@@ -1,0 +1,48 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "jp1ajs",
+	"scopeName": "source.ajs",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#comment"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"name": "jp1ajs.key",
+			"patterns": [
+				{
+				"name": "keyword.other.jp1ajs",
+				"match": "[a-zA-Z0-9]+?(?==)"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.jp1ajs",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.jp1ajs",
+					"match": "(#\"|##)"
+				}
+			]
+		},
+		"comment": {
+			"name": "comment.block.documentation.jp1ajs",
+			"begin": "/\\*",
+			"end": "\\*/",
+			"patterns": [
+				{
+					"match": ".*"
+				}
+			]
+		}
+	}
+}

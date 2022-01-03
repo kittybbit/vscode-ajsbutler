@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "name": "Launch Extension",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "request": "launch",
+            "type": "extensionHost"
+        },
+        {
+            "type": "antlr-debug",
+            "request": "launch",
+            "name": "Debug Current Grammar(Jp1Ajs3)",
+            "input": "./sample/sample1_utf8",
+            "grammar": "./src/antlr/Jp1Ajs3Parser.g4",
+            "visualParseTree": true,
+            "printParseTree": true
+        }
+    ]
+}

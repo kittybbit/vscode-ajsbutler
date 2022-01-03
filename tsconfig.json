@@ -1,0 +1,38 @@
+{
+	"compilerOptions": {
+		"module": "ESNext",
+		"target": "ES2022",
+		"moduleResolution": "node",
+		"rootDir": "src",
+		"outDir": "out",
+		"jsx": "react",
+		"lib": [
+			"ESNext",
+			"DOM"
+		],
+		"sourceMap": true,
+		"paths": {
+			"@resource/*": [
+				"./src/resource/*"
+			],
+			"@generate/*": [
+				"./src/generate/*"
+			]
+		},
+		"strict": true /* enable all strict type-checking options */,
+		"declaration": false,
+		"removeComments": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		// "experimentalDecorators": true,
+		/* Additional Checks */
+		"noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
+		"noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
+		// "noUnusedParameters": true, /* Report errors on unused parameters. */
+	},
+	"exclude": [
+		"node_modules"
+	]
+}

@@ -1,0 +1,147 @@
+{
+  "publisher": "kittybbit",
+  "name": "vscode-ajsbutler",
+  "displayName": "vscode-ajsbutler",
+  "description": "Support tool for JP1/AJS3",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/kittybbit/vscode-ajsbutler",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kittybbit/vscode-ajsbutler"
+  },
+  "bugs": {
+    "url": "https://github.com/kittybbit/vscode-ajsbutler/issues"
+  },
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "JP1/AJS"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "ajsbutler.tableViewer",
+        "displayName": "JP1/AJS table viewer",
+        "selector": [
+          {
+            "filenamePattern": "*"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "enablement": "resourceLangId == jp1ajs",
+        "command": "ajsbutler.openTableViewer",
+        "category": "View",
+        "title": "Open JP1/AJS table viewer",
+        "shortTitle": "JP1/AJS viewer",
+        "icon": "$(preview)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == jp1ajs",
+          "command": "ajsbutler.openTableViewer",
+          "group": "navigation"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "jp1ajs",
+        "aliases": [
+          "JP1/AJS",
+          "jp1ajs",
+          "JP1",
+          "AJS"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./resource/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jp1ajs",
+        "scopeName": "source.ajs",
+        "path": "./resource/jp1ajs.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "clean": "rimraf out",
+    "precompile": "npm-run-all lint",
+    "compile": "webpack",
+    "prebuild": "npm-run-all clean antlr4ts lint",
+    "build": "webpack --mode production --devtool hidden-source-map",
+    "antlr4ts": "npm-run-all antlr:clean antlr:generate",
+    "antlr:clean": "rimraf src/generate/parser",
+    "antlr:generate": "antlr4ts -o src/generate/parser -Xexact-output-dir src/antlr/*.g4",
+    "watch": "webpack -w",
+    "pretest": "npm-run-all compile",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "20.x",
+    "@types/react": "^18.2.34",
+    "@types/react-dom": "^18.2.14",
+    "@types/react-window": "^1.8.7",
+    "@types/styled-components": "^5.1.29",
+    "@types/uuid": "^9.0.6",
+    "@types/vscode": "^1.84.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "@typescript-eslint/parser": "^6.9.1",
+    "@vscode/test-electron": "^2.3.6",
+    "@vscode/vsce": "^2.22.0",
+    "antlr4ts-cli": "^0.5.0-alpha.4",
+    "copyfiles": "^2.4.1",
+    "css-loader": "^6.8.1",
+    "eslint": "^8.53.0",
+    "eslint-plugin-react": "^7.33.2",
+    "fork-ts-checker-webpack-plugin": "^9.0.2",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^5.0.5",
+    "style-loader": "^3.3.3",
+    "terser-webpack-plugin": "^5.3.9",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.2.2",
+    "webpack": "^5.89.0",
+    "webpack-bundle-analyzer": "^4.9.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.16",
+    "@mui/material": "^5.14.16",
+    "@tanstack/match-sorter-utils": "^8.8.4",
+    "@tanstack/react-table": "^8.10.7",
+    "@tanstack/table-core": "^8.10.7",
+    "@types/antlr4": "^4.11.5",
+    "@types/lodash": "^4.14.200",
+    "antlr4ts": "^0.5.0-alpha.4",
+    "flatted": "^3.2.9",
+    "lodash": "^4.17.21",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-virtuoso": "^4.6.2",
+    "uuid": "^9.0.1"
+  }
+}

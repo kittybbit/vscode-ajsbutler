@@ -1,0 +1,26 @@
+# npm
+node_modules/
+
+# antlr
+antlr/
+
+# vscode
+.vscode/
+.vscode-test/
+
+# source code
+src/
+
+# others
+report/
+sample/
+.browserslistrc
+.eslintrc.js
+.gitattributes
+.gitignore
+.vscodeignore
+tsconfig.json
+webpack.config.js
+*.log
+*.tmp
+secrets.json
