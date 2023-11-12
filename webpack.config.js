@@ -52,7 +52,9 @@ module.exports = (env, argv) => {
             ],
         },
         optimization: {
+            innerGraph: true,
             usedExports: true,
+            mangleExports: 'size',
             minimize: true,
             minimizer: [
                 new TerserPlugin({
