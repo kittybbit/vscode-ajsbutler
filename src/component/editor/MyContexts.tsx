@@ -1,5 +1,5 @@
-import { ReactNode, createContext, useContext, useEffect, useState } from "react"
-import React from "react";
+import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import React from 'react';
 
 /** app resouce */
 export type MyAppResource = {
@@ -33,10 +33,10 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
         updateMyAppResource(data);
     };
     useEffect(() => {
-        window.EventBridge.addCallback("resource", resourceCallbackFn);
+        window.EventBridge.addCallback('resource', resourceCallbackFn);
         window.vscode.postMessage({ type: 'resource', data: myAppResource });
         return () => {
-            window.EventBridge.removeCallback("resource", resourceCallbackFn);
+            window.EventBridge.removeCallback('resource', resourceCallbackFn);
         }
     }, []);
 

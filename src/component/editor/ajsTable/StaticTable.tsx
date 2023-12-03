@@ -21,10 +21,10 @@ const StaticTable = (props: { table: ReactTable<UnitEntity> }) => {
     };
 
     const styleTableCell: SxProps<Theme> = {
-        whiteSpace: "nowrap",
-        verticalAlign: "top",
-        "&:first-child": {
-            position: "sticky",
+        whiteSpace: 'nowrap',
+        verticalAlign: 'top',
+        '&:first-child': {
+            position: 'sticky',
             left: 0,
             backgroundColor: (theme) => theme.palette.background.default,
         }
@@ -33,7 +33,7 @@ const StaticTable = (props: { table: ReactTable<UnitEntity> }) => {
     return <>
         <Toolbar />
         {useMemo(() => <TableContainer component={Paper} elevation={3}>
-            <Table size="small" >
+            <Table size='small' >
                 <TableHead sx={{ backgroundColor: (theme) => theme.palette.background.default }}>
                     {table.getHeaderGroups().map(headerGroup => (
                         <TableHeader key={headerGroup.id} headerGroup={headerGroup} />

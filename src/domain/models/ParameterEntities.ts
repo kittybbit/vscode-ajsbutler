@@ -1,11 +1,11 @@
 /** JP1/AJS3 unit definition parameter entities */
-import { ParamsType, isTy, isWeek } from "../values/AjsType";
-import { UnitEntity } from "./UnitEntities";
+import { ParamsType, isTy, isWeek } from '../values/AjsType';
+import { UnitEntity } from './UnitEntities';
 
 export type ParamBase = {
     'unit': UnitEntity;
     'parameter': ParamsType;
-}
+};
 
 type ParamInternal = ParamBase
     & {
@@ -13,7 +13,7 @@ type ParamInternal = ParamBase
         'rawValue'?: string; // actual value
         'defaultRawValue'?: string; // default value
         'position': number; // defined position
-    }
+    };
 
 export type Rule = Sd | St | Sy | Ey | Ln | Cy | Sh | Shd | Wt | Wc | Cftd;
 
@@ -56,6 +56,7 @@ export abstract class Parameter {
     get position(): number {
         return this.#position;
     }
+    /** The raw value actually utilized in JP1/AJS */
     value(): string | undefined {
         return this.#rawValue ?? this.#defaultRawValue;
     }
@@ -80,25 +81,25 @@ class EncordedString extends Parameter {
 }
 class Calendar extends Parameter {
     get su(): boolean {
-        return "su" === this.value()?.split(':')[0];
+        return 'su' === this.value()?.split(':')[0];
     }
     get mo(): boolean {
-        return "mo" === this.value()?.split(':')[0];
+        return 'mo' === this.value()?.split(':')[0];
     }
     get tu(): boolean {
-        return "tu" === this.value()?.split(':')[0];
+        return 'tu' === this.value()?.split(':')[0];
     }
     get we(): boolean {
-        return "we" === this.value()?.split(':')[0];
+        return 'we' === this.value()?.split(':')[0];
     }
     get th(): boolean {
-        return "th" === this.value()?.split(':')[0];
+        return 'th' === this.value()?.split(':')[0];
     }
     get fr(): boolean {
-        return "fr" === this.value()?.split(':')[0];
+        return 'fr' === this.value()?.split(':')[0];
     }
     get sa(): boolean {
-        return "sa" === this.value()?.split(':')[0];
+        return 'sa' === this.value()?.split(':')[0];
     }
     get isWeek(): boolean {
         // op, cl, sdd
@@ -147,7 +148,7 @@ abstract class Time extends Parameter {
      * [N,]                   ((\d{1,3}),)?
      * {no|hh:mm|mmmm|un}     (no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)
      */
-    #pattern = /^((\d{1,3}),)?(no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)/;
+    #pattern = /^((\d{1,3}),)?(no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)?/;
     #_re;
     #_rule = -1;
     #_time;
@@ -217,7 +218,7 @@ export class Cftd extends Parameter {
         const re = this.#_re;
         if (re) {
             this.#_rule = Number(re[2]);
-            this.#_type = re[3] ?? "no";
+            this.#_type = re[3] ?? 'no';
             this.#_scheduleByDaysFromStart = re[6];
             this.#_maxShiftableDays = re[8];
         }
@@ -228,14 +229,14 @@ export class Cftd extends Parameter {
     }
 
     get scheduleByDaysFromStart() {
-        return this.#_type === "no" ? "no" : `${this.#_type},${this.#_scheduleByDaysFromStart ?? 1}`;
+        return this.#_type === 'no' ? 'no' : `${this.#_type},${this.#_scheduleByDaysFromStart ?? 1}`;
     }
 
     get maxShiftableDays() {
-        if (this.#_type && ["no", "db", "da"].includes(this.#_type)) {
+        if (this.#_type && ['no', 'db', 'da'].includes(this.#_type)) {
             return undefined;
         }
-        return this.#_maxShiftableDays ?? "10";
+        return this.#_maxShiftableDays ?? '10';
     }
 }
 export class Cgs extends PlainString { }
@@ -535,7 +536,7 @@ export class Sd extends Day {
 
     get day() {
         if (this._day !== 'en' && this._day !== 'ud') {
-            return this._day?.replace(/[+*@]/, "");
+            return this._day?.replace(/[+*@]/, '');
         }
         return undefined;
     }
@@ -567,18 +568,6 @@ export class Sh extends Parameter {
     }
 
     get substitute() {
-        // if (this._substitute === 'be') {
-        //     return paramDefinition['sh']['be'];
-        // }
-        // if (this._substitute === 'af') {
-        //     return paramDefinition['sh']['af'];
-        // }
-        // if (this._substitute === 'ca') {
-        //     return paramDefinition['sh']['ca'];
-        // }
-        // if (this._substitute === 'no') {
-        //     return paramDefinition['sh']['no'];
-        // }
         return this._substitute;
     }
 }
@@ -606,7 +595,7 @@ export class Shd extends Parameter {
     }
 
     get shiftDays() {
-        return this._shiftDays ?? 2;
+        return this._shiftDays ?? '2';
     }
 }
 export class Si extends EncordedString { }
@@ -684,7 +673,7 @@ export class Wc extends Parameter {
     }
 
     get numberOfTimes() {
-        return this._numberOfTimes ?? 1;
+        return this._numberOfTimes ?? '1';
     }
 }
 export class Wkp extends EncordedString { }

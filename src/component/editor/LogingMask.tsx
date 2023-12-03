@@ -1,5 +1,5 @@
-import { Backdrop, CircularProgress } from "@mui/material"
-import React, { useCallback, useState } from "react"
+import { Backdrop, CircularProgress } from '@mui/material';
+import React, { useCallback, useState } from 'react';
 
 /**
  * const {setIsLoading, LoadingMask} = useLoadingMask();
@@ -7,7 +7,7 @@ import React, { useCallback, useState } from "react"
  */
 export const useLoadingMask = () => {
 
-    console.log("render LoadingMask.");
+    console.log('render LoadingMask.');
 
     const [isLoading, setIsLoadingInternal] = useState(true);
 
@@ -19,7 +19,7 @@ export const useLoadingMask = () => {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={isLoading}
     >
-        <CircularProgress color="inherit" />
+        <CircularProgress color='inherit' />
     </Backdrop>;
 
     return {

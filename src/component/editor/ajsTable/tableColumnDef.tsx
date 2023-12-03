@@ -1,23 +1,68 @@
 // import * as vscode from 'vscode';
-import React from "react"
-import { G, J, N, Pj, Qj, Rj, Rn, Rp, UnitEntity } from "../../../domain/models/UnitEntities"
-import { Abr, Ar, Cd, Cftd, Cl, Cond, Cty, Cy, Da, De, Ed, Ega, Ej, Ejc, Ejf, Ejg, Ejh, Eji, Ejl, Ejm, Ejn, Ejs, Ejt, Eju, Ejv, Env, Etm, Etn, Ets, Eu, Eun, Ev, Evhst, Evsid, Evsms, Evspl, Evsrc, Evsrt, Evssv, Evwid, Evwms, Ex, Ey, Fd, Flco, Flwc, Flwf, Flwi, Fxg, Gty, Ha, Htcdm, Htcfl, Htexm, Htknd, Htrbf, Htrhf, Htrqf, Htrqm, Htrqu, Htspt, Htstf, Jc, Jd, Jdf, Jty, Ln, Md, Mh, Mm, Mp, Ms, Mu, Ncex, Nchn, Ncl, Ncn, Ncr, Ncs, Ncsv, Nmg, Op, Pfm, Prm, Qm, Qu, Rec, Rei, Req, Rg, Rh, Rje, Rjs, Sc, Sd, Sdd, Se, Sea, Sh, Shd, Si, So, Soa, St, Stt, Sy, Td1, Td2, Td3, Td4, Te, Tho, Tmitv, Top1, Top2, Top3, Top4, Ts1, Ts2, Ts3, Ts4, Uem, Un, Wc, Wkp, Wt, Wth } from "../../../domain/models/ParameterEntities";
-import { createColumnHelper } from "@tanstack/table-core";
-import CheckIcon from '@mui/icons-material/Check';
-import { ajsTableColumnHeaderLang, tyDefinitionLang, paramDefinitionLang } from '../../../domain/services/i18n/nls';
-import { Chip, Rating } from "@mui/material";
-import { TyType } from "../../../domain/values/AjsType";
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import RemoveDoneIcon from '@mui/icons-material/RemoveDone';
+import { Box, Chip, Rating } from '@mui/material';
+import { CellContext, createColumnHelper } from '@tanstack/table-core';
+import React from 'react';
+import { Cftd, Cl, Cy, Ex, Ey, Gty, Ln, Op, Parameter, Prm, Sd, Sh, Shd, St, Sy, Wc, Wt } from '../../../domain/models/ParameterEntities';
+import { G, J, N, Pj, Qj, Rj, Rn, Rp, UnitEntity } from '../../../domain/models/UnitEntities';
+import { ajsTableColumnHeaderLang, paramDefinitionLang, tyDefinitionLang } from '../../../domain/services/i18n/nls';
+import { ParamsType, TyType, WeekType } from '../../../domain/values/AjsType';
+import * as ajscolumn from '@resource/i18n/ajscolumn';
 
+const box = (param: unknown, index: number = 0, fn = (param: unknown) => {
+    if (param instanceof Parameter) {
+        return param.value();
+    }
+    return new String(param);
+}) => {
+    if (!(param instanceof Parameter)) {
+        return <Box
+            key={index}
+            data-param={undefined}
+            data-raw={param}
+            data-inherited={false}
+            data-defalut={false}
+        >
+            {fn(param)}
+        </Box>
+    }
+    return <Box
+        key={index}
+        data-param={param.parameter}
+        data-raw={param.rawValue}
+        data-inherited={param.inherited}
+        data-defalut={param.isDefault}
+        sx={
+            () => {
+                if (param.isDefault || param.inherited) {
+                    return { color: 'text.disabled' }
+                }
+                return {}
+            }
+        }
+    >
+        {fn(param)}
+    </Box>
+};
+
+// default setting of 
 export const tableDefaultColumnDef = {
     enableHiding: true,
     enableSorting: true,
-};
-
-/** When ty matches, invoke accessorFn. */
-const tyAccessorFn = (targetTy: TyType[], accessorFn: (row: UnitEntity, index: number) => unknown) => (row: UnitEntity, index: number): unknown => {
-    return targetTy.includes(row.ty.value())
-        ? accessorFn(row, index)
-        : undefined;
+    cell: (props: CellContext<UnitEntity, unknown>) => {
+        const param = props.getValue<Parameter | Parameter[] | string | undefined>();
+        // undefined
+        if (param === undefined) {
+            return undefined;
+        }
+        // Parameter[]
+        if (Array.isArray(param)) {
+            return <>{param.map((v, i) => box(v, i))}</>;
+        }
+        // Parameter or string
+        return box(param);
+    },
 };
 
 export const tableColumnDef = (language: string | undefined = 'en') => {
@@ -29,12 +74,27 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
     // paramter
     const paramDefinition = paramDefinitionLang(language);
 
+    /** accessorFn for cell method of tableDefaultColumnDef. */
+    const defaultAccessorFn = <T extends object | PrivateType>(param: ParamsType) => {
+        return (row: UnitEntity /*, index: number*/): T => {
+            return row.params(param) as T;
+        }
+    };
+    /** When ty matches, invoke accessorFn. */
+    const tyAccessorFn = <T extends object | PrivateType>(targetTy: TyType[], accessorFn: (row: UnitEntity, index: number) => T) => {
+        return (row: UnitEntity, index: number): T => {
+            return (targetTy.includes(row.ty.value())
+                ? accessorFn(row, index)
+                : undefined) as T;
+        }
+    };
+
     const columnHelper = createColumnHelper<UnitEntity>();
 
     return [
         columnHelper.display({
-            id: "#",
-            header: "#",
+            id: '#',
+            header: '#',
             cell: props => <span tabIndex={0}>{props.row.index + 1}</span>,
             enableHiding: false,
             enableSorting: false,
@@ -42,590 +102,519 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
         }),
         columnHelper.group(
             {
-                id: "group1", //Unit definition information
-                header: ajsTableColumnHeader["group1"],
+                id: 'group1', //Unit definition information
+                header: ajsTableColumnHeader['group1'],
                 columns: [
                     {
-                        id: "group1.col1",
-                        header: ajsTableColumnHeader["group1.col1"],
-                        accessorKey: "name",
+                        id: 'group1.col1',
+                        header: ajsTableColumnHeader['group1.col1'],
+                        accessorFn: row => row.name,
                     },
                     {
-                        id: "group1.col2",
-                        header: ajsTableColumnHeader["group1.col2"],
+                        id: 'group1.col2',
+                        header: ajsTableColumnHeader['group1.col2'],
                         accessorFn: row => row.parent ? row.parent.absolutePath() : '/',
                     },
                     {
-                        id: "group1.col3",
-                        header: ajsTableColumnHeader["group1.col3"],
+                        id: 'group1.col3',
+                        header: ajsTableColumnHeader['group1.col3'],
                         accessorFn: row => {
-                            if (row.ty.value() === "g") {
-                                const gty = row.params<Gty>("gty")?.value();
-                                return gty === "p" ? tyDefinition["g"]["gty"]["p"] : tyDefinition["g"]["gty"]["n"];
+                            if (row.ty.value() === 'g') {
+                                const gty = row.params<Gty>('gty')?.value();
+                                return gty === 'p'
+                                    ? tyDefinition['g']['gty']['p']
+                                    : tyDefinition['g']['gty']['n'];
                             }
                             return tyDefinition[row.ty.value()].name
                         },
                     },
                     {
-                        id: "group1.col4",
-                        header: ajsTableColumnHeader["group1.col4"],
-                        accessorFn: row => row.params<Cty>('cty')?.value(),
+                        id: 'group1.col4',
+                        header: ajsTableColumnHeader['group1.col4'],
+                        accessorFn: defaultAccessorFn('cty'),
                     },
                     {
-                        id: "group1.col5",
-                        header: ajsTableColumnHeader["group1.col5"],
+                        id: 'group1.col5',
+                        header: ajsTableColumnHeader['group1.col5'],
                         accessorFn: row => row.parent?.el?.find(v => v.name === row.name)?.hv,
                     },
                     {
-                        id: "group1.col6",
-                        header: ajsTableColumnHeader["group1.col6"],
-                        accessorFn: row => row.sz?.value(),
+                        id: 'group1.col6',
+                        header: ajsTableColumnHeader['group1.col6'],
+                        accessorFn: row => row.sz,
                     }
                 ]
             }),
         columnHelper.group({
-            id: "group2", //Unit common definition information
-            header: ajsTableColumnHeader["group2"],
+            id: 'group2', //Unit common definition information
+            header: ajsTableColumnHeader['group2'],
             columns: [
                 {
-                    id: "group2.col1",
-                    header: ajsTableColumnHeader["group2.col1"],
-                    accessorFn: row => row.cm?.value(),
+                    id: 'group2.col1',
+                    header: ajsTableColumnHeader['group2.col1'],
+                    accessorFn: row => row.cm,
                 },
                 {
-                    id: "group2.col2",
-                    header: ajsTableColumnHeader["group2.col2"],
-                    accessorFn: row => row.previous(),
-                    cell: props => <>{props.getValue<Ar[]>().map((v: Ar, i: number) => <div key={i} data-raw={v.rawValue}>{v.f}</div>)}</>,
+                    id: 'group2.col2',
+                    header: ajsTableColumnHeader['group2.col2'],
+                    accessorFn: row => {
+                        const ar = row.previous();
+                        return ar.map(v => v.f);
+                    },
+                    cell: props => props
+                        .getValue<string[]>()
+                        .map((v: string, i: number) => box(v, i)),
                 },
                 {
-                    id: "group2.col3",
-                    header: ajsTableColumnHeader["group2.col3"],
-                    accessorFn: row => row.previous(),
-                    cell: props => <>{props.getValue<Ar[]>().map((v: Ar, i: number) => <div key={i} data-raw={v.rawValue}>{v.relationType}</div>)}</>,
+                    id: 'group2.col3',
+                    header: ajsTableColumnHeader['group2.col3'],
+                    accessorFn: row => {
+                        const ar = row.previous();
+                        return ar.map(v => v.relationType);
+                    },
+                    cell: props => props
+                        .getValue<string[]>()
+                        .map((v: string, i: number) => box(v, i)),
                 },
                 {
-                    id: "group2.col4",
-                    header: ajsTableColumnHeader["group2.col4"],
-                    accessorFn: row => row.params<Ex>("ex")?.value(),
+                    id: 'group2.col4',
+                    header: ajsTableColumnHeader['group2.col4'],
+                    accessorFn: defaultAccessorFn('ex'),
                 },
                 {
-                    id: "group2.col5",
-                    header: ajsTableColumnHeader["group2.col5"],
-                    accessorFn: row => row.params<Ncl>("ncl")?.value(),
+                    id: 'group2.col5',
+                    header: ajsTableColumnHeader['group2.col5'],
+                    accessorFn: defaultAccessorFn('ncl'),
                 },
                 {
-                    id: "group2.col6",
-                    header: ajsTableColumnHeader["group2.col6"],
-                    accessorFn: row => row.params<Ncn>("ncn")?.value(),
+                    id: 'group2.col6',
+                    header: ajsTableColumnHeader['group2.col6'],
+                    accessorFn: defaultAccessorFn('ncn'),
                 },
                 {
-                    id: "group2.col7",
-                    header: ajsTableColumnHeader["group2.col7"],
-                    accessorFn: row => row.params<Ncs>("ncs")?.value(),
+                    id: 'group2.col7',
+                    header: ajsTableColumnHeader['group2.col7'],
+                    accessorFn: defaultAccessorFn('ncs'),
                 },
                 {
-                    id: "group2.col8",
-                    header: ajsTableColumnHeader["group2.col8"],
-                    accessorFn: row => row.params<Ncex>("ncex")?.value(),
+                    id: 'group2.col8',
+                    header: ajsTableColumnHeader['group2.col8'],
+                    accessorFn: defaultAccessorFn('ncex'),
                 },
                 {
-                    id: "group2.col9",
-                    header: ajsTableColumnHeader["group2.col9"],
-                    accessorFn: row => row.params<Nchn>("nchn")?.value(),
+                    id: 'group2.col9',
+                    header: ajsTableColumnHeader['group2.col9'],
+                    accessorFn: defaultAccessorFn('nchn'),
                 },
                 {
-                    id: "group2.col10",
-                    header: ajsTableColumnHeader["group2.col10"],
-                    accessorFn: row => row.params<Ncsv>("ncsv")?.value(),
+                    id: 'group2.col10',
+                    header: ajsTableColumnHeader['group2.col10'],
+                    accessorFn: defaultAccessorFn('ncsv'),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group3", //Unit common attributes information
-            header: ajsTableColumnHeader["group3"],
+            id: 'group3', //Unit common attributes information
+            header: ajsTableColumnHeader['group3'],
             columns: [
                 {
-                    id: "group3.col1",
-                    header: ajsTableColumnHeader["group3.col1"],
-                    accessorFn: row => row.params<Ha>("ha")?.value(),
+                    id: 'group3.col1',
+                    header: ajsTableColumnHeader['group3.col1'],
+                    accessorFn: defaultAccessorFn('ha'),
                 },
                 {
-                    id: "group3.col2",
-                    header: ajsTableColumnHeader["group3.col2"],
+                    id: 'group3.col2',
+                    header: ajsTableColumnHeader['group3.col2'],
                     accessorFn: row => row.isRecovery(),
                     cell: param => {
                         const isRecovery = param.getValue<boolean | undefined>();
                         if (isRecovery === undefined) {
                             return undefined;
                         }
-                        return isRecovery ? <Chip color="secondary" label="Recovery" />
-                            : <Chip color="primary" label="Normal" />
+                        return isRecovery ? <Chip color='secondary' label='Recovery' />
+                            : <Chip color='primary' label='Normal' />
                     }
                 },
                 {
-                    id: "group3.col3",
-                    header: ajsTableColumnHeader["group3.col3"],
-                    accessorKey: "jp1Username",
+                    id: 'group3.col3',
+                    header: ajsTableColumnHeader['group3.col3'],
+                    accessorFn: row => row.jp1Username,
                 },
                 {
-                    id: "group3.col4",
-                    header: ajsTableColumnHeader["group3.col4"],
-                    accessorKey: "jp1ResourceGroup",
+                    id: 'group3.col4',
+                    header: ajsTableColumnHeader['group3.col4'],
+                    accessorFn: row => row.jp1ResourceGroup,
                 }
             ]
         }),
         columnHelper.group({
-            id: "group4", //Manager unit definition information
-            header: ajsTableColumnHeader["group4"],
+            id: 'group4', //Manager unit definition information
+            header: ajsTableColumnHeader['group4'],
             columns: [
                 {
-                    id: "group4.col1",
-                    header: ajsTableColumnHeader["group4.col1"],
-                    accessorFn: tyAccessorFn(['mg', 'mn'], row => row.params<Mh>("mh")?.value()),
+                    id: 'group4.col1',
+                    header: ajsTableColumnHeader['group4.col1'],
+                    accessorFn: tyAccessorFn(['mg', 'mn'], defaultAccessorFn('mh')),
                 },
                 {
-                    id: "group4.col2",
-                    header: ajsTableColumnHeader["group4.col2"],
-                    accessorFn: tyAccessorFn(['mg', 'mn'], row => row.params<Mu>("mu")?.value()),
+                    id: 'group4.col2',
+                    header: ajsTableColumnHeader['group4.col2'],
+                    accessorFn: tyAccessorFn(['mg', 'mn'], defaultAccessorFn('mu')),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group5", //Job group definition information
-            header: ajsTableColumnHeader["group5"],
+            id: 'group5', //Job group definition information
+            header: ajsTableColumnHeader['group5'],
             columns: [
                 {
-                    id: "group5.col1",
-                    header: ajsTableColumnHeader["group5.col1"],
-                    accessorFn: tyAccessorFn(['g'], row => row.params<Sdd>("sdd")?.value()),
+                    id: 'group5.col1',
+                    header: ajsTableColumnHeader['group5.col1'],
+                    accessorFn: tyAccessorFn(['g'], defaultAccessorFn('sdd')),
                 },
                 {
-                    id: "group5.col2",
-                    header: ajsTableColumnHeader["group5.col2"],
-                    accessorFn: tyAccessorFn(['g'], row => row.params<Md>("md")?.value()),
+                    id: 'group5.col2',
+                    header: ajsTableColumnHeader['group5.col2'],
+                    accessorFn: tyAccessorFn(['g'], defaultAccessorFn('md')),
                 },
                 {
-                    id: "group5.col3",
-                    header: ajsTableColumnHeader["group5.col3"],
-                    accessorFn: tyAccessorFn(['g'], row => row.params<Stt>("stt")?.value()),
+                    id: 'group5.col3',
+                    header: ajsTableColumnHeader['group5.col3'],
+                    accessorFn: tyAccessorFn(['g'], defaultAccessorFn('stt')),
                 },
                 {
-                    id: "group5.col4",
-                    header: ajsTableColumnHeader["group5.col4"],
-                    accessorFn: tyAccessorFn(['g'], row => row.params<Gty>("gty")?.value()),
-                    cell: param => param.getValue<string | undefined>()
-                        ? param.getValue<string>() === "n"
-                            ? <Chip color="primary" label="Normal" />
-                            : <Chip color="secondary" label="Planning" />
-                        : undefined
+                    id: 'group5.col4',
+                    header: ajsTableColumnHeader['group5.col4'],
+                    accessorFn: tyAccessorFn(['g'], defaultAccessorFn('gty')),
+                    cell: param => {
+                        const gty = param.getValue<Gty | undefined>();
+                        if (gty === undefined) {
+                            return undefined;
+                        }
+                        return gty.value() === 'n'
+                            ? <Chip color='primary' label='Normal' />
+                            : <Chip color='secondary' label='Planning' />;
+                    }
                 }
             ]
         }),
         columnHelper.group({
-            id: "group6", //Calendar definition information
-            header: ajsTableColumnHeader["group6"],
+            id: 'group6', //Calendar definition information
+            header: ajsTableColumnHeader['group6'],
             columns: [
                 columnHelper.group({
-                    id: "group6.group1",
-                    header: ajsTableColumnHeader["group6.group1"],
-                    columns: [
-                        {
-                            id: "group6.group1.col1",
-                            header: ajsTableColumnHeader["group6.group1.col1"],
-                            accessorFn: tyAccessorFn(['g'], row => {
-                                const ty = row.ty.value();
-                                if (ty !== 'g') {
-                                    return false;
-                                }
+                    id: 'group6.group1',
+                    header: ajsTableColumnHeader['group6.group1'],
+                    columns: ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'].map((v, i) => {
+                        const id = (`group6.group1.col${i + 1}`) as keyof typeof ajscolumn.ajscolumn_en;
+                        return {
+                            id: id,
+                            header: ajsTableColumnHeader[id],
+                            accessorFn: tyAccessorFn<boolean | undefined>(['g'], row => {
                                 const g = row as G;
-                                return g.su;
+                                return g[v as WeekType];
                             }),
-                            cell: props => props.getValue<boolean>()
-                                ? <CheckIcon fontSize="small" color="primary" />
-                                : undefined,
-                        },
-                        {
-                            id: "group6.group1.col2",
-                            header: ajsTableColumnHeader["group6.group1.col2"],
-                            accessorFn: tyAccessorFn(['g'], row => {
-                                const ty = row.ty.value();
-                                if (ty !== 'g') {
-                                    return false;
+                            cell: props => {
+                                const result = props.getValue<boolean>();
+                                if (result == undefined) {
+                                    return undefined;
                                 }
-                                const g = row as G;
-                                return g.mo;
-                            }),
-                            cell: props => props.getValue<boolean>()
-                                ? <CheckIcon fontSize="small" color="primary" />
-                                : undefined,
-                        },
-                        {
-                            id: "group6.group1.col3",
-                            header: ajsTableColumnHeader["group6.group1.col3"],
-                            accessorFn: row => {
-                                const ty = row.ty.value();
-                                if (ty !== 'g') {
-                                    return false;
-                                }
-                                const g = row as G;
-                                return g.tu;
+                                return result
+                                    ? <DoneAllIcon fontSize='small' color='primary' />
+                                    : <RemoveDoneIcon fontSize='small' color='primary' />
                             },
-                            cell: props => props.getValue<boolean>()
-                                ? <CheckIcon fontSize="small" color="primary" />
-                                : undefined,
-                        },
-                        {
-                            id: "group6.group1.col4",
-                            header: ajsTableColumnHeader["group6.group1.col4"],
-                            accessorFn: row => {
-                                const ty = row.ty.value();
-                                if (ty !== 'g') {
-                                    return false;
-                                }
-                                const g = row as G;
-                                return g.we;
-                            },
-                            cell: props => props.getValue<boolean>()
-                                ? <CheckIcon fontSize="small" color="primary" />
-                                : undefined,
-                        },
-                        {
-                            id: "group6.group1.col5",
-                            header: ajsTableColumnHeader["group6.group1.col5"],
-                            accessorFn: row => {
-                                const ty = row.ty.value();
-                                if (ty !== 'g') {
-                                    return false;
-                                }
-                                const g = row as G;
-                                return g.th;
-                            },
-                            cell: props => props.getValue<boolean>()
-                                ? <CheckIcon fontSize="small" color="primary" />
-                                : undefined,
-                        },
-                        {
-                            id: "group6.group1.col6",
-                            header: ajsTableColumnHeader["group6.group1.col6"],
-                            accessorFn: tyAccessorFn(['g'], row => {
-                                const ty = row.ty.value();
-                                if (ty !== 'g') {
-                                    return false;
-                                }
-                                const g = row as G;
-                                return g.fr;
-                            }),
-                            cell: props => props.getValue<boolean>()
-                                ? <CheckIcon fontSize="small" color="primary" />
-                                : undefined,
-                        },
-                        {
-                            id: "group6.group1.col7",
-                            header: ajsTableColumnHeader["group6.group1.col7"],
-                            accessorFn: tyAccessorFn(['g'], row => {
-                                const ty = row.ty.value();
-                                if (ty !== 'g') {
-                                    return false;
-                                }
-                                const g = row as G;
-                                return g.sa;
-                            }),
-                            cell: props => props.getValue<boolean>()
-                                ? <CheckIcon fontSize="small" color="primary" />
-                                : undefined,
                         }
-                    ]
+                    }),
                 }),
                 {
-                    id: "group6.col1",
-                    header: ajsTableColumnHeader["group6.col1"],
-                    accessorFn: tyAccessorFn(['g'], row => row.params("op")),
+                    id: 'group6.col1',
+                    header: ajsTableColumnHeader['group6.col1'],
+                    accessorFn: tyAccessorFn<Op[] | undefined>(['g'], row => {
+                        return row.params<Op[]>('op')?.filter(v => !v.isWeek);
+                    }),
                     cell: props => {
-                        const op = props.getValue<Op[]>();
+                        const op = props.getValue<Op[] | undefined>();
                         return Array.isArray(op)
-                            ? <>{op.filter(v => !v.isWeek).map((v, i) => <div key={i} data-raw={v.rawValue}>{v.value()}</div>)}</>
+                            ? <>{op.map((v, i) => box(v, i))}</>
                             : undefined;
                     },
                 },
                 {
-                    id: "group6.col2",
-                    header: ajsTableColumnHeader["group6.col2"],
-                    accessorFn: tyAccessorFn(['g'], row => row.params("cl")),
+                    id: 'group6.col2',
+                    header: ajsTableColumnHeader['group6.col2'],
+                    accessorFn: tyAccessorFn<Cl[] | undefined>(['g'], row => {
+                        return row.params<Cl[]>('cl')?.filter(v => !v.isWeek);
+                    }),
                     cell: props => {
-                        const cl = props.getValue<Cl[]>();
+                        const cl = props.getValue<Cl[] | undefined>();
                         return Array.isArray(cl)
-                            ? <>{cl.filter(v => !v.isWeek).map((v, i) => <div key={i} data-raw={v.rawValue}>{v.value()}</div>)}</>
+                            ? <>{cl.map((v, i) => box(v, i))}</>
                             : undefined;
                     },
                 }
             ]
         }),
         columnHelper.group({
-            id: "group7", //Jobnet definition information
-            header: ajsTableColumnHeader["group7"],
+            id: 'group7', //Jobnet definition information
+            header: ajsTableColumnHeader['group7'],
             columns: [
                 {
-                    id: "group7.col1",
-                    header: ajsTableColumnHeader["group7.col1"],
-                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], row => row.params<Mp>("mp")?.value()),
+                    id: 'group7.col1',
+                    header: ajsTableColumnHeader['group7.col1'],
+                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], defaultAccessorFn('mp')),
                 },
                 {
-                    id: "group7.col2",
-                    header: ajsTableColumnHeader["group7.col2"],
-                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], row => row.params<Rg>("rg")?.value()),
+                    id: 'group7.col2',
+                    header: ajsTableColumnHeader['group7.col2'],
+                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], defaultAccessorFn('rg')),
                 },
                 {
-                    id: "group7.col3",
-                    header: ajsTableColumnHeader["group7.col3"],
-                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], row => row.params<Rh>("rh")?.value()),
+                    id: 'group7.col3',
+                    header: ajsTableColumnHeader['group7.col3'],
+                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], defaultAccessorFn('rh')),
                 },
                 {
-                    id: "group7.col4",
-                    header: ajsTableColumnHeader["group7.col4"],
-                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], row => {
-                        return ['n', 'rn'].some(v => v === row.ty.value())
-                            ? (row as N | Rn).priority
-                            : undefined;
-                    }),
+                    id: 'group7.col4',
+                    header: ajsTableColumnHeader['group7.col4'],
+                    accessorFn: tyAccessorFn(['n', 'rn'], row => (row as N | Rn)?.priority),
                     cell: props => {
                         const priority = props.getValue<number | undefined>();
                         return priority
-                            ? <Rating value={priority} size="small" sx={{ position: "inherit" }} readOnly />
+                            ? <Rating value={priority} size='small' sx={{ position: 'inherit' }} readOnly />
                             : undefined;
                     }
                 },
                 {
-                    id: "group7.col5",
-                    header: ajsTableColumnHeader["group7.col5"],
-                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], row => row.params<Cd>("cd")?.value()),
+                    id: 'group7.col5',
+                    header: ajsTableColumnHeader['group7.col5'],
+                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], defaultAccessorFn('cd')),
                 },
                 {
-                    id: "group7.col6",
-                    header: ajsTableColumnHeader["group7.col6"],
-                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], row => row.params<Ms>("ms")?.value()),
+                    id: 'group7.col6',
+                    header: ajsTableColumnHeader['group7.col6'],
+                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], defaultAccessorFn('ms')),
                 },
                 {
-                    id: "group7.col7",
-                    header: ajsTableColumnHeader["group7.col7"],
-                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], row => row.params<Fd>("fd")?.value()),
+                    id: 'group7.col7',
+                    header: ajsTableColumnHeader['group7.col7'],
+                    accessorFn: tyAccessorFn(['n', 'rn', 'rm', 'rr'], defaultAccessorFn('fd')),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group8", //Jobnet connector definition information
-            header: ajsTableColumnHeader["group8"],
+            id: 'group8', //Jobnet connector definition information
+            header: ajsTableColumnHeader['group8'],
             columns: [
                 {
-                    id: "group8.col1",
-                    header: ajsTableColumnHeader["group8.col1"],
-                    accessorFn: tyAccessorFn(['nc'], row => row.params<Ncr>("ncr")?.value()),
+                    id: 'group8.col1',
+                    header: ajsTableColumnHeader['group8.col1'],
+                    accessorFn: tyAccessorFn(['nc'], defaultAccessorFn('ncr')),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group9", //Start-condition definition information
-            header: ajsTableColumnHeader["group9"],
+            id: 'group9', //Start-condition definition information
+            header: ajsTableColumnHeader['group9'],
             columns: [
                 {
-                    id: "group9.col1",
-                    header: ajsTableColumnHeader["group9.col1"],
-                    accessorFn: tyAccessorFn(['rc'], row => row.params<Cond>("cond")?.value()),
+                    id: 'group9.col1',
+                    header: ajsTableColumnHeader['group9.col1'],
+                    accessorFn: tyAccessorFn(['rc'], defaultAccessorFn('cond')),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group10", //Schedule definition information
-            header: ajsTableColumnHeader["group10"],
+            id: 'group10', //Schedule definition information
+            header: ajsTableColumnHeader['group10'],
             columns: [
                 {
-                    id: "group10.col1",
-                    header: ajsTableColumnHeader["group10.col1"],
-                    accessorFn: row => row.params<De>("de")?.value(),
+                    id: 'group10.col1',
+                    header: ajsTableColumnHeader['group10.col1'],
+                    accessorFn: defaultAccessorFn('de'),
                 },
                 {
-                    id: "group10.col2",
-                    header: ajsTableColumnHeader["group10.col2"],
-                    accessorFn: row => row.params<Ed>("ed")?.value(),
+                    id: 'group10.col2',
+                    header: ajsTableColumnHeader['group10.col2'],
+                    accessorFn: defaultAccessorFn('ed'),
                 },
                 {
-                    id: "group10.col3",
-                    header: ajsTableColumnHeader["group10.col3"],
-                    accessorFn: row => row.params<Jc>("jc")?.value(),
+                    id: 'group10.col3',
+                    header: ajsTableColumnHeader['group10.col3'],
+                    accessorFn: defaultAccessorFn('jc'),
                 },
                 {
-                    id: "group10.col4",
-                    header: ajsTableColumnHeader["group10.col4"],
-                    accessorFn: row => row.params<Ejn>("ejn")?.value(),
+                    id: 'group10.col4',
+                    header: ajsTableColumnHeader['group10.col4'],
+                    accessorFn: defaultAccessorFn('ejn'),
                 },
                 {
-                    id: "group10.col5",
-                    header: ajsTableColumnHeader["group10.col5"],
-                    accessorFn: row => row.params('ln'),
+                    id: 'group10.col5',
+                    header: ajsTableColumnHeader['group10.col5'],
+                    accessorFn: defaultAccessorFn('ln'),
                     cell: props => {
                         const ln = props.getValue<Ln[]>();
                         return Array.isArray(ln)
-                            ? <>{ln.map((v, i) => <div key={i} data-raw={v.rawValue}>{v.parentRule}</div>)}</>
+                            ? <>{ln.map((v, i) => box(v, i, (v) => (v as Ln).parentRule))}</>
                             : undefined;
                     },
                 },
                 columnHelper.group({
-                    id: "group10.group1",
-                    header: ajsTableColumnHeader["group10.group1"],
+                    id: 'group10.group1',
+                    header: ajsTableColumnHeader['group10.group1'],
                     columns: [
                         {
-                            id: "group10.group1.col1",
-                            header: ajsTableColumnHeader["group10.group1.col1"],
-                            accessorFn: row => row.params("sd"),
+                            id: 'group10.group1.col1',
+                            header: ajsTableColumnHeader['group10.group1.col1'],
+                            accessorFn: defaultAccessorFn('sd'),
                             cell: props => {
                                 const sd = props.getValue<Sd[]>();
                                 return Array.isArray(sd)
-                                    ? <>{sd.map((v, i) => <div key={i} data-raw={v.rawValue}>{paramDefinition['sd'][v.type]}</div>)}</>
+                                    ? <>{sd.map((v, i) => box(v, i, (v) => paramDefinition['sd'][(v as Sd).type]))}</>
                                     : undefined;
                             }
                         },
                         {
-                            id: "group10.group1.col2",
-                            header: ajsTableColumnHeader["group10.group1.col2"],
-                            accessorFn: row => row.params("sd"),
+                            id: 'group10.group1.col2',
+                            header: ajsTableColumnHeader['group10.group1.col2'],
+                            accessorFn: defaultAccessorFn('sd'),
                             cell: props => {
                                 const sd = props.getValue<Sd[]>();
                                 return Array.isArray(sd)
-                                    ? <>{sd.map((v, i) => <div key={i} data-raw={v.rawValue}>{v.yearMonth ?? '\u00A0'}</div>)}</>
+                                    ? <>{sd.map((v, i) => box(v, i, (v) => (v as Sd).yearMonth ?? '\u00A0'))}</>
                                     : undefined;
                             }
                         },
                         {
-                            id: "group10.group1.col3",
-                            header: ajsTableColumnHeader["group10.group1.col3"],
-                            accessorFn: row => row.params("sd"),
+                            id: 'group10.group1.col3',
+                            header: ajsTableColumnHeader['group10.group1.col3'],
+                            accessorFn: defaultAccessorFn('sd'),
                             cell: props => {
                                 const sd = props.getValue<Sd[]>();
                                 return Array.isArray(sd)
-                                    ? <>{sd.map((v, i) => <div key={i} data-raw={v.rawValue}>{v.day ?? '\u00A0'}</div>)}</>
+                                    ? <>{sd.map((v, i) => box(v, i, (v) => (v as Sd).day ?? '\u00A0'))}</>
                                     : undefined;
                             }
                         }
                     ]
                 }),
                 {
-                    id: "group10.col6",
-                    header: ajsTableColumnHeader["group10.col6"],
-                    accessorFn: row => row.params("st"),
+                    id: 'group10.col6',
+                    header: ajsTableColumnHeader['group10.col6'],
+                    accessorFn: defaultAccessorFn('st'),
                     cell: props => {
                         const st = props.getValue<St[]>();
                         return Array.isArray(st)
-                            ? <>{st.map((v, i) => <div key={i} data-raw={v.rawValue ?? '\u00A0'}>{v.time ?? '\u00A0'}</div>)}</>
+                            ? <>{st.map((v, i) => box(v, i, (v) => (v as St).time ?? '\u00A0'))}</>
                             : undefined;
                     }
                 },
                 {
-                    id: "grsoup10.col7",
-                    header: ajsTableColumnHeader["group10.col7"],
-                    accessorFn: row => row.params("cy"),
+                    id: 'grsoup10.col7',
+                    header: ajsTableColumnHeader['group10.col7'],
+                    accessorFn: defaultAccessorFn('cy'),
                     cell: props => {
-                        const cy = props.getValue<Array<Cy | null>>();
+                        const cy = props.getValue<Cy[]>();
                         return Array.isArray(cy)
-                            ? <>{cy.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.cycle) ?? '\u00A0'}</div>)}</>
+                            ? <>{cy.map((v, i) => box(v, i, (v) => (v as Cy).cycle ?? '\u00A0'))}</>
                             : undefined;
                     }
                 },
                 {
-                    id: "group10.col8",
-                    header: ajsTableColumnHeader["group10.col8"],
-                    accessorFn: row => row.params("sh"),
+                    id: 'group10.col8',
+                    header: ajsTableColumnHeader['group10.col8'],
+                    accessorFn: defaultAccessorFn('sh'),
                     cell: props => {
-                        const sh = props.getValue<Array<Sh | null>>();
+                        const sh = props.getValue<Sh[]>();
                         return Array.isArray(sh)
-                            ? <>{sh.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.substitute) ?? '\u00A0'}</div>)}</>
+                            ? <>{sh.map((v, i) => box(v, i, (v) => (v as Sh).substitute ?? '\u00A0'))}</>
                             : undefined;
                     }
                 },
                 // FIXME
                 {
-                    id: "group10.col9",
-                    header: ajsTableColumnHeader["group10.col9"],
-                    accessorFn: row => row.params("shd"),
+                    id: 'group10.col9',
+                    header: ajsTableColumnHeader['group10.col9'],
+                    accessorFn: defaultAccessorFn('shd'),
                     cell: props => {
-                        const shd = props.getValue<Array<Shd | null>>(); ``
+                        const shd = props.getValue<Shd[]>(); ``
                         return Array.isArray(shd)
-                            ? <>{shd.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.shiftDays) ?? '\u00A0'}</div>)}</>
+                            ? <>{shd.map((v, i) => box(v, i, (v) => (v as Shd).shiftDays ?? '\u00A0'))}</>
                             : undefined;
                     }
                 },
                 {
-                    id: "group10.col10",
-                    header: ajsTableColumnHeader["group10.col10"],
-                    accessorFn: row => row.params("cftd"),
+                    id: 'group10.col10',
+                    header: ajsTableColumnHeader['group10.col10'],
+                    accessorFn: defaultAccessorFn('cftd'),
                     cell: props => {
-                        const cftd = props.getValue<Array<Cftd | null>>();
+                        const cftd = props.getValue<Cftd[]>();
                         return Array.isArray(cftd)
-                            ? <>{cftd.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.scheduleByDaysFromStart) ?? '\u00A0'}</div>)}</>
+                            ? <>{cftd.map((v, i) => box(v, i, (v) => (v as Cftd).scheduleByDaysFromStart ?? '\u00A0'))}</>
                             : undefined;
                     }
                 },
                 {
-                    id: "group10.col11",
-                    header: ajsTableColumnHeader["group10.col11"],
-                    accessorFn: row => row.params("cftd"),
+                    id: 'group10.col11',
+                    header: ajsTableColumnHeader['group10.col11'],
+                    accessorFn: defaultAccessorFn('cftd'),
                     cell: props => {
-                        const cftd = props.getValue<Array<Cftd | null>>();
+                        const cftd = props.getValue<Cftd[]>();
                         return Array.isArray(cftd)
-                            ? <>{cftd.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.maxShiftableDays) ?? '\u00A0'}</div>)}</>
+                            ? <>{cftd.map((v, i) => box(v, i, (v) => (v as Cftd).maxShiftableDays ?? '\u00A0'))}</>
                             : undefined;
                     }
                 },
                 columnHelper.group({
-                    id: "group10.group2",
-                    header: ajsTableColumnHeader["group10.group2"],
+                    id: 'group10.group2',
+                    header: ajsTableColumnHeader['group10.group2'],
                     columns: [
                         {
-                            id: "group10.group2.col1",
-                            header: ajsTableColumnHeader["group10.group2.col1"],
-                            accessorFn: row => row.params("sy"),
+                            id: 'group10.group2.col1',
+                            header: ajsTableColumnHeader['group10.group2.col1'],
+                            accessorFn: defaultAccessorFn('sy'),
                             cell: props => {
-                                const sy = props.getValue<Array<Sy | null>>();
+                                const sy = props.getValue<Sy[]>();
                                 return Array.isArray(sy)
-                                    ? <>{sy.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.time) ?? '\u00A0'}</div>)}</>
+                                    ? <>{sy.map((v, i) => box(v, i, (v) => (v as Sy).time ?? '\u00A0'))}</>
                                     : undefined;
                             }
                         },
                         {
-                            id: "group10.group2.col2",
-                            header: ajsTableColumnHeader["group10.group2.col2"],
-                            accessorFn: row => row.params("ey"),
+                            id: 'group10.group2.col2',
+                            header: ajsTableColumnHeader['group10.group2.col2'],
+                            accessorFn: defaultAccessorFn('ey'),
                             cell: props => {
-                                const ey = props.getValue<Array<Ey | null>>();
+                                const ey = props.getValue<Ey[]>();
                                 return Array.isArray(ey)
-                                    ? <>{ey.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.time) ?? '\u00A0'}</div>)}</>
+                                    ? <>{ey.map((v, i) => box(v, i, (v) => (v as Ey).time ?? '\u00A0'))}</>
                                     : undefined;
                             }
                         }
                     ]
                 }),
                 columnHelper.group({
-                    id: "group10.group3",
-                    header: ajsTableColumnHeader["group10.group3"],
+                    id: 'group10.group3',
+                    header: ajsTableColumnHeader['group10.group3'],
                     columns: [
                         {
-                            id: "group10.group3.col1",
-                            header: ajsTableColumnHeader["group10.group3.col1"],
-                            accessorFn: row => row.params("wc"),
+                            id: 'group10.group3.col1',
+                            header: ajsTableColumnHeader['group10.group3.col1'],
+                            accessorFn: defaultAccessorFn('wc'),
                             cell: props => {
-                                const wc = props.getValue<Array<Wc | null>>();
+                                const wc = props.getValue<Wc[]>();
                                 return Array.isArray(wc)
-                                    ? <>{wc.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.numberOfTimes) ?? '\u00A0'}</div>)}</>
+                                    ? <>{wc.map((v, i) => box(v, i, (v) => (v as Wc).numberOfTimes ?? '\u00A0'))}</>
                                     : undefined;
                             }
                         },
                         {
-                            id: "group10.group3.col2",
-                            header: ajsTableColumnHeader["group10.group3.col2"],
-                            accessorFn: row => row.params("wt"),
+                            id: 'group10.group3.col2',
+                            header: ajsTableColumnHeader['group10.group3.col2'],
+                            accessorFn: defaultAccessorFn('wt'),
                             cell: props => {
-                                const wt = props.getValue<Array<Wt | null>>();
+                                const wt = props.getValue<Wt[]>();
                                 return Array.isArray(wt)
-                                    ? <>{wt.map((v, i) => <div key={i} data-raw={(v && v.rawValue) ?? '\u00A0'}>{(v && v.time) ?? '\u00A0'}</div>)}</>
+                                    ? <>{wt.map((v, i) => box(v, i, (v) => (v as Wt).time ?? '\u00A0'))}</>
                                     : undefined;
                             }
                         }
@@ -634,100 +623,94 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
             ]
         }),
         columnHelper.group({
-            id: "group11", //Basic job definition information
-            header: ajsTableColumnHeader["group11"],
+            id: 'group11', //Basic job definition information
+            header: ajsTableColumnHeader['group11'],
             columns: [
                 {
-                    id: "group11.col1",
-                    header: ajsTableColumnHeader["group11.col1"],
-                    accessorFn: row => row.params<Te>("te")?.value(),
+                    id: 'group11.col1',
+                    header: ajsTableColumnHeader['group11.col1'],
+                    accessorFn: defaultAccessorFn('te'),
                 },
                 {
-                    id: "group11.col2",
-                    header: ajsTableColumnHeader["group11.col2"],
-                    accessorFn: row => row.params<Sc>("sc")?.value(),
+                    id: 'group11.col2',
+                    header: ajsTableColumnHeader['group11.col2'],
+                    accessorFn: defaultAccessorFn('sc'),
                 },
                 {
-                    id: "group11.col3",
-                    header: ajsTableColumnHeader["group11.col3"],
-                    accessorFn: row => row.params<Prm>("prm")?.value(),
+                    id: 'group11.col3',
+                    header: ajsTableColumnHeader['group11.col3'],
+                    accessorFn: defaultAccessorFn('prm'),
                 },
                 {
-                    id: "group11.col4",
-                    header: ajsTableColumnHeader["group11.col4"],
-                    accessorFn: row => row.params("env"),
-                    cell: props => {
-                        const env = props.getValue<Env[]>();
-                        return Array.isArray(env)
-                            ? <>{env.map((v, i) => <div key={i} data-raw={v.rawValue}>{v.value() ?? '\u00A0'}</div>)}</>
-                            : undefined;
-                    }
+                    id: 'group11.col4',
+                    header: ajsTableColumnHeader['group11.col4'],
+                    accessorFn: defaultAccessorFn('env'),
                 },
                 {
-                    id: "group11.col5",
-                    header: ajsTableColumnHeader["group11.col5"],
-                    accessorFn: row => row.params<Ev>("ev")?.value(),
+                    id: 'group11.col5',
+                    header: ajsTableColumnHeader['group11.col5'],
+                    accessorFn: defaultAccessorFn('ev'),
                 },
                 {
-                    id: "group11.col6",
-                    header: ajsTableColumnHeader["group11.col6"],
-                    accessorFn: row => row.params<Wkp>("wkp")?.value(),
+                    id: 'group11.col6',
+                    header: ajsTableColumnHeader['group11.col6'],
+                    accessorFn: defaultAccessorFn('wkp'),
                 },
                 {
-                    id: "group11.col7",
-                    header: ajsTableColumnHeader["group11.col7"],
-                    accessorFn: row => row.params<Si>("si")?.value(),
+                    id: 'group11.col7',
+                    header: ajsTableColumnHeader['group11.col7'],
+                    accessorFn: defaultAccessorFn('si'),
                 },
                 columnHelper.group({
-                    id: "group11.group1",
-                    header: ajsTableColumnHeader["group11.group1"],
+                    id: 'group11.group1',
+                    header: ajsTableColumnHeader['group11.group1'],
                     columns: [
                         {
-                            id: "group11.group1.col1",
-                            header: ajsTableColumnHeader["group11.group1.col1"],
-                            accessorFn: row => row.params<So>("so")?.value(),
+                            id: 'group11.group1.col1',
+                            header: ajsTableColumnHeader['group11.group1.col1'],
+                            accessorFn: defaultAccessorFn('so'),
                         },
                         {
-                            id: "group11.group1.col2",
-                            header: ajsTableColumnHeader["group11.group1.col2"],
-                            accessorFn: row => row.params<Soa>("soa")?.value(),
+                            id: 'group11.group1.col2',
+                            header: ajsTableColumnHeader['group11.group1.col2'],
+                            accessorFn: defaultAccessorFn('soa'),
                         }
                     ]
                 }),
                 columnHelper.group({
-                    id: "group11.group2",
-                    header: ajsTableColumnHeader["group11.group2"],
+                    id: 'group11.group2',
+                    header: ajsTableColumnHeader['group11.group2'],
                     columns: [
                         {
-                            id: "group11.group2.col1",
-                            header: ajsTableColumnHeader["group11.group2.col1"],
-                            accessorFn: row => row.params<Se>("se")?.value(),
+                            id: 'group11.group2.col1',
+                            header: ajsTableColumnHeader['group11.group2.col1'],
+                            accessorFn: defaultAccessorFn('se'),
                         },
                         {
-                            id: "group11.group2.col2",
-                            header: ajsTableColumnHeader["group11.group2.col2"],
-                            accessorFn: row => row.params<Sea>("sea")?.value(),
+                            id: 'group11.group2.col2',
+                            header: ajsTableColumnHeader['group11.group2.col2'],
+                            accessorFn: defaultAccessorFn('sea'),
                         }
                     ]
                 }),
                 {
-                    id: "group11.col8",
-                    header: ajsTableColumnHeader["group11.col8"],
-                    accessorFn: row => row.params<Qm>("qm")?.value(),
+                    id: 'group11.col8',
+                    header: ajsTableColumnHeader['group11.col8'],
+                    accessorFn: defaultAccessorFn('qm'),
                 },
                 {
-                    id: "group11.col9",
-                    header: ajsTableColumnHeader["group11.col9"],
-                    accessorFn: row => row.params<Qu>("qu")?.value(),
+                    id: 'group11.col9',
+                    header: ajsTableColumnHeader['group11.col9'],
+                    accessorFn: defaultAccessorFn('qu'),
                 },
                 {
-                    id: "group11.col10",
-                    header: ajsTableColumnHeader["group11.col10"],
-                    accessorFn: row => row.params<Req>("req")?.value(),
+                    id: 'group11.col10',
+                    header: ajsTableColumnHeader['group11.col10'],
+                    accessorFn: defaultAccessorFn('req'),
                 },
                 {
-                    id: "group11.col11",
-                    header: ajsTableColumnHeader["group11.col11"],
+                    id: 'group11.col11',
+                    header: ajsTableColumnHeader['group11.col11'],
                     accessorFn: row => {
                         return ['j', 'rj', 'pj', 'qj'].some(v => v === row.ty.value())
                             ? (row as J | Rj | Pj | Rp | Qj).priority
@@ -736,721 +719,708 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
                     cell: props => {
                         const priority = props.getValue<number | undefined>();
                         return priority
-                            ? <Rating value={priority} size="small" sx={{ position: "inherit" }} readOnly />
+                            ? <Rating value={priority} size='small' sx={{ position: 'inherit' }} readOnly />
                             : undefined;
                     }
                 },
                 columnHelper.group({
-                    id: "group11.group3",
-                    header: ajsTableColumnHeader["group11.group3"],
+                    id: 'group11.group3',
+                    header: ajsTableColumnHeader['group11.group3'],
                     columns: [
                         {
-                            id: "group11.group3.col1",
-                            header: ajsTableColumnHeader["group11.group3.col1"],
-                            accessorFn: row => row.params<Jd>("jd")?.value(),
+                            id: 'group11.group3.col1',
+                            header: ajsTableColumnHeader['group11.group3.col1'],
+                            accessorFn: defaultAccessorFn('jd'),
                         },
                         {
-                            id: "group11.group3.col2",
-                            header: ajsTableColumnHeader["group11.group3.col2"],
-                            accessorFn: row => row.params<Wth>("wth")?.value(),
+                            id: 'group11.group3.col2',
+                            header: ajsTableColumnHeader['group11.group3.col2'],
+                            accessorFn: defaultAccessorFn('wth'),
                         },
                         {
-                            id: "group11.group3.col3",
-                            header: ajsTableColumnHeader["group11.group3.col3"],
-                            accessorFn: row => row.params<Tho>("tho")?.value(),
+                            id: 'group11.group3.col3',
+                            header: ajsTableColumnHeader['group11.group3.col3'],
+                            accessorFn: defaultAccessorFn('tho'),
                         },
                         {
-                            id: "group11.group3.col4",
-                            header: ajsTableColumnHeader["group11.group3.col4"],
-                            accessorFn: row => row.params<Jdf>("jdf")?.value(),
+                            id: 'group11.group3.col4',
+                            header: ajsTableColumnHeader['group11.group3.col4'],
+                            accessorFn: defaultAccessorFn('jdf'),
                         }
                     ]
                 }),
                 {
-                    id: "group11.col12",
-                    header: ajsTableColumnHeader["group11.col12"],
-                    accessorFn: row => row.params<Abr>("abr")?.value(),
+                    id: 'group11.col12',
+                    header: ajsTableColumnHeader['group11.col12'],
+                    accessorFn: defaultAccessorFn('abr'),
                 },
                 columnHelper.group({
-                    id: "group11.group4",
-                    header: ajsTableColumnHeader["group11.group4"],
+                    id: 'group11.group4',
+                    header: ajsTableColumnHeader['group11.group4'],
                     columns: [
                         {
-                            id: "group11.group4.col1",
-                            header: ajsTableColumnHeader["group11.group4.col1"],
-                            accessorFn: row => row.params<Rjs>("rjs")?.value(),
+                            id: 'group11.group4.col1',
+                            header: ajsTableColumnHeader['group11.group4.col1'],
+                            accessorFn: defaultAccessorFn('rjs'),
                         },
                         {
-                            id: "group11.group4.col2",
-                            header: ajsTableColumnHeader["group11.group4.col2"],
-                            accessorFn: row => row.params<Rje>("rje")?.value(),
+                            id: 'group11.group4.col2',
+                            header: ajsTableColumnHeader['group11.group4.col2'],
+                            accessorFn: defaultAccessorFn('rje'),
                         }
                     ]
                 }),
                 {
-                    id: "group11.col13",
-                    header: ajsTableColumnHeader["group11.col13"],
-                    accessorFn: row => row.params<Rec>("rec")?.value(),
+                    id: 'group11.col13',
+                    header: ajsTableColumnHeader['group11.col13'],
+                    accessorFn: defaultAccessorFn('rec'),
                 },
                 {
-                    id: "group11.col14",
-                    header: ajsTableColumnHeader["group11.col14"],
-                    accessorFn: row => row.params<Rei>("rei")?.value(),
+                    id: 'group11.col14',
+                    header: ajsTableColumnHeader['group11.col14'],
+                    accessorFn: defaultAccessorFn('rei'),
                 },
                 {
-                    id: "group11.col15",
-                    header: ajsTableColumnHeader["group11.col15"],
-                    accessorFn: row => row.params<Un>("un")?.value(),
+                    id: 'group11.col15',
+                    header: ajsTableColumnHeader['group11.col15'],
+                    accessorFn: defaultAccessorFn('un'),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group12", //Judgment job definition information
-            header: ajsTableColumnHeader["group12"],
+            id: 'group12', //Judgment job definition information
+            header: ajsTableColumnHeader['group12'],
             columns: [
                 {
-                    id: "group12.col1",
-                    header: ajsTableColumnHeader["group12.col1"],
-                    accessorFn: row => row.params<Ej>("ej")?.value(),
+                    id: 'group12.col1',
+                    header: ajsTableColumnHeader['group12.col1'],
+                    accessorFn: defaultAccessorFn('ej'),
                 },
                 columnHelper.group({
-                    id: "group12.group1",
-                    header: ajsTableColumnHeader["group12.group1"],
+                    id: 'group12.group1',
+                    header: ajsTableColumnHeader['group12.group1'],
                     columns: [
                         {
-                            id: "group12.group1.col1",
-                            header: ajsTableColumnHeader["group12.group1.col1"],
-                            accessorFn: row => row.params<Ejc>("ejc")?.value(),
+                            id: 'group12.group1.col1',
+                            header: ajsTableColumnHeader['group12.group1.col1'],
+                            accessorFn: defaultAccessorFn('ejc'),
                         },
                         {
-                            id: "group12.group1.col2",
-                            header: ajsTableColumnHeader["group12.group1.col2"],
-                            accessorFn: row => row.params<Ejl>("ejl")?.value(),
+                            id: 'group12.group1.col2',
+                            header: ajsTableColumnHeader['group12.group1.col2'],
+                            accessorFn: defaultAccessorFn('ejl'),
                         },
                         {
-                            id: "group12.group1.col3",
-                            header: ajsTableColumnHeader["group12.group1.col3"],
-                            accessorFn: row => row.params<Ejs>("ejs")?.value(),
+                            id: 'group12.group1.col3',
+                            header: ajsTableColumnHeader['group12.group1.col3'],
+                            accessorFn: defaultAccessorFn('ejs'),
                         },
                         {
-                            id: "group12.group1.col4",
-                            header: ajsTableColumnHeader["group12.group1.col4"],
-                            accessorFn: row => row.params<Ejm>("ejm")?.value(),
+                            id: 'group12.group1.col4',
+                            header: ajsTableColumnHeader['group12.group1.col4'],
+                            accessorFn: defaultAccessorFn('ejm'),
                         },
                         {
-                            id: "group12.group1.col5",
-                            header: ajsTableColumnHeader["group12.group1.col5"],
-                            accessorFn: row => row.params<Ejh>("ejh")?.value(),
+                            id: 'group12.group1.col5',
+                            header: ajsTableColumnHeader['group12.group1.col5'],
+                            accessorFn: defaultAccessorFn('ejh'),
                         },
                         {
-                            id: "group12.group1.col6",
-                            header: ajsTableColumnHeader["group12.group1.col6"],
-                            accessorFn: row => row.params<Ejg>("ejg")?.value(),
+                            id: 'group12.group1.col6',
+                            header: ajsTableColumnHeader['group12.group1.col6'],
+                            accessorFn: defaultAccessorFn('ejg'),
                         },
                         {
-                            id: "group12.group1.col7",
-                            header: ajsTableColumnHeader["group12.group1.col7"],
-                            accessorFn: row => row.params<Eju>("eju")?.value(),
+                            id: 'group12.group1.col7',
+                            header: ajsTableColumnHeader['group12.group1.col7'],
+                            accessorFn: defaultAccessorFn('eju'),
                         },
                         {
-                            id: "group12.group1.col8",
-                            header: ajsTableColumnHeader["group12.group1.col8"],
-                            accessorFn: row => row.params<Ejt>("ejt")?.value(),
+                            id: 'group12.group1.col8',
+                            header: ajsTableColumnHeader['group12.group1.col8'],
+                            accessorFn: defaultAccessorFn('ejt'),
                         },
                         {
-                            id: "group12.group1.col9",
-                            header: ajsTableColumnHeader["group12.group1.col9"],
-                            accessorFn: row => row.params<Eji>("eji")?.value(),
+                            id: 'group12.group1.col9',
+                            header: ajsTableColumnHeader['group12.group1.col9'],
+                            accessorFn: defaultAccessorFn('eji'),
                         }
                     ]
                 }),
                 {
-                    id: "group12.col2",
-                    header: ajsTableColumnHeader["group12.col2"],
-                    accessorFn: row => row.params<Ejv>("ejv")?.value(),
+                    id: 'group12.col2',
+                    header: ajsTableColumnHeader['group12.col2'],
+                    accessorFn: defaultAccessorFn('ejv'),
                 },
                 {
-                    id: "group12.col3",
-                    header: ajsTableColumnHeader["group12.col3"],
-                    accessorFn: row => row.params<Ejf>("ejf")?.value(),
+                    id: 'group12.col3',
+                    header: ajsTableColumnHeader['group12.col3'],
+                    accessorFn: defaultAccessorFn('ejf'),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group13", //Event job definition information
-            header: ajsTableColumnHeader["group13"],
+            id: 'group13', //Event job definition information
+            header: ajsTableColumnHeader['group13'],
             columns: [
                 {
-                    id: "group13.col1",
-                    header: ajsTableColumnHeader["group13.col1"],
-                    accessorFn: row => row.params<Tmitv>("tmitv")?.value(),
+                    id: 'group13.col1',
+                    header: ajsTableColumnHeader['group13.col1'],
+                    accessorFn: defaultAccessorFn('tmitv'),
                 },
                 {
-                    id: "group13.col2",
-                    header: ajsTableColumnHeader["group13.col2"],
-                    accessorFn: row => row.params<Etn>("etn")?.value(),
+                    id: 'group13.col2',
+                    header: ajsTableColumnHeader['group13.col2'],
+                    accessorFn: defaultAccessorFn('etn'),
                 },
                 {
-                    id: "group13.col3",
-                    header: ajsTableColumnHeader["group13.col3"],
-                    accessorFn: row => row.params<Flwf>("flwf")?.value(),
+                    id: 'group13.col3',
+                    header: ajsTableColumnHeader['group13.col3'],
+                    accessorFn: defaultAccessorFn('flwf'),
                 },
                 columnHelper.group({
-                    id: "group13.group1",
-                    header: ajsTableColumnHeader["group13.group1"],
+                    id: 'group13.group1',
+                    header: ajsTableColumnHeader['group13.group1'],
                     columns: [
                         {
-                            id: "group13.group1.col1",
-                            header: ajsTableColumnHeader["group13.group1.col1"],
-                            accessorFn: row => row.params<Flwc>("flwc")?.value(),
+                            id: 'group13.group1.col1',
+                            header: ajsTableColumnHeader['group13.group1.col1'],
+                            accessorFn: defaultAccessorFn('flwc'),
                         },
                         {
-                            id: "group13.group1.col2",
-                            header: ajsTableColumnHeader["group13.group1.col2"],
-                            accessorFn: row => row.params<Flco>("flco")?.value(),
+                            id: 'group13.group1.col2',
+                            header: ajsTableColumnHeader['group13.group1.col2'],
+                            accessorFn: defaultAccessorFn('flco'),
                         }
                     ]
                 }),
                 {
-                    id: "group13.col4",
-                    header: ajsTableColumnHeader["group13.col4"],
-                    accessorFn: row => row.params<Flwi>("flwi")?.value(),
+                    id: 'group13.col4',
+                    header: ajsTableColumnHeader['group13.col4'],
+                    accessorFn: defaultAccessorFn('flwi'),
                 },
                 {
-                    id: "group13.col5",
-                    header: ajsTableColumnHeader["group13.col5"],
-                    accessorFn: row => row.params<Evwid>("evwid")?.value(),
+                    id: 'group13.col5',
+                    header: ajsTableColumnHeader['group13.col5'],
+                    accessorFn: defaultAccessorFn('evwid'),
                 },
                 {
-                    id: "group13.col6",
-                    header: ajsTableColumnHeader["group13.col6"],
-                    accessorFn: row => row.params<Evhst>("evhst")?.value(),
+                    id: 'group13.col6',
+                    header: ajsTableColumnHeader['group13.col6'],
+                    accessorFn: defaultAccessorFn('evhst'),
                 },
                 {
-                    id: "group13.col7",
-                    header: ajsTableColumnHeader["group13.col7"],
-                    accessorFn: row => row.params<Evwms>("evwms")?.value(),
+                    id: 'group13.col7',
+                    header: ajsTableColumnHeader['group13.col7'],
+                    accessorFn: defaultAccessorFn('evwms'),
                 },
                 {
-                    id: "group13.col8",
-                    header: ajsTableColumnHeader["group13.col8"],
-                    accessorFn: row => row.params<Ets>("ets")?.value(),
+                    id: 'group13.col8',
+                    header: ajsTableColumnHeader['group13.col8'],
+                    accessorFn: defaultAccessorFn('ets'),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group14", //Action job definition information
-            header: ajsTableColumnHeader["group14"],
+            id: 'group14', //Action job definition information
+            header: ajsTableColumnHeader['group14'],
             columns: [
                 {
-                    id: "group14.col1",
-                    header: ajsTableColumnHeader["group14.col1"],
-                    accessorFn: row => row.params<Evsid>("evsid")?.value(),
+                    id: 'group14.col1',
+                    header: ajsTableColumnHeader['group14.col1'],
+                    accessorFn: defaultAccessorFn('evsid'),
                 },
                 {
-                    id: "group14.col2",
-                    header: ajsTableColumnHeader["group14.col2"],
-                    accessorFn: row => row.params<Evhst>("evhst")?.value(),
+                    id: 'group14.col2',
+                    header: ajsTableColumnHeader['group14.col2'],
+                    accessorFn: defaultAccessorFn('evhst'),
                 },
                 {
-                    id: "group14.col3",
-                    header: ajsTableColumnHeader["group14.col3"],
-                    accessorFn: row => row.params<Evsms>("evsms")?.value(),
+                    id: 'group14.col3',
+                    header: ajsTableColumnHeader['group14.col3'],
+                    accessorFn: defaultAccessorFn('evsms'),
                 },
                 {
-                    id: "group14.col4",
-                    header: ajsTableColumnHeader["group14.col4"],
-                    accessorFn: row => row.params<Evssv>("evssv")?.value(),
+                    id: 'group14.col4',
+                    header: ajsTableColumnHeader['group14.col4'],
+                    accessorFn: defaultAccessorFn('evssv'),
                 },
                 {
-                    id: "group14.col5",
-                    header: ajsTableColumnHeader["group14.col5"],
-                    accessorFn: row => row.params<Evsrt>("evsrt")?.value(),
+                    id: 'group14.col5',
+                    header: ajsTableColumnHeader['group14.col5'],
+                    accessorFn: defaultAccessorFn('evsrt'),
                 },
                 {
-                    id: "group14.col6",
-                    header: ajsTableColumnHeader["group14.col6"],
-                    accessorFn: row => row.params<Evspl>("evspl")?.value(),
+                    id: 'group14.col6',
+                    header: ajsTableColumnHeader['group14.col6'],
+                    accessorFn: defaultAccessorFn('evspl'),
                 },
                 {
-                    id: "group14.col7",
-                    header: ajsTableColumnHeader["group14.col7"],
-                    accessorFn: row => row.params<Evsrc>("evsrc")?.value(),
+                    id: 'group14.col7',
+                    header: ajsTableColumnHeader['group14.col7'],
+                    accessorFn: defaultAccessorFn('evsrc'),
                 },
                 {
-                    id: "group14.col8",
-                    header: ajsTableColumnHeader["group14.col8"],
-                    accessorFn: row => row.params<Pfm>("pfm")?.value(),
+                    id: 'group14.col8',
+                    header: ajsTableColumnHeader['group14.col8'],
+                    accessorFn: defaultAccessorFn('pfm'),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group15", //Job common attribute information
-            header: ajsTableColumnHeader["group15"],
+            id: 'group15', //Job common attribute information
+            header: ajsTableColumnHeader['group15'],
             columns: [
                 {
-                    id: "group15.col1",
-                    header: ajsTableColumnHeader["group15.col1"],
-                    accessorFn: row => row.params<Eu>("eu")?.value(),
+                    id: 'group15.col1',
+                    header: ajsTableColumnHeader['group15.col1'],
+                    accessorFn: defaultAccessorFn('eu'),
                 },
                 {
-                    id: "group15.col2",
-                    header: ajsTableColumnHeader["group15.col2"],
-                    accessorFn: row => row.params<Etm>("etm")?.value(),
+                    id: 'group15.col2',
+                    header: ajsTableColumnHeader['group15.col2'],
+                    accessorFn: defaultAccessorFn('etm'),
                 },
                 {
-                    id: "group15.col3",
-                    header: ajsTableColumnHeader["group15.col3"],
-                    accessorFn: row => row.params<Fd>("fd")?.value(),
+                    id: 'group15.col3',
+                    header: ajsTableColumnHeader['group15.col3'],
+                    accessorFn: defaultAccessorFn('fd'),
                 },
                 {
-                    id: "group15.col4",
-                    header: ajsTableColumnHeader["group15.col4"],
-                    accessorFn: row => row.params<Jty>("jty")?.value(),
+                    id: 'group15.col4',
+                    header: ajsTableColumnHeader['group15.col4'],
+                    accessorFn: defaultAccessorFn('jty'),
                 },
                 columnHelper.group({
-                    id: "group15.group1",
-                    header: ajsTableColumnHeader["group15.group1"],
+                    id: 'group15.group1',
+                    header: ajsTableColumnHeader['group15.group1'],
                     columns: [
                         {
-                            id: "group15.group1.col1",
-                            header: ajsTableColumnHeader["group15.group1.col1"],
-                            accessorFn: row => row.params<Ts1>("ts1")?.value(),
+                            id: 'group15.group1.col1',
+                            header: ajsTableColumnHeader['group15.group1.col1'],
+                            accessorFn: defaultAccessorFn('ts1'),
                         },
                         {
-                            id: "group15.group1.col2",
-                            header: ajsTableColumnHeader["group15.group1.col2"],
-                            accessorFn: row => row.params<Td1>("td1")?.value(),
+                            id: 'group15.group1.col2',
+                            header: ajsTableColumnHeader['group15.group1.col2'],
+                            accessorFn: defaultAccessorFn('td1'),
                         },
                         {
-                            id: "group15.group1.col3",
-                            header: ajsTableColumnHeader["group15.group1.col3"],
-                            accessorFn: row => row.params<Top1>("top1")?.value(),
+                            id: 'group15.group1.col3',
+                            header: ajsTableColumnHeader['group15.group1.col3'],
+                            accessorFn: defaultAccessorFn('top1'),
                         }
                     ]
                 }),
                 columnHelper.group({
-                    id: "group15.group2",
-                    header: ajsTableColumnHeader["group15.group2"],
+                    id: 'group15.group2',
+                    header: ajsTableColumnHeader['group15.group2'],
                     columns: [
                         {
-                            id: "group15.group2.col1",
-                            header: ajsTableColumnHeader["group15.group2.col1"],
-                            accessorFn: row => row.params<Ts2>("ts2")?.value(),
+                            id: 'group15.group2.col1',
+                            header: ajsTableColumnHeader['group15.group2.col1'],
+                            accessorFn: defaultAccessorFn('ts2'),
                         },
                         {
-                            id: "group15.group2.col2",
-                            header: ajsTableColumnHeader["group15.group2.col2"],
-                            accessorFn: row => row.params<Td2>("td2")?.value(),
+                            id: 'group15.group2.col2',
+                            header: ajsTableColumnHeader['group15.group2.col2'],
+                            accessorFn: defaultAccessorFn('td2'),
                         },
                         {
-                            id: "group15.group2.col3",
-                            header: ajsTableColumnHeader["group15.group2.col3"],
-                            accessorFn: row => row.params<Top2>("top2")?.value(),
+                            id: 'group15.group2.col3',
+                            header: ajsTableColumnHeader['group15.group2.col3'],
+                            accessorFn: defaultAccessorFn('top2'),
                         }
                     ]
                 }),
                 columnHelper.group({
-                    id: "group15.group3",
-                    header: ajsTableColumnHeader["group15.group3"],
+                    id: 'group15.group3',
+                    header: ajsTableColumnHeader['group15.group3'],
                     columns: [
                         {
-                            id: "group15.group3.col1",
-                            header: ajsTableColumnHeader["group15.group3.col1"],
-                            accessorFn: row => row.params<Ts3>("ts3")?.value(),
+                            id: 'group15.group3.col1',
+                            header: ajsTableColumnHeader['group15.group3.col1'],
+                            accessorFn: defaultAccessorFn('ts3'),
                         },
                         {
-                            id: "group15.group3.col2",
-                            header: ajsTableColumnHeader["group15.group3.col2"],
-                            accessorFn: row => row.params<Td3>("td3")?.value(),
+                            id: 'group15.group3.col2',
+                            header: ajsTableColumnHeader['group15.group3.col2'],
+                            accessorFn: defaultAccessorFn('td3'),
                         },
                         {
-                            id: "group15.group3.col3",
-                            header: ajsTableColumnHeader["group15.group3.col3"],
-                            accessorFn: row => row.params<Top3>("top3")?.value(),
+                            id: 'group15.group3.col3',
+                            header: ajsTableColumnHeader['group15.group3.col3'],
+                            accessorFn: defaultAccessorFn('top3'),
                         }
                     ]
                 }),
                 columnHelper.group({
-                    id: "group15.group4",
-                    header: ajsTableColumnHeader["group15.group4"],
+                    id: 'group15.group4',
+                    header: ajsTableColumnHeader['group15.group4'],
                     columns: [
                         {
-                            id: "group15.group4.col1",
-                            header: ajsTableColumnHeader["group15.group4.col1"],
-                            accessorFn: row => row.params<Ts4>("ts4")?.value(),
+                            id: 'group15.group4.col1',
+                            header: ajsTableColumnHeader['group15.group4.col1'],
+                            accessorFn: defaultAccessorFn('ts4'),
                         },
                         {
-                            id: "group15.group4.col2",
-                            header: ajsTableColumnHeader["group15.group4.col2"],
-                            accessorFn: row => row.params<Td4>("td4")?.value(),
+                            id: 'group15.group4.col2',
+                            header: ajsTableColumnHeader['group15.group4.col2'],
+                            accessorFn: defaultAccessorFn('td4'),
                         },
                         {
-                            id: "group15.group4.col3",
-                            header: ajsTableColumnHeader["group15.group4.col3"],
-                            accessorFn: row => row.params<Top4>("top4")?.value(),
+                            id: 'group15.group4.col3',
+                            header: ajsTableColumnHeader['group15.group4.col3'],
+                            accessorFn: defaultAccessorFn('top4'),
                         }
                     ]
                 })
             ]
         }),
         columnHelper.group({
-            id: "group16", //Waiting condition definition information
-            header: ajsTableColumnHeader["group16"],
+            id: 'group16', //Waiting condition definition information
+            header: ajsTableColumnHeader['group16'],
             columns: [
                 {
-                    id: "group16.col1",
-                    header: ajsTableColumnHeader["group16.col1"],
-                    accessorFn: row => row.params<Eun>("eun"),
-                    cell: props => {
-                        const eun = props.getValue<Eun[]>();
-                        return Array.isArray(eun)
-                            ? <>{eun.map((v, i) => <div key={i} data-raw={v.rawValue}>{v.value() ?? '\u00A0'}</div>)}</>
-                            : undefined;
-                    }
+                    id: 'group16.col1',
+                    header: ajsTableColumnHeader['group16.col1'],
+                    accessorFn: defaultAccessorFn('eun'),
                 },
                 {
-                    id: "group16.col2",
-                    header: ajsTableColumnHeader["group16.col2"],
-                    accessorFn: row => row.params<Eun>("eun") ? row.params<Mm>("mm")?.value() : undefined,
+                    id: 'group16.col2',
+                    header: ajsTableColumnHeader['group16.col2'],
+                    accessorFn: defaultAccessorFn('mm'),
                 },
                 {
-                    id: "group16.col3",
-                    header: ajsTableColumnHeader["group16.col3"],
-                    accessorFn: row => row.params<Eun>("eun") ? row.params<Nmg>("nmg")?.value() : undefined,
+                    id: 'group16.col3',
+                    header: ajsTableColumnHeader['group16.col3'],
+                    accessorFn: defaultAccessorFn('nmg'),
                 },
                 {
-                    id: "group16.col4",
-                    header: ajsTableColumnHeader["group16.col4"],
-                    accessorFn: row => row.params<Eun>("eun") ? row.params<Uem>("uem")?.value() : undefined,
+                    id: 'group16.col4',
+                    header: ajsTableColumnHeader['group16.col4'],
+                    accessorFn: defaultAccessorFn('uem'),
                 },
                 {
-                    id: "group16.col5",
-                    header: ajsTableColumnHeader["group16.col5"],
-                    accessorFn: row => row.params<Eun>("eun") ? row.params<Ega>("ega")?.value() : undefined,
+                    id: 'group16.col5',
+                    header: ajsTableColumnHeader['group16.col5'],
+                    accessorFn: defaultAccessorFn('ega'),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group17", //Tool unit definition information
-            header: ajsTableColumnHeader["group17"],
+            id: 'group17', //Tool unit definition information
+            header: ajsTableColumnHeader['group17'],
             columns: [
                 columnHelper.group({
-                    id: "group17.group1",
-                    header: ajsTableColumnHeader["group17.group1"],
+                    id: 'group17.group1',
+                    header: ajsTableColumnHeader['group17.group1'],
                     columns: [
                         {
-                            id: "group17.group1.col1",
-                            header: ajsTableColumnHeader["group17.group1.col1"],
-                            accessorFn: row => ['cpj', 'rcpj'].includes(row.ty.value()) ? row.params<Prm>("prm")?.value() : undefined,
+                            id: 'group17.group1.col1',
+                            header: ajsTableColumnHeader['group17.group1.col1'],
+                            accessorFn: row => ['cpj', 'rcpj'].includes(row.ty.value()) ? row.params<Prm>('prm') : undefined,
                         },
                         {
-                            id: "group17.group1.col2",
-                            header: ajsTableColumnHeader["group17.group1.col2"],
-                            accessorFn: row => ['cpj', 'rcpj'].includes(row.ty.value()) ? row.params("env") : undefined,
-                            cell: props => {
-                                const env = props.getValue<Env[]>();
-                                return Array.isArray(env)
-                                    ? <>{env.map((v, i) => <div key={i} data-raw={v.rawValue}>{v.value() ?? '\u00A0'}</div>)}</>
-                                    : undefined;
-                            }
+                            id: 'group17.group1.col2',
+                            header: ajsTableColumnHeader['group17.group1.col2'],
+                            accessorFn: row => ['cpj', 'rcpj'].includes(row.ty.value()) ? row.params('env') : undefined,
                         }
                     ]
                 })
             ]
         }),
         columnHelper.group({
-            id: "group18", //Flexible job definition information
-            header: ajsTableColumnHeader["group18"],
+            id: 'group18', //Flexible job definition information
+            header: ajsTableColumnHeader['group18'],
             columns: [
                 {
-                    id: "group18.col1",
-                    header: ajsTableColumnHeader["group18.col1"],
-                    accessorFn: row => row.params<Da>("da")?.value(),
+                    id: 'group18.col1',
+                    header: ajsTableColumnHeader['group18.col1'],
+                    accessorFn: defaultAccessorFn('da'),
                 },
                 {
-                    id: "group18.col2",
-                    header: ajsTableColumnHeader["group18.col2"],
-                    accessorFn: row => row.params<Fxg>("fxg")?.value(),
+                    id: 'group18.col2',
+                    header: ajsTableColumnHeader['group18.col2'],
+                    accessorFn: defaultAccessorFn('fxg'),
                 },
                 {
-                    id: "group18.col3",
-                    header: ajsTableColumnHeader["group18.col3"],
-                    accessorFn: row => ['fxj', 'rfxj'].includes(row.ty.value()) ? row.params<Ex>("ex")?.value() : undefined,
+                    id: 'group18.col3',
+                    header: ajsTableColumnHeader['group18.col3'],
+                    accessorFn: row => ['fxj', 'rfxj'].includes(row.ty.value()) ? row.params<Ex>('ex') : undefined,
                 }
             ]
         }),
         columnHelper.group({
-            id: "group19", //Http connection job definition information
-            header: ajsTableColumnHeader["group19"],
+            id: 'group19', //Http connection job definition information
+            header: ajsTableColumnHeader['group19'],
             columns: [
                 {
-                    id: "group19.col1",
-                    header: ajsTableColumnHeader["group19.col1"],
-                    accessorFn: row => row.params<Htcfl>("htcfl")?.value(),
+                    id: 'group19.col1',
+                    header: ajsTableColumnHeader['group19.col1'],
+                    accessorFn: defaultAccessorFn('htcfl'),
                 },
                 {
-                    id: "group19.col2",
-                    header: ajsTableColumnHeader["group19.col2"],
-                    accessorFn: row => row.params<Htknd>("htknd")?.value(),
+                    id: 'group19.col2',
+                    header: ajsTableColumnHeader['group19.col2'],
+                    accessorFn: defaultAccessorFn('htknd'),
                 },
                 {
-                    id: "group19.col3",
-                    header: ajsTableColumnHeader["group19.col3"],
-                    accessorFn: row => row.params<Htexm>("htexm")?.value(),
+                    id: 'group19.col3',
+                    header: ajsTableColumnHeader['group19.col3'],
+                    accessorFn: defaultAccessorFn('htexm'),
                 },
                 {
-                    id: "group19.col4",
-                    header: ajsTableColumnHeader["group19.col4"],
-                    accessorFn: row => row.params<Htrqf>("htrqf")?.value(),
+                    id: 'group19.col4',
+                    header: ajsTableColumnHeader['group19.col4'],
+                    accessorFn: defaultAccessorFn('htrqf'),
                 },
                 {
-                    id: "group19.col5",
-                    header: ajsTableColumnHeader["group19.col5"],
-                    accessorFn: row => row.params<Htrqu>("htrqu")?.value(),
+                    id: 'group19.col5',
+                    header: ajsTableColumnHeader['group19.col5'],
+                    accessorFn: defaultAccessorFn('htrqu'),
                 },
                 {
-                    id: "group19.col6",
-                    header: ajsTableColumnHeader["group19.col6"],
-                    accessorFn: row => row.params<Htrqm>("htrqm")?.value(),
+                    id: 'group19.col6',
+                    header: ajsTableColumnHeader['group19.col6'],
+                    accessorFn: defaultAccessorFn('htrqm'),
                 },
                 {
-                    id: "group19.col7",
-                    header: ajsTableColumnHeader["group19.col7"],
-                    accessorFn: row => row.params<Htstf>("htstf")?.value(),
+                    id: 'group19.col7',
+                    header: ajsTableColumnHeader['group19.col7'],
+                    accessorFn: defaultAccessorFn('htstf'),
                 },
                 {
-                    id: "group19.col8",
-                    header: ajsTableColumnHeader["group19.col8"],
-                    accessorFn: row => row.params<Htspt>("htspt")?.value(),
+                    id: 'group19.col8',
+                    header: ajsTableColumnHeader['group19.col8'],
+                    accessorFn: defaultAccessorFn('htspt'),
                 },
                 {
-                    id: "group19.col9",
-                    header: ajsTableColumnHeader["group19.col9"],
-                    accessorFn: row => row.params<Htrhf>("htrhf")?.value(),
+                    id: 'group19.col9',
+                    header: ajsTableColumnHeader['group19.col9'],
+                    accessorFn: defaultAccessorFn('htrhf'),
                 },
                 {
-                    id: "group19.col10",
-                    header: ajsTableColumnHeader["group19.col10"],
-                    accessorFn: row => row.params<Htrbf>("htrbf")?.value(),
+                    id: 'group19.col10',
+                    header: ajsTableColumnHeader['group19.col10'],
+                    accessorFn: defaultAccessorFn('htrbf'),
                 },
                 {
-                    id: "group19.col11",
-                    header: ajsTableColumnHeader["group19.col11"],
-                    accessorFn: row => row.params<Htcdm>("htcdm")?.value(),
+                    id: 'group19.col11',
+                    header: ajsTableColumnHeader['group19.col11'],
+                    accessorFn: defaultAccessorFn('htcdm'),
                 }
             ]
         }),
         columnHelper.group({
-            id: "group20", //Other definition information
-            header: ajsTableColumnHeader["group20"],
+            id: 'group20', //Other definition information
+            header: ajsTableColumnHeader['group20'],
             columns: [
                 {
-                    id: "group20.col1",
-                    header: ajsTableColumnHeader["group20.col1"],
-                    accessorKey: undefined,
+                    id: 'group20.col1',
+                    header: ajsTableColumnHeader['group20.col1'],
                 }
             ]
         }),
         // columnHelper.group({
-        //     id: "group21", //Custom job definition information
-        //     header: ajsTableColumnHeader["group21"],
+        //     id: 'group21', //Custom job definition information
+        //     header: ajsTableColumnHeader['group21'],
         //     columns: [
         //         {
-        //             id: "group21.col1",
-        //             header: ajsTableColumnHeader["group21.col1"],
+        //             id: 'group21.col1',
+        //             header: ajsTableColumnHeader['group21.col1'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col2",
-        //             header: ajsTableColumnHeader["group21.col2"],
+        //             id: 'group21.col2',
+        //             header: ajsTableColumnHeader['group21.col2'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col3",
-        //             header: ajsTableColumnHeader["group21.col3"],
+        //             id: 'group21.col3',
+        //             header: ajsTableColumnHeader['group21.col3'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col4",
-        //             header: ajsTableColumnHeader["group21.col4"],
+        //             id: 'group21.col4',
+        //             header: ajsTableColumnHeader['group21.col4'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col5",
-        //             header: ajsTableColumnHeader["group21.col5"],
+        //             id: 'group21.col5',
+        //             header: ajsTableColumnHeader['group21.col5'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col6",
-        //             header: ajsTableColumnHeader["group21.col6"],
+        //             id: 'group21.col6',
+        //             header: ajsTableColumnHeader['group21.col6'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col7",
-        //             header: ajsTableColumnHeader["group21.col7"],
+        //             id: 'group21.col7',
+        //             header: ajsTableColumnHeader['group21.col7'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col8",
-        //             header: ajsTableColumnHeader["group21.col8"],
+        //             id: 'group21.col8',
+        //             header: ajsTableColumnHeader['group21.col8'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col9",
-        //             header: ajsTableColumnHeader["group21.col9"],
+        //             id: 'group21.col9',
+        //             header: ajsTableColumnHeader['group21.col9'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col10",
-        //             header: ajsTableColumnHeader["group21.col10"],
+        //             id: 'group21.col10',
+        //             header: ajsTableColumnHeader['group21.col10'],
         //             accessorKey: undefined,
         //         },
         //         columnHelper.group({
-        //             id: "group21.group1",
-        //             header: ajsTableColumnHeader["group21.group1"],
+        //             id: 'group21.group1',
+        //             header: ajsTableColumnHeader['group21.group1'],
         //             columns: [
         //                 {
-        //                     id: "group21.group1.col1",
-        //                     header: ajsTableColumnHeader["group21.group1.col1"],
+        //                     id: 'group21.group1.col1',
+        //                     header: ajsTableColumnHeader['group21.group1.col1'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col2",
-        //                     header: ajsTableColumnHeader["group21.group1.col2"],
+        //                     id: 'group21.group1.col2',
+        //                     header: ajsTableColumnHeader['group21.group1.col2'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col3",
-        //                     header: ajsTableColumnHeader["group21.group1.col3"],
+        //                     id: 'group21.group1.col3',
+        //                     header: ajsTableColumnHeader['group21.group1.col3'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col4",
-        //                     header: ajsTableColumnHeader["group21.group1.col4"],
+        //                     id: 'group21.group1.col4',
+        //                     header: ajsTableColumnHeader['group21.group1.col4'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col5",
-        //                     header: ajsTableColumnHeader["group21.group1.col5"],
+        //                     id: 'group21.group1.col5',
+        //                     header: ajsTableColumnHeader['group21.group1.col5'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col6",
-        //                     header: ajsTableColumnHeader["group21.group1.col6"],
+        //                     id: 'group21.group1.col6',
+        //                     header: ajsTableColumnHeader['group21.group1.col6'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col7",
-        //                     header: ajsTableColumnHeader["group21.group1.col7"],
+        //                     id: 'group21.group1.col7',
+        //                     header: ajsTableColumnHeader['group21.group1.col7'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col8",
-        //                     header: ajsTableColumnHeader["group21.group1.col8"],
+        //                     id: 'group21.group1.col8',
+        //                     header: ajsTableColumnHeader['group21.group1.col8'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col9",
-        //                     header: ajsTableColumnHeader["group21.group1.col9"],
+        //                     id: 'group21.group1.col9',
+        //                     header: ajsTableColumnHeader['group21.group1.col9'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col10",
-        //                     header: ajsTableColumnHeader["group21.group1.col10"],
+        //                     id: 'group21.group1.col10',
+        //                     header: ajsTableColumnHeader['group21.group1.col10'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col11",
-        //                     header: ajsTableColumnHeader["group21.group1.col11"],
+        //                     id: 'group21.group1.col11',
+        //                     header: ajsTableColumnHeader['group21.group1.col11'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col12",
-        //                     header: ajsTableColumnHeader["group21.group1.col12"],
+        //                     id: 'group21.group1.col12',
+        //                     header: ajsTableColumnHeader['group21.group1.col12'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col13",
-        //                     header: ajsTableColumnHeader["group21.group1.col13"],
+        //                     id: 'group21.group1.col13',
+        //                     header: ajsTableColumnHeader['group21.group1.col13'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col14",
-        //                     header: ajsTableColumnHeader["group21.group1.col14"],
+        //                     id: 'group21.group1.col14',
+        //                     header: ajsTableColumnHeader['group21.group1.col14'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col15",
-        //                     header: ajsTableColumnHeader["group21.group1.col15"],
+        //                     id: 'group21.group1.col15',
+        //                     header: ajsTableColumnHeader['group21.group1.col15'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col16",
-        //                     header: ajsTableColumnHeader["group21.group1.col16"],
+        //                     id: 'group21.group1.col16',
+        //                     header: ajsTableColumnHeader['group21.group1.col16'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col17",
-        //                     header: ajsTableColumnHeader["group21.group1.col17"],
+        //                     id: 'group21.group1.col17',
+        //                     header: ajsTableColumnHeader['group21.group1.col17'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col18",
-        //                     header: ajsTableColumnHeader["group21.group1.col18"],
+        //                     id: 'group21.group1.col18',
+        //                     header: ajsTableColumnHeader['group21.group1.col18'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col19",
-        //                     header: ajsTableColumnHeader["group21.group1.col19"],
+        //                     id: 'group21.group1.col19',
+        //                     header: ajsTableColumnHeader['group21.group1.col19'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group1.col20",
-        //                     header: ajsTableColumnHeader["group21.group1.col20"],
+        //                     id: 'group21.group1.col20',
+        //                     header: ajsTableColumnHeader['group21.group1.col20'],
         //                     accessorKey: undefined,
         //                 }
         //             ]
         //         }),
         //         {
-        //             id: "group21.col11",
-        //             header: ajsTableColumnHeader["group21.col11"],
+        //             id: 'group21.col11',
+        //             header: ajsTableColumnHeader['group21.col11'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col12",
-        //             header: ajsTableColumnHeader["group21.col12"],
+        //             id: 'group21.col12',
+        //             header: ajsTableColumnHeader['group21.col12'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col13",
-        //             header: ajsTableColumnHeader["group21.col13"],
+        //             id: 'group21.col13',
+        //             header: ajsTableColumnHeader['group21.col13'],
         //             accessorKey: undefined,
         //         },
         //         {
-        //             id: "group21.col14",
-        //             header: ajsTableColumnHeader["group21.col14"],
+        //             id: 'group21.col14',
+        //             header: ajsTableColumnHeader['group21.col14'],
         //             accessorKey: undefined,
         //         },
         //         columnHelper.group({
-        //             id: "group21.group2",
-        //             header: ajsTableColumnHeader["group21.group2"],
+        //             id: 'group21.group2',
+        //             header: ajsTableColumnHeader['group21.group2'],
         //             columns: [
         //                 {
-        //                     id: "group21.group2.col1",
-        //                     header: ajsTableColumnHeader["group21.group2.col1"],
+        //                     id: 'group21.group2.col1',
+        //                     header: ajsTableColumnHeader['group21.group2.col1'],
         //                     accessorKey: undefined,
         //                 },
         //                 {
-        //                     id: "group21.group2.col2",
-        //                     header: ajsTableColumnHeader["group21.group2.col2"],
+        //                     id: 'group21.group2.col2',
+        //                     header: ajsTableColumnHeader['group21.group2.col2'],
         //                     accessorKey: undefined,
         //                 }
         //             ]
         //         }),
         //         {
-        //             id: "group21.col15",
-        //             header: ajsTableColumnHeader["group21.col15"],
+        //             id: 'group21.col15',
+        //             header: ajsTableColumnHeader['group21.col15'],
         //             accessorKey: undefined,
         //         }
         //     ]

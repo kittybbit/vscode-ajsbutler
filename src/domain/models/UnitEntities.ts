@@ -1,9 +1,9 @@
 /** JP1/AJS3 unit entities  */
 
-import { Ar, Parameter } from "./ParameterEntities";
-import { Unit } from "../values/Unit";
-import { ParamsType, Ty, TyType, isParams, isTy } from "../values/AjsType";
-import { ParamFactory } from "./ParameterFactory";
+import { Ar, Parameter } from './ParameterEntities';
+import { Unit } from '../values/Unit';
+import { ParamsType, Ty, TyType, isParams, isTy } from '../values/AjsType';
+import { ParamFactory } from './ParameterFactory';
 
 /** abstract class of unit unit for decorator */
 export abstract class UnitEntity {
@@ -59,8 +59,8 @@ export abstract class UnitEntity {
         }
 
         return Ty
-            .filter(ty => ty.charAt(0) === "r")
-            .filter(r => !["rc", "rm"].includes(r))
+            .filter(ty => ty.charAt(0) === 'r')
+            .filter(r => !['rm'].includes(r))
             .includes(this.ty.value())
             ? true
             : false;
@@ -94,8 +94,9 @@ export abstract class UnitEntity {
                 .filter(p => p)
                 .map(p => {
                     if (Array.isArray(p)) {
-                        return p.map(q => q.prettyJSON())
-                    } else if (p) {
+                        //return (p instanceof Parameter) ? p.map(q => q.prettyJSON()) : undefined;
+                        return p.map(q => q.prettyJSON());
+                    } else if (p instanceof Parameter) {
                         return p.prettyJSON()
                     } else {
                         return; // not here
@@ -134,83 +135,83 @@ export class G extends UnitEntity {
 
     get su() {
         if (this.op === undefined && this.cl === undefined) {
-            return true;
+            return undefined;
         } else if (this.op && this.op.find(v => v.su)) {
             return true;
         } else if (this.cl && this.cl.find(v => v.su)) {
             return false;
         }
-        return false;
+        return undefined;
     }
 
     get mo() {
         if (this.op === undefined && this.cl === undefined) {
-            return true;
+            return undefined;
         } else if (this.op && this.op.find(v => v.mo)) {
             return true;
         } else if (this.cl && this.cl.find(v => v.mo)) {
             return false;
         }
-        return false;
+        return undefined;
     }
 
     get tu() {
         if (this.op === undefined && this.cl === undefined) {
-            return true;
+            return undefined;
         } else if (this.op && this.op.find(v => v.tu)) {
             return true;
         } else if (this.cl && this.cl.find(v => v.tu)) {
             return false;
         }
-        return false;
+        return undefined;
     }
 
     get we() {
         if (this.op === undefined && this.cl === undefined) {
-            return true;
+            return undefined;
         } else if (this.op && this.op.find(v => v.we)) {
             return true;
         } else if (this.cl && this.cl.find(v => v.we)) {
             return false;
         }
-        return false;
+        return undefined;
     }
 
     get th() {
         if (this.op === undefined && this.cl === undefined) {
-            return true;
+            return undefined;
         } else if (this.op && this.op.find(v => v.th)) {
             return true;
         } else if (this.cl && this.cl.find(v => v.th)) {
             return false;
         }
-        return false;
+        return undefined;
     }
 
     get fr() {
         if (this.op === undefined && this.cl === undefined) {
-            return true;
+            return undefined;
         } else if (this.op && this.op.find(v => v.fr)) {
             return true;
         } else if (this.cl && this.cl.find(v => v.fr)) {
             return false;
         }
-        return false;
+        return undefined;
     }
 
     get sa() {
         if (this.op === undefined && this.cl === undefined) {
-            return true;
+            return undefined;
         } else if (this.op && this.op.find(v => v.sa)) {
             return true;
         } else if (this.cl && this.cl.find(v => v.sa)) {
             return false;
         }
-        return false;
+        return undefined;
     }
 
     isPlanning() {
-        return this.gty?.value() === "p";
+        return this.gty?.value() === 'p';
     }
 }
 export class Mg extends UnitEntity {

@@ -24,10 +24,10 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
     };
 
     const styleTableCell: SxProps<Theme> = {
-        whiteSpace: "nowrap",
-        verticalAlign: "top",
-        "&:first-child": {
-            position: "sticky",
+        whiteSpace: 'nowrap',
+        verticalAlign: 'top',
+        '&:first-child': {
+            position: 'sticky',
             left: 0,
             backgroundColor: (theme) => theme.palette.background.default,
         }
@@ -42,7 +42,7 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
         />),
         Table: (props: object) => <Table
             {...props}
-            size="small"
+            size='small'
             stickyHeader
         />,
         TableHead: React.forwardRef<HTMLTableSectionElement>((props, ref) => <TableHead

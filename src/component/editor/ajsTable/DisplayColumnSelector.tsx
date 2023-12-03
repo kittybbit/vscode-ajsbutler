@@ -1,11 +1,11 @@
-import React, { Fragment } from "react";
-import { UnitEntity } from "../../../domain/models/UnitEntities";
-import { Column, Table as ReactTable } from "@tanstack/table-core";
-import { Accordion, AccordionDetails, AccordionSummary, Divider, Drawer, FormControlLabel, IconButton, List, ListItem, Stack, Switch, Toolbar, Tooltip, Typography } from "@mui/material";
-import { ToggleOff, ToggleOn, ExpandMore } from "@mui/icons-material";
-import { useMyAppContext } from "../MyContexts";
-import { localeMap } from "../../../domain/services/i18n/nls";
-import { MenuType } from "./Header";
+import React, { Fragment } from 'react';
+import { UnitEntity } from '../../../domain/models/UnitEntities';
+import { Column, Table as ReactTable } from '@tanstack/table-core';
+import { Accordion, AccordionDetails, AccordionSummary, Divider, Drawer, FormControlLabel, IconButton, List, ListItem, Stack, Switch, Toolbar, Tooltip, Typography } from '@mui/material';
+import { ToggleOff, ToggleOn, ExpandMore } from '@mui/icons-material';
+import { useMyAppContext } from '../MyContexts';
+import { localeMap } from '../../../domain/services/i18n/nls';
+import { MenuType } from './Header';
 
 export default function DisplayColumnSelector(props: { table: ReactTable<UnitEntity> } & MenuType) {
 
@@ -51,23 +51,23 @@ export default function DisplayColumnSelector(props: { table: ReactTable<UnitEnt
                 <Tooltip arrow title={localeMap('columnSelectSidebar.invisibleAll', lang)}>
                     <IconButton
                         aria-label={localeMap('columnSelectSidebar.invisibleAll', lang)}
-                        size="small"
+                        size='small'
                         onClick={() => {
                             table.toggleAllColumnsVisible(false);
                         }}
                     >
-                        <ToggleOff fontSize="large" color="disabled" />
+                        <ToggleOff fontSize='large' color='disabled' />
                     </IconButton>
                 </Tooltip>
                 <Tooltip arrow title={localeMap('columnSelectSidebar.visibleAll', lang)}>
                     <IconButton
                         aria-label={localeMap('columnSelectSidebar.visibleAll', lang)}
-                        size="small"
+                        size='small'
                         onClick={() => {
                             table.toggleAllColumnsVisible(true);
                         }}
                     >
-                        <ToggleOn fontSize="large" color="primary" />
+                        <ToggleOn fontSize='large' color='primary' />
                     </IconButton>
                 </Tooltip>
             </Stack>
@@ -79,12 +79,12 @@ export default function DisplayColumnSelector(props: { table: ReactTable<UnitEnt
                             expandIcon={<ExpandMore />}
                         >
                             <Switch
-                                size="small"
+                                size='small'
                                 onClick={handleClick}
                                 onChange={handleChangeHeader(column1)}
                                 checked={handlCheckedHeader(column1)}
                             />
-                            <Divider orientation="vertical" flexItem sx={{
+                            <Divider orientation='vertical' flexItem sx={{
                                 marginLeft: '0.5em',
                                 marginRight: '0.5em',
                             }} />
@@ -101,7 +101,7 @@ export default function DisplayColumnSelector(props: { table: ReactTable<UnitEnt
                                                 .map(column3 => <ListItem key={column3.id} dense>
                                                     <FormControlLabel
                                                         control={<Switch
-                                                            size="small"
+                                                            size='small'
                                                             onChange={handleChangeHeader(column3)}
                                                             checked={handlCheckedHeader(column3)}
                                                         />}

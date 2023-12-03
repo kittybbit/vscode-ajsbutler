@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+import React, { useState } from 'react';
+import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu'
-import { useMyAppContext } from "../MyContexts";
-import { localeMap } from "../../../domain/services/i18n/nls";
-import ViewColumn from "@mui/icons-material/ViewColumn";
-import Loop from "@mui/icons-material/Loop";
-import { MenuType } from "./Header";
+import { useMyAppContext } from '../MyContexts';
+import { localeMap } from '../../../domain/services/i18n/nls';
+import ViewColumn from '@mui/icons-material/ViewColumn';
+import Loop from '@mui/icons-material/Loop';
+import { MenuType } from './Header';
 
 const TableMenu = (params: MenuType) => {
 
@@ -24,16 +24,16 @@ const TableMenu = (params: MenuType) => {
 
     return <>
         <IconButton
-            size="small"
-            edge="start"
-            aria-label="menu"
+            size='small'
+            edge='start'
+            aria-label='menu'
             sx={{ mr: 2 }}
             onClick={handleMenuClick}
         >
             <MenuIcon />
         </IconButton>
         <Menu
-            id="menu"
+            id='menu'
             anchorEl={anchorEl}
             anchorOrigin={{
                 vertical: 'bottom',
@@ -48,7 +48,7 @@ const TableMenu = (params: MenuType) => {
             onClose={handleClose}
         >
             <MenuItem
-                id="menuItem1"
+                id='menuItem1'
                 onClick={() => {
                     console.log('click menuItem1');
                     handleClose();
@@ -58,7 +58,7 @@ const TableMenu = (params: MenuType) => {
                 <ListItemText>{localeMap('menu.menuItem1', lang)}</ListItemText>
             </MenuItem>
             <MenuItem
-                id="menuItem2"
+                id='menuItem2'
                 onClick={() => {
                     console.log('click menuItem2');
                     handleClose();

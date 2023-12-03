@@ -1,6 +1,6 @@
-import { AjsParserListener } from "@generate/parser/AjsParserListener";
-import { UnitAttributeContext, UnitDefinitionContext, UnitParameterContext } from "@generate/parser/AjsParser";
-import { Unit } from "../../values/Unit";
+import { AjsParserListener } from '@generate/parser/AjsParserListener';
+import { UnitAttributeContext, UnitDefinitionContext, UnitParameterContext } from '@generate/parser/AjsParser';
+import { Unit } from '../../values/Unit';
 
 export class Ajs3v12Evaluator implements AjsParserListener {
 

@@ -1,15 +1,16 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { useReactTable } from "@tanstack/react-table";
-import { SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from "@tanstack/table-core";
-import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
-import { useMyAppContext } from "../MyContexts";
-import { UnitEntity, tyFactory } from "../../../domain/models/UnitEntities";
-import VirtualizedTable from "./VirtualizedTable";
-import { CssBaseline, Stack, ThemeProvider, Typography, createTheme } from "@mui/material";
-import Header from "./Header";
-import { parse } from "flatted";
-import { Unit } from "../../../domain/values/Unit";
-import StaticTable from "./StaticTable";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { useReactTable } from '@tanstack/react-table';
+import { SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
+import { tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
+import { useMyAppContext } from '../MyContexts';
+import { UnitEntity, tyFactory } from '../../../domain/models/UnitEntities';
+import VirtualizedTable from './VirtualizedTable';
+import { CssBaseline, Stack, ThemeProvider, Typography, createTheme } from '@mui/material';
+import Header from './Header';
+import { parse } from 'flatted';
+import { Unit } from '../../../domain/values/Unit';
+import StaticTable from './StaticTable';
+import { toCsv } from '../../../domain/services/export/csv';
 
 export type GlobalFilterType = {
     globalFilter: string,
@@ -31,10 +32,10 @@ const TableContents = () => {
         setUnitEntities(() => newUnitEntities);
     };
     useEffect(() => {
-        window.EventBridge.addCallback("changeDocument", fn);
+        window.EventBridge.addCallback('changeDocument', fn);
         window.vscode.postMessage({ type: 'ready' });
         return () => {
-            window.EventBridge.removeCallback("changeDocument", fn);
+            window.EventBridge.removeCallback('changeDocument', fn);
         }
     }, []); // fire this when mount.
 
@@ -58,7 +59,7 @@ const TableContents = () => {
 
     const theme = useMemo(() => createTheme({
         palette: {
-            mode: isDarkMode ? "dark" : "light"
+            mode: isDarkMode ? 'dark' : 'light'
         }
     }), [isDarkMode]);
 
@@ -73,11 +74,12 @@ const TableContents = () => {
                     ? <VirtualizedTable table={table} />
                     : <StaticTable table={table} />
             }
-            <Stack direction='row' justifyContent="flex-end" spacing={2}>
+            <Stack direction='row' justifyContent='flex-end' spacing={2}>
                 <Typography>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>
             </Stack>
         </ThemeProvider>
         {DEVELOPMENT && <pre>{JSON.stringify(table.getState(), null, 2)}</pre>}
+        {DEVELOPMENT && <pre>{toCsv(table)}</pre>}
     </>;
 };
 export default TableContents;
