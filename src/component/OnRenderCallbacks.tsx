@@ -8,7 +8,7 @@ import { Interaction } from 'scheduler/tracing';
  */
 export function onRenderCallback(
     id: string,
-    phase: "mount" | "update",
+    phase: 'mount' | 'update',
     actualDuration: number,
     baseDuration: number,
     startTime: number,

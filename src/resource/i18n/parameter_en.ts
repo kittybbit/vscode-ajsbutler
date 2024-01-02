@@ -1,674 +1,674 @@
 export const parameter_en = {
-    "ab": {
-        "syntax": "{exec|hold|stop}"
+    'ab': {
+        'syntax': '{exec|hold|stop}'
     },
-    "abr": {
-        "syntax": "{y|n}"
+    'abr': {
+        'syntax': '{y|n}'
     },
-    "ar": {
-        "syntax": "(f=preceding-unit-name, t=succeeding-unit-name[,relation-type])"
+    'ar': {
+        'syntax': '(f=preceding-unit-name, t=succeeding-unit-name[,relation-type])'
     },
-    "cd": {
-        "syntax": "{no|un|n}"
+    'cd': {
+        'syntax': '{no|un|n}'
     },
-    "cftd": {
-        "syntax": "[N,]{no|be|af|db|da}[,n[,N]]"
+    'cftd': {
+        'syntax': '[N,]{no|be|af|db|da}[,n[,N]]'
     },
-    "cgs": {
-        "syntax": "{y|n}"
+    'cgs': {
+        'syntax': '{y|n}'
     },
-    "cl": {
-        "syntax": "yyyy/mm/dd|{su|mo|tu|we|th|fr|sa}"
+    'cl': {
+        'syntax': 'yyyy/mm/dd|{su|mo|tu|we|th|fr|sa}'
     },
-    "cm": {
-        "syntax": "comment"
+    'cm': {
+        'syntax': 'comment'
     },
-    "cmaif": {
-        "syntax": "\"additional-information\""
+    'cmaif': {
+        'syntax': '"additional-information"'
     },
-    "cmsts": {
-        "syntax": "{un|no|wa|mi|ma|cr|re|te|di}"
+    'cmsts': {
+        'syntax': '{un|no|wa|mi|ma|cr|re|te|di}'
     },
-    "cond": {
-        "syntax": "{and|or}"
+    'cond': {
+        'syntax': '{and|or}'
     },
-    "cty": {
-        "syntax": "\"custom-job-class-name\""
+    'cty': {
+        'syntax': '"custom-job-class-name"'
     },
-    "cy": {
-        "syntax": "[N,](n,{y|m|w|d})"
+    'cy': {
+        'syntax': '[N,](n,{y|m|w|d})'
     },
-    "da": {
-        "syntax": "\"destination-or-broadcast-agent\""
+    'da': {
+        'syntax': '"destination-or-broadcast-agent"'
     },
-    "de": {
-        "syntax": "{y|n}"
+    'de': {
+        'syntax': '{y|n}'
     },
-    "ed": {
-        "syntax": "yyyy/mm/dd"
+    'ed': {
+        'syntax': 'yyyy/mm/dd'
     },
-    "ega": {
-        "syntax": "{exec|execdeffer|none}"
+    'ega': {
+        'syntax': '{exec|execdeffer|none}'
     },
-    "ej": {
-        "syntax": "{gt|ge|lt|le|eq|ne|ri|ro|ef|nf|vgt|vge|vlt|vle|veq|vne|vri|vro|sce|spe|sne|spn|snn|snl}"
+    'ej': {
+        'syntax': '{gt|ge|lt|le|eq|ne|ri|ro|ef|nf|vgt|vge|vlt|vle|veq|vne|vri|vro|sce|spe|sne|spn|snn|snl}'
     },
-    "ejc": {
-        "syntax": "udgment-return-code"
+    'ejc': {
+        'syntax': 'udgment-return-code'
     },
-    "ejf": {
-        "syntax": "\"end-judgment-file-name\""
+    'ejf': {
+        'syntax': '"end-judgment-file-name"'
     },
-    "ejg": {
-        "syntax": "upper-limit-judgment-value-for-variable_(numeric)"
+    'ejg': {
+        'syntax': 'upper-limit-judgment-value-for-variable_(numeric)'
     },
-    "ejh": {
-        "syntax": "upper-limit-of-judgment-return-codes"
+    'ejh': {
+        'syntax': 'upper-limit-of-judgment-return-codes'
     },
-    "eji": {
-        "syntax": "judgment-value-for-variable (numeric)"
+    'eji': {
+        'syntax': 'judgment-value-for-variable (numeric)'
     },
-    "ejl": {
-        "syntax": "lower-limit-of-judgment-return-codes"
+    'ejl': {
+        'syntax': 'lower-limit-of-judgment-return-codes'
     },
-    "ejm": {
-        "syntax": "{gt|ge}"
+    'ejm': {
+        'syntax': '{gt|ge}'
     },
-    "ejn": {
-        "syntax": "exclusive-jobnet-name"
+    'ejn': {
+        'syntax': 'exclusive-jobnet-name'
     },
-    "ejs": {
-        "syntax": "lower-limit-judgment-value-for-variable_(numeric)"
+    'ejs': {
+        'syntax': 'lower-limit-judgment-value-for-variable_(numeric)'
     },
-    "ejt": {
-        "syntax": "\"judgment-value-for-variable (string)\""
+    'ejt': {
+        'syntax': '"judgment-value-for-variable (string)"'
     },
-    "eju": {
-        "syntax": "{lt|le}"
+    'eju': {
+        'syntax': '{lt|le}'
     },
-    "ejv": {
-        "syntax": "variable-name"
+    'ejv': {
+        'syntax': 'variable-name'
     },
-    "el": {
-        "syntax": "unit-name, unit-type, +H+V"
+    'el': {
+        'syntax': 'unit-name, unit-type, +H+V'
     },
-    "env": {
-        "syntax": "\"environment-variable\""
+    'env': {
+        'syntax': '"environment-variable"'
     },
-    "etm": {
-        "syntax": "n"
+    'etm': {
+        'syntax': 'n'
     },
-    "etn": {
-        "syntax": "{y|n}"
+    'etn': {
+        'syntax': '{y|n}'
     },
-    "ets": {
-        "syntax": "{kl|nr|wr|an}"
+    'ets': {
+        'syntax': '{kl|nr|wr|an}'
     },
-    "eu": {
-        "syntax": "{ent|def}"
+    'eu': {
+        'syntax': '{ent|def}'
     },
-    "eun": {
-        "syntax": "name-of-the-unit-whose-end-is-being-waited-for"
+    'eun': {
+        'syntax': 'name-of-the-unit-whose-end-is-being-waited-for'
     },
-    "ev": {
-        "syntax": "\"environmental-variable-file-name\""
+    'ev': {
+        'syntax': '"environmental-variable-file-name"'
     },
-    "evdet": {
-        "syntax": "\"detailed-event-information\""
+    'evdet': {
+        'syntax': '"detailed-event-information"'
     },
-    "evesc": {
-        "syntax": "{no|minutes}"
+    'evesc': {
+        'syntax': '{no|minutes}'
     },
-    "evgid": {
-        "syntax": "event-issue-source-group-ID"
+    'evgid': {
+        'syntax': 'event-issue-source-group-ID'
     },
-    "evgrp": {
-        "syntax": "\"event-issue-source-group-name\""
+    'evgrp': {
+        'syntax': '"event-issue-source-group-name"'
     },
-    "evhst": {
-        "syntax": "\"event-issue-source-host-name\""
+    'evhst': {
+        'syntax': '"event-issue-source-host-name"'
     },
-    "evipa": {
-        "syntax": "event-issue-source-IP-address"
+    'evipa': {
+        'syntax': 'event-issue-source-IP-address'
     },
-    "evpid": {
-        "syntax": "event-issue-source-process-ID"
+    'evpid': {
+        'syntax': 'event-issue-source-process-ID'
     },
-    "evsfr": {
-        "syntax": "extended-attribute-name:\"value\""
+    'evsfr': {
+        'syntax': 'extended-attribute-name:"value"'
     },
-    "evsid": {
-        "syntax": "event-ID"
+    'evsid': {
+        'syntax': 'event-ID'
     },
-    "evsms": {
-        "syntax": "\"message\""
+    'evsms': {
+        'syntax': '"message"'
     },
-    "evspl": {
-        "syntax": "check-interval"
+    'evspl': {
+        'syntax': 'check-interval'
     },
-    "evsrc": {
-        "syntax": "check-count"
+    'evsrc': {
+        'syntax': 'check-count'
     },
-    "evsrt": {
-        "syntax": "{y|n}"
+    'evsrt': {
+        'syntax': '{y|n}'
     },
-    "evssv": {
-        "syntax": "{em|al|cr|er|wr|no|in|db}"
+    'evssv': {
+        'syntax': '{em|al|cr|er|wr|no|in|db}'
     },
-    "evtmc": {
-        "syntax": "{n|a|n:\"file-name\"|a:\"file-name\"|d:\"file-name\"|b:\"file-name\"}"
+    'evtmc': {
+        'syntax': '{n|a|n:"file-name"|a:"file-name"|d:"file-name"|b:"file-name"}'
     },
-    "evuid": {
-        "syntax": "event-issue-source-user-ID"
+    'evuid': {
+        'syntax': 'event-issue-source-user-ID'
     },
-    "evusr": {
-        "syntax": "\"event-issue-source-user-name\""
+    'evusr': {
+        'syntax': '"event-issue-source-user-name"'
     },
-    "evwfr": {
-        "syntax": "optional-extended-attribute-name:\"value\""
+    'evwfr': {
+        'syntax': 'optional-extended-attribute-name:"value"'
     },
-    "evwid": {
-        "syntax": "event-ID"
+    'evwid': {
+        'syntax': 'event-ID'
     },
-    "evwms": {
-        "syntax": "\"message\""
+    'evwms': {
+        'syntax': '"message"'
     },
-    "evwsv": {
-        "syntax": "em[:al[:cr[:er[:wr[:no[:in[:db]]]]]]]"
+    'evwsv': {
+        'syntax': 'em[:al[:cr[:er[:wr[:no[:in[:db]]]]]]]'
     },
-    "ex": {
-        "syntax": "\"execution-agent-name\""
+    'ex': {
+        'syntax': '"execution-agent-name"'
     },
-    "ey": {
-        "syntax": "[N,]hh:mm|{M|U|C}mmmm"
+    'ey': {
+        'syntax': '[N,]hh:mm|{M|U|C}mmmm'
     },
-    "f": {
-        "syntax": "f"
+    'f': {
+        'syntax': 'f'
     },
-    "fd": {
-        "syntax": "time-required-for-execution"
+    'fd': {
+        'syntax': 'time-required-for-execution'
     },
-    "flco": {
-        "syntax": "{y|n}"
+    'flco': {
+        'syntax': '{y|n}'
     },
-    "flwc": {
-        "syntax": "c[:d[:{s|m}]]"
+    'flwc': {
+        'syntax': 'c[:d[:{s|m}]]'
     },
-    "flwf": {
-        "syntax": "\"name-of-file-to-be-monitored\""
+    'flwf': {
+        'syntax': '"name-of-file-to-be-monitored"'
     },
-    "flwi": {
-        "syntax": "monitoring-interval"
+    'flwi': {
+        'syntax': 'monitoring-interval'
     },
-    "fxg": {
-        "syntax": "{none|sync|async}"
+    'fxg': {
+        'syntax': '{none|sync|async}'
     },
-    "gty": {
-        "syntax": "{p|n}"
+    'gty': {
+        'syntax': '{p|n}'
     },
-    "ha": {
-        "syntax": "{y|w|a|n}"
+    'ha': {
+        'syntax': '{y|w|a|n}'
     },
-    "htcdm": {
-        "syntax": "return-code-1:HTTP-status-code-1,[HTTP-status-code-2...]"
+    'htcdm': {
+        'syntax': 'return-code-1:HTTP-status-code-1,[HTTP-status-code-2...]'
     },
-    "htcfl": {
-        "syntax": "\"connection-configuration-file-name\""
+    'htcfl': {
+        'syntax': '"connection-configuration-file-name"'
     },
-    "htexm": {
-        "syntax": "{y|n}"
+    'htexm': {
+        'syntax': '{y|n}'
     },
-    "htknd": {
-        "syntax": "{GET|POST|PUT|DELETE}"
+    'htknd': {
+        'syntax': '{GET|POST|PUT|DELETE}'
     },
-    "htrbf": {
-        "syntax": "\"received-body-store-file-name\""
+    'htrbf': {
+        'syntax': '"received-body-store-file-name"'
     },
-    "htrhf": {
-        "syntax": "\"received-header-store-file-name\""
+    'htrhf': {
+        'syntax': '"received-header-store-file-name"'
     },
-    "htrqf": {
-        "syntax": "\"transmission-information-file-name\""
+    'htrqf': {
+        'syntax': '"transmission-information-file-name"'
     },
-    "htrqm": {
-        "syntax": "\"transmission-information-file-name-(message-body)\""
+    'htrqm': {
+        'syntax': '"transmission-information-file-name-(message-body)"'
     },
-    "htrqu": {
-        "syntax": "\"transmission-information-file-name-(URL-parameter)\""
+    'htrqu': {
+        'syntax': '"transmission-information-file-name-(URL-parameter)"'
     },
-    "htspt": {
-        "syntax": "{diff|same}"
+    'htspt': {
+        'syntax': '{diff|same}'
     },
-    "htstf": {
-        "syntax": "\"statuses-store-file-name\""
+    'htstf': {
+        'syntax': '"statuses-store-file-name"'
     },
-    "jc": {
-        "syntax": "full-path-job-group-name"
+    'jc': {
+        'syntax': 'full-path-job-group-name'
     },
-    "jd": {
-        "syntax": "{nm|ab|cod|mdf|exf}"
+    'jd': {
+        'syntax': '{nm|ab|cod|mdf|exf}'
     },
-    "jdf": {
-        "syntax": "\"end-judgment-file-name\""
+    'jdf': {
+        'syntax': '"end-judgment-file-name"'
     },
-    "jpoif": {
-        "syntax": "macro-variable-name:passing-information-name"
+    'jpoif': {
+        'syntax': 'macro-variable-name:passing-information-name'
     },
-    "jty": {
-        "syntax": "{q|n}"
+    'jty': {
+        'syntax': '{q|n}'
     },
-    "lfcre": {
-        "syntax": "{y|n}"
+    'lfcre': {
+        'syntax': '{y|n}'
     },
-    "lfdft": {
-        "syntax": "{s|s2|w1|w2}"
+    'lfdft': {
+        'syntax': '{s|s2|w1|w2}'
     },
-    "lffnm": {
-        "syntax": "\"log-file-name\""
+    'lffnm': {
+        'syntax': '"log-file-name"'
     },
-    "lfhds": {
-        "syntax": "{l:header-row-count|s:header-size}"
+    'lfhds': {
+        'syntax': '{l:header-row-count|s:header-size}'
     },
-    "lfmks": {
-        "syntax": "[!]\"data-1-other-than-log-information\"[: [!]\"data-2-other-than-log-information\"...]"
+    'lfmks': {
+        'syntax': '[!]"data-1-other-than-log-information"[: [!]"data-2-other-than-log-information"...]'
     },
-    "lfmxl": {
-        "syntax": "maximum-event-data-length"
+    'lfmxl': {
+        'syntax': 'maximum-event-data-length'
     },
-    "lfrft": {
-        "syntax": "{v:'[\\]delimiter'|f:record-length}"
+    'lfrft': {
+        'syntax': '{v:\'[\\]delimiter\'|f:record-length}'
     },
-    "lfsiv": {
-        "syntax": "file-monitoring-interval"
+    'lfsiv': {
+        'syntax': 'file-monitoring-interval'
     },
-    "lfsrc": {
-        "syntax": "{y|n}"
+    'lfsrc': {
+        'syntax': '{y|n}'
     },
-    "lftpd": {
-        "syntax": "[!]\"trap-data-1\"[:[!]\"trap-data-2\"...];"
+    'lftpd': {
+        'syntax': '[!]"trap-data-1"[:[!]"trap-data-2"...];'
     },
-    "ln": {
-        "syntax": "[N,]n"
+    'ln': {
+        'syntax': '[N,]n'
     },
-    "mcs": {
-        "syntax": "{m|w|s}"
+    'mcs': {
+        'syntax': '{m|w|s}'
     },
-    "md": {
-        "syntax": "{th|ne}"
+    'md': {
+        'syntax': '{th|ne}'
     },
-    "mh": {
-        "syntax": "\"manager-host-name\""
+    'mh': {
+        'syntax': '"manager-host-name"'
     },
-    "mladr": {
-        "syntax": "\"sender\""
+    'mladr': {
+        'syntax': '"sender"'
     },
-    "mlafl": {
-        "syntax": "\"name-of-list-file\""
+    'mlafl': {
+        'syntax': '"name-of-list-file"'
     },
-    "mlatf": {
-        "syntax": "mlatf"
+    'mlatf': {
+        'syntax': 'mlatf'
     },
-    "mlftx": {
-        "syntax": "mlftx"
+    'mlftx': {
+        'syntax': 'mlftx'
     },
-    "mllst": {
-        "syntax": "\"received-email-list\""
+    'mllst': {
+        'syntax': '"received-email-list"'
     },
-    "mlprf": {
-        "syntax": "\"profile-name\""
+    'mlprf': {
+        'syntax': '"profile-name"'
     },
-    "mlsav": {
-        "syntax": "{y|n}"
+    'mlsav': {
+        'syntax': '{y|n}'
     },
-    "mlsbj": {
-        "syntax": "\"subject\""
+    'mlsbj': {
+        'syntax': '"subject"'
     },
-    "mlsfd": {
-        "syntax": "\"name-of-folder-to-save-attached-file\""
+    'mlsfd': {
+        'syntax': '"name-of-folder-to-save-attached-file"'
     },
-    "mlstx": {
-        "syntax": "\"name-of-text-file\""
+    'mlstx': {
+        'syntax': '"name-of-text-file"'
     },
-    "mltxt": {
-        "syntax": "\"text\""
+    'mltxt': {
+        'syntax': '"text"'
     },
-    "mm": {
-        "syntax": "{and|or}"
+    'mm': {
+        'syntax': '{and|or}'
     },
-    "mp": {
-        "syntax": "{y|n}"
+    'mp': {
+        'syntax': '{y|n}'
     },
-    "mqcor": {
-        "syntax": "correlation-ID"
+    'mqcor': {
+        'syntax': 'correlation-ID'
     },
-    "mqdsc": {
-        "syntax": "message-ID"
+    'mqdsc': {
+        'syntax': 'message-ID'
     },
-    "mqeqn": {
-        "syntax": "dead-letter-queue-name"
+    'mqeqn': {
+        'syntax': 'dead-letter-queue-name'
     },
-    "mqhld": {
-        "syntax": "mqhold-timehld"
+    'mqhld': {
+        'syntax': 'mqhold-timehld'
     },
-    "mqmdl": {
-        "syntax": "model-queue-name"
+    'mqmdl': {
+        'syntax': 'model-queue-name'
     },
-    "mqmdn": {
-        "syntax": "\"message-data-file-name\""
+    'mqmdn': {
+        'syntax': '"message-data-file-name"'
     },
-    "mqmfn": {
-        "syntax": "format-name"
+    'mqmfn': {
+        'syntax': 'format-name'
     },
-    "mqmgr": {
-        "syntax": "queue-manager-name"
+    'mqmgr': {
+        'syntax': 'queue-manager-name'
     },
-    "mqpgm": {
-        "syntax": "related-queue-management-program-name"
+    'mqpgm': {
+        'syntax': 'related-queue-management-program-name'
     },
-    "mqpri": {
-        "syntax": "priority"
+    'mqpri': {
+        'syntax': 'priority'
     },
-    "mqprm": {
-        "syntax": "{y|n}"
+    'mqprm': {
+        'syntax': '{y|n}'
     },
-    "mqque": {
-        "syntax": "message-input-queue-name"
+    'mqque': {
+        'syntax': 'message-input-queue-name'
     },
-    "mqsfn": {
-        "syntax": "\"message-storage-file-name\""
+    'mqsfn': {
+        'syntax': '"message-storage-file-name"'
     },
-    "ms": {
-        "syntax": "{sch|mlt}"
+    'ms': {
+        'syntax': '{sch|mlt}'
     },
-    "msapl": {
-        "syntax": "application-information"
+    'msapl': {
+        'syntax': 'application-information'
     },
-    "mshld": {
-        "syntax": "{-1|n}"
+    'mshld': {
+        'syntax': '{-1|n}'
     },
-    "msjnl": {
-        "syntax": "{y|n}"
+    'msjnl': {
+        'syntax': '{y|n}'
     },
-    "mslbl": {
-        "syntax": "\"message-label\""
+    'mslbl': {
+        'syntax': '"message-label"'
     },
-    "mslmt": {
-        "syntax": "{-2|-1|n}"
+    'mslmt': {
+        'syntax': '{-2|-1|n}'
     },
-    "msmod": {
-        "syntax": "{h|r}"
+    'msmod': {
+        'syntax': '{h|r}'
     },
-    "mspri": {
-        "syntax": "priority"
+    'mspri': {
+        'syntax': 'priority'
     },
-    "msqlb": {
-        "syntax": "\"queue-label-name\""
+    'msqlb': {
+        'syntax': '"queue-label-name"'
     },
-    "msqpt": {
-        "syntax": "\"path-name\""
+    'msqpt': {
+        'syntax': '"path-name"'
     },
-    "msrer": {
-        "syntax": "correlation-ID"
+    'msrer': {
+        'syntax': 'correlation-ID'
     },
-    "mssvf": {
-        "syntax": "\"message-storage-file-name\""
+    'mssvf': {
+        'syntax': '"message-storage-file-name"'
     },
-    "mstfn": {
-        "syntax": "\"text-file-name\""
+    'mstfn': {
+        'syntax': '"text-file-name"'
     },
-    "msttp": {
-        "syntax": "text-type"
+    'msttp': {
+        'syntax': 'text-type'
     },
-    "msunr": {
-        "syntax": "{y|n}"
+    'msunr': {
+        'syntax': '{y|n}'
     },
-    "mu": {
-        "syntax": "manager-unit-name"
+    'mu': {
+        'syntax': 'manager-unit-name'
     },
-    "ncex": {
-        "syntax": "{y|n}"
+    'ncex': {
+        'syntax': '{y|n}'
     },
-    "nchn": {
-        "syntax": "\"connection-host-name\""
+    'nchn': {
+        'syntax': '"connection-host-name"'
     },
-    "ncl": {
-        "syntax": "{y|n}"
+    'ncl': {
+        'syntax': '{y|n}'
     },
-    "ncn": {
-        "syntax": "jobnet-connector-name"
+    'ncn': {
+        'syntax': 'jobnet-connector-name'
     },
-    "ncr": {
-        "syntax": "connection-destination-root-jobnet-name"
+    'ncr': {
+        'syntax': 'connection-destination-root-jobnet-name'
     },
-    "ncs": {
-        "syntax": "{y|n}"
+    'ncs': {
+        'syntax': '{y|n}'
     },
-    "ncsv": {
-        "syntax": "connection-service-name"
+    'ncsv': {
+        'syntax': 'connection-service-name'
     },
-    "ni": {
-        "syntax": "n"
+    'ni': {
+        'syntax': 'n'
     },
-    "nmg": {
-        "syntax": "{y|n}"
+    'nmg': {
+        'syntax': '{y|n}'
     },
-    "ntcls": {
-        "syntax": "\"class\""
+    'ntcls': {
+        'syntax': '"class"'
     },
-    "ntdis": {
-        "syntax": "\"explanation\""
+    'ntdis': {
+        'syntax': '"explanation"'
     },
-    "nteid": {
-        "syntax": "event-ID"
+    'nteid': {
+        'syntax': 'event-ID'
     },
-    "ntevt": {
-        "syntax": "[v[: i[: w[: e[: s[: c[: f]]]]]]]"
+    'ntevt': {
+        'syntax': '[v[: i[: w[: e[: s[: c[: f]]]]]]]'
     },
-    "ntlgt": {
-        "syntax": "{sys|sec|app|dns|dir|frs|oth}"
+    'ntlgt': {
+        'syntax': '{sys|sec|app|dns|dir|frs|oth}'
     },
-    "ntncl": {
-        "syntax": "{y|n}"
+    'ntncl': {
+        'syntax': '{y|n}'
     },
-    "ntnei": {
-        "syntax": "{y|n}"
+    'ntnei': {
+        'syntax': '{y|n}'
     },
-    "ntnsr": {
-        "syntax": "{y|n}"
+    'ntnsr': {
+        'syntax': '{y|n}'
     },
-    "ntolg": {
-        "syntax": "\"any-log-type\""
+    'ntolg': {
+        'syntax': '"any-log-type"'
     },
-    "ntsrc": {
-        "syntax": "\"source\""
+    'ntsrc': {
+        'syntax': '"source"'
     },
-    "op": {
-        "syntax": "yyyy/mm/dd|{su|mo|tu|we|th|fr|sa}"
+    'op': {
+        'syntax': 'yyyy/mm/dd|{su|mo|tu|we|th|fr|sa}'
     },
-    "pfm": {
-        "syntax": "{u|p}"
+    'pfm': {
+        'syntax': '{u|p}'
     },
-    "pr": {
-        "syntax": "n"
+    'pr': {
+        'syntax': 'n'
     },
-    "prm": {
-        "syntax": "\"parameter\""
+    'prm': {
+        'syntax': '"parameter"'
     },
-    "pwlf": {
-        "syntax": "{m|r|f|p}"
+    'pwlf': {
+        'syntax': '{m|r|f|p}'
     },
-    "pwlt": {
-        "syntax": "{f|r|s}"
+    'pwlt': {
+        'syntax': '{f|r|s}'
     },
-    "pwrf": {
-        "syntax": "{o|m|r|f|p|s}"
+    'pwrf': {
+        'syntax': '{o|m|r|f|p|s}'
     },
-    "pwrh": {
-        "syntax": "\"target-host-name\""
+    'pwrh': {
+        'syntax': '"target-host-name"'
     },
-    "pwrn": {
-        "syntax": "{n|a|c:[mm/dd.]hh:mm}"
+    'pwrn': {
+        'syntax': '{n|a|c:[mm/dd.]hh:mm}'
     },
-    "pwrp": {
-        "syntax": "{p|u}"
+    'pwrp': {
+        'syntax': '{p|u}'
     },
-    "pwrr": {
-        "syntax": "{y|n}"
+    'pwrr': {
+        'syntax': '{y|n}'
     },
-    "pwrw": {
-        "syntax": "{y|n}"
+    'pwrw': {
+        'syntax': '{y|n}'
     },
-    "qm": {
-        "syntax": "\"host-name\""
+    'qm': {
+        'syntax': '"host-name"'
     },
-    "qu": {
-        "syntax": "\"queue-name\""
+    'qu': {
+        'syntax': '"queue-name"'
     },
-    "rec": {
-        "syntax": "maximum-number-of-retry-executions"
+    'rec': {
+        'syntax': 'maximum-number-of-retry-executions'
     },
-    "rei": {
-        "syntax": "rretry-interval"
+    'rei': {
+        'syntax': 'rretry-interval'
     },
-    "req": {
-        "syntax": "\"job-name\""
+    'req': {
+        'syntax': '"job-name"'
     },
-    "rg": {
-        "syntax": "n"
+    'rg': {
+        'syntax': 'n'
     },
-    "rh": {
-        "syntax": "\"execution-manager-name\""
+    'rh': {
+        'syntax': '"execution-manager-name"'
     },
-    "rje": {
-        "syntax": "upper-limit-of-return-codes-to-be-retried-automatically"
+    'rje': {
+        'syntax': 'upper-limit-of-return-codes-to-be-retried-automatically'
     },
-    "rjs": {
-        "syntax": "lower-limit-of-return-codes-to-be-retried-automatically"
+    'rjs': {
+        'syntax': 'lower-limit-of-return-codes-to-be-retried-automatically'
     },
-    "sc": {
-        "syntax": "\"script-file-name\""
+    'sc': {
+        'syntax': '"script-file-name"'
     },
-    "sd": {
-        "syntax": "[N,]{[[yyyy/]mm/]{[+|*|@]dd|[+|*|@]b[-DD]|[+]{su|mo|tu|we|th|fr|sa} [:{n|b}]}|en|ud}",
-        "en": "Registered day",
-        "": "Absolute day",
-        "+": "Relative day",
-        "*": "Open day",
-        "@": "Closed day",
-        "ud": "Unspecified"
+    'sd': {
+        'syntax': '[N,]{[[yyyy/]mm/]{[+|*|@]dd|[+|*|@]b[-DD]|[+]{su|mo|tu|we|th|fr|sa} [:{n|b}]}|en|ud}',
+        'en': 'Registered day',
+        '': 'Absolute day',
+        '+': 'Relative day',
+        '*': 'Open day',
+        '@': 'Closed day',
+        'ud': 'Unspecified'
     },
-    "sdd": {
-        "syntax": "{dd|{su|mo|tu|we|th|fr|sa}:n}"
+    'sdd': {
+        'syntax': '{dd|{su|mo|tu|we|th|fr|sa}:n}'
     },
-    "se": {
-        "syntax": "\"standard-error-output-file-name\""
+    'se': {
+        'syntax': '"standard-error-output-file-name"'
     },
-    "sea": {
-        "syntax": "{new|add}"
+    'sea': {
+        'syntax': '{new|add}'
     },
-    "sh": {
-        "syntax": "[N,]{be|af|ca|no}",
-        "be": "Before",
-        "af": "After",
-        "ca": "Cancel",
-        "no": "Execute"
+    'sh': {
+        'syntax': '[N,]{be|af|ca|no}',
+        'be': 'Before',
+        'af': 'After',
+        'ca': 'Cancel',
+        'no': 'Execute'
     },
-    "shd": {
-        "syntax": "[N,]n;]"
+    'shd': {
+        'syntax': '[N,]n;]'
     },
-    "si": {
-        "syntax": "\"standard-input-file-name\""
+    'si': {
+        'syntax': '"standard-input-file-name"'
     },
-    "so": {
-        "syntax": "\"standard-output-file-name\""
+    'so': {
+        'syntax': '"standard-output-file-name"'
     },
-    "soa": {
-        "syntax": "{new|add}"
+    'soa': {
+        'syntax': '{new|add}'
     },
-    "st": {
-        "syntax": "[N,][+]hh:mm",
-        "+": "Relative time",
-        "": "Absolute time"
+    'st': {
+        'syntax': '[N,][+]hh:mm',
+        '+': 'Relative time',
+        '': 'Absolute time'
     },
-    "stt": {
-        "syntax": "hh:mm"
+    'stt': {
+        'syntax': 'hh:mm'
     },
-    "sy": {
-        "syntax": "[N,]hh:mm|{M|U|C}mmmm"
+    'sy': {
+        'syntax': '[N,]hh:mm|{M|U|C}mmmm'
     },
-    "sz": {
-        "syntax": "horizontal-icon-count*vertical-icon-count"
+    'sz': {
+        'syntax': 'horizontal-icon-count*vertical-icon-count'
     },
-    "t": {
-        "syntax": "t"
+    't': {
+        'syntax': 't'
     },
-    "td1": {
-        "syntax": "\"transfer-destination-file-name-1\""
+    'td1': {
+        'syntax': '"transfer-destination-file-name-1"'
     },
-    "td2": {
-        "syntax": "\"transfer-destination-file-name-2\""
+    'td2': {
+        'syntax': '"transfer-destination-file-name-2"'
     },
-    "td3": {
-        "syntax": "\"transfer-destination-file-name-3\""
+    'td3': {
+        'syntax': '"transfer-destination-file-name-3"'
     },
-    "td4": {
-        "syntax": "\"transfer-destination-file-name-4\""
+    'td4': {
+        'syntax': '"transfer-destination-file-name-4"'
     },
-    "te": {
-        "syntax": "\"command-text\""
+    'te': {
+        'syntax': '"command-text"'
     },
-    "tho": {
-        "syntax": "n"
+    'tho': {
+        'syntax': 'n'
     },
-    "tmitv": {
-        "syntax": "wait-time"
+    'tmitv': {
+        'syntax': 'wait-time'
     },
-    "top1": {
-        "syntax": "{sav|del}"
+    'top1': {
+        'syntax': '{sav|del}'
     },
-    "top2": {
-        "syntax": "{sav|del}"
+    'top2': {
+        'syntax': '{sav|del}'
     },
-    "top3": {
-        "syntax": "{sav|del}"
+    'top3': {
+        'syntax': '{sav|del}'
     },
-    "top4": {
-        "syntax": "{sav|del}"
+    'top4': {
+        'syntax': '{sav|del}'
     },
-    "ts1": {
-        "syntax": "\"transfer-source-file-name-1\""
+    'ts1': {
+        'syntax': '"transfer-source-file-name-1"'
     },
-    "ts2": {
-        "syntax": "\"transfer-source-file-name-2\""
+    'ts2': {
+        'syntax': '"transfer-source-file-name-2"'
     },
-    "ts3": {
-        "syntax": "\"transfer-source-file-name-3\""
+    'ts3': {
+        'syntax': '"transfer-source-file-name-3"'
     },
-    "ts4": {
-        "syntax": "\"transfer-source-file-name-4\""
+    'ts4': {
+        'syntax': '"transfer-source-file-name-4"'
     },
-    "ty": {
-        "syntax": "{g|mg|n|rn|rm|rr|rc|mn|j|rj|pj|rp|qj|rq|jdj|rjdj|orj|rorj|evwj|revwj|flwj|rflwj|mlwj|rmlwj|mqwj|rmqwj|mswj|rmswj|lfwj|rlfwj|ntwj|rntwj|tmwj|rtmwj|evsj|revsj|mlsj|rmlsj|mqsj|rmqsj|mssj|rmssj|cmsj|rcmsj|pwlj|rpwlj|pwrj|rpwrj|cj|rcj|cpj|rcpj|fxj|rfxj|htpj|rhtpj|nc}"
+    'ty': {
+        'syntax': '{g|mg|n|rn|rm|rr|rc|mn|j|rj|pj|rp|qj|rq|jdj|rjdj|orj|rorj|evwj|revwj|flwj|rflwj|mlwj|rmlwj|mqwj|rmqwj|mswj|rmswj|lfwj|rlfwj|ntwj|rntwj|tmwj|rtmwj|evsj|revsj|mlsj|rmlsj|mqsj|rmqsj|mssj|rmssj|cmsj|rcmsj|pwlj|rpwlj|pwrj|rpwrj|cj|rcj|cpj|rcpj|fxj|rfxj|htpj|rhtpj|nc}'
     },
-    "uem": {
-        "syntax": "{y|n}"
+    'uem': {
+        'syntax': '{y|n}'
     },
-    "un": {
-        "syntax": "\"target-user-name\""
+    'un': {
+        'syntax': '"target-user-name"'
     },
-    "unit": {
-        "syntax": "unit-name[, [permission-mode][, [JP1-user-name][, [JP1-resource-group-name]]]]"
+    'unit': {
+        'syntax': 'unit-name[, [permission-mode][, [JP1-user-name][, [JP1-resource-group-name]]]]'
     },
-    "wc": {
-        "syntax": "[N,]{no|n|un}"
+    'wc': {
+        'syntax': '[N,]{no|n|un}'
     },
-    "wkp": {
-        "syntax": "\"work-path-name\""
+    'wkp': {
+        'syntax': '"work-path-name"'
     },
-    "wt": {
-        "syntax": "[N,]{no|hh:mm|mmmm|un}"
+    'wt': {
+        'syntax': '[N,]{no|hh:mm|mmmm|un}'
     },
-    "wth": {
-        "syntax": "n"
+    'wth': {
+        'syntax': 'n'
     }
 }

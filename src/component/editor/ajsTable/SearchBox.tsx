@@ -1,6 +1,6 @@
 import React, { FocusEvent, KeyboardEvent, useEffect, useMemo, useRef } from 'react';
-import TextField from "@mui/material/TextField";
-import SearchIcon from '@mui/icons-material/Search'
+import TextField from '@mui/material/TextField';
+import SearchIcon from '@mui/icons-material/Search';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
 import { Typography } from '@mui/material';
@@ -43,14 +43,14 @@ const SearchBox = (props: { table: Table<UnitEntity> }) => {
 
     return <>
         <TextField
-            id="search"
+            id='search'
             placeholder='Search...'
             helperText={useMemo(() => localeMap('search.helperText', lang), [lang])}
             InputProps={{
                 startAdornment: <SearchIcon sx={{ marginRight: '0.5rem' }} />,
                 endAdornment: <><kbd>{isMac() ? '\u2318' : 'CTRL'}</kbd><Typography sx={{ fontSize: '0.8em' }}>+</Typography><kbd>F</kbd></>,
             }}
-            variant="standard"
+            variant='standard'
             onKeyUp={handleKeyUp}
             onBlur={handleBlur}
             sx={{ width: '30em' }}

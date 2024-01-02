@@ -30,6 +30,6 @@ export type ParamsType = typeof Params[number];
 export const isParams = (param: string): param is ParamsType => Params.some((v) => v === param);
 
 /** week */
-export const Week = ["su", "mo", "tu", "we", "th", "fr", "sa"] as const;
+export const Week = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'] as const;
 export type WeekType = typeof Week[number];
 export const isWeek = (week?: string): week is WeekType => Week.some((v) => v === week);

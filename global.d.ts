@@ -10,4 +10,6 @@ interface Window {
     };
 }
 
+type PrivateType = string | number | boolean | symbol | null | undefined;
+
 declare const DEVELOPMENT: boolean;

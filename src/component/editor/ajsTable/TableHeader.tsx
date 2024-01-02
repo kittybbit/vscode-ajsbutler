@@ -1,14 +1,14 @@
-import { HeaderGroup } from "@tanstack/table-core";
-import { UnitEntity } from "../../../domain/models/UnitEntities";
-import { SxProps, TableCell, TableRow, TableSortLabel, Theme } from "@mui/material";
-import React from "react";
-import { flexRender } from "@tanstack/react-table";
+import { HeaderGroup } from '@tanstack/table-core';
+import { UnitEntity } from '../../../domain/models/UnitEntities';
+import { SxProps, TableCell, TableRow, TableSortLabel, Theme } from '@mui/material';
+import React from 'react';
+import { flexRender } from '@tanstack/react-table';
 
 const styleTableCell: SxProps<Theme> = {
-    whiteSpace: "nowrap",
-    verticalAlign: "top",
-    "&:first-child": {
-        position: "sticky",
+    whiteSpace: 'nowrap',
+    verticalAlign: 'top',
+    '&:first-child': {
+        position: 'sticky',
         left: 0,
         zIndex: (theme) => theme.zIndex.appBar,
         backgroundColor: (theme) => theme.palette.background.default,

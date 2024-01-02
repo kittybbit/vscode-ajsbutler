@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as os from 'os';
+import fs from 'fs';
 import { initReactPanel } from './ReactPanel';
 import { parseAjs } from '../../domain/services/parser/AjsParser';
 import { stringify } from 'flatted';
@@ -11,7 +12,7 @@ import { MyAppResource } from '../../component/editor/MyContexts';
 export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
 
     public static register(context: vscode.ExtensionContext) {
-        console.info("registerd AjsTableViewerProvider");
+        console.info('registerd AjsTableViewerProvider');
         const provider = new AjsTableViewerProvider(context);
         const disposable = vscode.window.registerCustomEditorProvider(AjsTableViewerProvider.viewType, provider);
         context.subscriptions.push(disposable);
@@ -92,6 +93,16 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
                     webviewPanel.webview.postMessage({
                         type: 'changeDocument',
                         data: createData(),
+                    });
+                    break;
+                }
+                case 'save': {//save contents
+                    console.log('invoke save.');
+                    vscode.window.showSaveDialog().then(uri => {
+                        if (uri) {
+                            fs.writeFileSync(uri.fsPath, e.data);
+                            vscode.window.showInformationMessage('The file has been saved.', { modal: true });
+                        }
                     });
                     break;
                 }
