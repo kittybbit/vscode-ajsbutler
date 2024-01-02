@@ -1,4 +1,4 @@
-import { isParams } from '../values/AjsType';
+import { isParamSymbol } from '../values/AjsType';
 import { Ab, Abr, Ar, Cd, Cftd, Cgs, Cl, Cm, Cmaif, Cmsts, Cond, Cty, Cy, Da, De, Ed, Ega, Ej, Ejc, Ejf, Ejg, Ejh, Eji, Ejl, Ejm, Ejn, Ejs, Ejt, Eju, Ejv, El, Env, Etm, Etn, Ets, Eu, Eun, Ev, Evdet, Evesc, Evgid, Evgrp, Evhst, Evipa, Evpid, Evsfr, Evsid, Evsms, Evspl, Evsrc, Evsrt, Evssv, Evtmc, Evuid, Evusr, Evwfr, Evwid, Evwms, Evwsv, Ex, Ey, F, Fd, Flco, Flwc, Flwf, Flwi, Fxg, Gty, Ha, Htcdm, Htcfl, Htexm, Htknd, Htrbf, Htrhf, Htrqf, Htrqm, Htrqu, Htspt, Htstf, Jc, Jd, Jdf, Jpoif, Jty, Lfcre, Lfdft, Lffnm, Lfhds, Lfmks, Lfmxl, Lfrft, Lfsiv, Lfsrc, Lftpd, Ln, Mcs, Md, Mh, Mladr, Mlafl, Mlatf, Mlftx, Mllst, Mlprf, Mlsav, Mlsbj, Mlsfd, Mlstx, Mltxt, Mm, Mp, Mqcor, Mqdsc, Mqeqn, Mqhld, Mqmdl, Mqmdn, Mqmfn, Mqmgr, Mqpgm, Mqpri, Mqprm, Mqque, Mqsfn, Ms, Msapl, Mshld, Msjnl, Mslbl, Mslmt, Msmod, Mspri, Msqlb, Msqpt, Msrer, Mssvf, Mstfn, Msttp, Msunr, Mu, Ncex, Nchn, Ncl, Ncn, Ncr, Ncs, Ncsv, Ni, Nmg, Ntcls, Ntdis, Nteid, Ntevt, Ntlgt, Ntncl, Ntnei, Ntnsr, Ntolg, Ntsrc, Op, ParamBase, Pfm, Pr, Prm, Pwlf, Pwlt, Pwrf, Pwrh, Pwrn, Pwrp, Pwrr, Pwrw, Qm, Qu, Rec, Rei, Req, Rg, Rh, Rje, Rjs, Rule, Sc, Sd, Sdd, Se, Sea, Sh, Shd, Si, So, Soa, St, Stt, Sy, Sz, T, Td1, Td2, Td3, Td4, Te, Tho, Tmitv, Top1, Top2, Top3, Top4, Ts1, Ts2, Ts3, Ts4, Ty, Uem, Un, Unit, Wc, Wkp, Wt, Wth } from './ParameterEntities';
 import { UnitEntity } from './UnitEntities';
 
@@ -1734,7 +1734,7 @@ export class ParamFactory {
     /** checkAndArray */
     static #checkAndGetArray(arg: ParamArg) {
 
-        if (!isParams(arg.parameter)) {
+        if (!isParamSymbol(arg.parameter)) {
             throw new Error(`${arg.parameter} is not unit definition parameter.`);
         }
 

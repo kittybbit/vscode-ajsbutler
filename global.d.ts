@@ -10,6 +10,7 @@ interface Window {
     };
 }
 
-type PrivateType = string | number | boolean | symbol | null | undefined;
+type PrimitiveType = string | number | boolean | symbol | null | undefined;
+type PrimitiveArrayType = PrimitiveType[];
 
 declare const DEVELOPMENT: boolean;

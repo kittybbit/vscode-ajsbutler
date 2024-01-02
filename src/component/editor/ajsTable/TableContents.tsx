@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useReactTable } from '@tanstack/react-table';
 import { SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
 import { tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
@@ -11,11 +11,6 @@ import { parse } from 'flatted';
 import { Unit } from '../../../domain/values/Unit';
 import StaticTable from './StaticTable';
 import { toCsv } from '../../../domain/services/export/csv';
-
-export type GlobalFilterType = {
-    globalFilter: string,
-    setGlobalFilter: Dispatch<SetStateAction<string>>
-}
 
 const TableContents = () => {
 

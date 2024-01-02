@@ -2,7 +2,7 @@
 
 import { Ar, Parameter } from './ParameterEntities';
 import { Unit } from '../values/Unit';
-import { ParamsType, Ty, TyType, isParams, isTy } from '../values/AjsType';
+import { ParamSymbol, TySymbols, TySymbol, isParamSymbol, isTySymbol } from '../values/AjsType';
 import { ParamFactory } from './ParameterFactory';
 
 /** abstract class of unit unit for decorator */
@@ -53,12 +53,12 @@ export abstract class UnitEntity {
     }
     isRecovery() {
         // There is no concept of recovery.
-        const excludes: TyType[] = ['g', 'mg', 'rc', 'mn', 'nc'];
+        const excludes: TySymbol[] = ['g', 'mg', 'rc', 'mn', 'nc'];
         if (excludes.includes(this.ty.value())) {
             return undefined;
         }
 
-        return Ty
+        return TySymbols
             .filter(ty => ty.charAt(0) === 'r')
             .filter(r => !['rm'].includes(r))
             .includes(this.ty.value())
@@ -74,12 +74,12 @@ export abstract class UnitEntity {
             proto = Object.getPrototypeOf(proto);
         }
         return params
-            .filter(v => isParams(v))
-            .map(v => v as ParamsType)
+            .filter(v => isParamSymbol(v))
+            .map(v => v as ParamSymbol)
             .sort();
     }
     /** Specified parameters in unit definitions */
-    params<T>(param: ParamsType): T | undefined {
+    params<T>(param: ParamSymbol): T | undefined {
         return this[param as keyof typeof this] as T;
     }
     /** human readable json */
@@ -1473,7 +1473,7 @@ export function tyFactory<T extends UnitEntity>(unit: Unit): T {
     if (!tyValue) {
         throw new Error('ty value is undefined.');
     }
-    if (!isTy(tyValue)) {
+    if (!isTySymbol(tyValue)) {
         throw new Error(`'${tyValue}' is not ty type.`);
     }
     return new tyClasses[tyValue](unit) as T;

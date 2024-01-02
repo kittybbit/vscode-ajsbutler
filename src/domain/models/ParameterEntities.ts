@@ -1,10 +1,10 @@
 /** JP1/AJS3 unit definition parameter entities */
-import { ParamsType, isTy, isWeek } from '../values/AjsType';
+import { ParamSymbol, isTySymbol, isWeekSymbol } from '../values/AjsType';
 import { UnitEntity } from './UnitEntities';
 
 export type ParamBase = {
     'unit': UnitEntity;
-    'parameter': ParamsType;
+    'parameter': ParamSymbol;
 };
 
 type ParamInternal = ParamBase
@@ -15,11 +15,13 @@ type ParamInternal = ParamBase
         'position': number; // defined position
     };
 
-export type Rule = Sd | St | Sy | Ey | Ln | Cy | Sh | Shd | Wt | Wc | Cftd;
+export interface Rule {
+    get rule(): number
+}
 
 export abstract class Parameter {
     #unit: UnitEntity;
-    #parameter: ParamsType;
+    #parameter: ParamSymbol;
     #rawValue?: string;
     #defaultRawValue?: string;
     #inherited = false;
@@ -44,7 +46,7 @@ export abstract class Parameter {
     get unit(): UnitEntity {
         return this.#unit;
     }
-    get parameter(): ParamsType {
+    get parameter(): ParamSymbol {
         return this.#parameter;
     }
     get inherited(): boolean {
@@ -104,7 +106,7 @@ class Calendar extends Parameter {
     get isWeek(): boolean {
         // op, cl, sdd
         const week = this.value()?.split(':')[0];
-        return isWeek(week);
+        return isWeekSymbol(week);
     }
     get weekOfTheMonth(): number | undefined {
         // sdd
@@ -143,7 +145,7 @@ class Day extends Parameter {
         }
     }
 }
-abstract class Time extends Parameter {
+abstract class Time extends Parameter implements Rule {
     /**
      * [N,]                   ((\d{1,3}),)?
      * {no|hh:mm|mmmm|un}     (no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)
@@ -201,7 +203,7 @@ export class Ar extends PlainString {
     }
 }
 export class Cd extends PlainString { }
-export class Cftd extends Parameter {
+export class Cftd extends Parameter implements Rule {
     /**
      * [N,]{no|be|af|db|da}[,n[,N]]    ((\d{1,3}),)?(no|be|af|db|da)((,(\d{1,2}))(,(\d{1,2}))?)?
      */
@@ -246,7 +248,7 @@ export class Cmaif extends PlainString { }
 export class Cmsts extends PlainString { }
 export class Cond extends PlainString { }
 export class Cty extends PlainString { }
-export class Cy extends Parameter {
+export class Cy extends Parameter implements Rule {
     /**
      * [N,](n,{y|m|w|d})    ((\d{1,3}),)?\(((\d{1,3}),([ymwd]))\)
      */
@@ -331,10 +333,6 @@ export class Evwms extends PlainString { }
 export class Evwsv extends PlainString { }
 export class Ex extends EncordedString { }
 export class Ey extends Time {
-    get rule() {
-        return super.rule ?? 1;
-    }
-
     get time() {
         return super.time;
     }
@@ -374,7 +372,7 @@ export class Lfrft extends PlainString { }
 export class Lfsiv extends PlainString { }
 export class Lfsrc extends PlainString { }
 export class Lftpd extends PlainString { }
-export class Ln extends Parameter {
+export class Ln extends Parameter implements Rule {
     /**
      * [N,] n       ((\d{1,3}),)?(\d{1,3})
      */
@@ -502,7 +500,7 @@ export class Rh extends EncordedString { }
 export class Rje extends PlainString { }
 export class Rjs extends PlainString { }
 export class Sc extends EncordedString { }
-export class Sd extends Day {
+export class Sd extends Day implements Rule {
 
     get rule() {
         return this._rule ?? 1;
@@ -544,7 +542,7 @@ export class Sd extends Day {
 export class Sdd extends Calendar { }
 export class Se extends EncordedString { }
 export class Sea extends PlainString { }
-export class Sh extends Parameter {
+export class Sh extends Parameter implements Rule {
     /**
      * [N,]{be|af|ca|no}      ((\d{1,3}),)?(be|af|ca|no)
      */
@@ -571,7 +569,7 @@ export class Sh extends Parameter {
         return this._substitute;
     }
 }
-export class Shd extends Parameter {
+export class Shd extends Parameter implements Rule {
     /**
      * [N,] n       ((\d{1,3}),)?(\d{1,3})
      */
@@ -602,20 +600,12 @@ export class Si extends EncordedString { }
 export class So extends EncordedString { }
 export class Soa extends PlainString { }
 export class St extends Time {
-    get rule() {
-        return super.rule ?? 1;
-    }
-
     get time() {
         return super.time ?? '+00:00';
     }
 }
 export class Stt extends PlainString { }
 export class Sy extends Time {
-    get rule() {
-        return super.rule ?? 1;
-    }
-
     get time() {
         return super.time;
     }
@@ -640,7 +630,7 @@ export class Ts4 extends EncordedString { }
 export class Ty extends PlainString {
     override value() {
         const ty = super.value();
-        if (ty && isTy(ty)) {
+        if (ty && isTySymbol(ty)) {
             return ty;
         }
         throw new Error(`Unknown ty value. ${ty}`);
@@ -649,7 +639,7 @@ export class Ty extends PlainString {
 export class Uem extends PlainString { }
 export class Un extends EncordedString { }
 export class Unit extends PlainString { }
-export class Wc extends Parameter {
+export class Wc extends Parameter implements Rule {
     /**
      * [N,] {no|N|un}       ((\d{1,3}),)?(.+)
      */
