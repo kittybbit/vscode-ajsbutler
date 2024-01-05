@@ -11,14 +11,15 @@ import { ParamSymbol, TySymbol, WeekSymbol } from '../../../domain/values/AjsTyp
 import * as ajscolumn from '@resource/i18n/ajscolumn';
 
 type BoxType = Parameter | PrimitiveType;
-type AccessorType = BoxType | BoxType[];
+export type AccessorType = BoxType | BoxType[];
 
 const box = (param: BoxType, index: number = 0, fn = (param: BoxType) => {
     if (param instanceof Parameter) {
         return param.value();
     }
-    return new String(param);
+    return new String(param).toString();
 }) => {
+    // String
     if (!(param instanceof Parameter)) {
         return <Box
             key={index}
@@ -30,6 +31,7 @@ const box = (param: BoxType, index: number = 0, fn = (param: BoxType) => {
             {fn(param)}
         </Box>
     }
+    // Parameter
     return <Box
         key={index}
         data-param={param.parameter}
@@ -59,11 +61,9 @@ export const tableDefaultColumnDef = {
         if (param === undefined) {
             return undefined;
         }
-        // Parameter[]
         if (Array.isArray(param)) {
             return <>{param.map((v, i) => box(v, i))}</>;
         }
-        // Parameter or string
         return box(param);
     },
 };

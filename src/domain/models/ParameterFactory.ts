@@ -1772,7 +1772,6 @@ export class ParamFactory {
                         };
                     });
                 if (parentParams.length !== 0) {
-                    console.log(parentParams);
                     return parentParams;
                 }
                 parent = parent.parent;
