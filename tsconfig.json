@@ -7,7 +7,6 @@
 		"outDir": "out",
 		"jsx": "react",
 		"lib": [
-			"ESNext",
 			"DOM"
 		],
 		"sourceMap": true,

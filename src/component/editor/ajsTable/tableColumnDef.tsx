@@ -7,15 +7,19 @@ import React from 'react';
 import { Cftd, Cl, Cy, Ex, Ey, Gty, Ln, Op, Parameter, Prm, Sd, Sh, Shd, St, Sy, Wc, Wt } from '../../../domain/models/ParameterEntities';
 import { G, J, N, Pj, Qj, Rj, Rn, Rp, UnitEntity } from '../../../domain/models/UnitEntities';
 import { ajsTableColumnHeaderLang, paramDefinitionLang, tyDefinitionLang } from '../../../domain/services/i18n/nls';
-import { ParamsType, TyType, WeekType } from '../../../domain/values/AjsType';
+import { ParamSymbol, TySymbol, WeekSymbol } from '../../../domain/values/AjsType';
 import * as ajscolumn from '@resource/i18n/ajscolumn';
 
-const box = (param: unknown, index: number = 0, fn = (param: unknown) => {
+type BoxType = Parameter | PrimitiveType;
+export type AccessorType = BoxType | BoxType[];
+
+const box = (param: BoxType, index: number = 0, fn = (param: BoxType) => {
     if (param instanceof Parameter) {
         return param.value();
     }
-    return new String(param);
+    return new String(param).toString();
 }) => {
+    // String
     if (!(param instanceof Parameter)) {
         return <Box
             key={index}
@@ -27,6 +31,7 @@ const box = (param: unknown, index: number = 0, fn = (param: unknown) => {
             {fn(param)}
         </Box>
     }
+    // Parameter
     return <Box
         key={index}
         data-param={param.parameter}
@@ -51,16 +56,14 @@ export const tableDefaultColumnDef = {
     enableHiding: true,
     enableSorting: true,
     cell: (props: CellContext<UnitEntity, unknown>) => {
-        const param = props.getValue<Parameter | Parameter[] | string | undefined>();
+        const param = props.getValue<AccessorType>();
         // undefined
         if (param === undefined) {
             return undefined;
         }
-        // Parameter[]
         if (Array.isArray(param)) {
             return <>{param.map((v, i) => box(v, i))}</>;
         }
-        // Parameter or string
         return box(param);
     },
 };
@@ -75,17 +78,17 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
     const paramDefinition = paramDefinitionLang(language);
 
     /** accessorFn for cell method of tableDefaultColumnDef. */
-    const defaultAccessorFn = <T extends object | PrivateType>(param: ParamsType) => {
+    const defaultAccessorFn = <T extends AccessorType>(param: ParamSymbol) => {
         return (row: UnitEntity /*, index: number*/): T => {
             return row.params(param) as T;
         }
     };
     /** When ty matches, invoke accessorFn. */
-    const tyAccessorFn = <T extends object | PrivateType>(targetTy: TyType[], accessorFn: (row: UnitEntity, index: number) => T) => {
+    const tyAccessorFn = <T extends AccessorType>(targetTy: TySymbol[], accessorFn: (row: UnitEntity, index: number) => T) => {
         return (row: UnitEntity, index: number): T => {
-            return (targetTy.includes(row.ty.value())
+            return targetTy.includes(row.ty.value())
                 ? accessorFn(row, index)
-                : undefined) as T;
+                : undefined as T;
         }
     };
 
@@ -312,7 +315,7 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
                             header: ajsTableColumnHeader[id],
                             accessorFn: tyAccessorFn<boolean | undefined>(['g'], row => {
                                 const g = row as G;
-                                return g[v as WeekType];
+                                return g[v as WeekSymbol];
                             }),
                             cell: props => {
                                 const result = props.getValue<boolean>();

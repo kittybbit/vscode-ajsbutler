@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { paramDefinitionLang } from '../../domain/services/i18n/nls'
-import { isParams } from '../../domain/values/AjsType';
+import { isParamSymbol } from '../../domain/values/AjsType';
 
 const MODE = { language: 'jp1ajs' };
 
@@ -24,7 +24,7 @@ export class Ajs3v12HoverProvider implements vscode.HoverProvider {
             return undefined
         }
         const currentWord = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
-        if (isParams(currentWord)) {
+        if (isParamSymbol(currentWord)) {
             const content = (new vscode.MarkdownString(`**${currentWord}**\n`))
                 .appendMarkdown('- - -\n')
                 .appendMarkdown(`\`${this.#paramDefinition[currentWord].syntax}\``);

@@ -59,10 +59,10 @@ module.exports = (env, argv) => {
             minimizer: [
                 new TerserPlugin({
                     terserOptions: {
-                        ecma: 2020,
+                        ecma: 2022,
                         warnings: DEVELOPMENT,
                         compress: {
-                            ecma: 2020,
+                            ecma: 2022,
                             drop_console: PRODUCTION,
                             drop_debugger: PRODUCTION,
                         },
@@ -136,10 +136,10 @@ module.exports = (env, argv) => {
             minimizer: [
                 new TerserPlugin({
                     terserOptions: {
-                        ecma: 2020,
+                        ecma: 2022,
                         warnings: DEVELOPMENT,
                         compress: {
-                            ecma: 2020,
+                            ecma: 2022,
                             drop_console: PRODUCTION,
                             drop_debugger: PRODUCTION,
                         },

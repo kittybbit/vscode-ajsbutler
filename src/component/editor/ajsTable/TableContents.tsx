@@ -1,7 +1,7 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useReactTable } from '@tanstack/react-table';
-import { SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
-import { tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
+import { FilterMeta, Row, SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
+import { AccessorType, tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
 import { useMyAppContext } from '../MyContexts';
 import { UnitEntity, tyFactory } from '../../../domain/models/UnitEntities';
 import VirtualizedTable from './VirtualizedTable';
@@ -11,11 +11,8 @@ import { parse } from 'flatted';
 import { Unit } from '../../../domain/values/Unit';
 import StaticTable from './StaticTable';
 import { toCsv } from '../../../domain/services/export/csv';
-
-export type GlobalFilterType = {
-    globalFilter: string,
-    setGlobalFilter: Dispatch<SetStateAction<string>>
-}
+import { rankItem } from '@tanstack/match-sorter-utils';
+import { Parameter } from '../../../domain/models/ParameterEntities';
 
 const TableContents = () => {
 
@@ -39,6 +36,40 @@ const TableContents = () => {
         }
     }, []); // fire this when mount.
 
+
+    const ajsGlobalFilterFn = (row: Row<UnitEntity>, columnId: string, value: string, addMeta: (meta: FilterMeta) => void) => {
+
+        const cellValue = row.getValue<AccessorType>(columnId);
+        if (cellValue === undefined) {
+            return false;
+        }
+
+        const targetValue: AccessorType = Array.isArray(cellValue) ? cellValue : [cellValue];
+
+        // Rank the item
+        const itemRank = targetValue
+            .map(v => {
+                if (v && v instanceof Parameter) {
+                    return v.value();
+                }
+                if (v && typeof v === 'string') {
+                    return v;
+                }
+                return (new String(v)).toString();
+            })
+            .map(v => rankItem(v, value))
+            .find(v => v.passed);
+        if (itemRank === undefined) {
+            return false;
+        }
+
+        // Store the ranking info
+        addMeta(itemRank)
+
+        // Return if the item should be filtered in/out
+        return itemRank.passed;
+    };
+
     const [globalFilter, setGlobalFilter] = useState('');
     const [sorting, setSorting] = useState<SortingState>([]);
     const table = useReactTable<UnitEntity>({
@@ -53,6 +84,8 @@ const TableContents = () => {
         getFilteredRowModel: getFilteredRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
+        globalFilterFn: ajsGlobalFilterFn,
+        getColumnCanGlobalFilter: () => true, // return true for all column
         defaultColumn: tableDefaultColumnDef,
         debugAll: DEVELOPMENT,
     });

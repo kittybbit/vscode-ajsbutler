@@ -1,6 +1,7 @@
 import { Table as ReactTable } from '@tanstack/react-table';
 import { UnitEntity } from '../../models/UnitEntities';
 import { Parameter } from '../../models/ParameterEntities';
+import { AccessorType } from '../../../component/editor/ajsTable/tableColumnDef';
 
 export const toCsv = (table: ReactTable<UnitEntity>): string => {
     const rows: Array<string> = [];
@@ -29,14 +30,14 @@ export const toCsv = (table: ReactTable<UnitEntity>): string => {
     table
         .getRowModel()
         .rows
-        .map(row => {
+        .map((row, rowIndex) => {
             return row
                 .getVisibleCells()
-                .map(cell => {
-                    if (!cell) {
-                        return '""';
+                .map((cell, cellIndex) => {
+                    if (cellIndex === 0) {
+                        return `"${rowIndex + 1}"`
                     }
-                    const value = cell.getValue<Parameter | Parameter[] | string | boolean | number | undefined>();
+                    const value = cell.getValue<AccessorType | undefined>();
                     if (value === undefined) {
                         return '';
                     } else if (Array.isArray(value)) {
@@ -53,10 +54,8 @@ export const toCsv = (table: ReactTable<UnitEntity>): string => {
                         return `"${value.value()?.replace(/"/g, '""')}"`;
                     } else if (typeof value === 'string') {
                         return `"${value.replace(/"/g, '""')}"`;
-                    } else if (typeof value === 'boolean' || typeof value === 'number') {
-                        return `"${value}"`;
                     }
-                    return `"${value}"`;
+                    return `"${String(value)}"`;
                 })
                 .join(',')
         })
