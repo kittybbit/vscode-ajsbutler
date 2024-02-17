@@ -2,14 +2,13 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { DefinePlugin } = require('webpack');
+const { ProvidePlugin } = require('webpack');
 const path = require('path');
 
-// const outputFilename = 'extension.js';
-
-module.exports = (env, argv) => {
+const editorConfig = (env, argv) => {
     const PRODUCTION = argv.mode === 'production';
     const DEVELOPMENT = argv.mode !== 'production';
-    return [{
+    return {
         mode: argv.mode ?? 'development',
         target: 'web',
         devtool: PRODUCTION ? false : 'inline-source-map',
@@ -54,15 +53,12 @@ module.exports = (env, argv) => {
         optimization: {
             innerGraph: true,
             usedExports: true,
-            mangleExports: 'size',
             minimize: true,
             minimizer: [
                 new TerserPlugin({
                     terserOptions: {
-                        ecma: 2022,
                         warnings: DEVELOPMENT,
                         compress: {
-                            ecma: 2022,
                             drop_console: PRODUCTION,
                             drop_debugger: PRODUCTION,
                         },
@@ -79,13 +75,19 @@ module.exports = (env, argv) => {
             new DefinePlugin({
                 DEVELOPMENT: DEVELOPMENT,
             }),
-            new BundleAnalyzerPlugin({
-                analyzerMode: "static",
-                openAnalyzer: false,
-                reportFilename: '../report/index_report.html',
-            }),
+            // new BundleAnalyzerPlugin({
+            //     analyzerMode: "static",
+            //     openAnalyzer: false,
+            //     reportFilename: '../report/index_report.html',
+            // }),
         ],
-    }, {
+    }
+};
+
+const nodeConfig = (env, argv) => {
+    const PRODUCTION = argv.mode === 'production';
+    const DEVELOPMENT = argv.mode !== 'production';
+    return {
         mode: argv.mode ?? 'development',
         target: 'node',
         devtool: PRODUCTION ? false : 'inline-source-map',
@@ -102,7 +104,7 @@ module.exports = (env, argv) => {
             alias: {
                 '@resource': path.join(__dirname, "src/resource/"),
                 '@generate': path.join(__dirname, "src/generate/"),
-            }
+            },
         },
         externals: {
             vscode: 'commonjs vscode',
@@ -136,10 +138,8 @@ module.exports = (env, argv) => {
             minimizer: [
                 new TerserPlugin({
                     terserOptions: {
-                        ecma: 2022,
                         warnings: DEVELOPMENT,
                         compress: {
-                            ecma: 2022,
                             drop_console: PRODUCTION,
                             drop_debugger: PRODUCTION,
                         },
@@ -156,11 +156,55 @@ module.exports = (env, argv) => {
             new DefinePlugin({
                 DEVELOPMENT: DEVELOPMENT,
             }),
-            new BundleAnalyzerPlugin({
-                analyzerMode: "static",
-                openAnalyzer: false,
-                reportFilename: '../report/extension_report.html',
-            }),
+            // new BundleAnalyzerPlugin({
+            //     analyzerMode: "static",
+            //     openAnalyzer: false,
+            //     reportFilename: '../report/extension_report.html',
+            // }),
         ],
-    }];
+    }
+};
+
+const webconfig = (env, argv) => {
+    const PRODUCTION = argv.mode === 'production';
+    const DEVELOPMENT = argv.mode !== 'production';
+    const nodeCfg = nodeConfig(env, argv);
+    return {
+        ...nodeCfg,
+        ...{
+            target: 'webworker',
+            entry: {
+                'web': './src/extension.ts',
+            },
+            resolve: {
+                ...nodeCfg.resolve,
+                fallback: {
+                    assert: require.resolve('assert'),
+                    os: require.resolve('os-browserify/browser'),
+                    util: require.resolve('util'),
+                    crypto: require.resolve('crypto-browserify'),
+                }
+            },
+            plugins: [
+                nodeCfg.plugins[0],
+                nodeCfg.plugins[1],
+                new ProvidePlugin({
+                    process: 'process/browser',
+                }),
+                // new BundleAnalyzerPlugin({
+                //     analyzerMode: "static",
+                //     openAnalyzer: false,
+                //     reportFilename: '../report/web_report.html',
+                // }),
+            ]
+        }
+    }
+};
+
+module.exports = (env, argv) => {
+    return [
+        editorConfig(env, argv),
+        nodeConfig(env, argv),
+        webconfig(env, argv)
+    ];
 };

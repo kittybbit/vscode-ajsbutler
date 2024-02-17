@@ -9,7 +9,7 @@ export function initReactPanel(
     panel.webview.options = {
         enableScripts: true,
         localResourceRoots: [
-            vscode.Uri.file(context.extensionPath)
+            context.extensionUri
         ]
     };
     panel.webview.html = _getHtmlForWebview(panel, context, bundle);
@@ -39,7 +39,7 @@ function _getHtmlForWebview(
                 style-src ${panel.webview.cspSource} 'unsafe-inline';
                 child-src ${panel.webview.cspSource};
                 ">
-    <base href='${panel.webview.asWebviewUri(vscode.Uri.file(context.extensionPath))}/'>
+    <base href='${panel.webview.asWebviewUri(context.extensionUri)}/'>
     <script nonce=${nonce} src='./public/ReactEventBridge.js'></script>
 </head>
 <body>

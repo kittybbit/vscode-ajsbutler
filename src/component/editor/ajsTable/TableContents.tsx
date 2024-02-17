@@ -1,17 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { SetStateAction, startTransition, useEffect, useMemo, useState } from 'react';
+import { CssBaseline, Stack, ThemeProvider, Typography, createTheme } from '@mui/material';
 import { useReactTable } from '@tanstack/react-table';
 import { FilterMeta, Row, SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
-import { AccessorType, tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
-import { useMyAppContext } from '../MyContexts';
-import { UnitEntity, tyFactory } from '../../../domain/models/UnitEntities';
-import VirtualizedTable from './VirtualizedTable';
-import { CssBaseline, Stack, ThemeProvider, Typography, createTheme } from '@mui/material';
-import Header from './Header';
-import { parse } from 'flatted';
-import { Unit } from '../../../domain/values/Unit';
-import StaticTable from './StaticTable';
-import { toCsv } from '../../../domain/services/export/csv';
 import { rankItem } from '@tanstack/match-sorter-utils';
+import { parse } from 'flatted';
+import { useMyAppContext } from '../MyContexts';
+import { AccessorType, tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
+import Header from './Header';
+import VirtualizedTable from './VirtualizedTable';
+import StaticTable from './StaticTable';
+import { Unit } from '../../../domain/values/Unit';
+import { UnitEntity, tyFactory } from '../../../domain/models/UnitEntities';
 import { Parameter } from '../../../domain/models/ParameterEntities';
 
 const TableContents = () => {
@@ -22,11 +21,15 @@ const TableContents = () => {
 
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
     const fn = (type: string, data: unknown) => {
-        const newUnitEntities: UnitEntity[] = parse(data as string)
-            .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
-            .flat()
-            .map((unit: Unit) => tyFactory(unit));
-        setUnitEntities(() => newUnitEntities);
+        try {
+            const newUnitEntities: UnitEntity[] = parse(data as string)
+                .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
+                .flat()
+                .map((unit: Unit) => tyFactory(unit));
+            startTransition(() => setUnitEntities(() => newUnitEntities));
+        } catch {
+            setUnitEntities(() => []);
+        }
     };
     useEffect(() => {
         window.EventBridge.addCallback('changeDocument', fn);
@@ -70,8 +73,10 @@ const TableContents = () => {
         return itemRank.passed;
     };
 
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const [globalFilter, setGlobalFilterInternal] = useState('');
+    const setGlobalFilter = (globalFilter: SetStateAction<string>) => startTransition(() => setGlobalFilterInternal(globalFilter));
+    const [sorting, setSortingInternal] = useState<SortingState>([]);
+    const setSorting = (sortingState: SetStateAction<SortingState>) => startTransition(() => setSortingInternal(sortingState));
     const table = useReactTable<UnitEntity>({
         columns: useMemo(() => tableColumnDef(lang), [lang]),
         data: useMemo(() => unitEntities ?? [], [unitEntities]),
@@ -102,17 +107,15 @@ const TableContents = () => {
             <Header
                 table={table}
             />
-            {
-                tableType === 'virtual'
-                    ? <VirtualizedTable table={table} />
-                    : <StaticTable table={table} />
+            {tableType === 'virtual'
+                ? <VirtualizedTable table={table} />
+                : <StaticTable table={table} />
             }
             <Stack direction='row' justifyContent='flex-end' spacing={2}>
                 <Typography>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>
             </Stack>
         </ThemeProvider>
         {DEVELOPMENT && <pre>{JSON.stringify(table.getState(), null, 2)}</pre>}
-        {DEVELOPMENT && <pre>{toCsv(table)}</pre>}
     </>;
 };
 export default TableContents;

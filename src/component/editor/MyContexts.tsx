@@ -1,5 +1,4 @@
-import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
-import React from 'react';
+import React, { ReactNode, SetStateAction, createContext, startTransition, useContext, useEffect, useState } from 'react';
 
 /** app resouce */
 export type MyAppResource = {
@@ -22,12 +21,13 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
 
     console.log('render MyAppContextProvider.');
 
-    const [myAppResource, setMyAppResource] = useState<MyAppResource>({
+    const [myAppResource, setMyAppResourceInternal] = useState<MyAppResource>({
         isDarkMode: undefined,
         lang: undefined,
         os: undefined,
         tableType: 'virtual',
     });
+    const setMyAppResource = (myAppResource: SetStateAction<MyAppResource>) => startTransition(() => setMyAppResourceInternal(myAppResource));
 
     const resourceCallbackFn = (type: string, data: Partial<MyAppResource>) => {
         updateMyAppResource(data);
@@ -52,5 +52,3 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
         }
     </>;
 }
-
-

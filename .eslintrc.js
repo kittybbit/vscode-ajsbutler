@@ -1,7 +1,8 @@
 module.exports = {
     "env": {
+        "node": true,
+        "browser": true,
         "es2022": true,
-        "node": true
     },
     "extends": [
         "eslint:recommended",
@@ -26,5 +27,11 @@ module.exports = {
     },
     "ignorePatterns": ["webpack.config.js", "**/generate/**/*.ts"],
     "rules": {
+        "no-restricted-imports": [
+            "error",
+            {
+                "patterns": ["@mui/*/*/*"]
+            }
+        ]
     }
 }

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu'
+import Loop from '@mui/icons-material/Loop';
+import ViewColumn from '@mui/icons-material/ViewColumn';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
-import ViewColumn from '@mui/icons-material/ViewColumn';
-import Loop from '@mui/icons-material/Loop';
 import { MenuType } from './Header';
 
 const TableMenu = (params: MenuType) => {

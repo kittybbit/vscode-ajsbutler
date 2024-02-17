@@ -366,6 +366,7 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+.vscode-test-web
 
 # yarn v2
 .yarn/cache

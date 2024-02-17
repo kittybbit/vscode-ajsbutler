@@ -1,10 +1,10 @@
 import React, { KeyboardEvent, useMemo } from 'react';
-import { UnitEntity } from '../../../domain/models/UnitEntities';
 import { flexRender, Table as ReactTable, Row } from '@tanstack/react-table';
-import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, Toolbar } from '@mui/material';
 import { ItemProps, TableVirtuoso } from 'react-virtuoso';
+import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, Toolbar } from '@mui/material';
 import { TableHeader } from './TableHeader';
 import { useUnitEntityDialog } from './UnitEntityDialog';
+import { UnitEntity } from '../../../domain/models/UnitEntities';
 
 const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
 
@@ -34,36 +34,39 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
     };
 
     const tableComponents = {
-        Scroller: React.forwardRef<HTMLDivElement>((props, ref) => <TableContainer
-            {...props}
-            ref={ref}
-            component={Paper}
-            elevation={3}
-        />),
+        Scroller: React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
+            return <TableContainer
+                {...props}
+                ref={ref}
+                component={Paper}
+                elevation={3}
+            />
+        }),
         Table: (props: object) => <Table
             {...props}
             size='small'
             stickyHeader
         />,
-        TableHead: React.forwardRef<HTMLTableSectionElement>((props, ref) => <TableHead
-            {...props}
-            ref={ref}
-            sx={{ position: 'sticky', top: 0, backgroundColor: (theme) => theme.palette.background.default, zIndex: (theme) => theme.zIndex.appBar }}
-        />),
+        TableHead: React.forwardRef<HTMLTableSectionElement>(function tableHead(props, ref) {
+            return <TableHead
+                {...props}
+                ref={ref}
+                sx={{ position: 'sticky', top: 0, backgroundColor: (theme) => theme.palette.background.default, zIndex: (theme) => theme.zIndex.appBar }}
+            />
+        }),
         TableRow: (props: ItemProps<Row<UnitEntity>>) => <TableRow
             {...props}
             hover={true}
             onDoubleClick={handleClickDialogOpen(props.item.original)}
             onKeyDown={handleKeyDown(props.item.original)}
         />,
-        TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => <TableBody
-            {...props}
-            ref={ref}
-        />),
+        TableBody: React.forwardRef<HTMLTableSectionElement>(function tableBody(props, ref) {
+            return <TableBody
+                {...props}
+                ref={ref}
+            />
+        }),
     };
-    tableComponents.Scroller.displayName = 'Scroller';
-    tableComponents.TableHead.displayName = 'TableHead';
-    tableComponents.TableBody.displayName = 'TableBody';
 
     return <>
         <Toolbar />

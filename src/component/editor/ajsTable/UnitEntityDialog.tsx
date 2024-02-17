@@ -1,9 +1,9 @@
+import React, { useCallback, useRef, useState } from 'react'
 import { Alert, Dialog, DialogContent, DialogTitle, IconButton, Snackbar, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import React, { useCallback, useRef, useState } from 'react'
-import { UnitEntity } from '../../../domain/models/UnitEntities';
 import { ContentCopy } from '@mui/icons-material';
+import { UnitEntity } from '../../../domain/models/UnitEntities';
 
 export const useUnitEntityDialog = () => {
 

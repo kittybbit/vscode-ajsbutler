@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.3.0]
+
+- Added support for web extension.
+- Fixed a few bugs.
+
 ## [1.2.0]
 
 - Updated so that all columns become subject to the global filter.

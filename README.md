@@ -12,6 +12,7 @@ vscode-ajsbutler is an extension that provides a convenient way to display the d
 - Set the editor's language mode to 'jp1ajs' to view the formatting of definition items.
 - Switching the editor allows for a list-style display of the information.
 - Save in CSV format.
+- Supports web extension.
 
 ## Extension Settings
 
