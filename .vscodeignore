@@ -7,6 +7,8 @@ antlr/
 # vscode
 .vscode/
 .vscode-test/
+*.code-workspace
+.vscodeignore
 
 # source code
 src/
@@ -18,9 +20,11 @@ sample/
 .eslintrc.js
 .gitattributes
 .gitignore
-.vscodeignore
+.ncurc.json
 tsconfig.json
 webpack.config.js
 *.log
 *.tmp
+*.map
+global.d.ts
 secrets.json
