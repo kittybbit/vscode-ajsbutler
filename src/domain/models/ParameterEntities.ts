@@ -534,7 +534,7 @@ export class Sd extends Day implements Rule {
 
     get day() {
         if (this._day !== 'en' && this._day !== 'ud') {
-            return this._day?.replace(/[+*@]/, '');
+            return this._day?.replace(/^[+*@]/, '');
         }
         return undefined;
     }
