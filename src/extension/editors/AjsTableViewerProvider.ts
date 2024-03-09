@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as os from 'os';
-import fs from 'fs';
 import { initReactPanel } from './ReactPanel';
 import { parseAjs } from '../../domain/services/parser/AjsParser';
 import { stringify } from 'flatted';
@@ -42,7 +41,14 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
             webviewPanel = initReactPanel(webviewPanel, context, './out/index.js');
         }
 
-        const createData = () => stringify(parseAjs(document.getText()).filter(unit => unit.parent === undefined));
+        const createData = () => {
+            const result = parseAjs(document.getText());
+            if (result.errors.length > 0) {
+                vscode.window.showErrorMessage('Please check syntax.', { detail: `${result.errors.length} antlr error occurs.`, modal: true });
+                return [];
+            }
+            return stringify(result.units.filter(unit => unit.parent === undefined))
+        };
         const debounceCreateData = (delay: number = 0) => {
             let id: NodeJS.Timeout;
             return (e: vscode.TextDocumentChangeEvent) => {
@@ -80,7 +86,7 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
                         ...e.data,
                         isDarkMode: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark,
                         lang: vscode.env.language,
-                        os: os.platform(),
+                        os: os.platform().toLocaleLowerCase(),
                     };
                     webviewPanel.webview.postMessage({
                         type: 'resource',
@@ -100,8 +106,8 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
                     console.log('invoke save.');
                     vscode.window.showSaveDialog().then(uri => {
                         if (uri) {
-                            fs.writeFileSync(uri.fsPath, e.data);
-                            vscode.window.showInformationMessage('The file has been saved.', { modal: true });
+                            vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(e.data));
+                            vscode.window.showInformationMessage('The file has been saved.', { detail: uri.toString(), modal: true });
                         }
                     });
                     break;

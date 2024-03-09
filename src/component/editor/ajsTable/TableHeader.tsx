@@ -1,8 +1,8 @@
-import { HeaderGroup } from '@tanstack/table-core';
-import { UnitEntity } from '../../../domain/models/UnitEntities';
-import { SxProps, TableCell, TableRow, TableSortLabel, Theme } from '@mui/material';
 import React from 'react';
+import { HeaderGroup } from '@tanstack/table-core';
 import { flexRender } from '@tanstack/react-table';
+import { SxProps, TableCell, TableRow, TableSortLabel, Theme } from '@mui/material';
+import { UnitEntity } from '../../../domain/models/UnitEntities';
 
 const styleTableCell: SxProps<Theme> = {
     whiteSpace: 'nowrap',
@@ -58,5 +58,5 @@ export const TableHeader = (props: { headerGroup: HeaderGroup<UnitEntity> }) => 
                 {headerContent}
             </TableCell>
         })}
-    </TableRow >
+    </TableRow>
 }

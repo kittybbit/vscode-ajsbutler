@@ -1,8 +1,8 @@
-import React, { KeyboardEvent, useMemo } from 'react';
-import { UnitEntity } from '../../../domain/models/UnitEntities';
+import React, { KeyboardEvent } from 'react';
 import { flexRender, Table as ReactTable } from '@tanstack/react-table';
-import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, Toolbar } from '@mui/material';
+import { SxProps, Table, TableBody, TableCell, TableHead, TableRow, Theme, Toolbar } from '@mui/material';
 import { TableHeader } from './TableHeader';
+import { UnitEntity } from '../../../domain/models/UnitEntities';
 import { useUnitEntityDialog } from './UnitEntityDialog';
 
 const StaticTable = (props: { table: ReactTable<UnitEntity> }) => {
@@ -32,33 +32,32 @@ const StaticTable = (props: { table: ReactTable<UnitEntity> }) => {
 
     return <>
         <Toolbar />
-        {useMemo(() => <TableContainer component={Paper} elevation={3}>
-            <Table size='small' >
-                <TableHead sx={{ backgroundColor: (theme) => theme.palette.background.default }}>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <TableHeader key={headerGroup.id} headerGroup={headerGroup} />
-                    ))}
-                </TableHead>
-                <TableBody>
-                    {table.getRowModel().rows.map(row => {
-                        return <TableRow
-                            key={row.id}
-                            hover={true}
-                            onDoubleClick={handleClickOpen(row.original)}
-                            onKeyDown={handleKeyDown(row.original)}
-                        >
-                            {row.getVisibleCells().map(cell => {
-                                return (
-                                    <TableCell key={cell.id} sx={styleTableCell}>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </TableCell>
-                                )
-                            })}
-                        </TableRow>
-                    })}
-                </TableBody>
-            </Table>
-        </TableContainer>, [table.getState()])}
+
+        <Table size='small' >
+            <TableHead sx={{ backgroundColor: (theme) => theme.palette.background.default }}>
+                {table.getHeaderGroups().map(headerGroup => (
+                    <TableHeader key={headerGroup.id} headerGroup={headerGroup} />
+                ))}
+            </TableHead>
+            <TableBody>
+                {table.getRowModel().rows.map(row => {
+                    return <TableRow
+                        key={row.id}
+                        hover={true}
+                        onDoubleClick={handleClickOpen(row.original)}
+                        onKeyDown={handleKeyDown(row.original)}
+                    >
+                        {row.getVisibleCells().map(cell => {
+                            return (
+                                <TableCell key={cell.id} sx={styleTableCell}>
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </TableCell>
+                            )
+                        })}
+                    </TableRow>
+                })}
+            </TableBody>
+        </Table>
         <UnitEntityDialog />
     </>;
 };

@@ -2,15 +2,28 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Extension",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}"
             ],
-            "name": "Launch Extension",
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
             "request": "launch",
             "type": "extensionHost"
+        },
+        {
+            "name": "Launch Extension(web)",
+            "debugWebWorkerHost": true,
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionDevelopmentKind=web"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "type": "extensionHost",
+            "request": "launch",
         },
         {
             "type": "antlr-debug",
