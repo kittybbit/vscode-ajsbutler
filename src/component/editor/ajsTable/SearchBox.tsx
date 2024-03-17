@@ -18,7 +18,6 @@ const SearchBox = (props: { table: Table<UnitEntity> }) => {
     const handleShortcut = (event: globalThis.KeyboardEvent) => {
         ((isMac() ? event.metaKey : event.ctrlKey) && event.key === 'f') && ref.current && ref.current.focus();
     };
-
     useEffect(() => {
         document.addEventListener('keydown', handleShortcut);
         return () => document.removeEventListener('keydown', handleShortcut);

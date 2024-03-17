@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.4.0]
+
+- Improved display performance.
+- Refactoring.
+
 ## [1.3.0]
 
 - Added support for web extension.

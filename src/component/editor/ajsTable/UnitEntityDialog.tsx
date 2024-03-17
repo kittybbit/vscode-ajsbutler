@@ -16,7 +16,7 @@ export const useUnitEntityDialog = () => {
         setDialogData(undefined);
     };
 
-    const [tabIndex, setTabIndex] = React.useState(0);
+    const [tabIndex, setTabIndex] = useState(0);
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);
     };

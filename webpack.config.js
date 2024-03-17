@@ -58,6 +58,7 @@ const editorConfig = (env, argv) => {
                 new TerserPlugin({
                     terserOptions: {
                         warnings: DEVELOPMENT,
+                        mangle: PRODUCTION,
                         compress: {
                             drop_console: PRODUCTION,
                             drop_debugger: PRODUCTION,
@@ -139,6 +140,7 @@ const nodeConfig = (env, argv) => {
                 new TerserPlugin({
                     terserOptions: {
                         warnings: DEVELOPMENT,
+                        mangle: PRODUCTION,
                         compress: {
                             drop_console: PRODUCTION,
                             drop_debugger: PRODUCTION,

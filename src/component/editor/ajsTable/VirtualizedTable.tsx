@@ -1,16 +1,17 @@
-import React, { KeyboardEvent, useMemo } from 'react';
+import React, { KeyboardEvent } from 'react';
 import { flexRender, Table as ReactTable, Row } from '@tanstack/react-table';
 import { ItemProps, TableVirtuoso } from 'react-virtuoso';
-import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, Toolbar } from '@mui/material';
+import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme } from '@mui/material';
 import { TableHeader } from './TableHeader';
 import { useUnitEntityDialog } from './UnitEntityDialog';
 import { UnitEntity } from '../../../domain/models/UnitEntities';
+import { MyAppResource } from '../MyContexts';
 
-const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
+const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: MyAppResource['scrollType'] }) => {
 
     console.log('render VirtualizedTable.');
 
-    const { table } = props;
+    const { table, scrollType } = props;
     const rows = table.getRowModel().rows;
     const headerGroups = table.getHeaderGroups();
 
@@ -34,14 +35,21 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
     };
 
     const tableComponents = {
-        Scroller: React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
-            return <TableContainer
-                {...props}
-                ref={ref}
-                component={Paper}
-                elevation={3}
-            />
-        }),
+        Scroller: scrollType === 'table'
+            ? React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
+                return <TableContainer
+                    {...props}
+                    ref={ref}
+                    component={Paper}
+                    elevation={3}
+                />
+            })
+            : React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
+                return <TableContainer
+                    {...props}
+                    ref={ref}
+                />
+            }),
         Table: (props: object) => <Table
             {...props}
             size='small'
@@ -51,7 +59,10 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
             return <TableHead
                 {...props}
                 ref={ref}
-                sx={{ position: 'sticky', top: 0, backgroundColor: (theme) => theme.palette.background.default, zIndex: (theme) => theme.zIndex.appBar }}
+                sx={{
+                    backgroundColor: (theme) => theme.palette.background.default,
+                    zIndex: (theme) => theme.zIndex.appBar,
+                }}
             />
         }),
         TableRow: (props: ItemProps<Row<UnitEntity>>) => <TableRow
@@ -69,13 +80,20 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
     };
 
     return <>
-        <Toolbar />
-        {useMemo(() => <TableVirtuoso
-            style={{
-                height: 'calc(100vh - 100px)',
-                maxHeight: 'calc(100vh - 100px)',
-                overflow: 'scroll',
-            }}
+        <TableVirtuoso
+            style={
+                scrollType === 'table'
+                    ? {
+                        height: 'calc(100vh - 100px)',
+                        maxHeight: 'calc(100vh - 100px)',
+                    }
+                    : {
+                        height: 'auto',
+                        maxHeight: 'none',
+                        overflow: 'visible',
+                    }
+            }
+            useWindowScroll={scrollType === 'window'}
             data={rows}
             components={tableComponents}
             fixedHeaderContent={
@@ -85,7 +103,7 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
                     )
             }
             itemContent={
-                (index, data) => {
+                (index: number, data: Row<UnitEntity>) => {
                     const row = data;
                     return row.getVisibleCells().map(cell => {
                         return <TableCell key={cell.id} sx={styleTableCell}>
@@ -94,7 +112,7 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity> }) => {
                     })
                 }
             }
-        />, [table.getState()])}
+        />
         <UnitEntityDialog />
     </>
 };
