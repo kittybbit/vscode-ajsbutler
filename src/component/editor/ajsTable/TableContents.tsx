@@ -8,7 +8,6 @@ import { useMyAppContext } from '../MyContexts';
 import { AccessorType, tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
 import Header from './Header';
 import VirtualizedTable from './VirtualizedTable';
-import StaticTable from './StaticTable';
 import { Unit } from '../../../domain/values/Unit';
 import { UnitEntity, tyFactory } from '../../../domain/models/UnitEntities';
 import { Parameter } from '../../../domain/models/ParameterEntities';
@@ -17,7 +16,7 @@ const TableContents = () => {
 
     console.log('render TableContents.');
 
-    const { isDarkMode, lang, tableType } = useMyAppContext();
+    const { isDarkMode, lang, scrollType } = useMyAppContext();
 
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
     const fn = (type: string, data: unknown) => {
@@ -104,13 +103,8 @@ const TableContents = () => {
     return <>
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Header
-                table={table}
-            />
-            {tableType === 'virtual'
-                ? <VirtualizedTable table={table} />
-                : <StaticTable table={table} />
-            }
+            <Header table={table} />
+            <VirtualizedTable table={table} scrollType={scrollType} />
             <Stack direction='row' justifyContent='flex-end' spacing={2}>
                 <Typography>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>
             </Stack>

@@ -5,18 +5,18 @@ export type MyAppResource = {
     isDarkMode: boolean | undefined,
     lang: string | undefined,
     os: string | undefined,
-    tableType: 'virtual' | 'static',
+    scrollType: 'window' | 'table',
 }
 
 type MyAppContext = MyAppResource & { updateMyAppResource: (newValue: Partial<MyAppResource>) => void }
-const MyAppContext = createContext<MyAppContext>({
+const myAppContext = createContext<MyAppContext>({
     isDarkMode: undefined,
     lang: undefined,
     os: undefined,
-    tableType: 'virtual',
+    scrollType: 'table',
     updateMyAppResource: () => { },
 });
-export const useMyAppContext = () => useContext(MyAppContext);
+export const useMyAppContext = () => useContext(myAppContext);
 export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
 
     console.log('render MyAppContextProvider.');
@@ -25,7 +25,7 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
         isDarkMode: undefined,
         lang: undefined,
         os: undefined,
-        tableType: 'virtual',
+        scrollType: 'table',
     });
     const setMyAppResource = (myAppResource: SetStateAction<MyAppResource>) => startTransition(() => setMyAppResourceInternal(myAppResource));
 
@@ -46,9 +46,9 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
 
     return <>
         {
-            myAppResource.isDarkMode !== undefined && <MyAppContext.Provider value={{ ...myAppResource, updateMyAppResource: updateMyAppResource }}>
+            myAppResource.isDarkMode !== undefined && <myAppContext.Provider value={{ ...myAppResource, updateMyAppResource: updateMyAppResource }}>
                 {children}
-            </MyAppContext.Provider>
+            </myAppContext.Provider>
         }
     </>;
 }

@@ -1,5 +1,5 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
-import { Alert, AppBar, IconButton, Snackbar, Stack, Toolbar, Tooltip } from '@mui/material';
+import React, { Dispatch, ReactElement, SetStateAction, useCallback, useState } from 'react';
+import { Alert, AppBar, IconButton, Slide, Snackbar, Stack, Toolbar, Tooltip, useScrollTrigger } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SaveIcon from '@mui/icons-material/Save';
 import { Table } from '@tanstack/table-core';
@@ -36,39 +36,54 @@ const Header = (params: { table: Table<UnitEntity> }) => {
         window.vscode.postMessage({ type: 'save', data: toCsv(table) });
     };
 
+    const HideOnScroll = useCallback(({ children }: { children: ReactElement }) => {
+        console.log('render HideOnScroll.');
+
+        const trigger = useScrollTrigger({
+            target: window,
+        });
+        return (
+            <Slide appear={false} direction="down" in={!trigger}>
+                {children}
+            </Slide>
+        );
+    }, []);
+
     return <>
-        <AppBar position='fixed' sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-            <Toolbar>
-                <TableMenu
-                    menuStatus={menuStatus}
-                    setMenuStatus={setMenuStatus}
-                />
-                <SearchBox table={table} />
-                <Stack flexGrow={1} />
-                <Tooltip title='Copy the contents to clipbord as csv.'>
-                    <IconButton aria-label='Copy the contents to clipbord as csv.' size='small' onClick={handleCopy}>
-                        <ContentCopyIcon fontSize='inherit' />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title='Save the contents as csv.'>
-                    <IconButton aria-label='Save the contents as csv.' size='small' onClick={handleSave}>
-                        <SaveIcon fontSize='inherit' />
-                    </IconButton>
-                </Tooltip>
-                <Snackbar
-                    sx={{ position: 'absolute' }}
-                    open={open}
-                    autoHideDuration={2500}
-                    onClose={() => setOpen(false)}
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'center',
-                    }}
-                >
-                    <Alert severity='info'>Copied</Alert>
-                </Snackbar>
-            </Toolbar>
-        </AppBar>
+        <HideOnScroll>
+            <AppBar position='sticky'>
+                <Toolbar>
+                    <TableMenu
+                        menuStatus={menuStatus}
+                        setMenuStatus={setMenuStatus}
+                    />
+                    <SearchBox table={table} />
+                    <Stack flexGrow={1} />
+                    <Tooltip title='Copy the contents to clipbord as csv.'>
+                        <IconButton aria-label='Copy the contents to clipbord as csv.' size='small' onClick={handleCopy}>
+                            <ContentCopyIcon fontSize='inherit' />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Save the contents as csv.'>
+                        <IconButton aria-label='Save the contents as csv.' size='small' onClick={handleSave}>
+                            <SaveIcon fontSize='inherit' />
+                        </IconButton>
+                    </Tooltip>
+                </Toolbar>
+            </AppBar>
+        </HideOnScroll>
+        <Snackbar
+            sx={{ position: 'absolute' }}
+            open={open}
+            autoHideDuration={2500}
+            onClose={() => setOpen(false)}
+            anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'center',
+            }}
+        >
+            <Alert severity='info'>Copied</Alert>
+        </Snackbar>
         <DisplayColumnSelector
             table={table}
             menuStatus={menuStatus}

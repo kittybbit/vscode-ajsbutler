@@ -11,7 +11,7 @@ const TableMenu = (params: MenuType) => {
 
     console.log('render TableMenu.');
 
-    const { lang, tableType, updateMyAppResource } = useMyAppContext();
+    const { lang, scrollType, updateMyAppResource } = useMyAppContext();
     const { setMenuStatus } = params;
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -62,11 +62,11 @@ const TableMenu = (params: MenuType) => {
                 onClick={() => {
                     console.log('click menuItem2');
                     handleClose();
-                    updateMyAppResource({ tableType: tableType === 'virtual' ? 'static' : 'virtual' });
+                    updateMyAppResource({ scrollType: scrollType === 'table' ? 'window' : 'table' });
                 }}>
                 <ListItemIcon><Loop /></ListItemIcon>
-                {tableType === 'virtual' && <ListItemText>{localeMap('menu.menuItem2.static', lang)}</ListItemText>}
-                {tableType === 'static' && <ListItemText>{localeMap('menu.menuItem2.virtual', lang)}</ListItemText>}
+                {scrollType === 'table' && <ListItemText>{localeMap('menu.menuItem2.window', lang)}</ListItemText>}
+                {scrollType === 'window' && <ListItemText>{localeMap('menu.menuItem2.table', lang)}</ListItemText>}
             </MenuItem>
         </Menu >
     </>;

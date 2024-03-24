@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { UnitEntity } from '../../../domain/models/UnitEntities';
 import { Column, Table as ReactTable } from '@tanstack/table-core';
-import { Accordion, AccordionDetails, AccordionSummary, Divider, Drawer, FormControlLabel, IconButton, List, ListItem, Stack, Switch, Toolbar, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Divider, Drawer, FormControlLabel, IconButton, List, ListItem, Stack, Switch, Tooltip, Typography } from '@mui/material';
 import { ToggleOff, ToggleOn, ExpandMore } from '@mui/icons-material';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
@@ -46,7 +46,6 @@ export default function DisplayColumnSelector(props: { table: ReactTable<UnitEnt
             open={menuStatus ? menuStatus.menuItem1 : false}
             onClose={toggleDrawer(false)}
         >
-            <Toolbar />
             <Stack direction='row' spacing={2} justifyContent='center'>
                 <Tooltip arrow title={localeMap('columnSelectSidebar.invisibleAll', lang)}>
                     <IconButton
