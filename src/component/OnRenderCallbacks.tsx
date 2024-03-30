@@ -1,5 +1,4 @@
 import { ProfilerOnRenderCallback } from 'react';
-import { Interaction } from 'scheduler/tracing';
 
 /**
  * @example
@@ -14,7 +13,6 @@ export const onRenderCallback: ProfilerOnRenderCallback = (
     baseDuration: number,
     startTime: number,
     commitTime: number,
-    interactions: Set<Interaction>,
 ) => {
-    console.log(`id=${id}, phase=${phase}, actualDuration=${actualDuration}[ms], baseDuration=${baseDuration}[ms], startTime=${startTime}, commitTime=${commitTime}, interactions=${interactions}`);
+    console.log(`id=${id}, phase=${phase}, actualDuration=${actualDuration}[ms], baseDuration=${baseDuration}[ms], startTime=${startTime}, commitTime=${commitTime}`);
 }
