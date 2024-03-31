@@ -1,18 +1,25 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Alert, Dialog, DialogContent, DialogTitle, IconButton, Snackbar, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { ContentCopy } from '@mui/icons-material';
 import { UnitEntity } from '../../../domain/models/UnitEntities';
 
-export const useUnitEntityDialog = () => {
+export const UnitEntityDialog = (props: {
+    dialogData: UnitEntity | undefined,
+    setDialogData: (dialogData: UnitEntity | undefined) => void
+}) => {
 
     console.log('render UnitEntityDialog.');
 
-    const [dialogData, setDialogDataInternal] = useState<UnitEntity | undefined>(undefined);
-    const setDialogData = useCallback((data: UnitEntity | undefined) => setDialogDataInternal(data), []);
+    const { dialogData, setDialogData } = props;
 
+    const [open, setOpen] = useState<boolean>(dialogData !== undefined);
+    useEffect(() => {
+        setOpen(dialogData !== undefined);
+    }, [dialogData]);
     const handleClose = () => {
+        setOpen(false);
         setDialogData(undefined);
     };
 
@@ -21,9 +28,9 @@ export const useUnitEntityDialog = () => {
         setTabIndex(newValue);
     };
 
-    const UnitEntityDialog = () => <Dialog
+    return <Dialog
         scroll='paper'
-        open={dialogData != undefined}
+        open={open}
         onClose={handleClose}
         fullWidth={true}
     >
@@ -44,16 +51,11 @@ export const useUnitEntityDialog = () => {
                     <CloseIcon />
                 </IconButton>
             </Stack>
-            <Typography variant='caption'>{dialogData?.absolutePath()}</Typography>
+            <Typography variant='caption'>{dialogData ? dialogData.absolutePath() : ''}</Typography>
         </DialogTitle>
         {tabIndex === 0 && <Tab1 dialogData={dialogData} />}
         {tabIndex === 1 && <Tab2 dialogData={dialogData} />}
     </Dialog>;
-
-    return {
-        setDialogData,
-        UnitEntityDialog
-    }
 }
 
 const Tab1 = (params: { dialogData: UnitEntity | undefined }) => {
