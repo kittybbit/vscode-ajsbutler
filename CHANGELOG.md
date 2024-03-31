@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.5.0]
+
+- Fixing the flash occurring during UnitEntityDialog display.
+- Adapting to the interface change in the onRenderCallback.
+
 ## [1.4.0]
 
 - Improved display performance.

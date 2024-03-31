@@ -1,9 +1,9 @@
-import React, { KeyboardEvent } from 'react';
+import React, { KeyboardEvent, useState } from 'react';
 import { flexRender, Table as ReactTable, Row } from '@tanstack/react-table';
 import { ItemProps, TableVirtuoso } from 'react-virtuoso';
 import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme } from '@mui/material';
 import { TableHeader } from './TableHeader';
-import { useUnitEntityDialog } from './UnitEntityDialog';
+import { UnitEntityDialog } from './UnitEntityDialog';
 import { UnitEntity } from '../../../domain/models/UnitEntities';
 import { MyAppResource } from '../MyContexts';
 
@@ -16,7 +16,7 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: My
     const headerGroups = table.getHeaderGroups();
 
     // control dialog
-    const { setDialogData, UnitEntityDialog } = useUnitEntityDialog();
+    const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
     const handleClickDialogOpen = (unitEntity: UnitEntity) => () => {
         setDialogData(unitEntity);
     };
@@ -113,7 +113,7 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: My
                 }
             }
         />
-        <UnitEntityDialog />
+        <UnitEntityDialog dialogData={dialogData} setDialogData={setDialogData} />
     </>
 };
 export default VirtualizedTable;

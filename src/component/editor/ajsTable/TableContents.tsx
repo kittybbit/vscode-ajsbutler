@@ -1,4 +1,4 @@
-import React, { SetStateAction, startTransition, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CssBaseline, Stack, ThemeProvider, Typography, createTheme } from '@mui/material';
 import { useReactTable } from '@tanstack/react-table';
 import { FilterMeta, Row, SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
@@ -25,7 +25,7 @@ const TableContents = () => {
                 .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
                 .flat()
                 .map((unit: Unit) => tyFactory(unit));
-            startTransition(() => setUnitEntities(() => newUnitEntities));
+            setUnitEntities(() => newUnitEntities);
         } catch {
             setUnitEntities(() => []);
         }
@@ -72,10 +72,8 @@ const TableContents = () => {
         return itemRank.passed;
     };
 
-    const [globalFilter, setGlobalFilterInternal] = useState('');
-    const setGlobalFilter = (globalFilter: SetStateAction<string>) => startTransition(() => setGlobalFilterInternal(globalFilter));
-    const [sorting, setSortingInternal] = useState<SortingState>([]);
-    const setSorting = (sortingState: SetStateAction<SortingState>) => startTransition(() => setSortingInternal(sortingState));
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [sorting, setSorting] = useState<SortingState>([]);
     const table = useReactTable<UnitEntity>({
         columns: useMemo(() => tableColumnDef(lang), [lang]),
         data: useMemo(() => unitEntities ?? [], [unitEntities]),
