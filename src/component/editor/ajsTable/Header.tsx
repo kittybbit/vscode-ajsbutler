@@ -51,7 +51,7 @@ const Header = (params: { table: Table<UnitEntity> }) => {
 
     return <>
         <HideOnScroll>
-            <AppBar position='sticky'>
+            <AppBar position='fixed'>
                 <Toolbar>
                     <TableMenu
                         menuStatus={menuStatus}

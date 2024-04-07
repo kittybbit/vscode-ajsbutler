@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.5.1]
+
+- Change the header position from sticky to fixed.
+
 ## [1.5.0]
 
 - Fixing the flash occurring during UnitEntityDialog display.
