@@ -8,6 +8,7 @@ import SearchBox from './SearchBox';
 import DisplayColumnSelector from './DisplayColumnSelector';
 import { UnitEntity } from '../../../domain/models/UnitEntities';
 import { toCsv } from '../../../domain/services/export/csv';
+import { MyAppResource } from '../MyContexts';
 
 export type MyMenuStatusType = {
     menuItem1: boolean,
@@ -17,11 +18,11 @@ export type MenuType = {
     setMenuStatus: Dispatch<SetStateAction<MyMenuStatusType>>
 }
 
-const Header = (params: { table: Table<UnitEntity> }) => {
+const Header = (params: { table: Table<UnitEntity>, scrollType: MyAppResource['scrollType'] }) => {
 
     console.log('render Header.');
 
-    const { table } = params;
+    const { table, scrollType } = params;
     const [menuStatus, setMenuStatus] = useState<MyMenuStatusType>({
         menuItem1: false,
     });
@@ -41,6 +42,7 @@ const Header = (params: { table: Table<UnitEntity> }) => {
 
         const trigger = useScrollTrigger({
             target: window,
+            threshold: 0,
         });
         return (
             <Slide appear={false} direction="down" in={!trigger}>
@@ -51,7 +53,7 @@ const Header = (params: { table: Table<UnitEntity> }) => {
 
     return <>
         <HideOnScroll>
-            <AppBar position='fixed'>
+            <AppBar position={scrollType === 'window' ? 'fixed' : 'sticky'}>
                 <Toolbar>
                     <TableMenu
                         menuStatus={menuStatus}
