@@ -101,7 +101,7 @@ const TableContents = () => {
     return <>
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Header table={table} />
+            <Header table={table} scrollType={scrollType} />
             <VirtualizedTable table={table} scrollType={scrollType} />
             <Stack direction='row' justifyContent='flex-end' spacing={2}>
                 <Typography>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>

@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.5.2]
+
+- Fixed header position.
+
 ## [1.5.1]
 
 - Change the header position from sticky to fixed.
