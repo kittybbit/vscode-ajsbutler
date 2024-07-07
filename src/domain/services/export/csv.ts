@@ -1,7 +1,7 @@
 import { Table as ReactTable } from '@tanstack/react-table';
 import { UnitEntity } from '../../models/UnitEntities';
 import { Parameter } from '../../models/ParameterEntities';
-import { AccessorType } from '../../../component/editor/ajsTable/tableColumnDef';
+import { AccessorType } from '../../../ui-component/editor/ajsTable/tableColumnDef';
 
 export const toCsv = (table: ReactTable<UnitEntity>): string => {
     const rows: Array<string> = [];

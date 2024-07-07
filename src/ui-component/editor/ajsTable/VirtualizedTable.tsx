@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useState } from 'react';
 import { flexRender, Table as ReactTable, Row } from '@tanstack/react-table';
 import { ItemProps, TableVirtuoso } from 'react-virtuoso';
 import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme } from '@mui/material';
@@ -18,11 +18,16 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: My
     // control dialog
     const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
     const handleClickDialogOpen = (unitEntity: UnitEntity) => () => {
-        setDialogData(unitEntity);
+        setDialogData(() => unitEntity);
     };
     const handleKeyDown = (unitEntity: UnitEntity) => (event: KeyboardEvent<HTMLTableRowElement>) => {
-        event.key === 'Enter' && setDialogData(unitEntity);
+        event.key === 'Enter' && handleClickDialogOpen(unitEntity);
     };
+
+    // log cause of rendering to console
+    DEVELOPMENT && useEffect(() => console.log('rendering due to table@VirtualizedTable.'), [table]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to scrollType@VirtualizedTable.'), [scrollType]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to dialogData@VirtualizedTable.'), [dialogData]);
 
     const styleTableCell: SxProps<Theme> = {
         whiteSpace: 'nowrap',
@@ -113,7 +118,7 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: My
                 }
             }
         />
-        <UnitEntityDialog dialogData={dialogData} setDialogData={setDialogData} />
+        <UnitEntityDialog dialogData={dialogData} onClose={() => setDialogData(undefined)} />
     </>
 };
 export default VirtualizedTable;

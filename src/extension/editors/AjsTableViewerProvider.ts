@@ -3,7 +3,7 @@ import * as os from 'os';
 import { initReactPanel } from './ReactPanel';
 import { parseAjs } from '../../domain/services/parser/AjsParser';
 import { stringify } from 'flatted';
-import { MyAppResource } from '../../component/editor/MyContexts';
+import { MyAppResource } from '../../ui-component/editor/MyContexts';
 
 /**
  * Provider for JP1/AJS table viewr.

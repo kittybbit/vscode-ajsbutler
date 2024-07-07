@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Alert, Dialog, DialogContent, DialogTitle, IconButton, Snackbar, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Dialog, DialogContent, DialogTitle, IconButton, Snackbar, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { ContentCopy } from '@mui/icons-material';
@@ -7,30 +7,28 @@ import { UnitEntity } from '../../../domain/models/UnitEntities';
 
 export const UnitEntityDialog = (props: {
     dialogData: UnitEntity | undefined,
-    setDialogData: (dialogData: UnitEntity | undefined) => void
+    onClose: VoidFunction,
 }) => {
 
     console.log('render UnitEntityDialog.');
 
-    const { dialogData, setDialogData } = props;
-
-    const [open, setOpen] = useState<boolean>(dialogData !== undefined);
-    useEffect(() => {
-        setOpen(dialogData !== undefined);
-    }, [dialogData]);
+    const { dialogData, onClose } = props;
     const handleClose = () => {
-        setOpen(false);
-        setDialogData(undefined);
+        onClose();
     };
 
     const [tabIndex, setTabIndex] = useState(0);
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setTabIndex(newValue);
+        setTabIndex(() => newValue);
     };
+
+    // log cause of rendering to console
+    DEVELOPMENT && useEffect(() => console.log('rendering due to dialogData@UnitEntityDialog.'), [dialogData]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to tabIndex@UnitEntityDialog.'), [tabIndex]);
 
     return <Dialog
         scroll='paper'
-        open={open}
+        open={dialogData !== undefined}
         onClose={handleClose}
         fullWidth={true}
     >
@@ -53,26 +51,37 @@ export const UnitEntityDialog = (props: {
             </Stack>
             <Typography variant='caption'>{dialogData ? dialogData.absolutePath() : ''}</Typography>
         </DialogTitle>
-        {tabIndex === 0 && <Tab1 dialogData={dialogData} />}
-        {tabIndex === 1 && <Tab2 dialogData={dialogData} />}
+        <Tab1 dialogData={dialogData} tabIndex={tabIndex} index={0} />
+        <Tab2 dialogData={dialogData} tabIndex={tabIndex} index={1} />
     </Dialog>;
 }
 
-const Tab1 = (params: { dialogData: UnitEntity | undefined }) => {
+type TabPanelProps = {
+    dialogData: UnitEntity | undefined,
+    tabIndex: number,
+    index: number
+};
 
-    console.log('render Tabl1.');
+const Tab1 = (params: TabPanelProps) => {
+
+    console.log('render Tab1.');
+
+    const { dialogData, tabIndex, index } = params;
 
     const [open, setOpen] = useState(false);
-
     const ref = useRef<HTMLDivElement>();
     const handleCopy = () => {
         ref.current?.textContent && navigator.clipboard.writeText(ref.current.textContent);
-        setOpen(true);
+        setOpen(() => true);
     };
 
-    const { dialogData } = params;
+    // log cause of rendering to console
+    DEVELOPMENT && useEffect(() => console.log('rendering due to dialogData@Tab1.'), [dialogData]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to tabIndex@Tab1.'), [tabIndex]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to index@Tab1.'), [index]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to open@Tab1.'), [open]);
 
-    return <>
+    return <Box key={index} sx={{ display: index === tabIndex ? 'block' : 'none' }}>
         <Stack direction='row' justifyContent='flex-end' sx={{ marginLeft: '2em', marginRight: '2em' }}>
             <Tooltip title='Copy the contents'>
                 <IconButton aria-label='Copy the contents to clipbord' size='small' onClick={handleCopy}>
@@ -105,23 +114,28 @@ const Tab1 = (params: { dialogData: UnitEntity | undefined }) => {
         >
             <Alert severity='info'>Copied</Alert>
         </Snackbar>
-    </>;
+    </Box>;
 };
 
-const Tab2 = (params: { dialogData: UnitEntity | undefined }) => {
+const Tab2 = (params: TabPanelProps) => {
 
     console.log('render Tab2.');
 
-    const { dialogData } = params;
+    const { dialogData, tabIndex, index } = params;
 
     const [open, setOpen] = useState(false);
-
     const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.currentTarget.parentNode?.textContent && navigator.clipboard.writeText(e.currentTarget.parentNode?.textContent);
-        setOpen(true);
+        setOpen(() => true);
     };
 
-    return <>
+    // log cause of rendering to console
+    DEVELOPMENT && useEffect(() => console.log('rendering due to dialogData@Tab2.'), [dialogData]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to tabIndex@Tab2.'), [tabIndex]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to index@Tab2.'), [index]);
+    DEVELOPMENT && useEffect(() => console.log('rendering due to open@Tab2.'), [open]);
+
+    return <Box key={index} sx={{ display: index === tabIndex ? 'block' : 'none' }}>
         <DialogContent dividers={true}>
             <TextField
                 label='ajsshow'
@@ -160,5 +174,5 @@ const Tab2 = (params: { dialogData: UnitEntity | undefined }) => {
         >
             <Alert severity='info'>Copied</Alert>
         </Snackbar>
-    </>
+    </Box>
 };
