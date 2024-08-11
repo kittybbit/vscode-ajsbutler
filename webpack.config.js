@@ -13,7 +13,7 @@ const editorConfig = (env, argv) => {
         target: 'web',
         devtool: PRODUCTION ? false : 'inline-source-map',
         entry: {
-            'index': './src/component/editor/index.tsx',
+            'index': './src/ui-component/editor/index.tsx',
         },
         output: {
             path: path.join(__dirname, 'out'),
@@ -110,6 +110,9 @@ const nodeConfig = (env, argv) => {
         externals: {
             vscode: 'commonjs vscode',
         },
+        cache: {
+            type: 'filesystem',
+        },
         stats: {
             orphanModules: true,
             errorDetails: true,
@@ -184,7 +187,6 @@ const webconfig = (env, argv) => {
                     assert: require.resolve('assert'),
                     os: require.resolve('os-browserify/browser'),
                     util: require.resolve('util'),
-                    crypto: require.resolve('crypto-browserify'),
                 }
             },
             plugins: [
