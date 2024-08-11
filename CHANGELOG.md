@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.5.3]
+
+- Extended Visual Studio Code backward compatibility from v1.82.0 to v1.75.0.
+- Changed package name from component to ui-component.
+- Fixed a few bugs.
+
 ## [1.5.2]
 
 - Fixed header position.

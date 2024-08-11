@@ -27,7 +27,7 @@ export class SyntaxErrorListener implements ANTLRErrorListener<never> {
   }
 
   public prettyPrint(title?: string) {
-    title ? console.log(title) : null;
+    console.log(title);
     console.log(this.errors.length > 0 ? this.errors : 'No errors.');
   }
 }

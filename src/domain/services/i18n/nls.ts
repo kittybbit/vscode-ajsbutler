@@ -1,5 +1,5 @@
 // internationalization
-import { merge } from 'lodash-es';
+import merge from 'lodash-es/merge';
 import * as message from '@resource/i18n/message';
 import * as ty from '@resource/i18n/ty';
 import * as parameter from '@resource/i18n/parameter';

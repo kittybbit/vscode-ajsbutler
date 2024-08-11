@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HeaderGroup } from '@tanstack/table-core';
 import { flexRender } from '@tanstack/react-table';
 import { SxProps, TableCell, TableRow, TableSortLabel, Theme } from '@mui/material';
@@ -20,6 +20,7 @@ export const TableHeader = (props: { headerGroup: HeaderGroup<UnitEntity> }) => 
     console.log('render TableHeader.');
 
     const { headerGroup } = props;
+    DEVELOPMENT && useEffect(() => console.log(`rendering due to headerGroup${headerGroup.id}@TableHeader`));
 
     return <TableRow key={headerGroup.id}>
         {headerGroup.headers.map(header => {

@@ -1,6 +1,8 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-[![](https://img.shields.io/visual-studio-marketplace/d/kittybbit.vscode-ajsbutler?color=blue&label=Downloads&logo=Microsoft&logoColor=lightgray)](https://marketplace.visualstudio.com/items?itemName=kittybbit.vscode-ajsbutler)
-[![](https://img.shields.io/visual-studio-marketplace/stars/kittybbit.vscode-ajsbutler?color=blue&label=Rating&logo=Microsoft&logoColor=lightgray)](https://marketplace.visualstudio.com/items?itemName=kittybbit.vscode-ajsbutler)
+![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/kittybbit.vscode-ajsbutler)
+![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/kittybbit.vscode-ajsbutler)
+![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/stars/kittybbit.vscode-ajsbutler)
+![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/kittybbit/vscode-ajsbutler)
 
 # vscode-ajsbutler
 
