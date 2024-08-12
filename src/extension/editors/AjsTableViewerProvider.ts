@@ -5,6 +5,11 @@ import { parseAjs } from '../../domain/services/parser/AjsParser';
 import { stringify } from 'flatted';
 import { MyAppResource } from '../../ui-component/editor/MyContexts';
 
+type EventType = ResourceEventType | ReadyEventType | SaveEventType;
+type ResourceEventType = { type: string, data: MyAppResource };
+type ReadyEventType = { type: string };
+type SaveEventType = { type: string, data: string };
+
 /**
  * Provider for JP1/AJS table viewr.
  */
@@ -78,42 +83,52 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
         });
 
         // message receiver
-        webviewPanel.webview.onDidReceiveMessage(e => {
+        const resourceFn = (e: ResourceEventType) => {
+            console.log('invoke resource.');
+            const data: MyAppResource = {
+                ...e.data as MyAppResource,
+                isDarkMode: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark,
+                lang: vscode.env.language,
+                os: os.platform().toLocaleLowerCase(),
+            };
+            webviewPanel.webview.postMessage({
+                type: 'resource',
+                data: data,
+            });
+        };
+        const readyFn = () => {
+            console.log('invoke ready.');
+            webviewPanel.webview.postMessage({
+                type: 'changeDocument',
+                data: createData(),
+            });
+        };
+        const saveFn = (e: SaveEventType) => {
+            console.log('invoke save.');
+            vscode.window.showSaveDialog().then(uri => {
+                if (uri) {
+                    vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(e.data as string));
+                    vscode.window.showInformationMessage('The file has been saved.', { detail: uri.toString(), modal: true });
+                }
+            });
+        };
+        const onDidRecieveMessage = (e: EventType) => {
             switch (e.type) {
                 case 'resource': {
-                    console.log('invoke resource.');
-                    const data: MyAppResource = {
-                        ...e.data,
-                        isDarkMode: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark,
-                        lang: vscode.env.language,
-                        os: os.platform().toLocaleLowerCase(),
-                    };
-                    webviewPanel.webview.postMessage({
-                        type: 'resource',
-                        data: data,
-                    });
+                    resourceFn(e as ResourceEventType);
                     break;
                 }
                 case 'ready': {// webview is ready.
-                    console.log('invoke ready.');
-                    webviewPanel.webview.postMessage({
-                        type: 'changeDocument',
-                        data: createData(),
-                    });
+                    readyFn();
                     break;
                 }
                 case 'save': {//save contents
-                    console.log('invoke save.');
-                    vscode.window.showSaveDialog().then(uri => {
-                        if (uri) {
-                            vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(e.data));
-                            vscode.window.showInformationMessage('The file has been saved.', { detail: uri.toString(), modal: true });
-                        }
-                    });
+                    saveFn(e as SaveEventType);
                     break;
                 }
             }
-        });
+        };
+        webviewPanel.webview.onDidReceiveMessage(onDidRecieveMessage);
 
         // initial display
         refreshWebview();

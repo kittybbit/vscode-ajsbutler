@@ -61,6 +61,18 @@ const Header = (params: { table: Table<UnitEntity>, scrollType: MyAppResource['s
                     />
                     <SearchBox table={table} />
                     <Stack flexGrow={1} />
+                    <Snackbar
+                        sx={{ position: 'absolute' }}
+                        open={open}
+                        autoHideDuration={2500}
+                        onClose={() => setOpen(false)}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                        }}
+                    >
+                        <Alert severity='info'>Copied</Alert>
+                    </Snackbar>
                     <Tooltip title='Copy the contents to clipbord as csv.'>
                         <IconButton aria-label='Copy the contents to clipbord as csv.' size='small' onClick={handleCopy}>
                             <ContentCopyIcon fontSize='inherit' />
@@ -74,18 +86,6 @@ const Header = (params: { table: Table<UnitEntity>, scrollType: MyAppResource['s
                 </Toolbar>
             </AppBar>
         </HideOnScroll>
-        <Snackbar
-            sx={{ position: 'absolute' }}
-            open={open}
-            autoHideDuration={2500}
-            onClose={() => setOpen(false)}
-            anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-            }}
-        >
-            <Alert severity='info'>Copied</Alert>
-        </Snackbar>
         <DisplayColumnSelector
             table={table}
             menuStatus={menuStatus}

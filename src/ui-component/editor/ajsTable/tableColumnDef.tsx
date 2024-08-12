@@ -13,12 +13,13 @@ import * as ajscolumn from '@resource/i18n/ajscolumn';
 type BoxType = Parameter | PrimitiveType;
 export type AccessorType = BoxType | BoxType[];
 
-const box = (param: BoxType, index: number = 0, fn = (param: BoxType) => {
+const defaultFn = (param: BoxType) => {
     if (param instanceof Parameter) {
         return param.value();
     }
     return new String(param).toString();
-}) => {
+};
+const box = (param: BoxType, index: number = 0, fn: (param: BoxType) => string | undefined = defaultFn) => {
     // String
     if (!(param instanceof Parameter)) {
         return <Box

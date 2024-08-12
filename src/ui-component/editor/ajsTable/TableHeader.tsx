@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { HeaderGroup } from '@tanstack/table-core';
 import { flexRender } from '@tanstack/react-table';
 import { SxProps, TableCell, TableRow, TableSortLabel, Theme } from '@mui/material';
@@ -20,36 +20,30 @@ export const TableHeader = (props: { headerGroup: HeaderGroup<UnitEntity> }) => 
     console.log('render TableHeader.');
 
     const { headerGroup } = props;
-    DEVELOPMENT && useEffect(() => console.log(`rendering due to headerGroup${headerGroup.id}@TableHeader`));
 
     return <TableRow key={headerGroup.id}>
         {headerGroup.headers.map(header => {
             const isPlaceholder = header.isPlaceholder;
             const isLeaf = header.subHeaders.length === 0;
             const canSort = header.column.columnDef.enableSorting || header.column.columnDef.enableMultiSort;
+            const headerTitle = flexRender(header.column.columnDef.header, header.getContext());
             let headerContent;
             if (isPlaceholder) {
                 headerContent = undefined;
             } else if (!isLeaf || (isLeaf && !canSort)) {
-                headerContent = flexRender(header.column.columnDef.header, header.getContext());
+                headerContent = headerTitle;
             } else if (isLeaf && canSort) {
                 const isSorted = header.column.getIsSorted();
-                if (isSorted) {
-                    headerContent = <TableSortLabel
-                        active={true}
-                        direction={isSorted}
-                        onClick={header.column.getToggleSortingHandler()}
-                    >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableSortLabel>
-                } else {
-                    headerContent = <TableSortLabel
-                        active={isSorted}
-                        onClick={header.column.getToggleSortingHandler()}
-                    >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableSortLabel>
-                }
+                headerContent = <TableSortLabel
+                    active={isSorted === false ? false : true}
+                    direction={isSorted !== false ? isSorted : undefined}
+                    onClick={header.column.getToggleSortingHandler()}
+                    sx={{
+                        '&:focus-visible': { outline: '-webkit-focus-ring-color auto 1px' }
+                    }}
+                >
+                    {headerTitle}
+                </TableSortLabel>
             }
             return <TableCell
                 key={header.id}

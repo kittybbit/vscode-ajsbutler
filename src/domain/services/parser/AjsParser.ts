@@ -19,7 +19,7 @@ export function parseAjs(content: string): { units: Unit[], errors: object[] } {
     const parser = new AjsParser(tokenStream);
     parser.addErrorListener(antlrError);
     const tree = parser.unitDefinitionFile();
-    const units = new Array<Unit>();
-    ParseTreeWalker.DEFAULT.walk(new Ajs3v12Evaluator(units), tree);
-    return { units: units, errors: antlrError.errors }
+    const evaluator = new Ajs3v12Evaluator();
+    ParseTreeWalker.DEFAULT.walk(evaluator, tree);
+    return { units: evaluator.units, errors: antlrError.errors }
 }

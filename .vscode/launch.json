@@ -30,7 +30,7 @@
             "request": "launch",
             "name": "Debug Current Grammar(Jp1Ajs3)",
             "input": "./sample/sample1_utf8",
-            "grammar": "./src/antlr/Jp1Ajs3Parser.g4",
+            "grammar": "./src/antlr/AjsParser.g4",
             "visualParseTree": true,
             "printParseTree": true
         }

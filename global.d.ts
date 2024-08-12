@@ -11,6 +11,6 @@ interface Window {
 }
 
 type PrimitiveType = string | number | boolean | symbol | null | undefined;
-type PrimitiveArrayType = PrimitiveType[];
+type PrimitiveTypes = PrimitiveType[];
 
 declare const DEVELOPMENT: boolean;
