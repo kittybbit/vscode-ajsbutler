@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.5.4]
+
+- Refactoring.
+- Fixed a few bugs.
+
 ## [1.5.3]
 
 - Extended Visual Studio Code backward compatibility from v1.82.0 to v1.75.0.

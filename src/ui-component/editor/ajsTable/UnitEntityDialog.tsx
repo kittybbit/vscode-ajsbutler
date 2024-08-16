@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Alert, Box, Dialog, DialogContent, DialogTitle, IconButton, Snackbar, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -21,10 +21,6 @@ export const UnitEntityDialog = (props: {
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(() => newValue);
     };
-
-    // log cause of rendering to console
-    DEVELOPMENT && useEffect(() => console.log('rendering due to dialogData@UnitEntityDialog.'), [dialogData]);
-    DEVELOPMENT && useEffect(() => console.log('rendering due to tabIndex@UnitEntityDialog.'), [tabIndex]);
 
     return <Dialog
         scroll='paper'
@@ -75,12 +71,6 @@ const Tab1 = (params: TabPanelProps) => {
         setOpen(() => true);
     };
 
-    // log cause of rendering to console
-    DEVELOPMENT && useEffect(() => console.log('rendering due to dialogData@Tab1.'), [dialogData]);
-    DEVELOPMENT && useEffect(() => console.log('rendering due to tabIndex@Tab1.'), [tabIndex]);
-    DEVELOPMENT && useEffect(() => console.log('rendering due to index@Tab1.'), [index]);
-    DEVELOPMENT && useEffect(() => console.log('rendering due to open@Tab1.'), [open]);
-
     return <Box key={index} sx={{ display: index === tabIndex ? 'block' : 'none' }}>
         <Stack direction='row' justifyContent='flex-end' sx={{ marginLeft: '2em', marginRight: '2em' }}>
             <Tooltip title='Copy the contents'>
@@ -128,12 +118,6 @@ const Tab2 = (params: TabPanelProps) => {
         e.currentTarget.parentNode?.textContent && navigator.clipboard.writeText(e.currentTarget.parentNode?.textContent);
         setOpen(() => true);
     };
-
-    // log cause of rendering to console
-    DEVELOPMENT && useEffect(() => console.log('rendering due to dialogData@Tab2.'), [dialogData]);
-    DEVELOPMENT && useEffect(() => console.log('rendering due to tabIndex@Tab2.'), [tabIndex]);
-    DEVELOPMENT && useEffect(() => console.log('rendering due to index@Tab2.'), [index]);
-    DEVELOPMENT && useEffect(() => console.log('rendering due to open@Tab2.'), [open]);
 
     return <Box key={index} sx={{ display: index === tabIndex ? 'block' : 'none' }}>
         <DialogContent dividers={true}>

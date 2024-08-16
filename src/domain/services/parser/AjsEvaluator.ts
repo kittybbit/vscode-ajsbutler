@@ -5,7 +5,7 @@ import { Unit } from '../../values/Unit';
 export class Ajs3v12Evaluator implements AjsParserListener {
 
     /** parsed definition */
-    #units: Array<Unit>;
+    #units: Array<Unit> = [];
 
     /** parsing context */
     #unitStack: Array<Unit> = [];
@@ -13,8 +13,8 @@ export class Ajs3v12Evaluator implements AjsParserListener {
     /** current unit object */
     #currentUnit?: Unit;
 
-    constructor(units: Array<Unit>) {
-        this.#units = units;
+    get units() {
+        return this.#units;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
