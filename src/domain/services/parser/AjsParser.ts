@@ -10,7 +10,7 @@ import { SyntaxErrorListener } from './SyntaxErrorListener';
 /**
  * parse Ajs definition.
  */
-export function parseAjs(content: string): { units: Unit[], errors: object[] } {
+export function parseAjs(content: string): { rootUnits: Unit[], errors: object[] } {
     const inputStream = CharStreams.fromString(content);
     const lexer = new AjsLexer(inputStream);
     const antlrError = new SyntaxErrorListener();
@@ -21,5 +21,5 @@ export function parseAjs(content: string): { units: Unit[], errors: object[] } {
     const tree = parser.unitDefinitionFile();
     const evaluator = new Ajs3v12Evaluator();
     ParseTreeWalker.DEFAULT.walk(evaluator, tree);
-    return { units: evaluator.units, errors: antlrError.errors }
+    return { rootUnits: evaluator.rootUnits, errors: antlrError.errors }
 }
