@@ -1,4 +1,4 @@
-export const message_ja = {
+export const ja = {
     'search.helperText': 'エンターキーまたはフォーカスアウトで検索',
     'menu.menuItem1': '表示するカラムを選択する。',
     'menu.menuItem2.window': 'ウィンドウスクロールに切り替える。',

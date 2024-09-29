@@ -1,22 +1,22 @@
 // internationalization
-import merge from 'lodash-es/merge';
 import * as message from '@resource/i18n/message';
 import * as ty from '@resource/i18n/ty';
 import * as parameter from '@resource/i18n/parameter';
 import * as ajscolumn from '@resource/i18n/ajscolumn';
 
 /** Literal type */
-export type LocaleKeyType = keyof typeof message.message_en;
+export type LocaleKeyType = keyof typeof message.en;
 type LocaleEntry = {
     [lang: string]: string;
 }
 const localeTable = (language: string): LocaleEntry => {
-    return Object.assign(
-        message.message_en,
-        {
-            'en': message.message_en,
-            'ja': message.message_ja
-        }[language]);
+    return {
+        ...message.en,
+        ...{
+            'en': message.en,
+            'ja': message.ja
+        }[language]
+    };
 };
 
 /** Return message or key string if key is not present. */
@@ -25,35 +25,34 @@ export const localeString = (key: string, language: string = 'en'): string => lo
 export const localeMap = (key: LocaleKeyType, language: string = 'en'): string => localeString(key, language);
 
 // ty name
-export const tyDefinitionLang = (language: string): typeof ty.ty_en => {
-    return merge(
-        {},
-        ty.ty_en,
-        {
-            'en': ty.ty_en,
-            'ja': ty.ty_ja,
-        }[language])
-        ;
+export const tyDefinitionLang = (language: string): typeof ty.en => {
+    return {
+        ...ty.en,
+        ...{
+            'en': ty.en,
+            'ja': ty.ja,
+        }[language]
+    };
 };
 
 // parameter
-export const paramDefinitionLang = (language: string): typeof parameter.parameter_en => {
-    return merge(
-        {},
-        parameter.parameter_en,
-        {
-            'en': parameter.parameter_en,
-            'ja': parameter.parameter_ja,
-        }[language]);
+export const paramDefinitionLang = (language: string): typeof parameter.en => {
+    return {
+        ...parameter.en,
+        ...{
+            'en': parameter.en,
+            'ja': parameter.ja,
+        }[language]
+    };
 };
 
 // column titles
-export const ajsTableColumnHeaderLang = (language: string): typeof ajscolumn.ajscolumn_en => {
-    return merge(
-        {},
-        ajscolumn.ajscolumn_en,
-        {
-            'en': ajscolumn.ajscolumn_en,
-            'ja': ajscolumn.ajscolumn_ja,
-        }[language]);
+export const ajsTableColumnHeaderLang = (language: string): typeof ajscolumn.en => {
+    return {
+        ...ajscolumn.en,
+        ...{
+            'en': ajscolumn.en,
+            'ja': ajscolumn.ja,
+        }[language]
+    };
 };

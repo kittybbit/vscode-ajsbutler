@@ -1,4 +1,4 @@
-export const ty_en = {
+export const en = {
     'g': {
         'name': 'job {planning} group',
         'gty': {

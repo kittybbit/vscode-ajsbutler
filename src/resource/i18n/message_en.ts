@@ -1,4 +1,4 @@
-export const message_en = {
+export const en = {
     'search.helperText': 'Search by enter or focus out.',
     'menu.menuItem1': 'Select display columns.',
     'menu.menuItem2.window': 'Toggle window scroll.',

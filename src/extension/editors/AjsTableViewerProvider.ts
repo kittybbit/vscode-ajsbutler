@@ -51,10 +51,6 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
                 refreshWebview();
             }
         })
-        webviewPanel.onDidDispose(() => {
-            changeDocumentSubscription.dispose();
-            changeConfigurationSubscription.dispose();
-        });
 
         // message receiver
         const ready = readyFn(document, webviewPanel);
@@ -76,7 +72,14 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
                 }
             }
         };
-        webviewPanel.webview.onDidReceiveMessage(onDidRecieveMessage);
+        const recieveMessageSubscription = webviewPanel.webview.onDidReceiveMessage(onDidRecieveMessage);
+
+        webviewPanel.onDidDispose(() => {
+            changeDocumentSubscription.dispose();
+            changeConfigurationSubscription.dispose();
+            recieveMessageSubscription.dispose();
+            console.log('dispose AjsTableViewerProvider');
+        });
 
         // initial display
         refreshWebview();

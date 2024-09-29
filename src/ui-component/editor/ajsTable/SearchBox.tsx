@@ -1,12 +1,16 @@
-import React, { FocusEvent, KeyboardEvent, useEffect, useMemo, useRef } from 'react';
+import React, { FC, FocusEvent, KeyboardEvent, memo, useEffect, useMemo, useRef } from 'react';
 import { Typography, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { Table } from '@tanstack/table-core';
+import { Updater } from '@tanstack/table-core';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
-import { UnitEntity } from '../../../domain/models/UnitEntities';
 
-const SearchBox = (props: { table: Table<UnitEntity> }) => {
+type SearchBoxProps = {
+    globalFilter: unknown,
+    setGlobalFilter: (updator: Updater<unknown>) => void,
+};
+
+const SearchBox: FC<SearchBoxProps> = ({ globalFilter, setGlobalFilter }) => {
 
     console.log('render SearchBox.');
 
@@ -23,10 +27,6 @@ const SearchBox = (props: { table: Table<UnitEntity> }) => {
         return () => document.removeEventListener('keydown', handleShortcut);
     }, []);
 
-    const { table } = props;
-    const globalFilter = table.getState().globalFilter;
-    const setGlobalFilter = table.setGlobalFilter
-
     const handleKeyUp = (e: KeyboardEvent<HTMLDivElement>) => {
         if (e.key === 'Enter') {
             const newValue = (e.target as HTMLInputElement).value;
@@ -39,21 +39,30 @@ const SearchBox = (props: { table: Table<UnitEntity> }) => {
         globalFilter !== newValue && setGlobalFilter(() => newValue);
     };
 
-    return <>
-        <TextField
-            id='search'
-            placeholder='Search...'
-            helperText={useMemo(() => localeMap('search.helperText', lang), [lang])}
-            InputProps={{
-                startAdornment: <SearchIcon sx={{ marginRight: '0.5rem' }} />,
-                endAdornment: <><kbd>{isMac() ? '\u2318' : 'CTRL'}</kbd><Typography sx={{ fontSize: '0.8em' }}>+</Typography><kbd>F</kbd></>,
-            }}
-            variant='standard'
-            onKeyUp={handleKeyUp}
-            onBlur={handleBlur}
-            sx={{ width: '30em' }}
-            inputRef={ref}
-        />
-    </>;
+    return (
+        <>
+            <TextField
+                id='search'
+                placeholder='Search...'
+                helperText={useMemo(() => localeMap('search.helperText', lang), [lang])}
+                slotProps={{
+                    input: {
+                        startAdornment: <SearchIcon sx={{ marginRight: '0.5em' }} />,
+                        endAdornment: <><kbd>{isMac() ? '\u2318' : 'CTRL'}</kbd><Typography sx={{ fontSize: '0.5em' }}>+</Typography><kbd>F</kbd></>,
+                    }
+                }}
+                variant='standard'
+                onKeyUp={handleKeyUp}
+                onBlur={handleBlur}
+                sx={
+                    {
+                        width: '20em',
+                        marginRight: '0.5em'
+                    }
+                }
+                inputRef={ref}
+            />
+        </>
+    );
 };
-export default SearchBox;
+export default memo(SearchBox);

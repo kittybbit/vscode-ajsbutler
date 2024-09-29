@@ -1,4 +1,4 @@
-export const parameter_en = {
+export const en = {
     'ab': {
         'syntax': '{exec|hold|stop}'
     },

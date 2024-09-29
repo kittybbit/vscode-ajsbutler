@@ -4,11 +4,15 @@ import { Box, Chip, Rating } from '@mui/material';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import RemoveDoneIcon from '@mui/icons-material/RemoveDone';
 import { CellContext, createColumnHelper } from '@tanstack/table-core';
-import { Cftd, Cl, Cy, Ex, Ey, Gty, Ln, Op, Parameter, Prm, Sd, Sh, Shd, St, Sy, Wc, Wt } from '../../../domain/models/ParameterEntities';
-import { G, J, N, Pj, Qj, Rj, Rn, Rp, UnitEntity } from '../../../domain/models/UnitEntities';
+import { Cftd, Cl, Cy, Ex, Ey, Gty, Ln, Op, Parameter, Prm, Sd, Sh, Shd, St, Sy, Wc, Wt } from '../../../domain/models/parameters/ParameterEntities';
+import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { ajsTableColumnHeaderLang, paramDefinitionLang, tyDefinitionLang } from '../../../domain/services/i18n/nls';
 import { ParamSymbol, TySymbol, WeekSymbol } from '../../../domain/values/AjsType';
 import * as ajscolumn from '@resource/i18n/ajscolumn';
+import { G } from '../../../domain/models/units/G';
+import { J, Rj, Pj, Rp } from '../../../domain/models/units/J';
+import { N, Rn } from '../../../domain/models/units/N';
+import { Qj } from '../../../domain/models/units/Qj';
 
 type BoxType = Parameter | PrimitiveType;
 export type AccessorType = BoxType | BoxType[];
@@ -99,7 +103,7 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
         columnHelper.display({
             id: '#',
             header: '#',
-            cell: props => <span tabIndex={0}>{props.row.index + 1}</span>,
+            cell: props => <span id={props.row.original.id} tabIndex={0}>{props.row.index + 1}</span>,
             enableHiding: false,
             enableSorting: false,
             enableGlobalFilter: false,
@@ -117,7 +121,7 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
                     {
                         id: 'group1.col2',
                         header: ajsTableColumnHeader['group1.col2'],
-                        accessorFn: row => row.parent ? row.parent.absolutePath() : '/',
+                        accessorFn: row => row.parent ? row.parent.absolutePath : '/',
                     },
                     {
                         id: 'group1.col3',
@@ -162,7 +166,7 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
                     id: 'group2.col2',
                     header: ajsTableColumnHeader['group2.col2'],
                     accessorFn: row => {
-                        const ar = row.previous();
+                        const ar = row.previous;
                         return ar.map(v => v.f);
                     },
                     cell: props => props
@@ -173,7 +177,7 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
                     id: 'group2.col3',
                     header: ajsTableColumnHeader['group2.col3'],
                     accessorFn: row => {
-                        const ar = row.previous();
+                        const ar = row.previous;
                         return ar.map(v => v.relationType);
                     },
                     cell: props => props
@@ -229,7 +233,7 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
                 {
                     id: 'group3.col2',
                     header: ajsTableColumnHeader['group3.col2'],
-                    accessorFn: row => row.isRecovery(),
+                    accessorFn: row => row.isRecovery,
                     cell: param => {
                         const isRecovery = param.getValue<boolean | undefined>();
                         if (isRecovery === undefined) {
@@ -310,7 +314,7 @@ export const tableColumnDef = (language: string | undefined = 'en') => {
                     id: 'group6.group1',
                     header: ajsTableColumnHeader['group6.group1'],
                     columns: ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'].map((v, i) => {
-                        const id = (`group6.group1.col${i + 1}`) as keyof typeof ajscolumn.ajscolumn_en;
+                        const id = (`group6.group1.col${i + 1}`) as keyof typeof ajscolumn.en;
                         return {
                             id: id,
                             header: ajsTableColumnHeader[id],

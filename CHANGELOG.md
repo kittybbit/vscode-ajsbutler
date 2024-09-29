@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.6.0]
+
+- The job list is not masked while the DisplayColumnSelector is shown.
+- refactoring AjsTableViewer
+- refactoring events
+
 ## [1.5.4]
 
 - Refactoring.

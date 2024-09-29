@@ -1,19 +1,21 @@
-import React, { KeyboardEvent, useState } from 'react';
-import { flexRender, Table as ReactTable, Row } from '@tanstack/react-table';
+import React, { FC, KeyboardEvent, memo, useState } from 'react';
+import { flexRender, HeaderGroup, Row } from '@tanstack/react-table';
 import { ItemProps, TableVirtuoso } from 'react-virtuoso';
-import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme } from '@mui/material';
-import { TableHeader } from './TableHeader';
-import { UnitEntityDialog } from './UnitEntityDialog';
-import { UnitEntity } from '../../../domain/models/UnitEntities';
+import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, useTheme } from '@mui/material';
+import TableHeader from './TableHeader';
+import UnitEntityDialog from '../UnitEntityDialog';
+import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { MyAppResource } from '../MyContexts';
 
-const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: MyAppResource['scrollType'] }) => {
+type VirtualizedTableProps = {
+    rows: Row<UnitEntity>[],
+    headerGroups: HeaderGroup<UnitEntity>[],
+    scrollType: MyAppResource['scrollType'],
+};
+
+const VirtualizedTable: FC<VirtualizedTableProps> = ({ rows, headerGroups, scrollType }) => {
 
     console.log('render VirtualizedTable.');
-
-    const { table, scrollType } = props;
-    const rows = table.getRowModel().rows;
-    const headerGroups = table.getHeaderGroups();
 
     // control dialog
     const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
@@ -34,6 +36,7 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: My
             backgroundColor: (theme) => theme.palette.background.default,
         }
     };
+    const theme = useTheme();
 
     const tableComponents = {
         Scroller: scrollType === 'table'
@@ -80,41 +83,46 @@ const VirtualizedTable = (props: { table: ReactTable<UnitEntity>, scrollType: My
         }),
     };
 
-    return <>
-        <TableVirtuoso
-            style={
-                scrollType === 'table'
-                    ? {
-                        height: 'calc(100vh - 100px)',
-                        maxHeight: 'calc(100vh - 100px)',
-                    }
-                    : {
-                        height: 'auto',
-                        maxHeight: 'none',
-                        overflow: 'visible',
-                    }
-            }
-            useWindowScroll={scrollType === 'window'}
-            data={rows}
-            components={tableComponents}
-            fixedHeaderContent={
-                () => headerGroups
-                    .map(headerGroup =>
-                        <TableHeader key={headerGroup.id} headerGroup={headerGroup} />
-                    )
-            }
-            itemContent={
-                (index: number, data: Row<UnitEntity>) => {
-                    const row = data;
-                    return row.getVisibleCells().map(cell => {
-                        return <TableCell key={cell.id} sx={styleTableCell}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                    })
+    const toolbarHeight = theme.mixins.toolbar.minHeight;
+    return (
+        <>
+            <TableVirtuoso
+                style={
+                    scrollType === 'table'
+                        ? {
+                            width: `calc(100vw - 2em)`,
+                            height: `calc(100vh - ${toolbarHeight}px - 2em)`,
+                            maxHeight: `calc(100vh - ${toolbarHeight}px - 2em)`,
+                        }
+                        : {
+                            width: `calc(100vw - 2em)`,
+                            height: 'auto',
+                            maxHeight: 'none',
+                            overflow: 'visible',
+                        }
                 }
-            }
-        />
-        <UnitEntityDialog dialogData={dialogData} onClose={() => setDialogData(undefined)} />
-    </>
+                useWindowScroll={scrollType === 'window'}
+                data={rows}
+                components={tableComponents}
+                fixedHeaderContent={
+                    () => headerGroups
+                        .map(headerGroup =>
+                            <TableHeader key={headerGroup.id} headerGroup={headerGroup} />
+                        )
+                }
+                itemContent={
+                    (index: number, data: Row<UnitEntity>) => {
+                        const row = data;
+                        return row.getVisibleCells().map(cell => {
+                            return <TableCell key={cell.id} sx={styleTableCell}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                        })
+                    }
+                }
+            />
+            <UnitEntityDialog dialogData={dialogData} onClose={() => setDialogData(undefined)} />
+        </>
+    );
 };
-export default VirtualizedTable;
+export default memo(VirtualizedTable);

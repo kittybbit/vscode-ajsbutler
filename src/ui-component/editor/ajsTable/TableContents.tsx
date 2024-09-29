@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { CssBaseline, Stack, ThemeProvider, Typography, createTheme } from '@mui/material';
+import React, { Dispatch, memo, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Accordion, AccordionDetails, AccordionSummary, CssBaseline, Stack, ThemeProvider, Typography, createTheme } from '@mui/material';
 import { useReactTable } from '@tanstack/react-table';
 import { FilterMeta, Row, SortingState, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
 import { rankItem } from '@tanstack/match-sorter-utils';
@@ -9,8 +9,10 @@ import { AccessorType, tableColumnDef, tableDefaultColumnDef } from './tableColu
 import Header from './Header';
 import VirtualizedTable from './VirtualizedTable';
 import { Unit } from '../../../domain/values/Unit';
-import { UnitEntity, tyFactory } from '../../../domain/models/UnitEntities';
-import { Parameter } from '../../../domain/models/ParameterEntities';
+import { UnitEntity } from '../../../domain/models/units/UnitEntities';
+import { flattenChildren, tyFactory } from '../../../domain/utils/TyUtils';
+import { Parameter } from '../../../domain/models/parameters/ParameterEntities';
+import DisplayColumnSelector from './DisplayColumnSelector';
 
 const ajsGlobalFilterFn = (row: Row<UnitEntity>, columnId: string, value: string, addMeta: (meta: FilterMeta) => void) => {
 
@@ -45,19 +47,33 @@ const ajsGlobalFilterFn = (row: Row<UnitEntity>, columnId: string, value: string
     return itemRank.passed;
 };
 
+export type TableMenuStatusType = {
+    menuItem1: boolean,
+}
+export type TableMenuStateType = {
+    menuStatus: TableMenuStatusType,
+    setMenuStatus: Dispatch<SetStateAction<TableMenuStatusType>>
+}
+
 const TableContents = () => {
 
     console.log('render TableContents.');
 
     const { isDarkMode, lang, scrollType } = useMyAppContext();
 
+    const [menuStatus, setMenuStatus] = useState<TableMenuStatusType>({
+        menuItem1: false,
+    });
+
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
     const changeDodumentFn = (type: string, data: unknown) => {
         try {
             const newUnitEntities: UnitEntity[] = parse(data as string)
                 .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
-                .flat()
-                .map((unit: Unit) => tyFactory(unit));
+                .map((unit: Unit) => tyFactory(unit))
+                .map((unitEntity: UnitEntity) => flattenChildren([unitEntity]))
+                .flat();
+            console.log(newUnitEntities.length);
             setUnitEntities(() => newUnitEntities);
         } catch {
             setUnitEntities(() => []);
@@ -97,16 +113,47 @@ const TableContents = () => {
         }
     }), [isDarkMode]);
 
-    return <>
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Header table={table} scrollType={scrollType} />
-            <VirtualizedTable table={table} scrollType={scrollType} />
-            <Stack direction='row' justifyContent='flex-end' spacing={2}>
-                <Typography>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>
-            </Stack>
-        </ThemeProvider>
-        {DEVELOPMENT && <pre>{JSON.stringify(table.getState(), null, 2)}</pre>}
-    </>;
+    const [drawerWidth, setDrawerWidth] = useState<number | null>(0);
+
+    let tableState = undefined;
+    if (DEVELOPMENT) {
+        tableState = <Accordion>
+            <AccordionSummary>[DEV] TABLE STATE</AccordionSummary>
+            <AccordionDetails>
+                <Typography>
+                    {JSON.stringify(table.getState(), null, 2)}
+                </Typography>
+            </AccordionDetails>
+        </Accordion>;
+    }
+
+    const tableMenuState = { menuStatus: menuStatus, setMenuStatus: setMenuStatus };
+
+    return (
+        <>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Stack direction='row' spacing={0}>
+                    {menuStatus.menuItem1 && <DisplayColumnSelector setDrawerWidth={setDrawerWidth} table={table} tableMenuState={tableMenuState} />}
+                    <Stack
+                        direction='column'
+                        spacing={0}
+                        sx={{
+                            marginLeft: `${drawerWidth}px`,
+                        }}
+                    >
+                        <Header setDrawerWidth={setDrawerWidth} table={table} tableMenuState={tableMenuState} />
+                        <VirtualizedTable
+                            rows={table.getRowModel().rows}
+                            headerGroups={table.getHeaderGroups()}
+                            scrollType={scrollType}
+                        />
+                        <Typography align='right'>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>
+                    </Stack>
+                </Stack>
+            </ThemeProvider>
+            {tableState}
+        </>
+    );
 };
-export default TableContents;
+export default memo(TableContents);

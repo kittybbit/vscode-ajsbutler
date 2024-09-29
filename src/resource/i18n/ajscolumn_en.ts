@@ -1,4 +1,4 @@
-export const ajscolumn_en = {
+export const en = {
     'group1': 'Unit definition information',
     'group1.col1': 'Unit name',
     'group1.col2': 'Complete name of upper unit',

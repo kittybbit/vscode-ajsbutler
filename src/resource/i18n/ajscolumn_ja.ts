@@ -1,4 +1,4 @@
-export const ajscolumn_ja = {
+export const ja = {
     'group1': 'ユニット定義情報',
     'group1.col1': 'ユニット名',
     'group1.col2': '上位ユニット完全名',
