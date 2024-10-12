@@ -1,14 +1,6 @@
 import * as vscode from 'vscode';
-import * as os from 'os';
 import { initReactPanel } from './ReactPanel';
-import { parseAjs } from '../../domain/services/parser/AjsParser';
-import { stringify } from 'flatted';
-import { MyAppResource } from '../../ui-component/editor/MyContexts';
-
-type EventType = ResourceEventType | ReadyEventType | SaveEventType;
-type ResourceEventType = { type: string, data: MyAppResource };
-type ReadyEventType = { type: string };
-type SaveEventType = { type: string, data: string };
+import { debounceCreateDataFn, EventType, readyFn, ResourceEventType, resourceFn, save, SaveEventType } from '../../domain/services/events/Events';
 
 /**
  * Provider for JP1/AJS table viewr.
@@ -40,95 +32,54 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
         /* token: vscode.CancellationToken */
     ): Promise<void> {
 
-        const context = this.context;
-
         const refreshWebview = () => {
-            webviewPanel = initReactPanel(webviewPanel, context, './out/index.js');
+            webviewPanel = initReactPanel(webviewPanel, this.context, './out/ajsTable/index.js');
         }
 
-        const createData = () => {
-            const result = parseAjs(document.getText());
-            if (result.errors.length > 0) {
-                vscode.window.showErrorMessage('Please check syntax.', { detail: `${result.errors.length} antlr error occurs.`, modal: true });
-                return [];
-            }
-            return stringify(result.units.filter(unit => unit.parent === undefined))
-        };
-        const debounceCreateData = (delay: number = 0) => {
-            let id: NodeJS.Timeout;
-            return (e: vscode.TextDocumentChangeEvent) => {
-                if (e.document.uri.toString() === document.uri.toString()) {
-                    clearInterval(id);
-                    id = setTimeout(() => {
-                        console.log('invoke change text document.');
-                        webviewPanel.webview.postMessage({
-                            type: 'changeDocument',
-                            data: createData(),
-                        });
-                    }, delay);
-                }
-            };
-        };
+        const debounceCreateData = debounceCreateDataFn(document, webviewPanel, 500);
 
         // change event listener
-        const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(debounceCreateData(500));
+        const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
+            if (!webviewPanel.visible) {
+                console.log('invisible AjsTableViewerProvider');
+                return;
+            }
+            debounceCreateData(e);
+        });
         const changeConfigurationSubscription = vscode.workspace.onDidChangeConfiguration(e => {
             if (e.affectsConfiguration('workbench.colorTheme')) {
                 refreshWebview();
             }
         })
-        webviewPanel.onDidDispose(() => {
-            changeDocumentSubscription.dispose();
-            changeConfigurationSubscription.dispose();
-        });
 
         // message receiver
-        const resourceFn = (e: ResourceEventType) => {
-            console.log('invoke resource.');
-            const data: MyAppResource = {
-                ...e.data as MyAppResource,
-                isDarkMode: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark,
-                lang: vscode.env.language,
-                os: os.platform().toLocaleLowerCase(),
-            };
-            webviewPanel.webview.postMessage({
-                type: 'resource',
-                data: data,
-            });
-        };
-        const readyFn = () => {
-            console.log('invoke ready.');
-            webviewPanel.webview.postMessage({
-                type: 'changeDocument',
-                data: createData(),
-            });
-        };
-        const saveFn = (e: SaveEventType) => {
-            console.log('invoke save.');
-            vscode.window.showSaveDialog().then(uri => {
-                if (uri) {
-                    vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(e.data as string));
-                    vscode.window.showInformationMessage('The file has been saved.', { detail: uri.toString(), modal: true });
-                }
-            });
-        };
+        const ready = readyFn(document, webviewPanel);
+        const resource = resourceFn(webviewPanel);
+
         const onDidRecieveMessage = (e: EventType) => {
             switch (e.type) {
                 case 'resource': {
-                    resourceFn(e as ResourceEventType);
+                    resource(e as ResourceEventType);
                     break;
                 }
                 case 'ready': {// webview is ready.
-                    readyFn();
+                    ready();
                     break;
                 }
                 case 'save': {//save contents
-                    saveFn(e as SaveEventType);
+                    save(e as SaveEventType);
                     break;
                 }
             }
         };
-        webviewPanel.webview.onDidReceiveMessage(onDidRecieveMessage);
+        const recieveMessageSubscription = webviewPanel.webview.onDidReceiveMessage(onDidRecieveMessage);
+
+        webviewPanel.onDidDispose(() => {
+            changeDocumentSubscription.dispose();
+            changeConfigurationSubscription.dispose();
+            recieveMessageSubscription.dispose();
+            console.log('dispose AjsTableViewerProvider');
+        });
 
         // initial display
         refreshWebview();

@@ -1,18 +1,18 @@
-import React, { useRef, useState } from 'react'
+import React, { FC, memo, useRef, useState } from 'react'
 import { Alert, Box, Dialog, DialogContent, DialogTitle, IconButton, Snackbar, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { ContentCopy } from '@mui/icons-material';
-import { UnitEntity } from '../../../domain/models/UnitEntities';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import { UnitEntity } from '../../domain/models/units/UnitEntities';
 
-export const UnitEntityDialog = (props: {
+type UnitEntityDialogProps = {
     dialogData: UnitEntity | undefined,
     onClose: VoidFunction,
-}) => {
+};
+const UnitEntityDialog: FC<UnitEntityDialogProps> = ({ dialogData, onClose }) => {
 
     console.log('render UnitEntityDialog.');
 
-    const { dialogData, onClose } = props;
     const handleClose = () => {
         onClose();
     };
@@ -45,7 +45,7 @@ export const UnitEntityDialog = (props: {
                     <CloseIcon />
                 </IconButton>
             </Stack>
-            <Typography variant='caption'>{dialogData ? dialogData.absolutePath() : ''}</Typography>
+            <Typography variant='caption'>{dialogData ? dialogData.absolutePath : ''}</Typography>
         </DialogTitle>
         <Tab1 dialogData={dialogData} tabIndex={tabIndex} index={0} />
         <Tab2 dialogData={dialogData} tabIndex={tabIndex} index={1} />
@@ -124,26 +124,30 @@ const Tab2 = (params: TabPanelProps) => {
             <TextField
                 label='ajsshow'
                 id='ajsshow'
-                InputProps={{
-                    endAdornment: <IconButton onClick={handleCopy}><ContentCopy fontSize='small' /></IconButton>,
+                slotProps={{
+                    input: {
+                        endAdornment: <IconButton onClick={handleCopy}><ContentCopy fontSize='small' /></IconButton>,
+                    }
                 }}
                 multiline={true}
                 variant='outlined'
                 fullWidth={true}
                 sx={{ marginBottom: '1em' }}
-                value={`ajsshow -R ${dialogData?.absolutePath()}`}
+                value={`ajsshow -R ${dialogData?.absolutePath}`}
             />
             <TextField
                 label='ajsprint'
                 id='ajsprint'
-                InputProps={{
-                    endAdornment: <IconButton onClick={handleCopy}><ContentCopy fontSize='small' /></IconButton>,
+                slotProps={{
+                    input: {
+                        endAdornment: <IconButton onClick={handleCopy}><ContentCopy fontSize='small' /></IconButton>,
+                    }
                 }}
                 multiline={true}
                 variant='outlined'
                 fullWidth={true}
                 sx={{ marginBottom: '1em' }}
-                value={`ajsprint -a -R ${dialogData?.absolutePath()}`}
+                value={`ajsprint -a -R ${dialogData?.absolutePath}`}
             />
         </DialogContent>
         <Snackbar
@@ -160,3 +164,5 @@ const Tab2 = (params: TabPanelProps) => {
         </Snackbar>
     </Box>
 };
+
+export default memo(UnitEntityDialog);

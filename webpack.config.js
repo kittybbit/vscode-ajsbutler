@@ -13,7 +13,7 @@ const editorConfig = (env, argv) => {
         target: 'web',
         devtool: PRODUCTION ? false : 'inline-source-map',
         entry: {
-            'index': './src/ui-component/editor/index.tsx',
+            'ajsTable/index': './src/ui-component/editor/ajsTable/index.tsx',
         },
         output: {
             path: path.join(__dirname, 'out'),
@@ -25,6 +25,12 @@ const editorConfig = (env, argv) => {
             alias: {
                 '@resource': path.join(__dirname, "src/resource/"),
             }
+        },
+        externals: {
+            vscode: 'commonjs vscode',
+        },
+        cache: {
+            type: 'filesystem',
         },
         stats: {
             orphanModules: true,
@@ -48,6 +54,13 @@ const editorConfig = (env, argv) => {
                         },
                     },
                 },
+                {
+                    test: /\.css$/,
+                    use: [
+                        'style-loader',
+                        'css-loader'
+                    ],
+                },
             ],
         },
         optimization: {
@@ -56,6 +69,7 @@ const editorConfig = (env, argv) => {
             minimize: true,
             minimizer: [
                 new TerserPlugin({
+                    parallel: true,
                     terserOptions: {
                         warnings: DEVELOPMENT,
                         mangle: PRODUCTION,
@@ -109,6 +123,10 @@ const nodeConfig = (env, argv) => {
         },
         externals: {
             vscode: 'commonjs vscode',
+            os: 'commonjs os',
+            'node:crypto': 'commonjs crypto',
+            assert: 'commonjs assert',
+            util: 'commonjs util',
         },
         cache: {
             type: 'filesystem',
@@ -137,10 +155,12 @@ const nodeConfig = (env, argv) => {
             ],
         },
         optimization: {
+            innerGraph: true,
             usedExports: true,
             minimize: true,
             minimizer: [
                 new TerserPlugin({
+                    parallel: true,
                     terserOptions: {
                         warnings: DEVELOPMENT,
                         mangle: PRODUCTION,
@@ -188,6 +208,9 @@ const webconfig = (env, argv) => {
                     os: require.resolve('os-browserify/browser'),
                     util: require.resolve('util'),
                 }
+            },
+            externals: {
+                vscode: 'commonjs vscode',
             },
             plugins: [
                 nodeCfg.plugins[0],

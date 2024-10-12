@@ -1,4 +1,4 @@
-export const ty_ja = {
+export const ja = {
     'g': {
         'name': '{ジョブ|プランニング}グループ',
         'gty': {

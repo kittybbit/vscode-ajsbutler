@@ -35,7 +35,7 @@ function _getHtmlForWebview(
         http-equiv='Content-Security-Policy'
         content="default-src 'none';
                 img-src ${panel.webview.cspSource};
-                script-src ${panel.webview.cspSource} 'nonce-${nonce}';
+                script-src ${panel.webview.cspSource} 'nonce-${nonce}' 'wasm-unsafe-eval';
                 style-src ${panel.webview.cspSource} 'unsafe-inline';
                 child-src ${panel.webview.cspSource};
                 ">

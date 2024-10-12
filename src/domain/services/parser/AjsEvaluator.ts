@@ -5,7 +5,7 @@ import { Unit } from '../../values/Unit';
 export class Ajs3v12Evaluator implements AjsParserListener {
 
     /** parsed definition */
-    #units: Array<Unit> = [];
+    #allUnits: Array<Unit> = [];
 
     /** parsing context */
     #unitStack: Array<Unit> = [];
@@ -13,8 +13,15 @@ export class Ajs3v12Evaluator implements AjsParserListener {
     /** current unit object */
     #currentUnit?: Unit;
 
-    get units() {
-        return this.#units;
+    get allUnits() {
+        return this.#allUnits;
+    }
+
+    get rootUnits() {
+        if (this.#allUnits.length === 0) {
+            return [];
+        }
+        return this.#allUnits.filter(unit => unit.parent === undefined);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,7 +35,7 @@ export class Ajs3v12Evaluator implements AjsParserListener {
         this.#currentUnit?.children.push(newUnit);
         this.#currentUnit = newUnit;
         this.#unitStack.push(newUnit);
-        this.#units.push(newUnit);
+        this.#allUnits.push(newUnit);
     }
 
     enterUnitParameter = (ctx: UnitParameterContext) => {

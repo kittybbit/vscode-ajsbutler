@@ -1,6 +1,6 @@
 /** JP1/AJS3 unit definition parameter entities */
-import { ParamSymbol, isTySymbol, isWeekSymbol } from '../values/AjsType';
-import { UnitEntity } from './UnitEntities';
+import { ParamSymbol, isTySymbol, isWeekSymbol } from '../../values/AjsType';
+import { UnitEntity } from '../units/UnitEntities';
 
 export type ParamBase = {
     'unit': UnitEntity;

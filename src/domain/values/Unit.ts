@@ -51,24 +51,21 @@ export class Unit {
     }
 
     /** Create a JavaScript object of UNIT from its JSON. */
-    static createFromJSON(rootUnitOfJSON: Unit): Unit[] {
+    static createFromJSON(rootUnitOfJSON: Unit): Unit {
         if (rootUnitOfJSON.parent) {
             throw new Error(`This unit is not root unit. (${rootUnitOfJSON.unitAttribute})`);
         }
         const rootUnit = Object.assign(new Unit(rootUnitOfJSON.unitAttribute), rootUnitOfJSON);
-        const units: Unit[] = [];
-        units.push(rootUnit);
-        rootUnit.children = rootUnitOfJSON.children.map(child => Unit.#createFromJSON(child, rootUnit, units));
-        return units;
+        rootUnit.children = rootUnitOfJSON.children.map(child => Unit.#createFromJSON(child, rootUnit));
+        return rootUnit;
     }
 
-    static #createFromJSON(unitOfJSON: Unit, parent: Unit, units: Unit[]): Unit {
+    static #createFromJSON(unitOfJSON: Unit, parent: Unit): Unit {
         const childUnit = Object.assign(new Unit(unitOfJSON.unitAttribute), unitOfJSON);
-        units.push(childUnit);
         if (parent) {
             childUnit.parent = parent;
         }
-        childUnit.children = unitOfJSON.children.map(v => Unit.#createFromJSON(v, childUnit, units));
+        childUnit.children = unitOfJSON.children.map(v => Unit.#createFromJSON(v, childUnit));
         return childUnit;
     }
 }

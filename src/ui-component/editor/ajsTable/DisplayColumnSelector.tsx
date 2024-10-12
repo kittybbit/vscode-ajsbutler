@@ -1,19 +1,30 @@
-import React, { Fragment } from 'react';
-import { UnitEntity } from '../../../domain/models/UnitEntities';
+import React, { Dispatch, FC, Fragment, memo, SetStateAction, useEffect, useRef } from 'react';
+import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { Column, Table as ReactTable } from '@tanstack/table-core';
-import { Accordion, AccordionDetails, AccordionSummary, Divider, Drawer, FormControlLabel, IconButton, List, ListItem, Stack, Switch, Tooltip, Typography } from '@mui/material';
-import { ToggleOff, ToggleOn, ExpandMore } from '@mui/icons-material';
+import { Accordion, AccordionDetails, AccordionSummary, Divider, Drawer, FormControlLabel, IconButton, List, ListItem, Stack, Switch, Toolbar, Tooltip, Typography, useTheme } from '@mui/material';
+import ToggleOff from '@mui/icons-material/ToggleOff';
+import ToggleOn from '@mui/icons-material/ToggleOn';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
-import { MenuType } from './Header';
+import { TableMenuStateType } from './TableContents';
 
-export default function DisplayColumnSelector(props: { table: ReactTable<UnitEntity> } & MenuType) {
+type DisplayColumnSelectorProps = {
+    table: ReactTable<UnitEntity>,
+    tableMenuState: TableMenuStateType,
+    setDrawerWidth: Dispatch<SetStateAction<number | null>>,
+};
+
+const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({ table, tableMenuState, setDrawerWidth }) => {
 
     console.log('render DisplayColumnSelector.');
 
     const { lang } = useMyAppContext();
-    const { menuStatus, setMenuStatus } = props;
-    const { table } = props;
+    const { menuStatus, setMenuStatus } = tableMenuState;
+
+    const theme = useTheme();
 
     const toggleDrawer = (open: boolean) =>
         (e: React.KeyboardEvent | React.MouseEvent) => {
@@ -23,6 +34,7 @@ export default function DisplayColumnSelector(props: { table: ReactTable<UnitEnt
             ) {
                 return;
             }
+            setDrawerWidth(() => 0);
             setMenuStatus((prev) => ({ ...prev, menuItem1: open }));
         };
 
@@ -40,92 +52,118 @@ export default function DisplayColumnSelector(props: { table: ReactTable<UnitEnt
             .reduce((accumurator, currentValue) => accumurator || currentValue.getIsVisible(), false);
     };
 
-    return <>
-        <Drawer
-            anchor='left'
-            open={menuStatus ? menuStatus.menuItem1 : false}
-            onClose={toggleDrawer(false)}
-        >
-            <Stack direction='row' spacing={2} justifyContent='center'>
-                <Tooltip arrow title={localeMap('columnSelectSidebar.invisibleAll', lang)}>
-                    <IconButton
-                        aria-label={localeMap('columnSelectSidebar.invisibleAll', lang)}
-                        size='small'
-                        onClick={() => {
-                            table.toggleAllColumnsVisible(false);
-                        }}
-                    >
-                        <ToggleOff fontSize='large' color='disabled' />
+    const drawerRef = useRef<HTMLDivElement>(null);
+    useEffect(
+        () => setDrawerWidth(() => drawerRef.current ? drawerRef.current.offsetWidth : 0)
+        , []
+    );
+
+    return (
+        <>
+            <Drawer
+                anchor='left'
+                variant="persistent"
+                open={menuStatus ? menuStatus.menuItem1 : false}
+                onClose={toggleDrawer(false)}
+                sx={{
+                    flexShrink: 0,
+                }}
+            >
+                <Toolbar
+                    ref={drawerRef}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: theme.spacing(0, 1),
+                        ...theme.mixins.toolbar,
+                        justifyContent: 'flex-end',
+                    }}>
+                    <IconButton onClick={toggleDrawer(false)}>
+                        {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                     </IconButton>
-                </Tooltip>
-                <Tooltip arrow title={localeMap('columnSelectSidebar.visibleAll', lang)}>
-                    <IconButton
-                        aria-label={localeMap('columnSelectSidebar.visibleAll', lang)}
-                        size='small'
-                        onClick={() => {
-                            table.toggleAllColumnsVisible(true);
-                        }}
-                    >
-                        <ToggleOn fontSize='large' color='primary' />
-                    </IconButton>
-                </Tooltip>
-            </Stack>
-            {table.getAllColumns()
-                .filter(column1 => column1.columnDef.enableHiding)
-                .map(column1 => {
-                    return <Accordion key={column1.id}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMore />}
+                </Toolbar>
+                <Stack direction='row' spacing={2} justifyContent='center'>
+                    <Tooltip arrow title={localeMap('columnSelectSidebar.invisibleAll', lang)}>
+                        <IconButton
+                            aria-label={localeMap('columnSelectSidebar.invisibleAll', lang)}
+                            size='small'
+                            onClick={() => {
+                                table.toggleAllColumnsVisible(false);
+                            }}
                         >
-                            <Switch
-                                size='small'
-                                onClick={handleClick}
-                                onChange={handleChangeHeader(column1)}
-                                checked={handlCheckedHeader(column1)}
-                            />
-                            <Divider orientation='vertical' flexItem sx={{
-                                marginLeft: '0.5em',
-                                marginRight: '0.5em',
-                            }} />
-                            <Typography>{column1.columnDef.header as string}</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <List sx={{ marginLeft: '0.5em' }}>
-                                {
-                                    column1.columns
-                                        .filter(column2 => column2.columnDef.enableHiding)
-                                        .map((column2, index) => {
-                                            const header = column2.getLeafColumns()
-                                                .filter(column3 => column3.columnDef.enableHiding)
-                                                .map(column3 => <ListItem key={column3.id} dense>
-                                                    <FormControlLabel
-                                                        control={<Switch
-                                                            size='small'
-                                                            onChange={handleChangeHeader(column3)}
-                                                            checked={handlCheckedHeader(column3)}
-                                                        />}
-                                                        label={column3.columnDef.header as string}
-                                                        sx={{
-                                                            width: '100%'
-                                                        }}
-                                                    />
-                                                </ListItem>);
-                                            if (column2.columns.length > 1) {
-                                                return <Fragment key={column2.id}>
-                                                    <Divider sx={{ marginTop: index > 0 ? '0.5em' : null }}>{column2.columnDef.header as string}</Divider>
-                                                    <List sx={{ marginLeft: '0.5em' }}>
-                                                        {header}
-                                                    </List>
-                                                </Fragment>
-                                            }
-                                            return header;
-                                        })
-                                }
-                            </List>
-                        </AccordionDetails>
-                    </Accordion>
-                })
-            }
-        </Drawer>
-    </>;
+                            <ToggleOff fontSize='large' color='disabled' />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip arrow title={localeMap('columnSelectSidebar.visibleAll', lang)}>
+                        <IconButton
+                            aria-label={localeMap('columnSelectSidebar.visibleAll', lang)}
+                            size='small'
+                            onClick={() => {
+                                table.toggleAllColumnsVisible(true);
+                            }}
+                        >
+                            <ToggleOn fontSize='large' color='primary' />
+                        </IconButton>
+                    </Tooltip>
+                </Stack>
+                {table.getAllColumns()
+                    .filter(column1 => column1.columnDef.enableHiding)
+                    .map(column1 => {
+                        return <Accordion key={column1.id}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMore />}
+                            >
+                                <Switch
+                                    size='small'
+                                    onClick={handleClick}
+                                    onChange={handleChangeHeader(column1)}
+                                    checked={handlCheckedHeader(column1)}
+                                />
+                                <Divider orientation='vertical' flexItem sx={{
+                                    marginLeft: '0.5em',
+                                    marginRight: '0.5em',
+                                }} />
+                                <Typography>{column1.columnDef.header as string}</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <List sx={{ marginLeft: '0.5em' }}>
+                                    {
+                                        column1.columns
+                                            .filter(column2 => column2.columnDef.enableHiding)
+                                            .map((column2, index) => {
+                                                const header = column2.getLeafColumns()
+                                                    .filter(column3 => column3.columnDef.enableHiding)
+                                                    .map(column3 => <ListItem key={column3.id} dense>
+                                                        <FormControlLabel
+                                                            control={<Switch
+                                                                size='small'
+                                                                onChange={handleChangeHeader(column3)}
+                                                                checked={handlCheckedHeader(column3)}
+                                                            />}
+                                                            label={column3.columnDef.header as string}
+                                                            sx={{
+                                                                width: '100%'
+                                                            }}
+                                                        />
+                                                    </ListItem>);
+                                                if (column2.columns.length > 1) {
+                                                    return <Fragment key={column2.id}>
+                                                        <Divider sx={{ marginTop: index > 0 ? '0.5em' : null }}>{column2.columnDef.header as string}</Divider>
+                                                        <List sx={{ marginLeft: '0.5em' }}>
+                                                            {header}
+                                                        </List>
+                                                    </Fragment>
+                                                }
+                                                return header;
+                                            })
+                                    }
+                                </List>
+                            </AccordionDetails>
+                        </Accordion>
+                    })
+                }
+            </Drawer>
+        </>
+    );
 }
+export default memo(DisplayColumnSelector);
