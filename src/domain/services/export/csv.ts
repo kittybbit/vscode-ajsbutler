@@ -1,7 +1,7 @@
 import { Table as ReactTable } from '@tanstack/react-table';
 import { UnitEntity } from '../../models/units/UnitEntities';
 import { Parameter } from '../../models/parameters/ParameterEntities';
-import { AccessorType } from '../../../ui-component/editor/ajsTable/tableColumnDef';
+import { AccessorType } from '../../../ui-component/editor/ajsTable/columnDefs/common';
 
 const createHeader = (table: ReactTable<UnitEntity>) => table
     .getHeaderGroups()

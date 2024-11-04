@@ -44,7 +44,7 @@ const SearchBox: FC<SearchBoxProps> = ({ globalFilter, setGlobalFilter }) => {
             <TextField
                 id='search'
                 placeholder='Search...'
-                helperText={useMemo(() => localeMap('search.helperText', lang), [lang])}
+                helperText={useMemo(() => localeMap('table.search.helperText', lang), [lang])}
                 slotProps={{
                     input: {
                         startAdornment: <SearchIcon sx={{ marginRight: '0.5em' }} />,
@@ -57,7 +57,6 @@ const SearchBox: FC<SearchBoxProps> = ({ globalFilter, setGlobalFilter }) => {
                 sx={
                     {
                         width: '20em',
-                        marginRight: '0.5em'
                     }
                 }
                 inputRef={ref}

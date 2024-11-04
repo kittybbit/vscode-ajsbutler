@@ -1,8 +1,6 @@
-import React, { FC, memo, useRef, useState } from 'react'
-import { Alert, Box, Dialog, DialogContent, DialogTitle, IconButton, Snackbar, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
+import React, { FC, memo, MouseEvent, useState } from 'react'
+import { Dialog, DialogContent, DialogTitle, IconButton, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import ContentCopy from '@mui/icons-material/ContentCopy';
 import { UnitEntity } from '../../domain/models/units/UnitEntities';
 
 type UnitEntityDialogProps = {
@@ -18,9 +16,6 @@ const UnitEntityDialog: FC<UnitEntityDialogProps> = ({ dialogData, onClose }) =>
     };
 
     const [tabIndex, setTabIndex] = useState(0);
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setTabIndex(() => newValue);
-    };
 
     return <Dialog
         scroll='paper'
@@ -32,10 +27,10 @@ const UnitEntityDialog: FC<UnitEntityDialogProps> = ({ dialogData, onClose }) =>
             <Stack direction='row' justifyContent='space-between'>
                 <Tabs
                     value={tabIndex}
-                    onChange={handleChange}
+                // onChange={handleChange}
                 >
-                    <Tab label='Raw data' />
-                    <Tab label='Command' />
+                    <Tab label='Raw data' onClick={() => setTabIndex(() => 0)} />
+                    <Tab label='Command' onClick={() => setTabIndex(() => 1)} />
                     {/* <Tab label='API' /> */}
                 </Tabs>
                 <IconButton
@@ -47,39 +42,30 @@ const UnitEntityDialog: FC<UnitEntityDialogProps> = ({ dialogData, onClose }) =>
             </Stack>
             <Typography variant='caption'>{dialogData ? dialogData.absolutePath : ''}</Typography>
         </DialogTitle>
-        <Tab1 dialogData={dialogData} tabIndex={tabIndex} index={0} />
-        <Tab2 dialogData={dialogData} tabIndex={tabIndex} index={1} />
+        <Tab1 dialogData={dialogData} show={tabIndex === 0} />
+        <Tab2 dialogData={dialogData} show={tabIndex === 1} />
     </Dialog>;
 }
 
 type TabPanelProps = {
     dialogData: UnitEntity | undefined,
-    tabIndex: number,
-    index: number
+    show: boolean,
 };
 
 const Tab1 = (params: TabPanelProps) => {
 
     console.log('render Tab1.');
 
-    const { dialogData, tabIndex, index } = params;
-
-    const [open, setOpen] = useState(false);
-    const ref = useRef<HTMLDivElement>();
-    const handleCopy = () => {
-        ref.current?.textContent && navigator.clipboard.writeText(ref.current.textContent);
-        setOpen(() => true);
+    const { dialogData, show } = params;
+    const [tooltipMsg, setTooltipMsg] = useState<string>('');
+    const handleCopy = (event: MouseEvent<HTMLDivElement>) => {
+        event.currentTarget.textContent && navigator.clipboard.writeText(event.currentTarget.textContent);
+        setTooltipMsg(() => 'Copied');
     };
+    const handleMouseEnter = () => setTooltipMsg(() => 'Click to copy');
 
-    return <Box key={index} sx={{ display: index === tabIndex ? 'block' : 'none' }}>
-        <Stack direction='row' justifyContent='flex-end' sx={{ marginLeft: '2em', marginRight: '2em' }}>
-            <Tooltip title='Copy the contents'>
-                <IconButton aria-label='Copy the contents to clipbord' size='small' onClick={handleCopy}>
-                    <ContentCopyIcon fontSize='inherit' />
-                </IconButton>
-            </Tooltip>
-        </Stack>
-        <DialogContent dividers={true} ref={ref}>
+    return <DialogContent key={dialogData?.id} sx={{ display: show ? 'block' : 'none' }} dividers>
+        <Tooltip placement='top' title={tooltipMsg}>
             <TextField
                 id='rawdata'
                 multiline={true}
@@ -90,79 +76,54 @@ const Tab1 = (params: TabPanelProps) => {
                         .map((p) => `${p.key}=${p.value}`)
                         .join('\n')
                 }
+                onClick={handleCopy}
+                onMouseEnter={handleMouseEnter}
             />
-        </DialogContent>
-        <Snackbar
-            sx={{ position: 'absolute' }}
-            open={open}
-            autoHideDuration={2500}
-            onClose={() => setOpen(false)}
-            anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-            }}
-        >
-            <Alert severity='info'>Copied</Alert>
-        </Snackbar>
-    </Box>;
+        </Tooltip>
+    </DialogContent>;
 };
 
 const Tab2 = (params: TabPanelProps) => {
 
     console.log('render Tab2.');
 
-    const { dialogData, tabIndex, index } = params;
+    const { dialogData, show } = params;
 
-    const [open, setOpen] = useState(false);
-    const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.currentTarget.parentNode?.textContent && navigator.clipboard.writeText(e.currentTarget.parentNode?.textContent);
-        setOpen(() => true);
+    const [tooltipMsg, setTooltipMsg] = useState<string>('');
+    const handleCopy = (event: MouseEvent<HTMLDivElement>) => {
+        event.currentTarget.textContent && navigator.clipboard.writeText(event.currentTarget.textContent);
+        setTooltipMsg(() => 'Copied');
     };
+    const handleMouseEnter = () => setTooltipMsg(() => 'Click to copy');
 
-    return <Box key={index} sx={{ display: index === tabIndex ? 'block' : 'none' }}>
-        <DialogContent dividers={true}>
+    return <DialogContent key={dialogData?.id} sx={{ display: show ? 'block' : 'none' }} dividers>
+        <Tooltip placement='top' title={tooltipMsg}>
             <TextField
                 label='ajsshow'
                 id='ajsshow'
-                slotProps={{
-                    input: {
-                        endAdornment: <IconButton onClick={handleCopy}><ContentCopy fontSize='small' /></IconButton>,
-                    }
-                }}
                 multiline={true}
                 variant='outlined'
                 fullWidth={true}
                 sx={{ marginBottom: '1em' }}
                 value={`ajsshow -R ${dialogData?.absolutePath}`}
+                onClick={handleCopy}
+                onMouseEnter={handleMouseEnter}
             />
+        </Tooltip>
+        <Tooltip placement='top' title={tooltipMsg}>
             <TextField
                 label='ajsprint'
                 id='ajsprint'
-                slotProps={{
-                    input: {
-                        endAdornment: <IconButton onClick={handleCopy}><ContentCopy fontSize='small' /></IconButton>,
-                    }
-                }}
                 multiline={true}
                 variant='outlined'
                 fullWidth={true}
                 sx={{ marginBottom: '1em' }}
                 value={`ajsprint -a -R ${dialogData?.absolutePath}`}
+                onClick={handleCopy}
+                onMouseEnter={handleMouseEnter}
             />
-        </DialogContent>
-        <Snackbar
-            sx={{ position: 'absolute' }}
-            open={open}
-            autoHideDuration={2500}
-            onClose={() => setOpen(false)}
-            anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-            }}
-        >
-            <Alert severity='info'>Copied</Alert>
-        </Snackbar>
-    </Box>
+        </Tooltip>
+    </DialogContent>;
 };
 
 export default memo(UnitEntityDialog);

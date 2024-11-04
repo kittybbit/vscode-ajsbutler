@@ -1,15 +1,15 @@
-import React, { Dispatch, FC, memo, ReactElement, SetStateAction, useCallback, useState } from 'react';
+import React, { FC, memo, ReactElement, useCallback, useState } from 'react';
 import { Alert, AppBar, IconButton, Slide, Snackbar, Stack, Toolbar, Tooltip, useScrollTrigger } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SaveIcon from '@mui/icons-material/Save';
-import ViewColumn from '@mui/icons-material/ViewColumn';
+import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import Loop from '@mui/icons-material/Loop';
 import { Table } from '@tanstack/table-core';
 import TableMenu from './TableMenu';
 import SearchBox from './SearchBox';
 import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { toCsv } from '../../../domain/services/export/csv';
-import { TableMenuStateType } from './TableContents';
+import { DrawerWidthStateType, TableMenuStateType } from './TableContents';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
 
@@ -17,14 +17,16 @@ import { localeMap } from '../../../domain/services/i18n/nls';
 type HeaderProps = {
     table: Table<UnitEntity>,
     tableMenuState: TableMenuStateType,
-    setDrawerWidth: Dispatch<SetStateAction<number | null>>,
+    drawerWidthState: DrawerWidthStateType,
 };
 
-const Header: FC<HeaderProps> = ({ table, tableMenuState, setDrawerWidth }) => {
+const Header: FC<HeaderProps> = ({ table, tableMenuState, drawerWidthState }) => {
 
     console.log('render Header.');
 
     const { lang, scrollType, updateMyAppResource } = useMyAppContext();
+    const { setMenuStatus } = tableMenuState;
+    const { setDrawerWidth } = drawerWidthState;
 
     const [open, setOpen] = useState(false);
 
@@ -55,29 +57,32 @@ const Header: FC<HeaderProps> = ({ table, tableMenuState, setDrawerWidth }) => {
         <>
             <HideOnScroll>
                 <AppBar position='sticky'>
-                    <Toolbar>
+                    <Toolbar
+                        sx={{ gap: 1 }}
+                    >
                         <TableMenu
-                            {...tableMenuState}
+                            tableMenuState={tableMenuState}
+                            drawerWidthState={drawerWidthState}
                         />
                         <SearchBox
                             globalFilter={table.getState().globalFilter}
                             setGlobalFilter={table.setGlobalFilter}
                         />
-                        <Tooltip title={localeMap('menu.menuItem1', lang)}>
+                        <Tooltip title={localeMap('table.menu.menuItem1', lang)}>
                             <IconButton
                                 size='small'
                                 aria-label='toggleMenu1'
                                 onClick={
                                     () => {
-                                        tableMenuState.setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
+                                        setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
                                         setDrawerWidth((prev) => prev !== 0 ? 0 : prev);
                                     }
                                 }
                             >
-                                <ViewColumn fontSize='inherit' />
+                                <DisplaySettingsIcon fontSize='inherit' />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={localeMap(scrollType === 'table' ? 'menu.menuItem2.window' : 'menu.menuItem2.table', lang)}>
+                        <Tooltip title={localeMap(scrollType === 'table' ? 'table.menu.menuItem2.window' : 'table.menu.menuItem2.table', lang)}>
                             <IconButton
                                 size='small'
                                 aria-label='toggleMenu2'

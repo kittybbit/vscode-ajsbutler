@@ -11,7 +11,6 @@ const styleTableCell: SxProps<Theme> = {
         position: 'sticky',
         left: 0,
         zIndex: (theme) => theme.zIndex.appBar,
-        backgroundColor: (theme) => theme.palette.background.default,
     },
 };
 
