@@ -61,10 +61,10 @@ export const tableColumnDef = (language: string | undefined = 'en', setDialogDat
             header: '#',
             cell: props => <>
                 <span id={props.row.original.id} tabIndex={0}>{props.row.index + 1}</span>
-                <Tooltip title='Show unit definition'>
+                <Tooltip title='View the unit definition'>
                     <IconButton
                         size='small'
-                        aria-label='Show unit definition'
+                        aria-label='View the unit definition'
                         onClick={
                             () => setDialogData(props.row.original)
                         }

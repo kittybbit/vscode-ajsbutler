@@ -6,33 +6,34 @@
 
 # vscode-ajsbutler
 
-vscode-ajsbutler is an extension that provides a convenient way to display the definition information of JP1/AJS3 from Hitachi in a human-readable format.
+The vscode-ajsbutler extension offers a convenient way to display definition information for JP1/AJS3 from Hitachi in a human-readable format.
 
 ## Features
 
-- Displays JP1/AJS3 definition information in a readable format.
-  
-- Set the editor's language mode to 'jp1ajs' to view the formatting of definition items.
-- Switching the editor allows for a list-style display of the information.
+- Displays JP1/AJS3 definition information in an easily readable format.
+- Set the editor’s language mode to ‘jp1ajs’ to view the formatted definition items.
+- Switch the editor to enable a list-style display of the information.
   ![unit-list](images/unit-list.png)
-- You can select the items to display in the unit list.
+- Select which items to display in the unit list.
   ![column-selector](images/column-selector.png)
-- Show unit definition.
+- View unit definitions.
   ![unit-dialog](images/unit-dialog.png)
-- Save in CSV format.
-- Supports web extension.
+- Save data in CSV format.
+- Switch the editor to enable a flow-style display of the information.
+  ![unit-list](images/unit-flow.png)
+- Supports web extensions.
 
 ## Extension Settings
 
-This extension does not have any specific configuration settings.
+This extension does not require any specific configuration settings.
 
 ## Usage
 
-To utilize this extension:
+To use this extension:
 
 1. Install the extension.
-2. Set the editor's language mode to 'jp1ajs' to view definition formatting.
-3. Switch the editor to enable the list-style display.
+2. Set the editor’s language mode to ‘jp1ajs’ to view the formatted definitions.
+3. Switch the editor to enable either a list-style or flow-style display.
 
 ## License
 

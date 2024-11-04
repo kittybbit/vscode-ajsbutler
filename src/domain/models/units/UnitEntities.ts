@@ -40,6 +40,12 @@ export abstract class UnitEntity {
     get unitAttribute() { return this.#unit.unitAttribute; }
     get parameters() { return this.#unit.parameters; }
     get parent() { return this.#parent; }
+    get ancestors(): UnitEntity[] {
+        if (!this.parent) {
+            return [];
+        }
+        return [this.parent, ...this.parent.ancestors];
+    }
     get children() { return this.#children; }
     get name() { return this.#unit.name; }
     get permission() { return this.#unit.permission; }
@@ -68,22 +74,24 @@ export abstract class UnitEntity {
             .filter(ar => ar.t === this.name);
     }
     get previousUnits() {
-        const previous = this.previous;
-        return this.#parent
-            ? this.#parent.children
-                .filter(sibling => previous.some(p => p.f === sibling.name))
-            : [];
+        return this.previous.map(p => {
+            return {
+                unitEntity: this.#parent?.children.find(child => child.name === p.f),
+                relationType: p.relationType
+            }
+        });
     }
     get next() {
         return (this.parent?.params<Ar[] | undefined>('ar') ?? [])
             .filter(ar => ar.f === this.name);
     }
     get nextUnits() {
-        const next = this.next;
-        return this.#parent
-            ? this.#parent.children
-                .filter(sibling => next.some(n => n.t === sibling.name))
-            : [];
+        return this.next.map(n => {
+            return {
+                unitEntity: this.#parent?.children.find(child => child.name === n.t),
+                relationType: n.relationType
+            }
+        });
     }
     /**
      * H=80＋160x -> x=(H-80)/160  
