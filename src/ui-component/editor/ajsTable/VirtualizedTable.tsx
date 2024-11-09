@@ -1,9 +1,8 @@
-import React, { FC, KeyboardEvent, memo, useState } from 'react';
+import React, { FC, memo } from 'react';
 import { flexRender, HeaderGroup, Row } from '@tanstack/react-table';
 import { ItemProps, TableVirtuoso } from 'react-virtuoso';
 import { Paper, SxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, useTheme } from '@mui/material';
 import TableHeader from './TableHeader';
-import UnitEntityDialog from '../UnitEntityDialog';
 import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { MyAppResource } from '../MyContexts';
 
@@ -17,23 +16,12 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({ rows, headerGroups, scrol
 
     console.log('render VirtualizedTable.');
 
-    // control dialog
-    const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
-    const handleClickDialogOpen = (unitEntity: UnitEntity) => () => {
-        setDialogData(() => unitEntity);
-    };
-    const handleKeyDown = (unitEntity: UnitEntity) => (event: KeyboardEvent<HTMLTableRowElement>) => {
-        console.log(`handleKeyDown: ${event.key}`);
-        event.key === 'Enter' && setDialogData(() => unitEntity);
-    };
-
     const styleTableCell: SxProps<Theme> = {
         whiteSpace: 'nowrap',
         verticalAlign: 'top',
         '&:first-child': {
             position: 'sticky',
             left: 0,
-            backgroundColor: (theme) => theme.palette.background.default,
         }
     };
     const theme = useTheme();
@@ -64,7 +52,6 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({ rows, headerGroups, scrol
                 {...props}
                 ref={ref}
                 sx={{
-                    backgroundColor: (theme) => theme.palette.background.default,
                     zIndex: (theme) => theme.zIndex.appBar,
                 }}
             />
@@ -72,8 +59,6 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({ rows, headerGroups, scrol
         TableRow: (props: ItemProps<Row<UnitEntity>>) => <TableRow
             {...props}
             hover={true}
-            onDoubleClick={handleClickDialogOpen(props.item.original)}
-            onKeyDown={handleKeyDown(props.item.original)}
         />,
         TableBody: React.forwardRef<HTMLTableSectionElement>(function tableBody(props, ref) {
             return <TableBody
@@ -121,7 +106,6 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({ rows, headerGroups, scrol
                     }
                 }
             />
-            <UnitEntityDialog dialogData={dialogData} onClose={() => setDialogData(undefined)} />
         </>
     );
 };

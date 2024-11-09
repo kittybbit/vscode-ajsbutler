@@ -5,7 +5,7 @@ import { FilterMeta, Row, SortingState, getCoreRowModel, getFilteredRowModel, ge
 import { rankItem } from '@tanstack/match-sorter-utils';
 import { parse } from 'flatted';
 import { useMyAppContext } from '../MyContexts';
-import { AccessorType, tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
+import { tableColumnDef, tableDefaultColumnDef } from './tableColumnDef';
 import Header from './Header';
 import VirtualizedTable from './VirtualizedTable';
 import { Unit } from '../../../domain/values/Unit';
@@ -13,6 +13,8 @@ import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { flattenChildren, tyFactory } from '../../../domain/utils/TyUtils';
 import { Parameter } from '../../../domain/models/parameters/ParameterEntities';
 import DisplayColumnSelector from './DisplayColumnSelector';
+import { AccessorType } from './columnDefs/common';
+import UnitEntityDialog from '../UnitEntityDialog';
 
 const ajsGlobalFilterFn = (row: Row<UnitEntity>, columnId: string, value: string, addMeta: (meta: FilterMeta) => void) => {
 
@@ -54,7 +56,10 @@ export type TableMenuStateType = {
     menuStatus: TableMenuStatusType,
     setMenuStatus: Dispatch<SetStateAction<TableMenuStatusType>>
 }
-
+export type DrawerWidthStateType = {
+    drawerWidth: number,
+    setDrawerWidth: Dispatch<SetStateAction<number>>
+}
 const TableContents = () => {
 
     console.log('render TableContents.');
@@ -87,10 +92,14 @@ const TableContents = () => {
         }
     }, []); // fire this when mount.
 
+    // control dialog
+    const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
+
     const [globalFilter, setGlobalFilter] = useState('');
     const [sorting, setSorting] = useState<SortingState>([]);
+
     const table = useReactTable<UnitEntity>({
-        columns: useMemo(() => tableColumnDef(lang), [lang]),
+        columns: useMemo(() => tableColumnDef(lang, setDialogData), [lang]),
         data: useMemo(() => unitEntities ?? [], [unitEntities]),
         state: {
             globalFilter: globalFilter,
@@ -113,7 +122,7 @@ const TableContents = () => {
         }
     }), [isDarkMode]);
 
-    const [drawerWidth, setDrawerWidth] = useState<number | null>(0);
+    const [drawerWidth, setDrawerWidth] = useState<number>(0);
 
     let tableState = undefined;
     if (DEVELOPMENT) {
@@ -128,13 +137,14 @@ const TableContents = () => {
     }
 
     const tableMenuState = { menuStatus: menuStatus, setMenuStatus: setMenuStatus };
+    const drawerWidthState = { drawerWidth: drawerWidth, setDrawerWidth: setDrawerWidth };
 
     return (
         <>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <Stack direction='row' spacing={0}>
-                    {menuStatus.menuItem1 && <DisplayColumnSelector setDrawerWidth={setDrawerWidth} table={table} tableMenuState={tableMenuState} />}
+                    {menuStatus.menuItem1 && <DisplayColumnSelector table={table} tableMenuState={tableMenuState} drawerWidthState={drawerWidthState} />}
                     <Stack
                         direction='column'
                         spacing={0}
@@ -142,7 +152,7 @@ const TableContents = () => {
                             marginLeft: `${drawerWidth}px`,
                         }}
                     >
-                        <Header setDrawerWidth={setDrawerWidth} table={table} tableMenuState={tableMenuState} />
+                        <Header table={table} tableMenuState={tableMenuState} drawerWidthState={drawerWidthState} />
                         <VirtualizedTable
                             rows={table.getRowModel().rows}
                             headerGroups={table.getHeaderGroups()}
@@ -151,6 +161,8 @@ const TableContents = () => {
                         <Typography align='right'>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>
                     </Stack>
                 </Stack>
+                {dialogData
+                    && <UnitEntityDialog dialogData={dialogData} onClose={() => setDialogData(undefined)} />}
             </ThemeProvider>
             {tableState}
         </>

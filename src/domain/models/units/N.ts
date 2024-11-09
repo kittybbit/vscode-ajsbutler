@@ -2,7 +2,7 @@ import { ParamFactory } from "../parameters/ParameterFactory";
 import { UnitEntity } from "./UnitEntities";
 
 export class N extends UnitEntity {
-    /** whether root jobnet or not. */
+    /** Whether this jobnet is the root jobnet. */
     get isRootJobnet() {
         if (!this.parent) {
             return true;
@@ -11,6 +11,17 @@ export class N extends UnitEntity {
             ? true
             : false;
     }
+    /** Whether a schedule is set for this jobnet. */
+    get hasSchedule() {
+        return this.sd
+            ? this.sd.some((sd) => sd.rule !== 0 || sd.type !== 'ud')
+            : false;
+    }
+    /** Whether this jobnet have a unit whose end is being waited for. */
+    get hasWaitedFor() {
+        return this.eun && this.eun.length > 0;
+    }
+
     // [sd=[N,]{[[yyyy/]mm/]{[+|*|@]dd|[+|*|@]b[-DD]|[+]{su|mo|tu|we|th|fr|sa}[:{n|b}]}|en|ud};]
     get sd() { return ParamFactory.sd(this, this.isRootJobnet ? 'en' : undefined); }
     // [st=[N,][+]hh:mm;]

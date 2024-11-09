@@ -114,6 +114,11 @@ export class J extends UnitEntity {
         }
         return 1;
     }
+
+    /** Whether this jobnet have a unit whose end is being waited for. */
+    get hasWaitedFor() {
+        return this.eun && this.eun.length > 0;
+    }
 }
 export class Rj extends J { }
 export class Pj extends J { }

@@ -20,4 +20,9 @@ export class Nc extends UnitEntity {
     get ega() { return ParamFactory.ega(this, 'none'); }
     // [uem={y|n};] 
     get uem() { return ParamFactory.uem(this, 'n'); }
+
+    /** Whether this jobnet have a unit whose end is being waited for. */
+    get hasWaitedFor() {
+        return this.eun && this.eun.length > 0;
+    }
 }

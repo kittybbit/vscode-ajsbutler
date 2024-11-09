@@ -14,6 +14,7 @@ const editorConfig = (env, argv) => {
         devtool: PRODUCTION ? false : 'inline-source-map',
         entry: {
             'ajsTable/index': './src/ui-component/editor/ajsTable/index.tsx',
+            'ajsFlow/index': './src/ui-component/editor/ajsFlow/index.tsx',
         },
         output: {
             path: path.join(__dirname, 'out'),

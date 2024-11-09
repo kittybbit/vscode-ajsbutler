@@ -10,7 +10,12 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
     public static register(context: vscode.ExtensionContext) {
         console.info('registerd AjsTableViewerProvider');
         const provider = new AjsTableViewerProvider(context);
-        const disposable = vscode.window.registerCustomEditorProvider(AjsTableViewerProvider.viewType, provider);
+        const disposable = vscode.window.registerCustomEditorProvider(
+            AjsTableViewerProvider.viewType,
+            provider,
+            {
+                webviewOptions: { retainContextWhenHidden: true }
+            });
         context.subscriptions.push(disposable);
         context.subscriptions.push(
             vscode.commands.registerCommand('ajsbutler.openTableViewer', () => {
@@ -40,10 +45,6 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
 
         // change event listener
         const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
-            if (!webviewPanel.visible) {
-                console.log('invisible AjsTableViewerProvider');
-                return;
-            }
             debounceCreateData(e);
         });
         const changeConfigurationSubscription = vscode.workspace.onDidChangeConfiguration(e => {

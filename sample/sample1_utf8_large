@@ -11,6 +11,9 @@ unit=test_jg_1,,jp1admin,;
                 ty=g;
                 cm="##テスト";
                 el=root_jn,n,+0+0;
+                el=root_jn2,n,+0+0;
+                el=root_jn3,n,+0+0;
+                el=nest_jg2,g,+0+0;
                 op=mo;
                 op=2020/01/01;
                 cl=su;
@@ -192,6 +195,30 @@ pwd";
                         {
                                 ty=jdj;
                         }
+                }
+                unit=root_jn2,,jp1admin,;
+                {
+                        ty=n;
+                        cm="ルートジョブネット2";
+                        sz=12x8;
+                }
+                unit=nest_jg2,,jp1admin,;
+                {
+                        ty=g;
+                        cm="##テスト2";
+                        el=root_jn2,n,+0+0;
+                        unit=root_jn2,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="ルートジョブネット2";
+                                sz=12x8;
+                        }
+                }
+                unit=root_jn3,,jp1admin,;
+                {
+                        ty=n;
+                        cm="ルートジョブネット3";
+                        sz=12x8;
                 }
         }
 }
