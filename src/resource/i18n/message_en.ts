@@ -1,5 +1,6 @@
 export const en = {
-    'table.search.helperText': 'Search by enter or focus out.',
+    'table.search.helperText': 'Search by enter or tab.',
+    'table.search.clear': 'Clear search results.',
     'table.menu.menuItem1': 'Select display columns.',
     'table.menu.menuItem2.window': 'Toggle window scroll.',
     'table.menu.menuItem2.table': 'Toggle table scroll.',

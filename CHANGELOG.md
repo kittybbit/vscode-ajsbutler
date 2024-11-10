@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.7.1]
+
+- Minor changes to AjsFlowView
+- Refactored AjsTableViewr.
+
 ## [1.7.0]
 
 - Added a feature to display in flow style.

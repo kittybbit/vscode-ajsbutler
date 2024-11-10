@@ -5,7 +5,7 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import DescriptionIcon from '@mui/icons-material/Description';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { Rc } from "../../../../domain/models/units/Rc";
-import { AjsNode, cardHeaderSxProps, cardSxProps } from "./AjsNode";
+import { AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
 import { handleClickChildOpen, handleClickDialogOpen, handleKeyDownChildOpen, handleKeyDownDialogOpen } from "./Utils";
 
 export type ConditionNode = Node<AjsNode<Rc>, 'condition'>;
@@ -23,13 +23,18 @@ const ConditionNode: FC<ConditionNodeProps> = (props: ConditionNodeProps) => {
             sx={cardSxProps}
             raised={myself}
         >
-            <CardHeader
-                disableTypography
-                avatar={<GavelIcon fontSize="inherit" />}
-                title={unitEntity.name}
-                sx={cardHeaderSxProps}
-            />
-            <CardActions disableSpacing>
+            <Tooltip title={unitEntity.cm?.value()} placement="top">
+                <CardHeader
+                    disableTypography
+                    avatar={<GavelIcon fontSize="inherit" />}
+                    title={unitEntity.name}
+                    sx={cardHeaderSxProps}
+                />
+            </Tooltip>
+            <CardActions
+                disableSpacing
+                sx={cardActionsSxProps}
+            >
                 <Tooltip title='View the unit definition'>
                     <IconButton
                         aria-label="View the unit definition"

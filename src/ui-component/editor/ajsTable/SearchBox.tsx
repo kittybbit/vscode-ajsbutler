@@ -1,6 +1,7 @@
-import React, { FC, FocusEvent, KeyboardEvent, memo, useEffect, useMemo, useRef } from 'react';
-import { Typography, TextField } from '@mui/material';
+import React, { ChangeEvent, FC, KeyboardEvent, memo, useEffect, useRef, useState } from 'react';
+import { TextField, IconButton, Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { Updater } from '@tanstack/table-core';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
@@ -18,7 +19,6 @@ const SearchBox: FC<SearchBoxProps> = ({ globalFilter, setGlobalFilter }) => {
     const isMac = () => os === 'darwin';
 
     const ref = useRef<HTMLInputElement>();
-
     const handleShortcut = (event: globalThis.KeyboardEvent) => {
         ((isMac() ? event.metaKey : event.ctrlKey) && event.key === 'f') && ref.current && ref.current.focus();
     };
@@ -27,31 +27,44 @@ const SearchBox: FC<SearchBoxProps> = ({ globalFilter, setGlobalFilter }) => {
         return () => document.removeEventListener('keydown', handleShortcut);
     }, []);
 
+    const [value, setValue] = useState<string>('');
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => setValue(() => e.target.value);
     const handleKeyUp = (e: KeyboardEvent<HTMLDivElement>) => {
         if (e.key === 'Enter') {
-            const newValue = (e.target as HTMLInputElement).value;
-            globalFilter !== newValue && setGlobalFilter(() => newValue);
+            globalFilter !== value && setGlobalFilter(() => value);
         }
     };
-
-    const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
-        const newValue = e.target.value;
-        globalFilter !== newValue && setGlobalFilter(() => newValue);
+    const handleBlur = () => {
+        globalFilter !== value && setGlobalFilter(() => value);
+    };
+    const handleClearClick = () => {
+        setValue(() => '');
+        setGlobalFilter(() => '');
+        ref.current?.focus();
     };
 
     return (
         <>
             <TextField
                 id='search'
-                placeholder='Search...'
-                helperText={useMemo(() => localeMap('table.search.helperText', lang), [lang])}
+                placeholder={`Search...(${isMac() ? '\u2318' : 'CTRL+'}F)`}
+                helperText={localeMap('table.search.helperText', lang)}
                 slotProps={{
                     input: {
                         startAdornment: <SearchIcon sx={{ marginRight: '0.5em' }} />,
-                        endAdornment: <><kbd>{isMac() ? '\u2318' : 'CTRL'}</kbd><Typography sx={{ fontSize: '0.5em' }}>+</Typography><kbd>F</kbd></>,
+                        endAdornment: <Tooltip title={localeMap('table.search.clear', lang)}>
+                            <IconButton
+                                size='small'
+                                aria-label={localeMap('table.search.clear', lang)}
+                                onClick={handleClearClick}
+                            >
+                                <ClearAllIcon fontSize='inherit' />
+                            </IconButton>
+                        </Tooltip>,
                     }
                 }}
                 variant='standard'
+                onChange={handleChange}
                 onKeyUp={handleKeyUp}
                 onBlur={handleBlur}
                 sx={
@@ -60,6 +73,7 @@ const SearchBox: FC<SearchBoxProps> = ({ globalFilter, setGlobalFilter }) => {
                     }
                 }
                 inputRef={ref}
+                value={value ?? ''}
             />
         </>
     );

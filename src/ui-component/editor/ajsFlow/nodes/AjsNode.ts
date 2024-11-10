@@ -9,13 +9,17 @@ export type AjsNode<T extends UnitEntity = UnitEntity> = {
     & CurrentUnitEntityStateType
     & Record<string, unknown>;
 
-
 export const cardSxProps: SxProps<Theme> = {
     width: '15rem',
 };
 
 export const cardHeaderSxProps: SxProps<Theme> = {
     height: '1em',
-    paddingTop: '0em',
+    paddingTop: '0.25em',
+    paddingBottom: '0em',
+};
+
+export const cardActionsSxProps: SxProps<Theme> = {
+    paddingTop: '0.25em',
     paddingBottom: '0em',
 };

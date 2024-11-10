@@ -6,7 +6,7 @@ import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { box, defaultAccessorFn } from "./common";
 import { Ln, Sd, St, Cy, Sh, Shd, Cftd, Sy, Ey, Wc, Wt } from "../../../../domain/models/parameters/ParameterEntities";
 
-const grouup10 = (
+const group10 = (
     columnHelper: ColumnHelper<UnitEntity>,
     ajsTableColumnHeader: typeof ajscolumn.en,
     paramDefinition: typeof parameter.en,
@@ -211,4 +211,4 @@ const grouup10 = (
     });
 };
 
-export default grouup10;
+export default group10;

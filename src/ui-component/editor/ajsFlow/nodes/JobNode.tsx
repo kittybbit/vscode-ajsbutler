@@ -3,7 +3,7 @@ import { Handle, Node, NodeProps, Position } from "@xyflow/react";
 import { Card, CardActions, CardHeader, IconButton, Tooltip } from "@mui/material";
 import DescriptionIcon from '@mui/icons-material/Description';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { AjsNode, cardHeaderSxProps, cardSxProps } from "./AjsNode";
+import { AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
 import { handleClickDialogOpen, handleKeyDownDialogOpen } from "./Utils";
 
 export type JobNode = Node<AjsNode, 'job'>;
@@ -21,12 +21,17 @@ const JobNode: FC<JobNodeProps> = (props) => {
             id={unitEntity.id}
             sx={cardSxProps}
         >
-            <CardHeader
-                disableTypography
-                sx={cardHeaderSxProps}
-                title={unitEntity.name}
-            />
-            <CardActions disableSpacing>
+            <Tooltip title={unitEntity.cm?.value()} placement="top">
+                <CardHeader
+                    disableTypography
+                    sx={cardHeaderSxProps}
+                    title={unitEntity.name}
+                />
+            </Tooltip>
+            <CardActions
+                disableSpacing
+                sx={cardActionsSxProps}
+            >
                 <Tooltip title='View the unit definition'>
                     <IconButton
                         aria-label="View the unit definition"

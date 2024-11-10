@@ -3,7 +3,7 @@ import * as ajscolumn from '@resource/i18n/ajscolumn';
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { defaultAccessorFn } from "./common";
 
-const grouup12 = (
+const group12 = (
     columnHelper: ColumnHelper<UnitEntity>,
     ajsTableColumnHeader: typeof ajscolumn.en,
 ): GroupColumnDef<UnitEntity, unknown> => {
@@ -81,4 +81,4 @@ const grouup12 = (
     });
 };
 
-export default grouup12;
+export default group12;
