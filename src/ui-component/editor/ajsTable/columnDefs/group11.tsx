@@ -7,7 +7,7 @@ import { Rating } from "@mui/material";
 import { J, Rj, Pj, Rp } from "../../../../domain/models/units/J";
 import { Qj } from "../../../../domain/models/units/Qj";
 
-const grouup11 = (
+const group11 = (
     columnHelper: ColumnHelper<UnitEntity>,
     ajsTableColumnHeader: typeof ajscolumn.en,
 ): GroupColumnDef<UnitEntity, unknown> => {
@@ -178,4 +178,4 @@ const grouup11 = (
     });
 };
 
-export default grouup11;
+export default group11;
