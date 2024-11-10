@@ -6,7 +6,7 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { N } from "../../../../domain/models/units/N";
-import { AjsNode, cardHeaderSxProps, cardSxProps } from "./AjsNode";
+import { AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
 import { handleClickChildOpen, handleClickDialogOpen, handleKeyDownChildOpen, handleKeyDownDialogOpen } from "./Utils";
 
 export type JobNetNode = Node<AjsNode<N>, 'jobnet'>;
@@ -24,12 +24,17 @@ const JobNetNode: FC<JobNetNodeProps> = (props: JobNetNodeProps) => {
             sx={cardSxProps}
             raised={myself}
         >
-            <CardHeader
-                disableTypography
-                sx={cardHeaderSxProps}
-                title={unitEntity.name}
-            />
-            <CardActions disableSpacing>
+            <Tooltip title={unitEntity.cm?.value()} placement="top">
+                <CardHeader
+                    disableTypography
+                    sx={cardHeaderSxProps}
+                    title={unitEntity.name}
+                />
+            </Tooltip>
+            <CardActions
+                disableSpacing
+                sx={cardActionsSxProps}
+            >
                 <Tooltip title='View the unit definition.'>
                     <IconButton
                         aria-label="View the unit definition."
