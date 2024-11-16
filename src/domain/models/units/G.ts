@@ -1,3 +1,4 @@
+import { WeekSymbol } from "../../values/AjsType";
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { UnitEntity } from "./UnitEntities";
 
@@ -29,83 +30,45 @@ export class G extends UnitEntity {
     get ncsv() { return ParamFactory.ncsv(this); }
 
     get su() {
-        if (this.op === undefined && this.cl === undefined) {
-            return undefined;
-        } else if (this.op && this.op.find(v => v.su)) {
-            return true;
-        } else if (this.cl && this.cl.find(v => v.su)) {
-            return false;
-        }
-        return undefined;
+        return this.#judgeWeek('su');
     }
 
     get mo() {
-        if (this.op === undefined && this.cl === undefined) {
-            return undefined;
-        } else if (this.op && this.op.find(v => v.mo)) {
-            return true;
-        } else if (this.cl && this.cl.find(v => v.mo)) {
-            return false;
-        }
-        return undefined;
+        return this.#judgeWeek('mo');
     }
 
     get tu() {
-        if (this.op === undefined && this.cl === undefined) {
-            return undefined;
-        } else if (this.op && this.op.find(v => v.tu)) {
-            return true;
-        } else if (this.cl && this.cl.find(v => v.tu)) {
-            return false;
-        }
-        return undefined;
+        return this.#judgeWeek('tu');
     }
 
     get we() {
-        if (this.op === undefined && this.cl === undefined) {
-            return undefined;
-        } else if (this.op && this.op.find(v => v.we)) {
-            return true;
-        } else if (this.cl && this.cl.find(v => v.we)) {
-            return false;
-        }
-        return undefined;
+        return this.#judgeWeek('we');
     }
 
     get th() {
-        if (this.op === undefined && this.cl === undefined) {
-            return undefined;
-        } else if (this.op && this.op.find(v => v.th)) {
-            return true;
-        } else if (this.cl && this.cl.find(v => v.th)) {
-            return false;
-        }
-        return undefined;
+        return this.#judgeWeek('th');
     }
 
     get fr() {
-        if (this.op === undefined && this.cl === undefined) {
-            return undefined;
-        } else if (this.op && this.op.find(v => v.fr)) {
-            return true;
-        } else if (this.cl && this.cl.find(v => v.fr)) {
-            return false;
-        }
-        return undefined;
+        return this.#judgeWeek('fr');
     }
 
     get sa() {
-        if (this.op === undefined && this.cl === undefined) {
-            return undefined;
-        } else if (this.op && this.op.find(v => v.sa)) {
-            return true;
-        } else if (this.cl && this.cl.find(v => v.sa)) {
-            return false;
-        }
-        return undefined;
+        return this.#judgeWeek('sa');
     }
 
     isPlanning() {
         return this.gty?.value() === 'p';
+    }
+
+    #judgeWeek = (week: WeekSymbol) => {
+        if (this.op === undefined && this.cl === undefined) {
+            return undefined;
+        } else if (this.op && this.op.find(v => v[week])) {
+            return true;
+        } else if (this.cl && this.cl.find(v => v[week])) {
+            return false;
+        }
+        return undefined;
     }
 }
