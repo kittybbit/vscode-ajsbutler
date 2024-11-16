@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { initReactPanel } from './ReactPanel';
 import { MyAppResource } from '../../ui-component/editor/MyContexts';
-import { debounceCreateDataFn, readyFn, resourceFn } from '../../domain/services/events/Events';
+import { debounceCreateDataFn, readyFn } from '../../domain/services/events/ready';
+import { resourceFn } from '../../domain/services/events/resource';
 
 type EventType = ResourceEventType | ReadyEventType | SaveEventType;
 type ResourceEventType = { type: string, data: MyAppResource };

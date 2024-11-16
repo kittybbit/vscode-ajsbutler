@@ -69,6 +69,10 @@ const TableContents = () => {
     const [menuStatus, setMenuStatus] = useState<TableMenuStatusType>({
         menuItem1: false,
     });
+    // control dialog
+    const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [sorting, setSorting] = useState<SortingState>([]);
 
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
     const changeDodumentFn = (type: string, data: unknown) => {
@@ -92,11 +96,6 @@ const TableContents = () => {
         }
     }, []); // fire this when mount.
 
-    // control dialog
-    const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
-
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [sorting, setSorting] = useState<SortingState>([]);
 
     const table = useReactTable<UnitEntity>({
         columns: useMemo(() => tableColumnDef(lang, setDialogData), [lang]),
