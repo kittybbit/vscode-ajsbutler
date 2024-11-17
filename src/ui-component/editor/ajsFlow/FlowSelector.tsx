@@ -9,9 +9,9 @@ import { N } from '../../../domain/models/units/N';
 import { CurrentUnitEntityStateType, DrawerWidthStateType, FlowMenuStateType } from './FlowContents';
 
 type FlowSelectorProps = {
-    unitEntites: UnitEntity[],
+    unitEntities: UnitEntity[],
     flowMenuState: FlowMenuStateType,
-    currentUnitEndityState: CurrentUnitEntityStateType,
+    currentUnitEntityState: CurrentUnitEntityStateType,
     drawerWidthState: DrawerWidthStateType,
 };
 
@@ -57,7 +57,7 @@ const AccordionActions = styled((props: AccordionActionsProps) => (
     justifyContent: 'flex-start',
 }));
 
-const FlowSelector: FC<FlowSelectorProps> = ({ unitEntites, currentUnitEndityState, flowMenuState, drawerWidthState }) => {
+const FlowSelector: FC<FlowSelectorProps> = ({ unitEntities, currentUnitEntityState: currentUnitEndityState, flowMenuState, drawerWidthState }) => {
 
     console.log('render FlowSelector.');
 
@@ -141,7 +141,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({ unitEntites, currentUnitEnditySta
                     {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                 </IconButton>
             </Toolbar>
-            {createContents(unitEntites)}
+            {createContents(unitEntities)}
         </Drawer>
     </>;
 }
