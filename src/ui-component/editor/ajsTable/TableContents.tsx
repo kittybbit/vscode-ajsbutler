@@ -16,62 +16,44 @@ import DisplayColumnSelector from './DisplayColumnSelector';
 import { AccessorType } from './columnDefs/common';
 import UnitEntityDialog from '../UnitEntityDialog';
 
-const ajsGlobalFilterFn = (row: Row<UnitEntity>, columnId: string, value: string, addMeta: (meta: FilterMeta) => void) => {
-
+const normalizeValue = (v: unknown) => v instanceof Parameter ? v.value() : String(v);
+const ajsGlobalFilterFn = (
+    row: Row<UnitEntity>,
+    columnId: string,
+    value: string,
+    addMeta: (meta: FilterMeta) => void
+): boolean => {
     const cellValue = row.getValue<AccessorType>(columnId);
-    if (cellValue === undefined) {
-        return false;
-    }
+    if (!cellValue) return false;
 
-    const targetValue: AccessorType = Array.isArray(cellValue) ? cellValue : [cellValue];
+    const targetValues: AccessorType = Array.isArray(cellValue) ? cellValue : [cellValue];
 
-    // Rank the item
-    const itemRank = targetValue
-        .map(v => {
-            if (v && v instanceof Parameter) {
-                return v.value();
-            }
-            if (v && typeof v === 'string') {
-                return v;
-            }
-            return (new String(v)).toString();
-        })
+    const itemRank = targetValues
+        .map(normalizeValue)
         .map(v => rankItem(v, value))
         .find(v => v.passed);
-    if (itemRank === undefined) {
-        return false;
-    }
 
-    // Store the ranking info
-    addMeta(itemRank)
+    if (!itemRank) return false;
 
-    // Return if the item should be filtered in/out
+    addMeta(itemRank);
     return itemRank.passed;
 };
 
 export type TableMenuStatusType = {
     menuItem1: boolean,
-}
+};
 export type TableMenuStateType = {
     menuStatus: TableMenuStatusType,
     setMenuStatus: Dispatch<SetStateAction<TableMenuStatusType>>
-}
+};
 export type DrawerWidthStateType = {
     drawerWidth: number,
     setDrawerWidth: Dispatch<SetStateAction<number>>
-}
-const TableContents = () => {
+};
 
-    console.log('render TableContents.');
-
-    const { isDarkMode, lang, scrollType } = useMyAppContext();
-
-    const [menuStatus, setMenuStatus] = useState<TableMenuStatusType>({
-        menuItem1: false,
-    });
-
+const useChangeDocument = (): [UnitEntity[] | undefined, (type: string, data: unknown) => void] => {
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
-    const changeDodumentFn = (type: string, data: unknown) => {
+    const changeDocumentFn = (type: string, data: unknown) => {
         try {
             const newUnitEntities: UnitEntity[] = parse(data as string)
                 .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
@@ -84,19 +66,33 @@ const TableContents = () => {
             setUnitEntities(() => []);
         }
     };
+    return [unitEntities, changeDocumentFn];
+};
+
+const TableContents = () => {
+
+    console.log('render TableContents.');
+
+    const { isDarkMode, lang, scrollType } = useMyAppContext();
+
+    const [menuStatus, setMenuStatus] = useState<TableMenuStatusType>({
+        menuItem1: false,
+    });
+    // control dialog
+    const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [drawerWidth, setDrawerWidth] = useState<number>(0);
+    const [unitEntities, changeDocumentFn] = useChangeDocument();
+
     useEffect(() => {
-        window.EventBridge.addCallback('changeDocument', changeDodumentFn);
+        window.EventBridge.addCallback('changeDocument', changeDocumentFn);
         window.vscode.postMessage({ type: 'ready' });
         return () => {
-            window.EventBridge.removeCallback('changeDocument', changeDodumentFn);
+            window.EventBridge.removeCallback('changeDocument', changeDocumentFn);
         }
     }, []); // fire this when mount.
 
-    // control dialog
-    const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
-
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [sorting, setSorting] = useState<SortingState>([]);
 
     const table = useReactTable<UnitEntity>({
         columns: useMemo(() => tableColumnDef(lang, setDialogData), [lang]),
@@ -122,22 +118,17 @@ const TableContents = () => {
         }
     }), [isDarkMode]);
 
-    const [drawerWidth, setDrawerWidth] = useState<number>(0);
+    const tableStateDev = DEVELOPMENT && <Accordion>
+        <AccordionSummary>[DEV] TABLE STATE</AccordionSummary>
+        <AccordionDetails>
+            <Typography>
+                {JSON.stringify(table.getState(), null, 2)}
+            </Typography>
+        </AccordionDetails>
+    </Accordion>;
 
-    let tableState = undefined;
-    if (DEVELOPMENT) {
-        tableState = <Accordion>
-            <AccordionSummary>[DEV] TABLE STATE</AccordionSummary>
-            <AccordionDetails>
-                <Typography>
-                    {JSON.stringify(table.getState(), null, 2)}
-                </Typography>
-            </AccordionDetails>
-        </Accordion>;
-    }
-
-    const tableMenuState = { menuStatus: menuStatus, setMenuStatus: setMenuStatus };
-    const drawerWidthState = { drawerWidth: drawerWidth, setDrawerWidth: setDrawerWidth };
+    const tableMenuState = { menuStatus, setMenuStatus };
+    const drawerWidthState = { drawerWidth, setDrawerWidth };
 
     return (
         <>
@@ -164,7 +155,7 @@ const TableContents = () => {
                 {dialogData
                     && <UnitEntityDialog dialogData={dialogData} onClose={() => setDialogData(undefined)} />}
             </ThemeProvider>
-            {tableState}
+            {tableStateDev}
         </>
     );
 };

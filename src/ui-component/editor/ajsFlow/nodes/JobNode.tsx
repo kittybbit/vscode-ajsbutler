@@ -1,26 +1,27 @@
 import React, { FC, memo } from "react";
 import { Handle, Node, NodeProps, Position } from "@xyflow/react";
-import { Card, CardActions, CardHeader, IconButton, Tooltip } from "@mui/material";
+import { Card, CardActions, CardHeader, Tooltip } from "@mui/material";
 import DescriptionIcon from '@mui/icons-material/Description';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
+import { ActionIcon, AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
 import { handleClickDialogOpen, handleKeyDownDialogOpen } from "./Utils";
 
 export type JobNode = Node<AjsNode, 'job'>;
 type JobNodeProps = NodeProps<JobNode>;
-const JobNode: FC<JobNodeProps> = (props) => {
+const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
 
     console.log('render JobNode.');
 
-    const { unitEntity } = props.data;
+    const { unitEntity } = data;
 
     const hasWaitedFor = 'hasWaitedFor' in unitEntity && unitEntity.hasWaitedFor as boolean;
 
-    return <>
+    return (
         <Card
             id={unitEntity.id}
             sx={cardSxProps}
         >
+            {/* header */}
             <Tooltip title={unitEntity.cm?.value()} placement="top">
                 <CardHeader
                     disableTypography
@@ -28,36 +29,29 @@ const JobNode: FC<JobNodeProps> = (props) => {
                     title={unitEntity.name}
                 />
             </Tooltip>
+            {/* action */}
             <CardActions
                 disableSpacing
                 sx={cardActionsSxProps}
             >
-                <Tooltip title='View the unit definition'>
-                    <IconButton
-                        aria-label="View the unit definition"
-                        size='small'
-                        onClick={handleClickDialogOpen(props.data)}
-                        onKeyDown={handleKeyDownDialogOpen(props.data)}
-                    >
-                        <DescriptionIcon fontSize='inherit' />
-                    </IconButton>
-                </Tooltip>
+                <ActionIcon
+                    title="View the unit definition."
+                    ariaLabel="View the unit definition."
+                    onClick={handleClickDialogOpen(data)}
+                    onKeyDown={handleKeyDownDialogOpen(data)}
+                    icon={<DescriptionIcon fontSize="inherit" />}
+                />
                 {hasWaitedFor
-                    && <Tooltip title='This job will wait for another unit.'>
-                        <IconButton
-                            aria-label='This job will wait for another unit.'
-                            size='small'
-                            disableRipple
-                        >
-                            <HourglassEmptyIcon fontSize='inherit' />
-                        </IconButton>
-                    </Tooltip>
-                }
+                    && <ActionIcon
+                        title="This job will wait for another unit."
+                        ariaLabel="This job will wait for another unit."
+                        icon={<HourglassEmptyIcon fontSize='inherit' />}
+                    />}
             </CardActions>
             <Handle type="source" position={Position.Right} />
             <Handle type="target" position={Position.Left} />
         </Card>
-    </>;
+    );
 };
 
 export default memo(JobNode);

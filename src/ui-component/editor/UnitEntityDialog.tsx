@@ -1,129 +1,130 @@
-import React, { FC, memo, MouseEvent, useState } from 'react'
-import { Dialog, DialogContent, DialogTitle, IconButton, Stack, Tab, Tabs, TextField, Tooltip, Typography } from '@mui/material'
+import React, { FC, memo, MouseEvent, useState } from 'react';
+import { Dialog, DialogContent, DialogTitle, IconButton, Stack, Tab, Tabs, TextField, Tooltip, Typography, } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { UnitEntity } from '../../domain/models/units/UnitEntities';
 
 type UnitEntityDialogProps = {
-    dialogData: UnitEntity | undefined,
-    onClose: VoidFunction,
+    dialogData: UnitEntity | undefined;
+    onClose: VoidFunction;
 };
-const UnitEntityDialog: FC<UnitEntityDialogProps> = ({ dialogData, onClose }) => {
 
-    console.log('render UnitEntityDialog.');
+const useCopyHandler = () => {
+    const [tooltipMsg, setTooltipMsg] = useState<string>('');
 
-    const handleClose = () => {
-        onClose();
+    const handleCopy = (event: MouseEvent<HTMLDivElement>) => {
+        const text = event.currentTarget.textContent;
+        if (text) {
+            navigator.clipboard.writeText(text);
+            setTooltipMsg('Copied');
+        }
     };
 
+    const handleMouseEnter = () => setTooltipMsg('Click to copy');
+
+    return { tooltipMsg, handleCopy, handleMouseEnter };
+};
+
+type CopyableTextFieldProps = {
+    id: string;
+    label?: string;
+    value: string;
+};
+
+const CopyableTextField: FC<CopyableTextFieldProps> = ({ id, label, value }) => {
+    const { tooltipMsg, handleCopy, handleMouseEnter } = useCopyHandler();
+
+    return (
+        <Tooltip placement="top" title={tooltipMsg}>
+            <TextField
+                id={id}
+                label={label}
+                multiline
+                variant="outlined"
+                fullWidth
+                value={value}
+                onClick={handleCopy}
+                onMouseEnter={handleMouseEnter}
+                sx={{ marginBottom: '1em' }}
+            />
+        </Tooltip>
+    );
+};
+
+const UnitEntityDialog: FC<UnitEntityDialogProps> = ({ dialogData, onClose }) => {
     const [tabIndex, setTabIndex] = useState(0);
 
-    return <Dialog
-        scroll='paper'
-        open={dialogData !== undefined}
-        onClose={handleClose}
-        fullWidth={true}
-    >
-        <DialogTitle sx={{ paddingBottom: '0em' }}>
-            <Stack direction='row' justifyContent='space-between'>
-                <Tabs
-                    value={tabIndex}
-                // onChange={handleChange}
-                >
-                    <Tab label='Raw data' onClick={() => setTabIndex(() => 0)} />
-                    <Tab label='Command' onClick={() => setTabIndex(() => 1)} />
-                    {/* <Tab label='API' /> */}
-                </Tabs>
-                <IconButton
-                    aria-label='close'
-                    onClick={handleClose}
-                >
-                    <CloseIcon />
-                </IconButton>
-            </Stack>
-            <Typography variant='caption'>{dialogData ? dialogData.absolutePath : ''}</Typography>
-        </DialogTitle>
-        <Tab1 dialogData={dialogData} show={tabIndex === 0} />
-        <Tab2 dialogData={dialogData} show={tabIndex === 1} />
-    </Dialog>;
-}
+    const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+        setTabIndex(newValue);
+    };
+
+    return (
+        <Dialog
+            scroll="paper"
+            open={!!dialogData}
+            onClose={onClose}
+            fullWidth
+        >
+            <DialogTitle sx={{ paddingBottom: '0em' }}>
+                <Stack direction="row" justifyContent="space-between">
+                    <Tabs value={tabIndex} onChange={handleTabChange}>
+                        <Tab label="Raw data" />
+                        <Tab label="Command" />
+                    </Tabs>
+                    <IconButton aria-label="close" onClick={onClose}>
+                        <CloseIcon />
+                    </IconButton>
+                </Stack>
+                <Typography variant="caption">{dialogData?.absolutePath}</Typography>
+            </DialogTitle>
+            <TabPanel value={tabIndex} index={0}>
+                <Tab1 dialogData={dialogData} />
+            </TabPanel>
+            <TabPanel value={tabIndex} index={1}>
+                <Tab2 dialogData={dialogData} />
+            </TabPanel>
+        </Dialog>
+    );
+};
 
 type TabPanelProps = {
-    dialogData: UnitEntity | undefined,
-    show: boolean,
+    value: number;
+    index: number;
+    children: React.ReactNode;
 };
 
-const Tab1 = (params: TabPanelProps) => {
-
-    console.log('render Tab1.');
-
-    const { dialogData, show } = params;
-    const [tooltipMsg, setTooltipMsg] = useState<string>('');
-    const handleCopy = (event: MouseEvent<HTMLDivElement>) => {
-        event.currentTarget.textContent && navigator.clipboard.writeText(event.currentTarget.textContent);
-        setTooltipMsg(() => 'Copied');
-    };
-    const handleMouseEnter = () => setTooltipMsg(() => 'Click to copy');
-
-    return <DialogContent key={dialogData?.id} sx={{ display: show ? 'block' : 'none' }} dividers>
-        <Tooltip placement='top' title={tooltipMsg}>
-            <TextField
-                id='rawdata'
-                multiline={true}
-                variant='outlined'
-                fullWidth={true}
-                value={
-                    dialogData && dialogData.parameters
-                        .map((p) => `${p.key}=${p.value}`)
-                        .join('\n')
-                }
-                onClick={handleCopy}
-                onMouseEnter={handleMouseEnter}
-            />
-        </Tooltip>
-    </DialogContent>;
+const TabPanel: FC<TabPanelProps> = ({ value, index, children }) => {
+    return (
+        <DialogContent sx={{ display: value === index ? 'block' : 'none' }} dividers>
+            {children}
+        </DialogContent>
+    );
 };
 
-const Tab2 = (params: TabPanelProps) => {
+const Tab1: FC<{ dialogData: UnitEntity | undefined }> = ({ dialogData }) => {
+    if (!dialogData) return null;
 
-    console.log('render Tab2.');
+    const rawData = dialogData.parameters
+        .map((p) => `${p.key}=${p.value}`)
+        .join('\n');
 
-    const { dialogData, show } = params;
+    return <CopyableTextField id="rawdata" value={rawData} />;
+};
 
-    const [tooltipMsg, setTooltipMsg] = useState<string>('');
-    const handleCopy = (event: MouseEvent<HTMLDivElement>) => {
-        event.currentTarget.textContent && navigator.clipboard.writeText(event.currentTarget.textContent);
-        setTooltipMsg(() => 'Copied');
-    };
-    const handleMouseEnter = () => setTooltipMsg(() => 'Click to copy');
+const Tab2: FC<{ dialogData: UnitEntity | undefined }> = ({ dialogData }) => {
+    if (!dialogData) return null;
 
-    return <DialogContent key={dialogData?.id} sx={{ display: show ? 'block' : 'none' }} dividers>
-        <Tooltip placement='top' title={tooltipMsg}>
-            <TextField
-                label='ajsshow'
-                id='ajsshow'
-                multiline={true}
-                variant='outlined'
-                fullWidth={true}
-                sx={{ marginBottom: '1em' }}
-                value={`ajsshow -R ${dialogData?.absolutePath}`}
-                onClick={handleCopy}
-                onMouseEnter={handleMouseEnter}
-            />
-        </Tooltip>
-        <Tooltip placement='top' title={tooltipMsg}>
-            <TextField
-                label='ajsprint'
-                id='ajsprint'
-                multiline={true}
-                variant='outlined'
-                fullWidth={true}
-                sx={{ marginBottom: '1em' }}
-                value={`ajsprint -a -R ${dialogData?.absolutePath}`}
-                onClick={handleCopy}
-                onMouseEnter={handleMouseEnter}
-            />
-        </Tooltip>
-    </DialogContent>;
+    const commands = [
+        { id: 'ajsshow', label: 'ajsshow', value: `ajsshow -R ${dialogData.absolutePath}` },
+        { id: 'ajsprint', label: 'ajsprint', value: `ajsprint -a -R ${dialogData.absolutePath}` },
+    ];
+
+    return (
+        <>
+            {commands.map((cmd) => (
+                <CopyableTextField key={cmd.id} id={cmd.id} label={cmd.label} value={cmd.value} />
+            ))}
+        </>
+    );
 };
 
 export default memo(UnitEntityDialog);

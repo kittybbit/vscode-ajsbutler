@@ -1,5 +1,19 @@
 # Change Log
 
+## [1.7.2]
+
+- Refactored FlowContents.
+- Refactored custom nodes in React Flow.
+- Refactored DisplayColumnSelector.
+- Refactored UnitEntityDialog.
+- Refactored TableContents.
+- Refactored event.
+- Refactored G
+  - Refactored the week symbol properties for improved clarity.
+- Fix and refactored J
+  - Fixed the issue with the sd2 property.
+  - Refactored the topN property for improved clarity.
+
 ## [1.7.1]
 
 - Minor changes to AjsFlowView

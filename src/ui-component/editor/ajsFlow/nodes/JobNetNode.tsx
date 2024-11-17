@@ -1,93 +1,75 @@
 import React, { FC, memo } from "react";
 import { Handle, Node, NodeProps, Position } from "@xyflow/react";
-import { Card, CardActions, CardHeader, IconButton, Tooltip } from "@mui/material";
-import DescriptionIcon from '@mui/icons-material/Description';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import { Card, CardActions, CardHeader, Tooltip } from "@mui/material";
+import DescriptionIcon from "@mui/icons-material/Description";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import { N } from "../../../../domain/models/units/N";
-import { AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
-import { handleClickChildOpen, handleClickDialogOpen, handleKeyDownChildOpen, handleKeyDownDialogOpen } from "./Utils";
+import { ActionIcon, AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
+import {
+    handleClickChildOpen, handleClickDialogOpen,
+    handleKeyDownChildOpen, handleKeyDownDialogOpen
+} from "./Utils";
 
-export type JobNetNode = Node<AjsNode<N>, 'jobnet'>;
+export type JobNetNode = Node<AjsNode<N>, "jobnet">;
 type JobNetNodeProps = NodeProps<JobNetNode>;
-const JobNetNode: FC<JobNetNodeProps> = (props: JobNetNodeProps) => {
 
-    console.log('render JobNetNode.');
+const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
+    console.log("render JobNetNode.");
 
-    const { unitEntity, currentUnitEntity } = props.data;
-    const myself = unitEntity === currentUnitEntity;
+    const { unitEntity, currentUnitEntity } = data;
+    const isCurrentUnit = unitEntity === currentUnitEntity;
 
-    return <>
-        <Card
-            id={unitEntity.id}
-            sx={cardSxProps}
-            raised={myself}
-        >
+    return (
+        <Card id={unitEntity.id} sx={cardSxProps} raised={isCurrentUnit}>
+            {/* header */}
             <Tooltip title={unitEntity.cm?.value()} placement="top">
-                <CardHeader
-                    disableTypography
-                    sx={cardHeaderSxProps}
-                    title={unitEntity.name}
-                />
+                <CardHeader disableTypography sx={cardHeaderSxProps} title={unitEntity.name} />
             </Tooltip>
-            <CardActions
-                disableSpacing
-                sx={cardActionsSxProps}
-            >
-                <Tooltip title='View the unit definition.'>
-                    <IconButton
-                        aria-label="View the unit definition."
-                        size='small'
-                        onClick={handleClickDialogOpen(props.data)}
-                        onKeyDown={handleKeyDownDialogOpen(props.data)}
-                    >
-                        <DescriptionIcon fontSize='inherit' />
-                    </IconButton>
-                </Tooltip>
-                {!myself
-                    && <Tooltip title='Open the jobnet.'>
-                        <IconButton
-                            aria-label="Open the jobnet."
-                            size='small'
-                            onClick={handleClickChildOpen(props.data)}
-                            onKeyDown={handleKeyDownChildOpen(props.data)}
-                        >
-                            <FolderOpenIcon fontSize='inherit' />
-                        </IconButton>
-                    </Tooltip>}
-                {unitEntity.hasSchedule
-                    && <Tooltip title='This job net has schedule.'>
-                        <IconButton
-                            aria-label='This job net has schedule.'
-                            size='small'
-                            disableRipple
-                        >
-                            <ScheduleIcon fontSize='inherit' />
-                        </IconButton>
-                    </Tooltip>
-                }
-                {unitEntity.hasWaitedFor
-                    && <Tooltip title='This jobnet will wait for another unit.'>
-                        <IconButton
-                            aria-label='This jobnet will wait for another unit.'
-                            size='small'
-                            disableRipple
-                        >
-                            <HourglassEmptyIcon fontSize='inherit' />
-                        </IconButton>
-                    </Tooltip>
-                }
+            {/* action */}
+            <CardActions disableSpacing sx={cardActionsSxProps}>
+                <ActionIcon
+                    title="View the unit definition."
+                    ariaLabel="View the unit definition."
+                    onClick={handleClickDialogOpen(data)}
+                    onKeyDown={handleKeyDownDialogOpen(data)}
+                    icon={<DescriptionIcon fontSize="inherit" />}
+                />
+                {!isCurrentUnit && (
+                    <ActionIcon
+                        title="Open the jobnet."
+                        ariaLabel="Open the jobnet."
+                        onClick={handleClickChildOpen(data)}
+                        onKeyDown={handleKeyDownChildOpen(data)}
+                        icon={<FolderOpenIcon fontSize="inherit" />}
+                    />
+                )}
+                {unitEntity.hasSchedule && (
+                    <ActionIcon
+                        title="This job net has schedule."
+                        ariaLabel="This job net has schedule."
+                        icon={<ScheduleIcon fontSize="inherit" />}
+                        disableRipple
+                    />
+                )}
+                {unitEntity.hasWaitedFor && (
+                    <ActionIcon
+                        title="This jobnet will wait for another unit."
+                        ariaLabel="This jobnet will wait for another unit."
+                        icon={<HourglassEmptyIcon fontSize="inherit" />}
+                        disableRipple
+                    />
+                )}
             </CardActions>
-            {unitEntity.isRootJobnet || myself
-                ? undefined
-                : <>
+            {!unitEntity.isRootJobnet && !isCurrentUnit && (
+                <>
                     <Handle type="source" position={Position.Right} />
                     <Handle type="target" position={Position.Left} />
                 </>
-            }
+            )}
         </Card>
-    </>;
+    );
 };
 
 export default memo(JobNetNode);

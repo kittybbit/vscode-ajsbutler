@@ -1,28 +1,32 @@
 import React, { FC, memo } from "react";
 import { Node, NodeProps } from "@xyflow/react";
-import { Card, CardActions, CardHeader, IconButton, Tooltip } from "@mui/material";
+import { Card, CardActions, CardHeader, Tooltip } from "@mui/material";
 import GavelIcon from '@mui/icons-material/Gavel';
 import DescriptionIcon from '@mui/icons-material/Description';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { Rc } from "../../../../domain/models/units/Rc";
-import { AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
-import { handleClickChildOpen, handleClickDialogOpen, handleKeyDownChildOpen, handleKeyDownDialogOpen } from "./Utils";
+import { ActionIcon, AjsNode, cardActionsSxProps, cardHeaderSxProps, cardSxProps } from "./AjsNode";
+import {
+    handleClickChildOpen, handleClickDialogOpen,
+    handleKeyDownChildOpen, handleKeyDownDialogOpen
+} from "./Utils";
 
 export type ConditionNode = Node<AjsNode<Rc>, 'condition'>;
 type ConditionNodeProps = NodeProps<ConditionNode>;
-const ConditionNode: FC<ConditionNodeProps> = (props: ConditionNodeProps) => {
+const ConditionNode: FC<ConditionNodeProps> = ({ data }: ConditionNodeProps) => {
 
     console.log('render ConditionNode.');
 
-    const { unitEntity, currentUnitEntity } = props.data;
+    const { unitEntity, currentUnitEntity } = data;
     const myself = unitEntity === currentUnitEntity;
 
-    return <>
+    return (
         <Card
             id={unitEntity.id}
             sx={cardSxProps}
             raised={myself}
         >
+            {/* header */}
             <Tooltip title={unitEntity.cm?.value()} placement="top">
                 <CardHeader
                     disableTypography
@@ -31,34 +35,29 @@ const ConditionNode: FC<ConditionNodeProps> = (props: ConditionNodeProps) => {
                     sx={cardHeaderSxProps}
                 />
             </Tooltip>
+            {/* action */}
             <CardActions
                 disableSpacing
                 sx={cardActionsSxProps}
             >
-                <Tooltip title='View the unit definition'>
-                    <IconButton
-                        aria-label="View the unit definition"
-                        size='small'
-                        onClick={handleClickDialogOpen(props.data)}
-                        onKeyDown={handleKeyDownDialogOpen(props.data)}
-                    >
-                        <DescriptionIcon fontSize='inherit' />
-                    </IconButton>
-                </Tooltip>
+                <ActionIcon
+                    title="View the unit definition."
+                    ariaLabel="View the unit definition."
+                    onClick={handleClickDialogOpen(data)}
+                    onKeyDown={handleKeyDownDialogOpen(data)}
+                    icon={<DescriptionIcon fontSize="inherit" />}
+                />
                 {!myself
-                    && <Tooltip title='Open the condition.'>
-                        <IconButton
-                            aria-label="Open the condition."
-                            size='small'
-                            onClick={handleClickChildOpen(props.data)}
-                            onKeyDown={handleKeyDownChildOpen(props.data)}
-                        >
-                            <FolderOpenIcon fontSize='inherit' />
-                        </IconButton>
-                    </Tooltip>}
+                    && <ActionIcon
+                        title="Open the condition."
+                        ariaLabel="Open the condition."
+                        onClick={handleClickChildOpen(data)}
+                        onKeyDown={handleKeyDownChildOpen(data)}
+                        icon={<FolderOpenIcon fontSize='inherit' />}
+                    />}
             </CardActions>
         </Card>
-    </>;
+    );
 };
 
 export default memo(ConditionNode);

@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import { initReactPanel } from './ReactPanel';
-import { debounceCreateDataFn, EventType, readyFn, ResourceEventType, resourceFn, save, SaveEventType } from '../../domain/services/events/Events';
+import { debounceCreateDataFn, readyFn } from '../../domain/services/events/ready';
+import { resourceFn } from '../../domain/services/events/resource';
+import { save } from '../../domain/services/events/save';
+import { EventType, ResourceEventType, SaveEventType } from '../../domain/services/events/event.types';
 
 /**
  * Provider for JP1/AJS table viewr.
