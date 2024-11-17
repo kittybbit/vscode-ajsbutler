@@ -1,192 +1,200 @@
 import React, { FC, Fragment, memo, useEffect, useRef } from 'react';
-import { UnitEntity } from '../../../domain/models/units/UnitEntities';
+import {
+    Accordion, AccordionDetails, AccordionSummary, Divider, Drawer,
+    FormControlLabel, IconButton, List, ListItem, Stack,
+    Switch, Toolbar, Tooltip, Typography, useTheme,
+} from '@mui/material';
 import { Column, Table as ReactTable } from '@tanstack/table-core';
-import { Accordion, AccordionDetails, AccordionSummary, Divider, Drawer, FormControlLabel, IconButton, List, ListItem, Stack, Switch, Toolbar, Tooltip, Typography, useTheme } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ToggleOff from '@mui/icons-material/ToggleOff';
 import ToggleOn from '@mui/icons-material/ToggleOn';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { useMyAppContext } from '../MyContexts';
 import { localeMap } from '../../../domain/services/i18n/nls';
 import { DrawerWidthStateType, TableMenuStateType } from './TableContents';
 
 type DisplayColumnSelectorProps = {
-    table: ReactTable<UnitEntity>,
-    tableMenuState: TableMenuStateType,
-    drawerWidthState: DrawerWidthStateType,
+    table: ReactTable<UnitEntity>;
+    tableMenuState: TableMenuStateType;
+    drawerWidthState: DrawerWidthStateType;
 };
 
-const handleClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
+const ColumnSwitch: FC<{
+    column: Column<UnitEntity, unknown>;
+    label: string;
+}> = ({ column, label }) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        column.getLeafColumns().forEach((col) => col.getToggleVisibilityHandler()(event));
+    };
+
+    const isChecked = column
+        .getLeafColumns()
+        .some((col) => col.getIsVisible());
+
+    return (
+        <FormControlLabel
+            control={
+                <Switch
+                    size="small"
+                    onChange={handleChange}
+                    checked={isChecked}
+                />
+            }
+            label={<Typography variant="body2">{label}</Typography>}
+            sx={{ width: '100%' }}
+        />
+    );
 };
 
-const handleChangeHeader = (column: Column<UnitEntity, unknown>) => (event: React.ChangeEvent) => {
-    column.getLeafColumns()
-        .forEach(column => column.getToggleVisibilityHandler()(event));
-};
+const ColumnDetail: FC<{ column: Column<UnitEntity, unknown> }> = ({ column }) => {
+    const subColumns = column.columns.filter((col) => col.columnDef.enableHiding);
 
-const handlCheckedHeader = (column: Column<UnitEntity, unknown>) => {
-    return column.getLeafColumns()
-        .reduce((accumurator, currentValue) => accumurator || currentValue.getIsVisible(), false);
-};
+    if (!subColumns.length) return null;
 
-const createDetail = (column1: Column<UnitEntity, unknown>) => {
-    return <List sx={{ marginLeft: '0.5em' }}>
-        {
-            column1.columns
-                .filter(column2 => column2.columnDef.enableHiding)
-                .map((column2, index) => {
-                    const header = column2.getLeafColumns()
-                        .filter(column3 => column3.columnDef.enableHiding)
-                        .map(column3 => <ListItem
-                            key={column3.id}
-                            dense
-                        >
-                            <FormControlLabel
-                                control={<Switch
-                                    size='small'
-                                    onChange={handleChangeHeader(column3)}
-                                    checked={handlCheckedHeader(column3)}
-                                    sx={{
-                                        fontSize: (theme) => theme.typography.body2.fontSize,
-                                    }}
-                                />}
-                                label={<Typography variant='body2'>{column3.columnDef.header as string}</Typography>}
-                                sx={{ width: '100%' }}
-                            />
-                        </ListItem>);
-                    if (column2.columns.length > 1) {
-                        return <Fragment key={column2.id}>
-                            <Divider
-                                sx={{
-                                    marginTop: index > 0 ? '0.5em' : null,
-                                    fontSize: (theme) => theme.typography.body2.fontSize,
-                                }}
-                            >
-                                <Typography variant='body2'>
-                                    {column2.columnDef.header as string}
-                                </Typography>
+    return (
+        <List sx={{ marginLeft: '0.5em' }}>
+            {subColumns.map((subColumn) => (
+                <Fragment key={subColumn.id}>
+                    {subColumn.columns.length > 1 ? (
+                        <>
+                            <Divider sx={{ marginTop: '0.5em' }}>
+                                <Typography variant="body2">{subColumn.columnDef.header as string}</Typography>
                             </Divider>
-                            <List sx={{ marginLeft: '0.5em' }} dense>
-                                {header}
+                            <List sx={{ marginLeft: '0.5em' }}>
+                                {subColumn.columns
+                                    .filter((col) => col.columnDef.enableHiding)
+                                    .map((leafColumn) => (
+                                        <ListItem key={leafColumn.id} dense>
+                                            <ColumnSwitch
+                                                column={leafColumn}
+                                                label={leafColumn.columnDef.header as string}
+                                            />
+                                        </ListItem>
+                                    ))}
                             </List>
-                        </Fragment>
-                    }
-                    return header;
-                })
-        }
-    </List>
+                        </>
+                    ) : (
+                        <ListItem dense>
+                            <ColumnSwitch
+                                column={subColumn}
+                                label={subColumn.columnDef.header as string}
+                            />
+                        </ListItem>
+                    )}
+                </Fragment>
+            ))}
+        </List>
+    );
 };
 
-const createContents = (column1: Column<UnitEntity, unknown>) => {
-    return <Accordion key={column1.id}>
+const ColumnAccordion: FC<{ column: Column<UnitEntity, unknown> }> = ({ column }) => (
+    <Accordion>
         <AccordionSummary expandIcon={<ExpandMore />}>
             <Switch
-                size='small'
-                onClick={handleClick}
-                onChange={handleChangeHeader(column1)}
-                checked={handlCheckedHeader(column1)}
+                size="small"
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) =>
+                    column
+                        .getLeafColumns()
+                        .forEach((col) => col.getToggleVisibilityHandler()(e))
+                }
+                checked={column.getLeafColumns().some((col) => col.getIsVisible())}
             />
             <Divider
-                orientation='vertical'
+                orientation="vertical"
                 flexItem
-                sx={{
-                    marginLeft: '0.5em',
-                    marginRight: '0.5em',
-                    fontSize: (theme) => theme.typography.body2.fontSize,
-                }} />
-            <Typography variant='body2'>{column1.columnDef.header as string}</Typography>
+                sx={{ marginLeft: '0.5em', marginRight: '0.5em' }}
+            />
+            <Typography variant="body2">{column.columnDef.header as string}</Typography>
         </AccordionSummary>
-        <AccordionDetails>{createDetail(column1)}</AccordionDetails>
+        <AccordionDetails>
+            <ColumnDetail column={column} />
+        </AccordionDetails>
     </Accordion>
-};
+);
 
-const createSelectItems = (table: ReactTable<UnitEntity>) => {
-    return table.getAllColumns()
-        .filter(column1 => column1.columnDef.enableHiding)
-        .map(createContents);
-};
-
-const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({ table, tableMenuState, drawerWidthState }) => {
-
-    console.log('render DisplayColumnSelector.');
-
+const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
+    table,
+    tableMenuState,
+    drawerWidthState,
+}) => {
     const { lang } = useMyAppContext();
     const { menuStatus, setMenuStatus } = tableMenuState;
     const { setDrawerWidth } = drawerWidthState;
 
     const theme = useTheme();
-
-    const toggleDrawer = (open: boolean) =>
-        (e: React.KeyboardEvent | React.MouseEvent) => {
-            if (e.type === 'keydown' &&
-                ((e as React.KeyboardEvent).key === 'Tab' ||
-                    (e as React.KeyboardEvent).key === 'Shift')
-            ) {
-                return;
-            }
-            setDrawerWidth(() => 0);
-            setMenuStatus((prev) => ({ ...prev, menuItem1: open }));
-        };
-
     const drawerRef = useRef<HTMLDivElement>(null);
-    useEffect(
-        () => setDrawerWidth(() => drawerRef.current ? drawerRef.current.offsetWidth : 0)
-        , []
-    );
+
+    useEffect(() => {
+        if (drawerRef.current) {
+            setDrawerWidth(drawerRef.current.offsetWidth);
+        }
+    }, [setDrawerWidth]);
+
+    const toggleDrawer = (open: boolean) => () => {
+        setDrawerWidth(0);
+        setMenuStatus((prev) => ({ ...prev, menuItem1: open }));
+    };
+
+    const visibleColumns = table
+        .getAllColumns()
+        .filter((col) => col.columnDef.enableHiding);
 
     return (
-        <>
-            <Drawer
-                anchor='left'
-                variant="persistent"
-                open={menuStatus ? menuStatus.menuItem1 : false}
-                onClose={toggleDrawer(false)}
+        <Drawer
+            anchor="left"
+            variant="persistent"
+            open={menuStatus?.menuItem1 ?? false}
+            onClose={toggleDrawer(false)}
+            sx={{ flexShrink: 0 }}
+        >
+            <Toolbar
+                ref={drawerRef}
                 sx={{
-                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: theme.spacing(0, 1),
+                    ...theme.mixins.toolbar,
+                    justifyContent: 'flex-end',
                 }}
             >
-                <Toolbar
-                    ref={drawerRef}
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: theme.spacing(0, 1),
-                        ...theme.mixins.toolbar,
-                        justifyContent: 'flex-end',
-                    }}>
-                    <IconButton onClick={toggleDrawer(false)}>
-                        {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                <IconButton onClick={toggleDrawer(false)}>
+                    {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                </IconButton>
+            </Toolbar>
+            <Stack direction="row" spacing={2} justifyContent="center">
+                <Tooltip
+                    arrow
+                    title={localeMap('table.columnSelectSidebar.invisibleAll', lang)}
+                >
+                    <IconButton
+                        aria-label={localeMap('table.columnSelectSidebar.invisibleAll', lang)}
+                        size="small"
+                        onClick={() => table.toggleAllColumnsVisible(false)}
+                    >
+                        <ToggleOff fontSize="large" color="disabled" />
                     </IconButton>
-                </Toolbar>
-                <Stack direction='row' spacing={2} justifyContent='center'>
-                    <Tooltip arrow title={localeMap('table.columnSelectSidebar.invisibleAll', lang)}>
-                        <IconButton
-                            aria-label={localeMap('table.columnSelectSidebar.invisibleAll', lang)}
-                            size='small'
-                            onClick={() => {
-                                table.toggleAllColumnsVisible(false);
-                            }}
-                        >
-                            <ToggleOff fontSize='large' color='disabled' />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip arrow title={localeMap('table.columnSelectSidebar.visibleAll', lang)}>
-                        <IconButton
-                            aria-label={localeMap('table.columnSelectSidebar.visibleAll', lang)}
-                            size='small'
-                            onClick={() => {
-                                table.toggleAllColumnsVisible(true);
-                            }}
-                        >
-                            <ToggleOn fontSize='large' color='primary' />
-                        </IconButton>
-                    </Tooltip>
-                </Stack>
-                {createSelectItems(table)}
-            </Drawer>
-        </>
+                </Tooltip>
+                <Tooltip
+                    arrow
+                    title={localeMap('table.columnSelectSidebar.visibleAll', lang)}
+                >
+                    <IconButton
+                        aria-label={localeMap('table.columnSelectSidebar.visibleAll', lang)}
+                        size="small"
+                        onClick={() => table.toggleAllColumnsVisible(true)}
+                    >
+                        <ToggleOn fontSize="large" color="primary" />
+                    </IconButton>
+                </Tooltip>
+            </Stack>
+            {visibleColumns.map((column) => (
+                <ColumnAccordion key={column.id} column={column} />
+            ))}
+        </Drawer>
     );
-}
+};
+
 export default memo(DisplayColumnSelector);
