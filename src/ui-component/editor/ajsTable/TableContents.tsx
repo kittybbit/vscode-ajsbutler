@@ -11,10 +11,10 @@ import VirtualizedTable from './VirtualizedTable';
 import { Unit } from '../../../domain/values/Unit';
 import { UnitEntity } from '../../../domain/models/units/UnitEntities';
 import { flattenChildren, tyFactory } from '../../../domain/utils/TyUtils';
-import { Parameter } from '../../../domain/models/parameters/ParameterEntities';
 import DisplayColumnSelector from './DisplayColumnSelector';
 import { AccessorType } from './columnDefs/common';
 import UnitEntityDialog from '../UnitEntityDialog';
+import Parameter from '../../../domain/models/parameters/Parameter';
 
 const normalizeValue = (v: unknown) => v instanceof Parameter ? v.value() : String(v);
 const ajsGlobalFilterFn = (

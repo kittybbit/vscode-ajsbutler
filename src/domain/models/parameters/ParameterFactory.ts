@@ -1,6 +1,46 @@
 import { isParamSymbol } from '../../values/AjsType';
-import { Ab, Abr, Ar, Cd, Cftd, Cgs, Cl, Cm, Cmaif, Cmsts, Cond, Cty, Cy, Da, De, Ed, Ega, Ej, Ejc, Ejf, Ejg, Ejh, Eji, Ejl, Ejm, Ejn, Ejs, Ejt, Eju, Ejv, El, Env, Etm, Etn, Ets, Eu, Eun, Ev, Evdet, Evesc, Evgid, Evgrp, Evhst, Evipa, Evpid, Evsfr, Evsid, Evsms, Evspl, Evsrc, Evsrt, Evssv, Evtmc, Evuid, Evusr, Evwfr, Evwid, Evwms, Evwsv, Ex, Ey, F, Fd, Flco, Flwc, Flwf, Flwi, Fxg, Gty, Ha, Htcdm, Htcfl, Htexm, Htknd, Htrbf, Htrhf, Htrqf, Htrqm, Htrqu, Htspt, Htstf, Jc, Jd, Jdf, Jpoif, Jty, Lfcre, Lfdft, Lffnm, Lfhds, Lfmks, Lfmxl, Lfrft, Lfsiv, Lfsrc, Lftpd, Ln, Mcs, Md, Mh, Mladr, Mlafl, Mlatf, Mlftx, Mllst, Mlprf, Mlsav, Mlsbj, Mlsfd, Mlstx, Mltxt, Mm, Mp, Mqcor, Mqdsc, Mqeqn, Mqhld, Mqmdl, Mqmdn, Mqmfn, Mqmgr, Mqpgm, Mqpri, Mqprm, Mqque, Mqsfn, Ms, Msapl, Mshld, Msjnl, Mslbl, Mslmt, Msmod, Mspri, Msqlb, Msqpt, Msrer, Mssvf, Mstfn, Msttp, Msunr, Mu, Ncex, Nchn, Ncl, Ncn, Ncr, Ncs, Ncsv, Ni, Nmg, Ntcls, Ntdis, Nteid, Ntevt, Ntlgt, Ntncl, Ntnei, Ntnsr, Ntolg, Ntsrc, Op, ParamBase, Pfm, Pr, Prm, Pwlf, Pwlt, Pwrf, Pwrh, Pwrn, Pwrp, Pwrr, Pwrw, Qm, Qu, Rec, Rei, Req, Rg, Rh, Rje, Rjs, Rule, Sc, Sd, Sdd, Se, Sea, Sh, Shd, Si, So, Soa, St, Stt, Sy, Sz, T, Td1, Td2, Td3, Td4, Te, Tho, Tmitv, Top1, Top2, Top3, Top4, Ts1, Ts2, Ts3, Ts4, Ty, Uem, Un, Unit, Wc, Wkp, Wt, Wth } from './ParameterEntities';
+import {
+    Ab, Abr, Ar,
+    Cd, Cftd, Cgs, Cl, Cm, Cmaif, Cmsts, Cond, Cty, Cy,
+    Da, De,
+    Ed, Ega, Ej, Ejc, Ejf, Ejg, Ejh, Eji, Ejl, Ejm,
+    Ejn, Ejs, Ejt, Eju, Ejv, El, Env, Etm, Etn, Ets,
+    Eu, Eun, Ev, Evdet, Evesc, Evgid, Evgrp, Evhst, Evipa, Evpid,
+    Evsfr, Evsid, Evsms, Evspl, Evsrc, Evsrt, Evssv, Evtmc, Evuid, Evusr,
+    Evwfr, Evwid, Evwms, Evwsv, Ex, Ey,
+    F, Fd, Flco, Flwc, Flwf, Flwi, Fxg,
+    Gty,
+    Ha, Htcdm, Htcfl, Htexm, Htknd, Htrbf, Htrhf, Htrqf, Htrqm, Htrqu,
+    Htspt, Htstf,
+    Jc, Jd, Jdf, Jpoif, Jty,
+    Lfcre, Lfdft, Lffnm, Lfhds, Lfmks, Lfmxl, Lfrft, Lfsiv, Lfsrc, Lftpd,
+    Ln,
+    Mcs, Md, Mh, Mladr, Mlafl, Mlatf, Mlftx, Mllst, Mlprf, Mlsav,
+    Mlsbj, Mlsfd, Mlstx, Mltxt, Mm, Mp, Mqcor, Mqdsc, Mqeqn, Mqhld,
+    Mqmdl, Mqmdn, Mqmfn, Mqmgr, Mqpgm, Mqpri, Mqprm, Mqque, Mqsfn, Ms,
+    Msapl, Mshld, Msjnl, Mslbl, Mslmt, Msmod, Mspri, Msqlb, Msqpt, Msrer,
+    Mssvf, Mstfn, Msttp, Msunr, Mu,
+    Ncex, Nchn, Ncl, Ncn, Ncr, Ncs, Ncsv, Ni, Nmg, Ntcls,
+    Ntdis, Nteid, Ntevt, Ntlgt, Ntncl, Ntnei, Ntnsr, Ntolg, Ntsrc,
+    Op,
+    Pfm, Pr, Prm, Pwlf, Pwlt, Pwrf, Pwrh, Pwrn, Pwrp, Pwrr,
+    Pwrw,
+    Qm, Qu,
+    Rec, Rei, Req, Rg, Rh, Rje, Rjs,
+    Sc, Sd, Sdd, Se, Sea, Sh, Shd, Si, So, Soa,
+    St, Stt, Sy, Sz,
+    T, Td1, Td2, Td3, Td4, Te, Tho, Tmitv, Top1, Top2,
+    Top3, Top4, Ts1, Ts2, Ts3, Ts4, Ty,
+    Uem, Un, Unit,
+    Wc, Wkp, Wt, Wth
+} from '../parameters';
+import { Cj } from '../units/Cj';
+import { J } from '../units/J';
+import { N } from '../units/N';
 import { UnitEntity } from '../units/UnitEntities';
+import { DEFAULTS } from './Defaults';
+import { ParamBase } from './parameter.types';
+import Rule from './Rule';
 
 type ParamArg = ParamBase & {
     'inherit'?: boolean; // need to get parent value
@@ -32,19 +72,19 @@ const adjustToSdItemCount = (sd: Array<Sd> | undefined, param: Array<Exclude<Rul
 }
 
 export class ParamFactory {
-    static ab(unit: UnitEntity, defaultRawValue: string) {
+    static ab(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ab',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Ab
         });
         return param ? new Ab(param) : undefined;
     }
-    static abr(unit: UnitEntity, defaultRawValue: string) {
+    static abr(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'abr',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Abr
         });
         return param ? new Abr(param) : undefined;
     }
@@ -55,19 +95,19 @@ export class ParamFactory {
         });
         return params ? params.map(param => new Ar(param)) : undefined;
     }
-    static cd(unit: UnitEntity, defaultRawValue: string) {
+    static cd(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'cd',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Cd
         });
         return param ? new Cd(param) : undefined;
     }
-    static cftd(unit: UnitEntity, defaultRawValue: string) {
+    static cftd(unit: UnitEntity) {
         const params = this.#checkAndGetArray({
             'unit': unit,
             'parameter': 'cftd',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Cftd
         });
         const values = params ? params.map(param => new Cftd(param)).sort((a, b) => a.rule - b.rule) : undefined;
         // adjust
@@ -75,15 +115,15 @@ export class ParamFactory {
             'unit': unit,
             'parameter': 'cftd',
             'inherited': false,
-            'defaultRawValue': `${rule},${defaultRawValue}`,
+            'defaultRawValue': `${rule},${DEFAULTS.Cftd}`,
             'position': -1,
         }));
     }
-    static cgs(unit: UnitEntity, defaultRawValue: string) {
+    static cgs(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'cgs',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Cgs
         });
         return param ? new Cgs(param) : undefined;
     }
@@ -116,11 +156,11 @@ export class ParamFactory {
         });
         return param ? new Cmsts(param) : undefined;
     }
-    static cond(unit: UnitEntity, defaultRawValue: string) {
+    static cond(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'cond',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Cond
         });
         return param ? new Cond(param) : undefined;
     }
@@ -153,11 +193,11 @@ export class ParamFactory {
         });
         return param ? new Da(param) : undefined;
     }
-    static de(unit: UnitEntity, defaultRawValue: string) {
+    static de(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'de',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.De
         });
         return param ? new De(param) : undefined;
     }
@@ -168,27 +208,27 @@ export class ParamFactory {
         });
         return param ? new Ed(param) : undefined;
     }
-    static ega(unit: UnitEntity, defaultRawValue: string) {
+    static ega(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ega',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Ega
         });
         return param ? new Ega(param) : undefined;
     }
-    static ej(unit: UnitEntity, defaultRawValue: string) {
+    static ej(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ej',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Ej
         });
         return param ? new Ej(param) : undefined;
     }
-    static ejc(unit: UnitEntity, defaultRawValue: string) {
+    static ejc(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ejc',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Ejc
         });
         return param ? new Ejc(param) : undefined;
     }
@@ -213,11 +253,11 @@ export class ParamFactory {
         });
         return param ? new Ejh(param) : undefined;
     }
-    static eji(unit: UnitEntity, defaultRawValue: string) {
+    static eji(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'eji',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Eji
         });
         return param ? new Eji(param) : undefined;
     }
@@ -228,11 +268,11 @@ export class ParamFactory {
         });
         return param ? new Ejl(param) : undefined;
     }
-    static ejm(unit: UnitEntity, defaultRawValue: string) {
+    static ejm(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ejm',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Ejm
         });
         return param ? new Ejm(param) : undefined;
     }
@@ -257,11 +297,11 @@ export class ParamFactory {
         });
         return param ? new Ejt(param) : undefined;
     }
-    static eju(unit: UnitEntity, defaultRawValue: string) {
+    static eju(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'eju',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Eju
         });
         return param ? new Eju(param) : undefined;
     }
@@ -293,27 +333,27 @@ export class ParamFactory {
         });
         return param ? new Etm(param) : undefined;
     }
-    static etn(unit: UnitEntity, defaultRawValue: string) {
+    static etn(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'etn',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Etn,
         });
         return param ? new Etn(param) : undefined;
     }
-    static ets(unit: UnitEntity, defaultRawValue: string) {
+    static ets(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ets',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Ets,
         });
         return param ? new Ets(param) : undefined;
     }
-    static eu(unit: UnitEntity, defaultRawValue: string) {
+    static eu(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'eu',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Eu
         });
         return param ? new Eu(param) : undefined;
     }
@@ -338,11 +378,11 @@ export class ParamFactory {
         });
         return param ? new Evdet(param) : undefined;
     }
-    static evesc(unit: UnitEntity, defaultRawValue: string) {
+    static evesc(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'evesc',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Evesc,
         });
         return param ? new Evesc(param) : undefined;
     }
@@ -402,43 +442,43 @@ export class ParamFactory {
         });
         return param ? new Evsms(param) : undefined;
     }
-    static evspl(unit: UnitEntity, defaultRawValue: string) {
+    static evspl(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'evspl',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Evspl,
         });
         return param ? new Evspl(param) : undefined;
     }
-    static evsrc(unit: UnitEntity, defaultRawValue: string) {
+    static evsrc(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'evsrc',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Evsrc,
         });
         return param ? new Evsrc(param) : undefined;
     }
-    static evsrt(unit: UnitEntity, defaultRawValue: string) {
+    static evsrt(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'evsrt',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Evsrt,
         });
         return param ? new Evsrt(param) : undefined;
     }
-    static evssv(unit: UnitEntity, defaultRawValue: string) {
+    static evssv(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'evssv',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Evssv,
         });
         return param ? new Evssv(param) : undefined;
     }
-    static evtmc(unit: UnitEntity, defaultRawValue: string) {
+    static evtmc(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'evtmc',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Evtmc,
         });
         return param ? new Evtmc(param) : undefined;
     }
@@ -520,19 +560,19 @@ export class ParamFactory {
         });
         return param ? new Fd(param) : undefined;
     }
-    static flco(unit: UnitEntity, defaultRawValue: string) {
+    static flco(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'flco',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Flco,
         });
         return param ? new Flco(param) : undefined;
     }
-    static flwc(unit: UnitEntity, defaultRawValue: string) {
+    static flwc(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'flwc',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Flwc,
         });
         return param ? new Flwc(param) : undefined;
     }
@@ -543,35 +583,35 @@ export class ParamFactory {
         });
         return param ? new Flwf(param) : undefined;
     }
-    static flwi(unit: UnitEntity, defaultRawValue: string) {
+    static flwi(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'flwi',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Flwi,
         });
         return param ? new Flwi(param) : undefined;
     }
-    static fxg(unit: UnitEntity, defaultRawValue: string) {
+    static fxg(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'fxg',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Fxg,
         });
         return param ? new Fxg(param) : undefined;
     }
-    static gty(unit: UnitEntity, defaultRawValue: string) {
+    static gty(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'gty',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Gty
         });
         return param ? new Gty(param) : undefined;
     }
-    static ha(unit: UnitEntity, defaultRawValue: string) {
+    static ha(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ha',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Ha
         });
         return param ? new Ha(param) : undefined;
     }
@@ -589,19 +629,19 @@ export class ParamFactory {
         });
         return param ? new Htcfl(param) : undefined;
     }
-    static htexm(unit: UnitEntity, defaultRawValue: string) {
+    static htexm(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'htexm',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Htexm,
         });
         return param ? new Htexm(param) : undefined;
     }
-    static htknd(unit: UnitEntity, defaultRawValue: string) {
+    static htknd(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'htknd',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Htknd,
         });
         return param ? new Htknd(param) : undefined;
     }
@@ -640,11 +680,11 @@ export class ParamFactory {
         });
         return param ? new Htrqu(param) : undefined;
     }
-    static htspt(unit: UnitEntity, defaultRawValue: string) {
+    static htspt(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'htspt',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Htspt,
         });
         return param ? new Htspt(param) : undefined;
     }
@@ -662,11 +702,11 @@ export class ParamFactory {
         });
         return param ? new Jc(param) : undefined;
     }
-    static jd(unit: UnitEntity, defaultRawValue: string) {
+    static jd(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'jd',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Jd
         });
         return param ? new Jd(param) : undefined;
     }
@@ -684,11 +724,11 @@ export class ParamFactory {
         });
         return params ? params.map(param => new Jpoif(param)) : undefined;
     }
-    static jty(unit: UnitEntity, defaultRawValue: string) {
+    static jty(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'jty',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Jty
         });
         return param ? new Jty(param) : undefined;
     }
@@ -769,20 +809,20 @@ export class ParamFactory {
         });
         return params ? params.map(param => new Ln(param)).sort((a, b) => a.rule - b.rule) : undefined;
     }
-    static mcs(unit: UnitEntity, defaultRawValue: string) {
+    static mcs(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'mcs',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Mcs
         });
         return param ? new Mcs(param) : undefined;
     }
-    static md(unit: UnitEntity, defaultRawValue: string) {
+    static md(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'md',
             'inherit': true,
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Md
         });
         return param ? new Md(param) : undefined;
     }
@@ -835,11 +875,11 @@ export class ParamFactory {
         });
         return param ? new Mlprf(param) : undefined;
     }
-    static mlsav(unit: UnitEntity, defaultRawValue: string) {
+    static mlsav(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'mlsav',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Mlsav,
         });
         return param ? new Mlsav(param) : undefined;
     }
@@ -871,19 +911,19 @@ export class ParamFactory {
         });
         return params ? params.map(param => new Mltxt(param)) : undefined;
     }
-    static mm(unit: UnitEntity, defaultRawValue: string) {
+    static mm(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'mm',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Mm
         });
         return param ? new Mm(param) : undefined;
     }
-    static mp(unit: UnitEntity, defaultRawValue: string) {
+    static mp(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'mp',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Mp,
         });
         return param ? new Mp(param) : undefined;
     }
@@ -978,11 +1018,11 @@ export class ParamFactory {
         });
         return param ? new Mqsfn(param) : undefined;
     }
-    static ms(unit: UnitEntity, defaultRawValue: string) {
+    static ms(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ms',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Ms
         });
         return param ? new Ms(param) : undefined;
     }
@@ -1143,20 +1183,20 @@ export class ParamFactory {
         });
         return param ? new Ncsv(param) : undefined;
     }
-    static ni(unit: UnitEntity, defaultRawValue: string) {
+    static ni(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'ni',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Ni,
             'inherit': true
         });
         return param ? new Ni(param) : undefined;
     }
-    static nmg(unit: UnitEntity, defaultRawValue: string) {
+    static nmg(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'nmg',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Nmg
         });
         return param ? new Nmg(param) : undefined;
     }
@@ -1238,19 +1278,19 @@ export class ParamFactory {
         });
         return params ? params.map(param => new Op(param)) : undefined;
     }
-    static pfm(unit: UnitEntity, defaultRawValue: string) {
+    static pfm(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'pfm',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Pfm,
         });
         return param ? new Pfm(param) : undefined;
     }
-    static pr(unit: UnitEntity, defaultRawValue: string) {
+    static pr(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'pr',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Pr,
             'inherit': true
         });
         return param ? new Pr(param) : undefined;
@@ -1332,19 +1372,19 @@ export class ParamFactory {
         });
         return param ? new Qu(param) : undefined;
     }
-    static rec(unit: UnitEntity, defaultRawValue: string) {
+    static rec(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'rec',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Rec
         });
         return param ? new Rec(param) : undefined;
     }
-    static rei(unit: UnitEntity, defaultRawValue: string) {
+    static rei(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'rei',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Rei
         });
         return param ? new Rei(param) : undefined;
     }
@@ -1355,11 +1395,11 @@ export class ParamFactory {
         });
         return param ? new Req(param) : undefined;
     }
-    static rg(unit: UnitEntity, defaultRawValue?: string) {
+    static rg(unit: N) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'rg',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': unit.isRootJobnet ? DEFAULTS.Rg : undefined,
             'inherit': true
         });
         return param ? new Rg(param) : undefined;
@@ -1392,19 +1432,19 @@ export class ParamFactory {
         });
         return param ? new Sc(param) : undefined;
     }
-    static sd(unit: UnitEntity, defaultRawValue?: string) {
+    static sd(unit: N) {
         const params = this.#checkAndGetArray({
             'unit': unit,
             'parameter': 'sd',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': unit.isRootJobnet ? DEFAULTS.Sd : undefined
         });
         return params ? params.map(param => new Sd(param)).sort((a, b) => a.rule - b.rule) : undefined;
     }
-    static sdd(unit: UnitEntity, defaultRawValue: string) {
+    static sdd(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'sdd',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Sdd,
             'inherit': true,
         });
         return param ? new Sdd(param) : undefined;
@@ -1416,11 +1456,11 @@ export class ParamFactory {
         });
         return param ? new Se(param) : undefined;
     }
-    static sea(unit: UnitEntity, defaultRawValue: string) {
+    static sea(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'sea',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Sea
         });
         return param ? new Sea(param) : undefined;
     }
@@ -1439,11 +1479,11 @@ export class ParamFactory {
             'position': -1,
         }));
     }
-    static shd(unit: UnitEntity, defaultRawValue: string) {
+    static shd(unit: UnitEntity) {
         const params = this.#checkAndGetArray({
             'unit': unit,
             'parameter': 'shd',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.Shd,
         });
         const values = params ? params.map(param => new Shd(param)).sort((a, b) => a.rule - b.rule) : undefined;
         // adjust
@@ -1451,7 +1491,7 @@ export class ParamFactory {
             'unit': unit,
             'parameter': 'shd',
             'inherited': false,
-            'defaultRawValue': `${rule},${defaultRawValue}`,
+            'defaultRawValue': `${rule},${DEFAULTS.Shd}`,
             'position': -1,
         }));
     }
@@ -1469,19 +1509,19 @@ export class ParamFactory {
         });
         return param ? new So(param) : undefined;
     }
-    static soa(unit: UnitEntity, defaultRawValue: string) {
+    static soa(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'soa',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Soa
         });
         return param ? new Soa(param) : undefined;
     }
-    static st(unit: UnitEntity, defaultRawValue: string) {
+    static st(unit: UnitEntity) {
         const params = this.#checkAndGetArray({
             'unit': unit,
             'parameter': 'st',
-            'defaultRawValue': defaultRawValue,
+            'defaultRawValue': DEFAULTS.St,
         });
         const values = params ? params.map(param => new St(param)).sort((a, b) => a.rule - b.rule) : undefined;
         // adjust
@@ -1489,16 +1529,16 @@ export class ParamFactory {
             'unit': unit,
             'parameter': 'st',
             'inherited': false,
-            'defaultRawValue': `${rule},${defaultRawValue}`,
+            'defaultRawValue': `${rule},${DEFAULTS.St}`,
             'position': -1,
         }));
     }
-    static stt(unit: UnitEntity, defaultRawValue: string) {
+    static stt(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'stt',
             'inherit': true,
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Stt
         });
         return param ? new Stt(param) : undefined;
     }
@@ -1566,11 +1606,11 @@ export class ParamFactory {
         });
         return param ? new Te(param) : undefined;
     }
-    static tho(unit: UnitEntity, defaultRawValue: string) {
+    static tho(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'tho',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Tho
         });
         return param ? new Tho(param) : undefined;
     }
@@ -1581,35 +1621,42 @@ export class ParamFactory {
         });
         return param ? new Tmitv(param) : undefined;
     }
-    static top1(unit: UnitEntity, defaultRawValue: string) {
+    static #top(unit: J | Cj, i: 1 | 2 | 3 | 4): string {
+        return unit[`ts${i}`] && this[`td${i}`]
+            ? 'sav'
+            : this[`ts${i}`] && !this[`td${i}`]
+                ? 'del'
+                : '';
+    }
+    static top1(unit: J | Cj) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'top1',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': this.#top(unit, 1)
         });
         return param ? new Top1(param) : undefined;
     }
-    static top2(unit: UnitEntity, defaultRawValue: string) {
+    static top2(unit: J | Cj) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'top2',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': this.#top(unit, 2)
         });
         return param ? new Top2(param) : undefined;
     }
-    static top3(unit: UnitEntity, defaultRawValue: string) {
+    static top3(unit: J | Cj) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'top3',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': this.#top(unit, 3)
         });
         return param ? new Top3(param) : undefined;
     }
-    static top4(unit: UnitEntity, defaultRawValue: string) {
+    static top4(unit: J | Cj) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'top4',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': this.#top(unit, 4)
         });
         return param ? new Top4(param) : undefined;
     }
@@ -1652,11 +1699,11 @@ export class ParamFactory {
             throw new Error('Ty parameter should be specified.');
         }
     }
-    static uem(unit: UnitEntity, defaultRawValue: string) {
+    static uem(unit: UnitEntity) {
         const param = this.#checkAndGet({
             'unit': unit,
             'parameter': 'uem',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Uem
         });
         return param ? new Uem(param) : undefined;
     }
@@ -1674,11 +1721,11 @@ export class ParamFactory {
         });
         return param ? new Unit(param) : undefined;
     }
-    static wc(unit: UnitEntity, defaultRawValue: string) {
+    static wc(unit: UnitEntity) {
         const params = this.#checkAndGetArray({
             'unit': unit,
             'parameter': 'wc',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Wc
         });
         const values = params ? params.map(param => new Wc(param)).sort((a, b) => a.rule - b.rule) : undefined;
         // adjust
@@ -1686,7 +1733,7 @@ export class ParamFactory {
             'unit': unit,
             'parameter': 'wc',
             'inherited': false,
-            'defaultRawValue': `${rule},${defaultRawValue}`,
+            'defaultRawValue': `${rule},${DEFAULTS.Wc}`,
             'position': -1,
         }));
     }
@@ -1697,11 +1744,11 @@ export class ParamFactory {
         });
         return param ? new Wkp(param) : undefined;
     }
-    static wt(unit: UnitEntity, defaultRawValue: string) {
+    static wt(unit: UnitEntity) {
         const params = this.#checkAndGetArray({
             'unit': unit,
             'parameter': 'wt',
-            'defaultRawValue': defaultRawValue
+            'defaultRawValue': DEFAULTS.Wt
         });
         const values = params ? params.map(param => new Wt(param)).sort((a, b) => a.rule - b.rule) : undefined;
         // adjust
@@ -1709,7 +1756,7 @@ export class ParamFactory {
             'unit': unit,
             'parameter': 'wt',
             'inherited': false,
-            'defaultRawValue': `${rule},${defaultRawValue}`,
+            'defaultRawValue': `${rule},${DEFAULTS.Wt}`,
             'position': -1,
         }));
     }

@@ -3,9 +3,9 @@ import { UnitEntity } from "./UnitEntities";
 
 export class Jdj extends UnitEntity {
     // [ej={gt|ge|lt|le|eq|ne|ri|ro|ef|nf|vgt|vge|vlt|vle|veq|vne|vri|vro|sce|spe|sne|spn|snn|snl};]
-    get ej() { return ParamFactory.ej(this, 'gt'); }
+    get ej() { return ParamFactory.ej(this); }
     // [ejc=judgment-return-code;]
-    get ejc() { return ParamFactory.ejc(this, '0'); }
+    get ejc() { return ParamFactory.ejc(this); }
     // [ejl=lower-limit-of-judgment-return-codes;]
     get ejl() { return ParamFactory.ejl(this); }
     // [ejh=upper-limit-of-judgment-return-codes;]
@@ -17,16 +17,16 @@ export class Jdj extends UnitEntity {
     // [ejt="judgment-value-for-variable (string)";]
     get ejt() { return ParamFactory.ejt(this); }
     // [eji=judgment-value-for-variable (numeric);]
-    get eji() { return ParamFactory.eji(this, '0'); }
+    get eji() { return ParamFactory.eji(this); }
     // [ejs=lower-limit-judgment-value-for-variable_(numeric);]
     get ejs() { return ParamFactory.ejs(this); }
     // [ejg=upper-limit-judgment-value-for-variable_(numeric);]
     get ejg() { return ParamFactory.ejg(this); }
     // [ejm={gt|ge};]
-    get ejm() { return ParamFactory.ejm(this, 'ge'); }
+    get ejm() { return ParamFactory.ejm(this); }
     // [eju={lt|le};]
-    get eju() { return ParamFactory.eju(this, 'le'); }
+    get eju() { return ParamFactory.eju(this); }
     // [ha={y|n};]
-    get ha() { return ParamFactory.ha(this, 'n'); }
+    get ha() { return ParamFactory.ha(this); }
 }
 export class Rjdj extends Jdj { }

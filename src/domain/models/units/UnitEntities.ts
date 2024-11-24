@@ -4,7 +4,8 @@ import { Unit } from '../../values/Unit';
 import { ParamSymbol, TySymbols, TySymbol, isParamSymbol } from '../../values/AjsType';
 import { tyFactory } from '../../utils/TyUtils';
 import { ParamFactory } from '../parameters/ParameterFactory';
-import { Ar, Parameter } from '../parameters/ParameterEntities';
+import { Ar } from '../parameters';
+import Parameter from '../parameters/Parameter';
 import xxhash from 'xxhash-wasm';
 
 const { h64ToString } = await xxhash();

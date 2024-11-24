@@ -1,6 +1,6 @@
 import { Table as ReactTable } from '@tanstack/react-table';
 import { UnitEntity } from '../../models/units/UnitEntities';
-import { Parameter } from '../../models/parameters/ParameterEntities';
+import Parameter from '../../models/parameters/Parameter';
 import { AccessorType } from '../../../ui-component/editor/ajsTable/columnDefs/common';
 
 const createHeader = (table: ReactTable<UnitEntity>) => table

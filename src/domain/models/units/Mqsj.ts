@@ -27,7 +27,7 @@ export class Mqsj extends UnitEntity {
     // [mqeqn=dead-letter-queue-name;] 
     get mqeqn() { return ParamFactory.mqeqn(this); }
     // [pfm={u|p};] 
-    get pfm() { return ParamFactory.pfm(this, 'p'); }
+    get pfm() { return ParamFactory.pfm(this); }
     // [etm=n;] 
     get etm() { return ParamFactory.etm(this); }
     // [fd=time-required-for-execution;] 
@@ -35,21 +35,21 @@ export class Mqsj extends UnitEntity {
     // [ex="execution-agent-name";] 
     get ex() { return ParamFactory.ex(this); }
     // [ha={y|n};] 
-    get ha() { return ParamFactory.ha(this, 'n'); }
+    get ha() { return ParamFactory.ha(this); }
     // [eu={ent|def};] 
-    get eu() { return ParamFactory.eu(this, 'ent'); }
+    get eu() { return ParamFactory.eu(this); }
     // [jty={q|n};] 
-    get jty() { return ParamFactory.jty(this, 'q'); }
+    get jty() { return ParamFactory.jty(this); }
     // [mm={and|or};] 
-    get mm() { return ParamFactory.mm(this, 'and'); }
+    get mm() { return ParamFactory.mm(this); }
     // [nmg={y|n};] 
-    get nmg() { return ParamFactory.nmg(this, 'n'); }
+    get nmg() { return ParamFactory.nmg(this); }
     // [eun=name-of-the-unit-whose-end-is-being-waited-for;] 
     get eun() { return ParamFactory.eun(this); }
     // [ega={exec|execdeffer|none};] 
-    get ega() { return ParamFactory.ega(this, 'none'); }
+    get ega() { return ParamFactory.ega(this); }
     // [uem={y|n};] 
-    get uem() { return ParamFactory.uem(this, 'n'); }
+    get uem() { return ParamFactory.uem(this); }
 
     /** Whether this jobnet have a unit whose end is being waited for. */
     get hasWaitedFor() {

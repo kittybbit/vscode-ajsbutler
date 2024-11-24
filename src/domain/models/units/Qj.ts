@@ -17,25 +17,25 @@ export class Qj extends UnitEntity {
     // [fd=time-required-for-execution;]
     get fd() { return ParamFactory.fd(this); }
     // [pr=n;]
-    get pr() { return ParamFactory.pr(this, '1'); }
+    get pr() { return ParamFactory.pr(this); }
     // [ni=n;]
-    get ni() { return ParamFactory.ni(this, '-39'); }
+    get ni() { return ParamFactory.ni(this); }
     // [jd={nm|ab|cod};]
-    get jd() { return ParamFactory.jd(this, 'cod'); }
+    get jd() { return ParamFactory.jd(this); }
     // [wth=n;]
     get wth() { return ParamFactory.wth(this); }
     // [tho=n;]
-    get tho() { return ParamFactory.tho(this, '0'); }
+    get tho() { return ParamFactory.tho(this); }
     // [abr={y|n};]
-    get abr() { return ParamFactory.abr(this, 'n'); }
+    get abr() { return ParamFactory.abr(this); }
     // [rjs=lower-limit-of-return-codes-to-be-retried-automatically;]
     get rjs() { return ParamFactory.rjs(this); }
     // [rje=upper-limit-of-return-codes-to-be-retried-automatically;]
     get rje() { return ParamFactory.rje(this); }
     // [rec=maximum-number-of-retry-executions;]
-    get rec() { return ParamFactory.rec(this, '1'); }
+    get rec() { return ParamFactory.rec(this); }
     // [rei=retry-interval;]
-    get rei() { return ParamFactory.rei(this, '1'); }
+    get rei() { return ParamFactory.rei(this); }
     // [ts1="transfer-source-file-name-1";]
     get ts1() { return ParamFactory.ts1(this); }
     // [td1="transfer-destination-file-name-1";]
@@ -53,19 +53,19 @@ export class Qj extends UnitEntity {
     // [td4="transfer-destination-file-name-4";]
     get td4() { return ParamFactory.td4(this); }
     // [ha={y|n};]
-    get ha() { return ParamFactory.ha(this, 'n'); }
+    get ha() { return ParamFactory.ha(this); }
     // [eu={ent|def};]
-    get eu() { return ParamFactory.eu(this, 'ent'); }
+    get eu() { return ParamFactory.eu(this); }
     // [mm={and|or};]
-    get mm() { return ParamFactory.mm(this, 'and'); }
+    get mm() { return ParamFactory.mm(this); }
     // [nmg={y|n};]
-    get nmg() { return ParamFactory.nmg(this, 'n'); }
+    get nmg() { return ParamFactory.nmg(this); }
     // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
     get eun() { return ParamFactory.eun(this); }
     // [ega={exec|execdeffer|none};]
-    get ega() { return ParamFactory.ega(this, 'none'); }
+    get ega() { return ParamFactory.ega(this); }
     // [uem={y|n};]
-    get uem() { return ParamFactory.uem(this, 'n'); }
+    get uem() { return ParamFactory.uem(this); }
 
     get priority(): number {
         const pr = this.pr;

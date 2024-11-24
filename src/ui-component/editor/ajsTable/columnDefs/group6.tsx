@@ -3,7 +3,7 @@ import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from '@resource/i18n/ajscolumn';
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { box, tyAccessorFn } from "./common";
-import { Op, Cl } from "../../../../domain/models/parameters/ParameterEntities";
+import { Op, Cl } from "../../../../domain/models/parameters";
 import { G } from "../../../../domain/models/units/G";
 import { WeekSymbol } from "../../../../domain/values/AjsType";
 import DoneAllIcon from '@mui/icons-material/DoneAll';

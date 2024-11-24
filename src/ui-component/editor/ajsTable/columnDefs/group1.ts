@@ -2,7 +2,7 @@ import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from '@resource/i18n/ajscolumn';
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import * as ty from '@resource/i18n/ty';
-import { Gty } from "../../../../domain/models/parameters/ParameterEntities";
+import { Gty } from "../../../../domain/models/parameters";
 import { defaultAccessorFn } from "./common";
 
 const group1 = (
