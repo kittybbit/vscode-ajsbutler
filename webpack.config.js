@@ -7,7 +7,7 @@ const path = require('path');
 
 const editorConfig = (env, argv) => {
     const PRODUCTION = argv.mode === 'production';
-    const DEVELOPMENT = argv.mode !== 'production';
+    const DEVELOPMENT = !PRODUCTION;
     return {
         mode: argv.mode ?? 'development',
         target: 'web',
@@ -91,18 +91,18 @@ const editorConfig = (env, argv) => {
             new DefinePlugin({
                 DEVELOPMENT: DEVELOPMENT,
             }),
-            // new BundleAnalyzerPlugin({
-            //     analyzerMode: "static",
-            //     openAnalyzer: false,
-            //     reportFilename: '../report/index_report.html',
-            // }),
+            env.analyzer && new BundleAnalyzerPlugin({
+                analyzerMode: "static",
+                openAnalyzer: false,
+                reportFilename: '../report/index_report.html',
+            }),
         ],
     }
 };
 
 const nodeConfig = (env, argv) => {
     const PRODUCTION = argv.mode === 'production';
-    const DEVELOPMENT = argv.mode !== 'production';
+    const DEVELOPMENT = !PRODUCTION;
     return {
         mode: argv.mode ?? 'development',
         target: 'node',
@@ -182,18 +182,18 @@ const nodeConfig = (env, argv) => {
             new DefinePlugin({
                 DEVELOPMENT: DEVELOPMENT,
             }),
-            // new BundleAnalyzerPlugin({
-            //     analyzerMode: "static",
-            //     openAnalyzer: false,
-            //     reportFilename: '../report/extension_report.html',
-            // }),
+            env.analyzer && new BundleAnalyzerPlugin({
+                analyzerMode: "static",
+                openAnalyzer: false,
+                reportFilename: '../report/extension_report.html',
+            }),
         ],
     }
 };
 
 const webconfig = (env, argv) => {
     const PRODUCTION = argv.mode === 'production';
-    const DEVELOPMENT = argv.mode !== 'production';
+    const DEVELOPMENT = !PRODUCTION;
     const nodeCfg = nodeConfig(env, argv);
     return {
         ...nodeCfg,
@@ -219,11 +219,11 @@ const webconfig = (env, argv) => {
                 new ProvidePlugin({
                     process: 'process/browser',
                 }),
-                // new BundleAnalyzerPlugin({
-                //     analyzerMode: "static",
-                //     openAnalyzer: false,
-                //     reportFilename: '../report/web_report.html',
-                // }),
+                env.analyzer && new BundleAnalyzerPlugin({
+                    analyzerMode: "static",
+                    openAnalyzer: false,
+                    reportFilename: '../report/web_report.html',
+                }),
             ]
         }
     }
