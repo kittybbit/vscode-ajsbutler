@@ -1,7 +1,10 @@
 import React, { FC } from "react";
-import { IconButton, SxProps, Theme, Tooltip } from "@mui/material";
+import { Box, IconButton, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { CurrentUnitEntityStateType, DialogDataStateType } from "../FlowContents";
+import { TySymbol } from "../../../../domain/values/AjsType";
+import { tyDefinitionLang } from "../../../../domain/services/i18n/nls";
+import { useMyAppContext } from "../../MyContexts";
 
 export type AjsNode<T extends UnitEntity = UnitEntity> = {
     unitEntity: T,
@@ -10,19 +13,47 @@ export type AjsNode<T extends UnitEntity = UnitEntity> = {
     & CurrentUnitEntityStateType
     & Record<string, unknown>;
 
-export const cardSxProps: SxProps<Theme> = {
-    width: '15rem',
+export const nodeSxProps: SxProps<Theme> = {
+    width: '6em',
+    height: '6em',
+    borderRadius: '50%',
+    backgroundColor: (theme) => theme.palette.background.default,
+    boxShadow: (theme) => theme.shadows[1],
+    justifyContent: 'center',
+    '&.current': {
+        borderStyle: 'solid',
+        borderColor: (theme) => theme.palette.action.active,
+    }
 };
 
-export const cardHeaderSxProps: SxProps<Theme> = {
+export const nodeTitleSxProps: SxProps<Theme> = {
     height: '1em',
     paddingTop: '0.25em',
     paddingBottom: '0em',
+    textAlign: 'center',
 };
 
-export const cardActionsSxProps: SxProps<Theme> = {
+export const nodeActionsSxProps: SxProps<Theme> = {
     paddingTop: '0.25em',
     paddingBottom: '0em',
+    textAlign: 'center',
+};
+
+export const TyTitle: FC<{
+    ty: TySymbol,
+    gty?: 'n' | 'p',
+}> = ({ ty, gty }) => {
+    const { lang = 'en' } = useMyAppContext();
+    const tyDefinition = tyDefinitionLang(lang);
+    return (
+        <Tooltip title={(ty === 'g' && gty) ? tyDefinition[ty].gty[gty] : tyDefinition[ty].name}>
+            <Box
+                sx={nodeTitleSxProps}
+            >
+                {ty.toUpperCase()}
+            </Box>
+        </Tooltip>
+    );
 };
 
 export const ActionIcon: FC<{
@@ -40,8 +71,32 @@ export const ActionIcon: FC<{
             onClick={onClick}
             onKeyDown={onKeyDown}
             disableRipple={disableRipple}
+            sx={{
+                padding: '0.1em',
+            }}
         >
             {icon}
         </IconButton>
     </Tooltip>
 );
+
+export const NameOrComment: React.FC<{
+    value?: string
+}> = ({ value }) => {
+    return (
+        <Tooltip title={value}>
+            <Typography
+                variant="body1"
+                fontSize="small"
+                sx={
+                    {
+                        width: '6em',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                    }
+                }
+            >{value}</Typography>
+        </Tooltip>
+    );
+};

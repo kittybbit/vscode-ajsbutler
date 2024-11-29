@@ -20,9 +20,9 @@ const ty2Type = (ty: TySymbol) => {
 const calcPosition = (unitEntity: UnitEntity, theme: Theme) => {
     const { h, v } = unitEntity.hv;
     const basePx = theme.typography.htmlFontSize;
-    const width = basePx * 15; // 15rem
-    const height = basePx * 4; // 4rem
-    const marginX = width / 3;
+    const width = basePx * 6; // 6rem
+    const height = basePx * 6; // 6rem
+    const marginX = width / 4;
     const marginY = height / 4;
     const offsetX = width / 3;
     const offsetY = height * 2;
@@ -34,8 +34,8 @@ const calcPosition = (unitEntity: UnitEntity, theme: Theme) => {
 };
 const calcAncestorPosition = (unitEntity: UnitEntity, theme: Theme) => {
     const basePx = theme.typography.htmlFontSize;
-    const width = basePx * 15; // 15rem
-    const hight = basePx * 4; // 4rem
+    const width = basePx * 6; // 6rem
+    const hight = basePx * 6; // 6rem
     const marginX = width / 5;
     const offsetX = width / 3;
     const offsetY = hight / 2;
