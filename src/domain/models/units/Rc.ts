@@ -3,11 +3,11 @@ import { UnitEntity } from "./UnitEntities";
 
 export class Rc extends UnitEntity {
     // [cond={and|or};]
-    get cond() { return ParamFactory.cond(this, 'and'); }
+    get cond() { return ParamFactory.cond(this); }
     // [mcs={m|w|s};]
-    get mcs() { return ParamFactory.mcs(this, 'm'); }
+    get mcs() { return ParamFactory.mcs(this); }
     // [cgs={y|n};]
-    get cgs() { return ParamFactory.cgs(this, 'y'); }
+    get cgs() { return ParamFactory.cgs(this); }
     // [ab={exec|hold|stop};]
-    get ab() { return ParamFactory.ab(this, 'exec'); }
+    get ab() { return ParamFactory.ab(this); }
 }

@@ -11,15 +11,15 @@ export class Nc extends UnitEntity {
     // [ncsv=connection-service-name;] 
     get ncsv() { return ParamFactory.ncsv(this); }
     // [mm={and|or};] 
-    get mm() { return ParamFactory.mm(this, 'and'); }
+    get mm() { return ParamFactory.mm(this); }
     // [nmg={y|n};] 
-    get nmg() { return ParamFactory.nmg(this, 'n'); }
+    get nmg() { return ParamFactory.nmg(this); }
     // [eun=name-of-the-unit-whose-end-is-being-waited-for;] 
     get eun() { return ParamFactory.eun(this); }
     // [ega={exec|execdeffer|none};] 
-    get ega() { return ParamFactory.ega(this, 'none'); }
+    get ega() { return ParamFactory.ega(this); }
     // [uem={y|n};] 
-    get uem() { return ParamFactory.uem(this, 'n'); }
+    get uem() { return ParamFactory.uem(this); }
 
     /** Whether this jobnet have a unit whose end is being waited for. */
     get hasWaitedFor() {

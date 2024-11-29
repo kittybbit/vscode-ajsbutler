@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { Parameter } from "../../../../domain/models/parameters/ParameterEntities";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { ParamSymbol, TySymbol } from "../../../../domain/values/AjsType";
+import Parameter from '../../../../domain/models/parameters/Parameter';
 
 type BoxType = Parameter | PrimitiveType;
 export type AccessorType = BoxType | BoxType[];

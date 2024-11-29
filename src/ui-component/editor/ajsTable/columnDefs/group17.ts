@@ -1,7 +1,7 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from '@resource/i18n/ajscolumn';
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { Prm } from "../../../../domain/models/parameters/ParameterEntities";
+import { Prm } from "../../../../domain/models/parameters";
 
 const group17 = (
     columnHelper: ColumnHelper<UnitEntity>,

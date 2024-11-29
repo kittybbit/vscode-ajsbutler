@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.7.3]
+
+- Modified the object display format in AjsFlowViewer to make it more user-friendly.
+- Refactored parameter.
+
 ## [1.7.2]
 
 - Refactored FlowContents.

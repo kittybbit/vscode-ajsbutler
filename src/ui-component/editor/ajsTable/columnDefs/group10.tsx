@@ -4,7 +4,7 @@ import * as ajscolumn from '@resource/i18n/ajscolumn';
 import * as parameter from '@resource/i18n/parameter';
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { box, defaultAccessorFn } from "./common";
-import { Ln, Sd, St, Cy, Sh, Shd, Cftd, Sy, Ey, Wc, Wt } from "../../../../domain/models/parameters/ParameterEntities";
+import { Ln, Sd, St, Cy, Sh, Shd, Cftd, Sy, Ey, Wc, Wt } from "../../../../domain/models/parameters";
 
 const group10 = (
     columnHelper: ColumnHelper<UnitEntity>,

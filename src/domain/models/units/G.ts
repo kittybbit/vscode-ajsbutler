@@ -9,13 +9,13 @@ export class G extends UnitEntity {
     // [cl={yyyy/mm/dd|{su|mo|tu|we|th|fr|sa}};]
     get cl() { return ParamFactory.cl(this); }
     // [sdd={dd|{su|mo|tu|we|th|fr|sa}:n};]
-    get sdd() { return ParamFactory.sdd(this, '1'); }
+    get sdd() { return ParamFactory.sdd(this); }
     // [md={th|ne};]
-    get md() { return ParamFactory.md(this, 'th'); }
+    get md() { return ParamFactory.md(this); }
     // [stt=hh:mm;]
-    get stt() { return ParamFactory.stt(this, '00:00'); }
+    get stt() { return ParamFactory.stt(this); }
     // [gty={p|n};]
-    get gty() { return ParamFactory.gty(this, 'n'); }
+    get gty() { return ParamFactory.gty(this); }
     // [ncl={y|n};]
     get ncl() { return ParamFactory.ncl(this, 'n'); }
     // [ncn=jobnet-connector-name;]
