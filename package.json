@@ -167,6 +167,7 @@
     "@xyflow/react": "^12.3.5",
     "antlr4ts": "^0.5.0-alpha.4",
     "assert": "^2.1.0",
+    "classnames": "^2.5.1",
     "flatted": "^3.3.2",
     "os-browserify": "^0.3.0",
     "react": "^18.3.1",

@@ -69,6 +69,7 @@ export const createReactFlowData = (unitEntity: UnitEntity, theme: Theme) => {
                 data: {
                     label: ancestor.name,
                     unitEntity: ancestor,
+                    isAncestor: true,
                 },
                 position: calcAncestorPosition(ancestor, theme),
             }

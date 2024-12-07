@@ -23,7 +23,10 @@ export const nodeSxProps: SxProps<Theme> = {
     '&.current': {
         borderStyle: 'solid',
         borderColor: (theme) => theme.palette.action.active,
-    }
+    },
+    '&.ancestor': {
+        borderRadius: '10%',
+    },
 };
 
 export const nodeTitleSxProps: SxProps<Theme> = {
@@ -46,7 +49,15 @@ export const TyTitle: FC<{
     const { lang = 'en' } = useMyAppContext();
     const tyDefinition = tyDefinitionLang(lang);
     return (
-        <Tooltip title={(ty === 'g' && gty) ? tyDefinition[ty].gty[gty] : tyDefinition[ty].name}>
+        <Tooltip
+            title={
+                (ty === 'g' && gty)
+                    ? tyDefinition[ty].gty[gty]
+                    : tyDefinition[ty].name
+            }
+            arrow={true}
+            placement="top"
+        >
             <Box
                 sx={nodeTitleSxProps}
             >

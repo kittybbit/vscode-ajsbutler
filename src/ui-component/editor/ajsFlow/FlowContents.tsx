@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, memo, SetStateAction, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, FC, memo, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Stack, ThemeProvider, createTheme } from '@mui/material';
 import { useMyAppContext } from '../MyContexts';
 import { Background, BackgroundVariant, Controls, Edge, MiniMap, Node, NodeTypes, ReactFlow, ReactFlowProvider } from '@xyflow/react';
@@ -12,9 +12,10 @@ import ConditionNode from './nodes/ConditionNode';
 import Header from './Header';
 import { parse } from 'flatted';
 import { Unit } from '../../../domain/values/Unit';
-import { tyFactory } from '../../../domain/utils/TyUtils';
+import { flattenChildren, tyFactory } from '../../../domain/utils/TyUtils';
 import FlowSelector from './FlowSelector';
 import { createReactFlowData } from './ReactFlowUtils';
+import { N } from '../../../domain/models/units/N';
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 
@@ -57,6 +58,7 @@ const FlowContents: FC = () => {
 
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>([]);
     const [currentUnitEntity, setCurrentUnitEntity] = useState<UnitEntity>();
+    const prevUnitEntityId = useRef<string>();
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
@@ -81,14 +83,26 @@ const FlowContents: FC = () => {
         setEdges(() => edges);
     };
 
-    useEffect(() => updateNodesAndEdges(currentUnitEntity), [currentUnitEntity]);
+    useEffect(
+        () => {
+            updateNodesAndEdges(currentUnitEntity);
+            prevUnitEntityId.current = currentUnitEntity?.id;
+        }
+        , [currentUnitEntity]);
     useEffect(() => {
         const changeDodumentFn = (type: string, data: unknown) => {
             const unitEntities: UnitEntity[] = parse(data as string)
                 .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON))
                 .map((unit: Unit) => tyFactory(unit));
-            setUnitEntities(unitEntities);
-            setCurrentUnitEntity(undefined);
+            setUnitEntities(() => unitEntities);
+            setCurrentUnitEntity(() => {
+                const x = unitEntities
+                    .map((unitEntity: UnitEntity) => flattenChildren([unitEntity]))
+                    .flat();
+                return prevUnitEntityId.current
+                    ? x.find(unitEntity => unitEntity.id === prevUnitEntityId.current)
+                    : x.find(unitEntity => unitEntity.ty.value() === 'n' && (unitEntity as N).isRootJobnet);
+            });
         };
         window.EventBridge.addCallback('changeDocument', changeDodumentFn);
         window.vscode.postMessage({ type: 'ready' });
