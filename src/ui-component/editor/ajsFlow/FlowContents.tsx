@@ -58,7 +58,7 @@ const FlowContents: FC = () => {
 
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>([]);
     const [currentUnitEntity, setCurrentUnitEntity] = useState<UnitEntity>();
-    const prevUnitEntityId = useRef<string>();
+    const prevUnitEntityId = useRef<string | undefined>(undefined);
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
