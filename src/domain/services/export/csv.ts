@@ -20,38 +20,53 @@ const createHeader = (table: ReactTable<UnitEntity>) => table
             .join(',')
     ));
 
-const createData = (table: ReactTable<UnitEntity>) => table
-    .getRowModel()
-    .rows
-    .map((row, rowIndex) => {
-        return row
-            .getVisibleCells()
-            .map((cell, cellIndex) => {
-                if (cellIndex === 0) {
-                    return `"${rowIndex + 1}"`
-                }
-                const value = cell.getValue<AccessorType | undefined>();
-                if (value === undefined) {
-                    return '';
-                } else if (Array.isArray(value)) {
-                    return `"${value
-                        .map(v => {
-                            if (v instanceof Parameter) {
-                                return v.value()?.replace(/"/g, '""');
-                            }
-                            return v;
-                        })
-                        .join('\n')
-                        }"`;
-                } else if (value instanceof Parameter) {
-                    return `"${value.value()?.replace(/"/g, '""')}"`;
-                } else if (typeof value === 'string') {
-                    return `"${value.replace(/"/g, '""')}"`;
-                }
-                return `"${String(value)}"`;
-            })
-            .join(',')
-    });
+const escapeValue = (value: string): string => value.replace(/"/g, '""');
+const processValue = (value: AccessorType | undefined): string => {
+    if (value === undefined) return ''; // Handle undefined values
+
+    if (Array.isArray(value)) {
+        // Handle array values
+        return `"${value
+            .map(v => (v instanceof Parameter
+                ? escapeValue(v.value() || '')
+                : String(v))).join('\n')}"`;
+    }
+
+    if (value instanceof Parameter) {
+        // Handle Parameter type
+        return `"${escapeValue(value.value() || '')}"`;
+    }
+
+    if (typeof value === 'string') {
+        // Handle string type
+        return `"${escapeValue(value)}"`;
+    }
+
+    // Fallback for other types
+    return `"${String(value)}"`;
+};
+const createData = (table: ReactTable<UnitEntity>): string[] => {
+
+    return table
+        .getRowModel()
+        .rows
+        .map((row, rowIndex) => {
+            // Process each row's cells
+            return row
+                .getVisibleCells()
+                .map((cell, cellIndex) => {
+                    // Handle the first column differently
+                    if (cellIndex === 0) {
+                        return `"${rowIndex + 1}"`;
+                    }
+
+                    // Process the value of the cell
+                    const value = cell.getValue<AccessorType | undefined>();
+                    return processValue(value);
+                })
+                .join(','); // Join cell values with a comma
+        });
+};
 
 export const toCsv = (table: ReactTable<UnitEntity>): string => {
     // header
