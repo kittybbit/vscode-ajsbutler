@@ -2,5 +2,7 @@
     "reject": [
         "@types/node",
         "@types/vscode",
+        "antlr4ts",
+        "antlr4ts-cli"
     ]
 }

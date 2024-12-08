@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.7.5]
+
+- Revert the React version from 19 to 18.
+
 ## [1.7.4]
 
 - Update packages.
