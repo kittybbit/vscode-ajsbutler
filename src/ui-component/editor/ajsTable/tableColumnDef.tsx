@@ -25,7 +25,7 @@ import group17 from './columnDefs/group17';
 import group18 from './columnDefs/group18';
 import group19 from './columnDefs/group19';
 import group20 from './columnDefs/group20';
-import { IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton, Tooltip } from '@mui/material';
 
 // default setting of 
 export const tableDefaultColumnDef = {
@@ -59,20 +59,24 @@ export const tableColumnDef = (language: string | undefined = 'en', setDialogDat
         columnHelper.display({
             id: '#',
             header: '#',
-            cell: props => <>
-                <span id={props.row.original.id} tabIndex={0}>{props.row.index + 1}</span>
-                <Tooltip title='View the unit definition'>
-                    <IconButton
-                        size='small'
-                        aria-label='View the unit definition'
-                        onClick={
-                            () => setDialogData(props.row.original)
-                        }
-                    >
-                        <DescriptionIcon fontSize='inherit' />
-                    </IconButton>
-                </Tooltip>
-            </>,
+            cell: props => {
+                return (
+                    <Box sx={{ textAlign: 'right' }}>
+                        <span id={props.row.original.id} tabIndex={0}>{props.row.index + 1}</span>
+                        <Tooltip title='View the unit definition'>
+                            <IconButton
+                                size='small'
+                                aria-label='View the unit definition'
+                                onClick={
+                                    () => setDialogData(props.row.original)
+                                }
+                            >
+                                <DescriptionIcon fontSize='inherit' />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                );
+            },
             enableHiding: false,
             enableSorting: false,
             enableGlobalFilter: false,
