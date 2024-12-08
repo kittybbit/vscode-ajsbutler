@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.7.4]
+
+- Update packages.
+- Refactored AjsTableViewer.
+- Refactored AjsFlowViewer.
+- Refactored csv export.
+- Refactored UnitEntity.
+
 ## [1.7.3]
 
 - Modified the object display format in AjsFlowViewer to make it more user-friendly.

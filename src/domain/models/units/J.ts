@@ -1,6 +1,6 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { N, Rn } from "./N";
 import { UnitEntity } from "./UnitEntities";
+import { priority } from "./Utils";
 
 export class J extends UnitEntity {
     // [te="command-text";]
@@ -96,24 +96,7 @@ export class J extends UnitEntity {
     // [uem={y|n};]
     get uem() { return ParamFactory.uem(this); }
 
-    get priority(): number {
-        const pr = this.pr;
-        const ni = this.ni;
-        if (pr && ni && !pr.inherited && !ni.inherited) {
-            return pr.position > ni.position ? Number(pr.value()) : ni.priority
-        } else if (pr && !pr.inherited) {
-            return Number(pr.value())
-        } else if (ni && !ni.inherited) {
-            return ni.priority
-        }
-
-        switch (this.parent && this.parent.ty.value()) {
-            case 'n':
-            case 'rn':
-                return (this.parent as N | Rn).priority;
-        }
-        return 1;
-    }
+    get priority(): number { return priority(this); }
 
     /** Whether this jobnet have a unit whose end is being waited for. */
     get hasWaitedFor() {

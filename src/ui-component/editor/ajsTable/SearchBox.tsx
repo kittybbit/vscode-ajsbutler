@@ -18,7 +18,7 @@ const SearchBox: FC<SearchBoxProps> = ({ globalFilter, setGlobalFilter }) => {
     const { lang, os } = useMyAppContext();
     const isMac = () => os === 'darwin';
 
-    const ref = useRef<HTMLInputElement>();
+    const ref = useRef<HTMLInputElement>(null);
     const handleShortcut = (event: globalThis.KeyboardEvent) => {
         ((isMac() ? event.metaKey : event.ctrlKey) && event.key === 'f') && ref.current && ref.current.focus();
     };

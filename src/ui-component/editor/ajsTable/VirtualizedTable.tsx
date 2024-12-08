@@ -22,6 +22,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({ rows, headerGroups, scrol
         '&:first-child': {
             position: 'sticky',
             left: 0,
+            backgroundColor: (theme) => theme.palette.background.default,
         }
     };
     const theme = useTheme();
@@ -51,9 +52,6 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({ rows, headerGroups, scrol
             return <TableHead
                 {...props}
                 ref={ref}
-                sx={{
-                    zIndex: (theme) => theme.zIndex.appBar,
-                }}
             />
         }),
         TableRow: (props: ItemProps<Row<UnitEntity>>) => <TableRow

@@ -91,6 +91,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({ unitEntities, currentUnitEntitySt
                         sx={{
                             marginLeft: `${unitEntity.depth}em`
                         }}
+                        expanded={true}
                     >
                         <AccordionSummary>
                             {unitEntity.name}

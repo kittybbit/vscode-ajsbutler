@@ -5,6 +5,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import classNames from 'classnames';
 import { N } from "../../../../domain/models/units/N";
 import { ActionIcon, AjsNode, nodeActionsSxProps, nodeSxProps, NameOrComment, TyTitle } from "./AjsNode";
 import {
@@ -18,7 +19,7 @@ type JobNetNodeProps = NodeProps<JobNetNode>;
 const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
     console.log("render JobNetNode.");
 
-    const { unitEntity, currentUnitEntity } = data;
+    const { unitEntity, currentUnitEntity, isAncestor } = data;
     const isCurrentUnit = unitEntity === currentUnitEntity;
 
     return (
@@ -26,7 +27,10 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
             <Stack
                 id={unitEntity.id}
                 sx={nodeSxProps}
-                className={isCurrentUnit ? 'current' : undefined}
+                className={classNames({
+                    current: isCurrentUnit,
+                    ancestor: isAncestor,
+                })}
             >
                 <TyTitle ty={unitEntity.ty.value()} />
                 {/* action */}

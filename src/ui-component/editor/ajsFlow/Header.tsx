@@ -23,31 +23,33 @@ const Header: FC<HeaderProps> = ({ flowMenuState, drawerWidthState, currentUnitE
     const { currentUnitEntity, setCurrentUnitEntity } = currentUnitEntityState;
     const { lang } = useMyAppContext();
 
-    const flatten = (unitEntity: UnitEntity | undefined, breadcrumbs: ReactElement[]) => {
-        if (!unitEntity) {
-            return;
-        }
-        if (currentUnitEntity === unitEntity) {
-            breadcrumbs.push(
-                <Typography
-                    key={unitEntity.id}
-                    color='inherit'
-                >
-                    {unitEntity.name}
+    const flatten = (
+        unitEntity: UnitEntity | undefined,
+        breadcrumbs: ReactElement[],
+    ): void => {
+        if (!unitEntity) return;
+
+        // Function to create a breadcrumb element based on whether it's the current entity
+        const createBreadcrumbElement = (entity: UnitEntity): ReactElement =>
+            entity === currentUnitEntity ? (
+                <Typography key={entity.id} color="inherit">
+                    {entity.name}
                 </Typography>
-            );
-        } else {
-            breadcrumbs.push(
+            ) : (
                 <Link
-                    key={unitEntity.id}
-                    color='inherit'
-                    onClick={() => setCurrentUnitEntity(() => unitEntity)}
+                    key={entity.id}
+                    color="inherit"
+                    onClick={() => setCurrentUnitEntity(() => entity)}
                 >
-                    {unitEntity.name}
+                    {entity.name}
                 </Link>
             );
-        }
-        if (!(unitEntity.ty.value() === 'n' && (unitEntity as N).isRootJobnet)) {
+
+        // Add the current entity to the breadcrumb list
+        breadcrumbs.push(createBreadcrumbElement(unitEntity));
+
+        // Recursively process the parent if it exists and does not meet the "isRootJobnet" condition
+        if (unitEntity.ty.value() !== 'n' || !(unitEntity as N).isRootJobnet) {
             flatten(unitEntity.parent, breadcrumbs);
         }
     };
