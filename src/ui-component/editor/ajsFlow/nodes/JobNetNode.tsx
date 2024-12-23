@@ -7,7 +7,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import classNames from 'classnames';
 import { N } from "../../../../domain/models/units/N";
-import { ActionIcon, AjsNode, nodeActionsSxProps, nodeSxProps, NameOrComment, TyTitle } from "./AjsNode";
+import { ActionIcon, AjsNode, nodeActionsSxProps, nodeSxProps, NameOrComment, TyTitle, handleStyle } from "./AjsNode";
 import {
     handleClickChildOpen, handleClickDialogOpen,
     handleKeyDownChildOpen, handleKeyDownDialogOpen
@@ -72,8 +72,8 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
             </Stack>
             {!unitEntity.isRootJobnet && !isCurrentUnit && (
                 <>
-                    <Handle type="source" position={Position.Right} />
-                    <Handle type="target" position={Position.Left} />
+                    <Handle type="source" position={Position.Right} style={handleStyle} />
+                    <Handle type="target" position={Position.Left} style={handleStyle} />
                 </>
             )}
             <NameOrComment value={unitEntity.name} />

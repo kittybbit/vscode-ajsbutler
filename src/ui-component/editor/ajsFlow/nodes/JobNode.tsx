@@ -3,7 +3,7 @@ import { Handle, Node, NodeProps, Position } from "@xyflow/react";
 import { Box, Stack } from "@mui/material";
 import DescriptionIcon from '@mui/icons-material/Description';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { ActionIcon, AjsNode, nodeActionsSxProps, nodeSxProps, NameOrComment, TyTitle } from "./AjsNode";
+import { ActionIcon, AjsNode, nodeActionsSxProps, nodeSxProps, NameOrComment, TyTitle, handleStyle } from "./AjsNode";
 import { handleClickDialogOpen, handleKeyDownDialogOpen } from "./Utils";
 
 export type JobNode = Node<AjsNode, 'job'>;
@@ -42,8 +42,8 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
                         />}
                 </Box>
             </Stack>
-            <Handle type="source" position={Position.Right} />
-            <Handle type="target" position={Position.Left} />
+            <Handle type="source" position={Position.Right} style={handleStyle} />
+            <Handle type="target" position={Position.Left} style={handleStyle} />
             <NameOrComment value={unitEntity.name} />
             <NameOrComment value={unitEntity.cm?.value()} />
         </>
