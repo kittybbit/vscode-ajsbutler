@@ -12,14 +12,13 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
 
     public static register(context: vscode.ExtensionContext) {
         console.info('registerd AjsTableViewerProvider');
-        const provider = new AjsTableViewerProvider(context);
-        const disposable = vscode.window.registerCustomEditorProvider(
+        context.subscriptions.push(vscode.window.registerCustomEditorProvider(
             AjsTableViewerProvider.viewType,
-            provider,
+            new AjsTableViewerProvider(context),
             {
                 webviewOptions: { retainContextWhenHidden: true }
-            });
-        context.subscriptions.push(disposable);
+            })
+        );
         context.subscriptions.push(
             vscode.commands.registerCommand('ajsbutler.openTableViewer', () => {
                 const uri = vscode.window.activeTextEditor?.document.uri;
@@ -42,7 +41,7 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
 
         const refreshWebview = () => {
             webviewPanel = initReactPanel(webviewPanel, this.context, './out/ajsTable/index.js');
-        }
+        };
 
         const debounceCreateData = debounceCreateDataFn(document, webviewPanel, 500);
 
@@ -54,7 +53,7 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
             if (e.affectsConfiguration('workbench.colorTheme')) {
                 refreshWebview();
             }
-        })
+        });
 
         // message receiver
         const ready = readyFn(document, webviewPanel);

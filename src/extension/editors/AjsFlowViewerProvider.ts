@@ -16,14 +16,14 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
 
     public static register(context: vscode.ExtensionContext) {
         console.info('registerd AjsFlowViewerProvider');
-        const provider = new AjsFlowViewerProvider(context);
-        const disposable = vscode.window.registerCustomEditorProvider(
-            AjsFlowViewerProvider.viewType,
-            provider,
-            {
-                webviewOptions: { retainContextWhenHidden: true }
-            });
-        context.subscriptions.push(disposable);
+        context.subscriptions.push(
+            vscode.window.registerCustomEditorProvider(
+                AjsFlowViewerProvider.viewType,
+                new AjsFlowViewerProvider(context),
+                {
+                    webviewOptions: { retainContextWhenHidden: true }
+                })
+        );
         context.subscriptions.push(
             vscode.commands.registerCommand('ajsbutler.openFlowViewer', () => {
                 const uri = vscode.window.activeTextEditor?.document.uri;
@@ -48,7 +48,7 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
 
         const refreshWebview = () => {
             webviewPanel = initReactPanel(webviewPanel, context, './out/ajsFlow/index.js');
-        }
+        };
 
         const debounceCreateData = debounceCreateDataFn(document, webviewPanel, 500);
 
@@ -60,7 +60,7 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
             if (e.affectsConfiguration('workbench.colorTheme')) {
                 refreshWebview();
             }
-        })
+        });
 
         // message receiver
         const ready = readyFn(document, webviewPanel);
