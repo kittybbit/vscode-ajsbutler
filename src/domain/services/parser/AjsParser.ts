@@ -5,12 +5,12 @@ import { AjsLexer } from '@generate/parser/AjsLexer';
 import { AjsParser } from '@generate/parser/AjsParser';
 import { Unit } from '../../values/Unit';
 import { Ajs3v12Evaluator } from './AjsEvaluator';
-import { SyntaxErrorListener } from './SyntaxErrorListener';
+import { ANTLRError, SyntaxErrorListener } from './SyntaxErrorListener';
 
 /**
  * parse Ajs definition.
  */
-export function parseAjs(content: string): { rootUnits: Unit[], errors: object[] } {
+export function parseAjs(content: string): { rootUnits: Unit[], errors: ANTLRError[] } {
     const inputStream = CharStreams.fromString(content);
     const lexer = new AjsLexer(inputStream);
     const antlrError = new SyntaxErrorListener();

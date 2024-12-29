@@ -5,8 +5,7 @@ import { parseAjs } from '../parser/AjsParser';
 export const createData = (document: vscode.TextDocument) => {
     const result = parseAjs(document.getText());
     if (result.errors.length > 0) {
-        vscode.window.showErrorMessage('Please check syntax.', { detail: `${result.errors.length} antlr error occurs.`, modal: true });
-        return [];
+        return stringify([]);
     }
     return stringify(result.rootUnits)
 };
