@@ -29,7 +29,11 @@ export const nodeSxProps: SxProps<Theme> = {
     },
 };
 
-export const nodeTitleSxProps: SxProps<Theme> = {
+export const handleStyle = {
+    top: '3em'
+};
+
+const nodeTitleSxProps: SxProps<Theme> = {
     height: '1em',
     paddingTop: '0.25em',
     paddingBottom: '0em',

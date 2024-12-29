@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.8.0]
+
+- Added Diagnostics API supports.
+- Refactored AjsFlowViewer.
+
 ## [1.7.5]
 
 - Revert the React version from 19 to 18.

@@ -44,9 +44,7 @@ const calcAncestorPosition = (unitEntity: UnitEntity, theme: Theme) => {
         y: offsetY,
     }
 };
-
-/** create React flow items from unitEntity. */
-export const createReactFlowData = (unitEntity: UnitEntity, theme: Theme) => {
+const createNode = (unitEntity: UnitEntity, theme: Theme): Node[] => {
     const nodes: Node[] = unitEntity.children
         .filter((child) => child.ty.value() !== 'rc')
         .map((child) => {
@@ -75,8 +73,10 @@ export const createReactFlowData = (unitEntity: UnitEntity, theme: Theme) => {
             }
         });
     nodes.push(...ancestors);
-    console.log(JSON.stringify(nodes, null, 2));
-    const edges: Edge[] = unitEntity.children
+    return nodes;
+};
+const createEdge = (unitEntity: UnitEntity): Edge[] => {
+    return unitEntity.children
         .filter((child) => child.nextUnits.length > 0)
         .map((source) => {
             return source.nextUnits
@@ -103,7 +103,10 @@ export const createReactFlowData = (unitEntity: UnitEntity, theme: Theme) => {
                     }
                 });
         })
-        .flat();
-    console.log(JSON.stringify(edges, null, 2));
-    return { nodes: nodes, edges: edges };
+        .flat()
+};
+
+/** create React flow items from unitEntity. */
+export const createReactFlowData = (unitEntity: UnitEntity, theme: Theme) => {
+    return { nodes: createNode(unitEntity, theme), edges: createEdge(unitEntity) };
 };

@@ -3,18 +3,19 @@ import { Recognizer } from 'antlr4ts/Recognizer'
 import { RecognitionException } from 'antlr4ts/RecognitionException'
 import { ANTLRErrorListener } from 'antlr4ts/ANTLRErrorListener'
 
+export type ANTLRError = {
+  recognizer: Recognizer<any, any>,
+  offendingSymbol: any,
+  line: number,
+  charPositionInLine: number,
+  msg: string,
+  e: RecognitionException | undefined
+};
 /**
  * emit errors for later access
  */
 export class SyntaxErrorListener implements ANTLRErrorListener<never> {
-  errors: Array<{
-    recognizer: Recognizer<any, any>,
-    offendingSymbol: any,
-    line: number,
-    charPositionInLine: any,
-    msg: string,
-    e: RecognitionException | undefined
-  }> = [];
+  errors: Array<ANTLRError> = [];
 
   public syntaxError<T>(
     recognizer: Recognizer<T, any>,
