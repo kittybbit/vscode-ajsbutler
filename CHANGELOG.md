@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.8.1]
+
+- Add parameter keys to Antlr and strictly modify the definitions.
+
 ## [1.8.0]
 
 - Added Diagnostics API supports.

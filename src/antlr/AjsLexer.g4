@@ -26,7 +26,225 @@ COMMENT: '/*' .*? '*/' -> skip;
 
 // unit definitions
 UNIT_KEY: 'unit';
-PARAMETER_KEY: [a-zA-Z] [a-zA-Z0-9]*;
+PARAMETER_KEY:
+	AB_KEY
+	| ABR_KEY
+	| AR_KEY
+	| CD_KEY
+	| CFTD_KEY
+	| CGS_KEY
+	| CL_KEY
+	| CM_KEY
+	| CMAIF_KEY
+	| CMSTS_KEY
+	| COND_KEY
+	| CTY_KEY
+	| CY_KEY
+	| DA_KEY
+	| DE_KEY
+	| ED_KEY
+	| EGA_KEY
+	| EJ_KEY
+	| EJC_KEY
+	| EJF_KEY
+	| EJG_KEY
+	| EJH_KEY
+	| EJI_KEY
+	| EJL_KEY
+	| EJM_KEY
+	| EJN_KEY
+	| EJS_KEY
+	| EJT_KEY
+	| EJU_KEY
+	| EJV_KEY
+	| EL_KEY
+	| ENV_KEY
+	| ETM_KEY
+	| ETN_KEY
+	| ETS_KEY
+	| EU_KEY
+	| EUN_KEY
+	| EV_KEY
+	| EVDET_KEY
+	| EVESC_KEY
+	| EVGID_KEY
+	| EVGRP_KEY
+	| EVHST_KEY
+	| EVIPA_KEY
+	| EVPID_KEY
+	| EVSFR_KEY
+	| EVSID_KEY
+	| EVSMS_KEY
+	| EVSPL_KEY
+	| EVSRC_KEY
+	| EVSRT_KEY
+	| EVSSV_KEY
+	| EVTMC_KEY
+	| EVUID_KEY
+	| EVUSR_KEY
+	| EVWFR_KEY
+	| EVWID_KEY
+	| EVWMS_KEY
+	| EVWSV_KEY
+	| EX_KEY
+	| EY_KEY
+	| FD_KEY
+	| FLCO_KEY
+	| FLWC_KEY
+	| FLWF_KEY
+	| FLWI_KEY
+	| FXG_KEY
+	| GTY_KEY
+	| HA_KEY
+	| HTCDM_KEY
+	| HTCFL_KEY
+	| HTEXM_KEY
+	| HTKND_KEY
+	| HTRBF_KEY
+	| HTRHF_KEY
+	| HTRQF_KEY
+	| HTRQM_KEY
+	| HTRQU_KEY
+	| HTSPT_KEY
+	| HTSTF_KEY
+	| JC_KEY
+	| JD_KEY
+	| JDF_KEY
+	| JPOIF_KEY
+	| JTY_KEY
+	| LFCRE_KEY
+	| LFDFT_KEY
+	| LFFNM_KEY
+	| LFHDS_KEY
+	| LFMKS_KEY
+	| LFMXL_KEY
+	| LFRFT_KEY
+	| LFSIV_KEY
+	| LFSRC_KEY
+	| LFTPD_KEY
+	| LN_KEY
+	| MCS_KEY
+	| MD_KEY
+	| MH_KEY
+	| MLADR_KEY
+	| MLAFL_KEY
+	| MLATF_KEY
+	| MLFTX_KEY
+	| MLLST_KEY
+	| MLPRF_KEY
+	| MLSAV_KEY
+	| MLSBJ_KEY
+	| MLSFD_KEY
+	| MLSTX_KEY
+	| MLTXT_KEY
+	| MM_KEY
+	| MP_KEY
+	| MQCOR_KEY
+	| MQDSC_KEY
+	| MQEQN_KEY
+	| MQHLD_KEY
+	| MQMDL_KEY
+	| MQMDN_KEY
+	| MQMFN_KEY
+	| MQMGR_KEY
+	| MQPGM_KEY
+	| MQPRI_KEY
+	| MQPRM_KEY
+	| MQQUE_KEY
+	| MQSFN_KEY
+	| MS_KEY
+	| MSAPL_KEY
+	| MSHLD_KEY
+	| MSJNL_KEY
+	| MSLBL_KEY
+	| MSLMT_KEY
+	| MSMOD_KEY
+	| MSPRI_KEY
+	| MSQLB_KEY
+	| MSQPT_KEY
+	| MSRER_KEY
+	| MSSVF_KEY
+	| MSTFN_KEY
+	| MSTTP_KEY
+	| MSUNR_KEY
+	| MU_KEY
+	| NCEX_KEY
+	| NCHN_KEY
+	| NCL_KEY
+	| NCN_KEY
+	| NCR_KEY
+	| NCS_KEY
+	| NCSV_KEY
+	| NI_KEY
+	| NMG_KEY
+	| NTCLS_KEY
+	| NTDIS_KEY
+	| NTEID_KEY
+	| NTEVT_KEY
+	| NTLGT_KEY
+	| NTNCL_KEY
+	| NTNEI_KEY
+	| NTNSR_KEY
+	| NTOLG_KEY
+	| NTSRC_KEY
+	| OP_KEY
+	| PFM_KEY
+	| PR_KEY
+	| PRM_KEY
+	| PWLF_KEY
+	| PWLT_KEY
+	| PWRF_KEY
+	| PWRH_KEY
+	| PWRN_KEY
+	| PWRP_KEY
+	| PWRR_KEY
+	| PWRW_KEY
+	| QM_KEY
+	| QU_KEY
+	| REC_KEY
+	| REI_KEY
+	| REQ_KEY
+	| RG_KEY
+	| RH_KEY
+	| RJE_KEY
+	| RJS_KEY
+	| SC_KEY
+	| SD_KEY
+	| SDD_KEY
+	| SE_KEY
+	| SEA_KEY
+	| SH_KEY
+	| SHD_KEY
+	| SI_KEY
+	| SO_KEY
+	| SOA_KEY
+	| ST_KEY
+	| STT_KEY
+	| SY_KEY
+	| SZ_KEY
+	| TD1_KEY
+	| TD2_KEY
+	| TD3_KEY
+	| TD4_KEY
+	| TE_KEY
+	| THO_KEY
+	| TMITV_KEY
+	| TOP1_KEY
+	| TOP2_KEY
+	| TOP3_KEY
+	| TOP4_KEY
+	| TS1_KEY
+	| TS2_KEY
+	| TS3_KEY
+	| TS4_KEY
+	| TY_KEY
+	| UEM_KEY
+	| UN_KEY
+	| UNIT_KEY
+	| WC_KEY
+	| WKP_KEY
+	| WT_KEY
+	| WTH_KEY;
 ASSIGN: '=' -> mode(VALUE);
 LBRACE: '{';
 RBRACE: '}';
@@ -39,3 +257,222 @@ TEXT: ~[\r\n;]+;
 SEMI: ';' -> mode(DEFAULT_MODE);
 
 fragment EscapeString: '#"' | '##';
+
+// parameter fragment
+AB_KEY: 'ab';
+ABR_KEY: 'abr';
+AR_KEY: 'ar';
+CD_KEY: 'cd';
+CFTD_KEY: 'cftd';
+CGS_KEY: 'cgs';
+CL_KEY: 'cl';
+CM_KEY: 'cm';
+CMAIF_KEY: 'cmaif';
+CMSTS_KEY: 'cmsts';
+COND_KEY: 'cond';
+CTY_KEY: 'cty';
+CY_KEY: 'cy';
+DA_KEY: 'da';
+DE_KEY: 'de';
+ED_KEY: 'ed';
+EGA_KEY: 'ega';
+EJ_KEY: 'ej';
+EJC_KEY: 'ejc';
+EJF_KEY: 'ejf';
+EJG_KEY: 'ejg';
+EJH_KEY: 'ejh';
+EJI_KEY: 'eji';
+EJL_KEY: 'ejl';
+EJM_KEY: 'ejm';
+EJN_KEY: 'ejn';
+EJS_KEY: 'ejs';
+EJT_KEY: 'ejt';
+EJU_KEY: 'eju';
+EJV_KEY: 'ejv';
+EL_KEY: 'el';
+ENV_KEY: 'env';
+ETM_KEY: 'etm';
+ETN_KEY: 'etn';
+ETS_KEY: 'ets';
+EU_KEY: 'eu';
+EUN_KEY: 'eun';
+EV_KEY: 'ev';
+EVDET_KEY: 'evdet';
+EVESC_KEY: 'evesc';
+EVGID_KEY: 'evgid';
+EVGRP_KEY: 'evgrp';
+EVHST_KEY: 'evhst';
+EVIPA_KEY: 'evipa';
+EVPID_KEY: 'evpid';
+EVSFR_KEY: 'evsfr';
+EVSID_KEY: 'evsid';
+EVSMS_KEY: 'evsms';
+EVSPL_KEY: 'evspl';
+EVSRC_KEY: 'evsrc';
+EVSRT_KEY: 'evsrt';
+EVSSV_KEY: 'evssv';
+EVTMC_KEY: 'evtmc';
+EVUID_KEY: 'evuid';
+EVUSR_KEY: 'evusr';
+EVWFR_KEY: 'evwfr';
+EVWID_KEY: 'evwid';
+EVWMS_KEY: 'evwms';
+EVWSV_KEY: 'evwsv';
+EX_KEY: 'ex';
+EY_KEY: 'ey';
+FD_KEY: 'fd';
+FLCO_KEY: 'flco';
+FLWC_KEY: 'flwc';
+FLWF_KEY: 'flwf';
+FLWI_KEY: 'flwi';
+FXG_KEY: 'fxg';
+GTY_KEY: 'gty';
+HA_KEY: 'ha';
+HTCDM_KEY: 'htcdm';
+HTCFL_KEY: 'htcfl';
+HTEXM_KEY: 'htexm';
+HTKND_KEY: 'htknd';
+HTRBF_KEY: 'htrbf';
+HTRHF_KEY: 'htrhf';
+HTRQF_KEY: 'htrqf';
+HTRQM_KEY: 'htrqm';
+HTRQU_KEY: 'htrqu';
+HTSPT_KEY: 'htspt';
+HTSTF_KEY: 'htstf';
+JC_KEY: 'jc';
+JD_KEY: 'jd';
+JDF_KEY: 'jdf';
+JPOIF_KEY: 'jpoif';
+JTY_KEY: 'jty';
+LFCRE_KEY: 'lfcre';
+LFDFT_KEY: 'lfdft';
+LFFNM_KEY: 'lffnm';
+LFHDS_KEY: 'lfhds';
+LFMKS_KEY: 'lfmks';
+LFMXL_KEY: 'lfmxl';
+LFRFT_KEY: 'lfrft';
+LFSIV_KEY: 'lfsiv';
+LFSRC_KEY: 'lfsrc';
+LFTPD_KEY: 'lftpd';
+LN_KEY: 'ln';
+MCS_KEY: 'mcs';
+MD_KEY: 'md';
+MH_KEY: 'mh';
+MLADR_KEY: 'mladr';
+MLAFL_KEY: 'mlafl';
+MLATF_KEY: 'mlatf';
+MLFTX_KEY: 'mlftx';
+MLLST_KEY: 'mllst';
+MLPRF_KEY: 'mlprf';
+MLSAV_KEY: 'mlsav';
+MLSBJ_KEY: 'mlsbj';
+MLSFD_KEY: 'mlsfd';
+MLSTX_KEY: 'mlstx';
+MLTXT_KEY: 'mltxt';
+MM_KEY: 'mm';
+MP_KEY: 'mp';
+MQCOR_KEY: 'mqcor';
+MQDSC_KEY: 'mqdsc';
+MQEQN_KEY: 'mqeqn';
+MQHLD_KEY: 'mqhld';
+MQMDL_KEY: 'mqmdl';
+MQMDN_KEY: 'mqmdn';
+MQMFN_KEY: 'mqmfn';
+MQMGR_KEY: 'mqmgr';
+MQPGM_KEY: 'mqpgm';
+MQPRI_KEY: 'mqpri';
+MQPRM_KEY: 'mqprm';
+MQQUE_KEY: 'mqque';
+MQSFN_KEY: 'mqsfn';
+MS_KEY: 'ms';
+MSAPL_KEY: 'msapl';
+MSHLD_KEY: 'mshld';
+MSJNL_KEY: 'msjnl';
+MSLBL_KEY: 'mslbl';
+MSLMT_KEY: 'mslmt';
+MSMOD_KEY: 'msmod';
+MSPRI_KEY: 'mspri';
+MSQLB_KEY: 'msqlb';
+MSQPT_KEY: 'msqpt';
+MSRER_KEY: 'msrer';
+MSSVF_KEY: 'mssvf';
+MSTFN_KEY: 'mstfn';
+MSTTP_KEY: 'msttp';
+MSUNR_KEY: 'msunr';
+MU_KEY: 'mu';
+NCEX_KEY: 'ncex';
+NCHN_KEY: 'nchn';
+NCL_KEY: 'ncl';
+NCN_KEY: 'ncn';
+NCR_KEY: 'ncr';
+NCS_KEY: 'ncs';
+NCSV_KEY: 'ncsv';
+NI_KEY: 'ni';
+NMG_KEY: 'nmg';
+NTCLS_KEY: 'ntcls';
+NTDIS_KEY: 'ntdis';
+NTEID_KEY: 'nteid';
+NTEVT_KEY: 'ntevt';
+NTLGT_KEY: 'ntlgt';
+NTNCL_KEY: 'ntncl';
+NTNEI_KEY: 'ntnei';
+NTNSR_KEY: 'ntnsr';
+NTOLG_KEY: 'ntolg';
+NTSRC_KEY: 'ntsrc';
+OP_KEY: 'op';
+PFM_KEY: 'pfm';
+PR_KEY: 'pr';
+PRM_KEY: 'prm';
+PWLF_KEY: 'pwlf';
+PWLT_KEY: 'pwlt';
+PWRF_KEY: 'pwrf';
+PWRH_KEY: 'pwrh';
+PWRN_KEY: 'pwrn';
+PWRP_KEY: 'pwrp';
+PWRR_KEY: 'pwrr';
+PWRW_KEY: 'pwrw';
+QM_KEY: 'qm';
+QU_KEY: 'qu';
+REC_KEY: 'rec';
+REI_KEY: 'rei';
+REQ_KEY: 'req';
+RG_KEY: 'rg';
+RH_KEY: 'rh';
+RJE_KEY: 'rje';
+RJS_KEY: 'rjs';
+SC_KEY: 'sc';
+SD_KEY: 'sd';
+SDD_KEY: 'sdd';
+SE_KEY: 'se';
+SEA_KEY: 'sea';
+SH_KEY: 'sh';
+SHD_KEY: 'shd';
+SI_KEY: 'si';
+SO_KEY: 'so';
+SOA_KEY: 'soa';
+ST_KEY: 'st';
+STT_KEY: 'stt';
+SY_KEY: 'sy';
+SZ_KEY: 'sz';
+TD1_KEY: 'td1';
+TD2_KEY: 'td2';
+TD3_KEY: 'td3';
+TD4_KEY: 'td4';
+TE_KEY: 'te';
+THO_KEY: 'tho';
+TMITV_KEY: 'tmitv';
+TOP1_KEY: 'top1';
+TOP2_KEY: 'top2';
+TOP3_KEY: 'top3';
+TOP4_KEY: 'top4';
+TS1_KEY: 'ts1';
+TS2_KEY: 'ts2';
+TS3_KEY: 'ts3';
+TS4_KEY: 'ts4';
+TY_KEY: 'ty';
+UEM_KEY: 'uem';
+UN_KEY: 'un';
+WC_KEY: 'wc';
+WKP_KEY: 'wkp';
+WT_KEY: 'wt';
+WTH_KEY: 'wth';
