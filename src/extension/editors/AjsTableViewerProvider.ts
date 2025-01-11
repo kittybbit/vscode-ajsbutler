@@ -11,7 +11,7 @@ import { EventType, ResourceEventType, SaveEventType } from '../../domain/servic
 export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
 
     public static register(context: vscode.ExtensionContext) {
-        console.info('registerd AjsTableViewerProvider');
+        console.info('registered AjsTableViewerProvider');
         context.subscriptions.push(vscode.window.registerCustomEditorProvider(
             AjsTableViewerProvider.viewType,
             new AjsTableViewerProvider(context),
@@ -21,8 +21,13 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
         );
         context.subscriptions.push(
             vscode.commands.registerCommand('ajsbutler.openTableViewer', () => {
-                const uri = vscode.window.activeTextEditor?.document.uri;
-                vscode.commands.executeCommand('vscode.openWith', uri, AjsTableViewerProvider.viewType, vscode.ViewColumn.Two);
+                const activeEditor = vscode.window.activeTextEditor;
+                if (activeEditor) {
+                    const uri = activeEditor.document.uri;
+                    vscode.commands.executeCommand('vscode.openWith', uri, AjsTableViewerProvider.viewType, vscode.ViewColumn.Two);
+                } else {
+                    vscode.window.showErrorMessage('No active editor found to open the table viewer.');
+                }
             })
         );
     }
@@ -40,16 +45,18 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
     ): Promise<void> {
 
         const refreshWebview = () => {
-            webviewPanel = initReactPanel(webviewPanel, this.context, './out/ajsTable/index.js');
+            initReactPanel(webviewPanel, this.context, './out/ajsTable/index.js');
         };
 
         const debounceCreateData = debounceCreateDataFn(document, webviewPanel, 500);
 
         // change event listener
         const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
+            // Debounce the creation of data to avoid excessive processing
             debounceCreateData(e);
         });
         const changeConfigurationSubscription = vscode.workspace.onDidChangeConfiguration(e => {
+            // Refresh the webview when the color theme changes to ensure the webview reflects the new theme
             if (e.affectsConfiguration('workbench.colorTheme')) {
                 refreshWebview();
             }
@@ -59,7 +66,7 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
         const ready = readyFn(document, webviewPanel);
         const resource = resourceFn(webviewPanel);
 
-        const onDidRecieveMessage = (e: EventType) => {
+        const onDidReceiveMessage = (e: EventType) => {
             switch (e.type) {
                 case 'resource': {
                     resource(e as ResourceEventType);
@@ -75,12 +82,12 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
                 }
             }
         };
-        const recieveMessageSubscription = webviewPanel.webview.onDidReceiveMessage(onDidRecieveMessage);
+        const receiveMessageSubscription = webviewPanel.webview.onDidReceiveMessage(onDidReceiveMessage);
 
         webviewPanel.onDidDispose(() => {
             changeDocumentSubscription.dispose();
             changeConfigurationSubscription.dispose();
-            recieveMessageSubscription.dispose();
+            receiveMessageSubscription.dispose();
             console.log('dispose AjsTableViewerProvider');
         });
 

@@ -1,4 +1,4 @@
-import { MyAppResource } from '../../../ui-component/editor/MyContexts';
+import { MyAppResource } from '@ui-component/editor/MyContexts';
 
 export type EventType = ResourceEventType | ReadyEventType | SaveEventType;
 export type ResourceEventType = { type: string, data: MyAppResource };

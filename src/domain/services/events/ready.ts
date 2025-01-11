@@ -7,14 +7,14 @@ export const createData = (document: vscode.TextDocument) => {
     if (result.errors.length > 0) {
         return undefined;
     }
-    return stringify(result.rootUnits)
+    return stringify(result.rootUnits);
 };
 
-export const debounceCreateDataFn = (document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel, delay: number = 0) => {
+export const debounceCreateDataFn = (document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel, delay: number = 300) => {
     let id: NodeJS.Timeout;
     return (e: vscode.TextDocumentChangeEvent) => {
         if (e.document.uri.toString() === document.uri.toString()) {
-            clearInterval(id);
+            clearTimeout(id);
             id = setTimeout(() => {
                 console.log('invoke change text document.');
                 webviewPanel.webview.postMessage({

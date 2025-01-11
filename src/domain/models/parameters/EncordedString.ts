@@ -8,7 +8,6 @@ class EncordedString extends Parameter {
             .replace(/##/g, '#');
     }
 }
-export default EncordedString;
 
 export class Cm extends EncordedString { }
 export class Da extends EncordedString { }

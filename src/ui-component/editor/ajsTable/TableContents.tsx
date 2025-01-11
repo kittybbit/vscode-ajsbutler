@@ -55,12 +55,18 @@ const useChangeDocument = (): [UnitEntity[] | undefined, (type: string, data: un
     const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
     const changeDocumentFn = (type: string, data: unknown) => {
         try {
-            const newUnitEntities: UnitEntity[] = parse(data as string)
-                .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
-                .map((unit: Unit) => tyFactory(unit))
-                .map((unitEntity: UnitEntity) => flattenChildren([unitEntity]))
-                .flat();
-            console.log(newUnitEntities.length);
+            const newUnitEntities: UnitEntity[] = (() => {
+                try {
+                    return parse(data as string)
+                        .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
+                        .map((unit: Unit) => tyFactory(unit))
+                        .map((unitEntity: UnitEntity) => flattenChildren([unitEntity]))
+                        .flat();
+                } catch (error) {
+                    console.error('Failed to parse data:', error);
+                    return [];
+                }
+            })();
             setUnitEntities(() => newUnitEntities);
         } catch {
             setUnitEntities(() => []);
@@ -135,7 +141,13 @@ const TableContents = () => {
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <Stack direction='row' spacing={0}>
-                    {menuStatus.menuItem1 && <DisplayColumnSelector table={table} tableMenuState={tableMenuState} drawerWidthState={drawerWidthState} />}
+                    {menuStatus.menuItem1 && (
+                        <DisplayColumnSelector
+                            table={table}
+                            tableMenuState={tableMenuState}
+                            drawerWidthState={drawerWidthState}
+                        />
+                    )}
                     <Stack
                         direction='column'
                         spacing={0}
@@ -143,17 +155,27 @@ const TableContents = () => {
                             marginLeft: `${drawerWidth}px`,
                         }}
                     >
-                        <Header table={table} tableMenuState={tableMenuState} drawerWidthState={drawerWidthState} />
+                        <Header
+                            table={table}
+                            tableMenuState={tableMenuState}
+                            drawerWidthState={drawerWidthState}
+                        />
                         <VirtualizedTable
                             rows={table.getRowModel().rows}
                             headerGroups={table.getHeaderGroups()}
                             scrollType={scrollType}
                         />
-                        <Typography align='right'>{table.getRowModel().rows.length} of {unitEntities?.length}</Typography>
+                        <Typography align='right'>
+                            {table.getRowModel().rows.length} of {unitEntities?.length}
+                        </Typography>
                     </Stack>
                 </Stack>
-                {dialogData
-                    && <UnitEntityDialog dialogData={dialogData} onClose={() => setDialogData(undefined)} />}
+                {dialogData && (
+                    <UnitEntityDialog
+                        dialogData={dialogData}
+                        onClose={() => setDialogData(undefined)}
+                    />
+                )}
             </ThemeProvider>
             {tableStateDev}
         </>

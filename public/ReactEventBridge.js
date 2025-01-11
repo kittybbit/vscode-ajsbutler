@@ -2,8 +2,14 @@
 
 vscode = acquireVsCodeApi();
 
+document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('message', event => {
+        EventBridge.dispatch(event);
+    });
+});
+
 EventBridge = {
-    callbacks: {}, // {[type: string]: ({type: string, data: unknown} => void)[]}
+    callbacks: {}, // {[type: string]: (type: string, data: unknown) => void}
     dispatch: (event) => {
         const type = event.data.type;
         const functions = window.EventBridge.callbacks[type];
@@ -28,8 +34,3 @@ EventBridge = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.addEventListener('message', event => {
-        EventBridge.dispatch(event);
-    });
-});

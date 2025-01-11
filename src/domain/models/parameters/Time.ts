@@ -30,7 +30,6 @@ abstract class Time extends Parameter implements Rule {
         return this.#_time;
     }
 }
-export default Time;
 
 export class Ey extends Time {
     get time() {

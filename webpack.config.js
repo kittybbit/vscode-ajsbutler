@@ -89,13 +89,13 @@ const editorConfig = (env, argv) => {
                 },
             }),
             new DefinePlugin({
-                DEVELOPMENT: DEVELOPMENT,
+                'DEVELOPMENT': JSON.stringify(DEVELOPMENT),
             }),
-            env.analyzer && new BundleAnalyzerPlugin({
+            ...(env.analyzer ? [new BundleAnalyzerPlugin({
                 analyzerMode: "static",
                 openAnalyzer: false,
                 reportFilename: '../report/index_report.html',
-            }),
+            })] : []),
         ],
     }
 };
@@ -180,13 +180,13 @@ const nodeConfig = (env, argv) => {
                 },
             }),
             new DefinePlugin({
-                DEVELOPMENT: DEVELOPMENT,
+                'DEVELOPMENT': JSON.stringify(DEVELOPMENT),
             }),
-            env.analyzer && new BundleAnalyzerPlugin({
+            ...(env.analyzer ? [new BundleAnalyzerPlugin({
                 analyzerMode: "static",
                 openAnalyzer: false,
                 reportFilename: '../report/extension_report.html',
-            }),
+            })] : []),
         ],
     }
 };
@@ -219,11 +219,11 @@ const webconfig = (env, argv) => {
                 new ProvidePlugin({
                     process: 'process/browser',
                 }),
-                env.analyzer && new BundleAnalyzerPlugin({
+                ...(env.analyzer ? [new BundleAnalyzerPlugin({
                     analyzerMode: "static",
                     openAnalyzer: false,
                     reportFilename: '../report/web_report.html',
-                }),
+                })] : []),
             ]
         }
     }

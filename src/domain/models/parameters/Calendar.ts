@@ -56,8 +56,6 @@ class Calendar extends Parameter {
     }
 }
 
-export default Calendar;
-
 export class Cl extends Calendar { }
 export class Op extends Calendar { }
 export class Sdd extends Calendar { }
