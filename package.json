@@ -3,7 +3,7 @@
   "name": "vscode-ajsbutler",
   "displayName": "vscode-ajsbutler",
   "description": "Support tool for JP1/AJS3",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "private": true,
   "license": "MIT",
   "homepage": "https://github.com/kittybbit/vscode-ajsbutler",
