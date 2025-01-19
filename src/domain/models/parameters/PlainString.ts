@@ -2,7 +2,6 @@ import { isTySymbol } from "../../values/AjsType";
 import Parameter from "./Parameter";
 
 class PlainString extends Parameter { }
-export default PlainString;
 
 export class Ab extends PlainString { }
 export class Abr extends PlainString { }

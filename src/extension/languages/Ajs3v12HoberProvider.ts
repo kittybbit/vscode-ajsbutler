@@ -7,7 +7,7 @@ const MODE = { language: 'jp1ajs' };
 export class Ajs3v12HoverProvider implements vscode.HoverProvider {
 
     public static register(context: vscode.ExtensionContext) {
-        console.info('registerd Ajs3v12HoverProvider');
+        console.info('registered Ajs3v12HoverProvider');
         context.subscriptions.push(
             vscode.languages.registerHoverProvider(
                 MODE,
@@ -16,18 +16,22 @@ export class Ajs3v12HoverProvider implements vscode.HoverProvider {
         );
     }
 
-    #paramDefinition = paramDefinitionLang(vscode.env.language);
+    private paramDefinition = paramDefinitionLang(vscode.env.language);
 
-    provideHover(document: vscode.TextDocument, position: vscode.Position /* , _token: vscode.CancellationToken */): vscode.ProviderResult<vscode.Hover> {
+    provideHover(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
         const wordRange = document.getWordRangeAtPosition(position, /[a-zA-Z0-9]+/);
         if (wordRange === undefined) {
-            return undefined
+            return undefined;
         }
-        const currentWord = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
+        const currentWord = document.getText(wordRange);
         if (isParamSymbol(currentWord)) {
             const content = (new vscode.MarkdownString(`**${currentWord}**\n`))
                 .appendMarkdown('- - -\n')
-                .appendMarkdown(`\`${this.#paramDefinition[currentWord].syntax}\``);
+                .appendMarkdown(`\`${this.paramDefinition[currentWord].syntax}\``);
             return new vscode.Hover(content);
         }
         return undefined;

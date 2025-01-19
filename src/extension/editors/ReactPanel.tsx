@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 export function initReactPanel(
     panel: vscode.WebviewPanel,
     context: vscode.ExtensionContext,
-    bundle: string): vscode.WebviewPanel {
+    bundle: string): void {
 
     panel.webview.options = {
         enableScripts: true,
@@ -13,8 +13,6 @@ export function initReactPanel(
         ]
     };
     panel.webview.html = _getHtmlForWebview(panel, context, bundle);
-
-    return panel;
 }
 
 function _getHtmlForWebview(
@@ -39,13 +37,13 @@ function _getHtmlForWebview(
                 style-src ${panel.webview.cspSource} 'unsafe-inline';
                 child-src ${panel.webview.cspSource};
                 ">
-    <base href='${panel.webview.asWebviewUri(context.extensionUri)}/'>
-    <script nonce=${nonce} src='./public/ReactEventBridge.js'></script>
+    <base href='${panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "/"))}'>
+    <script nonce='${nonce}' src='./public/ReactEventBridge.js'></script>
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id='root'></div>
-    <script nonce=${nonce} src='${bundle}'> </script>
+    <script nonce=${nonce} src='${bundle}'></script>
 </body>
 </html>`;
 }

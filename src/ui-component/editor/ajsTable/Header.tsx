@@ -3,7 +3,8 @@ import { Alert, AppBar, IconButton, Slide, Snackbar, Stack, Toolbar, Tooltip, us
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SaveIcon from '@mui/icons-material/Save';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
-import Loop from '@mui/icons-material/Loop';
+import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import { Table } from '@tanstack/table-core';
 import TableMenu from './TableMenu';
 import SearchBox from './SearchBox';
@@ -90,7 +91,10 @@ const Header: FC<HeaderProps> = ({ table, tableMenuState, drawerWidthState }) =>
                                     updateMyAppResource({ scrollType: scrollType === 'table' ? 'window' : 'table' });
                                 }}
                             >
-                                <Loop fontSize='inherit' />
+                                {scrollType === 'table'
+                                    ? <UnfoldLessIcon fontSize='inherit' />
+                                    : <UnfoldMoreIcon fontSize='inherit' />
+                                }
                             </IconButton>
                         </Tooltip>
                         <Stack flexGrow={1} />

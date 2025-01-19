@@ -3,7 +3,7 @@
  */
 export class Unit {
 
-    /** unit attribute prameter */
+    /** unit attribute parameter */
     unitAttribute: string;
 
     /** definition parameters */
@@ -50,23 +50,20 @@ export class Unit {
         return this.isRoot() ? `/${this.name}` : `${this.parent?.absolutePath()}/${this.name}`;
     }
 
-    /** Create a JavaScript object of UNIT from its JSON. */
+    /** Create a Unit instance from a JSON object. */
     static createFromJSON(rootUnitOfJSON: Unit): Unit {
         if (rootUnitOfJSON.parent) {
             throw new Error(`This unit is not root unit. (${rootUnitOfJSON.unitAttribute})`);
         }
         const rootUnit = Object.assign(new Unit(rootUnitOfJSON.unitAttribute), rootUnitOfJSON);
-        rootUnit.children = rootUnitOfJSON.children.map(child => Unit.#createFromJSON(child, rootUnit));
+        rootUnit.children = rootUnitOfJSON.children.map(child => this.#createFromJSON(child, rootUnit));
         return rootUnit;
     }
 
     static #createFromJSON(unitOfJSON: Unit, parent: Unit): Unit {
         const childUnit = Object.assign(new Unit(unitOfJSON.unitAttribute), unitOfJSON);
-        if (parent) {
-            childUnit.parent = parent;
-        }
-        childUnit.children = unitOfJSON.children.map(v => Unit.#createFromJSON(v, childUnit));
+        childUnit.parent = parent;
+        childUnit.children = unitOfJSON.children.map(v => this.#createFromJSON(v, childUnit));
         return childUnit;
     }
 }
-

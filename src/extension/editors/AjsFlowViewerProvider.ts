@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { initReactPanel } from './ReactPanel';
-import { MyAppResource } from '../../ui-component/editor/MyContexts';
+import { MyAppResource } from '@ui-component/editor/MyContexts';
 import { debounceCreateDataFn, readyFn } from '../../domain/services/events/ready';
 import { resourceFn } from '../../domain/services/events/resource';
 
@@ -15,7 +15,8 @@ type SaveEventType = { type: string, data: string };
 export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
 
     public static register(context: vscode.ExtensionContext) {
-        console.info('registerd AjsFlowViewerProvider');
+        // This method registers the AjsFlowViewerProvider and the command to open the flow viewer.
+        console.info('registered AjsFlowViewerProvider');
         context.subscriptions.push(
             vscode.window.registerCustomEditorProvider(
                 AjsFlowViewerProvider.viewType,
@@ -27,7 +28,9 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
         context.subscriptions.push(
             vscode.commands.registerCommand('ajsbutler.openFlowViewer', () => {
                 const uri = vscode.window.activeTextEditor?.document.uri;
-                vscode.commands.executeCommand('vscode.openWith', uri, AjsFlowViewerProvider.viewType, vscode.ViewColumn.Two);
+                if (uri) {
+                    vscode.commands.executeCommand('vscode.openWith', uri, AjsFlowViewerProvider.viewType, vscode.ViewColumn.Two);
+                }
             })
         );
     }
@@ -47,7 +50,7 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
         const context = this.context;
 
         const refreshWebview = () => {
-            webviewPanel = initReactPanel(webviewPanel, context, './out/ajsFlow/index.js');
+            initReactPanel(webviewPanel, context, './out/ajsFlow/index.js');
         };
 
         const debounceCreateData = debounceCreateDataFn(document, webviewPanel, 500);
@@ -66,24 +69,25 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
         const ready = readyFn(document, webviewPanel);
         const resource = resourceFn(webviewPanel);
 
-        const onDidRecieveMessage = (e: EventType) => {
+        const onDidReceiveMessage = (e: EventType) => {
             switch (e.type) {
                 case 'resource': {
                     resource(e as ResourceEventType);
                     break;
                 }
-                case 'ready': {// webview is ready.
+                // webview is ready.
+                case 'ready': {
                     ready();
                     break;
                 }
             }
         };
-        const recieveMessageSubscription = webviewPanel.webview.onDidReceiveMessage(onDidRecieveMessage);
+        const receiveMessageSubscription = webviewPanel.webview.onDidReceiveMessage(onDidReceiveMessage);
 
         webviewPanel.onDidDispose(() => {
             changeDocumentSubscription.dispose();
             changeConfigurationSubscription.dispose();
-            recieveMessageSubscription.dispose();
+            receiveMessageSubscription.dispose();
             console.log('dispose AjsFlowViewerProvider');
         });
 

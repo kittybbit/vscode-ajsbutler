@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.8.1]
+
+- Incorporate Copilot’s feedback into the source code.
+- Add parameter keys to Antlr and strictly modify the definitions.
+
 ## [1.8.0]
 
 - Added Diagnostics API supports.

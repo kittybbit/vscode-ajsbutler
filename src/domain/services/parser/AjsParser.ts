@@ -14,9 +14,11 @@ export function parseAjs(content: string): { rootUnits: Unit[], errors: ANTLRErr
     const inputStream = CharStreams.fromString(content);
     const lexer = new AjsLexer(inputStream);
     const antlrError = new SyntaxErrorListener();
+    DEVELOPMENT && lexer.removeErrorListeners();
     lexer.addErrorListener(antlrError);
     const tokenStream = new CommonTokenStream(lexer);
     const parser = new AjsParser(tokenStream);
+    DEVELOPMENT && parser.removeErrorListeners();
     parser.addErrorListener(antlrError);
     const tree = parser.unitDefinitionFile();
     const evaluator = new Ajs3v12Evaluator();

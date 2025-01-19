@@ -30,7 +30,16 @@ export abstract class UnitEntity {
         this.#absolutePath = unit.absolutePath();
         this.#id = h64ToString(this.#absolutePath);
         this.#parent = parent;
-        this.#children = this.#unit.children.map(v => tyFactory(v, this));
+        this.#children = this.#unit.children
+            .map(v => {
+                const child = tyFactory(v, this);
+                if (child instanceof UnitEntity) {
+                    return child;
+                } else {
+                    console.error(`Invalid child type: ${child}`);
+                    return undefined;
+                }
+            }).filter((child): child is UnitEntity => child instanceof UnitEntity);
         this.#isRoot = unit.isRoot();
         this.#isRecovery = this.#isRecoveryFn();
         this.#defineParams = this.#defineParamsFn();
@@ -150,7 +159,13 @@ export abstract class UnitEntity {
 
     /** Specified parameters in unit definitions */
     params<T>(param: ParamSymbol): T | undefined {
-        return this[param as keyof typeof this] as T;
+        const value = this[param as keyof typeof this];
+        if (value instanceof Parameter || Array.isArray(value) || value === undefined) {
+            return value as T;
+        } else {
+            console.error(`Invalid parameter type for ${param}`);
+            return undefined;
+        }
     }
 
     /** human readable json */
@@ -167,14 +182,16 @@ export abstract class UnitEntity {
                 .filter(p => p)
                 .map(p => {
                     if (Array.isArray(p)) {
-                        //return (p instanceof Parameter) ? p.map(q => q.prettyJSON()) : undefined;
-                        return p.map(q => q.prettyJSON());
+                        return p
+                            .filter(q => q instanceof Parameter)
+                            .map(q => q.prettyJSON());
                     } else if (p instanceof Parameter) {
-                        return p.prettyJSON()
+                        return p.prettyJSON();
                     } else {
-                        return; // not here
+                        return undefined; // not here
                     }
-                }),
+                })
+                .filter(p => p !== undefined),
         };
     }
 }

@@ -1,11 +1,17 @@
 import { J } from "./J";
 import { N, Rn } from "./N";
 import { Qj } from "./Qj";
+import { UnitEntity } from "./UnitEntities";
+
+const DEFAULT_PRIORITY = 1;
+const isN = (entity: UnitEntity | undefined): entity is N => entity !== undefined && entity.ty && entity.ty.value() === 'n';
+const isRn = (entity: UnitEntity | undefined): entity is Rn => entity !== undefined && entity.ty && entity.ty.value() === 'rn';
 
 export const priority = (unitEntity: J | N | Qj): number => {
     const getPrPriority = (): number | undefined => {
         if (unitEntity.pr && !unitEntity.pr.inherited) {
-            return Number(unitEntity.pr.value());
+            const prValue = unitEntity.pr.value();
+            return prValue !== undefined ? Number(prValue) : undefined;
         }
         return undefined;
     };
@@ -19,8 +25,8 @@ export const priority = (unitEntity: J | N | Qj): number => {
 
     const getParentPriority = (): number | undefined => {
         const parent = unitEntity.parent;
-        if (parent && (parent.ty.value() === 'n' || parent.ty.value() === 'rn')) {
-            return (parent as N | Rn).priority;
+        if (isN(parent) || isRn(parent)) {
+            return parent.priority;
         }
         return undefined;
     };
@@ -30,7 +36,9 @@ export const priority = (unitEntity: J | N | Qj): number => {
 
     // Compare pr and ni positions if both are valid
     if (prPriority !== undefined && niPriority !== undefined) {
-        return unitEntity.pr!.position > unitEntity.ni!.position ? prPriority : niPriority;
+        if (unitEntity.pr && unitEntity.ni) {
+            return unitEntity.pr.position > unitEntity.ni.position ? prPriority : niPriority;
+        }
     }
 
     // Return valid priority from pr or ni
@@ -42,5 +50,5 @@ export const priority = (unitEntity: J | N | Qj): number => {
     if (parentPriority !== undefined) return parentPriority;
 
     // Default priority
-    return 1;
+    return DEFAULT_PRIORITY;
 };
