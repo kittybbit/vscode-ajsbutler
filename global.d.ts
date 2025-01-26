@@ -14,3 +14,4 @@ type PrimitiveType = string | number | boolean | symbol | null | undefined;
 type PrimitiveTypes = PrimitiveType[];
 
 declare const DEVELOPMENT: boolean;
+declare const CONNECTION_STRING: string;

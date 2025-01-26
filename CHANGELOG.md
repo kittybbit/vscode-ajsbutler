@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.9.0]
+
+- Added support for telemetory.
+- The size of the extension has been reduced.
+
 ## [1.8.1]
 
 - Incorporate Copilot’s feedback into the source code.

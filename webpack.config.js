@@ -4,6 +4,9 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { DefinePlugin } = require('webpack');
 const { ProvidePlugin } = require('webpack');
 const path = require('path');
+const dotenv = require('dotenv');
+
+const env = dotenv.config().parsed;
 
 const editorConfig = (env, argv) => {
     const PRODUCTION = argv.mode === 'production';
@@ -13,8 +16,7 @@ const editorConfig = (env, argv) => {
         target: 'web',
         devtool: PRODUCTION ? false : 'inline-source-map',
         entry: {
-            'ajsTable/index': './src/ui-component/editor/ajsTable/index.tsx',
-            'ajsFlow/index': './src/ui-component/editor/ajsFlow/index.tsx',
+            'index': './src/ui-component/editor/index.tsx',
         },
         output: {
             path: path.join(__dirname, 'out'),
@@ -100,6 +102,7 @@ const editorConfig = (env, argv) => {
     }
 };
 
+const CONNECTION_STRING = env.connection_string;
 const nodeConfig = (env, argv) => {
     const PRODUCTION = argv.mode === 'production';
     const DEVELOPMENT = !PRODUCTION;
@@ -181,6 +184,7 @@ const nodeConfig = (env, argv) => {
             }),
             new DefinePlugin({
                 'DEVELOPMENT': JSON.stringify(DEVELOPMENT),
+                'CONNECTION_STRING': JSON.stringify(CONNECTION_STRING),
             }),
             ...(env.analyzer ? [new BundleAnalyzerPlugin({
                 analyzerMode: "static",

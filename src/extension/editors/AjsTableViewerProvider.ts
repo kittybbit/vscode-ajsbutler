@@ -4,6 +4,8 @@ import { debounceCreateDataFn, readyFn } from '../../domain/services/events/read
 import { resourceFn } from '../../domain/services/events/resource';
 import { save } from '../../domain/services/events/save';
 import { EventType, ResourceEventType, SaveEventType } from '../../domain/services/events/event.types';
+import { Extension } from '../Extension';
+import { Telemetry } from '../Constants';
 
 /**
  * Provider for JP1/AJS table viewr.
@@ -25,6 +27,7 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
                 if (activeEditor) {
                     const uri = activeEditor.document.uri;
                     vscode.commands.executeCommand('vscode.openWith', uri, AjsTableViewerProvider.viewType, vscode.ViewColumn.Two);
+                    Extension.reporter.sendTelemetryEvent(Telemetry.OpenTableViewer);
                 } else {
                     vscode.window.showErrorMessage('No active editor found to open the table viewer.');
                 }
@@ -32,7 +35,7 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
         );
     }
 
-    private static readonly viewType = 'ajsbutler.tableViewer';
+    public static readonly viewType = 'ajsbutler.tableViewer';
 
     constructor(
         private readonly context: vscode.ExtensionContext
@@ -45,7 +48,7 @@ export class AjsTableViewerProvider implements vscode.CustomTextEditorProvider {
     ): Promise<void> {
 
         const refreshWebview = () => {
-            initReactPanel(webviewPanel, this.context, './out/ajsTable/index.js');
+            initReactPanel(webviewPanel, this.context, './out/index.js', AjsTableViewerProvider.viewType);
         };
 
         const debounceCreateData = debounceCreateDataFn(document, webviewPanel, 500);
