@@ -35,6 +35,10 @@ To use this extension:
 2. Set the editor’s language mode to ‘jp1ajs’ to view the formatted definitions.
 3. Switch the editor to enable either a list-style or flow-style display.
 
+## Telemetry
+
+This extension collects telemetry data to improve the experience of using this extension with VS Code. We only collect data on which commands are executed. We do not collect any information about names, addresses, paths, etc. The extension respects the telemetry.enableTelemetry setting which you can learn more about in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
+
 ## License
 
 MIT

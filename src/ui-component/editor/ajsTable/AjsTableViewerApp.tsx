@@ -2,9 +2,9 @@ import React from 'react';
 import { MyAppContextProvider } from '../MyContexts';
 import TableContents from './TableContents';
 
-export const App = () => {
+export const AjsTableViewerApp = () => {
 
-    console.log('render App.');
+    console.log('render AjsTableViewerApp.');
 
     return <MyAppContextProvider>
         <TableContents />

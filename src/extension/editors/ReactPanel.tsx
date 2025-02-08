@@ -4,7 +4,8 @@ import { v4 } from 'uuid';
 export function initReactPanel(
     panel: vscode.WebviewPanel,
     context: vscode.ExtensionContext,
-    bundle: string): void {
+    bundle: string,
+    viewType: string): void {
 
     panel.webview.options = {
         enableScripts: true,
@@ -12,13 +13,14 @@ export function initReactPanel(
             context.extensionUri
         ]
     };
-    panel.webview.html = _getHtmlForWebview(panel, context, bundle);
+    panel.webview.html = _getHtmlForWebview(panel, context, bundle, viewType);
 }
 
 function _getHtmlForWebview(
     panel: vscode.WebviewPanel,
     context: vscode.ExtensionContext,
-    bundle: string): string {
+    bundle: string,
+    viewType: string): string {
 
     const nonce = v4();
 
@@ -32,6 +34,7 @@ function _getHtmlForWebview(
     <meta
         http-equiv='Content-Security-Policy'
         content="default-src 'none';
+                frame-src ${panel.webview.cspSource} https://file+.vscode-resource.vscode-cdn.net/;
                 img-src ${panel.webview.cspSource};
                 script-src ${panel.webview.cspSource} 'nonce-${nonce}' 'wasm-unsafe-eval';
                 style-src ${panel.webview.cspSource} 'unsafe-inline';
@@ -42,6 +45,7 @@ function _getHtmlForWebview(
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <input type="hidden" id="viewType" value="${viewType}" />
     <div id='root'></div>
     <script nonce=${nonce} src='${bundle}'></script>
 </body>

@@ -3,6 +3,8 @@ import { initReactPanel } from './ReactPanel';
 import { MyAppResource } from '@ui-component/editor/MyContexts';
 import { debounceCreateDataFn, readyFn } from '../../domain/services/events/ready';
 import { resourceFn } from '../../domain/services/events/resource';
+import { Extension } from '../Extension';
+import { Telemetry } from '../Constants';
 
 type EventType = ResourceEventType | ReadyEventType | SaveEventType;
 type ResourceEventType = { type: string, data: MyAppResource };
@@ -27,15 +29,19 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
         );
         context.subscriptions.push(
             vscode.commands.registerCommand('ajsbutler.openFlowViewer', () => {
-                const uri = vscode.window.activeTextEditor?.document.uri;
-                if (uri) {
+                const activeEditor = vscode.window.activeTextEditor;
+                if (activeEditor) {
+                    const uri = activeEditor.document.uri;
                     vscode.commands.executeCommand('vscode.openWith', uri, AjsFlowViewerProvider.viewType, vscode.ViewColumn.Two);
+                    Extension.reporter.sendTelemetryEvent(Telemetry.OpenFlowViewer);
+                } else {
+                    vscode.window.showErrorMessage('No active editor found to open the flow viewer.');
                 }
             })
         );
     }
 
-    private static readonly viewType = 'ajsbutler.flowViewer';
+    public static readonly viewType = 'ajsbutler.flowViewer';
 
     constructor(
         private readonly context: vscode.ExtensionContext
@@ -50,7 +56,7 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
         const context = this.context;
 
         const refreshWebview = () => {
-            initReactPanel(webviewPanel, context, './out/ajsFlow/index.js');
+            initReactPanel(webviewPanel, context, './out/index.js', AjsFlowViewerProvider.viewType);
         };
 
         const debounceCreateData = debounceCreateDataFn(document, webviewPanel, 500);

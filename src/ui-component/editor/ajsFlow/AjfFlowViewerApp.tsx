@@ -2,9 +2,9 @@ import React from 'react';
 import { MyAppContextProvider } from '../MyContexts';
 import FlowContents from './FlowContents';
 
-export const App = () => {
+export const AjsFlowViewerApp = () => {
 
-    console.log('render App.');
+    console.log('render AjfFlowViewerApp.');
 
     return <MyAppContextProvider>
         <FlowContents />
