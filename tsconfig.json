@@ -1,39 +1,27 @@
 {
-	"compilerOptions": {
-		"target": "ES2022",
-		"module": "ESNext",
-		"moduleResolution": "node",
-		"rootDir": "src",
-		"outDir": "out",
-		"jsx": "react",
-		"lib": [
-			"DOM",
-			"ES2022"
-		],
-		"sourceMap": true,
-		"paths": {
-			"@resource/*": [
-				"./src/resource/*"
-			],
-			"@generate/*": [
-				"./src/generate/*"
-			],
-			"@ui-component/*": [
-				"./src/ui-component/*"
-			]
-		},
-		"declaration": true,
-		"removeComments": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		/* Additional Checks */
-		"noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-		"noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-	},
-	"exclude": [
-		"node_modules",
-		"out"
-	]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "outDir": "out",
+    "jsx": "react",
+    "lib": ["DOM", "ES2022"],
+    "sourceMap": true,
+    "paths": {
+      "@resource/*": ["./src/resource/*"],
+      "@generate/*": ["./src/generate/*"],
+      "@ui-component/*": ["./src/ui-component/*"]
+    },
+    "declaration": true,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    /* Additional Checks */
+    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
+    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */
+  },
+  "exclude": ["node_modules", "out"]
 }

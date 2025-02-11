@@ -1,12 +1,13 @@
-import React from 'react';
-import { MyAppContextProvider } from '../MyContexts';
-import FlowContents from './FlowContents';
+import React from "react";
+import { MyAppContextProvider } from "../MyContexts";
+import FlowContents from "./FlowContents";
 
 export const AjsFlowViewerApp = () => {
+  console.log("render AjfFlowViewerApp.");
 
-    console.log('render AjfFlowViewerApp.');
-
-    return <MyAppContextProvider>
-        <FlowContents />
-    </MyAppContextProvider>;
-}
+  return (
+    <MyAppContextProvider>
+      <FlowContents />
+    </MyAppContextProvider>
+  );
+};

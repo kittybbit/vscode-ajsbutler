@@ -106,9 +106,9 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "clean": "rimraf out report",
-    "predevelopment": "npm-run-all lint",
+    "predevelopment": "npm-run-all qlty",
     "development": "webpack",
-    "prebuild": "npm-run-all clean antlr4ts lint",
+    "prebuild": "npm-run-all clean antlr4ts qlty",
     "build": "webpack --mode production",
     "antlr4ts": "npm-run-all antlr:clean antlr:generate",
     "antlr:clean": "rimraf src/generate/parser",
@@ -116,7 +116,9 @@
     "watch": "webpack -w",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
     "pretest": "npm-run-all development",
-    "lint": "eslint",
+    "qlty": "npm-run-all qlty:fmt qlty:check",
+    "qlty:fmt": "qlty fmt",
+    "qlty:check": "qlty check",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {

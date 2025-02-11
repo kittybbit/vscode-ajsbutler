@@ -13,6 +13,10 @@
 # Or for a full reference, visit https://qlty.sh/d/qlty-toml
 config_version = "0"
 
+[sources.default]
+repository = "https://github.com/kittybbit/vscode-ajsbutler.git"
+branch = "main"
+
 exclude_patterns = [
   "*_min.*",
   "*-min.*",
@@ -39,6 +43,7 @@ exclude_patterns = [
   "**/testdata/**",
   "**/vendor/**",
   "**/assets/**",
+  "**/generate/**",
 ]
 
 test_patterns = [
@@ -55,12 +60,37 @@ test_patterns = [
 [smells]
 mode = "comment"
 
+[smells.boolean_logic]
+threshold = 4
+enabled = true
+
+[smells.file_complexity]
+threshold = 55
+enabled = true
+
+[smells.return_statements]
+threshold = 4
+enabled = true
+
+[smells.nested_control_flow]
+threshold = 4
+enabled = true
+
+[smells.function_parameters]
+threshold = 4
+enabled = true
+
+[smells.function_complexity]
+threshold = 5
+enabled = true
+
+[smells.duplication]
+enabled = true
+threshold = 20
+
 [[source]]
 name = "default"
 default = true
-
-[[plugin]]
-name = "checkov"
 
 [[plugin]]
 name = "eslint"
@@ -69,14 +99,8 @@ package_file = "package.json"
 package_filters = ["eslint"]
 
 [[plugin]]
-name = "golangci-lint"
-
-[[plugin]]
 name = "markdownlint"
 version = "0.41.0"
-
-[[plugin]]
-name = "osv-scanner"
 
 [[plugin]]
 name = "prettier"

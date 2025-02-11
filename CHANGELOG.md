@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.9.1]
+
+- Added the static analysis tool Qlty.
+
 ## [1.9.0]
 
 - Added support for telemetory.

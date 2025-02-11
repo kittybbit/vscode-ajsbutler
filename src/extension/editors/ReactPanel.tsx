@@ -1,30 +1,28 @@
-import * as vscode from 'vscode';
-import { v4 } from 'uuid';
+import * as vscode from "vscode";
+import { v4 } from "uuid";
 
 export function initReactPanel(
-    panel: vscode.WebviewPanel,
-    context: vscode.ExtensionContext,
-    bundle: string,
-    viewType: string): void {
-
-    panel.webview.options = {
-        enableScripts: true,
-        localResourceRoots: [
-            context.extensionUri
-        ]
-    };
-    panel.webview.html = _getHtmlForWebview(panel, context, bundle, viewType);
+  panel: vscode.WebviewPanel,
+  context: vscode.ExtensionContext,
+  bundle: string,
+  viewType: string,
+): void {
+  panel.webview.options = {
+    enableScripts: true,
+    localResourceRoots: [context.extensionUri],
+  };
+  panel.webview.html = _getHtmlForWebview(panel, context, bundle, viewType);
 }
 
 function _getHtmlForWebview(
-    panel: vscode.WebviewPanel,
-    context: vscode.ExtensionContext,
-    bundle: string,
-    viewType: string): string {
+  panel: vscode.WebviewPanel,
+  context: vscode.ExtensionContext,
+  bundle: string,
+  viewType: string,
+): string {
+  const nonce = v4();
 
-    const nonce = v4();
-
-    return `
+  return `
 <!DOCTYPE html>
 <html lang='${vscode.env.language}'>
 <head>
