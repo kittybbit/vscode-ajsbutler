@@ -8,37 +8,32 @@ export default [
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   {
-    ignores: [
-      "webpack.config.js",
-      "src/generate/**/*.ts",
-      "out/",
-      ".*/"
-    ],
+    ignores: ["webpack.config.js", "src/generate/**/*.ts", "out/", ".*/"],
   },
   {
     rules: {
       "@typescript-eslint/no-unused-expressions": [
         "error",
         {
-          "allowShortCircuit": true,
-        }
-      ]
-    }
+          allowShortCircuit: true,
+        },
+      ],
+    },
   },
   {
     languageOptions: {
       globals: {
         ...globals.browser,
         ...globals.node,
-        ...globals.es2022
+        ...globals.es2022,
       },
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
-      }
+      },
     },
     settings: {
       react: {
-        version: 'detect',
+        version: "detect",
       },
     },
   },

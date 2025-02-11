@@ -1,4 +1,4 @@
-import { ProfilerOnRenderCallback } from 'react';
+import { ProfilerOnRenderCallback } from "react";
 
 /**
  * @example
@@ -7,12 +7,14 @@ import { ProfilerOnRenderCallback } from 'react';
  * </Profiler>
  */
 export const onRenderCallback: ProfilerOnRenderCallback = (
-    id: string,
-    phase: 'mount' | 'update' | "nested-update",
-    actualDuration: number,
-    baseDuration: number,
-    startTime: number,
-    commitTime: number,
+  id: string,
+  phase: "mount" | "update" | "nested-update",
+  actualDuration: number,
+  baseDuration: number,
+  startTime: number,
+  commitTime: number,
 ) => {
-    console.log(`id=${id}, phase=${phase}, actualDuration=${actualDuration}[ms], baseDuration=${baseDuration}[ms], startTime=${startTime}, commitTime=${commitTime}`);
-}
+  console.log(
+    `id=${id}, phase=${phase}, actualDuration=${actualDuration}[ms], baseDuration=${baseDuration}[ms], startTime=${startTime}, commitTime=${commitTime}`,
+  );
+};

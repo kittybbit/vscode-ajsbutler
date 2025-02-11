@@ -31,27 +31,84 @@ import { Rc } from "../models/units/Rc";
 import { Tmwj, Rtmwj } from "../models/units/Tmwj";
 
 const tyClasses = {
-    'g': G, 'mg': Mg, 'n': N, 'rn': Rn, 'rm': Rm, 'rr': Rr, 'rc': Rc, 'mn': Mn, 'j': J, 'rj': Rj, 'pj': Pj, 'rp': Rp, 'qj': Qj, 'rq': Rq,
-    'jdj': Jdj, 'rjdj': Rjdj, 'orj': Orj, 'rorj': Rorj, 'evwj': Evwj, 'revwj': Revwj, 'flwj': Flwj, 'rflwj': Rflwj, 'mlwj': Mlwj, 'rmlwj': Rmlwj, 'mqwj': Mqwj, 'rmqwj': Rmqwj,
-    'mswj': Mswj, 'rmswj': Rmswj, 'lfwj': Lfwj, 'rlfwj': Rlfwj, 'ntwj': Ntwj, 'rntwj': Rntwj, 'tmwj': Tmwj, 'rtmwj': Rtmwj, 'evsj': Evsj, 'revsj': Revsj, 'mlsj': Mlsj,
-    'rmlsj': Rmlsj, 'mqsj': Mqsj, 'rmqsj': Rmqsj, 'mssj': Mssj, 'rmssj': Rmssj, 'cmsj': Cmsj, 'rcmsj': Rcmsj, 'pwlj': Pwlj, 'rpwlj': Rpwlj, 'pwrj': Pwrj, 'rpwrj': Rpwrj,
-    'cj': Cj, 'rcj': Rcj, 'cpj': Cpj, 'rcpj': Rcpj, 'fxj': Fxj, 'rfxj': Rfxj, 'htpj': Htpj, 'rhtpj': Rhtpj, 'nc': Nc
+  g: G,
+  mg: Mg,
+  n: N,
+  rn: Rn,
+  rm: Rm,
+  rr: Rr,
+  rc: Rc,
+  mn: Mn,
+  j: J,
+  rj: Rj,
+  pj: Pj,
+  rp: Rp,
+  qj: Qj,
+  rq: Rq,
+  jdj: Jdj,
+  rjdj: Rjdj,
+  orj: Orj,
+  rorj: Rorj,
+  evwj: Evwj,
+  revwj: Revwj,
+  flwj: Flwj,
+  rflwj: Rflwj,
+  mlwj: Mlwj,
+  rmlwj: Rmlwj,
+  mqwj: Mqwj,
+  rmqwj: Rmqwj,
+  mswj: Mswj,
+  rmswj: Rmswj,
+  lfwj: Lfwj,
+  rlfwj: Rlfwj,
+  ntwj: Ntwj,
+  rntwj: Rntwj,
+  tmwj: Tmwj,
+  rtmwj: Rtmwj,
+  evsj: Evsj,
+  revsj: Revsj,
+  mlsj: Mlsj,
+  rmlsj: Rmlsj,
+  mqsj: Mqsj,
+  rmqsj: Rmqsj,
+  mssj: Mssj,
+  rmssj: Rmssj,
+  cmsj: Cmsj,
+  rcmsj: Rcmsj,
+  pwlj: Pwlj,
+  rpwlj: Rpwlj,
+  pwrj: Pwrj,
+  rpwrj: Rpwrj,
+  cj: Cj,
+  rcj: Rcj,
+  cpj: Cpj,
+  rcpj: Rcpj,
+  fxj: Fxj,
+  rfxj: Rfxj,
+  htpj: Htpj,
+  rhtpj: Rhtpj,
+  nc: Nc,
 } as const;
 
-export const tyFactory = <T extends UnitEntity>(unit: Unit, parent?: UnitEntity): T => {
-    const tyValue = unit.parameters.find((v) => v.key === 'ty')?.value;
-    if (!tyValue) {
-        throw new Error('ty value is undefined.');
-    }
-    if (!isTySymbol(tyValue)) {
-        throw new Error(`'${tyValue}' is not ty type.`);
-    }
-    const unitEntity = new tyClasses[tyValue](unit, parent) as T;
-    // console.log(JSON.stringify(unitEntity.prettyJSON(), null, 2));
-    return unitEntity;
-}
+export const tyFactory = <T extends UnitEntity>(
+  unit: Unit,
+  parent?: UnitEntity,
+): T => {
+  const tyValue = unit.parameters.find((v) => v.key === "ty")?.value;
+  if (!tyValue) {
+    throw new Error("ty value is undefined.");
+  }
+  if (!isTySymbol(tyValue)) {
+    throw new Error(`'${tyValue}' is not ty type.`);
+  }
+  const unitEntity = new tyClasses[tyValue](unit, parent) as T;
+  // console.log(JSON.stringify(unitEntity.prettyJSON(), null, 2));
+  return unitEntity;
+};
 
-export const flattenChildren = (unitEntities: UnitEntity[]): UnitEntity[] => unitEntities.reduce(
-    (acc, unitEntity) => acc.concat(unitEntity, flattenChildren(unitEntity.children || []))
-    , Array.of<UnitEntity>()
-);
+export const flattenChildren = (unitEntities: UnitEntity[]): UnitEntity[] =>
+  unitEntities.reduce(
+    (acc, unitEntity) =>
+      acc.concat(unitEntity, flattenChildren(unitEntity.children || [])),
+    Array.of<UnitEntity>(),
+  );

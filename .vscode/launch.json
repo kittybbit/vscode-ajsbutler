@@ -1,38 +1,32 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Launch Extension",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/out/**/*.js"
-            ],
-            "request": "launch",
-            "type": "extensionHost"
-        },
-        {
-            "name": "Launch Extension(web)",
-            "debugWebWorkerHost": true,
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionDevelopmentKind=web"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/out/**/*.js"
-            ],
-            "type": "extensionHost",
-            "request": "launch",
-        },
-        {
-            "type": "antlr-debug",
-            "request": "launch",
-            "name": "Debug Current Grammar(Jp1Ajs3)",
-            "input": "./sample/sample1_utf8",
-            "grammar": "./src/antlr/AjsParser.g4",
-            "visualParseTree": true,
-            "printParseTree": true
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Extension",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "request": "launch",
+      "type": "extensionHost"
+    },
+    {
+      "name": "Launch Extension(web)",
+      "debugWebWorkerHost": true,
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentKind=web"
+      ],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "type": "extensionHost",
+      "request": "launch"
+    },
+    {
+      "type": "antlr-debug",
+      "request": "launch",
+      "name": "Debug Current Grammar(Jp1Ajs3)",
+      "input": "./sample/sample1_utf8",
+      "grammar": "./src/antlr/AjsParser.g4",
+      "visualParseTree": true,
+      "printParseTree": true
+    }
+  ]
 }

@@ -4,6 +4,12 @@ node_modules/
 # antlr
 antlr/
 
+# qlty
+.qlty/
+
+# code climate
+.codeclimate.yml
+
 # vscode
 .vscode/
 .vscode-test/
@@ -28,3 +34,4 @@ webpack.config.js
 *.map
 global.d.ts
 secrets.json
+.env
