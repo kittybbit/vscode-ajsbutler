@@ -8,7 +8,7 @@ export default [
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   {
-    ignores: ["webpack.config.js", "src/generate/**/*.ts", "out/", ".*/"],
+    ignores: ["src/generate/**/*.ts", "out/", ".*/"],
   },
   {
     rules: {
