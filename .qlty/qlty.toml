@@ -13,10 +13,6 @@
 # Or for a full reference, visit https://qlty.sh/d/qlty-toml
 config_version = "0"
 
-[sources.default]
-repository = "https://github.com/kittybbit/vscode-ajsbutler.git"
-branch = "main"
-
 exclude_patterns = [
   "*_min.*",
   "*-min.*",
@@ -44,6 +40,7 @@ exclude_patterns = [
   "**/vendor/**",
   "**/assets/**",
   "**/generate/**",
+  "webpack.config.js",
 ]
 
 test_patterns = [
@@ -56,6 +53,10 @@ test_patterns = [
   "**/test_*.*",
   "**/spec_*.*",
 ]
+
+[sources.default]
+repository = "https://github.com/kittybbit/vscode-ajsbutler.git"
+branch = "main"
 
 [smells]
 mode = "comment"
@@ -94,7 +95,7 @@ default = true
 
 [[plugin]]
 name = "eslint"
-version = "9.20.0"
+version = "9.22.0"
 package_file = "package.json"
 package_filters = ["eslint"]
 
@@ -114,6 +115,7 @@ drivers = [
   "config",
   "fs-vuln",
 ]
+mode = "disabled"
 
 [[plugin]]
 name = "trufflehog"
