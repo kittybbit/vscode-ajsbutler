@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.9.3]
+
+- Fixed missing disposal of Diagnostic.
+- Update packages.
+
+## [1.9.2]
+
+- Update packages.
+
 ## [1.9.1]
 
 - Added the static analysis tool Qlty.
