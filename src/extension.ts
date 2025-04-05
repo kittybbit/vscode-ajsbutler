@@ -13,7 +13,7 @@ import { Telemetry } from "./extension/Constants";
 export function activate(context: vscode.ExtensionContext) {
   console.info('"vscode-ajsbutler" is now active.');
   const reporter = Extension.init(context);
-  Diagnostic.init();
+  Diagnostic.init(context);
   Ajs3v12HoverProvider.register(context);
   AjsTableViewerProvider.register(context);
   AjsFlowViewerProvider.register(context);

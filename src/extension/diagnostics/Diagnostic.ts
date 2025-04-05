@@ -29,15 +29,21 @@ export class Diagnostic {
     this.diagnosticCollection.set(document.uri, diagnostics);
   }
 
-  public static init() {
+  public static init(context: vscode.ExtensionContext) {
     console.info("initialize Diagnostic.");
     const diagnostic = new Diagnostic();
-    vscode.workspace.onDidOpenTextDocument(diagnostic.checkForErrors);
-    vscode.workspace.onDidChangeTextDocument((event) =>
-      diagnostic.checkForErrors(event.document),
+    context.subscriptions.push(
+      vscode.workspace.onDidOpenTextDocument(diagnostic.checkForErrors),
     );
-    vscode.workspace.onDidCloseTextDocument((doc) =>
-      diagnostic.diagnosticCollection.delete(doc.uri),
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeTextDocument((event) =>
+        diagnostic.checkForErrors(event.document),
+      ),
+    );
+    context.subscriptions.push(
+      vscode.workspace.onDidCloseTextDocument((doc) =>
+        diagnostic.diagnosticCollection.delete(doc.uri),
+      ),
     );
   }
 }
