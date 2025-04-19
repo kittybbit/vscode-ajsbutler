@@ -3,7 +3,7 @@ import * as os from "os";
 import { MyAppResource } from "@ui-component/editor/MyContexts";
 import { ResourceEventType } from "./event.types";
 
-export const resourceFn = (webviewPanel: vscode.WebviewPanel) => {
+export const resourceFn = (panel: vscode.WebviewPanel) => {
   return (e: ResourceEventType) => {
     console.log("invoke resource.");
     const data: MyAppResource = {
@@ -13,7 +13,7 @@ export const resourceFn = (webviewPanel: vscode.WebviewPanel) => {
       lang: vscode.env.language,
       os: os.platform().toLowerCase(),
     };
-    webviewPanel.webview.postMessage({
+    panel.webview.postMessage({
       type: "resource",
       data: data,
     });

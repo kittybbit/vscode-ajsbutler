@@ -20,11 +20,12 @@ type SaveEventType = { type: string; data: string };
 export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
   public static register(context: vscode.ExtensionContext) {
     // This method registers the AjsFlowViewerProvider and the command to open the flow viewer.
-    console.info("registered AjsFlowViewerProvider");
+    console.log("registered AjsFlowViewerProvider");
+    const ajsFlowViewerProvider = new AjsFlowViewerProvider(context);
     context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(
         AjsFlowViewerProvider.viewType,
-        new AjsFlowViewerProvider(context),
+        ajsFlowViewerProvider,
         {
           webviewOptions: { retainContextWhenHidden: true },
         },
@@ -53,27 +54,30 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
 
   public static readonly viewType = "ajsbutler.flowViewer";
 
-  constructor(private readonly context: vscode.ExtensionContext) {}
+  constructor(private readonly context: vscode.ExtensionContext) { }
+
+  private refreshWebview(panel: vscode.WebviewPanel) {
+    initReactPanel(
+      panel,
+      this.context,
+      "./out/index.js",
+      AjsFlowViewerProvider.viewType,
+    );
+  }
 
   public async resolveCustomTextEditor(
     document: vscode.TextDocument,
-    webviewPanel: vscode.WebviewPanel,
+    panel: vscode.WebviewPanel,
     /* token: vscode.CancellationToken */
   ): Promise<void> {
-    const context = this.context;
-
-    const refreshWebview = () => {
-      initReactPanel(
-        webviewPanel,
-        context,
-        "./out/index.js",
-        AjsFlowViewerProvider.viewType,
-      );
-    };
+    console.log(
+      "invoke AjsFlowViewerProvider.resolveCustomTextEditor.",
+      document.uri.toString(),
+    );
 
     const debounceCreateData = debounceCreateDataFn(
       document,
-      webviewPanel,
+      panel,
       500,
     );
 
@@ -85,16 +89,21 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
     );
     const changeConfigurationSubscription =
       vscode.workspace.onDidChangeConfiguration((e) => {
+        console.log(
+          "invoke AjsFlowViewerProvider.onDidChangeConfiguration.",
+          e,
+        );
         if (e.affectsConfiguration("workbench.colorTheme")) {
-          refreshWebview();
+          this.refreshWebview(panel);
         }
       });
 
     // message receiver
-    const ready = readyFn(document, webviewPanel);
-    const resource = resourceFn(webviewPanel);
+    const ready = readyFn(document, panel);
+    const resource = resourceFn(panel);
 
     const onDidReceiveMessage = (e: EventType) => {
+      console.log("invoke AjsFlowViewerProvider.onDidReceiveMessage", e);
       switch (e.type) {
         case "resource": {
           resource(e as ResourceEventType);
@@ -108,16 +117,17 @@ export class AjsFlowViewerProvider implements vscode.CustomTextEditorProvider {
       }
     };
     const receiveMessageSubscription =
-      webviewPanel.webview.onDidReceiveMessage(onDidReceiveMessage);
+      panel.webview.onDidReceiveMessage(onDidReceiveMessage);
 
-    webviewPanel.onDidDispose(() => {
+    panel.onDidDispose(() => {
+      console.log("invoke AjsFlowViewerProvider.onDidDispose.");
       changeDocumentSubscription.dispose();
       changeConfigurationSubscription.dispose();
       receiveMessageSubscription.dispose();
-      console.log("dispose AjsFlowViewerProvider");
+      panel = undefined;
     });
 
     // initial display
-    refreshWebview();
+    this.refreshWebview(panel);
   }
 }
