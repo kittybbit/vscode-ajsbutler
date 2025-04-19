@@ -1,15 +1,16 @@
 import * as vscode from "vscode";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { LANGUAGE_ID } from "../constant";
 
 export class Diagnostic {
   private diagnosticCollection =
     vscode.languages.createDiagnosticCollection("vscode.ajsbutler");
 
   private checkForErrors(document: vscode.TextDocument) {
-    if (document.languageId !== "jp1ajs") {
+    if (document.languageId !== LANGUAGE_ID) {
       return;
     }
-    console.log("checkForErrors");
+    console.log(`invoke checkForErrors. (${document.uri.toString()})`);
     const result = parseAjs(document.getText());
     const diagnostics = result.errors.map((result) => {
       const startPos = new vscode.Position(
@@ -30,30 +31,42 @@ export class Diagnostic {
     this.diagnosticCollection.set(document.uri, diagnostics);
   }
 
+  private constructor() {
+    console.log("invoke Diagnostic.constructor.");
+  }
+
   public static init(context: vscode.ExtensionContext) {
     console.log("initialize Diagnostic.");
     const diagnostic = new Diagnostic();
     context.subscriptions.push(
-      vscode.workspace.onDidOpenTextDocument((doc) => {
-        if (doc.languageId !== "jp1ajs") {
+      vscode.workspace.onDidOpenTextDocument((e: vscode.TextDocument) => {
+        if (e.languageId !== LANGUAGE_ID) {
           return;
         }
-        console.log("invoke Diagnostic.onDidOpenTextDocument.", doc);
-        diagnostic.checkForErrors(doc);
+        console.log(
+          `invoke Diagnostic.onDidOpenTextDocument. (${e.uri.toString()})`,
+        );
+        diagnostic.checkForErrors(e);
       }),
-      vscode.workspace.onDidChangeTextDocument((event) => {
-        if (event.document.languageId !== "jp1ajs") {
+      vscode.workspace.onDidChangeTextDocument(
+        (e: vscode.TextDocumentChangeEvent) => {
+          if (e.document.languageId !== LANGUAGE_ID) {
+            return;
+          }
+          console.log(
+            `invoke Diagnostic.onDidChangeTextDocument. (${e.document.uri.toString()})`,
+          );
+          diagnostic.checkForErrors(e.document);
+        },
+      ),
+      vscode.workspace.onDidCloseTextDocument((e: vscode.TextDocument) => {
+        if (e.languageId !== LANGUAGE_ID) {
           return;
         }
-        console.log("invoke Diagnostic.onDidChangeTextDocument.", event);
-        diagnostic.checkForErrors(event.document);
-      }),
-      vscode.workspace.onDidCloseTextDocument((doc) => {
-        if (doc.languageId !== "jp1ajs") {
-          return;
-        }
-        console.log("invoke Diagnostic.onDidCloseTextDocument.", doc);
-        diagnostic.diagnosticCollection.delete(doc.uri);
+        console.log(
+          `invoke Diagnostic.onDidCloseTextDocument. (${e.uri.toString()})`,
+        );
+        diagnostic.diagnosticCollection.delete(e.uri);
       }),
     );
   }

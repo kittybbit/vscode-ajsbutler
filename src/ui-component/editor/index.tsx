@@ -2,6 +2,10 @@ import React, { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AjsTableViewerApp } from "./ajsTable/AjsTableViewerApp";
 import { AjsFlowViewerApp } from "./ajsFlow/AjsFlowViewerApp";
+import {
+  AJS_TABLE_VIEWER_TYPE,
+  AJS_FLOW_VIEWER_TYPE,
+} from "../../extension/webview/constant";
 
 const App: React.FC = () => {
   console.log("render App.");
@@ -23,8 +27,8 @@ const App: React.FC = () => {
 
   return (
     <StrictMode>
-      {viewType === "ajsbutler.tableViewer" && <AjsTableViewerApp />}
-      {viewType === "ajsbutler.flowViewer" && <AjsFlowViewerApp />}
+      {viewType === AJS_TABLE_VIEWER_TYPE && <AjsTableViewerApp />}
+      {viewType === AJS_FLOW_VIEWER_TYPE && <AjsFlowViewerApp />}
     </StrictMode>
   );
 };

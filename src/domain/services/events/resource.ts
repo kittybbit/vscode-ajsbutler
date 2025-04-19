@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import * as os from "os";
 import { MyAppResource } from "@ui-component/editor/MyContexts";
-import { ResourceEventType } from "./event.types";
+import { ResourceEventType } from "./types";
 
 export const resource = (e: ResourceEventType, panel: vscode.WebviewPanel) => {
-  console.log("invoke resource.");
+  console.log(`post a message of resource. (${panel.title})`);
   const data: MyAppResource = {
     ...(e.data as MyAppResource),
     isDarkMode:

@@ -220,6 +220,7 @@ const webconfig = (env, argv) => {
                     assert: require.resolve("assert"),
                     os: require.resolve("os-browserify/browser"),
                     util: require.resolve("util"),
+                    path: require.resolve("path-browserify"),
                 },
             },
             externals: {
