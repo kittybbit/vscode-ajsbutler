@@ -2,17 +2,24 @@ import * as vscode from "vscode";
 import { paramDefinitionLang } from "../../domain/services/i18n/nls";
 import { isParamSymbol } from "../../domain/values/AjsType";
 
-const MODE = { language: "jp1ajs" };
+const SELECTOR: vscode.DocumentSelector = { language: "jp1ajs" };
 
 export class Ajs3v12HoverProvider implements vscode.HoverProvider {
   public static register(context: vscode.ExtensionContext) {
     console.log("registered Ajs3v12HoverProvider");
     context.subscriptions.push(
-      vscode.languages.registerHoverProvider(MODE, new Ajs3v12HoverProvider()),
+      vscode.languages.registerHoverProvider(
+        SELECTOR,
+        new Ajs3v12HoverProvider(),
+      ),
     );
   }
 
-  private paramDefinition = paramDefinitionLang(vscode.env.language);
+  static #paramDefinition = paramDefinitionLang(vscode.env.language);
+
+  private constructor() {
+    console.log("invoke Ajs3v12HoverProvider.constructor.");
+  }
 
   provideHover(
     document: vscode.TextDocument,
@@ -28,7 +35,9 @@ export class Ajs3v12HoverProvider implements vscode.HoverProvider {
     if (isParamSymbol(currentWord)) {
       const content = new vscode.MarkdownString(`**${currentWord}**\n`)
         .appendMarkdown("- - -\n")
-        .appendMarkdown(`\`${this.paramDefinition[currentWord].syntax}\``);
+        .appendMarkdown(
+          `\`${Ajs3v12HoverProvider.#paramDefinition[currentWord].syntax}\``,
+        );
       return new vscode.Hover(content);
     }
     return undefined;

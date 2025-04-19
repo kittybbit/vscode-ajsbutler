@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-import { SaveEventType } from "./event.types";
+import { SaveEventType } from "./types";
 
 export const save = (e: SaveEventType) => {
-  console.log("invoke save.");
   vscode.window.showSaveDialog().then((uri) => {
     if (uri) {
       if (typeof e.data === "string") {
