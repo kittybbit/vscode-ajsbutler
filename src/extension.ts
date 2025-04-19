@@ -6,12 +6,12 @@ import { Ajs3v12HoverProvider } from "./extension/languages/Ajs3v12HoberProvider
 import { AjsFlowViewerProvider } from "./extension/editors/AjsFlowViewerProvider";
 import { Diagnostic } from "./extension/diagnostics/Diagnostic";
 import { Extension } from "./extension/Extension";
-import { Telemetry } from "./extension/Constants";
+import { Telemetry } from "./extension/constant";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  console.info('"vscode-ajsbutler" is now active.');
+  console.log('"vscode-ajsbutler" is now active.');
   const reporter = Extension.init(context);
   Diagnostic.init(context);
   Ajs3v12HoverProvider.register(context);
@@ -31,5 +31,5 @@ export function deactivate(): void {
     });
     reporter.dispose();
   }
-  console.info('"vscode-ajsbutler" is deactive.');
+  console.log('"vscode-ajsbutler" is deactive.');
 }

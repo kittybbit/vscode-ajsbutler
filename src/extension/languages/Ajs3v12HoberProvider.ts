@@ -6,7 +6,7 @@ const MODE = { language: "jp1ajs" };
 
 export class Ajs3v12HoverProvider implements vscode.HoverProvider {
   public static register(context: vscode.ExtensionContext) {
-    console.info("registered Ajs3v12HoverProvider");
+    console.log("registered Ajs3v12HoverProvider");
     context.subscriptions.push(
       vscode.languages.registerHoverProvider(MODE, new Ajs3v12HoverProvider()),
     );

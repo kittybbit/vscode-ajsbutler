@@ -2,23 +2,23 @@ import * as vscode from "vscode";
 import { v4 } from "uuid";
 
 export function initReactPanel(
-  panel: vscode.WebviewPanel,
   context: vscode.ExtensionContext,
-  bundle: string,
+  panel: vscode.WebviewPanel,
   viewType: string,
+  bundle: string,
 ): void {
   panel.webview.options = {
     enableScripts: true,
     localResourceRoots: [context.extensionUri],
   };
-  panel.webview.html = _getHtmlForWebview(panel, context, bundle, viewType);
+  panel.webview.html = _getHtmlForWebview(context, panel, viewType, bundle);
 }
 
 function _getHtmlForWebview(
-  panel: vscode.WebviewPanel,
   context: vscode.ExtensionContext,
-  bundle: string,
+  panel: vscode.WebviewPanel,
   viewType: string,
+  bundle: string,
 ): string {
   const nonce = v4();
 
@@ -32,14 +32,13 @@ function _getHtmlForWebview(
     <meta
         http-equiv='Content-Security-Policy'
         content="default-src 'none';
-                frame-src ${panel.webview.cspSource} https://file+.vscode-resource.vscode-cdn.net/;
+                frame-src ${panel.webview.cspSource};
                 img-src ${panel.webview.cspSource};
                 script-src ${panel.webview.cspSource} 'nonce-${nonce}' 'wasm-unsafe-eval';
                 style-src ${panel.webview.cspSource} 'unsafe-inline';
                 child-src ${panel.webview.cspSource};
                 ">
     <base href='${panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "/"))}'>
-    <script nonce='${nonce}' src='./public/ReactEventBridge.js'></script>
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
