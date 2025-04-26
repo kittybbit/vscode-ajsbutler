@@ -92,17 +92,21 @@
         "extensions": [
           ""
         ],
-        "configuration": "./resource/language-configuration.json"
+        "configuration": "./lanuage/language-configuration.json"
       }
     ],
     "grammars": [
       {
         "language": "jp1ajs",
         "scopeName": "source.ajs",
-        "path": "./resource/jp1ajs.tmLanguage.json"
+        "path": "./syntax/jp1ajs.tmLanguage.json"
       }
     ]
   },
+  "activationEvents": [
+    "onWebviewPanel:ajsbutler.tableViewer",
+    "onWebviewPanel:ajsbutler.flowViewer"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run build",
     "clean": "rimraf out report",
