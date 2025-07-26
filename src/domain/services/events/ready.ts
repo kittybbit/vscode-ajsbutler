@@ -1,44 +1,14 @@
 import * as vscode from "vscode";
-import { stringify } from "flatted";
-import { parseAjs } from "../parser/AjsParser";
+import { CHANGE_DOCUMENT } from "./constant";
+import { toJsonData } from "../../models/converter";
 
-export const createData = (document: vscode.TextDocument) => {
-  const result = parseAjs(document.getText());
-  if (result.errors.length > 0) {
-    return undefined;
-  }
-  return stringify(result.rootUnits);
-};
-
-export const debounceCreateDataFn = (
+export const ready = (
   document: vscode.TextDocument,
-  webviewPanel: vscode.WebviewPanel,
-  delay: number = 300,
+  panel: vscode.WebviewPanel,
 ) => {
-  let id: NodeJS.Timeout;
-  return (e: vscode.TextDocumentChangeEvent) => {
-    if (e.document.uri.toString() === document.uri.toString()) {
-      clearTimeout(id);
-      id = setTimeout(() => {
-        console.log("invoke change text document.");
-        webviewPanel.webview.postMessage({
-          type: "changeDocument",
-          data: createData(document),
-        });
-      }, delay);
-    }
-  };
-};
-
-export const readyFn = (
-  document: vscode.TextDocument,
-  webviewPanel: vscode.WebviewPanel,
-) => {
-  return () => {
-    console.log("invoke ready.");
-    webviewPanel.webview.postMessage({
-      type: "changeDocument",
-      data: createData(document),
-    });
-  };
+  console.log(`post a message of ready. (${document.uri.toString()})`);
+  panel.webview.postMessage({
+    type: CHANGE_DOCUMENT,
+    data: toJsonData(document.uri),
+  });
 };

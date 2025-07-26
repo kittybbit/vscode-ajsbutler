@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.10.0]
+
+- Refactored the application structure.
+- WebviewPanel now closes automatically when the associated file is renamed.
+- Update packages.
+
 ## [1.9.3]
 
 - Fixed missing disposal of Diagnostic.

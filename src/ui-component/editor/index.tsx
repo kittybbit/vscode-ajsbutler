@@ -1,7 +1,11 @@
 import React, { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AjsTableViewerApp } from "./ajsTable/AjsTableViewerApp";
-import { AjsFlowViewerApp } from "./ajsFlow/AjfFlowViewerApp";
+import { AjsFlowViewerApp } from "./ajsFlow/AjsFlowViewerApp";
+import {
+  AJS_TABLE_VIEWER_TYPE,
+  AJS_FLOW_VIEWER_TYPE,
+} from "../../extension/webview/constant";
 
 const App: React.FC = () => {
   console.log("render App.");
@@ -23,11 +27,43 @@ const App: React.FC = () => {
 
   return (
     <StrictMode>
-      {viewType === "ajsbutler.tableViewer" && <AjsTableViewerApp />}
-      {viewType === "ajsbutler.flowViewer" && <AjsFlowViewerApp />}
+      {viewType === AJS_TABLE_VIEWER_TYPE && <AjsTableViewerApp />}
+      {viewType === AJS_FLOW_VIEWER_TYPE && <AjsFlowViewerApp />}
     </StrictMode>
   );
 };
+
+window.vscode = acquireVsCodeApi();
+window.EventBridge = {
+  callbacks: {}, // {[type: string]: (type: string, data: unknown) => void}
+  dispatch: (event) => {
+    const type = event.data.type;
+    const functions = window.EventBridge.callbacks[type];
+    if (functions) {
+      functions.forEach((fn) => {
+        fn(event.data.type, event.data.data);
+      });
+    }
+  },
+  addCallback: (type, fn) => {
+    let functions = window.EventBridge.callbacks[type];
+    if (!functions) {
+      functions = [];
+      window.EventBridge.callbacks[type] = functions;
+    }
+    functions.push(fn);
+  },
+  removeCallback: (type, fn) => {
+    let functions = window.EventBridge.callbacks[type];
+    functions = functions.filter((item) => item !== fn);
+    window.EventBridge.callbacks[type] = functions;
+  },
+};
+
+// Add event receiver in webview.
+window.addEventListener("message", (event) => {
+  window.EventBridge.dispatch(event);
+});
 
 const container = document.getElementById("root");
 if (container) {

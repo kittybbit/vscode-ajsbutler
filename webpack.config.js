@@ -22,7 +22,9 @@ const editorConfig = (env, argv) => {
         output: {
             path: path.join(__dirname, "out"),
             filename: "[name].js",
-            libraryTarget: "umd",
+            library: {
+                type: "umd",
+            }
         },
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".jsx", ".css"],
@@ -117,7 +119,9 @@ const nodeConfig = (env, argv) => {
         output: {
             path: path.join(__dirname, "out"),
             filename: "[name].js",
-            libraryTarget: "commonjs2",
+            library: {
+                type: "commonjs2",
+            }
         },
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".jsx", ".css"],
@@ -216,6 +220,7 @@ const webconfig = (env, argv) => {
                     assert: require.resolve("assert"),
                     os: require.resolve("os-browserify/browser"),
                     util: require.resolve("util"),
+                    path: require.resolve("path-browserify"),
                 },
             },
             externals: {
