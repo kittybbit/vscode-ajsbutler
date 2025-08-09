@@ -28,11 +28,17 @@ export function activate(context: vscode.ExtensionContext) {
 
   const ajsTableViewerStore = new WebviewStore(AJS_TABLE_VIEWER_TYPE);
   AjsTableViewerMediator.init(myExtension, ajsTableViewerStore);
-  const ajsTableViewerFactory = AjsTableViewerFactory.init(ajsTableViewerStore);
+  const ajsTableViewerFactory = AjsTableViewerFactory.init(
+    myExtension,
+    ajsTableViewerStore,
+  );
   registerPreview(ajsTableViewerFactory, myExtension);
   const ajsFlowViewerStore = new WebviewStore(AJS_FLOW_VIEWER_TYPE);
   AjsFlowViewerMediator.init(myExtension, ajsFlowViewerStore);
-  const ajsFlowViewerFactory = AjsFlowViewerFactory.init(ajsFlowViewerStore);
+  const ajsFlowViewerFactory = AjsFlowViewerFactory.init(
+    myExtension,
+    ajsFlowViewerStore,
+  );
   registerPreview(ajsFlowViewerFactory, myExtension);
 
   myExtension.reporter.sendTelemetryEvent(Telemetry.ExtensionActivate, {

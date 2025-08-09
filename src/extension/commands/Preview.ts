@@ -19,7 +19,9 @@ export const registerPreview = (
       const document = activeEditor.document;
       const panel = panelFactory.getPanel(document);
       initReactPanel(myExtension.context, panel, viewType, BUNDLE_SRC);
-      myExtension.reporter.sendTelemetryEvent(viewType);
+      myExtension.reporter.sendTelemetryEvent(viewType, {
+        development: String(DEVELOPMENT),
+      });
     } else {
       vscode.window.showErrorMessage("No active editor found to open.");
     }

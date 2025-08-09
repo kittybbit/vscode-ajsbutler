@@ -23,6 +23,7 @@ import { toCsv } from "../../../domain/services/export/csv";
 import { DrawerWidthStateType, TableMenuStateType } from "./TableContents";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../domain/services/i18n/nls";
+import { OPERATION, SAVE } from "../../../domain/services/events/constant";
 
 type HeaderProps = {
   table: Table<UnitEntity>;
@@ -44,12 +45,14 @@ const Header: FC<HeaderProps> = ({
   const [open, setOpen] = useState(false);
 
   const handleCopy = () => {
+    window.vscode.postMessage({ type: OPERATION, data: "copy.csv" });
     navigator.clipboard.writeText(toCsv(table));
     setOpen(true);
   };
 
   const handleSave = () => {
-    window.vscode.postMessage({ type: "save", data: toCsv(table) });
+    window.vscode.postMessage({ type: OPERATION, data: "save.csv" });
+    window.vscode.postMessage({ type: SAVE, data: toCsv(table) });
   };
 
   const HideOnScroll = useCallback(

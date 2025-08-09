@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { WebviewMediator } from "./WebviewMediator";
 import { WebviewStore } from "./WebviewStore";
+import { MyExtension } from "../MyExtension";
 
 /**
  * PanelFactory is responsible for creating and managing webview panels.
@@ -10,10 +10,15 @@ import { WebviewStore } from "./WebviewStore";
 export abstract class ViewerFactory {
   readonly viewType: string;
   protected store: WebviewStore;
-  protected webViewMediator: WebviewMediator;
+  protected myExtension: MyExtension;
 
-  protected constructor(viewType: string, store: WebviewStore) {
+  protected constructor(
+    viewType: string,
+    myExtension: MyExtension,
+    store: WebviewStore,
+  ) {
     this.viewType = viewType;
+    this.myExtension = myExtension;
     this.store = store;
   }
 
