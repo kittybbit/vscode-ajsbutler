@@ -128,9 +128,9 @@ const FlowContents: FC = () => {
         return prevUnitEntityId.current
           ? x.find((unitEntity) => unitEntity.id === prevUnitEntityId.current)
           : x.find(
-              (unitEntity) =>
-                unitEntity.ty.value() === "n" && (unitEntity as N).isRootJobnet,
-            );
+            (unitEntity) =>
+              unitEntity.ty.value() === "n" && (unitEntity as N).isRootJobnet,
+          );
       });
     };
     window.EventBridge.addCallback("changeDocument", changeDodumentFn);
@@ -195,7 +195,7 @@ const FlowContents: FC = () => {
               >
                 <Background variant={BackgroundVariant.Dots} />
                 <Controls position="bottom-left" showInteractive={false} />
-                <MiniMap pannable zoomable />
+                <MiniMap pannable zoomable style={{ position: "fixed" }} />
               </ReactFlow>
               {dialogData && (
                 <UnitEntityDialog
