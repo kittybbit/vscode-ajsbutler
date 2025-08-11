@@ -115,8 +115,9 @@ const FlowContents: FC = () => {
     updateNodesAndEdges(currentUnitEntity);
     prevUnitEntityId.current = currentUnitEntity?.id;
   }, [currentUnitEntity]);
+
   useEffect(() => {
-    const changeDodumentFn = (type: string, data: unknown) => {
+    const changeDocumentFn = (type: string, data: unknown) => {
       const unitEntities: UnitEntity[] = parse(data as string)
         .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON))
         .map((unit: Unit) => tyFactory(unit));
@@ -128,15 +129,15 @@ const FlowContents: FC = () => {
         return prevUnitEntityId.current
           ? x.find((unitEntity) => unitEntity.id === prevUnitEntityId.current)
           : x.find(
-            (unitEntity) =>
-              unitEntity.ty.value() === "n" && (unitEntity as N).isRootJobnet,
-          );
+              (unitEntity) =>
+                unitEntity.ty.value() === "n" && (unitEntity as N).isRootJobnet,
+            );
       });
     };
-    window.EventBridge.addCallback("changeDocument", changeDodumentFn);
+    window.EventBridge.addCallback("changeDocument", changeDocumentFn);
     window.vscode.postMessage({ type: "ready" });
     return () => {
-      window.EventBridge.removeCallback("changeDocument", changeDodumentFn);
+      window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
     };
   }, []); // fire this when mount.
 

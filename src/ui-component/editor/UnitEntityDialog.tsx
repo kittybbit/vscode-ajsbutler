@@ -69,6 +69,8 @@ const UnitEntityDialog: FC<UnitEntityDialogProps> = ({
   dialogData,
   onClose,
 }) => {
+  if (!dialogData) return null;
+
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -76,7 +78,7 @@ const UnitEntityDialog: FC<UnitEntityDialogProps> = ({
   };
 
   return (
-    <Dialog scroll="paper" open={!!dialogData} onClose={onClose} fullWidth>
+    <Dialog scroll="paper" open={true} onClose={onClose} fullWidth>
       <DialogTitle sx={{ paddingBottom: "0em" }}>
         <Stack direction="row" justifyContent="space-between">
           <Tabs value={tabIndex} onChange={handleTabChange}>
@@ -117,8 +119,6 @@ const TabPanel: FC<TabPanelProps> = ({ value, index, children }) => {
 };
 
 const Tab1: FC<{ dialogData: UnitEntity | undefined }> = ({ dialogData }) => {
-  if (!dialogData) return null;
-
   const rawData = dialogData.parameters
     .map((p) => `${p.key}=${p.value}`)
     .join("\n");
@@ -126,34 +126,30 @@ const Tab1: FC<{ dialogData: UnitEntity | undefined }> = ({ dialogData }) => {
   return <CopyableTextField id="rawdata" value={rawData} />;
 };
 
-const Tab2: FC<{ dialogData: UnitEntity | undefined }> = ({ dialogData }) => {
-  if (!dialogData) return null;
+const commandTemplates = [
+  {
+    id: "ajsshow",
+    label: "ajsshow",
+    cmd: (path: string) => `ajsshow -R ${path}`,
+  },
+  {
+    id: "ajsprint",
+    label: "ajsprint",
+    cmd: (path: string) => `ajsprint -a -R ${path}`,
+  },
+];
 
-  const commands = [
-    {
-      id: "ajsshow",
-      label: "ajsshow",
-      value: `ajsshow -R ${dialogData.absolutePath}`,
-    },
-    {
-      id: "ajsprint",
-      label: "ajsprint",
-      value: `ajsprint -a -R ${dialogData.absolutePath}`,
-    },
-  ];
-
-  return (
-    <>
-      {commands.map((cmd) => (
-        <CopyableTextField
-          key={cmd.id}
-          id={cmd.id}
-          label={cmd.label}
-          value={cmd.value}
-        />
-      ))}
-    </>
-  );
-};
+const Tab2: FC<{ dialogData: UnitEntity }> = ({ dialogData }) => (
+  <>
+    {commandTemplates.map(({ id, label, cmd }) => (
+      <CopyableTextField
+        key={id}
+        id={id}
+        label={label}
+        value={cmd(dialogData.absolutePath)}
+      />
+    ))}
+  </>
+);
 
 export default memo(UnitEntityDialog);

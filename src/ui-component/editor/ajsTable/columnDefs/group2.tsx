@@ -1,11 +1,14 @@
+import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { box, defaultAccessorFn } from "./common";
+import Link from "@mui/material/Link";
 
 const group2 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  handleJump: (id: string) => void,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group2", //Unit common definition information
@@ -19,12 +22,26 @@ const group2 = (
       {
         id: "group2.col2",
         header: ajsTableColumnHeader["group2.col2"],
-        accessorFn: (row) => {
-          const ar = row.previous;
-          return ar.map((v) => v.f);
+        accessorFn: (row) => row.previousUnits,
+        cell: (props) => {
+          type PU = UnitEntity["previousUnits"];
+          return props.getValue<PU[]>().map((v: PU, i: number) =>
+            box<UnitEntity>(v["unitEntity"], i, (v: UnitEntity, i: number) => {
+              return (
+                <Link
+                  key={i}
+                  sx={{
+                    display: "block",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleJump(v.id)}
+                >
+                  {v.name}
+                </Link>
+              );
+            }),
+          );
         },
-        cell: (props) =>
-          props.getValue<string[]>().map((v: string, i: number) => box(v, i)),
       },
       {
         id: "group2.col3",

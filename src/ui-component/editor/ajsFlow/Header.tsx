@@ -1,4 +1,4 @@
-import React, { FC, memo, ReactElement } from "react";
+import React, { FC, memo, ReactElement, useCallback, useMemo } from "react";
 import {
   AppBar,
   Breadcrumbs,
@@ -38,38 +38,45 @@ const Header: FC<HeaderProps> = ({
   const { currentUnitEntity, setCurrentUnitEntity } = currentUnitEntityState;
   const { lang } = useMyAppContext();
 
-  const flatten = (
-    unitEntity: UnitEntity | undefined,
-    breadcrumbs: ReactElement[],
-  ): void => {
-    if (!unitEntity) return;
+  const breadcrumbs = useMemo(() => {
+    const crumbs: ReactElement[] = [];
 
-    // Function to create a breadcrumb element based on whether it's the current entity
-    const createBreadcrumbElement = (entity: UnitEntity): ReactElement =>
-      entity === currentUnitEntity ? (
-        <Typography key={entity.id} color="inherit">
-          {entity.name}
-        </Typography>
-      ) : (
-        <Link
-          key={entity.id}
-          color="inherit"
-          onClick={() => setCurrentUnitEntity(() => entity)}
-        >
-          {entity.name}
-        </Link>
-      );
+    const build = (unitEntity?: UnitEntity) => {
+      if (!unitEntity) return;
+      const createCrumb = (entity: UnitEntity): ReactElement =>
+        entity === currentUnitEntity ? (
+          <Typography key={entity.id} color="inherit">
+            {entity.name}
+          </Typography>
+        ) : (
+          <Link
+            key={entity.id}
+            color="inherit"
+            onClick={() => setCurrentUnitEntity(entity)}
+          >
+            {entity.name}
+          </Link>
+        );
 
-    // Add the current entity to the breadcrumb list
-    breadcrumbs.push(createBreadcrumbElement(unitEntity));
+      crumbs.push(createCrumb(unitEntity));
 
-    // Recursively process the parent if it exists and does not meet the "isRootJobnet" condition
-    if (unitEntity.ty.value() !== "n" || !(unitEntity as N).isRootJobnet) {
-      flatten(unitEntity.parent, breadcrumbs);
-    }
-  };
-  const breadcrumbs: ReactElement[] = [];
-  flatten(currentUnitEntity, breadcrumbs);
+      if (unitEntity.ty.value() !== "n" || !(unitEntity as N).isRootJobnet) {
+        build(unitEntity.parent);
+      }
+    };
+
+    build(currentUnitEntity);
+    return crumbs.reverse();
+  }, [currentUnitEntity, setCurrentUnitEntity]);
+
+  const menuItem1Label = useMemo(
+    () => localeMap("flow.menu.menuItem1", lang),
+    [lang],
+  );
+  const handleToggleMenu1 = useCallback(() => {
+    setDrawerWidth(0);
+    setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
+  }, [setDrawerWidth, setMenuStatus]);
 
   return (
     <>
@@ -79,23 +86,17 @@ const Header: FC<HeaderProps> = ({
             flowMenuState={flowMenuState}
             drawerWidthState={drawerWidthState}
           />
-          <Tooltip title={localeMap("flow.menu.menuItem1", lang)}>
+          <Tooltip title={menuItem1Label}>
             <IconButton
               size="small"
               aria-label="toggleMenu1"
-              onClick={() => {
-                setDrawerWidth(() => 0);
-                setMenuStatus((prev) => ({
-                  ...prev,
-                  menuItem1: !prev.menuItem1,
-                }));
-              }}
+              onClick={handleToggleMenu1}
             >
               <ViewColumn fontSize="inherit" />
             </IconButton>
           </Tooltip>
           <Breadcrumbs separator="›" aria-label="breadcrumb">
-            {breadcrumbs.reverse()}
+            {breadcrumbs}
           </Breadcrumbs>
         </Toolbar>
       </AppBar>

@@ -1,4 +1,4 @@
-import React, { FC, Fragment, memo, useEffect, useRef } from "react";
+import React, { FC, Fragment, memo, useEffect, useMemo, useRef } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -16,7 +16,11 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { Column, Table as ReactTable } from "@tanstack/table-core";
+import {
+  Column,
+  Table as ReactTable,
+  VisibilityState,
+} from "@tanstack/table-core";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ToggleOff from "@mui/icons-material/ToggleOff";
@@ -29,6 +33,7 @@ import { DrawerWidthStateType, TableMenuStateType } from "./TableContents";
 
 type DisplayColumnSelectorProps = {
   table: ReactTable<UnitEntity>;
+  columnVisibility: VisibilityState;
   tableMenuState: TableMenuStateType;
   drawerWidthState: DrawerWidthStateType;
 };
@@ -133,9 +138,11 @@ const ColumnAccordion: FC<{ column: Column<UnitEntity, unknown> }> = ({
 
 const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
   table,
+  columnVisibility,
   tableMenuState,
   drawerWidthState,
 }) => {
+  console.log("render DisplayColumnSelector.");
   const { lang } = useMyAppContext();
   const { menuStatus, setMenuStatus } = tableMenuState;
   const { setDrawerWidth } = drawerWidthState;
@@ -154,9 +161,10 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
     setMenuStatus((prev) => ({ ...prev, menuItem1: open }));
   };
 
-  const visibleColumns = table
-    .getAllColumns()
-    .filter((col) => col.columnDef.enableHiding);
+  const visibleColumns = useMemo(
+    () => table.getAllColumns().filter((col) => col.columnDef.enableHiding),
+    [columnVisibility],
+  );
 
   return (
     <Drawer
