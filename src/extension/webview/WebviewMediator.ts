@@ -58,7 +58,7 @@ export abstract class WebviewMediator implements vscode.Disposable {
         );
         e.files.forEach((file) => {
           console.log(
-            `  File renamed from ${file.oldUri.toString()} to ${file.newUri.toString()}`,
+            `File renamed from ${file.oldUri.toString()} to ${file.newUri.toString()}`,
           );
           const panel = this.#store.panelByUri(file.oldUri);
           if (panel !== undefined) {
@@ -67,21 +67,12 @@ export abstract class WebviewMediator implements vscode.Disposable {
           }
         });
       }),
-      vscode.workspace.onDidChangeConfiguration(
-        (e: vscode.ConfigurationChangeEvent) => {
-          // Refresh the webview when the color theme changes to ensure the webview reflects the new theme
-          if (
-            e.affectsConfiguration("workbench.colorTheme") ||
-            e.affectsConfiguration("window.autoDetectColorScheme")
-          ) {
-            console.log("invoke WebviewMediator.onDidChangeConfiguration.", e);
-            this.#store.allPanels.forEach((panel) => {
-              initReactPanel(context, panel, this.#viewType, BUNDLE_SRC);
-            });
-          }
-        },
-      ),
-      this,
+      vscode.window.onDidChangeActiveColorTheme((e) => {
+        console.log("invoke WebviewMediator.onDidChangeActiveColorTheme.", e);
+        this.#store.allPanels.forEach((panel) => {
+          initReactPanel(context, panel, this.#viewType, BUNDLE_SRC);
+        });
+      }),
     );
   }
 
