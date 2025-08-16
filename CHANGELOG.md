@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.11.0]
+
+- Update packages.
+- Refactored AjsFlowViewer.
+- Added a feature to jump to the corresponding row when clicking the Previous unit.
+- Added support for switching the current theme.
+- Fixed MiniMap position in FlowView so it remains unaffected by sidebar visibility.
+- Add telemetry events.
+
 ## [1.10.0]
 
 - Refactored the application structure.
