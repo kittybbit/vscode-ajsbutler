@@ -25,10 +25,9 @@ const group1 = (
       {
         id: "group1.col2",
         header: ajsTableColumnHeader["group1.col2"],
-        //accessorFn: (row) => (row.parent ? row.parent.absolutePath : "/"),
-        accessorFn: (row) => row.parent,
+        accessorFn: (row) => (row.parent ? row.parent.absolutePath : "/"),
         cell: (props) => {
-          const parent = props.getValue();
+          const parent = props.row.original.parent;
           return parent ? (
             <Link
               key={0}
