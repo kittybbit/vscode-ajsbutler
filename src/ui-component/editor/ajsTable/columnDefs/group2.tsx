@@ -22,24 +22,32 @@ const group2 = (
       {
         id: "group2.col2",
         header: ajsTableColumnHeader["group2.col2"],
-        accessorFn: (row) => row.previousUnits,
+        accessorFn: (row) => {
+          const ar = row.previous;
+          return ar.map((v) => v.f);
+        },
         cell: (props) => {
-          type PU = UnitEntity["previousUnits"];
-          return props.getValue<PU[]>().map((v: PU, i: number) =>
-            box<UnitEntity>(v["unitEntity"], i, (v: UnitEntity, i: number) => {
-              return (
-                <Link
-                  key={i}
-                  sx={{
-                    display: "block",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleJump(v.id)}
-                >
-                  {v.name}
-                </Link>
-              );
-            }),
+          const previousUnits = props.row.original.previousUnits;
+          return previousUnits.map(
+            (v: (typeof previousUnits)[number], i: number) =>
+              box<UnitEntity>(
+                v["unitEntity"],
+                i,
+                (v: UnitEntity, i: number) => {
+                  return (
+                    <Link
+                      key={i}
+                      sx={{
+                        display: "block",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleJump(v.id)}
+                    >
+                      {v.name}
+                    </Link>
+                  );
+                },
+              ),
           );
         },
       },
