@@ -51,6 +51,7 @@ export const tableDefaultColumnDef = {
 export const tableColumnDef = (
   language: string | undefined = "en",
   setDialogData: Dispatch<SetStateAction<UnitEntity | undefined>>,
+  handleJump: (id: string) => void,
 ) => {
   // column titles
   const ajsTableColumnHeader = ajsTableColumnHeaderLang(language);
@@ -87,8 +88,8 @@ export const tableColumnDef = (
       enableSorting: false,
       enableGlobalFilter: false,
     }),
-    group1(columnHelper, ajsTableColumnHeader, tyDefinition),
-    group2(columnHelper, ajsTableColumnHeader),
+    group1(columnHelper, ajsTableColumnHeader, tyDefinition, handleJump),
+    group2(columnHelper, ajsTableColumnHeader, handleJump),
     group3(columnHelper, ajsTableColumnHeader),
     group4(columnHelper, ajsTableColumnHeader),
     group5(columnHelper, ajsTableColumnHeader),

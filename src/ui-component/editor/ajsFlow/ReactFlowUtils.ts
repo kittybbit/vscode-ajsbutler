@@ -4,18 +4,15 @@ import { UnitEntity } from "../../../domain/models/units/UnitEntities";
 import { Theme } from "@mui/material";
 
 // convert ty to ReactFlow type.
-const ty2Type = (ty: TySymbol) => {
-  if (["g"].includes(ty)) {
-    return "jobgroup";
-  }
-  if (["n", "rn", "rm", "rr"].includes(ty)) {
-    return "jobnet";
-  }
-  if (["rc"].includes(ty)) {
-    return "condition";
-  }
-  return "job";
-};
+const tyTypeMap: Partial<Record<TySymbol, string>> = {
+  g: "jobgroup",
+  n: "jobnet",
+  rn: "jobnet",
+  rm: "jobnet",
+  rr: "jobnet",
+  rc: "condition",
+} as const;
+const ty2Type = (ty: TySymbol) => tyTypeMap[ty] ?? "job";
 
 const calcPosition = (unitEntity: UnitEntity, theme: Theme) => {
   const { h, v } = unitEntity.hv;
@@ -32,6 +29,7 @@ const calcPosition = (unitEntity: UnitEntity, theme: Theme) => {
     y: offsetY + (height + marginY) * ((v - 48) / 96),
   };
 };
+
 const calcAncestorPosition = (unitEntity: UnitEntity, theme: Theme) => {
   const basePx = theme.typography.htmlFontSize;
   const width = basePx * 6; // 6rem
@@ -44,6 +42,7 @@ const calcAncestorPosition = (unitEntity: UnitEntity, theme: Theme) => {
     y: offsetY,
   };
 };
+
 const createNode = (unitEntity: UnitEntity, theme: Theme): Node[] => {
   const nodes: Node[] = unitEntity.children
     .filter((child) => child.ty.value() !== "rc")
@@ -79,34 +78,33 @@ const createNode = (unitEntity: UnitEntity, theme: Theme): Node[] => {
   nodes.push(...ancestors);
   return nodes;
 };
+
 const createEdge = (unitEntity: UnitEntity): Edge[] => {
   return unitEntity.children
     .filter((child) => child.nextUnits.length > 0)
-    .map((source) => {
-      return source.nextUnits
-        .filter((target) => target.unitEntity !== undefined)
-        .map((target) => {
-          return {
-            type: "smoothstep",
-            id: `${source.id}-${target.unitEntity?.id}`,
-            source: source.id,
-            target: target.unitEntity?.id as string,
-            markerStart:
-              target.relationType === "con"
-                ? {
-                    type: MarkerType.ArrowClosed,
-                    width: 20,
-                    height: 20,
-                  }
-                : undefined,
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 20,
-              height: 20,
-            },
-            animated: target.relationType === "con",
-          };
-        });
+    .flatMap((source) => {
+      return source.nextUnits.filter(Boolean).map((target) => {
+        return {
+          type: "smoothstep",
+          id: `${source.id}-${target.unitEntity?.id}`,
+          source: source.id,
+          target: target.unitEntity?.id as string,
+          markerStart:
+            target.relationType === "con"
+              ? {
+                  type: MarkerType.ArrowClosed,
+                  width: 20,
+                  height: 20,
+                }
+              : undefined,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 20,
+            height: 20,
+          },
+          animated: target.relationType === "con",
+        };
+      });
     })
     .flat();
 };

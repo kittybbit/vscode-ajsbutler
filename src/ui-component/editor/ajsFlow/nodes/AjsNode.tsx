@@ -73,7 +73,7 @@ export const TyTitle: FC<{
     </Tooltip>
   );
 };
-
+const iconButtonSx: SxProps<Theme> = { padding: "0.1em" };
 export const ActionIcon: FC<{
   title: string;
   ariaLabel: string;
@@ -96,30 +96,24 @@ export const ActionIcon: FC<{
       onClick={onClick}
       onKeyDown={onKeyDown}
       disableRipple={disableRipple}
-      sx={{
-        padding: "0.1em",
-      }}
+      sx={iconButtonSx}
     >
       {icon}
     </IconButton>
   </Tooltip>
 );
-
+const nameOrCommentSx: SxProps<Theme> = {
+  width: "6em",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  textOverflow: "ellipsis",
+};
 export const NameOrComment: React.FC<{
   value?: string;
 }> = ({ value }) => {
   return (
     <Tooltip title={value}>
-      <Typography
-        variant="body1"
-        fontSize="small"
-        sx={{
-          width: "6em",
-          overflow: "hidden",
-          whiteSpace: "nowrap",
-          textOverflow: "ellipsis",
-        }}
-      >
+      <Typography variant="body1" fontSize="small" sx={nameOrCommentSx}>
         {value}
       </Typography>
     </Tooltip>

@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useRef } from "react";
+import React, { FC, memo, useEffect, useMemo, useRef } from "react";
 import {
   Accordion as MuiAccordion,
   AccordionActions as MuiAccordionActions,
@@ -76,14 +76,14 @@ const AccordionActions = styled((props: AccordionActionsProps) => (
 
 const FlowSelector: FC<FlowSelectorProps> = ({
   unitEntities,
-  currentUnitEntityState: currentUnitEndityState,
+  currentUnitEntityState: currentUnitEntityState,
   flowMenuState,
   drawerWidthState,
 }) => {
   console.log("render FlowSelector.");
 
   const { menuStatus, setMenuStatus } = flowMenuState;
-  const { currentUnitEntity, setCurrentUnitEntity } = currentUnitEndityState;
+  const { currentUnitEntity, setCurrentUnitEntity } = currentUnitEntityState;
   const { setDrawerWidth } = drawerWidthState;
 
   const theme = useTheme();
@@ -95,32 +95,38 @@ const FlowSelector: FC<FlowSelectorProps> = ({
     });
   };
 
-  const isAncestorOf = (
-    currentUnitEntity?: UnitEntity,
-    unitEntity?: UnitEntity,
-  ): boolean => {
-    if (!(currentUnitEntity && unitEntity)) {
-      return false;
+  const isAncestorOf = useMemo(() => {
+    const set = new Set<string>();
+    let current = currentUnitEntity;
+    while (current) {
+      set.add(current.id);
+      current = current.parent;
     }
-    if (currentUnitEntity === unitEntity) {
-      return true;
-    }
-    return isAncestorOf(currentUnitEntity.parent, unitEntity);
-  };
+    return (target?: UnitEntity) => (target ? set.has(target.id) : false);
+  }, [currentUnitEntity]);
 
-  const createContents = (unitEntites: UnitEntity[]) => {
-    return unitEntites.map((unitEntity) => {
+  const renderUnitEntities = (
+    unitEntities: UnitEntity[],
+    currentUnitEntity: UnitEntity | undefined,
+    isAncestorOf: (target?: UnitEntity) => boolean,
+    setCurrentUnitEntity: (u: UnitEntity) => void,
+  ): React.ReactNode[] => {
+    return unitEntities.map((unitEntity) => {
       if (unitEntity.ty.value() === "g") {
         return (
           <Accordion
             key={unitEntity.id}
-            sx={{
-              marginLeft: `${unitEntity.depth}em`,
-            }}
-            defaultExpanded={isAncestorOf(currentUnitEntity, unitEntity)}
+            sx={{ marginLeft: `${unitEntity.depth}em` }}
+            expanded={isAncestorOf(unitEntity)}
+            onChange={() => setCurrentUnitEntity(unitEntity)}
           >
             <AccordionSummary>{unitEntity.name}</AccordionSummary>
-            {createContents(unitEntity.children)}
+            {renderUnitEntities(
+              unitEntity.children,
+              currentUnitEntity,
+              isAncestorOf,
+              setCurrentUnitEntity,
+            )}
           </Accordion>
         );
       }
@@ -129,12 +135,10 @@ const FlowSelector: FC<FlowSelectorProps> = ({
           <AccordionActions
             key={unitEntity.id}
             disableSpacing
-            onClick={() => setCurrentUnitEntity(() => unitEntity)}
-            sx={{
-              marginLeft: `${unitEntity.depth}em`,
-            }}
+            onClick={() => setCurrentUnitEntity(unitEntity)}
+            sx={{ marginLeft: `${unitEntity.depth}em` }}
           >
-            {isAncestorOf(currentUnitEntity, unitEntity) && (
+            {isAncestorOf(unitEntity) && (
               <CheckCircleOutlineIcon
                 fontSize="inherit"
                 sx={{ marginRight: "0.25em" }}
@@ -149,11 +153,18 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   };
 
   const drawerRef = useRef<HTMLDivElement>(null);
-  useEffect(() =>
-    setDrawerWidth(() =>
-      drawerRef.current ? drawerRef.current.offsetWidth : 0,
-    ),
-  );
+  useEffect(() => {
+    const el = drawerRef.current;
+    if (!el) return () => {};
+    const observer = new ResizeObserver(([entry]) => {
+      setDrawerWidth(entry.contentRect.width);
+    });
+    observer.observe(el);
+    return () => {
+      observer.unobserve(el);
+      observer.disconnect();
+    };
+  }, [setDrawerWidth]);
 
   return (
     <>
@@ -180,7 +191,12 @@ const FlowSelector: FC<FlowSelectorProps> = ({
             )}
           </IconButton>
         </Toolbar>
-        {createContents(unitEntities)}
+        {renderUnitEntities(
+          unitEntities,
+          currentUnitEntity,
+          isAncestorOf,
+          setCurrentUnitEntity,
+        )}
       </Drawer>
     </>
   );

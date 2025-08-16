@@ -14,7 +14,5 @@ declare global {
     };
     const DEVELOPMENT: boolean;
     const CONNECTION_STRING: string;
-    type PrimitiveType = string | number | boolean | symbol | null | undefined;
-    type PrimitiveTypes = PrimitiveType[];
 }
 

@@ -54,7 +54,7 @@ const group10 = (
         cell: (props) => {
           const ln = props.getValue<Ln[]>();
           return Array.isArray(ln) ? (
-            <>{ln.map((v, i) => box(v, i, (v) => (v as Ln).parentRule))}</>
+            <>{ln.map((v, i) => box((v as Ln).parentRule, i))}</>
           ) : undefined;
         },
       },
@@ -71,7 +71,7 @@ const group10 = (
               return Array.isArray(sd) ? (
                 <>
                   {sd.map((v, i) =>
-                    box(v, i, (v) => paramDefinition["sd"][(v as Sd).type]),
+                    box(paramDefinition["sd"][(v as Sd).type], i),
                   )}
                 </>
               ) : undefined;
@@ -84,11 +84,7 @@ const group10 = (
             cell: (props) => {
               const sd = props.getValue<Sd[]>();
               return Array.isArray(sd) ? (
-                <>
-                  {sd.map((v, i) =>
-                    box(v, i, (v) => (v as Sd).yearMonth ?? "\u00A0"),
-                  )}
-                </>
+                <>{sd.map((v, i) => box((v as Sd).yearMonth ?? "\u00A0", i))}</>
               ) : undefined;
             },
           },
@@ -99,11 +95,7 @@ const group10 = (
             cell: (props) => {
               const sd = props.getValue<Sd[]>();
               return Array.isArray(sd) ? (
-                <>
-                  {sd.map((v, i) =>
-                    box(v, i, (v) => (v as Sd).day ?? "\u00A0"),
-                  )}
-                </>
+                <>{sd.map((v, i) => box((v as Sd).day ?? "\u00A0", i))}</>
               ) : undefined;
             },
           },
@@ -116,9 +108,7 @@ const group10 = (
         cell: (props) => {
           const st = props.getValue<St[]>();
           return Array.isArray(st) ? (
-            <>
-              {st.map((v, i) => box(v, i, (v) => (v as St).time ?? "\u00A0"))}
-            </>
+            <>{st.map((v, i) => box((v as St).time ?? "\u00A0", i))}</>
           ) : undefined;
         },
       },
@@ -129,9 +119,7 @@ const group10 = (
         cell: (props) => {
           const cy = props.getValue<Cy[]>();
           return Array.isArray(cy) ? (
-            <>
-              {cy.map((v, i) => box(v, i, (v) => (v as Cy).cycle ?? "\u00A0"))}
-            </>
+            <>{cy.map((v, i) => box((v as Cy).cycle ?? "\u00A0", i))}</>
           ) : undefined;
         },
       },
@@ -142,11 +130,7 @@ const group10 = (
         cell: (props) => {
           const sh = props.getValue<Sh[]>();
           return Array.isArray(sh) ? (
-            <>
-              {sh.map((v, i) =>
-                box(v, i, (v) => (v as Sh).substitute ?? "\u00A0"),
-              )}
-            </>
+            <>{sh.map((v, i) => box((v as Sh).substitute ?? "\u00A0", i))}</>
           ) : undefined;
         },
       },
@@ -157,11 +141,7 @@ const group10 = (
         cell: (props) => {
           const shd = props.getValue<Shd[]>();
           return Array.isArray(shd) ? (
-            <>
-              {shd.map((v, i) =>
-                box(v, i, (v) => (v as Shd).shiftDays ?? "\u00A0"),
-              )}
-            </>
+            <>{shd.map((v, i) => box((v as Shd).shiftDays ?? "\u00A0", i))}</>
           ) : undefined;
         },
       },
@@ -174,11 +154,7 @@ const group10 = (
           return Array.isArray(cftd) ? (
             <>
               {cftd.map((v, i) =>
-                box(
-                  v,
-                  i,
-                  (v) => (v as Cftd).scheduleByDaysFromStart ?? "\u00A0",
-                ),
+                box((v as Cftd).scheduleByDaysFromStart ?? "\u00A0", i),
               )}
             </>
           ) : undefined;
@@ -193,7 +169,7 @@ const group10 = (
           return Array.isArray(cftd) ? (
             <>
               {cftd.map((v, i) =>
-                box(v, i, (v) => (v as Cftd).maxShiftableDays ?? "\u00A0"),
+                box((v as Cftd).maxShiftableDays ?? "\u00A0", i),
               )}
             </>
           ) : undefined;
@@ -210,11 +186,7 @@ const group10 = (
             cell: (props) => {
               const sy = props.getValue<Sy[]>();
               return Array.isArray(sy) ? (
-                <>
-                  {sy.map((v, i) =>
-                    box(v, i, (v) => (v as Sy).time ?? "\u00A0"),
-                  )}
-                </>
+                <>{sy.map((v, i) => box((v as Sy).time ?? "\u00A0", i))}</>
               ) : undefined;
             },
           },
@@ -225,11 +197,7 @@ const group10 = (
             cell: (props) => {
               const ey = props.getValue<Ey[]>();
               return Array.isArray(ey) ? (
-                <>
-                  {ey.map((v, i) =>
-                    box(v, i, (v) => (v as Ey).time ?? "\u00A0"),
-                  )}
-                </>
+                <>{ey.map((v, i) => box((v as Ey).time ?? "\u00A0", i))}</>
               ) : undefined;
             },
           },
@@ -248,7 +216,7 @@ const group10 = (
               return Array.isArray(wc) ? (
                 <>
                   {wc.map((v, i) =>
-                    box(v, i, (v) => (v as Wc).numberOfTimes ?? "\u00A0"),
+                    box((v as Wc).numberOfTimes ?? "\u00A0", i),
                   )}
                 </>
               ) : undefined;
@@ -261,11 +229,7 @@ const group10 = (
             cell: (props) => {
               const wt = props.getValue<Wt[]>();
               return Array.isArray(wt) ? (
-                <>
-                  {wt.map((v, i) =>
-                    box(v, i, (v) => (v as Wt).time ?? "\u00A0"),
-                  )}
-                </>
+                <>{wt.map((v, i) => box((v as Wt).time ?? "\u00A0", i))}</>
               ) : undefined;
             },
           },

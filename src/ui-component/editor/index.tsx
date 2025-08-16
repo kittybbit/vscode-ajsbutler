@@ -16,7 +16,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const hiddenInput = document.getElementById("viewType") as HTMLInputElement;
     if (hiddenInput) {
-      setViewType(hiddenInput.value);
+      setViewType(() => hiddenInput.value);
       setReady(() => true);
     }
   }, []);

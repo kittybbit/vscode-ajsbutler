@@ -5,21 +5,31 @@ import {
   ResourceEventType,
   SaveEventType,
 } from "../../domain/services/events/types";
-import { READY, RESOURCE, SAVE } from "../../domain/services/events/constant";
+import {
+  OPERATION,
+  READY,
+  RESOURCE,
+  SAVE,
+} from "../../domain/services/events/constant";
 import { ready } from "../../domain/services/events/ready";
 import { resource } from "../../domain/services/events/resource";
 import { save } from "../../domain/services/events/save";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_TABLE_VIEWER_TYPE } from "./constant";
+import { operation } from "../../domain/services/events/operation";
+import { MyExtension } from "../MyExtension";
 
 export class AjsTableViewerFactory extends ViewerFactory {
-  public static init(store: WebviewStore): ViewerFactory {
+  public static init(
+    myExtension: MyExtension,
+    store: WebviewStore,
+  ): ViewerFactory {
     console.log("invoke AjsTableViewerFactory.init");
-    return new AjsTableViewerFactory(store);
+    return new AjsTableViewerFactory(myExtension, store);
   }
 
-  private constructor(store: WebviewStore) {
-    super(AJS_TABLE_VIEWER_TYPE, store);
+  private constructor(myExtension: MyExtension, store: WebviewStore) {
+    super(AJS_TABLE_VIEWER_TYPE, myExtension, store);
   }
 
   override customize(
@@ -27,7 +37,7 @@ export class AjsTableViewerFactory extends ViewerFactory {
     panel: vscode.WebviewPanel,
   ): void {
     const onDidReceiveMessage = (e: EventType) => {
-      console.log("invode AjsTableViewerMediator.onDidReceiveMessage.", e);
+      console.log("invoke AjsTableViewerFactory.onDidReceiveMessage.", e);
       switch (e.type) {
         case RESOURCE: {
           resource(e as ResourceEventType, panel);
@@ -41,6 +51,11 @@ export class AjsTableViewerFactory extends ViewerFactory {
         case SAVE: {
           //save contents
           save(e as SaveEventType);
+          break;
+        }
+        case OPERATION: {
+          // track user operation.
+          operation(document, panel, this.myExtension.reporter, e.data);
           break;
         }
       }

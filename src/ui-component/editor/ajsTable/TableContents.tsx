@@ -2,8 +2,10 @@ import React, {
   Dispatch,
   memo,
   SetStateAction,
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -82,25 +84,19 @@ const useChangeDocument = (): [
   (type: string, data: unknown) => void,
 ] => {
   const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
-  const changeDocumentFn = (type: string, data: unknown) => {
+  const changeDocumentFn = useCallback((type: string, data: unknown) => {
     try {
-      const newUnitEntities: UnitEntity[] = (() => {
-        try {
-          return parse(data as string)
-            .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
-            .map((unit: Unit) => tyFactory(unit))
-            .map((unitEntity: UnitEntity) => flattenChildren([unitEntity]))
-            .flat();
-        } catch (error) {
-          console.error("Failed to parse data:", error);
-          return [];
-        }
-      })();
+      const newUnitEntities: UnitEntity[] = parse(data as string)
+        .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
+        .map((unit: Unit) => tyFactory(unit))
+        .map((unitEntity: UnitEntity) => flattenChildren([unitEntity]))
+        .flat();
       setUnitEntities(() => newUnitEntities);
-    } catch {
+    } catch (error) {
+      console.error("Failed to parse data:", error);
       setUnitEntities(() => []);
     }
-  };
+  }, []);
   return [unitEntities, changeDocumentFn];
 };
 
@@ -117,6 +113,7 @@ const TableContents = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
+  const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
   const [unitEntities, changeDocumentFn] = useChangeDocument();
 
   useEffect(() => {
@@ -127,9 +124,19 @@ const TableContents = () => {
     };
   }, []); // fire this when mount.
 
+  useEffect(() => {
+    setRowIndex(() => undefined);
+  }, [globalFilter]);
+
+  const handleJumpRef = useRef<(id: string) => void>(() => {});
+  const handleJump = useCallback((id: string) => handleJumpRef.current(id), []);
+
   const table = useReactTable<UnitEntity>({
-    columns: useMemo(() => tableColumnDef(lang, setDialogData), [lang]),
-    data: useMemo(() => unitEntities ?? [], [unitEntities]),
+    columns: useMemo(
+      () => tableColumnDef(lang, setDialogData, handleJump),
+      [lang, setDialogData, handleJump],
+    ),
+    data: unitEntities ?? [],
     state: {
       globalFilter: globalFilter,
       sorting: sorting,
@@ -144,6 +151,21 @@ const TableContents = () => {
     defaultColumn: tableDefaultColumnDef,
     debugAll: DEVELOPMENT,
   });
+
+  const rows = table.getRowModel().rows;
+
+  const rowIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    rows.forEach((row, index) => map.set(row.original.id, index));
+    return map;
+  }, [rows]);
+
+  useEffect(() => {
+    handleJumpRef.current = (id: string) => {
+      const index = rowIndexMap.get(id);
+      if (index !== undefined) setRowIndex(index);
+    };
+  }, [rowIndexMap]);
 
   const theme = useMemo(
     () =>
@@ -164,8 +186,15 @@ const TableContents = () => {
     </Accordion>
   );
 
-  const tableMenuState = { menuStatus, setMenuStatus };
-  const drawerWidthState = { drawerWidth, setDrawerWidth };
+  const tableMenuState = useMemo(
+    () => ({ menuStatus, setMenuStatus }),
+    [menuStatus],
+  );
+
+  const drawerWidthState = useMemo(
+    () => ({ drawerWidth, setDrawerWidth }),
+    [drawerWidth],
+  );
 
   return (
     <>
@@ -175,6 +204,7 @@ const TableContents = () => {
           {menuStatus.menuItem1 && (
             <DisplayColumnSelector
               table={table}
+              columnVisibility={table.getState().columnVisibility}
               tableMenuState={tableMenuState}
               drawerWidthState={drawerWidthState}
             />
@@ -192,12 +222,13 @@ const TableContents = () => {
               drawerWidthState={drawerWidthState}
             />
             <VirtualizedTable
-              rows={table.getRowModel().rows}
               headerGroups={table.getHeaderGroups()}
+              rows={rows}
               scrollType={scrollType}
+              rowIndex={rowIndex}
             />
             <Typography align="right">
-              {table.getRowModel().rows.length} of {unitEntities?.length}
+              {rows.length} of {unitEntities?.length}
             </Typography>
           </Stack>
         </Stack>

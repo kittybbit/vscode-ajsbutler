@@ -24,50 +24,55 @@ type TableHeaderProps = {
   headerGroup: HeaderGroup<UnitEntity>;
 };
 
+const sortLabelSx: SxProps<Theme> = {
+  "&:focus-visible": { outline: "-webkit-focus-ring-color auto 1px" },
+};
+
 const TableHeader: FC<TableHeaderProps> = ({ headerGroup }) => {
   console.log("render TableHeader.");
 
   return (
     <TableRow key={headerGroup.id}>
       {headerGroup.headers.map((header) => {
-        const isPlaceholder = header.isPlaceholder;
+        if (header.isPlaceholder) {
+          return (
+            <TableCell
+              key={header.id}
+              colSpan={header.colSpan}
+              sx={styleTableCell}
+            />
+          );
+        }
+
         const isLeaf = header.subHeaders.length === 0;
-        const canSort =
-          header.column.columnDef.enableSorting ||
-          header.column.columnDef.enableMultiSort;
-        const headerTitle = flexRender(
+        const canSort = header.column.getCanSort();
+
+        let content = flexRender(
           header.column.columnDef.header,
           header.getContext(),
         );
-        let headerContent;
-        if (isPlaceholder) {
-          headerContent = undefined;
-        } else if (!isLeaf || (isLeaf && !canSort)) {
-          headerContent = headerTitle;
-        } else if (isLeaf && canSort) {
+
+        if (isLeaf && canSort) {
           const isSorted = header.column.getIsSorted();
-          headerContent = (
+          content = (
             <TableSortLabel
-              active={isSorted === false ? false : true}
+              active={Boolean(isSorted)}
               direction={isSorted !== false ? isSorted : undefined}
               onClick={header.column.getToggleSortingHandler()}
-              sx={{
-                "&:focus-visible": {
-                  outline: "-webkit-focus-ring-color auto 1px",
-                },
-              }}
+              sx={sortLabelSx}
             >
-              {headerTitle}
+              {content}
             </TableSortLabel>
           );
         }
+
         return (
           <TableCell
             key={header.id}
             colSpan={header.colSpan}
             sx={styleTableCell}
           >
-            {headerContent}
+            {content}
           </TableCell>
         );
       })}

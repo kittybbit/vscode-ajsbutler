@@ -23,11 +23,21 @@ import { toCsv } from "../../../domain/services/export/csv";
 import { DrawerWidthStateType, TableMenuStateType } from "./TableContents";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../domain/services/i18n/nls";
+import { OPERATION, SAVE } from "../../../domain/services/events/constant";
 
 type HeaderProps = {
   table: Table<UnitEntity>;
   tableMenuState: TableMenuStateType;
   drawerWidthState: DrawerWidthStateType;
+};
+
+const HideOnScroll: FC<{ children: ReactElement }> = ({ children }) => {
+  const trigger = useScrollTrigger({ target: window, threshold: 0 });
+  return (
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
 };
 
 const Header: FC<HeaderProps> = ({
@@ -43,36 +53,32 @@ const Header: FC<HeaderProps> = ({
 
   const [open, setOpen] = useState(false);
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
+    window.vscode.postMessage({ type: OPERATION, data: "copy.csv" });
     navigator.clipboard.writeText(toCsv(table));
     setOpen(true);
-  };
+  }, [table]);
 
-  const handleSave = () => {
-    window.vscode.postMessage({ type: "save", data: toCsv(table) });
-  };
+  const handleSave = useCallback(() => {
+    window.vscode.postMessage({ type: OPERATION, data: "save.csv" });
+    window.vscode.postMessage({ type: SAVE, data: toCsv(table) });
+  }, [table]);
 
-  const HideOnScroll = useCallback(
-    ({ children }: { children: ReactElement }) => {
-      console.log("render HideOnScroll.");
+  const toggleMenu1 = useCallback(() => {
+    setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
+    setDrawerWidth((prev) => (prev !== 0 ? 0 : prev));
+  }, [setMenuStatus, setDrawerWidth]);
 
-      const trigger = useScrollTrigger({
-        target: window,
-        threshold: 0,
-      });
-      return (
-        <Slide appear={false} direction="down" in={!trigger}>
-          {children}
-        </Slide>
-      );
-    },
-    [],
-  );
+  const toggleScrollType = useCallback(() => {
+    updateMyAppResource({
+      scrollType: scrollType === "table" ? "window" : "table",
+    });
+  }, [scrollType, updateMyAppResource]);
 
   return (
     <>
       <HideOnScroll>
-        <AppBar position="sticky">
+        <AppBar position={scrollType === "table" ? "sticky" : "fixed"}>
           <Toolbar sx={{ gap: 1 }}>
             <TableMenu
               tableMenuState={tableMenuState}
@@ -86,13 +92,7 @@ const Header: FC<HeaderProps> = ({
               <IconButton
                 size="small"
                 aria-label="toggleMenu1"
-                onClick={() => {
-                  setMenuStatus((prev) => ({
-                    ...prev,
-                    menuItem1: !prev.menuItem1,
-                  }));
-                  setDrawerWidth((prev) => (prev !== 0 ? 0 : prev));
-                }}
+                onClick={toggleMenu1}
               >
                 <DisplaySettingsIcon fontSize="inherit" />
               </IconButton>
@@ -108,11 +108,7 @@ const Header: FC<HeaderProps> = ({
               <IconButton
                 size="small"
                 aria-label="toggleMenu2"
-                onClick={() => {
-                  updateMyAppResource({
-                    scrollType: scrollType === "table" ? "window" : "table",
-                  });
-                }}
+                onClick={toggleScrollType}
               >
                 {scrollType === "table" ? (
                   <UnfoldLessIcon fontSize="inherit" />
@@ -151,7 +147,9 @@ const Header: FC<HeaderProps> = ({
               horizontal: "center",
             }}
           >
-            <Alert severity="info">Copied</Alert>
+            <Alert severity="info" variant="filled">
+              Copied
+            </Alert>
           </Snackbar>
         </AppBar>
       </HideOnScroll>
