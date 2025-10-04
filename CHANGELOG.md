@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.11.2]
+
+- Update packages.
+
 ## [1.11.1]
 
 - Fixed incorrect CSV output for the “Jump to Unit” entry.
