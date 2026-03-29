@@ -61,7 +61,7 @@ export class AjsTableViewerFactory extends ViewerFactory {
           reportWebviewOperation(
             document,
             panel,
-            this.myExtension.reporter,
+            this.myExtension.telemetry,
             e.data,
           );
           break;

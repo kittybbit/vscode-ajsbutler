@@ -1,6 +1,6 @@
 import * as os from "os";
 import * as vscode from "vscode";
-import type { TelemetryReporter } from "@vscode/extension-telemetry";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import type { MyAppResource } from "../../shared/MyAppResource";
 import { OPERATION } from "../../shared/webviewEvents";
 
@@ -39,13 +39,13 @@ export const saveText = async (content: string): Promise<void> => {
 export const reportWebviewOperation = (
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
-  reporter: TelemetryReporter,
+  telemetry: TelemetryPort,
   operation: string,
 ): void => {
   console.log(
     `post a message of operation. (${document.uri.toString()}, ${operation})`,
   );
-  reporter.sendTelemetryEvent(OPERATION, {
+  telemetry.trackEvent(OPERATION, {
     development: String(DEVELOPMENT),
     viewType: panel.viewType,
     operation,

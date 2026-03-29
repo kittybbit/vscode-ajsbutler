@@ -13,6 +13,7 @@ import { AjsFlowViewerMediator } from "../webview/AjsFlowViewerMediator";
 import { AjsTableViewerFactory } from "../webview/AjsTableViewerFactory";
 import { AjsFlowViewerFactory } from "../webview/AjsFlowViewerFactory";
 import { registerPreviewCommand } from "../commands/registerPreviewCommand";
+import { createTelemetry } from "../telemetry/createTelemetry";
 
 export type ActivatedExtension = {
   myExtension: MyExtension;
@@ -21,7 +22,8 @@ export type ActivatedExtension = {
 export const activateExtension = (
   context: vscode.ExtensionContext,
 ): ActivatedExtension => {
-  const myExtension = MyExtension.init(context);
+  const telemetry = createTelemetry();
+  const myExtension = MyExtension.init(context, telemetry);
 
   const ajsTableViewerStore = new WebviewStore(AJS_TABLE_VIEWER_TYPE);
   const ajsTableViewerMediator = AjsTableViewerMediator.init(
@@ -52,7 +54,7 @@ export const activateExtension = (
     registerPreviewCommand(ajsFlowViewerFactory, myExtension),
   );
 
-  myExtension.reporter.sendTelemetryEvent(Telemetry.ExtensionActivate, {
+  myExtension.telemetry.trackEvent(Telemetry.ExtensionActivate, {
     development: String(DEVELOPMENT),
   });
 
@@ -64,11 +66,11 @@ export const activateExtension = (
 export const deactivateExtension = (
   activatedExtension: ActivatedExtension | undefined,
 ): void => {
-  const reporter = activatedExtension?.myExtension.reporter;
-  if (reporter) {
-    reporter.sendTelemetryEvent(Telemetry.ExtensionDeactivate, {
+  const telemetry = activatedExtension?.myExtension.telemetry;
+  if (telemetry) {
+    telemetry.trackEvent(Telemetry.ExtensionDeactivate, {
       development: String(DEVELOPMENT),
     });
-    reporter.dispose();
+    activatedExtension?.myExtension.dispose();
   }
 };

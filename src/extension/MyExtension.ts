@@ -1,31 +1,38 @@
 import * as vscode from "vscode";
-import { TelemetryReporter } from "@vscode/extension-telemetry";
+import { TelemetryPort } from "../application/telemetry/TelemetryPort";
 
 /**
  * Runtime context of this extension.
  */
 export class MyExtension {
-  #reporter: TelemetryReporter;
+  #telemetry: TelemetryPort;
   #context: vscode.ExtensionContext;
 
-  public static init(context: vscode.ExtensionContext): MyExtension {
-    const myExtension = new MyExtension();
-    context.subscriptions.push(myExtension.#reporter);
-    myExtension.#context = context;
-    return myExtension;
+  public static init(
+    context: vscode.ExtensionContext,
+    telemetry: TelemetryPort,
+  ): MyExtension {
+    return new MyExtension(context, telemetry);
   }
 
-  private constructor() {
+  private constructor(
+    context: vscode.ExtensionContext,
+    telemetry: TelemetryPort,
+  ) {
     console.log("initializing mycontext.");
-    this.#reporter = new TelemetryReporter(CONNECTION_STRING);
-    console.log(`connection string: ${CONNECTION_STRING}`);
+    this.#context = context;
+    this.#telemetry = telemetry;
   }
 
-  get reporter(): TelemetryReporter {
-    return this.#reporter;
+  get telemetry(): TelemetryPort {
+    return this.#telemetry;
   }
 
   get context(): vscode.ExtensionContext {
     return this.#context;
+  }
+
+  dispose(): void {
+    this.#telemetry.dispose();
   }
 }

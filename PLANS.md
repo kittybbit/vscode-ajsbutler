@@ -238,3 +238,80 @@ Provide editor feedback and isolate VS Code adapters.
 - restore the previous extension activation wiring
 - revert diagnostics and hover adapters to direct parser/domain access
 - restore legacy webview event helpers if adapter migration regresses behavior
+
+## Task
+
+Refactor telemetry integration behind an adapter boundary without changing
+telemetry event behavior.
+
+### Why
+
+Telemetry SDK usage is still referenced directly from runtime and webview
+adapter code, which makes ownership less clear and keeps outer-layer details
+visible to callers.
+
+### Scope
+
+- introduce a small application-facing telemetry port
+- add an extension-side adapter for the current telemetry SDK
+- refactor activation, commands, and webview telemetry callers to use the port
+- document the telemetry boundary in SDD docs
+- add tests where telemetry payload preservation becomes easy to verify
+
+### Non-Goals
+
+- changing telemetry event scope
+- changing event names
+- changing payload semantics beyond adapter translation
+- changing `engines.vscode`
+- redesigning unrelated extension runtime structure
+
+### Constraints
+
+- Keep runtime behavior unchanged.
+- Keep desktop and browser builds working.
+- Do not import telemetry SDK types into domain or application.
+- Keep telemetry minimal and privacy-conscious.
+
+### Design
+
+#### Use case
+
+Record telemetry through a small port.
+
+#### Layers affected
+
+- domain: unchanged
+- application: add telemetry port
+- infrastructure: none
+- presentation/extension: add telemetry adapter and inject it from bootstrap
+- docs: update architecture and add a telemetry design note
+
+#### Key decisions
+
+- Expose only `trackEvent` and `dispose` on the telemetry port.
+- Keep event names and payload property shapes unchanged during this slice.
+
+### Acceptance Criteria
+
+- [ ] application/domain contain no telemetry SDK imports
+- [ ] telemetry SDK usage exists only in outer adapter modules
+- [ ] existing telemetry-triggering flows call the new port
+- [ ] build passes
+- [ ] tests pass
+
+### Test Plan
+
+- run build
+- run tests
+- add a targeted test for telemetry payload translation where practical
+
+### Risks
+
+- web extension compatibility still depends on the current telemetry SDK package
+- telemetry lifecycle cleanup can regress if disposal wiring changes
+
+### Rollback Plan
+
+- restore direct telemetry SDK calls in the extension runtime and handlers
+- remove the telemetry adapter and port if regressions appear

@@ -26,7 +26,7 @@ export const executeOpenPreviewCommand = ({
   const document = activeEditor.document;
   const panel = panelFactory.getPanel(document);
   initReactPanel(myExtension.context, panel, viewType, BUNDLE_SRC);
-  myExtension.reporter.sendTelemetryEvent(viewType, {
+  myExtension.telemetry.trackEvent(viewType, {
     development: String(DEVELOPMENT),
   });
 };

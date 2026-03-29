@@ -88,6 +88,8 @@ Migration should be incremental and use-case driven.
   parse-error decisions without `vscode` types
 - `src/application/editor-feedback/findParameterHover.ts` exposes parameter
   hover decisions without `vscode` types
+- `src/application/telemetry/TelemetryPort.ts` exposes a small telemetry
+  contract without SDK-specific types
 
 ### VS Code-facing adapters
 
@@ -101,14 +103,29 @@ Migration should be incremental and use-case driven.
   payload enrichment, and telemetry reporting for webview events
 - `src/extension/bootstrap/activateExtension.ts` is the explicit composition
   root for activation wiring
+- `src/extension/telemetry/*` owns the telemetry SDK adapter and composition
+  of the runtime telemetry implementation
+
+## Telemetry Boundary
+
+- callers in extension-facing modules request telemetry via
+  `TelemetryPort.trackEvent(...)`
+- SDK-specific translation lives only in
+  `src/extension/telemetry/VscodeTelemetryAdapter.ts`
+- bootstrap wiring creates the telemetry adapter and injects it into the
+  extension runtime object
+- event names and payload shapes remain defined by the callers so the refactor
+  preserves existing collection scope
 
 ## Web Extension Risks
 
 - `src/extension.ts` is used for both desktop and browser entry points, so any shared import chain can affect both bundles
-- `src/extension/MyExtension.ts` depends on `@vscode/extension-telemetry`; this needs continued verification in web extension execution
-- `src/domain/services/events/resource.ts` imports `os`; webpack currently provides a browser fallback, but this keeps environment-specific logic in the wrong layer
-- `src/domain/services/events/save.ts` relies on `showSaveDialog` and `workspace.fs`; behavior must remain valid in browser-hosted extension contexts
-- `src/domain/models/converter.ts` reads from `vscode.window.visibleTextEditors`, which couples shared transformation flow to editor state assumptions
+- `src/extension/telemetry/VscodeTelemetryAdapter.ts` depends on
+  `@vscode/extension-telemetry`; this still needs continued verification in web
+  extension execution
+- `src/extension/webview/messageHandlers.ts` imports `os`; webpack currently
+  provides a browser fallback, but this remains an environment-specific adapter
+  concern that needs continued verification
 - `src/ui-component` receives flatted JSON payloads, so serialization format changes can break both desktop and web viewers even if parsing remains correct
 
 ## First Good Vertical Slice
