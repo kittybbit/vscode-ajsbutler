@@ -4,7 +4,7 @@ import { Unit } from "../../domain/values/Unit";
 
 export type UnitListRootDto = {
   unitAttribute: string;
-  parameters: Array<{ key: string; value: string }>;
+  parameters: Array<{ key: string; value: string; position?: number }>;
   children: UnitListRootDto[];
 };
 

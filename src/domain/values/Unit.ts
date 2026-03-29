@@ -6,7 +6,7 @@ export class Unit {
   unitAttribute: string;
 
   /** definition parameters */
-  parameters: Array<{ key: string; value: string }>;
+  parameters: Array<{ key: string; value: string; position?: number }>;
 
   /** parent */
   parent?: Unit;

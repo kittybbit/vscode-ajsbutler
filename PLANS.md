@@ -460,3 +460,65 @@ layer even though they are simple type-gated projections.
 - [ ] the new row view fields stay type-gated to the same unit kinds as today
 - [ ] build passes
 - [ ] tests pass
+
+## Task
+
+Extend `BuildUnitListView` to cover calendar columns in `group6`.
+
+### Why
+
+`group6` still depends on wrapper-only week-judgement logic in `G`, but the
+actual behavior is a projection of `op` and `cl` parameter values that can be
+made explicit in the application adapter.
+
+### Scope
+
+- project calendar weekday state for `g` units into the row view adapter
+- project non-week `op` and `cl` values into stable table view data
+- migrate `group6` to consume only the row view adapter
+- add or update tests for calendar projection
+
+### Non-Goals
+
+- migrating jobnet priority logic in `group7`
+- changing calendar rendering semantics
+
+### Acceptance Criteria
+
+- [ ] `group6` no longer depends on `G` or `row.params(...)`
+- [ ] weekday icons still follow the same open/close precedence
+- [ ] non-week `op` and `cl` entries still render in order
+- [ ] build passes
+- [ ] tests pass
+
+## Task
+
+Expose parameter order in the normalized/unit-list adapter path and migrate
+`group7`.
+
+### Why
+
+`group7` mostly projects simple jobnet parameters, but priority depends on the
+relative order of `pr` and `ni`, plus parent-jobnet inheritance. That behavior
+cannot be reproduced reliably unless parameter position survives normalization.
+
+### Scope
+
+- preserve parameter position from parser output through normalization and
+  unit-list DTO mapping
+- project `group7` fields from `BuildUnitListView`
+- migrate `group7` to consume only the row view adapter
+- add or update tests for priority ordering and inheritance
+
+### Non-Goals
+
+- migrating schedule-heavy `group10` in the same slice
+- changing jobnet priority semantics
+
+### Acceptance Criteria
+
+- [ ] normalized parameters preserve source order
+- [ ] `group7` no longer depends on `UnitEntity` priority or `params(...)`
+- [ ] `pr`/`ni` order and parent inheritance still produce the same priority
+- [ ] build passes
+- [ ] tests pass

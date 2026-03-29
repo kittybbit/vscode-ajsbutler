@@ -38,7 +38,7 @@ export type AjsUnit = {
     h: number;
     v: number;
   };
-  parameters: Array<{ key: string; value: string }>;
+  parameters: Array<{ key: string; value: string; position?: number }>;
   dependencies: AjsDependency[];
   children: AjsUnit[];
 };

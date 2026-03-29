@@ -45,6 +45,7 @@ export class Ajs3v12Evaluator implements AjsParserListener {
     this.#currentUnit?.parameters.push({
       key: ctx._key.text as string,
       value: ctx._value.text as string,
+      position: this.#currentUnit.parameters.length,
     });
   };
 
