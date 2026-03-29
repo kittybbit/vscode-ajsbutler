@@ -12,10 +12,10 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { UnitEntity } from "../../domain/models/units/UnitEntities";
+import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 
 type UnitEntityDialogProps = {
-  dialogData: UnitEntity | undefined;
+  dialogData: UnitDefinitionDialogDto | undefined;
   onClose: VoidFunction;
 };
 
@@ -89,7 +89,7 @@ const UnitEntityDialog: FC<UnitEntityDialogProps> = ({
             <CloseIcon />
           </IconButton>
         </Stack>
-        <Typography variant="caption">{dialogData?.absolutePath}</Typography>
+        <Typography variant="caption">{dialogData.absolutePath}</Typography>
       </DialogTitle>
       <TabPanel value={tabIndex} index={0}>
         <Tab1 dialogData={dialogData} />
@@ -118,36 +118,14 @@ const TabPanel: FC<TabPanelProps> = ({ value, index, children }) => {
   );
 };
 
-const Tab1: FC<{ dialogData: UnitEntity | undefined }> = ({ dialogData }) => {
-  const rawData = dialogData.parameters
-    .map((p) => `${p.key}=${p.value}`)
-    .join("\n");
+const Tab1: FC<{ dialogData: UnitDefinitionDialogDto }> = ({ dialogData }) => (
+  <CopyableTextField id="rawdata" value={dialogData.rawData} />
+);
 
-  return <CopyableTextField id="rawdata" value={rawData} />;
-};
-
-const commandTemplates = [
-  {
-    id: "ajsshow",
-    label: "ajsshow",
-    cmd: (path: string) => `ajsshow -R ${path}`,
-  },
-  {
-    id: "ajsprint",
-    label: "ajsprint",
-    cmd: (path: string) => `ajsprint -a -R ${path}`,
-  },
-];
-
-const Tab2: FC<{ dialogData: UnitEntity }> = ({ dialogData }) => (
+const Tab2: FC<{ dialogData: UnitDefinitionDialogDto }> = ({ dialogData }) => (
   <>
-    {commandTemplates.map(({ id, label, cmd }) => (
-      <CopyableTextField
-        key={id}
-        id={id}
-        label={label}
-        value={cmd(dialogData.absolutePath)}
-      />
+    {dialogData.commands.map(({ id, label, value }) => (
+      <CopyableTextField key={id} id={id} label={label} value={value} />
     ))}
   </>
 );

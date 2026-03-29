@@ -1,5 +1,5 @@
 // import * as vscode from 'vscode';
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { CellContext, createColumnHelper } from "@tanstack/table-core";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { UnitEntity } from "../../../domain/models/units/UnitEntities";
@@ -50,7 +50,7 @@ export const tableDefaultColumnDef = {
 
 export const tableColumnDef = (
   language: string | undefined = "en",
-  setDialogData: Dispatch<SetStateAction<UnitEntity | undefined>>,
+  openUnitDefinition: (absolutePath: string) => void,
   handleJump: (id: string) => void,
 ) => {
   // column titles
@@ -76,7 +76,9 @@ export const tableColumnDef = (
               <IconButton
                 size="small"
                 aria-label="View the unit definition"
-                onClick={() => setDialogData(props.row.original)}
+                onClick={() =>
+                  openUnitDefinition(props.row.original.absolutePath)
+                }
               >
                 <DescriptionIcon fontSize="inherit" />
               </IconButton>

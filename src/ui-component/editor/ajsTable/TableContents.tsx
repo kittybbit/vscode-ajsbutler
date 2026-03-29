@@ -28,8 +28,19 @@ import {
   getSortedRowModel,
 } from "@tanstack/table-core";
 import { rankItem } from "@tanstack/match-sorter-utils";
+import {
+  AjsDocument,
+  flattenAjsUnits,
+} from "../../../domain/models/ajs/AjsDocument";
+import {
+  buildUnitDefinition,
+  UnitDefinitionDialogDto,
+} from "../../../application/unit-definition/buildUnitDefinition";
 import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
-import { toUnitEntities } from "../../../application/unit-list/unitListDocumentView";
+import {
+  toAjsDocument,
+  toUnitEntities,
+} from "../../../application/unit-list/unitListDocumentView";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import Header from "./Header";
@@ -80,21 +91,28 @@ export type DrawerWidthStateType = {
 
 const useChangeDocument = (): [
   UnitEntity[] | undefined,
+  AjsDocument | undefined,
   (type: string, data: unknown) => void,
 ] => {
   const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
+  const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const changeDocumentFn = useCallback((type: string, data: unknown) => {
     try {
+      const nextDocument = data
+        ? toAjsDocument(data as UnitListDocumentDto)
+        : undefined;
       const newUnitEntities = data
         ? toUnitEntities(data as UnitListDocumentDto)
         : [];
+      setAjsDocument(() => nextDocument);
       setUnitEntities(() => newUnitEntities);
     } catch (error) {
       console.error("Failed to parse data:", error);
+      setAjsDocument(() => undefined);
       setUnitEntities(() => []);
     }
   }, []);
-  return [unitEntities, changeDocumentFn];
+  return [unitEntities, ajsDocument, changeDocumentFn];
 };
 
 const TableContents = () => {
@@ -106,12 +124,34 @@ const TableContents = () => {
     menuItem1: false,
   });
   // control dialog
-  const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
+  const [dialogData, setDialogData] = useState<
+    UnitDefinitionDialogDto | undefined
+  >();
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
   const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
-  const [unitEntities, changeDocumentFn] = useChangeDocument();
+  const [unitEntities, ajsDocument, changeDocumentFn] = useChangeDocument();
+
+  const unitDefinitionByPath = useMemo(
+    () =>
+      new Map(
+        ajsDocument
+          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
+              unit.absolutePath,
+              buildUnitDefinition(unit),
+            ])
+          : [],
+      ),
+    [ajsDocument],
+  );
+
+  const openUnitDefinition = useCallback(
+    (absolutePath: string) => {
+      setDialogData(() => unitDefinitionByPath.get(absolutePath));
+    },
+    [unitDefinitionByPath],
+  );
 
   useEffect(() => {
     window.EventBridge.addCallback("changeDocument", changeDocumentFn);
@@ -130,8 +170,8 @@ const TableContents = () => {
 
   const table = useReactTable<UnitEntity>({
     columns: useMemo(
-      () => tableColumnDef(lang, setDialogData, handleJump),
-      [lang, setDialogData, handleJump],
+      () => tableColumnDef(lang, openUnitDefinition, handleJump),
+      [lang, openUnitDefinition, handleJump],
     ),
     data: unitEntities ?? [],
     state: {

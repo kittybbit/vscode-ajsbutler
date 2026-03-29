@@ -23,7 +23,14 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { buildFlowGraph } from "../../../application/flow-graph/buildFlowGraph";
-import { AjsDocument } from "../../../domain/models/ajs/AjsDocument";
+import {
+  AjsDocument,
+  flattenAjsUnits,
+} from "../../../domain/models/ajs/AjsDocument";
+import {
+  buildUnitDefinition,
+  UnitDefinitionDialogDto,
+} from "../../../application/unit-definition/buildUnitDefinition";
 import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
 import {
   toAjsDocument,
@@ -51,8 +58,8 @@ const nodeTypes: NodeTypes = {
 };
 
 export type DialogDataStateType = {
-  dialogData?: UnitEntity;
-  setDialogData: Dispatch<SetStateAction<UnitEntity | undefined>>;
+  dialogData?: UnitDefinitionDialogDto;
+  setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
 };
 
 type FlowMenuStatusType = {
@@ -87,7 +94,9 @@ const FlowContents: FC = () => {
   const prevUnitEntityId = useRef<string | undefined>(undefined);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [dialogData, setDialogData] = useState<UnitEntity | undefined>();
+  const [dialogData, setDialogData] = useState<
+    UnitDefinitionDialogDto | undefined
+  >();
   const allUnitEntities = useMemo(
     () => unitEntities.flatMap((unitEntity) => flattenChildren([unitEntity])),
     [unitEntities],
@@ -101,6 +110,18 @@ const FlowContents: FC = () => {
         ]),
       ),
     [allUnitEntities],
+  );
+  const unitDefinitionByPath = useMemo(
+    () =>
+      new Map(
+        ajsDocument
+          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
+              unit.absolutePath,
+              buildUnitDefinition(unit),
+            ])
+          : [],
+      ),
+    [ajsDocument],
   );
 
   const theme = useMemo(
@@ -133,6 +154,7 @@ const FlowContents: FC = () => {
     const { nodes, edges } = createReactFlowData(
       graph,
       unitEntityByPath,
+      unitDefinitionByPath,
       theme,
       dialogDataState,
       currentUnitEndityState,
@@ -144,7 +166,14 @@ const FlowContents: FC = () => {
   useEffect(() => {
     updateNodesAndEdges(currentUnitEntity);
     prevUnitEntityId.current = currentUnitEntity?.id;
-  }, [ajsDocument, currentUnitEntity, unitEntityByPath, theme, dialogData]);
+  }, [
+    ajsDocument,
+    currentUnitEntity,
+    unitEntityByPath,
+    unitDefinitionByPath,
+    theme,
+    dialogData,
+  ]);
 
   useEffect(() => {
     const changeDocumentFn = (type: string, data: unknown) => {
