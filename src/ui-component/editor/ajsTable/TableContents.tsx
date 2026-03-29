@@ -28,14 +28,13 @@ import {
   getSortedRowModel,
 } from "@tanstack/table-core";
 import { rankItem } from "@tanstack/match-sorter-utils";
-import { parse } from "flatted";
+import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
+import { toUnitEntities } from "../../../application/unit-list/unitListDocumentView";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
-import { Unit } from "../../../domain/values/Unit";
 import { UnitEntity } from "../../../domain/models/units/UnitEntities";
-import { flattenChildren, tyFactory } from "../../../domain/utils/TyUtils";
 import DisplayColumnSelector from "./DisplayColumnSelector";
 import { AccessorType } from "./columnDefs/common";
 import UnitEntityDialog from "../UnitEntityDialog";
@@ -86,11 +85,9 @@ const useChangeDocument = (): [
   const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
   const changeDocumentFn = useCallback((type: string, data: unknown) => {
     try {
-      const newUnitEntities: UnitEntity[] = parse(data as string)
-        .map((rootUnitOfJSON: Unit) => Unit.createFromJSON(rootUnitOfJSON)) // all unit in root unit.
-        .map((unit: Unit) => tyFactory(unit))
-        .map((unitEntity: UnitEntity) => flattenChildren([unitEntity]))
-        .flat();
+      const newUnitEntities = data
+        ? toUnitEntities(data as UnitListDocumentDto)
+        : [];
       setUnitEntities(() => newUnitEntities);
     } catch (error) {
       console.error("Failed to parse data:", error);

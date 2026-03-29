@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "out",
+    "rootDir": "src",
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": true
+  },
+  "include": [
+    "global.d.ts",
+    "src/test/**/*.ts",
+    "src/application/unit-list/buildUnitList.ts",
+    "src/application/unit-list/unitListDocument.ts",
+    "src/domain/services/parser/**/*.ts",
+    "src/domain/values/Unit.ts",
+    "src/generate/parser/**/*.ts"
+  ]
+}

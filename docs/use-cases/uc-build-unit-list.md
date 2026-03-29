@@ -21,6 +21,7 @@ The user opens or refreshes a unit-list-oriented view of an AJS definition.
 
 - output should not depend on React or VS Code APIs
 - output should not expose parser-internal structures directly
+- UI-facing document payloads should be built from normalized unit values or application DTOs
 - filtering and sorting should be separable concerns
 
 ## Acceptance Notes

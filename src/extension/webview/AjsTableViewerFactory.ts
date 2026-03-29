@@ -11,13 +11,13 @@ import {
   RESOURCE,
   SAVE,
 } from "../../domain/services/events/constant";
-import { ready } from "../../domain/services/events/ready";
 import { resource } from "../../domain/services/events/resource";
 import { save } from "../../domain/services/events/save";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_TABLE_VIEWER_TYPE } from "./constant";
 import { operation } from "../../domain/services/events/operation";
 import { MyExtension } from "../MyExtension";
+import { readyTableDocument } from "./tableDocument";
 
 export class AjsTableViewerFactory extends ViewerFactory {
   public static init(
@@ -45,7 +45,7 @@ export class AjsTableViewerFactory extends ViewerFactory {
         }
         case READY: {
           // webview is ready.
-          ready(document, panel);
+          readyTableDocument(document, panel);
           break;
         }
         case SAVE: {

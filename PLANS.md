@@ -83,72 +83,74 @@ Track non-trivial changes using the repository's SDD workflow before implementat
 
 ### Task
 
-Analyze repository boundaries and document the first clean-architecture slice without refactoring code.
+Extract the first clean-architecture unit-list use case without changing table behavior.
 
 ### Why
 
-The repository already mixes parser, VS Code, and webview responsibilities, and the next refactoring step needs an explicit architectural readout before implementation work starts.
+The table viewer currently depends on parser invocation and serialization flow that bypass a clear application boundary.
 
 ### Scope
 
-- inspect parser-related modules
-- inspect VS Code-facing modules
-- inspect shared desktop/web extension entry points
+- add an application use case for unit-list document generation
+- update the table viewer message path to use the new use case
+- keep flow viewer behavior unchanged in this slice
+- add or update tests for the use case
 - update `docs/sdd/architecture.md`
-- record a short no-refactor plan in `PLANS.md`
+- update `PLANS.md`
 
 ### Non-Goals
 
 - parser changes
 - UI behavior changes
-- moving files
 - dependency updates
 - `engines.vscode` changes
+- flow viewer refactor
 
 ### Constraints
 
 - Keep runtime behavior unchanged.
-- Do not alter desktop or web extension execution paths.
-- Do not refactor in this task.
+- Keep desktop and browser builds working.
+- Do not expose parser internals in UI-facing DTOs.
 
 ### Design
 
 #### Use case
 
-Architectural analysis for the next specification-driven vertical slice.
+Build unit list extraction.
 
 #### Layers affected
 
-- domain: none
-- application: none
-- infrastructure: none
-- presentation: none
+- domain: reused
+- application: added
+- infrastructure: updated
+- presentation: updated
 - docs: updated
 
 #### Key decisions
 
-- Treat parser orchestration returning `Unit[]` as the strongest current extraction seam.
-- Recommend `Build Unit List` as the first vertical slice instead of starting with a broader parser rewrite.
+- Introduce an application DTO built from normalized `Unit` values rather than parser internals.
+- Change only the table viewer path in this slice to keep the refactor reviewable.
 
 ### Acceptance Criteria
 
-- [ ] parser boundaries are identified
-- [ ] VS Code API boundaries are identified
-- [ ] web extension risks are documented
-- [ ] first vertical slice is named with rationale
+- [ ] application use case exists for unit-list generation
+- [ ] table viewer consumes the new DTO path
+- [ ] parser internals are not exposed in the UI-facing DTO
+- [ ] relevant tests pass
 - [ ] runtime source files remain unchanged
 
 ### Test Plan
 
-- inspect referenced modules and entry points
-- inspect diff to confirm documentation-only changes
+- run build
+- run relevant tests
+- inspect diff for the intended slice only
 
 ### Risks
 
-- architectural observations may become stale as the repository evolves
-- undocumented edge cases may remain in browser-hosted extension execution
+- DTO conversion can drift from existing table assumptions if behavior coverage is thin
+- browser-hosted extension behavior still depends on existing webview and save-dialog constraints
 
 ### Rollback Plan
 
-- revert documentation-only edits
-- re-run analysis when the next refactoring task starts
+- revert the table viewer adapter to the previous message path
+- fall back to the existing shared document change helpers if regressions appear

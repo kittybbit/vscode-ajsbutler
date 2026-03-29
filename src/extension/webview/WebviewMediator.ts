@@ -12,13 +12,18 @@ export abstract class WebviewMediator implements vscode.Disposable {
   #store: WebviewStore;
   #change: ReturnType<typeof debouncedChangeFn>;
 
-  constructor(myExtension: MyExtension, viewType: string, store: WebviewStore) {
+  constructor(
+    myExtension: MyExtension,
+    viewType: string,
+    store: WebviewStore,
+    change: ReturnType<typeof debouncedChangeFn> = debouncedChangeFn(300),
+  ) {
     console.log(`invoke WebviewMediator.constructor. (${viewType})`);
 
     this.#viewType = viewType;
     this.#myExtension = myExtension;
     this.#store = store;
-    this.#change = debouncedChangeFn(300);
+    this.#change = change;
 
     const context = this.#myExtension.context;
     context.subscriptions.push(
