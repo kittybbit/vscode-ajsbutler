@@ -427,3 +427,36 @@ Normalize parsed AJS definitions into a stable application-facing model.
 
 - restore direct raw `Unit` / `UnitEntity` usage in affected use cases
 - remove the normalizer from migrated use cases if semantic regressions appear
+
+## Task
+
+Extend `BuildUnitListView` to cover additional low-risk table column groups.
+
+### Why
+
+The table adapter already covers groups 1 to 3, but `group4`, `group5`,
+`group8`, and `group9` still read `UnitEntity.params(...)` directly in the UI
+layer even though they are simple type-gated projections.
+
+### Scope
+
+- extend `buildUnitListView` with stable data for manager, job-group,
+  jobnet-connector, and start-condition columns
+- migrate `group4`, `group5`, `group8`, and `group9` to read only the row view
+  adapter
+- add or update tests for the new row view fields
+
+### Non-Goals
+
+- migrating the more complex calendar, jobnet, or schedule groups in the same
+  slice
+- changing visible table rendering semantics
+- changing parser or normalized model behavior beyond view projection
+
+### Acceptance Criteria
+
+- [ ] `group4`, `group5`, `group8`, and `group9` no longer call
+      `UnitEntity.params(...)`
+- [ ] the new row view fields stay type-gated to the same unit kinds as today
+- [ ] build passes
+- [ ] tests pass
