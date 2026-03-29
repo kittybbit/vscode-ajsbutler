@@ -108,7 +108,7 @@ export const tableColumnDef = (
     group8(columnHelper, ajsTableColumnHeader, rowViewByPath),
     group9(columnHelper, ajsTableColumnHeader, rowViewByPath),
     group10(columnHelper, ajsTableColumnHeader, paramDefinition, rowViewByPath),
-    group11(columnHelper, ajsTableColumnHeader),
+    group11(columnHelper, ajsTableColumnHeader, rowViewByPath),
     group12(columnHelper, ajsTableColumnHeader, rowViewByPath),
     group13(columnHelper, ajsTableColumnHeader, rowViewByPath),
     group14(columnHelper, ajsTableColumnHeader, rowViewByPath),

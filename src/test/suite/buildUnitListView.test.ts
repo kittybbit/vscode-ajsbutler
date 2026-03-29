@@ -123,9 +123,32 @@ unit=root,,jp1admin,;
     el=job,j,+0+0;
     el=.CONDITION,rc,+160+0;
     el=subnet,n,+320+0;
+    el=qjob,qj,+480+0;
     unit=job,,jp1admin,;
     {
       ty=rj;
+      te="run.sh";
+      sc="script.ksh";
+      prm=--job;
+      env="ENV=1";
+      ev="envfile.env";
+      wkp="/tmp";
+      si="stdin.txt";
+      so="stdout.txt";
+      soa=add;
+      se="stderr.txt";
+      sea=new;
+      pr=2;
+      jd=nm;
+      wth=20;
+      tho=5;
+      jdf="judge.txt";
+      abr=y;
+      rjs=1;
+      rje=9;
+      rec=3;
+      rei=60;
+      un=target-user;
     }
     unit=.CONDITION,,jp1admin,;
     {
@@ -134,6 +157,14 @@ unit=root,,jp1admin,;
     unit=subnet,,jp1admin,;
     {
       ty=n;
+    }
+    unit=qjob,,jp1admin,;
+    {
+      ty=qj;
+      qm=queue-manager;
+      qu=queue-name;
+      req=request-job;
+      ni=0;
     }
   }
   unit=manager,,jp1admin,;
@@ -188,6 +219,7 @@ suite("Build Unit List View", () => {
     const managerJobnet = rows.find(
       (row) => row.absolutePath === "/root/manager-jobnet",
     );
+    const qjob = rows.find((row) => row.absolutePath === "/root/jobnet/qjob");
     const subnet = rows.find(
       (row) => row.absolutePath === "/root/jobnet/subnet",
     );
@@ -256,6 +288,32 @@ suite("Build Unit List View", () => {
     assert.deepStrictEqual(jobnet?.group10.endRangeTimes, ["18:00"]);
     assert.deepStrictEqual(jobnet?.group10.waitCounts, ["4"]);
     assert.deepStrictEqual(jobnet?.group10.waitTimes, ["00:30"]);
+    assert.strictEqual(job?.group11.commandText, '"run.sh"');
+    assert.strictEqual(job?.group11.scriptFileName, '"script.ksh"');
+    assert.strictEqual(job?.group11.parameters, "--job");
+    assert.strictEqual(job?.group11.environmentVariable, '"ENV=1"');
+    assert.strictEqual(job?.group11.environmentVariableFile, '"envfile.env"');
+    assert.strictEqual(job?.group11.workPathName, '"/tmp"');
+    assert.strictEqual(job?.group11.standardInputFile, '"stdin.txt"');
+    assert.strictEqual(job?.group11.standardOutputFile, '"stdout.txt"');
+    assert.strictEqual(job?.group11.standardOutputAction, "add");
+    assert.strictEqual(job?.group11.standardErrorFile, '"stderr.txt"');
+    assert.strictEqual(job?.group11.standardErrorAction, "new");
+    assert.strictEqual(job?.group11.priority, 2);
+    assert.strictEqual(job?.group11.endJudgment, "nm");
+    assert.strictEqual(job?.group11.waitThreshold, "20");
+    assert.strictEqual(job?.group11.timeoutHold, "5");
+    assert.strictEqual(job?.group11.judgmentFile, '"judge.txt"');
+    assert.strictEqual(job?.group11.automaticRetryEnabled, "y");
+    assert.strictEqual(job?.group11.retryStart, "1");
+    assert.strictEqual(job?.group11.retryEnd, "9");
+    assert.strictEqual(job?.group11.retryCount, "3");
+    assert.strictEqual(job?.group11.retryInterval, "60");
+    assert.strictEqual(job?.group11.targetUserName, "target-user");
+    assert.strictEqual(qjob?.group11.queueManager, "queue-manager");
+    assert.strictEqual(qjob?.group11.queueName, "queue-name");
+    assert.strictEqual(qjob?.group11.requestJobName, "request-job");
+    assert.strictEqual(qjob?.group11.priority, 3);
     assert.strictEqual(jobnet?.group12.endJudgment, "gt");
     assert.strictEqual(jobnet?.group12.judgmentReturnCode, "8");
     assert.strictEqual(jobnet?.group12.lowerReturnCode, "1");

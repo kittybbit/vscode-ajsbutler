@@ -100,6 +100,34 @@ export type UnitListGroup10View = {
   waitTimes: string[];
 };
 
+export type UnitListGroup11View = {
+  commandText?: string;
+  scriptFileName?: string;
+  parameters?: string;
+  environmentVariable?: string;
+  environmentVariableFile?: string;
+  workPathName?: string;
+  standardInputFile?: string;
+  standardOutputFile?: string;
+  standardOutputAction?: string;
+  standardErrorFile?: string;
+  standardErrorAction?: string;
+  queueManager?: string;
+  queueName?: string;
+  requestJobName?: string;
+  priority?: number;
+  endJudgment?: string;
+  waitThreshold?: string;
+  timeoutHold?: string;
+  judgmentFile?: string;
+  automaticRetryEnabled?: string;
+  retryStart?: string;
+  retryEnd?: string;
+  retryCount?: string;
+  retryInterval?: string;
+  targetUserName?: string;
+};
+
 export type UnitListGroup12View = {
   endJudgment?: string;
   judgmentReturnCode?: string;
@@ -209,6 +237,7 @@ export type UnitListRowView = {
   group6: UnitListGroup6View;
   group7: UnitListGroup7View;
   group10: UnitListGroup10View;
+  group11: UnitListGroup11View;
   group12: UnitListGroup12View;
   group13: UnitListGroup13View;
   group14: UnitListGroup14View;
@@ -294,16 +323,17 @@ type Group7PriorityUnit = {
   parameters: UnitParameterView[];
 };
 
-const getGroup7Priority = (
+const getPriorityForUnitTypes = (
   unit: Group7PriorityUnit,
   unitById: ReadonlyMap<string, Group7PriorityUnit>,
   priorityById: Map<string, number>,
+  targetUnitTypes: readonly AjsUnitType[],
 ): number | undefined => {
   const cachedPriority = priorityById.get(unit.id);
   if (cachedPriority !== undefined) {
     return cachedPriority;
   }
-  if (unit.unitType !== "n" && unit.unitType !== "rn") {
+  if (!targetUnitTypes.includes(unit.unitType)) {
     return undefined;
   }
 
@@ -333,7 +363,12 @@ const getGroup7Priority = (
 
   const parent = unit.parentId ? unitById.get(unit.parentId) : undefined;
   if (parent && (parent.unitType === "n" || parent.unitType === "rn")) {
-    const parentPriority = getGroup7Priority(parent, unitById, priorityById);
+    const parentPriority = getPriorityForUnitTypes(
+      parent,
+      unitById,
+      priorityById,
+      ["n", "rn"],
+    );
     if (parentPriority !== undefined) {
       priorityById.set(unit.id, parentPriority);
       return parentPriority;
@@ -411,6 +446,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
   const units = flattenAjsUnits(document.rootUnits);
   const unitById = new Map(units.map((unit) => [unit.id, unit]));
   const group7PriorityById = new Map<string, number>();
+  const group11PriorityById = new Map<string, number>();
 
   return units.map((unit) => {
     const parent = unit.parentId ? unitById.get(unit.parentId) : undefined;
@@ -546,7 +582,10 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
           unit.unitType === "rr"
             ? findParameterValue(unit.parameters, "rh")
             : undefined,
-        priority: getGroup7Priority(unit, unitById, group7PriorityById),
+        priority: getPriorityForUnitTypes(unit, unitById, group7PriorityById, [
+          "n",
+          "rn",
+        ]),
         timeoutPeriod:
           unit.unitType === "n" ||
           unit.unitType === "rn" ||
@@ -609,6 +648,40 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
         waitTimes: findParameterValues(unit.parameters, "wt").map((value) =>
           parseTimeValue(value),
         ),
+      },
+      group11: {
+        commandText: findParameterValue(unit.parameters, "te"),
+        scriptFileName: findParameterValue(unit.parameters, "sc"),
+        parameters: findParameterValue(unit.parameters, "prm"),
+        environmentVariable: findParameterValue(unit.parameters, "env"),
+        environmentVariableFile: findParameterValue(unit.parameters, "ev"),
+        workPathName: findParameterValue(unit.parameters, "wkp"),
+        standardInputFile: findParameterValue(unit.parameters, "si"),
+        standardOutputFile: findParameterValue(unit.parameters, "so"),
+        standardOutputAction: findParameterValue(unit.parameters, "soa"),
+        standardErrorFile: findParameterValue(unit.parameters, "se"),
+        standardErrorAction: findParameterValue(unit.parameters, "sea"),
+        queueManager: findParameterValue(unit.parameters, "qm"),
+        queueName: findParameterValue(unit.parameters, "qu"),
+        requestJobName: findParameterValue(unit.parameters, "req"),
+        priority: getPriorityForUnitTypes(unit, unitById, group11PriorityById, [
+          "j",
+          "rj",
+          "pj",
+          "rp",
+          "qj",
+          "rq",
+        ]),
+        endJudgment: findParameterValue(unit.parameters, "jd"),
+        waitThreshold: findParameterValue(unit.parameters, "wth"),
+        timeoutHold: findParameterValue(unit.parameters, "tho"),
+        judgmentFile: findParameterValue(unit.parameters, "jdf"),
+        automaticRetryEnabled: findParameterValue(unit.parameters, "abr"),
+        retryStart: findParameterValue(unit.parameters, "rjs"),
+        retryEnd: findParameterValue(unit.parameters, "rje"),
+        retryCount: findParameterValue(unit.parameters, "rec"),
+        retryInterval: findParameterValue(unit.parameters, "rei"),
+        targetUserName: findParameterValue(unit.parameters, "un"),
       },
       group12: {
         endJudgment: findParameterValue(unit.parameters, "ej"),

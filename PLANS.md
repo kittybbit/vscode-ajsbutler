@@ -582,3 +582,33 @@ needing wrapper-heavy semantics like the remaining job-priority path in
       intact
 - [ ] build passes
 - [ ] tests pass
+
+## Task
+
+Extend `BuildUnitListView` to cover `group11` and remove the remaining table
+dependency on `UnitEntity` wrappers.
+
+### Why
+
+After the previous slices, `group11` is the last substantial column group still
+relying on `defaultAccessorFn(...)` and wrapper-based priority calculation.
+
+### Scope
+
+- project stable view data for `group11`
+- reuse application-side priority calculation for job and queue job rows
+- migrate `group11` to consume only the row view adapter
+- add or update tests for representative job and queue job fields
+
+### Non-Goals
+
+- changing job priority semantics
+- introducing new user-visible table behavior
+
+### Acceptance Criteria
+
+- [ ] `group11` no longer depends on `UnitEntity` wrapper accessors
+- [ ] job and queue job priority still follow existing `pr`/`ni` and parent
+      inheritance rules
+- [ ] build passes
+- [ ] tests pass
