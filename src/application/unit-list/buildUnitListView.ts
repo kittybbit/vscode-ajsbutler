@@ -79,6 +79,27 @@ export type UnitListGroup7View = {
   requiredExecutionTime?: string;
 };
 
+export type UnitListGroup10View = {
+  deleteAfterExecution?: string;
+  executionDate?: string;
+  jobGroupPath?: string;
+  exclusiveJobnetName?: string;
+  parentRules: string[];
+  scheduleDateTypes: string[];
+  scheduleDateYearMonths: string[];
+  scheduleDateDays: string[];
+  startTimes: string[];
+  cycles: string[];
+  substitutes: string[];
+  shiftDays: string[];
+  scheduleByDaysFromStart: string[];
+  maxShiftableDays: string[];
+  startRangeTimes: string[];
+  endRangeTimes: string[];
+  waitCounts: string[];
+  waitTimes: string[];
+};
+
 export type UnitListGroup8View = {
   nestedConnectorRelease?: string;
 };
@@ -96,6 +117,7 @@ export type UnitListRowView = {
   group5: UnitListGroup5View;
   group6: UnitListGroup6View;
   group7: UnitListGroup7View;
+  group10: UnitListGroup10View;
   group8: UnitListGroup8View;
   group9: UnitListGroup9View;
 };
@@ -221,6 +243,70 @@ const getGroup7Priority = (
   priorityById.set(unit.id, 1);
   return 1;
 };
+
+const parseRulePrefix = (value: string): { rule?: string; body: string } => {
+  const matched = /^(\d{1,3}),(.*)$/.exec(value);
+  return matched ? { rule: matched[1], body: matched[2] } : { body: value };
+};
+
+const parseLnParentRule = (value: string): string =>
+  parseRulePrefix(value).body;
+
+const parseSd = (
+  value: string,
+): { type: string; yearMonth: string; day: string } => {
+  const matched =
+    /^((\d{1,3}),)?((\d{4}\/)?\d{2}\/)?(([+*@])?\d{2}|([+*@])?b(-\d{2})?|\+?(su|mo|tu|we|th|fr|sa)(:(\d|b))?|en|ud)/.exec(
+      value,
+    );
+  const yearMonth = matched?.[3]?.slice(0, -1) ?? "";
+  const dayValue = matched?.[5] ?? "";
+  const type =
+    dayValue === "en" || dayValue === "ud"
+      ? dayValue
+      : dayValue.startsWith("+")
+        ? "+"
+        : dayValue.startsWith("*")
+          ? "*"
+          : dayValue.startsWith("@")
+            ? "@"
+            : "";
+  const day =
+    dayValue && dayValue !== "en" && dayValue !== "ud"
+      ? dayValue.replace(/^[+*@]/, "")
+      : "";
+  return { type, yearMonth, day };
+};
+
+const parseTimeValue = (value: string, fallback = ""): string =>
+  /^((\d{1,3}),)?(no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)?/.exec(value)?.[3] ??
+  fallback;
+
+const parseCy = (value: string): string =>
+  /^((\d{1,3}),)?\(((\d{1,3}),([ymwd]))\)/.exec(value)?.[3] ?? "";
+
+const parseSh = (value: string): string =>
+  /^((\d{1,3}),)?(be|af|ca|no)/.exec(value)?.[3] ?? "";
+
+const parseShd = (value: string): string =>
+  /^((\d{1,3}),)?(\d{1,3})/.exec(value)?.[3] ?? "2";
+
+const parseCftd = (
+  value: string,
+): { scheduleByDaysFromStart: string; maxShiftableDays: string } => {
+  const matched =
+    /^((\d{1,3}),)?(no|be|af|db|da)((,(\d{1,2}))(,(\d{1,2}))?)?/.exec(value);
+  const type = matched?.[3] ?? "no";
+  return {
+    scheduleByDaysFromStart:
+      type === "no" ? "no" : `${type},${matched?.[6] ?? "1"}`,
+    maxShiftableDays:
+      type && ["no", "db", "da"].includes(type) ? "" : (matched?.[8] ?? "10"),
+  };
+};
+
+const parseWc = (value: string): string =>
+  /^((\d{1,3}),)?(.+)/.exec(value)?.[3] ?? "1";
 
 export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
   const units = flattenAjsUnits(document.rootUnits);
@@ -383,6 +469,47 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
           unit.unitType === "rr"
             ? findParameterValue(unit.parameters, "fd")
             : undefined,
+      },
+      group10: {
+        deleteAfterExecution: findParameterValue(unit.parameters, "de"),
+        executionDate: findParameterValue(unit.parameters, "ed"),
+        jobGroupPath: findParameterValue(unit.parameters, "jc"),
+        exclusiveJobnetName: findParameterValue(unit.parameters, "ejn"),
+        parentRules: findParameterValues(unit.parameters, "ln").map(
+          parseLnParentRule,
+        ),
+        scheduleDateTypes: findParameterValues(unit.parameters, "sd").map(
+          (value) => parseSd(value).type,
+        ),
+        scheduleDateYearMonths: findParameterValues(unit.parameters, "sd").map(
+          (value) => parseSd(value).yearMonth,
+        ),
+        scheduleDateDays: findParameterValues(unit.parameters, "sd").map(
+          (value) => parseSd(value).day,
+        ),
+        startTimes: findParameterValues(unit.parameters, "st").map((value) =>
+          parseTimeValue(value, "+00:00"),
+        ),
+        cycles: findParameterValues(unit.parameters, "cy").map(parseCy),
+        substitutes: findParameterValues(unit.parameters, "sh").map(parseSh),
+        shiftDays: findParameterValues(unit.parameters, "shd").map(parseShd),
+        scheduleByDaysFromStart: findParameterValues(
+          unit.parameters,
+          "cftd",
+        ).map((value) => parseCftd(value).scheduleByDaysFromStart),
+        maxShiftableDays: findParameterValues(unit.parameters, "cftd").map(
+          (value) => parseCftd(value).maxShiftableDays,
+        ),
+        startRangeTimes: findParameterValues(unit.parameters, "sy").map(
+          (value) => parseTimeValue(value),
+        ),
+        endRangeTimes: findParameterValues(unit.parameters, "ey").map((value) =>
+          parseTimeValue(value),
+        ),
+        waitCounts: findParameterValues(unit.parameters, "wc").map(parseWc),
+        waitTimes: findParameterValues(unit.parameters, "wt").map((value) =>
+          parseTimeValue(value),
+        ),
       },
       group8: {
         nestedConnectorRelease:

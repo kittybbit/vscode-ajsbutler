@@ -35,6 +35,22 @@ unit=root,,jp1admin,;
     cd=10;
     ms=sch;
     fd=30;
+    de=y;
+    ed=2024/12/31;
+    jc=/root;
+    ejn=exclusive-a;
+    ln=2;
+    sd=2024/12/+31;
+    sd=2,en;
+    st=09:30;
+    cy=(3,d);
+    sh=be;
+    shd=5;
+    cftd=be,3,9;
+    sy=08:00;
+    ey=18:00;
+    wc=4;
+    wt=00:30;
     ex="agent-a";
     ncl=y;
     ncn=connector-1;
@@ -143,6 +159,27 @@ suite("Build Unit List View", () => {
     assert.strictEqual(jobnet?.group7.scheduleOption, "sch");
     assert.strictEqual(jobnet?.group7.requiredExecutionTime, "30");
     assert.strictEqual(subnet?.group7.priority, 4);
+    assert.strictEqual(jobnet?.group10.deleteAfterExecution, "y");
+    assert.strictEqual(jobnet?.group10.executionDate, "2024/12/31");
+    assert.strictEqual(jobnet?.group10.jobGroupPath, "/root");
+    assert.strictEqual(jobnet?.group10.exclusiveJobnetName, "exclusive-a");
+    assert.deepStrictEqual(jobnet?.group10.parentRules, ["2"]);
+    assert.deepStrictEqual(jobnet?.group10.scheduleDateTypes, ["+", "en"]);
+    assert.deepStrictEqual(jobnet?.group10.scheduleDateYearMonths, [
+      "2024/12",
+      "",
+    ]);
+    assert.deepStrictEqual(jobnet?.group10.scheduleDateDays, ["31", ""]);
+    assert.deepStrictEqual(jobnet?.group10.startTimes, ["09:30"]);
+    assert.deepStrictEqual(jobnet?.group10.cycles, ["3,d"]);
+    assert.deepStrictEqual(jobnet?.group10.substitutes, ["be"]);
+    assert.deepStrictEqual(jobnet?.group10.shiftDays, ["5"]);
+    assert.deepStrictEqual(jobnet?.group10.scheduleByDaysFromStart, ["be,3"]);
+    assert.deepStrictEqual(jobnet?.group10.maxShiftableDays, ["9"]);
+    assert.deepStrictEqual(jobnet?.group10.startRangeTimes, ["08:00"]);
+    assert.deepStrictEqual(jobnet?.group10.endRangeTimes, ["18:00"]);
+    assert.deepStrictEqual(jobnet?.group10.waitCounts, ["4"]);
+    assert.deepStrictEqual(jobnet?.group10.waitTimes, ["00:30"]);
     assert.deepStrictEqual(job?.group2.nextUnits, [
       {
         id: "/root/jobnet/.CONDITION",

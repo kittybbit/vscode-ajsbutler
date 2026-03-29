@@ -3,25 +3,14 @@ import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import * as parameter from "@resource/i18n/parameter";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { box, defaultAccessorFn } from "./common";
-import {
-  Ln,
-  Sd,
-  St,
-  Cy,
-  Sh,
-  Shd,
-  Cftd,
-  Sy,
-  Ey,
-  Wc,
-  Wt,
-} from "../../../../domain/models/parameters";
+import { box } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group10 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
   paramDefinition: typeof parameter.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group10", //Schedule definition information
@@ -30,31 +19,36 @@ const group10 = (
       {
         id: "group10.col1",
         header: ajsTableColumnHeader["group10.col1"],
-        accessorFn: defaultAccessorFn("de"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.deleteAfterExecution,
       },
       {
         id: "group10.col2",
         header: ajsTableColumnHeader["group10.col2"],
-        accessorFn: defaultAccessorFn("ed"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.executionDate,
       },
       {
         id: "group10.col3",
         header: ajsTableColumnHeader["group10.col3"],
-        accessorFn: defaultAccessorFn("jc"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.jobGroupPath,
       },
       {
         id: "group10.col4",
         header: ajsTableColumnHeader["group10.col4"],
-        accessorFn: defaultAccessorFn("ejn"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.exclusiveJobnetName,
       },
       {
         id: "group10.col5",
         header: ajsTableColumnHeader["group10.col5"],
-        accessorFn: defaultAccessorFn("ln"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.parentRules,
         cell: (props) => {
-          const ln = props.getValue<Ln[]>();
+          const ln = props.getValue<string[]>();
           return Array.isArray(ln) ? (
-            <>{ln.map((v, i) => box((v as Ln).parentRule, i))}</>
+            <>{ln.map((v, i) => box(v || "\u00A0", i))}</>
           ) : undefined;
         },
       },
@@ -65,13 +59,19 @@ const group10 = (
           {
             id: "group10.group1.col1",
             header: ajsTableColumnHeader["group10.group1.col1"],
-            accessorFn: defaultAccessorFn("sd"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group10.scheduleDateTypes,
             cell: (props) => {
-              const sd = props.getValue<Sd[]>();
+              const sd = props.getValue<string[]>();
               return Array.isArray(sd) ? (
                 <>
                   {sd.map((v, i) =>
-                    box(paramDefinition["sd"][(v as Sd).type], i),
+                    box(
+                      paramDefinition["sd"][
+                        v as keyof typeof paramDefinition.sd
+                      ],
+                      i,
+                    ),
                   )}
                 </>
               ) : undefined;
@@ -80,22 +80,25 @@ const group10 = (
           {
             id: "group10.group1.col2",
             header: ajsTableColumnHeader["group10.group1.col2"],
-            accessorFn: defaultAccessorFn("sd"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group10
+                .scheduleDateYearMonths,
             cell: (props) => {
-              const sd = props.getValue<Sd[]>();
+              const sd = props.getValue<string[]>();
               return Array.isArray(sd) ? (
-                <>{sd.map((v, i) => box((v as Sd).yearMonth ?? "\u00A0", i))}</>
+                <>{sd.map((v, i) => box(v || "\u00A0", i))}</>
               ) : undefined;
             },
           },
           {
             id: "group10.group1.col3",
             header: ajsTableColumnHeader["group10.group1.col3"],
-            accessorFn: defaultAccessorFn("sd"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group10.scheduleDateDays,
             cell: (props) => {
-              const sd = props.getValue<Sd[]>();
+              const sd = props.getValue<string[]>();
               return Array.isArray(sd) ? (
-                <>{sd.map((v, i) => box((v as Sd).day ?? "\u00A0", i))}</>
+                <>{sd.map((v, i) => box(v || "\u00A0", i))}</>
               ) : undefined;
             },
           },
@@ -104,74 +107,72 @@ const group10 = (
       {
         id: "group10.col6",
         header: ajsTableColumnHeader["group10.col6"],
-        accessorFn: defaultAccessorFn("st"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.startTimes,
         cell: (props) => {
-          const st = props.getValue<St[]>();
+          const st = props.getValue<string[]>();
           return Array.isArray(st) ? (
-            <>{st.map((v, i) => box((v as St).time ?? "\u00A0", i))}</>
+            <>{st.map((v, i) => box(v || "\u00A0", i))}</>
           ) : undefined;
         },
       },
       {
         id: "grsoup10.col7",
         header: ajsTableColumnHeader["group10.col7"],
-        accessorFn: defaultAccessorFn("cy"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.cycles,
         cell: (props) => {
-          const cy = props.getValue<Cy[]>();
+          const cy = props.getValue<string[]>();
           return Array.isArray(cy) ? (
-            <>{cy.map((v, i) => box((v as Cy).cycle ?? "\u00A0", i))}</>
+            <>{cy.map((v, i) => box(v || "\u00A0", i))}</>
           ) : undefined;
         },
       },
       {
         id: "group10.col8",
         header: ajsTableColumnHeader["group10.col8"],
-        accessorFn: defaultAccessorFn("sh"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.substitutes,
         cell: (props) => {
-          const sh = props.getValue<Sh[]>();
+          const sh = props.getValue<string[]>();
           return Array.isArray(sh) ? (
-            <>{sh.map((v, i) => box((v as Sh).substitute ?? "\u00A0", i))}</>
+            <>{sh.map((v, i) => box(v || "\u00A0", i))}</>
           ) : undefined;
         },
       },
       {
         id: "group10.col9",
         header: ajsTableColumnHeader["group10.col9"],
-        accessorFn: defaultAccessorFn("shd"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.shiftDays,
         cell: (props) => {
-          const shd = props.getValue<Shd[]>();
+          const shd = props.getValue<string[]>();
           return Array.isArray(shd) ? (
-            <>{shd.map((v, i) => box((v as Shd).shiftDays ?? "\u00A0", i))}</>
+            <>{shd.map((v, i) => box(v || "\u00A0", i))}</>
           ) : undefined;
         },
       },
       {
         id: "group10.col10",
         header: ajsTableColumnHeader["group10.col10"],
-        accessorFn: defaultAccessorFn("cftd"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.scheduleByDaysFromStart,
         cell: (props) => {
-          const cftd = props.getValue<Cftd[]>();
+          const cftd = props.getValue<string[]>();
           return Array.isArray(cftd) ? (
-            <>
-              {cftd.map((v, i) =>
-                box((v as Cftd).scheduleByDaysFromStart ?? "\u00A0", i),
-              )}
-            </>
+            <>{cftd.map((v, i) => box(v || "\u00A0", i))}</>
           ) : undefined;
         },
       },
       {
         id: "group10.col11",
         header: ajsTableColumnHeader["group10.col11"],
-        accessorFn: defaultAccessorFn("cftd"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group10.maxShiftableDays,
         cell: (props) => {
-          const cftd = props.getValue<Cftd[]>();
+          const cftd = props.getValue<string[]>();
           return Array.isArray(cftd) ? (
-            <>
-              {cftd.map((v, i) =>
-                box((v as Cftd).maxShiftableDays ?? "\u00A0", i),
-              )}
-            </>
+            <>{cftd.map((v, i) => box(v || "\u00A0", i))}</>
           ) : undefined;
         },
       },
@@ -182,22 +183,24 @@ const group10 = (
           {
             id: "group10.group2.col1",
             header: ajsTableColumnHeader["group10.group2.col1"],
-            accessorFn: defaultAccessorFn("sy"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group10.startRangeTimes,
             cell: (props) => {
-              const sy = props.getValue<Sy[]>();
+              const sy = props.getValue<string[]>();
               return Array.isArray(sy) ? (
-                <>{sy.map((v, i) => box((v as Sy).time ?? "\u00A0", i))}</>
+                <>{sy.map((v, i) => box(v || "\u00A0", i))}</>
               ) : undefined;
             },
           },
           {
             id: "group10.group2.col2",
             header: ajsTableColumnHeader["group10.group2.col2"],
-            accessorFn: defaultAccessorFn("ey"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group10.endRangeTimes,
             cell: (props) => {
-              const ey = props.getValue<Ey[]>();
+              const ey = props.getValue<string[]>();
               return Array.isArray(ey) ? (
-                <>{ey.map((v, i) => box((v as Ey).time ?? "\u00A0", i))}</>
+                <>{ey.map((v, i) => box(v || "\u00A0", i))}</>
               ) : undefined;
             },
           },
@@ -210,26 +213,24 @@ const group10 = (
           {
             id: "group10.group3.col1",
             header: ajsTableColumnHeader["group10.group3.col1"],
-            accessorFn: defaultAccessorFn("wc"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group10.waitCounts,
             cell: (props) => {
-              const wc = props.getValue<Wc[]>();
+              const wc = props.getValue<string[]>();
               return Array.isArray(wc) ? (
-                <>
-                  {wc.map((v, i) =>
-                    box((v as Wc).numberOfTimes ?? "\u00A0", i),
-                  )}
-                </>
+                <>{wc.map((v, i) => box(v || "\u00A0", i))}</>
               ) : undefined;
             },
           },
           {
             id: "group10.group3.col2",
             header: ajsTableColumnHeader["group10.group3.col2"],
-            accessorFn: defaultAccessorFn("wt"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group10.waitTimes,
             cell: (props) => {
-              const wt = props.getValue<Wt[]>();
+              const wt = props.getValue<string[]>();
               return Array.isArray(wt) ? (
-                <>{wt.map((v, i) => box((v as Wt).time ?? "\u00A0", i))}</>
+                <>{wt.map((v, i) => box(v || "\u00A0", i))}</>
               ) : undefined;
             },
           },

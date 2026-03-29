@@ -522,3 +522,31 @@ cannot be reproduced reliably unless parameter position survives normalization.
 - [ ] `pr`/`ni` order and parent inheritance still produce the same priority
 - [ ] build passes
 - [ ] tests pass
+
+## Task
+
+Extend `BuildUnitListView` to cover schedule columns in `group10`.
+
+### Why
+
+`group10` still depends on wrapper parsing for rule-based schedule parameters,
+but the table only needs display-oriented fields such as parsed date parts,
+times, cycles, and rule references.
+
+### Scope
+
+- project schedule-related parameter values into stable row view data
+- migrate `group10` to consume only the row view adapter
+- add or update tests for representative schedule fields
+
+### Non-Goals
+
+- changing schedule rendering semantics
+- migrating unrelated remaining column groups in the same slice
+
+### Acceptance Criteria
+
+- [ ] `group10` no longer depends on `defaultAccessorFn(...)`
+- [ ] parsed schedule fields preserve current visible table values
+- [ ] build passes
+- [ ] tests pass
