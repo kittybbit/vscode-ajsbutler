@@ -2,13 +2,13 @@ import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn, tyAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { Chip } from "@mui/material";
-import { Gty } from "../../../../domain/models/parameters";
 
 const group5 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group5", //Job group definition information
@@ -17,28 +17,32 @@ const group5 = (
       {
         id: "group5.col1",
         header: ajsTableColumnHeader["group5.col1"],
-        accessorFn: tyAccessorFn(["g"], defaultAccessorFn("sdd")),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group5.startDeadlineDate,
       },
       {
         id: "group5.col2",
         header: ajsTableColumnHeader["group5.col2"],
-        accessorFn: tyAccessorFn(["g"], defaultAccessorFn("md")),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group5.maximumDuration,
       },
       {
         id: "group5.col3",
         header: ajsTableColumnHeader["group5.col3"],
-        accessorFn: tyAccessorFn(["g"], defaultAccessorFn("stt")),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group5.startTimeType,
       },
       {
         id: "group5.col4",
         header: ajsTableColumnHeader["group5.col4"],
-        accessorFn: tyAccessorFn(["g"], defaultAccessorFn("gty")),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group5.jobGroupType,
         cell: (param) => {
-          const gty = param.getValue<Gty | undefined>();
+          const gty = param.getValue<"n" | "p" | undefined>();
           if (gty === undefined) {
             return undefined;
           }
-          return gty.value() === "n" ? (
+          return gty === "n" ? (
             <Chip color="primary" label="Normal" />
           ) : (
             <Chip color="secondary" label="Planning" />

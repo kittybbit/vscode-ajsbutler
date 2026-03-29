@@ -4,24 +4,34 @@ import { MyExtension } from "../MyExtension";
 import { LANGUAGE_ID } from "../constant";
 import { BUNDLE_SRC } from "./constant";
 import { initReactPanel } from "./reactPanel";
-import { debouncedChangeFn } from "../../domain/services/events/change";
+
+type DocumentChangeHandler = (
+  document: vscode.TextDocument,
+  panel: vscode.WebviewPanel,
+) => void;
 
 export abstract class WebviewMediator implements vscode.Disposable {
   #viewType: string;
   #myExtension: MyExtension;
   #store: WebviewStore;
-  #change: ReturnType<typeof debouncedChangeFn>;
+  #change: DocumentChangeHandler;
+  #subscriptions: vscode.Disposable;
 
-  constructor(myExtension: MyExtension, viewType: string, store: WebviewStore) {
+  constructor(
+    myExtension: MyExtension,
+    viewType: string,
+    store: WebviewStore,
+    change: DocumentChangeHandler,
+  ) {
     console.log(`invoke WebviewMediator.constructor. (${viewType})`);
 
     this.#viewType = viewType;
     this.#myExtension = myExtension;
     this.#store = store;
-    this.#change = debouncedChangeFn(300);
+    this.#change = change;
 
     const context = this.#myExtension.context;
-    context.subscriptions.push(
+    this.#subscriptions = vscode.Disposable.from(
       vscode.workspace.onDidChangeTextDocument(
         (e: vscode.TextDocumentChangeEvent) => {
           if (e.document.languageId !== LANGUAGE_ID) {
@@ -78,6 +88,7 @@ export abstract class WebviewMediator implements vscode.Disposable {
 
   dispose() {
     console.log(`invoke WebviewMediator.dispose. (${this.#viewType})`);
+    this.#subscriptions.dispose();
     this.#store.dispose();
   }
 }

@@ -1,11 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group14 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group14", //Action job definition information
@@ -14,42 +15,50 @@ const group14 = (
       {
         id: "group14.col1",
         header: ajsTableColumnHeader["group14.col1"],
-        accessorFn: defaultAccessorFn("evsid"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.actionEventId,
       },
       {
         id: "group14.col2",
         header: ajsTableColumnHeader["group14.col2"],
-        accessorFn: defaultAccessorFn("evhst"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.actionHostName,
       },
       {
         id: "group14.col3",
         header: ajsTableColumnHeader["group14.col3"],
-        accessorFn: defaultAccessorFn("evsms"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.actionMessage,
       },
       {
         id: "group14.col4",
         header: ajsTableColumnHeader["group14.col4"],
-        accessorFn: defaultAccessorFn("evssv"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.actionSeverity,
       },
       {
         id: "group14.col5",
         header: ajsTableColumnHeader["group14.col5"],
-        accessorFn: defaultAccessorFn("evsrt"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.actionStartType,
       },
       {
         id: "group14.col6",
         header: ajsTableColumnHeader["group14.col6"],
-        accessorFn: defaultAccessorFn("evspl"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.actionInterval,
       },
       {
         id: "group14.col7",
         header: ajsTableColumnHeader["group14.col7"],
-        accessorFn: defaultAccessorFn("evsrc"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.actionCount,
       },
       {
         id: "group14.col8",
         header: ajsTableColumnHeader["group14.col8"],
-        accessorFn: defaultAccessorFn("pfm"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group14.platformMethod,
       },
     ],
   });

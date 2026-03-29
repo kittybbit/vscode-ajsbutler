@@ -35,6 +35,52 @@ To use this extension:
 2. Set the editor’s language mode to ‘jp1ajs’ to view the formatted definitions.
 3. Switch the editor to enable either a list-style or flow-style display.
 
+## Development
+
+This repository is incrementally adopting Specification-Driven Development
+(SDD) and cleaner application boundaries.
+
+- SDD documents live in `docs/sdd/`.
+- Use-case specs live in `docs/sdd/use-cases/`.
+- Non-trivial implementation plans are tracked in `PLANS.md`.
+- Codex-specific repository guidance lives in `AGENTS.md`.
+
+Recent refactoring work introduced:
+
+- a normalized AJS model for application-facing use cases
+- application use cases for unit list, flow graph, CSV export, and unit
+  definition building
+- a table row/view adapter so the table UI consumes application view data
+  instead of `UnitEntity` wrapper accessors
+- repeatable web-extension verification via `npm run test:web`
+
+Browser-based extension testing uses `@vscode/test-web`, which currently requires Node.js 20 or later.
+If you manage Node with nodebrew, switch to a Node 20 release before running browser tooling:
+
+```bash
+nodebrew install-binary v20.19.0
+nodebrew use v20.19.0
+hash -r
+npm install
+```
+
+After switching, you can run:
+
+```bash
+npm run qlty
+npm run build
+npm test
+npm run open-in-browser
+npm run test:web
+```
+
+The `sample/` directory contains reusable JP1/AJS definition files for parser,
+normalization, unit-list, and flow-graph regression tests. Prefer those shared
+fixtures over ad hoc large inline definitions when adding broader coverage.
+
+`npm run test:web` runs the extension test suite against VS Code for the Web in headless Chromium.
+GitHub Actions also runs `npm run qlty`, `npm run build`, `npm test`, and `npm run test:web` on pushes and pull requests.
+
 ## Telemetry
 
 This extension collects telemetry data to improve the experience of using this extension with VS Code. We only collect data on which commands are executed. We do not collect any information about names, addresses, paths, etc. The extension respects the telemetry.enableTelemetry setting which you can learn more about in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).

@@ -7,14 +7,9 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import type { MyAppResource } from "../../shared/MyAppResource";
 
-/** app resouce */
-export type MyAppResource = {
-  isDarkMode: boolean | undefined;
-  lang: string | undefined;
-  os: string | undefined;
-  scrollType: "window" | "table";
-};
+export type { MyAppResource } from "../../shared/MyAppResource";
 
 type MyAppContext = MyAppResource & {
   updateMyAppResource: (newValue: Partial<MyAppResource>) => void;

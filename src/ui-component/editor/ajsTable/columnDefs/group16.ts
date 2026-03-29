@@ -1,11 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group16 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group16", //Waiting condition definition information
@@ -14,27 +15,33 @@ const group16 = (
       {
         id: "group16.col1",
         header: ajsTableColumnHeader["group16.col1"],
-        accessorFn: defaultAccessorFn("eun"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group16.endWaitUnitName,
       },
       {
         id: "group16.col2",
         header: ajsTableColumnHeader["group16.col2"],
-        accessorFn: defaultAccessorFn("mm"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group16.waitMode,
       },
       {
         id: "group16.col3",
         header: ajsTableColumnHeader["group16.col3"],
-        accessorFn: defaultAccessorFn("nmg"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group16.nestedMessageGeneration,
       },
       {
         id: "group16.col4",
         header: ajsTableColumnHeader["group16.col4"],
-        accessorFn: defaultAccessorFn("uem"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group16.unitEndMonitoring,
       },
       {
         id: "group16.col5",
         header: ajsTableColumnHeader["group16.col5"],
-        accessorFn: defaultAccessorFn("ega"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group16
+            .executionGenerationAction,
       },
     ],
   });

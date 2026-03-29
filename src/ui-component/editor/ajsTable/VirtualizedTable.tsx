@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import TableHeader from "./TableHeader";
 import { UnitEntity } from "../../../domain/models/units/UnitEntities";
-import { MyAppResource } from "../MyContexts";
+import type { MyAppResource } from "../../../shared/MyAppResource";
 
 type VirtualizedTableProps = {
   headerGroups: HeaderGroup<UnitEntity>[];

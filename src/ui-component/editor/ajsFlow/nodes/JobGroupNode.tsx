@@ -18,7 +18,7 @@ export type JobGroupNode = Node<AjsNode<G>, "jobgroup">;
 type JobGroupNodeProp = NodeProps<JobGroupNode>;
 const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
   console.log("render JobGroupNode.");
-  const { unitEntity, isAncestor } = data;
+  const { unitEntity, isAncestor, label, comment, ty, gty } = data;
 
   return (
     <>
@@ -29,10 +29,7 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
           ancestor: isAncestor,
         })}
       >
-        <TyTitle
-          ty={unitEntity.ty.value()}
-          gty={unitEntity.gty?.value() as "n" | "p"}
-        />
+        <TyTitle ty={ty} gty={gty} />
         {/* action */}
         <Box sx={nodeActionsSxProps}>
           <ActionIcon
@@ -44,8 +41,8 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
           />
         </Box>
       </Stack>
-      <NameOrComment value={unitEntity.name} />
-      <NameOrComment value={unitEntity.cm?.value()} />
+      <NameOrComment value={label} />
+      <NameOrComment value={comment} />
     </>
   );
 };

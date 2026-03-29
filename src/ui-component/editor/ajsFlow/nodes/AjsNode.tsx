@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
+import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import {
   CurrentUnitEntityStateType,
   DialogDataStateType,
@@ -18,6 +19,16 @@ import { useMyAppContext } from "../../MyContexts";
 
 export type AjsNode<T extends UnitEntity = UnitEntity> = {
   unitEntity: T;
+  unitDefinition: UnitDefinitionDialogDto;
+  label: string;
+  comment?: string;
+  ty: TySymbol;
+  gty?: "n" | "p";
+  isAncestor: boolean;
+  isCurrent: boolean;
+  isRootJobnet: boolean;
+  hasSchedule: boolean;
+  hasWaitedFor: boolean;
 } & DialogDataStateType &
   CurrentUnitEntityStateType &
   Record<string, unknown>;

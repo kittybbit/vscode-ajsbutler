@@ -19,15 +19,12 @@ type JobNodeProps = NodeProps<JobNode>;
 const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
   console.log("render JobNode.");
 
-  const { unitEntity } = data;
-
-  const hasWaitedFor =
-    "hasWaitedFor" in unitEntity && (unitEntity.hasWaitedFor as boolean);
+  const { unitEntity, hasWaitedFor, label, comment, ty } = data;
 
   return (
     <>
       <Stack id={unitEntity.id} sx={nodeSxProps}>
-        <TyTitle ty={unitEntity.ty.value()} />
+        <TyTitle ty={ty} />
         {/* action */}
         <Box sx={nodeActionsSxProps}>
           <ActionIcon
@@ -48,8 +45,8 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
       </Stack>
       <Handle type="source" position={Position.Right} style={handleStyle} />
       <Handle type="target" position={Position.Left} style={handleStyle} />
-      <NameOrComment value={unitEntity.name} />
-      <NameOrComment value={unitEntity.cm?.value()} />
+      <NameOrComment value={label} />
+      <NameOrComment value={comment} />
     </>
   );
 };

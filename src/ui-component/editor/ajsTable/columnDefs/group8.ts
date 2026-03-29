@@ -1,11 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn, tyAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group8 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group8", //Jobnet connector definition information
@@ -14,7 +15,8 @@ const group8 = (
       {
         id: "group8.col1",
         header: ajsTableColumnHeader["group8.col1"],
-        accessorFn: tyAccessorFn(["nc"], defaultAccessorFn("ncr")),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group8.nestedConnectorRelease,
       },
     ],
   });

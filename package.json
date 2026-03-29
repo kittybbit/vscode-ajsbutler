@@ -3,7 +3,7 @@
   "name": "vscode-ajsbutler",
   "displayName": "vscode-ajsbutler",
   "description": "Support tool for JP1/AJS3",
-  "version": "1.11.3",
+  "version": "1.11.4",
   "private": true,
   "license": "MIT",
   "homepage": "https://github.com/kittybbit/vscode-ajsbutler",
@@ -15,6 +15,7 @@
     "url": "https://github.com/kittybbit/vscode-ajsbutler/issues"
   },
   "engines": {
+    "node": ">=20",
     "vscode": "^1.75.0"
   },
   "categories": [
@@ -119,11 +120,14 @@
     "antlr:generate": "antlr4ts -o src/generate/parser -Xexact-output-dir src/antlr/*.g4",
     "watch": "webpack -w",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
-    "pretest": "npm-run-all development",
+    "pretest": "npm-run-all development test:compile",
+    "pretest:web": "npm-run-all development test:compile",
+    "test:compile": "tsc -p tsconfig.test.json",
     "qlty": "npm-run-all qlty:fmt qlty:check",
     "qlty:fmt": "qlty fmt",
     "qlty:check": "qlty check",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "test:web": "node ./out/test/runWebTest.js"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

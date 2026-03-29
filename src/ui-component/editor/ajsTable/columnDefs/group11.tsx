@@ -2,14 +2,13 @@ import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { Rating } from "@mui/material";
-import { J, Rj, Pj, Rp } from "../../../../domain/models/units/J";
-import { Qj } from "../../../../domain/models/units/Qj";
 
 const group11 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group11", //Basic job definition information
@@ -18,37 +17,44 @@ const group11 = (
       {
         id: "group11.col1",
         header: ajsTableColumnHeader["group11.col1"],
-        accessorFn: defaultAccessorFn("te"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.commandText,
       },
       {
         id: "group11.col2",
         header: ajsTableColumnHeader["group11.col2"],
-        accessorFn: defaultAccessorFn("sc"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.scriptFileName,
       },
       {
         id: "group11.col3",
         header: ajsTableColumnHeader["group11.col3"],
-        accessorFn: defaultAccessorFn("prm"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.parameters,
       },
       {
         id: "group11.col4",
         header: ajsTableColumnHeader["group11.col4"],
-        accessorFn: defaultAccessorFn("env"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.environmentVariable,
       },
       {
         id: "group11.col5",
         header: ajsTableColumnHeader["group11.col5"],
-        accessorFn: defaultAccessorFn("ev"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.environmentVariableFile,
       },
       {
         id: "group11.col6",
         header: ajsTableColumnHeader["group11.col6"],
-        accessorFn: defaultAccessorFn("wkp"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.workPathName,
       },
       {
         id: "group11.col7",
         header: ajsTableColumnHeader["group11.col7"],
-        accessorFn: defaultAccessorFn("si"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.standardInputFile,
       },
       columnHelper.group({
         id: "group11.group1",
@@ -57,12 +63,14 @@ const group11 = (
           {
             id: "group11.group1.col1",
             header: ajsTableColumnHeader["group11.group1.col1"],
-            accessorFn: defaultAccessorFn("so"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.standardOutputFile,
           },
           {
             id: "group11.group1.col2",
             header: ajsTableColumnHeader["group11.group1.col2"],
-            accessorFn: defaultAccessorFn("soa"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.standardOutputAction,
           },
         ],
       }),
@@ -73,38 +81,40 @@ const group11 = (
           {
             id: "group11.group2.col1",
             header: ajsTableColumnHeader["group11.group2.col1"],
-            accessorFn: defaultAccessorFn("se"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.standardErrorFile,
           },
           {
             id: "group11.group2.col2",
             header: ajsTableColumnHeader["group11.group2.col2"],
-            accessorFn: defaultAccessorFn("sea"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.standardErrorAction,
           },
         ],
       }),
       {
         id: "group11.col8",
         header: ajsTableColumnHeader["group11.col8"],
-        accessorFn: defaultAccessorFn("qm"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.queueManager,
       },
       {
         id: "group11.col9",
         header: ajsTableColumnHeader["group11.col9"],
-        accessorFn: defaultAccessorFn("qu"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.queueName,
       },
       {
         id: "group11.col10",
         header: ajsTableColumnHeader["group11.col10"],
-        accessorFn: defaultAccessorFn("req"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.requestJobName,
       },
       {
         id: "group11.col11",
         header: ajsTableColumnHeader["group11.col11"],
-        accessorFn: (row) => {
-          return ["j", "rj", "pj", "qj"].some((v) => v === row.ty.value())
-            ? (row as J | Rj | Pj | Rp | Qj).priority
-            : undefined;
-        },
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.priority,
         cell: (props) => {
           const priority = props.getValue<number | undefined>();
           return priority ? (
@@ -124,29 +134,34 @@ const group11 = (
           {
             id: "group11.group3.col1",
             header: ajsTableColumnHeader["group11.group3.col1"],
-            accessorFn: defaultAccessorFn("jd"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.endJudgment,
           },
           {
             id: "group11.group3.col2",
             header: ajsTableColumnHeader["group11.group3.col2"],
-            accessorFn: defaultAccessorFn("wth"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.waitThreshold,
           },
           {
             id: "group11.group3.col3",
             header: ajsTableColumnHeader["group11.group3.col3"],
-            accessorFn: defaultAccessorFn("tho"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.timeoutHold,
           },
           {
             id: "group11.group3.col4",
             header: ajsTableColumnHeader["group11.group3.col4"],
-            accessorFn: defaultAccessorFn("jdf"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.judgmentFile,
           },
         ],
       }),
       {
         id: "group11.col12",
         header: ajsTableColumnHeader["group11.col12"],
-        accessorFn: defaultAccessorFn("abr"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.automaticRetryEnabled,
       },
       columnHelper.group({
         id: "group11.group4",
@@ -155,29 +170,34 @@ const group11 = (
           {
             id: "group11.group4.col1",
             header: ajsTableColumnHeader["group11.group4.col1"],
-            accessorFn: defaultAccessorFn("rjs"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.retryStart,
           },
           {
             id: "group11.group4.col2",
             header: ajsTableColumnHeader["group11.group4.col2"],
-            accessorFn: defaultAccessorFn("rje"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group11.retryEnd,
           },
         ],
       }),
       {
         id: "group11.col13",
         header: ajsTableColumnHeader["group11.col13"],
-        accessorFn: defaultAccessorFn("rec"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.retryCount,
       },
       {
         id: "group11.col14",
         header: ajsTableColumnHeader["group11.col14"],
-        accessorFn: defaultAccessorFn("rei"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.retryInterval,
       },
       {
         id: "group11.col15",
         header: ajsTableColumnHeader["group11.col15"],
-        accessorFn: defaultAccessorFn("un"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group11.targetUserName,
       },
     ],
   });

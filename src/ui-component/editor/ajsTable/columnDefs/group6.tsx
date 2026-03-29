@@ -2,9 +2,8 @@ import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { box, tyAccessorFn } from "./common";
-import { Op, Cl } from "../../../../domain/models/parameters";
-import { G } from "../../../../domain/models/units/G";
+import { box } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { WeekSymbol } from "../../../../domain/values/AjsType";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
@@ -12,6 +11,7 @@ import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
 const group6 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group6", //Calendar definition information
@@ -25,10 +25,8 @@ const group6 = (
           return {
             id: id,
             header: ajsTableColumnHeader[id],
-            accessorFn: tyAccessorFn<boolean | undefined>(["g"], (row) => {
-              const g = row as G;
-              return g[v as WeekSymbol];
-            }),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group6[v as WeekSymbol],
             cell: (props) => {
               const result = props.getValue<boolean>();
               if (result == undefined) {
@@ -46,11 +44,10 @@ const group6 = (
       {
         id: "group6.col1",
         header: ajsTableColumnHeader["group6.col1"],
-        accessorFn: tyAccessorFn<Op[] | undefined>(["g"], (row) => {
-          return row.params<Op[]>("op")?.filter((v) => !v.isWeek);
-        }),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group6.openDates,
         cell: (props) => {
-          const op = props.getValue<Op[] | undefined>();
+          const op = props.getValue<string[] | undefined>();
           return Array.isArray(op) ? (
             <>{op.map((v, i) => box(v, i))}</>
           ) : undefined;
@@ -59,11 +56,10 @@ const group6 = (
       {
         id: "group6.col2",
         header: ajsTableColumnHeader["group6.col2"],
-        accessorFn: tyAccessorFn<Cl[] | undefined>(["g"], (row) => {
-          return row.params<Cl[]>("cl")?.filter((v) => !v.isWeek);
-        }),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group6.closeDates,
         cell: (props) => {
-          const cl = props.getValue<Cl[] | undefined>();
+          const cl = props.getValue<string[] | undefined>();
           return Array.isArray(cl) ? (
             <>{cl.map((v, i) => box(v, i))}</>
           ) : undefined;

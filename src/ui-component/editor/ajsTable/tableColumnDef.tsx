@@ -1,5 +1,5 @@
 // import * as vscode from 'vscode';
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { CellContext, createColumnHelper } from "@tanstack/table-core";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { UnitEntity } from "../../../domain/models/units/UnitEntities";
@@ -8,6 +8,7 @@ import {
   paramDefinitionLang,
   tyDefinitionLang,
 } from "../../../domain/services/i18n/nls";
+import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import { AccessorType, box } from "./columnDefs/common";
 import group1 from "./columnDefs/group1";
 import group2 from "./columnDefs/group2";
@@ -50,8 +51,9 @@ export const tableDefaultColumnDef = {
 
 export const tableColumnDef = (
   language: string | undefined = "en",
-  setDialogData: Dispatch<SetStateAction<UnitEntity | undefined>>,
+  openUnitDefinition: (absolutePath: string) => void,
   handleJump: (id: string) => void,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ) => {
   // column titles
   const ajsTableColumnHeader = ajsTableColumnHeaderLang(language);
@@ -76,7 +78,9 @@ export const tableColumnDef = (
               <IconButton
                 size="small"
                 aria-label="View the unit definition"
-                onClick={() => setDialogData(props.row.original)}
+                onClick={() =>
+                  openUnitDefinition(props.row.original.absolutePath)
+                }
               >
                 <DescriptionIcon fontSize="inherit" />
               </IconButton>
@@ -88,25 +92,31 @@ export const tableColumnDef = (
       enableSorting: false,
       enableGlobalFilter: false,
     }),
-    group1(columnHelper, ajsTableColumnHeader, tyDefinition, handleJump),
-    group2(columnHelper, ajsTableColumnHeader, handleJump),
-    group3(columnHelper, ajsTableColumnHeader),
-    group4(columnHelper, ajsTableColumnHeader),
-    group5(columnHelper, ajsTableColumnHeader),
-    group6(columnHelper, ajsTableColumnHeader),
-    group7(columnHelper, ajsTableColumnHeader),
-    group8(columnHelper, ajsTableColumnHeader),
-    group9(columnHelper, ajsTableColumnHeader),
-    group10(columnHelper, ajsTableColumnHeader, paramDefinition),
-    group11(columnHelper, ajsTableColumnHeader),
-    group12(columnHelper, ajsTableColumnHeader),
-    group13(columnHelper, ajsTableColumnHeader),
-    group14(columnHelper, ajsTableColumnHeader),
-    group15(columnHelper, ajsTableColumnHeader),
-    group16(columnHelper, ajsTableColumnHeader),
-    group17(columnHelper, ajsTableColumnHeader),
-    group18(columnHelper, ajsTableColumnHeader),
-    group19(columnHelper, ajsTableColumnHeader),
+    group1(
+      columnHelper,
+      ajsTableColumnHeader,
+      tyDefinition,
+      handleJump,
+      rowViewByPath,
+    ),
+    group2(columnHelper, ajsTableColumnHeader, handleJump, rowViewByPath),
+    group3(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group4(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group5(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group6(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group7(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group8(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group9(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group10(columnHelper, ajsTableColumnHeader, paramDefinition, rowViewByPath),
+    group11(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group12(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group13(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group14(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group15(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group16(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group17(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group18(columnHelper, ajsTableColumnHeader, rowViewByPath),
+    group19(columnHelper, ajsTableColumnHeader, rowViewByPath),
     group20(columnHelper, ajsTableColumnHeader),
   ];
 };

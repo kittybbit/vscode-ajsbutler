@@ -1,14 +1,14 @@
 import { AjsNode } from "./AjsNode";
 
 export const handleClickDialogOpen = (data: AjsNode) => () => {
-  const { unitEntity, setDialogData } = data;
-  setDialogData(() => unitEntity);
+  const { unitDefinition, setDialogData } = data;
+  setDialogData(() => unitDefinition);
 };
 
 export const handleKeyDownDialogOpen =
   (data: AjsNode) => (event: React.KeyboardEvent<HTMLElement>) => {
-    const { unitEntity, setDialogData } = data;
-    event.key === "Enter" && setDialogData(() => unitEntity);
+    const { unitDefinition, setDialogData } = data;
+    event.key === "Enter" && setDialogData(() => unitDefinition);
   };
 
 export const handleClickChildOpen = (data: AjsNode) => () => {

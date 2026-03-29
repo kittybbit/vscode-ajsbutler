@@ -1,11 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn, tyAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group4 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group4", //Manager unit definition information
@@ -14,12 +15,14 @@ const group4 = (
       {
         id: "group4.col1",
         header: ajsTableColumnHeader["group4.col1"],
-        accessorFn: tyAccessorFn(["mg", "mn"], defaultAccessorFn("mh")),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group4.managerHost,
       },
       {
         id: "group4.col2",
         header: ajsTableColumnHeader["group4.col2"],
-        accessorFn: tyAccessorFn(["mg", "mn"], defaultAccessorFn("mu")),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group4.managerUnit,
       },
     ],
   });
