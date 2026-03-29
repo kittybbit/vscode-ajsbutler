@@ -1,5 +1,20 @@
 # Change Log
 
+## [1.11.4]
+
+- Introduced Specification-Driven Development documents under `docs/sdd/` and
+  aligned repository planning around `PLANS.md`.
+- Added Codex repository guidance in `AGENTS.md`.
+- Introduced a normalized AJS model and migrated unit-list and flow-graph
+  application slices toward it.
+- Extracted application-facing use cases for CSV export, unit definition,
+  editor feedback, and telemetry boundaries.
+- Added repeatable web-extension verification with `npm run test:web` and GitHub
+  Actions automation.
+- Refactored the table view so column groups consume application row/view data
+  instead of direct `UnitEntity` wrapper accessors.
+- Consolidated SDD use-case documents under `docs/sdd/use-cases/`.
+
 ## [1.11.3]
 
 - Update packages.
