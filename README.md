@@ -51,7 +51,11 @@ After switching, you can run:
 
 ```bash
 npm run open-in-browser
+npm run test:web
 ```
+
+`npm run test:web` runs the extension test suite against VS Code for the Web in headless Chromium.
+GitHub Actions also runs `npm run qlty`, `npm run build`, `npm test`, and `npm run test:web` on pushes and pull requests.
 
 ## Telemetry
 
