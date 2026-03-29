@@ -29,8 +29,17 @@ type JobNetNodeProps = NodeProps<JobNetNode>;
 const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
   console.log("render JobNetNode.");
 
-  const { unitEntity, currentUnitEntity, isAncestor } = data;
-  const isCurrentUnit = unitEntity === currentUnitEntity;
+  const {
+    unitEntity,
+    isAncestor,
+    isCurrent,
+    hasSchedule,
+    hasWaitedFor,
+    isRootJobnet,
+    label,
+    comment,
+    ty,
+  } = data;
 
   return (
     <>
@@ -38,11 +47,11 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
         id={unitEntity.id}
         sx={nodeSxProps}
         className={classNames({
-          current: isCurrentUnit,
+          current: isCurrent,
           ancestor: isAncestor,
         })}
       >
-        <TyTitle ty={unitEntity.ty.value()} />
+        <TyTitle ty={ty} />
         {/* action */}
         <Box sx={nodeActionsSxProps}>
           <ActionIcon
@@ -52,7 +61,7 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
             onKeyDown={handleKeyDownDialogOpen(data)}
             icon={<DescriptionIcon fontSize="inherit" />}
           />
-          {!isCurrentUnit && (
+          {!isCurrent && (
             <ActionIcon
               title="Open the jobnet."
               ariaLabel="Open the jobnet."
@@ -61,7 +70,7 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
               icon={<FolderOpenIcon fontSize="inherit" />}
             />
           )}
-          {unitEntity.hasSchedule && (
+          {hasSchedule && (
             <ActionIcon
               title="This job net has schedule."
               ariaLabel="This job net has schedule."
@@ -69,7 +78,7 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
               disableRipple
             />
           )}
-          {unitEntity.hasWaitedFor && (
+          {hasWaitedFor && (
             <ActionIcon
               title="This jobnet will wait for another unit."
               ariaLabel="This jobnet will wait for another unit."
@@ -79,14 +88,14 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
           )}
         </Box>
       </Stack>
-      {!unitEntity.isRootJobnet && !isCurrentUnit && (
+      {!isRootJobnet && !isCurrent && (
         <>
           <Handle type="source" position={Position.Right} style={handleStyle} />
           <Handle type="target" position={Position.Left} style={handleStyle} />
         </>
       )}
-      <NameOrComment value={unitEntity.name} />
-      <NameOrComment value={unitEntity.cm?.value()} />
+      <NameOrComment value={label} />
+      <NameOrComment value={comment} />
     </>
   );
 };

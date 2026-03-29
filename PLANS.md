@@ -83,20 +83,20 @@ Track non-trivial changes using the repository's SDD workflow before implementat
 
 ### Task
 
-Extract the first clean-architecture unit-list use case without changing table behavior.
+Extract flow graph generation into a clean-architecture use case without changing flow behavior.
 
 ### Why
 
-The table viewer currently depends on parser invocation and serialization flow that bypass a clear application boundary.
+The flow view still builds graph data directly inside presentation code and mixes graph construction with XyFlow concerns.
 
 ### Scope
 
-- add an application use case for unit-list document generation
-- update the table viewer message path to use the new use case
-- keep flow viewer behavior unchanged in this slice
-- add or update tests for the use case
-- update `docs/sdd/architecture.md`
-- update `PLANS.md`
+- add a `BuildFlowGraph` use case
+- define a UI-independent flow graph DTO
+- move graph construction logic out of XyFlow-facing presentation code
+- keep flow rendering and VS Code activation behavior unchanged
+- add or update tests for graph construction
+- update SDD docs and `PLANS.md`
 
 ### Non-Goals
 
@@ -104,19 +104,21 @@ The table viewer currently depends on parser invocation and serialization flow t
 - UI behavior changes
 - dependency updates
 - `engines.vscode` changes
-- flow viewer refactor
+- VS Code command changes
+- activation/bootstrap refactor beyond this slice
 
 ### Constraints
 
 - Keep runtime behavior unchanged.
 - Keep desktop and browser builds working.
-- Do not expose parser internals in UI-facing DTOs.
+- Do not expose parser internals or XyFlow types in application DTOs.
+- Do not add `vscode` imports to domain or application.
 
 ### Design
 
 #### Use case
 
-Build unit list extraction.
+Build flow graph extraction.
 
 #### Layers affected
 
@@ -128,16 +130,17 @@ Build unit list extraction.
 
 #### Key decisions
 
-- Introduce an application DTO built from normalized `Unit` values rather than parser internals.
-- Change only the table viewer path in this slice to keep the refactor reviewable.
+- Introduce a pure flow graph DTO with node and edge metadata independent from XyFlow.
+- Keep XyFlow conversion in presentation and reuse normalized unit reconstruction where possible.
 
 ### Acceptance Criteria
 
-- [ ] application use case exists for unit-list generation
-- [ ] table viewer consumes the new DTO path
-- [ ] parser internals are not exposed in the UI-facing DTO
+- [ ] `BuildFlowGraph` use case exists
+- [ ] flow view consumes the DTO via a presentation-layer mapper
+- [ ] application DTO does not expose parser internals or XyFlow types
+- [ ] flow rendering remains behaviorally unchanged
 - [ ] relevant tests pass
-- [ ] runtime source files remain unchanged
+- [ ] desktop and web builds pass
 
 ### Test Plan
 
@@ -147,10 +150,10 @@ Build unit list extraction.
 
 ### Risks
 
-- DTO conversion can drift from existing table assumptions if behavior coverage is thin
-- browser-hosted extension behavior still depends on existing webview and save-dialog constraints
+- DTO conversion can drift from current flow-node rendering assumptions if metadata is incomplete
+- browser-hosted extension behavior still depends on existing webview constraints and bundle assumptions
 
 ### Rollback Plan
 
-- revert the table viewer adapter to the previous message path
-- fall back to the existing shared document change helpers if regressions appear
+- revert the flow viewer adapter to the previous message path
+- fall back to the previous presentation-side graph builder if regressions appear

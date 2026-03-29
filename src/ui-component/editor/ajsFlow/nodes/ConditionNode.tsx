@@ -26,17 +26,16 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 }: ConditionNodeProps) => {
   console.log("render ConditionNode.");
 
-  const { unitEntity, currentUnitEntity } = data;
-  const isCurrentUnit = unitEntity === currentUnitEntity;
+  const { unitEntity, isCurrent, label, comment, ty } = data;
 
   return (
     <>
       <Stack
         id={unitEntity.id}
         sx={nodeSxProps}
-        className={isCurrentUnit ? "current" : undefined}
+        className={isCurrent ? "current" : undefined}
       >
-        <TyTitle ty={unitEntity.ty.value()} />
+        <TyTitle ty={ty} />
         {/* action */}
         <Box sx={nodeActionsSxProps}>
           <ActionIcon
@@ -46,7 +45,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
             onKeyDown={handleKeyDownDialogOpen(data)}
             icon={<DescriptionIcon fontSize="inherit" />}
           />
-          {!isCurrentUnit && (
+          {!isCurrent && (
             <ActionIcon
               title="Open the condition."
               ariaLabel="Open the condition."
@@ -57,8 +56,8 @@ const ConditionNode: FC<ConditionNodeProps> = ({
           )}
         </Box>
       </Stack>
-      <NameOrComment value={unitEntity.name} />
-      <NameOrComment value={unitEntity.cm?.value()} />
+      <NameOrComment value={label} />
+      <NameOrComment value={comment} />
     </>
   );
 };

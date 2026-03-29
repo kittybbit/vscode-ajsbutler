@@ -5,7 +5,6 @@ import {
   READY,
   OPERATION,
 } from "../../domain/services/events/constant";
-import { ready } from "../../domain/services/events/ready";
 import { resource } from "../../domain/services/events/resource";
 import {
   EventType,
@@ -15,6 +14,7 @@ import { WebviewStore } from "./WebviewStore";
 import { AJS_FLOW_VIEWER_TYPE } from "./constant";
 import { operation } from "../../domain/services/events/operation";
 import { MyExtension } from "../MyExtension";
+import { readyFlowDocument } from "./flowDocument";
 
 export class AjsFlowViewerFactory extends ViewerFactory {
   public static init(
@@ -42,7 +42,7 @@ export class AjsFlowViewerFactory extends ViewerFactory {
         }
         case READY: {
           // webview is ready.
-          ready(document, panel);
+          readyFlowDocument(document, panel);
           break;
         }
         case OPERATION: {

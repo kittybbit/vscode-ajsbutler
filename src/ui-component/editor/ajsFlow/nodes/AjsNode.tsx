@@ -18,6 +18,15 @@ import { useMyAppContext } from "../../MyContexts";
 
 export type AjsNode<T extends UnitEntity = UnitEntity> = {
   unitEntity: T;
+  label: string;
+  comment?: string;
+  ty: TySymbol;
+  gty?: "n" | "p";
+  isAncestor: boolean;
+  isCurrent: boolean;
+  isRootJobnet: boolean;
+  hasSchedule: boolean;
+  hasWaitedFor: boolean;
 } & DialogDataStateType &
   CurrentUnitEntityStateType &
   Record<string, unknown>;
