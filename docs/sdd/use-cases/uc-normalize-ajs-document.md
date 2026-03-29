@@ -39,6 +39,8 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
 - `BuildFlowGraph` can derive its graph inputs from the normalized model
 - user-visible behavior remains unchanged while use cases stop depending on raw
   or wrapper-oriented structures directly
+- normalization tests should prefer shared fixtures in `sample/` for UTF-8,
+  Shift_JIS, and large-definition regression coverage
 
 ## Risks Or Edge Cases
 
@@ -46,3 +48,5 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
   jobnet detection or dependency interpretation are not preserved exactly
 - normalization should capture enough metadata for current safe consumers
   without overcommitting to all future semantics at once
+- encoding-sensitive regressions can be missed if only inline UTF-8 snippets
+  are used in tests

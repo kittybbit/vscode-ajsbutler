@@ -32,9 +32,13 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
 - the same selected unit scope produces deterministic graph DTO content
 - desktop and web presentation layers can convert the DTO into their own graph structures
 - flow rendering behavior remains unchanged after DTO to XyFlow mapping
+- representative graph-oriented fixtures in `sample/` should be reusable for
+  regression coverage instead of rebuilding large inline definitions
 
 ## Risks Or Edge Cases
 
 - cyclic or malformed relationships must not force
   UI-library-specific workarounds into the use case
 - selected scope changes must preserve current-node and ancestor rendering semantics
+- large sample definitions should continue to build graph DTOs without
+  presentation-layer shortcuts

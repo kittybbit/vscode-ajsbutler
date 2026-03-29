@@ -34,6 +34,8 @@ presentation without exposing parser-adjacent structures to the UI.
 - invalid JP1/AJS input reports parser errors without constructing a partial UI
   document
 - desktop and web table viewers can consume the same DTO shape
+- representative fixtures in `sample/` should be reusable for regression tests,
+  especially UTF-8, Shift_JIS, and large-definition coverage
 
 ## Risks Or Edge Cases
 
@@ -41,3 +43,5 @@ presentation without exposing parser-adjacent structures to the UI.
   parameters are mapped inconsistently
 - large definitions must continue to build list DTOs without introducing
   presentation-specific filtering behavior into the use case
+- encoding-sensitive input should keep working for both UTF-8 and Shift_JIS
+  samples
