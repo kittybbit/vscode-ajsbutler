@@ -17,15 +17,19 @@ Track non-trivial changes using the repository's SDD workflow before implementat
 ## Task Template
 
 ### Task
+
 <!-- A single sentence describing what will be changed. -->
 
 ### Why
+
 <!-- Why this change is necessary. -->
 
 ### Scope
+
 <!-- Target files, modules, or use cases for the change. -->
 
 ### Non-Goals
+
 <!-- What is out of scope for this task. -->
 
 ### Constraints
@@ -37,6 +41,7 @@ Track non-trivial changes using the repository's SDD workflow before implementat
 ### Design
 
 #### Use case
+
 <!-- Which use case(s) will be addressed. -->
 
 #### Layers affected
@@ -48,8 +53,8 @@ Track non-trivial changes using the repository's SDD workflow before implementat
 
 #### Key decisions
 
-- 
-- 
+-
+-
 
 ### Acceptance Criteria
 
@@ -61,54 +66,56 @@ Track non-trivial changes using the repository's SDD workflow before implementat
 
 ### Test Plan
 
-- 
-- 
+-
+-
 
 ### Risks
 
-- 
-- 
+-
+-
 
 ### Rollback Plan
 
-- 
-- 
+-
+-
 
 ## Current Task
 
 ### Task
 
-Create SDD and planning scaffolding plus repo-local Codex skills without changing runtime behavior.
+Analyze repository boundaries and document the first clean-architecture slice without refactoring code.
 
 ### Why
 
-The repository already references SDD and incremental architectural migration, but the supporting docs and local agent workflow need a clearer default shape.
+The repository already mixes parser, VS Code, and webview responsibilities, and the next refactoring step needs an explicit architectural readout before implementation work starts.
 
 ### Scope
 
-- `docs/sdd/` scaffolding and navigation
-- `docs/use-cases/` template support
-- `PLANS.md` planning template
-- `.codex/skills/` additions for SDD and planning work
+- inspect parser-related modules
+- inspect VS Code-facing modules
+- inspect shared desktop/web extension entry points
+- update `docs/sdd/architecture.md`
+- record a short no-refactor plan in `PLANS.md`
 
 ### Non-Goals
 
 - parser changes
 - UI behavior changes
+- moving files
 - dependency updates
 - `engines.vscode` changes
 
 ### Constraints
 
-- Keep `package.json` runtime behavior unchanged.
+- Keep runtime behavior unchanged.
 - Do not alter desktop or web extension execution paths.
-- Keep all additions documentation-only.
+- Do not refactor in this task.
 
 ### Design
 
 #### Use case
 
-Repository scaffolding for specification-driven changes.
+Architectural analysis for the next specification-driven vertical slice.
 
 #### Layers affected
 
@@ -116,32 +123,32 @@ Repository scaffolding for specification-driven changes.
 - application: none
 - infrastructure: none
 - presentation: none
-- docs/tooling guidance: updated
+- docs: updated
 
 #### Key decisions
 
-- Add index/template documents instead of broad rewrites of existing specs.
-- Add small repo-local skills that mirror the existing simple skill format.
+- Treat parser orchestration returning `Unit[]` as the strongest current extraction seam.
+- Recommend `Build Unit List` as the first vertical slice instead of starting with a broader parser rewrite.
 
 ### Acceptance Criteria
 
-- [ ] build impact is none or verified safe
+- [ ] parser boundaries are identified
+- [ ] VS Code API boundaries are identified
+- [ ] web extension risks are documented
+- [ ] first vertical slice is named with rationale
 - [ ] runtime source files remain unchanged
-- [ ] docs provide an obvious SDD entry point
-- [ ] plan template is reusable for future tasks
-- [ ] local skills support SDD and plan-oriented work
 
 ### Test Plan
 
+- inspect referenced modules and entry points
 - inspect diff to confirm documentation-only changes
-- run relevant quality check if documentation tooling is affected
 
 ### Risks
 
-- new scaffolding can drift if future changes do not keep docs updated
-- additional skills may overlap unless their purposes stay narrowly defined
+- architectural observations may become stale as the repository evolves
+- undocumented edge cases may remain in browser-hosted extension execution
 
 ### Rollback Plan
 
-- remove the added scaffolding files
 - revert documentation-only edits
+- re-run analysis when the next refactoring task starts

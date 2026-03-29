@@ -10,20 +10,20 @@
 
 ## Inputs
 
-- 
+-
 
 ## Outputs
 
-- 
+-
 
 ## Rules
 
-- 
+-
 
 ## Acceptance Notes
 
-- 
+-
 
 ## Risks Or Edge Cases
 
-- 
+-

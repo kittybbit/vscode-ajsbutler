@@ -1,7 +1,9 @@
 ## Summary
+
 <!-- Briefly describe what was changed -->
 
 ## Why
+
 <!-- Explain why this change is necessary -->
 
 ## Layer Impact
@@ -31,4 +33,5 @@
 - [ ] web scenario checked if relevant
 
 ## Risks
+
 <!-- Potential risks regarding compatibility or migration -->
