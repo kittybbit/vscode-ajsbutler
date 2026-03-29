@@ -36,6 +36,7 @@ import {
   buildUnitDefinition,
   UnitDefinitionDialogDto,
 } from "../../../application/unit-definition/buildUnitDefinition";
+import { buildUnitListView } from "../../../application/unit-list/buildUnitListView";
 import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
 import {
   toAjsDocument,
@@ -145,6 +146,18 @@ const TableContents = () => {
       ),
     [ajsDocument],
   );
+  const rowViewByPath = useMemo(
+    () =>
+      new Map(
+        ajsDocument
+          ? buildUnitListView(ajsDocument).map((rowView) => [
+              rowView.absolutePath,
+              rowView,
+            ])
+          : [],
+      ),
+    [ajsDocument],
+  );
 
   const openUnitDefinition = useCallback(
     (absolutePath: string) => {
@@ -170,8 +183,8 @@ const TableContents = () => {
 
   const table = useReactTable<UnitEntity>({
     columns: useMemo(
-      () => tableColumnDef(lang, openUnitDefinition, handleJump),
-      [lang, openUnitDefinition, handleJump],
+      () => tableColumnDef(lang, openUnitDefinition, handleJump, rowViewByPath),
+      [lang, openUnitDefinition, handleJump, rowViewByPath],
     ),
     data: unitEntities ?? [],
     state: {
@@ -193,7 +206,10 @@ const TableContents = () => {
 
   const rowIndexMap = useMemo(() => {
     const map = new Map<string, number>();
-    rows.forEach((row, index) => map.set(row.original.id, index));
+    rows.forEach((row, index) => {
+      map.set(row.original.id, index);
+      map.set(row.original.absolutePath, index);
+    });
     return map;
   }, [rows]);
 

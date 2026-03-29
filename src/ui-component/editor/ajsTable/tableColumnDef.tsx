@@ -8,6 +8,7 @@ import {
   paramDefinitionLang,
   tyDefinitionLang,
 } from "../../../domain/services/i18n/nls";
+import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import { AccessorType, box } from "./columnDefs/common";
 import group1 from "./columnDefs/group1";
 import group2 from "./columnDefs/group2";
@@ -52,6 +53,7 @@ export const tableColumnDef = (
   language: string | undefined = "en",
   openUnitDefinition: (absolutePath: string) => void,
   handleJump: (id: string) => void,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ) => {
   // column titles
   const ajsTableColumnHeader = ajsTableColumnHeaderLang(language);
@@ -90,9 +92,15 @@ export const tableColumnDef = (
       enableSorting: false,
       enableGlobalFilter: false,
     }),
-    group1(columnHelper, ajsTableColumnHeader, tyDefinition, handleJump),
-    group2(columnHelper, ajsTableColumnHeader, handleJump),
-    group3(columnHelper, ajsTableColumnHeader),
+    group1(
+      columnHelper,
+      ajsTableColumnHeader,
+      tyDefinition,
+      handleJump,
+      rowViewByPath,
+    ),
+    group2(columnHelper, ajsTableColumnHeader, handleJump, rowViewByPath),
+    group3(columnHelper, ajsTableColumnHeader, rowViewByPath),
     group4(columnHelper, ajsTableColumnHeader),
     group5(columnHelper, ajsTableColumnHeader),
     group6(columnHelper, ajsTableColumnHeader),

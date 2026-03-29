@@ -14,6 +14,8 @@ Track non-trivial changes using the repository's SDD workflow before implementat
   `src/test/suite/exportUnitListCsv.test.ts`.
 - `BuildFlowGraph` use case exists and is covered by
   `src/test/suite/buildFlowGraphUseCase.test.ts`.
+- `ShowUnitDefinition` is documented and now uses an application DTO instead of
+  passing `UnitEntity` directly into the dialog.
 - editor feedback extraction exists and is covered by
   `src/test/suite/buildSyntaxDiagnostics.test.ts` and
   `src/test/suite/findParameterHover.test.ts`.
@@ -21,15 +23,18 @@ Track non-trivial changes using the repository's SDD workflow before implementat
   `src/test/suite/reportWebviewOperation.test.ts`.
 - normalized AJS model exists and is covered by
   `src/test/suite/normalizeAjsDocument.test.ts`.
+- repeatable web-extension verification now exists via `npm run test:web` and
+  GitHub Actions workflow automation.
 
 ### Next Priority Tasks
 
-1. Document and extract `ShowUnitDefinition` so unit-definition rendering stops
-   depending on parser-adjacent or wrapper-specific structures where practical.
-2. Add a repeatable web-extension verification step in CI or an equivalent
-   documented release check.
-3. Decide whether the remaining `UnitEntity`-based table presentation should
-   move to normalized-model-backed view adapters in a dedicated slice.
+1. Introduce a normalized-model-backed table row/view adapter so the table view
+   stops depending directly on `UnitEntity` and `tyFactory`.
+2. Start that migration with the lowest-risk table columns, likely current
+   `group3` and the non-relational subset of `group1`, before attempting link-
+   heavy groups such as `group2`.
+3. Revisit whether remaining wrapper-derived semantics belong in the normalized
+   model or in application view adapters.
 
 ## Default Workflow
 
