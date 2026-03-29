@@ -13,11 +13,13 @@
     "global.d.ts",
     "src/test/**/*.ts",
     "src/application/editor-feedback/**/*.ts",
-    "src/application/flow-graph/buildFlowGraphCore.ts",
+    "src/application/flow-graph/**/*.ts",
+    "src/application/telemetry/**/*.ts",
     "src/application/unit-list/buildUnitList.ts",
     "src/application/unit-list/unitListDocument.ts",
+    "src/domain/models/ajs/**/*.ts",
     "src/domain/services/parser/**/*.ts",
-    "src/domain/values/Unit.ts",
+    "src/domain/values/**/*.ts",
     "src/generate/parser/**/*.ts"
   ]
 }

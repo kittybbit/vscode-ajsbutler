@@ -4,10 +4,37 @@
 
 Track non-trivial changes using the repository's SDD workflow before implementation.
 
+## Branch Status
+
+### Completed In This Branch
+
+- `BuildUnitList` use case exists and is covered by
+  `src/test/suite/buildUnitList.test.ts`.
+- `ExportUnitListCsv` use case exists and is covered by
+  `src/test/suite/exportUnitListCsv.test.ts`.
+- `BuildFlowGraph` use case exists and is covered by
+  `src/test/suite/buildFlowGraphUseCase.test.ts`.
+- editor feedback extraction exists and is covered by
+  `src/test/suite/buildSyntaxDiagnostics.test.ts` and
+  `src/test/suite/findParameterHover.test.ts`.
+- telemetry port extraction exists and is covered by
+  `src/test/suite/reportWebviewOperation.test.ts`.
+- normalized AJS model exists and is covered by
+  `src/test/suite/normalizeAjsDocument.test.ts`.
+
+### Next Priority Tasks
+
+1. Document and extract `ShowUnitDefinition` so unit-definition rendering stops
+   depending on parser-adjacent or wrapper-specific structures where practical.
+2. Add a repeatable web-extension verification step in CI or an equivalent
+   documented release check.
+3. Decide whether the remaining `UnitEntity`-based table presentation should
+   move to normalized-model-backed view adapters in a dedicated slice.
+
 ## Default Workflow
 
 1. Read the relevant documents in `docs/sdd/`.
-2. Update or create the related use-case spec in `docs/use-cases/`.
+2. Update or create the related use-case spec in `docs/sdd/use-cases/`.
 3. Copy the task template below for the current change.
 4. Fill in assumptions explicitly when requirements are ambiguous.
 5. Implement only after acceptance criteria are clear.
@@ -315,3 +342,83 @@ Record telemetry through a small port.
 
 - restore direct telemetry SDK calls in the extension runtime and handlers
 - remove the telemetry adapter and port if regressions appear
+
+## Task
+
+Introduce a normalized AJS model and normalization step without changing
+user-visible behavior.
+
+### Why
+
+`Unit` is still a parser-adjacent raw tree and `UnitEntity` still acts as an
+interpreter/wrapper layer. Application use cases need a more stable model for
+shared product semantics.
+
+### Scope
+
+- add normalized model types such as `AjsDocument`, `AjsUnit`, and
+  `AjsDependency`
+- add a normalizer from raw parsed units into the normalized model
+- migrate `BuildUnitList` and `BuildFlowGraph` through the normalized model
+- keep raw `Unit` and existing `UnitEntity` wrappers for now
+- update SDD docs and add normalization tests
+
+### Non-Goals
+
+- removing the raw `Unit` model
+- deleting `UnitEntity` classes
+- rewriting every use case to normalized model in one step
+- changing user-visible list or flow behavior
+- changing `engines.vscode`
+
+### Constraints
+
+- Keep runtime behavior unchanged.
+- Keep desktop and browser builds working.
+- Do not add `vscode` imports to domain or application.
+- Keep the refactor small and reviewable.
+
+### Design
+
+#### Use case
+
+Normalize parsed AJS definitions into a stable application-facing model.
+
+#### Layers affected
+
+- domain: add normalized model and normalizer while preserving raw/interpreter layers
+- application: migrate selected use cases to consume normalized model
+- infrastructure: none
+- presentation: minimal adaptation where selected use cases now expect normalized data
+- docs: update architecture and add normalization design note
+
+#### Key decisions
+
+- Keep normalization incremental by deriving normalized semantics from the current wrapper layer.
+- Migrate only `BuildUnitList` and `BuildFlowGraph` in this slice.
+
+### Acceptance Criteria
+
+- [ ] normalized model exists with stable business-oriented names
+- [ ] normalizer converts parsed definitions into normalized units and dependencies
+- [ ] `BuildUnitList` uses normalized model internally
+- [ ] `BuildFlowGraph` uses normalized model internally
+- [ ] build passes
+- [ ] tests pass
+
+### Test Plan
+
+- run build
+- run tests
+- add normalization tests
+- verify existing unit-list and flow-graph tests still pass effectively
+
+### Risks
+
+- normalization can subtly drift from existing wrapper semantics
+- flow graph behavior can regress if dependency or layout metadata is not preserved exactly
+
+### Rollback Plan
+
+- restore direct raw `Unit` / `UnitEntity` usage in affected use cases
+- remove the normalizer from migrated use cases if semantic regressions appear

@@ -1,6 +1,8 @@
-import { G } from "../../domain/models/units/G";
-import { N } from "../../domain/models/units/N";
-import { UnitEntity } from "../../domain/models/units/UnitEntities";
+import {
+  AjsDocument,
+  AjsUnit,
+  findAjsUnitById,
+} from "../../domain/models/ajs/AjsDocument";
 import {
   buildFlowGraphFromInput,
   FlowGraphDto,
@@ -9,54 +11,67 @@ import {
   FlowGraphInputNode,
 } from "./buildFlowGraphCore";
 
-const toInputNode = (unitEntity: UnitEntity): FlowGraphInputNode => ({
-  id: unitEntity.id,
-  label: unitEntity.name,
-  absolutePath: unitEntity.absolutePath,
-  ty: unitEntity.ty.value(),
-  gty:
-    unitEntity.ty.value() === "g"
-      ? ((unitEntity as G).gty?.value() as "n" | "p" | undefined)
-      : undefined,
-  comment: unitEntity.cm?.value(),
-  depth: unitEntity.depth,
-  h: unitEntity.hv.h,
-  v: unitEntity.hv.v,
-  isRootJobnet:
-    unitEntity.ty.value() === "n" ? (unitEntity as N).isRootJobnet : false,
-  hasSchedule:
-    unitEntity.ty.value() === "n" ? (unitEntity as N).hasSchedule : false,
-  hasWaitedFor:
-    "hasWaitedFor" in unitEntity && (unitEntity.hasWaitedFor as boolean),
+const toInputNode = (unit: AjsUnit): FlowGraphInputNode => ({
+  id: unit.id,
+  label: unit.name,
+  absolutePath: unit.absolutePath,
+  ty: unit.unitType,
+  gty: unit.groupType,
+  comment: unit.comment,
+  depth: unit.depth,
+  h: unit.layout.h,
+  v: unit.layout.v,
+  isRootJobnet: unit.isRootJobnet,
+  hasSchedule: unit.hasSchedule,
+  hasWaitedFor: unit.hasWaitedFor,
 });
 
-const toEdgeDtos = (unitEntity: UnitEntity): FlowGraphEdgeDto[] =>
-  unitEntity.children
-    .filter((child) => child.nextUnits.length > 0)
-    .flatMap((source) =>
-      source.nextUnits
-        .filter((target) => target.unitEntity !== undefined)
-        .map((target) => ({
-          source: source.id,
-          target: target.unitEntity!.id,
-          type: target.relationType === "con" ? "con" : "seq",
-        })),
-    );
+const toAncestorNodes = (
+  document: AjsDocument,
+  unit: AjsUnit,
+): FlowGraphInputNode[] => {
+  const ancestors: AjsUnit[] = [];
+  let currentParentId = unit.parentId;
+  while (currentParentId) {
+    const parent = findAjsUnitById(document, currentParentId);
+    if (!parent) {
+      break;
+    }
+    ancestors.push(parent);
+    currentParentId = parent.parentId;
+  }
+  return ancestors.map(toInputNode);
+};
 
-const toInput = (unitEntity: UnitEntity): FlowGraphInput => {
-  const conditionUnit = unitEntity.children.find(
-    (child) => child.ty.value() === "rc",
+const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
+  unit.children.flatMap((child) =>
+    child.dependencies.map((dependency) => ({
+      source: dependency.sourceUnitId,
+      target: dependency.targetUnitId,
+      type: dependency.type,
+    })),
   );
+
+const toInput = (document: AjsDocument, unit: AjsUnit): FlowGraphInput => {
+  const conditionUnit = unit.children.find((child) => child.unitType === "rc");
   return {
-    currentNode: toInputNode(unitEntity),
-    ancestorNodes: unitEntity.ancestors.map(toInputNode),
-    childNodes: unitEntity.children
-      .filter((child) => child.ty.value() !== "rc")
+    currentNode: toInputNode(unit),
+    ancestorNodes: toAncestorNodes(document, unit),
+    childNodes: unit.children
+      .filter((child) => child.unitType !== "rc")
       .map(toInputNode),
     conditionNode: conditionUnit ? toInputNode(conditionUnit) : undefined,
-    edges: toEdgeDtos(unitEntity),
+    edges: toEdgeDtos(unit),
   };
 };
 
-export const buildFlowGraph = (unitEntity: UnitEntity): FlowGraphDto =>
-  buildFlowGraphFromInput(toInput(unitEntity));
+export const buildFlowGraph = (
+  document: AjsDocument,
+  currentUnitId: string,
+): FlowGraphDto | undefined => {
+  const unit = findAjsUnitById(document, currentUnitId);
+  if (!unit) {
+    return undefined;
+  }
+  return buildFlowGraphFromInput(toInput(document, unit));
+};

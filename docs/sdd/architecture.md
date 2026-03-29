@@ -40,15 +40,41 @@ Migration should be incremental and use-case driven.
 ### Where parser output crosses outward
 
 - `src/domain/services/parser/AjsParser.ts` returns `Unit[]` plus syntax errors, which is a reasonable boundary for domain-facing consumers
-- `src/domain/models/converter.ts` turns parsed units into flatted JSON for webview messaging
-- `src/extension/diagnostics/Diagnostic.ts` consumes parse errors directly and maps them to VS Code diagnostics
-- webview event handlers call `toJsonData(...)`, so parser output currently flows toward presentation through domain-side helpers
+- `src/domain/models/ajs/normalizeAjsDocument.ts` converts raw `Unit[]` into a stable normalized model
+- `src/application/unit-list/*` and `src/application/flow-graph/*` can now consume normalized units instead of raw parser-adjacent trees for selected slices
+- VS Code-facing diagnostics and webview adapters remain outside the parser boundary
 
 ### Boundary assessment
 
 - the grammar and generated parser are already isolated
-- the evaluator-to-`Unit[]` mapping is the best current seam for a future application use case
-- `converter.ts` is not a domain concern because it mixes parser access, serialization format, and VS Code editor lookup
+- the evaluator-to-`Unit[]` mapping is still the raw seam
+- normalization is now the next stable seam for application-facing use cases
+- the remaining migration work is to move more use cases from raw or wrapper-oriented structures onto the normalized model
+
+## Model Layers
+
+### Raw parsed model
+
+- `src/domain/values/Unit.ts` remains the parser-adjacent raw unit tree
+- this model keeps source-oriented structure such as `unitAttribute`,
+  free-form parameters, parent links, and child nesting
+
+### Interpreter / wrapper layer
+
+- `src/domain/models/units/*` remains an interpretation layer over raw `Unit`
+- this layer derives JP1/AJS semantics such as schedule flags, root jobnet
+  detection, layout hints, and relation traversal
+- these wrappers are still useful during migration, but they are not the final
+  stable application-facing model
+
+### Normalized model
+
+- normalized AJS concepts should live behind stable names such as
+  `AjsDocument`, `AjsUnit`, and `AjsDependency`
+- the normalizer may use the current wrapper layer internally while producing a
+  stable model for application use cases
+- application slices should gradually depend on the normalized model instead of
+  raw `Unit` or wrapper-specific classes
 
 ## VS Code API Boundaries
 
@@ -90,6 +116,8 @@ Migration should be incremental and use-case driven.
   hover decisions without `vscode` types
 - `src/application/telemetry/TelemetryPort.ts` exposes a small telemetry
   contract without SDK-specific types
+- normalized AJS use cases should depend on `AjsDocument` and `AjsUnit`
+  instead of directly on `Unit` or `UnitEntity` where migration is practical
 
 ### VS Code-facing adapters
 

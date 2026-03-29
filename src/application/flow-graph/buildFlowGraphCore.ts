@@ -1,4 +1,4 @@
-import { TySymbol } from "../../domain/values/AjsType";
+import { AjsUnitType } from "../../domain/models/ajs/AjsDocument";
 
 export type FlowGraphNodeType = "job" | "jobnet" | "jobgroup" | "condition";
 export type FlowGraphEdgeType = "seq" | "con";
@@ -16,7 +16,7 @@ export type FlowGraphNodeLayout =
 
 export type FlowGraphNodeMetadata = {
   absolutePath: string;
-  ty: TySymbol;
+  ty: AjsUnitType;
   gty?: "n" | "p";
   comment?: string;
   isAncestor: boolean;
@@ -49,7 +49,7 @@ export type FlowGraphInputNode = {
   id: string;
   label: string;
   absolutePath: string;
-  ty: TySymbol;
+  ty: AjsUnitType;
   gty?: "n" | "p";
   comment?: string;
   depth: number;
@@ -68,7 +68,7 @@ export type FlowGraphInput = {
   edges: FlowGraphEdgeDto[];
 };
 
-const tyTypeMap: Partial<Record<TySymbol, FlowGraphNodeType>> = {
+const tyTypeMap: Partial<Record<AjsUnitType, FlowGraphNodeType>> = {
   g: "jobgroup",
   n: "jobnet",
   rn: "jobnet",
@@ -77,7 +77,8 @@ const tyTypeMap: Partial<Record<TySymbol, FlowGraphNodeType>> = {
   rc: "condition",
 };
 
-const toNodeType = (ty: TySymbol): FlowGraphNodeType => tyTypeMap[ty] ?? "job";
+const toNodeType = (ty: AjsUnitType): FlowGraphNodeType =>
+  tyTypeMap[ty] ?? "job";
 
 const toGridNode = (node: FlowGraphInputNode): FlowGraphNodeDto => ({
   id: node.id,

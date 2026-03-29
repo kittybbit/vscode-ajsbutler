@@ -42,13 +42,15 @@ const calcPosition = (node: FlowGraphNodeDto, theme: Theme) => {
 
 const toNodeData = (
   node: FlowGraphNodeDto,
-  unitEntityById: ReadonlyMap<string, UnitEntity>,
+  unitEntityByPath: ReadonlyMap<string, UnitEntity>,
   dialogDataState: DialogDataStateType,
   currentUnitEntityState: CurrentUnitEntityStateType,
 ): AjsNode => {
-  const unitEntity = unitEntityById.get(node.id);
+  const unitEntity = unitEntityByPath.get(node.metadata.absolutePath);
   if (!unitEntity) {
-    throw new Error(`Unit entity not found for flow graph node ${node.id}`);
+    throw new Error(
+      `Unit entity not found for flow graph node ${node.metadata.absolutePath}`,
+    );
   }
 
   return {
@@ -69,7 +71,7 @@ const toNodeData = (
 
 export const createReactFlowData = (
   graph: FlowGraphDto,
-  unitEntityById: ReadonlyMap<string, UnitEntity>,
+  unitEntityByPath: ReadonlyMap<string, UnitEntity>,
   theme: Theme,
   dialogDataState: DialogDataStateType,
   currentUnitEntityState: CurrentUnitEntityStateType,
@@ -79,7 +81,7 @@ export const createReactFlowData = (
     type: node.type,
     data: toNodeData(
       node,
-      unitEntityById,
+      unitEntityByPath,
       dialogDataState,
       currentUnitEntityState,
     ),

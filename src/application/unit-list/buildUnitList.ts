@@ -1,5 +1,6 @@
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { ANTLRError } from "../../domain/services/parser/SyntaxErrorListener";
+import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { toUnitListRootDto, UnitListDocumentDto } from "./unitListDocument";
 
 export type BuildUnitListResult = {
@@ -12,9 +13,10 @@ export const buildUnitList = (content: string): BuildUnitListResult => {
   if (result.errors.length > 0) {
     return { errors: result.errors };
   }
+  const document = normalizeAjsDocument(result.rootUnits);
   return {
     document: {
-      rootUnits: result.rootUnits.map(toUnitListRootDto),
+      rootUnits: document.rootUnits.map(toUnitListRootDto),
     },
     errors: [],
   };
