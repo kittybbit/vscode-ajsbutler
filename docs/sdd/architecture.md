@@ -19,7 +19,11 @@ Migration should be incremental and use-case driven.
 ## Current Structure
 
 - `src/domain`
-  Contains unit models, value objects, parser orchestration, CSV export logic, and some adapter-like event helpers.
+  Contains unit models, value objects, parser orchestration, the normalized AJS
+  model, and some transitional wrapper/event helpers.
+- `src/application`
+  Contains DTO-oriented use cases and view adapters for unit list, flow graph,
+  editor feedback, telemetry ports, and unit definition building.
 - `src/extension`
   Contains extension activation, diagnostics, hover provider registration, preview commands, and webview panel orchestration.
 - `src/ui-component`
@@ -49,7 +53,10 @@ Migration should be incremental and use-case driven.
 - the grammar and generated parser are already isolated
 - the evaluator-to-`Unit[]` mapping is still the raw seam
 - normalization is now the next stable seam for application-facing use cases
-- the remaining migration work is to move more use cases from raw or wrapper-oriented structures onto the normalized model
+- unit-list table rendering now depends on an application row/view adapter
+  instead of direct wrapper accessors
+- the remaining migration work is to move more non-table use cases from raw or
+  wrapper-oriented structures onto the normalized model
 
 ## Model Layers
 
@@ -109,6 +116,8 @@ Migration should be incremental and use-case driven.
 ### Application-facing logic
 
 - `src/application/unit-list/*` exposes DTO-oriented unit-list building
+- `src/application/unit-list/buildUnitListView.ts` projects normalized units
+  into stable table row/view data for the table presentation
 - `src/application/flow-graph/*` exposes DTO-oriented flow graph building
 - `src/application/editor-feedback/buildSyntaxDiagnostics.ts` exposes
   parse-error decisions without `vscode` types
@@ -162,28 +171,32 @@ Migration should be incremental and use-case driven.
 
 Build Unit List
 
-### Why this slice is first
+### Why this slice was first
 
 - it already has a documented use case
 - it sits closest to the existing parser-to-domain seam
 - it is shared by diagnostics-adjacent parsing and table-view presentation needs
 - it can reduce current coupling without forcing an immediate flow-graph redesign
 
-### Slice goal
+### Slice outcome
 
-Extract an application-facing "build unit list" use case that accepts raw AJS text and returns UI-independent rows or DTOs.
+The repository now has application-facing unit-list, CSV export, flow-graph,
+unit-definition, and table row/view adapter slices built on top of the
+normalized model where practical.
 
-### Expected benefits
+### Current benefits
 
 - moves parser invocation behind a clearer application boundary
 - removes `vscode` and serialization concerns from domain-side helpers
-- gives the table webview a DTO-oriented input instead of parser-adjacent structures
+- gives the table webview application-projected row/view data instead of
+  wrapper-driven accessor logic
 - creates a repeatable pattern for later slices such as CSV export and flow graph building
 
-## Initial extraction priority
+## Remaining extraction priority
 
-1. ParseAjsDefinition
-2. BuildUnitList
-3. ExportUnitListCsv
-4. BuildFlowGraph
-5. ShowUnitDefinition
+1. Reconcile any remaining wrapper-derived semantics that should move into the
+   normalized model instead of staying in view adapters
+2. Continue moving non-table presentation paths toward explicit DTO/view-model
+   boundaries
+3. Reduce residual raw-`Unit` / wrapper usage where application slices already
+   provide stable models

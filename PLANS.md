@@ -25,16 +25,19 @@ Track non-trivial changes using the repository's SDD workflow before implementat
   `src/test/suite/normalizeAjsDocument.test.ts`.
 - repeatable web-extension verification now exists via `npm run test:web` and
   GitHub Actions workflow automation.
+- table row/view adapter migration is complete for `group1` to `group19`, and
+  the table presentation now reads application view data instead of
+  `UnitEntity` wrapper accessors for those groups.
 
 ### Next Priority Tasks
 
-1. Introduce a normalized-model-backed table row/view adapter so the table view
-   stops depending directly on `UnitEntity` and `tyFactory`.
-2. Start that migration with the lowest-risk table columns, likely current
-   `group3` and the non-relational subset of `group1`, before attempting link-
-   heavy groups such as `group2`.
-3. Revisit whether remaining wrapper-derived semantics belong in the normalized
-   model or in application view adapters.
+1. Close out branch documentation so `PLANS.md` and `docs/sdd/architecture.md`
+   describe the current migrated state instead of the starting plan.
+2. Decide whether remaining wrapper-derived semantics belong in the normalized
+   model or should stay in application view adapters.
+3. Choose the next post-table slice, likely deeper normalized-model adoption in
+   non-table paths or cleanup of residual wrapper dependencies outside the
+   table.
 
 ## Default Workflow
 
@@ -404,12 +407,12 @@ Normalize parsed AJS definitions into a stable application-facing model.
 
 ### Acceptance Criteria
 
-- [ ] normalized model exists with stable business-oriented names
-- [ ] normalizer converts parsed definitions into normalized units and dependencies
-- [ ] `BuildUnitList` uses normalized model internally
-- [ ] `BuildFlowGraph` uses normalized model internally
-- [ ] build passes
-- [ ] tests pass
+- [x] normalized model exists with stable business-oriented names
+- [x] normalizer converts parsed definitions into normalized units and dependencies
+- [x] `BuildUnitList` uses normalized model internally
+- [x] `BuildFlowGraph` uses normalized model internally
+- [x] build passes
+- [x] tests pass
 
 ### Test Plan
 
@@ -455,11 +458,11 @@ layer even though they are simple type-gated projections.
 
 ### Acceptance Criteria
 
-- [ ] `group4`, `group5`, `group8`, and `group9` no longer call
+- [x] `group4`, `group5`, `group8`, and `group9` no longer call
       `UnitEntity.params(...)`
-- [ ] the new row view fields stay type-gated to the same unit kinds as today
-- [ ] build passes
-- [ ] tests pass
+- [x] the new row view fields stay type-gated to the same unit kinds as today
+- [x] build passes
+- [x] tests pass
 
 ## Task
 
@@ -485,11 +488,11 @@ made explicit in the application adapter.
 
 ### Acceptance Criteria
 
-- [ ] `group6` no longer depends on `G` or `row.params(...)`
-- [ ] weekday icons still follow the same open/close precedence
-- [ ] non-week `op` and `cl` entries still render in order
-- [ ] build passes
-- [ ] tests pass
+- [x] `group6` no longer depends on `G` or `row.params(...)`
+- [x] weekday icons still follow the same open/close precedence
+- [x] non-week `op` and `cl` entries still render in order
+- [x] build passes
+- [x] tests pass
 
 ## Task
 
@@ -517,11 +520,11 @@ cannot be reproduced reliably unless parameter position survives normalization.
 
 ### Acceptance Criteria
 
-- [ ] normalized parameters preserve source order
-- [ ] `group7` no longer depends on `UnitEntity` priority or `params(...)`
-- [ ] `pr`/`ni` order and parent inheritance still produce the same priority
-- [ ] build passes
-- [ ] tests pass
+- [x] normalized parameters preserve source order
+- [x] `group7` no longer depends on `UnitEntity` priority or `params(...)`
+- [x] `pr`/`ni` order and parent inheritance still produce the same priority
+- [x] build passes
+- [x] tests pass
 
 ## Task
 
@@ -546,10 +549,10 @@ times, cycles, and rule references.
 
 ### Acceptance Criteria
 
-- [ ] `group10` no longer depends on `defaultAccessorFn(...)`
-- [ ] parsed schedule fields preserve current visible table values
-- [ ] build passes
-- [ ] tests pass
+- [x] `group10` no longer depends on `defaultAccessorFn(...)`
+- [x] parsed schedule fields preserve current visible table values
+- [x] build passes
+- [x] tests pass
 
 ## Task
 
@@ -576,12 +579,12 @@ needing wrapper-heavy semantics like the remaining job-priority path in
 
 ### Acceptance Criteria
 
-- [ ] `group12` to `group19` no longer depend on `defaultAccessorFn(...)` or
+- [x] `group12` to `group19` no longer depend on `defaultAccessorFn(...)` or
       ad hoc `params(...)`
-- [ ] existing type-gated behavior for `cpj`/`rcpj` and `fxj`/`rfxj` remains
+- [x] existing type-gated behavior for `cpj`/`rcpj` and `fxj`/`rfxj` remains
       intact
-- [ ] build passes
-- [ ] tests pass
+- [x] build passes
+- [x] tests pass
 
 ## Task
 
@@ -607,8 +610,8 @@ relying on `defaultAccessorFn(...)` and wrapper-based priority calculation.
 
 ### Acceptance Criteria
 
-- [ ] `group11` no longer depends on `UnitEntity` wrapper accessors
-- [ ] job and queue job priority still follow existing `pr`/`ni` and parent
+- [x] `group11` no longer depends on `UnitEntity` wrapper accessors
+- [x] job and queue job priority still follow existing `pr`/`ni` and parent
       inheritance rules
-- [ ] build passes
-- [ ] tests pass
+- [x] build passes
+- [x] tests pass
