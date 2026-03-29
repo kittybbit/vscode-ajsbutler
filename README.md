@@ -35,6 +35,24 @@ To use this extension:
 2. Set the editor’s language mode to ‘jp1ajs’ to view the formatted definitions.
 3. Switch the editor to enable either a list-style or flow-style display.
 
+## Development
+
+Browser-based extension testing uses `@vscode/test-web`, which currently requires Node.js 20 or later.
+If you manage Node with nodebrew, switch to a Node 20 release before running browser tooling:
+
+```bash
+nodebrew install-binary v20.19.0
+nodebrew use v20.19.0
+hash -r
+npm install
+```
+
+After switching, you can run:
+
+```bash
+npm run open-in-browser
+```
+
 ## Telemetry
 
 This extension collects telemetry data to improve the experience of using this extension with VS Code. We only collect data on which commands are executed. We do not collect any information about names, addresses, paths, etc. The extension respects the telemetry.enableTelemetry setting which you can learn more about in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).

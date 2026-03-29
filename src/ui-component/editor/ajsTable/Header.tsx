@@ -23,7 +23,7 @@ import { toCsv } from "../../../domain/services/export/csv";
 import { DrawerWidthStateType, TableMenuStateType } from "./TableContents";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../domain/services/i18n/nls";
-import { OPERATION, SAVE } from "../../../domain/services/events/constant";
+import { OPERATION, SAVE } from "../../../shared/webviewEvents";
 
 type HeaderProps = {
   table: Table<UnitEntity>;

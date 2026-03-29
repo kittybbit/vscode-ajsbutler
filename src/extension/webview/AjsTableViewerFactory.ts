@@ -1,23 +1,20 @@
 import * as vscode from "vscode";
 import { ViewerFactory } from "./ViewerFactory";
 import {
-  EventType,
   ResourceEventType,
   SaveEventType,
-} from "../../domain/services/events/types";
-import {
-  OPERATION,
-  READY,
-  RESOURCE,
-  SAVE,
-} from "../../domain/services/events/constant";
-import { resource } from "../../domain/services/events/resource";
-import { save } from "../../domain/services/events/save";
+  WebviewEventType,
+} from "../../shared/webviewEvents";
+import { OPERATION, READY, RESOURCE, SAVE } from "../../shared/webviewEvents";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_TABLE_VIEWER_TYPE } from "./constant";
-import { operation } from "../../domain/services/events/operation";
 import { MyExtension } from "../MyExtension";
 import { readyTableDocument } from "./tableDocument";
+import {
+  postResourceMessage,
+  reportWebviewOperation,
+  saveText,
+} from "./messageHandlers";
 
 export class AjsTableViewerFactory extends ViewerFactory {
   public static init(
@@ -36,11 +33,11 @@ export class AjsTableViewerFactory extends ViewerFactory {
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
   ): void {
-    const onDidReceiveMessage = (e: EventType) => {
+    const onDidReceiveMessage = (e: WebviewEventType) => {
       console.log("invoke AjsTableViewerFactory.onDidReceiveMessage.", e);
       switch (e.type) {
         case RESOURCE: {
-          resource(e as ResourceEventType, panel);
+          postResourceMessage((e as ResourceEventType).data, panel);
           break;
         }
         case READY: {
@@ -50,12 +47,23 @@ export class AjsTableViewerFactory extends ViewerFactory {
         }
         case SAVE: {
           //save contents
-          save(e as SaveEventType);
+          if (typeof (e as SaveEventType).data === "string") {
+            void saveText((e as SaveEventType).data);
+          } else {
+            void vscode.window.showErrorMessage(
+              "Data is not a string and cannot be saved.",
+            );
+          }
           break;
         }
         case OPERATION: {
           // track user operation.
-          operation(document, panel, this.myExtension.reporter, e.data);
+          reportWebviewOperation(
+            document,
+            panel,
+            this.myExtension.reporter,
+            e.data,
+          );
           break;
         }
       }

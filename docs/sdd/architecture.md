@@ -63,18 +63,44 @@ Migration should be incremental and use-case driven.
 
 ### Current boundary leaks
 
-- `src/domain/models/converter.ts` imports `vscode`
-- `src/domain/services/events/change.ts` imports `vscode`
-- `src/domain/services/events/ready.ts` imports `vscode`
-- `src/domain/services/events/resource.ts` imports `vscode`
-- `src/domain/services/events/save.ts` imports `vscode`
-- `src/domain/services/events/operation.ts` imports `vscode`
+- diagnostics and hover behavior still originate from extension-facing
+  registration modules, but some construction and wiring is still concentrated
+  in bootstrap code
+- webview panel creation, telemetry, and message handling are still grouped
+  under `src/extension/webview`, which is correct for adapter code but still
+  mixes some responsibilities that can be decomposed further
 
 ### Interpretation
 
 - the extension layer is already the natural adapter boundary
-- the event helpers under `src/domain/services/events` are presentation or infrastructure adapters and should not remain in domain long term
-- `src/domain/models/converter.ts` should become an application or presentation-facing mapper rather than a domain utility
+- diagnostics should depend on an application use case that returns diagnostic DTOs
+- hover should depend on an application use case that returns hover DTOs
+- webview message constants and payload types should live in a neutral shared
+  module rather than in domain
+
+## Adapter Boundary Clarifications
+
+### Application-facing logic
+
+- `src/application/unit-list/*` exposes DTO-oriented unit-list building
+- `src/application/flow-graph/*` exposes DTO-oriented flow graph building
+- `src/application/editor-feedback/buildSyntaxDiagnostics.ts` exposes
+  parse-error decisions without `vscode` types
+- `src/application/editor-feedback/findParameterHover.ts` exposes parameter
+  hover decisions without `vscode` types
+
+### VS Code-facing adapters
+
+- `src/extension/diagnostics/registerDiagnostics.ts` owns
+  `DiagnosticCollection`, document subscriptions, and DTO-to-VS Code mapping
+- `src/extension/languages/registerHoverProvider.ts` owns hover provider
+  registration and `MarkdownString` construction
+- `src/extension/commands/registerPreviewCommand.ts` owns command registration
+  and active-editor checks
+- `src/extension/webview/messageHandlers.ts` owns save dialogs, theme/env/os
+  payload enrichment, and telemetry reporting for webview events
+- `src/extension/bootstrap/activateExtension.ts` is the explicit composition
+  root for activation wiring
 
 ## Web Extension Risks
 

@@ -1,20 +1,15 @@
 import * as vscode from "vscode";
 import { ViewerFactory } from "./ViewerFactory";
+import { RESOURCE, READY, OPERATION } from "../../shared/webviewEvents";
 import {
-  RESOURCE,
-  READY,
-  OPERATION,
-} from "../../domain/services/events/constant";
-import { resource } from "../../domain/services/events/resource";
-import {
-  EventType,
   ResourceEventType,
-} from "../../domain/services/events/types";
+  WebviewEventType,
+} from "../../shared/webviewEvents";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_FLOW_VIEWER_TYPE } from "./constant";
-import { operation } from "../../domain/services/events/operation";
 import { MyExtension } from "../MyExtension";
 import { readyFlowDocument } from "./flowDocument";
+import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
 
 export class AjsFlowViewerFactory extends ViewerFactory {
   public static init(
@@ -33,11 +28,11 @@ export class AjsFlowViewerFactory extends ViewerFactory {
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
   ): void {
-    const onDidReceiveMessage = (e: EventType) => {
+    const onDidReceiveMessage = (e: WebviewEventType) => {
       console.log("invoke AjsFlowViewerFactory.onDidReceiveMessage.", e);
       switch (e.type) {
         case RESOURCE: {
-          resource(e as ResourceEventType, panel);
+          postResourceMessage((e as ResourceEventType).data, panel);
           break;
         }
         case READY: {
@@ -47,7 +42,12 @@ export class AjsFlowViewerFactory extends ViewerFactory {
         }
         case OPERATION: {
           // track user operation.
-          operation(document, panel, this.myExtension.reporter, e.data);
+          reportWebviewOperation(
+            document,
+            panel,
+            this.myExtension.reporter,
+            e.data,
+          );
           break;
         }
       }

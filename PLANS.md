@@ -157,3 +157,84 @@ Build flow graph extraction.
 
 - revert the flow viewer adapter to the previous message path
 - fall back to the previous presentation-side graph builder if regressions appear
+
+## Task
+
+Refactor VS Code integration points toward adapter boundaries without changing
+user-visible behavior.
+
+### Why
+
+Diagnostics, hover, commands, and activation wiring are still correct
+behaviorally, but the repository benefits from clearer application-vs-adapter
+seams and a more explicit composition root.
+
+### Scope
+
+- extract testable application logic for diagnostics and hover
+- move VS Code-coupled webview event helpers out of domain
+- clarify command registration ownership in the VS Code-facing layer
+- reduce extension activation concentration with an explicit bootstrap module
+- update SDD docs and tests for the new seams
+
+### Non-Goals
+
+- parser grammar changes
+- list or flow behavior changes
+- command ID changes
+- `engines.vscode` changes
+- broad folder-structure rewrites beyond this adapter slice
+
+### Constraints
+
+- Keep runtime behavior unchanged.
+- Keep desktop and browser builds working.
+- Do not add `vscode` imports to domain or application.
+- Preserve existing diagnostics, hover content, command IDs, and telemetry flow.
+
+### Design
+
+#### Use case
+
+Provide editor feedback and isolate VS Code adapters.
+
+#### Layers affected
+
+- domain: remove legacy VS Code-coupled helpers
+- application: add diagnostics and hover decision use cases
+- infrastructure: none
+- presentation: keep UI/event translation at extension/webview boundaries
+- docs: update architecture and add an editor-feedback use case
+
+#### Key decisions
+
+- Put syntax-diagnostic and parameter-hover decisions in application DTO use cases.
+- Make `src/extension/bootstrap/activateExtension.ts` the explicit composition root.
+
+### Acceptance Criteria
+
+- [ ] domain and application contain no direct `vscode` imports
+- [ ] diagnostics and hover adapters depend on application DTO logic
+- [ ] command registration remains unchanged from the user perspective
+- [ ] activation wiring is easier to follow from a single composition module
+- [ ] build passes
+- [ ] tests pass
+
+### Test Plan
+
+- run build
+- run tests
+- add unit tests for extracted application logic
+- add extension integration checks for command registration, diagnostics, and hover
+
+### Risks
+
+- diagnostics and hover integration tests can be timing-sensitive in VS Code
+- webview adapter refactor can still regress browser behavior if shared message
+  contracts drift
+
+### Rollback Plan
+
+- restore the previous extension activation wiring
+- revert diagnostics and hover adapters to direct parser/domain access
+- restore legacy webview event helpers if adapter migration regresses behavior
