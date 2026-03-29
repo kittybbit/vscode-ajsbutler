@@ -550,3 +550,35 @@ times, cycles, and rule references.
 - [ ] parsed schedule fields preserve current visible table values
 - [ ] build passes
 - [ ] tests pass
+
+## Task
+
+Extend `BuildUnitListView` to cover the remaining low-risk parameter projection
+groups.
+
+### Why
+
+`group12` to `group19` are largely simple parameter projections or light
+type-gated projections. They can move behind the row view adapter without
+needing wrapper-heavy semantics like the remaining job-priority path in
+`group11`.
+
+### Scope
+
+- project stable view data for `group12` to `group19`
+- migrate those column groups to consume only the row view adapter
+- add or update tests for representative projected fields
+
+### Non-Goals
+
+- migrating `group11` priority semantics in the same slice
+- changing any visible table values
+
+### Acceptance Criteria
+
+- [ ] `group12` to `group19` no longer depend on `defaultAccessorFn(...)` or
+      ad hoc `params(...)`
+- [ ] existing type-gated behavior for `cpj`/`rcpj` and `fxj`/`rfxj` remains
+      intact
+- [ ] build passes
+- [ ] tests pass

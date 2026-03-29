@@ -1,11 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group12 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group12", //Judgment job definition information
@@ -14,7 +15,8 @@ const group12 = (
       {
         id: "group12.col1",
         header: ajsTableColumnHeader["group12.col1"],
-        accessorFn: defaultAccessorFn("ej"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group12.endJudgment,
       },
       columnHelper.group({
         id: "group12.group1",
@@ -23,59 +25,70 @@ const group12 = (
           {
             id: "group12.group1.col1",
             header: ajsTableColumnHeader["group12.group1.col1"],
-            accessorFn: defaultAccessorFn("ejc"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.judgmentReturnCode,
           },
           {
             id: "group12.group1.col2",
             header: ajsTableColumnHeader["group12.group1.col2"],
-            accessorFn: defaultAccessorFn("ejl"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.lowerReturnCode,
           },
           {
             id: "group12.group1.col3",
             header: ajsTableColumnHeader["group12.group1.col3"],
-            accessorFn: defaultAccessorFn("ejs"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.lowerJudgmentValue,
           },
           {
             id: "group12.group1.col4",
             header: ajsTableColumnHeader["group12.group1.col4"],
-            accessorFn: defaultAccessorFn("ejm"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.upperComparison,
           },
           {
             id: "group12.group1.col5",
             header: ajsTableColumnHeader["group12.group1.col5"],
-            accessorFn: defaultAccessorFn("ejh"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.upperReturnCode,
           },
           {
             id: "group12.group1.col6",
             header: ajsTableColumnHeader["group12.group1.col6"],
-            accessorFn: defaultAccessorFn("ejg"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.upperJudgmentValue,
           },
           {
             id: "group12.group1.col7",
             header: ajsTableColumnHeader["group12.group1.col7"],
-            accessorFn: defaultAccessorFn("eju"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.lowerComparison,
           },
           {
             id: "group12.group1.col8",
             header: ajsTableColumnHeader["group12.group1.col8"],
-            accessorFn: defaultAccessorFn("ejt"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.judgmentValueString,
           },
           {
             id: "group12.group1.col9",
             header: ajsTableColumnHeader["group12.group1.col9"],
-            accessorFn: defaultAccessorFn("eji"),
+            accessorFn: (row) =>
+              rowViewByPath.get(row.absolutePath)?.group12.judgmentValueNumeric,
           },
         ],
       }),
       {
         id: "group12.col2",
         header: ajsTableColumnHeader["group12.col2"],
-        accessorFn: defaultAccessorFn("ejv"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group12.variableName,
       },
       {
         id: "group12.col3",
         header: ajsTableColumnHeader["group12.col3"],
-        accessorFn: defaultAccessorFn("ejf"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group12.judgmentFileName,
       },
     ],
   });

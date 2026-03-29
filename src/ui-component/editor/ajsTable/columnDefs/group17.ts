@@ -1,11 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { Prm } from "../../../../domain/models/parameters";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group17 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group17", //Tool unit definition information
@@ -19,17 +20,13 @@ const group17 = (
             id: "group17.group1.col1",
             header: ajsTableColumnHeader["group17.group1.col1"],
             accessorFn: (row) =>
-              ["cpj", "rcpj"].includes(row.ty.value())
-                ? row.params<Prm>("prm")
-                : undefined,
+              rowViewByPath.get(row.absolutePath)?.group17.toolParameters,
           },
           {
             id: "group17.group1.col2",
             header: ajsTableColumnHeader["group17.group1.col2"],
             accessorFn: (row) =>
-              ["cpj", "rcpj"].includes(row.ty.value())
-                ? row.params("env")
-                : undefined,
+              rowViewByPath.get(row.absolutePath)?.group17.toolEnvironment,
           },
         ],
       }),

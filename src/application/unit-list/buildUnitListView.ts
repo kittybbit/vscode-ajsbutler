@@ -100,6 +100,97 @@ export type UnitListGroup10View = {
   waitTimes: string[];
 };
 
+export type UnitListGroup12View = {
+  endJudgment?: string;
+  judgmentReturnCode?: string;
+  lowerReturnCode?: string;
+  lowerJudgmentValue?: string;
+  upperComparison?: string;
+  upperReturnCode?: string;
+  upperJudgmentValue?: string;
+  lowerComparison?: string;
+  judgmentValueString?: string;
+  judgmentValueNumeric?: string;
+  variableName?: string;
+  judgmentFileName?: string;
+};
+
+export type UnitListGroup13View = {
+  timeoutInterval?: string;
+  eventTimeout?: string;
+  monitoredFileName?: string;
+  monitoredFileCondition?: string;
+  monitoredFileCloseMode?: string;
+  monitoringInterval?: string;
+  waitEventId?: string;
+  waitHostName?: string;
+  waitMessage?: string;
+  eventTimeoutAction?: string;
+};
+
+export type UnitListGroup14View = {
+  actionEventId?: string;
+  actionHostName?: string;
+  actionMessage?: string;
+  actionSeverity?: string;
+  actionStartType?: string;
+  actionInterval?: string;
+  actionCount?: string;
+  platformMethod?: string;
+};
+
+export type UnitListGroup15View = {
+  executionUser?: string;
+  executionTimeMonitor?: string;
+  fileDescriptor?: string;
+  jobType?: string;
+  terminationStatus1?: string;
+  terminationDelay1?: string;
+  terminationOperation1?: string;
+  terminationStatus2?: string;
+  terminationDelay2?: string;
+  terminationOperation2?: string;
+  terminationStatus3?: string;
+  terminationDelay3?: string;
+  terminationOperation3?: string;
+  terminationStatus4?: string;
+  terminationDelay4?: string;
+  terminationOperation4?: string;
+};
+
+export type UnitListGroup16View = {
+  endWaitUnitName?: string;
+  waitMode?: string;
+  nestedMessageGeneration?: string;
+  unitEndMonitoring?: string;
+  executionGenerationAction?: string;
+};
+
+export type UnitListGroup17View = {
+  toolParameters?: string;
+  toolEnvironment?: string;
+};
+
+export type UnitListGroup18View = {
+  destinationAgent?: string;
+  flexibleJobGroup?: string;
+  executionAgent?: string;
+};
+
+export type UnitListGroup19View = {
+  httpConnectionConfig?: string;
+  httpKind?: string;
+  httpExecutionMode?: string;
+  httpRequestFile?: string;
+  httpRequestEncoding?: string;
+  httpRequestMethod?: string;
+  httpStatusFile?: string;
+  httpStatusPoint?: string;
+  httpResponseHeaderFile?: string;
+  httpResponseBodyFile?: string;
+  httpCodeMap?: string;
+};
+
 export type UnitListGroup8View = {
   nestedConnectorRelease?: string;
 };
@@ -118,6 +209,14 @@ export type UnitListRowView = {
   group6: UnitListGroup6View;
   group7: UnitListGroup7View;
   group10: UnitListGroup10View;
+  group12: UnitListGroup12View;
+  group13: UnitListGroup13View;
+  group14: UnitListGroup14View;
+  group15: UnitListGroup15View;
+  group16: UnitListGroup16View;
+  group17: UnitListGroup17View;
+  group18: UnitListGroup18View;
+  group19: UnitListGroup19View;
   group8: UnitListGroup8View;
   group9: UnitListGroup9View;
 };
@@ -510,6 +609,98 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
         waitTimes: findParameterValues(unit.parameters, "wt").map((value) =>
           parseTimeValue(value),
         ),
+      },
+      group12: {
+        endJudgment: findParameterValue(unit.parameters, "ej"),
+        judgmentReturnCode: findParameterValue(unit.parameters, "ejc"),
+        lowerReturnCode: findParameterValue(unit.parameters, "ejl"),
+        lowerJudgmentValue: findParameterValue(unit.parameters, "ejs"),
+        upperComparison: findParameterValue(unit.parameters, "ejm"),
+        upperReturnCode: findParameterValue(unit.parameters, "ejh"),
+        upperJudgmentValue: findParameterValue(unit.parameters, "ejg"),
+        lowerComparison: findParameterValue(unit.parameters, "eju"),
+        judgmentValueString: findParameterValue(unit.parameters, "ejt"),
+        judgmentValueNumeric: findParameterValue(unit.parameters, "eji"),
+        variableName: findParameterValue(unit.parameters, "ejv"),
+        judgmentFileName: findParameterValue(unit.parameters, "ejf"),
+      },
+      group13: {
+        timeoutInterval: findParameterValue(unit.parameters, "tmitv"),
+        eventTimeout: findParameterValue(unit.parameters, "etn"),
+        monitoredFileName: findParameterValue(unit.parameters, "flwf"),
+        monitoredFileCondition: findParameterValue(unit.parameters, "flwc"),
+        monitoredFileCloseMode: findParameterValue(unit.parameters, "flco"),
+        monitoringInterval: findParameterValue(unit.parameters, "flwi"),
+        waitEventId: findParameterValue(unit.parameters, "evwid"),
+        waitHostName: findParameterValue(unit.parameters, "evhst"),
+        waitMessage: findParameterValue(unit.parameters, "evwms"),
+        eventTimeoutAction: findParameterValue(unit.parameters, "ets"),
+      },
+      group14: {
+        actionEventId: findParameterValue(unit.parameters, "evsid"),
+        actionHostName: findParameterValue(unit.parameters, "evhst"),
+        actionMessage: findParameterValue(unit.parameters, "evsms"),
+        actionSeverity: findParameterValue(unit.parameters, "evssv"),
+        actionStartType: findParameterValue(unit.parameters, "evsrt"),
+        actionInterval: findParameterValue(unit.parameters, "evspl"),
+        actionCount: findParameterValue(unit.parameters, "evsrc"),
+        platformMethod: findParameterValue(unit.parameters, "pfm"),
+      },
+      group15: {
+        executionUser: findParameterValue(unit.parameters, "eu"),
+        executionTimeMonitor: findParameterValue(unit.parameters, "etm"),
+        fileDescriptor: findParameterValue(unit.parameters, "fd"),
+        jobType: findParameterValue(unit.parameters, "jty"),
+        terminationStatus1: findParameterValue(unit.parameters, "ts1"),
+        terminationDelay1: findParameterValue(unit.parameters, "td1"),
+        terminationOperation1: findParameterValue(unit.parameters, "top1"),
+        terminationStatus2: findParameterValue(unit.parameters, "ts2"),
+        terminationDelay2: findParameterValue(unit.parameters, "td2"),
+        terminationOperation2: findParameterValue(unit.parameters, "top2"),
+        terminationStatus3: findParameterValue(unit.parameters, "ts3"),
+        terminationDelay3: findParameterValue(unit.parameters, "td3"),
+        terminationOperation3: findParameterValue(unit.parameters, "top3"),
+        terminationStatus4: findParameterValue(unit.parameters, "ts4"),
+        terminationDelay4: findParameterValue(unit.parameters, "td4"),
+        terminationOperation4: findParameterValue(unit.parameters, "top4"),
+      },
+      group16: {
+        endWaitUnitName: findParameterValue(unit.parameters, "eun"),
+        waitMode: findParameterValue(unit.parameters, "mm"),
+        nestedMessageGeneration: findParameterValue(unit.parameters, "nmg"),
+        unitEndMonitoring: findParameterValue(unit.parameters, "uem"),
+        executionGenerationAction: findParameterValue(unit.parameters, "ega"),
+      },
+      group17: {
+        toolParameters:
+          unit.unitType === "cpj" || unit.unitType === "rcpj"
+            ? findParameterValue(unit.parameters, "prm")
+            : undefined,
+        toolEnvironment:
+          unit.unitType === "cpj" || unit.unitType === "rcpj"
+            ? findParameterValue(unit.parameters, "env")
+            : undefined,
+      },
+      group18: {
+        destinationAgent: findParameterValue(unit.parameters, "da"),
+        flexibleJobGroup: findParameterValue(unit.parameters, "fxg"),
+        executionAgent:
+          unit.unitType === "fxj" || unit.unitType === "rfxj"
+            ? findParameterValue(unit.parameters, "ex")
+            : undefined,
+      },
+      group19: {
+        httpConnectionConfig: findParameterValue(unit.parameters, "htcfl"),
+        httpKind: findParameterValue(unit.parameters, "htknd"),
+        httpExecutionMode: findParameterValue(unit.parameters, "htexm"),
+        httpRequestFile: findParameterValue(unit.parameters, "htrqf"),
+        httpRequestEncoding: findParameterValue(unit.parameters, "htrqu"),
+        httpRequestMethod: findParameterValue(unit.parameters, "htrqm"),
+        httpStatusFile: findParameterValue(unit.parameters, "htstf"),
+        httpStatusPoint: findParameterValue(unit.parameters, "htspt"),
+        httpResponseHeaderFile: findParameterValue(unit.parameters, "htrhf"),
+        httpResponseBodyFile: findParameterValue(unit.parameters, "htrbf"),
+        httpCodeMap: findParameterValue(unit.parameters, "htcdm"),
       },
       group8: {
         nestedConnectorRelease:

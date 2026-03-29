@@ -20,6 +20,8 @@ unit=root,,jp1admin,;
   el=manager-jobnet,mn,+320+0;
   el=connector,nc,+480+0;
   el=start-condition,rc,+640+0;
+  el=tool-unit,cpj,+800+0;
+  el=flex-job,fxj,+960+0;
   unit=jobnet,,jp1admin,;
   {
     ty=n;
@@ -51,6 +53,65 @@ unit=root,,jp1admin,;
     ey=18:00;
     wc=4;
     wt=00:30;
+    ej=gt;
+    ejc=8;
+    ejl=1;
+    ejs=100;
+    ejm=ge;
+    ejh=9;
+    ejg=200;
+    eju=le;
+    ejt="abc";
+    eji=150;
+    ejv=VALUE;
+    ejf="result.txt";
+    tmitv=30;
+    etn=y;
+    flwf="watch.txt";
+    flwc=c:d:s;
+    flco=y;
+    flwi=60;
+    evwid=EV-1;
+    evwms="waiting";
+    ets=wr;
+    evsid=ACT-1;
+    evsms="action";
+    evssv=wr;
+    evsrt=y;
+    evspl=5;
+    evsrc=2;
+    pfm=unix;
+    eu=def;
+    etm=10;
+    jty=batch;
+    ts1=ok;
+    td1=1;
+    top1=stop;
+    ts2=ng;
+    td2=2;
+    top2=skip;
+    ts3=warn;
+    td3=3;
+    top3=hold;
+    ts4=err;
+    td4=4;
+    top4=retry;
+    eun=subnet;
+    mm=and;
+    nmg=y;
+    uem=n;
+    ega=exec;
+    htcfl="conn.conf";
+    htknd=post;
+    htexm=y;
+    htrqf="request.json";
+    htrqu=utf8;
+    htrqm=json;
+    htstf="status.log";
+    htspt=200;
+    htrhf="header.log";
+    htrbf="body.log";
+    htcdm=0:200;
     ex="agent-a";
     ncl=y;
     ncn=connector-1;
@@ -97,6 +158,19 @@ unit=root,,jp1admin,;
     ty=rc;
     cond="AJSROOT" = "ready";
   }
+  unit=tool-unit,,jp1admin,;
+  {
+    ty=cpj;
+    prm=--verbose;
+    env="TOOL=1";
+  }
+  unit=flex-job,,jp1admin,;
+  {
+    ty=fxj;
+    da="agent-dest";
+    fxg=sync;
+    ex="flex-agent";
+  }
 }
 `;
 
@@ -120,6 +194,8 @@ suite("Build Unit List View", () => {
     const connector = rows.find(
       (row) => row.absolutePath === "/root/connector",
     );
+    const toolUnit = rows.find((row) => row.absolutePath === "/root/tool-unit");
+    const flexJob = rows.find((row) => row.absolutePath === "/root/flex-job");
     const startCondition = rows.find(
       (row) => row.absolutePath === "/root/start-condition",
     );
@@ -180,6 +256,67 @@ suite("Build Unit List View", () => {
     assert.deepStrictEqual(jobnet?.group10.endRangeTimes, ["18:00"]);
     assert.deepStrictEqual(jobnet?.group10.waitCounts, ["4"]);
     assert.deepStrictEqual(jobnet?.group10.waitTimes, ["00:30"]);
+    assert.strictEqual(jobnet?.group12.endJudgment, "gt");
+    assert.strictEqual(jobnet?.group12.judgmentReturnCode, "8");
+    assert.strictEqual(jobnet?.group12.lowerReturnCode, "1");
+    assert.strictEqual(jobnet?.group12.lowerJudgmentValue, "100");
+    assert.strictEqual(jobnet?.group12.upperComparison, "ge");
+    assert.strictEqual(jobnet?.group12.upperReturnCode, "9");
+    assert.strictEqual(jobnet?.group12.upperJudgmentValue, "200");
+    assert.strictEqual(jobnet?.group12.lowerComparison, "le");
+    assert.strictEqual(jobnet?.group12.judgmentValueString, '"abc"');
+    assert.strictEqual(jobnet?.group12.judgmentValueNumeric, "150");
+    assert.strictEqual(jobnet?.group12.variableName, "VALUE");
+    assert.strictEqual(jobnet?.group12.judgmentFileName, '"result.txt"');
+    assert.strictEqual(jobnet?.group13.timeoutInterval, "30");
+    assert.strictEqual(jobnet?.group13.eventTimeout, "y");
+    assert.strictEqual(jobnet?.group13.monitoredFileName, '"watch.txt"');
+    assert.strictEqual(jobnet?.group13.monitoredFileCondition, "c:d:s");
+    assert.strictEqual(jobnet?.group13.monitoredFileCloseMode, "y");
+    assert.strictEqual(jobnet?.group13.monitoringInterval, "60");
+    assert.strictEqual(jobnet?.group13.waitEventId, "EV-1");
+    assert.strictEqual(jobnet?.group13.waitHostName, undefined);
+    assert.strictEqual(jobnet?.group13.waitMessage, '"waiting"');
+    assert.strictEqual(jobnet?.group13.eventTimeoutAction, "wr");
+    assert.strictEqual(jobnet?.group14.actionEventId, "ACT-1");
+    assert.strictEqual(jobnet?.group14.actionHostName, undefined);
+    assert.strictEqual(jobnet?.group14.actionMessage, '"action"');
+    assert.strictEqual(jobnet?.group14.actionSeverity, "wr");
+    assert.strictEqual(jobnet?.group14.actionStartType, "y");
+    assert.strictEqual(jobnet?.group14.actionInterval, "5");
+    assert.strictEqual(jobnet?.group14.actionCount, "2");
+    assert.strictEqual(jobnet?.group14.platformMethod, "unix");
+    assert.strictEqual(jobnet?.group15.executionUser, "def");
+    assert.strictEqual(jobnet?.group15.executionTimeMonitor, "10");
+    assert.strictEqual(jobnet?.group15.fileDescriptor, "30");
+    assert.strictEqual(jobnet?.group15.jobType, "batch");
+    assert.strictEqual(jobnet?.group15.terminationStatus1, "ok");
+    assert.strictEqual(jobnet?.group15.terminationDelay1, "1");
+    assert.strictEqual(jobnet?.group15.terminationOperation1, "stop");
+    assert.strictEqual(jobnet?.group15.terminationStatus4, "err");
+    assert.strictEqual(jobnet?.group15.terminationDelay4, "4");
+    assert.strictEqual(jobnet?.group15.terminationOperation4, "retry");
+    assert.strictEqual(jobnet?.group16.endWaitUnitName, "subnet");
+    assert.strictEqual(jobnet?.group16.waitMode, "and");
+    assert.strictEqual(jobnet?.group16.nestedMessageGeneration, "y");
+    assert.strictEqual(jobnet?.group16.unitEndMonitoring, "n");
+    assert.strictEqual(jobnet?.group16.executionGenerationAction, "exec");
+    assert.strictEqual(toolUnit?.group17.toolParameters, "--verbose");
+    assert.strictEqual(toolUnit?.group17.toolEnvironment, '"TOOL=1"');
+    assert.strictEqual(flexJob?.group18.destinationAgent, '"agent-dest"');
+    assert.strictEqual(flexJob?.group18.flexibleJobGroup, "sync");
+    assert.strictEqual(flexJob?.group18.executionAgent, '"flex-agent"');
+    assert.strictEqual(jobnet?.group19.httpConnectionConfig, '"conn.conf"');
+    assert.strictEqual(jobnet?.group19.httpKind, "post");
+    assert.strictEqual(jobnet?.group19.httpExecutionMode, "y");
+    assert.strictEqual(jobnet?.group19.httpRequestFile, '"request.json"');
+    assert.strictEqual(jobnet?.group19.httpRequestEncoding, "utf8");
+    assert.strictEqual(jobnet?.group19.httpRequestMethod, "json");
+    assert.strictEqual(jobnet?.group19.httpStatusFile, '"status.log"');
+    assert.strictEqual(jobnet?.group19.httpStatusPoint, "200");
+    assert.strictEqual(jobnet?.group19.httpResponseHeaderFile, '"header.log"');
+    assert.strictEqual(jobnet?.group19.httpResponseBodyFile, '"body.log"');
+    assert.strictEqual(jobnet?.group19.httpCodeMap, "0:200");
     assert.deepStrictEqual(job?.group2.nextUnits, [
       {
         id: "/root/jobnet/.CONDITION",

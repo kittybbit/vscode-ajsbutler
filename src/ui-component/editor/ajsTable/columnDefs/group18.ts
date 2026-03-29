@@ -1,12 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn } from "./common";
-import { Ex } from "../../../../domain/models/parameters";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group18 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group18", //Flexible job definition information
@@ -15,20 +15,20 @@ const group18 = (
       {
         id: "group18.col1",
         header: ajsTableColumnHeader["group18.col1"],
-        accessorFn: defaultAccessorFn("da"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group18.destinationAgent,
       },
       {
         id: "group18.col2",
         header: ajsTableColumnHeader["group18.col2"],
-        accessorFn: defaultAccessorFn("fxg"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group18.flexibleJobGroup,
       },
       {
         id: "group18.col3",
         header: ajsTableColumnHeader["group18.col3"],
         accessorFn: (row) =>
-          ["fxj", "rfxj"].includes(row.ty.value())
-            ? row.params<Ex>("ex")
-            : undefined,
+          rowViewByPath.get(row.absolutePath)?.group18.executionAgent,
       },
     ],
   });

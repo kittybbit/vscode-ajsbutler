@@ -1,11 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { defaultAccessorFn } from "./common";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group19 = (
   columnHelper: ColumnHelper<UnitEntity>,
   ajsTableColumnHeader: typeof ajscolumn.en,
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitEntity, unknown> => {
   return columnHelper.group({
     id: "group19", //Http connection job definition information
@@ -14,57 +15,68 @@ const group19 = (
       {
         id: "group19.col1",
         header: ajsTableColumnHeader["group19.col1"],
-        accessorFn: defaultAccessorFn("htcfl"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpConnectionConfig,
       },
       {
         id: "group19.col2",
         header: ajsTableColumnHeader["group19.col2"],
-        accessorFn: defaultAccessorFn("htknd"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpKind,
       },
       {
         id: "group19.col3",
         header: ajsTableColumnHeader["group19.col3"],
-        accessorFn: defaultAccessorFn("htexm"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpExecutionMode,
       },
       {
         id: "group19.col4",
         header: ajsTableColumnHeader["group19.col4"],
-        accessorFn: defaultAccessorFn("htrqf"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpRequestFile,
       },
       {
         id: "group19.col5",
         header: ajsTableColumnHeader["group19.col5"],
-        accessorFn: defaultAccessorFn("htrqu"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpRequestEncoding,
       },
       {
         id: "group19.col6",
         header: ajsTableColumnHeader["group19.col6"],
-        accessorFn: defaultAccessorFn("htrqm"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpRequestMethod,
       },
       {
         id: "group19.col7",
         header: ajsTableColumnHeader["group19.col7"],
-        accessorFn: defaultAccessorFn("htstf"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpStatusFile,
       },
       {
         id: "group19.col8",
         header: ajsTableColumnHeader["group19.col8"],
-        accessorFn: defaultAccessorFn("htspt"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpStatusPoint,
       },
       {
         id: "group19.col9",
         header: ajsTableColumnHeader["group19.col9"],
-        accessorFn: defaultAccessorFn("htrhf"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpResponseHeaderFile,
       },
       {
         id: "group19.col10",
         header: ajsTableColumnHeader["group19.col10"],
-        accessorFn: defaultAccessorFn("htrbf"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpResponseBodyFile,
       },
       {
         id: "group19.col11",
         header: ajsTableColumnHeader["group19.col11"],
-        accessorFn: defaultAccessorFn("htcdm"),
+        accessorFn: (row) =>
+          rowViewByPath.get(row.absolutePath)?.group19.httpCodeMap,
       },
     ],
   });
