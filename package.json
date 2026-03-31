@@ -113,7 +113,7 @@
     "clean": "rimraf out report",
     "predevelopment": "npm-run-all qlty",
     "development": "webpack",
-    "prebuild": "npm-run-all clean antlr4ts qlty",
+    "prebuild": "npm-run-all clean antlr4ts",
     "build": "webpack --mode production",
     "antlr4ts": "npm-run-all antlr:clean antlr:generate",
     "antlr:clean": "rimraf src/generate/parser",
