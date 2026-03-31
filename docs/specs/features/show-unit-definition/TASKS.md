@@ -1,3 +1,9 @@
-# TASKS for show-unit-definition
+# TASKS: show-unit-definition
 
-- [ ] Map requirement sections from SPECS to code modules.
+- [ ] Review use case: docs/requirements/use-cases/uc-show-unit-definition.md
+- [ ] Confirm SPECS.md
+- [ ] Implement code
+- [ ] Add tests
+- [ ] Run npm test/lint/qlty
+- [ ] Manual smoke test
+- [ ] Update docs and submit PR

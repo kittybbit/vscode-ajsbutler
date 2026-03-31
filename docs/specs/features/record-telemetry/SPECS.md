@@ -1,39 +1,20 @@
-# UC: Record Telemetry
+# SPECS: record-telemetry
 
-## Goal
+## Purpose
 
-Record existing extension telemetry events through a narrow contract without
-exposing telemetry SDK types outside the outer adapter layer.
+Implement the use case: UC: Record Telemetry.
 
-## Trigger
+## Origin
 
-- extension activation and deactivation
-- preview commands for table and flow views
-- webview-originated operation tracking
+Source use case: docs/requirements/use-cases/uc-record-telemetry.md
 
-## Inputs
+## Acceptance Criteria
 
-- event name
-- existing string payload properties for the event
+- All criteria in the source use case are satisfied.
+- Behavior is stable across desktop/web builds.
+- Tests cover normal and edge cases.
 
-## Outputs
+## Implementation Notes
 
-- telemetry event submission through an adapter implementation
-- no SDK-specific types outside the telemetry adapter
-
-## Rules
-
-- application-facing callers depend on a small telemetry port only
-- event names and basic payload behavior stay unchanged in this refactor
-- telemetry scope must remain minimal and privacy-conscious
-
-## Acceptance Notes
-
-- activation and deactivation events still fire
-- existing preview and webview operation telemetry still fires
-- desktop and web entry points share the same telemetry contract
-
-## Risks Or Edge Cases
-
-- browser execution still depends on the current telemetry SDK package behavior
-- lifecycle cleanup must continue to dispose the telemetry adapter correctly
+- Keep domain/application/infrastructure boundaries clear.
+- Avoid direct vscode imports in domain layers.

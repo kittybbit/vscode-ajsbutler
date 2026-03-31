@@ -1,52 +1,20 @@
-# UC: Normalize AJS Document
+# SPECS: normalize-ajs-document
 
-## Goal
+## Purpose
 
-Convert parsed JP1/AJS definitions into a stable normalized model that is
-independent from parser tree mechanics, VS Code APIs, and UI-library types.
+Implement the use case: UC: Normalize AJS Document.
 
-## Trigger
+## Origin
 
-- an application use case needs stable unit and dependency semantics
-- parsed raw `Unit` trees must be interpreted consistently across multiple
-  use cases
+Source use case: docs/requirements/use-cases/uc-normalize-ajs-document.md
 
-## Inputs
+## Acceptance Criteria
 
-- parsed raw `Unit` root tree
-- current interpreter/wrapper semantics derived from `UnitEntity` classes
+- All criteria in the source use case are satisfied.
+- Behavior is stable across desktop/web builds.
+- Tests cover normal and edge cases.
 
-## Outputs
+## Implementation Notes
 
-- `AjsDocument`
-- `AjsUnit`
-- `AjsDependency`
-- optional normalization warnings
-
-## Rules
-
-- raw `Unit` remains the parser-adjacent model
-- `UnitEntity` wrappers remain interpreter helpers during migration, but are not
-  the final application-facing model
-- normalized model names should reflect product concepts, not wrapper class
-  names such as `G`, `N`, or `Rc`
-- normalized output must be deterministic and suitable for unit list, flow
-  graph, CSV, and future reuse
-
-## Acceptance Notes
-
-- `BuildUnitList` can derive its DTOs from the normalized model
-- `BuildFlowGraph` can derive its graph inputs from the normalized model
-- user-visible behavior remains unchanged while use cases stop depending on raw
-  or wrapper-oriented structures directly
-- normalization tests should prefer shared fixtures in `sample/` for UTF-8,
-  Shift_JIS, and large-definition regression coverage
-
-## Risks Or Edge Cases
-
-- semantic mismatches can appear if wrapper-derived behaviors such as root
-  jobnet detection or dependency interpretation are not preserved exactly
-- normalization should capture enough metadata for current safe consumers
-  without overcommitting to all future semantics at once
-- encoding-sensitive regressions can be missed if only inline UTF-8 snippets
-  are used in tests
+- Keep domain/application/infrastructure boundaries clear.
+- Avoid direct vscode imports in domain layers.

@@ -1,3 +1,9 @@
-# TASKS for normalize-ajs-document
+# TASKS: normalize-ajs-document
 
-- [ ] Map requirement sections from SPECS to code modules.
+- [ ] Review use case: docs/requirements/use-cases/uc-normalize-ajs-document.md
+- [ ] Confirm SPECS.md
+- [ ] Implement code
+- [ ] Add tests
+- [ ] Run npm test/lint/qlty
+- [ ] Manual smoke test
+- [ ] Update docs and submit PR
