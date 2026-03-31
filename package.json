@@ -126,6 +126,7 @@
     "qlty": "npm-run-all qlty:fmt qlty:check",
     "qlty:fmt": "qlty fmt",
     "qlty:check": "qlty check",
+    "lint:md": "npx markdownlint-cli2 'docs/specs/features/**/*.md' 'docs/requirements/use-cases/**/*.md'",
     "test": "node ./out/test/runTest.js",
     "test:web": "node ./out/test/runWebTest.js"
   },

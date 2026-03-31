@@ -4,6 +4,8 @@
 
 Track non-trivial changes using the repository's SDD workflow before implementation.
 
+This file is the high-level index for the per-feature plan structure in `docs/specs/features/<feature>/PLANS.md`.
+
 ## Branch Status
 
 ### Completed In This Branch
@@ -42,12 +44,17 @@ Track non-trivial changes using the repository's SDD workflow before implementat
 ## Default Workflow
 
 1. Read the relevant documents in `docs/specs/`.
-2. Update or create the related use-case spec in `docs/specs/use-cases/`.
-3. Copy the task template below for the current change.
+2. Update or create the related use-case spec in `docs/requirements/use-cases/`.
+3. Create or update corresponding feature docs in `docs/specs/features/<feature>/`:
+   - `SPECS.md` for implementation requirements
+   - `PLANS.md` for planning and milestones
+   - `TASKS.md` for execution items
 4. Fill in assumptions explicitly when requirements are ambiguous.
 5. Implement only after acceptance criteria are clear.
 6. Run build, quality checks, and relevant tests.
 7. Summarize compatibility risks and follow-up work.
+
+## Task Template
 
 ## Task Template
 
