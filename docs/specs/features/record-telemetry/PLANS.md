@@ -1,0 +1,25 @@
+# PLANS: record-telemetry
+
+## Objective
+
+Deliver the feature for use case: UC: Record Telemetry.
+
+## Scope
+
+- Requirements from docs/requirements/use-cases/uc-record-telemetry.md.
+- Implement in domain/application layers and ensure cross-platform adapters.
+- Update tests and docs.
+
+## Milestones
+
+1. Write and review SPECS.md
+2. Implement feature logic
+3. Add and run tests
+4. Validate extension behavior
+5. Close PR
+
+## Validation
+
+- npm test
+- npm run lint:md
+- npm run qlty

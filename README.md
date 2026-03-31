@@ -40,8 +40,8 @@ To use this extension:
 This repository is incrementally adopting Specification-Driven Development
 (SDD) and cleaner application boundaries.
 
-- SDD documents live in `docs/sdd/`.
-- Use-case specs live in `docs/sdd/use-cases/`.
+- SDD documents live in `docs/specs/`.
+- Use-case specs live in `docs/specs/use-cases/`.
 - Non-trivial implementation plans are tracked in `PLANS.md`.
 - Codex-specific repository guidance lives in `AGENTS.md`.
 

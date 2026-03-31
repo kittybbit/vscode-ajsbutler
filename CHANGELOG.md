@@ -2,7 +2,7 @@
 
 ## [1.11.4]
 
-- Introduced Specification-Driven Development documents under `docs/sdd/` and
+- Introduced Specification-Driven Development documents under `docs/specs/` and
   aligned repository planning around `PLANS.md`.
 - Added Codex repository guidance in `AGENTS.md`.
 - Introduced a normalized AJS model and migrated unit-list and flow-graph
@@ -13,7 +13,7 @@
   Actions automation.
 - Refactored the table view so column groups consume application row/view data
   instead of direct `UnitEntity` wrapper accessors.
-- Consolidated SDD use-case documents under `docs/sdd/use-cases/`.
+- Consolidated SDD use-case documents under `docs/specs/use-cases/`.
 
 ## [1.11.3]
 

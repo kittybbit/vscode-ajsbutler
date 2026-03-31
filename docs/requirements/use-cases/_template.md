@@ -1,4 +1,4 @@
-# UC: <Use Case Name>
+# UC: Use Case Name
 
 ## Goal
 
