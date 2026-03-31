@@ -22,7 +22,7 @@ This directory is the entry point for Specification-Driven Development in this r
 
 For non-trivial changes:
 
-1. update or create the relevant use-case spec in `docs/sdd/use-cases/`
+1. update or create the relevant use-case spec in `docs/specs/use-cases/`
 2. update `PLANS.md`
 3. document assumptions explicitly
 4. implement in small vertical slices

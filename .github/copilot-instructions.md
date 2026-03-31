@@ -5,7 +5,7 @@ This repository is a Visual Studio Code extension for viewing and analyzing JP1/
 
 ## Key References
 - **[AGENTS.md](../AGENTS.md)**: Comprehensive guide to architecture rules, coding/testing policies, and workflows.
-- **[docs/sdd](../docs/sdd)**: Specification-Driven Development (SDD) documentation, including use cases and architecture decisions.
+- **[docs/specs](../docs/specs)**: Specification-Driven Development (SDD) documentation, including use cases and architecture decisions.
 - **[README.md](../README.md)**: Build/test commands and project overview.
 
 ## Principles
@@ -30,7 +30,7 @@ This repository is a Visual Studio Code extension for viewing and analyzing JP1/
 - "Update the `README.md` to include new build instructions."
 
 ## Next Steps
-- For complex tasks, refer to the relevant use case in `docs/sdd/use-cases`.
+- For complex tasks, refer to the relevant use case in `docs/specs/use-cases`.
 - Suggest additional agent customizations if needed, such as hooks or skills for specific workflows.
 
 ---

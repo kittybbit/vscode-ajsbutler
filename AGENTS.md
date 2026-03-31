@@ -64,7 +64,7 @@ Good first slices:
 
 For non-trivial changes, follow this order:
 
-1. Read relevant docs in `docs/sdd/`.
+1. Read relevant docs in `docs/specs/`.
 2. Update or create the relevant use-case spec.
 3. Write or update a short implementation plan in `PLANS.md`.
 4. Confirm acceptance criteria.
