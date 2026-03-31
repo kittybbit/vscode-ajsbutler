@@ -111,7 +111,6 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "clean": "rimraf out report",
-    "predevelopment": "npm-run-all qlty",
     "development": "webpack",
     "prebuild": "npm-run-all clean antlr4ts",
     "build": "webpack --mode production",
