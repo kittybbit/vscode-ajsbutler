@@ -7,7 +7,7 @@ const { ProvidePlugin } = require("webpack");
 const path = require("path");
 const dotenv = require("dotenv");
 
-const env = dotenv.config().parsed;
+const parsedEnv = dotenv.config().parsed ?? {};
 
 const editorConfig = (env, argv) => {
     const PRODUCTION = argv.mode === "production";
@@ -105,7 +105,7 @@ const editorConfig = (env, argv) => {
     };
 };
 
-const CONNECTION_STRING = env.connection_string;
+const CONNECTION_STRING = parsedEnv.connection_string ?? "";
 const nodeConfig = (env, argv) => {
     const PRODUCTION = argv.mode === "production";
     const DEVELOPMENT = !PRODUCTION;

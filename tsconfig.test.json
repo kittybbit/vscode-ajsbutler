@@ -20,6 +20,7 @@
     "src/domain/models/ajs/**/*.ts",
     "src/domain/services/parser/**/*.ts",
     "src/domain/values/**/*.ts",
+    "src/extension/telemetry/**/*.ts",
     "src/generate/parser/**/*.ts"
   ]
 }
