@@ -70,7 +70,6 @@ After switching, you can run:
 npm run qlty
 npm run build
 npm test
-npm run open-in-browser
 npm run test:web
 ```
 
@@ -78,8 +77,10 @@ The `sample/` directory contains reusable JP1/AJS definition files for parser,
 normalization, unit-list, and flow-graph regression tests. Prefer those shared
 fixtures over ad hoc large inline definitions when adding broader coverage.
 
+For manual browser-side verification during development, use the VS Code launch configuration `Launch Extension(web)` in `.vscode/launch.json`.
+
 `npm run test:web` runs the extension test suite against VS Code for the Web in headless Chromium.
-GitHub Actions also runs `npm run qlty`, `npm run build`, `npm test`, and `npm run test:web` on pushes and pull requests.
+GitHub Actions also runs `npm run lint:md`, `npm run build`, `npm test`, and `npm run test:web` on pushes and pull requests.
 
 ## Telemetry
 

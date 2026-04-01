@@ -7,128 +7,209 @@ const { ProvidePlugin } = require("webpack");
 const path = require("path");
 const dotenv = require("dotenv");
 
-const env = dotenv.config().parsed;
+const parsedEnv = dotenv.config().parsed ?? {};
+const OUTPUT_PATH = path.join(__dirname, "out");
+const EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".css"];
+const BASE_ALIAS = {
+    "@resource": path.join(__dirname, "src/resource/"),
+};
+const BASE_STATS = {
+    orphanModules: true,
+    errorDetails: true,
+};
+const BASE_CACHE = {
+    type: "filesystem",
+};
+const CONNECTION_STRING = parsedEnv.connection_string ?? "";
+const EXTENSION_ALIAS = {
+    "@generate": path.join(__dirname, "src/generate/"),
+};
+const EXTENSION_DEFINE_VALUES = (development) => ({
+    DEVELOPMENT: JSON.stringify(development),
+    CONNECTION_STRING: JSON.stringify(CONNECTION_STRING),
+});
 
-const editorConfig = (env, argv) => {
-    const PRODUCTION = argv.mode === "production";
-    const DEVELOPMENT = !PRODUCTION;
+const getBuildFlags = (argv) => {
+    const mode = argv.mode ?? "development";
+    const production = mode === "production";
     return {
-        mode: argv.mode ?? "development",
-        target: "web",
-        devtool: PRODUCTION ? false : "inline-source-map",
-        entry: {
-            index: "./src/ui-component/editor/index.tsx",
-        },
-        output: {
-            path: path.join(__dirname, "out"),
-            filename: "[name].js",
-            library: {
-                type: "umd",
-            }
-        },
-        resolve: {
-            extensions: [".ts", ".tsx", ".js", ".jsx", ".css"],
-            alias: {
-                "@resource": path.join(__dirname, "src/resource/"),
-            },
-        },
-        externals: {
-            vscode: "commonjs vscode",
-        },
-        cache: {
-            type: "filesystem",
-        },
-        stats: {
-            orphanModules: true,
-            errorDetails: true,
-        },
-        module: {
-            rules: [
-                // Allow importing ts(x) files:
-                {
-                    test: /\.tsx?$/,
-                    loader: "ts-loader",
-                    exclude: /node_modules/,
-                    options: {
-                        configFile: "tsconfig.json",
-                        // transpileOnly enables hot-module-replacement
-                        transpileOnly: true,
-                        compilerOptions: {
-                            // Overwrite the noEmit from the client's tsconfig
-                            noEmit: false,
-                            target: "ES2022",
-                        },
-                    },
-                },
-                {
-                    test: /\.css$/,
-                    use: ["style-loader", "css-loader"],
-                },
-            ],
-        },
-        optimization: {
-            innerGraph: true,
-            usedExports: true,
-            minimize: true,
-            minimizer: [
-                new TerserPlugin({
-                    parallel: true,
-                    terserOptions: {
-                        warnings: DEVELOPMENT,
-                        compress: {
-                            drop_console: PRODUCTION,
-                            drop_debugger: PRODUCTION,
-                        },
-                    },
-                }),
-            ],
-        },
-        plugins: [
-            new ForkTsCheckerWebpackPlugin({
-                typescript: {
-                    tsconfig: "tsconfig.json",
-                },
-            }),
-            new DefinePlugin({
-                DEVELOPMENT: JSON.stringify(DEVELOPMENT),
-            }),
-            ...(env.analyzer
-                ? [
-                    new BundleAnalyzerPlugin({
-                        analyzerMode: "static",
-                        openAnalyzer: false,
-                        reportFilename: "../report/index_report.html",
-                    }),
-                ]
-                : []),
-        ],
+        mode,
+        production,
+        development: !production,
     };
 };
 
-const CONNECTION_STRING = env.connection_string;
+const createTsRule = (compilerOptions = {}) => ({
+    test: /\.tsx?$/,
+    loader: "ts-loader",
+    exclude: /node_modules/,
+    options: {
+        configFile: "tsconfig.json",
+        transpileOnly: true,
+        compilerOptions: {
+            noEmit: false,
+            ...compilerOptions,
+        },
+    },
+});
+
+const createOptimization = (production, development) => ({
+    innerGraph: true,
+    usedExports: true,
+    minimize: true,
+    minimizer: [
+        new TerserPlugin({
+            parallel: true,
+            terserOptions: {
+                warnings: development,
+                compress: {
+                    drop_console: production,
+                    drop_debugger: production,
+                },
+            },
+        }),
+    ],
+});
+
+const createAnalyzerPlugin = (enabled, reportFilename) => (enabled
+    ? [
+        new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+            openAnalyzer: false,
+            reportFilename,
+        }),
+    ]
+    : []);
+
+const createBasePlugins = ({ defineValues, analyzer, reportFilename, extraPlugins = [] }) => [
+    new ForkTsCheckerWebpackPlugin({
+        typescript: {
+            tsconfig: "tsconfig.json",
+        },
+    }),
+    new DefinePlugin(defineValues),
+    ...extraPlugins,
+    ...createAnalyzerPlugin(analyzer, reportFilename),
+];
+
+const createConfig = ({
+    mode,
+    production,
+    development,
+    target,
+    entry,
+    libraryType,
+    aliases = {},
+    externals,
+    tsCompilerOptions,
+    extraRules = [],
+    defineValues,
+    analyzer,
+    reportFilename,
+    extraPlugins = [],
+    fallback,
+}) => ({
+    mode,
+    target,
+    devtool: production ? false : "inline-source-map",
+    entry,
+    output: {
+        path: OUTPUT_PATH,
+        filename: "[name].js",
+        library: {
+            type: libraryType,
+        },
+    },
+    resolve: {
+        extensions: EXTENSIONS,
+        alias: {
+            ...BASE_ALIAS,
+            ...aliases,
+        },
+        ...(fallback ? { fallback } : {}),
+    },
+    externals,
+    cache: BASE_CACHE,
+    stats: BASE_STATS,
+    module: {
+        rules: [createTsRule(tsCompilerOptions), ...extraRules],
+    },
+    optimization: createOptimization(production, development),
+    plugins: createBasePlugins({
+        defineValues,
+        analyzer,
+        reportFilename,
+        extraPlugins,
+    }),
+});
+
+const createExtensionConfig = ({
+    mode,
+    production,
+    development,
+    target,
+    entry,
+    externals,
+    extraPlugins = [],
+    fallback,
+    reportFilename,
+    analyzer,
+}) => createConfig({
+    mode,
+    production,
+    development,
+    target,
+    entry,
+    libraryType: "commonjs2",
+    aliases: EXTENSION_ALIAS,
+    externals,
+    defineValues: EXTENSION_DEFINE_VALUES(development),
+    analyzer,
+    reportFilename,
+    extraPlugins,
+    fallback,
+});
+
+const editorConfig = (env, argv) => {
+    const { mode, production, development } = getBuildFlags(argv);
+    return createConfig({
+        mode,
+        production,
+        development,
+        target: "web",
+        entry: {
+            index: "./src/ui-component/editor/index.tsx",
+        },
+        libraryType: "umd",
+        externals: {
+            vscode: "commonjs vscode",
+        },
+        tsCompilerOptions: {
+            target: "ES2022",
+        },
+        extraRules: [
+            {
+                test: /\.css$/,
+                use: ["style-loader", "css-loader"],
+            },
+        ],
+        defineValues: {
+            DEVELOPMENT: JSON.stringify(development),
+        },
+        analyzer: !!env.analyzer,
+        reportFilename: "../report/index_report.html",
+    });
+};
+
 const nodeConfig = (env, argv) => {
-    const PRODUCTION = argv.mode === "production";
-    const DEVELOPMENT = !PRODUCTION;
-    return {
-        mode: argv.mode ?? "development",
+    const { mode, production, development } = getBuildFlags(argv);
+    return createExtensionConfig({
+        mode,
+        production,
+        development,
         target: "node",
-        devtool: PRODUCTION ? false : "inline-source-map",
         entry: {
             extension: "./src/extension.ts",
-        },
-        output: {
-            path: path.join(__dirname, "out"),
-            filename: "[name].js",
-            library: {
-                type: "commonjs2",
-            }
-        },
-        resolve: {
-            extensions: [".ts", ".tsx", ".js", ".jsx", ".css"],
-            alias: {
-                "@resource": path.join(__dirname, "src/resource/"),
-                "@generate": path.join(__dirname, "src/generate/"),
-            },
         },
         externals: {
             vscode: "commonjs vscode",
@@ -137,115 +218,40 @@ const nodeConfig = (env, argv) => {
             assert: "commonjs assert",
             util: "commonjs util",
         },
-        cache: {
-            type: "filesystem",
-        },
-        stats: {
-            orphanModules: true,
-            errorDetails: true,
-        },
-        module: {
-            rules: [
-                // Allow importing ts(x) files:
-                {
-                    test: /\.tsx?$/,
-                    loader: "ts-loader",
-                    exclude: /node_modules/,
-                    options: {
-                        configFile: "tsconfig.json",
-                        // transpileOnly enables hot-module-replacement
-                        transpileOnly: true,
-                        compilerOptions: {
-                            // Overwrite the noEmit from the client's tsconfig
-                            noEmit: false,
-                        },
-                    },
-                },
-            ],
-        },
-        optimization: {
-            innerGraph: true,
-            usedExports: true,
-            minimize: true,
-            minimizer: [
-                new TerserPlugin({
-                    parallel: true,
-                    terserOptions: {
-                        warnings: DEVELOPMENT,
-                        compress: {
-                            drop_console: PRODUCTION,
-                            drop_debugger: PRODUCTION,
-                        },
-                    },
-                }),
-            ],
-        },
-        plugins: [
-            new ForkTsCheckerWebpackPlugin({
-                typescript: {
-                    tsconfig: "tsconfig.json",
-                },
-            }),
-            new DefinePlugin({
-                DEVELOPMENT: JSON.stringify(DEVELOPMENT),
-                CONNECTION_STRING: JSON.stringify(CONNECTION_STRING),
-            }),
-            ...(env.analyzer
-                ? [
-                    new BundleAnalyzerPlugin({
-                        analyzerMode: "static",
-                        openAnalyzer: false,
-                        reportFilename: "../report/extension_report.html",
-                    }),
-                ]
-                : []),
-        ],
-    };
+        analyzer: !!env.analyzer,
+        reportFilename: "../report/extension_report.html",
+    });
 };
 
-const webconfig = (env, argv) => {
-    // const PRODUCTION = argv.mode === "production";
-    // const DEVELOPMENT = !PRODUCTION;
-    const nodeCfg = nodeConfig(env, argv);
-    return {
-        ...nodeCfg,
-        ...{
-            target: "webworker",
-            entry: {
-                web: "./src/extension.ts",
-            },
-            resolve: {
-                ...nodeCfg.resolve,
-                fallback: {
-                    assert: require.resolve("assert"),
-                    os: require.resolve("os-browserify/browser"),
-                    util: require.resolve("util"),
-                    path: require.resolve("path-browserify"),
-                },
-            },
-            externals: {
-                vscode: "commonjs vscode",
-            },
-            plugins: [
-                nodeCfg.plugins[0],
-                nodeCfg.plugins[1],
-                new ProvidePlugin({
-                    process: "process/browser",
-                }),
-                ...(env.analyzer
-                    ? [
-                        new BundleAnalyzerPlugin({
-                            analyzerMode: "static",
-                            openAnalyzer: false,
-                            reportFilename: "../report/web_report.html",
-                        }),
-                    ]
-                    : []),
-            ],
+const webConfig = (env, argv) => {
+    const { mode, production, development } = getBuildFlags(argv);
+    return createExtensionConfig({
+        mode,
+        production,
+        development,
+        target: "webworker",
+        entry: {
+            web: "./src/extension.ts",
         },
-    };
+        externals: {
+            vscode: "commonjs vscode",
+        },
+        analyzer: !!env.analyzer,
+        reportFilename: "../report/web_report.html",
+        extraPlugins: [
+            new ProvidePlugin({
+                process: "process/browser",
+            }),
+        ],
+        fallback: {
+            assert: require.resolve("assert"),
+            os: require.resolve("os-browserify/browser"),
+            util: require.resolve("util"),
+            path: require.resolve("path-browserify"),
+        },
+    });
 };
 
 module.exports = (env, argv) => {
-    return [editorConfig(env, argv), nodeConfig(env, argv), webconfig(env, argv)];
+    return [editorConfig(env, argv), nodeConfig(env, argv), webConfig(env, argv)];
 };
