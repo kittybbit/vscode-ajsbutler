@@ -31,15 +31,20 @@ This file is the high-level index for the per-feature plan structure in
   `src/test/suite/reportWebviewOperation.test.ts`.
 - normalized AJS model exists and is covered by
   `src/test/suite/normalizeAjsDocument.test.ts`.
+- normalized AJS navigation helpers now expose parent lookup, ancestor lookup,
+  and root jobnet lookup without reusing wrapper traversal in consumers.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
 
 1. Refresh roadmap and feature task documents so completed slices and remaining
    debt are visible in one place.
-2. Decide which wrapper-derived semantics belong in the normalized model versus
-   staying in application view adapters.
-3. Continue reducing activation and webview concentration without changing user
+2. Continue moving broadly reusable wrapper-derived semantics into the
+   normalized model in small slices, starting with parameter and inheritance
+   behaviors that are still concentrated in `ParameterFactory`.
+3. Document which remaining semantics should intentionally stay in application
+   view adapters instead of the normalized model.
+4. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 
 ## Default Workflow
