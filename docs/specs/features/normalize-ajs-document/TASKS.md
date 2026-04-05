@@ -20,4 +20,6 @@
 - [x] Expose shared helpers for reusable transfer-operation defaults so
       `top1` to `top4` fallback behavior stops living only in
       `ParameterFactory`
+- [x] Expose shared helpers for reusable sorted rule-parameter mapping so
+      simple rule arrays stop sorting directly inside `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

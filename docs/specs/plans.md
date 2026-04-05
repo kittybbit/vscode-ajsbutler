@@ -39,6 +39,8 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now expose `top1` to `top4` transfer-operation
   default derivation so wrapper-only fallback rules are testable outside
   `ParameterFactory`.
+- shared parameter helpers now expose reusable sorted rule-parameter mapping so
+  `ln` and `sd` no longer sort rule arrays directly inside `ParameterFactory`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -143,30 +145,28 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable helper for `top1` to `top4` default derivation so transfer
-operation semantics stop living only inside `ParameterFactory`.
+Extract a reusable helper for sorted rule parameters so `ln` and `sd` stop
+sorting rule arrays directly inside `ParameterFactory`.
 
 ### Why
 
-`top1` to `top4` still derive their fallback behavior from wrapper getters
-inside `ParameterFactory`. Moving that transfer-operation default rule into a
-shared helper keeps the semantics explicit and easier to test before broader
-wrapper cleanup continues.
+`ParameterFactory` still contains direct rule-array sorting for `ln` and `sd`.
+Moving that simple rule-order semantic into shared helpers keeps the factory
+closer to typed construction and makes rule-order behavior easier to test.
 
 ### Scope
 
-- add a helper that derives `top1` to `top4` default raw values from `ts*` and
-  `td*`
-- switch `ParameterFactory` `top1` to `top4` to the shared helper
-- keep public parameter behavior unchanged while reducing wrapper-only logic
-- add focused tests for transfer-operation default derivation
+- add a helper that maps and sorts rule-based parameters
+- switch `ParameterFactory` `ln` and `sd` to the shared helper
+- keep public parameter behavior unchanged while reducing repeated rule sorting
+- add focused tests for sorted rule-parameter behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing transfer-operation semantics or fallback values
+- changing root-jobnet defaults or rule values
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -180,25 +180,25 @@ wrapper cleanup continues.
 
 #### Use case
 
-Transfer-operation default helper extraction.
+Sorted rule-parameter helper extraction.
 
 #### Layers affected
 
-- domain: transfer-operation parameter helper usage
+- domain: rule-parameter helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize the existing `top*`
-  fallback rule.
-- Limit this slice to `top1` to `top4` and leave broader wrapper reduction for
+- Keep semantic behavior identical and only centralize the existing rule sort
+  behavior.
+- Limit this slice to `ln` and `sd` and leave broader wrapper reduction for
   later work.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for `top1` to `top4` default derivation
-- [ ] `ParameterFactory` `top1` to `top4` delegate to the helper
-- [ ] focused tests cover the transfer-operation default behavior
+- [ ] shared helper exists for sorted rule-parameter mapping
+- [ ] `ParameterFactory` `ln` and `sd` delegate to the helper
+- [ ] focused tests cover rule-order behavior
 
 ### Test Plan
 
@@ -209,13 +209,11 @@ Transfer-operation default helper extraction.
 
 ### Risks
 
-- helper extraction could accidentally change when `sav`, `del`, or empty
-  fallback is produced
-- transfer-operation semantics might rely on wrapper getter truthiness in ways
-  that are easy to misread
+- helper extraction could accidentally change rule ordering
+- `sd` root default behavior could drift if sorting is not preserved exactly
 
 ### Rollback Plan
 
-- revert the `top1` to `top4` helper usage in `ParameterFactory`
+- revert the `ln` and `sd` helper usage in `ParameterFactory`
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

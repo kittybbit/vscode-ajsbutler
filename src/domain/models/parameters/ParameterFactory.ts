@@ -229,6 +229,7 @@ import { ParamBase } from "./parameter.types";
 import {
   adjustToSdItemCount,
   buildSdAlignedParameters,
+  buildSortedRuleParameters,
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
@@ -989,9 +990,7 @@ export class ParamFactory {
       unit: unit,
       parameter: "ln",
     });
-    return params
-      ? params.map((param) => new Ln(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
+    return buildSortedRuleParameters(params, (param) => new Ln(param));
   }
   static mcs(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1628,9 +1627,7 @@ export class ParamFactory {
         unit.isRootJobnet,
       ),
     });
-    return params
-      ? params.map((param) => new Sd(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
+    return buildSortedRuleParameters(params, (param) => new Sd(param));
   }
   static sdd(unit: UnitEntity) {
     const param = this.#checkAndGet({
