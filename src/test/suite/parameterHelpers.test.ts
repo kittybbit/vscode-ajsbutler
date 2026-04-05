@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
+import { J } from "../../domain/models/units/J";
 import { N } from "../../domain/models/units/N";
 import { Sd, Wc } from "../../domain/models/parameters";
 import {
@@ -9,6 +10,7 @@ import {
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
+  resolveTopDefaultRawValue,
 } from "../../domain/models/parameters/parameterHelpers";
 
 const validDefinition = `
@@ -39,6 +41,30 @@ const parseJobnets = (): { jobnet: N; subnet: N } => {
   const jobnet = root.children[0] as N;
   const subnet = jobnet.children[0] as N;
   return { jobnet, subnet };
+};
+
+const transferDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=job1,j,+0+0;
+  unit=job1,,jp1admin,;
+  {
+    ty=j;
+    ts1=source-1;
+    td1=dest-1;
+    ts2=source-2;
+    ts3=source-3;
+    top4=keep;
+  }
+}
+`;
+
+const parseTransferJob = (): J => {
+  const result = parseAjs(transferDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as J;
 };
 
 suite("Parameter helpers", () => {
@@ -180,5 +206,19 @@ suite("Parameter helpers", () => {
     assert.strictEqual(subnet.ncl, undefined);
     assert.strictEqual(subnet.ncs, undefined);
     assert.strictEqual(subnet.ncex, undefined);
+  });
+
+  test("derives top defaults from transfer source and destination presence", () => {
+    const job = parseTransferJob();
+
+    assert.strictEqual(resolveTopDefaultRawValue(job, 1), "sav");
+    assert.strictEqual(resolveTopDefaultRawValue(job, 2), "del");
+    assert.strictEqual(resolveTopDefaultRawValue(job, 3), "del");
+    assert.strictEqual(resolveTopDefaultRawValue(job, 4), "");
+
+    assert.strictEqual(job.top1?.value(), "sav");
+    assert.strictEqual(job.top2?.value(), "del");
+    assert.strictEqual(job.top3?.value(), "del");
+    assert.strictEqual(job.top4?.value(), "keep");
   });
 });
