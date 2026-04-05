@@ -9,6 +9,7 @@ import {
   adjustToSdItemCount,
   buildInheritedParameter,
   buildInheritedParameterArray,
+  buildOptionalParameter,
   buildRequiredParameter,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
@@ -359,6 +360,39 @@ suite("Parameter helpers", () => {
       (param) => param.defaultRawValue ?? param.rawValue,
     );
     assert.strictEqual(explicitTop4, "keep");
+  });
+
+  test("builds optional scalar parameters with explicit, default, and missing values", () => {
+    const { jobnet } = parseJobnets();
+
+    const explicitRg = buildOptionalParameter(
+      {
+        unit: jobnet,
+        parameter: "rg",
+        defaultRawValue: "9",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.strictEqual(explicitRg, "3");
+
+    const defaultAb = buildOptionalParameter(
+      {
+        unit: jobnet,
+        parameter: "ab",
+        defaultRawValue: "no",
+      },
+      (param) => param.defaultRawValue ?? param.rawValue,
+    );
+    assert.strictEqual(defaultAb, "no");
+
+    const missingCm = buildOptionalParameter(
+      {
+        unit: jobnet,
+        parameter: "cm",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.strictEqual(missingCm, undefined);
   });
 
   test("builds required parameters and keeps the missing-parameter error", () => {

@@ -227,6 +227,7 @@ import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
+  buildOptionalParameter,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
   buildRequiredParameter,
@@ -246,20 +247,24 @@ type ParamArg = ParamBase & {
 
 export class ParamFactory {
   static ab(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ab",
-      defaultRawValue: DEFAULTS.Ab,
-    });
-    return param ? new Ab(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ab",
+        defaultRawValue: DEFAULTS.Ab,
+      },
+      (param) => new Ab(param),
+    );
   }
   static abr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "abr",
-      defaultRawValue: DEFAULTS.Abr,
-    });
-    return param ? new Abr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "abr",
+        defaultRawValue: DEFAULTS.Abr,
+      },
+      (param) => new Abr(param),
+    );
   }
   static ar(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -269,12 +274,14 @@ export class ParamFactory {
     return params ? params.map((param) => new Ar(param)) : undefined;
   }
   static cd(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "cd",
-      defaultRawValue: DEFAULTS.Cd,
-    });
-    return param ? new Cd(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "cd",
+        defaultRawValue: DEFAULTS.Cd,
+      },
+      (param) => new Cd(param),
+    );
   }
   static cftd(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -297,12 +304,14 @@ export class ParamFactory {
     );
   }
   static cgs(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "cgs",
-      defaultRawValue: DEFAULTS.Cgs,
-    });
-    return param ? new Cgs(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "cgs",
+        defaultRawValue: DEFAULTS.Cgs,
+      },
+      (param) => new Cgs(param),
+    );
   }
   static cl(unit: UnitEntity) {
     return buildInheritedParameterArray(
@@ -314,40 +323,50 @@ export class ParamFactory {
     );
   }
   static cm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "cm",
-    });
-    return param ? new Cm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "cm",
+      },
+      (param) => new Cm(param),
+    );
   }
   static cmaif(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "cmaif",
-    });
-    return param ? new Cmaif(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "cmaif",
+      },
+      (param) => new Cmaif(param),
+    );
   }
   static cmsts(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "cmsts",
-    });
-    return param ? new Cmsts(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "cmsts",
+      },
+      (param) => new Cmsts(param),
+    );
   }
   static cond(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "cond",
-      defaultRawValue: DEFAULTS.Cond,
-    });
-    return param ? new Cond(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "cond",
+        defaultRawValue: DEFAULTS.Cond,
+      },
+      (param) => new Cond(param),
+    );
   }
   static cty(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "cty",
-    });
-    return param ? new Cty(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "cty",
+      },
+      (param) => new Cty(param),
+    );
   }
   static cy(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -369,130 +388,164 @@ export class ParamFactory {
     );
   }
   static da(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "da",
-    });
-    return param ? new Da(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "da",
+      },
+      (param) => new Da(param),
+    );
   }
   static de(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "de",
-      defaultRawValue: DEFAULTS.De,
-    });
-    return param ? new De(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "de",
+        defaultRawValue: DEFAULTS.De,
+      },
+      (param) => new De(param),
+    );
   }
   static ed(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ed",
-    });
-    return param ? new Ed(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ed",
+      },
+      (param) => new Ed(param),
+    );
   }
   static ega(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ega",
-      defaultRawValue: DEFAULTS.Ega,
-    });
-    return param ? new Ega(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ega",
+        defaultRawValue: DEFAULTS.Ega,
+      },
+      (param) => new Ega(param),
+    );
   }
   static ej(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ej",
-      defaultRawValue: DEFAULTS.Ej,
-    });
-    return param ? new Ej(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ej",
+        defaultRawValue: DEFAULTS.Ej,
+      },
+      (param) => new Ej(param),
+    );
   }
   static ejc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejc",
-      defaultRawValue: DEFAULTS.Ejc,
-    });
-    return param ? new Ejc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejc",
+        defaultRawValue: DEFAULTS.Ejc,
+      },
+      (param) => new Ejc(param),
+    );
   }
   static ejf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejf",
-    });
-    return param ? new Ejf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejf",
+      },
+      (param) => new Ejf(param),
+    );
   }
   static ejg(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejg",
-    });
-    return param ? new Ejg(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejg",
+      },
+      (param) => new Ejg(param),
+    );
   }
   static ejh(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejh",
-    });
-    return param ? new Ejh(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejh",
+      },
+      (param) => new Ejh(param),
+    );
   }
   static eji(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "eji",
-      defaultRawValue: DEFAULTS.Eji,
-    });
-    return param ? new Eji(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "eji",
+        defaultRawValue: DEFAULTS.Eji,
+      },
+      (param) => new Eji(param),
+    );
   }
   static ejl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejl",
-    });
-    return param ? new Ejl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejl",
+      },
+      (param) => new Ejl(param),
+    );
   }
   static ejm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejm",
-      defaultRawValue: DEFAULTS.Ejm,
-    });
-    return param ? new Ejm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejm",
+        defaultRawValue: DEFAULTS.Ejm,
+      },
+      (param) => new Ejm(param),
+    );
   }
   static ejn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejn",
-    });
-    return param ? new Ejn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejn",
+      },
+      (param) => new Ejn(param),
+    );
   }
   static ejs(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejs",
-    });
-    return param ? new Ejs(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejs",
+      },
+      (param) => new Ejs(param),
+    );
   }
   static ejt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejt",
-    });
-    return param ? new Ejt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejt",
+      },
+      (param) => new Ejt(param),
+    );
   }
   static eju(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "eju",
-      defaultRawValue: DEFAULTS.Eju,
-    });
-    return param ? new Eju(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "eju",
+        defaultRawValue: DEFAULTS.Eju,
+      },
+      (param) => new Eju(param),
+    );
   }
   static ejv(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ejv",
-    });
-    return param ? new Ejv(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ejv",
+      },
+      (param) => new Ejv(param),
+    );
   }
   static el(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -509,35 +562,43 @@ export class ParamFactory {
     return params ? params.map((param) => new Env(param)) : undefined;
   }
   static etm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "etm",
-    });
-    return param ? new Etm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "etm",
+      },
+      (param) => new Etm(param),
+    );
   }
   static etn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "etn",
-      defaultRawValue: DEFAULTS.Etn,
-    });
-    return param ? new Etn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "etn",
+        defaultRawValue: DEFAULTS.Etn,
+      },
+      (param) => new Etn(param),
+    );
   }
   static ets(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ets",
-      defaultRawValue: DEFAULTS.Ets,
-    });
-    return param ? new Ets(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ets",
+        defaultRawValue: DEFAULTS.Ets,
+      },
+      (param) => new Ets(param),
+    );
   }
   static eu(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "eu",
-      defaultRawValue: DEFAULTS.Eu,
-    });
-    return param ? new Eu(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "eu",
+        defaultRawValue: DEFAULTS.Eu,
+      },
+      (param) => new Eu(param),
+    );
   }
   static eun(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -547,171 +608,217 @@ export class ParamFactory {
     return params ? params.map((param) => new Eun(param)) : undefined;
   }
   static ev(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ev",
-    });
-    return param ? new Ev(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ev",
+      },
+      (param) => new Ev(param),
+    );
   }
   static evdet(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evdet",
-    });
-    return param ? new Evdet(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evdet",
+      },
+      (param) => new Evdet(param),
+    );
   }
   static evesc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evesc",
-      defaultRawValue: DEFAULTS.Evesc,
-    });
-    return param ? new Evesc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evesc",
+        defaultRawValue: DEFAULTS.Evesc,
+      },
+      (param) => new Evesc(param),
+    );
   }
   static evgid(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evgid",
-    });
-    return param ? new Evgid(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evgid",
+      },
+      (param) => new Evgid(param),
+    );
   }
   static evgrp(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evgrp",
-    });
-    return param ? new Evgrp(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evgrp",
+      },
+      (param) => new Evgrp(param),
+    );
   }
   static evhst(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evhst",
-    });
-    return param ? new Evhst(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evhst",
+      },
+      (param) => new Evhst(param),
+    );
   }
   static evipa(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evipa",
-    });
-    return param ? new Evipa(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evipa",
+      },
+      (param) => new Evipa(param),
+    );
   }
   static evpid(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evpid",
-    });
-    return param ? new Evpid(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evpid",
+      },
+      (param) => new Evpid(param),
+    );
   }
   static evsfr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evsfr",
-    });
-    return param ? new Evsfr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evsfr",
+      },
+      (param) => new Evsfr(param),
+    );
   }
   static evsid(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evsid",
-    });
-    return param ? new Evsid(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evsid",
+      },
+      (param) => new Evsid(param),
+    );
   }
   static evsms(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evsms",
-    });
-    return param ? new Evsms(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evsms",
+      },
+      (param) => new Evsms(param),
+    );
   }
   static evspl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evspl",
-      defaultRawValue: DEFAULTS.Evspl,
-    });
-    return param ? new Evspl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evspl",
+        defaultRawValue: DEFAULTS.Evspl,
+      },
+      (param) => new Evspl(param),
+    );
   }
   static evsrc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evsrc",
-      defaultRawValue: DEFAULTS.Evsrc,
-    });
-    return param ? new Evsrc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evsrc",
+        defaultRawValue: DEFAULTS.Evsrc,
+      },
+      (param) => new Evsrc(param),
+    );
   }
   static evsrt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evsrt",
-      defaultRawValue: DEFAULTS.Evsrt,
-    });
-    return param ? new Evsrt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evsrt",
+        defaultRawValue: DEFAULTS.Evsrt,
+      },
+      (param) => new Evsrt(param),
+    );
   }
   static evssv(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evssv",
-      defaultRawValue: DEFAULTS.Evssv,
-    });
-    return param ? new Evssv(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evssv",
+        defaultRawValue: DEFAULTS.Evssv,
+      },
+      (param) => new Evssv(param),
+    );
   }
   static evtmc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evtmc",
-      defaultRawValue: DEFAULTS.Evtmc,
-    });
-    return param ? new Evtmc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evtmc",
+        defaultRawValue: DEFAULTS.Evtmc,
+      },
+      (param) => new Evtmc(param),
+    );
   }
   static evuid(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evuid",
-    });
-    return param ? new Evuid(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evuid",
+      },
+      (param) => new Evuid(param),
+    );
   }
   static evusr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evusr",
-    });
-    return param ? new Evusr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evusr",
+      },
+      (param) => new Evusr(param),
+    );
   }
   static evwfr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evwfr",
-    });
-    return param ? new Evwfr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evwfr",
+      },
+      (param) => new Evwfr(param),
+    );
   }
   static evwid(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evwid",
-    });
-    return param ? new Evwid(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evwid",
+      },
+      (param) => new Evwid(param),
+    );
   }
   static evwms(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evwms",
-    });
-    return param ? new Evwms(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evwms",
+      },
+      (param) => new Evwms(param),
+    );
   }
   static evwsv(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "evwsv",
-    });
-    return param ? new Evwsv(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "evwsv",
+      },
+      (param) => new Evwsv(param),
+    );
   }
   static ex(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ex",
-    });
-    return param ? new Ex(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ex",
+      },
+      (param) => new Ex(param),
+    );
   }
   static ey(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -733,175 +840,221 @@ export class ParamFactory {
     );
   }
   static f(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "f",
-    });
-    return param ? new F(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "f",
+      },
+      (param) => new F(param),
+    );
   }
   static fd(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "fd",
-    });
-    return param ? new Fd(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "fd",
+      },
+      (param) => new Fd(param),
+    );
   }
   static flco(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "flco",
-      defaultRawValue: DEFAULTS.Flco,
-    });
-    return param ? new Flco(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "flco",
+        defaultRawValue: DEFAULTS.Flco,
+      },
+      (param) => new Flco(param),
+    );
   }
   static flwc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "flwc",
-      defaultRawValue: DEFAULTS.Flwc,
-    });
-    return param ? new Flwc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "flwc",
+        defaultRawValue: DEFAULTS.Flwc,
+      },
+      (param) => new Flwc(param),
+    );
   }
   static flwf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "flwf",
-    });
-    return param ? new Flwf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "flwf",
+      },
+      (param) => new Flwf(param),
+    );
   }
   static flwi(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "flwi",
-      defaultRawValue: DEFAULTS.Flwi,
-    });
-    return param ? new Flwi(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "flwi",
+        defaultRawValue: DEFAULTS.Flwi,
+      },
+      (param) => new Flwi(param),
+    );
   }
   static fxg(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "fxg",
-      defaultRawValue: DEFAULTS.Fxg,
-    });
-    return param ? new Fxg(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "fxg",
+        defaultRawValue: DEFAULTS.Fxg,
+      },
+      (param) => new Fxg(param),
+    );
   }
   static gty(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "gty",
-      defaultRawValue: DEFAULTS.Gty,
-    });
-    return param ? new Gty(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "gty",
+        defaultRawValue: DEFAULTS.Gty,
+      },
+      (param) => new Gty(param),
+    );
   }
   static ha(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ha",
-      defaultRawValue: DEFAULTS.Ha,
-    });
-    return param ? new Ha(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ha",
+        defaultRawValue: DEFAULTS.Ha,
+      },
+      (param) => new Ha(param),
+    );
   }
   static htcdm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htcdm",
-    });
-    return param ? new Htcdm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htcdm",
+      },
+      (param) => new Htcdm(param),
+    );
   }
   static htcfl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htcfl",
-    });
-    return param ? new Htcfl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htcfl",
+      },
+      (param) => new Htcfl(param),
+    );
   }
   static htexm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htexm",
-      defaultRawValue: DEFAULTS.Htexm,
-    });
-    return param ? new Htexm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htexm",
+        defaultRawValue: DEFAULTS.Htexm,
+      },
+      (param) => new Htexm(param),
+    );
   }
   static htknd(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htknd",
-      defaultRawValue: DEFAULTS.Htknd,
-    });
-    return param ? new Htknd(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htknd",
+        defaultRawValue: DEFAULTS.Htknd,
+      },
+      (param) => new Htknd(param),
+    );
   }
   static htrbf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htrbf",
-    });
-    return param ? new Htrbf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htrbf",
+      },
+      (param) => new Htrbf(param),
+    );
   }
   static htrhf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htrhf",
-    });
-    return param ? new Htrhf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htrhf",
+      },
+      (param) => new Htrhf(param),
+    );
   }
   static htrqf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htrqf",
-    });
-    return param ? new Htrqf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htrqf",
+      },
+      (param) => new Htrqf(param),
+    );
   }
   static htrqm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htrqm",
-    });
-    return param ? new Htrqm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htrqm",
+      },
+      (param) => new Htrqm(param),
+    );
   }
   static htrqu(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htrqu",
-    });
-    return param ? new Htrqu(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htrqu",
+      },
+      (param) => new Htrqu(param),
+    );
   }
   static htspt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htspt",
-      defaultRawValue: DEFAULTS.Htspt,
-    });
-    return param ? new Htspt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htspt",
+        defaultRawValue: DEFAULTS.Htspt,
+      },
+      (param) => new Htspt(param),
+    );
   }
   static htstf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "htstf",
-    });
-    return param ? new Htstf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "htstf",
+      },
+      (param) => new Htstf(param),
+    );
   }
   static jc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "jc",
-    });
-    return param ? new Jc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "jc",
+      },
+      (param) => new Jc(param),
+    );
   }
   static jd(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "jd",
-      defaultRawValue: DEFAULTS.Jd,
-    });
-    return param ? new Jd(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "jd",
+        defaultRawValue: DEFAULTS.Jd,
+      },
+      (param) => new Jd(param),
+    );
   }
   static jdf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "jdf",
-    });
-    return param ? new Jdf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "jdf",
+      },
+      (param) => new Jdf(param),
+    );
   }
   static jpoif(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -911,82 +1064,104 @@ export class ParamFactory {
     return params ? params.map((param) => new Jpoif(param)) : undefined;
   }
   static jty(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "jty",
-      defaultRawValue: DEFAULTS.Jty,
-    });
-    return param ? new Jty(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "jty",
+        defaultRawValue: DEFAULTS.Jty,
+      },
+      (param) => new Jty(param),
+    );
   }
   static lfcre(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfcre",
-    });
-    return param ? new Lfcre(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfcre",
+      },
+      (param) => new Lfcre(param),
+    );
   }
   static lfdft(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfdft",
-    });
-    return param ? new Lfdft(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfdft",
+      },
+      (param) => new Lfdft(param),
+    );
   }
   static lffnm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lffnm",
-    });
-    return param ? new Lffnm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lffnm",
+      },
+      (param) => new Lffnm(param),
+    );
   }
   static lfhds(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfhds",
-    });
-    return param ? new Lfhds(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfhds",
+      },
+      (param) => new Lfhds(param),
+    );
   }
   static lfmks(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfmks",
-    });
-    return param ? new Lfmks(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfmks",
+      },
+      (param) => new Lfmks(param),
+    );
   }
   static lfmxl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfmxl",
-    });
-    return param ? new Lfmxl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfmxl",
+      },
+      (param) => new Lfmxl(param),
+    );
   }
   static lfrft(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfrft",
-    });
-    return param ? new Lfrft(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfrft",
+      },
+      (param) => new Lfrft(param),
+    );
   }
   static lfsiv(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfsiv",
-    });
-    return param ? new Lfsiv(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfsiv",
+      },
+      (param) => new Lfsiv(param),
+    );
   }
   static lfsrc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lfsrc",
-    });
-    return param ? new Lfsrc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lfsrc",
+      },
+      (param) => new Lfsrc(param),
+    );
   }
   static lftpd(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "lftpd",
-    });
-    return param ? new Lftpd(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "lftpd",
+      },
+      (param) => new Lftpd(param),
+    );
   }
   static ln(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -996,12 +1171,14 @@ export class ParamFactory {
     return buildSortedRuleParameters(params, (param) => new Ln(param));
   }
   static mcs(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mcs",
-      defaultRawValue: DEFAULTS.Mcs,
-    });
-    return param ? new Mcs(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mcs",
+        defaultRawValue: DEFAULTS.Mcs,
+      },
+      (param) => new Mcs(param),
+    );
   }
   static md(unit: UnitEntity) {
     return buildInheritedParameter(
@@ -1014,11 +1191,13 @@ export class ParamFactory {
     );
   }
   static mh(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mh",
-    });
-    return param ? new Mh(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mh",
+      },
+      (param) => new Mh(param),
+    );
   }
   static mladr(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -1028,47 +1207,59 @@ export class ParamFactory {
     return params ? params.map((param) => new Mladr(param)) : undefined;
   }
   static mlafl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mlafl",
-    });
-    return param ? new Mlafl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mlafl",
+      },
+      (param) => new Mlafl(param),
+    );
   }
   static mlatf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mlatf",
-    });
-    return param ? new Mlatf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mlatf",
+      },
+      (param) => new Mlatf(param),
+    );
   }
   static mlftx(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mlftx",
-    });
-    return param ? new Mlftx(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mlftx",
+      },
+      (param) => new Mlftx(param),
+    );
   }
   static mllst(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mllst",
-    });
-    return param ? new Mllst(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mllst",
+      },
+      (param) => new Mllst(param),
+    );
   }
   static mlprf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mlprf",
-    });
-    return param ? new Mlprf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mlprf",
+      },
+      (param) => new Mlprf(param),
+    );
   }
   static mlsav(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mlsav",
-      defaultRawValue: DEFAULTS.Mlsav,
-    });
-    return param ? new Mlsav(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mlsav",
+        defaultRawValue: DEFAULTS.Mlsav,
+      },
+      (param) => new Mlsav(param),
+    );
   }
   static mlsbj(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -1078,18 +1269,22 @@ export class ParamFactory {
     return params ? params.map((param) => new Mlsbj(param)) : undefined;
   }
   static mlsfd(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mlsfd",
-    });
-    return param ? new Mlsfd(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mlsfd",
+      },
+      (param) => new Mlsfd(param),
+    );
   }
   static mlstx(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mlstx",
-    });
-    return param ? new Mlstx(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mlstx",
+      },
+      (param) => new Mlstx(param),
+    );
   }
   static mltxt(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -1099,224 +1294,286 @@ export class ParamFactory {
     return params ? params.map((param) => new Mltxt(param)) : undefined;
   }
   static mm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mm",
-      defaultRawValue: DEFAULTS.Mm,
-    });
-    return param ? new Mm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mm",
+        defaultRawValue: DEFAULTS.Mm,
+      },
+      (param) => new Mm(param),
+    );
   }
   static mp(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mp",
-      defaultRawValue: DEFAULTS.Mp,
-    });
-    return param ? new Mp(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mp",
+        defaultRawValue: DEFAULTS.Mp,
+      },
+      (param) => new Mp(param),
+    );
   }
   static mqcor(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqcor",
-    });
-    return param ? new Mqcor(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqcor",
+      },
+      (param) => new Mqcor(param),
+    );
   }
   static mqdsc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqdsc",
-    });
-    return param ? new Mqdsc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqdsc",
+      },
+      (param) => new Mqdsc(param),
+    );
   }
   static mqeqn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqeqn",
-    });
-    return param ? new Mqeqn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqeqn",
+      },
+      (param) => new Mqeqn(param),
+    );
   }
   static mqhld(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqhld",
-    });
-    return param ? new Mqhld(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqhld",
+      },
+      (param) => new Mqhld(param),
+    );
   }
   static mqmdl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqmdl",
-    });
-    return param ? new Mqmdl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqmdl",
+      },
+      (param) => new Mqmdl(param),
+    );
   }
   static mqmdn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqmdn",
-    });
-    return param ? new Mqmdn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqmdn",
+      },
+      (param) => new Mqmdn(param),
+    );
   }
   static mqmfn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqmfn",
-    });
-    return param ? new Mqmfn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqmfn",
+      },
+      (param) => new Mqmfn(param),
+    );
   }
   static mqmgr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqmgr",
-    });
-    return param ? new Mqmgr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqmgr",
+      },
+      (param) => new Mqmgr(param),
+    );
   }
   static mqpgm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqpgm",
-    });
-    return param ? new Mqpgm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqpgm",
+      },
+      (param) => new Mqpgm(param),
+    );
   }
   static mqpri(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqpri",
-    });
-    return param ? new Mqpri(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqpri",
+      },
+      (param) => new Mqpri(param),
+    );
   }
   static mqprm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqprm",
-    });
-    return param ? new Mqprm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqprm",
+      },
+      (param) => new Mqprm(param),
+    );
   }
   static mqque(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqque",
-    });
-    return param ? new Mqque(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqque",
+      },
+      (param) => new Mqque(param),
+    );
   }
   static mqsfn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mqsfn",
-    });
-    return param ? new Mqsfn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mqsfn",
+      },
+      (param) => new Mqsfn(param),
+    );
   }
   static ms(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ms",
-      defaultRawValue: DEFAULTS.Ms,
-    });
-    return param ? new Ms(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ms",
+        defaultRawValue: DEFAULTS.Ms,
+      },
+      (param) => new Ms(param),
+    );
   }
   static msapl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msapl",
-    });
-    return param ? new Msapl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msapl",
+      },
+      (param) => new Msapl(param),
+    );
   }
   static mshld(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mshld",
-    });
-    return param ? new Mshld(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mshld",
+      },
+      (param) => new Mshld(param),
+    );
   }
   static msjnl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msjnl",
-    });
-    return param ? new Msjnl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msjnl",
+      },
+      (param) => new Msjnl(param),
+    );
   }
   static mslbl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mslbl",
-    });
-    return param ? new Mslbl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mslbl",
+      },
+      (param) => new Mslbl(param),
+    );
   }
   static mslmt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mslmt",
-    });
-    return param ? new Mslmt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mslmt",
+      },
+      (param) => new Mslmt(param),
+    );
   }
   static msmod(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msmod",
-    });
-    return param ? new Msmod(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msmod",
+      },
+      (param) => new Msmod(param),
+    );
   }
   static mspri(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mspri",
-    });
-    return param ? new Mspri(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mspri",
+      },
+      (param) => new Mspri(param),
+    );
   }
   static msqlb(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msqlb",
-    });
-    return param ? new Msqlb(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msqlb",
+      },
+      (param) => new Msqlb(param),
+    );
   }
   static msqpt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msqpt",
-    });
-    return param ? new Msqpt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msqpt",
+      },
+      (param) => new Msqpt(param),
+    );
   }
   static msrer(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msrer",
-    });
-    return param ? new Msrer(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msrer",
+      },
+      (param) => new Msrer(param),
+    );
   }
   static mssvf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mssvf",
-    });
-    return param ? new Mssvf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mssvf",
+      },
+      (param) => new Mssvf(param),
+    );
   }
   static mstfn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mstfn",
-    });
-    return param ? new Mstfn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mstfn",
+      },
+      (param) => new Mstfn(param),
+    );
   }
   static msttp(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msttp",
-    });
-    return param ? new Msttp(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msttp",
+      },
+      (param) => new Msttp(param),
+    );
   }
   static msunr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "msunr",
-    });
-    return param ? new Msunr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "msunr",
+      },
+      (param) => new Msunr(param),
+    );
   }
   static mu(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "mu",
-    });
-    return param ? new Mu(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "mu",
+      },
+      (param) => new Mu(param),
+    );
   }
   static ncex(unit: UnitEntity, defaultRawValue?: string) {
     const param = this.#checkAndGet({
@@ -1327,11 +1584,13 @@ export class ParamFactory {
     return param ? new Ncex(param) : undefined;
   }
   static nchn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "nchn",
-    });
-    return param ? new Nchn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "nchn",
+      },
+      (param) => new Nchn(param),
+    );
   }
   static ncl(unit: UnitEntity, defaultRawValue?: string) {
     const param = this.#checkAndGet({
@@ -1342,18 +1601,22 @@ export class ParamFactory {
     return param ? new Ncl(param) : undefined;
   }
   static ncn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ncn",
-    });
-    return param ? new Ncn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ncn",
+      },
+      (param) => new Ncn(param),
+    );
   }
   static ncr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ncr",
-    });
-    return param ? new Ncr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ncr",
+      },
+      (param) => new Ncr(param),
+    );
   }
   static ncs(unit: UnitEntity, defaultRawValue?: string) {
     const param = this.#checkAndGet({
@@ -1364,11 +1627,13 @@ export class ParamFactory {
     return param ? new Ncs(param) : undefined;
   }
   static ncsv(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ncsv",
-    });
-    return param ? new Ncsv(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ncsv",
+      },
+      (param) => new Ncsv(param),
+    );
   }
   static ni(unit: UnitEntity) {
     return buildInheritedParameter(
@@ -1381,82 +1646,104 @@ export class ParamFactory {
     );
   }
   static nmg(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "nmg",
-      defaultRawValue: DEFAULTS.Nmg,
-    });
-    return param ? new Nmg(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "nmg",
+        defaultRawValue: DEFAULTS.Nmg,
+      },
+      (param) => new Nmg(param),
+    );
   }
   static ntcls(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntcls",
-    });
-    return param ? new Ntcls(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntcls",
+      },
+      (param) => new Ntcls(param),
+    );
   }
   static ntdis(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntdis",
-    });
-    return param ? new Ntdis(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntdis",
+      },
+      (param) => new Ntdis(param),
+    );
   }
   static nteid(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "nteid",
-    });
-    return param ? new Nteid(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "nteid",
+      },
+      (param) => new Nteid(param),
+    );
   }
   static ntevt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntevt",
-    });
-    return param ? new Ntevt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntevt",
+      },
+      (param) => new Ntevt(param),
+    );
   }
   static ntlgt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntlgt",
-    });
-    return param ? new Ntlgt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntlgt",
+      },
+      (param) => new Ntlgt(param),
+    );
   }
   static ntncl(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntncl",
-    });
-    return param ? new Ntncl(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntncl",
+      },
+      (param) => new Ntncl(param),
+    );
   }
   static ntnei(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntnei",
-    });
-    return param ? new Ntnei(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntnei",
+      },
+      (param) => new Ntnei(param),
+    );
   }
   static ntnsr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntnsr",
-    });
-    return param ? new Ntnsr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntnsr",
+      },
+      (param) => new Ntnsr(param),
+    );
   }
   static ntolg(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntolg",
-    });
-    return param ? new Ntolg(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntolg",
+      },
+      (param) => new Ntolg(param),
+    );
   }
   static ntsrc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ntsrc",
-    });
-    return param ? new Ntsrc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ntsrc",
+      },
+      (param) => new Ntsrc(param),
+    );
   }
   static op(unit: UnitEntity) {
     return buildInheritedParameterArray(
@@ -1468,12 +1755,14 @@ export class ParamFactory {
     );
   }
   static pfm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pfm",
-      defaultRawValue: DEFAULTS.Pfm,
-    });
-    return param ? new Pfm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pfm",
+        defaultRawValue: DEFAULTS.Pfm,
+      },
+      (param) => new Pfm(param),
+    );
   }
   static pr(unit: UnitEntity) {
     return buildInheritedParameter(
@@ -1486,104 +1775,132 @@ export class ParamFactory {
     );
   }
   static prm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "prm",
-    });
-    return param ? new Prm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "prm",
+      },
+      (param) => new Prm(param),
+    );
   }
   static pwlf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwlf",
-    });
-    return param ? new Pwlf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwlf",
+      },
+      (param) => new Pwlf(param),
+    );
   }
   static pwlt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwlt",
-    });
-    return param ? new Pwlt(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwlt",
+      },
+      (param) => new Pwlt(param),
+    );
   }
   static pwrf(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwrf",
-    });
-    return param ? new Pwrf(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwrf",
+      },
+      (param) => new Pwrf(param),
+    );
   }
   static pwrh(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwrh",
-    });
-    return param ? new Pwrh(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwrh",
+      },
+      (param) => new Pwrh(param),
+    );
   }
   static pwrn(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwrn",
-    });
-    return param ? new Pwrn(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwrn",
+      },
+      (param) => new Pwrn(param),
+    );
   }
   static pwrp(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwrp",
-    });
-    return param ? new Pwrp(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwrp",
+      },
+      (param) => new Pwrp(param),
+    );
   }
   static pwrr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwrr",
-    });
-    return param ? new Pwrr(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwrr",
+      },
+      (param) => new Pwrr(param),
+    );
   }
   static pwrw(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pwrw",
-    });
-    return param ? new Pwrw(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "pwrw",
+      },
+      (param) => new Pwrw(param),
+    );
   }
   static qm(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "qm",
-    });
-    return param ? new Qm(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "qm",
+      },
+      (param) => new Qm(param),
+    );
   }
   static qu(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "qu",
-    });
-    return param ? new Qu(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "qu",
+      },
+      (param) => new Qu(param),
+    );
   }
   static rec(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "rec",
-      defaultRawValue: DEFAULTS.Rec,
-    });
-    return param ? new Rec(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "rec",
+        defaultRawValue: DEFAULTS.Rec,
+      },
+      (param) => new Rec(param),
+    );
   }
   static rei(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "rei",
-      defaultRawValue: DEFAULTS.Rei,
-    });
-    return param ? new Rei(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "rei",
+        defaultRawValue: DEFAULTS.Rei,
+      },
+      (param) => new Rei(param),
+    );
   }
   static req(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "req",
-    });
-    return param ? new Req(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "req",
+      },
+      (param) => new Req(param),
+    );
   }
   static rg(unit: N) {
     return buildRootJobnetParameter(
@@ -1597,32 +1914,40 @@ export class ParamFactory {
     );
   }
   static rh(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "rh",
-    });
-    return param ? new Rh(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "rh",
+      },
+      (param) => new Rh(param),
+    );
   }
   static rje(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "rje",
-    });
-    return param ? new Rje(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "rje",
+      },
+      (param) => new Rje(param),
+    );
   }
   static rjs(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "rjs",
-    });
-    return param ? new Rjs(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "rjs",
+      },
+      (param) => new Rjs(param),
+    );
   }
   static sc(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "sc",
-    });
-    return param ? new Sc(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "sc",
+      },
+      (param) => new Sc(param),
+    );
   }
   static sd(unit: N) {
     return buildRootJobnetRuleParameters(
@@ -1646,19 +1971,23 @@ export class ParamFactory {
     );
   }
   static se(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "se",
-    });
-    return param ? new Se(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "se",
+      },
+      (param) => new Se(param),
+    );
   }
   static sea(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "sea",
-      defaultRawValue: DEFAULTS.Sea,
-    });
-    return param ? new Sea(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "sea",
+        defaultRawValue: DEFAULTS.Sea,
+      },
+      (param) => new Sea(param),
+    );
   }
   static sh(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -1700,26 +2029,32 @@ export class ParamFactory {
     );
   }
   static si(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "si",
-    });
-    return param ? new Si(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "si",
+      },
+      (param) => new Si(param),
+    );
   }
   static so(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "so",
-    });
-    return param ? new So(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "so",
+      },
+      (param) => new So(param),
+    );
   }
   static soa(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "soa",
-      defaultRawValue: DEFAULTS.Soa,
-    });
-    return param ? new Soa(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "soa",
+        defaultRawValue: DEFAULTS.Soa,
+      },
+      (param) => new Soa(param),
+    );
   }
   static st(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -1771,68 +2106,86 @@ export class ParamFactory {
     );
   }
   static sz(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "sz",
-    });
-    return param ? new Sz(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "sz",
+      },
+      (param) => new Sz(param),
+    );
   }
   static t(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "t",
-    });
-    return param ? new T(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "t",
+      },
+      (param) => new T(param),
+    );
   }
   static td1(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "td1",
-    });
-    return param ? new Td1(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "td1",
+      },
+      (param) => new Td1(param),
+    );
   }
   static td2(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "td2",
-    });
-    return param ? new Td2(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "td2",
+      },
+      (param) => new Td2(param),
+    );
   }
   static td3(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "td3",
-    });
-    return param ? new Td3(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "td3",
+      },
+      (param) => new Td3(param),
+    );
   }
   static td4(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "td4",
-    });
-    return param ? new Td4(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "td4",
+      },
+      (param) => new Td4(param),
+    );
   }
   static te(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "te",
-    });
-    return param ? new Te(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "te",
+      },
+      (param) => new Te(param),
+    );
   }
   static tho(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "tho",
-      defaultRawValue: DEFAULTS.Tho,
-    });
-    return param ? new Tho(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "tho",
+        defaultRawValue: DEFAULTS.Tho,
+      },
+      (param) => new Tho(param),
+    );
   }
   static tmitv(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "tmitv",
-    });
-    return param ? new Tmitv(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "tmitv",
+      },
+      (param) => new Tmitv(param),
+    );
   }
   static top1(unit: J | Cj) {
     return buildTopParameter(
@@ -1875,32 +2228,40 @@ export class ParamFactory {
     );
   }
   static ts1(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ts1",
-    });
-    return param ? new Ts1(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ts1",
+      },
+      (param) => new Ts1(param),
+    );
   }
   static ts2(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ts2",
-    });
-    return param ? new Ts2(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ts2",
+      },
+      (param) => new Ts2(param),
+    );
   }
   static ts3(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ts3",
-    });
-    return param ? new Ts3(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ts3",
+      },
+      (param) => new Ts3(param),
+    );
   }
   static ts4(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ts4",
-    });
-    return param ? new Ts4(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "ts4",
+      },
+      (param) => new Ts4(param),
+    );
   }
   static ty(unit: UnitEntity) {
     return buildRequiredParameter(
@@ -1913,19 +2274,23 @@ export class ParamFactory {
     );
   }
   static uem(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "uem",
-      defaultRawValue: DEFAULTS.Uem,
-    });
-    return param ? new Uem(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "uem",
+        defaultRawValue: DEFAULTS.Uem,
+      },
+      (param) => new Uem(param),
+    );
   }
   static un(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "un",
-    });
-    return param ? new Un(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "un",
+      },
+      (param) => new Un(param),
+    );
   }
   static unit(unit1: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1955,11 +2320,13 @@ export class ParamFactory {
     );
   }
   static wkp(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "wkp",
-    });
-    return param ? new Wkp(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "wkp",
+      },
+      (param) => new Wkp(param),
+    );
   }
   static wt(unit: UnitEntity) {
     const params = this.#checkAndGetArray({
@@ -1982,11 +2349,13 @@ export class ParamFactory {
     );
   }
   static wth(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "wt",
-    });
-    return param ? new Wth(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: "wt",
+      },
+      (param) => new Wth(param),
+    );
   }
 
   /** checkAndGet */
