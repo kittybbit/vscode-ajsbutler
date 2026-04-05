@@ -11,6 +11,7 @@ import { resolveUnitLayout } from "../units/unitLayoutHelpers";
 import { resolveHasSchedule } from "../units/unitScheduleStateHelpers";
 import { resolveHasWaitedFor } from "../units/unitWaitStateHelpers";
 import { AjsGroupType, AjsNormalizationWarning } from "./AjsDocument";
+import { buildMissingUnitTypeWarning } from "./normalizeWarningHelpers";
 
 export const resolveNormalizedUnitType = (
   unit: Unit,
@@ -21,11 +22,7 @@ export const resolveNormalizedUnitType = (
     return tyValue;
   }
 
-  warnings.push({
-    code: "missing-unit-type",
-    message: `Unit type could not be resolved for ${unit.absolutePath()}.`,
-    unitPath: unit.absolutePath(),
-  });
+  warnings.push(buildMissingUnitTypeWarning(unit.absolutePath()));
   return "g";
 };
 

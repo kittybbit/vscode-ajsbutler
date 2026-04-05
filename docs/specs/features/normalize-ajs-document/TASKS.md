@@ -95,4 +95,6 @@
 - [x] Extract shared normalize-relation helpers so `ar` relation parsing,
       child resolution, and warning generation no longer live only inside
       `normalizeAjsDocument.ts`
+- [x] Extract shared normalize-warning helpers so warning payload construction
+      no longer lives inline in normalization helpers
 - [x] Document which semantics intentionally remain in application view adapters

@@ -5,6 +5,10 @@ import {
   parseUnitEdge,
 } from "../parameters/unitEdgeHelpers";
 import { AjsNormalizationWarning, AjsRelation, AjsUnit } from "./AjsDocument";
+import {
+  buildInvalidRelationWarning,
+  buildMissingRelationTargetWarning,
+} from "./normalizeWarningHelpers";
 
 type ParsedNormalizedRelation = {
   sourceName: string;
@@ -38,22 +42,14 @@ export const resolveNormalizedRelations = (
     .map(parseNormalizedRelation)
     .flatMap((relation) => {
       if (!relation) {
-        warnings.push({
-          code: "invalid-dependency",
-          message: `Dependency could not be parsed for ${unit.absolutePath()}.`,
-          unitPath: unit.absolutePath(),
-        });
+        warnings.push(buildInvalidRelationWarning(unit.absolutePath()));
         return [];
       }
 
       const sourceUnit = childByName.get(relation.sourceName);
       const targetUnit = childByName.get(relation.targetName);
       if (!sourceUnit || !targetUnit) {
-        warnings.push({
-          code: "missing-dependency-target",
-          message: `Dependency target was not found for ${unit.absolutePath()}.`,
-          unitPath: unit.absolutePath(),
-        });
+        warnings.push(buildMissingRelationTargetWarning(unit.absolutePath()));
         return [];
       }
 
