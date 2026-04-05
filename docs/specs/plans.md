@@ -112,6 +112,9 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model mapping now reuses shared normalize-unit helpers so
   type/group/comment/layout/root-jobnet/schedule/wait derivation no longer
   lives only inside `normalizeAjsDocument.ts`.
+- normalized-model mapping now reuses shared normalize-relation helpers so
+  `ar` relation parsing, child resolution, and warning generation no longer
+  live only inside `normalizeAjsDocument.ts`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -217,8 +220,8 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract normalize-unit helper functions so non-relation derivation logic is not
-kept inline in `normalizeAjsDocument.ts`.
+Extract normalize-relation helper functions so relation parsing and warning
+resolution are not kept inline in `normalizeAjsDocument.ts`.
 
 ### Why
 
