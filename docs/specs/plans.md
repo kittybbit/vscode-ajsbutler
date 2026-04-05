@@ -94,6 +94,8 @@ This file is the high-level index for the per-feature plan structure in
   `N`, and `Qj` stop routing the same semantics through a misc utility module.
 - shared depth helpers now resolve absolute-path-based depth so wrapper and
   normalized-model logic stop maintaining separate depth calculation rules.
+- normalized-model mapping now reuses the shared wait-state helper so wrapper
+  and normalized-model wait detection fully share the same `eun` rule.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -199,20 +201,20 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared depth helpers so duplicated depth calculation uses a shared
-implementation.
+Reuse the shared wait-state helper from normalized-model mapping so duplicated
+`eun` wait detection uses one implementation.
 
 ### Why
 
-Depth calculation currently lives in both wrapper and normalized-model code
-paths with separate implementations. Pulling that into one shared helper makes
-the depth rule explicit and separately testable.
+Wait detection is already shared for wrappers, but normalized-model mapping
+still keeps a local `eun` check. Reusing the same helper removes the last
+separate implementation of that rule.
 
 ### Scope
 
-- add a shared helper for resolving depth from unit absolute paths
-- switch wrapper and normalized-model depth calculation to use the helper
-- add focused tests for depth resolution
+- expand the shared wait-state helper so it accepts normalized-model inputs
+- switch normalized-model wait detection to use the helper
+- add focused tests for string-based wait-state resolution
 
 ### Non-Goals
 
@@ -232,27 +234,28 @@ the depth rule explicit and separately testable.
 
 #### Use case
 
-Shared depth helper extraction.
+Shared wait-state helper reuse.
 
 #### Layers affected
 
-- domain: shared depth helper and depth resolution cleanup
+- domain: shared wait-state helper reuse across wrapper and normalized-model code
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep depth behavior identical to existing wrapper and normalized behavior.
-- Limit the slice to depth resolution extraction only.
+- Keep wait detection behavior identical to existing wrapper and normalized
+  behavior.
+- Limit the slice to unifying the wait-state helper call path only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves depth from absolute paths
-- [ ] wrapper and normalized-model depth calculation delegate to the helper
+- [ ] shared wait-state helper accepts normalized-model inputs
+- [ ] normalized-model wait detection delegates to the shared helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for depth resolution
+- add helper coverage for string-based wait-state resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -260,11 +263,12 @@ Shared depth helper extraction.
 
 ### Risks
 
-- depth helper extraction could accidentally change root depth handling
-- wrapper and normalized-model code could diverge if one call site is missed
+- helper generalization could accidentally change wrapper wait detection
+- normalized-model mapping could still keep a separate wait check if a call
+  site is missed
 
 ### Rollback Plan
 
-- restore inline depth calculation if behavior changes
+- restore the local normalized-model wait check if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
