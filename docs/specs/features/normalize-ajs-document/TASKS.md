@@ -57,4 +57,6 @@
       sibling `ar` lookup and relation-to-unit mapping logic
 - [x] Expose shared recovery-type helpers so wrapper and normalized-model
       recovery semantics no longer drift apart
+- [x] Expose shared layout helpers so wrapper and normalized-model `el`
+      interpretation no longer drift apart
 - [x] Document which semantics intentionally remain in application view adapters

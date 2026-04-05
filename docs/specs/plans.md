@@ -73,6 +73,8 @@ This file is the high-level index for the per-feature plan structure in
   logic inline.
 - shared unit-type helpers now resolve recovery semantics so `UnitEntity` and
   normalized AJS mapping stop maintaining duplicate `isRecovery` rules.
+- shared unit-layout helpers now resolve `el`-based coordinates so `UnitEntity`
+  and normalized AJS mapping stop maintaining duplicate layout parsing rules.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -178,21 +180,21 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared recovery-type helpers so wrapper and normalized-model
-`isRecovery` semantics use the same implementation.
+Extract shared layout helpers so wrapper and normalized-model `el`
+interpretation use the same implementation.
 
 ### Why
 
-`isRecovery` rules currently exist in both `UnitEntity` and
+`el`-based coordinate parsing currently exists in both `UnitEntity` and
 `normalizeAjsDocument`. Pulling that logic into one shared helper reduces the
 risk of drift between wrapper behavior and normalized-model behavior.
 
 ### Scope
 
-- add a shared helper for recovery-type resolution from `TySymbol`
+- add a shared helper for resolving unit layout from raw `el` parameter values
 - switch both `UnitEntity` and normalized AJS mapping to use the helper
-- add focused tests for recovery-type resolution and a normalized-model
-  regression assertion
+- add focused tests for layout resolution and a normalized-model regression
+  assertion
 
 ### Non-Goals
 
@@ -212,28 +214,28 @@ risk of drift between wrapper behavior and normalized-model behavior.
 
 #### Use case
 
-Shared recovery-type helper extraction.
+Shared layout helper extraction.
 
 #### Layers affected
 
-- domain: shared unit-type helper and duplicate recovery logic cleanup
+- domain: shared layout helper and duplicate coordinate parsing cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep `isRecovery` behavior identical to existing wrapper and normalized-model
+- Keep layout behavior identical to existing wrapper and normalized-model
   behavior.
-- Limit the slice to recovery-type resolution only.
+- Limit the slice to `el`-based coordinate resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves `isRecovery` from unit type
+- [ ] shared helper resolves unit layout from `el` parameter values
 - [ ] `UnitEntity` and normalized AJS mapping both delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for recovery-type resolution
+- add helper coverage for layout resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -241,12 +243,12 @@ Shared recovery-type helper extraction.
 
 ### Risks
 
-- recovery-type logic could accidentally change for excluded unit types
+- layout parsing could accidentally change default coordinates or name matching
 - helper extraction could overreach into unrelated unit metadata logic
 
 ### Rollback Plan
 
-- restore local `isRecovery` logic in `UnitEntity` and `normalizeAjsDocument`
-  if behavior changes
+- restore local layout parsing in `UnitEntity` and `normalizeAjsDocument` if
+  behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

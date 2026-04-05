@@ -1,5 +1,6 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
+import { resolveUnitLayout } from "../units/unitLayoutHelpers";
 import { resolveIsRecovery } from "../units/unitTypeHelpers";
 import {
   AjsDependency,
@@ -50,18 +51,12 @@ const getLayout = (unit: Unit): { h: number; v: number } => {
     return { h: 0, v: 0 };
   }
 
-  const layoutParameter = unit.parent.parameters.find(
-    (parameter) =>
-      parameter.key === "el" &&
-      parameter.value.split(",")[0]?.trim() === unit.name,
-  )?.value;
-  const hv = layoutParameter?.match(/\+(\d+)\+(\d+)/);
-  return hv
-    ? { h: Number(hv[1]), v: Number(hv[2]) }
-    : {
-        h: 0,
-        v: 0,
-      };
+  return resolveUnitLayout(
+    unit.name,
+    unit.parent.parameters
+      .filter((parameter) => parameter.key === "el")
+      .map((parameter) => parameter.value),
+  );
 };
 
 const getHasWaitedFor = (unit: Unit): boolean =>
