@@ -59,6 +59,9 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now expose sd-aligned empty-rule builders so `cy`,
   `ey`, `sh`, and `sy` stop constructing `${rule},` fallbacks inline in
   `ParameterFactory`.
+- shared parameter helpers now expose sd-aligned default-rule builders so
+  `cftd`, `shd`, `st`, `wc`, and `wt` stop constructing
+  `${rule},<default>` fallbacks inline in `ParameterFactory`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -163,31 +166,30 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable sd-aligned empty-rule builder so `cy`, `ey`, `sh`, and
-`sy` stop repeating the same `${rule},` fallback construction in
-`ParameterFactory`.
+Extract a reusable sd-aligned default-rule builder so `cftd`, `shd`, `st`,
+`wc`, and `wt` stop repeating the same `${rule},<default>` fallback
+construction in `ParameterFactory`.
 
 ### Why
 
-The next clearly repeated pattern is the sd-aligned rule-array builder whose
-missing items are synthesized as `${rule},`. Four methods still repeat the same
-lookup and fallback wiring.
+After the empty-rule slice, the next clearly repeated pattern is the sd-aligned
+rule-array builder whose missing items are synthesized with a fixed default
+value.
 
 ### Scope
 
-- add a shared helper for sd-aligned rule arrays with `${rule},` fallback
-- switch `cy`, `ey`, `sh`, and `sy` to the shared helper
+- add a shared helper for sd-aligned rule arrays with fixed default fallback
+- switch `cftd`, `shd`, `st`, `wc`, and `wt` to the shared helper
 - keep public parameter behavior unchanged while reducing repeated builder
   wiring
-- add focused tests for the sd-aligned empty-rule helper behavior
+- add focused tests for the sd-aligned default-rule helper behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing default-valued sd-aligned builders like `cftd`, `shd`, `st`, `wc`,
-  or `wt`
+- changing empty-rule sd-aligned builders like `cy`, `ey`, `sh`, or `sy`
 - changing inherited, root-jobnet, or top-parameter behavior
 - changing extension activation, diagnostics, or telemetry
 
@@ -202,25 +204,24 @@ lookup and fallback wiring.
 
 #### Use case
 
-Sd-aligned empty-rule builder extraction.
+Sd-aligned default-rule builder extraction.
 
 #### Layers affected
 
-- domain: sd-aligned rule-array helper usage
+- domain: sd-aligned default-rule helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize the `${rule},` fallback
-  rule-array wiring.
-- Limit this slice to `cy`, `ey`, `sh`, and `sy` and leave default-valued
-  sd-aligned builders for a later slice.
+- Keep semantic behavior identical and only centralize the
+  `${rule},<default>` fallback rule-array wiring.
+- Limit this slice to `cftd`, `shd`, `st`, `wc`, and `wt`.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for sd-aligned empty-rule parameter building
-- [ ] `cy`, `ey`, `sh`, and `sy` delegate to the helper
-- [ ] focused tests cover sd-aligned empty-rule helper behavior
+- [ ] shared helper exists for sd-aligned default-rule parameter building
+- [ ] `cftd`, `shd`, `st`, `wc`, and `wt` delegate to the helper
+- [ ] focused tests cover sd-aligned default-rule helper behavior
 
 ### Test Plan
 
@@ -231,14 +232,14 @@ Sd-aligned empty-rule builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change sd alignment or synthesized rule
-  ordering
-- the helper could be widened too far and blur the distinction from
-  default-valued sd-aligned builders
+- helper extraction could accidentally change sd alignment or synthesized
+  default values
+- the helper could be widened too far and blur the distinction from empty-rule
+  sd-aligned builders
 
 ### Rollback Plan
 
-- revert sd-aligned empty-rule helper usage in the affected `ParameterFactory`
+- revert sd-aligned default-rule helper usage in the affected `ParameterFactory`
   methods
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

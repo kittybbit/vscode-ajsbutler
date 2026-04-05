@@ -46,4 +46,7 @@
 - [x] Expose a shared helper for sd-aligned empty-rule parameters so `cy`,
       `ey`, `sh`, and `sy` stop constructing `${rule},` fallbacks inline in
       `ParameterFactory`
+- [x] Expose a shared helper for sd-aligned default-rule parameters so
+      `cftd`, `shd`, `st`, `wc`, and `wt` stop constructing
+      `${rule},<default>` fallbacks inline in `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

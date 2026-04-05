@@ -193,6 +193,31 @@ export const buildSdAlignedEmptyRuleParameters = <T extends Rule>(
       }),
   );
 
+export const buildSdAlignedDefaultRuleParameters = <T extends Rule>(
+  arg: Omit<ParamLookupArg, "inherit"> & {
+    sd: Array<Sd> | undefined;
+    buildFallbackRawValue: (rule: number) => string;
+  },
+  mapParam: (param: ParamInternal) => T,
+): Array<T | null> | undefined =>
+  buildSdAlignedParameters(
+    resolveParameterArray({
+      unit: arg.unit,
+      parameter: arg.parameter,
+      defaultRawValue: arg.defaultRawValue,
+    }),
+    arg.sd,
+    mapParam,
+    (rule) =>
+      mapParam({
+        unit: arg.unit,
+        parameter: arg.parameter,
+        defaultRawValue: arg.buildFallbackRawValue(rule),
+        inherited: false,
+        position: -1,
+      }),
+  );
+
 export const buildSortedRuleParameters = <T extends Rule>(
   params: ParamInternal[] | undefined,
   mapParam: (param: ParamInternal) => T,

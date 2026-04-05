@@ -15,6 +15,7 @@ import {
   buildRequiredParameter,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
+  buildSdAlignedDefaultRuleParameters,
   buildSdAlignedEmptyRuleParameters,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
@@ -483,6 +484,32 @@ suite("Parameter helpers", () => {
       [
         { rule: 1, value: "" },
         { rule: 2, value: "" },
+      ],
+    );
+  });
+
+  test("builds sd-aligned default-rule parameters with synthesized defaults", () => {
+    const { jobnet } = parseJobnets();
+
+    const alignedWc = buildSdAlignedDefaultRuleParameters(
+      {
+        unit: jobnet,
+        parameter: "wc",
+        defaultRawValue: "1",
+        sd: jobnet.sd,
+        buildFallbackRawValue: (rule) => `${rule},1`,
+      },
+      (param) => new Wc(param),
+    );
+
+    assert.deepStrictEqual(
+      alignedWc?.map((parameter) => ({
+        rule: parameter?.rule,
+        value: parameter?.value(),
+      })),
+      [
+        { rule: 1, value: "2" },
+        { rule: 2, value: "2,1" },
       ],
     );
   });
