@@ -99,4 +99,6 @@
       no longer lives inline in normalization helpers
 - [x] Extract a shared normalize-unit builder so `AjsUnit` DTO assembly no
       longer lives inline in `normalizeAjsDocument.ts`
+- [x] Extract a shared normalize-document-tree helper so recursive
+      normalization no longer lives inline in `normalizeAjsDocument.ts`
 - [x] Document which semantics intentionally remain in application view adapters

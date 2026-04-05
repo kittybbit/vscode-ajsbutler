@@ -120,6 +120,9 @@ This file is the high-level index for the per-feature plan structure in
   normalization helpers.
 - normalized-model mapping now reuses a shared normalize-unit builder so
   `AjsUnit` DTO assembly no longer lives inline in `normalizeAjsDocument.ts`.
+- normalized-model mapping now reuses a shared normalize-document-tree helper
+  so recursive unit traversal no longer lives inline in
+  `normalizeAjsDocument.ts`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -225,7 +228,7 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a normalize-unit builder helper so `AjsUnit` DTO assembly is not kept
+Extract a normalize-document-tree helper so recursive normalization is not kept
 inline in `normalizeAjsDocument.ts`.
 
 ### Why
