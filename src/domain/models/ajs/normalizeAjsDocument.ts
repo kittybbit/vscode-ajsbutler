@@ -5,6 +5,7 @@ import { resolveUnitDepth } from "../units/unitDepthHelpers";
 import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
 import { resolveUnitLayout } from "../units/unitLayoutHelpers";
 import { resolveHasSchedule } from "../units/unitScheduleStateHelpers";
+import { resolveHasWaitedFor } from "../units/unitWaitStateHelpers";
 import { resolveIsRecovery } from "../units/unitTypeHelpers";
 import {
   AjsDependency,
@@ -63,7 +64,7 @@ const getLayout = (unit: Unit): { h: number; v: number } => {
 };
 
 const getHasWaitedFor = (unit: Unit): boolean =>
-  getParameterValues(unit, "eun").some((value) => value.length > 0);
+  resolveHasWaitedFor(getParameterValues(unit, "eun"));
 
 const getHasSchedule = (unit: Unit, unitType: TySymbol): boolean => {
   if (unitType !== "n") {

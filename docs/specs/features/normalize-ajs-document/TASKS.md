@@ -75,4 +75,6 @@
       resolution through a misc utility module
 - [x] Expose shared depth helpers so wrapper and normalized-model depth
       calculation no longer drift apart
+- [x] Reuse shared wait-state helpers from normalized-model mapping so wrapper
+      and normalized-model wait detection fully share the same rule
 - [x] Document which semantics intentionally remain in application view adapters
