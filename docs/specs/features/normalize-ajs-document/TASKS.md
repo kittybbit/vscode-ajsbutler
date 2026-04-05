@@ -65,4 +65,6 @@
       `eun`-based `hasWaitedFor` checks
 - [x] Expose shared root-jobnet helpers so wrapper and normalized-model
       root-jobnet detection no longer drift apart
+- [x] Expose shared schedule-state helpers so wrapper and normalized-model
+      schedule detection no longer drift apart
 - [x] Document which semantics intentionally remain in application view adapters

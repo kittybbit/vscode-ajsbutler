@@ -1,6 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
+import { resolveHasSchedule } from "./unitScheduleStateHelpers";
 import { priority } from "./Utils";
 import { resolveIsRootJobnet } from "./unitJobnetStateHelpers";
 import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
@@ -12,9 +13,9 @@ export class N extends UnitEntity {
   }
   /** Whether a schedule is set for this jobnet. */
   get hasSchedule() {
-    return this.sd
-      ? this.sd.some((sd) => sd.rule !== 0 || sd.type !== "ud")
-      : false;
+    return resolveHasSchedule(
+      (this.sd ?? []).map((schedule) => schedule.value() ?? ""),
+    );
   }
   /** Whether this jobnet have a unit whose end is being waited for. */
   get hasWaitedFor() {
