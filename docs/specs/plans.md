@@ -96,6 +96,9 @@ This file is the high-level index for the per-feature plan structure in
   normalized-model logic stop maintaining separate depth calculation rules.
 - normalized-model mapping now reuses the shared wait-state helper so wrapper
   and normalized-model wait detection fully share the same `eun` rule.
+- normalized-model mapping now reuses the shared encoded-string helper so
+  wrapper and normalized-model comment decoding fully share the same quoting
+  and escape rules.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -103,7 +106,7 @@ This file is the high-level index for the per-feature plan structure in
 1. Continue moving the remaining wrapper-derived semantics that still require
    typed wrapper interpretation or other unit-type-specific defaults into
    shared helpers in small slices, with priority on repeated logic still kept
-   inside wrapper classes.
+   inside wrapper classes or normalized-model local helpers.
 2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 3. Keep roadmap and feature task files aligned with merged slices so remaining
@@ -201,22 +204,25 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Reuse the shared wait-state helper from normalized-model mapping so duplicated
-`eun` wait detection uses one implementation.
+Reuse the shared encoded-string helper from normalized-model mapping so comment
+decoding follows the same escaping rules as wrapper parameters.
 
 ### Why
 
-Wait detection is already shared for wrappers, but normalized-model mapping
-still keeps a local `eun` check. Reusing the same helper removes the last
-separate implementation of that rule.
+Normalized comment decoding currently strips outer quotes only, while wrapper
+`EncordedString` values also decode `#"` and `##` escapes. Sharing the helper
+removes that semantic drift.
 
 ### Scope
 
-- expand the shared wait-state helper so it accepts normalized-model inputs
-- switch normalized-model wait detection to use the helper
-- add focused tests for string-based wait-state resolution
+- extract the encoded-string decode rule into a shared helper
+- switch `EncordedString` and normalized comment decoding to use it
+- add focused tests for escaped comment decoding
 
 ### Non-Goals
+
+- changing which normalized fields are decoded beyond the existing comment path
+- renaming the existing `EncordedString` type in this slice
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior

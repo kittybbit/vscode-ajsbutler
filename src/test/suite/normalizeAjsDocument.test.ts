@@ -19,7 +19,7 @@ unit=root,,jp1admin,;
     unit=job-a,,jp1admin,;
     {
       ty=j;
-      cm="first";
+      cm="first#"#"##note";
     }
     unit=job-b,,jp1admin,;
     {
@@ -50,6 +50,7 @@ suite("Normalize AJS Document", () => {
     assert.strictEqual(root.children[0].isRecovery, false);
     assert.strictEqual(root.children[0].name, "jobnet");
     assert.strictEqual(root.children[0].isRootJobnet, true);
+    assert.strictEqual(root.children[0].children[0].comment, 'first""#note');
     assert.deepStrictEqual(root.children[0].children[0].layout, {
       h: 240,
       v: 144,

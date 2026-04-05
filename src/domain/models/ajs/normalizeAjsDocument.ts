@@ -1,5 +1,6 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
+import { decodeEncodedString } from "../parameters/encodedStringHelpers";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
 import { resolveUnitDepth } from "../units/unitDepthHelpers";
 import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
@@ -46,8 +47,7 @@ const getGroupType = (unit: Unit): AjsGroupType | undefined => {
 };
 
 const getComment = (unit: Unit): string | undefined => {
-  const comment = getFirstParameterValue(unit, "cm");
-  return comment?.replace(/^"|"$/g, "");
+  return decodeEncodedString(getFirstParameterValue(unit, "cm"));
 };
 
 const getLayout = (unit: Unit): { h: number; v: number } => {
