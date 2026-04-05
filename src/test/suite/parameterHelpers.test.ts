@@ -15,6 +15,7 @@ import {
   buildRequiredParameter,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
+  buildSdAlignedEmptyRuleParameters,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
   buildTopParameter,
@@ -460,6 +461,30 @@ suite("Parameter helpers", () => {
       (param) => param.rawValue ?? param.defaultRawValue,
     );
     assert.strictEqual(missingNcex, undefined);
+  });
+
+  test("builds sd-aligned empty-rule parameters with synthesized rule placeholders", () => {
+    const { jobnet } = parseJobnets();
+
+    const alignedEy = buildSdAlignedEmptyRuleParameters(
+      {
+        unit: jobnet,
+        parameter: "ey",
+        sd: jobnet.sd,
+      },
+      (param) => new Ln({ ...param, parameter: "ln" }),
+    );
+
+    assert.deepStrictEqual(
+      alignedEy?.map((parameter) => ({
+        rule: parameter?.rule,
+        value: parameter?.value(),
+      })),
+      [
+        { rule: 1, value: "" },
+        { rule: 2, value: "" },
+      ],
+    );
   });
 
   test("builds required parameters and keeps the missing-parameter error", () => {

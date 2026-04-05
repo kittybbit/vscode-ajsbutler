@@ -56,6 +56,9 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now expose defaultable scalar builders so `ncl`,
   `ncs`, and `ncex` stop forwarding caller-supplied defaults inline in
   `ParameterFactory`.
+- shared parameter helpers now expose sd-aligned empty-rule builders so `cy`,
+  `ey`, `sh`, and `sy` stop constructing `${rule},` fallbacks inline in
+  `ParameterFactory`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -160,32 +163,32 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable defaultable-scalar builder so the extra-argument `ncl`,
-`ncs`, and `ncex` methods stop repeating `checkAndGet(...)` plus
-`defaultRawValue` forwarding in `ParameterFactory`.
+Extract a reusable sd-aligned empty-rule builder so `cy`, `ey`, `sh`, and
+`sy` stop repeating the same `${rule},` fallback construction in
+`ParameterFactory`.
 
 ### Why
 
-After the optional scalar and array extractions, the smallest repeated pattern
-left is the "optional scalar with caller-supplied default" builder used by the
-connector-control parameters.
+The next clearly repeated pattern is the sd-aligned rule-array builder whose
+missing items are synthesized as `${rule},`. Four methods still repeat the same
+lookup and fallback wiring.
 
 ### Scope
 
-- add a shared helper for optional scalar parameters with caller-supplied
-  default values
-- switch `ncl`, `ncs`, and `ncex` to the shared helper
+- add a shared helper for sd-aligned rule arrays with `${rule},` fallback
+- switch `cy`, `ey`, `sh`, and `sy` to the shared helper
 - keep public parameter behavior unchanged while reducing repeated builder
   wiring
-- add focused tests for the defaultable-scalar helper behavior
+- add focused tests for the sd-aligned empty-rule helper behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing sd-aligned, inherited, root-jobnet, or plain optional parameter
-  behavior outside the 3 connector-control methods
+- changing default-valued sd-aligned builders like `cftd`, `shd`, `st`, `wc`,
+  or `wt`
+- changing inherited, root-jobnet, or top-parameter behavior
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -199,25 +202,25 @@ connector-control parameters.
 
 #### Use case
 
-Defaultable-scalar builder extraction.
+Sd-aligned empty-rule builder extraction.
 
 #### Layers affected
 
-- domain: defaultable-scalar helper usage
+- domain: sd-aligned rule-array helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize caller-supplied default
-  forwarding for optional scalar builders.
-- Limit this slice to `ncl`, `ncs`, and `ncex` instead of widening the helper
-  to unrelated semantics.
+- Keep semantic behavior identical and only centralize the `${rule},` fallback
+  rule-array wiring.
+- Limit this slice to `cy`, `ey`, `sh`, and `sy` and leave default-valued
+  sd-aligned builders for a later slice.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for defaultable scalar parameter building
-- [ ] `ncl`, `ncs`, and `ncex` delegate to the helper
-- [ ] focused tests cover defaultable-scalar helper behavior
+- [ ] shared helper exists for sd-aligned empty-rule parameter building
+- [ ] `cy`, `ey`, `sh`, and `sy` delegate to the helper
+- [ ] focused tests cover sd-aligned empty-rule helper behavior
 
 ### Test Plan
 
@@ -228,14 +231,14 @@ Defaultable-scalar builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change caller-supplied default
-  precedence
-- the helper could be widened too far and blur the distinction from plain
-  optional scalar builders
+- helper extraction could accidentally change sd alignment or synthesized rule
+  ordering
+- the helper could be widened too far and blur the distinction from
+  default-valued sd-aligned builders
 
 ### Rollback Plan
 
-- revert defaultable-scalar helper usage in the affected `ParameterFactory`
+- revert sd-aligned empty-rule helper usage in the affected `ParameterFactory`
   methods
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

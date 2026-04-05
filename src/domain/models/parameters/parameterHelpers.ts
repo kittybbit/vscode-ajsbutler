@@ -170,6 +170,29 @@ export const buildSdAlignedParameters = <T extends Rule>(
   return adjustToSdItemCount(sd, values, buildDefault);
 };
 
+export const buildSdAlignedEmptyRuleParameters = <T extends Rule>(
+  arg: Omit<ParamLookupArg, "inherit" | "defaultRawValue"> & {
+    sd: Array<Sd> | undefined;
+  },
+  mapParam: (param: ParamInternal) => T,
+): Array<T | null> | undefined =>
+  buildSdAlignedParameters(
+    resolveParameterArray({
+      unit: arg.unit,
+      parameter: arg.parameter,
+    }),
+    arg.sd,
+    mapParam,
+    (rule) =>
+      mapParam({
+        unit: arg.unit,
+        parameter: arg.parameter,
+        rawValue: `${rule},`,
+        inherited: false,
+        position: -1,
+      }),
+  );
+
 export const buildSortedRuleParameters = <T extends Rule>(
   params: ParamInternal[] | undefined,
   mapParam: (param: ParamInternal) => T,

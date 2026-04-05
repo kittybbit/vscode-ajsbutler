@@ -227,6 +227,7 @@ import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
+  buildSdAlignedEmptyRuleParameters,
   buildDefaultableParameter,
   buildOptionalParameterArray,
   buildOptionalParameter,
@@ -373,22 +374,13 @@ export class ParamFactory {
     );
   }
   static cy(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "cy",
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedEmptyRuleParameters(
+      {
+        unit: unit,
+        parameter: "cy",
+        sd: unit.params("sd"),
+      },
       (param) => new Cy(param),
-      (rule) =>
-        new Cy({
-          unit: unit,
-          parameter: "cy",
-          rawValue: rule + ",",
-          inherited: false,
-          position: -1,
-        }),
     );
   }
   static da(unit: UnitEntity) {
@@ -831,22 +823,13 @@ export class ParamFactory {
     );
   }
   static ey(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "ey",
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedEmptyRuleParameters(
+      {
+        unit: unit,
+        parameter: "ey",
+        sd: unit.params("sd"),
+      },
       (param) => new Ey(param),
-      (rule) =>
-        new Ey({
-          unit: unit,
-          parameter: "ey",
-          rawValue: rule + ",",
-          inherited: false,
-          position: -1,
-        }),
     );
   }
   static f(unit: UnitEntity) {
@@ -2014,22 +1997,13 @@ export class ParamFactory {
     );
   }
   static sh(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "sh",
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedEmptyRuleParameters(
+      {
+        unit: unit,
+        parameter: "sh",
+        sd: unit.params("sd"),
+      },
       (param) => new Sh(param),
-      (rule) =>
-        new Sh({
-          unit: unit,
-          parameter: "sh",
-          rawValue: rule + ",",
-          inherited: false,
-          position: -1,
-        }),
     );
   }
   static shd(unit: UnitEntity) {
@@ -2111,22 +2085,13 @@ export class ParamFactory {
     );
   }
   static sy(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "sy",
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedEmptyRuleParameters(
+      {
+        unit: unit,
+        parameter: "sy",
+        sd: unit.params("sd"),
+      },
       (param) => new Sy(param),
-      (rule) =>
-        new Sy({
-          unit: unit,
-          parameter: "sy",
-          rawValue: rule + ",",
-          inherited: false,
-          position: -1,
-        }),
     );
   }
   static sz(unit: UnitEntity) {
