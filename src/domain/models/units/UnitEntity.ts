@@ -1,12 +1,7 @@
 /** JP1/AJS3 unit entities  */
 
 import { Unit } from "../../values/Unit";
-import {
-  ParamSymbol,
-  TySymbols,
-  TySymbol,
-  isParamSymbol,
-} from "../../values/AjsType";
+import { ParamSymbol, isParamSymbol } from "../../values/AjsType";
 import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
 import Parameter from "../parameters/Parameter";
@@ -16,6 +11,7 @@ import {
   findPreviousRelations,
   findPreviousUnits,
 } from "./unitRelationHelpers";
+import { resolveIsRecovery } from "./unitTypeHelpers";
 
 const hashToString = (value: string): string => {
   // Use a deterministic sync hash so this module works under CommonJS test compilation.
@@ -61,7 +57,7 @@ export abstract class UnitEntity {
       })
       .filter((child): child is UnitEntity => child instanceof UnitEntity);
     this.#isRoot = unit.isRoot();
-    this.#isRecovery = this.#isRecoveryFn();
+    this.#isRecovery = resolveIsRecovery(this.ty.value());
     this.#defineParams = this.#defineParamsFn();
   }
 
@@ -171,19 +167,6 @@ export abstract class UnitEntity {
   /** my el paramater */
   #getMyElFn() {
     return this.parent?.el?.find((el) => el.name === this.name);
-  }
-  #isRecoveryFn() {
-    // There is no concept of recovery.
-    const excludes: TySymbol[] = ["g", "mg", "rc", "mn", "nc"];
-    if (excludes.includes(this.ty.value())) {
-      return undefined;
-    }
-
-    return TySymbols.filter((ty) => ty.charAt(0) === "r")
-      .filter((r) => !["rm"].includes(r))
-      .includes(this.ty.value())
-      ? true
-      : false;
   }
   #defineParamsFn(): ParamSymbol[] {
     let proto = Object.getPrototypeOf(this);
