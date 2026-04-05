@@ -17,4 +17,4 @@
 - [x] Expose normalized helpers for direct parameter lookup, repeated-value
       lookup, and first-ancestor inherited parameter lookup so application
       slices stop repeating wrapper-era parameter traversal logic
-- [ ] Document which semantics intentionally remain in application view adapters
+- [x] Document which semantics intentionally remain in application view adapters

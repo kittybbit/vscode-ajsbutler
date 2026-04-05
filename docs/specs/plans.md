@@ -40,15 +40,13 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Next Priority Tasks
 
-1. Refresh roadmap and feature task documents so completed slices and remaining
-   debt are visible in one place.
-2. Continue moving the remaining wrapper-derived parameter semantics that still
+1. Continue moving the remaining wrapper-derived parameter semantics that still
    require rule-aware defaults or typed wrapper interpretation out of
    `ParameterFactory` in small slices.
-3. Document which remaining semantics should intentionally stay in application
-   view adapters instead of the normalized model.
-4. Continue reducing activation and webview concentration without changing user
+2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
+3. Keep roadmap and feature task files aligned with merged slices so remaining
+   debt stays explicit.
 
 ## Default Workflow
 
@@ -142,29 +140,28 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Move reusable parameter lookup and simple inheritance traversal from ad hoc
-application code into the normalized AJS model.
+Extract reusable rule-aware parameter helpers from `ParameterFactory` so the
+remaining wrapper-derived parameter semantics can move in smaller slices.
 
 ### Why
 
-`buildUnitListView` still repeated wrapper-era parameter traversal logic even
-after table and flow viewers stopped reconstructing `UnitEntity`. Exposing that
-lookup from the normalized model is a small slice that reduces duplication
-before larger `ParameterFactory` cleanup.
+`ParameterFactory` still concentrates lookup, inheritance, defaulting, and
+SD-rule alignment behavior in one large module. Pulling the shared helper logic
+out first makes the next semantic cleanup slices smaller and easier to review.
 
 ### Scope
 
-- add normalized helper functions for direct parameter lookup
-- add normalized helper functions for repeated-value lookup
-- add normalized helper functions for first-ancestor inherited lookup
-- refactor `buildUnitListView` to consume those helpers
-- update normalize docs and tests
+- extract reusable parameter lookup and fallback helpers into a dedicated module
+- extract reusable SD-rule alignment helpers into a dedicated module
+- keep public `ParamFactory` behavior unchanged while switching it to the
+  extracted helpers
+- add focused tests for helper behavior
 
 ### Non-Goals
 
-- replacing `ParameterFactory` wholesale
 - changing parser output
-- changing user-visible unit list behavior
+- changing user-visible unit list, flow, or CSV behavior
+- rewriting all parameter semantics at once
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -178,27 +175,25 @@ before larger `ParameterFactory` cleanup.
 
 #### Use case
 
-Normalize AJS Document.
+Parameter helper extraction for remaining `ParameterFactory` cleanup.
 
 #### Layers affected
 
-- domain: normalized AJS helper functions
-- application: unit-list view mapping
-- docs: normalize use case and feature tracking
+- domain: parameter helper extraction
+- docs: plan tracking for the extracted helper slice
 
 #### Key decisions
 
-- Put parameter lookup helpers on the normalized model instead of keeping
-  application-local lookup helpers in each consumer.
-- Limit inheritance support to first-ancestor lookup for this slice and leave
-  rule-aware defaults in `ParameterFactory` for later work.
+- Extract helper logic without changing the public `ParamFactory` API.
+- Keep semantic behavior identical and limit the slice to lookup/defaulting and
+  SD-rule alignment helpers.
 
 ### Acceptance Criteria
 
-- [ ] normalized helpers expose direct, repeated-value, and inherited parameter
-      lookup
-- [ ] `buildUnitListView` stops defining its own parameter lookup helpers
-- [ ] normalize docs and tasks reflect the completed sub-slice
+- [ ] shared helper module exists for parameter lookup/defaulting
+- [ ] shared helper module exists for SD-rule alignment
+- [ ] `ParamFactory` delegates to the extracted helpers without behavior changes
+- [ ] focused tests cover helper behavior
 
 ### Test Plan
 
@@ -208,11 +203,12 @@ Normalize AJS Document.
 
 ### Risks
 
-- inherited lookup could diverge from wrapper semantics if ancestor order or
-  first-hit behavior changes
-- build-unit-list regressions could hide in priority and schedule field mapping
+- helper extraction could accidentally change inherited/default parameter
+  precedence
+- helper extraction could accidentally change SD-rule alignment order or
+  fallback generation
 
 ### Rollback Plan
 
-- revert the helper extraction and return to application-local lookup functions
-- keep deeper `ParameterFactory` cleanup in later isolated slices
+- revert the helper-module extraction and return the logic to `ParamFactory`
+- keep later semantic moves separate from this extraction step
