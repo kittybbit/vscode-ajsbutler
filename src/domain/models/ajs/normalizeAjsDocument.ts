@@ -1,5 +1,9 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
+import {
+  findUnitParameterValue,
+  findUnitParameterValues,
+} from "../../values/unitParameterLookupHelpers";
 import { decodeEncodedString } from "../parameters/encodedStringHelpers";
 import { parseUnitEdge } from "../parameters/unitEdgeHelpers";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
@@ -18,19 +22,11 @@ import {
   AjsUnit,
 } from "./AjsDocument";
 
-const getParameterValues = (unit: Unit, key: string): string[] =>
-  unit.parameters
-    .filter((parameter) => parameter.key === key)
-    .map((parameter) => parameter.value);
-
-const getFirstParameterValue = (unit: Unit, key: string): string | undefined =>
-  getParameterValues(unit, key)[0];
-
 const getUnitType = (
   unit: Unit,
   warnings: AjsNormalizationWarning[],
 ): TySymbol => {
-  const tyValue = getFirstParameterValue(unit, "ty");
+  const tyValue = findUnitParameterValue(unit, "ty");
   if (tyValue && isTySymbol(tyValue)) {
     return tyValue;
   }
@@ -44,11 +40,11 @@ const getUnitType = (
 };
 
 const getGroupType = (unit: Unit): AjsGroupType | undefined => {
-  return resolveGroupType(getFirstParameterValue(unit, "gty"));
+  return resolveGroupType(findUnitParameterValue(unit, "gty"));
 };
 
 const getComment = (unit: Unit): string | undefined => {
-  return decodeEncodedString(getFirstParameterValue(unit, "cm"));
+  return decodeEncodedString(findUnitParameterValue(unit, "cm"));
 };
 
 const getLayout = (unit: Unit): { h: number; v: number } => {
@@ -65,19 +61,19 @@ const getLayout = (unit: Unit): { h: number; v: number } => {
 };
 
 const getHasWaitedFor = (unit: Unit): boolean =>
-  resolveHasWaitedFor(getParameterValues(unit, "eun"));
+  resolveHasWaitedFor(findUnitParameterValues(unit, "eun"));
 
 const getHasSchedule = (unit: Unit, unitType: TySymbol): boolean => {
   if (unitType !== "n") {
     return false;
   }
 
-  return resolveHasSchedule(getParameterValues(unit, "sd"));
+  return resolveHasSchedule(findUnitParameterValues(unit, "sd"));
 };
 
 const getIsRootJobnet = (unit: Unit, unitType: TySymbol): boolean =>
   unitType === "n"
-    ? resolveIsRootJobnet(getFirstParameterValue(unit.parent, "ty"))
+    ? resolveIsRootJobnet(findUnitParameterValue(unit.parent, "ty"))
     : false;
 
 const toDependencyType = (
@@ -108,7 +104,7 @@ const normalizeUnit = (
   const unitType = getUnitType(unit, warnings);
   const children = unit.children.map((child) => normalizeUnit(child, warnings));
   const childByName = new Map(children.map((child) => [child.name, child]));
-  const dependencies: AjsDependency[] = getParameterValues(unit, "ar")
+  const dependencies: AjsDependency[] = findUnitParameterValues(unit, "ar")
     .map(parseDependency)
     .flatMap((dependency) => {
       if (!dependency) {

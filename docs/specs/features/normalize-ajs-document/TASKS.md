@@ -82,4 +82,7 @@
 - [x] Reuse shared dependency parsing helpers from normalized-model mapping so
       wrapper and normalized-model `ar` interpretation fully share the same
       rule
+- [x] Reuse shared raw unit-parameter lookup helpers from normalized-model
+      mapping so raw parameter filtering no longer lives only inside
+      normalization
 - [x] Document which semantics intentionally remain in application view adapters
