@@ -1,7 +1,7 @@
 import { J } from "./J";
 import { N, Rn } from "./N";
 import { Qj } from "./Qj";
-import { UnitEntity } from "./UnitEntities";
+import { UnitEntity } from "./UnitEntity";
 
 const DEFAULT_PRIORITY = 1;
 const isN = (entity: UnitEntity | undefined): entity is N =>

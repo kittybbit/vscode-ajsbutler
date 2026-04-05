@@ -1,5 +1,5 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntities";
+import { UnitEntity } from "./UnitEntity";
 
 export class Cmsj extends UnitEntity {
   // [cmsts={un|no|wa|mi|ma|cr|re|te|di};]

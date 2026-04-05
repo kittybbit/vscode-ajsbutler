@@ -1,6 +1,6 @@
 import { WeekSymbol } from "../../values/AjsType";
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntities";
+import { UnitEntity } from "./UnitEntity";
 
 /** job group */
 export class G extends UnitEntity {

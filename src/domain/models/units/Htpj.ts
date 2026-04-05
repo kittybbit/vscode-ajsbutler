@@ -1,5 +1,5 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntities";
+import { UnitEntity } from "./UnitEntity";
 
 export class Htpj extends UnitEntity {
   // htcfl="connection-configuration-file-name";

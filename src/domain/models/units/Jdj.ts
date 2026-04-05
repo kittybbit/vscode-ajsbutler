@@ -1,5 +1,5 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntities";
+import { UnitEntity } from "./UnitEntity";
 
 export class Jdj extends UnitEntity {
   // [ej={gt|ge|lt|le|eq|ne|ri|ro|ef|nf|vgt|vge|vlt|vle|veq|vne|vri|vro|sce|spe|sne|spn|snn|snl};]

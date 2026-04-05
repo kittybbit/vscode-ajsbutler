@@ -16,7 +16,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
+import { UnitEntity } from "../../../domain/models/units/UnitEntity";
 import { N } from "../../../domain/models/units/N";
 import {
   CurrentUnitEntityStateType,
@@ -105,7 +105,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
     return (target?: UnitEntity) => (target ? set.has(target.id) : false);
   }, [currentUnitEntity]);
 
-  const renderUnitEntities = (
+  const renderUnitEntity = (
     unitEntities: UnitEntity[],
     currentUnitEntity: UnitEntity | undefined,
     isAncestorOf: (target?: UnitEntity) => boolean,
@@ -121,7 +121,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
             onChange={() => setCurrentUnitEntity(unitEntity)}
           >
             <AccordionSummary>{unitEntity.name}</AccordionSummary>
-            {renderUnitEntities(
+            {renderUnitEntity(
               unitEntity.children,
               currentUnitEntity,
               isAncestorOf,
@@ -191,7 +191,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
             )}
           </IconButton>
         </Toolbar>
-        {renderUnitEntities(
+        {renderUnitEntity(
           unitEntities,
           currentUnitEntity,
           isAncestorOf,

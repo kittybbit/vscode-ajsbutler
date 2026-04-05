@@ -5,7 +5,7 @@ import {
   FlowGraphNodeDto,
 } from "../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../application/unit-definition/buildUnitDefinition";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
+import { UnitEntity } from "../../../domain/models/units/UnitEntity";
 import {
   CurrentUnitEntityStateType,
   DialogDataStateType,

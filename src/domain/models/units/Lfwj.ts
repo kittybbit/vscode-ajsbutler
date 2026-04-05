@@ -1,5 +1,5 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntities";
+import { UnitEntity } from "./UnitEntity";
 
 export class Lfwj extends UnitEntity {
   // [lftpd=[!]"trap-data-1"[:[!]"trap-data-2"...];]...
