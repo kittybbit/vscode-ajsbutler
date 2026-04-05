@@ -1,6 +1,7 @@
 import {
   AjsDocument,
   AjsUnit,
+  findAjsUnitAncestors,
   findAjsUnitById,
 } from "../../domain/models/ajs/AjsDocument";
 import {
@@ -29,19 +30,8 @@ const toInputNode = (unit: AjsUnit): FlowGraphInputNode => ({
 const toAncestorNodes = (
   document: AjsDocument,
   unit: AjsUnit,
-): FlowGraphInputNode[] => {
-  const ancestors: AjsUnit[] = [];
-  let currentParentId = unit.parentId;
-  while (currentParentId) {
-    const parent = findAjsUnitById(document, currentParentId);
-    if (!parent) {
-      break;
-    }
-    ancestors.push(parent);
-    currentParentId = parent.parentId;
-  }
-  return ancestors.map(toInputNode);
-};
+): FlowGraphInputNode[] =>
+  findAjsUnitAncestors(document, unit).map(toInputNode);
 
 const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
   unit.children.flatMap((child) =>

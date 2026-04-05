@@ -37,6 +37,9 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
 
 - `BuildUnitList` can derive its DTOs from the normalized model
 - `BuildFlowGraph` can derive its graph inputs from the normalized model
+- common navigation semantics such as parent lookup, ancestor lookup, and root
+  jobnet lookup should be reusable from the normalized model when multiple
+  application or presentation paths need them
 - user-visible behavior remains unchanged while use cases stop depending on raw
   or wrapper-oriented structures directly
 - normalization tests should prefer shared fixtures in `sample/` for UTF-8,

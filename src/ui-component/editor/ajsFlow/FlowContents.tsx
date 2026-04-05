@@ -26,6 +26,7 @@ import { buildFlowGraph } from "../../../application/flow-graph/buildFlowGraph";
 import {
   AjsDocument,
   flattenAjsUnits,
+  findRootJobnet,
 } from "../../../domain/models/ajs/AjsDocument";
 import {
   buildUnitDefinition,
@@ -168,7 +169,9 @@ const FlowContents: FC = () => {
         const x = nextDocument ? flattenAjsUnits(nextDocument.rootUnits) : [];
         return prevUnitEntityId.current
           ? x.find((unit) => unit.id === prevUnitEntityId.current)?.id
-          : x.find((unit) => unit.unitType === "n" && unit.isRootJobnet)?.id;
+          : nextDocument
+            ? findRootJobnet(nextDocument)?.id
+            : undefined;
       });
     };
     window.EventBridge.addCallback("changeDocument", changeDocumentFn);

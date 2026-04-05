@@ -59,3 +59,27 @@ export const findAjsUnitById = (
   unitId: string,
 ): AjsUnit | undefined =>
   flattenAjsUnits(document.rootUnits).find((unit) => unit.id === unitId);
+
+export const findParentAjsUnit = (
+  document: AjsDocument,
+  unit: AjsUnit,
+): AjsUnit | undefined =>
+  unit.parentId ? findAjsUnitById(document, unit.parentId) : undefined;
+
+export const findAjsUnitAncestors = (
+  document: AjsDocument,
+  unit: AjsUnit,
+): AjsUnit[] => {
+  const ancestors: AjsUnit[] = [];
+  let current = findParentAjsUnit(document, unit);
+  while (current) {
+    ancestors.push(current);
+    current = findParentAjsUnit(document, current);
+  }
+  return ancestors;
+};
+
+export const findRootJobnet = (document: AjsDocument): AjsUnit | undefined =>
+  flattenAjsUnits(document.rootUnits).find(
+    (unit) => unit.unitType === "n" && unit.isRootJobnet,
+  );
