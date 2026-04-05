@@ -8,7 +8,7 @@ import {
   resolveNormalizedIsRootJobnet,
   resolveNormalizedLayout,
   resolveNormalizedUnitType,
-} from "../../domain/models/ajs/normalizeUnitHelpers";
+} from "../../domain/models/ajs/normalize/unit";
 import { AjsNormalizationWarning } from "../../domain/models/ajs/AjsDocument";
 
 const validDefinition = `

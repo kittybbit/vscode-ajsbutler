@@ -1,14 +1,14 @@
-import { findUnitParameterValues } from "../../values/unitParameterLookupHelpers";
-import { Unit } from "../../values/Unit";
+import { findUnitParameterValues } from "../../../values/unitParameterLookupHelpers";
+import { Unit } from "../../../values/Unit";
 import {
   normalizeAjsRelationType,
   parseUnitEdge,
-} from "../parameters/unitEdgeHelpers";
-import { AjsNormalizationWarning, AjsRelation, AjsUnit } from "./AjsDocument";
+} from "../../parameters/unitEdgeHelpers";
+import { AjsNormalizationWarning, AjsRelation, AjsUnit } from "../AjsDocument";
 import {
   buildInvalidRelationWarning,
   buildMissingRelationTargetWarning,
-} from "./normalizeWarningHelpers";
+} from "./warnings";
 
 type ParsedNormalizedRelation = {
   sourceName: string;

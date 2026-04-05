@@ -3,7 +3,7 @@ import { parseAjs } from "../../domain/services/parser/AjsParser";
 import {
   parseNormalizedRelation,
   resolveNormalizedRelations,
-} from "../../domain/models/ajs/normalizeRelationHelpers";
+} from "../../domain/models/ajs/normalize/relations";
 import {
   AjsNormalizationWarning,
   AjsUnit,
