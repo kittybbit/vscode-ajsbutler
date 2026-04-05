@@ -11,63 +11,66 @@ import {
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import FlowMenu from "./FlowMenu";
 import {
-  CurrentUnitEntityStateType,
+  CurrentUnitIdStateType,
   DrawerWidthStateType,
   FlowMenuStateType,
 } from "./FlowContents";
 import { localeMap } from "../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
-import { UnitEntity } from "../../../domain/models/units/UnitEntity";
-import { N } from "../../../domain/models/units/N";
+import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";
 
 type HeaderProps = {
   flowMenuState: FlowMenuStateType;
   drawerWidthState: DrawerWidthStateType;
-  currentUnitEntityState: CurrentUnitEntityStateType;
+  currentUnit?: AjsUnit;
+  unitById: ReadonlyMap<string, AjsUnit>;
+  currentUnitIdState: CurrentUnitIdStateType;
 };
 
 const Header: FC<HeaderProps> = ({
   flowMenuState,
   drawerWidthState,
-  currentUnitEntityState,
+  currentUnit,
+  unitById,
+  currentUnitIdState,
 }) => {
   console.log("render Header.");
 
   const { setMenuStatus } = flowMenuState;
   const { setDrawerWidth } = drawerWidthState;
-  const { currentUnitEntity, setCurrentUnitEntity } = currentUnitEntityState;
+  const { setCurrentUnitId } = currentUnitIdState;
   const { lang } = useMyAppContext();
 
   const breadcrumbs = useMemo(() => {
     const crumbs: ReactElement[] = [];
 
-    const build = (unitEntity?: UnitEntity) => {
-      if (!unitEntity) return;
-      const createCrumb = (entity: UnitEntity): ReactElement =>
-        entity === currentUnitEntity ? (
-          <Typography key={entity.id} color="inherit">
-            {entity.name}
+    const build = (unit?: AjsUnit) => {
+      if (!unit) return;
+      const createCrumb = (target: AjsUnit): ReactElement =>
+        target.id === currentUnit?.id ? (
+          <Typography key={target.id} color="inherit">
+            {target.name}
           </Typography>
         ) : (
           <Link
-            key={entity.id}
+            key={target.id}
             color="inherit"
-            onClick={() => setCurrentUnitEntity(entity)}
+            onClick={() => setCurrentUnitId(target.id)}
           >
-            {entity.name}
+            {target.name}
           </Link>
         );
 
-      crumbs.push(createCrumb(unitEntity));
+      crumbs.push(createCrumb(unit));
 
-      if (unitEntity.ty.value() !== "n" || !(unitEntity as N).isRootJobnet) {
-        build(unitEntity.parent);
+      if (unit.unitType !== "n" || !unit.isRootJobnet) {
+        build(unit.parentId ? unitById.get(unit.parentId) : undefined);
       }
     };
 
-    build(currentUnitEntity);
+    build(currentUnit);
     return crumbs.reverse();
-  }, [currentUnitEntity, setCurrentUnitEntity]);
+  }, [currentUnit, setCurrentUnitId, unitById]);
 
   const menuItem1Label = useMemo(
     () => localeMap("flow.menu.menuItem1", lang),

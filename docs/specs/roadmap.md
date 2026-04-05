@@ -22,16 +22,12 @@
 
 1. Refresh SDD documentation so roadmap, plans, and feature task files reflect
    the migrated state instead of the starting plan.
-2. Remove remaining `UnitEntity`-driven table dependencies so the table
-   presentation consumes application view data end to end.
-3. Remove remaining `UnitEntity` reconstruction in flow presentation so the
-   flow path can stay on application DTOs and normalized AJS concepts.
-4. Reconcile wrapper-derived semantics that still live outside the normalized
+2. Reconcile wrapper-derived semantics that still live outside the normalized
    model and decide whether they belong in domain normalization or application
    view adapters.
-5. Continue reducing activation and webview concentration in
+3. Continue reducing activation and webview concentration in
    `src/extension` without changing user-visible behavior.
-6. Keep validating desktop and web extension compatibility while managing build
+4. Keep validating desktop and web extension compatibility while managing build
    and bundle-size risk.
 
 ## Deferred / Optional Slices

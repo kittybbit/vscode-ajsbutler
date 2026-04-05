@@ -10,6 +10,6 @@
 
 ## Remaining Follow-up
 
-- [ ] Remove residual `UnitEntity` reconstruction from flow presentation
+- [x] Remove residual `UnitEntity` reconstruction from flow presentation
 - [ ] Record a current manual smoke-test result for desktop and web viewers in docs
 - [ ] Keep architecture and roadmap docs aligned with the migrated state

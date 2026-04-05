@@ -12,12 +12,12 @@ export const handleKeyDownDialogOpen =
   };
 
 export const handleClickChildOpen = (data: AjsNode) => () => {
-  const { unitEntity, setCurrentUnitEntity } = data;
-  setCurrentUnitEntity(() => unitEntity);
+  const { unitId, setCurrentUnitId } = data;
+  setCurrentUnitId(() => unitId);
 };
 
 export const handleKeyDownChildOpen =
   (data: AjsNode) => (event: React.KeyboardEvent<HTMLElement>) => {
-    const { unitEntity, setCurrentUnitEntity } = data;
-    event.key === "Enter" && setCurrentUnitEntity(() => unitEntity);
+    const { unitId, setCurrentUnitId } = data;
+    event.key === "Enter" && setCurrentUnitId(() => unitId);
   };

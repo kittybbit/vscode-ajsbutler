@@ -5,11 +5,7 @@ import {
   FlowGraphNodeDto,
 } from "../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../application/unit-definition/buildUnitDefinition";
-import { UnitEntity } from "../../../domain/models/units/UnitEntity";
-import {
-  CurrentUnitEntityStateType,
-  DialogDataStateType,
-} from "./FlowContents";
+import { CurrentUnitIdStateType, DialogDataStateType } from "./FlowContents";
 import { AjsNode } from "./nodes/AjsNode";
 
 const calcPosition = (node: FlowGraphNodeDto, theme: Theme) => {
@@ -43,18 +39,11 @@ const calcPosition = (node: FlowGraphNodeDto, theme: Theme) => {
 
 const toNodeData = (
   node: FlowGraphNodeDto,
-  unitEntityByPath: ReadonlyMap<string, UnitEntity>,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
   dialogDataState: DialogDataStateType,
-  currentUnitEntityState: CurrentUnitEntityStateType,
+  currentUnitIdState: CurrentUnitIdStateType,
 ): AjsNode => {
-  const unitEntity = unitEntityByPath.get(node.metadata.absolutePath);
   const unitDefinition = unitDefinitionByPath.get(node.metadata.absolutePath);
-  if (!unitEntity) {
-    throw new Error(
-      `Unit entity not found for flow graph node ${node.metadata.absolutePath}`,
-    );
-  }
   if (!unitDefinition) {
     throw new Error(
       `Unit definition not found for flow graph node ${node.metadata.absolutePath}`,
@@ -62,7 +51,7 @@ const toNodeData = (
   }
 
   return {
-    unitEntity,
+    unitId: node.id,
     unitDefinition,
     label: node.label,
     comment: node.metadata.comment,
@@ -74,27 +63,25 @@ const toNodeData = (
     hasSchedule: node.metadata.hasSchedule,
     hasWaitedFor: node.metadata.hasWaitedFor,
     ...dialogDataState,
-    ...currentUnitEntityState,
+    ...currentUnitIdState,
   };
 };
 
 export const createReactFlowData = (
   graph: FlowGraphDto,
-  unitEntityByPath: ReadonlyMap<string, UnitEntity>,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
   theme: Theme,
   dialogDataState: DialogDataStateType,
-  currentUnitEntityState: CurrentUnitEntityStateType,
+  currentUnitIdState: CurrentUnitIdStateType,
 ): { nodes: Node<AjsNode>[]; edges: Edge[] } => {
   const nodes: Node<AjsNode>[] = graph.nodes.map((node) => ({
     id: node.id,
     type: node.type,
     data: toNodeData(
       node,
-      unitEntityByPath,
       unitDefinitionByPath,
       dialogDataState,
-      currentUnitEntityState,
+      currentUnitIdState,
     ),
     position: calcPosition(node, theme),
   }));

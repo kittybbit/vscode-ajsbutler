@@ -16,18 +16,18 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { UnitEntity } from "../../../domain/models/units/UnitEntity";
-import { N } from "../../../domain/models/units/N";
+import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";
 import {
-  CurrentUnitEntityStateType,
+  CurrentUnitIdStateType,
   DrawerWidthStateType,
   FlowMenuStateType,
 } from "./FlowContents";
 
 type FlowSelectorProps = {
-  unitEntities: UnitEntity[];
+  rootUnits: AjsUnit[];
+  unitById: ReadonlyMap<string, AjsUnit>;
   flowMenuState: FlowMenuStateType;
-  currentUnitEntityState: CurrentUnitEntityStateType;
+  currentUnitIdState: CurrentUnitIdStateType;
   drawerWidthState: DrawerWidthStateType;
 };
 
@@ -75,15 +75,16 @@ const AccordionActions = styled((props: AccordionActionsProps) => (
 }));
 
 const FlowSelector: FC<FlowSelectorProps> = ({
-  unitEntities,
-  currentUnitEntityState: currentUnitEntityState,
+  rootUnits,
+  unitById,
+  currentUnitIdState,
   flowMenuState,
   drawerWidthState,
 }) => {
   console.log("render FlowSelector.");
 
   const { menuStatus, setMenuStatus } = flowMenuState;
-  const { currentUnitEntity, setCurrentUnitEntity } = currentUnitEntityState;
+  const { currentUnitId, setCurrentUnitId } = currentUnitIdState;
   const { setDrawerWidth } = drawerWidthState;
 
   const theme = useTheme();
@@ -97,54 +98,48 @@ const FlowSelector: FC<FlowSelectorProps> = ({
 
   const isAncestorOf = useMemo(() => {
     const set = new Set<string>();
-    let current = currentUnitEntity;
+    let current = currentUnitId ? unitById.get(currentUnitId) : undefined;
     while (current) {
       set.add(current.id);
-      current = current.parent;
+      current = current.parentId ? unitById.get(current.parentId) : undefined;
     }
-    return (target?: UnitEntity) => (target ? set.has(target.id) : false);
-  }, [currentUnitEntity]);
+    return (target?: AjsUnit) => (target ? set.has(target.id) : false);
+  }, [currentUnitId, unitById]);
 
   const renderUnitEntity = (
-    unitEntities: UnitEntity[],
-    currentUnitEntity: UnitEntity | undefined,
-    isAncestorOf: (target?: UnitEntity) => boolean,
-    setCurrentUnitEntity: (u: UnitEntity) => void,
+    units: AjsUnit[],
+    isAncestorOf: (target?: AjsUnit) => boolean,
+    setCurrentUnitId: (unitId: string) => void,
   ): React.ReactNode[] => {
-    return unitEntities.map((unitEntity) => {
-      if (unitEntity.ty.value() === "g") {
+    return units.map((unit) => {
+      if (unit.unitType === "g") {
         return (
           <Accordion
-            key={unitEntity.id}
-            sx={{ marginLeft: `${unitEntity.depth}em` }}
-            expanded={isAncestorOf(unitEntity)}
-            onChange={() => setCurrentUnitEntity(unitEntity)}
+            key={unit.id}
+            sx={{ marginLeft: `${unit.depth}em` }}
+            expanded={isAncestorOf(unit)}
+            onChange={() => setCurrentUnitId(unit.id)}
           >
-            <AccordionSummary>{unitEntity.name}</AccordionSummary>
-            {renderUnitEntity(
-              unitEntity.children,
-              currentUnitEntity,
-              isAncestorOf,
-              setCurrentUnitEntity,
-            )}
+            <AccordionSummary>{unit.name}</AccordionSummary>
+            {renderUnitEntity(unit.children, isAncestorOf, setCurrentUnitId)}
           </Accordion>
         );
       }
-      if (unitEntity.ty.value() === "n" && (unitEntity as N).isRootJobnet) {
+      if (unit.unitType === "n" && unit.isRootJobnet) {
         return (
           <AccordionActions
-            key={unitEntity.id}
+            key={unit.id}
             disableSpacing
-            onClick={() => setCurrentUnitEntity(unitEntity)}
-            sx={{ marginLeft: `${unitEntity.depth}em` }}
+            onClick={() => setCurrentUnitId(unit.id)}
+            sx={{ marginLeft: `${unit.depth}em` }}
           >
-            {isAncestorOf(unitEntity) && (
+            {isAncestorOf(unit) && (
               <CheckCircleOutlineIcon
                 fontSize="inherit"
                 sx={{ marginRight: "0.25em" }}
               />
             )}
-            {unitEntity.name}
+            {unit.name}
           </AccordionActions>
         );
       }
@@ -191,12 +186,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
             )}
           </IconButton>
         </Toolbar>
-        {renderUnitEntity(
-          unitEntities,
-          currentUnitEntity,
-          isAncestorOf,
-          setCurrentUnitEntity,
-        )}
+        {renderUnitEntity(rootUnits, isAncestorOf, setCurrentUnitId)}
       </Drawer>
     </>
   );

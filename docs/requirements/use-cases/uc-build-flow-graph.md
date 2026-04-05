@@ -30,7 +30,8 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
 ## Acceptance Notes
 
 - the same selected unit scope produces deterministic graph DTO content
-- desktop and web presentation layers can convert the DTO into their own graph structures
+- desktop and web presentation layers can convert the DTO into their own graph
+  structures without requiring `UnitEntity` reconstruction
 - flow rendering behavior remains unchanged after DTO to XyFlow mapping
 - representative graph-oriented fixtures in `sample/` should be reusable for
   regression coverage instead of rebuilding large inline definitions

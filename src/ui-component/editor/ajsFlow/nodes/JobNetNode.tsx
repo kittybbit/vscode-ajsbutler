@@ -6,7 +6,6 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import classNames from "classnames";
-import { N } from "../../../../domain/models/units/N";
 import {
   ActionIcon,
   AjsNode,
@@ -23,14 +22,14 @@ import {
   handleKeyDownDialogOpen,
 } from "./Utils";
 
-export type JobNetNode = Node<AjsNode<N>, "jobnet">;
+export type JobNetNode = Node<AjsNode, "jobnet">;
 type JobNetNodeProps = NodeProps<JobNetNode>;
 
 const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
   console.log("render JobNetNode.");
 
   const {
-    unitEntity,
+    unitId,
     isAncestor,
     isCurrent,
     hasSchedule,
@@ -44,7 +43,7 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
   return (
     <>
       <Stack
-        id={unitEntity.id}
+        id={unitId}
         sx={nodeSxProps}
         className={classNames({
           current: isCurrent,

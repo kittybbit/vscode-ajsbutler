@@ -2,7 +2,6 @@ import React, { FC, memo } from "react";
 import { Node, NodeProps } from "@xyflow/react";
 import { Box, Stack } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { G } from "../../../../domain/models/units/G";
 import {
   ActionIcon,
   AjsNode,
@@ -14,16 +13,16 @@ import {
 import { handleClickDialogOpen, handleKeyDownDialogOpen } from "./Utils";
 import classNames from "classnames";
 
-export type JobGroupNode = Node<AjsNode<G>, "jobgroup">;
+export type JobGroupNode = Node<AjsNode, "jobgroup">;
 type JobGroupNodeProp = NodeProps<JobGroupNode>;
 const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
   console.log("render JobGroupNode.");
-  const { unitEntity, isAncestor, label, comment, ty, gty } = data;
+  const { unitId, isAncestor, label, comment, ty, gty } = data;
 
   return (
     <>
       <Stack
-        id={unitEntity.id}
+        id={unitId}
         sx={nodeSxProps}
         className={classNames({
           ancestor: isAncestor,

@@ -3,7 +3,6 @@ import { Node, NodeProps } from "@xyflow/react";
 import { Box, Stack } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import { Rc } from "../../../../domain/models/units/Rc";
 import {
   ActionIcon,
   AjsNode,
@@ -19,19 +18,19 @@ import {
   handleKeyDownDialogOpen,
 } from "./Utils";
 
-export type ConditionNode = Node<AjsNode<Rc>, "condition">;
+export type ConditionNode = Node<AjsNode, "condition">;
 type ConditionNodeProps = NodeProps<ConditionNode>;
 const ConditionNode: FC<ConditionNodeProps> = ({
   data,
 }: ConditionNodeProps) => {
   console.log("render ConditionNode.");
 
-  const { unitEntity, isCurrent, label, comment, ty } = data;
+  const { unitId, isCurrent, label, comment, ty } = data;
 
   return (
     <>
       <Stack
-        id={unitEntity.id}
+        id={unitId}
         sx={nodeSxProps}
         className={isCurrent ? "current" : undefined}
       >

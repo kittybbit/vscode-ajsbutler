@@ -19,11 +19,11 @@ type JobNodeProps = NodeProps<JobNode>;
 const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
   console.log("render JobNode.");
 
-  const { unitEntity, hasWaitedFor, label, comment, ty } = data;
+  const { unitId, hasWaitedFor, label, comment, ty } = data;
 
   return (
     <>
-      <Stack id={unitEntity.id} sx={nodeSxProps}>
+      <Stack id={unitId} sx={nodeSxProps}>
         <TyTitle ty={ty} />
         {/* action */}
         <Box sx={nodeActionsSxProps}>
