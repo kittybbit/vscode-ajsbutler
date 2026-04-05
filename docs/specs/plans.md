@@ -87,6 +87,9 @@ This file is the high-level index for the per-feature plan structure in
   interpretation rules.
 - shared unit group-state helpers now resolve `gty` interpretation so wrapper
   and normalized-model logic stop maintaining duplicate group/planning checks.
+- shared group-week helpers now resolve `op` and `cl` weekday interpretation so
+  `G` stops duplicating the same open/close calendar precedence logic across
+  weekday getters.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -192,21 +195,21 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared group-state helpers so duplicated `gty` interpretation uses a
-shared implementation.
+Extract shared group-week helpers so duplicated weekday calendar interpretation
+uses a shared implementation.
 
 ### Why
 
-Group-type interpretation currently lives in both wrapper and normalized-model
-code paths. Pulling that into one shared helper makes the `gty` rule explicit
-and separately testable.
+Group weekday interpretation currently lives in `G` as repeated `op`/`cl`
+calendar precedence logic. Pulling that into one shared helper makes the
+weekday rule explicit and separately testable.
 
 ### Scope
 
-- add a shared helper for resolving supported group types and planning state
-  from `gty`
-- switch wrapper and normalized-model group-state checks to use the helper
-- add focused tests for group-state resolution
+- add a shared helper for resolving weekday state from `op` and `cl`
+  calendars
+- switch `G` weekday getters to use the helper
+- add focused tests for weekday-state resolution
 
 ### Non-Goals
 
@@ -226,29 +229,27 @@ and separately testable.
 
 #### Use case
 
-Shared group-state helper extraction.
+Shared group-week helper extraction.
 
 #### Layers affected
 
-- domain: shared group-state helper and group-state detection cleanup
+- domain: shared group-week helper and weekday detection cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep `groupType` and `isPlanning` behavior identical to existing wrapper and
-  normalized behavior.
-- Limit the slice to `gty`-based group-state resolution only.
+- Keep weekday getter behavior identical to existing wrapper behavior.
+- Limit the slice to `op`/`cl`-based weekday resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves supported group types and planning state from
-      `gty`
-- [ ] wrapper and normalized-model group-state checks delegate to the helper
+- [ ] shared helper resolves weekday state from `op` and `cl` calendars
+- [ ] `G` weekday getters delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for group-state resolution
+- add helper coverage for weekday-state resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -256,12 +257,12 @@ Shared group-state helper extraction.
 
 ### Risks
 
-- group-state helper extraction could accidentally change how unsupported `gty`
-  values are treated
-- wrapper and normalized-model code could diverge if one call site is missed
+- weekday helper extraction could accidentally change `op` versus `cl`
+  precedence
+- wrapper updates could miss one weekday getter and leave duplication behind
 
 ### Rollback Plan
 
-- restore inline `gty` checks if behavior changes
+- restore inline weekday checks in `G` if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

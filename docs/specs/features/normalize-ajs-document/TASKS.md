@@ -69,4 +69,6 @@
       schedule detection no longer drift apart
 - [x] Expose shared group-state helpers so wrapper and normalized-model `gty`
       interpretation no longer drift apart
+- [x] Expose shared group-week helpers so wrapper group weekday checks stop
+      duplicating `op` and `cl` interpretation logic
 - [x] Document which semantics intentionally remain in application view adapters
