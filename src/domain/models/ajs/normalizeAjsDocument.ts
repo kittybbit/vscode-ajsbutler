@@ -1,5 +1,6 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
+import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
 import { resolveUnitLayout } from "../units/unitLayoutHelpers";
 import { resolveIsRecovery } from "../units/unitTypeHelpers";
 import {
@@ -74,7 +75,7 @@ const getHasSchedule = (unit: Unit, unitType: TySymbol): boolean => {
 
 const getIsRootJobnet = (unit: Unit, unitType: TySymbol): boolean =>
   unitType === "n"
-    ? getFirstParameterValue(unit.parent ?? unit, "ty") !== "n" || !unit.parent
+    ? resolveIsRootJobnet(getFirstParameterValue(unit.parent, "ty"))
     : false;
 
 const toDependencyType = (

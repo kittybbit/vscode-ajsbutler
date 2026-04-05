@@ -2,15 +2,13 @@ import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
 import { priority } from "./Utils";
+import { resolveIsRootJobnet } from "./unitJobnetStateHelpers";
 import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
 
 export class N extends UnitEntity {
   /** Whether this jobnet is the root jobnet. */
   get isRootJobnet() {
-    if (!this.parent) {
-      return true;
-    }
-    return this.parent.ty.value() !== "n" ? true : false;
+    return resolveIsRootJobnet(this.parent?.ty.value());
   }
   /** Whether a schedule is set for this jobnet. */
   get hasSchedule() {
