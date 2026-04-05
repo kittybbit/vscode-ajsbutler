@@ -87,4 +87,6 @@
       normalization
 - [x] Reuse shared raw unit-parameter lookup helpers in normalized layout
       mapping so `el` lookup no longer filters parent parameters inline
+- [x] Reuse shared unit-edge type normalization helpers from normalized mapping
+      so `con` or `seq` coercion no longer lives only inside normalization
 - [x] Document which semantics intentionally remain in application view adapters

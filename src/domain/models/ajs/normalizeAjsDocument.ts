@@ -5,7 +5,10 @@ import {
   findUnitParameterValues,
 } from "../../values/unitParameterLookupHelpers";
 import { decodeEncodedString } from "../parameters/encodedStringHelpers";
-import { parseUnitEdge } from "../parameters/unitEdgeHelpers";
+import {
+  normalizeUnitEdgeType,
+  parseUnitEdge,
+} from "../parameters/unitEdgeHelpers";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
 import { resolveUnitDepth } from "../units/unitDepthHelpers";
 import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
@@ -15,7 +18,6 @@ import { resolveHasWaitedFor } from "../units/unitWaitStateHelpers";
 import { resolveIsRecovery } from "../units/unitTypeHelpers";
 import {
   AjsDependency,
-  AjsDependencyType,
   AjsDocument,
   AjsGroupType,
   AjsNormalizationWarning,
@@ -74,14 +76,10 @@ const getIsRootJobnet = (unit: Unit, unitType: TySymbol): boolean =>
     ? resolveIsRootJobnet(findUnitParameterValue(unit.parent, "ty"))
     : false;
 
-const toDependencyType = (
-  relationType: string | undefined,
-): AjsDependencyType => (relationType === "con" ? "con" : "seq");
-
 const parseDependency = (
   parameterValue: string,
 ):
-  | { sourceName: string; targetName: string; type: AjsDependencyType }
+  | { sourceName: string; targetName: string; type: AjsDependency["type"] }
   | undefined => {
   const relation = parseUnitEdge(parameterValue);
   if (!relation) {
@@ -91,7 +89,7 @@ const parseDependency = (
   return {
     sourceName: relation.sourceName,
     targetName: relation.targetName,
-    type: toDependencyType(relation.relationType),
+    type: normalizeUnitEdgeType(relation.relationType),
   };
 };
 
