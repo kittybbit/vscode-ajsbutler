@@ -85,4 +85,6 @@
 - [x] Reuse shared raw unit-parameter lookup helpers from normalized-model
       mapping so raw parameter filtering no longer lives only inside
       normalization
+- [x] Reuse shared raw unit-parameter lookup helpers in normalized layout
+      mapping so `el` lookup no longer filters parent parameters inline
 - [x] Document which semantics intentionally remain in application view adapters

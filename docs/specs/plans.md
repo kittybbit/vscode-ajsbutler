@@ -104,6 +104,8 @@ This file is the high-level index for the per-feature plan structure in
   target, and relation parsing rule.
 - normalized-model mapping now reuses shared raw unit-parameter lookup helpers
   so simple key/value filtering no longer lives only inside normalization.
+- normalized-model layout mapping now reuses shared raw unit-parameter lookup
+  helpers so parent `el` lookup no longer filters parameters inline.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -209,25 +211,25 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Reuse shared raw unit-parameter lookup helpers from normalized-model mapping so
-simple key/value filtering is not reimplemented locally.
+Reuse shared raw unit-parameter lookup helpers in normalized layout mapping so
+parent `el` lookup is not reimplemented inline.
 
 ### Why
 
-Normalized mapping still keeps local parameter filtering helpers for repeated
-and first-value lookup. Sharing that raw lookup rule makes future normalized
-helper extraction smaller and avoids another isolated parameter walk.
+After extracting raw unit-parameter lookup helpers, normalized layout mapping
+still filters parent `el` parameters directly. Switching that last call site to
+the shared helper keeps raw parameter walking in one place.
 
 ### Scope
 
-- extract raw unit-parameter lookup helpers for repeated and first-value access
-- switch normalized-model mapping to use those helpers
-- add focused tests for raw lookup behavior
+- switch normalized layout lookup to `findUnitParameterValues(...)`
+- update normalize planning docs for the completed sub-slice
+- keep the existing layout behavior unchanged
 
 ### Non-Goals
 
-- changing normalized parameter DTO shape
-- replacing normalized `AjsDocument` helpers with raw `Unit` helpers
+- introducing a new layout helper
+- changing layout coordinate parsing or fallback behavior
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
