@@ -1,8 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntity";
-import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
+import { WaitableUnitEntity } from "./WaitableUnitEntity";
 
-export class Lfwj extends UnitEntity {
+export class Lfwj extends WaitableUnitEntity {
   // [lftpd=[!]"trap-data-1"[:[!]"trap-data-2"...];]...
   get lftpd() {
     return ParamFactory.lftpd(this);
@@ -91,11 +90,6 @@ export class Lfwj extends UnitEntity {
   // [uem={y|n};]
   get uem() {
     return ParamFactory.uem(this);
-  }
-
-  /** Whether this jobnet have a unit whose end is being waited for. */
-  get hasWaitedFor() {
-    return resolveHasWaitedFor(this.eun);
   }
 }
 export class Rlfwj extends Lfwj {}

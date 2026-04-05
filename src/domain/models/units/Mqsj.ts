@@ -1,8 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntity";
-import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
+import { WaitableUnitEntity } from "./WaitableUnitEntity";
 
-export class Mqsj extends UnitEntity {
+export class Mqsj extends WaitableUnitEntity {
   // [mqque=queue-name;]
   get mqque() {
     return ParamFactory.mqque(this);
@@ -98,11 +97,6 @@ export class Mqsj extends UnitEntity {
   // [uem={y|n};]
   get uem() {
     return ParamFactory.uem(this);
-  }
-
-  /** Whether this jobnet have a unit whose end is being waited for. */
-  get hasWaitedFor() {
-    return resolveHasWaitedFor(this.eun);
   }
 }
 export class Rmqsj extends Mqsj {}
