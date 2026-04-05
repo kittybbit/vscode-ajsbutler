@@ -2,6 +2,7 @@ import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
 import { priority } from "./Utils";
+import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
 
 export class N extends UnitEntity {
   /** Whether this jobnet is the root jobnet. */
@@ -19,7 +20,7 @@ export class N extends UnitEntity {
   }
   /** Whether this jobnet have a unit whose end is being waited for. */
   get hasWaitedFor() {
-    return this.eun && this.eun.length > 0;
+    return resolveHasWaitedFor(this.eun);
   }
 
   // [sd=[N,]{[[yyyy/]mm/]{[+|*|@]dd|[+|*|@]b[-DD]|[+]{su|mo|tu|we|th|fr|sa}[:{n|b}]}|en|ud};]

@@ -61,4 +61,6 @@
       interpretation no longer drift apart
 - [x] Expose shared defined-parameter helpers so wrapper prototype inspection no
       longer lives only inside `UnitEntity`
+- [x] Expose shared wait-state helpers so wrapper classes stop duplicating
+      `eun`-based `hasWaitedFor` checks
 - [x] Document which semantics intentionally remain in application view adapters
