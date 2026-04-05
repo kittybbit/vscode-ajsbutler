@@ -64,6 +64,21 @@ export const resolveTopDefaultRawValue = (
   return "";
 };
 
+export const buildTopParameter = <T>(
+  arg: Omit<ParamLookupArg, "defaultRawValue"> & {
+    unit: TopParameterSource & ParamLookupArg["unit"];
+    index: TopParameterIndex;
+  },
+  mapParam: (param: ParamInternal) => T,
+): T | undefined => {
+  const parameter = resolveParameter({
+    unit: arg.unit,
+    parameter: arg.parameter,
+    defaultRawValue: resolveTopDefaultRawValue(arg.unit, arg.index),
+  });
+  return parameter ? mapParam(parameter) : undefined;
+};
+
 /** Create a parameter value map with rule numbers as keys. */
 const mapByRule = <T extends Rule>(params: Array<T> | undefined) =>
   params

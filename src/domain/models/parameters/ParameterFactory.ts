@@ -229,6 +229,7 @@ import { ParamBase } from "./parameter.types";
 import {
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
+  buildTopParameter,
   buildInheritedParameter,
   buildInheritedParameterArray,
   buildSdAlignedParameters,
@@ -1834,36 +1835,44 @@ export class ParamFactory {
     return param ? new Tmitv(param) : undefined;
   }
   static top1(unit: J | Cj) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "top1",
-      defaultRawValue: resolveTopDefaultRawValue(unit, 1),
-    });
-    return param ? new Top1(param) : undefined;
+    return buildTopParameter(
+      {
+        unit: unit,
+        parameter: "top1",
+        index: 1,
+      },
+      (param) => new Top1(param),
+    );
   }
   static top2(unit: J | Cj) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "top2",
-      defaultRawValue: resolveTopDefaultRawValue(unit, 2),
-    });
-    return param ? new Top2(param) : undefined;
+    return buildTopParameter(
+      {
+        unit: unit,
+        parameter: "top2",
+        index: 2,
+      },
+      (param) => new Top2(param),
+    );
   }
   static top3(unit: J | Cj) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "top3",
-      defaultRawValue: resolveTopDefaultRawValue(unit, 3),
-    });
-    return param ? new Top3(param) : undefined;
+    return buildTopParameter(
+      {
+        unit: unit,
+        parameter: "top3",
+        index: 3,
+      },
+      (param) => new Top3(param),
+    );
   }
   static top4(unit: J | Cj) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "top4",
-      defaultRawValue: resolveTopDefaultRawValue(unit, 4),
-    });
-    return param ? new Top4(param) : undefined;
+    return buildTopParameter(
+      {
+        unit: unit,
+        parameter: "top4",
+        index: 4,
+      },
+      (param) => new Top4(param),
+    );
   }
   static ts1(unit: UnitEntity) {
     const param = this.#checkAndGet({
