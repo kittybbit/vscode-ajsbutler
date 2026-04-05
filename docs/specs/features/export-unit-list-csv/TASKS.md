@@ -10,5 +10,6 @@
 
 ## Remaining Follow-up
 
-- [ ] Remove the remaining table-to-CSV dependency on `UnitEntity`-typed presentation rows
+- [ ] Remove the remaining table-to-CSV dependency on
+      `UnitEntity`-typed presentation rows
 - [ ] Record a current manual smoke-test result for CSV export behavior

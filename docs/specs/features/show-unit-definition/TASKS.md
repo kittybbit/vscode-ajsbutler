@@ -10,5 +10,7 @@
 
 ## Remaining Follow-up
 
-- [ ] Remove any remaining dialog-opening paths that still assume wrapper-backed UI state
-- [ ] Record a current manual smoke-test result for table and flow dialog behavior
+- [ ] Remove any remaining dialog-opening paths that still assume
+      wrapper-backed UI state
+- [ ] Record a current manual smoke-test result for table and
+      flow dialog behavior

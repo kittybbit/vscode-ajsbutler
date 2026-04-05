@@ -10,5 +10,6 @@
 
 ## Remaining Follow-up
 
-- [ ] Move remaining wrapper-derived semantics into the normalized model where they are broadly reusable
+- [ ] Move remaining wrapper-derived semantics into the normalized model
+      where they are broadly reusable
 - [ ] Document which semantics intentionally remain in application view adapters
