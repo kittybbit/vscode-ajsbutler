@@ -65,14 +65,18 @@ This file is the high-level index for the per-feature plan structure in
 - `ParameterFactory` no longer keeps private `#checkAndGet` and
   `#checkAndGetArray` wrappers now that `ln` and `unit` delegate to shared
   helper paths directly.
+- shared parameter helpers now resolve `sd` through root-jobnet-aware helper
+  logic so sd-aligned builders stop calling `unit.params("sd")` directly in
+  `ParameterFactory`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
 
 1. Continue moving the remaining wrapper-derived parameter semantics that still
    require typed wrapper interpretation or other unit-type-specific defaults
-   out of `ParameterFactory` in small slices, with priority on any helpers
-   still coupled to wrapper-specific `params(...)` calls.
+   out of `ParameterFactory` in small slices, with priority on any behavior
+   that still depends on wrapper instance methods beyond shared helper entry
+   points.
 2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 3. Keep roadmap and feature task files aligned with merged slices so remaining
@@ -170,22 +174,23 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Identify the next small slice of wrapper-derived parameter semantics that can
-move out of `ParameterFactory` after removal of the final private
-`#checkAndGet` wrappers.
+Move sd resolution for sd-aligned parameter builders into shared helpers so
+`ParameterFactory` no longer calls `unit.params("sd")` directly.
 
 ### Why
 
-The factory now uses shared helper entry points consistently for simple lookup
-paths. The next value comes from targeting the remaining behavior that still
-depends on wrapper-specific interpretation or type-local defaults.
+After removing the final private lookup wrappers, the next repeated
+wrapper-specific dependency is `unit.params("sd")` in sd-aligned builder
+methods. Pulling that into shared helpers reduces direct wrapper coupling
+without changing behavior.
 
 ### Scope
 
-- inspect the remaining `ParameterFactory` methods that still depend on
-  wrapper-local `params(...)` interpretation
-- choose one small, behavior-preserving extraction slice
-- update specs before implementing that next slice
+- add a shared helper that resolves `sd` with the same root-jobnet-aware logic
+  already used for `sd` wrapper behavior
+- switch sd-aligned helper entry points to derive `sd` internally
+- remove direct `unit.params("sd")` calls from `ParameterFactory`
+- add focused helper tests for shared `sd` resolution
 
 ### Non-Goals
 
@@ -205,28 +210,29 @@ depends on wrapper-specific interpretation or type-local defaults.
 
 #### Use case
 
-Plan the next parameter-helper extraction slice.
+Shared `sd` resolution extraction for sd-aligned parameter builders.
 
 #### Layers affected
 
-- domain: identify the next extraction target
-- docs: plan tracking for the next slice
+- domain: shared parameter helper and `ParameterFactory` cleanup
+- docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep slices behavior-preserving and small enough to review.
-- Prefer extracting semantics that can be tested outside `ParameterFactory`.
+- Keep root-jobnet-aware `sd` behavior identical to existing wrapper behavior.
+- Limit the slice to shared `sd` resolution and removal of inline
+  `unit.params("sd")` calls.
 
 ### Acceptance Criteria
 
-- [ ] the next extraction target is explicitly identified
-- [ ] scope stays within one small behavior-preserving slice
+- [ ] shared helpers resolve `sd` without `ParameterFactory` calling
+      `unit.params("sd")` directly
+- [ ] sd-aligned builder call sites use the shared `sd` resolution path
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- inspect remaining wrapper-derived parameter methods
-- choose the next slice
+- add helper coverage for shared `sd` resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -234,13 +240,13 @@ Plan the next parameter-helper extraction slice.
 
 ### Risks
 
-- the remaining methods may look similar while hiding different defaulting
-  rules
-- a too-large slice could blur review boundaries
+- `sd` lookup could accidentally lose root-jobnet defaults or rule ordering
+- helper refactoring could overreach and mix `sd` resolution with unrelated
+  semantics
 
 ### Rollback Plan
 
-- restore the private wrapper methods and the two direct call sites if behavior
-  changes
+- restore inline `unit.params("sd")` lookups in the affected methods if
+  behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

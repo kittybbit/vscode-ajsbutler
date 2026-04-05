@@ -20,6 +20,7 @@ import {
   buildSdAlignedParameters,
   buildSortedRuleParameters,
   buildTopParameter,
+  resolveSdParameters,
   resolveConnectorControlDefaultRawValue,
   resolveJobnetConnectorControlDefaultRawValue,
   resolveParameter,
@@ -471,7 +472,6 @@ suite("Parameter helpers", () => {
       {
         unit: jobnet,
         parameter: "ey",
-        sd: jobnet.sd,
       },
       (param) => new Ln({ ...param, parameter: "ln" }),
     );
@@ -496,7 +496,6 @@ suite("Parameter helpers", () => {
         unit: jobnet,
         parameter: "wc",
         defaultRawValue: "1",
-        sd: jobnet.sd,
         buildFallbackRawValue: (rule) => `${rule},1`,
       },
       (param) => new Wc(param),
@@ -510,6 +509,30 @@ suite("Parameter helpers", () => {
       [
         { rule: 1, value: "2" },
         { rule: 2, value: "2,1" },
+      ],
+    );
+  });
+
+  test("resolves sd parameters through shared root-jobnet-aware helper logic", () => {
+    const rootJobnet = parseRootDefaultJobnet();
+    const { jobnet } = parseJobnets();
+
+    assert.deepStrictEqual(
+      resolveSdParameters(rootJobnet)?.map((parameter) => ({
+        rule: parameter.rule,
+        value: parameter.value(),
+      })),
+      [{ rule: 1, value: "en" }],
+    );
+
+    assert.deepStrictEqual(
+      resolveSdParameters(jobnet)?.map((parameter) => ({
+        rule: parameter.rule,
+        value: parameter.value(),
+      })),
+      [
+        { rule: 1, value: "ud" },
+        { rule: 2, value: "en" },
       ],
     );
   });

@@ -287,7 +287,6 @@ export class ParamFactory {
         unit: unit,
         parameter: "cftd",
         defaultRawValue: DEFAULTS.Cftd,
-        sd: unit.params("sd"),
         buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Cftd}`,
       },
       (param) => new Cftd(param),
@@ -363,7 +362,6 @@ export class ParamFactory {
       {
         unit: unit,
         parameter: "cy",
-        sd: unit.params("sd"),
       },
       (param) => new Cy(param),
     );
@@ -812,7 +810,6 @@ export class ParamFactory {
       {
         unit: unit,
         parameter: "ey",
-        sd: unit.params("sd"),
       },
       (param) => new Ey(param),
     );
@@ -1988,7 +1985,6 @@ export class ParamFactory {
       {
         unit: unit,
         parameter: "sh",
-        sd: unit.params("sd"),
       },
       (param) => new Sh(param),
     );
@@ -1999,7 +1995,6 @@ export class ParamFactory {
         unit: unit,
         parameter: "shd",
         defaultRawValue: DEFAULTS.Shd,
-        sd: unit.params("sd"),
         buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Shd}`,
       },
       (param) => new Shd(param),
@@ -2039,7 +2034,6 @@ export class ParamFactory {
         unit: unit,
         parameter: "st",
         defaultRawValue: DEFAULTS.St,
-        sd: unit.params("sd"),
         buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.St}`,
       },
       (param) => new St(param),
@@ -2060,7 +2054,6 @@ export class ParamFactory {
       {
         unit: unit,
         parameter: "sy",
-        sd: unit.params("sd"),
       },
       (param) => new Sy(param),
     );
@@ -2267,7 +2260,6 @@ export class ParamFactory {
         unit: unit,
         parameter: "wc",
         defaultRawValue: DEFAULTS.Wc,
-        sd: unit.params("sd"),
         buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Wc}`,
       },
       (param) => new Wc(param),
@@ -2288,7 +2280,6 @@ export class ParamFactory {
         unit: unit,
         parameter: "wt",
         defaultRawValue: DEFAULTS.Wt,
-        sd: unit.params("sd"),
         buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Wt}`,
       },
       (param) => new Wt(param),

@@ -51,4 +51,6 @@
       `${rule},<default>` fallbacks inline in `ParameterFactory`
 - [x] Remove the final `#checkAndGet` and `#checkAndGetArray` wrapper usage so
       `ParameterFactory` depends on shared helper paths consistently
+- [x] Expose shared sd resolution helpers so sd-aligned parameter builders stop
+      calling `unit.params("sd")` directly in `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

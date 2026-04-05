@@ -170,10 +170,21 @@ export const buildSdAlignedParameters = <T extends Rule>(
   return adjustToSdItemCount(sd, values, buildDefault);
 };
 
+export const resolveSdParameters = (
+  unit: ParamLookupArg["unit"] & { isRoot: boolean },
+): Array<Sd> | undefined =>
+  buildRootJobnetRuleParameters(
+    {
+      unit: unit,
+      parameter: "sd",
+      isRootJobnet: unit.isRoot,
+      rootDefaultParameter: "sd",
+    },
+    (param) => new Sd(param),
+  );
+
 export const buildSdAlignedEmptyRuleParameters = <T extends Rule>(
-  arg: Omit<ParamLookupArg, "inherit" | "defaultRawValue"> & {
-    sd: Array<Sd> | undefined;
-  },
+  arg: Omit<ParamLookupArg, "inherit" | "defaultRawValue">,
   mapParam: (param: ParamInternal) => T,
 ): Array<T | null> | undefined =>
   buildSdAlignedParameters(
@@ -181,7 +192,7 @@ export const buildSdAlignedEmptyRuleParameters = <T extends Rule>(
       unit: arg.unit,
       parameter: arg.parameter,
     }),
-    arg.sd,
+    resolveSdParameters(arg.unit),
     mapParam,
     (rule) =>
       mapParam({
@@ -195,7 +206,6 @@ export const buildSdAlignedEmptyRuleParameters = <T extends Rule>(
 
 export const buildSdAlignedDefaultRuleParameters = <T extends Rule>(
   arg: Omit<ParamLookupArg, "inherit"> & {
-    sd: Array<Sd> | undefined;
     buildFallbackRawValue: (rule: number) => string;
   },
   mapParam: (param: ParamInternal) => T,
@@ -206,7 +216,7 @@ export const buildSdAlignedDefaultRuleParameters = <T extends Rule>(
       parameter: arg.parameter,
       defaultRawValue: arg.defaultRawValue,
     }),
-    arg.sd,
+    resolveSdParameters(arg.unit),
     mapParam,
     (rule) =>
       mapParam({
