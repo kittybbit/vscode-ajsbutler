@@ -1,7 +1,5 @@
 import React, { JSX } from "react";
 import { Box } from "@mui/material";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
-import { ParamSymbol, TySymbol } from "../../../../domain/values/AjsType";
 import Parameter from "../../../../domain/models/parameters/Parameter";
 
 type PrimitiveType =
@@ -26,15 +24,6 @@ const isPrimitiveType = (value: unknown): value is PrimitiveType => {
 };
 type BoxType = Parameter | PrimitiveType;
 export type AccessorType = BoxType | BoxType[];
-
-/** accessorFn for cell method of tableDefaultColumnDef. */
-export const defaultAccessorFn = <T extends AccessorType>(
-  param: ParamSymbol,
-) => {
-  return (row: UnitEntity /*, index: number*/): T => {
-    return row.params(param) as T;
-  };
-};
 
 const defaultFn = <T,>(param: T, index: number): JSX.Element => {
   if (param instanceof Parameter) {
@@ -84,15 +73,3 @@ export const box = <T,>(
   index: number = 0,
   fn: (param: T, index: number) => JSX.Element = defaultFn,
 ) => fn(param, index);
-
-/** When ty matches, invoke accessorFn. */
-export const tyAccessorFn = <T extends AccessorType>(
-  targetTy: TySymbol[],
-  accessorFn: (row: UnitEntity, index: number) => T,
-) => {
-  return (row: UnitEntity, index: number): T => {
-    return targetTy.includes(row.ty.value())
-      ? accessorFn(row, index)
-      : (undefined as T);
-  };
-};

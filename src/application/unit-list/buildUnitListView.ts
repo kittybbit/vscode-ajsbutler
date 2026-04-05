@@ -228,6 +228,7 @@ export type UnitListGroup9View = {
 };
 
 export type UnitListRowView = {
+  id: string;
   absolutePath: string;
   group2: UnitListGroup2View;
   group1: UnitListGroup1View;
@@ -484,6 +485,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
         }) ?? [];
 
     return {
+      id: unit.id,
       absolutePath: unit.absolutePath,
       group2: {
         comment: unit.comment,

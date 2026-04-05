@@ -15,7 +15,8 @@ This file is the high-level index for the per-feature plan structure in
 - `BuildUnitList` use case exists and is covered by
   `src/test/suite/buildUnitList.test.ts`.
 - `BuildUnitListView` exists and the table column groups now read application
-  view data for `group1` to `group19`.
+  view data for `group1` to `group19`, and the table presentation now consumes
+  `UnitListRowView` end to end.
 - `ExportUnitListCsv` use case exists and is covered by
   `src/test/suite/exportUnitListCsv.test.ts`.
 - `BuildFlowGraph` use case exists and is covered by
@@ -35,29 +36,28 @@ This file is the high-level index for the per-feature plan structure in
 
 1. Refresh roadmap and feature task documents so completed slices and remaining
    debt are visible in one place.
-2. Remove remaining `UnitEntity`-typed table dependencies and make table
-   presentation consume application row/view data end to end.
-3. Remove remaining `UnitEntity` reconstruction from the flow presentation
+2. Remove remaining `UnitEntity` reconstruction from the flow presentation
    path.
-4. Decide which wrapper-derived semantics belong in the normalized model versus
+3. Decide which wrapper-derived semantics belong in the normalized model versus
    staying in application view adapters.
-5. Continue reducing activation and webview concentration without changing user
+4. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 
 ## Default Workflow
 
-1. Read the relevant documents in `docs/specs/`.
-2. Update or create the related use-case spec in
+1. Create a dedicated git branch before implementation work starts.
+2. Read the relevant documents in `docs/specs/`.
+3. Update or create the related use-case spec in
    `docs/requirements/use-cases/`.
-3. Create or update corresponding feature docs in
+4. Create or update corresponding feature docs in
    `docs/specs/features/<feature>/`:
    - `SPECS.md` for implementation requirements
    - `PLANS.md` for planning and milestones
    - `TASKS.md` for execution items
-4. Fill in assumptions explicitly when requirements are ambiguous.
-5. Implement only after acceptance criteria are clear.
-6. Run build, quality checks, and relevant tests.
-7. Summarize compatibility risks and follow-up work.
+5. Fill in assumptions explicitly when requirements are ambiguous.
+6. Implement only after acceptance criteria are clear.
+7. Run build, quality checks, and relevant tests.
+8. Summarize compatibility risks and follow-up work.
 
 ## Task Template
 
@@ -82,6 +82,7 @@ This file is the high-level index for the per-feature plan structure in
 - Keep `engines.vscode` compatibility unless explicitly approved.
 - Keep desktop and web extension behavior intact.
 - Avoid direct `vscode` dependency in domain.
+- Start implementation from a dedicated git branch, not directly on `main`.
 
 ### Design
 

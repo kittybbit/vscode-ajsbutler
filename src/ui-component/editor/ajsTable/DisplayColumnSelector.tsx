@@ -26,20 +26,20 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ToggleOff from "@mui/icons-material/ToggleOff";
 import ToggleOn from "@mui/icons-material/ToggleOn";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
+import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../domain/services/i18n/nls";
 import { DrawerWidthStateType, TableMenuStateType } from "./TableContents";
 
 type DisplayColumnSelectorProps = {
-  table: ReactTable<UnitEntity>;
+  table: ReactTable<UnitListRowView>;
   columnVisibility: VisibilityState;
   tableMenuState: TableMenuStateType;
   drawerWidthState: DrawerWidthStateType;
 };
 
 const ColumnSwitch: FC<{
-  column: Column<UnitEntity, unknown>;
+  column: Column<UnitListRowView, unknown>;
   label: string;
 }> = ({ column, label }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +61,7 @@ const ColumnSwitch: FC<{
   );
 };
 
-const ColumnDetail: FC<{ column: Column<UnitEntity, unknown> }> = ({
+const ColumnDetail: FC<{ column: Column<UnitListRowView, unknown> }> = ({
   column,
 }) => {
   const subColumns = column.columns.filter((col) => col.columnDef.enableHiding);
@@ -106,7 +106,7 @@ const ColumnDetail: FC<{ column: Column<UnitEntity, unknown> }> = ({
   );
 };
 
-const ColumnAccordion: FC<{ column: Column<UnitEntity, unknown> }> = ({
+const ColumnAccordion: FC<{ column: Column<UnitListRowView, unknown> }> = ({
   column,
 }) => (
   <Accordion>

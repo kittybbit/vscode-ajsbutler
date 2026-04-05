@@ -235,6 +235,9 @@ suite("Build Unit List View", () => {
       (row) => row.absolutePath === "/root/jobnet/.CONDITION",
     );
 
+    assert.ok(root?.id);
+    assert.ok(jobnet?.id);
+
     assert.strictEqual(root?.group1.parentAbsolutePath, "/");
     assert.strictEqual(root?.group5.startDeadlineDate, "20240101");
     assert.strictEqual(root?.group5.maximumDuration, "30");

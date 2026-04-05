@@ -1,10 +1,10 @@
 import { Table } from "@tanstack/table-core";
 import Parameter from "../../../domain/models/parameters/Parameter";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
 import {
   ExportUnitListCsvInput,
   exportUnitListCsv,
 } from "../../../application/unit-list/exportUnitListCsv";
+import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import { AccessorType } from "./columnDefs/common";
 
 const toCellString = (value: AccessorType | undefined): string => {
@@ -27,7 +27,9 @@ const toCellString = (value: AccessorType | undefined): string => {
   return String(value);
 };
 
-const toExportInput = (table: Table<UnitEntity>): ExportUnitListCsvInput => ({
+const toExportInput = (
+  table: Table<UnitListRowView>,
+): ExportUnitListCsvInput => ({
   headerRows: table.getHeaderGroups().map((headerGroup) =>
     headerGroup.headers.flatMap((header) => {
       const placeholders = new Array(Math.max(header.colSpan - 1, 0)).fill("");
@@ -51,5 +53,5 @@ const toExportInput = (table: Table<UnitEntity>): ExportUnitListCsvInput => ({
   ]),
 });
 
-export const exportCsvView = (table: Table<UnitEntity>): string =>
+export const exportCsvView = (table: Table<UnitListRowView>): string =>
   exportUnitListCsv(toExportInput(table));

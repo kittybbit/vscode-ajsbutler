@@ -2,16 +2,15 @@ import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import * as parameter from "@resource/i18n/parameter";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { box } from "./common";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group10 = (
-  columnHelper: ColumnHelper<UnitEntity>,
+  columnHelper: ColumnHelper<UnitListRowView>,
   ajsTableColumnHeader: typeof ajscolumn.en,
   paramDefinition: typeof parameter.en,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitEntity, unknown> => {
+): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({
     id: "group10", //Schedule definition information
     header: ajsTableColumnHeader["group10"],

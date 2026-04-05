@@ -22,12 +22,13 @@ This directory is the entry point for Specification-Driven Development in this r
 
 For non-trivial changes:
 
-1. update or create the relevant use-case spec in `docs/requirements/use-cases/` and/or `docs/specs/features/<feature>/SPECS.md`
-2. update or create corresponding plans in `docs/specs/features/<feature>/PLANS.md`
-3. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
-4. document assumptions explicitly
-5. implement in small vertical slices
-6. run the most relevant checks before finishing
+1. create a dedicated git branch before implementation work starts
+2. update or create the relevant use-case spec in `docs/requirements/use-cases/` and/or `docs/specs/features/<feature>/SPECS.md`
+3. update or create corresponding plans in `docs/specs/features/<feature>/PLANS.md`
+4. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
+5. document assumptions explicitly
+6. implement in small vertical slices
+7. run the most relevant checks before finishing
 
 ## Document Roles
 

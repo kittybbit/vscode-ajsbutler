@@ -1,15 +1,14 @@
 import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { Chip } from "@mui/material";
 
 const group5 = (
-  columnHelper: ColumnHelper<UnitEntity>,
+  columnHelper: ColumnHelper<UnitListRowView>,
   ajsTableColumnHeader: typeof ajscolumn.en,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitEntity, unknown> => {
+): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({
     id: "group5", //Job group definition information
     header: ajsTableColumnHeader["group5"],

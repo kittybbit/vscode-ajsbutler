@@ -20,13 +20,13 @@ import {
   Theme,
   useTheme,
 } from "@mui/material";
+import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import TableHeader from "./TableHeader";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
 import type { MyAppResource } from "../../../shared/MyAppResource";
 
 type VirtualizedTableProps = {
-  headerGroups: HeaderGroup<UnitEntity>[];
-  rows: Row<UnitEntity>[];
+  headerGroups: HeaderGroup<UnitListRowView>[];
+  rows: Row<UnitListRowView>[];
   scrollType: MyAppResource["scrollType"];
   rowIndex?: number;
 };
@@ -68,7 +68,7 @@ const createTableComponents = (scrollType: string, rowIndex?: number) => ({
       return <TableBody {...props} ref={ref} />;
     },
   ),
-  TableRow: (props: ItemProps<Row<UnitEntity>>) => (
+  TableRow: (props: ItemProps<Row<UnitListRowView>>) => (
     <TableRow
       {...props}
       hover={true}
@@ -95,7 +95,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   const itemContent = useCallback(
-    (index: number, data: Row<UnitEntity>) =>
+    (index: number, data: Row<UnitListRowView>) =>
       data.getVisibleCells().map((cell) => (
         <TableCell key={cell.id} sx={styleTableCell}>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}

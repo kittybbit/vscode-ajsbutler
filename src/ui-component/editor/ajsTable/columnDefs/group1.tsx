@@ -1,18 +1,17 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import * as ty from "@resource/i18n/ty";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import Link from "@mui/material/Link";
 import React from "react";
 
 const group1 = (
-  columnHelper: ColumnHelper<UnitEntity>,
+  columnHelper: ColumnHelper<UnitListRowView>,
   ajsTableColumnHeader: typeof ajscolumn.en,
   tyDefinition: typeof ty.en,
   handleJump: (id: string) => void,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitEntity, unknown> =>
+): GroupColumnDef<UnitListRowView, unknown> =>
   columnHelper.group({
     id: "group1", //Unit definition information
     header: ajsTableColumnHeader["group1"],

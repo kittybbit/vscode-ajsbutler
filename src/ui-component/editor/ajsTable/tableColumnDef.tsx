@@ -2,7 +2,6 @@
 import React from "react";
 import { CellContext, createColumnHelper } from "@tanstack/table-core";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
 import {
   ajsTableColumnHeaderLang,
   paramDefinitionLang,
@@ -36,7 +35,7 @@ import { Box, IconButton, Tooltip } from "@mui/material";
 export const tableDefaultColumnDef = {
   enableHiding: true,
   enableSorting: true,
-  cell: (props: CellContext<UnitEntity, unknown>) => {
+  cell: (props: CellContext<UnitListRowView, unknown>) => {
     const param = props.getValue<AccessorType>();
     // undefined
     if (param === undefined) {
@@ -62,7 +61,7 @@ export const tableColumnDef = (
   // paramter
   const paramDefinition = paramDefinitionLang(language);
 
-  const columnHelper = createColumnHelper<UnitEntity>();
+  const columnHelper = createColumnHelper<UnitListRowView>();
 
   return [
     columnHelper.display({

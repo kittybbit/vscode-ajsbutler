@@ -1,13 +1,12 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group4 = (
-  columnHelper: ColumnHelper<UnitEntity>,
+  columnHelper: ColumnHelper<UnitListRowView>,
   ajsTableColumnHeader: typeof ajscolumn.en,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitEntity, unknown> => {
+): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({
     id: "group4", //Manager unit definition information
     header: ajsTableColumnHeader["group4"],
