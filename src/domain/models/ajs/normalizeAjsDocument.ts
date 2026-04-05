@@ -2,6 +2,7 @@ import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
 import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
 import { resolveUnitLayout } from "../units/unitLayoutHelpers";
+import { resolveHasSchedule } from "../units/unitScheduleStateHelpers";
 import { resolveIsRecovery } from "../units/unitTypeHelpers";
 import {
   AjsDependency,
@@ -68,9 +69,7 @@ const getHasSchedule = (unit: Unit, unitType: TySymbol): boolean => {
     return false;
   }
 
-  return getParameterValues(unit, "sd").some(
-    (value) => !/^(\d+,)?ud$/.test(value.trim()),
-  );
+  return resolveHasSchedule(getParameterValues(unit, "sd"));
 };
 
 const getIsRootJobnet = (unit: Unit, unitType: TySymbol): boolean =>

@@ -82,6 +82,9 @@ This file is the high-level index for the per-feature plan structure in
 - shared unit jobnet-state helpers now resolve root-jobnet detection so
   wrapper and normalized-model logic stop maintaining duplicate parent-type
   checks.
+- shared unit schedule-state helpers now resolve effective schedule detection
+  so wrapper and normalized-model logic stop maintaining duplicate `sd`
+  interpretation rules.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -187,20 +190,20 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared root-jobnet helpers so duplicated parent-type root-jobnet
+Extract shared schedule-state helpers so duplicated `sd`-based schedule
 detection uses a shared implementation.
 
 ### Why
 
-Root-jobnet detection currently lives in both wrapper and normalized-model
-code paths. Pulling that into one shared helper makes the parent-type rule
+Schedule detection currently lives in both wrapper and normalized-model code
+paths. Pulling that into one shared helper makes the effective `sd` rule
 explicit and separately testable.
 
 ### Scope
 
-- add a shared helper for resolving root-jobnet state from the parent unit type
-- switch wrapper and normalized-model root-jobnet detection to use the helper
-- add focused tests for root-jobnet resolution
+- add a shared helper for resolving schedule state from `sd` parameter values
+- switch wrapper and normalized-model schedule detection to use the helper
+- add focused tests for schedule-state resolution
 
 ### Non-Goals
 
@@ -220,28 +223,28 @@ explicit and separately testable.
 
 #### Use case
 
-Shared root-jobnet helper extraction.
+Shared schedule-state helper extraction.
 
 #### Layers affected
 
-- domain: shared root-jobnet helper and root-jobnet detection cleanup
+- domain: shared schedule-state helper and schedule detection cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep `isRootJobnet` behavior identical to existing wrapper and normalized
+- Keep `hasSchedule` behavior identical to existing wrapper and normalized
   behavior.
-- Limit the slice to parent-type-based root-jobnet resolution only.
+- Limit the slice to `sd`-based schedule resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves root-jobnet state from the parent unit type
-- [ ] wrapper and normalized-model root-jobnet checks delegate to the helper
+- [ ] shared helper resolves effective schedule state from `sd` values
+- [ ] wrapper and normalized-model schedule checks delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for root-jobnet resolution
+- add helper coverage for schedule-state resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -249,12 +252,12 @@ Shared root-jobnet helper extraction.
 
 ### Risks
 
-- root-jobnet helper extraction could accidentally change how non-jobnet units
-  are treated
+- schedule helper extraction could accidentally change how `ud` schedule values
+  are interpreted
 - wrapper and normalized-model code could diverge if one call site is missed
 
 ### Rollback Plan
 
-- restore inline root-jobnet checks if behavior changes
+- restore inline schedule checks if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
