@@ -41,6 +41,9 @@ This file is the high-level index for the per-feature plan structure in
   `ParameterFactory`.
 - shared parameter helpers now expose reusable sorted rule-parameter mapping so
   `ln` and `sd` no longer sort rule arrays directly inside `ParameterFactory`.
+- shared parameter helpers now expose connector-control default resolution so
+  `G` and `N` stop deciding `ncl`, `ncs`, and `ncex` fallback values with
+  wrapper-local literals and branching.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -145,28 +148,30 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable helper for sorted rule parameters so `ln` and `sd` stop
-sorting rule arrays directly inside `ParameterFactory`.
+Extract a reusable helper for connector-control defaults so `ncl`, `ncs`, and
+`ncex` stop deciding root/group fallback values directly in unit wrappers.
 
 ### Why
 
-`ParameterFactory` still contains direct rule-array sorting for `ln` and `sd`.
-Moving that simple rule-order semantic into shared helpers keeps the factory
-closer to typed construction and makes rule-order behavior easier to test.
+`G` and `N` still hard-code connector-control default rules with literal `"n"`
+values and root-jobnet checks. Moving that decision into shared helpers keeps
+the fallback semantics explicit and reduces wrapper-specific branching.
 
 ### Scope
 
-- add a helper that maps and sorts rule-based parameters
-- switch `ParameterFactory` `ln` and `sd` to the shared helper
-- keep public parameter behavior unchanged while reducing repeated rule sorting
-- add focused tests for sorted rule-parameter behavior
+- add a helper that resolves connector-control defaults for group and jobnet
+  wrappers
+- switch `G` and `N` connector-control getters to the shared helper
+- keep public parameter behavior unchanged while reducing wrapper-local default
+  logic
+- add focused tests for connector-control default behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing root-jobnet defaults or rule values
+- changing connector semantics for `Nc`
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -180,25 +185,24 @@ closer to typed construction and makes rule-order behavior easier to test.
 
 #### Use case
 
-Sorted rule-parameter helper extraction.
+Connector-control default helper extraction.
 
 #### Layers affected
 
-- domain: rule-parameter helper usage
+- domain: connector-control helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize the existing rule sort
-  behavior.
-- Limit this slice to `ln` and `sd` and leave broader wrapper reduction for
-  later work.
+- Keep semantic behavior identical and only centralize the existing connector
+  default rule.
+- Limit this slice to `ncl`, `ncs`, and `ncex` defaults in `G` and `N`.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for sorted rule-parameter mapping
-- [ ] `ParameterFactory` `ln` and `sd` delegate to the helper
-- [ ] focused tests cover rule-order behavior
+- [ ] shared helper exists for connector-control default resolution
+- [ ] `G` and `N` connector-control getters delegate to the helper
+- [ ] focused tests cover group and root-jobnet default behavior
 
 ### Test Plan
 
@@ -209,11 +213,12 @@ Sorted rule-parameter helper extraction.
 
 ### Risks
 
-- helper extraction could accidentally change rule ordering
-- `sd` root default behavior could drift if sorting is not preserved exactly
+- helper extraction could accidentally change when connector defaults appear
+- group and root-jobnet semantics could drift if the fallback rule is encoded
+  incorrectly
 
 ### Rollback Plan
 
-- revert the `ln` and `sd` helper usage in `ParameterFactory`
+- revert the connector-control helper usage in `G` and `N`
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

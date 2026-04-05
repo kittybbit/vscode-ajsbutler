@@ -1,5 +1,6 @@
 import { WeekSymbol } from "../../values/AjsType";
 import { ParamFactory } from "../parameters/ParameterFactory";
+import { resolveConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
 
 /** job group */
@@ -30,7 +31,10 @@ export class G extends UnitEntity {
   }
   // [ncl={y|n};]
   get ncl() {
-    return ParamFactory.ncl(this, "n");
+    return ParamFactory.ncl(
+      this,
+      resolveConnectorControlDefaultRawValue("always-disabled"),
+    );
   }
   // [ncn=jobnet-connector-name;]
   get ncn() {
@@ -38,11 +42,17 @@ export class G extends UnitEntity {
   }
   // [ncs={y|n};]
   get ncs() {
-    return ParamFactory.ncs(this, "n");
+    return ParamFactory.ncs(
+      this,
+      resolveConnectorControlDefaultRawValue("always-disabled"),
+    );
   }
   // [ncex={y|n};]
   get ncex() {
-    return ParamFactory.ncex(this, "n");
+    return ParamFactory.ncex(
+      this,
+      resolveConnectorControlDefaultRawValue("always-disabled"),
+    );
   }
   // [nchn="connection-host-name";]
   get nchn() {

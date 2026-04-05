@@ -30,6 +30,24 @@ export const resolveRootJobnetDefaultRawValue = (
 ): string | undefined =>
   isRootJobnet ? rootJobnetDefaultByParameter[parameter] : undefined;
 
+export const resolveConnectorControlDefaultRawValue = (
+  mode: "always-disabled" | "root-jobnet-only",
+): string | undefined => {
+  switch (mode) {
+    case "always-disabled":
+      return "n";
+    case "root-jobnet-only":
+      return "n";
+  }
+};
+
+export const resolveJobnetConnectorControlDefaultRawValue = (
+  isRootJobnet: boolean,
+): string | undefined =>
+  isRootJobnet
+    ? resolveConnectorControlDefaultRawValue("root-jobnet-only")
+    : undefined;
+
 export const resolveTopDefaultRawValue = (
   unit: TopParameterSource,
   index: TopParameterIndex,

@@ -22,4 +22,7 @@
       `ParameterFactory`
 - [x] Expose shared helpers for reusable sorted rule-parameter mapping so
       simple rule arrays stop sorting directly inside `ParameterFactory`
+- [x] Expose shared helpers for connector-control default resolution so group
+      and root-jobnet wrappers stop hard-coding `ncl`, `ncs`, and `ncex`
+      fallback values
 - [x] Document which semantics intentionally remain in application view adapters
