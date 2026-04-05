@@ -227,6 +227,7 @@ import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
+  buildOptionalParameterArray,
   buildOptionalParameter,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
@@ -267,11 +268,13 @@ export class ParamFactory {
     );
   }
   static ar(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "ar",
-    });
-    return params ? params.map((param) => new Ar(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "ar",
+      },
+      (param) => new Ar(param),
+    );
   }
   static cd(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -548,18 +551,22 @@ export class ParamFactory {
     );
   }
   static el(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "el",
-    });
-    return params ? params.map((param) => new El(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "el",
+      },
+      (param) => new El(param),
+    );
   }
   static env(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "env",
-    });
-    return params ? params.map((param) => new Env(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "env",
+      },
+      (param) => new Env(param),
+    );
   }
   static etm(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -601,11 +608,13 @@ export class ParamFactory {
     );
   }
   static eun(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "eun",
-    });
-    return params ? params.map((param) => new Eun(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "eun",
+      },
+      (param) => new Eun(param),
+    );
   }
   static ev(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -1057,11 +1066,13 @@ export class ParamFactory {
     );
   }
   static jpoif(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "jpoif",
-    });
-    return params ? params.map((param) => new Jpoif(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "jpoif",
+      },
+      (param) => new Jpoif(param),
+    );
   }
   static jty(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -1200,11 +1211,13 @@ export class ParamFactory {
     );
   }
   static mladr(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "mladr",
-    });
-    return params ? params.map((param) => new Mladr(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "mladr",
+      },
+      (param) => new Mladr(param),
+    );
   }
   static mlafl(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -1262,11 +1275,13 @@ export class ParamFactory {
     );
   }
   static mlsbj(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "mlsbj",
-    });
-    return params ? params.map((param) => new Mlsbj(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "mlsbj",
+      },
+      (param) => new Mlsbj(param),
+    );
   }
   static mlsfd(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -1287,11 +1302,13 @@ export class ParamFactory {
     );
   }
   static mltxt(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "mltxt",
-    });
-    return params ? params.map((param) => new Mltxt(param)) : undefined;
+    return buildOptionalParameterArray(
+      {
+        unit: unit,
+        parameter: "mltxt",
+      },
+      (param) => new Mltxt(param),
+    );
   }
   static mm(unit: UnitEntity) {
     return buildOptionalParameter(
