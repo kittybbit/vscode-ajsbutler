@@ -68,15 +68,17 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now resolve `sd` through root-jobnet-aware helper
   logic so sd-aligned builders stop calling `unit.params("sd")` directly in
   `ParameterFactory`.
+- shared unit-relation helpers now resolve sibling `ar` links so `UnitEntity`
+  stops duplicating previous/next relation lookup and relation-to-unit mapping
+  logic inline.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
 
-1. Continue moving the remaining wrapper-derived parameter semantics that still
-   require typed wrapper interpretation or other unit-type-specific defaults
-   out of `ParameterFactory` in small slices, with priority on any behavior
-   that still depends on wrapper instance methods beyond shared helper entry
-   points.
+1. Continue moving the remaining wrapper-derived semantics that still require
+   typed wrapper interpretation or other unit-type-specific defaults into
+   shared helpers in small slices, with priority on repeated logic still kept
+   inside wrapper classes.
 2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 3. Keep roadmap and feature task files aligned with merged slices so remaining
@@ -174,23 +176,22 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Move sd resolution for sd-aligned parameter builders into shared helpers so
-`ParameterFactory` no longer calls `unit.params("sd")` directly.
+Extract shared unit-relation helpers so `UnitEntity` no longer implements
+previous/next sibling `ar` traversal inline.
 
 ### Why
 
-After removing the final private lookup wrappers, the next repeated
-wrapper-specific dependency is `unit.params("sd")` in sd-aligned builder
-methods. Pulling that into shared helpers reduces direct wrapper coupling
-without changing behavior.
+`UnitEntity` still repeats the same sibling relation lookup and linked-unit
+mapping logic across `previous`, `previousUnits`, `next`, and `nextUnits`.
+Pulling that into shared helpers keeps behavior the same while shrinking
+wrapper-local interpretation code.
 
 ### Scope
 
-- add a shared helper that resolves `sd` with the same root-jobnet-aware logic
-  already used for `sd` wrapper behavior
-- switch sd-aligned helper entry points to derive `sd` internally
-- remove direct `unit.params("sd")` calls from `ParameterFactory`
-- add focused helper tests for shared `sd` resolution
+- add shared helpers for sibling `ar` relation lookup and linked-unit mapping
+- switch `UnitEntity.previous`, `previousUnits`, `next`, and `nextUnits` to
+  delegate to the helpers
+- add focused tests for relation lookup and sibling target mapping
 
 ### Non-Goals
 
@@ -210,29 +211,29 @@ without changing behavior.
 
 #### Use case
 
-Shared `sd` resolution extraction for sd-aligned parameter builders.
+Shared unit-relation helper extraction.
 
 #### Layers affected
 
-- domain: shared parameter helper and `ParameterFactory` cleanup
+- domain: shared relation helper and `UnitEntity` cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep root-jobnet-aware `sd` behavior identical to existing wrapper behavior.
-- Limit the slice to shared `sd` resolution and removal of inline
-  `unit.params("sd")` calls.
+- Keep sibling relation behavior identical to existing `UnitEntity` behavior.
+- Limit the slice to `ar` relation lookup and relation-to-sibling mapping.
 
 ### Acceptance Criteria
 
-- [ ] shared helpers resolve `sd` without `ParameterFactory` calling
-      `unit.params("sd")` directly
-- [ ] sd-aligned builder call sites use the shared `sd` resolution path
+- [ ] shared helpers resolve previous and next sibling relations from parent
+      `ar` definitions
+- [ ] `UnitEntity` delegates previous and next relation mapping to shared
+      helpers
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for shared `sd` resolution
+- add helper coverage for sibling relation lookup and target mapping
 - run quality checks
 - run desktop tests
 - run build
@@ -240,13 +241,13 @@ Shared `sd` resolution extraction for sd-aligned parameter builders.
 
 ### Risks
 
-- `sd` lookup could accidentally lose root-jobnet defaults or rule ordering
-- helper refactoring could overreach and mix `sd` resolution with unrelated
-  semantics
+- relation lookup could accidentally change source/target matching
+- helper extraction could overreach into broader graph or normalized-model
+  behavior
 
 ### Rollback Plan
 
-- restore inline `unit.params("sd")` lookups in the affected methods if
+- restore inline `previous` and `next` relation logic in `UnitEntity` if
   behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

@@ -9,8 +9,13 @@ import {
 } from "../../values/AjsType";
 import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { Ar } from "../parameters";
 import Parameter from "../parameters/Parameter";
+import {
+  findNextRelations,
+  findNextUnits,
+  findPreviousRelations,
+  findPreviousUnits,
+} from "./unitRelationHelpers";
 
 const hashToString = (value: string): string => {
   // Use a deterministic sync hash so this module works under CommonJS test compilation.
@@ -125,30 +130,16 @@ export abstract class UnitEntity {
     return this.#isRoot;
   }
   get previous() {
-    return (this.parent?.params<Ar[] | undefined>("ar") ?? []).filter(
-      (ar) => ar.t === this.name,
-    );
+    return findPreviousRelations(this);
   }
   get previousUnits() {
-    return this.previous.map((p) => {
-      return {
-        unitEntity: this.#parent?.children.find((child) => child.name === p.f),
-        relationType: p.relationType,
-      };
-    });
+    return findPreviousUnits(this);
   }
   get next() {
-    return (this.parent?.params<Ar[] | undefined>("ar") ?? []).filter(
-      (ar) => ar.f === this.name,
-    );
+    return findNextRelations(this);
   }
   get nextUnits() {
-    return this.next.map((n) => {
-      return {
-        unitEntity: this.#parent?.children.find((child) => child.name === n.t),
-        relationType: n.relationType,
-      };
-    });
+    return findNextUnits(this);
   }
   /**
    * H=80＋160x -> x=(H-80)/160

@@ -53,4 +53,6 @@
       `ParameterFactory` depends on shared helper paths consistently
 - [x] Expose shared sd resolution helpers so sd-aligned parameter builders stop
       calling `unit.params("sd")` directly in `ParameterFactory`
+- [x] Expose shared unit-relation helpers so `UnitEntity` stops duplicating
+      sibling `ar` lookup and relation-to-unit mapping logic
 - [x] Document which semantics intentionally remain in application view adapters
