@@ -97,4 +97,6 @@
       `normalizeAjsDocument.ts`
 - [x] Extract shared normalize-warning helpers so warning payload construction
       no longer lives inline in normalization helpers
+- [x] Extract a shared normalize-unit builder so `AjsUnit` DTO assembly no
+      longer lives inline in `normalizeAjsDocument.ts`
 - [x] Document which semantics intentionally remain in application view adapters

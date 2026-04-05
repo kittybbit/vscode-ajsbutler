@@ -118,6 +118,8 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model mapping now reuses shared normalize-warning helpers so
   warning payload construction no longer lives inline in unit and relation
   normalization helpers.
+- normalized-model mapping now reuses a shared normalize-unit builder so
+  `AjsUnit` DTO assembly no longer lives inline in `normalizeAjsDocument.ts`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -223,8 +225,8 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract normalize-warning helper functions so warning payload construction is
-not kept inline in normalization helpers.
+Extract a normalize-unit builder helper so `AjsUnit` DTO assembly is not kept
+inline in `normalizeAjsDocument.ts`.
 
 ### Why
 
