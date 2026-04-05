@@ -101,4 +101,6 @@
       longer lives inline in `normalizeAjsDocument.ts`
 - [x] Extract a shared normalize-document-tree helper so recursive
       normalization no longer lives inline in `normalizeAjsDocument.ts`
+- [x] Align normalize-warning codes and messages with relation terminology so
+      warning payloads match the normalized relation model
 - [x] Document which semantics intentionally remain in application view adapters

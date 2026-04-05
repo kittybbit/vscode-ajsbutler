@@ -123,6 +123,8 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model mapping now reuses a shared normalize-document-tree helper
   so recursive unit traversal no longer lives inline in
   `normalizeAjsDocument.ts`.
+- normalized-model relation warnings now use relation terminology so warning
+  codes and messages align with the normalized relation model.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -228,8 +230,8 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a normalize-document-tree helper so recursive normalization is not kept
-inline in `normalizeAjsDocument.ts`.
+Align normalize-warning wording with relation terminology so warning payloads
+match the normalized relation model.
 
 ### Why
 

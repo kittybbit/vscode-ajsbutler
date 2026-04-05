@@ -16,13 +16,13 @@ suite("Normalize warning helpers", () => {
 
   test("builds relation warnings", () => {
     assert.deepStrictEqual(buildInvalidRelationWarning("/root/jobnet"), {
-      code: "invalid-dependency",
-      message: "Dependency could not be parsed for /root/jobnet.",
+      code: "invalid-relation",
+      message: "Relation could not be parsed for /root/jobnet.",
       unitPath: "/root/jobnet",
     });
     assert.deepStrictEqual(buildMissingRelationTargetWarning("/root/jobnet"), {
-      code: "missing-dependency-target",
-      message: "Dependency target was not found for /root/jobnet.",
+      code: "missing-relation-target",
+      message: "Relation target was not found for /root/jobnet.",
       unitPath: "/root/jobnet",
     });
   });
