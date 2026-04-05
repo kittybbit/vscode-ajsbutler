@@ -40,6 +40,9 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
 - common navigation semantics such as parent lookup, ancestor lookup, and root
   jobnet lookup should be reusable from the normalized model when multiple
   application or presentation paths need them
+- common parameter semantics such as direct lookup, repeated-value lookup, and
+  first-ancestor inherited lookup should be reusable from the normalized model
+  when multiple consumers need the same interpretation
 - user-visible behavior remains unchanged while use cases stop depending on raw
   or wrapper-oriented structures directly
 - normalization tests should prefer shared fixtures in `sample/` for UTF-8,

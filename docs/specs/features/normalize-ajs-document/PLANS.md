@@ -13,7 +13,7 @@ Deliver the feature for use case: UC: Normalize AJS Document.
 ## Milestones
 
 1. Write and review SPECS.md
-2. Implement feature logic
+2. Implement normalized navigation and parameter helper logic in small slices
 3. Add and run tests
 4. Validate extension behavior
 5. Close PR
@@ -23,3 +23,4 @@ Deliver the feature for use case: UC: Normalize AJS Document.
 - npm test
 - npm run lint:md
 - npm run qlty
+- npm run build
