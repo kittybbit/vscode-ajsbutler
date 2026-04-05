@@ -52,6 +52,18 @@ export const adjustToSdItemCount = <T extends Rule>(
   return newParams;
 };
 
+export const buildSdAlignedParameters = <T extends Rule>(
+  params: ParamInternal[] | undefined,
+  sd: Array<Sd> | undefined,
+  mapParam: (param: ParamInternal) => T,
+  buildDefault: (rule: number) => T | null,
+): Array<T | null> | undefined => {
+  const values = params
+    ? params.map(mapParam).sort((a, b) => a.rule - b.rule)
+    : undefined;
+  return adjustToSdItemCount(sd, values, buildDefault);
+};
+
 export const resolveParameterArray = (
   arg: ParamLookupArg,
 ): ParamInternal[] | undefined => {
