@@ -1,5 +1,5 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { resolveRootJobnetDefaultRawValue } from "../parameters/parameterHelpers";
+import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
 import { priority } from "./Utils";
 
@@ -130,7 +130,7 @@ export class N extends UnitEntity {
   get ncl() {
     return ParamFactory.ncl(
       this,
-      resolveRootJobnetDefaultRawValue("ncl", this.isRootJobnet),
+      resolveJobnetConnectorControlDefaultRawValue(this.isRootJobnet),
     );
   }
   // [ncn=jobnet-connector-name;]
@@ -141,14 +141,14 @@ export class N extends UnitEntity {
   get ncs() {
     return ParamFactory.ncs(
       this,
-      resolveRootJobnetDefaultRawValue("ncs", this.isRootJobnet),
+      resolveJobnetConnectorControlDefaultRawValue(this.isRootJobnet),
     );
   }
   // [ncex={y|n};]
   get ncex() {
     return ParamFactory.ncex(
       this,
-      resolveRootJobnetDefaultRawValue("ncex", this.isRootJobnet),
+      resolveJobnetConnectorControlDefaultRawValue(this.isRootJobnet),
     );
   }
   // [nchn="connection-host-name";]

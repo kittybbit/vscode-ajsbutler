@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
+import { G } from "../../domain/models/units/G";
 import { J } from "../../domain/models/units/J";
 import { N } from "../../domain/models/units/N";
 import { Ln, Sd, Wc } from "../../domain/models/parameters";
@@ -8,6 +9,8 @@ import {
   adjustToSdItemCount,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
+  resolveConnectorControlDefaultRawValue,
+  resolveJobnetConnectorControlDefaultRawValue,
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
@@ -42,6 +45,12 @@ const parseJobnets = (): { jobnet: N; subnet: N } => {
   const jobnet = root.children[0] as N;
   const subnet = jobnet.children[0] as N;
   return { jobnet, subnet };
+};
+
+const parseRootGroup = (): G => {
+  const result = parseAjs(validDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  return tyFactory(result.rootUnits[0]) as G;
 };
 
 const transferDefinition = `
@@ -234,8 +243,22 @@ suite("Parameter helpers", () => {
   });
 
   test("keeps root-jobnet defaults centralized for wrapper behavior", () => {
+    const rootGroup = parseRootGroup();
     const { jobnet, subnet } = parseJobnets();
 
+    assert.strictEqual(
+      resolveConnectorControlDefaultRawValue("always-disabled"),
+      "n",
+    );
+    assert.strictEqual(resolveJobnetConnectorControlDefaultRawValue(true), "n");
+    assert.strictEqual(
+      resolveJobnetConnectorControlDefaultRawValue(false),
+      undefined,
+    );
+
+    assert.strictEqual(rootGroup.ncl?.value(), "n");
+    assert.strictEqual(rootGroup.ncs?.value(), "n");
+    assert.strictEqual(rootGroup.ncex?.value(), "n");
     assert.strictEqual(jobnet.ncl?.value(), "n");
     assert.strictEqual(jobnet.ncs?.value(), "n");
     assert.strictEqual(jobnet.ncex?.value(), "n");
