@@ -140,28 +140,28 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract reusable rule-aware parameter helpers from `ParameterFactory` so the
-remaining wrapper-derived parameter semantics can move in smaller slices.
+Centralize root-jobnet-specific parameter defaults so the remaining
+wrapper-derived semantics stop being split across `N` and `ParameterFactory`.
 
 ### Why
 
-`ParameterFactory` still concentrates lookup, inheritance, defaulting, and
-SD-rule alignment behavior in one large module. Pulling the shared helper logic
-out first makes the next semantic cleanup slices smaller and easier to review.
+Root-jobnet defaults currently live in two places: `ParameterFactory` decides
+them for `rg` and `sd`, while `N` decides them for `ncl`, `ncs`, and `ncex`.
+That split makes the remaining semantic cleanup harder to reason about.
 
 ### Scope
 
-- extract reusable parameter lookup and fallback helpers into a dedicated module
-- extract reusable SD-rule alignment helpers into a dedicated module
-- keep public `ParamFactory` behavior unchanged while switching it to the
-  extracted helpers
-- add focused tests for helper behavior
+- centralize root-jobnet default raw values behind one helper
+- switch `ParameterFactory` root-jobnet defaults to the shared helper
+- switch `N` connector default behavior to the shared helper
+- add focused tests for the centralized default behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
+- changing non-root-jobnet defaults
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -175,40 +175,41 @@ out first makes the next semantic cleanup slices smaller and easier to review.
 
 #### Use case
 
-Parameter helper extraction for remaining `ParameterFactory` cleanup.
+Root-jobnet parameter default consolidation.
 
 #### Layers affected
 
-- domain: parameter helper extraction
-- docs: plan tracking for the extracted helper slice
+- domain: root-jobnet default helper usage
+- docs: plan tracking for the consolidation slice
 
 #### Key decisions
 
-- Extract helper logic without changing the public `ParamFactory` API.
-- Keep semantic behavior identical and limit the slice to lookup/defaulting and
-  SD-rule alignment helpers.
+- Keep semantic behavior identical and only centralize where the default values
+  are decided.
+- Limit this slice to root-jobnet defaults and leave broader rule-aware
+  semantics for later work.
 
 ### Acceptance Criteria
 
-- [ ] shared helper module exists for parameter lookup/defaulting
-- [ ] shared helper module exists for SD-rule alignment
-- [ ] `ParamFactory` delegates to the extracted helpers without behavior changes
-- [ ] focused tests cover helper behavior
+- [ ] root-jobnet defaults for `rg`, `sd`, `ncl`, `ncs`, and `ncex` are
+      decided in one helper
+- [ ] `ParameterFactory` and `N` delegate to the shared root-jobnet helper
+- [ ] focused tests cover the centralized default behavior
 
 ### Test Plan
 
 - run quality checks
 - run desktop tests
 - run build
+- run web tests
 
 ### Risks
 
-- helper extraction could accidentally change inherited/default parameter
-  precedence
-- helper extraction could accidentally change SD-rule alignment order or
-  fallback generation
+- centralized defaults could accidentally change root-vs-non-root behavior
+- inherited `rg` behavior could accidentally change if root defaults move in
+  the wrong order
 
 ### Rollback Plan
 
-- revert the helper-module extraction and return the logic to `ParamFactory`
-- keep later semantic moves separate from this extraction step
+- revert the centralized-default helper usage in `N` and `ParameterFactory`
+- keep broader rule-aware semantic moves separate from this consolidation step

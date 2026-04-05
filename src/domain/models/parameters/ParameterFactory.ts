@@ -230,6 +230,7 @@ import {
   adjustToSdItemCount,
   resolveParameter,
   resolveParameterArray,
+  resolveRootJobnetDefaultRawValue,
 } from "./parameterHelpers";
 import Rule from "./Rule";
 
@@ -1589,7 +1590,10 @@ export class ParamFactory {
     const param = this.#checkAndGet({
       unit: unit,
       parameter: "rg",
-      defaultRawValue: unit.isRootJobnet ? DEFAULTS.Rg : undefined,
+      defaultRawValue: resolveRootJobnetDefaultRawValue(
+        "rg",
+        unit.isRootJobnet,
+      ),
       inherit: true,
     });
     return param ? new Rg(param) : undefined;
@@ -1626,7 +1630,10 @@ export class ParamFactory {
     const params = this.#checkAndGetArray({
       unit: unit,
       parameter: "sd",
-      defaultRawValue: unit.isRootJobnet ? DEFAULTS.Sd : undefined,
+      defaultRawValue: resolveRootJobnetDefaultRawValue(
+        "sd",
+        unit.isRootJobnet,
+      ),
     });
     return params
       ? params.map((param) => new Sd(param)).sort((a, b) => a.rule - b.rule)

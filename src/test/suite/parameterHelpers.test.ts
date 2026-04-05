@@ -7,6 +7,7 @@ import {
   adjustToSdItemCount,
   resolveParameter,
   resolveParameterArray,
+  resolveRootJobnetDefaultRawValue,
 } from "../../domain/models/parameters/parameterHelpers";
 
 const validDefinition = `
@@ -82,6 +83,16 @@ suite("Parameter helpers", () => {
         }),
       /unexpected array/,
     );
+
+    assert.strictEqual(resolveRootJobnetDefaultRawValue("rg", true), "1");
+    assert.strictEqual(resolveRootJobnetDefaultRawValue("sd", true), "en");
+    assert.strictEqual(resolveRootJobnetDefaultRawValue("ncl", true), "n");
+    assert.strictEqual(resolveRootJobnetDefaultRawValue("ncs", true), "n");
+    assert.strictEqual(resolveRootJobnetDefaultRawValue("ncex", true), "n");
+    assert.strictEqual(
+      resolveRootJobnetDefaultRawValue("rg", false),
+      undefined,
+    );
   });
 
   test("aligns rule-based parameters to sd item count", () => {
@@ -124,5 +135,16 @@ suite("Parameter helpers", () => {
         }),
     );
     assert.strictEqual(unchanged, undefined);
+  });
+
+  test("keeps root-jobnet defaults centralized for wrapper behavior", () => {
+    const { jobnet, subnet } = parseJobnets();
+
+    assert.strictEqual(jobnet.ncl?.value(), "n");
+    assert.strictEqual(jobnet.ncs?.value(), "n");
+    assert.strictEqual(jobnet.ncex?.value(), "n");
+    assert.strictEqual(subnet.ncl, undefined);
+    assert.strictEqual(subnet.ncs, undefined);
+    assert.strictEqual(subnet.ncex, undefined);
   });
 });
