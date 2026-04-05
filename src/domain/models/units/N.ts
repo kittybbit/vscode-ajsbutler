@@ -2,8 +2,8 @@ import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
 import { resolveHasSchedule } from "./unitScheduleStateHelpers";
-import { priority } from "./Utils";
 import { resolveIsRootJobnet } from "./unitJobnetStateHelpers";
+import { resolveUnitPriority } from "./unitPriorityHelpers";
 import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
 
 export class N extends UnitEntity {
@@ -181,7 +181,7 @@ export class N extends UnitEntity {
   }
 
   get priority(): number {
-    return priority(this);
+    return resolveUnitPriority(this);
   }
 }
 export class Rn extends N {}

@@ -90,6 +90,8 @@ This file is the high-level index for the per-feature plan structure in
 - shared group-week helpers now resolve `op` and `cl` weekday interpretation so
   `G` stops duplicating the same open/close calendar precedence logic across
   weekday getters.
+- shared priority helpers now resolve wrapper priority fallback rules so `J`,
+  `N`, and `Qj` stop routing the same semantics through a misc utility module.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -195,21 +197,20 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared group-week helpers so duplicated weekday calendar interpretation
-uses a shared implementation.
+Extract shared priority helpers so duplicated wrapper priority fallback wiring
+uses a dedicated implementation.
 
 ### Why
 
-Group weekday interpretation currently lives in `G` as repeated `op`/`cl`
-calendar precedence logic. Pulling that into one shared helper makes the
-weekday rule explicit and separately testable.
+Priority resolution currently lives in a generic utility file while multiple
+wrapper classes delegate to it. Pulling that into a dedicated helper makes the
+priority rule explicit and separately testable.
 
 ### Scope
 
-- add a shared helper for resolving weekday state from `op` and `cl`
-  calendars
-- switch `G` weekday getters to use the helper
-- add focused tests for weekday-state resolution
+- add a dedicated helper for resolving wrapper priority fallback rules
+- switch `J`, `N`, and `Qj` priority getters to use the helper
+- add focused tests for priority resolution
 
 ### Non-Goals
 
@@ -229,27 +230,27 @@ weekday rule explicit and separately testable.
 
 #### Use case
 
-Shared group-week helper extraction.
+Shared priority helper extraction.
 
 #### Layers affected
 
-- domain: shared group-week helper and weekday detection cleanup
+- domain: shared priority helper and priority resolution cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep weekday getter behavior identical to existing wrapper behavior.
-- Limit the slice to `op`/`cl`-based weekday resolution only.
+- Keep priority behavior identical to existing wrapper behavior.
+- Limit the slice to priority resolution extraction only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves weekday state from `op` and `cl` calendars
-- [ ] `G` weekday getters delegate to the helper
+- [ ] shared helper resolves wrapper priority fallback behavior
+- [ ] `J`, `N`, and `Qj` priority getters delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for weekday-state resolution
+- add helper coverage for priority resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -257,12 +258,12 @@ Shared group-week helper extraction.
 
 ### Risks
 
-- weekday helper extraction could accidentally change `op` versus `cl`
-  precedence
-- wrapper updates could miss one weekday getter and leave duplication behind
+- priority helper extraction could accidentally change fallback precedence
+- wrapper updates could miss one priority getter and leave utility coupling
+  behind
 
 ### Rollback Plan
 
-- restore inline weekday checks in `G` if behavior changes
+- restore wrapper priority delegation to `Utils.ts` if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

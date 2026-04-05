@@ -71,4 +71,6 @@
       interpretation no longer drift apart
 - [x] Expose shared group-week helpers so wrapper group weekday checks stop
       duplicating `op` and `cl` interpretation logic
+- [x] Expose shared priority helpers so wrapper classes stop routing priority
+      resolution through a misc utility module
 - [x] Document which semantics intentionally remain in application view adapters
