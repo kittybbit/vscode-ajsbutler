@@ -20,14 +20,12 @@
 
 ## Current Roadmap
 
-1. Refresh SDD documentation so roadmap, plans, and feature task files reflect
-   the migrated state instead of the starting plan.
-2. Reconcile wrapper-derived semantics that still live outside the normalized
+1. Reconcile wrapper-derived semantics that still live outside the normalized
    model and decide whether they belong in domain normalization or application
    view adapters.
-3. Continue reducing activation and webview concentration in
+2. Continue reducing activation and webview concentration in
    `src/extension` without changing user-visible behavior.
-4. Keep validating desktop and web extension compatibility while managing build
+3. Keep validating desktop and web extension compatibility while managing build
    and bundle-size risk.
 
 ## Deferred / Optional Slices

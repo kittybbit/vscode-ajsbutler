@@ -131,6 +131,22 @@ Migration should be incremental and use-case driven.
 - normalized AJS use cases should depend on `AjsDocument` and `AjsUnit`
   instead of directly on `Unit` or `UnitEntity` where migration is practical
 
+### Semantics that can remain in view adapters
+
+- normalized helpers should expose reusable lookup and traversal semantics, but
+  they do not need to absorb every table-specific formatting rule
+- `src/application/unit-list/buildUnitListView.ts` may continue to parse and
+  reshape schedule-oriented parameter strings such as `sd`, `cy`, `sh`, `cftd`,
+  `sy`, `ey`, `wc`, and `wt` into table-specific group fields because that
+  logic is about presentation-facing view structure rather than shared domain
+  meaning
+- CSV export may continue to depend on visible column order and rendered cell
+  stringification because those concerns belong to the export adapter boundary,
+  not to normalized AJS semantics
+- future normalization work should focus on semantics that are reused by
+  multiple consumers, such as lookup, inheritance, dependency interpretation,
+  root defaults, and rule-aware parameter alignment
+
 ### VS Code-facing adapters
 
 - `src/extension/diagnostics/registerDiagnostics.ts` owns

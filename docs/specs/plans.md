@@ -40,15 +40,13 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Next Priority Tasks
 
-1. Refresh roadmap and feature task documents so completed slices and remaining
-   debt are visible in one place.
-2. Continue moving the remaining wrapper-derived parameter semantics that still
+1. Continue moving the remaining wrapper-derived parameter semantics that still
    require rule-aware defaults or typed wrapper interpretation out of
    `ParameterFactory` in small slices.
-3. Document which remaining semantics should intentionally stay in application
-   view adapters instead of the normalized model.
-4. Continue reducing activation and webview concentration without changing user
+2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
+3. Keep roadmap and feature task files aligned with merged slices so remaining
+   debt stays explicit.
 
 ## Default Workflow
 
@@ -142,29 +140,29 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Move reusable parameter lookup and simple inheritance traversal from ad hoc
-application code into the normalized AJS model.
+Refresh roadmap and feature task documentation so it matches the migrated
+table/flow/CSV state and explicitly records which semantics still belong in
+application view adapters.
 
 ### Why
 
-`buildUnitListView` still repeated wrapper-era parameter traversal logic even
-after table and flow viewers stopped reconstructing `UnitEntity`. Exposing that
-lookup from the normalized model is a small slice that reduces duplication
-before larger `ParameterFactory` cleanup.
+Several docs still describe already-completed migration work as pending, and
+the normalize feature docs do not yet distinguish shared normalized semantics
+from table-specific adapter formatting. That makes the next `ParameterFactory`
+cleanup slices harder to scope.
 
 ### Scope
 
-- add normalized helper functions for direct parameter lookup
-- add normalized helper functions for repeated-value lookup
-- add normalized helper functions for first-ancestor inherited lookup
-- refactor `buildUnitListView` to consume those helpers
-- update normalize docs and tests
+- update roadmap and feature task docs to reflect merged slices
+- mark completed CSV and normalize follow-up items that are no longer pending
+- document which semantics intentionally remain in application view adapters
+- keep the next remaining `ParameterFactory` cleanup visible
 
 ### Non-Goals
 
-- replacing `ParameterFactory` wholesale
 - changing parser output
-- changing user-visible unit list behavior
+- changing user-visible unit list, flow, or CSV behavior
+- refactoring `ParameterFactory` implementation in this slice
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -178,41 +176,38 @@ before larger `ParameterFactory` cleanup.
 
 #### Use case
 
-Normalize AJS Document.
+Documentation alignment across roadmap, normalize, and CSV feature slices.
 
 #### Layers affected
 
-- domain: normalized AJS helper functions
-- application: unit-list view mapping
-- docs: normalize use case and feature tracking
+- docs: roadmap, plans, architecture, and feature task tracking
 
 #### Key decisions
 
-- Put parameter lookup helpers on the normalized model instead of keeping
-  application-local lookup helpers in each consumer.
-- Limit inheritance support to first-ancestor lookup for this slice and leave
-  rule-aware defaults in `ParameterFactory` for later work.
+- Treat table-specific schedule and string formatting as application adapter
+  logic, not as normalized-domain semantics.
+- Keep the next implementation target focused on the remaining rule-aware
+  defaults and alignment behavior in `ParameterFactory`.
 
 ### Acceptance Criteria
 
-- [ ] normalized helpers expose direct, repeated-value, and inherited parameter
-      lookup
-- [ ] `buildUnitListView` stops defining its own parameter lookup helpers
-- [ ] normalize docs and tasks reflect the completed sub-slice
+- [ ] roadmap no longer lists already-finished documentation refresh as pending
+- [ ] normalize docs explicitly state which semantics remain in adapters
+- [ ] CSV feature task tracking reflects the current DTO-based export path
 
 ### Test Plan
 
-- run quality checks
-- run desktop tests
-- run build
+- run markdown-aware quality checks if available
+- verify docs are internally consistent with merged code state
 
 ### Risks
 
-- inherited lookup could diverge from wrapper semantics if ancestor order or
-  first-hit behavior changes
-- build-unit-list regressions could hide in priority and schedule field mapping
+- docs can still drift again if future merged slices skip task-file updates
+- adapter-boundary wording can become too broad and accidentally hide domain
+  semantics that should still move out of wrappers
 
 ### Rollback Plan
 
-- revert the helper extraction and return to application-local lookup functions
-- keep deeper `ParameterFactory` cleanup in later isolated slices
+- revert the documentation updates if they misstate current repository behavior
+- keep future `ParameterFactory` slices small so any documentation mismatch is
+  easy to correct
