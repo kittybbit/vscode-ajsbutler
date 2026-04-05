@@ -85,6 +85,8 @@ This file is the high-level index for the per-feature plan structure in
 - shared unit schedule-state helpers now resolve effective schedule detection
   so wrapper and normalized-model logic stop maintaining duplicate `sd`
   interpretation rules.
+- shared unit group-state helpers now resolve `gty` interpretation so wrapper
+  and normalized-model logic stop maintaining duplicate group/planning checks.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -190,20 +192,21 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared schedule-state helpers so duplicated `sd`-based schedule
-detection uses a shared implementation.
+Extract shared group-state helpers so duplicated `gty` interpretation uses a
+shared implementation.
 
 ### Why
 
-Schedule detection currently lives in both wrapper and normalized-model code
-paths. Pulling that into one shared helper makes the effective `sd` rule
-explicit and separately testable.
+Group-type interpretation currently lives in both wrapper and normalized-model
+code paths. Pulling that into one shared helper makes the `gty` rule explicit
+and separately testable.
 
 ### Scope
 
-- add a shared helper for resolving schedule state from `sd` parameter values
-- switch wrapper and normalized-model schedule detection to use the helper
-- add focused tests for schedule-state resolution
+- add a shared helper for resolving supported group types and planning state
+  from `gty`
+- switch wrapper and normalized-model group-state checks to use the helper
+- add focused tests for group-state resolution
 
 ### Non-Goals
 
@@ -223,28 +226,29 @@ explicit and separately testable.
 
 #### Use case
 
-Shared schedule-state helper extraction.
+Shared group-state helper extraction.
 
 #### Layers affected
 
-- domain: shared schedule-state helper and schedule detection cleanup
+- domain: shared group-state helper and group-state detection cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep `hasSchedule` behavior identical to existing wrapper and normalized
-  behavior.
-- Limit the slice to `sd`-based schedule resolution only.
+- Keep `groupType` and `isPlanning` behavior identical to existing wrapper and
+  normalized behavior.
+- Limit the slice to `gty`-based group-state resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves effective schedule state from `sd` values
-- [ ] wrapper and normalized-model schedule checks delegate to the helper
+- [ ] shared helper resolves supported group types and planning state from
+      `gty`
+- [ ] wrapper and normalized-model group-state checks delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for schedule-state resolution
+- add helper coverage for group-state resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -252,12 +256,12 @@ Shared schedule-state helper extraction.
 
 ### Risks
 
-- schedule helper extraction could accidentally change how `ud` schedule values
-  are interpreted
+- group-state helper extraction could accidentally change how unsupported `gty`
+  values are treated
 - wrapper and normalized-model code could diverge if one call site is missed
 
 ### Rollback Plan
 
-- restore inline schedule checks if behavior changes
+- restore inline `gty` checks if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
