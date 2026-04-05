@@ -1,9 +1,14 @@
 # TASKS: provide-editor-feedback
 
-- [ ] Review use case: docs/requirements/use-cases/uc-provide-editor-feedback.md
-- [ ] Confirm SPECS.md
-- [ ] Implement code
-- [ ] Add tests
-- [ ] Run npm test/lint/qlty
-- [ ] Manual smoke test
-- [ ] Update docs and submit PR
+## Completed
+
+- [x] Review use case: docs/requirements/use-cases/uc-provide-editor-feedback.md
+- [x] Confirm SPECS.md
+- [x] Implement diagnostics and hover application logic
+- [x] Add and update tests
+- [x] Run relevant build and test checks for the slice
+
+## Remaining Follow-up
+
+- [ ] Record a current manual smoke-test result for diagnostics and hover behavior
+- [ ] Continue reducing activation/bootstrap concentration around registration wiring
