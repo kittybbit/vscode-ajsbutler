@@ -79,4 +79,7 @@
       and normalized-model wait detection fully share the same rule
 - [x] Reuse shared encoded-string helpers from normalized-model mapping so
       wrapper and normalized-model comment decoding fully share the same rule
+- [x] Reuse shared dependency parsing helpers from normalized-model mapping so
+      wrapper and normalized-model `ar` interpretation fully share the same
+      rule
 - [x] Document which semantics intentionally remain in application view adapters
