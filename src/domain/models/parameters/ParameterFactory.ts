@@ -227,7 +227,8 @@ import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
-  adjustToSdItemCount,
+  buildInheritedParameter,
+  buildInheritedParameterArray,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
   resolveParameter,
@@ -235,7 +236,6 @@ import {
   resolveRootJobnetDefaultRawValue,
   resolveTopDefaultRawValue,
 } from "./parameterHelpers";
-import Rule from "./Rule";
 
 type ParamArg = ParamBase & {
   inherit?: boolean; // need to get parent value
@@ -303,12 +303,13 @@ export class ParamFactory {
     return param ? new Cgs(param) : undefined;
   }
   static cl(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "cl",
-      inherit: true,
-    });
-    return params ? params.map((param) => new Cl(param)) : undefined;
+    return buildInheritedParameterArray(
+      {
+        unit: unit,
+        parameter: "cl",
+      },
+      (param) => new Cl(param),
+    );
   }
   static cm(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1001,13 +1002,14 @@ export class ParamFactory {
     return param ? new Mcs(param) : undefined;
   }
   static md(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "md",
-      inherit: true,
-      defaultRawValue: DEFAULTS.Md,
-    });
-    return param ? new Md(param) : undefined;
+    return buildInheritedParameter(
+      {
+        unit: unit,
+        parameter: "md",
+        defaultRawValue: DEFAULTS.Md,
+      },
+      (param) => new Md(param),
+    );
   }
   static mh(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1367,13 +1369,14 @@ export class ParamFactory {
     return param ? new Ncsv(param) : undefined;
   }
   static ni(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ni",
-      defaultRawValue: DEFAULTS.Ni,
-      inherit: true,
-    });
-    return param ? new Ni(param) : undefined;
+    return buildInheritedParameter(
+      {
+        unit: unit,
+        parameter: "ni",
+        defaultRawValue: DEFAULTS.Ni,
+      },
+      (param) => new Ni(param),
+    );
   }
   static nmg(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1454,12 +1457,13 @@ export class ParamFactory {
     return param ? new Ntsrc(param) : undefined;
   }
   static op(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "op",
-      inherit: true,
-    });
-    return params ? params.map((param) => new Op(param)) : undefined;
+    return buildInheritedParameterArray(
+      {
+        unit: unit,
+        parameter: "op",
+      },
+      (param) => new Op(param),
+    );
   }
   static pfm(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1470,13 +1474,14 @@ export class ParamFactory {
     return param ? new Pfm(param) : undefined;
   }
   static pr(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "pr",
-      defaultRawValue: DEFAULTS.Pr,
-      inherit: true,
-    });
-    return param ? new Pr(param) : undefined;
+    return buildInheritedParameter(
+      {
+        unit: unit,
+        parameter: "pr",
+        defaultRawValue: DEFAULTS.Pr,
+      },
+      (param) => new Pr(param),
+    );
   }
   static prm(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1630,13 +1635,14 @@ export class ParamFactory {
     return buildSortedRuleParameters(params, (param) => new Sd(param));
   }
   static sdd(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "sdd",
-      defaultRawValue: DEFAULTS.Sdd,
-      inherit: true,
-    });
-    return param ? new Sdd(param) : undefined;
+    return buildInheritedParameter(
+      {
+        unit: unit,
+        parameter: "sdd",
+        defaultRawValue: DEFAULTS.Sdd,
+      },
+      (param) => new Sdd(param),
+    );
   }
   static se(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1735,13 +1741,14 @@ export class ParamFactory {
     );
   }
   static stt(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "stt",
-      inherit: true,
-      defaultRawValue: DEFAULTS.Stt,
-    });
-    return param ? new Stt(param) : undefined;
+    return buildInheritedParameter(
+      {
+        unit: unit,
+        parameter: "stt",
+        defaultRawValue: DEFAULTS.Stt,
+      },
+      (param) => new Stt(param),
+    );
   }
   static sy(unit: UnitEntity) {
     const params = this.#checkAndGetArray({

@@ -112,6 +112,28 @@ export const buildSortedRuleParameters = <T extends Rule>(
 ): Array<T> | undefined =>
   params ? params.map(mapParam).sort((a, b) => a.rule - b.rule) : undefined;
 
+export const buildInheritedParameter = <T>(
+  arg: Omit<ParamLookupArg, "inherit">,
+  mapParam: (param: ParamInternal) => T,
+): T | undefined => {
+  const parameter = resolveParameter({
+    ...arg,
+    inherit: true,
+  });
+  return parameter ? mapParam(parameter) : undefined;
+};
+
+export const buildInheritedParameterArray = <T>(
+  arg: Omit<ParamLookupArg, "inherit">,
+  mapParam: (param: ParamInternal) => T,
+): Array<T> | undefined => {
+  const parameters = resolveParameterArray({
+    ...arg,
+    inherit: true,
+  });
+  return parameters ? parameters.map(mapParam) : undefined;
+};
+
 export const resolveParameterArray = (
   arg: ParamLookupArg,
 ): ParamInternal[] | undefined => {
