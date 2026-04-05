@@ -12,4 +12,6 @@
 
 - [ ] Move remaining wrapper-derived semantics into the normalized model
       where they are broadly reusable
+- [x] Expose normalized helpers for parent, ancestor, and root jobnet lookup
+      so application slices stop repeating wrapper-era navigation logic
 - [ ] Document which semantics intentionally remain in application view adapters
