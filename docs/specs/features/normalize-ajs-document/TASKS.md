@@ -27,4 +27,7 @@
       fallback values
 - [x] Expose shared helpers for inherited scalar and array parameter building
       so simple inherited lookup wiring stops repeating in `ParameterFactory`
+- [x] Expose shared helpers for root-jobnet-aware scalar and rule-array
+      building so `rg` and `sd` stop assembling root defaults directly in
+      `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

@@ -134,6 +134,44 @@ export const buildInheritedParameterArray = <T>(
   return parameters ? parameters.map(mapParam) : undefined;
 };
 
+export const buildRootJobnetParameter = <T>(
+  arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit"> & {
+    isRootJobnet: boolean;
+    rootDefaultParameter: keyof typeof rootJobnetDefaultByParameter;
+  },
+  mapParam: (param: ParamInternal) => T,
+): T | undefined =>
+  buildInheritedParameter(
+    {
+      unit: arg.unit,
+      parameter: arg.parameter,
+      defaultRawValue: resolveRootJobnetDefaultRawValue(
+        arg.rootDefaultParameter,
+        arg.isRootJobnet,
+      ),
+    },
+    mapParam,
+  );
+
+export const buildRootJobnetRuleParameters = <T extends Rule>(
+  arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit"> & {
+    isRootJobnet: boolean;
+    rootDefaultParameter: keyof typeof rootJobnetDefaultByParameter;
+  },
+  mapParam: (param: ParamInternal) => T,
+): Array<T> | undefined =>
+  buildSortedRuleParameters(
+    resolveParameterArray({
+      unit: arg.unit,
+      parameter: arg.parameter,
+      defaultRawValue: resolveRootJobnetDefaultRawValue(
+        arg.rootDefaultParameter,
+        arg.isRootJobnet,
+      ),
+    }),
+    mapParam,
+  );
+
 export const resolveParameterArray = (
   arg: ParamLookupArg,
 ): ParamInternal[] | undefined => {

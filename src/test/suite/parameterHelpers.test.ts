@@ -9,6 +9,8 @@ import {
   adjustToSdItemCount,
   buildInheritedParameter,
   buildInheritedParameterArray,
+  buildRootJobnetParameter,
+  buildRootJobnetRuleParameters,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
   resolveConnectorControlDefaultRawValue,
@@ -105,6 +107,25 @@ const parseInheritedJobnets = (): { jobnet: N; subnet: N } => {
   const jobnet = root.children[0] as N;
   const subnet = jobnet.children[0] as N;
   return { jobnet, subnet };
+};
+
+const rootDefaultDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+  }
+}
+`;
+
+const parseRootDefaultJobnet = (): N => {
+  const result = parseAjs(rootDefaultDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
 };
 
 suite("Parameter helpers", () => {
@@ -268,6 +289,50 @@ suite("Parameter helpers", () => {
       (param) => param.rawValue ?? param.defaultRawValue,
     );
     assert.deepStrictEqual(inheritedCloseDates, ["mo"]);
+  });
+
+  test("builds root-jobnet-aware scalar and rule-array parameters", () => {
+    const rootJobnet = parseRootDefaultJobnet();
+    const { subnet } = parseJobnets();
+
+    const rootRg = buildRootJobnetParameter(
+      {
+        unit: rootJobnet,
+        parameter: "rg",
+        isRootJobnet: true,
+        rootDefaultParameter: "rg",
+      },
+      (param) => param.defaultRawValue ?? param.rawValue,
+    );
+    assert.strictEqual(rootRg, "1");
+
+    const inheritedRg = buildRootJobnetParameter(
+      {
+        unit: subnet,
+        parameter: "rg",
+        isRootJobnet: false,
+        rootDefaultParameter: "rg",
+      },
+      (param) => param.defaultRawValue ?? param.rawValue,
+    );
+    assert.strictEqual(inheritedRg, "3");
+
+    const rootSd = buildRootJobnetRuleParameters(
+      {
+        unit: rootJobnet,
+        parameter: "sd",
+        isRootJobnet: true,
+        rootDefaultParameter: "sd",
+      },
+      (param) => new Sd(param),
+    );
+    assert.deepStrictEqual(
+      rootSd?.map((parameter) => ({
+        rule: parameter.rule,
+        value: parameter.value(),
+      })),
+      [{ rule: 1, value: "en" }],
+    );
   });
 
   test("builds sorted rule parameters for simple rule arrays", () => {
