@@ -3,10 +3,11 @@ import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { J } from "../../domain/models/units/J";
 import { N } from "../../domain/models/units/N";
-import { Sd, Wc } from "../../domain/models/parameters";
+import { Ln, Sd, Wc } from "../../domain/models/parameters";
 import {
   adjustToSdItemCount,
   buildSdAlignedParameters,
+  buildSortedRuleParameters,
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
@@ -197,6 +198,41 @@ suite("Parameter helpers", () => {
     );
   });
 
+  test("builds sorted rule parameters for simple rule arrays", () => {
+    const { jobnet } = parseJobnets();
+
+    const sortedLn = buildSortedRuleParameters(
+      [
+        {
+          unit: jobnet,
+          parameter: "ln",
+          inherited: false,
+          rawValue: "2,after",
+          position: 1,
+        },
+        {
+          unit: jobnet,
+          parameter: "ln",
+          inherited: false,
+          rawValue: "1,before",
+          position: 0,
+        },
+      ],
+      (param) => new Ln(param),
+    );
+
+    assert.deepStrictEqual(
+      sortedLn?.map((parameter) => ({
+        rule: parameter.rule,
+        value: parameter.value(),
+      })),
+      [
+        { rule: 1, value: "before" },
+        { rule: 2, value: "after" },
+      ],
+    );
+  });
+
   test("keeps root-jobnet defaults centralized for wrapper behavior", () => {
     const { jobnet, subnet } = parseJobnets();
 
@@ -206,6 +242,27 @@ suite("Parameter helpers", () => {
     assert.strictEqual(subnet.ncl, undefined);
     assert.strictEqual(subnet.ncs, undefined);
     assert.strictEqual(subnet.ncex, undefined);
+  });
+
+  test("preserves sorted root-jobnet sd defaults through shared helper usage", () => {
+    const rootDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+}
+`;
+
+    const result = parseAjs(rootDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const root = tyFactory(result.rootUnits[0]) as N;
+
+    assert.deepStrictEqual(
+      root.sd?.map((parameter) => ({
+        rule: parameter.rule,
+        value: parameter.value(),
+      })),
+      [{ rule: 1, value: "en" }],
+    );
   });
 
   test("derives top defaults from transfer source and destination presence", () => {
