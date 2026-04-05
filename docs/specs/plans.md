@@ -99,6 +99,9 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model mapping now reuses the shared encoded-string helper so
   wrapper and normalized-model comment decoding fully share the same quoting
   and escape rules.
+- normalized-model mapping now reuses the shared dependency parsing helper so
+  wrapper and normalized-model `ar` interpretation fully share the same source,
+  target, and relation parsing rule.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -204,25 +207,26 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Reuse the shared encoded-string helper from normalized-model mapping so comment
-decoding follows the same escaping rules as wrapper parameters.
+Reuse the shared dependency parsing helper from normalized-model mapping so
+`ar` interpretation follows the same parsing rules as wrapper parameters.
 
 ### Why
 
-Normalized comment decoding currently strips outer quotes only, while wrapper
-`EncordedString` values also decode `#"` and `##` escapes. Sharing the helper
+Normalized dependency parsing still keeps its own string parsing logic, while
+wrapper `Ar` parameters parse the same syntax independently. Sharing the helper
 removes that semantic drift.
 
 ### Scope
 
-- extract the encoded-string decode rule into a shared helper
-- switch `EncordedString` and normalized comment decoding to use it
-- add focused tests for escaped comment decoding
+- extract the dependency relation parse rule into a shared helper
+- switch `Ar` and normalized dependency parsing to use it
+- add focused tests for dependency relation parsing
 
 ### Non-Goals
 
-- changing which normalized fields are decoded beyond the existing comment path
-- renaming the existing `EncordedString` type in this slice
+- changing dependency-target validation behavior in normalization
+- changing how dependency types are normalized beyond the existing `con` or
+  `seq` mapping
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior

@@ -1,5 +1,6 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
+import { parseDependencyRelation } from "../parameters/dependencyHelpers";
 import { decodeEncodedString } from "../parameters/encodedStringHelpers";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
 import { resolveUnitDepth } from "../units/unitDepthHelpers";
@@ -88,22 +89,15 @@ const parseDependency = (
 ):
   | { sourceName: string; targetName: string; type: AjsDependencyType }
   | undefined => {
-  const sourceName = parameterValue.match(/f=([^,)\s]+)/)?.[1];
-  const targetName = parameterValue.match(/t=([^,)\s]+)/)?.[1];
-  if (!sourceName || !targetName) {
+  const relation = parseDependencyRelation(parameterValue);
+  if (!relation) {
     return undefined;
   }
 
-  const relationType = parameterValue
-    .split(",")
-    .map((part) => part.trim())
-    .at(-1)
-    ?.replace(/\)$/, "");
-
   return {
-    sourceName,
-    targetName,
-    type: toDependencyType(relationType),
+    sourceName: relation.sourceName,
+    targetName: relation.targetName,
+    type: toDependencyType(relation.relationType),
   };
 };
 

@@ -1,35 +1,38 @@
 import { isTySymbol } from "../../values/AjsType";
 import Parameter from "./Parameter";
+import { parseDependencyRelation } from "./dependencyHelpers";
 
 class PlainString extends Parameter {}
 
 export class Ab extends PlainString {}
 export class Abr extends PlainString {}
 export class Ar extends PlainString {
-  #pattern = /\(f=(.+?),t=(.+?),(.+)\)/;
   get f(): string {
-    const result = this.#pattern.exec(this.value() as string);
-    if (result?.length === 4) {
-      return result[1];
-    } else {
-      throw new Error(`unexpected format: ${this.value()}`);
+    const relation = parseDependencyRelation(this.value(), {
+      requireRelationType: true,
+    });
+    if (relation) {
+      return relation.sourceName;
     }
+    throw new Error(`unexpected format: ${this.value()}`);
   }
   get t(): string | undefined {
-    const result = this.#pattern.exec(this.value() as string);
-    if (result?.length === 4) {
-      return result[2];
-    } else {
-      throw new Error(`unexpected format: ${this.value()}`);
+    const relation = parseDependencyRelation(this.value(), {
+      requireRelationType: true,
+    });
+    if (relation) {
+      return relation.targetName;
     }
+    throw new Error(`unexpected format: ${this.value()}`);
   }
   get relationType(): string | undefined {
-    const result = this.#pattern.exec(this.value() as string);
-    if (result?.length === 4) {
-      return result[3];
-    } else {
-      throw new Error(`unexpected format: ${this.value()}`);
+    const relation = parseDependencyRelation(this.value(), {
+      requireRelationType: true,
+    });
+    if (relation) {
+      return relation.relationType;
     }
+    throw new Error(`unexpected format: ${this.value()}`);
   }
 }
 export class Cd extends PlainString {}
