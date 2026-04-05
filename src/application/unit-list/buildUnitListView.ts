@@ -1,7 +1,7 @@
 import {
-  AjsDependencyType,
   AjsDocument,
   AjsGroupType,
+  AjsRelationType,
   AjsUnit,
   AjsUnitType,
   findAjsUnitParameter,
@@ -34,7 +34,7 @@ export type UnitListLinkedUnitView = {
   id: string;
   name: string;
   absolutePath: string;
-  relationType: AjsDependencyType;
+  relationType: AjsRelationType;
 };
 
 export type UnitListGroup2View = {
@@ -428,7 +428,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
   return units.map((unit) => {
     const parent = findParentAjsUnit(document, unit);
     const previousUnits =
-      parent?.dependencies
+      parent?.relations
         .filter((dependency) => dependency.targetUnitId === unit.id)
         .flatMap((dependency) => {
           const sourceUnit = unitById.get(dependency.sourceUnitId);
@@ -444,7 +444,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
             : [];
         }) ?? [];
     const nextUnits =
-      parent?.dependencies
+      parent?.relations
         .filter((dependency) => dependency.sourceUnitId === unit.id)
         .flatMap((dependency) => {
           const targetUnit = unitById.get(dependency.targetUnitId);

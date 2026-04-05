@@ -1,5 +1,8 @@
 import * as assert from "assert";
-import { parseUnitEdge } from "../../domain/models/parameters/unitEdgeHelpers";
+import {
+  normalizeAjsRelationType,
+  parseUnitEdge,
+} from "../../domain/models/parameters/unitEdgeHelpers";
 
 suite("Unit Edge Helpers", () => {
   test("parses unit edge strings", () => {
@@ -34,5 +37,12 @@ suite("Unit Edge Helpers", () => {
       }),
       undefined,
     );
+  });
+
+  test("normalizes unit edge types for the normalized model", () => {
+    assert.strictEqual(normalizeAjsRelationType("con"), "con");
+    assert.strictEqual(normalizeAjsRelationType("seq"), "seq");
+    assert.strictEqual(normalizeAjsRelationType(undefined), "seq");
+    assert.strictEqual(normalizeAjsRelationType("unexpected"), "seq");
   });
 });

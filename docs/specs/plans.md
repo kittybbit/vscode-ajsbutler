@@ -99,13 +99,16 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model mapping now reuses the shared encoded-string helper so
   wrapper and normalized-model comment decoding fully share the same quoting
   and escape rules.
-- normalized-model mapping now reuses the shared dependency parsing helper so
-  wrapper and normalized-model `ar` interpretation fully share the same source,
-  target, and relation parsing rule.
+- normalized-model mapping now reuses the shared unit-relation parsing helper
+  so wrapper and normalized-model `ar` interpretation fully share the same
+  source, target, and relation parsing rule.
 - normalized-model mapping now reuses shared raw unit-parameter lookup helpers
   so simple key/value filtering no longer lives only inside normalization.
 - normalized-model layout mapping now reuses shared raw unit-parameter lookup
   helpers so parent `el` lookup no longer filters parameters inline.
+- normalized-model relation mapping now reuses shared relation-type
+  normalization helpers so relation-type coercion no longer lives only inside
+  normalization.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -211,25 +214,25 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Reuse shared raw unit-parameter lookup helpers in normalized layout mapping so
-parent `el` lookup is not reimplemented inline.
+Reuse shared relation-type normalization helpers in normalized mapping so
+relation-type coercion is not reimplemented inline.
 
 ### Why
 
-After extracting raw unit-parameter lookup helpers, normalized layout mapping
-still filters parent `el` parameters directly. Switching that last call site to
-the shared helper keeps raw parameter walking in one place.
+After extracting shared unit-edge parsing, normalized mapping still keeps its
+own `con` or `seq` coercion rule. Moving that rule next to edge parsing keeps
+all edge interpretation in one place.
 
 ### Scope
 
-- switch normalized layout lookup to `findUnitParameterValues(...)`
-- update normalize planning docs for the completed sub-slice
-- keep the existing layout behavior unchanged
+- add a shared unit-edge type normalization helper
+- switch normalized dependency mapping to use it
+- add focused tests for edge-type normalization
 
 ### Non-Goals
 
-- introducing a new layout helper
-- changing layout coordinate parsing or fallback behavior
+- changing edge validation or missing-target warning behavior
+- changing the normalized dependency DTO shape
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior

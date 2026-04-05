@@ -35,7 +35,7 @@ unit=root,,jp1admin,;
 `;
 
 suite("Normalize AJS Document", () => {
-  test("creates a stable document model with units and dependencies", () => {
+  test("creates a stable document model with units and relations", () => {
     const result = parseAjs(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
@@ -58,8 +58,8 @@ suite("Normalize AJS Document", () => {
     assert.strictEqual(root.children[0].children[2].isRecovery, undefined);
     assert.deepStrictEqual(
       root.children[0].children
-        .flatMap((child) => child.dependencies)
-        .map((dependency) => dependency.type),
+        .flatMap((child) => child.relations)
+        .map((relation) => relation.type),
       ["seq", "con"],
     );
   });

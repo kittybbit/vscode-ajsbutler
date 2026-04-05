@@ -35,10 +35,10 @@ const toAncestorNodes = (
 
 const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
   unit.children.flatMap((child) =>
-    child.dependencies.map((dependency) => ({
-      source: dependency.sourceUnitId,
-      target: dependency.targetUnitId,
-      type: dependency.type,
+    child.relations.map((relation) => ({
+      source: relation.sourceUnitId,
+      target: relation.targetUnitId,
+      type: relation.type,
     })),
   );
 

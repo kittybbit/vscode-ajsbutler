@@ -1,3 +1,5 @@
+import { AjsRelationType } from "../ajs/AjsDocument";
+
 export type ParsedUnitEdge = {
   sourceName: string;
   targetName: string;
@@ -31,3 +33,7 @@ export const parseUnitEdge = (
     relationType,
   };
 };
+
+export const normalizeAjsRelationType = (
+  relationType: string | undefined,
+): AjsRelationType => (relationType === "con" ? "con" : "seq");
