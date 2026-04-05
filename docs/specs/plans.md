@@ -33,15 +33,18 @@ This file is the high-level index for the per-feature plan structure in
   `src/test/suite/normalizeAjsDocument.test.ts`.
 - normalized AJS navigation helpers now expose parent lookup, ancestor lookup,
   and root jobnet lookup without reusing wrapper traversal in consumers.
+- normalized AJS helpers now expose direct parameter lookup, repeated-value
+  lookup, and first-ancestor inherited parameter lookup so application slices
+  stop repeating wrapper-era parameter traversal logic.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
 
 1. Refresh roadmap and feature task documents so completed slices and remaining
    debt are visible in one place.
-2. Continue moving broadly reusable wrapper-derived semantics into the
-   normalized model in small slices, starting with parameter and inheritance
-   behaviors that are still concentrated in `ParameterFactory`.
+2. Continue moving the remaining wrapper-derived parameter semantics that still
+   require rule-aware defaults or typed wrapper interpretation out of
+   `ParameterFactory` in small slices.
 3. Document which remaining semantics should intentionally stay in application
    view adapters instead of the normalized model.
 4. Continue reducing activation and webview concentration without changing user
@@ -139,27 +142,30 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Bring SDD planning documents up to date and define the next cleanup slice
-around residual `UnitEntity` dependencies.
+Move reusable parameter lookup and simple inheritance traversal from ad hoc
+application code into the normalized AJS model.
 
 ### Why
 
-The repository has already completed several vertical slices, but the roadmap
-and per-feature task files still read like pre-implementation templates. That
-makes the remaining migration work harder to prioritize and review.
+`buildUnitListView` still repeated wrapper-era parameter traversal logic even
+after table and flow viewers stopped reconstructing `UnitEntity`. Exposing that
+lookup from the normalized model is a small slice that reduces duplication
+before larger `ParameterFactory` cleanup.
 
 ### Scope
 
-- update roadmap and feature task documents to reflect completed slices
-- identify the highest-value remaining boundary problems
-- define the next implementation slice around table and flow cleanup
+- add normalized helper functions for direct parameter lookup
+- add normalized helper functions for repeated-value lookup
+- add normalized helper functions for first-ancestor inherited lookup
+- refactor `buildUnitListView` to consume those helpers
+- update normalize docs and tests
 
 ### Non-Goals
 
-- parser grammar changes
-- UI behavior changes
-- dependency updates
-- `engines.vscode` changes
+- replacing `ParameterFactory` wholesale
+- changing parser output
+- changing user-visible unit list behavior
+- changing extension activation, diagnostics, or telemetry
 
 ### Constraints
 
@@ -172,42 +178,41 @@ makes the remaining migration work harder to prioritize and review.
 
 #### Use case
 
-Documentation alignment and next-slice planning.
+Normalize AJS Document.
 
 #### Layers affected
 
-- docs: roadmap, plans, and per-feature task tracking
-- application: next slice expected around unit-list and flow DTO boundaries
-- presentation: next slice expected around table and flow cleanup
+- domain: normalized AJS helper functions
+- application: unit-list view mapping
+- docs: normalize use case and feature tracking
 
 #### Key decisions
 
-- Treat unit-list, flow-graph, normalize, editor-feedback, telemetry, and
-  unit-definition slices as completed and track only their remaining follow-up
-  debt.
-- Prioritize removal of residual `UnitEntity` dependencies before broader
-  structural refactors.
+- Put parameter lookup helpers on the normalized model instead of keeping
+  application-local lookup helpers in each consumer.
+- Limit inheritance support to first-ancestor lookup for this slice and leave
+  rule-aware defaults in `ParameterFactory` for later work.
 
 ### Acceptance Criteria
 
-- [ ] roadmap reflects completed and upcoming slices
-- [ ] feature task files distinguish completed work from remaining follow-up
-- [ ] next implementation slice is explicit about boundary debt and validation
+- [ ] normalized helpers expose direct, repeated-value, and inherited parameter
+      lookup
+- [ ] `buildUnitListView` stops defining its own parameter lookup helpers
+- [ ] normalize docs and tasks reflect the completed sub-slice
 
 ### Test Plan
 
-- run build
+- run quality checks
 - run desktop tests
-- run web tests when the environment can complete them reliably
+- run build
 
 ### Risks
 
-- documentation can drift again if future slices are merged without updating
-  task files
-- flow and table cleanup can surface subtle wrapper-derived behavior
-  differences
+- inherited lookup could diverge from wrapper semantics if ancestor order or
+  first-hit behavior changes
+- build-unit-list regressions could hide in priority and schedule field mapping
 
 ### Rollback Plan
 
-- revert the documentation updates if they misrepresent repository state
-- keep follow-up slices small so behavior regressions are easy to isolate
+- revert the helper extraction and return to application-local lookup functions
+- keep deeper `ParameterFactory` cleanup in later isolated slices

@@ -2,7 +2,12 @@ import {
   AjsDependencyType,
   AjsDocument,
   AjsGroupType,
+  AjsUnit,
   AjsUnitType,
+  findAjsUnitParameter,
+  findAjsUnitParameterValue,
+  findAjsUnitParameterValues,
+  findParentAjsUnit,
   flattenAjsUnits,
 } from "../../domain/models/ajs/AjsDocument";
 import { WeekSymbol, isWeekSymbol } from "../../domain/values/AjsType";
@@ -253,28 +258,6 @@ export type UnitListRowView = {
 
 const weekSymbols: WeekSymbol[] = ["su", "mo", "tu", "we", "th", "fr", "sa"];
 
-type UnitParameterView = { key: string; value: string; position?: number };
-
-const findParameterValue = (
-  parameters: UnitParameterView[],
-  key: string,
-): string | undefined =>
-  parameters.find((parameter) => parameter.key === key)?.value;
-
-const findParameterValues = (
-  parameters: UnitParameterView[],
-  key: string,
-): string[] =>
-  parameters
-    .filter((parameter) => parameter.key === key)
-    .map((parameter) => parameter.value);
-
-const findFirstParameter = (
-  parameters: UnitParameterView[],
-  key: string,
-): UnitParameterView | undefined =>
-  parameters.find((parameter) => parameter.key === key);
-
 const getCalendarWeekSymbol = (value: string): WeekSymbol | undefined => {
   const parsedValue = value.split(":")[0];
   return isWeekSymbol(parsedValue) ? parsedValue : undefined;
@@ -317,16 +300,9 @@ const toNiPriority = (value: string): number => {
   return 1;
 };
 
-type Group7PriorityUnit = {
-  id: string;
-  unitType: AjsUnitType;
-  parentId?: string;
-  parameters: UnitParameterView[];
-};
-
 const getPriorityForUnitTypes = (
-  unit: Group7PriorityUnit,
-  unitById: ReadonlyMap<string, Group7PriorityUnit>,
+  document: AjsDocument,
+  unit: AjsUnit,
   priorityById: Map<string, number>,
   targetUnitTypes: readonly AjsUnitType[],
 ): number | undefined => {
@@ -338,8 +314,8 @@ const getPriorityForUnitTypes = (
     return undefined;
   }
 
-  const pr = findFirstParameter(unit.parameters, "pr");
-  const ni = findFirstParameter(unit.parameters, "ni");
+  const pr = findAjsUnitParameter(unit, "pr");
+  const ni = findAjsUnitParameter(unit, "ni");
 
   const prPriority =
     pr && pr.value !== undefined && pr.value !== ""
@@ -362,11 +338,11 @@ const getPriorityForUnitTypes = (
     return niPriority;
   }
 
-  const parent = unit.parentId ? unitById.get(unit.parentId) : undefined;
+  const parent = findParentAjsUnit(document, unit);
   if (parent && (parent.unitType === "n" || parent.unitType === "rn")) {
     const parentPriority = getPriorityForUnitTypes(
+      document,
       parent,
-      unitById,
       priorityById,
       ["n", "rn"],
     );
@@ -450,7 +426,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
   const group11PriorityById = new Map<string, number>();
 
   return units.map((unit) => {
-    const parent = unit.parentId ? unitById.get(unit.parentId) : undefined;
+    const parent = findParentAjsUnit(document, unit);
     const previousUnits =
       parent?.dependencies
         .filter((dependency) => dependency.targetUnitId === unit.id)
@@ -491,13 +467,13 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
         comment: unit.comment,
         previousUnits,
         nextUnits,
-        executionAgent: findParameterValue(unit.parameters, "ex"),
-        nestedConnectionLimit: findParameterValue(unit.parameters, "ncl"),
-        nestedConnectionName: findParameterValue(unit.parameters, "ncn"),
-        nestedConnectionService: findParameterValue(unit.parameters, "ncsv"),
-        nestedConnectionEnabled: findParameterValue(unit.parameters, "ncs"),
-        nestedConnectionExternal: findParameterValue(unit.parameters, "ncex"),
-        nestedConnectionHost: findParameterValue(unit.parameters, "nchn"),
+        executionAgent: findAjsUnitParameterValue(unit, "ex"),
+        nestedConnectionLimit: findAjsUnitParameterValue(unit, "ncl"),
+        nestedConnectionName: findAjsUnitParameterValue(unit, "ncn"),
+        nestedConnectionService: findAjsUnitParameterValue(unit, "ncsv"),
+        nestedConnectionEnabled: findAjsUnitParameterValue(unit, "ncs"),
+        nestedConnectionExternal: findAjsUnitParameterValue(unit, "ncex"),
+        nestedConnectionHost: findAjsUnitParameterValue(unit, "nchn"),
       },
       group1: {
         name: unit.name,
@@ -508,13 +484,13 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
         parentId: unit.parentId,
         unitType: unit.unitType,
         groupType: unit.groupType,
-        cty: findParameterValue(unit.parameters, "cty"),
+        cty: findAjsUnitParameterValue(unit, "cty"),
         layoutHv:
           unit.depth > 0 ? `+${unit.layout.h}+${unit.layout.v}` : undefined,
-        size: findParameterValue(unit.parameters, "sz"),
+        size: findAjsUnitParameterValue(unit, "sz"),
       },
       group3: {
-        hardAttribute: findParameterValue(unit.parameters, "ha"),
+        hardAttribute: findAjsUnitParameterValue(unit, "ha"),
         isRecovery: unit.isRecovery,
         jp1Username: unit.jp1Username,
         jp1ResourceGroup: unit.jp1ResourceGroup,
@@ -522,25 +498,25 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
       group4: {
         managerHost:
           unit.unitType === "mg" || unit.unitType === "mn"
-            ? findParameterValue(unit.parameters, "mh")
+            ? findAjsUnitParameterValue(unit, "mh")
             : undefined,
         managerUnit:
           unit.unitType === "mg" || unit.unitType === "mn"
-            ? findParameterValue(unit.parameters, "mu")
+            ? findAjsUnitParameterValue(unit, "mu")
             : undefined,
       },
       group5: {
         startDeadlineDate:
           unit.unitType === "g"
-            ? findParameterValue(unit.parameters, "sdd")
+            ? findAjsUnitParameterValue(unit, "sdd")
             : undefined,
         maximumDuration:
           unit.unitType === "g"
-            ? findParameterValue(unit.parameters, "md")
+            ? findAjsUnitParameterValue(unit, "md")
             : undefined,
         startTimeType:
           unit.unitType === "g"
-            ? findParameterValue(unit.parameters, "stt")
+            ? findAjsUnitParameterValue(unit, "stt")
             : undefined,
         jobGroupType: unit.unitType === "g" ? unit.groupType : undefined,
       },
@@ -548,13 +524,13 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
         unit.unitType === "g"
           ? {
               ...buildCalendarWeekView(
-                findParameterValues(unit.parameters, "op"),
-                findParameterValues(unit.parameters, "cl"),
+                findAjsUnitParameterValues(unit, "op"),
+                findAjsUnitParameterValues(unit, "cl"),
               ),
-              openDates: findParameterValues(unit.parameters, "op").filter(
+              openDates: findAjsUnitParameterValues(unit, "op").filter(
                 isNonWeekCalendarValue,
               ),
-              closeDates: findParameterValues(unit.parameters, "cl").filter(
+              closeDates: findAjsUnitParameterValues(unit, "cl").filter(
                 isNonWeekCalendarValue,
               ),
             }
@@ -568,23 +544,23 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
           unit.unitType === "rn" ||
           unit.unitType === "rm" ||
           unit.unitType === "rr"
-            ? findParameterValue(unit.parameters, "mp")
+            ? findAjsUnitParameterValue(unit, "mp")
             : undefined,
         retainedGenerationCount:
           unit.unitType === "n" ||
           unit.unitType === "rn" ||
           unit.unitType === "rm" ||
           unit.unitType === "rr"
-            ? findParameterValue(unit.parameters, "rg")
+            ? findAjsUnitParameterValue(unit, "rg")
             : undefined,
         targetManager:
           unit.unitType === "n" ||
           unit.unitType === "rn" ||
           unit.unitType === "rm" ||
           unit.unitType === "rr"
-            ? findParameterValue(unit.parameters, "rh")
+            ? findAjsUnitParameterValue(unit, "rh")
             : undefined,
-        priority: getPriorityForUnitTypes(unit, unitById, group7PriorityById, [
+        priority: getPriorityForUnitTypes(document, unit, group7PriorityById, [
           "n",
           "rn",
         ]),
@@ -593,80 +569,79 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
           unit.unitType === "rn" ||
           unit.unitType === "rm" ||
           unit.unitType === "rr"
-            ? findParameterValue(unit.parameters, "cd")
+            ? findAjsUnitParameterValue(unit, "cd")
             : undefined,
         scheduleOption:
           unit.unitType === "n" ||
           unit.unitType === "rn" ||
           unit.unitType === "rm" ||
           unit.unitType === "rr"
-            ? findParameterValue(unit.parameters, "ms")
+            ? findAjsUnitParameterValue(unit, "ms")
             : undefined,
         requiredExecutionTime:
           unit.unitType === "n" ||
           unit.unitType === "rn" ||
           unit.unitType === "rm" ||
           unit.unitType === "rr"
-            ? findParameterValue(unit.parameters, "fd")
+            ? findAjsUnitParameterValue(unit, "fd")
             : undefined,
       },
       group10: {
-        deleteAfterExecution: findParameterValue(unit.parameters, "de"),
-        executionDate: findParameterValue(unit.parameters, "ed"),
-        jobGroupPath: findParameterValue(unit.parameters, "jc"),
-        exclusiveJobnetName: findParameterValue(unit.parameters, "ejn"),
-        parentRules: findParameterValues(unit.parameters, "ln").map(
+        deleteAfterExecution: findAjsUnitParameterValue(unit, "de"),
+        executionDate: findAjsUnitParameterValue(unit, "ed"),
+        jobGroupPath: findAjsUnitParameterValue(unit, "jc"),
+        exclusiveJobnetName: findAjsUnitParameterValue(unit, "ejn"),
+        parentRules: findAjsUnitParameterValues(unit, "ln").map(
           parseLnParentRule,
         ),
-        scheduleDateTypes: findParameterValues(unit.parameters, "sd").map(
+        scheduleDateTypes: findAjsUnitParameterValues(unit, "sd").map(
           (value) => parseSd(value).type,
         ),
-        scheduleDateYearMonths: findParameterValues(unit.parameters, "sd").map(
+        scheduleDateYearMonths: findAjsUnitParameterValues(unit, "sd").map(
           (value) => parseSd(value).yearMonth,
         ),
-        scheduleDateDays: findParameterValues(unit.parameters, "sd").map(
+        scheduleDateDays: findAjsUnitParameterValues(unit, "sd").map(
           (value) => parseSd(value).day,
         ),
-        startTimes: findParameterValues(unit.parameters, "st").map((value) =>
+        startTimes: findAjsUnitParameterValues(unit, "st").map((value) =>
           parseTimeValue(value, "+00:00"),
         ),
-        cycles: findParameterValues(unit.parameters, "cy").map(parseCy),
-        substitutes: findParameterValues(unit.parameters, "sh").map(parseSh),
-        shiftDays: findParameterValues(unit.parameters, "shd").map(parseShd),
-        scheduleByDaysFromStart: findParameterValues(
-          unit.parameters,
-          "cftd",
-        ).map((value) => parseCftd(value).scheduleByDaysFromStart),
-        maxShiftableDays: findParameterValues(unit.parameters, "cftd").map(
+        cycles: findAjsUnitParameterValues(unit, "cy").map(parseCy),
+        substitutes: findAjsUnitParameterValues(unit, "sh").map(parseSh),
+        shiftDays: findAjsUnitParameterValues(unit, "shd").map(parseShd),
+        scheduleByDaysFromStart: findAjsUnitParameterValues(unit, "cftd").map(
+          (value) => parseCftd(value).scheduleByDaysFromStart,
+        ),
+        maxShiftableDays: findAjsUnitParameterValues(unit, "cftd").map(
           (value) => parseCftd(value).maxShiftableDays,
         ),
-        startRangeTimes: findParameterValues(unit.parameters, "sy").map(
-          (value) => parseTimeValue(value),
-        ),
-        endRangeTimes: findParameterValues(unit.parameters, "ey").map((value) =>
+        startRangeTimes: findAjsUnitParameterValues(unit, "sy").map((value) =>
           parseTimeValue(value),
         ),
-        waitCounts: findParameterValues(unit.parameters, "wc").map(parseWc),
-        waitTimes: findParameterValues(unit.parameters, "wt").map((value) =>
+        endRangeTimes: findAjsUnitParameterValues(unit, "ey").map((value) =>
+          parseTimeValue(value),
+        ),
+        waitCounts: findAjsUnitParameterValues(unit, "wc").map(parseWc),
+        waitTimes: findAjsUnitParameterValues(unit, "wt").map((value) =>
           parseTimeValue(value),
         ),
       },
       group11: {
-        commandText: findParameterValue(unit.parameters, "te"),
-        scriptFileName: findParameterValue(unit.parameters, "sc"),
-        parameters: findParameterValue(unit.parameters, "prm"),
-        environmentVariable: findParameterValue(unit.parameters, "env"),
-        environmentVariableFile: findParameterValue(unit.parameters, "ev"),
-        workPathName: findParameterValue(unit.parameters, "wkp"),
-        standardInputFile: findParameterValue(unit.parameters, "si"),
-        standardOutputFile: findParameterValue(unit.parameters, "so"),
-        standardOutputAction: findParameterValue(unit.parameters, "soa"),
-        standardErrorFile: findParameterValue(unit.parameters, "se"),
-        standardErrorAction: findParameterValue(unit.parameters, "sea"),
-        queueManager: findParameterValue(unit.parameters, "qm"),
-        queueName: findParameterValue(unit.parameters, "qu"),
-        requestJobName: findParameterValue(unit.parameters, "req"),
-        priority: getPriorityForUnitTypes(unit, unitById, group11PriorityById, [
+        commandText: findAjsUnitParameterValue(unit, "te"),
+        scriptFileName: findAjsUnitParameterValue(unit, "sc"),
+        parameters: findAjsUnitParameterValue(unit, "prm"),
+        environmentVariable: findAjsUnitParameterValue(unit, "env"),
+        environmentVariableFile: findAjsUnitParameterValue(unit, "ev"),
+        workPathName: findAjsUnitParameterValue(unit, "wkp"),
+        standardInputFile: findAjsUnitParameterValue(unit, "si"),
+        standardOutputFile: findAjsUnitParameterValue(unit, "so"),
+        standardOutputAction: findAjsUnitParameterValue(unit, "soa"),
+        standardErrorFile: findAjsUnitParameterValue(unit, "se"),
+        standardErrorAction: findAjsUnitParameterValue(unit, "sea"),
+        queueManager: findAjsUnitParameterValue(unit, "qm"),
+        queueName: findAjsUnitParameterValue(unit, "qu"),
+        requestJobName: findAjsUnitParameterValue(unit, "req"),
+        priority: getPriorityForUnitTypes(document, unit, group11PriorityById, [
           "j",
           "rj",
           "pj",
@@ -674,119 +649,119 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
           "qj",
           "rq",
         ]),
-        endJudgment: findParameterValue(unit.parameters, "jd"),
-        waitThreshold: findParameterValue(unit.parameters, "wth"),
-        timeoutHold: findParameterValue(unit.parameters, "tho"),
-        judgmentFile: findParameterValue(unit.parameters, "jdf"),
-        automaticRetryEnabled: findParameterValue(unit.parameters, "abr"),
-        retryStart: findParameterValue(unit.parameters, "rjs"),
-        retryEnd: findParameterValue(unit.parameters, "rje"),
-        retryCount: findParameterValue(unit.parameters, "rec"),
-        retryInterval: findParameterValue(unit.parameters, "rei"),
-        targetUserName: findParameterValue(unit.parameters, "un"),
+        endJudgment: findAjsUnitParameterValue(unit, "jd"),
+        waitThreshold: findAjsUnitParameterValue(unit, "wth"),
+        timeoutHold: findAjsUnitParameterValue(unit, "tho"),
+        judgmentFile: findAjsUnitParameterValue(unit, "jdf"),
+        automaticRetryEnabled: findAjsUnitParameterValue(unit, "abr"),
+        retryStart: findAjsUnitParameterValue(unit, "rjs"),
+        retryEnd: findAjsUnitParameterValue(unit, "rje"),
+        retryCount: findAjsUnitParameterValue(unit, "rec"),
+        retryInterval: findAjsUnitParameterValue(unit, "rei"),
+        targetUserName: findAjsUnitParameterValue(unit, "un"),
       },
       group12: {
-        endJudgment: findParameterValue(unit.parameters, "ej"),
-        judgmentReturnCode: findParameterValue(unit.parameters, "ejc"),
-        lowerReturnCode: findParameterValue(unit.parameters, "ejl"),
-        lowerJudgmentValue: findParameterValue(unit.parameters, "ejs"),
-        upperComparison: findParameterValue(unit.parameters, "ejm"),
-        upperReturnCode: findParameterValue(unit.parameters, "ejh"),
-        upperJudgmentValue: findParameterValue(unit.parameters, "ejg"),
-        lowerComparison: findParameterValue(unit.parameters, "eju"),
-        judgmentValueString: findParameterValue(unit.parameters, "ejt"),
-        judgmentValueNumeric: findParameterValue(unit.parameters, "eji"),
-        variableName: findParameterValue(unit.parameters, "ejv"),
-        judgmentFileName: findParameterValue(unit.parameters, "ejf"),
+        endJudgment: findAjsUnitParameterValue(unit, "ej"),
+        judgmentReturnCode: findAjsUnitParameterValue(unit, "ejc"),
+        lowerReturnCode: findAjsUnitParameterValue(unit, "ejl"),
+        lowerJudgmentValue: findAjsUnitParameterValue(unit, "ejs"),
+        upperComparison: findAjsUnitParameterValue(unit, "ejm"),
+        upperReturnCode: findAjsUnitParameterValue(unit, "ejh"),
+        upperJudgmentValue: findAjsUnitParameterValue(unit, "ejg"),
+        lowerComparison: findAjsUnitParameterValue(unit, "eju"),
+        judgmentValueString: findAjsUnitParameterValue(unit, "ejt"),
+        judgmentValueNumeric: findAjsUnitParameterValue(unit, "eji"),
+        variableName: findAjsUnitParameterValue(unit, "ejv"),
+        judgmentFileName: findAjsUnitParameterValue(unit, "ejf"),
       },
       group13: {
-        timeoutInterval: findParameterValue(unit.parameters, "tmitv"),
-        eventTimeout: findParameterValue(unit.parameters, "etn"),
-        monitoredFileName: findParameterValue(unit.parameters, "flwf"),
-        monitoredFileCondition: findParameterValue(unit.parameters, "flwc"),
-        monitoredFileCloseMode: findParameterValue(unit.parameters, "flco"),
-        monitoringInterval: findParameterValue(unit.parameters, "flwi"),
-        waitEventId: findParameterValue(unit.parameters, "evwid"),
-        waitHostName: findParameterValue(unit.parameters, "evhst"),
-        waitMessage: findParameterValue(unit.parameters, "evwms"),
-        eventTimeoutAction: findParameterValue(unit.parameters, "ets"),
+        timeoutInterval: findAjsUnitParameterValue(unit, "tmitv"),
+        eventTimeout: findAjsUnitParameterValue(unit, "etn"),
+        monitoredFileName: findAjsUnitParameterValue(unit, "flwf"),
+        monitoredFileCondition: findAjsUnitParameterValue(unit, "flwc"),
+        monitoredFileCloseMode: findAjsUnitParameterValue(unit, "flco"),
+        monitoringInterval: findAjsUnitParameterValue(unit, "flwi"),
+        waitEventId: findAjsUnitParameterValue(unit, "evwid"),
+        waitHostName: findAjsUnitParameterValue(unit, "evhst"),
+        waitMessage: findAjsUnitParameterValue(unit, "evwms"),
+        eventTimeoutAction: findAjsUnitParameterValue(unit, "ets"),
       },
       group14: {
-        actionEventId: findParameterValue(unit.parameters, "evsid"),
-        actionHostName: findParameterValue(unit.parameters, "evhst"),
-        actionMessage: findParameterValue(unit.parameters, "evsms"),
-        actionSeverity: findParameterValue(unit.parameters, "evssv"),
-        actionStartType: findParameterValue(unit.parameters, "evsrt"),
-        actionInterval: findParameterValue(unit.parameters, "evspl"),
-        actionCount: findParameterValue(unit.parameters, "evsrc"),
-        platformMethod: findParameterValue(unit.parameters, "pfm"),
+        actionEventId: findAjsUnitParameterValue(unit, "evsid"),
+        actionHostName: findAjsUnitParameterValue(unit, "evhst"),
+        actionMessage: findAjsUnitParameterValue(unit, "evsms"),
+        actionSeverity: findAjsUnitParameterValue(unit, "evssv"),
+        actionStartType: findAjsUnitParameterValue(unit, "evsrt"),
+        actionInterval: findAjsUnitParameterValue(unit, "evspl"),
+        actionCount: findAjsUnitParameterValue(unit, "evsrc"),
+        platformMethod: findAjsUnitParameterValue(unit, "pfm"),
       },
       group15: {
-        executionUser: findParameterValue(unit.parameters, "eu"),
-        executionTimeMonitor: findParameterValue(unit.parameters, "etm"),
-        fileDescriptor: findParameterValue(unit.parameters, "fd"),
-        jobType: findParameterValue(unit.parameters, "jty"),
-        terminationStatus1: findParameterValue(unit.parameters, "ts1"),
-        terminationDelay1: findParameterValue(unit.parameters, "td1"),
-        terminationOperation1: findParameterValue(unit.parameters, "top1"),
-        terminationStatus2: findParameterValue(unit.parameters, "ts2"),
-        terminationDelay2: findParameterValue(unit.parameters, "td2"),
-        terminationOperation2: findParameterValue(unit.parameters, "top2"),
-        terminationStatus3: findParameterValue(unit.parameters, "ts3"),
-        terminationDelay3: findParameterValue(unit.parameters, "td3"),
-        terminationOperation3: findParameterValue(unit.parameters, "top3"),
-        terminationStatus4: findParameterValue(unit.parameters, "ts4"),
-        terminationDelay4: findParameterValue(unit.parameters, "td4"),
-        terminationOperation4: findParameterValue(unit.parameters, "top4"),
+        executionUser: findAjsUnitParameterValue(unit, "eu"),
+        executionTimeMonitor: findAjsUnitParameterValue(unit, "etm"),
+        fileDescriptor: findAjsUnitParameterValue(unit, "fd"),
+        jobType: findAjsUnitParameterValue(unit, "jty"),
+        terminationStatus1: findAjsUnitParameterValue(unit, "ts1"),
+        terminationDelay1: findAjsUnitParameterValue(unit, "td1"),
+        terminationOperation1: findAjsUnitParameterValue(unit, "top1"),
+        terminationStatus2: findAjsUnitParameterValue(unit, "ts2"),
+        terminationDelay2: findAjsUnitParameterValue(unit, "td2"),
+        terminationOperation2: findAjsUnitParameterValue(unit, "top2"),
+        terminationStatus3: findAjsUnitParameterValue(unit, "ts3"),
+        terminationDelay3: findAjsUnitParameterValue(unit, "td3"),
+        terminationOperation3: findAjsUnitParameterValue(unit, "top3"),
+        terminationStatus4: findAjsUnitParameterValue(unit, "ts4"),
+        terminationDelay4: findAjsUnitParameterValue(unit, "td4"),
+        terminationOperation4: findAjsUnitParameterValue(unit, "top4"),
       },
       group16: {
-        endWaitUnitName: findParameterValue(unit.parameters, "eun"),
-        waitMode: findParameterValue(unit.parameters, "mm"),
-        nestedMessageGeneration: findParameterValue(unit.parameters, "nmg"),
-        unitEndMonitoring: findParameterValue(unit.parameters, "uem"),
-        executionGenerationAction: findParameterValue(unit.parameters, "ega"),
+        endWaitUnitName: findAjsUnitParameterValue(unit, "eun"),
+        waitMode: findAjsUnitParameterValue(unit, "mm"),
+        nestedMessageGeneration: findAjsUnitParameterValue(unit, "nmg"),
+        unitEndMonitoring: findAjsUnitParameterValue(unit, "uem"),
+        executionGenerationAction: findAjsUnitParameterValue(unit, "ega"),
       },
       group17: {
         toolParameters:
           unit.unitType === "cpj" || unit.unitType === "rcpj"
-            ? findParameterValue(unit.parameters, "prm")
+            ? findAjsUnitParameterValue(unit, "prm")
             : undefined,
         toolEnvironment:
           unit.unitType === "cpj" || unit.unitType === "rcpj"
-            ? findParameterValue(unit.parameters, "env")
+            ? findAjsUnitParameterValue(unit, "env")
             : undefined,
       },
       group18: {
-        destinationAgent: findParameterValue(unit.parameters, "da"),
-        flexibleJobGroup: findParameterValue(unit.parameters, "fxg"),
+        destinationAgent: findAjsUnitParameterValue(unit, "da"),
+        flexibleJobGroup: findAjsUnitParameterValue(unit, "fxg"),
         executionAgent:
           unit.unitType === "fxj" || unit.unitType === "rfxj"
-            ? findParameterValue(unit.parameters, "ex")
+            ? findAjsUnitParameterValue(unit, "ex")
             : undefined,
       },
       group19: {
-        httpConnectionConfig: findParameterValue(unit.parameters, "htcfl"),
-        httpKind: findParameterValue(unit.parameters, "htknd"),
-        httpExecutionMode: findParameterValue(unit.parameters, "htexm"),
-        httpRequestFile: findParameterValue(unit.parameters, "htrqf"),
-        httpRequestEncoding: findParameterValue(unit.parameters, "htrqu"),
-        httpRequestMethod: findParameterValue(unit.parameters, "htrqm"),
-        httpStatusFile: findParameterValue(unit.parameters, "htstf"),
-        httpStatusPoint: findParameterValue(unit.parameters, "htspt"),
-        httpResponseHeaderFile: findParameterValue(unit.parameters, "htrhf"),
-        httpResponseBodyFile: findParameterValue(unit.parameters, "htrbf"),
-        httpCodeMap: findParameterValue(unit.parameters, "htcdm"),
+        httpConnectionConfig: findAjsUnitParameterValue(unit, "htcfl"),
+        httpKind: findAjsUnitParameterValue(unit, "htknd"),
+        httpExecutionMode: findAjsUnitParameterValue(unit, "htexm"),
+        httpRequestFile: findAjsUnitParameterValue(unit, "htrqf"),
+        httpRequestEncoding: findAjsUnitParameterValue(unit, "htrqu"),
+        httpRequestMethod: findAjsUnitParameterValue(unit, "htrqm"),
+        httpStatusFile: findAjsUnitParameterValue(unit, "htstf"),
+        httpStatusPoint: findAjsUnitParameterValue(unit, "htspt"),
+        httpResponseHeaderFile: findAjsUnitParameterValue(unit, "htrhf"),
+        httpResponseBodyFile: findAjsUnitParameterValue(unit, "htrbf"),
+        httpCodeMap: findAjsUnitParameterValue(unit, "htcdm"),
       },
       group8: {
         nestedConnectorRelease:
           unit.unitType === "nc"
-            ? findParameterValue(unit.parameters, "ncr")
+            ? findAjsUnitParameterValue(unit, "ncr")
             : undefined,
       },
       group9: {
         startCondition:
           unit.unitType === "rc"
-            ? findParameterValue(unit.parameters, "cond")
+            ? findAjsUnitParameterValue(unit, "cond")
             : undefined,
       },
     };
