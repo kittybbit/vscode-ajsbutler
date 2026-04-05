@@ -1,13 +1,15 @@
 # SDD Overview
 
-This directory is the entry point for Specification-Driven Development in this repository.
+This directory is the entry point for Specification-Driven Development in this
+repository.
 
 ## Goals
 
 - keep behavior stable while refactoring incrementally
 - make use cases explicit before structural changes
 - preserve desktop and web extension compatibility
-- support migration toward clearer domain, application, infrastructure, and presentation boundaries
+- support migration toward clearer domain, application, infrastructure, and
+  presentation boundaries
 
 ## Recommended Reading Order
 
@@ -23,12 +25,16 @@ This directory is the entry point for Specification-Driven Development in this r
 For non-trivial changes:
 
 1. create a dedicated git branch before implementation work starts
-2. update or create the relevant use-case spec in `docs/requirements/use-cases/` and/or `docs/specs/features/<feature>/SPECS.md`
-3. update or create corresponding plans in `docs/specs/features/<feature>/PLANS.md`
+2. update or create the relevant use-case spec in
+   `docs/requirements/use-cases/` and/or
+   `docs/specs/features/<feature>/SPECS.md`
+3. update or create corresponding plans in
+   `docs/specs/features/<feature>/PLANS.md`
 4. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
 5. document assumptions explicitly
 6. implement in small vertical slices
-7. before `git push`, confirm `npm run qlty`, `npm test`, and `npm run build` all pass
+7. before `git push`, confirm `npm run qlty`, `npm test`, and
+   `npm run build` all pass
 8. run any additional task-specific checks before finishing
 
 ## Document Roles
