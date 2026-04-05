@@ -87,6 +87,14 @@ export const buildOptionalParameter = <T>(
   return parameter ? mapParam(parameter) : undefined;
 };
 
+export const buildOptionalParameterArray = <T>(
+  arg: Omit<ParamLookupArg, "inherit">,
+  mapParam: (param: ParamInternal) => T,
+): Array<T> | undefined => {
+  const parameters = resolveParameterArray(arg);
+  return parameters ? parameters.map(mapParam) : undefined;
+};
+
 export const buildRequiredParameter = <T>(
   arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit">,
   mapParam: (param: ParamInternal) => T,

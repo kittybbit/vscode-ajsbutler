@@ -37,4 +37,7 @@
 - [x] Expose a shared helper for simple optional scalar parameters so trivial
       `checkAndGet(...)` plus `new Xxx(...)` builders stop repeating in
       `ParameterFactory`
+- [x] Expose a shared helper for simple optional array parameters so trivial
+      `checkAndGetArray(...)` plus `params.map((param) => new Xxx(param))`
+      builders stop repeating in `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

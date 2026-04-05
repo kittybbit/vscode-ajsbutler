@@ -7,6 +7,7 @@ import { N } from "../../domain/models/units/N";
 import { Ln, Sd, Wc } from "../../domain/models/parameters";
 import {
   adjustToSdItemCount,
+  buildOptionalParameterArray,
   buildInheritedParameter,
   buildInheritedParameterArray,
   buildOptionalParameter,
@@ -393,6 +394,38 @@ suite("Parameter helpers", () => {
       (param) => param.rawValue ?? param.defaultRawValue,
     );
     assert.strictEqual(missingCm, undefined);
+  });
+
+  test("builds optional array parameters with explicit and missing values", () => {
+    const { jobnet } = parseJobnets();
+    const root = parseRootGroup();
+
+    const explicitSd = buildOptionalParameterArray(
+      {
+        unit: jobnet,
+        parameter: "sd",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.deepStrictEqual(explicitSd, ["ud", "2,en"]);
+
+    const explicitEl = buildOptionalParameterArray(
+      {
+        unit: root,
+        parameter: "el",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.deepStrictEqual(explicitEl, ["jobnet,n,+0+0"]);
+
+    const missingEnv = buildOptionalParameterArray(
+      {
+        unit: jobnet,
+        parameter: "env",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.strictEqual(missingEnv, undefined);
   });
 
   test("builds required parameters and keeps the missing-parameter error", () => {

@@ -50,6 +50,9 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now expose optional scalar builders so the simplest
   `checkAndGet(...)` plus `new Xxx(...)` parameter methods stop repeating in
   `ParameterFactory`.
+- shared parameter helpers now expose optional array builders so the plain
+  `checkAndGetArray(...)` plus `params.map((param) => new Xxx(param))`
+  parameter methods stop repeating in `ParameterFactory`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -154,30 +157,32 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable optional-scalar builder so the simplest `ParameterFactory`
-methods stop repeating `checkAndGet(...)` plus `new Xxx(...)` wiring.
+Extract a reusable optional-array builder so the plain `checkAndGetArray(...)`
+plus `params.map((param) => new Xxx(param))` methods stop repeating in
+`ParameterFactory`.
 
 ### Why
 
-`ParameterFactory` still contains many trivial scalar builders that differ only
-by parameter name, default value, and wrapper constructor. A shared helper can
-remove that boilerplate without changing behavior.
+After the optional-scalar extraction, the next cleanly repeatable pattern is
+the plain array builder. Several methods still differ only by parameter name
+and wrapper constructor.
 
 ### Scope
 
-- add a shared helper for optional scalar parameter building
-- switch the simple optional scalar builders that only wrap one resolved
-  parameter to the shared helper across `ParameterFactory`
+- add a shared helper for optional array parameter building
+- switch the plain optional array builders that only wrap resolved arrays to
+  the shared helper
 - keep public parameter behavior unchanged while reducing repeated builder
   wiring
-- add focused tests for the optional-scalar helper behavior
+- add focused tests for the optional-array helper behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing inherited, root-jobnet, or rule-array parameter behavior
+- changing sd-aligned, inherited, root-jobnet, or extra-argument parameter
+  behavior
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -191,25 +196,25 @@ remove that boilerplate without changing behavior.
 
 #### Use case
 
-Optional-scalar builder extraction.
+Optional-array builder extraction.
 
 #### Layers affected
 
-- domain: optional-scalar helper usage
+- domain: optional-array helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize the simplest optional
-  scalar builder wiring.
-- Limit this slice to plain optional scalar methods and leave array,
-  inherited, root-jobnet, and extra-argument builders untouched.
+- Keep semantic behavior identical and only centralize the plain optional
+  array-builder wiring.
+- Limit this slice to array methods that only map resolved params to wrapper
+  instances and leave sd-aligned and inherited arrays untouched.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for optional scalar parameter building
-- [ ] simple `ParameterFactory` scalar methods delegate to the helper
-- [ ] focused tests cover optional-scalar helper behavior
+- [ ] shared helper exists for optional array parameter building
+- [ ] plain `ParameterFactory` array methods delegate to the helper
+- [ ] focused tests cover optional-array helper behavior
 
 ### Test Plan
 
@@ -220,13 +225,14 @@ Optional-scalar builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change explicit-vs-default precedence
-- the helper could be widened too far and obscure where more complex semantics
-  should remain explicit
+- helper extraction could accidentally change array ordering or missing-array
+  handling
+- the helper could be widened too far and obscure where aligned or inherited
+  array semantics should remain explicit
 
 ### Rollback Plan
 
-- revert optional-scalar helper usage in the affected `ParameterFactory`
+- revert optional-array helper usage in the affected `ParameterFactory`
   methods
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
