@@ -79,6 +79,9 @@ This file is the high-level index for the per-feature plan structure in
   prototype inspection no longer lives only inside `UnitEntity`.
 - shared unit wait-state helpers now resolve `eun`-based wait detection so
   wrapper classes stop duplicating `hasWaitedFor` checks inline.
+- shared unit jobnet-state helpers now resolve root-jobnet detection so
+  wrapper and normalized-model logic stop maintaining duplicate parent-type
+  checks.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -184,21 +187,20 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared wait-state helpers so duplicated `eun`-based wait detection uses
-a shared implementation.
+Extract shared root-jobnet helpers so duplicated parent-type root-jobnet
+detection uses a shared implementation.
 
 ### Why
 
-Many wrapper classes still repeat the same `this.eun && this.eun.length > 0`
-check for `hasWaitedFor`. Pulling that into one shared helper makes the wait
-state rule explicit and separately testable.
+Root-jobnet detection currently lives in both wrapper and normalized-model
+code paths. Pulling that into one shared helper makes the parent-type rule
+explicit and separately testable.
 
 ### Scope
 
-- add a shared helper for resolving `hasWaitedFor` from optional `eun`
-  parameters
-- switch wrapper classes with `hasWaitedFor` getters to use the helper
-- add focused tests for wait-state resolution
+- add a shared helper for resolving root-jobnet state from the parent unit type
+- switch wrapper and normalized-model root-jobnet detection to use the helper
+- add focused tests for root-jobnet resolution
 
 ### Non-Goals
 
@@ -218,27 +220,28 @@ state rule explicit and separately testable.
 
 #### Use case
 
-Shared wait-state helper extraction.
+Shared root-jobnet helper extraction.
 
 #### Layers affected
 
-- domain: shared wait-state helper and wrapper wait detection cleanup
+- domain: shared root-jobnet helper and root-jobnet detection cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep `hasWaitedFor` behavior identical to existing wrapper behavior.
-- Limit the slice to `eun`-based wait-state resolution only.
+- Keep `isRootJobnet` behavior identical to existing wrapper and normalized
+  behavior.
+- Limit the slice to parent-type-based root-jobnet resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves wait-state from optional `eun` parameters
-- [ ] wrapper `hasWaitedFor` getters delegate to the helper
+- [ ] shared helper resolves root-jobnet state from the parent unit type
+- [ ] wrapper and normalized-model root-jobnet checks delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for `hasWaitedFor` resolution
+- add helper coverage for root-jobnet resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -246,12 +249,12 @@ Shared wait-state helper extraction.
 
 ### Risks
 
-- wait-state helper extraction could overreach into units that use a different
-  waiting semantic
-- wrapper updates could miss a `hasWaitedFor` getter and leave duplication
+- root-jobnet helper extraction could accidentally change how non-jobnet units
+  are treated
+- wrapper and normalized-model code could diverge if one call site is missed
 
 ### Rollback Plan
 
-- restore inline `hasWaitedFor` checks in wrapper classes if behavior changes
+- restore inline root-jobnet checks if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
