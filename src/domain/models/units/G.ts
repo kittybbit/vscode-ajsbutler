@@ -2,6 +2,7 @@ import { WeekSymbol } from "../../values/AjsType";
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
+import { resolveIsPlanning } from "./unitGroupStateHelpers";
 
 /** job group */
 export class G extends UnitEntity {
@@ -92,7 +93,7 @@ export class G extends UnitEntity {
   }
 
   isPlanning() {
-    return this.gty?.value() === "p";
+    return resolveIsPlanning(this.gty?.value());
   }
 
   #judgeWeek = (week: WeekSymbol) => {

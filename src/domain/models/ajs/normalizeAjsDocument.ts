@@ -1,5 +1,6 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
+import { resolveGroupType } from "../units/unitGroupStateHelpers";
 import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
 import { resolveUnitLayout } from "../units/unitLayoutHelpers";
 import { resolveHasSchedule } from "../units/unitScheduleStateHelpers";
@@ -39,8 +40,7 @@ const getUnitType = (
 };
 
 const getGroupType = (unit: Unit): AjsGroupType | undefined => {
-  const gty = getFirstParameterValue(unit, "gty");
-  return gty === "n" || gty === "p" ? gty : undefined;
+  return resolveGroupType(getFirstParameterValue(unit, "gty"));
 };
 
 const getComment = (unit: Unit): string | undefined => {

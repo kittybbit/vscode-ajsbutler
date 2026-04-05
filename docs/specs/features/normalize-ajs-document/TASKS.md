@@ -67,4 +67,6 @@
       root-jobnet detection no longer drift apart
 - [x] Expose shared schedule-state helpers so wrapper and normalized-model
       schedule detection no longer drift apart
+- [x] Expose shared group-state helpers so wrapper and normalized-model `gty`
+      interpretation no longer drift apart
 - [x] Document which semantics intentionally remain in application view adapters
