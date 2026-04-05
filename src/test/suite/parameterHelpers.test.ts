@@ -13,6 +13,7 @@ import {
   buildRootJobnetRuleParameters,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
+  buildTopParameter,
   resolveConnectorControlDefaultRawValue,
   resolveJobnetConnectorControlDefaultRawValue,
   resolveParameter,
@@ -333,6 +334,30 @@ suite("Parameter helpers", () => {
       })),
       [{ rule: 1, value: "en" }],
     );
+  });
+
+  test("builds top parameters through the shared helper", () => {
+    const job = parseTransferJob();
+
+    const derivedTop1 = buildTopParameter(
+      {
+        unit: job,
+        parameter: "top1",
+        index: 1,
+      },
+      (param) => param.defaultRawValue ?? param.rawValue,
+    );
+    assert.strictEqual(derivedTop1, "sav");
+
+    const explicitTop4 = buildTopParameter(
+      {
+        unit: job,
+        parameter: "top4",
+        index: 4,
+      },
+      (param) => param.defaultRawValue ?? param.rawValue,
+    );
+    assert.strictEqual(explicitTop4, "keep");
   });
 
   test("builds sorted rule parameters for simple rule arrays", () => {

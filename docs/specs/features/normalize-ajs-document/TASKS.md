@@ -30,4 +30,6 @@
 - [x] Expose shared helpers for root-jobnet-aware scalar and rule-array
       building so `rg` and `sd` stop assembling root defaults directly in
       `ParameterFactory`
+- [x] Expose a shared helper for `top1` to `top4` parameter building so
+      transfer-operation builder wiring stops repeating in `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

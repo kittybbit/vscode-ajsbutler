@@ -151,28 +151,29 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract reusable root-jobnet-aware parameter builders so `rg` and `sd` stop
-assembling root default behavior directly inside `ParameterFactory`.
+Extract a reusable top-parameter builder so `top1` to `top4` stop repeating
+the same wrapper-aware builder wiring in `ParameterFactory`.
 
 ### Why
 
-`ParameterFactory` still owns the root-jobnet-specific default wiring for `rg`
-and `sd`. Moving that into shared helpers keeps the factory closer to typed
-construction and makes the root-jobnet rule easier to test in one place.
+`ParameterFactory` still contains four nearly identical `top*` builders. The
+default rule is already shared, so the remaining builder wiring can also move
+into one helper without changing behavior.
 
 ### Scope
 
-- add shared helpers for root-jobnet-aware scalar and rule-array builders
-- switch `ParameterFactory` `rg` and `sd` to the shared helpers
-- keep public parameter behavior unchanged while reducing root-default wiring
-- add focused tests for root-jobnet-aware builder behavior
+- add a shared helper for `top1` to `top4` parameter building
+- switch `ParameterFactory` `top1` to `top4` to the shared helper
+- keep public parameter behavior unchanged while reducing repeated builder
+  wiring
+- add focused tests for the shared `top*` builder behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing the root-jobnet default values themselves
+- changing transfer-operation default values
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -186,25 +187,24 @@ construction and makes the root-jobnet rule easier to test in one place.
 
 #### Use case
 
-Root-jobnet parameter builder extraction.
+Top-parameter builder extraction.
 
 #### Layers affected
 
-- domain: root-jobnet parameter helper usage
+- domain: top-parameter helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize root-jobnet default
-  builder wiring.
-- Limit this slice to `rg` and `sd` instead of rewriting the full factory at
-  once.
+- Keep semantic behavior identical and only centralize `top*` builder wiring.
+- Limit this slice to `top1` to `top4` instead of rewriting all
+  job-transfer-related parameters at once.
 
 ### Acceptance Criteria
 
-- [ ] shared helpers exist for root-jobnet-aware scalar and array builders
-- [ ] `ParameterFactory` `rg` and `sd` delegate to the helpers
-- [ ] focused tests cover root-jobnet-aware builder behavior
+- [ ] shared helper exists for `top1` to `top4` parameter building
+- [ ] `ParameterFactory` `top1` to `top4` delegate to the helper
+- [ ] focused tests cover shared `top*` builder behavior
 
 ### Test Plan
 
@@ -215,12 +215,13 @@ Root-jobnet parameter builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change root-jobnet default precedence
-- scalar and array root-jobnet variants could diverge if the shared helper is
-  typed incorrectly
+- helper extraction could accidentally change explicit `top*` precedence over
+  derived defaults
+- the shared helper could drift from `J` / `Cj` typing if its accepted unit
+  shape is too broad
 
 ### Rollback Plan
 
-- revert root-jobnet builder helper usage in `ParameterFactory`
+- revert `top1` to `top4` helper usage in `ParameterFactory`
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
