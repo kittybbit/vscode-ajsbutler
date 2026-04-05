@@ -34,9 +34,9 @@ import {
 import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
 import {
   toAjsDocument,
-  toRootUnitEntities,
+  toRootUnitEntity,
 } from "../../../application/unit-list/unitListDocumentView";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
+import { UnitEntity } from "../../../domain/models/units/UnitEntity";
 import UnitEntityDialog from "../UnitEntityDialog";
 import JobNode from "./nodes/JobNode";
 import JobNetNode from "./nodes/JobNetNode";
@@ -88,7 +88,7 @@ const FlowContents: FC = () => {
   });
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
 
-  const [unitEntities, setUnitEntities] = useState<UnitEntity[]>([]);
+  const [unitEntities, setUnitEntity] = useState<UnitEntity[]>([]);
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const [currentUnitEntity, setCurrentUnitEntity] = useState<UnitEntity>();
   const prevUnitEntityId = useRef<string | undefined>(undefined);
@@ -97,19 +97,19 @@ const FlowContents: FC = () => {
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
   >();
-  const allUnitEntities = useMemo(
+  const allUnitEntity = useMemo(
     () => unitEntities.flatMap((unitEntity) => flattenChildren([unitEntity])),
     [unitEntities],
   );
   const unitEntityByPath = useMemo(
     () =>
       new Map(
-        allUnitEntities.map((unitEntity) => [
+        allUnitEntity.map((unitEntity) => [
           unitEntity.absolutePath,
           unitEntity,
         ]),
       ),
-    [allUnitEntities],
+    [allUnitEntity],
   );
   const unitDefinitionByPath = useMemo(
     () =>
@@ -180,13 +180,13 @@ const FlowContents: FC = () => {
       const nextDocument = data
         ? toAjsDocument(data as UnitListDocumentDto)
         : undefined;
-      const rootUnitEntities = data
-        ? toRootUnitEntities(data as UnitListDocumentDto)
+      const rootUnitEntity = data
+        ? toRootUnitEntity(data as UnitListDocumentDto)
         : [];
       setAjsDocument(() => nextDocument);
-      setUnitEntities(() => rootUnitEntities);
+      setUnitEntity(() => rootUnitEntity);
       setCurrentUnitEntity(() => {
-        const x = rootUnitEntities.flatMap((unitEntity) =>
+        const x = rootUnitEntity.flatMap((unitEntity) =>
           flattenChildren([unitEntity]),
         );
         return prevUnitEntityId.current

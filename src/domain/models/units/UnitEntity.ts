@@ -11,9 +11,19 @@ import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { Ar } from "../parameters";
 import Parameter from "../parameters/Parameter";
-import xxhash from "xxhash-wasm";
 
-const { h64ToString } = await xxhash();
+const hashToString = (value: string): string => {
+  // Use a deterministic sync hash so this module works under CommonJS test compilation.
+  let hash = BigInt("0xcbf29ce484222325");
+  const prime = BigInt("0x100000001b3");
+
+  for (const char of value) {
+    hash ^= BigInt(char.codePointAt(0) ?? 0);
+    hash = BigInt.asUintN(64, hash * prime);
+  }
+
+  return hash.toString(16).padStart(16, "0");
+};
 
 /** abstract class of unit unit for decorator */
 export abstract class UnitEntity {
@@ -32,7 +42,7 @@ export abstract class UnitEntity {
   constructor(unit: Unit, parent?: UnitEntity) {
     this.#unit = unit;
     this.#absolutePath = unit.absolutePath();
-    this.#id = h64ToString(this.#absolutePath);
+    this.#id = hashToString(this.#absolutePath);
     this.#parent = parent;
     this.#children = this.#unit.children
       .map((v) => {

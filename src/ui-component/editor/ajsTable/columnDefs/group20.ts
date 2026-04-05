@@ -1,11 +1,11 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
+import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group20 = (
-  columnHelper: ColumnHelper<UnitEntity>,
+  columnHelper: ColumnHelper<UnitListRowView>,
   ajsTableColumnHeader: typeof ajscolumn.en,
-): GroupColumnDef<UnitEntity, unknown> => {
+): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({
     id: "group20", //Other definition information
     header: ajsTableColumnHeader["group20"],

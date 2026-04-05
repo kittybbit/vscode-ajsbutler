@@ -7,8 +7,38 @@ name: Verify
       - "**"
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      should_verify: ${{ steps.decide.outputs.should_verify }}
+    steps:
+      - id: decide
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName === "pull_request") {
+              core.setOutput("should_verify", "true");
+              return;
+            }
+
+            const head = `${context.repo.owner}:${context.ref.replace("refs/heads/", "")}`;
+            const { data: pulls } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              head,
+            });
+
+            core.setOutput("should_verify", pulls.length === 0 ? "true" : "false");
+
   verify:
+    needs: decide
+    if: needs.decide.outputs.should_verify == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

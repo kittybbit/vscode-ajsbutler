@@ -224,7 +224,7 @@ import {
 import { Cj } from "../units/Cj";
 import { J } from "../units/J";
 import { N } from "../units/N";
-import { UnitEntity } from "../units/UnitEntities";
+import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import Rule from "./Rule";

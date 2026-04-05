@@ -7,7 +7,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
+import { UnitEntity } from "../../../../domain/models/units/UnitEntity";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import {
   CurrentUnitEntityStateType,

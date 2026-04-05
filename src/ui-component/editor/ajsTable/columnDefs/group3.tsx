@@ -1,16 +1,15 @@
 import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntities";
 import { Chip } from "@mui/material";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group3 = (
-  columnHelper: ColumnHelper<UnitEntity>,
+  columnHelper: ColumnHelper<UnitListRowView>,
   ajsTableColumnHeader: typeof ajscolumn.en,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitEntity, unknown> => {
-  const getGroup3View = (row: UnitEntity) =>
+): GroupColumnDef<UnitListRowView, unknown> => {
+  const getGroup3View = (row: UnitListRowView) =>
     rowViewByPath.get(row.absolutePath)?.group3;
 
   return columnHelper.group({

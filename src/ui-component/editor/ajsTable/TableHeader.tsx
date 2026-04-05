@@ -8,7 +8,7 @@ import {
   TableSortLabel,
   Theme,
 } from "@mui/material";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
+import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 
 const styleTableCell: SxProps<Theme> = {
   whiteSpace: "nowrap",
@@ -21,7 +21,7 @@ const styleTableCell: SxProps<Theme> = {
 };
 
 type TableHeaderProps = {
-  headerGroup: HeaderGroup<UnitEntity>;
+  headerGroup: HeaderGroup<UnitListRowView>;
 };
 
 const sortLabelSx: SxProps<Theme> = {

@@ -36,17 +36,16 @@ import {
   buildUnitDefinition,
   UnitDefinitionDialogDto,
 } from "../../../application/unit-definition/buildUnitDefinition";
-import { buildUnitListView } from "../../../application/unit-list/buildUnitListView";
-import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
 import {
-  toAjsDocument,
-  toUnitEntities,
-} from "../../../application/unit-list/unitListDocumentView";
+  buildUnitListView,
+  UnitListRowView,
+} from "../../../application/unit-list/buildUnitListView";
+import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
+import { toAjsDocument } from "../../../application/unit-list/unitListDocumentView";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
 import DisplayColumnSelector from "./DisplayColumnSelector";
 import { AccessorType } from "./columnDefs/common";
 import UnitEntityDialog from "../UnitEntityDialog";
@@ -55,7 +54,7 @@ import Parameter from "../../../domain/models/parameters/Parameter";
 const normalizeValue = (v: unknown) =>
   v instanceof Parameter ? v.value() : String(v);
 const ajsGlobalFilterFn = (
-  row: Row<UnitEntity>,
+  row: Row<UnitListRowView>,
   columnId: string,
   value: string,
   addMeta: (meta: FilterMeta) => void,
@@ -91,29 +90,27 @@ export type DrawerWidthStateType = {
 };
 
 const useChangeDocument = (): [
-  UnitEntity[] | undefined,
+  UnitListRowView[] | undefined,
   AjsDocument | undefined,
   (type: string, data: unknown) => void,
 ] => {
-  const [unitEntities, setUnitEntities] = useState<UnitEntity[]>();
+  const [rowViews, setRowViews] = useState<UnitListRowView[]>();
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const changeDocumentFn = useCallback((type: string, data: unknown) => {
     try {
       const nextDocument = data
         ? toAjsDocument(data as UnitListDocumentDto)
         : undefined;
-      const newUnitEntities = data
-        ? toUnitEntities(data as UnitListDocumentDto)
-        : [];
+      const nextRowViews = nextDocument ? buildUnitListView(nextDocument) : [];
       setAjsDocument(() => nextDocument);
-      setUnitEntities(() => newUnitEntities);
+      setRowViews(() => nextRowViews);
     } catch (error) {
       console.error("Failed to parse data:", error);
       setAjsDocument(() => undefined);
-      setUnitEntities(() => []);
+      setRowViews(() => []);
     }
   }, []);
-  return [unitEntities, ajsDocument, changeDocumentFn];
+  return [rowViews, ajsDocument, changeDocumentFn];
 };
 
 const TableContents = () => {
@@ -132,7 +129,7 @@ const TableContents = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
   const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
-  const [unitEntities, ajsDocument, changeDocumentFn] = useChangeDocument();
+  const [rowViews, ajsDocument, changeDocumentFn] = useChangeDocument();
 
   const unitDefinitionByPath = useMemo(
     () =>
@@ -149,14 +146,9 @@ const TableContents = () => {
   const rowViewByPath = useMemo(
     () =>
       new Map(
-        ajsDocument
-          ? buildUnitListView(ajsDocument).map((rowView) => [
-              rowView.absolutePath,
-              rowView,
-            ])
-          : [],
+        (rowViews ?? []).map((rowView) => [rowView.absolutePath, rowView]),
       ),
-    [ajsDocument],
+    [rowViews],
   );
 
   const openUnitDefinition = useCallback(
@@ -181,12 +173,12 @@ const TableContents = () => {
   const handleJumpRef = useRef<(id: string) => void>(() => {});
   const handleJump = useCallback((id: string) => handleJumpRef.current(id), []);
 
-  const table = useReactTable<UnitEntity>({
+  const table = useReactTable<UnitListRowView>({
     columns: useMemo(
       () => tableColumnDef(lang, openUnitDefinition, handleJump, rowViewByPath),
       [lang, openUnitDefinition, handleJump, rowViewByPath],
     ),
-    data: unitEntities ?? [],
+    data: rowViews ?? [],
     state: {
       globalFilter: globalFilter,
       sorting: sorting,
@@ -281,7 +273,7 @@ const TableContents = () => {
               rowIndex={rowIndex}
             />
             <Typography align="right">
-              {rows.length} of {unitEntities?.length}
+              {rows.length} of {rowViews?.length}
             </Typography>
           </Stack>
         </Stack>

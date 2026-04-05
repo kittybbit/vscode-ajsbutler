@@ -1,6 +1,6 @@
 import { isTySymbol } from "../values/AjsType";
 import { Unit } from "../values/Unit";
-import { UnitEntity } from "../models/units/UnitEntities";
+import { UnitEntity } from "../models/units/UnitEntity";
 import { G } from "../models/units/G";
 import { Cj, Rcj } from "../models/units/Cj";
 import { Cmsj, Rcmsj } from "../models/units/Cmsj";

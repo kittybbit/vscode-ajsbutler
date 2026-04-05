@@ -1,4 +1,4 @@
-import { UnitEntity } from "../../domain/models/units/UnitEntities";
+import { UnitEntity } from "../../domain/models/units/UnitEntity";
 import { flattenChildren, tyFactory } from "../../domain/utils/TyUtils";
 import {
   toAjsDocument,
@@ -6,12 +6,11 @@ import {
   toRootUnits,
 } from "./unitListDocument";
 
-export const toRootUnitEntities = (
-  document: UnitListDocumentDto,
-): UnitEntity[] => toRootUnits(document).map((rootUnit) => tyFactory(rootUnit));
+export const toRootUnitEntity = (document: UnitListDocumentDto): UnitEntity[] =>
+  toRootUnits(document).map((rootUnit) => tyFactory(rootUnit));
 
-export const toUnitEntities = (document: UnitListDocumentDto): UnitEntity[] =>
-  toRootUnitEntities(document).flatMap((rootUnitEntity) =>
+export const toUnitEntity = (document: UnitListDocumentDto): UnitEntity[] =>
+  toRootUnitEntity(document).flatMap((rootUnitEntity) =>
     flattenChildren([rootUnitEntity]),
   );
 

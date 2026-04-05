@@ -1,6 +1,6 @@
 import { Node, Edge, MarkerType } from "@xyflow/react";
 import { TySymbol } from "../../../domain/values/AjsType";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
+import { UnitEntity } from "../../../domain/models/units/UnitEntity";
 import { Theme } from "@mui/material";
 
 // convert ty to ReactFlow type.

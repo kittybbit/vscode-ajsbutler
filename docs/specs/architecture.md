@@ -54,7 +54,7 @@ Migration should be incremental and use-case driven.
 - the evaluator-to-`Unit[]` mapping is still the raw seam
 - normalization is now the next stable seam for application-facing use cases
 - unit-list table rendering now depends on an application row/view adapter
-  instead of direct wrapper accessors
+  end to end instead of direct wrapper accessors or `UnitEntity` row objects
 - the remaining migration work is to move more non-table use cases from raw or
   wrapper-oriented structures onto the normalized model
 

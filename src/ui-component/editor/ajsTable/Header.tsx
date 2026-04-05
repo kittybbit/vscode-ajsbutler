@@ -16,9 +16,9 @@ import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { Table } from "@tanstack/table-core";
+import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import TableMenu from "./TableMenu";
 import SearchBox from "./SearchBox";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
 import { DrawerWidthStateType, TableMenuStateType } from "./TableContents";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../domain/services/i18n/nls";
@@ -26,7 +26,7 @@ import { OPERATION, SAVE } from "../../../shared/webviewEvents";
 import { exportCsvView } from "./exportCsvView";
 
 type HeaderProps = {
-  table: Table<UnitEntity>;
+  table: Table<UnitListRowView>;
   tableMenuState: TableMenuStateType;
   drawerWidthState: DrawerWidthStateType;
 };

@@ -1,5 +1,5 @@
 import { ParamSymbol } from "../../values/AjsType";
-import { UnitEntity } from "../units/UnitEntities";
+import { UnitEntity } from "../units/UnitEntity";
 import { ParamInternal } from "./parameter.types";
 
 abstract class Parameter {

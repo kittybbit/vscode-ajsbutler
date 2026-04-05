@@ -1,5 +1,5 @@
 import { ParamSymbol } from '../../values/AjsType';
-import { UnitEntity } from '../units/UnitEntities';
+import { UnitEntity } from '../units/UnitEntity';
 
 export type ParamBase = {
     'unit': UnitEntity;

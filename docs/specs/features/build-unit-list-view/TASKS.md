@@ -11,9 +11,9 @@
 
 ## Remaining Follow-up
 
-- [ ] Replace `UnitEntity` as the primary table row type in
+- [x] Replace `UnitEntity` as the primary table row type in
       presentation
-- [ ] Update CSV export and table filtering paths to consume
+- [x] Update CSV export and table filtering paths to consume
       application-facing row data directly
 - [ ] Record a current manual smoke-test result for desktop and
       web viewers in docs

@@ -37,8 +37,8 @@ wrappers.
 
 - table view still renders the same visible rows and unit-ordering for the same
   input document
-- dialog opening, jump behavior, and CSV export continue to work from the new
-  row/view adapter path
+- dialog opening, jump behavior, filtering, and CSV export continue to work
+  from the application row/view adapter path
 - desktop and web viewers consume the same row/view model shape
 
 ## Risks Or Edge Cases

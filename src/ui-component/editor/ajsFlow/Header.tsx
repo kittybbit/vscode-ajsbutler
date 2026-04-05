@@ -17,7 +17,7 @@ import {
 } from "./FlowContents";
 import { localeMap } from "../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
-import { UnitEntity } from "../../../domain/models/units/UnitEntities";
+import { UnitEntity } from "../../../domain/models/units/UnitEntity";
 import { N } from "../../../domain/models/units/N";
 
 type HeaderProps = {
