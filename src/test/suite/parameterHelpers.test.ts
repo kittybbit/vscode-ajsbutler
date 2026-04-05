@@ -7,6 +7,7 @@ import { N } from "../../domain/models/units/N";
 import { Ln, Sd, Wc } from "../../domain/models/parameters";
 import {
   adjustToSdItemCount,
+  buildDefaultableParameter,
   buildOptionalParameterArray,
   buildInheritedParameter,
   buildInheritedParameterArray,
@@ -426,6 +427,39 @@ suite("Parameter helpers", () => {
       (param) => param.rawValue ?? param.defaultRawValue,
     );
     assert.strictEqual(missingEnv, undefined);
+  });
+
+  test("builds defaultable scalar parameters with explicit, supplied, and missing defaults", () => {
+    const { jobnet } = parseJobnets();
+
+    const explicitNcl = buildDefaultableParameter(
+      {
+        unit: jobnet,
+        parameter: "ncl",
+        defaultRawValue: "y",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.strictEqual(explicitNcl, "y");
+
+    const suppliedNcs = buildDefaultableParameter(
+      {
+        unit: jobnet,
+        parameter: "ncs",
+        defaultRawValue: "n",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.strictEqual(suppliedNcs, "n");
+
+    const missingNcex = buildDefaultableParameter(
+      {
+        unit: jobnet,
+        parameter: "ncex",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.strictEqual(missingNcex, undefined);
   });
 
   test("builds required parameters and keeps the missing-parameter error", () => {

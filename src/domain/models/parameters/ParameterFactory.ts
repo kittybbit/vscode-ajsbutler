@@ -227,6 +227,7 @@ import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
+  buildDefaultableParameter,
   buildOptionalParameterArray,
   buildOptionalParameter,
   buildRootJobnetParameter,
@@ -1593,12 +1594,14 @@ export class ParamFactory {
     );
   }
   static ncex(unit: UnitEntity, defaultRawValue?: string) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ncex",
-      defaultRawValue: defaultRawValue,
-    });
-    return param ? new Ncex(param) : undefined;
+    return buildDefaultableParameter(
+      {
+        unit: unit,
+        parameter: "ncex",
+        defaultRawValue: defaultRawValue,
+      },
+      (param) => new Ncex(param),
+    );
   }
   static nchn(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -1610,12 +1613,14 @@ export class ParamFactory {
     );
   }
   static ncl(unit: UnitEntity, defaultRawValue?: string) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ncl",
-      defaultRawValue: defaultRawValue,
-    });
-    return param ? new Ncl(param) : undefined;
+    return buildDefaultableParameter(
+      {
+        unit: unit,
+        parameter: "ncl",
+        defaultRawValue: defaultRawValue,
+      },
+      (param) => new Ncl(param),
+    );
   }
   static ncn(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -1636,12 +1641,14 @@ export class ParamFactory {
     );
   }
   static ncs(unit: UnitEntity, defaultRawValue?: string) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ncs",
-      defaultRawValue: defaultRawValue,
-    });
-    return param ? new Ncs(param) : undefined;
+    return buildDefaultableParameter(
+      {
+        unit: unit,
+        parameter: "ncs",
+        defaultRawValue: defaultRawValue,
+      },
+      (param) => new Ncs(param),
+    );
   }
   static ncsv(unit: UnitEntity) {
     return buildOptionalParameter(
