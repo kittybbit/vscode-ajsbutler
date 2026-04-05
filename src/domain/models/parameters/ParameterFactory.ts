@@ -227,6 +227,7 @@ import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
+  buildSdAlignedDefaultRuleParameters,
   buildSdAlignedEmptyRuleParameters,
   buildDefaultableParameter,
   buildOptionalParameterArray,
@@ -237,7 +238,6 @@ import {
   buildTopParameter,
   buildInheritedParameter,
   buildInheritedParameterArray,
-  buildSdAlignedParameters,
   buildSortedRuleParameters,
   resolveParameter,
   resolveParameterArray,
@@ -289,23 +289,15 @@ export class ParamFactory {
     );
   }
   static cftd(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "cftd",
-      defaultRawValue: DEFAULTS.Cftd,
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedDefaultRuleParameters(
+      {
+        unit: unit,
+        parameter: "cftd",
+        defaultRawValue: DEFAULTS.Cftd,
+        sd: unit.params("sd"),
+        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Cftd}`,
+      },
       (param) => new Cftd(param),
-      (rule) =>
-        new Cftd({
-          unit: unit,
-          parameter: "cftd",
-          inherited: false,
-          defaultRawValue: `${rule},${DEFAULTS.Cftd}`,
-          position: -1,
-        }),
     );
   }
   static cgs(unit: UnitEntity) {
@@ -2007,23 +1999,15 @@ export class ParamFactory {
     );
   }
   static shd(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "shd",
-      defaultRawValue: DEFAULTS.Shd,
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedDefaultRuleParameters(
+      {
+        unit: unit,
+        parameter: "shd",
+        defaultRawValue: DEFAULTS.Shd,
+        sd: unit.params("sd"),
+        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Shd}`,
+      },
       (param) => new Shd(param),
-      (rule) =>
-        new Shd({
-          unit: unit,
-          parameter: "shd",
-          inherited: false,
-          defaultRawValue: `${rule},${DEFAULTS.Shd}`,
-          position: -1,
-        }),
     );
   }
   static si(unit: UnitEntity) {
@@ -2055,23 +2039,15 @@ export class ParamFactory {
     );
   }
   static st(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "st",
-      defaultRawValue: DEFAULTS.St,
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedDefaultRuleParameters(
+      {
+        unit: unit,
+        parameter: "st",
+        defaultRawValue: DEFAULTS.St,
+        sd: unit.params("sd"),
+        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.St}`,
+      },
       (param) => new St(param),
-      (rule) =>
-        new St({
-          unit: unit,
-          parameter: "st",
-          inherited: false,
-          defaultRawValue: `${rule},${DEFAULTS.St}`,
-          position: -1,
-        }),
     );
   }
   static stt(unit: UnitEntity) {
@@ -2289,23 +2265,15 @@ export class ParamFactory {
     return param ? new Unit(param) : undefined;
   }
   static wc(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "wc",
-      defaultRawValue: DEFAULTS.Wc,
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedDefaultRuleParameters(
+      {
+        unit: unit,
+        parameter: "wc",
+        defaultRawValue: DEFAULTS.Wc,
+        sd: unit.params("sd"),
+        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Wc}`,
+      },
       (param) => new Wc(param),
-      (rule) =>
-        new Wc({
-          unit: unit,
-          parameter: "wc",
-          inherited: false,
-          defaultRawValue: `${rule},${DEFAULTS.Wc}`,
-          position: -1,
-        }),
     );
   }
   static wkp(unit: UnitEntity) {
@@ -2318,23 +2286,15 @@ export class ParamFactory {
     );
   }
   static wt(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "wt",
-      defaultRawValue: DEFAULTS.Wt,
-    });
-    return buildSdAlignedParameters(
-      params,
-      unit.params("sd"),
+    return buildSdAlignedDefaultRuleParameters(
+      {
+        unit: unit,
+        parameter: "wt",
+        defaultRawValue: DEFAULTS.Wt,
+        sd: unit.params("sd"),
+        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Wt}`,
+      },
       (param) => new Wt(param),
-      (rule) =>
-        new Wt({
-          unit: unit,
-          parameter: "wt",
-          inherited: false,
-          defaultRawValue: `${rule},${DEFAULTS.Wt}`,
-          position: -1,
-        }),
     );
   }
   static wth(unit: UnitEntity) {
