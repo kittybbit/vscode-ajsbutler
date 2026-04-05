@@ -11,6 +11,7 @@ import {
   findPreviousRelations,
   findPreviousUnits,
 } from "./unitRelationHelpers";
+import { resolveUnitLayout } from "./unitLayoutHelpers";
 import { resolveIsRecovery } from "./unitTypeHelpers";
 
 const hashToString = (value: string): string => {
@@ -142,13 +143,12 @@ export abstract class UnitEntity {
    * V=48＋96y -> y=(V-48)/96
    */
   get hv() {
-    const el = this.#getMyElFn();
-    return el && el.hv
-      ? (() => {
-          const [h, v] = el.hv.split("+").filter((v) => v !== "");
-          return { h: Number(h), v: Number(v) };
-        })()
-      : { h: 0, v: 0 };
+    return resolveUnitLayout(
+      this.name,
+      (this.parent?.el ?? [])
+        .map((el) => el.value())
+        .filter((value): value is string => value !== undefined),
+    );
   }
   /** key of unit difinition parameters */
   get isRecovery() {
@@ -162,11 +162,6 @@ export abstract class UnitEntity {
       return this.parent.depth + 1;
     }
     return 0;
-  }
-
-  /** my el paramater */
-  #getMyElFn() {
-    return this.parent?.el?.find((el) => el.name === this.name);
   }
   #defineParamsFn(): ParamSymbol[] {
     let proto = Object.getPrototypeOf(this);

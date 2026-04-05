@@ -50,6 +50,10 @@ suite("Normalize AJS Document", () => {
     assert.strictEqual(root.children[0].isRecovery, false);
     assert.strictEqual(root.children[0].name, "jobnet");
     assert.strictEqual(root.children[0].isRootJobnet, true);
+    assert.deepStrictEqual(root.children[0].children[0].layout, {
+      h: 240,
+      v: 144,
+    });
     assert.strictEqual(root.children[0].children[2].isRecovery, undefined);
     assert.deepStrictEqual(
       root.children[0].children
