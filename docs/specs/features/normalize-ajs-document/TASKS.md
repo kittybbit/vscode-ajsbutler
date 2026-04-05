@@ -32,4 +32,6 @@
       `ParameterFactory`
 - [x] Expose a shared helper for `top1` to `top4` parameter building so
       transfer-operation builder wiring stops repeating in `ParameterFactory`
+- [x] Expose a shared helper for required scalar parameters so `ty` stops
+      handling the required-or-throw path inline in `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

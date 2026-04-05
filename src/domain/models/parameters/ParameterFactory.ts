@@ -229,6 +229,7 @@ import { ParamBase } from "./parameter.types";
 import {
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
+  buildRequiredParameter,
   buildTopParameter,
   buildInheritedParameter,
   buildInheritedParameterArray,
@@ -236,7 +237,6 @@ import {
   buildSortedRuleParameters,
   resolveParameter,
   resolveParameterArray,
-  resolveTopDefaultRawValue,
 } from "./parameterHelpers";
 
 type ParamArg = ParamBase & {
@@ -1903,15 +1903,14 @@ export class ParamFactory {
     return param ? new Ts4(param) : undefined;
   }
   static ty(unit: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "ty",
-    });
-    if (param) {
-      return new Ty(param);
-    } else {
-      throw new Error("Ty parameter should be specified.");
-    }
+    return buildRequiredParameter(
+      {
+        unit: unit,
+        parameter: "ty",
+      },
+      (param) => new Ty(param),
+      () => "Ty parameter should be specified.",
+    );
   }
   static uem(unit: UnitEntity) {
     const param = this.#checkAndGet({
