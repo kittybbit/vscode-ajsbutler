@@ -6,7 +6,7 @@ import {
 } from "../../values/unitParameterLookupHelpers";
 import { decodeEncodedString } from "../parameters/encodedStringHelpers";
 import {
-  normalizeUnitEdgeType,
+  normalizeAjsDependencyType,
   parseUnitEdge,
 } from "../parameters/unitEdgeHelpers";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
@@ -89,7 +89,7 @@ const parseDependency = (
   return {
     sourceName: relation.sourceName,
     targetName: relation.targetName,
-    type: normalizeUnitEdgeType(relation.relationType),
+    type: normalizeAjsDependencyType(relation.relationType),
   };
 };
 

@@ -34,6 +34,6 @@ export const parseUnitEdge = (
   };
 };
 
-export const normalizeUnitEdgeType = (
+export const normalizeAjsDependencyType = (
   relationType: string | undefined,
 ): AjsDependencyType => (relationType === "con" ? "con" : "seq");
