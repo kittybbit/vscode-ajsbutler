@@ -54,9 +54,7 @@ const getLayout = (unit: Unit): { h: number; v: number } => {
 
   return resolveUnitLayout(
     unit.name,
-    unit.parent.parameters
-      .filter((parameter) => parameter.key === "el")
-      .map((parameter) => parameter.value),
+    findUnitParameterValues(unit.parent, "el"),
   );
 };
 
