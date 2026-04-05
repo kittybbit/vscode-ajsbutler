@@ -8,6 +8,14 @@ export type ParamLookupArg = ParamBase & {
   defaultRawValue?: string | string[];
 };
 
+type TopParameterIndex = 1 | 2 | 3 | 4;
+
+type TopParameterSource = {
+  [key in `ts${TopParameterIndex}`]?: unknown;
+} & {
+  [key in `td${TopParameterIndex}`]?: unknown;
+};
+
 const rootJobnetDefaultByParameter: Partial<Record<ParamSymbol, string>> = {
   rg: DEFAULTS.Rg,
   sd: DEFAULTS.Sd,
@@ -21,6 +29,22 @@ export const resolveRootJobnetDefaultRawValue = (
   isRootJobnet: boolean,
 ): string | undefined =>
   isRootJobnet ? rootJobnetDefaultByParameter[parameter] : undefined;
+
+export const resolveTopDefaultRawValue = (
+  unit: TopParameterSource,
+  index: TopParameterIndex,
+): string => {
+  const hasTransferSource = Boolean(unit[`ts${index}`]);
+  const hasTransferDestination = Boolean(unit[`td${index}`]);
+
+  if (hasTransferSource && hasTransferDestination) {
+    return "sav";
+  }
+  if (hasTransferSource) {
+    return "del";
+  }
+  return "";
+};
 
 /** Create a parameter value map with rule numbers as keys. */
 const mapByRule = <T extends Rule>(params: Array<T> | undefined) =>

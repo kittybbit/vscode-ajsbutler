@@ -36,13 +36,16 @@ This file is the high-level index for the per-feature plan structure in
 - normalized AJS helpers now expose direct parameter lookup, repeated-value
   lookup, and first-ancestor inherited parameter lookup so application slices
   stop repeating wrapper-era parameter traversal logic.
+- shared parameter helpers now expose `top1` to `top4` transfer-operation
+  default derivation so wrapper-only fallback rules are testable outside
+  `ParameterFactory`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
 
 1. Continue moving the remaining wrapper-derived parameter semantics that still
-   require rule-aware defaults or typed wrapper interpretation out of
-   `ParameterFactory` in small slices.
+   require typed wrapper interpretation or other unit-type-specific defaults
+   out of `ParameterFactory` in small slices.
 2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 3. Keep roadmap and feature task files aligned with merged slices so remaining
@@ -140,29 +143,30 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable builder for SD-aligned rule parameters so the remaining
-rule-aware parameter semantics stop repeating the same mapping pattern.
+Extract a reusable helper for `top1` to `top4` default derivation so transfer
+operation semantics stop living only inside `ParameterFactory`.
 
 ### Why
 
-`ParameterFactory` still repeats the same "lookup -> class mapping -> sort ->
-SD alignment -> rule fallback" pattern across multiple parameter families.
-Collapsing that pattern into one helper reduces duplication before deeper
-semantic moves.
+`top1` to `top4` still derive their fallback behavior from wrapper getters
+inside `ParameterFactory`. Moving that transfer-operation default rule into a
+shared helper keeps the semantics explicit and easier to test before broader
+wrapper cleanup continues.
 
 ### Scope
 
-- add a helper that builds and aligns SD-based rule parameters
-- switch repeated `ParameterFactory` SD-aligned families to the shared helper
-- keep public parameter behavior unchanged while reducing duplication
-- add focused tests for the shared builder behavior
+- add a helper that derives `top1` to `top4` default raw values from `ts*` and
+  `td*`
+- switch `ParameterFactory` `top1` to `top4` to the shared helper
+- keep public parameter behavior unchanged while reducing wrapper-only logic
+- add focused tests for transfer-operation default derivation
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing rule semantics or fallback values
+- changing transfer-operation semantics or fallback values
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -176,25 +180,25 @@ semantic moves.
 
 #### Use case
 
-SD-aligned parameter builder extraction.
+Transfer-operation default helper extraction.
 
 #### Layers affected
 
-- domain: SD-aligned parameter helper usage
+- domain: transfer-operation parameter helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize the repeated builder
-  pattern.
-- Limit this slice to SD-aligned parameter families and leave broader
-  rule-specific semantics for later work.
+- Keep semantic behavior identical and only centralize the existing `top*`
+  fallback rule.
+- Limit this slice to `top1` to `top4` and leave broader wrapper reduction for
+  later work.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for SD-aligned parameter building
-- [ ] repeated SD-aligned families in `ParameterFactory` delegate to the helper
-- [ ] focused tests cover the shared builder behavior
+- [ ] shared helper exists for `top1` to `top4` default derivation
+- [ ] `ParameterFactory` `top1` to `top4` delegate to the helper
+- [ ] focused tests cover the transfer-operation default behavior
 
 ### Test Plan
 
@@ -205,12 +209,13 @@ SD-aligned parameter builder extraction.
 
 ### Risks
 
-- builder extraction could accidentally change rule sorting or fallback
-  generation order
-- one parameter family could diverge if its constructor semantics differ from
-  the others
+- helper extraction could accidentally change when `sav`, `del`, or empty
+  fallback is produced
+- transfer-operation semantics might rely on wrapper getter truthiness in ways
+  that are easy to misread
 
 ### Rollback Plan
 
-- revert the SD-aligned builder helper usage in `ParameterFactory`
-- keep broader rule-aware semantic moves separate from this extraction step
+- revert the `top1` to `top4` helper usage in `ParameterFactory`
+- keep broader wrapper-derived semantic moves separate from this extraction
+  step

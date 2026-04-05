@@ -232,6 +232,7 @@ import {
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
+  resolveTopDefaultRawValue,
 } from "./parameterHelpers";
 import Rule from "./Rule";
 
@@ -1828,18 +1829,11 @@ export class ParamFactory {
     });
     return param ? new Tmitv(param) : undefined;
   }
-  static #top(unit: J | Cj, i: 1 | 2 | 3 | 4): string {
-    return unit[`ts${i}`] && this[`td${i}`]
-      ? "sav"
-      : this[`ts${i}`] && !this[`td${i}`]
-        ? "del"
-        : "";
-  }
   static top1(unit: J | Cj) {
     const param = this.#checkAndGet({
       unit: unit,
       parameter: "top1",
-      defaultRawValue: this.#top(unit, 1),
+      defaultRawValue: resolveTopDefaultRawValue(unit, 1),
     });
     return param ? new Top1(param) : undefined;
   }
@@ -1847,7 +1841,7 @@ export class ParamFactory {
     const param = this.#checkAndGet({
       unit: unit,
       parameter: "top2",
-      defaultRawValue: this.#top(unit, 2),
+      defaultRawValue: resolveTopDefaultRawValue(unit, 2),
     });
     return param ? new Top2(param) : undefined;
   }
@@ -1855,7 +1849,7 @@ export class ParamFactory {
     const param = this.#checkAndGet({
       unit: unit,
       parameter: "top3",
-      defaultRawValue: this.#top(unit, 3),
+      defaultRawValue: resolveTopDefaultRawValue(unit, 3),
     });
     return param ? new Top3(param) : undefined;
   }
@@ -1863,7 +1857,7 @@ export class ParamFactory {
     const param = this.#checkAndGet({
       unit: unit,
       parameter: "top4",
-      defaultRawValue: this.#top(unit, 4),
+      defaultRawValue: resolveTopDefaultRawValue(unit, 4),
     });
     return param ? new Top4(param) : undefined;
   }

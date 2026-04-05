@@ -17,4 +17,7 @@
 - [x] Expose normalized helpers for direct parameter lookup, repeated-value
       lookup, and first-ancestor inherited parameter lookup so application
       slices stop repeating wrapper-era parameter traversal logic
+- [x] Expose shared helpers for reusable transfer-operation defaults so
+      `top1` to `top4` fallback behavior stops living only in
+      `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters
