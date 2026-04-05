@@ -28,7 +28,8 @@ For non-trivial changes:
 4. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
 5. document assumptions explicitly
 6. implement in small vertical slices
-7. run the most relevant checks before finishing
+7. before `git push`, confirm `npm run qlty`, `npm test`, and `npm run build` all pass
+8. run any additional task-specific checks before finishing
 
 ## Document Roles
 

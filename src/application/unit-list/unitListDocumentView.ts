@@ -6,9 +6,8 @@ import {
   toRootUnits,
 } from "./unitListDocument";
 
-export const toRootUnitEntity = (
-  document: UnitListDocumentDto,
-): UnitEntity[] => toRootUnits(document).map((rootUnit) => tyFactory(rootUnit));
+export const toRootUnitEntity = (document: UnitListDocumentDto): UnitEntity[] =>
+  toRootUnits(document).map((rootUnit) => tyFactory(rootUnit));
 
 export const toUnitEntity = (document: UnitListDocumentDto): UnitEntity[] =>
   toRootUnitEntity(document).flatMap((rootUnitEntity) =>

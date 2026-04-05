@@ -101,9 +101,7 @@ const useChangeDocument = (): [
       const nextDocument = data
         ? toAjsDocument(data as UnitListDocumentDto)
         : undefined;
-      const nextRowViews = nextDocument
-        ? buildUnitListView(nextDocument)
-        : [];
+      const nextRowViews = nextDocument ? buildUnitListView(nextDocument) : [];
       setAjsDocument(() => nextDocument);
       setRowViews(() => nextRowViews);
     } catch (error) {

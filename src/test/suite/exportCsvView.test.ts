@@ -58,6 +58,9 @@ suite("Export CSV View", () => {
 
     const csv = exportCsvView(table);
 
-    assert.strictEqual(csv, '"#","Command","Flags"\n"1","line1\nline2","one\ntwo"');
+    assert.strictEqual(
+      csv,
+      '"#","Command","Flags"\n"1","line1\nline2","one\ntwo"',
+    );
   });
 });

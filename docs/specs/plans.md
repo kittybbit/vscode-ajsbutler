@@ -56,8 +56,10 @@ This file is the high-level index for the per-feature plan structure in
    - `TASKS.md` for execution items
 5. Fill in assumptions explicitly when requirements are ambiguous.
 6. Implement only after acceptance criteria are clear.
-7. Run build, quality checks, and relevant tests.
-8. Summarize compatibility risks and follow-up work.
+7. Before `git push`, confirm `npm run qlty`, `npm test`, and
+   `npm run build` all pass.
+8. Run any additional task-specific checks such as `npm run test:web`.
+9. Summarize compatibility risks and follow-up work.
 
 ## Task Template
 
@@ -83,6 +85,8 @@ This file is the high-level index for the per-feature plan structure in
 - Keep desktop and web extension behavior intact.
 - Avoid direct `vscode` dependency in domain.
 - Start implementation from a dedicated git branch, not directly on `main`.
+- Do not `git push` until `npm run qlty`, `npm test`, and `npm run build`
+  have all passed locally.
 
 ### Design
 
@@ -107,6 +111,8 @@ This file is the high-level index for the per-feature plan structure in
 - [ ] build passes
 - [ ] quality/lint passes
 - [ ] tests updated
+- [ ] `git push` happens only after local `npm run qlty`, `npm test`, and
+      `npm run build` pass
 - [ ] desktop behavior preserved
 - [ ] web behavior preserved if affected
 
