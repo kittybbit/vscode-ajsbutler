@@ -2,12 +2,12 @@ import { ParamSymbol, TySymbol } from "../../values/AjsType";
 
 export type AjsUnitType = TySymbol;
 export type AjsGroupType = "n" | "p";
-export type AjsDependencyType = "seq" | "con";
+export type AjsRelationType = "seq" | "con";
 
-export type AjsDependency = {
+export type AjsRelation = {
   sourceUnitId: string;
   targetUnitId: string;
-  type: AjsDependencyType;
+  type: AjsRelationType;
 };
 
 export type AjsNormalizationWarning = {
@@ -39,7 +39,7 @@ export type AjsUnit = {
     v: number;
   };
   parameters: Array<{ key: string; value: string; position?: number }>;
-  dependencies: AjsDependency[];
+  relations: AjsRelation[];
   children: AjsUnit[];
 };
 

@@ -6,7 +6,7 @@ import {
 } from "../../values/unitParameterLookupHelpers";
 import { decodeEncodedString } from "../parameters/encodedStringHelpers";
 import {
-  normalizeAjsDependencyType,
+  normalizeAjsRelationType,
   parseUnitEdge,
 } from "../parameters/unitEdgeHelpers";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
@@ -17,10 +17,10 @@ import { resolveHasSchedule } from "../units/unitScheduleStateHelpers";
 import { resolveHasWaitedFor } from "../units/unitWaitStateHelpers";
 import { resolveIsRecovery } from "../units/unitTypeHelpers";
 import {
-  AjsDependency,
   AjsDocument,
   AjsGroupType,
   AjsNormalizationWarning,
+  AjsRelation,
   AjsUnit,
 } from "./AjsDocument";
 
@@ -76,10 +76,10 @@ const getIsRootJobnet = (unit: Unit, unitType: TySymbol): boolean =>
     ? resolveIsRootJobnet(findUnitParameterValue(unit.parent, "ty"))
     : false;
 
-const parseDependency = (
+const parseRelation = (
   parameterValue: string,
 ):
-  | { sourceName: string; targetName: string; type: AjsDependency["type"] }
+  | { sourceName: string; targetName: string; type: AjsRelation["type"] }
   | undefined => {
   const relation = parseUnitEdge(parameterValue);
   if (!relation) {
@@ -89,7 +89,7 @@ const parseDependency = (
   return {
     sourceName: relation.sourceName,
     targetName: relation.targetName,
-    type: normalizeAjsDependencyType(relation.relationType),
+    type: normalizeAjsRelationType(relation.relationType),
   };
 };
 
@@ -100,10 +100,10 @@ const normalizeUnit = (
   const unitType = getUnitType(unit, warnings);
   const children = unit.children.map((child) => normalizeUnit(child, warnings));
   const childByName = new Map(children.map((child) => [child.name, child]));
-  const dependencies: AjsDependency[] = findUnitParameterValues(unit, "ar")
-    .map(parseDependency)
-    .flatMap((dependency) => {
-      if (!dependency) {
+  const relations: AjsRelation[] = findUnitParameterValues(unit, "ar")
+    .map(parseRelation)
+    .flatMap((relation) => {
+      if (!relation) {
         warnings.push({
           code: "invalid-dependency",
           message: `Dependency could not be parsed for ${unit.absolutePath()}.`,
@@ -112,8 +112,8 @@ const normalizeUnit = (
         return [];
       }
 
-      const sourceUnit = childByName.get(dependency.sourceName);
-      const targetUnit = childByName.get(dependency.targetName);
+      const sourceUnit = childByName.get(relation.sourceName);
+      const targetUnit = childByName.get(relation.targetName);
       if (!sourceUnit || !targetUnit) {
         warnings.push({
           code: "missing-dependency-target",
@@ -127,7 +127,7 @@ const normalizeUnit = (
         {
           sourceUnitId: sourceUnit.id,
           targetUnitId: targetUnit.id,
-          type: dependency.type,
+          type: relation.type,
         },
       ];
     });
@@ -152,7 +152,7 @@ const normalizeUnit = (
     hasWaitedFor: getHasWaitedFor(unit),
     layout: getLayout(unit),
     parameters: unit.parameters.map((parameter) => ({ ...parameter })),
-    dependencies,
+    relations,
     children,
   };
 };

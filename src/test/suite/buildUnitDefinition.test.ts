@@ -25,7 +25,7 @@ const unit: AjsUnit = {
     { key: "ty", value: "j" },
     { key: "cm", value: "example" },
   ],
-  dependencies: [],
+  relations: [],
   children: [],
 };
 

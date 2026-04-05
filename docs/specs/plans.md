@@ -99,15 +99,16 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model mapping now reuses the shared encoded-string helper so
   wrapper and normalized-model comment decoding fully share the same quoting
   and escape rules.
-- normalized-model mapping now reuses the shared dependency parsing helper so
-  wrapper and normalized-model `ar` interpretation fully share the same source,
-  target, and relation parsing rule.
+- normalized-model mapping now reuses the shared unit-relation parsing helper
+  so wrapper and normalized-model `ar` interpretation fully share the same
+  source, target, and relation parsing rule.
 - normalized-model mapping now reuses shared raw unit-parameter lookup helpers
   so simple key/value filtering no longer lives only inside normalization.
 - normalized-model layout mapping now reuses shared raw unit-parameter lookup
   helpers so parent `el` lookup no longer filters parameters inline.
-- normalized-model edge mapping now reuses shared unit-edge type normalization
-  helpers so relation-type coercion no longer lives only inside normalization.
+- normalized-model relation mapping now reuses shared relation-type
+  normalization helpers so relation-type coercion no longer lives only inside
+  normalization.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -213,8 +214,8 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Reuse shared unit-edge type normalization helpers in normalized mapping so edge
-type coercion is not reimplemented inline.
+Reuse shared relation-type normalization helpers in normalized mapping so
+relation-type coercion is not reimplemented inline.
 
 ### Why
 

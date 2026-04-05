@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import {
-  normalizeAjsDependencyType,
+  normalizeAjsRelationType,
   parseUnitEdge,
 } from "../../domain/models/parameters/unitEdgeHelpers";
 
@@ -40,9 +40,9 @@ suite("Unit Edge Helpers", () => {
   });
 
   test("normalizes unit edge types for the normalized model", () => {
-    assert.strictEqual(normalizeAjsDependencyType("con"), "con");
-    assert.strictEqual(normalizeAjsDependencyType("seq"), "seq");
-    assert.strictEqual(normalizeAjsDependencyType(undefined), "seq");
-    assert.strictEqual(normalizeAjsDependencyType("unexpected"), "seq");
+    assert.strictEqual(normalizeAjsRelationType("con"), "con");
+    assert.strictEqual(normalizeAjsRelationType("seq"), "seq");
+    assert.strictEqual(normalizeAjsRelationType(undefined), "seq");
+    assert.strictEqual(normalizeAjsRelationType("unexpected"), "seq");
   });
 });

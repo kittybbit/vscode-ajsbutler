@@ -1,4 +1,4 @@
-import { AjsDependencyType } from "../ajs/AjsDocument";
+import { AjsRelationType } from "../ajs/AjsDocument";
 
 export type ParsedUnitEdge = {
   sourceName: string;
@@ -34,6 +34,6 @@ export const parseUnitEdge = (
   };
 };
 
-export const normalizeAjsDependencyType = (
+export const normalizeAjsRelationType = (
   relationType: string | undefined,
-): AjsDependencyType => (relationType === "con" ? "con" : "seq");
+): AjsRelationType => (relationType === "con" ? "con" : "seq");
