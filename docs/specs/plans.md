@@ -62,13 +62,17 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now expose sd-aligned default-rule builders so
   `cftd`, `shd`, `st`, `wc`, and `wt` stop constructing
   `${rule},<default>` fallbacks inline in `ParameterFactory`.
+- `ParameterFactory` no longer keeps private `#checkAndGet` and
+  `#checkAndGetArray` wrappers now that `ln` and `unit` delegate to shared
+  helper paths directly.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
 
 1. Continue moving the remaining wrapper-derived parameter semantics that still
    require typed wrapper interpretation or other unit-type-specific defaults
-   out of `ParameterFactory` in small slices.
+   out of `ParameterFactory` in small slices, with priority on any helpers
+   still coupled to wrapper-specific `params(...)` calls.
 2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 3. Keep roadmap and feature task files aligned with merged slices so remaining
@@ -166,31 +170,28 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable sd-aligned default-rule builder so `cftd`, `shd`, `st`,
-`wc`, and `wt` stop repeating the same `${rule},<default>` fallback
-construction in `ParameterFactory`.
+Identify the next small slice of wrapper-derived parameter semantics that can
+move out of `ParameterFactory` after removal of the final private
+`#checkAndGet` wrappers.
 
 ### Why
 
-After the empty-rule slice, the next clearly repeated pattern is the sd-aligned
-rule-array builder whose missing items are synthesized with a fixed default
-value.
+The factory now uses shared helper entry points consistently for simple lookup
+paths. The next value comes from targeting the remaining behavior that still
+depends on wrapper-specific interpretation or type-local defaults.
 
 ### Scope
 
-- add a shared helper for sd-aligned rule arrays with fixed default fallback
-- switch `cftd`, `shd`, `st`, `wc`, and `wt` to the shared helper
-- keep public parameter behavior unchanged while reducing repeated builder
-  wiring
-- add focused tests for the sd-aligned default-rule helper behavior
+- inspect the remaining `ParameterFactory` methods that still depend on
+  wrapper-local `params(...)` interpretation
+- choose one small, behavior-preserving extraction slice
+- update specs before implementing that next slice
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
-- rewriting all parameter semantics at once
-- changing empty-rule sd-aligned builders like `cy`, `ey`, `sh`, or `sy`
-- changing inherited, root-jobnet, or top-parameter behavior
+- rewriting all remaining parameter semantics at once
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -204,27 +205,28 @@ value.
 
 #### Use case
 
-Sd-aligned default-rule builder extraction.
+Plan the next parameter-helper extraction slice.
 
 #### Layers affected
 
-- domain: sd-aligned default-rule helper usage
-- docs: plan tracking for the extraction slice
+- domain: identify the next extraction target
+- docs: plan tracking for the next slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize the
-  `${rule},<default>` fallback rule-array wiring.
-- Limit this slice to `cftd`, `shd`, `st`, `wc`, and `wt`.
+- Keep slices behavior-preserving and small enough to review.
+- Prefer extracting semantics that can be tested outside `ParameterFactory`.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for sd-aligned default-rule parameter building
-- [ ] `cftd`, `shd`, `st`, `wc`, and `wt` delegate to the helper
-- [ ] focused tests cover sd-aligned default-rule helper behavior
+- [ ] the next extraction target is explicitly identified
+- [ ] scope stays within one small behavior-preserving slice
+- [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
+- inspect remaining wrapper-derived parameter methods
+- choose the next slice
 - run quality checks
 - run desktop tests
 - run build
@@ -232,14 +234,13 @@ Sd-aligned default-rule builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change sd alignment or synthesized
-  default values
-- the helper could be widened too far and blur the distinction from empty-rule
-  sd-aligned builders
+- the remaining methods may look similar while hiding different defaulting
+  rules
+- a too-large slice could blur review boundaries
 
 ### Rollback Plan
 
-- revert sd-aligned default-rule helper usage in the affected `ParameterFactory`
-  methods
+- restore the private wrapper methods and the two direct call sites if behavior
+  changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

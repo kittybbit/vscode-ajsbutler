@@ -225,7 +225,6 @@ import { J } from "../units/J";
 import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
-import { ParamBase } from "./parameter.types";
 import {
   buildSdAlignedDefaultRuleParameters,
   buildSdAlignedEmptyRuleParameters,
@@ -239,14 +238,8 @@ import {
   buildInheritedParameter,
   buildInheritedParameterArray,
   buildSortedRuleParameters,
-  resolveParameter,
   resolveParameterArray,
 } from "./parameterHelpers";
-
-type ParamArg = ParamBase & {
-  inherit?: boolean; // need to get parent value
-  defaultRawValue?: string | string[];
-};
 
 export class ParamFactory {
   static ab(unit: UnitEntity) {
@@ -1151,11 +1144,13 @@ export class ParamFactory {
     );
   }
   static ln(unit: UnitEntity) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "ln",
-    });
-    return buildSortedRuleParameters(params, (param) => new Ln(param));
+    return buildSortedRuleParameters(
+      resolveParameterArray({
+        unit: unit,
+        parameter: "ln",
+      }),
+      (param) => new Ln(param),
+    );
   }
   static mcs(unit: UnitEntity) {
     return buildOptionalParameter(
@@ -2258,11 +2253,13 @@ export class ParamFactory {
     );
   }
   static unit(unit1: UnitEntity) {
-    const param = this.#checkAndGet({
-      unit: unit1,
-      parameter: "unit",
-    });
-    return param ? new Unit(param) : undefined;
+    return buildOptionalParameter(
+      {
+        unit: unit1,
+        parameter: "unit",
+      },
+      (param) => new Unit(param),
+    );
   }
   static wc(unit: UnitEntity) {
     return buildSdAlignedDefaultRuleParameters(
@@ -2305,14 +2302,5 @@ export class ParamFactory {
       },
       (param) => new Wth(param),
     );
-  }
-
-  /** checkAndGet */
-  static #checkAndGet(arg: ParamArg) {
-    return resolveParameter(arg);
-  }
-  /** checkAndArray */
-  static #checkAndGetArray(arg: ParamArg) {
-    return resolveParameterArray(arg);
   }
 }
