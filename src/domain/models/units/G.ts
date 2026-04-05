@@ -2,7 +2,10 @@ import { WeekSymbol } from "../../values/AjsType";
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
-import { resolveIsPlanning } from "./unitGroupStateHelpers";
+import {
+  resolveGroupWeekState,
+  resolveIsPlanning,
+} from "./unitGroupStateHelpers";
 
 /** job group */
 export class G extends UnitEntity {
@@ -97,13 +100,6 @@ export class G extends UnitEntity {
   }
 
   #judgeWeek = (week: WeekSymbol) => {
-    if (this.op === undefined && this.cl === undefined) {
-      return undefined;
-    } else if (this.op && this.op.find((v) => v[week])) {
-      return true;
-    } else if (this.cl && this.cl.find((v) => v[week])) {
-      return false;
-    }
-    return undefined;
+    return resolveGroupWeekState(this.op, this.cl, week);
   };
 }
