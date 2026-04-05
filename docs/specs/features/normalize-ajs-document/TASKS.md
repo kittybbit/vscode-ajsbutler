@@ -43,4 +43,7 @@
 - [x] Expose a shared helper for defaultable scalar parameters so `ncl`,
       `ncs`, and `ncex` stop forwarding caller-supplied defaults inline in
       `ParameterFactory`
+- [x] Expose a shared helper for sd-aligned empty-rule parameters so `cy`,
+      `ey`, `sh`, and `sy` stop constructing `${rule},` fallbacks inline in
+      `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters
