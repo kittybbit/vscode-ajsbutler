@@ -1,13 +1,13 @@
-export type ParsedDependencyRelation = {
+export type ParsedUnitEdge = {
   sourceName: string;
   targetName: string;
   relationType?: string;
 };
 
-export const parseDependencyRelation = (
+export const parseUnitEdge = (
   value: string | undefined,
   options?: { requireRelationType?: boolean },
-): ParsedDependencyRelation | undefined => {
+): ParsedUnitEdge | undefined => {
   if (!value) {
     return undefined;
   }

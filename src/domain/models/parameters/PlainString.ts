@@ -1,6 +1,6 @@
 import { isTySymbol } from "../../values/AjsType";
 import Parameter from "./Parameter";
-import { parseDependencyRelation } from "./dependencyHelpers";
+import { parseUnitEdge } from "./unitEdgeHelpers";
 
 class PlainString extends Parameter {}
 
@@ -8,7 +8,7 @@ export class Ab extends PlainString {}
 export class Abr extends PlainString {}
 export class Ar extends PlainString {
   get f(): string {
-    const relation = parseDependencyRelation(this.value(), {
+    const relation = parseUnitEdge(this.value(), {
       requireRelationType: true,
     });
     if (relation) {
@@ -17,7 +17,7 @@ export class Ar extends PlainString {
     throw new Error(`unexpected format: ${this.value()}`);
   }
   get t(): string | undefined {
-    const relation = parseDependencyRelation(this.value(), {
+    const relation = parseUnitEdge(this.value(), {
       requireRelationType: true,
     });
     if (relation) {
@@ -26,7 +26,7 @@ export class Ar extends PlainString {
     throw new Error(`unexpected format: ${this.value()}`);
   }
   get relationType(): string | undefined {
-    const relation = parseDependencyRelation(this.value(), {
+    const relation = parseUnitEdge(this.value(), {
       requireRelationType: true,
     });
     if (relation) {

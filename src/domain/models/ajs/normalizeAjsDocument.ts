@@ -1,7 +1,7 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
-import { parseDependencyRelation } from "../parameters/dependencyHelpers";
 import { decodeEncodedString } from "../parameters/encodedStringHelpers";
+import { parseUnitEdge } from "../parameters/unitEdgeHelpers";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
 import { resolveUnitDepth } from "../units/unitDepthHelpers";
 import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
@@ -89,7 +89,7 @@ const parseDependency = (
 ):
   | { sourceName: string; targetName: string; type: AjsDependencyType }
   | undefined => {
-  const relation = parseDependencyRelation(parameterValue);
+  const relation = parseUnitEdge(parameterValue);
   if (!relation) {
     return undefined;
   }
