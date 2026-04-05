@@ -25,4 +25,6 @@
 - [x] Expose shared helpers for connector-control default resolution so group
       and root-jobnet wrappers stop hard-coding `ncl`, `ncs`, and `ncex`
       fallback values
+- [x] Expose shared helpers for inherited scalar and array parameter building
+      so simple inherited lookup wiring stops repeating in `ParameterFactory`
 - [x] Document which semantics intentionally remain in application view adapters

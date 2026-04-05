@@ -7,6 +7,8 @@ import { N } from "../../domain/models/units/N";
 import { Ln, Sd, Wc } from "../../domain/models/parameters";
 import {
   adjustToSdItemCount,
+  buildInheritedParameter,
+  buildInheritedParameterArray,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
   resolveConnectorControlDefaultRawValue,
@@ -75,6 +77,34 @@ const parseTransferJob = (): J => {
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
+};
+
+const inheritedDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  cl=mo;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    pr=4;
+    el=subnet,n,+160+0;
+    unit=subnet,,jp1admin,;
+    {
+      ty=n;
+    }
+  }
+}
+`;
+
+const parseInheritedJobnets = (): { jobnet: N; subnet: N } => {
+  const result = parseAjs(inheritedDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  const jobnet = root.children[0] as N;
+  const subnet = jobnet.children[0] as N;
+  return { jobnet, subnet };
 };
 
 suite("Parameter helpers", () => {
@@ -205,6 +235,39 @@ suite("Parameter helpers", () => {
         { rule: 2, value: "2,no" },
       ],
     );
+  });
+
+  test("builds inherited scalar and array parameters through shared helpers", () => {
+    const { jobnet, subnet } = parseInheritedJobnets();
+
+    const inheritedPriority = buildInheritedParameter(
+      {
+        unit: subnet,
+        parameter: "pr",
+        defaultRawValue: "1",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.strictEqual(inheritedPriority, "4");
+
+    const fallbackPriority = buildInheritedParameter(
+      {
+        unit: jobnet,
+        parameter: "ni",
+        defaultRawValue: "7",
+      },
+      (param) => param.defaultRawValue ?? param.rawValue,
+    );
+    assert.strictEqual(fallbackPriority, "7");
+
+    const inheritedCloseDates = buildInheritedParameterArray(
+      {
+        unit: subnet,
+        parameter: "cl",
+      },
+      (param) => param.rawValue ?? param.defaultRawValue,
+    );
+    assert.deepStrictEqual(inheritedCloseDates, ["mo"]);
   });
 
   test("builds sorted rule parameters for simple rule arrays", () => {

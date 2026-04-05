@@ -44,6 +44,9 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now expose connector-control default resolution so
   `G` and `N` stop deciding `ncl`, `ncs`, and `ncex` fallback values with
   wrapper-local literals and branching.
+- shared parameter helpers now expose inherited scalar and array builders so
+  selected `ParameterFactory` methods stop repeating `inherit: true` lookup
+  wiring.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -148,30 +151,30 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable helper for connector-control defaults so `ncl`, `ncs`, and
-`ncex` stop deciding root/group fallback values directly in unit wrappers.
+Extract reusable inherited-parameter builders so simple inherited parameter
+mapping stops being repeated in `ParameterFactory`.
 
 ### Why
 
-`G` and `N` still hard-code connector-control default rules with literal `"n"`
-values and root-jobnet checks. Moving that decision into shared helpers keeps
-the fallback semantics explicit and reduces wrapper-specific branching.
+`ParameterFactory` still repeats the same `resolveParameter*` plus
+`inherit: true` mapping pattern for multiple scalar and array parameters.
+Moving that into shared helpers keeps the factory focused on which parameter is
+being exposed rather than how inherited lookup is wired.
 
 ### Scope
 
-- add a helper that resolves connector-control defaults for group and jobnet
-  wrappers
-- switch `G` and `N` connector-control getters to the shared helper
-- keep public parameter behavior unchanged while reducing wrapper-local default
-  logic
-- add focused tests for connector-control default behavior
+- add shared helpers for inherited scalar and array parameter builders
+- switch selected `ParameterFactory` inherited parameters to the shared helper
+- keep public parameter behavior unchanged while reducing repeated inherited
+  lookup wiring
+- add focused tests for inherited builder behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing connector semantics for `Nc`
+- changing root-jobnet default rules
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -185,24 +188,25 @@ the fallback semantics explicit and reduces wrapper-specific branching.
 
 #### Use case
 
-Connector-control default helper extraction.
+Inherited parameter builder extraction.
 
 #### Layers affected
 
-- domain: connector-control helper usage
+- domain: inherited parameter helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize the existing connector
-  default rule.
-- Limit this slice to `ncl`, `ncs`, and `ncex` defaults in `G` and `N`.
+- Keep semantic behavior identical and only centralize inherited lookup
+  builder wiring.
+- Limit this slice to selected inherited parameters instead of rewriting the
+  full factory at once.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for connector-control default resolution
-- [ ] `G` and `N` connector-control getters delegate to the helper
-- [ ] focused tests cover group and root-jobnet default behavior
+- [ ] shared helpers exist for inherited scalar and array parameter builders
+- [ ] selected inherited parameters in `ParameterFactory` delegate to helpers
+- [ ] focused tests cover inherited builder behavior
 
 ### Test Plan
 
@@ -213,12 +217,12 @@ Connector-control default helper extraction.
 
 ### Risks
 
-- helper extraction could accidentally change when connector defaults appear
-- group and root-jobnet semantics could drift if the fallback rule is encoded
+- helper extraction could accidentally change inherited precedence
+- scalar and array variants could diverge if the shared helper is typed
   incorrectly
 
 ### Rollback Plan
 
-- revert the connector-control helper usage in `G` and `N`
+- revert inherited-builder helper usage in `ParameterFactory`
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
