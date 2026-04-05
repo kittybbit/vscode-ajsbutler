@@ -49,4 +49,6 @@
 - [x] Expose a shared helper for sd-aligned default-rule parameters so
       `cftd`, `shd`, `st`, `wc`, and `wt` stop constructing
       `${rule},<default>` fallbacks inline in `ParameterFactory`
+- [x] Remove the final `#checkAndGet` and `#checkAndGetArray` wrapper usage so
+      `ParameterFactory` depends on shared helper paths consistently
 - [x] Document which semantics intentionally remain in application view adapters
