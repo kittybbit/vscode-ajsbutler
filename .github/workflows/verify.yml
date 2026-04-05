@@ -22,7 +22,10 @@ jobs:
         with:
           script: |
             const isFeatureBranch = (ref) =>
-              ref.startsWith("feat/") || ref.startsWith("feature/");
+              ref.startsWith("feat/") ||
+              ref.startsWith("feature/") ||
+              ref.startsWith("fix/") ||
+              ref.startsWith("chore/");
 
             if (context.eventName === "pull_request") {
               const headRef = context.payload.pull_request?.head?.ref ?? "";
