@@ -1,5 +1,6 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
+import { resolveIsRecovery } from "../units/unitTypeHelpers";
 import {
   AjsDependency,
   AjsDependencyType,
@@ -61,14 +62,6 @@ const getLayout = (unit: Unit): { h: number; v: number } => {
         h: 0,
         v: 0,
       };
-};
-
-const getIsRecovery = (unitType: TySymbol): boolean | undefined => {
-  if (["g", "mg", "rc", "mn", "nc"].includes(unitType)) {
-    return undefined;
-  }
-
-  return unitType.startsWith("r") && unitType !== "rm";
 };
 
 const getHasWaitedFor = (unit: Unit): boolean =>
@@ -170,7 +163,7 @@ const normalizeUnit = (
     depth: unit.absolutePath().split("/").filter(Boolean).length - 1,
     parentId: unit.parent?.absolutePath(),
     isRoot: unit.isRoot(),
-    isRecovery: getIsRecovery(unitType),
+    isRecovery: resolveIsRecovery(unitType),
     isRootJobnet: getIsRootJobnet(unit, unitType),
     hasSchedule: getHasSchedule(unit, unitType),
     hasWaitedFor: getHasWaitedFor(unit),

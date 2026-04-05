@@ -47,8 +47,10 @@ suite("Normalize AJS Document", () => {
     assert.strictEqual(root.name, "root");
     assert.strictEqual(root.unitType, "g");
     assert.strictEqual(root.groupType, "n");
+    assert.strictEqual(root.children[0].isRecovery, false);
     assert.strictEqual(root.children[0].name, "jobnet");
     assert.strictEqual(root.children[0].isRootJobnet, true);
+    assert.strictEqual(root.children[0].children[2].isRecovery, undefined);
     assert.deepStrictEqual(
       root.children[0].children
         .flatMap((child) => child.dependencies)

@@ -71,6 +71,8 @@ This file is the high-level index for the per-feature plan structure in
 - shared unit-relation helpers now resolve sibling `ar` links so `UnitEntity`
   stops duplicating previous/next relation lookup and relation-to-unit mapping
   logic inline.
+- shared unit-type helpers now resolve recovery semantics so `UnitEntity` and
+  normalized AJS mapping stop maintaining duplicate `isRecovery` rules.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -176,22 +178,21 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared unit-relation helpers so `UnitEntity` no longer implements
-previous/next sibling `ar` traversal inline.
+Extract shared recovery-type helpers so wrapper and normalized-model
+`isRecovery` semantics use the same implementation.
 
 ### Why
 
-`UnitEntity` still repeats the same sibling relation lookup and linked-unit
-mapping logic across `previous`, `previousUnits`, `next`, and `nextUnits`.
-Pulling that into shared helpers keeps behavior the same while shrinking
-wrapper-local interpretation code.
+`isRecovery` rules currently exist in both `UnitEntity` and
+`normalizeAjsDocument`. Pulling that logic into one shared helper reduces the
+risk of drift between wrapper behavior and normalized-model behavior.
 
 ### Scope
 
-- add shared helpers for sibling `ar` relation lookup and linked-unit mapping
-- switch `UnitEntity.previous`, `previousUnits`, `next`, and `nextUnits` to
-  delegate to the helpers
-- add focused tests for relation lookup and sibling target mapping
+- add a shared helper for recovery-type resolution from `TySymbol`
+- switch both `UnitEntity` and normalized AJS mapping to use the helper
+- add focused tests for recovery-type resolution and a normalized-model
+  regression assertion
 
 ### Non-Goals
 
@@ -211,29 +212,28 @@ wrapper-local interpretation code.
 
 #### Use case
 
-Shared unit-relation helper extraction.
+Shared recovery-type helper extraction.
 
 #### Layers affected
 
-- domain: shared relation helper and `UnitEntity` cleanup
+- domain: shared unit-type helper and duplicate recovery logic cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep sibling relation behavior identical to existing `UnitEntity` behavior.
-- Limit the slice to `ar` relation lookup and relation-to-sibling mapping.
+- Keep `isRecovery` behavior identical to existing wrapper and normalized-model
+  behavior.
+- Limit the slice to recovery-type resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helpers resolve previous and next sibling relations from parent
-      `ar` definitions
-- [ ] `UnitEntity` delegates previous and next relation mapping to shared
-      helpers
+- [ ] shared helper resolves `isRecovery` from unit type
+- [ ] `UnitEntity` and normalized AJS mapping both delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for sibling relation lookup and target mapping
+- add helper coverage for recovery-type resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -241,13 +241,12 @@ Shared unit-relation helper extraction.
 
 ### Risks
 
-- relation lookup could accidentally change source/target matching
-- helper extraction could overreach into broader graph or normalized-model
-  behavior
+- recovery-type logic could accidentally change for excluded unit types
+- helper extraction could overreach into unrelated unit metadata logic
 
 ### Rollback Plan
 
-- restore inline `previous` and `next` relation logic in `UnitEntity` if
-  behavior changes
+- restore local `isRecovery` logic in `UnitEntity` and `normalizeAjsDocument`
+  if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
