@@ -92,4 +92,7 @@
 - [x] Extract shared normalize-unit helpers so normalized type, group, comment,
       layout, root-jobnet, schedule, and wait derivation no longer live only
       inside `normalizeAjsDocument.ts`
+- [x] Extract shared normalize-relation helpers so `ar` relation parsing,
+      child resolution, and warning generation no longer live only inside
+      `normalizeAjsDocument.ts`
 - [x] Document which semantics intentionally remain in application view adapters
