@@ -1,6 +1,7 @@
 import { TySymbol, isTySymbol } from "../../values/AjsType";
 import { Unit } from "../../values/Unit";
 import { resolveGroupType } from "../units/unitGroupStateHelpers";
+import { resolveUnitDepth } from "../units/unitDepthHelpers";
 import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
 import { resolveUnitLayout } from "../units/unitLayoutHelpers";
 import { resolveHasSchedule } from "../units/unitScheduleStateHelpers";
@@ -155,7 +156,7 @@ const normalizeUnit = (
     groupType: getGroupType(unit),
     comment: getComment(unit),
     absolutePath: unit.absolutePath(),
-    depth: unit.absolutePath().split("/").filter(Boolean).length - 1,
+    depth: resolveUnitDepth(unit.absolutePath()),
     parentId: unit.parent?.absolutePath(),
     isRoot: unit.isRoot(),
     isRecovery: resolveIsRecovery(unitType),

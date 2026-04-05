@@ -92,6 +92,8 @@ This file is the high-level index for the per-feature plan structure in
   weekday getters.
 - shared priority helpers now resolve wrapper priority fallback rules so `J`,
   `N`, and `Qj` stop routing the same semantics through a misc utility module.
+- shared depth helpers now resolve absolute-path-based depth so wrapper and
+  normalized-model logic stop maintaining separate depth calculation rules.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -197,20 +199,20 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared priority helpers so duplicated wrapper priority fallback wiring
-uses a dedicated implementation.
+Extract shared depth helpers so duplicated depth calculation uses a shared
+implementation.
 
 ### Why
 
-Priority resolution currently lives in a generic utility file while multiple
-wrapper classes delegate to it. Pulling that into a dedicated helper makes the
-priority rule explicit and separately testable.
+Depth calculation currently lives in both wrapper and normalized-model code
+paths with separate implementations. Pulling that into one shared helper makes
+the depth rule explicit and separately testable.
 
 ### Scope
 
-- add a dedicated helper for resolving wrapper priority fallback rules
-- switch `J`, `N`, and `Qj` priority getters to use the helper
-- add focused tests for priority resolution
+- add a shared helper for resolving depth from unit absolute paths
+- switch wrapper and normalized-model depth calculation to use the helper
+- add focused tests for depth resolution
 
 ### Non-Goals
 
@@ -230,27 +232,27 @@ priority rule explicit and separately testable.
 
 #### Use case
 
-Shared priority helper extraction.
+Shared depth helper extraction.
 
 #### Layers affected
 
-- domain: shared priority helper and priority resolution cleanup
+- domain: shared depth helper and depth resolution cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep priority behavior identical to existing wrapper behavior.
-- Limit the slice to priority resolution extraction only.
+- Keep depth behavior identical to existing wrapper and normalized behavior.
+- Limit the slice to depth resolution extraction only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves wrapper priority fallback behavior
-- [ ] `J`, `N`, and `Qj` priority getters delegate to the helper
+- [ ] shared helper resolves depth from absolute paths
+- [ ] wrapper and normalized-model depth calculation delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for priority resolution
+- add helper coverage for depth resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -258,12 +260,11 @@ Shared priority helper extraction.
 
 ### Risks
 
-- priority helper extraction could accidentally change fallback precedence
-- wrapper updates could miss one priority getter and leave utility coupling
-  behind
+- depth helper extraction could accidentally change root depth handling
+- wrapper and normalized-model code could diverge if one call site is missed
 
 ### Rollback Plan
 
-- restore wrapper priority delegation to `Utils.ts` if behavior changes
+- restore inline depth calculation if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
