@@ -73,4 +73,6 @@
       duplicating `op` and `cl` interpretation logic
 - [x] Expose shared priority helpers so wrapper classes stop routing priority
       resolution through a misc utility module
+- [x] Expose shared depth helpers so wrapper and normalized-model depth
+      calculation no longer drift apart
 - [x] Document which semantics intentionally remain in application view adapters

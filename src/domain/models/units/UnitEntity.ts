@@ -13,6 +13,7 @@ import {
 } from "./unitRelationHelpers";
 import { resolveUnitLayout } from "./unitLayoutHelpers";
 import { resolveDefinedParams } from "./unitParameterHelpers";
+import { resolveUnitDepth } from "./unitDepthHelpers";
 import { resolveIsRecovery } from "./unitTypeHelpers";
 
 const hashToString = (value: string): string => {
@@ -159,10 +160,7 @@ export abstract class UnitEntity {
     return this.#defineParams;
   }
   get depth(): number {
-    if (this.parent) {
-      return this.parent.depth + 1;
-    }
-    return 0;
+    return resolveUnitDepth(this.absolutePath);
   }
   /** Specified parameters in unit definitions */
   params<T>(param: ParamSymbol): T | undefined {
