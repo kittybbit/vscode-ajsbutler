@@ -1,7 +1,7 @@
 /** JP1/AJS3 unit entities  */
 
 import { Unit } from "../../values/Unit";
-import { ParamSymbol, isParamSymbol } from "../../values/AjsType";
+import { ParamSymbol } from "../../values/AjsType";
 import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
 import Parameter from "../parameters/Parameter";
@@ -12,6 +12,7 @@ import {
   findPreviousUnits,
 } from "./unitRelationHelpers";
 import { resolveUnitLayout } from "./unitLayoutHelpers";
+import { resolveDefinedParams } from "./unitParameterHelpers";
 import { resolveIsRecovery } from "./unitTypeHelpers";
 
 const hashToString = (value: string): string => {
@@ -59,7 +60,7 @@ export abstract class UnitEntity {
       .filter((child): child is UnitEntity => child instanceof UnitEntity);
     this.#isRoot = unit.isRoot();
     this.#isRecovery = resolveIsRecovery(this.ty.value());
-    this.#defineParams = this.#defineParamsFn();
+    this.#defineParams = resolveDefinedParams(this);
   }
 
   get absolutePath() {
@@ -163,16 +164,6 @@ export abstract class UnitEntity {
     }
     return 0;
   }
-  #defineParamsFn(): ParamSymbol[] {
-    let proto = Object.getPrototypeOf(this);
-    let params: string[] = [];
-    while (proto && proto.constructor.name !== "Object") {
-      params = params.concat(Object.getOwnPropertyNames(proto));
-      proto = Object.getPrototypeOf(proto);
-    }
-    return params.filter((v) => isParamSymbol(v)).sort();
-  }
-
   /** Specified parameters in unit definitions */
   params<T>(param: ParamSymbol): T | undefined {
     const value = this[param as keyof typeof this];

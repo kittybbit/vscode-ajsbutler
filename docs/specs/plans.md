@@ -75,6 +75,8 @@ This file is the high-level index for the per-feature plan structure in
   normalized AJS mapping stop maintaining duplicate `isRecovery` rules.
 - shared unit-layout helpers now resolve `el`-based coordinates so `UnitEntity`
   and normalized AJS mapping stop maintaining duplicate layout parsing rules.
+- shared unit-parameter helpers now resolve defined parameter names so wrapper
+  prototype inspection no longer lives only inside `UnitEntity`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -180,21 +182,21 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared layout helpers so wrapper and normalized-model `el`
-interpretation use the same implementation.
+Extract shared defined-parameter helpers so wrapper prototype inspection uses a
+shared implementation.
 
 ### Why
 
-`el`-based coordinate parsing currently exists in both `UnitEntity` and
-`normalizeAjsDocument`. Pulling that logic into one shared helper reduces the
-risk of drift between wrapper behavior and normalized-model behavior.
+`defineParams` currently depends on prototype-chain inspection embedded inside
+`UnitEntity`. Pulling that into one shared helper makes the wrapper
+introspection rule explicit and separately testable.
 
 ### Scope
 
-- add a shared helper for resolving unit layout from raw `el` parameter values
-- switch both `UnitEntity` and normalized AJS mapping to use the helper
-- add focused tests for layout resolution and a normalized-model regression
-  assertion
+- add a shared helper for resolving defined parameter names from a wrapper
+  instance prototype chain
+- switch `UnitEntity` to use the helper for `defineParams`
+- add focused tests for parameter-name resolution
 
 ### Non-Goals
 
@@ -214,28 +216,27 @@ risk of drift between wrapper behavior and normalized-model behavior.
 
 #### Use case
 
-Shared layout helper extraction.
+Shared defined-parameter helper extraction.
 
 #### Layers affected
 
-- domain: shared layout helper and duplicate coordinate parsing cleanup
+- domain: shared parameter-name helper and wrapper introspection cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep layout behavior identical to existing wrapper and normalized-model
-  behavior.
-- Limit the slice to `el`-based coordinate resolution only.
+- Keep `defineParams` behavior identical to existing wrapper behavior.
+- Limit the slice to prototype-based parameter-name resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves unit layout from `el` parameter values
-- [ ] `UnitEntity` and normalized AJS mapping both delegate to the helper
+- [ ] shared helper resolves defined parameter names from a wrapper instance
+- [ ] `UnitEntity` delegates `defineParams` resolution to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for layout resolution
+- add helper coverage for defined parameter-name resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -243,12 +244,12 @@ Shared layout helper extraction.
 
 ### Risks
 
-- layout parsing could accidentally change default coordinates or name matching
+- parameter-name resolution could accidentally include non-parameter getters
 - helper extraction could overreach into unrelated unit metadata logic
 
 ### Rollback Plan
 
-- restore local layout parsing in `UnitEntity` and `normalizeAjsDocument` if
+- restore local `defineParams` prototype inspection in `UnitEntity` if
   behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
