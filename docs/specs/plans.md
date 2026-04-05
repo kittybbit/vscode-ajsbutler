@@ -140,29 +140,28 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Refresh roadmap and feature task documentation so it matches the migrated
-table/flow/CSV state and explicitly records which semantics still belong in
-application view adapters.
+Extract reusable rule-aware parameter helpers from `ParameterFactory` so the
+remaining wrapper-derived parameter semantics can move in smaller slices.
 
 ### Why
 
-Several docs still describe already-completed migration work as pending, and
-the normalize feature docs do not yet distinguish shared normalized semantics
-from table-specific adapter formatting. That makes the next `ParameterFactory`
-cleanup slices harder to scope.
+`ParameterFactory` still concentrates lookup, inheritance, defaulting, and
+SD-rule alignment behavior in one large module. Pulling the shared helper logic
+out first makes the next semantic cleanup slices smaller and easier to review.
 
 ### Scope
 
-- update roadmap and feature task docs to reflect merged slices
-- mark completed CSV and normalize follow-up items that are no longer pending
-- document which semantics intentionally remain in application view adapters
-- keep the next remaining `ParameterFactory` cleanup visible
+- extract reusable parameter lookup and fallback helpers into a dedicated module
+- extract reusable SD-rule alignment helpers into a dedicated module
+- keep public `ParamFactory` behavior unchanged while switching it to the
+  extracted helpers
+- add focused tests for helper behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
-- refactoring `ParameterFactory` implementation in this slice
+- rewriting all parameter semantics at once
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -176,38 +175,40 @@ cleanup slices harder to scope.
 
 #### Use case
 
-Documentation alignment across roadmap, normalize, and CSV feature slices.
+Parameter helper extraction for remaining `ParameterFactory` cleanup.
 
 #### Layers affected
 
-- docs: roadmap, plans, architecture, and feature task tracking
+- domain: parameter helper extraction
+- docs: plan tracking for the extracted helper slice
 
 #### Key decisions
 
-- Treat table-specific schedule and string formatting as application adapter
-  logic, not as normalized-domain semantics.
-- Keep the next implementation target focused on the remaining rule-aware
-  defaults and alignment behavior in `ParameterFactory`.
+- Extract helper logic without changing the public `ParamFactory` API.
+- Keep semantic behavior identical and limit the slice to lookup/defaulting and
+  SD-rule alignment helpers.
 
 ### Acceptance Criteria
 
-- [ ] roadmap no longer lists already-finished documentation refresh as pending
-- [ ] normalize docs explicitly state which semantics remain in adapters
-- [ ] CSV feature task tracking reflects the current DTO-based export path
+- [ ] shared helper module exists for parameter lookup/defaulting
+- [ ] shared helper module exists for SD-rule alignment
+- [ ] `ParamFactory` delegates to the extracted helpers without behavior changes
+- [ ] focused tests cover helper behavior
 
 ### Test Plan
 
-- run markdown-aware quality checks if available
-- verify docs are internally consistent with merged code state
+- run quality checks
+- run desktop tests
+- run build
 
 ### Risks
 
-- docs can still drift again if future merged slices skip task-file updates
-- adapter-boundary wording can become too broad and accidentally hide domain
-  semantics that should still move out of wrappers
+- helper extraction could accidentally change inherited/default parameter
+  precedence
+- helper extraction could accidentally change SD-rule alignment order or
+  fallback generation
 
 ### Rollback Plan
 
-- revert the documentation updates if they misstate current repository behavior
-- keep future `ParameterFactory` slices small so any documentation mismatch is
-  easy to correct
+- revert the helper-module extraction and return the logic to `ParamFactory`
+- keep later semantic moves separate from this extraction step

@@ -1,4 +1,3 @@
-import { isParamSymbol } from "../../values/AjsType";
 import {
   Ab,
   Abr,
@@ -227,42 +226,16 @@ import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
+import {
+  adjustToSdItemCount,
+  resolveParameter,
+  resolveParameterArray,
+} from "./parameterHelpers";
 import Rule from "./Rule";
 
 type ParamArg = ParamBase & {
   inherit?: boolean; // need to get parent value
   defaultRawValue?: string | string[];
-};
-
-/** Create a parameter value map with rule numbers as keys. */
-const mapByRule = (params: Array<Rule> | undefined) => {
-  return params
-    ? params.reduce(
-        (work, param) => {
-          work[String(param.rule)] = param;
-          return work;
-        },
-        {} as { [rule: string]: Rule },
-      )
-    : undefined;
-};
-
-const adjustToSdItemCount = (
-  sd: Array<Sd> | undefined,
-  param: Array<Exclude<Rule, Sd>> | undefined,
-  fn: (rule: number) => Rule | null,
-): Array<Rule | null> | undefined => {
-  const sdMap = mapByRule(sd);
-  if (sdMap === undefined) {
-    return undefined;
-  }
-  const paramMap = mapByRule(param);
-  const newParams: Array<Rule | null> = [];
-  Object.keys(sdMap).forEach((sdRule) => {
-    const rule = sdMap[sdRule].rule;
-    newParams.push((paramMap && paramMap[String(rule)]) ?? fn(rule));
-  });
-  return newParams;
 };
 
 export class ParamFactory {
@@ -2031,88 +2004,10 @@ export class ParamFactory {
 
   /** checkAndGet */
   static #checkAndGet(arg: ParamArg) {
-    const params = this.#checkAndGetArray(arg);
-    if (params === undefined) {
-      return undefined;
-    } else if (params.length === 1) {
-      return params[0];
-    }
-    throw new Error(`unexpected array. (${arg.parameter})`);
+    return resolveParameter(arg);
   }
   /** checkAndArray */
   static #checkAndGetArray(arg: ParamArg) {
-    if (!isParamSymbol(arg.parameter)) {
-      throw new Error(`${arg.parameter} is not unit definition parameter.`);
-    }
-
-    // my parameter
-    const actualParams = arg.unit.parameters
-      .map((v, i) => {
-        return { parameter: v, index: i };
-      })
-      .filter((v) => v.parameter.key === arg.parameter)
-      .map((v) => {
-        return {
-          unit: arg.unit,
-          parameter: arg.parameter,
-          inherited: false,
-          rawValue: v.parameter.value,
-          position: v.index,
-        };
-      });
-    if (actualParams.length !== 0) {
-      return actualParams;
-    }
-
-    // inherited parameter
-    if (arg.inherit) {
-      let parent = arg.unit.parent;
-      while (parent) {
-        const parentParams = parent.parameters
-          .map((v, i) => {
-            return { parameter: v, index: i };
-          })
-          .filter((v) => v.parameter.key === arg.parameter)
-          .map((v) => {
-            return {
-              unit: arg.unit,
-              parameter: arg.parameter,
-              inherited: true,
-              rawValue: v.parameter.value,
-              position: -1,
-            };
-          });
-        if (parentParams.length !== 0) {
-          return parentParams;
-        }
-        parent = parent.parent;
-      }
-    }
-
-    // default parameter
-    if (Array.isArray(arg.defaultRawValue)) {
-      return arg.defaultRawValue.map((v) => {
-        return {
-          unit: arg.unit,
-          parameter: arg.parameter,
-          inherited: false,
-          defaultRawValue: v,
-          position: -1,
-        };
-      });
-    } else if (arg.defaultRawValue) {
-      return [
-        {
-          unit: arg.unit,
-          parameter: arg.parameter,
-          inherited: false,
-          defaultRawValue: arg.defaultRawValue,
-          position: -1,
-        },
-      ];
-    }
-
-    // no effective value
-    return undefined;
+    return resolveParameterArray(arg);
   }
 }
