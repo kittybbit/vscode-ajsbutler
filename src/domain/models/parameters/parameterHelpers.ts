@@ -1,4 +1,5 @@
-import { isParamSymbol } from "../../values/AjsType";
+import { ParamSymbol, isParamSymbol } from "../../values/AjsType";
+import { DEFAULTS } from "./Defaults";
 import { ParamBase, ParamInternal } from "./parameter.types";
 import Rule, { Sd } from "./Rule";
 
@@ -6,6 +7,20 @@ export type ParamLookupArg = ParamBase & {
   inherit?: boolean;
   defaultRawValue?: string | string[];
 };
+
+const rootJobnetDefaultByParameter: Partial<Record<ParamSymbol, string>> = {
+  rg: DEFAULTS.Rg,
+  sd: DEFAULTS.Sd,
+  ncl: "n",
+  ncs: "n",
+  ncex: "n",
+};
+
+export const resolveRootJobnetDefaultRawValue = (
+  parameter: keyof typeof rootJobnetDefaultByParameter,
+  isRootJobnet: boolean,
+): string | undefined =>
+  isRootJobnet ? rootJobnetDefaultByParameter[parameter] : undefined;
 
 /** Create a parameter value map with rule numbers as keys. */
 const mapByRule = <T extends Rule>(params: Array<T> | undefined) =>
