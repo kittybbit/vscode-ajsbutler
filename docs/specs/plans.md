@@ -20,7 +20,8 @@ This file is the high-level index for the per-feature plan structure in
 - `ExportUnitListCsv` use case exists and is covered by
   `src/test/suite/exportUnitListCsv.test.ts`.
 - `BuildFlowGraph` use case exists and is covered by
-  `src/test/suite/buildFlowGraphUseCase.test.ts`.
+  `src/test/suite/buildFlowGraphUseCase.test.ts`, and the flow presentation
+  no longer reconstructs `UnitEntity` to render, navigate, or open dialog data.
 - `ShowUnitDefinition` now uses an application DTO instead of passing
   `UnitEntity` directly into the dialog.
 - editor feedback extraction exists and is covered by
@@ -36,11 +37,9 @@ This file is the high-level index for the per-feature plan structure in
 
 1. Refresh roadmap and feature task documents so completed slices and remaining
    debt are visible in one place.
-2. Remove remaining `UnitEntity` reconstruction from the flow presentation
-   path.
-3. Decide which wrapper-derived semantics belong in the normalized model versus
+2. Decide which wrapper-derived semantics belong in the normalized model versus
    staying in application view adapters.
-4. Continue reducing activation and webview concentration without changing user
+3. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 
 ## Default Workflow

@@ -55,6 +55,9 @@ Migration should be incremental and use-case driven.
 - normalization is now the next stable seam for application-facing use cases
 - unit-list table rendering now depends on an application row/view adapter
   end to end instead of direct wrapper accessors or `UnitEntity` row objects
+- flow rendering now depends on flow-graph DTOs plus normalized AJS state and
+  unit-definition DTOs instead of reconstructing `UnitEntity` for selection and
+  node interaction
 - the remaining migration work is to move more non-table use cases from raw or
   wrapper-oriented structures onto the normalized model
 

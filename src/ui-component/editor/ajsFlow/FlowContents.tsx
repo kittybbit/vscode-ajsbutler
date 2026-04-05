@@ -32,21 +32,15 @@ import {
   UnitDefinitionDialogDto,
 } from "../../../application/unit-definition/buildUnitDefinition";
 import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
-import {
-  toAjsDocument,
-  toRootUnitEntity,
-} from "../../../application/unit-list/unitListDocumentView";
-import { UnitEntity } from "../../../domain/models/units/UnitEntity";
+import { toAjsDocument } from "../../../application/unit-list/unitListDocumentView";
 import UnitEntityDialog from "../UnitEntityDialog";
 import JobNode from "./nodes/JobNode";
 import JobNetNode from "./nodes/JobNetNode";
 import JobGroupNode from "./nodes/JobGroupNode";
 import ConditionNode from "./nodes/ConditionNode";
 import Header from "./Header";
-import { flattenChildren } from "../../../domain/utils/TyUtils";
 import FlowSelector from "./FlowSelector";
 import { createReactFlowData } from "./flowGraphView";
-import { N } from "../../../domain/models/units/N";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 
@@ -73,9 +67,9 @@ export type DrawerWidthStateType = {
   drawerWidth: number;
   setDrawerWidth: Dispatch<SetStateAction<number>>;
 };
-export type CurrentUnitEntityStateType = {
-  currentUnitEntity?: UnitEntity;
-  setCurrentUnitEntity: Dispatch<SetStateAction<UnitEntity | undefined>>;
+export type CurrentUnitIdStateType = {
+  currentUnitId?: string;
+  setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
 };
 
 const FlowContents: FC = () => {
@@ -88,28 +82,21 @@ const FlowContents: FC = () => {
   });
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
 
-  const [unitEntities, setUnitEntity] = useState<UnitEntity[]>([]);
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
-  const [currentUnitEntity, setCurrentUnitEntity] = useState<UnitEntity>();
+  const [currentUnitId, setCurrentUnitId] = useState<string>();
   const prevUnitEntityId = useRef<string | undefined>(undefined);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
   >();
-  const allUnitEntity = useMemo(
-    () => unitEntities.flatMap((unitEntity) => flattenChildren([unitEntity])),
-    [unitEntities],
+  const allUnits = useMemo(
+    () => (ajsDocument ? flattenAjsUnits(ajsDocument.rootUnits) : []),
+    [ajsDocument],
   );
-  const unitEntityByPath = useMemo(
-    () =>
-      new Map(
-        allUnitEntity.map((unitEntity) => [
-          unitEntity.absolutePath,
-          unitEntity,
-        ]),
-      ),
-    [allUnitEntity],
+  const unitById = useMemo(
+    () => new Map(allUnits.map((unit) => [unit.id, unit])),
+    [allUnits],
   );
   const unitDefinitionByPath = useMemo(
     () =>
@@ -123,6 +110,10 @@ const FlowContents: FC = () => {
       ),
     [ajsDocument],
   );
+  const currentUnit = useMemo(
+    () => (currentUnitId ? unitById.get(currentUnitId) : undefined),
+    [currentUnitId, unitById],
+  );
 
   const theme = useMemo(
     () =>
@@ -134,8 +125,8 @@ const FlowContents: FC = () => {
     [isDarkMode],
   );
 
-  const updateNodesAndEdges = (unitEntity?: UnitEntity) => {
-    if (!unitEntity) {
+  const updateNodesAndEdges = (selectedUnitId?: string) => {
+    if (!selectedUnitId) {
       setNodes(() => []);
       setEdges(() => []);
       return;
@@ -145,7 +136,7 @@ const FlowContents: FC = () => {
       setEdges(() => []);
       return;
     }
-    const graph = buildFlowGraph(ajsDocument, unitEntity.absolutePath);
+    const graph = buildFlowGraph(ajsDocument, selectedUnitId);
     if (!graph) {
       setNodes(() => []);
       setEdges(() => []);
@@ -153,48 +144,31 @@ const FlowContents: FC = () => {
     }
     const { nodes, edges } = createReactFlowData(
       graph,
-      unitEntityByPath,
       unitDefinitionByPath,
       theme,
       dialogDataState,
-      currentUnitEndityState,
+      currentUnitIdState,
     );
     setNodes(() => nodes);
     setEdges(() => edges);
   };
 
   useEffect(() => {
-    updateNodesAndEdges(currentUnitEntity);
-    prevUnitEntityId.current = currentUnitEntity?.id;
-  }, [
-    ajsDocument,
-    currentUnitEntity,
-    unitEntityByPath,
-    unitDefinitionByPath,
-    theme,
-    dialogData,
-  ]);
+    updateNodesAndEdges(currentUnitId);
+    prevUnitEntityId.current = currentUnitId;
+  }, [ajsDocument, currentUnitId, unitDefinitionByPath, theme, dialogData]);
 
   useEffect(() => {
     const changeDocumentFn = (type: string, data: unknown) => {
       const nextDocument = data
         ? toAjsDocument(data as UnitListDocumentDto)
         : undefined;
-      const rootUnitEntity = data
-        ? toRootUnitEntity(data as UnitListDocumentDto)
-        : [];
       setAjsDocument(() => nextDocument);
-      setUnitEntity(() => rootUnitEntity);
-      setCurrentUnitEntity(() => {
-        const x = rootUnitEntity.flatMap((unitEntity) =>
-          flattenChildren([unitEntity]),
-        );
+      setCurrentUnitId(() => {
+        const x = nextDocument ? flattenAjsUnits(nextDocument.rootUnits) : [];
         return prevUnitEntityId.current
-          ? x.find((unitEntity) => unitEntity.id === prevUnitEntityId.current)
-          : x.find(
-              (unitEntity) =>
-                unitEntity.ty.value() === "n" && (unitEntity as N).isRootJobnet,
-            );
+          ? x.find((unit) => unit.id === prevUnitEntityId.current)?.id
+          : x.find((unit) => unit.unitType === "n" && unit.isRootJobnet)?.id;
       });
     };
     window.EventBridge.addCallback("changeDocument", changeDocumentFn);
@@ -212,9 +186,9 @@ const FlowContents: FC = () => {
     drawerWidth: drawerWidth,
     setDrawerWidth: setDrawerWidth,
   };
-  const currentUnitEndityState = {
-    currentUnitEntity: currentUnitEntity,
-    setCurrentUnitEntity: setCurrentUnitEntity,
+  const currentUnitIdState = {
+    currentUnitId: currentUnitId,
+    setCurrentUnitId: setCurrentUnitId,
   };
   const dialogDataState = {
     dialogData: dialogData,
@@ -227,8 +201,9 @@ const FlowContents: FC = () => {
         <Stack direction="row" spacing={0}>
           {menuStatus.menuItem1 && (
             <FlowSelector
-              unitEntities={unitEntities}
-              currentUnitEntityState={currentUnitEndityState}
+              rootUnits={ajsDocument?.rootUnits ?? []}
+              unitById={unitById}
+              currentUnitIdState={currentUnitIdState}
               flowMenuState={flowMenuState}
               drawerWidthState={drawerWidthState}
             />
@@ -239,7 +214,9 @@ const FlowContents: FC = () => {
             flex={1}
           >
             <Header
-              currentUnitEntityState={currentUnitEndityState}
+              currentUnit={currentUnit}
+              unitById={unitById}
+              currentUnitIdState={currentUnitIdState}
               flowMenuState={flowMenuState}
               drawerWidthState={drawerWidthState}
             />

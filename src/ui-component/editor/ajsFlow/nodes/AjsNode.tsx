@@ -7,18 +7,14 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { UnitEntity } from "../../../../domain/models/units/UnitEntity";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import {
-  CurrentUnitEntityStateType,
-  DialogDataStateType,
-} from "../FlowContents";
+import { CurrentUnitIdStateType, DialogDataStateType } from "../FlowContents";
 import { TySymbol } from "../../../../domain/values/AjsType";
 import { tyDefinitionLang } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../../MyContexts";
 
-export type AjsNode<T extends UnitEntity = UnitEntity> = {
-  unitEntity: T;
+export type AjsNode = {
+  unitId: string;
   unitDefinition: UnitDefinitionDialogDto;
   label: string;
   comment?: string;
@@ -30,7 +26,7 @@ export type AjsNode<T extends UnitEntity = UnitEntity> = {
   hasSchedule: boolean;
   hasWaitedFor: boolean;
 } & DialogDataStateType &
-  CurrentUnitEntityStateType &
+  CurrentUnitIdStateType &
   Record<string, unknown>;
 
 export const nodeSxProps: SxProps<Theme> = {
