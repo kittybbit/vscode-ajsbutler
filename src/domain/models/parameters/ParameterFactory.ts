@@ -228,6 +228,7 @@ import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
   adjustToSdItemCount,
+  buildSdAlignedParameters,
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
@@ -277,13 +278,10 @@ export class ParamFactory {
       parameter: "cftd",
       defaultRawValue: DEFAULTS.Cftd,
     });
-    const values = params
-      ? params.map((param) => new Cftd(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Cftd(param),
       (rule) =>
         new Cftd({
           unit: unit,
@@ -351,13 +349,10 @@ export class ParamFactory {
       unit: unit,
       parameter: "cy",
     });
-    const values = params
-      ? params.map((param) => new Cy(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Cy(param),
       (rule) =>
         new Cy({
           unit: unit,
@@ -718,13 +713,10 @@ export class ParamFactory {
       unit: unit,
       parameter: "ey",
     });
-    const values = params
-      ? params.map((param) => new Ey(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Ey(param),
       (rule) =>
         new Ey({
           unit: unit,
@@ -1668,13 +1660,10 @@ export class ParamFactory {
       unit: unit,
       parameter: "sh",
     });
-    const values = params
-      ? params.map((param) => new Sh(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Sh(param),
       (rule) =>
         new Sh({
           unit: unit,
@@ -1691,13 +1680,10 @@ export class ParamFactory {
       parameter: "shd",
       defaultRawValue: DEFAULTS.Shd,
     });
-    const values = params
-      ? params.map((param) => new Shd(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Shd(param),
       (rule) =>
         new Shd({
           unit: unit,
@@ -1736,13 +1722,10 @@ export class ParamFactory {
       parameter: "st",
       defaultRawValue: DEFAULTS.St,
     });
-    const values = params
-      ? params.map((param) => new St(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new St(param),
       (rule) =>
         new St({
           unit: unit,
@@ -1767,13 +1750,10 @@ export class ParamFactory {
       unit: unit,
       parameter: "sy",
     });
-    const values = params
-      ? params.map((param) => new Sy(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Sy(param),
       (rule) =>
         new Sy({
           unit: unit,
@@ -1954,13 +1934,10 @@ export class ParamFactory {
       parameter: "wc",
       defaultRawValue: DEFAULTS.Wc,
     });
-    const values = params
-      ? params.map((param) => new Wc(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Wc(param),
       (rule) =>
         new Wc({
           unit: unit,
@@ -1984,13 +1961,10 @@ export class ParamFactory {
       parameter: "wt",
       defaultRawValue: DEFAULTS.Wt,
     });
-    const values = params
-      ? params.map((param) => new Wt(param)).sort((a, b) => a.rule - b.rule)
-      : undefined;
-    // adjust
-    return adjustToSdItemCount(
+    return buildSdAlignedParameters(
+      params,
       unit.params("sd"),
-      values,
+      (param) => new Wt(param),
       (rule) =>
         new Wt({
           unit: unit,

@@ -5,6 +5,7 @@ import { N } from "../../domain/models/units/N";
 import { Sd, Wc } from "../../domain/models/parameters";
 import {
   adjustToSdItemCount,
+  buildSdAlignedParameters,
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
@@ -135,6 +136,39 @@ suite("Parameter helpers", () => {
         }),
     );
     assert.strictEqual(unchanged, undefined);
+  });
+
+  test("builds and aligns sd-based rule parameters in one helper", () => {
+    const { jobnet } = parseJobnets();
+
+    const aligned = buildSdAlignedParameters(
+      resolveParameterArray({
+        unit: jobnet,
+        parameter: "wc",
+        defaultRawValue: "no",
+      }),
+      jobnet.sd,
+      (param) => new Wc(param),
+      (rule) =>
+        new Wc({
+          unit: jobnet,
+          parameter: "wc",
+          inherited: false,
+          defaultRawValue: `${rule},no`,
+          position: -1,
+        }),
+    );
+
+    assert.deepStrictEqual(
+      aligned?.map((parameter) => ({
+        rule: parameter?.rule,
+        value: parameter?.value(),
+      })),
+      [
+        { rule: 1, value: "2" },
+        { rule: 2, value: "2,no" },
+      ],
+    );
   });
 
   test("keeps root-jobnet defaults centralized for wrapper behavior", () => {

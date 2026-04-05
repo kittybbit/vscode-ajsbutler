@@ -140,28 +140,29 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Centralize root-jobnet-specific parameter defaults so the remaining
-wrapper-derived semantics stop being split across `N` and `ParameterFactory`.
+Extract a reusable builder for SD-aligned rule parameters so the remaining
+rule-aware parameter semantics stop repeating the same mapping pattern.
 
 ### Why
 
-Root-jobnet defaults currently live in two places: `ParameterFactory` decides
-them for `rg` and `sd`, while `N` decides them for `ncl`, `ncs`, and `ncex`.
-That split makes the remaining semantic cleanup harder to reason about.
+`ParameterFactory` still repeats the same "lookup -> class mapping -> sort ->
+SD alignment -> rule fallback" pattern across multiple parameter families.
+Collapsing that pattern into one helper reduces duplication before deeper
+semantic moves.
 
 ### Scope
 
-- centralize root-jobnet default raw values behind one helper
-- switch `ParameterFactory` root-jobnet defaults to the shared helper
-- switch `N` connector default behavior to the shared helper
-- add focused tests for the centralized default behavior
+- add a helper that builds and aligns SD-based rule parameters
+- switch repeated `ParameterFactory` SD-aligned families to the shared helper
+- keep public parameter behavior unchanged while reducing duplication
+- add focused tests for the shared builder behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing non-root-jobnet defaults
+- changing rule semantics or fallback values
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -175,26 +176,25 @@ That split makes the remaining semantic cleanup harder to reason about.
 
 #### Use case
 
-Root-jobnet parameter default consolidation.
+SD-aligned parameter builder extraction.
 
 #### Layers affected
 
-- domain: root-jobnet default helper usage
-- docs: plan tracking for the consolidation slice
+- domain: SD-aligned parameter helper usage
+- docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize where the default values
-  are decided.
-- Limit this slice to root-jobnet defaults and leave broader rule-aware
-  semantics for later work.
+- Keep semantic behavior identical and only centralize the repeated builder
+  pattern.
+- Limit this slice to SD-aligned parameter families and leave broader
+  rule-specific semantics for later work.
 
 ### Acceptance Criteria
 
-- [ ] root-jobnet defaults for `rg`, `sd`, `ncl`, `ncs`, and `ncex` are
-      decided in one helper
-- [ ] `ParameterFactory` and `N` delegate to the shared root-jobnet helper
-- [ ] focused tests cover the centralized default behavior
+- [ ] shared helper exists for SD-aligned parameter building
+- [ ] repeated SD-aligned families in `ParameterFactory` delegate to the helper
+- [ ] focused tests cover the shared builder behavior
 
 ### Test Plan
 
@@ -205,11 +205,12 @@ Root-jobnet parameter default consolidation.
 
 ### Risks
 
-- centralized defaults could accidentally change root-vs-non-root behavior
-- inherited `rg` behavior could accidentally change if root defaults move in
-  the wrong order
+- builder extraction could accidentally change rule sorting or fallback
+  generation order
+- one parameter family could diverge if its constructor semantics differ from
+  the others
 
 ### Rollback Plan
 
-- revert the centralized-default helper usage in `N` and `ParameterFactory`
-- keep broader rule-aware semantic moves separate from this consolidation step
+- revert the SD-aligned builder helper usage in `ParameterFactory`
+- keep broader rule-aware semantic moves separate from this extraction step
