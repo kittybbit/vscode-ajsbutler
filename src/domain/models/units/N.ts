@@ -1,12 +1,11 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
-import { UnitEntity } from "./UnitEntity";
+import { WaitableUnitEntity } from "./WaitableUnitEntity";
 import { resolveHasSchedule } from "./unitScheduleStateHelpers";
 import { resolveIsRootJobnet } from "./unitJobnetStateHelpers";
 import { resolveUnitPriority } from "./unitPriorityHelpers";
-import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
 
-export class N extends UnitEntity {
+export class N extends WaitableUnitEntity {
   /** Whether this jobnet is the root jobnet. */
   get isRootJobnet() {
     return resolveIsRootJobnet(this.parent?.ty.value());
@@ -17,11 +16,6 @@ export class N extends UnitEntity {
       (this.sd ?? []).map((schedule) => schedule.value() ?? ""),
     );
   }
-  /** Whether this jobnet have a unit whose end is being waited for. */
-  get hasWaitedFor() {
-    return resolveHasWaitedFor(this.eun);
-  }
-
   // [sd=[N,]{[[yyyy/]mm/]{[+|*|@]dd|[+|*|@]b[-DD]|[+]{su|mo|tu|we|th|fr|sa}[:{n|b}]}|en|ud};]
   get sd() {
     return ParamFactory.sd(this);

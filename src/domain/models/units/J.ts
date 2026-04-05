@@ -1,9 +1,8 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntity";
+import { WaitableUnitEntity } from "./WaitableUnitEntity";
 import { resolveUnitPriority } from "./unitPriorityHelpers";
-import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
 
-export class J extends UnitEntity {
+export class J extends WaitableUnitEntity {
   // [te="command-text";]
   get te() {
     return ParamFactory.te(this);
@@ -191,11 +190,6 @@ export class J extends UnitEntity {
 
   get priority(): number {
     return resolveUnitPriority(this);
-  }
-
-  /** Whether this jobnet have a unit whose end is being waited for. */
-  get hasWaitedFor() {
-    return resolveHasWaitedFor(this.eun);
   }
 }
 export class Rj extends J {}

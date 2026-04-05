@@ -128,6 +128,8 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model helper modules now live under `src/domain/models/ajs/normalize/`
   so unit, relation, warning, builder, and tree concerns share a single
   location and naming scheme.
+- wait-capable wrapper units now share a `WaitableUnitEntity` base class so
+  `hasWaitedFor` behavior no longer repeats across each `eun`-aware subclass.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -233,26 +235,26 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Reorganize normalized helper modules under a single `normalize/` location and
-align their names with their responsibilities.
+Introduce a shared wait-capable wrapper base class so repeated
+`hasWaitedFor` behavior moves into inheritance instead of staying duplicated in
+each `eun`-aware unit.
 
 ### Why
 
-After extracting shared unit-edge parsing, normalized mapping still keeps its
-own `con` or `seq` coercion rule. Moving that rule next to edge parsing keeps
-all edge interpretation in one place.
+The remaining duplication in wrapper classes is now mostly repetitive wrapper
+glue rather than cross-boundary domain rules. `hasWaitedFor` is repeated across
+many `eun`-aware units, and inheritance is a better fit here than another
+helper extraction.
 
 ### Scope
 
-- add a shared unit-edge type normalization helper
-- switch normalized dependency mapping to use it
-- add focused tests for edge-type normalization
+- add a `WaitableUnitEntity` base class with shared `hasWaitedFor` behavior
+- move `eun`-aware wrapper subclasses to the shared base class
+- add focused inheritance-path coverage
 
 ### Non-Goals
 
-- changing edge validation or missing-target warning behavior
-- changing the normalized dependency DTO shape
-
+- changing normalized-model wait-state behavior
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all remaining parameter semantics at once
@@ -269,28 +271,29 @@ all edge interpretation in one place.
 
 #### Use case
 
-Shared wait-state helper reuse.
+Shared wait-capable wrapper base class.
 
 #### Layers affected
 
-- domain: shared wait-state helper reuse across wrapper and normalized-model code
+- domain: wrapper inheritance for wait-capable units
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep wait detection behavior identical to existing wrapper and normalized
-  behavior.
-- Limit the slice to unifying the wait-state helper call path only.
+- Use inheritance, not another helper, because this duplication is wrapper
+  behavior shared by many subclasses.
+- Keep `eun` parameter access in concrete units and move only
+  `hasWaitedFor` into the shared base.
 
 ### Acceptance Criteria
 
-- [ ] shared wait-state helper accepts normalized-model inputs
-- [ ] normalized-model wait detection delegates to the shared helper
+- [ ] `eun`-aware wrapper units inherit `hasWaitedFor`
+- [ ] wrapper behavior remains unchanged
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for string-based wait-state resolution
+- add a focused wrapper test for inherited `hasWaitedFor`
 - run quality checks
 - run desktop tests
 - run build
@@ -298,12 +301,10 @@ Shared wait-state helper reuse.
 
 ### Risks
 
-- helper generalization could accidentally change wrapper wait detection
-- normalized-model mapping could still keep a separate wait check if a call
-  site is missed
+- a unit without `eun` could be moved to the shared base by mistake
+- inheritance changes could miss one subclass and leave duplicate behavior
 
 ### Rollback Plan
 
-- restore the local normalized-model wait check if behavior changes
-- keep broader wrapper-derived semantic moves separate from this extraction
-  step
+- revert the shared base class and restore local getters in affected units
+- keep broader wrapper-derived semantic moves separate from this slice
