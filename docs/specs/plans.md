@@ -151,29 +151,29 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable top-parameter builder so `top1` to `top4` stop repeating
-the same wrapper-aware builder wiring in `ParameterFactory`.
+Extract a reusable required-parameter builder so mandatory parameter handling
+stops being hand-written in `ParameterFactory.ty`.
 
 ### Why
 
-`ParameterFactory` still contains four nearly identical `top*` builders. The
-default rule is already shared, so the remaining builder wiring can also move
-into one helper without changing behavior.
+`ParameterFactory.ty` still handles "required parameter or throw" inline.
+Moving that into a shared helper makes the required-parameter rule explicit and
+reduces one more remaining special case inside the factory.
 
 ### Scope
 
-- add a shared helper for `top1` to `top4` parameter building
-- switch `ParameterFactory` `top1` to `top4` to the shared helper
-- keep public parameter behavior unchanged while reducing repeated builder
-  wiring
-- add focused tests for the shared `top*` builder behavior
+- add a shared helper for required scalar parameter building
+- switch `ParameterFactory.ty` to the shared helper
+- keep public parameter behavior unchanged while reducing inline required
+  handling
+- add focused tests for the shared required-parameter behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing transfer-operation default values
+- changing `ty` validation semantics
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -187,24 +187,25 @@ into one helper without changing behavior.
 
 #### Use case
 
-Top-parameter builder extraction.
+Required-parameter builder extraction.
 
 #### Layers affected
 
-- domain: top-parameter helper usage
+- domain: required-parameter helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize `top*` builder wiring.
-- Limit this slice to `top1` to `top4` instead of rewriting all
-  job-transfer-related parameters at once.
+- Keep semantic behavior identical and only centralize required-parameter
+  handling.
+- Limit this slice to `ty` instead of rewriting all remaining special cases at
+  once.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for `top1` to `top4` parameter building
-- [ ] `ParameterFactory` `top1` to `top4` delegate to the helper
-- [ ] focused tests cover shared `top*` builder behavior
+- [ ] shared helper exists for required scalar parameter building
+- [ ] `ParameterFactory.ty` delegates to the helper
+- [ ] focused tests cover required-parameter behavior
 
 ### Test Plan
 
@@ -215,13 +216,12 @@ Top-parameter builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change explicit `top*` precedence over
-  derived defaults
-- the shared helper could drift from `J` / `Cj` typing if its accepted unit
-  shape is too broad
+- helper extraction could accidentally change the `ty` error path
+- the helper could be too generic and hide required-parameter semantics that
+  should stay explicit
 
 ### Rollback Plan
 
-- revert `top1` to `top4` helper usage in `ParameterFactory`
+- revert required-parameter helper usage in `ParameterFactory.ty`
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

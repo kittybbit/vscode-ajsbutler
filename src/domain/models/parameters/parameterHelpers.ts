@@ -79,6 +79,21 @@ export const buildTopParameter = <T>(
   return parameter ? mapParam(parameter) : undefined;
 };
 
+export const buildRequiredParameter = <T>(
+  arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit">,
+  mapParam: (param: ParamInternal) => T,
+  buildErrorMessage: (parameter: ParamSymbol) => string,
+): T => {
+  const parameter = resolveParameter({
+    unit: arg.unit,
+    parameter: arg.parameter,
+  });
+  if (parameter === undefined) {
+    throw new Error(buildErrorMessage(arg.parameter));
+  }
+  return mapParam(parameter);
+};
+
 /** Create a parameter value map with rule numbers as keys. */
 const mapByRule = <T extends Rule>(params: Array<T> | undefined) =>
   params

@@ -9,6 +9,7 @@ import {
   adjustToSdItemCount,
   buildInheritedParameter,
   buildInheritedParameterArray,
+  buildRequiredParameter,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
   buildSdAlignedParameters,
@@ -358,6 +359,43 @@ suite("Parameter helpers", () => {
       (param) => param.defaultRawValue ?? param.rawValue,
     );
     assert.strictEqual(explicitTop4, "keep");
+  });
+
+  test("builds required parameters and keeps the missing-parameter error", () => {
+    const { jobnet } = parseJobnets();
+
+    const requiredTy = buildRequiredParameter(
+      {
+        unit: jobnet,
+        parameter: "ty",
+      },
+      (param) => param.rawValue,
+      () => "Ty parameter should be specified.",
+    );
+    assert.strictEqual(requiredTy, "n");
+
+    const missingTyUnit = Object.assign(
+      Object.create(Object.getPrototypeOf(jobnet)),
+      jobnet,
+      {
+        parameters: jobnet.parameters.filter(
+          (parameter) => parameter.key !== "ty",
+        ),
+      },
+    ) as N;
+
+    assert.throws(
+      () =>
+        buildRequiredParameter(
+          {
+            unit: missingTyUnit,
+            parameter: "ty",
+          },
+          (param) => param.rawValue,
+          () => "Ty parameter should be specified.",
+        ),
+      /Ty parameter should be specified\./,
+    );
   });
 
   test("builds sorted rule parameters for simple rule arrays", () => {
