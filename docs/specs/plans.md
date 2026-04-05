@@ -151,30 +151,28 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract reusable inherited-parameter builders so simple inherited parameter
-mapping stops being repeated in `ParameterFactory`.
+Extract reusable root-jobnet-aware parameter builders so `rg` and `sd` stop
+assembling root default behavior directly inside `ParameterFactory`.
 
 ### Why
 
-`ParameterFactory` still repeats the same `resolveParameter*` plus
-`inherit: true` mapping pattern for multiple scalar and array parameters.
-Moving that into shared helpers keeps the factory focused on which parameter is
-being exposed rather than how inherited lookup is wired.
+`ParameterFactory` still owns the root-jobnet-specific default wiring for `rg`
+and `sd`. Moving that into shared helpers keeps the factory closer to typed
+construction and makes the root-jobnet rule easier to test in one place.
 
 ### Scope
 
-- add shared helpers for inherited scalar and array parameter builders
-- switch selected `ParameterFactory` inherited parameters to the shared helper
-- keep public parameter behavior unchanged while reducing repeated inherited
-  lookup wiring
-- add focused tests for inherited builder behavior
+- add shared helpers for root-jobnet-aware scalar and rule-array builders
+- switch `ParameterFactory` `rg` and `sd` to the shared helpers
+- keep public parameter behavior unchanged while reducing root-default wiring
+- add focused tests for root-jobnet-aware builder behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing root-jobnet default rules
+- changing the root-jobnet default values themselves
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -188,25 +186,25 @@ being exposed rather than how inherited lookup is wired.
 
 #### Use case
 
-Inherited parameter builder extraction.
+Root-jobnet parameter builder extraction.
 
 #### Layers affected
 
-- domain: inherited parameter helper usage
+- domain: root-jobnet parameter helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize inherited lookup
+- Keep semantic behavior identical and only centralize root-jobnet default
   builder wiring.
-- Limit this slice to selected inherited parameters instead of rewriting the
-  full factory at once.
+- Limit this slice to `rg` and `sd` instead of rewriting the full factory at
+  once.
 
 ### Acceptance Criteria
 
-- [ ] shared helpers exist for inherited scalar and array parameter builders
-- [ ] selected inherited parameters in `ParameterFactory` delegate to helpers
-- [ ] focused tests cover inherited builder behavior
+- [ ] shared helpers exist for root-jobnet-aware scalar and array builders
+- [ ] `ParameterFactory` `rg` and `sd` delegate to the helpers
+- [ ] focused tests cover root-jobnet-aware builder behavior
 
 ### Test Plan
 
@@ -217,12 +215,12 @@ Inherited parameter builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change inherited precedence
-- scalar and array variants could diverge if the shared helper is typed
-  incorrectly
+- helper extraction could accidentally change root-jobnet default precedence
+- scalar and array root-jobnet variants could diverge if the shared helper is
+  typed incorrectly
 
 ### Rollback Plan
 
-- revert inherited-builder helper usage in `ParameterFactory`
+- revert root-jobnet builder helper usage in `ParameterFactory`
 - keep broader wrapper-derived semantic moves separate from this extraction
   step

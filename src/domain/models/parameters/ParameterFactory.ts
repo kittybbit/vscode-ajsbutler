@@ -227,13 +227,14 @@ import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase } from "./parameter.types";
 import {
+  buildRootJobnetParameter,
+  buildRootJobnetRuleParameters,
   buildInheritedParameter,
   buildInheritedParameterArray,
   buildSdAlignedParameters,
   buildSortedRuleParameters,
   resolveParameter,
   resolveParameterArray,
-  resolveRootJobnetDefaultRawValue,
   resolveTopDefaultRawValue,
 } from "./parameterHelpers";
 
@@ -1584,16 +1585,15 @@ export class ParamFactory {
     return param ? new Req(param) : undefined;
   }
   static rg(unit: N) {
-    const param = this.#checkAndGet({
-      unit: unit,
-      parameter: "rg",
-      defaultRawValue: resolveRootJobnetDefaultRawValue(
-        "rg",
-        unit.isRootJobnet,
-      ),
-      inherit: true,
-    });
-    return param ? new Rg(param) : undefined;
+    return buildRootJobnetParameter(
+      {
+        unit: unit,
+        parameter: "rg",
+        isRootJobnet: unit.isRootJobnet,
+        rootDefaultParameter: "rg",
+      },
+      (param) => new Rg(param),
+    );
   }
   static rh(unit: UnitEntity) {
     const param = this.#checkAndGet({
@@ -1624,15 +1624,15 @@ export class ParamFactory {
     return param ? new Sc(param) : undefined;
   }
   static sd(unit: N) {
-    const params = this.#checkAndGetArray({
-      unit: unit,
-      parameter: "sd",
-      defaultRawValue: resolveRootJobnetDefaultRawValue(
-        "sd",
-        unit.isRootJobnet,
-      ),
-    });
-    return buildSortedRuleParameters(params, (param) => new Sd(param));
+    return buildRootJobnetRuleParameters(
+      {
+        unit: unit,
+        parameter: "sd",
+        isRootJobnet: unit.isRootJobnet,
+        rootDefaultParameter: "sd",
+      },
+      (param) => new Sd(param),
+    );
   }
   static sdd(unit: UnitEntity) {
     return buildInheritedParameter(
