@@ -1,5 +1,6 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { UnitEntity } from "./UnitEntity";
+import { resolveHasWaitedFor } from "./unitWaitStateHelpers";
 
 export class Mswj extends UnitEntity {
   // [msqpt="path-name";]
@@ -73,7 +74,7 @@ export class Mswj extends UnitEntity {
 
   /** Whether this jobnet have a unit whose end is being waited for. */
   get hasWaitedFor() {
-    return this.eun && this.eun.length > 0;
+    return resolveHasWaitedFor(this.eun);
   }
 }
 export class Rmswj extends Mswj {}

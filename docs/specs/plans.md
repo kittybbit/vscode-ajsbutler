@@ -77,6 +77,8 @@ This file is the high-level index for the per-feature plan structure in
   and normalized AJS mapping stop maintaining duplicate layout parsing rules.
 - shared unit-parameter helpers now resolve defined parameter names so wrapper
   prototype inspection no longer lives only inside `UnitEntity`.
+- shared unit wait-state helpers now resolve `eun`-based wait detection so
+  wrapper classes stop duplicating `hasWaitedFor` checks inline.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -182,21 +184,21 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract shared defined-parameter helpers so wrapper prototype inspection uses a
-shared implementation.
+Extract shared wait-state helpers so duplicated `eun`-based wait detection uses
+a shared implementation.
 
 ### Why
 
-`defineParams` currently depends on prototype-chain inspection embedded inside
-`UnitEntity`. Pulling that into one shared helper makes the wrapper
-introspection rule explicit and separately testable.
+Many wrapper classes still repeat the same `this.eun && this.eun.length > 0`
+check for `hasWaitedFor`. Pulling that into one shared helper makes the wait
+state rule explicit and separately testable.
 
 ### Scope
 
-- add a shared helper for resolving defined parameter names from a wrapper
-  instance prototype chain
-- switch `UnitEntity` to use the helper for `defineParams`
-- add focused tests for parameter-name resolution
+- add a shared helper for resolving `hasWaitedFor` from optional `eun`
+  parameters
+- switch wrapper classes with `hasWaitedFor` getters to use the helper
+- add focused tests for wait-state resolution
 
 ### Non-Goals
 
@@ -216,27 +218,27 @@ introspection rule explicit and separately testable.
 
 #### Use case
 
-Shared defined-parameter helper extraction.
+Shared wait-state helper extraction.
 
 #### Layers affected
 
-- domain: shared parameter-name helper and wrapper introspection cleanup
+- domain: shared wait-state helper and wrapper wait detection cleanup
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep `defineParams` behavior identical to existing wrapper behavior.
-- Limit the slice to prototype-based parameter-name resolution only.
+- Keep `hasWaitedFor` behavior identical to existing wrapper behavior.
+- Limit the slice to `eun`-based wait-state resolution only.
 
 ### Acceptance Criteria
 
-- [ ] shared helper resolves defined parameter names from a wrapper instance
-- [ ] `UnitEntity` delegates `defineParams` resolution to the helper
+- [ ] shared helper resolves wait-state from optional `eun` parameters
+- [ ] wrapper `hasWaitedFor` getters delegate to the helper
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add helper coverage for defined parameter-name resolution
+- add helper coverage for `hasWaitedFor` resolution
 - run quality checks
 - run desktop tests
 - run build
@@ -244,12 +246,12 @@ Shared defined-parameter helper extraction.
 
 ### Risks
 
-- parameter-name resolution could accidentally include non-parameter getters
-- helper extraction could overreach into unrelated unit metadata logic
+- wait-state helper extraction could overreach into units that use a different
+  waiting semantic
+- wrapper updates could miss a `hasWaitedFor` getter and leave duplication
 
 ### Rollback Plan
 
-- restore local `defineParams` prototype inspection in `UnitEntity` if
-  behavior changes
+- restore inline `hasWaitedFor` checks in wrapper classes if behavior changes
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
