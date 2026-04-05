@@ -1,7 +1,7 @@
-import { Unit } from "../../values/Unit";
-import { resolveUnitDepth } from "../units/unitDepthHelpers";
-import { resolveIsRecovery } from "../units/unitTypeHelpers";
-import { AjsRelation, AjsUnit, AjsUnitType } from "./AjsDocument";
+import { Unit } from "../../../values/Unit";
+import { resolveUnitDepth } from "../../units/unitDepthHelpers";
+import { resolveIsRecovery } from "../../units/unitTypeHelpers";
+import { AjsRelation, AjsUnit, AjsUnitType } from "../AjsDocument";
 import {
   resolveNormalizedComment,
   resolveNormalizedGroupType,
@@ -9,7 +9,7 @@ import {
   resolveNormalizedHasWaitedFor,
   resolveNormalizedIsRootJobnet,
   resolveNormalizedLayout,
-} from "./normalizeUnitHelpers";
+} from "./unit";
 
 export const buildNormalizedUnit = (
   unit: Unit,

@@ -1,17 +1,17 @@
-import { TySymbol, isTySymbol } from "../../values/AjsType";
-import { Unit } from "../../values/Unit";
+import { TySymbol, isTySymbol } from "../../../values/AjsType";
+import { Unit } from "../../../values/Unit";
 import {
   findUnitParameterValue,
   findUnitParameterValues,
-} from "../../values/unitParameterLookupHelpers";
-import { decodeEncodedString } from "../parameters/encodedStringHelpers";
-import { resolveGroupType } from "../units/unitGroupStateHelpers";
-import { resolveIsRootJobnet } from "../units/unitJobnetStateHelpers";
-import { resolveUnitLayout } from "../units/unitLayoutHelpers";
-import { resolveHasSchedule } from "../units/unitScheduleStateHelpers";
-import { resolveHasWaitedFor } from "../units/unitWaitStateHelpers";
-import { AjsGroupType, AjsNormalizationWarning } from "./AjsDocument";
-import { buildMissingUnitTypeWarning } from "./normalizeWarningHelpers";
+} from "../../../values/unitParameterLookupHelpers";
+import { decodeEncodedString } from "../../parameters/encodedStringHelpers";
+import { resolveGroupType } from "../../units/unitGroupStateHelpers";
+import { resolveIsRootJobnet } from "../../units/unitJobnetStateHelpers";
+import { resolveUnitLayout } from "../../units/unitLayoutHelpers";
+import { resolveHasSchedule } from "../../units/unitScheduleStateHelpers";
+import { resolveHasWaitedFor } from "../../units/unitWaitStateHelpers";
+import { AjsGroupType, AjsNormalizationWarning } from "../AjsDocument";
+import { buildMissingUnitTypeWarning } from "./warnings";
 
 export const resolveNormalizedUnitType = (
   unit: Unit,

@@ -1,8 +1,8 @@
-import { Unit } from "../../values/Unit";
-import { AjsNormalizationWarning, AjsUnit } from "./AjsDocument";
-import { resolveNormalizedRelations } from "./normalizeRelationHelpers";
-import { buildNormalizedUnit } from "./normalizeUnitBuilderHelpers";
-import { resolveNormalizedUnitType } from "./normalizeUnitHelpers";
+import { Unit } from "../../../values/Unit";
+import { AjsNormalizationWarning, AjsUnit } from "../AjsDocument";
+import { resolveNormalizedRelations } from "./relations";
+import { buildNormalizedUnit } from "./unitBuilder";
+import { resolveNormalizedUnitType } from "./unit";
 
 export const normalizeUnitTree = (
   unit: Unit,

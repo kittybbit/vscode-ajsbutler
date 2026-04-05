@@ -1,4 +1,4 @@
-import { AjsNormalizationWarning } from "./AjsDocument";
+import { AjsNormalizationWarning } from "../AjsDocument";
 
 export const buildMissingUnitTypeWarning = (
   unitPath: string,

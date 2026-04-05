@@ -125,6 +125,9 @@ This file is the high-level index for the per-feature plan structure in
   `normalizeAjsDocument.ts`.
 - normalized-model relation warnings now use relation terminology so warning
   codes and messages align with the normalized relation model.
+- normalized-model helper modules now live under `src/domain/models/ajs/normalize/`
+  so unit, relation, warning, builder, and tree concerns share a single
+  location and naming scheme.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -230,8 +233,8 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Align normalize-warning wording with relation terminology so warning payloads
-match the normalized relation model.
+Reorganize normalized helper modules under a single `normalize/` location and
+align their names with their responsibilities.
 
 ### Why
 

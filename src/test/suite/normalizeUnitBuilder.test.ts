@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
-import { buildNormalizedUnit } from "../../domain/models/ajs/normalizeUnitBuilderHelpers";
+import { buildNormalizedUnit } from "../../domain/models/ajs/normalize/unitBuilder";
 
 const validDefinition = `
 unit=root,,jp1admin,;

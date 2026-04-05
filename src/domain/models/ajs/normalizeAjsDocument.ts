@@ -1,6 +1,6 @@
 import { Unit } from "../../values/Unit";
 import { AjsDocument, AjsNormalizationWarning } from "./AjsDocument";
-import { normalizeUnitTree } from "./normalizeDocumentTreeHelpers";
+import { normalizeUnitTree } from "./normalize/documentTree";
 
 export const normalizeAjsDocument = (rootUnits: Unit[]): AjsDocument => {
   const warnings: AjsNormalizationWarning[] = [];
