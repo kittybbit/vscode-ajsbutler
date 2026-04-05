@@ -47,6 +47,9 @@ This file is the high-level index for the per-feature plan structure in
 - shared parameter helpers now expose inherited scalar and array builders so
   selected `ParameterFactory` methods stop repeating `inherit: true` lookup
   wiring.
+- shared parameter helpers now expose optional scalar builders so the simplest
+  `checkAndGet(...)` plus `new Xxx(...)` parameter methods stop repeating in
+  `ParameterFactory`.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -151,29 +154,30 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Extract a reusable required-parameter builder so mandatory parameter handling
-stops being hand-written in `ParameterFactory.ty`.
+Extract a reusable optional-scalar builder so the simplest `ParameterFactory`
+methods stop repeating `checkAndGet(...)` plus `new Xxx(...)` wiring.
 
 ### Why
 
-`ParameterFactory.ty` still handles "required parameter or throw" inline.
-Moving that into a shared helper makes the required-parameter rule explicit and
-reduces one more remaining special case inside the factory.
+`ParameterFactory` still contains many trivial scalar builders that differ only
+by parameter name, default value, and wrapper constructor. A shared helper can
+remove that boilerplate without changing behavior.
 
 ### Scope
 
-- add a shared helper for required scalar parameter building
-- switch `ParameterFactory.ty` to the shared helper
-- keep public parameter behavior unchanged while reducing inline required
-  handling
-- add focused tests for the shared required-parameter behavior
+- add a shared helper for optional scalar parameter building
+- switch the simple optional scalar builders that only wrap one resolved
+  parameter to the shared helper across `ParameterFactory`
+- keep public parameter behavior unchanged while reducing repeated builder
+  wiring
+- add focused tests for the optional-scalar helper behavior
 
 ### Non-Goals
 
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all parameter semantics at once
-- changing `ty` validation semantics
+- changing inherited, root-jobnet, or rule-array parameter behavior
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -187,25 +191,25 @@ reduces one more remaining special case inside the factory.
 
 #### Use case
 
-Required-parameter builder extraction.
+Optional-scalar builder extraction.
 
 #### Layers affected
 
-- domain: required-parameter helper usage
+- domain: optional-scalar helper usage
 - docs: plan tracking for the extraction slice
 
 #### Key decisions
 
-- Keep semantic behavior identical and only centralize required-parameter
-  handling.
-- Limit this slice to `ty` instead of rewriting all remaining special cases at
-  once.
+- Keep semantic behavior identical and only centralize the simplest optional
+  scalar builder wiring.
+- Limit this slice to plain optional scalar methods and leave array,
+  inherited, root-jobnet, and extra-argument builders untouched.
 
 ### Acceptance Criteria
 
-- [ ] shared helper exists for required scalar parameter building
-- [ ] `ParameterFactory.ty` delegates to the helper
-- [ ] focused tests cover required-parameter behavior
+- [ ] shared helper exists for optional scalar parameter building
+- [ ] simple `ParameterFactory` scalar methods delegate to the helper
+- [ ] focused tests cover optional-scalar helper behavior
 
 ### Test Plan
 
@@ -216,12 +220,13 @@ Required-parameter builder extraction.
 
 ### Risks
 
-- helper extraction could accidentally change the `ty` error path
-- the helper could be too generic and hide required-parameter semantics that
-  should stay explicit
+- helper extraction could accidentally change explicit-vs-default precedence
+- the helper could be widened too far and obscure where more complex semantics
+  should remain explicit
 
 ### Rollback Plan
 
-- revert required-parameter helper usage in `ParameterFactory.ty`
+- revert optional-scalar helper usage in the affected `ParameterFactory`
+  methods
 - keep broader wrapper-derived semantic moves separate from this extraction
   step
