@@ -59,4 +59,6 @@
       recovery semantics no longer drift apart
 - [x] Expose shared layout helpers so wrapper and normalized-model `el`
       interpretation no longer drift apart
+- [x] Expose shared defined-parameter helpers so wrapper prototype inspection no
+      longer lives only inside `UnitEntity`
 - [x] Document which semantics intentionally remain in application view adapters
