@@ -77,4 +77,6 @@
       calculation no longer drift apart
 - [x] Reuse shared wait-state helpers from normalized-model mapping so wrapper
       and normalized-model wait detection fully share the same rule
+- [x] Reuse shared encoded-string helpers from normalized-model mapping so
+      wrapper and normalized-model comment decoding fully share the same rule
 - [x] Document which semantics intentionally remain in application view adapters

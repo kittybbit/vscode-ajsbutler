@@ -1,12 +1,9 @@
 import Parameter from "./Parameter";
+import { decodeEncodedString } from "./encodedStringHelpers";
 
 class EncordedString extends Parameter {
   override value(): string | undefined {
-    return super
-      .value()
-      ?.replace(/^"(.*)"$/, "$1")
-      .replace(/#"/g, '"')
-      .replace(/##/g, "#");
+    return decodeEncodedString(super.value());
   }
 }
 
