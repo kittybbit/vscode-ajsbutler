@@ -114,4 +114,7 @@
 - [x] Audit remaining wrapper semantics after `WaitableUnit` and
       `PrioritizableUnit` so future capability extraction stays focused on
       real cross-unit behavior instead of unit-local rules
+- [x] Keep `G` planning, weekday-state, and connector-control defaults as
+      group-local wrapper behavior with focused wrapper tests instead of
+      introducing another capability interface
 - [x] Document which semantics intentionally remain in application view adapters
