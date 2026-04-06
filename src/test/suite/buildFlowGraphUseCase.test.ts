@@ -43,10 +43,18 @@ suite("Build Flow Graph Use Case", () => {
     const graph = buildFlowGraph(document, currentUnitId);
 
     assert.ok(graph);
-    assert.deepStrictEqual(
-      graph?.edges.map((edge) => edge.type),
-      ["seq", "con"],
-    );
+    assert.deepStrictEqual(graph?.edges, [
+      {
+        source: "/root/jobnet/job-a",
+        target: "/root/jobnet/job-b",
+        type: "seq",
+      },
+      {
+        source: "/root/jobnet/.CONDITION",
+        target: "/root/jobnet/job-a",
+        type: "con",
+      },
+    ]);
     assert.deepStrictEqual(
       graph?.nodes.map((node) => node.id),
       [
