@@ -1,17 +1,8 @@
 /** JP1/AJS3 unit entities  */
 
 import { Unit } from "../../values/Unit";
-import { ParamSymbol } from "../../values/AjsType";
 import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
-import {
-  findNextRelations,
-  findNextUnits,
-  findPreviousRelations,
-  findPreviousUnits,
-} from "./unitRelationHelpers";
-import { resolveUnitLayout } from "./unitLayoutHelpers";
-import { resolveDefinedParams } from "./unitParameterHelpers";
 import { resolveUnitDepth } from "./unitDepthHelpers";
 import { resolveIsRecovery } from "./unitTypeHelpers";
 
@@ -40,7 +31,6 @@ export abstract class UnitEntity {
   #parent?: UnitEntity;
   #children: UnitEntity[];
   #isRecovery?: boolean;
-  #defineParams: ParamSymbol[];
 
   constructor(unit: Unit, parent?: UnitEntity) {
     this.#unit = unit;
@@ -60,7 +50,6 @@ export abstract class UnitEntity {
       .filter((child): child is UnitEntity => child instanceof UnitEntity);
     this.#isRoot = unit.isRoot();
     this.#isRecovery = resolveIsRecovery(this.ty.value());
-    this.#defineParams = resolveDefinedParams(this);
   }
 
   get absolutePath() {
@@ -127,36 +116,9 @@ export abstract class UnitEntity {
   get isRoot() {
     return this.#isRoot;
   }
-  get previous() {
-    return findPreviousRelations(this);
-  }
-  get previousUnits() {
-    return findPreviousUnits(this);
-  }
-  get next() {
-    return findNextRelations(this);
-  }
-  get nextUnits() {
-    return findNextUnits(this);
-  }
-  /**
-   * H=80＋160x -> x=(H-80)/160
-   * V=48＋96y -> y=(V-48)/96
-   */
-  get hv() {
-    return resolveUnitLayout(
-      this.name,
-      (this.parent?.el ?? [])
-        .map((el) => el.value())
-        .filter((value): value is string => value !== undefined),
-    );
-  }
   /** key of unit difinition parameters */
   get isRecovery() {
     return this.#isRecovery;
-  }
-  get defineParams() {
-    return this.#defineParams;
   }
   get depth(): number {
     return resolveUnitDepth(this.absolutePath);

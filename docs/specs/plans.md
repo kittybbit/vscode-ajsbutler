@@ -142,6 +142,10 @@ This file is the high-level index for the per-feature plan structure in
 - `UnitEntity` no longer exposes generic `params<T>()` or debug-oriented
   `prettyJSON()` helpers now that relation lookup uses typed wrapper access and
   wrapper serialization is no longer part of the supported domain API.
+- `UnitEntity` no longer exposes dead wrapper-era navigation/layout/introspection
+  APIs (`previous`, `next`, `previousUnits`, `nextUnits`, `hv`,
+  `defineParams`) now that active consumers use normalized DTOs or dedicated
+  relation helpers instead.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -275,6 +279,8 @@ entity boundary less clear than necessary.
 - remove `params<T>()` from `UnitEntity`
 - remove debug-only `prettyJSON()` helpers that no longer have live callers
 - keep typed wrapper getters and relation navigation behavior unchanged
+- remove additional dead wrapper-era APIs from `UnitEntity` when no live
+  consumer remains
 - add focused wrapper tests for planning, weekday-state, and connector-control
   defaults
 - document that `G` semantics remain unit-local for now
