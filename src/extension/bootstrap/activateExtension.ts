@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import { Telemetry } from "../constant";
-import { createTelemetry } from "../telemetry/createTelemetry";
 import { createEditorAdapterSubscriptions } from "./editorAdapterWiring";
+import { createExtensionRuntime } from "./extensionRuntime";
 import { createViewerSubscriptions } from "./viewerWiring";
 
 export type ActivatedExtension = {
@@ -12,8 +12,7 @@ export type ActivatedExtension = {
 export const activateExtension = (
   context: vscode.ExtensionContext,
 ): ActivatedExtension => {
-  const telemetry = createTelemetry();
-  const myExtension = MyExtension.init(context, telemetry);
+  const myExtension = createExtensionRuntime(context);
 
   context.subscriptions.push(
     ...createEditorAdapterSubscriptions(),
