@@ -1,11 +1,6 @@
 import * as vscode from "vscode";
 import { ViewerFactory } from "./ViewerFactory";
-import {
-  ResourceEventType,
-  SaveEventType,
-  WebviewEventType,
-} from "../../shared/webviewEvents";
-import { OPERATION, READY, RESOURCE, SAVE } from "../../shared/webviewEvents";
+import { WebviewEventType } from "../../shared/webviewEvents";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_TABLE_VIEWER_TYPE } from "./constant";
 import { MyExtension } from "../MyExtension";
@@ -15,6 +10,10 @@ import {
   reportWebviewOperation,
   saveText,
 } from "./messageHandlers";
+import {
+  createViewerMessageHandler,
+  registerViewerPanelDispose,
+} from "./viewerMessageRouting";
 
 export class AjsTableViewerFactory extends ViewerFactory {
   public static init(
@@ -33,50 +32,32 @@ export class AjsTableViewerFactory extends ViewerFactory {
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
   ): void {
-    const onDidReceiveMessage = (e: WebviewEventType) => {
-      console.log("invoke AjsTableViewerFactory.onDidReceiveMessage.", e);
-      switch (e.type) {
-        case RESOURCE: {
-          postResourceMessage((e as ResourceEventType).data, panel);
-          break;
-        }
-        case READY: {
-          // webview is ready.
-          readyTableDocument(document, panel);
-          break;
-        }
-        case SAVE: {
-          //save contents
-          if (typeof (e as SaveEventType).data === "string") {
-            void saveText((e as SaveEventType).data);
-          } else {
-            void vscode.window.showErrorMessage(
-              "Data is not a string and cannot be saved.",
-            );
-          }
-          break;
-        }
-        case OPERATION: {
-          // track user operation.
-          reportWebviewOperation(
-            document,
-            panel,
-            this.myExtension.telemetry,
-            e.data,
+    const onDidReceiveMessage: (e: WebviewEventType) => void =
+      createViewerMessageHandler({
+        document,
+        panel,
+        telemetry: this.myExtension.telemetry,
+        onReady: readyTableDocument,
+        onResource: (event, receivedPanel) => {
+          console.log(
+            "invoke AjsTableViewerFactory.onDidReceiveMessage.",
+            event,
           );
-          break;
-        }
-      }
-    };
-    const receiveMessageDisose =
+          postResourceMessage(event.data, receivedPanel);
+        },
+        onOperation: reportWebviewOperation,
+        onSave: (event) => saveText(event.data),
+        showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+      });
+    const receiveMessageDispose =
       panel.webview.onDidReceiveMessage(onDidReceiveMessage);
 
-    panel.onDidDispose(() => {
-      console.log(
-        `invoke panel.onDidDispose. (${this.viewType}, ${document.uri.toString()})`,
-      );
-      this.store.removeByDocument(document);
-      receiveMessageDisose.dispose();
+    registerViewerPanelDispose({
+      document,
+      panel,
+      viewType: this.viewType,
+      store: this.store,
+      receiveMessageDispose,
     });
   }
 }
