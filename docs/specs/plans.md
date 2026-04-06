@@ -155,6 +155,10 @@ This file is the high-level index for the per-feature plan structure in
   APIs (`previous`, `next`, `previousUnits`, `nextUnits`, `hv`,
   `defineParams`) now that active consumers use normalized DTOs or dedicated
   relation helpers instead.
+- `UnitEntity` now has an explicit docs-level boundary: wrapper identity,
+  tree mechanics, raw metadata exposure, common JP1 getters, and recovery or
+  depth semantics stay in the base entity, while debug helpers and dead
+  compatibility APIs do not.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -190,9 +194,10 @@ model.
   Treat most remaining wrapper members as typed parameter accessors unless a
   new cross-unit rule or genuinely unit-local behavior is identified.
 - `UnitEntity` core responsibilities: identity, tree structure, children,
-  parent, ancestors, `depth`, common JP1 getters
-  Keep only stable base-wrapper concerns here. Remove dead wrapper-era APIs
-  once live consumers migrate away.
+  parent, ancestors, `depth`, recovery, raw metadata, common JP1 getters
+  Keep only stable base-wrapper concerns here. This includes constructor-bound
+  identity derivation and basic tree mechanics, but not debug helpers, dead
+  compatibility APIs, or wrapper-specific business rules.
 
 ## Default Workflow
 

@@ -135,6 +135,8 @@
 - [x] Remove dead wrapper-era `UnitEntity` APIs once flow and list consumers no
       longer depend on wrapper navigation, layout, or parameter-introspection
       getters
+- [x] Document `UnitEntity` core responsibilities so future refactors preserve
+      base-wrapper identity and tree mechanics while avoiding wrapper bloat
 - [x] Document which semantics intentionally remain in application view adapters
 - [x] Document the current capability/shared/local wrapper semantics matrix so
       future refactors use the same extraction criteria

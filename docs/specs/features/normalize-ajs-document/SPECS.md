@@ -28,3 +28,9 @@ Source use case: docs/requirements/use-cases/uc-normalize-ajs-document.md
   rule is still duplicated across multiple normalized or application paths.
 - Keep `UnitEntity` focused on stable base-wrapper concerns, not debug helpers
   or dead compatibility APIs.
+- Treat `UnitEntity` as the owner of wrapper identity and tree mechanics:
+  deterministic ID derivation, absolute path, parent/ancestor/child links,
+  raw unit metadata, and common JP1 getters such as `ty`, `cm`, `el`, and `sz`.
+- Do not move constructor-bound identity logic or basic tree traversal out of
+  `UnitEntity` unless multiple consumers require a separate abstraction with
+  real semantic value.
