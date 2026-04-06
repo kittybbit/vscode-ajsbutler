@@ -20,7 +20,7 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
 
 - `AjsDocument`
 - `AjsUnit`
-- `AjsDependency`
+- `AjsRelation`
 - optional normalization warnings
 
 ## Rules
@@ -43,6 +43,9 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
 - common parameter semantics such as direct lookup, repeated-value lookup, and
   first-ancestor inherited lookup should be reusable from the normalized model
   when multiple consumers need the same interpretation
+- remaining wrapper-derived semantics should move into the normalized model
+  only when the same rule is still duplicated across multiple normalized or
+  application consumers
 - user-visible behavior remains unchanged while use cases stop depending on raw
   or wrapper-oriented structures directly
 - normalization tests should prefer shared fixtures in `sample/` for UTF-8,

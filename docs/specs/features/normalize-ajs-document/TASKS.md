@@ -10,8 +10,14 @@
 
 ## Remaining Follow-up
 
-- [ ] Move remaining wrapper-derived semantics into the normalized model
-      where they are broadly reusable
+- [ ] Revisit normalized-model extraction only when a wrapper rule is both
+      broadly reusable and still duplicated outside the owning wrapper
+- [ ] Prefer fixture-backed normalization coverage for remaining edge cases such
+      as encoding-sensitive documents and larger definitions, instead of
+      creating new abstractions without repeated consumers
+- [ ] Keep adapter-boundary docs aligned when a semantic intentionally remains
+      wrapper-local or application-local, so future slices do not re-open
+      already settled extraction decisions
 - [x] Expose normalized helpers for parent, ancestor, and root jobnet lookup
       so application slices stop repeating wrapper-era navigation logic
 - [x] Expose normalized helpers for direct parameter lookup, repeated-value
