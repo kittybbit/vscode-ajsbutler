@@ -34,13 +34,11 @@ const toAncestorNodes = (
   findAjsUnitAncestors(document, unit).map(toInputNode);
 
 const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
-  unit.children.flatMap((child) =>
-    child.relations.map((relation) => ({
-      source: relation.sourceUnitId,
-      target: relation.targetUnitId,
-      type: relation.type,
-    })),
-  );
+  unit.relations.map((relation) => ({
+    source: relation.sourceUnitId,
+    target: relation.targetUnitId,
+    type: relation.type,
+  }));
 
 const toInput = (document: AjsDocument, unit: AjsUnit): FlowGraphInput => {
   const conditionUnit = unit.children.find((child) => child.unitType === "rc");
