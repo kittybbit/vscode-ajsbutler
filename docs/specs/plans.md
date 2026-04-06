@@ -133,6 +133,9 @@ This file is the high-level index for the per-feature plan structure in
   dedicated inheritance layer across each `eun`-aware subclass, while
   `hasSchedule` remains local to `N` because no other wrapper shares that
   concept.
+- prioritizable wrapper units now implement a shared `PrioritizableUnit`
+  interface so `priority` semantics are expressed as composition-oriented
+  wrapper capabilities instead of class-family coupling.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -238,29 +241,27 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Evaluate remaining wrapper-derived semantics and prefer composition-oriented
-patterns when inheritance would create an unstable class hierarchy.
+Express shared wrapper priority semantics with a `PrioritizableUnit`
+interface while preserving the existing helper-based resolution rule.
 
 ### Why
 
-JP1/AJS wrapper behavior can overlap in ways that TypeScript single
-inheritance does not model cleanly. Future slices should avoid stacking base
-classes when interface-plus-helper composition would stay clearer.
+`priority` already lives in a shared helper, but the capability is still only
+implicit in `J`, `N`, and `Qj`. An explicit interface keeps the composition
+direction consistent with `WaitableUnit` without introducing new inheritance.
 
 ### Scope
 
-- review remaining wrapper duplication with a bias toward composition
-- avoid adding new inheritance layers unless they model a stable unit family
-- replace behavior-only wrapper bases with interface-plus-helper composition
-  when JP1/AJS semantics overlap across unrelated unit families
-- document the selection rule for future slices
+- add a `PrioritizableUnit` interface beside the shared priority helper
+- make `J`, `N`, and `Qj` implement the shared capability explicitly
+- keep the current `resolveUnitPriority(...)` behavior unchanged
 
 ### Non-Goals
 
 - changing normalized-model priority behavior
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
-- rewriting all remaining parameter semantics at once
+- rewriting all remaining wrapper semantics at once
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -274,22 +275,21 @@ classes when interface-plus-helper composition would stay clearer.
 
 #### Use case
 
-Wrapper semantic selection guidelines.
+Composition-oriented wrapper priority semantics.
 
 #### Layers affected
 
-- domain: no new wrapper extraction until the next target is justified
-- docs: plan tracking for the selection rule
+- domain: wrapper priority capability typing
+- docs: plan tracking for the composition slice
 
 #### Key decisions
 
-- Prefer interface-plus-helper composition over new inheritance layers when
-  JP1/AJS semantics may need to combine across multiple unit families.
-- Keep existing helper-based `priority` delegation as-is for now.
+- Keep `priority` resolution in the shared helper.
+- Add an interface for the capability instead of adding another base class.
 
 ### Acceptance Criteria
 
-- [ ] no new inheritance layer is introduced without a stable semantic family
+- [ ] `J`, `N`, and `Qj` expose `priority` through a shared interface
 - [ ] wrapper behavior remains unchanged
 - [ ] local quality, test, build, and web checks pass after implementation
 
@@ -303,10 +303,11 @@ Wrapper semantic selection guidelines.
 
 ### Risks
 
-- future slices may still overuse inheritance if the rule is not explicit
-- deferring extraction may leave some low-value duplication in place
+- the interface could be typed too narrowly and block future priority-capable
+  wrappers
+- the interface could be typed too loosely and lose domain meaning
 
 ### Rollback Plan
 
-- revisit the selection rule if a future slice shows composition is insufficient
+- remove the interface and keep `resolveUnitPriority(...)` structural-only
 - keep broader wrapper-derived semantic moves separate from this slice

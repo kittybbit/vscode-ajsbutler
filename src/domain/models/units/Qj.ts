@@ -1,12 +1,15 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { UnitEntity } from "./UnitEntity";
-import { resolveUnitPriority } from "./unitPriorityHelpers";
+import {
+  resolveUnitPriority,
+  type PrioritizableUnit,
+} from "./unitPriorityHelpers";
 import {
   resolveUnitHasWaitedFor,
   type WaitableUnit,
 } from "./unitWaitStateHelpers";
 
-export class Qj extends UnitEntity implements WaitableUnit {
+export class Qj extends UnitEntity implements PrioritizableUnit, WaitableUnit {
   // [qu="queue-name";]
   get qu() {
     return ParamFactory.qu(this);

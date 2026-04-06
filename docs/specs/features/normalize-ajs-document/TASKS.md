@@ -73,6 +73,8 @@
       duplicating `op` and `cl` interpretation logic
 - [x] Expose shared priority helpers so wrapper classes stop routing priority
       resolution through a misc utility module
+- [x] Expose a shared `PrioritizableUnit` capability so wrapper priority
+      semantics remain composition-oriented without adding another base class
 - [x] Expose shared depth helpers so wrapper and normalized-model depth
       calculation no longer drift apart
 - [x] Reuse shared wait-state helpers from normalized-model mapping so wrapper

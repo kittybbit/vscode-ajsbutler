@@ -3,7 +3,10 @@ import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { J } from "../../domain/models/units/J";
 import { N } from "../../domain/models/units/N";
-import { resolveUnitPriority } from "../../domain/models/units/unitPriorityHelpers";
+import {
+  resolveUnitPriority,
+  type PrioritizableUnit,
+} from "../../domain/models/units/unitPriorityHelpers";
 
 suite("Unit priority helpers", () => {
   test("prefers explicit pr over inherited parent priority", () => {
@@ -55,5 +58,19 @@ suite("Unit priority helpers", () => {
     const root = tyFactory(result.rootUnits[0]) as N;
     const child = root.children[0] as J;
     assert.strictEqual(resolveUnitPriority(child), 1);
+  });
+
+  test("accepts prioritizable unit shapes through the shared interface", () => {
+    const unit = {
+      pr: undefined,
+      ni: {
+        inherited: false,
+        priority: 4,
+      },
+      parent: undefined,
+      priority: 4,
+    } as PrioritizableUnit;
+
+    assert.strictEqual(resolveUnitPriority(unit), 4);
   });
 });

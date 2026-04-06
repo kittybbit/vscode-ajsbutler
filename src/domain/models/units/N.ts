@@ -2,14 +2,17 @@ import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
 import { UnitEntity } from "./UnitEntity";
 import { resolveIsRootJobnet } from "./unitJobnetStateHelpers";
-import { resolveUnitPriority } from "./unitPriorityHelpers";
+import {
+  resolveUnitPriority,
+  type PrioritizableUnit,
+} from "./unitPriorityHelpers";
 import { resolveHasSchedule } from "./unitScheduleStateHelpers";
 import {
   resolveUnitHasWaitedFor,
   type WaitableUnit,
 } from "./unitWaitStateHelpers";
 
-export class N extends UnitEntity implements WaitableUnit {
+export class N extends UnitEntity implements PrioritizableUnit, WaitableUnit {
   /** Whether this jobnet is the root jobnet. */
   get isRootJobnet() {
     return resolveIsRootJobnet(this.parent?.ty.value());
