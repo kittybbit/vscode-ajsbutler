@@ -119,4 +119,7 @@
       introducing another capability interface
 - [x] Remove generic `UnitEntity` parameter lookup and debug serialization
       helpers now that remaining relation access can use typed wrapper APIs
+- [x] Remove dead wrapper-era `UnitEntity` APIs once flow and list consumers no
+      longer depend on wrapper navigation, layout, or parameter-introspection
+      getters
 - [x] Document which semantics intentionally remain in application view adapters
