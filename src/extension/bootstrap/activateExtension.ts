@@ -1,7 +1,10 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
-import { Telemetry } from "../constant";
 import { createEditorAdapterSubscriptions } from "./editorAdapterWiring";
+import {
+  deactivateExtensionRuntime,
+  reportExtensionActivated,
+} from "./extensionLifecycle";
 import { createExtensionRuntime } from "./extensionRuntime";
 import { createViewerSubscriptions } from "./viewerWiring";
 
@@ -19,9 +22,7 @@ export const activateExtension = (
     ...createViewerSubscriptions(myExtension),
   );
 
-  myExtension.telemetry.trackEvent(Telemetry.ExtensionActivate, {
-    development: String(DEVELOPMENT),
-  });
+  reportExtensionActivated(myExtension);
 
   return {
     myExtension,
@@ -31,11 +32,5 @@ export const activateExtension = (
 export const deactivateExtension = (
   activatedExtension: ActivatedExtension | undefined,
 ): void => {
-  const telemetry = activatedExtension?.myExtension.telemetry;
-  if (telemetry) {
-    telemetry.trackEvent(Telemetry.ExtensionDeactivate, {
-      development: String(DEVELOPMENT),
-    });
-    activatedExtension?.myExtension.dispose();
-  }
+  deactivateExtensionRuntime(activatedExtension?.myExtension);
 };
