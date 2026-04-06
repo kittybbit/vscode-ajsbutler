@@ -159,6 +159,9 @@ This file is the high-level index for the per-feature plan structure in
   tree mechanics, raw metadata exposure, common JP1 getters, and recovery or
   depth semantics stay in the base entity, while debug helpers and dead
   compatibility APIs do not.
+- preview command registration now stays focused on command wiring, while the
+  open-preview execution path and webview React panel mount logic live in
+  dedicated helpers with direct unit-test coverage.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

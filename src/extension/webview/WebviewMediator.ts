@@ -2,8 +2,7 @@ import * as vscode from "vscode";
 import { WebviewStore } from "./WebviewStore";
 import { MyExtension } from "../MyExtension";
 import { LANGUAGE_ID } from "../constant";
-import { BUNDLE_SRC } from "./constant";
-import { initReactPanel } from "./reactPanel";
+import { mountViewerPanel } from "./mountViewerPanel";
 
 type DocumentChangeHandler = (
   document: vscode.TextDocument,
@@ -38,7 +37,8 @@ export abstract class WebviewMediator implements vscode.Disposable {
             return;
           }
           console.log(
-            `invoke WebviewMediator.onDidChangeTextDocument. (${this.#viewType}, ${e.document.uri.toString()})`,
+            "invoke WebviewMediator.onDidChangeTextDocument.",
+            `(${this.#viewType}, ${e.document.uri.toString()})`,
           );
           const panel = this.#store.panelByDocument(e.document);
           if (panel === undefined) {
@@ -52,7 +52,8 @@ export abstract class WebviewMediator implements vscode.Disposable {
           return;
         }
         console.log(
-          `invoke WebviewMediator.onDidCloseTextDocument. (${this.#viewType}), ${e.uri.toString()})`,
+          "invoke WebviewMediator.onDidCloseTextDocument.",
+          `(${this.#viewType}), ${e.uri.toString()})`,
         );
         const panel = this.#store.panelByDocument(e);
         if (panel === undefined) {
@@ -68,7 +69,8 @@ export abstract class WebviewMediator implements vscode.Disposable {
         );
         e.files.forEach((file) => {
           console.log(
-            `File renamed from ${file.oldUri.toString()} to ${file.newUri.toString()}`,
+            `File renamed from ${file.oldUri.toString()}`,
+            `to ${file.newUri.toString()}`,
           );
           const panel = this.#store.panelByUri(file.oldUri);
           if (panel !== undefined) {
@@ -80,7 +82,7 @@ export abstract class WebviewMediator implements vscode.Disposable {
       vscode.window.onDidChangeActiveColorTheme((e) => {
         console.log("invoke WebviewMediator.onDidChangeActiveColorTheme.", e);
         this.#store.allPanels.forEach((panel) => {
-          initReactPanel(context, panel, this.#viewType, BUNDLE_SRC);
+          mountViewerPanel(context, panel, this.#viewType);
         });
       }),
     );
