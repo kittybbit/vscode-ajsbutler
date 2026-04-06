@@ -117,6 +117,9 @@
 - [x] Keep `G` planning, weekday-state, and connector-control defaults as
       group-local wrapper behavior with focused wrapper tests instead of
       introducing another capability interface
+- [x] Keep `N` root-jobnet detection, schedule ownership, and connector-control
+      defaults as jobnet-local wrapper behavior with focused wrapper tests
+      instead of introducing another capability interface
 - [x] Remove generic `UnitEntity` parameter lookup and debug serialization
       helpers now that remaining relation access can use typed wrapper APIs
 - [x] Remove dead wrapper-era `UnitEntity` APIs once flow and list consumers no
