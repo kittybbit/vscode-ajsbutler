@@ -136,6 +136,9 @@ This file is the high-level index for the per-feature plan structure in
 - prioritizable wrapper units now implement a shared `PrioritizableUnit`
   interface so `priority` semantics are expressed as composition-oriented
   wrapper capabilities instead of class-family coupling.
+- group-wrapper semantics now stay explicitly local to `G`, with focused
+  wrapper coverage for planning, weekday-state, and connector-control default
+  behavior instead of introducing another shared capability.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -241,29 +244,30 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Audit the remaining wrapper-derived semantics and document which ones should
-stay unit-local instead of becoming another shared capability.
+Clarify the remaining group-local wrapper semantics in `G` without extracting
+another shared capability.
 
 ### Why
 
-`WaitableUnit` and `PrioritizableUnit` cover the main cross-unit wrapper
-capabilities. The remaining wrapper semantics are mostly unit-local, and the
-next step is to make that boundary explicit so future slices do not extract
-helpers or interfaces mechanically.
+After `WaitableUnit` and `PrioritizableUnit`, `G` is the clearest example of
+semantics that belong to one wrapper family only. This slice makes that
+boundary explicit in code and tests so future refactors do not treat every
+repeated getter as a new capability candidate.
 
 ### Scope
 
-- review the remaining wrapper-local getters after the wait and priority slices
-- classify semantics as either cross-unit capabilities or unit-local behavior
-- document why `hasSchedule` stays local to `N` and why `G` semantics stay
-  local to group wrappers for now
+- keep connector-control defaults and weekday-state resolution grouped inside
+  `G`
+- add focused wrapper tests for planning, weekday-state, and connector-control
+  defaults
+- document that `G` semantics remain unit-local for now
 
 ### Non-Goals
 
 - changing normalized-model behavior
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
-- extracting new wrapper capabilities without a clear cross-unit need
+- extracting a `GroupUnit` capability or other new shared interface
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -277,40 +281,41 @@ helpers or interfaces mechanically.
 
 #### Use case
 
-Wrapper capability audit.
+Group-local wrapper semantics.
 
 #### Layers affected
 
-- domain: no code extraction unless the audit finds a justified next target
-- docs: plan tracking for the capability boundary
+- domain: `G` wrapper readability and focused wrapper coverage
+- docs: plan tracking for local-vs-shared semantics
 
 #### Key decisions
 
-- Keep cross-unit capabilities explicit through interface-plus-helper
-  composition.
-- Keep semantics that appear in only one wrapper family as unit-local behavior.
+- Keep `G` semantics local because they are specific to the group wrapper
+  family.
+- Add focused wrapper tests instead of introducing another capability
+  interface.
 
 ### Acceptance Criteria
 
-- [ ] remaining wrapper semantics are classified as cross-unit or unit-local
-- [ ] docs explain why no new capability interface is added in this slice
-- [ ] local quality, test, build, and web checks pass after implementation if
-      code changes are made
+- [ ] `G` keeps planning, weekday-state, and connector-control defaults as
+      local wrapper behavior
+- [ ] focused wrapper tests cover those local semantics
+- [ ] local quality, test, build, and web checks pass
 
 ### Test Plan
 
-- update planning docs
-- run quality checks if docs or code are changed
+- add a focused `G` wrapper test
+- run quality checks
+- run desktop tests
+- run build
+- run web tests
 
 ### Risks
 
-- the audit could miss a future cross-unit capability hiding in a small number
-  of wrappers
-- over-documenting the current boundary could make future extraction feel more
-  rigid than intended
+- the slice could drift into a broader group-capability refactor
+- wrapper tests could duplicate helper tests if they become too low-level
 
 ### Rollback Plan
 
-- revisit the classification if a future slice discovers another real
-  cross-unit capability
+- revert the local wrapper cleanup and keep the previous `G` implementation
 - keep broader wrapper-derived semantic moves separate from this slice

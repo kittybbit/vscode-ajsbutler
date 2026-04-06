@@ -35,10 +35,7 @@ export class G extends UnitEntity {
   }
   // [ncl={y|n};]
   get ncl() {
-    return ParamFactory.ncl(
-      this,
-      resolveConnectorControlDefaultRawValue("always-disabled"),
-    );
+    return ParamFactory.ncl(this, this.#connectorControlDefault());
   }
   // [ncn=jobnet-connector-name;]
   get ncn() {
@@ -46,17 +43,11 @@ export class G extends UnitEntity {
   }
   // [ncs={y|n};]
   get ncs() {
-    return ParamFactory.ncs(
-      this,
-      resolveConnectorControlDefaultRawValue("always-disabled"),
-    );
+    return ParamFactory.ncs(this, this.#connectorControlDefault());
   }
   // [ncex={y|n};]
   get ncex() {
-    return ParamFactory.ncex(
-      this,
-      resolveConnectorControlDefaultRawValue("always-disabled"),
-    );
+    return ParamFactory.ncex(this, this.#connectorControlDefault());
   }
   // [nchn="connection-host-name";]
   get nchn() {
@@ -68,38 +59,42 @@ export class G extends UnitEntity {
   }
 
   get su() {
-    return this.#judgeWeek("su");
+    return this.#resolveWeekState("su");
   }
 
   get mo() {
-    return this.#judgeWeek("mo");
+    return this.#resolveWeekState("mo");
   }
 
   get tu() {
-    return this.#judgeWeek("tu");
+    return this.#resolveWeekState("tu");
   }
 
   get we() {
-    return this.#judgeWeek("we");
+    return this.#resolveWeekState("we");
   }
 
   get th() {
-    return this.#judgeWeek("th");
+    return this.#resolveWeekState("th");
   }
 
   get fr() {
-    return this.#judgeWeek("fr");
+    return this.#resolveWeekState("fr");
   }
 
   get sa() {
-    return this.#judgeWeek("sa");
+    return this.#resolveWeekState("sa");
   }
 
   isPlanning() {
     return resolveIsPlanning(this.gty?.value());
   }
 
-  #judgeWeek = (week: WeekSymbol) => {
+  #connectorControlDefault() {
+    return resolveConnectorControlDefaultRawValue("always-disabled");
+  }
+
+  #resolveWeekState(week: WeekSymbol) {
     return resolveGroupWeekState(this.op, this.cl, week);
-  };
+  }
 }
