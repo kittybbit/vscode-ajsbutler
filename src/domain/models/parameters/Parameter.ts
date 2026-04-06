@@ -45,14 +45,6 @@ abstract class Parameter {
   value(): string | undefined {
     return this.#rawValue ?? this.#defaultRawValue;
   }
-  prettyJSON() {
-    return {
-      param: this.parameter,
-      value: this.value(),
-      inherited: this.inherited,
-      poisition: this.position,
-    };
-  }
 }
 
 export default Parameter;
