@@ -168,6 +168,9 @@ This file is the high-level index for the per-feature plan structure in
 - extension bootstrap now delegates table and flow viewer wiring to a dedicated
   helper so `activateExtension.ts` stays closer to a composition root than a
   full setup script.
+- extension bootstrap now delegates diagnostics and hover wiring to a
+  dedicated helper so editor adapter registration stays separate from runtime
+  creation and viewer wiring.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

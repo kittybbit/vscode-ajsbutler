@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import { Telemetry } from "../constant";
-import { registerHoverProvider } from "../languages/registerHoverProvider";
-import { registerDiagnostics } from "../diagnostics/registerDiagnostics";
 import { createTelemetry } from "../telemetry/createTelemetry";
+import { createEditorAdapterSubscriptions } from "./editorAdapterWiring";
 import { createViewerSubscriptions } from "./viewerWiring";
 
 export type ActivatedExtension = {
@@ -17,8 +16,7 @@ export const activateExtension = (
   const myExtension = MyExtension.init(context, telemetry);
 
   context.subscriptions.push(
-    registerDiagnostics(),
-    registerHoverProvider(),
+    ...createEditorAdapterSubscriptions(),
     ...createViewerSubscriptions(myExtension),
   );
 
