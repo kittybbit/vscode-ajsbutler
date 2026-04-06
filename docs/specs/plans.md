@@ -165,6 +165,9 @@ This file is the high-level index for the per-feature plan structure in
 - webview factories now delegate shared message routing and panel-dispose
   cleanup to dedicated helpers so factory classes can focus on viewer-specific
   ready behavior and adapter wiring.
+- extension bootstrap now delegates table and flow viewer wiring to a dedicated
+  helper so `activateExtension.ts` stays closer to a composition root than a
+  full setup script.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
