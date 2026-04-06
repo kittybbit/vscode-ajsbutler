@@ -241,27 +241,29 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Express shared wrapper priority semantics with a `PrioritizableUnit`
-interface while preserving the existing helper-based resolution rule.
+Audit the remaining wrapper-derived semantics and document which ones should
+stay unit-local instead of becoming another shared capability.
 
 ### Why
 
-`priority` already lives in a shared helper, but the capability is still only
-implicit in `J`, `N`, and `Qj`. An explicit interface keeps the composition
-direction consistent with `WaitableUnit` without introducing new inheritance.
+`WaitableUnit` and `PrioritizableUnit` cover the main cross-unit wrapper
+capabilities. The remaining wrapper semantics are mostly unit-local, and the
+next step is to make that boundary explicit so future slices do not extract
+helpers or interfaces mechanically.
 
 ### Scope
 
-- add a `PrioritizableUnit` interface beside the shared priority helper
-- make `J`, `N`, and `Qj` implement the shared capability explicitly
-- keep the current `resolveUnitPriority(...)` behavior unchanged
+- review the remaining wrapper-local getters after the wait and priority slices
+- classify semantics as either cross-unit capabilities or unit-local behavior
+- document why `hasSchedule` stays local to `N` and why `G` semantics stay
+  local to group wrappers for now
 
 ### Non-Goals
 
-- changing normalized-model priority behavior
+- changing normalized-model behavior
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
-- rewriting all remaining wrapper semantics at once
+- extracting new wrapper capabilities without a clear cross-unit need
 - changing extension activation, diagnostics, or telemetry
 
 ### Constraints
@@ -275,39 +277,40 @@ direction consistent with `WaitableUnit` without introducing new inheritance.
 
 #### Use case
 
-Composition-oriented wrapper priority semantics.
+Wrapper capability audit.
 
 #### Layers affected
 
-- domain: wrapper priority capability typing
-- docs: plan tracking for the composition slice
+- domain: no code extraction unless the audit finds a justified next target
+- docs: plan tracking for the capability boundary
 
 #### Key decisions
 
-- Keep `priority` resolution in the shared helper.
-- Add an interface for the capability instead of adding another base class.
+- Keep cross-unit capabilities explicit through interface-plus-helper
+  composition.
+- Keep semantics that appear in only one wrapper family as unit-local behavior.
 
 ### Acceptance Criteria
 
-- [ ] `J`, `N`, and `Qj` expose `priority` through a shared interface
-- [ ] wrapper behavior remains unchanged
-- [ ] local quality, test, build, and web checks pass after implementation
+- [ ] remaining wrapper semantics are classified as cross-unit or unit-local
+- [ ] docs explain why no new capability interface is added in this slice
+- [ ] local quality, test, build, and web checks pass after implementation if
+      code changes are made
 
 ### Test Plan
 
-- run quality checks
-- run quality checks
-- run desktop tests
-- run build
-- run web tests
+- update planning docs
+- run quality checks if docs or code are changed
 
 ### Risks
 
-- the interface could be typed too narrowly and block future priority-capable
-  wrappers
-- the interface could be typed too loosely and lose domain meaning
+- the audit could miss a future cross-unit capability hiding in a small number
+  of wrappers
+- over-documenting the current boundary could make future extraction feel more
+  rigid than intended
 
 ### Rollback Plan
 
-- remove the interface and keep `resolveUnitPriority(...)` structural-only
+- revisit the classification if a future slice discovers another real
+  cross-unit capability
 - keep broader wrapper-derived semantic moves separate from this slice

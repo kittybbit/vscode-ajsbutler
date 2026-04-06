@@ -111,4 +111,7 @@
 - [x] Reuse shared wait-state helpers through structural wrapper shapes so
       repeated `hasWaitedFor` behavior no longer requires dedicated wrapper
       base classes while `hasSchedule` remains local to `N`
+- [x] Audit remaining wrapper semantics after `WaitableUnit` and
+      `PrioritizableUnit` so future capability extraction stays focused on
+      real cross-unit behavior instead of unit-local rules
 - [x] Document which semantics intentionally remain in application view adapters
