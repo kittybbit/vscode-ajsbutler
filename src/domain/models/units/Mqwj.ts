@@ -1,7 +1,11 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./WaitableUnitEntity";
+import { UnitEntity } from "./UnitEntity";
+import {
+  resolveUnitHasWaitedFor,
+  type WaitableUnit,
+} from "./unitWaitStateHelpers";
 
-export class Mqwj extends WaitableUnitEntity {
+export class Mqwj extends UnitEntity implements WaitableUnit {
   // [mqcor=correlation-ID;]
   get mqcor() {
     return ParamFactory.mqcor(this);
@@ -61,6 +65,9 @@ export class Mqwj extends WaitableUnitEntity {
   // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
   get eun() {
     return ParamFactory.eun(this);
+  }
+  get hasWaitedFor() {
+    return resolveUnitHasWaitedFor(this);
   }
   // [ega={exec|execdeffer|none};]
   get ega() {

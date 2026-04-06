@@ -2,6 +2,15 @@ import type { Eun } from "../parameters";
 
 type WaitStateSource = Eun | string;
 
+export interface WaitableUnit {
+  readonly eun: Eun[] | undefined;
+  readonly hasWaitedFor: boolean;
+}
+
+type WaitableUnitLike = {
+  eun: WaitStateSource[] | undefined;
+};
+
 const resolveWaitStateValue = (
   waitedUnit: WaitStateSource,
 ): string | undefined =>
@@ -14,3 +23,6 @@ export const resolveHasWaitedFor = (
     const value = resolveWaitStateValue(waitedUnit);
     return value !== undefined && value.length > 0;
   });
+
+export const resolveUnitHasWaitedFor = (unit: WaitableUnitLike): boolean =>
+  resolveHasWaitedFor(unit.eun);

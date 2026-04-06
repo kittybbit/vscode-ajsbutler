@@ -106,7 +106,7 @@
 - [x] Reorganize normalized helper modules under `src/domain/models/ajs/normalize/`
       so file placement and naming are consistent across unit, relation,
       warning, builder, and tree concerns
-- [x] Introduce a shared wait-capable wrapper base class so repeated
-      `hasWaitedFor` behavior no longer stays duplicated in each `eun`-aware
-      subclass
+- [x] Reuse shared wait-state helpers through structural wrapper shapes so
+      repeated `hasWaitedFor` behavior no longer requires dedicated wrapper
+      base classes while `hasSchedule` remains local to `N`
 - [x] Document which semantics intentionally remain in application view adapters

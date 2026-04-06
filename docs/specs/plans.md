@@ -128,8 +128,11 @@ This file is the high-level index for the per-feature plan structure in
 - normalized-model helper modules now live under `src/domain/models/ajs/normalize/`
   so unit, relation, warning, builder, and tree concerns share a single
   location and naming scheme.
-- wait-capable wrapper units now share a `WaitableUnitEntity` base class so
-  `hasWaitedFor` behavior no longer repeats across each `eun`-aware subclass.
+- wait-capable wrapper units now reuse structural wait-state helpers through
+  `UnitEntity` subclasses so `hasWaitedFor` behavior no longer requires a
+  dedicated inheritance layer across each `eun`-aware subclass, while
+  `hasSchedule` remains local to `N` because no other wrapper shares that
+  concept.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -235,26 +238,26 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Introduce a shared wait-capable wrapper base class so repeated
-`hasWaitedFor` behavior moves into inheritance instead of staying duplicated in
-each `eun`-aware unit.
+Evaluate remaining wrapper-derived semantics and prefer composition-oriented
+patterns when inheritance would create an unstable class hierarchy.
 
 ### Why
 
-The remaining duplication in wrapper classes is now mostly repetitive wrapper
-glue rather than cross-boundary domain rules. `hasWaitedFor` is repeated across
-many `eun`-aware units, and inheritance is a better fit here than another
-helper extraction.
+JP1/AJS wrapper behavior can overlap in ways that TypeScript single
+inheritance does not model cleanly. Future slices should avoid stacking base
+classes when interface-plus-helper composition would stay clearer.
 
 ### Scope
 
-- add a `WaitableUnitEntity` base class with shared `hasWaitedFor` behavior
-- move `eun`-aware wrapper subclasses to the shared base class
-- add focused inheritance-path coverage
+- review remaining wrapper duplication with a bias toward composition
+- avoid adding new inheritance layers unless they model a stable unit family
+- replace behavior-only wrapper bases with interface-plus-helper composition
+  when JP1/AJS semantics overlap across unrelated unit families
+- document the selection rule for future slices
 
 ### Non-Goals
 
-- changing normalized-model wait-state behavior
+- changing normalized-model priority behavior
 - changing parser output
 - changing user-visible unit list, flow, or CSV behavior
 - rewriting all remaining parameter semantics at once
@@ -271,29 +274,28 @@ helper extraction.
 
 #### Use case
 
-Shared wait-capable wrapper base class.
+Wrapper semantic selection guidelines.
 
 #### Layers affected
 
-- domain: wrapper inheritance for wait-capable units
-- docs: plan tracking for the extraction slice
+- domain: no new wrapper extraction until the next target is justified
+- docs: plan tracking for the selection rule
 
 #### Key decisions
 
-- Use inheritance, not another helper, because this duplication is wrapper
-  behavior shared by many subclasses.
-- Keep `eun` parameter access in concrete units and move only
-  `hasWaitedFor` into the shared base.
+- Prefer interface-plus-helper composition over new inheritance layers when
+  JP1/AJS semantics may need to combine across multiple unit families.
+- Keep existing helper-based `priority` delegation as-is for now.
 
 ### Acceptance Criteria
 
-- [ ] `eun`-aware wrapper units inherit `hasWaitedFor`
+- [ ] no new inheritance layer is introduced without a stable semantic family
 - [ ] wrapper behavior remains unchanged
 - [ ] local quality, test, build, and web checks pass after implementation
 
 ### Test Plan
 
-- add a focused wrapper test for inherited `hasWaitedFor`
+- run quality checks
 - run quality checks
 - run desktop tests
 - run build
@@ -301,10 +303,10 @@ Shared wait-capable wrapper base class.
 
 ### Risks
 
-- a unit without `eun` could be moved to the shared base by mistake
-- inheritance changes could miss one subclass and leave duplicate behavior
+- future slices may still overuse inheritance if the rule is not explicit
+- deferring extraction may leave some low-value duplication in place
 
 ### Rollback Plan
 
-- revert the shared base class and restore local getters in affected units
+- revisit the selection rule if a future slice shows composition is insufficient
 - keep broader wrapper-derived semantic moves separate from this slice

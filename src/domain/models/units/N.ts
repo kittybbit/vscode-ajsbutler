@@ -1,11 +1,15 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveJobnetConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
-import { WaitableUnitEntity } from "./WaitableUnitEntity";
-import { resolveHasSchedule } from "./unitScheduleStateHelpers";
+import { UnitEntity } from "./UnitEntity";
 import { resolveIsRootJobnet } from "./unitJobnetStateHelpers";
 import { resolveUnitPriority } from "./unitPriorityHelpers";
+import { resolveHasSchedule } from "./unitScheduleStateHelpers";
+import {
+  resolveUnitHasWaitedFor,
+  type WaitableUnit,
+} from "./unitWaitStateHelpers";
 
-export class N extends WaitableUnitEntity {
+export class N extends UnitEntity implements WaitableUnit {
   /** Whether this jobnet is the root jobnet. */
   get isRootJobnet() {
     return resolveIsRootJobnet(this.parent?.ty.value());
@@ -164,6 +168,9 @@ export class N extends WaitableUnitEntity {
   // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
   get eun() {
     return ParamFactory.eun(this);
+  }
+  get hasWaitedFor() {
+    return resolveUnitHasWaitedFor(this);
   }
   // [ega={exec|execdeffer|none};]
   get ega() {

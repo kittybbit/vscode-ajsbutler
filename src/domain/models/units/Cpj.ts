@@ -1,7 +1,11 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./WaitableUnitEntity";
+import { UnitEntity } from "./UnitEntity";
+import {
+  resolveUnitHasWaitedFor,
+  type WaitableUnit,
+} from "./unitWaitStateHelpers";
 
-export class Cpj extends WaitableUnitEntity {
+export class Cpj extends UnitEntity implements WaitableUnit {
   // cty="AJSVAR";
   get cty() {
     return ParamFactory.cty(this);
@@ -40,6 +44,9 @@ export class Cpj extends WaitableUnitEntity {
   // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
   get eun() {
     return ParamFactory.eun(this);
+  }
+  get hasWaitedFor() {
+    return resolveUnitHasWaitedFor(this);
   }
   // [ega={exec|execdeffer|none};]
   get ega() {
