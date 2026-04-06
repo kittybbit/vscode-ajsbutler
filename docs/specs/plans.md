@@ -140,6 +140,9 @@ This file is the high-level index for the per-feature plan structure in
 - group-wrapper semantics now stay explicitly local to `G`, with focused
   wrapper coverage for planning, weekday-state, and connector-control default
   behavior instead of introducing another shared capability.
+- jobnet-wrapper semantics now stay explicitly local to `N`, with focused
+  wrapper coverage for root-jobnet detection, schedule ownership, and
+  connector-control defaults instead of introducing another capability.
 - `UnitEntity` no longer exposes generic `params<T>()` or debug-oriented
   `prettyJSON()` helpers now that relation lookup uses typed wrapper access and
   wrapper serialization is no longer part of the supported domain API.
