@@ -1,7 +1,11 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./WaitableUnitEntity";
+import { UnitEntity } from "./UnitEntity";
+import {
+  resolveUnitHasWaitedFor,
+  type WaitableUnit,
+} from "./unitWaitStateHelpers";
 
-export class Lfwj extends WaitableUnitEntity {
+export class Lfwj extends UnitEntity implements WaitableUnit {
   // [lftpd=[!]"trap-data-1"[:[!]"trap-data-2"...];]...
   get lftpd() {
     return ParamFactory.lftpd(this);
@@ -82,6 +86,9 @@ export class Lfwj extends WaitableUnitEntity {
   // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
   get eun() {
     return ParamFactory.eun(this);
+  }
+  get hasWaitedFor() {
+    return resolveUnitHasWaitedFor(this);
   }
   // [ega={exec|execdeffer|none};]
   get ega() {

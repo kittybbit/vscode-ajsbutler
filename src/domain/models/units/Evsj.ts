@@ -1,7 +1,11 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./WaitableUnitEntity";
+import { UnitEntity } from "./UnitEntity";
+import {
+  resolveUnitHasWaitedFor,
+  type WaitableUnit,
+} from "./unitWaitStateHelpers";
 
-export class Evsj extends WaitableUnitEntity {
+export class Evsj extends UnitEntity implements WaitableUnit {
   // [evsid=event-ID;]
   get evsid() {
     return ParamFactory.evsid(this);
@@ -73,6 +77,9 @@ export class Evsj extends WaitableUnitEntity {
   // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
   get eun() {
     return ParamFactory.eun(this);
+  }
+  get hasWaitedFor() {
+    return resolveUnitHasWaitedFor(this);
   }
   // [ega={exec|execdeffer|none};]
   get ega() {

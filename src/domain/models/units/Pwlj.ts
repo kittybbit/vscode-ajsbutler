@@ -1,7 +1,11 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./WaitableUnitEntity";
+import { UnitEntity } from "./UnitEntity";
+import {
+  resolveUnitHasWaitedFor,
+  type WaitableUnit,
+} from "./unitWaitStateHelpers";
 
-export class Pwlj extends WaitableUnitEntity {
+export class Pwlj extends UnitEntity implements WaitableUnit {
   // [pwlt={f|r|s};]
   get pwlt() {
     return ParamFactory.pwlt(this);
@@ -49,6 +53,9 @@ export class Pwlj extends WaitableUnitEntity {
   // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
   get eun() {
     return ParamFactory.eun(this);
+  }
+  get hasWaitedFor() {
+    return resolveUnitHasWaitedFor(this);
   }
   // [ega={exec|execdeffer|none};]
   get ega() {

@@ -1,5 +1,8 @@
 import * as assert from "assert";
-import { resolveHasWaitedFor } from "../../domain/models/units/unitWaitStateHelpers";
+import {
+  resolveHasWaitedFor,
+  resolveUnitHasWaitedFor,
+} from "../../domain/models/units/unitWaitStateHelpers";
 
 suite("Unit wait state helpers", () => {
   test("resolves whether a unit waits for any predecessor end", () => {
@@ -11,5 +14,10 @@ suite("Unit wait state helpers", () => {
       resolveHasWaitedFor([{ unitName: "job1" }] as never[]),
       true,
     );
+  });
+
+  test("resolves wait state from a waitable unit shape", () => {
+    assert.strictEqual(resolveUnitHasWaitedFor({ eun: undefined }), false);
+    assert.strictEqual(resolveUnitHasWaitedFor({ eun: ["job1"] }), true);
   });
 });
