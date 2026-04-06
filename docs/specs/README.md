@@ -36,6 +36,16 @@ For non-trivial changes:
 7. before `git push`, confirm `npm run qlty`, `npm test`, and
    `npm run build` all pass
 8. run any additional task-specific checks before finishing
+9. avoid anemic domain models: extract only cross-unit or cross-layer
+   semantics into helpers/interfaces, and keep entity identity plus
+   unit-local behavior in the entity when that behavior is part of the
+   JP1/AJS concept itself
+
+For docs-only changes:
+
+- `npm run build` is not required
+- prefer markdown-focused validation such as `npm run lint:md`
+- repository `Verify` workflow should not be relied on as a required gate
 
 ## Document Roles
 
