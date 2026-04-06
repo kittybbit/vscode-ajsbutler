@@ -105,8 +105,9 @@
       normalization no longer lives inline in `normalizeAjsDocument.ts`
 - [x] Align normalize-warning codes and messages with relation terminology so
       warning payloads match the normalized relation model
-- [x] Reorganize normalized helper modules under `src/domain/models/ajs/normalize/`
-      so file placement and naming are consistent across unit, relation,
+- [x] Reorganize normalized helper modules under
+      `src/domain/models/ajs/normalize/` so file placement and naming are
+      consistent across unit, relation,
       warning, builder, and tree concerns
 - [x] Reuse shared wait-state helpers through structural wrapper shapes so
       repeated `hasWaitedFor` behavior no longer requires dedicated wrapper
@@ -120,6 +121,9 @@
 - [x] Keep `N` root-jobnet detection, schedule ownership, and connector-control
       defaults as jobnet-local wrapper behavior with focused wrapper tests
       instead of introducing another capability interface
+- [x] Confirm that, after `WaitableUnit`, `PrioritizableUnit`, `G`, and `N`,
+      the remaining wrappers are mostly typed parameter-access surfaces rather
+      than additional strong unit-local semantics that need new abstraction
 - [x] Remove generic `UnitEntity` parameter lookup and debug serialization
       helpers now that remaining relation access can use typed wrapper APIs
 - [x] Remove dead wrapper-era `UnitEntity` APIs once flow and list consumers no

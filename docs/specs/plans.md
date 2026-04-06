@@ -143,6 +143,10 @@ This file is the high-level index for the per-feature plan structure in
 - jobnet-wrapper semantics now stay explicitly local to `N`, with focused
   wrapper coverage for root-jobnet detection, schedule ownership, and
   connector-control defaults instead of introducing another capability.
+- wrapper-capability audit now confirms that, after `WaitableUnit`,
+  `PrioritizableUnit`, `G`, and `N`, the remaining wrappers are mostly
+  parameter-access surfaces rather than new cross-unit or unit-local
+  semantics that need additional abstraction.
 - `UnitEntity` no longer exposes generic `params<T>()` or debug-oriented
   `prettyJSON()` helpers now that relation lookup uses typed wrapper access and
   wrapper serialization is no longer part of the supported domain API.
@@ -155,10 +159,10 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Next Priority Tasks
 
-1. Continue moving the remaining wrapper-derived semantics that still require
-   typed wrapper interpretation or other unit-type-specific defaults into
-   shared helpers in small slices, with priority on repeated logic still kept
-   inside wrapper classes or normalized-model local helpers.
+1. Continue moving only the remaining broadly reusable wrapper-derived
+   semantics that still require typed wrapper interpretation into shared
+   helpers, and avoid forcing abstraction onto wrappers that are now mostly
+   parameter-access surfaces.
 2. Continue reducing activation and webview concentration without changing user
    behavior or breaking web-extension support.
 3. Keep roadmap and feature task files aligned with merged slices so remaining
@@ -181,6 +185,10 @@ model.
   schedule ownership
   Keep behavior on the wrapper when it belongs to one unit family only and
   would become artificial if lifted into a cross-unit abstraction.
+- Audit result after `G` and `N`: no additional strong unit-local semantics
+  were found in the remaining wrappers
+  Treat most remaining wrapper members as typed parameter accessors unless a
+  new cross-unit rule or genuinely unit-local behavior is identified.
 - `UnitEntity` core responsibilities: identity, tree structure, children,
   parent, ancestors, `depth`, common JP1 getters
   Keep only stable base-wrapper concerns here. Remove dead wrapper-era APIs
