@@ -123,3 +123,5 @@
       longer depend on wrapper navigation, layout, or parameter-introspection
       getters
 - [x] Document which semantics intentionally remain in application view adapters
+- [x] Document the current capability/shared/local wrapper semantics matrix so
+      future refactors use the same extraction criteria

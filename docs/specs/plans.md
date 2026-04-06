@@ -125,7 +125,8 @@ This file is the high-level index for the per-feature plan structure in
   `normalizeAjsDocument.ts`.
 - normalized-model relation warnings now use relation terminology so warning
   codes and messages align with the normalized relation model.
-- normalized-model helper modules now live under `src/domain/models/ajs/normalize/`
+- normalized-model helper modules now live under
+  `src/domain/models/ajs/normalize/`
   so unit, relation, warning, builder, and tree concerns share a single
   location and naming scheme.
 - wait-capable wrapper units now reuse structural wait-state helpers through
@@ -142,7 +143,8 @@ This file is the high-level index for the per-feature plan structure in
 - `UnitEntity` no longer exposes generic `params<T>()` or debug-oriented
   `prettyJSON()` helpers now that relation lookup uses typed wrapper access and
   wrapper serialization is no longer part of the supported domain API.
-- `UnitEntity` no longer exposes dead wrapper-era navigation/layout/introspection
+- `UnitEntity` no longer exposes dead wrapper-era
+  navigation/layout/introspection
   APIs (`previous`, `next`, `previousUnits`, `nextUnits`, `hv`,
   `defineParams`) now that active consumers use normalized DTOs or dedicated
   relation helpers instead.
@@ -158,6 +160,28 @@ This file is the high-level index for the per-feature plan structure in
    behavior or breaking web-extension support.
 3. Keep roadmap and feature task files aligned with merged slices so remaining
    debt stays explicit.
+
+## Wrapper Semantics Matrix
+
+Use this matrix when deciding whether a JP1/AJS rule belongs in a
+capability, shared helper, unit-local wrapper method, or the normalized
+model.
+
+- Capability interface + helper: `WaitableUnit`, `PrioritizableUnit`
+  Use when a JP1/AJS concept spans multiple wrapper families and should be
+  visible in type declarations without forcing inheritance.
+- Shared helper reused by wrapper and normalized model: relation parsing,
+  layout, recovery, root-jobnet, depth, encoded string, schedule detection
+  Use when the same rule must stay identical across wrapper and normalized
+  DTO paths.
+- Unit-local wrapper semantics: `G` planning and weekday behavior, `N`
+  schedule ownership
+  Keep behavior on the wrapper when it belongs to one unit family only and
+  would become artificial if lifted into a cross-unit abstraction.
+- `UnitEntity` core responsibilities: identity, tree structure, children,
+  parent, ancestors, `depth`, common JP1 getters
+  Keep only stable base-wrapper concerns here. Remove dead wrapper-era APIs
+  once live consumers migrate away.
 
 ## Default Workflow
 
