@@ -101,9 +101,7 @@ export const tyFactory = <T extends UnitEntity>(
   if (!isTySymbol(tyValue)) {
     throw new Error(`'${tyValue}' is not ty type.`);
   }
-  const unitEntity = new tyClasses[tyValue](unit, parent) as T;
-  // console.log(JSON.stringify(unitEntity.prettyJSON(), null, 2));
-  return unitEntity;
+  return new tyClasses[tyValue](unit, parent) as T;
 };
 
 export const flattenChildren = (unitEntities: UnitEntity[]): UnitEntity[] =>

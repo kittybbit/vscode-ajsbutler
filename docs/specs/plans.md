@@ -139,6 +139,9 @@ This file is the high-level index for the per-feature plan structure in
 - group-wrapper semantics now stay explicitly local to `G`, with focused
   wrapper coverage for planning, weekday-state, and connector-control default
   behavior instead of introducing another shared capability.
+- `UnitEntity` no longer exposes generic `params<T>()` or debug-oriented
+  `prettyJSON()` helpers now that relation lookup uses typed wrapper access and
+  wrapper serialization is no longer part of the supported domain API.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -244,20 +247,21 @@ This file is the high-level index for the per-feature plan structure in
 
 ### Task
 
-Clarify the remaining group-local wrapper semantics in `G` without extracting
-another shared capability.
+Audit `UnitEntity` APIs and remove helper methods that are no longer part of
+its core wrapper responsibility.
 
 ### Why
 
-After `WaitableUnit` and `PrioritizableUnit`, `G` is the clearest example of
-semantics that belong to one wrapper family only. This slice makes that
-boundary explicit in code and tests so future refactors do not treat every
-repeated getter as a new capability candidate.
+After moving repeated JP1/AJS semantics into focused helpers and capability
+interfaces, `UnitEntity` still exposed a generic parameter lookup and a debug
+serialization hook. Neither reflected core wrapper behavior, and both made the
+entity boundary less clear than necessary.
 
 ### Scope
 
-- keep connector-control defaults and weekday-state resolution grouped inside
-  `G`
+- remove `params<T>()` from `UnitEntity`
+- remove debug-only `prettyJSON()` helpers that no longer have live callers
+- keep typed wrapper getters and relation navigation behavior unchanged
 - add focused wrapper tests for planning, weekday-state, and connector-control
   defaults
 - document that `G` semantics remain unit-local for now

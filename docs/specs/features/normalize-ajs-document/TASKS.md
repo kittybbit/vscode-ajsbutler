@@ -117,4 +117,6 @@
 - [x] Keep `G` planning, weekday-state, and connector-control defaults as
       group-local wrapper behavior with focused wrapper tests instead of
       introducing another capability interface
+- [x] Remove generic `UnitEntity` parameter lookup and debug serialization
+      helpers now that remaining relation access can use typed wrapper APIs
 - [x] Document which semantics intentionally remain in application view adapters

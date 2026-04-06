@@ -4,7 +4,6 @@ import { Unit } from "../../values/Unit";
 import { ParamSymbol } from "../../values/AjsType";
 import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
-import Parameter from "../parameters/Parameter";
 import {
   findNextRelations,
   findNextUnits,
@@ -161,46 +160,5 @@ export abstract class UnitEntity {
   }
   get depth(): number {
     return resolveUnitDepth(this.absolutePath);
-  }
-  /** Specified parameters in unit definitions */
-  params<T>(param: ParamSymbol): T | undefined {
-    const value = this[param as keyof typeof this];
-    if (
-      value instanceof Parameter ||
-      Array.isArray(value) ||
-      value === undefined
-    ) {
-      return value as T;
-    } else {
-      console.error(`Invalid parameter type for ${param}`);
-      return undefined;
-    }
-  }
-
-  /** human readable json */
-  prettyJSON() {
-    return {
-      id: this.id,
-      path: this.absolutePath,
-      ty: this.ty.value(),
-      cm: this.cm?.value(),
-      parent: this.parent?.name ?? "",
-      depth: this.depth,
-      params: this.defineParams
-        .map((v) => this.params<Parameter | Parameter[] | undefined>(v))
-        .filter((p) => p)
-        .map((p) => {
-          if (Array.isArray(p)) {
-            return p
-              .filter((q) => q instanceof Parameter)
-              .map((q) => q.prettyJSON());
-          } else if (p instanceof Parameter) {
-            return p.prettyJSON();
-          } else {
-            return undefined; // not here
-          }
-        })
-        .filter((p) => p !== undefined),
-    };
   }
 }

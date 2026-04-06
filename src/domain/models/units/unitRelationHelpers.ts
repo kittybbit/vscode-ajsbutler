@@ -6,11 +6,30 @@ export type UnitRelationLink = {
   relationType: string | undefined;
 };
 
+type RelationParentUnit = UnitEntity & {
+  readonly ar?: Ar[];
+};
+
+const hasSiblingRelations = (
+  unitEntity: UnitEntity | undefined,
+): unitEntity is RelationParentUnit => {
+  if (!unitEntity || !("ar" in unitEntity)) {
+    return false;
+  }
+
+  return Array.isArray(unitEntity.ar);
+};
+
 const resolveSiblingRelations = (
   unitEntity: UnitEntity,
   match: (relation: Ar) => boolean,
-): Ar[] =>
-  (unitEntity.parent?.params<Ar[] | undefined>("ar") ?? []).filter(match);
+): Ar[] => {
+  if (!hasSiblingRelations(unitEntity.parent)) {
+    return [];
+  }
+
+  return unitEntity.parent.ar.filter(match);
+};
 
 export const findPreviousRelations = (unitEntity: UnitEntity): Ar[] =>
   resolveSiblingRelations(
