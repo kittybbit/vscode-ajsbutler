@@ -165,6 +165,9 @@ This file is the high-level index for the per-feature plan structure in
 - webview factories now delegate shared message routing and panel-dispose
   cleanup to dedicated helpers so factory classes can focus on viewer-specific
   ready behavior and adapter wiring.
+- extension bootstrap now delegates table and flow viewer wiring to a dedicated
+  helper so `activateExtension.ts` stays closer to a composition root than a
+  full setup script.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
@@ -218,9 +221,11 @@ model.
    - `TASKS.md` for execution items
 5. Fill in assumptions explicitly when requirements are ambiguous.
 6. Implement only after acceptance criteria are clear.
-7. Before `git push`, confirm `npm run qlty`, `npm test`, and
-   `npm run build` all pass.
-8. Run any additional task-specific checks such as `npm run test:web`.
+7. Before `git push`, run local validation serially in this order for code
+   changes: `qlty fmt`, `npm run qlty`, `npm test`, `npm run test:web`,
+   `npm run build`.
+8. Run any additional task-specific checks after that serial baseline when
+   needed.
 9. Summarize compatibility risks and follow-up work.
 
 Docs-only exception:
@@ -256,8 +261,9 @@ Docs-only exception:
   semantics into helpers/interfaces, and keep entity identity plus
   unit-local JP1/AJS behavior in the entity when it is part of that concept.
 - Start implementation from a dedicated git branch, not directly on `main`.
-- Do not `git push` until `npm run qlty`, `npm test`, and `npm run build`
-  have all passed locally.
+- Do not `git push` until `qlty fmt`, `npm run qlty`, `npm test`,
+  `npm run test:web`, and `npm run build` have all passed locally in that
+  order for code changes.
 - For docs-only changes, `npm run build` is not required; use markdown-focused
   validation instead and do not treat repository `Verify` as a required gate.
 
