@@ -1,8 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import { MyExtension } from "../../extension/MyExtension";
-import { createViewerSubscriptions } from
-  "../../extension/bootstrap/viewerWiring";
+import { createViewerSubscriptions } from "../../extension/bootstrap/viewerWiring";
 
 suite("Viewer wiring", () => {
   test("creates viewer subscriptions for both table and flow viewers", () => {
