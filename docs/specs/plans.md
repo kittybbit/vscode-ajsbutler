@@ -173,6 +173,12 @@ This file is the high-level index for the per-feature plan structure in
 8. Run any additional task-specific checks such as `npm run test:web`.
 9. Summarize compatibility risks and follow-up work.
 
+Docs-only exception:
+
+- `npm run build` is not required
+- prefer `npm run lint:md` as the main validation step
+- do not require the repository `Verify` workflow for docs-only slices
+
 ## Task Template
 
 ### Task
@@ -196,9 +202,14 @@ This file is the high-level index for the per-feature plan structure in
 - Keep `engines.vscode` compatibility unless explicitly approved.
 - Keep desktop and web extension behavior intact.
 - Avoid direct `vscode` dependency in domain.
+- Avoid anemic domain models: move only broadly reusable or cross-unit
+  semantics into helpers/interfaces, and keep entity identity plus
+  unit-local JP1/AJS behavior in the entity when it is part of that concept.
 - Start implementation from a dedicated git branch, not directly on `main`.
 - Do not `git push` until `npm run qlty`, `npm test`, and `npm run build`
   have all passed locally.
+- For docs-only changes, `npm run build` is not required; use markdown-focused
+  validation instead and do not treat repository `Verify` as a required gate.
 
 ### Design
 
@@ -225,6 +236,8 @@ This file is the high-level index for the per-feature plan structure in
 - [ ] tests updated
 - [ ] `git push` happens only after local `npm run qlty`, `npm test`, and
       `npm run build` pass
+- [ ] docs-only slices may use `npm run lint:md` instead of `npm run build`
+      and may skip repository `Verify`
 - [ ] desktop behavior preserved
 - [ ] web behavior preserved if affected
 
