@@ -162,6 +162,9 @@ This file is the high-level index for the per-feature plan structure in
 - preview command registration now stays focused on command wiring, while the
   open-preview execution path and webview React panel mount logic live in
   dedicated helpers with direct unit-test coverage.
+- webview factories now delegate shared message routing and panel-dispose
+  cleanup to dedicated helpers so factory classes can focus on viewer-specific
+  ready behavior and adapter wiring.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

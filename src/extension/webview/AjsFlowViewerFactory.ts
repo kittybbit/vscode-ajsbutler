@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
 import { ViewerFactory } from "./ViewerFactory";
-import { RESOURCE, READY, OPERATION } from "../../shared/webviewEvents";
-import {
-  ResourceEventType,
-  WebviewEventType,
-} from "../../shared/webviewEvents";
+import { WebviewEventType } from "../../shared/webviewEvents";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_FLOW_VIEWER_TYPE } from "./constant";
 import { MyExtension } from "../MyExtension";
 import { readyFlowDocument } from "./flowDocument";
 import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
+import {
+  createViewerMessageHandler,
+  registerViewerPanelDispose,
+} from "./viewerMessageRouting";
 
 export class AjsFlowViewerFactory extends ViewerFactory {
   public static init(
@@ -28,39 +28,31 @@ export class AjsFlowViewerFactory extends ViewerFactory {
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
   ): void {
-    const onDidReceiveMessage = (e: WebviewEventType) => {
-      console.log("invoke AjsFlowViewerFactory.onDidReceiveMessage.", e);
-      switch (e.type) {
-        case RESOURCE: {
-          postResourceMessage((e as ResourceEventType).data, panel);
-          break;
-        }
-        case READY: {
-          // webview is ready.
-          readyFlowDocument(document, panel);
-          break;
-        }
-        case OPERATION: {
-          // track user operation.
-          reportWebviewOperation(
-            document,
-            panel,
-            this.myExtension.telemetry,
-            e.data,
+    const onDidReceiveMessage: (e: WebviewEventType) => void =
+      createViewerMessageHandler({
+        document,
+        panel,
+        telemetry: this.myExtension.telemetry,
+        onReady: readyFlowDocument,
+        onResource: (event, receivedPanel) => {
+          console.log(
+            "invoke AjsFlowViewerFactory.onDidReceiveMessage.",
+            event,
           );
-          break;
-        }
-      }
-    };
+          postResourceMessage(event.data, receivedPanel);
+        },
+        onOperation: reportWebviewOperation,
+        showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+      });
     const receiveMessageDispose =
       panel.webview.onDidReceiveMessage(onDidReceiveMessage);
 
-    panel.onDidDispose(() => {
-      console.log(
-        `invoke panel.onDidDispose. (${this.viewType}, ${document.uri.toString()})`,
-      );
-      this.store.removeByDocument(document);
-      receiveMessageDispose.dispose();
+    registerViewerPanelDispose({
+      document,
+      panel,
+      viewType: this.viewType,
+      store: this.store,
+      receiveMessageDispose,
     });
   }
 }
