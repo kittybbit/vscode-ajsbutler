@@ -18,3 +18,8 @@ Source use case: docs/requirements/use-cases/uc-normalize-ajs-document.md
 
 - Keep domain/application/infrastructure boundaries clear.
 - Avoid direct vscode imports in domain layers.
+- Prefer `interface + helper` for cross-unit JP1/AJS capabilities.
+- Keep unit-local semantics on the owning wrapper when they do not span
+  multiple wrapper families.
+- Keep `UnitEntity` focused on stable base-wrapper concerns, not debug helpers
+  or dead compatibility APIs.
