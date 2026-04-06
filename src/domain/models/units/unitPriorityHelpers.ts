@@ -1,3 +1,4 @@
+import type { Ni, Pr } from "../parameters/PlainString";
 import type { J } from "./J";
 import type { N, Rn } from "./N";
 import type { Qj } from "./Qj";
@@ -5,13 +6,20 @@ import type { UnitEntity } from "./UnitEntity";
 
 const DEFAULT_PRIORITY = 1;
 
+export interface PrioritizableUnit {
+  readonly pr: Pr | undefined;
+  readonly ni: Ni | undefined;
+  readonly parent: UnitEntity | undefined;
+  readonly priority: number;
+}
+
 const isN = (entity: UnitEntity | undefined): entity is N =>
   entity !== undefined && entity.ty && entity.ty.value() === "n";
 
 const isRn = (entity: UnitEntity | undefined): entity is Rn =>
   entity !== undefined && entity.ty && entity.ty.value() === "rn";
 
-export const resolveUnitPriority = (unitEntity: J | N | Qj): number => {
+export const resolveUnitPriority = (unitEntity: PrioritizableUnit): number => {
   const getPrPriority = (): number | undefined => {
     if (unitEntity.pr && !unitEntity.pr.inherited) {
       const prValue = unitEntity.pr.value();
