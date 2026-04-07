@@ -196,6 +196,8 @@ This file is the high-level index for the per-feature plan structure in
   regression test covering change, close, rename, theme refresh, and dispose.
 - thin table and flow mediator subclasses now rely on the base dispose
   behavior instead of carrying pass-through overrides.
+- thin table/flow viewer `init` wrappers are removed, and `viewerWiring`
+  constructs mediators and factories directly.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

@@ -8,15 +8,7 @@ import { debouncedTableDocumentChangeFn } from "./tableDocument";
  * Mediator for JP1/AJS table viewer.
  */
 export class AjsTableViewerMediator extends WebviewMediator {
-  public static init(
-    myExtension: MyExtension,
-    store: WebviewStore,
-  ): AjsTableViewerMediator {
-    console.log("invoke AjsTableViewerMediator.init");
-    return new AjsTableViewerMediator(myExtension, store);
-  }
-
-  private constructor(myExtension: MyExtension, store: WebviewStore) {
+  public constructor(myExtension: MyExtension, store: WebviewStore) {
     super(
       myExtension,
       AJS_TABLE_VIEWER_TYPE,
