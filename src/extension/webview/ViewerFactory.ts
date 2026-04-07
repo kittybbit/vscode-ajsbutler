@@ -1,5 +1,11 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import type { SaveEventType } from "../../shared/webviewEvents";
+import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
+import {
+  createViewerMessageHandler,
+  registerViewerPanelDispose,
+} from "./viewerMessageRouting";
 import { WebviewStore } from "./WebviewStore";
 import { MyExtension } from "../MyExtension";
 
@@ -46,6 +52,40 @@ export abstract class ViewerFactory {
       this.store.add(document, panel);
     }
     return panel;
+  }
+
+  protected registerStandardViewerCustomize(
+    document: vscode.TextDocument,
+    panel: vscode.WebviewPanel,
+    onReady: (
+      document: vscode.TextDocument,
+      panel: vscode.WebviewPanel,
+    ) => void,
+    onSave?: (event: SaveEventType) => Promise<void>,
+  ): void {
+    const onDidReceiveMessage = createViewerMessageHandler({
+      document,
+      panel,
+      telemetry: this.myExtension.telemetry,
+      onReady,
+      onResource: (event, receivedPanel) => {
+        console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
+        postResourceMessage(event.data, receivedPanel);
+      },
+      onOperation: reportWebviewOperation,
+      onSave,
+      showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+    });
+    const receiveMessageDispose =
+      panel.webview.onDidReceiveMessage(onDidReceiveMessage);
+
+    registerViewerPanelDispose({
+      document,
+      panel,
+      viewType: this.viewType,
+      store: this.store,
+      receiveMessageDispose,
+    });
   }
 
   abstract customize(
