@@ -15,8 +15,8 @@ const createTableViewerSubscriptions = (
   myExtension: MyExtension,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(AJS_TABLE_VIEWER_TYPE);
-  const mediator = AjsTableViewerMediator.init(myExtension, store);
-  const factory = AjsTableViewerFactory.init(myExtension, store);
+  const mediator = new AjsTableViewerMediator(myExtension, store);
+  const factory = new AjsTableViewerFactory(myExtension, store);
 
   return [mediator, registerPreviewCommand(factory, myExtension)];
 };
@@ -25,8 +25,8 @@ const createFlowViewerSubscriptions = (
   myExtension: MyExtension,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(AJS_FLOW_VIEWER_TYPE);
-  const mediator = AjsFlowViewerMediator.init(myExtension, store);
-  const factory = AjsFlowViewerFactory.init(myExtension, store);
+  const mediator = new AjsFlowViewerMediator(myExtension, store);
+  const factory = new AjsFlowViewerFactory(myExtension, store);
 
   return [mediator, registerPreviewCommand(factory, myExtension)];
 };

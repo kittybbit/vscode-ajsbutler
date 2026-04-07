@@ -8,15 +8,7 @@ import { debouncedFlowDocumentChangeFn } from "./flowDocument";
  * Mediator for JP1/AJS flow viewer.
  */
 export class AjsFlowViewerMediator extends WebviewMediator {
-  public static init(
-    myExtension: MyExtension,
-    store: WebviewStore,
-  ): AjsFlowViewerMediator {
-    console.log("invoke AjsFlowViewerMediator.init");
-    return new AjsFlowViewerMediator(myExtension, store);
-  }
-
-  private constructor(myExtension: MyExtension, store: WebviewStore) {
+  public constructor(myExtension: MyExtension, store: WebviewStore) {
     super(
       myExtension,
       AJS_FLOW_VIEWER_TYPE,

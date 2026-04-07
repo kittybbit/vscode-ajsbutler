@@ -7,15 +7,7 @@ import { readyTableDocument } from "./tableDocument";
 import { saveText } from "./messageHandlers";
 
 export class AjsTableViewerFactory extends ViewerFactory {
-  public static init(
-    myExtension: MyExtension,
-    store: WebviewStore,
-  ): ViewerFactory {
-    console.log("invoke AjsTableViewerFactory.init");
-    return new AjsTableViewerFactory(myExtension, store);
-  }
-
-  private constructor(myExtension: MyExtension, store: WebviewStore) {
+  public constructor(myExtension: MyExtension, store: WebviewStore) {
     super(AJS_TABLE_VIEWER_TYPE, myExtension, store);
   }
 

@@ -6,15 +6,7 @@ import { MyExtension } from "../MyExtension";
 import { readyFlowDocument } from "./flowDocument";
 
 export class AjsFlowViewerFactory extends ViewerFactory {
-  public static init(
-    myExtension: MyExtension,
-    store: WebviewStore,
-  ): ViewerFactory {
-    console.log("invoke AjsFlowViewerFactory.init");
-    return new AjsFlowViewerFactory(myExtension, store);
-  }
-
-  private constructor(myExtension: MyExtension, store: WebviewStore) {
+  public constructor(myExtension: MyExtension, store: WebviewStore) {
     super(AJS_FLOW_VIEWER_TYPE, myExtension, store);
   }
 
