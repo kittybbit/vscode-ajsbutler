@@ -190,6 +190,8 @@ This file is the high-level index for the per-feature plan structure in
   and flow factories only provide viewer-specific ready and save behavior.
 - shared viewer factory customization now has a focused base-flow regression
   test covering ready, resource, save, operation, and dispose wiring.
+- extension subscription composition now inlines the last thin editor-adapter
+  helper and uses a test file name aligned with the actual subject under test.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
