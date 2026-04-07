@@ -180,6 +180,9 @@ This file is the high-level index for the per-feature plan structure in
 - extension bootstrap now delegates editor and viewer subscription composition
   to a dedicated helper so `activateExtension.ts` only assembles runtime,
   subscriptions, and lifecycle hooks.
+- viewer wiring now keeps table and flow setup as local subroutines inside the
+  same file so the bootstrap path reads symmetrically without introducing
+  another helper file.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
