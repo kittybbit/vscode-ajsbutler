@@ -15,7 +15,8 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      docs_only: ${{ steps.filter.outputs.docs_only }}
+      docs: ${{ steps.filter.outputs.docs }}
+      non_docs: ${{ steps.filter.outputs.non_docs }}
     steps:
       - uses: actions/checkout@v4
 
@@ -23,10 +24,15 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            docs_only:
+            docs:
               - 'docs/**'
               - 'README.md'
               - '.github/**/*.md'
+            non_docs:
+              - '**'
+              - '!docs/**'
+              - '!README.md'
+              - '!.github/**/*.md'
 
   decide:
     needs: changes
@@ -38,8 +44,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const docsOnly =
-              "${{ needs.changes.outputs.docs_only }}" === "true";
+            const docsChanged =
+              "${{ needs.changes.outputs.docs }}" === "true";
+            const nonDocsChanged =
+              "${{ needs.changes.outputs.non_docs }}" === "true";
+            const docsOnly = docsChanged && !nonDocsChanged;
 
             if (docsOnly) {
               core.setOutput("should_verify", "false");
@@ -50,7 +59,8 @@ jobs:
               ref.startsWith("feat/") ||
               ref.startsWith("feature/") ||
               ref.startsWith("fix/") ||
-              ref.startsWith("chore/");
+              ref.startsWith("chore/") ||
+              ref.startsWith("refactor/");
 
             if (context.eventName === "pull_request") {
               const headRef = context.payload.pull_request?.head?.ref ?? "";

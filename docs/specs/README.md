@@ -34,8 +34,7 @@ For non-trivial changes:
 5. document assumptions explicitly
 6. implement in small vertical slices
 7. before `git push`, run local validation serially in this order for code
-   changes: `qlty fmt`, `npm run qlty`, `npm test`, `npm run test:web`,
-   `npm run build`
+   changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`
 8. run any additional task-specific checks before finishing
 9. avoid anemic domain models: extract only cross-unit or cross-layer
    semantics into helpers/interfaces, and keep entity identity plus
