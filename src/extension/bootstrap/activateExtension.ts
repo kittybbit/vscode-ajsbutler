@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import {
-  deactivateExtensionRuntime,
   reportExtensionActivated,
+  reportAndDisposeExtensionRuntime,
 } from "./extensionLifecycle";
 import { createExtensionRuntime } from "./extensionRuntime";
 import { createExtensionSubscriptions } from "./extensionSubscriptions";
@@ -28,5 +28,5 @@ export const activateExtension = (
 export const deactivateExtension = (
   activatedExtension: ActivatedExtension | undefined,
 ): void => {
-  deactivateExtensionRuntime(activatedExtension?.myExtension);
+  reportAndDisposeExtensionRuntime(activatedExtension?.myExtension);
 };

@@ -12,7 +12,7 @@ export const reportExtensionActivated = (myExtension: MyExtension): void => {
   );
 };
 
-export const deactivateExtensionRuntime = (
+export const reportAndDisposeExtensionRuntime = (
   myExtension: MyExtension | undefined,
 ): void => {
   if (!myExtension) {

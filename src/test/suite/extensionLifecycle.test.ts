@@ -2,8 +2,8 @@ import * as assert from "assert";
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { MyExtension } from "../../extension/MyExtension";
 import {
-  deactivateExtensionRuntime,
   reportExtensionActivated,
+  reportAndDisposeExtensionRuntime,
 } from "../../extension/bootstrap/extensionLifecycle";
 import { Telemetry } from "../../extension/constant";
 
@@ -36,14 +36,14 @@ suite("Extension lifecycle", () => {
     };
     const extension = MyExtension.init({} as never, telemetry);
 
-    deactivateExtensionRuntime(extension);
+    reportAndDisposeExtensionRuntime(extension);
 
     assert.deepStrictEqual(events, [Telemetry.ExtensionDeactivate]);
     assert.strictEqual(disposed, true);
   });
 
   test("ignores missing runtime on deactivate", () => {
-    deactivateExtensionRuntime(undefined);
+    reportAndDisposeExtensionRuntime(undefined);
     assert.ok(true);
   });
 });
