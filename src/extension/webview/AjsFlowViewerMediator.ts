@@ -24,9 +24,4 @@ export class AjsFlowViewerMediator extends WebviewMediator {
       debouncedFlowDocumentChangeFn(300),
     );
   }
-
-  override dispose() {
-    console.log("invoke AjsFlowViewerMediator.dispose.");
-    super.dispose();
-  }
 }

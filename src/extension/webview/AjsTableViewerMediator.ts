@@ -24,9 +24,4 @@ export class AjsTableViewerMediator extends WebviewMediator {
       debouncedTableDocumentChangeFn(300),
     );
   }
-
-  override dispose() {
-    console.log("invoke AjsTableViewerMediator.dispose.");
-    super.dispose();
-  }
 }
