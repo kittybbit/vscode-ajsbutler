@@ -1,12 +1,11 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
-import { createEditorAdapterSubscriptions } from "./editorAdapterWiring";
 import {
   deactivateExtensionRuntime,
   reportExtensionActivated,
 } from "./extensionLifecycle";
 import { createExtensionRuntime } from "./extensionRuntime";
-import { createViewerSubscriptions } from "./viewerWiring";
+import { createExtensionSubscriptions } from "./extensionSubscriptions";
 
 export type ActivatedExtension = {
   myExtension: MyExtension;
@@ -17,10 +16,7 @@ export const activateExtension = (
 ): ActivatedExtension => {
   const myExtension = createExtensionRuntime(context);
 
-  context.subscriptions.push(
-    ...createEditorAdapterSubscriptions(),
-    ...createViewerSubscriptions(myExtension),
-  );
+  context.subscriptions.push(...createExtensionSubscriptions(myExtension));
 
   reportExtensionActivated(myExtension);
 
