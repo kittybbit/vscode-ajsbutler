@@ -2,9 +2,6 @@
 name: Verify
 
 "on":
-  push:
-    branches:
-      - "**"
   pull_request:
 
 permissions:
@@ -55,27 +52,7 @@ jobs:
               return;
             }
 
-            const isFeatureBranch = (ref) =>
-              ref.startsWith("feat/") ||
-              ref.startsWith("feature/") ||
-              ref.startsWith("fix/") ||
-              ref.startsWith("chore/") ||
-              ref.startsWith("refactor/");
-
-            if (context.eventName === "pull_request") {
-              const headRef = context.payload.pull_request?.head?.ref ?? "";
-              core.setOutput(
-                "should_verify",
-                isFeatureBranch(headRef) ? "true" : "false",
-              );
-              return;
-            }
-
-            const branchRef = context.ref.replace("refs/heads/", "");
-            core.setOutput(
-              "should_verify",
-              isFeatureBranch(branchRef) ? "false" : "true",
-            );
+            core.setOutput("should_verify", "true");
 
   verify:
     needs: decide
