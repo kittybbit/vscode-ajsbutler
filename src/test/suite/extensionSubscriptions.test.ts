@@ -1,10 +1,10 @@
 import * as assert from "assert";
-import { createExtensionSubscriptions } from "../../extension/bootstrap/extensionSubscriptions";
-import { MyExtension } from "../../extension/MyExtension";
 import * as vscode from "vscode";
+import { MyExtension } from "../../extension/MyExtension";
+import { createExtensionSubscriptions } from "../../extension/bootstrap/extensionSubscriptions";
 
 suite("Extension subscriptions", () => {
-  test("creates diagnostics and hover subscriptions", () => {
+  test("creates diagnostics, hover, and viewer subscriptions", () => {
     const extension = MyExtension.init(
       { subscriptions: [] } as unknown as vscode.ExtensionContext,
       {
@@ -12,6 +12,7 @@ suite("Extension subscriptions", () => {
         dispose() {},
       },
     );
+
     const subscriptions = createExtensionSubscriptions(extension);
 
     assert.strictEqual(subscriptions.length, 6);
