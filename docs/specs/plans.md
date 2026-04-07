@@ -183,6 +183,9 @@ This file is the high-level index for the per-feature plan structure in
 - viewer wiring now keeps table and flow setup as local subroutines inside the
   same file so the bootstrap path reads symmetrically without introducing
   another helper file.
+- extension subscription composition now inlines the thin diagnostics and
+  hover registration helper so bootstrap files do not keep one-line adapter
+  wrappers.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

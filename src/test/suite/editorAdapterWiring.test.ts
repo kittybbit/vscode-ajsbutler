@@ -1,11 +1,20 @@
 import * as assert from "assert";
-import { createEditorAdapterSubscriptions } from "../../extension/bootstrap/editorAdapterWiring";
+import { createExtensionSubscriptions } from "../../extension/bootstrap/extensionSubscriptions";
+import { MyExtension } from "../../extension/MyExtension";
+import * as vscode from "vscode";
 
-suite("Editor adapter wiring", () => {
+suite("Extension subscriptions", () => {
   test("creates diagnostics and hover subscriptions", () => {
-    const subscriptions = createEditorAdapterSubscriptions();
+    const extension = MyExtension.init(
+      { subscriptions: [] } as unknown as vscode.ExtensionContext,
+      {
+        trackEvent() {},
+        dispose() {},
+      },
+    );
+    const subscriptions = createExtensionSubscriptions(extension);
 
-    assert.strictEqual(subscriptions.length, 2);
+    assert.strictEqual(subscriptions.length, 6);
     subscriptions.forEach((subscription) => {
       assert.strictEqual(typeof subscription.dispose, "function");
       subscription.dispose();
