@@ -194,6 +194,8 @@ This file is the high-level index for the per-feature plan structure in
   helper and uses a test file name aligned with the actual subject under test.
 - WebviewMediator event wiring now uses focused handler methods and has a
   regression test covering change, close, rename, theme refresh, and dispose.
+- thin table and flow mediator subclasses now rely on the base dispose
+  behavior instead of carrying pass-through overrides.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
