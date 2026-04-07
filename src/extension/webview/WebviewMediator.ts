@@ -9,11 +9,28 @@ type DocumentChangeHandler = (
   panel: vscode.WebviewPanel,
 ) => void;
 
+type WebviewMediatorDeps = {
+  onDidChangeTextDocument: typeof vscode.workspace.onDidChangeTextDocument;
+  onDidCloseTextDocument: typeof vscode.workspace.onDidCloseTextDocument;
+  onDidRenameFiles: typeof vscode.workspace.onDidRenameFiles;
+  onDidChangeActiveColorTheme: typeof vscode.window.onDidChangeActiveColorTheme;
+  mountPanel: typeof mountViewerPanel;
+};
+
+const defaultDeps: WebviewMediatorDeps = {
+  onDidChangeTextDocument: vscode.workspace.onDidChangeTextDocument,
+  onDidCloseTextDocument: vscode.workspace.onDidCloseTextDocument,
+  onDidRenameFiles: vscode.workspace.onDidRenameFiles,
+  onDidChangeActiveColorTheme: vscode.window.onDidChangeActiveColorTheme,
+  mountPanel: mountViewerPanel,
+};
+
 export abstract class WebviewMediator implements vscode.Disposable {
   #viewType: string;
   #myExtension: MyExtension;
   #store: WebviewStore;
   #change: DocumentChangeHandler;
+  #deps: WebviewMediatorDeps;
   #subscriptions: vscode.Disposable;
 
   constructor(
@@ -21,6 +38,7 @@ export abstract class WebviewMediator implements vscode.Disposable {
     viewType: string,
     store: WebviewStore,
     change: DocumentChangeHandler,
+    deps: WebviewMediatorDeps = defaultDeps,
   ) {
     console.log(`invoke WebviewMediator.constructor. (${viewType})`);
 
@@ -28,63 +46,19 @@ export abstract class WebviewMediator implements vscode.Disposable {
     this.#myExtension = myExtension;
     this.#store = store;
     this.#change = change;
+    this.#deps = deps;
 
-    const context = this.#myExtension.context;
     this.#subscriptions = vscode.Disposable.from(
-      vscode.workspace.onDidChangeTextDocument(
-        (e: vscode.TextDocumentChangeEvent) => {
-          if (e.document.languageId !== LANGUAGE_ID) {
-            return;
-          }
-          console.log(
-            "invoke WebviewMediator.onDidChangeTextDocument.",
-            `(${this.#viewType}, ${e.document.uri.toString()})`,
-          );
-          const panel = this.#store.panelByDocument(e.document);
-          if (panel === undefined) {
-            return;
-          }
-          this.#change(e.document, panel);
-        },
+      this.#deps.onDidChangeTextDocument((event) =>
+        this.onDidChangeTextDocument(event),
       ),
-      vscode.workspace.onDidCloseTextDocument((e: vscode.TextDocument) => {
-        if (e.languageId !== LANGUAGE_ID) {
-          return;
-        }
-        console.log(
-          "invoke WebviewMediator.onDidCloseTextDocument.",
-          `(${this.#viewType}), ${e.uri.toString()})`,
-        );
-        const panel = this.#store.panelByDocument(e);
-        if (panel === undefined) {
-          return;
-        }
-        this.#store.removeByDocument(e);
-        panel.dispose();
-      }),
-      vscode.workspace.onDidRenameFiles((e: vscode.FileRenameEvent) => {
-        // Handle file renames
-        console.log(
-          `invoke WebviewMediator.onDidRenameFiles. (${this.#viewType})`,
-        );
-        e.files.forEach((file) => {
-          console.log(
-            `File renamed from ${file.oldUri.toString()}`,
-            `to ${file.newUri.toString()}`,
-          );
-          const panel = this.#store.panelByUri(file.oldUri);
-          if (panel !== undefined) {
-            this.#store.removeByPanel(panel);
-            panel.dispose();
-          }
-        });
-      }),
-      vscode.window.onDidChangeActiveColorTheme((e) => {
-        console.log("invoke WebviewMediator.onDidChangeActiveColorTheme.", e);
-        this.#store.allPanels.forEach((panel) => {
-          mountViewerPanel(context, panel, this.#viewType);
-        });
-      }),
+      this.#deps.onDidCloseTextDocument((document) =>
+        this.onDidCloseTextDocument(document),
+      ),
+      this.#deps.onDidRenameFiles((event) => this.onDidRenameFiles(event)),
+      this.#deps.onDidChangeActiveColorTheme((event) =>
+        this.onDidChangeActiveColorTheme(event),
+      ),
     );
   }
 
@@ -92,5 +66,59 @@ export abstract class WebviewMediator implements vscode.Disposable {
     console.log(`invoke WebviewMediator.dispose. (${this.#viewType})`);
     this.#subscriptions.dispose();
     this.#store.dispose();
+  }
+
+  private onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
+    if (event.document.languageId !== LANGUAGE_ID) {
+      return;
+    }
+    console.log(
+      "invoke WebviewMediator.onDidChangeTextDocument.",
+      `(${this.#viewType}, ${event.document.uri.toString()})`,
+    );
+    const panel = this.#store.panelByDocument(event.document);
+    if (panel === undefined) {
+      return;
+    }
+    this.#change(event.document, panel);
+  }
+
+  private onDidCloseTextDocument(document: vscode.TextDocument): void {
+    if (document.languageId !== LANGUAGE_ID) {
+      return;
+    }
+    console.log(
+      "invoke WebviewMediator.onDidCloseTextDocument.",
+      `(${this.#viewType}), ${document.uri.toString()})`,
+    );
+    const panel = this.#store.panelByDocument(document);
+    if (panel === undefined) {
+      return;
+    }
+    this.#store.removeByDocument(document);
+    panel.dispose();
+  }
+
+  private onDidRenameFiles(event: vscode.FileRenameEvent): void {
+    console.log(`invoke WebviewMediator.onDidRenameFiles. (${this.#viewType})`);
+    event.files.forEach((file) => {
+      console.log(
+        `File renamed from ${file.oldUri.toString()}`,
+        `to ${file.newUri.toString()}`,
+      );
+      const panel = this.#store.panelByUri(file.oldUri);
+      if (panel !== undefined) {
+        this.#store.removeByPanel(panel);
+        panel.dispose();
+      }
+    });
+  }
+
+  private onDidChangeActiveColorTheme(event: vscode.ColorTheme): void {
+    console.log("invoke WebviewMediator.onDidChangeActiveColorTheme.", event);
+    const context = this.#myExtension.context;
+    this.#store.allPanels.forEach((panel) => {
+      this.#deps.mountPanel(context, panel, this.#viewType);
+    });
   }
 }
