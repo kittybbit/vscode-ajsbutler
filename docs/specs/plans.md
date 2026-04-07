@@ -188,6 +188,8 @@ This file is the high-level index for the per-feature plan structure in
   wrappers.
 - viewer factories now reuse a protected base customization helper so table
   and flow factories only provide viewer-specific ready and save behavior.
+- shared viewer factory customization now has a focused base-flow regression
+  test covering ready, resource, save, operation, and dispose wiring.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
