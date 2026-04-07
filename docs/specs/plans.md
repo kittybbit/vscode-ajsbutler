@@ -186,6 +186,8 @@ This file is the high-level index for the per-feature plan structure in
 - extension subscription composition now inlines the thin diagnostics and
   hover registration helper so bootstrap files do not keep one-line adapter
   wrappers.
+- viewer factories now reuse a protected base customization helper so table
+  and flow factories only provide viewer-specific ready and save behavior.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
