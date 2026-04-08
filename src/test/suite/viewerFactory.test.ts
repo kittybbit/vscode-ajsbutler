@@ -154,6 +154,10 @@ suite("ViewerFactory", () => {
         return { dispose() {} };
       },
     } as unknown as vscode.WebviewPanel;
+    const added: Array<{
+      document: vscode.TextDocument;
+      panel: vscode.WebviewPanel;
+    }> = [];
 
     const factory = new ViewerFactory(
       "ajsbutler.testViewer",
@@ -165,8 +169,8 @@ suite("ViewerFactory", () => {
         removeByUri(uri) {
           removed.push(uri.toString());
         },
-        add() {
-          throw new Error("add should not be used in this test");
+        add(receivedDocument, receivedPanel) {
+          added.push({ document: receivedDocument, panel: receivedPanel });
         },
         panelByDocument() {
           return undefined;
@@ -180,9 +184,14 @@ suite("ViewerFactory", () => {
       async (content) => {
         calls.push(`save:${content}`);
       },
+      {
+        createWebviewPanel() {
+          return panel;
+        },
+      },
     );
 
-    factory.customize(document, panel);
+    const createdPanel = factory.getPanel(document);
 
     receiveMessageHandler?.({ type: READY });
     receiveMessageHandler?.({
@@ -200,6 +209,8 @@ suite("ViewerFactory", () => {
       "post:resource:table",
       "save:body",
     ]);
+    assert.strictEqual(createdPanel, panel);
+    assert.deepStrictEqual(added, [{ document, panel }]);
     assert.deepStrictEqual(telemetryEvents, [OPERATION]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
     assert.strictEqual(receiverDisposed, true);

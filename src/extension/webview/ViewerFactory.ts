@@ -104,7 +104,7 @@ export class ViewerFactory {
     });
   }
 
-  public customize(document: vscode.TextDocument, panel: vscode.WebviewPanel) {
+  private customize(document: vscode.TextDocument, panel: vscode.WebviewPanel) {
     this.registerStandardViewerCustomize(
       document,
       panel,
