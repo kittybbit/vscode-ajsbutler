@@ -228,6 +228,8 @@ This file is the high-level index for the per-feature plan structure in
   cleanup path no longer depends on a full `TextDocument` object.
 - ViewerFactory is now fully concrete internally as well, so subclass-era
   `protected` members are narrowed back to private fields and helpers.
+- WebviewMediator tests now instantiate the concrete mediator directly instead
+  of keeping a thin test-only subclass around.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
