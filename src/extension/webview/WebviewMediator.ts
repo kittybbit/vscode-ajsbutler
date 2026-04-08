@@ -95,8 +95,7 @@ export abstract class WebviewMediator implements vscode.Disposable {
     if (panel === undefined) {
       return;
     }
-    this.#store.removeByDocument(document);
-    panel.dispose();
+    this.removeAndDisposePanel(panel);
   }
 
   private onDidRenameFiles(event: vscode.FileRenameEvent): void {
@@ -108,8 +107,7 @@ export abstract class WebviewMediator implements vscode.Disposable {
       );
       const panel = this.#store.panelByUri(file.oldUri);
       if (panel !== undefined) {
-        this.#store.removeByPanel(panel);
-        panel.dispose();
+        this.removeAndDisposePanel(panel);
       }
     });
   }
@@ -120,5 +118,10 @@ export abstract class WebviewMediator implements vscode.Disposable {
     this.#store.allPanels.forEach((panel) => {
       this.#deps.mountPanel(context, panel, this.#viewType);
     });
+  }
+
+  private removeAndDisposePanel(panel: vscode.WebviewPanel): void {
+    this.#store.removeByPanel(panel);
+    panel.dispose();
   }
 }

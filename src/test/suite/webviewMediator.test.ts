@@ -127,8 +127,8 @@ suite("WebviewMediator", () => {
     mediator.dispose();
 
     assert.deepStrictEqual(changed, ["file:///sample.ajs"]);
-    assert.deepStrictEqual(removedByDocument, ["file:///sample.ajs"]);
-    assert.deepStrictEqual(removedByPanel, ["sample"]);
+    assert.deepStrictEqual(removedByDocument, []);
+    assert.deepStrictEqual(removedByPanel, ["sample", "sample"]);
     assert.deepStrictEqual(mounted, ["ajsbutler.testViewer"]);
     assert.strictEqual(panelDisposed, true);
     assert.strictEqual(storeDisposed, true);
