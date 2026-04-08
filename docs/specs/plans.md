@@ -224,6 +224,8 @@ This file is the high-level index for the per-feature plan structure in
   factory wiring.
 - viewer wiring now derives the table and flow subscription pair from one local
   config list so the remaining viewer-specific differences live in one place.
+- viewer panel-dispose wiring now removes store entries by URI so the factory
+  cleanup path no longer depends on a full `TextDocument` object.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

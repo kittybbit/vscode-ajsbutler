@@ -86,12 +86,12 @@ suite("Viewer message routing", () => {
     };
 
     registerViewerPanelDispose({
-      document: document as never,
+      uri: document.uri as never,
       panel: panel as never,
       viewType: "ajsbutler.flowViewer",
       store: {
-        removeByDocument: (receivedDocument) => {
-          removed.push(receivedDocument.uri.toString());
+        removeByUri: (receivedUri) => {
+          removed.push(receivedUri.toString());
         },
       },
       receiveMessageDispose: {
