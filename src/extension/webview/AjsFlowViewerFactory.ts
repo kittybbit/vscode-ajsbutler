@@ -3,7 +3,7 @@ import { ViewerFactory } from "./ViewerFactory";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_FLOW_VIEWER_TYPE } from "./constant";
 import { MyExtension } from "../MyExtension";
-import { readyFlowDocument } from "./flowDocument";
+import { readyAjsDocument } from "./ajsDocument";
 
 export class AjsFlowViewerFactory extends ViewerFactory {
   public constructor(myExtension: MyExtension, store: WebviewStore) {
@@ -14,6 +14,6 @@ export class AjsFlowViewerFactory extends ViewerFactory {
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
   ): void {
-    this.registerStandardViewerCustomize(document, panel, readyFlowDocument);
+    this.registerStandardViewerCustomize(document, panel, readyAjsDocument);
   }
 }
