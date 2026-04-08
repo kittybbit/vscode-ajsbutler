@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import type { SaveEventType } from "../../shared/webviewEvents";
 import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
 import {
   createViewerMessageHandler,
@@ -36,7 +35,7 @@ export class ViewerFactory {
   protected store: ViewerFactoryStore;
   protected myExtension: MyExtension;
   #onReady: ViewerReadyHandler;
-  #onSave?: (event: SaveEventType) => Promise<void>;
+  #onSave?: (content: string) => Promise<void>;
   #deps: ViewerFactoryDeps;
 
   public constructor(
@@ -44,7 +43,7 @@ export class ViewerFactory {
     myExtension: MyExtension,
     store: ViewerFactoryStore,
     onReady: ViewerReadyHandler,
-    onSave?: (event: SaveEventType) => Promise<void>,
+    onSave?: (content: string) => Promise<void>,
     deps: ViewerFactoryDeps = defaultDeps,
   ) {
     this.viewType = viewType;
@@ -78,7 +77,7 @@ export class ViewerFactory {
       document: vscode.TextDocument,
       panel: vscode.WebviewPanel,
     ) => void,
-    onSave?: (event: SaveEventType) => Promise<void>,
+    onSave?: (content: string) => Promise<void>,
   ): void {
     const onDidReceiveMessage = createViewerMessageHandler({
       document,

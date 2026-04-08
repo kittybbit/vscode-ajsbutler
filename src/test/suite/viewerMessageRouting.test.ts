@@ -28,8 +28,8 @@ suite("Viewer message routing", () => {
       onOperation: (_document, _panel, _telemetry, operation) => {
         calls.push(`operation:${operation}`);
       },
-      onSave: async (event) => {
-        calls.push(`save:${event.data}`);
+      onSave: async (content) => {
+        calls.push(`save:${content}`);
       },
       showErrorMessage: async () => undefined,
     });

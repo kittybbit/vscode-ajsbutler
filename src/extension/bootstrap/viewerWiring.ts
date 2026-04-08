@@ -17,7 +17,7 @@ import { saveText } from "../webview/messageHandlers";
 const createViewerBundle = (
   myExtension: MyExtension,
   viewType: string,
-  saveHandler?: (event: { data: string }) => Promise<void>,
+  saveHandler?: (content: string) => Promise<void>,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator(
@@ -40,8 +40,6 @@ const createViewerBundle = (
 export const createViewerSubscriptions = (
   myExtension: MyExtension,
 ): vscode.Disposable[] => [
-  ...createViewerBundle(myExtension, AJS_TABLE_VIEWER_TYPE, (event) =>
-    saveText(event.data),
-  ),
+  ...createViewerBundle(myExtension, AJS_TABLE_VIEWER_TYPE, saveText),
   ...createViewerBundle(myExtension, AJS_FLOW_VIEWER_TYPE),
 ];
