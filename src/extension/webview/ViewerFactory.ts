@@ -32,8 +32,8 @@ type ViewerReadyHandler = (
  */
 export class ViewerFactory {
   readonly viewType: string;
-  protected store: ViewerFactoryStore;
-  protected myExtension: MyExtension;
+  #store: ViewerFactoryStore;
+  #myExtension: MyExtension;
   #onReady: ViewerReadyHandler;
   #onSave?: (content: string) => Promise<void>;
   #deps: ViewerFactoryDeps;
@@ -47,8 +47,8 @@ export class ViewerFactory {
     deps: ViewerFactoryDeps = defaultDeps,
   ) {
     this.viewType = viewType;
-    this.myExtension = myExtension;
-    this.store = store;
+    this.#myExtension = myExtension;
+    this.#store = store;
     this.#onReady = onReady;
     this.#onSave = onSave;
     this.#deps = deps;
@@ -62,7 +62,7 @@ export class ViewerFactory {
       `invoke PanelFactory.getPanel. (${this.viewType}, ${document.uri.toString()})`,
     );
 
-    const existingPanel = this.store.panelByDocument(document);
+    const existingPanel = this.#store.panelByDocument(document);
     if (existingPanel) {
       return existingPanel;
     }
@@ -70,7 +70,7 @@ export class ViewerFactory {
     return this.createAndStorePanel(document);
   }
 
-  protected registerStandardViewerCustomize(
+  private registerStandardViewerCustomize(
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
     onReady: (
@@ -82,7 +82,7 @@ export class ViewerFactory {
     const onDidReceiveMessage = createViewerMessageHandler({
       document,
       panel,
-      telemetry: this.myExtension.telemetry,
+      telemetry: this.#myExtension.telemetry,
       onReady,
       onResource: (event, receivedPanel) => {
         console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
@@ -99,7 +99,7 @@ export class ViewerFactory {
       uri: document.uri,
       panel,
       viewType: this.viewType,
-      store: this.store,
+      store: this.#store,
       receiveMessageDispose,
     });
   }
@@ -126,7 +126,7 @@ export class ViewerFactory {
       },
     );
     this.customize(document, panel);
-    this.store.add(document, panel);
+    this.#store.add(document, panel);
     return panel;
   }
 }
