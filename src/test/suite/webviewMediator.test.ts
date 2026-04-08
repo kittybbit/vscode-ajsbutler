@@ -13,7 +13,6 @@ class TestWebviewMediator extends WebviewMediator {
       panelByDocument(
         document: vscode.TextDocument,
       ): vscode.WebviewPanel | undefined;
-      removeByDocument(document: vscode.TextDocument): void;
       panelByUri(uri: vscode.Uri): vscode.WebviewPanel | undefined;
       removeByPanel(panel: vscode.WebviewPanel): void;
       allPanels: Set<vscode.WebviewPanel>;
@@ -34,7 +33,6 @@ class TestWebviewMediator extends WebviewMediator {
 
 suite("WebviewMediator", () => {
   test("routes close, rename, and theme events through focused handlers", () => {
-    const removedByDocument: string[] = [];
     const removedByPanel: string[] = [];
     const mounted: string[] = [];
     const changed: string[] = [];
@@ -75,9 +73,6 @@ suite("WebviewMediator", () => {
       store: {
         panelByDocument(receivedDocument) {
           return receivedDocument === document ? panel : undefined;
-        },
-        removeByDocument(receivedDocument) {
-          removedByDocument.push(receivedDocument.uri.toString());
         },
         panelByUri(receivedUri) {
           return receivedUri.toString() === document.uri.toString()
@@ -127,7 +122,6 @@ suite("WebviewMediator", () => {
     mediator.dispose();
 
     assert.deepStrictEqual(changed, ["file:///sample.ajs"]);
-    assert.deepStrictEqual(removedByDocument, []);
     assert.deepStrictEqual(removedByPanel, ["sample", "sample"]);
     assert.deepStrictEqual(mounted, ["ajsbutler.testViewer"]);
     assert.strictEqual(panelDisposed, true);

@@ -9,6 +9,11 @@ import {
 import { WebviewStore } from "./WebviewStore";
 import { MyExtension } from "../MyExtension";
 
+type ViewerFactoryStore = Pick<
+  WebviewStore,
+  "add" | "panelByDocument" | "removeByDocument"
+>;
+
 type ViewerFactoryDeps = {
   createWebviewPanel: typeof vscode.window.createWebviewPanel;
 };
@@ -23,14 +28,14 @@ const defaultDeps: ViewerFactoryDeps = {
  */
 export abstract class ViewerFactory {
   readonly viewType: string;
-  protected store: WebviewStore;
+  protected store: ViewerFactoryStore;
   protected myExtension: MyExtension;
   #deps: ViewerFactoryDeps;
 
   protected constructor(
     viewType: string,
     myExtension: MyExtension,
-    store: WebviewStore,
+    store: ViewerFactoryStore,
     deps: ViewerFactoryDeps = defaultDeps,
   ) {
     this.viewType = viewType;

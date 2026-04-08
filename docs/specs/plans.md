@@ -209,6 +209,8 @@ This file is the high-level index for the per-feature plan structure in
   panel via a distinct document object that shares the same URI.
 - WebviewMediator now reuses one panel cleanup path for both document-close and
   file-rename handling instead of duplicating remove-and-dispose logic.
+- ViewerFactory and WebviewMediator now depend only on the focused store
+  surface they actually use instead of the full `WebviewStore` API.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

@@ -4,6 +4,11 @@ import { MyExtension } from "../MyExtension";
 import { LANGUAGE_ID } from "../constant";
 import { mountViewerPanel } from "./mountViewerPanel";
 
+type WebviewMediatorStore = Pick<
+  WebviewStore,
+  "allPanels" | "dispose" | "panelByDocument" | "panelByUri" | "removeByPanel"
+>;
+
 type DocumentChangeHandler = (
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
@@ -28,7 +33,7 @@ const defaultDeps: WebviewMediatorDeps = {
 export abstract class WebviewMediator implements vscode.Disposable {
   #viewType: string;
   #myExtension: MyExtension;
-  #store: WebviewStore;
+  #store: WebviewMediatorStore;
   #change: DocumentChangeHandler;
   #deps: WebviewMediatorDeps;
   #subscriptions: vscode.Disposable;
@@ -36,7 +41,7 @@ export abstract class WebviewMediator implements vscode.Disposable {
   constructor(
     myExtension: MyExtension,
     viewType: string,
-    store: WebviewStore,
+    store: WebviewMediatorStore,
     change: DocumentChangeHandler,
     deps: WebviewMediatorDeps = defaultDeps,
   ) {
