@@ -213,6 +213,9 @@ This file is the high-level index for the per-feature plan structure in
   surface they actually use instead of the full `WebviewStore` API.
 - table and flow viewers now share one AJS document posting helper because
   their ready and debounced change behavior were identical.
+- table and flow viewers now instantiate `WebviewMediator` directly from
+  `viewerWiring.ts` because the dedicated mediator subclasses no longer carried
+  viewer-specific behavior.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
