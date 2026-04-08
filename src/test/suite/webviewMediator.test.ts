@@ -6,31 +6,6 @@ import { WebviewMediator } from "../../extension/webview/WebviewMediator";
 
 type Listener<T> = (event: T) => void;
 
-class TestWebviewMediator extends WebviewMediator {
-  public constructor(args: {
-    extension: MyExtension;
-    store: {
-      panelByDocument(
-        document: vscode.TextDocument,
-      ): vscode.WebviewPanel | undefined;
-      panelByUri(uri: vscode.Uri): vscode.WebviewPanel | undefined;
-      removeByPanel(panel: vscode.WebviewPanel): void;
-      allPanels: Set<vscode.WebviewPanel>;
-      dispose(): void;
-    };
-    change: (document: vscode.TextDocument, panel: vscode.WebviewPanel) => void;
-    deps: ConstructorParameters<typeof WebviewMediator>[4];
-  }) {
-    super(
-      args.extension,
-      "ajsbutler.testViewer",
-      args.store as never,
-      args.change,
-      args.deps,
-    );
-  }
-}
-
 suite("WebviewMediator", () => {
   test("routes close, rename, and theme events through focused handlers", () => {
     const removedByPanel: string[] = [];
@@ -68,9 +43,10 @@ suite("WebviewMediator", () => {
       },
     } as unknown as vscode.WebviewPanel;
 
-    const mediator = new TestWebviewMediator({
+    const mediator = new WebviewMediator(
       extension,
-      store: {
+      "ajsbutler.testViewer",
+      {
         panelByDocument(receivedDocument) {
           return receivedDocument === document ? panel : undefined;
         },
@@ -87,10 +63,10 @@ suite("WebviewMediator", () => {
           storeDisposed = true;
         },
       },
-      change(receivedDocument) {
+      (receivedDocument) => {
         changed.push(receivedDocument.uri.toString());
       },
-      deps: {
+      {
         onDidChangeTextDocument(listener) {
           onChangeTextDocument = listener;
           return { dispose() {} };
@@ -111,7 +87,7 @@ suite("WebviewMediator", () => {
           mounted.push(viewType);
         },
       },
-    });
+    );
 
     onChangeTextDocument?.({ document } as vscode.TextDocumentChangeEvent);
     onCloseTextDocument?.(document);
