@@ -54,4 +54,21 @@ suite("WebviewStore", () => {
     assert.strictEqual(store.panelByUri(document1.uri), undefined);
     assert.strictEqual(store.panelByUri(document2.uri), undefined);
   });
+
+  test("removes by uri identity rather than document object identity", () => {
+    const store = new WebviewStore("ajsbutler.testViewer");
+    const uri = { toString: () => "file:///same.ajs" } as vscode.Uri;
+    const storedDocument = { uri } as vscode.TextDocument;
+    const sameUriDocument = { uri } as vscode.TextDocument;
+    const panel = {
+      title: "same",
+      dispose() {},
+    } as unknown as vscode.WebviewPanel;
+
+    store.add(storedDocument, panel);
+    store.removeByDocument(sameUriDocument);
+
+    assert.strictEqual(store.panelByUri(uri), undefined);
+    assert.strictEqual(store.documentByUri(uri), undefined);
+  });
 });
