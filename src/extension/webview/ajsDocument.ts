@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { buildUnitList } from "../../application/unit-list/buildUnitList";
 import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
 
-const postFlowDocument = (
+const postAjsDocument = (
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
 ): void => {
@@ -13,15 +13,15 @@ const postFlowDocument = (
   });
 };
 
-export const readyFlowDocument = (
+export const readyAjsDocument = (
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
 ): void => {
   console.log(`post a message of ready. (${document.uri.toString()})`);
-  postFlowDocument(document, panel);
+  postAjsDocument(document, panel);
 };
 
-export function debouncedFlowDocumentChangeFn(delay: number = 300) {
+export function debouncedAjsDocumentChangeFn(delay: number = 300) {
   const id: Map<string, NodeJS.Timeout> = new Map();
   return (document: vscode.TextDocument, panel: vscode.WebviewPanel) => {
     if (panel === undefined) {
@@ -33,7 +33,7 @@ export function debouncedFlowDocumentChangeFn(delay: number = 300) {
       key,
       setTimeout(() => {
         console.log(`post a message of changeDocument. ${key}:${id.get(key)}`);
-        postFlowDocument(document, panel);
+        postAjsDocument(document, panel);
       }, delay),
     );
   };

@@ -3,7 +3,7 @@ import { ViewerFactory } from "./ViewerFactory";
 import { WebviewStore } from "./WebviewStore";
 import { AJS_TABLE_VIEWER_TYPE } from "./constant";
 import { MyExtension } from "../MyExtension";
-import { readyTableDocument } from "./tableDocument";
+import { readyAjsDocument } from "./ajsDocument";
 import { saveText } from "./messageHandlers";
 
 export class AjsTableViewerFactory extends ViewerFactory {
@@ -18,7 +18,7 @@ export class AjsTableViewerFactory extends ViewerFactory {
     this.registerStandardViewerCustomize(
       document,
       panel,
-      readyTableDocument,
+      readyAjsDocument,
       (event) => saveText(event.data),
     );
   }
