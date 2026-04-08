@@ -9,53 +9,6 @@ type ViewerFactoryDeps = {
   createWebviewPanel: typeof vscode.window.createWebviewPanel;
 };
 
-class TestViewerFactory extends ViewerFactory {
-  public customizeCallback:
-    | ((document: vscode.TextDocument, panel: vscode.WebviewPanel) => void)
-    | undefined;
-
-  public constructor(
-    telemetry: TelemetryPort,
-    store: {
-      panelByDocument(
-        document: vscode.TextDocument,
-      ): vscode.WebviewPanel | undefined;
-      add(document: vscode.TextDocument, panel: vscode.WebviewPanel): void;
-      removeByDocument(document: vscode.TextDocument): void;
-    },
-    deps?: ViewerFactoryDeps,
-  ) {
-    super(
-      "ajsbutler.testViewer",
-      MyExtension.init(
-        { subscriptions: [] } as unknown as vscode.ExtensionContext,
-        telemetry,
-      ),
-      store as never,
-      deps,
-    );
-  }
-
-  override customize(
-    document: vscode.TextDocument,
-    panel: vscode.WebviewPanel,
-  ): void {
-    this.customizeCallback?.(document, panel);
-  }
-
-  public customizeForTest(
-    document: vscode.TextDocument,
-    panel: vscode.WebviewPanel,
-    onReady: (
-      document: vscode.TextDocument,
-      panel: vscode.WebviewPanel,
-    ) => void,
-    onSave?: (event: { data: string }) => Promise<void>,
-  ): void {
-    this.registerStandardViewerCustomize(document, panel, onReady, onSave);
-  }
-}
-
 suite("ViewerFactory", () => {
   test("reuses an existing panel before creating a new one", () => {
     const telemetry: TelemetryPort = {
@@ -68,11 +21,15 @@ suite("ViewerFactory", () => {
       uri: { toString: () => "file:///sample.ajs" },
     } as unknown as vscode.TextDocument;
     let addCalled = false;
-    let customizeCalled = false;
+    let readyCalled = false;
     let createCalled = false;
 
-    const factory = new TestViewerFactory(
-      telemetry,
+    const factory = new ViewerFactory(
+      "ajsbutler.testViewer",
+      MyExtension.init(
+        { subscriptions: [] } as unknown as vscode.ExtensionContext,
+        telemetry,
+      ),
       {
         panelByDocument() {
           return existingPanel;
@@ -82,6 +39,10 @@ suite("ViewerFactory", () => {
         },
         removeByDocument() {},
       },
+      () => {
+        readyCalled = true;
+      },
+      undefined,
       {
         createWebviewPanel() {
           createCalled = true;
@@ -89,16 +50,13 @@ suite("ViewerFactory", () => {
         },
       },
     );
-    factory.customizeCallback = () => {
-      customizeCalled = true;
-    };
 
     const panel = factory.getPanel(document);
 
     assert.strictEqual(panel, existingPanel);
     assert.strictEqual(createCalled, false);
     assert.strictEqual(addCalled, false);
-    assert.strictEqual(customizeCalled, false);
+    assert.strictEqual(readyCalled, false);
   });
 
   test("creates, customizes, and stores a new panel when missing", () => {
@@ -115,12 +73,16 @@ suite("ViewerFactory", () => {
       document: vscode.TextDocument;
       panel: vscode.WebviewPanel;
     }> = [];
-    let customizeArgs:
+    let readyArgs:
       | { document: vscode.TextDocument; panel: vscode.WebviewPanel }
       | undefined;
 
-    const factory = new TestViewerFactory(
-      telemetry,
+    const factory = new ViewerFactory(
+      "ajsbutler.testViewer",
+      MyExtension.init(
+        { subscriptions: [] } as unknown as vscode.ExtensionContext,
+        telemetry,
+      ),
       {
         panelByDocument() {
           return undefined;
@@ -130,20 +92,21 @@ suite("ViewerFactory", () => {
         },
         removeByDocument() {},
       },
+      (receivedDocument, receivedPanel) => {
+        readyArgs = { document: receivedDocument, panel: receivedPanel };
+      },
+      undefined,
       {
         createWebviewPanel() {
           return createdPanel;
         },
       },
     );
-    factory.customizeCallback = (receivedDocument, receivedPanel) => {
-      customizeArgs = { document: receivedDocument, panel: receivedPanel };
-    };
 
     const panel = factory.getPanel(document);
 
     assert.strictEqual(panel, createdPanel);
-    assert.deepStrictEqual(customizeArgs, {
+    assert.deepStrictEqual(readyArgs, {
       document,
       panel: createdPanel,
     });
@@ -192,21 +155,23 @@ suite("ViewerFactory", () => {
       },
     } as unknown as vscode.WebviewPanel;
 
-    const factory = new TestViewerFactory(telemetry, {
-      removeByDocument(receivedDocument) {
-        removed.push(receivedDocument.uri.toString());
+    const factory = new ViewerFactory(
+      "ajsbutler.testViewer",
+      MyExtension.init(
+        { subscriptions: [] } as unknown as vscode.ExtensionContext,
+        telemetry,
+      ),
+      {
+        removeByDocument(receivedDocument) {
+          removed.push(receivedDocument.uri.toString());
+        },
+        add() {
+          throw new Error("add should not be used in this test");
+        },
+        panelByDocument() {
+          return undefined;
+        },
       },
-      add() {
-        throw new Error("add should not be used in this test");
-      },
-      panelByDocument() {
-        return undefined;
-      },
-    });
-
-    factory.customizeForTest(
-      document,
-      panel,
       (receivedDocument, receivedPanel) => {
         calls.push(
           `ready:${receivedDocument.uri.toString()}:${receivedPanel.viewType}`,
@@ -216,6 +181,8 @@ suite("ViewerFactory", () => {
         calls.push(`save:${event.data}`);
       },
     );
+
+    factory.customize(document, panel);
 
     receiveMessageHandler?.({ type: READY });
     receiveMessageHandler?.({

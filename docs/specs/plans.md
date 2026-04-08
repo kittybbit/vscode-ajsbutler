@@ -216,6 +216,9 @@ This file is the high-level index for the per-feature plan structure in
 - table and flow viewers now instantiate `WebviewMediator` directly from
   `viewerWiring.ts` because the dedicated mediator subclasses no longer carried
   viewer-specific behavior.
+- table and flow viewers now instantiate `ViewerFactory` directly from
+  `viewerWiring.ts` because the dedicated factory subclasses no longer carried
+  viewer-specific behavior beyond `viewType` and optional save handling.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
