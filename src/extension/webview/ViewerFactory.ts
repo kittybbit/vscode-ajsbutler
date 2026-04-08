@@ -22,25 +22,36 @@ const defaultDeps: ViewerFactoryDeps = {
   createWebviewPanel: vscode.window.createWebviewPanel,
 };
 
+type ViewerReadyHandler = (
+  document: vscode.TextDocument,
+  panel: vscode.WebviewPanel,
+) => void;
+
 /**
  * PanelFactory is responsible for creating and managing webview panels.
  * It ensures that only one panel exists for a given URI, reusing existing panels when possible.
  */
-export abstract class ViewerFactory {
+export class ViewerFactory {
   readonly viewType: string;
   protected store: ViewerFactoryStore;
   protected myExtension: MyExtension;
+  #onReady: ViewerReadyHandler;
+  #onSave?: (event: SaveEventType) => Promise<void>;
   #deps: ViewerFactoryDeps;
 
-  protected constructor(
+  public constructor(
     viewType: string,
     myExtension: MyExtension,
     store: ViewerFactoryStore,
+    onReady: ViewerReadyHandler,
+    onSave?: (event: SaveEventType) => Promise<void>,
     deps: ViewerFactoryDeps = defaultDeps,
   ) {
     this.viewType = viewType;
     this.myExtension = myExtension;
     this.store = store;
+    this.#onReady = onReady;
+    this.#onSave = onSave;
     this.#deps = deps;
   }
 
@@ -94,10 +105,14 @@ export abstract class ViewerFactory {
     });
   }
 
-  abstract customize(
-    document: vscode.TextDocument,
-    panel: vscode.WebviewPanel,
-  ): void;
+  public customize(document: vscode.TextDocument, panel: vscode.WebviewPanel) {
+    this.registerStandardViewerCustomize(
+      document,
+      panel,
+      this.#onReady,
+      this.#onSave,
+    );
+  }
 
   private createAndStorePanel(
     document: vscode.TextDocument,

@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import { registerPreviewCommand } from "../commands/registerPreviewCommand";
-import { AjsFlowViewerFactory } from "../webview/AjsFlowViewerFactory";
-import { AjsTableViewerFactory } from "../webview/AjsTableViewerFactory";
 import { ViewerFactory } from "../webview/ViewerFactory";
 import { WebviewMediator } from "../webview/WebviewMediator";
 import {
@@ -10,17 +8,16 @@ import {
   AJS_TABLE_VIEWER_TYPE,
 } from "../webview/constant";
 import { WebviewStore } from "../webview/WebviewStore";
-import { debouncedAjsDocumentChangeFn } from "../webview/ajsDocument";
-
-type ViewerFactoryConstructor = new (
-  myExtension: MyExtension,
-  store: WebviewStore,
-) => ViewerFactory;
+import {
+  debouncedAjsDocumentChangeFn,
+  readyAjsDocument,
+} from "../webview/ajsDocument";
+import { saveText } from "../webview/messageHandlers";
 
 const createViewerBundle = (
   myExtension: MyExtension,
   viewType: string,
-  ViewerFactory: ViewerFactoryConstructor,
+  saveHandler?: (event: { data: string }) => Promise<void>,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator(
@@ -29,7 +26,13 @@ const createViewerBundle = (
     store,
     debouncedAjsDocumentChangeFn(300),
   );
-  const factory = new ViewerFactory(myExtension, store);
+  const factory = new ViewerFactory(
+    viewType,
+    myExtension,
+    store,
+    readyAjsDocument,
+    saveHandler,
+  );
 
   return [mediator, registerPreviewCommand(factory, myExtension)];
 };
@@ -37,14 +40,8 @@ const createViewerBundle = (
 export const createViewerSubscriptions = (
   myExtension: MyExtension,
 ): vscode.Disposable[] => [
-  ...createViewerBundle(
-    myExtension,
-    AJS_TABLE_VIEWER_TYPE,
-    AjsTableViewerFactory,
+  ...createViewerBundle(myExtension, AJS_TABLE_VIEWER_TYPE, (event) =>
+    saveText(event.data),
   ),
-  ...createViewerBundle(
-    myExtension,
-    AJS_FLOW_VIEWER_TYPE,
-    AjsFlowViewerFactory,
-  ),
+  ...createViewerBundle(myExtension, AJS_FLOW_VIEWER_TYPE),
 ];
