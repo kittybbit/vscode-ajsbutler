@@ -14,10 +14,19 @@ import {
 } from "../webview/ajsDocument";
 import { saveText } from "../webview/messageHandlers";
 
+type ViewerConfig = {
+  viewType: string;
+  saveHandler?: (content: string) => Promise<void>;
+};
+
+const viewerConfigs: ViewerConfig[] = [
+  { viewType: AJS_TABLE_VIEWER_TYPE, saveHandler: saveText },
+  { viewType: AJS_FLOW_VIEWER_TYPE },
+];
+
 const createViewerBundle = (
   myExtension: MyExtension,
-  viewType: string,
-  saveHandler?: (content: string) => Promise<void>,
+  { viewType, saveHandler }: ViewerConfig,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator(
@@ -39,7 +48,5 @@ const createViewerBundle = (
 
 export const createViewerSubscriptions = (
   myExtension: MyExtension,
-): vscode.Disposable[] => [
-  ...createViewerBundle(myExtension, AJS_TABLE_VIEWER_TYPE, saveText),
-  ...createViewerBundle(myExtension, AJS_FLOW_VIEWER_TYPE),
-];
+): vscode.Disposable[] =>
+  viewerConfigs.flatMap((config) => createViewerBundle(myExtension, config));
