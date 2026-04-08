@@ -204,6 +204,9 @@ This file is the high-level index for the per-feature plan structure in
   focused store regression test for add, lookup, remove, and dispose.
 - ViewerFactory panel creation now uses a focused create/store path with
   regression tests for both reuse and new-panel creation.
+- WebviewStore document-based access now resolves through the same URI key path
+  as add and lookup operations, with regression coverage for removing a stored
+  panel via a distinct document object that shares the same URI.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
