@@ -198,6 +198,8 @@ This file is the high-level index for the per-feature plan structure in
   behavior instead of carrying pass-through overrides.
 - thin table/flow viewer `init` wrappers are removed, and `viewerWiring`
   constructs mediators and factories directly.
+- viewer wiring now uses a single local builder for the table/flow pair so
+  the file keeps one symmetric construction path instead of duplicated blocks.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
