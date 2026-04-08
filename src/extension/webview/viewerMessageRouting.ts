@@ -6,7 +6,6 @@ import {
   RESOURCE,
   SAVE,
   type ResourceEventType,
-  type SaveEventType,
   type WebviewEventType,
 } from "../../shared/webviewEvents";
 import { WebviewStore } from "./WebviewStore";
@@ -23,7 +22,7 @@ type ViewerMessageRoutingDeps = {
     telemetry: TelemetryPort,
     operation: string,
   ) => void;
-  onSave?: (event: SaveEventType) => Promise<void>;
+  onSave?: (content: string) => Promise<void>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
 };
 
@@ -50,7 +49,7 @@ export const createViewerMessageHandler =
       }
       case SAVE: {
         if (typeof event.data === "string" && onSave) {
-          void onSave(event);
+          void onSave(event.data);
         } else {
           void showErrorMessage("Data is not a string and cannot be saved.");
         }

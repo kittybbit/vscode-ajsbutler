@@ -177,8 +177,8 @@ suite("ViewerFactory", () => {
           `ready:${receivedDocument.uri.toString()}:${receivedPanel.viewType}`,
         );
       },
-      async (event) => {
-        calls.push(`save:${event.data}`);
+      async (content) => {
+        calls.push(`save:${content}`);
       },
     );
 
