@@ -10,7 +10,7 @@ import { MyExtension } from "../MyExtension";
 
 type ViewerFactoryStore = Pick<
   WebviewStore,
-  "add" | "panelByDocument" | "removeByDocument"
+  "add" | "panelByDocument" | "removeByUri"
 >;
 
 type ViewerFactoryDeps = {
@@ -96,7 +96,7 @@ export class ViewerFactory {
       panel.webview.onDidReceiveMessage(onDidReceiveMessage);
 
     registerViewerPanelDispose({
-      document,
+      uri: document.uri,
       panel,
       viewType: this.viewType,
       store: this.store,

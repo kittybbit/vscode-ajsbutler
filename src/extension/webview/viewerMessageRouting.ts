@@ -63,25 +63,23 @@ export const createViewerMessageHandler =
   };
 
 type ViewerPanelDisposeDeps = {
-  document: vscode.TextDocument;
+  uri: vscode.Uri;
   panel: vscode.WebviewPanel;
   viewType: string;
-  store: Pick<WebviewStore, "removeByDocument">;
+  store: Pick<WebviewStore, "removeByUri">;
   receiveMessageDispose: Pick<vscode.Disposable, "dispose">;
 };
 
 export const registerViewerPanelDispose = ({
-  document,
+  uri,
   panel,
   viewType,
   store,
   receiveMessageDispose,
 }: ViewerPanelDisposeDeps): void => {
   panel.onDidDispose(() => {
-    console.log(
-      `invoke panel.onDidDispose. (${viewType}, ${document.uri.toString()})`,
-    );
-    store.removeByDocument(document);
+    console.log(`invoke panel.onDidDispose. (${viewType}, ${uri.toString()})`);
+    store.removeByUri(uri);
     receiveMessageDispose.dispose();
   });
 };

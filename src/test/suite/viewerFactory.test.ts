@@ -37,7 +37,7 @@ suite("ViewerFactory", () => {
         add() {
           addCalled = true;
         },
-        removeByDocument() {},
+        removeByUri() {},
       },
       () => {
         readyCalled = true;
@@ -90,7 +90,7 @@ suite("ViewerFactory", () => {
         add(receivedDocument, receivedPanel) {
           added.push({ document: receivedDocument, panel: receivedPanel });
         },
-        removeByDocument() {},
+        removeByUri() {},
       },
       (receivedDocument, receivedPanel) => {
         readyArgs = { document: receivedDocument, panel: receivedPanel };
@@ -162,8 +162,8 @@ suite("ViewerFactory", () => {
         telemetry,
       ),
       {
-        removeByDocument(receivedDocument) {
-          removed.push(receivedDocument.uri.toString());
+        removeByUri(uri) {
+          removed.push(uri.toString());
         },
         add() {
           throw new Error("add should not be used in this test");
