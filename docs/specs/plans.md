@@ -222,6 +222,8 @@ This file is the high-level index for the per-feature plan structure in
 - viewer save handling now crosses the factory boundary as plain text content,
   keeping `SaveEventType` scoped to message routing instead of bootstrap and
   factory wiring.
+- viewer wiring now derives the table and flow subscription pair from one local
+  config list so the remaining viewer-specific differences live in one place.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
