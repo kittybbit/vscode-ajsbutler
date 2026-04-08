@@ -1,21 +1,16 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import { registerPreviewCommand } from "../commands/registerPreviewCommand";
-import { AjsFlowViewerMediator } from "../webview/AjsFlowViewerMediator";
 import { AjsFlowViewerFactory } from "../webview/AjsFlowViewerFactory";
-import { AjsTableViewerMediator } from "../webview/AjsTableViewerMediator";
 import { AjsTableViewerFactory } from "../webview/AjsTableViewerFactory";
 import { ViewerFactory } from "../webview/ViewerFactory";
+import { WebviewMediator } from "../webview/WebviewMediator";
 import {
   AJS_FLOW_VIEWER_TYPE,
   AJS_TABLE_VIEWER_TYPE,
 } from "../webview/constant";
 import { WebviewStore } from "../webview/WebviewStore";
-
-type ViewerMediatorConstructor = new (
-  myExtension: MyExtension,
-  store: WebviewStore,
-) => vscode.Disposable;
+import { debouncedAjsDocumentChangeFn } from "../webview/ajsDocument";
 
 type ViewerFactoryConstructor = new (
   myExtension: MyExtension,
@@ -25,11 +20,15 @@ type ViewerFactoryConstructor = new (
 const createViewerBundle = (
   myExtension: MyExtension,
   viewType: string,
-  ViewerMediator: ViewerMediatorConstructor,
   ViewerFactory: ViewerFactoryConstructor,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
-  const mediator = new ViewerMediator(myExtension, store);
+  const mediator = new WebviewMediator(
+    myExtension,
+    viewType,
+    store,
+    debouncedAjsDocumentChangeFn(300),
+  );
   const factory = new ViewerFactory(myExtension, store);
 
   return [mediator, registerPreviewCommand(factory, myExtension)];
@@ -41,13 +40,11 @@ export const createViewerSubscriptions = (
   ...createViewerBundle(
     myExtension,
     AJS_TABLE_VIEWER_TYPE,
-    AjsTableViewerMediator,
     AjsTableViewerFactory,
   ),
   ...createViewerBundle(
     myExtension,
     AJS_FLOW_VIEWER_TYPE,
-    AjsFlowViewerMediator,
     AjsFlowViewerFactory,
   ),
 ];

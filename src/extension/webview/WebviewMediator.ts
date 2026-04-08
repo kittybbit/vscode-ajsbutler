@@ -30,7 +30,7 @@ const defaultDeps: WebviewMediatorDeps = {
   mountPanel: mountViewerPanel,
 };
 
-export abstract class WebviewMediator implements vscode.Disposable {
+export class WebviewMediator implements vscode.Disposable {
   #viewType: string;
   #myExtension: MyExtension;
   #store: WebviewMediatorStore;
