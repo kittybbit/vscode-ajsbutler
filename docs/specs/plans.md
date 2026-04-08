@@ -202,6 +202,8 @@ This file is the high-level index for the per-feature plan structure in
   the file keeps one symmetric construction path instead of duplicated blocks.
 - WebviewStore removal paths now share one internal delete path and have a
   focused store regression test for add, lookup, remove, and dispose.
+- ViewerFactory panel creation now uses a focused create/store path with
+  regression tests for both reuse and new-panel creation.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

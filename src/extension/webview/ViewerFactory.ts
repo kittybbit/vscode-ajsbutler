@@ -9,6 +9,14 @@ import {
 import { WebviewStore } from "./WebviewStore";
 import { MyExtension } from "../MyExtension";
 
+type ViewerFactoryDeps = {
+  createWebviewPanel: typeof vscode.window.createWebviewPanel;
+};
+
+const defaultDeps: ViewerFactoryDeps = {
+  createWebviewPanel: vscode.window.createWebviewPanel,
+};
+
 /**
  * PanelFactory is responsible for creating and managing webview panels.
  * It ensures that only one panel exists for a given URI, reusing existing panels when possible.
@@ -17,15 +25,18 @@ export abstract class ViewerFactory {
   readonly viewType: string;
   protected store: WebviewStore;
   protected myExtension: MyExtension;
+  #deps: ViewerFactoryDeps;
 
   protected constructor(
     viewType: string,
     myExtension: MyExtension,
     store: WebviewStore,
+    deps: ViewerFactoryDeps = defaultDeps,
   ) {
     this.viewType = viewType;
     this.myExtension = myExtension;
     this.store = store;
+    this.#deps = deps;
   }
 
   /**
@@ -36,22 +47,12 @@ export abstract class ViewerFactory {
       `invoke PanelFactory.getPanel. (${this.viewType}, ${document.uri.toString()})`,
     );
 
-    let panel = this.store.panelByDocument(document);
-    if (panel === undefined) {
-      panel = vscode.window.createWebviewPanel(
-        this.viewType,
-        path.basename(document.fileName),
-        vscode.ViewColumn.Beside,
-        {
-          enableScripts: true,
-          retainContextWhenHidden: true,
-        },
-      );
-      this.customize(document, panel);
-      // Add to store
-      this.store.add(document, panel);
+    const existingPanel = this.store.panelByDocument(document);
+    if (existingPanel) {
+      return existingPanel;
     }
-    return panel;
+
+    return this.createAndStorePanel(document);
   }
 
   protected registerStandardViewerCustomize(
@@ -92,4 +93,21 @@ export abstract class ViewerFactory {
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
   ): void;
+
+  private createAndStorePanel(
+    document: vscode.TextDocument,
+  ): vscode.WebviewPanel {
+    const panel = this.#deps.createWebviewPanel(
+      this.viewType,
+      path.basename(document.fileName),
+      vscode.ViewColumn.Beside,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+      },
+    );
+    this.customize(document, panel);
+    this.store.add(document, panel);
+    return panel;
+  }
 }
