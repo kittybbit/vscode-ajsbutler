@@ -13,8 +13,9 @@ export class WebviewStore implements vscode.Disposable {
     console.log(
       `invoke WebviewStore.add. (${this.#viewType}, ${document.uri.toString()})`,
     );
-    this.#mapDocument.set(document.uri.toString(), document);
-    this.#mapPanel.set(document.uri.toString(), panel);
+    const key = document.uri.toString();
+    this.#mapDocument.set(key, document);
+    this.#mapPanel.set(key, panel);
     this.prettyPrint();
   }
 
@@ -22,14 +23,13 @@ export class WebviewStore implements vscode.Disposable {
     console.log(
       `invoke WebviewStore.removeByUri. (${this.#viewType}, ${uri.toString()})`,
     );
-    const panel = this.#mapPanel.get(uri.toString());
-    if (!panel) {
+    const key = uri.toString();
+    if (!this.#mapPanel.has(key)) {
       console.log("Webview panel not found for this uri.");
       this.prettyPrint();
       return;
     }
-    this.#mapPanel.delete(uri.toString());
-    this.#mapDocument.delete(uri.toString());
+    this.deleteByKey(key);
     this.prettyPrint();
   }
 
@@ -37,12 +37,9 @@ export class WebviewStore implements vscode.Disposable {
     console.log(
       `invoke WebviewStore.removeByPanel. (${this.#viewType}, ${panel.title})`,
     );
-    for (const [key, value] of this.#mapPanel.entries()) {
-      if (value === panel) {
-        this.#mapPanel.delete(key);
-        this.#mapDocument.delete(key);
-        break;
-      }
+    const key = this.keyByPanel(panel);
+    if (key) {
+      this.deleteByKey(key);
     }
     this.prettyPrint();
   }
@@ -51,15 +48,9 @@ export class WebviewStore implements vscode.Disposable {
     console.log(
       `invoke WebviewStore.removeByDocument. (${this.#viewType}, ${document.uri.toString()})`,
     );
-    for (const [key, value] of this.#mapDocument.entries()) {
-      if (value === document) {
-        const panel = this.#mapPanel.get(key);
-        if (panel) {
-          this.#mapPanel.delete(key);
-        }
-        this.#mapDocument.delete(key);
-        break;
-      }
+    const key = this.keyByDocument(document);
+    if (key) {
+      this.deleteByKey(key);
     }
     this.prettyPrint();
   }
@@ -107,5 +98,28 @@ export class WebviewStore implements vscode.Disposable {
     console.log("WebviewStore:");
     console.log("  #mapPanel:", this.#mapPanel);
     console.log("  #mapDocument:", this.#mapDocument);
+  }
+
+  private deleteByKey(key: string): void {
+    this.#mapPanel.delete(key);
+    this.#mapDocument.delete(key);
+  }
+
+  private keyByPanel(panel: vscode.WebviewPanel): string | undefined {
+    for (const [key, value] of this.#mapPanel.entries()) {
+      if (value === panel) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  private keyByDocument(document: vscode.TextDocument): string | undefined {
+    for (const [key, value] of this.#mapDocument.entries()) {
+      if (value === document) {
+        return key;
+      }
+    }
+    return undefined;
   }
 }
