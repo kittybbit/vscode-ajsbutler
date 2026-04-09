@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
-import { ViewerFactory } from "../webview/ViewerFactory";
 import { mountViewerPanel } from "../webview/mountViewerPanel";
 
-type PreviewPanelFactory = Pick<ViewerFactory, "getPanel">;
+export type PreviewPanelFactory = {
+  getPanel(document: vscode.TextDocument): vscode.WebviewPanel;
+};
 
 type OpenPreviewCommandDependencies = {
   getActiveEditor: () => vscode.TextEditor | undefined;
