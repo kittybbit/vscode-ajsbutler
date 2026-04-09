@@ -8,11 +8,11 @@ export class WebviewStore implements vscode.Disposable {
     this.#viewType = viewType;
   }
 
-  add(document: vscode.TextDocument, panel: vscode.WebviewPanel): void {
+  add(uri: vscode.Uri, panel: vscode.WebviewPanel): void {
     console.log(
-      `invoke WebviewStore.add. (${this.#viewType}, ${document.uri.toString()})`,
+      `invoke WebviewStore.add. (${this.#viewType}, ${uri.toString()})`,
     );
-    const key = this.keyByUri(document.uri);
+    const key = this.keyByUri(uri);
     this.#mapPanel.set(key, panel);
     this.prettyPrint();
   }

@@ -70,7 +70,7 @@ suite("ViewerFactory", () => {
       uri: { toString: () => "file:///sample.ajs" },
     } as unknown as vscode.TextDocument;
     const added: Array<{
-      document: vscode.TextDocument;
+      uri: vscode.Uri;
       panel: vscode.WebviewPanel;
     }> = [];
     let readyArgs:
@@ -87,8 +87,8 @@ suite("ViewerFactory", () => {
         panelByUri() {
           return undefined;
         },
-        add(receivedDocument, receivedPanel) {
-          added.push({ document: receivedDocument, panel: receivedPanel });
+        add(receivedUri, receivedPanel) {
+          added.push({ uri: receivedUri, panel: receivedPanel });
         },
         removeByUri() {},
       },
@@ -110,7 +110,7 @@ suite("ViewerFactory", () => {
       document,
       panel: createdPanel,
     });
-    assert.deepStrictEqual(added, [{ document, panel: createdPanel }]);
+    assert.deepStrictEqual(added, [{ uri: document.uri, panel: createdPanel }]);
   });
 
   test("registers the shared viewer customize flow", async () => {
@@ -155,7 +155,7 @@ suite("ViewerFactory", () => {
       },
     } as unknown as vscode.WebviewPanel;
     const added: Array<{
-      document: vscode.TextDocument;
+      uri: vscode.Uri;
       panel: vscode.WebviewPanel;
     }> = [];
 
@@ -169,8 +169,8 @@ suite("ViewerFactory", () => {
         removeByUri(uri) {
           removed.push(uri.toString());
         },
-        add(receivedDocument, receivedPanel) {
-          added.push({ document: receivedDocument, panel: receivedPanel });
+        add(receivedUri, receivedPanel) {
+          added.push({ uri: receivedUri, panel: receivedPanel });
         },
         panelByUri() {
           return undefined;
@@ -210,7 +210,7 @@ suite("ViewerFactory", () => {
       "save:body",
     ]);
     assert.strictEqual(createdPanel, panel);
-    assert.deepStrictEqual(added, [{ document, panel }]);
+    assert.deepStrictEqual(added, [{ uri: document.uri, panel }]);
     assert.deepStrictEqual(telemetryEvents, [OPERATION]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
     assert.strictEqual(receiverDisposed, true);

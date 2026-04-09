@@ -238,6 +238,8 @@ This file is the high-level index for the per-feature plan structure in
   parallel document map no longer served any live lookup path.
 - WebviewStore callers now resolve panels by URI only, so the last
   document-based panel lookup path is removed from both store and callers.
+- WebviewStore registration now also takes a URI directly, so its public
+  contract is fully aligned with the URI-keyed internal model.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks
