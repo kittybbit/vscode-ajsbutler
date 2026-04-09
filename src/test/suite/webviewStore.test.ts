@@ -36,7 +36,7 @@ suite("WebviewStore", () => {
     store.removeByUri(document1.uri);
     assert.strictEqual(store.panelByUri(document1.uri), undefined);
 
-    store.removeByPanel(panel2);
+    store.removeByUri(document2.uri);
     assert.strictEqual(store.panelByUri(document2.uri), undefined);
 
     store.add(document1.uri, panel1);

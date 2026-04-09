@@ -240,6 +240,8 @@ This file is the high-level index for the per-feature plan structure in
   document-based panel lookup path is removed from both store and callers.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
+- WebviewMediator cleanup now removes store entries by URI directly, allowing
+  WebviewStore to drop its last panel-based reverse-lookup helper.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

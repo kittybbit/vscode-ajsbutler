@@ -8,7 +8,7 @@ type Listener<T> = (event: T) => void;
 
 suite("WebviewMediator", () => {
   test("routes close, rename, and theme events through focused handlers", () => {
-    const removedByPanel: string[] = [];
+    const removedByUri: string[] = [];
     const mounted: string[] = [];
     const changed: string[] = [];
     let storeDisposed = false;
@@ -52,8 +52,8 @@ suite("WebviewMediator", () => {
             ? panel
             : undefined;
         },
-        removeByPanel(receivedPanel) {
-          removedByPanel.push(receivedPanel.title);
+        removeByUri(receivedUri) {
+          removedByUri.push(receivedUri.toString());
         },
         allPanels: new Set([panel]),
         dispose() {
@@ -95,7 +95,10 @@ suite("WebviewMediator", () => {
     mediator.dispose();
 
     assert.deepStrictEqual(changed, ["file:///sample.ajs"]);
-    assert.deepStrictEqual(removedByPanel, ["sample", "sample"]);
+    assert.deepStrictEqual(removedByUri, [
+      "file:///sample.ajs",
+      "file:///sample.ajs",
+    ]);
     assert.deepStrictEqual(mounted, ["ajsbutler.testViewer"]);
     assert.strictEqual(panelDisposed, true);
     assert.strictEqual(storeDisposed, true);
