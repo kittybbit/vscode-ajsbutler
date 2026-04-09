@@ -244,6 +244,9 @@ This file is the high-level index for the per-feature plan structure in
 - preview command wiring now owns `viewType` explicitly, so `ViewerFactory`
   no longer exposes it as part of its public API just to support command
   registration, mounting, and telemetry naming.
+- preview command registration now depends only on a local `getPanel(...)`
+  contract, so command wiring no longer imports the concrete `ViewerFactory`
+  type just to invoke the shared preview-open flow.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
 - WebviewMediator cleanup now removes store entries by URI directly, allowing
