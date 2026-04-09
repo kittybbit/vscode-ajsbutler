@@ -8,7 +8,6 @@ import {
   type ResourceEventType,
   type WebviewEventType,
 } from "../../shared/webviewEvents";
-import { WebviewStore } from "./WebviewStore";
 
 type ViewerMessageRoutingDeps = {
   document: vscode.TextDocument;
@@ -66,7 +65,9 @@ type ViewerPanelDisposeDeps = {
   uri: vscode.Uri;
   panel: vscode.WebviewPanel;
   viewType: string;
-  store: Pick<WebviewStore, "removeByUri">;
+  store: {
+    removeByUri(uri: vscode.Uri): void;
+  };
   receiveMessageDispose: Pick<vscode.Disposable, "dispose">;
 };
 

@@ -5,13 +5,13 @@ import {
   createViewerMessageHandler,
   registerViewerPanelDispose,
 } from "./viewerMessageRouting";
-import { WebviewStore } from "./WebviewStore";
 import { MyExtension } from "../MyExtension";
 
-type ViewerFactoryStore = Pick<
-  WebviewStore,
-  "add" | "panelByUri" | "removeByUri"
->;
+type ViewerFactoryStore = {
+  add(uri: vscode.Uri, panel: vscode.WebviewPanel): void;
+  panelByUri(uri: vscode.Uri): vscode.WebviewPanel | undefined;
+  removeByUri(uri: vscode.Uri): void;
+};
 
 type ViewerFactoryDeps = {
   createWebviewPanel: typeof vscode.window.createWebviewPanel;

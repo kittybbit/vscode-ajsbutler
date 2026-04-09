@@ -238,6 +238,9 @@ This file is the high-level index for the per-feature plan structure in
   parallel document map no longer served any live lookup path.
 - WebviewStore callers now resolve panels by URI only, so the last
   document-based panel lookup path is removed from both store and callers.
+- viewer factory, mediator, and message-routing contracts now describe the
+  minimal store surface locally instead of importing `WebviewStore` just to
+  slice its type with `Pick`.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
 - WebviewMediator cleanup now removes store entries by URI directly, allowing
