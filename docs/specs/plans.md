@@ -236,6 +236,8 @@ This file is the high-level index for the per-feature plan structure in
   no longer have production callers.
 - WebviewStore now keeps only the URI-keyed panel map internally because the
   parallel document map no longer served any live lookup path.
+- WebviewStore callers now resolve panels by URI only, so the last
+  document-based panel lookup path is removed from both store and callers.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

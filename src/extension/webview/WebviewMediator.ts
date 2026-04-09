@@ -6,7 +6,7 @@ import { mountViewerPanel } from "./mountViewerPanel";
 
 type WebviewMediatorStore = Pick<
   WebviewStore,
-  "allPanels" | "dispose" | "panelByDocument" | "panelByUri" | "removeByPanel"
+  "allPanels" | "dispose" | "panelByUri" | "removeByPanel"
 >;
 
 type DocumentChangeHandler = (
@@ -81,7 +81,7 @@ export class WebviewMediator implements vscode.Disposable {
       "invoke WebviewMediator.onDidChangeTextDocument.",
       `(${this.#viewType}, ${event.document.uri.toString()})`,
     );
-    const panel = this.#store.panelByDocument(event.document);
+    const panel = this.#store.panelByUri(event.document.uri);
     if (panel === undefined) {
       return;
     }
@@ -96,7 +96,7 @@ export class WebviewMediator implements vscode.Disposable {
       "invoke WebviewMediator.onDidCloseTextDocument.",
       `(${this.#viewType}), ${document.uri.toString()})`,
     );
-    const panel = this.#store.panelByDocument(document);
+    const panel = this.#store.panelByUri(document.uri);
     if (panel === undefined) {
       return;
     }

@@ -31,7 +31,7 @@ suite("ViewerFactory", () => {
         telemetry,
       ),
       {
-        panelByDocument() {
+        panelByUri() {
           return existingPanel;
         },
         add() {
@@ -84,7 +84,7 @@ suite("ViewerFactory", () => {
         telemetry,
       ),
       {
-        panelByDocument() {
+        panelByUri() {
           return undefined;
         },
         add(receivedDocument, receivedPanel) {
@@ -172,7 +172,7 @@ suite("ViewerFactory", () => {
         add(receivedDocument, receivedPanel) {
           added.push({ document: receivedDocument, panel: receivedPanel });
         },
-        panelByDocument() {
+        panelByUri() {
           return undefined;
         },
       },

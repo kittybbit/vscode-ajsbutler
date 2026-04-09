@@ -30,7 +30,7 @@ suite("WebviewStore", () => {
     store.add(document1, panel1);
     store.add(document2, panel2);
 
-    assert.strictEqual(store.panelByDocument(document1), panel1);
+    assert.strictEqual(store.panelByUri(document1.uri), panel1);
     assert.strictEqual(store.panelByUri(document2.uri), panel2);
 
     store.removeByUri(document1.uri);

@@ -42,16 +42,6 @@ export class WebviewStore implements vscode.Disposable {
     this.prettyPrint();
   }
 
-  panelByDocument(
-    document: vscode.TextDocument,
-  ): vscode.WebviewPanel | undefined {
-    console.log(
-      `invoke WebviewStore.panelByDocument. (${this.#viewType}, ${document.uri.toString()})`,
-    );
-    this.prettyPrint();
-    return this.#mapPanel.get(this.keyByUri(document.uri));
-  }
-
   panelByUri(uri: vscode.Uri): vscode.WebviewPanel | undefined {
     console.log(
       `invoke WebviewStore.panelByUri. (${this.#viewType}, ${uri.toString()})`,

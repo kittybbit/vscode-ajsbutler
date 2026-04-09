@@ -10,7 +10,7 @@ import { MyExtension } from "../MyExtension";
 
 type ViewerFactoryStore = Pick<
   WebviewStore,
-  "add" | "panelByDocument" | "removeByUri"
+  "add" | "panelByUri" | "removeByUri"
 >;
 
 type ViewerFactoryDeps = {
@@ -62,7 +62,7 @@ export class ViewerFactory {
       `invoke PanelFactory.getPanel. (${this.viewType}, ${document.uri.toString()})`,
     );
 
-    const existingPanel = this.#store.panelByDocument(document);
+    const existingPanel = this.#store.panelByUri(document.uri);
     if (existingPanel) {
       return existingPanel;
     }
