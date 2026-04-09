@@ -234,6 +234,8 @@ This file is the high-level index for the per-feature plan structure in
   of keeping a thin test-only subclass around.
 - WebviewStore has dropped dead document-based removal and lookup helpers that
   no longer have production callers.
+- WebviewStore now keeps only the URI-keyed panel map internally because the
+  parallel document map no longer served any live lookup path.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

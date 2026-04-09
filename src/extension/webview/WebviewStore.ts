@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 
 export class WebviewStore implements vscode.Disposable {
   readonly #viewType: string;
-  readonly #mapDocument = new Map<string, vscode.TextDocument>();
   readonly #mapPanel = new Map<string, vscode.WebviewPanel>();
 
   constructor(viewType: string) {
@@ -14,7 +13,6 @@ export class WebviewStore implements vscode.Disposable {
       `invoke WebviewStore.add. (${this.#viewType}, ${document.uri.toString()})`,
     );
     const key = this.keyByUri(document.uri);
-    this.#mapDocument.set(key, document);
     this.#mapPanel.set(key, panel);
     this.prettyPrint();
   }
@@ -72,18 +70,15 @@ export class WebviewStore implements vscode.Disposable {
       panel.dispose();
     });
     this.#mapPanel.clear();
-    this.#mapDocument.clear();
   }
 
   private prettyPrint() {
     console.log("WebviewStore:");
     console.log("  #mapPanel:", this.#mapPanel);
-    console.log("  #mapDocument:", this.#mapDocument);
   }
 
   private deleteByKey(key: string): void {
     this.#mapPanel.delete(key);
-    this.#mapDocument.delete(key);
   }
 
   private keyByUri(uri: vscode.Uri): string {
