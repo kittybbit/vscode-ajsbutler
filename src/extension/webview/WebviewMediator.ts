@@ -6,7 +6,7 @@ import { mountViewerPanel } from "./mountViewerPanel";
 
 type WebviewMediatorStore = Pick<
   WebviewStore,
-  "allPanels" | "dispose" | "panelByUri" | "removeByPanel"
+  "allPanels" | "dispose" | "panelByUri" | "removeByUri"
 >;
 
 type DocumentChangeHandler = (
@@ -100,7 +100,7 @@ export class WebviewMediator implements vscode.Disposable {
     if (panel === undefined) {
       return;
     }
-    this.removeAndDisposePanel(panel);
+    this.removeAndDisposePanel(document.uri, panel);
   }
 
   private onDidRenameFiles(event: vscode.FileRenameEvent): void {
@@ -112,7 +112,7 @@ export class WebviewMediator implements vscode.Disposable {
       );
       const panel = this.#store.panelByUri(file.oldUri);
       if (panel !== undefined) {
-        this.removeAndDisposePanel(panel);
+        this.removeAndDisposePanel(file.oldUri, panel);
       }
     });
   }
@@ -125,8 +125,11 @@ export class WebviewMediator implements vscode.Disposable {
     });
   }
 
-  private removeAndDisposePanel(panel: vscode.WebviewPanel): void {
-    this.#store.removeByPanel(panel);
+  private removeAndDisposePanel(
+    uri: vscode.Uri,
+    panel: vscode.WebviewPanel,
+  ): void {
+    this.#store.removeByUri(uri);
     panel.dispose();
   }
 }

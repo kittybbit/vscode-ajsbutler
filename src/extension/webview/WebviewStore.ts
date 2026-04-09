@@ -31,17 +31,6 @@ export class WebviewStore implements vscode.Disposable {
     this.prettyPrint();
   }
 
-  removeByPanel(panel: vscode.WebviewPanel): void {
-    console.log(
-      `invoke WebviewStore.removeByPanel. (${this.#viewType}, ${panel.title})`,
-    );
-    const key = this.keyByPanel(panel);
-    if (key) {
-      this.deleteByKey(key);
-    }
-    this.prettyPrint();
-  }
-
   panelByUri(uri: vscode.Uri): vscode.WebviewPanel | undefined {
     console.log(
       `invoke WebviewStore.panelByUri. (${this.#viewType}, ${uri.toString()})`,
@@ -73,14 +62,5 @@ export class WebviewStore implements vscode.Disposable {
 
   private keyByUri(uri: vscode.Uri): string {
     return uri.toString();
-  }
-
-  private keyByPanel(panel: vscode.WebviewPanel): string | undefined {
-    for (const [key, value] of this.#mapPanel.entries()) {
-      if (value === panel) {
-        return key;
-      }
-    }
-    return undefined;
   }
 }
