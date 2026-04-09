@@ -126,7 +126,7 @@ export class ViewerFactory {
       },
     );
     this.customize(document, panel);
-    this.#store.add(document, panel);
+    this.#store.add(document.uri, panel);
     return panel;
   }
 }

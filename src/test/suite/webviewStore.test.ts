@@ -27,8 +27,8 @@ suite("WebviewStore", () => {
       },
     } as unknown as vscode.WebviewPanel;
 
-    store.add(document1, panel1);
-    store.add(document2, panel2);
+    store.add(document1.uri, panel1);
+    store.add(document2.uri, panel2);
 
     assert.strictEqual(store.panelByUri(document1.uri), panel1);
     assert.strictEqual(store.panelByUri(document2.uri), panel2);
@@ -39,8 +39,8 @@ suite("WebviewStore", () => {
     store.removeByPanel(panel2);
     assert.strictEqual(store.panelByUri(document2.uri), undefined);
 
-    store.add(document1, panel1);
-    store.add(document2, panel2);
+    store.add(document1.uri, panel1);
+    store.add(document2.uri, panel2);
     store.removeByUri(document1.uri);
     assert.strictEqual(store.panelByUri(document1.uri), undefined);
 
@@ -61,7 +61,7 @@ suite("WebviewStore", () => {
       dispose() {},
     } as unknown as vscode.WebviewPanel;
 
-    store.add(storedDocument, panel);
+    store.add(storedDocument.uri, panel);
     store.removeByUri(uri);
 
     assert.strictEqual(store.panelByUri(uri), undefined);
