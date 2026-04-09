@@ -31,8 +31,8 @@ type ViewerReadyHandler = (
  * It ensures that only one panel exists for a given URI, reusing existing panels when possible.
  */
 export class ViewerFactory {
-  readonly viewType: string;
   #store: ViewerFactoryStore;
+  #viewType: string;
   #myExtension: MyExtension;
   #onReady: ViewerReadyHandler;
   #onSave?: (content: string) => Promise<void>;
@@ -46,7 +46,7 @@ export class ViewerFactory {
     onSave?: (content: string) => Promise<void>,
     deps: ViewerFactoryDeps = defaultDeps,
   ) {
-    this.viewType = viewType;
+    this.#viewType = viewType;
     this.#myExtension = myExtension;
     this.#store = store;
     this.#onReady = onReady;
@@ -59,7 +59,7 @@ export class ViewerFactory {
    */
   public getPanel(document: vscode.TextDocument) {
     console.log(
-      `invoke PanelFactory.getPanel. (${this.viewType}, ${document.uri.toString()})`,
+      `invoke PanelFactory.getPanel. (${this.#viewType}, ${document.uri.toString()})`,
     );
 
     const existingPanel = this.#store.panelByUri(document.uri);
@@ -98,7 +98,7 @@ export class ViewerFactory {
     registerViewerPanelDispose({
       uri: document.uri,
       panel,
-      viewType: this.viewType,
+      viewType: this.#viewType,
       store: this.#store,
       receiveMessageDispose,
     });
@@ -117,7 +117,7 @@ export class ViewerFactory {
     document: vscode.TextDocument,
   ): vscode.WebviewPanel {
     const panel = this.#deps.createWebviewPanel(
-      this.viewType,
+      this.#viewType,
       path.basename(document.fileName),
       vscode.ViewColumn.Beside,
       {

@@ -241,6 +241,9 @@ This file is the high-level index for the per-feature plan structure in
 - viewer factory, mediator, and message-routing contracts now describe the
   minimal store surface locally instead of importing `WebviewStore` just to
   slice its type with `Pick`.
+- preview command wiring now owns `viewType` explicitly, so `ViewerFactory`
+  no longer exposes it as part of its public API just to support command
+  registration, mounting, and telemetry naming.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
 - WebviewMediator cleanup now removes store entries by URI directly, allowing

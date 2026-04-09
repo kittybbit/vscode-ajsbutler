@@ -3,7 +3,7 @@ import { MyExtension } from "../MyExtension";
 import { ViewerFactory } from "../webview/ViewerFactory";
 import { mountViewerPanel } from "../webview/mountViewerPanel";
 
-type PreviewPanelFactory = Pick<ViewerFactory, "viewType" | "getPanel">;
+type PreviewPanelFactory = Pick<ViewerFactory, "getPanel">;
 
 type OpenPreviewCommandDependencies = {
   getActiveEditor: () => vscode.TextEditor | undefined;
@@ -13,6 +13,7 @@ type OpenPreviewCommandDependencies = {
 };
 
 type ExecuteOpenPreviewCommandArgs = {
+  viewType: string;
   panelFactory: PreviewPanelFactory;
   deps: OpenPreviewCommandDependencies;
 };
@@ -31,10 +32,10 @@ const createDependencies = (
 });
 
 export const executeOpenPreviewCommand = ({
+  viewType,
   panelFactory,
   deps,
 }: ExecuteOpenPreviewCommandArgs): void => {
-  const viewType = panelFactory.viewType;
   const activeEditor = deps.getActiveEditor();
   if (!activeEditor) {
     void deps.showErrorMessage("No active editor found to open.");
@@ -52,10 +53,12 @@ export const executeOpenPreviewCommand = ({
 };
 
 export const openPreviewCommand = (
+  viewType: string,
   panelFactory: PreviewPanelFactory,
   myExtension: MyExtension,
 ): void => {
   executeOpenPreviewCommand({
+    viewType,
     panelFactory,
     deps: createDependencies(myExtension),
   });

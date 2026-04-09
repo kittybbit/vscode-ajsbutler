@@ -8,8 +8,8 @@ suite("Open Preview Command", () => {
     let tracked = false;
 
     executeOpenPreviewCommand({
+      viewType: "ajsbutler.tableViewer",
       panelFactory: {
-        viewType: "ajsbutler.tableViewer",
         getPanel: () => {
           throw new Error("panel should not be created");
         },
@@ -47,8 +47,8 @@ suite("Open Preview Command", () => {
     const activeEditor = { document };
 
     executeOpenPreviewCommand({
+      viewType: "ajsbutler.flowViewer",
       panelFactory: {
-        viewType: "ajsbutler.flowViewer",
         getPanel: (receivedDocument) => {
           assert.strictEqual(receivedDocument, document);
           return panel as never;
