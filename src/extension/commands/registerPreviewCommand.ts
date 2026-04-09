@@ -4,12 +4,12 @@ import { MyExtension } from "../MyExtension";
 import { openPreviewCommand } from "./openPreviewCommand";
 
 export const registerPreviewCommand = (
+  viewType: string,
   panelFactory: ViewerFactory,
   myExtension: MyExtension,
 ): vscode.Disposable => {
-  const viewType = panelFactory.viewType;
   console.log(`invoke registerPreview. (${viewType})`);
   return vscode.commands.registerCommand(`open.${viewType}`, () => {
-    openPreviewCommand(panelFactory, myExtension);
+    openPreviewCommand(viewType, panelFactory, myExtension);
   });
 };

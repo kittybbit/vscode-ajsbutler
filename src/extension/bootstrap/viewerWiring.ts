@@ -43,7 +43,7 @@ const createViewerBundle = (
     saveHandler,
   );
 
-  return [mediator, registerPreviewCommand(factory, myExtension)];
+  return [mediator, registerPreviewCommand(viewType, factory, myExtension)];
 };
 
 export const createViewerSubscriptions = (
