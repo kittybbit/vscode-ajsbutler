@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
-import { WebviewStore } from "./WebviewStore";
 import { MyExtension } from "../MyExtension";
 import { LANGUAGE_ID } from "../constant";
 import { mountViewerPanel } from "./mountViewerPanel";
 
-type WebviewMediatorStore = Pick<
-  WebviewStore,
-  "allPanels" | "dispose" | "panelByUri" | "removeByUri"
->;
+type WebviewMediatorStore = {
+  readonly allPanels: ReadonlySet<vscode.WebviewPanel>;
+  dispose(): void;
+  panelByUri(uri: vscode.Uri): vscode.WebviewPanel | undefined;
+  removeByUri(uri: vscode.Uri): void;
+};
 
 type DocumentChangeHandler = (
   document: vscode.TextDocument,
