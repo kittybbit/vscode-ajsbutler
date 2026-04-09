@@ -47,9 +47,6 @@ suite("WebviewMediator", () => {
       extension,
       "ajsbutler.testViewer",
       {
-        panelByDocument(receivedDocument) {
-          return receivedDocument === document ? panel : undefined;
-        },
         panelByUri(receivedUri) {
           return receivedUri.toString() === document.uri.toString()
             ? panel
