@@ -232,6 +232,8 @@ This file is the high-level index for the per-feature plan structure in
   customize flow is no longer exposed as part of the public API.
 - WebviewMediator tests now instantiate the concrete mediator directly instead
   of keeping a thin test-only subclass around.
+- WebviewStore has dropped dead document-based removal and lookup helpers that
+  no longer have production callers.
 - repeatable web-extension verification exists via `npm run test:web`.
 
 ### Next Priority Tasks

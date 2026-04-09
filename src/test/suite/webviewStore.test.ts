@@ -32,15 +32,12 @@ suite("WebviewStore", () => {
 
     assert.strictEqual(store.panelByDocument(document1), panel1);
     assert.strictEqual(store.panelByUri(document2.uri), panel2);
-    assert.strictEqual(store.documentByUri(document1.uri), document1);
 
-    store.removeByDocument(document1);
-    assert.strictEqual(store.panelByDocument(document1), undefined);
-    assert.strictEqual(store.documentByUri(document1.uri), undefined);
+    store.removeByUri(document1.uri);
+    assert.strictEqual(store.panelByUri(document1.uri), undefined);
 
     store.removeByPanel(panel2);
     assert.strictEqual(store.panelByUri(document2.uri), undefined);
-    assert.strictEqual(store.documentByUri(document2.uri), undefined);
 
     store.add(document1, panel1);
     store.add(document2, panel2);
@@ -59,16 +56,14 @@ suite("WebviewStore", () => {
     const store = new WebviewStore("ajsbutler.testViewer");
     const uri = { toString: () => "file:///same.ajs" } as vscode.Uri;
     const storedDocument = { uri } as vscode.TextDocument;
-    const sameUriDocument = { uri } as vscode.TextDocument;
     const panel = {
       title: "same",
       dispose() {},
     } as unknown as vscode.WebviewPanel;
 
     store.add(storedDocument, panel);
-    store.removeByDocument(sameUriDocument);
+    store.removeByUri(uri);
 
     assert.strictEqual(store.panelByUri(uri), undefined);
-    assert.strictEqual(store.documentByUri(uri), undefined);
   });
 });
