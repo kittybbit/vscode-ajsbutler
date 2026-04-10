@@ -265,6 +265,9 @@ This file is the high-level index for the per-feature plan structure in
 - viewer wiring now inlines the preview command registration helper, removing
   the last one-line `registerPreviewCommand(...)` wrapper from the command
   layer and keeping the bootstrap wiring in one local flow.
+- viewer wiring no longer keeps a second local `registerPreview(...)` helper
+  now that preview command registration happens only once per viewer entry and
+  reads clearly inline at the command registration site.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
 - WebviewMediator cleanup now removes store entries by URI directly, allowing
