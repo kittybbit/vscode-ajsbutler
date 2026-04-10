@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
-import { registerPreviewCommand } from "../commands/registerPreviewCommand";
 import {
   type OpenPreviewCommandDependencies,
   executeOpenPreviewCommand,
@@ -42,6 +41,14 @@ const createPreviewCommandDependencies = (
   },
 });
 
+const registerPreview = (
+  viewType: string,
+  execute: () => void,
+): vscode.Disposable => {
+  console.log(`invoke registerPreview. (${viewType})`);
+  return vscode.commands.registerCommand(`open.${viewType}`, execute);
+};
+
 const createViewerBundle = (
   myExtension: MyExtension,
   previewDeps: OpenPreviewCommandDependencies,
@@ -64,7 +71,7 @@ const createViewerBundle = (
 
   return [
     mediator,
-    registerPreviewCommand(viewType, () => {
+    registerPreview(viewType, () => {
       executeOpenPreviewCommand({
         viewType,
         panelFactory: factory,
