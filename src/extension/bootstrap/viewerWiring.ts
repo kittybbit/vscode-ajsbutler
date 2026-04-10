@@ -30,6 +30,7 @@ const viewerConfigs: ViewerConfig[] = [
 
 const createViewerBundle = (
   myExtension: MyExtension,
+  previewDeps: ReturnType<typeof createOpenPreviewCommandDependencies>,
   { viewType, saveHandler }: ViewerConfig,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
@@ -46,12 +47,6 @@ const createViewerBundle = (
     readyAjsDocument,
     saveHandler,
   );
-  const previewDeps = createOpenPreviewCommandDependencies(
-    myExtension.context,
-    (eventViewType, properties) => {
-      myExtension.telemetry.trackEvent(eventViewType, properties);
-    },
-  );
 
   return [
     mediator,
@@ -63,5 +58,15 @@ const createViewerBundle = (
 
 export const createViewerSubscriptions = (
   myExtension: MyExtension,
-): vscode.Disposable[] =>
-  viewerConfigs.flatMap((config) => createViewerBundle(myExtension, config));
+): vscode.Disposable[] => {
+  const previewDeps = createOpenPreviewCommandDependencies(
+    myExtension.context,
+    (eventViewType, properties) => {
+      myExtension.telemetry.trackEvent(eventViewType, properties);
+    },
+  );
+
+  return viewerConfigs.flatMap((config) =>
+    createViewerBundle(myExtension, previewDeps, config),
+  );
+};
