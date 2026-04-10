@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import { registerPreviewCommand } from "../commands/registerPreviewCommand";
+import { openPreviewCommand } from "../commands/openPreviewCommand";
 import { ViewerFactory } from "../webview/ViewerFactory";
 import { WebviewMediator } from "../webview/WebviewMediator";
 import {
@@ -43,7 +44,12 @@ const createViewerBundle = (
     saveHandler,
   );
 
-  return [mediator, registerPreviewCommand(viewType, factory, myExtension)];
+  return [
+    mediator,
+    registerPreviewCommand(viewType, () => {
+      openPreviewCommand(viewType, factory, myExtension);
+    }),
+  ];
 };
 
 export const createViewerSubscriptions = (
