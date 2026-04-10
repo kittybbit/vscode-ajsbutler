@@ -259,6 +259,9 @@ This file is the high-level index for the per-feature plan structure in
 - preview command execution now exports only runtime-agnostic command logic,
   while viewer wiring owns the VS Code-specific dependency construction used
   to mount panels and emit preview telemetry.
+- viewer wiring now calls `executeOpenPreviewCommand(...)` directly, so the
+  command module no longer keeps a one-line `openPreviewCommand(...)` wrapper
+  around the same execution arguments.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
 - WebviewMediator cleanup now removes store entries by URI directly, allowing
