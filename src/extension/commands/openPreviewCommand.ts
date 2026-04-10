@@ -37,15 +37,3 @@ export const executeOpenPreviewCommand = ({
     development: String(DEVELOPMENT),
   });
 };
-
-export const openPreviewCommand = (
-  viewType: string,
-  panelFactory: PreviewPanelFactory,
-  deps: OpenPreviewCommandDependencies,
-): void => {
-  executeOpenPreviewCommand({
-    viewType,
-    panelFactory,
-    deps,
-  });
-};

@@ -3,7 +3,7 @@ import { MyExtension } from "../MyExtension";
 import { registerPreviewCommand } from "../commands/registerPreviewCommand";
 import {
   type OpenPreviewCommandDependencies,
-  openPreviewCommand,
+  executeOpenPreviewCommand,
 } from "../commands/openPreviewCommand";
 import { ViewerFactory } from "../webview/ViewerFactory";
 import { WebviewMediator } from "../webview/WebviewMediator";
@@ -65,7 +65,11 @@ const createViewerBundle = (
   return [
     mediator,
     registerPreviewCommand(viewType, () => {
-      openPreviewCommand(viewType, factory, previewDeps);
+      executeOpenPreviewCommand({
+        viewType,
+        panelFactory: factory,
+        deps: previewDeps,
+      });
     }),
   ];
 };
