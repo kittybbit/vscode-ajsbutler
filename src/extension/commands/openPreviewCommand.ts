@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { mountViewerPanel } from "../webview/mountViewerPanel";
 
 export type PreviewPanelFactory = {
   getPanel(document: vscode.TextDocument): vscode.WebviewPanel;
@@ -50,15 +49,3 @@ export const openPreviewCommand = (
     deps,
   });
 };
-
-export const createOpenPreviewCommandDependencies = (
-  context: vscode.ExtensionContext,
-  trackEvent: (viewType: string, properties: Record<string, string>) => void,
-): OpenPreviewCommandDependencies => ({
-  getActiveEditor: () => vscode.window.activeTextEditor,
-  showErrorMessage: (message) => vscode.window.showErrorMessage(message),
-  mountPanel: (panel, viewType) => {
-    mountViewerPanel(context, panel, viewType);
-  },
-  trackEvent,
-});

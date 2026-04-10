@@ -256,6 +256,9 @@ This file is the high-level index for the per-feature plan structure in
 - viewer wiring now creates preview command dependencies once per extension
   runtime instead of rebuilding the same context and telemetry closures for
   each viewer entry.
+- preview command execution now exports only runtime-agnostic command logic,
+  while viewer wiring owns the VS Code-specific dependency construction used
+  to mount panels and emit preview telemetry.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
 - WebviewMediator cleanup now removes store entries by URI directly, allowing
