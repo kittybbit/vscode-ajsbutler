@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import { registerPreviewCommand } from "../commands/registerPreviewCommand";
 import {
-  createOpenPreviewCommandDependencies,
+  type OpenPreviewCommandDependencies,
   openPreviewCommand,
 } from "../commands/openPreviewCommand";
 import { ViewerFactory } from "../webview/ViewerFactory";
@@ -16,6 +16,7 @@ import {
   debouncedAjsDocumentChangeFn,
   readyAjsDocument,
 } from "../webview/ajsDocument";
+import { mountViewerPanel } from "../webview/mountViewerPanel";
 import { saveText } from "../webview/messageHandlers";
 
 type ViewerConfig = {
@@ -28,9 +29,22 @@ const viewerConfigs: ViewerConfig[] = [
   { viewType: AJS_FLOW_VIEWER_TYPE },
 ];
 
+const createPreviewCommandDependencies = (
+  myExtension: MyExtension,
+): OpenPreviewCommandDependencies => ({
+  getActiveEditor: () => vscode.window.activeTextEditor,
+  showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+  mountPanel: (panel, viewType) => {
+    mountViewerPanel(myExtension.context, panel, viewType);
+  },
+  trackEvent: (viewType, properties) => {
+    myExtension.telemetry.trackEvent(viewType, properties);
+  },
+});
+
 const createViewerBundle = (
   myExtension: MyExtension,
-  previewDeps: ReturnType<typeof createOpenPreviewCommandDependencies>,
+  previewDeps: OpenPreviewCommandDependencies,
   { viewType, saveHandler }: ViewerConfig,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
@@ -59,12 +73,7 @@ const createViewerBundle = (
 export const createViewerSubscriptions = (
   myExtension: MyExtension,
 ): vscode.Disposable[] => {
-  const previewDeps = createOpenPreviewCommandDependencies(
-    myExtension.context,
-    (eventViewType, properties) => {
-      myExtension.telemetry.trackEvent(eventViewType, properties);
-    },
-  );
+  const previewDeps = createPreviewCommandDependencies(myExtension);
 
   return viewerConfigs.flatMap((config) =>
     createViewerBundle(myExtension, previewDeps, config),
