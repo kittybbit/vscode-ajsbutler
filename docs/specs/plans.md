@@ -253,6 +253,9 @@ This file is the high-level index for the per-feature plan structure in
 - preview-open execution now depends on explicit command dependencies instead
   of `MyExtension`, so viewer bootstrap owns the extension-context and
   telemetry wiring while the command module stays focused on execution flow.
+- viewer wiring now creates preview command dependencies once per extension
+  runtime instead of rebuilding the same context and telemetry closures for
+  each viewer entry.
 - WebviewStore registration now also takes a URI directly, so its public
   contract is fully aligned with the URI-keyed internal model.
 - WebviewMediator cleanup now removes store entries by URI directly, allowing
