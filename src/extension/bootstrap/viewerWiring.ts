@@ -1,7 +1,10 @@
 import * as vscode from "vscode";
 import { MyExtension } from "../MyExtension";
 import { registerPreviewCommand } from "../commands/registerPreviewCommand";
-import { openPreviewCommand } from "../commands/openPreviewCommand";
+import {
+  createOpenPreviewCommandDependencies,
+  openPreviewCommand,
+} from "../commands/openPreviewCommand";
 import { ViewerFactory } from "../webview/ViewerFactory";
 import { WebviewMediator } from "../webview/WebviewMediator";
 import {
@@ -43,11 +46,17 @@ const createViewerBundle = (
     readyAjsDocument,
     saveHandler,
   );
+  const previewDeps = createOpenPreviewCommandDependencies(
+    myExtension.context,
+    (eventViewType, properties) => {
+      myExtension.telemetry.trackEvent(eventViewType, properties);
+    },
+  );
 
   return [
     mediator,
     registerPreviewCommand(viewType, () => {
-      openPreviewCommand(viewType, factory, myExtension);
+      openPreviewCommand(viewType, factory, previewDeps);
     }),
   ];
 };

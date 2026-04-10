@@ -1,12 +1,11 @@
 import * as vscode from "vscode";
-import { MyExtension } from "../MyExtension";
 import { mountViewerPanel } from "../webview/mountViewerPanel";
 
 export type PreviewPanelFactory = {
   getPanel(document: vscode.TextDocument): vscode.WebviewPanel;
 };
 
-type OpenPreviewCommandDependencies = {
+export type OpenPreviewCommandDependencies = {
   getActiveEditor: () => vscode.TextEditor | undefined;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void;
@@ -18,19 +17,6 @@ type ExecuteOpenPreviewCommandArgs = {
   panelFactory: PreviewPanelFactory;
   deps: OpenPreviewCommandDependencies;
 };
-
-const createDependencies = (
-  myExtension: MyExtension,
-): OpenPreviewCommandDependencies => ({
-  getActiveEditor: () => vscode.window.activeTextEditor,
-  showErrorMessage: (message) => vscode.window.showErrorMessage(message),
-  mountPanel: (panel, viewType) => {
-    mountViewerPanel(myExtension.context, panel, viewType);
-  },
-  trackEvent: (viewType, properties) => {
-    myExtension.telemetry.trackEvent(viewType, properties);
-  },
-});
 
 export const executeOpenPreviewCommand = ({
   viewType,
@@ -56,11 +42,23 @@ export const executeOpenPreviewCommand = ({
 export const openPreviewCommand = (
   viewType: string,
   panelFactory: PreviewPanelFactory,
-  myExtension: MyExtension,
+  deps: OpenPreviewCommandDependencies,
 ): void => {
   executeOpenPreviewCommand({
     viewType,
     panelFactory,
-    deps: createDependencies(myExtension),
+    deps,
   });
 };
+
+export const createOpenPreviewCommandDependencies = (
+  context: vscode.ExtensionContext,
+  trackEvent: (viewType: string, properties: Record<string, string>) => void,
+): OpenPreviewCommandDependencies => ({
+  getActiveEditor: () => vscode.window.activeTextEditor,
+  showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+  mountPanel: (panel, viewType) => {
+    mountViewerPanel(context, panel, viewType);
+  },
+  trackEvent,
+});
