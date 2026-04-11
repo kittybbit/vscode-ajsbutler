@@ -107,20 +107,25 @@ configurations.
 
 ### Quick Reference
 
-| Agent                      | Best For                               | Configuration                     |
-| -------------------------- | -------------------------------------- | --------------------------------- |
-| **Codex** (VS Code chat)   | Live coding, refactoring, SDD workflow | `.codex/skills/`                  |
-| **Copilot CLI** (terminal) | Automation, git ops, batch scripts     | `.github/copilot-instructions.md` |
+| Agent | Primary Strength | Fallback Available | Configuration |
+|-------|------------------|-------------------|----------------|
+| **Codex** | Live coding, SDD workflow, interactive | Yes (Copilot CLI) | `.codex/skills/` |
+| **Copilot CLI** | Automation, git ops, batch work | Yes (Codex) | `.github/copilot-instructions.md` |
 
-### Routing Guide
+**Note**: If a Primary agent reaches token limit or session loss, use the Fallback agent.
+Both agents stay coordinated through a single routing guide (see below).
 
-For detailed task-to-agent assignment and shared principles:
+### Routing Guide (Single Source of Truth)
+
+For detailed task-to-agent assignment with Primary/Fallback options:
 - **See** `AGENTS.md` § "AI Agent Routing Guide"
-- This is the **single source of truth** for both agents
+- **See** `.agent.md` for lightweight coordination index
+- All rules reference **AGENTS.md**, never duplicate
 
 ### Key Files
 
-- `AGENTS.md` - Architecture rules and agent routing (source of truth)
+- `AGENTS.md` - Architecture rules and agent routing (authoritative)
+- `.agent.md` - Multi-agent coordination index
 - `docs/specs/` - Specification-driven development documentation
 - `.github/copilot-instructions.md` - Copilot CLI entry point
 - `.codex/skills/` - Codex-specific workflows
