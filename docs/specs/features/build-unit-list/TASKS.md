@@ -18,4 +18,9 @@
 ## Remaining Follow-up
 
 - [ ] Decide whether filtering/search should become a separate application use case
-- [ ] Keep fixture guidance and manual verification notes current
+
+## Notes
+
+- Fixture guidance and manual verification notes are maintenance concerns.
+  Keep them current when that evidence changes, but do not track them as an
+  always-open slice task.

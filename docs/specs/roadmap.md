@@ -32,10 +32,10 @@
 2. Keep wrapper-domain cleanup selective:
    move only cross-unit or normalization-shared semantics into helpers, and
    avoid abstracting unit-local JP1/AJS rules prematurely.
-3. Bring feature-local SDD files back in sync with the current merged state so
-   task lists stop describing already-finished slices.
-4. Record current manual smoke-test results for completed viewer-facing slices
+3. Record current manual smoke-test results for completed viewer-facing slices
    so remaining verification debt is explicit instead of implicit.
+4. Verify browser-hosted telemetry behavior and fallback handling instead of
+   leaving that follow-up as a standing assumption.
 5. Keep validating desktop and web extension compatibility while managing
    bundle-size and shared-runtime risk.
 
@@ -59,3 +59,5 @@
   drops a task
 - branch-level docs are updated in the same commit when the slice changes
   roadmap priorities
+- open task lists prefer actionable remaining work over evergreen policy or
+  maintenance reminders

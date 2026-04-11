@@ -18,4 +18,9 @@
 ## Remaining Follow-up
 
 - [ ] Record a current manual smoke-test result for diagnostics and hover behavior
-- [ ] Continue reducing activation/bootstrap concentration around registration wiring
+
+## Notes
+
+- Remaining activation/bootstrap concentration around registration wiring is
+  tracked as branch-level architecture work in `docs/specs/plans.md`, not as a
+  feature-local follow-up for editor feedback alone.
