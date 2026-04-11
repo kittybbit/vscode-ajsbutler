@@ -20,7 +20,6 @@ Deliver the feature for use case: UC: Normalize AJS Document.
 
 ## Validation
 
-- npm test
-- npm run lint:md
-- npm run qlty
-- npm run build
+- code changes: `npm run qlty`, `npm test`, `npm run test:web`,
+  `npm run build`
+- docs-only changes: `npm run lint:md`

@@ -20,6 +20,6 @@ Deliver the feature for use case: UC: Export Unit List CSV.
 
 ## Validation
 
-- npm test
-- npm run lint:md
-- npm run qlty
+- code changes: `npm run qlty`, `npm test`, `npm run test:web`,
+  `npm run build`
+- docs-only changes: `npm run lint:md`

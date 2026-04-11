@@ -26,20 +26,25 @@ repository.
 For non-trivial changes:
 
 1. create a dedicated git branch before implementation work starts
+   and use `docs/...` only for docs-only slices
 2. update or create the relevant use-case spec in
    `docs/requirements/use-cases/` and/or
    `docs/specs/features/<feature>/SPECS.md`
 3. update or create corresponding plans in
    `docs/specs/features/<feature>/PLANS.md`
 4. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
+   and update that file in the same commit whenever a task is completed,
+   reframed, or dropped
 5. document assumptions explicitly
 6. implement in small vertical slices
-7. refresh `docs/specs/plans.md` if the active slice or branch priorities
-   change materially
-8. before `git push`, run local validation serially in this order for code
+7. refresh `docs/specs/plans.md` in the same commit if the active slice or
+   branch priorities change materially
+8. refresh `docs/specs/roadmap.md` in the same commit if a completed slice
+   changes repository-level ordering, remaining debt, or deferred work
+9. before `git push`, run local validation serially in this order for code
    changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`
-9. run any additional task-specific checks before finishing
-10. avoid anemic domain models: extract only cross-unit or cross-layer
+10. run any additional task-specific checks before finishing
+11. avoid anemic domain models: extract only cross-unit or cross-layer
     semantics into helpers/interfaces, and keep entity identity plus
     unit-local behavior in the entity when that behavior is part of the
     JP1/AJS concept itself
@@ -47,10 +52,30 @@ For non-trivial changes:
 For docs-only changes:
 
 - `npm run build` is not required
-- prefer markdown-focused validation such as `npm run lint:md`
-- `npm run qlty` is still recommended when docs formatting or repository-wide
-  quality rules may be affected
+- run markdown-focused validation such as `npm run lint:md`
 - repository `Verify` workflow should not be relied on as a required gate
+
+## Branch Naming
+
+Use branch names to signal verification intent clearly:
+
+- `docs/...`
+  Reserve for docs-only slices.
+- non-`docs/...`
+  Use for any slice that changes runtime code, tests, config, or other
+  non-doc files.
+
+Match the branch name to the `Verify` workflow's docs-only rule.
+In `.github/workflows/verify.yml`, a PR is treated as docs-only only when the
+changed files stay within:
+
+- `docs/**`
+- `README.md`
+- `.codex/**/*.md`
+- `.github/**/*.md`
+
+If a `docs/...` branch needs any file outside that set, rename the branch or
+start a new non-doc branch before continuing.
 
 ## When To Use `docs/requirements/use-cases/`
 
@@ -71,6 +96,24 @@ Poor fit:
 - file-by-file execution checklists
 
 Those belong under `docs/specs/`.
+
+## Sync Cadence
+
+Treat the following docs as required sync artifacts, not optional catch-up
+notes:
+
+- `docs/specs/features/<feature>/TASKS.md`
+  Update immediately when one task or follow-up is completed, re-scoped, or
+  intentionally dropped.
+- `docs/specs/plans.md`
+  Update when that task completion changes the branch summary or next priority.
+- `docs/specs/roadmap.md`
+  Update when that completion changes repository-level sequence, remaining
+  debt, or deferred work.
+
+Prefer the smallest useful cadence:
+one completed task or one resolved follow-up is enough reason to sync the
+docs in the same commit.
 
 ## Document Roles
 

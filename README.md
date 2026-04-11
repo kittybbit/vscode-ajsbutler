@@ -53,6 +53,9 @@ This repository is incrementally adopting Specification-Driven Development
 - Branch-level planning is tracked in `docs/specs/plans.md`.
 - `PLANS.md` is the root index that points to the active SDD documents.
 - Codex-specific repository guidance lives in `AGENTS.md`.
+- Docs-only work should use a `docs/...` branch name and stay within the
+  docs-only file set used by `.github/workflows/verify.yml`:
+  `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md`.
 
 Recent refactoring work introduced:
 

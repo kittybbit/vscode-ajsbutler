@@ -74,6 +74,16 @@ For non-trivial changes, follow this order:
 
 If the requested change is ambiguous, prefer documenting assumptions explicitly in `PLANS.md` instead of making hidden assumptions.
 
+## Branch Naming
+
+- Use a dedicated git branch for each slice.
+- Reserve `docs/...` branch names for docs-only changes.
+- Treat "docs-only" the same way as the `Verify` workflow:
+  only `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md` may
+  change.
+- If a branch named `docs/...` needs any non-doc change, rename it or start a
+  non-doc branch before continuing so verification expectations stay honest.
+
 ## Coding Rules
 
 - Use TypeScript.
@@ -88,6 +98,8 @@ If the requested change is ambiguous, prefer documenting assumptions explicitly 
 ## Testing Policy
 
 Before finishing a task, run the most relevant checks available.
+
+For docs-only changes, markdown lint is sufficient.
 
 Minimum expectation for meaningful code changes:
 
