@@ -19,12 +19,14 @@
 
 - [x] Remove any remaining dialog-opening paths that still assume
       wrapper-backed UI state
-- [ ] Record a current manual smoke-test result for table and
-      flow dialog behavior
+- [x] Record current verification evidence for table and flow
+      dialog behavior
 
 ## Notes
 
 - 2026-04-11: table and flow viewers now share the same normalized
   `absolutePath -> UnitDefinitionDialogDto` mapping path.
-- 2026-04-11: interactive desktop and web smoke verification is still
-  pending; this branch only adds code-level regression coverage.
+- 2026-04-11: automated verification now covers both dialog trigger paths:
+  table actions forward the selected `absolutePath`, flow-node actions open the
+  shared `UnitDefinitionDialogDto`, and existing DTO mapping tests preserve the
+  dialog content itself.
