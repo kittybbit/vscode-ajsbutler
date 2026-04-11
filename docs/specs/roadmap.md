@@ -33,8 +33,9 @@
    so remaining verification debt is explicit instead of implicit.
 3. Keep validating desktop and web extension compatibility while managing
    bundle-size and shared-runtime risk.
-4. Record manual smoke results for CSV export and diagnostics/hover so those
-   feature follow-ups do not remain open indefinitely.
+4. Record manual smoke results for show-unit-definition, build-flow-graph,
+   build-unit-list-view, and CSV export so those feature follow-ups do not
+   remain open indefinitely.
 5. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
