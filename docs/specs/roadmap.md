@@ -31,12 +31,12 @@
    avoid abstracting unit-local JP1/AJS rules prematurely.
 2. Record current manual smoke-test results for completed viewer-facing slices
    so remaining verification debt is explicit instead of implicit.
-3. Verify browser-hosted telemetry behavior and fallback handling instead of
-   leaving that follow-up as a standing assumption.
-4. Keep validating desktop and web extension compatibility while managing
+3. Keep validating desktop and web extension compatibility while managing
    bundle-size and shared-runtime risk.
-5. Decide whether unit-list filtering/search has enough shared behavior to move
+4. Decide whether unit-list filtering/search has enough shared behavior to move
    out of presentation and into a dedicated application use case.
+5. Record manual smoke results for CSV export and diagnostics/hover so those
+   feature follow-ups do not remain open indefinitely.
 
 ## Deferred / Optional Slices
 
