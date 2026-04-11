@@ -34,7 +34,9 @@
    avoid abstracting unit-local JP1/AJS rules prematurely.
 3. Bring feature-local SDD files back in sync with the current merged state so
    task lists stop describing already-finished slices.
-4. Keep validating desktop and web extension compatibility while managing
+4. Record current manual smoke-test results for completed viewer-facing slices
+   so remaining verification debt is explicit instead of implicit.
+5. Keep validating desktop and web extension compatibility while managing
    bundle-size and shared-runtime risk.
 
 ## Deferred / Optional Slices

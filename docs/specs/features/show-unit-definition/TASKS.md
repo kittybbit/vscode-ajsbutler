@@ -17,7 +17,14 @@
 
 ## Remaining Follow-up
 
-- [ ] Remove any remaining dialog-opening paths that still assume
+- [x] Remove any remaining dialog-opening paths that still assume
       wrapper-backed UI state
 - [ ] Record a current manual smoke-test result for table and
       flow dialog behavior
+
+## Notes
+
+- 2026-04-11: table and flow viewers now share the same normalized
+  `absolutePath -> UnitDefinitionDialogDto` mapping path.
+- 2026-04-11: interactive desktop and web smoke verification is still
+  pending; this branch only adds code-level regression coverage.

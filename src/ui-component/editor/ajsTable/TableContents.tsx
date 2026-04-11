@@ -28,12 +28,9 @@ import {
   getSortedRowModel,
 } from "@tanstack/table-core";
 import { rankItem } from "@tanstack/match-sorter-utils";
+import { AjsDocument } from "../../../domain/models/ajs/AjsDocument";
 import {
-  AjsDocument,
-  flattenAjsUnits,
-} from "../../../domain/models/ajs/AjsDocument";
-import {
-  buildUnitDefinition,
+  buildUnitDefinitionByPath,
   UnitDefinitionDialogDto,
 } from "../../../application/unit-definition/buildUnitDefinition";
 import {
@@ -133,14 +130,9 @@ const TableContents = () => {
 
   const unitDefinitionByPath = useMemo(
     () =>
-      new Map(
-        ajsDocument
-          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
-              unit.absolutePath,
-              buildUnitDefinition(unit),
-            ])
-          : [],
-      ),
+      ajsDocument
+        ? buildUnitDefinitionByPath(ajsDocument)
+        : new Map<string, UnitDefinitionDialogDto>(),
     [ajsDocument],
   );
   const rowViewByPath = useMemo(

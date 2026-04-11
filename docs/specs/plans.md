@@ -41,6 +41,10 @@ structure in `docs/specs/features/<feature>/`.
   `npm run test:web`, and `npm run build`, while docs-only slices can stay on
   markdown or docs-focused validation and should not depend on repository
   `Verify`.
+- `ShowUnitDefinition` follow-up wiring is now shared:
+  table and flow viewers consume the same normalized
+  `absolutePath -> UnitDefinitionDialogDto` mapping path instead of
+  rebuilding equivalent dialog DTO maps separately.
 
 ### How To Maintain This Section
 
@@ -55,16 +59,19 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Close the remaining activation and webview concentration by deciding which
+1. Record current manual smoke-test results for viewer-facing completed slices,
+   starting with `show-unit-definition`, so feature TASKS stop carrying
+   stale verification debt.
+2. Close the remaining activation and webview concentration by deciding which
    pieces should stay as local wiring in `viewerWiring.ts` and which deserve
    a stable application or infrastructure boundary.
-2. Audit feature-local SDD files under `docs/specs/features/` and remove stale
+3. Audit feature-local SDD files under `docs/specs/features/` and remove stale
    tasks that no longer match what has already merged to `main`.
-3. Keep wrapper refactoring selective:
+4. Keep wrapper refactoring selective:
    extract only semantics that are cross-unit or shared with normalization,
    and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
    would be artificial.
-4. Continue treating desktop and web compatibility as an explicit acceptance
+5. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
 
 ## Wrapper Semantics Matrix
@@ -224,62 +231,61 @@ Use-case note:
 
 ### Task
 
-Narrow the remaining viewer wiring seam so webview adapters stop depending on
-the full `MyExtension` runtime when they only need telemetry or extension
-context.
+Close the remaining `show-unit-definition` follow-up by removing duplicated
+viewer-local dialog DTO reconstruction and updating the synced SDD docs.
 
 ### Why
 
-`viewerWiring.ts` is already much smaller than before, but the remaining
-factory and mediator setup still pass the full `MyExtension` object into
-webview adapters. That keeps the adapter boundary broader than necessary and
-makes the remaining seam less explicit than it should be.
+The feature already moved away from wrapper-backed dialog state, but the table
+and flow viewers still each built their own path-to-dialog DTO map. That keeps
+the same application-facing behavior duplicated in presentation and makes the
+remaining follow-up harder to verify and close cleanly.
 
 ### Scope
 
-- narrow `ViewerFactory` to depend on telemetry instead of `MyExtension`
-- narrow `WebviewMediator` to depend on extension context instead of
-  `MyExtension`
-- keep `createViewerSubscriptions(...)` as the composition point that still
-  owns the full runtime
-- update focused regression tests for factory and mediator construction
+- extract a shared normalized-unit mapping helper for unit-definition DTOs
+- switch table and flow viewers to that shared helper
+- extend focused regression coverage for the shared mapping path
+- sync feature and branch-level SDD docs with the closed follow-up
 
 ### Non-Goals
 
-- changing viewer behavior, command ids, or mount timing
-- introducing a new helper file when local wiring remains readable
-- changing parser, list, flow, CSV, diagnostics, hover, or telemetry payloads
+- changing dialog content, command ids, or open/close behavior
+- adding a new wrapper abstraction or reintroducing `UnitEntity`
+- claiming interactive smoke coverage that was not actually run
 
 ### Constraints
 
 - Keep desktop and web extension behavior unchanged.
-- Do not widen webview adapter responsibilities while narrowing constructor
-  dependencies.
-- Keep the slice small and adapter-focused.
+- Keep the slice small and feature-focused.
+- Use the normalized AJS model as the only input to dialog DTO construction.
 
 ### Design
 
 #### Use case
 
-Remaining activation and webview boundary cleanup.
+`ShowUnitDefinition` follow-up cleanup.
 
 #### Layers affected
 
-- extension/bootstrap: viewer composition
-- extension/webview: factory and mediator constructor seams
-- tests: viewer factory and mediator regression coverage
+- application: unit-definition DTO mapping
+- presentation: table and flow viewer consumption
+- tests: unit-definition mapping regression coverage
+- docs/specs: feature tasks and branch-level planning sync
 
 #### Key decisions
 
-- `viewerWiring.ts` remains the composition root for the full runtime.
-- Viewer adapters receive only the dependency surface they actually consume.
+- Table and flow should share one `absolutePath -> UnitDefinitionDialogDto`
+  mapping helper instead of rebuilding equivalent maps locally.
+- Interactive smoke verification remains open until it is run in an actual
+  VS Code environment and recorded in docs.
 
 ### Acceptance Criteria
 
-- [ ] `ViewerFactory` no longer depends on `MyExtension`
-- [ ] `WebviewMediator` no longer depends on `MyExtension`
-- [ ] `viewerWiring.ts` still owns the full runtime composition
-- [ ] focused regression tests cover the narrowed seams
+- [x] table and flow both consume a shared normalized DTO mapping path
+- [x] tests cover nested unit mapping without requiring wrapper instances
+- [x] `docs/specs/features/show-unit-definition/TASKS.md` reflects the closed
+      code follow-up and the remaining manual smoke debt
 
 ### Test Plan
 
@@ -290,13 +296,14 @@ Remaining activation and webview boundary cleanup.
 
 ### Risks
 
-- the slice could become a broader bootstrap refactor if too many adapters are
-  touched at once
-- test doubles could hide an accidental runtime dependency if constructor
-  seams are not updated consistently
+- viewer behavior could drift if the shared mapping changes path keys or raw
+  parameter formatting
+- docs could imply manual verification is complete when only automated
+  regression coverage was added
 
 ### Rollback Plan
 
-- revert the constructor narrowing and keep `MyExtension` flowing through the
-  viewer adapters
-- keep any future seam change separate from this small adapter cleanup
+- revert the shared mapping helper and restore the prior viewer-local map
+  construction
+- keep manual smoke verification as a separate follow-up if interactive
+  validation cannot be run in this environment
