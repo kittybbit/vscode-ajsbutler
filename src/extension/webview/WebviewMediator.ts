@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { MyExtension } from "../MyExtension";
 import { LANGUAGE_ID } from "../constant";
 import { mountViewerPanel } from "./mountViewerPanel";
 
@@ -33,14 +32,14 @@ const defaultDeps: WebviewMediatorDeps = {
 
 export class WebviewMediator implements vscode.Disposable {
   #viewType: string;
-  #myExtension: MyExtension;
+  #context: vscode.ExtensionContext;
   #store: WebviewMediatorStore;
   #change: DocumentChangeHandler;
   #deps: WebviewMediatorDeps;
   #subscriptions: vscode.Disposable;
 
   constructor(
-    myExtension: MyExtension,
+    context: vscode.ExtensionContext,
     viewType: string,
     store: WebviewMediatorStore,
     change: DocumentChangeHandler,
@@ -49,7 +48,7 @@ export class WebviewMediator implements vscode.Disposable {
     console.log(`invoke WebviewMediator.constructor. (${viewType})`);
 
     this.#viewType = viewType;
-    this.#myExtension = myExtension;
+    this.#context = context;
     this.#store = store;
     this.#change = change;
     this.#deps = deps;
@@ -120,9 +119,8 @@ export class WebviewMediator implements vscode.Disposable {
 
   private onDidChangeActiveColorTheme(event: vscode.ColorTheme): void {
     console.log("invoke WebviewMediator.onDidChangeActiveColorTheme.", event);
-    const context = this.#myExtension.context;
     this.#store.allPanels.forEach((panel) => {
-      this.#deps.mountPanel(context, panel, this.#viewType);
+      this.#deps.mountPanel(this.#context, panel, this.#viewType);
     });
   }
 

@@ -48,14 +48,14 @@ const createViewerBundle = (
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator(
-    myExtension,
+    myExtension.context,
     viewType,
     store,
     debouncedAjsDocumentChangeFn(300),
   );
   const factory = new ViewerFactory(
     viewType,
-    myExtension,
+    myExtension.telemetry,
     store,
     readyAjsDocument,
     saveHandler,
