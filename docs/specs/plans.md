@@ -58,6 +58,10 @@ structure in `docs/specs/features/<feature>/`.
 - Unit-list filtering and search remain presentation-local by decision:
   the current behavior depends on TanStack Table row access and fuzzy matching
   over view values, so it does not yet justify a separate application use case.
+- Editor-feedback smoke coverage is now explicit:
+  existing desktop integration tests and the web smoke runner both verify the
+  diagnostics and hover path, so that feature no longer depends on an
+  unrecorded manual check.
 
 ### How To Maintain This Section
 
@@ -81,8 +85,9 @@ structure in `docs/specs/features/<feature>/`.
    would be artificial.
 3. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
-4. Record current manual smoke-test results for CSV export and
-   diagnostics/hover so the remaining feature follow-ups stay evidence-based.
+4. Record current manual smoke-test results for show-unit-definition,
+   build-unit-list-view, build-flow-graph, and CSV export so the remaining
+   feature follow-ups stay evidence-based.
 5. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 

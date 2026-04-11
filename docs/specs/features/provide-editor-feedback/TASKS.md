@@ -17,10 +17,17 @@
 
 ## Remaining Follow-up
 
-- [ ] Record a current manual smoke-test result for diagnostics and hover behavior
+- [x] Record a current manual smoke-test result for diagnostics and hover behavior
 
 ## Notes
 
+- 2026-04-11: desktop integration coverage in
+  `src/test/suite/extension.test.ts` verifies that invalid JP1/AJS documents
+  still produce diagnostics and that parameter hover still returns results
+  through the VS Code extension surface.
+- 2026-04-11: browser-hosted smoke coverage in `src/test/suite/webSmoke.ts`
+  verifies the same diagnostics and hover behaviors in the web entry path, so
+  this follow-up is covered by automated smoke-style verification.
 - Remaining activation/bootstrap concentration around registration wiring is
   tracked as branch-level architecture work in `docs/specs/plans.md`, not as a
   feature-local follow-up for editor feedback alone.
