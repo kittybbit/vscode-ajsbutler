@@ -12,26 +12,41 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      docs: ${{ steps.filter.outputs.docs }}
-      non_docs: ${{ steps.filter.outputs.non_docs }}
+      docs_only: ${{ steps.classify.outputs.docs_only }}
     steps:
-      - uses: actions/checkout@v4
-
-      - id: filter
-        uses: dorny/paths-filter@v3
+      - id: classify
+        uses: actions/github-script@v7
         with:
-          filters: |
-            docs:
-              - 'docs/**'
-              - 'README.md'
-              - '.codex/**/*.md'
-              - '.github/**/*.md'
-            non_docs:
-              - '**'
-              - '!docs/**'
-              - '!README.md'
-              - '!.codex/**/*.md'
-              - '!.github/**/*.md'
+          script: |
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const docsOnlyPatterns = [
+              /^docs\/.+/,
+              /^README\.md$/,
+              /^\.codex\/.+\.md$/,
+              /^\.github\/.+\.md$/,
+            ];
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner,
+                repo,
+                pull_number,
+                per_page: 100,
+              },
+              (response) => response.data.map((file) => file.filename),
+            );
+
+            const docsOnly =
+              files.length > 0 &&
+              files.every((filename) =>
+                docsOnlyPatterns.some((pattern) => pattern.test(filename)),
+              );
+
+            core.info(`changed files: ${JSON.stringify(files)}`);
+            core.info(`docs_only=${docsOnly}`);
+            core.setOutput("docs_only", String(docsOnly));
 
   decide:
     needs: changes
@@ -43,18 +58,10 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const docsChanged =
-              "${{ needs.changes.outputs.docs }}" === "true";
-            const nonDocsChanged =
-              "${{ needs.changes.outputs.non_docs }}" === "true";
-            const docsOnly = docsChanged && !nonDocsChanged;
+            const docsOnly =
+              "${{ needs.changes.outputs.docs_only }}" === "true";
 
-            if (docsOnly) {
-              core.setOutput("should_verify", "false");
-              return;
-            }
-
-            core.setOutput("should_verify", "true");
+            core.setOutput("should_verify", docsOnly ? "false" : "true");
 
   verify:
     needs: decide
