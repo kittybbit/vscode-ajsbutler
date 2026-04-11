@@ -5,285 +5,67 @@
 Track non-trivial changes using the repository's SDD workflow before
 implementation.
 
-This file is the high-level index for the per-feature plan structure in
-`docs/specs/features/<feature>/`.
+This file is the branch-level planning summary for the per-feature plan
+structure in `docs/specs/features/<feature>/`.
 
 ## Branch Status
 
 ### Completed In This Branch
 
-- `BuildUnitList` use case exists and is covered by
-  `src/test/suite/buildUnitList.test.ts`.
-- `BuildUnitListView` exists and the table column groups now read application
-  view data for `group1` to `group19`, and the table presentation now consumes
-  `UnitListRowView` end to end.
-- `ExportUnitListCsv` use case exists and is covered by
-  `src/test/suite/exportUnitListCsv.test.ts`.
-- `BuildFlowGraph` use case exists and is covered by
-  `src/test/suite/buildFlowGraphUseCase.test.ts`, and the flow presentation
-  no longer reconstructs `UnitEntity` to render, navigate, or open dialog data.
-- `ShowUnitDefinition` now uses an application DTO instead of passing
-  `UnitEntity` directly into the dialog.
-- editor feedback extraction exists and is covered by
-  `src/test/suite/buildSyntaxDiagnostics.test.ts` and
-  `src/test/suite/findParameterHover.test.ts`.
-- telemetry port extraction exists and is covered by
-  `src/test/suite/reportWebviewOperation.test.ts`.
-- normalized AJS model exists and is covered by
-  `src/test/suite/normalizeAjsDocument.test.ts`.
-- normalized AJS navigation helpers now expose parent lookup, ancestor lookup,
-  and root jobnet lookup without reusing wrapper traversal in consumers.
-- normalized AJS helpers now expose direct parameter lookup, repeated-value
-  lookup, and first-ancestor inherited parameter lookup so application slices
-  stop repeating wrapper-era parameter traversal logic.
-- shared parameter helpers now expose `top1` to `top4` transfer-operation
-  default derivation so wrapper-only fallback rules are testable outside
-  `ParameterFactory`.
-- shared parameter helpers now expose reusable sorted rule-parameter mapping so
-  `ln` and `sd` no longer sort rule arrays directly inside `ParameterFactory`.
-- shared parameter helpers now expose connector-control default resolution so
-  `G` and `N` stop deciding `ncl`, `ncs`, and `ncex` fallback values with
-  wrapper-local literals and branching.
-- shared parameter helpers now expose inherited scalar and array builders so
-  selected `ParameterFactory` methods stop repeating `inherit: true` lookup
-  wiring.
-- shared parameter helpers now expose optional scalar builders so the simplest
-  `checkAndGet(...)` plus `new Xxx(...)` parameter methods stop repeating in
-  `ParameterFactory`.
-- shared parameter helpers now expose optional array builders so the plain
-  `checkAndGetArray(...)` plus `params.map((param) => new Xxx(param))`
-  parameter methods stop repeating in `ParameterFactory`.
-- shared parameter helpers now expose defaultable scalar builders so `ncl`,
-  `ncs`, and `ncex` stop forwarding caller-supplied defaults inline in
-  `ParameterFactory`.
-- shared parameter helpers now expose sd-aligned empty-rule builders so `cy`,
-  `ey`, `sh`, and `sy` stop constructing `${rule},` fallbacks inline in
-  `ParameterFactory`.
-- shared parameter helpers now expose sd-aligned default-rule builders so
-  `cftd`, `shd`, `st`, `wc`, and `wt` stop constructing
-  `${rule},<default>` fallbacks inline in `ParameterFactory`.
-- `ParameterFactory` no longer keeps private `#checkAndGet` and
-  `#checkAndGetArray` wrappers now that `ln` and `unit` delegate to shared
-  helper paths directly.
-- shared parameter helpers now resolve `sd` through root-jobnet-aware helper
-  logic so sd-aligned builders stop calling `unit.params("sd")` directly in
-  `ParameterFactory`.
-- shared unit-relation helpers now resolve sibling `ar` links so `UnitEntity`
-  stops duplicating previous/next relation lookup and relation-to-unit mapping
-  logic inline.
-- shared unit-type helpers now resolve recovery semantics so `UnitEntity` and
-  normalized AJS mapping stop maintaining duplicate `isRecovery` rules.
-- shared unit-layout helpers now resolve `el`-based coordinates so `UnitEntity`
-  and normalized AJS mapping stop maintaining duplicate layout parsing rules.
-- shared unit-parameter helpers now resolve defined parameter names so wrapper
-  prototype inspection no longer lives only inside `UnitEntity`.
-- shared unit wait-state helpers now resolve `eun`-based wait detection so
-  wrapper classes stop duplicating `hasWaitedFor` checks inline.
-- shared unit jobnet-state helpers now resolve root-jobnet detection so
-  wrapper and normalized-model logic stop maintaining duplicate parent-type
-  checks.
-- shared unit schedule-state helpers now resolve effective schedule detection
-  so wrapper and normalized-model logic stop maintaining duplicate `sd`
-  interpretation rules.
-- shared unit group-state helpers now resolve `gty` interpretation so wrapper
-  and normalized-model logic stop maintaining duplicate group/planning checks.
-- shared group-week helpers now resolve `op` and `cl` weekday interpretation so
-  `G` stops duplicating the same open/close calendar precedence logic across
-  weekday getters.
-- shared priority helpers now resolve wrapper priority fallback rules so `J`,
-  `N`, and `Qj` stop routing the same semantics through a misc utility module.
-- shared depth helpers now resolve absolute-path-based depth so wrapper and
-  normalized-model logic stop maintaining separate depth calculation rules.
-- normalized-model mapping now reuses the shared wait-state helper so wrapper
-  and normalized-model wait detection fully share the same `eun` rule.
-- normalized-model mapping now reuses the shared encoded-string helper so
-  wrapper and normalized-model comment decoding fully share the same quoting
-  and escape rules.
-- normalized-model mapping now reuses the shared unit-relation parsing helper
-  so wrapper and normalized-model `ar` interpretation fully share the same
-  source, target, and relation parsing rule.
-- normalized-model mapping now reuses shared raw unit-parameter lookup helpers
-  so simple key/value filtering no longer lives only inside normalization.
-- normalized-model layout mapping now reuses shared raw unit-parameter lookup
-  helpers so parent `el` lookup no longer filters parameters inline.
-- normalized-model relation mapping now reuses shared relation-type
-  normalization helpers so relation-type coercion no longer lives only inside
-  normalization.
-- normalized-model mapping now reuses shared normalize-unit helpers so
-  type/group/comment/layout/root-jobnet/schedule/wait derivation no longer
-  lives only inside `normalizeAjsDocument.ts`.
-- normalized-model mapping now reuses shared normalize-relation helpers so
-  `ar` relation parsing, child resolution, and warning generation no longer
-  live only inside `normalizeAjsDocument.ts`.
-- normalized-model mapping now reuses shared normalize-warning helpers so
-  warning payload construction no longer lives inline in unit and relation
-  normalization helpers.
-- normalized-model mapping now reuses a shared normalize-unit builder so
-  `AjsUnit` DTO assembly no longer lives inline in `normalizeAjsDocument.ts`.
-- normalized-model mapping now reuses a shared normalize-document-tree helper
-  so recursive unit traversal no longer lives inline in
-  `normalizeAjsDocument.ts`.
-- normalized-model relation warnings now use relation terminology so warning
-  codes and messages align with the normalized relation model.
-- normalized-model helper modules now live under
-  `src/domain/models/ajs/normalize/`
-  so unit, relation, warning, builder, and tree concerns share a single
-  location and naming scheme.
-- wait-capable wrapper units now reuse structural wait-state helpers through
-  `UnitEntity` subclasses so `hasWaitedFor` behavior no longer requires a
-  dedicated inheritance layer across each `eun`-aware subclass, while
-  `hasSchedule` remains local to `N` because no other wrapper shares that
-  concept.
-- prioritizable wrapper units now implement a shared `PrioritizableUnit`
-  interface so `priority` semantics are expressed as composition-oriented
-  wrapper capabilities instead of class-family coupling.
-- group-wrapper semantics now stay explicitly local to `G`, with focused
-  wrapper coverage for planning, weekday-state, and connector-control default
-  behavior instead of introducing another shared capability.
-- jobnet-wrapper semantics now stay explicitly local to `N`, with focused
-  wrapper coverage for root-jobnet detection, schedule ownership, and
-  connector-control defaults instead of introducing another capability.
-- wrapper-capability audit now confirms that, after `WaitableUnit`,
-  `PrioritizableUnit`, `G`, and `N`, the remaining wrappers are mostly
-  parameter-access surfaces rather than new cross-unit or unit-local
-  semantics that need additional abstraction.
-- `UnitEntity` no longer exposes generic `params<T>()` or debug-oriented
-  `prettyJSON()` helpers now that relation lookup uses typed wrapper access and
-  wrapper serialization is no longer part of the supported domain API.
-- `UnitEntity` no longer exposes dead wrapper-era
-  navigation/layout/introspection
-  APIs (`previous`, `next`, `previousUnits`, `nextUnits`, `hv`,
-  `defineParams`) now that active consumers use normalized DTOs or dedicated
-  relation helpers instead.
-- `UnitEntity` now has an explicit docs-level boundary: wrapper identity,
-  tree mechanics, raw metadata exposure, common JP1 getters, and recovery or
-  depth semantics stay in the base entity, while debug helpers and dead
-  compatibility APIs do not.
-- preview command registration now stays focused on command wiring, while the
-  open-preview execution path and webview React panel mount logic live in
-  dedicated helpers with direct unit-test coverage.
-- webview factories now delegate shared message routing and panel-dispose
-  cleanup to dedicated helpers so factory classes can focus on viewer-specific
-  ready behavior and adapter wiring.
-- extension bootstrap now delegates table and flow viewer wiring to a dedicated
-  helper so `activateExtension.ts` stays closer to a composition root than a
-  full setup script.
-- extension bootstrap now delegates diagnostics and hover wiring to a
-  dedicated helper so editor adapter registration stays separate from runtime
-  creation and viewer wiring.
-- extension bootstrap now delegates telemetry creation and `MyExtension`
-  initialization to a dedicated helper so `activateExtension.ts` keeps only
-  lifecycle tracking plus subscription composition.
-- extension bootstrap now delegates activate and deactivate lifecycle
-  telemetry plus runtime disposal to a dedicated helper so bootstrap stays
-  focused on composition rather than event payload assembly.
-- extension bootstrap now delegates editor and viewer subscription composition
-  to a dedicated helper so `activateExtension.ts` only assembles runtime,
-  subscriptions, and lifecycle hooks.
-- viewer wiring now keeps table and flow setup as local subroutines inside the
-  same file so the bootstrap path reads symmetrically without introducing
-  another helper file.
-- extension subscription composition now inlines the thin diagnostics and
-  hover registration helper so bootstrap files do not keep one-line adapter
-  wrappers.
-- viewer factories now reuse a protected base customization helper so table
-  and flow factories only provide viewer-specific ready and save behavior.
-- shared viewer factory customization now has a focused base-flow regression
-  test covering ready, resource, save, operation, and dispose wiring.
-- extension subscription composition now inlines the last thin editor-adapter
-  helper and uses a test file name aligned with the actual subject under test.
-- WebviewMediator event wiring now uses focused handler methods and has a
-  regression test covering change, close, rename, theme refresh, and dispose.
-- thin table and flow mediator subclasses now rely on the base dispose
-  behavior instead of carrying pass-through overrides.
-- thin table/flow viewer `init` wrappers are removed, and `viewerWiring`
-  constructs mediators and factories directly.
-- viewer wiring now uses a single local builder for the table/flow pair so
-  the file keeps one symmetric construction path instead of duplicated blocks.
-- WebviewStore removal paths now share one internal delete path and have a
-  focused store regression test for add, lookup, remove, and dispose.
-- ViewerFactory panel creation now uses a focused create/store path with
-  regression tests for both reuse and new-panel creation.
-- WebviewStore document-based access now resolves through the same URI key path
-  as add and lookup operations, with regression coverage for removing a stored
-  panel via a distinct document object that shares the same URI.
-- WebviewMediator now reuses one panel cleanup path for both document-close and
-  file-rename handling instead of duplicating remove-and-dispose logic.
-- ViewerFactory and WebviewMediator now depend only on the focused store
-  surface they actually use instead of the full `WebviewStore` API.
-- table and flow viewers now share one AJS document posting helper because
-  their ready and debounced change behavior were identical.
-- table and flow viewers now instantiate `WebviewMediator` directly from
-  `viewerWiring.ts` because the dedicated mediator subclasses no longer carried
-  viewer-specific behavior.
-- table and flow viewers now instantiate `ViewerFactory` directly from
-  `viewerWiring.ts` because the dedicated factory subclasses no longer carried
-  viewer-specific behavior beyond `viewType` and optional save handling.
-- viewer save handling now crosses the factory boundary as plain text content,
-  keeping `SaveEventType` scoped to message routing instead of bootstrap and
-  factory wiring.
-- viewer wiring now derives the table and flow subscription pair from one local
-  config list so the remaining viewer-specific differences live in one place.
-- viewer panel-dispose wiring now removes store entries by URI so the factory
-  cleanup path no longer depends on a full `TextDocument` object.
-- ViewerFactory is now fully concrete internally as well, so subclass-era
-  `protected` members are narrowed back to private fields and helpers.
-- ViewerFactory test coverage now goes through `getPanel`, and the shared
-  customize flow is no longer exposed as part of the public API.
-- WebviewMediator tests now instantiate the concrete mediator directly instead
-  of keeping a thin test-only subclass around.
-- WebviewStore has dropped dead document-based removal and lookup helpers that
-  no longer have production callers.
-- WebviewStore now keeps only the URI-keyed panel map internally because the
-  parallel document map no longer served any live lookup path.
-- WebviewStore callers now resolve panels by URI only, so the last
-  document-based panel lookup path is removed from both store and callers.
-- viewer factory, mediator, and message-routing contracts now describe the
-  minimal store surface locally instead of importing `WebviewStore` just to
-  slice its type with `Pick`.
-- preview command wiring now owns `viewType` explicitly, so `ViewerFactory`
-  no longer exposes it as part of its public API just to support command
-  registration, mounting, and telemetry naming.
-- preview command registration now depends only on a local `getPanel(...)`
-  contract, so command wiring no longer imports the concrete `ViewerFactory`
-  type just to invoke the shared preview-open flow.
-- preview command registration now accepts a plain execute callback, so the
-  registration helper no longer depends on `MyExtension` or preview-open
-  wiring details beyond the command id it publishes.
-- preview-open execution now depends on explicit command dependencies instead
-  of `MyExtension`, so viewer bootstrap owns the extension-context and
-  telemetry wiring while the command module stays focused on execution flow.
-- viewer wiring now creates preview command dependencies once per extension
-  runtime instead of rebuilding the same context and telemetry closures for
-  each viewer entry.
-- preview command execution now exports only runtime-agnostic command logic,
-  while viewer wiring owns the VS Code-specific dependency construction used
-  to mount panels and emit preview telemetry.
-- viewer wiring now calls `executeOpenPreviewCommand(...)` directly, so the
-  command module no longer keeps a one-line `openPreviewCommand(...)` wrapper
-  around the same execution arguments.
-- viewer wiring now inlines the preview command registration helper, removing
-  the last one-line `registerPreviewCommand(...)` wrapper from the command
-  layer and keeping the bootstrap wiring in one local flow.
-- viewer wiring no longer keeps a second local `registerPreview(...)` helper
-  now that preview command registration happens only once per viewer entry and
-  reads clearly inline at the command registration site.
-- WebviewStore registration now also takes a URI directly, so its public
-  contract is fully aligned with the URI-keyed internal model.
-- WebviewMediator cleanup now removes store entries by URI directly, allowing
-  WebviewStore to drop its last panel-based reverse-lookup helper.
-- repeatable web-extension verification exists via `npm run test:web`.
+- Core application slices are in place and covered:
+  `BuildUnitList`, `BuildUnitListView`, `ExportUnitListCsv`,
+  `BuildFlowGraph`, `ShowUnitDefinition`, normalized AJS mapping,
+  editor feedback, and telemetry-port extraction all exist with focused tests.
+- Wrapper-derived semantics have been consolidated where reuse is real:
+  parameter lookup and defaulting helpers, relation parsing, layout, recovery,
+  wait state, schedule detection, root-jobnet detection, group-state,
+  priorities, depth, encoded strings, and relation normalization now live in
+  shared helpers instead of duplicated wrapper or normalization logic.
+- The normalized AJS model is now the stable integration surface for
+  application and presentation slices:
+  unit, relation, warning, builder, and tree concerns are grouped under
+  `src/domain/models/ajs/normalize/`, and flow/list consumers no longer
+  reconstruct wrapper behavior ad hoc.
+- Wrapper boundaries are clearer:
+  `WaitableUnit` and `PrioritizableUnit` remain explicit capabilities,
+  `G` and `N` keep their unit-local semantics, and `UnitEntity` has shed
+  debug and dead compatibility APIs that were no longer part of the supported
+  domain surface.
+- Extension bootstrap and webview wiring have been reduced in small slices:
+  runtime creation, lifecycle handling, diagnostics and hover registration,
+  viewer wiring, preview command execution, store cleanup, and
+  mediator/factory contracts now have narrower responsibilities and focused
+  regression tests.
+- Validation flow is explicit and repeatable:
+  code-change slices use the serial baseline `npm run qlty`, `npm test`,
+  `npm run test:web`, and `npm run build`, while docs-only slices can stay on
+  markdown or docs-focused validation and should not depend on repository
+  `Verify`.
+
+### How To Maintain This Section
+
+- Record branch-level outcomes, not every micro-refactor.
+- Prefer grouped milestones by concern:
+  domain semantics, normalized model, wrapper boundaries, extension/bootstrap,
+  and validation workflow.
+- When a detailed bullet no longer affects branch planning, compress it into a
+  grouped outcome instead of appending another one-line completion note.
+- Move still-open detail into `### Next Priority Tasks` or a feature-local
+  `docs/specs/features/<feature>/TASKS.md` file.
 
 ### Next Priority Tasks
 
-1. Continue moving only the remaining broadly reusable wrapper-derived
-   semantics that still require typed wrapper interpretation into shared
-   helpers, and avoid forcing abstraction onto wrappers that are now mostly
-   parameter-access surfaces.
-2. Continue reducing activation and webview concentration without changing user
-   behavior or breaking web-extension support.
-3. Keep roadmap and feature task files aligned with merged slices so remaining
-   debt stays explicit.
+1. Close the remaining activation and webview concentration by deciding which
+   pieces should stay as local wiring in `viewerWiring.ts` and which deserve
+   a stable application or infrastructure boundary.
+2. Audit feature-local SDD files under `docs/specs/features/` and remove stale
+   tasks that no longer match what has already merged to `main`.
+3. Keep wrapper refactoring selective:
+   extract only semantics that are cross-unit or shared with normalization,
+   and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
+   would be artificial.
+4. Continue treating desktop and web compatibility as an explicit acceptance
+   criterion whenever bootstrap, preview, parsing, or shared adapters change.
 
 ## Wrapper Semantics Matrix
 
@@ -325,17 +107,26 @@ model.
    - `TASKS.md` for execution items
 5. Fill in assumptions explicitly when requirements are ambiguous.
 6. Implement only after acceptance criteria are clear.
-7. Before `git push`, run local validation serially in this order for code
+7. Refresh `docs/specs/plans.md` when the active slice or branch-level
+   priorities change materially.
+8. Before `git push`, run local validation serially in this order for code
    changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`.
-8. Run any additional task-specific checks after that serial baseline when
+9. Run any additional task-specific checks after that serial baseline when
    needed.
-9. Summarize compatibility risks and follow-up work.
+10. Summarize compatibility risks and follow-up work.
 
 Docs-only exception:
 
 - `npm run build` is not required
 - prefer `npm run lint:md` as the main validation step
 - do not require the repository `Verify` workflow for docs-only slices
+
+Use-case note:
+
+- `docs/requirements/use-cases/` is for behavior contracts that should survive
+  refactors
+- `docs/specs/` is for implementation decisions, branch planning, and task
+  execution
 
 ## Task Template
 
@@ -368,6 +159,8 @@ Docs-only exception:
   and `npm run build` have all passed locally in that order for code changes.
 - For docs-only changes, `npm run build` is not required; use markdown-focused
   validation instead and do not treat repository `Verify` as a required gate.
+- Keep `Completed In This Branch` concise enough to function as a planning
+  summary rather than a chronological changelog.
 
 ### Design
 
@@ -392,8 +185,8 @@ Docs-only exception:
 - [ ] build passes
 - [ ] quality/lint passes
 - [ ] tests updated
-- [ ] `git push` happens only after local `npm run qlty`, `npm test`, and
-      `npm run build` pass
+- [ ] `git push` happens only after local `npm run qlty`, `npm test`,
+      `npm run test:web`, and `npm run build` pass for code changes
 - [ ] docs-only slices may use `npm run lint:md` instead of `npm run build`
       and may skip repository `Verify`
 - [ ] desktop behavior preserved
@@ -418,81 +211,80 @@ Docs-only exception:
 
 ### Task
 
-Audit `UnitEntity` APIs and remove helper methods that are no longer part of
-its core wrapper responsibility.
+Refresh the branch-level SDD instructions so the active plan, completed work
+summary, and roadmap reflect the current post-refactor state.
 
 ### Why
 
-After moving repeated JP1/AJS semantics into focused helpers and capability
-interfaces, `UnitEntity` still exposed a generic parameter lookup and a debug
-serialization hook. Neither reflected core wrapper behavior, and both made the
-entity boundary less clear than necessary.
+The branch has accumulated many small refactor slices across wrapper
+semantics, normalized AJS mapping, activation/bootstrap, and webview wiring.
+The existing plan file read like a running changelog and still carried an
+outdated current task, which made it harder to choose the next slice
+deliberately.
 
 ### Scope
 
-- remove `params<T>()` from `UnitEntity`
-- remove debug-only `prettyJSON()` helpers that no longer have live callers
-- keep typed wrapper getters and relation navigation behavior unchanged
-- remove additional dead wrapper-era APIs from `UnitEntity` when no live
-  consumer remains
-- add focused wrapper tests for planning, weekday-state, and connector-control
-  defaults
-- document that `G` semantics remain unit-local for now
+- update the root `PLANS.md` index so it points at the active SDD sources more
+  clearly
+- compress `docs/specs/plans.md` branch status into grouped branch-level
+  outcomes
+- replace the stale current task with an SDD-maintenance task that matches the
+  present branch state
+- tighten next-priority guidance so roadmap and plan files point to the same
+  remaining concerns
+- update `docs/specs/roadmap.md` so completed slices and next work reflect the
+  latest extension/bootstrap and webview refactors
 
 ### Non-Goals
 
-- changing normalized-model behavior
-- changing parser output
-- changing user-visible unit list, flow, or CSV behavior
-- extracting a `GroupUnit` capability or other new shared interface
-- changing extension activation, diagnostics, or telemetry
+- changing runtime code behavior
+- changing parser, normalized-model, flow, list, or CSV outputs
+- introducing a new architectural policy that contradicts `AGENTS.md`
+- touching unrelated local modifications outside the SDD docs
 
 ### Constraints
 
-- Keep desktop and browser builds working.
-- Keep `domain` and `application` free of direct `vscode` imports.
-- Preserve current parser, list, flow, CSV, diagnostics, hover, and telemetry
-  behavior.
+- Keep the docs aligned with actual merged code, not with an aspirational but
+  stale intermediate state.
+- Do not edit unrelated local worktree changes.
+- For docs-only updates, prefer docs-focused validation and skip build.
 
 ### Design
 
 #### Use case
 
-Group-local wrapper semantics.
+Repository-level SDD workflow maintenance.
 
 #### Layers affected
 
-- domain: `G` wrapper readability and focused wrapper coverage
-- docs: plan tracking for local-vs-shared semantics
+- docs: root planning index, branch-level plan summary, roadmap guidance
 
 #### Key decisions
 
-- Keep `G` semantics local because they are specific to the group wrapper
-  family.
-- Add focused wrapper tests instead of introducing another capability
-  interface.
+- Treat `docs/specs/plans.md` as a planning summary, not a branch changelog.
+- Keep roadmap and current-task wording synchronized with the latest merged
+  refactor themes.
 
 ### Acceptance Criteria
 
-- [ ] `G` keeps planning, weekday-state, and connector-control defaults as
-      local wrapper behavior
-- [ ] focused wrapper tests cover those local semantics
-- [ ] local quality, test, build, and web checks pass
+- [ ] branch status is readable as grouped outcomes rather than a long
+      chronological list
+- [ ] current task reflects the real documentation-maintenance slice
+- [ ] roadmap and next-priority tasks point at the same remaining concerns
+- [ ] docs-only validation passes
 
 ### Test Plan
 
-- add a focused `G` wrapper test
-- run quality checks
-- run desktop tests
-- run build
-- run web tests
+- run `npm run lint:md`
+- run `npm run qlty`
 
 ### Risks
 
-- the slice could drift into a broader group-capability refactor
-- wrapper tests could duplicate helper tests if they become too low-level
+- the grouped summary could omit useful detail if compressed too aggressively
+- roadmap language could drift again if future slices are not reflected here
 
 ### Rollback Plan
 
-- revert the local wrapper cleanup and keep the previous `G` implementation
-- keep broader wrapper-derived semantic moves separate from this slice
+- restore the previous detailed branch log if the grouped summary proves too
+  lossy for planning
+- move any missing implementation detail into feature-local SDD files instead

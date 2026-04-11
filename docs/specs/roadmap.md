@@ -17,16 +17,25 @@
 6. Show unit definition via application DTO
 7. Isolate diagnostics and hover adapters
 8. Wrap telemetry behind an application port
+9. Consolidate wrapper-derived semantics into shared helpers and focused
+   capability interfaces
+10. Reduce activation/bootstrap concentration into explicit runtime,
+    lifecycle, subscription, and viewer wiring slices
+11. Simplify webview preview wiring, store cleanup, and factory or mediator
+    contracts without changing viewer behavior
 
 ## Current Roadmap
 
-1. Reconcile wrapper-derived semantics that still live outside the normalized
-   model and decide whether they belong in domain normalization or application
-   view adapters.
-2. Continue reducing activation and webview concentration in
-   `src/extension` without changing user-visible behavior.
-3. Keep validating desktop and web extension compatibility while managing build
-   and bundle-size risk.
+1. Finish the remaining activation and webview boundary decisions:
+   keep simple composition local in `viewerWiring.ts`, but extract stable
+   seams when a dependency stops being wiring-only.
+2. Keep wrapper-domain cleanup selective:
+   move only cross-unit or normalization-shared semantics into helpers, and
+   avoid abstracting unit-local JP1/AJS rules prematurely.
+3. Bring feature-local SDD files back in sync with the current merged state so
+   task lists stop describing already-finished slices.
+4. Keep validating desktop and web extension compatibility while managing
+   bundle-size and shared-runtime risk.
 
 ## Deferred / Optional Slices
 
@@ -34,6 +43,8 @@
    move out of presentation logic.
 2. Reduce bundle size for webview and browser targets if compatibility work is
    complete and performance becomes a stronger priority.
+3. Revisit directory structure under `src/extension/webview/` only if the
+   remaining files stop reading as one cohesive viewer module.
 
 ## Done Criteria For A Slice
 
@@ -42,3 +53,4 @@
 - tests cover the behavior being preserved
 - compatibility impact is stated for desktop and web
 - remaining debt is listed instead of hidden
+- branch-level docs are updated when the slice changes roadmap priorities

@@ -19,6 +19,7 @@ repository.
 4. [Architecture](./architecture.md)
 5. [Current State](./current-state.md)
 6. [Roadmap](./roadmap.md)
+7. [Requirements Use Cases](../requirements/use-cases/README.md)
 
 ## Working Agreement
 
@@ -33,19 +34,43 @@ For non-trivial changes:
 4. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
 5. document assumptions explicitly
 6. implement in small vertical slices
-7. before `git push`, run local validation serially in this order for code
+7. refresh `docs/specs/plans.md` if the active slice or branch priorities
+   change materially
+8. before `git push`, run local validation serially in this order for code
    changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`
-8. run any additional task-specific checks before finishing
-9. avoid anemic domain models: extract only cross-unit or cross-layer
-   semantics into helpers/interfaces, and keep entity identity plus
-   unit-local behavior in the entity when that behavior is part of the
-   JP1/AJS concept itself
+9. run any additional task-specific checks before finishing
+10. avoid anemic domain models: extract only cross-unit or cross-layer
+    semantics into helpers/interfaces, and keep entity identity plus
+    unit-local behavior in the entity when that behavior is part of the
+    JP1/AJS concept itself
 
 For docs-only changes:
 
 - `npm run build` is not required
 - prefer markdown-focused validation such as `npm run lint:md`
+- `npm run qlty` is still recommended when docs formatting or repository-wide
+  quality rules may be affected
 - repository `Verify` workflow should not be relied on as a required gate
+
+## When To Use `docs/requirements/use-cases/`
+
+Use `docs/requirements/use-cases/` for repository-level behavior contracts.
+These files should remain meaningful even if modules, adapters, or file layout
+change.
+
+Good fit:
+
+- application use cases such as build list, build flow graph, normalize
+  document, export CSV, or show definition
+- cross-feature behavior that multiple implementations or adapters rely on
+
+Poor fit:
+
+- branch task sequencing
+- implementation notes tied to the current refactor
+- file-by-file execution checklists
+
+Those belong under `docs/specs/`.
 
 ## Document Roles
 
