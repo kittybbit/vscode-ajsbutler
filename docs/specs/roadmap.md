@@ -30,8 +30,9 @@
     so remaining verification debt is explicit instead of implicit.
 14. Keep validating desktop and web extension compatibility while managing
     bundle-size and shared-runtime risk.
-15. Record manual smoke results for show-unit-definition and CSV export so
-    those feature follow-ups do not remain open indefinitely.
+15. Make verification evidence explicit for completed features:
+    close follow-ups with automated coverage when a reliable smoke seam
+    already exists, and keep manual smoke debt only where it is still needed.
 16. Revisit a dedicated filter/search use case only if a second non-table
     consumer appears and needs the same matching semantics.
 
@@ -45,6 +46,9 @@
    buildUnitListView.ts into smaller, focused modules.
 4. Consolidate i18n translation files to reduce duplication between language
    variants.
+5. Record current interactive verification evidence for
+   `show-unit-definition`, where dialog behavior still lacks the same explicit
+   smoke coverage now documented for CSV export and preview commands.
 
 ## Deferred / Optional Slices
 
