@@ -52,6 +52,9 @@ structure in `docs/specs/features/<feature>/`.
   `createViewerSubscriptions(...)` and
   `createExtensionSubscriptions(...)` now take explicit `context` and
   `telemetry` inputs instead of the full `MyExtension` runtime.
+- Telemetry fallback expectations are now explicit:
+  automated tests verify both noop fallback handling and browser-hosted event
+  forwarding through the shared `TelemetryPort` contract.
 
 ### How To Maintain This Section
 
@@ -73,12 +76,12 @@ structure in `docs/specs/features/<feature>/`.
    extract only semantics that are cross-unit or shared with normalization,
    and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
    would be artificial.
-3. Verify browser-hosted telemetry behavior and fallback handling so the
-   telemetry follow-up does not remain purely assumption-based.
-4. Continue treating desktop and web compatibility as an explicit acceptance
+3. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
-5. Decide whether unit-list filtering/search has enough cross-surface behavior
+4. Decide whether unit-list filtering/search has enough cross-surface behavior
    to justify a dedicated application use case.
+5. Record current manual smoke-test results for CSV export and
+   diagnostics/hover so the remaining feature follow-ups stay evidence-based.
 
 ## Wrapper Semantics Matrix
 
@@ -237,62 +240,64 @@ Use-case note:
 
 ### Task
 
-Narrow the remaining viewer wiring seam so bootstrap subscription wiring stops
-passing the full `MyExtension` runtime where only `context` and `telemetry`
-are actually required.
+Close the telemetry follow-up by verifying browser-hosted contract reuse and
+fallback behavior through automated tests and synced SDD docs.
 
 ### Why
 
-`ViewerFactory` and `WebviewMediator` already consume narrower constructor
-surfaces, but `createViewerSubscriptions(...)` and
-`createExtensionSubscriptions(...)` still accept `MyExtension`. That keeps the
-bootstrap seam wider than the actual dependency surface and makes tests depend
-on runtime construction they do not need.
+The telemetry slice still carried an open follow-up because browser-hosted
+behavior and fallback handling were described as risks, but the evidence in
+tests and docs was weaker than it should be. The code already shares one
+telemetry contract across desktop and browser entry points, so this slice
+should make that verification explicit.
 
 ### Scope
 
-- change viewer wiring to accept explicit `context` and `telemetry`
-- change extension subscription wiring to pass only those dependencies
-- update focused regression tests for the narrowed seams
-- sync branch-level planning docs for the active slice
+- strengthen `createTelemetry` tests around noop fallback behavior
+- verify browser-hosted callers still use the same `TelemetryPort` contract
+- update telemetry feature tasks to record the automated verification basis
+- sync branch-level planning docs for the closed follow-up
 
 ### Non-Goals
 
-- changing viewer behavior, command ids, or mount timing
-- introducing a new application or infrastructure layer without repeated need
-- widening any adapter dependency back to `MyExtension`
+- changing telemetry event names or payload shape
+- introducing browser-only telemetry code paths without a repeated need
+- weakening existing privacy constraints
 
 ### Constraints
 
 - Keep desktop and web extension behavior unchanged.
-- Keep the slice small and bootstrap-focused.
-- Narrow dependencies only where the consumed surface is already clear.
+- Keep the slice small and verification-focused.
+- Verify through shared contract tests rather than host-specific behavior
+  branches.
 
 ### Design
 
 #### Use case
 
-Remaining activation and viewer wiring cleanup.
+Telemetry follow-up verification.
 
 #### Layers affected
 
-- extension/bootstrap: subscription composition
-- extension/webview: viewer wiring dependency flow
-- tests: wiring seam regression coverage
+- extension/telemetry: fallback behavior
+- tests: telemetry contract and fallback coverage
+- docs/specs/features: telemetry task sync
 - docs/specs: branch-level planning sync
 
 #### Key decisions
 
-- `createViewerSubscriptions(...)` should depend on explicit viewer wiring
-  needs, not the full extension runtime.
-- `createExtensionSubscriptions(...)` should pass only the subset of runtime
-  state that viewer wiring actually consumes.
+- Browser-hosted execution should be verified through the same
+  `TelemetryPort` contract, not through a separate telemetry interface.
+- Fallback handling should prove that failed adapter creation degrades to noop
+  behavior without changing caller code.
 
 ### Acceptance Criteria
 
-- [x] viewer wiring no longer accepts `MyExtension`
-- [x] extension subscription wiring no longer accepts `MyExtension`
-- [x] focused tests construct the wiring seam without creating `MyExtension`
+- [x] `createTelemetry` fallback tests assert noop behavior explicitly
+- [x] tests verify browser-hosted callers still use the shared
+      `TelemetryPort` contract
+- [x] `docs/specs/features/record-telemetry/TASKS.md` reflects the closed
+      telemetry follow-up
 
 ### Test Plan
 
@@ -303,14 +308,14 @@ Remaining activation and viewer wiring cleanup.
 
 ### Risks
 
-- bootstrap code could still hide an unnecessary runtime dependency after the
-  viewer adapters were already narrowed
-- tests could keep constructing `MyExtension`, masking whether the seam is
-  actually narrower
+- tests could still prove only desktop assumptions and miss the shared browser
+  contract
+- docs could overstate browser evidence if the verification remains purely
+  descriptive
 
 ### Rollback Plan
 
-- restore the previous `MyExtension`-based wiring if a hidden dependency turns
-  out to be real
-- keep any further seam extraction separate if this slice starts touching
-  viewer behavior
+- reopen the telemetry follow-up in `TASKS.md` if the new tests do not provide
+  enough evidence for browser-hosted behavior
+- keep any host-specific telemetry implementation change separate from this
+  verification slice
