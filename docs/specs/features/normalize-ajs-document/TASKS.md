@@ -1,5 +1,12 @@
 # TASKS: normalize-ajs-document
 
+## Sync Rule
+
+- Update this file in the same commit whenever one task or follow-up is
+  completed, re-scoped, or intentionally dropped.
+- If that change affects branch priorities or repository sequencing, update
+  `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
+
 ## Completed
 
 - [x] Review use case: docs/requirements/use-cases/uc-normalize-ajs-document.md
@@ -15,7 +22,7 @@
 - [ ] Prefer fixture-backed normalization coverage for remaining edge cases such
       as encoding-sensitive documents and larger definitions, instead of
       creating new abstractions without repeated consumers
-- [ ] Keep adapter-boundary docs aligned when a semantic intentionally remains
+- [x] Keep adapter-boundary docs aligned when a semantic intentionally remains
       wrapper-local or application-local, so future slices do not re-open
       already settled extraction decisions
 - [x] Expose normalized helpers for parent, ancestor, and root jobnet lookup

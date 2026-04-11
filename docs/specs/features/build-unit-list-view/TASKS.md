@@ -1,5 +1,12 @@
 # TASKS: build-unit-list-view
 
+## Sync Rule
+
+- Update this file in the same commit whenever one task or follow-up is
+  completed, re-scoped, or intentionally dropped.
+- If that change affects branch priorities or repository sequencing, update
+  `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
+
 ## Completed
 
 - [x] Review use case: docs/requirements/use-cases/uc-build-unit-list-view.md

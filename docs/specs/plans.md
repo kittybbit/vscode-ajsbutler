@@ -105,15 +105,19 @@ model.
    - `SPECS.md` for implementation requirements
    - `PLANS.md` for planning and milestones
    - `TASKS.md` for execution items
-5. Fill in assumptions explicitly when requirements are ambiguous.
-6. Implement only after acceptance criteria are clear.
-7. Refresh `docs/specs/plans.md` when the active slice or branch-level
-   priorities change materially.
-8. Before `git push`, run local validation serially in this order for code
-   changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`.
-9. Run any additional task-specific checks after that serial baseline when
-   needed.
-10. Summarize compatibility risks and follow-up work.
+5. Update the owning `TASKS.md` in the same commit whenever one task or
+   follow-up is completed, re-scoped, or intentionally dropped.
+6. Fill in assumptions explicitly when requirements are ambiguous.
+7. Implement only after acceptance criteria are clear.
+8. Refresh `docs/specs/plans.md` in the same commit when the active slice or
+   branch-level priorities change materially.
+9. Refresh `docs/specs/roadmap.md` in the same commit when a completed slice
+   changes repository-level ordering, remaining debt, or deferred work.
+10. Before `git push`, run local validation serially in this order for code
+    changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`.
+11. Run any additional task-specific checks after that serial baseline when
+    needed.
+12. Summarize compatibility risks and follow-up work.
 
 Docs-only exception:
 
@@ -161,6 +165,9 @@ Use-case note:
   validation instead and do not treat repository `Verify` as a required gate.
 - Keep `Completed In This Branch` concise enough to function as a planning
   summary rather than a chronological changelog.
+- Treat `docs/specs/features/<feature>/TASKS.md`, `docs/specs/plans.md`, and
+  `docs/specs/roadmap.md` as sync targets that should be updated at the time a
+  task outcome becomes known, not in a later cleanup pass.
 
 ### Design
 
@@ -211,35 +218,29 @@ Use-case note:
 
 ### Task
 
-Refresh the branch-level SDD instructions so the active plan, completed work
-summary, and roadmap reflect the current post-refactor state.
+Audit feature-local SDD task files and add a same-commit sync rule for task,
+plan, and roadmap updates.
 
 ### Why
 
-The branch has accumulated many small refactor slices across wrapper
-semantics, normalized AJS mapping, activation/bootstrap, and webview wiring.
-The existing plan file read like a running changelog and still carried an
-outdated current task, which made it harder to choose the next slice
-deliberately.
+The branch-level docs are now in better shape, but the feature-local
+`TASKS.md` files still contain stale follow-up notes and no explicit rule
+about when to sync task, plan, and roadmap documents. Without a tighter
+cadence, the repo drifts back toward catch-up documentation.
 
 ### Scope
 
-- update the root `PLANS.md` index so it points at the active SDD sources more
-  clearly
-- compress `docs/specs/plans.md` branch status into grouped branch-level
-  outcomes
-- replace the stale current task with an SDD-maintenance task that matches the
-  present branch state
-- tighten next-priority guidance so roadmap and plan files point to the same
-  remaining concerns
-- update `docs/specs/roadmap.md` so completed slices and next work reflect the
-  latest extension/bootstrap and webview refactors
+- audit `docs/specs/features/*/TASKS.md` against the current merged state
+- remove or reclassify follow-up notes that are already satisfied
+- add a shared operating rule that task completion should trigger same-commit
+  updates to feature tasks and, when applicable, branch plans and roadmap docs
+- keep the rule visible in both central SDD guidance and feature task files
 
 ### Non-Goals
 
 - changing runtime code behavior
-- changing parser, normalized-model, flow, list, or CSV outputs
-- introducing a new architectural policy that contradicts `AGENTS.md`
+- reopening already-settled wrapper-capability decisions
+- adding automation tooling beyond explicit repository guidance
 - touching unrelated local modifications outside the SDD docs
 
 ### Constraints
@@ -253,24 +254,26 @@ deliberately.
 
 #### Use case
 
-Repository-level SDD workflow maintenance.
+Repository-level SDD workflow maintenance and feature-task sync discipline.
 
 #### Layers affected
 
-- docs: root planning index, branch-level plan summary, roadmap guidance
+- docs: central SDD workflow guidance, branch-level plan summary, roadmap
+  guidance, feature task files
 
 #### Key decisions
 
-- Treat `docs/specs/plans.md` as a planning summary, not a branch changelog.
-- Keep roadmap and current-task wording synchronized with the latest merged
-  refactor themes.
+- Treat `TASKS.md`, `plans.md`, and `roadmap.md` as same-commit sync targets
+  once a task outcome becomes known.
+- Remove obviously stale follow-up items instead of carrying them as passive
+  reminders forever.
 
 ### Acceptance Criteria
 
-- [ ] branch status is readable as grouped outcomes rather than a long
-      chronological list
-- [ ] current task reflects the real documentation-maintenance slice
-- [ ] roadmap and next-priority tasks point at the same remaining concerns
+- [ ] feature-local task files no longer carry obviously stale follow-up notes
+- [ ] central SDD docs define when task, plan, and roadmap files must be
+      updated together
+- [ ] feature task files carry a visible sync rule
 - [ ] docs-only validation passes
 
 ### Test Plan
@@ -280,11 +283,11 @@ Repository-level SDD workflow maintenance.
 
 ### Risks
 
-- the grouped summary could omit useful detail if compressed too aggressively
-- roadmap language could drift again if future slices are not reflected here
+- the sync rule could be too heavy if written like a bureaucratic checklist
+- some feature follow-up items may look stale without being fully closed in
+  code, so each removal must stay conservative
 
 ### Rollback Plan
 
-- restore the previous detailed branch log if the grouped summary proves too
-  lossy for planning
-- move any missing implementation detail into feature-local SDD files instead
+- restore removed follow-up notes if a task was closed prematurely
+- narrow the sync rule wording if it proves too rigid in practice

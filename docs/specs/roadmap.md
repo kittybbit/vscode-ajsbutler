@@ -53,4 +53,7 @@
 - tests cover the behavior being preserved
 - compatibility impact is stated for desktop and web
 - remaining debt is listed instead of hidden
-- branch-level docs are updated when the slice changes roadmap priorities
+- feature `TASKS.md` is updated in the same commit that closes, reframes, or
+  drops a task
+- branch-level docs are updated in the same commit when the slice changes
+  roadmap priorities
