@@ -17,10 +17,16 @@
 
 ## Remaining Follow-up
 
-- [ ] Decide whether filtering/search should become a separate application use case
+- [x] Decide whether filtering/search should become a separate application use case
 
 ## Notes
 
+- 2026-04-11: keep filtering/search in presentation for now. The current
+  behavior depends on TanStack Table row access, presentation column accessors,
+  and `rankItem`-based fuzzy matching over rendered row values rather than on a
+  stable cross-surface application rule.
+- Revisit a dedicated application use case only if filtering/search needs to be
+  shared across table, CSV, commands, or another non-table consumer.
 - Fixture guidance and manual verification notes are maintenance concerns.
   Keep them current when that evidence changes, but do not track them as an
   always-open slice task.
