@@ -92,10 +92,13 @@ structure in `docs/specs/features/<feature>/`.
 3. Reduce `buildUnitListView.ts` incrementally:
    extract calendar, priority, and schedule parsing helpers into focused
    modules while preserving the existing `UnitListRowView` contract and tests.
-4. Keep feature follow-up verification evidence concrete:
+4. Decompose `ParameterFactory.ts` as a dedicated feature:
+   extract coherent builder families behind the existing facade instead of
+   attempting another large refactor in one pass.
+5. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-5. Revisit a dedicated filter/search use case only if a second non-table
+6. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix
