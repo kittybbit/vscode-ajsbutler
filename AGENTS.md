@@ -178,6 +178,86 @@ Do not:
 - remove existing user-visible behavior unless explicitly requested
 - skip tests for non-trivial architectural changes
 
+## AI Agent Routing Guide
+
+This repository is designed to work seamlessly with multiple AI agents, each with distinct strengths.
+
+### Agents
+
+#### Copilot CLI
+- **Invocation**: `copilot ...` command in terminal
+- **Session Model**: Stateless, request-based
+- **Strengths**:
+  - Complex multi-step automation
+  - Git operations and branch management
+  - CI/CD setup and scripting
+  - Batch operations across files
+- **Capabilities**: Full bash/git/tool access, parallel execution
+- **Configuration**: `.github/copilot-instructions.md`
+
+#### Codex (VS Code Copilot)
+- **Invocation**: Chat panel in VS Code editor
+- **Session Model**: Workspace-persistent, context-aware
+- **Strengths**:
+  - Live coding and refactoring
+  - Interactive debugging
+  - Editor-integrated analysis
+  - Contextual suggestions
+- **Capabilities**: Workspace awareness, real-time error feedback, file-level changes
+- **Configuration**: `.codex/skills/` directory with specialized skills
+
+### Task Routing Matrix
+
+| Category         | Task                               | Recommended                                | Why                                             |
+| ---------------- | ---------------------------------- | ------------------------------------------ | ----------------------------------------------- |
+| **SDD Workflow** | Create/update SDD specs            | Codex                                      | Editor context + multi-file coordination        |
+|                  | Implement feature from SDD         | Codex                                      | Live coding with immediate feedback             |
+|                  | Update branch docs                 | Codex or CLI                               | Either works; prefer CLI for large restructures |
+| **Analysis**     | Repository analysis before changes | Codex (repo-analyse skill)                 | Workspace-aware, finds patterns                 |
+|                  | Search across codebase             | CLI (grep/glob)                            | Faster batch operations                         |
+| **Architecture** | Validate clean architecture        | Codex (clean-architecture-refactor skill)  | Contextual understanding                        |
+|                  | Refactor parser code               | Codex (parser-change skill)                | Interactive, test-driven                        |
+| **VS Code**      | Safe extension API changes         | Codex (vscode-extension-safe-change skill) | Compatibility checking built-in                 |
+| **Webview**      | React/webview changes              | Codex (webview-change skill)               | Component-aware suggestions                     |
+| **Automation**   | Set up new CI/CD step              | CLI                                        | Script execution + git workflows                |
+|                  | Batch file edits                   | CLI                                        | Parallel editing across modules                 |
+|                  | Generate boilerplate               | CLI                                        | Template expansion + formatting                 |
+| **Complex Ops**  | Multi-slice refactor               | CLI                                        | Multi-step coordination, git management         |
+
+### Configuration Sources
+
+**Source of Truth** (all agents reference, never duplicate):
+- `AGENTS.md` - Architecture rules and agent routing (you are here)
+- `docs/specs/` - SDD specifications and use cases
+- `README.md` - Build/test commands and quick reference
+
+**Agent-Specific Configuration** (agent instructions, not rules):
+- `.github/copilot-instructions.md` - Copilot CLI entry point
+- `.codex/skills/*/SKILL.md` - Codex specialized workflows
+- `.agent.md` - VS Code Copilot extension metadata
+
+### How Agents Find Information
+
+1. **Copilot CLI** reads:
+   - `.github/copilot-instructions.md` → points to this section
+   - `AGENTS.md` (this routing guide) → determines task type
+   - `docs/specs/` → gets SDD context
+   - `README.md` → gets build/test commands
+
+2. **Codex** reads:
+   - `.codex/skills/*/SKILL.md` → references `AGENTS.md` routing
+   - `AGENTS.md` (this routing guide) → determines task type
+   - `docs/specs/` → gets SDD context
+   - Editor context → live analysis
+
+### Best Practices for Multi-Agent Work
+
+1. **Use the right agent for the task** - Check the routing matrix above
+2. **Keep agents coordinated** - Both reference AGENTS.md, not separate configs
+3. **Document assumptions in specs** - Prefer `docs/specs/` over agent-specific notes
+4. **Avoid duplicating rules** - Update AGENTS.md once, both agents follow
+5. **Record manual verification** - Update feature docs when smoke testing completes
+
 ## Repository-Specific Guidance
 
 Current important concerns in this repository:

@@ -1,3 +1,6 @@
+> **Coordination Note**: See `AGENTS.md` § "AI Agent Routing Guide" for multi-agent task assignment.
+> This skill is one part of a coordinated system that also includes Copilot CLI automation.
+>
 # repo-analyze
 
 ## Purpose

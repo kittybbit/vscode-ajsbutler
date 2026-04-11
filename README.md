@@ -99,6 +99,32 @@ in headless Chromium.
 GitHub Actions also runs `npm run lint:md`, `npm run build`, `npm test`, and
 `npm run test:web` on pushes and pull requests.
 
+## For AI Agents
+
+This repository supports both **Copilot CLI** and **Codex** (VS Code Copilot).
+Agents should coordinate using a shared routing guide rather than separate
+configurations.
+
+### Quick Reference
+
+| Agent                      | Best For                               | Configuration                     |
+| -------------------------- | -------------------------------------- | --------------------------------- |
+| **Codex** (VS Code chat)   | Live coding, refactoring, SDD workflow | `.codex/skills/`                  |
+| **Copilot CLI** (terminal) | Automation, git ops, batch scripts     | `.github/copilot-instructions.md` |
+
+### Routing Guide
+
+For detailed task-to-agent assignment and shared principles:
+- **See** `AGENTS.md` § "AI Agent Routing Guide"
+- This is the **single source of truth** for both agents
+
+### Key Files
+
+- `AGENTS.md` - Architecture rules and agent routing (source of truth)
+- `docs/specs/` - Specification-driven development documentation
+- `.github/copilot-instructions.md` - Copilot CLI entry point
+- `.codex/skills/` - Codex-specific workflows
+
 ## Telemetry
 
 This extension collects telemetry data to improve the experience of using this
