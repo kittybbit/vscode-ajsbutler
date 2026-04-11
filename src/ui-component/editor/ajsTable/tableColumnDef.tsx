@@ -48,6 +48,12 @@ export const tableDefaultColumnDef = {
   },
 };
 
+export const handleOpenUnitDefinition =
+  (absolutePath: string, openUnitDefinition: (absolutePath: string) => void) =>
+  () => {
+    openUnitDefinition(absolutePath);
+  };
+
 export const tableColumnDef = (
   language: string | undefined = "en",
   openUnitDefinition: (absolutePath: string) => void,
@@ -77,9 +83,10 @@ export const tableColumnDef = (
               <IconButton
                 size="small"
                 aria-label="View the unit definition"
-                onClick={() =>
-                  openUnitDefinition(props.row.original.absolutePath)
-                }
+                onClick={handleOpenUnitDefinition(
+                  props.row.original.absolutePath,
+                  openUnitDefinition,
+                )}
               >
                 <DescriptionIcon fontSize="inherit" />
               </IconButton>
