@@ -23,20 +23,28 @@
     lifecycle, subscription, and viewer wiring slices
 11. Simplify webview preview wiring, store cleanup, and factory or mediator
     contracts without changing viewer behavior
+12. Keep wrapper-domain cleanup selective:
+    move only cross-unit or normalization-shared semantics into helpers, and
+    avoid abstracting unit-local JP1/AJS rules prematurely.
+13. Record current manual smoke-test results for completed viewer-facing slices
+    so remaining verification debt is explicit instead of implicit.
+14. Keep validating desktop and web extension compatibility while managing
+    bundle-size and shared-runtime risk.
+15. Record manual smoke results for show-unit-definition and CSV export so
+    those feature follow-ups do not remain open indefinitely.
+16. Revisit a dedicated filter/search use case only if a second non-table
+    consumer appears and needs the same matching semantics.
 
 ## Current Roadmap
 
-1. Keep wrapper-domain cleanup selective:
-   move only cross-unit or normalization-shared semantics into helpers, and
-   avoid abstracting unit-local JP1/AJS rules prematurely.
-2. Record current manual smoke-test results for completed viewer-facing slices
-   so remaining verification debt is explicit instead of implicit.
-3. Keep validating desktop and web extension compatibility while managing
-   bundle-size and shared-runtime risk.
-4. Record manual smoke results for show-unit-definition and CSV export so
-   those feature follow-ups do not remain open indefinitely.
-5. Revisit a dedicated filter/search use case only if a second non-table
-   consumer appears and needs the same matching semantics.
+1. Refactor unit model classes to reduce code duplication across similar unit
+   types.
+2. Break down high-complexity functions in application layer (e.g.,
+   buildUnitListView, parameterHelpers, unitPriorityHelpers).
+3. Extract common logic from large files like ParameterFactory.ts and
+   buildUnitListView.ts into smaller, focused modules.
+4. Consolidate i18n translation files to reduce duplication between language
+   variants.
 
 ## Deferred / Optional Slices
 

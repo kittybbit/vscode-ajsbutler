@@ -248,19 +248,19 @@ Use-case note:
 
 ## Current Task
 
-### Task
+### Task: Decide unit-list filtering boundary
 
 Decide whether unit-list filtering/search should move into a dedicated
 application use case or remain in presentation.
 
-### Why
+### Why: Architectural decision closure
 
 The build-unit-list task list still carried an open architectural decision.
 That decision should be closed explicitly, because leaving it open suggests
 there is unresolved shared business logic when the current implementation is
 still table-specific presentation behavior.
 
-### Scope
+### Scope: Review and decide filtering boundary
 
 - review the current filtering/search implementation and its dependencies
 - decide whether the behavior is reusable application logic or
@@ -268,38 +268,36 @@ still table-specific presentation behavior.
 - update build-unit-list tasks with the decision and rationale
 - sync branch-level planning docs after closing the follow-up
 
-### Non-Goals
+### Non-Goals: Avoid premature extraction
 
 - changing table filtering behavior
 - introducing a new application use case without a second consumer
 - rewriting current UI-specific matching rules into fake domain logic
 
-### Constraints
+### Constraints: Keep behavior unchanged
 
 - Keep desktop and web extension behavior unchanged.
 - Keep the slice docs-only.
 - Treat TanStack row access and fuzzy matching over rendered values as
   presentation concerns unless another consumer proves otherwise.
 
-### Design
+### Design: Boundary decision
 
-#### Use case
+#### Use case: Build-unit-list boundary decision
 
-Build-unit-list boundary decision.
-
-#### Layers affected
+#### Layers affected: Docs sync
 
 - docs/specs/features: build-unit-list task sync
 - docs/specs: branch-level planning sync
 
-#### Key decisions
+#### Key decisions: Keep in presentation
 
 - Keep filtering/search in presentation while it still depends on
   table-library row access and presentation column values.
 - Extract an application use case only when matching semantics become shared
   across multiple non-presentation consumers.
 
-### Acceptance Criteria
+### Acceptance Criteria: Docs updated
 
 - [x] `docs/specs/features/build-unit-list/TASKS.md` reflects the boundary
       decision and rationale
@@ -307,17 +305,17 @@ Build-unit-list boundary decision.
 - [x] roadmap wording reflects that a dedicated filter/search use case is
       deferred until another consumer appears
 
-### Test Plan
+### Test Plan: Lint check
 
 - run `npm run lint:md`
 
-### Risks
+### Risks: Mislabeling concerns
 
 - a presentation-specific concern could be mislabeled as reusable business
   logic
 - the deferred note could be lost if roadmap and feature tasks drift apart
 
-### Rollback Plan
+### Rollback Plan: Reopen if needed
 
 - reopen the build-unit-list follow-up if a second consumer later needs the
   same matching semantics

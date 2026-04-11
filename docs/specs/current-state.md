@@ -24,7 +24,8 @@ The repository currently mixes legacy and target-oriented structure.
 - `engines.vscode` is a compatibility contract
 - desktop extension and web extension must both continue to work
 - domain code must stay free of direct `vscode` imports
-- parser, list, flow, CSV, diagnostics, hover, and telemetry behavior should remain stable
+- parser, list, flow, CSV, diagnostics, hover, and telemetry behavior should
+  remain stable
 
 ## Immediate Documentation Need
 
