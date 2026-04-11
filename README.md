@@ -107,10 +107,10 @@ configurations.
 
 ### Quick Reference
 
-| Agent | Primary Strength | Fallback Available | Configuration |
-|-------|------------------|-------------------|----------------|
-| **Codex** | Live coding, SDD workflow, interactive | Yes (Copilot CLI) | `.codex/skills/` |
-| **Copilot CLI** | Automation, git ops, batch work | Yes (Codex) | `.github/copilot-instructions.md` |
+| Agent           | Primary Strength                       | Fallback Available | Configuration                     |
+| --------------- | -------------------------------------- | ------------------ | --------------------------------- |
+| **Codex**       | Live coding, SDD workflow, interactive | Yes (Copilot CLI)  | `.codex/skills/`                  |
+| **Copilot CLI** | Automation, git ops, batch work        | Yes (Codex)        | `.github/copilot-instructions.md` |
 
 **Note**: If a Primary agent reaches token limit or session loss, use the Fallback agent.
 Both agents stay coordinated through a single routing guide (see below).
@@ -118,6 +118,7 @@ Both agents stay coordinated through a single routing guide (see below).
 ### Routing Guide (Single Source of Truth)
 
 For detailed task-to-agent assignment with Primary/Fallback options:
+
 - **See** `AGENTS.md` § "AI Agent Routing Guide"
 - **See** `.agent.md` for lightweight coordination index
 - All rules reference **AGENTS.md**, never duplicate

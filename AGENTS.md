@@ -185,6 +185,7 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 ### Agents
 
 #### Copilot CLI
+
 - **Invocation**: `copilot ...` command in terminal
 - **Session Model**: Stateless, request-based
 - **Strengths**:
@@ -196,6 +197,7 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 - **Configuration**: `.github/copilot-instructions.md`
 
 #### Codex (VS Code Copilot)
+
 - **Invocation**: Chat panel in VS Code editor
 - **Session Model**: Workspace-persistent, context-aware
 - **Strengths**:
@@ -208,28 +210,30 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 
 ### Task Routing Matrix
 
-| Category | Task | Primary | Fallback | Notes |
-|----------|------|---------|----------|-------|
-| **SDD Workflow** | Create/update SDD specs | Codex | CLI | Editor context preferred; CLI for batch doc updates |
-| | Implement feature from SDD | Codex | CLI | Live coding preferred; CLI for multi-file refactor |
-| | Update branch docs | Codex | CLI | Either works; Codex for interactive flow |
-| **Analysis** | Repository analysis | Codex (repo-analyse skill) | CLI | Workspace awareness preferred; CLI for complex grep |
-| | Search codebase | CLI | Codex | Batch speed preferred; Codex for contextual search |
-| **Architecture** | Validate clean architecture | Codex (clean-architecture-refactor skill) | CLI | Interactive guidance preferred; CLI for systematic checks |
-| | Refactor parser code | Codex (parser-change skill) | CLI | Test-driven feedback preferred; CLI for large restructure |
-| **VS Code** | Safe extension API changes | Codex (vscode-extension-safe-change skill) | CLI | Compatibility built-in; CLI for API automation |
-| **Webview** | React/webview changes | Codex (webview-change skill) | CLI | Component awareness preferred; CLI for multi-module edits |
-| **Automation** | Set up CI/CD step | CLI | Codex | Script execution required; Codex if workflow guidance needed |
-| | Batch file edits | CLI | Codex | Parallel ops preferred; Codex for interactive refinement |
-| | Generate boilerplate | CLI | Codex | Template expansion required; Codex for quick scaffolding |
-| **Complex Ops** | Multi-slice refactor | CLI | Codex | Git coordination required; Codex if per-step iteration preferred |
+| Category         | Task                        | Primary                                    | Fallback | Notes                                                            |
+| ---------------- | --------------------------- | ------------------------------------------ | -------- | ---------------------------------------------------------------- |
+| **SDD Workflow** | Create/update SDD specs     | Codex                                      | CLI      | Editor context preferred; CLI for batch doc updates              |
+|                  | Implement feature from SDD  | Codex                                      | CLI      | Live coding preferred; CLI for multi-file refactor               |
+|                  | Update branch docs          | Codex                                      | CLI      | Either works; Codex for interactive flow                         |
+| **Analysis**     | Repository analysis         | Codex (repo-analyse skill)                 | CLI      | Workspace awareness preferred; CLI for complex grep              |
+|                  | Search codebase             | CLI                                        | Codex    | Batch speed preferred; Codex for contextual search               |
+| **Architecture** | Validate clean architecture | Codex (clean-architecture-refactor skill)  | CLI      | Interactive guidance preferred; CLI for systematic checks        |
+|                  | Refactor parser code        | Codex (parser-change skill)                | CLI      | Test-driven feedback preferred; CLI for large restructure        |
+| **VS Code**      | Safe extension API changes  | Codex (vscode-extension-safe-change skill) | CLI      | Compatibility built-in; CLI for API automation                   |
+| **Webview**      | React/webview changes       | Codex (webview-change skill)               | CLI      | Component awareness preferred; CLI for multi-module edits        |
+| **Automation**   | Set up CI/CD step           | CLI                                        | Codex    | Script execution required; Codex if workflow guidance needed     |
+|                  | Batch file edits            | CLI                                        | Codex    | Parallel ops preferred; Codex for interactive refinement         |
+|                  | Generate boilerplate        | CLI                                        | Codex    | Template expansion required; Codex for quick scaffolding         |
+| **Complex Ops**  | Multi-slice refactor        | CLI                                        | Codex    | Git coordination required; Codex if per-step iteration preferred |
 
 **Column Definitions**:
+
 - **Primary**: Recommended agent for this task (optimal capabilities/context match)
 - **Fallback**: Alternative if Primary reaches token limit, session loss, or scope expansion
 - **Notes**: Why each assignment and when fallback becomes the better choice
 
 **When to Switch to Fallback**:
+
 - ✅ Token limit reached on Primary
 - ✅ Session timeout or connection lost
 - ✅ Task scope expanded significantly beyond original scope
@@ -239,11 +243,13 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 ### Configuration Sources
 
 **Source of Truth** (all agents reference, never duplicate):
+
 - `AGENTS.md` - Architecture rules and agent routing (you are here)
 - `docs/specs/` - SDD specifications and use cases
 - `README.md` - Build/test commands and quick reference
 
 **Agent-Specific Configuration** (agent instructions, not rules):
+
 - `.github/copilot-instructions.md` - Copilot CLI entry point
 - `.codex/skills/*/SKILL.md` - Codex specialized workflows
 - `.agent.md` - VS Code Copilot extension metadata
@@ -251,6 +257,7 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 ### How Agents Find Information
 
 1. **Copilot CLI** reads:
+
    - `.github/copilot-instructions.md` → points to this section
    - `AGENTS.md` (this routing guide) → determines task type
    - `docs/specs/` → gets SDD context
