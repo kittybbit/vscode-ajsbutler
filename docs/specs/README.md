@@ -26,6 +26,7 @@ repository.
 For non-trivial changes:
 
 1. create a dedicated git branch before implementation work starts
+   and use `docs/...` only for docs-only slices
 2. update or create the relevant use-case spec in
    `docs/requirements/use-cases/` and/or
    `docs/specs/features/<feature>/SPECS.md`
@@ -51,10 +52,30 @@ For non-trivial changes:
 For docs-only changes:
 
 - `npm run build` is not required
-- prefer markdown-focused validation such as `npm run lint:md`
-- `npm run qlty` is still recommended when docs formatting or repository-wide
-  quality rules may be affected
+- run markdown-focused validation such as `npm run lint:md`
 - repository `Verify` workflow should not be relied on as a required gate
+
+## Branch Naming
+
+Use branch names to signal verification intent clearly:
+
+- `docs/...`
+  Reserve for docs-only slices.
+- non-`docs/...`
+  Use for any slice that changes runtime code, tests, config, or other
+  non-doc files.
+
+Match the branch name to the `Verify` workflow's docs-only rule.
+In `.github/workflows/verify.yml`, a PR is treated as docs-only only when the
+changed files stay within:
+
+- `docs/**`
+- `README.md`
+- `.codex/**/*.md`
+- `.github/**/*.md`
+
+If a `docs/...` branch needs any file outside that set, rename the branch or
+start a new non-doc branch before continuing.
 
 ## When To Use `docs/requirements/use-cases/`
 

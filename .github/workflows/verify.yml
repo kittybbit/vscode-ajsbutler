@@ -24,11 +24,13 @@ jobs:
             docs:
               - 'docs/**'
               - 'README.md'
+              - '.codex/**/*.md'
               - '.github/**/*.md'
             non_docs:
               - '**'
               - '!docs/**'
               - '!README.md'
+              - '!.codex/**/*.md'
               - '!.github/**/*.md'
 
   decide:

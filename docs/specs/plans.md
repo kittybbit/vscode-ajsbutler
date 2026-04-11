@@ -97,6 +97,9 @@ model.
 ## Default Workflow
 
 1. Create a dedicated git branch before implementation work starts.
+   Use `docs/...` only when the slice changes files that `Verify` treats as
+   docs-only: `docs/**`, `README.md`, `.codex/**/*.md`, and
+   `.github/**/*.md`.
 2. Read the relevant documents in `docs/specs/`.
 3. Update or create the related use-case spec in
    `docs/requirements/use-cases/`.
@@ -122,7 +125,7 @@ model.
 Docs-only exception:
 
 - `npm run build` is not required
-- prefer `npm run lint:md` as the main validation step
+- `npm run lint:md` is sufficient
 - do not require the repository `Verify` workflow for docs-only slices
 
 Use-case note:
@@ -159,10 +162,13 @@ Use-case note:
   semantics into helpers/interfaces, and keep entity identity plus
   unit-local JP1/AJS behavior in the entity when it is part of that concept.
 - Start implementation from a dedicated git branch, not directly on `main`.
+- Reserve `docs/...` branch names for slices that stay within the docs-only
+  file set used by `.github/workflows/verify.yml`:
+  `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md`.
 - Do not `git push` until `npm run qlty`, `npm test`, `npm run test:web`,
   and `npm run build` have all passed locally in that order for code changes.
-- For docs-only changes, `npm run build` is not required; use markdown-focused
-  validation instead and do not treat repository `Verify` as a required gate.
+- For docs-only changes, markdown lint is sufficient and repository `Verify`
+  is not a required gate.
 - Keep `Completed In This Branch` concise enough to function as a planning
   summary rather than a chronological changelog.
 - Treat `docs/specs/features/<feature>/TASKS.md`, `docs/specs/plans.md`, and
@@ -194,8 +200,8 @@ Use-case note:
 - [ ] tests updated
 - [ ] `git push` happens only after local `npm run qlty`, `npm test`,
       `npm run test:web`, and `npm run build` pass for code changes
-- [ ] docs-only slices may use `npm run lint:md` instead of `npm run build`
-      and may skip repository `Verify`
+- [ ] docs-only slices use `npm run lint:md` and do not rely on repository
+      `Verify` as a required gate
 - [ ] desktop behavior preserved
 - [ ] web behavior preserved if affected
 
@@ -218,30 +224,33 @@ Use-case note:
 
 ### Task
 
-Audit feature-local SDD task files and add a same-commit sync rule for task,
-plan, and roadmap updates.
+Align docs-only verification rules, branch naming rules, and stale use-case
+paths with the actual `Verify` workflow behavior.
 
 ### Why
 
-The branch-level docs are now in better shape, but the feature-local
-`TASKS.md` files still contain stale follow-up notes and no explicit rule
-about when to sync task, plan, and roadmap documents. Without a tighter
-cadence, the repo drifts back toward catch-up documentation.
+The repo now has explicit docs-only branch naming guidance, but the
+implementation and documents drifted in two places:
+the `Verify` workflow did not yet treat `.codex/**/*.md` as docs-only, and
+some docs still implied broader docs-only validation or referenced the old
+use-case path.
 
 ### Scope
 
-- audit `docs/specs/features/*/TASKS.md` against the current merged state
-- remove or reclassify follow-up notes that are already satisfied
-- add a shared operating rule that task completion should trigger same-commit
-  updates to feature tasks and, when applicable, branch plans and roadmap docs
-- keep the rule visible in both central SDD guidance and feature task files
+- update `.github/workflows/verify.yml` so docs-only detection includes
+  `.codex/**/*.md`
+- align central docs and repo guidance with that docs-only file set
+- correct stale `docs/use-cases/` references to
+  `docs/requirements/use-cases/`
+- align docs-only validation wording so markdown lint is the required check
+  for docs-only slices
 
 ### Non-Goals
 
 - changing runtime code behavior
-- reopening already-settled wrapper-capability decisions
+- changing parser, flow, list, CSV, diagnostics, hover, or telemetry behavior
 - adding automation tooling beyond explicit repository guidance
-- touching unrelated local modifications outside the SDD docs
+- touching unrelated local modifications outside the docs and verify workflow
 
 ### Constraints
 
@@ -254,40 +263,42 @@ cadence, the repo drifts back toward catch-up documentation.
 
 #### Use case
 
-Repository-level SDD workflow maintenance and feature-task sync discipline.
+Repository-level SDD workflow maintenance and verification-rule alignment.
 
 #### Layers affected
 
-- docs: central SDD workflow guidance, branch-level plan summary, roadmap
-  guidance, feature task files
+- docs: central SDD workflow guidance, root guidance, skill guidance
+- workflow: docs-only verification filter
 
 #### Key decisions
 
-- Treat `TASKS.md`, `plans.md`, and `roadmap.md` as same-commit sync targets
-  once a task outcome becomes known.
-- Remove obviously stale follow-up items instead of carrying them as passive
-  reminders forever.
+- Treat `.codex/**/*.md` as docs-only for verification because those files are
+  documentation, not runtime code.
+- Keep docs-only required validation minimal: markdown lint only.
 
 ### Acceptance Criteria
 
-- [ ] feature-local task files no longer carry obviously stale follow-up notes
-- [ ] central SDD docs define when task, plan, and roadmap files must be
-      updated together
-- [ ] feature task files carry a visible sync rule
-- [ ] docs-only validation passes
+- [ ] `Verify` docs-only detection includes `.codex/**/*.md`
+- [ ] central docs describe the same docs-only file set and branch naming rule
+- [ ] stale use-case path references are removed
+- [ ] docs-only validation wording is consistent
 
 ### Test Plan
 
-- run `npm run lint:md`
 - run `npm run qlty`
+- run `npm test`
+- run `npm run test:web`
+- run `npm run build`
 
 ### Risks
 
-- the sync rule could be too heavy if written like a bureaucratic checklist
-- some feature follow-up items may look stale without being fully closed in
-  code, so each removal must stay conservative
+- docs and workflow rules could drift again if the docs-only file set changes
+  in the workflow but not in the docs
+- expanding docs-only too broadly could hide non-doc changes, so the rule
+  stays scoped to `.codex/**/*.md`
 
 ### Rollback Plan
 
-- restore removed follow-up notes if a task was closed prematurely
-- narrow the sync rule wording if it proves too rigid in practice
+- revert the workflow filter and matching docs changes together
+- narrow the docs-only file set if future `.codex` content stops being purely
+  documentation
