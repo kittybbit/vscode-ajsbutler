@@ -33,15 +33,15 @@
    so remaining verification debt is explicit instead of implicit.
 3. Keep validating desktop and web extension compatibility while managing
    bundle-size and shared-runtime risk.
-4. Decide whether unit-list filtering/search has enough shared behavior to move
-   out of presentation and into a dedicated application use case.
-5. Record manual smoke results for CSV export and diagnostics/hover so those
+4. Record manual smoke results for CSV export and diagnostics/hover so those
    feature follow-ups do not remain open indefinitely.
+5. Revisit a dedicated filter/search use case only if a second non-table
+   consumer appears and needs the same matching semantics.
 
 ## Deferred / Optional Slices
 
-1. Add a dedicated filter/search unit-list use case if table filtering needs to
-   move out of presentation logic.
+1. Add a dedicated filter/search unit-list use case only if matching semantics
+   need to be shared outside the table presentation layer.
 2. Reduce bundle size for webview and browser targets if compatibility work is
    complete and performance becomes a stronger priority.
 3. Revisit directory structure under `src/extension/webview/` only if the

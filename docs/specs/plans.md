@@ -55,6 +55,9 @@ structure in `docs/specs/features/<feature>/`.
 - Telemetry fallback expectations are now explicit:
   automated tests verify both noop fallback handling and browser-hosted event
   forwarding through the shared `TelemetryPort` contract.
+- Unit-list filtering and search remain presentation-local by decision:
+  the current behavior depends on TanStack Table row access and fuzzy matching
+  over view values, so it does not yet justify a separate application use case.
 
 ### How To Maintain This Section
 
@@ -78,10 +81,10 @@ structure in `docs/specs/features/<feature>/`.
    would be artificial.
 3. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
-4. Decide whether unit-list filtering/search has enough cross-surface behavior
-   to justify a dedicated application use case.
-5. Record current manual smoke-test results for CSV export and
+4. Record current manual smoke-test results for CSV export and
    diagnostics/hover so the remaining feature follow-ups stay evidence-based.
+5. Revisit a dedicated filter/search use case only if a second non-table
+   consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix
 
@@ -240,82 +243,75 @@ Use-case note:
 
 ### Task
 
-Close the telemetry follow-up by verifying browser-hosted contract reuse and
-fallback behavior through automated tests and synced SDD docs.
+Decide whether unit-list filtering/search should move into a dedicated
+application use case or remain in presentation.
 
 ### Why
 
-The telemetry slice still carried an open follow-up because browser-hosted
-behavior and fallback handling were described as risks, but the evidence in
-tests and docs was weaker than it should be. The code already shares one
-telemetry contract across desktop and browser entry points, so this slice
-should make that verification explicit.
+The build-unit-list task list still carried an open architectural decision.
+That decision should be closed explicitly, because leaving it open suggests
+there is unresolved shared business logic when the current implementation is
+still table-specific presentation behavior.
 
 ### Scope
 
-- strengthen `createTelemetry` tests around noop fallback behavior
-- verify browser-hosted callers still use the same `TelemetryPort` contract
-- update telemetry feature tasks to record the automated verification basis
-- sync branch-level planning docs for the closed follow-up
+- review the current filtering/search implementation and its dependencies
+- decide whether the behavior is reusable application logic or
+  table-specific presentation logic
+- update build-unit-list tasks with the decision and rationale
+- sync branch-level planning docs after closing the follow-up
 
 ### Non-Goals
 
-- changing telemetry event names or payload shape
-- introducing browser-only telemetry code paths without a repeated need
-- weakening existing privacy constraints
+- changing table filtering behavior
+- introducing a new application use case without a second consumer
+- rewriting current UI-specific matching rules into fake domain logic
 
 ### Constraints
 
 - Keep desktop and web extension behavior unchanged.
-- Keep the slice small and verification-focused.
-- Verify through shared contract tests rather than host-specific behavior
-  branches.
+- Keep the slice docs-only.
+- Treat TanStack row access and fuzzy matching over rendered values as
+  presentation concerns unless another consumer proves otherwise.
 
 ### Design
 
 #### Use case
 
-Telemetry follow-up verification.
+Build-unit-list boundary decision.
 
 #### Layers affected
 
-- extension/telemetry: fallback behavior
-- tests: telemetry contract and fallback coverage
-- docs/specs/features: telemetry task sync
+- docs/specs/features: build-unit-list task sync
 - docs/specs: branch-level planning sync
 
 #### Key decisions
 
-- Browser-hosted execution should be verified through the same
-  `TelemetryPort` contract, not through a separate telemetry interface.
-- Fallback handling should prove that failed adapter creation degrades to noop
-  behavior without changing caller code.
+- Keep filtering/search in presentation while it still depends on
+  table-library row access and presentation column values.
+- Extract an application use case only when matching semantics become shared
+  across multiple non-presentation consumers.
 
 ### Acceptance Criteria
 
-- [x] `createTelemetry` fallback tests assert noop behavior explicitly
-- [x] tests verify browser-hosted callers still use the shared
-      `TelemetryPort` contract
-- [x] `docs/specs/features/record-telemetry/TASKS.md` reflects the closed
-      telemetry follow-up
+- [x] `docs/specs/features/build-unit-list/TASKS.md` reflects the boundary
+      decision and rationale
+- [x] branch-level priorities no longer treat this decision as unresolved
+- [x] roadmap wording reflects that a dedicated filter/search use case is
+      deferred until another consumer appears
 
 ### Test Plan
 
-- run `npm run qlty`
-- run `npm test`
-- run `npm run test:web`
-- run `npm run build`
+- run `npm run lint:md`
 
 ### Risks
 
-- tests could still prove only desktop assumptions and miss the shared browser
-  contract
-- docs could overstate browser evidence if the verification remains purely
-  descriptive
+- a presentation-specific concern could be mislabeled as reusable business
+  logic
+- the deferred note could be lost if roadmap and feature tasks drift apart
 
 ### Rollback Plan
 
-- reopen the telemetry follow-up in `TASKS.md` if the new tests do not provide
-  enough evidence for browser-hosted behavior
-- keep any host-specific telemetry implementation change separate from this
-  verification slice
+- reopen the build-unit-list follow-up if a second consumer later needs the
+  same matching semantics
+- keep any future filter/search extraction as a separate code slice
