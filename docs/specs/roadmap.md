@@ -37,10 +37,14 @@
 
 ## Current Roadmap
 
-1. Refactor unit model classes to reduce code duplication across similar unit types.
-2. Break down high-complexity functions in application layer (e.g., buildUnitListView, parameterHelpers, unitPriorityHelpers).
-3. Extract common logic from large files like ParameterFactory.ts and buildUnitListView.ts into smaller, focused modules.
-4. Consolidate i18n translation files to reduce duplication between language variants.
+1. Refactor unit model classes to reduce code duplication across similar unit
+   types.
+2. Break down high-complexity functions in application layer (e.g.,
+   buildUnitListView, parameterHelpers, unitPriorityHelpers).
+3. Extract common logic from large files like ParameterFactory.ts and
+   buildUnitListView.ts into smaller, focused modules.
+4. Consolidate i18n translation files to reduce duplication between language
+   variants.
 
 ## Deferred / Optional Slices
 

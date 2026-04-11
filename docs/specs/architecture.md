@@ -25,7 +25,8 @@ Migration should be incremental and use-case driven.
   Contains DTO-oriented use cases and view adapters for unit list, flow graph,
   editor feedback, telemetry ports, and unit definition building.
 - `src/extension`
-  Contains extension activation, diagnostics, hover provider registration, preview commands, and webview panel orchestration.
+  Contains extension activation, diagnostics, hover provider registration,
+  preview commands, and webview panel orchestration.
 - `src/ui-component`
   Contains React-based webview presentation for table and flow views.
 - `src/generate/parser`
@@ -37,16 +38,24 @@ Migration should be incremental and use-case driven.
 
 - grammar source lives in `src/antlr`
 - generated parser code lives in `src/generate/parser`
-- parser orchestration currently lives in `src/domain/services/parser/AjsParser.ts`
-- parse-tree evaluation currently lives in `src/domain/services/parser/AjsEvaluator.ts`
-- syntax error collection currently lives in `src/domain/services/parser/SyntaxErrorListener.ts`
+- parser orchestration currently lives in
+  `src/domain/services/parser/AjsParser.ts`
+- parse-tree evaluation currently lives in
+  `src/domain/services/parser/AjsEvaluator.ts`
+- syntax error collection currently lives in
+  `src/domain/services/parser/SyntaxErrorListener.ts`
 
 ### Where parser output crosses outward
 
-- `src/domain/services/parser/AjsParser.ts` returns `Unit[]` plus syntax errors, which is a reasonable boundary for domain-facing consumers
-- `src/domain/models/ajs/normalizeAjsDocument.ts` converts raw `Unit[]` into a stable normalized model
-- `src/application/unit-list/*` and `src/application/flow-graph/*` can now consume normalized units instead of raw parser-adjacent trees for selected slices
-- VS Code-facing diagnostics and webview adapters remain outside the parser boundary
+- `src/domain/services/parser/AjsParser.ts` returns `Unit[]` plus syntax errors,
+  which is a reasonable boundary for domain-facing consumers
+- `src/domain/models/ajs/normalizeAjsDocument.ts` converts raw `Unit[]` into a
+  stable normalized model
+- `src/application/unit-list/*` and `src/application/flow-graph/*` can now
+  consume normalized units instead of raw parser-adjacent trees for selected
+  slices
+- VS Code-facing diagnostics and webview adapters remain outside the parser
+  boundary
 
 ### Boundary assessment
 
@@ -109,7 +118,8 @@ Migration should be incremental and use-case driven.
 ### Interpretation
 
 - the extension layer is already the natural adapter boundary
-- diagnostics should depend on an application use case that returns diagnostic DTOs
+- diagnostics should depend on an application use case that returns diagnostic
+  DTOs
 - hover should depend on an application use case that returns hover DTOs
 - webview message constants and payload types should live in a neutral shared
   module rather than in domain
@@ -175,14 +185,17 @@ Migration should be incremental and use-case driven.
 
 ## Web Extension Risks
 
-- `src/extension.ts` is used for both desktop and browser entry points, so any shared import chain can affect both bundles
+- `src/extension.ts` is used for both desktop and browser entry points, so any
+  shared import chain can affect both bundles
 - `src/extension/telemetry/VscodeTelemetryAdapter.ts` depends on
   `@vscode/extension-telemetry`; this still needs continued verification in web
   extension execution
 - `src/extension/webview/messageHandlers.ts` imports `os`; webpack currently
-  provides a browser fallback, but this remains an environment-specific adapter
-  concern that needs continued verification
-- `src/ui-component` receives flatted JSON payloads, so serialization format changes can break both desktop and web viewers even if parsing remains correct
+  provides a browser fallback, but this remains an environment-specific
+  adapter concern that needs continued verification
+- `src/ui-component` receives flatted JSON payloads, so serialization format
+  changes can break both desktop and web viewers even if parsing remains
+  correct
 
 ## First Good Vertical Slice
 
@@ -195,7 +208,8 @@ Build Unit List
 - it already has a documented use case
 - it sits closest to the existing parser-to-domain seam
 - it is shared by diagnostics-adjacent parsing and table-view presentation needs
-- it can reduce current coupling without forcing an immediate flow-graph redesign
+- it can reduce current coupling without forcing an immediate flow-graph
+  redesign
 
 ### Slice outcome
 
@@ -209,7 +223,8 @@ normalized model where practical.
 - removes `vscode` and serialization concerns from domain-side helpers
 - gives the table webview application-projected row/view data instead of
   wrapper-driven accessor logic
-- creates a repeatable pattern for later slices such as CSV export and flow graph building
+- creates a repeatable pattern for later slices such as CSV export and flow
+  graph building
 
 ## Remaining extraction priority
 

@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Provide JP1/AJS3 users with a practical, readable, and maintainable VS Code extension for understanding job definitions.
+Provide JP1/AJS3 users with a practical, readable, and maintainable VS Code
+extension for understanding job definitions.
 
 ## Primary users
 
