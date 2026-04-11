@@ -22,5 +22,15 @@
       presentation
 - [x] Update CSV export and table filtering paths to consume
       application-facing row data directly
-- [ ] Record a current manual smoke-test result for desktop and
+- [x] Record a current manual smoke-test result for desktop and
       web viewers in docs
+
+## Notes
+
+- 2026-04-11: desktop integration coverage in
+  `src/test/suite/extension.test.ts` now verifies that executing
+  `open.ajsbutler.tableViewer` creates the table viewer webview tab.
+- 2026-04-11: browser-hosted smoke coverage in `src/test/suite/webSmoke.ts`
+  verifies that the same table viewer command path executes in the web entry
+  flow without failing, so this follow-up is covered by automated smoke-style
+  verification.
