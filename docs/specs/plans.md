@@ -65,6 +65,10 @@ structure in `docs/specs/features/<feature>/`.
 - Table and flow viewer smoke coverage is now explicit:
   existing desktop integration tests and the web smoke runner both verify that
   the preview commands open the corresponding webview tabs in both hosts.
+- CSV export verification evidence is now explicit:
+  dedicated CSV output tests and shared viewer-routing tests cover escaping,
+  table export values, copy telemetry, and save-message handling, so that
+  feature no longer depends on a separate manual smoke note.
 
 ### How To Maintain This Section
 
@@ -80,16 +84,17 @@ structure in `docs/specs/features/<feature>/`.
 ### Next Priority Tasks
 
 1. Record current manual smoke-test results for viewer-facing completed slices,
-   starting with `show-unit-definition`, so feature TASKS stop carrying
-   stale verification debt.
+   starting with `show-unit-definition`, so feature TASKS stop carrying stale
+   verification debt.
 2. Keep wrapper refactoring selective:
    extract only semantics that are cross-unit or shared with normalization,
    and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
    would be artificial.
 3. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
-4. Record current manual smoke-test results for show-unit-definition and CSV
-   export so the remaining feature follow-ups stay evidence-based.
+4. Keep feature follow-up verification evidence concrete:
+   prefer automated smoke or regression coverage where practical, and reserve
+   manual smoke debt for behavior that still lacks a reliable test seam.
 5. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 

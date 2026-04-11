@@ -19,4 +19,11 @@
 
 - [x] Remove the remaining table-to-CSV dependency on
       `UnitEntity`-typed presentation rows
-- [ ] Record a current manual smoke-test result for CSV export behavior
+- [x] Record current verification evidence for CSV export behavior
+
+## Notes
+
+- 2026-04-11: CSV export verification is covered by automated evidence:
+  `exportUnitListCsv.test.ts` preserves CSV escaping rules,
+  `exportCsvView.test.ts` verifies table-view export values, and the shared
+  viewer routing tests cover `copy.csv` and save-message handling.
