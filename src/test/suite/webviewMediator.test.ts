@@ -1,7 +1,5 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { MyExtension } from "../../extension/MyExtension";
 import { WebviewMediator } from "../../extension/webview/WebviewMediator";
 
 type Listener<T> = (event: T) => void;
@@ -21,14 +19,9 @@ suite("WebviewMediator", () => {
     let onRenameFiles: Listener<vscode.FileRenameEvent> | undefined;
     let onChangeTheme: Listener<vscode.ColorTheme> | undefined;
 
-    const telemetry: TelemetryPort = {
-      trackEvent() {},
-      dispose() {},
-    };
-    const extension = MyExtension.init(
-      { subscriptions: [] } as unknown as vscode.ExtensionContext,
-      telemetry,
-    );
+    const context = {
+      subscriptions: [],
+    } as unknown as vscode.ExtensionContext;
     const document = {
       languageId: "jp1ajs",
       uri: { toString: () => "file:///sample.ajs" },
@@ -44,7 +37,7 @@ suite("WebviewMediator", () => {
     } as unknown as vscode.WebviewPanel;
 
     const mediator = new WebviewMediator(
-      extension,
+      context,
       "ajsbutler.testViewer",
       {
         panelByUri(receivedUri) {

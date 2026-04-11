@@ -1,7 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { MyExtension } from "../../extension/MyExtension";
 import { ViewerFactory } from "../../extension/webview/ViewerFactory";
 import { OPERATION, READY, RESOURCE, SAVE } from "../../shared/webviewEvents";
 
@@ -26,10 +25,7 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory(
       "ajsbutler.testViewer",
-      MyExtension.init(
-        { subscriptions: [] } as unknown as vscode.ExtensionContext,
-        telemetry,
-      ),
+      telemetry,
       {
         panelByUri() {
           return existingPanel;
@@ -79,10 +75,7 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory(
       "ajsbutler.testViewer",
-      MyExtension.init(
-        { subscriptions: [] } as unknown as vscode.ExtensionContext,
-        telemetry,
-      ),
+      telemetry,
       {
         panelByUri() {
           return undefined;
@@ -161,10 +154,7 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory(
       "ajsbutler.testViewer",
-      MyExtension.init(
-        { subscriptions: [] } as unknown as vscode.ExtensionContext,
-        telemetry,
-      ),
+      telemetry,
       {
         removeByUri(uri) {
           removed.push(uri.toString());

@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
 import {
   createViewerMessageHandler,
   registerViewerPanelDispose,
 } from "./viewerMessageRouting";
-import { MyExtension } from "../MyExtension";
 
 type ViewerFactoryStore = {
   add(uri: vscode.Uri, panel: vscode.WebviewPanel): void;
@@ -33,21 +33,21 @@ type ViewerReadyHandler = (
 export class ViewerFactory {
   #store: ViewerFactoryStore;
   #viewType: string;
-  #myExtension: MyExtension;
+  #telemetry: TelemetryPort;
   #onReady: ViewerReadyHandler;
   #onSave?: (content: string) => Promise<void>;
   #deps: ViewerFactoryDeps;
 
   public constructor(
     viewType: string,
-    myExtension: MyExtension,
+    telemetry: TelemetryPort,
     store: ViewerFactoryStore,
     onReady: ViewerReadyHandler,
     onSave?: (content: string) => Promise<void>,
     deps: ViewerFactoryDeps = defaultDeps,
   ) {
     this.#viewType = viewType;
-    this.#myExtension = myExtension;
+    this.#telemetry = telemetry;
     this.#store = store;
     this.#onReady = onReady;
     this.#onSave = onSave;
@@ -82,7 +82,7 @@ export class ViewerFactory {
     const onDidReceiveMessage = createViewerMessageHandler({
       document,
       panel,
-      telemetry: this.#myExtension.telemetry,
+      telemetry: this.#telemetry,
       onReady,
       onResource: (event, receivedPanel) => {
         console.log("invoke ViewerFactory.onDidReceiveMessage.", event);

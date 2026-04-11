@@ -224,64 +224,62 @@ Use-case note:
 
 ### Task
 
-Align docs-only verification rules, branch naming rules, and stale use-case
-paths with the actual `Verify` workflow behavior.
+Narrow the remaining viewer wiring seam so webview adapters stop depending on
+the full `MyExtension` runtime when they only need telemetry or extension
+context.
 
 ### Why
 
-The repo now has explicit docs-only branch naming guidance, but the
-implementation and documents drifted in two places:
-the `Verify` workflow did not yet treat `.codex/**/*.md` as docs-only, and
-some docs still implied broader docs-only validation or referenced the old
-use-case path.
+`viewerWiring.ts` is already much smaller than before, but the remaining
+factory and mediator setup still pass the full `MyExtension` object into
+webview adapters. That keeps the adapter boundary broader than necessary and
+makes the remaining seam less explicit than it should be.
 
 ### Scope
 
-- update `.github/workflows/verify.yml` so docs-only detection includes
-  `.codex/**/*.md`
-- align central docs and repo guidance with that docs-only file set
-- correct stale `docs/use-cases/` references to
-  `docs/requirements/use-cases/`
-- align docs-only validation wording so markdown lint is the required check
-  for docs-only slices
+- narrow `ViewerFactory` to depend on telemetry instead of `MyExtension`
+- narrow `WebviewMediator` to depend on extension context instead of
+  `MyExtension`
+- keep `createViewerSubscriptions(...)` as the composition point that still
+  owns the full runtime
+- update focused regression tests for factory and mediator construction
 
 ### Non-Goals
 
-- changing runtime code behavior
-- changing parser, flow, list, CSV, diagnostics, hover, or telemetry behavior
-- adding automation tooling beyond explicit repository guidance
-- touching unrelated local modifications outside the docs and verify workflow
+- changing viewer behavior, command ids, or mount timing
+- introducing a new helper file when local wiring remains readable
+- changing parser, list, flow, CSV, diagnostics, hover, or telemetry payloads
 
 ### Constraints
 
-- Keep the docs aligned with actual merged code, not with an aspirational but
-  stale intermediate state.
-- Do not edit unrelated local worktree changes.
-- For docs-only updates, prefer docs-focused validation and skip build.
+- Keep desktop and web extension behavior unchanged.
+- Do not widen webview adapter responsibilities while narrowing constructor
+  dependencies.
+- Keep the slice small and adapter-focused.
 
 ### Design
 
 #### Use case
 
-Repository-level SDD workflow maintenance and verification-rule alignment.
+Remaining activation and webview boundary cleanup.
 
 #### Layers affected
 
-- docs: central SDD workflow guidance, root guidance, skill guidance
-- workflow: docs-only verification filter
+- extension/bootstrap: viewer composition
+- extension/webview: factory and mediator constructor seams
+- tests: viewer factory and mediator regression coverage
 
 #### Key decisions
 
-- Treat `.codex/**/*.md` as docs-only for verification because those files are
-  documentation, not runtime code.
-- Keep docs-only required validation minimal: markdown lint only.
+- `viewerWiring.ts` remains the composition root for the full runtime.
+- Viewer adapters receive only the dependency surface they actually consume.
 
 ### Acceptance Criteria
 
-- [ ] `Verify` docs-only detection includes `.codex/**/*.md`
-- [ ] central docs describe the same docs-only file set and branch naming rule
-- [ ] stale use-case path references are removed
-- [ ] docs-only validation wording is consistent
+- [ ] `ViewerFactory` no longer depends on `MyExtension`
+- [ ] `WebviewMediator` no longer depends on `MyExtension`
+- [ ] `viewerWiring.ts` still owns the full runtime composition
+- [ ] focused regression tests cover the narrowed seams
 
 ### Test Plan
 
@@ -292,13 +290,13 @@ Repository-level SDD workflow maintenance and verification-rule alignment.
 
 ### Risks
 
-- docs and workflow rules could drift again if the docs-only file set changes
-  in the workflow but not in the docs
-- expanding docs-only too broadly could hide non-doc changes, so the rule
-  stays scoped to `.codex/**/*.md`
+- the slice could become a broader bootstrap refactor if too many adapters are
+  touched at once
+- test doubles could hide an accidental runtime dependency if constructor
+  seams are not updated consistently
 
 ### Rollback Plan
 
-- revert the workflow filter and matching docs changes together
-- narrow the docs-only file set if future `.codex` content stops being purely
-  documentation
+- revert the constructor narrowing and keep `MyExtension` flowing through the
+  viewer adapters
+- keep any future seam change separate from this small adapter cleanup
