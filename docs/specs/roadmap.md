@@ -43,8 +43,8 @@
 2. Break down high-complexity functions in the application layer, starting
    with focused helper extraction from `buildUnitListView.ts` instead of
    another broad rewrite.
-3. Extract common logic from large files like ParameterFactory.ts and
-   buildUnitListView.ts into smaller, focused modules.
+3. Decompose `ParameterFactory.ts` by coherent builder families while keeping
+   `ParamFactory` as the stable facade during migration.
 4. Consolidate i18n translation files to reduce duplication between language
    variants.
 
