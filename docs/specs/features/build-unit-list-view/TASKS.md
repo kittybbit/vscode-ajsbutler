@@ -34,3 +34,7 @@
   verifies that the same table viewer command path executes in the web entry
   flow without failing, so this follow-up is covered by automated smoke-style
   verification.
+- 2026-04-12: internal calendar, priority, and schedule-value parsing helpers
+  can be extracted independently from `buildUnitListView.ts` without changing
+  the `UnitListRowView` contract, so future complexity-reduction slices should
+  prefer helper extraction over another broad rewrite.

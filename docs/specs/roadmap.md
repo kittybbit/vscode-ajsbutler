@@ -40,15 +40,13 @@
 
 1. Refactor unit model classes to reduce code duplication across similar unit
    types.
-2. Break down high-complexity functions in application layer (e.g.,
-   buildUnitListView, parameterHelpers, unitPriorityHelpers).
+2. Break down high-complexity functions in the application layer, starting
+   with focused helper extraction from `buildUnitListView.ts` instead of
+   another broad rewrite.
 3. Extract common logic from large files like ParameterFactory.ts and
    buildUnitListView.ts into smaller, focused modules.
 4. Consolidate i18n translation files to reduce duplication between language
    variants.
-5. Record current interactive verification evidence for
-   `show-unit-definition`, where dialog behavior still lacks the same explicit
-   smoke coverage now documented for CSV export and preview commands.
 
 ## Deferred / Optional Slices
 
