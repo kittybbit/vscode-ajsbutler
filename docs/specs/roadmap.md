@@ -46,6 +46,9 @@
    buildUnitListView.ts into smaller, focused modules.
 4. Consolidate i18n translation files to reduce duplication between language
    variants.
+5. Record current interactive verification evidence for
+   `show-unit-definition`, where dialog behavior still lacks the same explicit
+   smoke coverage now documented for CSV export and preview commands.
 
 ## Deferred / Optional Slices
 
