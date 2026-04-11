@@ -1,6 +1,9 @@
 import * as assert from "assert";
-import { buildUnitDefinition } from "../../application/unit-definition/buildUnitDefinition";
-import { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import {
+  buildUnitDefinition,
+  buildUnitDefinitionByPath,
+} from "../../application/unit-definition/buildUnitDefinition";
+import { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 
 const unit: AjsUnit = {
   id: "u1",
@@ -47,5 +50,57 @@ suite("Build Unit Definition", () => {
         value: "ajsprint -a -R /root/job1",
       },
     ]);
+  });
+
+  test("builds dialog DTOs by absolute path from normalized units only", () => {
+    const child: AjsUnit = {
+      ...unit,
+      id: "u2",
+      name: "job2",
+      absolutePath: "/root/job1/job2",
+      parentId: "u1",
+      depth: 2,
+      parameters: [{ key: "ty", value: "j" }],
+      children: [],
+    };
+    const document: AjsDocument = {
+      rootUnits: [{ ...unit, children: [child] }],
+      warnings: [],
+    };
+
+    const definitions = buildUnitDefinitionByPath(document);
+
+    assert.deepStrictEqual(definitions.get("/root/job1"), {
+      absolutePath: "/root/job1",
+      rawData: "ty=j\ncm=example",
+      commands: [
+        {
+          id: "ajsshow",
+          label: "ajsshow",
+          value: "ajsshow -R /root/job1",
+        },
+        {
+          id: "ajsprint",
+          label: "ajsprint",
+          value: "ajsprint -a -R /root/job1",
+        },
+      ],
+    });
+    assert.deepStrictEqual(definitions.get("/root/job1/job2"), {
+      absolutePath: "/root/job1/job2",
+      rawData: "ty=j",
+      commands: [
+        {
+          id: "ajsshow",
+          label: "ajsshow",
+          value: "ajsshow -R /root/job1/job2",
+        },
+        {
+          id: "ajsprint",
+          label: "ajsprint",
+          value: "ajsprint -a -R /root/job1/job2",
+        },
+      ],
+    });
   });
 });

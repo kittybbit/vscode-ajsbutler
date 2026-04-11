@@ -1,4 +1,8 @@
-import { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import {
+  AjsDocument,
+  AjsUnit,
+  flattenAjsUnits,
+} from "../../domain/models/ajs/AjsDocument";
 
 export type UnitDefinitionCommandDto = {
   id: string;
@@ -32,3 +36,13 @@ export const buildUnitDefinition = (
     },
   ],
 });
+
+export const buildUnitDefinitionByPath = (
+  document: AjsDocument,
+): ReadonlyMap<string, UnitDefinitionDialogDto> =>
+  new Map(
+    flattenAjsUnits(document.rootUnits).map((unit) => [
+      unit.absolutePath,
+      buildUnitDefinition(unit),
+    ]),
+  );

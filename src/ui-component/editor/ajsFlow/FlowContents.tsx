@@ -29,7 +29,7 @@ import {
   findRootJobnet,
 } from "../../../domain/models/ajs/AjsDocument";
 import {
-  buildUnitDefinition,
+  buildUnitDefinitionByPath,
   UnitDefinitionDialogDto,
 } from "../../../application/unit-definition/buildUnitDefinition";
 import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
@@ -101,14 +101,9 @@ const FlowContents: FC = () => {
   );
   const unitDefinitionByPath = useMemo(
     () =>
-      new Map(
-        ajsDocument
-          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
-              unit.absolutePath,
-              buildUnitDefinition(unit),
-            ])
-          : [],
-      ),
+      ajsDocument
+        ? buildUnitDefinitionByPath(ajsDocument)
+        : new Map<string, UnitDefinitionDialogDto>(),
     [ajsDocument],
   );
   const currentUnit = useMemo(
