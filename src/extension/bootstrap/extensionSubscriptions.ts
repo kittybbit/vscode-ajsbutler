@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
-import { MyExtension } from "../MyExtension";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { registerDiagnostics } from "../diagnostics/registerDiagnostics";
 import { registerHoverProvider } from "../languages/registerHoverProvider";
 import { createViewerSubscriptions } from "./viewerWiring";
 
 export const createExtensionSubscriptions = (
-  myExtension: MyExtension,
+  context: vscode.ExtensionContext,
+  telemetry: TelemetryPort,
 ): vscode.Disposable[] => [
   registerDiagnostics(),
   registerHoverProvider(),
-  ...createViewerSubscriptions(myExtension),
+  ...createViewerSubscriptions({ context, telemetry }),
 ];

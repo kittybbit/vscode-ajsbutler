@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { MyExtension } from "../MyExtension";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import {
   type OpenPreviewCommandDependencies,
   executeOpenPreviewCommand,
@@ -28,34 +28,40 @@ const viewerConfigs: ViewerConfig[] = [
   { viewType: AJS_FLOW_VIEWER_TYPE },
 ];
 
+export type ViewerWiringDeps = {
+  context: vscode.ExtensionContext;
+  telemetry: TelemetryPort;
+};
+
 const createPreviewCommandDependencies = (
-  myExtension: MyExtension,
+  context: vscode.ExtensionContext,
+  telemetry: TelemetryPort,
 ): OpenPreviewCommandDependencies => ({
   getActiveEditor: () => vscode.window.activeTextEditor,
   showErrorMessage: (message) => vscode.window.showErrorMessage(message),
   mountPanel: (panel, viewType) => {
-    mountViewerPanel(myExtension.context, panel, viewType);
+    mountViewerPanel(context, panel, viewType);
   },
   trackEvent: (viewType, properties) => {
-    myExtension.telemetry.trackEvent(viewType, properties);
+    telemetry.trackEvent(viewType, properties);
   },
 });
 
 const createViewerBundle = (
-  myExtension: MyExtension,
+  { context, telemetry }: ViewerWiringDeps,
   previewDeps: OpenPreviewCommandDependencies,
   { viewType, saveHandler }: ViewerConfig,
 ): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator(
-    myExtension.context,
+    context,
     viewType,
     store,
     debouncedAjsDocumentChangeFn(300),
   );
   const factory = new ViewerFactory(
     viewType,
-    myExtension.telemetry,
+    telemetry,
     store,
     readyAjsDocument,
     saveHandler,
@@ -75,11 +81,14 @@ const createViewerBundle = (
 };
 
 export const createViewerSubscriptions = (
-  myExtension: MyExtension,
+  deps: ViewerWiringDeps,
 ): vscode.Disposable[] => {
-  const previewDeps = createPreviewCommandDependencies(myExtension);
+  const previewDeps = createPreviewCommandDependencies(
+    deps.context,
+    deps.telemetry,
+  );
 
   return viewerConfigs.flatMap((config) =>
-    createViewerBundle(myExtension, previewDeps, config),
+    createViewerBundle(deps, previewDeps, config),
   );
 };
