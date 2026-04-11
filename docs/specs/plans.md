@@ -48,6 +48,10 @@ structure in `docs/specs/features/<feature>/`.
 - Feature-local `TASKS.md` files now distinguish actionable follow-up debt
   from standing policy or maintenance notes, so open task lists stay aligned
   with real remaining work.
+- Viewer bootstrap seams are narrower:
+  `createViewerSubscriptions(...)` and
+  `createExtensionSubscriptions(...)` now take explicit `context` and
+  `telemetry` inputs instead of the full `MyExtension` runtime.
 
 ### How To Maintain This Section
 
@@ -65,17 +69,16 @@ structure in `docs/specs/features/<feature>/`.
 1. Record current manual smoke-test results for viewer-facing completed slices,
    starting with `show-unit-definition`, so feature TASKS stop carrying
    stale verification debt.
-2. Close the remaining activation and webview concentration by deciding which
-   pieces should stay as local wiring in `viewerWiring.ts` and which deserve
-   a stable application or infrastructure boundary.
-3. Keep wrapper refactoring selective:
+2. Keep wrapper refactoring selective:
    extract only semantics that are cross-unit or shared with normalization,
    and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
    would be artificial.
-4. Verify browser-hosted telemetry behavior and fallback handling so the
+3. Verify browser-hosted telemetry behavior and fallback handling so the
    telemetry follow-up does not remain purely assumption-based.
-5. Continue treating desktop and web compatibility as an explicit acceptance
+4. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
+5. Decide whether unit-list filtering/search has enough cross-surface behavior
+   to justify a dedicated application use case.
 
 ## Wrapper Semantics Matrix
 
@@ -234,74 +237,80 @@ Use-case note:
 
 ### Task
 
-Audit feature-local SDD task lists and remove stale open items that are really
-standing policy notes or maintenance guidance.
+Narrow the remaining viewer wiring seam so bootstrap subscription wiring stops
+passing the full `MyExtension` runtime where only `context` and `telemetry`
+are actually required.
 
 ### Why
 
-Several feature `TASKS.md` files still mixed concrete follow-up work with
-evergreen policies such as privacy constraints, extraction guardrails, or
-maintenance reminders. That makes the open task lists noisier than they should
-be and weakens the value of `TASKS.md` as an execution tracker.
+`ViewerFactory` and `WebviewMediator` already consume narrower constructor
+surfaces, but `createViewerSubscriptions(...)` and
+`createExtensionSubscriptions(...)` still accept `MyExtension`. That keeps the
+bootstrap seam wider than the actual dependency surface and makes tests depend
+on runtime construction they do not need.
 
 ### Scope
 
-- review remaining unchecked items across feature `TASKS.md` files
-- keep concrete follow-up work as open tasks
-- move standing guidance into `Notes` where the item is not an actionable
-  slice
-- sync branch-level plans and roadmap after the audit
+- change viewer wiring to accept explicit `context` and `telemetry`
+- change extension subscription wiring to pass only those dependencies
+- update focused regression tests for the narrowed seams
+- sync branch-level planning docs for the active slice
 
 ### Non-Goals
 
-- changing product behavior or code
-- closing legitimate manual smoke or browser-verification debt without
-  evidence
-- rewriting feature history into a changelog
+- changing viewer behavior, command ids, or mount timing
+- introducing a new application or infrastructure layer without repeated need
+- widening any adapter dependency back to `MyExtension`
 
 ### Constraints
 
-- Keep the slice docs-only.
-- Preserve a clear separation between actionable follow-up debt and policy.
-- Do not remove open tasks that still correspond to real unresolved work.
+- Keep desktop and web extension behavior unchanged.
+- Keep the slice small and bootstrap-focused.
+- Narrow dependencies only where the consumed surface is already clear.
 
 ### Design
 
 #### Use case
 
-Feature-local SDD maintenance.
+Remaining activation and viewer wiring cleanup.
 
 #### Layers affected
 
-- docs/specs/features: task-list cleanup
+- extension/bootstrap: subscription composition
+- extension/webview: viewer wiring dependency flow
+- tests: wiring seam regression coverage
 - docs/specs: branch-level planning sync
 
 #### Key decisions
 
-- Open tasks should represent concrete remaining work, not standing policy.
-- Evergreen guidance should move to `Notes` instead of remaining indefinitely
-  under `## Remaining Follow-up`.
+- `createViewerSubscriptions(...)` should depend on explicit viewer wiring
+  needs, not the full extension runtime.
+- `createExtensionSubscriptions(...)` should pass only the subset of runtime
+  state that viewer wiring actually consumes.
 
 ### Acceptance Criteria
 
-- [x] feature task lists keep real unresolved work as open items
-- [x] standing policy or maintenance guidance is moved out of open task lists
-- [x] `docs/specs/plans.md` and `docs/specs/roadmap.md` reflect the post-audit
-      priorities
+- [x] viewer wiring no longer accepts `MyExtension`
+- [x] extension subscription wiring no longer accepts `MyExtension`
+- [x] focused tests construct the wiring seam without creating `MyExtension`
 
 ### Test Plan
 
-- run `npm run lint:md`
+- run `npm run qlty`
+- run `npm test`
+- run `npm run test:web`
+- run `npm run build`
 
 ### Risks
 
-- a real unresolved follow-up could be misclassified as mere guidance
-- branch-level priorities could drift if the roadmap is not updated with the
-  audit outcome
+- bootstrap code could still hide an unnecessary runtime dependency after the
+  viewer adapters were already narrowed
+- tests could keep constructing `MyExtension`, masking whether the seam is
+  actually narrower
 
 ### Rollback Plan
 
-- restore any removed open task if later inspection shows it still represents
-  real unresolved work
-- keep the audit slice docs-only and defer any code follow-up to a separate
-  branch
+- restore the previous `MyExtension`-based wiring if a hidden dependency turns
+  out to be real
+- keep any further seam extraction separate if this slice starts touching
+  viewer behavior

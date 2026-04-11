@@ -16,7 +16,9 @@ export const activateExtension = (
 ): ActivatedExtension => {
   const myExtension = createExtensionRuntime(context);
 
-  context.subscriptions.push(...createExtensionSubscriptions(myExtension));
+  context.subscriptions.push(
+    ...createExtensionSubscriptions(myExtension.context, myExtension.telemetry),
+  );
 
   reportExtensionActivated(myExtension);
 

@@ -26,18 +26,17 @@
 
 ## Current Roadmap
 
-1. Finish the remaining activation and webview boundary decisions:
-   keep simple composition local in `viewerWiring.ts`, but extract stable
-   seams when a dependency stops being wiring-only.
-2. Keep wrapper-domain cleanup selective:
+1. Keep wrapper-domain cleanup selective:
    move only cross-unit or normalization-shared semantics into helpers, and
    avoid abstracting unit-local JP1/AJS rules prematurely.
-3. Record current manual smoke-test results for completed viewer-facing slices
+2. Record current manual smoke-test results for completed viewer-facing slices
    so remaining verification debt is explicit instead of implicit.
-4. Verify browser-hosted telemetry behavior and fallback handling instead of
+3. Verify browser-hosted telemetry behavior and fallback handling instead of
    leaving that follow-up as a standing assumption.
-5. Keep validating desktop and web extension compatibility while managing
+4. Keep validating desktop and web extension compatibility while managing
    bundle-size and shared-runtime risk.
+5. Decide whether unit-list filtering/search has enough shared behavior to move
+   out of presentation and into a dedicated application use case.
 
 ## Deferred / Optional Slices
 
