@@ -47,9 +47,11 @@ To use this extension:
 This repository is incrementally adopting Specification-Driven Development
 (SDD) and cleaner application boundaries.
 
-- SDD documents live in `docs/specs/`.
-- Use-case specs live in `docs/specs/use-cases/`.
-- Non-trivial implementation plans are tracked in `PLANS.md`.
+- SDD guidance starts in `docs/specs/README.md`.
+- Repository-level use-case contracts live in
+  `docs/requirements/use-cases/`.
+- Branch-level planning is tracked in `docs/specs/plans.md`.
+- `PLANS.md` is the root index that points to the active SDD documents.
 - Codex-specific repository guidance lives in `AGENTS.md`.
 
 Recent refactoring work introduced:
@@ -77,9 +79,9 @@ After switching, you can run:
 
 ```bash
 npm run qlty
-npm run build
 npm test
 npm run test:web
+npm run build
 ```
 
 The `sample/` directory contains reusable JP1/AJS definition files for parser,
