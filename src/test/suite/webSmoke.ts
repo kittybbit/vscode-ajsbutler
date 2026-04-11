@@ -50,4 +50,13 @@ export async function run(): Promise<void> {
   if (hovers.length === 0) {
     throw new Error("Expected hover results for parameter symbol");
   }
+
+  const previewDocument = await vscode.workspace.openTextDocument({
+    language: LANGUAGE_ID,
+    content: "unit=root,,jp1admin,;\n{\n  ty=n;\n}\n",
+  });
+  await vscode.window.showTextDocument(previewDocument);
+  await vscode.commands.executeCommand("open.ajsbutler.tableViewer");
+  await vscode.commands.executeCommand("open.ajsbutler.flowViewer");
+  await waitFor(200);
 }
