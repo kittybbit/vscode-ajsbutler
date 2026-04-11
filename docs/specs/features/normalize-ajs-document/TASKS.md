@@ -17,11 +17,6 @@
 
 ## Remaining Follow-up
 
-- [ ] Revisit normalized-model extraction only when a wrapper rule is both
-      broadly reusable and still duplicated outside the owning wrapper
-- [ ] Prefer fixture-backed normalization coverage for remaining edge cases such
-      as encoding-sensitive documents and larger definitions, instead of
-      creating new abstractions without repeated consumers
 - [x] Keep adapter-boundary docs aligned when a semantic intentionally remains
       wrapper-local or application-local, so future slices do not re-open
       already settled extraction decisions
@@ -147,3 +142,11 @@
 - [x] Document which semantics intentionally remain in application view adapters
 - [x] Document the current capability/shared/local wrapper semantics matrix so
       future refactors use the same extraction criteria
+
+## Notes
+
+- Revisit normalized-model extraction only when a wrapper rule is both broadly
+  reusable and still duplicated outside the owning wrapper.
+- Prefer fixture-backed normalization coverage for remaining edge cases such as
+  encoding-sensitive documents and larger definitions, instead of creating new
+  abstractions without repeated consumers.

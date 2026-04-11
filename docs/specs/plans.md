@@ -45,6 +45,9 @@ structure in `docs/specs/features/<feature>/`.
   table and flow viewers consume the same normalized
   `absolutePath -> UnitDefinitionDialogDto` mapping path instead of
   rebuilding equivalent dialog DTO maps separately.
+- Feature-local `TASKS.md` files now distinguish actionable follow-up debt
+  from standing policy or maintenance notes, so open task lists stay aligned
+  with real remaining work.
 
 ### How To Maintain This Section
 
@@ -65,12 +68,12 @@ structure in `docs/specs/features/<feature>/`.
 2. Close the remaining activation and webview concentration by deciding which
    pieces should stay as local wiring in `viewerWiring.ts` and which deserve
    a stable application or infrastructure boundary.
-3. Audit feature-local SDD files under `docs/specs/features/` and remove stale
-   tasks that no longer match what has already merged to `main`.
-4. Keep wrapper refactoring selective:
+3. Keep wrapper refactoring selective:
    extract only semantics that are cross-unit or shared with normalization,
    and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
    would be artificial.
+4. Verify browser-hosted telemetry behavior and fallback handling so the
+   telemetry follow-up does not remain purely assumption-based.
 5. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
 
@@ -231,79 +234,74 @@ Use-case note:
 
 ### Task
 
-Close the remaining `show-unit-definition` follow-up by removing duplicated
-viewer-local dialog DTO reconstruction and updating the synced SDD docs.
+Audit feature-local SDD task lists and remove stale open items that are really
+standing policy notes or maintenance guidance.
 
 ### Why
 
-The feature already moved away from wrapper-backed dialog state, but the table
-and flow viewers still each built their own path-to-dialog DTO map. That keeps
-the same application-facing behavior duplicated in presentation and makes the
-remaining follow-up harder to verify and close cleanly.
+Several feature `TASKS.md` files still mixed concrete follow-up work with
+evergreen policies such as privacy constraints, extraction guardrails, or
+maintenance reminders. That makes the open task lists noisier than they should
+be and weakens the value of `TASKS.md` as an execution tracker.
 
 ### Scope
 
-- extract a shared normalized-unit mapping helper for unit-definition DTOs
-- switch table and flow viewers to that shared helper
-- extend focused regression coverage for the shared mapping path
-- sync feature and branch-level SDD docs with the closed follow-up
+- review remaining unchecked items across feature `TASKS.md` files
+- keep concrete follow-up work as open tasks
+- move standing guidance into `Notes` where the item is not an actionable
+  slice
+- sync branch-level plans and roadmap after the audit
 
 ### Non-Goals
 
-- changing dialog content, command ids, or open/close behavior
-- adding a new wrapper abstraction or reintroducing `UnitEntity`
-- claiming interactive smoke coverage that was not actually run
+- changing product behavior or code
+- closing legitimate manual smoke or browser-verification debt without
+  evidence
+- rewriting feature history into a changelog
 
 ### Constraints
 
-- Keep desktop and web extension behavior unchanged.
-- Keep the slice small and feature-focused.
-- Use the normalized AJS model as the only input to dialog DTO construction.
+- Keep the slice docs-only.
+- Preserve a clear separation between actionable follow-up debt and policy.
+- Do not remove open tasks that still correspond to real unresolved work.
 
 ### Design
 
 #### Use case
 
-`ShowUnitDefinition` follow-up cleanup.
+Feature-local SDD maintenance.
 
 #### Layers affected
 
-- application: unit-definition DTO mapping
-- presentation: table and flow viewer consumption
-- tests: unit-definition mapping regression coverage
-- docs/specs: feature tasks and branch-level planning sync
+- docs/specs/features: task-list cleanup
+- docs/specs: branch-level planning sync
 
 #### Key decisions
 
-- Table and flow should share one `absolutePath -> UnitDefinitionDialogDto`
-  mapping helper instead of rebuilding equivalent maps locally.
-- Interactive smoke verification remains open until it is run in an actual
-  VS Code environment and recorded in docs.
+- Open tasks should represent concrete remaining work, not standing policy.
+- Evergreen guidance should move to `Notes` instead of remaining indefinitely
+  under `## Remaining Follow-up`.
 
 ### Acceptance Criteria
 
-- [x] table and flow both consume a shared normalized DTO mapping path
-- [x] tests cover nested unit mapping without requiring wrapper instances
-- [x] `docs/specs/features/show-unit-definition/TASKS.md` reflects the closed
-      code follow-up and the remaining manual smoke debt
+- [x] feature task lists keep real unresolved work as open items
+- [x] standing policy or maintenance guidance is moved out of open task lists
+- [x] `docs/specs/plans.md` and `docs/specs/roadmap.md` reflect the post-audit
+      priorities
 
 ### Test Plan
 
-- run `npm run qlty`
-- run `npm test`
-- run `npm run test:web`
-- run `npm run build`
+- run `npm run lint:md`
 
 ### Risks
 
-- viewer behavior could drift if the shared mapping changes path keys or raw
-  parameter formatting
-- docs could imply manual verification is complete when only automated
-  regression coverage was added
+- a real unresolved follow-up could be misclassified as mere guidance
+- branch-level priorities could drift if the roadmap is not updated with the
+  audit outcome
 
 ### Rollback Plan
 
-- revert the shared mapping helper and restore the prior viewer-local map
-  construction
-- keep manual smoke verification as a separate follow-up if interactive
-  validation cannot be run in this environment
+- restore any removed open task if later inspection shows it still represents
+  real unresolved work
+- keep the audit slice docs-only and defer any code follow-up to a separate
+  branch

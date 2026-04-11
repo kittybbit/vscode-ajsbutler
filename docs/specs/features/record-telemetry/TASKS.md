@@ -18,4 +18,8 @@
 ## Remaining Follow-up
 
 - [ ] Continue verifying browser-hosted telemetry behavior and fallback handling
-- [ ] Keep privacy constraints explicit in follow-on telemetry changes
+
+## Notes
+
+- Privacy constraints are ongoing policy, not a standing open slice task.
+  Keep them explicit in follow-on telemetry work per `AGENTS.md`.
