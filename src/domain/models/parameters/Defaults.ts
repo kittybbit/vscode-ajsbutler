@@ -1,4 +1,4 @@
-export const DEFAULTS = {
+const parameterDefaults = {
   Ab: "exec",
   Pr: "1",
   Jd: "cond",
@@ -53,7 +53,12 @@ export const DEFAULTS = {
   Mlsav: "y",
   Mp: "n",
   Ms: "sch",
+  Ncex: "n",
+  Ncl: "n",
+  Ncs: "n",
   Ni: "-39",
   Pfm: "p",
   Rg: "1",
-};
+} as const;
+
+export const DEFAULTS = parameterDefaults;

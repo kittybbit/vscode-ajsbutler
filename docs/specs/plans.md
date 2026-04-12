@@ -96,6 +96,8 @@ structure in `docs/specs/features/<feature>/`.
    if `Rule.ts` and related helpers are renamed, do it as one focused pass
    across `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
    `cftd` instead of piecemeal renames.
+   The inherited-builder shape follow-up inside the ParameterFactory
+   decomposition is complete; only the naming slice remains open there.
 5. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.

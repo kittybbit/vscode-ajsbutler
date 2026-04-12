@@ -22,7 +22,6 @@ import {
   buildTopParameter,
   resolveSdParameters,
   resolveConnectorControlDefaultRawValue,
-  resolveJobnetConnectorControlDefaultRawValue,
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
@@ -614,12 +613,15 @@ suite("Parameter helpers", () => {
     const { jobnet, subnet } = parseJobnets();
 
     assert.strictEqual(
-      resolveConnectorControlDefaultRawValue("always-disabled"),
+      resolveConnectorControlDefaultRawValue("ncl", "always"),
       "n",
     );
-    assert.strictEqual(resolveJobnetConnectorControlDefaultRawValue(true), "n");
     assert.strictEqual(
-      resolveJobnetConnectorControlDefaultRawValue(false),
+      resolveConnectorControlDefaultRawValue("ncs", "root-jobnet-only", true),
+      "n",
+    );
+    assert.strictEqual(
+      resolveConnectorControlDefaultRawValue("ncex", "root-jobnet-only", false),
       undefined,
     );
 

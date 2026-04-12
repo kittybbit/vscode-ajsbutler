@@ -16,37 +16,61 @@ type TopParameterSource = {
   [key in `td${TopParameterIndex}`]?: unknown;
 };
 
-const rootJobnetDefaultByParameter: Partial<Record<ParamSymbol, string>> = {
-  rg: DEFAULTS.Rg,
-  sd: DEFAULTS.Sd,
-  ncl: "n",
-  ncs: "n",
-  ncex: "n",
-};
+type DefaultApplicationMode = "always" | "root-jobnet-only";
+type RootJobnetDefaultParameter = "rg" | "sd" | "ncl" | "ncs" | "ncex";
+type ConnectorControlDefaultParameter = "ncl" | "ncs" | "ncex";
 
-export const resolveRootJobnetDefaultRawValue = (
-  parameter: keyof typeof rootJobnetDefaultByParameter,
-  isRootJobnet: boolean,
-): string | undefined =>
-  isRootJobnet ? rootJobnetDefaultByParameter[parameter] : undefined;
-
-export const resolveConnectorControlDefaultRawValue = (
-  mode: "always-disabled" | "root-jobnet-only",
-): string | undefined => {
-  switch (mode) {
-    case "always-disabled":
-      return "n";
-    case "root-jobnet-only":
-      return "n";
+const resolveDefaultRawValue = (
+  parameter: RootJobnetDefaultParameter,
+): string => {
+  switch (parameter) {
+    case "rg":
+      return DEFAULTS.Rg;
+    case "sd":
+      return DEFAULTS.Sd;
+    case "ncl":
+      return DEFAULTS.Ncl;
+    case "ncs":
+      return DEFAULTS.Ncs;
+    case "ncex":
+      return DEFAULTS.Ncex;
   }
 };
 
-export const resolveJobnetConnectorControlDefaultRawValue = (
+const resolveScopedDefaultRawValue = (
+  defaultRawValue: string,
+  mode: DefaultApplicationMode,
+  isRootJobnet: boolean,
+): string | undefined => {
+  switch (mode) {
+    case "always":
+      return defaultRawValue;
+    case "root-jobnet-only":
+      return isRootJobnet ? defaultRawValue : undefined;
+  }
+};
+
+export const resolveRootJobnetDefaultRawValue = (
+  parameter: RootJobnetDefaultParameter,
   isRootJobnet: boolean,
 ): string | undefined =>
-  isRootJobnet
-    ? resolveConnectorControlDefaultRawValue("root-jobnet-only")
-    : undefined;
+  resolveScopedDefaultRawValue(
+    resolveDefaultRawValue(parameter),
+    "root-jobnet-only",
+    isRootJobnet,
+  );
+
+export const resolveConnectorControlDefaultRawValue = (
+  parameter: ConnectorControlDefaultParameter,
+  mode: DefaultApplicationMode,
+  isRootJobnet = true,
+): string | undefined => {
+  return resolveScopedDefaultRawValue(
+    resolveDefaultRawValue(parameter),
+    mode,
+    isRootJobnet,
+  );
+};
 
 export const resolveTopDefaultRawValue = (
   unit: TopParameterSource,
@@ -259,7 +283,7 @@ export const buildInheritedParameterArray = <T>(
 export const buildRootJobnetParameter = <T>(
   arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit"> & {
     isRootJobnet: boolean;
-    rootDefaultParameter: keyof typeof rootJobnetDefaultByParameter;
+    rootDefaultParameter: RootJobnetDefaultParameter;
   },
   mapParam: (param: ParamInternal) => T,
 ): T | undefined =>
@@ -278,7 +302,7 @@ export const buildRootJobnetParameter = <T>(
 export const buildRootDefaultAwareRuleParameters = <T extends Rule>(
   arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit"> & {
     isRootJobnet: boolean;
-    rootDefaultParameter: keyof typeof rootJobnetDefaultByParameter;
+    rootDefaultParameter: RootJobnetDefaultParameter;
   },
   mapParam: (param: ParamInternal) => T,
 ): Array<T> | undefined =>
