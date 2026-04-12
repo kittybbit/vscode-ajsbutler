@@ -160,6 +160,7 @@ import {
   Rec,
   Rei,
   Req,
+  Rg,
   Rh,
   Rje,
   Rjs,
@@ -188,18 +189,39 @@ import {
   Wkp,
   Wth,
 } from "../parameters";
+import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
-import { buildOptionalParameter } from "./parameterHelpers";
+import {
+  buildInheritedParameter,
+  buildOptionalParameter,
+  resolveRootJobnetDefaultRawValue,
+} from "./parameterHelpers";
 import { ParamInternal } from "./parameter.types";
+
+type OptionalScalarBuilderOptions<TUnit extends UnitEntity> = {
+  defaultRawValue?: string;
+  inherit?: boolean;
+  resolveDefaultRawValue?: (unit: TUnit) => string | undefined;
+};
 
 const createOptionalScalarBuilder = <T, P extends ParamInternal["parameter"]>(
   parameter: P,
   mapParam: (param: ParamInternal) => T,
-  defaultRawValue?: string,
+  options: OptionalScalarBuilderOptions<UnitEntity> | string = {},
 ) => {
-  return (unit: UnitEntity): T | undefined =>
-    buildOptionalParameter(
+  const normalizedOptions =
+    typeof options === "string" ? { defaultRawValue: options } : options;
+
+  return (unit: UnitEntity): T | undefined => {
+    const defaultRawValue =
+      normalizedOptions.resolveDefaultRawValue?.(unit) ??
+      normalizedOptions.defaultRawValue;
+    const buildParameter = normalizedOptions.inherit
+      ? buildInheritedParameter
+      : buildOptionalParameter;
+
+    return buildParameter(
       {
         unit: unit,
         parameter: parameter,
@@ -207,6 +229,7 @@ const createOptionalScalarBuilder = <T, P extends ParamInternal["parameter"]>(
       },
       mapParam,
     );
+  };
 };
 
 const createRuntimeDefaultOptionalScalarBuilder = <
@@ -495,6 +518,11 @@ export const optionalScalarParameterBuilders = {
   ntnsr: createOptionalScalarBuilder("ntnsr", (param) => new Ntnsr(param)),
   ntolg: createOptionalScalarBuilder("ntolg", (param) => new Ntolg(param)),
   ntsrc: createOptionalScalarBuilder("ntsrc", (param) => new Ntsrc(param)),
+  rg: createOptionalScalarBuilder("rg", (param) => new Rg(param), {
+    inherit: true,
+    resolveDefaultRawValue: (unit) =>
+      resolveRootJobnetDefaultRawValue("rg", (unit as N).isRootJobnet),
+  }),
   pfm: createOptionalScalarBuilder(
     "pfm",
     (param) => new Pfm(param),

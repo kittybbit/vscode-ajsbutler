@@ -2,7 +2,6 @@ import { inheritedParameterBuilders } from "./inheritedParameterBuilders";
 import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
 import { requiredScalarParameterBuilders } from "./requiredScalarParameterBuilders";
-import { rootJobnetParameterBuilders } from "./rootJobnetParameterBuilders";
 import { ruleParameterBuilders } from "./ruleParameterBuilders";
 import { transferOperationParameterBuilders } from "./transferOperationParameterBuilders";
 
@@ -185,7 +184,7 @@ export class ParamFactory {
   static rec = optionalScalarParameterBuilders.rec;
   static rei = optionalScalarParameterBuilders.rei;
   static req = optionalScalarParameterBuilders.req;
-  static rg = rootJobnetParameterBuilders.rg;
+  static rg = optionalScalarParameterBuilders.rg;
   static rh = optionalScalarParameterBuilders.rh;
   static rje = optionalScalarParameterBuilders.rje;
   static rjs = optionalScalarParameterBuilders.rjs;

@@ -18,7 +18,8 @@
 - [x] Extract optional array builders into a focused internal module
 - [x] Extract inherited builders into a focused internal module
 - [x] Extract rule-bearing parameter builders into a focused internal module
-- [x] Extract root-jobnet-aware builders into a focused internal module
+- [x] Preserve root-jobnet default handling while keeping `rg` aligned with
+      scalar-builder construction patterns
 - [x] Extract transfer-operation `top1` to `top4` builders into a focused
       internal module
 - [x] Keep `ParamFactory` as a thin facade by extracting the remaining
@@ -62,9 +63,10 @@
 - 2026-04-12: the broader naming review concluded that this family is really
   about schedule-rule-bearing parameters, but that terminology change should
   happen in its own slice instead of being mixed into the extraction work.
-- 2026-04-12: root-jobnet-aware builders now live in
-  `rootJobnetParameterBuilders.ts`, with `ParamFactory` still exposing the
-  public entry point for `rg`.
+- 2026-04-12: `rg` now lives in `optionalScalarParameterBuilders.ts` via an
+  inherited optional-scalar variant with runtime root-default resolution, so
+  scalar families continue to reflect construction patterns instead of
+  domain-specific naming.
 - 2026-04-12: transfer-operation builders now live in
   `transferOperationParameterBuilders.ts`, with `ParamFactory` still exposing
   the public entry points for `top1`, `top2`, `top3`, and `top4`.
