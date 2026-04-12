@@ -1,8 +1,8 @@
 import { ParamInternal } from "./parameter.types";
 import Parameter from "./Parameter";
-import Rule from "./Rule";
+import ScheduleRule from "./ScheduleRule";
 
-abstract class Time extends Parameter implements Rule {
+abstract class Time extends Parameter implements ScheduleRule {
   /**
    * [N,]                   ((\d{1,3}),)?
    * {no|hh:mm|mmmm|un}     (no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)

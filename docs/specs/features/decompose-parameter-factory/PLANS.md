@@ -98,6 +98,10 @@ focused builder modules while preserving behavior.
   shape as root-jobnet defaults at the call-site level, but the defaults
   themselves now live in the flat `DEFAULTS` table instead of nested
   sub-objects, so value ownership stays with the parameter definitions.
+- 2026-04-12: the dedicated terminology slice renamed `Rule.ts` to
+  `ScheduleRule.ts` and aligned the shared interface plus helper/builder names
+  around `schedule rule` terminology while preserving the `ParamFactory`
+  facade and parameter parsing behavior.
 
 ## Proposed Slice Order
 
@@ -121,9 +125,9 @@ focused builder modules while preserving behavior.
    option, and inherited array builders now reuse the array family through
    the same construction-pattern axis.
 8. Schedule-rule naming review as a dedicated follow-up slice
-   Status: deferred from the current extraction slice on 2026-04-12
-   Notes: if executed, rename `Rule.ts` and related helpers/builders together
-   so the terminology consistently reflects schedule-rule-bearing parameters.
+   Status: completed on 2026-04-12
+   Notes: `Rule.ts` and related helpers/builders were renamed together so the
+   terminology now consistently reflects schedule-rule-bearing parameters.
 9. Final pass to keep `ParamFactory.ts` as a thin facade only if that still
    reads better than direct exports
    Status: completed on 2026-04-12

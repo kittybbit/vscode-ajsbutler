@@ -2,12 +2,12 @@ import Day from "./Day";
 import Parameter from "./Parameter";
 import { ParamInternal } from "./parameter.types";
 
-interface Rule {
+interface ScheduleRule {
   get rule(): number;
 }
-export default Rule;
+export default ScheduleRule;
 
-export class Cftd extends Parameter implements Rule {
+export class Cftd extends Parameter implements ScheduleRule {
   /**
    * [N,]{no|be|af|db|da}[,n[,N]]    ((\d{1,3}),)?(no|be|af|db|da)((,(\d{1,2}))(,(\d{1,2}))?)?
    */
@@ -48,7 +48,7 @@ export class Cftd extends Parameter implements Rule {
   }
 }
 
-export class Cy extends Parameter implements Rule {
+export class Cy extends Parameter implements ScheduleRule {
   /**
    * [N,](n,{y|m|w|d})    ((\d{1,3}),)?\(((\d{1,3}),([ymwd]))\)
    */
@@ -76,7 +76,7 @@ export class Cy extends Parameter implements Rule {
   }
 }
 
-export class Ln extends Parameter implements Rule {
+export class Ln extends Parameter implements ScheduleRule {
   /**
    * [N,] n       ((\d{1,3}),)?(\d{1,3})
    */
@@ -104,7 +104,7 @@ export class Ln extends Parameter implements Rule {
   }
 }
 
-export class Sd extends Day implements Rule {
+export class Sd extends Day implements ScheduleRule {
   get rule() {
     return this._rule ?? 1;
   }
@@ -142,7 +142,7 @@ export class Sd extends Day implements Rule {
     return undefined;
   }
 }
-export class Sh extends Parameter implements Rule {
+export class Sh extends Parameter implements ScheduleRule {
   /**
    * [N,]{be|af|ca|no}      ((\d{1,3}),)?(be|af|ca|no)
    */
@@ -170,7 +170,7 @@ export class Sh extends Parameter implements Rule {
   }
 }
 
-export class Shd extends Parameter implements Rule {
+export class Shd extends Parameter implements ScheduleRule {
   /**
    * [N,] n       ((\d{1,3}),)?(\d{1,3})
    */
@@ -198,7 +198,7 @@ export class Shd extends Parameter implements Rule {
   }
 }
 
-export class Wc extends Parameter implements Rule {
+export class Wc extends Parameter implements ScheduleRule {
   /**
    * [N,] {no|N|un}       ((\d{1,3}),)?(.+)
    */

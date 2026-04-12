@@ -92,12 +92,11 @@ structure in `docs/specs/features/<feature>/`.
 3. Reduce `buildUnitListView.ts` incrementally:
    extract calendar, priority, and schedule parsing helpers into focused
    modules while preserving the existing `UnitListRowView` contract and tests.
-4. Keep schedule-rule terminology changes separate from extraction slices:
-   if `Rule.ts` and related helpers are renamed, do it as one focused pass
-   across `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
-   `cftd` instead of piecemeal renames.
-   The inherited-builder shape follow-up inside the ParameterFactory
-   decomposition is complete; only the naming slice remains open there.
+4. The inherited-builder shape and schedule-rule naming follow-ups inside the
+   ParameterFactory decomposition are complete.
+   Keep any future terminology cleanup as one focused pass across `sd`, `st`,
+   `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and `cftd` instead of
+   piecemeal renames.
 5. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
@@ -258,6 +257,85 @@ Use-case note:
 -
 
 ## Current Task
+
+### Task
+
+Align the internal `ParameterFactory` rule family with `schedule rule`
+terminology without changing parameter behavior or the `ParamFactory` facade.
+
+### Why
+
+The decomposition work already isolated this family, but the remaining
+`Rule.ts` naming obscures that these parameters are organized around
+schedule-rule-bearing behavior rather than a generic rule concept.
+
+### Scope
+
+- `src/domain/models/parameters/ScheduleRule.ts` and dependent parameter modules
+- schedule-rule helper and builder naming under
+  `src/domain/models/parameters/`
+- regression-test wording and feature-plan synchronization
+
+### Non-Goals
+
+- changing JP1/AJS parsing behavior or default semantics
+- changing `ParamFactory` call sites or public import paths
+- moving parameter ownership outside the current domain layer
+
+### Constraints
+
+- Keep `engines.vscode` compatibility unless explicitly approved.
+- Keep desktop and web extension behavior intact.
+- Avoid direct `vscode` dependency in domain.
+- Start implementation from a dedicated git branch, not directly on `main`.
+- Do not `git push` until `npm run qlty`, `npm test`, `npm run test:web`,
+  and `npm run build` have all passed locally in that order for code changes.
+
+### Design
+
+#### Use case
+
+Behavior-preserving follow-up to the `decompose-parameter-factory` feature.
+
+#### Layers affected
+
+- domain: yes
+- application: no
+- infrastructure: no
+- presentation: no
+
+#### Key decisions
+
+- Keep `ParamFactory` as the stable public facade and rename only the internal
+  schedule-rule family surface.
+- Rename the file, shared interface, and helper/builder identifiers together
+  so terminology changes land in one coherent slice.
+
+### Acceptance Criteria
+
+- [ ] build passes
+- [ ] quality/lint passes
+- [ ] tests updated
+- [ ] desktop behavior preserved
+- [ ] web behavior preserved if affected
+
+### Test Plan
+
+- Run `npm run qlty`
+- Run `npm test`
+- Run `npm run test:web`
+- Run `npm run build`
+
+### Risks
+
+- Missing a remaining `ScheduleRule` import and breaking type exports.
+- Renaming helper APIs without preserving existing behavior for schedule-rule
+  sorting, alignment, or defaults.
+
+### Rollback Plan
+
+- Restore the previous file and identifier names while keeping the extracted
+  builder modules intact.
 
 ### Task: Decide unit-list filtering boundary
 

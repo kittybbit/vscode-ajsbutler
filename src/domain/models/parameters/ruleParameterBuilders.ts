@@ -3,17 +3,17 @@ import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import {
-  buildRootDefaultAwareRuleParameters,
-  buildSortedRuleParameters,
-  buildSdAlignedDefaultRuleParameters,
-  buildSdAlignedEmptyRuleParameters,
+  buildRootDefaultAwareScheduleRuleParameters,
+  buildSortedScheduleRuleParameters,
+  buildSdAlignedDefaultScheduleRuleParameters,
+  buildSdAlignedEmptyScheduleRuleParameters,
   resolveParameterArray,
 } from "./parameterHelpers";
 import { ParamInternal } from "./parameter.types";
-import Rule from "./Rule";
+import ScheduleRule from "./ScheduleRule";
 
 const createScheduleRuleDefaultBuilder = <
-  T extends Rule,
+  T extends ScheduleRule,
   P extends ParamInternal["parameter"],
 >(
   parameter: P,
@@ -21,7 +21,7 @@ const createScheduleRuleDefaultBuilder = <
   defaultRawValue: string,
 ) => {
   return (unit: UnitEntity): Array<T | null> | undefined =>
-    buildSdAlignedDefaultRuleParameters(
+    buildSdAlignedDefaultScheduleRuleParameters(
       {
         unit: unit,
         parameter: parameter,
@@ -33,14 +33,14 @@ const createScheduleRuleDefaultBuilder = <
 };
 
 const createScheduleRuleEmptyBuilder = <
-  T extends Rule,
+  T extends ScheduleRule,
   P extends ParamInternal["parameter"],
 >(
   parameter: P,
   mapParam: (param: ParamInternal) => T,
 ) => {
   return (unit: UnitEntity): Array<T | null> | undefined =>
-    buildSdAlignedEmptyRuleParameters(
+    buildSdAlignedEmptyScheduleRuleParameters(
       {
         unit: unit,
         parameter: parameter,
@@ -49,15 +49,15 @@ const createScheduleRuleEmptyBuilder = <
     );
 };
 
-const createSortedRuleBuilder = <
-  T extends Rule,
+const createSortedScheduleRuleBuilder = <
+  T extends ScheduleRule,
   P extends ParamInternal["parameter"],
 >(
   parameter: P,
   mapParam: (param: ParamInternal) => T,
 ) => {
   return (unit: UnitEntity): Array<T> | undefined =>
-    buildSortedRuleParameters(
+    buildSortedScheduleRuleParameters(
       resolveParameterArray({
         unit: unit,
         parameter: parameter,
@@ -66,8 +66,8 @@ const createSortedRuleBuilder = <
     );
 };
 
-const createRootDefaultAwareRuleBuilder = <
-  T extends Rule,
+const createRootDefaultAwareScheduleRuleBuilder = <
+  T extends ScheduleRule,
   P extends ParamInternal["parameter"],
 >(
   parameter: P,
@@ -75,7 +75,7 @@ const createRootDefaultAwareRuleBuilder = <
   mapParam: (param: ParamInternal) => T,
 ) => {
   return (unit: N): Array<T> | undefined =>
-    buildRootDefaultAwareRuleParameters(
+    buildRootDefaultAwareScheduleRuleParameters(
       {
         unit: unit,
         parameter: parameter,
@@ -86,7 +86,7 @@ const createRootDefaultAwareRuleBuilder = <
     );
 };
 
-// Rule-bearing parameters are primarily meaningful on jobnets (`ty=n`),
+// Schedule-rule-bearing parameters are primarily meaningful on jobnets (`ty=n`),
 // but the split here is based on parameter structure, not owning unit type.
 export const ruleParameterBuilders = {
   cftd: createScheduleRuleDefaultBuilder(
@@ -96,8 +96,12 @@ export const ruleParameterBuilders = {
   ),
   cy: createScheduleRuleEmptyBuilder("cy", (param) => new Cy(param)),
   ey: createScheduleRuleEmptyBuilder("ey", (param) => new Ey(param)),
-  ln: createSortedRuleBuilder("ln", (param) => new Ln(param)),
-  sd: createRootDefaultAwareRuleBuilder("sd", "sd", (param) => new Sd(param)),
+  ln: createSortedScheduleRuleBuilder("ln", (param) => new Ln(param)),
+  sd: createRootDefaultAwareScheduleRuleBuilder(
+    "sd",
+    "sd",
+    (param) => new Sd(param),
+  ),
   sh: createScheduleRuleEmptyBuilder("sh", (param) => new Sh(param)),
   shd: createScheduleRuleDefaultBuilder(
     "shd",

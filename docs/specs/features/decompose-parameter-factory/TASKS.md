@@ -28,7 +28,7 @@
 - [x] Revisit whether inherited builders should remain a dedicated family or
       be absorbed into scalar and array builder families so decomposition uses
       one consistent construction-pattern axis
-- [ ] Revisit `Rule.ts` family naming in a dedicated slice so
+- [x] Revisit `Rule.ts` family naming in a dedicated slice so
       `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
       `cftd` can be renamed together if `schedule rule` terminology is
       adopted
@@ -100,3 +100,7 @@
 - 2026-04-12: connector-control defaults are now parameter-keyed in
   the flat `DEFAULTS` table as well, so both connector-control and
   root-jobnet defaults read from the same per-parameter source of truth.
+- 2026-04-12: the deferred naming slice is now complete; `Rule.ts`,
+  its shared interface, and the builder/helper APIs now use
+  `ScheduleRule` terminology consistently without changing the
+  `ParamFactory` facade or parameter behavior.

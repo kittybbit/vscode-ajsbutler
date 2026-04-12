@@ -1,7 +1,7 @@
 import { ParamSymbol, isParamSymbol } from "../../values/AjsType";
 import { DEFAULTS } from "./Defaults";
 import { ParamBase, ParamInternal } from "./parameter.types";
-import Rule, { Sd } from "./Rule";
+import ScheduleRule, { Sd } from "./ScheduleRule";
 
 export type ParamLookupArg = ParamBase & {
   inherit?: boolean;
@@ -152,8 +152,10 @@ export const buildRequiredParameter = <T>(
   return parameter;
 };
 
-/** Create a parameter value map with rule numbers as keys. */
-const mapByRule = <T extends Rule>(params: Array<T> | undefined) =>
+/** Create a parameter value map with schedule rule numbers as keys. */
+const mapByScheduleRule = <T extends ScheduleRule>(
+  params: Array<T> | undefined,
+) =>
   params
     ? params.reduce(
         (work, param) => {
@@ -164,16 +166,16 @@ const mapByRule = <T extends Rule>(params: Array<T> | undefined) =>
       )
     : undefined;
 
-export const adjustToSdItemCount = <T extends Rule>(
+export const adjustToSdItemCount = <T extends ScheduleRule>(
   sd: Array<Sd> | undefined,
   param: Array<T> | undefined,
   buildDefault: (rule: number) => T | null,
 ): Array<T | null> | undefined => {
-  const sdMap = mapByRule(sd);
+  const sdMap = mapByScheduleRule(sd);
   if (sdMap === undefined) {
     return undefined;
   }
-  const paramMap = mapByRule(param);
+  const paramMap = mapByScheduleRule(param);
   const newParams: Array<T | null> = [];
   Object.keys(sdMap).forEach((sdRule) => {
     const rule = sdMap[sdRule].rule;
@@ -182,7 +184,7 @@ export const adjustToSdItemCount = <T extends Rule>(
   return newParams;
 };
 
-export const buildSdAlignedParameters = <T extends Rule>(
+export const buildSdAlignedScheduleParameters = <T extends ScheduleRule>(
   params: ParamInternal[] | undefined,
   sd: Array<Sd> | undefined,
   mapParam: (param: ParamInternal) => T,
@@ -197,7 +199,7 @@ export const buildSdAlignedParameters = <T extends Rule>(
 export const resolveSdParameters = (
   unit: ParamLookupArg["unit"] & { isRoot: boolean },
 ): Array<Sd> | undefined =>
-  buildRootDefaultAwareRuleParameters(
+  buildRootDefaultAwareScheduleRuleParameters(
     {
       unit: unit,
       parameter: "sd",
@@ -207,11 +209,13 @@ export const resolveSdParameters = (
     (param) => new Sd(param),
   );
 
-export const buildSdAlignedEmptyRuleParameters = <T extends Rule>(
+export const buildSdAlignedEmptyScheduleRuleParameters = <
+  T extends ScheduleRule,
+>(
   arg: Omit<ParamLookupArg, "inherit" | "defaultRawValue">,
   mapParam: (param: ParamInternal) => T,
 ): Array<T | null> | undefined =>
-  buildSdAlignedParameters(
+  buildSdAlignedScheduleParameters(
     resolveParameterArray({
       unit: arg.unit,
       parameter: arg.parameter,
@@ -228,13 +232,15 @@ export const buildSdAlignedEmptyRuleParameters = <T extends Rule>(
       }),
   );
 
-export const buildSdAlignedDefaultRuleParameters = <T extends Rule>(
+export const buildSdAlignedDefaultScheduleRuleParameters = <
+  T extends ScheduleRule,
+>(
   arg: Omit<ParamLookupArg, "inherit"> & {
     buildFallbackRawValue: (rule: number) => string;
   },
   mapParam: (param: ParamInternal) => T,
 ): Array<T | null> | undefined =>
-  buildSdAlignedParameters(
+  buildSdAlignedScheduleParameters(
     resolveParameterArray({
       unit: arg.unit,
       parameter: arg.parameter,
@@ -252,7 +258,7 @@ export const buildSdAlignedDefaultRuleParameters = <T extends Rule>(
       }),
   );
 
-export const buildSortedRuleParameters = <T extends Rule>(
+export const buildSortedScheduleRuleParameters = <T extends ScheduleRule>(
   params: ParamInternal[] | undefined,
   mapParam: (param: ParamInternal) => T,
 ): Array<T> | undefined =>
@@ -299,14 +305,16 @@ export const buildRootJobnetParameter = <T>(
     mapParam,
   );
 
-export const buildRootDefaultAwareRuleParameters = <T extends Rule>(
+export const buildRootDefaultAwareScheduleRuleParameters = <
+  T extends ScheduleRule,
+>(
   arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit"> & {
     isRootJobnet: boolean;
     rootDefaultParameter: RootJobnetDefaultParameter;
   },
   mapParam: (param: ParamInternal) => T,
 ): Array<T> | undefined =>
-  buildSortedRuleParameters(
+  buildSortedScheduleRuleParameters(
     resolveParameterArray({
       unit: arg.unit,
       parameter: arg.parameter,

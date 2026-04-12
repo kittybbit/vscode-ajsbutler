@@ -14,11 +14,11 @@ import {
   buildOptionalParameter,
   buildRequiredParameter,
   buildRootJobnetParameter,
-  buildRootDefaultAwareRuleParameters,
-  buildSdAlignedDefaultRuleParameters,
-  buildSdAlignedEmptyRuleParameters,
-  buildSdAlignedParameters,
-  buildSortedRuleParameters,
+  buildRootDefaultAwareScheduleRuleParameters,
+  buildSdAlignedDefaultScheduleRuleParameters,
+  buildSdAlignedEmptyScheduleRuleParameters,
+  buildSdAlignedScheduleParameters,
+  buildSortedScheduleRuleParameters,
   buildTopParameter,
   resolveSdParameters,
   resolveConnectorControlDefaultRawValue,
@@ -232,10 +232,10 @@ suite("Parameter helpers", () => {
     assert.strictEqual(unchanged, undefined);
   });
 
-  test("builds and aligns sd-based rule parameters in one helper", () => {
+  test("builds and aligns sd-based schedule-rule parameters in one helper", () => {
     const { jobnet } = parseJobnets();
 
-    const aligned = buildSdAlignedParameters(
+    const aligned = buildSdAlignedScheduleParameters(
       resolveParameterArray({
         unit: jobnet,
         parameter: "wc",
@@ -298,7 +298,7 @@ suite("Parameter helpers", () => {
     assert.deepStrictEqual(inheritedCloseDates, ["mo"]);
   });
 
-  test("builds root-jobnet-aware scalars and root-default-aware rule arrays", () => {
+  test("builds root-jobnet-aware scalars and root-default-aware schedule-rule arrays", () => {
     const rootJobnet = parseRootDefaultJobnet();
     const { subnet } = parseJobnets();
 
@@ -324,7 +324,7 @@ suite("Parameter helpers", () => {
     );
     assert.strictEqual(inheritedRg, "3");
 
-    const rootSd = buildRootDefaultAwareRuleParameters(
+    const rootSd = buildRootDefaultAwareScheduleRuleParameters(
       {
         unit: rootJobnet,
         parameter: "sd",
@@ -464,10 +464,10 @@ suite("Parameter helpers", () => {
     assert.strictEqual(missingNcex, undefined);
   });
 
-  test("builds sd-aligned empty-rule parameters with synthesized rule placeholders", () => {
+  test("builds sd-aligned empty schedule-rule parameters with synthesized rule placeholders", () => {
     const { jobnet } = parseJobnets();
 
-    const alignedEy = buildSdAlignedEmptyRuleParameters(
+    const alignedEy = buildSdAlignedEmptyScheduleRuleParameters(
       {
         unit: jobnet,
         parameter: "ey",
@@ -487,10 +487,10 @@ suite("Parameter helpers", () => {
     );
   });
 
-  test("builds sd-aligned default-rule parameters with synthesized defaults", () => {
+  test("builds sd-aligned default schedule-rule parameters with synthesized defaults", () => {
     const { jobnet } = parseJobnets();
 
-    const alignedWc = buildSdAlignedDefaultRuleParameters(
+    const alignedWc = buildSdAlignedDefaultScheduleRuleParameters(
       {
         unit: jobnet,
         parameter: "wc",
@@ -573,10 +573,10 @@ suite("Parameter helpers", () => {
     );
   });
 
-  test("builds sorted rule parameters for simple rule arrays", () => {
+  test("builds sorted schedule-rule parameters for simple rule arrays", () => {
     const { jobnet } = parseJobnets();
 
-    const sortedLn = buildSortedRuleParameters(
+    const sortedLn = buildSortedScheduleRuleParameters(
       [
         {
           unit: jobnet,
