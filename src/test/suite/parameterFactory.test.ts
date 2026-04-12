@@ -55,6 +55,24 @@ unit=root,,jp1admin,;
 }
 `;
 
+const scheduleDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    rg=3;
+    sd=ud;
+    sd=2,en;
+    wc=2;
+    ln=2;
+    ln=1;
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -75,6 +93,13 @@ const parseInheritedJobnet = (): N => {
   const root = tyFactory(result.rootUnits[0]);
   const jobnet = root.children[0] as N;
   return jobnet.children[0] as N;
+};
+
+const parseScheduleJobnet = (): N => {
+  const result = parseAjs(scheduleDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
 };
 
 suite("ParameterFactory", () => {
@@ -153,5 +178,44 @@ suite("ParameterFactory", () => {
       ["mo"],
     );
     assert.ok(cl?.every((parameter) => parameter.inherited));
+  });
+
+  test("returns schedule-rule parameters with explicit and fallback values", () => {
+    const jobnet = parseScheduleJobnet();
+
+    const wc = ParamFactory.wc(jobnet);
+
+    assert.deepStrictEqual(
+      wc?.map((parameter) => parameter?.value()),
+      ["2", "2,no"],
+    );
+  });
+
+  test("returns schedule-rule default values aligned to sd rules", () => {
+    const jobnet = parseScheduleJobnet();
+
+    const wt = ParamFactory.wt(jobnet);
+
+    assert.deepStrictEqual(
+      wt?.map((parameter) => parameter?.value()),
+      ["no", "2,no"],
+    );
+  });
+
+  test("returns rule-bearing parameters sorted by rule", () => {
+    const jobnet = parseScheduleJobnet();
+
+    const ln = ParamFactory.ln(jobnet);
+
+    assert.deepStrictEqual(
+      ln?.map((parameter) => ({
+        rule: parameter.rule,
+        value: parameter.value(),
+      })),
+      [
+        { rule: 1, value: "1" },
+        { rule: 2, value: "2" },
+      ],
+    );
   });
 });

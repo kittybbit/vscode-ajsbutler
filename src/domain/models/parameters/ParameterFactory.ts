@@ -1,43 +1,29 @@
 import {
-  Cftd,
-  Cy,
-  Ey,
-  Ln,
   Ncex,
   Ncl,
   Ncs,
   Rg,
   Sd,
-  Sh,
-  Shd,
-  St,
-  Sy,
   Top1,
   Top2,
   Top3,
   Top4,
   Ty,
-  Wc,
-  Wt,
 } from "../parameters";
 import { Cj } from "../units/Cj";
 import { J } from "../units/J";
 import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
-import { DEFAULTS } from "./Defaults";
 import { inheritedParameterBuilders } from "./inheritedParameterBuilders";
 import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
+import { ruleParameterBuilders } from "./ruleParameterBuilders";
 import {
-  buildSdAlignedDefaultRuleParameters,
-  buildSdAlignedEmptyRuleParameters,
   buildDefaultableParameter,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
   buildRequiredParameter,
   buildTopParameter,
-  buildSortedRuleParameters,
-  resolveParameterArray,
 } from "./parameterHelpers";
 
 export class ParamFactory {
@@ -45,17 +31,7 @@ export class ParamFactory {
   static abr = optionalScalarParameterBuilders.abr;
   static ar = optionalArrayParameterBuilders.ar;
   static cd = optionalScalarParameterBuilders.cd;
-  static cftd(unit: UnitEntity) {
-    return buildSdAlignedDefaultRuleParameters(
-      {
-        unit: unit,
-        parameter: "cftd",
-        defaultRawValue: DEFAULTS.Cftd,
-        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Cftd}`,
-      },
-      (param) => new Cftd(param),
-    );
-  }
+  static cftd = ruleParameterBuilders.cftd;
   static cgs = optionalScalarParameterBuilders.cgs;
   static cl = inheritedParameterBuilders.cl;
   static cm = optionalScalarParameterBuilders.cm;
@@ -63,15 +39,7 @@ export class ParamFactory {
   static cmsts = optionalScalarParameterBuilders.cmsts;
   static cond = optionalScalarParameterBuilders.cond;
   static cty = optionalScalarParameterBuilders.cty;
-  static cy(unit: UnitEntity) {
-    return buildSdAlignedEmptyRuleParameters(
-      {
-        unit: unit,
-        parameter: "cy",
-      },
-      (param) => new Cy(param),
-    );
-  }
+  static cy = ruleParameterBuilders.cy;
   static da = optionalScalarParameterBuilders.da;
   static de = optionalScalarParameterBuilders.de;
   static ed = optionalScalarParameterBuilders.ed;
@@ -119,15 +87,7 @@ export class ParamFactory {
   static evwms = optionalScalarParameterBuilders.evwms;
   static evwsv = optionalScalarParameterBuilders.evwsv;
   static ex = optionalScalarParameterBuilders.ex;
-  static ey(unit: UnitEntity) {
-    return buildSdAlignedEmptyRuleParameters(
-      {
-        unit: unit,
-        parameter: "ey",
-      },
-      (param) => new Ey(param),
-    );
-  }
+  static ey = ruleParameterBuilders.ey;
   static f = optionalScalarParameterBuilders.f;
   static fd = optionalScalarParameterBuilders.fd;
   static flco = optionalScalarParameterBuilders.flco;
@@ -163,15 +123,7 @@ export class ParamFactory {
   static lfsiv = optionalScalarParameterBuilders.lfsiv;
   static lfsrc = optionalScalarParameterBuilders.lfsrc;
   static lftpd = optionalScalarParameterBuilders.lftpd;
-  static ln(unit: UnitEntity) {
-    return buildSortedRuleParameters(
-      resolveParameterArray({
-        unit: unit,
-        parameter: "ln",
-      }),
-      (param) => new Ln(param),
-    );
-  }
+  static ln = ruleParameterBuilders.ln;
   static mcs = optionalScalarParameterBuilders.mcs;
   static md = inheritedParameterBuilders.md;
   static mh = optionalScalarParameterBuilders.mh;
@@ -309,50 +261,14 @@ export class ParamFactory {
   static sdd = inheritedParameterBuilders.sdd;
   static se = optionalScalarParameterBuilders.se;
   static sea = optionalScalarParameterBuilders.sea;
-  static sh(unit: UnitEntity) {
-    return buildSdAlignedEmptyRuleParameters(
-      {
-        unit: unit,
-        parameter: "sh",
-      },
-      (param) => new Sh(param),
-    );
-  }
-  static shd(unit: UnitEntity) {
-    return buildSdAlignedDefaultRuleParameters(
-      {
-        unit: unit,
-        parameter: "shd",
-        defaultRawValue: DEFAULTS.Shd,
-        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Shd}`,
-      },
-      (param) => new Shd(param),
-    );
-  }
+  static sh = ruleParameterBuilders.sh;
+  static shd = ruleParameterBuilders.shd;
   static si = optionalScalarParameterBuilders.si;
   static so = optionalScalarParameterBuilders.so;
   static soa = optionalScalarParameterBuilders.soa;
-  static st(unit: UnitEntity) {
-    return buildSdAlignedDefaultRuleParameters(
-      {
-        unit: unit,
-        parameter: "st",
-        defaultRawValue: DEFAULTS.St,
-        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.St}`,
-      },
-      (param) => new St(param),
-    );
-  }
+  static st = ruleParameterBuilders.st;
   static stt = inheritedParameterBuilders.stt;
-  static sy(unit: UnitEntity) {
-    return buildSdAlignedEmptyRuleParameters(
-      {
-        unit: unit,
-        parameter: "sy",
-      },
-      (param) => new Sy(param),
-    );
-  }
+  static sy = ruleParameterBuilders.sy;
   static sz = optionalScalarParameterBuilders.sz;
   static t = optionalScalarParameterBuilders.t;
   static td1 = optionalScalarParameterBuilders.td1;
@@ -419,28 +335,8 @@ export class ParamFactory {
   static uem = optionalScalarParameterBuilders.uem;
   static un = optionalScalarParameterBuilders.un;
   static unit = optionalScalarParameterBuilders.unit;
-  static wc(unit: UnitEntity) {
-    return buildSdAlignedDefaultRuleParameters(
-      {
-        unit: unit,
-        parameter: "wc",
-        defaultRawValue: DEFAULTS.Wc,
-        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Wc}`,
-      },
-      (param) => new Wc(param),
-    );
-  }
+  static wc = ruleParameterBuilders.wc;
   static wkp = optionalScalarParameterBuilders.wkp;
-  static wt(unit: UnitEntity) {
-    return buildSdAlignedDefaultRuleParameters(
-      {
-        unit: unit,
-        parameter: "wt",
-        defaultRawValue: DEFAULTS.Wt,
-        buildFallbackRawValue: (rule) => `${rule},${DEFAULTS.Wt}`,
-      },
-      (param) => new Wt(param),
-    );
-  }
+  static wt = ruleParameterBuilders.wt;
   static wth = optionalScalarParameterBuilders.wth;
 }

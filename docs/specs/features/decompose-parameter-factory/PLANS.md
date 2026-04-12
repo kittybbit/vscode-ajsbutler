@@ -45,6 +45,11 @@ focused builder modules while preserving behavior.
 - 2026-04-12: `ParamFactory` now delegates inherited scalar and array builders
   through the same facade style, with focused regression tests for inherited
   values and inherited flags.
+- 2026-04-12: rule-bearing parameter builders were extracted to
+  `ruleParameterBuilders.ts`.
+- 2026-04-12: this family is defined around `Rule.ts`, including both
+  schedule-rule-aligned parameters and other rule-bearing parameters such as
+  `ln`.
 
 ## Proposed Slice Order
 
@@ -54,7 +59,8 @@ focused builder modules while preserving behavior.
    Status: completed on 2026-04-12
 3. Inherited builders
    Status: completed on 2026-04-12
-4. SD-aligned builders
+4. Rule-bearing parameter builders
+   Status: completed on 2026-04-12
 5. Root-jobnet-aware builders
 6. Transfer-operation builders
 7. Final pass to keep `ParamFactory.ts` as a thin facade only if that still
