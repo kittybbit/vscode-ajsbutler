@@ -35,12 +35,18 @@ focused builder modules while preserving behavior.
 - 2026-04-12: `ParamFactory` now delegates that family through a thin facade.
 - 2026-04-12: focused regression tests were added for explicit value,
   defaulted value, and the legacy `wth` to `wt` mapping.
+- 2026-04-12: optional array builders were extracted to
+  `optionalArrayParameterBuilders.ts`.
+- 2026-04-12: `ParamFactory` now delegates optional array builders through the
+  same facade style, with focused regression tests for explicit and missing
+  array values.
 
 ## Proposed Slice Order
 
 1. Optional scalar builders
    Status: completed on 2026-04-12
 2. Optional array builders
+   Status: completed on 2026-04-12
 3. Inherited builders
 4. SD-aligned builders
 5. Root-jobnet-aware builders
