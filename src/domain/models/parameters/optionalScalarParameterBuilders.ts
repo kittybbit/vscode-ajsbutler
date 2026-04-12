@@ -127,9 +127,12 @@ import {
   Msttp,
   Msunr,
   Mu,
+  Ncex,
   Nchn,
+  Ncl,
   Ncn,
   Ncr,
+  Ncs,
   Ncsv,
   Nmg,
   Ntcls,
@@ -196,6 +199,24 @@ const createOptionalScalarBuilder = <T, P extends ParamInternal["parameter"]>(
   defaultRawValue?: string,
 ) => {
   return (unit: UnitEntity): T | undefined =>
+    buildOptionalParameter(
+      {
+        unit: unit,
+        parameter: parameter,
+        defaultRawValue: defaultRawValue,
+      },
+      mapParam,
+    );
+};
+
+const createRuntimeDefaultOptionalScalarBuilder = <
+  T,
+  P extends ParamInternal["parameter"],
+>(
+  parameter: P,
+  mapParam: (param: ParamInternal) => T,
+) => {
+  return (unit: UnitEntity, defaultRawValue?: string): T | undefined =>
     buildOptionalParameter(
       {
         unit: unit,
@@ -443,9 +464,21 @@ export const optionalScalarParameterBuilders = {
   msttp: createOptionalScalarBuilder("msttp", (param) => new Msttp(param)),
   msunr: createOptionalScalarBuilder("msunr", (param) => new Msunr(param)),
   mu: createOptionalScalarBuilder("mu", (param) => new Mu(param)),
+  ncex: createRuntimeDefaultOptionalScalarBuilder(
+    "ncex",
+    (param) => new Ncex(param),
+  ),
   nchn: createOptionalScalarBuilder("nchn", (param) => new Nchn(param)),
+  ncl: createRuntimeDefaultOptionalScalarBuilder(
+    "ncl",
+    (param) => new Ncl(param),
+  ),
   ncn: createOptionalScalarBuilder("ncn", (param) => new Ncn(param)),
   ncr: createOptionalScalarBuilder("ncr", (param) => new Ncr(param)),
+  ncs: createRuntimeDefaultOptionalScalarBuilder(
+    "ncs",
+    (param) => new Ncs(param),
+  ),
   ncsv: createOptionalScalarBuilder("ncsv", (param) => new Ncsv(param)),
   nmg: createOptionalScalarBuilder(
     "nmg",
