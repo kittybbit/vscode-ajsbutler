@@ -258,31 +258,31 @@ Use-case note:
 
 ## Current Task
 
-### Task
+### Current Slice
 
 Align the internal `ParameterFactory` rule family with `schedule rule`
 terminology without changing parameter behavior or the `ParamFactory` facade.
 
-### Why
+### Current Need
 
 The decomposition work already isolated this family, but the remaining
 `Rule.ts` naming obscures that these parameters are organized around
 schedule-rule-bearing behavior rather than a generic rule concept.
 
-### Scope
+### Current Scope
 
 - `src/domain/models/parameters/ScheduleRule.ts` and dependent parameter modules
 - schedule-rule helper and builder naming under
   `src/domain/models/parameters/`
 - regression-test wording and feature-plan synchronization
 
-### Non-Goals
+### Current Non-Goals
 
 - changing JP1/AJS parsing behavior or default semantics
 - changing `ParamFactory` call sites or public import paths
 - moving parameter ownership outside the current domain layer
 
-### Constraints
+### Current Constraints
 
 - Keep `engines.vscode` compatibility unless explicitly approved.
 - Keep desktop and web extension behavior intact.
@@ -291,27 +291,27 @@ schedule-rule-bearing behavior rather than a generic rule concept.
 - Do not `git push` until `npm run qlty`, `npm test`, `npm run test:web`,
   and `npm run build` have all passed locally in that order for code changes.
 
-### Design
+### Current Design
 
-#### Use case
+#### Current use case
 
 Behavior-preserving follow-up to the `decompose-parameter-factory` feature.
 
-#### Layers affected
+#### Current layers affected
 
 - domain: yes
 - application: no
 - infrastructure: no
 - presentation: no
 
-#### Key decisions
+#### Current key decisions
 
 - Keep `ParamFactory` as the stable public facade and rename only the internal
   schedule-rule family surface.
 - Rename the file, shared interface, and helper/builder identifiers together
   so terminology changes land in one coherent slice.
 
-### Acceptance Criteria
+### Current Acceptance Criteria
 
 - [ ] build passes
 - [ ] quality/lint passes
@@ -319,20 +319,20 @@ Behavior-preserving follow-up to the `decompose-parameter-factory` feature.
 - [ ] desktop behavior preserved
 - [ ] web behavior preserved if affected
 
-### Test Plan
+### Current Test Plan
 
 - Run `npm run qlty`
 - Run `npm test`
 - Run `npm run test:web`
 - Run `npm run build`
 
-### Risks
+### Current Risks
 
 - Missing a remaining `ScheduleRule` import and breaking type exports.
 - Renaming helper APIs without preserving existing behavior for schedule-rule
   sorting, alignment, or defaults.
 
-### Rollback Plan
+### Current Rollback Plan
 
 - Restore the previous file and identifier names while keeping the extracted
   builder modules intact.
