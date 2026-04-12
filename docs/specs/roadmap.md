@@ -35,6 +35,8 @@
     already exists, and keep manual smoke debt only where it is still needed.
 16. Revisit a dedicated filter/search use case only if a second non-table
     consumer appears and needs the same matching semantics.
+17. Decompose `ParameterFactory.ts` into focused builder modules while keeping
+    `ParamFactory` as the stable thin facade for existing callers.
 
 ## Current Roadmap
 
@@ -43,9 +45,7 @@
 2. Break down high-complexity functions in the application layer, starting
    with focused helper extraction from `buildUnitListView.ts` instead of
    another broad rewrite.
-3. Decompose `ParameterFactory.ts` by coherent builder families while keeping
-   `ParamFactory` as the stable facade during migration.
-4. Consolidate i18n translation files to reduce duplication between language
+3. Consolidate i18n translation files to reduce duplication between language
    variants.
 
 ## Deferred / Optional Slices
@@ -56,6 +56,8 @@
    complete and performance becomes a stronger priority.
 3. Revisit directory structure under `src/extension/webview/` only if the
    remaining files stop reading as one cohesive viewer module.
+4. Revisit schedule-rule terminology around `Rule.ts` only as a dedicated
+   rename slice across the full rule-bearing parameter family.
 
 ## Done Criteria For A Slice
 

@@ -85,6 +85,13 @@ unit=root,,jp1admin,;
 }
 `;
 
+const groupDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+}
+`;
+
 const transferDefinition = `
 unit=root,,jp1admin,;
 {
@@ -136,6 +143,12 @@ const parseRootDefaultJobnet = (): N => {
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
+};
+
+const parseRootGroup = () => {
+  const result = parseAjs(groupDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  return tyFactory(result.rootUnits[0]);
 };
 
 const parseTransferJob = (): J => {
@@ -286,6 +299,25 @@ suite("ParameterFactory", () => {
       sd?.map((parameter) => parameter.value()),
       [DEFAULTS.Sd],
     );
+  });
+
+  test("returns connector-control defaults through the facade", () => {
+    const root = parseRootGroup();
+
+    assert.strictEqual(ParamFactory.ncl(root, "n")?.value(), "n");
+    assert.strictEqual(ParamFactory.ncs(root, "n")?.value(), "n");
+    assert.strictEqual(ParamFactory.ncex(root, "n")?.value(), "n");
+    assert.strictEqual(ParamFactory.ncl(root, "y")?.value(), "y");
+    assert.strictEqual(ParamFactory.ncs(root, "y")?.value(), "y");
+    assert.strictEqual(ParamFactory.ncex(root, "y")?.value(), "y");
+  });
+
+  test("returns required parameters through the facade", () => {
+    const job = parseJob();
+
+    const ty = ParamFactory.ty(job);
+
+    assert.strictEqual(ty.value(), "j");
   });
 
   test("returns transfer-operation parameters with derived and explicit values through the facade", () => {

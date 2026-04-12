@@ -92,17 +92,14 @@ structure in `docs/specs/features/<feature>/`.
 3. Reduce `buildUnitListView.ts` incrementally:
    extract calendar, priority, and schedule parsing helpers into focused
    modules while preserving the existing `UnitListRowView` contract and tests.
-4. Decompose `ParameterFactory.ts` as a dedicated feature:
-   extract coherent builder families behind the existing facade instead of
-   attempting another large refactor in one pass.
-5. Keep schedule-rule terminology changes separate from extraction slices:
+4. Keep schedule-rule terminology changes separate from extraction slices:
    if `Rule.ts` and related helpers are renamed, do it as one focused pass
    across `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
    `cftd` instead of piecemeal renames.
-6. Keep feature follow-up verification evidence concrete:
+5. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-7. Revisit a dedicated filter/search use case only if a second non-table
+6. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix

@@ -21,11 +21,14 @@
 - [x] Extract root-jobnet-aware builders into a focused internal module
 - [x] Extract transfer-operation `top1` to `top4` builders into a focused
       internal module
+- [x] Keep `ParamFactory` as a thin facade by extracting the remaining
+      required builders and absorbing runtime-default optional scalars into
+      the optional-scalar family
 - [ ] Revisit `Rule.ts` family naming in a dedicated slice so
       `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
       `cftd` can be renamed together if `schedule rule` terminology is
       adopted
-- [ ] Decide whether the end state should keep `ParamFactory` as a thin facade
+- [x] Decide whether the end state should keep `ParamFactory` as a thin facade
       or collapse to direct exports
 
 ## Notes
@@ -65,3 +68,14 @@
 - 2026-04-12: transfer-operation builders now live in
   `transferOperationParameterBuilders.ts`, with `ParamFactory` still exposing
   the public entry points for `top1`, `top2`, `top3`, and `top4`.
+- 2026-04-12: runtime-default optional scalar builders for `ncex`, `ncl`, and
+  `ncs` now live in `optionalScalarParameterBuilders.ts`, so that family
+  continues to group scalar builders by construction pattern rather than by
+  domain concept.
+- 2026-04-12: required scalar builders now live in
+  `requiredScalarParameterBuilders.ts`, with `ParamFactory` still exposing
+  the public entry point for `ty`.
+- 2026-04-12: `ParamFactory.ts` now reads as a thin facade only; the branch
+  decision is to keep that facade instead of collapsing to direct exports so
+  existing callers retain the stable public import path defined in the
+  feature spec.

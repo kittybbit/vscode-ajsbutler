@@ -69,6 +69,19 @@ focused builder modules while preserving behavior.
 - 2026-04-12: `ParamFactory` now delegates `top1`, `top2`, `top3`, and `top4`
   through a focused module, while the shared fallback behavior remains in
   `parameterHelpers.ts`.
+- 2026-04-12: `ncex`, `ncl`, and `ncs` stay in the optional-scalar builder
+  family, using a runtime-default variant so the decomposition still groups
+  builders by construction pattern rather than by jobnet-connector semantics.
+- 2026-04-12: `ParamFactory` now delegates those runtime-default optional
+  scalars through `optionalScalarParameterBuilders.ts`, with facade-level
+  regression coverage for passed-through default values.
+- 2026-04-12: the last required builder was extracted to
+  `requiredScalarParameterBuilders.ts`.
+- 2026-04-12: `ParamFactory` now delegates `ty` through the same facade style,
+  leaving `ParameterFactory.ts` as a thin static export surface only.
+- 2026-04-12: the end-state decision is to keep `ParamFactory` as that thin
+  facade instead of collapsing to direct exports, because the feature spec
+  treats the current import path as a compatibility contract.
 
 ## Proposed Slice Order
 
@@ -90,6 +103,9 @@ focused builder modules while preserving behavior.
    so the terminology consistently reflects schedule-rule-bearing parameters.
 8. Final pass to keep `ParamFactory.ts` as a thin facade only if that still
    reads better than direct exports
+   Status: completed on 2026-04-12
+   Notes: the facade stays because it preserves the stable public API while
+   keeping implementation ownership in focused internal modules.
 
 ## Validation
 

@@ -1,15 +1,10 @@
-import { Ncex, Ncl, Ncs, Ty } from "../parameters";
-import { UnitEntity } from "../units/UnitEntity";
 import { inheritedParameterBuilders } from "./inheritedParameterBuilders";
 import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
+import { requiredScalarParameterBuilders } from "./requiredScalarParameterBuilders";
 import { rootJobnetParameterBuilders } from "./rootJobnetParameterBuilders";
 import { ruleParameterBuilders } from "./ruleParameterBuilders";
 import { transferOperationParameterBuilders } from "./transferOperationParameterBuilders";
-import {
-  buildDefaultableParameter,
-  buildRequiredParameter,
-} from "./parameterHelpers";
 
 export class ParamFactory {
   static ab = optionalScalarParameterBuilders.ab;
@@ -154,39 +149,12 @@ export class ParamFactory {
   static msttp = optionalScalarParameterBuilders.msttp;
   static msunr = optionalScalarParameterBuilders.msunr;
   static mu = optionalScalarParameterBuilders.mu;
-  static ncex(unit: UnitEntity, defaultRawValue?: string) {
-    return buildDefaultableParameter(
-      {
-        unit: unit,
-        parameter: "ncex",
-        defaultRawValue: defaultRawValue,
-      },
-      (param) => new Ncex(param),
-    );
-  }
+  static ncex = optionalScalarParameterBuilders.ncex;
   static nchn = optionalScalarParameterBuilders.nchn;
-  static ncl(unit: UnitEntity, defaultRawValue?: string) {
-    return buildDefaultableParameter(
-      {
-        unit: unit,
-        parameter: "ncl",
-        defaultRawValue: defaultRawValue,
-      },
-      (param) => new Ncl(param),
-    );
-  }
+  static ncl = optionalScalarParameterBuilders.ncl;
   static ncn = optionalScalarParameterBuilders.ncn;
   static ncr = optionalScalarParameterBuilders.ncr;
-  static ncs(unit: UnitEntity, defaultRawValue?: string) {
-    return buildDefaultableParameter(
-      {
-        unit: unit,
-        parameter: "ncs",
-        defaultRawValue: defaultRawValue,
-      },
-      (param) => new Ncs(param),
-    );
-  }
+  static ncs = optionalScalarParameterBuilders.ncs;
   static ncsv = optionalScalarParameterBuilders.ncsv;
   static ni = inheritedParameterBuilders.ni;
   static nmg = optionalScalarParameterBuilders.nmg;
@@ -251,16 +219,7 @@ export class ParamFactory {
   static ts2 = optionalScalarParameterBuilders.ts2;
   static ts3 = optionalScalarParameterBuilders.ts3;
   static ts4 = optionalScalarParameterBuilders.ts4;
-  static ty(unit: UnitEntity) {
-    return buildRequiredParameter(
-      {
-        unit: unit,
-        parameter: "ty",
-      },
-      (param) => new Ty(param),
-      () => "Ty parameter should be specified.",
-    );
-  }
+  static ty = requiredScalarParameterBuilders.ty;
   static uem = optionalScalarParameterBuilders.uem;
   static un = optionalScalarParameterBuilders.un;
   static unit = optionalScalarParameterBuilders.unit;
