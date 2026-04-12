@@ -17,7 +17,7 @@
 - [x] Extract optional scalar builders into a focused internal module
 - [x] Extract optional array builders into a focused internal module
 - [x] Extract inherited builders into a focused internal module
-- [ ] Extract SD-aligned builders into a focused internal module
+- [x] Extract rule-bearing parameter builders into a focused internal module
 - [ ] Extract root-jobnet-aware builders into a focused internal module
 - [ ] Extract transfer-operation `top1` to `top4` builders into a focused
       internal module
@@ -42,3 +42,9 @@
 - 2026-04-12: inherited builders now live in
   `inheritedParameterBuilders.ts`, with `ParamFactory` still exposing the
   public entry points for `cl`, `md`, `ni`, `op`, `pr`, `sdd`, and `stt`.
+- 2026-04-12: rule-bearing parameter builders now live in
+  `ruleParameterBuilders.ts`, with `ParamFactory` still exposing the public
+  entry points for `cftd`, `cy`, `ey`, `ln`, `sh`, `shd`, `st`, `sy`, `wc`,
+  and `wt`.
+- 2026-04-12: this family is anchored in `Rule.ts`; the shared concept is
+  parameters that carry a rule number, not the `sd` parameter name by itself.
