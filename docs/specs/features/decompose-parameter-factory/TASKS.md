@@ -16,7 +16,7 @@
 
 - [x] Extract optional scalar builders into a focused internal module
 - [x] Extract optional array builders into a focused internal module
-- [ ] Extract inherited builders into a focused internal module
+- [x] Extract inherited builders into a focused internal module
 - [ ] Extract SD-aligned builders into a focused internal module
 - [ ] Extract root-jobnet-aware builders into a focused internal module
 - [ ] Extract transfer-operation `top1` to `top4` builders into a focused
@@ -39,3 +39,6 @@
   `optionalArrayParameterBuilders.ts`, with `ParamFactory` still exposing the
   public entry points for `ar`, `el`, `env`, `eun`, `jpoif`, `mladr`,
   `mlsbj`, and `mltxt`.
+- 2026-04-12: inherited builders now live in
+  `inheritedParameterBuilders.ts`, with `ParamFactory` still exposing the
+  public entry points for `cl`, `md`, `ni`, `op`, `pr`, `sdd`, and `stt`.

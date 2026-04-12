@@ -2,6 +2,7 @@ import * as assert from "assert";
 import { ParamFactory } from "../../domain/models/parameters/ParameterFactory";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
 import { J } from "../../domain/models/units/J";
+import { N } from "../../domain/models/units/N";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
@@ -35,6 +36,25 @@ unit=root,,jp1admin,;
 }
 `;
 
+const inheritedDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  cl=mo;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    pr=4;
+    el=subnet,n,+160+0;
+    unit=subnet,,jp1admin,;
+    {
+      ty=n;
+    }
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -47,6 +67,14 @@ const parseArrayJob = (): J => {
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
+};
+
+const parseInheritedJobnet = (): N => {
+  const result = parseAjs(inheritedDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  const jobnet = root.children[0] as N;
+  return jobnet.children[0] as N;
 };
 
 suite("ParameterFactory", () => {
@@ -103,5 +131,27 @@ suite("ParameterFactory", () => {
     const ar = ParamFactory.ar(job);
 
     assert.strictEqual(ar, undefined);
+  });
+
+  test("returns inherited scalar parameters through the facade", () => {
+    const subnet = parseInheritedJobnet();
+
+    const pr = ParamFactory.pr(subnet);
+
+    assert.ok(pr);
+    assert.strictEqual(pr?.value(), "4");
+    assert.strictEqual(pr?.inherited, true);
+  });
+
+  test("returns inherited array parameters through the facade", () => {
+    const subnet = parseInheritedJobnet();
+
+    const cl = ParamFactory.cl(subnet);
+
+    assert.deepStrictEqual(
+      cl?.map((parameter) => parameter.value()),
+      ["mo"],
+    );
+    assert.ok(cl?.every((parameter) => parameter.inherited));
   });
 });
