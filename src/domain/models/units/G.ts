@@ -35,7 +35,7 @@ export class G extends UnitEntity {
   }
   // [ncl={y|n};]
   get ncl() {
-    return ParamFactory.ncl(this, this.#connectorControlDefault());
+    return ParamFactory.ncl(this, this.#connectorControlDefault("ncl"));
   }
   // [ncn=jobnet-connector-name;]
   get ncn() {
@@ -43,11 +43,11 @@ export class G extends UnitEntity {
   }
   // [ncs={y|n};]
   get ncs() {
-    return ParamFactory.ncs(this, this.#connectorControlDefault());
+    return ParamFactory.ncs(this, this.#connectorControlDefault("ncs"));
   }
   // [ncex={y|n};]
   get ncex() {
-    return ParamFactory.ncex(this, this.#connectorControlDefault());
+    return ParamFactory.ncex(this, this.#connectorControlDefault("ncex"));
   }
   // [nchn="connection-host-name";]
   get nchn() {
@@ -90,8 +90,8 @@ export class G extends UnitEntity {
     return resolveIsPlanning(this.gty?.value());
   }
 
-  #connectorControlDefault() {
-    return resolveConnectorControlDefaultRawValue("always-disabled");
+  #connectorControlDefault(parameter: "ncl" | "ncs" | "ncex") {
+    return resolveConnectorControlDefaultRawValue(parameter, "always");
   }
 
   #resolveWeekState(week: WeekSymbol) {

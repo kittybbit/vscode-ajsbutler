@@ -1,4 +1,3 @@
-import { inheritedParameterBuilders } from "./inheritedParameterBuilders";
 import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
 import { requiredScalarParameterBuilders } from "./requiredScalarParameterBuilders";
@@ -12,7 +11,7 @@ export class ParamFactory {
   static cd = optionalScalarParameterBuilders.cd;
   static cftd = ruleParameterBuilders.cftd;
   static cgs = optionalScalarParameterBuilders.cgs;
-  static cl = inheritedParameterBuilders.cl;
+  static cl = optionalArrayParameterBuilders.cl;
   static cm = optionalScalarParameterBuilders.cm;
   static cmaif = optionalScalarParameterBuilders.cmaif;
   static cmsts = optionalScalarParameterBuilders.cmsts;
@@ -104,7 +103,7 @@ export class ParamFactory {
   static lftpd = optionalScalarParameterBuilders.lftpd;
   static ln = ruleParameterBuilders.ln;
   static mcs = optionalScalarParameterBuilders.mcs;
-  static md = inheritedParameterBuilders.md;
+  static md = optionalScalarParameterBuilders.md;
   static mh = optionalScalarParameterBuilders.mh;
   static mladr = optionalArrayParameterBuilders.mladr;
   static mlafl = optionalScalarParameterBuilders.mlafl;
@@ -155,7 +154,7 @@ export class ParamFactory {
   static ncr = optionalScalarParameterBuilders.ncr;
   static ncs = optionalScalarParameterBuilders.ncs;
   static ncsv = optionalScalarParameterBuilders.ncsv;
-  static ni = inheritedParameterBuilders.ni;
+  static ni = optionalScalarParameterBuilders.ni;
   static nmg = optionalScalarParameterBuilders.nmg;
   static ntcls = optionalScalarParameterBuilders.ntcls;
   static ntdis = optionalScalarParameterBuilders.ntdis;
@@ -167,9 +166,9 @@ export class ParamFactory {
   static ntnsr = optionalScalarParameterBuilders.ntnsr;
   static ntolg = optionalScalarParameterBuilders.ntolg;
   static ntsrc = optionalScalarParameterBuilders.ntsrc;
-  static op = inheritedParameterBuilders.op;
+  static op = optionalArrayParameterBuilders.op;
   static pfm = optionalScalarParameterBuilders.pfm;
-  static pr = inheritedParameterBuilders.pr;
+  static pr = optionalScalarParameterBuilders.pr;
   static prm = optionalScalarParameterBuilders.prm;
   static pwlf = optionalScalarParameterBuilders.pwlf;
   static pwlt = optionalScalarParameterBuilders.pwlt;
@@ -190,7 +189,7 @@ export class ParamFactory {
   static rjs = optionalScalarParameterBuilders.rjs;
   static sc = optionalScalarParameterBuilders.sc;
   static sd = ruleParameterBuilders.sd;
-  static sdd = inheritedParameterBuilders.sdd;
+  static sdd = optionalScalarParameterBuilders.sdd;
   static se = optionalScalarParameterBuilders.se;
   static sea = optionalScalarParameterBuilders.sea;
   static sh = ruleParameterBuilders.sh;
@@ -199,7 +198,7 @@ export class ParamFactory {
   static so = optionalScalarParameterBuilders.so;
   static soa = optionalScalarParameterBuilders.soa;
   static st = ruleParameterBuilders.st;
-  static stt = inheritedParameterBuilders.stt;
+  static stt = optionalScalarParameterBuilders.stt;
   static sy = ruleParameterBuilders.sy;
   static sz = optionalScalarParameterBuilders.sz;
   static t = optionalScalarParameterBuilders.t;

@@ -25,7 +25,7 @@
 - [x] Keep `ParamFactory` as a thin facade by extracting the remaining
       required builders and absorbing runtime-default optional scalars into
       the optional-scalar family
-- [ ] Revisit whether inherited builders should remain a dedicated family or
+- [x] Revisit whether inherited builders should remain a dedicated family or
       be absorbed into scalar and array builder families so decomposition uses
       one consistent construction-pattern axis
 - [ ] Revisit `Rule.ts` family naming in a dedicated slice so
@@ -88,3 +88,15 @@
   decision is to keep that facade instead of collapsing to direct exports so
   existing callers retain the stable public import path defined in the
   feature spec.
+- 2026-04-12: inherited builders were absorbed into
+  `optionalScalarParameterBuilders.ts` and
+  `optionalArrayParameterBuilders.ts`, so decomposition now uses one
+  consistent construction-pattern axis and `inheritedParameterBuilders.ts`
+  was removed.
+- 2026-04-12: runtime defaults now stay centralized in `Defaults.ts`, while
+  `parameterHelpers.ts` resolves only when a default applies
+  (`always` or `root-jobnet-only`), so connector-control and root-jobnet
+  defaults follow the same structural pattern.
+- 2026-04-12: connector-control defaults are now parameter-keyed in
+  the flat `DEFAULTS` table as well, so both connector-control and
+  root-jobnet defaults read from the same per-parameter source of truth.

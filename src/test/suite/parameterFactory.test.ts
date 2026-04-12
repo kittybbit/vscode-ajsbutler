@@ -224,6 +224,15 @@ suite("ParameterFactory", () => {
     assert.strictEqual(pr?.inherited, true);
   });
 
+  test("returns inherited-scalar defaults through the facade", () => {
+    const subnet = parseInheritedJobnet();
+
+    assert.strictEqual(ParamFactory.md(subnet)?.value(), DEFAULTS.Md);
+    assert.strictEqual(ParamFactory.ni(subnet)?.value(), DEFAULTS.Ni);
+    assert.strictEqual(ParamFactory.sdd(subnet)?.value(), DEFAULTS.Sdd);
+    assert.strictEqual(ParamFactory.stt(subnet)?.value(), DEFAULTS.Stt);
+  });
+
   test("returns inherited array parameters through the facade", () => {
     const subnet = parseInheritedJobnet();
 

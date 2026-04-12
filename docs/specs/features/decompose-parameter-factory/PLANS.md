@@ -76,13 +76,6 @@ focused builder modules while preserving behavior.
 - 2026-04-12: `ParamFactory` now delegates those runtime-default optional
   scalars through `optionalScalarParameterBuilders.ts`, with facade-level
   regression coverage for passed-through default values.
-- 2026-04-12: after `rg` joined the optional-scalar family, the main remaining
-  classification mismatch is that `inheritedParameterBuilders.ts` still uses
-  lookup strategy as its family boundary while other families are now
-  described primarily by parameter-construction shape.
-- 2026-04-12: keep that inherited-family question as an explicit follow-up
-  instead of folding it into the already-completed thin-facade work, because
-  it may require reshaping both scalar and array families together.
 - 2026-04-12: the last required builder was extracted to
   `requiredScalarParameterBuilders.ts`.
 - 2026-04-12: `ParamFactory` now delegates `ty` through the same facade style,
@@ -90,6 +83,21 @@ focused builder modules while preserving behavior.
 - 2026-04-12: the end-state decision is to keep `ParamFactory` as that thin
   facade instead of collapsing to direct exports, because the feature spec
   treats the current import path as a compatibility contract.
+- 2026-04-12: inherited scalar builders now live in
+  `optionalScalarParameterBuilders.ts`, inherited array builders now live in
+  `optionalArrayParameterBuilders.ts`, and `inheritedParameterBuilders.ts`
+  was removed.
+- 2026-04-12: this resolves the last family-boundary mismatch inside the
+  decomposition work by organizing both inherited and non-inherited builders
+  around parameter-construction shape instead of lookup strategy.
+- 2026-04-12: root-jobnet and connector-control default values are now
+  centralized in `Defaults.ts`, while `parameterHelpers.ts` resolves only the
+  application mode (`always` or `root-jobnet-only`) so default ownership and
+  default-application rules are structurally consistent.
+- 2026-04-12: connector-control defaults now use the same per-parameter map
+  shape as root-jobnet defaults at the call-site level, but the defaults
+  themselves now live in the flat `DEFAULTS` table instead of nested
+  sub-objects, so value ownership stays with the parameter definitions.
 
 ## Proposed Slice Order
 
@@ -107,11 +115,16 @@ focused builder modules while preserving behavior.
    is runtime default resolution, not a different builder shape.
 6. Transfer-operation builders
    Status: completed on 2026-04-12
-7. Schedule-rule naming review as a dedicated follow-up slice
+7. Revisit inherited-family classification against scalar/array shape
+   Status: completed on 2026-04-12
+   Notes: inherited scalar builders now reuse the scalar family `inherit`
+   option, and inherited array builders now reuse the array family through
+   the same construction-pattern axis.
+8. Schedule-rule naming review as a dedicated follow-up slice
    Status: deferred from the current extraction slice on 2026-04-12
    Notes: if executed, rename `Rule.ts` and related helpers/builders together
    so the terminology consistently reflects schedule-rule-bearing parameters.
-8. Final pass to keep `ParamFactory.ts` as a thin facade only if that still
+9. Final pass to keep `ParamFactory.ts` as a thin facade only if that still
    reads better than direct exports
    Status: completed on 2026-04-12
    Notes: the facade stays because it preserves the stable public API while
