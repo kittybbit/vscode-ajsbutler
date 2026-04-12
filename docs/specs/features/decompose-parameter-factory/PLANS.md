@@ -76,6 +76,13 @@ focused builder modules while preserving behavior.
 - 2026-04-12: `ParamFactory` now delegates those runtime-default optional
   scalars through `optionalScalarParameterBuilders.ts`, with facade-level
   regression coverage for passed-through default values.
+- 2026-04-12: after `rg` joined the optional-scalar family, the main remaining
+  classification mismatch is that `inheritedParameterBuilders.ts` still uses
+  lookup strategy as its family boundary while other families are now
+  described primarily by parameter-construction shape.
+- 2026-04-12: keep that inherited-family question as an explicit follow-up
+  instead of folding it into the already-completed thin-facade work, because
+  it may require reshaping both scalar and array families together.
 - 2026-04-12: the last required builder was extracted to
   `requiredScalarParameterBuilders.ts`.
 - 2026-04-12: `ParamFactory` now delegates `ty` through the same facade style,

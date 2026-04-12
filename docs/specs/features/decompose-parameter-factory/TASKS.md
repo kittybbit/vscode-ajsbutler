@@ -25,6 +25,9 @@
 - [x] Keep `ParamFactory` as a thin facade by extracting the remaining
       required builders and absorbing runtime-default optional scalars into
       the optional-scalar family
+- [ ] Revisit whether inherited builders should remain a dedicated family or
+      be absorbed into scalar and array builder families so decomposition uses
+      one consistent construction-pattern axis
 - [ ] Revisit `Rule.ts` family naming in a dedicated slice so
       `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
       `cftd` can be renamed together if `schedule rule` terminology is
@@ -74,6 +77,10 @@
   `ncs` now live in `optionalScalarParameterBuilders.ts`, so that family
   continues to group scalar builders by construction pattern rather than by
   domain concept.
+- 2026-04-12: after `rg` moved into the optional-scalar family, the remaining
+  axis mismatch is that `inheritedParameterBuilders.ts` is still organized by
+  lookup strategy while scalar and array builders are now organized by value
+  shape; that alignment question should stay as an explicit follow-up task.
 - 2026-04-12: required scalar builders now live in
   `requiredScalarParameterBuilders.ts`, with `ParamFactory` still exposing
   the public entry point for `ty`.
