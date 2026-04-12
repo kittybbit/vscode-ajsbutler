@@ -38,3 +38,6 @@
   can be extracted independently from `buildUnitListView.ts` without changing
   the `UnitListRowView` contract, so future complexity-reduction slices should
   prefer helper extraction over another broad rewrite.
+- 2026-04-12: follow-up decomposition work is now tracked in
+  `docs/specs/features/decompose-build-unit-list-view/` so the delivered
+  use-case docs stay separate from behavior-preserving refactor planning.
