@@ -172,23 +172,23 @@ Use-case note:
 
 ## Task Template
 
-### Task
+### Template Task
 
 <!-- A single sentence describing what will be changed. -->
 
-### Why
+### Template Why
 
 <!-- Why this change is necessary. -->
 
-### Scope
+### Template Scope
 
 <!-- Target files, modules, or use cases for the change. -->
 
-### Non-Goals
+### Template Non-Goals
 
 <!-- What is out of scope for this task. -->
 
-### Constraints
+### Template Constraints
 
 - Keep `engines.vscode` compatibility unless explicitly approved.
 - Keep desktop and web extension behavior intact.
@@ -210,25 +210,25 @@ Use-case note:
   `docs/specs/roadmap.md` as sync targets that should be updated at the time a
   task outcome becomes known, not in a later cleanup pass.
 
-### Design
+### Template Design
 
-#### Use case
+#### Template use case
 
 <!-- Which use case(s) will be addressed. -->
 
-#### Layers affected
+#### Template layers affected
 
 - domain:
 - application:
 - infrastructure:
 - presentation:
 
-#### Key decisions
+#### Template key decisions
 
 -
 -
 
-### Acceptance Criteria
+### Template Acceptance Criteria
 
 - [ ] build passes
 - [ ] quality/lint passes
@@ -240,17 +240,17 @@ Use-case note:
 - [ ] desktop behavior preserved
 - [ ] web behavior preserved if affected
 
-### Test Plan
+### Template Test Plan
 
 -
 -
 
-### Risks
+### Template Risks
 
 -
 -
 
-### Rollback Plan
+### Template Rollback Plan
 
 -
 -
