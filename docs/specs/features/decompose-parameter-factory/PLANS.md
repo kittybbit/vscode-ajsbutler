@@ -40,6 +40,11 @@ focused builder modules while preserving behavior.
 - 2026-04-12: `ParamFactory` now delegates optional array builders through the
   same facade style, with focused regression tests for explicit and missing
   array values.
+- 2026-04-12: inherited builders were extracted to
+  `inheritedParameterBuilders.ts`.
+- 2026-04-12: `ParamFactory` now delegates inherited scalar and array builders
+  through the same facade style, with focused regression tests for inherited
+  values and inherited flags.
 
 ## Proposed Slice Order
 
@@ -48,6 +53,7 @@ focused builder modules while preserving behavior.
 2. Optional array builders
    Status: completed on 2026-04-12
 3. Inherited builders
+   Status: completed on 2026-04-12
 4. SD-aligned builders
 5. Root-jobnet-aware builders
 6. Transfer-operation builders

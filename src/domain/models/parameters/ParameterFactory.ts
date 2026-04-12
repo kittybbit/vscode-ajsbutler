@@ -1,23 +1,16 @@
 import {
   Cftd,
-  Cl,
   Cy,
   Ey,
   Ln,
-  Md,
   Ncex,
   Ncl,
   Ncs,
-  Ni,
-  Op,
-  Pr,
   Rg,
   Sd,
-  Sdd,
   Sh,
   Shd,
   St,
-  Stt,
   Sy,
   Top1,
   Top2,
@@ -32,6 +25,7 @@ import { J } from "../units/J";
 import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
+import { inheritedParameterBuilders } from "./inheritedParameterBuilders";
 import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
 import {
@@ -42,8 +36,6 @@ import {
   buildRootJobnetRuleParameters,
   buildRequiredParameter,
   buildTopParameter,
-  buildInheritedParameter,
-  buildInheritedParameterArray,
   buildSortedRuleParameters,
   resolveParameterArray,
 } from "./parameterHelpers";
@@ -65,15 +57,7 @@ export class ParamFactory {
     );
   }
   static cgs = optionalScalarParameterBuilders.cgs;
-  static cl(unit: UnitEntity) {
-    return buildInheritedParameterArray(
-      {
-        unit: unit,
-        parameter: "cl",
-      },
-      (param) => new Cl(param),
-    );
-  }
+  static cl = inheritedParameterBuilders.cl;
   static cm = optionalScalarParameterBuilders.cm;
   static cmaif = optionalScalarParameterBuilders.cmaif;
   static cmsts = optionalScalarParameterBuilders.cmsts;
@@ -189,16 +173,7 @@ export class ParamFactory {
     );
   }
   static mcs = optionalScalarParameterBuilders.mcs;
-  static md(unit: UnitEntity) {
-    return buildInheritedParameter(
-      {
-        unit: unit,
-        parameter: "md",
-        defaultRawValue: DEFAULTS.Md,
-      },
-      (param) => new Md(param),
-    );
-  }
+  static md = inheritedParameterBuilders.md;
   static mh = optionalScalarParameterBuilders.mh;
   static mladr = optionalArrayParameterBuilders.mladr;
   static mlafl = optionalScalarParameterBuilders.mlafl;
@@ -276,16 +251,7 @@ export class ParamFactory {
     );
   }
   static ncsv = optionalScalarParameterBuilders.ncsv;
-  static ni(unit: UnitEntity) {
-    return buildInheritedParameter(
-      {
-        unit: unit,
-        parameter: "ni",
-        defaultRawValue: DEFAULTS.Ni,
-      },
-      (param) => new Ni(param),
-    );
-  }
+  static ni = inheritedParameterBuilders.ni;
   static nmg = optionalScalarParameterBuilders.nmg;
   static ntcls = optionalScalarParameterBuilders.ntcls;
   static ntdis = optionalScalarParameterBuilders.ntdis;
@@ -297,26 +263,9 @@ export class ParamFactory {
   static ntnsr = optionalScalarParameterBuilders.ntnsr;
   static ntolg = optionalScalarParameterBuilders.ntolg;
   static ntsrc = optionalScalarParameterBuilders.ntsrc;
-  static op(unit: UnitEntity) {
-    return buildInheritedParameterArray(
-      {
-        unit: unit,
-        parameter: "op",
-      },
-      (param) => new Op(param),
-    );
-  }
+  static op = inheritedParameterBuilders.op;
   static pfm = optionalScalarParameterBuilders.pfm;
-  static pr(unit: UnitEntity) {
-    return buildInheritedParameter(
-      {
-        unit: unit,
-        parameter: "pr",
-        defaultRawValue: DEFAULTS.Pr,
-      },
-      (param) => new Pr(param),
-    );
-  }
+  static pr = inheritedParameterBuilders.pr;
   static prm = optionalScalarParameterBuilders.prm;
   static pwlf = optionalScalarParameterBuilders.pwlf;
   static pwlt = optionalScalarParameterBuilders.pwlt;
@@ -357,16 +306,7 @@ export class ParamFactory {
       (param) => new Sd(param),
     );
   }
-  static sdd(unit: UnitEntity) {
-    return buildInheritedParameter(
-      {
-        unit: unit,
-        parameter: "sdd",
-        defaultRawValue: DEFAULTS.Sdd,
-      },
-      (param) => new Sdd(param),
-    );
-  }
+  static sdd = inheritedParameterBuilders.sdd;
   static se = optionalScalarParameterBuilders.se;
   static sea = optionalScalarParameterBuilders.sea;
   static sh(unit: UnitEntity) {
@@ -403,16 +343,7 @@ export class ParamFactory {
       (param) => new St(param),
     );
   }
-  static stt(unit: UnitEntity) {
-    return buildInheritedParameter(
-      {
-        unit: unit,
-        parameter: "stt",
-        defaultRawValue: DEFAULTS.Stt,
-      },
-      (param) => new Stt(param),
-    );
-  }
+  static stt = inheritedParameterBuilders.stt;
   static sy(unit: UnitEntity) {
     return buildSdAlignedEmptyRuleParameters(
       {
