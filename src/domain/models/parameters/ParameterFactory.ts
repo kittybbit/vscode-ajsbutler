@@ -1,16 +1,14 @@
-import { Ncex, Ncl, Ncs, Top1, Top2, Top3, Top4, Ty } from "../parameters";
-import { Cj } from "../units/Cj";
-import { J } from "../units/J";
+import { Ncex, Ncl, Ncs, Ty } from "../parameters";
 import { UnitEntity } from "../units/UnitEntity";
 import { inheritedParameterBuilders } from "./inheritedParameterBuilders";
 import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
 import { rootJobnetParameterBuilders } from "./rootJobnetParameterBuilders";
 import { ruleParameterBuilders } from "./ruleParameterBuilders";
+import { transferOperationParameterBuilders } from "./transferOperationParameterBuilders";
 import {
   buildDefaultableParameter,
   buildRequiredParameter,
-  buildTopParameter,
 } from "./parameterHelpers";
 
 export class ParamFactory {
@@ -245,46 +243,10 @@ export class ParamFactory {
   static te = optionalScalarParameterBuilders.te;
   static tho = optionalScalarParameterBuilders.tho;
   static tmitv = optionalScalarParameterBuilders.tmitv;
-  static top1(unit: J | Cj) {
-    return buildTopParameter(
-      {
-        unit: unit,
-        parameter: "top1",
-        index: 1,
-      },
-      (param) => new Top1(param),
-    );
-  }
-  static top2(unit: J | Cj) {
-    return buildTopParameter(
-      {
-        unit: unit,
-        parameter: "top2",
-        index: 2,
-      },
-      (param) => new Top2(param),
-    );
-  }
-  static top3(unit: J | Cj) {
-    return buildTopParameter(
-      {
-        unit: unit,
-        parameter: "top3",
-        index: 3,
-      },
-      (param) => new Top3(param),
-    );
-  }
-  static top4(unit: J | Cj) {
-    return buildTopParameter(
-      {
-        unit: unit,
-        parameter: "top4",
-        index: 4,
-      },
-      (param) => new Top4(param),
-    );
-  }
+  static top1 = transferOperationParameterBuilders.top1;
+  static top2 = transferOperationParameterBuilders.top2;
+  static top3 = transferOperationParameterBuilders.top3;
+  static top4 = transferOperationParameterBuilders.top4;
   static ts1 = optionalScalarParameterBuilders.ts1;
   static ts2 = optionalScalarParameterBuilders.ts2;
   static ts3 = optionalScalarParameterBuilders.ts3;

@@ -19,7 +19,7 @@
 - [x] Extract inherited builders into a focused internal module
 - [x] Extract rule-bearing parameter builders into a focused internal module
 - [x] Extract root-jobnet-aware builders into a focused internal module
-- [ ] Extract transfer-operation `top1` to `top4` builders into a focused
+- [x] Extract transfer-operation `top1` to `top4` builders into a focused
       internal module
 - [ ] Revisit `Rule.ts` family naming in a dedicated slice so
       `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
@@ -62,3 +62,6 @@
 - 2026-04-12: root-jobnet-aware builders now live in
   `rootJobnetParameterBuilders.ts`, with `ParamFactory` still exposing the
   public entry point for `rg`.
+- 2026-04-12: transfer-operation builders now live in
+  `transferOperationParameterBuilders.ts`, with `ParamFactory` still exposing
+  the public entry points for `top1`, `top2`, `top3`, and `top4`.

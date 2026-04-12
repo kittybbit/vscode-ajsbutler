@@ -85,6 +85,23 @@ unit=root,,jp1admin,;
 }
 `;
 
+const transferDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=job1,j,+0+0;
+  unit=job1,,jp1admin,;
+  {
+    ty=j;
+    ts1=src-1;
+    td1=dst-1;
+    ts2=src-2;
+    ts3=src-3;
+    top4=keep;
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -119,6 +136,13 @@ const parseRootDefaultJobnet = (): N => {
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
+};
+
+const parseTransferJob = (): J => {
+  const result = parseAjs(transferDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as J;
 };
 
 suite("ParameterFactory", () => {
@@ -262,5 +286,14 @@ suite("ParameterFactory", () => {
       sd?.map((parameter) => parameter.value()),
       [DEFAULTS.Sd],
     );
+  });
+
+  test("returns transfer-operation parameters with derived and explicit values through the facade", () => {
+    const job = parseTransferJob();
+
+    assert.strictEqual(ParamFactory.top1(job)?.value(), "sav");
+    assert.strictEqual(ParamFactory.top2(job)?.value(), "del");
+    assert.strictEqual(ParamFactory.top3(job)?.value(), "del");
+    assert.strictEqual(ParamFactory.top4(job)?.value(), "keep");
   });
 });
