@@ -14,7 +14,7 @@ import {
   buildOptionalParameter,
   buildRequiredParameter,
   buildRootJobnetParameter,
-  buildRootJobnetRuleParameters,
+  buildRootDefaultAwareRuleParameters,
   buildSdAlignedDefaultRuleParameters,
   buildSdAlignedEmptyRuleParameters,
   buildSdAlignedParameters,
@@ -299,7 +299,7 @@ suite("Parameter helpers", () => {
     assert.deepStrictEqual(inheritedCloseDates, ["mo"]);
   });
 
-  test("builds root-jobnet-aware scalar and rule-array parameters", () => {
+  test("builds root-jobnet-aware scalars and root-default-aware rule arrays", () => {
     const rootJobnet = parseRootDefaultJobnet();
     const { subnet } = parseJobnets();
 
@@ -325,7 +325,7 @@ suite("Parameter helpers", () => {
     );
     assert.strictEqual(inheritedRg, "3");
 
-    const rootSd = buildRootJobnetRuleParameters(
+    const rootSd = buildRootDefaultAwareRuleParameters(
       {
         unit: rootJobnet,
         parameter: "sd",
@@ -513,7 +513,7 @@ suite("Parameter helpers", () => {
     );
   });
 
-  test("resolves sd parameters through shared root-jobnet-aware helper logic", () => {
+  test("resolves sd parameters through shared root-default-aware helper logic", () => {
     const rootJobnet = parseRootDefaultJobnet();
     const { jobnet } = parseJobnets();
 

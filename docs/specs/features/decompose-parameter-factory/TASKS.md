@@ -18,9 +18,13 @@
 - [x] Extract optional array builders into a focused internal module
 - [x] Extract inherited builders into a focused internal module
 - [x] Extract rule-bearing parameter builders into a focused internal module
-- [ ] Extract root-jobnet-aware builders into a focused internal module
+- [x] Extract root-jobnet-aware builders into a focused internal module
 - [ ] Extract transfer-operation `top1` to `top4` builders into a focused
       internal module
+- [ ] Revisit `Rule.ts` family naming in a dedicated slice so
+      `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and
+      `cftd` can be renamed together if `schedule rule` terminology is
+      adopted
 - [ ] Decide whether the end state should keep `ParamFactory` as a thin facade
       or collapse to direct exports
 
@@ -44,7 +48,17 @@
   public entry points for `cl`, `md`, `ni`, `op`, `pr`, `sdd`, and `stt`.
 - 2026-04-12: rule-bearing parameter builders now live in
   `ruleParameterBuilders.ts`, with `ParamFactory` still exposing the public
-  entry points for `cftd`, `cy`, `ey`, `ln`, `sh`, `shd`, `st`, `sy`, `wc`,
-  and `wt`.
+  entry points for `cftd`, `cy`, `ey`, `ln`, `sd`, `sh`, `shd`, `st`, `sy`,
+  `wc`, and `wt`.
 - 2026-04-12: this family is anchored in `Rule.ts`; the shared concept is
-  parameters that carry a rule number, not the `sd` parameter name by itself.
+  parameters that carry a rule number, including root-default-aware cases such
+  as `sd`.
+- 2026-04-12: the `sd` builder/helper naming was corrected to describe
+  root-default-aware behavior instead of implying that `sd` itself is limited
+  to the root jobnet.
+- 2026-04-12: the broader naming review concluded that this family is really
+  about schedule-rule-bearing parameters, but that terminology change should
+  happen in its own slice instead of being mixed into the extraction work.
+- 2026-04-12: root-jobnet-aware builders now live in
+  `rootJobnetParameterBuilders.ts`, with `ParamFactory` still exposing the
+  public entry point for `rg`.

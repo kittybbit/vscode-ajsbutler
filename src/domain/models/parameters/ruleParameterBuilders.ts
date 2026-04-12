@@ -1,7 +1,9 @@
-import { Cftd, Cy, Ey, Ln, Sh, Shd, St, Sy, Wc, Wt } from "../parameters";
+import { Cftd, Cy, Ey, Ln, Sd, Sh, Shd, St, Sy, Wc, Wt } from "../parameters";
+import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
 import {
+  buildRootDefaultAwareRuleParameters,
   buildSortedRuleParameters,
   buildSdAlignedDefaultRuleParameters,
   buildSdAlignedEmptyRuleParameters,
@@ -64,6 +66,26 @@ const createSortedRuleBuilder = <
     );
 };
 
+const createRootDefaultAwareRuleBuilder = <
+  T extends Rule,
+  P extends ParamInternal["parameter"],
+>(
+  parameter: P,
+  rootDefaultParameter: "sd",
+  mapParam: (param: ParamInternal) => T,
+) => {
+  return (unit: N): Array<T> | undefined =>
+    buildRootDefaultAwareRuleParameters(
+      {
+        unit: unit,
+        parameter: parameter,
+        isRootJobnet: unit.isRootJobnet,
+        rootDefaultParameter: rootDefaultParameter,
+      },
+      mapParam,
+    );
+};
+
 // Rule-bearing parameters are primarily meaningful on jobnets (`ty=n`),
 // but the split here is based on parameter structure, not owning unit type.
 export const ruleParameterBuilders = {
@@ -75,6 +97,7 @@ export const ruleParameterBuilders = {
   cy: createScheduleRuleEmptyBuilder("cy", (param) => new Cy(param)),
   ey: createScheduleRuleEmptyBuilder("ey", (param) => new Ey(param)),
   ln: createSortedRuleBuilder("ln", (param) => new Ln(param)),
+  sd: createRootDefaultAwareRuleBuilder("sd", "sd", (param) => new Sd(param)),
   sh: createScheduleRuleEmptyBuilder("sh", (param) => new Sh(param)),
   shd: createScheduleRuleDefaultBuilder(
     "shd",
