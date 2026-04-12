@@ -257,31 +257,31 @@ Use-case note:
 
 ## Current Task
 
-### Task
+### Current Slice
 
 Define a dedicated decomposition feature for `buildUnitListView.ts` and fix
 the initial extraction order before runtime code changes begin.
 
-### Why
+### Current Need
 
 The branch priorities already identify `buildUnitListView.ts` as the next
 complexity hotspot, but the repository does not yet have feature-local docs
 that separate decomposition work from the already-delivered
 `build-unit-list-view` use case.
 
-### Scope
+### Current Scope
 
 - create `docs/specs/features/decompose-build-unit-list-view/`
 - define decomposition-specific scope, risks, and slice order
 - sync branch-level planning with the new dedicated feature
 
-### Non-Goals
+### Current Non-Goals
 
 - changing runtime behavior in `buildUnitListView.ts`
 - redesigning `UnitListRowView` or table column group contracts
 - combining this planning slice with helper extraction implementation
 
-### Constraints
+### Current Constraints
 
 - Keep `engines.vscode` compatibility unless explicitly approved.
 - Keep desktop and web extension behavior intact.
@@ -289,45 +289,45 @@ that separate decomposition work from the already-delivered
 - Start implementation from a dedicated git branch, not directly on `main`.
 - Docs-only changes may validate with `npm run lint:md`.
 
-### Design
+### Current Design
 
-#### Use case
+#### Current use case
 
 Behavior-preserving follow-up to the existing `build-unit-list-view` feature.
 
-#### Layers affected
+#### Current layers affected
 
 - domain: no
 - application: planning only
 - infrastructure: no
 - presentation: no
 
-#### Key decisions
+#### Current key decisions
 
 - Track `buildUnitListView.ts` decomposition as its own feature so extraction
   slices do not blur with the original use-case delivery docs.
 - Start with calendar, priority, and schedule projection families because
   they already read as coherent seams in code and tests.
 
-### Acceptance Criteria
+### Current Acceptance Criteria
 
 - [ ] dedicated feature docs exist for `buildUnitListView.ts` decomposition
 - [ ] branch-level plan points at the new feature instead of stale follow-ups
 - [ ] the first extraction candidates and non-goals are explicit
 - [ ] docs-only validation passes
 
-### Test Plan
+### Current Test Plan
 
 - Run `npm run lint:md`
 
-### Risks
+### Current Risks
 
 - Creating docs that are too abstract to drive a small first implementation
   slice
 - Choosing a slice order that hides relation traversal or priority-caching
   risks until too late
 
-### Rollback Plan
+### Current Rollback Plan
 
 - Remove the new feature docs and restore `docs/specs/plans.md` to its prior
   planning state.
