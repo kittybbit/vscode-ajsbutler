@@ -69,6 +69,10 @@ structure in `docs/specs/features/<feature>/`.
   automated tests cover table and flow dialog-open triggers plus the shared
   normalized DTO mapping, so that feature no longer depends on a separate
   manual smoke note.
+- ParameterFactory decomposition follow-ups are closed:
+  inherited-builder shape alignment and schedule-rule naming cleanup were
+  completed in focused slices, so no immediate ParameterFactory follow-up
+  remains on this branch priority list.
 
 ### How To Maintain This Section
 
@@ -92,15 +96,10 @@ structure in `docs/specs/features/<feature>/`.
 3. Reduce `buildUnitListView.ts` incrementally:
    extract calendar, priority, and schedule parsing helpers into focused
    modules while preserving the existing `UnitListRowView` contract and tests.
-4. The inherited-builder shape and schedule-rule naming follow-ups inside the
-   ParameterFactory decomposition are complete.
-   Keep any future terminology cleanup as one focused pass across `sd`, `st`,
-   `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and `cftd` instead of
-   piecemeal renames.
-5. Keep feature follow-up verification evidence concrete:
+4. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-6. Revisit a dedicated filter/search use case only if a second non-table
+5. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix
@@ -173,23 +172,23 @@ Use-case note:
 
 ## Task Template
 
-### Task
+### Template Task
 
 <!-- A single sentence describing what will be changed. -->
 
-### Why
+### Template Why
 
 <!-- Why this change is necessary. -->
 
-### Scope
+### Template Scope
 
 <!-- Target files, modules, or use cases for the change. -->
 
-### Non-Goals
+### Template Non-Goals
 
 <!-- What is out of scope for this task. -->
 
-### Constraints
+### Template Constraints
 
 - Keep `engines.vscode` compatibility unless explicitly approved.
 - Keep desktop and web extension behavior intact.
@@ -211,25 +210,25 @@ Use-case note:
   `docs/specs/roadmap.md` as sync targets that should be updated at the time a
   task outcome becomes known, not in a later cleanup pass.
 
-### Design
+### Template Design
 
-#### Use case
+#### Template use case
 
 <!-- Which use case(s) will be addressed. -->
 
-#### Layers affected
+#### Template layers affected
 
 - domain:
 - application:
 - infrastructure:
 - presentation:
 
-#### Key decisions
+#### Template key decisions
 
 -
 -
 
-### Acceptance Criteria
+### Template Acceptance Criteria
 
 - [ ] build passes
 - [ ] quality/lint passes
@@ -241,17 +240,17 @@ Use-case note:
 - [ ] desktop behavior preserved
 - [ ] web behavior preserved if affected
 
-### Test Plan
+### Template Test Plan
 
 -
 -
 
-### Risks
+### Template Risks
 
 -
 -
 
-### Rollback Plan
+### Template Rollback Plan
 
 -
 -
@@ -260,27 +259,27 @@ Use-case note:
 
 ### Current Slice
 
-Align the internal `ParameterFactory` rule family with `schedule rule`
-terminology without changing parameter behavior or the `ParamFactory` facade.
+Define a dedicated decomposition feature for `buildUnitListView.ts` and fix
+the initial extraction order before runtime code changes begin.
 
 ### Current Need
 
-The decomposition work already isolated this family, but the remaining
-`Rule.ts` naming obscures that these parameters are organized around
-schedule-rule-bearing behavior rather than a generic rule concept.
+The branch priorities already identify `buildUnitListView.ts` as the next
+complexity hotspot, but the repository does not yet have feature-local docs
+that separate decomposition work from the already-delivered
+`build-unit-list-view` use case.
 
 ### Current Scope
 
-- `src/domain/models/parameters/ScheduleRule.ts` and dependent parameter modules
-- schedule-rule helper and builder naming under
-  `src/domain/models/parameters/`
-- regression-test wording and feature-plan synchronization
+- create `docs/specs/features/decompose-build-unit-list-view/`
+- define decomposition-specific scope, risks, and slice order
+- sync branch-level planning with the new dedicated feature
 
 ### Current Non-Goals
 
-- changing JP1/AJS parsing behavior or default semantics
-- changing `ParamFactory` call sites or public import paths
-- moving parameter ownership outside the current domain layer
+- changing runtime behavior in `buildUnitListView.ts`
+- redesigning `UnitListRowView` or table column group contracts
+- combining this planning slice with helper extraction implementation
 
 ### Current Constraints
 
@@ -288,124 +287,47 @@ schedule-rule-bearing behavior rather than a generic rule concept.
 - Keep desktop and web extension behavior intact.
 - Avoid direct `vscode` dependency in domain.
 - Start implementation from a dedicated git branch, not directly on `main`.
-- Do not `git push` until `npm run qlty`, `npm test`, `npm run test:web`,
-  and `npm run build` have all passed locally in that order for code changes.
+- Docs-only changes may validate with `npm run lint:md`.
 
 ### Current Design
 
 #### Current use case
 
-Behavior-preserving follow-up to the `decompose-parameter-factory` feature.
+Behavior-preserving follow-up to the existing `build-unit-list-view` feature.
 
 #### Current layers affected
 
-- domain: yes
-- application: no
+- domain: no
+- application: planning only
 - infrastructure: no
 - presentation: no
 
 #### Current key decisions
 
-- Keep `ParamFactory` as the stable public facade and rename only the internal
-  schedule-rule family surface.
-- Rename the file, shared interface, and helper/builder identifiers together
-  so terminology changes land in one coherent slice.
+- Track `buildUnitListView.ts` decomposition as its own feature so extraction
+  slices do not blur with the original use-case delivery docs.
+- Start with calendar, priority, and schedule projection families because
+  they already read as coherent seams in code and tests.
 
 ### Current Acceptance Criteria
 
-- [ ] build passes
-- [ ] quality/lint passes
-- [ ] tests updated
-- [ ] desktop behavior preserved
-- [ ] web behavior preserved if affected
+- [ ] dedicated feature docs exist for `buildUnitListView.ts` decomposition
+- [ ] branch-level plan points at the new feature instead of stale follow-ups
+- [ ] the first extraction candidates and non-goals are explicit
+- [ ] docs-only validation passes
 
 ### Current Test Plan
 
-- Run `npm run qlty`
-- Run `npm test`
-- Run `npm run test:web`
-- Run `npm run build`
+- Run `npm run lint:md`
 
 ### Current Risks
 
-- Missing a remaining `ScheduleRule` import and breaking type exports.
-- Renaming helper APIs without preserving existing behavior for schedule-rule
-  sorting, alignment, or defaults.
+- Creating docs that are too abstract to drive a small first implementation
+  slice
+- Choosing a slice order that hides relation traversal or priority-caching
+  risks until too late
 
 ### Current Rollback Plan
 
-- Restore the previous file and identifier names while keeping the extracted
-  builder modules intact.
-
-### Task: Decide unit-list filtering boundary
-
-Decide whether unit-list filtering/search should move into a dedicated
-application use case or remain in presentation.
-
-### Why: Architectural decision closure
-
-The build-unit-list task list still carried an open architectural decision.
-That decision should be closed explicitly, because leaving it open suggests
-there is unresolved shared business logic when the current implementation is
-still table-specific presentation behavior.
-
-### Scope: Review and decide filtering boundary
-
-- review the current filtering/search implementation and its dependencies
-- decide whether the behavior is reusable application logic or
-  table-specific presentation logic
-- update build-unit-list tasks with the decision and rationale
-- sync branch-level planning docs after closing the follow-up
-
-### Non-Goals: Avoid premature extraction
-
-- changing table filtering behavior
-- introducing a new application use case without a second consumer
-- rewriting current UI-specific matching rules into fake domain logic
-
-### Constraints: Keep behavior unchanged
-
-- Keep desktop and web extension behavior unchanged.
-- Keep the slice docs-only.
-- Treat TanStack row access and fuzzy matching over rendered values as
-  presentation concerns unless another consumer proves otherwise.
-
-### Design: Boundary decision
-
-#### Use case: Build-unit-list boundary decision
-
-#### Layers affected: Docs sync
-
-- docs/specs/features: build-unit-list task sync
-- docs/specs: branch-level planning sync
-
-#### Key decisions: Keep in presentation
-
-- Keep filtering/search in presentation while it still depends on
-  table-library row access and presentation column values.
-- Extract an application use case only when matching semantics become shared
-  across multiple non-presentation consumers.
-
-### Acceptance Criteria: Docs updated
-
-- [x] `docs/specs/features/build-unit-list/TASKS.md` reflects the boundary
-      decision and rationale
-- [x] branch-level priorities no longer treat this decision as unresolved
-- [x] roadmap wording reflects that a dedicated filter/search use case is
-      deferred until another consumer appears
-
-### Test Plan: Lint check
-
-- run `npm run lint:md`
-
-### Risks: Mislabeling concerns
-
-- a presentation-specific concern could be mislabeled as reusable business
-  logic
-- the deferred note could be lost if roadmap and feature tasks drift apart
-
-### Rollback Plan: Reopen if needed
-
-- reopen the build-unit-list follow-up if a second consumer later needs the
-  same matching semantics
-- keep any future filter/search extraction as a separate code slice
+- Remove the new feature docs and restore `docs/specs/plans.md` to its prior
+  planning state.
