@@ -28,9 +28,18 @@ focused builder modules while preserving behavior.
 4. Run the full serial validation baseline
 5. Re-sync feature `TASKS.md`, branch `plans.md`, and `roadmap.md`
 
+## Current Status
+
+- 2026-04-12: optional scalar builders were extracted to
+  `optionalScalarParameterBuilders.ts`.
+- 2026-04-12: `ParamFactory` now delegates that family through a thin facade.
+- 2026-04-12: focused regression tests were added for explicit value,
+  defaulted value, and the legacy `wth` to `wt` mapping.
+
 ## Proposed Slice Order
 
 1. Optional scalar builders
+   Status: completed on 2026-04-12
 2. Optional array builders
 3. Inherited builders
 4. SD-aligned builders
