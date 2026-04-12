@@ -60,10 +60,11 @@ focused builder modules while preserving behavior.
   dedicated follow-up slice, so this decomposition slice can preserve
   behavior and avoid mixing extraction with a cross-cutting terminology
   change.
-- 2026-04-12: root-jobnet-aware builders were extracted to
-  `rootJobnetParameterBuilders.ts`.
-- 2026-04-12: `ParamFactory` now delegates `rg` through a focused module that
-  owns the root-jobnet scalar default concern.
+- 2026-04-12: `rg` now stays in `optionalScalarParameterBuilders.ts` through an
+  inherited optional-scalar variant that resolves root-jobnet defaults at
+  runtime.
+- 2026-04-12: this keeps scalar families grouped by construction pattern even
+  when the fallback value depends on root-jobnet state.
 - 2026-04-12: transfer-operation builders were extracted to
   `transferOperationParameterBuilders.ts`.
 - 2026-04-12: `ParamFactory` now delegates `top1`, `top2`, `top3`, and `top4`
@@ -93,8 +94,10 @@ focused builder modules while preserving behavior.
    Status: completed on 2026-04-12
 4. Rule-bearing parameter builders
    Status: completed on 2026-04-12
-5. Root-jobnet-aware builders
+5. Root-jobnet default handling within optional scalar builders
    Status: completed on 2026-04-12
+   Notes: `rg` no longer needs a dedicated family because its distinct concern
+   is runtime default resolution, not a different builder shape.
 6. Transfer-operation builders
    Status: completed on 2026-04-12
 7. Schedule-rule naming review as a dedicated follow-up slice
