@@ -4,5 +4,5 @@ export * from "./Calendar";
 export * from "./Day";
 export * from "./PlainString";
 export * from "./EncordedString";
-export * from "./Rule";
+export * from "./ScheduleRule";
 export * from "./Time";

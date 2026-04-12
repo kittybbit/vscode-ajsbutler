@@ -56,8 +56,6 @@
    complete and performance becomes a stronger priority.
 3. Revisit directory structure under `src/extension/webview/` only if the
    remaining files stop reading as one cohesive viewer module.
-4. Revisit schedule-rule terminology around `Rule.ts` only as a dedicated
-   rename slice across the full rule-bearing parameter family.
 
 ## Done Criteria For A Slice
 

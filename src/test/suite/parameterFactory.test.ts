@@ -267,7 +267,7 @@ suite("ParameterFactory", () => {
     );
   });
 
-  test("returns rule-bearing parameters sorted by rule", () => {
+  test("returns schedule-rule-bearing parameters sorted by rule", () => {
     const jobnet = parseScheduleJobnet();
 
     const ln = ParamFactory.ln(jobnet);
@@ -284,7 +284,7 @@ suite("ParameterFactory", () => {
     );
   });
 
-  test("returns explicit root-aware scalar and root-default-aware rule parameters through the facade", () => {
+  test("returns explicit root-aware scalar and root-default-aware schedule-rule parameters through the facade", () => {
     const jobnet = parseScheduleJobnet();
 
     const rg = ParamFactory.rg(jobnet);
