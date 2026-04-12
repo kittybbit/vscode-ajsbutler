@@ -15,7 +15,7 @@
 ## Planned Slices
 
 - [x] Extract optional scalar builders into a focused internal module
-- [ ] Extract optional array builders into a focused internal module
+- [x] Extract optional array builders into a focused internal module
 - [ ] Extract inherited builders into a focused internal module
 - [ ] Extract SD-aligned builders into a focused internal module
 - [ ] Extract root-jobnet-aware builders into a focused internal module
@@ -35,3 +35,7 @@
 - 2026-04-12: optional scalar builders now live in
   `optionalScalarParameterBuilders.ts`, with `ParamFactory` preserved as the
   public facade for that family.
+- 2026-04-12: optional array builders now live in
+  `optionalArrayParameterBuilders.ts`, with `ParamFactory` still exposing the
+  public entry points for `ar`, `el`, `env`, `eun`, `jpoif`, `mladr`,
+  `mlsbj`, and `mltxt`.

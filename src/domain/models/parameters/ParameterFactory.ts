@@ -1,18 +1,10 @@
 import {
-  Ar,
   Cftd,
   Cl,
   Cy,
-  El,
-  Env,
-  Eun,
   Ey,
-  Jpoif,
   Ln,
   Md,
-  Mladr,
-  Mlsbj,
-  Mltxt,
   Ncex,
   Ncl,
   Ncs,
@@ -40,12 +32,12 @@ import { J } from "../units/J";
 import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
+import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
 import {
   buildSdAlignedDefaultRuleParameters,
   buildSdAlignedEmptyRuleParameters,
   buildDefaultableParameter,
-  buildOptionalParameterArray,
   buildRootJobnetParameter,
   buildRootJobnetRuleParameters,
   buildRequiredParameter,
@@ -59,15 +51,7 @@ import {
 export class ParamFactory {
   static ab = optionalScalarParameterBuilders.ab;
   static abr = optionalScalarParameterBuilders.abr;
-  static ar(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "ar",
-      },
-      (param) => new Ar(param),
-    );
-  }
+  static ar = optionalArrayParameterBuilders.ar;
   static cd = optionalScalarParameterBuilders.cd;
   static cftd(unit: UnitEntity) {
     return buildSdAlignedDefaultRuleParameters(
@@ -121,37 +105,13 @@ export class ParamFactory {
   static ejt = optionalScalarParameterBuilders.ejt;
   static eju = optionalScalarParameterBuilders.eju;
   static ejv = optionalScalarParameterBuilders.ejv;
-  static el(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "el",
-      },
-      (param) => new El(param),
-    );
-  }
-  static env(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "env",
-      },
-      (param) => new Env(param),
-    );
-  }
+  static el = optionalArrayParameterBuilders.el;
+  static env = optionalArrayParameterBuilders.env;
   static etm = optionalScalarParameterBuilders.etm;
   static etn = optionalScalarParameterBuilders.etn;
   static ets = optionalScalarParameterBuilders.ets;
   static eu = optionalScalarParameterBuilders.eu;
-  static eun(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "eun",
-      },
-      (param) => new Eun(param),
-    );
-  }
+  static eun = optionalArrayParameterBuilders.eun;
   static ev = optionalScalarParameterBuilders.ev;
   static evdet = optionalScalarParameterBuilders.evdet;
   static evesc = optionalScalarParameterBuilders.evesc;
@@ -207,15 +167,7 @@ export class ParamFactory {
   static jc = optionalScalarParameterBuilders.jc;
   static jd = optionalScalarParameterBuilders.jd;
   static jdf = optionalScalarParameterBuilders.jdf;
-  static jpoif(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "jpoif",
-      },
-      (param) => new Jpoif(param),
-    );
-  }
+  static jpoif = optionalArrayParameterBuilders.jpoif;
   static jty = optionalScalarParameterBuilders.jty;
   static lfcre = optionalScalarParameterBuilders.lfcre;
   static lfdft = optionalScalarParameterBuilders.lfdft;
@@ -248,41 +200,17 @@ export class ParamFactory {
     );
   }
   static mh = optionalScalarParameterBuilders.mh;
-  static mladr(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "mladr",
-      },
-      (param) => new Mladr(param),
-    );
-  }
+  static mladr = optionalArrayParameterBuilders.mladr;
   static mlafl = optionalScalarParameterBuilders.mlafl;
   static mlatf = optionalScalarParameterBuilders.mlatf;
   static mlftx = optionalScalarParameterBuilders.mlftx;
   static mllst = optionalScalarParameterBuilders.mllst;
   static mlprf = optionalScalarParameterBuilders.mlprf;
   static mlsav = optionalScalarParameterBuilders.mlsav;
-  static mlsbj(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "mlsbj",
-      },
-      (param) => new Mlsbj(param),
-    );
-  }
+  static mlsbj = optionalArrayParameterBuilders.mlsbj;
   static mlsfd = optionalScalarParameterBuilders.mlsfd;
   static mlstx = optionalScalarParameterBuilders.mlstx;
-  static mltxt(unit: UnitEntity) {
-    return buildOptionalParameterArray(
-      {
-        unit: unit,
-        parameter: "mltxt",
-      },
-      (param) => new Mltxt(param),
-    );
-  }
+  static mltxt = optionalArrayParameterBuilders.mltxt;
   static mm = optionalScalarParameterBuilders.mm;
   static mp = optionalScalarParameterBuilders.mp;
   static mqcor = optionalScalarParameterBuilders.mqcor;
