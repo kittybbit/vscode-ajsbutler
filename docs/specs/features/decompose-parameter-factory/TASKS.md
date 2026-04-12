@@ -14,7 +14,7 @@
 
 ## Planned Slices
 
-- [ ] Extract optional scalar builders into a focused internal module
+- [x] Extract optional scalar builders into a focused internal module
 - [ ] Extract optional array builders into a focused internal module
 - [ ] Extract inherited builders into a focused internal module
 - [ ] Extract SD-aligned builders into a focused internal module
@@ -32,3 +32,6 @@
 - 2026-04-12: the safest first slices are the families that already delegate
   almost entirely to `parameterHelpers.ts`; they can reduce file size without
   reopening parameter semantics.
+- 2026-04-12: optional scalar builders now live in
+  `optionalScalarParameterBuilders.ts`, with `ParamFactory` preserved as the
+  public facade for that family.
