@@ -48,8 +48,22 @@ focused builder modules while preserving behavior.
 - 2026-04-12: rule-bearing parameter builders were extracted to
   `ruleParameterBuilders.ts`.
 - 2026-04-12: this family is defined around `Rule.ts`, including both
-  schedule-rule-aligned parameters and other rule-bearing parameters such as
-  `ln`.
+  schedule-rule-aligned parameters, root-default-aware rule parameters such as
+  `sd`, and other rule-bearing parameters such as `ln`.
+- 2026-04-12: the `sd` builder naming was clarified so this family no longer
+  implies `sd` is root-jobnet-only; the root-only concern remains limited to
+  its default fallback behavior.
+- 2026-04-12: a broader naming review confirmed that `Rule.ts` and this
+  builder family actually model schedule-rule-bearing parameters, covering
+  `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`, `wt`, `wc`, and `cftd`.
+- 2026-04-12: the branch decision is to defer any broader rename to a
+  dedicated follow-up slice, so this decomposition slice can preserve
+  behavior and avoid mixing extraction with a cross-cutting terminology
+  change.
+- 2026-04-12: root-jobnet-aware builders were extracted to
+  `rootJobnetParameterBuilders.ts`.
+- 2026-04-12: `ParamFactory` now delegates `rg` through a focused module that
+  owns the root-jobnet scalar default concern.
 
 ## Proposed Slice Order
 
@@ -62,8 +76,13 @@ focused builder modules while preserving behavior.
 4. Rule-bearing parameter builders
    Status: completed on 2026-04-12
 5. Root-jobnet-aware builders
+   Status: completed on 2026-04-12
 6. Transfer-operation builders
-7. Final pass to keep `ParamFactory.ts` as a thin facade only if that still
+7. Schedule-rule naming review as a dedicated follow-up slice
+   Status: deferred from the current extraction slice on 2026-04-12
+   Notes: if executed, rename `Rule.ts` and related helpers/builders together
+   so the terminology consistently reflects schedule-rule-bearing parameters.
+8. Final pass to keep `ParamFactory.ts` as a thin facade only if that still
    reads better than direct exports
 
 ## Validation

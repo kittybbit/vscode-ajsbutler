@@ -173,7 +173,7 @@ export const buildSdAlignedParameters = <T extends Rule>(
 export const resolveSdParameters = (
   unit: ParamLookupArg["unit"] & { isRoot: boolean },
 ): Array<Sd> | undefined =>
-  buildRootJobnetRuleParameters(
+  buildRootDefaultAwareRuleParameters(
     {
       unit: unit,
       parameter: "sd",
@@ -275,7 +275,7 @@ export const buildRootJobnetParameter = <T>(
     mapParam,
   );
 
-export const buildRootJobnetRuleParameters = <T extends Rule>(
+export const buildRootDefaultAwareRuleParameters = <T extends Rule>(
   arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit"> & {
     isRootJobnet: boolean;
     rootDefaultParameter: keyof typeof rootJobnetDefaultByParameter;

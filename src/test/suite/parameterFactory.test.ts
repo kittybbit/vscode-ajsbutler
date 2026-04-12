@@ -73,6 +73,18 @@ unit=root,,jp1admin,;
 }
 `;
 
+const rootDefaultDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -97,6 +109,13 @@ const parseInheritedJobnet = (): N => {
 
 const parseScheduleJobnet = (): N => {
   const result = parseAjs(scheduleDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
+};
+
+const parseRootDefaultJobnet = (): N => {
+  const result = parseAjs(rootDefaultDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
@@ -216,6 +235,32 @@ suite("ParameterFactory", () => {
         { rule: 1, value: "1" },
         { rule: 2, value: "2" },
       ],
+    );
+  });
+
+  test("returns explicit root-aware scalar and root-default-aware rule parameters through the facade", () => {
+    const jobnet = parseScheduleJobnet();
+
+    const rg = ParamFactory.rg(jobnet);
+    const sd = ParamFactory.sd(jobnet);
+
+    assert.strictEqual(rg?.value(), "3");
+    assert.deepStrictEqual(
+      sd?.map((parameter) => parameter.value()),
+      ["ud", "2,en"],
+    );
+  });
+
+  test("returns root-jobnet defaults through the facade", () => {
+    const jobnet = parseRootDefaultJobnet();
+
+    const rg = ParamFactory.rg(jobnet);
+    const sd = ParamFactory.sd(jobnet);
+
+    assert.strictEqual(rg?.value(), DEFAULTS.Rg);
+    assert.deepStrictEqual(
+      sd?.map((parameter) => parameter.value()),
+      [DEFAULTS.Sd],
     );
   });
 });

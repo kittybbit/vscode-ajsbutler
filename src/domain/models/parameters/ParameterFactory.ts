@@ -1,27 +1,14 @@
-import {
-  Ncex,
-  Ncl,
-  Ncs,
-  Rg,
-  Sd,
-  Top1,
-  Top2,
-  Top3,
-  Top4,
-  Ty,
-} from "../parameters";
+import { Ncex, Ncl, Ncs, Top1, Top2, Top3, Top4, Ty } from "../parameters";
 import { Cj } from "../units/Cj";
 import { J } from "../units/J";
-import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { inheritedParameterBuilders } from "./inheritedParameterBuilders";
 import { optionalArrayParameterBuilders } from "./optionalArrayParameterBuilders";
 import { optionalScalarParameterBuilders } from "./optionalScalarParameterBuilders";
+import { rootJobnetParameterBuilders } from "./rootJobnetParameterBuilders";
 import { ruleParameterBuilders } from "./ruleParameterBuilders";
 import {
   buildDefaultableParameter,
-  buildRootJobnetParameter,
-  buildRootJobnetRuleParameters,
   buildRequiredParameter,
   buildTopParameter,
 } from "./parameterHelpers";
@@ -232,32 +219,12 @@ export class ParamFactory {
   static rec = optionalScalarParameterBuilders.rec;
   static rei = optionalScalarParameterBuilders.rei;
   static req = optionalScalarParameterBuilders.req;
-  static rg(unit: N) {
-    return buildRootJobnetParameter(
-      {
-        unit: unit,
-        parameter: "rg",
-        isRootJobnet: unit.isRootJobnet,
-        rootDefaultParameter: "rg",
-      },
-      (param) => new Rg(param),
-    );
-  }
+  static rg = rootJobnetParameterBuilders.rg;
   static rh = optionalScalarParameterBuilders.rh;
   static rje = optionalScalarParameterBuilders.rje;
   static rjs = optionalScalarParameterBuilders.rjs;
   static sc = optionalScalarParameterBuilders.sc;
-  static sd(unit: N) {
-    return buildRootJobnetRuleParameters(
-      {
-        unit: unit,
-        parameter: "sd",
-        isRootJobnet: unit.isRootJobnet,
-        rootDefaultParameter: "sd",
-      },
-      (param) => new Sd(param),
-    );
-  }
+  static sd = ruleParameterBuilders.sd;
   static sdd = inheritedParameterBuilders.sdd;
   static se = optionalScalarParameterBuilders.se;
   static sea = optionalScalarParameterBuilders.sea;
