@@ -259,27 +259,28 @@ Use-case note:
 
 ### Current Slice
 
-Define a dedicated decomposition feature for `buildUnitListView.ts` and fix
-the initial extraction order before runtime code changes begin.
+Extract `group6` calendar projection from `buildUnitListView.ts` into a
+focused helper module without changing the `UnitListRowView` contract.
 
 ### Current Need
 
 The branch priorities already identify `buildUnitListView.ts` as the next
-complexity hotspot, but the repository does not yet have feature-local docs
-that separate decomposition work from the already-delivered
-`build-unit-list-view` use case.
+complexity hotspot, and the dedicated decomposition feature now exists. The
+next step is to prove the extraction pattern on the smallest coherent
+projection family before moving on to priority and schedule logic.
 
 ### Current Scope
 
-- create `docs/specs/features/decompose-build-unit-list-view/`
-- define decomposition-specific scope, risks, and slice order
-- sync branch-level planning with the new dedicated feature
+- extract `group6` calendar projection behind the existing
+  `buildUnitListView(...)` entry point
+- add focused regression coverage for the extracted helper
+- sync feature-local and branch-level planning docs with the completed slice
 
 ### Current Non-Goals
 
-- changing runtime behavior in `buildUnitListView.ts`
+- changing runtime behavior outside `group6` extraction
 - redesigning `UnitListRowView` or table column group contracts
-- combining this planning slice with helper extraction implementation
+- mixing the priority or schedule extraction slices into this change
 
 ### Current Constraints
 
@@ -287,7 +288,8 @@ that separate decomposition work from the already-delivered
 - Keep desktop and web extension behavior intact.
 - Avoid direct `vscode` dependency in domain.
 - Start implementation from a dedicated git branch, not directly on `main`.
-- Docs-only changes may validate with `npm run lint:md`.
+- Code changes must validate with the serial baseline:
+  `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`.
 
 ### Current Design
 
@@ -298,36 +300,38 @@ Behavior-preserving follow-up to the existing `build-unit-list-view` feature.
 #### Current layers affected
 
 - domain: no
-- application: planning only
+- application: `buildUnitListView.ts` and extracted helper module
 - infrastructure: no
-- presentation: no
+- presentation: no contract changes expected
 
 #### Current key decisions
 
-- Track `buildUnitListView.ts` decomposition as its own feature so extraction
-  slices do not blur with the original use-case delivery docs.
-- Start with calendar, priority, and schedule projection families because
-  they already read as coherent seams in code and tests.
+- Keep `buildUnitListView(...)` as the stable entry point while moving one
+  projection family at a time behind helper modules.
+- Use `group6` as the proving slice because its weekday and date shaping is
+  self-contained and already backed by broad row-view assertions.
 
 ### Current Acceptance Criteria
 
-- [ ] dedicated feature docs exist for `buildUnitListView.ts` decomposition
-- [ ] branch-level plan points at the new feature instead of stale follow-ups
-- [ ] the first extraction candidates and non-goals are explicit
-- [ ] docs-only validation passes
+- [ ] `group6` projection builds through a focused helper module
+- [ ] `buildUnitListView(...)` keeps the current `UnitListRowView` shape
+- [ ] focused regression coverage exists for the extracted helper
+- [ ] `npm run qlty`, `npm test`, `npm run test:web`, and `npm run build` pass
 
 ### Current Test Plan
 
-- Run `npm run lint:md`
+- Run `npm run qlty`
+- Run `npm test`
+- Run `npm run test:web`
+- Run `npm run build`
 
 ### Current Risks
 
-- Creating docs that are too abstract to drive a small first implementation
-  slice
-- Choosing a slice order that hides relation traversal or priority-caching
-  risks until too late
+- Accidentally changing non-group unit output by over-typing the helper return
+- Extracting only call sites without actually reducing branching in the main
+  row builder
 
 ### Current Rollback Plan
 
-- Remove the new feature docs and restore `docs/specs/plans.md` to its prior
-  planning state.
+- Inline the helper body back into `buildUnitListView.ts` and remove the
+  focused helper test if the extraction adds churn without reducing risk.

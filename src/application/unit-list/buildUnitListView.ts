@@ -9,10 +9,9 @@ import {
   findParentAjsUnit,
   flattenAjsUnits,
 } from "../../domain/models/ajs/AjsDocument";
+import { buildUnitListGroup6View } from "./buildUnitListGroup6View";
 import {
-  buildCalendarWeekView,
   getPriorityForUnitTypes,
-  isNonWeekCalendarValue,
   parseCftd,
   parseCy,
   parseLnParentRule,
@@ -368,24 +367,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
             : undefined,
         jobGroupType: unit.unitType === "g" ? unit.groupType : undefined,
       },
-      group6:
-        unit.unitType === "g"
-          ? {
-              ...buildCalendarWeekView(
-                findAjsUnitParameterValues(unit, "op"),
-                findAjsUnitParameterValues(unit, "cl"),
-              ),
-              openDates: findAjsUnitParameterValues(unit, "op").filter(
-                isNonWeekCalendarValue,
-              ),
-              closeDates: findAjsUnitParameterValues(unit, "cl").filter(
-                isNonWeekCalendarValue,
-              ),
-            }
-          : {
-              openDates: [],
-              closeDates: [],
-            },
+      group6: buildUnitListGroup6View(unit),
       group7: {
         concurrentExecution:
           unit.unitType === "n" ||
