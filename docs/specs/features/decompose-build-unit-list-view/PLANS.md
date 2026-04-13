@@ -40,13 +40,16 @@ projection logic into focused application helpers while preserving behavior.
   extraction-specific risks.
 - 2026-04-12: existing tests already cover a broad end-to-end row projection,
   which is a stable baseline for behavior-preserving extraction.
+- 2026-04-12: the first extraction slice is now `group6`; it is small,
+  DTO-shaped, and already anchored in existing helper behavior for calendar
+  weekday parsing.
 
 ## Proposed Slice Order
 
 1. Calendar projection helper extraction
-   Status: proposed
-   Notes: `group6` already depends on dedicated helper parsing and has a small
-   isolated DTO surface.
+   Status: completed
+   Notes: `group6` now builds through a dedicated helper module while keeping
+   the `UnitListRowView` shape unchanged for table and CSV consumers.
 2. Priority projection helper extraction
    Status: proposed
    Notes: `group7` and `group11` share the caching and inheritance behavior,

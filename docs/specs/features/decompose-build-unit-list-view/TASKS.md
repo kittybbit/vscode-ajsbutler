@@ -14,7 +14,7 @@
 
 ## Planned Slices
 
-- [ ] Extract `group6` calendar projection into a focused helper module
+- [x] Extract `group6` calendar projection into a focused helper module
 - [ ] Extract shared priority projection for `group7` and `group11`
 - [ ] Extract `group10` schedule projection into a focused helper module
 - [ ] Revisit whether linked-unit projection should become its own helper
@@ -33,3 +33,6 @@
 - 2026-04-12: this decomposition must keep the current `UnitListRowView`
   contract stable so table rendering and CSV export do not need follow-up
   rewiring in the same slice.
+- 2026-04-12: `group6` calendar projection now lives in
+  `src/application/unit-list/buildUnitListGroup6View.ts`, with focused
+  regression coverage in `src/test/suite/buildUnitListGroup6View.test.ts`.
