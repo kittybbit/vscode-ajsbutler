@@ -15,7 +15,7 @@
 ## Planned Slices
 
 - [x] Extract `group6` calendar projection into a focused helper module
-- [ ] Extract shared priority projection for `group7` and `group11`
+- [x] Extract shared priority projection for `group7` and `group11`
 - [ ] Extract `group10` schedule projection into a focused helper module
 - [ ] Revisit whether linked-unit projection should become its own helper
       family or stay near the main row builder after the first extractions
@@ -36,3 +36,6 @@
 - 2026-04-12: `group6` calendar projection now lives in
   `src/application/unit-list/buildUnitListGroup6View.ts`, with focused
   regression coverage in `src/test/suite/buildUnitListGroup6View.test.ts`.
+- 2026-04-13: shared priority projection for `group7` and `group11` now lives
+  in `src/application/unit-list/buildUnitListPriorityViews.ts`, with focused
+  regression coverage in `src/test/suite/buildUnitListPriorityViews.test.ts`.

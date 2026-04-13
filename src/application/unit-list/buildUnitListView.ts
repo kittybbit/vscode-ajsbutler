@@ -11,7 +11,10 @@ import {
 } from "../../domain/models/ajs/AjsDocument";
 import { buildUnitListGroup6View } from "./buildUnitListGroup6View";
 import {
-  getPriorityForUnitTypes,
+  buildUnitListGroup11View,
+  buildUnitListGroup7View,
+} from "./buildUnitListPriorityViews";
+import {
   parseCftd,
   parseCy,
   parseLnParentRule,
@@ -368,54 +371,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
         jobGroupType: unit.unitType === "g" ? unit.groupType : undefined,
       },
       group6: buildUnitListGroup6View(unit),
-      group7: {
-        concurrentExecution:
-          unit.unitType === "n" ||
-          unit.unitType === "rn" ||
-          unit.unitType === "rm" ||
-          unit.unitType === "rr"
-            ? findAjsUnitParameterValue(unit, "mp")
-            : undefined,
-        retainedGenerationCount:
-          unit.unitType === "n" ||
-          unit.unitType === "rn" ||
-          unit.unitType === "rm" ||
-          unit.unitType === "rr"
-            ? findAjsUnitParameterValue(unit, "rg")
-            : undefined,
-        targetManager:
-          unit.unitType === "n" ||
-          unit.unitType === "rn" ||
-          unit.unitType === "rm" ||
-          unit.unitType === "rr"
-            ? findAjsUnitParameterValue(unit, "rh")
-            : undefined,
-        priority: getPriorityForUnitTypes(document, unit, group7PriorityById, [
-          "n",
-          "rn",
-        ]),
-        timeoutPeriod:
-          unit.unitType === "n" ||
-          unit.unitType === "rn" ||
-          unit.unitType === "rm" ||
-          unit.unitType === "rr"
-            ? findAjsUnitParameterValue(unit, "cd")
-            : undefined,
-        scheduleOption:
-          unit.unitType === "n" ||
-          unit.unitType === "rn" ||
-          unit.unitType === "rm" ||
-          unit.unitType === "rr"
-            ? findAjsUnitParameterValue(unit, "ms")
-            : undefined,
-        requiredExecutionTime:
-          unit.unitType === "n" ||
-          unit.unitType === "rn" ||
-          unit.unitType === "rm" ||
-          unit.unitType === "rr"
-            ? findAjsUnitParameterValue(unit, "fd")
-            : undefined,
-      },
+      group7: buildUnitListGroup7View(document, unit, group7PriorityById),
       group10: {
         deleteAfterExecution: findAjsUnitParameterValue(unit, "de"),
         executionDate: findAjsUnitParameterValue(unit, "ed"),
@@ -456,40 +412,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
           parseTimeValue(value),
         ),
       },
-      group11: {
-        commandText: findAjsUnitParameterValue(unit, "te"),
-        scriptFileName: findAjsUnitParameterValue(unit, "sc"),
-        parameters: findAjsUnitParameterValue(unit, "prm"),
-        environmentVariable: findAjsUnitParameterValue(unit, "env"),
-        environmentVariableFile: findAjsUnitParameterValue(unit, "ev"),
-        workPathName: findAjsUnitParameterValue(unit, "wkp"),
-        standardInputFile: findAjsUnitParameterValue(unit, "si"),
-        standardOutputFile: findAjsUnitParameterValue(unit, "so"),
-        standardOutputAction: findAjsUnitParameterValue(unit, "soa"),
-        standardErrorFile: findAjsUnitParameterValue(unit, "se"),
-        standardErrorAction: findAjsUnitParameterValue(unit, "sea"),
-        queueManager: findAjsUnitParameterValue(unit, "qm"),
-        queueName: findAjsUnitParameterValue(unit, "qu"),
-        requestJobName: findAjsUnitParameterValue(unit, "req"),
-        priority: getPriorityForUnitTypes(document, unit, group11PriorityById, [
-          "j",
-          "rj",
-          "pj",
-          "rp",
-          "qj",
-          "rq",
-        ]),
-        endJudgment: findAjsUnitParameterValue(unit, "jd"),
-        waitThreshold: findAjsUnitParameterValue(unit, "wth"),
-        timeoutHold: findAjsUnitParameterValue(unit, "tho"),
-        judgmentFile: findAjsUnitParameterValue(unit, "jdf"),
-        automaticRetryEnabled: findAjsUnitParameterValue(unit, "abr"),
-        retryStart: findAjsUnitParameterValue(unit, "rjs"),
-        retryEnd: findAjsUnitParameterValue(unit, "rje"),
-        retryCount: findAjsUnitParameterValue(unit, "rec"),
-        retryInterval: findAjsUnitParameterValue(unit, "rei"),
-        targetUserName: findAjsUnitParameterValue(unit, "un"),
-      },
+      group11: buildUnitListGroup11View(document, unit, group11PriorityById),
       group12: {
         endJudgment: findAjsUnitParameterValue(unit, "ej"),
         judgmentReturnCode: findAjsUnitParameterValue(unit, "ejc"),
