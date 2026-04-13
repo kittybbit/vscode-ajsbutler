@@ -94,8 +94,9 @@ structure in `docs/specs/features/<feature>/`.
 2. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
 3. Reduce `buildUnitListView.ts` incrementally:
-   extract calendar, priority, and schedule parsing helpers into focused
-   modules while preserving the existing `UnitListRowView` contract and tests.
+   calendar and priority projections now build through focused helpers;
+   continue with schedule extraction while preserving the existing
+   `UnitListRowView` contract and tests.
 4. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.

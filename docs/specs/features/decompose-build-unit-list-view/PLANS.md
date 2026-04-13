@@ -51,9 +51,11 @@ projection logic into focused application helpers while preserving behavior.
    Notes: `group6` now builds through a dedicated helper module while keeping
    the `UnitListRowView` shape unchanged for table and CSV consumers.
 2. Priority projection helper extraction
-   Status: proposed
+   Status: completed
    Notes: `group7` and `group11` share the caching and inheritance behavior,
    so one focused helper can narrow the remaining branching in the main file.
+   `buildUnitListView.ts` now delegates these DTOs to
+   `buildUnitListPriorityViews.ts` with focused regression coverage.
 3. Schedule projection helper extraction
    Status: proposed
    Notes: `group10` is the densest projection family and should move only
