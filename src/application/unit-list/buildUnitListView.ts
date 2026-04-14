@@ -10,17 +10,13 @@ import {
   flattenAjsUnits,
 } from "../../domain/models/ajs/AjsDocument";
 import { buildUnitListGroup6View } from "./buildUnitListGroup6View";
+import { buildUnitListGroup10View } from "./buildUnitListGroup10View";
 import {
   buildUnitListGroup11View,
   buildUnitListGroup7View,
 } from "./buildUnitListPriorityViews";
 import {
-  parseCftd,
-  parseCy,
   parseLnParentRule,
-  parseSd,
-  parseSh,
-  parseShd,
   parseTimeValue,
   parseWc,
 } from "./unitListViewHelpers";
@@ -372,46 +368,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
       },
       group6: buildUnitListGroup6View(unit),
       group7: buildUnitListGroup7View(document, unit, group7PriorityById),
-      group10: {
-        deleteAfterExecution: findAjsUnitParameterValue(unit, "de"),
-        executionDate: findAjsUnitParameterValue(unit, "ed"),
-        jobGroupPath: findAjsUnitParameterValue(unit, "jc"),
-        exclusiveJobnetName: findAjsUnitParameterValue(unit, "ejn"),
-        parentRules: findAjsUnitParameterValues(unit, "ln").map(
-          parseLnParentRule,
-        ),
-        scheduleDateTypes: findAjsUnitParameterValues(unit, "sd").map(
-          (value) => parseSd(value).type,
-        ),
-        scheduleDateYearMonths: findAjsUnitParameterValues(unit, "sd").map(
-          (value) => parseSd(value).yearMonth,
-        ),
-        scheduleDateDays: findAjsUnitParameterValues(unit, "sd").map(
-          (value) => parseSd(value).day,
-        ),
-        startTimes: findAjsUnitParameterValues(unit, "st").map((value) =>
-          parseTimeValue(value, "+00:00"),
-        ),
-        cycles: findAjsUnitParameterValues(unit, "cy").map(parseCy),
-        substitutes: findAjsUnitParameterValues(unit, "sh").map(parseSh),
-        shiftDays: findAjsUnitParameterValues(unit, "shd").map(parseShd),
-        scheduleByDaysFromStart: findAjsUnitParameterValues(unit, "cftd").map(
-          (value) => parseCftd(value).scheduleByDaysFromStart,
-        ),
-        maxShiftableDays: findAjsUnitParameterValues(unit, "cftd").map(
-          (value) => parseCftd(value).maxShiftableDays,
-        ),
-        startRangeTimes: findAjsUnitParameterValues(unit, "sy").map((value) =>
-          parseTimeValue(value),
-        ),
-        endRangeTimes: findAjsUnitParameterValues(unit, "ey").map((value) =>
-          parseTimeValue(value),
-        ),
-        waitCounts: findAjsUnitParameterValues(unit, "wc").map(parseWc),
-        waitTimes: findAjsUnitParameterValues(unit, "wt").map((value) =>
-          parseTimeValue(value),
-        ),
-      },
+      group10: buildUnitListGroup10View(unit),
       group11: buildUnitListGroup11View(document, unit, group11PriorityById),
       group12: {
         endJudgment: findAjsUnitParameterValue(unit, "ej"),

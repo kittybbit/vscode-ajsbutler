@@ -16,7 +16,7 @@
 
 - [x] Extract `group6` calendar projection into a focused helper module
 - [x] Extract shared priority projection for `group7` and `group11`
-- [ ] Extract `group10` schedule projection into a focused helper module
+- [x] Extract `group10` schedule projection into a focused helper module
 - [ ] Revisit whether linked-unit projection should become its own helper
       family or stay near the main row builder after the first extractions
 - [ ] Decide whether the end state should keep one coordinator file or
