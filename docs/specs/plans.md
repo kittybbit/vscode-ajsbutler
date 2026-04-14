@@ -12,6 +12,12 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Completed In This Branch
 
+- Decompose `buildUnitListView.ts` into focused projection helpers:
+  `group6` calendar, `group7`/`group11` priority, `group10` schedule, and
+  linked-unit projections now live in dedicated helper modules with focused
+  regression coverage. Remaining groups were consolidated into
+  `buildUnitListRemainingGroups.ts` to reduce file width while maintaining
+  reviewability.
 - Core application slices are in place and covered:
   `BuildUnitList`, `BuildUnitListView`, `ExportUnitListCsv`,
   `BuildFlowGraph`, `ShowUnitDefinition`, normalized AJS mapping,
@@ -93,10 +99,9 @@ structure in `docs/specs/features/<feature>/`.
    would be artificial.
 2. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
-3. Reduce `buildUnitListView.ts` incrementally:
-   calendar and priority projections now build through focused helpers;
-   continue with schedule extraction while preserving the existing
-   `UnitListRowView` contract and tests.
+3. Profile webview bundle size and evaluate deferred optimization:
+   if compatibility work is stable, consider selective tree-shaking or
+   lazy-load of lower-priority viewers.
 4. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
@@ -170,169 +175,3 @@ Use-case note:
   refactors
 - `docs/specs/` is for implementation decisions, branch planning, and task
   execution
-
-## Task Template
-
-### Template Task
-
-<!-- A single sentence describing what will be changed. -->
-
-### Template Why
-
-<!-- Why this change is necessary. -->
-
-### Template Scope
-
-<!-- Target files, modules, or use cases for the change. -->
-
-### Template Non-Goals
-
-<!-- What is out of scope for this task. -->
-
-### Template Constraints
-
-- Keep `engines.vscode` compatibility unless explicitly approved.
-- Keep desktop and web extension behavior intact.
-- Avoid direct `vscode` dependency in domain.
-- Avoid anemic domain models: move only broadly reusable or cross-unit
-  semantics into helpers/interfaces, and keep entity identity plus
-  unit-local JP1/AJS behavior in the entity when it is part of that concept.
-- Start implementation from a dedicated git branch, not directly on `main`.
-- Reserve `docs/...` branch names for slices that stay within the docs-only
-  file set used by `.github/workflows/verify.yml`:
-  `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md`.
-- Do not `git push` until `npm run qlty`, `npm test`, `npm run test:web`,
-  and `npm run build` have all passed locally in that order for code changes.
-- For docs-only changes, markdown lint is sufficient and repository `Verify`
-  is not a required gate.
-- Keep `Completed In This Branch` concise enough to function as a planning
-  summary rather than a chronological changelog.
-- Treat `docs/specs/features/<feature>/TASKS.md`, `docs/specs/plans.md`, and
-  `docs/specs/roadmap.md` as sync targets that should be updated at the time a
-  task outcome becomes known, not in a later cleanup pass.
-
-### Template Design
-
-#### Template use case
-
-<!-- Which use case(s) will be addressed. -->
-
-#### Template layers affected
-
-- domain:
-- application:
-- infrastructure:
-- presentation:
-
-#### Template key decisions
-
--
--
-
-### Template Acceptance Criteria
-
-- [ ] build passes
-- [ ] quality/lint passes
-- [ ] tests updated
-- [ ] `git push` happens only after local `npm run qlty`, `npm test`,
-      `npm run test:web`, and `npm run build` pass for code changes
-- [ ] docs-only slices use `npm run lint:md` and do not rely on repository
-      `Verify` as a required gate
-- [ ] desktop behavior preserved
-- [ ] web behavior preserved if affected
-
-### Template Test Plan
-
--
--
-
-### Template Risks
-
--
--
-
-### Template Rollback Plan
-
--
--
-
-## Current Task
-
-### Current Slice
-
-Extract `group6` calendar projection from `buildUnitListView.ts` into a
-focused helper module without changing the `UnitListRowView` contract.
-
-### Current Need
-
-The branch priorities already identify `buildUnitListView.ts` as the next
-complexity hotspot, and the dedicated decomposition feature now exists. The
-next step is to prove the extraction pattern on the smallest coherent
-projection family before moving on to priority and schedule logic.
-
-### Current Scope
-
-- extract `group6` calendar projection behind the existing
-  `buildUnitListView(...)` entry point
-- add focused regression coverage for the extracted helper
-- sync feature-local and branch-level planning docs with the completed slice
-
-### Current Non-Goals
-
-- changing runtime behavior outside `group6` extraction
-- redesigning `UnitListRowView` or table column group contracts
-- mixing the priority or schedule extraction slices into this change
-
-### Current Constraints
-
-- Keep `engines.vscode` compatibility unless explicitly approved.
-- Keep desktop and web extension behavior intact.
-- Avoid direct `vscode` dependency in domain.
-- Start implementation from a dedicated git branch, not directly on `main`.
-- Code changes must validate with the serial baseline:
-  `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`.
-
-### Current Design
-
-#### Current use case
-
-Behavior-preserving follow-up to the existing `build-unit-list-view` feature.
-
-#### Current layers affected
-
-- domain: no
-- application: `buildUnitListView.ts` and extracted helper module
-- infrastructure: no
-- presentation: no contract changes expected
-
-#### Current key decisions
-
-- Keep `buildUnitListView(...)` as the stable entry point while moving one
-  projection family at a time behind helper modules.
-- Use `group6` as the proving slice because its weekday and date shaping is
-  self-contained and already backed by broad row-view assertions.
-
-### Current Acceptance Criteria
-
-- [ ] `group6` projection builds through a focused helper module
-- [ ] `buildUnitListView(...)` keeps the current `UnitListRowView` shape
-- [ ] focused regression coverage exists for the extracted helper
-- [ ] `npm run qlty`, `npm test`, `npm run test:web`, and `npm run build` pass
-
-### Current Test Plan
-
-- Run `npm run qlty`
-- Run `npm test`
-- Run `npm run test:web`
-- Run `npm run build`
-
-### Current Risks
-
-- Accidentally changing non-group unit output by over-typing the helper return
-- Extracting only call sites without actually reducing branching in the main
-  row builder
-
-### Current Rollback Plan
-
-- Inline the helper body back into `buildUnitListView.ts` and remove the
-  focused helper test if the extraction adds churn without reducing risk.

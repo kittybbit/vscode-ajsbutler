@@ -37,24 +37,25 @@
     consumer appears and needs the same matching semantics.
 17. Decompose `ParameterFactory.ts` into focused builder modules while keeping
     `ParamFactory` as the stable thin facade for existing callers.
+18. Decompose `buildUnitListView.ts` into focused projection helpers:
+    extracted `group6` calendar, `group7`/`group11` priority, `group10`
+    schedule, and linked-unit projections with consolidated remaining groups
+    in a dedicated helper module.
 
 ## Current Roadmap
 
 1. Refactor unit model classes to reduce code duplication across similar unit
    types.
-2. Break down high-complexity functions in the application layer, starting
-   with focused helper extraction from `buildUnitListView.ts` instead of
-   another broad rewrite.
-3. Consolidate i18n translation files to reduce duplication between language
+2. Consolidate i18n translation files to reduce duplication between language
    variants.
+3. Profile and address webview bundle size if compatibility and stability
+   goals are stable.
 
 ## Deferred / Optional Slices
 
 1. Add a dedicated filter/search unit-list use case only if matching semantics
    need to be shared outside the table presentation layer.
-2. Reduce bundle size for webview and browser targets if compatibility work is
-   complete and performance becomes a stronger priority.
-3. Revisit directory structure under `src/extension/webview/` only if the
+2. Revisit directory structure under `src/extension/webview/` only if the
    remaining files stop reading as one cohesive viewer module.
 
 ## Done Criteria For A Slice
