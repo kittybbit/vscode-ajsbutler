@@ -55,9 +55,7 @@
 
 1. Add a dedicated filter/search unit-list use case only if matching semantics
    need to be shared outside the table presentation layer.
-2. Reduce bundle size for webview and browser targets if compatibility work is
-   complete and performance becomes a stronger priority.
-3. Revisit directory structure under `src/extension/webview/` only if the
+2. Revisit directory structure under `src/extension/webview/` only if the
    remaining files stop reading as one cohesive viewer module.
 
 ## Done Criteria For A Slice
