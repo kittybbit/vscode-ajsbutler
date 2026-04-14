@@ -17,10 +17,14 @@
 - [x] Extract `group6` calendar projection into a focused helper module
 - [x] Extract shared priority projection for `group7` and `group11`
 - [x] Extract `group10` schedule projection into a focused helper module
-- [ ] Revisit whether linked-unit projection should become its own helper
+- [x] Revisit whether linked-unit projection should become its own helper
       family or stay near the main row builder after the first extractions
-- [ ] Decide whether the end state should keep one coordinator file or
+- [x] Decide whether the end state should keep one coordinator file or
       collapse to direct helper composition from a smaller entry module
+      (Decision: Keep coordinator file for now - the remaining groups were
+      consolidated into buildUnitListRemainingGroups.ts to reduce file size
+      while maintaining reviewability. Direct composition could be considered
+      in future if the coordinator becomes too thin.)
 
 ## Notes
 

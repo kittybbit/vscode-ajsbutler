@@ -2,24 +2,17 @@ import {
   AjsDocument,
   AjsGroupType,
   AjsRelationType,
-  AjsUnit,
   AjsUnitType,
-  findAjsUnitParameterValue,
-  findAjsUnitParameterValues,
-  findParentAjsUnit,
   flattenAjsUnits,
 } from "../../domain/models/ajs/AjsDocument";
 import { buildUnitListGroup6View } from "./buildUnitListGroup6View";
 import { buildUnitListGroup10View } from "./buildUnitListGroup10View";
+import { buildUnitListLinkedUnits } from "./buildUnitListLinkedUnits";
+import { buildUnitListRemainingGroups } from "./buildUnitListRemainingGroups";
 import {
   buildUnitListGroup11View,
   buildUnitListGroup7View,
 } from "./buildUnitListPriorityViews";
-import {
-  parseLnParentRule,
-  parseTimeValue,
-  parseWc,
-} from "./unitListViewHelpers";
 
 export type UnitListGroup1View = {
   name: string;
@@ -272,208 +265,26 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
   const group11PriorityById = new Map<string, number>();
 
   return units.map((unit) => {
-    const parent = findParentAjsUnit(document, unit);
-    const previousUnits =
-      parent?.relations
-        .filter((dependency) => dependency.targetUnitId === unit.id)
-        .flatMap((dependency) => {
-          const sourceUnit = unitById.get(dependency.sourceUnitId);
-          return sourceUnit
-            ? [
-                {
-                  id: sourceUnit.id,
-                  name: sourceUnit.name,
-                  absolutePath: sourceUnit.absolutePath,
-                  relationType: dependency.type,
-                },
-              ]
-            : [];
-        }) ?? [];
-    const nextUnits =
-      parent?.relations
-        .filter((dependency) => dependency.sourceUnitId === unit.id)
-        .flatMap((dependency) => {
-          const targetUnit = unitById.get(dependency.targetUnitId);
-          return targetUnit
-            ? [
-                {
-                  id: targetUnit.id,
-                  name: targetUnit.name,
-                  absolutePath: targetUnit.absolutePath,
-                  relationType: dependency.type,
-                },
-              ]
-            : [];
-        }) ?? [];
+    const { previousUnits, nextUnits } = buildUnitListLinkedUnits(
+      document,
+      unit,
+      unitById,
+    );
+
+    const remainingGroups = buildUnitListRemainingGroups(
+      unit,
+      previousUnits,
+      nextUnits,
+    );
 
     return {
       id: unit.id,
       absolutePath: unit.absolutePath,
-      group2: {
-        comment: unit.comment,
-        previousUnits,
-        nextUnits,
-        executionAgent: findAjsUnitParameterValue(unit, "ex"),
-        nestedConnectionLimit: findAjsUnitParameterValue(unit, "ncl"),
-        nestedConnectionName: findAjsUnitParameterValue(unit, "ncn"),
-        nestedConnectionService: findAjsUnitParameterValue(unit, "ncsv"),
-        nestedConnectionEnabled: findAjsUnitParameterValue(unit, "ncs"),
-        nestedConnectionExternal: findAjsUnitParameterValue(unit, "ncex"),
-        nestedConnectionHost: findAjsUnitParameterValue(unit, "nchn"),
-      },
-      group1: {
-        name: unit.name,
-        parentAbsolutePath:
-          unit.depth > 0
-            ? unit.absolutePath.split("/").slice(0, -1).join("/") || "/"
-            : "/",
-        parentId: unit.parentId,
-        unitType: unit.unitType,
-        groupType: unit.groupType,
-        cty: findAjsUnitParameterValue(unit, "cty"),
-        layoutHv:
-          unit.depth > 0 ? `+${unit.layout.h}+${unit.layout.v}` : undefined,
-        size: findAjsUnitParameterValue(unit, "sz"),
-      },
-      group3: {
-        hardAttribute: findAjsUnitParameterValue(unit, "ha"),
-        isRecovery: unit.isRecovery,
-        jp1Username: unit.jp1Username,
-        jp1ResourceGroup: unit.jp1ResourceGroup,
-      },
-      group4: {
-        managerHost:
-          unit.unitType === "mg" || unit.unitType === "mn"
-            ? findAjsUnitParameterValue(unit, "mh")
-            : undefined,
-        managerUnit:
-          unit.unitType === "mg" || unit.unitType === "mn"
-            ? findAjsUnitParameterValue(unit, "mu")
-            : undefined,
-      },
-      group5: {
-        startDeadlineDate:
-          unit.unitType === "g"
-            ? findAjsUnitParameterValue(unit, "sdd")
-            : undefined,
-        maximumDuration:
-          unit.unitType === "g"
-            ? findAjsUnitParameterValue(unit, "md")
-            : undefined,
-        startTimeType:
-          unit.unitType === "g"
-            ? findAjsUnitParameterValue(unit, "stt")
-            : undefined,
-        jobGroupType: unit.unitType === "g" ? unit.groupType : undefined,
-      },
+      ...remainingGroups,
       group6: buildUnitListGroup6View(unit),
       group7: buildUnitListGroup7View(document, unit, group7PriorityById),
       group10: buildUnitListGroup10View(unit),
       group11: buildUnitListGroup11View(document, unit, group11PriorityById),
-      group12: {
-        endJudgment: findAjsUnitParameterValue(unit, "ej"),
-        judgmentReturnCode: findAjsUnitParameterValue(unit, "ejc"),
-        lowerReturnCode: findAjsUnitParameterValue(unit, "ejl"),
-        lowerJudgmentValue: findAjsUnitParameterValue(unit, "ejs"),
-        upperComparison: findAjsUnitParameterValue(unit, "ejm"),
-        upperReturnCode: findAjsUnitParameterValue(unit, "ejh"),
-        upperJudgmentValue: findAjsUnitParameterValue(unit, "ejg"),
-        lowerComparison: findAjsUnitParameterValue(unit, "eju"),
-        judgmentValueString: findAjsUnitParameterValue(unit, "ejt"),
-        judgmentValueNumeric: findAjsUnitParameterValue(unit, "eji"),
-        variableName: findAjsUnitParameterValue(unit, "ejv"),
-        judgmentFileName: findAjsUnitParameterValue(unit, "ejf"),
-      },
-      group13: {
-        timeoutInterval: findAjsUnitParameterValue(unit, "tmitv"),
-        eventTimeout: findAjsUnitParameterValue(unit, "etn"),
-        monitoredFileName: findAjsUnitParameterValue(unit, "flwf"),
-        monitoredFileCondition: findAjsUnitParameterValue(unit, "flwc"),
-        monitoredFileCloseMode: findAjsUnitParameterValue(unit, "flco"),
-        monitoringInterval: findAjsUnitParameterValue(unit, "flwi"),
-        waitEventId: findAjsUnitParameterValue(unit, "evwid"),
-        waitHostName: findAjsUnitParameterValue(unit, "evhst"),
-        waitMessage: findAjsUnitParameterValue(unit, "evwms"),
-        eventTimeoutAction: findAjsUnitParameterValue(unit, "ets"),
-      },
-      group14: {
-        actionEventId: findAjsUnitParameterValue(unit, "evsid"),
-        actionHostName: findAjsUnitParameterValue(unit, "evhst"),
-        actionMessage: findAjsUnitParameterValue(unit, "evsms"),
-        actionSeverity: findAjsUnitParameterValue(unit, "evssv"),
-        actionStartType: findAjsUnitParameterValue(unit, "evsrt"),
-        actionInterval: findAjsUnitParameterValue(unit, "evspl"),
-        actionCount: findAjsUnitParameterValue(unit, "evsrc"),
-        platformMethod: findAjsUnitParameterValue(unit, "pfm"),
-      },
-      group15: {
-        executionUser: findAjsUnitParameterValue(unit, "eu"),
-        executionTimeMonitor: findAjsUnitParameterValue(unit, "etm"),
-        fileDescriptor: findAjsUnitParameterValue(unit, "fd"),
-        jobType: findAjsUnitParameterValue(unit, "jty"),
-        terminationStatus1: findAjsUnitParameterValue(unit, "ts1"),
-        terminationDelay1: findAjsUnitParameterValue(unit, "td1"),
-        terminationOperation1: findAjsUnitParameterValue(unit, "top1"),
-        terminationStatus2: findAjsUnitParameterValue(unit, "ts2"),
-        terminationDelay2: findAjsUnitParameterValue(unit, "td2"),
-        terminationOperation2: findAjsUnitParameterValue(unit, "top2"),
-        terminationStatus3: findAjsUnitParameterValue(unit, "ts3"),
-        terminationDelay3: findAjsUnitParameterValue(unit, "td3"),
-        terminationOperation3: findAjsUnitParameterValue(unit, "top3"),
-        terminationStatus4: findAjsUnitParameterValue(unit, "ts4"),
-        terminationDelay4: findAjsUnitParameterValue(unit, "td4"),
-        terminationOperation4: findAjsUnitParameterValue(unit, "top4"),
-      },
-      group16: {
-        endWaitUnitName: findAjsUnitParameterValue(unit, "eun"),
-        waitMode: findAjsUnitParameterValue(unit, "mm"),
-        nestedMessageGeneration: findAjsUnitParameterValue(unit, "nmg"),
-        unitEndMonitoring: findAjsUnitParameterValue(unit, "uem"),
-        executionGenerationAction: findAjsUnitParameterValue(unit, "ega"),
-      },
-      group17: {
-        toolParameters:
-          unit.unitType === "cpj" || unit.unitType === "rcpj"
-            ? findAjsUnitParameterValue(unit, "prm")
-            : undefined,
-        toolEnvironment:
-          unit.unitType === "cpj" || unit.unitType === "rcpj"
-            ? findAjsUnitParameterValue(unit, "env")
-            : undefined,
-      },
-      group18: {
-        destinationAgent: findAjsUnitParameterValue(unit, "da"),
-        flexibleJobGroup: findAjsUnitParameterValue(unit, "fxg"),
-        executionAgent:
-          unit.unitType === "fxj" || unit.unitType === "rfxj"
-            ? findAjsUnitParameterValue(unit, "ex")
-            : undefined,
-      },
-      group19: {
-        httpConnectionConfig: findAjsUnitParameterValue(unit, "htcfl"),
-        httpKind: findAjsUnitParameterValue(unit, "htknd"),
-        httpExecutionMode: findAjsUnitParameterValue(unit, "htexm"),
-        httpRequestFile: findAjsUnitParameterValue(unit, "htrqf"),
-        httpRequestEncoding: findAjsUnitParameterValue(unit, "htrqu"),
-        httpRequestMethod: findAjsUnitParameterValue(unit, "htrqm"),
-        httpStatusFile: findAjsUnitParameterValue(unit, "htstf"),
-        httpStatusPoint: findAjsUnitParameterValue(unit, "htspt"),
-        httpResponseHeaderFile: findAjsUnitParameterValue(unit, "htrhf"),
-        httpResponseBodyFile: findAjsUnitParameterValue(unit, "htrbf"),
-        httpCodeMap: findAjsUnitParameterValue(unit, "htcdm"),
-      },
-      group8: {
-        nestedConnectorRelease:
-          unit.unitType === "nc"
-            ? findAjsUnitParameterValue(unit, "ncr")
-            : undefined,
-      },
-      group9: {
-        startCondition:
-          unit.unitType === "rc"
-            ? findAjsUnitParameterValue(unit, "cond")
-            : undefined,
-      },
     };
   });
 };
