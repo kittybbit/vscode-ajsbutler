@@ -97,6 +97,7 @@ structure in `docs/specs/features/<feature>/`.
    extract only semantics that are cross-unit or shared with normalization,
    and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
    would be artificial.
+   - Feature planning now exists in `docs/specs/features/refactor-unit-model-classes/`.
 2. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
 3. Profile webview bundle size and evaluate deferred optimization:
