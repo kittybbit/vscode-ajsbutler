@@ -41,14 +41,16 @@
     extracted `group6` calendar, `group7`/`group11` priority, `group10`
     schedule, and linked-unit projections with consolidated remaining groups
     in a dedicated helper module.
+19. Refactor unit model classes selectively:
+    shared wait-state and priority boilerplate now lives in focused capability
+    base classes, while unit-local JP1/AJS semantics stay on the owning
+    wrappers.
 
 ## Current Roadmap
 
-1. Refactor unit model classes to reduce code duplication across similar unit
-   types.
-2. Consolidate i18n translation files to reduce duplication between language
+1. Consolidate i18n translation files to reduce duplication between language
    variants.
-3. Profile and address webview bundle size if compatibility and stability
+2. Profile and address webview bundle size if compatibility and stability
    goals are stable.
 
 ## Deferred / Optional Slices

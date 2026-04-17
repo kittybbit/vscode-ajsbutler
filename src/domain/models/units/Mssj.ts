@@ -1,11 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntity";
-import {
-  resolveUnitHasWaitedFor,
-  type WaitableUnit,
-} from "./unitWaitStateHelpers";
+import { WaitableUnitEntity } from "./unitCapabilityEntities";
 
-export class Mssj extends UnitEntity implements WaitableUnit {
+export class Mssj extends WaitableUnitEntity {
   // [msqpt="queue-path-name";]
   get msqpt() {
     return ParamFactory.msqpt(this);
@@ -81,29 +77,6 @@ export class Mssj extends UnitEntity implements WaitableUnit {
   // [jty={q|n};]
   get jty() {
     return ParamFactory.jty(this);
-  }
-  // [mm={and|or};]
-  get mm() {
-    return ParamFactory.mm(this);
-  }
-  // [nmg={y|n};]
-  get nmg() {
-    return ParamFactory.nmg(this);
-  }
-  // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
-  get eun() {
-    return ParamFactory.eun(this);
-  }
-  get hasWaitedFor() {
-    return resolveUnitHasWaitedFor(this);
-  }
-  // [ega={exec|execdeffer|none};]
-  get ega() {
-    return ParamFactory.ega(this);
-  }
-  // [uem={y|n};]
-  get uem() {
-    return ParamFactory.uem(this);
   }
 }
 export class Rmssj extends Mssj {}

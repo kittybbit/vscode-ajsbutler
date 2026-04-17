@@ -1,11 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntity";
-import {
-  resolveUnitHasWaitedFor,
-  type WaitableUnit,
-} from "./unitWaitStateHelpers";
+import { WaitableUnitEntity } from "./unitCapabilityEntities";
 
-export class Evwj extends UnitEntity implements WaitableUnit {
+export class Evwj extends WaitableUnitEntity {
   // [evwid=event-ID;]
   get evwid() {
     return ParamFactory.evwid(this);
@@ -90,29 +86,6 @@ export class Evwj extends UnitEntity implements WaitableUnit {
   // [ets={kl|nr|wr|an};]
   get ets() {
     return ParamFactory.ets(this);
-  }
-  // [mm={and|or};]
-  get mm() {
-    return ParamFactory.mm(this);
-  }
-  // [nmg={y|n};]
-  get nmg() {
-    return ParamFactory.nmg(this);
-  }
-  // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
-  get eun() {
-    return ParamFactory.eun(this);
-  }
-  get hasWaitedFor() {
-    return resolveUnitHasWaitedFor(this);
-  }
-  // [ega={exec|execdeffer|none};]
-  get ega() {
-    return ParamFactory.ega(this);
-  }
-  // [uem={y|n};]
-  get uem() {
-    return ParamFactory.uem(this);
   }
 }
 export class Revwj extends Evwj {}

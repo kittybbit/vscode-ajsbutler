@@ -79,6 +79,10 @@ structure in `docs/specs/features/<feature>/`.
   inherited-builder shape alignment and schedule-rule naming cleanup were
   completed in focused slices, so no immediate ParameterFactory follow-up
   remains on this branch priority list.
+- Unit model wrapper duplication is reduced selectively:
+  shared wait-state and priority getter boilerplate now lives in focused
+  capability base classes, while `G` and `N` keep their unit-local planning,
+  schedule, and connector-control semantics with regression coverage.
 
 ### How To Maintain This Section
 
@@ -93,20 +97,15 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Keep wrapper refactoring selective:
-   extract only semantics that are cross-unit or shared with normalization,
-   and keep unit-local JP1/AJS rules on the owning wrapper when abstraction
-   would be artificial.
-   - Feature planning now exists in `docs/specs/features/refactor-unit-model-classes/`.
-2. Continue treating desktop and web compatibility as an explicit acceptance
+1. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, or shared adapters change.
-3. Profile webview bundle size and evaluate deferred optimization:
+2. Profile webview bundle size and evaluate deferred optimization:
    if compatibility work is stable, consider selective tree-shaking or
    lazy-load of lower-priority viewers.
-4. Keep feature follow-up verification evidence concrete:
+3. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-5. Revisit a dedicated filter/search use case only if a second non-table
+4. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix

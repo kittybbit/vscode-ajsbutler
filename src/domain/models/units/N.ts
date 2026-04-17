@@ -1,18 +1,10 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveConnectorControlDefaultRawValue } from "../parameters/parameterHelpers";
-import { UnitEntity } from "./UnitEntity";
+import { PrioritizableWaitableUnitEntity } from "./unitCapabilityEntities";
 import { resolveIsRootJobnet } from "./unitJobnetStateHelpers";
-import {
-  resolveUnitPriority,
-  type PrioritizableUnit,
-} from "./unitPriorityHelpers";
 import { resolveHasSchedule } from "./unitScheduleStateHelpers";
-import {
-  resolveUnitHasWaitedFor,
-  type WaitableUnit,
-} from "./unitWaitStateHelpers";
 
-export class N extends UnitEntity implements PrioritizableUnit, WaitableUnit {
+export class N extends PrioritizableWaitableUnitEntity {
   /** Whether this jobnet is the root jobnet. */
   get isRootJobnet() {
     return resolveIsRootJobnet(this.parent?.ty.value());
@@ -74,14 +66,6 @@ export class N extends UnitEntity implements PrioritizableUnit, WaitableUnit {
   // [rg=n;]
   get rg() {
     return ParamFactory.rg(this);
-  }
-  // [pr=n;]
-  get pr() {
-    return ParamFactory.pr(this);
-  }
-  // [ni=n;]
-  get ni() {
-    return ParamFactory.ni(this);
   }
   // [ha={y|w|a|n};]
   get ha() {
@@ -171,33 +155,6 @@ export class N extends UnitEntity implements PrioritizableUnit, WaitableUnit {
   // [ncsv=connection-service-name;]
   get ncsv() {
     return ParamFactory.ncsv(this);
-  }
-  // [mm={and|or};]
-  get mm() {
-    return ParamFactory.mm(this);
-  }
-  // [nmg={y|n};]
-  get nmg() {
-    return ParamFactory.nmg(this);
-  }
-  // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
-  get eun() {
-    return ParamFactory.eun(this);
-  }
-  get hasWaitedFor() {
-    return resolveUnitHasWaitedFor(this);
-  }
-  // [ega={exec|execdeffer|none};]
-  get ega() {
-    return ParamFactory.ega(this);
-  }
-  // [uem={y|n};]
-  get uem() {
-    return ParamFactory.uem(this);
-  }
-
-  get priority(): number {
-    return resolveUnitPriority(this);
   }
 }
 export class Rn extends N {}
