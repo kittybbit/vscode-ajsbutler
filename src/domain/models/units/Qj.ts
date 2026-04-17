@@ -1,15 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { UnitEntity } from "./UnitEntity";
-import {
-  resolveUnitPriority,
-  type PrioritizableUnit,
-} from "./unitPriorityHelpers";
-import {
-  resolveUnitHasWaitedFor,
-  type WaitableUnit,
-} from "./unitWaitStateHelpers";
+import { PrioritizableWaitableUnitEntity } from "./unitCapabilityEntities";
 
-export class Qj extends UnitEntity implements PrioritizableUnit, WaitableUnit {
+export class Qj extends PrioritizableWaitableUnitEntity {
   // [qu="queue-name";]
   get qu() {
     return ParamFactory.qu(this);
@@ -33,14 +25,6 @@ export class Qj extends UnitEntity implements PrioritizableUnit, WaitableUnit {
   // [fd=time-required-for-execution;]
   get fd() {
     return ParamFactory.fd(this);
-  }
-  // [pr=n;]
-  get pr() {
-    return ParamFactory.pr(this);
-  }
-  // [ni=n;]
-  get ni() {
-    return ParamFactory.ni(this);
   }
   // [jd={nm|ab|cod};]
   get jd() {
@@ -113,33 +97,6 @@ export class Qj extends UnitEntity implements PrioritizableUnit, WaitableUnit {
   // [eu={ent|def};]
   get eu() {
     return ParamFactory.eu(this);
-  }
-  // [mm={and|or};]
-  get mm() {
-    return ParamFactory.mm(this);
-  }
-  // [nmg={y|n};]
-  get nmg() {
-    return ParamFactory.nmg(this);
-  }
-  // [eun=name-of-the-unit-whose-end-is-being-waited-for;]
-  get eun() {
-    return ParamFactory.eun(this);
-  }
-  get hasWaitedFor() {
-    return resolveUnitHasWaitedFor(this);
-  }
-  // [ega={exec|execdeffer|none};]
-  get ega() {
-    return ParamFactory.ega(this);
-  }
-  // [uem={y|n};]
-  get uem() {
-    return ParamFactory.uem(this);
-  }
-
-  get priority(): number {
-    return resolveUnitPriority(this);
   }
 }
 export class Rq extends Qj {}

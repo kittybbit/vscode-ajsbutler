@@ -12,15 +12,16 @@
 - [x] Confirm this feature aligns with `docs/specs/plans.md` and
       `docs/specs/roadmap.md`.
 - [x] Create feature-level SPECS and PLANS.
+- [x] Review wrapper class duplication across `src/domain/models/units/`.
+- [x] Identify common extraction points for parameter getters and helper logic.
+- [x] Implement shared wrapper abstractions while preserving unit-local rules.
+- [x] Add regression tests covering shared behavior and wrapper-specific cases.
+- [x] Run validation: `npm run qlty`, `npm test`, `npm run test:web`,
+      `npm run build`.
 
 ## Remaining
 
-- [ ] Review wrapper class duplication across `src/domain/models/units/`.
-- [ ] Identify common extraction points for parameter getters and helper logic.
-- [ ] Implement shared wrapper abstractions while preserving unit-local rules.
-- [ ] Add regression tests covering shared behavior and wrapper-specific cases.
-- [ ] Run validation: `npm run qlty`, `npm test`, `npm run test:web`,
-      `npm run build`.
+- [ ] None.
 
 ## Notes
 
