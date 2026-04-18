@@ -248,6 +248,8 @@ const TableContents = () => {
             spacing={0}
             sx={{
               marginLeft: `${drawerWidth}px`,
+              width: `calc(100% - ${drawerWidth}px)`,
+              minWidth: 0,
             }}
           >
             <Header

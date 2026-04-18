@@ -1,6 +1,7 @@
 import React, { FC, memo, ReactElement, useCallback, useMemo } from "react";
 import AppBar from "@mui/material/AppBar";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Toolbar from "@mui/material/Toolbar";
@@ -74,6 +75,16 @@ const Header: FC<HeaderProps> = ({
     () => localeMap("flow.menu.menuItem1", lang),
     [lang],
   );
+  const currentUnitLabel = useMemo(() => {
+    if (!currentUnit) {
+      return undefined;
+    }
+    if (currentUnit.unitType === "n" && currentUnit.isRootJobnet) {
+      return "ROOT JOBNET";
+    }
+    return currentUnit.unitType.toUpperCase();
+  }, [currentUnit]);
+
   const handleToggleMenu1 = useCallback(() => {
     setDrawerWidth(0);
     setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
@@ -81,8 +92,17 @@ const Header: FC<HeaderProps> = ({
 
   return (
     <>
-      <AppBar position="sticky">
-        <Toolbar sx={{ gap: 1 }}>
+      <AppBar
+        position="sticky"
+        color="transparent"
+        elevation={0}
+        sx={{
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          backgroundColor: (theme) => `${theme.palette.background.paper}f2`,
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <Toolbar sx={{ gap: 1.25, minHeight: "3.5rem" }}>
           <FlowMenu
             flowMenuState={flowMenuState}
             drawerWidthState={drawerWidthState}
@@ -96,9 +116,26 @@ const Header: FC<HeaderProps> = ({
               <ViewColumn fontSize="inherit" />
             </IconButton>
           </Tooltip>
-          <Breadcrumbs separator="›" aria-label="breadcrumb">
+          <Breadcrumbs
+            separator="›"
+            aria-label="breadcrumb"
+            sx={{
+              flex: 1,
+              "& .MuiBreadcrumbs-ol": {
+                flexWrap: "nowrap",
+              },
+            }}
+          >
             {breadcrumbs}
           </Breadcrumbs>
+          {currentUnitLabel && (
+            <Chip
+              size="small"
+              label={currentUnitLabel}
+              color={currentUnit?.isRootJobnet ? "primary" : "default"}
+              variant="outlined"
+            />
+          )}
         </Toolbar>
       </AppBar>
     </>

@@ -7,8 +7,8 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import {
   ActionIcon,
   AjsNode,
+  buildNodeSxProps,
   nodeActionsSxProps,
-  nodeSxProps,
   NameOrComment,
   TyTitle,
 } from "./AjsNode";
@@ -26,13 +26,13 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 }: ConditionNodeProps) => {
   console.log("render ConditionNode.");
 
-  const { unitId, isCurrent, label, comment, ty } = data;
+  const { unitId, isAncestor, isCurrent, label, comment, ty } = data;
 
   return (
     <>
       <Stack
         id={unitId}
-        sx={nodeSxProps}
+        sx={buildNodeSxProps({ isCurrent, isAncestor, isRootJobnet: false })}
         className={isCurrent ? "current" : undefined}
       >
         <TyTitle ty={ty} />

@@ -6,8 +6,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import {
   ActionIcon,
   AjsNode,
+  buildNodeSxProps,
   nodeActionsSxProps,
-  nodeSxProps,
   NameOrComment,
   TyTitle,
 } from "./AjsNode";
@@ -24,7 +24,11 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
     <>
       <Stack
         id={unitId}
-        sx={nodeSxProps}
+        sx={buildNodeSxProps({
+          isCurrent: false,
+          isAncestor,
+          isRootJobnet: false,
+        })}
         className={classNames({
           ancestor: isAncestor,
         })}

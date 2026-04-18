@@ -26,35 +26,87 @@ export type AjsNode = {
   CurrentUnitIdStateType &
   Record<string, unknown>;
 
-export const nodeSxProps: SxProps<Theme> = {
-  width: "6em",
-  height: "6em",
-  borderRadius: "50%",
-  backgroundColor: (theme) => theme.palette.background.default,
-  boxShadow: (theme) => theme.shadows[1],
+export const buildNodeSxProps = ({
+  isCurrent,
+  isAncestor,
+  isRootJobnet,
+}: Pick<
+  AjsNode,
+  "isCurrent" | "isAncestor" | "isRootJobnet"
+>): SxProps<Theme> => ({
+  width: "7.25em",
+  minHeight: "7.25em",
+  paddingX: "0.55em",
+  paddingY: "0.45em",
+  borderRadius: isAncestor ? "1.35em" : "50%",
+  borderWidth: isCurrent ? "3px" : isRootJobnet ? "2px" : "1px",
+  borderStyle: "solid",
+  borderColor: (theme) =>
+    isCurrent
+      ? theme.palette.info.main
+      : isRootJobnet
+        ? theme.palette.primary.main
+        : theme.palette.divider,
+  background: (theme) => {
+    if (isCurrent) {
+      return `linear-gradient(160deg, ${theme.palette.info.light}22 0%, ${theme.palette.background.paper} 58%, ${theme.palette.background.default} 100%)`;
+    }
+    if (isAncestor) {
+      return `linear-gradient(180deg, ${theme.palette.warning.light}1f 0%, ${theme.palette.background.paper} 100%)`;
+    }
+    if (isRootJobnet) {
+      return `linear-gradient(180deg, ${theme.palette.primary.light}18 0%, ${theme.palette.background.paper} 100%)`;
+    }
+    return theme.palette.background.paper;
+  },
+  boxShadow: (theme) =>
+    isCurrent
+      ? `0 0 0 4px ${theme.palette.info.light}30, ${theme.shadows[6]}`
+      : isAncestor
+        ? theme.shadows[4]
+        : theme.shadows[2],
   justifyContent: "center",
-  "&.current": {
-    borderStyle: "solid",
-    borderColor: (theme) => theme.palette.action.active,
+  alignItems: "center",
+  gap: "0.15em",
+  transition:
+    "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
+  "&:hover": {
+    transform: "translateY(-1px)",
   },
-  "&.ancestor": {
-    borderRadius: "10%",
+  "& button": {
+    color: (theme) =>
+      isCurrent ? theme.palette.info.dark : theme.palette.text.secondary,
   },
+});
+
+export const nodeBadgeSxProps: SxProps<Theme> = {
+  minWidth: "3.8em",
+  paddingX: "0.55em",
+  paddingY: "0.15em",
+  borderRadius: "999px",
+  border: (theme) => `1px solid ${theme.palette.divider}`,
+  backgroundColor: (theme) => theme.palette.background.default,
+  fontSize: "0.68rem",
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  lineHeight: 1.2,
+  textAlign: "center",
 };
 
 export const handleStyle = {
-  top: "3em",
+  top: "3.6em",
 };
 
 const nodeTitleSxProps: SxProps<Theme> = {
-  height: "1em",
-  paddingTop: "0.25em",
+  minHeight: "1.6em",
+  paddingTop: "0.1em",
   paddingBottom: "0em",
   textAlign: "center",
 };
 
 export const nodeActionsSxProps: SxProps<Theme> = {
-  paddingTop: "0.25em",
+  minHeight: "1.8em",
+  paddingTop: "0.1em",
   paddingBottom: "0em",
   textAlign: "center",
 };
@@ -107,10 +159,11 @@ export const ActionIcon: FC<{
   </Tooltip>
 );
 const nameOrCommentSx: SxProps<Theme> = {
-  width: "6em",
+  width: "7.25em",
   overflow: "hidden",
   whiteSpace: "nowrap",
   textOverflow: "ellipsis",
+  textAlign: "center",
 };
 export const NameOrComment: React.FC<{
   value?: string;
