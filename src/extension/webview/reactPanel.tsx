@@ -37,6 +37,23 @@ function _getHtmlForWebview(
                 child-src ${panel.webview.cspSource};
                 ">
     <base href='${panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "/"))}'>
+    <style>
+        html, body, #root {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            box-sizing: border-box;
+            background: transparent;
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+    </style>
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

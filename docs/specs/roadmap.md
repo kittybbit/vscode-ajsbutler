@@ -59,30 +59,33 @@
 24. Re-measure viewer-side `@mui/material` path imports after bundle
     splitting and use that evidence to decide whether the next reduction
     target should move to table-only or flow-only dependencies.
+25. Compare viewer-specific dependency weight after the MUI import-shape slice
+    and choose the next shrinking target by removable parsed cost rather than
+    by raw emitted bundle size alone.
+26. Make the `UnitEntity` hash-change preconditions explicit:
+    confirm current hashed ids stay inside transient UI identity paths,
+    document the persistence boundaries that must stay clear, and name the
+    regression coverage to refresh before swapping algorithms.
 
 ## Current Roadmap
 
-1. Revisit table-side `react-virtuoso` and TanStack payload cost now that the
-   shared MUI import-shape experiment is complete.
-2. Revisit flow-side `@xyflow/*` payload cost now that the shared MUI import
-   shape experiment is complete.
-3. Refresh the flow-graph presentation so its visual design is closer to
+1. Refresh the flow-graph presentation so its visual design is closer to
    JP1/AJS View while preserving current desktop and web compatibility.
-4. Add progressive nested-graph expansion in the flow view, with both
+2. Add progressive nested-graph expansion in the flow view, with both
    user-driven incremental expansion and a one-click expand-all path.
-5. Add explicit navigation between unit-list and flow-graph units when the
+3. Add explicit navigation between unit-list and flow-graph units when the
    counterpart view for the selected unit is available.
-6. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+4. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-7. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+5. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-8. Add a read-only JP1/AJS WebAPI import path for loading server-side
+6. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-9. Replace the custom `UnitEntity` hash implementation with a common
+7. Replace the custom `UnitEntity` hash implementation with a common
    algorithm once identity and compatibility checks are explicit.
-10. Consolidate i18n translation files to reduce duplication between language
-    variants.
+8. Consolidate i18n translation files to reduce duplication between language
+   variants.
 
 ## Deferred / Optional Slices
 
@@ -94,6 +97,9 @@
    and nested expansion slices settle.
 4. Extend JP1/AJS WebAPI support beyond read-only import only after the
    initial boundary and authentication model are stable.
+5. Revisit viewer-specific bundle-size reductions only if a future
+   compatibility, startup, or payload target creates stronger pressure than
+   the current marginal gains justify.
 
 ## Done Criteria For A Slice
 

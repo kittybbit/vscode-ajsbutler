@@ -7,8 +7,8 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import {
   ActionIcon,
   AjsNode,
+  buildNodeSxProps,
   nodeActionsSxProps,
-  nodeSxProps,
   NameOrComment,
   TyTitle,
   handleStyle,
@@ -20,11 +20,15 @@ type JobNodeProps = NodeProps<JobNode>;
 const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
   console.log("render JobNode.");
 
-  const { unitId, hasWaitedFor, label, comment, ty } = data;
+  const { unitId, hasWaitedFor, label, comment, ty, isAncestor, isCurrent } =
+    data;
 
   return (
     <>
-      <Stack id={unitId} sx={nodeSxProps}>
+      <Stack
+        id={unitId}
+        sx={buildNodeSxProps({ isCurrent, isAncestor, isRootJobnet: false })}
+      >
         <TyTitle ty={ty} />
         {/* action */}
         <Box sx={nodeActionsSxProps}>

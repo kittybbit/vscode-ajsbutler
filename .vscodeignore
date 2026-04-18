@@ -7,8 +7,11 @@ antlr/
 # qlty
 .qlty/
 
-# code climate
-.codeclimate.yml
+# codex
+.codex/
+
+# github
+.github/
 
 # vscode
 .vscode/
@@ -19,16 +22,24 @@ antlr/
 # source code
 src/
 
+# SDD
+docs/
+.agent.md
+AGENTS.md
+PLANS.md
+
 # others
 report/
 sample/
 .browserslistrc
-.eslintrc.js
+eslint.config.mjs
 .gitattributes
 .gitignore
 .ncurc.json
 tsconfig.json
+tsconfig.test.json
 webpack.config.js
+pnpm-lock.yaml
 *.log
 *.tmp
 *.map

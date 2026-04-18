@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
@@ -178,6 +179,25 @@ const FlowContents: FC = () => {
     };
   }, []); // fire this when mount.
 
+  useEffect(() => {
+    const root = document.getElementById("root");
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    if (root) {
+      root.style.overflow = "hidden";
+      root.style.height = "100%";
+    }
+
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      if (root) {
+        root.style.overflow = "";
+        root.style.height = "";
+      }
+    };
+  }, []);
+
   const flowMenuState = {
     menuStatus: menuStatus,
     setMenuStatus: setMenuStatus,
@@ -198,7 +218,15 @@ const FlowContents: FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <ReactFlowProvider>
-        <Stack direction="row" spacing={0}>
+        <Stack
+          direction="row"
+          spacing={0}
+          sx={{
+            width: "100%",
+            height: "100vh",
+            overflow: "hidden",
+          }}
+        >
           {menuStatus.menuItem1 && (
             <FlowSelector
               rootUnits={ajsDocument?.rootUnits ?? []}
@@ -210,8 +238,13 @@ const FlowContents: FC = () => {
           )}
           <Stack
             direction="column"
-            sx={{ marginLeft: `${drawerWidth}px` }}
-            flex={1}
+            sx={{
+              marginLeft: `${drawerWidth}px`,
+              width: `calc(100% - ${drawerWidth}px)`,
+              minWidth: 0,
+              height: "100%",
+              overflow: "hidden",
+            }}
           >
             <Header
               currentUnit={currentUnit}
@@ -222,22 +255,68 @@ const FlowContents: FC = () => {
             />
             <Box
               sx={{
-                width: "100vw",
-                height: (theme) =>
-                  `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
+                width: "100%",
+                flex: 1,
+                minWidth: 0,
+                minHeight: 0,
+                overflow: "hidden",
+                padding: 1.25,
+                background: (theme) =>
+                  `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+                boxSizing: "border-box",
               }}
             >
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                defaultViewport={defaultViewport}
-                colorMode={theme.palette.mode}
-                nodeTypes={nodeTypes}
+              <Paper
+                variant="outlined"
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  minWidth: 0,
+                  minHeight: 0,
+                  overflow: "hidden",
+                  borderRadius: 3,
+                  backgroundColor: "background.paper",
+                }}
               >
-                <Background variant={BackgroundVariant.Dots} />
-                <Controls position="bottom-left" showInteractive={false} />
-                <MiniMap pannable zoomable style={{ position: "fixed" }} />
-              </ReactFlow>
+                <ReactFlow
+                  nodes={nodes}
+                  edges={edges}
+                  defaultViewport={defaultViewport}
+                  colorMode={theme.palette.mode}
+                  nodeTypes={nodeTypes}
+                  fitView
+                  fitViewOptions={{ padding: 0.22 }}
+                >
+                  <Background
+                    variant={BackgroundVariant.Dots}
+                    gap={20}
+                    size={1}
+                    color={theme.palette.divider}
+                  />
+                  <Controls
+                    position="bottom-left"
+                    showInteractive={false}
+                    style={{
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      boxShadow: theme.shadows[3],
+                    }}
+                  />
+                  <MiniMap
+                    pannable
+                    zoomable
+                    style={{
+                      position: "fixed",
+                      right: 16,
+                      bottom: 16,
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      opacity: 0.88,
+                      boxShadow: theme.shadows[3],
+                    }}
+                  />
+                </ReactFlow>
+              </Paper>
               {dialogData && (
                 <UnitEntityDialog
                   dialogData={dialogData}

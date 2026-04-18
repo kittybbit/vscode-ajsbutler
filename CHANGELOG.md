@@ -1,5 +1,16 @@
 # Change Log
 
+## [1.12.0]
+
+- Refreshed the flow viewer presentation so the current node, ancestor chain,
+  and root jobnet are easier to distinguish.
+- Fixed flow-view layout overflow so the webview fits the available panel area
+  without stray window scrollbars.
+- Restored table-view scrolling behavior after the webview layout changes and
+  corrected extra right-side whitespace in table-scroll mode.
+- Continued aligning the repository with Specification-Driven Development by
+  recording the remaining runtime-boundary and flow-graph follow-up decisions.
+
 ## [1.11.4]
 
 - Introduced Specification-Driven Development documents under `docs/specs/` and

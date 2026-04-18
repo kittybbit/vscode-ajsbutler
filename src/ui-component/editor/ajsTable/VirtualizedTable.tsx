@@ -115,15 +115,19 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     () =>
       scrollType === "table"
         ? {
-            width: `calc(100vw - 2em)`,
+            width: "100%",
+            minWidth: 0,
             height: `calc(100vh - ${toolbarHeight}px - 2em)`,
             maxHeight: `calc(100vh - ${toolbarHeight}px - 2em)`,
+            boxSizing: "border-box" as const,
           }
         : {
-            width: `calc(100vw - 2em)`,
+            width: "100%",
+            minWidth: 0,
             height: "auto",
             maxHeight: "none",
             overflow: "visible",
+            boxSizing: "border-box" as const,
           },
     [scrollType, toolbarHeight],
   );

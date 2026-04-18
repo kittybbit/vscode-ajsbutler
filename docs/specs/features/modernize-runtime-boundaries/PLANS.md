@@ -28,6 +28,14 @@ hashing internals, and bundle-size reduction while preserving behavior.
 - Resource and save events are already string- and object-based contracts:
   `MyAppResource`, operation names, and CSV save bodies do not require custom
   cyclic serialization.
+- `UnitEntity.id` is still derived from `absolutePath` through a local sync
+  hash helper and is consumed mostly as an in-memory UI identity for unit-list
+  row ids, flow-graph node ids, current selection, linked-unit references, and
+  DOM anchor ids.
+- Current extension and webview wiring does not persist that hashed id through
+  `workspaceState`, `globalState`, webview serializers, or `vscode.setState`;
+  the visible extension-to-webview document contract remains DTO-based and
+  rebuilds normalized units from posted data.
 
 ## Ordering Decision
 
@@ -104,3 +112,23 @@ hashing internals, and bundle-size reduction while preserving behavior.
   re-measure `tableViewer.js` and `flowViewer.js`, then decide whether the
   next target should be table virtualization (`react-virtuoso`) or flow graph
   libraries (`@xyflow/*`)
+- 2026-04-18 follow-up decision after re-measuring the MUI import-shape slice:
+  keep the next shrinking target on the flow side first because the current
+  analyzer evidence still shows `@xyflow/react` + `@xyflow/system`
+  outweighing table-side `react-virtuoso` + `@tanstack/table-core` by roughly
+  `139053` parsed bytes, while the emitted production bundle sizes remain too
+  close to make raw bundle bytes a better prioritization signal.
+- First flow-side implementation slice result:
+  deferring minimap-centered flow chrome behind an async seam did not produce
+  a meaningful reduction, so the experiment was reverted rather than kept as a
+  complexity-increasing baseline.
+- Current prioritization adjustment:
+  do not keep forcing viewer bundle-size work when the measured win is
+  marginal; shift the next branch-level attention to flow-graph UX and other
+  higher-value slices unless a stronger bundle constraint appears.
+- Hash-replacement readiness finding:
+  the required pre-change checks are now explicit rather than implicit.
+  Any future swap to a common hash algorithm should first re-verify that
+  hashed ids still do not cross persistence boundaries, keep webview DTOs on
+  stable normalized ids such as `absolutePath`, and refresh focused tests for
+  flow selection continuity plus table/graph anchor behavior.

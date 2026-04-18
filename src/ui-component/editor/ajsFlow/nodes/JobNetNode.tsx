@@ -10,8 +10,9 @@ import classNames from "classnames";
 import {
   ActionIcon,
   AjsNode,
+  buildNodeSxProps,
+  nodeBadgeSxProps,
   nodeActionsSxProps,
-  nodeSxProps,
   NameOrComment,
   TyTitle,
   handleStyle,
@@ -45,12 +46,13 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
     <>
       <Stack
         id={unitId}
-        sx={nodeSxProps}
+        sx={buildNodeSxProps({ isCurrent, isAncestor, isRootJobnet })}
         className={classNames({
           current: isCurrent,
           ancestor: isAncestor,
         })}
       >
+        {isRootJobnet && <Box sx={nodeBadgeSxProps}>ROOT</Box>}
         <TyTitle ty={ty} />
         {/* action */}
         <Box sx={nodeActionsSxProps}>

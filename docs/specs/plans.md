@@ -119,6 +119,21 @@ structure in `docs/specs/features/<feature>/`.
   711,123 bytes raw / 216,983 bytes gzip, so the next bundle-size slice
   should target viewer-specific dependencies instead of more MUI import-shape
   work.
+- Viewer-specific dependency comparison is now explicit:
+  despite the similar emitted bundle sizes, current analyzer evidence still
+  shows flow-side `@xyflow/react` + `@xyflow/system` outweighing table-side
+  `react-virtuoso` + `@tanstack/table-core`, so the next shrinking slice
+  should target flow dependencies first.
+- A concrete flow-side shrinking experiment has now been tried and rejected:
+  deferring minimap-centered flow chrome behind an async seam slightly
+  increased the initial flow bundle instead of shrinking it enough to justify
+  the extra complexity, so that source change was reverted and should be kept
+  only as recorded evidence, not as the new baseline.
+- Hash-replacement prerequisites are now explicit:
+  current `UnitEntity.id` usage stays inside in-memory UI identity paths
+  rather than persisted extension or webview state, and the next eventual hash
+  slice should preserve normalized `absolutePath`-based DTO contracts while
+  refreshing focused selection and anchor regressions.
 
 ### How To Maintain This Section
 
@@ -133,24 +148,22 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Reduce the next-largest viewer-specific webview bundle contributors now
-   that MUI import narrowing has been measured.
-2. Compare table-side `react-virtuoso` and TanStack cost against flow-side
-   `@xyflow/*` cost to choose the next shrinking slice.
-3. Refresh flow-graph UX in focused slices:
+1. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.
-4. Align parameter parsing and `ajs` command generation with
+2. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
-5. Define a read-only JP1/AJS WebAPI import boundary with clear application
+3. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
-6. Continue treating desktop and web compatibility as an explicit acceptance
+4. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, shared adapters, or package
    runtime behavior change.
-7. Keep feature follow-up verification evidence concrete:
+5. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-8. Revisit a dedicated filter/search use case only if a second non-table
+6. Revisit viewer bundle-size work only when a clearer reduction seam or
+   stronger product need appears.
+7. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix

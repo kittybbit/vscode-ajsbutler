@@ -94,7 +94,11 @@ suite("Flow Graph View", () => {
       nodes[0].data.unitDefinition.absolutePath,
       "/root/jobnet",
     );
+    assert.strictEqual(nodes[0].data.isCurrent, true);
+    assert.strictEqual(nodes[0].data.isAncestor, true);
+    assert.strictEqual(nodes[0].data.isRootJobnet, true);
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
+    assert.strictEqual(nodes[1].data.hasWaitedFor, true);
     assert.strictEqual(edges[0].source, "/root/jobnet");
     assert.strictEqual(edges[0].target, "/root/jobnet/job-a");
   });

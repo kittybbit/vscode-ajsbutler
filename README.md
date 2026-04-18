@@ -27,7 +27,18 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
 - Save data in CSV format.
 - Switch the editor to enable a flow-style display of the information.
   ![unit-list](images/unit-flow.png)
+- Highlights the current node, ancestor path, and root jobnet more clearly in
+  the flow viewer.
 - Supports web extensions.
+
+## Recent Updates
+
+- Flow viewer visuals are more legible, with clearer emphasis on the current
+  node, ancestor chain, and root jobnet.
+- Flow webview sizing now stays within the available panel area instead of
+  showing stray browser-level scrollbars.
+- Table view scrolling behavior is preserved for both window-scroll and
+  table-scroll modes after the webview layout updates.
 
 ## Extension Settings
 

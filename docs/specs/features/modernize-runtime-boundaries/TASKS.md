@@ -41,8 +41,18 @@
 - [x] Narrow viewer-side `@mui/material` imports away from barrel imports and
       re-measure both bundles before choosing a viewer-specific dependency
       reduction slice
-- [ ] Identify identity and persistence checks needed before changing the hash
-      algorithm
+- [x] Compare table-side `react-virtuoso` and TanStack cost against flow-side
+      `@xyflow/*` cost and choose the next viewer-specific shrinking slice
+- [x] Evaluate whether deferring flow-only `@xyflow/react` auxiliary UI such
+      as minimap or controls is worth the added complexity:
+      attempted async flow chrome did not reduce the initial flow bundle
+      enough to justify keeping the source change
+- [x] Identify identity and persistence checks needed before changing the hash
+      algorithm:
+      current `UnitEntity.id` usage is limited to in-memory selection, graph
+      node keys, and DOM anchors; no `workspaceState`/`globalState`, webview
+      serializer, or extension-side DTO contract currently persists the hashed
+      value across sessions
 
 ## Notes
 
@@ -92,3 +102,30 @@
   should move to viewer-specific dependencies such as `react-virtuoso` on the
   table side or `@xyflow/*` on the flow side rather than spending another
   slice on the same import shape.
+- 2026-04-18: rerunning analyzer output after the MUI import-shape slice keeps
+  the production editor bundles at `out/tableViewer.js` = `737279` bytes raw /
+  `218908` bytes gzip and `out/flowViewer.js` = `711123` bytes raw /
+  `216983` bytes gzip, so the next decision still depends on viewer-specific
+  dependency cost rather than gross output size.
+- 2026-04-18: the current viewer-specific dependency comparison still favors a
+  flow-first shrinking slice: prior analyzer evidence put
+  `@xyflow/react` + `@xyflow/system` at about `368916` parsed bytes versus
+  `@tanstack/table-core` + `react-virtuoso` at about `229863`, so
+  `@xyflow/*` remains the larger removable seam.
+- 2026-04-18: a follow-up experiment moved minimap-centered flow chrome behind
+  an async seam, but the production result regressed slightly:
+  `out/flowViewer.js` moved to `714801` bytes raw / `218913` bytes gzip and
+  emitted only a tiny extra async chunk (`out/69.js` = `406` bytes raw /
+  `283` bytes gzip), so the source change was reverted and should not be
+  treated as a worthwhile reduction path.
+- 2026-04-18: current branch intent is not to force marginal viewer shrinking
+  work when the trade-off is extra complexity without meaningful payload
+  improvement; bundle follow-up should resume only when a clearer reduction
+  seam or stronger product need appears.
+- 2026-04-18: identity and persistence review for `UnitEntity.id` found three
+  concrete pre-change checks:
+  confirm no future extension storage or webview state serializer starts
+  persisting hashed ids, keep extension-to-webview DTO boundaries on
+  `absolutePath`/normalized ids rather than legacy wrapper hashes, and update
+  focused regression coverage around flow selection plus table jump anchors if
+  the hashing implementation changes.
