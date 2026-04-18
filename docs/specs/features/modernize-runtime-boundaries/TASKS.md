@@ -33,7 +33,7 @@
       record the 2026-04-18 baseline for `out/index.js`, keep analyzer output
       as evidence, and identify the current single-entry viewer bundle as the
       first concrete reduction target
-- [ ] Split the shared viewer entry so table and flow webviews can ship
+- [x] Split the shared viewer entry so table and flow webviews can ship
       separate bundles instead of always loading both `AjsTableViewerApp` and
       `AjsFlowViewerApp`
 - [ ] Profile the largest contributors after entry splitting and choose the
@@ -63,3 +63,7 @@
   `9,166,525` bytes raw and `2,362,382` bytes gzip, and the strongest current
   hypothesis is that the single viewer entry point keeps both table and flow
   trees in the shipped bundle.
+- 2026-04-18: entry splitting now emits `out/tableViewer.js` =
+  `737,279` bytes raw / `219,019` bytes gzip and `out/flowViewer.js` =
+  `711,195` bytes raw / `217,051` bytes gzip; the next follow-up is to
+  inspect which dependencies still dominate each bundle separately.

@@ -94,6 +94,15 @@ structure in `docs/specs/features/<feature>/`.
   the shared viewer bundle `out/index.js` is the first shrinking seam, its
   2026-04-18 baseline is recorded for evidence, and the next concrete refactor
   is to stop shipping table and flow viewer code through one entry by default.
+- The first bundle-splitting refactor is now in place:
+  webpack emits dedicated `tableViewer.js` and `flowViewer.js` webview
+  bundles, and panel mounting resolves the bundle from the viewer `viewType`
+  instead of loading one shared entry.
+- Post-split production evidence is recorded:
+  `out/tableViewer.js` is 737,279 bytes raw / 219,019 bytes gzip and
+  `out/flowViewer.js` is 711,195 bytes raw / 217,051 bytes gzip, so the next
+  bundle-size slice should profile each viewer separately rather than treating
+  the webview payload as one monolith.
 
 ### How To Maintain This Section
 
@@ -108,24 +117,22 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Split the shared viewer entry so table and flow webviews can load
-   narrower bundles before deeper dependency cleanup.
-2. Profile and reduce the next-largest webview bundle contributors after
+1. Profile and reduce the next-largest webview bundle contributors after
    entry splitting.
-3. Refresh flow-graph UX in focused slices:
+2. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.
-4. Align parameter parsing and `ajs` command generation with
+3. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
-5. Define a read-only JP1/AJS WebAPI import boundary with clear application
+4. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
-6. Continue treating desktop and web compatibility as an explicit acceptance
+5. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, shared adapters, or package
    runtime behavior change.
-7. Keep feature follow-up verification evidence concrete:
+6. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-8. Revisit a dedicated filter/search use case only if a second non-table
+7. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix
