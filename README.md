@@ -64,7 +64,7 @@ Recent refactoring work introduced:
   definition building
 - a table row/view adapter so the table UI consumes application view data
   instead of `UnitEntity` wrapper accessors
-- repeatable web-extension verification via `npm run test:web`
+- repeatable web-extension verification via `pnpm run test:web`
 
 Browser-based extension testing uses `@vscode/test-web`, which currently
 requires Node.js 20 or later.
@@ -75,16 +75,17 @@ browser tooling:
 nodebrew install-binary v20.19.0
 nodebrew use v20.19.0
 hash -r
-npm install
+corepack enable
+pnpm install
 ```
 
 After switching, you can run:
 
 ```bash
-npm run qlty
-npm test
-npm run test:web
-npm run build
+pnpm run qlty
+pnpm test
+pnpm run test:web
+pnpm run build
 ```
 
 The `sample/` directory contains reusable JP1/AJS definition files for parser,
@@ -94,10 +95,10 @@ fixtures over ad hoc large inline definitions when adding broader coverage.
 For manual browser-side verification during development, use the VS Code
 launch configuration `Launch Extension(web)` in `.vscode/launch.json`.
 
-`npm run test:web` runs the extension test suite against VS Code for the Web
+`pnpm run test:web` runs the extension test suite against VS Code for the Web
 in headless Chromium.
-GitHub Actions also runs `npm run lint:md`, `npm run build`, `npm test`, and
-`npm run test:web` on pushes and pull requests.
+GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`, `pnpm test`, and
+`pnpm run test:web` on pushes and pull requests.
 
 ## For AI Agents
 

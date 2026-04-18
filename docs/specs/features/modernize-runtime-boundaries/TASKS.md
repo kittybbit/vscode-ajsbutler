@@ -22,13 +22,15 @@
       the viewers
 - [x] Remove the direct `flatted` dependency from repository manifests and
       align the modernization docs with the current DTO-based transport seam
+- [x] Migrate the repository package manager from `npm` to `pnpm`:
+      add `packageManager`, commit `pnpm-lock.yaml`, update CI, and switch
+      contributor-facing validation commands to `pnpm`
 
 ## Remaining Follow-up
 
 - [ ] Define bundle-size measurement and acceptance thresholds
 - [ ] Identify identity and persistence checks needed before changing the hash
       algorithm
-- [ ] Update validation commands after package-manager migration lands
 
 ## Notes
 
@@ -39,6 +41,9 @@
   `buildUnitList(...) -> UnitListDocumentDto -> panel.webview.postMessage`
   on the extension side, followed by `toAjsDocument(document)` in both table
   and flow viewers.
-- 2026-04-18: after `npm uninstall flatted`, the package manifest no longer
-  declares `flatted` directly; remaining lockfile entries are currently
-  transitive tooling dependencies rather than viewer transport requirements.
+- 2026-04-18: after removing the direct `flatted` dependency, viewer transport
+  requirements stayed on DTO-based payloads and event objects rather than any
+  lockfile-specific serialization package.
+- 2026-04-18: `pnpm` migration pins `packageManager: pnpm@10.33.0`, replaces
+  `package-lock.json` with `pnpm-lock.yaml`, and switches local plus CI
+  validation commands to `pnpm`.

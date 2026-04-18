@@ -70,24 +70,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: >-
           Markdown lint for docs/specs/features and
           docs/requirements/use-cases
-        run: npm run lint:md
+        run: pnpm run lint:md
 
       - name: Production build
-        run: npm run build
+        run: pnpm run build
 
       - name: Desktop extension tests
-        run: npm test
+        run: pnpm test
 
       - name: Web extension tests
-        run: npm run test:web
+        run: pnpm run test:web

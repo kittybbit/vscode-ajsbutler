@@ -16,8 +16,8 @@
 - [x] Identify common extraction points for parameter getters and helper logic.
 - [x] Implement shared wrapper abstractions while preserving unit-local rules.
 - [x] Add regression tests covering shared behavior and wrapper-specific cases.
-- [x] Run validation: `npm run qlty`, `npm test`, `npm run test:web`,
-      `npm run build`.
+- [x] Run validation: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`,
+      `pnpm run build`.
 
 ## Remaining
 

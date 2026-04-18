@@ -20,6 +20,6 @@ Define and deliver the first read-only JP1/AJS WebAPI import slice.
 
 ## Validation
 
-- code changes: `npm run qlty`, `npm test`, `npm run test:web`,
-  `npm run build`
-- docs-only changes: `npm run lint:md`
+- code changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`,
+  `pnpm run build`
+- docs-only changes: `pnpm run lint:md`

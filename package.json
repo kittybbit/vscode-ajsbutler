@@ -6,6 +6,7 @@
   "version": "1.11.4",
   "private": true,
   "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
   "homepage": "https://github.com/kittybbit/vscode-ajsbutler",
   "repository": {
     "type": "git",
@@ -109,7 +110,7 @@
     "onWebviewPanel:ajsbutler.flowViewer"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run build",
+    "vscode:prepublish": "pnpm run build",
     "clean": "rimraf out report",
     "development": "webpack",
     "prebuild": "npm-run-all clean antlr4ts",

@@ -42,7 +42,7 @@ For non-trivial changes:
 8. refresh `docs/specs/roadmap.md` in the same commit if a completed slice
    changes repository-level ordering, remaining debt, or deferred work
 9. before `git push`, run local validation serially in this order for code
-   changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`
+   changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`, `pnpm run build`
 10. run any additional task-specific checks before finishing
 11. avoid anemic domain models: extract only cross-unit or cross-layer
     semantics into helpers/interfaces, and keep entity identity plus
@@ -51,8 +51,8 @@ For non-trivial changes:
 
 For docs-only changes:
 
-- `npm run build` is not required
-- run markdown-focused validation such as `npm run lint:md`
+- `pnpm run build` is not required
+- run markdown-focused validation such as `pnpm run lint:md`
 - repository `Verify` workflow should not be relied on as a required gate
 
 ## Branch Naming

@@ -48,16 +48,16 @@ Check the routing matrix in `AGENTS.md` § "AI Agent Routing Guide":
 ## Build and Test Commands
 
 ```bash
-npm run qlty        # Lint and quality checks
-npm test           # Desktop extension tests
-npm run test:web   # Web extension tests
-npm run build      # Production build
+pnpm run qlty      # Lint and quality checks
+pnpm test          # Desktop extension tests
+pnpm run test:web  # Web extension tests
+pnpm run build     # Production build
 ```
 
 **Full validation sequence** (use before pushing):
 
 ```bash
-npm run qlty && npm test && npm run test:web && npm run build
+pnpm run qlty && pnpm test && pnpm run test:web && pnpm run build
 ```
 
 ## Testing Policy
@@ -65,8 +65,8 @@ npm run qlty && npm test && npm run test:web && npm run build
 When touching parser, list view, flow view, CSV export, diagnostics, hover, or adapter boundaries:
 
 - Add or update unit/integration tests
-- Run `npm run qlty && npm test && npm run test:web`
-- For docs-only changes, `npm run lint:md` is sufficient
+- Run `pnpm run qlty && pnpm test && pnpm run test:web`
+- For docs-only changes, `pnpm run lint:md` is sufficient
 
 ## Key Constraints
 
@@ -114,7 +114,7 @@ If you're uncertain whether CLI or Codex should handle a task, check that routin
 - For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
 - Refer to `docs/specs/features/` for use-case examples
 - Keep assumptions and design decisions documented in feature `PLANS.md`
-- Run full validation (`npm run qlty && npm test && npm run test:web && npm run build`) before pushing
+- Run full validation (`pnpm run qlty && pnpm test && pnpm run test:web && pnpm run build`) before pushing
 
 ---
 
