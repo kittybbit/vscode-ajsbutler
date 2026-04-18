@@ -1,20 +1,25 @@
 # Copilot CLI Instructions
 
-This file is for **Copilot CLI** (terminal agent). For multi-agent coordination details,
-see `.agent.md` and `AGENTS.md` § "AI Agent Routing Guide".
+This file is for **Copilot CLI** (terminal agent).
+For multi-agent coordination details, see `.agent.md` and `AGENTS.md`
+§ "AI Agent Routing Guide".
 
 ## Overview
 
-This repository is a Visual Studio Code extension for viewing and analyzing JP1/AJS3 definition files. It supports both desktop and web extension execution.
+This repository is a Visual Studio Code extension for viewing and analyzing
+JP1/AJS3 definition files.
+It supports both desktop and web extension execution.
 
 ## Architecture & Principles
 
-**Source of Truth**: Read these in order before making changes
+**Source of Truth**:
+Read these in order before making changes
 
 1. **`AGENTS.md`** - Architecture rules, agent routing, and coding policies
 
    - § "AI Agent Routing Guide" determines when to use Copilot CLI vs Codex
-   - § "Architecture Rules" lists strict dependency rules (domain, application, presentation, infrastructure)
+   - § "Architecture Rules" lists strict dependency rules
+     (domain, application, presentation, infrastructure)
    - § "SDD Workflow" outlines the specification-driven process
 
 2. **`docs/specs/`** - Specification-driven development documentation
@@ -48,25 +53,26 @@ Check the routing matrix in `AGENTS.md` § "AI Agent Routing Guide":
 ## Build and Test Commands
 
 ```bash
-npm run qlty        # Lint and quality checks
-npm test           # Desktop extension tests
-npm run test:web   # Web extension tests
-npm run build      # Production build
+pnpm run qlty      # Lint and quality checks
+pnpm test          # Desktop extension tests
+pnpm run test:web  # Web extension tests
+pnpm run build     # Production build
 ```
 
 **Full validation sequence** (use before pushing):
 
 ```bash
-npm run qlty && npm test && npm run test:web && npm run build
+pnpm run qlty && pnpm test && pnpm run test:web && pnpm run build
 ```
 
 ## Testing Policy
 
-When touching parser, list view, flow view, CSV export, diagnostics, hover, or adapter boundaries:
+When touching parser, list view, flow view, CSV export, diagnostics, hover,
+or adapter boundaries:
 
 - Add or update unit/integration tests
-- Run `npm run qlty && npm test && npm run test:web`
-- For docs-only changes, `npm run lint:md` is sufficient
+- Run `pnpm run qlty && pnpm test && pnpm run test:web`
+- For docs-only changes, `pnpm run lint:md` is sufficient
 
 ## Key Constraints
 
@@ -107,14 +113,15 @@ Both Copilot CLI and Codex share a routing guide:
 
 **Single source of truth**: `AGENTS.md` § "AI Agent Routing Guide"
 
-If you're uncertain whether CLI or Codex should handle a task, check that routing matrix first.
+If you're uncertain whether CLI or Codex should handle a task, check that
+routing matrix first.
 
 ## Next Steps
 
 - For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
 - Refer to `docs/specs/features/` for use-case examples
 - Keep assumptions and design decisions documented in feature `PLANS.md`
-- Run full validation (`npm run qlty && npm test && npm run test:web && npm run build`) before pushing
+- Run full validation (`pnpm run qlty && pnpm test && pnpm run test:web && pnpm run build`) before pushing
 
 ---
 

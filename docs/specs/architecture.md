@@ -201,11 +201,11 @@ Migration should be incremental and use-case driven.
 
 ### Package manager and toolchain
 
-- the repository may migrate from `npm` to `pnpm`, but package-manager changes
-  must stay outside domain/application behavior contracts
+- the repository now uses `pnpm`, but package-manager changes must stay
+  outside domain/application behavior contracts
 - build, test, and docs validation commands should remain explicit in SDD docs
-  during the migration period so contributors can tell whether current
-  instructions describe the live toolchain or the target toolchain
+  so contributors can tell whether instructions describe the live toolchain
+  and lockfile expectations
 
 ### Serialization boundary
 

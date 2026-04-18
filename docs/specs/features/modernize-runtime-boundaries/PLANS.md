@@ -7,7 +7,7 @@ hashing internals, and bundle-size reduction while preserving behavior.
 
 ## Scope
 
-- Plan `npm` to `pnpm` migration
+- Migrate package management from `npm` to `pnpm`
 - Remove `flatted`-based payload assumptions
 - Reduce webview bundle size
 - Replace custom `UnitEntity` hashing with a common algorithm when safe
@@ -16,8 +16,7 @@ hashing internals, and bundle-size reduction while preserving behavior.
 
 - No current source file imports `flatted` directly.
 - The repository manifest no longer declares `flatted` as a direct runtime
-  dependency, though the current `package-lock.json` may still contain it as a
-  transitive dependency of tooling packages.
+  dependency.
 - The extension-to-webview transport currently posts plain event objects via
   `panel.webview.postMessage(...)` and `window.vscode.postMessage(...)`.
 - The main document payload seam is
@@ -53,14 +52,14 @@ hashing internals, and bundle-size reduction while preserving behavior.
 
 ## Validation
 
-- code changes before `pnpm` migration lands:
-  `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`
-- docs-only changes: `npm run lint:md`
-- after `pnpm` migration lands, update this section in the same commit
+- code changes after `pnpm` migration lands:
+  `pnpm run qlty`, `pnpm test`, `pnpm run test:web`, `pnpm run build`
+- docs-only changes: `pnpm run lint:md`
 
 ## This Slice
 
-- Remove the direct `flatted` dependency from `package.json`
-- Keep `package-lock.json` aligned with the current npm toolchain state
-- Sync modernization docs so they describe DTO-based viewer payloads instead
-  of obsolete `flatted` transport coupling
+- Pin the repository package manager with `packageManager: pnpm@10.33.0`
+- Replace `package-lock.json` with `pnpm-lock.yaml`
+- Update GitHub Actions and contributor docs to use `pnpm` consistently
+- Keep build, desktop test, web test, and markdown lint validation explicit
+  during the migration

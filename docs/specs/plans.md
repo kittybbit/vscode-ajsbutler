@@ -43,10 +43,13 @@ structure in `docs/specs/features/<feature>/`.
   mediator/factory contracts now have narrower responsibilities and focused
   regression tests.
 - Validation flow is explicit and repeatable:
-  code-change slices use the serial baseline `npm run qlty`, `npm test`,
-  `npm run test:web`, and `npm run build`, while docs-only slices can stay on
-  markdown or docs-focused validation and should not depend on repository
-  `Verify`.
+  code-change slices now use the serial baseline `pnpm run qlty`,
+  `pnpm test`, `pnpm run test:web`, and `pnpm run build`, while docs-only
+  slices can stay on markdown or docs-focused validation and should not
+  depend on repository `Verify`.
+- Package management has been migrated to `pnpm` with an explicit pinned
+  `packageManager` version, committed `pnpm-lock.yaml`, and matching CI plus
+  contributor workflow updates.
 - `ShowUnitDefinition` follow-up wiring is now shared:
   table and flow viewers consume the same normalized
   `absolutePath -> UnitDefinitionDialogDto` mapping path instead of
@@ -83,6 +86,10 @@ structure in `docs/specs/features/<feature>/`.
   shared wait-state and priority getter boilerplate now lives in focused
   capability base classes, while `G` and `N` keep their unit-local planning,
   schedule, and connector-control semantics with regression coverage.
+- Runtime-boundary modernization has advanced in two concrete steps:
+  stale `flatted` transport assumptions were removed from manifests and docs,
+  and package management now uses pinned `pnpm` metadata plus
+  `pnpm-lock.yaml` with matching CI and contributor workflow updates.
 
 ### How To Maintain This Section
 
@@ -97,26 +104,22 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Remove stale `flatted` assumptions from viewer payload docs and manifests
-   first, now that the current transport seam is documented as plain DTOs and
-   postMessage event objects rather than cyclic runtime state.
-2. Plan the package-manager migration from `npm` to `pnpm` as a behavior-safe
-   infrastructure slice after the serialization boundary is simplified, while
-   keeping validation commands explicit during the transition.
-3. Refresh flow-graph UX in focused slices:
+1. Define bundle-size measurement and acceptance thresholds now that
+   serialization cleanup and package-manager migration have landed.
+2. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.
-4. Align parameter parsing and `ajs` command generation with
+3. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
-5. Define a read-only JP1/AJS WebAPI import boundary with clear application
+4. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
-6. Continue treating desktop and web compatibility as an explicit acceptance
+5. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, shared adapters, or package
    runtime behavior change.
-7. Keep feature follow-up verification evidence concrete:
+6. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-8. Revisit a dedicated filter/search use case only if a second non-table
+7. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix
@@ -169,24 +172,22 @@ model.
 9. Refresh `docs/specs/roadmap.md` in the same commit when a completed slice
    changes repository-level ordering, remaining debt, or deferred work.
 10. Before `git push`, run local validation serially in this order for code
-    changes: `npm run qlty`, `npm test`, `npm run test:web`, `npm run build`.
+    changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`,
+    `pnpm run build`.
 11. Run any additional task-specific checks after that serial baseline when
     needed.
 12. Summarize compatibility risks and follow-up work.
 
-Package-manager transition note:
+Package-manager note:
 
-- until the `pnpm` migration slice lands, repository docs may discuss `pnpm`
-  as a target state while validation instructions still use the current
-  `npm`-based commands; serialization cleanup may remove stale dependencies
-  first if it reduces the package-manager diff surface
-- when the migration lands, update this file, `docs/specs/README.md`, and any
-  affected feature `PLANS.md` validation sections in the same commit
+- the repository now treats `pnpm` as the live toolchain
+- keep `packageManager`, `pnpm-lock.yaml`, CI setup, and contributor docs in
+  sync whenever package-manager behavior changes
 
 Docs-only exception:
 
-- `npm run build` is not required
-- `npm run lint:md` is sufficient
+- `pnpm run build` is not required
+- `pnpm run lint:md` is sufficient
 - do not require the repository `Verify` workflow for docs-only slices
 
 Use-case note:

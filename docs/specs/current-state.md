@@ -18,11 +18,11 @@ The repository currently mixes legacy and target-oriented structure.
 - parser-adjacent logic can still leak toward UI-oriented code
 - DTO and use-case boundaries are still being clarified
 - old folder names coexist with the target clean-architecture layout
-- package-management and validation workflow still assume `npm`, which makes
-  lockfile strategy and dependency hygiene harder to modernize incrementally
-- webview payload contracts are now plain DTOs and event objects, but some
-  specs and follow-up tasks still need to finish removing stale
-  serialization-boundary assumptions from the remaining modernization docs
+- package-management and validation workflow now center on `pnpm`, so local
+  docs, CI, and contributor instructions need to stay aligned with the pinned
+  lockfile and `packageManager` metadata
+- webview payload contracts are now plain DTOs and event objects, reducing
+  serialization-boundary coupling across desktop and web hosts
 - webview bundle-size pressure remains visible in roadmap planning, especially
   while shared dependencies continue to grow
 - some legacy `UnitEntity` mechanics still rely on custom implementation

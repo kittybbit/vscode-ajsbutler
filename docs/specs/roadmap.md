@@ -45,32 +45,34 @@
     shared wait-state and priority boilerplate now lives in focused capability
     base classes, while unit-local JP1/AJS semantics stay on the owning
     wrappers.
+20. Remove stale `flatted` assumptions from viewer payload docs and manifests
+    so the transport contract is explicitly DTO-based rather than implicitly
+    cyclic.
+21. Migrate package management from `npm` to `pnpm` with a pinned
+    `packageManager`, committed `pnpm-lock.yaml`, and matching CI plus
+    contributor workflow updates.
 
 ## Current Roadmap
 
-1. Remove `flatted`-dependent viewer payload assumptions and simplify the
-   serialization boundary to standard JSON-safe DTOs.
-2. Migrate package management from `npm` to `pnpm` without changing extension
-   behavior or weakening current validation expectations.
-3. Profile and address webview bundle size once serialization and dependency
+1. Profile and address webview bundle size once serialization and dependency
    boundaries are clearer.
-4. Refresh the flow-graph presentation so its visual design is closer to
+2. Refresh the flow-graph presentation so its visual design is closer to
    JP1/AJS View while preserving current desktop and web compatibility.
-5. Add progressive nested-graph expansion in the flow view, with both
+3. Add progressive nested-graph expansion in the flow view, with both
    user-driven incremental expansion and a one-click expand-all path.
-6. Add explicit navigation between unit-list and flow-graph units when the
+4. Add explicit navigation between unit-list and flow-graph units when the
    counterpart view for the selected unit is available.
-7. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+5. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-8. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+6. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-9. Add a read-only JP1/AJS WebAPI import path for loading server-side
+7. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-10. Replace the custom `UnitEntity` hash implementation with a common
-    algorithm once identity and compatibility checks are explicit.
-11. Consolidate i18n translation files to reduce duplication between language
-    variants.
+8. Replace the custom `UnitEntity` hash implementation with a common
+   algorithm once identity and compatibility checks are explicit.
+9. Consolidate i18n translation files to reduce duplication between language
+   variants.
 
 ## Deferred / Optional Slices
 

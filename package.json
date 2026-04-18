@@ -6,6 +6,7 @@
   "version": "1.11.4",
   "private": true,
   "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
   "homepage": "https://github.com/kittybbit/vscode-ajsbutler",
   "repository": {
     "type": "git",
@@ -109,7 +110,7 @@
     "onWebviewPanel:ajsbutler.flowViewer"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run build",
+    "vscode:prepublish": "pnpm run build",
     "clean": "rimraf out report",
     "development": "webpack",
     "prebuild": "npm-run-all clean antlr4ts",
@@ -144,6 +145,7 @@
     "@types/vscode-webview": "^1.57.5",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
+    "playwright": "1.56.1",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/test-web": "^0.0.76",
     "@vscode/vsce": "^3.7.0",
