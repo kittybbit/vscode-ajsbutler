@@ -97,15 +97,25 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Continue treating desktop and web compatibility as an explicit acceptance
-   criterion whenever bootstrap, preview, parsing, or shared adapters change.
-2. Profile webview bundle size and evaluate deferred optimization:
-   if compatibility work is stable, consider selective tree-shaking or
-   lazy-load of lower-priority viewers.
-3. Keep feature follow-up verification evidence concrete:
+1. Plan the package-manager migration from `npm` to `pnpm` as a behavior-safe
+   infrastructure slice, while keeping validation commands explicit during the
+   transition.
+2. Remove `flatted` assumptions from viewer payloads before or alongside
+   bundle-size work so the transport contract is simpler and easier to trim.
+3. Refresh flow-graph UX in focused slices:
+   visual parity with JP1/AJS View first, then progressive nested expansion and
+   view-to-view navigation.
+4. Align parameter parsing and `ajs` command generation with
+   JP1/Automatic Job Management System 3 version 13 reference manuals.
+5. Define a read-only JP1/AJS WebAPI import boundary with clear application
+   and infrastructure responsibilities.
+6. Continue treating desktop and web compatibility as an explicit acceptance
+   criterion whenever bootstrap, preview, parsing, shared adapters, or package
+   runtime behavior change.
+7. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-4. Revisit a dedicated filter/search use case only if a second non-table
+8. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix
@@ -163,6 +173,14 @@ model.
     needed.
 12. Summarize compatibility risks and follow-up work.
 
+Package-manager transition note:
+
+- until the `pnpm` migration slice lands, repository docs may discuss `pnpm`
+  as a target state while validation instructions still use the current
+  `npm`-based commands
+- when the migration lands, update this file, `docs/specs/README.md`, and any
+  affected feature `PLANS.md` validation sections in the same commit
+
 Docs-only exception:
 
 - `npm run build` is not required
@@ -175,3 +193,20 @@ Use-case note:
   refactors
 - `docs/specs/` is for implementation decisions, branch planning, and task
   execution
+
+## Confirmed Assumptions For Upcoming Slices
+
+- JP1 manual alignment targets JP1/Automatic Job Management System 3 version 13
+- normative parameter source:
+  [Definition File Reference](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0211.HTM)
+- normative command source:
+  [Command Reference](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0067.HTM)
+- JP1/AJS WebAPI scope is read-only import at first
+- flow-graph refresh targets visual resemblance to JP1/AJS View, not full
+  interaction parity in one slice
+- nested graph expansion should support both incremental reveal and one-click
+  expand-all behavior
+- unit-list and flow-graph integration currently targets explicit navigation
+  when the counterpart view exists
+- dependency freshness follows the "keep current when practical, document
+  compatibility holds when necessary" rule
