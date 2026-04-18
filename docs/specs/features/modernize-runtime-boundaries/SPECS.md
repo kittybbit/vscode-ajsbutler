@@ -16,9 +16,9 @@ serialization boundaries, hashing internals, and bundle-size follow-up work.
   does not weaken current validation expectations during transition
 - viewer payload contracts no longer require `flatted` as the default
   serialization assumption
-- bundle-size follow-up names an explicit measurement seam, baseline commands,
-  and review thresholds instead of treating size changes as an implicit side
-  effect
+- bundle-size follow-up names concrete refactoring seams that are expected to
+  shrink the shipped webview payload, with measurement serving as evidence
+  rather than the primary outcome
 - `UnitEntity` hashing can move to a common algorithm without changing stable
   identity behavior relied on by the extension
 - desktop and web compatibility risks are named before implementation work
@@ -30,11 +30,14 @@ serialization boundaries, hashing internals, and bundle-size follow-up work.
   feature umbrella
 - prioritize serialization-boundary cleanup before bundle-size tuning when the
   same dependencies influence both concerns
-- treat the webview viewer bundle `out/index.js` as the primary size budget
-  because it is the shared entry point for the table and flow viewers
-- use `webpack-bundle-analyzer` reports as the required evidence for any
-  slice that materially increases bundle size or adds a heavy shared
-  dependency
+- treat the current shared webview viewer bundle `out/index.js` as the main
+  reduction target because it eagerly includes both table and flow viewer
+  trees behind one entry point
+- prefer refactors that remove code from the shipped viewer path, especially
+  entry-point splitting, host-specific adapter isolation, and dependency
+  narrowing around MUI icon usage and flow-only libraries
+- use `webpack-bundle-analyzer` reports and production byte counts as proof
+  that a reduction slice actually shrank the delivered payload
 - document current-state commands separately from target-state commands while
   the repository is in transition
 - do not combine runtime-boundary modernization with unrelated new end-user

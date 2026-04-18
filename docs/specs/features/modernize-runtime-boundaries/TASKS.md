@@ -28,14 +28,16 @@
 
 ## Remaining Follow-up
 
-- [x] Define bundle-size measurement and acceptance thresholds:
-      measure production output with `pnpm run build`, capture analyzer
-      evidence with `pnpm run build -- --env analyzer=true`, treat
-      `out/index.js` as the primary webview budget, and use the
-      2026-04-18 baseline (`9,166,525` raw / `2,362,382` gzip) with
-      +5% review and `10,000,000` raw / `2,500,000` gzip escalation limits
-- [ ] Profile the largest contributors in `report/index_report.html` and
-      choose the first concrete bundle-reduction slice
+- [x] Re-scope bundle-size follow-up around shrinking refactors rather than
+      only guarding growth:
+      record the 2026-04-18 baseline for `out/index.js`, keep analyzer output
+      as evidence, and identify the current single-entry viewer bundle as the
+      first concrete reduction target
+- [ ] Split the shared viewer entry so table and flow webviews can ship
+      separate bundles instead of always loading both `AjsTableViewerApp` and
+      `AjsFlowViewerApp`
+- [ ] Profile the largest contributors after entry splitting and choose the
+      next concrete shrinking slice
 - [ ] Identify identity and persistence checks needed before changing the hash
       algorithm
 
@@ -54,11 +56,10 @@
 - 2026-04-18: `pnpm` migration pins `packageManager: pnpm@10.33.0`, replaces
   `package-lock.json` with `pnpm-lock.yaml`, and switches local plus CI
   validation commands to `pnpm`.
-- 2026-04-18: bundle-size measurement now treats `out/index.js` as the
-  primary viewer budget because both table and flow viewers load the same
-  webview bundle, while `out/web.js` and `out/extension.js` stay secondary
-  guards for shared runtime drift.
+- 2026-04-18: bundle-size follow-up is now framed as webview-payload
+  reduction; measurement exists to prove shrinkage, not to substitute for the
+  refactor itself.
 - 2026-04-18: the post-migration baseline is `out/index.js` =
-  `9,166,525` bytes raw and `2,362,382` bytes gzip; routine slices should
-  stay within +5% unless the SDD docs record an explicit exception with
-  analyzer evidence.
+  `9,166,525` bytes raw and `2,362,382` bytes gzip, and the strongest current
+  hypothesis is that the single viewer entry point keeps both table and flow
+  trees in the shipped bundle.

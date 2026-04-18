@@ -51,32 +51,33 @@
 21. Migrate package management from `npm` to `pnpm` with a pinned
     `packageManager`, committed `pnpm-lock.yaml`, and matching CI plus
     contributor workflow updates.
-22. Define bundle-size measurement and acceptance thresholds for the shared
-    webview bundle so future runtime and UI slices can be reviewed against an
-    explicit budget instead of bundle growth being incidental.
+22. Reframe bundle-size work around webview-payload reduction:
+    record the current shared viewer baseline as evidence, then target
+    concrete shrinking refactors instead of only guarding against regressions.
 
 ## Current Roadmap
 
-1. Profile and reduce the largest webview bundle contributors now that
-   serialization, package-manager, and measurement-budget groundwork is in
-   place.
-2. Refresh the flow-graph presentation so its visual design is closer to
+1. Split the shared viewer entry so table and flow webviews no longer ship
+   each other's code by default.
+2. Profile and reduce the next-largest webview bundle contributors after the
+   entry split lands.
+3. Refresh the flow-graph presentation so its visual design is closer to
    JP1/AJS View while preserving current desktop and web compatibility.
-3. Add progressive nested-graph expansion in the flow view, with both
+4. Add progressive nested-graph expansion in the flow view, with both
    user-driven incremental expansion and a one-click expand-all path.
-4. Add explicit navigation between unit-list and flow-graph units when the
+5. Add explicit navigation between unit-list and flow-graph units when the
    counterpart view for the selected unit is available.
-5. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+6. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-6. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+7. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-7. Add a read-only JP1/AJS WebAPI import path for loading server-side
+8. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-8. Replace the custom `UnitEntity` hash implementation with a common
+9. Replace the custom `UnitEntity` hash implementation with a common
    algorithm once identity and compatibility checks are explicit.
-9. Consolidate i18n translation files to reduce duplication between language
-   variants.
+10. Consolidate i18n translation files to reduce duplication between language
+    variants.
 
 ## Deferred / Optional Slices
 

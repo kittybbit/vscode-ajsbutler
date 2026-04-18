@@ -90,11 +90,10 @@ structure in `docs/specs/features/<feature>/`.
   stale `flatted` transport assumptions were removed from manifests and docs,
   and package management now uses pinned `pnpm` metadata plus
   `pnpm-lock.yaml` with matching CI and contributor workflow updates.
-- Runtime-boundary modernization now has an explicit bundle budget:
-  production size measurement is anchored on `out/index.js` with analyzer
-  reports in `report/`, the 2026-04-18 baseline is recorded, and future
-  slices use +5% review plus 10,000,000 raw / 2,500,000 gzip escalation
-  thresholds instead of treating bundle growth as an untracked side effect.
+- Runtime-boundary modernization now has an explicit bundle-reduction target:
+  the shared viewer bundle `out/index.js` is the first shrinking seam, its
+  2026-04-18 baseline is recorded for evidence, and the next concrete refactor
+  is to stop shipping table and flow viewer code through one entry by default.
 
 ### How To Maintain This Section
 
@@ -109,22 +108,24 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Profile and reduce the largest webview bundle contributors using the new
-   measurement baseline and thresholds.
-2. Refresh flow-graph UX in focused slices:
+1. Split the shared viewer entry so table and flow webviews can load
+   narrower bundles before deeper dependency cleanup.
+2. Profile and reduce the next-largest webview bundle contributors after
+   entry splitting.
+3. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.
-3. Align parameter parsing and `ajs` command generation with
+4. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
-4. Define a read-only JP1/AJS WebAPI import boundary with clear application
+5. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
-5. Continue treating desktop and web compatibility as an explicit acceptance
+6. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, shared adapters, or package
    runtime behavior change.
-6. Keep feature follow-up verification evidence concrete:
+7. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-7. Revisit a dedicated filter/search use case only if a second non-table
+8. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix
