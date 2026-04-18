@@ -2,7 +2,7 @@ import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { Rating } from "@mui/material";
+import Rating from "@mui/material/Rating";
 
 const group11 = (
   columnHelper: ColumnHelper<UnitListRowView>,

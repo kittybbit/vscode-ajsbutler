@@ -112,6 +112,13 @@ structure in `docs/specs/features/<feature>/`.
   first replace viewer-side `@mui/material` barrel imports with path imports,
   then re-measure before choosing whether table virtualization or flow-graph
   libraries deserve the next targeted reduction.
+- Viewer-side `@mui/material` import narrowing is now complete:
+  table and flow components use path imports instead of the shared barrel, but
+  the resulting production build still measures `out/tableViewer.js` at
+  737,279 bytes raw / 218,908 bytes gzip and `out/flowViewer.js` at
+  711,123 bytes raw / 216,983 bytes gzip, so the next bundle-size slice
+  should target viewer-specific dependencies instead of more MUI import-shape
+  work.
 
 ### How To Maintain This Section
 
@@ -126,10 +133,10 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Profile and reduce the next-largest webview bundle contributors after
-   entry splitting.
-2. Narrow viewer-side `@mui/material` imports and re-measure bundle impact
-   before larger dependency changes.
+1. Reduce the next-largest viewer-specific webview bundle contributors now
+   that MUI import narrowing has been measured.
+2. Compare table-side `react-virtuoso` and TanStack cost against flow-side
+   `@xyflow/*` cost to choose the next shrinking slice.
 3. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.

@@ -1,11 +1,9 @@
 import React, { FC, memo, useRef, useState } from "react";
-import {
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import Loop from "@mui/icons-material/Loop";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
