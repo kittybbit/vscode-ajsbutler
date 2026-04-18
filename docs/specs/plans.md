@@ -103,6 +103,15 @@ structure in `docs/specs/features/<feature>/`.
   `out/flowViewer.js` is 711,195 bytes raw / 217,051 bytes gzip, so the next
   bundle-size slice should profile each viewer separately rather than treating
   the webview payload as one monolith.
+- Post-split profiling evidence is now explicit:
+  `@mui/*` is the largest remaining shared contributor in both viewer bundles,
+  while `@tanstack/table-core` plus `react-virtuoso` dominate the table-only
+  remainder and `@xyflow/react` plus `@xyflow/system` dominate the flow-only
+  remainder.
+- The next concrete shrinking slice is narrower than a broad library swap:
+  first replace viewer-side `@mui/material` barrel imports with path imports,
+  then re-measure before choosing whether table virtualization or flow-graph
+  libraries deserve the next targeted reduction.
 
 ### How To Maintain This Section
 
@@ -119,20 +128,22 @@ structure in `docs/specs/features/<feature>/`.
 
 1. Profile and reduce the next-largest webview bundle contributors after
    entry splitting.
-2. Refresh flow-graph UX in focused slices:
+2. Narrow viewer-side `@mui/material` imports and re-measure bundle impact
+   before larger dependency changes.
+3. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.
-3. Align parameter parsing and `ajs` command generation with
+4. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
-4. Define a read-only JP1/AJS WebAPI import boundary with clear application
+5. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
-5. Continue treating desktop and web compatibility as an explicit acceptance
+6. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, shared adapters, or package
    runtime behavior change.
-6. Keep feature follow-up verification evidence concrete:
+7. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-7. Revisit a dedicated filter/search use case only if a second non-table
+8. Revisit a dedicated filter/search use case only if a second non-table
    consumer appears and needs the same matching semantics.
 
 ## Wrapper Semantics Matrix

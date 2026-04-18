@@ -87,3 +87,20 @@ hashing internals, and bundle-size reduction while preserving behavior.
 - Next shrinking slice:
   profile the separated bundles to identify the largest remaining
   table-only and flow-only contributors before choosing another refactor
+- 2026-04-18 profiling evidence after the split:
+  webpack stats and analyzer output show that the largest remaining shared
+  contributor in both viewer bundles is `@mui/*`
+  (`tableViewer`: about 1,036,500 parsed bytes inside the concatenated viewer
+  module, `flowViewer`: about 853,234), while the largest viewer-specific
+  contributors are `@tanstack/table-core` plus `react-virtuoso` for table and
+  `@xyflow/react` plus `@xyflow/system` for flow
+- 2026-04-18 import-shape finding:
+  viewer components still import many controls from the `@mui/material`
+  barrel rather than path-specific entry points, so the first follow-up worth
+  testing is a focused import-narrowing slice before deeper UI-library
+  replacement discussions
+- Next concrete shrinking slice after profiling:
+  replace viewer-side `@mui/material` barrel imports with path imports,
+  re-measure `tableViewer.js` and `flowViewer.js`, then decide whether the
+  next target should be table virtualization (`react-virtuoso`) or flow graph
+  libraries (`@xyflow/*`)
