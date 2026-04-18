@@ -10,17 +10,17 @@
 ## Completed
 
 - [x] Document the modernization scope in SDD:
-  `pnpm`, `flatted` removal, bundle-size reduction, dependency freshness, and
-  `UnitEntity` hash replacement
+      `pnpm`, `flatted` removal, bundle-size reduction, dependency freshness, and
+      `UnitEntity` hash replacement
 
 ## Remaining Follow-up
 
 - [ ] Decide the review order between `pnpm` migration and viewer
-  serialization cleanup
+      serialization cleanup
 - [ ] Document the current `flatted` payload seams before replacement
 - [ ] Define bundle-size measurement and acceptance thresholds
 - [ ] Identify identity and persistence checks needed before changing the hash
-  algorithm
+      algorithm
 - [ ] Update validation commands after package-manager migration lands
 
 ## Notes

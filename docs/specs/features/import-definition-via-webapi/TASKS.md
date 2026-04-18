@@ -16,7 +16,7 @@
 - [ ] Identify the first user-visible import trigger
 - [ ] Document desktop and web host constraints for WebAPI access
 - [ ] Decide whether imported data feeds the existing parser directly or
-  requires a separate normalization seam
+      requires a separate normalization seam
 - [ ] Define authentication and error-reporting expectations
 
 ## Notes

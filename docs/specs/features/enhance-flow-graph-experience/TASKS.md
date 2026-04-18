@@ -10,17 +10,17 @@
 ## Completed
 
 - [x] Record the new SDD scope for flow-graph visual refresh, nested expansion,
-  and list/flow navigation
+      and list/flow navigation
 
 ## Remaining Follow-up
 
 - [ ] Define the visual cues that most matter for JP1/AJS View resemblance
 - [ ] Decide whether expand-all ships in the same slice as incremental
-  expansion or immediately after
+      expansion or immediately after
 - [ ] Document the target behavior when a counterpart list or flow view is not
-  available
+      available
 - [ ] Add focused validation plans for selection, navigation, and nested
-  expansion state
+      expansion state
 
 ## Notes
 

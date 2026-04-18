@@ -10,16 +10,16 @@
 ## Completed
 
 - [x] Record JP1/AJS3 version 13 as the target reference for parameter parsing
-  and command generation
+      and command generation
 - [x] Record that command generation should be separated from
-  `buildUnitDefinition.ts`
+      `buildUnitDefinition.ts`
 
 ## Remaining Follow-up
 
 - [ ] Inventory current parameter semantics that already match the version 13
-  definition reference
+      definition reference
 - [ ] Inventory current command-generation behavior and its coupling to
-  show-unit-definition
+      show-unit-definition
 - [ ] Decide the first supported set of auto-generated `ajs` commands
 - [ ] Define how manual mismatches are tracked and closed incrementally
 
