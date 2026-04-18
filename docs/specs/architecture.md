@@ -197,6 +197,51 @@ Migration should be incremental and use-case driven.
   changes can break both desktop and web viewers even if parsing remains
   correct
 
+## Planned Boundary Tightening
+
+### Package manager and toolchain
+
+- the repository may migrate from `npm` to `pnpm`, but package-manager changes
+  must stay outside domain/application behavior contracts
+- build, test, and docs validation commands should remain explicit in SDD docs
+  during the migration period so contributors can tell whether current
+  instructions describe the live toolchain or the target toolchain
+
+### Serialization boundary
+
+- viewer payloads should move away from `flatted` as an implicit transport
+  contract
+- presentation payloads should prefer DTOs that can be serialized by standard
+  JSON boundaries without circular-reference assumptions
+- serialization simplification is expected to support bundle-size reduction,
+  but the primary architectural goal is a clearer adapter boundary
+
+### Identity and hashing
+
+- `UnitEntity` identity semantics should remain stable, but internal hashing
+  should prefer a common, well-understood algorithm instead of repository-local
+  bespoke logic when behavior can be preserved
+- hash-algorithm changes should remain an implementation detail unless a
+  public or persisted identity contract is affected
+
+### JP1 reference alignment
+
+- JP1/AJS3 version 13 is the current normative product target for new
+  parameter-parsing and command-generation slices
+- manual-aligned parsing rules belong in domain/application seams that are
+  reusable by hover, definition rendering, navigation, and future import paths
+- command generation should be isolated behind an application-facing service or
+  use case instead of remaining embedded in a presentation-oriented
+  unit-definition builder
+
+### JP1/AJS WebAPI integration
+
+- JP1/AJS WebAPI access should sit behind infrastructure adapters with
+  application-facing DTOs or use cases
+- initial scope is read-only import of server-side definition information
+- WebAPI transport details, authentication, and endpoint wiring should stay
+  outside domain logic and outside webview presentation modules
+
 ## First Good Vertical Slice
 
 ### Recommended slice
@@ -234,3 +279,7 @@ normalized model where practical.
    boundaries
 3. Reduce residual raw-`Unit` / wrapper usage where application slices already
    provide stable models
+4. Simplify viewer serialization and dependency weight where adapter contracts
+   are still broader than necessary
+5. Add application and infrastructure seams for JP1/AJS3 version 13
+   reference-aligned parameter, command, and WebAPI work
