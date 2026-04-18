@@ -20,8 +20,9 @@ The repository currently mixes legacy and target-oriented structure.
 - old folder names coexist with the target clean-architecture layout
 - package-management and validation workflow still assume `npm`, which makes
   lockfile strategy and dependency hygiene harder to modernize incrementally
-- webview payloads still depend on `flatted`, so viewer serialization carries
-  avoidable format coupling across desktop and web hosts
+- webview payload contracts are now plain DTOs and event objects, but some
+  specs and follow-up tasks still need to finish removing stale
+  serialization-boundary assumptions from the remaining modernization docs
 - webview bundle-size pressure remains visible in roadmap planning, especially
   while shared dependencies continue to grow
 - some legacy `UnitEntity` mechanics still rely on custom implementation
