@@ -4,20 +4,18 @@ import { v4 } from "uuid";
 export function initReactPanel(
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
-  viewType: string,
   bundle: string,
 ): void {
   panel.webview.options = {
     enableScripts: true,
     localResourceRoots: [context.extensionUri],
   };
-  panel.webview.html = _getHtmlForWebview(context, panel, viewType, bundle);
+  panel.webview.html = _getHtmlForWebview(context, panel, bundle);
 }
 
 function _getHtmlForWebview(
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
-  viewType: string,
   bundle: string,
 ): string {
   const nonce = v4();
@@ -42,7 +40,6 @@ function _getHtmlForWebview(
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <input type="hidden" id="viewType" value="${viewType}" />
     <div id='root'></div>
     <script nonce=${nonce} src='${bundle}'></script>
 </body>

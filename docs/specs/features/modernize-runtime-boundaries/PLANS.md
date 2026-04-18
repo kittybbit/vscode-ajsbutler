@@ -77,3 +77,13 @@ hashing internals, and bundle-size reduction while preserving behavior.
   trim flow-only libraries from the table path, reduce MUI icon fan-out, and
   isolate browser fallbacks like `os-browserify` to the paths that still need
   them
+- 2026-04-18 implementation result:
+  `webpack` now emits `out/tableViewer.js` and `out/flowViewer.js` as
+  separate editor entries, and `mountViewerPanel(...)` resolves the bundle by
+  `viewType` instead of always loading one shared `out/index.js`
+- 2026-04-18 production evidence after the split:
+  `out/tableViewer.js` is 737,279 bytes raw and 219,019 bytes gzip, while
+  `out/flowViewer.js` is 711,195 bytes raw and 217,051 bytes gzip
+- Next shrinking slice:
+  profile the separated bundles to identify the largest remaining
+  table-only and flow-only contributors before choosing another refactor

@@ -178,7 +178,8 @@ const editorConfig = (env, argv) => {
         development,
         target: "web",
         entry: {
-            index: "./src/ui-component/editor/index.tsx",
+            tableViewer: "./src/ui-component/editor/tableViewer.tsx",
+            flowViewer: "./src/ui-component/editor/flowViewer.tsx",
         },
         libraryType: "umd",
         externals: {
@@ -197,7 +198,7 @@ const editorConfig = (env, argv) => {
             DEVELOPMENT: JSON.stringify(development),
         },
         analyzer: !!env.analyzer,
-        reportFilename: "../report/index_report.html",
+        reportFilename: "../report/editor_report.html",
     });
 };
 
