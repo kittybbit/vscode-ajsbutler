@@ -8,7 +8,9 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Box, Stack, ThemeProvider, createTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
 import {
   Background,

@@ -1,12 +1,9 @@
 import React, { FC } from "react";
-import {
-  Box,
-  IconButton,
-  SxProps,
-  Theme,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import { CurrentUnitIdStateType, DialogDataStateType } from "../FlowContents";
 import { TySymbol } from "../../../../domain/values/AjsType";

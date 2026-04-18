@@ -1,5 +1,5 @@
 import React, { JSX } from "react";
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import Parameter from "../../../../domain/models/parameters/Parameter";
 
 type PrimitiveType =

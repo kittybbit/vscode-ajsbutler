@@ -1,15 +1,13 @@
 import React, { FC, memo, ReactElement, useCallback, useState } from "react";
-import {
-  Alert,
-  AppBar,
-  IconButton,
-  Slide,
-  Snackbar,
-  Stack,
-  Toolbar,
-  Tooltip,
-  useScrollTrigger,
-} from "@mui/material";
+import Alert from "@mui/material/Alert";
+import AppBar from "@mui/material/AppBar";
+import IconButton from "@mui/material/IconButton";
+import Slide from "@mui/material/Slide";
+import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
+import useScrollTrigger from "@mui/material/useScrollTrigger";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SaveIcon from "@mui/icons-material/Save";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";

@@ -29,7 +29,9 @@ import group17 from "./columnDefs/group17";
 import group18 from "./columnDefs/group18";
 import group19 from "./columnDefs/group19";
 import group20 from "./columnDefs/group20";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 
 // default setting of
 export const tableDefaultColumnDef = {

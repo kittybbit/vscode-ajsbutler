@@ -1,13 +1,11 @@
 import React, { FC, memo, ReactElement, useCallback, useMemo } from "react";
-import {
-  AppBar,
-  Breadcrumbs,
-  IconButton,
-  Link,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import AppBar from "@mui/material/AppBar";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import IconButton from "@mui/material/IconButton";
+import Link from "@mui/material/Link";
+import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import FlowMenu from "./FlowMenu";
 import {

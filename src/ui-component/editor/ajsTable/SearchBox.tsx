@@ -7,7 +7,9 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { TextField, IconButton, Tooltip } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import { Updater } from "@tanstack/table-core";

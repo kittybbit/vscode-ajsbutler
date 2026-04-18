@@ -1,13 +1,10 @@
 import React, { FC, memo } from "react";
 import { HeaderGroup } from "@tanstack/table-core";
 import { flexRender } from "@tanstack/react-table";
-import {
-  SxProps,
-  TableCell,
-  TableRow,
-  TableSortLabel,
-  Theme,
-} from "@mui/material";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 
 const styleTableCell: SxProps<Theme> = {

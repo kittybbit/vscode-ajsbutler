@@ -1,6 +1,7 @@
 import React, { FC, memo } from "react";
 import { Handle, Node, NodeProps, Position } from "@xyflow/react";
-import { Box, Stack } from "@mui/material";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ScheduleIcon from "@mui/icons-material/Schedule";

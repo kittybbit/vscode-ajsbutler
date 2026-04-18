@@ -8,16 +8,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  CssBaseline,
-  Stack,
-  ThemeProvider,
-  Typography,
-  createTheme,
-} from "@mui/material";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import CssBaseline from "@mui/material/CssBaseline";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useReactTable } from "@tanstack/react-table";
 import {
   FilterMeta,

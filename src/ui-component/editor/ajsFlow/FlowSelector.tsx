@@ -1,17 +1,15 @@
 import React, { FC, memo, useEffect, useMemo, useRef } from "react";
-import {
-  Accordion as MuiAccordion,
-  AccordionActions as MuiAccordionActions,
-  AccordionSummary as MuiAccordionSummary,
-  Drawer,
-  IconButton,
-  Toolbar,
-  useTheme,
-  AccordionProps,
-  styled,
-  AccordionSummaryProps,
-  AccordionActionsProps,
-} from "@mui/material";
+import MuiAccordion, { type AccordionProps } from "@mui/material/Accordion";
+import MuiAccordionActions, {
+  type AccordionActionsProps,
+} from "@mui/material/AccordionActions";
+import MuiAccordionSummary, {
+  type AccordionSummaryProps,
+} from "@mui/material/AccordionSummary";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
+import { styled, useTheme } from "@mui/material/styles";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";

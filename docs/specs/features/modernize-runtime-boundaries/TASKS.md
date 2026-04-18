@@ -38,7 +38,7 @@
       `AjsFlowViewerApp`
 - [x] Profile the largest contributors after entry splitting and choose the
       next concrete shrinking slice
-- [ ] Narrow viewer-side `@mui/material` imports away from barrel imports and
+- [x] Narrow viewer-side `@mui/material` imports away from barrel imports and
       re-measure both bundles before choosing a viewer-specific dependency
       reduction slice
 - [ ] Identify identity and persistence checks needed before changing the hash
@@ -81,3 +81,14 @@
   across table and flow viewer components, so the next shrinking slice is to
   convert those imports to path imports and measure whether the shared MUI
   footprint drops before targeting `react-virtuoso` or `@xyflow/*`.
+- 2026-04-18: viewer-side `@mui/material` barrel imports were replaced with
+  path imports across table and flow components plus the focused flow-graph
+  regression test, and production re-measurement now reports
+  `out/tableViewer.js` = `737279` bytes raw / `218908` bytes gzip and
+  `out/flowViewer.js` = `711123` bytes raw / `216983` bytes gzip when built
+  through the current `corepack pnpm run build` pipeline.
+- 2026-04-18: path-import narrowing did not reduce emitted production bytes
+  under the current MUI and webpack setup, so the next bundle-size follow-up
+  should move to viewer-specific dependencies such as `react-virtuoso` on the
+  table side or `@xyflow/*` on the flow side rather than spending another
+  slice on the same import shape.

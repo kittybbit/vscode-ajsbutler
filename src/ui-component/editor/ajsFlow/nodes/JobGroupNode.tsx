@@ -1,6 +1,7 @@
 import React, { FC, memo } from "react";
 import { Node, NodeProps } from "@xyflow/react";
-import { Box, Stack } from "@mui/material";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import DescriptionIcon from "@mui/icons-material/Description";
 import {
   ActionIcon,

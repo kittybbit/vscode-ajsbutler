@@ -56,31 +56,32 @@
     concrete shrinking refactors instead of only guarding against regressions.
 23. Split the shared webview entry into dedicated table and flow bundles so
     each viewer stops shipping the other viewer tree by default.
+24. Re-measure viewer-side `@mui/material` path imports after bundle
+    splitting and use that evidence to decide whether the next reduction
+    target should move to table-only or flow-only dependencies.
 
 ## Current Roadmap
 
-1. Narrow viewer-side `@mui/material` imports away from barrel imports and
-   re-measure both webview bundles before deeper dependency changes.
-2. Revisit table-side `react-virtuoso` and TanStack payload cost after the
-   shared MUI import shape is narrowed.
-3. Revisit flow-side `@xyflow/*` payload cost after the shared MUI import
-   shape is narrowed.
-4. Refresh the flow-graph presentation so its visual design is closer to
+1. Revisit table-side `react-virtuoso` and TanStack payload cost now that the
+   shared MUI import-shape experiment is complete.
+2. Revisit flow-side `@xyflow/*` payload cost now that the shared MUI import
+   shape experiment is complete.
+3. Refresh the flow-graph presentation so its visual design is closer to
    JP1/AJS View while preserving current desktop and web compatibility.
-5. Add progressive nested-graph expansion in the flow view, with both
+4. Add progressive nested-graph expansion in the flow view, with both
    user-driven incremental expansion and a one-click expand-all path.
-6. Add explicit navigation between unit-list and flow-graph units when the
+5. Add explicit navigation between unit-list and flow-graph units when the
    counterpart view for the selected unit is available.
-7. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+6. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-8. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+7. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-9. Add a read-only JP1/AJS WebAPI import path for loading server-side
+8. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-10. Replace the custom `UnitEntity` hash implementation with a common
-    algorithm once identity and compatibility checks are explicit.
-11. Consolidate i18n translation files to reduce duplication between language
+9. Replace the custom `UnitEntity` hash implementation with a common
+   algorithm once identity and compatibility checks are explicit.
+10. Consolidate i18n translation files to reduce duplication between language
     variants.
 
 ## Deferred / Optional Slices
