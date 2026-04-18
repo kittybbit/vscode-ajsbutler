@@ -16,8 +16,9 @@ serialization boundaries, hashing internals, and bundle-size follow-up work.
   does not weaken current validation expectations during transition
 - viewer payload contracts no longer require `flatted` as the default
   serialization assumption
-- bundle-size reduction is tracked as an explicit outcome, not an implicit
-  side effect
+- bundle-size follow-up names an explicit measurement seam, baseline commands,
+  and review thresholds instead of treating size changes as an implicit side
+  effect
 - `UnitEntity` hashing can move to a common algorithm without changing stable
   identity behavior relied on by the extension
 - desktop and web compatibility risks are named before implementation work
@@ -29,6 +30,11 @@ serialization boundaries, hashing internals, and bundle-size follow-up work.
   feature umbrella
 - prioritize serialization-boundary cleanup before bundle-size tuning when the
   same dependencies influence both concerns
+- treat the webview viewer bundle `out/index.js` as the primary size budget
+  because it is the shared entry point for the table and flow viewers
+- use `webpack-bundle-analyzer` reports as the required evidence for any
+  slice that materially increases bundle size or adds a heavy shared
+  dependency
 - document current-state commands separately from target-state commands while
   the repository is in transition
 - do not combine runtime-boundary modernization with unrelated new end-user

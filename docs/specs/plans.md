@@ -90,6 +90,11 @@ structure in `docs/specs/features/<feature>/`.
   stale `flatted` transport assumptions were removed from manifests and docs,
   and package management now uses pinned `pnpm` metadata plus
   `pnpm-lock.yaml` with matching CI and contributor workflow updates.
+- Runtime-boundary modernization now has an explicit bundle budget:
+  production size measurement is anchored on `out/index.js` with analyzer
+  reports in `report/`, the 2026-04-18 baseline is recorded, and future
+  slices use +5% review plus 10,000,000 raw / 2,500,000 gzip escalation
+  thresholds instead of treating bundle growth as an untracked side effect.
 
 ### How To Maintain This Section
 
@@ -104,8 +109,8 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Define bundle-size measurement and acceptance thresholds now that
-   serialization cleanup and package-manager migration have landed.
+1. Profile and reduce the largest webview bundle contributors using the new
+   measurement baseline and thresholds.
 2. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.

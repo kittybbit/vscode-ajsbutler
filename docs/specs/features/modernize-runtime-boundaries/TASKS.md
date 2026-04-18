@@ -28,7 +28,14 @@
 
 ## Remaining Follow-up
 
-- [ ] Define bundle-size measurement and acceptance thresholds
+- [x] Define bundle-size measurement and acceptance thresholds:
+      measure production output with `pnpm run build`, capture analyzer
+      evidence with `pnpm run build -- --env analyzer=true`, treat
+      `out/index.js` as the primary webview budget, and use the
+      2026-04-18 baseline (`9,166,525` raw / `2,362,382` gzip) with
+      +5% review and `10,000,000` raw / `2,500,000` gzip escalation limits
+- [ ] Profile the largest contributors in `report/index_report.html` and
+      choose the first concrete bundle-reduction slice
 - [ ] Identify identity and persistence checks needed before changing the hash
       algorithm
 
@@ -47,3 +54,11 @@
 - 2026-04-18: `pnpm` migration pins `packageManager: pnpm@10.33.0`, replaces
   `package-lock.json` with `pnpm-lock.yaml`, and switches local plus CI
   validation commands to `pnpm`.
+- 2026-04-18: bundle-size measurement now treats `out/index.js` as the
+  primary viewer budget because both table and flow viewers load the same
+  webview bundle, while `out/web.js` and `out/extension.js` stay secondary
+  guards for shared runtime drift.
+- 2026-04-18: the post-migration baseline is `out/index.js` =
+  `9,166,525` bytes raw and `2,362,382` bytes gzip; routine slices should
+  stay within +5% unless the SDD docs record an explicit exception with
+  analyzer evidence.

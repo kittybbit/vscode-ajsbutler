@@ -51,11 +51,15 @@
 21. Migrate package management from `npm` to `pnpm` with a pinned
     `packageManager`, committed `pnpm-lock.yaml`, and matching CI plus
     contributor workflow updates.
+22. Define bundle-size measurement and acceptance thresholds for the shared
+    webview bundle so future runtime and UI slices can be reviewed against an
+    explicit budget instead of bundle growth being incidental.
 
 ## Current Roadmap
 
-1. Profile and address webview bundle size once serialization and dependency
-   boundaries are clearer.
+1. Profile and reduce the largest webview bundle contributors now that
+   serialization, package-manager, and measurement-budget groundwork is in
+   place.
 2. Refresh the flow-graph presentation so its visual design is closer to
    JP1/AJS View while preserving current desktop and web compatibility.
 3. Add progressive nested-graph expansion in the flow view, with both

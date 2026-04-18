@@ -45,8 +45,8 @@ hashing internals, and bundle-size reduction while preserving behavior.
 1. Document current and target runtime/tooling boundaries
 2. Remove stale `flatted` assumptions from viewer payload docs and manifests
 3. Migrate package management from `npm` to `pnpm` with validation parity
-4. Sequence bundle-size work after the highest-value dependency and payload
-   simplifications are identified
+4. Define bundle-size measurement and acceptance thresholds after the
+   highest-value dependency and payload simplifications are identified
 5. Add or update compatibility and regression checks
 6. Close each sub-slice with explicit docs sync
 
@@ -58,8 +58,21 @@ hashing internals, and bundle-size reduction while preserving behavior.
 
 ## This Slice
 
-- Pin the repository package manager with `packageManager: pnpm@10.33.0`
-- Replace `package-lock.json` with `pnpm-lock.yaml`
-- Update GitHub Actions and contributor docs to use `pnpm` consistently
-- Keep build, desktop test, web test, and markdown lint validation explicit
-  during the migration
+- Document the primary bundle-size seam as the production webview bundle
+  `out/index.js`, with `out/web.js` and `out/extension.js` tracked as
+  secondary guards when shared runtime imports change
+- Standardize the measurement commands:
+  `pnpm run build` for production output byte counts and
+  `pnpm run build -- --env analyzer=true` for static analyzer reports in
+  `report/`
+- Record the 2026-04-18 baseline after the `flatted` cleanup and `pnpm`
+  migration:
+  `out/index.js` = 9,166,525 bytes raw, 2,362,382 bytes gzip
+- Set review thresholds for future slices:
+  keep routine changes within +5% of the current `out/index.js` raw and gzip
+  baseline, and require an explicit SDD note plus analyzer evidence for
+  larger increases
+- Set escalation thresholds for future slices:
+  treat `out/index.js` above 10,000,000 bytes raw or 2,500,000 bytes gzip as
+  a stop-and-review condition before merge, even if behavior is otherwise
+  correct
