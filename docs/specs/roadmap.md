@@ -48,10 +48,10 @@
 
 ## Current Roadmap
 
-1. Migrate package management from `npm` to `pnpm` without changing extension
-   behavior or weakening current validation expectations.
-2. Remove `flatted`-dependent viewer payload assumptions and simplify the
+1. Remove `flatted`-dependent viewer payload assumptions and simplify the
    serialization boundary to standard JSON-safe DTOs.
+2. Migrate package management from `npm` to `pnpm` without changing extension
+   behavior or weakening current validation expectations.
 3. Profile and address webview bundle size once serialization and dependency
    boundaries are clearer.
 4. Refresh the flow-graph presentation so its visual design is closer to

@@ -193,9 +193,9 @@ Migration should be incremental and use-case driven.
 - `src/extension/webview/messageHandlers.ts` imports `os`; webpack currently
   provides a browser fallback, but this remains an environment-specific
   adapter concern that needs continued verification
-- `src/ui-component` receives flatted JSON payloads, so serialization format
-  changes can break both desktop and web viewers even if parsing remains
-  correct
+- `src/ui-component` receives webview event payloads rebuilt from plain DTO
+  documents, so serialization-boundary changes still affect both desktop and
+  web viewers even when parsing behavior is unchanged
 
 ## Planned Boundary Tightening
 
@@ -209,8 +209,9 @@ Migration should be incremental and use-case driven.
 
 ### Serialization boundary
 
-- viewer payloads should move away from `flatted` as an implicit transport
-  contract
+- viewer payloads should stay on plain DTO and event-object transport
+  contracts instead of reintroducing `flatted`-style implicit serialization
+  assumptions
 - presentation payloads should prefer DTOs that can be serialized by standard
   JSON boundaries without circular-reference assumptions
 - serialization simplification is expected to support bundle-size reduction,

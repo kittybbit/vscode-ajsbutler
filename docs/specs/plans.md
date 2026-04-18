@@ -97,11 +97,12 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Plan the package-manager migration from `npm` to `pnpm` as a behavior-safe
-   infrastructure slice, while keeping validation commands explicit during the
-   transition.
-2. Remove `flatted` assumptions from viewer payloads before or alongside
-   bundle-size work so the transport contract is simpler and easier to trim.
+1. Remove stale `flatted` assumptions from viewer payload docs and manifests
+   first, now that the current transport seam is documented as plain DTOs and
+   postMessage event objects rather than cyclic runtime state.
+2. Plan the package-manager migration from `npm` to `pnpm` as a behavior-safe
+   infrastructure slice after the serialization boundary is simplified, while
+   keeping validation commands explicit during the transition.
 3. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View first, then progressive nested expansion and
    view-to-view navigation.
@@ -177,7 +178,8 @@ Package-manager transition note:
 
 - until the `pnpm` migration slice lands, repository docs may discuss `pnpm`
   as a target state while validation instructions still use the current
-  `npm`-based commands
+  `npm`-based commands; serialization cleanup may remove stale dependencies
+  first if it reduces the package-manager diff surface
 - when the migration lands, update this file, `docs/specs/README.md`, and any
   affected feature `PLANS.md` validation sections in the same commit
 
