@@ -59,25 +59,29 @@
 
 ## Current Roadmap
 
-1. Profile and reduce the next-largest webview bundle contributors after the
-   viewer entry split.
-2. Refresh the flow-graph presentation so its visual design is closer to
+1. Narrow viewer-side `@mui/material` imports away from barrel imports and
+   re-measure both webview bundles before deeper dependency changes.
+2. Revisit table-side `react-virtuoso` and TanStack payload cost after the
+   shared MUI import shape is narrowed.
+3. Revisit flow-side `@xyflow/*` payload cost after the shared MUI import
+   shape is narrowed.
+4. Refresh the flow-graph presentation so its visual design is closer to
    JP1/AJS View while preserving current desktop and web compatibility.
-3. Add progressive nested-graph expansion in the flow view, with both
+5. Add progressive nested-graph expansion in the flow view, with both
    user-driven incremental expansion and a one-click expand-all path.
-4. Add explicit navigation between unit-list and flow-graph units when the
+6. Add explicit navigation between unit-list and flow-graph units when the
    counterpart view for the selected unit is available.
-5. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+7. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-6. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+8. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-7. Add a read-only JP1/AJS WebAPI import path for loading server-side
+9. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-8. Replace the custom `UnitEntity` hash implementation with a common
-   algorithm once identity and compatibility checks are explicit.
-9. Consolidate i18n translation files to reduce duplication between language
-   variants.
+10. Replace the custom `UnitEntity` hash implementation with a common
+    algorithm once identity and compatibility checks are explicit.
+11. Consolidate i18n translation files to reduce duplication between language
+    variants.
 
 ## Deferred / Optional Slices
 
