@@ -77,6 +77,7 @@ nodebrew use v20.19.0
 hash -r
 corepack enable
 pnpm install
+pnpm exec playwright install chromium-headless-shell
 ```
 
 After switching, you can run:
