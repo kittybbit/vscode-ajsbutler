@@ -46,6 +46,10 @@ import Header from "./Header";
 import FlowSelector from "./FlowSelector";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
 import { createReactFlowData } from "./flowGraphView";
+import {
+  collectExpandableNestedUnitIds,
+  hasExpandedAllNestedUnitIds,
+} from "./nestedExpansion";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 
@@ -130,6 +134,33 @@ const FlowContents: FC = () => {
     () => new Set(expandedUnitIds),
     [expandedUnitIds],
   );
+  const expandableNestedUnitIds = useMemo(
+    () => collectExpandableNestedUnitIds(currentUnit),
+    [currentUnit],
+  );
+  const hasExpandedAllNestedUnits = useMemo(
+    () =>
+      hasExpandedAllNestedUnitIds(expandableNestedUnitIds, expandedUnitIdSet),
+    [expandableNestedUnitIds, expandedUnitIdSet],
+  );
+  const toggleExpandAllNestedUnits = useCallback(() => {
+    if (expandableNestedUnitIds.length === 0) {
+      return;
+    }
+    setExpandedUnitIds((prev) => {
+      const prevSet = new Set(prev);
+      if (hasExpandedAllNestedUnitIds(expandableNestedUnitIds, prevSet)) {
+        return prev.filter(
+          (unitId) => !expandableNestedUnitIds.includes(unitId),
+        );
+      }
+      const next = new Set(prev);
+      for (const unitId of expandableNestedUnitIds) {
+        next.add(unitId);
+      }
+      return [...next];
+    });
+  }, [expandableNestedUnitIds]);
   const nestedExpansionState = useMemo<NestedExpansionStateType>(
     () => ({
       expandedUnitIds: expandedUnitIdSet,
@@ -310,6 +341,9 @@ const FlowContents: FC = () => {
               currentUnitIdState={currentUnitIdState}
               flowMenuState={flowMenuState}
               drawerWidthState={drawerWidthState}
+              canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
+              hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
+              toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
             />
             <Box
               sx={{

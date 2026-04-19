@@ -18,7 +18,7 @@
 
 ## Remaining Follow-up
 
-- [ ] Add a one-click expand-all path on top of the new nested-expansion state
+- [x] Add a one-click expand-all path on top of the new nested-expansion state
 - [ ] Add a deeper nested-expansion slice after the direct-child path is stable:
       reopen support for nested-in-nested jobnets only when the viewer can
       render and re-layout those deeper scopes predictably instead of exposing
@@ -71,6 +71,10 @@
   `currentUnitId` as the viewer's base scope and layers additional nested
   content on top through separate expand/collapse state, so the follow-up
   expand-all and later navigation slices can reuse the same scope model.
+- 2026-04-19: one-click expand-all now reuses the same nested-expansion state
+  model instead of introducing a separate graph mode; when every expandable
+  nested jobnet in the current scope is already open, the same control
+  collapses that scope back to the current baseline.
 - 2026-04-19: deeper nested expand/collapse remains intentionally deferred.
   The current UI now hides those controls below the first nested level until
   the viewer can reveal multi-level nested scopes with stable layout and
