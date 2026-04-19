@@ -23,6 +23,9 @@
       reopen support for nested-in-nested jobnets only when the viewer can
       render and re-layout those deeper scopes predictably instead of exposing
       non-working controls
+- [x] Refactor `buildExpandedFlowGraph.ts` after the deeper nested-expansion
+      fixes so expansion, panel sizing, and sibling collision handling are
+      easier to extend without changing behavior
 - [ ] Add flow-view search that finds a target unit and opens the hierarchy
       needed to reveal that unit in context before focusing it
 - [x] Define the visual cues that most matter for JP1/AJS View resemblance
@@ -88,3 +91,7 @@
   behavior is to search units from the flow surface, reveal any collapsed
   ancestors needed to show the match, and then focus the matching unit without
   requiring manual hierarchy expansion first.
+- 2026-04-19: after the nested-expansion bug fixes, `buildExpandedFlowGraph.ts`
+  should keep the same layout semantics but separate node reveal, panel-bounds
+  calculation, and sibling re-layout so the next flow-view interactions do not
+  pile more stateful logic into one long function.

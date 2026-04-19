@@ -87,6 +87,94 @@ unit=root,,jp1admin,;
 }
 `;
 
+const deepNestedJobnetDefinition = `
+unit=deep_jobnet_root,,jp1admin,;
+{
+  ty=g;
+  cm="deep jobnet root group";
+  el=jn_lv1,n,+0+0;
+  unit=jn_lv1,,jp1admin,;
+  {
+    ty=n;
+    cm="jobnet level 1";
+    sz=6x3;
+    el=jn_lv2,n,+240+144;
+    unit=jn_lv2,,jp1admin,;
+    {
+      ty=n;
+      cm="jobnet level 2";
+      sz=6x3;
+      el=jn_lv3,n,+240+144;
+      unit=jn_lv3,,jp1admin,;
+      {
+        ty=n;
+        cm="jobnet level 3";
+        sz=6x3;
+        el=jn_lv4,n,+240+144;
+        unit=jn_lv4,,jp1admin,;
+        {
+          ty=n;
+          cm="jobnet level 4";
+          sz=6x3;
+          el=jn_lv5,n,+240+144;
+          unit=jn_lv5,,jp1admin,;
+          {
+            ty=n;
+            cm="jobnet level 5";
+            sz=6x3;
+            el=leaf_job,j,+240+144;
+            unit=leaf_job,,jp1admin,;
+            {
+              ty=j;
+              sc="echo";
+              prm="leaf";
+              tho=0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+const deepNestedWithSiblingDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=child-net,n,+240+144;
+    el=sibling-job,j,+880+144;
+    unit=child-net,,jp1admin,;
+    {
+      ty=n;
+      el=grand-net,n,+240+144;
+      unit=grand-net,,jp1admin,;
+      {
+        ty=n;
+        el=great-net,n,+240+144;
+        unit=great-net,,jp1admin,;
+        {
+          ty=n;
+          el=leaf-job,j,+240+144;
+          unit=leaf-job,,jp1admin,;
+          {
+            ty=j;
+          }
+        }
+      }
+    }
+    unit=sibling-job,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
 suite("Build Expanded Flow Graph", () => {
   test("reveals nested jobnets only after their parent scope is expanded", () => {
     const result = parseAjs(nestedDefinition);
@@ -245,5 +333,115 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(orjExpanded!.y > panelBottom);
     assert.ok(flwjExpanded!.y > flwjCollapsed!.y);
     assert.ok(ntwjExpanded!.y > ntwjCollapsed!.y);
+  });
+
+  test("expands nested jobnets level by level when a newly visible child is also expanded", () => {
+    const result = parseAjs(deepNestedJobnetDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const level3Id =
+      document.rootUnits[0].children[0].children[0].children[0].id;
+    const level4Id =
+      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
+    const level5Id =
+      document.rootUnits[0].children[0].children[0].children[0].children[0]
+        .children[0].id;
+    const leafJobId =
+      document.rootUnits[0].children[0].children[0].children[0].children[0]
+        .children[0].children[0].id;
+
+    const expanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([level2Id, level3Id, level4Id, level5Id]),
+      16,
+    );
+
+    assert.ok(expanded.graph);
+    assert.strictEqual(
+      expanded.graph?.nodes.some((node) => node.id === level5Id),
+      true,
+    );
+    assert.strictEqual(
+      expanded.graph?.nodes.some((node) => node.id === leafJobId),
+      true,
+    );
+
+    const level2Decoration = expanded.nodeDecorations.get(level2Id);
+    const level3Decoration = expanded.nodeDecorations.get(level3Id);
+    const level2Position = expanded.positionOverrides.get(level2Id);
+    const level3Position = expanded.positionOverrides.get(level3Id);
+
+    assert.ok(level2Decoration);
+    assert.ok(level3Decoration);
+    assert.ok(level2Position);
+    assert.ok(level3Position);
+
+    const level2PanelRight =
+      level2Position!.x +
+      level2Decoration!.panelOffsetXPx +
+      level2Decoration!.panelWidthPx;
+    const level3PanelRight =
+      level3Position!.x +
+      level3Decoration!.panelOffsetXPx +
+      level3Decoration!.panelWidthPx;
+    const level2PanelBottom =
+      level2Position!.y +
+      level2Decoration!.panelOffsetYPx +
+      level2Decoration!.panelHeightPx;
+    const level3PanelBottom =
+      level3Position!.y +
+      level3Decoration!.panelOffsetYPx +
+      level3Decoration!.panelHeightPx;
+
+    assert.ok(level2PanelRight >= level3PanelRight);
+    assert.ok(level2PanelBottom >= level3PanelBottom);
+  });
+
+  test("repositions parent-level siblings after a deeper nested panel enlarges its ancestor", () => {
+    const result = parseAjs(deepNestedWithSiblingDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const level3Id =
+      document.rootUnits[0].children[0].children[0].children[0].id;
+    const level4Id =
+      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
+    const siblingId = document.rootUnits[0].children[0].children[1].id;
+
+    const shallowExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([level2Id]),
+      16,
+    );
+    const deepExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([level2Id, level3Id, level4Id]),
+      16,
+    );
+
+    const shallowSiblingPosition =
+      shallowExpanded.positionOverrides.get(siblingId);
+    const deepSiblingPosition = deepExpanded.positionOverrides.get(siblingId);
+    const deepLevel2Position = deepExpanded.positionOverrides.get(level2Id);
+    const deepLevel2Decoration = deepExpanded.nodeDecorations.get(level2Id);
+
+    assert.ok(shallowSiblingPosition);
+    assert.ok(deepSiblingPosition);
+    assert.ok(deepLevel2Position);
+    assert.ok(deepLevel2Decoration);
+
+    const deepLevel2PanelRight =
+      deepLevel2Position!.x +
+      deepLevel2Decoration!.panelOffsetXPx +
+      deepLevel2Decoration!.panelWidthPx;
+
+    assert.ok(deepSiblingPosition!.x > shallowSiblingPosition!.x);
+    assert.ok(deepSiblingPosition!.x > deepLevel2PanelRight);
   });
 });

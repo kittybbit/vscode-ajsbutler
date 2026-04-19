@@ -1,9 +1,10 @@
 # Change Log
 
-## [1.15.0]
+## [1.13.0]
 
-- Added inline nested expansion for direct child jobnets in the flow viewer.
-- Improved flow-view expansion layout and highlighting.
+- Added inline nested expansion for nested jobnets in the flow viewer,
+  including deeper nested scopes.
+- Improved flow-view expansion layout, re-layout stability, and highlighting.
 
 ## [1.12.0]
 

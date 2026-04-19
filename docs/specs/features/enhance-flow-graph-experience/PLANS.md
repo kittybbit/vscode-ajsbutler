@@ -88,6 +88,11 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
 - 2026-04-19 next slice:
   move from deeper nested reveal to flow-view search, then layer explicit
   list/flow navigation on top of the established expansion-state model.
+- 2026-04-19 maintenance slice:
+  keep the new deeper nested-expansion behavior, but refactor
+  `buildExpandedFlowGraph.ts` so expansion, panel sizing, and sibling
+  re-layout steps are separated into focused helpers before adding more
+  interaction on top.
 
 ## Validation
 
