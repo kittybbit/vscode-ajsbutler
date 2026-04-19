@@ -179,7 +179,25 @@ suite("Flow Graph View", () => {
                   layout: { h: 560, v: 240 },
                   parameters: [],
                   relations: [],
-                  children: [],
+                  children: [
+                    {
+                      id: "/root/jobnet/child-net/grand-net/leaf",
+                      name: "leaf",
+                      unitAttribute: "",
+                      unitType: "j",
+                      absolutePath: "/root/jobnet/child-net/grand-net/leaf",
+                      depth: 4,
+                      parentId: "/root/jobnet/child-net/grand-net",
+                      isRoot: false,
+                      isRootJobnet: false,
+                      hasSchedule: false,
+                      hasWaitedFor: false,
+                      layout: { h: 720, v: 336 },
+                      parameters: [],
+                      relations: [],
+                      children: [],
+                    },
+                  ],
                 },
               ],
             },
@@ -201,7 +219,25 @@ suite("Flow Graph View", () => {
               layout: { h: 560, v: 240 },
               parameters: [],
               relations: [],
-              children: [],
+              children: [
+                {
+                  id: "/root/jobnet/child-net/grand-net/leaf",
+                  name: "leaf",
+                  unitAttribute: "",
+                  unitType: "j",
+                  absolutePath: "/root/jobnet/child-net/grand-net/leaf",
+                  depth: 4,
+                  parentId: "/root/jobnet/child-net/grand-net",
+                  isRoot: false,
+                  isRootJobnet: false,
+                  hasSchedule: false,
+                  hasWaitedFor: false,
+                  layout: { h: 720, v: 336 },
+                  parameters: [],
+                  relations: [],
+                  children: [],
+                },
+              ],
             },
           ],
         ]),
@@ -225,7 +261,7 @@ suite("Flow Graph View", () => {
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
     assert.strictEqual(nodes[2].data.canExpandNested, true);
-    assert.strictEqual(nodes[3].data.canExpandNested, false);
+    assert.strictEqual(nodes[3].data.canExpandNested, true);
     assert.strictEqual(edges[0].source, "/root/jobnet");
     assert.strictEqual(edges[0].target, "/root/jobnet/job-a");
   });

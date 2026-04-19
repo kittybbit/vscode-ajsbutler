@@ -1,0 +1,47 @@
+unit=sample_ref_relations,,jp1admin,;
+{
+        ty=g;
+        cm="relation sample";
+        el=root_jn,n,+0+0;
+        unit=root_jn,,jp1admin,;
+        {
+                ty=n;
+                cm="relation root";
+                sz=8x4;
+                el=job_a,j,+240+144;
+                el=job_b,j,+560+144;
+                el=job_c,j,+880+144;
+                el=job_d,j,+560+336;
+                ar=(f=job_a,t=job_b,seq);
+                ar=(f=job_b,t=job_c,seq);
+                ar=(f=job_a,t=job_d,con);
+                unit=job_a,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="A";
+                        tho=0;
+                }
+                unit=job_b,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="B";
+                        tho=0;
+                }
+                unit=job_c,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="C";
+                        tho=0;
+                }
+                unit=job_d,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="D";
+                        tho=0;
+                }
+        }
+}

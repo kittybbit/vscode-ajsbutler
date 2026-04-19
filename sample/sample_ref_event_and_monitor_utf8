@@ -1,0 +1,61 @@
+unit=sample_ref_event_and_monitor,,jp1admin,;
+{
+        ty=g;
+        cm="event and monitor sample";
+        el=root_jn,n,+0+0;
+        unit=root_jn,,jp1admin,;
+        {
+                ty=n;
+                cm="event root";
+                sz=8x4;
+                el=.CONDITION,rc,+0+0;
+                el=send_event,evsj,+560+336;
+                el=file_watch,flwj,+880+144;
+                el=win_event_watch,ntwj,+1200+144;
+                ar=(f=file_watch,t=send_event,seq);
+                ar=(f=win_event_watch,t=send_event,seq);
+                unit=.CONDITION,,jp1admin,;
+                {
+                        ty=rc;
+                        cm="start condition";
+                        sz=6x2;
+                        el=recv_event,evwj,+240+48;
+                        el=interval_watch,tmwj,+560+48;
+                        cond=and;
+                        unit=recv_event,,jp1admin,;
+                        {
+                                ty=evwj;
+                                evwid=0:0;
+                                evwms="^start$";
+                        }
+                        unit=interval_watch,,jp1admin,;
+                        {
+                                ty=tmwj;
+                                tmitv=10;
+                        }
+                }
+                unit=send_event,,jp1admin,;
+                {
+                        ty=evsj;
+                        evsid=0;
+                        evsms="publish";
+                        evssv=no;
+                }
+                unit=file_watch,,jp1admin,;
+                {
+                        ty=flwj;
+                        flwf="end.file";
+                }
+                unit=win_event_watch,,jp1admin,;
+                {
+                        ty=ntwj;
+                        ntlgt=sys;
+                        ntevt=v:i:w:e:s:c:f;
+                        ntsrc="source";
+                        ntcls="class";
+                        nteid=1;
+                        ntdis="description line1
+description line2";
+                }
+        }
+}

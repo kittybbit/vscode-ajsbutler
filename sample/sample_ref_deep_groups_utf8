@@ -1,0 +1,62 @@
+unit=deep_root,,jp1admin,;
+{
+        ty=g;
+        cm="deep group root";
+        el=group_lv1,g,+0+0;
+        unit=group_lv1,,jp1admin,;
+        {
+                ty=g;
+                cm="group level 1";
+                el=group_lv2,g,+0+0;
+                unit=group_lv2,,jp1admin,;
+                {
+                        ty=g;
+                        cm="group level 2";
+                        el=group_lv3,g,+0+0;
+                        unit=group_lv3,,jp1admin,;
+                        {
+                                ty=g;
+                                cm="group level 3";
+                                el=group_lv4,g,+0+0;
+                                unit=group_lv4,,jp1admin,;
+                                {
+                                        ty=g;
+                                        cm="group level 4";
+                                        el=group_lv5,g,+0+0;
+                                        unit=group_lv5,,jp1admin,;
+                                        {
+                                                ty=g;
+                                                cm="group level 5";
+                                                el=group_lv6,g,+0+0;
+                                                unit=group_lv6,,jp1admin,;
+                                                {
+                                                        ty=g;
+                                                        cm="group level 6";
+                                                        el=group_lv7,g,+0+0;
+                                                        unit=group_lv7,,jp1admin,;
+                                                        {
+                                                                ty=g;
+                                                                cm="group level 7";
+                                                                el=deep_jobnet,n,+0+0;
+                                                                unit=deep_jobnet,,jp1admin,;
+                                                                {
+                                                                        ty=n;
+                                                                        cm="deep jobnet";
+                                                                        sz=4x2;
+                                                                        el=deep_job,j,+240+144;
+                                                                        unit=deep_job,,jp1admin,;
+                                                                        {
+                                                                                ty=j;
+                                                                                sc="echo";
+                                                                                prm="deep";
+                                                                                tho=0;
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+}

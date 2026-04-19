@@ -75,6 +75,24 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   move from scope-wide expansion to deeper nested reveal and search behavior,
   reusing the same expansion-state model rather than replacing it for each
   follow-up interaction.
+- 2026-04-19 implementation result:
+  visible nested jobnets are no longer limited to direct-child expansion
+  controls. Once a nested jobnet appears in the current canvas and has nested
+  children of its own, the same inline expand/collapse affordance can reveal
+  the next level without requiring a separate scope change.
+- 2026-04-19 validation result:
+  the flow-view mapping regression now verifies that expandable deeper nested
+  jobnets keep their inline toggle affordance once visible, alongside the
+  existing expanded-graph layout coverage and the standard desktop, web, and
+  build baseline.
+- 2026-04-19 next slice:
+  move from deeper nested reveal to flow-view search, then layer explicit
+  list/flow navigation on top of the established expansion-state model.
+- 2026-04-19 maintenance slice:
+  keep the new deeper nested-expansion behavior, but refactor
+  `buildExpandedFlowGraph.ts` so expansion, panel sizing, and sibling
+  re-layout steps are separated into focused helpers before adding more
+  interaction on top.
 
 ## Validation
 
