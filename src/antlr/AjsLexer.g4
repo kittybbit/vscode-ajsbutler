@@ -252,11 +252,13 @@ RBRACE: '}';
 WS: [ \t\r\n\u000C\u00A0]+ -> skip;
 
 mode VALUE;
+WS_VALUE: [ \t\r\n\u000C\u00A0]+ -> skip;
 STRING: '"' (EscapeString | ~["#])* '"';
-TEXT: ~[\r\n;]+;
+TEXT: TEXT_CHAR (~[\r\n;]* TEXT_CHAR)?;
 SEMI: ';' -> mode(DEFAULT_MODE);
 
 fragment EscapeString: '#"' | '##';
+fragment TEXT_CHAR: ~[\r\n; \t\u000C\u00A0];
 
 // parameter fragment
 AB_KEY: 'ab';

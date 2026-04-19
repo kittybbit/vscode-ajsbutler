@@ -1,0 +1,48 @@
+unit=deep_jobnet_root,,jp1admin,;
+{
+        ty=g;
+        cm="deep jobnet root group";
+        el=jn_lv1,n,+0+0;
+        unit=jn_lv1,,jp1admin,;
+        {
+                ty=n;
+                cm="jobnet level 1";
+                sz=6x3;
+                el=jn_lv2,n,+240+144;
+                unit=jn_lv2,,jp1admin,;
+                {
+                        ty=n;
+                        cm="jobnet level 2";
+                        sz=6x3;
+                        el=jn_lv3,n,+240+144;
+                        unit=jn_lv3,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="jobnet level 3";
+                                sz=6x3;
+                                el=jn_lv4,n,+240+144;
+                                unit=jn_lv4,,jp1admin,;
+                                {
+                                        ty=n;
+                                        cm="jobnet level 4";
+                                        sz=6x3;
+                                        el=jn_lv5,n,+240+144;
+                                        unit=jn_lv5,,jp1admin,;
+                                        {
+                                                ty=n;
+                                                cm="jobnet level 5";
+                                                sz=6x3;
+                                                el=leaf_job,j,+240+144;
+                                                unit=leaf_job,,jp1admin,;
+                                                {
+                                                        ty=j;
+                                                        sc="echo";
+                                                        prm="leaf";
+                                                        tho=0;
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+}
