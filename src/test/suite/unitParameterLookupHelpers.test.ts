@@ -8,12 +8,12 @@ import {
 } from "../../domain/values/unitParameterLookupHelpers";
 
 const validDefinition = `
-unit=root,,jp1admin,;
+unit = root,,jp1admin, ;
 {
-  ty=g;
-  gty=n;
-  op=mo:1;
-  op=2024/01/01;
+  ty = g ;
+  gty = n ;
+  op = mo:1 ;
+  op = 2024/01/01 ;
 }
 `;
 
@@ -23,6 +23,7 @@ suite("Unit Parameter Lookup Helpers", () => {
     assert.deepStrictEqual(result.errors, []);
     const unit = result.rootUnits[0];
 
+    assert.strictEqual(unit.name, "root");
     assert.strictEqual(findUnitParameter(unit, "ty")?.value, "g");
     assert.strictEqual(findUnitParameterValue(unit, "gty"), "n");
     assert.deepStrictEqual(

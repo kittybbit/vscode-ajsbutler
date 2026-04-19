@@ -1,0 +1,20 @@
+unit=sample_ref_minimal,,jp1admin,;
+{
+        ty=g;
+        cm="minimal root group";
+        el=root_jn,n,+0+0;
+        unit=root_jn,,jp1admin,;
+        {
+                ty=n;
+                cm="minimal root jobnet";
+                sz=4x2;
+                el=job1,j,+240+144;
+                unit=job1,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="hello";
+                        tho=0;
+                }
+        }
+}
