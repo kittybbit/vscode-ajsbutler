@@ -19,7 +19,7 @@
       "patterns": [
         {
           "name": "keyword.other.jp1ajs",
-          "match": "[a-zA-Z0-9]+?(?==)"
+          "match": "[a-zA-Z0-9]+?(?=\\s*=)"
         }
       ]
     },

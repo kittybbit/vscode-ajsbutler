@@ -17,13 +17,13 @@
     ["\"", "\""]
   ],
   "indentationRules": {
-    "increaseIndentPattern": "{",
-    "decreaseIndentPattern": "}"
+    "increaseIndentPattern": "^\\s*\\{\\s*$",
+    "decreaseIndentPattern": "^\\s*\\}\\s*$"
   },
   "folding": {
     "markers": {
-      "start": "{",
-      "end": "}"
+      "start": "^\\s*\\{\\s*$",
+      "end": "^\\s*\\}\\s*$"
     }
   }
 }
