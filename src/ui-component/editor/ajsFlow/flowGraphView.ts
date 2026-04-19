@@ -26,11 +26,6 @@ type CreateReactFlowDataOptions = {
 const hasExpandableChildren = (unit?: AjsUnit): boolean =>
   !!unit && unit.unitType === "n" && unit.children.length > 0;
 
-const isDirectNestedExpansionTarget = (
-  unit: AjsUnit | undefined,
-  currentUnitId: string | undefined,
-): boolean => !!unit && !!currentUnitId && unit.parentId === currentUnitId;
-
 const toNodeData = (
   node: FlowGraphNodeDto,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
@@ -62,8 +57,7 @@ const toNodeData = (
     canExpandNested:
       !node.metadata.isCurrent &&
       !node.metadata.isAncestor &&
-      hasExpandableChildren(unit) &&
-      isDirectNestedExpansionTarget(unit, currentUnitIdState.currentUnitId),
+      hasExpandableChildren(unit),
     isExpandedNested: options?.nestedExpansionState?.expandedUnitIds.has(
       node.id,
     ),

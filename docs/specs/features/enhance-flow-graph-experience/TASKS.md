@@ -19,7 +19,7 @@
 ## Remaining Follow-up
 
 - [x] Add a one-click expand-all path on top of the new nested-expansion state
-- [ ] Add a deeper nested-expansion slice after the direct-child path is stable:
+- [x] Add a deeper nested-expansion slice after the direct-child path is stable:
       reopen support for nested-in-nested jobnets only when the viewer can
       render and re-layout those deeper scopes predictably instead of exposing
       non-working controls
@@ -79,6 +79,11 @@
   The current UI now hides those controls below the first nested level until
   the viewer can reveal multi-level nested scopes with stable layout and
   collision handling.
+- 2026-04-19: deeper nested expand/collapse now reuses the same visible-node
+  affordance as the direct-child slice. Once a nested jobnet is revealed in
+  the current flow canvas and it has nested children of its own, the same
+  expand/collapse control stays available without forcing a scope change back
+  through "open jobnet".
 - 2026-04-19: flow-view search is a planned usability follow-up. The desired
   behavior is to search units from the flow surface, reveal any collapsed
   ancestors needed to show the match, and then focus the matching unit without
