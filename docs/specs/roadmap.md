@@ -74,23 +74,21 @@
 
 1. Refresh the flow-graph presentation so its visual design is closer to
    JP1/AJS View while preserving current desktop and web compatibility.
-2. Add flow-view search that locates a unit and reveals the hierarchy needed
-   to show that unit in context before focusing it.
-3. Add explicit navigation between unit-list and flow-graph units when the
+2. Add explicit navigation between unit-list and flow-graph units when the
    counterpart view for the selected unit is available.
-4. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+3. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-5. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+4. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-6. Add a read-only JP1/AJS WebAPI import path for loading server-side
+5. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-7. Replace the custom `UnitEntity` hash implementation with a common
+6. Replace the custom `UnitEntity` hash implementation with a common
    algorithm once identity and compatibility checks are explicit.
-8. Add richer unit-list search on top of the current presentation-local
+7. Add richer unit-list search on top of the current presentation-local
    matcher so parameter-key and parameter-value queries complement the current
    partial-match behavior.
-9. Consolidate i18n translation files to reduce duplication between language
+8. Consolidate i18n translation files to reduce duplication between language
    variants.
 
 ## Deferred / Optional Slices
@@ -106,6 +104,10 @@
 5. Revisit viewer-specific bundle-size reductions only if a future
    compatibility, startup, or payload target creates stronger pressure than
    the current marginal gains justify.
+6. Revisit broader flow-view search behavior only if the current-scope
+   first-match slice proves insufficient after explicit list/flow navigation
+   lands; likely candidates are multi-match stepping, explicit camera
+   centering, or cross-scope rebasing.
 
 ## Done Criteria For A Slice
 

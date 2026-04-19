@@ -2,7 +2,13 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { ViewerFactory } from "../../extension/webview/ViewerFactory";
-import { OPERATION, READY, RESOURCE, SAVE } from "../../shared/webviewEvents";
+import {
+  NAVIGATE,
+  OPERATION,
+  READY,
+  RESOURCE,
+  SAVE,
+} from "../../shared/webviewEvents";
 
 type ViewerFactoryDeps = {
   createWebviewPanel: typeof vscode.window.createWebviewPanel;
@@ -38,6 +44,7 @@ suite("ViewerFactory", () => {
       () => {
         readyCalled = true;
       },
+      () => {},
       undefined,
       {
         createWebviewPanel() {
@@ -88,6 +95,7 @@ suite("ViewerFactory", () => {
       (receivedDocument, receivedPanel) => {
         readyArgs = { document: receivedDocument, panel: receivedPanel };
       },
+      () => {},
       undefined,
       {
         createWebviewPanel() {
@@ -106,10 +114,39 @@ suite("ViewerFactory", () => {
     assert.deepStrictEqual(added, [{ uri: document.uri, panel: createdPanel }]);
   });
 
+  test("returns an existing panel without creating a new one", () => {
+    const telemetry: TelemetryPort = {
+      trackEvent() {},
+      dispose() {},
+    };
+    const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
+    const document = {
+      fileName: "/tmp/sample.ajs",
+      uri: { toString: () => "file:///sample.ajs" },
+    } as unknown as vscode.TextDocument;
+
+    const factory = new ViewerFactory(
+      "ajsbutler.testViewer",
+      telemetry,
+      {
+        panelByUri() {
+          return existingPanel;
+        },
+        add() {},
+        removeByUri() {},
+      },
+      () => {},
+      () => {},
+    );
+
+    assert.strictEqual(factory.getExistingPanel(document), existingPanel);
+  });
+
   test("registers the shared viewer customize flow", async () => {
     const calls: string[] = [];
     const telemetryEvents: string[] = [];
     const removed: string[] = [];
+    const navigated: string[] = [];
     let receiverDisposed = false;
     let receiveMessageHandler:
       | ((event: { type: string; data?: unknown }) => void)
@@ -171,6 +208,9 @@ suite("ViewerFactory", () => {
           `ready:${receivedDocument.uri.toString()}:${receivedPanel.viewType}`,
         );
       },
+      (_receivedDocument, event) => {
+        navigated.push(`${event.data.targetView}:${event.data.absolutePath}`);
+      },
       async (content) => {
         calls.push(`save:${content}`);
       },
@@ -190,6 +230,10 @@ suite("ViewerFactory", () => {
     });
     receiveMessageHandler?.({ type: SAVE, data: "body" });
     receiveMessageHandler?.({ type: OPERATION, data: "copy.csv" });
+    receiveMessageHandler?.({
+      type: NAVIGATE,
+      data: { targetView: "table", absolutePath: "/root/unit" },
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     onDidDispose?.();
@@ -201,6 +245,7 @@ suite("ViewerFactory", () => {
     ]);
     assert.strictEqual(createdPanel, panel);
     assert.deepStrictEqual(added, [{ uri: document.uri, panel }]);
+    assert.deepStrictEqual(navigated, ["table:/root/unit"]);
     assert.deepStrictEqual(telemetryEvents, [OPERATION]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
     assert.strictEqual(receiverDisposed, true);

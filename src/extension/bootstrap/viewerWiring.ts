@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import {
+  createRevealUnitEvent,
+  type NavigationTargetView,
+} from "../../shared/webviewEvents";
+import {
   type OpenPreviewCommandDependencies,
   executeOpenPreviewCommand,
 } from "../commands/openPreviewCommand";
@@ -47,11 +51,42 @@ const createPreviewCommandDependencies = (
   },
 });
 
-const createViewerBundle = (
-  { context, telemetry }: ViewerWiringDeps,
-  previewDeps: OpenPreviewCommandDependencies,
-  { viewType, saveHandler }: ViewerConfig,
-): vscode.Disposable[] => {
+const resolveTargetViewType = (targetView: NavigationTargetView): string =>
+  targetView === "flow" ? AJS_FLOW_VIEWER_TYPE : AJS_TABLE_VIEWER_TYPE;
+
+const revealExistingCounterpartPanel = (
+  document: vscode.TextDocument,
+  targetViewType: string,
+  absolutePath: string,
+  factoryByViewType: ReadonlyMap<string, ViewerFactory>,
+): void => {
+  const targetFactory = factoryByViewType.get(targetViewType);
+  if (!targetFactory) {
+    return;
+  }
+
+  const panel = targetFactory.getExistingPanel(document);
+  if (!panel) {
+    return;
+  }
+
+  panel.reveal(panel.viewColumn);
+  panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+};
+
+const createViewerBundle = ({
+  context,
+  telemetry,
+  previewDeps,
+  factoryByViewType,
+  viewType,
+  saveHandler,
+}: ViewerWiringDeps & {
+  previewDeps: OpenPreviewCommandDependencies;
+  factoryByViewType: Map<string, ViewerFactory>;
+  viewType: string;
+  saveHandler?: (content: string) => Promise<void>;
+}): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator(
     context,
@@ -64,8 +99,17 @@ const createViewerBundle = (
     telemetry,
     store,
     readyAjsDocument,
+    (document, event) => {
+      revealExistingCounterpartPanel(
+        document,
+        resolveTargetViewType(event.data.targetView),
+        event.data.absolutePath,
+        factoryByViewType,
+      );
+    },
     saveHandler,
   );
+  factoryByViewType.set(viewType, factory);
 
   return [
     mediator,
@@ -87,8 +131,14 @@ export const createViewerSubscriptions = (
     deps.context,
     deps.telemetry,
   );
+  const factoryByViewType = new Map<string, ViewerFactory>();
 
   return viewerConfigs.flatMap((config) =>
-    createViewerBundle(deps, previewDeps, config),
+    createViewerBundle({
+      ...deps,
+      previewDeps,
+      factoryByViewType,
+      ...config,
+    }),
   );
 };

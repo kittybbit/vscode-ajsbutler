@@ -1,6 +1,7 @@
 // import * as vscode from 'vscode';
 import React from "react";
 import { CellContext, createColumnHelper } from "@tanstack/table-core";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import DescriptionIcon from "@mui/icons-material/Description";
 import {
   ajsTableColumnHeaderLang,
@@ -32,6 +33,7 @@ import group20 from "./columnDefs/group20";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import { createNavigationEvent } from "../../../shared/webviewEvents";
 
 // default setting of
 export const tableDefaultColumnDef = {
@@ -55,6 +57,10 @@ export const handleOpenUnitDefinition =
   () => {
     openUnitDefinition(absolutePath);
   };
+
+export const handleNavigateToFlow = (absolutePath: string) => () => {
+  window.vscode.postMessage(createNavigationEvent("flow", absolutePath));
+};
 
 export const tableColumnDef = (
   language: string | undefined = "en",
@@ -91,6 +97,15 @@ export const tableColumnDef = (
                 )}
               >
                 <DescriptionIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Open the matching unit in the flow graph">
+              <IconButton
+                size="small"
+                aria-label="Open the matching unit in the flow graph"
+                onClick={handleNavigateToFlow(props.row.original.absolutePath)}
+              >
+                <AccountTreeIcon fontSize="inherit" />
               </IconButton>
             </Tooltip>
           </Box>

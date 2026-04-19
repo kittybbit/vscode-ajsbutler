@@ -30,10 +30,10 @@
       search by unit name, comment, or path from the flow header, reveal the
       collapsed ancestor hierarchy needed to show the first match, and
       visually focus that match without changing the current scope
-- [ ] Decide whether flow-view search needs follow-up work beyond the first
+- [x] Decide whether flow-view search needs follow-up work beyond the first
       current-scope slice:
-      examples include multi-match navigation, explicit camera centering, or
-      cross-scope search that can rebase the current flow scope predictably
+      broader search behavior is intentionally deferred for now so the next
+      viewer-facing slice can focus on explicit list/flow navigation first
 - [x] Define the visual cues that most matter for JP1/AJS View resemblance
 - [x] Decide whether expand-all ships in the same slice as incremental
       expansion or immediately after
@@ -107,3 +107,9 @@
   should keep the same layout semantics but separate node reveal, panel-bounds
   calculation, and sibling re-layout so the next flow-view interactions do not
   pile more stateful logic into one long function.
+- 2026-04-19: broader flow-search follow-up is intentionally deferred after the
+  first current-scope slice. Multi-match stepping, explicit camera centering,
+  and cross-scope search remain valid future ideas, but the next active
+  implementation slice should be explicit unit-list and flow-graph navigation
+  because that use case is already specified and benefits from the stable
+  `absolutePath` / `currentUnitId` identity seams now in place.

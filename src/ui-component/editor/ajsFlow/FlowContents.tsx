@@ -51,6 +51,11 @@ import {
   hasExpandedAllNestedUnitIds,
 } from "./nestedExpansion";
 import { findFlowSearchResult } from "./flowSearch";
+import { REVEAL_UNIT } from "../../../shared/webviewEvents";
+import {
+  getRevealUnitAbsolutePath,
+  resolveFlowRevealTarget,
+} from "../revealUnit";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 
@@ -100,6 +105,7 @@ const FlowContents: FC = () => {
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
   const [searchedUnitId, setSearchedUnitId] = useState<string>();
+  const preserveSearchOnNextScopeChange = useRef<boolean>(false);
   const prevUnitEntityId = useRef<string | undefined>(undefined);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -272,6 +278,20 @@ const FlowContents: FC = () => {
     setSearchedUnitId(undefined);
   }, []);
 
+  const handleRevealUnit = useCallback(
+    (absolutePath: string) => {
+      const revealTarget = resolveFlowRevealTarget(unitById, absolutePath);
+      if (!revealTarget) {
+        return;
+      }
+      preserveSearchOnNextScopeChange.current = true;
+      setExpandedUnitIds(revealTarget.expandedAncestorUnitIds);
+      setCurrentUnitId(revealTarget.scopeUnitId);
+      setSearchedUnitId(revealTarget.revealedUnitId);
+    },
+    [unitById],
+  );
+
   useEffect(() => {
     updateNodesAndEdges(currentUnitId);
     prevUnitEntityId.current = currentUnitId;
@@ -279,6 +299,10 @@ const FlowContents: FC = () => {
 
   useEffect(() => {
     setExpandedUnitIds((prev) => (prev.length === 0 ? prev : []));
+    if (preserveSearchOnNextScopeChange.current) {
+      preserveSearchOnNextScopeChange.current = false;
+      return;
+    }
     setSearchedUnitId(undefined);
   }, [ajsDocument, currentUnitId]);
 
@@ -303,6 +327,20 @@ const FlowContents: FC = () => {
       window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
     };
   }, []); // fire this when mount.
+
+  useEffect(() => {
+    const revealUnitFn = (_type: string, data: unknown) => {
+      const absolutePath = getRevealUnitAbsolutePath(data);
+      if (!absolutePath) {
+        return;
+      }
+      handleRevealUnit(absolutePath);
+    };
+    window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
+    return () => {
+      window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
+    };
+  }, [handleRevealUnit]);
 
   useEffect(() => {
     const root = document.getElementById("root");

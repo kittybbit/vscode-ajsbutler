@@ -111,9 +111,26 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   search-match decoration path, and the standard desktop, web, and build
   baseline should continue to validate host compatibility.
 - 2026-04-19 next slice:
-  decide whether flow-view search should grow beyond the current scope through
-  multi-match navigation, explicit camera centering, or cross-scope search
-  before moving on to list/flow navigation.
+  keep the first flow-view search slice as the stable baseline, defer broader
+  search behavior for now, and move next to explicit unit-list and flow-graph
+  navigation on top of the same identity and expansion-state model.
+- 2026-04-19 next slice decision:
+  do not add multi-match stepping, explicit camera centering, or cross-scope
+  search before cross-view navigation. Those search follow-ups stay deferred
+  until a later slice shows that the first current-scope search behavior is
+  insufficient for real navigation needs.
+- 2026-04-19 navigation implementation focus:
+  use stable normalized identity that already exists in both viewers
+  (`absolutePath` for unit-list rows and the flow viewer's current-unit scope
+  contract) to open or focus the counterpart viewer without importing the
+  other viewer's internal component state. Keep unavailable-counterpart paths
+  as hidden, disabled, or no-op behaviors rather than mutating the current
+  viewer opportunistically.
+- 2026-04-19 navigation validation focus:
+  add focused regression coverage for list-to-flow target resolution and
+  flow-to-list target resolution, then re-run the standard desktop, web, and
+  production-build baseline to confirm the navigation wiring behaves the same
+  in both hosts.
 
 ## Validation
 
