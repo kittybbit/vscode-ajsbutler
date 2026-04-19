@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -22,9 +23,11 @@ import {
 import {
   handleClickChildOpen,
   handleClickDialogOpen,
+  handleClickNavigateToTable,
   handleClickNestedToggle,
   handleKeyDownChildOpen,
   handleKeyDownDialogOpen,
+  handleKeyDownNavigateToTable,
   handleKeyDownNestedToggle,
 } from "./Utils";
 
@@ -75,6 +78,13 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
             onClick={handleClickDialogOpen(data)}
             onKeyDown={handleKeyDownDialogOpen(data)}
             icon={<DescriptionIcon fontSize="inherit" />}
+          />
+          <ActionIcon
+            title="Open the matching unit in the unit list."
+            ariaLabel="Open the matching unit in the unit list."
+            onClick={handleClickNavigateToTable(data)}
+            onKeyDown={handleKeyDownNavigateToTable(data)}
+            icon={<TableChartIcon fontSize="inherit" />}
           />
           {!isCurrent && (
             <ActionIcon

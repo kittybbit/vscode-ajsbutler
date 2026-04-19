@@ -7,6 +7,8 @@
 - Improved flow-view expansion layout, re-layout stability, and highlighting.
 - Added current-scope flow search that reveals collapsed ancestors and
   highlights the first matching unit.
+- Added explicit bridge actions between the unit list and flow viewer when the
+  counterpart viewer is already open.
 
 ## [1.12.0]
 

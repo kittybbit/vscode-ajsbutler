@@ -44,6 +44,11 @@ import DisplayColumnSelector from "./DisplayColumnSelector";
 import { AccessorType } from "./columnDefs/common";
 import UnitEntityDialog from "../UnitEntityDialog";
 import Parameter from "../../../domain/models/parameters/Parameter";
+import { REVEAL_UNIT } from "../../../shared/webviewEvents";
+import {
+  findRowIndexByAbsolutePath,
+  getRevealUnitAbsolutePath,
+} from "../revealUnit";
 
 const normalizeValue = (v: unknown) =>
   v instanceof Parameter ? v.value() : String(v);
@@ -123,6 +128,9 @@ const TableContents = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
   const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
+  const [revealedAbsolutePath, setRevealedAbsolutePath] = useState<
+    string | undefined
+  >(undefined);
   const [rowViews, ajsDocument, changeDocumentFn] = useChangeDocument();
 
   const unitDefinitionByPath = useMemo(
@@ -149,9 +157,19 @@ const TableContents = () => {
 
   useEffect(() => {
     window.EventBridge.addCallback("changeDocument", changeDocumentFn);
+    const revealUnitFn = (_type: string, data: unknown) => {
+      const absolutePath = getRevealUnitAbsolutePath(data);
+      if (!absolutePath) {
+        return;
+      }
+      setGlobalFilter("");
+      setRevealedAbsolutePath(absolutePath);
+    };
+    window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     window.vscode.postMessage({ type: "ready" });
     return () => {
       window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
+      window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
     };
   }, []); // fire this when mount.
 
@@ -193,6 +211,18 @@ const TableContents = () => {
     });
     return map;
   }, [rows]);
+
+  useEffect(() => {
+    if (!revealedAbsolutePath) {
+      return;
+    }
+    const index = findRowIndexByAbsolutePath(rowIndexMap, revealedAbsolutePath);
+    if (index === undefined) {
+      return;
+    }
+    setRowIndex(index);
+    setRevealedAbsolutePath(undefined);
+  }, [revealedAbsolutePath, rowIndexMap]);
 
   useEffect(() => {
     handleJumpRef.current = (id: string) => {

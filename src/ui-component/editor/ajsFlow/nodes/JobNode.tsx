@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import DescriptionIcon from "@mui/icons-material/Description";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import {
   ActionIcon,
   AjsNode,
@@ -13,7 +14,12 @@ import {
   TyTitle,
   handleStyle,
 } from "./AjsNode";
-import { handleClickDialogOpen, handleKeyDownDialogOpen } from "./Utils";
+import {
+  handleClickDialogOpen,
+  handleClickNavigateToTable,
+  handleKeyDownDialogOpen,
+  handleKeyDownNavigateToTable,
+} from "./Utils";
 
 export type JobNode = Node<AjsNode, "job">;
 type JobNodeProps = NodeProps<JobNode>;
@@ -51,6 +57,13 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
             onClick={handleClickDialogOpen(data)}
             onKeyDown={handleKeyDownDialogOpen(data)}
             icon={<DescriptionIcon fontSize="inherit" />}
+          />
+          <ActionIcon
+            title="Open the matching unit in the unit list."
+            ariaLabel="Open the matching unit in the unit list."
+            onClick={handleClickNavigateToTable(data)}
+            onKeyDown={handleKeyDownNavigateToTable(data)}
+            icon={<TableChartIcon fontSize="inherit" />}
           />
           {hasWaitedFor && (
             <ActionIcon

@@ -18,6 +18,7 @@ export type AjsNode = {
     panelHeightPx: number;
   };
   unitId: string;
+  absolutePath: string;
   unitDefinition: UnitDefinitionDialogDto;
   label: string;
   comment?: string;

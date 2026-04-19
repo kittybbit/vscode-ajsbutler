@@ -3,6 +3,7 @@ import { Node, NodeProps } from "@xyflow/react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import DescriptionIcon from "@mui/icons-material/Description";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import {
   ActionIcon,
   AjsNode,
@@ -11,7 +12,12 @@ import {
   NameOrComment,
   TyTitle,
 } from "./AjsNode";
-import { handleClickDialogOpen, handleKeyDownDialogOpen } from "./Utils";
+import {
+  handleClickDialogOpen,
+  handleClickNavigateToTable,
+  handleKeyDownDialogOpen,
+  handleKeyDownNavigateToTable,
+} from "./Utils";
 import classNames from "classnames";
 
 export type JobGroupNode = Node<AjsNode, "jobgroup">;
@@ -42,6 +48,13 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
             onClick={handleClickDialogOpen(data)}
             onKeyDown={handleKeyDownDialogOpen(data)}
             icon={<DescriptionIcon fontSize="inherit" />}
+          />
+          <ActionIcon
+            title="Open the matching unit in the unit list."
+            ariaLabel="Open the matching unit in the unit list."
+            onClick={handleClickNavigateToTable(data)}
+            onKeyDown={handleKeyDownNavigateToTable(data)}
+            icon={<TableChartIcon fontSize="inherit" />}
           />
         </Box>
       </Stack>

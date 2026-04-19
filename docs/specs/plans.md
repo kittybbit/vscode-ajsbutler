@@ -155,10 +155,10 @@ structure in `docs/specs/features/<feature>/`.
 
 1. Refresh flow-graph UX in focused slices:
    visual parity with JP1/AJS View plus incremental, one-click, deeper nested
-   expansion, and first-slice current-scope search are now in place, so the
-   next active follow-ups are deciding whether flow search needs broader
-   navigation behavior, and then explicit view-to-view navigation on top of
-   the same interaction model.
+   expansion, and first-slice current-scope search are now in place. Broader
+   flow-search behavior is intentionally deferred for now, so the next active
+   viewer-facing slice is explicit unit-list and flow-graph navigation on top
+   of the same interaction model.
 2. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
 3. Define a read-only JP1/AJS WebAPI import boundary with clear application

@@ -45,6 +45,7 @@ const toNodeData = (
   return {
     nestedPanel: options?.nodeDecorations?.get(node.id),
     unitId: node.id,
+    absolutePath: node.metadata.absolutePath,
     unitDefinition,
     label: node.label,
     comment: node.metadata.comment,

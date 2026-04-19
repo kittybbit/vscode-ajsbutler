@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import type { NavigationEventType } from "../../shared/webviewEvents";
 import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
 import {
   createViewerMessageHandler,
@@ -25,6 +26,10 @@ type ViewerReadyHandler = (
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
 ) => void;
+type ViewerNavigateHandler = (
+  document: vscode.TextDocument,
+  event: NavigationEventType,
+) => void;
 
 /**
  * PanelFactory is responsible for creating and managing webview panels.
@@ -35,6 +40,7 @@ export class ViewerFactory {
   #viewType: string;
   #telemetry: TelemetryPort;
   #onReady: ViewerReadyHandler;
+  #onNavigate: ViewerNavigateHandler;
   #onSave?: (content: string) => Promise<void>;
   #deps: ViewerFactoryDeps;
 
@@ -43,6 +49,7 @@ export class ViewerFactory {
     telemetry: TelemetryPort,
     store: ViewerFactoryStore,
     onReady: ViewerReadyHandler,
+    onNavigate: ViewerNavigateHandler,
     onSave?: (content: string) => Promise<void>,
     deps: ViewerFactoryDeps = defaultDeps,
   ) {
@@ -50,6 +57,7 @@ export class ViewerFactory {
     this.#telemetry = telemetry;
     this.#store = store;
     this.#onReady = onReady;
+    this.#onNavigate = onNavigate;
     this.#onSave = onSave;
     this.#deps = deps;
   }
@@ -62,12 +70,18 @@ export class ViewerFactory {
       `invoke PanelFactory.getPanel. (${this.#viewType}, ${document.uri.toString()})`,
     );
 
-    const existingPanel = this.#store.panelByUri(document.uri);
+    const existingPanel = this.getExistingPanel(document);
     if (existingPanel) {
       return existingPanel;
     }
 
     return this.createAndStorePanel(document);
+  }
+
+  public getExistingPanel(
+    document: vscode.TextDocument,
+  ): vscode.WebviewPanel | undefined {
+    return this.#store.panelByUri(document.uri);
   }
 
   private registerStandardViewerCustomize(
@@ -89,6 +103,7 @@ export class ViewerFactory {
         postResourceMessage(event.data, receivedPanel);
       },
       onOperation: reportWebviewOperation,
+      onNavigate: this.#onNavigate,
       onSave,
       showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     });

@@ -1,10 +1,12 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import {
+  NAVIGATE,
   OPERATION,
   READY,
   RESOURCE,
   SAVE,
+  type NavigationEventType,
   type ResourceEventType,
   type WebviewEventType,
 } from "../../shared/webviewEvents";
@@ -21,6 +23,10 @@ type ViewerMessageRoutingDeps = {
     telemetry: TelemetryPort,
     operation: string,
   ) => void;
+  onNavigate: (
+    document: vscode.TextDocument,
+    event: NavigationEventType,
+  ) => void;
   onSave?: (content: string) => Promise<void>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
 };
@@ -33,6 +39,7 @@ export const createViewerMessageHandler =
     onReady,
     onResource,
     onOperation,
+    onNavigate,
     onSave,
     showErrorMessage,
   }: ViewerMessageRoutingDeps) =>
@@ -56,6 +63,10 @@ export const createViewerMessageHandler =
       }
       case OPERATION: {
         onOperation(document, panel, telemetry, event.data);
+        break;
+      }
+      case NAVIGATE: {
+        onNavigate(document, event);
         break;
       }
     }

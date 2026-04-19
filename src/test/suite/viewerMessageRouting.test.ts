@@ -1,5 +1,11 @@
 import * as assert from "assert";
-import { OPERATION, READY, RESOURCE, SAVE } from "../../shared/webviewEvents";
+import {
+  NAVIGATE,
+  OPERATION,
+  READY,
+  RESOURCE,
+  SAVE,
+} from "../../shared/webviewEvents";
 import {
   createViewerMessageHandler,
   registerViewerPanelDispose,
@@ -28,6 +34,11 @@ suite("Viewer message routing", () => {
       onOperation: (_document, _panel, _telemetry, operation) => {
         calls.push(`operation:${operation}`);
       },
+      onNavigate: (_document, event) => {
+        calls.push(
+          `navigate:${event.data.targetView}:${event.data.absolutePath}`,
+        );
+      },
       onSave: async (content) => {
         calls.push(`save:${content}`);
       },
@@ -38,6 +49,10 @@ suite("Viewer message routing", () => {
     handler({ type: READY });
     handler({ type: SAVE, data: "body" });
     handler({ type: OPERATION, data: "copy.csv" });
+    handler({
+      type: NAVIGATE,
+      data: { targetView: "flow", absolutePath: "/root/unit" },
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepStrictEqual(calls, [
@@ -45,6 +60,7 @@ suite("Viewer message routing", () => {
       "ready",
       "save:body",
       "operation:copy.csv",
+      "navigate:flow:/root/unit",
     ]);
   });
 
@@ -57,6 +73,7 @@ suite("Viewer message routing", () => {
       onReady: () => {},
       onResource: () => {},
       onOperation: () => {},
+      onNavigate: () => {},
       onSave: async () => undefined,
       showErrorMessage: async (message) => {
         errors.push(message);

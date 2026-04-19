@@ -8,7 +8,13 @@ const installViewerBridge = () => {
   window.EventBridge = {
     callbacks: {}, // {[type: string]: (type: string, data: unknown) => void}
     dispatch: (event) => {
+      if (!event.data || typeof event.data !== "object") {
+        return;
+      }
       const type = event.data.type;
+      if (typeof type !== "string") {
+        return;
+      }
       const functions = window.EventBridge.callbacks[type];
       if (functions) {
         functions.forEach((fn) => {
@@ -26,6 +32,9 @@ const installViewerBridge = () => {
     },
     removeCallback: (type, fn) => {
       let functions = window.EventBridge.callbacks[type];
+      if (!functions) {
+        return;
+      }
       functions = functions.filter((item) => item !== fn);
       window.EventBridge.callbacks[type] = functions;
     },
