@@ -21,6 +21,7 @@ type CreateReactFlowDataOptions = {
   nestedExpansionState?: NestedExpansionStateType;
   nodeDecorations?: ReadonlyMap<string, ExpandedNodeDecoration>;
   positionOverrides?: ReadonlyMap<string, { x: number; y: number }>;
+  searchedUnitId?: string;
 };
 
 const hasExpandableChildren = (unit?: AjsUnit): boolean =>
@@ -54,6 +55,7 @@ const toNodeData = (
     isRootJobnet: node.metadata.isRootJobnet,
     hasSchedule: node.metadata.hasSchedule,
     hasWaitedFor: node.metadata.hasWaitedFor,
+    isSearchMatch: options?.searchedUnitId === node.id,
     canExpandNested:
       !node.metadata.isCurrent &&
       !node.metadata.isAncestor &&
@@ -99,6 +101,7 @@ export const createReactFlowData = (
   const nodes: Node<AjsNode>[] = graph.nodes.map((node) => ({
     id: node.id,
     type: node.type,
+    selected: options?.searchedUnitId === node.id,
     data: toNodeData(
       node,
       unitDefinitionByPath,

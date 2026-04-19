@@ -93,6 +93,27 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   `buildExpandedFlowGraph.ts` so expansion, panel sizing, and sibling
   re-layout steps are separated into focused helpers before adding more
   interaction on top.
+- 2026-04-19 search slice decision:
+  start with search inside the current flow scope only, keep
+  `currentUnitId` as the stable base scope, reveal collapsed ancestor jobnets
+  through the existing nested-expansion state, and use a presentation-local
+  visual focus marker for the first match instead of changing the graph DTO
+  contract or adding cross-scope camera navigation in the same slice.
+- 2026-04-19 implementation result:
+  the flow header now exposes a search box for the current scope; submitting a
+  query finds the first matching unit by visible JP1/AJS labels and paths,
+  expands the collapsed ancestor jobnets needed to reveal it in the current
+  canvas, and visually highlights the matching node without re-scoping the
+  viewer away from the current unit.
+- 2026-04-19 validation result:
+  focused helper coverage now verifies current-scope search matching and
+  ancestor expansion decisions, flow-node mapping coverage verifies the new
+  search-match decoration path, and the standard desktop, web, and build
+  baseline should continue to validate host compatibility.
+- 2026-04-19 next slice:
+  decide whether flow-view search should grow beyond the current scope through
+  multi-match navigation, explicit camera centering, or cross-scope search
+  before moving on to list/flow navigation.
 
 ## Validation
 

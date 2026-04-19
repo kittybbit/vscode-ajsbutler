@@ -28,6 +28,7 @@ export type AjsNode = {
   isRootJobnet: boolean;
   hasSchedule: boolean;
   hasWaitedFor: boolean;
+  isSearchMatch?: boolean;
   canExpandNested?: boolean;
   isExpandedNested?: boolean;
   toggleExpandedUnitId?: (unitId: string) => void;
@@ -39,10 +40,11 @@ export const buildNodeSxProps = ({
   isCurrent,
   isAncestor,
   isRootJobnet,
+  isSearchMatch,
   nestedPanel,
 }: Pick<
   AjsNode,
-  "isCurrent" | "isAncestor" | "isRootJobnet" | "nestedPanel"
+  "isCurrent" | "isAncestor" | "isRootJobnet" | "isSearchMatch" | "nestedPanel"
 >): SxProps<Theme> => ({
   position: "relative",
   zIndex: 1,
@@ -57,12 +59,17 @@ export const buildNodeSxProps = ({
   borderColor: (theme) =>
     isCurrent
       ? theme.palette.info.main
-      : isRootJobnet
-        ? theme.palette.primary.main
-        : theme.palette.divider,
+      : isSearchMatch
+        ? theme.palette.success.main
+        : isRootJobnet
+          ? theme.palette.primary.main
+          : theme.palette.divider,
   background: (theme) => {
     if (isCurrent) {
       return `linear-gradient(160deg, ${theme.palette.info.light}22 0%, ${theme.palette.background.paper} 58%, ${theme.palette.background.default} 100%)`;
+    }
+    if (isSearchMatch) {
+      return `linear-gradient(180deg, ${theme.palette.success.light}20 0%, ${theme.palette.background.paper} 100%)`;
     }
     if (isAncestor) {
       return `linear-gradient(180deg, ${theme.palette.warning.light}1f 0%, ${theme.palette.background.paper} 100%)`;
@@ -75,9 +82,11 @@ export const buildNodeSxProps = ({
   boxShadow: (theme) =>
     isCurrent
       ? `0 0 0 4px ${theme.palette.info.light}30, ${theme.shadows[6]}`
-      : isAncestor
-        ? theme.shadows[4]
-        : theme.shadows[2],
+      : isSearchMatch
+        ? `0 0 0 3px ${theme.palette.success.light}30, ${theme.shadows[4]}`
+        : isAncestor
+          ? theme.shadows[4]
+          : theme.shadows[2],
   justifyContent: "center",
   alignItems: "center",
   gap: "0.15em",
@@ -105,7 +114,11 @@ export const buildNodeSxProps = ({
     : undefined,
   "& button": {
     color: (theme) =>
-      isCurrent ? theme.palette.info.dark : theme.palette.text.secondary,
+      isCurrent
+        ? theme.palette.info.dark
+        : isSearchMatch
+          ? theme.palette.success.dark
+          : theme.palette.text.secondary,
   },
 });
 

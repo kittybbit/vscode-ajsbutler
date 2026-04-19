@@ -41,6 +41,7 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
     hasSchedule,
     hasWaitedFor,
     isRootJobnet,
+    isSearchMatch,
     canExpandNested,
     isExpandedNested,
     label,
@@ -56,6 +57,7 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
           isCurrent,
           isAncestor,
           isRootJobnet,
+          isSearchMatch,
           nestedPanel: data.nestedPanel,
         })}
         className={classNames({

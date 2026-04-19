@@ -20,14 +20,27 @@ type JobNodeProps = NodeProps<JobNode>;
 const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
   console.log("render JobNode.");
 
-  const { unitId, hasWaitedFor, label, comment, ty, isAncestor, isCurrent } =
-    data;
+  const {
+    unitId,
+    hasWaitedFor,
+    label,
+    comment,
+    ty,
+    isAncestor,
+    isCurrent,
+    isSearchMatch,
+  } = data;
 
   return (
     <>
       <Stack
         id={unitId}
-        sx={buildNodeSxProps({ isCurrent, isAncestor, isRootJobnet: false })}
+        sx={buildNodeSxProps({
+          isCurrent,
+          isAncestor,
+          isRootJobnet: false,
+          isSearchMatch,
+        })}
       >
         <TyTitle ty={ty} />
         {/* action */}

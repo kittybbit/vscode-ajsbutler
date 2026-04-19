@@ -17,6 +17,9 @@ navigation from and to the unit list.
 - flow-graph presentation goals are described as visual resemblance to
   JP1/AJS View, not full interaction parity in one slice
 - nested graphs can be revealed progressively in the same screen
+- the first flow-view search slice may stay within the current flow scope
+  if it reveals collapsed ancestors needed to show the first match before
+  visually focusing that match
 - a one-click expand-all path is considered in the design, even if it lands
   after the first incremental expansion slice
 - explicit navigation between unit-list and flow-graph units is defined when
@@ -28,6 +31,9 @@ navigation from and to the unit list.
 - keep graph DTO construction separate from viewer styling and interaction
   controls
 - prefer stable unit identity or path when coordinating list/flow navigation
+- for the first flow-view search slice, prefer reusing the existing
+  nested-expansion state and a presentation-local focus marker instead of
+  introducing a new graph DTO contract or a second scope-selection model
 - split the work into small viewer-facing slices:
   visual refresh, nested expansion, and cross-view navigation do not need to
   land in one commit
