@@ -139,6 +139,11 @@ structure in `docs/specs/features/<feature>/`.
   collapsed nested-jobnet hierarchy required to show the first match, and
   visually emphasize that match without changing the base `currentUnitId`
   scope contract.
+- Explicit list/flow bridge navigation is now in place:
+  table rows can request the matching flow scope and flow nodes can request the
+  matching table row through shared `absolutePath`-based navigation events and
+  local reveal helpers, without either viewer importing the other's internal
+  component state.
 
 ### How To Maintain This Section
 
@@ -153,25 +158,21 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Refresh flow-graph UX in focused slices:
-   visual parity with JP1/AJS View plus incremental, one-click, deeper nested
-   expansion, and first-slice current-scope search are now in place. Broader
-   flow-search behavior is intentionally deferred for now, so the next active
-   viewer-facing slice is explicit unit-list and flow-graph navigation on top
-   of the same interaction model.
-2. Align parameter parsing and `ajs` command generation with
-   JP1/Automatic Job Management System 3 version 13 reference manuals.
-3. Define a read-only JP1/AJS WebAPI import boundary with clear application
+1. Align parameter parsing and `ajs` command generation with
+   JP1/Automatic Job Management System 3 version 13 reference manuals,
+   starting with an explicit inventory of the current parameter semantics and
+   command-generation seams that already match the named references.
+2. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
-4. Continue treating desktop and web compatibility as an explicit acceptance
+3. Continue treating desktop and web compatibility as an explicit acceptance
    criterion whenever bootstrap, preview, parsing, shared adapters, or package
    runtime behavior change.
-5. Keep feature follow-up verification evidence concrete:
+4. Keep feature follow-up verification evidence concrete:
    prefer automated smoke or regression coverage where practical, and reserve
    manual smoke debt for behavior that still lacks a reliable test seam.
-6. Revisit viewer bundle-size work only when a clearer reduction seam or
+5. Revisit viewer bundle-size work only when a clearer reduction seam or
    stronger product need appears.
-7. Extend list-view search on the current presentation path so parameter key
+6. Extend list-view search on the current presentation path so parameter key
    and value queries can complement the existing partial-match behavior, while
    still revisiting a dedicated application use case only if another
    non-table consumer needs the same matching semantics.

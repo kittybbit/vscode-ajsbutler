@@ -15,6 +15,11 @@
       the current viewer selection contract:
       child jobnets can now expand or collapse nested content inline while the
       existing scope-changing open action remains available
+- [x] Add explicit bridge actions between the unit list and flow graph using
+      stable `absolutePath`-based navigation events and reveal helpers:
+      the table can request the matching flow scope, and the flow view can
+      request the matching table row without importing the other viewer's
+      internal state
 
 ## Remaining Follow-up
 
@@ -113,3 +118,7 @@
   implementation slice should be explicit unit-list and flow-graph navigation
   because that use case is already specified and benefits from the stable
   `absolutePath` / `currentUnitId` identity seams now in place.
+- 2026-04-19: explicit list/flow bridge navigation is now implemented in both
+  directions. Table rows post shared navigation events toward the flow viewer,
+  flow nodes post the symmetric table-navigation event, and focused helper plus
+  routing tests cover the identity-preserving reveal behavior.

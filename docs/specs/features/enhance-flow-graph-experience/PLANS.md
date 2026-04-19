@@ -131,6 +131,19 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   flow-to-list target resolution, then re-run the standard desktop, web, and
   production-build baseline to confirm the navigation wiring behaves the same
   in both hosts.
+- 2026-04-19 navigation implementation result:
+  explicit bridge actions now connect the table and flow viewers through shared
+  navigation events keyed by normalized `absolutePath`. The table can request
+  the matching flow scope, and flow nodes can request the matching table row,
+  while each viewer keeps ownership of its own local selection state.
+- 2026-04-19 navigation validation result:
+  shared viewer-message routing coverage now exercises navigation events,
+  reveal-helper coverage verifies flow target and table row resolution by
+  stable path, and viewer-factory coverage confirms the injected navigation
+  handler receives the expected target view plus absolute path.
+- 2026-04-19 follow-up decision:
+  keep broader flow-search behavior deferred for now and move the next active
+  SDD slice to JP1/AJS3 version 13 parameter and command-reference alignment.
 
 ## Validation
 
