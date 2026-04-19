@@ -6,6 +6,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import classNames from "classnames";
 import {
   ActionIcon,
@@ -20,8 +22,10 @@ import {
 import {
   handleClickChildOpen,
   handleClickDialogOpen,
+  handleClickNestedToggle,
   handleKeyDownChildOpen,
   handleKeyDownDialogOpen,
+  handleKeyDownNestedToggle,
 } from "./Utils";
 
 export type JobNetNode = Node<AjsNode, "jobnet">;
@@ -37,6 +41,8 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
     hasSchedule,
     hasWaitedFor,
     isRootJobnet,
+    canExpandNested,
+    isExpandedNested,
     label,
     comment,
     ty,
@@ -46,7 +52,12 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
     <>
       <Stack
         id={unitId}
-        sx={buildNodeSxProps({ isCurrent, isAncestor, isRootJobnet })}
+        sx={buildNodeSxProps({
+          isCurrent,
+          isAncestor,
+          isRootJobnet,
+          nestedPanel: data.nestedPanel,
+        })}
         className={classNames({
           current: isCurrent,
           ancestor: isAncestor,
@@ -70,6 +81,29 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
               onClick={handleClickChildOpen(data)}
               onKeyDown={handleKeyDownChildOpen(data)}
               icon={<FolderOpenIcon fontSize="inherit" />}
+            />
+          )}
+          {!isCurrent && canExpandNested && (
+            <ActionIcon
+              title={
+                isExpandedNested
+                  ? "Collapse the nested jobnet."
+                  : "Expand the nested jobnet."
+              }
+              ariaLabel={
+                isExpandedNested
+                  ? "Collapse the nested jobnet."
+                  : "Expand the nested jobnet."
+              }
+              onClick={handleClickNestedToggle(data)}
+              onKeyDown={handleKeyDownNestedToggle(data)}
+              icon={
+                isExpandedNested ? (
+                  <UnfoldLessIcon fontSize="inherit" />
+                ) : (
+                  <UnfoldMoreIcon fontSize="inherit" />
+                )
+              }
             />
           )}
           {hasSchedule && (

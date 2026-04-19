@@ -18,6 +18,9 @@
 ## Remaining Follow-up
 
 - [x] Decide whether filtering/search should become a separate application use case
+- [ ] Add a future search enhancement on the current list presentation path:
+      support searching by parameter key and parameter value in addition to the
+      existing partial-match behavior over rendered row values
 
 ## Notes
 
@@ -25,6 +28,10 @@
   behavior depends on TanStack Table row access, presentation column accessors,
   and `rankItem`-based fuzzy matching over rendered row values rather than on a
   stable cross-surface application rule.
+- 2026-04-19: a future list-search slice should extend the presentation-local
+  matcher so users can search by parameter key/value pairs as well as today's
+  partial matches over rendered row text, while keeping the search behavior in
+  the table layer unless another consumer needs the same semantics.
 - Revisit a dedicated application use case only if filtering/search needs to be
   shared across table, CSV, commands, or another non-table consumer.
 - Fixture guidance and manual verification notes are maintenance concerns.

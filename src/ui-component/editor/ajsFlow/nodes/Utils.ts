@@ -21,3 +21,16 @@ export const handleKeyDownChildOpen =
     const { unitId, setCurrentUnitId } = data;
     event.key === "Enter" && setCurrentUnitId(() => unitId);
   };
+
+export const handleClickNestedToggle = (data: AjsNode) => () => {
+  const { unitId, toggleExpandedUnitId } = data;
+  toggleExpandedUnitId?.(unitId);
+};
+
+export const handleKeyDownNestedToggle =
+  (data: AjsNode) => (event: React.KeyboardEvent<HTMLElement>) => {
+    const { unitId, toggleExpandedUnitId } = data;
+    if (event.key === "Enter") {
+      toggleExpandedUnitId?.(unitId);
+    }
+  };

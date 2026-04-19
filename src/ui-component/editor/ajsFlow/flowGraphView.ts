@@ -1,47 +1,42 @@
 import type { Theme } from "@mui/material/styles";
 import { Edge, MarkerType, Node } from "@xyflow/react";
+import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";
 import {
   FlowGraphDto,
+  FlowGraphEdgeDto,
   FlowGraphNodeDto,
 } from "../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../application/unit-definition/buildUnitDefinition";
-import { CurrentUnitIdStateType, DialogDataStateType } from "./FlowContents";
+import {
+  CurrentUnitIdStateType,
+  DialogDataStateType,
+  NestedExpansionStateType,
+} from "./FlowContents";
+import { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
 import { AjsNode } from "./nodes/AjsNode";
+import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
 
-const calcPosition = (node: FlowGraphNodeDto, theme: Theme) => {
-  if (node.metadata.layout.kind === "ancestor") {
-    const basePx = theme.typography.htmlFontSize;
-    const width = basePx * 6;
-    const height = basePx * 6;
-    const marginX = width / 5;
-    const offsetX = width / 3;
-    const offsetY = height / 2;
-    return {
-      x: offsetX + (width + marginX) * node.metadata.layout.depth,
-      y: offsetY,
-    };
-  }
-
-  const { h, v } = node.metadata.layout;
-  const basePx = theme.typography.htmlFontSize;
-  const width = basePx * 6;
-  const height = basePx * 6;
-  const marginX = width / 4;
-  const marginY = height / 4;
-  const offsetX = width / 3;
-  const offsetY = height * 2;
-
-  return {
-    x: offsetX + (width + marginX) * ((h - 80) / 160 - 1),
-    y: offsetY + (height + marginY) * ((v - 48) / 96),
-  };
+type CreateReactFlowDataOptions = {
+  unitById?: ReadonlyMap<string, AjsUnit>;
+  nestedExpansionState?: NestedExpansionStateType;
+  nodeDecorations?: ReadonlyMap<string, ExpandedNodeDecoration>;
+  positionOverrides?: ReadonlyMap<string, { x: number; y: number }>;
 };
+
+const hasExpandableChildren = (unit?: AjsUnit): boolean =>
+  !!unit && unit.unitType === "n" && unit.children.length > 0;
+
+const isDirectNestedExpansionTarget = (
+  unit: AjsUnit | undefined,
+  currentUnitId: string | undefined,
+): boolean => !!unit && !!currentUnitId && unit.parentId === currentUnitId;
 
 const toNodeData = (
   node: FlowGraphNodeDto,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
   dialogDataState: DialogDataStateType,
   currentUnitIdState: CurrentUnitIdStateType,
+  options?: CreateReactFlowDataOptions,
 ): AjsNode => {
   const unitDefinition = unitDefinitionByPath.get(node.metadata.absolutePath);
   if (!unitDefinition) {
@@ -50,7 +45,9 @@ const toNodeData = (
     );
   }
 
+  const unit = options?.unitById?.get(node.id);
   return {
+    nestedPanel: options?.nodeDecorations?.get(node.id),
     unitId: node.id,
     unitDefinition,
     label: node.label,
@@ -62,10 +59,40 @@ const toNodeData = (
     isRootJobnet: node.metadata.isRootJobnet,
     hasSchedule: node.metadata.hasSchedule,
     hasWaitedFor: node.metadata.hasWaitedFor,
+    canExpandNested:
+      !node.metadata.isCurrent &&
+      !node.metadata.isAncestor &&
+      hasExpandableChildren(unit) &&
+      isDirectNestedExpansionTarget(unit, currentUnitIdState.currentUnitId),
+    isExpandedNested: options?.nestedExpansionState?.expandedUnitIds.has(
+      node.id,
+    ),
+    toggleExpandedUnitId: options?.nestedExpansionState?.toggleExpandedUnitId,
     ...dialogDataState,
     ...currentUnitIdState,
   };
 };
+
+const toEdge = (edge: FlowGraphEdgeDto): Edge => ({
+  id: `${edge.source}-${edge.target}`,
+  type: "smoothstep",
+  source: edge.source,
+  target: edge.target,
+  markerStart:
+    edge.type === "con"
+      ? {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+        }
+      : undefined,
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    width: 20,
+    height: 20,
+  },
+  animated: edge.type === "con",
+});
 
 export const createReactFlowData = (
   graph: FlowGraphDto,
@@ -73,6 +100,7 @@ export const createReactFlowData = (
   theme: Theme,
   dialogDataState: DialogDataStateType,
   currentUnitIdState: CurrentUnitIdStateType,
+  options?: CreateReactFlowDataOptions,
 ): { nodes: Node<AjsNode>[]; edges: Edge[] } => {
   const nodes: Node<AjsNode>[] = graph.nodes.map((node) => ({
     id: node.id,
@@ -82,30 +110,14 @@ export const createReactFlowData = (
       unitDefinitionByPath,
       dialogDataState,
       currentUnitIdState,
+      options,
     ),
-    position: calcPosition(node, theme),
+    position:
+      options?.positionOverrides?.get(node.id) ??
+      calculateFlowGraphNodePosition(node, theme.typography.htmlFontSize),
   }));
 
-  const edges: Edge[] = graph.edges.map((edge) => ({
-    id: `${edge.source}-${edge.target}`,
-    type: "smoothstep",
-    source: edge.source,
-    target: edge.target,
-    markerStart:
-      edge.type === "con"
-        ? {
-            type: MarkerType.ArrowClosed,
-            width: 20,
-            height: 20,
-          }
-        : undefined,
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      width: 20,
-      height: 20,
-    },
-    animated: edge.type === "con",
-  }));
+  const edges: Edge[] = graph.edges.map(toEdge);
 
   return { nodes, edges };
 };

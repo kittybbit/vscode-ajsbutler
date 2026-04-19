@@ -73,19 +73,26 @@
    JP1/AJS View while preserving current desktop and web compatibility.
 2. Add progressive nested-graph expansion in the flow view, with both
    user-driven incremental expansion and a one-click expand-all path.
-3. Add explicit navigation between unit-list and flow-graph units when the
+3. Extend nested-graph expansion beyond the first direct-child slice so deeper
+   nested jobnets can be revealed with stable layout and collision handling.
+4. Add flow-view search that locates a unit and reveals the hierarchy needed
+   to show that unit in context before focusing it.
+5. Add explicit navigation between unit-list and flow-graph units when the
    counterpart view for the selected unit is available.
-4. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+6. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-5. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+7. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-6. Add a read-only JP1/AJS WebAPI import path for loading server-side
+8. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-7. Replace the custom `UnitEntity` hash implementation with a common
+9. Replace the custom `UnitEntity` hash implementation with a common
    algorithm once identity and compatibility checks are explicit.
-8. Consolidate i18n translation files to reduce duplication between language
-   variants.
+10. Add richer unit-list search on top of the current presentation-local
+    matcher so parameter-key and parameter-value queries complement the current
+    partial-match behavior.
+11. Consolidate i18n translation files to reduce duplication between language
+    variants.
 
 ## Deferred / Optional Slices
 

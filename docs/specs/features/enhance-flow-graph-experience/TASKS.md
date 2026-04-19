@@ -11,13 +11,24 @@
 
 - [x] Record the new SDD scope for flow-graph visual refresh, nested expansion,
       and list/flow navigation
+- [x] Implement the first progressive nested-expansion slice without changing
+      the current viewer selection contract:
+      child jobnets can now expand or collapse nested content inline while the
+      existing scope-changing open action remains available
 
 ## Remaining Follow-up
 
+- [ ] Add a one-click expand-all path on top of the new nested-expansion state
+- [ ] Add a deeper nested-expansion slice after the direct-child path is stable:
+      reopen support for nested-in-nested jobnets only when the viewer can
+      render and re-layout those deeper scopes predictably instead of exposing
+      non-working controls
+- [ ] Add flow-view search that finds a target unit and opens the hierarchy
+      needed to reveal that unit in context before focusing it
 - [x] Define the visual cues that most matter for JP1/AJS View resemblance
-- [ ] Decide whether expand-all ships in the same slice as incremental
+- [x] Decide whether expand-all ships in the same slice as incremental
       expansion or immediately after
-- [ ] Document the target behavior when a counterpart list or flow view is not
+- [x] Document the target behavior when a counterpart list or flow view is not
       available
 - [x] Add focused validation plans for selection, navigation, and nested
       expansion state:
@@ -48,3 +59,23 @@
   mapping, desktop `pnpm test` still opens the viewers, and `pnpm run test:web`
   confirms the web preview wiring remains intact after the presentation-only
   restyle.
+- 2026-04-19: the next implementation slice is progressive nested expansion
+  first; one-click expand-all remains in scope but is intentionally sequenced
+  as the immediate follow-up so the first interaction change stays smaller and
+  easier to validate across desktop and web hosts.
+- 2026-04-19: when a counterpart view is unavailable, navigation must leave the
+  current view and selection unchanged; UI affordances should be hidden or
+  disabled when availability is known up front, and any remaining command path
+  should degrade to a predictable no-op instead of mutating local viewer state.
+- 2026-04-19: the first incremental nested-expansion implementation keeps
+  `currentUnitId` as the viewer's base scope and layers additional nested
+  content on top through separate expand/collapse state, so the follow-up
+  expand-all and later navigation slices can reuse the same scope model.
+- 2026-04-19: deeper nested expand/collapse remains intentionally deferred.
+  The current UI now hides those controls below the first nested level until
+  the viewer can reveal multi-level nested scopes with stable layout and
+  collision handling.
+- 2026-04-19: flow-view search is a planned usability follow-up. The desired
+  behavior is to search units from the flow surface, reveal any collapsed
+  ancestors needed to show the match, and then focus the matching unit without
+  requiring manual hierarchy expansion first.
