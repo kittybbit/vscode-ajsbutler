@@ -149,11 +149,10 @@ structure in `docs/specs/features/<feature>/`.
 ### Next Priority Tasks
 
 1. Refresh flow-graph UX in focused slices:
-   visual parity with JP1/AJS View and the first progressive nested-expansion
-   seam are now in place, so the next active follow-ups are one-click
-   expand-all, deeper nested expansion, flow-view search that can reveal a
-   target unit's hierarchy, and then explicit view-to-view navigation on top of
-   the same interaction model.
+   visual parity with JP1/AJS View plus both incremental and one-click nested
+   expansion are now in place, so the next active follow-ups are deeper nested
+   expansion, flow-view search that can reveal a target unit's hierarchy, and
+   then explicit view-to-view navigation on top of the same interaction model.
 2. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
 3. Define a read-only JP1/AJS WebAPI import boundary with clear application

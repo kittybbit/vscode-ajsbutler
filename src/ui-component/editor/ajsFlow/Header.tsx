@@ -7,6 +7,8 @@ import Link from "@mui/material/Link";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import UnfoldLess from "@mui/icons-material/UnfoldLess";
+import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import FlowMenu from "./FlowMenu";
 import {
@@ -24,6 +26,9 @@ type HeaderProps = {
   currentUnit?: AjsUnit;
   unitById: ReadonlyMap<string, AjsUnit>;
   currentUnitIdState: CurrentUnitIdStateType;
+  canToggleExpandAllNestedUnits: boolean;
+  hasExpandedAllNestedUnits: boolean;
+  toggleExpandAllNestedUnits: () => void;
 };
 
 const Header: FC<HeaderProps> = ({
@@ -32,6 +37,9 @@ const Header: FC<HeaderProps> = ({
   currentUnit,
   unitById,
   currentUnitIdState,
+  canToggleExpandAllNestedUnits,
+  hasExpandedAllNestedUnits,
+  toggleExpandAllNestedUnits,
 }) => {
   console.log("render Header.");
 
@@ -89,6 +97,9 @@ const Header: FC<HeaderProps> = ({
     setDrawerWidth(0);
     setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
   }, [setDrawerWidth, setMenuStatus]);
+  const expandAllLabel = hasExpandedAllNestedUnits
+    ? "Collapse all nested jobnets."
+    : "Expand all nested jobnets.";
 
   return (
     <>
@@ -115,6 +126,22 @@ const Header: FC<HeaderProps> = ({
             >
               <ViewColumn fontSize="inherit" />
             </IconButton>
+          </Tooltip>
+          <Tooltip title={expandAllLabel}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="toggleExpandAllNestedJobnets"
+                onClick={toggleExpandAllNestedUnits}
+                disabled={!canToggleExpandAllNestedUnits}
+              >
+                {hasExpandedAllNestedUnits ? (
+                  <UnfoldLess fontSize="inherit" />
+                ) : (
+                  <UnfoldMore fontSize="inherit" />
+                )}
+              </IconButton>
+            </span>
           </Tooltip>
           <Breadcrumbs
             separator="›"

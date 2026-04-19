@@ -61,6 +61,20 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   keep one-click expand-all as the immediate follow-up before cross-view
   navigation so the newly introduced nested-expansion state model can be reused
   instead of replaced.
+- 2026-04-19 implementation result:
+  the flow header now exposes a one-click nested-scope control that expands
+  every expandable descendant jobnet in the current scope and collapses the
+  same scope back to baseline once everything is open, while keeping the
+  existing `currentUnitId`-driven selection contract unchanged.
+- 2026-04-19 validation result:
+  focused helper coverage now verifies which nested jobnets qualify for the
+  scope-wide action and when the current scope should be treated as fully
+  expanded, alongside the existing graph expansion regression coverage and the
+  standard desktop, web, and build baseline.
+- 2026-04-19 next slice:
+  move from scope-wide expansion to deeper nested reveal and search behavior,
+  reusing the same expansion-state model rather than replacing it for each
+  follow-up interaction.
 
 ## Validation
 
