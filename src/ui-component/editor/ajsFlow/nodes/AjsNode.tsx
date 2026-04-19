@@ -11,6 +11,12 @@ import { tyDefinitionLang } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../../MyContexts";
 
 export type AjsNode = {
+  nestedPanel?: {
+    panelOffsetXPx: number;
+    panelOffsetYPx: number;
+    panelWidthPx: number;
+    panelHeightPx: number;
+  };
   unitId: string;
   unitDefinition: UnitDefinitionDialogDto;
   label: string;
@@ -22,6 +28,9 @@ export type AjsNode = {
   isRootJobnet: boolean;
   hasSchedule: boolean;
   hasWaitedFor: boolean;
+  canExpandNested?: boolean;
+  isExpandedNested?: boolean;
+  toggleExpandedUnitId?: (unitId: string) => void;
 } & DialogDataStateType &
   CurrentUnitIdStateType &
   Record<string, unknown>;
@@ -30,10 +39,14 @@ export const buildNodeSxProps = ({
   isCurrent,
   isAncestor,
   isRootJobnet,
+  nestedPanel,
 }: Pick<
   AjsNode,
-  "isCurrent" | "isAncestor" | "isRootJobnet"
+  "isCurrent" | "isAncestor" | "isRootJobnet" | "nestedPanel"
 >): SxProps<Theme> => ({
+  position: "relative",
+  zIndex: 1,
+  overflow: "visible",
   width: "7.25em",
   minHeight: "7.25em",
   paddingX: "0.55em",
@@ -73,6 +86,23 @@ export const buildNodeSxProps = ({
   "&:hover": {
     transform: "translateY(-1px)",
   },
+  "&::after": nestedPanel
+    ? {
+        content: '""',
+        position: "absolute",
+        left: `${nestedPanel.panelOffsetXPx}px`,
+        top: `${nestedPanel.panelOffsetYPx}px`,
+        width: `${nestedPanel.panelWidthPx}px`,
+        height: `${nestedPanel.panelHeightPx}px`,
+        borderRadius: "1.5em",
+        border: (theme) => `1px solid ${theme.palette.primary.light}`,
+        background: (theme) =>
+          `linear-gradient(180deg, ${theme.palette.primary.light}10 0%, ${theme.palette.background.paper}cc 100%)`,
+        boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.divider}`,
+        pointerEvents: "none",
+        zIndex: -1,
+      }
+    : undefined,
   "& button": {
     color: (theme) =>
       isCurrent ? theme.palette.info.dark : theme.palette.text.secondary,

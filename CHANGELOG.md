@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.15.0]
+
+- Added inline nested expansion for direct child jobnets in the flow viewer.
+- Improved flow-view expansion layout and highlighting.
+
 ## [1.12.0]
 
 - Refreshed the flow viewer presentation so the current node, ancestor chain,

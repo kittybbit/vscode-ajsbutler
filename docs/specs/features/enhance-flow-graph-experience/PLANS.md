@@ -20,13 +20,6 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
 
 ## Current Slice
 
-- Define the first visual-refresh slice as a presentation-only pass that keeps
-  flow DTO construction and current selection semantics unchanged.
-- Prioritize a JP1/AJS View-like feel through clearer current-node emphasis,
-  stronger ancestor readability, more intentional graph chrome, and a minimap
-  or overview treatment that does not dominate the primary canvas.
-- Keep nested expansion and cross-view navigation as follow-up slices so the
-  visual refresh remains reviewable and compatibility-focused.
 - 2026-04-18 implementation result:
   the flow viewer now gives the active node, ancestor chain, and root jobnet a
   stronger visual hierarchy while keeping the existing graph DTOs, selection
@@ -35,6 +28,39 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   preserve the DTO-to-node identity mapping in `flowGraphView.test.ts`, then
   confirm both desktop and web preview hosts still open and render the updated
   flow view through the standard serial quality baseline.
+- 2026-04-19 next slice decision:
+  move to progressive nested expansion while keeping flow DTO construction,
+  current-unit selection, and desktop/web host behavior unchanged until the
+  interaction seam is proven.
+- 2026-04-19 expand-all decision:
+  do not force one-click expand-all into the first incremental-expansion
+  implementation; instead, keep that control as the immediate follow-up so the
+  first behavior slice can validate identity, rendering, and host compatibility
+  with less UI and state-synchronization risk.
+- 2026-04-19 navigation fallback decision:
+  when a counterpart list or flow view is unavailable, keep the current viewer
+  state stable and make the jump action fail predictably through hidden or
+  disabled affordances plus a no-op command path, rather than changing
+  selection opportunistically.
+- 2026-04-19 implementation focus:
+  start with user-driven incremental reveal of nested jobnets in one screen,
+  preserve the existing `currentUnitId`-driven selection contract, and leave
+  cross-view jump actions as the next slice once nested expansion semantics are
+  established.
+- 2026-04-19 implementation result:
+  child jobnets in the flow canvas can now reveal their nested scope in place
+  without replacing the current viewer scope; the existing "open jobnet" action
+  still re-scopes the viewer, while a separate expand/collapse affordance adds
+  or removes nested children progressively.
+- 2026-04-19 validation result:
+  focused regression coverage now verifies that nested descendants appear only
+  after their visible parent jobnet is expanded, keyboard and click handling
+  toggle the nested reveal affordance predictably, and the standard desktop,
+  web, and production-build baseline still passes.
+- 2026-04-19 next slice:
+  keep one-click expand-all as the immediate follow-up before cross-view
+  navigation so the newly introduced nested-expansion state model can be reused
+  instead of replaced.
 
 ## Validation
 

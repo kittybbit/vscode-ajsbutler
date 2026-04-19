@@ -2,7 +2,9 @@ import * as assert from "assert";
 import type { KeyboardEvent } from "react";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 import {
+  handleClickNestedToggle,
   handleClickDialogOpen,
+  handleKeyDownNestedToggle,
   handleKeyDownDialogOpen,
 } from "../../ui-component/editor/ajsFlow/nodes/Utils";
 import { AjsNode } from "../../ui-component/editor/ajsFlow/nodes/AjsNode";
@@ -87,5 +89,28 @@ suite("Show Unit Definition interaction", () => {
       key: "Enter",
     } as KeyboardEvent<HTMLElement>);
     assert.deepStrictEqual(received, dialogData);
+  });
+
+  test("flow nested toggle action expands only on click or Enter key", () => {
+    const toggled: string[] = [];
+    const node = createNode({
+      unitId: "/root/jobnet/child-net",
+      toggleExpandedUnitId: (unitId) => {
+        toggled.push(unitId);
+      },
+    });
+
+    handleClickNestedToggle(node)();
+    handleKeyDownNestedToggle(node)({
+      key: "Space",
+    } as KeyboardEvent<HTMLElement>);
+    handleKeyDownNestedToggle(node)({
+      key: "Enter",
+    } as KeyboardEvent<HTMLElement>);
+
+    assert.deepStrictEqual(toggled, [
+      "/root/jobnet/child-net",
+      "/root/jobnet/child-net",
+    ]);
   });
 });

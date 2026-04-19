@@ -47,6 +47,46 @@ suite("Flow Graph View", () => {
             },
           },
         },
+        {
+          id: "/root/jobnet/child-net",
+          label: "child-net",
+          type: "jobnet",
+          metadata: {
+            absolutePath: "/root/jobnet/child-net",
+            ty: "n",
+            comment: "nested child",
+            isAncestor: false,
+            isCurrent: false,
+            isRootJobnet: false,
+            hasSchedule: false,
+            hasWaitedFor: false,
+            layout: {
+              kind: "grid",
+              h: 400,
+              v: 144,
+            },
+          },
+        },
+        {
+          id: "/root/jobnet/child-net/grand-net",
+          label: "grand-net",
+          type: "jobnet",
+          metadata: {
+            absolutePath: "/root/jobnet/child-net/grand-net",
+            ty: "n",
+            comment: "nested grandchild",
+            isAncestor: false,
+            isCurrent: false,
+            isRootJobnet: false,
+            hasSchedule: false,
+            hasWaitedFor: false,
+            layout: {
+              kind: "grid",
+              h: 560,
+              v: 240,
+            },
+          },
+        },
       ],
       edges: [
         {
@@ -73,6 +113,22 @@ suite("Flow Graph View", () => {
           commands: [],
         },
       ],
+      [
+        "/root/jobnet/child-net",
+        {
+          absolutePath: "/root/jobnet/child-net",
+          rawData: "ty=n",
+          commands: [],
+        },
+      ],
+      [
+        "/root/jobnet/child-net/grand-net",
+        {
+          absolutePath: "/root/jobnet/child-net/grand-net",
+          rawData: "ty=n",
+          commands: [],
+        },
+      ],
     ]);
 
     const { nodes, edges } = createReactFlowData(
@@ -87,6 +143,74 @@ suite("Flow Graph View", () => {
         currentUnitId: "/root/jobnet",
         setCurrentUnitId: () => undefined,
       },
+      {
+        nodeDecorations: new Map(),
+        unitById: new Map([
+          [
+            "/root/jobnet/child-net",
+            {
+              id: "/root/jobnet/child-net",
+              name: "child-net",
+              unitAttribute: "",
+              unitType: "n",
+              absolutePath: "/root/jobnet/child-net",
+              depth: 2,
+              parentId: "/root/jobnet",
+              isRoot: false,
+              isRootJobnet: false,
+              hasSchedule: false,
+              hasWaitedFor: false,
+              layout: { h: 400, v: 144 },
+              parameters: [],
+              relations: [],
+              children: [
+                {
+                  id: "/root/jobnet/child-net/grand-net",
+                  name: "grand-net",
+                  unitAttribute: "",
+                  unitType: "n",
+                  absolutePath: "/root/jobnet/child-net/grand-net",
+                  depth: 3,
+                  parentId: "/root/jobnet/child-net",
+                  isRoot: false,
+                  isRootJobnet: false,
+                  hasSchedule: false,
+                  hasWaitedFor: false,
+                  layout: { h: 560, v: 240 },
+                  parameters: [],
+                  relations: [],
+                  children: [],
+                },
+              ],
+            },
+          ],
+          [
+            "/root/jobnet/child-net/grand-net",
+            {
+              id: "/root/jobnet/child-net/grand-net",
+              name: "grand-net",
+              unitAttribute: "",
+              unitType: "n",
+              absolutePath: "/root/jobnet/child-net/grand-net",
+              depth: 3,
+              parentId: "/root/jobnet/child-net",
+              isRoot: false,
+              isRootJobnet: false,
+              hasSchedule: false,
+              hasWaitedFor: false,
+              layout: { h: 560, v: 240 },
+              parameters: [],
+              relations: [],
+              children: [],
+            },
+          ],
+        ]),
+        nestedExpansionState: {
+          expandedUnitIds: new Set<string>(),
+          toggleExpandedUnitId: () => undefined,
+        },
+        positionOverrides: new Map(),
+      },
     );
 
     assert.strictEqual(nodes[0].data.unitId, "/root/jobnet");
@@ -97,8 +221,11 @@ suite("Flow Graph View", () => {
     assert.strictEqual(nodes[0].data.isCurrent, true);
     assert.strictEqual(nodes[0].data.isAncestor, true);
     assert.strictEqual(nodes[0].data.isRootJobnet, true);
+    assert.strictEqual(nodes[0].data.canExpandNested, false);
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
+    assert.strictEqual(nodes[2].data.canExpandNested, true);
+    assert.strictEqual(nodes[3].data.canExpandNested, false);
     assert.strictEqual(edges[0].source, "/root/jobnet");
     assert.strictEqual(edges[0].target, "/root/jobnet/job-a");
   });

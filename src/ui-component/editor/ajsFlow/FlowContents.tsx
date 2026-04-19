@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   Dispatch,
   FC,
   memo,
@@ -25,7 +26,6 @@ import {
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { buildFlowGraph } from "../../../application/flow-graph/buildFlowGraph";
 import {
   AjsDocument,
   flattenAjsUnits,
@@ -44,6 +44,7 @@ import JobGroupNode from "./nodes/JobGroupNode";
 import ConditionNode from "./nodes/ConditionNode";
 import Header from "./Header";
 import FlowSelector from "./FlowSelector";
+import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
 import { createReactFlowData } from "./flowGraphView";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
@@ -75,6 +76,10 @@ export type CurrentUnitIdStateType = {
   currentUnitId?: string;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
 };
+export type NestedExpansionStateType = {
+  expandedUnitIds: ReadonlySet<string>;
+  toggleExpandedUnitId: (unitId: string) => void;
+};
 
 const FlowContents: FC = () => {
   console.log("render FlowContents.");
@@ -88,6 +93,7 @@ const FlowContents: FC = () => {
 
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const [currentUnitId, setCurrentUnitId] = useState<string>();
+  const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
   const prevUnitEntityId = useRef<string | undefined>(undefined);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -113,6 +119,39 @@ const FlowContents: FC = () => {
     () => (currentUnitId ? unitById.get(currentUnitId) : undefined),
     [currentUnitId, unitById],
   );
+  const toggleExpandedUnitId = useCallback((unitId: string) => {
+    setExpandedUnitIds((prev) =>
+      prev.includes(unitId)
+        ? prev.filter((id) => id !== unitId)
+        : [...prev, unitId],
+    );
+  }, []);
+  const expandedUnitIdSet = useMemo(
+    () => new Set(expandedUnitIds),
+    [expandedUnitIds],
+  );
+  const nestedExpansionState = useMemo<NestedExpansionStateType>(
+    () => ({
+      expandedUnitIds: expandedUnitIdSet,
+      toggleExpandedUnitId,
+    }),
+    [expandedUnitIdSet, toggleExpandedUnitId],
+  );
+
+  const currentUnitIdState = useMemo<CurrentUnitIdStateType>(
+    () => ({
+      currentUnitId,
+      setCurrentUnitId,
+    }),
+    [currentUnitId],
+  );
+  const dialogDataState = useMemo<DialogDataStateType>(
+    () => ({
+      dialogData,
+      setDialogData,
+    }),
+    [dialogData],
+  );
 
   const theme = useMemo(
     () =>
@@ -124,38 +163,65 @@ const FlowContents: FC = () => {
     [isDarkMode],
   );
 
-  const updateNodesAndEdges = (selectedUnitId?: string) => {
-    if (!selectedUnitId) {
-      setNodes(() => []);
-      setEdges(() => []);
-      return;
-    }
-    if (!ajsDocument) {
-      setNodes(() => []);
-      setEdges(() => []);
-      return;
-    }
-    const graph = buildFlowGraph(ajsDocument, selectedUnitId);
-    if (!graph) {
-      setNodes(() => []);
-      setEdges(() => []);
-      return;
-    }
-    const { nodes, edges } = createReactFlowData(
-      graph,
-      unitDefinitionByPath,
-      theme,
-      dialogDataState,
+  const updateNodesAndEdges = useCallback(
+    (selectedUnitId?: string) => {
+      if (!selectedUnitId) {
+        setNodes(() => []);
+        setEdges(() => []);
+        return;
+      }
+      if (!ajsDocument) {
+        setNodes(() => []);
+        setEdges(() => []);
+        return;
+      }
+      const { graph, positionOverrides, nodeDecorations } =
+        buildExpandedFlowGraph(
+          ajsDocument,
+          selectedUnitId,
+          nestedExpansionState.expandedUnitIds,
+          theme.typography.htmlFontSize,
+        );
+      if (!graph) {
+        setNodes(() => []);
+        setEdges(() => []);
+        return;
+      }
+      const { nodes, edges } = createReactFlowData(
+        graph,
+        unitDefinitionByPath,
+        theme,
+        dialogDataState,
+        currentUnitIdState,
+        {
+          nodeDecorations,
+          unitById,
+          nestedExpansionState,
+          positionOverrides,
+        },
+      );
+      setNodes(() => nodes);
+      setEdges(() => edges);
+    },
+    [
+      ajsDocument,
       currentUnitIdState,
-    );
-    setNodes(() => nodes);
-    setEdges(() => edges);
-  };
+      dialogDataState,
+      nestedExpansionState,
+      theme,
+      unitDefinitionByPath,
+      unitById,
+    ],
+  );
 
   useEffect(() => {
     updateNodesAndEdges(currentUnitId);
     prevUnitEntityId.current = currentUnitId;
-  }, [ajsDocument, currentUnitId, unitDefinitionByPath, theme, dialogData]);
+  }, [currentUnitId, updateNodesAndEdges]);
+
+  useEffect(() => {
+    setExpandedUnitIds((prev) => (prev.length === 0 ? prev : []));
+  }, [ajsDocument, currentUnitId]);
 
   useEffect(() => {
     const changeDocumentFn = (type: string, data: unknown) => {
@@ -205,14 +271,6 @@ const FlowContents: FC = () => {
   const drawerWidthState = {
     drawerWidth: drawerWidth,
     setDrawerWidth: setDrawerWidth,
-  };
-  const currentUnitIdState = {
-    currentUnitId: currentUnitId,
-    setCurrentUnitId: setCurrentUnitId,
-  };
-  const dialogDataState = {
-    dialogData: dialogData,
-    setDialogData: setDialogData,
   };
 
   return (
