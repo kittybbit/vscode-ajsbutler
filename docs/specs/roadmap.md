@@ -69,26 +69,26 @@
 27. Add a one-click expand-all path on top of the flow viewer's new
     nested-expansion state so users can reveal the current scope in one step
     without changing the existing selection contract.
+28. Refresh the flow-graph presentation so its visual design is closer to
+    JP1/AJS View while preserving current desktop and web compatibility.
+29. Add explicit navigation between unit-list and flow-graph units when the
+    counterpart view for the selected unit is available.
 
 ## Current Roadmap
 
-1. Refresh the flow-graph presentation so its visual design is closer to
-   JP1/AJS View while preserving current desktop and web compatibility.
-2. Add explicit navigation between unit-list and flow-graph units when the
-   counterpart view for the selected unit is available.
-3. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+1. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-4. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
+2. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
    Command Reference.
-5. Add a read-only JP1/AJS WebAPI import path for loading server-side
+3. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-6. Replace the custom `UnitEntity` hash implementation with a common
+4. Replace the custom `UnitEntity` hash implementation with a common
    algorithm once identity and compatibility checks are explicit.
-7. Add richer unit-list search on top of the current presentation-local
+5. Add richer unit-list search on top of the current presentation-local
    matcher so parameter-key and parameter-value queries complement the current
    partial-match behavior.
-8. Consolidate i18n translation files to reduce duplication between language
+6. Consolidate i18n translation files to reduce duplication between language
    variants.
 
 ## Deferred / Optional Slices
