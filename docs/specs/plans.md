@@ -134,6 +134,11 @@ structure in `docs/specs/features/<feature>/`.
   rather than persisted extension or webview state, and the next eventual hash
   slice should preserve normalized `absolutePath`-based DTO contracts while
   refreshing focused selection and anchor regressions.
+- The first flow-view search slice is now in place:
+  the flow header can search within the current scope subtree, reveal the
+  collapsed nested-jobnet hierarchy required to show the first match, and
+  visually emphasize that match without changing the base `currentUnitId`
+  scope contract.
 
 ### How To Maintain This Section
 
@@ -149,10 +154,11 @@ structure in `docs/specs/features/<feature>/`.
 ### Next Priority Tasks
 
 1. Refresh flow-graph UX in focused slices:
-   visual parity with JP1/AJS View plus incremental, one-click, and deeper
-   nested expansion are now in place, so the next active follow-ups are
-   flow-view search that can reveal a target unit's hierarchy, and then
-   explicit view-to-view navigation on top of the same interaction model.
+   visual parity with JP1/AJS View plus incremental, one-click, deeper nested
+   expansion, and first-slice current-scope search are now in place, so the
+   next active follow-ups are deciding whether flow search needs broader
+   navigation behavior, and then explicit view-to-view navigation on top of
+   the same interaction model.
 2. Align parameter parsing and `ajs` command generation with
    JP1/Automatic Job Management System 3 version 13 reference manuals.
 3. Define a read-only JP1/AJS WebAPI import boundary with clear application

@@ -26,8 +26,14 @@
 - [x] Refactor `buildExpandedFlowGraph.ts` after the deeper nested-expansion
       fixes so expansion, panel sizing, and sibling collision handling are
       easier to extend without changing behavior
-- [ ] Add flow-view search that finds a target unit and opens the hierarchy
-      needed to reveal that unit in context before focusing it
+- [x] Add the first flow-view search slice inside the current scope:
+      search by unit name, comment, or path from the flow header, reveal the
+      collapsed ancestor hierarchy needed to show the first match, and
+      visually focus that match without changing the current scope
+- [ ] Decide whether flow-view search needs follow-up work beyond the first
+      current-scope slice:
+      examples include multi-match navigation, explicit camera centering, or
+      cross-scope search that can rebase the current flow scope predictably
 - [x] Define the visual cues that most matter for JP1/AJS View resemblance
 - [x] Decide whether expand-all ships in the same slice as incremental
       expansion or immediately after
@@ -91,6 +97,12 @@
   behavior is to search units from the flow surface, reveal any collapsed
   ancestors needed to show the match, and then focus the matching unit without
   requiring manual hierarchy expansion first.
+- 2026-04-19: the first implemented flow-view search slice intentionally stays
+  inside the current flow scope. It searches current-scope descendants by
+  unit name, comment, and absolute path, expands any collapsed ancestor
+  jobnets needed to reveal the first match, and uses a presentation-local
+  focus marker rather than rebasing `currentUnitId` or adding camera control
+  in the same change.
 - 2026-04-19: after the nested-expansion bug fixes, `buildExpandedFlowGraph.ts`
   should keep the same layout semantics but separate node reveal, panel-bounds
   calculation, and sibling re-layout so the next flow-view interactions do not

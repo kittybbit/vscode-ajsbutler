@@ -5,6 +5,8 @@
 - Added inline nested expansion for nested jobnets in the flow viewer,
   including deeper nested scopes.
 - Improved flow-view expansion layout, re-layout stability, and highlighting.
+- Added current-scope flow search that reveals collapsed ancestors and
+  highlights the first matching unit.
 
 ## [1.12.0]
 

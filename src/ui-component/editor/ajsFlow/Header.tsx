@@ -1,12 +1,27 @@
-import React, { FC, memo, ReactElement, useCallback, useMemo } from "react";
+import React, {
+  ChangeEvent,
+  FC,
+  KeyboardEvent,
+  memo,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import AppBar from "@mui/material/AppBar";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import Link from "@mui/material/Link";
+import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import ClearAllIcon from "@mui/icons-material/ClearAll";
+import SearchIcon from "@mui/icons-material/Search";
 import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
@@ -29,6 +44,9 @@ type HeaderProps = {
   canToggleExpandAllNestedUnits: boolean;
   hasExpandedAllNestedUnits: boolean;
   toggleExpandAllNestedUnits: () => void;
+  searchedUnitId?: string;
+  onSearchSubmit: (query: string) => void;
+  onSearchClear: () => void;
 };
 
 const Header: FC<HeaderProps> = ({
@@ -40,13 +58,19 @@ const Header: FC<HeaderProps> = ({
   canToggleExpandAllNestedUnits,
   hasExpandedAllNestedUnits,
   toggleExpandAllNestedUnits,
+  searchedUnitId,
+  onSearchSubmit,
+  onSearchClear,
 }) => {
   console.log("render Header.");
 
   const { setMenuStatus } = flowMenuState;
   const { setDrawerWidth } = drawerWidthState;
   const { setCurrentUnitId } = currentUnitIdState;
-  const { lang } = useMyAppContext();
+  const { lang, os } = useMyAppContext();
+  const isMac = os === "darwin";
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchValue, setSearchValue] = useState<string>("");
 
   const breadcrumbs = useMemo(() => {
     const crumbs: ReactElement[] = [];
@@ -97,9 +121,46 @@ const Header: FC<HeaderProps> = ({
     setDrawerWidth(0);
     setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
   }, [setDrawerWidth, setMenuStatus]);
+  const handleShortcut = useCallback(
+    (event: globalThis.KeyboardEvent) => {
+      if ((isMac ? event.metaKey : event.ctrlKey) && event.key === "f") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    },
+    [isMac],
+  );
+  useEffect(() => {
+    document.addEventListener("keydown", handleShortcut);
+    return () => document.removeEventListener("keydown", handleShortcut);
+  }, [handleShortcut]);
+  const handleSearchChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) =>
+      setSearchValue(event.target.value),
+    [],
+  );
+  const handleSearchSubmit = useCallback(() => {
+    onSearchSubmit(searchValue);
+  }, [onSearchSubmit, searchValue]);
+  const handleSearchKeyUp = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Enter") {
+        handleSearchSubmit();
+      }
+    },
+    [handleSearchSubmit],
+  );
+  const handleSearchClear = useCallback(() => {
+    setSearchValue("");
+    onSearchClear();
+    searchInputRef.current?.focus();
+  }, [onSearchClear]);
   const expandAllLabel = hasExpandedAllNestedUnits
     ? "Collapse all nested jobnets."
     : "Expand all nested jobnets.";
+  const searchHelperText = searchedUnitId
+    ? "Matched unit is highlighted in the current scope."
+    : "Search current scope by unit name, comment, or path.";
 
   return (
     <>
@@ -143,6 +204,43 @@ const Header: FC<HeaderProps> = ({
               </IconButton>
             </span>
           </Tooltip>
+          <TextField
+            size="small"
+            variant="standard"
+            placeholder={`Search current scope...(${isMac ? "\u2318" : "CTRL+"}F)`}
+            helperText={searchHelperText}
+            value={searchValue}
+            onChange={handleSearchChange}
+            onKeyUp={handleSearchKeyUp}
+            onBlur={handleSearchSubmit}
+            inputRef={searchInputRef}
+            sx={{ width: "20rem", maxWidth: "32vw", flexShrink: 0 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Tooltip title="Clear flow search.">
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Clear flow search."
+                          onClick={handleSearchClear}
+                          disabled={searchValue.length === 0 && !searchedUnitId}
+                        >
+                          <ClearAllIcon fontSize="inherit" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
           <Breadcrumbs
             separator="›"
             aria-label="breadcrumb"

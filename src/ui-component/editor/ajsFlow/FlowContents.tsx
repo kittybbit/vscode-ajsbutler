@@ -50,6 +50,7 @@ import {
   collectExpandableNestedUnitIds,
   hasExpandedAllNestedUnitIds,
 } from "./nestedExpansion";
+import { findFlowSearchResult } from "./flowSearch";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 
@@ -98,6 +99,7 @@ const FlowContents: FC = () => {
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
+  const [searchedUnitId, setSearchedUnitId] = useState<string>();
   const prevUnitEntityId = useRef<string | undefined>(undefined);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -226,6 +228,7 @@ const FlowContents: FC = () => {
         currentUnitIdState,
         {
           nodeDecorations,
+          searchedUnitId,
           unitById,
           nestedExpansionState,
           positionOverrides,
@@ -242,8 +245,32 @@ const FlowContents: FC = () => {
       theme,
       unitDefinitionByPath,
       unitById,
+      searchedUnitId,
     ],
   );
+
+  const handleSearchSubmit = useCallback(
+    (query: string) => {
+      const result = findFlowSearchResult(currentUnit, query, unitById);
+      if (!result) {
+        setSearchedUnitId(undefined);
+        return;
+      }
+
+      setExpandedUnitIds((prev) => {
+        const next = new Set(prev);
+        for (const unitId of result.expandedAncestorUnitIds) {
+          next.add(unitId);
+        }
+        return [...next];
+      });
+      setSearchedUnitId(result.matchedUnitId);
+    },
+    [currentUnit, unitById],
+  );
+  const handleSearchClear = useCallback(() => {
+    setSearchedUnitId(undefined);
+  }, []);
 
   useEffect(() => {
     updateNodesAndEdges(currentUnitId);
@@ -252,6 +279,7 @@ const FlowContents: FC = () => {
 
   useEffect(() => {
     setExpandedUnitIds((prev) => (prev.length === 0 ? prev : []));
+    setSearchedUnitId(undefined);
   }, [ajsDocument, currentUnitId]);
 
   useEffect(() => {
@@ -344,6 +372,9 @@ const FlowContents: FC = () => {
               canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
               hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
               toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
+              searchedUnitId={searchedUnitId}
+              onSearchSubmit={handleSearchSubmit}
+              onSearchClear={handleSearchClear}
             />
             <Box
               sx={{
