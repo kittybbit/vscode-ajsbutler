@@ -77,10 +77,12 @@
 ## Current Roadmap
 
 1. Re-base parameter interpretation on JP1/Automatic Job Management System 3
-   version 13 Definition File Reference.
+   version 13 Definition File Reference, starting from the documented audit
+   of today's shared parameter-semantics seams.
 2. Separate `ajs` command generation from `buildUnitDefinition.ts` and align
    generated commands with JP1/Automatic Job Management System 3 version 13
-   Command Reference.
+   Command Reference, beginning with the existing `ajsshow` and `ajsprint`
+   behavior as the first extracted supported command set.
 3. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
 4. Replace the custom `UnitEntity` hash implementation with a common
