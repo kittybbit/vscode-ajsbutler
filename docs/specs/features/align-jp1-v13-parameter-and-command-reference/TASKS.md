@@ -16,14 +16,30 @@
 
 ## Remaining Follow-up
 
-- [ ] Inventory current parameter semantics that already match the version 13
+- [x] Inventory current parameter semantics that already match the version 13
       definition reference
-- [ ] Inventory current command-generation behavior and its coupling to
+- [x] Inventory current command-generation behavior and its coupling to
       show-unit-definition
-- [ ] Decide the first supported set of auto-generated `ajs` commands
-- [ ] Define how manual mismatches are tracked and closed incrementally
+- [x] Decide the first supported set of auto-generated `ajs` commands
+- [x] Define how manual mismatches are tracked and closed incrementally
+
+## Next Slice
+
+- [ ] Extract the current `ajsshow` and `ajsprint` generation logic from
+      `buildUnitDefinition.ts` into a dedicated application-facing seam while
+      preserving the existing dialog DTO behavior
+- [ ] Turn the audit notes into an explicit parameter-coverage matrix only when
+      a behavior-changing alignment slice needs per-key status beyond the
+      current audit summary
 
 ## Notes
 
 - 2026-04-18: normative parameter and command sources were fixed to the user
   supplied JP1/AJS3 version 13 reference documents.
+- 2026-04-20: the initial audit is recorded in `AUDIT.md`. Current parameter
+  semantics are already centralized mainly in `parameterHelpers.ts`,
+  `Defaults.ts`, and the builder families behind `ParamFactory`, while command
+  generation is still embedded in
+  `src/application/unit-definition/buildUnitDefinition.ts`.
+- 2026-04-20: the first extracted supported command set will preserve the
+  current user-visible behavior only: `ajsshow` and `ajsprint`.

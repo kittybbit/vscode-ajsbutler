@@ -12,6 +12,12 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Completed In This Branch
 
+- JP1/AJS3 version 13 alignment now has an explicit audit baseline:
+  `docs/specs/features/align-jp1-v13-parameter-and-command-reference/AUDIT.md`
+  records the current shared parameter-semantics seams, the current
+  command-generation coupling inside `buildUnitDefinition.ts`, the first
+  preserved supported command set (`ajsshow`, `ajsprint`), and the rule for
+  tracking manual mismatches incrementally.
 - Decompose `buildUnitListView.ts` into focused projection helpers:
   `group6` calendar, `group7`/`group11` priority, `group10` schedule, and
   linked-unit projections now live in dedicated helper modules with focused
@@ -159,9 +165,10 @@ structure in `docs/specs/features/<feature>/`.
 ### Next Priority Tasks
 
 1. Align parameter parsing and `ajs` command generation with
-   JP1/Automatic Job Management System 3 version 13 reference manuals,
-   starting with an explicit inventory of the current parameter semantics and
-   command-generation seams that already match the named references.
+   JP1/Automatic Job Management System 3 version 13 reference manuals by
+   using the new audit baseline to extract the current `ajsshow` and
+   `ajsprint` generation logic from `buildUnitDefinition.ts` into a dedicated
+   application-facing seam.
 2. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
 3. Continue treating desktop and web compatibility as an explicit acceptance
