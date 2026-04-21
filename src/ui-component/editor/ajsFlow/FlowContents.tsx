@@ -105,6 +105,9 @@ const FlowContents: FC = () => {
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
   const [searchedUnitId, setSearchedUnitId] = useState<string>();
+  const [searchMatchedUnitIds, setSearchMatchedUnitIds] = useState<string[]>(
+    [],
+  );
   const preserveSearchOnNextScopeChange = useRef<boolean>(false);
   const prevUnitEntityId = useRef<string | undefined>(undefined);
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -234,6 +237,7 @@ const FlowContents: FC = () => {
         currentUnitIdState,
         {
           nodeDecorations,
+          searchMatchedUnitIds: new Set(searchMatchedUnitIds),
           searchedUnitId,
           unitById,
           nestedExpansionState,
@@ -251,6 +255,7 @@ const FlowContents: FC = () => {
       theme,
       unitDefinitionByPath,
       unitById,
+      searchMatchedUnitIds,
       searchedUnitId,
     ],
   );
@@ -260,6 +265,7 @@ const FlowContents: FC = () => {
       const result = findFlowSearchResult(currentUnit, query, unitById);
       if (!result) {
         setSearchedUnitId(undefined);
+        setSearchMatchedUnitIds([]);
         return;
       }
 
@@ -270,12 +276,14 @@ const FlowContents: FC = () => {
         }
         return [...next];
       });
+      setSearchMatchedUnitIds(result.matchedUnitIds);
       setSearchedUnitId(result.matchedUnitId);
     },
     [currentUnit, unitById],
   );
   const handleSearchClear = useCallback(() => {
     setSearchedUnitId(undefined);
+    setSearchMatchedUnitIds([]);
   }, []);
 
   const handleRevealUnit = useCallback(
@@ -287,6 +295,7 @@ const FlowContents: FC = () => {
       preserveSearchOnNextScopeChange.current = true;
       setExpandedUnitIds(revealTarget.expandedAncestorUnitIds);
       setCurrentUnitId(revealTarget.scopeUnitId);
+      setSearchMatchedUnitIds([revealTarget.revealedUnitId]);
       setSearchedUnitId(revealTarget.revealedUnitId);
     },
     [unitById],
@@ -304,6 +313,7 @@ const FlowContents: FC = () => {
       return;
     }
     setSearchedUnitId(undefined);
+    setSearchMatchedUnitIds([]);
   }, [ajsDocument, currentUnitId]);
 
   useEffect(() => {

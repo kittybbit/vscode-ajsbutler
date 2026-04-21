@@ -33,12 +33,10 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
 
 ## Recent Updates
 
-- Flow viewer visuals are more legible, with clearer emphasis on the current
-  node, ancestor chain, and root jobnet.
-- Flow webview sizing now stays within the available panel area instead of
-  showing stray browser-level scrollbars.
-- Table view scrolling behavior is preserved for both window-scroll and
-  table-scroll modes after the webview layout updates.
+- Flow viewer now supports inline nested jobnet expansion, current-scope flow
+  search, and list/flow bridge navigation.
+- Flow viewer visuals and layout behavior are more stable in both desktop and
+  web hosts.
 
 ## Extension Settings
 

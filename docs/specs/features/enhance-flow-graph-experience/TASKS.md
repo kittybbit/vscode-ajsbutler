@@ -39,6 +39,17 @@
       current-scope slice:
       broader search behavior is intentionally deferred for now so the next
       viewer-facing slice can focus on explicit list/flow navigation first
+- [x] Refine current-scope flow search matching:
+      preserve space-containing query text, keep ancestor reveal semantics,
+      and prefer a descendant focus target when the current scope root also
+      matches
+- [x] Highlight all visible flow-search matches while preserving first-match
+      focus:
+      keep selected/focused state on the first chosen match, but decorate every
+      visible node that matches the current-scope query
+- [x] Expand all matched flow-search results in the current scope:
+      keep first-match focus, but reveal every matching node by expanding the
+      combined ancestor jobnet set for all matches
 - [x] Define the visual cues that most matter for JP1/AJS View resemblance
 - [x] Decide whether expand-all ships in the same slice as incremental
       expansion or immediately after
@@ -50,6 +61,14 @@
       seam, verify both desktop and web preview opening still succeed, and
       reserve nested-expansion plus cross-view navigation behavior for the
       follow-up slices that introduce those interactions
+
+## Release Note
+
+- 2026-04-21: this flow-view usability slice is complete for the `1.13.0`
+  release line:
+  visual refresh, nested expansion, current-scope search refinement, and
+  list/flow bridge navigation are now recorded in SDD, covered by focused
+  regression tests, and ready for release packaging.
 
 ## Notes
 
@@ -122,3 +141,16 @@
   directions. Table rows post shared navigation events toward the flow viewer,
   flow nodes post the symmetric table-navigation event, and focused helper plus
   routing tests cover the identity-preserving reveal behavior.
+- 2026-04-21: current-scope flow search now keeps internal spaces in the query
+  and performs case-insensitive contiguous partial matching over the existing
+  unit search text. When the current scope root and its descendants both
+  match, the viewer prefers the first descendant so the highlighted result is
+  visibly useful without changing the collapsed-ancestor reveal behavior.
+- 2026-04-21: when one flow query matches multiple units in the current scope,
+  the viewer now keeps first-match selection semantics for focus and ancestor
+  reveal, but highlights every visible matching node instead of decorating only
+  the selected one.
+- 2026-04-21: when one flow query matches multiple units in the current scope,
+  ancestor expansion now uses the combined reveal path for every match instead
+  of only the first focused result, so one search submit can expose all
+  matching nodes that belong in the current canvas.

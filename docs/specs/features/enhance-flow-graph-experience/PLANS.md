@@ -119,6 +119,32 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   search before cross-view navigation. Those search follow-ups stay deferred
   until a later slice shows that the first current-scope search behavior is
   insufficient for real navigation needs.
+- 2026-04-21 refinement focus:
+  keep the first-match, current-scope search interaction unchanged, but widen
+  the matcher so it stays case-insensitive and contiguous, preserves internal
+  spaces for comment/path fragments, and still chooses a visibly focused
+  descendant when the current scope root also matches the same query.
+- 2026-04-21 refinement result:
+  flow search now preserves internal spaces in the query, treats the whole
+  normalized input as one contiguous partial match against the existing
+  searchable unit text, and prefers the first descendant over the scope root
+  when multiple current-scope units match the same query.
+- 2026-04-21 refinement follow-up:
+  current-scope search should not stop visual feedback at the first chosen
+  match. Keep first-match focus and ancestor expansion for stability, but pass
+  the full visible match set through the presentation layer so every matching
+  node is highlighted.
+- 2026-04-21 refinement correction:
+  first-match focus stays useful, but ancestor expansion should not stay
+  first-match-only. Expand the combined ancestor jobnet set for every current-
+  scope match so all matching nodes that can be revealed in the current canvas
+  become visible after one search submit.
+- 2026-04-21 refinement validation result:
+  focused flow-search regression coverage now verifies preserved-space comment
+  matching, descendant-priority focus, and all-match ancestor expansion
+  alongside the existing blank-query and current-scope boundary checks;
+  desktop, web, and production-build validation remain the expected
+  compatibility baseline for this viewer-facing refinement.
 - 2026-04-19 navigation implementation focus:
   use stable normalized identity that already exists in both viewers
   (`absolutePath` for unit-list rows and the flow viewer's current-unit scope

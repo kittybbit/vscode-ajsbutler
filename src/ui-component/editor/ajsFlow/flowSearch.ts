@@ -2,6 +2,7 @@ import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";
 
 export type FlowSearchResult = {
   matchedUnitId: string;
+  matchedUnitIds: string[];
   expandedAncestorUnitIds: string[];
 };
 
@@ -41,6 +42,26 @@ const collectExpandedAncestorUnitIds = (
   return expandedAncestorUnitIds;
 };
 
+const collectExpandedAncestorUnitIdsForMatches = (
+  scopeRoot: AjsUnit,
+  matchedUnits: ReadonlyArray<AjsUnit>,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): string[] => {
+  const expandedAncestorUnitIds = new Set<string>();
+
+  for (const matchedUnit of matchedUnits) {
+    for (const ancestorUnitId of collectExpandedAncestorUnitIds(
+      scopeRoot,
+      matchedUnit,
+      unitById,
+    )) {
+      expandedAncestorUnitIds.add(ancestorUnitId);
+    }
+  }
+
+  return [...expandedAncestorUnitIds];
+};
+
 export const findFlowSearchResult = (
   scopeRoot: AjsUnit | undefined,
   query: string,
@@ -55,18 +76,21 @@ export const findFlowSearchResult = (
     return undefined;
   }
 
-  const matchedUnit = collectScopeUnits(scopeRoot).find((unit) =>
+  const matchedUnits = collectScopeUnits(scopeRoot).filter((unit) =>
     unitSearchText(unit).includes(normalizedQuery),
   );
+  const matchedUnit =
+    matchedUnits.find((unit) => unit.id !== scopeRoot.id) ?? matchedUnits[0];
   if (!matchedUnit) {
     return undefined;
   }
 
   return {
     matchedUnitId: matchedUnit.id,
-    expandedAncestorUnitIds: collectExpandedAncestorUnitIds(
+    matchedUnitIds: matchedUnits.map((unit) => unit.id),
+    expandedAncestorUnitIds: collectExpandedAncestorUnitIdsForMatches(
       scopeRoot,
-      matchedUnit,
+      matchedUnits,
       unitById,
     ),
   };

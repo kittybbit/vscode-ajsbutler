@@ -20,6 +20,9 @@ navigation from and to the unit list.
 - the first flow-view search slice may stay within the current flow scope
   if it reveals collapsed ancestors needed to show the first match before
   visually focusing that match
+- current-scope flow search supports case-insensitive contiguous partial
+  matches across unit name, comment, and path so users do not need exact
+  full-label input to find the first match
 - a one-click expand-all path is considered in the design, even if it lands
   after the first incremental expansion slice
 - explicit navigation between unit-list and flow-graph units is defined when
@@ -34,6 +37,19 @@ navigation from and to the unit list.
 - for the first flow-view search slice, prefer reusing the existing
   nested-expansion state and a presentation-local focus marker instead of
   introducing a new graph DTO contract or a second scope-selection model
+- keep current-scope search matching presentation-local:
+  normalize the query, preserve internal spaces, and treat the full query as a
+  case-insensitive contiguous partial match against the existing unit search
+  text
+- when more than one unit matches inside the current scope, prefer the first
+  descendant match over the scope root itself so search still produces a
+  visible focus change
+- when more than one unit matches inside the current scope, visually
+  highlight every visible match while keeping keyboard focus and ancestor
+  expansion decisions anchored to the first chosen match
+- when more than one unit matches inside the current scope, expand the union
+  of collapsed ancestor jobnets needed to reveal every visible match rather
+  than only the first chosen one
 - split the work into small viewer-facing slices:
   visual refresh, nested expansion, and cross-view navigation do not need to
   land in one commit

@@ -65,7 +65,58 @@ suite("Flow Search", () => {
 
     assert.deepStrictEqual(searchResult, {
       matchedUnitId: leafJobId,
+      matchedUnitIds: [leafJobId],
       expandedAncestorUnitIds: [childNetId, grandNetId],
+    });
+  });
+
+  test("matches a contiguous query that includes spaces from searchable unit text", () => {
+    const result = parseAjs(nestedDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const allUnits = flattenAjsUnits(document.rootUnits);
+    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
+    const currentUnit = document.rootUnits[0].children[0];
+    const childNetId = currentUnit.children[0].id;
+    const grandNetId = currentUnit.children[0].children[0].id;
+    const leafJobId = currentUnit.children[0].children[0].children[0].id;
+
+    const searchResult = findFlowSearchResult(
+      currentUnit,
+      "leaf comment",
+      unitById,
+    );
+
+    assert.deepStrictEqual(searchResult, {
+      matchedUnitId: leafJobId,
+      matchedUnitIds: [leafJobId],
+      expandedAncestorUnitIds: [childNetId, grandNetId],
+    });
+  });
+
+  test("prefers the first descendant match when the current scope also matches", () => {
+    const result = parseAjs(nestedDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const allUnits = flattenAjsUnits(document.rootUnits);
+    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
+    const currentUnit = document.rootUnits[0].children[0];
+    const childNetId = currentUnit.children[0].id;
+
+    const searchResult = findFlowSearchResult(currentUnit, "/jobnet", unitById);
+
+    assert.deepStrictEqual(searchResult, {
+      matchedUnitId: childNetId,
+      matchedUnitIds: [
+        currentUnit.id,
+        childNetId,
+        currentUnit.children[0].children[0].id,
+        currentUnit.children[0].children[0].children[0].id,
+      ],
+      expandedAncestorUnitIds: [
+        childNetId,
+        currentUnit.children[0].children[0].id,
+      ],
     });
   });
 

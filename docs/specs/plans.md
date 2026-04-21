@@ -145,11 +145,23 @@ structure in `docs/specs/features/<feature>/`.
   collapsed nested-jobnet hierarchy required to show the first match, and
   visually emphasize that match without changing the base `currentUnitId`
   scope contract.
+- Flow-view search now keeps internal spaces in the query, matches contiguous
+  case-insensitive substrings against unit name, comment, and path, and
+  prefers a descendant over the current scope root when both match.
+- Flow-view search now also highlights every visible match in the current
+  scope while keeping focus and ancestor reveal anchored to the first chosen
+  match.
+- Flow-view search now also expands the combined ancestor jobnet set for all
+  current-scope matches so every matched node can be revealed by one submit.
 - Explicit list/flow bridge navigation is now in place:
   table rows can request the matching flow scope and flow nodes can request the
   matching table row through shared `absolutePath`-based navigation events and
   local reveal helpers, without either viewer importing the other's internal
   component state.
+- The `1.13.0` flow-view usability slice is now release-ready:
+  the visual refresh, nested expansion, current-scope search refinement, and
+  list/flow bridge navigation changes are recorded in SDD and backed by the
+  standard local validation baseline.
 
 ### How To Maintain This Section
 
