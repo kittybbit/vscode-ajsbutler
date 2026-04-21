@@ -121,18 +121,29 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   insufficient for real navigation needs.
 - 2026-04-21 refinement focus:
   keep the first-match, current-scope search interaction unchanged, but widen
-  the matcher from whole-query substring checks to space-separated
-  case-insensitive partial-match keywords so shorter user input and combined
-  name/comment/path fragments can reveal the same first visible target.
+  the matcher so it stays case-insensitive and contiguous, preserves internal
+  spaces for comment/path fragments, and still chooses a visibly focused
+  descendant when the current scope root also matches the same query.
 - 2026-04-21 refinement result:
-  flow search now treats each non-blank query token as a partial-match keyword
-  against the existing searchable unit text, preserving current-scope first
-  match ordering and collapsed-ancestor expansion while reducing the need for
-  exact contiguous input.
+  flow search now preserves internal spaces in the query, treats the whole
+  normalized input as one contiguous partial match against the existing
+  searchable unit text, and prefers the first descendant over the scope root
+  when multiple current-scope units match the same query.
+- 2026-04-21 refinement follow-up:
+  current-scope search should not stop visual feedback at the first chosen
+  match. Keep first-match focus and ancestor expansion for stability, but pass
+  the full visible match set through the presentation layer so every matching
+  node is highlighted.
+- 2026-04-21 refinement correction:
+  first-match focus stays useful, but ancestor expansion should not stay
+  first-match-only. Expand the combined ancestor jobnet set for every current-
+  scope match so all matching nodes that can be revealed in the current canvas
+  become visible after one search submit.
 - 2026-04-21 refinement validation result:
-  focused flow-search regression coverage now verifies multi-keyword partial
-  matching alongside the existing blank-query and current-scope boundary
-  checks; desktop, web, and production-build validation remain the expected
+  focused flow-search regression coverage now verifies preserved-space comment
+  matching, descendant-priority focus, and all-match ancestor expansion
+  alongside the existing blank-query and current-scope boundary checks;
+  desktop, web, and production-build validation remain the expected
   compatibility baseline for this viewer-facing refinement.
 - 2026-04-19 navigation implementation focus:
   use stable normalized identity that already exists in both viewers

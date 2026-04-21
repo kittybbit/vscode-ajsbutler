@@ -17,6 +17,7 @@ import { AjsNode } from "./nodes/AjsNode";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
 
 type CreateReactFlowDataOptions = {
+  searchMatchedUnitIds?: ReadonlySet<string>;
   unitById?: ReadonlyMap<string, AjsUnit>;
   nestedExpansionState?: NestedExpansionStateType;
   nodeDecorations?: ReadonlyMap<string, ExpandedNodeDecoration>;
@@ -56,7 +57,7 @@ const toNodeData = (
     isRootJobnet: node.metadata.isRootJobnet,
     hasSchedule: node.metadata.hasSchedule,
     hasWaitedFor: node.metadata.hasWaitedFor,
-    isSearchMatch: options?.searchedUnitId === node.id,
+    isSearchMatch: options?.searchMatchedUnitIds?.has(node.id) ?? false,
     canExpandNested:
       !node.metadata.isCurrent &&
       !node.metadata.isAncestor &&
