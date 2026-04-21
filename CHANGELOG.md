@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.13.1]
+
+- Fixed flow-view nested expand/collapse layout so expanded panels stay
+  compact, revealed children stay anchored near their parent, and surrounding
+  nodes move with predictable offsets.
+- Fixed collapse behavior so nested descendant expansion state is cleared when
+  a parent jobnet is collapsed.
+
 ## [1.13.0]
 
 - Expanded the flow viewer with inline nested jobnet expansion, including

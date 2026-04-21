@@ -53,7 +53,7 @@ suite("Flow Graph View", () => {
           type: "jobnet",
           metadata: {
             absolutePath: "/root/jobnet/child-net",
-            ty: "n",
+            ty: "rn",
             comment: "nested child",
             isAncestor: false,
             isCurrent: false,
@@ -157,7 +157,7 @@ suite("Flow Graph View", () => {
               id: "/root/jobnet/child-net",
               name: "child-net",
               unitAttribute: "",
-              unitType: "n",
+              unitType: "rn",
               absolutePath: "/root/jobnet/child-net",
               depth: 2,
               parentId: "/root/jobnet",

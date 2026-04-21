@@ -15,6 +15,7 @@ import {
 import { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
 import { AjsNode } from "./nodes/AjsNode";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
+import { isExpandableNestedUnit } from "./nestedExpansion";
 
 type CreateReactFlowDataOptions = {
   searchMatchedUnitIds?: ReadonlySet<string>;
@@ -24,9 +25,6 @@ type CreateReactFlowDataOptions = {
   positionOverrides?: ReadonlyMap<string, { x: number; y: number }>;
   searchedUnitId?: string;
 };
-
-const hasExpandableChildren = (unit?: AjsUnit): boolean =>
-  !!unit && unit.unitType === "n" && unit.children.length > 0;
 
 const toNodeData = (
   node: FlowGraphNodeDto,
@@ -61,7 +59,8 @@ const toNodeData = (
     canExpandNested:
       !node.metadata.isCurrent &&
       !node.metadata.isAncestor &&
-      hasExpandableChildren(unit),
+      !!unit &&
+      isExpandableNestedUnit(unit),
     isExpandedNested: options?.nestedExpansionState?.expandedUnitIds.has(
       node.id,
     ),

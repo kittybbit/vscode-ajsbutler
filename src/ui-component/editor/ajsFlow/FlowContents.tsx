@@ -47,6 +47,7 @@ import FlowSelector from "./FlowSelector";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
 import { createReactFlowData } from "./flowGraphView";
 import {
+  collapseExpandedNestedUnitIds,
   collectExpandableNestedUnitIds,
   hasExpandedAllNestedUnitIds,
 } from "./nestedExpansion";
@@ -134,13 +135,22 @@ const FlowContents: FC = () => {
     () => (currentUnitId ? unitById.get(currentUnitId) : undefined),
     [currentUnitId, unitById],
   );
-  const toggleExpandedUnitId = useCallback((unitId: string) => {
-    setExpandedUnitIds((prev) =>
-      prev.includes(unitId)
-        ? prev.filter((id) => id !== unitId)
-        : [...prev, unitId],
-    );
-  }, []);
+  const toggleExpandedUnitId = useCallback(
+    (unitId: string) => {
+      setExpandedUnitIds((prev) => {
+        if (!prev.includes(unitId)) {
+          return [...prev, unitId];
+        }
+
+        return collapseExpandedNestedUnitIds(
+          prev,
+          unitId,
+          unitById.get(unitId),
+        );
+      });
+    },
+    [unitById],
+  );
   const expandedUnitIdSet = useMemo(
     () => new Set(expandedUnitIds),
     [expandedUnitIds],

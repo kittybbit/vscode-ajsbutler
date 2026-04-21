@@ -175,6 +175,28 @@ unit=root,,jp1admin,;
 }
 `;
 
+const recoveryJobnetDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=recovery-net,rn,+240+144;
+    unit=recovery-net,,jp1admin,;
+    {
+      ty=rn;
+      el=leaf-job,j,+240+144;
+      unit=leaf-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+  }
+}
+`;
+
 suite("Build Expanded Flow Graph", () => {
   test("reveals nested jobnets only after their parent scope is expanded", () => {
     const result = parseAjs(nestedDefinition);
@@ -287,7 +309,7 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(fullyExpandedSiblingPosition!.x > childPanelRight);
   });
 
-  test("moves colliding siblings and their nearby incoming sources below the expanded panel", () => {
+  test("adds offsets to visible nodes below or right of the expanded node", () => {
     const result = parseAjs(overlappingSiblingDefinition);
     assert.deepStrictEqual(result.errors, []);
     const document = normalizeAjsDocument(result.rootUnits);
@@ -330,9 +352,42 @@ suite("Build Expanded Flow Graph", () => {
 
     const panelBottom =
       childExpanded!.y + decoration!.panelOffsetYPx + decoration!.panelHeightPx;
+    assert.ok(orjExpanded!.x > orjCollapsed!.x);
     assert.ok(orjExpanded!.y > panelBottom);
-    assert.ok(flwjExpanded!.y > flwjCollapsed!.y);
+    assert.deepStrictEqual(flwjExpanded, flwjCollapsed);
+    assert.strictEqual(ntwjExpanded!.x, ntwjCollapsed!.x);
     assert.ok(ntwjExpanded!.y > ntwjCollapsed!.y);
+  });
+
+  test("keeps revealed children anchored near the expanded node origin", () => {
+    const result = parseAjs(overlappingSiblingDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const childNetId = document.rootUnits[0].children[0].children[0].id;
+    const grandNetId =
+      document.rootUnits[0].children[0].children[0].children[0].id;
+    const nestedJobId =
+      document.rootUnits[0].children[0].children[0].children[1].id;
+
+    const expanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([childNetId]),
+      16,
+    );
+
+    const childPosition = expanded.positionOverrides.get(childNetId);
+    const grandNetPosition = expanded.positionOverrides.get(grandNetId);
+    const nestedJobPosition = expanded.positionOverrides.get(nestedJobId);
+
+    assert.ok(childPosition);
+    assert.ok(grandNetPosition);
+    assert.ok(nestedJobPosition);
+    assert.ok(grandNetPosition!.x - childPosition!.x < 160);
+    assert.ok(grandNetPosition!.y - childPosition!.y < 320);
+    assert.ok(nestedJobPosition!.x - childPosition!.x < 240);
+    assert.ok(nestedJobPosition!.y - childPosition!.y < 320);
   });
 
   test("expands nested jobnets level by level when a newly visible child is also expanded", () => {
@@ -443,5 +498,29 @@ suite("Build Expanded Flow Graph", () => {
 
     assert.ok(deepSiblingPosition!.x > shallowSiblingPosition!.x);
     assert.ok(deepSiblingPosition!.x > deepLevel2PanelRight);
+  });
+
+  test("expands recovery jobnet variants with nested children", () => {
+    const result = parseAjs(recoveryJobnetDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const recoveryNetId = document.rootUnits[0].children[0].children[0].id;
+    const leafJobId =
+      document.rootUnits[0].children[0].children[0].children[0].id;
+
+    const expanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([recoveryNetId]),
+      16,
+    );
+
+    assert.ok(expanded.graph);
+    assert.strictEqual(
+      expanded.graph?.nodes.some((node) => node.id === leafJobId),
+      true,
+    );
+    assert.ok(expanded.nodeDecorations.get(recoveryNetId));
   });
 });
