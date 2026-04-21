@@ -69,6 +69,29 @@ suite("Flow Search", () => {
     });
   });
 
+  test("matches space-separated partial keywords across searchable unit text", () => {
+    const result = parseAjs(nestedDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const allUnits = flattenAjsUnits(document.rootUnits);
+    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
+    const currentUnit = document.rootUnits[0].children[0];
+    const childNetId = currentUnit.children[0].id;
+    const grandNetId = currentUnit.children[0].children[0].id;
+    const leafJobId = currentUnit.children[0].children[0].children[0].id;
+
+    const searchResult = findFlowSearchResult(
+      currentUnit,
+      "leaf /jobnet/child",
+      unitById,
+    );
+
+    assert.deepStrictEqual(searchResult, {
+      matchedUnitId: leafJobId,
+      expandedAncestorUnitIds: [childNetId, grandNetId],
+    });
+  });
+
   test("matches by absolute path and stays inside the current scope", () => {
     const result = parseAjs(nestedDefinition);
     assert.deepStrictEqual(result.errors, []);

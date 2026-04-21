@@ -39,6 +39,10 @@
       current-scope slice:
       broader search behavior is intentionally deferred for now so the next
       viewer-facing slice can focus on explicit list/flow navigation first
+- [x] Refine current-scope flow search to support space-separated partial-match
+      keywords:
+      keep first-match behavior and ancestor reveal semantics, but reduce the
+      need for exact contiguous query text
 - [x] Define the visual cues that most matter for JP1/AJS View resemblance
 - [x] Decide whether expand-all ships in the same slice as incremental
       expansion or immediately after
@@ -122,3 +126,7 @@
   directions. Table rows post shared navigation events toward the flow viewer,
   flow nodes post the symmetric table-navigation event, and focused helper plus
   routing tests cover the identity-preserving reveal behavior.
+- 2026-04-21: current-scope flow search now accepts space-separated keywords as
+  case-insensitive partial matches over the existing unit search text. The
+  first-match and collapsed-ancestor reveal behavior stay unchanged; only the
+  matcher becomes less strict than one contiguous whole-query substring.

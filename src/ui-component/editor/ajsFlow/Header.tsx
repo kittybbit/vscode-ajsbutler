@@ -160,7 +160,7 @@ const Header: FC<HeaderProps> = ({
     : "Expand all nested jobnets.";
   const searchHelperText = searchedUnitId
     ? "Matched unit is highlighted in the current scope."
-    : "Search current scope by unit name, comment, or path.";
+    : "Search current scope by partial unit name, comment, or path.";
 
   return (
     <>

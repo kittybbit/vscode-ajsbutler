@@ -5,7 +5,12 @@ export type FlowSearchResult = {
   expandedAncestorUnitIds: string[];
 };
 
-const normalizeQuery = (query: string): string => query.trim().toLowerCase();
+const normalizeQueryTokens = (query: string): string[] =>
+  query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((token) => token.length > 0);
 
 const unitSearchText = (unit: AjsUnit): string =>
   [unit.name, unit.comment, unit.absolutePath]
@@ -50,13 +55,15 @@ export const findFlowSearchResult = (
     return undefined;
   }
 
-  const normalizedQuery = normalizeQuery(query);
-  if (normalizedQuery.length === 0) {
+  const normalizedQueryTokens = normalizeQueryTokens(query);
+  if (normalizedQueryTokens.length === 0) {
     return undefined;
   }
 
   const matchedUnit = collectScopeUnits(scopeRoot).find((unit) =>
-    unitSearchText(unit).includes(normalizedQuery),
+    normalizedQueryTokens.every((token) =>
+      unitSearchText(unit).includes(token),
+    ),
   );
   if (!matchedUnit) {
     return undefined;

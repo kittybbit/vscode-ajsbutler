@@ -145,6 +145,9 @@ structure in `docs/specs/features/<feature>/`.
   collapsed nested-jobnet hierarchy required to show the first match, and
   visually emphasize that match without changing the base `currentUnitId`
   scope contract.
+- Flow-view search now also accepts space-separated partial-match keywords
+  against unit name, comment, and path while keeping the same current-scope
+  first-match and ancestor-reveal behavior.
 - Explicit list/flow bridge navigation is now in place:
   table rows can request the matching flow scope and flow nodes can request the
   matching table row through shared `absolutePath`-based navigation events and
