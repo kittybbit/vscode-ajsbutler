@@ -21,13 +21,17 @@ version 13 reference-driven contracts.
 
 ## Current Slice
 
-- 2026-04-19 next slice decision:
-  start with an audit pass before behavior changes. Inventory the current
-  parameter semantics that already match the JP1/AJS3 version 13 Definition
-  File Reference, inventory the current command-generation behavior and its
-  coupling to `buildUnitDefinition.ts`, and use that evidence to choose the
-  first reusable extraction or supported-command slice without hiding known
-  mismatches.
+- 2026-04-20 audit outcome:
+  the inventory pass is now recorded in `AUDIT.md`. Shared parameter
+  interpretation already lives mainly behind `ParamFactory`,
+  `parameterHelpers.ts`, the builder-family modules, and `Defaults.ts`,
+  while command generation is still directly embedded in
+  `buildUnitDefinition.ts`.
+- 2026-04-20 next implementation slice:
+  extract the existing `ajsshow` and `ajsprint` command generation into a
+  dedicated application-facing seam without changing the dialog DTO contract,
+  then use that seam as the first reusable command-generation contract for
+  `show-unit-definition`.
 
 ## Validation
 
