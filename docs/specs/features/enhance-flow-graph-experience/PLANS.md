@@ -170,6 +170,17 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
 - 2026-04-19 follow-up decision:
   keep broader flow-search behavior deferred for now and move the next active
   SDD slice to JP1/AJS3 version 13 parameter and command-reference alignment.
+- 2026-04-21 nested expansion fix focus:
+  preserve the current flow scope model, but make inline collapse discard
+  descendant expansion state so reopening a parent jobnet starts from the
+  expected one-level reveal. Treat recovery jobnet variants that already map
+  to flow `jobnet` nodes as expandable when they have nested children.
+- 2026-04-21 offset-layout refinement:
+  replace nested-expansion collision handling with a display-position model:
+  each visible node keeps an initial position plus accumulated x/y offsets,
+  expansion adds vertical offsets to nodes below the expanded node and
+  horizontal offsets to nodes to its right regardless of nesting, and expanded
+  panel boundaries are rebuilt from final display positions.
 
 ## Validation
 

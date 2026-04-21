@@ -18,6 +18,7 @@ import {
   createFlowGraphMetrics,
   FlowGraphPosition,
 } from "./flowGraphPosition";
+import { isNestedJobnetUnit } from "./nestedExpansion";
 
 export type ExpandedNodeDecoration = {
   panelOffsetXPx: number;
@@ -48,10 +49,11 @@ type ExpandedFlowGraphBuildContext = {
   nodeIds: Set<string>;
   edgeIds: Set<string>;
   visibleUnitIds: Set<string>;
+  initialPositions: Map<string, FlowGraphPosition>;
+  offsets: Map<string, FlowGraphPosition>;
   positionOverrides: Map<string, FlowGraphPosition>;
   nodeDecorations: Map<string, ExpandedNodeDecoration>;
   unitById: ReadonlyMap<string, AjsUnit>;
-  incomingSourcesByTarget: ReadonlyMap<string, string[]>;
   metrics: FlowGraphMetrics;
 };
 
@@ -165,39 +167,68 @@ const includeDecorationBounds = (
   );
 };
 
-const intersectsBounds = (
+const addPositions = (
   position: FlowGraphPosition,
-  width: number,
-  height: number,
-  bounds: FlowGraphBounds,
-): boolean =>
-  position.x < bounds.maxX &&
-  position.x + width > bounds.minX &&
-  position.y < bounds.maxY &&
-  position.y + height > bounds.minY;
+  offset: FlowGraphPosition,
+): FlowGraphPosition => ({
+  x: position.x + offset.x,
+  y: position.y + offset.y,
+});
 
-const buildIncomingSourcesByTarget = (
-  edges: ReadonlyArray<FlowGraphEdgeDto>,
-): Map<string, string[]> => {
-  const incomingSourcesByTarget = new Map<string, string[]>();
-  for (const edge of edges) {
-    const sources = incomingSourcesByTarget.get(edge.target) ?? [];
-    sources.push(edge.source);
-    incomingSourcesByTarget.set(edge.target, sources);
+const getOffset = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+): FlowGraphPosition => context.offsets.get(unitId) ?? { x: 0, y: 0 };
+
+const getDisplayPosition = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+): FlowGraphPosition | undefined => {
+  const initialPosition = context.initialPositions.get(unitId);
+  if (!initialPosition) {
+    return undefined;
   }
-  return incomingSourcesByTarget;
+  return addPositions(initialPosition, getOffset(context, unitId));
+};
+
+const syncPositionOverride = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+) => {
+  const displayPosition = getDisplayPosition(context, unitId);
+  if (displayPosition) {
+    context.positionOverrides.set(unitId, displayPosition);
+  }
+};
+
+const addOffset = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+  delta: FlowGraphPosition,
+) => {
+  if (delta.x === 0 && delta.y === 0) {
+    return;
+  }
+
+  const offset = getOffset(context, unitId);
+  context.offsets.set(unitId, {
+    x: offset.x + delta.x,
+    y: offset.y + delta.y,
+  });
+  syncPositionOverride(context, unitId);
 };
 
 const addVisibleNode = (
   context: ExpandedFlowGraphBuildContext,
   unit: AjsUnit,
   node: FlowGraphNodeDto,
-  position: FlowGraphPosition,
+  initialPosition: FlowGraphPosition,
 ) => {
   context.nodes.push(node);
   context.nodeIds.add(unit.id);
   context.visibleUnitIds.add(unit.id);
-  context.positionOverrides.set(unit.id, position);
+  context.initialPositions.set(unit.id, initialPosition);
+  syncPositionOverride(context, unit.id);
 };
 
 const ensureChildNodeVisible = (
@@ -205,7 +236,7 @@ const ensureChildNodeVisible = (
   expandedUnitPosition: FlowGraphPosition,
   child: AjsUnit,
 ): FlowGraphPosition | undefined => {
-  const existingPosition = context.positionOverrides.get(child.id);
+  const existingPosition = context.initialPositions.get(child.id);
   if (existingPosition) {
     return existingPosition;
   }
@@ -228,7 +259,7 @@ const ensureConditionNodeVisible = (
   expandedUnitPosition: FlowGraphPosition,
   conditionUnit: AjsUnit,
 ): FlowGraphPosition | undefined => {
-  const existingPosition = context.positionOverrides.get(conditionUnit.id);
+  const existingPosition = context.initialPositions.get(conditionUnit.id);
   if (existingPosition) {
     return existingPosition;
   }
@@ -289,16 +320,15 @@ const buildPanelBoundsFromSubtreeBounds = (
   };
 };
 
-const buildExpandedUnitSubtreeBounds = (
+const buildExpandedUnitRevealBounds = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnit: AjsUnit,
-): { bounds: FlowGraphBounds; subtreeUnitIds: Set<string> } | undefined => {
-  const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
+): FlowGraphBounds | undefined => {
+  const expandedUnitPosition = getDisplayPosition(context, expandedUnit.id);
   if (!expandedUnitPosition) {
     return undefined;
   }
 
-  const subtreeUnitIds = new Set<string>([expandedUnit.id]);
   const bounds: FlowGraphBounds = {
     minX: expandedUnitPosition.x,
     maxX: expandedUnitPosition.x + context.metrics.width,
@@ -309,7 +339,6 @@ const buildExpandedUnitSubtreeBounds = (
   for (const child of expandedUnit.children.filter(
     (unit) => unit.unitType !== "rc",
   )) {
-    subtreeUnitIds.add(child.id);
     const childPosition = ensureChildNodeVisible(
       context,
       expandedUnitPosition,
@@ -318,216 +347,84 @@ const buildExpandedUnitSubtreeBounds = (
     if (!childPosition) {
       continue;
     }
+    const childDisplayPosition = getDisplayPosition(context, child.id);
+    if (!childDisplayPosition) {
+      continue;
+    }
     includeNodeBounds(
       bounds,
-      childPosition,
+      childDisplayPosition,
       context.metrics.width,
       context.metrics.height,
     );
-    const childDecoration = context.nodeDecorations.get(child.id);
-    if (childDecoration) {
-      includeDecorationBounds(bounds, childPosition, childDecoration);
-    }
   }
 
   const conditionUnit = expandedUnit.children.find(
     (child) => child.unitType === "rc",
   );
   if (conditionUnit) {
-    subtreeUnitIds.add(conditionUnit.id);
     const conditionPosition = ensureConditionNodeVisible(
       context,
       expandedUnitPosition,
       conditionUnit,
     );
-    if (conditionPosition) {
+    const conditionDisplayPosition = getDisplayPosition(
+      context,
+      conditionUnit.id,
+    );
+    if (conditionPosition && conditionDisplayPosition) {
       includeNodeBounds(
         bounds,
-        conditionPosition,
+        conditionDisplayPosition,
         context.metrics.width,
         context.metrics.height,
       );
     }
   }
 
-  return { bounds, subtreeUnitIds };
+  return bounds;
 };
 
-const shiftNodeByDelta = (
+const applyExpansionOffsets = (
   context: ExpandedFlowGraphBuildContext,
-  unitId: string,
-  dy: number,
-) => {
-  const position = context.positionOverrides.get(unitId);
-  if (!position || dy <= 0) {
-    return;
-  }
-  context.positionOverrides.set(unitId, {
-    x: position.x,
-    y: position.y + dy,
-  });
-};
-
-const cascadeShiftToIncomingSources = (
-  context: ExpandedFlowGraphBuildContext,
-  unitId: string,
-  dy: number,
-  subtreeUnitIds: ReadonlySet<string>,
+  expandedUnitPosition: FlowGraphPosition,
   panelBounds: FlowGraphBounds,
-  visited: Set<string>,
+  excludedUnitIds: ReadonlySet<string>,
 ) => {
-  if (visited.has(unitId)) {
-    return;
-  }
-  visited.add(unitId);
-  const incomingSources = context.incomingSourcesByTarget.get(unitId) ?? [];
-  for (const sourceUnitId of incomingSources) {
-    if (subtreeUnitIds.has(sourceUnitId)) {
-      continue;
-    }
-    const sourcePosition = context.positionOverrides.get(sourceUnitId);
-    const targetPosition = context.positionOverrides.get(unitId);
-    if (!sourcePosition || !targetPosition) {
-      continue;
-    }
-    if (sourcePosition.x >= targetPosition.x) {
-      continue;
-    }
-    if (sourcePosition.y + context.metrics.height < panelBounds.minY) {
-      continue;
-    }
-    shiftNodeByDelta(context, sourceUnitId, dy);
-    cascadeShiftToIncomingSources(
-      context,
-      sourceUnitId,
-      dy,
-      subtreeUnitIds,
-      panelBounds,
-      visited,
-    );
-  }
-};
-
-const shiftSiblingNodesRight = (
-  context: ExpandedFlowGraphBuildContext,
-  targetUnit: AjsUnit,
-  targetMinX: number,
-  excludes: ReadonlySet<string>,
-) => {
-  const targetPosition = context.positionOverrides.get(targetUnit.id);
-  if (!targetPosition) {
-    return;
-  }
-
-  let minSiblingX = Number.POSITIVE_INFINITY;
-  for (const unitId of context.visibleUnitIds) {
-    if (excludes.has(unitId)) {
-      continue;
-    }
-    const unit = context.unitById.get(unitId);
-    const position = context.positionOverrides.get(unitId);
-    if (!unit || !position) {
-      continue;
-    }
-    if (unit.parentId !== targetUnit.parentId) {
-      continue;
-    }
-    if (position.x <= targetPosition.x) {
-      continue;
-    }
-    minSiblingX = Math.min(minSiblingX, position.x);
-  }
-
-  const dx = Number.isFinite(minSiblingX)
-    ? Math.max(0, targetMinX - minSiblingX)
-    : 0;
-  if (dx <= 0) {
-    return;
-  }
-
-  for (const unitId of context.visibleUnitIds) {
-    if (excludes.has(unitId)) {
-      continue;
-    }
-    const unit = context.unitById.get(unitId);
-    const position = context.positionOverrides.get(unitId);
-    if (!unit || !position) {
-      continue;
-    }
-    if (unit.parentId !== targetUnit.parentId) {
-      continue;
-    }
-    if (position.x <= targetPosition.x) {
-      continue;
-    }
-    context.positionOverrides.set(unitId, {
-      x: position.x + dx,
-      y: position.y,
-    });
-  }
-};
-
-const collectCollidingSiblingIds = (
-  context: ExpandedFlowGraphBuildContext,
-  subtreeUnitIds: ReadonlySet<string>,
-  panelBounds: FlowGraphBounds,
-): string[] =>
-  [...context.visibleUnitIds]
-    .filter((unitId) => !subtreeUnitIds.has(unitId))
-    .filter((unitId) => {
-      const position = context.positionOverrides.get(unitId);
-      return (
-        !!position &&
-        intersectsBounds(
-          position,
-          context.metrics.width,
-          context.metrics.height,
-          panelBounds,
-        )
-      );
-    })
-    .sort(
-      (left, right) =>
-        (context.positionOverrides.get(left)?.y ?? 0) -
-        (context.positionOverrides.get(right)?.y ?? 0),
-    );
-
-const shiftCollidingSiblingsBelowPanel = (
-  context: ExpandedFlowGraphBuildContext,
-  subtreeUnitIds: ReadonlySet<string>,
-  panelBounds: FlowGraphBounds,
-) => {
-  const collidingSiblingIds = collectCollidingSiblingIds(
-    context,
-    subtreeUnitIds,
-    panelBounds,
+  const clearanceX = context.metrics.width * 0.12;
+  const clearanceY = context.metrics.height * 0.12;
+  const horizontalOffset = Math.max(
+    0,
+    panelBounds.maxX -
+      (expandedUnitPosition.x + context.metrics.width) +
+      clearanceX,
+  );
+  const verticalOffset = Math.max(
+    0,
+    panelBounds.maxY -
+      (expandedUnitPosition.y + context.metrics.height) +
+      clearanceY,
   );
 
-  let nextAvailableY = panelBounds.maxY + context.metrics.marginY;
-  for (const siblingId of collidingSiblingIds) {
-    const siblingPosition = context.positionOverrides.get(siblingId);
-    if (!siblingPosition) {
+  const positionsBeforeExpansionOffset = new Map<string, FlowGraphPosition>();
+  for (const unitId of context.visibleUnitIds) {
+    const displayPosition = getDisplayPosition(context, unitId);
+    if (displayPosition) {
+      positionsBeforeExpansionOffset.set(unitId, displayPosition);
+    }
+  }
+
+  for (const [unitId, displayPosition] of positionsBeforeExpansionOffset) {
+    if (excludedUnitIds.has(unitId)) {
       continue;
     }
-    const dy = Math.max(0, nextAvailableY - siblingPosition.y);
-    if (dy <= 0) {
-      nextAvailableY =
-        siblingPosition.y + context.metrics.height + context.metrics.marginY;
+    const dx =
+      displayPosition.x > expandedUnitPosition.x ? horizontalOffset : 0;
+    const dy = displayPosition.y > expandedUnitPosition.y ? verticalOffset : 0;
+    if (dx === 0 && dy === 0) {
       continue;
     }
-    shiftNodeByDelta(context, siblingId, dy);
-    cascadeShiftToIncomingSources(
-      context,
-      siblingId,
-      dy,
-      subtreeUnitIds,
-      panelBounds,
-      new Set<string>(),
-    );
-    nextAvailableY =
-      (context.positionOverrides.get(siblingId)?.y ?? siblingPosition.y) +
-      context.metrics.height +
-      context.metrics.marginY;
+    addOffset(context, unitId, { x: dx, y: dy });
   }
 };
 
@@ -535,82 +432,28 @@ const expandVisibleNestedUnit = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnit: AjsUnit,
 ) => {
-  const subtreeLayout = buildExpandedUnitSubtreeBounds(context, expandedUnit);
-  const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
-  if (!subtreeLayout || !expandedUnitPosition) {
+  const expandedUnitPosition = getDisplayPosition(context, expandedUnit.id);
+  const revealBounds = buildExpandedUnitRevealBounds(context, expandedUnit);
+  if (!revealBounds || !expandedUnitPosition) {
     return;
   }
 
   appendExpandedUnitEdges(context, expandedUnit);
 
   const panelBounds = buildPanelBoundsFromSubtreeBounds(
-    subtreeLayout.bounds,
+    revealBounds,
     context.metrics,
   );
-  shiftSiblingNodesRight(
+  applyExpansionOffsets(
     context,
-    expandedUnit,
-    panelBounds.maxX + context.metrics.marginX,
-    subtreeLayout.subtreeUnitIds,
-  );
-  shiftCollidingSiblingsBelowPanel(
-    context,
-    subtreeLayout.subtreeUnitIds,
+    expandedUnitPosition,
     panelBounds,
+    collectVisibleSubtreeUnitIds(
+      expandedUnit,
+      context.visibleUnitIds,
+      context.unitById,
+    ),
   );
-  context.nodeDecorations.set(
-    expandedUnit.id,
-    toDecorationFromBounds(expandedUnitPosition, panelBounds),
-  );
-};
-
-const relayoutExpandedAncestorPanels = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnits: ReadonlyArray<AjsUnit>,
-) => {
-  for (const expandedUnit of [...expandedUnits].reverse()) {
-    const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
-    const panelBounds = buildExpandedPanelBounds(
-      expandedUnit,
-      context.visibleUnitIds,
-      context.unitById,
-      context.positionOverrides,
-      context.nodeDecorations,
-      context.metrics,
-    );
-    if (!expandedUnitPosition || !panelBounds) {
-      continue;
-    }
-    const subtreeUnitIds = collectVisibleSubtreeUnitIds(
-      expandedUnit,
-      context.visibleUnitIds,
-      context.unitById,
-    );
-
-    shiftSiblingNodesRight(
-      context,
-      expandedUnit,
-      panelBounds.maxX + context.metrics.marginX,
-      subtreeUnitIds,
-    );
-    shiftCollidingSiblingsBelowPanel(context, subtreeUnitIds, panelBounds);
-
-    const updatedPanelBounds = buildExpandedPanelBounds(
-      expandedUnit,
-      context.visibleUnitIds,
-      context.unitById,
-      context.positionOverrides,
-      context.nodeDecorations,
-      context.metrics,
-    );
-    if (!updatedPanelBounds) {
-      continue;
-    }
-    context.nodeDecorations.set(
-      expandedUnit.id,
-      toDecorationFromBounds(expandedUnitPosition, updatedPanelBounds),
-    );
-  }
 };
 
 const buildExpandedPanelBounds = (
@@ -664,6 +507,31 @@ const buildExpandedPanelBounds = (
   };
 };
 
+const updateExpandedNodeDecorations = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnits: ReadonlyArray<AjsUnit>,
+) => {
+  context.nodeDecorations.clear();
+  for (const expandedUnit of [...expandedUnits].reverse()) {
+    const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
+    const panelBounds = buildExpandedPanelBounds(
+      expandedUnit,
+      context.visibleUnitIds,
+      context.unitById,
+      context.positionOverrides,
+      context.nodeDecorations,
+      context.metrics,
+    );
+    if (!expandedUnitPosition || !panelBounds) {
+      continue;
+    }
+    context.nodeDecorations.set(
+      expandedUnit.id,
+      toDecorationFromBounds(expandedUnitPosition, panelBounds),
+    );
+  }
+};
+
 const collectVisibleSubtreeUnitIds = (
   expandedUnit: AjsUnit,
   visibleUnitIds: ReadonlySet<string>,
@@ -705,14 +573,16 @@ export const buildExpandedFlowGraph = (
   const edges = [...baseGraph.edges];
   const nodeIds = new Set(nodes.map((node) => node.id));
   const edgeIds = new Set(edges.map((edge) => `${edge.source}-${edge.target}`));
+  const initialPositions = new Map<string, FlowGraphPosition>();
+  const offsets = new Map<string, FlowGraphPosition>();
   const positionOverrides = new Map<string, FlowGraphPosition>();
   const nodeDecorations = new Map<string, ExpandedNodeDecoration>();
 
   for (const node of baseGraph.nodes) {
-    positionOverrides.set(
-      node.id,
-      calculateFlowGraphNodePosition(node, basePx),
-    );
+    const initialPosition = calculateFlowGraphNodePosition(node, basePx);
+    initialPositions.set(node.id, initialPosition);
+    offsets.set(node.id, { x: 0, y: 0 });
+    positionOverrides.set(node.id, initialPosition);
   }
 
   const allUnits = flattenAjsUnits(document.rootUnits);
@@ -723,7 +593,6 @@ export const buildExpandedFlowGraph = (
   }
 
   const visibleUnitIds = new Set(nodes.map((node) => node.id));
-  const incomingSourcesByTarget = buildIncomingSourcesByTarget(edges);
   const context: ExpandedFlowGraphBuildContext = {
     basePx,
     nodes,
@@ -731,10 +600,11 @@ export const buildExpandedFlowGraph = (
     nodeIds,
     edgeIds,
     visibleUnitIds,
+    initialPositions,
+    offsets,
     positionOverrides,
     nodeDecorations,
     unitById,
-    incomingSourcesByTarget,
     metrics,
   };
 
@@ -744,7 +614,7 @@ export const buildExpandedFlowGraph = (
       (unit): unit is AjsUnit =>
         !!unit &&
         unit.id !== currentUnitId &&
-        unit.unitType === "n" &&
+        isNestedJobnetUnit(unit) &&
         isDescendantOf(unit, currentUnitId, unitById),
     )
     .sort((left, right) => left.depth - right.depth);
@@ -753,7 +623,7 @@ export const buildExpandedFlowGraph = (
     expandVisibleNestedUnit(context, expandedUnit);
   }
 
-  relayoutExpandedAncestorPanels(context, sortedExpandedUnits);
+  updateExpandedNodeDecorations(context, sortedExpandedUnits);
 
   return {
     graph: {

@@ -64,6 +64,11 @@
 
 ## Release Note
 
+- 2026-04-21: the flow-view expand/collapse correction is complete for the
+  `1.13.1` release line:
+  nested panels now use display-position offsets, revealed children stay
+  anchored near the expanded jobnet, parent collapse clears descendant
+  expansion state, and the release note is recorded in `CHANGELOG.md`.
 - 2026-04-21: this flow-view usability slice is complete for the `1.13.0`
   release line:
   visual refresh, nested expansion, current-scope search refinement, and
