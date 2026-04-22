@@ -58,16 +58,16 @@ suite("Build Unit Definition", () => {
     const builders = buildAjsCommandBuilders(unit);
 
     assert.deepStrictEqual(
-      builders.map(({ id, label, labelKey, manualUrl }) => ({
+      builders.map(({ id, commandName, labelKey, manualUrl }) => ({
         id,
-        label,
+        commandName,
         labelKey,
         manualUrl: manualUrl.urlByLang,
       })),
       [
         {
           id: "ajsshow",
-          label: "ajsshow",
+          commandName: "ajsshow",
           labelKey: "commandBuilder.ajsshow.label",
           manualUrl: {
             en: "https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0131.HTM",
@@ -76,7 +76,7 @@ suite("Build Unit Definition", () => {
         },
         {
           id: "ajsprint",
-          label: "ajsprint",
+          commandName: "ajsprint",
           labelKey: "commandBuilder.ajsprint.label",
           manualUrl: {
             en: "https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0121.HTM",
@@ -96,7 +96,7 @@ suite("Build Unit Definition", () => {
 
     assert.strictEqual(
       localeString(ajsshow.descriptionKey, "en"),
-      ajsshow.description,
+      "Show execution status, results, schedules, and related information for the selected unit.",
     );
     assert.strictEqual(
       localeString(ajsshow.descriptionKey, "ja"),
