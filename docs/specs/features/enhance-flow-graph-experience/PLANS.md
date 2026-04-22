@@ -181,6 +181,11 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
   expansion adds vertical offsets to nodes below the expanded node and
   horizontal offsets to nodes to its right regardless of nesting, and expanded
   panel boundaries are rebuilt from final display positions.
+- 2026-04-23 offset-target refinement:
+  make nested-expansion re-layout position-aware:
+  lower-right units receive both x/y offsets, units in the same x column below
+  the expanded unit receive only y offsets, and units in the same y row to the
+  right receive only x offsets.
 
 ## Validation
 

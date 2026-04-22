@@ -418,9 +418,12 @@ const applyExpansionOffsets = (
     if (excludedUnitIds.has(unitId)) {
       continue;
     }
-    const dx =
-      displayPosition.x > expandedUnitPosition.x ? horizontalOffset : 0;
-    const dy = displayPosition.y > expandedUnitPosition.y ? verticalOffset : 0;
+    const isRight = displayPosition.x > expandedUnitPosition.x;
+    const isBelow = displayPosition.y > expandedUnitPosition.y;
+    const isSameX = displayPosition.x === expandedUnitPosition.x;
+    const isSameY = displayPosition.y === expandedUnitPosition.y;
+    const dx = isRight && (isBelow || isSameY) ? horizontalOffset : 0;
+    const dy = isBelow && (isRight || isSameX) ? verticalOffset : 0;
     if (dx === 0 && dy === 0) {
       continue;
     }
