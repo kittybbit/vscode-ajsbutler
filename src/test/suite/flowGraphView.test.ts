@@ -103,6 +103,7 @@ suite("Flow Graph View", () => {
           absolutePath: "/root/jobnet",
           rawData: "ty=n",
           commands: [],
+          commandBuilders: [],
         },
       ],
       [
@@ -111,6 +112,7 @@ suite("Flow Graph View", () => {
           absolutePath: "/root/jobnet/job-a",
           rawData: "ty=j",
           commands: [],
+          commandBuilders: [],
         },
       ],
       [
@@ -119,6 +121,7 @@ suite("Flow Graph View", () => {
           absolutePath: "/root/jobnet/child-net",
           rawData: "ty=n",
           commands: [],
+          commandBuilders: [],
         },
       ],
       [
@@ -127,6 +130,7 @@ suite("Flow Graph View", () => {
           absolutePath: "/root/jobnet/child-net/grand-net",
           rawData: "ty=n",
           commands: [],
+          commandBuilders: [],
         },
       ],
     ]);

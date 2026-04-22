@@ -3,17 +3,23 @@ import {
   AjsUnit,
   flattenAjsUnits,
 } from "../../domain/models/ajs/AjsDocument";
+import {
+  buildAjsCommands,
+  buildAjsCommandBuilders,
+  UnitDefinitionCommandBuilderDto,
+  UnitDefinitionCommandDto,
+} from "./buildAjsCommands";
 
-export type UnitDefinitionCommandDto = {
-  id: string;
-  label: string;
-  value: string;
-};
+export type {
+  UnitDefinitionCommandBuilderDto,
+  UnitDefinitionCommandDto,
+} from "./buildAjsCommands";
 
 export type UnitDefinitionDialogDto = {
   absolutePath: string;
   rawData: string;
   commands: UnitDefinitionCommandDto[];
+  commandBuilders: UnitDefinitionCommandBuilderDto[];
 };
 
 export const buildUnitDefinition = (
@@ -23,18 +29,8 @@ export const buildUnitDefinition = (
   rawData: unit.parameters
     .map((parameter) => `${parameter.key}=${parameter.value}`)
     .join("\n"),
-  commands: [
-    {
-      id: "ajsshow",
-      label: "ajsshow",
-      value: `ajsshow -R ${unit.absolutePath}`,
-    },
-    {
-      id: "ajsprint",
-      label: "ajsprint",
-      value: `ajsprint -a -R ${unit.absolutePath}`,
-    },
-  ],
+  commands: buildAjsCommands(unit),
+  commandBuilders: buildAjsCommandBuilders(unit),
 });
 
 export const buildUnitDefinitionByPath = (

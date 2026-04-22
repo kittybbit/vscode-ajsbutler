@@ -162,6 +162,18 @@ structure in `docs/specs/features/<feature>/`.
   the visual refresh, nested expansion, current-scope search refinement, and
   list/flow bridge navigation changes are recorded in SDD and backed by the
   standard local validation baseline.
+- JP1/AJS v13 command-generation alignment has its first implementation seam:
+  `ajsshow` and `ajsprint` generation now lives in a dedicated
+  `buildAjsCommands(...)` application helper, while show-unit-definition keeps
+  the existing dialog DTO contract.
+- The supported command surface is now builder-shaped instead of fixed-text
+  only:
+  show-unit-definition can render `ajsshow` and `ajsprint` option metadata,
+  rebuild command text from user selections, and preserve stable text keys for
+  future i18n.
+- Command-builder i18n is now wired into the existing `lang` context:
+  labels, helper text, and command reference links switch through message
+  resources and language-specific JP1/AJS manual URLs.
 
 ### How To Maintain This Section
 
@@ -176,11 +188,9 @@ structure in `docs/specs/features/<feature>/`.
 
 ### Next Priority Tasks
 
-1. Align parameter parsing and `ajs` command generation with
-   JP1/Automatic Job Management System 3 version 13 reference manuals by
-   using the new audit baseline to extract the current `ajsshow` and
-   `ajsprint` generation logic from `buildUnitDefinition.ts` into a dedicated
-   application-facing seam.
+1. Align parameter parsing with JP1/Automatic Job Management System 3 version
+   13 reference manuals when a behavior-changing parameter slice needs
+   per-key coverage beyond the current audit summary.
 2. Define a read-only JP1/AJS WebAPI import boundary with clear application
    and infrastructure responsibilities.
 3. Continue treating desktop and web compatibility as an explicit acceptance

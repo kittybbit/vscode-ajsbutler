@@ -25,6 +25,7 @@ const dialogData: UnitDefinitionDialogDto = {
       value: "ajsprint -a -R /root/job1",
     },
   ],
+  commandBuilders: [],
 };
 
 const createNode = (overrides: Partial<AjsNode> = {}): AjsNode =>

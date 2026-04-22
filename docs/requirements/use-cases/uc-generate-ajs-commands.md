@@ -20,7 +20,9 @@ inside one presentation-specific builder.
 
 ## Outputs
 
-- generated `ajs` command text or structured command-generation results
+- generated `ajs` command text
+- structured command builder definitions for presentation surfaces that allow
+  users to choose supported command options
 
 ## Rules
 
@@ -30,6 +32,11 @@ inside one presentation-specific builder.
   can be reused outside `buildUnitDefinition.ts`
 - generation logic should depend on stable application-facing data instead of
   webview component state
+- command builder labels and descriptions should keep stable text keys so a
+  later i18n layer can translate the presentation without changing command
+  semantics
+- command reference links should follow the active UI language when a
+  language-specific JP1/AJS manual URL is known
 
 ## Acceptance Notes
 
@@ -38,6 +45,8 @@ inside one presentation-specific builder.
   same dedicated contract
 - command support can expand incrementally across documented JP1/AJS commands
   without rewriting the consumer surface each time
+- the initial builder surface preserves the existing default command text for
+  `ajsshow` and `ajsprint`
 
 ## Risks Or Edge Cases
 
