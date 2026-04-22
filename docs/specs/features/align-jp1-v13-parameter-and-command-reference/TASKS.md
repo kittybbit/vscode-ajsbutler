@@ -22,12 +22,17 @@
       show-unit-definition
 - [x] Decide the first supported set of auto-generated `ajs` commands
 - [x] Define how manual mismatches are tracked and closed incrementally
+- [x] Extract the current `ajsshow` and `ajsprint` generation logic from
+      `buildUnitDefinition.ts` into a dedicated application-facing seam while
+      preserving the existing dialog DTO behavior
+- [x] Replace fixed command text display with an `ajsshow` / `ajsprint`
+      command-builder DTO and show-unit-definition builder UI, preserving the
+      existing default command text
+- [x] Localize command-builder labels, descriptions, and command reference
+      links through the existing `lang` context
 
 ## Next Slice
 
-- [ ] Extract the current `ajsshow` and `ajsprint` generation logic from
-      `buildUnitDefinition.ts` into a dedicated application-facing seam while
-      preserving the existing dialog DTO behavior
 - [ ] Turn the audit notes into an explicit parameter-coverage matrix only when
       a behavior-changing alignment slice needs per-key status beyond the
       current audit summary
@@ -43,3 +48,12 @@
   `src/application/unit-definition/buildUnitDefinition.ts`.
 - 2026-04-20: the first extracted supported command set will preserve the
   current user-visible behavior only: `ajsshow` and `ajsprint`.
+- 2026-04-22: `ajsshow` and `ajsprint` generation now lives behind
+  `src/application/unit-definition/buildAjsCommands.ts`, while
+  `buildUnitDefinition.ts` remains responsible for assembling the dialog DTO.
+- 2026-04-23: show-unit-definition now receives structured command-builder
+  metadata for the two supported commands with stable label and description
+  keys for the presentation layer.
+- 2026-04-23: command-builder UI now resolves labels and descriptions through
+  the existing message resources and switches `ajsshow` / `ajsprint` manual
+  links between English and Japanese URLs from the active `lang` context.

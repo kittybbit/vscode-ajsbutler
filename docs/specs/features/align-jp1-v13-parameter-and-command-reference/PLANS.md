@@ -32,6 +32,20 @@ version 13 reference-driven contracts.
   dedicated application-facing seam without changing the dialog DTO contract,
   then use that seam as the first reusable command-generation contract for
   `show-unit-definition`.
+- 2026-04-22 implementation outcome:
+  `buildAjsCommands(...)` now owns the supported `ajsshow` and `ajsprint`
+  command DTO generation, and `buildUnitDefinition(...)` consumes that seam
+  without changing the existing dialog DTO shape.
+- 2026-04-23 builder outcome:
+  command generation now also exposes structured builder metadata for the two
+  supported commands. The show-unit-definition command tab renders that
+  metadata as a small option builder and generates the command line from user
+  selections, while keeping the previous `ajsshow -R <path>` and
+  `ajsprint -a -R <path>` defaults.
+- 2026-04-23 i18n outcome:
+  command-builder labels and descriptions now resolve through the existing
+  message resources, and each supported command carries English and Japanese
+  manual URLs selected from the active UI language.
 
 ## Validation
 
