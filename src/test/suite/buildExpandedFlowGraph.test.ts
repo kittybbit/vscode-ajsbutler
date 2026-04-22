@@ -309,7 +309,7 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(fullyExpandedSiblingPosition!.x > childPanelRight);
   });
 
-  test("adds offsets to visible nodes below or right of the expanded node", () => {
+  test("adds offsets by row, column, and lower-right position around the expanded node", () => {
     const result = parseAjs(overlappingSiblingDefinition);
     assert.deepStrictEqual(result.errors, []);
     const document = normalizeAjsDocument(result.rootUnits);
@@ -354,7 +354,8 @@ suite("Build Expanded Flow Graph", () => {
       childExpanded!.y + decoration!.panelOffsetYPx + decoration!.panelHeightPx;
     assert.ok(orjExpanded!.x > orjCollapsed!.x);
     assert.ok(orjExpanded!.y > panelBottom);
-    assert.deepStrictEqual(flwjExpanded, flwjCollapsed);
+    assert.ok(flwjExpanded!.x > flwjCollapsed!.x);
+    assert.strictEqual(flwjExpanded!.y, flwjCollapsed!.y);
     assert.strictEqual(ntwjExpanded!.x, ntwjCollapsed!.x);
     assert.ok(ntwjExpanded!.y > ntwjCollapsed!.y);
   });
