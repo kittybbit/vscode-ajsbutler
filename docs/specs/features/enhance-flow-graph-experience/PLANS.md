@@ -10,182 +10,40 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
 - nested graph expansion inside one screen
 - jump actions between list and flow viewers
 
-## Milestones
+## Current Design
 
-1. Confirm viewer-facing requirements and stable navigation identity
-2. Document the visual refresh target and its non-goals
-3. Add progressive nested-expansion behavior
-4. Add explicit list-to-flow and flow-to-list navigation actions
-5. Validate desktop and web viewer behavior
-
-## Current Slice
-
-- 2026-04-18 implementation result:
-  the flow viewer now gives the active node, ancestor chain, and root jobnet a
-  stronger visual hierarchy while keeping the existing graph DTOs, selection
-  state, and dialog-open actions unchanged.
-- 2026-04-18 validation focus:
-  preserve the DTO-to-node identity mapping in `flowGraphView.test.ts`, then
-  confirm both desktop and web preview hosts still open and render the updated
-  flow view through the standard serial quality baseline.
-- 2026-04-19 next slice decision:
-  move to progressive nested expansion while keeping flow DTO construction,
-  current-unit selection, and desktop/web host behavior unchanged until the
-  interaction seam is proven.
-- 2026-04-19 expand-all decision:
-  do not force one-click expand-all into the first incremental-expansion
-  implementation; instead, keep that control as the immediate follow-up so the
-  first behavior slice can validate identity, rendering, and host compatibility
-  with less UI and state-synchronization risk.
-- 2026-04-19 navigation fallback decision:
-  when a counterpart list or flow view is unavailable, keep the current viewer
-  state stable and make the jump action fail predictably through hidden or
-  disabled affordances plus a no-op command path, rather than changing
-  selection opportunistically.
-- 2026-04-19 implementation focus:
-  start with user-driven incremental reveal of nested jobnets in one screen,
-  preserve the existing `currentUnitId`-driven selection contract, and leave
-  cross-view jump actions as the next slice once nested expansion semantics are
-  established.
-- 2026-04-19 implementation result:
-  child jobnets in the flow canvas can now reveal their nested scope in place
-  without replacing the current viewer scope; the existing "open jobnet" action
-  still re-scopes the viewer, while a separate expand/collapse affordance adds
-  or removes nested children progressively.
-- 2026-04-19 validation result:
-  focused regression coverage now verifies that nested descendants appear only
-  after their visible parent jobnet is expanded, keyboard and click handling
-  toggle the nested reveal affordance predictably, and the standard desktop,
-  web, and production-build baseline still passes.
-- 2026-04-19 next slice:
-  keep one-click expand-all as the immediate follow-up before cross-view
-  navigation so the newly introduced nested-expansion state model can be reused
-  instead of replaced.
-- 2026-04-19 implementation result:
-  the flow header now exposes a one-click nested-scope control that expands
-  every expandable descendant jobnet in the current scope and collapses the
-  same scope back to baseline once everything is open, while keeping the
-  existing `currentUnitId`-driven selection contract unchanged.
-- 2026-04-19 validation result:
-  focused helper coverage now verifies which nested jobnets qualify for the
-  scope-wide action and when the current scope should be treated as fully
-  expanded, alongside the existing graph expansion regression coverage and the
-  standard desktop, web, and build baseline.
-- 2026-04-19 next slice:
-  move from scope-wide expansion to deeper nested reveal and search behavior,
-  reusing the same expansion-state model rather than replacing it for each
-  follow-up interaction.
-- 2026-04-19 implementation result:
-  visible nested jobnets are no longer limited to direct-child expansion
-  controls. Once a nested jobnet appears in the current canvas and has nested
-  children of its own, the same inline expand/collapse affordance can reveal
-  the next level without requiring a separate scope change.
-- 2026-04-19 validation result:
-  the flow-view mapping regression now verifies that expandable deeper nested
-  jobnets keep their inline toggle affordance once visible, alongside the
-  existing expanded-graph layout coverage and the standard desktop, web, and
-  build baseline.
-- 2026-04-19 next slice:
-  move from deeper nested reveal to flow-view search, then layer explicit
-  list/flow navigation on top of the established expansion-state model.
-- 2026-04-19 maintenance slice:
-  keep the new deeper nested-expansion behavior, but refactor
-  `buildExpandedFlowGraph.ts` so expansion, panel sizing, and sibling
-  re-layout steps are separated into focused helpers before adding more
-  interaction on top.
-- 2026-04-19 search slice decision:
-  start with search inside the current flow scope only, keep
-  `currentUnitId` as the stable base scope, reveal collapsed ancestor jobnets
-  through the existing nested-expansion state, and use a presentation-local
-  visual focus marker for the first match instead of changing the graph DTO
-  contract or adding cross-scope camera navigation in the same slice.
-- 2026-04-19 implementation result:
-  the flow header now exposes a search box for the current scope; submitting a
-  query finds the first matching unit by visible JP1/AJS labels and paths,
-  expands the collapsed ancestor jobnets needed to reveal it in the current
-  canvas, and visually highlights the matching node without re-scoping the
-  viewer away from the current unit.
-- 2026-04-19 validation result:
-  focused helper coverage now verifies current-scope search matching and
-  ancestor expansion decisions, flow-node mapping coverage verifies the new
-  search-match decoration path, and the standard desktop, web, and build
-  baseline should continue to validate host compatibility.
-- 2026-04-19 next slice:
-  keep the first flow-view search slice as the stable baseline, defer broader
-  search behavior for now, and move next to explicit unit-list and flow-graph
-  navigation on top of the same identity and expansion-state model.
-- 2026-04-19 next slice decision:
-  do not add multi-match stepping, explicit camera centering, or cross-scope
-  search before cross-view navigation. Those search follow-ups stay deferred
-  until a later slice shows that the first current-scope search behavior is
-  insufficient for real navigation needs.
-- 2026-04-21 refinement focus:
-  keep the first-match, current-scope search interaction unchanged, but widen
-  the matcher so it stays case-insensitive and contiguous, preserves internal
-  spaces for comment/path fragments, and still chooses a visibly focused
-  descendant when the current scope root also matches the same query.
-- 2026-04-21 refinement result:
-  flow search now preserves internal spaces in the query, treats the whole
-  normalized input as one contiguous partial match against the existing
-  searchable unit text, and prefers the first descendant over the scope root
-  when multiple current-scope units match the same query.
-- 2026-04-21 refinement follow-up:
-  current-scope search should not stop visual feedback at the first chosen
-  match. Keep first-match focus and ancestor expansion for stability, but pass
-  the full visible match set through the presentation layer so every matching
-  node is highlighted.
-- 2026-04-21 refinement correction:
-  first-match focus stays useful, but ancestor expansion should not stay
-  first-match-only. Expand the combined ancestor jobnet set for every current-
-  scope match so all matching nodes that can be revealed in the current canvas
-  become visible after one search submit.
-- 2026-04-21 refinement validation result:
-  focused flow-search regression coverage now verifies preserved-space comment
-  matching, descendant-priority focus, and all-match ancestor expansion
-  alongside the existing blank-query and current-scope boundary checks;
-  desktop, web, and production-build validation remain the expected
-  compatibility baseline for this viewer-facing refinement.
-- 2026-04-19 navigation implementation focus:
-  use stable normalized identity that already exists in both viewers
-  (`absolutePath` for unit-list rows and the flow viewer's current-unit scope
-  contract) to open or focus the counterpart viewer without importing the
-  other viewer's internal component state. Keep unavailable-counterpart paths
-  as hidden, disabled, or no-op behaviors rather than mutating the current
-  viewer opportunistically.
-- 2026-04-19 navigation validation focus:
-  add focused regression coverage for list-to-flow target resolution and
-  flow-to-list target resolution, then re-run the standard desktop, web, and
-  production-build baseline to confirm the navigation wiring behaves the same
-  in both hosts.
-- 2026-04-19 navigation implementation result:
-  explicit bridge actions now connect the table and flow viewers through shared
-  navigation events keyed by normalized `absolutePath`. The table can request
-  the matching flow scope, and flow nodes can request the matching table row,
-  while each viewer keeps ownership of its own local selection state.
-- 2026-04-19 navigation validation result:
-  shared viewer-message routing coverage now exercises navigation events,
-  reveal-helper coverage verifies flow target and table row resolution by
-  stable path, and viewer-factory coverage confirms the injected navigation
-  handler receives the expected target view plus absolute path.
-- 2026-04-19 follow-up decision:
-  keep broader flow-search behavior deferred for now and move the next active
-  SDD slice to JP1/AJS3 version 13 parameter and command-reference alignment.
-- 2026-04-21 nested expansion fix focus:
-  preserve the current flow scope model, but make inline collapse discard
-  descendant expansion state so reopening a parent jobnet starts from the
-  expected one-level reveal. Treat recovery jobnet variants that already map
-  to flow `jobnet` nodes as expandable when they have nested children.
-- 2026-04-21 offset-layout refinement:
-  replace nested-expansion collision handling with a display-position model:
-  each visible node keeps an initial position plus accumulated x/y offsets,
-  expansion adds vertical offsets to nodes below the expanded node and
-  horizontal offsets to nodes to its right regardless of nesting, and expanded
-  panel boundaries are rebuilt from final display positions.
-- 2026-04-23 offset-target refinement:
-  make nested-expansion re-layout position-aware:
-  lower-right units receive both x/y offsets, units in the same x column below
-  the expanded unit receive only y offsets, and units in the same y row to the
-  right receive only x offsets.
+- flow styling keeps the existing graph DTO, current-unit selection contract,
+  and dialog-open behavior intact.
+- nested jobnets can expand progressively in the current canvas, including
+  deeper visible descendants and a scope-wide expand-all path.
+- nested expansion layout uses display positions plus accumulated offsets so
+  sibling panels can push nearby units without rebuilding the base graph DTO.
+- revealed descendants keep parent-relative anchors, so if a later sibling
+  expansion moves their parent jobnet they move with it instead of staying at
+  stale absolute coordinates.
+- each nested panel remains anchored to its expanded unit and grows only
+  rightward and downward from that visible origin.
+- sibling panel push rules are resolved from the currently visible panel
+  bounds in the same immediate scope:
+  horizontal growth uses only the amount that exceeds the maximum right edge
+  already occupied by expanded panels above, and vertical growth uses only the
+  missing downward distance a target still needs.
+- when an upper panel newly intrudes into a lower expanded panel, the lower
+  panel origin may be pushed downward, but the inverse case of opening the
+  lower panel itself does not trigger that same downward correction.
+- collapsing a parent jobnet clears descendant expansion state so reopening the
+  same branch returns to the expected one-level reveal.
+- recovery jobnet variants that render as flow `jobnet` nodes stay expandable
+  when they have nested children.
+- flow search stays within the current scope, performs case-insensitive
+  contiguous partial matching across unit name, comment, and path, prefers a
+  descendant over the scope root when both match, highlights every visible
+  match, and expands the combined ancestor set needed to reveal them.
+- list/flow bridge navigation uses stable `absolutePath` identity and keeps
+  missing-counterpart paths as hidden, disabled, or no-op behavior.
+- when nested expansion or collapse changes visible bounds, the viewer refits
+  the current React Flow viewport to the latest rendered nodes instead of
+  relying on initial mount-time `fitView` behavior.
 
 ## Validation
 

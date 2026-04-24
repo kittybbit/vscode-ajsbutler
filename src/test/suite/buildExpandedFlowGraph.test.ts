@@ -197,6 +197,304 @@ unit=root,,jp1admin,;
 }
 `;
 
+const siblingExpandedJobnetsDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=left-net,n,+240+144;
+    el=right-net,n,+560+144;
+    unit=left-net,,jp1admin,;
+    {
+      ty=n;
+      el=left-grand,n,+240+144;
+      el=left-job,j,+560+144;
+      ar=(f=left-grand,t=left-job);
+      unit=left-grand,,jp1admin,;
+      {
+        ty=n;
+      }
+      unit=left-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=right-net,,jp1admin,;
+    {
+      ty=n;
+      el=right-grand,n,+240+144;
+      el=right-job,j,+560+144;
+      ar=(f=right-grand,t=right-job);
+      unit=right-grand,,jp1admin,;
+      {
+        ty=n;
+      }
+      unit=right-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+  }
+}
+`;
+
+const parentRowPropagationDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=parent-net,n,+240+144;
+    el=sibling-right,j,+880+144;
+    unit=parent-net,,jp1admin,;
+    {
+      ty=n;
+      el=child-net,n,+240+144;
+      unit=child-net,,jp1admin,;
+      {
+        ty=n;
+        el=child-job,j,+560+144;
+        unit=child-job,,jp1admin,;
+        {
+          ty=j;
+        }
+      }
+    }
+    unit=sibling-right,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
+const upperPanelCoversLowerWidthDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=upper-net,n,+240+144;
+    el=lower-net,n,+240+432;
+    el=right-lower,j,+880+432;
+    unit=upper-net,,jp1admin,;
+    {
+      ty=n;
+      el=upper-wide-job,j,+880+144;
+      unit=upper-wide-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=lower-net,,jp1admin,;
+    {
+      ty=n;
+      el=lower-job,j,+560+144;
+      unit=lower-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=right-lower,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
+const lowerPanelExceedsUpperWidthDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=upper-net,n,+240+144;
+    el=lower-net,n,+240+432;
+    el=right-lower,j,+880+432;
+    unit=upper-net,,jp1admin,;
+    {
+      ty=n;
+      el=upper-wide-job,j,+560+144;
+      unit=upper-wide-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=lower-net,,jp1admin,;
+    {
+      ty=n;
+      el=lower-wide-job,j,+880+144;
+      unit=lower-wide-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=right-lower,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
+const upperPanelIntrudesLowerPanelDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=upper-net,n,+240+144;
+    el=lower-net,n,+240+432;
+    unit=upper-net,,jp1admin,;
+    {
+      ty=n;
+      el=upper-deep-job,j,+240+432;
+      unit=upper-deep-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=lower-net,,jp1admin,;
+    {
+      ty=n;
+      el=lower-job,j,+240+144;
+      unit=lower-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+  }
+}
+`;
+
+const alreadyOffsetTargetDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=upper-net,n,+240+144;
+    el=lower-net,n,+560+432;
+    el=target-job,j,+880+720;
+    unit=upper-net,,jp1admin,;
+    {
+      ty=n;
+      el=upper-deep-job,j,+240+720;
+      unit=upper-deep-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=lower-net,,jp1admin,;
+    {
+      ty=n;
+      el=lower-job,j,+240+144;
+      unit=lower-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=target-job,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
+const verticallyOffsetTargetNeedsHorizontalOffsetDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=upper-net,n,+880+144;
+    el=lower-net,n,+560+432;
+    el=target-job,j,+880+720;
+    unit=upper-net,,jp1admin,;
+    {
+      ty=n;
+      el=upper-deep-job,j,+240+720;
+      unit=upper-deep-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=lower-net,,jp1admin,;
+    {
+      ty=n;
+      el=lower-wide-job,j,+880+144;
+      unit=lower-wide-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=target-job,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
+const nestedExpansionExceedsUpperWidthDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=upper-net,n,+240+144;
+    el=lower-net,n,+240+432;
+    el=right-lower,j,+880+432;
+    unit=upper-net,,jp1admin,;
+    {
+      ty=n;
+      el=upper-wide-job,j,+560+144;
+      unit=upper-wide-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=lower-net,,jp1admin,;
+    {
+      ty=n;
+      el=lower-child,n,+240+144;
+      unit=lower-child,,jp1admin,;
+      {
+        ty=n;
+        el=lower-wide-job,j,+1120+144;
+        unit=lower-wide-job,,jp1admin,;
+        {
+          ty=j;
+        }
+      }
+    }
+    unit=right-lower,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
 suite("Build Expanded Flow Graph", () => {
   test("reveals nested jobnets only after their parent scope is expanded", () => {
     const result = parseAjs(nestedDefinition);
@@ -501,6 +799,54 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(deepSiblingPosition!.x > deepLevel2PanelRight);
   });
 
+  test("keeps panel origin anchored to the expanded unit while deeper descendants grow it", () => {
+    const result = parseAjs(deepNestedJobnetDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const level3Id =
+      document.rootUnits[0].children[0].children[0].children[0].id;
+    const level4Id =
+      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
+
+    const shallowExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([level2Id]),
+      16,
+    );
+    const deepExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([level2Id, level3Id, level4Id]),
+      16,
+    );
+
+    const shallowLevel2Decoration =
+      shallowExpanded.nodeDecorations.get(level2Id);
+    const deepLevel2Decoration = deepExpanded.nodeDecorations.get(level2Id);
+
+    assert.ok(shallowLevel2Decoration);
+    assert.ok(deepLevel2Decoration);
+    assert.strictEqual(
+      deepLevel2Decoration!.panelOffsetXPx,
+      shallowLevel2Decoration!.panelOffsetXPx,
+    );
+    assert.strictEqual(
+      deepLevel2Decoration!.panelOffsetYPx,
+      shallowLevel2Decoration!.panelOffsetYPx,
+    );
+    assert.ok(
+      deepLevel2Decoration!.panelWidthPx >
+        shallowLevel2Decoration!.panelWidthPx,
+    );
+    assert.ok(
+      deepLevel2Decoration!.panelHeightPx >
+        shallowLevel2Decoration!.panelHeightPx,
+    );
+  });
+
   test("expands recovery jobnet variants with nested children", () => {
     const result = parseAjs(recoveryJobnetDefinition);
     assert.deepStrictEqual(result.errors, []);
@@ -523,5 +869,654 @@ suite("Build Expanded Flow Graph", () => {
       true,
     );
     assert.ok(expanded.nodeDecorations.get(recoveryNetId));
+  });
+
+  test("keeps expanded descendants anchored when a sibling expansion later moves their parent", () => {
+    const result = parseAjs(siblingExpandedJobnetsDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const leftNetId = document.rootUnits[0].children[0].children[0].id;
+    const rightNetId = document.rootUnits[0].children[0].children[1].id;
+    const rightGrandId =
+      document.rootUnits[0].children[0].children[1].children[0].id;
+    const rightJobId =
+      document.rootUnits[0].children[0].children[1].children[1].id;
+
+    const rightExpandedOnly = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([rightNetId]),
+      16,
+    );
+    const siblingExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([rightNetId, leftNetId]),
+      16,
+    );
+
+    const rightOnlyParentPosition =
+      rightExpandedOnly.positionOverrides.get(rightNetId);
+    const rightOnlyGrandPosition =
+      rightExpandedOnly.positionOverrides.get(rightGrandId);
+    const rightOnlyJobPosition =
+      rightExpandedOnly.positionOverrides.get(rightJobId);
+    const movedParentPosition =
+      siblingExpanded.positionOverrides.get(rightNetId);
+    const movedGrandPosition =
+      siblingExpanded.positionOverrides.get(rightGrandId);
+    const movedJobPosition = siblingExpanded.positionOverrides.get(rightJobId);
+
+    assert.ok(rightOnlyParentPosition);
+    assert.ok(rightOnlyGrandPosition);
+    assert.ok(rightOnlyJobPosition);
+    assert.ok(movedParentPosition);
+    assert.ok(movedGrandPosition);
+    assert.ok(movedJobPosition);
+
+    assert.ok(movedParentPosition!.x > rightOnlyParentPosition!.x);
+    assert.strictEqual(
+      movedGrandPosition!.x - movedParentPosition!.x,
+      rightOnlyGrandPosition!.x - rightOnlyParentPosition!.x,
+    );
+    assert.strictEqual(
+      movedGrandPosition!.y - movedParentPosition!.y,
+      rightOnlyGrandPosition!.y - rightOnlyParentPosition!.y,
+    );
+    assert.strictEqual(
+      movedJobPosition!.x - movedParentPosition!.x,
+      rightOnlyJobPosition!.x - rightOnlyParentPosition!.x,
+    );
+    assert.strictEqual(
+      movedJobPosition!.y - movedParentPosition!.y,
+      rightOnlyJobPosition!.y - rightOnlyParentPosition!.y,
+    );
+  });
+
+  test("keeps a later expanded sibling panel aligned with descendants after sibling offsets", () => {
+    const result = parseAjs(siblingExpandedJobnetsDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const leftNetId = document.rootUnits[0].children[0].children[0].id;
+    const rightNetId = document.rootUnits[0].children[0].children[1].id;
+    const rightGrandId =
+      document.rootUnits[0].children[0].children[1].children[0].id;
+    const rightJobId =
+      document.rootUnits[0].children[0].children[1].children[1].id;
+
+    const expanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([leftNetId, rightNetId]),
+      16,
+    );
+
+    const rightParentPosition = expanded.positionOverrides.get(rightNetId);
+    const rightGrandPosition = expanded.positionOverrides.get(rightGrandId);
+    const rightJobPosition = expanded.positionOverrides.get(rightJobId);
+    const rightDecoration = expanded.nodeDecorations.get(rightNetId);
+
+    assert.ok(rightParentPosition);
+    assert.ok(rightGrandPosition);
+    assert.ok(rightJobPosition);
+    assert.ok(rightDecoration);
+
+    const panelLeft = rightParentPosition!.x + rightDecoration!.panelOffsetXPx;
+    const panelRight = panelLeft + rightDecoration!.panelWidthPx;
+    const panelTop = rightParentPosition!.y + rightDecoration!.panelOffsetYPx;
+    const panelBottom = panelTop + rightDecoration!.panelHeightPx;
+
+    assert.ok(rightGrandPosition!.x >= panelLeft);
+    assert.ok(rightGrandPosition!.x + 160 <= panelRight);
+    assert.ok(rightGrandPosition!.y >= panelTop);
+    assert.ok(rightGrandPosition!.y + 96 <= panelBottom);
+    assert.ok(rightJobPosition!.x >= panelLeft);
+    assert.ok(rightJobPosition!.x + 160 <= panelRight);
+    assert.ok(rightJobPosition!.y >= panelTop);
+    assert.ok(rightJobPosition!.y + 96 <= panelBottom);
+  });
+
+  test("pushes units on the parent row when a nested expansion enlarges that parent scope", () => {
+    const result = parseAjs(parentRowPropagationDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const parentNetId = document.rootUnits[0].children[0].children[0].id;
+    const childNetId =
+      document.rootUnits[0].children[0].children[0].children[0].id;
+    const siblingRightId = document.rootUnits[0].children[0].children[1].id;
+
+    const parentOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([parentNetId]),
+      16,
+    );
+    const childExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([parentNetId, childNetId]),
+      16,
+    );
+
+    const siblingBefore =
+      parentOnlyExpanded.positionOverrides.get(siblingRightId);
+    const siblingAfter = childExpanded.positionOverrides.get(siblingRightId);
+    const parentBefore = parentOnlyExpanded.positionOverrides.get(parentNetId);
+    const parentAfter = childExpanded.positionOverrides.get(parentNetId);
+    const parentDecorationBefore =
+      parentOnlyExpanded.nodeDecorations.get(parentNetId);
+    const parentDecorationAfter =
+      childExpanded.nodeDecorations.get(parentNetId);
+
+    assert.ok(siblingBefore);
+    assert.ok(siblingAfter);
+    assert.ok(parentBefore);
+    assert.ok(parentAfter);
+    assert.ok(parentDecorationBefore);
+    assert.ok(parentDecorationAfter);
+    assert.strictEqual(siblingBefore!.y, parentBefore!.y);
+    assert.strictEqual(siblingAfter!.y, parentAfter!.y);
+    assert.ok(siblingAfter!.x > siblingBefore!.x);
+    const parentPanelRightBefore =
+      parentBefore!.x +
+      parentDecorationBefore!.panelOffsetXPx +
+      parentDecorationBefore!.panelWidthPx;
+    const parentPanelRightAfter =
+      parentAfter!.x +
+      parentDecorationAfter!.panelOffsetXPx +
+      parentDecorationAfter!.panelWidthPx;
+    assert.ok(siblingAfter!.x > parentPanelRightAfter);
+    assert.strictEqual(
+      siblingAfter!.x - siblingBefore!.x,
+      parentPanelRightAfter - parentPanelRightBefore,
+    );
+  });
+
+  test("does not propagate horizontal growth when an upper expanded panel already covers it", () => {
+    const result = parseAjs(upperPanelCoversLowerWidthDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+
+    const upperOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([upperNetId]),
+      16,
+    );
+    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([upperNetId, lowerNetId]),
+      16,
+    );
+
+    const rightLowerBefore =
+      upperOnlyExpanded.positionOverrides.get(rightLowerId);
+    const rightLowerAfter =
+      upperAndLowerExpanded.positionOverrides.get(rightLowerId);
+    const upperPosition =
+      upperAndLowerExpanded.positionOverrides.get(upperNetId);
+    const lowerPosition =
+      upperAndLowerExpanded.positionOverrides.get(lowerNetId);
+    const upperDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(upperNetId);
+    const lowerDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(lowerNetId);
+
+    assert.ok(rightLowerBefore);
+    assert.ok(rightLowerAfter);
+    assert.ok(upperPosition);
+    assert.ok(lowerPosition);
+    assert.ok(upperDecoration);
+    assert.ok(lowerDecoration);
+
+    const upperPanelRight =
+      upperPosition!.x +
+      upperDecoration!.panelOffsetXPx +
+      upperDecoration!.panelWidthPx;
+    const lowerPanelRight =
+      lowerPosition!.x +
+      lowerDecoration!.panelOffsetXPx +
+      lowerDecoration!.panelWidthPx;
+
+    assert.ok(upperPosition!.y < lowerPosition!.y);
+    assert.ok(upperPanelRight > lowerPanelRight);
+    assert.strictEqual(rightLowerAfter!.x, rightLowerBefore!.x);
+  });
+
+  test("propagates only the horizontal growth beyond the upper expanded panel", () => {
+    const result = parseAjs(lowerPanelExceedsUpperWidthDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+
+    const upperOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([upperNetId]),
+      16,
+    );
+    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([upperNetId, lowerNetId]),
+      16,
+    );
+
+    const rightLowerBefore =
+      upperOnlyExpanded.positionOverrides.get(rightLowerId);
+    const rightLowerAfter =
+      upperAndLowerExpanded.positionOverrides.get(rightLowerId);
+    const upperPosition =
+      upperAndLowerExpanded.positionOverrides.get(upperNetId);
+    const lowerPosition =
+      upperAndLowerExpanded.positionOverrides.get(lowerNetId);
+    const upperDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(upperNetId);
+    const lowerDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(lowerNetId);
+
+    assert.ok(rightLowerBefore);
+    assert.ok(rightLowerAfter);
+    assert.ok(upperPosition);
+    assert.ok(lowerPosition);
+    assert.ok(upperDecoration);
+    assert.ok(lowerDecoration);
+
+    const upperPanelRight =
+      upperPosition!.x +
+      upperDecoration!.panelOffsetXPx +
+      upperDecoration!.panelWidthPx;
+    const lowerPanelRight =
+      lowerPosition!.x +
+      lowerDecoration!.panelOffsetXPx +
+      lowerDecoration!.panelWidthPx;
+
+    assert.ok(upperPosition!.y < lowerPosition!.y);
+    assert.ok(lowerPanelRight > upperPanelRight);
+    assert.strictEqual(
+      rightLowerAfter!.x - rightLowerBefore!.x,
+      lowerPanelRight - upperPanelRight,
+    );
+  });
+
+  test("propagates horizontal growth beyond the upper panel when lower is expanded after upper", () => {
+    const result = parseAjs(lowerPanelExceedsUpperWidthDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+
+    const upperOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId],
+      16,
+    );
+    const lowerExpandedAfterUpper = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId, lowerNetId],
+      16,
+    );
+
+    const rightLowerBefore =
+      upperOnlyExpanded.positionOverrides.get(rightLowerId);
+    const rightLowerAfter =
+      lowerExpandedAfterUpper.positionOverrides.get(rightLowerId);
+    const upperPosition =
+      lowerExpandedAfterUpper.positionOverrides.get(upperNetId);
+    const lowerPosition =
+      lowerExpandedAfterUpper.positionOverrides.get(lowerNetId);
+    const upperDecoration =
+      lowerExpandedAfterUpper.nodeDecorations.get(upperNetId);
+    const lowerDecoration =
+      lowerExpandedAfterUpper.nodeDecorations.get(lowerNetId);
+
+    assert.ok(rightLowerBefore);
+    assert.ok(rightLowerAfter);
+    assert.ok(upperPosition);
+    assert.ok(lowerPosition);
+    assert.ok(upperDecoration);
+    assert.ok(lowerDecoration);
+
+    const upperPanelRight =
+      upperPosition!.x +
+      upperDecoration!.panelOffsetXPx +
+      upperDecoration!.panelWidthPx;
+    const lowerPanelRight =
+      lowerPosition!.x +
+      lowerDecoration!.panelOffsetXPx +
+      lowerDecoration!.panelWidthPx;
+
+    assert.ok(lowerPanelRight > upperPanelRight);
+    assert.strictEqual(
+      rightLowerAfter!.x - rightLowerBefore!.x,
+      lowerPanelRight - upperPanelRight,
+    );
+  });
+
+  test("pushes a lower expanded panel origin when an upper expanded panel intrudes into it", () => {
+    const result = parseAjs(upperPanelIntrudesLowerPanelDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+
+    const lowerOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([lowerNetId]),
+      16,
+    );
+    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [lowerNetId, upperNetId],
+      16,
+    );
+
+    const lowerBefore = lowerOnlyExpanded.positionOverrides.get(lowerNetId);
+    const upperPosition =
+      upperAndLowerExpanded.positionOverrides.get(upperNetId);
+    const lowerAfter = upperAndLowerExpanded.positionOverrides.get(lowerNetId);
+    const upperDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(upperNetId);
+    const lowerDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(lowerNetId);
+
+    assert.ok(lowerBefore);
+    assert.ok(upperPosition);
+    assert.ok(lowerAfter);
+    assert.ok(upperDecoration);
+    assert.ok(lowerDecoration);
+
+    const upperPanelBottom =
+      upperPosition!.y +
+      upperDecoration!.panelOffsetYPx +
+      upperDecoration!.panelHeightPx;
+    const lowerPanelTop = lowerAfter!.y + lowerDecoration!.panelOffsetYPx;
+
+    assert.ok(lowerAfter!.y > lowerBefore!.y);
+    assert.ok(upperPanelBottom <= lowerPanelTop);
+  });
+
+  test("does not push a lower panel origin when that lower unit is the newly expanded unit", () => {
+    const result = parseAjs(upperPanelIntrudesLowerPanelDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+
+    const upperOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId],
+      16,
+    );
+    const lowerExpandedAfterUpper = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId, lowerNetId],
+      16,
+    );
+
+    const lowerBefore = upperOnlyExpanded.positionOverrides.get(lowerNetId);
+    const lowerAfter =
+      lowerExpandedAfterUpper.positionOverrides.get(lowerNetId);
+
+    assert.ok(lowerBefore);
+    assert.ok(lowerAfter);
+    assert.strictEqual(lowerAfter!.y, lowerBefore!.y);
+  });
+
+  test("does not apply vertical growth again when a target already has enough y offset", () => {
+    const result = parseAjs(alreadyOffsetTargetDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const targetJobId = document.rootUnits[0].children[0].children[2].id;
+
+    const upperOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId],
+      16,
+    );
+    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId, lowerNetId],
+      16,
+    );
+
+    const targetBefore = upperOnlyExpanded.positionOverrides.get(targetJobId);
+    const targetAfter =
+      upperAndLowerExpanded.positionOverrides.get(targetJobId);
+    const lowerPosition =
+      upperAndLowerExpanded.positionOverrides.get(lowerNetId);
+    const lowerDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(lowerNetId);
+
+    assert.ok(targetBefore);
+    assert.ok(targetAfter);
+    assert.ok(lowerPosition);
+    assert.ok(lowerDecoration);
+
+    const lowerPanelBottom =
+      lowerPosition!.y +
+      lowerDecoration!.panelOffsetYPx +
+      lowerDecoration!.panelHeightPx;
+
+    assert.ok(targetBefore!.y >= lowerPanelBottom);
+    assert.strictEqual(targetAfter!.x, targetBefore!.x);
+    assert.strictEqual(targetAfter!.y, targetBefore!.y);
+  });
+
+  test("keeps horizontal growth when vertical growth is already covered", () => {
+    const result = parseAjs(
+      verticallyOffsetTargetNeedsHorizontalOffsetDefinition,
+    );
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const targetJobId = document.rootUnits[0].children[0].children[2].id;
+
+    const upperOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId],
+      16,
+    );
+    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId, lowerNetId],
+      16,
+    );
+
+    const targetBefore = upperOnlyExpanded.positionOverrides.get(targetJobId);
+    const targetAfter =
+      upperAndLowerExpanded.positionOverrides.get(targetJobId);
+    const lowerPosition =
+      upperAndLowerExpanded.positionOverrides.get(lowerNetId);
+    const upperPosition =
+      upperAndLowerExpanded.positionOverrides.get(upperNetId);
+    const upperDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(upperNetId);
+    const lowerDecoration =
+      upperAndLowerExpanded.nodeDecorations.get(lowerNetId);
+
+    assert.ok(targetBefore);
+    assert.ok(targetAfter);
+    assert.ok(lowerPosition);
+    assert.ok(upperPosition);
+    assert.ok(upperDecoration);
+    assert.ok(lowerDecoration);
+
+    const upperPanelRight =
+      upperPosition!.x +
+      upperDecoration!.panelOffsetXPx +
+      upperDecoration!.panelWidthPx;
+    const lowerPanelRight =
+      lowerPosition!.x +
+      lowerDecoration!.panelOffsetXPx +
+      lowerDecoration!.panelWidthPx;
+    const lowerPanelBottom =
+      lowerPosition!.y +
+      lowerDecoration!.panelOffsetYPx +
+      lowerDecoration!.panelHeightPx;
+
+    assert.ok(targetBefore!.y >= lowerPanelBottom);
+    assert.ok(lowerPanelRight > upperPanelRight);
+    assert.strictEqual(
+      targetAfter!.x - targetBefore!.x,
+      lowerPanelRight - upperPanelRight,
+    );
+    assert.strictEqual(targetAfter!.y, targetBefore!.y);
+  });
+
+  test("propagates horizontal growth when a nested expansion makes the parent exceed the upper panel", () => {
+    const result = parseAjs(nestedExpansionExceedsUpperWidthDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const upperNetId = document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const lowerChildId =
+      document.rootUnits[0].children[0].children[1].children[0].id;
+    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+
+    const lowerOnlyExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId, lowerNetId],
+      16,
+    );
+    const lowerChildExpanded = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [upperNetId, lowerNetId, lowerChildId],
+      16,
+    );
+
+    const rightLowerBefore =
+      lowerOnlyExpanded.positionOverrides.get(rightLowerId);
+    const rightLowerAfter =
+      lowerChildExpanded.positionOverrides.get(rightLowerId);
+    const upperPosition = lowerChildExpanded.positionOverrides.get(upperNetId);
+    const lowerPosition = lowerChildExpanded.positionOverrides.get(lowerNetId);
+    const upperDecoration = lowerChildExpanded.nodeDecorations.get(upperNetId);
+    const lowerDecoration = lowerChildExpanded.nodeDecorations.get(lowerNetId);
+
+    assert.ok(rightLowerBefore);
+    assert.ok(rightLowerAfter);
+    assert.ok(upperPosition);
+    assert.ok(lowerPosition);
+    assert.ok(upperDecoration);
+    assert.ok(lowerDecoration);
+
+    const upperPanelRight =
+      upperPosition!.x +
+      upperDecoration!.panelOffsetXPx +
+      upperDecoration!.panelWidthPx;
+    const lowerPanelRight =
+      lowerPosition!.x +
+      lowerDecoration!.panelOffsetXPx +
+      lowerDecoration!.panelWidthPx;
+
+    assert.ok(lowerPanelRight > upperPanelRight);
+    assert.strictEqual(
+      rightLowerAfter!.x - rightLowerBefore!.x,
+      lowerPanelRight - upperPanelRight,
+    );
+  });
+
+  test("keeps the same layout when the same-depth expanded order changes", () => {
+    const result = parseAjs(siblingExpandedJobnetsDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const leftNetId = document.rootUnits[0].children[0].children[0].id;
+    const rightNetId = document.rootUnits[0].children[0].children[1].id;
+    const rightJobId =
+      document.rootUnits[0].children[0].children[1].children[1].id;
+
+    const leftThenRight = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([leftNetId, rightNetId]),
+      16,
+    );
+    const rightThenLeft = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([rightNetId, leftNetId]),
+      16,
+    );
+
+    assert.deepStrictEqual(
+      leftThenRight.positionOverrides.get(rightNetId),
+      rightThenLeft.positionOverrides.get(rightNetId),
+    );
+    assert.deepStrictEqual(
+      leftThenRight.positionOverrides.get(rightJobId),
+      rightThenLeft.positionOverrides.get(rightJobId),
+    );
+    assert.deepStrictEqual(
+      leftThenRight.nodeDecorations.get(leftNetId),
+      rightThenLeft.nodeDecorations.get(leftNetId),
+    );
+    assert.deepStrictEqual(
+      leftThenRight.nodeDecorations.get(rightNetId),
+      rightThenLeft.nodeDecorations.get(rightNetId),
+    );
+  });
+
+  test("rebuilding the same expanded state keeps panel bounds stable", () => {
+    const result = parseAjs(deepNestedJobnetDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const currentUnitId = document.rootUnits[0].children[0].id;
+    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const level3Id =
+      document.rootUnits[0].children[0].children[0].children[0].id;
+    const level4Id =
+      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
+
+    const expandedUnitIds = new Set<string>([level2Id, level3Id, level4Id]);
+    const first = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      expandedUnitIds,
+      16,
+    );
+    const second = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      new Set<string>([level2Id, level3Id, level4Id]),
+      16,
+    );
+
+    assert.deepStrictEqual(first.positionOverrides, second.positionOverrides);
+    assert.deepStrictEqual(first.nodeDecorations, second.nodeDecorations);
   });
 });

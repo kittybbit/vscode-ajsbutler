@@ -1,46 +1,615 @@
-unit=deep_jobnet_root,,jp1admin,;
+unit=viewer_root,,jp1admin,;
 {
         ty=g;
-        cm="deep jobnet root group";
-        el=jn_lv1,n,+0+0;
-        unit=jn_lv1,,jp1admin,;
+        cm="nested and wide expandable sample";
+        el=top_main,n,+0+0;
+        unit=top_main,,jp1admin,;
         {
                 ty=n;
-                cm="jobnet level 1";
-                sz=6x3;
-                el=jn_lv2,n,+240+144;
-                unit=jn_lv2,,jp1admin,;
+                cm="top main";
+                sz=18x8;
+
+                el=top_left_a,j,+240+144;
+                el=branch_alpha,n,+560+144;
+                el=top_mid_a,j,+880+144;
+                el=branch_beta,n,+1200+144;
+                el=top_right_a,j,+1520+144;
+
+                el=top_left_b,j,+240+432;
+                el=branch_gamma,n,+560+432;
+                el=top_mid_b,j,+880+432;
+                el=branch_delta,n,+1200+432;
+                el=top_right_b,j,+1520+432;
+
+                ar=(f=top_left_a,t=branch_alpha,seq);
+                ar=(f=branch_alpha,t=top_mid_a,seq);
+                ar=(f=top_mid_a,t=branch_beta,seq);
+                ar=(f=branch_beta,t=top_right_a,seq);
+
+                ar=(f=top_left_b,t=branch_gamma,seq);
+                ar=(f=branch_gamma,t=top_mid_b,seq);
+                ar=(f=top_mid_b,t=branch_delta,seq);
+                ar=(f=branch_delta,t=top_right_b,seq);
+
+                ar=(f=branch_alpha,t=branch_gamma,con);
+                ar=(f=branch_beta,t=branch_delta,con);
+
+                unit=top_left_a,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="top-left-a";
+                        tho=0;
+                }
+
+                unit=top_mid_a,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="top-mid-a";
+                        tho=0;
+                }
+
+                unit=top_right_a,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="top-right-a";
+                        tho=0;
+                }
+
+                unit=top_left_b,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="top-left-b";
+                        tho=0;
+                }
+
+                unit=top_mid_b,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="top-mid-b";
+                        tho=0;
+                }
+
+                unit=top_right_b,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo";
+                        prm="top-right-b";
+                        tho=0;
+                }
+
+                unit=branch_alpha,,jp1admin,;
                 {
                         ty=n;
-                        cm="jobnet level 2";
-                        sz=6x3;
-                        el=jn_lv3,n,+240+144;
-                        unit=jn_lv3,,jp1admin,;
+                        cm="branch alpha";
+                        sz=14x6;
+
+                        el=alpha_job_a,j,+240+144;
+                        el=alpha_nested_1,n,+560+144;
+                        el=alpha_job_b,j,+880+144;
+                        el=alpha_nested_2,n,+1200+144;
+
+                        el=alpha_job_c,j,+240+432;
+                        el=alpha_job_d,j,+880+432;
+
+                        ar=(f=alpha_job_a,t=alpha_nested_1,seq);
+                        ar=(f=alpha_nested_1,t=alpha_job_b,seq);
+                        ar=(f=alpha_job_b,t=alpha_nested_2,seq);
+                        ar=(f=alpha_nested_2,t=alpha_job_d,seq);
+                        ar=(f=alpha_job_c,t=alpha_nested_1,con);
+
+                        unit=alpha_job_a,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="alpha-a";
+                                tho=0;
+                        }
+
+                        unit=alpha_job_b,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="alpha-b";
+                                tho=0;
+                        }
+
+                        unit=alpha_job_c,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="alpha-c";
+                                tho=0;
+                        }
+
+                        unit=alpha_job_d,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="alpha-d";
+                                tho=0;
+                        }
+
+                        unit=alpha_nested_1,,jp1admin,;
                         {
                                 ty=n;
-                                cm="jobnet level 3";
-                                sz=6x3;
-                                el=jn_lv4,n,+240+144;
-                                unit=jn_lv4,,jp1admin,;
+                                cm="alpha nested 1";
+                                sz=10x4;
+
+                                el=alpha1_job_a,j,+240+144;
+                                el=alpha1_deep,n,+560+144;
+                                el=alpha1_job_b,j,+880+144;
+                                ar=(f=alpha1_job_a,t=alpha1_deep,seq);
+                                ar=(f=alpha1_deep,t=alpha1_job_b,seq);
+
+                                unit=alpha1_job_a,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="alpha1-a";
+                                        tho=0;
+                                }
+
+                                unit=alpha1_job_b,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="alpha1-b";
+                                        tho=0;
+                                }
+
+                                unit=alpha1_deep,,jp1admin,;
                                 {
                                         ty=n;
-                                        cm="jobnet level 4";
-                                        sz=6x3;
-                                        el=jn_lv5,n,+240+144;
-                                        unit=jn_lv5,,jp1admin,;
+                                        cm="alpha1 deep";
+                                        sz=8x3;
+
+                                        el=alpha1_deep_job1,j,+240+144;
+                                        el=alpha1_deep_job2,j,+560+144;
+                                        el=alpha1_deep_job3,j,+880+144;
+                                        ar=(f=alpha1_deep_job1,t=alpha1_deep_job2,seq);
+                                        ar=(f=alpha1_deep_job2,t=alpha1_deep_job3,seq);
+
+                                        unit=alpha1_deep_job1,,jp1admin,;
                                         {
-                                                ty=n;
-                                                cm="jobnet level 5";
-                                                sz=6x3;
-                                                el=leaf_job,j,+240+144;
-                                                unit=leaf_job,,jp1admin,;
-                                                {
-                                                        ty=j;
-                                                        sc="echo";
-                                                        prm="leaf";
-                                                        tho=0;
-                                                }
+                                                ty=j;
+                                                sc="echo";
+                                                prm="alpha1-deep-1";
+                                                tho=0;
                                         }
+
+                                        unit=alpha1_deep_job2,,jp1admin,;
+                                        {
+                                                ty=j;
+                                                sc="echo";
+                                                prm="alpha1-deep-2";
+                                                tho=0;
+                                        }
+
+                                        unit=alpha1_deep_job3,,jp1admin,;
+                                        {
+                                                ty=j;
+                                                sc="echo";
+                                                prm="alpha1-deep-3";
+                                                tho=0;
+                                        }
+                                }
+                        }
+
+                        unit=alpha_nested_2,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="alpha nested 2";
+                                sz=12x4;
+
+                                el=alpha2_job_a,j,+240+144;
+                                el=alpha2_job_b,j,+560+144;
+                                el=alpha2_job_c,j,+880+144;
+                                el=alpha2_job_d,j,+1200+144;
+                                ar=(f=alpha2_job_a,t=alpha2_job_b,seq);
+                                ar=(f=alpha2_job_b,t=alpha2_job_c,seq);
+                                ar=(f=alpha2_job_c,t=alpha2_job_d,seq);
+
+                                unit=alpha2_job_a,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="alpha2-a";
+                                        tho=0;
+                                }
+
+                                unit=alpha2_job_b,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="alpha2-b";
+                                        tho=0;
+                                }
+
+                                unit=alpha2_job_c,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="alpha2-c";
+                                        tho=0;
+                                }
+
+                                unit=alpha2_job_d,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="alpha2-d";
+                                        tho=0;
+                                }
+                        }
+                }
+
+                unit=branch_beta,,jp1admin,;
+                {
+                        ty=n;
+                        cm="branch beta";
+                        sz=14x5;
+
+                        el=beta_job_a,j,+240+144;
+                        el=beta_nested_1,n,+560+144;
+                        el=beta_nested_2,n,+880+144;
+                        el=beta_job_b,j,+1200+144;
+
+                        el=beta_job_c,j,+240+432;
+                        el=beta_job_d,j,+1200+432;
+
+                        ar=(f=beta_job_a,t=beta_nested_1,seq);
+                        ar=(f=beta_nested_1,t=beta_nested_2,seq);
+                        ar=(f=beta_nested_2,t=beta_job_b,seq);
+                        ar=(f=beta_job_c,t=beta_nested_2,con);
+                        ar=(f=beta_nested_1,t=beta_job_d,con);
+
+                        unit=beta_job_a,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="beta-a";
+                                tho=0;
+                        }
+
+                        unit=beta_job_b,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="beta-b";
+                                tho=0;
+                        }
+
+                        unit=beta_job_c,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="beta-c";
+                                tho=0;
+                        }
+
+                        unit=beta_job_d,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="beta-d";
+                                tho=0;
+                        }
+
+                        unit=beta_nested_1,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="beta nested 1";
+                                sz=8x3;
+
+                                el=beta1_job1,j,+240+144;
+                                el=beta1_job2,j,+560+144;
+                                el=beta1_job3,j,+880+144;
+                                ar=(f=beta1_job1,t=beta1_job2,seq);
+                                ar=(f=beta1_job2,t=beta1_job3,seq);
+
+                                unit=beta1_job1,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="beta1-1";
+                                        tho=0;
+                                }
+
+                                unit=beta1_job2,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="beta1-2";
+                                        tho=0;
+                                }
+
+                                unit=beta1_job3,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="beta1-3";
+                                        tho=0;
+                                }
+                        }
+
+                        unit=beta_nested_2,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="beta nested 2";
+                                sz=10x4;
+
+                                el=beta2_job1,j,+240+144;
+                                el=beta2_deep,n,+560+144;
+                                el=beta2_job2,j,+880+144;
+                                ar=(f=beta2_job1,t=beta2_deep,seq);
+                                ar=(f=beta2_deep,t=beta2_job2,seq);
+
+                                unit=beta2_job1,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="beta2-1";
+                                        tho=0;
+                                }
+
+                                unit=beta2_job2,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="beta2-2";
+                                        tho=0;
+                                }
+
+                                unit=beta2_deep,,jp1admin,;
+                                {
+                                        ty=n;
+                                        cm="beta2 deep";
+                                        sz=8x3;
+
+                                        el=beta2_deep_job1,j,+240+144;
+                                        el=beta2_deep_job2,j,+560+144;
+                                        el=beta2_deep_job3,j,+880+144;
+                                        ar=(f=beta2_deep_job1,t=beta2_deep_job2,seq);
+                                        ar=(f=beta2_deep_job2,t=beta2_deep_job3,seq);
+
+                                        unit=beta2_deep_job1,,jp1admin,;
+                                        {
+                                                ty=j;
+                                                sc="echo";
+                                                prm="beta2-deep-1";
+                                                tho=0;
+                                        }
+
+                                        unit=beta2_deep_job2,,jp1admin,;
+                                        {
+                                                ty=j;
+                                                sc="echo";
+                                                prm="beta2-deep-2";
+                                                tho=0;
+                                        }
+
+                                        unit=beta2_deep_job3,,jp1admin,;
+                                        {
+                                                ty=j;
+                                                sc="echo";
+                                                prm="beta2-deep-3";
+                                                tho=0;
+                                        }
+                                }
+                        }
+                }
+
+                unit=branch_gamma,,jp1admin,;
+                {
+                        ty=n;
+                        cm="branch gamma";
+                        sz=12x4;
+
+                        el=gamma_job_a,j,+240+144;
+                        el=gamma_nested_1,n,+560+144;
+                        el=gamma_job_b,j,+880+144;
+                        el=gamma_nested_2,n,+1200+144;
+                        ar=(f=gamma_job_a,t=gamma_nested_1,seq);
+                        ar=(f=gamma_nested_1,t=gamma_job_b,seq);
+                        ar=(f=gamma_job_b,t=gamma_nested_2,seq);
+
+                        unit=gamma_job_a,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="gamma-a";
+                                tho=0;
+                        }
+
+                        unit=gamma_job_b,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="gamma-b";
+                                tho=0;
+                        }
+
+                        unit=gamma_nested_1,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="gamma nested 1";
+                                sz=8x3;
+
+                                el=gamma1_job1,j,+240+144;
+                                el=gamma1_job2,j,+560+144;
+                                el=gamma1_job3,j,+880+144;
+                                ar=(f=gamma1_job1,t=gamma1_job2,seq);
+                                ar=(f=gamma1_job2,t=gamma1_job3,seq);
+
+                                unit=gamma1_job1,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="gamma1-1";
+                                        tho=0;
+                                }
+
+                                unit=gamma1_job2,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="gamma1-2";
+                                        tho=0;
+                                }
+
+                                unit=gamma1_job3,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="gamma1-3";
+                                        tho=0;
+                                }
+                        }
+
+                        unit=gamma_nested_2,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="gamma nested 2";
+                                sz=8x3;
+
+                                el=gamma2_job1,j,+240+144;
+                                el=gamma2_job2,j,+560+144;
+                                el=gamma2_job3,j,+880+144;
+                                ar=(f=gamma2_job1,t=gamma2_job2,seq);
+                                ar=(f=gamma2_job2,t=gamma2_job3,seq);
+
+                                unit=gamma2_job1,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="gamma2-1";
+                                        tho=0;
+                                }
+
+                                unit=gamma2_job2,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="gamma2-2";
+                                        tho=0;
+                                }
+
+                                unit=gamma2_job3,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="gamma2-3";
+                                        tho=0;
+                                }
+                        }
+                }
+
+                unit=branch_delta,,jp1admin,;
+                {
+                        ty=n;
+                        cm="branch delta";
+                        sz=14x4;
+
+                        el=delta_nested_1,n,+240+144;
+                        el=delta_job_a,j,+560+144;
+                        el=delta_nested_2,n,+880+144;
+                        el=delta_job_b,j,+1200+144;
+                        ar=(f=delta_nested_1,t=delta_job_a,seq);
+                        ar=(f=delta_job_a,t=delta_nested_2,seq);
+                        ar=(f=delta_nested_2,t=delta_job_b,seq);
+
+                        unit=delta_job_a,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="delta-a";
+                                tho=0;
+                        }
+
+                        unit=delta_job_b,,jp1admin,;
+                        {
+                                ty=j;
+                                sc="echo";
+                                prm="delta-b";
+                                tho=0;
+                        }
+
+                        unit=delta_nested_1,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="delta nested 1";
+                                sz=10x3;
+
+                                el=delta1_job1,j,+240+144;
+                                el=delta1_job2,j,+560+144;
+                                el=delta1_job3,j,+880+144;
+                                ar=(f=delta1_job1,t=delta1_job2,seq);
+                                ar=(f=delta1_job2,t=delta1_job3,seq);
+
+                                unit=delta1_job1,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="delta1-1";
+                                        tho=0;
+                                }
+
+                                unit=delta1_job2,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="delta1-2";
+                                        tho=0;
+                                }
+
+                                unit=delta1_job3,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="delta1-3";
+                                        tho=0;
+                                }
+                        }
+
+                        unit=delta_nested_2,,jp1admin,;
+                        {
+                                ty=n;
+                                cm="delta nested 2";
+                                sz=10x3;
+
+                                el=delta2_job1,j,+240+144;
+                                el=delta2_job2,j,+560+144;
+                                el=delta2_job3,j,+880+144;
+                                ar=(f=delta2_job1,t=delta2_job2,seq);
+                                ar=(f=delta2_job2,t=delta2_job3,seq);
+
+                                unit=delta2_job1,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="delta2-1";
+                                        tho=0;
+                                }
+
+                                unit=delta2_job2,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="delta2-2";
+                                        tho=0;
+                                }
+
+                                unit=delta2_job3,,jp1admin,;
+                                {
+                                        ty=j;
+                                        sc="echo";
+                                        prm="delta2-3";
+                                        tho=0;
                                 }
                         }
                 }

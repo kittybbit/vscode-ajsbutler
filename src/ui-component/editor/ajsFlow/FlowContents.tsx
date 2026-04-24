@@ -23,6 +23,7 @@ import {
   Node,
   NodeTypes,
   ReactFlow,
+  ReactFlowInstance,
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -109,6 +110,10 @@ const FlowContents: FC = () => {
   const [searchMatchedUnitIds, setSearchMatchedUnitIds] = useState<string[]>(
     [],
   );
+  const reactFlowInstanceRef = useRef<ReactFlowInstance<Node, Edge> | null>(
+    null,
+  );
+  const fitViewFrameRef = useRef<number | undefined>(undefined);
   const preserveSearchOnNextScopeChange = useRef<boolean>(false);
   const prevUnitEntityId = useRef<string | undefined>(undefined);
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -231,7 +236,7 @@ const FlowContents: FC = () => {
         buildExpandedFlowGraph(
           ajsDocument,
           selectedUnitId,
-          nestedExpansionState.expandedUnitIds,
+          expandedUnitIds,
           theme.typography.htmlFontSize,
         );
       if (!graph) {
@@ -261,6 +266,7 @@ const FlowContents: FC = () => {
       ajsDocument,
       currentUnitIdState,
       dialogDataState,
+      expandedUnitIds,
       nestedExpansionState,
       theme,
       unitDefinitionByPath,
@@ -315,6 +321,28 @@ const FlowContents: FC = () => {
     updateNodesAndEdges(currentUnitId);
     prevUnitEntityId.current = currentUnitId;
   }, [currentUnitId, updateNodesAndEdges]);
+
+  useEffect(() => {
+    if (!reactFlowInstanceRef.current || nodes.length === 0) {
+      return undefined;
+    }
+
+    if (fitViewFrameRef.current) {
+      window.cancelAnimationFrame(fitViewFrameRef.current);
+    }
+
+    fitViewFrameRef.current = window.requestAnimationFrame(() => {
+      void reactFlowInstanceRef.current?.fitView({ padding: 0.22 });
+      fitViewFrameRef.current = undefined;
+    });
+
+    return () => {
+      if (fitViewFrameRef.current) {
+        window.cancelAnimationFrame(fitViewFrameRef.current);
+        fitViewFrameRef.current = undefined;
+      }
+    };
+  }, [nodes, edges]);
 
   useEffect(() => {
     setExpandedUnitIds((prev) => (prev.length === 0 ? prev : []));
@@ -465,6 +493,9 @@ const FlowContents: FC = () => {
                   defaultViewport={defaultViewport}
                   colorMode={theme.palette.mode}
                   nodeTypes={nodeTypes}
+                  onInit={(instance) => {
+                    reactFlowInstanceRef.current = instance;
+                  }}
                   fitView
                   fitViewOptions={{ padding: 0.22 }}
                 >
