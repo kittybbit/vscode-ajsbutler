@@ -50,12 +50,19 @@ type ExpandedFlowGraphBuildContext = {
   edgeIds: Set<string>;
   visibleUnitIds: Set<string>;
   initialPositions: Map<string, FlowGraphPosition>;
+  parentAnchors: Map<string, string>;
   offsets: Map<string, FlowGraphPosition>;
   positionOverrides: Map<string, FlowGraphPosition>;
   nodeDecorations: Map<string, ExpandedNodeDecoration>;
   unitById: ReadonlyMap<string, AjsUnit>;
   metrics: FlowGraphMetrics;
 };
+
+const compareExpandedUnits = (left: AjsUnit, right: AjsUnit): number =>
+  left.depth - right.depth ||
+  left.layout.v - right.layout.v ||
+  left.layout.h - right.layout.h ||
+  left.absolutePath.localeCompare(right.absolutePath);
 
 const toNodeType = (unit: AjsUnit): FlowGraphNodeType => {
   switch (unit.unitType) {
@@ -188,7 +195,14 @@ const getDisplayPosition = (
   if (!initialPosition) {
     return undefined;
   }
-  return addPositions(initialPosition, getOffset(context, unitId));
+  const parentAnchorId = context.parentAnchors.get(unitId);
+  const anchoredOrigin = parentAnchorId
+    ? getDisplayPosition(context, parentAnchorId)
+    : undefined;
+  return addPositions(
+    addPositions(anchoredOrigin ?? { x: 0, y: 0 }, initialPosition),
+    getOffset(context, unitId),
+  );
 };
 
 const syncPositionOverride = (
@@ -201,13 +215,26 @@ const syncPositionOverride = (
   }
 };
 
+const syncAnchoredDescendantOverrides = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+) => {
+  for (const visibleUnitId of context.visibleUnitIds) {
+    if (context.parentAnchors.get(visibleUnitId) !== unitId) {
+      continue;
+    }
+    syncPositionOverride(context, visibleUnitId);
+    syncAnchoredDescendantOverrides(context, visibleUnitId);
+  }
+};
+
 const addOffset = (
   context: ExpandedFlowGraphBuildContext,
   unitId: string,
   delta: FlowGraphPosition,
 ) => {
   if (delta.x === 0 && delta.y === 0) {
-    return;
+    return false;
   }
 
   const offset = getOffset(context, unitId);
@@ -216,6 +243,8 @@ const addOffset = (
     y: offset.y + delta.y,
   });
   syncPositionOverride(context, unitId);
+  syncAnchoredDescendantOverrides(context, unitId);
+  return true;
 };
 
 const addVisibleNode = (
@@ -223,18 +252,22 @@ const addVisibleNode = (
   unit: AjsUnit,
   node: FlowGraphNodeDto,
   initialPosition: FlowGraphPosition,
+  parentAnchorId?: string,
 ) => {
   context.nodes.push(node);
   context.nodeIds.add(unit.id);
   context.visibleUnitIds.add(unit.id);
   context.initialPositions.set(unit.id, initialPosition);
+  if (parentAnchorId) {
+    context.parentAnchors.set(unit.id, parentAnchorId);
+  }
   syncPositionOverride(context, unit.id);
 };
 
 const ensureChildNodeVisible = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnitPosition: FlowGraphPosition,
   child: AjsUnit,
+  parentUnitId: string,
 ): FlowGraphPosition | undefined => {
   const existingPosition = context.initialPositions.get(child.id);
   if (existingPosition) {
@@ -245,19 +278,25 @@ const ensureChildNodeVisible = (
   }
 
   const childPosition = calculateNestedChildPosition(
-    expandedUnitPosition,
+    { x: 0, y: 0 },
     child.layout.h,
     child.layout.v,
     context.basePx,
   );
-  addVisibleNode(context, child, toGridNode(child), childPosition);
+  addVisibleNode(
+    context,
+    child,
+    toGridNode(child),
+    childPosition,
+    parentUnitId,
+  );
   return childPosition;
 };
 
 const ensureConditionNodeVisible = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnitPosition: FlowGraphPosition,
   conditionUnit: AjsUnit,
+  parentUnitId: string,
 ): FlowGraphPosition | undefined => {
   const existingPosition = context.initialPositions.get(conditionUnit.id);
   if (existingPosition) {
@@ -268,7 +307,7 @@ const ensureConditionNodeVisible = (
   }
 
   const conditionPosition = calculateNestedConditionPosition(
-    expandedUnitPosition,
+    { x: 0, y: 0 },
     context.basePx,
   );
   addVisibleNode(
@@ -276,6 +315,7 @@ const ensureConditionNodeVisible = (
     conditionUnit,
     toConditionNode(conditionUnit),
     conditionPosition,
+    parentUnitId,
   );
   return conditionPosition;
 };
@@ -305,6 +345,7 @@ const toDecorationFromBounds = (
 });
 
 const buildPanelBoundsFromSubtreeBounds = (
+  position: FlowGraphPosition,
   bounds: FlowGraphBounds,
   metrics: FlowGraphMetrics,
 ): FlowGraphBounds => {
@@ -313,150 +354,303 @@ const buildPanelBoundsFromSubtreeBounds = (
   const panelPaddingBottom = metrics.height * 0.35;
 
   return {
-    minX: bounds.minX - panelPaddingX,
+    minX: position.x - panelPaddingX,
     maxX: bounds.maxX + panelPaddingX,
-    minY: bounds.minY - panelPaddingTop,
+    minY: position.y - panelPaddingTop,
     maxY: bounds.maxY + panelPaddingBottom,
   };
 };
 
-const buildExpandedUnitRevealBounds = (
+const buildUnitBaseBounds = (
+  position: FlowGraphPosition,
+  metrics: FlowGraphMetrics,
+): FlowGraphBounds => ({
+  minX: position.x - metrics.width * 0.3,
+  maxX: position.x + metrics.width * 1.3,
+  minY: position.y - metrics.height * 0.2,
+  maxY: position.y + metrics.height * 1.35,
+});
+
+const revealVisibleNestedUnit = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnit: AjsUnit,
-): FlowGraphBounds | undefined => {
-  const expandedUnitPosition = getDisplayPosition(context, expandedUnit.id);
-  if (!expandedUnitPosition) {
-    return undefined;
+) => {
+  if (!getDisplayPosition(context, expandedUnit.id)) {
+    return;
   }
-
-  const bounds: FlowGraphBounds = {
-    minX: expandedUnitPosition.x,
-    maxX: expandedUnitPosition.x + context.metrics.width,
-    minY: expandedUnitPosition.y,
-    maxY: expandedUnitPosition.y + context.metrics.height,
-  };
 
   for (const child of expandedUnit.children.filter(
     (unit) => unit.unitType !== "rc",
   )) {
-    const childPosition = ensureChildNodeVisible(
-      context,
-      expandedUnitPosition,
-      child,
-    );
-    if (!childPosition) {
-      continue;
-    }
-    const childDisplayPosition = getDisplayPosition(context, child.id);
-    if (!childDisplayPosition) {
-      continue;
-    }
-    includeNodeBounds(
-      bounds,
-      childDisplayPosition,
-      context.metrics.width,
-      context.metrics.height,
-    );
+    ensureChildNodeVisible(context, child, expandedUnit.id);
   }
 
   const conditionUnit = expandedUnit.children.find(
     (child) => child.unitType === "rc",
   );
   if (conditionUnit) {
-    const conditionPosition = ensureConditionNodeVisible(
-      context,
-      expandedUnitPosition,
-      conditionUnit,
-    );
-    const conditionDisplayPosition = getDisplayPosition(
-      context,
-      conditionUnit.id,
-    );
-    if (conditionPosition && conditionDisplayPosition) {
-      includeNodeBounds(
-        bounds,
-        conditionDisplayPosition,
-        context.metrics.width,
-        context.metrics.height,
-      );
-    }
+    ensureConditionNodeVisible(context, conditionUnit, expandedUnit.id);
   }
 
-  return bounds;
+  appendExpandedUnitEdges(context, expandedUnit);
 };
 
-const applyExpansionOffsets = (
+const buildExpandedUnitPanelBounds = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnit: AjsUnit,
+): FlowGraphBounds | undefined => {
+  const expandedUnitPosition = getDisplayPosition(context, expandedUnit.id);
+  const decoration = context.nodeDecorations.get(expandedUnit.id);
+  if (!expandedUnitPosition) {
+    return undefined;
+  }
+  if (!decoration) {
+    return buildUnitBaseBounds(expandedUnitPosition, context.metrics);
+  }
+  return {
+    minX: expandedUnitPosition.x + decoration.panelOffsetXPx,
+    maxX:
+      expandedUnitPosition.x +
+      decoration.panelOffsetXPx +
+      decoration.panelWidthPx,
+    minY: expandedUnitPosition.y + decoration.panelOffsetYPx,
+    maxY:
+      expandedUnitPosition.y +
+      decoration.panelOffsetYPx +
+      decoration.panelHeightPx,
+  };
+};
+
+const applyGrowthOffsets = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnitPosition: FlowGraphPosition,
-  panelBounds: FlowGraphBounds,
-  excludedUnitIds: ReadonlySet<string>,
+  horizontalGrowth: number,
+  verticalGrowth: number,
+  targetUnitIds: ReadonlySet<string>,
 ) => {
-  const clearanceX = context.metrics.width * 0.12;
-  const clearanceY = context.metrics.height * 0.12;
-  const horizontalOffset = Math.max(
-    0,
-    panelBounds.maxX -
-      (expandedUnitPosition.x + context.metrics.width) +
-      clearanceX,
-  );
-  const verticalOffset = Math.max(
-    0,
-    panelBounds.maxY -
-      (expandedUnitPosition.y + context.metrics.height) +
-      clearanceY,
-  );
+  if (horizontalGrowth === 0 && verticalGrowth === 0) {
+    return false;
+  }
 
-  const positionsBeforeExpansionOffset = new Map<string, FlowGraphPosition>();
+  const positionsBeforeOffset = new Map<string, FlowGraphPosition>();
   for (const unitId of context.visibleUnitIds) {
     const displayPosition = getDisplayPosition(context, unitId);
     if (displayPosition) {
-      positionsBeforeExpansionOffset.set(unitId, displayPosition);
+      positionsBeforeOffset.set(unitId, displayPosition);
     }
   }
 
-  for (const [unitId, displayPosition] of positionsBeforeExpansionOffset) {
-    if (excludedUnitIds.has(unitId)) {
+  let changed = false;
+  for (const [unitId, displayPosition] of positionsBeforeOffset) {
+    if (!targetUnitIds.has(unitId)) {
       continue;
     }
     const isRight = displayPosition.x > expandedUnitPosition.x;
     const isBelow = displayPosition.y > expandedUnitPosition.y;
     const isSameX = displayPosition.x === expandedUnitPosition.x;
     const isSameY = displayPosition.y === expandedUnitPosition.y;
-    const dx = isRight && (isBelow || isSameY) ? horizontalOffset : 0;
-    const dy = isBelow && (isRight || isSameX) ? verticalOffset : 0;
+    const dx = isRight && (isBelow || isSameY) ? horizontalGrowth : 0;
+    const dy =
+      isBelow && (isRight || isSameX)
+        ? Math.max(0, verticalGrowth - getOffset(context, unitId).y)
+        : 0;
     if (dx === 0 && dy === 0) {
       continue;
     }
-    addOffset(context, unitId, { x: dx, y: dy });
+    changed = addOffset(context, unitId, { x: dx, y: dy }) || changed;
   }
+
+  return changed;
 };
 
-const expandVisibleNestedUnit = (
+const getVisibleImmediateChildren = (
+  context: ExpandedFlowGraphBuildContext,
+  containerUnitId: string,
+): AjsUnit[] =>
+  [...context.visibleUnitIds]
+    .map((unitId) => context.unitById.get(unitId))
+    .filter(
+      (unit): unit is AjsUnit => !!unit && unit.parentId === containerUnitId,
+    )
+    .sort(compareExpandedUnits);
+
+const updateExpandedNodeDecoration = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnit: AjsUnit,
 ) => {
-  const expandedUnitPosition = getDisplayPosition(context, expandedUnit.id);
-  const revealBounds = buildExpandedUnitRevealBounds(context, expandedUnit);
-  if (!revealBounds || !expandedUnitPosition) {
+  const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
+  const panelBounds = buildExpandedPanelBounds(
+    expandedUnit,
+    context.visibleUnitIds,
+    context.unitById,
+    context.positionOverrides,
+    context.nodeDecorations,
+    context.metrics,
+  );
+  if (!expandedUnitPosition || !panelBounds) {
+    return;
+  }
+  context.nodeDecorations.set(
+    expandedUnit.id,
+    toDecorationFromBounds(expandedUnitPosition, panelBounds),
+  );
+};
+
+const getUpperExpandedPanelMaxRight = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedChildren: ReadonlyArray<AjsUnit>,
+  expandedChild: AjsUnit,
+  expandedChildPosition: FlowGraphPosition,
+): number | undefined => {
+  let maxRight: number | undefined;
+  for (const upperCandidate of expandedChildren) {
+    if (upperCandidate.id === expandedChild.id) {
+      continue;
+    }
+    const upperPosition = getDisplayPosition(context, upperCandidate.id);
+    const upperPanelBounds = buildExpandedUnitPanelBounds(
+      context,
+      upperCandidate,
+    );
+    if (
+      !upperPosition ||
+      !upperPanelBounds ||
+      upperPosition.y >= expandedChildPosition.y
+    ) {
+      continue;
+    }
+    maxRight =
+      maxRight === undefined
+        ? upperPanelBounds.maxX
+        : Math.max(maxRight, upperPanelBounds.maxX);
+  }
+  return maxRight;
+};
+
+const doBoundsOverlapHorizontally = (
+  upperBounds: FlowGraphBounds,
+  lowerBounds: FlowGraphBounds,
+) => upperBounds.minX < lowerBounds.maxX && lowerBounds.minX < upperBounds.maxX;
+
+const resolveLowerExpandedPanelIntrusions = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedChildren: ReadonlyArray<AjsUnit>,
+  activeExpandedUnitId: string | undefined,
+) => {
+  if (!activeExpandedUnitId) {
     return;
   }
 
-  appendExpandedUnitEdges(context, expandedUnit);
+  for (const upperChild of expandedChildren) {
+    if (upperChild.id !== activeExpandedUnitId) {
+      continue;
+    }
 
-  const panelBounds = buildPanelBoundsFromSubtreeBounds(
-    revealBounds,
-    context.metrics,
-  );
-  applyExpansionOffsets(
+    const upperPosition = getDisplayPosition(context, upperChild.id);
+    const upperPanelBounds = buildExpandedUnitPanelBounds(context, upperChild);
+    if (!upperPosition || !upperPanelBounds) {
+      continue;
+    }
+
+    for (const lowerChild of expandedChildren) {
+      if (upperChild.id === lowerChild.id) {
+        continue;
+      }
+
+      const lowerPosition = getDisplayPosition(context, lowerChild.id);
+      const lowerPanelBounds = buildExpandedUnitPanelBounds(
+        context,
+        lowerChild,
+      );
+      if (
+        !lowerPosition ||
+        !lowerPanelBounds ||
+        upperPosition.y >= lowerPosition.y ||
+        upperPanelBounds.maxY <= lowerPanelBounds.minY ||
+        !doBoundsOverlapHorizontally(upperPanelBounds, lowerPanelBounds)
+      ) {
+        continue;
+      }
+
+      addOffset(context, lowerChild.id, {
+        x: 0,
+        y: upperPanelBounds.maxY - lowerPanelBounds.minY,
+      });
+    }
+  }
+};
+
+const relayoutExpandedScope = (
+  context: ExpandedFlowGraphBuildContext,
+  containerUnit: AjsUnit,
+  expandedUnitIdSet: ReadonlySet<string>,
+  activeExpandedUnitId: string | undefined,
+) => {
+  const expandedChildren = containerUnit.children
+    .filter(
+      (unit): unit is AjsUnit =>
+        expandedUnitIdSet.has(unit.id) && isNestedJobnetUnit(unit),
+    )
+    .sort(compareExpandedUnits);
+
+  for (const expandedChild of expandedChildren) {
+    revealVisibleNestedUnit(context, expandedChild);
+    relayoutExpandedScope(
+      context,
+      expandedChild,
+      expandedUnitIdSet,
+      activeExpandedUnitId,
+    );
+    updateExpandedNodeDecoration(context, expandedChild);
+  }
+
+  resolveLowerExpandedPanelIntrusions(
     context,
-    expandedUnitPosition,
-    panelBounds,
-    collectVisibleSubtreeUnitIds(
-      expandedUnit,
-      context.visibleUnitIds,
-      context.unitById,
-    ),
+    expandedChildren,
+    activeExpandedUnitId,
   );
+
+  const immediateVisibleChildren = getVisibleImmediateChildren(
+    context,
+    containerUnit.id,
+  );
+
+  for (const expandedChild of expandedChildren) {
+    const expandedChildPosition = getDisplayPosition(context, expandedChild.id);
+    const panelBounds = buildExpandedUnitPanelBounds(context, expandedChild);
+    if (!expandedChildPosition || !panelBounds) {
+      continue;
+    }
+
+    const baseBounds = buildUnitBaseBounds(
+      expandedChildPosition,
+      context.metrics,
+    );
+    const upperPanelMaxRight = getUpperExpandedPanelMaxRight(
+      context,
+      expandedChildren,
+      expandedChild,
+      expandedChildPosition,
+    );
+    const horizontalGrowth =
+      upperPanelMaxRight === undefined
+        ? Math.max(0, panelBounds.maxX - baseBounds.maxX)
+        : Math.max(0, panelBounds.maxX - upperPanelMaxRight);
+    const verticalGrowth = Math.max(0, panelBounds.maxY - baseBounds.maxY);
+    const targetUnitIds = new Set(
+      immediateVisibleChildren
+        .filter((unit) => unit.id !== expandedChild.id)
+        .map((unit) => unit.id),
+    );
+
+    applyGrowthOffsets(
+      context,
+      expandedChildPosition,
+      horizontalGrowth,
+      verticalGrowth,
+      targetUnitIds,
+    );
+  }
 };
 
 const buildExpandedPanelBounds = (
@@ -498,68 +692,17 @@ const buildExpandedPanelBounds = (
     }
   }
 
-  const panelPaddingX = metrics.width * 0.3;
-  const panelPaddingTop = metrics.height * 0.2;
-  const panelPaddingBottom = metrics.height * 0.35;
-
-  return {
-    minX: subtreeBounds.minX - panelPaddingX,
-    maxX: subtreeBounds.maxX + panelPaddingX,
-    minY: subtreeBounds.minY - panelPaddingTop,
-    maxY: subtreeBounds.maxY + panelPaddingBottom,
-  };
-};
-
-const updateExpandedNodeDecorations = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnits: ReadonlyArray<AjsUnit>,
-) => {
-  context.nodeDecorations.clear();
-  for (const expandedUnit of [...expandedUnits].reverse()) {
-    const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
-    const panelBounds = buildExpandedPanelBounds(
-      expandedUnit,
-      context.visibleUnitIds,
-      context.unitById,
-      context.positionOverrides,
-      context.nodeDecorations,
-      context.metrics,
-    );
-    if (!expandedUnitPosition || !panelBounds) {
-      continue;
-    }
-    context.nodeDecorations.set(
-      expandedUnit.id,
-      toDecorationFromBounds(expandedUnitPosition, panelBounds),
-    );
-  }
-};
-
-const collectVisibleSubtreeUnitIds = (
-  expandedUnit: AjsUnit,
-  visibleUnitIds: ReadonlySet<string>,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): Set<string> => {
-  const subtreeUnitIds = new Set<string>();
-  for (const unitId of visibleUnitIds) {
-    const unit = unitById.get(unitId);
-    if (!unit) {
-      continue;
-    }
-    if (
-      unit.id === expandedUnit.id ||
-      isDescendantOf(unit, expandedUnit.id, unitById)
-    ) {
-      subtreeUnitIds.add(unitId);
-    }
-  }
-  return subtreeUnitIds;
+  return buildPanelBoundsFromSubtreeBounds(
+    parentPosition,
+    subtreeBounds,
+    metrics,
+  );
 };
 
 export const buildExpandedFlowGraph = (
   document: AjsDocument,
   currentUnitId: string,
-  expandedUnitIds: ReadonlySet<string>,
+  expandedUnitIds: ReadonlySet<string> | readonly string[],
   basePx: number,
 ): ExpandedFlowGraphResult => {
   const baseGraph = buildFlowGraph(document, currentUnitId);
@@ -578,6 +721,7 @@ export const buildExpandedFlowGraph = (
   const edgeIds = new Set(edges.map((edge) => `${edge.source}-${edge.target}`));
   const initialPositions = new Map<string, FlowGraphPosition>();
   const offsets = new Map<string, FlowGraphPosition>();
+  const parentAnchors = new Map<string, string>();
   const positionOverrides = new Map<string, FlowGraphPosition>();
   const nodeDecorations = new Map<string, ExpandedNodeDecoration>();
 
@@ -604,6 +748,7 @@ export const buildExpandedFlowGraph = (
     edgeIds,
     visibleUnitIds,
     initialPositions,
+    parentAnchors,
     offsets,
     positionOverrides,
     nodeDecorations,
@@ -611,22 +756,28 @@ export const buildExpandedFlowGraph = (
     metrics,
   };
 
-  const sortedExpandedUnits = [...expandedUnitIds]
-    .map((unitId) => unitById.get(unitId))
-    .filter(
-      (unit): unit is AjsUnit =>
+  const expandedUnitIdList = [...expandedUnitIds];
+  const activeExpandedUnitId = Array.isArray(expandedUnitIds)
+    ? expandedUnitIds.at(-1)
+    : undefined;
+  const expandedUnitIdSet = new Set(
+    expandedUnitIdList.filter((unitId) => {
+      const unit = unitById.get(unitId);
+      return (
         !!unit &&
         unit.id !== currentUnitId &&
         isNestedJobnetUnit(unit) &&
-        isDescendantOf(unit, currentUnitId, unitById),
-    )
-    .sort((left, right) => left.depth - right.depth);
+        isDescendantOf(unit, currentUnitId, unitById)
+      );
+    }),
+  );
 
-  for (const expandedUnit of sortedExpandedUnits) {
-    expandVisibleNestedUnit(context, expandedUnit);
-  }
-
-  updateExpandedNodeDecorations(context, sortedExpandedUnits);
+  relayoutExpandedScope(
+    context,
+    currentUnit,
+    expandedUnitIdSet,
+    activeExpandedUnitId,
+  );
 
   return {
     graph: {

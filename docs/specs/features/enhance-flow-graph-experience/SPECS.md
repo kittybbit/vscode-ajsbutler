@@ -17,14 +17,27 @@ navigation from and to the unit list.
 - flow-graph presentation goals are described as visual resemblance to
   JP1/AJS View, not full interaction parity in one slice
 - nested graphs can be revealed progressively in the same screen
-- the first flow-view search slice may stay within the current flow scope
-  if it reveals collapsed ancestors needed to show the first match before
-  visually focusing that match
+- each revealed nested panel stays anchored to the expanded unit that owns it
+  and grows only to the right and downward from that unit
+- when a nested panel enlarges its parent scope, sibling offsets are derived
+  from current visible panel bounds within the same immediate scope rather
+  than by replaying historical expansion deltas
+- horizontal offset propagation uses only the portion of a lower panel that
+  extends beyond the maximum right edge already occupied by expanded panels
+  above it in the same scope
+- vertical offset propagation applies only the missing downward distance needed
+  to clear the relevant visible panel bounds, so already-offset targets are
+  not pushed again unnecessarily
+- when an upper panel newly intrudes into a lower expanded panel, the lower
+  panel origin may be pushed downward, but reopening the lower panel itself
+  does not trigger that same intrusion rule against the lower panel
+- flow-view search may stay within the current scope if it reveals collapsed
+  ancestors needed to show matching units before visually focusing them
 - current-scope flow search supports case-insensitive contiguous partial
-  matches across unit name, comment, and path so users do not need exact
-  full-label input to find the first match
-- a one-click expand-all path is considered in the design, even if it lands
-  after the first incremental expansion slice
+  matches across unit name, comment, and path
+- a one-click expand-all path is available for the current scope
+- when nested expansion changes the visible graph bounds, the viewer recomputes
+  the viewport so fit-to-view behavior still reaches the expanded nodes
 - explicit navigation between unit-list and flow-graph units is defined when
   the counterpart view exists
 - desktop and web compatibility remain explicit for all viewer-facing work
@@ -34,13 +47,16 @@ navigation from and to the unit list.
 - keep graph DTO construction separate from viewer styling and interaction
   controls
 - prefer stable unit identity or path when coordinating list/flow navigation
-- for the first flow-view search slice, prefer reusing the existing
-  nested-expansion state and a presentation-local focus marker instead of
-  introducing a new graph DTO contract or a second scope-selection model
-- keep current-scope search matching presentation-local:
-  normalize the query, preserve internal spaces, and treat the full query as a
-  case-insensitive contiguous partial match against the existing unit search
-  text
+- reuse the existing nested-expansion state and a presentation-local focus
+  marker instead of introducing a second scope-selection model
+- keep viewport fitting presentation-local: when visible flow bounds change
+  after nested expansion or collapse, recompute the React Flow viewport from
+  the latest rendered nodes instead of encoding graph bounds into DTO shape
+- when nested expansion layout needs ordering-sensitive behavior, use the
+  current expansion order from presentation state instead of reconstructing a
+  synthetic order from a set alone
+- keep current-scope search matching presentation-local and treat the full
+  normalized query as a case-insensitive contiguous partial match
 - when more than one unit matches inside the current scope, prefer the first
   descendant match over the scope root itself so search still produces a
   visible focus change
