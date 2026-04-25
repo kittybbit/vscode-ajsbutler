@@ -7,14 +7,14 @@
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
 
-## Completed
+## Delivered
 
 - [x] Record JP1/AJS3 version 13 as the target reference for parameter parsing
       and command generation
 - [x] Record that command generation should be separated from
       `buildUnitDefinition.ts`
 
-## Remaining Follow-up
+## Delivered Follow-up
 
 - [x] Inventory current parameter semantics that already match the version 13
       definition reference
@@ -31,7 +31,7 @@
 - [x] Localize command-builder labels, descriptions, and command reference
       links through the existing `lang` context
 
-## Next Slice
+## Follow-up
 
 - [ ] Turn the audit notes into an explicit parameter-coverage matrix only when
       a behavior-changing alignment slice needs per-key status beyond the

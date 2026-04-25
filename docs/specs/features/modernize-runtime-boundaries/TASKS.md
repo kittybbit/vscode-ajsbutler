@@ -2,130 +2,32 @@
 
 ## Sync Rule
 
-- Update this file in the same commit whenever one task or follow-up is
-  completed, re-scoped, or intentionally dropped.
+- Update this file in the same commit whenever a durable requirement or
+  follow-up decision changes.
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
 
-## Completed
+## Delivered
 
-- [x] Document the modernization scope in SDD:
-      `pnpm`, `flatted` removal, bundle-size reduction, dependency freshness, and
-      `UnitEntity` hash replacement
-- [x] Decide the review order between viewer serialization cleanup and
-      `pnpm` migration:
-      remove stale `flatted` assumptions first so package-manager diffs stay
-      tooling-focused
-- [x] Document the current `flatted` payload seams before replacement:
-      current webview transport uses plain event objects and a
-      `UnitListDocumentDto` payload that is rebuilt into normalized state in
-      the viewers
-- [x] Remove the direct `flatted` dependency from repository manifests and
-      align the modernization docs with the current DTO-based transport seam
-- [x] Migrate the repository package manager from `npm` to `pnpm`:
-      add `packageManager`, commit `pnpm-lock.yaml`, update CI, and switch
-      contributor-facing validation commands to `pnpm`
+- [x] Remove stale `flatted` transport assumptions.
+- [x] Migrate package management to pinned `pnpm` with validation parity.
+- [x] Split table and flow viewer bundles.
+- [x] Measure post-split viewer bundle output.
+- [x] Re-measure MUI path-import narrowing and record that it did not produce
+      meaningful production-size gains.
+- [x] Compare table-side and flow-side dependency weight.
+- [x] Reject async flow-chrome deferral after it increased complexity without
+      useful bundle reduction.
+- [x] Identify `UnitEntity.id` persistence checks before changing the hash
+      algorithm.
 
-## Remaining Follow-up
+## Follow-up
 
-- [x] Re-scope bundle-size follow-up around shrinking refactors rather than
-      only guarding growth:
-      record the 2026-04-18 baseline for `out/index.js`, keep analyzer output
-      as evidence, and identify the current single-entry viewer bundle as the
-      first concrete reduction target
-- [x] Split the shared viewer entry so table and flow webviews can ship
-      separate bundles instead of always loading both `AjsTableViewerApp` and
-      `AjsFlowViewerApp`
-- [x] Profile the largest contributors after entry splitting and choose the
-      next concrete shrinking slice
-- [x] Narrow viewer-side `@mui/material` imports away from barrel imports and
-      re-measure both bundles before choosing a viewer-specific dependency
-      reduction slice
-- [x] Compare table-side `react-virtuoso` and TanStack cost against flow-side
-      `@xyflow/*` cost and choose the next viewer-specific shrinking slice
-- [x] Evaluate whether deferring flow-only `@xyflow/react` auxiliary UI such
-      as minimap or controls is worth the added complexity:
-      attempted async flow chrome did not reduce the initial flow bundle
-      enough to justify keeping the source change
-- [x] Identify identity and persistence checks needed before changing the hash
-      algorithm:
-      current `UnitEntity.id` usage is limited to in-memory selection, graph
-      node keys, and DOM anchors; no `workspaceState`/`globalState`, webview
-      serializer, or extension-side DTO contract currently persists the hashed
-      value across sessions
+- [ ] Replace the custom `UnitEntity` hash implementation only after the
+      documented identity and compatibility checks are refreshed.
 
 ## Notes
 
-- 2026-04-18: repository-level policy now states that dependencies should stay
-  as current as practical, with explicit documentation when compatibility or
-  ecosystem regressions require a hold.
-- 2026-04-18: current implementation evidence for the serialization seam is
-  `buildUnitList(...) -> UnitListDocumentDto -> panel.webview.postMessage`
-  on the extension side, followed by `toAjsDocument(document)` in both table
-  and flow viewers.
-- 2026-04-18: after removing the direct `flatted` dependency, viewer transport
-  requirements stayed on DTO-based payloads and event objects rather than any
-  lockfile-specific serialization package.
-- 2026-04-18: `pnpm` migration pins `packageManager: pnpm@10.33.0`, replaces
-  `package-lock.json` with `pnpm-lock.yaml`, and switches local plus CI
-  validation commands to `pnpm`.
-- 2026-04-18: bundle-size follow-up is now framed as webview-payload
-  reduction; measurement exists to prove shrinkage, not to substitute for the
-  refactor itself.
-- 2026-04-18: the post-migration baseline is `out/index.js` =
-  `9,166,525` bytes raw and `2,362,382` bytes gzip, and the strongest current
-  hypothesis is that the single viewer entry point keeps both table and flow
-  trees in the shipped bundle.
-- 2026-04-18: entry splitting now emits `out/tableViewer.js` =
-  `737,279` bytes raw / `219,019` bytes gzip and `out/flowViewer.js` =
-  `711,195` bytes raw / `217,051` bytes gzip; the next follow-up is to
-  inspect which dependencies still dominate each bundle separately.
-- 2026-04-18: profiling with analyzer output plus webpack stats showed that
-  `@mui/*` remains the largest shared contributor in both viewer bundles
-  (about `1,036,500` parsed bytes in `tableViewer`, `853,234` in
-  `flowViewer`), while table-specific weight is led by
-  `@tanstack/table-core` (`138,845`) and `react-virtuoso` (`91,018`) and
-  flow-specific weight is led by `@xyflow/react` (`220,733`) and
-  `@xyflow/system` (`148,183`).
-- 2026-04-18: source imports still show broad `@mui/material` barrel usage
-  across table and flow viewer components, so the next shrinking slice is to
-  convert those imports to path imports and measure whether the shared MUI
-  footprint drops before targeting `react-virtuoso` or `@xyflow/*`.
-- 2026-04-18: viewer-side `@mui/material` barrel imports were replaced with
-  path imports across table and flow components plus the focused flow-graph
-  regression test, and production re-measurement now reports
-  `out/tableViewer.js` = `737279` bytes raw / `218908` bytes gzip and
-  `out/flowViewer.js` = `711123` bytes raw / `216983` bytes gzip when built
-  through the current `corepack pnpm run build` pipeline.
-- 2026-04-18: path-import narrowing did not reduce emitted production bytes
-  under the current MUI and webpack setup, so the next bundle-size follow-up
-  should move to viewer-specific dependencies such as `react-virtuoso` on the
-  table side or `@xyflow/*` on the flow side rather than spending another
-  slice on the same import shape.
-- 2026-04-18: rerunning analyzer output after the MUI import-shape slice keeps
-  the production editor bundles at `out/tableViewer.js` = `737279` bytes raw /
-  `218908` bytes gzip and `out/flowViewer.js` = `711123` bytes raw /
-  `216983` bytes gzip, so the next decision still depends on viewer-specific
-  dependency cost rather than gross output size.
-- 2026-04-18: the current viewer-specific dependency comparison still favors a
-  flow-first shrinking slice: prior analyzer evidence put
-  `@xyflow/react` + `@xyflow/system` at about `368916` parsed bytes versus
-  `@tanstack/table-core` + `react-virtuoso` at about `229863`, so
-  `@xyflow/*` remains the larger removable seam.
-- 2026-04-18: a follow-up experiment moved minimap-centered flow chrome behind
-  an async seam, but the production result regressed slightly:
-  `out/flowViewer.js` moved to `714801` bytes raw / `218913` bytes gzip and
-  emitted only a tiny extra async chunk (`out/69.js` = `406` bytes raw /
-  `283` bytes gzip), so the source change was reverted and should not be
-  treated as a worthwhile reduction path.
-- 2026-04-18: current branch intent is not to force marginal viewer shrinking
-  work when the trade-off is extra complexity without meaningful payload
-  improvement; bundle follow-up should resume only when a clearer reduction
-  seam or stronger product need appears.
-- 2026-04-18: identity and persistence review for `UnitEntity.id` found three
-  concrete pre-change checks:
-  confirm no future extension storage or webview state serializer starts
-  persisting hashed ids, keep extension-to-webview DTO boundaries on
-  `absolutePath`/normalized ids rather than legacy wrapper hashes, and update
-  focused regression coverage around flow selection plus table jump anchors if
-  the hashing implementation changes.
+- Current DTO transport does not require cyclic serialization.
+- Current bundle-size work is deferred until a clearer shrinking seam or
+  stronger product requirement appears.

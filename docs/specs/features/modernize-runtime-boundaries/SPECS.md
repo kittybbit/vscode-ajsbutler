@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Modernize repository runtime boundaries and maintenance workflow without
-changing end-user extension behavior.
+Modernize repository runtime boundaries and maintenance workflow while
+preserving extension behavior.
 
 ## Origin
 
@@ -12,36 +12,20 @@ serialization boundaries, hashing internals, and bundle-size follow-up work.
 
 ## Acceptance Criteria
 
-- package-management migration from `npm` to `pnpm` is planned explicitly and
-  does not weaken current validation expectations during transition
-- viewer payload contracts no longer require `flatted` as the default
-  serialization assumption
-- bundle-size follow-up names concrete refactoring seams that are expected to
-  shrink the shipped webview payload, with measurement serving as evidence
-  rather than the primary outcome
-- `UnitEntity` hashing can move to a common algorithm without changing stable
-  identity behavior relied on by the extension
-- desktop and web compatibility risks are named before implementation work
+- Package management uses pinned `pnpm` metadata and validation parity.
+- Viewer payload contracts are DTO-based and do not require `flatted`.
+- Table and flow webview bundles are split by viewer entry point.
+- Bundle-size work resumes only when a clearer reduction seam or stronger
+  product need appears.
+- `UnitEntity` hashing can change only after persistence and selection risks
+  are rechecked.
 
 ## Implementation Notes
 
-- keep package-manager migration, serialization simplification, hash migration,
-  and bundle-size reduction in reviewable slices even if they share one
-  feature umbrella
-- prioritize serialization-boundary cleanup before bundle-size tuning when the
-  same dependencies influence both concerns
-- treat the current shared webview viewer bundle `out/index.js` as the main
-  reduction target because it eagerly includes both table and flow viewer
-  trees behind one entry point
-- prefer refactors that remove code from the shipped viewer path, especially
-  entry-point splitting, host-specific adapter isolation, and dependency
-  narrowing around MUI icon usage and flow-only libraries
-- use `webpack-bundle-analyzer` reports and production byte counts as proof
-  that a reduction slice actually shrank the delivered payload
-- document current-state commands separately from target-state commands while
-  the repository is in transition
-- do not combine runtime-boundary modernization with unrelated new end-user
-  features in the same slice
+- Keep modernization slices behavior-preserving and reviewable.
+- Use production byte counts and analyzer output as evidence, not as a
+  substitute for a real shrinking refactor.
+- Do not combine runtime modernization with unrelated end-user features.
 
 ## Non-Goals
 

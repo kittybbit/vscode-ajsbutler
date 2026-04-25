@@ -2,21 +2,19 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Build Unit List View.
+Maintain the delivered table-view projection boundary.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-build-unit-list-view.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve the `UnitListRowView` contract.
+- Keep table-only filtering and UI state outside the application use case.
+- Update this feature only when row DTO behavior changes.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement feature logic
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve current row projection.
+2. Add focused tests when DTO semantics change.
+3. Keep completed decomposition history in roadmap/plans.
 
 ## Validation
 

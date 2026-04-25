@@ -1,7 +1,6 @@
-# PLANS.md (index)
+# PLANS.md
 
-This repository keeps the active SDD plan index in
-`docs/specs/plans.md`.
+The active SDD plan index lives in `docs/specs/plans.md`.
 
 Use the documents as follows:
 
@@ -14,5 +13,6 @@ Use the documents as follows:
 - `docs/specs/features/<feature>/TASKS.md`: execution checklist for the
   current slice
 
-When a branch changes direction, update `docs/specs/plans.md` first so the
-active task, completed work, and next priorities stay aligned with reality.
+Keep this root file as a pointer only. When branch direction changes, update
+`docs/specs/plans.md` first, then refresh feature docs and roadmap only where
+the change affects them.
