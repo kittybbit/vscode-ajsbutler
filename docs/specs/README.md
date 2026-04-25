@@ -28,10 +28,10 @@ For non-trivial changes:
 1. create a dedicated git branch before implementation work starts
    and use `docs/...` only for docs-only slices
 2. update or create the relevant use-case spec in
-   `docs/requirements/use-cases/` and/or
-   `docs/specs/features/<feature>/SPECS.md`
-3. update or create corresponding plans in
-   `docs/specs/features/<feature>/PLANS.md`
+   `docs/requirements/use-cases/` when the behavior contract changes
+3. update or create concise feature docs under
+   `docs/specs/features/<feature>/` when implementation requirements,
+   boundary decisions, or active tasks need tracking
 4. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
    and update that file in the same commit whenever a task is completed,
    reframed, or dropped
@@ -97,6 +97,13 @@ Poor fit:
 
 Those belong under `docs/specs/`.
 
+## When To Remove Feature Docs
+
+Remove a `docs/specs/features/<feature>/` folder when it no longer carries an
+active requirement, durable boundary decision, or useful follow-up. Compress
+completed refactor-only slices into `roadmap.md` or `plans.md` instead of
+keeping a stale feature folder as historical log.
+
 ## Sync Cadence
 
 Treat the following docs as required sync artifacts, not optional catch-up
@@ -123,3 +130,4 @@ docs in the same commit.
 - `architecture.md`: target layering and dependency direction
 - `current-state.md`: present-day repository shape and tensions
 - `roadmap.md`: preferred incremental extraction order
+- `features/_templates/`: templates for new repository-native feature docs

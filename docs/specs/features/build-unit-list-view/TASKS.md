@@ -7,23 +7,18 @@
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
 
-## Completed
+## Delivered
 
 - [x] Review use case: docs/requirements/use-cases/uc-build-unit-list-view.md
-- [x] Confirm SPECS.md
 - [x] Implement `BuildUnitListView` and migrate table column groups to
       application view data
-- [x] Add and update tests
-- [x] Run relevant build and test checks for the slice
+- [x] Replace `UnitEntity` as the primary table row type in presentation
+- [x] Update CSV export and table filtering paths to consume application rows
+- [x] Cover desktop and web table viewer command smoke paths
 
-## Remaining Follow-up
+## Follow-up
 
-- [x] Replace `UnitEntity` as the primary table row type in
-      presentation
-- [x] Update CSV export and table filtering paths to consume
-      application-facing row data directly
-- [x] Record a current manual smoke-test result for desktop and
-      web viewers in docs
+- [ ] None.
 
 ## Notes
 
@@ -38,6 +33,5 @@
   can be extracted independently from `buildUnitListView.ts` without changing
   the `UnitListRowView` contract, so future complexity-reduction slices should
   prefer helper extraction over another broad rewrite.
-- 2026-04-12: follow-up decomposition work is now tracked in
-  `docs/specs/features/decompose-build-unit-list-view/` so the delivered
-  use-case docs stay separate from behavior-preserving refactor planning.
+- 2026-04-12: follow-up decomposition work was completed and compressed into
+  roadmap/plans instead of kept as a long-lived feature folder.

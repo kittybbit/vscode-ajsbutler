@@ -2,21 +2,20 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Normalize AJS Document.
+Maintain the normalized AJS document boundary and the wrapper/shared/local
+semantics split.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-normalize-ajs-document.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve normalized DTO behavior for application and presentation slices.
+- Keep new shared helpers limited to rules with real repeated consumers.
+- Keep wrapper-local JP1/AJS semantics on the owning wrapper.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement normalized navigation and parameter helper logic in small slices
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve current normalization behavior.
+2. Add helper or wrapper tests when semantics move.
+3. Keep extraction criteria aligned with `docs/specs/plans.md`.
 
 ## Validation
 

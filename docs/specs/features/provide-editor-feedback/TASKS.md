@@ -7,17 +7,15 @@
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
 
-## Completed
+## Delivered
 
 - [x] Review use case: docs/requirements/use-cases/uc-provide-editor-feedback.md
-- [x] Confirm SPECS.md
 - [x] Implement diagnostics and hover application logic
-- [x] Add and update tests
-- [x] Run relevant build and test checks for the slice
+- [x] Cover diagnostics and hover in desktop and browser smoke tests
 
-## Remaining Follow-up
+## Follow-up
 
-- [x] Record a current manual smoke-test result for diagnostics and hover behavior
+- [ ] None.
 
 ## Notes
 

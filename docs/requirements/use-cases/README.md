@@ -20,7 +20,8 @@ That belongs in `docs/specs/`.
 ## How To Use It
 
 1. Start from `_template.md`.
-2. Create or update one `uc-*.md` file per use case.
+2. Create or update one `uc-*.md` file per use case, using hyphenated
+   filenames such as `uc-build-flow-graph.md`.
 3. Write the use case in terms of trigger, inputs, outputs, rules, and
    acceptance notes.
 4. Keep UI framework details, VS Code adapter details, and file-level refactor

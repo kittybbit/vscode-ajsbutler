@@ -7,17 +7,15 @@
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
 
-## Completed
+## Delivered
 
 - [x] Review use case: docs/requirements/use-cases/uc-build-unit-list.md
-- [x] Confirm SPECS.md
 - [x] Implement `BuildUnitList` on top of normalized AJS inputs
-- [x] Add and update tests
-- [x] Run relevant build and test checks for the slice
+- [x] Decide whether filtering/search should become a separate application
+      use case
 
-## Remaining Follow-up
+## Follow-up
 
-- [x] Decide whether filtering/search should become a separate application use case
 - [ ] Add a future search enhancement on the current list presentation path:
       support searching by parameter key and parameter value in addition to the
       existing partial-match behavior over rendered row values

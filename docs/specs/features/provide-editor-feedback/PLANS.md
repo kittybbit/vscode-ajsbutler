@@ -2,21 +2,20 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Provide Editor Feedback.
+Maintain delivered diagnostics and hover behavior.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-provide-editor-feedback.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve desktop and web feedback behavior.
+- Keep activation or registration refactors in runtime-boundary docs unless
+  feedback behavior changes.
+- Update this feature only when diagnostics or hover semantics change.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement feature logic
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve diagnostics and hover behavior.
+2. Add tests when feedback semantics change.
+3. Keep adapter wiring isolated.
 
 ## Validation
 

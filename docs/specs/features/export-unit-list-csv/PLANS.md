@@ -2,21 +2,19 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Export Unit List CSV.
+Maintain delivered CSV export behavior.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-export-unit-list-csv.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve CSV generation and escaping rules.
+- Keep table-to-CSV mapping on application-facing row data.
+- Update this feature only when export semantics change.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement feature logic
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve CSV generation behavior.
+2. Add focused tests for any export semantics change.
+3. Keep adapter-specific save behavior outside the use case.
 
 ## Validation
 

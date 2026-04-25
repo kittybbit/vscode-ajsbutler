@@ -2,50 +2,28 @@
 
 ## Objective
 
-Move parameter interpretation and command generation onto explicit JP1/AJS3
-version 13 reference-driven contracts.
+Move parameter interpretation and supported `ajs` command generation onto
+explicit JP1/AJS3 version 13 reference-driven contracts.
 
 ## Scope
 
-- align parameter parsing with the Definition File Reference
-- separate command generation from `buildUnitDefinition.ts`
-- expand generated command support incrementally using the Command Reference
+- Align parameter parsing with the Definition File Reference.
+- Keep generated command support tied to the Command Reference.
+- Expand command and parameter support incrementally.
 
-## Milestones
+## Delivered
 
-1. Identify the current parameter and command seams
-2. Define stable reusable contracts for parameter interpretation
-3. Extract command generation behind a dedicated application-facing seam
-4. Add manual-aligned coverage in small command and parameter slices
-5. Update consumers such as show-unit-definition
+- Recorded the current parameter and command-generation audit in `AUDIT.md`.
+- Extracted `ajsshow` and `ajsprint` generation into
+  `buildAjsCommands(...)`.
+- Added command-builder metadata for the supported commands.
+- Localized command-builder labels, descriptions, and manual links through the
+  existing message resources.
 
-## Current Slice
+## Follow-up
 
-- 2026-04-20 audit outcome:
-  the inventory pass is now recorded in `AUDIT.md`. Shared parameter
-  interpretation already lives mainly behind `ParamFactory`,
-  `parameterHelpers.ts`, the builder-family modules, and `Defaults.ts`,
-  while command generation is still directly embedded in
-  `buildUnitDefinition.ts`.
-- 2026-04-20 next implementation slice:
-  extract the existing `ajsshow` and `ajsprint` command generation into a
-  dedicated application-facing seam without changing the dialog DTO contract,
-  then use that seam as the first reusable command-generation contract for
-  `show-unit-definition`.
-- 2026-04-22 implementation outcome:
-  `buildAjsCommands(...)` now owns the supported `ajsshow` and `ajsprint`
-  command DTO generation, and `buildUnitDefinition(...)` consumes that seam
-  without changing the existing dialog DTO shape.
-- 2026-04-23 builder outcome:
-  command generation now also exposes structured builder metadata for the two
-  supported commands. The show-unit-definition command tab renders that
-  metadata as a small option builder and generates the command line from user
-  selections, while keeping the previous `ajsshow -R <path>` and
-  `ajsprint -a -R <path>` defaults.
-- 2026-04-23 i18n outcome:
-  command-builder labels and descriptions now resolve through the existing
-  message resources, and each supported command carries English and Japanese
-  manual URLs selected from the active UI language.
+- Build a parameter-coverage matrix only when a behavior-changing alignment
+  slice needs per-key status beyond the current audit summary.
 
 ## Validation
 

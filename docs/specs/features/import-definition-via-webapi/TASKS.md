@@ -11,7 +11,7 @@
 
 - [x] Record read-only JP1/AJS WebAPI import as a planned feature slice
 
-## Remaining Follow-up
+## Follow-up
 
 - [ ] Identify the first user-visible import trigger
 - [ ] Document desktop and web host constraints for WebAPI access

@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Implement the use case: UC: Build Unit List View.
+Define the table-oriented application view model consumed by list
+presentation and CSV export paths.
 
 ## Origin
 
@@ -10,11 +11,12 @@ Source use case: docs/requirements/use-cases/uc-build-unit-list-view.md
 
 ## Acceptance Criteria
 
-- All criteria in the source use case are satisfied.
-- Behavior is stable across desktop/web builds.
-- Tests cover normal and edge cases.
+- Table rows consume application view data, not parser or wrapper internals.
+- Existing row groups and field names remain stable for presentation and CSV
+  consumers.
+- Tests preserve row projection behavior across representative unit types.
 
 ## Implementation Notes
 
-- Keep domain/application/infrastructure boundaries clear.
-- Avoid direct vscode imports in domain layers.
+- Keep UI formatting and TanStack-specific filtering in presentation code.
+- Prefer focused projection helpers over widening the coordinator file.

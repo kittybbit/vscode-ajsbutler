@@ -2,21 +2,19 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Record Telemetry.
+Maintain delivered telemetry-port behavior.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-record-telemetry.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve privacy constraints and noop fallback behavior.
+- Keep host-specific telemetry wiring behind the port.
+- Update this feature only when telemetry semantics change.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement feature logic
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve telemetry port behavior.
+2. Add tests when event semantics or fallback behavior changes.
+3. Keep privacy constraints explicit.
 
 ## Validation
 

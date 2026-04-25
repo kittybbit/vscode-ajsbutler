@@ -2,21 +2,20 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Build Unit List.
+Maintain the delivered build-unit-list use case and track the next list-search
+presentation enhancement.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-build-unit-list.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve unit-list construction behavior.
+- Extend parameter key/value search in presentation code first.
+- Revisit shared search only if another non-table consumer needs it.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement feature logic
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve current unit-list construction.
+2. Add parameter key/value search in the table presentation path.
+3. Revisit `uc-search-domain-unification.md` only when justified.
 
 ## Validation
 

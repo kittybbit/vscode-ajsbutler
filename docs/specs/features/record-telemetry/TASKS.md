@@ -7,17 +7,15 @@
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
 
-## Completed
+## Delivered
 
 - [x] Review use case: docs/requirements/use-cases/uc-record-telemetry.md
-- [x] Confirm SPECS.md
 - [x] Implement telemetry port and VS Code adapter
-- [x] Add and update tests
-- [x] Run relevant build and test checks for the slice
+- [x] Verify noop fallback and browser-hosted forwarding
 
-## Remaining Follow-up
+## Follow-up
 
-- [x] Continue verifying browser-hosted telemetry behavior and fallback handling
+- [ ] None.
 
 ## Notes
 

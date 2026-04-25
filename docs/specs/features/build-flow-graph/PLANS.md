@@ -2,21 +2,20 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Build Flow Graph.
+Maintain the delivered build-flow-graph use case as a stable application
+boundary.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-build-flow-graph.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve graph DTO behavior for desktop and web viewers.
+- Keep flow presentation changes in `enhance-flow-graph-experience`.
+- Update this feature only when the application graph contract changes.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement feature logic
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve current graph DTO mapping.
+2. Add focused tests when graph semantics change.
+3. Keep viewer-only behavior out of this feature.
 
 ## Validation
 

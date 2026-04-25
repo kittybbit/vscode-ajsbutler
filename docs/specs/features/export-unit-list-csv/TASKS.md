@@ -7,19 +7,16 @@
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
 
-## Completed
+## Delivered
 
 - [x] Review use case: docs/requirements/use-cases/uc-export-unit-list-csv.md
-- [x] Confirm SPECS.md
 - [x] Implement `ExportUnitListCsv` use case
-- [x] Add and update tests
-- [x] Run relevant build and test checks for the slice
+- [x] Remove the table-to-CSV dependency on `UnitEntity`-typed rows
+- [x] Record automated verification evidence for CSV behavior
 
-## Remaining Follow-up
+## Follow-up
 
-- [x] Remove the remaining table-to-CSV dependency on
-      `UnitEntity`-typed presentation rows
-- [x] Record current verification evidence for CSV export behavior
+- [ ] None.
 
 ## Notes
 

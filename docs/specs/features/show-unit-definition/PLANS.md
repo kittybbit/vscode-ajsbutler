@@ -2,21 +2,20 @@
 
 ## Objective
 
-Deliver the feature for use case: UC: Show Unit Definition.
+Maintain delivered unit-definition dialog behavior.
 
 ## Scope
 
-- Requirements from docs/requirements/use-cases/uc-show-unit-definition.md.
-- Implement in domain/application layers and ensure cross-platform adapters.
-- Update tests and docs.
+- Preserve shared dialog DTO mapping for table and flow viewers.
+- Keep command-generation expansion in
+  `align-jp1-v13-parameter-and-command-reference`.
+- Update this feature only when dialog behavior changes.
 
 ## Milestones
 
-1. Write and review SPECS.md
-2. Implement feature logic
-3. Add and run tests
-4. Validate extension behavior
-5. Close PR
+1. Preserve dialog DTO behavior.
+2. Add tests when dialog content or trigger behavior changes.
+3. Keep command-generation ownership in the application layer.
 
 ## Validation
 
