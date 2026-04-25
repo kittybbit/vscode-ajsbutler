@@ -42,7 +42,6 @@
 1. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference, starting from the documented audit of
    current shared parameter-semantics seams.
-
    - Add traceability from JP1/AJS v13 manual sections to supported parameter
      keys, parser behavior, normalized model fields, use cases, and regression
      tests.
@@ -53,7 +52,6 @@
 
 2. Add a read-only JP1/AJS WebAPI import path for loading server-side
    definition data.
-
    - Keep transport, authentication, and endpoint details in infrastructure.
    - Expose imported definitions through application-facing DTOs or use cases.
    - Reuse the normalized AJS model where imported data represents the same
@@ -63,7 +61,6 @@
 
 3. Extend list-view search on the current presentation path with parameter key
    and parameter value matching.
-
    - Add parameter key and parameter value matching without prematurely
      introducing a shared search domain.
    - Revisit shared search only when flow, list, or another consumer requires
@@ -71,18 +68,15 @@
 
 4. Replace the custom `UnitEntity` hash implementation with a common algorithm
    only after identity and compatibility checks are refreshed.
-
    - Treat hash behavior as an implementation detail unless persisted or
      user-visible identity semantics are affected.
    - Add compatibility fixtures before changing the algorithm.
 
 5. Consolidate i18n translation files where duplication remains high enough to
    justify the change.
-
    - Keep this as a targeted cleanup, not a broad localization rewrite.
 
 6. Strengthen normalized-model convergence.
-
    - Reduce remaining raw `Unit` and wrapper-oriented dependencies in
      application-facing paths where a stable `AjsDocument` / `AjsUnit` contract
      already exists.
@@ -93,7 +87,6 @@
      and parameter interpretation rules.
 
 7. Introduce stricter parser/infrastructure boundaries.
-
    - Define an application-facing parser or document-loading port.
    - Move concrete parser orchestration behind an adapter boundary when
      practical.
