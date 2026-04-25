@@ -3,9 +3,6 @@
 <!-- markdownlint-disable MD013 -->
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Visual Studio Marketplace Version][marketplace-version-badge]][marketplace]
-[![Marketplace Downloads][marketplace-downloads-badge]][marketplace]
-[![Visual Studio Marketplace Rating][marketplace-rating-badge]][marketplace]
 [![Qlty Maintainability][qlty-badge]][qlty-project]
 
 <!-- markdownlint-enable MD013 -->
@@ -156,10 +153,6 @@ MIT
 
 <!-- markdownlint-disable MD013 -->
 
-[marketplace]: https://marketplace.visualstudio.com/items?itemName=kittybbit.vscode-ajsbutler
-[marketplace-version-badge]: https://img.shields.io/visual-studio-marketplace/v/kittybbit.vscode-ajsbutler
-[marketplace-downloads-badge]: https://img.shields.io/visual-studio-marketplace/d/kittybbit.vscode-ajsbutler
-[marketplace-rating-badge]: https://img.shields.io/visual-studio-marketplace/stars/kittybbit.vscode-ajsbutler
 [qlty-project]: https://qlty.sh/gh/kittybbit/projects/vscode-ajsbutler
 [qlty-badge]: https://qlty.sh/badges/0cc9e169-14e8-44d7-a0de-5c358687a18e/maintainability.png
 [telemetry-faq]: https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting
