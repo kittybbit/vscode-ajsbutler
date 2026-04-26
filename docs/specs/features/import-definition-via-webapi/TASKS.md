@@ -32,15 +32,15 @@
 - [x] Add reproducibility checks for generated OpenAPI artifacts
 - [x] Define request, result, normalized-content, and error DTOs for the first
       desktop read-only import slice
+- [x] Implement the extension command and desktop infrastructure adapter behind
+      the application import port
+- [x] Add compatibility tests that keep shared domain/application paths free of
+      WebAPI transport, Node-only, and webview dependencies
+- [x] Add beta labeling to the command, release notes, or user-facing docs when
+      the first implementation ships
 
 ## Follow-up
 
-- [ ] Implement the extension command and desktop infrastructure adapter behind
-      the application import port
-- [ ] Add compatibility tests that keep shared domain/application paths free of
-      WebAPI transport, Node-only, and webview dependencies
-- [ ] Add beta labeling to the command, release notes, or user-facing docs when
-      the first implementation ships
 - [ ] Record real JP1/AJS3 environment smoke verification before exiting beta
 
 ## Notes
@@ -85,3 +85,9 @@
   list requests, normalized imported definition content, and recoverable
   structured errors without depending on generated OpenAPI artifacts,
   VS Code APIs, Node transport, Prism, or webview code.
+- 2026-04-26: the beta import command is contributed as
+  `ajsbutler.importDefinitionViaWebApiBeta`. It prompts in the extension host,
+  stores credentials through VS Code secret storage, calls a desktop WebAPI
+  infrastructure adapter behind the application port, and reports the number
+  of imported definition units without handing raw WebAPI responses to webview
+  or downstream presentation code.

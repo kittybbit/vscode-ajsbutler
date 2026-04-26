@@ -33,6 +33,7 @@ suite("Extension Test Suite", () => {
 
     assert.ok(commands.includes("open.ajsbutler.tableViewer"));
     assert.ok(commands.includes("open.ajsbutler.flowViewer"));
+    assert.ok(commands.includes("ajsbutler.importDefinitionViaWebApiBeta"));
   });
 
   test("provides diagnostics for invalid jp1ajs documents", async () => {

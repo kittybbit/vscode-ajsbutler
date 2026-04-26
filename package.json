@@ -66,6 +66,13 @@
         "title": "Open JP1/AJS table viewer",
         "shortTitle": "JP1/AJS table viewer",
         "icon": "$(output)"
+      },
+      {
+        "command": "ajsbutler.importDefinitionViaWebApiBeta",
+        "category": "JP1/AJS",
+        "title": "Import JP1/AJS Definition via WebAPI (Beta)",
+        "shortTitle": "Import via WebAPI (Beta)",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
@@ -106,6 +113,7 @@
     ]
   },
   "activationEvents": [
+    "onCommand:ajsbutler.importDefinitionViaWebApiBeta",
     "onWebviewPanel:ajsbutler.tableViewer",
     "onWebviewPanel:ajsbutler.flowViewer"
   ],
