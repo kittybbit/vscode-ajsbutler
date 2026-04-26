@@ -20,8 +20,8 @@
 - [x] Record OpenAPI-generated mocks and stubs as the stability strategy for
       the first import implementation
 - [x] Define the repository-local OpenAPI source placement
-- [x] Record beta availability until real JP1/AJS3 environment verification is
-      sufficient
+- [x] Record beta availability until real JP1/AJS3 environment verification
+      and user feedback are sufficient
 - [x] Audit the JP1/AJS3 version 13 API reference sections needed by the first
       import endpoint and record traceability before implementation
 - [x] Define the first supported read-only import endpoint in a repository-local
@@ -41,7 +41,8 @@
 
 ## Follow-up
 
-- [ ] Record real JP1/AJS3 environment smoke verification before exiting beta
+- [ ] Record real JP1/AJS3 environment smoke verification and user feedback
+      before exiting beta
 
 ## Notes
 
@@ -64,9 +65,13 @@
   artifacts should live outside domain/application code and must be
   reproducible from the checked-in contracts.
 - 2026-04-26: read-only WebAPI import should be offered as beta until real
-  JP1/AJS3 environment smoke verification is recorded. Generated mocks/stubs
-  stabilize automated tests but do not count as beta-exit evidence by
-  themselves.
+  JP1/AJS3 environment smoke verification and user feedback are recorded.
+  Generated mocks/stubs stabilize automated tests but do not count as beta-exit
+  evidence by themselves.
+- 2026-04-26: beta exit is intentionally feedback-gated. Keep the smoke
+  verification task open but do not treat it as the next active implementation
+  priority until enough user feedback exists to evaluate whether the beta label
+  should be removed.
 - 2026-04-26: first-endpoint traceability is recorded in `TRACEABILITY.md`.
   The first OpenAPI endpoint should model the unit list acquisition API
   (`GET /ajs/api/v1/objects/statuses`) with definition-only import as the

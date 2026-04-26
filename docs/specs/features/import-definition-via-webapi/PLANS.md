@@ -40,9 +40,9 @@ adapter or return a structured unsupported-host result without changing shared
 domain or application code.
 
 The initial user-facing feature should ship as beta because verification
-against real JP1/AJS3 environments is expected to be limited. OpenAPI-generated
-mocks and stubs stabilize the boundary, but they do not replace real server
-smoke evidence.
+against real JP1/AJS3 environments and user feedback are expected to be
+limited. OpenAPI-generated mocks and stubs stabilize the boundary, but they do
+not replace real server smoke evidence or beta usage feedback.
 
 ## Milestones
 
@@ -186,8 +186,10 @@ hover, or unit-definition features remains a follow-up integration slice.
   timeout, unexpected status, malformed response, and unsupported host behavior
 - at least one real JP1/AJS3 environment smoke verification is recorded with
   product version and tested scenario
+- enough user feedback is recorded to show that the supported read-only import
+  path behaves predictably outside mock and local test environments
 - release notes or user documentation no longer need to warn that the feature
-  has limited real-environment validation
+  has limited real-environment validation or limited beta feedback
 
 ## Validation
 

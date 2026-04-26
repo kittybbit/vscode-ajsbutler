@@ -36,6 +36,9 @@
 - [ ] Turn the audit notes into an explicit parameter-coverage matrix only when
       a behavior-changing alignment slice needs per-key status beyond the
       current audit summary
+- [ ] Prepare the next behavior-changing alignment slice around schedule-rule
+      parameters (`sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`,
+      `wc`, and `wt`) before attempting a broad all-key coverage matrix
 
 ## Notes
 
@@ -57,3 +60,7 @@
 - 2026-04-23: command-builder UI now resolves labels and descriptions through
   the existing message resources and switches `ajsshow` / `ajsprint` manual
   links between English and Japanese URLs from the active `lang` context.
+- 2026-04-26: the next parameter-alignment candidate is the schedule-rule
+  family because these keys already share helper seams, affect unit-list
+  behavior, and can be covered as a focused manual-alignment slice without
+  creating a full parameter matrix first.
