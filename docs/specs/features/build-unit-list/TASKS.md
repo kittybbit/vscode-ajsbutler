@@ -13,12 +13,10 @@
 - [x] Implement `BuildUnitList` on top of normalized AJS inputs
 - [x] Decide whether filtering/search should become a separate application
       use case
-
-## Follow-up
-
-- [ ] Add a future search enhancement on the current list presentation path:
-      support searching by parameter key and parameter value in addition to the
-      existing partial-match behavior over rendered row values
+- [x] Add a future search enhancement on the current list presentation path:
+      support switching between parameter value partial matching and
+      `key=value` matching in addition to the existing partial-match behavior
+      over rendered row values
 
 ## Notes
 
@@ -30,6 +28,14 @@
   matcher so users can search by parameter key/value pairs as well as today's
   partial matches over rendered row text, while keeping the search behavior in
   the table layer unless another consumer needs the same semantics.
+- 2026-04-26: table global search now has two presentation-local modes:
+  rendered row values plus normalized parameter values, and normalized
+  `key=value` candidates. The matcher remains presentation-local and covered by
+  a focused helper test.
+- 2026-04-26: matching table cells are highlighted so users can identify the
+  column that made a filtered row match. In `key=value` mode, the displayed
+  value cell for the matched parameter is highlighted when the list view
+  projects that value.
 - Revisit a dedicated application use case only if filtering/search needs to be
   shared across table, CSV, commands, or another non-table consumer.
 - Fixture guidance and manual verification notes are maintenance concerns.
