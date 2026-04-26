@@ -45,17 +45,37 @@ under `docs/requirements/use-cases/`.
   product need appears.
 - Parameter-reference alignment should proceed in small JP1/AJS v13 slices
   with explicit manual coverage.
+- The first read-only JP1/AJS WebAPI import trigger is an extension command on
+  the desktop host. Imported data should cross an application import port and a
+  normalization seam before downstream list, flow, CSV, diagnostics, hover, or
+  unit-definition presentation code sees it.
+- JP1/AJS WebAPI implementation should follow JP1 Version 13
+  JP1/Automatic Job Management System 3 Command Reference, manual
+  3021-3-L49-20(E), Part 3 API.
+- OpenAPI should be used as a repository-local, manual-derived contract for the
+  supported WebAPI subset so mocks, infrastructure/test stubs, and
+  reproducibility checks can stabilize implementation. OpenAPI source contracts
+  live under `docs/specs/features/import-definition-via-webapi/openapi/`.
+- Read-only JP1/AJS WebAPI import should be offered as beta until real JP1/AJS3
+  environment smoke verification is recorded.
 
 ### Next Priority Tasks
 
 1. Align parameter parsing with JP1/Automatic Job Management System 3 version
    13 reference manuals when a behavior-changing parameter slice needs
    per-key coverage beyond the current audit summary.
-2. Define a read-only JP1/AJS WebAPI import boundary with clear application
-   and infrastructure responsibilities.
-3. Extend list-view search on the current presentation path so parameter key
+2. Audit the JP1/AJS3 version 13 API reference sections needed by the first
+   read-only WebAPI import endpoint and record traceability.
+3. Define the first supported endpoint in OpenAPI and generate mock/stub
+   artifacts for infrastructure and integration tests.
+4. Define request, result, normalized-content, and structured-error DTOs for
+   the first desktop read-only JP1/AJS WebAPI import slice.
+5. Implement the beta-labeled extension command and desktop infrastructure
+   adapter behind the application WebAPI import port.
+6. Record real JP1/AJS3 smoke verification before removing beta labeling.
+7. Extend list-view search on the current presentation path so parameter key
    and value queries complement existing rendered-row partial matching.
-4. Keep desktop and web compatibility explicit whenever bootstrap, preview,
+8. Keep desktop and web compatibility explicit whenever bootstrap, preview,
    parsing, shared adapters, or runtime behavior change.
 
 ## Wrapper Semantics Matrix
