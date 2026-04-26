@@ -4,7 +4,7 @@ import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { createExtensionSubscriptions } from "../../extension/bootstrap/extensionSubscriptions";
 
 suite("Extension subscriptions", () => {
-  test("creates diagnostics, hover, and viewer subscriptions", () => {
+  test("creates diagnostics, hover, import, and viewer subscriptions", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {
       trackEvent() {},
@@ -13,7 +13,7 @@ suite("Extension subscriptions", () => {
 
     const subscriptions = createExtensionSubscriptions(context, telemetry);
 
-    assert.strictEqual(subscriptions.length, 6);
+    assert.strictEqual(subscriptions.length, 7);
     subscriptions.forEach((subscription) => {
       assert.strictEqual(typeof subscription.dispose, "function");
       subscription.dispose();

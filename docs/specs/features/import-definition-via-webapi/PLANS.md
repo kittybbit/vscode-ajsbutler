@@ -136,6 +136,28 @@ The first application-owned WebAPI import contract lives under
 These DTOs intentionally do not import generated OpenAPI artifacts, VS Code
 APIs, Node transport modules, Prism helpers, or webview code.
 
+## Desktop Beta Command
+
+The first command implementation contributes
+`ajsbutler.importDefinitionViaWebApiBeta`.
+
+- the command is beta-labeled in the VS Code command palette
+- input collection lives in the extension command boundary, outside webview
+  code
+- credentials are stored through VS Code secret storage and are referenced by
+  an application DTO credential reference rather than passed as DTO fields
+- the desktop infrastructure adapter performs the unit-list WebAPI request,
+  maps documented HTTP statuses and transport failures to structured import
+  errors, and converts success responses to normalized imported definition
+  content
+- browser-hosted execution returns an unsupported-host result until a
+  browser-safe transport and authentication model is explicitly implemented
+  and tested
+
+The initial beta command reports the number of imported units. Opening or
+persisting imported definitions in downstream list, flow, CSV, diagnostics,
+hover, or unit-definition features remains a follow-up integration slice.
+
 ## OpenAPI Workflow
 
 1. Trace the selected endpoint to JP1/AJS3 version 13 manual sections.

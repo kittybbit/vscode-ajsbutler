@@ -64,12 +64,10 @@ under `docs/requirements/use-cases/`.
 1. Align parameter parsing with JP1/Automatic Job Management System 3 version
    13 reference manuals when a behavior-changing parameter slice needs
    per-key coverage beyond the current audit summary.
-2. Implement the beta-labeled extension command and desktop infrastructure
-   adapter behind the application WebAPI import port.
-3. Record real JP1/AJS3 smoke verification before removing beta labeling.
-4. Extend list-view search on the current presentation path so parameter key
+2. Record real JP1/AJS3 smoke verification before removing beta labeling.
+3. Extend list-view search on the current presentation path so parameter key
    and value queries complement existing rendered-row partial matching.
-5. Keep desktop and web compatibility explicit whenever bootstrap, preview,
+4. Keep desktop and web compatibility explicit whenever bootstrap, preview,
    parsing, shared adapters, or runtime behavior change.
 
 ## Wrapper Semantics Matrix
