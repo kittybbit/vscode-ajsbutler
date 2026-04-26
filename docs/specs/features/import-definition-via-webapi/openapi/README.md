@@ -25,6 +25,8 @@ normative product manual.
   infrastructure artifacts under an infrastructure-specific generated path.
 - Add or update generation scripts when generated artifacts are introduced so
   the checked-in outputs can be reproduced from the OpenAPI source.
+- Prism-based test fixtures may derive response examples from `sample/`, but
+  generated fixture files should remain outside this source-contract directory.
 
 ## Traceability
 

@@ -126,12 +126,16 @@
     "qlty:fmt": "qlty fmt",
     "qlty:check": "qlty check",
     "lint:md": "npx markdownlint-cli2 'docs/specs/features/**/*.md' 'docs/requirements/use-cases/**/*.md'",
+    "openapi:generate": "node scripts/generate-webapi-openapi-artifacts.mjs",
+    "openapi:check": "node scripts/generate-webapi-openapi-artifacts.mjs --check",
+    "openapi:mock": "prism mock src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml",
     "test": "node ./out/test/runTest.js",
     "test:web": "node ./out/test/runWebTest.js"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.39.1",
+    "@stoplight/prism-cli": "^5.15.10",
     "@types/glob": "^9.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.0.10",
@@ -145,7 +149,6 @@
     "@types/vscode-webview": "^1.57.5",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
-    "playwright": "1.59.1",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/test-web": "^0.0.80",
     "@vscode/vsce": "^3.9.1",
@@ -159,6 +162,7 @@
     "globals": "^16.5.0",
     "mocha": "^11.7.5",
     "npm-run-all": "^4.1.5",
+    "playwright": "1.59.1",
     "process": "^0.11.10",
     "rimraf": "^6.1.2",
     "style-loader": "^4.0.0",
@@ -168,7 +172,8 @@
     "typescript-eslint": "^8.47.0",
     "webpack": "^5.106.2",
     "webpack-bundle-analyzer": "^4.10.2",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^6.0.1",
+    "yaml": "1.10.3"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

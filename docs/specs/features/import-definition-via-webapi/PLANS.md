@@ -80,6 +80,27 @@ Unit information acquisition remains adjacent follow-up scope because it
 requires an execution ID and is better suited to detail retrieval after the
 unit-list import identifies units and generations.
 
+## Generated Artifacts
+
+`pnpm run openapi:generate` reads the repository-local OpenAPI contract and
+generates:
+
+- infrastructure-facing WebAPI operation metadata and transport DTO types under
+  `src/infrastructure/webapi/generated/`
+- test fixture operation metadata and Prism startup helpers under
+  `src/test/fixtures/webapi/generated/`
+- a Prism-specific OpenAPI fixture under
+  `src/test/fixtures/webapi/generated/` whose response examples are derived
+  from repository samples under `sample/`
+
+`pnpm run openapi:check` compares the checked-in generated artifacts with a
+fresh generation pass so CI or local validation can detect stale OpenAPI
+outputs before infrastructure adapters start depending on them.
+
+`pnpm run openapi:mock` starts a Prism mock server from the generated Prism
+fixture. Infrastructure tests should prefer this Prism path over hand-written
+mock HTTP responses when they need OpenAPI-compatible WebAPI behavior.
+
 ## Boundary Sketch
 
 - presentation/extension command: prompts for import inputs and displays
