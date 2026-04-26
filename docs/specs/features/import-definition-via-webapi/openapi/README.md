@@ -35,3 +35,6 @@ Each supported endpoint should record the JP1/AJS3 manual section used for:
 - response status, headers, and body
 - error response mapping
 - API usage notes and host constraints
+
+The first endpoint audit is recorded in
+`docs/specs/features/import-definition-via-webapi/TRACEABILITY.md`.

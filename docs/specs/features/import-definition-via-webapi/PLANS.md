@@ -49,7 +49,7 @@ smoke evidence.
 1. Confirm WebAPI scope and host constraints
 2. Audit the JP1/AJS3 version 13 API reference sections needed by the first
    import endpoint
-3. Define the first endpoint in OpenAPI with manual-section traceability
+3. Define the first endpoint in OpenAPI from the recorded traceability
 4. Generate mock server and infrastructure/test stubs from the OpenAPI contract
 5. Define request, result, normalized-content, and error DTOs
 6. Design desktop infrastructure adapters for transport and authentication
@@ -57,6 +57,28 @@ smoke evidence.
 8. Add focused integration and compatibility checks
 9. Revisit browser-hosted transport only after the desktop slice is stable
 10. Update docs and remaining follow-up tasks
+
+## Traceability Snapshot
+
+The first endpoint audit is recorded in `TRACEABILITY.md`.
+
+The initial OpenAPI operation now models the JP1/AJS3 version 13 unit list
+acquisition API in `openapi/jp1-ajs3-webapi.v13.openapi.yaml`:
+
+- manual section: 7.1.1 Unit list acquisition API
+- API ID: SC-009
+- request:
+  `GET /ajs/api/v1/objects/statuses?{query}`
+- initial behavior:
+  request definition-only import with `searchTarget=DEFINITION`
+- response:
+  `200` with `statuses` and `all`
+- documented error responses:
+  `400`, `401`, `403`, `404`, `409`, `412`, `500`
+
+Unit information acquisition remains adjacent follow-up scope because it
+requires an execution ID and is better suited to detail retrieval after the
+unit-list import identifies units and generations.
 
 ## Boundary Sketch
 
