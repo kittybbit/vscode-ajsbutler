@@ -22,14 +22,14 @@
 - [x] Define the repository-local OpenAPI source placement
 - [x] Record beta availability until real JP1/AJS3 environment verification is
       sufficient
+- [x] Audit the JP1/AJS3 version 13 API reference sections needed by the first
+      import endpoint and record traceability before implementation
+- [x] Define the first supported read-only import endpoint in a repository-local
+      OpenAPI contract under
+      `docs/specs/features/import-definition-via-webapi/openapi/`
 
 ## Follow-up
 
-- [ ] Audit the JP1/AJS3 version 13 API reference sections needed by the first
-      import endpoint and record traceability before implementation
-- [ ] Define the first supported read-only import endpoint in a repository-local
-      OpenAPI contract under
-      `docs/specs/features/import-definition-via-webapi/openapi/`
 - [ ] Generate a mock server and infrastructure/test stubs from the OpenAPI
       contract
 - [ ] Add reproducibility checks for generated OpenAPI artifacts
@@ -67,3 +67,12 @@
   JP1/AJS3 environment smoke verification is recorded. Generated mocks/stubs
   stabilize automated tests but do not count as beta-exit evidence by
   themselves.
+- 2026-04-26: first-endpoint traceability is recorded in `TRACEABILITY.md`.
+  The first OpenAPI endpoint should model the unit list acquisition API
+  (`GET /ajs/api/v1/objects/statuses`) with definition-only import as the
+  initial application behavior. Unit information acquisition is deferred as
+  adjacent detail-retrieval scope.
+- 2026-04-26: the first OpenAPI source contract is recorded in
+  `openapi/jp1-ajs3-webapi.v13.openapi.yaml`. It covers the unit list
+  acquisition API request, success response, documented HTTP error responses,
+  and permissive status/release objects for definition-only beta import.
