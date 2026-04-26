@@ -27,12 +27,12 @@
 - [x] Define the first supported read-only import endpoint in a repository-local
       OpenAPI contract under
       `docs/specs/features/import-definition-via-webapi/openapi/`
+- [x] Generate a mock server and infrastructure/test stubs from the OpenAPI
+      contract
+- [x] Add reproducibility checks for generated OpenAPI artifacts
 
 ## Follow-up
 
-- [ ] Generate a mock server and infrastructure/test stubs from the OpenAPI
-      contract
-- [ ] Add reproducibility checks for generated OpenAPI artifacts
 - [ ] Define request, result, normalized-content, and error DTOs for the first
       desktop read-only import slice
 - [ ] Implement the extension command and desktop infrastructure adapter behind
@@ -76,3 +76,7 @@
   `openapi/jp1-ajs3-webapi.v13.openapi.yaml`. It covers the unit list
   acquisition API request, success response, documented HTTP error responses,
   and permissive status/release objects for definition-only beta import.
+- 2026-04-26: `pnpm run openapi:generate` now generates infrastructure
+  WebAPI types, Prism test helpers, and a Prism OpenAPI fixture whose examples
+  are derived from `sample/`. `pnpm run openapi:check` verifies that the
+  checked-in generated artifacts are reproducible.
