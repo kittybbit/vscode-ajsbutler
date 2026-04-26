@@ -15,6 +15,7 @@
     "src/application/editor-feedback/**/*.ts",
     "src/application/flow-graph/**/*.ts",
     "src/application/telemetry/**/*.ts",
+    "src/application/webapi-import/**/*.ts",
     "src/application/unit-list/buildUnitList.ts",
     "src/application/unit-list/unitListDocument.ts",
     "src/domain/models/ajs/**/*.ts",
