@@ -20,12 +20,16 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import TableHeader from "./TableHeader";
 import type { MyAppResource } from "../../../shared/MyAppResource";
+import type { AjsTableSearchState } from "./TableContents";
+import { AccessorType } from "./columnDefs/common";
+import { isAjsTableSearchHit } from "./globalFilter";
 
 type VirtualizedTableProps = {
   headerGroups: HeaderGroup<UnitListRowView>[];
   rows: Row<UnitListRowView>[];
   scrollType: MyAppResource["scrollType"];
   rowIndex?: number;
+  searchState: AjsTableSearchState;
 };
 
 const styleTableCell: SxProps<Theme> = {
@@ -79,6 +83,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   rows,
   scrollType,
   rowIndex,
+  searchState,
 }) => {
   console.log("render VirtualizedTable.");
 
@@ -93,12 +98,35 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
 
   const itemContent = useCallback(
     (index: number, data: Row<UnitListRowView>) =>
-      data.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id} sx={styleTableCell}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      )),
-    [styleTableCell],
+      data.getVisibleCells().map((cell) => {
+        const parameters =
+          searchState.parameterSearchValuesByPath.get(
+            data.original.absolutePath,
+          ) ?? [];
+        const isSearchHit = isAjsTableSearchHit(
+          cell.getValue<AccessorType | undefined>(),
+          parameters,
+          searchState.globalFilter,
+          searchState.searchMode,
+        );
+        return (
+          <TableCell
+            key={cell.id}
+            sx={[
+              styleTableCell,
+              isSearchHit && {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 214, 102, 0.24)"
+                    : "rgba(255, 214, 102, 0.36)",
+              },
+            ]}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        );
+      }),
+    [searchState],
   );
 
   const fixedHeaderContent = useCallback(

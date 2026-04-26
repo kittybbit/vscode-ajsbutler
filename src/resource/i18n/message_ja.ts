@@ -1,6 +1,9 @@
 export const ja = {
   "table.search.helperText": "エンターキーまたはタブで検索",
   "table.search.clear": "検索結果のクリア",
+  "table.search.mode": "検索モード",
+  "table.search.mode.value": "Value",
+  "table.search.mode.keyValue": "key=value",
   "table.menu.menuItem1": "表示するカラムを選択する。",
   "table.menu.menuItem2.window": "ウィンドウスクロールに切り替える。",
   "table.menu.menuItem2.table": "テーブルスクロールに切り替える。",

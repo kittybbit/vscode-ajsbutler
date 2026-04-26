@@ -17,15 +17,15 @@ import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useReactTable } from "@tanstack/react-table";
 import {
-  FilterMeta,
-  Row,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
 } from "@tanstack/table-core";
-import { rankItem } from "@tanstack/match-sorter-utils";
-import { AjsDocument } from "../../../domain/models/ajs/AjsDocument";
+import {
+  AjsDocument,
+  flattenAjsUnits,
+} from "../../../domain/models/ajs/AjsDocument";
 import {
   buildUnitDefinitionByPath,
   UnitDefinitionDialogDto,
@@ -38,43 +38,20 @@ import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocu
 import { toAjsDocument } from "../../../application/unit-list/unitListDocumentView";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
+import {
+  AjsTableSearchMode,
+  createAjsGlobalFilterFn,
+  ParameterSearchValuesByPath,
+} from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
 import DisplayColumnSelector from "./DisplayColumnSelector";
-import { AccessorType } from "./columnDefs/common";
 import UnitEntityDialog from "../UnitEntityDialog";
-import Parameter from "../../../domain/models/parameters/Parameter";
 import { REVEAL_UNIT } from "../../../shared/webviewEvents";
 import {
   findRowIndexByAbsolutePath,
   getRevealUnitAbsolutePath,
 } from "../revealUnit";
-
-const normalizeValue = (v: unknown) =>
-  v instanceof Parameter ? v.value() : String(v);
-const ajsGlobalFilterFn = (
-  row: Row<UnitListRowView>,
-  columnId: string,
-  value: string,
-  addMeta: (meta: FilterMeta) => void,
-): boolean => {
-  const cellValue = row.getValue<AccessorType>(columnId);
-  if (!cellValue) return false;
-
-  const targetValues: AccessorType = Array.isArray(cellValue)
-    ? cellValue
-    : [cellValue];
-
-  const itemRank = targetValues
-    .map(normalizeValue)
-    .map((v) => rankItem(v, value))
-    .find((v) => v.passed);
-
-  if (!itemRank) return false;
-
-  addMeta(itemRank);
-  return itemRank.passed;
-};
 
 export type TableMenuStatusType = {
   menuItem1: boolean;
@@ -86,6 +63,11 @@ export type TableMenuStateType = {
 export type DrawerWidthStateType = {
   drawerWidth: number;
   setDrawerWidth: Dispatch<SetStateAction<number>>;
+};
+export type AjsTableSearchState = {
+  globalFilter: string;
+  searchMode: AjsTableSearchMode;
+  parameterSearchValuesByPath: ParameterSearchValuesByPath;
 };
 
 const useChangeDocument = (): [
@@ -125,6 +107,7 @@ const TableContents = () => {
     UnitDefinitionDialogDto | undefined
   >();
   const [globalFilter, setGlobalFilter] = useState("");
+  const [searchMode, setSearchMode] = useState<AjsTableSearchMode>("value");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
   const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
@@ -179,6 +162,22 @@ const TableContents = () => {
 
   const handleJumpRef = useRef<(id: string) => void>(() => {});
   const handleJump = useCallback((id: string) => handleJumpRef.current(id), []);
+  const parameterSearchValuesByPath = useMemo(
+    () =>
+      new Map(
+        ajsDocument
+          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
+              unit.absolutePath,
+              unit.parameters,
+            ])
+          : [],
+      ),
+    [ajsDocument],
+  );
+  const globalFilterFn = useMemo(
+    () => createAjsGlobalFilterFn(parameterSearchValuesByPath, searchMode),
+    [parameterSearchValuesByPath, searchMode],
+  );
 
   const table = useReactTable<UnitListRowView>({
     columns: useMemo(
@@ -195,7 +194,7 @@ const TableContents = () => {
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    globalFilterFn: ajsGlobalFilterFn,
+    globalFilterFn,
     getColumnCanGlobalFilter: () => true, // return true for all column
     defaultColumn: tableDefaultColumnDef,
     debugAll: DEVELOPMENT,
@@ -286,12 +285,19 @@ const TableContents = () => {
               table={table}
               tableMenuState={tableMenuState}
               drawerWidthState={drawerWidthState}
+              searchMode={searchMode}
+              setSearchMode={setSearchMode}
             />
             <VirtualizedTable
               headerGroups={table.getHeaderGroups()}
               rows={rows}
               scrollType={scrollType}
               rowIndex={rowIndex}
+              searchState={{
+                globalFilter,
+                searchMode,
+                parameterSearchValuesByPath,
+              }}
             />
             <Typography align="right">
               {rows.length} of {rowViews?.length}

@@ -22,11 +22,14 @@ import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../domain/services/i18n/nls";
 import { OPERATION, SAVE } from "../../../shared/webviewEvents";
 import { exportCsvView } from "./exportCsvView";
+import { AjsTableSearchMode } from "./globalFilter";
 
 type HeaderProps = {
   table: Table<UnitListRowView>;
   tableMenuState: TableMenuStateType;
   drawerWidthState: DrawerWidthStateType;
+  searchMode: AjsTableSearchMode;
+  setSearchMode: (mode: AjsTableSearchMode) => void;
 };
 
 const HideOnScroll: FC<{ children: ReactElement }> = ({ children }) => {
@@ -42,6 +45,8 @@ const Header: FC<HeaderProps> = ({
   table,
   tableMenuState,
   drawerWidthState,
+  searchMode,
+  setSearchMode,
 }) => {
   console.log("render Header.");
 
@@ -87,6 +92,8 @@ const Header: FC<HeaderProps> = ({
             <SearchBox
               globalFilter={table.getState().globalFilter}
               setGlobalFilter={table.setGlobalFilter}
+              searchMode={searchMode}
+              setSearchMode={setSearchMode}
             />
             <Tooltip title={localeMap("table.menu.menuItem1", lang)}>
               <IconButton

@@ -39,8 +39,10 @@ under `docs/requirements/use-cases/`.
 ### Current Decisions
 
 - List search stays presentation-local until another non-table consumer needs
-  the same matching semantics. The new search-domain use case is a deferred
-  contract, not an implementation mandate.
+  the same matching semantics. The table global filter now searches rendered
+  row values plus normalized parameter values in value mode, or normalized
+  `key=value` candidates in key-value mode; the new search-domain use case
+  remains a deferred contract, not an implementation mandate.
 - Bundle-size work is deferred unless a clearer reduction seam or stronger
   product need appears.
 - Parameter-reference alignment should proceed in small JP1/AJS v13 slices
@@ -65,9 +67,7 @@ under `docs/requirements/use-cases/`.
    13 reference manuals when a behavior-changing parameter slice needs
    per-key coverage beyond the current audit summary.
 2. Record real JP1/AJS3 smoke verification before removing beta labeling.
-3. Extend list-view search on the current presentation path so parameter key
-   and value queries complement existing rendered-row partial matching.
-4. Keep desktop and web compatibility explicit whenever bootstrap, preview,
+3. Keep desktop and web compatibility explicit whenever bootstrap, preview,
    parsing, shared adapters, or runtime behavior change.
 
 ## Wrapper Semantics Matrix
