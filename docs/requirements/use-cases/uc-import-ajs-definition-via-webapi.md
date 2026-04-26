@@ -30,8 +30,8 @@ the extension is not limited to local definition files.
 ## Rules
 
 - initial scope is read-only import only
-- initial availability is beta until real JP1/AJS3 environment verification is
-  recorded and beta exit criteria are met
+- initial availability is beta until real JP1/AJS3 environment verification and
+  enough user feedback are recorded to make beta exit credible
 - request construction, authentication, response parsing, and error mapping
   must follow the JP1/AJS3 version 13 API reference unless a documented product
   or host compatibility constraint requires a narrower first slice
@@ -60,7 +60,8 @@ the extension is not limited to local definition files.
   starts
 - generated mocks or stubs can exercise supported success and failure paths
   without requiring a live JP1/AJS3 server for every test run
-- beta labeling makes limited real-environment validation visible to users
+- beta labeling makes limited real-environment validation and limited field
+  feedback visible to users
 
 ## Risks Or Edge Cases
 
@@ -73,4 +74,5 @@ the extension is not limited to local definition files.
 - user-facing errors must not leak credentials, raw tokens, file content,
   definition content, or server-provided secrets
 - generated mocks can hide server-specific behavior differences, so beta exit
-  requires recorded smoke verification against a real JP1/AJS3 environment
+  requires recorded smoke verification against a real JP1/AJS3 environment and
+  user feedback from beta usage

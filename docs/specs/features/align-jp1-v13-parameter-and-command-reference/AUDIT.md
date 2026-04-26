@@ -116,3 +116,33 @@ behavior.
 - Until a dedicated matrix file is needed, keep that status in
   `TASKS.md` notes and update it in the same commit as the behavior or doc
   change.
+
+## Next Candidate Parameter Slice
+
+The next behavior-changing alignment slice should start with schedule-rule
+parameter semantics rather than a broad all-key matrix.
+
+Candidate keys:
+
+- `sd`
+- `ln`
+- `st`
+- `cy`
+- `sh`
+- `shd`
+- `cftd`
+- `sy`
+- `ey`
+- `wc`
+- `wt`
+
+Rationale:
+
+- These keys are already interpreted by shared helper seams and are consumed by
+  the unit list view.
+- `sd`-aligned expansion and rule sorting are cross-cutting enough that manual
+  alignment would benefit multiple downstream consumers.
+- The current audit already names `ruleParameterBuilders.ts`,
+  `parameterHelpers.ts`, and `Defaults.ts` as the owning seams, so this slice
+  can add focused per-key status without committing to a repository-wide
+  coverage matrix.

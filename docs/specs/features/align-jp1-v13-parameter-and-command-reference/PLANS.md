@@ -24,6 +24,11 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 
 - Build a parameter-coverage matrix only when a behavior-changing alignment
   slice needs per-key status beyond the current audit summary.
+- Use the schedule-rule family as the next likely behavior-changing parameter
+  slice: `sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and
+  `wt`.
+- Keep this as a focused manual-alignment slice before introducing a broad
+  repository-wide parameter matrix.
 
 ## Validation
 

@@ -17,7 +17,7 @@ Add a read-only JP1/AJS WebAPI import path for server-side definition data.
 
 - initial scope is explicitly read-only
 - initial user-facing availability is beta until real JP1/AJS3 environment
-  verification is sufficient
+  verification and user feedback are sufficient
 - application and infrastructure responsibilities are named before
   implementation starts
 - downstream consumers do not depend directly on raw WebAPI transport objects
@@ -100,15 +100,15 @@ Add a read-only JP1/AJS WebAPI import path for server-side definition data.
 ## Beta Availability
 
 - provide the read-only WebAPI import path as beta while real JP1/AJS3
-  environment verification remains limited
+  environment verification and user feedback remain limited
 - beta scope still requires automated tests through generated mocks/stubs,
   structured error handling, and explicit desktop/web compatibility behavior
 - do not advertise update/write scenarios or broad endpoint coverage during
   beta
 - exit beta only after the first supported import path has documented manual
   traceability, reproducible OpenAPI-generated artifacts, automated success and
-  failure-path coverage, and recorded smoke verification against a real JP1/AJS3
-  environment
+  failure-path coverage, recorded smoke verification against a real JP1/AJS3
+  environment, and enough user feedback to justify removing beta labeling
 
 ## Non-Goals
 

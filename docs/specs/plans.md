@@ -6,69 +6,29 @@ This is the branch-level SDD planning index. Feature-local details live under
 `docs/specs/features/<feature>/`; repository-level behavior contracts live
 under `docs/requirements/use-cases/`.
 
-## Branch Status
-
-### Completed In This Branch
-
-- Core application slices are implemented and covered:
-  build unit list, build unit list view, export CSV, normalize AJS document,
-  build flow graph, show unit definition, editor feedback, and telemetry.
-- Wrapper and normalization cleanup is complete enough for current use:
-  reusable cross-unit semantics moved to helpers or capability interfaces,
-  while unit-local JP1/AJS behavior remains on the owning wrappers.
-- Large internal refactor slices have been compressed out of
-  `docs/specs/features/`:
-  `buildUnitListView.ts` decomposition, `ParameterFactory` decomposition, and
-  wrapper-class duplication reduction are now treated as completed roadmap
-  history instead of active feature folders.
-- Runtime-boundary modernization delivered the important behavior-preserving
-  slices:
-  stale `flatted` assumptions were removed, package management moved to pinned
-  `pnpm`, webview bundles were split by viewer, and bundle-size experiments are
-  documented as evidence rather than active pressure.
-- Flow-view usability work for `1.13.0` is release-ready:
-  visual refresh, nested expansion, current-scope search refinement, and
-  list/flow bridge navigation are documented and validated.
-- JP1/AJS v13 command-generation alignment has a first supported seam:
-  `ajsshow` and `ajsprint` generation lives in an application helper, and the
-  show-unit-definition command builder is localized through existing message
-  resources.
-- Feature-local task lists were tightened so open tasks represent actionable
-  work rather than standing policy reminders.
-
-### Current Decisions
+## Current Decisions
 
 - List search stays presentation-local until another non-table consumer needs
-  the same matching semantics. The table global filter now searches rendered
-  row values plus normalized parameter values in value mode, or normalized
-  `key=value` candidates in key-value mode; the new search-domain use case
-  remains a deferred contract, not an implementation mandate.
-- Bundle-size work is deferred unless a clearer reduction seam or stronger
-  product need appears.
+  the same matching semantics.
 - Parameter-reference alignment should proceed in small JP1/AJS v13 slices
-  with explicit manual coverage.
-- The first read-only JP1/AJS WebAPI import trigger is an extension command on
-  the desktop host. Imported data should cross an application import port and a
-  normalization seam before downstream list, flow, CSV, diagnostics, hover, or
-  unit-definition presentation code sees it.
-- JP1/AJS WebAPI implementation should follow JP1 Version 13
-  JP1/Automatic Job Management System 3 Command Reference, manual
-  3021-3-L49-20(E), Part 3 API.
-- OpenAPI should be used as a repository-local, manual-derived contract for the
-  supported WebAPI subset so mocks, infrastructure/test stubs, and
-  reproducibility checks can stabilize implementation. OpenAPI source contracts
-  live under `docs/specs/features/import-definition-via-webapi/openapi/`.
-- Read-only JP1/AJS WebAPI import should be offered as beta until real JP1/AJS3
-  environment smoke verification is recorded.
+  with explicit manual coverage. The next likely behavior-changing slice is the
+  schedule-rule parameter family: `sd`, `ln`, `st`, `cy`, `sh`, `shd`,
+  `cftd`, `sy`, `ey`, `wc`, and `wt`.
+- Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
+  smoke verification and enough user feedback are recorded. Beta exit is
+  feedback-gated and is not the next active implementation priority.
+- Desktop and web compatibility must stay explicit whenever bootstrap,
+  preview, parsing, shared adapters, or runtime behavior change.
 
-### Next Priority Tasks
+## Next Priority Tasks
 
-1. Align parameter parsing with JP1/Automatic Job Management System 3 version
-   13 reference manuals when a behavior-changing parameter slice needs
-   per-key coverage beyond the current audit summary.
-2. Record real JP1/AJS3 smoke verification before removing beta labeling.
-3. Keep desktop and web compatibility explicit whenever bootstrap, preview,
-   parsing, shared adapters, or runtime behavior change.
+1. Prepare the schedule-rule parameter alignment slice with manual references,
+   per-key expected behavior, and regression evidence before changing parsing
+   or helper semantics.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence
+   tracked, but defer beta exit until feedback is sufficient.
+3. Keep compatibility risk visible for every shared or extension-runtime
+   change.
 
 ## Wrapper Semantics Matrix
 
@@ -84,8 +44,8 @@ under `docs/requirements/use-cases/`.
   planning behavior or `N` schedule ownership.
 - `UnitEntity` core responsibilities:
   keep constructor-bound identity, tree mechanics, raw metadata, and common
-  JP1 getters; avoid debug helpers, dead compatibility APIs, or wrapper-specific
-  business rules.
+  JP1 getters; avoid debug helpers, dead compatibility APIs, or
+  wrapper-specific business rules.
 
 ## Default Workflow
 
