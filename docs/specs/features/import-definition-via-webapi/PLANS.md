@@ -115,6 +115,27 @@ mock HTTP responses when they need OpenAPI-compatible WebAPI behavior.
 - domain/normalization: receives only product concepts that match existing AJS
   document semantics
 
+## Application DTO Contract
+
+The first application-owned WebAPI import contract lives under
+`src/application/webapi-import/`.
+
+- request DTOs describe the host, connection context, credential reference,
+  manager, scheduler service, and unit location without carrying raw
+  credentials
+- port request DTOs fix the first endpoint to
+  `GET /ajs/api/v1/objects/statuses` with `mode=search` and
+  `searchTarget=DEFINITION`
+- normalized content DTOs expose imported definition units and source metadata
+  without exposing raw WebAPI response objects to downstream presentation
+  features
+- structured error DTOs cover cancellation, unsupported host, authentication,
+  authorization, network, timeout, unexpected status, malformed response, and
+  documented HTTP status mappings
+
+These DTOs intentionally do not import generated OpenAPI artifacts, VS Code
+APIs, Node transport modules, Prism helpers, or webview code.
+
 ## OpenAPI Workflow
 
 1. Trace the selected endpoint to JP1/AJS3 version 13 manual sections.

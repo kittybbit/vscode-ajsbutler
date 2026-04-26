@@ -30,11 +30,11 @@
 - [x] Generate a mock server and infrastructure/test stubs from the OpenAPI
       contract
 - [x] Add reproducibility checks for generated OpenAPI artifacts
+- [x] Define request, result, normalized-content, and error DTOs for the first
+      desktop read-only import slice
 
 ## Follow-up
 
-- [ ] Define request, result, normalized-content, and error DTOs for the first
-      desktop read-only import slice
 - [ ] Implement the extension command and desktop infrastructure adapter behind
       the application import port
 - [ ] Add compatibility tests that keep shared domain/application paths free of
@@ -80,3 +80,8 @@
   WebAPI types, Prism test helpers, and a Prism OpenAPI fixture whose examples
   are derived from `sample/`. `pnpm run openapi:check` verifies that the
   checked-in generated artifacts are reproducible.
+- 2026-04-26: application-owned import DTOs and the first import port live in
+  `src/application/webapi-import/`. They define desktop definition-only unit
+  list requests, normalized imported definition content, and recoverable
+  structured errors without depending on generated OpenAPI artifacts,
+  VS Code APIs, Node transport, Prism, or webview code.
