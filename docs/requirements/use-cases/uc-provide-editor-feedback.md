@@ -28,10 +28,29 @@ embedding VS Code object construction inside parser-adjacent business logic.
 - VS Code adapters map DTOs into editor-specific objects
 - existing diagnostic messages and hover syntax content must remain unchanged
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Provide editor feedback
+
+Scenario: Invalid JP1/AJS text produces diagnostics
+  Given a JP1/AJS document containing invalid syntax
+  When editor feedback is requested
+  Then application-level diagnostic DTOs are returned
+
+Scenario: Parameter hover returns syntax information
+  Given a JP1/AJS document with a recognized parameter token
+  When hover information is requested for that token
+  Then application-level hover DTOs include the same syntax information
+
+Scenario: VS Code objects stay outside application output
+  Given JP1/AJS editor feedback output
+  When diagnostics and hover data are produced
+  Then the application output does not construct VS Code API objects
+```
+
 ## Acceptance Notes
 
-- invalid JP1/AJS text still produces diagnostics in the editor
-- parameter hover still shows the same syntax information as before
 - desktop and web extension entry points continue to share the same
   application logic for diagnostics and hover decisions
 

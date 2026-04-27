@@ -2,14 +2,19 @@
 
 ## Purpose
 
-Map the use case, feature requirements, tasks, and tests when that mapping is
-not obvious from SPECS.md and TASKS.md alone.
+Map the use case, behavioral scenarios, feature requirements, implementation,
+tasks, and tests when that mapping is not obvious from SPECS.md and TASKS.md
+alone.
 
-## Matrix
+## Mapping
 
-| Use Case  | Requirement | Spec        | Task     | Test     |
-| --------- | ----------- | ----------- | -------- | -------- |
-| UC-{{ID}} | FR-{{ID}}   | {{section}} | {{task}} | {{test}} |
+- UC: UC-{{ID}}
+- Scenario: SCN-{{ID}}-1
+- Requirement: FR-{{ID}}
+- Spec: {{section}}
+- Implementation: {{path}}
+- Task: {{task}}
+- Test: TEST-{{ID}}
 
 ## Coverage
 

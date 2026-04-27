@@ -9,7 +9,11 @@
 
 ## Tasks
 
-- [ ] {{task}}
+- [ ] Impact investigation completed and recorded in PLANS/SPECS/TASKS by
+      responsibility
+- [ ] Human approval gate passed before implementation
+- [ ] Fix targets tracked to completion
+- [ ] {{implementation task}}
 
 ## Validation
 
@@ -19,4 +23,6 @@
 
 ## Notes
 
-- {{durable note}}
+- Keep investigation details in PLANS.md or SPECS.md when they describe scope,
+  risk, alternatives, or boundary decisions.
+- Use this file for executable tasks and follow-up tracking only.

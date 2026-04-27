@@ -38,6 +38,28 @@ inside one presentation-specific builder.
 - command reference links should follow the active UI language when a
   language-specific JP1/AJS manual URL is known
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Generate AJS commands
+
+Scenario: Selected scope produces command text
+  Given a selected JP1/AJS unit or scope
+  And application-facing definition data for that context
+  When command text is generated
+  Then generated JP1/AJS command text is returned for the selected scope
+
+Scenario: Default command text is preserved
+  Given a selected scope supported by existing ajsshow and ajsprint behavior
+  When command text is generated
+  Then the default ajsshow and ajsprint command text remains unchanged
+
+Scenario: Presentation surfaces receive structured builder definitions
+  Given supported command options for a selected scope
+  When command builder definitions are requested
+  Then presentation surfaces receive structured command option definitions
+```
+
 ## Acceptance Notes
 
 - command-generation behavior can be tested without opening a viewer dialog
@@ -45,8 +67,6 @@ inside one presentation-specific builder.
   same dedicated contract
 - command support can expand incrementally across documented JP1/AJS commands
   without rewriting the consumer surface each time
-- the initial builder surface preserves the existing default command text for
-  `ajsshow` and `ajsprint`
 
 ## Risks Or Edge Cases
 

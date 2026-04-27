@@ -27,9 +27,29 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
   when practical
 - parser internals must not be exposed in the graph DTO
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Build flow graph
+
+Scenario: Selected scope produces deterministic graph content
+  Given normalized unit relationships for a selected unit scope
+  When the flow graph DTO is built for that scope
+  Then the graph contains deterministic nodes and edges for the same input
+
+Scenario: Parser internals are hidden from graph output
+  Given normalized unit relationships for visible units
+  When the flow graph DTO is built
+  Then the graph output does not expose parser-internal structures
+
+Scenario: Malformed relationships stay outside presentation workarounds
+  Given normalized unit relationships that include malformed links
+  When the flow graph DTO is built
+  Then the use case reports graph content without requiring UI-library types
+```
+
 ## Acceptance Notes
 
-- the same selected unit scope produces deterministic graph DTO content
 - desktop and web presentation layers can convert the DTO into their own graph
   structures without requiring `UnitEntity` reconstruction
 - flow rendering behavior remains unchanged after DTO to XyFlow mapping
@@ -38,8 +58,6 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
 
 ## Risks Or Edge Cases
 
-- cyclic or malformed relationships must not force
-  UI-library-specific workarounds into the use case
 - selected scope changes must preserve current-node and ancestor rendering semantics
 - large sample definitions should continue to build graph DTOs without
   presentation-layer shortcuts

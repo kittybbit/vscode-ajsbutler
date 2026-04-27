@@ -29,12 +29,31 @@ objects.
   the same selected unit
 - platform-specific dialog rendering stays in presentation code
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Show unit definition
+
+Scenario: Table and flow views show the same unit definition
+  Given the same selected JP1/AJS unit in table and flow contexts
+  When unit-definition details are requested
+  Then both viewers receive the same raw parameter text
+
+Scenario: Command text uses the selected unit path
+  Given a selected JP1/AJS unit with an absolute path
+  When unit-definition details are requested
+  Then command text is derived from that selected unit path
+
+Scenario: Opening definition details preserves flow navigation
+  Given a selected unit in the flow view
+  When unit-definition details are opened
+  Then current flow-navigation behavior is unchanged
+```
+
 ## Acceptance Notes
 
-- the same selected unit shows the same raw parameter text in table and flow
-  views
-- command text remains based on the selected unit absolute path
-- opening the dialog does not change current flow-navigation behavior
+- unit-definition dialog content can be extracted without forcing a broader
+  table or flow rewrite
 
 ## Risks Or Edge Cases
 

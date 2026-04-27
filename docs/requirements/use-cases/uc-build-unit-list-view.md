@@ -33,13 +33,31 @@ wrappers.
 - migration should be incremental, starting with the smallest set of columns
   that can move behind a stable row/view adapter
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Build unit list view
+
+Scenario: Same document produces the same visible rows
+  Given a normalized JP1/AJS document
+  When table row view models are built
+  Then the visible rows and unit ordering match current behavior
+
+Scenario: Row view models support definition actions
+  Given table row view models for a normalized JP1/AJS document
+  When a viewer requests dialog-opening metadata for a row
+  Then the row provides stable unit metadata for that action
+
+Scenario: Desktop and web viewers share the row shape
+  Given a normalized JP1/AJS document
+  When table row view models are built
+  Then desktop and web viewers can consume the same row shape
+```
+
 ## Acceptance Notes
 
-- table view still renders the same visible rows and unit-ordering for the same
-  input document
 - dialog opening, jump behavior, filtering, and CSV export continue to work
   from the application row/view adapter path
-- desktop and web viewers consume the same row/view model shape
 
 ## Risks Or Edge Cases
 
