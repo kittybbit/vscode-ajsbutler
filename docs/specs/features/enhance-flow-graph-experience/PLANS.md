@@ -49,4 +49,4 @@ Deliver a clearer and more navigable flow-graph experience in focused slices.
 
 - code changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`,
   `pnpm run build`
-- docs-only changes: `pnpm run lint:md`
+- docs-only changes: `pnpm run qlty`; add `pnpm run lint:md` when useful

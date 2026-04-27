@@ -6,6 +6,9 @@ This is the branch-level SDD planning index. Feature-local details live under
 `docs/specs/features/<feature>/`; repository-level behavior contracts live
 under `docs/requirements/use-cases/`.
 
+Clear branch-specific notes when starting a new branch. Keep stable workflow
+rules in `docs/specs/README.md`, not in this file.
+
 ## Current Decisions
 
 - List search stays presentation-local until another non-table consumer needs
@@ -32,6 +35,26 @@ under `docs/requirements/use-cases/`.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
+## Current Branch Plan
+
+- Branch: `docs/sdd-safety-gates`
+- Objective: tighten SDD safety gates and add selective Gherkin guidance for
+  behavior-oriented specifications without adding new document families.
+- Scope: update the SDD README, Codex SDD skill, branch plan guidance, and
+  feature/use-case templates for SPECS, TASKS, TRACEABILITY, implementation
+  prompts, plan validation, and behavior scenarios. Add selective Gherkin
+  scenarios to existing use cases where the behavior contract is already clear.
+- Out of scope: runtime code changes, generated artifacts, and new feature
+  directories.
+- Impact summary: SDD workflow documentation and templates only. Gherkin is
+  documentation guidance for behavior contracts, not a test-tool dependency;
+  no product behavior, VS Code compatibility, parser behavior, web extension
+  runtime, or tests are changed. Existing use-case behavior is clarified, not
+  expanded.
+- Risks and assumptions: keep the rules concise so feature docs remain useful
+  working documents rather than process logs; require `pnpm run qlty` for this
+  docs-only slice.
+
 ## Wrapper Semantics Matrix
 
 - Capability interface + helper:
@@ -49,17 +72,8 @@ under `docs/requirements/use-cases/`.
   JP1 getters; avoid debug helpers, dead compatibility APIs, or
   wrapper-specific business rules.
 
-## Default Workflow
+## Branch Validation
 
-1. Use a dedicated branch. Reserve `docs/...` branches for docs-only changes.
-2. Read the relevant documents in `docs/specs/`.
-3. Update `docs/requirements/use-cases/` only when the durable behavior
-   contract changes.
-4. Update or create feature docs under `docs/specs/features/<feature>/` only
-   when implementation requirements, boundary decisions, or active tasks need
-   tracking.
-5. Update feature `TASKS.md`, this file, and `roadmap.md` in the same commit
-   when task completion changes priorities or repository sequencing.
-6. For code changes, run `pnpm run qlty`, `pnpm test`,
-   `pnpm run test:web`, and `pnpm run build`.
-7. For docs-only changes, run `pnpm run lint:md`.
+- docs-only changes: `pnpm run qlty`; add `pnpm run lint:md` when markdown
+  structure or links need focused validation
+- code changes: follow `docs/specs/README.md`

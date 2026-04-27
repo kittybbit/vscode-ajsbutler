@@ -27,24 +27,26 @@ For non-trivial changes:
 
 1. create a dedicated git branch before implementation work starts
    and use `docs/...` only for docs-only slices
-2. update or create the relevant use-case spec in
+2. prefer quality assurance, KISS, DRY/YAGNI, then SOLID in that order;
+   do not add abstractions unless they reduce real complexity
+3. update or create the relevant use-case spec in
    `docs/requirements/use-cases/` when the behavior contract changes
-3. update or create concise feature docs under
+4. update or create concise feature docs under
    `docs/specs/features/<feature>/` when implementation requirements,
    boundary decisions, or active tasks need tracking
-4. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
+5. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
    and update that file in the same commit whenever a task is completed,
    reframed, or dropped
-5. document assumptions explicitly
-6. implement in small vertical slices
-7. refresh `docs/specs/plans.md` in the same commit if the active slice or
+6. document assumptions explicitly
+7. implement in small vertical slices
+8. refresh `docs/specs/plans.md` in the same commit if the active slice or
    branch priorities change materially
-8. refresh `docs/specs/roadmap.md` in the same commit if a completed slice
+9. refresh `docs/specs/roadmap.md` in the same commit if a completed slice
    changes repository-level ordering, remaining debt, or deferred work
-9. before `git push`, run local validation serially in this order for code
-   changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`, `pnpm run build`
-10. run any additional task-specific checks before finishing
-11. avoid anemic domain models: extract only cross-unit or cross-layer
+10. before `git push`, run local validation serially in this order for code
+    changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`, `pnpm run build`
+11. run any additional task-specific checks before finishing
+12. avoid anemic domain models: extract only cross-unit or cross-layer
     semantics into helpers/interfaces, and keep entity identity plus
     unit-local behavior in the entity when that behavior is part of the
     JP1/AJS concept itself
@@ -52,8 +54,100 @@ For non-trivial changes:
 For docs-only changes:
 
 - `pnpm run build` is not required
-- run markdown-focused validation such as `pnpm run lint:md`
+- `pnpm run qlty` is required
+- run `pnpm run lint:md` when the changed markdown scope benefits from
+  markdown-specific validation
 - repository `Verify` workflow should not be relied on as a required gate
+
+## Implementation Change Gate
+
+Before editing runtime code, tests, generated artifacts, or configuration:
+
+1. perform an impact investigation
+2. record the findings in the right SDD artifacts
+3. report the planned change, affected files, affected features, affected
+   tests, breaking-change risk, and alternatives
+4. stop until a human explicitly approves implementation
+
+After approval, expand the investigation into a complete reference impact
+check, list every required fix, and task the work before implementation.
+Do not finish with only a subset of affected references updated.
+
+Implementation should then proceed in small meaningful blocks:
+
+1. implement one coherent block
+2. compile or run the closest fast check
+3. repair affected references in order
+4. run relevant unit tests
+5. after all fixes, run non-unit validation required by the change
+
+Do not leave failing checks unexplained or deferred without an explicit
+follow-up decision.
+
+## Impact Investigation Records
+
+Use the SDD artifacts by responsibility instead of storing all investigation
+notes in `TASKS.md`.
+
+- `docs/specs/plans.md`:
+  branch-level plan, scope boundary, changed-area summary, likely fix
+  candidates, risk summary, and assumptions
+- `docs/specs/features/<feature>/SPECS.md`:
+  durable impact analysis, reference propagation decisions, breaking-change
+  analysis, alternatives, and boundary decisions
+- `docs/specs/features/<feature>/TASKS.md`:
+  execution tasks for investigation, approval, implementation, tests, and
+  follow-up tracking
+
+`TASKS.md` may point to investigation results, but it is not the primary
+record for design decisions or impact analysis.
+
+When behavior scenarios exist, include the scenario impact in the same
+investigation: changed scenarios, added scenarios, removed scenarios, and
+tests affected by those scenarios.
+
+## Gherkin Usage
+
+Use Gherkin selectively for behavior contracts where Given / When / Then makes
+the expected behavior clearer.
+
+Keep use-case sections separated by responsibility:
+
+- `Rules`:
+  invariant constraints, boundaries, must-not statements, compatibility
+  requirements, and policy decisions that apply across scenarios
+- `Behavioral Scenarios`:
+  concrete observable examples of behavior, one behavior per scenario
+- `Acceptance Notes`:
+  supplemental acceptance or validation notes that are not already expressed by
+  scenarios, such as fixture strategy, migration caveats, or cross-host checks
+- `Risks Or Edge Cases`:
+  unresolved hazards, rare inputs, and conditions that need focused future
+  verification
+
+When adding scenarios, remove or shorten `Acceptance Notes` that repeat the
+same Given / When / Then behavior. Keep `Rules` unless they are only restating
+one scenario and are not a general constraint.
+
+Good fit:
+
+- use-case scenarios
+- regression-prone behavior
+- domain rules
+- bug recurrence prevention
+- breaking-change examples
+
+Poor fit:
+
+- architecture design
+- layering decisions
+- refactor plans
+- dependency design
+- internal algorithm details
+
+Prefer clarity over ceremony. Do not force every specification into Gherkin,
+and do not add Cucumber or other executable-spec tooling unless a future slice
+explicitly justifies it.
 
 ## Branch Naming
 

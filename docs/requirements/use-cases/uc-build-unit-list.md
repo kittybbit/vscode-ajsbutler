@@ -27,12 +27,29 @@ presentation without exposing parser-adjacent structures to the UI.
 - normalized AJS semantics should be reused when practical so list and flow
   slices share the same business interpretation
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Build unit list
+
+Scenario: Valid JP1/AJS input produces deterministic unit-list data
+  Given valid JP1/AJS document text
+  When the unit-list document DTO is built
+  Then root units and nested children are returned in deterministic order
+
+Scenario: Invalid JP1/AJS input reports parser errors
+  Given invalid JP1/AJS document text
+  When the unit-list document DTO is built
+  Then parser errors are returned without constructing a partial UI document
+
+Scenario: Encoded sample definitions remain supported
+  Given a representative UTF-8 or Shift_JIS JP1/AJS sample definition
+  When the unit-list document DTO is built
+  Then the output preserves the expected unit-list content
+```
+
 ## Acceptance Notes
 
-- valid JP1/AJS input produces deterministic root-unit ordering and nested unit
-  content
-- invalid JP1/AJS input reports parser errors without constructing a partial UI
-  document
 - desktop and web table viewers can consume the same DTO shape
 - representative fixtures in `sample/` should be reusable for regression tests,
   especially UTF-8, Shift_JIS, and large-definition coverage
@@ -43,5 +60,3 @@ presentation without exposing parser-adjacent structures to the UI.
   parameters are mapped inconsistently
 - large definitions must continue to build list DTOs without introducing
   presentation-specific filtering behavior into the use case
-- encoding-sensitive input should keep working for both UTF-8 and Shift_JIS
-  samples

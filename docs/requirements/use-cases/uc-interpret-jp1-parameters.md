@@ -33,11 +33,30 @@ target product reference so multiple features can rely on the same semantics.
 - manual-aligned semantics should not be duplicated independently in multiple
   viewers or adapters
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Interpret JP1 parameters
+
+Scenario: Parameter interpretation follows the named product version
+  Given parsed or normalized JP1/AJS parameter data
+  And JP1/AJS3 version 13 parameter rules
+  When parameter interpretation is requested
+  Then results are described against JP1/AJS3 version 13 semantics
+
+Scenario: Shared consumers reuse interpretation results
+  Given parameter interpretation results for a JP1/AJS unit
+  When hover, unit definition, flow, or list presentation needs the same rule
+  Then consumers reuse the shared interpretation instead of re-deriving it
+
+Scenario: Context-sensitive rules remain explicit
+  Given a parameter rule that depends on unit type, inheritance, or schedule
+  When the parameter is interpreted
+  Then the context that affects the result is visible in the interpretation
+```
+
 ## Acceptance Notes
 
-- parameter parsing behavior is described against one named product version
-- shared consumers can reuse the same parameter interpretation results instead
-  of re-deriving semantics ad hoc
 - existing behavior can be preserved incrementally while mismatches against the
   chosen manual are made explicit and corrected in focused slices
 

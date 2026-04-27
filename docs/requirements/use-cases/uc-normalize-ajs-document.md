@@ -33,16 +33,31 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
 - normalized output must be deterministic and suitable for unit list, flow
   graph, CSV, and future reuse
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Normalize AJS document
+
+Scenario: Parsed units become deterministic normalized units
+  Given a parsed raw Unit root tree
+  When the AJS document is normalized
+  Then normalized units are produced with deterministic identity and structure
+
+Scenario: Common navigation semantics are reusable
+  Given a normalized AJS document with nested units
+  When parent, ancestor, or root jobnet lookup is requested
+  Then the normalized model provides reusable navigation semantics
+
+Scenario: Shared parameter lookup stays consistent
+  Given a normalized AJS document with inherited parameter values
+  When direct, repeated, or first-ancestor parameter lookup is requested
+  Then consumers receive consistent parameter semantics
+```
+
 ## Acceptance Notes
 
 - `BuildUnitList` can derive its DTOs from the normalized model
 - `BuildFlowGraph` can derive its graph inputs from the normalized model
-- common navigation semantics such as parent lookup, ancestor lookup, and root
-  jobnet lookup should be reusable from the normalized model when multiple
-  application or presentation paths need them
-- common parameter semantics such as direct lookup, repeated-value lookup, and
-  first-ancestor inherited lookup should be reusable from the normalized model
-  when multiple consumers need the same interpretation
 - remaining wrapper-derived semantics should move into the normalized model
   only when the same rule is still duplicated across multiple normalized or
   application consumers

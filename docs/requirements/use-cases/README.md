@@ -26,9 +26,12 @@ That belongs in `docs/specs/`.
    acceptance notes.
 4. Keep UI framework details, VS Code adapter details, and file-level refactor
    steps out of the use case unless they are part of the behavior contract.
-5. When implementation changes but the behavior contract does not, update
+5. Use Gherkin scenarios only when they clarify behavior contracts. Keep
+   `Rules` for invariant constraints and remove `Acceptance Notes` that merely
+   repeat the same scenario.
+6. When implementation changes but the behavior contract does not, update
    `docs/specs/` and leave the use-case file stable.
-6. When the actual behavior contract changes, update the use-case file first,
+7. When the actual behavior contract changes, update the use-case file first,
    then align specs, plans, tasks, tests, and code.
 
 ## Relationship To `docs/specs/`

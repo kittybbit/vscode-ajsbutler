@@ -31,18 +31,38 @@ other viewer when that counterpart view is available.
 - desktop and web hosts should be able to use the same application-facing
   navigation contract
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Navigate between unit list and flow graph
+
+Scenario: Jump from unit list to matching flow scope
+  Given a selected unit in the unit-list viewer
+  And a flow graph can be built for the same document context
+  When the user invokes jump to flow graph
+  Then the flow graph opens or focuses the matching unit scope
+
+Scenario: Jump from flow graph to matching unit row
+  Given a selected unit in the flow-graph viewer
+  And a unit-list view can be built for the same document context
+  When the user invokes jump to unit list
+  Then the unit-list viewer opens or focuses the matching unit row
+
+Scenario: Counterpart viewer is unavailable
+  Given a selected unit in one viewer
+  And the counterpart viewer cannot be opened for that context
+  When the user invokes cross-view navigation
+  Then the current viewer state remains stable
+  And the action fails predictably
+```
+
 ## Acceptance Notes
 
-- a jump from unit-list to flow-graph lands on the matching unit scope when a
-  flow view can be built
-- a jump from flow-graph to unit-list lands on the matching unit row when a
-  list view can be built
 - the action does not require `UnitEntity` reconstruction in the presentation
   layer if stable normalized or DTO identity is sufficient
 
 ## Risks Or Edge Cases
 
-- target viewers might not already be open
 - some units might not have a meaningful flow scope or list row under the same
   presentation rules
 - navigation semantics can drift if unit identity differs between list and flow

@@ -48,16 +48,34 @@ the extension is not limited to local definition files.
 - server responses must not be exposed directly to list, flow, CSV,
   diagnostics, hover, or unit-definition presentation code
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Import AJS definition via WebAPI
+
+Scenario: Read-only import returns consumable definition data
+  Given a supported JP1/AJS WebAPI connection context
+  And request parameters for a definition scope
+  When read-only import is requested
+  Then definition data is returned through application-facing structures
+
+Scenario: Unsupported browser host reports a stable error
+  Given browser-hosted execution without a browser-safe WebAPI adapter
+  When read-only import is requested
+  Then the import result reports unsupported host
+
+Scenario: Authentication or transport failure is structured
+  Given a JP1/AJS WebAPI request that fails authentication or transport
+  When read-only import is requested
+  Then a structured import error is returned without leaking secrets
+```
+
 ## Acceptance Notes
 
 - a user can request server-side definition loading without relying on a local
   exported file as the primary source
-- downstream features can consume imported data through explicit application
-  contracts instead of direct WebAPI response objects
 - desktop and web compatibility implications are documented explicitly for the
   chosen transport approach
-- authentication and error-reporting behavior is explicit before implementation
-  starts
 - generated mocks or stubs can exercise supported success and failure paths
   without requiring a live JP1/AJS3 server for every test run
 - beta labeling makes limited real-environment validation and limited field

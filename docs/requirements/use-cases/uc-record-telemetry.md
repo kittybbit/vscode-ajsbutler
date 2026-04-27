@@ -27,10 +27,29 @@ exposing telemetry SDK types outside the outer adapter layer.
 - event names and basic payload behavior stay unchanged in this refactor
 - telemetry scope must remain minimal and privacy-conscious
 
+## Behavioral Scenarios (Gherkin)
+
+```gherkin
+Feature: Record telemetry
+
+Scenario: Activation and deactivation events are submitted
+  Given the extension activates or deactivates
+  When telemetry is recorded through the application-facing contract
+  Then the existing lifecycle event is submitted through the adapter
+
+Scenario: Preview and webview operation events are submitted
+  Given a preview command or webview-originated operation occurs
+  When telemetry is recorded through the application-facing contract
+  Then the existing event name and basic payload behavior are preserved
+
+Scenario: Telemetry payload remains privacy-conscious
+  Given telemetry event payload properties
+  When an event is submitted
+  Then file content, file paths, and personal identifiers are not added
+```
+
 ## Acceptance Notes
 
-- activation and deactivation events still fire
-- existing preview and webview operation telemetry still fires
 - desktop and web entry points share the same telemetry contract
 
 ## Risks Or Edge Cases

@@ -34,8 +34,10 @@ Instructions:
    - TRACEABILITY.md if requirements mapping is useful
 5. Keep documents concise, repository-specific, and implementation-ready.
 6. Align with DDD and Clean Architecture.
-7. Preserve VS Code 1.75 compatibility when relevant.
+7. Preserve VS Code compatibility declared in `package.json` when relevant.
 8. Prefer evolutionary design over rewrite-oriented plans.
+9. Use Gherkin scenarios only when they clarify behavior contracts,
+   regression-prone behavior, domain rules, or bug recurrence prevention.
 
 Output:
 

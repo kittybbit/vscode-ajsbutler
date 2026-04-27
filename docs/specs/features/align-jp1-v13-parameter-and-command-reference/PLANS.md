@@ -39,4 +39,4 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 
 - code changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`,
   `pnpm run build`
-- docs-only changes: `pnpm run lint:md`
+- docs-only changes: `pnpm run qlty`; add `pnpm run lint:md` when useful
