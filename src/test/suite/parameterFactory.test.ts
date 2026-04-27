@@ -87,6 +87,40 @@ unit=root,,jp1admin,;
 }
 `;
 
+const explicitRuleOneScheduleDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    sd=1,en;
+    sd=2,en;
+    st=08:00;
+    st=2,09:00;
+    sy=M120;
+    sy=2,U60;
+    ey=C180;
+    ey=2,18:00;
+    ln=3;
+    ln=2,4;
+    cy=(3,d);
+    cy=2,(4,w);
+    sh=be;
+    sh=2,af;
+    shd=5;
+    shd=2,6;
+    cftd=be,3,9;
+    cftd=2,af,4,8;
+    wc=4;
+    wc=2,5;
+    wt=00:30;
+    wt=2,01:00;
+  }
+}
+`;
+
 const undefinedScheduleDefinition = `
 unit=root,,jp1admin,;
 {
@@ -203,6 +237,13 @@ const parseScheduleJobnet = (): N => {
 
 const parseScheduleDefaultJobnet = (): N => {
   const result = parseAjs(scheduleDefaultDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
+};
+
+const parseExplicitRuleOneScheduleJobnet = (): N => {
+  const result = parseAjs(explicitRuleOneScheduleDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
@@ -357,6 +398,68 @@ suite("ParameterFactory", () => {
     assert.deepStrictEqual(
       wt?.map((parameter) => parameter?.value()),
       ["no", "2,no"],
+    );
+  });
+
+  test("aligns omitted schedule-rule numbers to explicit rule one", () => {
+    const jobnet = parseExplicitRuleOneScheduleJobnet();
+
+    const st = ParamFactory.st(jobnet);
+    const sy = ParamFactory.sy(jobnet);
+    const ey = ParamFactory.ey(jobnet);
+    const ln = ParamFactory.ln(jobnet);
+    const cy = ParamFactory.cy(jobnet);
+    const sh = ParamFactory.sh(jobnet);
+    const shd = ParamFactory.shd(jobnet);
+    const cftd = ParamFactory.cftd(jobnet);
+    const wc = ParamFactory.wc(jobnet);
+    const wt = ParamFactory.wt(jobnet);
+
+    assert.deepStrictEqual(
+      st?.map((parameter) => parameter?.time),
+      ["08:00", "09:00"],
+    );
+    assert.deepStrictEqual(
+      sy?.map((parameter) => parameter?.time),
+      ["M120", "U60"],
+    );
+    assert.deepStrictEqual(
+      ey?.map((parameter) => parameter?.time),
+      ["C180", "18:00"],
+    );
+    assert.deepStrictEqual(
+      ln?.map((parameter) => parameter?.parentRule),
+      ["3", "4"],
+    );
+    assert.deepStrictEqual(
+      cy?.map((parameter) => parameter?.cycle),
+      ["3,d", "4,w"],
+    );
+    assert.deepStrictEqual(
+      sh?.map((parameter) => parameter?.substitute),
+      ["be", "af"],
+    );
+    assert.deepStrictEqual(
+      shd?.map((parameter) => parameter?.shiftDays),
+      ["5", "6"],
+    );
+    assert.deepStrictEqual(
+      cftd?.map((parameter) => ({
+        scheduleByDaysFromStart: parameter?.scheduleByDaysFromStart,
+        maxShiftableDays: parameter?.maxShiftableDays,
+      })),
+      [
+        { scheduleByDaysFromStart: "be,3", maxShiftableDays: "9" },
+        { scheduleByDaysFromStart: "af,4", maxShiftableDays: "8" },
+      ],
+    );
+    assert.deepStrictEqual(
+      wc?.map((parameter) => parameter?.numberOfTimes),
+      ["4", "5"],
+    );
+    assert.deepStrictEqual(
+      wt?.map((parameter) => parameter?.time),
+      ["00:30", "01:00"],
     );
   });
 

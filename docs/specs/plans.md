@@ -11,9 +11,10 @@ under `docs/requirements/use-cases/`.
 - List search stays presentation-local until another non-table consumer needs
   the same matching semantics.
 - Parameter-reference alignment should proceed in small JP1/AJS v13 slices
-  with explicit manual coverage. The next likely behavior-changing slice is the
-  schedule-rule parameter family: `sd`, `ln`, `st`, `cy`, `sh`, `shd`,
-  `cftd`, `sy`, `ey`, `wc`, and `wt`.
+  with explicit manual coverage. For each parameter category, verify value
+  parsing against the official format before claiming the category aligned.
+  The active category is the schedule-rule parameter family: `sd`, `ln`, `st`,
+  `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
@@ -22,8 +23,10 @@ under `docs/requirements/use-cases/`.
 
 ## Next Priority Tasks
 
-1. Choose the next behavior-changing schedule-rule manual-alignment fix from
-   the remaining partial statuses.
+1. Continue category-level parameter parsing alignment. Use the schedule-rule
+   helper boundary as the first pattern, then apply the same audit/refactor
+   workflow to other parameter categories instead of checking isolated keys one
+   by one.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime

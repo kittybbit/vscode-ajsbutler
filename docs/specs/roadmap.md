@@ -18,10 +18,13 @@
    - Add traceability from JP1/AJS v13 manual sections to supported parameter
      keys, parser behavior, normalized model fields, use cases, and regression
      tests.
+   - Parameter value parsing must be verified by category against the official
+     format before a category is marked aligned; avoid one-key-at-a-time slices
+     when a shared helper boundary can cover the category.
    - The active focused slice is the schedule-rule parameter family: `sd`,
-     `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`; the
-     first behavior-changing fix ignores root-jobnet `ln` values, and the next
-     fix should come from the remaining partial statuses.
+     `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`; use it
+     as the first category-level parser alignment pattern before applying the
+     same workflow to other parameter families.
    - Keep behavior-preserving slices separate from behavior-changing manual
      alignment slices.
 
