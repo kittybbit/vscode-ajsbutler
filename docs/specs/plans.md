@@ -37,22 +37,23 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/align-transfer-operation-parameters`
-- Objective: continue JP1/AJS3 version 13 parameter alignment by extracting the
-  transfer-operation `top1` to `top4` default rule into a category-specific
-  domain helper seam.
-- Scope: update the SDD plan for the transfer-operation category, preserve
-  current explicit and derived `topN` values, and add focused regression
-  evidence for source/destination-driven defaults.
-- Out of scope: parser grammar changes, byte-length validation, macro-variable
-  validation, custom PC job invalidation, QUEUE job transfer-file behavior, and
-  UI changes.
-- Impact summary: domain parameter helper ownership changes only. User-visible
-  parser, list, flow, CSV, diagnostics, hover, telemetry, desktop extension,
-  and web extension behavior should remain unchanged.
-- Risks and assumptions: treat the JP1/AJS3 v13 UNIX/PC job and UNIX/PC custom
-  job references as the normative source for `topN` defaults; keep invalid
-  value handling deferred until a diagnostics/warnings policy is chosen.
+- Branch: `codex/align-job-end-judgment-parameters`
+- Objective: continue JP1/AJS3 version 13 parameter alignment by aligning the
+  job end-judgment `jd` default for UNIX/PC jobs and UNIX/PC custom jobs.
+- Status: implemented locally; validation completed on 2026-04-27.
+- Scope: record the SDD plan for the end-judgment category, preserve explicit
+  `jd` values, change omitted `jd` from the legacy `cond` fallback to the
+  manual-backed `cod` default, and add focused regression evidence.
+- Out of scope: parser grammar changes, byte-length validation, numeric range
+  validation, invalid `jd` / `abr` diagnostics, retry range diagnostics, and UI
+  changes.
+- Impact summary: domain parameter default behavior changes for omitted `jd`.
+  Parser, list, flow, CSV, diagnostics, hover, telemetry, desktop extension,
+  and web extension code paths should remain structurally unchanged.
+- Risks and assumptions: treat the JP1/AJS3 v13 UNIX/PC job, UNIX/PC custom
+  job, and `ajsprint -a` default table references as the normative source for
+  `jd=cod`; keep invalid value handling deferred until a diagnostics/warnings
+  policy is chosen.
 
 ## Wrapper Semantics Matrix
 
@@ -76,3 +77,10 @@ rules in `docs/specs/README.md`, not in this file.
 - docs-only changes: `pnpm run qlty`; add `pnpm run lint:md` when markdown
   structure or links need focused validation
 - code changes: follow `docs/specs/README.md`
+
+Current branch checks:
+
+- 2026-04-27: `npm run qlty`
+- 2026-04-27: `npm test`
+- 2026-04-27: `npm run test:web`
+- 2026-04-27: `npm run build`

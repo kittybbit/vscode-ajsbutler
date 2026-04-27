@@ -20,6 +20,13 @@
 - Related docs: {{docs or "none"}}
 - Breaking-change risk: {{none/low/medium/high and reason}}
 
+## Approval Scope Summary
+
+- Approval status: see TASKS.md `Human Approval`
+- Approved scope: {{implementation scope once approved}}
+- Scope guard: stop and request additional approval before changing anything
+  outside the approved scope
+
 ## Milestones
 
 1. {{milestone}}

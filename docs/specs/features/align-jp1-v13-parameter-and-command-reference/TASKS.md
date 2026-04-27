@@ -48,11 +48,15 @@
 - [x] Record transfer-operation alignment scope, manual references, affected
       seams, and expected `top1` to `top4` default behavior before completing
       the helper-boundary extraction
+- [x] Record job end-judgment alignment scope, manual references, affected
+      seams, and expected `jd` default behavior before implementation
 
 ## Follow-up
 
 - [x] Extract `top1` to `top4` default resolution into a transfer-operation
       helper seam while preserving explicit and derived values
+- [x] Align omitted UNIX/PC job and UNIX/PC custom job `jd` values to the
+      JP1/AJS3 v13 default `cod`
 - [ ] Apply the same category-level value parsing audit/refactor workflow to
       another non-schedule parameter family before marking those categories
       aligned
@@ -109,3 +113,9 @@
 - 2026-04-27: `topN` default resolution now lives in
   `transferOperationHelpers.ts`; regression evidence covers explicit `topN`,
   derived `sav`, derived `del`, and the no-default case.
+- 2026-04-27: job end-judgment alignment is the next non-schedule parameter
+  family. The manual-backed behavior change is limited to omitted `jd`
+  resolving to `cod`; invalid pairing diagnostics remain deferred.
+- 2026-04-27: omitted UNIX/PC job and UNIX/PC custom job `jd` values now
+  resolve to `cod` through `jobEndJudgmentHelpers.ts`; explicit `jd` values
+  remain preserved.

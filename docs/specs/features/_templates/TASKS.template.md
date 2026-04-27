@@ -7,11 +7,23 @@
 - Update `docs/specs/plans.md` or `docs/specs/roadmap.md` in the same commit
   when branch priorities or repository sequencing change.
 
+## Human Approval
+
+- Status: Pending
+- Approved by:
+- Approved at:
+- Approval text:
+- Approved scope:
+
+Implementation must not start while Status is Pending.
+Only clear human approval can change Status to Approved.
+
 ## Tasks
 
 - [ ] Impact investigation completed and recorded in PLANS/SPECS/TASKS by
       responsibility
-- [ ] Human approval gate passed before implementation
+- [ ] Human approval recorded
+- [ ] Implementation scope matches approved scope
 - [ ] Fix targets tracked to completion
 - [ ] {{implementation task}}
 

@@ -57,6 +57,12 @@ Scenario: {{one observable behavior}}
 
 - {{alternative}}: {{reason accepted or rejected}}
 
+### Approval Impact Decisions
+
+- Approval evidence owner: TASKS.md `Human Approval`
+- Scope changes requiring re-approval: {{changes that exceed the approved
+  scope}}
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
