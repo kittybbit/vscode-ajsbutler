@@ -25,13 +25,15 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   before changing helper semantics.
 - Implemented the first behavior-changing schedule-rule alignment fix by
   ignoring `ln` on root jobnets.
+- Started category-level value parsing alignment with the schedule-rule
+  parameter family, using shared domain helpers as the boundary pattern.
 
 ## Follow-up
 
-- Build a parameter-coverage matrix only when a behavior-changing alignment
-  slice needs per-key status beyond the current audit summary.
-- Choose the next behavior-changing schedule-rule fix from the remaining
-  partial statuses.
+- Apply the same value parsing audit/refactor workflow to other parameter
+  categories before marking them official-reference aligned.
+- Build a parameter-coverage matrix when category-level status needs tracking
+  beyond the current audit summary.
 
 ## Validation
 

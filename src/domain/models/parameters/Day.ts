@@ -1,5 +1,6 @@
 import Parameter from "./Parameter";
 import { ParamInternal } from "./parameter.types";
+import { parseScheduleDateValue } from "./scheduleRuleHelpers";
 
 class Day extends Parameter {
   /**
@@ -15,21 +16,17 @@ class Day extends Parameter {
    *   }|en|ud                                 )
    * }
    */
-  #pattern =
-    /^((\d{1,3}),)?((\d{4}\/)?\d{2}\/)?(([+|*|@])?\d{2}|([+|*|@])?b(-\d{2})?|[+]?(su|mo|tu|we|th|fr|sa)(:(\d|b))?|en|ud)/;
-  _re;
-  _rule = -1;
+  _rule = 1;
   _yearMonth;
   _day;
 
   constructor(arg: ParamInternal) {
     super(arg);
-    this._re = this.#pattern.exec(this.value() ?? "");
-    const re = this._re;
-    if (re) {
-      this._rule = Number(re[2]);
-      this._yearMonth = re[3];
-      this._day = re[5];
+    const parsed = parseScheduleDateValue(this.value());
+    if (parsed) {
+      this._rule = parsed.rule;
+      this._yearMonth = parsed.yearMonth;
+      this._day = parsed.day;
     }
   }
 }

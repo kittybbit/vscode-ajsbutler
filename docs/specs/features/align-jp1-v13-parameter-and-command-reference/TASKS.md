@@ -39,14 +39,22 @@
 - [x] Implement the first behavior-changing schedule-rule alignment fix:
       ignore `ln` on root jobnets while preserving nested jobnet `ln`
       behavior
+- [x] Align omitted schedule-rule numbers to rule `1` across the schedule-rule
+      helper boundary for `sd`, `st`, `sy`, `ey`, `ln`, `cy`, `sh`, `shd`,
+      `cftd`, `wc`, and `wt`
+- [x] Centralize schedule-rule value parsing behind domain helpers and verify
+      the official format shape for the schedule-rule family before treating
+      the category as aligned
 
 ## Follow-up
 
-- [ ] Turn the audit notes into an explicit parameter-coverage matrix only when
-      a behavior-changing alignment slice needs per-key status beyond the
-      current audit summary
-- [ ] Choose the next schedule-rule manual-alignment fix from the remaining
-      partial statuses
+- [ ] Apply the same category-level value parsing audit/refactor workflow to
+      non-schedule parameter families before marking those categories aligned
+- [ ] Turn the audit notes into an explicit parameter-coverage matrix when
+      category-level status needs tracking beyond the current audit summary
+- [ ] Continue schedule-rule helper-boundary alignment with the remaining
+      grouped semantics, such as `wc` / `wt` pairing or range validation, when
+      the behavior contract is explicit enough to test across the family
 
 ## Notes
 
@@ -81,3 +89,11 @@
 - 2026-04-27: `ln` now follows the JP1/AJS3 v13 root-jobnet rule: root-jobnet
   `ln` values are ignored, while nested jobnet `ln` values remain sorted and
   visible to the unit-list parent-rule projection.
+- 2026-04-27: schedule-rule number omission is now handled as a shared
+  schedule-rule boundary concern. The domain parameter classes resolve omitted
+  rule numbers to manual default rule `1`, and regression coverage verifies the
+  schedule family together instead of one parameter at a time.
+- 2026-04-27: schedule-rule value parsing is now centralized in domain helpers
+  and reused by unit-list projection. This is the first category-level parser
+  alignment pattern; later parameter categories should follow the same audit,
+  helper-boundary, and regression-test workflow.

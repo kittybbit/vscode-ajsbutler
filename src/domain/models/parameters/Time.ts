@@ -1,24 +1,29 @@
 import { ParamInternal } from "./parameter.types";
 import Parameter from "./Parameter";
 import ScheduleRule from "./ScheduleRule";
+import {
+  parseDelayTimeValue,
+  parseStartTimeValue,
+  parseWaitTimeValue,
+} from "./scheduleRuleHelpers";
+
+type ParseTimeValue = (rawValue: string | undefined) =>
+  | {
+      rule: number;
+      value: string;
+    }
+  | undefined;
 
 abstract class Time extends Parameter implements ScheduleRule {
-  /**
-   * [N,]                   ((\d{1,3}),)?
-   * {no|hh:mm|mmmm|un}     (no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)
-   */
-  #pattern = /^((\d{1,3}),)?(no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)?/;
-  #_re;
-  #_rule = -1;
+  #_rule = 1;
   #_time;
 
-  constructor(arg: ParamInternal) {
+  constructor(arg: ParamInternal, parseTimeValue: ParseTimeValue) {
     super(arg);
-    this.#_re = this.#pattern.exec(this.value() ?? "");
-    const re = this.#_re;
-    if (re) {
-      this.#_rule = Number(re[2]);
-      this.#_time = re[3];
+    const parsed = parseTimeValue(this.value());
+    if (parsed) {
+      this.#_rule = parsed.rule;
+      this.#_time = parsed.value;
     }
   }
 
@@ -32,21 +37,37 @@ abstract class Time extends Parameter implements ScheduleRule {
 }
 
 export class Ey extends Time {
+  constructor(arg: ParamInternal) {
+    super(arg, parseDelayTimeValue);
+  }
+
   get time() {
     return super.time;
   }
 }
 
 export class St extends Time {
+  constructor(arg: ParamInternal) {
+    super(arg, parseStartTimeValue);
+  }
+
   get time() {
     return super.time ?? "+00:00";
   }
 }
 
 export class Sy extends Time {
+  constructor(arg: ParamInternal) {
+    super(arg, parseDelayTimeValue);
+  }
+
   get time() {
     return super.time;
   }
 }
 
-export class Wt extends Time {}
+export class Wt extends Time {
+  constructor(arg: ParamInternal) {
+    super(arg, parseWaitTimeValue);
+  }
+}

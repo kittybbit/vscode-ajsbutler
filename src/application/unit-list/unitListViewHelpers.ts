@@ -5,6 +5,16 @@ import {
   findAjsUnitParameter,
   findParentAjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
+import {
+  parseAnyScheduleTimeValue,
+  parseClosedDaySubstitutionValue,
+  parseCycleValue,
+  parseParentScheduleRuleValue,
+  parseScheduleByDaysFromStartValue,
+  parseScheduleDateValue,
+  parseShiftDaysValue,
+  parseWaitCountValue,
+} from "../../domain/models/parameters/scheduleRuleHelpers";
 import { WeekSymbol, isWeekSymbol } from "../../domain/values/AjsType";
 
 const weekSymbols: WeekSymbol[] = ["su", "mo", "tu", "we", "th", "fr", "sa"];
@@ -106,23 +116,15 @@ export const getPriorityForUnitTypes = (
   return 1;
 };
 
-const parseRulePrefix = (value: string): { rule?: string; body: string } => {
-  const matched = /^(\d{1,3}),(.*)$/.exec(value);
-  return matched ? { rule: matched[1], body: matched[2] } : { body: value };
-};
-
 export const parseLnParentRule = (value: string): string =>
-  parseRulePrefix(value).body;
+  parseParentScheduleRuleValue(value)?.value ?? "";
 
 export const parseSd = (
   value: string,
 ): { type: string; yearMonth: string; day: string } => {
-  const matched =
-    /^((\d{1,3}),)?((\d{4}\/)?\d{2}\/)?(([+*@])?\d{2}|([+*@])?b(-\d{2})?|\+?(su|mo|tu|we|th|fr|sa)(:(\d|b))?|en|ud)/.exec(
-      value,
-    );
-  const yearMonth = matched?.[3]?.slice(0, -1) ?? "";
-  const dayValue = matched?.[5] ?? "";
+  const parsed = parseScheduleDateValue(value);
+  const yearMonth = parsed?.yearMonth?.slice(0, -1) ?? "";
+  const dayValue = parsed?.day ?? "";
   const type =
     dayValue === "en" || dayValue === "ud"
       ? dayValue
@@ -141,31 +143,33 @@ export const parseSd = (
 };
 
 export const parseTimeValue = (value: string, fallback = ""): string =>
-  /^((\d{1,3}),)?(no|([+]?)\d{2}:\d{2}|([MCU])?\d{1,4}|un)?/.exec(value)?.[3] ??
-  fallback;
+  parseAnyScheduleTimeValue(value)?.value ?? fallback;
 
 export const parseCy = (value: string): string =>
-  /^((\d{1,3}),)?\(((\d{1,3}),([ymwd]))\)/.exec(value)?.[3] ?? "";
+  parseCycleValue(value)?.value.slice(1, -1) ?? "";
 
 export const parseSh = (value: string): string =>
-  /^((\d{1,3}),)?(be|af|ca|no)/.exec(value)?.[3] ?? "";
+  parseClosedDaySubstitutionValue(value)?.value ?? "";
 
 export const parseShd = (value: string): string =>
-  /^((\d{1,3}),)?(\d{1,3})/.exec(value)?.[3] ?? "2";
+  parseShiftDaysValue(value)?.value ?? "2";
 
 export const parseCftd = (
   value: string,
 ): { scheduleByDaysFromStart: string; maxShiftableDays: string } => {
-  const matched =
-    /^((\d{1,3}),)?(no|be|af|db|da)((,(\d{1,2}))(,(\d{1,2}))?)?/.exec(value);
-  const type = matched?.[3] ?? "no";
+  const parsed = parseScheduleByDaysFromStartValue(value);
+  const type = parsed?.type ?? "no";
   return {
     scheduleByDaysFromStart:
-      type === "no" ? "no" : `${type},${matched?.[6] ?? "1"}`,
+      type === "no"
+        ? "no"
+        : `${type},${parsed?.scheduleByDaysFromStart ?? "1"}`,
     maxShiftableDays:
-      type && ["no", "db", "da"].includes(type) ? "" : (matched?.[8] ?? "10"),
+      type && ["no", "db", "da"].includes(type)
+        ? ""
+        : (parsed?.maxShiftableDays ?? "10"),
   };
 };
 
 export const parseWc = (value: string): string =>
-  /^((\d{1,3}),)?(.+)/.exec(value)?.[3] ?? "1";
+  parseWaitCountValue(value)?.value ?? "1";

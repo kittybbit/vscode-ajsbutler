@@ -49,23 +49,6 @@ const createScheduleRuleEmptyBuilder = <
     );
 };
 
-const createSortedScheduleRuleBuilder = <
-  T extends ScheduleRule,
-  P extends ParamInternal["parameter"],
->(
-  parameter: P,
-  mapParam: (param: ParamInternal) => T,
-) => {
-  return (unit: UnitEntity): Array<T> | undefined =>
-    buildSortedScheduleRuleParameters(
-      resolveParameterArray({
-        unit: unit,
-        parameter: parameter,
-      }),
-      mapParam,
-    );
-};
-
 const createRootJobnetIgnoredScheduleRuleBuilder = <
   T extends ScheduleRule,
   P extends ParamInternal["parameter"],
