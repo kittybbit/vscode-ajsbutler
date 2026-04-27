@@ -1,8 +1,16 @@
+---
+name: sdd-change
+description: Use when preparing or updating SDD artifacts for a non-trivial repository change in vscode-ajsbutler. Enforces impact investigation, human approval before implementation, scoped approval evidence, and validation rules.
+---
+
 # sdd-change
 
 ## Purpose
 
 Prepare or update SDD artifacts before implementing a non-trivial repository change.
+This is the single change-workflow skill for the repository. Former specialized
+skills are represented here only as supplemental checks; they do not bypass the
+SDD investigation, approval, evidence, implementation, and validation flow.
 
 ## Steps
 
@@ -14,6 +22,8 @@ Prepare or update SDD artifacts before implementing a non-trivial repository cha
    - list affected files, features, tests, docs, and breaking-change risk
    - when behavior scenarios exist, list changed, added, or removed scenarios
      and affected tests
+   - check relevant supplemental perspectives below without treating them as
+     separate approval paths
 5. record findings by responsibility:
    - `docs/specs/plans.md` for branch scope, assumptions, candidates, and risk
    - feature `SPECS.md` for durable impact analysis, alternatives, and boundary
@@ -32,6 +42,53 @@ Prepare or update SDD artifacts before implementing a non-trivial repository cha
 12. stop again for additional approval if required changes exceed the approved
     scope
 13. run required validation before finishing
+
+## Supplemental Checks
+
+Use these checks during investigation and planning when they match the change.
+Keep the notes short and focused on impact, decisions, and validation.
+
+### Repository Investigation
+
+- identify desktop and web entry points affected by the change
+- identify parser-related modules and generated grammar boundaries
+- identify direct VS Code API boundaries and adapter locations
+- summarize architectural risks, test impact, and compatibility impact
+
+### Planning
+
+- state scope and non-goals
+- name affected layers and ownership boundaries
+- record assumptions, key decisions, and approval-sensitive ambiguity
+- define acceptance criteria and a concrete test plan
+- note rollback or recovery steps when behavior or compatibility risk exists
+
+### Parser Changes
+
+- keep grammar-generated boundaries explicit
+- do not leak parser internals into UI components
+- add or update golden tests when parser behavior changes
+- verify normalization behavior and malformed-input behavior
+
+### VS Code Extension Changes
+
+- confirm desktop impact, web impact, or both
+- keep direct `vscode` API usage near extension or presentation boundaries
+- check browser build risk and Node-only runtime assumptions
+- avoid minimum VS Code version drift unless explicitly approved
+
+### Webview Changes
+
+- consume DTOs or view models, not parser internals
+- keep UI-library-specific types in presentation code
+- keep parse, business, and CSV logic out of components
+
+### Architecture Refactors
+
+- define the use case before moving code
+- identify mixed responsibilities and move adapters outward
+- preserve behavior, keep the slice reviewable, and add focused tests
+- summarize remaining technical debt instead of broadening the refactor
 
 ## Rules
 
