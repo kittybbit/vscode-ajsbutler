@@ -65,9 +65,79 @@ Before editing runtime code, tests, generated artifacts, or configuration:
 
 1. perform an impact investigation
 2. record the findings in the right SDD artifacts
-3. report the planned change, affected files, affected features, affected
-   tests, breaking-change risk, and alternatives
-4. stop until a human explicitly approves implementation
+3. record the approval evidence section in the feature `TASKS.md`
+4. report the planned change, affected files, affected functions/classes or
+   components, affected features, affected tests, related docs,
+   breaking-change risk, and alternatives
+5. stop until a human gives clear approval for implementation
+
+Clear approval means the human response unambiguously permits implementation
+for the reported scope. The following are not approval:
+
+- answers to investigation questions
+- additional information
+- design discussion
+- ambiguous agreement
+- Codex's own judgment
+
+While approval is pending, Codex must not:
+
+- edit runtime code
+- edit tests
+- edit generated artifacts
+- edit configuration
+- create an implementation branch
+- create an implementation commit
+- refactor for implementation purposes
+- make incidental or "while here" fixes
+
+While approval is pending, Codex may only:
+
+- investigate
+- update SDD documents
+- record impact scope
+- organize alternatives
+- present the approval request
+
+Each feature `TASKS.md` must include the approval evidence:
+
+```md
+## Human Approval
+
+- Status: Pending | Approved
+- Approved by:
+- Approved at:
+- Approval text:
+- Approved scope:
+```
+
+Implementation may start only when `Status: Approved` and `Approval text`
+records the human approval. If implementation reveals required changes
+outside the approved scope, stop again, update the impact record, and obtain
+additional clear approval before editing those areas.
+
+Before approval, Codex must report only this implementation-gate output and
+must not claim that implementation has started or completed:
+
+```md
+## Impact Investigation Summary
+
+- Planned change:
+- Affected files:
+- Affected functions/classes/components:
+- Affected features:
+- Affected tests:
+- Related docs:
+- Breaking-change risk:
+- Alternatives:
+
+## Approval Request
+
+Please approve implementation before I edit runtime code, tests,
+generated artifacts, or configuration.
+
+Implementation will not proceed until approval is given.
+```
 
 After approval, expand the investigation into a complete reference impact
 check, list every required fix, and task the work before implementation.

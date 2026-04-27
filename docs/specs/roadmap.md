@@ -21,10 +21,15 @@
    - Parameter value parsing must be verified by category against the official
      format before a category is marked aligned; avoid one-key-at-a-time slices
      when a shared helper boundary can cover the category.
-   - The active focused slice is the schedule-rule parameter family: `sd`,
-     `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`; use it
-     as the first category-level parser alignment pattern before applying the
-     same workflow to other parameter families.
+   - The first category-level parser alignment pattern has been applied to the
+     schedule-rule parameter family: `sd`, `ln`, `st`, `cy`, `sh`, `shd`,
+     `cftd`, `sy`, `ey`, `wc`, and `wt`.
+   - The next completed focused slices extracted transfer-operation `top1` to
+     `top4` defaults and aligned the job end-judgment `jd` default for
+     UNIX/PC jobs and UNIX/PC custom jobs.
+   - Continue applying the same audit, helper-boundary, and regression-test
+     workflow to other parameter families instead of checking isolated keys one
+     by one.
    - Keep behavior-preserving slices separate from behavior-changing manual
      alignment slices.
 

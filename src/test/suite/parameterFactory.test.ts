@@ -2,6 +2,7 @@ import * as assert from "assert";
 import { ParamFactory } from "../../domain/models/parameters/ParameterFactory";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
 import { J } from "../../domain/models/units/J";
+import { Cj } from "../../domain/models/units/Cj";
 import { N } from "../../domain/models/units/N";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
@@ -206,6 +207,36 @@ unit=root,,jp1admin,;
 }
 `;
 
+const jobEndJudgmentDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=job1,j,+0+0;
+  el=custom,cj,+160+0;
+  unit=job1,,jp1admin,;
+  {
+    ty=j;
+  }
+  unit=custom,,jp1admin,;
+  {
+    ty=cj;
+  }
+}
+`;
+
+const explicitJobEndJudgmentDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=job1,j,+0+0;
+  unit=job1,,jp1admin,;
+  {
+    ty=j;
+    jd=ab;
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -287,6 +318,23 @@ const parseRootGroup = () => {
 
 const parseTransferJob = (): J => {
   const result = parseAjs(transferDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as J;
+};
+
+const parseJobEndJudgmentUnits = (): { job: J; customJob: Cj } => {
+  const result = parseAjs(jobEndJudgmentDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return {
+    job: root.children[0] as J,
+    customJob: root.children[1] as Cj,
+  };
+};
+
+const parseExplicitJobEndJudgmentJob = (): J => {
+  const result = parseAjs(explicitJobEndJudgmentDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
@@ -606,5 +654,22 @@ suite("ParameterFactory", () => {
     assert.strictEqual(ParamFactory.top2(job)?.value(), "del");
     assert.strictEqual(ParamFactory.top3(job)?.value(), "del");
     assert.strictEqual(ParamFactory.top4(job)?.value(), "keep");
+  });
+
+  test("returns JP1/AJS3 v13 end-judgment defaults through the facade", () => {
+    const { job, customJob } = parseJobEndJudgmentUnits();
+
+    assert.strictEqual(ParamFactory.jd(job)?.value(), "cod");
+    assert.strictEqual(ParamFactory.jd(customJob)?.value(), "cod");
+    assert.strictEqual(ParamFactory.tho(job)?.value(), DEFAULTS.Tho);
+    assert.strictEqual(ParamFactory.abr(job)?.value(), DEFAULTS.Abr);
+    assert.strictEqual(ParamFactory.wth(job), undefined);
+    assert.strictEqual(ParamFactory.jdf(job), undefined);
+  });
+
+  test("preserves explicit end-judgment values through the facade", () => {
+    const job = parseExplicitJobEndJudgmentJob();
+
+    assert.strictEqual(ParamFactory.jd(job)?.value(), "ab");
   });
 });

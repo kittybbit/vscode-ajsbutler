@@ -9,7 +9,7 @@ Prepare or update SDD artifacts before implementing a non-trivial repository cha
 1. read `AGENTS.md`
 2. read `package.json`
 3. read the relevant files in `docs/specs/`
-4. investigate impact before implementation changes:
+4. run the investigation-only phase before implementation changes:
    - search affected functions, classes, components, and commands
    - list affected files, features, tests, docs, and breaking-change risk
    - when behavior scenarios exist, list changed, added, or removed scenarios
@@ -23,14 +23,27 @@ Prepare or update SDD artifacts before implementing a non-trivial repository cha
 6. update or create the matching use-case spec in
    `docs/requirements/use-cases/`
    when the behavior contract changes
-7. stop after the investigation and ask for explicit human approval before
+7. record `TASKS.md` human approval evidence with `Status: Pending`
+8. stop after the investigation and ask for clear human approval before
    editing runtime code, tests, generated artifacts, or configuration
-8. after approval, enumerate all affected references and task the complete fix
-9. implement in small meaningful blocks, checking compile/tests as you go
-10. run required validation before finishing
+9. after approval, record the approval text and approved scope in `TASKS.md`
+10. enumerate all affected references and task the complete fix
+11. implement in small meaningful blocks, checking compile/tests as you go
+12. stop again for additional approval if required changes exceed the approved
+    scope
+13. run required validation before finishing
 
 ## Rules
 
+- investigation-only phase permits investigation, SDD document updates, impact
+  records, alternatives, and approval requests only
+- approval-required phase must not edit runtime code, tests, generated
+  artifacts, configuration, implementation branches, implementation commits,
+  implementation refactors, or incidental fixes
+- approval definition, approval evidence, and re-approval rules are centralized
+  in `docs/specs/README.md` `Implementation Change Gate`
+- implementation phase starts only when `TASKS.md` records `Status: Approved`
+  and the approval text
 - keep `engines.vscode` unchanged unless explicitly approved
 - preserve desktop and web extension behavior
 - prefer small vertical slices over broad rewrites

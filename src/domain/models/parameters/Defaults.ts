@@ -1,7 +1,7 @@
 const parameterDefaults = {
   Ab: "exec",
   Pr: "1",
-  Jd: "cond",
+  Jd: "cod",
   Tho: "0",
   Abr: "n",
   Rec: "1",

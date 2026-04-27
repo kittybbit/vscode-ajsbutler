@@ -197,6 +197,7 @@ import {
 import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
+import { resolveJobEndJudgmentDefaultRawValue } from "./jobEndJudgmentHelpers";
 import {
   buildInheritedParameter,
   buildOptionalParameter,
@@ -426,7 +427,9 @@ export const optionalScalarParameterBuilders = {
   ),
   htstf: createOptionalScalarBuilder("htstf", (param) => new Htstf(param)),
   jc: createOptionalScalarBuilder("jc", (param) => new Jc(param)),
-  jd: createOptionalScalarBuilder("jd", (param) => new Jd(param), DEFAULTS.Jd),
+  jd: createOptionalScalarBuilder("jd", (param) => new Jd(param), {
+    resolveDefaultRawValue: resolveJobEndJudgmentDefaultRawValue,
+  }),
   jdf: createOptionalScalarBuilder("jdf", (param) => new Jdf(param)),
   jty: createOptionalScalarBuilder(
     "jty",
