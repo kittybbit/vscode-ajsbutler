@@ -64,13 +64,16 @@ Good first slices:
 
 For non-trivial changes, follow this order:
 
-1. Read relevant docs in `docs/specs/`.
-2. Update or create the relevant use-case spec.
-3. Write or update a short implementation plan in `PLANS.md`.
-4. Confirm acceptance criteria.
-5. Implement.
-6. Run quality checks.
-7. Summarize impact and remaining risks.
+1. Read `docs/specs/README.md` first, especially the
+   Implementation Change Gate.
+2. Read relevant feature and roadmap docs in `docs/specs/`.
+3. Update or create the relevant use-case spec.
+4. Write or update a short implementation plan in `PLANS.md`.
+5. Confirm acceptance criteria and required approval gates before editing
+   runtime code, tests, generated artifacts, or configuration.
+6. Implement.
+7. Run quality checks.
+8. Summarize impact and remaining risks.
 
 If the requested change is ambiguous, prefer documenting assumptions explicitly in `PLANS.md` instead of making hidden assumptions.
 

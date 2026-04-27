@@ -27,6 +27,28 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   ignoring `ln` on root jobnets.
 - Started category-level value parsing alignment with the schedule-rule
   parameter family, using shared domain helpers as the boundary pattern.
+- Prepared the next category-level helper-boundary slice for transfer
+  operation parameters in `TRANSFER_OPERATION_ALIGNMENT.md`.
+- Extracted `top1` to `top4` default resolution into
+  `transferOperationHelpers.ts` while preserving explicit and derived values.
+
+## Impact Investigation
+
+- Planned change: move `top1` to `top4` default resolution out of the generic
+  `parameterHelpers.ts` module and into a transfer-operation helper seam.
+- Affected files:
+  `src/domain/models/parameters/parameterHelpers.ts`,
+  `src/domain/models/parameters/transferOperationHelpers.ts`,
+  `src/domain/models/parameters/transferOperationParameterBuilders.ts`,
+  `src/test/suite/parameterHelpers.test.ts`, and this feature's SDD docs.
+- Affected features: JP1/AJS parameter interpretation for UNIX/PC job and
+  UNIX/PC custom job transfer operation defaults.
+- Tests affected: parameter helper and parameter factory regression tests.
+- Breaking-change risk: low. The intended behavior preserves current explicit
+  and derived `topN` values while narrowing the owning helper boundary.
+- Alternatives considered: leave `topN` logic in `parameterHelpers.ts`; this
+  was rejected because the schedule-rule slice established category-specific
+  helper seams and `topN` has transfer-specific paired-parameter semantics.
 
 ## Follow-up
 
@@ -34,6 +56,8 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   categories before marking them official-reference aligned.
 - Build a parameter-coverage matrix when category-level status needs tracking
   beyond the current audit summary.
+- Revisit QUEUE job transfer-file coverage separately because the manual
+  defines `tsN` and `tdN` but not `topN`.
 
 ## Validation
 

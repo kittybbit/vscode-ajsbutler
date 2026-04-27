@@ -1,7 +1,7 @@
 import { Top1, Top2, Top3, Top4 } from "../parameters";
 import { Cj } from "../units/Cj";
 import { J } from "../units/J";
-import { buildTopParameter } from "./parameterHelpers";
+import { buildTopParameter } from "./transferOperationHelpers";
 
 export const transferOperationParameterBuilders = {
   top1(unit: J | Cj) {
