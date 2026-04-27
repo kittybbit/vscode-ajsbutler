@@ -19,16 +19,19 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Added command-builder metadata for the supported commands.
 - Localized command-builder labels, descriptions, and manual links through the
   existing message resources.
+- Prepared the schedule-rule parameter slice in
+  `SCHEDULE_RULE_ALIGNMENT.md`.
+- Added behavior-preserving schedule-rule regression tests for thin evidence
+  before changing helper semantics.
+- Implemented the first behavior-changing schedule-rule alignment fix by
+  ignoring `ln` on root jobnets.
 
 ## Follow-up
 
 - Build a parameter-coverage matrix only when a behavior-changing alignment
   slice needs per-key status beyond the current audit summary.
-- Use the schedule-rule family as the next likely behavior-changing parameter
-  slice: `sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and
-  `wt`.
-- Keep this as a focused manual-alignment slice before introducing a broad
-  repository-wide parameter matrix.
+- Choose the next behavior-changing schedule-rule fix from the remaining
+  partial statuses.
 
 ## Validation
 

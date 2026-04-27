@@ -66,6 +66,27 @@ const createSortedScheduleRuleBuilder = <
     );
 };
 
+const createRootJobnetIgnoredScheduleRuleBuilder = <
+  T extends ScheduleRule,
+  P extends ParamInternal["parameter"],
+>(
+  parameter: P,
+  mapParam: (param: ParamInternal) => T,
+) => {
+  return (unit: UnitEntity): Array<T> | undefined => {
+    if (unit instanceof N && unit.isRootJobnet) {
+      return undefined;
+    }
+    return buildSortedScheduleRuleParameters(
+      resolveParameterArray({
+        unit: unit,
+        parameter: parameter,
+      }),
+      mapParam,
+    );
+  };
+};
+
 const createRootDefaultAwareScheduleRuleBuilder = <
   T extends ScheduleRule,
   P extends ParamInternal["parameter"],
@@ -96,7 +117,10 @@ export const ruleParameterBuilders = {
   ),
   cy: createScheduleRuleEmptyBuilder("cy", (param) => new Cy(param)),
   ey: createScheduleRuleEmptyBuilder("ey", (param) => new Ey(param)),
-  ln: createSortedScheduleRuleBuilder("ln", (param) => new Ln(param)),
+  ln: createRootJobnetIgnoredScheduleRuleBuilder(
+    "ln",
+    (param) => new Ln(param),
+  ),
   sd: createRootDefaultAwareScheduleRuleBuilder(
     "sd",
     "sd",

@@ -32,6 +32,25 @@ unit=root,,jp1admin,;
 }
 `;
 
+const rootJobnetLnDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    ln=2;
+    el=subnet,n,+160+0;
+    unit=subnet,,jp1admin,;
+    {
+      ty=n;
+      ln=2;
+    }
+  }
+}
+`;
+
 suite("Build Unit List Group 10 View", () => {
   test("projects schedule-related group10 fields from unit parameters", () => {
     const result = parseAjs(definition);
@@ -85,5 +104,19 @@ suite("Build Unit List Group 10 View", () => {
     assert.deepStrictEqual(view.endRangeTimes, []);
     assert.deepStrictEqual(view.waitCounts, []);
     assert.deepStrictEqual(view.waitTimes, []);
+  });
+
+  test("ignores parent rules on the root jobnet only", () => {
+    const result = parseAjs(rootJobnetLnDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const jobnet = document.rootUnits[0]?.children[0];
+    const subnet = jobnet?.children[0];
+
+    assert.ok(jobnet);
+    assert.ok(subnet);
+
+    assert.deepStrictEqual(buildUnitListGroup10View(jobnet).parentRules, []);
+    assert.deepStrictEqual(buildUnitListGroup10View(subnet).parentRules, ["2"]);
   });
 });

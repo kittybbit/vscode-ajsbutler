@@ -22,9 +22,8 @@ under `docs/requirements/use-cases/`.
 
 ## Next Priority Tasks
 
-1. Prepare the schedule-rule parameter alignment slice with manual references,
-   per-key expected behavior, and regression evidence before changing parsing
-   or helper semantics.
+1. Choose the next behavior-changing schedule-rule manual-alignment fix from
+   the remaining partial statuses.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime

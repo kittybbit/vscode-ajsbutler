@@ -22,7 +22,9 @@ export const buildUnitListGroup10View = (
   executionDate: findAjsUnitParameterValue(unit, "ed"),
   jobGroupPath: findAjsUnitParameterValue(unit, "jc"),
   exclusiveJobnetName: findAjsUnitParameterValue(unit, "ejn"),
-  parentRules: findAjsUnitParameterValues(unit, "ln").map(parseLnParentRule),
+  parentRules: unit.isRootJobnet
+    ? []
+    : findAjsUnitParameterValues(unit, "ln").map(parseLnParentRule),
   scheduleDateTypes: findAjsUnitParameterValues(unit, "sd").map(
     (value) => parseSd(value).type,
   ),

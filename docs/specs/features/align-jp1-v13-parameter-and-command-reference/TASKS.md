@@ -30,15 +30,23 @@
       existing default command text
 - [x] Localize command-builder labels, descriptions, and command reference
       links through the existing `lang` context
+- [x] Prepare the next behavior-changing alignment slice around schedule-rule
+      parameters (`sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`,
+      `wc`, and `wt`) with manual references, code seams, and regression
+      evidence status
+- [x] Add behavior-preserving regression tests for thin schedule-rule evidence
+      before changing helper semantics
+- [x] Implement the first behavior-changing schedule-rule alignment fix:
+      ignore `ln` on root jobnets while preserving nested jobnet `ln`
+      behavior
 
 ## Follow-up
 
 - [ ] Turn the audit notes into an explicit parameter-coverage matrix only when
       a behavior-changing alignment slice needs per-key status beyond the
       current audit summary
-- [ ] Prepare the next behavior-changing alignment slice around schedule-rule
-      parameters (`sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`,
-      `wc`, and `wt`) before attempting a broad all-key coverage matrix
+- [ ] Choose the next schedule-rule manual-alignment fix from the remaining
+      partial statuses
 
 ## Notes
 
@@ -64,3 +72,12 @@
   family because these keys already share helper seams, affect unit-list
   behavior, and can be covered as a focused manual-alignment slice without
   creating a full parameter matrix first.
+- 2026-04-27: schedule-rule alignment preparation is recorded in
+  `SCHEDULE_RULE_ALIGNMENT.md`, keeping the matrix limited to the focused
+  schedule-rule family instead of expanding to all parameters.
+- 2026-04-27: behavior-preserving regression tests now cover explicit
+  `sd=0,ud` preservation, default expansion for `st`, `shd`, `cftd`, `wc`, and
+  `wt`, and relative-minute preservation for `sy` and `ey`.
+- 2026-04-27: `ln` now follows the JP1/AJS3 v13 root-jobnet rule: root-jobnet
+  `ln` values are ignored, while nested jobnet `ln` values remain sorted and
+  visible to the unit-list parent-rule projection.
