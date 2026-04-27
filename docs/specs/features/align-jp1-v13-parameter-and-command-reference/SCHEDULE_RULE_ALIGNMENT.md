@@ -56,19 +56,54 @@ This document covers only the jobnet schedule-rule family already called out in
 
 ## Parameter Status
 
-| Key    | Manual expectation covered in this slice                                                 | Owning parser/helper seam                                         | Remaining gap                                                        |
-| ------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `sd`   | Repeatable schedule dates, rule numbers, root default `1,en`, and `sd=0,ud` preservation | `parseScheduleDateValue`, `Sd`, `resolveSdParameters`             | Date and rule value ranges; product decision on collapsing `sd=0,ud` |
-| `ln`   | Nested jobnet parent-rule mapping; root-jobnet values ignored                            | `parseParentScheduleRuleValue`, `Ln`, root-jobnet ignored builder | Rule value ranges                                                    |
-| `st`   | Per-`sd` start time; omitted value default `+00:00`                                      | `parseStartTimeValue`, `St`                                       | Time range validation                                                |
-| `cy`   | Per-`sd` cycle value shape                                                               | `parseCycleValue`, `Cy`                                           | Cycle ranges and open/closed-day restrictions                        |
-| `sh`   | Per-`sd` substitution values `be`, `af`, `ca`, `no`                                      | `parseClosedDaySubstitutionValue`, `Sh`                           | None for value-shape parsing                                         |
-| `shd`  | Per-`sd` max shift days; omitted value default `2`                                       | `parseShiftDaysValue`, `Shd`                                      | Range validation                                                     |
-| `cftd` | Per-`sd` mode, start-day default, and mode-specific max-shift default/ignore behavior    | `parseScheduleByDaysFromStartValue`, `Cftd`                       | Range validation                                                     |
-| `sy`   | Per-`sd` delayed start time; absolute or relative-minute shape                           | `parseDelayTimeValue`, `Sy`                                       | Range validation                                                     |
-| `ey`   | Per-`sd` delayed end time; absolute or relative-minute shape                             | `parseDelayTimeValue`, `Ey`                                       | Range validation                                                     |
-| `wc`   | Per-`sd` start-condition count; omitted value default `no`                               | `parseWaitCountValue`, `Wc`                                       | Range validation and paired `wt` invalidation                        |
-| `wt`   | Per-`sd` monitoring end time; omitted value default `no`                                 | `parseWaitTimeValue`, `Wt`                                        | Range validation and paired `wc` invalidation                        |
+- `sd`
+  - Covered: repeatable schedule dates, rule numbers, root default `1,en`, and
+    `sd=0,ud` preservation.
+  - Seam: `parseScheduleDateValue`, `Sd`, and `resolveSdParameters`.
+  - Remaining gap: date and rule value ranges; product decision on collapsing
+    `sd=0,ud`.
+- `ln`
+  - Covered: nested jobnet parent-rule mapping; root-jobnet values ignored.
+  - Seam: `parseParentScheduleRuleValue`, `Ln`, and the root-jobnet ignored
+    builder.
+  - Remaining gap: rule value ranges.
+- `st`
+  - Covered: per-`sd` start time; omitted value default `+00:00`.
+  - Seam: `parseStartTimeValue` and `St`.
+  - Remaining gap: time range validation.
+- `cy`
+  - Covered: per-`sd` cycle value shape.
+  - Seam: `parseCycleValue` and `Cy`.
+  - Remaining gap: cycle ranges and open/closed-day restrictions.
+- `sh`
+  - Covered: per-`sd` substitution values `be`, `af`, `ca`, and `no`.
+  - Seam: `parseClosedDaySubstitutionValue` and `Sh`.
+  - Remaining gap: none for value-shape parsing.
+- `shd`
+  - Covered: per-`sd` max shift days; omitted value default `2`.
+  - Seam: `parseShiftDaysValue` and `Shd`.
+  - Remaining gap: range validation.
+- `cftd`
+  - Covered: per-`sd` mode, start-day default, and mode-specific max-shift
+    default/ignore behavior.
+  - Seam: `parseScheduleByDaysFromStartValue` and `Cftd`.
+  - Remaining gap: range validation.
+- `sy`
+  - Covered: per-`sd` delayed start time; absolute or relative-minute shape.
+  - Seam: `parseDelayTimeValue` and `Sy`.
+  - Remaining gap: range validation.
+- `ey`
+  - Covered: per-`sd` delayed end time; absolute or relative-minute shape.
+  - Seam: `parseDelayTimeValue` and `Ey`.
+  - Remaining gap: range validation.
+- `wc`
+  - Covered: per-`sd` start-condition count; omitted value default `no`.
+  - Seam: `parseWaitCountValue` and `Wc`.
+  - Remaining gap: range validation and paired `wt` invalidation.
+- `wt`
+  - Covered: per-`sd` monitoring end time; omitted value default `no`.
+  - Seam: `parseWaitTimeValue` and `Wt`.
+  - Remaining gap: range validation and paired `wc` invalidation.
 
 ## Delivered Alignment
 
