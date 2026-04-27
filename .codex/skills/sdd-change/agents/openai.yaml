@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "SDD Change"
+  short_description: "Prepare or update SDD artifacts with approval gates"
+  default_prompt: >-
+    Use $sdd-change to prepare or update SDD artifacts for a non-trivial
+    repository change in vscode-ajsbutler.
