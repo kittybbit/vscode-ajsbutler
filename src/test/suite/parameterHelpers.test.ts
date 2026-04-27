@@ -19,14 +19,16 @@ import {
   buildSdAlignedEmptyScheduleRuleParameters,
   buildSdAlignedScheduleParameters,
   buildSortedScheduleRuleParameters,
-  buildTopParameter,
   resolveSdParameters,
   resolveConnectorControlDefaultRawValue,
   resolveParameter,
   resolveParameterArray,
   resolveRootJobnetDefaultRawValue,
-  resolveTopDefaultRawValue,
 } from "../../domain/models/parameters/parameterHelpers";
+import {
+  buildTopParameter,
+  resolveTopDefaultRawValue,
+} from "../../domain/models/parameters/transferOperationHelpers";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -663,7 +665,7 @@ unit=root,,jp1admin,;
     assert.strictEqual(resolveTopDefaultRawValue(job, 1), "sav");
     assert.strictEqual(resolveTopDefaultRawValue(job, 2), "del");
     assert.strictEqual(resolveTopDefaultRawValue(job, 3), "del");
-    assert.strictEqual(resolveTopDefaultRawValue(job, 4), "");
+    assert.strictEqual(resolveTopDefaultRawValue(job, 4), undefined);
 
     assert.strictEqual(job.top1?.value(), "sav");
     assert.strictEqual(job.top2?.value(), "del");

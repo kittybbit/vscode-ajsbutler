@@ -8,14 +8,6 @@ export type ParamLookupArg = ParamBase & {
   defaultRawValue?: string | string[];
 };
 
-type TopParameterIndex = 1 | 2 | 3 | 4;
-
-type TopParameterSource = {
-  [key in `ts${TopParameterIndex}`]?: unknown;
-} & {
-  [key in `td${TopParameterIndex}`]?: unknown;
-};
-
 type DefaultApplicationMode = "always" | "root-jobnet-only";
 type RootJobnetDefaultParameter = "rg" | "sd" | "ncl" | "ncs" | "ncex";
 type ConnectorControlDefaultParameter = "ncl" | "ncs" | "ncex";
@@ -70,37 +62,6 @@ export const resolveConnectorControlDefaultRawValue = (
     mode,
     isRootJobnet,
   );
-};
-
-export const resolveTopDefaultRawValue = (
-  unit: TopParameterSource,
-  index: TopParameterIndex,
-): string => {
-  const hasTransferSource = Boolean(unit[`ts${index}`]);
-  const hasTransferDestination = Boolean(unit[`td${index}`]);
-
-  if (hasTransferSource && hasTransferDestination) {
-    return "sav";
-  }
-  if (hasTransferSource) {
-    return "del";
-  }
-  return "";
-};
-
-export const buildTopParameter = <T>(
-  arg: Omit<ParamLookupArg, "defaultRawValue"> & {
-    unit: TopParameterSource & ParamLookupArg["unit"];
-    index: TopParameterIndex;
-  },
-  mapParam: (param: ParamInternal) => T,
-): T | undefined => {
-  const parameter = resolveParameter({
-    unit: arg.unit,
-    parameter: arg.parameter,
-    defaultRawValue: resolveTopDefaultRawValue(arg.unit, arg.index),
-  });
-  return parameter ? mapParam(parameter) : undefined;
 };
 
 export const buildOptionalParameter = <T>(

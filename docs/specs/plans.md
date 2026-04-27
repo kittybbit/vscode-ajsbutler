@@ -37,23 +37,22 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `docs/sdd-safety-gates`
-- Objective: tighten SDD safety gates and add selective Gherkin guidance for
-  behavior-oriented specifications without adding new document families.
-- Scope: update the SDD README, Codex SDD skill, branch plan guidance, and
-  feature/use-case templates for SPECS, TASKS, TRACEABILITY, implementation
-  prompts, plan validation, and behavior scenarios. Add selective Gherkin
-  scenarios to existing use cases where the behavior contract is already clear.
-- Out of scope: runtime code changes, generated artifacts, and new feature
-  directories.
-- Impact summary: SDD workflow documentation and templates only. Gherkin is
-  documentation guidance for behavior contracts, not a test-tool dependency;
-  no product behavior, VS Code compatibility, parser behavior, web extension
-  runtime, or tests are changed. Existing use-case behavior is clarified, not
-  expanded.
-- Risks and assumptions: keep the rules concise so feature docs remain useful
-  working documents rather than process logs; require `pnpm run qlty` for this
-  docs-only slice.
+- Branch: `codex/align-transfer-operation-parameters`
+- Objective: continue JP1/AJS3 version 13 parameter alignment by extracting the
+  transfer-operation `top1` to `top4` default rule into a category-specific
+  domain helper seam.
+- Scope: update the SDD plan for the transfer-operation category, preserve
+  current explicit and derived `topN` values, and add focused regression
+  evidence for source/destination-driven defaults.
+- Out of scope: parser grammar changes, byte-length validation, macro-variable
+  validation, custom PC job invalidation, QUEUE job transfer-file behavior, and
+  UI changes.
+- Impact summary: domain parameter helper ownership changes only. User-visible
+  parser, list, flow, CSV, diagnostics, hover, telemetry, desktop extension,
+  and web extension behavior should remain unchanged.
+- Risks and assumptions: treat the JP1/AJS3 v13 UNIX/PC job and UNIX/PC custom
+  job references as the normative source for `topN` defaults; keep invalid
+  value handling deferred until a diagnostics/warnings policy is chosen.
 
 ## Wrapper Semantics Matrix
 

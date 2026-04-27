@@ -45,11 +45,17 @@
 - [x] Centralize schedule-rule value parsing behind domain helpers and verify
       the official format shape for the schedule-rule family before treating
       the category as aligned
+- [x] Record transfer-operation alignment scope, manual references, affected
+      seams, and expected `top1` to `top4` default behavior before completing
+      the helper-boundary extraction
 
 ## Follow-up
 
+- [x] Extract `top1` to `top4` default resolution into a transfer-operation
+      helper seam while preserving explicit and derived values
 - [ ] Apply the same category-level value parsing audit/refactor workflow to
-      non-schedule parameter families before marking those categories aligned
+      another non-schedule parameter family before marking those categories
+      aligned
 - [ ] Turn the audit notes into an explicit parameter-coverage matrix when
       category-level status needs tracking beyond the current audit summary
 - [ ] Continue schedule-rule helper-boundary alignment with the remaining
@@ -97,3 +103,9 @@
   and reused by unit-list projection. This is the first category-level parser
   alignment pattern; later parameter categories should follow the same audit,
   helper-boundary, and regression-test workflow.
+- 2026-04-27: transfer-operation alignment is the next helper-boundary slice.
+  It keeps the existing `topN` behavior but moves the paired `tsN` / `tdN`
+  default rule out of generic parameter helper code.
+- 2026-04-27: `topN` default resolution now lives in
+  `transferOperationHelpers.ts`; regression evidence covers explicit `topN`,
+  derived `sav`, derived `del`, and the no-default case.
