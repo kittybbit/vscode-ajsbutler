@@ -73,6 +73,69 @@ unit=root,,jp1admin,;
 }
 `;
 
+const scheduleDefaultDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    sd=2026/04/27;
+    sd=2,en;
+  }
+}
+`;
+
+const undefinedScheduleDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    sd=0,ud;
+  }
+}
+`;
+
+const scheduleRelativeTimeDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    sd=2026/04/27;
+    sd=2,en;
+    sy=M120;
+    ey=2,U60;
+  }
+}
+`;
+
+const nestedScheduleDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    ln=2;
+    el=subnet,n,+160+0;
+    unit=subnet,,jp1admin,;
+    {
+      ty=n;
+      ln=2;
+      ln=1;
+    }
+  }
+}
+`;
+
 const rootDefaultDefinition = `
 unit=root,,jp1admin,;
 {
@@ -136,6 +199,36 @@ const parseScheduleJobnet = (): N => {
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
+};
+
+const parseScheduleDefaultJobnet = (): N => {
+  const result = parseAjs(scheduleDefaultDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
+};
+
+const parseUndefinedScheduleJobnet = (): N => {
+  const result = parseAjs(undefinedScheduleDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
+};
+
+const parseScheduleRelativeTimeJobnet = (): N => {
+  const result = parseAjs(scheduleRelativeTimeDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
+};
+
+const parseNestedScheduleJobnets = (): { jobnet: N; subnet: N } => {
+  const result = parseAjs(nestedScheduleDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  const jobnet = root.children[0] as N;
+  const subnet = jobnet.children[0] as N;
+  return { jobnet, subnet };
 };
 
 const parseRootDefaultJobnet = (): N => {
@@ -268,9 +361,9 @@ suite("ParameterFactory", () => {
   });
 
   test("returns schedule-rule-bearing parameters sorted by rule", () => {
-    const jobnet = parseScheduleJobnet();
+    const { subnet } = parseNestedScheduleJobnets();
 
-    const ln = ParamFactory.ln(jobnet);
+    const ln = ParamFactory.ln(subnet);
 
     assert.deepStrictEqual(
       ln?.map((parameter) => ({
@@ -282,6 +375,12 @@ suite("ParameterFactory", () => {
         { rule: 2, value: "2" },
       ],
     );
+  });
+
+  test("ignores ln on the root jobnet", () => {
+    const { jobnet } = parseNestedScheduleJobnets();
+
+    assert.strictEqual(ParamFactory.ln(jobnet), undefined);
   });
 
   test("returns explicit root-aware scalar and root-default-aware schedule-rule parameters through the facade", () => {
@@ -307,6 +406,74 @@ suite("ParameterFactory", () => {
     assert.deepStrictEqual(
       sd?.map((parameter) => parameter.value()),
       [DEFAULTS.Sd],
+    );
+  });
+
+  test("preserves an explicit undefined schedule rule through the facade", () => {
+    const jobnet = parseUndefinedScheduleJobnet();
+
+    const sd = ParamFactory.sd(jobnet);
+
+    assert.deepStrictEqual(
+      sd?.map((parameter) => ({
+        rule: parameter.rule,
+        type: parameter.type,
+        value: parameter.value(),
+      })),
+      [{ rule: 0, type: "ud", value: "0,ud" }],
+    );
+  });
+
+  test("returns schedule-rule defaults aligned to every sd rule", () => {
+    const jobnet = parseScheduleDefaultJobnet();
+
+    const st = ParamFactory.st(jobnet);
+    const shd = ParamFactory.shd(jobnet);
+    const cftd = ParamFactory.cftd(jobnet);
+    const wc = ParamFactory.wc(jobnet);
+    const wt = ParamFactory.wt(jobnet);
+
+    assert.deepStrictEqual(
+      st?.map((parameter) => parameter?.time),
+      [DEFAULTS.St, DEFAULTS.St],
+    );
+    assert.deepStrictEqual(
+      shd?.map((parameter) => parameter?.shiftDays),
+      [DEFAULTS.Shd, DEFAULTS.Shd],
+    );
+    assert.deepStrictEqual(
+      cftd?.map((parameter) => ({
+        scheduleByDaysFromStart: parameter?.scheduleByDaysFromStart,
+        maxShiftableDays: parameter?.maxShiftableDays,
+      })),
+      [
+        { scheduleByDaysFromStart: DEFAULTS.Cftd, maxShiftableDays: undefined },
+        { scheduleByDaysFromStart: DEFAULTS.Cftd, maxShiftableDays: undefined },
+      ],
+    );
+    assert.deepStrictEqual(
+      wc?.map((parameter) => parameter?.numberOfTimes),
+      [DEFAULTS.Wc, DEFAULTS.Wc],
+    );
+    assert.deepStrictEqual(
+      wt?.map((parameter) => parameter?.time),
+      [DEFAULTS.Wt, DEFAULTS.Wt],
+    );
+  });
+
+  test("preserves relative-minute start and end delay values", () => {
+    const jobnet = parseScheduleRelativeTimeJobnet();
+
+    const sy = ParamFactory.sy(jobnet);
+    const ey = ParamFactory.ey(jobnet);
+
+    assert.deepStrictEqual(
+      sy?.map((parameter) => parameter?.time),
+      ["M120", undefined],
+    );
+    assert.deepStrictEqual(
+      ey?.map((parameter) => parameter?.time),
+      [undefined, "U60"],
     );
   });
 

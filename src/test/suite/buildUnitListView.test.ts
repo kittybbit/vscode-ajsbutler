@@ -274,7 +274,7 @@ suite("Build Unit List View", () => {
     assert.strictEqual(jobnet?.group10.executionDate, "2024/12/31");
     assert.strictEqual(jobnet?.group10.jobGroupPath, "/root");
     assert.strictEqual(jobnet?.group10.exclusiveJobnetName, "exclusive-a");
-    assert.deepStrictEqual(jobnet?.group10.parentRules, ["2"]);
+    assert.deepStrictEqual(jobnet?.group10.parentRules, []);
     assert.deepStrictEqual(jobnet?.group10.scheduleDateTypes, ["+", "en"]);
     assert.deepStrictEqual(jobnet?.group10.scheduleDateYearMonths, [
       "2024/12",

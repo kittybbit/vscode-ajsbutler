@@ -18,8 +18,10 @@
    - Add traceability from JP1/AJS v13 manual sections to supported parameter
      keys, parser behavior, normalized model fields, use cases, and regression
      tests.
-   - The next likely focused slice is the schedule-rule parameter family:
-     `sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`.
+   - The active focused slice is the schedule-rule parameter family: `sd`,
+     `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`; the
+     first behavior-changing fix ignores root-jobnet `ln` values, and the next
+     fix should come from the remaining partial statuses.
    - Keep behavior-preserving slices separate from behavior-changing manual
      alignment slices.
 
