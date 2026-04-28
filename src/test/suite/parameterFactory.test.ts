@@ -6,6 +6,7 @@ import { Cj } from "../../domain/models/units/Cj";
 import { Evsj } from "../../domain/models/units/Evsj";
 import { Htpj } from "../../domain/models/units/Htpj";
 import { N } from "../../domain/models/units/N";
+import { Qj, Rq } from "../../domain/models/units/Qj";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
@@ -209,6 +210,33 @@ unit=root,,jp1admin,;
 }
 `;
 
+const queueTransferDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=queue,qj,+0+0;
+  el=recovery,rq,+160+0;
+  unit=queue,,jp1admin,;
+  {
+    ty=qj;
+    ts1=queue-src-1;
+    td1=queue-dst-1;
+    ts2=queue-src-2;
+    td2=queue-dst-2;
+    ts3=queue-src-3;
+    td3=queue-dst-3;
+    ts4=queue-src-4;
+    td4=queue-dst-4;
+  }
+  unit=recovery,,jp1admin,;
+  {
+    ty=rq;
+    ts1=recovery-src-1;
+    td1=recovery-dst-1;
+  }
+}
+`;
+
 const jobEndJudgmentDefinition = `
 unit=root,,jp1admin,;
 {
@@ -368,6 +396,16 @@ const parseTransferJob = (): J => {
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
+};
+
+const parseQueueTransferJobs = (): { queueJob: Qj; recoveryQueueJob: Rq } => {
+  const result = parseAjs(queueTransferDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return {
+    queueJob: root.children[0] as Qj,
+    recoveryQueueJob: root.children[1] as Rq,
+  };
 };
 
 const parseJobEndJudgmentUnits = (): { job: J; customJob: Cj } => {
@@ -727,6 +765,26 @@ suite("ParameterFactory", () => {
     assert.strictEqual(ParamFactory.top2(job)?.value(), "del");
     assert.strictEqual(ParamFactory.top3(job)?.value(), "del");
     assert.strictEqual(ParamFactory.top4(job)?.value(), "keep");
+  });
+
+  test("preserves QUEUE transfer files without deriving transfer operations", () => {
+    const { queueJob, recoveryQueueJob } = parseQueueTransferJobs();
+
+    assert.strictEqual(queueJob.ts1?.value(), "queue-src-1");
+    assert.strictEqual(queueJob.td1?.value(), "queue-dst-1");
+    assert.strictEqual(queueJob.ts2?.value(), "queue-src-2");
+    assert.strictEqual(queueJob.td2?.value(), "queue-dst-2");
+    assert.strictEqual(queueJob.ts3?.value(), "queue-src-3");
+    assert.strictEqual(queueJob.td3?.value(), "queue-dst-3");
+    assert.strictEqual(queueJob.ts4?.value(), "queue-src-4");
+    assert.strictEqual(queueJob.td4?.value(), "queue-dst-4");
+    assert.strictEqual(recoveryQueueJob.ts1?.value(), "recovery-src-1");
+    assert.strictEqual(recoveryQueueJob.td1?.value(), "recovery-dst-1");
+    assert.strictEqual("top1" in queueJob, false);
+    assert.strictEqual("top2" in queueJob, false);
+    assert.strictEqual("top3" in queueJob, false);
+    assert.strictEqual("top4" in queueJob, false);
+    assert.strictEqual("top1" in recoveryQueueJob, false);
   });
 
   test("returns JP1/AJS3 v13 end-judgment defaults through the facade", () => {

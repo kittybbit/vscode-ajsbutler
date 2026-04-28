@@ -47,6 +47,10 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Aligned omitted JP1 event sending job `evsrc` values to `10` through
   `DEFAULTS.Evsrc`, while preserving explicit values and leaving normalized
   unit-list projection raw.
+- Investigated QUEUE job transfer-file alignment as the next non-schedule
+  parameter family. The candidate is behavior-preserving regression evidence
+  that `Qj` / `Rq` expose `ts1` to `ts4` and `td1` to `td4` without exposing or
+  deriving `top1` to `top4`.
 
 ## Impact Investigation
 
@@ -83,6 +87,38 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Approval: human approval to proceed was given on 2026-04-28 after the
   investigation summary for JP1 event sending job `evsrc` default alignment.
   The approved scope keeps unit-list normalized projection raw.
+
+### QUEUE Job Transfer-File Candidate
+
+- Planned change: add focused regression evidence for QUEUE job transfer-file
+  parameters, preserving explicit `ts1` to `ts4` and `td1` to `td4` values and
+  confirming `top1` to `top4` are not exposed or derived for `Qj` / `Rq`.
+- Affected files:
+  `src/domain/models/units/Qj.ts`,
+  `src/domain/models/parameters/ParameterFactory.ts`,
+  `src/domain/models/parameters/optionalScalarParameterBuilders.ts`,
+  `src/domain/models/parameters/transferOperationHelpers.ts`,
+  `src/domain/models/parameters/transferOperationParameterBuilders.ts`,
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  focused parameter factory or helper tests,
+  focused unit-list tests if raw projection evidence is added, and this
+  feature's SDD docs.
+- Affected features: JP1/AJS parameter interpretation for QUEUE job
+  transfer-file parameters; unit-list group 15 transfer columns remain raw
+  normalized projection.
+- Tests affected: focused parameter factory tests for `Qj` / `Rq`; existing
+  transfer-operation helper tests for UNIX/PC job behavior must continue to
+  pass; unit-list tests only if the approved scope includes explicit raw
+  projection evidence.
+- Breaking-change risk: low if limited to regression evidence. Risk becomes
+  medium if implementation attempts to add `topN` to QUEUE jobs or changes
+  group 15 projection semantics.
+- Alternatives considered: add `topN` getters to QUEUE wrappers, rejected
+  because the JP1/AJS3 version 13 QUEUE job definition does not define `topN`;
+  make group 15 unit-type-aware, deferred as a separate unit-list behavior
+  slice; defer to a full parameter matrix, not preferred because the current
+  follow-up is already narrow and testable.
+- Approval: pending.
 
 ## Follow-up
 
@@ -122,3 +158,9 @@ Current branch validation:
 - 2026-04-28: `npm run build` completed with existing webpack asset-size
   warnings
 - 2026-04-28: `pnpm run qlty` passed after excluding `.serena/` from Qlty
+- 2026-04-29: `npm test`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `pnpm run lint:md`

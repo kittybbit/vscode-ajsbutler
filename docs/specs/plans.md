@@ -16,8 +16,8 @@ rules in `docs/specs/README.md`, not in this file.
 - Parameter-reference alignment should proceed in small JP1/AJS v13 slices
   with explicit manual coverage. For each parameter category, verify value
   parsing against the official format before claiming the category aligned.
-  The next active candidate is the JP1 event sending job arrival-check family:
-  `evssv`, `evsrt`, `evspl`, and `evsrc`.
+  The next active candidate is the QUEUE job transfer-file family: `ts1` to
+  `ts4` and `td1` to `td4`, with explicit no-`topN` behavior for `Qj` / `Rq`.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
@@ -37,24 +37,23 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/align-event-send-job-evsrc-default`
+- Branch: `codex/align-queue-transfer-files`
 - Objective: continue JP1/AJS3 version 13 parameter alignment with the next
-  category-level candidate for JP1 event sending job arrival-check defaults.
+  non-schedule family: QUEUE job transfer-file parameters.
 - Status: implemented locally; validation completed.
-- Scope: preserve explicit JP1 event sending job `evssv`, `evsrt`, `evspl`,
-  and `evsrc` values; keep existing `evssv=no`, `evsrt=n`, and `evspl=10`
-  defaults; change omitted `evsrc` for `Evsj` / `Revsj` from the previous
-  generic `0` fallback to the manual default `10`.
+- Scope: preserve explicit QUEUE job `ts1` to `ts4` and `td1` to `td4` values
+  for `Qj` / `Rq`; add focused regression evidence that `top1` to `top4` are
+  not exposed or derived for QUEUE jobs.
 - Out of scope: parser grammar changes, command generation, byte-length
-  validation, numeric range validation, event arrival runtime behavior,
-  `evhst` requiredness diagnostics, and broader event receiving job semantics.
-- Impact summary: domain parameter default behavior changes only for omitted
-  `evsrc` on `Evsj` / `Revsj`. Unit-list projection remains raw normalized
-  key/value projection and does not synthesize omitted defaults.
-- Risks and assumptions: the approval-sensitive reference boundary is the
-  JP1/AJS3 v13 JP1 event sending job definition stating omitted `evsrc` is
-  assumed as `10`. A focused helper seam is preferred unless the complete
-  reference impact check proves a global `DEFAULTS.Evsrc` change is safe.
+  validation, macro-variable validation, transfer-file runtime behavior,
+  adding `topN` getters to `Qj` / `Rq`, and changing unit-list group 15 raw
+  projection semantics.
+- Impact summary: behavior should remain unchanged if implemented as focused
+  regression evidence. The key boundary is preventing the existing UNIX/PC
+  `topN` default helper from being broadened to QUEUE jobs.
+- Risks and assumptions: JP1/AJS3 version 13 QUEUE job definition lists `tsN`
+  and `tdN` but not `topN`; related UNIX/PC job definitions list all three.
+  Treating QUEUE as no-`topN` is the approval-sensitive distinction.
 
 ## Wrapper Semantics Matrix
 
@@ -95,3 +94,9 @@ Current branch checks:
 - 2026-04-28: `npm run build` completed with existing webpack asset-size
   warnings
 - 2026-04-28: `pnpm run qlty` passed after excluding `.serena/` from Qlty
+- 2026-04-29: `npm test`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `pnpm run lint:md`
