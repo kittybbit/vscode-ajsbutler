@@ -3,6 +3,7 @@ import { ParamFactory } from "../../domain/models/parameters/ParameterFactory";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
 import { J } from "../../domain/models/units/J";
 import { Cj } from "../../domain/models/units/Cj";
+import { Htpj } from "../../domain/models/units/Htpj";
 import { N } from "../../domain/models/units/N";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
@@ -237,6 +238,30 @@ unit=root,,jp1admin,;
 }
 `;
 
+const httpConnectionJobDefaultDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=http,htpj,+0+0;
+  el=explicit,rhtpj,+160+0;
+  unit=http,,jp1admin,;
+  {
+    ty=htpj;
+    htcfl="conn.conf";
+    htstf="status.log";
+    htrhf="header.log";
+  }
+  unit=explicit,,jp1admin,;
+  {
+    ty=rhtpj;
+    htcfl="conn.conf";
+    htstf="status.log";
+    htrhf="header.log";
+    eu=ent;
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -338,6 +363,19 @@ const parseExplicitJobEndJudgmentJob = (): J => {
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
+};
+
+const parseHttpConnectionJobs = (): {
+  httpJob: Htpj;
+  explicitHttpJob: Htpj;
+} => {
+  const result = parseAjs(httpConnectionJobDefaultDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return {
+    httpJob: root.children[0] as Htpj,
+    explicitHttpJob: root.children[1] as Htpj,
+  };
 };
 
 suite("ParameterFactory", () => {
@@ -671,5 +709,14 @@ suite("ParameterFactory", () => {
     const job = parseExplicitJobEndJudgmentJob();
 
     assert.strictEqual(ParamFactory.jd(job)?.value(), "ab");
+  });
+
+  test("returns HTTP Connection job execution-user defaults through the facade", () => {
+    const { httpJob, explicitHttpJob } = parseHttpConnectionJobs();
+    const genericJob = parseJob();
+
+    assert.strictEqual(httpJob.eu?.value(), DEFAULTS.HttpConnectionJobEu);
+    assert.strictEqual(explicitHttpJob.eu?.value(), "ent");
+    assert.strictEqual(ParamFactory.eu(genericJob)?.value(), DEFAULTS.Eu);
   });
 });

@@ -10,9 +10,7 @@
 ## Human Approval
 
 - Status: Pending
-- Approved by:
 - Approved at:
-- Approval text:
 - Approved scope:
 
 Implementation must not start while Status is Pending.

@@ -116,7 +116,7 @@ export class Htpj extends WaitableUnitEntity {
   }
   // [eu={ent|def};]
   get eu() {
-    return ParamFactory.eu(this);
+    return ParamFactory.httpConnectionJobEu(this);
   }
 }
 export class Rhtpj extends Htpj {}

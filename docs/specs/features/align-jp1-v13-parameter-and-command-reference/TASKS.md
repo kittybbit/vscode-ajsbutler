@@ -50,6 +50,9 @@
       the helper-boundary extraction
 - [x] Record job end-judgment alignment scope, manual references, affected
       seams, and expected `jd` default behavior before implementation
+- [x] Record HTTP Connection job default alignment scope, manual references,
+      affected seams, alternatives, and expected omitted `eu` behavior before
+      implementation
 
 ## Follow-up
 
@@ -57,6 +60,8 @@
       helper seam while preserving explicit and derived values
 - [x] Align omitted UNIX/PC job and UNIX/PC custom job `jd` values to the
       JP1/AJS3 v13 default `cod`
+- [x] Align omitted HTTP Connection job `eu` values to the JP1/AJS3 v13
+      `ajsprint -a` default values table value `def`
 - [ ] Apply the same category-level value parsing audit/refactor workflow to
       another non-schedule parameter family before marking those categories
       aligned
@@ -119,3 +124,19 @@
 - 2026-04-27: omitted UNIX/PC job and UNIX/PC custom job `jd` values now
   resolve to `cod` through `jobEndJudgmentHelpers.ts`; explicit `jd` values
   remain preserved.
+- 2026-04-28: HTTP Connection job default alignment is the next small
+  parameter-default candidate. The proposed behavior change is limited to
+  omitted `eu` resolving to `def` for `Htpj` / `Rhtpj`, while other job
+  families continue to use generic `eu=ent`.
+- 2026-04-28: omitted HTTP Connection job `eu` values now resolve to `def`
+  through `httpConnectionJobDefaultHelpers.ts`; explicit HTTP Connection job
+  `eu` values and non-HTTP generic `eu=ent` behavior remain preserved.
+
+## Human Approval
+
+- Status: Approved
+- Approved at: 2026-04-28
+- Approved scope: Implement the recorded HTTP Connection job default alignment
+  slice by resolving omitted `eu` values to `def` for `Htpj` / `Rhtpj`, keeping
+  explicit `eu` values and non-HTTP job-family `eu` defaults unchanged, and
+  adding focused regression evidence.

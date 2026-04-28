@@ -197,6 +197,7 @@ import {
 import { N } from "../units/N";
 import { UnitEntity } from "../units/UnitEntity";
 import { DEFAULTS } from "./Defaults";
+import { resolveHttpConnectionJobEuDefaultRawValue } from "./httpConnectionJobDefaultHelpers";
 import { resolveJobEndJudgmentDefaultRawValue } from "./jobEndJudgmentHelpers";
 import {
   buildInheritedParameter,
@@ -327,6 +328,11 @@ export const optionalScalarParameterBuilders = {
     DEFAULTS.Ets,
   ),
   eu: createOptionalScalarBuilder("eu", (param) => new Eu(param), DEFAULTS.Eu),
+  httpConnectionJobEu: createOptionalScalarBuilder(
+    "eu",
+    (param) => new Eu(param),
+    { resolveDefaultRawValue: resolveHttpConnectionJobEuDefaultRawValue },
+  ),
   ev: createOptionalScalarBuilder("ev", (param) => new Ev(param)),
   evdet: createOptionalScalarBuilder("evdet", (param) => new Evdet(param)),
   evesc: createOptionalScalarBuilder(

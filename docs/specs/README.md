@@ -105,16 +105,14 @@ Each feature `TASKS.md` must include the approval evidence:
 ## Human Approval
 
 - Status: Pending | Approved
-- Approved by:
 - Approved at:
-- Approval text:
 - Approved scope:
 ```
 
-Implementation may start only when `Status: Approved` and `Approval text`
-records the human approval. If implementation reveals required changes
-outside the approved scope, stop again, update the impact record, and obtain
-additional clear approval before editing those areas.
+Implementation may start only when `Status: Approved` and `Approved scope`
+records the human-approved implementation boundary. If implementation reveals
+required changes outside the approved scope, stop again, update the impact
+record, and obtain additional clear approval before editing those areas.
 
 Before approval, Codex must report only this implementation-gate output and
 must not claim that implementation has started or completed:

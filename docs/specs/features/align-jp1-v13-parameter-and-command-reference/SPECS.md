@@ -32,6 +32,17 @@ JP1/AJS3 version 13 reference documents.
 - avoid bundling these reference-alignment slices with unrelated flow-graph or
   package-manager work
 
+## Durable Impact Analysis
+
+- Unit-type-specific defaults must not be collapsed into a single global
+  default when the JP1/AJS3 version 13 `ajsprint -a` default values table
+  distinguishes a unit family.
+- HTTP Connection job `eu` is approval-sensitive because the generic
+  `DEFAULTS.Eu` value is shared by many job families, while the `ajsprint -a`
+  default values table lists HTTP Connection job `Eu` separately as `def`.
+- A focused helper seam is preferred over changing `DEFAULTS.Eu` globally so
+  non-HTTP job families continue to preserve their existing `ent` default.
+
 ## Reference Documents
 
 - Definition File Reference:

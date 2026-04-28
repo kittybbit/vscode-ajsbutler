@@ -72,10 +72,10 @@ Implementation will not proceed until approval is given.
 
 After approval:
 
-- Record `Status: Approved`, the human approver, approval time, exact approval
-  text, and approved scope in TASKS.md before implementation.
+- Record `Status: Approved`, approval time, and approved scope in TASKS.md
+  before implementation.
 - Do not implement if TASKS.md does not contain `Status: Approved` and
-  `Approval text`.
+  `Approved scope`.
 - Inspect existing files and naming conventions.
 - Confirm every affected reference is either fixed or explicitly left
   unchanged in SPECS.md.
