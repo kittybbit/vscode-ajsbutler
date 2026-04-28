@@ -53,6 +53,12 @@ Scenario: Context-sensitive rules remain explicit
   Given a parameter rule that depends on unit type, inheritance, or schedule
   When the parameter is interpreted
   Then the context that affects the result is visible in the interpretation
+
+Scenario: Unit-specific defaults are applied only in their documented context
+  Given a JP1/AJS parameter default that differs by unit family
+  When the parameter is interpreted for a specific unit type
+  Then only the documented unit family receives that default
+  And other unit families keep their documented behavior
 ```
 
 ## Acceptance Notes

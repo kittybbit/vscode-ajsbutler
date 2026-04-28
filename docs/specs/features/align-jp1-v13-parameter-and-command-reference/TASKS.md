@@ -53,6 +53,9 @@
 - [x] Record HTTP Connection job default alignment scope, manual references,
       affected seams, alternatives, and expected omitted `eu` behavior before
       implementation
+- [x] Record JP1 event sending job alignment scope, manual references,
+      affected seams, alternatives, and expected omitted `evsrc` behavior
+      before implementation
 
 ## Follow-up
 
@@ -62,6 +65,9 @@
       JP1/AJS3 v13 default `cod`
 - [x] Align omitted HTTP Connection job `eu` values to the JP1/AJS3 v13
       `ajsprint -a` default values table value `def`
+- [x] Align omitted JP1 event sending job `evsrc` values to the JP1/AJS3 v13
+      default `10`, preserving explicit values and deciding whether normalized
+      unit-list projection should remain raw or become default-aware
 - [ ] Apply the same category-level value parsing audit/refactor workflow to
       another non-schedule parameter family before marking those categories
       aligned
@@ -131,12 +137,28 @@
 - 2026-04-28: omitted HTTP Connection job `eu` values now resolve to `def`
   through `httpConnectionJobDefaultHelpers.ts`; explicit HTTP Connection job
   `eu` values and non-HTTP generic `eu=ent` behavior remain preserved.
+- 2026-04-28: JP1 event sending job arrival-check defaults are the next
+  category-level parameter candidate. The proposed behavior change is limited
+  to omitted `evsrc` resolving to `10` for `Evsj` / `Revsj`, while explicit
+  values remain preserved. Normalized unit-list projection is approval
+  sensitive because it currently reads raw normalized parameters by key.
+- 2026-04-28: omitted JP1 event sending job `evsrc` now resolves to `10`
+  through `DEFAULTS.Evsrc`; explicit event sending job values remain preserved.
+  Unit-list projection remains raw normalized key/value projection.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-04-28
-- Approved scope: Implement the recorded HTTP Connection job default alignment
-  slice by resolving omitted `eu` values to `def` for `Htpj` / `Rhtpj`, keeping
-  explicit `eu` values and non-HTTP job-family `eu` defaults unchanged, and
-  adding focused regression evidence.
+- Approved scope: Implement the recorded JP1 event sending job arrival-check
+  default alignment by resolving omitted `evsrc` values to `10` for `Evsj` /
+  `Revsj`, preserving explicit `evsrc`, `evssv`, `evsrt`, and `evspl` values,
+  keeping normalized unit-list projection raw and unchanged, and adding focused
+  regression evidence.
+
+## Prior Approval Evidence
+
+- 2026-04-28: Approved HTTP Connection job default alignment by resolving
+  omitted `eu` values to `def` for `Htpj` / `Rhtpj`, keeping explicit `eu`
+  values and non-HTTP job-family `eu` defaults unchanged, and adding focused
+  regression evidence.
