@@ -15,10 +15,11 @@ rules in `docs/specs/README.md`, not in this file.
   the same matching semantics.
 - Parameter-reference alignment should proceed in small JP1/AJS v13 slices
   with explicit manual coverage. For each parameter category, verify value
-  parsing against the official format before claiming the category aligned.
-  The next active candidate is the job end-judgment `wth` key mapping, because
-  the current factory intentionally preserves a legacy `wth` to `wt` lookup
-  that conflicts with the JP1/AJS3 v13 end-judgment parameter name.
+  parsing against the official format before claiming the category aligned. A
+  feature-local parameter coverage matrix now tracks the investigated
+  categories without claiming repository-wide coverage. Schedule-rule
+  `wc` / `wt` effective-value pairing is aligned in the domain boundary while
+  unit-list projection remains raw.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
@@ -27,9 +28,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Continue category-level parameter parsing alignment by correcting the
-   end-judgment `wth` lookup to read the `wth` parameter instead of the
-   schedule-rule `wt` parameter, after approval.
+1. Continue category-level parameter parsing alignment by selecting the next
+   focused behavior contract and recording approval before implementation.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
@@ -39,18 +39,26 @@ rules in `docs/specs/README.md`, not in this file.
 
 - Branch: `codex/align-wth-end-judgment`
 - Objective: continue JP1/AJS3 version 13 parameter alignment with a focused
-  job end-judgment correction for `wth`.
-- Status: implemented locally; validation completed.
+  job end-judgment correction for `wth`, then close the docs-only follow-up
+  that turns current audit notes into a category-level parameter coverage
+  matrix.
+- Status: implementation validation completed for `wth`; docs-only coverage
+  matrix update completed; domain-only `wc` / `wt` pairing implemented and
+  validated.
 - Scope: update the `ParamFactory.wth` builder to read the raw `wth`
   parameter; preserve omitted `wth` as undefined; preserve schedule-rule `wt`
   behavior through `ruleParameterBuilders.wt`; update focused regression
-  evidence.
+  evidence; add a docs-only parameter coverage matrix for already investigated
+  categories; investigate schedule-rule `wc` / `wt` effective-value pairing.
 - Out of scope: parser grammar changes, command generation, byte-length or
   numeric range validation, invalid `jd` / `abr` pairing diagnostics, retry
   range diagnostics, and changing unit-list normalized raw projection.
 - Impact summary: behavior changes only for wrappers that expose `wth`
   (`J`, `Cj`, `Cpj`, `Fxj`, `Htpj`, `Qj`, and recovery variants). Existing
   callers should stop seeing schedule-rule `wt` as an end-judgment threshold.
+  The coverage matrix itself is docs-only and does not broaden runtime
+  behavior. The `wc` / `wt` investigation does not change runtime behavior
+  until approved; the approved domain helper preserves raw projection.
 - Risks and assumptions: this intentionally breaks the legacy `wth` to `wt`
   mapping test. The risk is low-to-medium because the current mapping is
   documented as legacy behavior, but any downstream consumer depending on that
@@ -101,8 +109,17 @@ Current branch checks:
   warnings
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `npm test`
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `npm run test:web`
 - 2026-04-29: `npm run build` completed with existing webpack asset-size
   warnings
+- 2026-04-29: `npm test`
+- 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `pnpm run lint:md`

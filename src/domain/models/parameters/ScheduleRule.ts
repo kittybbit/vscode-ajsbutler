@@ -8,6 +8,7 @@ import {
   parseScheduleByDaysFromStartValue,
   parseShiftDaysValue,
   parseWaitCountValue,
+  resolveEffectiveStartConditionMonitoringPair,
 } from "./scheduleRuleHelpers";
 
 interface ScheduleRule {
@@ -195,5 +196,14 @@ export class Wc extends Parameter implements ScheduleRule {
 
   get numberOfTimes() {
     return this._numberOfTimes ?? "1";
+  }
+
+  effectiveNumberOfTimes(
+    waitTimeRawValue: string | undefined,
+  ): string | undefined {
+    return resolveEffectiveStartConditionMonitoringPair(
+      this.value(),
+      waitTimeRawValue,
+    ).numberOfTimes;
   }
 }

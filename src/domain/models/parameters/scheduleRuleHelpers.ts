@@ -2,7 +2,7 @@ export const resolveScheduleRuleNumber = (
   rawRuleNumber: string | undefined,
 ): number => (rawRuleNumber === undefined ? 1 : Number(rawRuleNumber));
 
-type ParsedRuleValue = {
+export type ParsedRuleValue = {
   rule: number;
   value: string;
 };
@@ -87,6 +87,33 @@ export const parseAnyScheduleTimeValue = (
 export const parseWaitCountValue = (
   rawValue: string | undefined,
 ): ParsedRuleValue | undefined => parseRuleValue(rawValue, /^(no|\d{1,3}|un)$/);
+
+export type EffectiveStartConditionMonitoringPair = {
+  numberOfTimes?: string;
+  time?: string;
+};
+
+export const resolveEffectiveStartConditionMonitoringPair = (
+  waitCountRawValue: string | undefined,
+  waitTimeRawValue: string | undefined,
+): EffectiveStartConditionMonitoringPair => {
+  const waitCount = parseWaitCountValue(waitCountRawValue ?? "no");
+  const waitTime = parseWaitTimeValue(waitTimeRawValue ?? "no");
+
+  if (
+    waitCount === undefined ||
+    waitTime === undefined ||
+    waitCount.value === "no" ||
+    waitTime.value === "no"
+  ) {
+    return {};
+  }
+
+  return {
+    numberOfTimes: waitCount.value,
+    time: waitTime.value,
+  };
+};
 
 export type ParsedScheduleByDaysFromStartValue = {
   rule: number;
