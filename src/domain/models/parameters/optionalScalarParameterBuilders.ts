@@ -626,5 +626,5 @@ export const optionalScalarParameterBuilders = {
   un: createOptionalScalarBuilder("un", (param) => new Un(param)),
   unit: createOptionalScalarBuilder("unit", (param) => new Unit(param)),
   wkp: createOptionalScalarBuilder("wkp", (param) => new Wkp(param)),
-  wth: createOptionalScalarBuilder("wt", (param) => new Wth(param)),
+  wth: createOptionalScalarBuilder("wth", (param) => new Wth(param)),
 } as const;

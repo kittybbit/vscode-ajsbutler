@@ -74,9 +74,8 @@
 - [x] Add focused regression evidence that QUEUE job `ts1` to `ts4` and `td1`
       to `td4` values are preserved while `top1` to `top4` are not exposed or
       derived for `Qj` / `Rq`
-- [ ] Apply the same category-level value parsing audit/refactor workflow to
-      another non-schedule parameter family before marking those categories
-      aligned
+- [x] Align `wth` key mapping so job end-judgment threshold parsing reads
+      `wth` rather than the schedule-rule `wt` parameter
 - [ ] Turn the audit notes into an explicit parameter-coverage matrix when
       category-level status needs tracking beyond the current audit summary
 - [ ] Continue schedule-rule helper-boundary alignment with the remaining
@@ -161,19 +160,35 @@
   and `Rq` preserve explicit transfer source/destination values and do not
   expose transfer operation getters. Parser grammar, command generation,
   validation behavior, and unit-list group 15 raw projection remain unchanged.
+- 2026-04-29: job end-judgment `wth` key mapping is the next focused
+  non-schedule parameter correction. Current code maps `ParamFactory.wth` to
+  raw `wt`, and current regression evidence preserves that legacy behavior.
+  The proposed implementation changes only the builder/test seam so explicit
+  `wth` is preserved and schedule-rule `wt` no longer satisfies
+  end-judgment threshold lookup.
+- 2026-04-29: `ParamFactory.wth` now reads raw `wth`; focused regression
+  evidence verifies explicit `wth` preservation and confirms raw `wt` no
+  longer satisfies end-judgment threshold lookup. Parser grammar, command
+  generation, validation behavior, schedule-rule `wt`, and unit-list
+  normalized raw projection remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-04-29
-- Approved scope: Implement the recorded QUEUE job transfer-file alignment by
-  adding focused regression evidence that `Qj` / `Rq` preserve explicit `ts1`
-  to `ts4` and `td1` to `td4` values without exposing or deriving `top1` to
-  `top4`; keep parser grammar, command generation, validation behavior, and
-  unit-list group 15 projection unchanged.
+- Approved scope: Align `wth` key mapping so job end-judgment threshold
+  parsing reads raw `wth` rather than the schedule-rule `wt` parameter; update
+  focused regression evidence; keep parser grammar, command generation,
+  validation behavior, schedule-rule `wt`, and unit-list normalized raw
+  projection unchanged.
 
 ## Prior Approval Evidence
 
+- 2026-04-29: Approved QUEUE job transfer-file alignment by adding focused
+  regression evidence that `Qj` / `Rq` preserve explicit `ts1` to `ts4` and
+  `td1` to `td4` values without exposing or deriving `top1` to `top4`, while
+  keeping parser grammar, command generation, validation behavior, and
+  unit-list group 15 projection unchanged.
 - 2026-04-28: Approved JP1 event sending job arrival-check default alignment
   by resolving omitted `evsrc` values to `10` for `Evsj` / `Revsj`, preserving
   explicit `evsrc`, `evssv`, `evsrt`, and `evspl` values, keeping normalized
