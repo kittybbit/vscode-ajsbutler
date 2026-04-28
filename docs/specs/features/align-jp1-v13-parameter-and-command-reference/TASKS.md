@@ -56,6 +56,9 @@
 - [x] Record JP1 event sending job alignment scope, manual references,
       affected seams, alternatives, and expected omitted `evsrc` behavior
       before implementation
+- [x] Record QUEUE job transfer-file alignment scope, manual references,
+      affected seams, alternatives, and expected no-`topN` behavior before
+      implementation
 
 ## Follow-up
 
@@ -68,6 +71,9 @@
 - [x] Align omitted JP1 event sending job `evsrc` values to the JP1/AJS3 v13
       default `10`, preserving explicit values and deciding whether normalized
       unit-list projection should remain raw or become default-aware
+- [x] Add focused regression evidence that QUEUE job `ts1` to `ts4` and `td1`
+      to `td4` values are preserved while `top1` to `top4` are not exposed or
+      derived for `Qj` / `Rq`
 - [ ] Apply the same category-level value parsing audit/refactor workflow to
       another non-schedule parameter family before marking those categories
       aligned
@@ -145,19 +151,34 @@
 - 2026-04-28: omitted JP1 event sending job `evsrc` now resolves to `10`
   through `DEFAULTS.Evsrc`; explicit event sending job values remain preserved.
   Unit-list projection remains raw normalized key/value projection.
+- 2026-04-29: QUEUE job transfer-file alignment is the next non-schedule
+  parameter family. The proposed behavior-preserving change is limited to
+  focused regression evidence that `Qj` / `Rq` preserve explicit `ts1` to
+  `ts4` and `td1` to `td4` values without exposing or deriving `top1` to
+  `top4`, because JP1/AJS3 version 13 QUEUE job definitions do not define
+  `topN`.
+- 2026-04-29: QUEUE job transfer-file regression evidence now verifies `Qj`
+  and `Rq` preserve explicit transfer source/destination values and do not
+  expose transfer operation getters. Parser grammar, command generation,
+  validation behavior, and unit-list group 15 raw projection remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-04-28
-- Approved scope: Implement the recorded JP1 event sending job arrival-check
-  default alignment by resolving omitted `evsrc` values to `10` for `Evsj` /
-  `Revsj`, preserving explicit `evsrc`, `evssv`, `evsrt`, and `evspl` values,
-  keeping normalized unit-list projection raw and unchanged, and adding focused
-  regression evidence.
+- Approved at: 2026-04-29
+- Approved scope: Implement the recorded QUEUE job transfer-file alignment by
+  adding focused regression evidence that `Qj` / `Rq` preserve explicit `ts1`
+  to `ts4` and `td1` to `td4` values without exposing or deriving `top1` to
+  `top4`; keep parser grammar, command generation, validation behavior, and
+  unit-list group 15 projection unchanged.
 
 ## Prior Approval Evidence
 
+- 2026-04-28: Approved JP1 event sending job arrival-check default alignment
+  by resolving omitted `evsrc` values to `10` for `Evsj` / `Revsj`, preserving
+  explicit `evsrc`, `evssv`, `evsrt`, and `evspl` values, keeping normalized
+  unit-list projection raw and unchanged, and adding focused regression
+  evidence.
 - 2026-04-28: Approved HTTP Connection job default alignment by resolving
   omitted `eu` values to `def` for `Htpj` / `Rhtpj`, keeping explicit `eu`
   values and non-HTTP job-family `eu` defaults unchanged, and adding focused

@@ -49,6 +49,11 @@ JP1/AJS3 version 13 reference documents.
   from normalized raw key/value data, so default-aware wrapper changes do not
   automatically change list projection unless that boundary is explicitly in
   scope.
+- QUEUE job transfer-file alignment is approval-sensitive because `Qj` / `Rq`
+  expose `ts1` to `ts4` and `td1` to `td4`, while the related UNIX/PC job and
+  UNIX/PC custom job definitions also define `top1` to `top4`. The QUEUE job
+  slice must preserve that distinction and must not broaden `topN` default
+  derivation to wrappers whose manual section does not define `topN`.
 
 ## Reference Documents
 
