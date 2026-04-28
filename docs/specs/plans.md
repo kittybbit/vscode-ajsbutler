@@ -37,23 +37,24 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/align-job-end-judgment-parameters`
-- Objective: continue JP1/AJS3 version 13 parameter alignment by aligning the
-  job end-judgment `jd` default for UNIX/PC jobs and UNIX/PC custom jobs.
-- Status: implemented locally; validation completed on 2026-04-27.
-- Scope: record the SDD plan for the end-judgment category, preserve explicit
-  `jd` values, change omitted `jd` from the legacy `cond` fallback to the
-  manual-backed `cod` default, and add focused regression evidence.
-- Out of scope: parser grammar changes, byte-length validation, numeric range
-  validation, invalid `jd` / `abr` diagnostics, retry range diagnostics, and UI
-  changes.
-- Impact summary: domain parameter default behavior changes for omitted `jd`.
-  Parser, list, flow, CSV, diagnostics, hover, telemetry, desktop extension,
-  and web extension code paths should remain structurally unchanged.
-- Risks and assumptions: treat the JP1/AJS3 v13 UNIX/PC job, UNIX/PC custom
-  job, and `ajsprint -a` default table references as the normative source for
-  `jd=cod`; keep invalid value handling deferred until a diagnostics/warnings
-  policy is chosen.
+- Branch: `codex/align-http-connection-eu-default`
+- Objective: continue JP1/AJS3 version 13 parameter alignment with the next
+  small parameter-default slice for HTTP Connection job `eu`.
+- Status: implemented locally; validation completed on 2026-04-28.
+- Scope: preserve explicit HTTP Connection job `eu` values, change omitted
+  `eu` from the generic `ent` fallback to the `ajsprint -a` default table value
+  `def`, and keep other job families on the existing generic `eu=ent` default.
+- Out of scope: parser grammar changes, command generation, byte-length
+  validation, numeric range validation, HTTP return-code mapping validation,
+  broader event/wait default refactors, and global `DEFAULTS.Eu` changes.
+- Impact summary: domain parameter default behavior would change only for
+  omitted `eu` on `Htpj` / `Rhtpj`. Parser, list, flow, CSV, diagnostics,
+  hover, telemetry, desktop extension, and web extension code paths should
+  remain structurally unchanged.
+- Risks and assumptions: the approval-sensitive reference boundary is the
+  JP1/AJS3 v13 `ajsprint -a` default values table listing HTTP Connection job
+  `Eu=def`; the HTTP Connection job definition section should remain cited
+  because it also describes `eu={ent|def};`.
 
 ## Wrapper Semantics Matrix
 
@@ -84,3 +85,7 @@ Current branch checks:
 - 2026-04-27: `npm test`
 - 2026-04-27: `npm run test:web`
 - 2026-04-27: `npm run build`
+- 2026-04-28: `npm test`
+- 2026-04-28: `npm run qlty`
+- 2026-04-28: `npm run test:web`
+- 2026-04-28: `npm run build`

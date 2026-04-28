@@ -8,6 +8,7 @@ const parameterDefaults = {
   Rei: "1",
   Ha: "n",
   Eu: "ent",
+  HttpConnectionJobEu: "def",
   Soa: "new",
   Sea: "new",
   Mm: "and",

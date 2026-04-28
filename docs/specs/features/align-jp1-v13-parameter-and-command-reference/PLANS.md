@@ -35,31 +35,42 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   parameters in `JOB_END_JUDGMENT_ALIGNMENT.md`.
 - Aligned omitted UNIX/PC job and UNIX/PC custom job `jd` values to the
   JP1/AJS3 v13 default `cod` behind `jobEndJudgmentHelpers.ts`.
+- Investigated HTTP Connection job defaults in
+  `HTTP_CONNECTION_JOB_DEFAULT_ALIGNMENT.md` as the next small
+  parameter-default candidate.
+- Aligned omitted HTTP Connection job `eu` values to `def` through
+  `httpConnectionJobDefaultHelpers.ts` while preserving explicit values and
+  generic non-HTTP `eu=ent` behavior.
 
 ## Impact Investigation
 
-- Planned change: align the omitted `jd` default for UNIX/PC jobs and
-  UNIX/PC custom jobs with JP1/AJS3 version 13 by changing the default from
-  `cond` to `cod` and moving the category-specific default into a
-  job-end-judgment helper seam.
+- Planned change: align the omitted HTTP Connection job `eu` default with the
+  JP1/AJS3 version 13 `ajsprint -a` default values table by resolving `Htpj`
+  and `Rhtpj` omitted `eu` values to `def` while preserving the generic `eu`
+  default of `ent` for other job families.
 - Affected files:
+  `src/domain/models/units/Htpj.ts`,
   `src/domain/models/parameters/Defaults.ts`,
-  `src/domain/models/parameters/jobEndJudgmentHelpers.ts`,
   `src/domain/models/parameters/optionalScalarParameterBuilders.ts`,
-  `src/test/suite/jobEndJudgmentHelpers.test.ts`,
-  `src/test/suite/parameterFactory.test.ts`, and this feature's SDD docs.
-- Affected features: JP1/AJS parameter interpretation for UNIX/PC job and
-  UNIX/PC custom job end-judgment defaults.
-- Tests affected: parameter helper and parameter factory regression tests.
-- Breaking-change risk: medium. Omitted `jd` values will now surface as
-  `cod`, matching the v13 manual and `ajsprint -a` default table, but any
-  existing consumer that expected the previous `cond` fallback will observe a
-  changed default value.
-- Alternatives considered: leave `DEFAULTS.Jd` as-is and document the mismatch;
-  this was rejected because the roadmap prioritizes manual-backed parameter
-  alignment and the affected behavior has a focused regression boundary.
-- Approval: human approval to proceed was given on 2026-04-27 after branch
-  creation for `codex/align-job-end-judgment-parameters`.
+  a possible new HTTP Connection job default helper, focused parameter factory
+  tests, and this feature's SDD docs.
+- Affected features: JP1/AJS parameter interpretation for HTTP Connection job
+  execution-user defaults.
+- Tests affected: parameter factory regression tests; helper tests if a helper
+  seam is introduced.
+- Breaking-change risk: medium. Omitted HTTP Connection job `eu` values would
+  surface as `def`, matching the `ajsprint -a` default values table, but any
+  existing consumer that expected the generic `ent` fallback for HTTP
+  Connection jobs will observe a changed default value. The definition section
+  and `ajsprint -a` default table must remain explicitly cited because they are
+  the approval-sensitive reference boundary for this slice.
+- Alternatives considered: leave generic `DEFAULTS.Eu` behavior unchanged and
+  record the HTTP Connection job default as unresolved; change `DEFAULTS.Eu`
+  globally to `def`; or build a full parameter matrix before implementation.
+  The proposed small helper seam is preferred because it limits the behavior
+  change to `Htpj` and `Rhtpj`.
+- Approval: human approval to proceed was given on 2026-04-28 after the
+  investigation summary for HTTP Connection job `eu` default alignment.
 
 ## Follow-up
 
@@ -71,6 +82,9 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   defines `tsN` and `tdN` but not `topN`.
 - Revisit invalid `jd` / `abr` combinations when diagnostics behavior is
   explicit.
+- Reconcile HTTP Connection job `eu` wording across the definition section and
+  `ajsprint -a` default table if future evidence conflicts with the approved
+  behavior.
 
 ## Validation
 
@@ -84,3 +98,7 @@ Current branch validation:
 - 2026-04-27: `npm run qlty`
 - 2026-04-27: `npm run test:web`
 - 2026-04-27: `npm run build`
+- 2026-04-28: `npm test`
+- 2026-04-28: `npm run qlty`
+- 2026-04-28: `npm run test:web`
+- 2026-04-28: `npm run build`

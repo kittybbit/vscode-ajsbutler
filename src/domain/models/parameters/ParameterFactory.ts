@@ -41,6 +41,8 @@ export class ParamFactory {
   static etn = optionalScalarParameterBuilders.etn;
   static ets = optionalScalarParameterBuilders.ets;
   static eu = optionalScalarParameterBuilders.eu;
+  static httpConnectionJobEu =
+    optionalScalarParameterBuilders.httpConnectionJobEu;
   static eun = optionalArrayParameterBuilders.eun;
   static ev = optionalScalarParameterBuilders.ev;
   static evdet = optionalScalarParameterBuilders.evdet;
