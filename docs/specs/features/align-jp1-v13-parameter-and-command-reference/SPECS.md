@@ -42,6 +42,13 @@ JP1/AJS3 version 13 reference documents.
   default values table lists HTTP Connection job `Eu` separately as `def`.
 - A focused helper seam is preferred over changing `DEFAULTS.Eu` globally so
   non-HTTP job families continue to preserve their existing `ent` default.
+- JP1 event sending job `evsrc` is approval-sensitive because the current
+  generic default is `0`, while the JP1/AJS3 version 13 event sending job
+  definition says omitted `evsrc` is assumed as `10`.
+- Normalized unit-list projection currently reads event sending job parameters
+  from normalized raw key/value data, so default-aware wrapper changes do not
+  automatically change list projection unless that boundary is explicitly in
+  scope.
 
 ## Reference Documents
 

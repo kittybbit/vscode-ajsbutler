@@ -3,6 +3,7 @@ import { ParamFactory } from "../../domain/models/parameters/ParameterFactory";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
 import { J } from "../../domain/models/units/J";
 import { Cj } from "../../domain/models/units/Cj";
+import { Evsj } from "../../domain/models/units/Evsj";
 import { Htpj } from "../../domain/models/units/Htpj";
 import { N } from "../../domain/models/units/N";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
@@ -262,6 +263,27 @@ unit=root,,jp1admin,;
 }
 `;
 
+const eventSendingJobDefaultDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=event,evsj,+0+0;
+  el=explicit,revsj,+160+0;
+  unit=event,,jp1admin,;
+  {
+    ty=evsj;
+  }
+  unit=explicit,,jp1admin,;
+  {
+    ty=revsj;
+    evssv=wr;
+    evsrt=y;
+    evspl=5;
+    evsrc=7;
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -375,6 +397,19 @@ const parseHttpConnectionJobs = (): {
   return {
     httpJob: root.children[0] as Htpj,
     explicitHttpJob: root.children[1] as Htpj,
+  };
+};
+
+const parseEventSendingJobs = (): {
+  eventJob: Evsj;
+  explicitEventJob: Evsj;
+} => {
+  const result = parseAjs(eventSendingJobDefaultDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return {
+    eventJob: root.children[0] as Evsj,
+    explicitEventJob: root.children[1] as Evsj,
   };
 };
 
@@ -718,5 +753,18 @@ suite("ParameterFactory", () => {
     assert.strictEqual(httpJob.eu?.value(), DEFAULTS.HttpConnectionJobEu);
     assert.strictEqual(explicitHttpJob.eu?.value(), "ent");
     assert.strictEqual(ParamFactory.eu(genericJob)?.value(), DEFAULTS.Eu);
+  });
+
+  test("returns JP1 event sending job arrival-check defaults through the facade", () => {
+    const { eventJob, explicitEventJob } = parseEventSendingJobs();
+
+    assert.strictEqual(eventJob.evssv?.value(), DEFAULTS.Evssv);
+    assert.strictEqual(eventJob.evsrt?.value(), DEFAULTS.Evsrt);
+    assert.strictEqual(eventJob.evspl?.value(), DEFAULTS.Evspl);
+    assert.strictEqual(eventJob.evsrc?.value(), DEFAULTS.Evsrc);
+    assert.strictEqual(explicitEventJob.evssv?.value(), "wr");
+    assert.strictEqual(explicitEventJob.evsrt?.value(), "y");
+    assert.strictEqual(explicitEventJob.evspl?.value(), "5");
+    assert.strictEqual(explicitEventJob.evsrc?.value(), "7");
   });
 });

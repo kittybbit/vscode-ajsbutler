@@ -41,36 +41,48 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Aligned omitted HTTP Connection job `eu` values to `def` through
   `httpConnectionJobDefaultHelpers.ts` while preserving explicit values and
   generic non-HTTP `eu=ent` behavior.
+- Investigated JP1 event sending job arrival-check defaults in
+  `EVENT_SEND_JOB_ALIGNMENT.md` as the next category-level parameter
+  candidate.
+- Aligned omitted JP1 event sending job `evsrc` values to `10` through
+  `DEFAULTS.Evsrc`, while preserving explicit values and leaving normalized
+  unit-list projection raw.
 
 ## Impact Investigation
 
-- Planned change: align the omitted HTTP Connection job `eu` default with the
-  JP1/AJS3 version 13 `ajsprint -a` default values table by resolving `Htpj`
-  and `Rhtpj` omitted `eu` values to `def` while preserving the generic `eu`
-  default of `ent` for other job families.
+- Planned change: align the omitted JP1 event sending job `evsrc` default with
+  the JP1/AJS3 version 13 event sending job definition by resolving `Evsj` and
+  `Revsj` omitted `evsrc` values to `10`, while preserving explicit `evsrc`
+  values and existing `evssv`, `evsrt`, and `evspl` defaults.
 - Affected files:
-  `src/domain/models/units/Htpj.ts`,
+  `src/domain/models/units/Evsj.ts`,
   `src/domain/models/parameters/Defaults.ts`,
   `src/domain/models/parameters/optionalScalarParameterBuilders.ts`,
-  a possible new HTTP Connection job default helper, focused parameter factory
-  tests, and this feature's SDD docs.
-- Affected features: JP1/AJS parameter interpretation for HTTP Connection job
-  execution-user defaults.
+  a possible new JP1 event sending job default helper,
+  `src/application/unit-list/buildUnitListRemainingGroups.ts` if normalized
+  projection is approved for default-aware behavior, focused parameter factory
+  tests, focused unit-list tests if projection changes, and this feature's SDD
+  docs.
+- Affected features: JP1/AJS parameter interpretation for JP1 event sending
+  job arrival-check defaults; unit-list group 14 event-action columns if
+  normalized projection behavior changes.
 - Tests affected: parameter factory regression tests; helper tests if a helper
-  seam is introduced.
-- Breaking-change risk: medium. Omitted HTTP Connection job `eu` values would
-  surface as `def`, matching the `ajsprint -a` default values table, but any
-  existing consumer that expected the generic `ent` fallback for HTTP
-  Connection jobs will observe a changed default value. The definition section
-  and `ajsprint -a` default table must remain explicitly cited because they are
-  the approval-sensitive reference boundary for this slice.
-- Alternatives considered: leave generic `DEFAULTS.Eu` behavior unchanged and
-  record the HTTP Connection job default as unresolved; change `DEFAULTS.Eu`
-  globally to `def`; or build a full parameter matrix before implementation.
-  The proposed small helper seam is preferred because it limits the behavior
-  change to `Htpj` and `Rhtpj`.
+  seam is introduced; build-unit-list view tests only if default-aware
+  projection is approved.
+- Breaking-change risk: medium. Omitted JP1 event sending job `evsrc` values
+  would surface as `10`, matching the manual, but any consumer expecting the
+  current generic `0` fallback will observe a changed default value. Unit-list
+  behavior is a separate risk because it currently reads normalized raw
+  parameters rather than wrapper defaults.
+- Alternatives considered: leave generic `DEFAULTS.Evsrc` behavior unchanged
+  and record the event sending job check-count mismatch as unresolved; change
+  `DEFAULTS.Evsrc` globally to `10` only after confirming no other unit family
+  shares the current `0` assumption; or defer until a full parameter coverage
+  matrix exists. A focused helper seam is preferred if global impact remains
+  ambiguous.
 - Approval: human approval to proceed was given on 2026-04-28 after the
-  investigation summary for HTTP Connection job `eu` default alignment.
+  investigation summary for JP1 event sending job `evsrc` default alignment.
+  The approved scope keeps unit-list normalized projection raw.
 
 ## Follow-up
 
@@ -85,6 +97,8 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Reconcile HTTP Connection job `eu` wording across the definition section and
   `ajsprint -a` default table if future evidence conflicts with the approved
   behavior.
+- Revisit JP1 event sending job `evhst` requiredness when `evsrt=y` after the
+  diagnostics behavior contract is explicit.
 
 ## Validation
 
@@ -102,3 +116,9 @@ Current branch validation:
 - 2026-04-28: `npm run qlty`
 - 2026-04-28: `npm run test:web`
 - 2026-04-28: `npm run build`
+- 2026-04-28: `pnpm run lint:md`
+- 2026-04-28: `npm test`
+- 2026-04-28: `npm run test:web`
+- 2026-04-28: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-28: `pnpm run qlty` passed after excluding `.serena/` from Qlty

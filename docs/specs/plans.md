@@ -16,8 +16,8 @@ rules in `docs/specs/README.md`, not in this file.
 - Parameter-reference alignment should proceed in small JP1/AJS v13 slices
   with explicit manual coverage. For each parameter category, verify value
   parsing against the official format before claiming the category aligned.
-  The active category is the schedule-rule parameter family: `sd`, `ln`, `st`,
-  `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`.
+  The next active candidate is the JP1 event sending job arrival-check family:
+  `evssv`, `evsrt`, `evspl`, and `evsrc`.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
@@ -37,24 +37,24 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/align-http-connection-eu-default`
+- Branch: `codex/align-event-send-job-evsrc-default`
 - Objective: continue JP1/AJS3 version 13 parameter alignment with the next
-  small parameter-default slice for HTTP Connection job `eu`.
-- Status: implemented locally; validation completed on 2026-04-28.
-- Scope: preserve explicit HTTP Connection job `eu` values, change omitted
-  `eu` from the generic `ent` fallback to the `ajsprint -a` default table value
-  `def`, and keep other job families on the existing generic `eu=ent` default.
+  category-level candidate for JP1 event sending job arrival-check defaults.
+- Status: implemented locally; validation completed.
+- Scope: preserve explicit JP1 event sending job `evssv`, `evsrt`, `evspl`,
+  and `evsrc` values; keep existing `evssv=no`, `evsrt=n`, and `evspl=10`
+  defaults; change omitted `evsrc` for `Evsj` / `Revsj` from the previous
+  generic `0` fallback to the manual default `10`.
 - Out of scope: parser grammar changes, command generation, byte-length
-  validation, numeric range validation, HTTP return-code mapping validation,
-  broader event/wait default refactors, and global `DEFAULTS.Eu` changes.
-- Impact summary: domain parameter default behavior would change only for
-  omitted `eu` on `Htpj` / `Rhtpj`. Parser, list, flow, CSV, diagnostics,
-  hover, telemetry, desktop extension, and web extension code paths should
-  remain structurally unchanged.
+  validation, numeric range validation, event arrival runtime behavior,
+  `evhst` requiredness diagnostics, and broader event receiving job semantics.
+- Impact summary: domain parameter default behavior changes only for omitted
+  `evsrc` on `Evsj` / `Revsj`. Unit-list projection remains raw normalized
+  key/value projection and does not synthesize omitted defaults.
 - Risks and assumptions: the approval-sensitive reference boundary is the
-  JP1/AJS3 v13 `ajsprint -a` default values table listing HTTP Connection job
-  `Eu=def`; the HTTP Connection job definition section should remain cited
-  because it also describes `eu={ent|def};`.
+  JP1/AJS3 v13 JP1 event sending job definition stating omitted `evsrc` is
+  assumed as `10`. A focused helper seam is preferred unless the complete
+  reference impact check proves a global `DEFAULTS.Evsrc` change is safe.
 
 ## Wrapper Semantics Matrix
 
@@ -89,3 +89,9 @@ Current branch checks:
 - 2026-04-28: `npm run qlty`
 - 2026-04-28: `npm run test:web`
 - 2026-04-28: `npm run build`
+- 2026-04-28: `pnpm run lint:md`
+- 2026-04-28: `npm test`
+- 2026-04-28: `npm run test:web`
+- 2026-04-28: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-28: `pnpm run qlty` passed after excluding `.serena/` from Qlty
