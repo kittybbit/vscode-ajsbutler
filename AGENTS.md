@@ -67,13 +67,15 @@ For non-trivial changes, follow this order:
 1. Read `docs/specs/README.md` first, especially the
    Implementation Change Gate.
 2. Read relevant feature and roadmap docs in `docs/specs/`.
-3. Update or create the relevant use-case spec.
-4. Write or update a short implementation plan in `PLANS.md`.
-5. Confirm acceptance criteria and required approval gates before editing
+3. Follow the semantic code navigation guidance in `docs/specs/README.md`
+   when Serena or an equivalent tool is available.
+4. Update or create the relevant use-case spec.
+5. Write or update a short implementation plan in `PLANS.md`.
+6. Confirm acceptance criteria and required approval gates before editing
    runtime code, tests, generated artifacts, or configuration.
-6. Implement.
-7. Run quality checks.
-8. Summarize impact and remaining risks.
+7. Implement.
+8. Run quality checks.
+9. Summarize impact and remaining risks.
 
 If the requested change is ambiguous, prefer documenting assumptions explicitly in `PLANS.md` instead of making hidden assumptions.
 

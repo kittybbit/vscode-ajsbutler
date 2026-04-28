@@ -59,6 +59,40 @@ For docs-only changes:
   markdown-specific validation
 - repository `Verify` workflow should not be relied on as a required gate
 
+## Semantic Code Navigation
+
+When Serena or another semantic code navigation tool is available, use it
+during impact investigation and reference impact verification to identify
+affected symbols, references, call sites, and dependency impact.
+
+Use semantic analysis to reduce reference omissions, including transitive
+reference and dependency impact, in:
+
+- Phase 1 impact investigation before requesting approval
+- Phase 3 reference impact verification after approval
+
+Serena is supplemental tooling. It does not replace:
+
+- SDD artifacts
+- human approval
+- approval evidence
+- tests
+- validation
+
+Manual impact analysis remains required. Do not treat Serena-only results as
+proof that a change is safe.
+
+Minimal local setup:
+
+```bash
+uv tool install -p 3.13 serena-agent@latest --prerelease=allow
+serena init
+serena setup codex
+```
+
+If the MCP client cannot find `serena` on `PATH`, configure the Codex MCP
+server command with the absolute path to the installed `serena` executable.
+
 ## Implementation Change Gate
 
 Before editing runtime code, tests, generated artifacts, or configuration:
@@ -139,6 +173,8 @@ Implementation will not proceed until approval is given.
 
 After approval, expand the investigation into a complete reference impact
 check, list every required fix, and task the work before implementation.
+Use Serena or another semantic code navigation tool when available to verify
+affected references, call sites, transitive references, and dependency impact.
 Do not finish with only a subset of affected references updated.
 
 Implementation should then proceed in small meaningful blocks:

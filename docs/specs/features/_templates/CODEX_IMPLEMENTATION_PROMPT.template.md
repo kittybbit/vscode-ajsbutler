@@ -39,6 +39,8 @@ in `docs/specs/README.md` `Implementation Change Gate`.
 Before editing:
 
 - Search affected functions, classes, components, commands, and DTOs.
+- Follow `docs/specs/README.md` semantic code navigation guidance when Serena
+  or an equivalent tool is available.
 - List changed areas, affected features, affected tests, related docs, and
   breaking-change risk.
 - When behavior scenarios exist, list changed, added, or removed scenarios and

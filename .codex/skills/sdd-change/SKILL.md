@@ -19,6 +19,8 @@ SDD investigation, approval, evidence, implementation, and validation flow.
 3. read the relevant files in `docs/specs/`
 4. run the investigation-only phase before implementation changes:
    - search affected functions, classes, components, and commands
+   - follow `docs/specs/README.md` semantic code navigation guidance when
+     Serena or an equivalent tool is available
    - list affected files, features, tests, docs, and breaking-change risk
    - when behavior scenarios exist, list changed, added, or removed scenarios
      and affected tests
@@ -53,6 +55,8 @@ Keep the notes short and focused on impact, decisions, and validation.
 - identify desktop and web entry points affected by the change
 - identify parser-related modules and generated grammar boundaries
 - identify direct VS Code API boundaries and adapter locations
+- apply semantic code navigation checks from `docs/specs/README.md` when
+  available
 - summarize architectural risks, test impact, and compatibility impact
 
 ### Planning
