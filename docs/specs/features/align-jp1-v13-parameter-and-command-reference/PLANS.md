@@ -51,6 +51,10 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   parameter family. The candidate is behavior-preserving regression evidence
   that `Qj` / `Rq` expose `ts1` to `ts4` and `td1` to `td4` without exposing or
   deriving `top1` to `top4`.
+- Investigated job end-judgment `wth` key mapping as the next focused
+  non-schedule parameter correction.
+- Aligned `ParamFactory.wth` to read raw `wth`, replacing the legacy
+  `wth` to `wt` lookup while preserving schedule-rule `wt` behavior.
 
 ## Impact Investigation
 
@@ -118,7 +122,42 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   make group 15 unit-type-aware, deferred as a separate unit-list behavior
   slice; defer to a full parameter matrix, not preferred because the current
   follow-up is already narrow and testable.
-- Approval: pending.
+- Approval: completed in the prior QUEUE transfer-file slice; see
+  `TASKS.md` prior approval evidence.
+
+### WTH End-Judgment Key Mapping Candidate
+
+- Planned change: align `ParamFactory.wth` with the JP1/AJS3 v13
+  end-judgment parameter by reading raw `wth` instead of the schedule-rule
+  `wt` parameter.
+- Affected files:
+  `src/domain/models/parameters/optionalScalarParameterBuilders.ts`,
+  `src/domain/models/parameters/ParameterFactory.ts`,
+  `src/domain/models/parameters/index.ts`,
+  `src/domain/models/units/J.ts`,
+  `src/domain/models/units/Cj.ts`,
+  `src/domain/models/units/Cpj.ts`,
+  `src/domain/models/units/Fxj.ts`,
+  `src/domain/models/units/Htpj.ts`,
+  `src/domain/models/units/Qj.ts`,
+  `src/test/suite/parameterFactory.test.ts`,
+  `src/test/suite/buildUnitListView.test.ts` if raw projection evidence needs
+  adjustment, and this feature's SDD docs.
+- Affected features: JP1/AJS parameter interpretation for job end-judgment
+  thresholds; unit-list group 11 raw threshold projection should remain
+  unchanged unless implementation reveals test gaps.
+- Tests affected: replace the legacy `wth` to `wt` regression with evidence
+  that explicit `wth` is preserved and schedule-rule `wt` does not satisfy
+  `ParamFactory.wth`; keep omitted `wth` undefined evidence.
+- Breaking-change risk: low-to-medium. The planned behavior matches the
+  parameter name used by wrappers and JP1/AJS3 v13 docs, but it intentionally
+  removes a documented legacy compatibility quirk.
+- Alternatives considered: leave the legacy `wth` to `wt` mapping and record it
+  as a known mismatch; support both `wth` and `wt` fallback, rejected because it
+  would continue mixing schedule-rule and end-judgment semantics; defer to a
+  full parameter matrix, rejected because this is a small, isolated correction.
+- Approval: human approval to proceed was given on 2026-04-29 after the
+  investigation summary for `wth` key mapping alignment.
 
 ## Follow-up
 
@@ -164,3 +203,8 @@ Current branch validation:
   warnings
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `npm test`
+- 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings

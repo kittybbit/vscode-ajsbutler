@@ -267,6 +267,25 @@ unit=root,,jp1admin,;
 }
 `;
 
+const wthKeyMappingDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=job1,j,+0+0;
+  el=job2,j,+160+0;
+  unit=job1,,jp1admin,;
+  {
+    ty=j;
+    wth=20;
+  }
+  unit=job2,,jp1admin,;
+  {
+    ty=j;
+    wt=00:30;
+  }
+}
+`;
+
 const httpConnectionJobDefaultDefinition = `
 unit=root,,jp1admin,;
 {
@@ -425,6 +444,19 @@ const parseExplicitJobEndJudgmentJob = (): J => {
   return root.children[0] as J;
 };
 
+const parseWthKeyMappingJobs = (): {
+  explicitWthJob: J;
+  scheduleWtOnlyJob: J;
+} => {
+  const result = parseAjs(wthKeyMappingDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return {
+    explicitWthJob: root.children[0] as J,
+    scheduleWtOnlyJob: root.children[1] as J,
+  };
+};
+
 const parseHttpConnectionJobs = (): {
   httpJob: Htpj;
   explicitHttpJob: Htpj;
@@ -473,14 +505,15 @@ suite("ParameterFactory", () => {
     assert.strictEqual(ab?.value(), DEFAULTS.Ab);
   });
 
-  test("preserves the legacy wth to wt mapping", () => {
-    const job = parseJob();
+  test("reads end-judgment wth without using schedule wt", () => {
+    const { explicitWthJob, scheduleWtOnlyJob } = parseWthKeyMappingJobs();
 
-    const wth = ParamFactory.wth(job);
+    const wth = ParamFactory.wth(explicitWthJob);
 
     assert.ok(wth);
-    assert.strictEqual(wth?.parameter, "wt");
-    assert.strictEqual(wth?.value(), "wait-target");
+    assert.strictEqual(wth?.parameter, "wth");
+    assert.strictEqual(wth?.value(), "20");
+    assert.strictEqual(ParamFactory.wth(scheduleWtOnlyJob), undefined);
   });
 
   test("returns explicit optional array parameters through the facade", () => {

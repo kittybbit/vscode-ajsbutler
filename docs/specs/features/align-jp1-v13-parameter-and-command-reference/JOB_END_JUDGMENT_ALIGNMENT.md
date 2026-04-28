@@ -45,9 +45,33 @@ This document covers the currently modeled end-judgment defaults for `jd`,
 - Omitted `jd` resolves to `cod` for UNIX/PC jobs and UNIX/PC custom jobs.
 - Omitted `tho` remains `0`.
 - Omitted `abr` remains `n`.
+- Explicit `wth` values are read from the `wth` parameter, not from the
+  schedule-rule `wt` parameter.
 - `wth` and `jdf` are not synthesized when omitted.
 - Invalid combinations, such as `jd` values other than `cod` with `abr=y`,
   remain preserved raw values until the diagnostics policy is explicit.
+
+## WTH Key Mapping Follow-up
+
+- Current behavior:
+  `src/domain/models/parameters/optionalScalarParameterBuilders.ts` maps
+  `ParamFactory.wth` through `createOptionalScalarBuilder("wt", ...)`.
+- Current regression evidence:
+  `src/test/suite/parameterFactory.test.ts` explicitly preserves the legacy
+  `wth` to `wt` mapping.
+- Planned behavior if approved:
+  `ParamFactory.wth` reads `wth`, explicit `wth` values are preserved, omitted
+  `wth` remains undefined, and schedule-rule `wt` continues to be handled only
+  by the schedule-rule helper path.
+- Affected wrappers:
+  `J`, `Cj`, `Cpj`, `Fxj`, `Htpj`, `Qj`, and their recovery variants.
+- Affected tests:
+  replace the legacy mapping test with explicit `wth` preservation and
+  `wt`/`wth` non-confusion evidence; keep the existing omitted `wth` default
+  assertion.
+- Out of scope:
+  parser grammar changes, command generation, validation diagnostics, and
+  unit-list normalized raw projection changes.
 
 ## Follow-up
 

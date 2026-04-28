@@ -54,6 +54,11 @@ JP1/AJS3 version 13 reference documents.
   UNIX/PC custom job definitions also define `top1` to `top4`. The QUEUE job
   slice must preserve that distinction and must not broaden `topN` default
   derivation to wrappers whose manual section does not define `topN`.
+- Job end-judgment `wth` alignment is approval-sensitive because the current
+  factory preserves a legacy lookup from `wth` to the schedule-rule `wt`
+  parameter. Correct alignment should read explicit `wth` values without
+  synthesizing omitted values and without changing schedule-rule `wt`
+  projection.
 
 ## Reference Documents
 
