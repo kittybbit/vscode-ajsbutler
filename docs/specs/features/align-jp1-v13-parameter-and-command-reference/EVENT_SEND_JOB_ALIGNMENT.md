@@ -48,6 +48,9 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
   `evsrc` from normalized unit parameters by key, so a default change in the
   domain wrapper path does not automatically change normalized list projection
   unless that path is intentionally updated.
+- Unit-list group 14 projection is now the next approval-gated behavior
+  candidate because the domain wrapper defaults are implemented, but the table
+  viewer still displays empty cells for omitted arrival-check parameters.
 
 ## Expected Behavior If Approved
 
@@ -68,6 +71,10 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
   `Evsj`; `Revsj` receives the same behavior through inheritance.
 - Normalized unit-list projection remains raw key/value projection and does not
   synthesize omitted event sending job defaults.
+- Unit-list group 14 JP1 event sending job arrival-check projection now
+  displays the existing domain defaults for omitted `evssv`, `evsrt`,
+  `evspl`, and `evsrc` values. Explicit normalized values remain preserved,
+  and non-event-sending jobs do not synthesize these defaults.
 
 ## Alternatives
 
@@ -81,10 +88,38 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 
 ## Follow-up
 
-- Decide whether normalized unit-list projection should display JP1 event
-  sending job defaults or continue showing only explicit normalized
-  parameters.
 - Revisit `evhst` requiredness when `evsrt=y` only after diagnostics behavior
   is explicitly scoped.
 - Add range validation for `evspl` and `evsrc` only after invalid JP1/AJS
   parameter handling is defined across domain and diagnostics.
+
+## Unit-List Group 14 Projection Candidate
+
+- Planned change:
+  make group 14 JP1 event sending job arrival-check columns consume existing
+  domain default semantics for omitted `evssv`, `evsrt`, `evspl`, and
+  `evsrc`, while preserving explicit normalized values.
+- Affected files:
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  `src/application/unit-list/buildUnitListView.ts` only if helper typing
+  changes, focused unit-list tests, this document, `SPECS.md`, `TASKS.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, and branch-level `docs/specs/plans.md`.
+- Affected features:
+  JP1/AJS table viewer group 14 action job definition columns; build-unit-list
+  application use case; JP1 event sending job parameter interpretation.
+- Tests affected:
+  focused `buildUnitListRemainingGroups` or `buildUnitListView` regression
+  evidence for omitted and explicit `evssv`, `evsrt`, `evspl`, and `evsrc`.
+- Breaking-change risk:
+  medium. This intentionally changes user-visible table output for definitions
+  that omit JP1 event sending job arrival-check parameters. Raw parser output
+  and normalized key/value storage remain unchanged.
+- Alternatives considered:
+  keep group 14 raw by design and leave the matrix gap visible; add separate
+  raw and default-aware columns, rejected for this slice because it expands UI
+  and localization scope; add diagnostics for `evhst` requiredness or numeric
+  ranges first, deferred because diagnostics policy is a separate behavior
+  contract.
+- Approval:
+  human approval to proceed was given on 2026-04-29 after the investigation
+  summary for unit-list group 14 default-aware projection.

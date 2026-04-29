@@ -99,8 +99,8 @@ coverage.
   `Defaults.ts`
 - Evidence: `parameterFactory.test.ts` and `buildUnitListView.test.ts`
 - Remaining gap:
-  unit-list projection remains raw; `evhst` requiredness and range validation
-  are deferred
+  unit-list group 14 default-aware projection is aligned for these defaults;
+  `evhst` requiredness and range validation are deferred
 
 ## Boundary Decisions
 

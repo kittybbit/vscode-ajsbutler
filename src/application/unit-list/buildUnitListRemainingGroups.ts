@@ -2,6 +2,8 @@ import {
   AjsUnit,
   findAjsUnitParameterValue,
 } from "../../domain/models/ajs/AjsDocument";
+import { DEFAULTS } from "../../domain/models/parameters/Defaults";
+import type { ParamSymbol } from "../../domain/values/AjsType";
 import type {
   UnitListGroup1View,
   UnitListGroup2View,
@@ -20,6 +22,18 @@ import type {
   UnitListGroup19View,
   UnitListLinkedUnitView,
 } from "./buildUnitListView";
+
+const isEventSendingJob = (unit: AjsUnit): boolean =>
+  unit.unitType === "evsj" || unit.unitType === "revsj";
+
+const findEventSendingJobDefaultAwareParameterValue = (
+  unit: AjsUnit,
+  key: ParamSymbol,
+  defaultValue: string,
+): string | undefined =>
+  isEventSendingJob(unit)
+    ? (findAjsUnitParameterValue(unit, key) ?? defaultValue)
+    : findAjsUnitParameterValue(unit, key);
 
 export const buildUnitListRemainingGroups = (
   unit: AjsUnit,
@@ -138,10 +152,26 @@ export const buildUnitListRemainingGroups = (
     actionEventId: findAjsUnitParameterValue(unit, "evsid"),
     actionHostName: findAjsUnitParameterValue(unit, "evhst"),
     actionMessage: findAjsUnitParameterValue(unit, "evsms"),
-    actionSeverity: findAjsUnitParameterValue(unit, "evssv"),
-    actionStartType: findAjsUnitParameterValue(unit, "evsrt"),
-    actionInterval: findAjsUnitParameterValue(unit, "evspl"),
-    actionCount: findAjsUnitParameterValue(unit, "evsrc"),
+    actionSeverity: findEventSendingJobDefaultAwareParameterValue(
+      unit,
+      "evssv",
+      DEFAULTS.Evssv,
+    ),
+    actionStartType: findEventSendingJobDefaultAwareParameterValue(
+      unit,
+      "evsrt",
+      DEFAULTS.Evsrt,
+    ),
+    actionInterval: findEventSendingJobDefaultAwareParameterValue(
+      unit,
+      "evspl",
+      DEFAULTS.Evspl,
+    ),
+    actionCount: findEventSendingJobDefaultAwareParameterValue(
+      unit,
+      "evsrc",
+      DEFAULTS.Evsrc,
+    ),
     platformMethod: findAjsUnitParameterValue(unit, "pfm"),
   },
   group15: {

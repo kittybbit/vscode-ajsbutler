@@ -31,8 +31,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Continue category-level parameter parsing alignment by selecting the next
-   focused behavior contract and recording approval before implementation.
+1. Prepare JP1 event sending job unit-list group 14 projection as the next
+   focused parameter-alignment behavior contract, then record approval before
+   implementation.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
@@ -40,27 +41,31 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: not created for implementation while approval is pending.
+- Branch: `codex/event-send-group14-projection`.
 - Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
-  focused unit-list projection slice for schedule-rule `wc` / `wt` effective
-  start-condition monitoring values.
-- Status: build/test performance PR #222 is merged with successful CI. The
-  current slice implements unit-list group 10 projection for the already
-  implemented domain effective `wc` / `wt` pairing.
-- Scope: update SDD records and request approval for changing unit-list
-  projection from raw independent `wc` / `wt` values to paired effective values
-  for the group 10 start-condition columns.
+  focused unit-list projection slice for JP1 event sending job group 14
+  arrival-check defaults.
+- Status: schedule-rule `wc` / `wt` domain pairing and group 10 projection are
+  delivered. Unit-list group 14 now consumes the existing JP1 event sending job
+  arrival-check defaults after approval.
+- Scope: make group 14 JP1 event sending job arrival-check columns display
+  existing domain defaults for omitted `evssv`, `evsrt`, `evspl`, and
+  `evsrc` values.
 - Out of scope: parser grammar changes, command generation, diagnostics,
-  generated artifacts, dependency changes, `engines.vscode`, and broader
-  schedule-rule range validation.
+  generated artifacts, dependency changes, `engines.vscode`, JP1 event
+  destination host requiredness, byte-length validation, numeric range
+  validation, and broader raw projection policy changes.
 - Impact summary: the candidate affects
-  `src/application/unit-list/buildUnitListGroup10View.ts`,
-  `src/application/unit-list/unitListViewHelpers.ts`, group 10 unit-list
-  regression tests, and the schedule-rule SDD documents.
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  `src/application/unit-list/buildUnitListView.ts` DTO fields only if helper
+  typing requires it, focused unit-list regression tests, and the JP1 event
+  sending job SDD documents. Existing domain default behavior in
+  `ParamFactory.evssv`, `ParamFactory.evsrt`, `ParamFactory.evspl`, and
+  `ParamFactory.evsrc` should be reused rather than changed.
 - Risks and assumptions: behavior changes are user-visible in the table viewer
-  because paired values such as `wc=4` with `wt=no` would display as empty
-  effective start-condition monitoring values instead of raw independent
-  values. Raw parameter parsing and domain wrapper raw values remain preserved.
+  because omitted group 14 arrival-check fields would display defaults instead
+  of empty cells. Raw parser output and normalized parameter storage remain
+  preserved.
 
 ## Build/Test Performance SDD
 
@@ -89,8 +94,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: unit-list group 10 projection for effective schedule-rule `wc` /
-  `wt` pairing.
+  slice: JP1 event sending job unit-list group 14 default-aware projection.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -117,3 +121,11 @@ Current branch checks:
   warnings
 - 2026-04-29: `pnpm run lint:md`
 - 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `pnpm run test:compile`
+- 2026-04-29: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
+- 2026-04-29: `npm test`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-29: `pnpm run lint:md`

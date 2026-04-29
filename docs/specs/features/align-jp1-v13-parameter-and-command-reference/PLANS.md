@@ -66,6 +66,12 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   approval-gated behavior candidate after domain-only pairing.
 - Implemented unit-list group 10 projection for effective `wc` / `wt` values
   while preserving raw parser, wrapper, and normalized parameter values.
+- Investigated JP1 event sending job unit-list group 14 projection for
+  default-aware `evssv`, `evsrt`, `evspl`, and `evsrc` values as the next
+  approval-gated behavior candidate after the group 10 slice.
+- Implemented unit-list group 14 projection for JP1 event sending job
+  arrival-check defaults while preserving explicit normalized values and raw
+  storage.
 
 ## Impact Investigation
 
@@ -253,6 +259,48 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Approval:
   human approval to proceed was given on 2026-04-29 after the investigation
   summary for unit-list group 10 effective `wc` / `wt` projection.
+
+### JP1 Event Sending Job Group 14 Projection Candidate
+
+- Planned change:
+  change unit-list group 14 JP1 event sending job arrival-check projection to
+  display existing domain defaults for omitted `evssv`, `evsrt`, `evspl`, and
+  `evsrc`, while preserving explicit normalized values.
+- Affected files:
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  `src/application/unit-list/buildUnitListView.ts` only if helper typing
+  changes, `src/test/suite/buildUnitListRemainingGroups.test.ts` or
+  `src/test/suite/buildUnitListView.test.ts`, `EVENT_SEND_JOB_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `TASKS.md`, and branch-level
+  `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `buildUnitListRemainingGroups`, `UnitListGroup14View.actionSeverity`,
+  `UnitListGroup14View.actionStartType`,
+  `UnitListGroup14View.actionInterval`,
+  `UnitListGroup14View.actionCount`, and the group 14 table columns that
+  render those DTO fields.
+- Affected features:
+  JP1/AJS table viewer group 14 action job definition columns;
+  build-unit-list application use case; JP1 event sending job parameter
+  interpretation.
+- Tests affected:
+  focused unit-list tests for omitted event sending job arrival-check
+  parameters and explicit value preservation; existing `parameterFactory`
+  default tests should continue to pass unchanged.
+- Breaking-change risk:
+  medium. This intentionally changes user-visible table output for definitions
+  where JP1 event sending job `evssv`, `evsrt`, `evspl`, or `evsrc` are
+  omitted. Raw parser output, raw domain wrapper values, and normalized
+  key/value storage remain unchanged.
+- Alternatives considered:
+  keep group 14 raw by design and leave the matrix gap visible; add separate
+  raw and default-aware columns, rejected for this slice because it expands UI
+  and localization scope; prioritize `evhst` requiredness diagnostics first,
+  deferred until editor-feedback behavior explicitly owns cross-parameter
+  diagnostics.
+- Approval:
+  human approval to proceed was given on 2026-04-29 after the investigation
+  summary for unit-list group 14 default-aware projection.
 
 ## Follow-up
 

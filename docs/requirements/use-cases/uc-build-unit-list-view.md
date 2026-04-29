@@ -56,6 +56,12 @@ Scenario: Desktop and web viewers share the row shape
   Given a normalized JP1/AJS document
   When table row view models are built
   Then desktop and web viewers can consume the same row shape
+
+Scenario: JP1 event sending job arrival-check defaults are projected
+  Given a normalized JP1/AJS document with a JP1 event sending job
+  When table row view models are built
+  Then omitted group 14 arrival-check values display their JP1/AJS defaults
+  And explicit group 14 arrival-check values remain visible
 ```
 
 ## Acceptance Notes
