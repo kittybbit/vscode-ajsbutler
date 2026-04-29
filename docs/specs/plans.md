@@ -31,7 +31,7 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Continue build/test performance after Slice-3 CI feedback is reviewed,
+1. Continue build/test performance after Slice-8 CI feedback is reviewed,
    selecting the next slice only after updating the feature SDD and recording
    approval.
 2. Continue category-level parameter parsing alignment by selecting the next
@@ -49,20 +49,22 @@ rules in `docs/specs/README.md`, not in this file.
   validation, push, and CI review per slice.
 - Status: Slice-1, Slice-2, Slice-3, Slice-4, Slice-5, and Slice-7 are
   implemented in draft PR #222. CI completed successfully through Slice-7 per
-  human confirmation; Slice-3 is ready for push and CI review.
+  human confirmation, and Slice-3 CI also completed successfully per human
+  confirmation. Slice-8 Playwright browser cache is implemented locally and
+  ready for push and CI review.
 - Scope: keep changes focused on validation performance command ownership,
   ANTLR generation freshness, webpack development speed, type-check ownership,
   CI rebuild reduction, and cache behavior as described by the feature docs.
 - Out of scope: product behavior changes, parser grammar changes, generated
   parser semantic changes, dependency modernization unrelated to validation
   performance, and raising `engines.vscode`.
-- Impact summary: Slice-3 affects webpack target selection and package script
-  ownership for focused desktop and web preparation. Default development and
-  production builds continue to emit all current bundles.
+- Impact summary: Slice-8 affects `.github/workflows/verify.yml` only, adding
+  a conservative Playwright browser cache while preserving pnpm dependency
+  caching and the existing Playwright install command.
 - Risks and assumptions: performance reductions are hypotheses until measured.
-  Slice-3 bundle omission risk is controlled by focused desktop/web validation
-  and by keeping editor bundles in both focused preparation paths because both
-  runners open table and flow viewers.
+  Slice-8 cache risk is controlled by keeping cache misses first-class and
+  deferring VS Code test binary caching until the VS Code binary version input
+  is explicit.
 
 ## Build/Test Performance SDD
 
@@ -76,7 +78,7 @@ rules in `docs/specs/README.md`, not in this file.
   optimization; Slice-5, type-check responsibility; Slice-7, CI rebuild
   reduction.
 - Next implementation slice:
-  to be selected after Slice-3 CI feedback is reviewed.
+  to be selected after Slice-8 CI feedback is reviewed.
 - Roadmap:
   Phase 1 covers Slice-1, Slice-2, and Slice-4; Phase 2 covers Slice-5 and
   Slice-7; Phase 3 covers Slice-3, Slice-6, and Slice-8.

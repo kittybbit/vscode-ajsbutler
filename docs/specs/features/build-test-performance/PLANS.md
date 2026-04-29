@@ -252,6 +252,29 @@ Implementation notes:
 - Web extension bundling explicitly prefers browser package resolution for the
   webworker target.
 
+## Slice-8 Implementation Plan
+
+Slice-8 is implemented locally and pending CI review.
+
+1. Keep existing dependency cache ownership.
+   - `actions/setup-node` already caches pnpm dependencies.
+   - Do not replace `pnpm/action-setup` or dependency installation behavior.
+2. Add a Playwright browser cache only.
+   - Cache the Playwright browser download directory used by CI.
+   - Include runner OS, `pnpm-lock.yaml`, and Playwright version in the cache
+     key.
+   - Preserve the existing Playwright headless browser install command after
+     the cache restore.
+3. Defer VS Code test binary caching.
+   - Current desktop tests call `downloadAndUnzipVSCode()` without a
+     repository-pinned VS Code test binary version.
+   - Caching `.vscode-test` is deferred until the version input is explicit.
+4. Validate.
+   - `pnpm run lint:md`
+   - `pnpm run qlty`
+   - CI verify workflow cache-miss correctness after push
+   - human-reviewed CI cache-hit timing on a later run when available
+
 ## Measurement Plan
 
 Each implementation slice must record:

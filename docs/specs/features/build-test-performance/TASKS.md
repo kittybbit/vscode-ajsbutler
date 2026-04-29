@@ -11,21 +11,30 @@
 
 - Status: Approved
 - Approved at: 2026-04-29
-- Approved scope: User replied "OK.Proceed." after the Slice-3
-  implementation approval request. Approved changes are limited to adding
-  explicit development webpack target filtering, focused desktop and web
-  preparation scripts, preserving default all-target `development`,
-  production `build`, CI production-artifact reuse, bundle entry points,
-  output names, output directories, dependency versions, and `engines.vscode`,
-  updating SDD tracking, and running validation.
+- Approved scope: User replied "OKです。進めてください。" after the Slice-8
+  implementation approval request and cache-effect explanation. Approved
+  changes are limited to adding a GitHub Actions cache for Playwright browser
+  downloads, preserving the existing pnpm dependency cache, preserving the
+  Playwright install command, deferring VS Code test binary caching, updating
+  SDD tracking, and running validation. Runtime code, package scripts,
+  dependency versions, bundle outputs, and `engines.vscode` changes are out of
+  scope.
 
-Current implementation gate: Slice-3 webpack target splitting.
+Current implementation gate: Slice-8 Playwright browser cache.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 
 Prior approval:
 
+- Slice-3 was approved on 2026-04-29 when the user replied "OK.Proceed."
+  after the Slice-3 implementation approval request. Approved changes were
+  limited to adding explicit development webpack target filtering, focused
+  desktop and web preparation scripts, preserving default all-target
+  `development`, production `build`, CI production-artifact reuse, bundle
+  entry points, output names, output directories, dependency versions, and
+  `engines.vscode`, updating SDD tracking, and running validation. CI later
+  completed successfully per human confirmation.
 - Slice-7 was approved on 2026-04-29 when the user replied
   "実装を進めてください。" after the Slice-7 implementation approval request.
   Approved changes were limited to changing the verify workflow to reuse
@@ -126,8 +135,57 @@ Prior approval:
 - [x] Slice-3 focused preparation scripts completed.
 - [x] Slice-3 focused desktop/web validation completed.
 - [x] Slice-3 timings recorded.
+- [x] Slice-3 CI pass confirmed by human.
+- [x] Slice-8 selected as the next implementation candidate.
+- [x] Slice-8 impact investigation completed.
+- [x] Slice-8 SDD plan updated.
+- [x] Human approval recorded for Slice-8 implementation.
+- [x] Slice-8 implementation scope matches approved scope.
+- [x] Slice-8 Playwright browser cache workflow change completed.
+- [ ] Slice-8 cache-miss validation completed.
+- [ ] Slice-8 CI timing evidence recorded.
 - [ ] Draft slices 3, 6, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
+
+## Slice-8 Impact Investigation
+
+- Planned change:
+  add a conservative GitHub Actions cache for Playwright browser downloads to
+  reduce external setup time on cache hits.
+- Affected files:
+  `.github/workflows/verify.yml`,
+  `docs/specs/features/build-test-performance/*`, and `docs/specs/plans.md`.
+- Affected commands:
+  CI `pnpm exec playwright install --with-deps chromium-headless-shell`,
+  `pnpm run test:web:run`, and the verify workflow setup sequence.
+- Affected features:
+  GitHub Actions verify workflow and web extension test setup.
+- Affected tests:
+  verify workflow cache-miss run, later cache-hit run, markdown lint, and qlty.
+- Version inputs:
+  Playwright is pinned to `1.59.1` in `package.json` and `pnpm-lock.yaml`.
+  Local dry-run output shows Chromium headless shell build `1217` and FFmpeg
+  build `1011` for Playwright `1.59.1`; CI must still run the install command
+  after cache restore so misses and system dependency setup remain correct.
+- Scope decision:
+  pnpm dependency caching is already handled by `actions/setup-node` with
+  `cache: pnpm`. VS Code test binary caching is deferred because
+  `downloadAndUnzipVSCode()` currently resolves the VS Code version implicitly,
+  so the repository does not have a stable VS Code binary cache-key input.
+- Breaking-change risk:
+  low to medium. Cache misses must behave exactly like the current workflow;
+  cache hits must not skip browser dependency installation or validation.
+- Implementation decision:
+  use `actions/cache@v4` on `~/.cache/ms-playwright` with a key containing
+  `${{ runner.os }}`, the pinned Playwright version `1.59.1`, and
+  `hashFiles('pnpm-lock.yaml')`. Keep
+  `pnpm exec playwright install --with-deps chromium-headless-shell` after the
+  cache restore so a miss or partial restore still installs required browser
+  files and Linux dependencies.
+- Alternatives:
+  do nothing; cache `.vscode-test`; cache Playwright plus VS Code binaries in
+  one slice; pin the VS Code test binary version before adding `.vscode-test`
+  caching.
 
 ## Slice-3 Impact Investigation
 

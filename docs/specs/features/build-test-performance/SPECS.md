@@ -843,6 +843,20 @@ CI:
   VS Code test binary version inputs where applicable
 - cache misses must fall back to normal install/download behavior
 
+Slice-8 selected approach:
+
+- Add a CI cache for Playwright browser downloads only.
+- Keep pnpm dependency caching owned by existing `actions/setup-node` with
+  `cache: pnpm`.
+- Do not cache VS Code test binaries in Slice-8 because the current
+  `@vscode/test-electron` runner resolves the VS Code version implicitly; cache
+  keys would not have a stable repository-owned VS Code version input.
+- Keep `pnpm exec playwright install --with-deps chromium-headless-shell` in
+  the workflow so cache misses and browser dependency installation remain
+  first-class.
+- Key the Playwright browser cache by runner OS, `pnpm-lock.yaml`, and the
+  Playwright version recorded in the lockfile/package metadata.
+
 ### Acceptance Criteria
 
 ```gherkin
