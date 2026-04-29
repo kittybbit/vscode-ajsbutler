@@ -9,23 +9,25 @@
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-04-29
-- Approved scope: User replied "実装を進めてください。" after the Slice-7
-  implementation approval request. Approved changes are limited to changing
-  the verify workflow to reuse production build artifacts for raw desktop and
-  web test runners, preserving local `test:full`, updating SDD tracking, and
-  running validation. Package scripts, runtime code, test selection, bundle
-  entry points, output names, dependency versions, and `engines.vscode`
-  changes are out of scope.
+- Status: Pending
+- Approved at:
+- Approved scope:
 
-Current implementation gate: Slice-7 CI rebuild reduction.
+Current implementation gate: Slice-3 webpack target splitting.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 
 Prior approval:
 
+- Slice-7 was approved on 2026-04-29 when the user replied
+  "実装を進めてください。" after the Slice-7 implementation approval request.
+  Approved changes were limited to changing the verify workflow to reuse
+  production build artifacts for raw desktop and web test runners, preserving
+  local `test:full`, updating SDD tracking, and running validation. Package
+  scripts, runtime code, test selection, bundle entry points, output names,
+  dependency versions, and `engines.vscode` changes were out of scope. CI
+  later completed successfully per human confirmation.
 - Slice-5 was approved on 2026-04-29 when the user replied "OK. proceed."
   after the Slice-5 implementation approval request. Approved changes were
   limited to disabling `ForkTsCheckerWebpackPlugin` in development-mode webpack
@@ -108,8 +110,55 @@ Prior approval:
 - [x] Slice-7 verify workflow changes completed.
 - [x] Slice-7 local production-artifact runner validation completed.
 - [x] Slice-7 CI timing evidence recorded.
+- [x] Slice-7 CI pass confirmed by human.
+- [x] Slice-3 selected as the next implementation candidate.
+- [x] Slice-3 impact investigation completed.
+- [x] Slice-3 SDD plan updated.
+- [ ] Human approval recorded for Slice-3 implementation.
+- [ ] Slice-3 implementation scope matches approved scope.
+- [ ] Slice-3 webpack target filtering completed.
+- [ ] Slice-3 focused preparation scripts completed.
+- [ ] Slice-3 focused desktop/web validation completed.
+- [ ] Slice-3 timings recorded.
 - [ ] Draft slices 3, 6, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
+
+## Slice-3 Impact Investigation
+
+- Planned change:
+  split development webpack targets so focused desktop and web validation can
+  build only the bundles each runner needs.
+- Affected files:
+  `webpack.config.js`, `package.json`,
+  `docs/specs/features/build-test-performance/*`, and `docs/specs/plans.md`.
+- Affected commands:
+  planned focused preparation commands, `pnpm run development`, `pnpm test`,
+  `pnpm run test:web`, `pnpm run test:full`, `pnpm run build`, and CI raw
+  test-runner commands indirectly through artifact expectations.
+- Affected functions/classes/components:
+  `editorConfig`, `nodeConfig`, `webConfig`, webpack module export target
+  selection, and package script ownership for desktop and web preparation.
+- Affected features:
+  desktop extension tests, web extension smoke tests, table and flow webview
+  bundle loading, and production packaging.
+- Affected tests:
+  focused desktop preparation plus desktop runner, focused web preparation
+  plus web runner, full test validation, production build, markdown lint, and
+  qlty.
+- Target ownership finding:
+  desktop tests open table and flow webview tabs in `extension.test.ts`, so a
+  desktop-focused preparation still needs editor bundles plus `extension.js`.
+  Web smoke tests open the same viewers in `webSmoke.ts`, so a web-focused
+  preparation needs editor bundles plus `web.js`.
+- Breaking-change risk:
+  medium. Omitting an indirectly loaded bundle can produce runtime failures
+  even when TypeScript compilation succeeds. Keeping default `development`
+  all-target behavior and validating desktop/web focused paths separately
+  mitigates this.
+- Alternatives:
+  keep all-target development builds; split only package scripts without
+  webpack target filtering; change `test:full` to compose focused preparation
+  steps; defer target splitting and move to cache optimization.
 
 ## Slice-7 Impact Investigation
 

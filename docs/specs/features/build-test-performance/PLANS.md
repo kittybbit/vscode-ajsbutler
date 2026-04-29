@@ -175,9 +175,10 @@ test preparation focused on test-output checking.
    - `pnpm run build`
 5. Recorded timings and remaining local-test coverage risk in `TASKS.md`.
 
-## Slice-7 Implementation Plan
+## Completed Slice-7 Implementation
 
-Slice-7 is the next candidate and is pending approval.
+Slice-7 changed CI to reuse production build artifacts for raw desktop and web
+test runners instead of running `test:full` after production build.
 
 1. Confirm production artifact compatibility for test runners.
    - `pnpm run build`
@@ -199,7 +200,44 @@ Slice-7 is the next candidate and is pending approval.
    - `pnpm run test:desktop:run`
    - `pnpm run test:web:run`
    - `pnpm run test:full`
-5. Record CI step timing evidence after the pushed workflow completes.
+5. Recorded local timing evidence and human-reported CI pass confirmation.
+
+## Slice-3 Implementation Plan
+
+Slice-3 is the next candidate and is pending approval.
+
+1. Confirm bundle ownership for each runner.
+   - Desktop runner needs the desktop extension bundle, editor bundles, and
+     test output because `extension.test.ts` opens table and flow viewers.
+   - Web runner needs the web extension bundle, editor bundles, and test
+     output because `webSmoke.ts` opens table and flow viewers.
+   - Production build needs all bundles.
+2. Add explicit webpack target filtering.
+   - Keep default `pnpm run development` as the all-target development build.
+   - Add target selection through webpack env flags or similarly explicit
+     script names.
+   - Preserve existing output names: `extension.js`, `web.js`,
+     `tableViewer.js`, and `flowViewer.js`.
+3. Add focused preparation scripts.
+   - Add a desktop-focused preparation command that emits editor plus desktop
+     extension bundles and compiles tests.
+   - Add a web-focused preparation command that emits editor plus web extension
+     bundles and compiles tests.
+   - Keep `test:full` on the all-target preparation path unless a later
+     approved slice changes full validation behavior.
+4. Preserve compatibility.
+   - Keep `pnpm test`, `pnpm run test:web`, and `pnpm run test:full`
+     compatible from a clean checkout.
+   - Do not change production build, CI production-artifact reuse, bundle entry
+     points, output directories, or `engines.vscode`.
+5. Validate.
+   - `pnpm run development`
+   - focused desktop preparation plus `pnpm run test:desktop:run`
+   - focused web preparation plus `pnpm run test:web:run`
+   - `pnpm run test:full`
+   - `pnpm run build`
+   - `pnpm run lint:md`
+   - `pnpm run qlty`
 
 ## Measurement Plan
 

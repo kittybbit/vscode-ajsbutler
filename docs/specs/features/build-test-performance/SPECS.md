@@ -406,7 +406,8 @@ checks may need only editor bundles or only extension entry points.
 
 Target requirements:
 
-- desktop extension tests require the desktop extension bundle and test output
+- desktop extension tests require the desktop extension bundle, editor bundles,
+  and test output because the desktop suite opens table and flow webview tabs
 - web extension tests require the web extension bundle, editor bundles, and
   test output
 - production build requires extension, web, and editor bundles
@@ -418,6 +419,8 @@ Exclusion rules:
 - production packaging must continue to emit all contributed entry points
 - target filtering must be explicit in script names or webpack environment
   flags
+- the default `development` command must continue to emit all development
+  bundles unless a separate focused script is invoked
 
 Compatibility:
 
@@ -436,7 +439,13 @@ Scenario: Production build emits all bundles
 
 Scenario: Desktop test preparation excludes unnecessary web bundles
   Given a desktop-only preparation command is executed
-  Then only bundles required by desktop tests are emitted
+  Then the desktop extension bundle and editor bundles are emitted
+  And the web extension bundle is not emitted
+
+Scenario: Web test preparation excludes unnecessary desktop bundles
+  Given a web-only preparation command is executed
+  Then the web extension bundle and editor bundles are emitted
+  And the desktop extension bundle is not emitted
 ```
 
 ### Compatibility / Risk
