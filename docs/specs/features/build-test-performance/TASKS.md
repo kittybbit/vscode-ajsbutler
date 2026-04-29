@@ -9,9 +9,15 @@
 
 ## Human Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
+- Status: Approved
+- Approved at: 2026-04-29
+- Approved scope: User replied "OK. proceed." after the Slice-5
+  implementation approval request. Approved changes are limited to disabling
+  `ForkTsCheckerWebpackPlugin` in development-mode webpack builds, preserving
+  production build type checking, updating SDD tracking, and running
+  validation. TypeScript compiler options, test selection, bundle entry
+  points, output names, dependency versions, and `engines.vscode` changes are
+  out of scope.
 
 Current implementation gate: Slice-5 type-check responsibility.
 
@@ -81,12 +87,12 @@ Prior approval:
 - [x] Slice-5 selected as the next implementation candidate.
 - [x] Slice-5 impact investigation completed.
 - [x] Slice-5 SDD plan updated.
-- [ ] Human approval recorded for Slice-5 implementation.
-- [ ] Slice-5 implementation scope matches approved scope.
-- [ ] Slice-5 webpack checker ownership changes completed.
-- [ ] Slice-5 temporary type-error checks completed.
-- [ ] Slice-5 normal validation completed.
-- [ ] Slice-5 timings recorded.
+- [x] Human approval recorded for Slice-5 implementation.
+- [x] Slice-5 implementation scope matches approved scope.
+- [x] Slice-5 webpack checker ownership changes completed.
+- [x] Slice-5 temporary type-error checks completed.
+- [x] Slice-5 normal validation completed.
+- [x] Slice-5 timings recorded.
 - [ ] Draft slices 3, 6, 7, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
 
@@ -232,6 +238,23 @@ Prior approval:
 - 2026-04-29 Slice-4 post-change `pnpm run build`: passed, 36.31s real time.
   Production assets remained `[minimized]` and reported existing webpack
   asset-size warnings.
+- 2026-04-29 Slice-5 post-change `pnpm run development`: passed, 1.58s real
+  time on a warm run.
+- 2026-04-29 Slice-5 post-change `pnpm run test:prepare`: passed, 6.20s real
+  time. Development webpack did not run `ForkTsCheckerWebpackPlugin`;
+  `test:compile` remained the test-preparation checker.
+- 2026-04-29 Slice-5 temporary type error in an editor-feedback source file:
+  `pnpm run test:prepare` failed in `test:compile` as expected.
+- 2026-04-29 Slice-5 temporary type error in
+  `src/ui-component/editor/ajsTable/Header.tsx`: `pnpm run build` failed in
+  production webpack checking as expected.
+- 2026-04-29 Slice-5 post-change `pnpm run test:full`: passed outside the
+  sandbox, 13.50s real time.
+- 2026-04-29 Slice-5 post-change `pnpm test`: passed, 17.03s real time.
+- 2026-04-29 Slice-5 post-change `pnpm run test:web`: passed outside the
+  sandbox, 9.59s real time.
+- 2026-04-29 Slice-5 post-change `pnpm run build`: passed, 15.76s real time,
+  with existing webpack asset-size warnings.
 
 ## Validation
 
@@ -244,12 +267,17 @@ Prior approval:
 - [x] Slice-2: run `pnpm run test:prepare`.
 - [x] Slice-2: run `pnpm run antlr4ts` and verify no generated parser diff.
 - [x] Slice-4: run `pnpm run development`.
+- [x] Slice-5: run temporary `test:prepare` type-error check.
+- [x] Slice-5: run temporary `build` type-error check.
 
 ## Notes
 
 - Slice-1 is implemented after approval.
 - Slice-2 is implemented after approval.
 - Slice-4 is implemented after approval.
+- Slice-5 is implemented after approval.
 - `pnpm run qlty` initially failed in the sandbox because qlty could not create
   its log file; the same command passed outside the sandbox.
 - `pnpm run build` completed with existing webpack asset-size warnings.
+- A local `pnpm test` run intentionally remains narrower than full validation;
+  `pnpm run build` remains required to catch full source graph type errors.

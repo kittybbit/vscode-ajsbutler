@@ -83,12 +83,16 @@ const createAnalyzerPlugin = (enabled, reportFilename) => (enabled
     ]
     : []);
 
-const createBasePlugins = ({ defineValues, analyzer, reportFilename, extraPlugins = [] }) => [
-    new ForkTsCheckerWebpackPlugin({
-        typescript: {
-            tsconfig: "tsconfig.json",
-        },
-    }),
+const createBasePlugins = ({ defineValues, production, analyzer, reportFilename, extraPlugins = [] }) => [
+    ...(production
+        ? [
+            new ForkTsCheckerWebpackPlugin({
+                typescript: {
+                    tsconfig: "tsconfig.json",
+                },
+            }),
+        ]
+        : []),
     new DefinePlugin(defineValues),
     ...extraPlugins,
     ...createAnalyzerPlugin(analyzer, reportFilename),
@@ -139,6 +143,7 @@ const createConfig = ({
     optimization: createOptimization(production, development),
     plugins: createBasePlugins({
         defineValues,
+        production,
         analyzer,
         reportFilename,
         extraPlugins,
