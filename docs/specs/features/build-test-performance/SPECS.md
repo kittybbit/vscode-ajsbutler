@@ -729,6 +729,27 @@ prepared or validated.
 - CI logs must show enough step detail to diagnose whether lint, build,
   desktop tests, or web tests failed.
 
+Slice-7 selected approach:
+
+- Reuse production build artifacts in CI for extension test runners.
+- Keep the existing `Production build` step as the production bundle and full
+  source graph type-check gate.
+- Replace CI `pnpm run test:full` with explicit `pnpm run test:compile`,
+  `pnpm run test:desktop:run`, and `pnpm run test:web:run` steps.
+- Keep local `pnpm run test:full` unchanged for contributor convenience.
+- Do not reuse artifacts across jobs or add cache/artifact upload behavior in
+  Slice-7.
+
+Artifact compatibility decision:
+
+- `pnpm run build` emits `out/extension.js`, `out/web.js`, `out/tableViewer.js`,
+  and `out/flowViewer.js`, matching package entry points and webview bundle
+  names used by the extension under test.
+- `pnpm run test:compile` emits compiled test files under `out/test` without
+  deleting production bundles.
+- Raw test runner scripts can run against the production build output after
+  `test:compile`.
+
 ### Acceptance Criteria
 
 ```gherkin
@@ -750,6 +771,23 @@ prefer explicit preparation over ambiguous lifecycle hooks.
 
 Compare GitHub Actions total duration and step duration across at least two
 runs before and after the change.
+
+Local validation before implementation approval:
+
+- `pnpm run build`
+- `pnpm run test:compile`
+- `pnpm run test:desktop:run`
+- `pnpm run test:web:run`
+
+Slice-7 validation commands after implementation:
+
+- `pnpm run lint:md`
+- `pnpm run qlty`
+- `pnpm run build`
+- `pnpm run test:compile`
+- `pnpm run test:desktop:run`
+- `pnpm run test:web:run`
+- `pnpm run test:full`
 
 ### Rollback Strategy
 

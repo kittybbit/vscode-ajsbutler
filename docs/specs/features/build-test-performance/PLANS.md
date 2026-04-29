@@ -145,34 +145,61 @@ preserving production minification.
 4. Recorded timings and remaining production/development divergence risk in
    `TASKS.md`.
 
-## Slice-5 Implementation Plan
+## Completed Slice-5 Implementation
 
-Slice-5 is the next candidate and is pending approval.
+Slice-5 made production build the full source graph type-check gate and kept
+test preparation focused on test-output checking.
 
-1. Compare type-check coverage.
+1. Compared type-check coverage.
    - `tsconfig.json` covers the full source graph for production build
      checking.
    - `tsconfig.test.json` covers tests plus test-dependent
      application/domain/extension boundaries, but not every UI or extension
      source file.
-2. Update webpack checker ownership.
+2. Updated webpack checker ownership.
    - Keep `ts-loader` in transpile-only mode.
    - Keep `ForkTsCheckerWebpackPlugin` enabled for production builds.
    - Disable `ForkTsCheckerWebpackPlugin` for development-mode webpack builds.
    - Keep `test:compile` as the single checker during test preparation.
-3. Validate coverage boundaries.
-   - Confirm `pnpm run test:prepare` still fails for a temporary type error in
+3. Validated coverage boundaries.
+   - Confirmed `pnpm run test:prepare` still fails for a temporary type error in
      a file included by `tsconfig.test.json`.
-   - Confirm `pnpm run build` still fails for a temporary type error in a
+   - Confirmed `pnpm run build` still fails for a temporary type error in a
      source file outside `tsconfig.test.json`.
-4. Validate normal commands.
+4. Validated normal commands.
    - `pnpm run development`
    - `pnpm run test:prepare`
    - `pnpm test`
    - `pnpm run test:web`
    - `pnpm run test:full`
    - `pnpm run build`
-5. Record timings and remaining local-test coverage risk in `TASKS.md`.
+5. Recorded timings and remaining local-test coverage risk in `TASKS.md`.
+
+## Slice-7 Implementation Plan
+
+Slice-7 is the next candidate and is pending approval.
+
+1. Confirm production artifact compatibility for test runners.
+   - `pnpm run build`
+   - `pnpm run test:compile`
+   - `pnpm run test:desktop:run`
+   - `pnpm run test:web:run`
+2. Update CI workflow steps.
+   - Keep the `Production build` step.
+   - Add a `Compile tests` step after production build.
+   - Run `test:desktop:run` and `test:web:run` directly in separate CI steps.
+   - Remove CI use of `test:full` so CI does not rerun development webpack
+     after production build.
+3. Preserve local commands.
+   - Keep `pnpm run test:full` unchanged for local prepare-once validation.
+   - Do not add cross-job artifacts or external caches in this slice.
+4. Validate.
+   - `pnpm run build`
+   - `pnpm run test:compile`
+   - `pnpm run test:desktop:run`
+   - `pnpm run test:web:run`
+   - `pnpm run test:full`
+5. Record CI step timing evidence after the pushed workflow completes.
 
 ## Measurement Plan
 

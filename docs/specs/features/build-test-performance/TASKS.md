@@ -9,23 +9,24 @@
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-04-29
-- Approved scope: User replied "OK. proceed." after the Slice-5
-  implementation approval request. Approved changes are limited to disabling
-  `ForkTsCheckerWebpackPlugin` in development-mode webpack builds, preserving
-  production build type checking, updating SDD tracking, and running
-  validation. TypeScript compiler options, test selection, bundle entry
-  points, output names, dependency versions, and `engines.vscode` changes are
-  out of scope.
+- Status: Pending
+- Approved at:
+- Approved scope:
 
-Current implementation gate: Slice-5 type-check responsibility.
+Current implementation gate: Slice-7 CI rebuild reduction.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 
 Prior approval:
 
+- Slice-5 was approved on 2026-04-29 when the user replied "OK. proceed."
+  after the Slice-5 implementation approval request. Approved changes were
+  limited to disabling `ForkTsCheckerWebpackPlugin` in development-mode webpack
+  builds, preserving production build type checking, updating SDD tracking, and
+  running validation. TypeScript compiler options, test selection, bundle
+  entry points, output names, dependency versions, and `engines.vscode` changes
+  were out of scope.
 - Slice-4 was approved on 2026-04-29 when the user replied
   "実装を進めてください。" after the Slice-4 implementation approval request.
   Approved changes were limited to disabling webpack minification in
@@ -93,8 +94,47 @@ Prior approval:
 - [x] Slice-5 temporary type-error checks completed.
 - [x] Slice-5 normal validation completed.
 - [x] Slice-5 timings recorded.
-- [ ] Draft slices 3, 6, 7, and 8 promoted to detailed specs only when their
+- [x] Slice-7 selected as the next implementation candidate.
+- [x] Slice-7 impact investigation completed.
+- [x] Slice-7 SDD plan updated.
+- [ ] Human approval recorded for Slice-7 implementation.
+- [ ] Slice-7 implementation scope matches approved scope.
+- [ ] Slice-7 verify workflow changes completed.
+- [ ] Slice-7 local production-artifact runner validation completed.
+- [ ] Slice-7 CI timing evidence recorded.
+- [ ] Draft slices 3, 6, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
+
+## Slice-7 Impact Investigation
+
+- Planned change:
+  reduce CI rebuilds by reusing production build artifacts for desktop and web
+  extension test runners instead of running `test:full` after production
+  build.
+- Affected files:
+  `.github/workflows/verify.yml`,
+  `docs/specs/features/build-test-performance/*`, and `docs/specs/plans.md`.
+- Affected commands:
+  CI `pnpm run build`, `pnpm run test:compile`, `pnpm run test:desktop:run`,
+  and `pnpm run test:web:run`. Local `pnpm run test:full` remains unchanged.
+- Affected features:
+  GitHub Actions verify workflow, desktop extension test execution, and web
+  extension test execution.
+- Affected tests:
+  verify workflow, desktop extension tests, web extension tests, production
+  build, lint, and qlty.
+- Artifact compatibility:
+  `pnpm run build` emits runtime bundles under `out`; `pnpm run test:compile`
+  adds `out/test` without deleting those bundles; raw desktop and web runners
+  successfully executed against production build artifacts during
+  investigation.
+- Breaking-change risk:
+  medium. Tests will execute against production bundles in CI while local
+  `test:full` continues to use development bundles. Keeping local `test:full`
+  and CI production-build runner validation visible mitigates the divergence.
+- Alternatives:
+  keep CI `test:full`; add a new `test:ci` package script; upload/download
+  artifacts across jobs; defer CI rebuild work and move to external caches.
 
 ## Slice-5 Impact Investigation
 
