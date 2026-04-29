@@ -79,6 +79,16 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: >-
+            ${{ runner.os }}-playwright-1.59.1-${{
+            hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-1.59.1-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -93,8 +103,11 @@ jobs:
       - name: Production build
         run: pnpm run build
 
+      - name: Compile tests
+        run: pnpm run test:compile
+
       - name: Desktop extension tests
-        run: pnpm test
+        run: pnpm run test:desktop:run
 
       - name: Web extension tests
-        run: pnpm run test:web
+        run: pnpm run test:web:run

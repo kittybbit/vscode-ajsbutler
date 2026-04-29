@@ -245,75 +245,94 @@ loses desktop or web coverage, or if prepare-once behavior hides stale output.
 The rollback is to restore the previous `pretest` and `pretest:web` lifecycle
 scripts and remove `test:prepare` / `test:full` workflow usage.
 
-## Slice-2: Incremental ANTLR Generation
+## Slice-2: Manual ANTLR Generation
 
 ### Context
 
-`antlr4ts` currently runs `antlr:clean` and `antlr:generate`, removing
-`src/generate/parser` before every generation.
+`antlr4ts` currently runs during build and test preparation. It removes
+`src/generate/parser` and regenerates parser artifacts before webpack or test
+compilation continues.
 
 ### Problem Statement
 
-ANTLR generation is expensive relative to unchanged grammar inputs. Cleaning
-and regenerating on every build or test preparation also creates unnecessary
-file churn.
+ANTLR generation is expensive relative to unchanged grammar inputs, and grammar
+changes are uncommon compared with normal build and test validation. Automatic
+generation inside build/test preparation also hides a source-control
+responsibility: generated parser artifacts are committed and should be updated
+intentionally when grammar changes.
 
 ### Goals
 
-- Regenerate parser artifacts only when grammar inputs or generator options
-  change.
+- Remove automatic ANTLR generation from normal build and test preparation.
+- Keep ANTLR generation as an explicit maintainer command.
 - Preserve deterministic generated output.
-- Keep clean regeneration available for recovery.
+- Keep clean regeneration available for grammar-change and recovery workflows.
 
 ### Non-Goals
 
 - Do not change grammar semantics.
 - Do not edit generated parser files manually.
 - Do not replace ANTLR or `antlr4ts`.
+- Do not add hash, timestamp, cache, or stamp-based freshness logic in
+  Slice-2.
 
 ### Proposed Specification
 
-Regeneration triggers:
+Command responsibilities:
 
-- any `src/antlr/*.g4` content change
-- ANTLR command option change
-- `antlr4ts-cli` version change
-- missing generated parser directory
-- explicit clean generation command
+- `antlr4ts`
+  Remains the explicit parser generation command and may continue to run
+  `antlr:clean` plus `antlr:generate`.
+- `antlr:clean`
+  Removes generated parser artifacts for explicit regeneration.
+- `antlr:generate`
+  Invokes `antlr4ts` with the existing output directory and grammar inputs.
+- `build`
+  Runs the production webpack build without automatically regenerating parser
+  artifacts.
+- `test:prepare`
+  Builds development bundles and compiles tests without automatically
+  regenerating parser artifacts.
 
-Cache strategy:
+Contributor responsibility:
 
-- store a small generation stamp or hash file outside manually edited source
-  paths, or under the generated parser directory if ignored from manual edits
-- hash grammar inputs, generator options, and generator package version
-- skip generation when the stamp matches and expected generated files exist
+- When `src/antlr/*.g4`, ANTLR command options, or generator versions change,
+  the contributor must run `pnpm run antlr4ts` and commit any generated parser
+  artifact changes.
+- Normal validation commands consume committed `src/generate/parser`
+  artifacts.
 
-Failure fallback:
+Implementation boundary:
 
-- if incremental generation fails or generated file presence checks fail,
-  perform a clean generation once
-- if clean generation fails, fail the command visibly
+- Update package scripts to remove automatic `antlr4ts` execution from build
+  and test preparation.
+- Keep explicit ANTLR scripts available and documented.
+- Do not edit `src/antlr/*.g4` or generated parser files manually.
+- Do not change parser consumers or parser runtime behavior.
+- Do not introduce a new build helper script unless validation reveals a
+  missing safety check that cannot be expressed with existing scripts.
 
 ### Acceptance Criteria
 
 ```gherkin
-Feature: Incremental parser generation
+Feature: Manual parser generation
 
-Scenario: Unchanged grammar skips generation
+Scenario: Build does not regenerate parser artifacts
   Given generated parser artifacts exist
-  And grammar files and generator inputs are unchanged
-  When test preparation runs
-  Then ANTLR generation is skipped
+  When the production build runs
+  Then ANTLR generation is not invoked
+  And the build consumes committed generated parser artifacts
 
-Scenario: Changed grammar regenerates artifacts
+Scenario: Test preparation does not regenerate parser artifacts
+  Given generated parser artifacts exist
+  When test preparation runs
+  Then ANTLR generation is not invoked
+  And development bundles and compiled tests are produced
+
+Scenario: Maintainer regenerates parser artifacts explicitly
   Given a grammar file changes
-  When test preparation runs
-  Then generated parser artifacts are regenerated
-
-Scenario: Incremental failure falls back to clean generation
-  Given the generation stamp is invalid or generated files are incomplete
-  When incremental generation fails validation
-  Then clean ANTLR generation is attempted once
+  When the maintainer runs `pnpm run antlr4ts`
+  Then generated parser artifacts are cleaned and regenerated
 ```
 
 ### Compatibility / Risk
@@ -325,25 +344,38 @@ Scenario: Incremental failure falls back to clean generation
 - Existing test compatibility:
   parser, diagnostics, list, flow, and CSV tests remain the safety net.
 - Risk:
-  stale parser artifacts could mask grammar changes. The stamp must include
-  all generator inputs and fail closed.
+  stale parser artifacts could mask grammar changes if contributors forget the
+  explicit generation step. Documentation and parser-dependent validation must
+  make that responsibility visible.
 
 ### Validation Plan
 
-Measure cold and warm `test:prepare`, warm `test:full`, and CI prepare time.
-Compare generated parser output after forced clean generation.
+Measure warm `test:prepare`, warm `test:full`, and CI prepare time. Compare
+generated parser output after explicit clean generation.
+
+Slice-2 validation commands:
+
+- `pnpm run qlty`
+- `pnpm run lint:md`
+- `pnpm run test:prepare`, confirming ANTLR generation is not invoked
+- `pnpm run antlr4ts` followed by `git diff -- src/generate/parser`
+- `pnpm test`
+- `pnpm run test:web`
+- `pnpm run test:full`
+- `pnpm run build`
 
 ### Rollback Strategy
 
-Restore `antlr4ts` to unconditional clean generation if stale output,
-non-determinism, or parser regressions appear.
+Restore automatic `antlr4ts` execution in build/test preparation if manual
+generation proves too error-prone or if validation misses parser artifact drift.
 
 Expected reduction:
 
-- warm local preparation:
+- local build/test preparation:
   medium, because grammar usually changes rarely
 - cold CI:
-  low unless cache is added in later slices
+  medium, because CI no longer regenerates committed parser artifacts for every
+  build/test run
 
 ## Slice-3: Split Webpack Targets
 
@@ -374,7 +406,8 @@ checks may need only editor bundles or only extension entry points.
 
 Target requirements:
 
-- desktop extension tests require the desktop extension bundle and test output
+- desktop extension tests require the desktop extension bundle, editor bundles,
+  and test output because the desktop suite opens table and flow webview tabs
 - web extension tests require the web extension bundle, editor bundles, and
   test output
 - production build requires extension, web, and editor bundles
@@ -386,6 +419,8 @@ Exclusion rules:
 - production packaging must continue to emit all contributed entry points
 - target filtering must be explicit in script names or webpack environment
   flags
+- the default `development` command must continue to emit all development
+  bundles unless a separate focused script is invoked
 
 Compatibility:
 
@@ -404,7 +439,13 @@ Scenario: Production build emits all bundles
 
 Scenario: Desktop test preparation excludes unnecessary web bundles
   Given a desktop-only preparation command is executed
-  Then only bundles required by desktop tests are emitted
+  Then the desktop extension bundle and editor bundles are emitted
+  And the web extension bundle is not emitted
+
+Scenario: Web test preparation excludes unnecessary desktop bundles
+  Given a web-only preparation command is executed
+  Then the web extension bundle and editor bundles are emitted
+  And the desktop extension bundle is not emitted
 ```
 
 ### Compatibility / Risk
@@ -524,6 +565,30 @@ validation sequence.
 - Keep production build type-check responsibility explicit, either through
   webpack checker or a separate `typecheck` command.
 
+Slice-5 selected approach:
+
+- Keep `ForkTsCheckerWebpackPlugin` enabled for production webpack builds.
+- Disable `ForkTsCheckerWebpackPlugin` for development webpack builds used by
+  `pnpm run development`, `pnpm run test:prepare`, `pnpm test`,
+  `pnpm run test:web`, and `pnpm run test:full`.
+- Keep `test:compile` as the single TypeScript checker during test
+  preparation.
+- Treat `pnpm run build` as the full source graph type-check and production
+  bundling gate. This remains required for CI and before push.
+- Do not broaden `tsconfig.test.json` in Slice-5 because doing so would mix
+  test-output ownership and type-check coverage changes into the same slice.
+
+Coverage decision:
+
+- `tsconfig.json` remains the full source graph contract used by production
+  webpack checking.
+- `tsconfig.test.json` remains focused on test output and the test-dependent
+  application/domain/extension boundary.
+- A local `pnpm test` run may no longer catch unrelated UI-only or
+  extension-only type errors until `pnpm run build` runs. This is accepted only
+  because the repository validation contract already requires build for code
+  changes.
+
 ### Acceptance Criteria
 
 ```gherkin
@@ -542,12 +607,32 @@ Scenario: Production validation still catches type errors
 ### Compatibility / Risk
 
 Risk is a checker coverage gap between `tsconfig.json` and
-`tsconfig.test.json`. Implementation must compare included files.
+`tsconfig.test.json`. Slice-5 accepts that `test:compile` is narrower than
+`tsconfig.json`; the mitigation is preserving production webpack checking and
+keeping `pnpm run build` required in CI and local code-change validation.
 
 ### Validation Plan
 
 Measure type-check time and confirm injected temporary type errors fail the
 intended command during local investigation.
+
+Slice-5 validation commands:
+
+- `pnpm run development`
+- `pnpm run test:prepare`
+- `pnpm test`
+- `pnpm run test:web`
+- `pnpm run test:full`
+- `pnpm run build`
+- `pnpm run lint:md`
+- `pnpm run qlty`
+
+Temporary type-error checks:
+
+- Add a temporary type error in a file included by `tsconfig.test.json`; verify
+  `pnpm run test:prepare` fails, then revert the temporary edit.
+- Add a temporary type error in a UI-only file outside `tsconfig.test.json`;
+  verify `pnpm run build` fails, then revert the temporary edit.
 
 ### Rollback Strategy
 
@@ -653,6 +738,27 @@ prepared or validated.
 - CI logs must show enough step detail to diagnose whether lint, build,
   desktop tests, or web tests failed.
 
+Slice-7 selected approach:
+
+- Reuse production build artifacts in CI for extension test runners.
+- Keep the existing `Production build` step as the production bundle and full
+  source graph type-check gate.
+- Replace CI `pnpm run test:full` with explicit `pnpm run test:compile`,
+  `pnpm run test:desktop:run`, and `pnpm run test:web:run` steps.
+- Keep local `pnpm run test:full` unchanged for contributor convenience.
+- Do not reuse artifacts across jobs or add cache/artifact upload behavior in
+  Slice-7.
+
+Artifact compatibility decision:
+
+- `pnpm run build` emits `out/extension.js`, `out/web.js`, `out/tableViewer.js`,
+  and `out/flowViewer.js`, matching package entry points and webview bundle
+  names used by the extension under test.
+- `pnpm run test:compile` emits compiled test files under `out/test` without
+  deleting production bundles.
+- Raw test runner scripts can run against the production build output after
+  `test:compile`.
+
 ### Acceptance Criteria
 
 ```gherkin
@@ -674,6 +780,23 @@ prefer explicit preparation over ambiguous lifecycle hooks.
 
 Compare GitHub Actions total duration and step duration across at least two
 runs before and after the change.
+
+Local validation before implementation approval:
+
+- `pnpm run build`
+- `pnpm run test:compile`
+- `pnpm run test:desktop:run`
+- `pnpm run test:web:run`
+
+Slice-7 validation commands after implementation:
+
+- `pnpm run lint:md`
+- `pnpm run qlty`
+- `pnpm run build`
+- `pnpm run test:compile`
+- `pnpm run test:desktop:run`
+- `pnpm run test:web:run`
+- `pnpm run test:full`
 
 ### Rollback Strategy
 
@@ -719,6 +842,20 @@ CI:
 - cache keys must include OS, package manager lockfile, Playwright version, and
   VS Code test binary version inputs where applicable
 - cache misses must fall back to normal install/download behavior
+
+Slice-8 selected approach:
+
+- Add a CI cache for Playwright browser downloads only.
+- Keep pnpm dependency caching owned by existing `actions/setup-node` with
+  `cache: pnpm`.
+- Do not cache VS Code test binaries in Slice-8 because the current
+  `@vscode/test-electron` runner resolves the VS Code version implicitly; cache
+  keys would not have a stable repository-owned VS Code version input.
+- Keep `pnpm exec playwright install --with-deps chromium-headless-shell` in
+  the workflow so cache misses and browser dependency installation remain
+  first-class.
+- Key the Playwright browser cache by runner OS, `pnpm-lock.yaml`, and the
+  Playwright version recorded in the lockfile/package metadata.
 
 ### Acceptance Criteria
 
@@ -779,8 +916,12 @@ Affected files and areas during future implementation:
 
 Propagation decision:
 
-- Slice-1 is the first implementation target.
-- Slices 2 through 8 remain draft until Slice-1 timings and validation results
+- Slice-1 is implemented and pushed on the feature branch.
+- Slice-2 is the next implementation target because the maintainer approved
+  manual ANTLR generation over stamp/hash-based freshness logic. It directly
+  reduces `build`, `test:prepare`, and `test:full` cost without changing
+  webpack targets or test coverage.
+- Slices 3 through 8 remain draft until Slice-2 timings and validation results
   are recorded.
 - Runtime code is intentionally unchanged by this SDD creation task.
 
@@ -806,6 +947,9 @@ Propagation decision:
   Slice-1.
 - Replace webpack or ANTLR tooling:
   rejected as out of scope for performance slices.
+- Use hash/stamp-based incremental generation:
+  rejected for Slice-2 because it adds hidden build state and complexity.
+  Manual generation keeps ownership explicit and simpler.
 
 ### Approval Impact Decisions
 
@@ -832,7 +976,7 @@ Propagation decision:
 
 - Should future raw test-runner commands be exposed as public package scripts,
   or should they remain internal to avoid confusing contributors?
-- Should Slice-2 store the ANTLR stamp in `src/generate/parser` or in a build
-  metadata directory?
+- Should a later guard check verify that generated parser artifacts are in sync
+  with grammar changes, or is explicit maintainer responsibility sufficient?
 - Should Slice-7 reuse production build artifacts for tests, or keep test
   preparation development-mode only for debugging parity?

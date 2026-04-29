@@ -31,8 +31,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement Slice-1 of build/test performance only after approval is recorded
-   in `docs/specs/features/build-test-performance/TASKS.md`.
+1. Prepare build/test performance for PR review or merge after final human
+   confirmation.
 2. Continue category-level parameter parsing alignment by selecting the next
    focused behavior contract and recording approval before implementation.
 3. Keep WebAPI import beta feedback and real-environment smoke evidence
@@ -42,30 +42,30 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: current docs-only SDD planning branch.
-- Objective: keep the branch focused on build/test performance SDD while also
-  pruning completed SDD feature folders whose durable requirements now live in
-  use cases.
-- Status: docs-only SDD drafting and cleanup in progress; implementation
-  approval remains pending.
-- Scope: document Slice-1 in detail; document Slices 2 through 8 at draft
-  level; create the related use case, feature spec, feature plan, task list,
-  prioritized roadmap, and remove completed feature-local logs after preserving
-  useful requirement content in use cases.
-- Out of scope: runtime code edits, test edits, generated parser edits,
-  package-script edits, workflow edits, dependency updates, and implementation
-  commits.
-- Impact summary: future implementation will affect `package.json` scripts,
-  `webpack.config.js`, `.github/workflows/verify.yml`, TypeScript output
-  ownership, ANTLR generation behavior, and validation documentation.
-  Completed feature folders for list, flow, CSV, normalization, editor
-  feedback, telemetry, and unit definition are removed from active SDD tracking
-  after their durable behavior contracts are kept in use cases. This docs-only
-  task does not change extension behavior.
+- Branch: `codex/build-test-performance`.
+- Objective: complete the build/test performance feature in one PR-sized
+  feature branch by repeating SDD investigation, approval, implementation,
+  validation, push, and CI review per slice.
+- Status: Slice-1, Slice-2, Slice-3, Slice-4, Slice-5, and Slice-7 are
+  implemented in draft PR #222. CI completed successfully through Slice-7 per
+  human confirmation, and Slice-3 CI also completed successfully per human
+  confirmation. Slice-8 Playwright browser cache completed successfully with
+  cache-miss and cache-hit CI evidence per human confirmation. Slice-6 was
+  investigated and deferred from this branch because it is primarily output
+  ownership cleanup with low direct speedup and higher test-launcher risk.
+- Scope: keep changes focused on validation performance command ownership,
+  ANTLR generation freshness, webpack development speed, type-check ownership,
+  CI rebuild reduction, and cache behavior as described by the feature docs.
+- Out of scope: product behavior changes, parser grammar changes, generated
+  parser semantic changes, dependency modernization unrelated to validation
+  performance, and raising `engines.vscode`.
+- Impact summary: Slice-8 affects `.github/workflows/verify.yml` only, adding
+  a conservative Playwright browser cache while preserving pnpm dependency
+  caching and the existing Playwright install command.
 - Risks and assumptions: performance reductions are hypotheses until measured.
-  Slice-1 is fixed as the first implementation target to avoid broad CI/build
-  rewrites before command ownership is explicit. Feature-folder deletion is
-  limited to completed folders with no active follow-up.
+  Slice-8 cache risk is controlled by keeping cache misses first-class and
+  deferring VS Code test binary caching until the VS Code binary version input
+  is explicit.
 
 ## Build/Test Performance SDD
 
@@ -73,8 +73,13 @@ rules in `docs/specs/README.md`, not in this file.
   `docs/specs/features/build-test-performance/`
 - Use case:
   `docs/requirements/use-cases/uc-improve-build-test-performance.md`
-- First implementation slice:
-  Slice-1, separate test execution from build preparation.
+- Completed implementation slices:
+  Slice-1, separate test execution from build preparation; Slice-2, manual
+  ANTLR generation; Slice-3, split webpack targets; Slice-4, development build
+  optimization; Slice-5, type-check responsibility; Slice-7, CI rebuild
+  reduction; Slice-8, Playwright browser cache.
+- Next implementation slice:
+  none; Slice-6 is deferred as future cleanup.
 - Roadmap:
   Phase 1 covers Slice-1, Slice-2, and Slice-4; Phase 2 covers Slice-5 and
   Slice-7; Phase 3 covers Slice-3, Slice-6, and Slice-8.

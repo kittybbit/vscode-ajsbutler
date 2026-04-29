@@ -90,10 +90,30 @@ After switching, you can run:
 
 ```bash
 pnpm run qlty
+pnpm run test:full
 pnpm test
 pnpm run test:web
 pnpm run build
 ```
+
+ANTLR parser generation is explicit. Normal build and test commands consume
+the committed parser artifacts in `src/generate/parser`. When changing
+`src/antlr/*.g4`, ANTLR command options, or the generator version, run:
+
+```bash
+pnpm run antlr4ts
+```
+
+Then commit any generated parser artifact changes with the grammar change.
+
+Desktop and web test commands are compatible from a clean checkout:
+
+- `pnpm test` prepares the desktop extension and editor bundles, compiles
+  tests, then runs the desktop extension tests.
+- `pnpm run test:web` prepares the web extension and editor bundles, compiles
+  tests, then runs the web extension smoke tests.
+- `pnpm run test:full` prepares all development bundles and compiled tests
+  once, then runs both desktop and web test runners.
 
 The `sample/` directory contains reusable JP1/AJS definition files for parser,
 normalization, unit-list, and flow-graph regression tests. Prefer those shared
@@ -104,8 +124,13 @@ launch configuration `Launch Extension(web)` in `.vscode/launch.json`.
 
 `pnpm run test:web` runs the extension test suite against VS Code for the Web
 in headless Chromium.
-GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`, `pnpm test`, and
-`pnpm run test:web` on pushes and pull requests.
+`pnpm run test:full` prepares development bundles and compiled tests once
+before running both desktop and web extension tests.
+GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`,
+`pnpm run test:compile`, `pnpm run test:desktop:run`, and
+`pnpm run test:web:run` on pull requests. The workflow caches Playwright
+browser downloads while still running the Playwright install command, so cache
+misses remain valid.
 
 ## For AI Agents
 
