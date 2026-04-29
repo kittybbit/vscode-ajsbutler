@@ -32,6 +32,17 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
   names such as `G`, `N`, or `Rc`
 - normalized output must be deterministic and suitable for unit list, flow
   graph, CSV, and future reuse
+- shared JP1/AJS semantics should move into normalized helpers only when the
+  same rule is reused across wrappers, normalized paths, or multiple
+  application consumers
+- unit-local semantics remain on the owning wrapper when they do not span
+  multiple wrapper families
+- `UnitEntity` remains responsible for wrapper identity and tree mechanics
+  during migration: deterministic ID derivation, absolute path,
+  parent/ancestor/child links, raw unit metadata, and common JP1 getters
+- constructor-bound identity logic and basic tree traversal should not move out
+  of `UnitEntity` unless multiple consumers need a separate abstraction with
+  clear semantic value
 
 ## Behavioral Scenarios (Gherkin)
 
@@ -61,6 +72,11 @@ Scenario: Shared parameter lookup stays consistent
 - remaining wrapper-derived semantics should move into the normalized model
   only when the same rule is still duplicated across multiple normalized or
   application consumers
+- cross-unit JP1/AJS capabilities can use an interface plus helper pattern
+  when that removes real duplicated semantics
+- remaining wrapper members should be treated as typed parameter-access
+  surfaces unless a new cross-unit rule or clearly unit-local behavior is
+  identified
 - user-visible behavior remains unchanged while use cases stop depending on raw
   or wrapper-oriented structures directly
 - normalization tests should prefer shared fixtures in `sample/` for UTF-8,

@@ -32,6 +32,10 @@ wrappers.
   the UI should not depend on wrapper classes directly
 - migration should be incremental, starting with the smallest set of columns
   that can move behind a stable row/view adapter
+- row groups and field names must remain stable for table rendering and CSV
+  export consumers unless a separate behavior change is approved
+- table-specific formatting, filtering, and TanStack integration stay in
+  presentation code
 
 ## Behavioral Scenarios (Gherkin)
 

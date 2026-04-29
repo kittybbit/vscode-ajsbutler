@@ -26,6 +26,8 @@ React table internals or webview event handling.
 - export logic must not depend on VS Code APIs, clipboard APIs, or save-dialog
   APIs
 - CSV escaping and column ordering must preserve current user-visible behavior
+- export input should use application-facing row data rather than
+  `UnitEntity`-typed table rows
 
 ## Behavioral Scenarios (Gherkin)
 
@@ -52,6 +54,8 @@ Scenario: Escaped values preserve current CSV behavior
 
 - desktop and web viewers can request the same CSV payload shape before their
   platform-specific save/copy steps
+- automated regression coverage should preserve escaping rules, visible-column
+  behavior, and application-row input shape
 
 ## Risks Or Edge Cases
 

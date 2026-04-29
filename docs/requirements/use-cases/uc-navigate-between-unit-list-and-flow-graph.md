@@ -30,6 +30,10 @@ other viewer when that counterpart view is available.
   internal component state
 - desktop and web hosts should be able to use the same application-facing
   navigation contract
+- navigation may be offered only when the counterpart view exists for the same
+  document context
+- if navigation changes the visible graph bounds or selected row, the target
+  viewer should preserve its normal focus and fit behavior
 
 ## Behavioral Scenarios (Gherkin)
 
