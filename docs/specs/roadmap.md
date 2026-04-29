@@ -12,17 +12,7 @@
 
 ## Current Roadmap
 
-1. Improve build/test validation performance through SDD-defined slices.
-
-   - Start with Slice-1, separating test execution from build preparation.
-   - Keep Slices 2 through 8 draft-level until Slice-1 timing evidence is
-     recorded.
-   - Preserve desktop tests, web tests, production build validation, generated
-     parser correctness, and VS Code `^1.75.0` compatibility.
-   - Phase 1 order is Slice-1, Slice-2, then Slice-4; Phase 2 is Slice-5 then
-     Slice-7; Phase 3 is Slice-3, Slice-6, then Slice-8.
-
-2. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+1. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
 
    - Start from the documented audit of current shared parameter-semantics
@@ -42,10 +32,13 @@
    - Continue applying the same audit, helper-boundary, and regression-test
      workflow to other parameter families instead of checking isolated keys one
      by one.
+   - Unit-list group 10 projection now consumes effective schedule-rule
+     `wc` / `wt` start-condition monitoring values after the domain-only
+     pairing API was implemented.
    - Keep behavior-preserving slices separate from behavior-changing manual
      alignment slices.
 
-3. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
+2. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
 
    - Keep transport, authentication, and endpoint details in infrastructure.
    - Keep generated OpenAPI mocks and stubs reproducible from repository-local
@@ -55,7 +48,7 @@
    - Offer the feature as beta until smoke verification against a real JP1/AJS3
      environment and enough user feedback are recorded.
 
-4. Maintain normalized-model convergence.
+3. Maintain normalized-model convergence.
 
    - Prefer stable `AjsDocument` / `AjsUnit` contracts for application-facing
      behavior.
@@ -63,7 +56,7 @@
      consumers.
    - Promote only cross-consumer semantics into normalized helpers.
 
-5. Introduce stricter parser/infrastructure boundaries.
+4. Introduce stricter parser/infrastructure boundaries.
 
    - Define an application-facing parser or document-loading port.
    - Move concrete parser orchestration behind an adapter boundary when
@@ -72,7 +65,7 @@
      application use cases.
    - Preserve current desktop and web extension behavior while migrating.
 
-6. Use Qlty findings as architectural feedback.
+5. Use Qlty findings as architectural feedback.
 
    - Treat recurring duplication, complexity, and nested-control-flow findings
      as prioritized refactoring candidates.
@@ -80,19 +73,22 @@
 
 ## Deferred / Optional Slices
 
-1. Introduce a shared search use case only if list, flow, or another non-table
+1. Build/test performance Slice-6 output directory ownership cleanup is
+   deferred until packaging, caching, or stale output issues make it a concrete
+   blocker. PR #222 delivered the other build/test performance slices.
+2. Introduce a shared search use case only if list, flow, or another non-table
    consumer needs common query semantics.
-2. Extend JP1/AJS WebAPI support beyond read-only import only after the initial
+3. Extend JP1/AJS WebAPI support beyond read-only import only after the initial
    boundary, authentication model, and beta feedback are stable.
-3. Revisit viewer-specific bundle-size reductions only if a future
+4. Revisit viewer-specific bundle-size reductions only if a future
    compatibility, startup, or payload target creates stronger pressure.
-4. Replace the custom `UnitEntity` hash implementation only after identity and
+5. Replace the custom `UnitEntity` hash implementation only after identity and
    compatibility checks are refreshed.
-5. Consolidate i18n translation files only when duplication is high enough to
+6. Consolidate i18n translation files only when duplication is high enough to
    justify a targeted cleanup.
-6. Add deeper JP1/AJS View interaction parity only after the current visual
+7. Add deeper JP1/AJS View interaction parity only after the current visual
    refresh and nested expansion behavior settle.
-7. Revisit directory structure under `src/extension/webview/` only if the
+8. Revisit directory structure under `src/extension/webview/` only if the
    remaining files stop reading as one cohesive viewer module.
 
 ## Done Criteria For A Slice

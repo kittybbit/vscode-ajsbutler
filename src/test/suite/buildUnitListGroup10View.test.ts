@@ -51,6 +51,19 @@ unit=root,,jp1admin,;
 }
 `;
 
+const startConditionMonitoringDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  wc=4;
+  wt=no;
+  wc=2,no;
+  wt=2,01:00;
+  wc=3,un;
+  wt=3,un;
+}
+`;
+
 suite("Build Unit List Group 10 View", () => {
   test("projects schedule-related group10 fields from unit parameters", () => {
     const result = parseAjs(definition);
@@ -118,5 +131,17 @@ suite("Build Unit List Group 10 View", () => {
 
     assert.deepStrictEqual(buildUnitListGroup10View(jobnet).parentRules, []);
     assert.deepStrictEqual(buildUnitListGroup10View(subnet).parentRules, ["2"]);
+  });
+
+  test("projects effective start-condition monitoring pairs", () => {
+    const result = parseAjs(startConditionMonitoringDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const root = document.rootUnits[0];
+
+    const view = buildUnitListGroup10View(root);
+
+    assert.deepStrictEqual(view.waitCounts, ["", "", "un"]);
+    assert.deepStrictEqual(view.waitTimes, ["", "", "un"]);
   });
 });

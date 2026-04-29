@@ -35,8 +35,7 @@ coverage.
   `buildUnitListView.test.ts`
 - Remaining gap:
   range validation remains deferred. `wc` / `wt` effective-value pairing is
-  aligned in the domain wrapper boundary, while unit-list projection remains
-  raw by design.
+  aligned in the domain wrapper boundary and unit-list group 10 projection.
 
 ### Transfer Operation
 
