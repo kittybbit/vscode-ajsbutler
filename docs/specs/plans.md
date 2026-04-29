@@ -31,8 +31,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement Slice-2 of build/test performance only after approval is recorded
-   in `docs/specs/features/build-test-performance/TASKS.md`.
+1. Continue build/test performance after Slice-7 CI feedback is reviewed,
+   selecting the next slice only after updating the feature SDD and recording
+   approval.
 2. Continue category-level parameter parsing alignment by selecting the next
    focused behavior contract and recording approval before implementation.
 3. Keep WebAPI import beta feedback and real-environment smoke evidence
@@ -46,18 +47,17 @@ rules in `docs/specs/README.md`, not in this file.
 - Objective: complete the build/test performance feature in one PR-sized
   feature branch by repeating SDD investigation, approval, implementation,
   validation, push, and CI review per slice.
-- Status: Slice-1, Slice-2, Slice-4, and Slice-5 are implemented and pushed in
-  draft PR #222. CI completed successfully for those slices per human
-  confirmation. Slice-7 CI rebuild reduction is selected and pending
-  implementation approval.
+- Status: Slice-1, Slice-2, Slice-4, Slice-5, and Slice-7 are implemented in
+  draft PR #222. CI completed successfully through Slice-5 per human
+  confirmation; Slice-7 is ready for push and CI review.
 - Scope: keep changes focused on validation performance command ownership,
   ANTLR generation freshness, webpack development speed, type-check ownership,
   CI rebuild reduction, and cache behavior as described by the feature docs.
 - Out of scope: product behavior changes, parser grammar changes, generated
   parser semantic changes, dependency modernization unrelated to validation
   performance, and raising `engines.vscode`.
-- Impact summary: Slice-7 will affect `.github/workflows/verify.yml` only; it
-  must preserve lint, production build, desktop test, and web test coverage
+- Impact summary: Slice-7 affects `.github/workflows/verify.yml` only. The
+  verify job keeps lint, production build, desktop test, and web test coverage
   while avoiding development webpack rebuilds after production build in CI.
 - Risks and assumptions: performance reductions are hypotheses until measured.
   Slice-7 artifact reuse risk is controlled by keeping production build and raw
@@ -72,9 +72,9 @@ rules in `docs/specs/README.md`, not in this file.
 - Completed implementation slices:
   Slice-1, separate test execution from build preparation; Slice-2, manual
   ANTLR generation; Slice-4, development build optimization; Slice-5,
-  type-check responsibility.
+  type-check responsibility; Slice-7, CI rebuild reduction.
 - Next implementation slice:
-  Slice-7, CI rebuild reduction.
+  to be selected after Slice-7 CI feedback is reviewed.
 - Roadmap:
   Phase 1 covers Slice-1, Slice-2, and Slice-4; Phase 2 covers Slice-5 and
   Slice-7; Phase 3 covers Slice-3, Slice-6, and Slice-8.

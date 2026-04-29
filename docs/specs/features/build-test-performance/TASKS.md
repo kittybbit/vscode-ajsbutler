@@ -9,9 +9,15 @@
 
 ## Human Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
+- Status: Approved
+- Approved at: 2026-04-29
+- Approved scope: User replied "実装を進めてください。" after the Slice-7
+  implementation approval request. Approved changes are limited to changing
+  the verify workflow to reuse production build artifacts for raw desktop and
+  web test runners, preserving local `test:full`, updating SDD tracking, and
+  running validation. Package scripts, runtime code, test selection, bundle
+  entry points, output names, dependency versions, and `engines.vscode`
+  changes are out of scope.
 
 Current implementation gate: Slice-7 CI rebuild reduction.
 
@@ -97,11 +103,11 @@ Prior approval:
 - [x] Slice-7 selected as the next implementation candidate.
 - [x] Slice-7 impact investigation completed.
 - [x] Slice-7 SDD plan updated.
-- [ ] Human approval recorded for Slice-7 implementation.
-- [ ] Slice-7 implementation scope matches approved scope.
-- [ ] Slice-7 verify workflow changes completed.
-- [ ] Slice-7 local production-artifact runner validation completed.
-- [ ] Slice-7 CI timing evidence recorded.
+- [x] Human approval recorded for Slice-7 implementation.
+- [x] Slice-7 implementation scope matches approved scope.
+- [x] Slice-7 verify workflow changes completed.
+- [x] Slice-7 local production-artifact runner validation completed.
+- [x] Slice-7 CI timing evidence recorded.
 - [ ] Draft slices 3, 6, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
 
@@ -295,6 +301,13 @@ Prior approval:
   sandbox, 9.59s real time.
 - 2026-04-29 Slice-5 post-change `pnpm run build`: passed, 15.76s real time,
   with existing webpack asset-size warnings.
+- 2026-04-29 Slice-7 production-artifact CI sequence: `pnpm run build`
+  passed in 8.08s real time, `pnpm run test:compile` passed in 3.21s,
+  `pnpm run test:desktop:run` passed in 2.39s, and
+  `pnpm run test:web:run` passed outside the sandbox in 4.17s.
+- 2026-04-29 Slice-7 compatibility `pnpm run test:full`: passed outside the
+  sandbox, 13.27s real time. This confirms the local prepare-once command
+  still runs development bundling before desktop and web test runners.
 
 ## Validation
 
@@ -309,6 +322,11 @@ Prior approval:
 - [x] Slice-4: run `pnpm run development`.
 - [x] Slice-5: run temporary `test:prepare` type-error check.
 - [x] Slice-5: run temporary `build` type-error check.
+- [x] Slice-7: run production-artifact CI sequence:
+      `pnpm run build`, `pnpm run test:compile`,
+      `pnpm run test:desktop:run`, and `pnpm run test:web:run`.
+- [x] Slice-7: rerun `pnpm run test:full` to verify the local command remains
+      unchanged.
 
 ## Notes
 
@@ -316,8 +334,12 @@ Prior approval:
 - Slice-2 is implemented after approval.
 - Slice-4 is implemented after approval.
 - Slice-5 is implemented after approval.
+- Slice-7 is implemented after approval.
 - `pnpm run qlty` initially failed in the sandbox because qlty could not create
   its log file; the same command passed outside the sandbox.
 - `pnpm run build` completed with existing webpack asset-size warnings.
 - A local `pnpm test` run intentionally remains narrower than full validation;
   `pnpm run build` remains required to catch full source graph type errors.
+- CI now runs tests against the production build artifacts, while local
+  `pnpm run test:full` intentionally keeps the development-build preparation
+  path for contributor compatibility.
