@@ -9,9 +9,14 @@
 
 ## Human Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
+- Status: Approved
+- Approved at: 2026-04-29
+- Approved scope: User replied "実装を進めてください。" after the Slice-4
+  implementation approval request. Approved changes are limited to disabling
+  webpack minification in development mode, preserving production
+  minification, updating SDD tracking, and running validation. Bundle entry
+  points, output names, target selection, dependency versions, and
+  `engines.vscode` changes are out of scope.
 
 Current implementation gate: Slice-4 development build optimization.
 
@@ -67,11 +72,11 @@ Prior approval:
 - [x] Slice-4 selected as the next implementation candidate.
 - [x] Slice-4 impact investigation completed.
 - [x] Slice-4 SDD plan updated.
-- [ ] Human approval recorded for Slice-4 implementation.
-- [ ] Slice-4 implementation scope matches approved scope.
-- [ ] Slice-4 webpack optimization changes completed.
-- [ ] Slice-4 development/production validation completed.
-- [ ] Slice-4 timings recorded.
+- [x] Human approval recorded for Slice-4 implementation.
+- [x] Slice-4 implementation scope matches approved scope.
+- [x] Slice-4 webpack optimization changes completed.
+- [x] Slice-4 development/production validation completed.
+- [x] Slice-4 timings recorded.
 - [ ] Draft slices 3, 5, 6, 7, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
 
@@ -167,6 +172,18 @@ Prior approval:
   sandbox, 15.11s real time.
 - 2026-04-29 Slice-2 post-change `pnpm run build`: passed, 20.39s real time,
   with existing webpack asset-size warnings.
+- 2026-04-29 Slice-4 baseline `pnpm run development`: passed, 8.14s real
+  time. Logs showed `[minimized]` development assets.
+- 2026-04-29 Slice-4 post-change `pnpm run development`: passed, 8.91s real
+  time. Logs showed development assets without `[minimized]`.
+- 2026-04-29 Slice-4 post-change `pnpm run test:full`: passed outside the
+  sandbox, 18.99s real time.
+- 2026-04-29 Slice-4 post-change `pnpm test`: passed, 13.62s real time.
+- 2026-04-29 Slice-4 post-change `pnpm run test:web`: passed outside the
+  sandbox, 15.12s real time.
+- 2026-04-29 Slice-4 post-change `pnpm run build`: passed, 36.31s real time.
+  Production assets remained `[minimized]` and reported existing webpack
+  asset-size warnings.
 
 ## Validation
 
@@ -178,11 +195,13 @@ Prior approval:
 - [x] Run `pnpm run build`.
 - [x] Slice-2: run `pnpm run test:prepare`.
 - [x] Slice-2: run `pnpm run antlr4ts` and verify no generated parser diff.
+- [x] Slice-4: run `pnpm run development`.
 
 ## Notes
 
 - Slice-1 is implemented after approval.
 - Slice-2 is implemented after approval.
+- Slice-4 is implemented after approval.
 - `pnpm run qlty` initially failed in the sandbox because qlty could not create
   its log file; the same command passed outside the sandbox.
 - `pnpm run build` completed with existing webpack asset-size warnings.

@@ -56,19 +56,21 @@ const createTsRule = (compilerOptions = {}) => ({
 const createOptimization = (production, development) => ({
     innerGraph: true,
     usedExports: true,
-    minimize: true,
-    minimizer: [
-        new TerserPlugin({
-            parallel: true,
-            terserOptions: {
-                warnings: development,
-                compress: {
-                    drop_console: production,
-                    drop_debugger: production,
+    minimize: production,
+    minimizer: production
+        ? [
+            new TerserPlugin({
+                parallel: true,
+                terserOptions: {
+                    warnings: development,
+                    compress: {
+                        drop_console: production,
+                        drop_debugger: production,
+                    },
                 },
-            },
-        }),
-    ],
+            }),
+        ]
+        : [],
 });
 
 const createAnalyzerPlugin = (enabled, reportFilename) => (enabled

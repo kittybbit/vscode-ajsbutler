@@ -48,16 +48,16 @@ rules in `docs/specs/README.md`, not in this file.
   validation, push, and CI review per slice.
 - Status: Slice-1 and Slice-2 are implemented and pushed in draft PR #222. CI
   completed successfully for both slices per human confirmation. Slice-4
-  development build optimization is selected and pending implementation
-  approval.
+  development build optimization is implemented locally and pending push/CI
+  review.
 - Scope: keep changes focused on validation performance command ownership,
   ANTLR generation freshness, webpack development speed, type-check ownership,
   CI rebuild reduction, and cache behavior as described by the feature docs.
 - Out of scope: product behavior changes, parser grammar changes, generated
   parser semantic changes, dependency modernization unrelated to validation
   performance, and raising `engines.vscode`.
-- Impact summary: Slice-4 will affect `webpack.config.js` development-mode
-  optimization only; it must preserve production minification, bundle entry
+- Impact summary: Slice-4 affects `webpack.config.js` development-mode
+  optimization only; it preserves production minification, bundle entry
   points, output names, desktop tests, web tests, and production build
   behavior.
 - Risks and assumptions: performance reductions are hypotheses until measured.
