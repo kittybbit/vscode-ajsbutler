@@ -154,6 +154,27 @@ unit=root,,jp1admin,;
 }
 `;
 
+const scheduleWaitPairingDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    sd=1,en;
+    sd=2,en;
+    sd=3,en;
+    wc=4;
+    wt=no;
+    wc=2,no;
+    wt=2,01:00;
+    wc=3,un;
+    wt=3,un;
+  }
+}
+`;
+
 const nestedScheduleDefinition = `
 unit=root,,jp1admin,;
 {
@@ -383,6 +404,13 @@ const parseUndefinedScheduleJobnet = (): N => {
 
 const parseScheduleRelativeTimeJobnet = (): N => {
   const result = parseAjs(scheduleRelativeTimeDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return root.children[0] as N;
+};
+
+const parseScheduleWaitPairingJobnet = (): N => {
+  const result = parseAjs(scheduleWaitPairingDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
@@ -769,6 +797,34 @@ suite("ParameterFactory", () => {
     assert.deepStrictEqual(
       ey?.map((parameter) => parameter?.time),
       [undefined, "U60"],
+    );
+  });
+
+  test("resolves effective wc and wt pairs without changing raw values", () => {
+    const jobnet = parseScheduleWaitPairingJobnet();
+
+    const wc = ParamFactory.wc(jobnet);
+    const wt = ParamFactory.wt(jobnet);
+
+    assert.deepStrictEqual(
+      wc?.map((parameter) => parameter?.numberOfTimes),
+      ["4", "no", "un"],
+    );
+    assert.deepStrictEqual(
+      wt?.map((parameter) => parameter?.time),
+      ["no", "01:00", "un"],
+    );
+    assert.deepStrictEqual(
+      wc?.map((parameter, index) =>
+        parameter?.effectiveNumberOfTimes(wt?.[index]?.value()),
+      ),
+      [undefined, undefined, "un"],
+    );
+    assert.deepStrictEqual(
+      wt?.map((parameter, index) =>
+        parameter?.effectiveTime(wc?.[index]?.value()),
+      ),
+      [undefined, undefined, "un"],
     );
   });
 

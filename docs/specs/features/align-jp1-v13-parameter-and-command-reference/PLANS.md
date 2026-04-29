@@ -55,6 +55,13 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   non-schedule parameter correction.
 - Aligned `ParamFactory.wth` to read raw `wth`, replacing the legacy
   `wth` to `wt` lookup while preserving schedule-rule `wt` behavior.
+- Added `PARAMETER_COVERAGE_MATRIX.md` as a docs-only category-level status
+  index for the alignment slices that already have focused investigation
+  records.
+- Investigated schedule-rule `wc` / `wt` pairing as the next approval-gated
+  behavior candidate.
+- Implemented domain-only `wc` / `wt` effective-value pairing while preserving
+  raw schedule-rule values and unit-list projection.
 
 ## Impact Investigation
 
@@ -159,12 +166,59 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Approval: human approval to proceed was given on 2026-04-29 after the
   investigation summary for `wth` key mapping alignment.
 
+### WC / WT Schedule-Rule Pairing Candidate
+
+- Planned change: add a small schedule-rule helper seam for `wc` / `wt`
+  effective start-condition monitoring values so a rule is treated as disabled
+  when either paired value for the same rule is `no`, while preserving raw
+  parameter parsing and current raw normalized projection unless separately
+  approved.
+- Affected files:
+  `src/domain/models/parameters/scheduleRuleHelpers.ts`,
+  `src/domain/models/parameters/ScheduleRule.ts`,
+  `src/domain/models/parameters/Time.ts`,
+  `src/domain/models/parameters/ruleParameterBuilders.ts`,
+  `src/domain/models/parameters/ParameterFactory.ts`,
+  `src/domain/models/units/N.ts`,
+  `src/application/unit-list/buildUnitListGroup10View.ts` if effective
+  projection is approved,
+  `src/application/unit-list/unitListViewHelpers.ts` if effective projection
+  is approved,
+  focused schedule-rule helper and parameter factory tests,
+  focused unit-list tests only if projection changes,
+  and this feature's SDD docs.
+- Affected features:
+  JP1/AJS parameter interpretation for jobnet start-condition monitoring;
+  unit-list group 10 schedule projection only if default-aware effective values
+  are explicitly approved.
+- Tests affected:
+  `src/test/suite/scheduleRuleHelpers.test.ts`,
+  `src/test/suite/parameterFactory.test.ts`,
+  `src/test/suite/parameterHelpers.test.ts` if builder output changes, and
+  `src/test/suite/buildUnitListGroup10View.test.ts` /
+  `src/test/suite/buildUnitListView.test.ts` only if projection changes.
+- Breaking-change risk:
+  medium. The manual-aligned effective behavior would treat some currently
+  visible paired values as disabled when the counterpart is `no`. Preserving
+  raw parameter values and limiting the first slice to domain effective helpers
+  keeps projection and dialog behavior stable.
+- Alternatives considered:
+  leave independent `wc` and `wt` values as-is and keep the matrix marked
+  partial; add diagnostics instead of changing interpretation, deferred until
+  editor-feedback behavior is explicit; update unit-list projection immediately,
+  deferred unless explicitly approved because list groups currently read raw
+  normalized key/value data.
+- Approval:
+  human approval to proceed was given on 2026-04-29 after the investigation
+  summary for domain-only `wc` / `wt` effective-value pairing.
+
 ## Follow-up
 
 - Apply the same value parsing audit/refactor workflow to other parameter
   categories before marking them official-reference aligned.
-- Build a parameter-coverage matrix when category-level status needs tracking
-  beyond the current audit summary.
+- Keep the parameter-coverage matrix current whenever a focused alignment
+  slice is added, completed, re-scoped, or deferred.
+- Revisit `wc` / `wt` unit-list projection only as a separate behavior slice.
 - Revisit QUEUE job transfer-file coverage separately because the manual
   defines `tsN` and `tdN` but not `topN`.
 - Revisit invalid `jd` / `abr` combinations when diagnostics behavior is
@@ -203,8 +257,17 @@ Current branch validation:
   warnings
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `npm test`
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `npm run test:web`
 - 2026-04-29: `npm run build` completed with existing webpack asset-size
   warnings
+- 2026-04-29: `npm test`
+- 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-29: `pnpm run qlty`
+- 2026-04-29: `pnpm run lint:md`

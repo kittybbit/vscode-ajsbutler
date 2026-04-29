@@ -10,6 +10,7 @@ import {
   parseStartTimeValue,
   parseWaitCountValue,
   parseWaitTimeValue,
+  resolveEffectiveStartConditionMonitoringPair,
 } from "../../domain/models/parameters/scheduleRuleHelpers";
 
 suite("Schedule rule helpers", () => {
@@ -92,5 +93,27 @@ suite("Schedule rule helpers", () => {
     assert.strictEqual(parseCycleValue("(3,q)"), undefined);
     assert.strictEqual(parseClosedDaySubstitutionValue("before"), undefined);
     assert.strictEqual(parseScheduleByDaysFromStartValue("be,3,9x"), undefined);
+  });
+
+  test("resolves effective wc and wt pairs", () => {
+    assert.deepStrictEqual(
+      resolveEffectiveStartConditionMonitoringPair("4", "00:30"),
+      {
+        numberOfTimes: "4",
+        time: "00:30",
+      },
+    );
+    assert.deepStrictEqual(
+      resolveEffectiveStartConditionMonitoringPair("no", "00:30"),
+      {},
+    );
+    assert.deepStrictEqual(
+      resolveEffectiveStartConditionMonitoringPair("4", "no"),
+      {},
+    );
+    assert.deepStrictEqual(
+      resolveEffectiveStartConditionMonitoringPair(undefined, "00:30"),
+      {},
+    );
   });
 });

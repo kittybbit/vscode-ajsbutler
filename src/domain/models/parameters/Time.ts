@@ -5,6 +5,7 @@ import {
   parseDelayTimeValue,
   parseStartTimeValue,
   parseWaitTimeValue,
+  resolveEffectiveStartConditionMonitoringPair,
 } from "./scheduleRuleHelpers";
 
 type ParseTimeValue = (rawValue: string | undefined) =>
@@ -69,5 +70,12 @@ export class Sy extends Time {
 export class Wt extends Time {
   constructor(arg: ParamInternal) {
     super(arg, parseWaitTimeValue);
+  }
+
+  effectiveTime(waitCountRawValue: string | undefined): string | undefined {
+    return resolveEffectiveStartConditionMonitoringPair(
+      waitCountRawValue,
+      this.value(),
+    ).time;
   }
 }

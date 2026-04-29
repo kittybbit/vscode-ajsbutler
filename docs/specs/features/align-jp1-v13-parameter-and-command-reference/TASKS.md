@@ -76,11 +76,14 @@
       derived for `Qj` / `Rq`
 - [x] Align `wth` key mapping so job end-judgment threshold parsing reads
       `wth` rather than the schedule-rule `wt` parameter
-- [ ] Turn the audit notes into an explicit parameter-coverage matrix when
+- [x] Turn the audit notes into an explicit parameter-coverage matrix when
       category-level status needs tracking beyond the current audit summary
-- [ ] Continue schedule-rule helper-boundary alignment with the remaining
+- [x] Investigate schedule-rule helper-boundary alignment with the remaining
       grouped semantics, such as `wc` / `wt` pairing or range validation, when
       the behavior contract is explicit enough to test across the family
+- [x] Implement schedule-rule `wc` / `wt` effective-value pairing after human
+      approval clarifies whether the slice is domain-only or includes
+      unit-list projection
 
 ## Notes
 
@@ -171,19 +174,40 @@
   longer satisfies end-judgment threshold lookup. Parser grammar, command
   generation, validation behavior, schedule-rule `wt`, and unit-list
   normalized raw projection remain unchanged.
+- 2026-04-29: `PARAMETER_COVERAGE_MATRIX.md` now turns the current audit and
+  focused alignment records into an explicit category-level matrix. This is a
+  docs-only status index and does not broaden parameter coverage or approve
+  new runtime behavior.
+- 2026-04-29: schedule-rule `wc` / `wt` pairing is the next investigated
+  behavior candidate. The current code parses and defaults both parameters
+  independently, while the JP1/AJS3 v13 jobnet definition says they are
+  specified together and `no` in one parameter invalidates the paired
+  start-condition monitoring value. Implementation approval is pending.
+- 2026-04-29: schedule-rule `wc` / `wt` effective-value pairing is implemented
+  as a domain-only helper/API. Raw `Wc.numberOfTimes`, `Wt.time`, `value()`,
+  and normalized unit-list projection remain unchanged. Effective values are
+  empty when either paired value is `no`, missing, or unparsable.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-04-29
-- Approved scope: Align `wth` key mapping so job end-judgment threshold
-  parsing reads raw `wth` rather than the schedule-rule `wt` parameter; update
-  focused regression evidence; keep parser grammar, command generation,
-  validation behavior, schedule-rule `wt`, and unit-list normalized raw
-  projection unchanged.
+- Approved scope: Implement domain-only effective-value helper/tests for
+  schedule-rule `wc` / `wt` pairing, keeping raw normalized unit-list
+  projection unchanged. Do not change parser grammar, command generation,
+  validation diagnostics, generated artifacts, or configuration.
 
 ## Prior Approval Evidence
 
+- 2026-04-29: Approved domain-only effective-value helper/tests for
+  schedule-rule `wc` / `wt` pairing, keeping raw normalized unit-list
+  projection unchanged. Parser grammar, command generation, validation
+  diagnostics, generated artifacts, and configuration remained out of scope.
+- 2026-04-29: Approved `wth` key mapping alignment so job end-judgment
+  threshold parsing reads raw `wth` rather than the schedule-rule `wt`
+  parameter; update focused regression evidence; keep parser grammar, command
+  generation, validation behavior, schedule-rule `wt`, and unit-list
+  normalized raw projection unchanged.
 - 2026-04-29: Approved QUEUE job transfer-file alignment by adding focused
   regression evidence that `Qj` / `Rq` preserve explicit `ts1` to `ts4` and
   `td1` to `td4` values without exposing or deriving `top1` to `top4`, while

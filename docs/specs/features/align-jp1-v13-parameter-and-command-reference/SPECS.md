@@ -59,6 +59,14 @@ JP1/AJS3 version 13 reference documents.
   parameter. Correct alignment should read explicit `wth` values without
   synthesizing omitted values and without changing schedule-rule `wt`
   projection.
+- `PARAMETER_COVERAGE_MATRIX.md` is the feature-local status index for
+  investigated categories. It is intentionally narrower than `ParamFactory`
+  and must not be read as repository-wide JP1/AJS3 parameter coverage.
+- Schedule-rule `wc` / `wt` pairing is approval-sensitive because the current
+  wrappers expose both values independently, while the JP1/AJS3 version 13
+  jobnet definition treats `no` in either parameter as invalidating the paired
+  start-condition monitoring value. Any implementation must distinguish raw
+  parameter preservation from effective-value interpretation.
 
 ## Reference Documents
 
