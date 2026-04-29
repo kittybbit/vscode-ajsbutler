@@ -90,8 +90,10 @@ Scenario: Cache miss remains correct
 
 - Npm lifecycle hooks may hide preparation and make commands harder to reason
   about.
-- Incremental ANTLR generation may produce stale parser artifacts if cache
-  keys omit a generator input.
+- Manual ANTLR generation may leave stale parser artifacts if grammar changes
+  are not followed by explicit regeneration.
+- Development build optimization may hide production-only minification
+  failures unless production build remains part of validation.
 - Targeted webpack builds may omit bundles loaded indirectly by a test runner.
 - Removing duplicated type checks may create a coverage gap between runtime
   and test TypeScript projects.

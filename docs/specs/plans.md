@@ -46,22 +46,23 @@ rules in `docs/specs/README.md`, not in this file.
 - Objective: complete the build/test performance feature in one PR-sized
   feature branch by repeating SDD investigation, approval, implementation,
   validation, push, and CI review per slice.
-- Status: Slice-1 is implemented and pushed in draft PR #222. CI completed
-  successfully per human confirmation. Slice-2 manual ANTLR generation is
-  implemented locally and pending push/CI review.
+- Status: Slice-1 and Slice-2 are implemented and pushed in draft PR #222. CI
+  completed successfully for both slices per human confirmation. Slice-4
+  development build optimization is selected and pending implementation
+  approval.
 - Scope: keep changes focused on validation performance command ownership,
   ANTLR generation freshness, webpack development speed, type-check ownership,
   CI rebuild reduction, and cache behavior as described by the feature docs.
 - Out of scope: product behavior changes, parser grammar changes, generated
   parser semantic changes, dependency modernization unrelated to validation
   performance, and raising `engines.vscode`.
-- Impact summary: Slice-2 affects `package.json` scripts and contributor
-  documentation; it preserves `src/antlr/*.g4`, `src/generate/parser`, parser
-  imports, desktop tests, web tests, and production build behavior.
+- Impact summary: Slice-4 will affect `webpack.config.js` development-mode
+  optimization only; it must preserve production minification, bundle entry
+  points, output names, desktop tests, web tests, and production build
+  behavior.
 - Risks and assumptions: performance reductions are hypotheses until measured.
-  Slice-2 stale-output risk is controlled by explicit contributor
-  responsibility and parser-dependent validation rather than hidden build
-  metadata.
+  Slice-4 development/production divergence risk is controlled by keeping
+  `pnpm run build` in validation and CI.
 
 ## Build/Test Performance SDD
 
@@ -69,10 +70,11 @@ rules in `docs/specs/README.md`, not in this file.
   `docs/specs/features/build-test-performance/`
 - Use case:
   `docs/requirements/use-cases/uc-improve-build-test-performance.md`
-- Completed implementation slice:
-  Slice-1, separate test execution from build preparation.
+- Completed implementation slices:
+  Slice-1, separate test execution from build preparation; Slice-2, manual
+  ANTLR generation.
 - Next implementation slice:
-  Slice-2, manual ANTLR generation.
+  Slice-4, development build optimization.
 - Roadmap:
   Phase 1 covers Slice-1, Slice-2, and Slice-4; Phase 2 covers Slice-5 and
   Slice-7; Phase 3 covers Slice-3, Slice-6, and Slice-8.

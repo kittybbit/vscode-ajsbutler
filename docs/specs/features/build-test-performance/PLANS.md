@@ -98,29 +98,51 @@ Slice-1 separated test execution from shared preparation.
    - `pnpm run build`
 6. Recorded timings and remaining risks in `TASKS.md`.
 
-## Slice-2 Implementation Plan
+## Completed Slice-2 Implementation
 
-Slice-2 is the next candidate and is pending approval.
+Slice-2 made ANTLR generation explicit for grammar-change workflows.
 
-1. Measure current parser-generation baseline.
+1. Measured parser-generation baseline.
    - `pnpm run build`
    - `pnpm run test:prepare`
    - `pnpm run test:full`
-2. Update package scripts.
+2. Updated package scripts.
    - Remove automatic `antlr4ts` execution from `prebuild`.
    - Remove automatic `antlr4ts` execution from `test:prepare`.
    - Preserve `antlr:clean` and `antlr:generate` as explicit recovery
      commands.
    - Keep `antlr4ts` as the explicit clean generation command.
-3. Update contributor documentation.
+3. Updated contributor documentation.
    - Document that grammar changes require explicit `pnpm run antlr4ts`.
    - Document that normal build/test commands consume committed generated
      parser artifacts.
-4. Validate parser artifact safety.
-   - Run explicit `pnpm run antlr4ts`.
-   - Confirm no unexpected generated parser diff remains.
-   - Run parser-dependent test suites through desktop and web validation.
-5. Record timings and remaining stale-output risks in `TASKS.md`.
+4. Validated parser artifact safety.
+   - Ran explicit `pnpm run antlr4ts`.
+   - Confirmed no unexpected generated parser diff remains.
+   - Ran parser-dependent test suites through desktop and web validation.
+5. Recorded timings and remaining stale-output risks in `TASKS.md`.
+
+## Slice-4 Implementation Plan
+
+Slice-4 is the next candidate and is pending approval.
+
+1. Measure current development webpack baseline.
+   - `pnpm run development`
+   - `pnpm run test:prepare`
+   - `pnpm run test:full`
+   - `pnpm run build`
+2. Update webpack optimization.
+   - Set development-mode `optimization.minimize` to `false`.
+   - Keep production-mode `TerserPlugin` and minification unchanged.
+   - Preserve existing entry points, output names, externals, aliases, and
+     source-map behavior.
+3. Validate development and production behavior.
+   - Confirm development output is emitted without Terser minification.
+   - Confirm production build remains minified and still reports existing
+     asset-size warnings only.
+   - Run desktop and web extension tests.
+4. Record timings and remaining production/development divergence risk in
+   `TASKS.md`.
 
 ## Measurement Plan
 

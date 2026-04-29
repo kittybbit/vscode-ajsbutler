@@ -9,23 +9,24 @@
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-04-29
-- Approved scope: User replied "OK.proceed." after approving the manual ANTLR
-  generation direction. Approved changes are limited to removing automatic
-  `antlr4ts` execution from ordinary build/test preparation, preserving
-  explicit ANTLR generation commands, updating contributor documentation and
-  SDD tracking, and running validation. Parser grammar changes, generated
-  parser semantic changes, dependency changes, and `engines.vscode` changes
-  are out of scope.
+- Status: Pending
+- Approved at:
+- Approved scope:
 
-Current implementation gate: Slice-2 manual ANTLR generation.
+Current implementation gate: Slice-4 development build optimization.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 
 Prior approval:
 
+- Slice-2 was approved on 2026-04-29 when the user replied "OK.proceed." after
+  approving the manual ANTLR generation direction. Approved changes were
+  limited to removing automatic `antlr4ts` execution from ordinary build/test
+  preparation, preserving explicit ANTLR generation commands, updating
+  contributor documentation and SDD tracking, and running validation. Parser
+  grammar changes, generated parser semantic changes, dependency changes, and
+  `engines.vscode` changes were out of scope.
 - Slice-1 was approved on 2026-04-29 when the user replied "はい" to the
   Slice-1 implementation approval request. Approved changes were limited to
   separating test execution from shared build preparation, adding prepare-once
@@ -63,8 +64,46 @@ Prior approval:
 - [x] Slice-2 documentation changes completed.
 - [x] Slice-2 generated parser safety checks completed.
 - [x] Slice-2 timings recorded.
-- [ ] Draft slices 3 through 8 promoted to detailed specs only when their
+- [x] Slice-4 selected as the next implementation candidate.
+- [x] Slice-4 impact investigation completed.
+- [x] Slice-4 SDD plan updated.
+- [ ] Human approval recorded for Slice-4 implementation.
+- [ ] Slice-4 implementation scope matches approved scope.
+- [ ] Slice-4 webpack optimization changes completed.
+- [ ] Slice-4 development/production validation completed.
+- [ ] Slice-4 timings recorded.
+- [ ] Draft slices 3, 5, 6, 7, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
+
+## Slice-4 Impact Investigation
+
+- Planned change:
+  disable webpack minimization in development mode while preserving production
+  minification.
+- Affected files:
+  `webpack.config.js`, `docs/specs/features/build-test-performance/*`, and
+  `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `createOptimization`, `createConfig`, and webpack configs that consume the
+  shared optimization object: editor, desktop extension, and web extension.
+- Affected commands:
+  `pnpm run development`, `pnpm run test:prepare`, `pnpm run test:full`,
+  `pnpm test`, `pnpm run test:web`, and `pnpm run build`.
+- Affected features:
+  development bundles for table/flow webviews, desktop extension bundle, web
+  extension bundle, desktop tests, and web tests.
+- Affected tests:
+  desktop extension tests, web extension tests, production build, and quality
+  checks.
+- Related docs:
+  `SPECS.md`, `PLANS.md`, this task file, and branch-level `docs/specs/plans.md`.
+- Breaking-change risk:
+  low to medium. Production output remains minified, but development/test
+  bundles will differ more from production bundles. Keeping `pnpm run build` in
+  validation mitigates production-only minification failures.
+- Alternatives:
+  keep development minification; add a separate non-minified development
+  command; defer minification work and implement target splitting first.
 
 ## Slice-2 Impact Investigation
 
