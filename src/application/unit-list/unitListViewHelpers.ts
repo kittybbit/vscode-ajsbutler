@@ -14,6 +14,7 @@ import {
   parseScheduleDateValue,
   parseShiftDaysValue,
   parseWaitCountValue,
+  resolveEffectiveStartConditionMonitoringPair,
 } from "../../domain/models/parameters/scheduleRuleHelpers";
 import { WeekSymbol, isWeekSymbol } from "../../domain/values/AjsType";
 
@@ -173,3 +174,24 @@ export const parseCftd = (
 
 export const parseWc = (value: string): string =>
   parseWaitCountValue(value)?.value ?? "1";
+
+export const buildEffectiveStartConditionMonitoringViews = (
+  waitCountValues: string[],
+  waitTimeValues: string[],
+): { waitCounts: string[]; waitTimes: string[] } => {
+  const pairCount = Math.max(waitCountValues.length, waitTimeValues.length);
+  const waitCounts: string[] = [];
+  const waitTimes: string[] = [];
+
+  for (let index = 0; index < pairCount; index += 1) {
+    const effectivePair = resolveEffectiveStartConditionMonitoringPair(
+      waitCountValues[index],
+      waitTimeValues[index],
+    );
+
+    waitCounts.push(effectivePair.numberOfTimes ?? "");
+    waitTimes.push(effectivePair.time ?? "");
+  }
+
+  return { waitCounts, waitTimes };
+};

@@ -67,6 +67,11 @@ JP1/AJS3 version 13 reference documents.
   jobnet definition treats `no` in either parameter as invalidating the paired
   start-condition monitoring value. Any implementation must distinguish raw
   parameter preservation from effective-value interpretation.
+- Unit-list group 10 `wc` / `wt` projection is a separate approval-sensitive
+  boundary from domain interpretation because it is user-visible table output.
+  If approved, it should consume the existing paired effective-value semantics
+  while preserving parser output, raw domain wrapper values, and normalized raw
+  parameter storage.
 
 ## Reference Documents
 

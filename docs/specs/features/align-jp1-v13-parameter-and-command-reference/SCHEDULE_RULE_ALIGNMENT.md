@@ -150,6 +150,44 @@ This document covers only the jobnet schedule-rule family already called out in
   `parameterFactory.test.ts` verifies raw values stay visible while effective
   values are disabled for `no` pairs.
 
+## WC / WT Unit-List Projection Candidate
+
+- Planned change:
+  make unit-list group 10 start-condition columns display effective `wc` /
+  `wt` values from the existing paired domain semantics instead of raw
+  independent parsed values.
+- Current behavior:
+  `buildUnitListGroup10View.ts` reads normalized raw `wc` and `wt` values
+  independently through `findAjsUnitParameterValues(...)`, then maps them with
+  `parseWc` and `parseTimeValue`.
+- Expected behavior:
+  paired values display only when both values for the same schedule-rule row
+  are effective. If either side is `no`, missing, or unparsable, both group 10
+  start-condition cells for that pair display empty values.
+- Affected seams:
+  `src/application/unit-list/buildUnitListGroup10View.ts`,
+  `src/application/unit-list/unitListViewHelpers.ts`, and the existing
+  schedule-rule helper `resolveEffectiveStartConditionMonitoringPair`.
+- Regression evidence needed:
+  focused group 10 unit-list tests for `wc=4` / `wt=no`, `wc=2,no` /
+  `wt=2,01:00`, and a valid `wc` / `wt` pair that remains visible.
+- Approval-sensitive boundary:
+  parser grammar, raw domain wrappers, normalized raw parameter storage,
+  diagnostics, and generated artifacts remain out of scope.
+
+## WC / WT Unit-List Projection Delivered Alignment
+
+- Projection behavior:
+  unit-list group 10 start-condition columns now display effective `wc` /
+  `wt` values from the paired helper. Disabled, missing, or unparsable pairs
+  display empty count and time cells.
+- Raw preservation:
+  parser output, raw domain wrapper values, and normalized raw parameter
+  storage remain unchanged.
+- Regression evidence:
+  `buildUnitListGroup10View.test.ts` covers disabled `wc=4` / `wt=no`,
+  disabled `wc=2,no` / `wt=2,01:00`, and valid `wc=3,un` / `wt=3,un`.
+
 ## Delivered Alignment
 
 - `ln`: root-jobnet values are ignored while nested jobnet values remain sorted
@@ -164,7 +202,5 @@ This document covers only the jobnet schedule-rule family already called out in
 
 - Add range validation only after deciding whether invalid JP1/AJS parameter
   values should become diagnostics, warnings, or preserved raw values.
-- Revisit whether unit-list projection should consume effective `wc` / `wt`
-  values only as a separate projection behavior slice.
 - Apply this category-level parser alignment workflow to the next non-schedule
   parameter family before marking that category official-reference aligned.

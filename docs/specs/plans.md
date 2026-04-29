@@ -31,41 +31,36 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Prepare build/test performance for PR review or merge after final human
-   confirmation.
-2. Continue category-level parameter parsing alignment by selecting the next
+1. Continue category-level parameter parsing alignment by selecting the next
    focused behavior contract and recording approval before implementation.
-3. Keep WebAPI import beta feedback and real-environment smoke evidence
+2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-4. Keep compatibility risk visible for every shared or extension-runtime
+3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
 ## Current Branch Plan
 
-- Branch: `codex/build-test-performance`.
-- Objective: complete the build/test performance feature in one PR-sized
-  feature branch by repeating SDD investigation, approval, implementation,
-  validation, push, and CI review per slice.
-- Status: Slice-1, Slice-2, Slice-3, Slice-4, Slice-5, and Slice-7 are
-  implemented in draft PR #222. CI completed successfully through Slice-7 per
-  human confirmation, and Slice-3 CI also completed successfully per human
-  confirmation. Slice-8 Playwright browser cache completed successfully with
-  cache-miss and cache-hit CI evidence per human confirmation. Slice-6 was
-  investigated and deferred from this branch because it is primarily output
-  ownership cleanup with low direct speedup and higher test-launcher risk.
-- Scope: keep changes focused on validation performance command ownership,
-  ANTLR generation freshness, webpack development speed, type-check ownership,
-  CI rebuild reduction, and cache behavior as described by the feature docs.
-- Out of scope: product behavior changes, parser grammar changes, generated
-  parser semantic changes, dependency modernization unrelated to validation
-  performance, and raising `engines.vscode`.
-- Impact summary: Slice-8 affects `.github/workflows/verify.yml` only, adding
-  a conservative Playwright browser cache while preserving pnpm dependency
-  caching and the existing Playwright install command.
-- Risks and assumptions: performance reductions are hypotheses until measured.
-  Slice-8 cache risk is controlled by keeping cache misses first-class and
-  deferring VS Code test binary caching until the VS Code binary version input
-  is explicit.
+- Branch: not created for implementation while approval is pending.
+- Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
+  focused unit-list projection slice for schedule-rule `wc` / `wt` effective
+  start-condition monitoring values.
+- Status: build/test performance PR #222 is merged with successful CI. The
+  current slice implements unit-list group 10 projection for the already
+  implemented domain effective `wc` / `wt` pairing.
+- Scope: update SDD records and request approval for changing unit-list
+  projection from raw independent `wc` / `wt` values to paired effective values
+  for the group 10 start-condition columns.
+- Out of scope: parser grammar changes, command generation, diagnostics,
+  generated artifacts, dependency changes, `engines.vscode`, and broader
+  schedule-rule range validation.
+- Impact summary: the candidate affects
+  `src/application/unit-list/buildUnitListGroup10View.ts`,
+  `src/application/unit-list/unitListViewHelpers.ts`, group 10 unit-list
+  regression tests, and the schedule-rule SDD documents.
+- Risks and assumptions: behavior changes are user-visible in the table viewer
+  because paired values such as `wc=4` with `wt=no` would display as empty
+  effective start-condition monitoring values instead of raw independent
+  values. Raw parameter parsing and domain wrapper raw values remain preserved.
 
 ## Build/Test Performance SDD
 
@@ -79,7 +74,7 @@ rules in `docs/specs/README.md`, not in this file.
   optimization; Slice-5, type-check responsibility; Slice-7, CI rebuild
   reduction; Slice-8, Playwright browser cache.
 - Next implementation slice:
-  none; Slice-6 is deferred as future cleanup.
+  none; PR #222 is merged and Slice-6 is deferred as future cleanup.
 - Roadmap:
   Phase 1 covers Slice-1, Slice-2, and Slice-4; Phase 2 covers Slice-5 and
   Slice-7; Phase 3 covers Slice-3, Slice-6, and Slice-8.
@@ -93,7 +88,9 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/build-test-performance/`:
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
-  active JP1/AJS3 version 13 alignment records and coverage matrix.
+  active JP1/AJS3 version 13 alignment records and coverage matrix. Current
+  slice: unit-list group 10 projection for effective schedule-rule `wc` /
+  `wt` pairing.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -113,3 +110,10 @@ Current branch checks:
 
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `pnpm run test:compile`
+- 2026-04-29: `npm test`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `pnpm run qlty`

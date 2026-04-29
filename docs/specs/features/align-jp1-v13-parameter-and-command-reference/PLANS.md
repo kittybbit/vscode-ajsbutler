@@ -62,6 +62,10 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   behavior candidate.
 - Implemented domain-only `wc` / `wt` effective-value pairing while preserving
   raw schedule-rule values and unit-list projection.
+- Investigated unit-list group 10 projection for `wc` / `wt` as the next
+  approval-gated behavior candidate after domain-only pairing.
+- Implemented unit-list group 10 projection for effective `wc` / `wt` values
+  while preserving raw parser, wrapper, and normalized parameter values.
 
 ## Impact Investigation
 
@@ -212,13 +216,50 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   human approval to proceed was given on 2026-04-29 after the investigation
   summary for domain-only `wc` / `wt` effective-value pairing.
 
+### WC / WT Unit-List Projection Candidate
+
+- Planned change:
+  change unit-list group 10 start-condition projection to consume effective
+  `wc` / `wt` pairing semantics instead of displaying raw independent values.
+- Affected files:
+  `src/application/unit-list/buildUnitListGroup10View.ts`,
+  `src/application/unit-list/unitListViewHelpers.ts` if a projection helper is
+  added, `src/test/suite/buildUnitListGroup10View.test.ts`,
+  `src/test/suite/buildUnitListView.test.ts` if the full unit-list fixture
+  needs explicit coverage, `docs/requirements/use-cases/uc-build-unit-list.md`,
+  `SCHEDULE_RULE_ALIGNMENT.md`, `SPECS.md`, `TASKS.md`, and branch-level
+  `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `buildUnitListGroup10View`, `parseWc`, `parseTimeValue`, the
+  `UnitListGroup10View.waitCounts` and `waitTimes` DTO fields, and the group
+  10 table columns that render those arrays.
+- Affected features:
+  JP1/AJS table viewer group 10 schedule definition columns; build-unit-list
+  application use case; schedule-rule parameter interpretation.
+- Tests affected:
+  focused group 10 unit-list tests; full build-unit-list tests only if needed
+  to lock the DTO-level behavior; existing domain tests for
+  `resolveEffectiveStartConditionMonitoringPair` should continue to pass.
+- Breaking-change risk:
+  medium. This intentionally changes user-visible table output for definitions
+  where one side of a `wc` / `wt` pair disables start-condition monitoring.
+  Raw parser output, raw domain wrapper values, and normalized key/value
+  storage remain unchanged.
+- Alternatives considered:
+  keep group 10 raw by design and leave the matrix gap visible; add separate
+  raw and effective columns, rejected for this slice because it expands UI and
+  localization scope; add diagnostics instead of projection changes, deferred
+  until editor-feedback behavior explicitly owns cross-parameter warnings.
+- Approval:
+  human approval to proceed was given on 2026-04-29 after the investigation
+  summary for unit-list group 10 effective `wc` / `wt` projection.
+
 ## Follow-up
 
 - Apply the same value parsing audit/refactor workflow to other parameter
   categories before marking them official-reference aligned.
 - Keep the parameter-coverage matrix current whenever a focused alignment
   slice is added, completed, re-scoped, or deferred.
-- Revisit `wc` / `wt` unit-list projection only as a separate behavior slice.
 - Revisit QUEUE job transfer-file coverage separately because the manual
   defines `tsN` and `tdN` but not `topN`.
 - Revisit invalid `jd` / `abr` combinations when diagnostics behavior is

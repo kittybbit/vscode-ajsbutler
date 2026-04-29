@@ -84,6 +84,12 @@
 - [x] Implement schedule-rule `wc` / `wt` effective-value pairing after human
       approval clarifies whether the slice is domain-only or includes
       unit-list projection
+- [x] Investigate unit-list group 10 projection for schedule-rule `wc` / `wt`
+      effective values as a separate behavior slice after domain-only pairing
+- [x] Record human approval before changing unit-list projection behavior
+- [x] Implement group 10 effective `wc` / `wt` projection only after approval
+- [x] Add focused group 10 regression evidence for disabled and valid pairs
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -187,15 +193,35 @@
   as a domain-only helper/API. Raw `Wc.numberOfTimes`, `Wt.time`, `value()`,
   and normalized unit-list projection remain unchanged. Effective values are
   empty when either paired value is `no`, missing, or unparsable.
+- 2026-04-29: unit-list group 10 `wc` / `wt` projection is the next
+  approval-gated behavior candidate. The proposed scope is limited to table
+  DTO projection using the existing effective pairing semantics; parser
+  grammar, raw wrappers, normalized raw parameter storage, diagnostics,
+  generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain out of scope.
+- 2026-04-29: unit-list group 10 `wc` / `wt` projection now consumes the
+  existing effective pairing semantics. Disabled pairs display empty
+  start-condition monitoring values, valid pairs remain visible, and raw
+  parser/domain/normalized values remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-04-29
-- Approved scope: Implement domain-only effective-value helper/tests for
-  schedule-rule `wc` / `wt` pairing, keeping raw normalized unit-list
-  projection unchanged. Do not change parser grammar, command generation,
-  validation diagnostics, generated artifacts, or configuration.
+- Approved scope: User replied "OK.Proceed." after the unit-list group 10
+  effective projection approval request. Approved changes are limited to
+  making group 10 `wc` / `wt` schedule-rule start-condition columns consume
+  existing effective pairing semantics, adding focused regression evidence,
+  updating SDD tracking, and running validation. Parser grammar, raw domain
+  wrappers, normalized raw parameter storage, diagnostics, generated artifacts,
+  configuration, dependency versions, and `engines.vscode` changes are out of
+  scope.
+
+Current implementation gate: unit-list group 10 effective projection for
+schedule-rule `wc` / `wt` pairing.
+
+Implementation must not start while Status is Pending.
+Only clear human approval can change Status to Approved.
 
 ## Prior Approval Evidence
 
@@ -222,3 +248,13 @@
   omitted `eu` values to `def` for `Htpj` / `Rhtpj`, keeping explicit `eu`
   values and non-HTTP job-family `eu` defaults unchanged, and adding focused
   regression evidence.
+
+## Validation
+
+- 2026-04-29: `pnpm run test:compile`
+- 2026-04-29: `npm test`
+- 2026-04-29: `npm run test:web`
+- 2026-04-29: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-04-29: `pnpm run lint:md`
+- 2026-04-29: `pnpm run qlty`
