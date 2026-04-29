@@ -9,17 +9,24 @@
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-04-29
-- Approved scope: User replied "はい" to the Slice-1 implementation approval
-  request. Approved changes are limited to separating test execution from
-  shared build preparation, adding prepare-once package scripts, updating CI to
-  use the prepare-once command, updating related README/SDD tracking, and
-  running validation. Parser grammar, runtime behavior, generated artifact
-  semantics, dependency versions, and `engines.vscode` are out of scope.
+- Status: Pending
+- Approved at:
+- Approved scope:
+
+Current implementation gate: Slice-2 manual ANTLR generation.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
+
+Prior approval:
+
+- Slice-1 was approved on 2026-04-29 when the user replied "はい" to the
+  Slice-1 implementation approval request. Approved changes were limited to
+  separating test execution from shared build preparation, adding prepare-once
+  package scripts, updating CI to use the prepare-once command, updating
+  related README/SDD tracking, and running validation. Parser grammar, runtime
+  behavior, generated artifact semantics, dependency versions, and
+  `engines.vscode` were out of scope.
 
 ## Investigation
 
@@ -41,8 +48,53 @@ Only clear human approval can change Status to Approved.
 - [x] Slice-1 package-script changes completed.
 - [x] Slice-1 CI or README changes completed only if approved.
 - [x] Slice-1 timings recorded.
-- [ ] Draft slices 2 through 8 promoted to detailed specs only when their
+- [x] Slice-2 selected as the next implementation candidate.
+- [x] Slice-2 impact investigation completed.
+- [x] Slice-2 SDD plan updated.
+- [ ] Human approval recorded for Slice-2 implementation.
+- [ ] Slice-2 implementation scope matches approved scope.
+- [ ] Slice-2 package-script changes completed.
+- [ ] Slice-2 documentation changes completed.
+- [ ] Slice-2 generated parser safety checks completed.
+- [ ] Slice-2 timings recorded.
+- [ ] Draft slices 3 through 8 promoted to detailed specs only when their
       implementation slice becomes active.
+
+## Slice-2 Impact Investigation
+
+- Planned change:
+  remove automatic ANTLR generation from ordinary build/test preparation and
+  keep parser generation as an explicit maintainer command.
+- Affected files:
+  `package.json`, `README.md`,
+  `docs/specs/features/build-test-performance/*`,
+  `docs/requirements/use-cases/uc-improve-build-test-performance.md`, and
+  `docs/specs/plans.md`.
+- Affected commands:
+  `pnpm run antlr4ts`, `pnpm run antlr:clean`, `pnpm run antlr:generate`,
+  `pnpm run test:prepare`, `pnpm run test:full`, `pnpm test`,
+  `pnpm run test:web`, and `pnpm run build`.
+- Affected parser boundary:
+  grammar source remains `src/antlr/*.g4`; generated parser files remain under
+  `src/generate/parser`; runtime parser imports through `@generate/parser/*`
+  must remain unchanged.
+- Affected features:
+  parser preparation, diagnostics, unit list, flow graph, CSV export, hover,
+  desktop tests, and web tests through their shared parser dependency.
+- Affected tests:
+  parser-dependent unit/integration suites, desktop extension tests, web
+  extension tests, and production build.
+- Related docs:
+  `SPECS.md`, `PLANS.md`, this task file, and the build/test performance use
+  case.
+- Breaking-change risk:
+  medium for stale generated parser artifacts if contributors forget explicit
+  generation after grammar or generator changes; low for VS Code compatibility
+  because no extension API changes are planned.
+- Alternatives:
+  keep unconditional clean generation; use hash/stamp-based incremental
+  generation; use filesystem timestamps; defer ANTLR work and implement
+  development webpack optimization first.
 
 ## Timing Evidence
 

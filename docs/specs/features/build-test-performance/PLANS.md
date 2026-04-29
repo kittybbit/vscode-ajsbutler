@@ -43,9 +43,10 @@ configuration remain unchanged until a slice receives explicit approval.
      one avoided preparation pass when running desktop and web tests together
    - First implementation target:
      yes
-2. Slice-2: incremental ANTLR generation.
+2. Slice-2: manual ANTLR generation.
    - Expected reduction:
-     medium for warm local preparation; low for cold CI before caching
+     medium for local preparation and CI because grammar generation is removed
+     from ordinary build/test commands
 3. Slice-4: development build optimization.
    - Expected reduction:
      medium to high for development webpack and test preparation
@@ -72,30 +73,54 @@ configuration remain unchanged until a slice receives explicit approval.
    - Expected reduction:
      high for external setup on cache hits; none on cache misses
 
-## Slice-1 Implementation Plan
+## Completed Slice-1 Implementation
 
-Slice-1 is the only slice ready for detailed implementation approval.
+Slice-1 separated test execution from shared preparation.
 
-1. Measure current baseline.
+1. Measured current baseline.
    - `pnpm run build`
    - `pnpm test`
    - `pnpm run test:web`
    - CI verify workflow total and step timings when available
-2. Update package scripts.
+2. Updated package scripts.
    - Add `test:prepare`.
    - Add `test:full`.
    - Preserve `test` and `test:web` compatibility.
    - Decide whether lifecycle hooks stay as compatibility shims or are
      replaced by explicit wrappers.
-3. Update CI only if the package-script compatibility plan is approved.
+3. Updated CI after approval.
    - Use the explicit prepare-once test command where it preserves coverage.
-4. Update README developer commands if command usage changes.
-5. Validate.
+4. Updated README developer commands.
+5. Validated.
    - `pnpm run qlty`
    - `pnpm run lint:md`
    - `pnpm run test:full`
    - `pnpm run build`
-6. Record timings and remaining risks in this plan or `TASKS.md`.
+6. Recorded timings and remaining risks in `TASKS.md`.
+
+## Slice-2 Implementation Plan
+
+Slice-2 is the next candidate and is pending approval.
+
+1. Measure current parser-generation baseline.
+   - `pnpm run build`
+   - `pnpm run test:prepare`
+   - `pnpm run test:full`
+2. Update package scripts.
+   - Remove automatic `antlr4ts` execution from `prebuild`.
+   - Remove automatic `antlr4ts` execution from `test:prepare`.
+   - Preserve `antlr:clean` and `antlr:generate` as explicit recovery
+     commands.
+   - Keep `antlr4ts` as the explicit clean generation command.
+3. Update contributor documentation.
+   - Document that grammar changes require explicit `pnpm run antlr4ts`.
+   - Document that normal build/test commands consume committed generated
+     parser artifacts.
+4. Validate parser artifact safety.
+   - Run explicit `pnpm run antlr4ts`.
+   - Confirm no unexpected generated parser diff remains.
+   - Run parser-dependent test suites through desktop and web validation.
+5. Record timings and remaining stale-output risks in `TASKS.md`.
 
 ## Measurement Plan
 
@@ -118,7 +143,8 @@ before/after runs.
 - Hidden lifecycle behavior:
   contributors may expect `pnpm test` to prepare everything automatically.
 - Stale generated parser:
-  Slice-2 must fail closed and keep clean generation available.
+  Slice-2 makes parser generation explicit, so contributors must remember to
+  regenerate artifacts when grammar or generator inputs change.
 - Bundle omission:
   Slice-3 must prove test runners do not load omitted targets.
 - Type-check coverage gap:
@@ -133,7 +159,7 @@ before/after runs.
 Rollback by slice, never by broad workflow reset:
 
 - restore previous package scripts for Slice-1
-- restore unconditional clean ANTLR generation for Slice-2
+- restore automatic ANTLR generation in build/test preparation for Slice-2
 - restore all-target webpack development builds for Slice-3
 - restore development minimization for Slice-4
 - restore prior type-check duplication for Slice-5
