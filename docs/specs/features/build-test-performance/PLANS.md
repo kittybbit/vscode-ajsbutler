@@ -122,27 +122,57 @@ Slice-2 made ANTLR generation explicit for grammar-change workflows.
    - Ran parser-dependent test suites through desktop and web validation.
 5. Recorded timings and remaining stale-output risks in `TASKS.md`.
 
-## Slice-4 Implementation Plan
+## Completed Slice-4 Implementation
 
-Slice-4 is the next candidate and is pending approval.
+Slice-4 disabled minification for development-mode webpack builds while
+preserving production minification.
 
-1. Measure current development webpack baseline.
+1. Measured development webpack baseline.
    - `pnpm run development`
    - `pnpm run test:prepare`
    - `pnpm run test:full`
    - `pnpm run build`
-2. Update webpack optimization.
+2. Updated webpack optimization.
    - Set development-mode `optimization.minimize` to `false`.
    - Keep production-mode `TerserPlugin` and minification unchanged.
    - Preserve existing entry points, output names, externals, aliases, and
      source-map behavior.
-3. Validate development and production behavior.
-   - Confirm development output is emitted without Terser minification.
-   - Confirm production build remains minified and still reports existing
+3. Validated development and production behavior.
+   - Confirmed development output is emitted without Terser minification.
+   - Confirmed production build remains minified and still reports existing
      asset-size warnings only.
-   - Run desktop and web extension tests.
-4. Record timings and remaining production/development divergence risk in
+   - Ran desktop and web extension tests.
+4. Recorded timings and remaining production/development divergence risk in
    `TASKS.md`.
+
+## Slice-5 Implementation Plan
+
+Slice-5 is the next candidate and is pending approval.
+
+1. Compare type-check coverage.
+   - `tsconfig.json` covers the full source graph for production build
+     checking.
+   - `tsconfig.test.json` covers tests plus test-dependent
+     application/domain/extension boundaries, but not every UI or extension
+     source file.
+2. Update webpack checker ownership.
+   - Keep `ts-loader` in transpile-only mode.
+   - Keep `ForkTsCheckerWebpackPlugin` enabled for production builds.
+   - Disable `ForkTsCheckerWebpackPlugin` for development-mode webpack builds.
+   - Keep `test:compile` as the single checker during test preparation.
+3. Validate coverage boundaries.
+   - Confirm `pnpm run test:prepare` still fails for a temporary type error in
+     a file included by `tsconfig.test.json`.
+   - Confirm `pnpm run build` still fails for a temporary type error in a
+     source file outside `tsconfig.test.json`.
+4. Validate normal commands.
+   - `pnpm run development`
+   - `pnpm run test:prepare`
+   - `pnpm test`
+   - `pnpm run test:web`
+   - `pnpm run test:full`
+   - `pnpm run build`
+5. Record timings and remaining local-test coverage risk in `TASKS.md`.
 
 ## Measurement Plan
 

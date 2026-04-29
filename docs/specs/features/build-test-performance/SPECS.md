@@ -556,6 +556,30 @@ validation sequence.
 - Keep production build type-check responsibility explicit, either through
   webpack checker or a separate `typecheck` command.
 
+Slice-5 selected approach:
+
+- Keep `ForkTsCheckerWebpackPlugin` enabled for production webpack builds.
+- Disable `ForkTsCheckerWebpackPlugin` for development webpack builds used by
+  `pnpm run development`, `pnpm run test:prepare`, `pnpm test`,
+  `pnpm run test:web`, and `pnpm run test:full`.
+- Keep `test:compile` as the single TypeScript checker during test
+  preparation.
+- Treat `pnpm run build` as the full source graph type-check and production
+  bundling gate. This remains required for CI and before push.
+- Do not broaden `tsconfig.test.json` in Slice-5 because doing so would mix
+  test-output ownership and type-check coverage changes into the same slice.
+
+Coverage decision:
+
+- `tsconfig.json` remains the full source graph contract used by production
+  webpack checking.
+- `tsconfig.test.json` remains focused on test output and the test-dependent
+  application/domain/extension boundary.
+- A local `pnpm test` run may no longer catch unrelated UI-only or
+  extension-only type errors until `pnpm run build` runs. This is accepted only
+  because the repository validation contract already requires build for code
+  changes.
+
 ### Acceptance Criteria
 
 ```gherkin
@@ -574,12 +598,32 @@ Scenario: Production validation still catches type errors
 ### Compatibility / Risk
 
 Risk is a checker coverage gap between `tsconfig.json` and
-`tsconfig.test.json`. Implementation must compare included files.
+`tsconfig.test.json`. Slice-5 accepts that `test:compile` is narrower than
+`tsconfig.json`; the mitigation is preserving production webpack checking and
+keeping `pnpm run build` required in CI and local code-change validation.
 
 ### Validation Plan
 
 Measure type-check time and confirm injected temporary type errors fail the
 intended command during local investigation.
+
+Slice-5 validation commands:
+
+- `pnpm run development`
+- `pnpm run test:prepare`
+- `pnpm test`
+- `pnpm run test:web`
+- `pnpm run test:full`
+- `pnpm run build`
+- `pnpm run lint:md`
+- `pnpm run qlty`
+
+Temporary type-error checks:
+
+- Add a temporary type error in a file included by `tsconfig.test.json`; verify
+  `pnpm run test:prepare` fails, then revert the temporary edit.
+- Add a temporary type error in a UI-only file outside `tsconfig.test.json`;
+  verify `pnpm run build` fails, then revert the temporary edit.
 
 ### Rollback Strategy
 

@@ -9,22 +9,23 @@
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-04-29
-- Approved scope: User replied "実装を進めてください。" after the Slice-4
-  implementation approval request. Approved changes are limited to disabling
-  webpack minification in development mode, preserving production
-  minification, updating SDD tracking, and running validation. Bundle entry
-  points, output names, target selection, dependency versions, and
-  `engines.vscode` changes are out of scope.
+- Status: Pending
+- Approved at:
+- Approved scope:
 
-Current implementation gate: Slice-4 development build optimization.
+Current implementation gate: Slice-5 type-check responsibility.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 
 Prior approval:
 
+- Slice-4 was approved on 2026-04-29 when the user replied
+  "実装を進めてください。" after the Slice-4 implementation approval request.
+  Approved changes were limited to disabling webpack minification in
+  development mode, preserving production minification, updating SDD tracking,
+  and running validation. Bundle entry points, output names, target selection,
+  dependency versions, and `engines.vscode` changes were out of scope.
 - Slice-2 was approved on 2026-04-29 when the user replied "OK.proceed." after
   approving the manual ANTLR generation direction. Approved changes were
   limited to removing automatic `antlr4ts` execution from ordinary build/test
@@ -77,8 +78,55 @@ Prior approval:
 - [x] Slice-4 webpack optimization changes completed.
 - [x] Slice-4 development/production validation completed.
 - [x] Slice-4 timings recorded.
-- [ ] Draft slices 3, 5, 6, 7, and 8 promoted to detailed specs only when their
+- [x] Slice-5 selected as the next implementation candidate.
+- [x] Slice-5 impact investigation completed.
+- [x] Slice-5 SDD plan updated.
+- [ ] Human approval recorded for Slice-5 implementation.
+- [ ] Slice-5 implementation scope matches approved scope.
+- [ ] Slice-5 webpack checker ownership changes completed.
+- [ ] Slice-5 temporary type-error checks completed.
+- [ ] Slice-5 normal validation completed.
+- [ ] Slice-5 timings recorded.
+- [ ] Draft slices 3, 6, 7, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
+
+## Slice-5 Impact Investigation
+
+- Planned change:
+  remove duplicate TypeScript checking from development/test webpack
+  preparation by disabling `ForkTsCheckerWebpackPlugin` in development mode,
+  while keeping production build type checking.
+- Affected files:
+  `webpack.config.js`, `docs/specs/features/build-test-performance/*`, and
+  `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `createBasePlugins`, `createConfig`, the shared webpack plugin list,
+  `ForkTsCheckerWebpackPlugin`, and configs for editor, desktop extension, and
+  web extension bundles.
+- Affected commands:
+  `pnpm run development`, `pnpm run test:prepare`, `pnpm test`,
+  `pnpm run test:web`, `pnpm run test:full`, and `pnpm run build`.
+- Affected features:
+  development bundle preparation, desktop tests, web tests, and production
+  build validation.
+- Affected tests:
+  desktop extension tests, web extension tests, production build, temporary
+  type-error checks, markdown lint, and qlty.
+- Related docs:
+  `SPECS.md`, `PLANS.md`, this task file, and branch-level `docs/specs/plans.md`.
+- Coverage decision:
+  `tsconfig.test.json` is narrower than `tsconfig.json`; therefore local test
+  preparation remains a focused test-output checker, while `pnpm run build`
+  remains the full source graph type-check and production bundling gate.
+- Breaking-change risk:
+  medium. A local `pnpm test` run may no longer catch unrelated UI-only or
+  extension-only type errors until `pnpm run build` runs. CI and required local
+  validation mitigate this by keeping `pnpm run build`.
+- Alternatives:
+  keep `ForkTsCheckerWebpackPlugin` in all modes; add a separate `typecheck`
+  command before changing webpack checker behavior; broaden
+  `tsconfig.test.json`; defer type-check ownership and move to CI rebuild
+  reduction first.
 
 ## Slice-4 Impact Investigation
 

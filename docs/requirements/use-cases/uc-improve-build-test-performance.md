@@ -43,6 +43,8 @@ for a pull request.
 - Performance improvements must be split into small PR-sized slices.
 - Each slice must record a performance hypothesis before implementation and
   timing evidence after implementation.
+- Any slice that removes duplicate checking must keep an authoritative
+  type-check gate in local validation and CI.
 - Clean Architecture boundaries remain unchanged by build tooling work.
 
 ## Behavioral Scenarios (Gherkin)
@@ -62,6 +64,7 @@ Scenario: Production build remains authoritative
   When CI validation runs
   Then the production build is executed
   And production-only bundling failures are not hidden by development builds
+  And production type errors are not hidden by faster development preparation
 
 Scenario: Parser generation remains explicit and trustworthy
   Given grammar inputs are changed
