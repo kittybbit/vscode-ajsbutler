@@ -9,9 +9,15 @@
 
 ## Human Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
+- Status: Approved
+- Approved at: 2026-04-29
+- Approved scope: User replied "OK.Proceed." after the Slice-3
+  implementation approval request. Approved changes are limited to adding
+  explicit development webpack target filtering, focused desktop and web
+  preparation scripts, preserving default all-target `development`,
+  production `build`, CI production-artifact reuse, bundle entry points,
+  output names, output directories, dependency versions, and `engines.vscode`,
+  updating SDD tracking, and running validation.
 
 Current implementation gate: Slice-3 webpack target splitting.
 
@@ -114,12 +120,12 @@ Prior approval:
 - [x] Slice-3 selected as the next implementation candidate.
 - [x] Slice-3 impact investigation completed.
 - [x] Slice-3 SDD plan updated.
-- [ ] Human approval recorded for Slice-3 implementation.
-- [ ] Slice-3 implementation scope matches approved scope.
-- [ ] Slice-3 webpack target filtering completed.
-- [ ] Slice-3 focused preparation scripts completed.
-- [ ] Slice-3 focused desktop/web validation completed.
-- [ ] Slice-3 timings recorded.
+- [x] Human approval recorded for Slice-3 implementation.
+- [x] Slice-3 implementation scope matches approved scope.
+- [x] Slice-3 webpack target filtering completed.
+- [x] Slice-3 focused preparation scripts completed.
+- [x] Slice-3 focused desktop/web validation completed.
+- [x] Slice-3 timings recorded.
 - [ ] Draft slices 3, 6, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
 
@@ -155,6 +161,12 @@ Prior approval:
   even when TypeScript compilation succeeds. Keeping default `development`
   all-target behavior and validating desktop/web focused paths separately
   mitigates this.
+- Implementation finding:
+  web-focused builds exposed that the web extension bundle must resolve
+  package `browser` entries independently, rather than relying on shared
+  multi-config webpack cache state from the node extension build. Slice-3
+  therefore separates filesystem cache names by config and makes web resolver
+  browser conditions explicit.
 - Alternatives:
   keep all-target development builds; split only package scripts without
   webpack target filtering; change `test:full` to compose focused preparation
@@ -357,6 +369,34 @@ Prior approval:
 - 2026-04-29 Slice-7 compatibility `pnpm run test:full`: passed outside the
   sandbox, 13.27s real time. This confirms the local prepare-once command
   still runs development bundling before desktop and web test runners.
+- 2026-04-29 Slice-3 focused desktop `pnpm run test:prepare:desktop`: passed,
+  6.82s real time from a clean `out`. Output contained `extension.js`,
+  `tableViewer.js`, and `flowViewer.js`; `web.js` was not emitted.
+- 2026-04-29 Slice-3 focused desktop runner `pnpm run test:desktop:run`:
+  passed, 3.02s real time.
+- 2026-04-29 Slice-3 focused web `pnpm run test:prepare:web`: passed, 9.34s
+  real time from a clean `out`. Output contained `web.js`, `tableViewer.js`,
+  and `flowViewer.js`; `extension.js` was not emitted.
+- 2026-04-29 Slice-3 focused web runner `pnpm run test:web:run`: passed
+  outside the sandbox, 4.58s real time.
+- 2026-04-29 Slice-3 compatibility `pnpm test`: passed, 7.03s real time from
+  a clean `out`, using focused desktop preparation via `pretest`.
+- 2026-04-29 Slice-3 compatibility `pnpm run test:web`: passed outside the
+  sandbox, 9.40s real time from a clean `out`, using focused web preparation
+  via `pretest:web`.
+- 2026-04-29 Slice-3 compatibility `pnpm run test:full`: passed outside the
+  sandbox, 12.76s real time. The command still used all-target
+  `test:prepare`.
+- 2026-04-29 Slice-3 web resolver check `pnpm run development:web`: passed,
+  6.14s real time after preserving webpack default resolver conditions with
+  browser preference.
+- 2026-04-29 Slice-3 production `pnpm run build`: passed, 21.22s real time,
+  with existing webpack asset-size warnings. Production output still emitted
+  `extension.js`, `web.js`, `tableViewer.js`, and `flowViewer.js`.
+- 2026-04-29 Slice-3 production-artifact runner sequence:
+  `pnpm run test:compile` passed in 3.91s, `pnpm run test:desktop:run`
+  passed in 2.46s, and `pnpm run test:web:run` passed outside the sandbox in
+  3.46s.
 
 ## Validation
 
@@ -376,6 +416,12 @@ Prior approval:
       `pnpm run test:desktop:run`, and `pnpm run test:web:run`.
 - [x] Slice-7: rerun `pnpm run test:full` to verify the local command remains
       unchanged.
+- [x] Slice-3: run focused desktop preparation and desktop runner.
+- [x] Slice-3: run focused web preparation and web runner.
+- [x] Slice-3: run compatibility `pnpm test`.
+- [x] Slice-3: run compatibility `pnpm run test:web`.
+- [x] Slice-3: run compatibility `pnpm run test:full`.
+- [x] Slice-3: run production build and production-artifact runner sequence.
 
 ## Notes
 
@@ -384,6 +430,7 @@ Prior approval:
 - Slice-4 is implemented after approval.
 - Slice-5 is implemented after approval.
 - Slice-7 is implemented after approval.
+- Slice-3 is implemented after approval.
 - `pnpm run qlty` initially failed in the sandbox because qlty could not create
   its log file; the same command passed outside the sandbox.
 - `pnpm run build` completed with existing webpack asset-size warnings.
@@ -392,3 +439,6 @@ Prior approval:
 - CI now runs tests against the production build artifacts, while local
   `pnpm run test:full` intentionally keeps the development-build preparation
   path for contributor compatibility.
+- `pnpm test` and `pnpm run test:web` now use focused preparation lifecycle
+  hooks, while raw runner commands and `test:full` keep their previous
+  responsibilities.

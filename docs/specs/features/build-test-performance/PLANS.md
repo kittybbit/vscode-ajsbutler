@@ -202,9 +202,10 @@ test runners instead of running `test:full` after production build.
    - `pnpm run test:full`
 5. Recorded local timing evidence and human-reported CI pass confirmation.
 
-## Slice-3 Implementation Plan
+## Completed Slice-3 Implementation
 
-Slice-3 is the next candidate and is pending approval.
+Slice-3 added focused webpack target selection for desktop and web validation
+while keeping default development and production builds all-target.
 
 1. Confirm bundle ownership for each runner.
    - Desktop runner needs the desktop extension bundle, editor bundles, and
@@ -238,6 +239,18 @@ Slice-3 is the next candidate and is pending approval.
    - `pnpm run build`
    - `pnpm run lint:md`
    - `pnpm run qlty`
+
+Implementation notes:
+
+- `development:desktop` emits editor bundles plus `extension.js`.
+- `development:web` emits editor bundles plus `web.js`.
+- `pretest` and `pretest:web` use focused preparation for compatibility
+  commands from a clean checkout.
+- `test:full` remains on the all-target `test:prepare` path.
+- Webpack filesystem cache names are separated per config so target-specific
+  builds do not depend on shared multi-config cache state.
+- Web extension bundling explicitly prefers browser package resolution for the
+  webworker target.
 
 ## Measurement Plan
 

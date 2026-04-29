@@ -28,6 +28,13 @@ const EXTENSION_DEFINE_VALUES = (development) => ({
     DEVELOPMENT: JSON.stringify(development),
     CONNECTION_STRING: JSON.stringify(CONNECTION_STRING),
 });
+const TARGET_CONFIGS = {
+    all: ["editor", "node", "web"],
+    desktop: ["editor", "node"],
+    web: ["editor", "web"],
+    editor: ["editor"],
+    node: ["node"],
+};
 
 const getBuildFlags = (argv) => {
     const mode = argv.mode ?? "development";
@@ -114,6 +121,8 @@ const createConfig = ({
     reportFilename,
     extraPlugins = [],
     fallback,
+    resolveOptions = {},
+    cacheName,
 }) => ({
     mode,
     target,
@@ -128,14 +137,19 @@ const createConfig = ({
     },
     resolve: {
         extensions: EXTENSIONS,
+        ...resolveOptions,
         alias: {
             ...BASE_ALIAS,
+            ...(resolveOptions.alias ?? {}),
             ...aliases,
         },
         ...(fallback ? { fallback } : {}),
     },
     externals,
-    cache: BASE_CACHE,
+    cache: {
+        ...BASE_CACHE,
+        ...(cacheName ? { name: cacheName } : {}),
+    },
     stats: BASE_STATS,
     module: {
         rules: [createTsRule(tsCompilerOptions), ...extraRules],
@@ -161,6 +175,8 @@ const createExtensionConfig = ({
     fallback,
     reportFilename,
     analyzer,
+    resolveOptions,
+    cacheName,
 }) => createConfig({
     mode,
     production,
@@ -175,6 +191,8 @@ const createExtensionConfig = ({
     reportFilename,
     extraPlugins,
     fallback,
+    resolveOptions,
+    cacheName,
 });
 
 const editorConfig = (env, argv) => {
@@ -206,6 +224,7 @@ const editorConfig = (env, argv) => {
         },
         analyzer: !!env.analyzer,
         reportFilename: "../report/editor_report.html",
+        cacheName: `editor-${mode}`,
     });
 };
 
@@ -228,6 +247,7 @@ const nodeConfig = (env, argv) => {
         },
         analyzer: !!env.analyzer,
         reportFilename: "../report/extension_report.html",
+        cacheName: `node-${mode}`,
     });
 };
 
@@ -257,9 +277,36 @@ const webConfig = (env, argv) => {
             util: require.resolve("util"),
             path: require.resolve("path-browserify"),
         },
+        resolveOptions: {
+            conditionNames: ["browser", "..."],
+            mainFields: ["browser", "module", "main"],
+        },
+        cacheName: `web-${mode}`,
     });
 };
 
+const getSelectedTarget = (env = {}) => env.target ?? "all";
+
+const getSelectedConfigs = (env = {}, argv) => {
+    const selectedTarget = getSelectedTarget(env);
+    const selectedConfigNames = TARGET_CONFIGS[selectedTarget];
+
+    if (!selectedConfigNames) {
+        throw new Error(
+            `Unknown webpack target "${selectedTarget}". ` +
+            `Expected one of: ${Object.keys(TARGET_CONFIGS).join(", ")}.`,
+        );
+    }
+
+    const configs = {
+        editor: editorConfig,
+        node: nodeConfig,
+        web: webConfig,
+    };
+
+    return selectedConfigNames.map((configName) => configs[configName](env, argv));
+};
+
 module.exports = (env, argv) => {
-    return [editorConfig(env, argv), nodeConfig(env, argv), webConfig(env, argv)];
+    return getSelectedConfigs(env, argv);
 };
