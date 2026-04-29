@@ -252,9 +252,10 @@ Implementation notes:
 - Web extension bundling explicitly prefers browser package resolution for the
   webworker target.
 
-## Slice-8 Implementation Plan
+## Completed Slice-8 Implementation
 
-Slice-8 is implemented locally and pending CI review.
+Slice-8 added a Playwright browser cache to GitHub Actions and was confirmed by
+CI cache-miss and cache-hit runs.
 
 1. Keep existing dependency cache ownership.
    - `actions/setup-node` already caches pnpm dependencies.
@@ -273,7 +274,7 @@ Slice-8 is implemented locally and pending CI review.
    - `pnpm run lint:md`
    - `pnpm run qlty`
    - CI verify workflow cache-miss correctness after push
-   - human-reviewed CI cache-hit timing on a later run when available
+   - human-reviewed CI cache-hit evidence on rerun
 
 ## Measurement Plan
 

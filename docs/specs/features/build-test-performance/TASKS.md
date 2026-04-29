@@ -142,8 +142,8 @@ Prior approval:
 - [x] Human approval recorded for Slice-8 implementation.
 - [x] Slice-8 implementation scope matches approved scope.
 - [x] Slice-8 Playwright browser cache workflow change completed.
-- [ ] Slice-8 cache-miss validation completed.
-- [ ] Slice-8 CI timing evidence recorded.
+- [x] Slice-8 cache-miss validation completed.
+- [x] Slice-8 CI timing evidence recorded.
 - [ ] Draft slices 3, 6, and 8 promoted to detailed specs only when their
       implementation slice becomes active.
 
@@ -455,6 +455,14 @@ Prior approval:
   `pnpm run test:compile` passed in 3.91s, `pnpm run test:desktop:run`
   passed in 2.46s, and `pnpm run test:web:run` passed outside the sandbox in
   3.46s.
+- 2026-04-29 Slice-8 CI cache-miss validation: verify workflow completed
+  successfully after adding the Playwright browser cache, per human
+  confirmation.
+- 2026-04-29 Slice-8 CI cache-hit validation: rerun restored cache key
+  `Linux-playwright-1.59.1-046997f001e1eb1345a812d0a09093540082a162168567519eb01ac93c6079df`
+  successfully. GitHub Actions reported a cache hit, restored approximately
+  101 MB from `~/.cache/ms-playwright`, and completed the workflow
+  successfully per human confirmation.
 
 ## Validation
 
@@ -480,6 +488,10 @@ Prior approval:
 - [x] Slice-3: run compatibility `pnpm run test:web`.
 - [x] Slice-3: run compatibility `pnpm run test:full`.
 - [x] Slice-3: run production build and production-artifact runner sequence.
+- [x] Slice-8: run CI verify workflow after push and confirm cache-miss
+      correctness.
+- [x] Slice-8: rerun CI verify workflow and confirm Playwright browser cache
+      hit.
 
 ## Notes
 
@@ -489,6 +501,7 @@ Prior approval:
 - Slice-5 is implemented after approval.
 - Slice-7 is implemented after approval.
 - Slice-3 is implemented after approval.
+- Slice-8 is implemented after approval.
 - `pnpm run qlty` initially failed in the sandbox because qlty could not create
   its log file; the same command passed outside the sandbox.
 - `pnpm run build` completed with existing webpack asset-size warnings.
@@ -500,3 +513,5 @@ Prior approval:
 - `pnpm test` and `pnpm run test:web` now use focused preparation lifecycle
   hooks, while raw runner commands and `test:full` keep their previous
   responsibilities.
+- GitHub Actions confirmed the Playwright browser cache restores on rerun while
+  preserving the existing browser install step.
