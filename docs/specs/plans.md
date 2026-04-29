@@ -48,16 +48,16 @@ rules in `docs/specs/README.md`, not in this file.
   validation, push, and CI review per slice.
 - Status: Slice-1 is implemented and pushed in draft PR #222. CI completed
   successfully per human confirmation. Slice-2 manual ANTLR generation is
-  selected and pending implementation approval.
+  implemented locally and pending push/CI review.
 - Scope: keep changes focused on validation performance command ownership,
   ANTLR generation freshness, webpack development speed, type-check ownership,
   CI rebuild reduction, and cache behavior as described by the feature docs.
 - Out of scope: product behavior changes, parser grammar changes, generated
   parser semantic changes, dependency modernization unrelated to validation
   performance, and raising `engines.vscode`.
-- Impact summary: Slice-2 will affect `package.json` scripts and contributor
-  documentation; it must preserve `src/antlr/*.g4`, `src/generate/parser`,
-  parser imports, desktop tests, web tests, and production build behavior.
+- Impact summary: Slice-2 affects `package.json` scripts and contributor
+  documentation; it preserves `src/antlr/*.g4`, `src/generate/parser`, parser
+  imports, desktop tests, web tests, and production build behavior.
 - Risks and assumptions: performance reductions are hypotheses until measured.
   Slice-2 stale-output risk is controlled by explicit contributor
   responsibility and parser-dependent validation rather than hidden build

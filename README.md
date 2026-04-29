@@ -96,6 +96,16 @@ pnpm run test:web
 pnpm run build
 ```
 
+ANTLR parser generation is explicit. Normal build and test commands consume
+the committed parser artifacts in `src/generate/parser`. When changing
+`src/antlr/*.g4`, ANTLR command options, or the generator version, run:
+
+```bash
+pnpm run antlr4ts
+```
+
+Then commit any generated parser artifact changes with the grammar change.
+
 The `sample/` directory contains reusable JP1/AJS definition files for parser,
 normalization, unit-list, and flow-graph regression tests. Prefer those shared
 fixtures over ad hoc large inline definitions when adding broader coverage.
@@ -105,8 +115,8 @@ launch configuration `Launch Extension(web)` in `.vscode/launch.json`.
 
 `pnpm run test:web` runs the extension test suite against VS Code for the Web
 in headless Chromium.
-`pnpm run test:full` prepares generated parser, development bundles, and
-compiled tests once before running both desktop and web extension tests.
+`pnpm run test:full` prepares development bundles and compiled tests once
+before running both desktop and web extension tests.
 GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`, and
 `pnpm run test:full` on pull requests.
 

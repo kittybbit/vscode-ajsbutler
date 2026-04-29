@@ -9,9 +9,15 @@
 
 ## Human Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
+- Status: Approved
+- Approved at: 2026-04-29
+- Approved scope: User replied "OK.proceed." after approving the manual ANTLR
+  generation direction. Approved changes are limited to removing automatic
+  `antlr4ts` execution from ordinary build/test preparation, preserving
+  explicit ANTLR generation commands, updating contributor documentation and
+  SDD tracking, and running validation. Parser grammar changes, generated
+  parser semantic changes, dependency changes, and `engines.vscode` changes
+  are out of scope.
 
 Current implementation gate: Slice-2 manual ANTLR generation.
 
@@ -51,12 +57,12 @@ Prior approval:
 - [x] Slice-2 selected as the next implementation candidate.
 - [x] Slice-2 impact investigation completed.
 - [x] Slice-2 SDD plan updated.
-- [ ] Human approval recorded for Slice-2 implementation.
-- [ ] Slice-2 implementation scope matches approved scope.
-- [ ] Slice-2 package-script changes completed.
-- [ ] Slice-2 documentation changes completed.
-- [ ] Slice-2 generated parser safety checks completed.
-- [ ] Slice-2 timings recorded.
+- [x] Human approval recorded for Slice-2 implementation.
+- [x] Slice-2 implementation scope matches approved scope.
+- [x] Slice-2 package-script changes completed.
+- [x] Slice-2 documentation changes completed.
+- [x] Slice-2 generated parser safety checks completed.
+- [x] Slice-2 timings recorded.
 - [ ] Draft slices 3 through 8 promoted to detailed specs only when their
       implementation slice becomes active.
 
@@ -110,6 +116,18 @@ Prior approval:
   the sandbox, 16.69s real time.
 - Local observed reduction for running both suites together:
   approximately 31.85s baseline combined time to 22.03s with `test:full`.
+- 2026-04-29 Slice-2 post-change `pnpm run test:prepare`: passed, 14.10s
+  real time. Logs show `development` and `test:compile` only; ANTLR generation
+  was not invoked.
+- 2026-04-29 Slice-2 explicit `pnpm run antlr4ts`: passed and produced no
+  `src/generate/parser` diff.
+- 2026-04-29 Slice-2 post-change `pnpm run test:full`: passed outside the
+  sandbox, 18.60s real time.
+- 2026-04-29 Slice-2 post-change `pnpm test`: passed, 24.87s real time.
+- 2026-04-29 Slice-2 post-change `pnpm run test:web`: passed outside the
+  sandbox, 15.11s real time.
+- 2026-04-29 Slice-2 post-change `pnpm run build`: passed, 20.39s real time,
+  with existing webpack asset-size warnings.
 
 ## Validation
 
@@ -119,10 +137,13 @@ Prior approval:
 - [x] Run `pnpm test`.
 - [x] Run `pnpm run test:web`.
 - [x] Run `pnpm run build`.
+- [x] Slice-2: run `pnpm run test:prepare`.
+- [x] Slice-2: run `pnpm run antlr4ts` and verify no generated parser diff.
 
 ## Notes
 
 - Slice-1 is implemented after approval.
+- Slice-2 is implemented after approval.
 - `pnpm run qlty` initially failed in the sandbox because qlty could not create
   its log file; the same command passed outside the sandbox.
 - `pnpm run build` completed with existing webpack asset-size warnings.
