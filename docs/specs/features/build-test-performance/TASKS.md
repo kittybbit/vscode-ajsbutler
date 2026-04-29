@@ -144,8 +144,44 @@ Prior approval:
 - [x] Slice-8 Playwright browser cache workflow change completed.
 - [x] Slice-8 cache-miss validation completed.
 - [x] Slice-8 CI timing evidence recorded.
-- [ ] Draft slices 3, 6, and 8 promoted to detailed specs only when their
-      implementation slice becomes active.
+- [x] Slice-6 investigated and deferred from this feature branch.
+- [x] Draft slices 3, 6, and 8 resolved as implemented or deferred.
+
+## Slice-6 Deferral Investigation
+
+- Planned change:
+  separate compiled test output from runtime bundle output.
+- Affected files if implemented:
+  `tsconfig.test.json`, `package.json`, `src/test/runTest.ts`,
+  `src/test/runWebTest.ts`, `docs/specs/features/build-test-performance/*`,
+  and `docs/specs/plans.md`.
+- Affected commands if implemented:
+  `pnpm run test:compile`, `pnpm test`, `pnpm run test:web`,
+  `pnpm run test:full`, CI `pnpm run test:compile`,
+  `pnpm run test:desktop:run`, and `pnpm run test:web:run`.
+- Affected features:
+  desktop test launching, web test launching, production-artifact CI test
+  reuse, and extension development path resolution.
+- Current ownership finding:
+  `package.json` runtime entry points remain `./out/extension.js` and
+  `./out/web.js`; webview bundle constants also reference `./out/*.js`.
+  `tsconfig.test.json` currently emits compiled test runners and selected
+  test-dependent support modules into `out`, and runner scripts are invoked
+  from `out/test`.
+- Risk:
+  medium to high. Moving test output to `out-test` requires changing runner
+  script paths and proving both VS Code desktop and web test launchers resolve
+  extension development paths and test suites correctly from the new compiled
+  location.
+- Benefit:
+  low direct speedup in this branch. The main value is output ownership clarity
+  for a future cleanup if packaging, caching, or stale output issues become a
+  concrete blocker.
+- Decision:
+  defer Slice-6 from this feature branch. The implemented slices already cover
+  duplicated preparation, manual parser generation, development webpack speed,
+  checker ownership, CI rebuild reduction, focused target preparation, and
+  Playwright browser caching.
 
 ## Slice-8 Impact Investigation
 
@@ -463,6 +499,9 @@ Prior approval:
   successfully. GitHub Actions reported a cache hit, restored approximately
   101 MB from `~/.cache/ms-playwright`, and completed the workflow
   successfully per human confirmation.
+- 2026-04-29 qlty line-length fix validation: verify workflow completed
+  successfully after folding the Playwright cache key in `verify.yml`, per
+  human confirmation.
 
 ## Validation
 
@@ -492,6 +531,7 @@ Prior approval:
       correctness.
 - [x] Slice-8: rerun CI verify workflow and confirm Playwright browser cache
       hit.
+- [x] Slice-8: rerun CI verify workflow after qlty line-length fix.
 
 ## Notes
 
@@ -515,3 +555,4 @@ Prior approval:
   responsibilities.
 - GitHub Actions confirmed the Playwright browser cache restores on rerun while
   preserving the existing browser install step.
+- Slice-6 remains a future cleanup candidate, not part of this feature branch.

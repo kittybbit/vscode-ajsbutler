@@ -276,6 +276,27 @@ CI cache-miss and cache-hit runs.
    - CI verify workflow cache-miss correctness after push
    - human-reviewed CI cache-hit evidence on rerun
 
+## Deferred Slice-6 Investigation
+
+Slice-6 is deferred from this feature branch after investigation.
+
+1. Current ownership:
+   - Runtime bundles are emitted to `out`.
+   - `tsconfig.test.json` also emits compiled test runners and test-dependent
+     support modules to `out`.
+   - Package runtime entry points and webview bundle constants still reference
+     `out`.
+2. Risk:
+   - Moving test compilation to `out-test` requires changing runner script
+     paths and validating both desktop and web launchers from the new compiled
+     location.
+   - The direct speed improvement is low; the benefit is mostly output
+     ownership clarity for a future test-runner cleanup.
+3. Decision:
+   - Do not implement Slice-6 in this build/test performance branch.
+   - Keep it as a future cleanup candidate only if output ownership becomes a
+     concrete blocker for packaging, caching, or test reliability.
+
 ## Measurement Plan
 
 Each implementation slice must record:

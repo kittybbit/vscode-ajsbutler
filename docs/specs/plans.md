@@ -31,9 +31,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Continue build/test performance after Slice-8 CI feedback is reviewed,
-   selecting any remaining follow-up only after updating the feature SDD and
-   recording approval.
+1. Prepare build/test performance for PR review or merge after final human
+   confirmation.
 2. Continue category-level parameter parsing alignment by selecting the next
    focused behavior contract and recording approval before implementation.
 3. Keep WebAPI import beta feedback and real-environment smoke evidence
@@ -51,7 +50,9 @@ rules in `docs/specs/README.md`, not in this file.
   implemented in draft PR #222. CI completed successfully through Slice-7 per
   human confirmation, and Slice-3 CI also completed successfully per human
   confirmation. Slice-8 Playwright browser cache completed successfully with
-  cache-miss and cache-hit CI evidence per human confirmation.
+  cache-miss and cache-hit CI evidence per human confirmation. Slice-6 was
+  investigated and deferred from this branch because it is primarily output
+  ownership cleanup with low direct speedup and higher test-launcher risk.
 - Scope: keep changes focused on validation performance command ownership,
   ANTLR generation freshness, webpack development speed, type-check ownership,
   CI rebuild reduction, and cache behavior as described by the feature docs.
@@ -78,7 +79,7 @@ rules in `docs/specs/README.md`, not in this file.
   optimization; Slice-5, type-check responsibility; Slice-7, CI rebuild
   reduction; Slice-8, Playwright browser cache.
 - Next implementation slice:
-  none selected.
+  none; Slice-6 is deferred as future cleanup.
 - Roadmap:
   Phase 1 covers Slice-1, Slice-2, and Slice-4; Phase 2 covers Slice-5 and
   Slice-7; Phase 3 covers Slice-3, Slice-6, and Slice-8.
