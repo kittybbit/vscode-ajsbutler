@@ -6,11 +6,23 @@
 - Refactor in small vertical slices.
 - Prefer one use case per extraction.
 - Keep parser internals away from UI-facing components.
-- Keep feature docs active and concise.
+- Keep active feature docs concise; remove completed feature-local folders
+  after durable requirements are represented in use cases, architecture, or
+  roadmap.
 
 ## Current Roadmap
 
-1. Re-base parameter interpretation on JP1/Automatic Job Management System 3
+1. Improve build/test validation performance through SDD-defined slices.
+
+   - Start with Slice-1, separating test execution from build preparation.
+   - Keep Slices 2 through 8 draft-level until Slice-1 timing evidence is
+     recorded.
+   - Preserve desktop tests, web tests, production build validation, generated
+     parser correctness, and VS Code `^1.75.0` compatibility.
+   - Phase 1 order is Slice-1, Slice-2, then Slice-4; Phase 2 is Slice-5 then
+     Slice-7; Phase 3 is Slice-3, Slice-6, then Slice-8.
+
+2. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
 
    - Start from the documented audit of current shared parameter-semantics
@@ -33,7 +45,7 @@
    - Keep behavior-preserving slices separate from behavior-changing manual
      alignment slices.
 
-2. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
+3. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
 
    - Keep transport, authentication, and endpoint details in infrastructure.
    - Keep generated OpenAPI mocks and stubs reproducible from repository-local
@@ -43,16 +55,15 @@
    - Offer the feature as beta until smoke verification against a real JP1/AJS3
      environment and enough user feedback are recorded.
 
-3. Strengthen normalized-model convergence.
+4. Maintain normalized-model convergence.
 
-   - Reduce remaining raw `Unit` and wrapper-oriented dependencies in
-     application-facing paths where a stable `AjsDocument` / `AjsUnit` contract
-     already exists.
+   - Prefer stable `AjsDocument` / `AjsUnit` contracts for application-facing
+     behavior.
    - Keep unit-local JP1/AJS behavior on wrappers when it is not reused across
      consumers.
    - Promote only cross-consumer semantics into normalized helpers.
 
-4. Introduce stricter parser/infrastructure boundaries.
+5. Introduce stricter parser/infrastructure boundaries.
 
    - Define an application-facing parser or document-loading port.
    - Move concrete parser orchestration behind an adapter boundary when
@@ -61,7 +72,7 @@
      application use cases.
    - Preserve current desktop and web extension behavior while migrating.
 
-5. Use Qlty findings as architectural feedback.
+6. Use Qlty findings as architectural feedback.
 
    - Treat recurring duplication, complexity, and nested-control-flow findings
      as prioritized refactoring candidates.
@@ -96,3 +107,5 @@
   when priorities or repository sequencing change.
 - JP1/AJS manual-dependent work names the target product version and source
   document.
+- Completed feature folders are removed when they no longer carry active
+  requirements, durable boundary decisions, or useful follow-up.

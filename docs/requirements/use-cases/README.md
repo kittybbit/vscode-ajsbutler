@@ -6,13 +6,30 @@ Use this directory when the behavior being described is a stable product or
 application use case that may survive refactors of modules, adapters, or file
 layout.
 
-Examples:
+Use cases are grouped by requirement area:
+
+Core definition interpretation:
+
+- normalize AJS document
+- interpret JP1 parameters
+- generate AJS commands
+- import AJS definition via WebAPI
+
+Viewer and export behavior:
 
 - build unit list
+- build unit list view
 - build flow graph
-- normalize AJS document
+- show unit definition
 - export unit list CSV
 - provide editor feedback
+- navigate between unit list and flow graph
+
+Cross-cutting operations:
+
+- record telemetry
+- improve build and test performance
+- search domain unification
 
 Do not use this directory as a task log or implementation notebook.
 That belongs in `docs/specs/`.

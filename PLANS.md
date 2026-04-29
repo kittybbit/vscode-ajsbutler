@@ -2,6 +2,9 @@
 
 The active SDD plan index lives in `docs/specs/plans.md`.
 
+Current active planning topic:
+`docs/specs/features/build-test-performance/PLANS.md`.
+
 Use the documents as follows:
 
 - `docs/specs/plans.md`: branch status, current task, workflow rules, and
