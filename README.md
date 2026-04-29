@@ -106,6 +106,15 @@ pnpm run antlr4ts
 
 Then commit any generated parser artifact changes with the grammar change.
 
+Desktop and web test commands are compatible from a clean checkout:
+
+- `pnpm test` prepares the desktop extension and editor bundles, compiles
+  tests, then runs the desktop extension tests.
+- `pnpm run test:web` prepares the web extension and editor bundles, compiles
+  tests, then runs the web extension smoke tests.
+- `pnpm run test:full` prepares all development bundles and compiled tests
+  once, then runs both desktop and web test runners.
+
 The `sample/` directory contains reusable JP1/AJS definition files for parser,
 normalization, unit-list, and flow-graph regression tests. Prefer those shared
 fixtures over ad hoc large inline definitions when adding broader coverage.
@@ -117,8 +126,11 @@ launch configuration `Launch Extension(web)` in `.vscode/launch.json`.
 in headless Chromium.
 `pnpm run test:full` prepares development bundles and compiled tests once
 before running both desktop and web extension tests.
-GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`, and
-`pnpm run test:full` on pull requests.
+GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`,
+`pnpm run test:compile`, `pnpm run test:desktop:run`, and
+`pnpm run test:web:run` on pull requests. The workflow caches Playwright
+browser downloads while still running the Playwright install command, so cache
+misses remain valid.
 
 ## For AI Agents
 
