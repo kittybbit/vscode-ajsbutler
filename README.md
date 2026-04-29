@@ -90,6 +90,7 @@ After switching, you can run:
 
 ```bash
 pnpm run qlty
+pnpm run test:full
 pnpm test
 pnpm run test:web
 pnpm run build
@@ -104,8 +105,10 @@ launch configuration `Launch Extension(web)` in `.vscode/launch.json`.
 
 `pnpm run test:web` runs the extension test suite against VS Code for the Web
 in headless Chromium.
-GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`, `pnpm test`, and
-`pnpm run test:web` on pushes and pull requests.
+`pnpm run test:full` prepares generated parser, development bundles, and
+compiled tests once before running both desktop and web extension tests.
+GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`, and
+`pnpm run test:full` on pull requests.
 
 ## For AI Agents
 

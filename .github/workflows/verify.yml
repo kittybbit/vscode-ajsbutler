@@ -93,8 +93,5 @@ jobs:
       - name: Production build
         run: pnpm run build
 
-      - name: Desktop extension tests
-        run: pnpm test
-
-      - name: Web extension tests
-        run: pnpm run test:web
+      - name: Desktop and web extension tests
+        run: pnpm run test:full
