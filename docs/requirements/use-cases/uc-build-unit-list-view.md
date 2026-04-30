@@ -62,6 +62,12 @@ Scenario: JP1 event sending job arrival-check defaults are projected
   When table row view models are built
   Then omitted group 14 arrival-check values display their JP1/AJS defaults
   And explicit group 14 arrival-check values remain visible
+
+Scenario: File monitoring job defaults are projected
+  Given a normalized JP1/AJS document with a file monitoring job
+  When table row view models are built
+  Then omitted group 13 file monitoring values display their JP1/AJS defaults
+  And explicit group 13 file monitoring values remain visible
 ```
 
 ## Acceptance Notes

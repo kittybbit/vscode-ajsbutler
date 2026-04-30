@@ -18,8 +18,8 @@ rules in `docs/specs/README.md`, not in this file.
   parsing against the official format before claiming the category aligned. A
   feature-local parameter coverage matrix now tracks the investigated
   categories without claiming repository-wide coverage. Schedule-rule
-  `wc` / `wt` effective-value pairing is aligned in the domain boundary while
-  unit-list projection remains raw.
+  `wc` / `wt` effective-value pairing is aligned in the domain boundary and
+  unit-list projection.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
@@ -31,7 +31,7 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Prepare JP1 event sending job unit-list group 14 projection as the next
+1. Prepare file monitoring job unit-list group 13 projection as the next
    focused parameter-alignment behavior contract, then record approval before
    implementation.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
@@ -41,31 +41,30 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/event-send-group14-projection`.
+- Branch: `codex/file-monitoring-group13-projection`.
 - Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
-  focused unit-list projection slice for JP1 event sending job group 14
-  arrival-check defaults.
-- Status: schedule-rule `wc` / `wt` domain pairing and group 10 projection are
-  delivered. Unit-list group 14 now consumes the existing JP1 event sending job
-  arrival-check defaults after approval.
-- Scope: make group 14 JP1 event sending job arrival-check columns display
-  existing domain defaults for omitted `evssv`, `evsrt`, `evspl`, and
-  `evsrc` values.
+  focused unit-list projection slice for file monitoring job group 13
+  defaults.
+- Status: unit-list group 14 JP1 event sending job projection is merged in
+  PR #224. The current slice is approved for implementation.
+- Scope: make group 13 file monitoring job columns display existing domain
+  defaults for omitted `flwc`, `flwi`, `flco`, and `ets` values.
 - Out of scope: parser grammar changes, command generation, diagnostics,
-  generated artifacts, dependency changes, `engines.vscode`, JP1 event
-  destination host requiredness, byte-length validation, numeric range
-  validation, and broader raw projection policy changes.
+  generated artifacts, dependency changes, `engines.vscode`, file name
+  byte-length validation, wildcard validation, `flwc` invalid-combination
+  diagnostics, numeric range validation, and broader raw projection policy
+  changes.
 - Impact summary: the candidate affects
   `src/application/unit-list/buildUnitListRemainingGroups.ts`,
   `src/application/unit-list/buildUnitListView.ts` DTO fields only if helper
-  typing requires it, focused unit-list regression tests, and the JP1 event
-  sending job SDD documents. Existing domain default behavior in
-  `ParamFactory.evssv`, `ParamFactory.evsrt`, `ParamFactory.evspl`, and
-  `ParamFactory.evsrc` should be reused rather than changed.
+  typing requires it, focused unit-list regression tests, and the file
+  monitoring job SDD documents. Existing domain default behavior in
+  `ParamFactory.flwc`, `ParamFactory.flwi`, `ParamFactory.flco`, and
+  `ParamFactory.ets` should be reused rather than changed.
 - Risks and assumptions: behavior changes are user-visible in the table viewer
-  because omitted group 14 arrival-check fields would display defaults instead
-  of empty cells. Raw parser output and normalized parameter storage remain
-  preserved.
+  because omitted group 13 file monitoring fields would display defaults
+  instead of empty cells. Raw parser output and normalized parameter storage
+  remain preserved.
 
 ## Build/Test Performance SDD
 
@@ -94,7 +93,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: JP1 event sending job unit-list group 14 default-aware projection.
+  slice: file monitoring job unit-list group 13 default-aware projection.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -120,6 +119,17 @@ Current branch checks:
 - 2026-04-29: `npm run build` completed with existing webpack asset-size
   warnings
 - 2026-04-29: `pnpm run lint:md`
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
+- 2026-05-01: `pnpm run test:compile`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm test`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and shutdown-time
+  `ECONNRESET` / premature-close noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run test:compile`
 - 2026-04-29: `pnpm run qlty` required an escalated rerun after a sandboxed

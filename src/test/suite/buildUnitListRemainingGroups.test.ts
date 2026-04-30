@@ -68,6 +68,30 @@ unit=root,,jp1admin,;
 }
 `;
 
+const fileMonitoringJobDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=file-defaults,,jp1admin,;
+  {
+    ty=flwj;
+  }
+  unit=file-explicit,,jp1admin,;
+  {
+    ty=rflwj;
+    flwf="watch.txt";
+    flwc=c:d:s;
+    flco=y;
+    flwi=30;
+    ets=wr;
+  }
+  unit=regular-job,,jp1admin,;
+  {
+    ty=j;
+  }
+}
+`;
+
 suite("Build Unit List Remaining Groups", () => {
   test("projects all remaining group fields from unit parameters", () => {
     const result = parseAjs(definition);
@@ -162,5 +186,45 @@ suite("Build Unit List Remaining Groups", () => {
     assert.strictEqual(regularView.group14.actionStartType, undefined);
     assert.strictEqual(regularView.group14.actionInterval, undefined);
     assert.strictEqual(regularView.group14.actionCount, undefined);
+  });
+
+  test("projects file monitoring job defaults for group 13", () => {
+    const result = parseAjs(fileMonitoringJobDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const fileDefaults = document.rootUnits[0]?.children[0];
+    const fileExplicit = document.rootUnits[0]?.children[1];
+    const regularJob = document.rootUnits[0]?.children[2];
+
+    assert.ok(fileDefaults);
+    assert.ok(fileExplicit);
+    assert.ok(regularJob);
+
+    const defaultView = buildUnitListRemainingGroups(fileDefaults, [], []);
+    const explicitView = buildUnitListRemainingGroups(fileExplicit, [], []);
+    const regularView = buildUnitListRemainingGroups(regularJob, [], []);
+
+    assert.strictEqual(defaultView.group13.monitoredFileName, undefined);
+    assert.strictEqual(
+      defaultView.group13.monitoredFileCondition,
+      DEFAULTS.Flwc,
+    );
+    assert.strictEqual(
+      defaultView.group13.monitoredFileCloseMode,
+      DEFAULTS.Flco,
+    );
+    assert.strictEqual(defaultView.group13.monitoringInterval, DEFAULTS.Flwi);
+    assert.strictEqual(defaultView.group13.eventTimeoutAction, DEFAULTS.Ets);
+
+    assert.strictEqual(explicitView.group13.monitoredFileName, '"watch.txt"');
+    assert.strictEqual(explicitView.group13.monitoredFileCondition, "c:d:s");
+    assert.strictEqual(explicitView.group13.monitoredFileCloseMode, "y");
+    assert.strictEqual(explicitView.group13.monitoringInterval, "30");
+    assert.strictEqual(explicitView.group13.eventTimeoutAction, "wr");
+
+    assert.strictEqual(regularView.group13.monitoredFileCondition, undefined);
+    assert.strictEqual(regularView.group13.monitoredFileCloseMode, undefined);
+    assert.strictEqual(regularView.group13.monitoringInterval, undefined);
+    assert.strictEqual(regularView.group13.eventTimeoutAction, undefined);
   });
 });
