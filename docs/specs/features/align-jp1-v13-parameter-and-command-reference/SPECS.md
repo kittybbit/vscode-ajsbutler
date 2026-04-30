@@ -72,6 +72,11 @@ JP1/AJS3 version 13 reference documents.
   If approved, it should consume the existing paired effective-value semantics
   while preserving parser output, raw domain wrapper values, and normalized raw
   parameter storage.
+- JP1 event sending job unit-list group 14 projection is a separate
+  approval-sensitive boundary from domain defaults because it is user-visible
+  table output. If approved, it should consume the existing wrapper/default
+  semantics for `evssv`, `evsrt`, `evspl`, and `evsrc` while preserving parser
+  output and normalized raw parameter storage.
 
 ## Reference Documents
 

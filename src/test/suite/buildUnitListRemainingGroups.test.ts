@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { DEFAULTS } from "../../domain/models/parameters/Defaults";
 import { buildUnitListRemainingGroups } from "../../application/unit-list/buildUnitListRemainingGroups";
 
 const definition = `
@@ -40,6 +41,29 @@ unit=root,,jp1admin,;
   {
     ty=rc;
     cond="AJSROOT" = "ready";
+  }
+}
+`;
+
+const eventSendingJobDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=event-defaults,,jp1admin,;
+  {
+    ty=evsj;
+  }
+  unit=event-explicit,,jp1admin,;
+  {
+    ty=revsj;
+    evssv=wr;
+    evsrt=y;
+    evspl=5;
+    evsrc=7;
+  }
+  unit=regular-job,,jp1admin,;
+  {
+    ty=j;
   }
 }
 `;
@@ -106,5 +130,37 @@ suite("Build Unit List Remaining Groups", () => {
       startConditionView.group9.startCondition,
       '"AJSROOT" = "ready"',
     );
+  });
+
+  test("projects JP1 event sending job arrival-check defaults for group 14", () => {
+    const result = parseAjs(eventSendingJobDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const eventDefaults = document.rootUnits[0]?.children[0];
+    const eventExplicit = document.rootUnits[0]?.children[1];
+    const regularJob = document.rootUnits[0]?.children[2];
+
+    assert.ok(eventDefaults);
+    assert.ok(eventExplicit);
+    assert.ok(regularJob);
+
+    const defaultView = buildUnitListRemainingGroups(eventDefaults, [], []);
+    const explicitView = buildUnitListRemainingGroups(eventExplicit, [], []);
+    const regularView = buildUnitListRemainingGroups(regularJob, [], []);
+
+    assert.strictEqual(defaultView.group14.actionSeverity, DEFAULTS.Evssv);
+    assert.strictEqual(defaultView.group14.actionStartType, DEFAULTS.Evsrt);
+    assert.strictEqual(defaultView.group14.actionInterval, DEFAULTS.Evspl);
+    assert.strictEqual(defaultView.group14.actionCount, DEFAULTS.Evsrc);
+
+    assert.strictEqual(explicitView.group14.actionSeverity, "wr");
+    assert.strictEqual(explicitView.group14.actionStartType, "y");
+    assert.strictEqual(explicitView.group14.actionInterval, "5");
+    assert.strictEqual(explicitView.group14.actionCount, "7");
+
+    assert.strictEqual(regularView.group14.actionSeverity, undefined);
+    assert.strictEqual(regularView.group14.actionStartType, undefined);
+    assert.strictEqual(regularView.group14.actionInterval, undefined);
+    assert.strictEqual(regularView.group14.actionCount, undefined);
   });
 });
