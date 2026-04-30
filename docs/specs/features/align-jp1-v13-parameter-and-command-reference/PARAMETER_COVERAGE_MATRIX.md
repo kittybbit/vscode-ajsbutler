@@ -102,6 +102,21 @@ coverage.
   unit-list group 14 default-aware projection is aligned for these defaults;
   `evhst` requiredness and range validation are deferred
 
+### File Monitoring Job Defaults
+
+- Keys: `flwf`, `flwc`, `flwi`, `flco`, and `ets`
+- Unit scope: file monitoring jobs and recovery file monitoring jobs
+- Status: partial
+- Owning seam: `Flwj.ts`, `optionalScalarParameterBuilders.ts`, and
+  `Defaults.ts`
+- Evidence:
+  `parameterFactory.test.ts` for existing domain default seams and
+  `buildUnitListRemainingGroups.test.ts` for group 13 projection
+- Remaining gap:
+  unit-list group 13 default-aware projection is aligned for these defaults;
+  `flwc` invalid-combination diagnostics, wildcard restrictions, byte-length
+  validation, and range validation are deferred
+
 ## Boundary Decisions
 
 - This matrix covers only categories with feature-local investigation records.

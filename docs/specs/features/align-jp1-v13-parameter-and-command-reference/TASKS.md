@@ -97,6 +97,14 @@
 - [x] Add focused group 14 regression evidence for omitted defaults and
       explicit value preservation
 - [x] Run required code-change validation after implementation
+- [x] Investigate unit-list group 13 projection for file monitoring job
+      defaults as a separate behavior slice
+- [x] Record human approval before changing unit-list group 13 projection
+- [x] Implement group 13 file monitoring default-aware projection only after
+      approval
+- [x] Add focused group 13 regression evidence for omitted defaults and
+      explicit value preservation
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -222,29 +230,47 @@
   Explicit normalized values remain visible, non-event-sending jobs do not
   synthesize these defaults, and raw parser/domain/normalized values remain
   unchanged.
+- 2026-05-01: unit-list group 13 file monitoring job projection is the next
+  approval-gated behavior candidate. The proposed scope is limited to table
+  DTO projection using the existing domain defaults for omitted `flwc`,
+  `flwi`, `flco`, and `ets`; parser grammar, raw domain wrappers, normalized
+  raw parameter storage, diagnostics, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` remain out of scope.
+- 2026-05-01: unit-list group 13 file monitoring job projection now consumes
+  existing defaults for omitted `flwc`, `flwi`, `flco`, and `ets`. Explicit
+  normalized values remain visible, omitted `flwf` remains empty,
+  non-file-monitoring jobs do not synthesize these defaults, and raw
+  parser/domain/normalized values remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-04-29
-- Approved scope: User replied "OK.Proceed." after the unit-list group 14 JP1
-  event sending job default-aware projection approval request. Approved
-  changes are limited to making group 14 `evssv`, `evsrt`, `evspl`, and
-  `evsrc` arrival-check columns consume existing domain defaults for omitted
-  values, preserving explicit values, adding focused regression evidence,
-  updating SDD tracking, and running validation. Parser grammar, raw domain
-  wrappers, normalized raw parameter storage, diagnostics, generated artifacts,
-  configuration, dependency versions, and `engines.vscode` changes are out of
-  scope.
+- Approved at: 2026-05-01
+- Approved scope: User replied "OK.Proceed." after the unit-list group 13 file
+  monitoring job default-aware projection approval request. Approved changes
+  are limited to making group 13 `flwc`, `flwi`, `flco`, and `ets` columns
+  consume existing domain defaults for omitted values, preserving explicit
+  values, adding focused regression evidence, updating SDD tracking, and
+  running validation. Parser grammar, raw domain wrappers, normalized raw
+  parameter storage, diagnostics, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` changes are out of scope.
 
-Current implementation gate: unit-list group 14 default-aware projection for
-JP1 event sending job arrival-check defaults.
+Current implementation gate: unit-list group 13 default-aware projection for
+file monitoring job defaults.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 
 ## Prior Approval Evidence
 
+- 2026-04-29: Approved unit-list group 14 default-aware projection for JP1
+  event sending job arrival-check defaults. Approved changes were limited to
+  making group 14 `evssv`, `evsrt`, `evspl`, and `evsrc` arrival-check
+  columns consume existing domain defaults for omitted values, preserving
+  explicit values, adding focused regression evidence, updating SDD tracking,
+  and running validation. Parser grammar, raw domain wrappers, normalized raw
+  parameter storage, diagnostics, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` changes were out of scope.
 - 2026-04-29: Approved unit-list group 10 effective projection for
   schedule-rule `wc` / `wt` pairing. Approved changes were limited to making
   group 10 `wc` / `wt` schedule-rule start-condition columns consume existing
@@ -279,6 +305,14 @@ Only clear human approval can change Status to Approved.
 
 ## Validation
 
+- 2026-05-01: `pnpm run test:compile`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm test`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and shutdown-time
+  `ECONNRESET` / premature-close noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-04-29: `pnpm run test:compile`
 - 2026-04-29: `pnpm run qlty` required an escalated rerun after a sandboxed
   log-file permission failure

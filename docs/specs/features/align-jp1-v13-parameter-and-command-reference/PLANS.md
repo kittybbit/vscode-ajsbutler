@@ -72,6 +72,11 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Implemented unit-list group 14 projection for JP1 event sending job
   arrival-check defaults while preserving explicit normalized values and raw
   storage.
+- Investigated file monitoring job unit-list group 13 projection for
+  default-aware `flwc`, `flwi`, `flco`, and `ets` values as the next
+  approval-gated behavior candidate after the group 14 slice.
+- Implemented unit-list group 13 projection for file monitoring job defaults
+  while preserving explicit normalized values and raw storage.
 
 ## Impact Investigation
 
@@ -302,6 +307,52 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   human approval to proceed was given on 2026-04-29 after the investigation
   summary for unit-list group 14 default-aware projection.
 
+### File Monitoring Job Group 13 Projection Candidate
+
+- Planned change:
+  change unit-list group 13 file monitoring job projection to display existing
+  domain defaults for omitted `flwc`, `flwi`, `flco`, and `ets`, while
+  preserving explicit normalized values.
+- Affected files:
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  `src/application/unit-list/buildUnitListView.ts` only if helper typing
+  changes, `src/test/suite/buildUnitListRemainingGroups.test.ts` or
+  `src/test/suite/buildUnitListView.test.ts`,
+  `FILE_MONITORING_JOB_ALIGNMENT.md`, `PARAMETER_COVERAGE_MATRIX.md`,
+  `SPECS.md`, `TASKS.md`, `docs/requirements/use-cases/uc-build-unit-list-view.md`,
+  and branch-level `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `buildUnitListRemainingGroups`,
+  `UnitListGroup13View.monitoredFileCondition`,
+  `UnitListGroup13View.monitoredFileCloseMode`,
+  `UnitListGroup13View.monitoringInterval`,
+  `UnitListGroup13View.eventTimeoutAction`, and the group 13 table columns
+  that render those DTO fields.
+- Affected features:
+  JP1/AJS table viewer group 13 event job definition columns;
+  build-unit-list application use case; file monitoring job parameter
+  interpretation.
+- Tests affected:
+  focused unit-list tests for omitted file monitoring job defaults and
+  explicit value preservation; existing domain default behavior should
+  continue to pass unchanged.
+- Breaking-change risk:
+  medium. This intentionally changes user-visible table output for definitions
+  where file monitoring job `flwc`, `flwi`, `flco`, or `ets` are omitted. Raw
+  parser output, raw domain wrapper values, and normalized key/value storage
+  remain unchanged.
+- Alternatives considered:
+  keep group 13 raw by design and leave the matrix gap visible; add separate
+  raw and default-aware columns, rejected for this slice because it expands UI
+  and localization scope; change domain defaults or add a file-monitoring
+  helper seam, deferred because the behavior gap is projection-only; prioritize
+  diagnostics for `flwc` invalid combinations, wildcard restrictions, or
+  numeric ranges first, deferred until editor-feedback behavior explicitly
+  owns invalid JP1/AJS parameter handling.
+- Approval:
+  human approval to proceed was given on 2026-05-01 after the investigation
+  summary for unit-list group 13 default-aware projection.
+
 ## Follow-up
 
 - Apply the same value parsing audit/refactor workflow to other parameter
@@ -317,6 +368,9 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   behavior.
 - Revisit JP1 event sending job `evhst` requiredness when `evsrt=y` after the
   diagnostics behavior contract is explicit.
+- Revisit file monitoring job `flwc` invalid combinations, `flwi` range
+  validation, wildcard restrictions, and `flco` pairing diagnostics after the
+  editor-feedback behavior contract is explicit.
 
 ## Validation
 
