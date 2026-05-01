@@ -172,6 +172,36 @@ When finishing a task, provide:
 3. compatibility risks
 4. follow-up tasks if any
 
+## CLI Command Policy
+
+AI agents should run CLI commands through `rtk` by default when `rtk` provides
+an appropriate proxy. Prefer `rtk` for command output that can otherwise flood
+agent context, including file inspection, search, git/GitHub operations,
+package scripts, tests, builds, type checks, and browser test tooling.
+
+Examples:
+
+- `rtk ls`
+- `rtk read AGENTS.md`
+- `rtk grep "pattern" src`
+- `rtk git status --short --branch`
+- `rtk gh pr view`
+- `rtk pnpm run qlty`
+- `rtk pnpm test`
+- `rtk pnpm run test:web`
+- `rtk pnpm run build`
+
+Use the native command directly only when:
+
+- `rtk` has no suitable proxy for the command
+- exact, unfiltered output is required for diagnosis or user reporting
+- the command is interactive or relies on shell behavior that `rtk` should not
+  wrap
+- an `rtk` proxy fails and the native command is needed to confirm the issue
+
+When falling back to a native command, mention the reason in the task summary if
+it affects validation or reproducibility.
+
 ## Forbidden Changes
 
 Do not:
@@ -198,7 +228,8 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
   - Git operations and branch management
   - CI/CD setup and scripting
   - Batch operations across files
-- **Capabilities**: Full bash/git/tool access, parallel execution
+- **Capabilities**: Full bash/git/tool access through `rtk` by default,
+  parallel execution
 - **Configuration**: `.github/copilot-instructions.md`
 
 #### Codex (VS Code Copilot)

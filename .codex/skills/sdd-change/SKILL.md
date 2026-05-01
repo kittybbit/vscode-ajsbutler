@@ -112,5 +112,5 @@ Keep the notes short and focused on impact, decisions, and validation.
 - keep KISS and YAGNI ahead of abstraction; avoid over-DRY process or code
 - use a `docs/...` branch name only when the slice stays within the docs-only
   file set used by `.github/workflows/verify.yml`
-- for docs-only changes, `pnpm run qlty` is required; add
-  `pnpm run lint:md` when useful
+- for docs-only changes, `rtk pnpm run qlty` is required; add
+  `rtk pnpm run lint:md` when useful

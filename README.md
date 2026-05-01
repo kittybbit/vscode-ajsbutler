@@ -164,6 +164,12 @@ For detailed task-to-agent assignment with Primary/Fallback options:
 - `.github/copilot-instructions.md` - Copilot CLI entry point
 - `.codex/skills/` - Codex-specific workflows
 
+AI agents should run CLI commands through `rtk` by default when a matching
+proxy exists, for example `rtk git status --short --branch`,
+`rtk pnpm run qlty`, or `rtk pnpm run build`. Use native commands only when
+`rtk` has no suitable proxy, exact unfiltered output is required, or the
+command is interactive.
+
 ## Telemetry
 
 This extension collects telemetry data to improve the experience of using this
