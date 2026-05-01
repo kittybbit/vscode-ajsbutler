@@ -31,9 +31,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Prepare job end-judgment `jd` / `abr` invalid-combination diagnostics as
-   the next focused parameter-alignment behavior contract, then record approval
-   before implementation.
+1. Select the next focused JP1/AJS3 v13 parameter-alignment gap from the
+   documented deferred diagnostics and range-validation candidates.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
@@ -44,7 +43,7 @@ rules in `docs/specs/README.md`, not in this file.
 - Branch: `codex/job-end-judgment-diagnostics`.
 - Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
   focused diagnostic contract for job end-judgment invalid combinations.
-- Status: investigation recorded; implementation approval is pending.
+- Status: implemented and validated on 2026-05-01.
 - Scope: add application-level semantic diagnostics for explicit UNIX/PC job
   and UNIX/PC custom job `abr=y` values when the effective `jd` value is not
   `cod`, while preserving raw parser output, domain wrapper values, unit-list
@@ -63,6 +62,12 @@ rules in `docs/specs/README.md`, not in this file.
   web extension hosts. Implementation should keep parser syntax diagnostics
   unchanged and should report semantic diagnostics only when explicit
   parameters make the invalid combination observable.
+- Outcome: explicit UNIX/PC job and UNIX/PC custom job `abr=y` values now
+  produce semantic diagnostics when the effective `jd` value is not `cod`.
+  Parameter source-location metadata supports diagnostic ranges; parser
+  grammar, raw parser values, domain wrapper values, normalized parameters,
+  unit-list projection, command generation, generated artifacts,
+  configuration, dependency versions, and `engines.vscode` remain unchanged.
 
 ## Build/Test Performance SDD
 
@@ -91,7 +96,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: QUEUE job unit-list group 15 unit-type-aware projection.
+  slice: job end-judgment semantic diagnostics.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -109,6 +114,16 @@ contracts were compressed into `docs/requirements/use-cases/`.
 
 Current branch checks:
 
+- 2026-05-01: `pnpm run qlty` completed with exit code 0; final runs used an
+  escalated command because sandboxed qlty cannot create its log file
+- 2026-05-01: `pnpm test`
+- 2026-05-01: `pnpm run test:web` required an escalated rerun after Chromium
+  failed to launch in the sandbox with macOS Mach port permission errors; the
+  escalated rerun completed with exit code 0 and existing localhost
+  dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run qlty`
 - 2026-05-01: `npm test`

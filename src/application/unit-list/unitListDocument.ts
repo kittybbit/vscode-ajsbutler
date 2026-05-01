@@ -1,10 +1,10 @@
-import { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import { AjsParameter, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { Unit } from "../../domain/values/Unit";
 
 export type UnitListRootDto = {
   unitAttribute: string;
-  parameters: Array<{ key: string; value: string; position?: number }>;
+  parameters: AjsParameter[];
   children: UnitListRootDto[];
 };
 

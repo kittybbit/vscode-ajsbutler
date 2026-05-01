@@ -1,3 +1,12 @@
+export type UnitParameter = {
+  key: string;
+  value: string;
+  position?: number;
+  line?: number;
+  column?: number;
+  length?: number;
+};
+
 /**
  * raw object of unit
  */
@@ -6,7 +15,7 @@ export class Unit {
   unitAttribute: string;
 
   /** definition parameters */
-  parameters: Array<{ key: string; value: string; position?: number }>;
+  parameters: UnitParameter[];
 
   /** parent */
   parent?: Unit;

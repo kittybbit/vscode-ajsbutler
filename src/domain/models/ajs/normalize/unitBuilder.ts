@@ -35,7 +35,11 @@ export const buildNormalizedUnit = (
   hasSchedule: resolveNormalizedHasSchedule(unit, unitType),
   hasWaitedFor: resolveNormalizedHasWaitedFor(unit),
   layout: resolveNormalizedLayout(unit),
-  parameters: unit.parameters.map((parameter) => ({ ...parameter })),
+  parameters: unit.parameters.map((parameter) => ({
+    key: parameter.key,
+    value: parameter.value,
+    position: parameter.position,
+  })),
   relations,
   children,
 });
