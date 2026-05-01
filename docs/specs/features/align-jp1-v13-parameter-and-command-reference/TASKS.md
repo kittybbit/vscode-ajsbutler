@@ -105,6 +105,14 @@
 - [x] Add focused group 13 regression evidence for omitted defaults and
       explicit value preservation
 - [x] Run required code-change validation after implementation
+- [x] Investigate execution-interval control job defaults and unit-list group
+      13 projection as a separate behavior slice
+- [x] Record human approval before changing execution-interval control job
+      default or projection behavior
+- [x] Implement execution-interval control job defaults only after approval
+- [x] Add focused execution-interval control job regression evidence for
+      omitted defaults, explicit value preservation, and non-target jobs
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -241,27 +249,49 @@
   normalized values remain visible, omitted `flwf` remains empty,
   non-file-monitoring jobs do not synthesize these defaults, and raw
   parser/domain/normalized values remain unchanged.
+- 2026-05-01: execution-interval control job defaults are the next
+  approval-gated behavior candidate. The proposed scope is limited to
+  `tmwj` / `rtmwj` omitted `tmitv=10`, `etn=n`, and `ets=kl` behavior plus
+  unit-list group 13 default-aware projection. Parser grammar, normalized raw
+  parameter storage, diagnostics, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` remain out of scope.
+- 2026-05-01: execution-interval control job defaults now resolve omitted
+  `tmitv`, `etn`, and `ets` values to `10`, `n`, and `kl`. Unit-list group 13
+  projection consumes those defaults for `tmwj` / `rtmwj`, explicit normalized
+  values remain visible, non-execution-interval-control jobs do not synthesize
+  those defaults, and raw parser/normalized values remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-01
-- Approved scope: User replied "OK.Proceed." after the unit-list group 13 file
+- Approved scope: User replied "OK. Proceed." after the execution-interval
+  control job defaults and unit-list group 13 projection approval request.
+  Approved changes are limited to aligning omitted `tmwj` / `rtmwj`
+  `tmitv=10`, `etn=n`, and `ets=kl` behavior, making group 13 projection
+  consume those defaults for execution-interval control jobs, preserving
+  explicit values and non-target job behavior, adding focused regression
+  evidence, updating SDD tracking, and running validation. Parser grammar,
+  normalized raw parameter storage, diagnostics, generated artifacts,
+  configuration, dependency versions, and `engines.vscode` changes are out of
+  scope.
+
+Current implementation gate: execution-interval control job defaults and
+unit-list group 13 projection for `tmitv`, `etn`, and `ets`.
+
+## Prior Approval Evidence
+
+- 2026-05-01: User replied "OK.Proceed." after the unit-list group 13 file
   monitoring job default-aware projection approval request. Approved changes
-  are limited to making group 13 `flwc`, `flwi`, `flco`, and `ets` columns
+  were limited to making group 13 `flwc`, `flwi`, `flco`, and `ets` columns
   consume existing domain defaults for omitted values, preserving explicit
   values, adding focused regression evidence, updating SDD tracking, and
   running validation. Parser grammar, raw domain wrappers, normalized raw
   parameter storage, diagnostics, generated artifacts, configuration,
-  dependency versions, and `engines.vscode` changes are out of scope.
-
-Current implementation gate: unit-list group 13 default-aware projection for
-file monitoring job defaults.
+  dependency versions, and `engines.vscode` changes were out of scope.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
-
-## Prior Approval Evidence
 
 - 2026-04-29: Approved unit-list group 14 default-aware projection for JP1
   event sending job arrival-check defaults. Approved changes were limited to

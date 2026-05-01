@@ -7,6 +7,7 @@ import { Evsj } from "../../domain/models/units/Evsj";
 import { Htpj } from "../../domain/models/units/Htpj";
 import { N } from "../../domain/models/units/N";
 import { Qj, Rq } from "../../domain/models/units/Qj";
+import { Tmwj } from "../../domain/models/units/Tmwj";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
@@ -352,6 +353,26 @@ unit=root,,jp1admin,;
 }
 `;
 
+const executionIntervalControlJobDefaultDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=interval,tmwj,+0+0;
+  el=explicit,rtmwj,+160+0;
+  unit=interval,,jp1admin,;
+  {
+    ty=tmwj;
+  }
+  unit=explicit,,jp1admin,;
+  {
+    ty=rtmwj;
+    tmitv=30;
+    etn=y;
+    ets=wr;
+  }
+}
+`;
+
 const parseJob = (): J => {
   const result = parseAjs(definition);
   assert.deepStrictEqual(result.errors, []);
@@ -508,6 +529,19 @@ const parseEventSendingJobs = (): {
   return {
     eventJob: root.children[0] as Evsj,
     explicitEventJob: root.children[1] as Evsj,
+  };
+};
+
+const parseExecutionIntervalControlJobs = (): {
+  intervalJob: Tmwj;
+  explicitIntervalJob: Tmwj;
+} => {
+  const result = parseAjs(executionIntervalControlJobDefaultDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const root = tyFactory(result.rootUnits[0]);
+  return {
+    intervalJob: root.children[0] as Tmwj,
+    explicitIntervalJob: root.children[1] as Tmwj,
   };
 };
 
@@ -913,5 +947,17 @@ suite("ParameterFactory", () => {
     assert.strictEqual(explicitEventJob.evsrt?.value(), "y");
     assert.strictEqual(explicitEventJob.evspl?.value(), "5");
     assert.strictEqual(explicitEventJob.evsrc?.value(), "7");
+  });
+
+  test("returns execution-interval control job defaults through the facade", () => {
+    const { intervalJob, explicitIntervalJob } =
+      parseExecutionIntervalControlJobs();
+
+    assert.strictEqual(intervalJob.tmitv?.value(), DEFAULTS.Tmitv);
+    assert.strictEqual(intervalJob.etn?.value(), DEFAULTS.Etn);
+    assert.strictEqual(intervalJob.ets?.value(), DEFAULTS.Ets);
+    assert.strictEqual(explicitIntervalJob.tmitv?.value(), "30");
+    assert.strictEqual(explicitIntervalJob.etn?.value(), "y");
+    assert.strictEqual(explicitIntervalJob.ets?.value(), "wr");
   });
 });

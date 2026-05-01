@@ -117,6 +117,23 @@ coverage.
   `flwc` invalid-combination diagnostics, wildcard restrictions, byte-length
   validation, and range validation are deferred
 
+### Execution-Interval Control Job Defaults
+
+- Keys: `tmitv`, `etn`, and `ets`
+- Unit scope:
+  execution-interval control jobs and recovery execution-interval control jobs
+- Status: partial
+- Owning seam:
+  `Tmwj.ts`, `optionalScalarParameterBuilders.ts`, `Defaults.ts`, and
+  `buildUnitListRemainingGroups.ts`
+- Evidence:
+  `parameterFactory.test.ts` for domain defaults and
+  `buildUnitListRemainingGroups.test.ts` for group 13 projection
+- Remaining gap:
+  execution-interval control job defaults and unit-list group 13 projection
+  are aligned for these values; range validation and broader wait-job default
+  reconciliation are deferred
+
 ## Boundary Decisions
 
 - This matrix covers only categories with feature-local investigation records.

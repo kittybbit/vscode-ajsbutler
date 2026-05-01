@@ -92,6 +92,28 @@ unit=root,,jp1admin,;
 }
 `;
 
+const executionIntervalControlJobDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=interval-defaults,,jp1admin,;
+  {
+    ty=tmwj;
+  }
+  unit=interval-explicit,,jp1admin,;
+  {
+    ty=rtmwj;
+    tmitv=30;
+    etn=y;
+    ets=wr;
+  }
+  unit=regular-job,,jp1admin,;
+  {
+    ty=j;
+  }
+}
+`;
+
 suite("Build Unit List Remaining Groups", () => {
   test("projects all remaining group fields from unit parameters", () => {
     const result = parseAjs(definition);
@@ -225,6 +247,35 @@ suite("Build Unit List Remaining Groups", () => {
     assert.strictEqual(regularView.group13.monitoredFileCondition, undefined);
     assert.strictEqual(regularView.group13.monitoredFileCloseMode, undefined);
     assert.strictEqual(regularView.group13.monitoringInterval, undefined);
+    assert.strictEqual(regularView.group13.eventTimeoutAction, undefined);
+  });
+
+  test("projects execution-interval control job defaults for group 13", () => {
+    const result = parseAjs(executionIntervalControlJobDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const intervalDefaults = document.rootUnits[0]?.children[0];
+    const intervalExplicit = document.rootUnits[0]?.children[1];
+    const regularJob = document.rootUnits[0]?.children[2];
+
+    assert.ok(intervalDefaults);
+    assert.ok(intervalExplicit);
+    assert.ok(regularJob);
+
+    const defaultView = buildUnitListRemainingGroups(intervalDefaults, [], []);
+    const explicitView = buildUnitListRemainingGroups(intervalExplicit, [], []);
+    const regularView = buildUnitListRemainingGroups(regularJob, [], []);
+
+    assert.strictEqual(defaultView.group13.timeoutInterval, DEFAULTS.Tmitv);
+    assert.strictEqual(defaultView.group13.eventTimeout, DEFAULTS.Etn);
+    assert.strictEqual(defaultView.group13.eventTimeoutAction, DEFAULTS.Ets);
+
+    assert.strictEqual(explicitView.group13.timeoutInterval, "30");
+    assert.strictEqual(explicitView.group13.eventTimeout, "y");
+    assert.strictEqual(explicitView.group13.eventTimeoutAction, "wr");
+
+    assert.strictEqual(regularView.group13.timeoutInterval, undefined);
+    assert.strictEqual(regularView.group13.eventTimeout, undefined);
     assert.strictEqual(regularView.group13.eventTimeoutAction, undefined);
   });
 });

@@ -31,9 +31,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Prepare file monitoring job unit-list group 13 projection as the next
-   focused parameter-alignment behavior contract, then record approval before
-   implementation.
+1. Choose the next JP1/AJS3 v13 parameter-alignment slice after
+   execution-interval control job defaults.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
@@ -41,30 +40,33 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/file-monitoring-group13-projection`.
+- Branch: `codex/interval-control-defaults`.
 - Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
-  focused unit-list projection slice for file monitoring job group 13
-  defaults.
-- Status: unit-list group 14 JP1 event sending job projection is merged in
-  PR #224. The current slice is approved for implementation.
-- Scope: make group 13 file monitoring job columns display existing domain
-  defaults for omitted `flwc`, `flwi`, `flco`, and `ets` values.
+  focused implementation of execution-interval control job defaults and group
+  13 projection.
+- Status: unit-list group 13 file monitoring job projection is merged in
+  PR #225. The current slice is approved and implemented locally.
+- Scope: align omitted `tmitv`, `etn`, and `ets` behavior on
+  execution-interval control jobs (`tmwj` / `rtmwj`) and make unit-list group
+  13 projection default-aware for those values.
 - Out of scope: parser grammar changes, command generation, diagnostics,
-  generated artifacts, dependency changes, `engines.vscode`, file name
-  byte-length validation, wildcard validation, `flwc` invalid-combination
-  diagnostics, numeric range validation, and broader raw projection policy
-  changes.
+  generated artifacts, dependency changes, `engines.vscode`, numeric range
+  validation, invalid-combination diagnostics, and broader raw projection
+  policy changes.
 - Impact summary: the candidate affects
+  `src/domain/models/parameters/Defaults.ts`,
+  `src/domain/models/parameters/optionalScalarParameterBuilders.ts`,
   `src/application/unit-list/buildUnitListRemainingGroups.ts`,
   `src/application/unit-list/buildUnitListView.ts` DTO fields only if helper
-  typing requires it, focused unit-list regression tests, and the file
-  monitoring job SDD documents. Existing domain default behavior in
-  `ParamFactory.flwc`, `ParamFactory.flwi`, `ParamFactory.flco`, and
-  `ParamFactory.ets` should be reused rather than changed.
+  typing requires it, focused parameter factory and unit-list regression
+  tests, and the execution-interval control job SDD documents. Existing
+  domain default behavior in `ParamFactory.etn` and `ParamFactory.ets` is
+  reused; `ParamFactory.tmitv` now uses `DEFAULTS.Tmitv`.
 - Risks and assumptions: behavior changes are user-visible in the table viewer
-  because omitted group 13 file monitoring fields would display defaults
-  instead of empty cells. Raw parser output and normalized parameter storage
-  remain preserved.
+  because omitted execution-interval control job group 13 fields would display
+  defaults instead of empty cells. Adding a `tmitv` domain default is also
+  observable through the `Tmwj.tmitv` wrapper. Raw parser output and
+  normalized parameter storage remain preserved.
 
 ## Build/Test Performance SDD
 
@@ -93,7 +95,8 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: file monitoring job unit-list group 13 default-aware projection.
+  slice: execution-interval control job defaults and unit-list group 13
+  default-aware projection.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -119,6 +122,16 @@ Current branch checks:
 - 2026-04-29: `npm run build` completed with existing webpack asset-size
   warnings
 - 2026-04-29: `pnpm run lint:md`
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
+- 2026-05-01: `pnpm run test:compile`
+- 2026-05-01: `npm test`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
+  localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
 - 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
   log-file permission failure

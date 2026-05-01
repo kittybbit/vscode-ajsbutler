@@ -22,6 +22,7 @@ const parameterDefaults = {
   St: "+00:00",
   Stt: "00:00",
   Wt: "no",
+  Tmitv: "10",
   Cd: "n",
   Cftd: "no",
   Cgs: "y",

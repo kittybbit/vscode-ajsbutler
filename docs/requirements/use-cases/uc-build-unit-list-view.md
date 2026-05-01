@@ -68,6 +68,12 @@ Scenario: File monitoring job defaults are projected
   When table row view models are built
   Then omitted group 13 file monitoring values display their JP1/AJS defaults
   And explicit group 13 file monitoring values remain visible
+
+Scenario: Execution-interval control job defaults are projected
+  Given a normalized JP1/AJS document with an execution-interval control job
+  When table row view models are built
+  Then omitted group 13 execution-interval control values display JP1/AJS defaults
+  And explicit group 13 execution-interval control values remain visible
 ```
 
 ## Acceptance Notes
