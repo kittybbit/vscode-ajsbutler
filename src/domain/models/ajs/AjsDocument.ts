@@ -1,8 +1,10 @@
 import { ParamSymbol, TySymbol } from "../../values/AjsType";
+import type { UnitParameter } from "../../values/Unit";
 
 export type AjsUnitType = TySymbol;
 export type AjsGroupType = "n" | "p";
 export type AjsRelationType = "seq" | "con";
+export type AjsParameter = Pick<UnitParameter, "key" | "value" | "position">;
 
 export type AjsRelation = {
   sourceUnitId: string;
@@ -38,7 +40,7 @@ export type AjsUnit = {
     h: number;
     v: number;
   };
-  parameters: Array<{ key: string; value: string; position?: number }>;
+  parameters: AjsParameter[];
   relations: AjsRelation[];
   children: AjsUnit[];
 };
@@ -47,8 +49,6 @@ export type AjsDocument = {
   rootUnits: AjsUnit[];
   warnings: AjsNormalizationWarning[];
 };
-
-export type AjsParameter = AjsUnit["parameters"][number];
 
 export const flattenAjsUnits = (units: AjsUnit[]): AjsUnit[] =>
   units.reduce<AjsUnit[]>(

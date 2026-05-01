@@ -49,7 +49,8 @@ This document covers the currently modeled end-judgment defaults for `jd`,
   schedule-rule `wt` parameter.
 - `wth` and `jdf` are not synthesized when omitted.
 - Invalid combinations, such as `jd` values other than `cod` with `abr=y`,
-  remain preserved raw values until the diagnostics policy is explicit.
+  remain preserved raw values and are reported through focused semantic
+  diagnostics for UNIX/PC jobs and UNIX/PC custom jobs.
 
 ## WTH Key Mapping Follow-up
 
@@ -94,18 +95,17 @@ This document covers the currently modeled end-judgment defaults for `jd`,
 - Parsed unit parameters preserve key, value, and definition order, but not
   line and column source locations.
 
-### Proposed Behavior
+### Implemented Behavior
 
-After human approval:
-
-- keep raw parser output, domain wrapper values, normalized parameters,
-  unit-list projection, and command generation unchanged;
-- add an application-level semantic diagnostic when an explicit UNIX/PC job or
-  UNIX/PC custom job has effective `abr=y` and effective `jd` is not `cod`;
-- report the diagnostic through the existing editor-feedback DTO and VS Code
-  adapter path so desktop and web hosts share the same rule;
-- keep omitted `jd=cod` and omitted `abr=n` behavior non-diagnostic;
-- add focused tests for syntax-only diagnostics, valid omitted defaults,
+- Raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, and command generation remain unchanged.
+- The application diagnostics boundary reports a semantic diagnostic when an
+  explicit UNIX/PC job or UNIX/PC custom job has effective `abr=y` and
+  effective `jd` is not `cod`.
+- The diagnostic is reported through the existing editor-feedback DTO and VS
+  Code adapter path so desktop and web hosts share the same rule.
+- Omitted `jd=cod` and omitted `abr=n` behavior remains non-diagnostic.
+- Focused tests cover syntax-only diagnostics, valid omitted defaults,
   explicit valid `jd=cod` / `abr=y`, and explicit invalid `jd` / `abr`
   combinations.
 
@@ -113,9 +113,9 @@ After human approval:
 
 - User-visible diagnostics change for syntactically valid JP1/AJS documents
   containing the invalid combination.
-- The parser grammar should not change, but parsed parameter source locations
-  may need to be added to `Unit.parameters` so semantic diagnostics can point
-  at the explicit offending parameter instead of reporting a generic document
+- The parser grammar did not change, but parsed parameter source locations
+  were added to `Unit.parameters` so semantic diagnostics can point at the
+  explicit offending parameter instead of reporting a generic document
   position.
 - The application diagnostics boundary broadens from syntax-only feedback to
   syntax plus focused semantic parameter feedback.

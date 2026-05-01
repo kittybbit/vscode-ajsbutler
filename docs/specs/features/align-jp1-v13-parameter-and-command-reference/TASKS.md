@@ -123,13 +123,13 @@
 - [x] Run required code-change validation after implementation
 - [x] Investigate job end-judgment `jd` / `abr` invalid-combination diagnostics
       as the next parameter semantic diagnostics slice
-- [ ] Record human approval before changing editor-feedback diagnostics,
+- [x] Record human approval before changing editor-feedback diagnostics,
       parser source-location data, runtime code, tests, generated artifacts,
       or configuration
-- [ ] Implement focused `jd` / `abr` semantic diagnostics only after approval
-- [ ] Add focused diagnostics regression evidence for valid omitted defaults,
+- [x] Implement focused `jd` / `abr` semantic diagnostics only after approval
+- [x] Add focused diagnostics regression evidence for valid omitted defaults,
       explicit valid retry settings, and explicit invalid combinations
-- [ ] Run required code-change validation after implementation
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -297,12 +297,34 @@
   artifacts, configuration, dependency versions, `engines.vscode`, retry range
   diagnostics, byte-length validation, and broad range validation remain out of
   scope.
+- 2026-05-01: implementation approval was recorded for job end-judgment
+  `jd` / `abr` invalid-combination diagnostics. Complete reference impact
+  check before editing the application diagnostic boundary and parser
+  source-location data, then keep the implementation limited to the approved
+  semantic diagnostic and focused regression evidence.
+- 2026-05-01: job end-judgment `jd` / `abr` invalid-combination diagnostics
+  now report explicit UNIX/PC job and UNIX/PC custom job `abr=y` values when
+  the effective `jd` value is not `cod`. Parser grammar, raw parser values,
+  domain wrapper values, normalized parameters, unit-list projection, command
+  generation, generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain unchanged. Parameter source-location metadata was
+  added to support diagnostic ranges.
 
 ## Human Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
+- Status: Approved
+- Approved at: 2026-05-01
+- Approved scope: User replied "OK.Proceed." after the job end-judgment
+  `jd` / `abr` invalid-combination diagnostics approval request. Approved
+  changes are limited to adding focused application-level semantic diagnostics
+  for explicit UNIX/PC job and UNIX/PC custom job `abr=y` values when the
+  effective `jd` value is not `cod`; adding source-location metadata only as
+  needed for diagnostic ranges; preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, and command generation;
+  adding focused regression evidence; updating SDD tracking; and running
+  validation. Parser grammar, generated artifacts, configuration, dependency
+  versions, `engines.vscode`, retry range diagnostics, byte-length validation,
+  and broad parameter range validation remain out of scope.
 
 Current implementation gate: job end-judgment `jd` / `abr`
 invalid-combination diagnostics.
@@ -335,9 +357,6 @@ invalid-combination diagnostics.
   running validation. Parser grammar, raw domain wrappers, normalized raw
   parameter storage, diagnostics, generated artifacts, configuration,
   dependency versions, and `engines.vscode` changes were out of scope.
-
-Implementation must not start while Status is Pending.
-Only clear human approval can change Status to Approved.
 
 - 2026-04-29: Approved unit-list group 14 default-aware projection for JP1
   event sending job arrival-check defaults. Approved changes were limited to
@@ -381,6 +400,16 @@ Only clear human approval can change Status to Approved.
 
 ## Validation
 
+- 2026-05-01: `pnpm run qlty` completed with exit code 0; final runs used an
+  escalated command because sandboxed qlty cannot create its log file
+- 2026-05-01: `pnpm test`
+- 2026-05-01: `pnpm run test:web` required an escalated rerun after Chromium
+  failed to launch in the sandbox with macOS Mach port permission errors; the
+  escalated rerun completed with exit code 0 and existing localhost
+  dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
   log-file permission failure
