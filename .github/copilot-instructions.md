@@ -52,17 +52,25 @@ Check the routing matrix in `AGENTS.md` § "AI Agent Routing Guide":
 
 ## Build and Test Commands
 
+Run CLI commands through `rtk` by default when a matching proxy exists. Use a
+native command only when `rtk` has no suitable proxy, exact unfiltered output is
+required, the command is interactive, or an `rtk` proxy needs native-command
+confirmation.
+
 ```bash
-pnpm run qlty      # Lint and quality checks
-pnpm test          # Desktop extension tests
-pnpm run test:web  # Web extension tests
-pnpm run build     # Production build
+rtk pnpm run qlty      # Lint and quality checks
+rtk pnpm test          # Desktop extension tests
+rtk pnpm run test:web  # Web extension tests
+rtk pnpm run build     # Production build
 ```
 
-**Full validation sequence** (use before pushing):
+**Full validation sequence** (use before pushing; run serially):
 
 ```bash
-pnpm run qlty && pnpm test && pnpm run test:web && pnpm run build
+rtk pnpm run qlty
+rtk pnpm test
+rtk pnpm run test:web
+rtk pnpm run build
 ```
 
 ## Testing Policy
@@ -71,8 +79,9 @@ When touching parser, list view, flow view, CSV export, diagnostics, hover,
 or adapter boundaries:
 
 - Add or update unit/integration tests
-- Run `pnpm run qlty && pnpm test && pnpm run test:web`
-- For docs-only changes, `pnpm run lint:md` is sufficient
+- Run `rtk pnpm run qlty`, `rtk pnpm test`, and
+  `rtk pnpm run test:web`
+- For docs-only changes, `rtk pnpm run lint:md` is sufficient
 
 ## Key Constraints
 
@@ -121,7 +130,8 @@ routing matrix first.
 - For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
 - Refer to `docs/specs/features/` for use-case examples
 - Keep assumptions and design decisions documented in feature `PLANS.md`
-- Run full validation (`pnpm run qlty && pnpm test && pnpm run test:web && pnpm run build`) before pushing
+- Run full validation (`rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, `rtk pnpm run build`) before pushing
 
 ---
 
