@@ -59,7 +59,8 @@ coverage.
 - Owning seam: `Qj.ts` and `ParameterFactory.ts`
 - Evidence: `parameterFactory.test.ts`
 - Remaining gap:
-  group 15 remains raw projection; unit-type-aware list behavior is deferred
+  group 15 unit-type-aware projection now hides `topN` on QUEUE jobs; byte
+  length, macro-variable, and invalid-combination validation remain deferred
 
 ### Job End Judgment
 

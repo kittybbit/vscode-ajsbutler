@@ -54,6 +54,12 @@ JP1/AJS3 version 13 reference documents.
   UNIX/PC custom job definitions also define `top1` to `top4`. The QUEUE job
   slice must preserve that distinction and must not broaden `topN` default
   derivation to wrappers whose manual section does not define `topN`.
+- QUEUE job unit-list group 15 projection is a separate approval-sensitive
+  boundary from wrapper behavior because it is user-visible table output. If
+  approved, it should preserve `ts1` to `ts4` and `td1` to `td4` projection
+  for `qj` / `rq`, but hide `top1` to `top4` transfer-operation projection
+  for those unit types because the JP1/AJS3 version 13 QUEUE job definition
+  does not define `topN`.
 - Job end-judgment `wth` alignment is approval-sensitive because the current
   factory preserves a legacy lookup from `wth` to the schedule-rule `wt`
   parameter. Correct alignment should read explicit `wth` values without

@@ -74,6 +74,13 @@ Scenario: Execution-interval control job defaults are projected
   When table row view models are built
   Then omitted group 13 execution-interval control values display JP1/AJS defaults
   And explicit group 13 execution-interval control values remain visible
+
+Scenario: QUEUE job transfer operations are not projected
+  Given a normalized JP1/AJS document with a QUEUE job
+  When table row view models are built
+  Then group 15 displays QUEUE job transfer source and destination values
+  And group 15 does not display QUEUE job transfer operation values
+  And non-QUEUE group 15 transfer operation values remain visible
 ```
 
 ## Acceptance Notes

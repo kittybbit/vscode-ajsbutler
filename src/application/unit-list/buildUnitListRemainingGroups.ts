@@ -32,6 +32,9 @@ const isFileMonitoringJob = (unit: AjsUnit): boolean =>
 const isExecutionIntervalControlJob = (unit: AjsUnit): boolean =>
   unit.unitType === "tmwj" || unit.unitType === "rtmwj";
 
+const isQueueJob = (unit: AjsUnit): boolean =>
+  unit.unitType === "qj" || unit.unitType === "rq";
+
 const findDefaultAwareParameterValue = (
   unit: AjsUnit,
   key: ParamSymbol,
@@ -85,6 +88,12 @@ const findGroup13EventTimeoutAction = (unit: AjsUnit): string | undefined =>
     DEFAULTS.Ets,
     isFileMonitoringJob(unit) || isExecutionIntervalControlJob(unit),
   );
+
+const findGroup15TransferOperation = (
+  unit: AjsUnit,
+  key: "top1" | "top2" | "top3" | "top4",
+): string | undefined =>
+  isQueueJob(unit) ? undefined : findAjsUnitParameterValue(unit, key);
 
 export const buildUnitListRemainingGroups = (
   unit: AjsUnit,
@@ -252,16 +261,16 @@ export const buildUnitListRemainingGroups = (
     jobType: findAjsUnitParameterValue(unit, "jty"),
     terminationStatus1: findAjsUnitParameterValue(unit, "ts1"),
     terminationDelay1: findAjsUnitParameterValue(unit, "td1"),
-    terminationOperation1: findAjsUnitParameterValue(unit, "top1"),
+    terminationOperation1: findGroup15TransferOperation(unit, "top1"),
     terminationStatus2: findAjsUnitParameterValue(unit, "ts2"),
     terminationDelay2: findAjsUnitParameterValue(unit, "td2"),
-    terminationOperation2: findAjsUnitParameterValue(unit, "top2"),
+    terminationOperation2: findGroup15TransferOperation(unit, "top2"),
     terminationStatus3: findAjsUnitParameterValue(unit, "ts3"),
     terminationDelay3: findAjsUnitParameterValue(unit, "td3"),
-    terminationOperation3: findAjsUnitParameterValue(unit, "top3"),
+    terminationOperation3: findGroup15TransferOperation(unit, "top3"),
     terminationStatus4: findAjsUnitParameterValue(unit, "ts4"),
     terminationDelay4: findAjsUnitParameterValue(unit, "td4"),
-    terminationOperation4: findAjsUnitParameterValue(unit, "top4"),
+    terminationOperation4: findGroup15TransferOperation(unit, "top4"),
   },
   group16: {
     endWaitUnitName: findAjsUnitParameterValue(unit, "eun"),

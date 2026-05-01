@@ -113,6 +113,14 @@
 - [x] Add focused execution-interval control job regression evidence for
       omitted defaults, explicit value preservation, and non-target jobs
 - [x] Run required code-change validation after implementation
+- [x] Investigate unit-list group 15 projection for QUEUE job transfer-file
+      operations as a separate behavior slice
+- [x] Record human approval before changing QUEUE job group 15 projection
+- [x] Implement QUEUE job group 15 unit-type-aware projection only after
+      approval
+- [x] Add focused group 15 regression evidence for QUEUE `tsN` / `tdN`
+      preservation, QUEUE `topN` hiding, and non-QUEUE `topN` preservation
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -260,27 +268,46 @@
   projection consumes those defaults for `tmwj` / `rtmwj`, explicit normalized
   values remain visible, non-execution-interval-control jobs do not synthesize
   those defaults, and raw parser/normalized values remain unchanged.
+- 2026-05-01: QUEUE job group 15 projection is the next approval-gated
+  behavior candidate. The proposed scope is limited to hiding `top1` to
+  `top4` transfer-operation projection for `qj` / `rq`, preserving explicit
+  `ts1` to `ts4` and `td1` to `td4`, and preserving non-QUEUE `topN`
+  projection. Parser grammar, normalized raw parameter storage, diagnostics,
+  generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain out of scope.
+- 2026-05-01: QUEUE job group 15 projection now hides `top1` to `top4`
+  transfer-operation values for `qj` / `rq`. Explicit `ts1` to `ts4` and
+  `td1` to `td4` remain visible, non-QUEUE `topN` projection remains visible,
+  and raw parser/normalized values remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-01
-- Approved scope: User replied "OK. Proceed." after the execution-interval
+- Approved scope: User replied "OK. Proceed." after the QUEUE job unit-list
+  group 15 projection approval request. Approved changes are limited to
+  hiding `top1` to `top4` transfer-operation projection for `qj` / `rq`,
+  preserving explicit `ts1` to `ts4` and `td1` to `td4`, preserving non-QUEUE
+  `topN` projection, adding focused regression evidence, updating SDD and
+  use-case tracking, and running validation. Parser grammar, normalized raw
+  parameter storage, diagnostics, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` changes are out of scope.
+
+Current implementation gate: QUEUE job unit-list group 15 projection for
+`ts1` to `ts4`, `td1` to `td4`, and `top1` to `top4`.
+
+## Prior Approval Evidence
+
+- 2026-05-01: User replied "OK. Proceed." after the execution-interval
   control job defaults and unit-list group 13 projection approval request.
-  Approved changes are limited to aligning omitted `tmwj` / `rtmwj`
+  Approved changes were limited to aligning omitted `tmwj` / `rtmwj`
   `tmitv=10`, `etn=n`, and `ets=kl` behavior, making group 13 projection
   consume those defaults for execution-interval control jobs, preserving
   explicit values and non-target job behavior, adding focused regression
   evidence, updating SDD tracking, and running validation. Parser grammar,
   normalized raw parameter storage, diagnostics, generated artifacts,
-  configuration, dependency versions, and `engines.vscode` changes are out of
+  configuration, dependency versions, and `engines.vscode` changes were out of
   scope.
-
-Current implementation gate: execution-interval control job defaults and
-unit-list group 13 projection for `tmitv`, `etn`, and `ets`.
-
-## Prior Approval Evidence
-
 - 2026-05-01: User replied "OK.Proceed." after the unit-list group 13 file
   monitoring job default-aware projection approval request. Approved changes
   were limited to making group 13 `flwc`, `flwi`, `flco`, and `ets` columns
@@ -335,6 +362,17 @@ Only clear human approval can change Status to Approved.
 
 ## Validation
 
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
+- 2026-05-01: `pnpm run test:compile`
+- 2026-05-01: `npm test`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
+  localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run test:compile`
 - 2026-05-01: `pnpm run qlty`
 - 2026-05-01: `npm test`
