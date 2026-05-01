@@ -83,6 +83,12 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Implemented execution-interval control job `tmitv=10`, `etn=n`, and
   `ets=kl` defaults and group 13 default-aware projection while preserving
   explicit normalized values and raw storage.
+- Investigated QUEUE job unit-list group 15 projection as the next
+  approval-gated behavior candidate after the execution-interval control job
+  slice.
+- Implemented QUEUE job unit-list group 15 projection so `qj` / `rq`
+  transfer-operation values are hidden while transfer source/destination and
+  non-QUEUE `topN` projection remain visible.
 
 ## Impact Investigation
 
@@ -152,6 +158,46 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   follow-up is already narrow and testable.
 - Approval: completed in the prior QUEUE transfer-file slice; see
   `TASKS.md` prior approval evidence.
+
+### QUEUE Job Group 15 Projection Candidate
+
+- Planned change:
+  make unit-list group 15 transfer-operation projection unit-type-aware for
+  QUEUE jobs by hiding `top1` to `top4` values on `qj` / `rq`, while
+  preserving explicit `ts1` to `ts4` and `td1` to `td4` projection and
+  preserving non-QUEUE `topN` projection.
+- Affected files:
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  `src/application/unit-list/buildUnitListView.ts` only if helper typing
+  changes, `src/test/suite/buildUnitListRemainingGroups.test.ts` or
+  `src/test/suite/buildUnitListView.test.ts`,
+  `QUEUE_TRANSFER_FILE_ALIGNMENT.md`, `PARAMETER_COVERAGE_MATRIX.md`,
+  `SPECS.md`, `TASKS.md`, `docs/requirements/use-cases/uc-build-unit-list-view.md`,
+  and branch-level `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `buildUnitListRemainingGroups`,
+  `UnitListGroup15View.terminationStatus1` to `terminationStatus4`,
+  `UnitListGroup15View.terminationDelay1` to `terminationDelay4`,
+  `UnitListGroup15View.terminationOperation1` to `terminationOperation4`, and
+  the group 15 table columns that render those DTO fields.
+- Affected features:
+  JP1/AJS table viewer group 15 transfer-file columns; build-unit-list
+  application use case; QUEUE job transfer-file parameter interpretation.
+- Tests affected:
+  focused unit-list tests for QUEUE jobs with explicit `tsN`, `tdN`, and raw
+  `topN`; non-QUEUE tests proving existing `topN` projection remains visible.
+- Breaking-change risk:
+  medium. This intentionally changes user-visible table output for QUEUE job
+  definitions that contain raw `top1` to `top4` values. Raw parser output and
+  normalized key/value storage remain unchanged.
+- Alternatives considered:
+  keep group 15 raw by design and leave the matrix gap visible; add `topN`
+  getters to `Qj` / `Rq`, rejected because the QUEUE job definition does not
+  define `top1` to `top4`; add diagnostics first, deferred until
+  editor-feedback behavior explicitly owns invalid JP1/AJS parameter handling.
+- Approval:
+  human approval to proceed was given on 2026-05-01 after the investigation
+  summary for QUEUE job unit-list group 15 projection.
 
 ### WTH End-Judgment Key Mapping Candidate
 
@@ -469,6 +515,17 @@ Current branch validation:
   localhost dev-extension `package.nls.json` 404 noise
 - 2026-05-01: `npm run build` completed with existing webpack asset-size
   warnings
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run test:compile`
+- 2026-05-01: `npm test`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
+  localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
 - 2026-04-29: `pnpm run lint:md`
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `npm test`

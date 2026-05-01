@@ -31,8 +31,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Choose the next JP1/AJS3 v13 parameter-alignment slice after
-   execution-interval control job defaults.
+1. Prepare QUEUE job unit-list group 15 projection as the next focused
+   parameter-alignment behavior contract, then record approval before
+   implementation.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
@@ -40,33 +41,28 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/interval-control-defaults`.
+- Branch: `codex/queue-group15-projection`.
 - Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
-  focused implementation of execution-interval control job defaults and group
-  13 projection.
-- Status: unit-list group 13 file monitoring job projection is merged in
-  PR #225. The current slice is approved and implemented locally.
-- Scope: align omitted `tmitv`, `etn`, and `ets` behavior on
-  execution-interval control jobs (`tmwj` / `rtmwj`) and make unit-list group
-  13 projection default-aware for those values.
+  focused implementation of QUEUE job group 15 transfer-file projection.
+- Status: execution-interval control job defaults are merged in PR #226. The
+  current slice is approved and implemented locally.
+- Scope: hide `top1` to `top4` transfer-operation projection on QUEUE jobs
+  (`qj` / `rq`) while preserving explicit `ts1` to `ts4` and `td1` to `td4`
+  projection.
 - Out of scope: parser grammar changes, command generation, diagnostics,
-  generated artifacts, dependency changes, `engines.vscode`, numeric range
-  validation, invalid-combination diagnostics, and broader raw projection
-  policy changes.
+  generated artifacts, dependency changes, `engines.vscode`, byte-length
+  validation, macro-variable validation, invalid-combination diagnostics, and
+  broader raw projection policy changes.
 - Impact summary: the candidate affects
-  `src/domain/models/parameters/Defaults.ts`,
-  `src/domain/models/parameters/optionalScalarParameterBuilders.ts`,
   `src/application/unit-list/buildUnitListRemainingGroups.ts`,
   `src/application/unit-list/buildUnitListView.ts` DTO fields only if helper
-  typing requires it, focused parameter factory and unit-list regression
-  tests, and the execution-interval control job SDD documents. Existing
-  domain default behavior in `ParamFactory.etn` and `ParamFactory.ets` is
-  reused; `ParamFactory.tmitv` now uses `DEFAULTS.Tmitv`.
+  typing requires it, focused unit-list regression tests, and the QUEUE job
+  SDD documents. Existing `Qj` / `Rq` wrapper behavior already avoids `topN`;
+  the approval-sensitive boundary is user-visible group 15 projection.
 - Risks and assumptions: behavior changes are user-visible in the table viewer
-  because omitted execution-interval control job group 13 fields would display
-  defaults instead of empty cells. Adding a `tmitv` domain default is also
-  observable through the `Tmwj.tmitv` wrapper. Raw parser output and
-  normalized parameter storage remain preserved.
+  because raw `topN` values on QUEUE jobs would no longer appear in group 15
+  transfer-operation columns. Raw parser output and normalized parameter
+  storage remain preserved.
 
 ## Build/Test Performance SDD
 
@@ -95,8 +91,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: execution-interval control job defaults and unit-list group 13
-  default-aware projection.
+  slice: QUEUE job unit-list group 15 unit-type-aware projection.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -133,6 +128,14 @@ Current branch checks:
 - 2026-05-01: `npm run build` completed with existing webpack asset-size
   warnings
 - 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run test:compile`
+- 2026-05-01: `npm test`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
+  localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
   log-file permission failure
 - 2026-05-01: `pnpm run test:compile`
@@ -143,6 +146,9 @@ Current branch checks:
 - 2026-05-01: `npm run build` completed with existing webpack asset-size
   warnings
 - 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run test:compile`
 - 2026-04-29: `pnpm run qlty` required an escalated rerun after a sandboxed

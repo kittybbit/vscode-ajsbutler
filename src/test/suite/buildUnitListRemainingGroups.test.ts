@@ -114,6 +114,40 @@ unit=root,,jp1admin,;
 }
 `;
 
+const queueGroup15Definition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=queue,,jp1admin,;
+  {
+    ty=qj;
+    ts1=queue-src-1;
+    td1=queue-dst-1;
+    top1=sav;
+    ts2=queue-src-2;
+    td2=queue-dst-2;
+    top2=del;
+  }
+  unit=recovery-queue,,jp1admin,;
+  {
+    ty=rq;
+    ts3=recovery-src-3;
+    td3=recovery-dst-3;
+    top3=sav;
+  }
+  unit=regular-job,,jp1admin,;
+  {
+    ty=j;
+    ts1=regular-src-1;
+    td1=regular-dst-1;
+    top1=del;
+    ts4=regular-src-4;
+    td4=regular-dst-4;
+    top4=sav;
+  }
+}
+`;
+
 suite("Build Unit List Remaining Groups", () => {
   test("projects all remaining group fields from unit parameters", () => {
     const result = parseAjs(definition);
@@ -277,5 +311,53 @@ suite("Build Unit List Remaining Groups", () => {
     assert.strictEqual(regularView.group13.timeoutInterval, undefined);
     assert.strictEqual(regularView.group13.eventTimeout, undefined);
     assert.strictEqual(regularView.group13.eventTimeoutAction, undefined);
+  });
+
+  test("hides QUEUE job transfer operations in group 15", () => {
+    const result = parseAjs(queueGroup15Definition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const queueJob = document.rootUnits[0]?.children[0];
+    const recoveryQueueJob = document.rootUnits[0]?.children[1];
+    const regularJob = document.rootUnits[0]?.children[2];
+
+    assert.ok(queueJob);
+    assert.ok(recoveryQueueJob);
+    assert.ok(regularJob);
+
+    const queueView = buildUnitListRemainingGroups(queueJob, [], []);
+    const recoveryQueueView = buildUnitListRemainingGroups(
+      recoveryQueueJob,
+      [],
+      [],
+    );
+    const regularView = buildUnitListRemainingGroups(regularJob, [], []);
+
+    assert.strictEqual(queueView.group15.terminationStatus1, "queue-src-1");
+    assert.strictEqual(queueView.group15.terminationDelay1, "queue-dst-1");
+    assert.strictEqual(queueView.group15.terminationOperation1, undefined);
+    assert.strictEqual(queueView.group15.terminationStatus2, "queue-src-2");
+    assert.strictEqual(queueView.group15.terminationDelay2, "queue-dst-2");
+    assert.strictEqual(queueView.group15.terminationOperation2, undefined);
+
+    assert.strictEqual(
+      recoveryQueueView.group15.terminationStatus3,
+      "recovery-src-3",
+    );
+    assert.strictEqual(
+      recoveryQueueView.group15.terminationDelay3,
+      "recovery-dst-3",
+    );
+    assert.strictEqual(
+      recoveryQueueView.group15.terminationOperation3,
+      undefined,
+    );
+
+    assert.strictEqual(regularView.group15.terminationStatus1, "regular-src-1");
+    assert.strictEqual(regularView.group15.terminationDelay1, "regular-dst-1");
+    assert.strictEqual(regularView.group15.terminationOperation1, "del");
+    assert.strictEqual(regularView.group15.terminationStatus4, "regular-src-4");
+    assert.strictEqual(regularView.group15.terminationDelay4, "regular-dst-4");
+    assert.strictEqual(regularView.group15.terminationOperation4, "sav");
   });
 });

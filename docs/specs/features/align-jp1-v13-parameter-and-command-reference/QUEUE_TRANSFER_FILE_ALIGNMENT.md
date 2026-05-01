@@ -73,3 +73,42 @@ parameters.
   behavior is specified as diagnostics, warnings, or raw preservation.
 - Revisit whether group 15 should become unit-type-aware only as a separate
   unit-list behavior slice.
+
+## Group 15 Projection Candidate
+
+### Current Behavior
+
+- `Qj` / `Rq` wrappers do not expose `top1` to `top4`.
+- Unit-list group 15 reads normalized raw `top1` to `top4` values for every
+  unit type.
+- If a QUEUE job definition contains raw `topN` values, group 15 can display
+  those transfer-operation values even though the QUEUE job manual section
+  does not define them.
+
+### Proposed Behavior
+
+After human approval:
+
+- keep displaying explicit `ts1` to `ts4` and `td1` to `td4` values for
+  `qj` / `rq`;
+- hide `top1` to `top4` group 15 transfer-operation values for `qj` / `rq`;
+- preserve non-QUEUE group 15 transfer-operation projection;
+- preserve raw parser output and normalized key/value storage.
+
+### Impact
+
+- User-visible table output changes only for QUEUE jobs that contain raw
+  `top1` to `top4` values.
+- The projection behavior becomes aligned with the existing `Qj` / `Rq`
+  wrapper boundary and the JP1/AJS3 version 13 QUEUE job definition.
+- Parser grammar, generated artifacts, diagnostics, and command generation are
+  unchanged.
+
+### Projection Alternatives
+
+- Keep group 15 raw by design and leave the matrix gap visible.
+- Add `topN` getters to `Qj` / `Rq`, rejected because the QUEUE job definition
+  does not define `top1` to `top4`.
+- Add diagnostics for raw `topN` on QUEUE jobs instead of changing projection,
+  deferred until editor-feedback behavior explicitly owns invalid JP1/AJS
+  parameter handling.
