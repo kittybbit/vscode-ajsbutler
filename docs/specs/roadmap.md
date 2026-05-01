@@ -35,6 +35,8 @@
    - Unit-list group 10 projection now consumes effective schedule-rule
      `wc` / `wt` start-condition monitoring values after the domain-only
      pairing API was implemented.
+   - The next focused remaining gap is parameter semantic diagnostics, starting
+     with job end-judgment `jd` / `abr` invalid-combination reporting.
    - Keep behavior-preserving slices separate from behavior-changing manual
      alignment slices.
 

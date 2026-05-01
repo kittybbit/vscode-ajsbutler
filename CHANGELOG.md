@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.14.0]
+
+- Added read-only JP1/AJS WebAPI import as a beta command.
+- Improved JP1/AJS3 version 13 parameter handling so table output and defaults
+  better match the official definition reference.
+
 ## [1.13.1]
 
 - Fixed flow-view nested expand/collapse layout so expanded panels stay

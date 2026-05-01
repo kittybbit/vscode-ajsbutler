@@ -98,6 +98,12 @@ JP1/AJS3 version 13 reference documents.
   table output. If approved, it should consume execution-interval defaults for
   `tmitv`, `etn`, and `ets` while preserving explicit normalized values,
   parser output, and normalized raw parameter storage.
+- Job end-judgment `jd` / `abr` diagnostics are approval-sensitive because
+  existing behavior preserves explicit invalid combinations as raw parsed
+  values without editor feedback. A diagnostic slice must preserve raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  and command generation while adding application-level semantic diagnostics
+  through the existing editor-feedback boundary.
 
 ## Reference Documents
 

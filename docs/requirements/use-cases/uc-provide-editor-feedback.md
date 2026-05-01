@@ -26,7 +26,10 @@ embedding VS Code object construction inside parser-adjacent business logic.
 - domain and application layers must not construct `vscode.Diagnostic`,
   `vscode.Hover`, `vscode.Range`, or `vscode.MarkdownString`
 - VS Code adapters map DTOs into editor-specific objects
-- existing diagnostic messages and hover syntax content must remain unchanged
+- existing parser syntax diagnostic messages and hover syntax content must
+  remain unchanged
+- semantic parameter diagnostics must preserve raw parsed data and report
+  focused JP1/AJS3 version 13 rule violations without changing parser output
 
 ## Behavioral Scenarios (Gherkin)
 
@@ -47,6 +50,14 @@ Scenario: VS Code objects stay outside application output
   Given JP1/AJS editor feedback output
   When diagnostics and hover data are produced
   Then the application output does not construct VS Code API objects
+
+Scenario: Invalid parameter combinations produce semantic diagnostics
+  Given a syntactically valid JP1/AJS document
+  And the document contains a parameter combination that violates an explicit
+    JP1/AJS3 version 13 rule
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

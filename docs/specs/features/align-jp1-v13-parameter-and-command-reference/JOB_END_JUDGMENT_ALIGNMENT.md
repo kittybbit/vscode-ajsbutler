@@ -75,7 +75,57 @@ This document covers the currently modeled end-judgment defaults for `jd`,
 
 ## Follow-up
 
-- Add range validation only after deciding whether invalid JP1/AJS parameter
-  values should become diagnostics, warnings, or preserved raw values.
-- Model `jd` / `abr` invalid combinations once the behavior contract is
-  explicit enough to test across domain and editor-feedback paths.
+- Add range validation only after the first semantic diagnostic slice proves
+  where source locations and parameter-rule checks belong.
+- Model additional retry diagnostics after `jd` / `abr` invalid-combination
+  behavior is implemented and validated across domain and editor-feedback
+  paths.
+
+## JD / ABR Diagnostic Candidate
+
+### Current Behavior
+
+- `ParamFactory.jd` resolves omitted `jd` to `cod`.
+- `ParamFactory.abr` resolves omitted `abr` to `n`.
+- Explicit invalid combinations, such as `jd=ab` with `abr=y`, are preserved
+  as raw values and do not currently produce semantic diagnostics.
+- `buildSyntaxDiagnostics` currently maps parser syntax errors only; it does
+  not inspect parsed units for JP1/AJS parameter-rule violations.
+- Parsed unit parameters preserve key, value, and definition order, but not
+  line and column source locations.
+
+### Proposed Behavior
+
+After human approval:
+
+- keep raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, and command generation unchanged;
+- add an application-level semantic diagnostic when an explicit UNIX/PC job or
+  UNIX/PC custom job has effective `abr=y` and effective `jd` is not `cod`;
+- report the diagnostic through the existing editor-feedback DTO and VS Code
+  adapter path so desktop and web hosts share the same rule;
+- keep omitted `jd=cod` and omitted `abr=n` behavior non-diagnostic;
+- add focused tests for syntax-only diagnostics, valid omitted defaults,
+  explicit valid `jd=cod` / `abr=y`, and explicit invalid `jd` / `abr`
+  combinations.
+
+### Impact
+
+- User-visible diagnostics change for syntactically valid JP1/AJS documents
+  containing the invalid combination.
+- The parser grammar should not change, but parsed parameter source locations
+  may need to be added to `Unit.parameters` so semantic diagnostics can point
+  at the explicit offending parameter instead of reporting a generic document
+  position.
+- The application diagnostics boundary broadens from syntax-only feedback to
+  syntax plus focused semantic parameter feedback.
+
+### Diagnostic Alternatives
+
+- Preserve invalid combinations silently and leave the matrix gap visible.
+- Change domain defaults or wrapper values to avoid the invalid combination,
+  rejected because raw manual-invalid input should remain inspectable.
+- Add broad parameter validation first, rejected because it is too large for
+  the next alignment slice.
+- Add diagnostics without source locations, possible as a fallback but less
+  useful for editor feedback and likely to weaken regression evidence.

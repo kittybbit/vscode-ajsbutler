@@ -121,6 +121,15 @@
 - [x] Add focused group 15 regression evidence for QUEUE `tsN` / `tdN`
       preservation, QUEUE `topN` hiding, and non-QUEUE `topN` preservation
 - [x] Run required code-change validation after implementation
+- [x] Investigate job end-judgment `jd` / `abr` invalid-combination diagnostics
+      as the next parameter semantic diagnostics slice
+- [ ] Record human approval before changing editor-feedback diagnostics,
+      parser source-location data, runtime code, tests, generated artifacts,
+      or configuration
+- [ ] Implement focused `jd` / `abr` semantic diagnostics only after approval
+- [ ] Add focused diagnostics regression evidence for valid omitted defaults,
+      explicit valid retry settings, and explicit invalid combinations
+- [ ] Run required code-change validation after implementation
 
 ## Notes
 
@@ -279,25 +288,35 @@
   transfer-operation values for `qj` / `rq`. Explicit `ts1` to `ts4` and
   `td1` to `td4` remain visible, non-QUEUE `topN` projection remains visible,
   and raw parser/normalized values remain unchanged.
+- 2026-05-01: job end-judgment `jd` / `abr` invalid-combination diagnostics
+  are the next approval-gated parameter semantic diagnostics candidate. The
+  proposed scope is limited to reporting explicit UNIX/PC job and UNIX/PC
+  custom job `abr=y` values when the effective `jd` value is not `cod`,
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, and command generation. Parser grammar, generated
+  artifacts, configuration, dependency versions, `engines.vscode`, retry range
+  diagnostics, byte-length validation, and broad range validation remain out of
+  scope.
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-05-01
-- Approved scope: User replied "OK. Proceed." after the QUEUE job unit-list
-  group 15 projection approval request. Approved changes are limited to
-  hiding `top1` to `top4` transfer-operation projection for `qj` / `rq`,
-  preserving explicit `ts1` to `ts4` and `td1` to `td4`, preserving non-QUEUE
-  `topN` projection, adding focused regression evidence, updating SDD and
-  use-case tracking, and running validation. Parser grammar, normalized raw
-  parameter storage, diagnostics, generated artifacts, configuration,
-  dependency versions, and `engines.vscode` changes are out of scope.
+- Status: Pending
+- Approved at:
+- Approved scope:
 
-Current implementation gate: QUEUE job unit-list group 15 projection for
-`ts1` to `ts4`, `td1` to `td4`, and `top1` to `top4`.
+Current implementation gate: job end-judgment `jd` / `abr`
+invalid-combination diagnostics.
 
 ## Prior Approval Evidence
 
+- 2026-05-01: User replied "OK. Proceed." after the QUEUE job unit-list group
+  15 projection approval request. Approved changes were limited to hiding
+  `top1` to `top4` transfer-operation projection for `qj` / `rq`, preserving
+  explicit `ts1` to `ts4` and `td1` to `td4`, preserving non-QUEUE `topN`
+  projection, adding focused regression evidence, updating SDD and use-case
+  tracking, and running validation. Parser grammar, normalized raw parameter
+  storage, diagnostics, generated artifacts, configuration, dependency
+  versions, and `engines.vscode` changes were out of scope.
 - 2026-05-01: User replied "OK. Proceed." after the execution-interval
   control job defaults and unit-list group 13 projection approval request.
   Approved changes were limited to aligning omitted `tmwj` / `rtmwj`
