@@ -31,9 +31,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Prepare QUEUE job unit-list group 15 projection as the next focused
-   parameter-alignment behavior contract, then record approval before
-   implementation.
+1. Prepare job end-judgment `jd` / `abr` invalid-combination diagnostics as
+   the next focused parameter-alignment behavior contract, then record approval
+   before implementation.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
@@ -41,28 +41,28 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/queue-group15-projection`.
+- Branch: `codex/job-end-judgment-diagnostics`.
 - Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
-  focused implementation of QUEUE job group 15 transfer-file projection.
-- Status: execution-interval control job defaults are merged in PR #226. The
-  current slice is approved and implemented locally.
-- Scope: hide `top1` to `top4` transfer-operation projection on QUEUE jobs
-  (`qj` / `rq`) while preserving explicit `ts1` to `ts4` and `td1` to `td4`
-  projection.
-- Out of scope: parser grammar changes, command generation, diagnostics,
-  generated artifacts, dependency changes, `engines.vscode`, byte-length
-  validation, macro-variable validation, invalid-combination diagnostics, and
-  broader raw projection policy changes.
+  focused diagnostic contract for job end-judgment invalid combinations.
+- Status: investigation recorded; implementation approval is pending.
+- Scope: add application-level semantic diagnostics for explicit UNIX/PC job
+  and UNIX/PC custom job `abr=y` values when the effective `jd` value is not
+  `cod`, while preserving raw parser output, domain wrapper values, unit-list
+  projection, and command generation.
+- Out of scope: parser grammar changes, generated artifacts, dependency
+  changes, `engines.vscode`, changing `jd` / `abr` default semantics, changing
+  list or flow projection, retry range diagnostics, byte-length validation, and
+  broad parameter range validation.
 - Impact summary: the candidate affects
-  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
-  `src/application/unit-list/buildUnitListView.ts` DTO fields only if helper
-  typing requires it, focused unit-list regression tests, and the QUEUE job
-  SDD documents. Existing `Qj` / `Rq` wrapper behavior already avoids `topN`;
-  the approval-sensitive boundary is user-visible group 15 projection.
-- Risks and assumptions: behavior changes are user-visible in the table viewer
-  because raw `topN` values on QUEUE jobs would no longer appear in group 15
-  transfer-operation columns. Raw parser output and normalized parameter
-  storage remain preserved.
+  `src/application/editor-feedback/buildSyntaxDiagnostics.ts` or an adjacent
+  application diagnostic helper, `src/domain/services/parser/AjsEvaluator.ts`
+  and `src/domain/values/Unit.ts` only if parameter source locations are added,
+  focused diagnostics tests, VS Code diagnostic adapter behavior through the
+  existing DTO mapping, and the job end-judgment SDD documents.
+- Risks and assumptions: the diagnostic is user-visible in both desktop and
+  web extension hosts. Implementation should keep parser syntax diagnostics
+  unchanged and should report semantic diagnostics only when explicit
+  parameters make the invalid combination observable.
 
 ## Build/Test Performance SDD
 
@@ -109,6 +109,13 @@ contracts were compressed into `docs/requirements/use-cases/`.
 
 Current branch checks:
 
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm test`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
+  localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run lint:md`
 - 2026-04-29: `pnpm run test:compile`
