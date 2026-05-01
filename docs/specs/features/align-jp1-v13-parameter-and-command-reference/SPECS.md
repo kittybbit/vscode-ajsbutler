@@ -82,6 +82,16 @@ JP1/AJS3 version 13 reference documents.
   table output. If approved, it should consume the existing wrapper/default
   semantics for `flwc`, `flwi`, `flco`, and `ets` while preserving parser
   output and normalized raw parameter storage.
+- Execution-interval control job defaults are approval-sensitive because
+  JP1/AJS3 version 13 defines omitted `tmitv`, `etn`, and `ets` behavior for
+  `tmwj` / `rtmwj`, while current code only has generic defaults for `etn` and
+  `ets`. `ParamFactory.tmitv` is referenced only through `Tmwj.tmitv` today,
+  but adding a wrapper default is still a domain behavior change.
+- Execution-interval control job unit-list group 13 projection is a separate
+  approval-sensitive boundary from domain defaults because it is user-visible
+  table output. If approved, it should consume execution-interval defaults for
+  `tmitv`, `etn`, and `ets` while preserving explicit normalized values,
+  parser output, and normalized raw parameter storage.
 
 ## Reference Documents
 

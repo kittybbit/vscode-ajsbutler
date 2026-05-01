@@ -29,6 +29,9 @@ const isEventSendingJob = (unit: AjsUnit): boolean =>
 const isFileMonitoringJob = (unit: AjsUnit): boolean =>
   unit.unitType === "flwj" || unit.unitType === "rflwj";
 
+const isExecutionIntervalControlJob = (unit: AjsUnit): boolean =>
+  unit.unitType === "tmwj" || unit.unitType === "rtmwj";
+
 const findDefaultAwareParameterValue = (
   unit: AjsUnit,
   key: ParamSymbol,
@@ -61,6 +64,26 @@ const findFileMonitoringJobDefaultAwareParameterValue = (
     key,
     defaultValue,
     isFileMonitoringJob(unit),
+  );
+
+const findExecutionIntervalControlJobDefaultAwareParameterValue = (
+  unit: AjsUnit,
+  key: ParamSymbol,
+  defaultValue: string,
+): string | undefined =>
+  findDefaultAwareParameterValue(
+    unit,
+    key,
+    defaultValue,
+    isExecutionIntervalControlJob(unit),
+  );
+
+const findGroup13EventTimeoutAction = (unit: AjsUnit): string | undefined =>
+  findDefaultAwareParameterValue(
+    unit,
+    "ets",
+    DEFAULTS.Ets,
+    isFileMonitoringJob(unit) || isExecutionIntervalControlJob(unit),
   );
 
 export const buildUnitListRemainingGroups = (
@@ -165,8 +188,16 @@ export const buildUnitListRemainingGroups = (
     judgmentFileName: findAjsUnitParameterValue(unit, "ejf"),
   },
   group13: {
-    timeoutInterval: findAjsUnitParameterValue(unit, "tmitv"),
-    eventTimeout: findAjsUnitParameterValue(unit, "etn"),
+    timeoutInterval: findExecutionIntervalControlJobDefaultAwareParameterValue(
+      unit,
+      "tmitv",
+      DEFAULTS.Tmitv,
+    ),
+    eventTimeout: findExecutionIntervalControlJobDefaultAwareParameterValue(
+      unit,
+      "etn",
+      DEFAULTS.Etn,
+    ),
     monitoredFileName: findAjsUnitParameterValue(unit, "flwf"),
     monitoredFileCondition: findFileMonitoringJobDefaultAwareParameterValue(
       unit,
@@ -186,11 +217,7 @@ export const buildUnitListRemainingGroups = (
     waitEventId: findAjsUnitParameterValue(unit, "evwid"),
     waitHostName: findAjsUnitParameterValue(unit, "evhst"),
     waitMessage: findAjsUnitParameterValue(unit, "evwms"),
-    eventTimeoutAction: findFileMonitoringJobDefaultAwareParameterValue(
-      unit,
-      "ets",
-      DEFAULTS.Ets,
-    ),
+    eventTimeoutAction: findGroup13EventTimeoutAction(unit),
   },
   group14: {
     actionEventId: findAjsUnitParameterValue(unit, "evsid"),

@@ -77,6 +77,12 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   approval-gated behavior candidate after the group 14 slice.
 - Implemented unit-list group 13 projection for file monitoring job defaults
   while preserving explicit normalized values and raw storage.
+- Investigated execution-interval control job defaults and unit-list group 13
+  projection for omitted `tmitv`, `etn`, and `ets` values as the next
+  approval-gated behavior candidate after the file monitoring slice.
+- Implemented execution-interval control job `tmitv=10`, `etn=n`, and
+  `ets=kl` defaults and group 13 default-aware projection while preserving
+  explicit normalized values and raw storage.
 
 ## Impact Investigation
 
@@ -353,6 +359,57 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   human approval to proceed was given on 2026-05-01 after the investigation
   summary for unit-list group 13 default-aware projection.
 
+### Execution-Interval Control Job Defaults Candidate
+
+- Planned change:
+  align omitted execution-interval control job `tmitv`, `etn`, and `ets`
+  behavior with the JP1/AJS3 version 13 execution-interval control job
+  definition. The recommended implementation adds a `tmitv=10` domain default
+  and makes unit-list group 13 display defaults for omitted `tmwj` / `rtmwj`
+  values while preserving explicit normalized values.
+- Affected files:
+  `src/domain/models/parameters/Defaults.ts`,
+  `src/domain/models/parameters/optionalScalarParameterBuilders.ts`,
+  `src/domain/models/units/Tmwj.ts` as the wrapper consumer,
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  `src/application/unit-list/buildUnitListView.ts` only if helper typing
+  changes, `src/test/suite/parameterFactory.test.ts`,
+  `src/test/suite/buildUnitListRemainingGroups.test.ts` or
+  `src/test/suite/buildUnitListView.test.ts`,
+  `EXECUTION_INTERVAL_CONTROL_JOB_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `TASKS.md`, and branch-level
+  `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `ParamFactory.tmitv`, `optionalScalarParameterBuilders.tmitv`,
+  `DEFAULTS`, `Tmwj.tmitv`, `Tmwj.etn`, `Tmwj.ets`,
+  `buildUnitListRemainingGroups`, `UnitListGroup13View.timeoutInterval`,
+  `UnitListGroup13View.eventTimeout`,
+  `UnitListGroup13View.eventTimeoutAction`, and the group 13 table columns
+  that render those DTO fields.
+- Affected features:
+  JP1/AJS parameter interpretation for execution-interval control jobs;
+  JP1/AJS table viewer group 13 event job definition columns;
+  build-unit-list application use case.
+- Tests affected:
+  focused parameter factory tests for omitted and explicit `tmitv`, `etn`, and
+  `ets` behavior; focused unit-list tests for omitted execution-interval
+  control job defaults, explicit value preservation, and non-target job
+  behavior.
+- Breaking-change risk:
+  medium. Omitted `tmitv` would become visible through the domain wrapper as
+  `10`, and omitted group 13 execution-interval control job fields would
+  display defaults instead of empty cells. The planned scope preserves raw
+  parser output and normalized key/value storage.
+- Alternatives considered:
+  keep group 13 raw by design and leave the matrix gap visible; add
+  projection-only defaults without adding a `tmitv` domain default, rejected as
+  less domain-aligned; broaden the slice to all wait-job defaults, deferred
+  because it expands the approval and regression surface.
+- Approval:
+  human approval to proceed was given on 2026-05-01 after the investigation
+  summary for execution-interval control job defaults and unit-list group 13
+  projection.
+
 ## Follow-up
 
 - Apply the same value parsing audit/refactor workflow to other parameter
@@ -371,6 +428,8 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Revisit file monitoring job `flwc` invalid combinations, `flwi` range
   validation, wildcard restrictions, and `flco` pairing diagnostics after the
   editor-feedback behavior contract is explicit.
+- Revisit execution-interval control job `tmitv` range validation and broader
+  wait-job default reconciliation after the focused default/projection slice.
 
 ## Validation
 
@@ -400,6 +459,16 @@ Current branch validation:
   warnings
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `pnpm run lint:md`
+- 2026-05-01: `pnpm run lint:md`
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
+- 2026-05-01: `pnpm run test:compile`
+- 2026-05-01: `npm test`
+- 2026-05-01: `pnpm run qlty`
+- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
+  localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `npm run build` completed with existing webpack asset-size
+  warnings
 - 2026-04-29: `pnpm run lint:md`
 - 2026-04-29: `pnpm run qlty`
 - 2026-04-29: `npm test`

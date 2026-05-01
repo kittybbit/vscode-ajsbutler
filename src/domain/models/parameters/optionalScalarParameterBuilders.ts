@@ -613,7 +613,11 @@ export const optionalScalarParameterBuilders = {
     (param) => new Tho(param),
     DEFAULTS.Tho,
   ),
-  tmitv: createOptionalScalarBuilder("tmitv", (param) => new Tmitv(param)),
+  tmitv: createOptionalScalarBuilder(
+    "tmitv",
+    (param) => new Tmitv(param),
+    DEFAULTS.Tmitv,
+  ),
   ts1: createOptionalScalarBuilder("ts1", (param) => new Ts1(param)),
   ts2: createOptionalScalarBuilder("ts2", (param) => new Ts2(param)),
   ts3: createOptionalScalarBuilder("ts3", (param) => new Ts3(param)),
