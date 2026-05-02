@@ -75,9 +75,13 @@
 
 5. Use Qlty findings as architectural feedback.
 
-   - Treat recurring duplication, complexity, and nested-control-flow findings
-     as prioritized refactoring candidates.
-   - Correlate Qlty findings with SDD tasks and technical debt slices.
+   - Track active implementation under
+     `docs/specs/features/qlty-driven-architecture-refactoring/`.
+   - Phase 0 removes repository noise before structural changes.
+   - Phase 1 targets flow-viewer complexity.
+   - Phase 2 targets application orchestration duplication.
+   - Phase 3 targets domain conditional complexity.
+   - Every slice must preserve desktop and web extension behavior.
 
 ## Deferred / Optional Slices
 

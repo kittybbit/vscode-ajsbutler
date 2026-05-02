@@ -38,6 +38,8 @@ rules in `docs/specs/README.md`, not in this file.
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
+4. Execute Phase 0 of the Qlty-driven architecture refactoring feature to
+   remove repository noise before structural refactoring.
 
 ## Current Branch Plan
 
@@ -109,6 +111,9 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/modernize-runtime-boundaries/`:
   active modernization follow-up for `UnitEntity` hash readiness and bundle
   pressure notes.
+- `docs/specs/features/qlty-driven-architecture-refactoring/`:
+  active maintainability-driven architectural refactoring based on Qlty
+  complexity, duplication, and code-smell findings.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
@@ -118,82 +123,3 @@ contracts were compressed into `docs/requirements/use-cases/`.
 - docs-only changes: `pnpm run qlty`; add `pnpm run lint:md` when markdown
   structure or links need focused validation
 - code changes: follow `docs/specs/README.md`
-
-Current branch checks:
-
-- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
-  log-file permission failure
-- 2026-05-01: `pnpm test`
-- 2026-05-01: `pnpm run test:web` required an escalated rerun after Chromium
-  failed to launch in the sandbox with macOS Mach port permission errors; the
-  escalated rerun completed with exit code 0 and existing localhost
-  dev-extension `package.nls.json` 404 noise
-- 2026-05-01: `pnpm run build` completed with existing webpack asset-size
-  warnings
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run qlty` completed with exit code 0; final runs used an
-  escalated command because sandboxed qlty cannot create its log file
-- 2026-05-01: `pnpm test`
-- 2026-05-01: `pnpm run test:web` required an escalated rerun after Chromium
-  failed to launch in the sandbox with macOS Mach port permission errors; the
-  escalated rerun completed with exit code 0 and existing localhost
-  dev-extension `package.nls.json` 404 noise
-- 2026-05-01: `pnpm run build` completed with existing webpack asset-size
-  warnings
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run qlty`
-- 2026-05-01: `npm test`
-- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
-  localhost dev-extension `package.nls.json` 404 noise
-- 2026-05-01: `npm run build` completed with existing webpack asset-size
-  warnings
-- 2026-04-29: `pnpm run qlty`
-- 2026-04-29: `pnpm run lint:md`
-- 2026-04-29: `pnpm run test:compile`
-- 2026-04-29: `npm test`
-- 2026-04-29: `npm run test:web`
-- 2026-04-29: `npm run build` completed with existing webpack asset-size
-  warnings
-- 2026-04-29: `pnpm run lint:md`
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
-  log-file permission failure
-- 2026-05-01: `pnpm run test:compile`
-- 2026-05-01: `npm test`
-- 2026-05-01: `pnpm run qlty`
-- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
-  localhost dev-extension `package.nls.json` 404 noise
-- 2026-05-01: `npm run build` completed with existing webpack asset-size
-  warnings
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run test:compile`
-- 2026-05-01: `npm test`
-- 2026-05-01: `pnpm run qlty`
-- 2026-05-01: `npm run test:web` completed with exit code 0 and existing
-  localhost dev-extension `package.nls.json` 404 noise
-- 2026-05-01: `npm run build` completed with existing webpack asset-size
-  warnings
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
-  log-file permission failure
-- 2026-05-01: `pnpm run test:compile`
-- 2026-05-01: `pnpm run qlty`
-- 2026-05-01: `npm test`
-- 2026-05-01: `npm run test:web` completed with exit code 0 and shutdown-time
-  `ECONNRESET` / premature-close noise
-- 2026-05-01: `npm run build` completed with existing webpack asset-size
-  warnings
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run lint:md`
-- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
-  log-file permission failure
-- 2026-04-29: `pnpm run qlty`
-- 2026-04-29: `pnpm run test:compile`
-- 2026-04-29: `pnpm run qlty` required an escalated rerun after a sandboxed
-  log-file permission failure
-- 2026-04-29: `npm test`
-- 2026-04-29: `npm run test:web`
-- 2026-04-29: `npm run build` completed with existing webpack asset-size
-  warnings
-- 2026-04-29: `pnpm run lint:md`
