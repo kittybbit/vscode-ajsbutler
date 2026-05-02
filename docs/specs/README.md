@@ -43,8 +43,9 @@ For non-trivial changes:
    branch priorities change materially
 9. refresh `docs/specs/roadmap.md` in the same commit if a completed slice
    changes repository-level ordering, remaining debt, or deferred work
-10. before `git push`, run local validation serially in this order for code
-    changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`, `pnpm run build`
+10. before `git push`, run local validation through `rtk` serially in this
+    order for code changes: `rtk pnpm run qlty`, `rtk pnpm test`,
+    `rtk pnpm run test:web`, `rtk pnpm run build`
 11. run any additional task-specific checks before finishing
 12. avoid anemic domain models: extract only cross-unit or cross-layer
     semantics into helpers/interfaces, and keep entity identity plus
@@ -54,10 +55,13 @@ For non-trivial changes:
 For docs-only changes:
 
 - `pnpm run build` is not required
-- `pnpm run qlty` is required
-- run `pnpm run lint:md` when the changed markdown scope benefits from
+- `rtk pnpm run qlty` is required
+- run `rtk pnpm run lint:md` when the changed markdown scope benefits from
   markdown-specific validation
 - repository `Verify` workflow should not be relied on as a required gate
+
+Run validation commands through `rtk` by default. `rtk` is a cost-control and
+execution-efficiency tool; it is not a reason to skip required validation.
 
 ## Semantic Code Navigation
 
@@ -71,6 +75,16 @@ reference and dependency impact, in:
 - Phase 1 impact investigation before requesting approval
 - Phase 3 reference impact verification after approval
 
+Use Serena selectively. Default order:
+
+1. targeted symbol lookup
+2. direct reference lookup
+3. call-site and dependency impact lookup
+4. broader repository exploration only when uncertainty remains
+
+Do not perform broad repository exploration before identifying target symbols.
+Do not repeat the same semantic search without a new question.
+
 Serena is supplemental tooling. It does not replace:
 
 - SDD artifacts
@@ -82,6 +96,10 @@ Serena is supplemental tooling. It does not replace:
 Manual impact analysis remains required. Do not treat Serena-only results as
 proof that a change is safe.
 
+Start with local, targeted lookup to reduce token use. Use broad exploration
+only when the targeted checks still leave uncertainty about impact or
+references.
+
 Minimal local setup:
 
 ```bash
@@ -92,6 +110,45 @@ serena setup codex
 
 If the MCP client cannot find `serena` on `PATH`, configure the Codex MCP
 server command with the absolute path to the installed `serena` executable.
+
+## Model and Agent Usage
+
+Use model and agent selection to control cost and precision without changing
+the SDD process. Do not define a separate abstract "intelligence" rule; choose
+the model based on whether the current phase requires judgment or execution.
+
+Recommended model use:
+
+- planning, impact investigation, design decisions, and pre-approval review:
+  use a high-accuracy model
+- destructive-change decisions, architecture decisions, and specification
+  decisions: use a high-accuracy model
+- implementation inside an already-approved scope: medium- or lower-cost
+  models may be used
+- simple fixes, lint follow-up, and approved test expectation updates:
+  lower-cost models may be used
+- if implementation reveals an out-of-scope change, specification change, or
+  design decision: stop and return to high-accuracy investigation and
+  re-approval
+
+Codex, GitHub Copilot, or another coding assistant may be used, but all agents
+must follow the same SDD gate. Changing the agent or model does not change the
+process.
+
+Every agent must preserve:
+
+- impact investigation
+- approval evidence
+- approved scope boundaries
+- required validation
+
+Copilot suggestions must be checked against the approved `SPECS.md`,
+`TASKS.md`, and approved scope before adoption. Do not accept Copilot
+suggestions outside the approved scope. If an out-of-scope change appears
+necessary, stop and return to investigation and re-approval.
+
+When Codex orchestrates work across agents, Codex owns consistency of the SDD
+documents, approval evidence, scope tracking, and validation record.
 
 ## Implementation Change Gate
 
