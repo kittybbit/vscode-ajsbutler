@@ -84,7 +84,7 @@ This document covers the currently modeled end-judgment defaults for `jd`,
 
 ## JD / ABR Diagnostic Candidate
 
-### Current Behavior
+### JD / ABR Current Behavior
 
 - `ParamFactory.jd` resolves omitted `jd` to `cod`.
 - `ParamFactory.abr` resolves omitted `abr` to `n`.
@@ -109,7 +109,7 @@ This document covers the currently modeled end-judgment defaults for `jd`,
   explicit valid `jd=cod` / `abr=y`, and explicit invalid `jd` / `abr`
   combinations.
 
-### Impact
+### JD / ABR Diagnostic Impact
 
 - User-visible diagnostics change for syntactically valid JP1/AJS documents
   containing the invalid combination.
@@ -120,7 +120,7 @@ This document covers the currently modeled end-judgment defaults for `jd`,
 - The application diagnostics boundary broadens from syntax-only feedback to
   syntax plus focused semantic parameter feedback.
 
-### Diagnostic Alternatives
+### JD / ABR Diagnostic Alternatives
 
 - Preserve invalid combinations silently and leave the matrix gap visible.
 - Change domain defaults or wrapper values to avoid the invalid combination,
@@ -129,3 +129,48 @@ This document covers the currently modeled end-judgment defaults for `jd`,
   the next alignment slice.
 - Add diagnostics without source locations, possible as a fallback but less
   useful for editor feedback and likely to weaken regression evidence.
+
+## Retry Parameter Diagnostic Candidate
+
+### Current Behavior
+
+- `buildSyntaxDiagnostics` now reports the focused `jd` / `abr`
+  invalid-combination diagnostic after syntax parsing succeeds.
+- Explicit `rjs`, `rje`, `rec`, and `rei` values are preserved as raw values
+  and do not currently produce semantic diagnostics when effective `jd` is not
+  `cod`.
+- Unit-list group 11 projects retry parameters from normalized raw key/value
+  data, so invalid combinations remain visible in the table viewer.
+
+### Implemented Retry Behavior
+
+- keep raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation unchanged;
+- focused application-level semantic diagnostics report when an explicit UNIX/PC
+  job or UNIX/PC custom job has effective `jd` not equal to `cod` and also
+  specifies any of `rjs`, `rje`, `rec`, or `rei`;
+- each diagnostic is reported through the existing editor-feedback DTO and VS Code
+  adapter path so desktop and web hosts share the same rule;
+- keep omitted retry parameters non-diagnostic;
+- keep explicit `jd=cod` with retry parameters non-diagnostic for this slice;
+- focused tests cover valid `jd=cod` retry parameters and explicit invalid
+  `jd` / retry-parameter combinations.
+
+### Impact
+
+- User-visible diagnostics change for syntactically valid JP1/AJS documents
+  containing the invalid combination.
+- Existing parser source-location metadata can point diagnostics at the
+  explicit offending retry parameter.
+- The application diagnostics boundary remains the owner of semantic
+  parameter feedback; parser grammar and domain wrapper values remain raw.
+
+### Diagnostic Alternatives
+
+- Preserve invalid retry parameters silently and leave the matrix gap visible.
+- Remove or hide retry values from domain/list outputs when `jd` is not `cod`,
+  rejected because manual-invalid raw input should remain inspectable.
+- Add numeric range checks for `rjs`, `rje`, `rec`, and `rei` in the same
+  slice, rejected because this broadens the behavior and regression surface.
+- Implement a generic parameter-rule engine first, deferred because the next
+  slice can be covered by the existing small diagnostics boundary.

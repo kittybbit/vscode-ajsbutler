@@ -18,6 +18,7 @@ const jobEndJudgmentDiagnosticTargetTypes = new Set([
   "cj",
   "rcj",
 ]);
+const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
 
 const flattenUnits = (units: Unit[]): Unit[] =>
   units.reduce<Unit[]>(
@@ -39,27 +40,41 @@ const buildJobEndJudgmentDiagnostics = (
         : false;
     })
     .flatMap((unit) => {
+      const diagnostics: SyntaxDiagnosticDto[] = [];
       const abrParameter = findParameter(unit, "abr");
-      if (abrParameter?.value !== "y") {
-        return [];
-      }
-
       const effectiveJobEndJudgment =
         findParameter(unit, "jd")?.value ?? DEFAULTS.Jd;
       if (effectiveJobEndJudgment === DEFAULTS.Jd) {
         return [];
       }
 
-      return [
-        {
+      if (abrParameter?.value === "y") {
+        diagnostics.push({
           line: abrParameter.line ?? 1,
           column: abrParameter.column ?? 0,
           length: abrParameter.length ?? abrParameter.key.length,
           message:
             "Automatic retry (abr=y) requires end judgment (jd) to be cod.",
           severity: "error" as const,
-        },
-      ];
+        });
+      }
+
+      for (const retryParameterKey of jobEndJudgmentRetryParameterKeys) {
+        const retryParameter = findParameter(unit, retryParameterKey);
+        if (!retryParameter) {
+          continue;
+        }
+
+        diagnostics.push({
+          line: retryParameter.line ?? 1,
+          column: retryParameter.column ?? 0,
+          length: retryParameter.length ?? retryParameter.key.length,
+          message: `Retry parameter (${retryParameterKey}) requires end judgment (jd) to be cod.`,
+          severity: "error" as const,
+        });
+      }
+
+      return diagnostics;
     });
 
 export const buildSyntaxDiagnostics = (

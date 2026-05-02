@@ -54,6 +54,10 @@ suite("Build Syntax Diagnostics", () => {
         "    ty=j;",
         "    jd=cod;",
         "    abr=y;",
+        "    rjs=1;",
+        "    rje=9;",
+        "    rec=3;",
+        "    rei=1;",
         "  }",
         "}",
         "",
@@ -116,6 +120,78 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => diagnostic.severity),
       ["error", "error"],
+    );
+  });
+
+  test("reports retry parameter diagnostics for explicit invalid end-judgment combinations", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=custom,cj,+160+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    jd=ab;",
+        "    rjs=1;",
+        "    rje=9;",
+        "  }",
+        "  unit=custom,,jp1admin,;",
+        "  {",
+        "    ty=cj;",
+        "    jd=nm;",
+        "    rec=3;",
+        "    rei=1;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 4);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 10,
+          column: 4,
+          length: 3,
+          message:
+            "Retry parameter (rjs) requires end judgment (jd) to be cod.",
+        },
+        {
+          line: 11,
+          column: 4,
+          length: 3,
+          message:
+            "Retry parameter (rje) requires end judgment (jd) to be cod.",
+        },
+        {
+          line: 17,
+          column: 4,
+          length: 3,
+          message:
+            "Retry parameter (rec) requires end judgment (jd) to be cod.",
+        },
+        {
+          line: 18,
+          column: 4,
+          length: 3,
+          message:
+            "Retry parameter (rei) requires end judgment (jd) to be cod.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error", "error"],
     );
   });
 });

@@ -38,6 +38,9 @@
    - The first focused parameter semantic diagnostic reports job end-judgment
      `jd` / `abr` invalid combinations for UNIX/PC jobs and UNIX/PC custom
      jobs while preserving raw parameter data.
+   - The next focused semantic diagnostic candidate is job end-judgment retry
+     parameter reporting for explicit `rjs`, `rje`, `rec`, or `rei` values
+     when effective `jd` is not `cod`.
    - Continue with documented deferred diagnostics and range-validation gaps
      only as focused, approval-gated slices.
    - Keep behavior-preserving slices separate from behavior-changing manual
