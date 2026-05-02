@@ -31,8 +31,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Select the next focused JP1/AJS3 v13 parameter-alignment gap from the
-   documented deferred diagnostics and range-validation candidates.
+1. Prepare job end-judgment retry-parameter diagnostics as the next focused
+   JP1/AJS3 v13 parameter-alignment behavior contract, then record approval
+   before implementation.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 3. Keep compatibility risk visible for every shared or extension-runtime
@@ -40,34 +41,40 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/job-end-judgment-diagnostics`.
+- Branch: `codex/job-end-judgment-retry-diagnostics`.
 - Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
-  focused diagnostic contract for job end-judgment invalid combinations.
+  focused diagnostic contract for job end-judgment retry parameters.
 - Status: implemented and validated on 2026-05-01.
 - Scope: add application-level semantic diagnostics for explicit UNIX/PC job
-  and UNIX/PC custom job `abr=y` values when the effective `jd` value is not
-  `cod`, while preserving raw parser output, domain wrapper values, unit-list
+  and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei` values when the
+  effective `jd` value is not `cod`, while preserving raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
   projection, and command generation.
 - Out of scope: parser grammar changes, generated artifacts, dependency
-  changes, `engines.vscode`, changing `jd` / `abr` default semantics, changing
-  list or flow projection, retry range diagnostics, byte-length validation, and
-  broad parameter range validation.
+  changes, `engines.vscode`, changing `jd` / retry default semantics, changing
+  list or flow projection, numeric retry range validation, retry threshold
+  ordering, byte-length validation, and broad parameter range validation.
 - Impact summary: the candidate affects
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts` or an adjacent
-  application diagnostic helper, `src/domain/services/parser/AjsEvaluator.ts`
-  and `src/domain/values/Unit.ts` only if parameter source locations are added,
-  focused diagnostics tests, VS Code diagnostic adapter behavior through the
-  existing DTO mapping, and the job end-judgment SDD documents.
+  application diagnostic helper, focused diagnostics tests, VS Code diagnostic
+  adapter behavior through the existing DTO mapping, and the job end-judgment
+  SDD documents. Existing parser source-location metadata should be sufficient
+  for diagnostic ranges.
 - Risks and assumptions: the diagnostic is user-visible in both desktop and
   web extension hosts. Implementation should keep parser syntax diagnostics
   unchanged and should report semantic diagnostics only when explicit
   parameters make the invalid combination observable.
-- Outcome: explicit UNIX/PC job and UNIX/PC custom job `abr=y` values now
-  produce semantic diagnostics when the effective `jd` value is not `cod`.
-  Parameter source-location metadata supports diagnostic ranges; parser
-  grammar, raw parser values, domain wrapper values, normalized parameters,
-  unit-list projection, command generation, generated artifacts,
-  configuration, dependency versions, and `engines.vscode` remain unchanged.
+- Alternatives considered: keep invalid retry parameters silent and leave the
+  matrix gap visible; hide or alter retry values in domain/list outputs when
+  `jd` is not `cod`, rejected because raw manual-invalid input should remain
+  inspectable; add numeric range validation in the same slice, deferred because
+  it broadens the behavior and regression surface.
+- Outcome: explicit UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or
+  `rei` values now produce semantic diagnostics when the effective `jd` value
+  is not `cod`. Parser grammar, raw parser values, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, command
+  generation, generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain unchanged.
 
 ## Build/Test Performance SDD
 
@@ -96,7 +103,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: job end-judgment semantic diagnostics.
+  slice: job end-judgment retry-parameter diagnostics.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -114,6 +121,16 @@ contracts were compressed into `docs/requirements/use-cases/`.
 
 Current branch checks:
 
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
+- 2026-05-01: `pnpm test`
+- 2026-05-01: `pnpm run test:web` required an escalated rerun after Chromium
+  failed to launch in the sandbox with macOS Mach port permission errors; the
+  escalated rerun completed with exit code 0 and existing localhost
+  dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run qlty` completed with exit code 0; final runs used an
   escalated command because sandboxed qlty cannot create its log file
 - 2026-05-01: `pnpm test`

@@ -130,6 +130,15 @@
 - [x] Add focused diagnostics regression evidence for valid omitted defaults,
       explicit valid retry settings, and explicit invalid combinations
 - [x] Run required code-change validation after implementation
+- [x] Investigate job end-judgment retry-parameter diagnostics as the next
+      focused semantic diagnostics slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration
+- [x] Implement focused retry-parameter semantic diagnostics only after
+      approval
+- [x] Add focused diagnostics regression evidence for valid `jd=cod` retry
+      parameters and explicit invalid `jd` / retry-parameter combinations
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -309,28 +318,56 @@
   generation, generated artifacts, configuration, dependency versions, and
   `engines.vscode` remain unchanged. Parameter source-location metadata was
   added to support diagnostic ranges.
+- 2026-05-01: job end-judgment retry-parameter diagnostics are the next
+  approval-gated semantic diagnostics candidate. JP1/AJS3 version 13 UNIX/PC
+  job and UNIX/PC custom job definitions say `rjs`, `rje`, `rec`, and `rei`
+  cannot be specified when the effective `jd` value is not `cod`. The
+  proposed scope is limited to reporting explicit target job retry parameters
+  when effective `jd` is not `cod`, preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow projection,
+  and command generation. Parser grammar, generated artifacts, configuration,
+  dependency versions, `engines.vscode`, numeric retry ranges, threshold
+  ordering, byte-length validation, and broad parameter validation remain out
+  of scope.
+- 2026-05-01: job end-judgment retry-parameter diagnostics now report explicit
+  UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei` values when
+  the effective `jd` value is not `cod`. Parser grammar, raw parser values,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, command generation, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` remain unchanged. Numeric retry
+  ranges and threshold ordering remain deferred.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-01
 - Approved scope: User replied "OK.Proceed." after the job end-judgment
-  `jd` / `abr` invalid-combination diagnostics approval request. Approved
-  changes are limited to adding focused application-level semantic diagnostics
-  for explicit UNIX/PC job and UNIX/PC custom job `abr=y` values when the
+  retry-parameter diagnostics approval request. Approved changes are limited
+  to adding focused application-level semantic diagnostics for explicit
+  UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei` values
+  when the effective `jd` value is not `cod`; preserving raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation; adding focused regression evidence;
+  updating SDD tracking; and running validation. Parser grammar, generated
+  artifacts, configuration, dependency versions, `engines.vscode`, numeric
+  retry ranges, retry threshold ordering, byte-length validation, and broad
+  parameter validation remain out of scope.
+
+Current implementation gate: job end-judgment retry-parameter diagnostics.
+
+## Prior Approval Evidence
+
+- 2026-05-01: User replied "OK.Proceed." after the job end-judgment `jd` /
+  `abr` invalid-combination diagnostics approval request. Approved changes
+  were limited to adding focused application-level semantic diagnostics for
+  explicit UNIX/PC job and UNIX/PC custom job `abr=y` values when the
   effective `jd` value is not `cod`; adding source-location metadata only as
   needed for diagnostic ranges; preserving raw parser output, domain wrapper
   values, normalized parameters, unit-list projection, and command generation;
   adding focused regression evidence; updating SDD tracking; and running
   validation. Parser grammar, generated artifacts, configuration, dependency
   versions, `engines.vscode`, retry range diagnostics, byte-length validation,
-  and broad parameter range validation remain out of scope.
-
-Current implementation gate: job end-judgment `jd` / `abr`
-invalid-combination diagnostics.
-
-## Prior Approval Evidence
-
+  and broad parameter range validation were out of scope.
 - 2026-05-01: User replied "OK. Proceed." after the QUEUE job unit-list group
   15 projection approval request. Approved changes were limited to hiding
   `top1` to `top4` transfer-operation projection for `qj` / `rq`, preserving
@@ -400,6 +437,16 @@ invalid-combination diagnostics.
 
 ## Validation
 
+- 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
+  log-file permission failure
+- 2026-05-01: `pnpm test`
+- 2026-05-01: `pnpm run test:web` required an escalated rerun after Chromium
+  failed to launch in the sandbox with macOS Mach port permission errors; the
+  escalated rerun completed with exit code 0 and existing localhost
+  dev-extension `package.nls.json` 404 noise
+- 2026-05-01: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-01: `pnpm run lint:md`
 - 2026-05-01: `pnpm run qlty` completed with exit code 0; final runs used an
   escalated command because sandboxed qlty cannot create its log file
 - 2026-05-01: `pnpm test`

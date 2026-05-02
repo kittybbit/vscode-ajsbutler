@@ -104,6 +104,13 @@ JP1/AJS3 version 13 reference documents.
   output, domain wrapper values, normalized parameters, unit-list projection,
   and command generation while adding application-level semantic diagnostics
   through the existing editor-feedback boundary.
+- Job end-judgment retry-parameter diagnostics are approval-sensitive for the
+  same reason: existing behavior preserves explicit `rjs`, `rje`, `rec`, and
+  `rei` values even when effective `jd` is not `cod`. A focused diagnostic
+  slice should report these explicit invalid combinations through
+  editor-feedback while preserving raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation.
 
 ## Reference Documents
 

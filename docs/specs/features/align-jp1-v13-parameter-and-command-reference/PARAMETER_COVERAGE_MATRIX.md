@@ -73,8 +73,10 @@ coverage.
   `Defaults.ts`
 - Evidence: `parameterFactory.test.ts` and `jobEndJudgmentHelpers.test.ts`
 - Remaining gap:
-  range validation, `jd` / `abr` invalid-combination diagnostics, and retry
-  diagnostics remain deferred
+  `jd` / `abr` invalid-combination diagnostics are aligned through
+  editor-feedback. Retry-parameter diagnostics for effective non-`cod` end
+  judgment are aligned through editor-feedback. Numeric range validation and
+  retry threshold ordering remain deferred.
 
 ### HTTP Connection Job Defaults
 
