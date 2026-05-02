@@ -38,6 +38,7 @@
 
 ## Validation
 
-- code changes: `pnpm run qlty`, `pnpm test`, `pnpm run test:web`,
-  `pnpm run build`
-- docs-only changes: `pnpm run qlty`; add `pnpm run lint:md` when useful
+- code changes: `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, `rtk pnpm run build`
+- docs-only changes: `rtk pnpm run qlty`; add `rtk pnpm run lint:md` when
+  useful

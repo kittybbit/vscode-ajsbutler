@@ -68,6 +68,8 @@ Scenario: {{one observable behavior}}
 - VS Code compatibility follows `package.json` `engines.vscode`.
 - Web extension compatibility: {{impact}}
 - Desktop extension compatibility: {{impact}}
+- Model, Serena, or agent choice does not change this behavior contract or the
+  SDD approval gate.
 
 ## Acceptance Criteria
 
