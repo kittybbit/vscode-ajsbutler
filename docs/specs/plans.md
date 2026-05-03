@@ -20,9 +20,15 @@ rules in `docs/specs/README.md`, not in this file.
   categories without claiming repository-wide coverage. Schedule-rule
   `wc` / `wt` effective-value pairing is aligned in the domain boundary and
   unit-list projection.
+- JP1/AJS v13 parameter alignment remains the active implementation priority
+  until the documented diagnostics, validation, and category-level coverage
+  gaps are either completed or explicitly re-scoped.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
+- Qlty-driven architecture refactoring remains active but is deferred until
+  JP1/AJS v13 parameter alignment is completed or an explicit priority override
+  is recorded here.
 - Completed feature folders should be removed once their durable requirements
   are represented in `docs/requirements/use-cases/`, `docs/specs/roadmap.md`,
   or `docs/specs/architecture.md`.
@@ -31,52 +37,44 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Prepare job end-judgment retry-parameter diagnostics as the next focused
-   JP1/AJS3 v13 parameter-alignment behavior contract, then record approval
-   before implementation.
-2. Keep WebAPI import beta feedback and real-environment smoke evidence
+1. Select the next focused JP1/AJS3 v13 parameter-alignment gap from the
+   documented deferred diagnostics, range-validation, byte-length validation,
+   macro-variable validation, wildcard restriction, and requiredness candidates.
+2. Prepare that selected parameter-alignment slice as an approval-gated
+   behavior contract before implementation, keeping parser grammar, generated
+   artifacts, normalized raw storage, projections, command generation,
+   dependency versions, and `engines.vscode` out of scope unless explicitly
+   approved.
+3. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
+   coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
+   until a gap is explicitly re-scoped as outside the alignment feature.
+4. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-3. Keep compatibility risk visible for every shared or extension-runtime
+5. Keep compatibility risk visible for every shared or extension-runtime
    change.
-4. Execute Phase 0 of the Qlty-driven architecture refactoring feature to
-   remove repository noise before structural refactoring.
+6. Defer Qlty-driven architecture refactoring Phase 0 until JP1/AJS v13
+   parameter alignment is complete or this plan records an explicit override.
 
 ## Current Branch Plan
 
-- Branch: `codex/job-end-judgment-retry-diagnostics`.
-- Objective: continue the JP1/AJS3 v13 parameter alignment feature with a
-  focused diagnostic contract for job end-judgment retry parameters.
-- Status: implemented and validated on 2026-05-01.
-- Scope: add application-level semantic diagnostics for explicit UNIX/PC job
-  and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei` values when the
-  effective `jd` value is not `cod`, while preserving raw parser output,
-  domain wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation.
-- Out of scope: parser grammar changes, generated artifacts, dependency
-  changes, `engines.vscode`, changing `jd` / retry default semantics, changing
-  list or flow projection, numeric retry range validation, retry threshold
-  ordering, byte-length validation, and broad parameter range validation.
-- Impact summary: the candidate affects
-  `src/application/editor-feedback/buildSyntaxDiagnostics.ts` or an adjacent
-  application diagnostic helper, focused diagnostics tests, VS Code diagnostic
-  adapter behavior through the existing DTO mapping, and the job end-judgment
-  SDD documents. Existing parser source-location metadata should be sufficient
-  for diagnostic ranges.
-- Risks and assumptions: the diagnostic is user-visible in both desktop and
-  web extension hosts. Implementation should keep parser syntax diagnostics
-  unchanged and should report semantic diagnostics only when explicit
-  parameters make the invalid combination observable.
-- Alternatives considered: keep invalid retry parameters silent and leave the
-  matrix gap visible; hide or alter retry values in domain/list outputs when
-  `jd` is not `cod`, rejected because raw manual-invalid input should remain
-  inspectable; add numeric range validation in the same slice, deferred because
-  it broadens the behavior and regression surface.
-- Outcome: explicit UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or
-  `rei` values now produce semantic diagnostics when the effective `jd` value
-  is not `cod`. Parser grammar, raw parser values, domain wrapper values,
-  normalized parameters, unit-list projection, flow projection, command
-  generation, generated artifacts, configuration, dependency versions, and
-  `engines.vscode` remain unchanged.
+- Branch: `codex/prioritize-parameter-alignment-before-qlty`.
+- Objective: correct branch-level sequencing so JP1/AJS v13 parameter
+  alignment remains the active implementation priority before Qlty-driven
+  architecture refactoring.
+- Status: docs-only planning correction.
+- Scope: update `docs/specs/plans.md` to make the parameter-alignment-first
+  order explicit, preserve WebAPI beta tracking as deferred, and defer Qlty
+  Phase 0 until parameter alignment is complete or explicitly overridden.
+- Out of scope: runtime code changes, parser grammar changes, generated
+  artifacts, dependency changes, `engines.vscode`, test/build script changes,
+  and changing the roadmap content without a separate priority decision.
+- Impact summary: this change affects branch sequencing only. It does not alter
+  delivered job end-judgment retry diagnostics or any user-visible extension
+  behavior.
+- Risks and assumptions: JP1/AJS v13 parameter alignment still has documented
+  actionable gaps in the feature-local coverage matrix. Treat Qlty refactoring
+  as valuable but not the next implementation priority until alignment is
+  finished or explicitly re-prioritized.
 
 ## Build/Test Performance SDD
 
@@ -105,7 +103,8 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: job end-judgment retry-parameter diagnostics.
+  next slice: select the next unresolved diagnostics or validation gap before
+  implementation approval.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -113,7 +112,8 @@ rules in `docs/specs/README.md`, not in this file.
   pressure notes.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
   active maintainability-driven architectural refactoring based on Qlty
-  complexity, duplication, and code-smell findings.
+  complexity, duplication, and code-smell findings; deferred until JP1/AJS v13
+  parameter alignment is complete or explicitly re-prioritized.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
