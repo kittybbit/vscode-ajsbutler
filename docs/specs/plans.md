@@ -37,53 +37,51 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Close the file monitoring job `flwc` / `flco` diagnostics slice with
-   validation evidence and SDD synchronization.
-2. Select the next focused JP1/AJS3 v13 parameter-alignment gap from the
+1. Select the next focused JP1/AJS3 v13 parameter-alignment gap from the
    documented deferred diagnostics, range-validation, byte-length validation,
    macro-variable validation, wildcard restriction, and requiredness
    candidates.
-3. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
+2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
-4. Keep WebAPI import beta feedback and real-environment smoke evidence
+3. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-5. Keep compatibility risk visible for every shared or extension-runtime
+4. Keep compatibility risk visible for every shared or extension-runtime
    change.
-6. Defer Qlty-driven architecture refactoring Phase 0 until JP1/AJS v13
+5. Defer Qlty-driven architecture refactoring Phase 0 until JP1/AJS v13
    parameter alignment is complete or this plan records an explicit override.
 
 ## Current Branch Plan
 
-- Branch: `codex/file-monitoring-diagnostics`.
-- Objective: continue JP1/AJS v13 parameter alignment with the focused file
-  monitoring job `flwc` / `flco` semantic diagnostics slice before returning
+- Branch: `codex/job-end-retry-enable-diagnostics`.
+- Objective: continue JP1/AJS v13 parameter alignment with the focused job
+  end-judgment automatic-retry enablement diagnostics slice before returning
   to Qlty-driven architecture refactoring.
 - Status: implemented and validated on 2026-05-06.
 - Scope candidate: add application-level semantic diagnostics for explicit
-  `flwj` / `rflwj` invalid file monitoring combinations: `flwc` specifying
-  both `s` and `m`, and explicit `flco` when effective `flwc` does not include
-  `c`.
+  UNIX/PC job and UNIX/PC custom job retry parameters `rjs`, `rje`, `rec`, and
+  `rei` when effective `abr` is not `y`. Existing `jd != cod` diagnostics
+  remain the primary diagnostic for retry parameters in invalid end-judgment
+  combinations.
 - Out of scope: parser grammar changes, raw parser/domain/normalized value
   changes, unit-list projection changes, flow projection changes, command
   generation changes, generated artifacts, dependency changes,
-  `engines.vscode`, wildcard validation, byte-length validation, numeric range
-  validation, timeout behavior, and broad parameter validation.
+  `engines.vscode`, numeric retry ranges, retry threshold ordering,
+  byte-length validation, and broad parameter validation.
 - Impact summary: the candidate affects
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
   `buildSyntaxDiagnostics` tests, the existing VS Code diagnostics adapter
-  through DTO mapping, file monitoring alignment docs, the parameter coverage
+  through DTO mapping, job end-judgment alignment docs, the parameter coverage
   matrix, and the editor-feedback use-case contract.
 - Risks and assumptions: the change is user-visible in desktop and web
   diagnostics for syntactically valid documents. Existing parsed parameter
-  source-location metadata should be sufficient to point at the offending
-  explicit `flwc` or `flco` parameter. Raw values remain inspectable by
-  downstream consumers.
-- Alternatives considered: keep invalid combinations silent and leave the
-  matrix gap visible; hide or rewrite invalid values in domain/list output,
+  source-location metadata should be sufficient to point at each explicit
+  retry parameter. Raw values remain inspectable by downstream consumers.
+- Alternatives considered: keep retry parameters with `abr=n` silent and leave
+  the matrix gap visible; hide or rewrite retry values in domain/list output,
   rejected because raw manual-invalid input should remain inspectable; broaden
-  to wildcard, byte-length, `flwi` range, or timeout diagnostics, deferred to
-  keep the slice small.
+  to numeric ranges or retry threshold ordering, deferred to keep the slice
+  small.
 
 ## Build/Test Performance SDD
 
@@ -112,7 +110,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: file monitoring job `flwc` / `flco` semantic diagnostics completed;
+  slice: job end-judgment automatic-retry enablement diagnostics completed;
   next unresolved diagnostics or validation gap is not selected yet.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
