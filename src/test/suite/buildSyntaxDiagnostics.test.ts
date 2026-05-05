@@ -194,4 +194,86 @@ suite("Build Syntax Diagnostics", () => {
       ["error", "error", "error", "error"],
     );
   });
+
+  test("does not report file monitoring diagnostics for omitted defaults and valid explicit combinations", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=file1,flwj,+0+0;",
+        "  el=file2,rflwj,+160+0;",
+        "  unit=file1,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        "    flco=y;",
+        "  }",
+        "  unit=file2,,jp1admin,;",
+        "  {",
+        "    ty=rflwj;",
+        "    flwc=c:d:s;",
+        "    flco=n;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports file monitoring diagnostics for explicit invalid condition combinations", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=file1,flwj,+0+0;",
+        "  el=file2,rflwj,+160+0;",
+        "  unit=file1,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        "    flwc=d:s:m;",
+        "  }",
+        "  unit=file2,,jp1admin,;",
+        "  {",
+        "    ty=rflwj;",
+        "    flwc=d:s;",
+        "    flco=y;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 2);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 4,
+          message:
+            "File monitoring condition (flwc) cannot specify both s and m.",
+        },
+        {
+          line: 15,
+          column: 4,
+          length: 4,
+          message:
+            "File close option (flco) requires file creation monitoring (flwc=c).",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error"],
+    );
+  });
 });

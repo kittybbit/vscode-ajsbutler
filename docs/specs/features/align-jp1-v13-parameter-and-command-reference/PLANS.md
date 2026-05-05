@@ -89,6 +89,10 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
 - Implemented QUEUE job unit-list group 15 projection so `qj` / `rq`
   transfer-operation values are hidden while transfer source/destination and
   non-QUEUE `topN` projection remain visible.
+- Investigated file monitoring job `flwc` / `flco` semantic diagnostics as
+  the next approval-gated parameter diagnostics candidate.
+- Implemented file monitoring job `flwc` / `flco` semantic diagnostics through
+  editor feedback while preserving raw parser/domain/list/flow/command output.
 
 ## Impact Investigation
 
@@ -456,6 +460,48 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   summary for execution-interval control job defaults and unit-list group 13
   projection.
 
+### File Monitoring Job FLWC / FLCO Diagnostic Candidate
+
+- Planned change:
+  add focused application-level semantic diagnostics for explicit file
+  monitoring job and recovery file monitoring job `flwc` / `flco`
+  combinations that violate JP1/AJS3 version 13 rules: `flwc` must not
+  specify both `s` and `m`, and explicit `flco` is valid only when effective
+  `flwc` includes `c`.
+- Affected files:
+  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
+  `src/test/suite/buildSyntaxDiagnostics.test.ts`,
+  `FILE_MONITORING_JOB_ALIGNMENT.md`, `PARAMETER_COVERAGE_MATRIX.md`,
+  `SPECS.md`, `TASKS.md`,
+  `docs/requirements/use-cases/uc-provide-editor-feedback.md`, and
+  branch-level `docs/specs/plans.md`.
+- Affected functions/classes/components:
+  `buildSyntaxDiagnostics`, the existing unit-flattening and parameter lookup
+  helpers in that file, the existing diagnostics VS Code adapter through its
+  DTO mapping, and focused diagnostics tests.
+- Affected features:
+  JP1/AJS editor feedback diagnostics for file monitoring jobs; JP1/AJS3 v13
+  parameter interpretation for file monitoring conditions.
+- Tests affected:
+  focused `buildSyntaxDiagnostics` tests for valid omitted defaults, valid
+  explicit `flwc` / `flco` combinations, invalid `flwc` containing both
+  `s` and `m`, and invalid explicit `flco` when effective `flwc` does not
+  include `c`.
+- Breaking-change risk:
+  medium. This intentionally adds user-visible diagnostics for syntactically
+  valid documents. Raw parser output, domain wrapper values, normalized
+  parameter storage, list/flow projection, and command generation should
+  remain unchanged.
+- Alternatives considered:
+  keep invalid combinations silent and leave the matrix gap visible; hide or
+  rewrite invalid values in domain/list output, rejected because raw
+  manual-invalid input should remain inspectable; add wildcard, byte-length,
+  `flwi` range, or timeout diagnostics in the same slice, deferred because it
+  expands the behavior and regression surface.
+- Approval:
+  human approval to proceed was given on 2026-05-06 after the investigation
+  summary for file monitoring job `flwc` / `flco` diagnostics.
+
 ## Follow-up
 
 - Apply the same value parsing audit/refactor workflow to other parameter
@@ -471,9 +517,8 @@ explicit JP1/AJS3 version 13 reference-driven contracts.
   behavior.
 - Revisit JP1 event sending job `evhst` requiredness when `evsrt=y` after the
   diagnostics behavior contract is explicit.
-- Revisit file monitoring job `flwc` invalid combinations, `flwi` range
-  validation, wildcard restrictions, and `flco` pairing diagnostics after the
-  editor-feedback behavior contract is explicit.
+- Keep `flwi` range validation, wildcard restrictions, byte-length validation,
+  and broader file monitoring validation deferred.
 - Revisit execution-interval control job `tmitv` range validation and broader
   wait-job default reconciliation after the focused default/projection slice.
 
