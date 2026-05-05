@@ -37,14 +37,12 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Select the next focused JP1/AJS3 v13 parameter-alignment gap from the
+1. Close the file monitoring job `flwc` / `flco` diagnostics slice with
+   validation evidence and SDD synchronization.
+2. Select the next focused JP1/AJS3 v13 parameter-alignment gap from the
    documented deferred diagnostics, range-validation, byte-length validation,
-   macro-variable validation, wildcard restriction, and requiredness candidates.
-2. Prepare that selected parameter-alignment slice as an approval-gated
-   behavior contract before implementation, keeping parser grammar, generated
-   artifacts, normalized raw storage, projections, command generation,
-   dependency versions, and `engines.vscode` out of scope unless explicitly
-   approved.
+   macro-variable validation, wildcard restriction, and requiredness
+   candidates.
 3. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -57,24 +55,35 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/prioritize-parameter-alignment-before-qlty`.
-- Objective: correct branch-level sequencing so JP1/AJS v13 parameter
-  alignment remains the active implementation priority before Qlty-driven
-  architecture refactoring.
-- Status: docs-only planning correction.
-- Scope: update `docs/specs/plans.md` to make the parameter-alignment-first
-  order explicit, preserve WebAPI beta tracking as deferred, and defer Qlty
-  Phase 0 until parameter alignment is complete or explicitly overridden.
-- Out of scope: runtime code changes, parser grammar changes, generated
-  artifacts, dependency changes, `engines.vscode`, test/build script changes,
-  and changing the roadmap content without a separate priority decision.
-- Impact summary: this change affects branch sequencing only. It does not alter
-  delivered job end-judgment retry diagnostics or any user-visible extension
-  behavior.
-- Risks and assumptions: JP1/AJS v13 parameter alignment still has documented
-  actionable gaps in the feature-local coverage matrix. Treat Qlty refactoring
-  as valuable but not the next implementation priority until alignment is
-  finished or explicitly re-prioritized.
+- Branch: `codex/file-monitoring-diagnostics`.
+- Objective: continue JP1/AJS v13 parameter alignment with the focused file
+  monitoring job `flwc` / `flco` semantic diagnostics slice before returning
+  to Qlty-driven architecture refactoring.
+- Status: implemented and validated on 2026-05-06.
+- Scope candidate: add application-level semantic diagnostics for explicit
+  `flwj` / `rflwj` invalid file monitoring combinations: `flwc` specifying
+  both `s` and `m`, and explicit `flco` when effective `flwc` does not include
+  `c`.
+- Out of scope: parser grammar changes, raw parser/domain/normalized value
+  changes, unit-list projection changes, flow projection changes, command
+  generation changes, generated artifacts, dependency changes,
+  `engines.vscode`, wildcard validation, byte-length validation, numeric range
+  validation, timeout behavior, and broad parameter validation.
+- Impact summary: the candidate affects
+  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
+  `buildSyntaxDiagnostics` tests, the existing VS Code diagnostics adapter
+  through DTO mapping, file monitoring alignment docs, the parameter coverage
+  matrix, and the editor-feedback use-case contract.
+- Risks and assumptions: the change is user-visible in desktop and web
+  diagnostics for syntactically valid documents. Existing parsed parameter
+  source-location metadata should be sufficient to point at the offending
+  explicit `flwc` or `flco` parameter. Raw values remain inspectable by
+  downstream consumers.
+- Alternatives considered: keep invalid combinations silent and leave the
+  matrix gap visible; hide or rewrite invalid values in domain/list output,
+  rejected because raw manual-invalid input should remain inspectable; broaden
+  to wildcard, byte-length, `flwi` range, or timeout diagnostics, deferred to
+  keep the slice small.
 
 ## Build/Test Performance SDD
 
@@ -103,8 +112,8 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  next slice: select the next unresolved diagnostics or validation gap before
-  implementation approval.
+  slice: file monitoring job `flwc` / `flco` semantic diagnostics completed;
+  next unresolved diagnostics or validation gap is not selected yet.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

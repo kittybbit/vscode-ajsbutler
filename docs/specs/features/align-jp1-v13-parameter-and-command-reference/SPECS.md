@@ -88,6 +88,13 @@ JP1/AJS3 version 13 reference documents.
   table output. If approved, it should consume the existing wrapper/default
   semantics for `flwc`, `flwi`, `flco`, and `ets` while preserving parser
   output and normalized raw parameter storage.
+- File monitoring job `flwc` / `flco` diagnostics are approval-sensitive
+  because existing behavior preserves explicit invalid combinations as raw
+  parsed values without editor feedback. A focused diagnostic slice should
+  report `s` and `m` co-specification in `flwc`, and explicit `flco` when the
+  effective `flwc` value does not include `c`, while preserving raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation.
 - Execution-interval control job defaults are approval-sensitive because
   JP1/AJS3 version 13 defines omitted `tmitv`, `etn`, and `ets` behavior for
   `tmwj` / `rtmwj`, while current code only has generic defaults for `etn` and

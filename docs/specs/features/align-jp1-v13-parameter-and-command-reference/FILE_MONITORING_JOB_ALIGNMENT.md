@@ -59,6 +59,54 @@ This document focuses on the currently modeled file monitoring job parameters
 - Explicit normalized values remain preserved.
 - Omitted `flwf` remains empty because no monitored-file-name default exists.
 - Non-file-monitoring jobs do not synthesize these file monitoring defaults.
+- Editor feedback now reports focused semantic diagnostics for explicit
+  `flwj` / `rflwj` invalid combinations where `flwc` specifies both `s` and
+  `m`, or explicit `flco` is present when effective `flwc` does not include
+  `c`.
+
+## FLWC / FLCO Diagnostic Candidate
+
+### Current Behavior
+
+- `flwj` / `rflwj` raw parameters preserve explicit `flwc` and `flco` values
+  even when the combination is invalid according to JP1/AJS3 version 13.
+- `buildSyntaxDiagnostics` reports parser syntax errors and the focused job
+  end-judgment semantic diagnostics, but it does not inspect file monitoring
+  job parameter combinations.
+- Unit-list group 13 projects file monitoring values through the existing
+  default-aware projection boundary, so invalid raw combinations can remain
+  visible in table output.
+
+### Implemented Diagnostic Behavior
+
+- Report a semantic diagnostic when an explicit file monitoring job or
+  recovery file monitoring job `flwc` value specifies both `s` and `m`.
+- Report a semantic diagnostic when an explicit `flco` value is specified and
+  the effective `flwc` value does not include `c`.
+- Keep omitted `flwc` default `c` with omitted or explicit `flco` values
+  non-diagnostic for this slice.
+- Keep raw parser output, raw domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation unchanged.
+- Report diagnostics through the existing application editor-feedback DTO so
+  desktop and web hosts share the same rule.
+
+### Impact
+
+- User-visible diagnostics change for syntactically valid JP1/AJS documents
+  containing explicit invalid file monitoring parameter combinations.
+- Existing parsed parameter source-location metadata can point diagnostics at
+  the explicit offending `flwc` or `flco` parameter.
+- The application diagnostics boundary remains the owner of focused semantic
+  parameter feedback; parser grammar and domain wrapper values remain raw.
+
+### Diagnostic Alternatives
+
+- Preserve invalid file monitoring combinations silently and leave the matrix
+  gap visible.
+- Hide or rewrite invalid values in domain/list output, rejected because
+  manual-invalid raw input should remain inspectable.
+- Add wildcard, byte-length, `flwi` range, or timeout diagnostics in the same
+  slice, rejected because that broadens the behavior and regression surface.
 
 ## Expected Behavior If Approved
 
@@ -86,6 +134,6 @@ This document focuses on the currently modeled file monitoring job parameters
 
 ## Follow-up
 
-- Revisit `flwc` invalid combinations, `flwi` range validation, wildcard
-  restrictions, and `flco` pairing diagnostics only after editor-feedback
-  behavior explicitly owns invalid JP1/AJS parameter handling.
+- Revisit `flwi` range validation, wildcard restrictions, byte-length
+  validation, and timeout behavior only after the focused diagnostics slice is
+  completed or explicitly deferred.

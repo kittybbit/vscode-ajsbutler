@@ -116,9 +116,10 @@ coverage.
   `parameterFactory.test.ts` for existing domain default seams and
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
-  unit-list group 13 default-aware projection is aligned for these defaults;
-  `flwc` invalid-combination diagnostics, wildcard restrictions, byte-length
-  validation, and range validation are deferred
+  unit-list group 13 default-aware projection is aligned for these defaults,
+  and `flwc` / `flco` invalid-combination diagnostics are aligned through
+  editor-feedback. Wildcard restrictions, byte-length validation, and range
+  validation remain deferred.
 
 ### Execution-Interval Control Job Defaults
 

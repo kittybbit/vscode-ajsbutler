@@ -58,6 +58,21 @@ Scenario: Invalid parameter combinations produce semantic diagnostics
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Invalid file monitoring condition combinations produce diagnostics
+  Given a syntactically valid JP1/AJS document with a file monitoring job
+  And `flwc` specifies both size-change and modification-time monitoring
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
+Scenario: File existing-condition output requires creation monitoring
+  Given a syntactically valid JP1/AJS document with a file monitoring job
+  And `flco` is specified while the effective `flwc` value does not include
+    file-creation monitoring
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

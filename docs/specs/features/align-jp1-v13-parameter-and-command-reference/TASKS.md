@@ -139,6 +139,16 @@
 - [x] Add focused diagnostics regression evidence for valid `jd=cod` retry
       parameters and explicit invalid `jd` / retry-parameter combinations
 - [x] Run required code-change validation after implementation
+- [x] Investigate file monitoring job `flwc` / `flco` semantic diagnostics as
+      the next focused parameter diagnostics slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration
+- [x] Implement focused file monitoring semantic diagnostics only after
+      approval
+- [x] Add focused diagnostics regression evidence for valid omitted defaults,
+      valid explicit `flwc` / `flco` combinations, and explicit invalid
+      combinations
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -336,13 +346,51 @@
   projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged. Numeric retry
   ranges and threshold ordering remain deferred.
+- 2026-05-03: file monitoring job `flwc` / `flco` diagnostics are the next
+  approval-gated semantic diagnostics candidate. JP1/AJS3 version 13 file
+  monitoring job definitions say `flwc` can specify multiple monitoring
+  conditions but cannot specify `s` and `m` together, and `flco` can be
+  specified only when `flwc` includes `c`. The proposed scope is limited to
+  reporting explicit `flwj` / `rflwj` invalid combinations through the
+  existing editor-feedback boundary while preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation. Parser grammar, generated artifacts,
+  configuration, dependency versions, `engines.vscode`, wildcard validation,
+  byte-length validation, numeric range validation, timeout behavior, and
+  broad parameter validation remain out of scope.
+- 2026-05-06: file monitoring job `flwc` / `flco` diagnostics now report
+  explicit `flwj` / `rflwj` invalid combinations when `flwc` specifies both
+  `s` and `m`, or when explicit `flco` is present and effective `flwc` does
+  not include `c`. Omitted `flwc=c` remains non-diagnostic with explicit
+  `flco`, valid explicit combinations remain non-diagnostic, and raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, command generation, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-05-01
-- Approved scope: User replied "OK.Proceed." after the job end-judgment
-  retry-parameter diagnostics approval request. Approved changes are limited
+- Approved at: 2026-05-06
+- Approved scope: User replied "OK.Proceed." after the file monitoring job
+  `flwc` / `flco` diagnostics approval request. Approved changes are limited
+  to adding focused application-level semantic diagnostics for explicit
+  `flwj` / `rflwj` invalid combinations where `flwc` specifies both `s` and
+  `m`, or explicit `flco` is present when effective `flwc` does not include
+  `c`; preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation;
+  adding focused regression evidence; updating SDD tracking; and running
+  validation. Parser grammar, generated artifacts, configuration, dependency
+  versions, `engines.vscode`, wildcard validation, byte-length validation,
+  numeric range validation, timeout behavior, and broad parameter validation
+  remain out of scope.
+
+Current implementation gate: file monitoring job `flwc` / `flco` semantic
+diagnostics.
+
+## Prior Approval Evidence
+
+- 2026-05-01: User replied "OK.Proceed." after the job end-judgment
+  retry-parameter diagnostics approval request. Approved changes were limited
   to adding focused application-level semantic diagnostics for explicit
   UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei` values
   when the effective `jd` value is not `cod`; preserving raw parser output,
@@ -351,12 +399,7 @@
   updating SDD tracking; and running validation. Parser grammar, generated
   artifacts, configuration, dependency versions, `engines.vscode`, numeric
   retry ranges, retry threshold ordering, byte-length validation, and broad
-  parameter validation remain out of scope.
-
-Current implementation gate: job end-judgment retry-parameter diagnostics.
-
-## Prior Approval Evidence
-
+  parameter validation were out of scope.
 - 2026-05-01: User replied "OK.Proceed." after the job end-judgment `jd` /
   `abr` invalid-combination diagnostics approval request. Approved changes
   were limited to adding focused application-level semantic diagnostics for
@@ -437,6 +480,16 @@ Current implementation gate: job end-judgment retry-parameter diagnostics.
 
 ## Validation
 
+- 2026-05-06: `pnpm run test:compile`
+- 2026-05-06: `pnpm test`
+- 2026-05-06: `pnpm run qlty` completed with exit code 0; final run used an
+  escalated command because sandboxed qlty cannot create its log file
+- 2026-05-06: `pnpm test`
+- 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-06: `pnpm run build` completed with existing webpack asset-size
+  warnings
 - 2026-05-01: `pnpm run qlty` required an escalated rerun after a sandboxed
   log-file permission failure
 - 2026-05-01: `pnpm test`

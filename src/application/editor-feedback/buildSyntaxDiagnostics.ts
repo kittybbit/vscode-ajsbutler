@@ -19,6 +19,7 @@ const jobEndJudgmentDiagnosticTargetTypes = new Set([
   "rcj",
 ]);
 const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
+const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
 
 const flattenUnits = (units: Unit[]): Unit[] =>
   units.reduce<Unit[]>(
@@ -28,6 +29,17 @@ const flattenUnits = (units: Unit[]): Unit[] =>
 
 const findParameter = (unit: Unit, key: string): UnitParameter | undefined =>
   unit.parameters.find((parameter) => parameter.key === key);
+
+const buildDiagnostic = (
+  parameter: UnitParameter,
+  message: string,
+): SyntaxDiagnosticDto => ({
+  line: parameter.line ?? 1,
+  column: parameter.column ?? 0,
+  length: parameter.length ?? parameter.key.length,
+  message,
+  severity: "error" as const,
+});
 
 const buildJobEndJudgmentDiagnostics = (
   rootUnits: Unit[],
@@ -49,14 +61,12 @@ const buildJobEndJudgmentDiagnostics = (
       }
 
       if (abrParameter?.value === "y") {
-        diagnostics.push({
-          line: abrParameter.line ?? 1,
-          column: abrParameter.column ?? 0,
-          length: abrParameter.length ?? abrParameter.key.length,
-          message:
+        diagnostics.push(
+          buildDiagnostic(
+            abrParameter,
             "Automatic retry (abr=y) requires end judgment (jd) to be cod.",
-          severity: "error" as const,
-        });
+          ),
+        );
       }
 
       for (const retryParameterKey of jobEndJudgmentRetryParameterKeys) {
@@ -65,13 +75,53 @@ const buildJobEndJudgmentDiagnostics = (
           continue;
         }
 
-        diagnostics.push({
-          line: retryParameter.line ?? 1,
-          column: retryParameter.column ?? 0,
-          length: retryParameter.length ?? retryParameter.key.length,
-          message: `Retry parameter (${retryParameterKey}) requires end judgment (jd) to be cod.`,
-          severity: "error" as const,
-        });
+        diagnostics.push(
+          buildDiagnostic(
+            retryParameter,
+            `Retry parameter (${retryParameterKey}) requires end judgment (jd) to be cod.`,
+          ),
+        );
+      }
+
+      return diagnostics;
+    });
+
+const splitFileMonitoringConditions = (value: string): Set<string> =>
+  new Set(value.split(":").filter((condition) => condition.length > 0));
+
+const buildFileMonitoringDiagnostics = (
+  rootUnits: Unit[],
+): SyntaxDiagnosticDto[] =>
+  flattenUnits(rootUnits)
+    .filter((unit) => {
+      const unitType = findParameter(unit, "ty")?.value;
+      return unitType
+        ? fileMonitoringDiagnosticTargetTypes.has(unitType)
+        : false;
+    })
+    .flatMap((unit) => {
+      const diagnostics: SyntaxDiagnosticDto[] = [];
+      const flwcParameter = findParameter(unit, "flwc");
+      const flcoParameter = findParameter(unit, "flco");
+      const effectiveFlwc = flwcParameter?.value ?? DEFAULTS.Flwc;
+      const flwcConditions = splitFileMonitoringConditions(effectiveFlwc);
+
+      if (flwcParameter && flwcConditions.has("s") && flwcConditions.has("m")) {
+        diagnostics.push(
+          buildDiagnostic(
+            flwcParameter,
+            "File monitoring condition (flwc) cannot specify both s and m.",
+          ),
+        );
+      }
+
+      if (flcoParameter && !flwcConditions.has("c")) {
+        diagnostics.push(
+          buildDiagnostic(
+            flcoParameter,
+            "File close option (flco) requires file creation monitoring (flwc=c).",
+          ),
+        );
       }
 
       return diagnostics;
@@ -95,5 +145,6 @@ export const buildSyntaxDiagnostics = (
   return [
     ...syntaxDiagnostics,
     ...buildJobEndJudgmentDiagnostics(result.rootUnits),
+    ...buildFileMonitoringDiagnostics(result.rootUnits),
   ];
 };
