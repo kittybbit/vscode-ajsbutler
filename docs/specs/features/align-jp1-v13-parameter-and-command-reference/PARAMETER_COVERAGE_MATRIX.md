@@ -106,7 +106,8 @@ coverage.
   unit-list group 14 default-aware projection is aligned for these defaults;
   `evhst` requiredness diagnostics are aligned through editor-feedback;
   `evspl` / `evsrc` range diagnostics are aligned through editor-feedback;
-  other event-job validation remains deferred
+  `evsid` hexadecimal diagnostics are aligned through editor-feedback; other
+  event-job validation remains deferred
 
 ### File Monitoring Job Defaults
 

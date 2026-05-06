@@ -97,6 +97,14 @@ Scenario: Event arrival check values must stay within documented ranges
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Event sending event IDs must stay within documented hexadecimal ranges
+  Given a syntactically valid JP1/AJS document with a JP1 event sending job
+  And explicit `evsid` is outside the JP1/AJS3 v13 hexadecimal ranges
+    `00000000..00001FFF` and `7FFF8000..7FFFFFFF`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

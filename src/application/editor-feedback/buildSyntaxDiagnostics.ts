@@ -58,6 +58,22 @@ const parseExplicitDecimalInRange = (
     : undefined;
 };
 
+const parseExplicitHexadecimalInRange = (
+  parameter: UnitParameter | undefined,
+  minimum: number,
+  maximum: number,
+): number | undefined => {
+  const rawValue = parameter?.value;
+  if (!rawValue || !/^[0-9a-fA-F]{1,8}$/.test(rawValue)) {
+    return undefined;
+  }
+
+  const numericValue = Number.parseInt(rawValue, 16);
+  return numericValue >= minimum && numericValue <= maximum
+    ? numericValue
+    : undefined;
+};
+
 const buildJobEndJudgmentDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
@@ -174,11 +190,34 @@ const buildEventSendingDiagnostics = (
     })
     .flatMap((unit) => {
       const diagnostics: SyntaxDiagnosticDto[] = [];
+      const evsidParameter = findParameter(unit, "evsid");
       const evsrtParameter = findParameter(unit, "evsrt");
       const evhstParameter = findParameter(unit, "evhst");
       const evsplParameter = findParameter(unit, "evspl");
       const evsrcParameter = findParameter(unit, "evsrc");
       const effectiveEvsrt = evsrtParameter?.value ?? DEFAULTS.Evsrt;
+
+      if (
+        evsidParameter &&
+        parseExplicitHexadecimalInRange(
+          evsidParameter,
+          0x00000000,
+          0x00001fff,
+        ) === undefined &&
+        parseExplicitHexadecimalInRange(
+          evsidParameter,
+          0x7fff8000,
+          0x7fffffff,
+        ) === undefined
+      ) {
+        diagnostics.push(
+          buildDiagnostic(
+            evsidParameter,
+            "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
+          ),
+        );
+      }
+
       if (
         evsplParameter &&
         parseExplicitDecimalInRange(evsplParameter, 3, 600) === undefined

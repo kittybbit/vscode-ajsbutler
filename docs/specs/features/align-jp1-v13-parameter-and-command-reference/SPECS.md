@@ -136,6 +136,20 @@ JP1/AJS3 version 13 reference documents.
   `evsrc` values outside `0..999` checks through editor-feedback while
   preserving raw parser output, domain wrapper values, normalized parameters,
   unit-list projection, flow projection, and command generation.
+- JP1 event sending job `evsid` hexadecimal diagnostics are approval-sensitive
+  because existing behavior preserves explicit event IDs as raw parsed data
+  without editor feedback. A focused diagnostic slice should report explicit
+  `evsid` values outside the JP1/AJS3 v13 hexadecimal ranges
+  `00000000..00001FFF` and `7FFF8000..7FFFFFFF` through editor-feedback while
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation.
+- JP1 event sending job `evsid` hexadecimal diagnostics are aligned through
+  application editor-feedback. Explicit `evsid` values on `evsj` / `revsj`
+  now report a semantic diagnostic when they are malformed or fall outside the
+  JP1/AJS3 v13 hexadecimal ranges `00000000..00001FFF` and
+  `7FFF8000..7FFFFFFF`, while raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
 
 ## Reference Documents
 
