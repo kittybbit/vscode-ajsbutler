@@ -10,6 +10,12 @@ export type SyntaxDiagnosticDto = {
   severity: "error";
 };
 
+type UnitParameterDiagnosticRule = {
+  key: string;
+  message: string;
+  isInvalid: (parameter: UnitParameter, unit: Unit) => boolean;
+};
+
 const jobEndJudgmentDiagnosticTargetTypes = new Set([
   "j",
   "rj",
@@ -50,6 +56,18 @@ const buildDiagnostic = (
   length: parameter.length ?? parameter.key.length,
   message,
   severity: "error" as const,
+});
+
+const buildExplicitDecimalRangeRule = (
+  key: string,
+  minimum: number,
+  maximum: number,
+  message: string,
+): UnitParameterDiagnosticRule => ({
+  key,
+  message,
+  isInvalid: (parameter) =>
+    parseExplicitDecimalInRange(parameter, minimum, maximum) === undefined,
 });
 
 const parseExplicitDecimalInRange = (
@@ -126,12 +144,145 @@ const isValidExplicitIpv4Address = (
   });
 };
 
+const collectRuleDiagnostics = (
+  unit: Unit,
+  rules: readonly UnitParameterDiagnosticRule[],
+): SyntaxDiagnosticDto[] =>
+  rules.flatMap((rule) => {
+    const parameter = findParameter(unit, rule.key);
+    return parameter && rule.isInvalid(parameter, unit)
+      ? [buildDiagnostic(parameter, rule.message)]
+      : [];
+  });
+
+const jobEndJudgmentNumericRangeRules = [
+  buildExplicitDecimalRangeRule(
+    "wth",
+    0,
+    2147483647,
+    "Warning threshold (wth) must be between 0 and 2147483647.",
+  ),
+  buildExplicitDecimalRangeRule(
+    "tho",
+    0,
+    2147483647,
+    "Abnormal threshold (tho) must be between 0 and 2147483647.",
+  ),
+  buildExplicitDecimalRangeRule(
+    "rjs",
+    1,
+    4294967295,
+    "Retry start code (rjs) must be between 1 and 4294967295.",
+  ),
+  buildExplicitDecimalRangeRule(
+    "rje",
+    1,
+    4294967295,
+    "Retry end code (rje) must be between 1 and 4294967295.",
+  ),
+  buildExplicitDecimalRangeRule(
+    "rec",
+    1,
+    12,
+    "Retry count (rec) must be between 1 and 12.",
+  ),
+  buildExplicitDecimalRangeRule(
+    "rei",
+    1,
+    10,
+    "Retry interval (rei) must be between 1 and 10.",
+  ),
+] as const;
+
+const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
+  {
+    key: "flwc",
+    message: "File monitoring condition (flwc) cannot specify both s and m.",
+    isInvalid: (parameter) => {
+      const flwcConditions = splitFileMonitoringConditions(parameter.value);
+      return flwcConditions.has("s") && flwcConditions.has("m");
+    },
+  },
+  {
+    key: "flco",
+    message:
+      "File close option (flco) requires file creation monitoring (flwc=c).",
+    isInvalid: (_parameter, unit) => {
+      const effectiveFlwc = findParameter(unit, "flwc")?.value ?? DEFAULTS.Flwc;
+      return !splitFileMonitoringConditions(effectiveFlwc).has("c");
+    },
+  },
+];
+
+const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
+  {
+    key: "evsid",
+    message:
+      "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
+    isInvalid: (parameter) =>
+      parseExplicitHexadecimalInRange(
+        parameter.value,
+        0x00000000,
+        0x00001fff,
+      ) === undefined &&
+      parseExplicitHexadecimalInRange(
+        parameter.value,
+        0x7fff8000,
+        0x7fffffff,
+      ) === undefined,
+  },
+  buildExplicitDecimalRangeRule(
+    "evspl",
+    3,
+    600,
+    "Event arrival check interval (evspl) must be between 3 and 600.",
+  ),
+  buildExplicitDecimalRangeRule(
+    "evsrc",
+    0,
+    999,
+    "Event arrival check count (evsrc) must be between 0 and 999.",
+  ),
+  {
+    key: "evsrt",
+    message:
+      "Event arrival check (evsrt=y) requires an event destination host (evhst).",
+    isInvalid: (parameter, unit) =>
+      (parameter.value ?? DEFAULTS.Evsrt) === "y" &&
+      !findParameter(unit, "evhst"),
+  },
+];
+
+const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
+  {
+    key: "evwid",
+    message:
+      "Event ID (evwid) must be hexadecimal in 00000000:00000000-FFFFFFFF:FFFFFFFF format.",
+    isInvalid: (parameter) =>
+      !isValidExplicitColonSeparatedHexadecimalEventId(parameter),
+  },
+  {
+    key: "evipa",
+    message:
+      "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
+    isInvalid: (parameter) => !isValidExplicitIpv4Address(parameter),
+  },
+  {
+    key: "evesc",
+    message: "Event search condition (evesc) must be no or between 1 and 720.",
+    isInvalid: (parameter) => !isValidExplicitEventSearchCondition(parameter),
+  },
+];
+
 const buildJobEndJudgmentDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, jobEndJudgmentDiagnosticTargetTypes).flatMap(
     (unit) => {
-      const diagnostics: SyntaxDiagnosticDto[] = [];
+      const diagnostics = collectRuleDiagnostics(
+        unit,
+        jobEndJudgmentNumericRangeRules,
+      );
       const abrParameter = findParameter(unit, "abr");
       const effectiveJobEndJudgment =
         findParameter(unit, "jd")?.value ?? DEFAULTS.Jd;
@@ -193,104 +344,14 @@ const buildFileMonitoringDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, fileMonitoringDiagnosticTargetTypes).flatMap(
-    (unit) => {
-      const diagnostics: SyntaxDiagnosticDto[] = [];
-      const flwcParameter = findParameter(unit, "flwc");
-      const flcoParameter = findParameter(unit, "flco");
-      const effectiveFlwc = flwcParameter?.value ?? DEFAULTS.Flwc;
-      const flwcConditions = splitFileMonitoringConditions(effectiveFlwc);
-
-      if (flwcParameter && flwcConditions.has("s") && flwcConditions.has("m")) {
-        diagnostics.push(
-          buildDiagnostic(
-            flwcParameter,
-            "File monitoring condition (flwc) cannot specify both s and m.",
-          ),
-        );
-      }
-
-      if (flcoParameter && !flwcConditions.has("c")) {
-        diagnostics.push(
-          buildDiagnostic(
-            flcoParameter,
-            "File close option (flco) requires file creation monitoring (flwc=c).",
-          ),
-        );
-      }
-
-      return diagnostics;
-    },
+    (unit) => collectRuleDiagnostics(unit, fileMonitoringDiagnosticRules),
   );
 
 const buildEventSendingDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, eventSendingDiagnosticTargetTypes).flatMap(
-    (unit) => {
-      const diagnostics: SyntaxDiagnosticDto[] = [];
-      const evsidParameter = findParameter(unit, "evsid");
-      const evsrtParameter = findParameter(unit, "evsrt");
-      const evhstParameter = findParameter(unit, "evhst");
-      const evsplParameter = findParameter(unit, "evspl");
-      const evsrcParameter = findParameter(unit, "evsrc");
-      const effectiveEvsrt = evsrtParameter?.value ?? DEFAULTS.Evsrt;
-
-      if (
-        evsidParameter &&
-        parseExplicitHexadecimalInRange(
-          evsidParameter.value,
-          0x00000000,
-          0x00001fff,
-        ) === undefined &&
-        parseExplicitHexadecimalInRange(
-          evsidParameter.value,
-          0x7fff8000,
-          0x7fffffff,
-        ) === undefined
-      ) {
-        diagnostics.push(
-          buildDiagnostic(
-            evsidParameter,
-            "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
-          ),
-        );
-      }
-
-      if (
-        evsplParameter &&
-        parseExplicitDecimalInRange(evsplParameter, 3, 600) === undefined
-      ) {
-        diagnostics.push(
-          buildDiagnostic(
-            evsplParameter,
-            "Event arrival check interval (evspl) must be between 3 and 600.",
-          ),
-        );
-      }
-
-      if (
-        evsrcParameter &&
-        parseExplicitDecimalInRange(evsrcParameter, 0, 999) === undefined
-      ) {
-        diagnostics.push(
-          buildDiagnostic(
-            evsrcParameter,
-            "Event arrival check count (evsrc) must be between 0 and 999.",
-          ),
-        );
-      }
-
-      if (evsrtParameter && effectiveEvsrt === "y" && !evhstParameter) {
-        diagnostics.push(
-          buildDiagnostic(
-            evsrtParameter,
-            "Event arrival check (evsrt=y) requires an event destination host (evhst).",
-          ),
-        );
-      }
-
-      return diagnostics;
-    },
+    (unit) => collectRuleDiagnostics(unit, eventSendingDiagnosticRules),
   );
 
 const isValidExplicitEventSearchCondition = (
@@ -312,47 +373,7 @@ const buildEventReceivingDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, eventReceivingDiagnosticTargetTypes).flatMap(
-    (unit) => {
-      const diagnostics: SyntaxDiagnosticDto[] = [];
-      const evwidParameter = findParameter(unit, "evwid");
-      const evipaParameter = findParameter(unit, "evipa");
-      const evescParameter = findParameter(unit, "evesc");
-
-      if (
-        evwidParameter &&
-        !isValidExplicitColonSeparatedHexadecimalEventId(evwidParameter)
-      ) {
-        diagnostics.push(
-          buildDiagnostic(
-            evwidParameter,
-            "Event ID (evwid) must be hexadecimal in 00000000:00000000-FFFFFFFF:FFFFFFFF format.",
-          ),
-        );
-      }
-
-      if (evipaParameter && !isValidExplicitIpv4Address(evipaParameter)) {
-        diagnostics.push(
-          buildDiagnostic(
-            evipaParameter,
-            "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
-          ),
-        );
-      }
-
-      if (
-        evescParameter &&
-        !isValidExplicitEventSearchCondition(evescParameter)
-      ) {
-        diagnostics.push(
-          buildDiagnostic(
-            evescParameter,
-            "Event search condition (evesc) must be no or between 1 and 720.",
-          ),
-        );
-      }
-
-      return diagnostics;
-    },
+    (unit) => collectRuleDiagnostics(unit, eventReceivingDiagnosticRules),
   );
 
 export const buildSyntaxDiagnostics = (

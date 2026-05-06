@@ -62,148 +62,14 @@
 
 ## Follow-up
 
-- [x] Extract `top1` to `top4` default resolution into a transfer-operation
-      helper seam while preserving explicit and derived values
-- [x] Align omitted UNIX/PC job and UNIX/PC custom job `jd` values to the
-      JP1/AJS3 v13 default `cod`
-- [x] Align omitted HTTP Connection job `eu` values to the JP1/AJS3 v13
-      `ajsprint -a` default values table value `def`
-- [x] Align omitted JP1 event sending job `evsrc` values to the JP1/AJS3 v13
-      default `10`, preserving explicit values and deciding whether normalized
-      unit-list projection should remain raw or become default-aware
-- [x] Add focused regression evidence that QUEUE job `ts1` to `ts4` and `td1`
-      to `td4` values are preserved while `top1` to `top4` are not exposed or
-      derived for `Qj` / `Rq`
-- [x] Align `wth` key mapping so job end-judgment threshold parsing reads
-      `wth` rather than the schedule-rule `wt` parameter
-- [x] Turn the audit notes into an explicit parameter-coverage matrix when
-      category-level status needs tracking beyond the current audit summary
-- [x] Investigate schedule-rule helper-boundary alignment with the remaining
-      grouped semantics, such as `wc` / `wt` pairing or range validation, when
-      the behavior contract is explicit enough to test across the family
-- [x] Implement schedule-rule `wc` / `wt` effective-value pairing after human
-      approval clarifies whether the slice is domain-only or includes
-      unit-list projection
-- [x] Investigate unit-list group 10 projection for schedule-rule `wc` / `wt`
-      effective values as a separate behavior slice after domain-only pairing
-- [x] Record human approval before changing unit-list projection behavior
-- [x] Implement group 10 effective `wc` / `wt` projection only after approval
-- [x] Add focused group 10 regression evidence for disabled and valid pairs
-- [x] Run required code-change validation after implementation
-- [x] Investigate unit-list group 14 projection for JP1 event sending job
-      arrival-check defaults as a separate behavior slice
-- [x] Record human approval before changing unit-list group 14 projection
-- [x] Implement group 14 default-aware projection only after approval
-- [x] Add focused group 14 regression evidence for omitted defaults and
-      explicit value preservation
-- [x] Run required code-change validation after implementation
-- [x] Investigate unit-list group 13 projection for file monitoring job
-      defaults as a separate behavior slice
-- [x] Record human approval before changing unit-list group 13 projection
-- [x] Implement group 13 file monitoring default-aware projection only after
-      approval
-- [x] Add focused group 13 regression evidence for omitted defaults and
-      explicit value preservation
-- [x] Run required code-change validation after implementation
-- [x] Investigate execution-interval control job defaults and unit-list group
-      13 projection as a separate behavior slice
-- [x] Record human approval before changing execution-interval control job
-      default or projection behavior
-- [x] Implement execution-interval control job defaults only after approval
-- [x] Add focused execution-interval control job regression evidence for
-      omitted defaults, explicit value preservation, and non-target jobs
-- [x] Run required code-change validation after implementation
-- [x] Investigate unit-list group 15 projection for QUEUE job transfer-file
-      operations as a separate behavior slice
-- [x] Record human approval before changing QUEUE job group 15 projection
-- [x] Implement QUEUE job group 15 unit-type-aware projection only after
-      approval
-- [x] Add focused group 15 regression evidence for QUEUE `tsN` / `tdN`
-      preservation, QUEUE `topN` hiding, and non-QUEUE `topN` preservation
-- [x] Run required code-change validation after implementation
-- [x] Investigate job end-judgment `jd` / `abr` invalid-combination diagnostics
-      as the next parameter semantic diagnostics slice
 - [x] Record human approval before changing editor-feedback diagnostics,
-      parser source-location data, runtime code, tests, generated artifacts,
-      or configuration
-- [x] Implement focused `jd` / `abr` semantic diagnostics only after approval
-- [x] Add focused diagnostics regression evidence for valid omitted defaults,
-      explicit valid retry settings, and explicit invalid combinations
-- [x] Run required code-change validation after implementation
-- [x] Investigate job end-judgment retry-parameter diagnostics as the next
-      focused semantic diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement focused retry-parameter semantic diagnostics only after
-      approval
-- [x] Add focused diagnostics regression evidence for valid `jd=cod` retry
-      parameters and explicit invalid `jd` / retry-parameter combinations
-- [x] Run required code-change validation after implementation
-- [x] Investigate file monitoring job `flwc` / `flco` semantic diagnostics as
-      the next focused parameter diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement focused file monitoring semantic diagnostics only after
-      approval
-- [x] Add focused diagnostics regression evidence for valid omitted defaults,
-      valid explicit `flwc` / `flco` combinations, and explicit invalid
-      combinations
-- [x] Run required code-change validation after implementation
-- [x] Investigate job end-judgment automatic-retry enablement diagnostics as
-      the next focused parameter diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement focused automatic-retry enablement diagnostics only after
-      approval
-- [x] Add focused diagnostics regression evidence for omitted automatic retry
-      defaults, valid `abr=y` retry parameters, and explicit invalid `abr=n`
-      / retry-parameter combinations
-- [x] Run required code-change validation after implementation
-- [x] Investigate JP1 event sending job `evhst` requiredness diagnostics as
-      the next focused parameter diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement focused `evhst` requiredness diagnostics only after approval
-- [x] Add focused diagnostics regression evidence for omitted `evsrt=n`,
-      valid explicit `evsrt=y` with `evhst`, and explicit invalid `evsrt=y`
-      without `evhst`
-- [x] Run required code-change validation after implementation
-- [x] Investigate JP1 event sending job `evspl` / `evsrc` range diagnostics as
-      the next focused parameter diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement focused `evspl` / `evsrc` range diagnostics only after
+      runtime code, tests, generated artifacts, or configuration for grouped
+      job end-judgment numeric range validation
+- [x] Implement grouped job end-judgment numeric range validation only after
       approval
 - [x] Add focused diagnostics regression evidence for omitted defaults, valid
-      explicit in-range values, and explicit out-of-range `evspl` / `evsrc`
-      values
-- [x] Run required code-change validation after implementation
-- [x] Investigate JP1 event sending job `evsid` hexadecimal diagnostics as
-      the next focused parameter diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement focused `evsid` hexadecimal diagnostics only after approval
-- [x] Add focused diagnostics regression evidence for omitted `evsid`,
-      valid explicit in-range hexadecimal values, and explicit invalid
-      `evsid` values
-- [x] Run required code-change validation after implementation
-- [x] Investigate JP1 event reception monitoring job `evesc` range
-      diagnostics as the next focused parameter diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement focused `evesc` range diagnostics only after approval
-- [x] Add focused diagnostics regression evidence for omitted `evesc`,
-      valid explicit `evesc=no` or in-range decimal values, and explicit
-      invalid `evesc` values
-- [x] Run required code-change validation after implementation
-- [x] Investigate JP1 event reception monitoring job grouped `evwid` /
-      `evipa` validation as the next focused parameter diagnostics slice
-- [x] Record human approval before changing editor-feedback diagnostics,
-      runtime code, tests, generated artifacts, or configuration
-- [x] Implement grouped `evwid` / `evipa` validation only after approval
-- [x] Add focused diagnostics regression evidence for omitted `evwid` and
-      `evipa`, valid explicit hexadecimal event IDs and IPv4 addresses, and
-      explicit invalid `evwid` / `evipa` values
+      explicit in-range values, and explicit out-of-range `wth`, `tho`, `rjs`,
+      `rje`, `rec`, and `rei` values
 - [x] Run required code-change validation after implementation
 
 ## Notes
@@ -226,10 +92,6 @@
 - 2026-04-23: command-builder UI now resolves labels and descriptions through
   the existing message resources and switches `ajsshow` / `ajsprint` manual
   links between English and Japanese URLs from the active `lang` context.
-- 2026-04-26: the next parameter-alignment candidate is the schedule-rule
-  family because these keys already share helper seams, affect unit-list
-  behavior, and can be covered as a focused manual-alignment slice without
-  creating a full parameter matrix first.
 - 2026-04-27: schedule-rule alignment preparation is recorded in
   `SCHEDULE_RULE_ALIGNMENT.md`, keeping the matrix limited to the focused
   schedule-rule family instead of expanding to all parameters.
@@ -247,49 +109,22 @@
   and reused by unit-list projection. This is the first category-level parser
   alignment pattern; later parameter categories should follow the same audit,
   helper-boundary, and regression-test workflow.
-- 2026-04-27: transfer-operation alignment is the next helper-boundary slice.
-  It keeps the existing `topN` behavior but moves the paired `tsN` / `tdN`
-  default rule out of generic parameter helper code.
 - 2026-04-27: `topN` default resolution now lives in
   `transferOperationHelpers.ts`; regression evidence covers explicit `topN`,
   derived `sav`, derived `del`, and the no-default case.
-- 2026-04-27: job end-judgment alignment is the next non-schedule parameter
-  family. The manual-backed behavior change is limited to omitted `jd`
-  resolving to `cod`; invalid pairing diagnostics remain deferred.
 - 2026-04-27: omitted UNIX/PC job and UNIX/PC custom job `jd` values now
   resolve to `cod` through `jobEndJudgmentHelpers.ts`; explicit `jd` values
   remain preserved.
-- 2026-04-28: HTTP Connection job default alignment is the next small
-  parameter-default candidate. The proposed behavior change is limited to
-  omitted `eu` resolving to `def` for `Htpj` / `Rhtpj`, while other job
-  families continue to use generic `eu=ent`.
 - 2026-04-28: omitted HTTP Connection job `eu` values now resolve to `def`
   through `httpConnectionJobDefaultHelpers.ts`; explicit HTTP Connection job
   `eu` values and non-HTTP generic `eu=ent` behavior remain preserved.
-- 2026-04-28: JP1 event sending job arrival-check defaults are the next
-  category-level parameter candidate. The proposed behavior change is limited
-  to omitted `evsrc` resolving to `10` for `Evsj` / `Revsj`, while explicit
-  values remain preserved. Normalized unit-list projection is approval
-  sensitive because it currently reads raw normalized parameters by key.
 - 2026-04-28: omitted JP1 event sending job `evsrc` now resolves to `10`
   through `DEFAULTS.Evsrc`; explicit event sending job values remain preserved.
   Unit-list projection remains raw normalized key/value projection.
-- 2026-04-29: QUEUE job transfer-file alignment is the next non-schedule
-  parameter family. The proposed behavior-preserving change is limited to
-  focused regression evidence that `Qj` / `Rq` preserve explicit `ts1` to
-  `ts4` and `td1` to `td4` values without exposing or deriving `top1` to
-  `top4`, because JP1/AJS3 version 13 QUEUE job definitions do not define
-  `topN`.
 - 2026-04-29: QUEUE job transfer-file regression evidence now verifies `Qj`
   and `Rq` preserve explicit transfer source/destination values and do not
   expose transfer operation getters. Parser grammar, command generation,
   validation behavior, and unit-list group 15 raw projection remain unchanged.
-- 2026-04-29: job end-judgment `wth` key mapping is the next focused
-  non-schedule parameter correction. Current code maps `ParamFactory.wth` to
-  raw `wt`, and current regression evidence preserves that legacy behavior.
-  The proposed implementation changes only the builder/test seam so explicit
-  `wth` is preserved and schedule-rule `wt` no longer satisfies
-  end-judgment threshold lookup.
 - 2026-04-29: `ParamFactory.wth` now reads raw `wth`; focused regression
   evidence verifies explicit `wth` preservation and confirms raw `wt` no
   longer satisfies end-judgment threshold lookup. Parser grammar, command
@@ -299,84 +134,33 @@
   focused alignment records into an explicit category-level matrix. This is a
   docs-only status index and does not broaden parameter coverage or approve
   new runtime behavior.
-- 2026-04-29: schedule-rule `wc` / `wt` pairing is the next investigated
-  behavior candidate. The current code parses and defaults both parameters
-  independently, while the JP1/AJS3 v13 jobnet definition says they are
-  specified together and `no` in one parameter invalidates the paired
-  start-condition monitoring value. Implementation approval is pending.
 - 2026-04-29: schedule-rule `wc` / `wt` effective-value pairing is implemented
   as a domain-only helper/API. Raw `Wc.numberOfTimes`, `Wt.time`, `value()`,
   and normalized unit-list projection remain unchanged. Effective values are
   empty when either paired value is `no`, missing, or unparsable.
-- 2026-04-29: unit-list group 10 `wc` / `wt` projection is the next
-  approval-gated behavior candidate. The proposed scope is limited to table
-  DTO projection using the existing effective pairing semantics; parser
-  grammar, raw wrappers, normalized raw parameter storage, diagnostics,
-  generated artifacts, configuration, dependency versions, and
-  `engines.vscode` remain out of scope.
 - 2026-04-29: unit-list group 10 `wc` / `wt` projection now consumes the
   existing effective pairing semantics. Disabled pairs display empty
   start-condition monitoring values, valid pairs remain visible, and raw
   parser/domain/normalized values remain unchanged.
-- 2026-04-29: unit-list group 14 JP1 event sending job projection is the next
-  approval-gated behavior candidate. The proposed scope is limited to table
-  DTO projection using the existing domain defaults for omitted `evssv`,
-  `evsrt`, `evspl`, and `evsrc`; parser grammar, raw domain wrappers,
-  normalized raw parameter storage, diagnostics, generated artifacts,
-  configuration, dependency versions, and `engines.vscode` remain out of
-  scope.
 - 2026-04-29: unit-list group 14 JP1 event sending job projection now consumes
   existing defaults for omitted `evssv`, `evsrt`, `evspl`, and `evsrc`.
   Explicit normalized values remain visible, non-event-sending jobs do not
   synthesize these defaults, and raw parser/domain/normalized values remain
   unchanged.
-- 2026-05-01: unit-list group 13 file monitoring job projection is the next
-  approval-gated behavior candidate. The proposed scope is limited to table
-  DTO projection using the existing domain defaults for omitted `flwc`,
-  `flwi`, `flco`, and `ets`; parser grammar, raw domain wrappers, normalized
-  raw parameter storage, diagnostics, generated artifacts, configuration,
-  dependency versions, and `engines.vscode` remain out of scope.
 - 2026-05-01: unit-list group 13 file monitoring job projection now consumes
   existing defaults for omitted `flwc`, `flwi`, `flco`, and `ets`. Explicit
   normalized values remain visible, omitted `flwf` remains empty,
   non-file-monitoring jobs do not synthesize these defaults, and raw
   parser/domain/normalized values remain unchanged.
-- 2026-05-01: execution-interval control job defaults are the next
-  approval-gated behavior candidate. The proposed scope is limited to
-  `tmwj` / `rtmwj` omitted `tmitv=10`, `etn=n`, and `ets=kl` behavior plus
-  unit-list group 13 default-aware projection. Parser grammar, normalized raw
-  parameter storage, diagnostics, generated artifacts, configuration,
-  dependency versions, and `engines.vscode` remain out of scope.
 - 2026-05-01: execution-interval control job defaults now resolve omitted
   `tmitv`, `etn`, and `ets` values to `10`, `n`, and `kl`. Unit-list group 13
   projection consumes those defaults for `tmwj` / `rtmwj`, explicit normalized
   values remain visible, non-execution-interval-control jobs do not synthesize
   those defaults, and raw parser/normalized values remain unchanged.
-- 2026-05-01: QUEUE job group 15 projection is the next approval-gated
-  behavior candidate. The proposed scope is limited to hiding `top1` to
-  `top4` transfer-operation projection for `qj` / `rq`, preserving explicit
-  `ts1` to `ts4` and `td1` to `td4`, and preserving non-QUEUE `topN`
-  projection. Parser grammar, normalized raw parameter storage, diagnostics,
-  generated artifacts, configuration, dependency versions, and
-  `engines.vscode` remain out of scope.
 - 2026-05-01: QUEUE job group 15 projection now hides `top1` to `top4`
   transfer-operation values for `qj` / `rq`. Explicit `ts1` to `ts4` and
   `td1` to `td4` remain visible, non-QUEUE `topN` projection remains visible,
   and raw parser/normalized values remain unchanged.
-- 2026-05-01: job end-judgment `jd` / `abr` invalid-combination diagnostics
-  are the next approval-gated parameter semantic diagnostics candidate. The
-  proposed scope is limited to reporting explicit UNIX/PC job and UNIX/PC
-  custom job `abr=y` values when the effective `jd` value is not `cod`,
-  preserving raw parser output, domain wrapper values, normalized parameters,
-  unit-list projection, and command generation. Parser grammar, generated
-  artifacts, configuration, dependency versions, `engines.vscode`, retry range
-  diagnostics, byte-length validation, and broad range validation remain out of
-  scope.
-- 2026-05-01: implementation approval was recorded for job end-judgment
-  `jd` / `abr` invalid-combination diagnostics. Complete reference impact
-  check before editing the application diagnostic boundary and parser
-  source-location data, then keep the implementation limited to the approved
-  semantic diagnostic and focused regression evidence.
 - 2026-05-01: job end-judgment `jd` / `abr` invalid-combination diagnostics
   now report explicit UNIX/PC job and UNIX/PC custom job `abr=y` values when
   the effective `jd` value is not `cod`. Parser grammar, raw parser values,
@@ -389,17 +173,6 @@
   Omitted `evsrt=n` remains non-diagnostic, explicit valid `evhst` values
   remain accepted, and raw parser/domain/normalized values plus unit-list,
   flow, and command output remain unchanged.
-- 2026-05-01: job end-judgment retry-parameter diagnostics are the next
-  approval-gated semantic diagnostics candidate. JP1/AJS3 version 13 UNIX/PC
-  job and UNIX/PC custom job definitions say `rjs`, `rje`, `rec`, and `rei`
-  cannot be specified when the effective `jd` value is not `cod`. The
-  proposed scope is limited to reporting explicit target job retry parameters
-  when effective `jd` is not `cod`, preserving raw parser output, domain
-  wrapper values, normalized parameters, unit-list projection, flow projection,
-  and command generation. Parser grammar, generated artifacts, configuration,
-  dependency versions, `engines.vscode`, numeric retry ranges, threshold
-  ordering, byte-length validation, and broad parameter validation remain out
-  of scope.
 - 2026-05-01: job end-judgment retry-parameter diagnostics now report explicit
   UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei` values when
   the effective `jd` value is not `cod`. Parser grammar, raw parser values,
@@ -407,18 +180,6 @@
   projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged. Numeric retry
   ranges and threshold ordering remain deferred.
-- 2026-05-03: file monitoring job `flwc` / `flco` diagnostics are the next
-  approval-gated semantic diagnostics candidate. JP1/AJS3 version 13 file
-  monitoring job definitions say `flwc` can specify multiple monitoring
-  conditions but cannot specify `s` and `m` together, and `flco` can be
-  specified only when `flwc` includes `c`. The proposed scope is limited to
-  reporting explicit `flwj` / `rflwj` invalid combinations through the
-  existing editor-feedback boundary while preserving raw parser output, domain
-  wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation. Parser grammar, generated artifacts,
-  configuration, dependency versions, `engines.vscode`, wildcard validation,
-  byte-length validation, numeric range validation, timeout behavior, and
-  broad parameter validation remain out of scope.
 - 2026-05-06: file monitoring job `flwc` / `flco` diagnostics now report
   explicit `flwj` / `rflwj` invalid combinations when `flwc` specifies both
   `s` and `m`, or when explicit `flco` is present and effective `flwc` does
@@ -427,18 +188,6 @@
   output, domain wrapper values, normalized parameters, unit-list projection,
   flow projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged.
-- 2026-05-06: job end-judgment automatic-retry enablement diagnostics are the
-  next approval-gated semantic diagnostics candidate. JP1/AJS3 version 13
-  UNIX/PC job and UNIX/PC custom job definitions say `rjs`, `rje`, `rec`, and
-  `rei` can be specified only when automatic retry is enabled with `abr=y`.
-  Existing diagnostics already report these retry parameters when effective
-  `jd` is not `cod`; the proposed scope is limited to reporting explicit
-  retry parameters when effective `jd=cod` but effective `abr` is not `y`,
-  preserving raw parser output, domain wrapper values, normalized parameters,
-  unit-list projection, flow projection, and command generation. Parser
-  grammar, generated artifacts, configuration, dependency versions,
-  `engines.vscode`, numeric retry ranges, retry threshold ordering,
-  byte-length validation, and broad parameter validation remain out of scope.
 - 2026-05-06: job end-judgment automatic-retry enablement diagnostics now
   report explicit UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or
   `rei` values when effective `jd=cod` but effective `abr` is not `y`.
@@ -447,31 +196,6 @@
   domain wrapper values, normalized parameters, unit-list projection, flow
   projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged.
-- 2026-05-06: JP1 event sending job `evhst` requiredness diagnostics are the
-  next approval-gated semantic diagnostics candidate. JP1/AJS3 version 13 JP1
-  event sending job definitions say `evhst` is required when `evsrt=y`.
-  Existing behavior preserves explicit `evsrt=y` without `evhst` as raw parsed
-  values without editor feedback. The proposed scope is limited to reporting
-  explicit `evsj` / `revsj` missing-host combinations through the existing
-  editor-feedback boundary while preserving raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection, and
-  command generation. Parser grammar, generated artifacts, configuration,
-  dependency versions, `engines.vscode`, `evhst` byte-length validation,
-  macro-variable validation, `evspl` / `evsrc` range validation, and broad
-  parameter validation remain out of scope.
-- 2026-05-06: JP1 event sending job `evspl` / `evsrc` range diagnostics are
-  the next approval-gated semantic diagnostics candidate. JP1/AJS3 version 13
-  JP1 event sending job definitions say `evspl` accepts decimal values
-  `3..600` seconds and `evsrc` accepts decimal values `0..999`, while omitted
-  values default to `10`. Existing behavior preserves explicit out-of-range
-  values as raw parsed data without editor feedback. The proposed scope is
-  limited to reporting explicit out-of-range `evspl` / `evsrc` values through
-  the existing editor-feedback boundary while preserving raw parser output,
-  domain wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation. Parser grammar, generated artifacts,
-  configuration, dependency versions, `engines.vscode`, `evhst` byte-length
-  validation, host-name validation, macro-variable validation, `evsid`
-  hexadecimal validation, and broad parameter validation remain out of scope.
 - 2026-05-06: JP1 event sending job `evspl` / `evsrc` range diagnostics now
   report explicit out-of-range `evspl` and `evsrc` values through the
   existing editor-feedback boundary. Omitted defaults remain non-diagnostic,
@@ -479,19 +203,6 @@
   wrapper values, normalized parameters, unit-list projection, flow
   projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged.
-- 2026-05-06: JP1 event sending job `evsid` hexadecimal diagnostics are the
-  next approval-gated semantic diagnostics candidate. JP1/AJS3 version 13
-  JP1 event sending job definitions say `evsid` accepts hexadecimal values in
-  the disjoint ranges `00000000..00001FFF` and `7FFF8000..7FFFFFFF`.
-  Existing behavior preserves explicit invalid `evsid` values as raw parsed
-  data without editor feedback. The proposed scope is limited to reporting
-  explicit out-of-range or malformed `evsid` values through the existing
-  editor-feedback boundary while preserving raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection, and
-  command generation. Parser grammar, generated artifacts, configuration,
-  dependency versions, `engines.vscode`, `evhst` byte-length validation,
-  host-name validation, macro-variable validation, event receiving job
-  `evwid` validation, and broad parameter validation remain out of scope.
 - 2026-05-06: JP1 event sending job `evsid` hexadecimal diagnostics now
   report explicit malformed or out-of-range `evsid` values through the
   existing editor-feedback boundary. Omitted `evsid` values remain
@@ -501,40 +212,12 @@
   artifacts, configuration, dependency versions, and `engines.vscode` remain
   unchanged.
 - 2026-05-06: JP1 event reception monitoring job `evesc` range diagnostics
-  are the next approval-gated semantic diagnostics candidate. JP1/AJS3
-  version 13 job definitions for monitoring JP1 event reception say `evesc`
-  accepts either `no` or a decimal value in the range `1..720`, while omitted
-  values default to `no`. Existing behavior preserves explicit invalid
-  `evesc` values as raw parsed data without editor feedback. The proposed
-  scope is limited to reporting explicit malformed or out-of-range `evesc`
-  values through the existing editor-feedback boundary while preserving raw
-  parser output, domain wrapper values, normalized parameters, unit-list
-  projection, flow projection, and command generation. Parser grammar,
-  generated artifacts, configuration, dependency versions, `engines.vscode`,
-  `evwid` format validation, `evhst` byte-length validation, host-name
-  validation, regular-expression validation, macro-variable validation,
-  `evipa` address validation, and broad parameter validation remain out of
-  scope.
-- 2026-05-06: JP1 event reception monitoring job `evesc` range diagnostics
   now report explicit malformed or out-of-range `evesc` values through the
   existing editor-feedback boundary. Omitted `evesc` values and explicit
   `evesc=no` remain non-diagnostic, and raw parser output, domain wrapper
   values, normalized parameters, unit-list projection, flow projection,
   command generation, generated artifacts, configuration, dependency
   versions, and `engines.vscode` remain unchanged.
-- 2026-05-06: JP1 event reception monitoring job grouped `evwid` / `evipa`
-  validation is the next approval-gated semantic diagnostics candidate.
-  JP1/AJS3 version 13 job definitions for monitoring JP1 event reception say
-  `evwid` accepts hexadecimal values in the range `00000000:00000000` to
-  `FFFFFFFF:FFFFFFFF`, and `evipa` accepts IPv4 dotted-decimal values in the
-  range `0.0.0.0` to `255.255.255.255`. The proposed scope is limited to
-  reporting explicit malformed `evwid` or `evipa` values through the existing
-  editor-feedback boundary while preserving raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection, and
-  command generation. Parser grammar, generated artifacts, configuration,
-  dependency versions, `engines.vscode`, `evhst` byte-length validation,
-  host-name validation, regular-expression validation, macro-variable
-  validation, and broad parameter validation remain out of scope.
 - 2026-05-06: JP1 event reception monitoring job grouped `evwid` / `evipa`
   validation now reports explicit malformed event IDs and invalid dotted-
   decimal IPv4 source addresses through the existing editor-feedback
@@ -543,25 +226,54 @@
   parameters, unit-list projection, flow projection, command generation,
   generated artifacts, configuration, dependency versions, and
   `engines.vscode` remain unchanged.
+- 2026-05-06: The next JP1/AJS v13 parameter-alignment slice was re-scoped by
+  user-visible size rather than by single-parameter granularity. The next
+  approval-gated candidate is grouped job end-judgment numeric range
+  diagnostics for UNIX/PC jobs and UNIX/PC custom jobs, covering explicit
+  `wth`, `tho`, `rjs`, `rje`, `rec`, and `rei` values through the existing
+  editor-feedback boundary while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. Parser grammar, generated artifacts, configuration,
+  dependency versions, `engines.vscode`, retry threshold ordering,
+  byte-length validation, and broad parameter validation remain out of scope.
+- 2026-05-06: Grouped job end-judgment numeric range diagnostics now report
+  explicit out-of-range `wth`, `tho`, `rjs`, `rje`, `rec`, and `rei` values
+  for UNIX/PC jobs and UNIX/PC custom jobs through the existing
+  editor-feedback boundary. Omitted values remain non-diagnostic, valid
+  explicit in-range values remain accepted, and raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, command generation, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-06
-- Approved scope: focused application-level semantic diagnostics for explicit
-  JP1 event reception monitoring jobs and recovery JP1 event reception
-  monitoring jobs where `evwid` is outside the JP1/AJS3 v13 hexadecimal
-  event-ID format and range `00000000:00000000` to `FFFFFFFF:FFFFFFFF`, or
-  where `evipa` is outside the IPv4 dotted-decimal range `0.0.0.0` to
-  `255.255.255.255`; preserve raw parser output, domain wrapper values,
-  normalized parameters, unit-list projection, flow projection, and command
-  generation; add focused regression evidence; update SDD tracking; and run
-  validation.
+- Approved scope: grouped application-level semantic diagnostics for explicit
+  UNIX/PC jobs and UNIX/PC custom jobs where `wth` or `tho` is outside
+  `0..2147483647`, `rjs` or `rje` is outside `1..4294967295`, `rec` is
+  outside `1..12`, or `rei` is outside `1..10`; preserve raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation; add focused regression evidence; update
+  SDD tracking; and run validation.
 
-Current implementation gate: none; last completed slice was JP1 event
-reception monitoring job grouped `evwid` / `evipa` validation.
+Current implementation gate: none; last completed slice was grouped job
+end-judgment numeric range validation.
 
 ## Prior Approval Evidence
+
+- 2026-05-06: User replied "Approved. Proceed with implementation." after the
+  grouped job end-judgment numeric range validation approval request.
+  Approved changes were limited to adding grouped application-level semantic
+  diagnostics for explicit UNIX/PC jobs and UNIX/PC custom jobs where `wth`
+  or `tho` falls outside `0..2147483647`, `rjs` or `rje` falls outside
+  `1..4294967295`, `rec` falls outside `1..12`, or `rei` falls outside
+  `1..10`; preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation;
+  adding focused regression evidence; updating SDD tracking; and running
+  validation. Parser grammar, generated artifacts, configuration, dependency
+  versions, `engines.vscode`, retry threshold ordering, byte-length
+  validation, and broad parameter validation were out of scope.
 
 - 2026-05-06: User replied "Approved. Proceed with implementation." after the
   JP1 event reception monitoring job grouped `evwid` / `evipa` validation
@@ -747,6 +459,16 @@ reception monitoring job grouped `evwid` / `evipa` validation.
 
 ## Validation
 
+- 2026-05-06: `pnpm run qlty` required an escalated rerun after the sandboxed
+  qlty log-file permission failure; escalated rerun completed with exit code 0
+- 2026-05-06: `pnpm test` completed with exit code 0; the VS Code harness
+  emitted an existing macOS `task_name_for_pid` codesign noise line
+- 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-06: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-06: `pnpm run lint:md`
 - 2026-05-06: `pnpm run test:compile`
 - 2026-05-06: `pnpm run qlty` completed with exit code 0; run used an
   escalated command because sandboxed qlty cannot create its log file

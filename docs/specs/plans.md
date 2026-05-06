@@ -37,9 +37,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Select the next grouped JP1/AJS3 v13 parameter-alignment gap from the
-   remaining deferred validations after delivered event reception `evwid` /
-   `evipa` diagnostics.
+1. Request approval for the next grouped JP1/AJS3 v13 parameter-alignment
+   slice: job end-judgment numeric range diagnostics for `wth`, `tho`, `rjs`,
+   `rje`, `rec`, and `rei` on UNIX/PC jobs and UNIX/PC custom jobs.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -52,43 +52,39 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/event-receiving-id-ip-diagnostics`
-- Objective: continue JP1/AJS v13 parameter alignment with the focused JP1
-  event reception monitoring job grouped validation slice for `evwid` and
-  `evipa` before returning to broader deferred validation gaps.
+- Branch: `codex/job-end-judgment-range-diagnostics`
+- Objective: continue JP1/AJS v13 parameter alignment with a user-meaningful
+  grouped slice around job end-judgment numeric ranges for UNIX/PC jobs and
+  UNIX/PC custom jobs, instead of returning to one-parameter micro-slices.
 - Status: approved, implemented, and validated on
-  `codex/event-receiving-id-ip-diagnostics`.
-- Scope: add application-level semantic diagnostics for explicit
-  JP1 event reception monitoring jobs and recovery JP1 event reception
-  monitoring jobs where `evwid` is outside the JP1/AJS3 v13 hexadecimal
-  event-ID format and range `00000000:00000000` to `FFFFFFFF:FFFFFFFF`, or
-  where `evipa` is outside the IPv4 dotted-decimal range
-  `0.0.0.0` to `255.255.255.255`; preserve raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection, and
-  command generation.
+  `codex/job-end-judgment-range-diagnostics`.
+- Scope: add application-level semantic diagnostics for explicit `j` / `cj`
+  parameters where `wth` or `tho` is outside `0..2147483647`, `rjs` or `rje`
+  is outside `1..4294967295`, `rec` is outside `1..12`, or `rei` is outside
+  `1..10`; preserve raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation.
 - Out of scope: parser grammar changes, raw parser/domain/normalized value
   changes, unit-list projection changes, flow projection changes, command
   generation changes, generated artifacts, dependency changes,
-  `engines.vscode`, `evhst` byte-length validation, host-name validation,
-  regular-expression validation, macro-variable validation, and broad
-  parameter validation.
+  `engines.vscode`, retry threshold ordering, byte-length validation, and
+  broad parameter validation.
 - Impact summary: the slice would affect
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
   `buildSyntaxDiagnostics` tests, the existing VS Code diagnostics adapter
-  through DTO mapping, the JP1 event receiving job alignment record, and
-  the editor-feedback use-case contract.
+  through DTO mapping, the job end-judgment alignment record, and the
+  editor-feedback use-case contract.
 - Risks and assumptions: the change would be user-visible in desktop and web
   diagnostics for syntactically valid documents. Existing parsed parameter
-  source-location metadata should be enough to point at explicit `evwid` and
-  `evipa`, so no parser or DTO shape change is expected. Omitted values remain
-  non-diagnostic. Raw values remain inspectable by downstream consumers, and
-  the existing unit-list raw projection evidence should stay unchanged outside
-  diagnostics.
-- Alternatives considered: keep invalid `evwid` / `evipa` silent and leave
-  the gap visible; move these validations into domain wrappers, rejected for
-  this slice because current diagnostics policy keeps raw manual-invalid
-  values inspectable; broaden immediately to `evhst` and regex-bearing string
-  parameters, deferred because that expands the approval and test surface.
+  source-location metadata should be enough to point at explicit `wth`, `tho`,
+  `rjs`, `rje`, `rec`, and `rei`, so no parser or DTO shape change is
+  expected. Omitted values remain non-diagnostic. Raw values remain
+  inspectable by downstream consumers, and the existing unit-list raw
+  projection evidence should stay unchanged outside diagnostics.
+- Alternatives considered: keep invalid numeric values silent and leave the
+  gap visible; move these validations into domain wrappers, rejected for this
+  slice because current diagnostics policy keeps raw manual-invalid values
+  inspectable; include retry threshold ordering now, deferred because it adds
+  cross-parameter rule coupling beyond a single grouped numeric-range slice.
 
 ## Build/Test Performance SDD
 
@@ -117,9 +113,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: JP1 event reception monitoring job grouped `evwid` / `evipa`
-  validation implemented after delivered `evesc` diagnostics; next deferred
-  grouped gap remains to be selected.
+  slice: job end-judgment grouped numeric range diagnostics is implemented
+  after delivered event reception `evwid` / `evipa` validation; next step is
+  required validation.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
