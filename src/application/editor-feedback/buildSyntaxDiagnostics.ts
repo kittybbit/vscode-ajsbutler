@@ -20,6 +20,7 @@ const jobEndJudgmentDiagnosticTargetTypes = new Set([
 ]);
 const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
 const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
+const eventSendingDiagnosticTargetTypes = new Set(["evsj", "revsj"]);
 
 const flattenUnits = (units: Unit[]): Unit[] =>
   units.reduce<Unit[]>(
@@ -147,6 +148,31 @@ const buildFileMonitoringDiagnostics = (
       return diagnostics;
     });
 
+const buildEventSendingDiagnostics = (
+  rootUnits: Unit[],
+): SyntaxDiagnosticDto[] =>
+  flattenUnits(rootUnits)
+    .filter((unit) => {
+      const unitType = findParameter(unit, "ty")?.value;
+      return unitType ? eventSendingDiagnosticTargetTypes.has(unitType) : false;
+    })
+    .flatMap((unit) => {
+      const evsrtParameter = findParameter(unit, "evsrt");
+      const evhstParameter = findParameter(unit, "evhst");
+      const effectiveEvsrt = evsrtParameter?.value ?? DEFAULTS.Evsrt;
+
+      if (!evsrtParameter || effectiveEvsrt !== "y" || evhstParameter) {
+        return [];
+      }
+
+      return [
+        buildDiagnostic(
+          evsrtParameter,
+          "Event arrival check (evsrt=y) requires an event destination host (evhst).",
+        ),
+      ];
+    });
+
 export const buildSyntaxDiagnostics = (
   content: string,
 ): SyntaxDiagnosticDto[] => {
@@ -166,5 +192,6 @@ export const buildSyntaxDiagnostics = (
     ...syntaxDiagnostics,
     ...buildJobEndJudgmentDiagnostics(result.rootUnits),
     ...buildFileMonitoringDiagnostics(result.rootUnits),
+    ...buildEventSendingDiagnostics(result.rootUnits),
   ];
 };

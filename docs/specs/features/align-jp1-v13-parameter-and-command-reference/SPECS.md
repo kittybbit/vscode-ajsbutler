@@ -124,6 +124,11 @@ JP1/AJS3 version 13 reference documents.
   report these explicit invalid combinations through editor-feedback while
   preserving raw parser output, domain wrapper values, normalized parameters,
   unit-list projection, flow projection, and command generation.
+- JP1 event sending job `evhst` requiredness diagnostics are aligned through
+  application editor-feedback. Explicit `evsrt=y` on `evsj` / `revsj` now
+  reports a semantic diagnostic when `evhst` is omitted, while raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation remain unchanged.
 
 ## Reference Documents
 

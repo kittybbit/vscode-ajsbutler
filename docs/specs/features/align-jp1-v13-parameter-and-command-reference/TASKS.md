@@ -159,6 +159,15 @@
       defaults, valid `abr=y` retry parameters, and explicit invalid `abr=n`
       / retry-parameter combinations
 - [x] Run required code-change validation after implementation
+- [x] Investigate JP1 event sending job `evhst` requiredness diagnostics as
+      the next focused parameter diagnostics slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration
+- [x] Implement focused `evhst` requiredness diagnostics only after approval
+- [x] Add focused diagnostics regression evidence for omitted `evsrt=n`,
+      valid explicit `evsrt=y` with `evhst`, and explicit invalid `evsrt=y`
+      without `evhst`
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -338,6 +347,11 @@
   generation, generated artifacts, configuration, dependency versions, and
   `engines.vscode` remain unchanged. Parameter source-location metadata was
   added to support diagnostic ranges.
+- 2026-05-06: JP1 event sending job `evhst` requiredness diagnostics now
+  report explicit `evsj` / `revsj` `evsrt=y` values when `evhst` is omitted.
+  Omitted `evsrt=n` remains non-diagnostic, explicit valid `evhst` values
+  remain accepted, and raw parser/domain/normalized values plus unit-list,
+  flow, and command output remain unchanged.
 - 2026-05-01: job end-judgment retry-parameter diagnostics are the next
   approval-gated semantic diagnostics candidate. JP1/AJS3 version 13 UNIX/PC
   job and UNIX/PC custom job definitions say `rjs`, `rje`, `rec`, and `rei`
@@ -396,14 +410,51 @@
   domain wrapper values, normalized parameters, unit-list projection, flow
   projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged.
+- 2026-05-06: JP1 event sending job `evhst` requiredness diagnostics are the
+  next approval-gated semantic diagnostics candidate. JP1/AJS3 version 13 JP1
+  event sending job definitions say `evhst` is required when `evsrt=y`.
+  Existing behavior preserves explicit `evsrt=y` without `evhst` as raw parsed
+  values without editor feedback. The proposed scope is limited to reporting
+  explicit `evsj` / `revsj` missing-host combinations through the existing
+  editor-feedback boundary while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. Parser grammar, generated artifacts, configuration,
+  dependency versions, `engines.vscode`, `evhst` byte-length validation,
+  macro-variable validation, `evspl` / `evsrc` range validation, and broad
+  parameter validation remain out of scope.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-06
-- Approved scope: User replied "OK.Proceed." after the job end-judgment
+- Approved scope: focused application-level semantic diagnostics for explicit
+  JP1 event sending jobs and recovery JP1 event sending jobs where effective
+  `evsrt=y` omits `evhst`; preserve raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation; add focused regression evidence; update SDD tracking; and run
+  validation.
+
+Current implementation gate: none; last completed slice was JP1 event sending
+job `evhst` requiredness diagnostics.
+
+## Prior Approval Evidence
+
+- 2026-05-06: User replied "OK.Proseed." after the JP1 event sending job
+  `evhst` requiredness diagnostics approval request. Approved changes were
+  limited to adding focused application-level semantic diagnostics for
+  explicit JP1 event sending jobs and recovery JP1 event sending jobs where
+  effective `evsrt=y` omits `evhst`; preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation; adding focused regression evidence;
+  updating SDD tracking; and running validation. Parser grammar, generated
+  artifacts, configuration, dependency versions, `engines.vscode`, `evhst`
+  byte-length validation, host-name format validation, macro-variable
+  validation, `evspl` / `evsrc` range validation, and broad parameter
+  validation were out of scope.
+
+- 2026-05-06: User replied "OK.Proceed." after the job end-judgment
   automatic-retry enablement diagnostics approval request. Approved changes
-  are limited to adding focused application-level semantic diagnostics for
+  were limited to adding focused application-level semantic diagnostics for
   explicit UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei`
   values when effective `jd=cod` but effective `abr` is not `y`; preserving
   raw parser output, domain wrapper values, normalized parameters, unit-list
@@ -411,13 +462,7 @@
   regression evidence; updating SDD tracking; and running validation. Parser
   grammar, generated artifacts, configuration, dependency versions,
   `engines.vscode`, numeric retry ranges, retry threshold ordering,
-  byte-length validation, and broad parameter validation remain out of scope.
-
-Current implementation gate: no pending implementation gate for this feature;
-the automatic-retry enablement diagnostics slice completed on 2026-05-06.
-
-## Prior Approval Evidence
-
+  byte-length validation, and broad parameter validation were out of scope.
 - 2026-05-06: User replied "OK.Proceed." after the file monitoring job
   `flwc` / `flco` diagnostics approval request. Approved changes were limited
   to adding focused application-level semantic diagnostics for explicit
@@ -521,6 +566,15 @@ the automatic-retry enablement diagnostics slice completed on 2026-05-06.
 
 ## Validation
 
+- 2026-05-06: `pnpm run qlty` required an escalated rerun after a sandboxed
+  qlty log-file permission failure
+- 2026-05-06: `pnpm test`
+- 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-06: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-06: `pnpm run lint:md`
 - 2026-05-06: `pnpm run test:compile`
 - 2026-05-06: `pnpm test`
 - 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could

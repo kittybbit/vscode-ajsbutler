@@ -349,4 +349,104 @@ suite("Build Syntax Diagnostics", () => {
       ["error", "error"],
     );
   });
+
+  test("does not report event sending diagnostics for omitted evsrt defaults", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("does not report event sending diagnostics for valid explicit arrival-check settings", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=event2,revsj,+160+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "    evsrt=y;",
+        "    evhst=server-a;",
+        "  }",
+        "  unit=event2,,jp1admin,;",
+        "  {",
+        "    ty=revsj;",
+        "    evsrt=n;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event sending diagnostics when arrival checking omits evhst", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=event2,revsj,+160+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "    evsrt=y;",
+        "  }",
+        "  unit=event2,,jp1admin,;",
+        "  {",
+        "    ty=revsj;",
+        "    evsrt=y;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 2);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 5,
+          message:
+            "Event arrival check (evsrt=y) requires an event destination host (evhst).",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 5,
+          message:
+            "Event arrival check (evsrt=y) requires an event destination host (evhst).",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error"],
+    );
+  });
 });

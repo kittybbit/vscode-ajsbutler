@@ -81,6 +81,14 @@ Scenario: Retry parameters require automatic retry
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Event arrival check requires an event destination host
+  Given a syntactically valid JP1/AJS document with a JP1 event sending job
+  And effective `evsrt` is event-arrival checking enabled
+  And `evhst` is omitted
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

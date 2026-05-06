@@ -53,35 +53,35 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/job-end-retry-enable-diagnostics`.
-- Objective: continue JP1/AJS v13 parameter alignment with the focused job
-  end-judgment automatic-retry enablement diagnostics slice before returning
-  to Qlty-driven architecture refactoring.
-- Status: implemented and validated on 2026-05-06.
-- Scope candidate: add application-level semantic diagnostics for explicit
-  UNIX/PC job and UNIX/PC custom job retry parameters `rjs`, `rje`, `rec`, and
-  `rei` when effective `abr` is not `y`. Existing `jd != cod` diagnostics
-  remain the primary diagnostic for retry parameters in invalid end-judgment
-  combinations.
+- Branch: `codex/event-send-host-required-diagnostics` started from `main`.
+- Objective: continue JP1/AJS v13 parameter alignment with the focused JP1
+  event sending job `evhst` requiredness diagnostics slice before returning to
+  Qlty-driven architecture refactoring.
+- Status: approved, implemented, and validated.
+- Scope: add application-level semantic diagnostics for explicit
+  JP1 event sending jobs and recovery JP1 event sending jobs where effective
+  `evsrt=y` but explicit `evhst` is omitted.
 - Out of scope: parser grammar changes, raw parser/domain/normalized value
   changes, unit-list projection changes, flow projection changes, command
   generation changes, generated artifacts, dependency changes,
-  `engines.vscode`, numeric retry ranges, retry threshold ordering,
-  byte-length validation, and broad parameter validation.
-- Impact summary: the candidate affects
+  `engines.vscode`, `evhst` byte-length validation, host-name format
+  validation, macro-variable validation, `evspl` / `evsrc` range validation,
+  and broad parameter validation.
+- Impact summary: the slice affects
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
   `buildSyntaxDiagnostics` tests, the existing VS Code diagnostics adapter
-  through DTO mapping, job end-judgment alignment docs, the parameter coverage
-  matrix, and the editor-feedback use-case contract.
+  through DTO mapping, JP1 event sending job alignment docs, the parameter
+  coverage matrix, and the editor-feedback use-case contract.
 - Risks and assumptions: the change is user-visible in desktop and web
   diagnostics for syntactically valid documents. Existing parsed parameter
-  source-location metadata should be sufficient to point at each explicit
-  retry parameter. Raw values remain inspectable by downstream consumers.
-- Alternatives considered: keep retry parameters with `abr=n` silent and leave
-  the matrix gap visible; hide or rewrite retry values in domain/list output,
-  rejected because raw manual-invalid input should remain inspectable; broaden
-  to numeric ranges or retry threshold ordering, deferred to keep the slice
-  small.
+  source-location metadata can point at explicit `evsrt=y`; when `evsrt` is
+  omitted, the effective default is `n`, so no missing-host diagnostic is
+  needed. Raw values remain inspectable by downstream consumers.
+- Alternatives considered: keep missing `evhst` silent and leave the matrix
+  gap visible; synthesize or rewrite `evhst` in domain/list output, rejected
+  because manual-invalid input should remain inspectable; broaden to
+  byte-length, macro-variable, or range diagnostics, deferred to keep the
+  slice small.
 
 ## Build/Test Performance SDD
 
@@ -110,8 +110,8 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: job end-judgment automatic-retry enablement diagnostics completed;
-  next unresolved diagnostics or validation gap is not selected yet.
+  slice: JP1 event sending job `evsrt=y` / missing `evhst` diagnostics
+  implemented; next deferred gap to select remains open.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
