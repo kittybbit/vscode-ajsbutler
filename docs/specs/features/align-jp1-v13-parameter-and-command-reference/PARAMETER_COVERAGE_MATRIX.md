@@ -142,6 +142,23 @@ coverage.
   are aligned for these values; range validation and broader wait-job default
   reconciliation are deferred
 
+### Event Reception Monitoring Job Search Scope
+
+- Keys: `evesc`
+- Unit scope:
+  JP1 event reception monitoring jobs and recovery JP1 event reception
+  monitoring jobs
+- Status: partial
+- Owning seam:
+  `Evwj.ts`, `optionalScalarParameterBuilders.ts`, and
+  `buildSyntaxDiagnostics.ts`
+- Evidence: `buildSyntaxDiagnostics.test.ts`
+- Remaining gap:
+  `evesc` range diagnostics are aligned through editor-feedback. `evwid`
+  format validation, `evhst` byte-length validation, host-name validation,
+  regular-expression validation, macro-variable validation, `evipa` address
+  validation, and broader event-job validation remain deferred.
+
 ## Boundary Decisions
 
 - This matrix covers only categories with feature-local investigation records.

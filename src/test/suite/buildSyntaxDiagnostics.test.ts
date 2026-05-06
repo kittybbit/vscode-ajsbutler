@@ -614,4 +614,102 @@ suite("Build Syntax Diagnostics", () => {
       ["error", "error"],
     );
   });
+
+  test("does not report event receiving diagnostics for omitted defaults and valid explicit values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=wait1,evwj,+0+0;",
+        "  el=wait2,revwj,+160+0;",
+        "  el=wait3,evwj,+320+0;",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    evesc=no;",
+        "  }",
+        "  unit=wait3,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evesc=720;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event receiving diagnostics for explicit invalid evesc values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=wait1,evwj,+0+0;",
+        "  el=wait2,revwj,+160+0;",
+        "  el=wait3,evwj,+320+0;",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evesc=0;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    evesc=721;",
+        "  }",
+        "  unit=wait3,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evesc=abc;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 3);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 5,
+          message:
+            "Event search condition (evesc) must be no or between 1 and 720.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 5,
+          message:
+            "Event search condition (evesc) must be no or between 1 and 720.",
+        },
+        {
+          line: 19,
+          column: 4,
+          length: 5,
+          message:
+            "Event search condition (evesc) must be no or between 1 and 720.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
+    );
+  });
 });
