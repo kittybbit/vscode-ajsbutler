@@ -124,9 +124,11 @@ coverage.
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
   unit-list group 13 default-aware projection is aligned for these defaults,
-  and `flwc` / `flco` invalid-combination diagnostics are aligned through
-  editor-feedback. Wildcard restrictions, byte-length validation, and range
-  validation remain deferred.
+  `flwc` / `flco` invalid-combination diagnostics are aligned through
+  editor-feedback, and `flwf` / `flwi` target-pattern validation is aligned
+  through editor-feedback for byte-length, numeric range, and
+  wildcard-with-short-interval rules. `ets` timeout behavior remains
+  deferred.
 
 ### Execution-Interval Control Job Defaults
 

@@ -24,6 +24,11 @@ rules in `docs/specs/README.md`, not in this file.
   user-meaningful job type or parameter family where practical, instead of
   returning to single-parameter micro-slices once a family has shared seams
   and shared regression evidence.
+- After the delivered schedule-rule range diagnostics, the next recommended
+  JP1/AJS v13 slice is grouped file-monitoring target-pattern validation for
+  `Flwj` / `Rflwj`, centered on `flwf` / `flwi` byte-length, numeric range,
+  and wildcard-with-short-interval rules through the existing editor-feedback
+  boundary.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -42,9 +47,9 @@ rules in `docs/specs/README.md`, not in this file.
 ## Next Priority Tasks
 
 1. Request approval for the next grouped JP1/AJS3 v13 parameter-alignment
-   slice for the next user-meaningful remaining gap after the delivered
-   schedule-rule range diagnostics, keeping the grouping by job type or
-   parameter family.
+   slice selected from the remaining partial or deferred gaps after the
+   delivered file-monitoring target-pattern validation, keeping the grouping
+   by job type or parameter family.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -57,37 +62,38 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/schedule-rule-range-diagnostics`
+- Branch: `codex/file-monitoring-target-pattern-validation`
 - Objective: continue JP1/AJS v13 parameter alignment with a user-meaningful
-  grouped slice around the schedule-rule parameter family for jobnets, rather
-  than reopening the feature through another single-parameter fix.
-- Status: approved, implemented, and validated on
-  `codex/schedule-rule-range-diagnostics`.
-- Scope: add focused schedule-rule range diagnostics for already-modeled
-  jobnet parameters through the existing editor-feedback boundary while
-  reusing the shared schedule-rule helper seam; preserve raw parser output,
-  domain wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation.
-- Out of scope: parser grammar changes, schedule-rule value-shape parsing
-  changes already delivered, unrelated unit-list redesign, generated
-  artifacts, dependency changes, `engines.vscode`, and non-schedule parameter
-  validation.
+  grouped slice around file-monitoring target-pattern validation for
+  `Flwj` / `Rflwj`, rather than reopening the feature through another
+  single-parameter fix.
+- Status: implemented and validated on
+  `codex/file-monitoring-target-pattern-validation`.
+- Scope: add focused file-monitoring semantic diagnostics for explicit
+  monitored-file and monitoring-interval constraints through the existing
+  editor-feedback boundary, covering `flwf` byte-length, `flwi` numeric range,
+  and wildcard-with-short-interval invalid combinations while preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation.
+- Out of scope: parser grammar changes, domain default changes, unit-list
+  projection changes, `flwc` / `flco` diagnostics already delivered, `ets`
+  timeout behavior, generated artifacts, dependency changes,
+  `engines.vscode`, and non-file-monitoring parameter validation.
 - Impact summary: the next slice is expected to affect
-  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
-  `src/domain/models/parameters/scheduleRuleHelpers.ts`, focused
-  schedule-rule helper and diagnostics tests, the schedule-rule alignment
-  record, and the editor-feedback behavior contract if new diagnostics are
-  approved.
-- Risks and assumptions: schedule-rule values already share a parsing seam, so
-  the remaining work can stay grouped by parameter family without duplicating
-  parsing rules in presentation code. The main open design point is whether
-  every documented out-of-range value should become an editor diagnostic or
-  whether some cases should remain documented as raw-only gaps.
-- Alternatives considered: reopen the backlog as smaller single-parameter
-  fixes, rejected because that hides the category-level nature of the
-  remaining schedule-rule work; switch to a different job type first, viable
-  but deferred because schedule rules already have the clearest shared seam
-  and evidence set for a grouped follow-up.
+  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
+  file-monitoring diagnostics tests, the file-monitoring alignment record, and
+  the editor-feedback behavior contract if the new diagnostics are approved.
+- Risks and assumptions: the file-monitoring manual couples `flwf` wildcard
+  usage and `flwi` short intervals, so the remaining work is best treated as a
+  single parameter-family validation slice instead of separate key-level
+  checks. Existing parameter source-location metadata is assumed to be
+  sufficient to point diagnostics at explicit `flwf` / `flwi` parameters
+  without parser or DTO changes.
+- Alternatives considered: switch to another job type first, viable but
+  deferred because file monitoring still has a coherent deferred validation
+  family after its delivered defaults and invalid-combination diagnostics;
+  split `flwf` and `flwi` into micro-slices, rejected because the manual
+  defines a shared wildcard/interval rule across those parameters.
 
 ## Build/Test Performance SDD
 
@@ -116,9 +122,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped schedule-rule range diagnostics is implemented; next
-  candidate should be selected from the remaining partial/deferred gaps using
-  the same user-meaningful grouping rule.
+  slice: grouped file-monitoring target-pattern validation is implemented and
+  validated; the next candidate should be selected from the remaining
+  partial/deferred gaps using the same user-meaningful grouping rule.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

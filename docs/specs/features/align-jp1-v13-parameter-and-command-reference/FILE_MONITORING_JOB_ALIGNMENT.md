@@ -2,8 +2,7 @@
 
 ## Purpose
 
-Record the JP1/AJS3 version 13 alignment slice for file monitoring job
-defaults and unit-list projection behavior.
+Record the JP1/AJS3 version 13 alignment status for file monitoring jobs.
 
 This document focuses on the currently modeled file monitoring job parameters
 `flwf`, `flwc`, `flwi`, `flco`, and `ets` for `Flwj` / `Rflwj`.
@@ -64,6 +63,38 @@ This document focuses on the currently modeled file monitoring job parameters
   `m`, or explicit `flco` is present when effective `flwc` does not include
   `c`.
 
+## Delivered Target-Pattern Validation
+
+- Editor feedback now reports a semantic diagnostic when an explicit
+  file-monitoring job or recovery file-monitoring job sets `flwf` to a value
+  outside the JP1/AJS3 v13 byte-length range `1..255`.
+- Editor feedback now reports a semantic diagnostic when an explicit
+  file-monitoring job or recovery file-monitoring job sets `flwi` to a value
+  outside the JP1/AJS3 v13 numeric range `1..600`.
+- Editor feedback now reports a semantic diagnostic when an explicit
+  file-monitoring job or recovery file-monitoring job sets `flwf` to a
+  wildcard pattern containing `*` while the effective monitoring interval from
+  `flwi` is in the JP1/AJS3 v13 restricted range `1..9`.
+- The implementation stays in `buildSyntaxDiagnostics.ts`, preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation.
+- Omitted `flwf` remains non-diagnostic because no file-name default is
+  introduced, and omitted `flwi` remains non-diagnostic because the existing
+  default value `60` stays valid for wildcard usage.
+- Diagnostics point at the explicit `flwf` or `flwi` parameter, so parser and
+  DTO shapes remain unchanged.
+
+## Impact
+
+- User-visible diagnostics would change for syntactically valid JP1/AJS
+  documents containing explicit invalid monitored-file names or monitoring
+  intervals on `flwj` / `rflwj`.
+- Existing parsed parameter source-location metadata should be enough to point
+  diagnostics at explicit `flwf` and `flwi`, so no parser or DTO shape change
+  is expected.
+- The application diagnostics boundary remains the owner of focused semantic
+  parameter feedback; parser grammar and domain wrapper values remain raw.
+
 ## Alternatives
 
 - Keep group 13 raw by design and leave the matrix gap visible.
@@ -72,12 +103,18 @@ This document focuses on the currently modeled file monitoring job parameters
 - Change domain defaults or introduce a new file-monitoring helper seam;
   deferred because existing default values already match the manual and the
   behavior gap is projection-only.
-- Add diagnostics for `flwc` invalid combinations, wildcard restrictions, or
-  numeric ranges first; deferred because diagnostics policy is a separate
-  behavior contract.
+- Add diagnostics for `flwc` invalid combinations first; completed because the
+  invalid-combination rule was the narrowest safe first slice in this job
+  type.
+- Split `flwf` byte-length, `flwi` numeric range, and wildcard restrictions
+  into separate micro-slices; rejected because the manual couples wildcard
+  usage to short `flwi` values and the user asked for job-type or
+  parameter-family sized slices where practical.
+- Broaden the slice further to `ets` timeout behavior or other event-job rules,
+  deferred because that expands beyond the monitored-file and monitoring-
+  interval parameter family.
 
 ## Follow-up
 
-- Revisit `flwi` range validation, wildcard restrictions, byte-length
-  validation, and timeout behavior only after the focused diagnostics slice is
-  completed or explicitly deferred.
+- Revisit `ets` timeout behavior now that the grouped `flwf` / `flwi`
+  validation slice is implemented.
