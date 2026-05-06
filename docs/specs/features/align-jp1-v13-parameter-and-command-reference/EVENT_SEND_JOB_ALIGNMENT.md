@@ -32,8 +32,9 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
   evidence if a dedicated event sending job seam is introduced
 - Out of scope:
   parser grammar changes, command generation, byte-length validation, numeric
-  range validation, event arrival runtime behavior, event destination host
-  requiredness diagnostics, and broader event receiving job semantics
+  range validation, event arrival runtime behavior, broader event receiving
+  job semantics, and any validation beyond the focused `evsrt=y` / missing
+  `evhst` semantic diagnostic
 
 ## Investigation Notes
 
@@ -62,6 +63,46 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
   `evspl`, and `evsrc` values. Explicit normalized values remain preserved,
   and non-event-sending jobs do not synthesize these defaults.
 
+## EVHST Requiredness Diagnostics
+
+### Current Behavior
+
+- `Evsj` / `Revsj` expose `evhst` and `evsrt` through `ParamFactory`.
+- `ParamFactory.evsrt` resolves omitted `evsrt` to `n`.
+- Explicit `evsrt=y` without `evhst` is preserved as raw parsed data.
+- Unit-list group 14 projects `evhst` from normalized raw key/value data, so
+  missing `evhst` remains visible as an empty table value.
+
+### Delivered Behavior
+
+- Report a semantic diagnostic when an explicit JP1 event sending job or
+  recovery JP1 event sending job has effective `evsrt=y` and omits `evhst`.
+- Point the diagnostic at the explicit `evsrt` parameter because the required
+  `evhst` parameter has no source location when omitted.
+- Keep omitted `evsrt=n` without `evhst` non-diagnostic.
+- Keep raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation unchanged.
+- Report diagnostics through the existing application editor-feedback DTO so
+  desktop and web hosts share the same rule.
+
+### Impact
+
+- User-visible diagnostics change for syntactically valid JP1/AJS documents
+  containing explicit event-arrival checking without an event destination host.
+- Existing parsed parameter source-location metadata can point diagnostics at
+  explicit `evsrt`.
+- The application diagnostics boundary remains the owner of focused semantic
+  parameter feedback; parser grammar and domain wrapper values remain raw.
+
+### Diagnostic Alternatives
+
+- Preserve missing `evhst` silently and leave the matrix gap visible.
+- Synthesize or rewrite `evhst` in domain/list output, rejected because
+  manual-invalid raw input should remain inspectable.
+- Add `evhst` byte-length, macro-variable, or `evspl` / `evsrc` range
+  diagnostics in the same slice, rejected because that broadens the behavior
+  and regression surface.
+
 ## Alternatives
 
 - Leave `DEFAULTS.Evsrc` as `0` and record the event sending job check-count
@@ -74,7 +115,5 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 
 ## Follow-up
 
-- Revisit `evhst` requiredness when `evsrt=y` only after diagnostics behavior
-  is explicitly scoped.
 - Add range validation for `evspl` and `evsrc` only after invalid JP1/AJS
   parameter handling is defined across domain and diagnostics.

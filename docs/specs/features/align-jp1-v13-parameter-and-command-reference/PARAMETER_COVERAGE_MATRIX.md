@@ -104,7 +104,8 @@ coverage.
 - Evidence: `parameterFactory.test.ts` and `buildUnitListView.test.ts`
 - Remaining gap:
   unit-list group 14 default-aware projection is aligned for these defaults;
-  `evhst` requiredness and range validation are deferred
+  `evhst` requiredness diagnostics are aligned through editor-feedback; range
+  validation is deferred
 
 ### File Monitoring Job Defaults
 

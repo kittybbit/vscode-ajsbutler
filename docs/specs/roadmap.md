@@ -41,9 +41,10 @@
    - The job end-judgment automatic-retry enablement diagnostic now reports
      explicit `rjs`, `rje`, `rec`, or `rei` values when effective `jd=cod`
      but effective `abr` is not `y`.
-   - The next focused semantic diagnostic candidate should be selected from the
-     remaining deferred validation gaps instead of broadening this family in
-     the same slice.
+   - JP1 event sending job `evhst` requiredness is now aligned through
+     editor-feedback when explicit `evsrt=y` omits `evhst`, while preserving
+     raw parameter data and avoiding broader event-job validation in the same
+     slice.
    - Continue with documented deferred diagnostics and range-validation gaps
      only as focused, approval-gated slices.
    - Keep behavior-preserving slices separate from behavior-changing manual
