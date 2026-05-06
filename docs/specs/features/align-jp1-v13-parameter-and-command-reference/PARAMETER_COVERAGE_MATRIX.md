@@ -31,11 +31,14 @@ coverage.
   `Time.ts`
 - Evidence:
   `scheduleRuleHelpers.test.ts`, `parameterFactory.test.ts`,
-  `parameterHelpers.test.ts`, `buildUnitListGroup10View.test.ts`, and
-  `buildUnitListView.test.ts`
+  `parameterHelpers.test.ts`, `buildUnitListGroup10View.test.ts`,
+  `buildUnitListView.test.ts`, and `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
-  range validation remains deferred. `wc` / `wt` effective-value pairing is
-  aligned in the domain wrapper boundary and unit-list group 10 projection.
+  grouped range diagnostics are aligned for `ln`, `st`, `cy`, `shd`, `cftd`,
+  `sy`, `ey`, `wc`, and `wt` through editor-feedback. `sd` date/rule range
+  policy, `cy` open/closed-day restrictions, and any broader cross-parameter
+  invalidation remain deferred. `wc` / `wt` effective-value pairing is aligned
+  in the domain wrapper boundary and unit-list group 10 projection.
 
 ### Transfer Operation
 

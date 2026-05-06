@@ -28,6 +28,7 @@ const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
 const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
 const eventSendingDiagnosticTargetTypes = new Set(["evsj", "revsj"]);
 const eventReceivingDiagnosticTargetTypes = new Set(["evwj", "revwj"]);
+const scheduleRuleDiagnosticTargetTypes = new Set(["g", "n"]);
 
 const flattenUnits = (units: Unit[]): Unit[] =>
   units.reduce<Unit[]>(
@@ -155,6 +156,227 @@ const collectRuleDiagnostics = (
       : [];
   });
 
+type ParsedExplicitScheduleRuleValue = {
+  hasExplicitRuleNumber: boolean;
+  ruleNumber: number;
+  value: string;
+};
+
+const parseExplicitScheduleRuleValue = (
+  rawValue: string | undefined,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const matched = /^((\d{1,3}),)?(.+)$/.exec(rawValue ?? "");
+  if (!matched) {
+    return undefined;
+  }
+
+  return {
+    hasExplicitRuleNumber: matched[2] !== undefined,
+    ruleNumber: matched[2] === undefined ? 1 : Number(matched[2]),
+    value: matched[3],
+  };
+};
+
+const isValidScheduleRuleNumber = (
+  parsedValue: ParsedExplicitScheduleRuleValue | undefined,
+): boolean =>
+  parsedValue !== undefined &&
+  (!parsedValue.hasExplicitRuleNumber ||
+    (parsedValue.ruleNumber >= 1 && parsedValue.ruleNumber <= 144));
+
+const parseHourMinuteValue = (
+  rawValue: string,
+): { hours: number; minutes: number } | undefined => {
+  const matched = /^\+?(\d{2}):(\d{2})$/.exec(rawValue);
+  if (!matched) {
+    return undefined;
+  }
+
+  return {
+    hours: Number(matched[1]),
+    minutes: Number(matched[2]),
+  };
+};
+
+const isValidHourMinuteRange = (rawValue: string): boolean => {
+  const parsed = parseHourMinuteValue(rawValue);
+  return (
+    parsed !== undefined &&
+    parsed.hours >= 0 &&
+    parsed.hours <= 47 &&
+    parsed.minutes >= 0 &&
+    parsed.minutes <= 59
+  );
+};
+
+const isValidDelayMinutesRange = (rawValue: string): boolean => {
+  const matched = /^[MCU](\d{1,4})$/.exec(rawValue);
+  if (!matched) {
+    return false;
+  }
+
+  const minutes = Number(matched[1]);
+  return minutes >= 1 && minutes <= 2879;
+};
+
+const isValidWaitMinutesRange = (rawValue: string): boolean => {
+  if (!/^\d{1,4}$/.test(rawValue)) {
+    return false;
+  }
+
+  const minutes = Number(rawValue);
+  return minutes >= 1 && minutes <= 2879;
+};
+
+const isValidExplicitParentScheduleRule = (
+  parameter: UnitParameter,
+  unit: Unit,
+  rootUnits: readonly Unit[],
+): boolean => {
+  if (rootUnits.includes(unit)) {
+    return true;
+  }
+
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  if (!/^\d{1,3}$/.test(parsed.value)) {
+    return false;
+  }
+
+  const parentRuleNumber = Number(parsed.value);
+  return parentRuleNumber >= 1 && parentRuleNumber <= 144;
+};
+
+const isValidExplicitStartTime = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  return (
+    isValidScheduleRuleNumber(parsed) &&
+    parsed !== undefined &&
+    isValidHourMinuteRange(parsed.value)
+  );
+};
+
+const isValidExplicitCycle = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  const matched = /^\((\d{1,3}),([ymwd])\)$/.exec(parsed.value);
+  if (!matched) {
+    return false;
+  }
+
+  const cycle = Number(matched[1]);
+  const unitType = matched[2];
+  const maximumByUnit = {
+    y: 10,
+    m: 12,
+    w: 5,
+    d: 31,
+  } as const;
+  return cycle >= 1 && cycle <= maximumByUnit[unitType];
+};
+
+const isValidExplicitShiftDays = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  if (!/^\d{1,3}$/.test(parsed.value)) {
+    return false;
+  }
+
+  const shiftDays = Number(parsed.value);
+  return shiftDays >= 1 && shiftDays <= 31;
+};
+
+const isValidOptionalOneToThirtyOne = (rawValue: string | undefined): boolean =>
+  rawValue === undefined ||
+  (/^\d{1,2}$/.test(rawValue) &&
+    Number(rawValue) >= 1 &&
+    Number(rawValue) <= 31);
+
+const isValidExplicitScheduleByDaysFromStart = (
+  parameter: UnitParameter,
+): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  const segments = parsed.value.split(",");
+  const scheduleType = segments[0];
+  if (
+    !["no", "be", "af", "db", "da"].includes(scheduleType) ||
+    segments.some((segment) => segment.length === 0)
+  ) {
+    return false;
+  }
+
+  if (scheduleType === "no") {
+    return segments.length === 1;
+  }
+
+  if (scheduleType === "db" || scheduleType === "da") {
+    return segments.length <= 2 && isValidOptionalOneToThirtyOne(segments[1]);
+  }
+
+  return (
+    segments.length <= 3 &&
+    isValidOptionalOneToThirtyOne(segments[1]) &&
+    isValidOptionalOneToThirtyOne(segments[2])
+  );
+};
+
+const isValidExplicitDelayTime = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  return (
+    isValidHourMinuteRange(parsed.value) ||
+    isValidDelayMinutesRange(parsed.value)
+  );
+};
+
+const isValidExplicitWaitCount = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  if (parsed.value === "no" || parsed.value === "un") {
+    return true;
+  }
+
+  if (!/^\d{1,3}$/.test(parsed.value)) {
+    return false;
+  }
+
+  const waitCount = Number(parsed.value);
+  return waitCount >= 1 && waitCount <= 999;
+};
+
+const isValidExplicitWaitTime = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  return (
+    parsed.value === "no" ||
+    parsed.value === "un" ||
+    isValidHourMinuteRange(parsed.value) ||
+    isValidWaitMinutesRange(parsed.value)
+  );
+};
+
 const jobEndJudgmentNumericRangeRules = [
   buildExplicitDecimalRangeRule(
     "wth",
@@ -273,6 +495,75 @@ const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
     isInvalid: (parameter) => !isValidExplicitEventSearchCondition(parameter),
   },
 ];
+
+const buildScheduleRuleDiagnostics = (
+  rootUnits: Unit[],
+): SyntaxDiagnosticDto[] =>
+  findUnitsByTypes(rootUnits, scheduleRuleDiagnosticTargetTypes).flatMap(
+    (unit) =>
+      collectRuleDiagnostics(unit, [
+        {
+          key: "ln",
+          message:
+            "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
+          isInvalid: (parameter, currentUnit) =>
+            !isValidExplicitParentScheduleRule(
+              parameter,
+              currentUnit,
+              rootUnits,
+            ),
+        },
+        {
+          key: "st",
+          message:
+            "Start time (st) must use schedule rule numbers 1..144 and times between 00:00 and 47:59.",
+          isInvalid: (parameter) => !isValidExplicitStartTime(parameter),
+        },
+        {
+          key: "cy",
+          message:
+            "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..10, m=1..12, w=1..5, or d=1..31.",
+          isInvalid: (parameter) => !isValidExplicitCycle(parameter),
+        },
+        {
+          key: "shd",
+          message:
+            "Maximum shift days (shd) must use schedule rule numbers 1..144 and values between 1 and 31.",
+          isInvalid: (parameter) => !isValidExplicitShiftDays(parameter),
+        },
+        {
+          key: "cftd",
+          message:
+            "Days-from-start rule (cftd) must use schedule rule numbers 1..144 with valid no/be/af/db/da ranges.",
+          isInvalid: (parameter) =>
+            !isValidExplicitScheduleByDaysFromStart(parameter),
+        },
+        {
+          key: "sy",
+          message:
+            "Start delay time (sy) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
+          isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
+        },
+        {
+          key: "ey",
+          message:
+            "End delay time (ey) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
+          isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
+        },
+        {
+          key: "wc",
+          message:
+            "Start-condition count (wc) must use schedule rule numbers 1..144 and values no, un, or 1..999.",
+          isInvalid: (parameter) => !isValidExplicitWaitCount(parameter),
+        },
+        {
+          key: "wt",
+          message:
+            "Monitoring end time (wt) must use schedule rule numbers 1..144 and values no, un, 00:00-47:59, or 1..2879 minutes.",
+          isInvalid: (parameter) => !isValidExplicitWaitTime(parameter),
+        },
+      ]),
+  );
 
 const buildJobEndJudgmentDiagnostics = (
   rootUnits: Unit[],
@@ -393,6 +684,7 @@ export const buildSyntaxDiagnostics = (
 
   return [
     ...syntaxDiagnostics,
+    ...buildScheduleRuleDiagnostics(result.rootUnits),
     ...buildJobEndJudgmentDiagnostics(result.rootUnits),
     ...buildFileMonitoringDiagnostics(result.rootUnits),
     ...buildEventSendingDiagnostics(result.rootUnits),

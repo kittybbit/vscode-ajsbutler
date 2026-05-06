@@ -73,6 +73,13 @@ JP1/AJS3 version 13 reference documents.
   jobnet definition treats `no` in either parameter as invalidating the paired
   start-condition monitoring value. Any implementation must distinguish raw
   parameter preservation from effective-value interpretation.
+- Schedule-rule remaining range gaps are approval-sensitive because the
+  modeled jobnet parameters already share a parsing seam and regression
+  evidence set. Follow-up work should stay grouped by schedule-rule parameter
+  family where practical, rather than reopening the backlog as one-key
+  diagnostics, while still preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation unless a narrower approval explicitly broadens scope.
 - Unit-list group 10 `wc` / `wt` projection is a separate approval-sensitive
   boundary from domain interpretation because it is user-visible table output.
   If approved, it should consume the existing paired effective-value semantics

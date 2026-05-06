@@ -23,6 +23,151 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("does not report schedule-rule diagnostics for valid explicit values and ignored root ln", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  ln=1,999;",
+        "  st=144,+47:59;",
+        "  cy=143,(12,m);",
+        "  shd=142,31;",
+        "  cftd=141,af,31,31;",
+        "  sy=140,U2879;",
+        "  ey=139,47:59;",
+        "  wc=138,999;",
+        "  wt=137,2879;",
+        "  el=jobnet,n,+0+0;",
+        "  unit=jobnet,,jp1admin,;",
+        "  {",
+        "    ty=n;",
+        "    ln=136,144;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports schedule-rule diagnostics for explicit out-of-range values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  ln=1,999;",
+        "  st=145,+48:00;",
+        "  cy=1,(13,m);",
+        "  shd=1,0;",
+        "  cftd=1,no,2;",
+        "  sy=1,C2880;",
+        "  ey=1,48:00;",
+        "  wc=1,1000;",
+        "  wt=1,2880;",
+        "  el=jobnet,n,+0+0;",
+        "  unit=jobnet,,jp1admin,;",
+        "  {",
+        "    ty=n;",
+        "    ln=0,145;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 9);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 5,
+          column: 2,
+          length: 2,
+          message:
+            "Start time (st) must use schedule rule numbers 1..144 and times between 00:00 and 47:59.",
+        },
+        {
+          line: 6,
+          column: 2,
+          length: 2,
+          message:
+            "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..10, m=1..12, w=1..5, or d=1..31.",
+        },
+        {
+          line: 7,
+          column: 2,
+          length: 3,
+          message:
+            "Maximum shift days (shd) must use schedule rule numbers 1..144 and values between 1 and 31.",
+        },
+        {
+          line: 8,
+          column: 2,
+          length: 4,
+          message:
+            "Days-from-start rule (cftd) must use schedule rule numbers 1..144 with valid no/be/af/db/da ranges.",
+        },
+        {
+          line: 9,
+          column: 2,
+          length: 2,
+          message:
+            "Start delay time (sy) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
+        },
+        {
+          line: 10,
+          column: 2,
+          length: 2,
+          message:
+            "End delay time (ey) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
+        },
+        {
+          line: 11,
+          column: 2,
+          length: 2,
+          message:
+            "Start-condition count (wc) must use schedule rule numbers 1..144 and values no, un, or 1..999.",
+        },
+        {
+          line: 12,
+          column: 2,
+          length: 2,
+          message:
+            "Monitoring end time (wt) must use schedule rule numbers 1..144 and values no, un, 00:00-47:59, or 1..2879 minutes.",
+        },
+        {
+          line: 17,
+          column: 4,
+          length: 2,
+          message:
+            "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      [
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+      ],
+    );
+  });
+
   test("does not report end-judgment diagnostics for omitted defaults", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
