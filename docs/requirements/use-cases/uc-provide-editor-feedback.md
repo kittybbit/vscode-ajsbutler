@@ -94,6 +94,14 @@ Scenario: Job end-judgment numeric values must stay within documented ranges
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Schedule-rule values must stay within documented ranges
+  Given a syntactically valid JP1/AJS document with a jobnet
+  And explicit `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`, or `wt`
+    is outside the JP1/AJS3 v13 schedule-rule ranges
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Event arrival check requires an event destination host
   Given a syntactically valid JP1/AJS document with a JP1 event sending job
   And effective `evsrt` is event-arrival checking enabled

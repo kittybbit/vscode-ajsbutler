@@ -20,6 +20,10 @@ rules in `docs/specs/README.md`, not in this file.
   categories without claiming repository-wide coverage. Schedule-rule
   `wc` / `wt` effective-value pairing is aligned in the domain boundary and
   unit-list projection.
+- Remaining JP1/AJS v13 parameter-alignment gaps should be grouped by
+  user-meaningful job type or parameter family where practical, instead of
+  returning to single-parameter micro-slices once a family has shared seams
+  and shared regression evidence.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -38,8 +42,9 @@ rules in `docs/specs/README.md`, not in this file.
 ## Next Priority Tasks
 
 1. Request approval for the next grouped JP1/AJS3 v13 parameter-alignment
-   slice: job end-judgment numeric range diagnostics for `wth`, `tho`, `rjs`,
-   `rje`, `rec`, and `rei` on UNIX/PC jobs and UNIX/PC custom jobs.
+   slice for the next user-meaningful remaining gap after the delivered
+   schedule-rule range diagnostics, keeping the grouping by job type or
+   parameter family.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -52,39 +57,37 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/job-end-judgment-range-diagnostics`
+- Branch: `codex/schedule-rule-range-diagnostics`
 - Objective: continue JP1/AJS v13 parameter alignment with a user-meaningful
-  grouped slice around job end-judgment numeric ranges for UNIX/PC jobs and
-  UNIX/PC custom jobs, instead of returning to one-parameter micro-slices.
+  grouped slice around the schedule-rule parameter family for jobnets, rather
+  than reopening the feature through another single-parameter fix.
 - Status: approved, implemented, and validated on
-  `codex/job-end-judgment-range-diagnostics`.
-- Scope: add application-level semantic diagnostics for explicit `j` / `cj`
-  parameters where `wth` or `tho` is outside `0..2147483647`, `rjs` or `rje`
-  is outside `1..4294967295`, `rec` is outside `1..12`, or `rei` is outside
-  `1..10`; preserve raw parser output, domain wrapper values, normalized
-  parameters, unit-list projection, flow projection, and command generation.
-- Out of scope: parser grammar changes, raw parser/domain/normalized value
-  changes, unit-list projection changes, flow projection changes, command
-  generation changes, generated artifacts, dependency changes,
-  `engines.vscode`, retry threshold ordering, byte-length validation, and
-  broad parameter validation.
-- Impact summary: the slice would affect
-  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
-  `buildSyntaxDiagnostics` tests, the existing VS Code diagnostics adapter
-  through DTO mapping, the job end-judgment alignment record, and the
-  editor-feedback use-case contract.
-- Risks and assumptions: the change would be user-visible in desktop and web
-  diagnostics for syntactically valid documents. Existing parsed parameter
-  source-location metadata should be enough to point at explicit `wth`, `tho`,
-  `rjs`, `rje`, `rec`, and `rei`, so no parser or DTO shape change is
-  expected. Omitted values remain non-diagnostic. Raw values remain
-  inspectable by downstream consumers, and the existing unit-list raw
-  projection evidence should stay unchanged outside diagnostics.
-- Alternatives considered: keep invalid numeric values silent and leave the
-  gap visible; move these validations into domain wrappers, rejected for this
-  slice because current diagnostics policy keeps raw manual-invalid values
-  inspectable; include retry threshold ordering now, deferred because it adds
-  cross-parameter rule coupling beyond a single grouped numeric-range slice.
+  `codex/schedule-rule-range-diagnostics`.
+- Scope: add focused schedule-rule range diagnostics for already-modeled
+  jobnet parameters through the existing editor-feedback boundary while
+  reusing the shared schedule-rule helper seam; preserve raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation.
+- Out of scope: parser grammar changes, schedule-rule value-shape parsing
+  changes already delivered, unrelated unit-list redesign, generated
+  artifacts, dependency changes, `engines.vscode`, and non-schedule parameter
+  validation.
+- Impact summary: the next slice is expected to affect
+  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
+  `src/domain/models/parameters/scheduleRuleHelpers.ts`, focused
+  schedule-rule helper and diagnostics tests, the schedule-rule alignment
+  record, and the editor-feedback behavior contract if new diagnostics are
+  approved.
+- Risks and assumptions: schedule-rule values already share a parsing seam, so
+  the remaining work can stay grouped by parameter family without duplicating
+  parsing rules in presentation code. The main open design point is whether
+  every documented out-of-range value should become an editor diagnostic or
+  whether some cases should remain documented as raw-only gaps.
+- Alternatives considered: reopen the backlog as smaller single-parameter
+  fixes, rejected because that hides the category-level nature of the
+  remaining schedule-rule work; switch to a different job type first, viable
+  but deferred because schedule rules already have the clearest shared seam
+  and evidence set for a grouped follow-up.
 
 ## Build/Test Performance SDD
 
@@ -113,9 +116,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: job end-judgment grouped numeric range diagnostics is implemented
-  after delivered event reception `evwid` / `evipa` validation; next step is
-  required validation.
+  slice: grouped schedule-rule range diagnostics is implemented; next
+  candidate should be selected from the remaining partial/deferred gaps using
+  the same user-meaningful grouping rule.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

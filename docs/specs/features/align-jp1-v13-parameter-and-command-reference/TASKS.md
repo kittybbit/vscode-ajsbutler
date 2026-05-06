@@ -71,6 +71,13 @@
       explicit in-range values, and explicit out-of-range `wth`, `tho`, `rjs`,
       `rje`, `rec`, and `rei` values
 - [x] Run required code-change validation after implementation
+- [x] Record human approval before changing editor-feedback diagnostics,
+      shared schedule-rule helpers, runtime code, or tests for grouped
+      schedule-rule range diagnostics
+- [x] Implement grouped schedule-rule range diagnostics only after approval
+- [x] Add focused regression evidence for explicit valid and out-of-range
+      schedule-rule values in the approved key set
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -244,23 +251,55 @@
   wrapper values, normalized parameters, unit-list projection, flow
   projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged.
+- 2026-05-07: Remaining JP1/AJS v13 parameter-alignment gaps were re-grouped
+  around user-meaningful job types or parameter families instead of returning
+  to single-parameter micro-slices. The recommended next approval-gated
+  candidate is grouped schedule-rule range diagnostics for the already-modeled
+  jobnet parameter family, centered on `ln`, `st`, `cy`, `shd`, `cftd`,
+  `sy`, `ey`, `wc`, and `wt` through the existing editor-feedback boundary
+  while preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation.
+  Parser grammar, schedule-rule value-shape parsing already delivered,
+  generated artifacts, configuration, dependency versions, `engines.vscode`,
+  and non-schedule parameter validation remain out of scope.
+- 2026-05-07: Grouped schedule-rule range diagnostics now report explicit
+  out-of-range `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`
+  values on jobnets through the existing editor-feedback boundary. Root-jobnet
+  `ln` remains ignored, explicit in-range values remain accepted, and raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, command generation, generated artifacts,
+  configuration, dependency versions, and `engines.vscode` remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-05-06
-- Approved scope: grouped application-level semantic diagnostics for explicit
-  UNIX/PC jobs and UNIX/PC custom jobs where `wth` or `tho` is outside
-  `0..2147483647`, `rjs` or `rje` is outside `1..4294967295`, `rec` is
-  outside `1..12`, or `rei` is outside `1..10`; preserve raw parser output,
-  domain wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation; add focused regression evidence; update
-  SDD tracking; and run validation.
+- Approved at: 2026-05-07
+- Approved scope: grouped schedule-rule range diagnostics for already-modeled
+  jobnet parameters through the existing editor-feedback boundary, reusing the
+  shared schedule-rule helper seam where practical, while preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation. Initial target keys:
+  `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`. Parser grammar
+  changes, schedule-rule value-shape parsing changes, generated artifacts,
+  configuration, dependency versions, `engines.vscode`, `sd` product-policy
+  changes, and non-schedule parameter validation remain out of scope.
 
-Current implementation gate: none; last completed slice was grouped job
-end-judgment numeric range validation.
+Current implementation gate: none; grouped schedule-rule range diagnostics are
+implemented and awaiting final validation sync.
 
 ## Prior Approval Evidence
+
+- 2026-05-07: User replied "Approved. Proceed with implementation." after the
+  grouped schedule-rule range-diagnostics approval request. Approved changes
+  were limited to adding grouped application-level semantic diagnostics for
+  already-modeled jobnet `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`,
+  and `wt` values through the existing editor-feedback boundary; preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation; adding focused
+  regression evidence; updating SDD tracking; and running validation. Parser
+  grammar, schedule-rule value-shape parsing changes, generated artifacts,
+  configuration, dependency versions, `engines.vscode`, `sd` product-policy
+  changes, and non-schedule parameter validation were out of scope.
 
 - 2026-05-06: User replied "Approved. Proceed with implementation." after the
   grouped job end-judgment numeric range validation approval request.
@@ -459,6 +498,18 @@ end-judgment numeric range validation.
 
 ## Validation
 
+- 2026-05-07: `pnpm run qlty` required an escalated rerun after the sandboxed
+  qlty log-file permission failure; escalated rerun completed with exit code 0
+- 2026-05-07: `pnpm test` completed with exit code 0; the VS Code harness
+  emitted an existing macOS `task_name_for_pid` codesign noise line
+- 2026-05-07: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-07: `npm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-07: `pnpm run qlty` required an escalated rerun after the sandboxed
+  qlty log-file permission failure; escalated rerun completed with exit code 0
+- 2026-05-07: `pnpm run lint:md` completed with exit code 0
 - 2026-05-06: `pnpm run qlty` required an escalated rerun after the sandboxed
   qlty log-file permission failure; escalated rerun completed with exit code 0
 - 2026-05-06: `pnpm test` completed with exit code 0; the VS Code harness

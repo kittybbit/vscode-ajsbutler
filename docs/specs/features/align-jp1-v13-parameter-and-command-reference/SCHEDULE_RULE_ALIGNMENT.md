@@ -148,9 +148,69 @@ and `wt`.
   `scheduleRuleHelpers.ts`, and unit-list projection no longer maintains a
   separate set of schedule-rule regular expressions.
 
+## Proposed Next Grouped Slice
+
+- Treat the next remaining schedule-rule work as one parameter-family slice for
+  jobnets, not as a return to one-key diagnostics.
+- Use the shared `scheduleRuleHelpers.ts` seam to verify already-modeled
+  explicit schedule-rule values before reporting user-visible range issues
+  through `buildSyntaxDiagnostics.ts`.
+- Keep raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation unchanged
+  unless a later approval explicitly broadens scope beyond diagnostics.
+- Focus the approval-gated investigation on the schedule-rule keys that still
+  have documented range gaps after value-shape alignment:
+  `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`.
+- Keep `sd` out of the first grouped follow-up unless the implementation
+  investigation resolves the separate product decision around `sd=0,ud`
+  handling and date-range policy.
+- Keep `sh` out of the follow-up because value-shape parsing for that key has
+  no remaining gap in this feature record.
+
+## Impact
+
+- User-visible diagnostics would change for syntactically valid JP1/AJS
+  documents containing explicit out-of-range schedule-rule values on jobnets.
+- The likely implementation surface spans
+  `src/domain/models/parameters/scheduleRuleHelpers.ts`,
+  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
+  `src/test/suite/scheduleRuleHelpers.test.ts`, and
+  `src/test/suite/buildSyntaxDiagnostics.test.ts`.
+- Existing schedule-rule helper references in wrapper classes and unit-list
+  projection should not need projection changes if the slice stays inside
+  editor-feedback diagnostics.
+
+## Alternatives
+
+- Reopen the backlog as smaller single-parameter fixes, rejected because the
+  remaining gaps are already organized behind a shared schedule-rule seam and
+  shared regression evidence.
+- Switch to a different job type first, viable but deferred because schedule
+  rules are the clearest remaining parameter-family candidate.
+- Expand the slice to cross-parameter invalidation or UI redesign, rejected
+  because that broadens the behavior and regression surface beyond range
+  diagnostics.
+
+## Delivered Range Diagnostics
+
+- The editor-feedback boundary now reports semantic diagnostics for explicit
+  jobnet `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt` values
+  when they fall outside the grouped JP1/AJS3 v13 schedule-rule ranges covered
+  by this slice.
+- Root-jobnet `ln` remains ignored, matching the existing manual-aligned
+  boundary decision that root-jobnet parent-rule specification is ignored.
+- Diagnostics stay focused on explicit parameter values and preserve raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation.
+- This slice intentionally does not add cross-parameter invalidation such as
+  `sd` / `cy` open-closed-day coupling, and it keeps `sd` date-range policy
+  outside the grouped follow-up.
+
 ## Follow-up
 
-- Add range validation only after deciding whether invalid JP1/AJS parameter
-  values should become diagnostics, warnings, or preserved raw values.
+- Revisit `sd` date/rule range policy separately because `sd=0,ud` handling
+  still carries a product-decision note outside this grouped diagnostics slice.
+- Revisit `cy` open/closed-day restrictions and any other cross-parameter
+  invalidation separately from the delivered single-parameter range checks.
 - Apply this category-level parser alignment workflow to the next non-schedule
   parameter family before marking that category official-reference aligned.
