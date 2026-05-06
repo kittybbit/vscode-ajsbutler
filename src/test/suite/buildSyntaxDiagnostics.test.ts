@@ -67,6 +67,87 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("reports end-judgment numeric range diagnostics for explicit out-of-range values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=custom,cj,+160+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    wth=2147483648;",
+        "    tho=-1;",
+        "    rjs=0;",
+        "    rje=4294967296;",
+        "  }",
+        "  unit=custom,,jp1admin,;",
+        "  {",
+        "    ty=cj;",
+        "    abr=y;",
+        "    rec=13;",
+        "    rei=0;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 6);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 3,
+          message: "Warning threshold (wth) must be between 0 and 2147483647.",
+        },
+        {
+          line: 10,
+          column: 4,
+          length: 3,
+          message: "Abnormal threshold (tho) must be between 0 and 2147483647.",
+        },
+        {
+          line: 11,
+          column: 4,
+          length: 3,
+          message: "Retry start code (rjs) must be between 1 and 4294967295.",
+        },
+        {
+          line: 12,
+          column: 4,
+          length: 3,
+          message: "Retry end code (rje) must be between 1 and 4294967295.",
+        },
+        {
+          line: 17,
+          column: 4,
+          length: 3,
+          message: "Retry count (rec) must be between 1 and 12.",
+        },
+        {
+          line: 18,
+          column: 4,
+          length: 3,
+          message: "Retry interval (rei) must be between 1 and 10.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error", "error", "error", "error"],
+    );
+  });
+
   test("reports end-judgment diagnostics for explicit invalid retry combinations", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

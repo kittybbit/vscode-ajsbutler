@@ -99,9 +99,49 @@ This document covers the implemented behavior for `jd`, `wth`, `tho`, `jdf`,
 - Raw parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation remain unchanged.
 
+## Proposed Next Grouped Slice
+
+- Report semantic diagnostics when an explicit UNIX/PC job or UNIX/PC custom
+  job sets `wth` or `tho` outside the JP1/AJS3 v13 range
+  `0..2147483647`.
+- Report semantic diagnostics when an explicit UNIX/PC job or UNIX/PC custom
+  job sets `rjs` or `rje` outside the JP1/AJS3 v13 range
+  `1..4294967295`.
+- Report semantic diagnostics when an explicit UNIX/PC job or UNIX/PC custom
+  job sets `rec` outside the JP1/AJS3 v13 range `1..12` or `rei` outside the
+  range `1..10`.
+- Treat the rule as application-level numeric validation owned by
+  `buildSyntaxDiagnostics.ts`, preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation.
+- Keep omitted values non-diagnostic so the existing default-aware wrapper
+  semantics remain unchanged.
+- Point each diagnostic at the explicit out-of-range parameter so parser and
+  DTO shapes remain unchanged.
+
+## Impact
+
+- User-visible diagnostics would change for syntactically valid JP1/AJS
+  documents containing explicit out-of-range job end-judgment or automatic
+  retry values on `j` / `cj`.
+- Existing parsed parameter source-location metadata should be enough to point
+  diagnostics at explicit `wth`, `tho`, `rjs`, `rje`, `rec`, and `rei`, so no
+  parser or DTO shape change is expected.
+- The application diagnostics boundary remains the owner of focused semantic
+  parameter feedback; parser grammar and domain wrapper values remain raw.
+
+## Diagnostic Alternatives
+
+- Preserve out-of-range numeric values silently and leave the matrix gap
+  visible.
+- Move numeric validation into domain wrappers, rejected for this slice
+  because the current diagnostics policy preserves raw manual-invalid values.
+- Broaden the slice to retry threshold ordering in the same change, deferred
+  because cross-parameter ordering adds a second rule family and expands the
+  regression surface beyond a single numeric-range slice.
+
 ## Follow-up
 
-- Add range validation only after deciding whether invalid JP1/AJS parameter
-  values should become diagnostics, warnings, or preserved raw values.
-- Revisit numeric retry ranges and retry threshold ordering as a separate
-  approval-gated slice.
+- Implement grouped numeric range validation first, then revisit retry
+  threshold ordering as a separate approval-gated slice if the grouped numeric
+  diagnostics land cleanly.
