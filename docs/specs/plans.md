@@ -53,20 +53,26 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/event-send-host-required-diagnostics` started from `main`.
+- Branch: `codex/event-send-range-diagnostics` started after investigation on
+  `main`.
 - Objective: continue JP1/AJS v13 parameter alignment with the focused JP1
-  event sending job `evhst` requiredness diagnostics slice before returning to
-  Qlty-driven architecture refactoring.
-- Status: approved, implemented, and validated.
+  event sending job `evspl` / `evsrc` range-diagnostics slice before
+  returning to Qlty-driven architecture refactoring.
+- Status: approved, implemented, and validated on
+  `codex/event-send-range-diagnostics`.
 - Scope: add application-level semantic diagnostics for explicit
-  JP1 event sending jobs and recovery JP1 event sending jobs where effective
-  `evsrt=y` but explicit `evhst` is omitted.
+  JP1 event sending jobs and recovery JP1 event sending jobs where
+  `evspl` is outside the JP1/AJS3 v13 range `3..600` seconds or `evsrc`
+  is outside the JP1/AJS3 v13 range `0..999`; preserve raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation.
 - Out of scope: parser grammar changes, raw parser/domain/normalized value
   changes, unit-list projection changes, flow projection changes, command
   generation changes, generated artifacts, dependency changes,
   `engines.vscode`, `evhst` byte-length validation, host-name format
-  validation, macro-variable validation, `evspl` / `evsrc` range validation,
-  and broad parameter validation.
+  validation, macro-variable validation, `evsid` hexadecimal validation,
+  non-decimal numeric coercion policy beyond the focused range checks, and
+  broad parameter validation.
 - Impact summary: the slice affects
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
   `buildSyntaxDiagnostics` tests, the existing VS Code diagnostics adapter
@@ -74,14 +80,15 @@ rules in `docs/specs/README.md`, not in this file.
   coverage matrix, and the editor-feedback use-case contract.
 - Risks and assumptions: the change is user-visible in desktop and web
   diagnostics for syntactically valid documents. Existing parsed parameter
-  source-location metadata can point at explicit `evsrt=y`; when `evsrt` is
-  omitted, the effective default is `n`, so no missing-host diagnostic is
-  needed. Raw values remain inspectable by downstream consumers.
-- Alternatives considered: keep missing `evhst` silent and leave the matrix
-  gap visible; synthesize or rewrite `evhst` in domain/list output, rejected
-  because manual-invalid input should remain inspectable; broaden to
-  byte-length, macro-variable, or range diagnostics, deferred to keep the
-  slice small.
+  source-location metadata can point at explicit `evspl` / `evsrc`
+  parameters, so no parser or DTO shape change is expected. Omitted values
+  remain non-diagnostic because the existing defaults already align to `10`.
+  Raw values remain inspectable by downstream consumers.
+- Alternatives considered: keep out-of-range `evspl` / `evsrc` silent and
+  leave the matrix gap visible; move numeric validation into domain wrappers,
+  rejected for this slice because current diagnostics policy keeps raw manual-
+  invalid values inspectable; broaden to `evhst` byte-length, host-name, or
+  macro-variable validation, deferred to keep the slice small.
 
 ## Build/Test Performance SDD
 
@@ -110,7 +117,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: JP1 event sending job `evsrt=y` / missing `evhst` diagnostics
+  slice: JP1 event sending job `evspl` / `evsrc` range diagnostics
   implemented; next deferred gap to select remains open.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.

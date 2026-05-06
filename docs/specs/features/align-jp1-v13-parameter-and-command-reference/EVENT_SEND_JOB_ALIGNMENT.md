@@ -65,7 +65,7 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 
 ## EVHST Requiredness Diagnostics
 
-### Current Behavior
+### Current Range Behavior
 
 - `Evsj` / `Revsj` expose `evhst` and `evsrt` through `ParamFactory`.
 - `ParamFactory.evsrt` resolves omitted `evsrt` to `n`.
@@ -85,7 +85,7 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 - Report diagnostics through the existing application editor-feedback DTO so
   desktop and web hosts share the same rule.
 
-### Impact
+### Range Impact
 
 - User-visible diagnostics change for syntactically valid JP1/AJS documents
   containing explicit event-arrival checking without an event destination host.
@@ -94,7 +94,7 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 - The application diagnostics boundary remains the owner of focused semantic
   parameter feedback; parser grammar and domain wrapper values remain raw.
 
-### Diagnostic Alternatives
+### Range Diagnostic Alternatives
 
 - Preserve missing `evhst` silently and leave the matrix gap visible.
 - Synthesize or rewrite `evhst` in domain/list output, rejected because
@@ -113,7 +113,72 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 - Build a full parameter coverage matrix before changing this default; deferred
   because the roadmap favors small category-level slices with focused evidence.
 
+## EVSPL / EVSRC Range Diagnostics
+
+### Current Behavior
+
+- `Evsj` / `Revsj` expose `evspl` and `evsrc` through `ParamFactory`.
+- `ParamFactory.evspl` and `ParamFactory.evsrc` preserve explicit values as raw
+  strings and apply the existing aligned default `10` only when the parameter
+  is omitted.
+- `buildSyntaxDiagnostics.ts` already owns focused semantic diagnostics for
+  JP1 event sending jobs, but it currently checks only the `evsrt=y` /
+  missing-`evhst` rule.
+- Explicit out-of-range `evspl` / `evsrc` values are currently preserved
+  without editor feedback.
+
+### Proposed Next Slice
+
+- Report a semantic diagnostic when an explicit JP1 event sending job or
+  recovery JP1 event sending job sets `evspl` outside the JP1/AJS3 v13 range
+  `3..600` seconds.
+- Report a semantic diagnostic when an explicit JP1 event sending job or
+  recovery JP1 event sending job sets `evsrc` outside the JP1/AJS3 v13 range
+  `0..999` checks.
+- Keep omitted `evspl` / `evsrc` values non-diagnostic because the existing
+  defaults already align to `10`.
+- Point diagnostics at the explicit out-of-range parameter so parser output,
+  domain wrappers, normalized parameters, and downstream consumers remain
+  unchanged.
+- Report diagnostics through the existing application editor-feedback DTO so
+  desktop and web hosts continue to share the same rule.
+
+### Delivered Range Behavior
+
+- Explicit JP1 event sending job and recovery JP1 event sending job `evspl`
+  values now report a semantic diagnostic when outside `3..600` seconds.
+- Explicit JP1 event sending job and recovery JP1 event sending job `evsrc`
+  values now report a semantic diagnostic when outside `0..999` checks.
+- Omitted `evspl` / `evsrc` values remain non-diagnostic because the existing
+  defaults already align to `10`.
+- Raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation remain unchanged.
+
+### Impact
+
+- User-visible diagnostics would change for syntactically valid JP1/AJS
+  documents containing explicit out-of-range event-arrival interval or
+  check-count values.
+- Existing parsed parameter source-location metadata should be enough to point
+  diagnostics at explicit `evspl` / `evsrc` parameters, so no parser or DTO
+  shape change is expected.
+- The application diagnostics boundary remains the owner of focused semantic
+  parameter feedback; parser grammar and domain wrapper values remain raw.
+
+### Diagnostic Alternatives
+
+- Preserve out-of-range `evspl` / `evsrc` silently and leave the matrix gap
+  visible.
+- Move numeric validation into domain wrappers, rejected for this slice
+  because the current diagnostics policy preserves raw manual-invalid values.
+- Add `evhst` byte-length, macro-variable, or host-name validation in the
+  same slice, rejected because that broadens the behavior and regression
+  surface.
+
 ## Follow-up
 
-- Add range validation for `evspl` and `evsrc` only after invalid JP1/AJS
-  parameter handling is defined across domain and diagnostics.
+- Investigate `evspl` / `evsrc` range diagnostics as the next approval-gated
+  event sending job slice.
+- Revisit `evhst` byte-length, macro-variable, or host-name validation only
+  after the focused range-diagnostics slice is completed or explicitly
+  deferred.
