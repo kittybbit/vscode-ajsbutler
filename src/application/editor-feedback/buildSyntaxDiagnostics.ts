@@ -145,6 +145,44 @@ const isValidExplicitIpv4Address = (
   });
 };
 
+const getByteLength = (value: string): number =>
+  new TextEncoder().encode(value).length;
+
+const hasWildcard = (value: string): boolean => value.includes("*");
+
+const isValidExplicitFileMonitoringFileName = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (rawValue === undefined) {
+    return false;
+  }
+
+  const byteLength = getByteLength(rawValue);
+  return byteLength >= 1 && byteLength <= 255;
+};
+
+const isValidExplicitFileMonitoringInterval = (
+  parameter: UnitParameter | undefined,
+): boolean => parseExplicitDecimalInRange(parameter, 1, 600) !== undefined;
+
+const hasInvalidWildcardWithShortMonitoringInterval = (
+  parameter: UnitParameter,
+  unit: Unit,
+): boolean => {
+  if (!hasWildcard(parameter.value)) {
+    return false;
+  }
+
+  const effectiveFlwi = findParameter(unit, "flwi")?.value ?? DEFAULTS.Flwi;
+  if (!/^\d+$/.test(effectiveFlwi)) {
+    return false;
+  }
+
+  const monitoringInterval = Number(effectiveFlwi);
+  return monitoringInterval >= 1 && monitoringInterval <= 9;
+};
+
 const collectRuleDiagnostics = (
   unit: Unit,
   rules: readonly UnitParameterDiagnosticRule[],
@@ -417,6 +455,23 @@ const jobEndJudgmentNumericRangeRules = [
 ] as const;
 
 const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
+  {
+    key: "flwf",
+    message: "Monitored file name (flwf) must be between 1 and 255 bytes.",
+    isInvalid: (parameter) => !isValidExplicitFileMonitoringFileName(parameter),
+  },
+  {
+    key: "flwi",
+    message: "Monitoring interval (flwi) must be between 1 and 600.",
+    isInvalid: (parameter) => !isValidExplicitFileMonitoringInterval(parameter),
+  },
+  {
+    key: "flwf",
+    message:
+      "Monitored file name (flwf) cannot use wildcard (*) when monitoring interval (flwi) is between 1 and 9.",
+    isInvalid: (parameter, unit) =>
+      hasInvalidWildcardWithShortMonitoringInterval(parameter, unit),
+  },
   {
     key: "flwc",
     message: "File monitoring condition (flwc) cannot specify both s and m.",

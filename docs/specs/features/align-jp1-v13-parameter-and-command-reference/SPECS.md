@@ -102,6 +102,15 @@ JP1/AJS3 version 13 reference documents.
   effective `flwc` value does not include `c`, while preserving raw parser
   output, domain wrapper values, normalized parameters, unit-list projection,
   flow projection, and command generation.
+- File monitoring job `flwf` / `flwi` validation is approval-sensitive
+  because existing behavior preserves explicit monitored-file patterns and
+  monitoring-interval values as raw parsed data without editor feedback. A
+  grouped validation slice should report explicit `flwf` values outside the
+  JP1/AJS3 v13 byte-length range `1..255`, explicit `flwi` values outside the
+  range `1..600`, and explicit wildcard `flwf` patterns when the effective
+  `flwi` value is in the JP1/AJS3 v13 restricted range `1..9`, while
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation.
 - Execution-interval control job defaults are approval-sensitive because
   JP1/AJS3 version 13 defines omitted `tmitv`, `etn`, and `ets` behavior for
   `tmwj` / `rtmwj`, while current code only has generic defaults for `etn` and

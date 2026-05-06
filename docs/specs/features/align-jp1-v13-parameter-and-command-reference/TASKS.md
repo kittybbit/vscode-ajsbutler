@@ -78,6 +78,17 @@
 - [x] Add focused regression evidence for explicit valid and out-of-range
       schedule-rule values in the approved key set
 - [x] Run required code-change validation after implementation
+- [x] Re-group the remaining JP1/AJS v13 parameter-alignment backlog around
+      user-meaningful job types or parameter families after the delivered
+      schedule-rule slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      file-monitoring target-pattern validation
+- [x] Implement grouped file-monitoring target-pattern validation only after
+      approval
+- [x] Add focused regression evidence for explicit valid and invalid `flwf`
+      / `flwi` values and wildcard-with-short-interval combinations
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -269,25 +280,55 @@
   parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, command generation, generated artifacts,
   configuration, dependency versions, and `engines.vscode` remain unchanged.
+- 2026-05-07: Remaining JP1/AJS v13 parameter-alignment gaps were re-grouped
+  again around user-meaningful job types or parameter families after the
+  delivered schedule-rule slice. The recommended next approval-gated
+  candidate is grouped file-monitoring target-pattern validation for
+  `flwj` / `rflwj`, centered on `flwf` / `flwi` byte-length, numeric range,
+  and wildcard-with-short-interval rules through the existing
+  editor-feedback boundary while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. Parser grammar, unit-list projection changes, `flwc` /
+  `flco` diagnostics already delivered, `ets` timeout behavior, generated
+  artifacts, configuration, dependency versions, `engines.vscode`, and
+  non-file-monitoring validation remain out of scope.
+- 2026-05-07: Grouped file-monitoring target-pattern validation now reports
+  explicit `flwf` values outside the JP1/AJS3 v13 byte-length range
+  `1..255`, explicit `flwi` values outside `1..600`, and explicit wildcard
+  `flwf` patterns when effective `flwi` is in the restricted range `1..9`,
+  through the existing editor-feedback boundary. Omitted `flwf` and omitted
+  `flwi` remain non-diagnostic, raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged, and `ets` timeout behavior remains deferred.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-07
-- Approved scope: grouped schedule-rule range diagnostics for already-modeled
-  jobnet parameters through the existing editor-feedback boundary, reusing the
-  shared schedule-rule helper seam where practical, while preserving raw
-  parser output, domain wrapper values, normalized parameters, unit-list
-  projection, flow projection, and command generation. Initial target keys:
-  `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`, and `wt`. Parser grammar
-  changes, schedule-rule value-shape parsing changes, generated artifacts,
-  configuration, dependency versions, `engines.vscode`, `sd` product-policy
-  changes, and non-schedule parameter validation remain out of scope.
+- Approved scope: grouped file-monitoring target-pattern validation for
+  `Flwj` / `Rflwj` through the existing editor-feedback boundary, limited to
+  `flwf` byte-length, `flwi` numeric range, and wildcard-with-short-interval
+  diagnostics, while preserving raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation.
 
-Current implementation gate: none; grouped schedule-rule range diagnostics are
-implemented and awaiting final validation sync.
+Current implementation gate: grouped file-monitoring target-pattern validation
+is approved for implementation inside the recorded scope.
 
 ## Prior Approval Evidence
+
+- 2026-05-07: User replied "Approved. Proceed with implementation." after the
+  grouped file-monitoring target-pattern validation approval request.
+  Approved changes were limited to adding grouped application-level semantic
+  diagnostics for `Flwj` / `Rflwj` `flwf` byte-length, `flwi` numeric range,
+  and wildcard-with-short-interval rules through the existing editor-feedback
+  boundary; preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation;
+  adding focused regression evidence; updating SDD tracking; and running
+  validation. Parser grammar, unit-list projection changes, `flwc` / `flco`
+  diagnostics already delivered, `ets` timeout behavior, generated artifacts,
+  configuration, dependency versions, `engines.vscode`, and non-file-
+  monitoring validation were out of scope.
 
 - 2026-05-07: User replied "Approved. Proceed with implementation." after the
   grouped schedule-rule range-diagnostics approval request. Approved changes
@@ -498,6 +539,14 @@ implemented and awaiting final validation sync.
 
 ## Validation
 
+- 2026-05-07: `pnpm run qlty` completed with exit code 0 after the
+  file-monitoring target-pattern diagnostics implementation
+- 2026-05-07: `npm test` completed with exit code 0
+- 2026-05-07: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-07: `pnpm run build` completed with existing webpack asset-size
+  warnings
 - 2026-05-07: `pnpm run qlty` required an escalated rerun after the sandboxed
   qlty log-file permission failure; escalated rerun completed with exit code 0
 - 2026-05-07: `pnpm test` completed with exit code 0; the VS Code harness

@@ -521,6 +521,102 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("does not report file monitoring target-pattern diagnostics for valid explicit values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=file1,flwj,+0+0;",
+        "  el=file2,rflwj,+160+0;",
+        "  unit=file1,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        '    flwf="watch.txt";',
+        "    flwi=60;",
+        "  }",
+        "  unit=file2,,jp1admin,;",
+        "  {",
+        "    ty=rflwj;",
+        '    flwf="logs/*.txt";',
+        "    flwi=10;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports file monitoring target-pattern diagnostics for explicit out-of-range values and wildcard short intervals", () => {
+    const tooLongFileName = "a".repeat(256);
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=file1,flwj,+0+0;",
+        "  el=file2,rflwj,+160+0;",
+        "  el=file3,flwj,+320+0;",
+        "  unit=file1,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        `    flwf="${tooLongFileName}";`,
+        "  }",
+        "  unit=file2,,jp1admin,;",
+        "  {",
+        "    ty=rflwj;",
+        "    flwi=601;",
+        "  }",
+        "  unit=file3,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        '    flwf="logs/*.txt";',
+        "    flwi=9;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 3);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 10,
+          column: 4,
+          length: 4,
+          message:
+            "Monitored file name (flwf) must be between 1 and 255 bytes.",
+        },
+        {
+          line: 15,
+          column: 4,
+          length: 4,
+          message: "Monitoring interval (flwi) must be between 1 and 600.",
+        },
+        {
+          line: 20,
+          column: 4,
+          length: 4,
+          message:
+            "Monitored file name (flwf) cannot use wildcard (*) when monitoring interval (flwi) is between 1 and 9.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
+    );
+  });
+
   test("reports file monitoring diagnostics for explicit invalid condition combinations", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
