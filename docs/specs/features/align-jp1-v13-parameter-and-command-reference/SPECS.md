@@ -158,12 +158,32 @@ JP1/AJS3 version 13 reference documents.
   editor-feedback while preserving raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation.
+- JP1 event reception monitoring job `evwid` and `evipa` validation are
+  approval-sensitive because existing behavior preserves explicit event IDs
+  and source IP addresses as raw parsed data without editor feedback. A
+  grouped diagnostic slice should report explicit `evwid` values that fall
+  outside the JP1/AJS3 v13 hexadecimal event-ID format and range
+  `00000000:00000000` to `FFFFFFFF:FFFFFFFF`, plus explicit `evipa` values
+  that fall outside the JP1/AJS3 v13 IPv4 dotted-decimal range
+  `0.0.0.0` to `255.255.255.255`, through editor-feedback while preserving
+  raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation.
 - JP1 event reception monitoring job `evesc` range diagnostics are aligned
   through application editor-feedback. Explicit `evesc` values on `evwj` /
   `revwj` now report a semantic diagnostic when they are neither `no` nor
   decimal values in the JP1/AJS3 v13 range `1..720`, while raw parser output,
   domain wrapper values, normalized parameters, unit-list projection, flow
   projection, and command generation remain unchanged.
+- JP1 event reception monitoring job `evwid` and `evipa` validation are
+  aligned through application editor-feedback. Explicit `evwid` values on
+  `evwj` / `revwj` now report a semantic diagnostic when they are not
+  colon-separated hexadecimal event IDs within the
+  `00000000:00000000` to `FFFFFFFF:FFFFFFFF` range, and explicit `evipa`
+  values now report a semantic diagnostic when they are not IPv4
+  dotted-decimal values in `0.0.0.0` to
+  `255.255.255.255`, while raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
 
 ## Reference Documents
 

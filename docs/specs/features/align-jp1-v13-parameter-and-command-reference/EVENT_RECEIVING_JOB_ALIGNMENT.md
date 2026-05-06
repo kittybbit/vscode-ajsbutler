@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Record the next JP1/AJS3 version 13 alignment candidate for JP1 event
-reception monitoring job semantic diagnostics.
+Record the JP1/AJS3 version 13 alignment status and next grouped validation
+candidate for JP1 event reception monitoring job semantic diagnostics.
 
-This document focuses on the currently modeled JP1 event reception monitoring
-job parameter `evesc` for `Evwj` / `Revwj`.
+This document covers the delivered `evesc` diagnostic slice and the next
+grouped validation candidate for `Evwj` / `Revwj`.
 
 ## Normative Reference
 
@@ -28,10 +28,9 @@ job parameter `evesc` for `Evwj` / `Revwj`.
 - Out of scope:
   parser grammar changes, domain wrapper normalization, unit-list projection
   changes, flow projection changes, command generation, generated artifacts,
-  dependency changes, `engines.vscode`, `evwid` format validation, `evhst`
-  byte-length validation, host-name validation, regular-expression
-  validation, macro-variable validation, `evipa` address validation, and
-  broad event-job validation
+  dependency changes, `engines.vscode`, `evhst` byte-length validation,
+  host-name validation, regular-expression validation, macro-variable
+  validation, and broad event-job validation
 
 ## Investigation Notes
 
@@ -44,8 +43,15 @@ job parameter `evesc` for `Evwj` / `Revwj`.
 - The JP1/AJS3 v13 manual states that `evesc` accepts either `no` or a
   decimal value between `1` and `720` minutes, with omitted `evesc`
   defaulting to `no`.
+- The JP1/AJS3 v13 manual states that `evwid` accepts hexadecimal values in
+  the range `00000000:00000000` to `FFFFFFFF:FFFFFFFF`.
+- The JP1/AJS3 v13 manual states that `evipa` accepts IPv4 dotted-decimal
+  addresses in the range `0.0.0.0` to `255.255.255.255`.
+- Existing raw projection evidence includes `evwid=EV-1;` in
+  `buildUnitListView.test.ts`, which confirms that editor diagnostics can be
+  tightened without changing raw unit-list projection.
 
-## Proposed Next Slice
+## Delivered Slice Scope
 
 - Report a semantic diagnostic when an explicit JP1 event reception monitoring
   job or recovery JP1 event reception monitoring job sets `evesc` to a value
@@ -67,28 +73,55 @@ job parameter `evesc` for `Evwj` / `Revwj`.
 - Raw parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation remain unchanged.
 
+## Proposed Next Grouped Slice
+
+- Report a semantic diagnostic when an explicit JP1 event reception monitoring
+  job or recovery JP1 event reception monitoring job sets `evwid` to a value
+  outside the hexadecimal event-ID format and range
+  `00000000:00000000` to `FFFFFFFF:FFFFFFFF`.
+- Report a semantic diagnostic when an explicit JP1 event reception monitoring
+  job or recovery JP1 event reception monitoring job sets `evipa` to a value
+  outside the IPv4 dotted-decimal range `0.0.0.0` to `255.255.255.255`.
+- Treat both rules as application-level format validations owned by
+  `buildSyntaxDiagnostics.ts`, preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation.
+- Keep omitted `evwid` and `evipa` non-diagnostic.
+- Treat one to eight hexadecimal digits per `evwid` segment as valid when the
+  value stays within the documented range, because the manual defines a
+  hexadecimal range but does not explicitly require zero-padded eight-digit
+  segments.
+- Point diagnostics at the explicit `evwid` and `evipa` parameters so parser
+  and DTO shapes remain unchanged.
+
 ## Impact
 
 - User-visible diagnostics would change for syntactically valid JP1/AJS
-  documents containing explicit invalid event search conditions on
-  `evwj` / `revwj`.
+  documents containing explicit invalid event IDs or event source IP
+  addresses on `evwj` / `revwj`.
 - Existing parsed parameter source-location metadata should be enough to point
-  diagnostics at explicit `evesc`, so no parser or DTO shape change is
-  expected.
+  diagnostics at explicit `evwid` and `evipa`, so no parser or DTO shape
+  change is expected.
 - The application diagnostics boundary remains the owner of focused semantic
   parameter feedback; parser grammar and domain wrapper values remain raw.
 
 ## Diagnostic Alternatives
 
-- Preserve invalid `evesc` values silently and leave the matrix gap visible.
-- Move `evesc` range validation into domain wrappers, rejected for this slice
-  because the current diagnostics policy preserves raw manual-invalid values.
-- Broaden the slice to `evwid`, `evhst`, `evipa`, or message/regular-
-  expression validation, rejected because that increases behavior and
-  regression surface.
+- Preserve invalid `evwid` / `evipa` values silently and leave the matrix gap
+  visible.
+- Move `evwid` / `evipa` validation into domain wrappers, rejected for this
+  slice because the current diagnostics policy preserves raw manual-invalid
+  values.
+- Keep `evwid` and `evipa` as separate micro-slices, rejected because this
+  job type already has multiple related deferred validations and the user asked
+  for grouped fixes by job type or category where practical.
+- Broaden the slice further to `evhst` or message/regular-expression
+  validation, deferred because that increases behavior and regression surface
+  due to regex and macro-variable allowances.
 
 ## Follow-up
 
-- Revisit event reception monitoring job host-name, address, regular-
-  expression, and event-ID validation only after the focused `evesc`
-  diagnostics slice is completed or explicitly deferred.
+- Revisit event reception monitoring job host-name byte-length,
+  regular-expression, macro-variable, and broader string-filter validation
+  after the grouped `evwid` / `evipa` diagnostics slice is completed or
+  explicitly deferred.

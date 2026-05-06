@@ -196,6 +196,15 @@
       valid explicit `evesc=no` or in-range decimal values, and explicit
       invalid `evesc` values
 - [x] Run required code-change validation after implementation
+- [x] Investigate JP1 event reception monitoring job grouped `evwid` /
+      `evipa` validation as the next focused parameter diagnostics slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration
+- [x] Implement grouped `evwid` / `evipa` validation only after approval
+- [x] Add focused diagnostics regression evidence for omitted `evwid` and
+      `evipa`, valid explicit hexadecimal event IDs and IPv4 addresses, and
+      explicit invalid `evwid` / `evipa` values
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -513,6 +522,27 @@
   values, normalized parameters, unit-list projection, flow projection,
   command generation, generated artifacts, configuration, dependency
   versions, and `engines.vscode` remain unchanged.
+- 2026-05-06: JP1 event reception monitoring job grouped `evwid` / `evipa`
+  validation is the next approval-gated semantic diagnostics candidate.
+  JP1/AJS3 version 13 job definitions for monitoring JP1 event reception say
+  `evwid` accepts hexadecimal values in the range `00000000:00000000` to
+  `FFFFFFFF:FFFFFFFF`, and `evipa` accepts IPv4 dotted-decimal values in the
+  range `0.0.0.0` to `255.255.255.255`. The proposed scope is limited to
+  reporting explicit malformed `evwid` or `evipa` values through the existing
+  editor-feedback boundary while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. Parser grammar, generated artifacts, configuration,
+  dependency versions, `engines.vscode`, `evhst` byte-length validation,
+  host-name validation, regular-expression validation, macro-variable
+  validation, and broad parameter validation remain out of scope.
+- 2026-05-06: JP1 event reception monitoring job grouped `evwid` / `evipa`
+  validation now reports explicit malformed event IDs and invalid dotted-
+  decimal IPv4 source addresses through the existing editor-feedback
+  boundary. Omitted values remain non-diagnostic, valid explicit values remain
+  accepted, and raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, command generation,
+  generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain unchanged.
 
 ## Human Approval
 
@@ -520,16 +550,34 @@
 - Approved at: 2026-05-06
 - Approved scope: focused application-level semantic diagnostics for explicit
   JP1 event reception monitoring jobs and recovery JP1 event reception
-  monitoring jobs where `evesc` is neither `no` nor a decimal value in the
-  JP1/AJS3 v13 range `1..720`; preserve raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection, and
-  command generation; add focused regression evidence; update SDD tracking;
-  and run validation.
+  monitoring jobs where `evwid` is outside the JP1/AJS3 v13 hexadecimal
+  event-ID format and range `00000000:00000000` to `FFFFFFFF:FFFFFFFF`, or
+  where `evipa` is outside the IPv4 dotted-decimal range `0.0.0.0` to
+  `255.255.255.255`; preserve raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation; add focused regression evidence; update SDD tracking; and run
+  validation.
 
 Current implementation gate: none; last completed slice was JP1 event
-reception monitoring job `evesc` range diagnostics.
+reception monitoring job grouped `evwid` / `evipa` validation.
 
 ## Prior Approval Evidence
+
+- 2026-05-06: User replied "Approved. Proceed with implementation." after the
+  JP1 event reception monitoring job grouped `evwid` / `evipa` validation
+  approval request. Approved changes were limited to adding focused
+  application-level semantic diagnostics for explicit JP1 event reception
+  monitoring jobs and recovery JP1 event reception monitoring jobs where
+  `evwid` falls outside the JP1/AJS3 v13 hexadecimal event-ID format and
+  range `00000000:00000000` to `FFFFFFFF:FFFFFFFF`, or where `evipa` falls
+  outside the IPv4 dotted-decimal range `0.0.0.0` to `255.255.255.255`;
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation; adding
+  focused regression evidence; updating SDD tracking; and running validation.
+  Parser grammar, generated artifacts, configuration, dependency versions,
+  `engines.vscode`, `evhst` byte-length validation, host-name validation,
+  regular-expression validation, macro-variable validation, and broad
+  parameter validation were out of scope.
 
 - 2026-05-06: User replied "OK.Proceed." after the JP1 event reception
   monitoring job `evesc` range-diagnostics approval request. Approved changes
@@ -703,6 +751,17 @@ reception monitoring job `evesc` range diagnostics.
 - 2026-05-06: `pnpm run qlty` completed with exit code 0; run used an
   escalated command because sandboxed qlty cannot create its log file
 - 2026-05-06: `pnpm test`
+- 2026-05-06: `pnpm run qlty` completed with exit code 0 after grouped
+  `evwid` / `evipa` diagnostics implementation; run used an escalated command
+  because sandboxed qlty cannot create its log file
+- 2026-05-06: `pnpm run test:compile`
+- 2026-05-06: `pnpm test`
+- 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-06: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-06: `pnpm run lint:md`
 - 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could
   not access macOS Mach port APIs; escalated rerun completed with exit code 0
   and existing localhost dev-extension `package.nls.json` 404 noise

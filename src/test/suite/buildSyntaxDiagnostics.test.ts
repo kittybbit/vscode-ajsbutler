@@ -624,6 +624,7 @@ suite("Build Syntax Diagnostics", () => {
         "  el=wait1,evwj,+0+0;",
         "  el=wait2,revwj,+160+0;",
         "  el=wait3,evwj,+320+0;",
+        "  el=wait4,revwj,+480+0;",
         "  unit=wait1,,jp1admin,;",
         "  {",
         "    ty=evwj;",
@@ -631,12 +632,20 @@ suite("Build Syntax Diagnostics", () => {
         "  unit=wait2,,jp1admin,;",
         "  {",
         "    ty=revwj;",
+        "    evwid=0123ABCD:89ABCDEF;",
         "    evesc=no;",
         "  }",
         "  unit=wait3,,jp1admin,;",
         "  {",
         "    ty=evwj;",
+        "    evipa=192.168.0.1;",
         "    evesc=720;",
+        "  }",
+        "  unit=wait4,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    evwid=A:1;",
+        "    evipa=255.255.255.255;",
         "  }",
         "}",
         "",
@@ -646,7 +655,7 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
-  test("reports event receiving diagnostics for explicit invalid evesc values", () => {
+  test("reports event receiving diagnostics for explicit invalid evesc, evwid, and evipa values", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
         "unit=root,,jp1admin,;",
@@ -655,6 +664,8 @@ suite("Build Syntax Diagnostics", () => {
         "  el=wait1,evwj,+0+0;",
         "  el=wait2,revwj,+160+0;",
         "  el=wait3,evwj,+320+0;",
+        "  el=wait4,revwj,+480+0;",
+        "  el=wait5,evwj,+640+0;",
         "  unit=wait1,,jp1admin,;",
         "  {",
         "    ty=evwj;",
@@ -670,12 +681,22 @@ suite("Build Syntax Diagnostics", () => {
         "    ty=evwj;",
         "    evesc=abc;",
         "  }",
+        "  unit=wait4,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    evwid=123456789:1;",
+        "  }",
+        "  unit=wait5,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evipa=256.10.0.1;",
+        "  }",
         "}",
         "",
       ].join("\n"),
     );
 
-    assert.strictEqual(diagnostics.length, 3);
+    assert.strictEqual(diagnostics.length, 5);
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => ({
         line: diagnostic.line,
@@ -705,11 +726,25 @@ suite("Build Syntax Diagnostics", () => {
           message:
             "Event search condition (evesc) must be no or between 1 and 720.",
         },
+        {
+          line: 24,
+          column: 4,
+          length: 5,
+          message:
+            "Event ID (evwid) must be hexadecimal in 00000000:00000000-FFFFFFFF:FFFFFFFF format.",
+        },
+        {
+          line: 29,
+          column: 4,
+          length: 5,
+          message:
+            "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
+        },
       ],
     );
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => diagnostic.severity),
-      ["error", "error", "error"],
+      ["error", "error", "error", "error", "error"],
     );
   });
 });

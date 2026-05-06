@@ -144,7 +144,7 @@ coverage.
 
 ### Event Reception Monitoring Job Search Scope
 
-- Keys: `evesc`
+- Keys: `evesc`, `evwid`, and `evipa`
 - Unit scope:
   JP1 event reception monitoring jobs and recovery JP1 event reception
   monitoring jobs
@@ -154,10 +154,11 @@ coverage.
   `buildSyntaxDiagnostics.ts`
 - Evidence: `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
-  `evesc` range diagnostics are aligned through editor-feedback. `evwid`
-  format validation, `evhst` byte-length validation, host-name validation,
-  regular-expression validation, macro-variable validation, `evipa` address
-  validation, and broader event-job validation remain deferred.
+  `evesc` range diagnostics plus grouped `evwid` event-ID and `evipa` IPv4
+  validation are aligned through editor-feedback. `evhst` byte-length
+  validation, host-name validation, regular-expression validation,
+  macro-variable validation, and broader event-job validation remain
+  deferred.
 
 ## Boundary Decisions
 
