@@ -129,6 +129,13 @@ JP1/AJS3 version 13 reference documents.
   reports a semantic diagnostic when `evhst` is omitted, while raw parser
   output, domain wrapper values, normalized parameters, unit-list projection,
   flow projection, and command generation remain unchanged.
+- JP1 event sending job `evspl` / `evsrc` range diagnostics are approval-
+  sensitive because existing behavior preserves explicit out-of-range values as
+  raw parsed data without editor feedback. A focused diagnostic slice should
+  report explicit `evspl` values outside `3..600` seconds and explicit
+  `evsrc` values outside `0..999` checks through editor-feedback while
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation.
 
 ## Reference Documents
 

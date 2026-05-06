@@ -89,6 +89,14 @@ Scenario: Event arrival check requires an event destination host
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Event arrival check values must stay within documented ranges
+  Given a syntactically valid JP1/AJS document with a JP1 event sending job
+  And explicit `evspl` is outside the JP1/AJS3 v13 range `3..600`
+  Or explicit `evsrc` is outside the JP1/AJS3 v13 range `0..999`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

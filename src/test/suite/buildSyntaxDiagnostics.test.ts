@@ -396,6 +396,86 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("does not report event sending range diagnostics for omitted defaults and valid explicit ranges", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=event2,revsj,+160+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "  }",
+        "  unit=event2,,jp1admin,;",
+        "  {",
+        "    ty=revsj;",
+        "    evspl=600;",
+        "    evsrc=999;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event sending range diagnostics for explicit out-of-range values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=event2,revsj,+160+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "    evspl=2;",
+        "  }",
+        "  unit=event2,,jp1admin,;",
+        "  {",
+        "    ty=revsj;",
+        "    evsrc=1000;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 2);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 5,
+          message:
+            "Event arrival check interval (evspl) must be between 3 and 600.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 5,
+          message:
+            "Event arrival check count (evsrc) must be between 0 and 999.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error"],
+    );
+  });
+
   test("reports event sending diagnostics when arrival checking omits evhst", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

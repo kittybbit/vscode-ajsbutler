@@ -42,6 +42,22 @@ const buildDiagnostic = (
   severity: "error" as const,
 });
 
+const parseExplicitDecimalInRange = (
+  parameter: UnitParameter | undefined,
+  minimum: number,
+  maximum: number,
+): number | undefined => {
+  const rawValue = parameter?.value;
+  if (!rawValue || !/^\d+$/.test(rawValue)) {
+    return undefined;
+  }
+
+  const numericValue = Number(rawValue);
+  return numericValue >= minimum && numericValue <= maximum
+    ? numericValue
+    : undefined;
+};
+
 const buildJobEndJudgmentDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
@@ -157,20 +173,46 @@ const buildEventSendingDiagnostics = (
       return unitType ? eventSendingDiagnosticTargetTypes.has(unitType) : false;
     })
     .flatMap((unit) => {
+      const diagnostics: SyntaxDiagnosticDto[] = [];
       const evsrtParameter = findParameter(unit, "evsrt");
       const evhstParameter = findParameter(unit, "evhst");
+      const evsplParameter = findParameter(unit, "evspl");
+      const evsrcParameter = findParameter(unit, "evsrc");
       const effectiveEvsrt = evsrtParameter?.value ?? DEFAULTS.Evsrt;
-
-      if (!evsrtParameter || effectiveEvsrt !== "y" || evhstParameter) {
-        return [];
+      if (
+        evsplParameter &&
+        parseExplicitDecimalInRange(evsplParameter, 3, 600) === undefined
+      ) {
+        diagnostics.push(
+          buildDiagnostic(
+            evsplParameter,
+            "Event arrival check interval (evspl) must be between 3 and 600.",
+          ),
+        );
       }
 
-      return [
-        buildDiagnostic(
-          evsrtParameter,
-          "Event arrival check (evsrt=y) requires an event destination host (evhst).",
-        ),
-      ];
+      if (
+        evsrcParameter &&
+        parseExplicitDecimalInRange(evsrcParameter, 0, 999) === undefined
+      ) {
+        diagnostics.push(
+          buildDiagnostic(
+            evsrcParameter,
+            "Event arrival check count (evsrc) must be between 0 and 999.",
+          ),
+        );
+      }
+
+      if (evsrtParameter && effectiveEvsrt === "y" && !evhstParameter) {
+        diagnostics.push(
+          buildDiagnostic(
+            evsrtParameter,
+            "Event arrival check (evsrt=y) requires an event destination host (evhst).",
+          ),
+        );
+      }
+
+      return diagnostics;
     });
 
 export const buildSyntaxDiagnostics = (
