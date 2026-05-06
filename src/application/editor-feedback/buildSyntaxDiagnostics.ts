@@ -21,6 +21,7 @@ const jobEndJudgmentDiagnosticTargetTypes = new Set([
 const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
 const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
 const eventSendingDiagnosticTargetTypes = new Set(["evsj", "revsj"]);
+const eventReceivingDiagnosticTargetTypes = new Set(["evwj", "revwj"]);
 
 const flattenUnits = (units: Unit[]): Unit[] =>
   units.reduce<Unit[]>(
@@ -254,6 +255,50 @@ const buildEventSendingDiagnostics = (
       return diagnostics;
     });
 
+const isValidExplicitEventSearchCondition = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue) {
+    return false;
+  }
+
+  if (rawValue === "no") {
+    return true;
+  }
+
+  return parseExplicitDecimalInRange(parameter, 1, 720) !== undefined;
+};
+
+const buildEventReceivingDiagnostics = (
+  rootUnits: Unit[],
+): SyntaxDiagnosticDto[] =>
+  flattenUnits(rootUnits)
+    .filter((unit) => {
+      const unitType = findParameter(unit, "ty")?.value;
+      return unitType
+        ? eventReceivingDiagnosticTargetTypes.has(unitType)
+        : false;
+    })
+    .flatMap((unit) => {
+      const diagnostics: SyntaxDiagnosticDto[] = [];
+      const evescParameter = findParameter(unit, "evesc");
+
+      if (
+        evescParameter &&
+        !isValidExplicitEventSearchCondition(evescParameter)
+      ) {
+        diagnostics.push(
+          buildDiagnostic(
+            evescParameter,
+            "Event search condition (evesc) must be no or between 1 and 720.",
+          ),
+        );
+      }
+
+      return diagnostics;
+    });
+
 export const buildSyntaxDiagnostics = (
   content: string,
 ): SyntaxDiagnosticDto[] => {
@@ -274,5 +319,6 @@ export const buildSyntaxDiagnostics = (
     ...buildJobEndJudgmentDiagnostics(result.rootUnits),
     ...buildFileMonitoringDiagnostics(result.rootUnits),
     ...buildEventSendingDiagnostics(result.rootUnits),
+    ...buildEventReceivingDiagnostics(result.rootUnits),
   ];
 };

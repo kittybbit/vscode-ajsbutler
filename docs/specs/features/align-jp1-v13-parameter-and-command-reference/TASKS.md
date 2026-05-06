@@ -187,6 +187,15 @@
       valid explicit in-range hexadecimal values, and explicit invalid
       `evsid` values
 - [x] Run required code-change validation after implementation
+- [x] Investigate JP1 event reception monitoring job `evesc` range
+      diagnostics as the next focused parameter diagnostics slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration
+- [x] Implement focused `evesc` range diagnostics only after approval
+- [x] Add focused diagnostics regression evidence for omitted `evesc`,
+      valid explicit `evesc=no` or in-range decimal values, and explicit
+      invalid `evesc` values
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -482,23 +491,59 @@
   unit-list projection, flow projection, command generation, generated
   artifacts, configuration, dependency versions, and `engines.vscode` remain
   unchanged.
+- 2026-05-06: JP1 event reception monitoring job `evesc` range diagnostics
+  are the next approval-gated semantic diagnostics candidate. JP1/AJS3
+  version 13 job definitions for monitoring JP1 event reception say `evesc`
+  accepts either `no` or a decimal value in the range `1..720`, while omitted
+  values default to `no`. Existing behavior preserves explicit invalid
+  `evesc` values as raw parsed data without editor feedback. The proposed
+  scope is limited to reporting explicit malformed or out-of-range `evesc`
+  values through the existing editor-feedback boundary while preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation. Parser grammar,
+  generated artifacts, configuration, dependency versions, `engines.vscode`,
+  `evwid` format validation, `evhst` byte-length validation, host-name
+  validation, regular-expression validation, macro-variable validation,
+  `evipa` address validation, and broad parameter validation remain out of
+  scope.
+- 2026-05-06: JP1 event reception monitoring job `evesc` range diagnostics
+  now report explicit malformed or out-of-range `evesc` values through the
+  existing editor-feedback boundary. Omitted `evesc` values and explicit
+  `evesc=no` remain non-diagnostic, and raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection,
+  command generation, generated artifacts, configuration, dependency
+  versions, and `engines.vscode` remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-06
 - Approved scope: focused application-level semantic diagnostics for explicit
-  JP1 event sending jobs and recovery JP1 event sending jobs where `evsid`
-  falls outside the JP1/AJS3 v13 hexadecimal ranges
-  `00000000..00001FFF` and `7FFF8000..7FFFFFFF`; preserve raw parser output,
-  domain wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation; add focused regression evidence; update
-  SDD tracking; and run validation.
+  JP1 event reception monitoring jobs and recovery JP1 event reception
+  monitoring jobs where `evesc` is neither `no` nor a decimal value in the
+  JP1/AJS3 v13 range `1..720`; preserve raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation; add focused regression evidence; update SDD tracking;
+  and run validation.
 
-Current implementation gate: none; last completed slice was JP1 event sending
-job `evsid` hexadecimal diagnostics.
+Current implementation gate: none; last completed slice was JP1 event
+reception monitoring job `evesc` range diagnostics.
 
 ## Prior Approval Evidence
+
+- 2026-05-06: User replied "OK.Proceed." after the JP1 event reception
+  monitoring job `evesc` range-diagnostics approval request. Approved changes
+  were limited to adding focused application-level semantic diagnostics for
+  explicit JP1 event reception monitoring jobs and recovery JP1 event
+  reception monitoring jobs where `evesc` is neither `no` nor a decimal value
+  in the JP1/AJS3 v13 range `1..720`; preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation; adding focused regression evidence;
+  updating SDD tracking; and running validation. Parser grammar, generated
+  artifacts, configuration, dependency versions, `engines.vscode`, `evwid`
+  format validation, `evhst` byte-length validation, host-name validation,
+  regular-expression validation, macro-variable validation, `evipa` address
+  validation, and broad parameter validation were out of scope.
 
 - 2026-05-06: User replied "OK.Proceed." after the JP1 event sending job
   `evsid` hexadecimal-diagnostics approval request. Approved changes were
@@ -654,6 +699,16 @@ job `evsid` hexadecimal diagnostics.
 
 ## Validation
 
+- 2026-05-06: `pnpm run test:compile`
+- 2026-05-06: `pnpm run qlty` completed with exit code 0; run used an
+  escalated command because sandboxed qlty cannot create its log file
+- 2026-05-06: `pnpm test`
+- 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-06: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-06: `pnpm run lint:md`
 - 2026-05-06: `pnpm run qlty` required an escalated rerun after a sandboxed
   qlty log-file permission failure
 - 2026-05-06: `pnpm test`

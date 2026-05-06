@@ -105,6 +105,16 @@ Scenario: Event sending event IDs must stay within documented hexadecimal ranges
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Event reception monitoring search scope must stay within documented
+  values
+  Given a syntactically valid JP1/AJS document with a JP1 event reception
+    monitoring job
+  And explicit `evesc` is neither `no` nor within the JP1/AJS3 v13 range
+    `1..720`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

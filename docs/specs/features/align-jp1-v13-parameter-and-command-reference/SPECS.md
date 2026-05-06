@@ -150,6 +150,20 @@ JP1/AJS3 version 13 reference documents.
   `7FFF8000..7FFFFFFF`, while raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation remain unchanged.
+- JP1 event reception monitoring job `evesc` range diagnostics are
+  approval-sensitive because existing behavior preserves explicit invalid event
+  search values as raw parsed data without editor feedback. A focused
+  diagnostic slice should report explicit `evesc` values that are neither `no`
+  nor decimal values in the JP1/AJS3 v13 range `1..720` through
+  editor-feedback while preserving raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation.
+- JP1 event reception monitoring job `evesc` range diagnostics are aligned
+  through application editor-feedback. Explicit `evesc` values on `evwj` /
+  `revwj` now report a semantic diagnostic when they are neither `no` nor
+  decimal values in the JP1/AJS3 v13 range `1..720`, while raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation remain unchanged.
 
 ## Reference Documents
 
