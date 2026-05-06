@@ -32,6 +32,15 @@ const flattenUnits = (units: Unit[]): Unit[] =>
 const findParameter = (unit: Unit, key: string): UnitParameter | undefined =>
   unit.parameters.find((parameter) => parameter.key === key);
 
+const findUnitsByTypes = (
+  rootUnits: Unit[],
+  targetTypes: Set<string>,
+): Unit[] =>
+  flattenUnits(rootUnits).filter((unit) => {
+    const unitType = findParameter(unit, "ty")?.value;
+    return unitType ? targetTypes.has(unitType) : false;
+  });
+
 const buildDiagnostic = (
   parameter: UnitParameter,
   message: string,
@@ -60,32 +69,68 @@ const parseExplicitDecimalInRange = (
 };
 
 const parseExplicitHexadecimalInRange = (
-  parameter: UnitParameter | undefined,
+  value: string | undefined,
   minimum: number,
   maximum: number,
 ): number | undefined => {
-  const rawValue = parameter?.value;
-  if (!rawValue || !/^[0-9a-fA-F]{1,8}$/.test(rawValue)) {
+  if (!value || !/^[0-9a-fA-F]{1,8}$/.test(value)) {
     return undefined;
   }
 
-  const numericValue = Number.parseInt(rawValue, 16);
+  const numericValue = Number.parseInt(value, 16);
   return numericValue >= minimum && numericValue <= maximum
     ? numericValue
     : undefined;
 };
 
+const isValidExplicitColonSeparatedHexadecimalEventId = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue) {
+    return false;
+  }
+
+  const segments = rawValue.split(":");
+  if (segments.length !== 2) {
+    return false;
+  }
+
+  return segments.every(
+    (segment) =>
+      parseExplicitHexadecimalInRange(segment, 0x00000000, 0xffffffff) !==
+      undefined,
+  );
+};
+
+const isValidExplicitIpv4Address = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue) {
+    return false;
+  }
+
+  const octets = rawValue.split(".");
+  if (octets.length !== 4) {
+    return false;
+  }
+
+  return octets.every((octet) => {
+    if (!/^\d+$/.test(octet)) {
+      return false;
+    }
+
+    const numericValue = Number(octet);
+    return numericValue >= 0 && numericValue <= 255;
+  });
+};
+
 const buildJobEndJudgmentDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
-  flattenUnits(rootUnits)
-    .filter((unit) => {
-      const unitType = findParameter(unit, "ty")?.value;
-      return unitType
-        ? jobEndJudgmentDiagnosticTargetTypes.has(unitType)
-        : false;
-    })
-    .flatMap((unit) => {
+  findUnitsByTypes(rootUnits, jobEndJudgmentDiagnosticTargetTypes).flatMap(
+    (unit) => {
       const diagnostics: SyntaxDiagnosticDto[] = [];
       const abrParameter = findParameter(unit, "abr");
       const effectiveJobEndJudgment =
@@ -138,7 +183,8 @@ const buildJobEndJudgmentDiagnostics = (
       }
 
       return diagnostics;
-    });
+    },
+  );
 
 const splitFileMonitoringConditions = (value: string): Set<string> =>
   new Set(value.split(":").filter((condition) => condition.length > 0));
@@ -146,14 +192,8 @@ const splitFileMonitoringConditions = (value: string): Set<string> =>
 const buildFileMonitoringDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
-  flattenUnits(rootUnits)
-    .filter((unit) => {
-      const unitType = findParameter(unit, "ty")?.value;
-      return unitType
-        ? fileMonitoringDiagnosticTargetTypes.has(unitType)
-        : false;
-    })
-    .flatMap((unit) => {
+  findUnitsByTypes(rootUnits, fileMonitoringDiagnosticTargetTypes).flatMap(
+    (unit) => {
       const diagnostics: SyntaxDiagnosticDto[] = [];
       const flwcParameter = findParameter(unit, "flwc");
       const flcoParameter = findParameter(unit, "flco");
@@ -179,17 +219,14 @@ const buildFileMonitoringDiagnostics = (
       }
 
       return diagnostics;
-    });
+    },
+  );
 
 const buildEventSendingDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
-  flattenUnits(rootUnits)
-    .filter((unit) => {
-      const unitType = findParameter(unit, "ty")?.value;
-      return unitType ? eventSendingDiagnosticTargetTypes.has(unitType) : false;
-    })
-    .flatMap((unit) => {
+  findUnitsByTypes(rootUnits, eventSendingDiagnosticTargetTypes).flatMap(
+    (unit) => {
       const diagnostics: SyntaxDiagnosticDto[] = [];
       const evsidParameter = findParameter(unit, "evsid");
       const evsrtParameter = findParameter(unit, "evsrt");
@@ -201,12 +238,12 @@ const buildEventSendingDiagnostics = (
       if (
         evsidParameter &&
         parseExplicitHexadecimalInRange(
-          evsidParameter,
+          evsidParameter.value,
           0x00000000,
           0x00001fff,
         ) === undefined &&
         parseExplicitHexadecimalInRange(
-          evsidParameter,
+          evsidParameter.value,
           0x7fff8000,
           0x7fffffff,
         ) === undefined
@@ -253,7 +290,8 @@ const buildEventSendingDiagnostics = (
       }
 
       return diagnostics;
-    });
+    },
+  );
 
 const isValidExplicitEventSearchCondition = (
   parameter: UnitParameter | undefined,
@@ -273,16 +311,33 @@ const isValidExplicitEventSearchCondition = (
 const buildEventReceivingDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
-  flattenUnits(rootUnits)
-    .filter((unit) => {
-      const unitType = findParameter(unit, "ty")?.value;
-      return unitType
-        ? eventReceivingDiagnosticTargetTypes.has(unitType)
-        : false;
-    })
-    .flatMap((unit) => {
+  findUnitsByTypes(rootUnits, eventReceivingDiagnosticTargetTypes).flatMap(
+    (unit) => {
       const diagnostics: SyntaxDiagnosticDto[] = [];
+      const evwidParameter = findParameter(unit, "evwid");
+      const evipaParameter = findParameter(unit, "evipa");
       const evescParameter = findParameter(unit, "evesc");
+
+      if (
+        evwidParameter &&
+        !isValidExplicitColonSeparatedHexadecimalEventId(evwidParameter)
+      ) {
+        diagnostics.push(
+          buildDiagnostic(
+            evwidParameter,
+            "Event ID (evwid) must be hexadecimal in 00000000:00000000-FFFFFFFF:FFFFFFFF format.",
+          ),
+        );
+      }
+
+      if (evipaParameter && !isValidExplicitIpv4Address(evipaParameter)) {
+        diagnostics.push(
+          buildDiagnostic(
+            evipaParameter,
+            "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
+          ),
+        );
+      }
 
       if (
         evescParameter &&
@@ -297,7 +352,8 @@ const buildEventReceivingDiagnostics = (
       }
 
       return diagnostics;
-    });
+    },
+  );
 
 export const buildSyntaxDiagnostics = (
   content: string,

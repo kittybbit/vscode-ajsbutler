@@ -115,6 +115,18 @@ Scenario: Event reception monitoring search scope must stay within documented
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Event reception monitoring identifiers must stay within documented
+  formats
+  Given a syntactically valid JP1/AJS document with a JP1 event reception
+    monitoring job
+  And explicit `evwid` is outside the JP1/AJS3 v13 hexadecimal event-ID
+    format and range `00000000:00000000` to `FFFFFFFF:FFFFFFFF`
+  Or explicit `evipa` is outside the JP1/AJS3 v13 IPv4 dotted-decimal range
+    `0.0.0.0` to `255.255.255.255`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes
