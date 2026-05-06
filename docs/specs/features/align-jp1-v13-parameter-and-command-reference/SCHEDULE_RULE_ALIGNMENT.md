@@ -8,8 +8,8 @@ later parameter categories should follow the same audit, helper-boundary, and
 regression-test workflow instead of moving one key at a time.
 
 This document covers only the jobnet schedule-rule family already called out in
-`AUDIT.md`: `sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`, and
-`wt`.
+this feature: `sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`, `wc`,
+and `wt`.
 
 ## Normative Reference
 
@@ -105,36 +105,11 @@ This document covers only the jobnet schedule-rule family already called out in
   - Seam: `parseWaitTimeValue` and `Wt`.
   - Remaining gap: range validation.
 
-## WC / WT Pairing Candidate
+## WC / WT Pairing Delivered Alignment
 
 - Manual basis:
   Command Reference, `5.2.4 Jobnet definition`, says `wt` and `wc` are
   specified together for start-condition monitoring.
-- Current behavior:
-  `ruleParameterBuilders.wc` and `ruleParameterBuilders.wt` independently
-  align defaults to each `sd` rule. `Wc.numberOfTimes` and `Wt.time` expose the
-  parsed value without checking the paired parameter for the same rule.
-- Behavior candidate:
-  keep explicit raw `wc` and `wt` parameters parseable, but expose the
-  effective start-condition values as disabled when either paired value for the
-  same rule is `no`.
-- Affected seams:
-  `scheduleRuleHelpers.ts`, `ScheduleRule.ts`, `Time.ts`,
-  `ruleParameterBuilders.ts`, `ParamFactory.wc`, and `ParamFactory.wt`.
-- Affected application consumers:
-  group 10 unit-list projection through
-  `src/application/unit-list/buildUnitListGroup10View.ts` and
-  `src/application/unit-list/unitListViewHelpers.ts` if the approved behavior
-  includes default-aware or effective-value list projection.
-- Regression evidence needed:
-  focused domain tests for paired rule evaluation, and unit-list tests only if
-  projection behavior changes.
-- Approval-sensitive boundary:
-  raw normalized projection should remain unchanged unless explicitly approved.
-  Validation diagnostics and range checks remain separate follow-up work.
-
-## WC / WT Pairing Delivered Alignment
-
 - Domain helper:
   `resolveEffectiveStartConditionMonitoringPair` resolves paired `wc` / `wt`
   raw values and returns no effective values when either side is `no`, missing,
@@ -149,31 +124,6 @@ This document covers only the jobnet schedule-rule family already called out in
   `scheduleRuleHelpers.test.ts` covers helper-level pair resolution, and
   `parameterFactory.test.ts` verifies raw values stay visible while effective
   values are disabled for `no` pairs.
-
-## WC / WT Unit-List Projection Candidate
-
-- Planned change:
-  make unit-list group 10 start-condition columns display effective `wc` /
-  `wt` values from the existing paired domain semantics instead of raw
-  independent parsed values.
-- Current behavior:
-  `buildUnitListGroup10View.ts` reads normalized raw `wc` and `wt` values
-  independently through `findAjsUnitParameterValues(...)`, then maps them with
-  `parseWc` and `parseTimeValue`.
-- Expected behavior:
-  paired values display only when both values for the same schedule-rule row
-  are effective. If either side is `no`, missing, or unparsable, both group 10
-  start-condition cells for that pair display empty values.
-- Affected seams:
-  `src/application/unit-list/buildUnitListGroup10View.ts`,
-  `src/application/unit-list/unitListViewHelpers.ts`, and the existing
-  schedule-rule helper `resolveEffectiveStartConditionMonitoringPair`.
-- Regression evidence needed:
-  focused group 10 unit-list tests for `wc=4` / `wt=no`, `wc=2,no` /
-  `wt=2,01:00`, and a valid `wc` / `wt` pair that remains visible.
-- Approval-sensitive boundary:
-  parser grammar, raw domain wrappers, normalized raw parameter storage,
-  diagnostics, and generated artifacts remain out of scope.
 
 ## WC / WT Unit-List Projection Delivered Alignment
 

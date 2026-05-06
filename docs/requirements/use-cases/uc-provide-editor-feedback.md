@@ -73,6 +73,14 @@ Scenario: File existing-condition output requires creation monitoring
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Retry parameters require automatic retry
+  Given a syntactically valid JP1/AJS document with a UNIX/PC job
+  And `rjs`, `rje`, `rec`, or `rei` is specified while effective `abr` is not
+    automatic retry enabled
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

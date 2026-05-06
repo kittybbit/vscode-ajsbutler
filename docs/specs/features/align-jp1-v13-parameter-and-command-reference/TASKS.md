@@ -149,15 +149,25 @@
       valid explicit `flwc` / `flco` combinations, and explicit invalid
       combinations
 - [x] Run required code-change validation after implementation
+- [x] Investigate job end-judgment automatic-retry enablement diagnostics as
+      the next focused parameter diagnostics slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration
+- [x] Implement focused automatic-retry enablement diagnostics only after
+      approval
+- [x] Add focused diagnostics regression evidence for omitted automatic retry
+      defaults, valid `abr=y` retry parameters, and explicit invalid `abr=n`
+      / retry-parameter combinations
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
 - 2026-04-18: normative parameter and command sources were fixed to the user
   supplied JP1/AJS3 version 13 reference documents.
-- 2026-04-20: the initial audit is recorded in `AUDIT.md`. Current parameter
-  semantics are already centralized mainly in `parameterHelpers.ts`,
+- 2026-04-20: the initial audit findings established that current parameter
+  semantics were already centralized mainly in `parameterHelpers.ts`,
   `Defaults.ts`, and the builder families behind `ParamFactory`, while command
-  generation is still embedded in
+  generation was still embedded in
   `src/application/unit-definition/buildUnitDefinition.ts`.
 - 2026-04-20: the first extracted supported command set will preserve the
   current user-visible behavior only: `ajsshow` and `ajsprint`.
@@ -366,13 +376,50 @@
   output, domain wrapper values, normalized parameters, unit-list projection,
   flow projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged.
+- 2026-05-06: job end-judgment automatic-retry enablement diagnostics are the
+  next approval-gated semantic diagnostics candidate. JP1/AJS3 version 13
+  UNIX/PC job and UNIX/PC custom job definitions say `rjs`, `rje`, `rec`, and
+  `rei` can be specified only when automatic retry is enabled with `abr=y`.
+  Existing diagnostics already report these retry parameters when effective
+  `jd` is not `cod`; the proposed scope is limited to reporting explicit
+  retry parameters when effective `jd=cod` but effective `abr` is not `y`,
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation. Parser
+  grammar, generated artifacts, configuration, dependency versions,
+  `engines.vscode`, numeric retry ranges, retry threshold ordering,
+  byte-length validation, and broad parameter validation remain out of scope.
+- 2026-05-06: job end-judgment automatic-retry enablement diagnostics now
+  report explicit UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or
+  `rei` values when effective `jd=cod` but effective `abr` is not `y`.
+  Existing effective non-`cod` retry diagnostics remain the primary diagnostic
+  for invalid end-judgment combinations. Parser grammar, raw parser values,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, command generation, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-06
-- Approved scope: User replied "OK.Proceed." after the file monitoring job
-  `flwc` / `flco` diagnostics approval request. Approved changes are limited
+- Approved scope: User replied "OK.Proceed." after the job end-judgment
+  automatic-retry enablement diagnostics approval request. Approved changes
+  are limited to adding focused application-level semantic diagnostics for
+  explicit UNIX/PC job and UNIX/PC custom job `rjs`, `rje`, `rec`, or `rei`
+  values when effective `jd=cod` but effective `abr` is not `y`; preserving
+  raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation; adding focused
+  regression evidence; updating SDD tracking; and running validation. Parser
+  grammar, generated artifacts, configuration, dependency versions,
+  `engines.vscode`, numeric retry ranges, retry threshold ordering,
+  byte-length validation, and broad parameter validation remain out of scope.
+
+Current implementation gate: no pending implementation gate for this feature;
+the automatic-retry enablement diagnostics slice completed on 2026-05-06.
+
+## Prior Approval Evidence
+
+- 2026-05-06: User replied "OK.Proceed." after the file monitoring job
+  `flwc` / `flco` diagnostics approval request. Approved changes were limited
   to adding focused application-level semantic diagnostics for explicit
   `flwj` / `rflwj` invalid combinations where `flwc` specifies both `s` and
   `m`, or explicit `flco` is present when effective `flwc` does not include
@@ -382,13 +429,7 @@
   validation. Parser grammar, generated artifacts, configuration, dependency
   versions, `engines.vscode`, wildcard validation, byte-length validation,
   numeric range validation, timeout behavior, and broad parameter validation
-  remain out of scope.
-
-Current implementation gate: file monitoring job `flwc` / `flco` semantic
-diagnostics.
-
-## Prior Approval Evidence
-
+  were out of scope.
 - 2026-05-01: User replied "OK.Proceed." after the job end-judgment
   retry-parameter diagnostics approval request. Approved changes were limited
   to adding focused application-level semantic diagnostics for explicit
@@ -480,6 +521,14 @@ diagnostics.
 
 ## Validation
 
+- 2026-05-06: `pnpm run test:compile`
+- 2026-05-06: `pnpm test`
+- 2026-05-06: `pnpm run test:web` failed in the sandbox because Chromium could
+  not access macOS Mach port APIs; escalated rerun completed with exit code 0
+  and existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-06: `pnpm run build` completed with existing webpack asset-size
+  warnings
+- 2026-05-06: `pnpm run lint:md`
 - 2026-05-06: `pnpm run test:compile`
 - 2026-05-06: `pnpm test`
 - 2026-05-06: `pnpm run qlty` completed with exit code 0; final run used an
