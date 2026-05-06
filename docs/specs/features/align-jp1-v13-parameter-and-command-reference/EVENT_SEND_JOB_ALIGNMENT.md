@@ -115,7 +115,7 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 
 ## EVSPL / EVSRC Range Diagnostics
 
-### Current Behavior
+### Current EVSID Behavior
 
 - `Evsj` / `Revsj` expose `evspl` and `evsrc` through `ParamFactory`.
 - `ParamFactory.evspl` and `ParamFactory.evsrc` preserve explicit values as raw
@@ -127,7 +127,7 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 - Explicit out-of-range `evspl` / `evsrc` values are currently preserved
   without editor feedback.
 
-### Proposed Next Slice
+### Proposed EVSID Slice
 
 - Report a semantic diagnostic when an explicit JP1 event sending job or
   recovery JP1 event sending job sets `evspl` outside the JP1/AJS3 v13 range
@@ -154,7 +154,7 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 - Raw parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation remain unchanged.
 
-### Impact
+### EVSID Impact
 
 - User-visible diagnostics would change for syntactically valid JP1/AJS
   documents containing explicit out-of-range event-arrival interval or
@@ -165,7 +165,7 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 - The application diagnostics boundary remains the owner of focused semantic
   parameter feedback; parser grammar and domain wrapper values remain raw.
 
-### Diagnostic Alternatives
+### EVSID Diagnostic Alternatives
 
 - Preserve out-of-range `evspl` / `evsrc` silently and leave the matrix gap
   visible.
@@ -175,10 +175,73 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
   same slice, rejected because that broadens the behavior and regression
   surface.
 
+## EVSID Hexadecimal Diagnostics
+
+### Current Behavior
+
+- `Evsj` / `Revsj` expose `evsid` through `ParamFactory`.
+- `ParamFactory.evsid` preserves explicit values as raw strings and does not
+  currently validate hexadecimal shape or numeric range.
+- `buildSyntaxDiagnostics.ts` already owns focused semantic diagnostics for
+  JP1 event sending jobs, so an `evsid` rule can stay within the existing
+  application editor-feedback boundary.
+- Explicit invalid `evsid` values are currently preserved without editor
+  feedback, and unit-list group 14 projects the same raw value through
+  `actionEventId`.
+
+### Proposed Next Slice
+
+- Report a semantic diagnostic when an explicit JP1 event sending job or
+  recovery JP1 event sending job sets `evsid` outside the JP1/AJS3 v13
+  hexadecimal ranges `00000000..00001FFF` and `7FFF8000..7FFFFFFF`.
+- Treat `evsid` as a hexadecimal value-shape check owned by
+  `buildSyntaxDiagnostics.ts`, preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation.
+- Keep omitted `evsid` non-diagnostic.
+- Point diagnostics at the explicit `evsid` parameter so parser and DTO
+  shapes remain unchanged.
+- Interpret hexadecimal digits case-insensitively unless implementation
+  investigation reveals a product-specific uppercase-only constraint.
+- Accept 1 to 8 hexadecimal digits when the numeric value falls inside one of
+  the documented JP1/AJS3 v13 ranges, because the manual lists allowable
+  hexadecimal values by range rather than as fixed-width tokens.
+
+### Delivered EVSID Behavior
+
+- Explicit JP1 event sending job and recovery JP1 event sending job `evsid`
+  values now report a semantic diagnostic when they are malformed or outside
+  the JP1/AJS3 v13 hexadecimal ranges `00000000..00001FFF` and
+  `7FFF8000..7FFFFFFF`.
+- Omitted `evsid` values remain non-diagnostic.
+- Shorter hexadecimal representations such as `1FFF` remain accepted when the
+  numeric value falls inside one of the documented ranges.
+- Lowercase hexadecimal input remains accepted when the numeric value falls
+  inside one of the documented ranges.
+- Raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation remain unchanged.
+
+### Impact
+
+- User-visible diagnostics would change for syntactically valid JP1/AJS
+  documents containing explicit invalid event IDs on `evsj` / `revsj`.
+- Existing parsed parameter source-location metadata should be enough to point
+  diagnostics at explicit `evsid`, so no parser or DTO shape change is
+  expected.
+- The application diagnostics boundary remains the owner of focused semantic
+  parameter feedback; parser grammar and domain wrapper values remain raw.
+
+### Diagnostic Alternatives
+
+- Preserve invalid `evsid` values silently and leave the matrix gap visible.
+- Move hexadecimal validation into domain wrappers, rejected for this slice
+  because the current diagnostics policy preserves raw manual-invalid values.
+- Broaden the slice to `evhst` byte-length, host-name, or macro-variable
+  validation, rejected because that would increase behavior and regression
+  surface.
+
 ## Follow-up
 
-- Investigate `evspl` / `evsrc` range diagnostics as the next approval-gated
-  event sending job slice.
 - Revisit `evhst` byte-length, macro-variable, or host-name validation only
-  after the focused range-diagnostics slice is completed or explicitly
+  after the focused `evsid` diagnostics slice is completed or explicitly
   deferred.

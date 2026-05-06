@@ -178,6 +178,15 @@
       explicit in-range values, and explicit out-of-range `evspl` / `evsrc`
       values
 - [x] Run required code-change validation after implementation
+- [x] Investigate JP1 event sending job `evsid` hexadecimal diagnostics as
+      the next focused parameter diagnostics slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration
+- [x] Implement focused `evsid` hexadecimal diagnostics only after approval
+- [x] Add focused diagnostics regression evidence for omitted `evsid`,
+      valid explicit in-range hexadecimal values, and explicit invalid
+      `evsid` values
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -452,22 +461,58 @@
   wrapper values, normalized parameters, unit-list projection, flow
   projection, command generation, generated artifacts, configuration,
   dependency versions, and `engines.vscode` remain unchanged.
+- 2026-05-06: JP1 event sending job `evsid` hexadecimal diagnostics are the
+  next approval-gated semantic diagnostics candidate. JP1/AJS3 version 13
+  JP1 event sending job definitions say `evsid` accepts hexadecimal values in
+  the disjoint ranges `00000000..00001FFF` and `7FFF8000..7FFFFFFF`.
+  Existing behavior preserves explicit invalid `evsid` values as raw parsed
+  data without editor feedback. The proposed scope is limited to reporting
+  explicit out-of-range or malformed `evsid` values through the existing
+  editor-feedback boundary while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. Parser grammar, generated artifacts, configuration,
+  dependency versions, `engines.vscode`, `evhst` byte-length validation,
+  host-name validation, macro-variable validation, event receiving job
+  `evwid` validation, and broad parameter validation remain out of scope.
+- 2026-05-06: JP1 event sending job `evsid` hexadecimal diagnostics now
+  report explicit malformed or out-of-range `evsid` values through the
+  existing editor-feedback boundary. Omitted `evsid` values remain
+  non-diagnostic, explicit valid in-range hexadecimal values remain accepted,
+  and raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, command generation, generated
+  artifacts, configuration, dependency versions, and `engines.vscode` remain
+  unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-06
 - Approved scope: focused application-level semantic diagnostics for explicit
-  JP1 event sending jobs and recovery JP1 event sending jobs where `evspl` is
-  outside `3..600` seconds or `evsrc` is outside `0..999`; preserve raw parser
-  output, domain wrapper values, normalized parameters, unit-list projection,
-  flow projection, and command generation; add focused regression evidence;
-  update SDD tracking; and run validation.
+  JP1 event sending jobs and recovery JP1 event sending jobs where `evsid`
+  falls outside the JP1/AJS3 v13 hexadecimal ranges
+  `00000000..00001FFF` and `7FFF8000..7FFFFFFF`; preserve raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation; add focused regression evidence; update
+  SDD tracking; and run validation.
 
 Current implementation gate: none; last completed slice was JP1 event sending
-job `evspl` / `evsrc` range diagnostics.
+job `evsid` hexadecimal diagnostics.
 
 ## Prior Approval Evidence
+
+- 2026-05-06: User replied "OK.Proceed." after the JP1 event sending job
+  `evsid` hexadecimal-diagnostics approval request. Approved changes were
+  limited to adding focused application-level semantic diagnostics for
+  explicit JP1 event sending jobs and recovery JP1 event sending jobs where
+  `evsid` falls outside the JP1/AJS3 v13 hexadecimal ranges
+  `00000000..00001FFF` and `7FFF8000..7FFFFFFF`; preserving raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation; adding focused regression
+  evidence; updating SDD tracking; and running validation. Parser grammar,
+  generated artifacts, configuration, dependency versions, `engines.vscode`,
+  `evhst` byte-length validation, host-name validation, macro-variable
+  validation, event receiving job `evwid` validation, and broad parameter
+  validation were out of scope.
 
 - 2026-05-06: User replied "OK.Proceed." after the JP1 event sending job
   `evspl` / `evsrc` range-diagnostics approval request. Approved changes were

@@ -377,6 +377,7 @@ suite("Build Syntax Diagnostics", () => {
         "  ty=g;",
         "  el=event1,evsj,+0+0;",
         "  el=event2,revsj,+160+0;",
+        "  el=event3,evsj,+320+0;",
         "  unit=event1,,jp1admin,;",
         "  {",
         "    ty=evsj;",
@@ -394,6 +395,90 @@ suite("Build Syntax Diagnostics", () => {
     );
 
     assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("does not report event sending evsid diagnostics for omitted and valid explicit hexadecimal values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=event2,revsj,+160+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "    evsid=1fff;",
+        "  }",
+        "  unit=event2,,jp1admin,;",
+        "  {",
+        "    ty=revsj;",
+        "    evsid=7fff8000;",
+        "  }",
+        "  unit=event3,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event sending evsid diagnostics for explicit invalid values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=event2,revsj,+160+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "    evsid=ACT-1;",
+        "  }",
+        "  unit=event2,,jp1admin,;",
+        "  {",
+        "    ty=revsj;",
+        "    evsid=00002000;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 2);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 5,
+          message:
+            "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 5,
+          message:
+            "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error"],
+    );
   });
 
   test("does not report event sending range diagnostics for omitted defaults and valid explicit ranges", () => {

@@ -47,6 +47,8 @@
      slice.
    - JP1 event sending job `evspl` / `evsrc` range diagnostics are now aligned
      through editor-feedback while preserving raw parameter data.
+   - JP1 event sending job `evsid` hexadecimal diagnostics are now aligned
+     through editor-feedback while preserving raw parameter data.
    - Continue with documented deferred diagnostics and range-validation gaps
      only as focused, approval-gated slices.
    - Keep behavior-preserving slices separate from behavior-changing manual
