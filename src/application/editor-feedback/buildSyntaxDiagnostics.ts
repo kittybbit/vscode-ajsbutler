@@ -162,6 +162,18 @@ const isValidExplicitFileMonitoringFileName = (
   return byteLength >= 1 && byteLength <= 255;
 };
 
+const isValidExplicitEventHostValue = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (rawValue === undefined) {
+    return false;
+  }
+
+  const byteLength = getByteLength(rawValue);
+  return byteLength >= 1 && byteLength <= 255;
+};
+
 const isValidExplicitFileMonitoringInterval = (
   parameter: UnitParameter | undefined,
 ): boolean => parseExplicitDecimalInRange(parameter, 1, 600) !== undefined;
@@ -493,6 +505,11 @@ const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 
 const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
   {
+    key: "evhst",
+    message: "Event host (evhst) must be between 1 and 255 bytes.",
+    isInvalid: (parameter) => !isValidExplicitEventHostValue(parameter),
+  },
+  {
     key: "evsid",
     message:
       "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
@@ -531,6 +548,11 @@ const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 ];
 
 const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
+  {
+    key: "evhst",
+    message: "Event host (evhst) must be between 1 and 255 bytes.",
+    isInvalid: (parameter) => !isValidExplicitEventHostValue(parameter),
+  },
   {
     key: "evwid",
     message:

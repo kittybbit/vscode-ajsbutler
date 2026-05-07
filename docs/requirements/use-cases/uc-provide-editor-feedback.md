@@ -147,6 +147,15 @@ Scenario: Event reception monitoring identifiers must stay within documented
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Event host values must stay within documented byte-length rules
+  Given a syntactically valid JP1/AJS document with a JP1 event sending job
+    or JP1 event reception monitoring job
+  And explicit `evhst` is outside the JP1/AJS3 v13 byte-length range
+    `1..255`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

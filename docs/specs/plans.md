@@ -24,11 +24,10 @@ rules in `docs/specs/README.md`, not in this file.
   user-meaningful job type or parameter family where practical, instead of
   returning to single-parameter micro-slices once a family has shared seams
   and shared regression evidence.
-- After the delivered schedule-rule range diagnostics, the next recommended
-  JP1/AJS v13 slice is grouped file-monitoring target-pattern validation for
-  `Flwj` / `Rflwj`, centered on `flwf` / `flwi` byte-length, numeric range,
-  and wildcard-with-short-interval rules through the existing editor-feedback
-  boundary.
+- After the delivered grouped event-host validation for `evhst`, the next
+  recommended JP1/AJS v13 slice should again be selected from the remaining
+  partial or deferred gaps using the same user-meaningful job type or
+  parameter-family grouping rule.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -48,8 +47,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Request approval for the next grouped JP1/AJS3 v13 parameter-alignment
    slice selected from the remaining partial or deferred gaps after the
-   delivered file-monitoring target-pattern validation, keeping the grouping
-   by job type or parameter family.
+   delivered grouped event-host validation, keeping the grouping by job type
+   or parameter family.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -122,7 +121,7 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped file-monitoring target-pattern validation is implemented and
+  slice: grouped event-host validation for `evhst` is implemented and
   validated; the next candidate should be selected from the remaining
   partial/deferred gaps using the same user-meaningful grouping rule.
 - `docs/specs/features/import-definition-via-webapi/`:

@@ -200,6 +200,15 @@ JP1/AJS3 version 13 reference documents.
   `255.255.255.255`, while raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation remain unchanged.
+- Event-host `evhst` validation is approval-sensitive because the same
+  parameter name appears in both JP1 event sending jobs and JP1 event
+  reception monitoring jobs, but the documented allowances differ by job
+  family. A grouped follow-up should stay inside application editor-feedback,
+  enforce the documented `1..255` byte-length rule for explicit values, keep
+  event-sending macro-variable allowance visible, keep event-reception
+  regular-expression and macro-variable allowances visible, and preserve raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation.
 
 ## Reference Documents
 

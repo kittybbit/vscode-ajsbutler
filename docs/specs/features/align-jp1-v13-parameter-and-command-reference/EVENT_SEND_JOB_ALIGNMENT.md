@@ -242,6 +242,9 @@ parameters `evssv`, `evsrt`, `evspl`, and `evsrc` for `Evsj` / `Revsj`.
 
 ## Follow-up
 
-- Revisit `evhst` byte-length, macro-variable, or host-name validation only
-  after the focused `evsid` diagnostics slice is completed or explicitly
-  deferred.
+- Shared grouped event-host validation now aligns explicit `evhst`
+  byte-length diagnostics through the existing editor-feedback boundary while
+  preserving macro-variable allowance.
+- Revisit broader `evhst` host-name or string-shape validation only if a later
+  JP1/AJS v13 slice explicitly broadens scope beyond the approved byte-length
+  rule.

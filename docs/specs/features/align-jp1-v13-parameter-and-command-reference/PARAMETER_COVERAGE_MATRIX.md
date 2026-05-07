@@ -109,8 +109,10 @@ coverage.
   unit-list group 14 default-aware projection is aligned for these defaults;
   `evhst` requiredness diagnostics are aligned through editor-feedback;
   `evspl` / `evsrc` range diagnostics are aligned through editor-feedback;
-  `evsid` hexadecimal diagnostics are aligned through editor-feedback; other
-  event-job validation remains deferred
+  `evsid` hexadecimal diagnostics are aligned through editor-feedback; shared
+  `evhst` byte-length validation is aligned through editor-feedback while
+  preserving macro-variable allowance; other event-job validation remains
+  deferred
 
 ### File Monitoring Job Defaults
 
@@ -160,10 +162,10 @@ coverage.
 - Evidence: `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
   `evesc` range diagnostics plus grouped `evwid` event-ID and `evipa` IPv4
-  validation are aligned through editor-feedback. `evhst` byte-length
-  validation, host-name validation, regular-expression validation,
-  macro-variable validation, and broader event-job validation remain
-  deferred.
+  validation are aligned through editor-feedback. Shared `evhst`
+  byte-length validation is aligned through editor-feedback while preserving
+  regular-expression and macro-variable allowance. Broader event-job
+  string-filter validation remains deferred.
 
 ## Boundary Decisions
 
