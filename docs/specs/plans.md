@@ -32,6 +32,11 @@ rules in `docs/specs/README.md`, not in this file.
   next recommended JP1/AJS v13 candidate should again be selected from the
   remaining partial or deferred gaps using the same user-meaningful grouping
   rule.
+- After re-checking the remaining partial and deferred gaps, the next
+  recommended JP1/AJS v13 candidate should stay inside the already-modeled
+  schedule-rule family and group the remaining `sd` / `cy` compatibility
+  rule around user-visible jobnet scheduling semantics, instead of opening a
+  new single-parameter micro-slice or a broader lower-evidence job family.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -49,10 +54,10 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Request approval for the next grouped JP1/AJS3 v13 parameter-alignment
-   slice selected from the remaining partial or deferred gaps after the
-   delivered job end-judgment threshold-ordering diagnostics, keeping the
-   grouping by job type or parameter family.
+1. Re-select the next grouped JP1/AJS3 v13 parameter-alignment slice from the
+   remaining partial or deferred gaps after the delivered `sd` / `cy`
+   compatibility diagnostics, keeping the grouping by job type or parameter
+   family.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -65,38 +70,38 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/job-end-threshold-ordering`
+- Branch: `codex/sd-cy-compatibility`
 - Objective: continue JP1/AJS v13 parameter alignment with a user-meaningful
-  grouped slice around job end-judgment threshold-ordering diagnostics for
-  UNIX/PC jobs and UNIX/PC custom jobs, rather than opening a broader new job
-  family before closing the remaining focused follow-up in the existing
-  end-judgment diagnostics seam.
-- Status: implemented and validated on `codex/job-end-threshold-ordering`.
+  grouped slice around jobnet schedule-rule `sd` / `cy` compatibility, so the
+  remaining follow-up stays inside the already-modeled schedule-rule family
+  rather than switching to a lower-evidence job family or a one-key fix.
+- Status: implemented and validated on `codex/sd-cy-compatibility`.
 - Scope: add focused semantic diagnostics through the existing
-  editor-feedback boundary when explicit `wth` / `tho` pairs do not preserve
-  the documented warning-to-abnormal threshold ordering, while preserving raw
-  parser output, domain wrapper values, normalized parameters, unit-list
+  editor-feedback boundary when an explicit jobnet `cy=(n,w)` weekly cycle is
+  paired with an `sd` rule for the same schedule rule number that uses
+  open-day (`*`) or closed-day (`@`) scheduling semantics, while preserving
+  raw parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation.
-- Out of scope: parser grammar changes, domain default changes, numeric range
-  diagnostics already delivered, retry-parameter diagnostics already
-  delivered, generated artifacts, dependency changes, `engines.vscode`, and
-  non-end-judgment parameter validation.
-- Impact summary: the next slice is expected to affect
+- Out of scope: parser grammar changes, schedule-rule value-shape parsing and
+  range diagnostics already delivered, `sd` year/month/day range policy,
+  `sd=0,ud` product-decision handling, domain default changes, generated
+  artifacts, dependency changes, `engines.vscode`, and non-schedule parameter
+  validation.
+- Impact summary: the implemented slice affects
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
-  job-end-judgment diagnostics tests, the job-end-judgment alignment record,
-  the coverage matrix, and the editor-feedback behavior contract if the new
-  diagnostics are approved.
-- Risks and assumptions: the official JP1/AJS3 v13 end-judgment description is
-  interpreted to require a warning threshold below the abnormal threshold so
-  that normal, warning, and abnormal outcomes remain distinguishable. If
-  implementation investigation finds product behavior that permits an edge
-  case such as equal thresholds, stop and re-approve before broadening or
-  changing the rule.
+  schedule-rule diagnostics tests, the schedule-rule alignment record, the
+  coverage matrix, and the editor-feedback behavior contract.
+- Risks and assumptions: this slice assumes the JP1/AJS3 v13 rule that
+  weekly-cycle `cy=(n,w)` must not be used when the matching `sd` rule is
+  based on open days or closed days should be enforced as an application-level
+  semantic diagnostic rather than as parser rejection or wrapper mutation. If
+  implementation investigation reveals additional coupled schedule semantics
+  beyond this rule, stop and re-approve before broadening scope.
 - Alternatives considered: switch to a different job type first, viable but
-  deferred because job end judgment already has an established diagnostics seam
-  and one coherent remaining follow-up; move directly to broader event or
-  transfer-parameter validation, rejected for now because that increases scope
-  before this narrower family-level gap is closed.
+  deferred because schedule rules already have shared parsing seams and test
+  coverage; broaden the slice to all remaining `sd` validation, rejected for
+  now because `SCHEDULELIMIT` and `sd=0,ud` policy raise separate product
+  questions that would make the slice less reviewable.
 
 ## Build/Test Performance SDD
 
@@ -125,10 +130,10 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped job end-judgment threshold-ordering diagnostics for explicit
-  `wth` / `tho` pairs on UNIX/PC jobs and UNIX/PC custom jobs is implemented
-  and validated; the next candidate should be selected from the remaining
-  partial/deferred gaps using the same user-meaningful grouping rule.
+  slice: grouped `sd` / `cy` schedule-rule compatibility diagnostics for
+  jobnets is implemented; the next candidate should be re-selected from the
+  remaining partial/deferred gaps using the same user-meaningful grouping
+  rule.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

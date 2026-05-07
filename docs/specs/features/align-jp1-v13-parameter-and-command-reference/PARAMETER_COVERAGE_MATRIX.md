@@ -35,10 +35,12 @@ coverage.
   `buildUnitListView.test.ts`, and `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
   grouped range diagnostics are aligned for `ln`, `st`, `cy`, `shd`, `cftd`,
-  `sy`, `ey`, `wc`, and `wt` through editor-feedback. `sd` date/rule range
-  policy, `cy` open/closed-day restrictions, and any broader cross-parameter
-  invalidation remain deferred. `wc` / `wt` effective-value pairing is aligned
-  in the domain wrapper boundary and unit-list group 10 projection.
+  `sy`, `ey`, `wc`, and `wt` through editor-feedback. Grouped `sd` / `cy`
+  weekly-cycle compatibility for open-day and closed-day schedules is also
+  aligned through editor-feedback. `sd` date/rule range policy and any broader
+  cross-parameter invalidation remain deferred. `wc` / `wt` effective-value
+  pairing is aligned in the domain wrapper boundary and unit-list group 10
+  projection.
 
 ### Transfer Operation
 
@@ -46,7 +48,7 @@ coverage.
   `top1` to `top4`, with `ts1` to `ts4` and `td1` to `td4` presence
   checks
 - Unit scope: UNIX/PC jobs and UNIX/PC custom jobs
-- Status: aligned for default resolution
+- Status: partial
 - Owning seam:
   `transferOperationHelpers.ts` and `transferOperationParameterBuilders.ts`
 - Evidence: `parameterHelpers.test.ts` and `parameterFactory.test.ts`
@@ -58,7 +60,7 @@ coverage.
 
 - Keys: `ts1` to `ts4` and `td1` to `td4`
 - Unit scope: QUEUE jobs and recovery QUEUE jobs
-- Status: aligned for wrapper boundary
+- Status: partial
 - Owning seam: `Qj.ts` and `ParameterFactory.ts`
 - Evidence: `parameterFactory.test.ts`
 - Remaining gap:
@@ -70,19 +72,15 @@ coverage.
 - Keys: `jd`, `wth`, `tho`, `jdf`, and `abr`
 - Unit scope:
   UNIX/PC jobs, UNIX/PC custom jobs, and wrappers exposing end-judgment fields
-- Status: partial
+- Status: aligned
 - Owning seam:
   `jobEndJudgmentHelpers.ts`, `optionalScalarParameterBuilders.ts`, and
   `Defaults.ts`
-- Evidence: `parameterFactory.test.ts` and `jobEndJudgmentHelpers.test.ts`
+- Evidence:
+  `parameterFactory.test.ts`, `jobEndJudgmentHelpers.test.ts`, and
+  `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
-  `jd` / `abr` invalid-combination diagnostics are aligned through
-  editor-feedback. Retry-parameter diagnostics for effective non-`cod` end
-  judgment are aligned through editor-feedback. Retry-parameter diagnostics for
-  effective non-`y` automatic retry are aligned through editor-feedback.
-  Numeric range validation is aligned through editor-feedback. Threshold-
-  ordering diagnostics for explicit `wth` / `tho` pairs are aligned through
-  editor-feedback when effective `jd=cod`.
+  none for the currently modeled end-judgment fields in this feature scope
 
 ### HTTP Connection Job Defaults
 
@@ -103,18 +101,15 @@ coverage.
 - Keys: `evssv`, `evsrt`, `evspl`, and `evsrc`
 - Unit scope:
   JP1 event sending jobs and recovery JP1 event sending jobs
-- Status: partial
+- Status: aligned
 - Owning seam: `Evsj.ts`, `optionalScalarParameterBuilders.ts`, and
   `Defaults.ts`
-- Evidence: `parameterFactory.test.ts` and `buildUnitListView.test.ts`
+- Evidence:
+  `parameterFactory.test.ts`, `buildUnitListView.test.ts`, and
+  `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
-  unit-list group 14 default-aware projection is aligned for these defaults;
-  `evhst` requiredness diagnostics are aligned through editor-feedback;
-  `evspl` / `evsrc` range diagnostics are aligned through editor-feedback;
-  `evsid` hexadecimal diagnostics are aligned through editor-feedback; shared
-  `evhst` byte-length validation is aligned through editor-feedback while
-  preserving macro-variable allowance; other event-job validation remains
-  deferred
+  broader event-job validation outside the arrival-check keys in this row
+  remains deferred
 
 ### File Monitoring Job Defaults
 
@@ -157,17 +152,14 @@ coverage.
 - Unit scope:
   JP1 event reception monitoring jobs and recovery JP1 event reception
   monitoring jobs
-- Status: partial
+- Status: aligned
 - Owning seam:
   `Evwj.ts`, `optionalScalarParameterBuilders.ts`, and
   `buildSyntaxDiagnostics.ts`
 - Evidence: `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
-  `evesc` range diagnostics plus grouped `evwid` event-ID and `evipa` IPv4
-  validation are aligned through editor-feedback. Shared `evhst`
-  byte-length validation is aligned through editor-feedback while preserving
-  regular-expression and macro-variable allowance. Broader event-job
-  string-filter validation remains deferred.
+  broader event reception monitoring string-filter validation outside the
+  search-scope keys in this row remains deferred
 
 ## Boundary Decisions
 

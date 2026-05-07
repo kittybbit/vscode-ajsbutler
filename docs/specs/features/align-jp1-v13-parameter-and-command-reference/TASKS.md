@@ -108,6 +108,15 @@
 - [x] Add focused regression evidence for explicit valid and invalid `wth` /
       `tho` ordering
 - [x] Run required code-change validation after implementation
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      schedule-rule `sd` / `cy` compatibility diagnostics
+- [x] Implement grouped schedule-rule `sd` / `cy` compatibility diagnostics
+      only after approval
+- [x] Add focused regression evidence for explicit valid and invalid jobnet
+      `sd` / `cy` combinations, including weekly cycles on open-day or
+      closed-day schedules
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -364,24 +373,54 @@
   JP1/AJS v13 parameter-alignment candidate should be re-selected from the
   remaining partial or deferred gaps using the same user-meaningful job-type
   or parameter-family grouping rule.
+- 2026-05-07: Remaining JP1/AJS v13 parameter-alignment gaps were re-checked
+  again from the user-visible grouping perspective. The next recommended
+  approval-gated candidate is grouped schedule-rule `sd` / `cy`
+  compatibility diagnostics for jobnets, centered on the JP1/AJS3 v13 rule
+  that weekly cycles cannot be combined with open-day or closed-day
+  execution-start dates for the same schedule rule number.
+- 2026-05-07: Grouped schedule-rule `sd` / `cy` compatibility diagnostics now
+  report explicit jobnet `cy=(n,w)` values when the matching `sd` rule for the
+  same schedule rule number uses open-day (`*`) or closed-day (`@`)
+  scheduling semantics. Raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, command generation,
+  generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain unchanged.
+- 2026-05-07: The grouped schedule-rule `sd` / `cy` compatibility slice is
+  implemented on `codex/sd-cy-compatibility`. The next JP1/AJS v13
+  parameter-alignment candidate should be re-selected from the remaining
+  partial or deferred gaps using the same user-meaningful job-type or
+  parameter-family grouping rule.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-07
-- Approved scope: grouped job end-judgment threshold-ordering diagnostics for
-  explicit `wth` / `tho` pairs on UNIX/PC jobs and UNIX/PC custom jobs
-  through the existing editor-feedback boundary, keeping the slice narrow to
-  semantic diagnostics while preserving raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection, and
-  command generation.
+- Approved scope: grouped schedule-rule `sd` / `cy` compatibility diagnostics
+  for jobnets through the existing editor-feedback boundary, limited to
+  reporting explicit `cy=(n,w)` weekly-cycle values when the matching `sd`
+  rule for the same schedule rule number uses open-day (`*`) or closed-day
+  (`@`) scheduling semantics, while preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation.
 
-Current implementation gate: grouped job end-judgment threshold-ordering
-diagnostics for explicit `wth` / `tho` pairs is approved for implementation
-inside the recorded scope.
+Current implementation gate: grouped schedule-rule `sd` / `cy` compatibility
+diagnostics are approved and implemented inside the recorded scope.
 
 ## Prior Approval Evidence
 
+- 2026-05-07: User replied "Approved. Proceed with implementation." after the
+  grouped schedule-rule `sd` / `cy` compatibility diagnostics approval
+  request. Approved changes were limited to adding grouped application-level
+  semantic diagnostics for explicit jobnet `cy=(n,w)` values when the matching
+  `sd` rule for the same schedule rule number uses open-day (`*`) or
+  closed-day (`@`) scheduling semantics; preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation; adding focused regression evidence;
+  updating SDD tracking; and running validation. Parser grammar, schedule-rule
+  value-shape parsing and range diagnostics already delivered, `sd` date/rule
+  range policy, `sd=0,ud` product-decision handling, generated artifacts,
+  configuration, dependency versions, and `engines.vscode` were out of scope.
 - 2026-05-07: User replied "Approved. Proceed with implementation." after the
   grouped job end-judgment threshold-ordering diagnostics approval request.
   Approved changes were limited to adding grouped application-level semantic
@@ -629,6 +668,25 @@ inside the recorded scope.
 
 ## Validation
 
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  schedule-rule `sd` / `cy` compatibility diagnostics implementation
+- 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
+  schedule-rule `sd` / `cy` compatibility diagnostics implementation; the VS
+  Code harness emitted the existing macOS `task_name_for_pid` codesign noise
+  line
+- 2026-05-07: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped schedule-rule `sd` / `cy` compatibility diagnostics implementation
+  and emitted the existing localhost dev-extension `package.nls.json` 404
+  noise
+- 2026-05-07: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped schedule-rule `sd` / `cy` compatibility diagnostics
+  implementation
+- 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after grouped
+  schedule-rule `sd` / `cy` compatibility diagnostics implementation
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after the
+  docs-only `sd` / `cy` regrouping investigation
+- 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after the
+  docs-only `sd` / `cy` regrouping investigation
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   event-host validation implementation
 - 2026-05-07: `rtk pnpm test` completed with exit code 0; the VS Code harness

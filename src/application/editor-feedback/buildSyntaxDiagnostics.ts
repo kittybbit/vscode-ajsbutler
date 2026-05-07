@@ -39,6 +39,9 @@ const flattenUnits = (units: Unit[]): Unit[] =>
 const findParameter = (unit: Unit, key: string): UnitParameter | undefined =>
   unit.parameters.find((parameter) => parameter.key === key);
 
+const findParameters = (unit: Unit, key: string): UnitParameter[] =>
+  unit.parameters.filter((parameter) => parameter.key === key);
+
 const findUnitsByTypes = (
   rootUnits: Unit[],
   targetTypes: Set<string>,
@@ -350,6 +353,43 @@ const isValidExplicitCycle = (parameter: UnitParameter): boolean => {
   return cycle >= 1 && cycle <= maximumByUnit[unitType];
 };
 
+const isExplicitWeeklyCycle = (
+  parameter: UnitParameter,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return undefined;
+  }
+
+  return /^\(\d{1,3},w\)$/.test(parsed.value) ? parsed : undefined;
+};
+
+const usesOpenOrClosedDaySchedule = (
+  parameter: UnitParameter,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return undefined;
+  }
+
+  return /^((\d{4}\/)?\d{2}\/)?[*@]/.test(parsed.value) ? parsed : undefined;
+};
+
+const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
+  parameter: UnitParameter,
+  unit: Unit,
+): boolean => {
+  const weeklyCycle = isExplicitWeeklyCycle(parameter);
+  if (!weeklyCycle) {
+    return false;
+  }
+
+  return findParameters(unit, "sd").some((scheduleDateParameter) => {
+    const scheduleDate = usesOpenOrClosedDaySchedule(scheduleDateParameter);
+    return scheduleDate?.ruleNumber === weeklyCycle.ruleNumber;
+  });
+};
+
 const isValidExplicitShiftDays = (parameter: UnitParameter): boolean => {
   const parsed = parseExplicitScheduleRuleValue(parameter.value);
   if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
@@ -596,8 +636,8 @@ const buildScheduleRuleDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, scheduleRuleDiagnosticTargetTypes).flatMap(
-    (unit) =>
-      collectRuleDiagnostics(unit, [
+    (unit) => [
+      ...collectRuleDiagnostics(unit, [
         {
           key: "ln",
           message:
@@ -659,6 +699,17 @@ const buildScheduleRuleDiagnostics = (
           isInvalid: (parameter) => !isValidExplicitWaitTime(parameter),
         },
       ]),
+      ...findParameters(unit, "cy").flatMap((parameter) =>
+        hasInvalidExplicitWeeklyCycleScheduleCompatibility(parameter, unit)
+          ? [
+              buildDiagnostic(
+                parameter,
+                "Weekly cycle (cy=(n,w)) cannot be specified when execution-start date (sd) uses open-day (*) or closed-day (@) scheduling for the same rule.",
+              ),
+            ]
+          : [],
+      ),
+    ],
   );
 
 const buildJobEndJudgmentDiagnostics = (
