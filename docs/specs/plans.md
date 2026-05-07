@@ -33,10 +33,10 @@ rules in `docs/specs/README.md`, not in this file.
   remaining partial or deferred gaps using the same user-meaningful grouping
   rule.
 - After re-checking the remaining partial and deferred gaps, the next
-  recommended JP1/AJS v13 candidate should stay inside the already-modeled
-  schedule-rule family and group the remaining `sd` / `cy` compatibility
-  rule around user-visible jobnet scheduling semantics, instead of opening a
-  new single-parameter micro-slice or a broader lower-evidence job family.
+  recommended JP1/AJS v13 candidate should re-group the deferred
+  filename-like, byte-length, macro-variable, and invalid-combination rules
+  into one shared parameter-family slice, instead of returning to isolated
+  job-type micro-slices that duplicate the same editor-feedback logic.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -54,10 +54,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Re-select the next grouped JP1/AJS3 v13 parameter-alignment slice from the
-   remaining partial or deferred gaps after the delivered `sd` / `cy`
-   compatibility diagnostics, keeping the grouping by job type or parameter
-   family.
+1. Record and approve the next grouped JP1/AJS3 v13 parameter-alignment
+   slice around shared filename-like, byte-length, macro-variable, and
+   invalid-combination rules in the existing editor-feedback boundary.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -70,38 +69,41 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/sd-cy-compatibility`
-- Objective: continue JP1/AJS v13 parameter alignment with a user-meaningful
-  grouped slice around jobnet schedule-rule `sd` / `cy` compatibility, so the
-  remaining follow-up stays inside the already-modeled schedule-rule family
-  rather than switching to a lower-evidence job family or a one-key fix.
-- Status: implemented and validated on `codex/sd-cy-compatibility`.
-- Scope: add focused semantic diagnostics through the existing
-  editor-feedback boundary when an explicit jobnet `cy=(n,w)` weekly cycle is
-  paired with an `sd` rule for the same schedule rule number that uses
-  open-day (`*`) or closed-day (`@`) scheduling semantics, while preserving
-  raw parser output, domain wrapper values, normalized parameters, unit-list
-  projection, flow projection, and command generation.
-- Out of scope: parser grammar changes, schedule-rule value-shape parsing and
-  range diagnostics already delivered, `sd` year/month/day range policy,
-  `sd=0,ud` product-decision handling, domain default changes, generated
-  artifacts, dependency changes, `engines.vscode`, and non-schedule parameter
-  validation.
-- Impact summary: the implemented slice affects
+- Branch: `codex/generic-parameter-rules`
+- Objective: prepare the next JP1/AJS v13 parameter-alignment slice by
+  regrouping the remaining generic validation gaps around shared
+  filename-like, byte-length, macro-variable, and invalid-combination rules
+  instead of continuing job-type-by-job-type follow-ups.
+- Status: approved for implementation and in progress on
+  `codex/generic-parameter-rules`; implementation and validation are now
+  complete in the approved scope.
+- Scope: update SDD artifacts for the planned shared editor-feedback slice
+  that would consolidate duplicated explicit-value validation patterns in
+  `buildSyntaxDiagnostics.ts`, include the small refactoring needed so the new
+  rules remain on that existing generic-rule path, and then extend the same
+  boundary to remaining deferred transfer/QUEUE-style generic rules without
+  changing parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, command generation, generated
+  artifacts, dependency versions, or `engines.vscode`.
+- Out of scope: runtime implementation before approval, parser grammar
+  changes, domain default changes, list/flow projection changes, command
+  generation changes, dependency changes, and any product-decision rule that
+  requires behavior beyond the documented generic validation categories.
+- Impact summary: the approved implementation candidate would affect
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
-  schedule-rule diagnostics tests, the schedule-rule alignment record, the
-  coverage matrix, and the editor-feedback behavior contract.
-- Risks and assumptions: this slice assumes the JP1/AJS3 v13 rule that
-  weekly-cycle `cy=(n,w)` must not be used when the matching `sd` rule is
-  based on open days or closed days should be enforced as an application-level
-  semantic diagnostic rather than as parser rejection or wrapper mutation. If
-  implementation investigation reveals additional coupled schedule semantics
-  beyond this rule, stop and re-approve before broadening scope.
-- Alternatives considered: switch to a different job type first, viable but
-  deferred because schedule rules already have shared parsing seams and test
-  coverage; broaden the slice to all remaining `sd` validation, rejected for
-  now because `SCHEDULELIMIT` and `sd=0,ud` policy raise separate product
-  questions that would make the slice less reviewable.
+  `buildSyntaxDiagnostics` regression tests, the parameter-alignment feature
+  docs, the parameter coverage matrix, and the editor-feedback behavior
+  contract.
+- Risks and assumptions: this regrouping assumes the remaining deferred rules
+  can stay in the shared application editor-feedback boundary without pushing
+  validation into parser or domain layers. Macro-variable allowance still
+  varies by parameter family, so any helper extraction must keep per-family
+  policy explicit instead of collapsing all string-shape checks into one rule.
+- Alternatives considered: continue picking one job type at a time, rejected
+  because the remaining gaps now cluster more strongly by validation rule than
+  by unit family; broaden the slice to all remaining parameter gaps, rejected
+  because that would mix generic-rule cleanup with unrelated category-specific
+  semantics.
 
 ## Build/Test Performance SDD
 
@@ -130,10 +132,10 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped `sd` / `cy` schedule-rule compatibility diagnostics for
-  jobnets is implemented; the next candidate should be re-selected from the
-  remaining partial/deferred gaps using the same user-meaningful grouping
-  rule.
+  slice: grouped generic parameter-rule diagnostics are implemented for shared
+  transfer/QUEUE byte-length and invalid-combination rules through the
+  existing editor-feedback boundary; remaining deferred gaps should be
+  re-selected from the updated coverage matrix.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

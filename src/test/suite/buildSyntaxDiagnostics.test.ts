@@ -848,6 +848,160 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report transfer-file diagnostics for valid explicit values and macro variables", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=custom,cj,+160+0;",
+        "  el=queue1,qj,+320+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    ts1=?AJS2SRC1?;",
+        "    td1=?AJS2DST1?;",
+        "    top1=sav;",
+        "  }",
+        "  unit=custom,,jp1admin,;",
+        "  {",
+        "    ty=cj;",
+        "    ts1=source-1;",
+        "    top1=sav;",
+        "  }",
+        "  unit=queue1,,jp1admin,;",
+        "  {",
+        "    ty=qj;",
+        "    ts1=?AJS2QSRC1?;",
+        "    td1=?AJS2QDST1?;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports transfer-file byte-length diagnostics for explicit out-of-range values", () => {
+    const tooLongFileName = "a".repeat(512);
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=queue1,qj,+160+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        `    ts1=${tooLongFileName};`,
+        "  }",
+        "  unit=queue1,,jp1admin,;",
+        "  {",
+        "    ty=qj;",
+        "    ts1=queue-source;",
+        `    td1=${tooLongFileName};`,
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 2);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 3,
+          message:
+            "Transfer source file name (ts1) must be between 1 and 511 bytes.",
+        },
+        {
+          line: 15,
+          column: 4,
+          length: 3,
+          message:
+            "Transfer destination file name (td1) must be between 1 and 511 bytes.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error"],
+    );
+  });
+
+  test("reports transfer-file invalid-combination diagnostics when source files are omitted", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=queue1,qj,+160+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    td1=dest-only;",
+        "    top1=del;",
+        "  }",
+        "  unit=queue1,,jp1admin,;",
+        "  {",
+        "    ty=qj;",
+        "    td1=queue-dest-only;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 3);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 3,
+          message:
+            "Transfer destination file name (td1) requires transfer source file name (ts1).",
+        },
+        {
+          line: 10,
+          column: 4,
+          length: 4,
+          message:
+            "Transfer operation (top1) requires transfer source file name (ts1).",
+        },
+        {
+          line: 15,
+          column: 4,
+          length: 3,
+          message:
+            "Transfer destination file name (td1) requires transfer source file name (ts1).",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
+    );
+  });
+
   test("does not report event sending diagnostics for omitted evsrt defaults", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
