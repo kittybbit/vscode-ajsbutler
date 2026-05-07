@@ -168,6 +168,74 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report sd/cy compatibility diagnostics for valid explicit schedule combinations", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  sd=1,15;",
+        "  cy=1,(2,w);",
+        "  sd=2,*15;",
+        "  cy=2,(3,d);",
+        "  sd=3,@su;",
+        "  cy=4,(1,w);",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports sd/cy compatibility diagnostics for explicit weekly cycles on open-day and closed-day schedules", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  sd=1,*15;",
+        "  cy=1,(2,w);",
+        "  sd=2,@su;",
+        "  cy=2,(1,w);",
+        "  sd=3,20;",
+        "  cy=3,(4,w);",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 2);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 5,
+          column: 2,
+          length: 2,
+          message:
+            "Weekly cycle (cy=(n,w)) cannot be specified when execution-start date (sd) uses open-day (*) or closed-day (@) scheduling for the same rule.",
+        },
+        {
+          line: 7,
+          column: 2,
+          length: 2,
+          message:
+            "Weekly cycle (cy=(n,w)) cannot be specified when execution-start date (sd) uses open-day (*) or closed-day (@) scheduling for the same rule.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error"],
+    );
+  });
+
   test("does not report end-judgment diagnostics for omitted defaults", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

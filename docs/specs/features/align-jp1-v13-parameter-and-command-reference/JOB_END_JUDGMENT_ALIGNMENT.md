@@ -157,7 +157,7 @@ This document covers the implemented behavior for `jd`, `wth`, `tho`, `jdf`,
 - Raw parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation remain unchanged.
 
-## Proposed Next Grouped Slice
+## Historical Grouped Slice Plan
 
 - Report semantic diagnostics when an explicit UNIX/PC job or UNIX/PC custom
   job sets `wth` and `tho` in an order that does not preserve the documented

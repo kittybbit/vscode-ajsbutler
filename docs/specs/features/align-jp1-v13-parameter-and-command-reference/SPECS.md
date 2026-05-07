@@ -80,6 +80,14 @@ JP1/AJS3 version 13 reference documents.
   diagnostics, while still preserving raw parser output, domain wrapper
   values, normalized parameters, unit-list projection, flow projection, and
   command generation unless a narrower approval explicitly broadens scope.
+- Schedule-rule `sd` / `cy` compatibility is approval-sensitive because
+  existing behavior preserves explicit weekly cycle values on open-day or
+  closed-day schedules as raw parsed data without editor feedback. A focused
+  follow-up should stay inside application editor-feedback, report explicit
+  `cy=(n,w)` values when the matching `sd` rule for the same schedule rule
+  number uses open-day (`*`) or closed-day (`@`) scheduling semantics, and
+  preserve raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation.
 - Unit-list group 10 `wc` / `wt` projection is a separate approval-sensitive
   boundary from domain interpretation because it is user-visible table output.
   If approved, it should consume the existing paired effective-value semantics
