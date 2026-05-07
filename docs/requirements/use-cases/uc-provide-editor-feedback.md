@@ -94,6 +94,15 @@ Scenario: Job end-judgment numeric values must stay within documented ranges
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Job end-judgment thresholds must preserve warning-to-abnormal order
+  Given a syntactically valid JP1/AJS document with a UNIX/PC job
+  And effective `jd` is judgment by threshold
+  And explicit `wth` and `tho` do not preserve the documented warning-to-
+    abnormal threshold ordering
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Schedule-rule values must stay within documented ranges
   Given a syntactically valid JP1/AJS document with a jobnet
   And explicit `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`, `wc`, or `wt`

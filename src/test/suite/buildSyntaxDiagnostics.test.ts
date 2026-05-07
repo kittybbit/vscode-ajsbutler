@@ -494,6 +494,114 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report threshold-ordering diagnostics for omitted or ordered explicit end-judgment thresholds", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=job2,cj,+160+0;",
+        "  el=job3,j,+320+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    jd=cod;",
+        "  }",
+        "  unit=job2,,jp1admin,;",
+        "  {",
+        "    ty=cj;",
+        "    jd=cod;",
+        "    wth=10;",
+        "    tho=20;",
+        "  }",
+        "  unit=job3,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    jd=ab;",
+        "    wth=30;",
+        "    tho=10;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports threshold-ordering diagnostics for explicit invalid end-judgment thresholds", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=job2,cj,+160+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    jd=cod;",
+        "    wth=20;",
+        "    tho=10;",
+        "  }",
+        "  unit=job2,,jp1admin,;",
+        "  {",
+        "    ty=cj;",
+        "    jd=cod;",
+        "    wth=15;",
+        "    tho=15;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 4);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 10,
+          column: 4,
+          length: 3,
+          message:
+            "Warning threshold (wth) must be less than abnormal threshold (tho).",
+        },
+        {
+          line: 11,
+          column: 4,
+          length: 3,
+          message:
+            "Abnormal threshold (tho) must be greater than warning threshold (wth).",
+        },
+        {
+          line: 17,
+          column: 4,
+          length: 3,
+          message:
+            "Warning threshold (wth) must be less than abnormal threshold (tho).",
+        },
+        {
+          line: 18,
+          column: 4,
+          length: 3,
+          message:
+            "Abnormal threshold (tho) must be greater than warning threshold (wth).",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error", "error"],
+    );
+  });
+
   test("does not report file monitoring diagnostics for omitted defaults and valid explicit combinations", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

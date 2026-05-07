@@ -140,6 +140,16 @@ JP1/AJS3 version 13 reference documents.
   report these explicit invalid combinations through editor-feedback while
   preserving raw parser output, domain wrapper values, normalized parameters,
   unit-list projection, flow projection, and command generation.
+- Job end-judgment threshold-ordering diagnostics are approval-sensitive
+  because existing behavior preserves explicit `wth` / `tho` pairs without
+  semantic feedback. A focused diagnostic slice should stay inside
+  application editor-feedback and report explicit threshold pairs that do not
+  preserve the documented warning-to-abnormal ordering while preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation. This ordering rule is
+  inferred from the official JP1/AJS3 v13 description that normal ends fall
+  below the warning threshold, warning ends fall between the warning and
+  abnormal thresholds, and abnormal ends exceed the abnormal threshold.
 - JP1 event sending job `evhst` requiredness diagnostics are aligned through
   application editor-feedback. Explicit `evsrt=y` on `evsj` / `revsj` now
   reports a semantic diagnostic when `evhst` is omitted, while raw parser
