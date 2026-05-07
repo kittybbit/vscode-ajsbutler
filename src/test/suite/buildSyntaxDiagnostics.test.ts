@@ -937,6 +937,34 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report event-host diagnostics for valid explicit evhst values", () => {
+    const sendingHost = "a".repeat(255);
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=wait1,evwj,+160+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        `    evhst=${sendingHost};`,
+        "    evsrt=y;",
+        "  }",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evhst=*;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
   test("does not report event receiving diagnostics for omitted defaults and valid explicit values", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
@@ -1067,6 +1095,85 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => diagnostic.severity),
       ["error", "error", "error", "error", "error"],
+    );
+  });
+
+  test("reports event-host diagnostics for explicit out-of-range evhst values", () => {
+    const oversizedHost = "a".repeat(256);
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=event1,evsj,+0+0;",
+        "  el=event2,revsj,+160+0;",
+        "  el=wait1,evwj,+320+0;",
+        "  el=wait2,revwj,+480+0;",
+        "  unit=event1,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        `    evhst=${oversizedHost};`,
+        "    evsrt=y;",
+        "  }",
+        "  unit=event2,,jp1admin,;",
+        "  {",
+        "    ty=revsj;",
+        `    evhst=${oversizedHost};`,
+        "    evsrt=y;",
+        "  }",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        `    evhst=${oversizedHost};`,
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        `    evhst=${oversizedHost};`,
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 4);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 5,
+          message: "Event host (evhst) must be between 1 and 255 bytes.",
+        },
+        {
+          line: 15,
+          column: 4,
+          length: 5,
+          message: "Event host (evhst) must be between 1 and 255 bytes.",
+        },
+        {
+          line: 21,
+          column: 4,
+          length: 5,
+          message: "Event host (evhst) must be between 1 and 255 bytes.",
+        },
+        {
+          line: 26,
+          column: 4,
+          length: 5,
+          message: "Event host (evhst) must be between 1 and 255 bytes.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error", "error"],
     );
   });
 });

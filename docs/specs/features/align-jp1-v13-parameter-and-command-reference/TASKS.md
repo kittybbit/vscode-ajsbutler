@@ -89,6 +89,14 @@
 - [x] Add focused regression evidence for explicit valid and invalid `flwf`
       / `flwi` values and wildcard-with-short-interval combinations
 - [x] Run required code-change validation after implementation
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      event-host validation for `evhst` across JP1 event sending and JP1
+      event reception monitoring jobs
+- [x] Implement grouped event-host validation only after approval
+- [x] Add focused regression evidence for explicit valid and invalid `evhst`
+      values across both event-job families
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -300,22 +308,57 @@
   `flwi` remain non-diagnostic, raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation remain unchanged, and `ets` timeout behavior remains deferred.
+- 2026-05-07: Remaining JP1/AJS v13 parameter-alignment gaps were re-grouped
+  again by user-meaningful job type or parameter family after the delivered
+  file-monitoring target-pattern slice. The recommended next approval-gated
+  candidate is grouped event-host validation for `evhst` across JP1 event
+  sending and JP1 event reception monitoring jobs, centered on the documented
+  `1..255` byte-length rule plus the existing macro-variable or
+  regular-expression allowances through the existing editor-feedback
+  boundary while preserving raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation. Parser grammar, broader event-job string-filter validation,
+  generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain out of scope.
+- 2026-05-07: Grouped event-host validation now reports explicit out-of-range
+  `evhst` values across JP1 event sending and JP1 event reception monitoring
+  jobs when the byte length falls outside `1..255`, through the existing
+  editor-feedback boundary. Existing macro-variable allowance for event
+  sending jobs and regular-expression or macro-variable allowance for event
+  reception monitoring jobs remain preserved because the slice adds no
+  string-shape validation. Raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-07
-- Approved scope: grouped file-monitoring target-pattern validation for
-  `Flwj` / `Rflwj` through the existing editor-feedback boundary, limited to
-  `flwf` byte-length, `flwi` numeric range, and wildcard-with-short-interval
-  diagnostics, while preserving raw parser output, domain wrapper values,
-  normalized parameters, unit-list projection, flow projection, and command
-  generation.
+- Approved scope: grouped event-host validation for `evhst` across JP1 event
+  sending and JP1 event reception monitoring jobs through the existing
+  editor-feedback boundary, limited to the documented `1..255` byte-length
+  rule plus the existing macro-variable or regular-expression allowances,
+  while preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation.
 
-Current implementation gate: grouped file-monitoring target-pattern validation
-is approved for implementation inside the recorded scope.
+Current implementation gate: grouped event-host validation for `evhst` is
+approved for implementation inside the recorded scope.
 
 ## Prior Approval Evidence
+
+- 2026-05-07: User replied "Approved. Proceed with implementation." after the
+  grouped event-host validation approval request. Approved changes were
+  limited to adding grouped application-level semantic diagnostics for
+  explicit `evhst` values across JP1 event sending and JP1 event reception
+  monitoring jobs through the existing editor-feedback boundary, limited to
+  the documented `1..255` byte-length rule while preserving existing
+  macro-variable or regular-expression allowances; preserving raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation; adding focused regression
+  evidence; updating SDD tracking; and running validation. Parser grammar,
+  broader event-job string-filter validation, generated artifacts,
+  configuration, dependency versions, and `engines.vscode` were out of
+  scope.
 
 - 2026-05-07: User replied "Approved. Proceed with implementation." after the
   grouped file-monitoring target-pattern validation approval request.
@@ -539,6 +582,21 @@ is approved for implementation inside the recorded scope.
 
 ## Validation
 
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  event-host validation implementation
+- 2026-05-07: `rtk pnpm test` completed with exit code 0; the VS Code harness
+  emitted an existing macOS `task_name_for_pid` codesign noise line
+- 2026-05-07: `rtk pnpm run test:web` completed with exit code 0 and existing
+  localhost dev-extension `package.nls.json` 404 noise after grouped
+  event-host validation implementation
+- 2026-05-07: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped event-host validation implementation
+- 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after grouped
+  event-host validation implementation
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after the
+  docs-only event-host regrouping investigation
+- 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after the
+  docs-only event-host regrouping investigation
 - 2026-05-07: `pnpm run qlty` completed with exit code 0 after the
   file-monitoring target-pattern diagnostics implementation
 - 2026-05-07: `npm test` completed with exit code 0
