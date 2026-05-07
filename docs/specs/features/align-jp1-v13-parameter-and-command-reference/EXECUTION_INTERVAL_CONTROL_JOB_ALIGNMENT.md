@@ -49,8 +49,10 @@ The reference defines omitted values as:
 
 ## Remaining Gap
 
-- Range validation and broader wait-job default reconciliation remain outside
-  this delivered slice.
+- Explicit `ets` timeout-action diagnostics are now aligned through the shared
+  editor-feedback boundary for `tmwj` / `rtmwj`.
+- `tmitv` / `etn` validation and broader wait-job default reconciliation
+  remain outside the delivered slices.
 
 ## Alternatives
 

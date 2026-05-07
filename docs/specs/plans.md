@@ -52,6 +52,10 @@ rules in `docs/specs/README.md`, not in this file.
   next recommended JP1/AJS v13 candidate should be re-selected from the
   remaining partial or deferred gaps using the same user-meaningful grouping
   rule, instead of defaulting immediately to smaller default-only follow-ups.
+- After the delivered grouped `ets` timeout-action diagnostics slice, the next
+  recommended JP1/AJS v13 candidate should be re-selected from the remaining
+  partial or deferred gaps using the same user-meaningful grouping rule,
+  instead of defaulting immediately to smaller default-only follow-ups.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -86,32 +90,35 @@ rules in `docs/specs/README.md`, not in this file.
 
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
-- Objective: prepare the next JP1/AJS v13 parameter-alignment slice around
-  explicit transfer-file value-shape diagnostics for `tsN` / `tdN` across
-  UNIX/PC, UNIX/PC custom, and QUEUE-family units.
+- Objective: prepare the next JP1/AJS v13 parameter-alignment candidate after
+  the delivered grouped `ets` timeout-action diagnostics slice.
 - Status: approved implementation and validation are complete in the recorded
   scope.
-- Scope: grouped transfer-file explicit value-shape diagnostics were added in
-  `buildSyntaxDiagnostics.ts` for explicit `tsN` / `tdN` values that are
-  neither quoted transfer-file strings nor already accepted macro-variable
-  forms, while preserving parser output, domain wrapper values, normalized
-  parameters, unit-list projection, flow projection, command generation,
-  generated artifacts, dependency versions, and `engines.vscode`.
-- Out of scope: parser grammar changes, domain default changes,
-  transfer-operation `topN` behavior, platform-specific path interpretation,
-  projection changes, dependency changes, and unrelated default-only
-  follow-ups.
+- Scope: grouped explicit `ets` timeout-action diagnostics were added in
+  `buildSyntaxDiagnostics.ts` for explicit `ets` values outside
+  `{kl|nr|wr|an}` on `flwj` / `rflwj` and `tmwj` / `rtmwj`, including the
+  smallest helper/rule refactor needed to keep shared allowed-value
+  validation on the existing rule-array path, while preserving parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, command generation, generated artifacts, dependency versions,
+  and `engines.vscode`.
+- Out of scope: parser grammar changes, domain defaults, unit-list
+  projection changes, `tmitv` or `etn` validation, broader wait-job
+  reconciliation, other `ets`-bearing unit families, and unrelated
+  default-only follow-ups.
 - Impact summary: the implemented slice affected
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
-  transfer-file diagnostics regression tests, the parameter-alignment feature
-  docs, and the editor-feedback behavior contract.
-- Risks and assumptions: the slice keeps transfer-file validation at the
-  application editor-feedback boundary and preserves existing macro-variable
-  allowance. Broader path semantics remain deferred and should be reconsidered
-  only in a separate approved slice.
-- Alternatives considered: smaller default-only gaps remained rejected as less
-  user-meaningful; broader path semantics remained rejected as higher-risk
-  product interpretation.
+  diagnostics regression tests, the parameter-alignment feature docs, and the
+  editor-feedback behavior contract.
+- Risks and assumptions: `ParamFactory.ets` is shared by more wrappers than
+  the two implemented rows, so the delivered diagnostics stay scoped to the
+  investigated file-monitoring and execution-interval control job families.
+  Broader `ets` semantics remain deferred and should be reconsidered only in a
+  separate approved slice.
+- Alternatives considered: the remaining HTTP Connection `eu` conflict stayed
+  less user-visible, while broadening to every `ets`-bearing unit family or
+  folding `tmitv` / `etn` validation into the same slice would have exceeded
+  the shared-rule boundary that justified this grouped implementation.
 
 ## Build/Test Performance SDD
 
@@ -140,9 +147,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped transfer-file `tsN` / `tdN` explicit value-shape diagnostics
-  are implemented across transfer-operation and QUEUE transfer-file families;
-  the next candidate should be re-selected from the updated coverage matrix.
+  slice: grouped `ets` timeout-action diagnostics are implemented for
+  file-monitoring and execution-interval control jobs; the next candidate
+  should be re-selected from the updated coverage matrix.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

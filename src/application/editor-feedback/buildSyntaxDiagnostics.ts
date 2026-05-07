@@ -33,6 +33,10 @@ const jobEndJudgmentDiagnosticTargetTypes = new Set([
 ]);
 const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
 const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
+const executionIntervalControlDiagnosticTargetTypes = new Set([
+  "tmwj",
+  "rtmwj",
+]);
 const eventSendingDiagnosticTargetTypes = new Set(["evsj", "revsj"]);
 const eventReceivingDiagnosticTargetTypes = new Set(["evwj", "revwj"]);
 const scheduleRuleDiagnosticTargetTypes = new Set(["g", "n"]);
@@ -101,6 +105,16 @@ const buildExplicitByteLengthRule = (
   message,
   isInvalid: (parameter) =>
     !isValidExplicitByteLengthValue(parameter, minimum, maximum),
+});
+
+const buildExplicitAllowedValuesRule = (
+  key: string,
+  allowedValues: ReadonlySet<string>,
+  message: string,
+): UnitParameterDiagnosticRule => ({
+  key,
+  message,
+  isInvalid: (parameter) => !allowedValues.has(parameter.value),
 });
 
 const buildRequiredParameterRule = (
@@ -694,6 +708,8 @@ const isValidExplicitWaitTime = (parameter: UnitParameter): boolean => {
   );
 };
 
+const eventTimeoutActionAllowedValues = new Set(["kl", "nr", "wr", "an"]);
+
 const jobEndJudgmentNumericRangeRules = [
   buildExplicitDecimalRangeRule(
     "wth",
@@ -730,6 +746,14 @@ const jobEndJudgmentNumericRangeRules = [
     1,
     10,
     "Retry interval (rei) must be between 1 and 10.",
+  ),
+] as const;
+
+const eventTimeoutActionDiagnosticRules = [
+  buildExplicitAllowedValuesRule(
+    "ets",
+    eventTimeoutActionAllowedValues,
+    "Event timeout action (ets) must be one of kl, nr, wr, or an.",
   ),
 ] as const;
 
@@ -829,7 +853,11 @@ const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
       return !splitFileMonitoringConditions(effectiveFlwc).has("c");
     },
   },
+  ...eventTimeoutActionDiagnosticRules,
 ];
+
+const executionIntervalControlDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+  [...eventTimeoutActionDiagnosticRules];
 
 const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
   {
@@ -1094,6 +1122,16 @@ const buildFileMonitoringDiagnostics = (
     (unit) => collectRuleDiagnostics(unit, fileMonitoringDiagnosticRules),
   );
 
+const buildExecutionIntervalControlDiagnostics = (
+  rootUnits: Unit[],
+): SyntaxDiagnosticDto[] =>
+  findUnitsByTypes(
+    rootUnits,
+    executionIntervalControlDiagnosticTargetTypes,
+  ).flatMap((unit) =>
+    collectRuleDiagnostics(unit, executionIntervalControlDiagnosticRules),
+  );
+
 const buildTransferOperationDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
@@ -1158,6 +1196,7 @@ export const buildSyntaxDiagnostics = (
     ...buildScheduleRuleDiagnostics(result.rootUnits, options),
     ...buildJobEndJudgmentDiagnostics(result.rootUnits),
     ...buildFileMonitoringDiagnostics(result.rootUnits),
+    ...buildExecutionIntervalControlDiagnostics(result.rootUnits),
     ...buildTransferOperationDiagnostics(result.rootUnits),
     ...buildQueueTransferFileDiagnostics(result.rootUnits),
     ...buildEventSendingDiagnostics(result.rootUnits),

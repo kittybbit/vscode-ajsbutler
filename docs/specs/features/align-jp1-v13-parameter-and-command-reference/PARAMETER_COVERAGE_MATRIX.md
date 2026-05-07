@@ -129,21 +129,15 @@ coverage.
 
 - Keys: `flwf`, `flwc`, `flwi`, `flco`, and `ets`
 - Unit scope: file monitoring jobs and recovery file monitoring jobs
-- Status: partial
+- Status: aligned
 - Owning seam: `Flwj.ts`, `optionalScalarParameterBuilders.ts`, and
   `Defaults.ts`
 - Evidence:
   `parameterFactory.test.ts` for existing domain default seams and
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
-  unit-list group 13 default-aware projection is aligned for these defaults,
-  `flwc` / `flco` invalid-combination diagnostics are aligned through
-  editor-feedback, and `flwf` / `flwi` target-pattern validation is aligned
-  through editor-feedback for byte-length, numeric range, and
-  wildcard-with-short-interval rules. `ets` timeout behavior remains
-  deferred. The delivered file-monitoring diagnostics now serve as one reuse
-  reference for the shared generic-rule slice recorded in
-  `GENERIC_PARAMETER_RULE_ALIGNMENT.md`.
+  none for the currently modeled file-monitoring parameters in this feature
+  scope
 
 ### Execution-Interval Control Job Defaults
 
@@ -159,8 +153,9 @@ coverage.
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
   execution-interval control job defaults and unit-list group 13 projection
-  are aligned for these values; range validation and broader wait-job default
-  reconciliation are deferred
+  are aligned for these values, and explicit `ets` timeout-action
+  diagnostics are aligned through editor-feedback. `tmitv` / `etn`
+  validation and broader wait-job default reconciliation remain deferred
 
 ### Event Reception Monitoring Job Search Scope
 

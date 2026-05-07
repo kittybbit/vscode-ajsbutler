@@ -186,6 +186,15 @@ Scenario: Event host values must stay within documented byte-length rules
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Event timeout actions must stay within documented values
+  Given a syntactically valid JP1/AJS document with a file monitoring job or
+    execution-interval control job
+  And explicit `ets` is outside the JP1/AJS3 v13 value set
+    `{kl|nr|wr|an}`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Shared filename-like rules stay explicit across parameter families
   Given a syntactically valid JP1/AJS document with a parameter family that
     uses documented filename-like or host-like values
