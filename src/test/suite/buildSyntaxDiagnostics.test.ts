@@ -1004,19 +1004,19 @@ suite("Build Syntax Diagnostics", () => {
         "  {",
         "    ty=j;",
         "    ts1=?AJS2SRC1?;",
-        "    td1=?AJS2DST1?;",
+        '    td1="dest-1";',
         "    top1=sav;",
         "  }",
         "  unit=custom,,jp1admin,;",
         "  {",
         "    ty=cj;",
-        "    ts1=source-1;",
+        '    ts1="source-1";',
         "    top1=sav;",
         "  }",
         "  unit=queue1,,jp1admin,;",
         "  {",
         "    ty=qj;",
-        "    ts1=?AJS2QSRC1?;",
+        '    ts1="queue-source";',
         "    td1=?AJS2QDST1?;",
         "  }",
         "}",
@@ -1080,6 +1080,68 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => diagnostic.severity),
       ["error", "error"],
+    );
+  });
+
+  test("reports transfer-file value-shape diagnostics for explicit bare strings", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=job1,j,+0+0;",
+        "  el=queue1,qj,+160+0;",
+        "  unit=job1,,jp1admin,;",
+        "  {",
+        "    ty=j;",
+        "    ts1=source-1;",
+        "    td1=dest-1;",
+        "  }",
+        "  unit=queue1,,jp1admin,;",
+        "  {",
+        "    ty=qj;",
+        "    ts1=queue-source;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 3);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 3,
+          message:
+            "Transfer source file name (ts1) must be a quoted transfer-file value or macro-variable form.",
+        },
+        {
+          line: 10,
+          column: 4,
+          length: 3,
+          message:
+            "Transfer destination file name (td1) must be a quoted transfer-file value or macro-variable form.",
+        },
+        {
+          line: 15,
+          column: 4,
+          length: 3,
+          message:
+            "Transfer source file name (ts1) must be a quoted transfer-file value or macro-variable form.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
     );
   });
 

@@ -59,9 +59,11 @@ coverage.
 - Remaining gap:
   editor-feedback now aligns `tsN` / `tdN` byte-length diagnostics and
   `tdN` / `topN` source-file dependency diagnostics for the currently modeled
-  transfer-operation parameters. Full filename/path-shape validation and
-  macro-variable syntax validation remain deferred under
-  `GENERIC_PARAMETER_RULE_ALIGNMENT.md`
+  transfer-operation parameters. Explicit transfer-file value-shape
+  diagnostics for non-macro bare strings are now aligned through
+  editor-feedback; broader filename/path semantics and macro-variable syntax
+  tightening remain deferred under
+  `TRANSFER_FILE_VALUE_SHAPE_ALIGNMENT.md`
 
 ### QUEUE Transfer Files
 
@@ -74,9 +76,10 @@ coverage.
   group 15 unit-type-aware projection now hides `topN` on QUEUE jobs.
   Editor-feedback now aligns `tsN` / `tdN` byte-length diagnostics and `tdN`
   source-file dependency diagnostics for the currently modeled QUEUE
-  transfer-file parameters. Full filename/path-shape validation and
-  macro-variable syntax validation remain deferred under
-  `GENERIC_PARAMETER_RULE_ALIGNMENT.md`
+  transfer-file parameters. Explicit transfer-file value-shape diagnostics for
+  non-macro bare strings are now aligned through editor-feedback; broader
+  filename/path semantics and macro-variable syntax tightening remain deferred
+  under `TRANSFER_FILE_VALUE_SHAPE_ALIGNMENT.md`
 
 ### Job End Judgment
 

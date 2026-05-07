@@ -42,6 +42,16 @@ rules in `docs/specs/README.md`, not in this file.
   schedule-rule family and align explicit `sd` rule/day diagnostics before
   revisiting smaller default-only gaps such as HTTP Connection `eu` or
   file-monitoring `ets`.
+- After the delivered grouped schedule-rule `sd` explicit date/rule
+  diagnostics slice, the next recommended JP1/AJS v13 candidate should return
+  to the remaining transfer-related generic backlog and align explicit
+  transfer-file value shapes before revisiting smaller default-only gaps such
+  as HTTP Connection `eu`, file-monitoring `ets`, or broader wait-job
+  reconciliation.
+- After the delivered grouped transfer-file explicit value-shape slice, the
+  next recommended JP1/AJS v13 candidate should be re-selected from the
+  remaining partial or deferred gaps using the same user-meaningful grouping
+  rule, instead of defaulting immediately to smaller default-only follow-ups.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -59,10 +69,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Record and approve the next grouped JP1/AJS3 v13 parameter-alignment
-   slice around explicit schedule-rule `sd` rule/day diagnostics in the
-   existing editor-feedback boundary, while keeping `sd=0,ud` policy and
-   `SCHEDULELIMIT`-dependent year-range decisions out of scope.
+1. Re-check the remaining partial or deferred JP1/AJS3 v13 parameter-alignment
+   gaps after the delivered transfer-file value-shape slice and record the
+   next approval-gated candidate using the same user-meaningful grouping rule.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -78,39 +87,31 @@ rules in `docs/specs/README.md`, not in this file.
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
 - Objective: prepare the next JP1/AJS v13 parameter-alignment slice around
-  explicit jobnet `sd` rule/day diagnostics, and sync the stale
-  execution-interval alignment note so the backlog reflects delivered work.
+  explicit transfer-file value-shape diagnostics for `tsN` / `tdN` across
+  UNIX/PC, UNIX/PC custom, and QUEUE-family units.
 - Status: approved implementation and validation are complete in the recorded
   scope.
-- Scope: update SDD artifacts for a focused schedule-rule follow-up that would
-  keep ownership in `buildSyntaxDiagnostics.ts`, reuse the existing
-  `parseScheduleDateValue` seam for explicit `sd` interpretation, add user-
-  visible diagnostics for out-of-range schedule-rule numbers or day values,
-  treat the `SCHEDULELIMIT` year upper bound as the official default value
-  during this slice, and preserve parser output, domain wrapper values,
-  normalized parameters, unit-list projection, flow projection, command
-  generation, generated artifacts, dependency versions, and `engines.vscode`.
-- Out of scope: runtime implementation before approval, parser grammar
-  changes, domain default changes, schedule-rule projection changes, broader
-  schedule-rule cross-parameter invalidation, dependency changes, and
-  unrelated default-only follow-ups.
-- Impact summary: the approved implementation candidate would affect
-  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
-  `src/domain/models/parameters/scheduleRuleHelpers.ts`, focused
-  schedule-rule and diagnostics regression tests, the parameter-alignment
-  feature docs, and the editor-feedback behavior contract.
-- Risks and assumptions: this slice assumes explicit `sd` range validation can
-  remain in the shared application editor-feedback boundary without changing
-  parser acceptance or wrapper normalization. `sd=0,ud` must stay as a
-  documented special valid case, and the `SCHEDULELIMIT`-dependent year range
-  is currently interpreted using the official default value `2036`, because
-  this slice does not yet have a repository-approved environment-specific
-  input source.
-- Alternatives considered: switch to a smaller default-only gap such as HTTP
-  Connection `eu` or file-monitoring `ets`, rejected because those are less
-  user-visible and too fine-grained for the next slice; broaden the schedule
-  slice to all remaining `sd` policy questions, rejected because that would
-  mix straightforward diagnostics with unresolved product decisions.
+- Scope: grouped transfer-file explicit value-shape diagnostics were added in
+  `buildSyntaxDiagnostics.ts` for explicit `tsN` / `tdN` values that are
+  neither quoted transfer-file strings nor already accepted macro-variable
+  forms, while preserving parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, command generation,
+  generated artifacts, dependency versions, and `engines.vscode`.
+- Out of scope: parser grammar changes, domain default changes,
+  transfer-operation `topN` behavior, platform-specific path interpretation,
+  projection changes, dependency changes, and unrelated default-only
+  follow-ups.
+- Impact summary: the implemented slice affected
+  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
+  transfer-file diagnostics regression tests, the parameter-alignment feature
+  docs, and the editor-feedback behavior contract.
+- Risks and assumptions: the slice keeps transfer-file validation at the
+  application editor-feedback boundary and preserves existing macro-variable
+  allowance. Broader path semantics remain deferred and should be reconsidered
+  only in a separate approved slice.
+- Alternatives considered: smaller default-only gaps remained rejected as less
+  user-meaningful; broader path semantics remained rejected as higher-risk
+  product interpretation.
 
 ## Build/Test Performance SDD
 
@@ -139,9 +140,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped schedule-rule `sd` explicit date/rule diagnostics are
-  implemented using the official default `SCHEDULELIMIT=2036`; remaining
-  gaps should be re-selected from the updated coverage matrix.
+  slice: grouped transfer-file `tsN` / `tdN` explicit value-shape diagnostics
+  are implemented across transfer-operation and QUEUE transfer-file families;
+  the next candidate should be re-selected from the updated coverage matrix.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
