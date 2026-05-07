@@ -25,9 +25,13 @@ rules in `docs/specs/README.md`, not in this file.
   returning to single-parameter micro-slices once a family has shared seams
   and shared regression evidence.
 - After the delivered grouped event-host validation for `evhst`, the next
-  recommended JP1/AJS v13 slice should again be selected from the remaining
-  partial or deferred gaps using the same user-meaningful job type or
-  parameter-family grouping rule.
+  recommended JP1/AJS v13 slice stayed inside the already-modeled job
+  end-judgment family and tackled threshold ordering for explicit `wth` /
+  `tho` pairs before expanding to broader new parameter families.
+- After the delivered grouped job end-judgment threshold-ordering slice, the
+  next recommended JP1/AJS v13 candidate should again be selected from the
+  remaining partial or deferred gaps using the same user-meaningful grouping
+  rule.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -47,8 +51,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Request approval for the next grouped JP1/AJS3 v13 parameter-alignment
    slice selected from the remaining partial or deferred gaps after the
-   delivered grouped event-host validation, keeping the grouping by job type
-   or parameter family.
+   delivered job end-judgment threshold-ordering diagnostics, keeping the
+   grouping by job type or parameter family.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -61,38 +65,38 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Branch Plan
 
-- Branch: `codex/file-monitoring-target-pattern-validation`
+- Branch: `codex/job-end-threshold-ordering`
 - Objective: continue JP1/AJS v13 parameter alignment with a user-meaningful
-  grouped slice around file-monitoring target-pattern validation for
-  `Flwj` / `Rflwj`, rather than reopening the feature through another
-  single-parameter fix.
-- Status: implemented and validated on
-  `codex/file-monitoring-target-pattern-validation`.
-- Scope: add focused file-monitoring semantic diagnostics for explicit
-  monitored-file and monitoring-interval constraints through the existing
-  editor-feedback boundary, covering `flwf` byte-length, `flwi` numeric range,
-  and wildcard-with-short-interval invalid combinations while preserving raw
+  grouped slice around job end-judgment threshold-ordering diagnostics for
+  UNIX/PC jobs and UNIX/PC custom jobs, rather than opening a broader new job
+  family before closing the remaining focused follow-up in the existing
+  end-judgment diagnostics seam.
+- Status: implemented and validated on `codex/job-end-threshold-ordering`.
+- Scope: add focused semantic diagnostics through the existing
+  editor-feedback boundary when explicit `wth` / `tho` pairs do not preserve
+  the documented warning-to-abnormal threshold ordering, while preserving raw
   parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation.
-- Out of scope: parser grammar changes, domain default changes, unit-list
-  projection changes, `flwc` / `flco` diagnostics already delivered, `ets`
-  timeout behavior, generated artifacts, dependency changes,
-  `engines.vscode`, and non-file-monitoring parameter validation.
+- Out of scope: parser grammar changes, domain default changes, numeric range
+  diagnostics already delivered, retry-parameter diagnostics already
+  delivered, generated artifacts, dependency changes, `engines.vscode`, and
+  non-end-judgment parameter validation.
 - Impact summary: the next slice is expected to affect
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
-  file-monitoring diagnostics tests, the file-monitoring alignment record, and
-  the editor-feedback behavior contract if the new diagnostics are approved.
-- Risks and assumptions: the file-monitoring manual couples `flwf` wildcard
-  usage and `flwi` short intervals, so the remaining work is best treated as a
-  single parameter-family validation slice instead of separate key-level
-  checks. Existing parameter source-location metadata is assumed to be
-  sufficient to point diagnostics at explicit `flwf` / `flwi` parameters
-  without parser or DTO changes.
-- Alternatives considered: switch to another job type first, viable but
-  deferred because file monitoring still has a coherent deferred validation
-  family after its delivered defaults and invalid-combination diagnostics;
-  split `flwf` and `flwi` into micro-slices, rejected because the manual
-  defines a shared wildcard/interval rule across those parameters.
+  job-end-judgment diagnostics tests, the job-end-judgment alignment record,
+  the coverage matrix, and the editor-feedback behavior contract if the new
+  diagnostics are approved.
+- Risks and assumptions: the official JP1/AJS3 v13 end-judgment description is
+  interpreted to require a warning threshold below the abnormal threshold so
+  that normal, warning, and abnormal outcomes remain distinguishable. If
+  implementation investigation finds product behavior that permits an edge
+  case such as equal thresholds, stop and re-approve before broadening or
+  changing the rule.
+- Alternatives considered: switch to a different job type first, viable but
+  deferred because job end judgment already has an established diagnostics seam
+  and one coherent remaining follow-up; move directly to broader event or
+  transfer-parameter validation, rejected for now because that increases scope
+  before this narrower family-level gap is closed.
 
 ## Build/Test Performance SDD
 
@@ -121,8 +125,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped event-host validation for `evhst` is implemented and
-  validated; the next candidate should be selected from the remaining
+  slice: grouped job end-judgment threshold-ordering diagnostics for explicit
+  `wth` / `tho` pairs on UNIX/PC jobs and UNIX/PC custom jobs is implemented
+  and validated; the next candidate should be selected from the remaining
   partial/deferred gaps using the same user-meaningful grouping rule.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.

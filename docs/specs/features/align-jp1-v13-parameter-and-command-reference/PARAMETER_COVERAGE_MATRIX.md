@@ -80,7 +80,9 @@ coverage.
   editor-feedback. Retry-parameter diagnostics for effective non-`cod` end
   judgment are aligned through editor-feedback. Retry-parameter diagnostics for
   effective non-`y` automatic retry are aligned through editor-feedback.
-  Numeric range validation and retry threshold ordering remain deferred.
+  Numeric range validation is aligned through editor-feedback. Threshold-
+  ordering diagnostics for explicit `wth` / `tho` pairs are aligned through
+  editor-feedback when effective `jd=cod`.
 
 ### HTTP Connection Job Defaults
 

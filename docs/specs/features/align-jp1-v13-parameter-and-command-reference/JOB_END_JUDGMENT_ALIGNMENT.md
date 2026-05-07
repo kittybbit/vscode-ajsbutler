@@ -15,10 +15,12 @@ This document covers the implemented behavior for `jd`, `wth`, `tho`, `jdf`,
   - Command Reference, `5.2.6 UNIX/PC job definition`
   - Command Reference, `5.2.24 UNIX/PC custom job definition`
   - Command Reference, `ajsprint`, default values table
+  - System Design (Work Tasks) Guide, `2.1.4 Job definition considerations`
 - Source URLs:
   - <https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0221.HTM>
   - <https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0239.HTM>
   - <https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0121.HTM>
+  - <https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4410e/AJSG0015.HTM>
 
 ## Slice Boundary
 
@@ -40,8 +42,8 @@ This document covers the implemented behavior for `jd`, `wth`, `tho`, `jdf`,
   `src/test/suite/jobEndJudgmentHelpers.test.ts`, and
   `src/test/suite/buildSyntaxDiagnostics.test.ts`
 - Out of scope:
-  parser grammar changes, byte-length validation, numeric range validation,
-  retry threshold ordering, and command-generation changes
+  parser grammar changes, byte-length validation, and command-generation
+  changes
 
 ## Shared Expectations
 
@@ -99,7 +101,7 @@ This document covers the implemented behavior for `jd`, `wth`, `tho`, `jdf`,
 - Raw parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation remain unchanged.
 
-## Proposed Next Grouped Slice
+## Delivered Numeric Range Slice
 
 - Report semantic diagnostics when an explicit UNIX/PC job or UNIX/PC custom
   job sets `wth` or `tho` outside the JP1/AJS3 v13 range
@@ -142,6 +144,56 @@ This document covers the implemented behavior for `jd`, `wth`, `tho`, `jdf`,
 
 ## Follow-up
 
-- Implement grouped numeric range validation first, then revisit retry
-  threshold ordering as a separate approval-gated slice if the grouped numeric
-  diagnostics land cleanly.
+- Revisit explicit `wth` / `tho` threshold ordering as the next approval-gated
+  slice inside the existing job end-judgment diagnostics boundary.
+
+## Delivered Numeric Range Validation
+
+- The editor-feedback boundary now reports semantic diagnostics when explicit
+  UNIX/PC job or UNIX/PC custom job values fall outside the JP1/AJS3 v13
+  ranges for `wth`, `tho`, `rjs`, `rje`, `rec`, and `rei`.
+- Omitted values remain non-diagnostic, preserving the existing default-aware
+  wrapper semantics.
+- Raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation remain unchanged.
+
+## Proposed Next Grouped Slice
+
+- Report semantic diagnostics when an explicit UNIX/PC job or UNIX/PC custom
+  job sets `wth` and `tho` in an order that does not preserve the documented
+  warning-to-abnormal threshold progression.
+- Treat the rule as application-level threshold-ordering validation owned by
+  `buildSyntaxDiagnostics.ts`, preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation.
+- Keep omitted thresholds non-diagnostic so the existing wrapper behavior
+  remains unchanged.
+- Point each diagnostic at the explicit threshold parameter or parameters so
+  parser and DTO shapes remain unchanged.
+
+## Threshold-Ordering Note
+
+- The official JP1/AJS3 v13 end-judgment description explains that a job ends
+  normally below the warning threshold, ends with a warning between the
+  warning and abnormal thresholds, and ends abnormally beyond the abnormal
+  threshold.
+- This feature therefore treats threshold ordering as a semantic
+  application-level rule. The precise invalid pattern is expected to be
+  confirmed during implementation as part of the approved scope; if the
+  product behavior appears to allow an edge case that contradicts this
+  interpretation, return to investigation and approval before changing the
+  scope.
+
+## Delivered Threshold-Ordering Validation
+
+- The editor-feedback boundary now reports semantic diagnostics when explicit
+  UNIX/PC job or UNIX/PC custom job `wth` / `tho` pairs do not preserve the
+  documented warning-to-abnormal threshold progression.
+- This validation stays narrow to the approved scope: it runs when effective
+  `jd=cod`, both thresholds are explicitly present, and both values already
+  satisfy the delivered numeric range rules.
+- Omitted thresholds, out-of-range thresholds already handled by numeric range
+  diagnostics, and non-`cod` end-judgment modes remain outside this delivered
+  ordering slice.
+- Raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation remain unchanged.

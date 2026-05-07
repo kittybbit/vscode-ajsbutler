@@ -87,6 +87,25 @@ const parseExplicitDecimalInRange = (
     : undefined;
 };
 
+const hasInvalidExplicitThresholdOrdering = (unit: Unit): boolean => {
+  const warningThreshold = parseExplicitDecimalInRange(
+    findParameter(unit, "wth"),
+    0,
+    2147483647,
+  );
+  const abnormalThreshold = parseExplicitDecimalInRange(
+    findParameter(unit, "tho"),
+    0,
+    2147483647,
+  );
+
+  if (warningThreshold === undefined || abnormalThreshold === undefined) {
+    return false;
+  }
+
+  return warningThreshold >= abnormalThreshold;
+};
+
 const parseExplicitHexadecimalInRange = (
   value: string | undefined,
   minimum: number,
@@ -652,9 +671,34 @@ const buildJobEndJudgmentDiagnostics = (
         jobEndJudgmentNumericRangeRules,
       );
       const abrParameter = findParameter(unit, "abr");
+      const warningThresholdParameter = findParameter(unit, "wth");
+      const abnormalThresholdParameter = findParameter(unit, "tho");
       const effectiveJobEndJudgment =
         findParameter(unit, "jd")?.value ?? DEFAULTS.Jd;
       const effectiveAutomaticRetry = abrParameter?.value ?? DEFAULTS.Abr;
+
+      if (
+        effectiveJobEndJudgment === DEFAULTS.Jd &&
+        hasInvalidExplicitThresholdOrdering(unit)
+      ) {
+        if (warningThresholdParameter) {
+          diagnostics.push(
+            buildDiagnostic(
+              warningThresholdParameter,
+              "Warning threshold (wth) must be less than abnormal threshold (tho).",
+            ),
+          );
+        }
+
+        if (abnormalThresholdParameter) {
+          diagnostics.push(
+            buildDiagnostic(
+              abnormalThresholdParameter,
+              "Abnormal threshold (tho) must be greater than warning threshold (wth).",
+            ),
+          );
+        }
+      }
 
       if (effectiveJobEndJudgment !== DEFAULTS.Jd) {
         if (abrParameter?.value === "y") {

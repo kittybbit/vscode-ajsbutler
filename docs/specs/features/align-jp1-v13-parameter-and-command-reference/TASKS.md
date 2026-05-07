@@ -97,6 +97,17 @@
 - [x] Add focused regression evidence for explicit valid and invalid `evhst`
       values across both event-job families
 - [x] Run required code-change validation after implementation
+- [x] Re-group the remaining JP1/AJS v13 parameter-alignment backlog around
+      user-meaningful job types or parameter families after the delivered
+      event-host slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      job end-judgment threshold-ordering diagnostics
+- [x] Implement grouped job end-judgment threshold-ordering diagnostics only
+      after approval
+- [x] Add focused regression evidence for explicit valid and invalid `wth` /
+      `tho` ordering
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -329,23 +340,59 @@
   string-shape validation. Raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation remain unchanged.
+- 2026-05-07: Remaining JP1/AJS v13 parameter-alignment gaps were re-grouped
+  again by user-meaningful job type or parameter family after the delivered
+  event-host slice. The recommended next approval-gated candidate is grouped
+  job end-judgment threshold-ordering diagnostics for UNIX/PC jobs and UNIX/PC
+  custom jobs, centered on explicit `wth` / `tho` pairs through the existing
+  editor-feedback boundary while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. Parser grammar, domain default behavior, numeric range
+  diagnostics already delivered, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` remain out of scope.
+- 2026-05-07: Grouped job end-judgment threshold-ordering diagnostics now
+  report explicit `wth` / `tho` pairs on UNIX/PC jobs and UNIX/PC custom jobs
+  when effective `jd=cod` and the threshold values do not preserve the
+  documented warning-to-abnormal ordering. Omitted thresholds remain
+  non-diagnostic, out-of-range thresholds continue to be owned by the existing
+  numeric range diagnostics, and raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, command
+  generation, generated artifacts, configuration, dependency versions, and
+  `engines.vscode` remain unchanged.
+- 2026-05-07: The grouped job end-judgment threshold-ordering slice is now
+  implemented and validated on `codex/job-end-threshold-ordering`. The next
+  JP1/AJS v13 parameter-alignment candidate should be re-selected from the
+  remaining partial or deferred gaps using the same user-meaningful job-type
+  or parameter-family grouping rule.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-07
-- Approved scope: grouped event-host validation for `evhst` across JP1 event
-  sending and JP1 event reception monitoring jobs through the existing
-  editor-feedback boundary, limited to the documented `1..255` byte-length
-  rule plus the existing macro-variable or regular-expression allowances,
-  while preserving raw parser output, domain wrapper values, normalized
-  parameters, unit-list projection, flow projection, and command generation.
+- Approved scope: grouped job end-judgment threshold-ordering diagnostics for
+  explicit `wth` / `tho` pairs on UNIX/PC jobs and UNIX/PC custom jobs
+  through the existing editor-feedback boundary, keeping the slice narrow to
+  semantic diagnostics while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation.
 
-Current implementation gate: grouped event-host validation for `evhst` is
-approved for implementation inside the recorded scope.
+Current implementation gate: grouped job end-judgment threshold-ordering
+diagnostics for explicit `wth` / `tho` pairs is approved for implementation
+inside the recorded scope.
 
 ## Prior Approval Evidence
 
+- 2026-05-07: User replied "Approved. Proceed with implementation." after the
+  grouped job end-judgment threshold-ordering diagnostics approval request.
+  Approved changes were limited to adding grouped application-level semantic
+  diagnostics for explicit UNIX/PC jobs and UNIX/PC custom jobs where `wth`
+  and `tho` do not preserve documented threshold ordering; preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation; adding focused
+  regression evidence; updating SDD tracking; and running validation. Parser
+  grammar, domain default behavior, numeric range diagnostics already
+  delivered, generated artifacts, configuration, dependency versions, and
+  `engines.vscode` were out of scope.
 - 2026-05-07: User replied "Approved. Proceed with implementation." after the
   grouped event-host validation approval request. Approved changes were
   limited to adding grouped application-level semantic diagnostics for
@@ -597,6 +644,19 @@ approved for implementation inside the recorded scope.
   docs-only event-host regrouping investigation
 - 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after the
   docs-only event-host regrouping investigation
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  job end-judgment threshold-ordering diagnostics implementation
+- 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped job
+  end-judgment threshold-ordering diagnostics implementation; the VS Code
+  harness emitted the existing macOS `task_name_for_pid` codesign noise line
+- 2026-05-07: `rtk pnpm run test:web` completed with exit code 0 after grouped
+  job end-judgment threshold-ordering diagnostics implementation and emitted
+  the existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-07: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped job end-judgment threshold-ordering diagnostics
+  implementation
+- 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after grouped
+  job end-judgment threshold-ordering diagnostics implementation
 - 2026-05-07: `pnpm run qlty` completed with exit code 0 after the
   file-monitoring target-pattern diagnostics implementation
 - 2026-05-07: `npm test` completed with exit code 0
