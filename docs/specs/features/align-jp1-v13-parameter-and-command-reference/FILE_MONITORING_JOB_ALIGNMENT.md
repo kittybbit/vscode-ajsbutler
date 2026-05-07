@@ -84,6 +84,17 @@ This document focuses on the currently modeled file monitoring job parameters
 - Diagnostics point at the explicit `flwf` or `flwi` parameter, so parser and
   DTO shapes remain unchanged.
 
+## Delivered Timeout-Action Validation
+
+- Editor feedback now reports a semantic diagnostic when an explicit
+  file-monitoring job or recovery file-monitoring job sets `ets` outside the
+  documented JP1/AJS3 v13 value set `{kl|nr|wr|an}`.
+- Omitted `ets` remains non-diagnostic because the existing default value
+  `kl` is already aligned and valid.
+- The implementation stays in `buildSyntaxDiagnostics.ts`, preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation.
+
 ## Impact
 
 - User-visible diagnostics would change for syntactically valid JP1/AJS
@@ -116,5 +127,5 @@ This document focuses on the currently modeled file monitoring job parameters
 
 ## Follow-up
 
-- Revisit `ets` timeout behavior now that the grouped `flwf` / `flwi`
-  validation slice is implemented.
+- none for the currently modeled file-monitoring parameters in this feature
+  scope

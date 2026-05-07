@@ -157,6 +157,21 @@
 - [x] Add focused regression evidence for quoted transfer-file values,
       accepted macro-variable forms, and explicit bare-string violations
 - [x] Run required code-change validation after implementation
+- [x] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
+      delivered transfer-file explicit value-shape slice and select the next
+      candidate using the same user-meaningful grouping rule
+- [ ] Record human approval before changing editor-feedback diagnostics,
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      `ets` timeout-action diagnostics
+- [x] Implement grouped `ets` timeout-action diagnostics only after approval
+- [x] Refactor `buildSyntaxDiagnostics.ts` within the approved scope so shared
+      explicit allowed-value validation for `ets` stays on the existing
+      helper/rule-array path
+- [x] Add focused regression evidence for omitted defaults, valid explicit
+      `ets`, and explicit invalid `ets` values on file monitoring and
+      execution-interval control jobs
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -485,6 +500,32 @@
   rule path, and raw parser output, domain wrapper values, normalized
   parameters, unit-list projection, flow projection, and command generation
   remain unchanged.
+- 2026-05-08: Remaining partial and deferred JP1/AJS v13 gaps were re-checked
+  after the delivered transfer-file explicit value-shape slice. The next
+  recommended approval-gated candidate is grouped explicit `ets`
+  timeout-action diagnostics across file monitoring and execution-interval
+  control jobs, because the remaining user-visible gap now clusters around
+  one shared parameter family and one shared group 13 presentation concept.
+- 2026-05-08: Investigation confirmed that `DEFAULTS.Ets`, wrapper defaults,
+  and group 13 projection are already aligned for `flwj` / `rflwj` and
+  `tmwj` / `rtmwj`; the remaining gap is limited to explicit invalid `ets`
+  values that currently pass through editor feedback without semantic
+  diagnostics.
+- 2026-05-08: Investigation also confirmed that `ParamFactory.ets` is reused
+  by additional wait or event job families beyond the two current partial
+  rows, so the proposed slice must stay scoped to file monitoring and
+  execution-interval control jobs unless a later approval explicitly broadens
+  that boundary.
+- 2026-05-08: Grouped `ets` timeout-action diagnostics now report explicit
+  invalid `ets` values on `flwj` / `rflwj` and `tmwj` / `rtmwj` through the
+  existing editor-feedback boundary. Shared allowed-value validation stays on
+  the current `buildSyntaxDiagnostics.ts` rule-array path, and raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation remain unchanged.
+- 2026-05-08: `PARAMETER_COVERAGE_MATRIX.md` now marks file monitoring as
+  aligned for the currently modeled `flwf`, `flwc`, `flwi`, `flco`, and `ets`
+  scope. Execution-interval control remains partial because `tmitv` / `etn`
+  validation and broader wait-job reconciliation are still deferred.
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   transfer-file explicit value-shape diagnostics implementation.
 - 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
@@ -498,27 +539,56 @@
   implementation.
 - 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after grouped
   transfer-file explicit value-shape diagnostics implementation.
+- 2026-05-08: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  `ets` timeout-action diagnostics implementation.
+- 2026-05-08: `rtk pnpm test` completed with exit code 0 after grouped `ets`
+  timeout-action diagnostics implementation; the VS Code harness emitted the
+  existing macOS `task_name_for_pid` codesign noise line.
+- 2026-05-08: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped `ets` timeout-action diagnostics implementation and emitted the
+  existing localhost dev-extension `package.nls.json` 404 noise.
+- 2026-05-08: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped `ets` timeout-action diagnostics implementation.
+- 2026-05-08: `rtk pnpm run lint:md` completed with exit code 0 after grouped
+  `ets` timeout-action diagnostics implementation.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-05-07
-- Approved scope: grouped transfer-file explicit value-shape diagnostics
-  through the existing editor-feedback boundary, limited to explicit `ts1` to
-  `ts4` and `td1` to `td4` values on UNIX/PC jobs, UNIX/PC custom jobs,
-  QUEUE jobs, and recovery QUEUE jobs when the value is neither a quoted
-  transfer-file string nor an already accepted macro-variable form, while
-  preserving raw parser output, domain wrapper values, normalized parameters,
-  unit-list projection, flow projection, and command generation. Parser
-  grammar, transfer-operation `topN` behavior, byte-length rules already
-  delivered, generated artifacts, dependency versions, configuration, and
-  `engines.vscode` remain out of scope.
+- Approved at: 2026-05-08
+- Approved scope: grouped explicit `ets` timeout-action diagnostics through
+  the existing editor-feedback boundary, limited to explicit `ets` values on
+  file monitoring jobs (`flwj` / `rflwj`) and execution-interval control jobs
+  (`tmwj` / `rtmwj`) that fall outside the documented JP1/AJS3 v13 set
+  `{kl|nr|wr|an}`, plus the smallest refactor needed to keep shared
+  allowed-value validation on the current `buildSyntaxDiagnostics.ts`
+  helper/rule-array path, while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. Parser grammar, domain default changes, unit-list
+  projection changes, `tmitv` / `etn` validation, broader wait-job
+  reconciliation, other `ets`-bearing unit families, generated artifacts,
+  dependency versions, configuration, and `engines.vscode` remain out of
+  scope.
 
-Current implementation gate: transfer-file explicit value-shape diagnostics
-are implemented and validated inside the recorded scope.
+Current implementation gate: grouped `ets` timeout-action diagnostics are
+implemented and validated inside the recorded scope.
 
 ## Prior Approval Evidence
 
+- 2026-05-08: User replied "Approved. Proceed with implementation." after the
+  grouped `ets` timeout-action diagnostics approval request. Approved changes
+  were limited to adding grouped application-level semantic diagnostics for
+  explicit invalid `ets` values on file monitoring jobs and
+  execution-interval control jobs through the existing editor-feedback
+  boundary, plus the smallest refactor needed to keep shared allowed-value
+  validation on the current `buildSyntaxDiagnostics.ts` helper/rule-array
+  path; preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation;
+  adding focused regression evidence; updating SDD tracking; and running
+  validation. Parser grammar, domain default changes, unit-list projection
+  changes, `tmitv` / `etn` validation, broader wait-job reconciliation, other
+  `ets`-bearing unit families, generated artifacts, configuration, dependency
+  versions, and `engines.vscode` were out of scope.
 - 2026-05-07: User replied "Approved. Proceed with implementation." after the
   grouped transfer-file explicit value-shape diagnostics approval request.
   Approved changes were limited to adding grouped application-level semantic

@@ -991,6 +991,96 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report event timeout action diagnostics for omitted defaults and valid explicit values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=file1,flwj,+0+0;",
+        "  el=file2,rflwj,+160+0;",
+        "  el=interval1,tmwj,+320+0;",
+        "  el=interval2,rtmwj,+480+0;",
+        "  unit=file1,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        "  }",
+        "  unit=file2,,jp1admin,;",
+        "  {",
+        "    ty=rflwj;",
+        "    ets=wr;",
+        "  }",
+        "  unit=interval1,,jp1admin,;",
+        "  {",
+        "    ty=tmwj;",
+        "  }",
+        "  unit=interval2,,jp1admin,;",
+        "  {",
+        "    ty=rtmwj;",
+        "    ets=an;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event timeout action diagnostics for explicit invalid values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=file1,flwj,+0+0;",
+        "  el=interval1,tmwj,+160+0;",
+        "  unit=file1,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        "    ets=xx;",
+        "  }",
+        "  unit=interval1,,jp1admin,;",
+        "  {",
+        "    ty=tmwj;",
+        "    ets=yy;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 2);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 3,
+          message:
+            "Event timeout action (ets) must be one of kl, nr, wr, or an.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 3,
+          message:
+            "Event timeout action (ets) must be one of kl, nr, wr, or an.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error"],
+    );
+  });
+
   test("does not report transfer-file diagnostics for valid explicit values and macro variables", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

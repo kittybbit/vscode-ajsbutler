@@ -133,6 +133,25 @@ JP1/AJS3 version 13 reference documents.
   `flwi` value is in the JP1/AJS3 v13 restricted range `1..9`, while
   preserving raw parser output, domain wrapper values, normalized parameters,
   unit-list projection, flow projection, and command generation.
+- Shared `ets` timeout-action diagnostics are approval-sensitive because
+  `ParamFactory.ets` and group 13 `eventTimeoutAction` projection are shared
+  across multiple wait or event job families, while only file monitoring and
+  execution-interval control jobs remain as feature-local partial rows. A
+  focused follow-up should stay inside application editor-feedback, report
+  explicit `ets` values outside the documented set `{kl|nr|wr|an}` for
+  `flwj` / `rflwj` and `tmwj` / `rtmwj`, include only the small helper
+  extraction needed to keep explicit allowed-value validation on the existing
+  `buildSyntaxDiagnostics.ts` rule-array path, and preserve raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation. Broader `ets`-bearing unit families,
+  `tmitv` or `etn` validation, and wait-job default reconciliation remain
+  separate approval-sensitive work.
+- Shared `ets` timeout-action diagnostics are aligned through application
+  editor-feedback for explicit `flwj` / `rflwj` and `tmwj` / `rtmwj` values
+  that fall outside `{kl|nr|wr|an}`, while raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation remain unchanged. Broader `ets`-bearing unit families and
+  `tmitv` / `etn` validation remain deferred.
 - Execution-interval control job defaults are approval-sensitive because
   JP1/AJS3 version 13 defines omitted `tmitv`, `etn`, and `ets` behavior for
   `tmwj` / `rtmwj`, while current code only has generic defaults for `etn` and
