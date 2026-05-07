@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Track the JP1/AJS3 version 13 alignment slice for execution-interval control
-job defaults and unit-list group 13 projection.
+Record the delivered JP1/AJS3 version 13 alignment status for
+execution-interval control job defaults and unit-list group 13 projection.
 
 ## Reference
 
@@ -18,26 +18,15 @@ The reference defines omitted values as:
 - `etn`: `n`
 - `ets`: `kl`
 
-## Current Behavior
+## Delivered Alignment
 
-- `Tmwj.tmitv` delegates to `ParamFactory.tmitv`, and `ParamFactory.tmitv`
-  currently has no default value.
-- `Tmwj.etn` and `Tmwj.ets` delegate to factory builders that already use
-  `DEFAULTS.Etn` and `DEFAULTS.Ets`.
-- Unit-list group 13 currently reads normalized raw values for `tmitv` and
-  `etn`.
-- Unit-list group 13 now uses default-aware `ets` projection only for file
-  monitoring jobs, not for execution-interval control jobs.
-
-## Proposed Scope
-
-After human approval, align execution-interval control job behavior by:
-
-- adding a `tmitv` default of `10` at the domain parameter boundary;
-- projecting omitted `tmitv`, `etn`, and `ets` defaults for `tmwj` / `rtmwj`
-  in unit-list group 13;
-- preserving explicit normalized values;
-- leaving non-execution-interval-control jobs unchanged.
+- `Tmwj.tmitv`, `Tmwj.etn`, and `Tmwj.ets` now resolve omitted values through
+  `DEFAULTS.Tmitv`, `DEFAULTS.Etn`, and `DEFAULTS.Ets` at the domain parameter
+  boundary.
+- Unit-list group 13 now projects omitted `tmitv`, `etn`, and `ets` defaults
+  for `tmwj` / `rtmwj`.
+- Explicit normalized values remain visible.
+- Non-execution-interval-control jobs remain unchanged.
 
 ## Non-Goals
 
@@ -49,14 +38,19 @@ After human approval, align execution-interval control job behavior by:
 - `engines.vscode` changes
 - broad wait-job default reconciliation outside `tmwj` / `rtmwj`
 
-## Impact
+## Evidence
 
-- Domain behavior changes for omitted `Tmwj.tmitv`, because the wrapper would
-  return `10` instead of no value.
-- Unit-list group 13 output changes for omitted execution-interval control job
-  `tmitv`, `etn`, and `ets`, because the table would display defaults instead
-  of empty cells.
-- Raw parser output and normalized key/value storage should remain unchanged.
+- `src/test/suite/parameterFactory.test.ts` verifies omitted `tmitv`, `etn`,
+  and `ets` defaults through the wrapper facade.
+- `src/test/suite/buildUnitListRemainingGroups.test.ts` verifies group 13
+  projection for omitted and explicit execution-interval control job values.
+- `src/test/suite/buildUnitListView.test.ts` keeps the row-view projection
+  path covered.
+
+## Remaining Gap
+
+- Range validation and broader wait-job default reconciliation remain outside
+  this delivered slice.
 
 ## Alternatives
 

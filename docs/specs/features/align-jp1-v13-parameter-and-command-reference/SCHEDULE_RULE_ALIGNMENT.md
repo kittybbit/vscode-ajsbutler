@@ -60,8 +60,9 @@ and `wt`.
   - Covered: repeatable schedule dates, rule numbers, root default `1,en`, and
     `sd=0,ud` preservation.
   - Seam: `parseScheduleDateValue`, `Sd`, and `resolveSdParameters`.
-  - Remaining gap: date and rule value ranges; product decision on collapsing
-    `sd=0,ud`.
+  - Remaining gap: explicit date and rule value ranges; `sd=0,ud` handling and
+    `SCHEDULELIMIT`-dependent year-range policy remain separate product-
+    decision follow-up items.
 - `ln`
   - Covered: nested jobnet parent-rule mapping; root-jobnet values ignored.
   - Seam: `parseParentScheduleRuleValue`, `Ln`, and the root-jobnet ignored
@@ -212,9 +213,12 @@ and `wt`.
   through `buildSyntaxDiagnostics.ts`. Explicit `cy=(n,w)` values now report a
   semantic diagnostic when the matching `sd` rule for the same schedule rule
   number uses open-day (`*`) or closed-day (`@`) scheduling semantics.
-- Revisit `sd` date/rule range policy separately because `sd=0,ud` handling
-  and the `SCHEDULELIMIT`-dependent year range still carry product-decision
-  notes outside this grouped compatibility slice.
+- Grouped explicit `sd` diagnostics are now aligned through
+  `buildSyntaxDiagnostics.ts`, including the documented valid `sd=0,ud`
+  special case and the documented `1994..SCHEDULELIMIT` year range using the
+  official default `SCHEDULELIMIT=2036` during this slice.
+- Revisit environment-specific `SCHEDULELIMIT` override support separately if
+  the repository later needs diagnostics against non-default site settings.
 - Revisit any broader schedule-rule cross-parameter invalidation separately if
   implementation investigation reveals rules beyond the approved `sd` / `cy`
   weekly-cycle restriction.
@@ -232,3 +236,17 @@ and `wt`.
 - The delivered slice intentionally does not broaden into `sd` date-range
   validation, `sd=0,ud` product policy, or broader schedule-rule
   cross-parameter invalidation.
+
+## Delivered SD Date/Rule Diagnostics
+
+- The editor-feedback boundary now reports semantic diagnostics for explicit
+  jobnet `sd` values when they use rule numbers outside `1..144`, except for
+  the documented valid special case `sd=0,ud`.
+- Explicit `sd` year values now report a semantic diagnostic when they fall
+  outside the documented `1994..SCHEDULELIMIT` range, using the official
+  default `SCHEDULELIMIT=2036` during this slice.
+- Explicit `sd` month/day forms now report a semantic diagnostic when they use
+  out-of-range month, day, end-of-month-offset, or weekday-occurrence values.
+- Diagnostics stay focused on explicit `sd` parameters and preserve raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation.

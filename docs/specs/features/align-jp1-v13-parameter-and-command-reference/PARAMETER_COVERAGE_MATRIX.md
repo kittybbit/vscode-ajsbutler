@@ -37,7 +37,11 @@ coverage.
   grouped range diagnostics are aligned for `ln`, `st`, `cy`, `shd`, `cftd`,
   `sy`, `ey`, `wc`, and `wt` through editor-feedback. Grouped `sd` / `cy`
   weekly-cycle compatibility for open-day and closed-day schedules is also
-  aligned through editor-feedback. `sd` date/rule range policy and any broader
+  aligned through editor-feedback. Grouped `sd` explicit rule/day diagnostics
+  are aligned through editor-feedback, preserving `sd=0,ud` as the documented
+  valid special case and enforcing the documented `1994..SCHEDULELIMIT` year
+  range with the official default `SCHEDULELIMIT=2036` in this slice.
+  Environment-specific `SCHEDULELIMIT` override support and any broader
   cross-parameter invalidation remain deferred. `wc` / `wt` effective-value
   pairing is aligned in the domain wrapper boundary and unit-list group 10
   projection.

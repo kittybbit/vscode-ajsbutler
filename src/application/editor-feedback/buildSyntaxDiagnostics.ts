@@ -1,5 +1,6 @@
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
+import { parseScheduleDateValue } from "../../domain/models/parameters/scheduleRuleHelpers";
 import type { Unit, UnitParameter } from "../../domain/values/Unit";
 
 export type SyntaxDiagnosticDto = {
@@ -9,6 +10,12 @@ export type SyntaxDiagnosticDto = {
   message: string;
   severity: "error";
 };
+
+export type BuildSyntaxDiagnosticsOptions = {
+  scheduleLimitYear?: number;
+};
+
+const DEFAULT_SCHEDULE_LIMIT_YEAR = 2036;
 
 type UnitParameterDiagnosticRule = {
   key: string;
@@ -264,6 +271,14 @@ type ParsedExplicitScheduleRuleValue = {
   value: string;
 };
 
+type ParsedExplicitScheduleDateValue = {
+  hasExplicitRuleNumber: boolean;
+  ruleNumber: number;
+  year?: number;
+  month?: number;
+  dayValue: string;
+};
+
 const parseExplicitScheduleRuleValue = (
   rawValue: string | undefined,
 ): ParsedExplicitScheduleRuleValue | undefined => {
@@ -285,6 +300,152 @@ const isValidScheduleRuleNumber = (
   parsedValue !== undefined &&
   (!parsedValue.hasExplicitRuleNumber ||
     (parsedValue.ruleNumber >= 1 && parsedValue.ruleNumber <= 144));
+
+const normalizeScheduleLimitYear = (
+  scheduleLimitYear: number | undefined,
+): number | undefined =>
+  Number.isInteger(scheduleLimitYear) &&
+  scheduleLimitYear !== undefined &&
+  scheduleLimitYear >= 2036 &&
+  scheduleLimitYear <= 2099
+    ? scheduleLimitYear
+    : undefined;
+
+const parseExplicitScheduleDateDiagnosticValue = (
+  rawValue: string | undefined,
+): ParsedExplicitScheduleDateValue | undefined => {
+  const parsed = parseScheduleDateValue(rawValue);
+  if (!parsed?.day) {
+    return undefined;
+  }
+
+  const yearMonthMatch = /^((\d{4})\/)?(\d{2})\/$/.exec(parsed.yearMonth ?? "");
+  return {
+    hasExplicitRuleNumber: /^\d{1,3},/.test(rawValue ?? ""),
+    ruleNumber: parsed.rule,
+    year: yearMonthMatch?.[2] ? Number(yearMonthMatch[2]) : undefined,
+    month: yearMonthMatch ? Number(yearMonthMatch[3]) : undefined,
+    dayValue: parsed.day,
+  };
+};
+
+const getCalendarMonthDayLimit = (
+  year: number | undefined,
+  month: number | undefined,
+): number => {
+  if (month === undefined) {
+    return 31;
+  }
+
+  if (year === undefined) {
+    return month === 2 ? 29 : new Date(2000, month, 0).getDate();
+  }
+
+  return new Date(year, month, 0).getDate();
+};
+
+const isValidScheduleDateYear = (
+  year: number | undefined,
+  scheduleLimitYear: number | undefined,
+): boolean =>
+  year === undefined ||
+  (year >= 1994 &&
+    (scheduleLimitYear === undefined || year <= scheduleLimitYear));
+
+const isValidScheduleDateMonth = (month: number | undefined): boolean =>
+  month === undefined || (month >= 1 && month <= 12);
+
+const isValidScheduleDateDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean => {
+  if (parsed.dayValue === "en") {
+    return parsed.month === undefined;
+  }
+
+  if (parsed.dayValue === "ud") {
+    return parsed.month === undefined;
+  }
+
+  const explicitDayMatch = /^(\d{2})$/.exec(parsed.dayValue);
+  if (explicitDayMatch) {
+    const day = Number(explicitDayMatch[1]);
+    return (
+      day >= 1 && day <= getCalendarMonthDayLimit(parsed.year, parsed.month)
+    );
+  }
+
+  const relativeDayMatch = /^([+*@])(\d{2})$/.exec(parsed.dayValue);
+  if (relativeDayMatch) {
+    const day = Number(relativeDayMatch[2]);
+    return day >= 1 && day <= 35;
+  }
+
+  const backwardDayMatch = /^([+*@])?b(?:-(\d{2}))?$/.exec(parsed.dayValue);
+  if (backwardDayMatch) {
+    const direction = backwardDayMatch[1];
+    const offset = backwardDayMatch[2]
+      ? Number(backwardDayMatch[2])
+      : undefined;
+
+    if (offset === undefined) {
+      return true;
+    }
+
+    if (direction) {
+      return offset >= 0 && offset <= 34;
+    }
+
+    return (
+      offset >= 0 &&
+      offset <= getCalendarMonthDayLimit(parsed.year, parsed.month) - 1
+    );
+  }
+
+  const weekdayMatch = /^\+(su|mo|tu|we|th|fr|sa)(?::(\d|b))?$/.exec(
+    parsed.dayValue,
+  );
+  if (weekdayMatch) {
+    const occurrence = weekdayMatch[2];
+    return (
+      occurrence === undefined ||
+      occurrence === "b" ||
+      (Number(occurrence) >= 1 && Number(occurrence) <= 5)
+    );
+  }
+
+  return false;
+};
+
+const isValidExplicitScheduleDate = (
+  parameter: UnitParameter,
+  scheduleLimitYear: number | undefined,
+): boolean => {
+  const parsed = parseExplicitScheduleDateDiagnosticValue(parameter.value);
+  if (!parsed) {
+    return false;
+  }
+
+  if (parsed.dayValue === "ud") {
+    return (
+      parsed.hasExplicitRuleNumber &&
+      parsed.ruleNumber === 0 &&
+      parsed.month === undefined
+    );
+  }
+
+  if (
+    parsed.hasExplicitRuleNumber &&
+    (parsed.ruleNumber < 1 || parsed.ruleNumber > 144)
+  ) {
+    return false;
+  }
+
+  return (
+    isValidScheduleDateMonth(parsed.month) &&
+    isValidScheduleDateYear(parsed.year, scheduleLimitYear) &&
+    isValidScheduleDateDayToken(parsed)
+  );
+};
 
 const parseHourMinuteValue = (
   rawValue: string,
@@ -709,9 +870,24 @@ const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 
 const buildScheduleRuleDiagnostics = (
   rootUnits: Unit[],
+  options: BuildSyntaxDiagnosticsOptions,
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, scheduleRuleDiagnosticTargetTypes).flatMap(
     (unit) => [
+      ...findParameters(unit, "sd").flatMap((parameter) =>
+        isValidExplicitScheduleDate(
+          parameter,
+          normalizeScheduleLimitYear(options.scheduleLimitYear) ??
+            DEFAULT_SCHEDULE_LIMIT_YEAR,
+        )
+          ? []
+          : [
+              buildDiagnostic(
+                parameter,
+                "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+              ),
+            ],
+      ),
       ...collectRuleDiagnostics(unit, [
         {
           key: "ln",
@@ -930,6 +1106,7 @@ const buildEventReceivingDiagnostics = (
 
 export const buildSyntaxDiagnostics = (
   content: string,
+  options: BuildSyntaxDiagnosticsOptions = {},
 ): SyntaxDiagnosticDto[] => {
   const result = parseAjs(content);
   const syntaxDiagnostics = result.errors.map((error) => ({
@@ -945,7 +1122,7 @@ export const buildSyntaxDiagnostics = (
 
   return [
     ...syntaxDiagnostics,
-    ...buildScheduleRuleDiagnostics(result.rootUnits),
+    ...buildScheduleRuleDiagnostics(result.rootUnits, options),
     ...buildJobEndJudgmentDiagnostics(result.rootUnits),
     ...buildFileMonitoringDiagnostics(result.rootUnits),
     ...buildTransferOperationDiagnostics(result.rootUnits),

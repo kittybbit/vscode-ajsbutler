@@ -120,6 +120,17 @@ Scenario: Weekly schedule cycles must not use open-day or closed-day dates
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Schedule-rule execution-start dates must stay within documented rule
+  and day ranges
+  Given a syntactically valid JP1/AJS document with a jobnet
+  And explicit `sd` uses a schedule rule number outside `1..144`
+  Or explicit `sd` uses a documented day form with a day value outside the
+    JP1/AJS3 v13 allowed range
+  Or explicit `sd` uses a year outside `1994..SCHEDULELIMIT`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Event arrival check requires an event destination host
   Given a syntactically valid JP1/AJS document with a JP1 event sending job
   And effective `evsrt` is event-arrival checking enabled

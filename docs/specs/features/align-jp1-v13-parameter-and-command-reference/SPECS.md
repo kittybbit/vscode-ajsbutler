@@ -88,6 +88,20 @@ JP1/AJS3 version 13 reference documents.
   number uses open-day (`*`) or closed-day (`@`) scheduling semantics, and
   preserve raw parser output, domain wrapper values, normalized parameters,
   unit-list projection, flow projection, and command generation.
+- Schedule-rule `sd` explicit date/rule diagnostics remain approval-sensitive
+  because current behavior accepts supported `sd` value shapes through
+  `parseScheduleDateValue`, but editor feedback does not yet distinguish
+  explicit out-of-range schedule-rule numbers or day values. A focused
+  follow-up should stay inside application editor-feedback, reuse the existing
+  schedule-rule parsing seam, report explicit `sd` parameters when rule
+  numbers fall outside `1..144` or day tokens fall outside the documented
+  JP1/AJS3 v13 day ranges, and preserve raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation. The approved expanded scope may also keep `sd=0,ud` as
+  the one valid rule-`0` special case and may enforce the documented
+  `1994..SCHEDULELIMIT` year range using the official default
+  `SCHEDULELIMIT=2036` during this slice, as long as parser output, wrapper
+  values, normalized parameters, and projection boundaries remain unchanged.
 - Unit-list group 10 `wc` / `wt` projection is a separate approval-sensitive
   boundary from domain interpretation because it is user-visible table output.
   If approved, it should consume the existing paired effective-value semantics
