@@ -117,6 +117,20 @@
       `sd` / `cy` combinations, including weekly cycles on open-day or
       closed-day schedules
 - [x] Run required code-change validation after implementation
+- [x] Re-group the remaining JP1/AJS v13 parameter-alignment backlog around
+      shared filename-like, byte-length, macro-variable, and
+      invalid-combination rules after the delivered `sd` / `cy` slice
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      generic parameter-rule diagnostics
+- [x] Implement grouped generic parameter-rule diagnostics only after approval
+- [x] Refactor `buildSyntaxDiagnostics.ts` within the approved scope so the
+      new rules stay on the existing generic-rule path instead of creating a
+      separate rule layer
+- [x] Add focused regression evidence for shared byte-length, filename-like,
+      macro-variable-aware, and invalid-combination validation in the
+      approved parameter families
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -391,24 +405,57 @@
   parameter-alignment candidate should be re-selected from the remaining
   partial or deferred gaps using the same user-meaningful job-type or
   parameter-family grouping rule.
+- 2026-05-07: Remaining partial and deferred JP1/AJS v13 gaps were re-checked
+  against the coverage matrix and existing editor-feedback seam. The next
+  candidate is now re-grouped around shared filename-like, byte-length,
+  macro-variable, and invalid-combination rules rather than another
+  single-job follow-up, because the remaining gaps cluster more strongly by
+  validation-rule shape than by unit family.
+- 2026-05-07: The approved-scope draft was refined so this slice includes the
+  small refactoring needed to keep new generic rules in the existing
+  `buildSyntaxDiagnostics.ts` helper/rule-array structure, rather than adding
+  a separate implementation path beside the current general rules.
+- 2026-05-07: Grouped generic parameter-rule diagnostics now keep transfer
+  operation and QUEUE transfer-file validation on the existing
+  `buildSyntaxDiagnostics.ts` helper/rule-array path. Shared explicit
+  byte-length validation is reused for current `1..255` rules and new
+  `1..511` transfer-file rules; focused diagnostics now report explicit
+  `tdN` without `tsN`, explicit `topN` without `tsN`, and explicit out-of-
+  range transfer file values while preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-07
-- Approved scope: grouped schedule-rule `sd` / `cy` compatibility diagnostics
-  for jobnets through the existing editor-feedback boundary, limited to
-  reporting explicit `cy=(n,w)` weekly-cycle values when the matching `sd`
-  rule for the same schedule rule number uses open-day (`*`) or closed-day
-  (`@`) scheduling semantics, while preserving raw parser output, domain
-  wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation.
+- Approved scope: grouped generic parameter-rule diagnostics through the
+  existing editor-feedback boundary, limited to shared filename-like,
+  byte-length, macro-variable-aware, and invalid-combination validation for
+  the remaining deferred coverage-matrix rows, including the small
+  refactoring needed to keep those rules on the existing
+  `buildSyntaxDiagnostics.ts` generic-rule path, while preserving raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation.
 
-Current implementation gate: grouped schedule-rule `sd` / `cy` compatibility
-diagnostics are approved and implemented inside the recorded scope.
+Current implementation gate: generic parameter-rule diagnostics are approved
+inside the recorded scope.
 
 ## Prior Approval Evidence
 
+- 2026-05-07: User replied "Approved. Proceed with implementation." after the
+  grouped generic parameter-rule diagnostics approval request. Approved
+  changes were limited to adding grouped application-level semantic
+  diagnostics for the remaining shared filename-like, byte-length, and
+  invalid-combination rules through the existing editor-feedback boundary;
+  including the small refactoring needed to keep those rules on the existing
+  `buildSyntaxDiagnostics.ts` generic-rule path; preserving documented
+  macro-variable and regular-expression allowance where already accepted;
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation; adding
+  focused regression evidence; updating SDD tracking; and running validation.
+  Parser grammar, domain default changes, generated artifacts, configuration,
+  dependency versions, and `engines.vscode` were out of scope.
 - 2026-05-07: User replied "Approved. Proceed with implementation." after the
   grouped schedule-rule `sd` / `cy` compatibility diagnostics approval
   request. Approved changes were limited to adding grouped application-level
@@ -667,6 +714,17 @@ diagnostics are approved and implemented inside the recorded scope.
   regression evidence.
 
 ## Validation
+
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  generic parameter-rule diagnostics implementation
+- 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped generic
+  parameter-rule diagnostics implementation; the VS Code harness emitted the
+  existing macOS `task_name_for_pid` codesign noise line
+- 2026-05-07: `rtk pnpm run test:web` completed with exit code 0 after grouped
+  generic parameter-rule diagnostics implementation and emitted the existing
+  localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-07: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped generic parameter-rule diagnostics implementation
 
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   schedule-rule `sd` / `cy` compatibility diagnostics implementation

@@ -227,6 +227,17 @@ JP1/AJS3 version 13 reference documents.
   regular-expression and macro-variable allowances visible, and preserve raw
   parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation.
+- The remaining generic validation backlog is approval-sensitive because
+  multiple coverage-matrix rows now defer the same families of rules:
+  filename-like value checks, byte-length limits, macro-variable-aware string
+  handling, and invalid combinations. The next grouped slice should stay
+  inside application editor-feedback, reuse or extract shared explicit-value
+  validators only where that reduces duplication in
+  `buildSyntaxDiagnostics.ts`, include the small refactoring needed so the new
+  rules do not split away from the existing generic-rule path, and keep
+  per-family macro-variable allowances explicit so shared helpers do not
+  accidentally collapse distinct JP1/AJS3 v13 rules into one generic string
+  policy.
 
 ## Reference Documents
 

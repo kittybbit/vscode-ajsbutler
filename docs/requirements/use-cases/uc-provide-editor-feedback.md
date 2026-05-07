@@ -174,6 +174,23 @@ Scenario: Event host values must stay within documented byte-length rules
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
+
+Scenario: Shared filename-like rules stay explicit across parameter families
+  Given a syntactically valid JP1/AJS document with a parameter family that
+    uses documented filename-like or host-like values
+  And an explicit value is outside that family's JP1/AJS3 v13 byte-length or
+    invalid-combination rule
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
+Scenario: Shared string diagnostics preserve documented macro-variable allowance
+  Given a syntactically valid JP1/AJS document with a parameter family that
+    explicitly allows macro-variable or regular-expression forms
+  When editor feedback is requested
+  Then application-level diagnostic DTOs do not reject the value only because
+    it uses an allowed explicit string form
+  And raw parser output remains available to downstream consumers
 ```
 
 ## Acceptance Notes

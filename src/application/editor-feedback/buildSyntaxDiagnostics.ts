@@ -29,6 +29,16 @@ const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
 const eventSendingDiagnosticTargetTypes = new Set(["evsj", "revsj"]);
 const eventReceivingDiagnosticTargetTypes = new Set(["evwj", "revwj"]);
 const scheduleRuleDiagnosticTargetTypes = new Set(["g", "n"]);
+const transferOperationDiagnosticTargetTypes = new Set([
+  "j",
+  "rj",
+  "pj",
+  "rp",
+  "cj",
+  "rcj",
+]);
+const queueTransferFileDiagnosticTargetTypes = new Set(["qj", "rq"]);
+const transferFileIndexes = [1, 2, 3, 4] as const;
 
 const flattenUnits = (units: Unit[]): Unit[] =>
   units.reduce<Unit[]>(
@@ -72,6 +82,28 @@ const buildExplicitDecimalRangeRule = (
   message,
   isInvalid: (parameter) =>
     parseExplicitDecimalInRange(parameter, minimum, maximum) === undefined,
+});
+
+const buildExplicitByteLengthRule = (
+  key: string,
+  minimum: number,
+  maximum: number,
+  message: string,
+): UnitParameterDiagnosticRule => ({
+  key,
+  message,
+  isInvalid: (parameter) =>
+    !isValidExplicitByteLengthValue(parameter, minimum, maximum),
+});
+
+const buildRequiredParameterRule = (
+  key: string,
+  requiredKey: string,
+  message: string,
+): UnitParameterDiagnosticRule => ({
+  key,
+  message,
+  isInvalid: (_parameter, unit) => !findParameter(unit, requiredKey),
 });
 
 const parseExplicitDecimalInRange = (
@@ -172,8 +204,10 @@ const getByteLength = (value: string): number =>
 
 const hasWildcard = (value: string): boolean => value.includes("*");
 
-const isValidExplicitFileMonitoringFileName = (
+const isValidExplicitByteLengthValue = (
   parameter: UnitParameter | undefined,
+  minimum: number,
+  maximum: number,
 ): boolean => {
   const rawValue = parameter?.value;
   if (rawValue === undefined) {
@@ -181,20 +215,16 @@ const isValidExplicitFileMonitoringFileName = (
   }
 
   const byteLength = getByteLength(rawValue);
-  return byteLength >= 1 && byteLength <= 255;
+  return byteLength >= minimum && byteLength <= maximum;
 };
+
+const isValidExplicitFileMonitoringFileName = (
+  parameter: UnitParameter | undefined,
+): boolean => isValidExplicitByteLengthValue(parameter, 1, 255);
 
 const isValidExplicitEventHostValue = (
   parameter: UnitParameter | undefined,
-): boolean => {
-  const rawValue = parameter?.value;
-  if (rawValue === undefined) {
-    return false;
-  }
-
-  const byteLength = getByteLength(rawValue);
-  return byteLength >= 1 && byteLength <= 255;
-};
+): boolean => isValidExplicitByteLengthValue(parameter, 1, 255);
 
 const isValidExplicitFileMonitoringInterval = (
   parameter: UnitParameter | undefined,
@@ -525,6 +555,51 @@ const jobEndJudgmentNumericRangeRules = [
   ),
 ] as const;
 
+const transferFileByteLengthRules: readonly UnitParameterDiagnosticRule[] =
+  transferFileIndexes.flatMap((index) => [
+    buildExplicitByteLengthRule(
+      `ts${index}`,
+      1,
+      511,
+      `Transfer source file name (ts${index}) must be between 1 and 511 bytes.`,
+    ),
+    buildExplicitByteLengthRule(
+      `td${index}`,
+      1,
+      511,
+      `Transfer destination file name (td${index}) must be between 1 and 511 bytes.`,
+    ),
+  ]);
+
+const transferOperationDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+  [
+    ...transferFileByteLengthRules,
+    ...transferFileIndexes.flatMap((index) => [
+      buildRequiredParameterRule(
+        `td${index}`,
+        `ts${index}`,
+        `Transfer destination file name (td${index}) requires transfer source file name (ts${index}).`,
+      ),
+      buildRequiredParameterRule(
+        `top${index}`,
+        `ts${index}`,
+        `Transfer operation (top${index}) requires transfer source file name (ts${index}).`,
+      ),
+    ]),
+  ];
+
+const queueTransferFileDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+  [
+    ...transferFileByteLengthRules,
+    ...transferFileIndexes.map((index) =>
+      buildRequiredParameterRule(
+        `td${index}`,
+        `ts${index}`,
+        `Transfer destination file name (td${index}) requires transfer source file name (ts${index}).`,
+      ),
+    ),
+  ];
+
 const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
   {
     key: "flwf",
@@ -810,6 +885,20 @@ const buildFileMonitoringDiagnostics = (
     (unit) => collectRuleDiagnostics(unit, fileMonitoringDiagnosticRules),
   );
 
+const buildTransferOperationDiagnostics = (
+  rootUnits: Unit[],
+): SyntaxDiagnosticDto[] =>
+  findUnitsByTypes(rootUnits, transferOperationDiagnosticTargetTypes).flatMap(
+    (unit) => collectRuleDiagnostics(unit, transferOperationDiagnosticRules),
+  );
+
+const buildQueueTransferFileDiagnostics = (
+  rootUnits: Unit[],
+): SyntaxDiagnosticDto[] =>
+  findUnitsByTypes(rootUnits, queueTransferFileDiagnosticTargetTypes).flatMap(
+    (unit) => collectRuleDiagnostics(unit, queueTransferFileDiagnosticRules),
+  );
+
 const buildEventSendingDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
@@ -859,6 +948,8 @@ export const buildSyntaxDiagnostics = (
     ...buildScheduleRuleDiagnostics(result.rootUnits),
     ...buildJobEndJudgmentDiagnostics(result.rootUnits),
     ...buildFileMonitoringDiagnostics(result.rootUnits),
+    ...buildTransferOperationDiagnostics(result.rootUnits),
+    ...buildQueueTransferFileDiagnostics(result.rootUnits),
     ...buildEventSendingDiagnostics(result.rootUnits),
     ...buildEventReceivingDiagnostics(result.rootUnits),
   ];

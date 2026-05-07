@@ -53,8 +53,11 @@ coverage.
   `transferOperationHelpers.ts` and `transferOperationParameterBuilders.ts`
 - Evidence: `parameterHelpers.test.ts` and `parameterFactory.test.ts`
 - Remaining gap:
-  filename, byte-length, macro-variable, and invalid-combination validation
-  remain deferred
+  editor-feedback now aligns `tsN` / `tdN` byte-length diagnostics and
+  `tdN` / `topN` source-file dependency diagnostics for the currently modeled
+  transfer-operation parameters. Full filename/path-shape validation and
+  macro-variable syntax validation remain deferred under
+  `GENERIC_PARAMETER_RULE_ALIGNMENT.md`
 
 ### QUEUE Transfer Files
 
@@ -64,8 +67,12 @@ coverage.
 - Owning seam: `Qj.ts` and `ParameterFactory.ts`
 - Evidence: `parameterFactory.test.ts`
 - Remaining gap:
-  group 15 unit-type-aware projection now hides `topN` on QUEUE jobs; byte
-  length, macro-variable, and invalid-combination validation remain deferred
+  group 15 unit-type-aware projection now hides `topN` on QUEUE jobs.
+  Editor-feedback now aligns `tsN` / `tdN` byte-length diagnostics and `tdN`
+  source-file dependency diagnostics for the currently modeled QUEUE
+  transfer-file parameters. Full filename/path-shape validation and
+  macro-variable syntax validation remain deferred under
+  `GENERIC_PARAMETER_RULE_ALIGNMENT.md`
 
 ### Job End Judgment
 
@@ -127,7 +134,9 @@ coverage.
   editor-feedback, and `flwf` / `flwi` target-pattern validation is aligned
   through editor-feedback for byte-length, numeric range, and
   wildcard-with-short-interval rules. `ets` timeout behavior remains
-  deferred.
+  deferred. The delivered file-monitoring diagnostics now serve as one reuse
+  reference for the shared generic-rule slice recorded in
+  `GENERIC_PARAMETER_RULE_ALIGNMENT.md`.
 
 ### Execution-Interval Control Job Defaults
 
