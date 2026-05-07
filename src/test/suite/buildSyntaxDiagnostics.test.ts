@@ -52,6 +52,28 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("does not report sd diagnostics for valid explicit dates including sd=0,ud", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  sd=0,ud;",
+        "  sd=1,1994/01/01;",
+        "  sd=2,2036/12/31;",
+        "  sd=3,02/29;",
+        "  sd=4,+su:b;",
+        "  sd=5,b-30;",
+        "  sd=6,@35;",
+        "}",
+        "",
+      ].join("\n"),
+      { scheduleLimitYear: 2036 },
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
   test("reports schedule-rule diagnostics for explicit out-of-range values", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
@@ -155,6 +177,127 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => diagnostic.severity),
       [
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error",
+      ],
+    );
+  });
+
+  test("reports sd diagnostics for explicit out-of-range rule and date values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  sd=ud;",
+        "  sd=0,15;",
+        "  sd=1,1993/12/31;",
+        "  sd=2,2037/01/01;",
+        "  sd=3,2025/02/29;",
+        "  sd=4,04/31;",
+        "  sd=5,+36;",
+        "  sd=6,+su:6;",
+        "  sd=7,b-31;",
+        "  sd=8,2026/13/01;",
+        "  sd=0,2026/04/ud;",
+        "}",
+        "",
+      ].join("\n"),
+      { scheduleLimitYear: 2036 },
+    );
+
+    assert.strictEqual(diagnostics.length, 10);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 4,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 5,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 6,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 7,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 8,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 9,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 10,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 11,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 12,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+        {
+          line: 13,
+          column: 2,
+          length: 2,
+          message:
+            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      [
+        "error",
         "error",
         "error",
         "error",

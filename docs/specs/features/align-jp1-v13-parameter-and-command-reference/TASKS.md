@@ -131,6 +131,21 @@
       macro-variable-aware, and invalid-combination validation in the
       approved parameter families
 - [x] Run required code-change validation after implementation
+- [x] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
+      delivered generic-rule slice and select the next candidate using a
+      user-meaningful job-type or parameter-family grouping rule
+- [x] Sync the stale execution-interval alignment note to the already
+      delivered runtime and regression evidence so the remaining backlog does
+      not point at completed work
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      schedule-rule `sd` explicit date/rule diagnostics
+- [x] Implement grouped schedule-rule `sd` explicit date/rule diagnostics
+      only after approval
+- [x] Add focused regression evidence for explicit out-of-range `sd` rule
+      numbers and day values while preserving raw parser output and the
+      approved `sd=0,ud` special-case boundary
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -424,25 +439,56 @@
   range transfer file values while preserving raw parser output, domain
   wrapper values, normalized parameters, unit-list projection, flow
   projection, and command generation.
+- 2026-05-07: Remaining partial and deferred JP1/AJS v13 gaps were re-checked
+  again after the delivered generic-rule slice. The next recommended
+  approval-gated candidate is grouped schedule-rule `sd` explicit date/rule
+  diagnostics because it stays inside the already-modeled jobnet schedule
+  family, reuses `parseScheduleDateValue`, and is more user-meaningful than
+  smaller default-only follow-ups.
+- 2026-05-07: Investigation confirmed that execution-interval control job
+  defaults and group 13 projection are already delivered in runtime and
+  regression tests. `EXECUTION_INTERVAL_CONTROL_JOB_ALIGNMENT.md` was stale
+  and is now treated as documentation-sync work, not as remaining backlog.
+- 2026-05-07: User approved an expanded scope for the `sd` follow-up so it can
+  keep `sd=0,ud` as the documented valid special case and enforce the
+  `1994..SCHEDULELIMIT` year range using the official default value during
+  this slice, instead of leaving those decisions outside the slice.
+- 2026-05-07: Grouped schedule-rule `sd` diagnostics now report explicit
+  invalid rule/day values on jobnets, preserve `sd=0,ud` as the one valid
+  rule-`0` special case, and enforce the documented `1994..SCHEDULELIMIT`
+  year range using the official default value `2036`. Raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-07
-- Approved scope: grouped generic parameter-rule diagnostics through the
-  existing editor-feedback boundary, limited to shared filename-like,
-  byte-length, macro-variable-aware, and invalid-combination validation for
-  the remaining deferred coverage-matrix rows, including the small
-  refactoring needed to keep those rules on the existing
-  `buildSyntaxDiagnostics.ts` generic-rule path, while preserving raw parser
-  output, domain wrapper values, normalized parameters, unit-list projection,
-  flow projection, and command generation.
+- Approved scope: grouped schedule-rule `sd` explicit date/rule diagnostics
+  through the existing editor-feedback boundary, limited to explicit
+  out-of-range schedule-rule numbers and day values on jobnets, while
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation. Expanded
+  approval also includes preserving `sd=0,ud` as the documented valid special
+  case and enforcing the documented `1994..SCHEDULELIMIT` year upper bound
+  using the official default value `2036` for this slice. Parser grammar,
+  schedule-rule projection behavior, unrelated domain default behavior,
+  generated artifacts, dependency versions, and `engines.vscode` remain out
+  of scope.
 
-Current implementation gate: generic parameter-rule diagnostics are approved
-inside the recorded scope.
+Current implementation gate: schedule-rule `sd` explicit date/rule
+diagnostics are approved inside the recorded expanded scope.
 
 ## Prior Approval Evidence
 
+- 2026-05-07: User replied
+  "`sd=0,ud と SCHEDULELIMIT 依存 year range も含めて拡張スコープで承認します`"
+  after the follow-up scope discussion. Approved changes were broadened to
+  include the documented valid `sd=0,ud` special case and the documented
+  `1994..SCHEDULELIMIT` year-range rule, interpreted with the official
+  default value `2036` for this slice, while preserving raw parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation.
 - 2026-05-07: User replied "Approved. Proceed with implementation." after the
   grouped generic parameter-rule diagnostics approval request. Approved
   changes were limited to adding grouped application-level semantic
@@ -760,6 +806,21 @@ inside the recorded scope.
   docs-only event-host regrouping investigation
 - 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after the
   docs-only event-host regrouping investigation
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  schedule-rule `sd` explicit date/rule diagnostics implementation
+- 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
+  schedule-rule `sd` explicit date/rule diagnostics implementation; the VS
+  Code harness emitted the existing macOS `task_name_for_pid` codesign noise
+  line
+- 2026-05-07: `rtk pnpm run test:web` completed with exit code 0 after grouped
+  schedule-rule `sd` explicit date/rule diagnostics implementation and
+  emitted the existing localhost dev-extension `package.nls.json` 404 plus
+  shutdown-time `ECONNRESET` / premature-close noise
+- 2026-05-07: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped schedule-rule `sd` explicit date/rule diagnostics
+  implementation
+- 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after grouped
+  schedule-rule `sd` explicit date/rule diagnostics implementation
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   job end-judgment threshold-ordering diagnostics implementation
 - 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped job
