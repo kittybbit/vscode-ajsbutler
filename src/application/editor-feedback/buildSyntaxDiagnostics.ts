@@ -237,6 +237,23 @@ const isValidExplicitFileMonitoringInterval = (
   parameter: UnitParameter | undefined,
 ): boolean => parseExplicitDecimalInRange(parameter, 1, 600) !== undefined;
 
+const isExplicitMacroVariable = (value: string): boolean =>
+  /^\?[^?\r\n]+\?$/.test(value);
+
+const isQuotedStringLiteral = (value: string): boolean =>
+  /^"(?:\\.|[^"\\])*"$/.test(value);
+
+const isValidExplicitTransferFileValue = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue) {
+    return false;
+  }
+
+  return isQuotedStringLiteral(rawValue) || isExplicitMacroVariable(rawValue);
+};
+
 const hasInvalidWildcardWithShortMonitoringInterval = (
   parameter: UnitParameter,
   unit: Unit,
@@ -732,9 +749,24 @@ const transferFileByteLengthRules: readonly UnitParameterDiagnosticRule[] =
     ),
   ]);
 
+const transferFileValueShapeRules: readonly UnitParameterDiagnosticRule[] =
+  transferFileIndexes.flatMap((index) => [
+    {
+      key: `ts${index}`,
+      message: `Transfer source file name (ts${index}) must be a quoted transfer-file value or macro-variable form.`,
+      isInvalid: (parameter) => !isValidExplicitTransferFileValue(parameter),
+    },
+    {
+      key: `td${index}`,
+      message: `Transfer destination file name (td${index}) must be a quoted transfer-file value or macro-variable form.`,
+      isInvalid: (parameter) => !isValidExplicitTransferFileValue(parameter),
+    },
+  ]);
+
 const transferOperationDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
   [
     ...transferFileByteLengthRules,
+    ...transferFileValueShapeRules,
     ...transferFileIndexes.flatMap((index) => [
       buildRequiredParameterRule(
         `td${index}`,
@@ -752,6 +784,7 @@ const transferOperationDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
 const queueTransferFileDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
   [
     ...transferFileByteLengthRules,
+    ...transferFileValueShapeRules,
     ...transferFileIndexes.map((index) =>
       buildRequiredParameterRule(
         `td${index}`,

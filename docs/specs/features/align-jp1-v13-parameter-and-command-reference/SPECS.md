@@ -252,6 +252,16 @@ JP1/AJS3 version 13 reference documents.
   per-family macro-variable allowances explicit so shared helpers do not
   accidentally collapse distinct JP1/AJS3 v13 rules into one generic string
   policy.
+- Transfer-file `tsN` / `tdN` string-shape diagnostics are approval-sensitive
+  because current behavior preserves arbitrary explicit bare strings such as
+  `ts1=source-1;` as raw parsed values without editor feedback, even though
+  the currently modeled wrapper comments document quoted transfer-file values.
+  A focused follow-up should stay inside application editor-feedback, report
+  explicit transfer-file values on UNIX/PC, UNIX/PC custom, and QUEUE-family
+  units when they are neither quoted transfer-file strings nor already
+  accepted macro-variable forms, and preserve raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation.
 
 ## Reference Documents
 

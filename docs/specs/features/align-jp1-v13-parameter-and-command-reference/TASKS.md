@@ -146,6 +146,17 @@
       numbers and day values while preserving raw parser output and the
       approved `sd=0,ud` special-case boundary
 - [x] Run required code-change validation after implementation
+- [x] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
+      delivered schedule-rule `sd` slice and re-select the next candidate
+      using the same user-meaningful grouping rule
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      transfer-file explicit value-shape diagnostics
+- [x] Implement grouped transfer-file explicit value-shape diagnostics only
+      after approval
+- [x] Add focused regression evidence for quoted transfer-file values,
+      accepted macro-variable forms, and explicit bare-string violations
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -459,28 +470,67 @@
   year range using the official default value `2036`. Raw parser output,
   domain wrapper values, normalized parameters, unit-list projection, flow
   projection, and command generation remain unchanged.
+- 2026-05-07: Remaining partial and deferred JP1/AJS v13 gaps were re-checked
+  after the delivered `sd` diagnostics slice. The next recommended
+  approval-gated candidate is grouped transfer-file explicit value-shape
+  diagnostics for `tsN` / `tdN`, because it stays inside the existing
+  editor-feedback generic-rule path, reuses the already-delivered transfer
+  byte-length and dependency seams, and is more user-meaningful than smaller
+  default-only follow-ups.
+- 2026-05-07: Grouped transfer-file explicit value-shape diagnostics now
+  report explicit `tsN` / `tdN` bare strings on UNIX/PC, UNIX/PC custom,
+  QUEUE, and recovery QUEUE jobs when the value is neither a quoted
+  transfer-file string nor an accepted macro-variable form. Existing
+  byte-length and invalid-combination diagnostics remain on the same generic
+  rule path, and raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation
+  remain unchanged.
+- 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  transfer-file explicit value-shape diagnostics implementation.
+- 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
+  transfer-file explicit value-shape diagnostics implementation; the VS Code
+  harness emitted the existing macOS `task_name_for_pid` codesign noise line.
+- 2026-05-07: `rtk pnpm run test:web` completed with exit code 0 after grouped
+  transfer-file explicit value-shape diagnostics implementation and emitted
+  the existing localhost dev-extension `package.nls.json` 404 noise.
+- 2026-05-07: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped transfer-file explicit value-shape diagnostics
+  implementation.
+- 2026-05-07: `rtk pnpm run lint:md` completed with exit code 0 after grouped
+  transfer-file explicit value-shape diagnostics implementation.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-05-07
-- Approved scope: grouped schedule-rule `sd` explicit date/rule diagnostics
-  through the existing editor-feedback boundary, limited to explicit
-  out-of-range schedule-rule numbers and day values on jobnets, while
+- Approved scope: grouped transfer-file explicit value-shape diagnostics
+  through the existing editor-feedback boundary, limited to explicit `ts1` to
+  `ts4` and `td1` to `td4` values on UNIX/PC jobs, UNIX/PC custom jobs,
+  QUEUE jobs, and recovery QUEUE jobs when the value is neither a quoted
+  transfer-file string nor an already accepted macro-variable form, while
   preserving raw parser output, domain wrapper values, normalized parameters,
-  unit-list projection, flow projection, and command generation. Expanded
-  approval also includes preserving `sd=0,ud` as the documented valid special
-  case and enforcing the documented `1994..SCHEDULELIMIT` year upper bound
-  using the official default value `2036` for this slice. Parser grammar,
-  schedule-rule projection behavior, unrelated domain default behavior,
-  generated artifacts, dependency versions, and `engines.vscode` remain out
-  of scope.
+  unit-list projection, flow projection, and command generation. Parser
+  grammar, transfer-operation `topN` behavior, byte-length rules already
+  delivered, generated artifacts, dependency versions, configuration, and
+  `engines.vscode` remain out of scope.
 
-Current implementation gate: schedule-rule `sd` explicit date/rule
-diagnostics are approved inside the recorded expanded scope.
+Current implementation gate: transfer-file explicit value-shape diagnostics
+are implemented and validated inside the recorded scope.
 
 ## Prior Approval Evidence
 
+- 2026-05-07: User replied "Approved. Proceed with implementation." after the
+  grouped transfer-file explicit value-shape diagnostics approval request.
+  Approved changes were limited to adding grouped application-level semantic
+  diagnostics for explicit `ts1` to `ts4` and `td1` to `td4` values when the
+  value is neither a quoted transfer-file string nor an already accepted
+  macro-variable form, through the existing editor-feedback boundary;
+  preserving raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation; adding
+  focused regression evidence; updating SDD tracking; and running validation.
+  Parser grammar, transfer-operation `topN` behavior, byte-length rules
+  already delivered, generated artifacts, dependency versions,
+  configuration, and `engines.vscode` were out of scope.
 - 2026-05-07: User replied
   "`sd=0,ud と SCHEDULELIMIT 依存 year range も含めて拡張スコープで承認します`"
   after the follow-up scope discussion. Approved changes were broadened to
