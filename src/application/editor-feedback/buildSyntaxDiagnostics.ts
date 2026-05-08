@@ -857,7 +857,20 @@ const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 ];
 
 const executionIntervalControlDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
-  [...eventTimeoutActionDiagnosticRules];
+  [
+    buildExplicitDecimalRangeRule(
+      "tmitv",
+      1,
+      1440,
+      "Execution interval (tmitv) must be between 1 and 1440.",
+    ),
+    buildExplicitAllowedValuesRule(
+      "etn",
+      new Set(["y", "n"]),
+      "End timing (etn) must be y or n.",
+    ),
+    ...eventTimeoutActionDiagnosticRules,
+  ];
 
 const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
   {

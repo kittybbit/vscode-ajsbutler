@@ -1081,6 +1081,99 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report execution-interval control diagnostics for omitted defaults and valid explicit values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=intervalDefault,tmwj,+0+0;",
+        "  el=intervalExplicit,rtmwj,+160+0;",
+        "  unit=intervalDefault,,jp1admin,;",
+        "  {",
+        "    ty=tmwj;",
+        "  }",
+        "  unit=intervalExplicit,,jp1admin,;",
+        "  {",
+        "    ty=rtmwj;",
+        "    tmitv=1440;",
+        "    etn=y;",
+        "    ets=wr;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports execution-interval control diagnostics for explicit invalid tmitv and etn values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=interval1,tmwj,+0+0;",
+        "  el=interval2,rtmwj,+160+0;",
+        "  unit=interval1,,jp1admin,;",
+        "  {",
+        "    ty=tmwj;",
+        "    tmitv=0;",
+        "    etn=maybe;",
+        "  }",
+        "  unit=interval2,,jp1admin,;",
+        "  {",
+        "    ty=rtmwj;",
+        "    tmitv=1441;",
+        "    etn=Y;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 4);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 5,
+          message: "Execution interval (tmitv) must be between 1 and 1440.",
+        },
+        {
+          line: 10,
+          column: 4,
+          length: 3,
+          message: "End timing (etn) must be y or n.",
+        },
+        {
+          line: 15,
+          column: 4,
+          length: 5,
+          message: "Execution interval (tmitv) must be between 1 and 1440.",
+        },
+        {
+          line: 16,
+          column: 4,
+          length: 3,
+          message: "End timing (etn) must be y or n.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error", "error"],
+    );
+  });
+
   test("does not report transfer-file diagnostics for valid explicit values and macro variables", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

@@ -51,8 +51,13 @@ The reference defines omitted values as:
 
 - Explicit `ets` timeout-action diagnostics are now aligned through the shared
   editor-feedback boundary for `tmwj` / `rtmwj`.
-- `tmitv` / `etn` validation and broader wait-job default reconciliation
-  remain outside the delivered slices.
+- Explicit `tmitv` range diagnostics are now aligned through the shared
+  editor-feedback boundary for `tmwj` / `rtmwj`.
+- Explicit `etn` allowed-value diagnostics are now aligned through the shared
+  editor-feedback boundary for `tmwj` / `rtmwj`.
+- Broader `etn=y` start-condition semantics, compatible-ISAM restrictions,
+  and wait-job default reconciliation remain outside the smallest meaningful
+  validation slice.
 
 ## Alternatives
 
