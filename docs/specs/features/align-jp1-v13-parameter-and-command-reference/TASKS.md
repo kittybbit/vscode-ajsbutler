@@ -160,7 +160,6 @@
 - [x] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
       delivered transfer-file explicit value-shape slice and select the next
       candidate using the same user-meaningful grouping rule
-- [ ] Record human approval before changing editor-feedback diagnostics,
 - [x] Record human approval before changing editor-feedback diagnostics,
       runtime code, tests, generated artifacts, or configuration for grouped
       `ets` timeout-action diagnostics
@@ -171,6 +170,19 @@
 - [x] Add focused regression evidence for omitted defaults, valid explicit
       `ets`, and explicit invalid `ets` values on file monitoring and
       execution-interval control jobs
+- [x] Run required code-change validation after implementation
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      execution-interval control job `tmitv` / `etn` diagnostics
+- [x] Implement grouped execution-interval control job `tmitv` / `etn`
+      diagnostics only after approval
+- [x] Refactor `buildSyntaxDiagnostics.ts` within the approved scope so the
+      execution-interval rules reuse the existing decimal-range and
+      allowed-value helper/rule-array path without creating a separate
+      diagnostic layer
+- [x] Add focused regression evidence for omitted defaults, valid explicit
+      values, explicit out-of-range `tmitv`, and explicit invalid `etn`
+      values on execution-interval control jobs
 - [x] Run required code-change validation after implementation
 
 ## Notes
@@ -526,6 +538,29 @@
   aligned for the currently modeled `flwf`, `flwc`, `flwi`, `flco`, and `ets`
   scope. Execution-interval control remains partial because `tmitv` / `etn`
   validation and broader wait-job reconciliation are still deferred.
+- 2026-05-08: Remaining partial and deferred JP1/AJS v13 gaps were re-checked
+  after the delivered grouped `ets` timeout-action diagnostics slice. The
+  next recommended approval-gated candidate is grouped execution-interval
+  control job validation for explicit `tmitv` and `etn`, because both gaps
+  remain in the same job definition, the same editor-feedback rule array, and
+  the same group 13 user-facing concept.
+- 2026-05-08: Investigation confirmed from the JP1/AJS3 v13 execution-
+  interval control job definition that explicit `tmitv` values must stay
+  within `1..1440` minutes and explicit `etn` values must stay within
+  `{y|n}`. The same reference also documents additional `etn=y` start-
+  condition and compatible-ISAM restrictions, but those remain out of scope
+  for the smallest user-meaningful validation slice because current code does
+  not yet model those broader context gates in the editor-feedback boundary.
+- 2026-05-08: Grouped execution-interval control job diagnostics now report
+  explicit invalid `tmitv` and `etn` values on `tmwj` / `rtmwj` through the
+  existing editor-feedback boundary. The implementation reuses the current
+  decimal-range and allowed-value rule helpers on the existing rule-array
+  path, and raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation remain
+  unchanged.
+- 2026-05-08: Remaining partial and deferred JP1/AJS v13 gaps should now be
+  re-checked from the updated coverage matrix before selecting the next
+  approval-gated candidate.
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   transfer-file explicit value-shape diagnostics implementation.
 - 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
@@ -556,22 +591,22 @@
 
 - Status: Approved
 - Approved at: 2026-05-08
-- Approved scope: grouped explicit `ets` timeout-action diagnostics through
-  the existing editor-feedback boundary, limited to explicit `ets` values on
-  file monitoring jobs (`flwj` / `rflwj`) and execution-interval control jobs
-  (`tmwj` / `rtmwj`) that fall outside the documented JP1/AJS3 v13 set
-  `{kl|nr|wr|an}`, plus the smallest refactor needed to keep shared
-  allowed-value validation on the current `buildSyntaxDiagnostics.ts`
-  helper/rule-array path, while preserving raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection, and
-  command generation. Parser grammar, domain default changes, unit-list
-  projection changes, `tmitv` / `etn` validation, broader wait-job
-  reconciliation, other `ets`-bearing unit families, generated artifacts,
-  dependency versions, configuration, and `engines.vscode` remain out of
-  scope.
+- Approved scope: grouped execution-interval control job diagnostics through
+  the existing editor-feedback boundary, limited to explicit `tmitv` values
+  on `tmwj` / `rtmwj` that fall outside the documented JP1/AJS3 v13 range
+  `1..1440` minutes and explicit `etn` values on `tmwj` / `rtmwj` that fall
+  outside `{y|n}`, plus the smallest refactor needed to keep these checks on
+  the current `buildSyntaxDiagnostics.ts` decimal-range / allowed-value
+  helper and rule-array path, while preserving raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation. Parser grammar, domain default changes,
+  unit-list projection changes, `etn=y` start-condition semantics,
+  compatible-ISAM restrictions, broader wait-job reconciliation, other wait-
+  job families, generated artifacts, dependency versions, configuration, and
+  `engines.vscode` remain out of scope.
 
-Current implementation gate: grouped `ets` timeout-action diagnostics are
-implemented and validated inside the recorded scope.
+Current implementation gate: grouped execution-interval control job `tmitv` /
+`etn` diagnostics are implemented and validated inside the recorded scope.
 
 ## Prior Approval Evidence
 
@@ -881,6 +916,22 @@ implemented and validated inside the recorded scope.
 
 ## Validation
 
+- 2026-05-08: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  execution-interval control job `tmitv` / `etn` diagnostics implementation
+- 2026-05-08: `npm test` completed with exit code 0 after grouped
+  execution-interval control job `tmitv` / `etn` diagnostics implementation;
+  the VS Code harness emitted the existing macOS `task_name_for_pid` codesign
+  noise line
+- 2026-05-08: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped execution-interval control job `tmitv` / `etn` diagnostics
+  implementation and emitted the existing localhost dev-extension
+  `package.nls.json` 404 noise
+- 2026-05-08: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped execution-interval control job `tmitv` / `etn`
+  diagnostics implementation
+- 2026-05-08: `rtk pnpm run lint:md` completed with exit code 0 after
+  grouped execution-interval control job `tmitv` / `etn` diagnostics
+  implementation
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   generic parameter-rule diagnostics implementation
 - 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped generic

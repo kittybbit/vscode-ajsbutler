@@ -52,10 +52,11 @@ rules in `docs/specs/README.md`, not in this file.
   next recommended JP1/AJS v13 candidate should be re-selected from the
   remaining partial or deferred gaps using the same user-meaningful grouping
   rule, instead of defaulting immediately to smaller default-only follow-ups.
-- After the delivered grouped `ets` timeout-action diagnostics slice, the next
-  recommended JP1/AJS v13 candidate should be re-selected from the remaining
-  partial or deferred gaps using the same user-meaningful grouping rule,
-  instead of defaulting immediately to smaller default-only follow-ups.
+- After the delivered grouped execution-interval control job `tmitv` / `etn`
+  diagnostics slice, the next recommended JP1/AJS v13 candidate should be
+  re-selected from the remaining partial or deferred gaps using the same
+  user-meaningful grouping rule, instead of defaulting immediately to smaller
+  default-only follow-ups.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -74,8 +75,9 @@ rules in `docs/specs/README.md`, not in this file.
 ## Next Priority Tasks
 
 1. Re-check the remaining partial or deferred JP1/AJS3 v13 parameter-alignment
-   gaps after the delivered transfer-file value-shape slice and record the
-   next approval-gated candidate using the same user-meaningful grouping rule.
+   gaps after the delivered execution-interval control job validation slice
+   and record the next approval-gated candidate using the same user-meaningful
+   grouping rule.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -94,31 +96,32 @@ rules in `docs/specs/README.md`, not in this file.
   the delivered grouped `ets` timeout-action diagnostics slice.
 - Status: approved implementation and validation are complete in the recorded
   scope.
-- Scope: grouped explicit `ets` timeout-action diagnostics were added in
-  `buildSyntaxDiagnostics.ts` for explicit `ets` values outside
-  `{kl|nr|wr|an}` on `flwj` / `rflwj` and `tmwj` / `rtmwj`, including the
-  smallest helper/rule refactor needed to keep shared allowed-value
-  validation on the existing rule-array path, while preserving parser output,
-  domain wrapper values, normalized parameters, unit-list projection, flow
-  projection, command generation, generated artifacts, dependency versions,
-  and `engines.vscode`.
-- Out of scope: parser grammar changes, domain defaults, unit-list
-  projection changes, `tmitv` or `etn` validation, broader wait-job
-  reconciliation, other `ets`-bearing unit families, and unrelated
-  default-only follow-ups.
+- Scope: grouped explicit execution-interval control job diagnostics were
+  added in `buildSyntaxDiagnostics.ts` for explicit `tmitv` values outside the
+  documented `1..1440` minute range and explicit `etn` values outside
+  `{y|n}` on `tmwj` / `rtmwj`, including only the smallest helper/rule-array
+  refactor needed to keep these checks on the existing execution-interval
+  editor-feedback path, while preserving parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection,
+  command generation, generated artifacts, dependency versions, and
+  `engines.vscode`.
+- Out of scope: parser grammar changes, domain default changes, unit-list
+  projection changes, `etn=y` start-condition semantics, compatible-ISAM
+  environment restrictions, broader wait-job reconciliation, other wait-job
+  families, and unrelated default-only follow-ups.
 - Impact summary: the implemented slice affected
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
   diagnostics regression tests, the parameter-alignment feature docs, and the
   editor-feedback behavior contract.
-- Risks and assumptions: `ParamFactory.ets` is shared by more wrappers than
-  the two implemented rows, so the delivered diagnostics stay scoped to the
-  investigated file-monitoring and execution-interval control job families.
-  Broader `ets` semantics remain deferred and should be reconsidered only in a
-  separate approved slice.
-- Alternatives considered: the remaining HTTP Connection `eu` conflict stayed
-  less user-visible, while broadening to every `ets`-bearing unit family or
-  folding `tmitv` / `etn` validation into the same slice would have exceeded
-  the shared-rule boundary that justified this grouped implementation.
+- Risks and assumptions: `etn` has documented context-sensitive restrictions
+  beyond the base `{y|n}` value set, but those require broader start-
+  condition or environment modeling than the current slice. The delivered
+  slice therefore stays limited to explicit value-shape validation plus
+  `tmitv` range enforcement.
+- Alternatives considered: the remaining HTTP Connection `eu` note is less
+  user-visible, while broadening immediately into `etn=y` start-condition
+  semantics or broader wait-job reconciliation would exceed the smallest
+  meaningful execution-interval slice.
 
 ## Build/Test Performance SDD
 
@@ -147,9 +150,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped `ets` timeout-action diagnostics are implemented for
-  file-monitoring and execution-interval control jobs; the next candidate
-  should be re-selected from the updated coverage matrix.
+  slice: grouped execution-interval control job `tmitv` / `etn` diagnostics
+  are implemented and validated; the next candidate should be re-selected
+  from the updated coverage matrix.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

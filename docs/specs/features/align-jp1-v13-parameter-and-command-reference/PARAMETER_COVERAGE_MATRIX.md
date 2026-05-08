@@ -154,8 +154,11 @@ coverage.
 - Remaining gap:
   execution-interval control job defaults and unit-list group 13 projection
   are aligned for these values, and explicit `ets` timeout-action
-  diagnostics are aligned through editor-feedback. `tmitv` / `etn`
-  validation and broader wait-job default reconciliation remain deferred
+  diagnostics are aligned through editor-feedback. Explicit `tmitv` range
+  diagnostics and explicit `etn` allowed-value diagnostics are also aligned
+  through editor-feedback. Context-sensitive `etn=y` start-condition
+  semantics, compatible-ISAM restrictions, and broader wait-job default
+  reconciliation remain deferred
 
 ### Event Reception Monitoring Job Search Scope
 

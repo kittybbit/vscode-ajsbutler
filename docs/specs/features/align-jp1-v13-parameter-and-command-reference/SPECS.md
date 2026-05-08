@@ -162,6 +162,17 @@ JP1/AJS3 version 13 reference documents.
   table output. If approved, it should consume execution-interval defaults for
   `tmitv`, `etn`, and `ets` while preserving explicit normalized values,
   parser output, and normalized raw parameter storage.
+- Execution-interval control job `tmitv` / `etn` diagnostics are approval-
+  sensitive because existing behavior preserves explicit invalid wait-time and
+  end-timing values as raw parsed data without editor feedback. A focused
+  follow-up should stay inside application editor-feedback, report explicit
+  `tmitv` values outside the JP1/AJS3 v13 range `1..1440` and explicit `etn`
+  values outside `{y|n}` for `tmwj` / `rtmwj`, reuse the existing decimal-
+  range and allowed-value rule helpers where practical, and preserve raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation. Context-sensitive
+  `etn=y` start-condition semantics and compatible-ISAM restrictions remain
+  separate approval-sensitive work.
 - Job end-judgment `jd` / `abr` diagnostics are approval-sensitive because
   existing behavior preserves explicit invalid combinations as raw parsed
   values without editor feedback. A diagnostic slice must preserve raw parser
