@@ -162,6 +162,11 @@ const hasInvalidExplicitThresholdOrdering = (unit: Unit): boolean => {
   return warningThreshold >= abnormalThreshold;
 };
 
+const hasStartConditionContext = (unit: Unit): boolean =>
+  unit.parent?.children.some(
+    (sibling) => findParameter(sibling, "ty")?.value === "rc",
+  ) ?? false;
+
 const parseExplicitHexadecimalInRange = (
   value: string | undefined,
   minimum: number,
@@ -1172,9 +1177,24 @@ const buildExecutionIntervalControlDiagnostics = (
   findUnitsByTypes(
     rootUnits,
     executionIntervalControlDiagnosticTargetTypes,
-  ).flatMap((unit) =>
-    collectRuleDiagnostics(unit, executionIntervalControlDiagnosticRules),
-  );
+  ).flatMap((unit) => {
+    const diagnostics = collectRuleDiagnostics(
+      unit,
+      executionIntervalControlDiagnosticRules,
+    );
+    const endTimingParameter = findParameter(unit, "etn");
+
+    if (endTimingParameter?.value === "y" && !hasStartConditionContext(unit)) {
+      diagnostics.push(
+        buildDiagnostic(
+          endTimingParameter,
+          "End timing (etn=y) can be specified only for execution-interval control jobs defined as start conditions.",
+        ),
+      );
+    }
+
+    return diagnostics;
+  });
 
 const buildTransferOperationDiagnostics = (
   rootUnits: Unit[],

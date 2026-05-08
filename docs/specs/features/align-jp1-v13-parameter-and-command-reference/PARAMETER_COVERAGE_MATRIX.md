@@ -105,13 +105,14 @@ coverage.
   `eu` plus currently modeled `htknd`, `htexm`, `htspt`, `jd`, `abr`, `ha`,
   `mm`, `nmg`, `ega`, and `uem`
 - Unit scope: HTTP Connection jobs and recovery HTTP Connection jobs
-- Status: partial
+- Status: aligned
 - Owning seam: `Htpj.ts`, `optionalScalarParameterBuilders.ts`, and
   `Defaults.ts`
 - Evidence: `parameterFactory.test.ts`
 - Remaining gap:
-  future reconciliation may be needed if the definition section and
-  `ajsprint -a` default table conflict for `eu`
+  none for the currently modeled defaults in this feature scope; future
+  manual reconciliation may still be needed if the definition section and
+  `ajsprint -a` default table for `eu` are reinterpreted
 
 ### JP1 Event Sending Job Arrival Check
 
@@ -156,12 +157,12 @@ coverage.
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
   execution-interval control job defaults and unit-list group 13 projection
-  are aligned for these values, and explicit `ets` timeout-action
-  diagnostics are aligned through editor-feedback. Explicit `tmitv` range
-  diagnostics and explicit `etn` allowed-value diagnostics are also aligned
-  through editor-feedback. Context-sensitive `etn=y` start-condition
-  semantics, compatible-ISAM restrictions, and broader wait-job default
-  reconciliation remain deferred
+  are aligned for these values, explicit `ets` timeout-action diagnostics are
+  aligned through editor-feedback, explicit `tmitv` range diagnostics and
+  explicit `etn` allowed-value diagnostics are aligned through
+  editor-feedback, and explicit `etn=y` start-condition diagnostics are now
+  aligned through editor-feedback. Compatible-ISAM-specific restrictions and
+  broader wait-job default reconciliation remain deferred
 
 ### Event Reception Monitoring Job Search Scope
 

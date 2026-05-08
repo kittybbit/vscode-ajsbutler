@@ -173,6 +173,28 @@ JP1/AJS3 version 13 reference documents.
   projection, flow projection, and command generation. Context-sensitive
   `etn=y` start-condition semantics and compatible-ISAM restrictions remain
   separate approval-sensitive work.
+- Execution-interval control contextual diagnostics remain approval-sensitive
+  after the value-local `tmitv` / `etn` slice because current behavior still
+  preserves explicit `etn=y` combinations even when the surrounding
+  execution-interval control context violates the documented start-condition
+  or compatible-ISAM restrictions. The next focused follow-up should stay
+  inside application editor-feedback for `tmwj` / `rtmwj`, reuse the current
+  execution-interval rule-array path plus only the smallest helper extraction
+  needed for context-aware checks, and preserve raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation. Broader wait-job default reconciliation
+  remains separate approval-sensitive work.
+- Execution-interval control start-condition diagnostics are now aligned
+  through application editor-feedback. Explicit `etn=y` on `tmwj` / `rtmwj`
+  now reports a semantic diagnostic when the unit is not defined in a
+  start-condition context, while raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
+- Execution-interval control compatible-ISAM restrictions remain approval-
+  sensitive because the current repository has no explicit runtime input that
+  identifies database mode for editor-feedback decisions. Any future slice
+  should introduce that environment/configuration seam deliberately instead of
+  inferring compatible-ISAM mode from JP1/AJS definition text alone.
 - Job end-judgment `jd` / `abr` diagnostics are approval-sensitive because
   existing behavior preserves explicit invalid combinations as raw parsed
   values without editor feedback. A diagnostic slice must preserve raw parser

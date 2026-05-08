@@ -68,6 +68,11 @@ rules in `docs/specs/README.md`, not in this file.
   partial or deferred gaps using the same user-meaningful grouping rule,
   rather than broadening immediately into platform-specific path semantics or
   unrelated default-only follow-ups.
+- After the delivered grouped execution-interval control start-condition
+  diagnostics slice, the next recommended JP1/AJS v13 candidate should again
+  be re-selected from the remaining partial or deferred gaps using the same
+  user-meaningful grouping rule, rather than broadening immediately into a
+  new environment-configuration seam for compatible-ISAM.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -103,39 +108,31 @@ rules in `docs/specs/README.md`, not in this file.
 
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
-- Objective: prepare the next JP1/AJS v13 parameter-alignment candidate after
-  the delivered grouped execution-interval control job `tmitv` / `etn`
-  diagnostics slice.
-- Status: approved implementation and validation are complete in the recorded
-  scope.
-- Scope: grouped transfer-file filename/path diagnostics were added in
-  `buildSyntaxDiagnostics.ts` for explicit quoted `ts1` to `ts4` values on
-  UNIX/PC jobs, UNIX/PC custom jobs, QUEUE jobs, and recovery QUEUE jobs that
-  do not use a full-path form, including only the smallest helper/rule-array
-  refactor needed to keep transfer-operation and QUEUE transfer-file
-  diagnostics on the current shared path while preserving parser output,
-  domain wrapper values, normalized parameters, unit-list projection, flow
-  projection, command generation, generated artifacts, dependency versions,
-  and `engines.vscode`.
+- Objective: deliver the approved JP1/AJS v13 execution-interval control
+  context slice after the grouped transfer-file filename/path slice.
+- Status: implementation and validation are complete in the recorded scope.
+- Scope: grouped execution-interval control context diagnostics were added in
+  `buildSyntaxDiagnostics.ts` for explicit `etn=y` on `tmwj` / `rtmwj` when
+  the unit is not defined in a start-condition context, including only the
+  smallest helper needed to keep the check on the existing
+  execution-interval diagnostics path.
 - Out of scope: parser grammar changes, domain wrapper normalization changes,
-  transfer-operation `topN` behavior, unit-list projection changes,
-  platform-specific path normalization, path existence checks, macro-variable
-  expansion semantics, generated artifacts, dependency changes,
-  configuration, `engines.vscode`, and unrelated default-only follow-ups such
-  as HTTP Connection `eu`.
+  unit-list projection changes, compatible-ISAM environment detection,
+  broader wait-job default reconciliation, transfer-file platform-specific
+  path interpretation, generated artifacts, dependency changes,
+  configuration, and `engines.vscode`.
 - Impact summary: the implemented scope affected
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
   diagnostics regression tests, the parameter-alignment feature docs, and the
-  editor-feedback behavior contract.
-- Risks and assumptions: the implementation reference pass confirmed that
-  `tsN` carries the only clearly shared full-path rule inside the approved
-  scope. Broader platform-specific path interpretation, `tdN`-specific path
-  behavior, or stronger macro-variable tightening remain deferred and should
-  trigger re-approval if they become necessary.
-- Alternatives considered: the remaining HTTP Connection `eu` note is less
-  user-visible, while broadening immediately into `etn=y` start-condition
-  semantics or broader wait-job reconciliation would exceed the smallest
-  meaningful execution-interval slice.
+  editor-feedback behavior contract. The stale HTTP Connection coverage row
+  was also synchronized to the already delivered `eu=def` behavior.
+- Risks and assumptions: the delivered slice assumes that the file-local
+  detectable part of the JP1/AJS3 v13 rule is the start-condition context.
+  Compatible-ISAM restrictions remain visible as deferred work because the
+  current editor-feedback inputs do not identify database mode.
+- Alternatives considered: expanding immediately into compatible-ISAM support
+  would require a new environment/configuration seam; broad wait-job
+  reconciliation would exceed the current reviewable boundary.
 
 ## Build/Test Performance SDD
 
@@ -164,9 +161,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped transfer-file filename/path diagnostics are implemented and
-  validated; the next candidate should be re-selected from the updated
-  coverage matrix.
+  slice: grouped execution-interval control start-condition diagnostics are
+  implemented and validated; remaining candidates should be re-selected from
+  the updated coverage matrix.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
