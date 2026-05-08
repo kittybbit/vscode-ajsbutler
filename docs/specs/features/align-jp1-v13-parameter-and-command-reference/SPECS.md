@@ -292,6 +292,25 @@ JP1/AJS3 version 13 reference documents.
   accepted macro-variable forms, and preserve raw parser output, domain
   wrapper values, normalized parameters, unit-list projection, flow
   projection, and command generation.
+- Transfer-file `tsN` / `tdN` filename/path semantics remain approval-
+  sensitive because current behavior now distinguishes bare strings from
+  quoted or macro-variable forms, but still preserves any quoted explicit
+  transfer-file value without checking the remaining documented shared
+  filename/path constraints. The next grouped follow-up should stay inside
+  application editor-feedback, cover the shared `tsN` / `tdN` family across
+  UNIX/PC, UNIX/PC custom, and QUEUE-family jobs, include only the smallest
+  helper/rule-array refactor needed to keep transfer diagnostics on the
+  existing shared path, and preserve raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation unless broader platform-specific path interpretation
+  proves unavoidable and triggers re-approval.
+- Shared transfer-file filename/path alignment is now implemented through
+  application editor-feedback for explicit quoted `tsN` values that do not
+  use a full-path form on UNIX/PC jobs, UNIX/PC custom jobs, QUEUE jobs, and
+  recovery QUEUE jobs. Existing `tdN` handling remains on the already aligned
+  value-shape, byte-length, and dependency path because the focused reference
+  pass did not identify a stronger shared `tdN` path rule that could be
+  enforced without broadening into platform-specific interpretation.
 
 ## Reference Documents
 

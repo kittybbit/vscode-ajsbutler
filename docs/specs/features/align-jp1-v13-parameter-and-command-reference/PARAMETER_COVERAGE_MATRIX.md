@@ -61,9 +61,10 @@ coverage.
   `tdN` / `topN` source-file dependency diagnostics for the currently modeled
   transfer-operation parameters. Explicit transfer-file value-shape
   diagnostics for non-macro bare strings are now aligned through
-  editor-feedback; broader filename/path semantics and macro-variable syntax
-  tightening remain deferred under
-  `TRANSFER_FILE_VALUE_SHAPE_ALIGNMENT.md`
+  editor-feedback. Explicit quoted `tsN` full-path diagnostics are now also
+  aligned through editor-feedback for the shared transfer-file family.
+  Platform-specific path interpretation and macro-variable syntax tightening
+  remain deferred under `TRANSFER_FILE_FILENAME_PATH_ALIGNMENT.md`
 
 ### QUEUE Transfer Files
 
@@ -77,9 +78,11 @@ coverage.
   Editor-feedback now aligns `tsN` / `tdN` byte-length diagnostics and `tdN`
   source-file dependency diagnostics for the currently modeled QUEUE
   transfer-file parameters. Explicit transfer-file value-shape diagnostics for
-  non-macro bare strings are now aligned through editor-feedback; broader
-  filename/path semantics and macro-variable syntax tightening remain deferred
-  under `TRANSFER_FILE_VALUE_SHAPE_ALIGNMENT.md`
+  non-macro bare strings are now aligned through editor-feedback, and
+  explicit quoted `tsN` full-path diagnostics are aligned through the shared
+  transfer-file rule path. Platform-specific path interpretation and
+  macro-variable syntax tightening remain deferred under
+  `TRANSFER_FILE_FILENAME_PATH_ALIGNMENT.md`
 
 ### Job End Judgment
 

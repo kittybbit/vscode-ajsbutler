@@ -57,6 +57,17 @@ rules in `docs/specs/README.md`, not in this file.
   re-selected from the remaining partial or deferred gaps using the same
   user-meaningful grouping rule, instead of defaulting immediately to smaller
   default-only follow-ups.
+- After re-checking the updated matrix and feature-local deferred notes, the
+  next recommended JP1/AJS v13 candidate should group the remaining
+  transfer-file filename/path semantics across UNIX/PC, UNIX/PC custom, and
+  QUEUE-family jobs, because those rows share the same `tsN` / `tdN`
+  parameter family, the same editor-feedback rule arrays, and the same
+  refactoring seam inside `buildSyntaxDiagnostics.ts`.
+- After the delivered grouped transfer-file filename/path slice, the next
+  recommended JP1/AJS v13 candidate should be re-selected from the remaining
+  partial or deferred gaps using the same user-meaningful grouping rule,
+  rather than broadening immediately into platform-specific path semantics or
+  unrelated default-only follow-ups.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -75,9 +86,9 @@ rules in `docs/specs/README.md`, not in this file.
 ## Next Priority Tasks
 
 1. Re-check the remaining partial or deferred JP1/AJS3 v13 parameter-alignment
-   gaps after the delivered execution-interval control job validation slice
-   and record the next approval-gated candidate using the same user-meaningful
-   grouping rule.
+   gaps after the delivered transfer-file filename/path slice and record the
+   next approval-gated candidate using the same user-meaningful grouping
+   rule.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -93,31 +104,34 @@ rules in `docs/specs/README.md`, not in this file.
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
 - Objective: prepare the next JP1/AJS v13 parameter-alignment candidate after
-  the delivered grouped `ets` timeout-action diagnostics slice.
+  the delivered grouped execution-interval control job `tmitv` / `etn`
+  diagnostics slice.
 - Status: approved implementation and validation are complete in the recorded
   scope.
-- Scope: grouped explicit execution-interval control job diagnostics were
-  added in `buildSyntaxDiagnostics.ts` for explicit `tmitv` values outside the
-  documented `1..1440` minute range and explicit `etn` values outside
-  `{y|n}` on `tmwj` / `rtmwj`, including only the smallest helper/rule-array
-  refactor needed to keep these checks on the existing execution-interval
-  editor-feedback path, while preserving parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection,
-  command generation, generated artifacts, dependency versions, and
-  `engines.vscode`.
-- Out of scope: parser grammar changes, domain default changes, unit-list
-  projection changes, `etn=y` start-condition semantics, compatible-ISAM
-  environment restrictions, broader wait-job reconciliation, other wait-job
-  families, and unrelated default-only follow-ups.
-- Impact summary: the implemented slice affected
+- Scope: grouped transfer-file filename/path diagnostics were added in
+  `buildSyntaxDiagnostics.ts` for explicit quoted `ts1` to `ts4` values on
+  UNIX/PC jobs, UNIX/PC custom jobs, QUEUE jobs, and recovery QUEUE jobs that
+  do not use a full-path form, including only the smallest helper/rule-array
+  refactor needed to keep transfer-operation and QUEUE transfer-file
+  diagnostics on the current shared path while preserving parser output,
+  domain wrapper values, normalized parameters, unit-list projection, flow
+  projection, command generation, generated artifacts, dependency versions,
+  and `engines.vscode`.
+- Out of scope: parser grammar changes, domain wrapper normalization changes,
+  transfer-operation `topN` behavior, unit-list projection changes,
+  platform-specific path normalization, path existence checks, macro-variable
+  expansion semantics, generated artifacts, dependency changes,
+  configuration, `engines.vscode`, and unrelated default-only follow-ups such
+  as HTTP Connection `eu`.
+- Impact summary: the implemented scope affected
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`, focused
   diagnostics regression tests, the parameter-alignment feature docs, and the
   editor-feedback behavior contract.
-- Risks and assumptions: `etn` has documented context-sensitive restrictions
-  beyond the base `{y|n}` value set, but those require broader start-
-  condition or environment modeling than the current slice. The delivered
-  slice therefore stays limited to explicit value-shape validation plus
-  `tmitv` range enforcement.
+- Risks and assumptions: the implementation reference pass confirmed that
+  `tsN` carries the only clearly shared full-path rule inside the approved
+  scope. Broader platform-specific path interpretation, `tdN`-specific path
+  behavior, or stronger macro-variable tightening remain deferred and should
+  trigger re-approval if they become necessary.
 - Alternatives considered: the remaining HTTP Connection `eu` note is less
   user-visible, while broadening immediately into `etn=y` start-condition
   semantics or broader wait-job reconciliation would exceed the smallest
@@ -150,9 +164,9 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped execution-interval control job `tmitv` / `etn` diagnostics
-  are implemented and validated; the next candidate should be re-selected
-  from the updated coverage matrix.
+  slice: grouped transfer-file filename/path diagnostics are implemented and
+  validated; the next candidate should be re-selected from the updated
+  coverage matrix.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

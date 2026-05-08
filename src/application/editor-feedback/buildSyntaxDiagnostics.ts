@@ -254,8 +254,15 @@ const isValidExplicitFileMonitoringInterval = (
 const isExplicitMacroVariable = (value: string): boolean =>
   /^\?[^?\r\n]+\?$/.test(value);
 
-const isQuotedStringLiteral = (value: string): boolean =>
-  /^"(?:\\.|[^"\\])*"$/.test(value);
+const parseQuotedStringLiteralContent = (value: string): string | undefined => {
+  const matched = /^"((?:\\.|[^"\\])*)"$/.exec(value);
+  return matched?.[1];
+};
+
+const isAbsoluteTransferFilePath = (value: string): boolean =>
+  value.startsWith("/") ||
+  value.startsWith("\\") ||
+  /^[A-Za-z]:[\\/]/.test(value);
 
 const isValidExplicitTransferFileValue = (
   parameter: UnitParameter | undefined,
@@ -265,7 +272,22 @@ const isValidExplicitTransferFileValue = (
     return false;
   }
 
-  return isQuotedStringLiteral(rawValue) || isExplicitMacroVariable(rawValue);
+  return (
+    parseQuotedStringLiteralContent(rawValue) !== undefined ||
+    isExplicitMacroVariable(rawValue)
+  );
+};
+
+const hasInvalidExplicitTransferSourcePath = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue) {
+    return false;
+  }
+
+  const quotedContent = parseQuotedStringLiteralContent(rawValue);
+  return quotedContent ? !isAbsoluteTransferFilePath(quotedContent) : false;
 };
 
 const hasInvalidWildcardWithShortMonitoringInterval = (
@@ -787,10 +809,18 @@ const transferFileValueShapeRules: readonly UnitParameterDiagnosticRule[] =
     },
   ]);
 
+const transferSourceFilePathRules: readonly UnitParameterDiagnosticRule[] =
+  transferFileIndexes.map((index) => ({
+    key: `ts${index}`,
+    message: `Transfer source file name (ts${index}) must use a full path when specified as a quoted transfer-file value.`,
+    isInvalid: (parameter) => hasInvalidExplicitTransferSourcePath(parameter),
+  }));
+
 const transferOperationDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
   [
     ...transferFileByteLengthRules,
     ...transferFileValueShapeRules,
+    ...transferSourceFilePathRules,
     ...transferFileIndexes.flatMap((index) => [
       buildRequiredParameterRule(
         `td${index}`,
@@ -809,6 +839,7 @@ const queueTransferFileDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
   [
     ...transferFileByteLengthRules,
     ...transferFileValueShapeRules,
+    ...transferSourceFilePathRules,
     ...transferFileIndexes.map((index) =>
       buildRequiredParameterRule(
         `td${index}`,

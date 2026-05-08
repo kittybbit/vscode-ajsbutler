@@ -184,6 +184,19 @@
       values, explicit out-of-range `tmitv`, and explicit invalid `etn`
       values on execution-interval control jobs
 - [x] Run required code-change validation after implementation
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      transfer-file filename/path semantics across UNIX/PC, UNIX/PC custom,
+      and QUEUE-family jobs
+- [x] Implement grouped transfer-file filename/path semantics only after
+      approval
+- [x] Refactor `buildSyntaxDiagnostics.ts` within the approved scope so
+      transfer-operation and QUEUE transfer-file diagnostics continue to share
+      the existing helper/rule-array path
+- [x] Add focused regression evidence for the approved shared transfer-file
+      filename/path constraints while preserving existing quoted-string and
+      macro-variable acceptance outside the newly aligned rules
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -561,6 +574,37 @@
 - 2026-05-08: Remaining partial and deferred JP1/AJS v13 gaps should now be
   re-checked from the updated coverage matrix before selecting the next
   approval-gated candidate.
+- 2026-05-08: Remaining partial and deferred JP1/AJS v13 gaps were re-checked
+  after the delivered grouped execution-interval control job `tmitv` / `etn`
+  diagnostics slice. The next recommended approval-gated candidate is grouped
+  transfer-file filename/path semantics across UNIX/PC, UNIX/PC custom, and
+  QUEUE-family jobs because the remaining gap sits in one shared `tsN` /
+  `tdN` parameter family, one shared editor-feedback seam, and one shared
+  refactoring path inside `buildSyntaxDiagnostics.ts`.
+- 2026-05-08: Investigation confirmed that transfer-file value-shape,
+  byte-length, and `tdN` / `topN` dependency diagnostics are already aligned
+  on the current shared transfer rule path; the remaining transfer-related gap
+  is limited to still-deferred shared filename/path semantics for explicit
+  quoted transfer-file values.
+- 2026-05-08: The next transfer-file candidate was recorded in
+  `TRANSFER_FILE_FILENAME_PATH_ALIGNMENT.md` with scope limited to shared
+  application-level diagnostics plus the smallest helper/rule-array refactor
+  needed to keep UNIX/PC and QUEUE-family transfer diagnostics on the current
+  shared path. Parser grammar, domain normalization, projection changes, and
+  platform-specific path interpretation remain out of scope pending approval.
+- 2026-05-08: Reference-impact verification during implementation confirmed
+  that explicit quoted `tsN` values carry the only clearly shared full-path
+  rule across the approved UNIX/PC, UNIX/PC custom, and QUEUE-family
+  transfer-file scope. No stronger shared `tdN` path rule was enforced in
+  this slice because that would require broader platform-specific
+  interpretation than the approved boundary allows.
+- 2026-05-08: Grouped transfer-file filename/path diagnostics now report
+  explicit quoted relative `tsN` values through the existing shared
+  transfer-operation and QUEUE transfer-file editor-feedback path. Existing
+  `tdN` handling remains on the already delivered value-shape, byte-length,
+  and dependency path, and raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   transfer-file explicit value-shape diagnostics implementation.
 - 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
@@ -591,25 +635,38 @@
 
 - Status: Approved
 - Approved at: 2026-05-08
-- Approved scope: grouped execution-interval control job diagnostics through
-  the existing editor-feedback boundary, limited to explicit `tmitv` values
-  on `tmwj` / `rtmwj` that fall outside the documented JP1/AJS3 v13 range
-  `1..1440` minutes and explicit `etn` values on `tmwj` / `rtmwj` that fall
-  outside `{y|n}`, plus the smallest refactor needed to keep these checks on
-  the current `buildSyntaxDiagnostics.ts` decimal-range / allowed-value
-  helper and rule-array path, while preserving raw parser output, domain
-  wrapper values, normalized parameters, unit-list projection, flow
-  projection, and command generation. Parser grammar, domain default changes,
-  unit-list projection changes, `etn=y` start-condition semantics,
-  compatible-ISAM restrictions, broader wait-job reconciliation, other wait-
-  job families, generated artifacts, dependency versions, configuration, and
-  `engines.vscode` remain out of scope.
+- Approved scope: grouped transfer-file filename/path semantics through the
+  existing editor-feedback boundary, limited to explicit `ts1` to `ts4` and
+  `td1` to `td4` values on UNIX/PC jobs, UNIX/PC custom jobs, QUEUE jobs, and
+  recovery QUEUE jobs, plus the smallest refactor needed to keep
+  transfer-operation and QUEUE transfer-file checks on the current
+  `buildSyntaxDiagnostics.ts` helper and rule-array path, while preserving
+  raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation. Parser grammar,
+  domain normalization changes, transfer-operation `topN` behavior,
+  projection changes, platform-specific path normalization, generated
+  artifacts, dependency versions, configuration, and `engines.vscode` remain
+  out of scope unless re-approved.
 
-Current implementation gate: grouped execution-interval control job `tmitv` /
-`etn` diagnostics are implemented and validated inside the recorded scope.
+Current implementation gate: grouped transfer-file filename/path semantics are
+implemented and validated inside the recorded scope.
 
 ## Prior Approval Evidence
 
+- 2026-05-08: User replied "Approved. Proceed with implementation." after the
+  grouped transfer-file filename/path semantics approval request. Approved
+  changes were limited to adding grouped application-level semantic
+  diagnostics for the shared transfer-file family through the existing
+  editor-feedback boundary, plus the smallest refactor needed to keep
+  transfer-operation and QUEUE transfer-file checks on the current
+  `buildSyntaxDiagnostics.ts` helper/rule-array path; preserving raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation; adding focused regression
+  evidence; updating SDD tracking; and running validation. Parser grammar,
+  domain normalization changes, transfer-operation `topN` behavior,
+  projection changes, platform-specific path normalization, generated
+  artifacts, dependency versions, configuration, and `engines.vscode` were
+  out of scope.
 - 2026-05-08: User replied "Approved. Proceed with implementation." after the
   grouped `ets` timeout-action diagnostics approval request. Approved changes
   were limited to adding grouped application-level semantic diagnostics for
@@ -916,6 +973,21 @@ Current implementation gate: grouped execution-interval control job `tmitv` /
 
 ## Validation
 
+- 2026-05-08: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  transfer-file filename/path diagnostics implementation
+- 2026-05-08: `rtk pnpm test` completed with exit code 0 after grouped
+  transfer-file filename/path diagnostics implementation; the VS Code harness
+  emitted the existing macOS `task_name_for_pid` codesign noise line
+- 2026-05-08: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped transfer-file filename/path diagnostics implementation and emitted
+  the existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-08: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped transfer-file filename/path diagnostics
+  implementation
+- 2026-05-08: `rtk pnpm run qlty` completed with exit code 0 after SDD sync
+  for grouped transfer-file filename/path diagnostics implementation
+- 2026-05-08: `rtk pnpm run lint:md` completed with exit code 0 after SDD
+  sync for grouped transfer-file filename/path diagnostics implementation
 - 2026-05-08: `rtk pnpm run qlty` completed with exit code 0 after grouped
   execution-interval control job `tmitv` / `etn` diagnostics implementation
 - 2026-05-08: `npm test` completed with exit code 0 after grouped
