@@ -223,6 +223,17 @@ Scenario: Transfer-file parameters must use documented explicit string forms
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Transfer-file parameters must preserve documented shared
+  filename/path constraints
+  Given a syntactically valid JP1/AJS document with a UNIX/PC job,
+    UNIX/PC custom job, QUEUE job, or recovery QUEUE job
+  And explicit `tsN` or `tdN` uses a quoted transfer-file value
+  And that value violates a JP1/AJS3 v13 filename/path rule that is shared
+    across the approved transfer-file family scope
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Shared string diagnostics preserve documented macro-variable allowance
   Given a syntactically valid JP1/AJS document with a parameter family that
     explicitly allows macro-variable or regular-expression forms
