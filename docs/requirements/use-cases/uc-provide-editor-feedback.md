@@ -177,6 +177,21 @@ Scenario: Event reception monitoring identifiers must stay within documented
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Event reception monitoring string filters must stay within documented
+  explicit forms
+  Given a syntactically valid JP1/AJS document with a JP1 event reception
+    monitoring job
+  And explicit `evusr`, `evgrp`, `evwms`, or `evdet` is outside that
+    parameter's JP1/AJS3 v13 byte-length range
+  Or explicit `evwfr` is outside the documented
+    `optional-extended-attribute-name:"value"` form or total byte-length
+    range
+  Or explicit `evtmc` is outside the documented allowed forms or file-name
+    byte-length range
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Event host values must stay within documented byte-length rules
   Given a syntactically valid JP1/AJS document with a JP1 event sending job
     or JP1 event reception monitoring job

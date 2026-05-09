@@ -259,6 +259,38 @@ const isValidExplicitFileMonitoringInterval = (
 const isExplicitMacroVariable = (value: string): boolean =>
   /^\?[^?\r\n]+\?$/.test(value);
 
+const parseHashEscapedQuotedStringLiteralContent = (
+  value: string,
+): string | undefined => {
+  if (!value.startsWith('"') || !value.endsWith('"')) {
+    return undefined;
+  }
+
+  let content = "";
+  for (let index = 1; index < value.length - 1; index += 1) {
+    const character = value[index];
+
+    if (character === "#") {
+      const escapedCharacter = value[index + 1];
+      if (escapedCharacter !== '"' && escapedCharacter !== "#") {
+        return undefined;
+      }
+
+      content += escapedCharacter;
+      index += 1;
+      continue;
+    }
+
+    if (character === '"') {
+      return undefined;
+    }
+
+    content += character;
+  }
+
+  return content;
+};
+
 const parseQuotedStringLiteralContent = (value: string): string | undefined => {
   const matched = /^"((?:\\.|[^"\\])*)"$/.exec(value);
   return matched?.[1];
@@ -312,15 +344,89 @@ const hasInvalidWildcardWithShortMonitoringInterval = (
   return monitoringInterval >= 1 && monitoringInterval <= 9;
 };
 
+const hasValidByteLength = (
+  value: string,
+  minimum: number,
+  maximum: number,
+): boolean => {
+  const byteLength = getByteLength(value);
+  return byteLength >= minimum && byteLength <= maximum;
+};
+
+const isValidExplicitEventReceivingQuotedString = (
+  parameter: UnitParameter | undefined,
+  minimum: number,
+  maximum: number,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue) {
+    return false;
+  }
+
+  const content = parseHashEscapedQuotedStringLiteralContent(rawValue);
+  return content !== undefined && hasValidByteLength(content, minimum, maximum);
+};
+
+const isValidExplicitEventReceivingFilterReference = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue || !hasValidByteLength(rawValue, 1, 2048)) {
+    return false;
+  }
+
+  const separatorIndex = rawValue.indexOf(":");
+  if (separatorIndex <= 0) {
+    return false;
+  }
+
+  const attributeName = rawValue.slice(0, separatorIndex);
+  const attributeValue = rawValue.slice(separatorIndex + 1);
+  return (
+    attributeName.length > 0 &&
+    parseHashEscapedQuotedStringLiteralContent(attributeValue) !== undefined
+  );
+};
+
+const isValidExplicitEventReceivingTimeoutCondition = (
+  parameter: UnitParameter | undefined,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (!rawValue) {
+    return false;
+  }
+
+  if (rawValue === "n" || rawValue === "a") {
+    return true;
+  }
+
+  const separatorIndex = rawValue.indexOf(":");
+  if (separatorIndex <= 0) {
+    return false;
+  }
+
+  const mode = rawValue.slice(0, separatorIndex);
+  if (!["n", "a", "d", "b"].includes(mode)) {
+    return false;
+  }
+
+  const fileName = parseHashEscapedQuotedStringLiteralContent(
+    rawValue.slice(separatorIndex + 1),
+  );
+  return fileName !== undefined && hasValidByteLength(fileName, 1, 256);
+};
+
 const collectRuleDiagnostics = (
   unit: Unit,
   rules: readonly UnitParameterDiagnosticRule[],
 ): SyntaxDiagnosticDto[] =>
   rules.flatMap((rule) => {
-    const parameter = findParameter(unit, rule.key);
-    return parameter && rule.isInvalid(parameter, unit)
-      ? [buildDiagnostic(parameter, rule.message)]
-      : [];
+    const parameters = findParameters(unit, rule.key);
+    return parameters.flatMap((parameter) =>
+      rule.isInvalid(parameter, unit)
+        ? [buildDiagnostic(parameter, rule.message)]
+        : [],
+    );
   });
 
 type ParsedExplicitScheduleRuleValue = {
@@ -954,6 +1060,20 @@ const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 
 const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
   {
+    key: "evusr",
+    message:
+      "Event issue source user name (evusr) must be a quoted string between 1 and 20 bytes.",
+    isInvalid: (parameter) =>
+      !isValidExplicitEventReceivingQuotedString(parameter, 1, 20),
+  },
+  {
+    key: "evgrp",
+    message:
+      "Event issue source group name (evgrp) must be a quoted string between 1 and 20 bytes.",
+    isInvalid: (parameter) =>
+      !isValidExplicitEventReceivingQuotedString(parameter, 1, 20),
+  },
+  {
     key: "evhst",
     message: "Event host (evhst) must be between 1 and 255 bytes.",
     isInvalid: (parameter) => !isValidExplicitEventHostValue(parameter),
@@ -970,6 +1090,34 @@ const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
     message:
       "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
     isInvalid: (parameter) => !isValidExplicitIpv4Address(parameter),
+  },
+  {
+    key: "evwms",
+    message:
+      "Event message filter (evwms) must be a quoted string between 1 and 1024 bytes.",
+    isInvalid: (parameter) =>
+      !isValidExplicitEventReceivingQuotedString(parameter, 1, 1024),
+  },
+  {
+    key: "evdet",
+    message:
+      "Detailed event information filter (evdet) must be a quoted string between 1 and 1024 bytes.",
+    isInvalid: (parameter) =>
+      !isValidExplicitEventReceivingQuotedString(parameter, 1, 1024),
+  },
+  {
+    key: "evwfr",
+    message:
+      'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format within 2048 bytes.',
+    isInvalid: (parameter) =>
+      !isValidExplicitEventReceivingFilterReference(parameter),
+  },
+  {
+    key: "evtmc",
+    message:
+      'End judgment condition (evtmc) must be n, a, n:"file-name", a:"file-name", d:"file-name", or b:"file-name" with a file name between 1 and 256 bytes.',
+    isInvalid: (parameter) =>
+      !isValidExplicitEventReceivingTimeoutCondition(parameter),
   },
   {
     key: "evesc",
