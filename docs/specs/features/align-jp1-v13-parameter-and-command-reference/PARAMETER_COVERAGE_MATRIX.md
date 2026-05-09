@@ -190,9 +190,22 @@ coverage.
   `buildSyntaxDiagnostics.ts` and `Evwj.ts`
 - Evidence: `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
-  numeric identifier validation for `evuid`, `evgid`, and `evpid`, plus
   timeout- or start-condition-oriented validation outside this string-filter
-  family, remain deferred
+  family remains deferred
+
+### Event Reception Monitoring Numeric Identifiers
+
+- Keys: `evuid`, `evgid`, and `evpid`
+- Unit scope:
+  JP1 event reception monitoring jobs and recovery JP1 event reception
+  monitoring jobs
+- Status: aligned
+- Owning seam:
+  `buildSyntaxDiagnostics.ts` and `Evwj.ts`
+- Evidence: `buildSyntaxDiagnostics.test.ts`
+- Remaining gap:
+  timeout- or start-condition-oriented validation outside this numeric
+  identifier family remains deferred
 
 ## Boundary Decisions
 

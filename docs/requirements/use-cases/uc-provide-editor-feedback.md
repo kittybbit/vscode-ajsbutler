@@ -177,6 +177,16 @@ Scenario: Event reception monitoring identifiers must stay within documented
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Event reception monitoring numeric identifiers must stay within
+  documented ranges
+  Given a syntactically valid JP1/AJS document with a JP1 event reception
+    monitoring job
+  And explicit `evuid`, `evgid`, or `evpid` is outside the JP1/AJS3 v13
+    signed-decimal range `-1..9999999999`
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Event reception monitoring string filters must stay within documented
   explicit forms
   Given a syntactically valid JP1/AJS document with a JP1 event reception
