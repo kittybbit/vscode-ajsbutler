@@ -140,8 +140,9 @@ coverage.
   `parameterFactory.test.ts` for existing domain default seams and
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
-  none for the currently modeled file-monitoring parameters in this feature
-  scope
+  none for the currently modeled `flwf`, `flwc`, `flwi`, `flco`, and `ets`
+  family in this feature scope. Shared wait-job `fd` execution-time
+  semantics are tracked separately in `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`
 
 ### Execution-Interval Control Job Defaults
 
@@ -161,8 +162,10 @@ coverage.
   aligned through editor-feedback, explicit `tmitv` range diagnostics and
   explicit `etn` allowed-value diagnostics are aligned through
   editor-feedback, and explicit `etn=y` start-condition diagnostics are now
-  aligned through editor-feedback. Compatible-ISAM-specific restrictions and
-  broader wait-job default reconciliation remain deferred
+  aligned through editor-feedback. Shared wait-job `fd` execution-time
+  semantics are tracked separately in `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`.
+  Compatible-ISAM-specific restrictions are not planned for this repository.
+  Broader wait-job default reconciliation remains deferred
 
 ### Event Reception Monitoring Job Search Scope
 
@@ -221,9 +224,10 @@ coverage.
   `buildSyntaxDiagnostics.test.ts` and existing raw projection coverage in
   `buildUnitListView.test.ts`
 - Remaining gap:
-  `fd` disabled-on-execution semantics, compatible-ISAM-sensitive
-  interpretation, and the broader wait-condition parameter family remain
-  separate future slices
+  shared wait-job `fd` execution-time semantics are now tracked separately in
+  `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`. Compatible-ISAM-sensitive
+  interpretation is not planned for this repository, and the broader
+  wait-condition parameter family remains a separate future slice
 
 ## Boundary Decisions
 

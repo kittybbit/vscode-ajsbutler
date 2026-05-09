@@ -991,6 +991,70 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("reports file monitoring fd diagnostics for explicit out-of-range values and start-condition usage", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=start-condition,rc,+0+0;",
+        "  el=file1,flwj,+160+0;",
+        "  el=file2,rflwj,+320+0;",
+        "  unit=start-condition,,jp1admin,;",
+        "  {",
+        "    ty=rc;",
+        "  }",
+        "  unit=file1,,jp1admin,;",
+        "  {",
+        "    ty=flwj;",
+        "    fd=0;",
+        "  }",
+        "  unit=file2,,jp1admin,;",
+        "  {",
+        "    ty=rflwj;",
+        "    fd=10;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 14,
+          column: 4,
+          length: 4,
+          message: "Execution time (fd) must be between 1 and 1440.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 4,
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+        {
+          line: 19,
+          column: 4,
+          length: 5,
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
+    );
+  });
+
   test("does not report event timeout action diagnostics for omitted defaults and valid explicit values", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
@@ -1216,6 +1280,70 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => diagnostic.severity),
       ["error", "error", "error", "error"],
+    );
+  });
+
+  test("reports execution-interval control fd diagnostics for explicit out-of-range values and start-condition usage", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=start-condition,rc,+0+0;",
+        "  el=interval1,tmwj,+160+0;",
+        "  el=interval2,rtmwj,+320+0;",
+        "  unit=start-condition,,jp1admin,;",
+        "  {",
+        "    ty=rc;",
+        "  }",
+        "  unit=interval1,,jp1admin,;",
+        "  {",
+        "    ty=tmwj;",
+        "    fd=1441;",
+        "  }",
+        "  unit=interval2,,jp1admin,;",
+        "  {",
+        "    ty=rtmwj;",
+        "    fd=10;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 14,
+          column: 4,
+          length: 7,
+          message: "Execution time (fd) must be between 1 and 1440.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 7,
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+        {
+          line: 19,
+          column: 4,
+          length: 5,
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
     );
   });
 
@@ -2273,6 +2401,70 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(
       diagnostics.map((diagnostic) => diagnostic.severity),
       ["error", "error", "error", "error", "error", "error"],
+    );
+  });
+
+  test("reports event receiving fd diagnostics for explicit out-of-range values and start-condition usage", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=start-condition,rc,+0+0;",
+        "  el=wait1,evwj,+160+0;",
+        "  el=wait2,revwj,+320+0;",
+        "  unit=start-condition,,jp1admin,;",
+        "  {",
+        "    ty=rc;",
+        "  }",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    fd=0;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    fd=10;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 14,
+          column: 4,
+          length: 4,
+          message: "Execution time (fd) must be between 1 and 1440.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 4,
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+        {
+          line: 19,
+          column: 4,
+          length: 5,
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
     );
   });
 

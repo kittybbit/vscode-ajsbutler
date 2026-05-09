@@ -255,6 +255,18 @@ Scenario: Execution-interval control end timing must preserve documented
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Shared wait-job execution time must preserve documented range and
+  start-condition behavior
+  Given a syntactically valid JP1/AJS document with a file monitoring job,
+    execution-interval control job, or JP1 event reception monitoring job
+  And explicit `fd` is outside the JP1/AJS3 v13 range `1..1440`
+  Or explicit `fd` is specified on a job defined in a start-condition context
+    where the JP1/AJS3 v13 manual says the parameter is disabled when the job
+    executes
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Shared filename-like rules stay explicit across parameter families
   Given a syntactically valid JP1/AJS document with a parameter family that
     uses documented filename-like or host-like values
@@ -297,9 +309,9 @@ Scenario: Shared string diagnostics preserve documented macro-variable allowance
 
 - desktop and web extension entry points continue to share the same
   application logic for diagnostics and hover decisions
-- compatible-ISAM-specific semantic diagnostics require an explicit host or
-  workspace configuration input because the JP1/AJS definition file alone does
-  not identify the database mode
+- compatible-ISAM-specific semantic diagnostics are out of scope for this
+  repository because compatible-ISAM is limited to legacy migration-mode
+  environments that this extension will not model or support explicitly
 
 ## Risks Or Edge Cases
 

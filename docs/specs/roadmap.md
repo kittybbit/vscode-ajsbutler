@@ -51,6 +51,13 @@
      through editor-feedback while preserving raw parameter data.
    - Continue with documented deferred diagnostics and range-validation gaps
      only as focused, approval-gated slices.
+   - After the delivered grouped JP1 event reception monitoring timeout-control
+     slice, the next recommended JP1/AJS v13 candidate should group the shared
+     wait-job execution-time parameter `fd` across file monitoring,
+     execution-interval control, and JP1 event reception monitoring jobs,
+     because those families now share one parameter name, one `1..1440`
+     numeric-range rule, one documented start-condition-disabled rule, and
+     existing wait-like diagnostic seams.
    - Keep behavior-preserving slices separate from behavior-changing manual
      alignment slices.
 
