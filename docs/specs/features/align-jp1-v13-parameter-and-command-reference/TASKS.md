@@ -605,6 +605,41 @@
   and dependency path, and raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation remain unchanged.
+- 2026-05-09: Coverage-matrix re-check after the delivered transfer-file
+  filename/path slice found one stale status note: HTTP Connection job
+  `eu` is already aligned in runtime and regression evidence, so the matrix
+  row is now treated as documentation-sync work rather than remaining
+  implementation backlog.
+- 2026-05-09: Remaining actionable JP1/AJS v13 gaps were re-grouped again by
+  user-meaningful job type and shared implementation seam. The next
+  recommended approval-gated candidate is grouped execution-interval control
+  context diagnostics for `tmwj` / `rtmwj`, centered on explicit `etn=y`
+  combinations that violate documented start-condition or compatible-ISAM
+  restrictions through the existing editor-feedback boundary.
+- 2026-05-09: Investigation confirmed that `Tmwj` is the only currently
+  modeled unit wrapper exposing `etn`, so this context-sensitive slice stays
+  user-meaningful without broadening into unrelated `ets`-bearing wait-job
+  families. The remaining refactor need is limited to the smallest helper
+  extraction that keeps context-aware checks on the current
+  `executionIntervalControlDiagnosticRules` path instead of adding a separate
+  one-off implementation branch.
+- 2026-05-09: `EXECUTION_INTERVAL_CONTROL_JOB_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`, and
+  `uc-provide-editor-feedback.md` now record the pending execution-interval
+  context slice and the synchronized HTTP Connection coverage status.
+- 2026-05-09: Grouped execution-interval control context diagnostics now
+  report explicit `etn=y` on `tmwj` / `rtmwj` when the unit is not defined in
+  a start-condition context, through the existing editor-feedback boundary.
+  Raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation remain unchanged.
+- 2026-05-09: Implementation confirmed that the current editor-feedback
+  boundary has no host or workspace input that identifies compatible-ISAM
+  mode, so that environment-specific restriction remains deferred instead of
+  being guessed from JP1/AJS definition text.
+- 2026-05-09: `EXECUTION_INTERVAL_CONTROL_JOB_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
+  `TASKS.md`, and `uc-provide-editor-feedback.md` now record the delivered
+  start-condition slice and the deferred compatible-ISAM note.
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   transfer-file explicit value-shape diagnostics implementation.
 - 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
@@ -634,22 +669,21 @@
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-05-08
-- Approved scope: grouped transfer-file filename/path semantics through the
-  existing editor-feedback boundary, limited to explicit `ts1` to `ts4` and
-  `td1` to `td4` values on UNIX/PC jobs, UNIX/PC custom jobs, QUEUE jobs, and
-  recovery QUEUE jobs, plus the smallest refactor needed to keep
-  transfer-operation and QUEUE transfer-file checks on the current
-  `buildSyntaxDiagnostics.ts` helper and rule-array path, while preserving
-  raw parser output, domain wrapper values, normalized parameters, unit-list
-  projection, flow projection, and command generation. Parser grammar,
-  domain normalization changes, transfer-operation `topN` behavior,
-  projection changes, platform-specific path normalization, generated
-  artifacts, dependency versions, configuration, and `engines.vscode` remain
-  out of scope unless re-approved.
+- Approved at: 2026-05-09
+- Approved scope: grouped execution-interval control context diagnostics for
+  explicit `etn=y` combinations on `tmwj` / `rtmwj`, limited to documented
+  start-condition and compatible-ISAM restrictions through the existing
+  editor-feedback boundary, plus the smallest helper/rule-array refactor
+  needed to keep the checks on the current
+  `buildSyntaxDiagnostics.ts` execution-interval path, while preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, command generation, generated artifacts,
+  dependency versions, configuration, and `engines.vscode`.
 
-Current implementation gate: grouped transfer-file filename/path semantics are
-implemented and validated inside the recorded scope.
+Current implementation gate: the approved grouped execution-interval control
+context slice is implemented and validated for the file-local detectable
+start-condition restriction. Compatible-ISAM detection remains deferred
+because the current editor-feedback boundary has no database-mode input.
 
 ## Prior Approval Evidence
 
@@ -973,6 +1007,29 @@ implemented and validated inside the recorded scope.
 
 ## Validation
 
+- 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  execution-interval control start-condition diagnostics implementation
+- 2026-05-09: `rtk pnpm test` completed with exit code 0 after grouped
+  execution-interval control start-condition diagnostics implementation; the
+  VS Code harness emitted the existing macOS `task_name_for_pid` codesign
+  noise line
+- 2026-05-09: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped execution-interval control start-condition diagnostics
+  implementation and emitted the existing localhost dev-extension
+  `package.nls.json` 404 noise
+- 2026-05-09: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped execution-interval control start-condition
+  diagnostics implementation
+- 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after final SDD
+  sync for grouped execution-interval control start-condition diagnostics
+- 2026-05-09: `rtk pnpm run lint:md` completed with exit code 0 after final
+  SDD sync for grouped execution-interval control start-condition diagnostics
+- 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after the
+  docs-only execution-interval context investigation and HTTP Connection
+  coverage sync
+- 2026-05-09: `rtk pnpm run lint:md` completed with exit code 0 after the
+  docs-only execution-interval context investigation and HTTP Connection
+  coverage sync
 - 2026-05-08: `rtk pnpm run qlty` completed with exit code 0 after grouped
   transfer-file filename/path diagnostics implementation
 - 2026-05-08: `rtk pnpm test` completed with exit code 0 after grouped

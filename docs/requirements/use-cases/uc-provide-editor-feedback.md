@@ -205,6 +205,17 @@ Scenario: Execution-interval control job values must stay within documented
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Execution-interval control end timing must preserve documented
+  context rules
+  Given a syntactically valid JP1/AJS document with an execution-interval
+    control job
+  And explicit `etn=y` is specified
+  And the surrounding execution-interval context violates the documented
+    JP1/AJS3 v13 start-condition restriction
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Shared filename-like rules stay explicit across parameter families
   Given a syntactically valid JP1/AJS document with a parameter family that
     uses documented filename-like or host-like values
@@ -247,6 +258,9 @@ Scenario: Shared string diagnostics preserve documented macro-variable allowance
 
 - desktop and web extension entry points continue to share the same
   application logic for diagnostics and hover decisions
+- compatible-ISAM-specific semantic diagnostics require an explicit host or
+  workspace configuration input because the JP1/AJS definition file alone does
+  not identify the database mode
 
 ## Risks Or Edge Cases
 

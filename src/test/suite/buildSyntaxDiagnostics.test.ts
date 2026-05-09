@@ -1081,14 +1081,19 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
-  test("does not report execution-interval control diagnostics for omitted defaults and valid explicit values", () => {
+  test("does not report execution-interval control diagnostics for valid start-condition values", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [
         "unit=root,,jp1admin,;",
         "{",
         "  ty=g;",
+        "  el=.CONDITION,rc,+0+0;",
         "  el=intervalDefault,tmwj,+0+0;",
         "  el=intervalExplicit,rtmwj,+160+0;",
+        "  unit=.CONDITION,,jp1admin,;",
+        "  {",
+        "    ty=rc;",
+        "  }",
         "  unit=intervalDefault,,jp1admin,;",
         "  {",
         "    ty=tmwj;",
@@ -1106,6 +1111,46 @@ suite("Build Syntax Diagnostics", () => {
     );
 
     assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports execution-interval control diagnostics when etn=y is used outside start-condition context", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=interval,tmwj,+0+0;",
+        "  unit=interval,,jp1admin,;",
+        "  {",
+        "    ty=tmwj;",
+        "    etn=y;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 8,
+          column: 4,
+          length: 3,
+          message:
+            "End timing (etn=y) can be specified only for execution-interval control jobs defined as start conditions.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error"],
+    );
   });
 
   test("reports execution-interval control diagnostics for explicit invalid tmitv and etn values", () => {
