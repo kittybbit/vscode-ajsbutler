@@ -202,6 +202,20 @@ Scenario: Event reception monitoring string filters must stay within documented
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
 
+Scenario: Event reception monitoring timeout controls must preserve documented
+  values and start-condition rules
+  Given a syntactically valid JP1/AJS document with a JP1 event reception
+    monitoring job
+  And explicit `etm` is outside the JP1/AJS3 v13 range `1..1440`
+  Or explicit `ha` is outside the JP1/AJS3 v13 value set `{y|n}`
+  Or explicit `ets` is outside the JP1/AJS3 v13 value set
+    `{kl|nr|wr|an}`
+  Or explicit `etm`, `ha`, or `ets` is specified on a job defined in a
+    start-condition context
+  When editor feedback is requested
+  Then application-level diagnostic DTOs include the semantic parameter violation
+  And raw parser output remains available to downstream consumers
+
 Scenario: Event host values must stay within documented byte-length rules
   Given a syntactically valid JP1/AJS document with a JP1 event sending job
     or JP1 event reception monitoring job

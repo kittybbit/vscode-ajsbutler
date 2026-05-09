@@ -3,11 +3,12 @@
 ## Purpose
 
 Record the JP1/AJS3 version 13 alignment status and remaining grouped
-validation candidate for JP1 event reception monitoring job semantic
+validation candidates for JP1 event reception monitoring job semantic
 diagnostics.
 
-This document covers the delivered `evesc`, `evwid`, and `evipa` diagnostic
-slices plus the remaining grouped follow-up for `Evwj` / `Revwj`.
+This document covers the delivered `evesc`, `evwid`, `evipa`, and
+timeout-control diagnostic slices plus the remaining grouped follow-up for
+`Evwj` / `Revwj`.
 
 ## Normative Reference
 
@@ -125,6 +126,9 @@ slices plus the remaining grouped follow-up for `Evwj` / `Revwj`.
   preserving regular-expression and macro-variable allowance.
 - Grouped event-receiving string-filter validation is now aligned in
   `EVENT_RECEIVING_STRING_FILTER_ALIGNMENT.md`.
-- Revisit timeout-oriented event reception monitoring validation later.
+- Grouped event-receiving timeout-control validation is now aligned in
+  `EVENT_RECEIVING_TIMEOUT_CONTROL_ALIGNMENT.md`.
+- Revisit `fd` and broader wait-condition event reception monitoring
+  validation later.
 - Grouped numeric identifier validation for `evuid`, `evgid`, and `evpid` is
   now tracked in `EVENT_RECEIVING_NUMERIC_IDENTIFIER_ALIGNMENT.md`.

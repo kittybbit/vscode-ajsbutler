@@ -1064,6 +1064,18 @@ const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 
 const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
   buildExplicitDecimalRangeRule(
+    "etm",
+    1,
+    1440,
+    "Event timeout period (etm) must be between 1 and 1440.",
+  ),
+  buildExplicitAllowedValuesRule(
+    "ha",
+    new Set(["y", "n"]),
+    "Hold attribute (ha) must be y or n.",
+  ),
+  ...eventTimeoutActionDiagnosticRules,
+  buildExplicitDecimalRangeRule(
     "evuid",
     -1,
     9999999999,
@@ -1409,7 +1421,42 @@ const buildEventReceivingDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, eventReceivingDiagnosticTargetTypes).flatMap(
-    (unit) => collectRuleDiagnostics(unit, eventReceivingDiagnosticRules),
+    (unit) => {
+      const diagnostics = collectRuleDiagnostics(
+        unit,
+        eventReceivingDiagnosticRules,
+      );
+
+      if (!hasStartConditionContext(unit)) {
+        return diagnostics;
+      }
+
+      const invalidStartConditionParameters = [
+        {
+          parameter: findParameter(unit, "etm"),
+          message:
+            "Event timeout period (etm) cannot be specified for jobs defined as start conditions.",
+        },
+        {
+          parameter: findParameter(unit, "ha"),
+          message:
+            "Hold attribute (ha) cannot be specified for jobs defined as start conditions.",
+        },
+        {
+          parameter: findParameter(unit, "ets"),
+          message:
+            "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
+        },
+      ];
+
+      invalidStartConditionParameters.forEach(({ parameter, message }) => {
+        if (parameter) {
+          diagnostics.push(buildDiagnostic(parameter, message));
+        }
+      });
+
+      return diagnostics;
+    },
   );
 
 export const buildSyntaxDiagnostics = (
