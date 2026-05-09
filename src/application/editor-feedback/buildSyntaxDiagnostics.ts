@@ -88,11 +88,13 @@ const buildExplicitDecimalRangeRule = (
   minimum: number,
   maximum: number,
   message: string,
+  options: { allowNegative?: boolean } = {},
 ): UnitParameterDiagnosticRule => ({
   key,
   message,
   isInvalid: (parameter) =>
-    parseExplicitDecimalInRange(parameter, minimum, maximum) === undefined,
+    parseExplicitDecimalInRange(parameter, minimum, maximum, options) ===
+    undefined,
 });
 
 const buildExplicitByteLengthRule = (
@@ -131,9 +133,11 @@ const parseExplicitDecimalInRange = (
   parameter: UnitParameter | undefined,
   minimum: number,
   maximum: number,
+  options: { allowNegative?: boolean } = {},
 ): number | undefined => {
   const rawValue = parameter?.value;
-  if (!rawValue || !/^\d+$/.test(rawValue)) {
+  const decimalPattern = options.allowNegative ? /^-?\d+$/ : /^\d+$/;
+  if (!rawValue || !decimalPattern.test(rawValue)) {
     return undefined;
   }
 
@@ -1059,6 +1063,27 @@ const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 ];
 
 const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
+  buildExplicitDecimalRangeRule(
+    "evuid",
+    -1,
+    9999999999,
+    "Event issue source user ID (evuid) must be a signed decimal value between -1 and 9999999999.",
+    { allowNegative: true },
+  ),
+  buildExplicitDecimalRangeRule(
+    "evgid",
+    -1,
+    9999999999,
+    "Event issue source group ID (evgid) must be a signed decimal value between -1 and 9999999999.",
+    { allowNegative: true },
+  ),
+  buildExplicitDecimalRangeRule(
+    "evpid",
+    -1,
+    9999999999,
+    "Event issue source process ID (evpid) must be a signed decimal value between -1 and 9999999999.",
+    { allowNegative: true },
+  ),
   {
     key: "evusr",
     message:

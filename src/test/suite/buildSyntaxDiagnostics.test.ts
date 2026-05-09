@@ -2053,6 +2053,100 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report event receiving numeric-identifier diagnostics for omitted and boundary values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=wait1,evwj,+0+0;",
+        "  el=wait2,revwj,+160+0;",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evuid=-1;",
+        "    evgid=0;",
+        "    evpid=9999999999;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event receiving numeric-identifier diagnostics for explicit out-of-range values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=wait1,evwj,+0+0;",
+        "  el=wait2,revwj,+160+0;",
+        "  el=wait3,evwj,+320+0;",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evuid=-2;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    evgid=10000000000;",
+        "  }",
+        "  unit=wait3,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evpid=abc;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 3);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 9,
+          column: 4,
+          length: 5,
+          message:
+            "Event issue source user ID (evuid) must be a signed decimal value between -1 and 9999999999.",
+        },
+        {
+          line: 14,
+          column: 4,
+          length: 5,
+          message:
+            "Event issue source group ID (evgid) must be a signed decimal value between -1 and 9999999999.",
+        },
+        {
+          line: 19,
+          column: 4,
+          length: 5,
+          message:
+            "Event issue source process ID (evpid) must be a signed decimal value between -1 and 9999999999.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error"],
+    );
+  });
+
   test("reports event-host diagnostics for explicit out-of-range evhst values", () => {
     const oversizedHost = "a".repeat(256);
     const diagnostics = buildSyntaxDiagnostics(

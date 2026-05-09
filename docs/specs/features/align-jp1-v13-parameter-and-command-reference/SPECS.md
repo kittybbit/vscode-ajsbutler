@@ -281,6 +281,23 @@ JP1/AJS3 version 13 reference documents.
   byte-length or allowed-format rules, while raw parser output, domain
   wrapper values, normalized parameters, unit-list projection, flow
   projection, and command generation remain unchanged.
+- JP1 event reception monitoring job numeric identifier validation is
+  approval-sensitive because existing behavior preserves explicit `evuid`,
+  `evgid`, and `evpid` values as raw parsed data without editor feedback. A
+  grouped diagnostic slice should stay inside application editor-feedback for
+  `evwj` / `revwj`, report explicit signed-decimal values outside the
+  documented JP1/AJS3 v13 range `-1..9999999999`, reuse or extract only the
+  smallest signed-range helper needed to keep the checks on the current
+  event-receiving rule-array path, and preserve raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation.
+- JP1 event reception monitoring job numeric identifier validation is aligned
+  through application editor-feedback. Explicit `evuid`, `evgid`, and
+  `evpid` values on `evwj` / `revwj` now report a semantic diagnostic when
+  they are not signed decimal integers within the JP1/AJS3 v13 range
+  `-1..9999999999`, while raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
 - JP1 event reception monitoring job `evwid` and `evipa` validation are
   aligned through application editor-feedback. Explicit `evwid` values on
   `evwj` / `revwj` now report a semantic diagnostic when they are not

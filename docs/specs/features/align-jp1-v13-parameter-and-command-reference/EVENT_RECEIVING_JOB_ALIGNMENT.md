@@ -125,5 +125,6 @@ slices plus the remaining grouped follow-up for `Evwj` / `Revwj`.
   preserving regular-expression and macro-variable allowance.
 - Grouped event-receiving string-filter validation is now aligned in
   `EVENT_RECEIVING_STRING_FILTER_ALIGNMENT.md`.
-- Revisit numeric identifier and timeout-oriented event reception monitoring
-  validation as separate later slices.
+- Revisit timeout-oriented event reception monitoring validation later.
+- Grouped numeric identifier validation for `evuid`, `evgid`, and `evpid` is
+  now tracked in `EVENT_RECEIVING_NUMERIC_IDENTIFIER_ALIGNMENT.md`.
