@@ -894,6 +894,15 @@ const eventTimeoutActionDiagnosticRules = [
   ),
 ] as const;
 
+const waitJobExecutionTimeDiagnosticRules = [
+  buildExplicitDecimalRangeRule(
+    "fd",
+    1,
+    1440,
+    "Execution time (fd) must be between 1 and 1440.",
+  ),
+] as const;
+
 const transferFileByteLengthRules: readonly UnitParameterDiagnosticRule[] =
   transferFileIndexes.flatMap((index) => [
     buildExplicitByteLengthRule(
@@ -999,6 +1008,7 @@ const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
       return !splitFileMonitoringConditions(effectiveFlwc).has("c");
     },
   },
+  ...waitJobExecutionTimeDiagnosticRules,
   ...eventTimeoutActionDiagnosticRules,
 ];
 
@@ -1015,6 +1025,7 @@ const executionIntervalControlDiagnosticRules: readonly UnitParameterDiagnosticR
       new Set(["y", "n"]),
       "End timing (etn) must be y or n.",
     ),
+    ...waitJobExecutionTimeDiagnosticRules,
     ...eventTimeoutActionDiagnosticRules,
   ];
 
@@ -1063,6 +1074,7 @@ const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
 ];
 
 const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] = [
+  ...waitJobExecutionTimeDiagnosticRules,
   buildExplicitDecimalRangeRule(
     "etm",
     1,
@@ -1353,7 +1365,16 @@ const buildFileMonitoringDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, fileMonitoringDiagnosticTargetTypes).flatMap(
-    (unit) => collectRuleDiagnostics(unit, fileMonitoringDiagnosticRules),
+    (unit) => [
+      ...collectRuleDiagnostics(unit, fileMonitoringDiagnosticRules),
+      ...collectStartConditionDisabledParameterDiagnostics(unit, [
+        {
+          key: "fd",
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+      ]),
+    ],
   );
 
 const buildExecutionIntervalControlDiagnostics = (
@@ -1363,10 +1384,16 @@ const buildExecutionIntervalControlDiagnostics = (
     rootUnits,
     executionIntervalControlDiagnosticTargetTypes,
   ).flatMap((unit) => {
-    const diagnostics = collectRuleDiagnostics(
-      unit,
-      executionIntervalControlDiagnosticRules,
-    );
+    const diagnostics = [
+      ...collectRuleDiagnostics(unit, executionIntervalControlDiagnosticRules),
+      ...collectStartConditionDisabledParameterDiagnostics(unit, [
+        {
+          key: "fd",
+          message:
+            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+        },
+      ]),
+    ];
     const endTimingParameter = findParameter(unit, "etn");
 
     if (endTimingParameter?.value === "y" && !hasStartConditionContext(unit)) {
@@ -1417,43 +1444,56 @@ const isValidExplicitEventSearchCondition = (
   return parseExplicitDecimalInRange(parameter, 1, 720) !== undefined;
 };
 
+const collectStartConditionDisabledParameterDiagnostics = (
+  unit: Unit,
+  parameterMessages: readonly { key: string; message: string }[],
+): SyntaxDiagnosticDto[] => {
+  if (!hasStartConditionContext(unit)) {
+    return [];
+  }
+
+  return parameterMessages.flatMap(({ key, message }) => {
+    const parameter = findParameter(unit, key);
+    return parameter ? [buildDiagnostic(parameter, message)] : [];
+  });
+};
+
 const buildEventReceivingDiagnostics = (
   rootUnits: Unit[],
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(rootUnits, eventReceivingDiagnosticTargetTypes).flatMap(
     (unit) => {
-      const diagnostics = collectRuleDiagnostics(
-        unit,
-        eventReceivingDiagnosticRules,
-      );
-
-      if (!hasStartConditionContext(unit)) {
-        return diagnostics;
-      }
-
-      const invalidStartConditionParameters = [
-        {
-          parameter: findParameter(unit, "etm"),
-          message:
-            "Event timeout period (etm) cannot be specified for jobs defined as start conditions.",
-        },
-        {
-          parameter: findParameter(unit, "ha"),
-          message:
-            "Hold attribute (ha) cannot be specified for jobs defined as start conditions.",
-        },
-        {
-          parameter: findParameter(unit, "ets"),
-          message:
-            "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
-        },
+      const diagnostics = [
+        ...collectRuleDiagnostics(unit, eventReceivingDiagnosticRules),
+        ...collectStartConditionDisabledParameterDiagnostics(unit, [
+          {
+            key: "fd",
+            message:
+              "Execution time (fd) cannot be specified for jobs defined as start conditions.",
+          },
+        ]),
       ];
 
-      invalidStartConditionParameters.forEach(({ parameter, message }) => {
-        if (parameter) {
-          diagnostics.push(buildDiagnostic(parameter, message));
-        }
-      });
+      const invalidStartConditionParameters =
+        collectStartConditionDisabledParameterDiagnostics(unit, [
+          {
+            key: "etm",
+            message:
+              "Event timeout period (etm) cannot be specified for jobs defined as start conditions.",
+          },
+          {
+            key: "ha",
+            message:
+              "Hold attribute (ha) cannot be specified for jobs defined as start conditions.",
+          },
+          {
+            key: "ets",
+            message:
+              "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
+          },
+        ]);
+
+      diagnostics.push(...invalidStartConditionParameters);
 
       return diagnostics;
     },

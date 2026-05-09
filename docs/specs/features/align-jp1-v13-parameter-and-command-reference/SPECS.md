@@ -190,11 +190,24 @@ JP1/AJS3 version 13 reference documents.
   start-condition context, while raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation remain unchanged.
-- Execution-interval control compatible-ISAM restrictions remain approval-
-  sensitive because the current repository has no explicit runtime input that
-  identifies database mode for editor-feedback decisions. Any future slice
-  should introduce that environment/configuration seam deliberately instead of
-  inferring compatible-ISAM mode from JP1/AJS definition text alone.
+- Execution-interval control compatible-ISAM restrictions are not planned for
+  this repository because compatible-ISAM is limited to legacy migration-mode
+  environments that the extension will not model or support explicitly.
+- Shared wait-job execution-time diagnostics for `fd` are approval-sensitive
+  because file monitoring, execution-interval control, and JP1 event
+  reception monitoring jobs all expose the same parameter while current
+  behavior preserves explicit raw values without editor feedback. A focused
+  follow-up should stay inside application editor-feedback, report explicit
+  `fd` values outside the documented JP1/AJS3 v13 range `1..1440`, report
+  explicit `fd` on jobs defined in a start-condition context where the manual
+  says the parameter is disabled when the job executes, reuse the existing
+  start-condition helper and only the smallest shared helper/rule-array
+  refactor needed to keep the checks on the current wait-like diagnostic
+  paths, and preserve raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation.
+  Broader wait-condition family alignment remains separate approval-sensitive
+  work. Compatible-ISAM-sensitive restrictions are not planned because that
+  mode is outside this repository's supported environment scope.
 - Job end-judgment `jd` / `abr` diagnostics are approval-sensitive because
   existing behavior preserves explicit invalid combinations as raw parsed
   values without editor feedback. A diagnostic slice must preserve raw parser

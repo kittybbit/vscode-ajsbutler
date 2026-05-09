@@ -61,9 +61,9 @@ restrictions that are not yet modeled in editor feedback.
   editor-feedback boundary for `tmwj` / `rtmwj`.
 - Explicit `etn=y` now reports a semantic diagnostic when a `tmwj` / `rtmwj`
   unit is not defined in a start-condition context.
-- Compatible-ISAM-specific `etn` restrictions remain deferred because the
-  current editor-feedback boundary has no host-configuration input that can
-  identify database mode from the JP1/AJS definition alone.
+- Compatible-ISAM-specific `etn` restrictions are not planned for this
+  repository because compatible-ISAM applies only to legacy migration-mode
+  environments that this extension will not model explicitly.
 - Broader wait-job default reconciliation also remains outside the smallest
   meaningful validation slice.
 
@@ -107,6 +107,6 @@ restrictions that are not yet modeled in editor feedback.
   backlog grouped by one job definition instead of by environment-specific
   file-path behavior.
 - Model compatible-ISAM as a hard-coded global assumption:
-  rejected because the current repository has no explicit source of truth for
-  database mode, and inferring one inside editor feedback would hide a new
-  environment dependency.
+  rejected because compatible-ISAM is a legacy migration-only mode that this
+  repository will not support explicitly, and inferring it inside editor
+  feedback would add an unsupported environment dependency.

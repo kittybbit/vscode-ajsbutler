@@ -119,7 +119,9 @@ control gaps all sit on the same `evwj` / `revwj` diagnostic seam.
 
 ## Remaining Gap
 
-- `fd` range or disabled-on-execution behavior, compatible-ISAM-sensitive
-  interpretation, and the broader wait-condition parameter family remain
-  separate future slices because they introduce different validation shapes
-  or new runtime-context seams.
+- `fd` range or disabled-on-execution behavior and the broader wait-condition
+  parameter family remain separate future slices because they introduce
+  different validation shapes than this delivered timeout-control slice.
+  Compatible-ISAM-sensitive interpretation is not planned for this repository
+  because that mode is limited to legacy migration environments outside the
+  supported scope.

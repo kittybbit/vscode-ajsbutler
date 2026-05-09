@@ -251,9 +251,25 @@
 - [x] Add focused regression evidence for valid and invalid explicit `etm`,
       `ha`, and `ets` values, including start-condition-context violations
 - [x] Run required code-change validation after implementation
-- [ ] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
+- [x] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
       delivered JP1 event reception monitoring timeout-control slice and
       select the next candidate using the same user-meaningful grouping rule
+- [x] Record the next grouped shared wait-job execution-time (`fd`) slice in
+      feature-local investigation docs with manual-backed scope, affected
+      seams, alternatives, and regression evidence
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      shared wait-job `fd` diagnostics
+- [x] Implement grouped shared wait-job `fd` diagnostics only after approval
+- [x] Refactor `buildSyntaxDiagnostics.ts` within the approved scope so
+      shared `fd` checks stay on the existing file-monitoring,
+      execution-interval, and event-receiving diagnostic paths through the
+      smallest shared helper seam
+- [x] Add focused regression evidence for valid explicit `fd`, explicit
+      out-of-range `fd`, and explicit `fd` usage in start-condition context
+      across file monitoring, execution-interval control, and JP1 event
+      reception monitoring jobs
+- [x] Run required code-change validation after implementation
 
 ## Notes
 
@@ -690,13 +706,13 @@
   Raw parser output, domain wrapper values, normalized parameters, unit-list
   projection, flow projection, and command generation remain unchanged.
 - 2026-05-09: Implementation confirmed that the current editor-feedback
-  boundary has no host or workspace input that identifies compatible-ISAM
-  mode, so that environment-specific restriction remains deferred instead of
-  being guessed from JP1/AJS definition text.
+  boundary does not model compatible-ISAM mode, and the repository now treats
+  compatible-ISAM-specific restrictions as unsupported because that mode is
+  limited to legacy migration environments outside the target scope.
 - 2026-05-09: `EXECUTION_INTERVAL_CONTROL_JOB_ALIGNMENT.md`,
   `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
   `TASKS.md`, and `uc-provide-editor-feedback.md` now record the delivered
-  start-condition slice and the deferred compatible-ISAM note.
+  start-condition slice and the unsupported compatible-ISAM note.
 - 2026-05-09: Remaining actionable JP1/AJS v13 gaps were re-checked after the
   delivered execution-interval control start-condition slice. The next
   recommended approval-gated candidate is grouped JP1 event reception
@@ -798,6 +814,45 @@
   `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
   `TASKS.md`, and `uc-provide-editor-feedback.md` now record the delivered
   event-receiving timeout-control slice.
+- 2026-05-09: Remaining actionable JP1/AJS v13 gaps were re-checked after the
+  delivered JP1 event reception monitoring timeout-control slice. The next
+  recommended approval-gated candidate is grouped shared wait-job
+  execution-time (`fd`) diagnostics across `flwj` / `rflwj`,
+  `tmwj` / `rtmwj`, and `evwj` / `revwj`, because the remaining user-visible
+  gap now shares one parameter name, one numeric-range rule, one documented
+  start-condition-disabled rule, and existing wait-like diagnostic seams
+  inside `buildSyntaxDiagnostics.ts`.
+- 2026-05-09: Investigation confirmed from the JP1/AJS3 v13 file monitoring,
+  execution-interval control, and JP1 event reception monitoring definitions
+  that explicit `fd` accepts decimal values in the range `1..1440`, and when
+  the job is defined as a start condition the parameter is disabled when the
+  job executes.
+- 2026-05-09: The likely code refactor seam for the next slice is limited to
+  reusing the current decimal-range rule builder and
+  `hasStartConditionContext(...)` helper, plus only the smallest shared
+  helper or rule-array extraction needed to keep `fd` checks on the current
+  file-monitoring, execution-interval, and event-receiving diagnostics
+  paths instead of adding a separate validation branch.
+- 2026-05-09: `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`, `SPECS.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `docs/specs/plans.md`,
+  `docs/specs/roadmap.md`, `TASKS.md`, and
+  `uc-provide-editor-feedback.md` now record the pending shared wait-job
+  `fd` slice and its approval boundary.
+- 2026-05-09: Grouped shared wait-job execution-time (`fd`) diagnostics now
+  report explicit out-of-range `fd` values and explicit `fd` usage in
+  start-condition context on `flwj` / `rflwj`, `tmwj` / `rtmwj`, and
+  `evwj` / `revwj` through the existing editor-feedback boundary. Raw parser
+  output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation remain unchanged.
+- 2026-05-09: `buildSyntaxDiagnostics.ts` now keeps the shared `fd` checks on
+  the existing file-monitoring, execution-interval, and event-receiving
+  diagnostic paths by reusing the current decimal-range rule builder and
+  sibling start-condition helper, plus only the smallest shared helper
+  extraction needed for start-condition-disabled parameters.
+- 2026-05-09: `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`, `SPECS.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `docs/specs/plans.md`, `TASKS.md`, and
+  `uc-provide-editor-feedback.md` now record the delivered shared wait-job
+  `fd` slice and the unsupported compatible-ISAM policy.
 - 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after grouped
   event-receiving timeout-control diagnostics implementation.
 - 2026-05-09: `rtk pnpm test` completed with exit code 0 after grouped
@@ -867,23 +922,34 @@
 
 - Status: Approved
 - Approved at: 2026-05-09
-- Approved scope: grouped JP1 event reception monitoring timeout-control
-  diagnostics for explicit `etm`, `ha`, and `ets` values on `evwj` /
-  `revwj`, limited to the documented `etm` range `1..1440`, `ha` value set
-  `{y|n}`, `ets` value set `{kl|nr|wr|an}`, and explicit use of `etm`, `ha`,
-  or `ets` on jobs defined in a start-condition context through the existing
-  editor-feedback boundary, plus the smallest helper/rule-array refactor
-  needed to keep the checks on the current `buildSyntaxDiagnostics.ts`
-  event-receiving path, while preserving raw parser output, domain wrapper
-  values, normalized parameters, unit-list projection, flow projection,
-  command generation, generated artifacts, dependency versions,
-  configuration, and `engines.vscode`.
+- Approved scope: grouped shared wait-job execution-time (`fd`) diagnostics
+  for explicit `fd` values on `flwj` / `rflwj`, `tmwj` / `rtmwj`, and
+  `evwj` / `revwj`, limited to the documented `fd` range `1..1440` and the
+  documented start-condition-disabled behavior for explicit `fd` through the
+  existing editor-feedback boundary, plus the smallest helper/rule-array
+  refactor needed to keep the checks on the current file-monitoring,
+  execution-interval, and event-receiving diagnostic paths, while preserving
+  raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, command generation, generated artifacts,
+  dependency versions, configuration, and `engines.vscode`.
 
-Current implementation gate: approved implementation may proceed only within
-the grouped event-receiving timeout-control scope recorded above.
+Current implementation gate: the grouped shared wait-job `fd` scope recorded
+above has been approved and implemented.
 
 ## Prior Approval Evidence
 
+- 2026-05-09: User replied "Approved. Proceed with implementation." after the
+  grouped shared wait-job execution-time (`fd`) diagnostics approval request.
+  Approved changes were limited to adding grouped application-level semantic
+  diagnostics for explicit `fd` values on `flwj` / `rflwj`, `tmwj` /
+  `rtmwj`, and `evwj` / `revwj`, limited to the documented range `1..1440`
+  and documented start-condition-disabled behavior through the existing
+  editor-feedback boundary, plus the smallest helper/rule-array refactor
+  needed to keep the checks on the current file-monitoring,
+  execution-interval, and event-receiving diagnostic paths; preserving raw
+  parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, command generation, generated artifacts,
+  dependency versions, configuration, and `engines.vscode`.
 - 2026-05-09: User replied "Approved. Proceed with implementation." after the
   grouped JP1 event reception monitoring timeout-control diagnostics approval
   request. Approved changes are limited to adding grouped application-level
@@ -1259,6 +1325,16 @@ the grouped event-receiving timeout-control scope recorded above.
 
 ## Validation
 
+- 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  shared wait-job `fd` diagnostics implementation
+- 2026-05-09: `rtk pnpm test` completed with exit code 0 after grouped
+  shared wait-job `fd` diagnostics implementation; the VS Code harness
+  emitted the existing macOS `task_name_for_pid` codesign noise line
+- 2026-05-09: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped shared wait-job `fd` diagnostics implementation and emitted the
+  existing localhost dev-extension `package.nls.json` 404 noise
+- 2026-05-09: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped shared wait-job `fd` diagnostics implementation
 - 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after grouped
   execution-interval control start-condition diagnostics implementation
 - 2026-05-09: `rtk pnpm test` completed with exit code 0 after grouped

@@ -71,8 +71,8 @@ rules in `docs/specs/README.md`, not in this file.
 - After the delivered grouped execution-interval control start-condition
   diagnostics slice, the next recommended JP1/AJS v13 candidate should again
   be re-selected from the remaining partial or deferred gaps using the same
-  user-meaningful grouping rule, rather than broadening immediately into a
-  new environment-configuration seam for compatible-ISAM.
+  user-meaningful grouping rule, rather than broadening immediately into
+  unsupported compatible-ISAM-specific behavior.
 - After re-checking the remaining actionable gaps again, the next recommended
   JP1/AJS v13 candidate should move to the remaining event-reception
   monitoring filter family and group the still-raw string-filter parameters
@@ -91,10 +91,13 @@ rules in `docs/specs/README.md`, not in this file.
   manual section, one editor-feedback seam, one existing start-condition
   context helper, and one existing `ets` helper seam.
 - After the delivered grouped JP1 event reception monitoring timeout-control
-  slice, the next recommended JP1/AJS v13 candidate should be re-selected
-  from the remaining partial or deferred gaps using the same user-meaningful
-  grouping rule, instead of broadening immediately into `fd` disabled-
-  behavior or compatible-ISAM-sensitive work.
+  slice, the next recommended JP1/AJS v13 candidate should move to the
+  shared wait-job execution-time (`fd`) family across file monitoring,
+  execution-interval control, and JP1 event reception monitoring jobs,
+  because those families now share one parameter name, one numeric-range
+  rule, one start-condition-disabled rule, and existing diagnostic seams in
+  `buildSyntaxDiagnostics.ts`, while still avoiding unsupported
+  compatible-ISAM-specific behavior.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -113,7 +116,7 @@ rules in `docs/specs/README.md`, not in this file.
 ## Next Priority Tasks
 
 1. Re-check the remaining partial or deferred JP1/AJS3 v13 parameter-alignment
-   gaps after the delivered JP1 event reception monitoring timeout-control
+   gaps after the delivered grouped shared wait-job execution-time (`fd`)
    slice and record the next approval-gated candidate.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
@@ -129,33 +132,35 @@ rules in `docs/specs/README.md`, not in this file.
 
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
-- Objective: deliver the approved JP1/AJS v13 event-reception monitoring
-  timeout-control slice after the delivered numeric-identifier diagnostics.
+- Objective: deliver the approved grouped shared wait-job execution-time
+  (`fd`) slice after the delivered JP1 event reception monitoring
+  timeout-control diagnostics.
 - Status: implementation and validation are complete in the recorded scope.
-- Scope: grouped semantic diagnostics were added for explicit `etm`, `ha`,
-  and `ets` values on `evwj` / `revwj`, including the documented
-  start-condition invalidation for those parameters, plus only the smallest
-  helper/rule-array refactor needed to keep the checks on the current
-  event-receiving diagnostics path.
+- Scope: grouped semantic diagnostics were added for explicit `fd` values on
+  `flwj` / `rflwj`, `tmwj` / `rtmwj`, and `evwj` / `revwj`, limited to the
+  documented range `1..1440` and the documented start-condition-disabled
+  behavior, plus only the smallest helper/rule-array refactor needed to keep
+  the checks on the current file-monitoring, execution-interval, and
+  event-receiving diagnostics paths.
 - Out of scope: parser grammar changes, domain wrapper normalization changes,
   unit-list projection changes, flow projection changes, command generation,
-  `fd` disabled-on-execution behavior, compatible-ISAM detection, generated
+  broader wait-condition parameters, compatible-ISAM detection, generated
   artifacts, dependency changes, configuration, and `engines.vscode`.
 - Impact summary: the implemented scope affected
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
   `src/test/suite/buildSyntaxDiagnostics.test.ts`, the parameter-alignment
   feature docs, and the editor-feedback behavior contract for syntactically
-  valid `evwj` / `revwj` documents.
-- Risks and assumptions: the delivered slice stays diagnostic-only and does
-  not change raw parser output, domain wrapper values, or projection
-  behavior. The current manual wording is clear for `etm`, `ha`, and `ets`
-  invalidation in start-condition context. `fd` remains deferred because its
-  disabled-on-execution semantics are not the same as outright invalid
-  explicit parameter usage.
-- Alternatives considered: returning to HTTP Connection `eu` remains smaller
-  but less user-meaningful; broadening immediately into `fd` or
-  compatible-ISAM work would mix a different semantic shape or a new runtime
-  context seam into the same slice.
+  valid wait-like job documents that specify `fd`.
+- Risks and assumptions: this slice is intended to stay diagnostic-only and
+  must not change raw parser output, domain wrapper values, or projection
+  behavior. The current manual wording is consistent for `fd` across the
+  three targeted job definitions. Compatible-ISAM-sensitive restrictions are
+  intentionally unsupported because compatible-ISAM is limited to legacy
+  migration-mode environments outside this repository's target scope.
+- Alternatives considered: returning to smaller default-only cleanup remains
+  less user-meaningful; broadening immediately into the full wait-condition
+  family would enlarge the seam before the shared `fd` rule is closed, and
+  compatible-ISAM-sensitive work is intentionally unsupported.
 
 ## Build/Test Performance SDD
 
@@ -184,11 +189,12 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped JP1 event reception monitoring timeout-control diagnostics
-  are implemented and validated for explicit `etm`, `ha`, and `ets` values on
-  `evwj` / `revwj`, while the previously delivered event-receiving numeric-
-  identifier and string-filter diagnostics remain complete and compatible-
-  ISAM-sensitive work still deferred.
+  slice: grouped shared wait-job execution-time (`fd`) diagnostics are
+  implemented and validated for explicit `fd` values on
+  `flwj` / `rflwj`, `tmwj` / `rtmwj`, and `evwj` / `revwj`, while the
+  previously delivered event-receiving timeout-control, numeric-identifier,
+  and string-filter diagnostics remain complete and compatible-ISAM-sensitive
+  work is intentionally unsupported.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
