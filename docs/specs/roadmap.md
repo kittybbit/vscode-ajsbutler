@@ -14,7 +14,6 @@
 
 1. Re-base parameter interpretation on JP1/Automatic Job Management System 3
    version 13 Definition File Reference.
-
    - Start from the documented audit of current shared parameter-semantics
      seams.
    - Add traceability from JP1/AJS v13 manual sections to supported parameter
@@ -62,7 +61,6 @@
      alignment slices.
 
 2. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
-
    - Keep transport, authentication, and endpoint details in infrastructure.
    - Keep generated OpenAPI mocks and stubs reproducible from repository-local
      contracts.
@@ -72,7 +70,6 @@
      environment and enough user feedback are recorded.
 
 3. Maintain normalized-model convergence.
-
    - Prefer stable `AjsDocument` / `AjsUnit` contracts for application-facing
      behavior.
    - Keep unit-local JP1/AJS behavior on wrappers when it is not reused across
@@ -80,7 +77,6 @@
    - Promote only cross-consumer semantics into normalized helpers.
 
 4. Introduce stricter parser/infrastructure boundaries.
-
    - Define an application-facing parser or document-loading port.
    - Move concrete parser orchestration behind an adapter boundary when
      practical.
@@ -89,7 +85,6 @@
    - Preserve current desktop and web extension behavior while migrating.
 
 5. Use Qlty findings as architectural feedback.
-
    - Track active implementation under
      `docs/specs/features/qlty-driven-architecture-refactoring/`.
    - Phase 0 removes repository noise before structural changes.
