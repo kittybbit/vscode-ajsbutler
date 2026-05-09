@@ -298,6 +298,31 @@ JP1/AJS3 version 13 reference documents.
   `-1..9999999999`, while raw parser output, domain wrapper values,
   normalized parameters, unit-list projection, flow projection, and command
   generation remain unchanged.
+- JP1 event reception monitoring timeout-control diagnostics are approval-
+  sensitive because existing behavior preserves explicit `etm`, `ha`, and
+  `ets` values as raw parsed data without editor feedback, including when the
+  job is defined in a start-condition context where those parameters are
+  documented as invalid. A focused follow-up should stay inside application
+  editor-feedback for `evwj` / `revwj`, report explicit `etm` values outside
+  `1..1440`, explicit `ha` values outside `{y|n}`, explicit `ets` values
+  outside `{kl|nr|wr|an}`, and explicit `etm` / `ha` / `ets` when the unit is
+  defined in a start-condition context, reuse the existing decimal-range,
+  shared `ets`, and sibling-context helper seams where practical, and
+  preserve raw parser output, domain wrapper values, normalized parameters,
+  unit-list projection, flow projection, and command generation. `fd`
+  disabled-on-execution behavior, compatible-ISAM-sensitive interpretation,
+  and broader wait-condition semantics remain separate approval-sensitive
+  work.
+- JP1 event reception monitoring timeout-control diagnostics are aligned
+  through application editor-feedback. Explicit `etm` values on `evwj` /
+  `revwj` now report a semantic diagnostic when they fall outside `1..1440`,
+  explicit `ha` values now report a semantic diagnostic when they fall
+  outside `{y|n}`, explicit `ets` values now report a semantic diagnostic
+  when they fall outside `{kl|nr|wr|an}`, and explicit `etm` / `ha` / `ets`
+  now report a semantic diagnostic when they are specified on jobs defined in
+  a start-condition context, while raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
 - JP1 event reception monitoring job `evwid` and `evipa` validation are
   aligned through application editor-feedback. Explicit `evwid` values on
   `evwj` / `revwj` now report a semantic diagnostic when they are not

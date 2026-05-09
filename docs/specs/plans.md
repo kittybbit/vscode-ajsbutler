@@ -84,6 +84,17 @@ rules in `docs/specs/README.md`, not in this file.
   numeric identifier parameters (`evuid`, `evgid`, and `evpid`) together,
   because they share one manual section, one editor-feedback seam, one
   signed-decimal validation shape, and one regression-test file.
+- After the delivered grouped JP1 event reception monitoring numeric-
+  identifier slice, the next recommended JP1/AJS v13 candidate should stay
+  within the same `evwj` / `revwj` job definition and group the remaining
+  timeout-control parameters (`etm`, `ha`, and `ets`), because they share one
+  manual section, one editor-feedback seam, one existing start-condition
+  context helper, and one existing `ets` helper seam.
+- After the delivered grouped JP1 event reception monitoring timeout-control
+  slice, the next recommended JP1/AJS v13 candidate should be re-selected
+  from the remaining partial or deferred gaps using the same user-meaningful
+  grouping rule, instead of broadening immediately into `fd` disabled-
+  behavior or compatible-ISAM-sensitive work.
 - JP1/AJS v13 parameter alignment remains the active implementation priority
   until the documented diagnostics, validation, and category-level coverage
   gaps are either completed or explicitly re-scoped.
@@ -102,7 +113,7 @@ rules in `docs/specs/README.md`, not in this file.
 ## Next Priority Tasks
 
 1. Re-check the remaining partial or deferred JP1/AJS3 v13 parameter-alignment
-   gaps after the delivered JP1 event reception monitoring numeric identifier
+   gaps after the delivered JP1 event reception monitoring timeout-control
    slice and record the next approval-gated candidate.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
@@ -119,18 +130,17 @@ rules in `docs/specs/README.md`, not in this file.
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
 - Objective: deliver the approved JP1/AJS v13 event-reception monitoring
-  numeric-identifier slice after the delivered string-filter diagnostics.
+  timeout-control slice after the delivered numeric-identifier diagnostics.
 - Status: implementation and validation are complete in the recorded scope.
-- Scope: grouped semantic diagnostics were added in
-  `buildSyntaxDiagnostics.ts` for explicit `evuid`, `evgid`, and `evpid`
-  values on `evwj` / `revwj`, plus only the smallest helper/rule-array
-  refactor needed to keep the checks on the current event-receiving
-  diagnostics path.
+- Scope: grouped semantic diagnostics were added for explicit `etm`, `ha`,
+  and `ets` values on `evwj` / `revwj`, including the documented
+  start-condition invalidation for those parameters, plus only the smallest
+  helper/rule-array refactor needed to keep the checks on the current
+  event-receiving diagnostics path.
 - Out of scope: parser grammar changes, domain wrapper normalization changes,
   unit-list projection changes, flow projection changes, command generation,
-  timeout-oriented event-receiving rules such as `etm`, `fd`, `ha`, and
-  `ets`, compatible-ISAM detection, generated artifacts, dependency changes,
-  configuration, and `engines.vscode`.
+  `fd` disabled-on-execution behavior, compatible-ISAM detection, generated
+  artifacts, dependency changes, configuration, and `engines.vscode`.
 - Impact summary: the implemented scope affected
   `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
   `src/test/suite/buildSyntaxDiagnostics.test.ts`, the parameter-alignment
@@ -138,12 +148,14 @@ rules in `docs/specs/README.md`, not in this file.
   valid `evwj` / `revwj` documents.
 - Risks and assumptions: the delivered slice stays diagnostic-only and does
   not change raw parser output, domain wrapper values, or projection
-  behavior. The helper refactor stayed limited to one signed-range parsing
-  seam inside the existing editor-feedback path.
+  behavior. The current manual wording is clear for `etm`, `ha`, and `ets`
+  invalidation in start-condition context. `fd` remains deferred because its
+  disabled-on-execution semantics are not the same as outright invalid
+  explicit parameter usage.
 - Alternatives considered: returning to HTTP Connection `eu` remains smaller
-  but less user-meaningful; broadening immediately into timeout-oriented
-  `evwj` rules or compatible-ISAM work would mix different validation shapes
-  and introduce new context seams.
+  but less user-meaningful; broadening immediately into `fd` or
+  compatible-ISAM work would mix a different semantic shape or a new runtime
+  context seam into the same slice.
 
 ## Build/Test Performance SDD
 
@@ -172,11 +184,11 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped JP1 event reception monitoring numeric identifier
-  diagnostics are implemented and validated for explicit `evuid`, `evgid`,
-  and `evpid`, while the previously delivered event-receiving string-filter
-  and execution-interval start-condition diagnostics remain complete with
-  compatible-ISAM still deferred.
+  slice: grouped JP1 event reception monitoring timeout-control diagnostics
+  are implemented and validated for explicit `etm`, `ha`, and `ets` values on
+  `evwj` / `revwj`, while the previously delivered event-receiving numeric-
+  identifier and string-filter diagnostics remain complete and compatible-
+  ISAM-sensitive work still deferred.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

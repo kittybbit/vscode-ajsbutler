@@ -2147,6 +2147,135 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report event receiving timeout-control diagnostics for valid explicit values outside start-condition context", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=wait1,evwj,+0+0;",
+        "  el=wait2,revwj,+160+0;",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    etm=1;",
+        "    ha=y;",
+        "    ets=kl;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    etm=1440;",
+        "    ha=n;",
+        "    ets=an;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event receiving timeout-control diagnostics for explicit invalid values and start-condition usage", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=start-condition,rc,+0+0;",
+        "  el=wait1,evwj,+160+0;",
+        "  el=wait2,revwj,+320+0;",
+        "  el=wait3,evwj,+480+0;",
+        "  el=wait4,revwj,+640+0;",
+        "  unit=start-condition,,jp1admin,;",
+        "  {",
+        "    ty=rc;",
+        "  }",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    etm=0;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    ha=maybe;",
+        "  }",
+        "  unit=wait3,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    ets=xx;",
+        "  }",
+        "  unit=wait4,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    etm=10;",
+        "    ha=y;",
+        "    ets=wr;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 6);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 14,
+          column: 4,
+          length: 5,
+          message: "Event timeout period (etm) must be between 1 and 1440.",
+        },
+        {
+          line: 19,
+          column: 4,
+          length: 5,
+          message: "Hold attribute (ha) must be y or n.",
+        },
+        {
+          line: 24,
+          column: 4,
+          length: 5,
+          message:
+            "Event timeout action (ets) must be one of kl, nr, wr, or an.",
+        },
+        {
+          line: 29,
+          column: 4,
+          length: 5,
+          message:
+            "Event timeout period (etm) cannot be specified for jobs defined as start conditions.",
+        },
+        {
+          line: 30,
+          column: 4,
+          length: 5,
+          message:
+            "Hold attribute (ha) cannot be specified for jobs defined as start conditions.",
+        },
+        {
+          line: 31,
+          column: 4,
+          length: 5,
+          message:
+            "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error", "error", "error", "error"],
+    );
+  });
+
   test("reports event-host diagnostics for explicit out-of-range evhst values", () => {
     const oversizedHost = "a".repeat(256);
     const diagnostics = buildSyntaxDiagnostics(

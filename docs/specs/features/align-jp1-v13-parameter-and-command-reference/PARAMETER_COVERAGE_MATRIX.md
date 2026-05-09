@@ -207,6 +207,24 @@ coverage.
   timeout- or start-condition-oriented validation outside this numeric
   identifier family remains deferred
 
+### Event Reception Monitoring Timeout Controls
+
+- Keys: `etm`, `ha`, and `ets`
+- Unit scope:
+  JP1 event reception monitoring jobs and recovery JP1 event reception
+  monitoring jobs
+- Status: aligned
+- Owning seam:
+  `buildSyntaxDiagnostics.ts`, `Evwj.ts`, and shared
+  `eventTimeoutActionDiagnosticRules`
+- Evidence:
+  `buildSyntaxDiagnostics.test.ts` and existing raw projection coverage in
+  `buildUnitListView.test.ts`
+- Remaining gap:
+  `fd` disabled-on-execution semantics, compatible-ISAM-sensitive
+  interpretation, and the broader wait-condition parameter family remain
+  separate future slices
+
 ## Boundary Decisions
 
 - This matrix covers only categories with feature-local investigation records.

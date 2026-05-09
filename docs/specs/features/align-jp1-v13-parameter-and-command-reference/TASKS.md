@@ -234,8 +234,25 @@
       `evuid`, `evgid`, and `evpid` values, including boundary values
       `-1` and `9999999999`
 - [x] Run required code-change validation after implementation
-- [ ] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
+- [x] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
       delivered JP1 event reception monitoring numeric identifier slice and
+      select the next candidate using the same user-meaningful grouping rule
+- [x] Record the next grouped JP1 event reception monitoring timeout-control
+      slice in feature-local investigation docs with manual-backed scope,
+      affected seams, alternatives, and regression evidence
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      JP1 event reception monitoring timeout-control diagnostics
+- [x] Implement grouped JP1 event reception monitoring timeout-control
+      diagnostics only after approval
+- [x] Refactor `buildSyntaxDiagnostics.ts` within the approved scope so the
+      new timeout-control checks stay on the existing event-receiving rule-
+      array path and reuse the smallest shared start-condition helper seam
+- [x] Add focused regression evidence for valid and invalid explicit `etm`,
+      `ha`, and `ets` values, including start-condition-context violations
+- [x] Run required code-change validation after implementation
+- [ ] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
+      delivered JP1 event reception monitoring timeout-control slice and
       select the next candidate using the same user-meaningful grouping rule
 
 ## Notes
@@ -742,6 +759,58 @@
   `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
   `TASKS.md`, and `uc-provide-editor-feedback.md` now record the delivered
   event-receiving numeric identifier slice.
+- 2026-05-09: Remaining actionable JP1/AJS v13 gaps were re-checked after the
+  delivered event-receiving numeric-identifier slice. The next recommended
+  approval-gated candidate is grouped JP1 event reception monitoring
+  timeout-control diagnostics for `evwj` / `revwj`, because the remaining
+  user-visible gap still clusters around one job definition, one
+  event-receiving editor-feedback seam, and one existing start-condition
+  context helper.
+- 2026-05-09: Investigation confirmed from the JP1/AJS3 v13 event reception
+  monitoring definition that explicit `etm`, `ha`, and `ets` values share the
+  same timeout-control family and the same documented invalidation when the
+  job is defined in a start-condition context, while `fd` remains a separate
+  follow-up because the manual describes it as disabled-on-execution rather
+  than as an invalid explicit parameter.
+- 2026-05-09: The likely code refactor seam for the next slice is limited to
+  reusing the current decimal-range rule builder, the shared
+  `eventTimeoutActionDiagnosticRules`, and the existing
+  `hasStartConditionContext(...)` helper so the new checks stay on the current
+  `buildSyntaxDiagnostics.ts` `eventReceivingDiagnosticRules` path instead of
+  adding a separate validation branch.
+- 2026-05-09: `EVENT_RECEIVING_TIMEOUT_CONTROL_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
+  `TASKS.md`, and `uc-provide-editor-feedback.md` now record the pending
+  event-receiving timeout-control slice and its approval boundary.
+- 2026-05-09: Grouped JP1 event reception monitoring timeout-control
+  diagnostics now report explicit invalid `etm`, `ha`, and `ets` values on
+  `evwj` / `revwj`, and also report explicit `etm`, `ha`, or `ets` when the
+  job is defined in a start-condition context, through the existing
+  editor-feedback boundary. Raw parser output, domain wrapper values,
+  normalized parameters, unit-list projection, flow projection, and command
+  generation remain unchanged.
+- 2026-05-09: `buildSyntaxDiagnostics.ts` now keeps the new timeout-control
+  checks on the existing event-receiving rule-array path by reusing the
+  current decimal-range rule builder, shared `eventTimeoutActionDiagnosticRules`,
+  and `hasStartConditionContext(...)` helper instead of adding a separate
+  validation branch.
+- 2026-05-09: `EVENT_RECEIVING_TIMEOUT_CONTROL_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
+  `TASKS.md`, and `uc-provide-editor-feedback.md` now record the delivered
+  event-receiving timeout-control slice.
+- 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  event-receiving timeout-control diagnostics implementation.
+- 2026-05-09: `rtk pnpm test` completed with exit code 0 after grouped
+  event-receiving timeout-control diagnostics implementation; the VS Code
+  harness emitted the existing macOS `task_name_for_pid` codesign noise line.
+- 2026-05-09: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped event-receiving timeout-control diagnostics implementation and
+  emitted the existing localhost dev-extension `package.nls.json` 404 noise.
+- 2026-05-09: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped event-receiving timeout-control diagnostics
+  implementation.
+- 2026-05-09: `rtk pnpm run lint:md` completed with exit code 0 after
+  grouped event-receiving timeout-control diagnostics implementation.
 - 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after grouped
   event-receiving string-filter diagnostics implementation.
 - 2026-05-09: `rtk pnpm test` completed with exit code 0 after grouped
@@ -798,21 +867,37 @@
 
 - Status: Approved
 - Approved at: 2026-05-09
-- Approved scope: grouped JP1 event reception monitoring numeric identifier
-  diagnostics for explicit `evuid`, `evgid`, and `evpid` combinations on
-  `evwj` / `revwj`, limited to the documented signed-decimal range
-  `-1..9999999999` through the existing editor-feedback boundary, plus the
-  smallest helper/rule-array refactor needed to keep the checks on the
-  current `buildSyntaxDiagnostics.ts` event-receiving path, while preserving
-  raw parser output, domain wrapper values, normalized parameters, unit-list
-  projection, flow projection, command generation, generated artifacts,
-  dependency versions, configuration, and `engines.vscode`.
+- Approved scope: grouped JP1 event reception monitoring timeout-control
+  diagnostics for explicit `etm`, `ha`, and `ets` values on `evwj` /
+  `revwj`, limited to the documented `etm` range `1..1440`, `ha` value set
+  `{y|n}`, `ets` value set `{kl|nr|wr|an}`, and explicit use of `etm`, `ha`,
+  or `ets` on jobs defined in a start-condition context through the existing
+  editor-feedback boundary, plus the smallest helper/rule-array refactor
+  needed to keep the checks on the current `buildSyntaxDiagnostics.ts`
+  event-receiving path, while preserving raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection,
+  command generation, generated artifacts, dependency versions,
+  configuration, and `engines.vscode`.
 
 Current implementation gate: approved implementation may proceed only within
-the grouped event-receiving numeric identifier scope recorded above.
+the grouped event-receiving timeout-control scope recorded above.
 
 ## Prior Approval Evidence
 
+- 2026-05-09: User replied "Approved. Proceed with implementation." after the
+  grouped JP1 event reception monitoring timeout-control diagnostics approval
+  request. Approved changes are limited to adding grouped application-level
+  semantic diagnostics for explicit `etm`, `ha`, and `ets` values on
+  `evwj` / `revwj`, including their documented invalidation in
+  start-condition context, through the existing editor-feedback boundary,
+  plus the smallest helper/rule-array refactor needed to keep the checks on
+  the current `buildSyntaxDiagnostics.ts` event-receiving path; preserving
+  raw parser output, domain wrapper values, normalized parameters, unit-list
+  projection, flow projection, and command generation; adding focused
+  regression evidence; updating SDD tracking; and running validation. Parser
+  grammar, domain normalization, `fd` disabled-on-execution behavior,
+  generated artifacts, configuration, dependency versions,
+  compatible-ISAM/environment inputs, and `engines.vscode` are out of scope.
 - 2026-05-09: User replied "Approved. Proceed with implementation." after the
   grouped JP1 event reception monitoring numeric identifier diagnostics
   approval request. Approved changes are limited to adding grouped
