@@ -1917,6 +1917,142 @@ suite("Build Syntax Diagnostics", () => {
     );
   });
 
+  test("does not report event receiving string-filter diagnostics for omitted and valid explicit values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=wait1,evwj,+0+0;",
+        "  el=wait2,revwj,+160+0;",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        '    evusr="ops.*";',
+        '    evgrp="admins";',
+        '    evwms="match message";',
+        '    evdet="detail text";',
+        '    evwfr=?AJS2.EVENT?:"value";',
+        '    evtmc=n:"/tmp/result.txt";',
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports event receiving string-filter diagnostics for explicit invalid values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  el=wait1,evwj,+0+0;",
+        "  el=wait2,revwj,+160+0;",
+        "  el=wait3,evwj,+320+0;",
+        "  el=wait4,revwj,+480+0;",
+        "  el=wait5,evwj,+640+0;",
+        "  el=wait6,revwj,+800+0;",
+        "  unit=wait1,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evusr=plain-user;",
+        "  }",
+        "  unit=wait2,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        `    evgrp="${"a".repeat(21)}";`,
+        "  }",
+        "  unit=wait3,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        `    evwms="${"m".repeat(1025)}";`,
+        "  }",
+        "  unit=wait4,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        "    evdet=detail-text;",
+        "  }",
+        "  unit=wait5,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evwfr=attribute:value;",
+        "  }",
+        "  unit=wait6,,jp1admin,;",
+        "  {",
+        "    ty=revwj;",
+        '    evtmc=d:"";',
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.strictEqual(diagnostics.length, 6);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 12,
+          column: 4,
+          length: 5,
+          message:
+            "Event issue source user name (evusr) must be a quoted string between 1 and 20 bytes.",
+        },
+        {
+          line: 17,
+          column: 4,
+          length: 5,
+          message:
+            "Event issue source group name (evgrp) must be a quoted string between 1 and 20 bytes.",
+        },
+        {
+          line: 22,
+          column: 4,
+          length: 5,
+          message:
+            "Event message filter (evwms) must be a quoted string between 1 and 1024 bytes.",
+        },
+        {
+          line: 27,
+          column: 4,
+          length: 5,
+          message:
+            "Detailed event information filter (evdet) must be a quoted string between 1 and 1024 bytes.",
+        },
+        {
+          line: 32,
+          column: 4,
+          length: 5,
+          message:
+            'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format within 2048 bytes.',
+        },
+        {
+          line: 37,
+          column: 4,
+          length: 5,
+          message:
+            'End judgment condition (evtmc) must be n, a, n:"file-name", a:"file-name", d:"file-name", or b:"file-name" with a file name between 1 and 256 bytes.',
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.severity),
+      ["error", "error", "error", "error", "error", "error"],
+    );
+  });
+
   test("reports event-host diagnostics for explicit out-of-range evhst values", () => {
     const oversizedHost = "a".repeat(256);
     const diagnostics = buildSyntaxDiagnostics(

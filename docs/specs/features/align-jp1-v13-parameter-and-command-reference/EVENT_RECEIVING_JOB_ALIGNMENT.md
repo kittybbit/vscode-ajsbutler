@@ -123,5 +123,7 @@ slices plus the remaining grouped follow-up for `Evwj` / `Revwj`.
 - Shared grouped event-host validation now aligns explicit `evhst`
   byte-length diagnostics through the existing editor-feedback boundary while
   preserving regular-expression and macro-variable allowance.
-- Revisit broader event reception monitoring job string-filter validation as a
-  separate later slice now that the shared `evhst` follow-up is complete.
+- Grouped event-receiving string-filter validation is now aligned in
+  `EVENT_RECEIVING_STRING_FILTER_ALIGNMENT.md`.
+- Revisit numeric identifier and timeout-oriented event reception monitoring
+  validation as separate later slices.

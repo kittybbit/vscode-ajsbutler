@@ -198,6 +198,25 @@
       macro-variable acceptance outside the newly aligned rules
 - [x] Run required code-change validation after implementation
 
+## Next Candidate
+
+- [x] Re-check the remaining partial or deferred JP1/AJS v13 gaps after the
+      delivered execution-interval control start-condition slice and select
+      the next candidate using the same user-meaningful grouping rule
+- [x] Record the next grouped JP1 event reception monitoring string-filter
+      slice in feature-local investigation docs with manual-backed scope,
+      affected seams, alternatives, and regression evidence
+- [x] Record human approval before changing editor-feedback diagnostics,
+      runtime code, tests, generated artifacts, or configuration for grouped
+      JP1 event reception monitoring string-filter diagnostics
+- [x] Implement grouped JP1 event reception monitoring string-filter
+      diagnostics only after approval
+- [x] Refactor `buildSyntaxDiagnostics.ts` within the approved scope so the
+      new event-receiving filter checks stay on the existing rule-array path
+- [x] Add focused regression evidence for valid and invalid explicit
+      `evusr`, `evgrp`, `evwms`, `evdet`, `evwfr`, and `evtmc` values
+- [x] Run required code-change validation after implementation
+
 ## Notes
 
 - 2026-04-18: normative parameter and command sources were fixed to the user
@@ -640,6 +659,49 @@
   `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
   `TASKS.md`, and `uc-provide-editor-feedback.md` now record the delivered
   start-condition slice and the deferred compatible-ISAM note.
+- 2026-05-09: Remaining actionable JP1/AJS v13 gaps were re-checked after the
+  delivered execution-interval control start-condition slice. The next
+  recommended approval-gated candidate is grouped JP1 event reception
+  monitoring string-filter diagnostics for `evwj` / `revwj`, because the
+  remaining explicit validation gap clusters around one job definition, one
+  existing editor-feedback seam, and one regression-test file.
+- 2026-05-09: Investigation confirmed from the JP1/AJS3 v13 event reception
+  monitoring definition that the remaining grouped string-filter family is
+  `evusr`, `evgrp`, `evwms`, `evdet`, `evwfr`, and `evtmc`, while numeric
+  identifiers such as `evuid`, `evgid`, and `evpid` are a separate future
+  validation shape.
+- 2026-05-09: `EVENT_RECEIVING_STRING_FILTER_ALIGNMENT.md`, `SPECS.md`,
+  `docs/specs/plans.md`, `TASKS.md`, and `uc-provide-editor-feedback.md` now
+  record the pending event-receiving string-filter slice and its approval
+  boundary.
+- 2026-05-09: Grouped JP1 event reception monitoring string-filter
+  diagnostics now report explicit invalid `evusr`, `evgrp`, `evwms`,
+  `evdet`, `evwfr`, and `evtmc` values on `evwj` / `revwj` through the
+  existing editor-feedback boundary. Raw parser output, domain wrapper
+  values, normalized parameters, unit-list projection, flow projection, and
+  command generation remain unchanged.
+- 2026-05-09: `buildSyntaxDiagnostics.ts` now keeps the new event-receiving
+  filter checks on the existing rule-array path, and `collectRuleDiagnostics`
+  now evaluates all explicit occurrences for a key so repeated `evwfr`
+  parameters can be diagnosed without a separate implementation branch.
+- 2026-05-09:
+  `PARAMETER_COVERAGE_MATRIX.md`, `EVENT_RECEIVING_JOB_ALIGNMENT.md`,
+  `EVENT_RECEIVING_STRING_FILTER_ALIGNMENT.md`, `SPECS.md`,
+  `docs/specs/plans.md`, `TASKS.md`, and `uc-provide-editor-feedback.md` now
+  record the delivered event-receiving string-filter slice.
+- 2026-05-09: `rtk pnpm run qlty` completed with exit code 0 after grouped
+  event-receiving string-filter diagnostics implementation.
+- 2026-05-09: `rtk pnpm test` completed with exit code 0 after grouped
+  event-receiving string-filter diagnostics implementation; the VS Code
+  harness emitted the existing macOS `task_name_for_pid` codesign noise line.
+- 2026-05-09: `rtk pnpm run test:web` completed with exit code 0 after
+  grouped event-receiving string-filter diagnostics implementation and
+  emitted the existing localhost dev-extension `package.nls.json` 404 noise.
+- 2026-05-09: `rtk pnpm run build` completed with existing webpack asset-size
+  warnings after grouped event-receiving string-filter diagnostics
+  implementation.
+- 2026-05-09: `rtk pnpm run lint:md` completed with exit code 0 after grouped
+  event-receiving string-filter diagnostics implementation.
 - 2026-05-07: `rtk pnpm run qlty` completed with exit code 0 after grouped
   transfer-file explicit value-shape diagnostics implementation.
 - 2026-05-07: `rtk pnpm test` completed with exit code 0 after grouped
@@ -670,23 +732,50 @@
 
 - Status: Approved
 - Approved at: 2026-05-09
-- Approved scope: grouped execution-interval control context diagnostics for
-  explicit `etn=y` combinations on `tmwj` / `rtmwj`, limited to documented
-  start-condition and compatible-ISAM restrictions through the existing
-  editor-feedback boundary, plus the smallest helper/rule-array refactor
-  needed to keep the checks on the current
-  `buildSyntaxDiagnostics.ts` execution-interval path, while preserving raw
-  parser output, domain wrapper values, normalized parameters, unit-list
-  projection, flow projection, command generation, generated artifacts,
-  dependency versions, configuration, and `engines.vscode`.
+- Approved scope: grouped JP1 event reception monitoring string-filter
+  diagnostics for explicit `evusr`, `evgrp`, `evwms`, `evdet`, `evwfr`, and
+  `evtmc` combinations on `evwj` / `revwj`, limited to documented byte-length
+  and allowed-format rules through the existing editor-feedback boundary,
+  plus the smallest helper/rule-array refactor needed to keep the checks on
+  the current `buildSyntaxDiagnostics.ts` event-receiving path, while
+  preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, command generation,
+  generated artifacts, dependency versions, configuration, and
+  `engines.vscode`.
 
-Current implementation gate: the approved grouped execution-interval control
-context slice is implemented and validated for the file-local detectable
-start-condition restriction. Compatible-ISAM detection remains deferred
-because the current editor-feedback boundary has no database-mode input.
+Current implementation gate: approved implementation may proceed only within
+the grouped event-receiving string-filter scope recorded above.
 
 ## Prior Approval Evidence
 
+- 2026-05-09: User replied "Approved. Proceed with implementation." after the
+  grouped JP1 event reception monitoring string-filter diagnostics approval
+  request. Approved changes are limited to adding grouped application-level
+  semantic diagnostics for explicit `evusr`, `evgrp`, `evwms`, `evdet`,
+  `evwfr`, and `evtmc` values on `evwj` / `revwj` through the existing
+  editor-feedback boundary, plus the smallest helper/rule-array refactor
+  needed to keep the checks on the current
+  `buildSyntaxDiagnostics.ts` event-receiving path; preserving raw parser
+  output, domain wrapper values, normalized parameters, unit-list projection,
+  flow projection, and command generation; adding focused regression
+  evidence; updating SDD tracking; and running validation. Parser grammar,
+  domain normalization, generated artifacts, configuration, dependency
+  versions, compatible-ISAM/environment inputs, and `engines.vscode` are out
+  of scope.
+- 2026-05-09: User replied "Approved. Proceed with implementation." after the
+  grouped execution-interval control context diagnostics approval request.
+  Approved changes were limited to adding grouped application-level semantic
+  diagnostics for explicit `etn=y` combinations on `tmwj` / `rtmwj` through
+  the existing editor-feedback boundary, limited to the documented
+  start-condition restriction that is detectable from file-local context,
+  plus the smallest helper/rule-array refactor needed to keep the check on
+  the current `buildSyntaxDiagnostics.ts` execution-interval path;
+  preserving raw parser output, domain wrapper values, normalized
+  parameters, unit-list projection, flow projection, and command generation;
+  adding focused regression evidence; updating SDD tracking; and running
+  validation. Compatible-ISAM detection, parser grammar, domain defaults,
+  projection changes, generated artifacts, configuration, dependency
+  versions, and `engines.vscode` were out of scope.
 - 2026-05-08: User replied "Approved. Proceed with implementation." after the
   grouped transfer-file filename/path semantics approval request. Approved
   changes were limited to adding grouped application-level semantic

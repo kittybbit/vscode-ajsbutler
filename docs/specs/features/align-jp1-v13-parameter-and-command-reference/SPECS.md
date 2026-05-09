@@ -274,6 +274,13 @@ JP1/AJS3 version 13 reference documents.
   decimal values in the JP1/AJS3 v13 range `1..720`, while raw parser output,
   domain wrapper values, normalized parameters, unit-list projection, flow
   projection, and command generation remain unchanged.
+- JP1 event reception monitoring job string-filter diagnostics are aligned
+  through application editor-feedback. Explicit `evusr`, `evgrp`, `evwms`,
+  `evdet`, `evwfr`, and `evtmc` values on `evwj` / `revwj` now report a
+  semantic diagnostic when they violate the documented JP1/AJS3 v13
+  byte-length or allowed-format rules, while raw parser output, domain
+  wrapper values, normalized parameters, unit-list projection, flow
+  projection, and command generation remain unchanged.
 - JP1 event reception monitoring job `evwid` and `evipa` validation are
   aligned through application editor-feedback. Explicit `evwid` values on
   `evwj` / `revwj` now report a semantic diagnostic when they are not
