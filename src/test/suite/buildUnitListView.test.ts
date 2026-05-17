@@ -205,6 +205,38 @@ unit=root,,jp1admin,;
 }
 `;
 
+const waitJobTimeoutActionDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=log-file-defaults,,jp1admin,;
+  {
+    ty=lfwj;
+  }
+  unit=mail-defaults,,jp1admin,;
+  {
+    ty=mlwj;
+  }
+  unit=mq-defaults,,jp1admin,;
+  {
+    ty=mqwj;
+  }
+  unit=message-queue-defaults,,jp1admin,;
+  {
+    ty=mswj;
+  }
+  unit=windows-event-defaults,,jp1admin,;
+  {
+    ty=ntwj;
+  }
+  unit=mail-explicit,,jp1admin,;
+  {
+    ty=rmlwj;
+    ets=wr;
+  }
+}
+`;
+
 suite("Build Unit List View", () => {
   test("projects group fields from the normalized model", () => {
     const result = parseAjs(validDefinition);
@@ -415,5 +447,38 @@ suite("Build Unit List View", () => {
       startCondition?.group9.startCondition,
       '"AJSROOT" = "ready"',
     );
+  });
+
+  test("projects shared wait-job timeout-action defaults in group 13 rows", () => {
+    const result = parseAjs(waitJobTimeoutActionDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+
+    const rows = buildUnitListView(document);
+    const logFileDefaults = rows.find(
+      (row) => row.absolutePath === "/root/log-file-defaults",
+    );
+    const mailDefaults = rows.find(
+      (row) => row.absolutePath === "/root/mail-defaults",
+    );
+    const mqDefaults = rows.find(
+      (row) => row.absolutePath === "/root/mq-defaults",
+    );
+    const messageQueueDefaults = rows.find(
+      (row) => row.absolutePath === "/root/message-queue-defaults",
+    );
+    const windowsEventDefaults = rows.find(
+      (row) => row.absolutePath === "/root/windows-event-defaults",
+    );
+    const mailExplicit = rows.find(
+      (row) => row.absolutePath === "/root/mail-explicit",
+    );
+
+    assert.strictEqual(logFileDefaults?.group13.eventTimeoutAction, "kl");
+    assert.strictEqual(mailDefaults?.group13.eventTimeoutAction, "kl");
+    assert.strictEqual(mqDefaults?.group13.eventTimeoutAction, "kl");
+    assert.strictEqual(messageQueueDefaults?.group13.eventTimeoutAction, "kl");
+    assert.strictEqual(windowsEventDefaults?.group13.eventTimeoutAction, "kl");
+    assert.strictEqual(mailExplicit?.group13.eventTimeoutAction, "wr");
   });
 });

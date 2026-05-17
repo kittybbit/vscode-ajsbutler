@@ -52,6 +52,14 @@ Scenario: Start-condition monitoring projection uses effective schedule pairs
   When either the `wc` count or `wt` time disables monitoring for that pair
   Then the unit-list schedule definition output shows empty effective values
   for both start-condition monitoring columns
+
+Scenario: Wait-job timeout-action projection uses shared default semantics
+  Given a currently modeled wait-job family exposes `ets` through the shared
+    parameter accessor
+  And the job omits `ets`
+  When the unit-list document DTO is built
+  Then group 13 `eventTimeoutAction` shows the same JP1/AJS3 v13 default
+    semantics already exposed by the shared wait-job parameter path
 ```
 
 ## Acceptance Notes
