@@ -114,6 +114,42 @@ unit=root,,jp1admin,;
 }
 `;
 
+const waitJobTimeoutActionDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=log-file-defaults,,jp1admin,;
+  {
+    ty=lfwj;
+  }
+  unit=mail-defaults,,jp1admin,;
+  {
+    ty=mlwj;
+  }
+  unit=mq-defaults,,jp1admin,;
+  {
+    ty=mqwj;
+  }
+  unit=message-queue-defaults,,jp1admin,;
+  {
+    ty=mswj;
+  }
+  unit=windows-event-defaults,,jp1admin,;
+  {
+    ty=ntwj;
+  }
+  unit=mail-explicit,,jp1admin,;
+  {
+    ty=rmlwj;
+    ets=wr;
+  }
+  unit=regular-job,,jp1admin,;
+  {
+    ty=j;
+  }
+}
+`;
+
 const queueGroup15Definition = `
 unit=root,,jp1admin,;
 {
@@ -311,6 +347,63 @@ suite("Build Unit List Remaining Groups", () => {
     assert.strictEqual(regularView.group13.timeoutInterval, undefined);
     assert.strictEqual(regularView.group13.eventTimeout, undefined);
     assert.strictEqual(regularView.group13.eventTimeoutAction, undefined);
+  });
+
+  test("projects shared wait-job timeout-action defaults for group 13", () => {
+    const result = parseAjs(waitJobTimeoutActionDefinition);
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const logFileDefaults = document.rootUnits[0]?.children[0];
+    const mailDefaults = document.rootUnits[0]?.children[1];
+    const mqDefaults = document.rootUnits[0]?.children[2];
+    const messageQueueDefaults = document.rootUnits[0]?.children[3];
+    const windowsEventDefaults = document.rootUnits[0]?.children[4];
+    const mailExplicit = document.rootUnits[0]?.children[5];
+    const regularJob = document.rootUnits[0]?.children[6];
+
+    assert.ok(logFileDefaults);
+    assert.ok(mailDefaults);
+    assert.ok(mqDefaults);
+    assert.ok(messageQueueDefaults);
+    assert.ok(windowsEventDefaults);
+    assert.ok(mailExplicit);
+    assert.ok(regularJob);
+
+    assert.strictEqual(
+      buildUnitListRemainingGroups(logFileDefaults, [], []).group13
+        .eventTimeoutAction,
+      DEFAULTS.Ets,
+    );
+    assert.strictEqual(
+      buildUnitListRemainingGroups(mailDefaults, [], []).group13
+        .eventTimeoutAction,
+      DEFAULTS.Ets,
+    );
+    assert.strictEqual(
+      buildUnitListRemainingGroups(mqDefaults, [], []).group13
+        .eventTimeoutAction,
+      DEFAULTS.Ets,
+    );
+    assert.strictEqual(
+      buildUnitListRemainingGroups(messageQueueDefaults, [], []).group13
+        .eventTimeoutAction,
+      DEFAULTS.Ets,
+    );
+    assert.strictEqual(
+      buildUnitListRemainingGroups(windowsEventDefaults, [], []).group13
+        .eventTimeoutAction,
+      DEFAULTS.Ets,
+    );
+    assert.strictEqual(
+      buildUnitListRemainingGroups(mailExplicit, [], []).group13
+        .eventTimeoutAction,
+      "wr",
+    );
+    assert.strictEqual(
+      buildUnitListRemainingGroups(regularJob, [], []).group13
+        .eventTimeoutAction,
+      undefined,
+    );
   });
 
   test("hides QUEUE job transfer operations in group 15", () => {

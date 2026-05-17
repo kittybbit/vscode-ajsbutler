@@ -73,6 +73,13 @@ rules in `docs/specs/README.md`, not in this file.
   be re-selected from the remaining partial or deferred gaps using the same
   user-meaningful grouping rule, rather than broadening immediately into
   unsupported compatible-ISAM-specific behavior.
+- After re-checking the remaining actionable JP1/AJS v13 gaps again, the next
+  recommended candidate should group the still-inconsistent wait-job
+  `eventTimeoutAction` default projection across the currently modeled
+  `ets`-bearing wait-job families, because the domain wrapper default already
+  exists, the user-visible table concept is shared in group 13, and the
+  remaining work is better framed as one projection-reconciliation/refactor
+  slice than as job-by-job cleanup.
 - After re-checking the remaining actionable gaps again, the next recommended
   JP1/AJS v13 candidate should move to the remaining event-reception
   monitoring filter family and group the still-raw string-filter parameters
@@ -115,9 +122,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Re-check the remaining partial or deferred JP1/AJS3 v13 parameter-alignment
-   gaps after the delivered grouped shared wait-job execution-time (`fd`)
-   slice and record the next approval-gated candidate.
+1. Record and approval-gate the grouped shared wait-job
+   `eventTimeoutAction` default-projection reconciliation slice across the
+   currently modeled `ets`-bearing wait-job families.
 2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
    coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
    until a gap is explicitly re-scoped as outside the alignment feature.
@@ -132,35 +139,34 @@ rules in `docs/specs/README.md`, not in this file.
 
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
-- Objective: deliver the approved grouped shared wait-job execution-time
-  (`fd`) slice after the delivered JP1 event reception monitoring
-  timeout-control diagnostics.
+- Objective: deliver the approved grouped shared wait-job
+  `eventTimeoutAction` default-projection reconciliation slice after the
+  delivered shared wait-job execution-time (`fd`) and execution-interval
+  `etn=y` start-condition diagnostics.
 - Status: implementation and validation are complete in the recorded scope.
-- Scope: grouped semantic diagnostics were added for explicit `fd` values on
-  `flwj` / `rflwj`, `tmwj` / `rtmwj`, and `evwj` / `revwj`, limited to the
-  documented range `1..1440` and the documented start-condition-disabled
-  behavior, plus only the smallest helper/rule-array refactor needed to keep
-  the checks on the current file-monitoring, execution-interval, and
-  event-receiving diagnostics paths.
-- Out of scope: parser grammar changes, domain wrapper normalization changes,
-  unit-list projection changes, flow projection changes, command generation,
-  broader wait-condition parameters, compatible-ISAM detection, generated
-  artifacts, dependency changes, configuration, and `engines.vscode`.
+- Scope: grouped unit-list projection reconciliation for omitted `ets` on the
+  currently modeled wait-job families `lfwj` / `rlfwj`,
+  `mlwj` / `rmlwj`, `mqwj` / `rmqwj`, `mswj` / `rmswj`, and
+  `ntwj` / `rntwj`, limited to group 13 `eventTimeoutAction` plus only the
+  smallest helper refactor needed to replace the current family-specific
+  projection seam with one shared default-aware path.
+- Out of scope: parser grammar changes, editor-feedback diagnostics, domain
+  wrapper default behavior, normalized parameter storage, flow projection,
+  command generation, generated artifacts, dependency changes, configuration,
+  and `engines.vscode`.
 - Impact summary: the implemented scope affected
-  `src/application/editor-feedback/buildSyntaxDiagnostics.ts`,
-  `src/test/suite/buildSyntaxDiagnostics.test.ts`, the parameter-alignment
-  feature docs, and the editor-feedback behavior contract for syntactically
-  valid wait-like job documents that specify `fd`.
-- Risks and assumptions: this slice is intended to stay diagnostic-only and
-  must not change raw parser output, domain wrapper values, or projection
-  behavior. The current manual wording is consistent for `fd` across the
-  three targeted job definitions. Compatible-ISAM-sensitive restrictions are
-  intentionally unsupported because compatible-ISAM is limited to legacy
-  migration-mode environments outside this repository's target scope.
-- Alternatives considered: returning to smaller default-only cleanup remains
-  less user-meaningful; broadening immediately into the full wait-condition
-  family would enlarge the seam before the shared `fd` rule is closed, and
-  compatible-ISAM-sensitive work is intentionally unsupported.
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  `src/test/suite/buildUnitListRemainingGroups.test.ts`,
+  `src/test/suite/buildUnitListView.test.ts`, the parameter-alignment feature
+  docs, and the build-unit-list behavior contract for omitted `ets` display.
+- Risks and assumptions: this slice stays presentation-facing and assumes the
+  existing shared `ParamFactory.ets` default already expresses the intended
+  JP1/AJS3 v13 semantics for the approved wait-job families. It must not
+  broaden into other wait-condition parameters, event-receiving projection, or
+  unsupported compatible-ISAM behavior.
+- Alternatives considered: transfer-file macro-variable tightening remains a
+  viable later candidate, but the delivered wait-job projection slice closed a
+  clearer user-visible inconsistency with a smaller refactor seam.
 
 ## Build/Test Performance SDD
 
@@ -189,12 +195,12 @@ rules in `docs/specs/README.md`, not in this file.
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
   active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped shared wait-job execution-time (`fd`) diagnostics are
-  implemented and validated for explicit `fd` values on
-  `flwj` / `rflwj`, `tmwj` / `rtmwj`, and `evwj` / `revwj`, while the
-  previously delivered event-receiving timeout-control, numeric-identifier,
-  and string-filter diagnostics remain complete and compatible-ISAM-sensitive
-  work is intentionally unsupported.
+  slice: grouped shared wait-job `eventTimeoutAction` default projection
+  reconciliation is implemented and validated across the approved currently
+  modeled `ets`-bearing wait-job families, after the delivered shared
+  wait-job execution-time (`fd`) and execution-interval `etn=y`
+  start-condition diagnostics. Compatible-ISAM-sensitive work remains
+  intentionally unsupported.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:

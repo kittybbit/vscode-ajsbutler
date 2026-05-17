@@ -149,7 +149,7 @@ coverage.
 - Keys: `tmitv`, `etn`, and `ets`
 - Unit scope:
   execution-interval control jobs and recovery execution-interval control jobs
-- Status: partial
+- Status: aligned
 - Owning seam:
   `Tmwj.ts`, `optionalScalarParameterBuilders.ts`, `Defaults.ts`, and
   `buildUnitListRemainingGroups.ts`
@@ -157,15 +157,28 @@ coverage.
   `parameterFactory.test.ts` for domain defaults and
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
-  execution-interval control job defaults and unit-list group 13 projection
-  are aligned for these values, explicit `ets` timeout-action diagnostics are
-  aligned through editor-feedback, explicit `tmitv` range diagnostics and
-  explicit `etn` allowed-value diagnostics are aligned through
-  editor-feedback, and explicit `etn=y` start-condition diagnostics are now
-  aligned through editor-feedback. Shared wait-job `fd` execution-time
-  semantics are tracked separately in `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`.
-  Compatible-ISAM-specific restrictions are not planned for this repository.
-  Broader wait-job default reconciliation remains deferred
+  none for the currently modeled execution-interval control defaults in this
+  feature scope. Shared wait-job `fd` execution-time semantics are tracked
+  separately in `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`. Compatible-ISAM-
+  specific restrictions are not planned for this repository.
+
+### Wait-Job Timeout-Action Projection
+
+- Keys: `ets`
+- Unit scope:
+  log-file monitoring jobs, mail receiving monitoring jobs, MQ message
+  receiving monitoring jobs, message queue receiving jobs, and Windows event
+  log monitoring jobs, plus their recovery variants
+- Status: aligned
+- Owning seam:
+  `buildUnitListRemainingGroups.ts`,
+  `optionalScalarParameterBuilders.ts`, and `Defaults.ts`
+- Evidence:
+  `buildUnitListRemainingGroups.test.ts` and `buildUnitListView.test.ts`
+- Remaining gap:
+  none for the currently modeled wait-job `eventTimeoutAction` projection in
+  this feature scope. Event-receiving timeout-control projection remains
+  tracked separately from this slice.
 
 ### Event Reception Monitoring Job Search Scope
 

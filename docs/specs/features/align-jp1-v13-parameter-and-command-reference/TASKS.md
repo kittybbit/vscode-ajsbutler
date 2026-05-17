@@ -71,6 +71,20 @@
       explicit in-range values, and explicit out-of-range `wth`, `tho`, `rjs`,
       `rje`, `rec`, and `rei` values
 - [x] Run required code-change validation after implementation
+- [x] Record the next grouped shared wait-job `ets` default-projection slice
+      in feature-local investigation docs with manual-backed scope, affected
+      seams, alternatives, and regression evidence
+- [x] Record human approval before changing unit-list projection runtime code,
+      tests, generated artifacts, or configuration for grouped shared wait-job
+      `eventTimeoutAction` default reconciliation
+- [x] Implement grouped shared wait-job `eventTimeoutAction` default
+      reconciliation only after approval
+- [x] Refactor `buildUnitListRemainingGroups.ts` within the approved scope so
+      omitted `ets` projection stays on one shared default-aware helper path
+      for the currently modeled wait-job families
+- [x] Add focused regression evidence for omitted and explicit `ets`
+      projection across the approved wait-job family scope
+- [x] Run required code-change validation after implementation
 - [x] Record human approval before changing editor-feedback diagnostics,
       shared schedule-rule helpers, runtime code, or tests for grouped
       schedule-rule range diagnostics
@@ -738,6 +752,50 @@
   filter checks on the existing rule-array path, and `collectRuleDiagnostics`
   now evaluates all explicit occurrences for a key so repeated `evwfr`
   parameters can be diagnosed without a separate implementation branch.
+- 2026-05-09: Remaining actionable JP1/AJS v13 gaps were re-checked after the
+  delivered shared wait-job `fd` and execution-interval `etn=y`
+  start-condition slices. The next recommended approval-gated candidate is
+  grouped shared wait-job `eventTimeoutAction` default reconciliation across
+  the currently modeled `ets`-bearing wait-job families, because the
+  remaining mismatch now sits in one user-visible group 13 concept and one
+  small projection seam rather than in parser or editor-feedback behavior.
+- 2026-05-09: Investigation confirmed that `ParamFactory.ets` already resolves
+  omitted values through `DEFAULTS.Ets`, while
+  `buildUnitListRemainingGroups.ts` still limits default-aware
+  `eventTimeoutAction` projection to `flwj` / `rflwj` and
+  `tmwj` / `rtmwj`. The remaining candidate is therefore projection
+  reconciliation for the currently modeled wait-job families
+  `lfwj` / `rlfwj`, `mlwj` / `rmlwj`, `mqwj` / `rmqwj`,
+  `mswj` / `rmswj`, and `ntwj` / `rntwj`.
+- 2026-05-09: `WAIT_JOB_TIMEOUT_ACTION_DEFAULT_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
+  `TASKS.md`, and `uc-build-unit-list.md` now record the pending shared
+  wait-job `eventTimeoutAction` default-projection slice and its approval
+  boundary.
+- 2026-05-17: User replied "Approved. Proceed with implementation." after the
+  grouped shared wait-job `eventTimeoutAction` default-projection approval
+  request. Approved changes were limited to unit-list projection in
+  `buildUnitListRemainingGroups.ts` for omitted `ets` on
+  `lfwj` / `rlfwj`, `mlwj` / `rmlwj`, `mqwj` / `rmqwj`,
+  `mswj` / `rmswj`, and `ntwj` / `rntwj`, plus the smallest helper refactor
+  needed to keep the projection on one shared default-aware path, focused
+  regression updates in `buildUnitListRemainingGroups.test.ts` and
+  `buildUnitListView.test.ts`, SDD sync, and validation. Parser grammar,
+  editor-feedback behavior, domain wrapper defaults, flow projection,
+  command generation, generated artifacts, configuration, dependency
+  versions, and `engines.vscode` stayed out of scope.
+- 2026-05-17: Grouped shared wait-job `eventTimeoutAction` default
+  reconciliation now projects omitted `ets` through the shared
+  `DEFAULTS.Ets` path for the approved currently modeled wait-job families,
+  while explicit normalized values remain unchanged.
+- 2026-05-17: `buildUnitListRemainingGroups.ts` now keeps the approved wait-
+  job timeout-action projection on one shared default-aware helper path
+  instead of the earlier file-monitoring/execution-interval-only
+  special-casing.
+- 2026-05-17: `WAIT_JOB_TIMEOUT_ACTION_DEFAULT_ALIGNMENT.md`,
+  `PARAMETER_COVERAGE_MATRIX.md`, `SPECS.md`, `docs/specs/plans.md`,
+  `TASKS.md`, and `uc-build-unit-list.md` now record the delivered shared
+  wait-job `eventTimeoutAction` default-projection slice.
 - 2026-05-09:
   `PARAMETER_COVERAGE_MATRIX.md`, `EVENT_RECEIVING_JOB_ALIGNMENT.md`,
   `EVENT_RECEIVING_STRING_FILTER_ALIGNMENT.md`, `SPECS.md`,
@@ -921,20 +979,21 @@
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-05-09
-- Approved scope: grouped shared wait-job execution-time (`fd`) diagnostics
-  for explicit `fd` values on `flwj` / `rflwj`, `tmwj` / `rtmwj`, and
-  `evwj` / `revwj`, limited to the documented `fd` range `1..1440` and the
-  documented start-condition-disabled behavior for explicit `fd` through the
-  existing editor-feedback boundary, plus the smallest helper/rule-array
-  refactor needed to keep the checks on the current file-monitoring,
-  execution-interval, and event-receiving diagnostic paths, while preserving
-  raw parser output, domain wrapper values, normalized parameters, unit-list
-  projection, flow projection, command generation, generated artifacts,
-  dependency versions, configuration, and `engines.vscode`.
+- Approved at: 2026-05-17
+- Approved scope: grouped shared wait-job `eventTimeoutAction` default
+  reconciliation in `buildUnitListRemainingGroups.ts` for omitted `ets` on
+  `lfwj` / `rlfwj`, `mlwj` / `rmlwj`, `mqwj` / `rmqwj`,
+  `mswj` / `rmswj`, and `ntwj` / `rntwj`, plus the smallest helper refactor
+  needed to keep the projection on one shared default-aware path, focused
+  regression updates in `buildUnitListRemainingGroups.test.ts` and
+  `buildUnitListView.test.ts`, SDD sync, and required validation while
+  preserving parser output, domain wrapper values, editor-feedback behavior,
+  flow projection, command generation, generated artifacts, dependency
+  versions, configuration, and `engines.vscode`.
 
-Current implementation gate: the grouped shared wait-job `fd` scope recorded
-above has been approved and implemented.
+Current implementation gate: the grouped shared wait-job
+`eventTimeoutAction` default-projection scope recorded above has been approved
+and implemented.
 
 ## Prior Approval Evidence
 

@@ -32,6 +32,22 @@ const isFileMonitoringJob = (unit: AjsUnit): boolean =>
 const isExecutionIntervalControlJob = (unit: AjsUnit): boolean =>
   unit.unitType === "tmwj" || unit.unitType === "rtmwj";
 
+const isWaitJobWithGroup13TimeoutAction = (unit: AjsUnit): boolean =>
+  unit.unitType === "flwj" ||
+  unit.unitType === "rflwj" ||
+  unit.unitType === "tmwj" ||
+  unit.unitType === "rtmwj" ||
+  unit.unitType === "lfwj" ||
+  unit.unitType === "rlfwj" ||
+  unit.unitType === "mlwj" ||
+  unit.unitType === "rmlwj" ||
+  unit.unitType === "mqwj" ||
+  unit.unitType === "rmqwj" ||
+  unit.unitType === "mswj" ||
+  unit.unitType === "rmswj" ||
+  unit.unitType === "ntwj" ||
+  unit.unitType === "rntwj";
+
 const isQueueJob = (unit: AjsUnit): boolean =>
   unit.unitType === "qj" || unit.unitType === "rq";
 
@@ -86,7 +102,7 @@ const findGroup13EventTimeoutAction = (unit: AjsUnit): string | undefined =>
     unit,
     "ets",
     DEFAULTS.Ets,
-    isFileMonitoringJob(unit) || isExecutionIntervalControlJob(unit),
+    isWaitJobWithGroup13TimeoutAction(unit),
   );
 
 const findGroup15TransferOperation = (

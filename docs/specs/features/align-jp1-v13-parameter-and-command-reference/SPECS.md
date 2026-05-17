@@ -152,6 +152,25 @@ JP1/AJS3 version 13 reference documents.
   values, normalized parameters, unit-list projection, flow projection, and
   command generation remain unchanged. Broader `ets`-bearing unit families and
   `tmitv` / `etn` validation remain deferred.
+- Wait-job group 13 `eventTimeoutAction` projection is a separate approval-
+  sensitive boundary from the shared domain `ParamFactory.ets` default because
+  it is user-visible table output. Current projection is default-aware for
+  `flwj` / `rflwj` and `tmwj` / `rtmwj`, but other currently modeled
+  `ets`-bearing wait-job families still project omitted values raw/empty. If
+  approved, the next focused follow-up should stay inside
+  `buildUnitListRemainingGroups.ts`, reconcile omitted `ets` display for the
+  currently modeled wait-job families that already share `ParamFactory.ets`,
+  and include only the smallest helper refactor needed to replace the current
+  family-specific projection seam while preserving explicit normalized values,
+  parser output, domain wrapper values, editor-feedback diagnostics, flow
+  projection, and command generation.
+- Wait-job group 13 `eventTimeoutAction` projection is now aligned for the
+  currently modeled wait-job families `lfwj` / `rlfwj`, `mlwj` / `rmlwj`,
+  `mqwj` / `rmqwj`, `mswj` / `rmswj`, and `ntwj` / `rntwj`. Omitted `ets`
+  now uses the same shared default-aware semantics already exposed by
+  `ParamFactory.ets`, while explicit normalized values, parser output, domain
+  wrapper values, editor-feedback diagnostics, flow projection, and command
+  generation remain unchanged.
 - Execution-interval control job defaults are approval-sensitive because
   JP1/AJS3 version 13 defines omitted `tmitv`, `etn`, and `ets` behavior for
   `tmwj` / `rtmwj`, while current code only has generic defaults for `etn` and
