@@ -1254,7 +1254,7 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(upperPanelBottom <= lowerPanelTop);
   });
 
-  test("does not push a lower panel origin when that lower unit is the newly expanded unit", () => {
+  test("pushes a lower panel origin consistently when expansion order changes", () => {
     const result = parseAjs(upperPanelIntrudesLowerPanelDefinition);
     assert.deepStrictEqual(result.errors, []);
     const document = normalizeAjsDocument(result.rootUnits);
@@ -1278,10 +1278,41 @@ suite("Build Expanded Flow Graph", () => {
     const lowerBefore = upperOnlyExpanded.positionOverrides.get(lowerNetId);
     const lowerAfter =
       lowerExpandedAfterUpper.positionOverrides.get(lowerNetId);
+    const upperPosition =
+      lowerExpandedAfterUpper.positionOverrides.get(upperNetId);
+    const upperDecoration =
+      lowerExpandedAfterUpper.nodeDecorations.get(upperNetId);
+    const lowerDecoration =
+      lowerExpandedAfterUpper.nodeDecorations.get(lowerNetId);
+    const lowerThenUpper = buildExpandedFlowGraph(
+      document,
+      currentUnitId,
+      [lowerNetId, upperNetId],
+      16,
+    );
 
     assert.ok(lowerBefore);
     assert.ok(lowerAfter);
-    assert.strictEqual(lowerAfter!.y, lowerBefore!.y);
+    assert.ok(upperPosition);
+    assert.ok(upperDecoration);
+    assert.ok(lowerDecoration);
+
+    const upperPanelBottom =
+      upperPosition!.y +
+      upperDecoration!.panelOffsetYPx +
+      upperDecoration!.panelHeightPx;
+    const lowerPanelTop = lowerAfter!.y + lowerDecoration!.panelOffsetYPx;
+
+    assert.ok(lowerAfter!.y > lowerBefore!.y);
+    assert.ok(upperPanelBottom <= lowerPanelTop);
+    assert.deepStrictEqual(
+      lowerExpandedAfterUpper.positionOverrides,
+      lowerThenUpper.positionOverrides,
+    );
+    assert.deepStrictEqual(
+      lowerExpandedAfterUpper.nodeDecorations,
+      lowerThenUpper.nodeDecorations,
+    );
   });
 
   test("does not apply vertical growth again when a target already has enough y offset", () => {

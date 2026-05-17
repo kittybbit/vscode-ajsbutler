@@ -26,6 +26,9 @@ type CreateReactFlowDataOptions = {
   searchedUnitId?: string;
 };
 
+const nestedPanelBoundsNodeId = (unitId: string): string =>
+  `${unitId}::nested-panel-bounds`;
+
 const toNodeData = (
   node: FlowGraphNodeDto,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
@@ -91,6 +94,45 @@ const toEdge = (edge: FlowGraphEdgeDto): Edge => ({
   animated: edge.type === "con",
 });
 
+const toNestedPanelBoundsNode = (
+  node: Node<AjsNode>,
+): Node<AjsNode> | undefined => {
+  const nestedPanel = node.data.nestedPanel;
+  if (!nestedPanel) {
+    return undefined;
+  }
+
+  return {
+    id: nestedPanelBoundsNodeId(node.id),
+    type: "group",
+    data: { label: "" } as AjsNode,
+    position: {
+      x: node.position.x + nestedPanel.panelOffsetXPx,
+      y: node.position.y + nestedPanel.panelOffsetYPx,
+    },
+    width: nestedPanel.panelWidthPx,
+    height: nestedPanel.panelHeightPx,
+    initialWidth: nestedPanel.panelWidthPx,
+    initialHeight: nestedPanel.panelHeightPx,
+    style: {
+      width: nestedPanel.panelWidthPx,
+      height: nestedPanel.panelHeightPx,
+      opacity: 0,
+      pointerEvents: "none",
+      background: "transparent",
+      border: "none",
+    },
+    selectable: false,
+    draggable: false,
+    connectable: false,
+    focusable: false,
+    ariaRole: "presentation",
+    domAttributes: {
+      "aria-hidden": true,
+    },
+  };
+};
+
 export const createReactFlowData = (
   graph: FlowGraphDto,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
@@ -114,8 +156,11 @@ export const createReactFlowData = (
       options?.positionOverrides?.get(node.id) ??
       calculateFlowGraphNodePosition(node, theme.typography.htmlFontSize),
   }));
+  const nestedPanelBoundsNodes = nodes
+    .map(toNestedPanelBoundsNode)
+    .filter((node): node is Node<AjsNode> => !!node);
 
   const edges: Edge[] = graph.edges.map(toEdge);
 
-  return { nodes, edges };
+  return { nodes: [...nodes, ...nestedPanelBoundsNodes], edges };
 };

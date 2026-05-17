@@ -5,7 +5,7 @@ import { createViewerSubscriptions } from "../../extension/bootstrap/viewerWirin
 
 suite("Viewer wiring", () => {
   test("creates viewer subscriptions for both table and flow viewers", () => {
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
+    const context = { subscriptions: [] } as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {
       trackEvent() {},
       dispose() {},

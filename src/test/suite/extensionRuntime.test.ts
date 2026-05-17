@@ -6,7 +6,7 @@ suite("Extension runtime", () => {
   test("creates MyExtension with telemetry and context", () => {
     const context = {
       subscriptions: [],
-    } as unknown as vscode.ExtensionContext;
+    } as vscode.ExtensionContext;
 
     const runtime = createExtensionRuntime(context);
 

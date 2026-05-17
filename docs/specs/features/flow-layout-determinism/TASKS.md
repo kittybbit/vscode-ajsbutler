@@ -12,12 +12,13 @@
 ## Current Status
 
 - Runtime status:
-  investigation is recorded, but implementation has not started.
+  deterministic expanded-flow layout and fit-to-view follow-up implementation
+  are complete.
 - Active slice:
-  docs-only specification update for deterministic expanded-flow layout.
+  none.
 - Open follow-up:
-  request implementation approval after the deterministic layout scope and
-  test expectations are accepted.
+  watch for real-world nested layout examples that need additional collision or
+  refit coverage.
 
 ## Human Approval
 
@@ -35,25 +36,30 @@ active implementation approval remains.
 
 - [x] Impact investigation completed and recorded in PLANS/SPECS/TASKS by
       responsibility.
-- [ ] Record human approval for runtime implementation of deterministic
+- [x] Record human approval for runtime implementation of deterministic
       expanded-flow layout.
-- [ ] Add `LayoutBox`, `LayoutItem`, and occupied-box calculation in the
+- [x] Add `LayoutBox`, `LayoutItem`, and occupied-box calculation in the
       approved implementation slice.
-- [ ] Remove `activeExpandedUnitId`-dependent collision resolution in the
+- [x] Remove `activeExpandedUnitId`-dependent collision resolution in the
       approved implementation slice.
-- [ ] Add container-level collision resolution for sibling subtree occupied
+- [x] Add container-level collision resolution for sibling subtree occupied
       boxes in the approved implementation slice.
-- [ ] Move subtrees by one delta so descendant relative positions remain
+- [x] Move subtrees by one delta so descendant relative positions remain
       stable in the approved implementation slice.
-- [ ] Add regression tests for order-independent layout, panel/node
+- [x] Add regression tests for order-independent layout, panel/node
       non-overlap, and minimal right/down collision push in the approved
       implementation slice.
+- [x] Record human approval for the fit-to-view follow-up slice.
+- [x] Include expanded nested panel bounds when the flow viewer refits after
+      expansion.
+- [x] Add regression coverage for manual fit-to-view after nested expansion.
 
 ## Validation
 
-- [ ] Add or update tests where a slice changes behavior or ownership.
-- [ ] Update README or user documentation if user-facing behavior changes.
-- [ ] Run relevant validation for the approved slice.
+- [x] Add or update tests where a slice changes behavior or ownership.
+- [x] README update not required; behavior contract is covered by the
+      flow-graph use case and this feature spec.
+- [x] Run relevant validation for the approved slice.
 
 ## Notes
 

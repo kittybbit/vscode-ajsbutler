@@ -112,6 +112,12 @@
 
    - Track active implementation under
      `docs/specs/features/flow-layout-determinism/`.
+   - The first deterministic expanded-flow layout implementation slice is
+     delivered with occupied-box collision resolution and order-independent
+     regression coverage.
+   - The React Flow standard `fitView` follow-up is delivered by
+     representing expanded panel bounds as transparent React Flow group
+     nodes.
    - The same selected scope and expanded-unit set must yield the same layout
      regardless of expansion order.
    - Expanded sibling subtrees must not overlap by node or panel occupancy.

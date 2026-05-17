@@ -33,12 +33,20 @@ type ExpandedFlowGraphResult = {
   nodeDecorations: ReadonlyMap<string, ExpandedNodeDecoration>;
 };
 
-type FlowGraphBounds = {
+type LayoutBox = {
   minX: number;
   maxX: number;
   minY: number;
   maxY: number;
 };
+
+type LayoutItem = {
+  unit: AjsUnit;
+  position: FlowGraphPosition;
+  occupiedBox: LayoutBox;
+};
+
+type FlowGraphBounds = LayoutBox;
 
 type FlowGraphMetrics = ReturnType<typeof createFlowGraphMetrics>;
 
@@ -532,20 +540,81 @@ const doBoundsOverlapHorizontally = (
   lowerBounds: FlowGraphBounds,
 ) => upperBounds.minX < lowerBounds.maxX && lowerBounds.minX < upperBounds.maxX;
 
+const doBoundsOverlap = (left: LayoutBox, right: LayoutBox) =>
+  left.minX < right.maxX &&
+  right.minX < left.maxX &&
+  left.minY < right.maxY &&
+  right.minY < left.maxY;
+
+const buildOccupiedLayoutItem = (
+  context: ExpandedFlowGraphBuildContext,
+  unit: AjsUnit,
+): LayoutItem | undefined => {
+  const position = getDisplayPosition(context, unit.id);
+  if (!position) {
+    return undefined;
+  }
+  return {
+    unit,
+    position,
+    occupiedBox:
+      buildExpandedUnitPanelBounds(context, unit) ??
+      buildUnitBaseBounds(position, context.metrics),
+  };
+};
+
+const buildVisibleImmediateChildLayoutItems = (
+  context: ExpandedFlowGraphBuildContext,
+  containerUnitId: string,
+): LayoutItem[] =>
+  getVisibleImmediateChildren(context, containerUnitId)
+    .map((unit) => buildOccupiedLayoutItem(context, unit))
+    .filter((item): item is LayoutItem => !!item);
+
+const resolveSiblingSubtreeCollisions = (
+  context: ExpandedFlowGraphBuildContext,
+  containerUnitId: string,
+) => {
+  const layoutItems = buildVisibleImmediateChildLayoutItems(
+    context,
+    containerUnitId,
+  );
+
+  for (let targetIndex = 0; targetIndex < layoutItems.length; targetIndex++) {
+    let target = layoutItems[targetIndex];
+    for (let fixedIndex = 0; fixedIndex < targetIndex; fixedIndex++) {
+      const fixed = layoutItems[fixedIndex];
+      if (!doBoundsOverlap(fixed.occupiedBox, target.occupiedBox)) {
+        continue;
+      }
+
+      const dx =
+        fixed.position.x < target.position.x
+          ? fixed.occupiedBox.maxX - target.occupiedBox.minX
+          : 0;
+      const dy =
+        fixed.position.y < target.position.y
+          ? fixed.occupiedBox.maxY - target.occupiedBox.minY
+          : 0;
+      if (dx <= 0 && dy <= 0) {
+        continue;
+      }
+
+      addOffset(context, target.unit.id, {
+        x: Math.max(0, dx),
+        y: Math.max(0, dy),
+      });
+      target = buildOccupiedLayoutItem(context, target.unit) ?? target;
+      layoutItems[targetIndex] = target;
+    }
+  }
+};
+
 const resolveLowerExpandedPanelIntrusions = (
   context: ExpandedFlowGraphBuildContext,
   expandedChildren: ReadonlyArray<AjsUnit>,
-  activeExpandedUnitId: string | undefined,
 ) => {
-  if (!activeExpandedUnitId) {
-    return;
-  }
-
   for (const upperChild of expandedChildren) {
-    if (upperChild.id !== activeExpandedUnitId) {
-      continue;
-    }
-
     const upperPosition = getDisplayPosition(context, upperChild.id);
     const upperPanelBounds = buildExpandedUnitPanelBounds(context, upperChild);
     if (!upperPosition || !upperPanelBounds) {
@@ -584,7 +653,6 @@ const relayoutExpandedScope = (
   context: ExpandedFlowGraphBuildContext,
   containerUnit: AjsUnit,
   expandedUnitIdSet: ReadonlySet<string>,
-  activeExpandedUnitId: string | undefined,
 ) => {
   const expandedChildren = containerUnit.children
     .filter(
@@ -595,20 +663,11 @@ const relayoutExpandedScope = (
 
   for (const expandedChild of expandedChildren) {
     revealVisibleNestedUnit(context, expandedChild);
-    relayoutExpandedScope(
-      context,
-      expandedChild,
-      expandedUnitIdSet,
-      activeExpandedUnitId,
-    );
+    relayoutExpandedScope(context, expandedChild, expandedUnitIdSet);
     updateExpandedNodeDecoration(context, expandedChild);
   }
 
-  resolveLowerExpandedPanelIntrusions(
-    context,
-    expandedChildren,
-    activeExpandedUnitId,
-  );
+  resolveLowerExpandedPanelIntrusions(context, expandedChildren);
 
   const immediateVisibleChildren = getVisibleImmediateChildren(
     context,
@@ -651,6 +710,8 @@ const relayoutExpandedScope = (
       targetUnitIds,
     );
   }
+
+  resolveSiblingSubtreeCollisions(context, containerUnit.id);
 };
 
 const buildExpandedPanelBounds = (
@@ -757,9 +818,6 @@ export const buildExpandedFlowGraph = (
   };
 
   const expandedUnitIdList = [...expandedUnitIds];
-  const activeExpandedUnitId = Array.isArray(expandedUnitIds)
-    ? expandedUnitIds.at(-1)
-    : undefined;
   const expandedUnitIdSet = new Set(
     expandedUnitIdList.filter((unitId) => {
       const unit = unitById.get(unitId);
@@ -772,12 +830,7 @@ export const buildExpandedFlowGraph = (
     }),
   );
 
-  relayoutExpandedScope(
-    context,
-    currentUnit,
-    expandedUnitIdSet,
-    activeExpandedUnitId,
-  );
+  relayoutExpandedScope(context, currentUnit, expandedUnitIdSet);
 
   return {
     graph: {

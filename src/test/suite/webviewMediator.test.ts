@@ -21,20 +21,20 @@ suite("WebviewMediator", () => {
 
     const context = {
       subscriptions: [],
-    } as unknown as vscode.ExtensionContext;
+    } as vscode.ExtensionContext;
     const document = {
       languageId: "jp1ajs",
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     const renamedUri = {
       toString: () => "file:///renamed.ajs",
-    } as unknown as vscode.Uri;
+    } as vscode.Uri;
     const panel = {
       title: "sample",
       dispose() {
         panelDisposed = true;
       },
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
 
     const mediator = new WebviewMediator(
       context,

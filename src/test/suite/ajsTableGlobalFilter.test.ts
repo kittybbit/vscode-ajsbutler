@@ -20,7 +20,7 @@ const createRow = (
   value: unknown,
 ): Row<UnitListRowView> =>
   ({
-    original: { absolutePath } as UnitListRowView,
+    original: { absolutePath } as unknown as UnitListRowView,
     getValue: () => value,
   }) as unknown as Row<UnitListRowView>;
 
