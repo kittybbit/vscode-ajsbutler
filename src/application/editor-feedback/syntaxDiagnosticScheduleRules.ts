@@ -1,0 +1,419 @@
+import { parseScheduleDateValue } from "../../domain/models/parameters/scheduleRuleHelpers";
+import type { Unit, UnitParameter } from "../../domain/values/Unit";
+import { findParameters } from "./syntaxDiagnosticUnitLookup";
+
+export const DEFAULT_SCHEDULE_LIMIT_YEAR = 2036;
+
+export type ParsedExplicitScheduleRuleValue = {
+  hasExplicitRuleNumber: boolean;
+  ruleNumber: number;
+  value: string;
+};
+
+export type ParsedExplicitScheduleDateValue = {
+  hasExplicitRuleNumber: boolean;
+  ruleNumber: number;
+  year?: number;
+  month?: number;
+  dayValue: string;
+};
+
+export const parseExplicitScheduleRuleValue = (
+  rawValue: string | undefined,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const matched = /^((\d{1,3}),)?(.+)$/.exec(rawValue ?? "");
+  if (!matched) {
+    return undefined;
+  }
+
+  return {
+    hasExplicitRuleNumber: matched[2] !== undefined,
+    ruleNumber: matched[2] === undefined ? 1 : Number(matched[2]),
+    value: matched[3],
+  };
+};
+
+export const isValidScheduleRuleNumber = (
+  parsedValue: ParsedExplicitScheduleRuleValue | undefined,
+): boolean =>
+  parsedValue !== undefined &&
+  (!parsedValue.hasExplicitRuleNumber ||
+    (parsedValue.ruleNumber >= 1 && parsedValue.ruleNumber <= 144));
+
+export const normalizeScheduleLimitYear = (
+  scheduleLimitYear: number | undefined,
+): number | undefined =>
+  Number.isInteger(scheduleLimitYear) &&
+  scheduleLimitYear !== undefined &&
+  scheduleLimitYear >= 2036 &&
+  scheduleLimitYear <= 2099
+    ? scheduleLimitYear
+    : undefined;
+
+export const parseExplicitScheduleDateDiagnosticValue = (
+  rawValue: string | undefined,
+): ParsedExplicitScheduleDateValue | undefined => {
+  const parsed = parseScheduleDateValue(rawValue);
+  if (!parsed?.day) {
+    return undefined;
+  }
+
+  const yearMonthMatch = /^((\d{4})\/)?(\d{2})\/$/.exec(parsed.yearMonth ?? "");
+  return {
+    hasExplicitRuleNumber: /^\d{1,3},/.test(rawValue ?? ""),
+    ruleNumber: parsed.rule,
+    year: yearMonthMatch?.[2] ? Number(yearMonthMatch[2]) : undefined,
+    month: yearMonthMatch ? Number(yearMonthMatch[3]) : undefined,
+    dayValue: parsed.day,
+  };
+};
+
+export const getCalendarMonthDayLimit = (
+  year: number | undefined,
+  month: number | undefined,
+): number => {
+  if (month === undefined) {
+    return 31;
+  }
+
+  if (year === undefined) {
+    return month === 2 ? 29 : new Date(2000, month, 0).getDate();
+  }
+
+  return new Date(year, month, 0).getDate();
+};
+
+export const isValidScheduleDateYear = (
+  year: number | undefined,
+  scheduleLimitYear: number | undefined,
+): boolean =>
+  year === undefined ||
+  (year >= 1994 &&
+    (scheduleLimitYear === undefined || year <= scheduleLimitYear));
+
+export const isValidScheduleDateMonth = (month: number | undefined): boolean =>
+  month === undefined || (month >= 1 && month <= 12);
+
+export const isValidScheduleDateDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean => {
+  if (parsed.dayValue === "en") {
+    return parsed.month === undefined;
+  }
+
+  if (parsed.dayValue === "ud") {
+    return parsed.month === undefined;
+  }
+
+  const explicitDayMatch = /^(\d{2})$/.exec(parsed.dayValue);
+  if (explicitDayMatch) {
+    const day = Number(explicitDayMatch[1]);
+    return (
+      day >= 1 && day <= getCalendarMonthDayLimit(parsed.year, parsed.month)
+    );
+  }
+
+  const relativeDayMatch = /^([+*@])(\d{2})$/.exec(parsed.dayValue);
+  if (relativeDayMatch) {
+    const day = Number(relativeDayMatch[2]);
+    return day >= 1 && day <= 35;
+  }
+
+  const backwardDayMatch = /^([+*@])?b(?:-(\d{2}))?$/.exec(parsed.dayValue);
+  if (backwardDayMatch) {
+    const direction = backwardDayMatch[1];
+    const offset = backwardDayMatch[2]
+      ? Number(backwardDayMatch[2])
+      : undefined;
+
+    if (offset === undefined) {
+      return true;
+    }
+
+    if (direction) {
+      return offset >= 0 && offset <= 34;
+    }
+
+    return (
+      offset >= 0 &&
+      offset <= getCalendarMonthDayLimit(parsed.year, parsed.month) - 1
+    );
+  }
+
+  const weekdayMatch = /^\+(su|mo|tu|we|th|fr|sa)(?::(\d|b))?$/.exec(
+    parsed.dayValue,
+  );
+  if (weekdayMatch) {
+    const occurrence = weekdayMatch[2];
+    return (
+      occurrence === undefined ||
+      occurrence === "b" ||
+      (Number(occurrence) >= 1 && Number(occurrence) <= 5)
+    );
+  }
+
+  return false;
+};
+
+export const isValidExplicitScheduleDate = (
+  parameter: UnitParameter,
+  scheduleLimitYear: number | undefined,
+): boolean => {
+  const parsed = parseExplicitScheduleDateDiagnosticValue(parameter.value);
+  if (!parsed) {
+    return false;
+  }
+
+  if (parsed.dayValue === "ud") {
+    return (
+      parsed.hasExplicitRuleNumber &&
+      parsed.ruleNumber === 0 &&
+      parsed.month === undefined
+    );
+  }
+
+  if (
+    parsed.hasExplicitRuleNumber &&
+    (parsed.ruleNumber < 1 || parsed.ruleNumber > 144)
+  ) {
+    return false;
+  }
+
+  return (
+    isValidScheduleDateMonth(parsed.month) &&
+    isValidScheduleDateYear(parsed.year, scheduleLimitYear) &&
+    isValidScheduleDateDayToken(parsed)
+  );
+};
+
+export const parseHourMinuteValue = (
+  rawValue: string,
+): { hours: number; minutes: number } | undefined => {
+  const matched = /^\+?(\d{2}):(\d{2})$/.exec(rawValue);
+  if (!matched) {
+    return undefined;
+  }
+
+  return {
+    hours: Number(matched[1]),
+    minutes: Number(matched[2]),
+  };
+};
+
+export const isValidHourMinuteRange = (rawValue: string): boolean => {
+  const parsed = parseHourMinuteValue(rawValue);
+  return (
+    parsed !== undefined &&
+    parsed.hours >= 0 &&
+    parsed.hours <= 47 &&
+    parsed.minutes >= 0 &&
+    parsed.minutes <= 59
+  );
+};
+
+export const isValidDelayMinutesRange = (rawValue: string): boolean => {
+  const matched = /^[MCU](\d{1,4})$/.exec(rawValue);
+  if (!matched) {
+    return false;
+  }
+
+  const minutes = Number(matched[1]);
+  return minutes >= 1 && minutes <= 2879;
+};
+
+export const isValidWaitMinutesRange = (rawValue: string): boolean => {
+  if (!/^\d{1,4}$/.test(rawValue)) {
+    return false;
+  }
+
+  const minutes = Number(rawValue);
+  return minutes >= 1 && minutes <= 2879;
+};
+
+export const isValidExplicitParentScheduleRule = (
+  parameter: UnitParameter,
+  unit: Unit,
+  rootUnits: readonly Unit[],
+): boolean => {
+  if (rootUnits.includes(unit)) {
+    return true;
+  }
+
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  if (!/^\d{1,3}$/.test(parsed.value)) {
+    return false;
+  }
+
+  const parentRuleNumber = Number(parsed.value);
+  return parentRuleNumber >= 1 && parentRuleNumber <= 144;
+};
+
+export const isValidExplicitStartTime = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  return (
+    isValidScheduleRuleNumber(parsed) &&
+    parsed !== undefined &&
+    isValidHourMinuteRange(parsed.value)
+  );
+};
+
+export const isValidExplicitCycle = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  const matched = /^\((\d{1,3}),([ymwd])\)$/.exec(parsed.value);
+  if (!matched) {
+    return false;
+  }
+
+  const cycle = Number(matched[1]);
+  const unitType = matched[2];
+  const maximumByUnit = {
+    y: 10,
+    m: 12,
+    w: 5,
+    d: 31,
+  } as const;
+  return cycle >= 1 && cycle <= maximumByUnit[unitType];
+};
+
+export const isExplicitWeeklyCycle = (
+  parameter: UnitParameter,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return undefined;
+  }
+
+  return /^\(\d{1,3},w\)$/.test(parsed.value) ? parsed : undefined;
+};
+
+export const usesOpenOrClosedDaySchedule = (
+  parameter: UnitParameter,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return undefined;
+  }
+
+  return /^((\d{4}\/)?\d{2}\/)?[*@]/.test(parsed.value) ? parsed : undefined;
+};
+
+export const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
+  parameter: UnitParameter,
+  unit: Unit,
+): boolean => {
+  const weeklyCycle = isExplicitWeeklyCycle(parameter);
+  if (!weeklyCycle) {
+    return false;
+  }
+
+  return findParameters(unit, "sd").some((scheduleDateParameter) => {
+    const scheduleDate = usesOpenOrClosedDaySchedule(scheduleDateParameter);
+    return scheduleDate?.ruleNumber === weeklyCycle.ruleNumber;
+  });
+};
+
+export const isValidExplicitShiftDays = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  if (!/^\d{1,3}$/.test(parsed.value)) {
+    return false;
+  }
+
+  const shiftDays = Number(parsed.value);
+  return shiftDays >= 1 && shiftDays <= 31;
+};
+
+export const isValidOptionalOneToThirtyOne = (
+  rawValue: string | undefined,
+): boolean =>
+  rawValue === undefined ||
+  (/^\d{1,2}$/.test(rawValue) &&
+    Number(rawValue) >= 1 &&
+    Number(rawValue) <= 31);
+
+export const isValidExplicitScheduleByDaysFromStart = (
+  parameter: UnitParameter,
+): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  const segments = parsed.value.split(",");
+  const scheduleType = segments[0];
+  if (
+    !["no", "be", "af", "db", "da"].includes(scheduleType) ||
+    segments.some((segment) => segment.length === 0)
+  ) {
+    return false;
+  }
+
+  if (scheduleType === "no") {
+    return segments.length === 1;
+  }
+
+  if (scheduleType === "db" || scheduleType === "da") {
+    return segments.length <= 2 && isValidOptionalOneToThirtyOne(segments[1]);
+  }
+
+  return (
+    segments.length <= 3 &&
+    isValidOptionalOneToThirtyOne(segments[1]) &&
+    isValidOptionalOneToThirtyOne(segments[2])
+  );
+};
+
+export const isValidExplicitDelayTime = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  return (
+    isValidHourMinuteRange(parsed.value) ||
+    isValidDelayMinutesRange(parsed.value)
+  );
+};
+
+export const isValidExplicitWaitCount = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  if (parsed.value === "no" || parsed.value === "un") {
+    return true;
+  }
+
+  if (!/^\d{1,3}$/.test(parsed.value)) {
+    return false;
+  }
+
+  const waitCount = Number(parsed.value);
+  return waitCount >= 1 && waitCount <= 999;
+};
+
+export const isValidExplicitWaitTime = (parameter: UnitParameter): boolean => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
+    return false;
+  }
+
+  return (
+    parsed.value === "no" ||
+    parsed.value === "un" ||
+    isValidHourMinuteRange(parsed.value) ||
+    isValidWaitMinutesRange(parsed.value)
+  );
+};

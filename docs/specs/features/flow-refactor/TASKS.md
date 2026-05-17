@@ -12,12 +12,13 @@
 ## Current Status
 
 - Runtime status:
-  PR1 characterization tests are implemented and validated.
+  PR2 diagnostics rule-set extraction and support-module decomposition are
+  implemented and validated.
 - Active slice:
-  PR2 diagnostics rule-set extraction is the next planned slice, pending fresh
-  approval.
+  PR3 expanded-flow graph/layout extraction is the next planned slice,
+  pending fresh approval.
 - Open follow-up:
-  request approval for PR2, then keep the remaining structural refactor slices
+  request approval for PR3, then keep the remaining structural refactor slices
   in the agreed PR order.
 
 ## Human Approval
@@ -45,7 +46,8 @@ active implementation approval remains.
 - [x] Add expanded-flow coverage for no expansion, one-level expansion,
       multi-level expansion, upper/lower panel interference, and duplicate
       edge prevention.
-- [ ] Complete PR2 diagnostics rule-set extraction after PR1 lands.
+- [x] Complete PR2 diagnostics rule-set extraction after PR1 lands.
+- [x] Complete PR2 support-module decomposition follow-up.
 - [ ] Complete PR3 expanded-flow graph/layout extraction after PR2 lands.
 - [ ] Complete PR4 `FlowContents.tsx` hook/presentation extraction after PR3
       lands.
@@ -54,9 +56,11 @@ active implementation approval remains.
 
 ## Validation
 
-- [ ] Add or update tests where a slice changes behavior or ownership.
-- [ ] Update README or user documentation if user-facing behavior changes.
-- [ ] Run relevant validation for the approved slice.
+- [x] Confirm PR1 characterization tests cover the preserved diagnostics
+      behavior for PR2.
+- [x] Confirm README or user documentation does not need updates because PR2
+      changes internal structure only.
+- [x] Run relevant validation for the approved slice.
 
 ## Notes
 
