@@ -132,33 +132,36 @@ rules in `docs/specs/README.md`, not in this file.
    change.
 3. Keep deterministic expanded-flow layout and fit-to-view regression coverage
    visible while real nested-layout examples accumulate.
-4. Investigate and approve `flow-refactor` PR1 characterization tests before
-   starting the planned diagnostics, expanded-flow, and flow-viewer refactor
-   slices.
+4. Request approval for `flow-refactor` PR2 diagnostics rule-set extraction
+   before starting structural diagnostics changes.
 
 ## Current Branch Plan
 
-- Branch: `codex/flow-layout-determinism`
-- Objective: implement the approved deterministic expanded-flow layout slice
-  and its React Flow standard `fitView` follow-up.
-- Status: implementation and validation are complete for the approved slices.
-- Scope: expanded-flow layout collision resolution, React Flow standard
-  `fitView` bounds support, regression tests, and SDD task/plan sync for
-  `flow-layout-determinism`.
-- Out of scope: DTO shape changes, dependency changes, `engines.vscode`
-  changes, and search/reveal/fitView behavior changes.
-- Impact summary: expanded-flow layout already removes active expansion order
-  from collision decisions, computes occupied boxes for visible sibling
-  subtrees, and keeps sibling layout stable by pushing affected right/down
-  scopes. The fit-to-view follow-up represents expanded nested panel bounds as
-  transparent React Flow group nodes so the standard `fitView` calculation can
-  include them after expansion.
-- Risks and assumptions: real-world nested layouts may reveal additional
-  collision or refit cases, but the current slices preserve desktop and web
-  extension behavior under the existing test suite and do not change graph DTO
-  shape.
-- Alternatives considered: preserving active-expanded-unit collision behavior
-  was rejected because it keeps layout dependent on expansion order.
+- Branch: `codex/flow-refactor-pr1-tests`
+- Objective: complete the PR1 characterization-test slice before structural
+  flow or diagnostics refactors.
+- Status: PR1 tests-only implementation and validation are complete; PR2
+  diagnostics rule-set extraction remains pending fresh human approval in
+  `docs/specs/features/flow-refactor/TASKS.md`.
+- Scope: PR1 `tests only` characterization coverage for syntax diagnostics
+  and expanded-flow behavior, with no runtime, DTO, dependency, generated
+  artifact, or configuration changes.
+- Out of scope: diagnostics rule extraction, expanded-flow graph/layout
+  extraction, `FlowContents.tsx` hook/presentation extraction, parser changes,
+  dependency updates, `engines.vscode` changes, and user-visible behavior
+  changes.
+- Impact summary: PR1 added characterization coverage only so later PR2-PR4
+  refactors can preserve diagnostic messages, positions, counts,
+  expanded-flow layout, search/reveal, fit behavior, and duplicate-edge
+  prevention. Existing code still concentrates diagnostics rules in
+  `buildSyntaxDiagnostics.ts`, expanded flow construction/layout in
+  `buildExpandedFlowGraph.ts`, and viewer state plus React Flow mapping in
+  `FlowContents.tsx`.
+- Risks and assumptions: PR1 intentionally avoids implementation cleanup; the
+  next meaningful risk is preserving all existing diagnostics behavior while
+  extracting rule-set modules in PR2.
+- Alternatives considered: starting directly with PR2/PR3 refactors remains
+  rejected because the approved feature plan calls for tests first.
 
 ## Build/Test Performance SDD
 

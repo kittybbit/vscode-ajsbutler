@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  investigation is recorded, but implementation has not started.
+  PR1 characterization tests are implemented and validated.
 - Active slice:
-  PR1 `tests only` characterization coverage for diagnostics and expanded flow
-  behavior, pending approval.
+  PR2 diagnostics rule-set extraction is the next planned slice, pending fresh
+  approval.
 - Open follow-up:
-  request approval for PR1, then keep the remaining structural refactor slices
+  request approval for PR2, then keep the remaining structural refactor slices
   in the agreed PR order.
 
 ## Human Approval
@@ -36,11 +36,13 @@ active implementation approval remains.
 
 - [x] Impact investigation completed and recorded in PLANS/SPECS/TASKS by
       responsibility.
-- [ ] Record human approval for PR1 `tests only`.
-- [ ] Add characterization coverage for syntax diagnostics using existing
+- [x] Confirm current entry point is PR1 `tests only`, not a runtime flow
+      refactor.
+- [x] Record human approval for PR1 `tests only`.
+- [x] Add characterization coverage for syntax diagnostics using existing
       sample definitions and snapshot or equivalent fixed expectations for
       message, line, column, and count.
-- [ ] Add expanded-flow coverage for no expansion, one-level expansion,
+- [x] Add expanded-flow coverage for no expansion, one-level expansion,
       multi-level expansion, upper/lower panel interference, and duplicate
       edge prevention.
 - [ ] Complete PR2 diagnostics rule-set extraction after PR1 lands.
