@@ -130,36 +130,35 @@ rules in `docs/specs/README.md`, not in this file.
    tracked, but defer beta exit until feedback is sufficient.
 2. Keep compatibility risk visible for every shared or extension-runtime
    change.
-3. Record deterministic expanded-flow layout implementation approval before
-   editing runtime code or tests for `flow-layout-determinism`.
+3. Keep deterministic expanded-flow layout and fit-to-view regression coverage
+   visible while real nested-layout examples accumulate.
 4. Investigate and approve `flow-refactor` PR1 characterization tests before
    starting the planned diagnostics, expanded-flow, and flow-viewer refactor
    slices.
 
 ## Current Branch Plan
 
-- Branch: `docs/flow-refactor-sdd`
-- Objective: add the second docs-only SDD record by introducing the
-  `flow-layout-determinism` feature and tightening the flow-graph use-case
-  contract for deterministic, non-overlapping nested expansion layout.
-- Status: investigation is complete for the spec update only. Runtime
-  implementation has not started and still requires explicit approval.
-- Scope: docs-only creation of `docs/specs/features/flow-layout-determinism/`
-  plus use-case, architecture, current-state, plan, and roadmap updates that
-  define the deterministic expanded-flow layout contract.
-- Out of scope: runtime code, tests, generated artifacts, configuration,
-  dependency changes, and `engines.vscode`.
-- Impact summary: this branch now records two docs-only feature additions.
-  `flow-refactor` remains the maintainability umbrella. The new
-  `flow-layout-determinism` feature separately tightens the expanded-flow
-  behavior contract so future implementation can remove order-sensitive panel
-  overlap and recompute layout deterministically from the expanded set.
-- Risks and assumptions: the deterministic layout contract assumes right/down
-  push-only collision resolution is sufficient to avoid overlap while
-  preserving current search, reveal, and fitView behavior.
-- Alternatives considered: keeping this work inside `flow-refactor` was
-  rejected because the user wants deterministic flow layout tracked as a
-  separate feature.
+- Branch: `codex/flow-layout-determinism`
+- Objective: implement the approved deterministic expanded-flow layout slice
+  and its React Flow standard `fitView` follow-up.
+- Status: implementation and validation are complete for the approved slices.
+- Scope: expanded-flow layout collision resolution, React Flow standard
+  `fitView` bounds support, regression tests, and SDD task/plan sync for
+  `flow-layout-determinism`.
+- Out of scope: DTO shape changes, dependency changes, `engines.vscode`
+  changes, and search/reveal/fitView behavior changes.
+- Impact summary: expanded-flow layout already removes active expansion order
+  from collision decisions, computes occupied boxes for visible sibling
+  subtrees, and keeps sibling layout stable by pushing affected right/down
+  scopes. The fit-to-view follow-up represents expanded nested panel bounds as
+  transparent React Flow group nodes so the standard `fitView` calculation can
+  include them after expansion.
+- Risks and assumptions: real-world nested layouts may reveal additional
+  collision or refit cases, but the current slices preserve desktop and web
+  extension behavior under the existing test suite and do not change graph DTO
+  shape.
+- Alternatives considered: preserving active-expanded-unit collision behavior
+  was rejected because it keeps layout dependent on expansion order.
 
 ## Build/Test Performance SDD
 

@@ -54,7 +54,7 @@ suite("Export CSV View", () => {
           },
         ],
       }),
-    } as unknown as Table<UnitListRowView>;
+    } as Table<UnitListRowView>;
 
     const csv = exportCsvView(table);
 

@@ -10,10 +10,6 @@ import {
   SAVE,
 } from "../../shared/webviewEvents";
 
-type ViewerFactoryDeps = {
-  createWebviewPanel: typeof vscode.window.createWebviewPanel;
-};
-
 suite("ViewerFactory", () => {
   test("reuses an existing panel before creating a new one", () => {
     const telemetry: TelemetryPort = {
@@ -24,7 +20,7 @@ suite("ViewerFactory", () => {
     const document = {
       fileName: "/tmp/sample.ajs",
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     let addCalled = false;
     let readyCalled = false;
     let createCalled = false;
@@ -71,7 +67,7 @@ suite("ViewerFactory", () => {
     const document = {
       fileName: "/tmp/sample.ajs",
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     const added: Array<{
       uri: vscode.Uri;
       panel: vscode.WebviewPanel;
@@ -123,7 +119,7 @@ suite("ViewerFactory", () => {
     const document = {
       fileName: "/tmp/sample.ajs",
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
 
     const factory = new ViewerFactory(
       "ajsbutler.testViewer",
@@ -162,7 +158,7 @@ suite("ViewerFactory", () => {
     const document = {
       fileName: "/tmp/sample.ajs",
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     const panel = {
       title: "sample.ajs",
       viewType: "ajsbutler.testViewer",
@@ -183,7 +179,7 @@ suite("ViewerFactory", () => {
         onDidDispose = callback;
         return { dispose() {} };
       },
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
     const added: Array<{
       uri: vscode.Uri;
       panel: vscode.WebviewPanel;

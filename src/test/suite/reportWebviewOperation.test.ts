@@ -20,10 +20,10 @@ suite("Report Webview Operation", () => {
 
     const document = {
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     const panel = {
       viewType: "ajsbutler.tableViewer",
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
 
     reportWebviewOperation(document, panel, telemetry, "copy.csv");
 

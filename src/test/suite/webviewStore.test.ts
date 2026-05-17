@@ -7,10 +7,10 @@ suite("WebviewStore", () => {
     const store = new WebviewStore("ajsbutler.testViewer");
     const document1 = {
       uri: { toString: () => "file:///one.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     const document2 = {
       uri: { toString: () => "file:///two.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
 
     let panel1Disposed = false;
     let panel2Disposed = false;
@@ -19,13 +19,13 @@ suite("WebviewStore", () => {
       dispose() {
         panel1Disposed = true;
       },
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
     const panel2 = {
       title: "two",
       dispose() {
         panel2Disposed = true;
       },
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
 
     store.add(document1.uri, panel1);
     store.add(document2.uri, panel2);
@@ -59,7 +59,7 @@ suite("WebviewStore", () => {
     const panel = {
       title: "same",
       dispose() {},
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
 
     store.add(storedDocument.uri, panel);
     store.removeByUri(uri);

@@ -148,7 +148,6 @@ suite("Flow Graph View", () => {
         setCurrentUnitId: () => undefined,
       },
       {
-        nodeDecorations: new Map(),
         searchMatchedUnitIds: new Set([
           "/root/jobnet/child-net",
           "/root/jobnet/child-net/grand-net",
@@ -254,7 +253,20 @@ suite("Flow Graph View", () => {
           expandedUnitIds: new Set<string>(),
           toggleExpandedUnitId: () => undefined,
         },
-        positionOverrides: new Map(),
+        nodeDecorations: new Map([
+          [
+            "/root/jobnet/child-net",
+            {
+              panelOffsetXPx: -24,
+              panelOffsetYPx: -16,
+              panelWidthPx: 512,
+              panelHeightPx: 384,
+            },
+          ],
+        ]),
+        positionOverrides: new Map([
+          ["/root/jobnet/child-net", { x: 400, y: 144 }],
+        ]),
       },
     );
 
@@ -284,6 +296,21 @@ suite("Flow Graph View", () => {
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
     assert.strictEqual(nodes[2].data.canExpandNested, true);
     assert.strictEqual(nodes[3].data.canExpandNested, true);
+    const childNetBoundsNode = nodes.find(
+      (node) => node.id === "/root/jobnet/child-net::nested-panel-bounds",
+    );
+    assert.ok(childNetBoundsNode);
+    assert.strictEqual(childNetBoundsNode.type, "group");
+    assert.deepStrictEqual(childNetBoundsNode.position, { x: 376, y: 128 });
+    assert.strictEqual(childNetBoundsNode.width, 512);
+    assert.strictEqual(childNetBoundsNode.height, 384);
+    assert.strictEqual(childNetBoundsNode.initialWidth, 512);
+    assert.strictEqual(childNetBoundsNode.initialHeight, 384);
+    assert.strictEqual(childNetBoundsNode.style?.width, 512);
+    assert.strictEqual(childNetBoundsNode.style?.height, 384);
+    assert.strictEqual(childNetBoundsNode.selectable, false);
+    assert.strictEqual(childNetBoundsNode.draggable, false);
+    assert.strictEqual(childNetBoundsNode.connectable, false);
     assert.strictEqual(edges[0].source, "/root/jobnet");
     assert.strictEqual(edges[0].target, "/root/jobnet/job-a");
   });

@@ -5,7 +5,7 @@ import { createExtensionSubscriptions } from "../../extension/bootstrap/extensio
 
 suite("Extension subscriptions", () => {
   test("creates diagnostics, hover, import, and viewer subscriptions", () => {
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
+    const context = { subscriptions: [] } as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {
       trackEvent() {},
       dispose() {},

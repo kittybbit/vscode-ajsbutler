@@ -14,14 +14,14 @@ suite("ajsDocument", () => {
         return "";
       },
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     const panel = {
       webview: {
         postMessage(message: { type: string; data: unknown }) {
           posted.push(message);
         },
       },
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
 
     readyAjsDocument(document, panel);
 
@@ -36,14 +36,14 @@ suite("ajsDocument", () => {
         return "";
       },
       uri: { toString: () => "file:///sample.ajs" },
-    } as unknown as vscode.TextDocument;
+    } as vscode.TextDocument;
     const panel = {
       webview: {
         postMessage(message: { type: string; data: unknown }) {
           posted.push(message);
         },
       },
-    } as unknown as vscode.WebviewPanel;
+    } as vscode.WebviewPanel;
 
     const onChange = debouncedAjsDocumentChangeFn(5);
     onChange(document, panel);
