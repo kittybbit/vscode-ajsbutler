@@ -6,6 +6,14 @@
   or intentionally dropped.
 - Update `docs/specs/plans.md` or `docs/specs/roadmap.md` in the same commit
   when branch priorities or repository sequencing change.
+- Keep this file focused on current state only; do not retain historical logs,
+  prior approvals, or long validation diaries once they stop being actionable.
+
+## Current Status
+
+- Runtime status:
+- Active slice:
+- Open follow-up:
 
 ## Human Approval
 
@@ -16,7 +24,10 @@
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 
-## Tasks
+Reset this section back to Pending when the approved slice is complete and no
+active implementation approval remains.
+
+## Active Tasks
 
 - [ ] Impact investigation completed and recorded in PLANS/SPECS/TASKS by
       responsibility
@@ -35,4 +46,4 @@ Only clear human approval can change Status to Approved.
 
 - Keep investigation details in PLANS.md or SPECS.md when they describe scope,
   risk, alternatives, or boundary decisions.
-- Use this file for executable tasks and follow-up tracking only.
+- Use this file for current executable tasks and open follow-up tracking only.

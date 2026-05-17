@@ -13,17 +13,13 @@ rules in `docs/specs/README.md`, not in this file.
 
 - List search stays presentation-local until another non-table consumer needs
   the same matching semantics.
-- Parameter-reference alignment should proceed in small JP1/AJS v13 slices
-  with explicit manual coverage. For each parameter category, verify value
-  parsing against the official format before claiming the category aligned. A
-  feature-local parameter coverage matrix now tracks the investigated
-  categories without claiming repository-wide coverage. Schedule-rule
-  `wc` / `wt` effective-value pairing is aligned in the domain boundary and
-  unit-list projection.
-- Remaining JP1/AJS v13 parameter-alignment gaps should be grouped by
-  user-meaningful job type or parameter family where practical, instead of
-  returning to single-parameter micro-slices once a family has shared seams
-  and shared regression evidence.
+- Parameter-reference alignment was completed for the current repository-
+  supported JP1/AJS v13 feature scope using small slices with explicit manual
+  coverage. The feature-local coverage matrix tracks the investigated
+  categories without claiming repository-wide coverage. Remaining
+  platform-specific, environment-specific, or broader cross-parameter topics
+  were explicitly re-scoped out instead of being treated as unfinished work in
+  the same feature.
 - After the delivered grouped event-host validation for `evhst`, the next
   recommended JP1/AJS v13 slice stayed inside the already-modeled job
   end-judgment family and tackled threshold ordering for explicit `wth` /
@@ -105,9 +101,17 @@ rules in `docs/specs/README.md`, not in this file.
   rule, one start-condition-disabled rule, and existing diagnostic seams in
   `buildSyntaxDiagnostics.ts`, while still avoiding unsupported
   compatible-ISAM-specific behavior.
-- JP1/AJS v13 parameter alignment remains the active implementation priority
-  until the documented diagnostics, validation, and category-level coverage
-  gaps are either completed or explicitly re-scoped.
+- After the delivered grouped shared wait-job execution-time (`fd`) and
+  wait-job `eventTimeoutAction` default-projection slices, the next
+  recommended JP1/AJS v13 candidate should be re-selected from the remaining
+  partial or deferred gaps using the same user-meaningful grouping rule,
+  rather than defaulting immediately to platform-specific transfer-path or
+  broader deferred cross-parameter work.
+- JP1/AJS v13 parameter alignment is complete for the current repository-
+  supported feature scope. Platform-specific transfer-path interpretation,
+  non-default `SCHEDULELIMIT` handling, and broader cross-parameter
+  invalidation are explicitly outside that completed scope unless a future
+  feature re-introduces them with fresh approval.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
@@ -122,51 +126,41 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Record and approval-gate the grouped shared wait-job
-   `eventTimeoutAction` default-projection reconciliation slice across the
-   currently modeled `ets`-bearing wait-job families.
-2. Continue JP1/AJS v13 parameter-alignment slices until the feature-local
-   coverage matrix no longer has actionable `Partial` or `Deferred` gaps, or
-   until a gap is explicitly re-scoped as outside the alignment feature.
-3. Keep WebAPI import beta feedback and real-environment smoke evidence
+1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-4. Keep compatibility risk visible for every shared or extension-runtime
+2. Keep compatibility risk visible for every shared or extension-runtime
    change.
-5. Defer Qlty-driven architecture refactoring Phase 0 until JP1/AJS v13
-   parameter alignment is complete or this plan records an explicit override.
+3. Resume Qlty-driven architecture refactoring Phase 0 unless another
+   repository-level priority is explicitly recorded.
 
 ## Current Branch Plan
 
 - Branch: `main`; a dedicated implementation branch was attempted but could
   not be created from the sandboxed session after approval
-- Objective: deliver the approved grouped shared wait-job
-  `eventTimeoutAction` default-projection reconciliation slice after the
-  delivered shared wait-job execution-time (`fd`) and execution-interval
-  `etn=y` start-condition diagnostics.
-- Status: implementation and validation are complete in the recorded scope.
-- Scope: grouped unit-list projection reconciliation for omitted `ets` on the
-  currently modeled wait-job families `lfwj` / `rlfwj`,
-  `mlwj` / `rmlwj`, `mqwj` / `rmqwj`, `mswj` / `rmswj`, and
-  `ntwj` / `rntwj`, limited to group 13 `eventTimeoutAction` plus only the
-  smallest helper refactor needed to replace the current family-specific
-  projection seam with one shared default-aware path.
-- Out of scope: parser grammar changes, editor-feedback diagnostics, domain
-  wrapper default behavior, normalized parameter storage, flow projection,
-  command generation, generated artifacts, dependency changes, configuration,
-  and `engines.vscode`.
-- Impact summary: the implemented scope affected
-  `src/application/unit-list/buildUnitListRemainingGroups.ts`,
-  `src/test/suite/buildUnitListRemainingGroups.test.ts`,
-  `src/test/suite/buildUnitListView.test.ts`, the parameter-alignment feature
-  docs, and the build-unit-list behavior contract for omitted `ets` display.
-- Risks and assumptions: this slice stays presentation-facing and assumes the
-  existing shared `ParamFactory.ets` default already expresses the intended
-  JP1/AJS3 v13 semantics for the approved wait-job families. It must not
-  broaden into other wait-condition parameters, event-receiving projection, or
-  unsupported compatible-ISAM behavior.
-- Alternatives considered: transfer-file macro-variable tightening remains a
-  viable later candidate, but the delivered wait-job projection slice closed a
-  clearer user-visible inconsistency with a smaller refactor seam.
+- Objective: finish the JP1/AJS v13 parameter-alignment feature by explicitly
+  re-scoping the remaining backlog out of the active feature and promoting the
+  next repository priority.
+- Status: investigation confirmed that no additional runtime slice remains in
+  this feature for work that both shares a manual-backed rule family, reuses
+  an existing shared seam, and closes under repository-supported
+  interpretation. The only remaining completion work is docs-only closure and
+  compression.
+- Scope: docs-only closure work across the active parameter-alignment feature,
+  limited to `docs/specs/plans.md`, `docs/specs/roadmap.md`, and the
+  feature-local alignment docs needed to mark the current supported scope
+  complete.
+- Out of scope: runtime code, tests, generated artifacts, configuration,
+  dependency changes, and `engines.vscode`.
+- Impact summary: the feature is now documented as complete for the current
+  repository-supported JP1/AJS v13 scope, and the remaining backlog is
+  explicitly excluded instead of being treated as open alignment debt.
+  Investigation also found that no additional runtime slice remains in this
+  feature under the user's three conditions.
+- Risks and assumptions: this closure assumes the remaining excluded topics
+  are lower value than reopening the feature around platform-dependent or
+  broader cross-parameter interpretation.
+- Alternatives considered: reopening the feature for transfer-path semantics
+  or broader cross-parameter work was rejected in favor of a clean re-scope.
 
 ## Build/Test Performance SDD
 
@@ -194,13 +188,10 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/build-test-performance/`:
   active SDD for staged validation performance work.
 - `docs/specs/features/align-jp1-v13-parameter-and-command-reference/`:
-  active JP1/AJS3 version 13 alignment records and coverage matrix. Current
-  slice: grouped shared wait-job `eventTimeoutAction` default projection
-  reconciliation is implemented and validated across the approved currently
-  modeled `ets`-bearing wait-job families, after the delivered shared
-  wait-job execution-time (`fd`) and execution-interval `etn=y`
-  start-condition diagnostics. Compatible-ISAM-sensitive work remains
-  intentionally unsupported.
+  completed JP1/AJS3 version 13 alignment records for the current repository-
+  supported feature scope. The feature-local docs still hold durable boundary
+  decisions and the coverage matrix, while excluded platform-specific and
+  broader cross-parameter follow-ups are no longer active work here.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 - `docs/specs/features/modernize-runtime-boundaries/`:
@@ -208,8 +199,8 @@ rules in `docs/specs/README.md`, not in this file.
   pressure notes.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
   active maintainability-driven architectural refactoring based on Qlty
-  complexity, duplication, and code-smell findings; deferred until JP1/AJS v13
-  parameter alignment is complete or explicitly re-prioritized.
+  complexity, duplication, and code-smell findings; now eligible to resume as
+  the next implementation priority.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

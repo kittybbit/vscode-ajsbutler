@@ -126,7 +126,7 @@ Scenario: Schedule-rule execution-start dates must stay within documented rule
   And explicit `sd` uses a schedule rule number outside `1..144`
   Or explicit `sd` uses a documented day form with a day value outside the
     JP1/AJS3 v13 allowed range
-  Or explicit `sd` uses a year outside `1994..SCHEDULELIMIT`
+  Or explicit `sd` uses a year outside `1994..2036`
   When editor feedback is requested
   Then application-level diagnostic DTOs include the semantic parameter violation
   And raw parser output remains available to downstream consumers
@@ -309,6 +309,9 @@ Scenario: Shared string diagnostics preserve documented macro-variable allowance
 
 - desktop and web extension entry points continue to share the same
   application logic for diagnostics and hover decisions
+- this repository interprets schedule-rule year validation with the official
+  default `SCHEDULELIMIT=2036`; site-specific override handling is outside the
+  current feature scope
 - compatible-ISAM-specific semantic diagnostics are out of scope for this
   repository because compatible-ISAM is limited to legacy migration-mode
   environments that this extension will not model or support explicitly
