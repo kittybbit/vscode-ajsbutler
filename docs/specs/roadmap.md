@@ -101,6 +101,10 @@
    - Phase 1 targets flow-viewer complexity.
    - Phase 2 targets application orchestration duplication.
    - Phase 3 targets domain conditional complexity.
+   - `flow-refactor` is the current concrete repository-native slice plan for
+     those phases, bundling diagnostics modularization, expanded-flow graph
+     separation, and `FlowContents.tsx` composition cleanup behind ordered
+     PR-sized slices.
    - Every slice must preserve desktop and web extension behavior.
 
 ## Deferred / Optional Slices

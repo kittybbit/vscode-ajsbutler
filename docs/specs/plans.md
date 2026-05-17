@@ -130,37 +130,34 @@ rules in `docs/specs/README.md`, not in this file.
    tracked, but defer beta exit until feedback is sufficient.
 2. Keep compatibility risk visible for every shared or extension-runtime
    change.
-3. Resume Qlty-driven architecture refactoring Phase 0 unless another
-   repository-level priority is explicitly recorded.
+3. Investigate and approve `flow-refactor` PR1 characterization tests before
+   starting the planned diagnostics, expanded-flow, and flow-viewer refactor
+   slices.
 
 ## Current Branch Plan
 
-- Branch: `main`; a dedicated implementation branch was attempted but could
-  not be created from the sandboxed session after approval
-- Objective: finish the JP1/AJS v13 parameter-alignment feature by explicitly
-  re-scoping the remaining backlog out of the active feature and promoting the
-  next repository priority.
-- Status: investigation confirmed that no additional runtime slice remains in
-  this feature for work that both shares a manual-backed rule family, reuses
-  an existing shared seam, and closes under repository-supported
-  interpretation. The only remaining completion work is docs-only closure and
-  compression.
-- Scope: docs-only closure work across the active parameter-alignment feature,
-  limited to `docs/specs/plans.md`, `docs/specs/roadmap.md`, and the
-  feature-local alignment docs needed to mark the current supported scope
-  complete.
+- Branch: `docs/flow-refactor-sdd`
+- Objective: add the first SDD feature records for the planned `flow-refactor`
+  maintainability work as one umbrella feature with ordered refactoring
+  slices.
+- Status: investigation is complete for the feature definition only.
+  Implementation has not started and still requires explicit approval per
+  slice.
+- Scope: docs-only creation of `docs/specs/features/flow-refactor/`,
+  plus plan/roadmap synchronization needed to register the feature and the
+  first approval target.
 - Out of scope: runtime code, tests, generated artifacts, configuration,
   dependency changes, and `engines.vscode`.
-- Impact summary: the feature is now documented as complete for the current
-  repository-supported JP1/AJS v13 scope, and the remaining backlog is
-  explicitly excluded instead of being treated as open alignment debt.
-  Investigation also found that no additional runtime slice remains in this
-  feature under the user's three conditions.
-- Risks and assumptions: this closure assumes the remaining excluded topics
-  are lower value than reopening the feature around platform-dependent or
-  broader cross-parameter interpretation.
-- Alternatives considered: reopening the feature for transfer-path semantics
-  or broader cross-parameter work was rejected in favor of a clean re-scope.
+- Impact summary: this branch records one repository-native refactoring
+  feature that groups diagnostics modularization, expanded-flow graph
+  separation, and `FlowContents.tsx` composition cleanup under the agreed
+  five-PR sequence. The first future implementation slice is PR1
+  characterization tests only.
+- Risks and assumptions: the feature assumes the accepted slice order is
+  stable enough to document now and that no new behavior contract is needed as
+  long as runtime behavior remains unchanged.
+- Alternatives considered: documenting three independent features was rejected
+  because the user wants one related feature sliced by PR order.
 
 ## Build/Test Performance SDD
 
@@ -197,6 +194,10 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/modernize-runtime-boundaries/`:
   active modernization follow-up for `UnitEntity` hash readiness and bundle
   pressure notes.
+- `docs/specs/features/flow-refactor/`:
+  active repository-native maintainability feature for diagnostics,
+  expanded-flow layout, and flow-viewer composition separation using the
+  agreed five-PR slice order.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
   active maintainability-driven architectural refactoring based on Qlty
   complexity, duplication, and code-smell findings; now eligible to resume as
