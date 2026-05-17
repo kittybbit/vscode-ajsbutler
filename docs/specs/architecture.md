@@ -171,6 +171,10 @@ Migration should be incremental and use-case driven.
   root for activation wiring
 - `src/extension/telemetry/*` owns the telemetry SDK adapter and composition
   of the runtime telemetry implementation
+- `src/ui-component/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
+  presentation-local coordinate/layout resolution for nested expansion and
+  must preserve deterministic, expanded-set-based layout behavior without
+  depending on the last active expansion ID
 
 ## Telemetry Boundary
 

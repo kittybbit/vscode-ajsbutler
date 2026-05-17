@@ -130,37 +130,36 @@ rules in `docs/specs/README.md`, not in this file.
    tracked, but defer beta exit until feedback is sufficient.
 2. Keep compatibility risk visible for every shared or extension-runtime
    change.
-3. Resume Qlty-driven architecture refactoring Phase 0 unless another
-   repository-level priority is explicitly recorded.
+3. Record deterministic expanded-flow layout implementation approval before
+   editing runtime code or tests for `flow-layout-determinism`.
+4. Investigate and approve `flow-refactor` PR1 characterization tests before
+   starting the planned diagnostics, expanded-flow, and flow-viewer refactor
+   slices.
 
 ## Current Branch Plan
 
-- Branch: `main`; a dedicated implementation branch was attempted but could
-  not be created from the sandboxed session after approval
-- Objective: finish the JP1/AJS v13 parameter-alignment feature by explicitly
-  re-scoping the remaining backlog out of the active feature and promoting the
-  next repository priority.
-- Status: investigation confirmed that no additional runtime slice remains in
-  this feature for work that both shares a manual-backed rule family, reuses
-  an existing shared seam, and closes under repository-supported
-  interpretation. The only remaining completion work is docs-only closure and
-  compression.
-- Scope: docs-only closure work across the active parameter-alignment feature,
-  limited to `docs/specs/plans.md`, `docs/specs/roadmap.md`, and the
-  feature-local alignment docs needed to mark the current supported scope
-  complete.
+- Branch: `docs/flow-refactor-sdd`
+- Objective: add the second docs-only SDD record by introducing the
+  `flow-layout-determinism` feature and tightening the flow-graph use-case
+  contract for deterministic, non-overlapping nested expansion layout.
+- Status: investigation is complete for the spec update only. Runtime
+  implementation has not started and still requires explicit approval.
+- Scope: docs-only creation of `docs/specs/features/flow-layout-determinism/`
+  plus use-case, architecture, current-state, plan, and roadmap updates that
+  define the deterministic expanded-flow layout contract.
 - Out of scope: runtime code, tests, generated artifacts, configuration,
   dependency changes, and `engines.vscode`.
-- Impact summary: the feature is now documented as complete for the current
-  repository-supported JP1/AJS v13 scope, and the remaining backlog is
-  explicitly excluded instead of being treated as open alignment debt.
-  Investigation also found that no additional runtime slice remains in this
-  feature under the user's three conditions.
-- Risks and assumptions: this closure assumes the remaining excluded topics
-  are lower value than reopening the feature around platform-dependent or
-  broader cross-parameter interpretation.
-- Alternatives considered: reopening the feature for transfer-path semantics
-  or broader cross-parameter work was rejected in favor of a clean re-scope.
+- Impact summary: this branch now records two docs-only feature additions.
+  `flow-refactor` remains the maintainability umbrella. The new
+  `flow-layout-determinism` feature separately tightens the expanded-flow
+  behavior contract so future implementation can remove order-sensitive panel
+  overlap and recompute layout deterministically from the expanded set.
+- Risks and assumptions: the deterministic layout contract assumes right/down
+  push-only collision resolution is sufficient to avoid overlap while
+  preserving current search, reveal, and fitView behavior.
+- Alternatives considered: keeping this work inside `flow-refactor` was
+  rejected because the user wants deterministic flow layout tracked as a
+  separate feature.
 
 ## Build/Test Performance SDD
 
@@ -197,6 +196,13 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/modernize-runtime-boundaries/`:
   active modernization follow-up for `UnitEntity` hash readiness and bundle
   pressure notes.
+- `docs/specs/features/flow-refactor/`:
+  active repository-native maintainability feature for diagnostics,
+  expanded-flow layout, and flow-viewer composition separation using the
+  agreed five-PR slice order.
+- `docs/specs/features/flow-layout-determinism/`:
+  active repository-native feature for deterministic, non-overlapping nested
+  expansion layout in the flow viewer.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
   active maintainability-driven architectural refactoring based on Qlty
   complexity, duplication, and code-smell findings; now eligible to resume as
