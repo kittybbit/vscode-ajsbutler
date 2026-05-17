@@ -1,7 +1,62 @@
 import * as assert from "assert";
+import { readFileSync } from "fs";
+import { join } from "path";
+import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { buildExpandedFlowGraph } from "../../ui-component/editor/ajsFlow/buildExpandedFlowGraph";
+
+const readSample = (name: string): string =>
+  readFileSync(join(__dirname, "../../../sample", name), "utf8");
+
+const tryFindUnitByName = (
+  unit: AjsUnit,
+  name: string,
+): AjsUnit | undefined => {
+  if (unit.name === name) {
+    return unit;
+  }
+  for (const child of unit.children) {
+    const found = tryFindUnitByName(child, name);
+    if (found) {
+      return found;
+    }
+  }
+  return undefined;
+};
+
+const findUnitByName = (unit: AjsUnit, name: string): AjsUnit => {
+  const found = tryFindUnitByName(unit, name);
+  if (found) {
+    return found;
+  }
+  throw new Error(`Unit not found: ${name}`);
+};
+
+const toEdgeLabel = (edge: {
+  source: string;
+  target: string;
+  type: string;
+}): string =>
+  `${edge.source.split("/").pop()}->${edge.target.split("/").pop()}:${
+    edge.type
+  }`;
+
+const toRoundedDecoration = (
+  id: string,
+  decoration: {
+    panelOffsetXPx: number;
+    panelOffsetYPx: number;
+    panelWidthPx: number;
+    panelHeightPx: number;
+  },
+) => ({
+  id: id.split("/").pop() ?? id,
+  panelOffsetXPx: Math.round(decoration.panelOffsetXPx),
+  panelOffsetYPx: Math.round(decoration.panelOffsetYPx),
+  panelWidthPx: Math.round(decoration.panelWidthPx),
+  panelHeightPx: Math.round(decoration.panelHeightPx),
+});
 
 const nestedDefinition = `
 unit=root,,jp1admin,;
@@ -496,6 +551,161 @@ unit=root,,jp1admin,;
 `;
 
 suite("Build Expanded Flow Graph", () => {
+  test("characterizes deep sample graph summaries for collapsed and expanded states", () => {
+    const result = parseAjs(readSample("sample_ref_deep_jobnets_utf8"));
+    assert.deepStrictEqual(result.errors, []);
+    const document = normalizeAjsDocument(result.rootUnits);
+    const rootUnit = document.rootUnits[0];
+    const currentUnit = findUnitByName(rootUnit, "top_main");
+    const expandedUnitNames = [
+      "branch_alpha",
+      "alpha_nested_1",
+      "branch_beta",
+      "branch_gamma",
+    ];
+    const expandedUnitIds = new Set(
+      expandedUnitNames.map((name) => findUnitByName(rootUnit, name).id),
+    );
+
+    const collapsed = buildExpandedFlowGraph(
+      document,
+      currentUnit.id,
+      new Set<string>(),
+      16,
+    );
+    const expanded = buildExpandedFlowGraph(
+      document,
+      currentUnit.id,
+      expandedUnitIds,
+      16,
+    );
+
+    assert.ok(collapsed.graph);
+    assert.ok(expanded.graph);
+    assert.deepStrictEqual(
+      {
+        nodeCount: collapsed.graph.nodes.length,
+        edgeCount: collapsed.graph.edges.length,
+        positionCount: collapsed.positionOverrides.size,
+        decorationCount: collapsed.nodeDecorations.size,
+        labels: collapsed.graph.nodes.map((node) => node.label).sort(),
+        edgeLabels: collapsed.graph.edges.map(toEdgeLabel).sort(),
+      },
+      {
+        nodeCount: 12,
+        edgeCount: 10,
+        positionCount: 12,
+        decorationCount: 0,
+        labels: [
+          "branch_alpha",
+          "branch_beta",
+          "branch_delta",
+          "branch_gamma",
+          "top_left_a",
+          "top_left_b",
+          "top_main",
+          "top_mid_a",
+          "top_mid_b",
+          "top_right_a",
+          "top_right_b",
+          "viewer_root",
+        ],
+        edgeLabels: [
+          "branch_alpha->branch_gamma:con",
+          "branch_alpha->top_mid_a:seq",
+          "branch_beta->branch_delta:con",
+          "branch_beta->top_right_a:seq",
+          "branch_delta->top_right_b:seq",
+          "branch_gamma->top_mid_b:seq",
+          "top_left_a->branch_alpha:seq",
+          "top_left_b->branch_gamma:seq",
+          "top_mid_a->branch_beta:seq",
+          "top_mid_b->branch_delta:seq",
+        ],
+      },
+    );
+
+    const expandedEdgeLabels = expanded.graph.edges.map(toEdgeLabel).sort();
+    assert.strictEqual(
+      new Set(expandedEdgeLabels).size,
+      expandedEdgeLabels.length,
+    );
+    assert.deepStrictEqual(
+      {
+        nodeCount: expanded.graph.nodes.length,
+        edgeCount: expanded.graph.edges.length,
+        positionCount: expanded.positionOverrides.size,
+        decorationCount: expanded.nodeDecorations.size,
+        decorations: Array.from(expanded.nodeDecorations)
+          .map(([id, decoration]) => toRoundedDecoration(id, decoration))
+          .sort((left, right) => left.id!.localeCompare(right.id!)),
+        keyPositions: [
+          "branch_alpha",
+          "alpha_nested_1",
+          "alpha1_deep",
+          "top_mid_a",
+          "branch_beta",
+          "top_right_a",
+          "branch_gamma",
+          "top_mid_b",
+          "branch_delta",
+          "top_right_b",
+        ].map((name) => [
+          name,
+          expanded.positionOverrides.get(findUnitByName(rootUnit, name).id),
+        ]),
+      },
+      {
+        nodeCount: 31,
+        edgeCount: 25,
+        positionCount: 31,
+        decorationCount: 4,
+        decorations: [
+          {
+            id: "alpha_nested_1",
+            panelOffsetXPx: -29,
+            panelOffsetYPx: -19,
+            panelWidthPx: 634,
+            panelHeightPx: 389,
+          },
+          {
+            id: "branch_alpha",
+            panelOffsetXPx: -29,
+            panelOffsetYPx: -19,
+            panelWidthPx: 1354,
+            panelHeightPx: 989,
+          },
+          {
+            id: "branch_beta",
+            panelOffsetXPx: -29,
+            panelOffsetYPx: -19,
+            panelWidthPx: 874,
+            panelHeightPx: 749,
+          },
+          {
+            id: "branch_gamma",
+            panelOffsetXPx: -29,
+            panelOffsetYPx: -19,
+            panelWidthPx: 874,
+            panelHeightPx: 389,
+          },
+        ],
+        keyPositions: [
+          ["branch_alpha", { x: 272, y: 312 }],
+          ["alpha_nested_1", { x: 512, y: 552 }],
+          ["alpha1_deep", { x: 752, y: 792 }],
+          ["top_mid_a", { x: 1712, y: 312 }],
+          ["branch_beta", { x: 1952, y: 312 }],
+          ["top_right_a", { x: 2912, y: 312 }],
+          ["branch_gamma", { x: 272, y: 1512 }],
+          ["top_mid_b", { x: 1712, y: 1512 }],
+          ["branch_delta", { x: 1952, y: 1512 }],
+          ["top_right_b", { x: 2912, y: 1512 }],
+        ],
+      },
+    );
+  });
+
   test("reveals nested jobnets only after their parent scope is expanded", () => {
     const result = parseAjs(nestedDefinition);
     assert.deepStrictEqual(result.errors, []);

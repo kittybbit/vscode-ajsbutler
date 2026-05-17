@@ -2,6 +2,91 @@ import * as assert from "assert";
 import { buildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
 
 suite("Build Syntax Diagnostics", () => {
+  test("characterizes mixed diagnostic summaries across parser and domain rules", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  st=145,+48:00;",
+        "  el=jobnet,n,+0+0;",
+        "  el=event,evsj,+240+0;",
+        "  el=wait,evwj,+480+0;",
+        "  unit=jobnet,,jp1admin,;",
+        "  {",
+        "    ty=n;",
+        "    ln=0,145;",
+        "  }",
+        "  unit=event,,jp1admin,;",
+        "  {",
+        "    ty=evsj;",
+        "    evsrt=y;",
+        "    evsid=zz;",
+        "  }",
+        "  unit=wait,,jp1admin,;",
+        "  {",
+        "    ty=evwj;",
+        "    evuid=2147483648;",
+        "    evwms=bare;",
+        "  }",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => ({
+        line: diagnostic.line,
+        column: diagnostic.column,
+        length: diagnostic.length,
+        severity: diagnostic.severity,
+        message: diagnostic.message,
+      })),
+      [
+        {
+          line: 4,
+          column: 2,
+          length: 2,
+          severity: "error",
+          message:
+            "Start time (st) must use schedule rule numbers 1..144 and times between 00:00 and 47:59.",
+        },
+        {
+          line: 11,
+          column: 4,
+          length: 2,
+          severity: "error",
+          message:
+            "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
+        },
+        {
+          line: 17,
+          column: 4,
+          length: 5,
+          severity: "error",
+          message:
+            "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
+        },
+        {
+          line: 16,
+          column: 4,
+          length: 5,
+          severity: "error",
+          message:
+            "Event arrival check (evsrt=y) requires an event destination host (evhst).",
+        },
+        {
+          line: 23,
+          column: 4,
+          length: 5,
+          severity: "error",
+          message:
+            "Event message filter (evwms) must be a quoted string between 1 and 1024 bytes.",
+        },
+      ],
+    );
+  });
+
   test("returns parser errors as UI-independent diagnostics", () => {
     const diagnostics = buildSyntaxDiagnostics(
       "unit=root,,jp1admin,;\n{\n  ty=g\n}\n",
