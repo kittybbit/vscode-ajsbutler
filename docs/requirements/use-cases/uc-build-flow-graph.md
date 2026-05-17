@@ -37,6 +37,20 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
   changing the selected document
 - nested panels should stay anchored to the expanded unit that owns them and
   should not require reconstructing `UnitEntity` in presentation code
+- expanded nested layout must be recomputed from the selected scope and the
+  full expanded-unit set so the same expanded set always yields the same final
+  placement
+- expanded nested units must be processed in stable order by
+  `depth`, `layout.v`, `layout.h`, `absolutePath`
+- each expanded unit must be treated as one occupied rectangle covering the
+  visible node, its expanded panel, and expanded descendant panels that remain
+  inside that subtree
+- sibling subtrees inside the same container must not overlap by occupied
+  rectangle after expanded layout is resolved
+- collision resolution for nested expansion may push layout only to the right
+  or downward and must keep unaffected upper-left areas fixed
+- collision resolution must move whole subtrees rather than isolated nodes so
+  descendant relative positions stay stable
 - when nested expansion changes visible graph bounds, the viewer must be able
   to refit the current view to include newly visible nodes
 - current-scope flow search uses case-insensitive contiguous partial matching
@@ -72,6 +86,26 @@ Scenario: Nested jobnets can expand in the current graph
   Then the nested graph is revealed in the same viewer scope
   And the parent graph can still be fit into view
 
+Scenario: Expanded layout is deterministic for the same expanded set
+  Given a visible flow graph with two expandable nested jobnets
+  When the first layout is built after expanding A then B
+  And the second layout is built for the same expanded set after
+    expanding B then A
+  Then `positionOverrides` are identical
+  And `nodeDecorations` are identical
+
+Scenario: Expanded sibling panels and visible nodes do not overlap
+  Given a visible flow graph with expanded sibling subtrees in one container
+  When the expanded layout is built
+  Then expanded panels do not overlap each other
+  And expanded panels do not overlap visible nodes from sibling subtrees
+
+Scenario: Expanded layout moves only the affected right/down scope
+  Given a visible flow graph with a deep nested expansion
+  When the parent panel grows because of the expanded descendant
+  Then collision resolution propagates to the affected parent-level scope
+  And unrelated upper-left nodes do not move
+
 Scenario: Current-scope search reveals matches
   Given a visible flow graph with collapsed ancestor jobnets
   When current-scope flow search matches a descendant unit
@@ -84,6 +118,10 @@ Scenario: Current-scope search reveals matches
 - desktop and web presentation layers can convert the DTO into their own graph
   structures without requiring `UnitEntity` reconstruction
 - flow rendering behavior remains unchanged after DTO to XyFlow mapping
+- `src/ui-component/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
+  presentation-local expanded layout orchestration, including stable expansion
+  ordering, occupied-box calculation, subtree movement, and collision
+  resolution, while preserving the use-case output contract
 - representative graph-oriented fixtures in `sample/` should be reusable for
   regression coverage instead of rebuilding large inline definitions
 - layout details that depend on rendered node bounds stay presentation-local,
@@ -95,8 +133,8 @@ Scenario: Current-scope search reveals matches
 - selected scope changes must preserve current-node and ancestor rendering semantics
 - large sample definitions should continue to build graph DTOs without
   presentation-layer shortcuts
-- expansion ordering can affect layout; presentation state should preserve a
-  predictable order rather than deriving it from unordered sets
+- deep expansion can enlarge an ancestor panel, so collision propagation must
+  be checked at each affected container level
 - search behavior can feel inert if the scope root matches before a more
   visible descendant, so descendant matches may need priority when that
   produces clearer focus behavior

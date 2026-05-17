@@ -130,34 +130,36 @@ rules in `docs/specs/README.md`, not in this file.
    tracked, but defer beta exit until feedback is sufficient.
 2. Keep compatibility risk visible for every shared or extension-runtime
    change.
-3. Investigate and approve `flow-refactor` PR1 characterization tests before
+3. Record deterministic expanded-flow layout implementation approval before
+   editing runtime code or tests for `flow-layout-determinism`.
+4. Investigate and approve `flow-refactor` PR1 characterization tests before
    starting the planned diagnostics, expanded-flow, and flow-viewer refactor
    slices.
 
 ## Current Branch Plan
 
 - Branch: `docs/flow-refactor-sdd`
-- Objective: add the first SDD feature records for the planned `flow-refactor`
-  maintainability work as one umbrella feature with ordered refactoring
-  slices.
-- Status: investigation is complete for the feature definition only.
-  Implementation has not started and still requires explicit approval per
-  slice.
-- Scope: docs-only creation of `docs/specs/features/flow-refactor/`,
-  plus plan/roadmap synchronization needed to register the feature and the
-  first approval target.
+- Objective: add the second docs-only SDD record by introducing the
+  `flow-layout-determinism` feature and tightening the flow-graph use-case
+  contract for deterministic, non-overlapping nested expansion layout.
+- Status: investigation is complete for the spec update only. Runtime
+  implementation has not started and still requires explicit approval.
+- Scope: docs-only creation of `docs/specs/features/flow-layout-determinism/`
+  plus use-case, architecture, current-state, plan, and roadmap updates that
+  define the deterministic expanded-flow layout contract.
 - Out of scope: runtime code, tests, generated artifacts, configuration,
   dependency changes, and `engines.vscode`.
-- Impact summary: this branch records one repository-native refactoring
-  feature that groups diagnostics modularization, expanded-flow graph
-  separation, and `FlowContents.tsx` composition cleanup under the agreed
-  five-PR sequence. The first future implementation slice is PR1
-  characterization tests only.
-- Risks and assumptions: the feature assumes the accepted slice order is
-  stable enough to document now and that no new behavior contract is needed as
-  long as runtime behavior remains unchanged.
-- Alternatives considered: documenting three independent features was rejected
-  because the user wants one related feature sliced by PR order.
+- Impact summary: this branch now records two docs-only feature additions.
+  `flow-refactor` remains the maintainability umbrella. The new
+  `flow-layout-determinism` feature separately tightens the expanded-flow
+  behavior contract so future implementation can remove order-sensitive panel
+  overlap and recompute layout deterministically from the expanded set.
+- Risks and assumptions: the deterministic layout contract assumes right/down
+  push-only collision resolution is sufficient to avoid overlap while
+  preserving current search, reveal, and fitView behavior.
+- Alternatives considered: keeping this work inside `flow-refactor` was
+  rejected because the user wants deterministic flow layout tracked as a
+  separate feature.
 
 ## Build/Test Performance SDD
 
@@ -198,6 +200,9 @@ rules in `docs/specs/README.md`, not in this file.
   active repository-native maintainability feature for diagnostics,
   expanded-flow layout, and flow-viewer composition separation using the
   agreed five-PR slice order.
+- `docs/specs/features/flow-layout-determinism/`:
+  active repository-native feature for deterministic, non-overlapping nested
+  expansion layout in the flow viewer.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
   active maintainability-driven architectural refactoring based on Qlty
   complexity, duplication, and code-smell findings; now eligible to resume as

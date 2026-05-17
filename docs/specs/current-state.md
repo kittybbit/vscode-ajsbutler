@@ -17,6 +17,9 @@ The repository currently mixes legacy and target-oriented structure.
 - activation and composition remain concentrated
 - parser-adjacent logic can still leak toward UI-oriented code
 - DTO and use-case boundaries are still being clarified
+- expanded flow layout is still vulnerable to order-sensitive nested-panel
+  collision handling, with layout growth responsibilities concentrated in one
+  presentation file
 - old folder names coexist with the target clean-architecture layout
 - package-management and validation workflow now center on `pnpm`, so local
   docs, CI, and contributor instructions need to stay aligned with the pinned
@@ -82,3 +85,5 @@ specifically about a narrow edge case.
 - flow-graph improvements are currently aimed at visual resemblance to
   JP1/AJS View, progressive nested expansion, and explicit navigation between
   list and flow views when both are available
+- deterministic nested expansion layout is a current product requirement so
+  the same expanded-unit set yields the same non-overlapping viewer layout

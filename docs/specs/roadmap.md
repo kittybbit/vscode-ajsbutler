@@ -95,6 +95,7 @@
    - Preserve current desktop and web extension behavior while migrating.
 
 5. Use Qlty findings as architectural feedback.
+
    - Track active implementation under
      `docs/specs/features/qlty-driven-architecture-refactoring/`.
    - Phase 0 removes repository noise before structural changes.
@@ -106,6 +107,17 @@
      separation, and `FlowContents.tsx` composition cleanup behind ordered
      PR-sized slices.
    - Every slice must preserve desktop and web extension behavior.
+
+6. Make expanded flow layout deterministic.
+
+   - Track active implementation under
+     `docs/specs/features/flow-layout-determinism/`.
+   - The same selected scope and expanded-unit set must yield the same layout
+     regardless of expansion order.
+   - Expanded sibling subtrees must not overlap by node or panel occupancy.
+   - Collision resolution should push only the affected right/down scope and
+     keep unrelated upper-left regions fixed.
+   - Search, reveal, and fitView behavior must remain intact.
 
 ## Deferred / Optional Slices
 
