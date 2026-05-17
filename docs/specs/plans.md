@@ -132,36 +132,39 @@ rules in `docs/specs/README.md`, not in this file.
    change.
 3. Keep deterministic expanded-flow layout and fit-to-view regression coverage
    visible while real nested-layout examples accumulate.
-4. Request approval for `flow-refactor` PR2 diagnostics rule-set extraction
-   before starting structural diagnostics changes.
+4. Request approval for `flow-refactor` PR3 expanded-flow graph/layout
+   extraction before starting structural flow-graph changes.
 
 ## Current Branch Plan
 
-- Branch: `codex/flow-refactor-pr1-tests`
-- Objective: complete the PR1 characterization-test slice before structural
-  flow or diagnostics refactors.
-- Status: PR1 tests-only implementation and validation are complete; PR2
-  diagnostics rule-set extraction remains pending fresh human approval in
+- Branch: `codex/flow-refactor-pr2-diagnostics`
+- Objective: complete the PR2 diagnostics rule-set extraction after PR1
+  characterization coverage.
+- Status: PR2 diagnostics rule-set extraction and support-module
+  decomposition are implemented and validated. PR3 expanded-flow graph/layout
+  extraction is the next planned slice, pending fresh approval in
   `docs/specs/features/flow-refactor/TASKS.md`.
-- Scope: PR1 `tests only` characterization coverage for syntax diagnostics
-  and expanded-flow behavior, with no runtime, DTO, dependency, generated
-  artifact, or configuration changes.
-- Out of scope: diagnostics rule extraction, expanded-flow graph/layout
-  extraction, `FlowContents.tsx` hook/presentation extraction, parser changes,
+- Scope delivered: extracted diagnostics rule orchestration, declarative rule
+  sets, DTO types, diagnostic core helpers, unit lookup, target-type constants,
+  scalar/string validators, and family-specific helper modules from
+  `buildSyntaxDiagnostics.ts` and the former `syntaxDiagnosticRuleSupport.ts`
+  while keeping parser conversion, DTO shape, messages, positions, and counts
+  unchanged.
+- Out of scope: new diagnostics behavior, parser changes, expanded-flow
+  graph/layout extraction, `FlowContents.tsx` hook/presentation extraction,
   dependency updates, `engines.vscode` changes, and user-visible behavior
   changes.
-- Impact summary: PR1 added characterization coverage only so later PR2-PR4
-  refactors can preserve diagnostic messages, positions, counts,
-  expanded-flow layout, search/reveal, fit behavior, and duplicate-edge
-  prevention. Existing code still concentrates diagnostics rules in
-  `buildSyntaxDiagnostics.ts`, expanded flow construction/layout in
-  `buildExpandedFlowGraph.ts`, and viewer state plus React Flow mapping in
-  `FlowContents.tsx`.
-- Risks and assumptions: PR1 intentionally avoids implementation cleanup; the
-  next meaningful risk is preserving all existing diagnostics behavior while
-  extracting rule-set modules in PR2.
-- Alternatives considered: starting directly with PR2/PR3 refactors remains
-  rejected because the approved feature plan calls for tests first.
+- Impact summary: `buildSyntaxDiagnostics.ts` is now a thin parser and
+  orchestration entry point. The former support module is removed; diagnostic
+  core helpers, unit lookup, target-type constants, scalar/string validators,
+  transfer/event/file-monitoring/job-end/schedule helpers, rule builders, and
+  declarative rule sets are separate application editor-feedback modules that
+  stay browser-safe.
+- Risks and assumptions: validation covered desktop and web diagnostics paths;
+  webpack bundle-size warnings remain pre-existing build warnings.
+- Alternatives considered: combining PR2 with expanded-flow or React
+  extraction remains rejected because the feature plan keeps those as later
+  reviewable slices.
 
 ## Build/Test Performance SDD
 
