@@ -20,6 +20,9 @@ JP1/AJS3 version 13 reference documents.
 - `buildUnitDefinition.ts` no longer needs to own command-generation logic as
   an inseparable concern
 - reference alignment can proceed incrementally without hiding known gaps
+- the current feature scope ends once the modeled shared parameter families are
+  aligned and any remaining platform-specific, environment-specific, or
+  broader cross-parameter backlog is explicitly re-scoped out
 
 ## Implementation Notes
 
@@ -31,6 +34,9 @@ JP1/AJS3 version 13 reference documents.
   gaps explicitly in `TASKS.md`
 - avoid bundling these reference-alignment slices with unrelated flow-graph or
   package-manager work
+- when the remaining backlog no longer forms a user-meaningful shared rule
+  family, prefer closing the feature scope over broadening into
+  environment-dependent interpretation
 
 ## Durable Impact Analysis
 
@@ -102,6 +108,11 @@ JP1/AJS3 version 13 reference documents.
   `1994..SCHEDULELIMIT` year range using the official default
   `SCHEDULELIMIT=2036` during this slice, as long as parser output, wrapper
   values, normalized parameters, and projection boundaries remain unchanged.
+- Schedule-rule `sd` explicit date/rule diagnostics are aligned through
+  application editor-feedback. This feature treats the documented year range
+  with the repository's fixed default `SCHEDULELIMIT=2036`; site-specific
+  `SCHEDULELIMIT` override handling is outside this feature scope and must not
+  be re-opened as part of the remaining schedule-rule backlog.
 - Unit-list group 10 `wc` / `wt` projection is a separate approval-sensitive
   boundary from domain interpretation because it is user-visible table output.
   If approved, it should consume the existing paired effective-value semantics
@@ -414,6 +425,33 @@ JP1/AJS3 version 13 reference documents.
   value-shape, byte-length, and dependency path because the focused reference
   pass did not identify a stronger shared `tdN` path rule that could be
   enforced without broadening into platform-specific interpretation.
+- After the delivered shared wait-job `eventTimeoutAction` projection and
+  shared transfer-file `tsN` full-path slices, the remaining feature-local
+  gaps no longer cluster around one clearly shared manual-backed rule family.
+  The feature is therefore re-scoped as complete for the current repository-
+  supported scope. The remaining backlog now leans toward either
+  platform-specific transfer-path interpretation or broader deferred
+  cross-parameter behavior, so those items are intentionally excluded from
+  this feature instead of being treated as unfinished alignment work here.
+  Non-default `SCHEDULELIMIT` handling is already out of scope for this
+  feature and is not part of that remaining backlog.
+
+## Rescope Decision
+
+- This feature is complete for the repository-supported JP1/AJS v13 alignment
+  scope captured in the current use cases, coverage matrix, and feature docs.
+- The following work is explicitly re-scoped out of this feature:
+  - platform-specific transfer-file path interpretation beyond the already
+    aligned shared quoted `tsN` full-path rule
+  - family-specific macro-variable syntax tightening for transfer-file values
+  - site-specific `SCHEDULELIMIT` override handling
+  - broader cross-parameter invalidation or environment-dependent semantics
+    that do not fit the current shared parameter-family slices
+  - broader wait-condition-family semantics beyond the already modeled and
+    aligned diagnostics/defaults
+- If any of those topics becomes product-relevant later, it should start as a
+  separate approval-gated feature or follow-up slice instead of re-opening
+  this completed feature by default.
 
 ## Reference Documents
 

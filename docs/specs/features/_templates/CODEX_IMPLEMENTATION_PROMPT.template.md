@@ -54,6 +54,8 @@ Before editing:
   SPECS.md.
 - Record investigation, implementation, test, and follow-up tasks in TASKS.md.
 - Record the TASKS.md `Human Approval` section with `Status: Pending`.
+- Keep TASKS.md focused on current status and active tasks; do not accumulate
+  historical logs, prior approvals, or long validation histories there.
 - Report only this approval request, then wait for approval:
 
 ```md

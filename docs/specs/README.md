@@ -37,6 +37,7 @@ For non-trivial changes:
 5. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
    and update that file in the same commit whenever a task is completed,
    reframed, or dropped
+   `TASKS.md` is a current-state execution tracker, not a historical log
 6. document assumptions explicitly
 7. implement in small vertical slices
 8. refresh `docs/specs/plans.md` in the same commit if the active slice or
@@ -142,6 +143,17 @@ Every agent must preserve:
 - approved scope boundaries
 - required validation
 
+Keep feature `TASKS.md` concise:
+
+- keep only the current status, active tasks, current approval state, and
+  open follow-up items
+- do not accumulate dated implementation diaries, prior approval transcripts,
+  or long validation histories in `TASKS.md`
+- move durable decisions to `SPECS.md`
+- move branch/repository priority updates to `plans.md` or `roadmap.md`
+- summarize validation expectations in `TASKS.md`, but keep detailed past run
+  history out unless a failure or risk is still actionable now
+
 Copilot suggestions must be checked against the approved `SPECS.md`,
 `TASKS.md`, and approved scope before adoption. Do not accept Copilot
 suggestions outside the approved scope. If an out-of-scope change appears
@@ -190,7 +202,7 @@ While approval is pending, Codex may only:
 - organize alternatives
 - present the approval request
 
-Each feature `TASKS.md` must include the approval evidence:
+Each feature `TASKS.md` must include only the current approval evidence:
 
 ```md
 ## Human Approval
@@ -201,9 +213,11 @@ Each feature `TASKS.md` must include the approval evidence:
 ```
 
 Implementation may start only when `Status: Approved` and `Approved scope`
-records the human-approved implementation boundary. If implementation reveals
-required changes outside the approved scope, stop again, update the impact
-record, and obtain additional clear approval before editing those areas.
+records the human-approved implementation boundary. Reset the section back to
+`Pending` when that approved slice is finished and no active implementation
+approval remains. If implementation reveals required changes outside the
+approved scope, stop again, update the impact record, and obtain additional
+clear approval before editing those areas.
 
 Before approval, Codex must report only this implementation-gate output and
 must not claim that implementation has started or completed:
@@ -257,11 +271,11 @@ notes in `TASKS.md`.
   durable impact analysis, reference propagation decisions, breaking-change
   analysis, alternatives, and boundary decisions
 - `docs/specs/features/<feature>/TASKS.md`:
-  execution tasks for investigation, approval, implementation, tests, and
-  follow-up tracking
+  current execution tasks for investigation, approval, implementation, tests,
+  and open follow-up tracking
 
 `TASKS.md` may point to investigation results, but it is not the primary
-record for design decisions or impact analysis.
+record for design decisions, impact analysis, or historical narrative.
 
 When behavior scenarios exist, include the scenario impact in the same
 investigation: changed scenarios, added scenarios, removed scenarios, and
@@ -376,6 +390,12 @@ notes:
 Prefer the smallest useful cadence:
 one completed task or one resolved follow-up is enough reason to sync the
 docs in the same commit.
+
+When syncing, compress instead of accreting:
+
+- remove or rewrite completed checklist/history sections when they no longer
+  help current execution
+- keep `TASKS.md` readable from the top without scrolling through old logs
 
 ## Document Roles
 

@@ -6,28 +6,41 @@
   follow-up decision changes.
 - If that change affects branch priorities or repository sequencing, update
   `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
+- Keep this file focused on current state only; do not retain historical logs,
+  prior approvals, or long validation diaries once they stop being actionable.
 
-## Delivered
+## Current Status
 
-- [x] Remove stale `flatted` transport assumptions.
-- [x] Migrate package management to pinned `pnpm` with validation parity.
-- [x] Split table and flow viewer bundles.
-- [x] Measure post-split viewer bundle output.
-- [x] Re-measure MUI path-import narrowing and record that it did not produce
-      meaningful production-size gains.
-- [x] Compare table-side and flow-side dependency weight.
-- [x] Reject async flow-chrome deferral after it increased complexity without
-      useful bundle reduction.
-- [x] Identify `UnitEntity.id` persistence checks before changing the hash
-      algorithm.
+- Runtime status:
+  the currently approved modernization slices are delivered.
+- Active slice:
+  none.
+- Open follow-up:
+  replace the custom `UnitEntity` hash implementation only after identity and
+  compatibility checks are refreshed.
 
-## Follow-up
+## Human Approval
 
-- [ ] Replace the custom `UnitEntity` hash implementation only after the
-      documented identity and compatibility checks are refreshed.
+- Status: Pending
+- Approved at:
+- Approved scope:
+
+Implementation must not start while Status is Pending.
+Only clear human approval can change Status to Approved.
+
+Reset this section back to Pending when the approved slice is complete and no
+active implementation approval remains.
+
+## Active Tasks
+
+- [x] Record delivered runtime-boundary modernization outcomes in durable SDD
+      documents.
+- [ ] Refresh identity and compatibility checks before proposing a hash
+      replacement slice.
+- [ ] Request new approval before any `UnitEntity` hash implementation change.
 
 ## Notes
 
 - Current DTO transport does not require cyclic serialization.
-- Current bundle-size work is deferred until a clearer shrinking seam or
+- Bundle-size follow-up remains deferred until a clearer shrinking seam or
   stronger product requirement appears.

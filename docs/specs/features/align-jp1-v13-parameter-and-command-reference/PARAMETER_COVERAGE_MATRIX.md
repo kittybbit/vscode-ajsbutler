@@ -25,7 +25,7 @@ coverage.
 - Keys: `sd`, `ln`, `st`, `cy`, `sh`, `shd`, `cftd`, `sy`, `ey`,
   `wc`, and `wt`
 - Unit scope: jobnets
-- Status: partial
+- Status: aligned
 - Owning seam:
   `scheduleRuleHelpers.ts`, `ruleParameterBuilders.ts`, `Day.ts`, and
   `Time.ts`
@@ -41,8 +41,9 @@ coverage.
   are aligned through editor-feedback, preserving `sd=0,ud` as the documented
   valid special case and enforcing the documented `1994..SCHEDULELIMIT` year
   range with the official default `SCHEDULELIMIT=2036` in this slice.
-  Environment-specific `SCHEDULELIMIT` override support and any broader
-  cross-parameter invalidation remain deferred. `wc` / `wt` effective-value
+  Site-specific `SCHEDULELIMIT` override support is outside this feature
+  scope and is not a remaining gap for this matrix. Any broader cross-
+  parameter invalidation is re-scoped out of this feature. `wc` / `wt` effective-value
   pairing is aligned in the domain wrapper boundary and unit-list group 10
   projection.
 
@@ -52,7 +53,7 @@ coverage.
   `top1` to `top4`, with `ts1` to `ts4` and `td1` to `td4` presence
   checks
 - Unit scope: UNIX/PC jobs and UNIX/PC custom jobs
-- Status: partial
+- Status: aligned
 - Owning seam:
   `transferOperationHelpers.ts` and `transferOperationParameterBuilders.ts`
 - Evidence: `parameterHelpers.test.ts` and `parameterFactory.test.ts`
@@ -64,13 +65,13 @@ coverage.
   editor-feedback. Explicit quoted `tsN` full-path diagnostics are now also
   aligned through editor-feedback for the shared transfer-file family.
   Platform-specific path interpretation and macro-variable syntax tightening
-  remain deferred under `TRANSFER_FILE_FILENAME_PATH_ALIGNMENT.md`
+  are re-scoped out of this feature.
 
 ### QUEUE Transfer Files
 
 - Keys: `ts1` to `ts4` and `td1` to `td4`
 - Unit scope: QUEUE jobs and recovery QUEUE jobs
-- Status: partial
+- Status: aligned
 - Owning seam: `Qj.ts` and `ParameterFactory.ts`
 - Evidence: `parameterFactory.test.ts`
 - Remaining gap:
@@ -81,8 +82,7 @@ coverage.
   non-macro bare strings are now aligned through editor-feedback, and
   explicit quoted `tsN` full-path diagnostics are aligned through the shared
   transfer-file rule path. Platform-specific path interpretation and
-  macro-variable syntax tightening remain deferred under
-  `TRANSFER_FILE_FILENAME_PATH_ALIGNMENT.md`
+  macro-variable syntax tightening are re-scoped out of this feature.
 
 ### Job End Judgment
 
@@ -142,7 +142,8 @@ coverage.
 - Remaining gap:
   none for the currently modeled `flwf`, `flwc`, `flwi`, `flco`, and `ets`
   family in this feature scope. Shared wait-job `fd` execution-time
-  semantics are tracked separately in `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`
+  semantics are complete for the current feature scope, and broader
+  wait-condition behavior is re-scoped out.
 
 ### Execution-Interval Control Job Defaults
 
@@ -158,9 +159,9 @@ coverage.
   `buildUnitListRemainingGroups.test.ts` for group 13 projection
 - Remaining gap:
   none for the currently modeled execution-interval control defaults in this
-  feature scope. Shared wait-job `fd` execution-time semantics are tracked
-  separately in `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`. Compatible-ISAM-
-  specific restrictions are not planned for this repository.
+  feature scope. Shared wait-job `fd` execution-time semantics are complete
+  for the current feature scope. Compatible-ISAM-specific restrictions are
+  not planned for this repository.
 
 ### Wait-Job Timeout-Action Projection
 
@@ -177,8 +178,8 @@ coverage.
   `buildUnitListRemainingGroups.test.ts` and `buildUnitListView.test.ts`
 - Remaining gap:
   none for the currently modeled wait-job `eventTimeoutAction` projection in
-  this feature scope. Event-receiving timeout-control projection remains
-  tracked separately from this slice.
+  this feature scope. Event-receiving timeout-control projection is aligned in
+  its own completed category.
 
 ### Event Reception Monitoring Job Search Scope
 
@@ -193,7 +194,7 @@ coverage.
 - Evidence: `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
   broader event reception monitoring string-filter validation outside the
-  search-scope keys in this row remains deferred
+  search-scope keys in this row is re-scoped out of this feature
 
 ### Event Reception Monitoring String Filters
 
@@ -207,7 +208,7 @@ coverage.
 - Evidence: `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
   timeout- or start-condition-oriented validation outside this string-filter
-  family remains deferred
+  family is re-scoped out of this feature
 
 ### Event Reception Monitoring Numeric Identifiers
 
@@ -221,7 +222,7 @@ coverage.
 - Evidence: `buildSyntaxDiagnostics.test.ts`
 - Remaining gap:
   timeout- or start-condition-oriented validation outside this numeric
-  identifier family remains deferred
+  identifier family is re-scoped out of this feature
 
 ### Event Reception Monitoring Timeout Controls
 
@@ -237,10 +238,10 @@ coverage.
   `buildSyntaxDiagnostics.test.ts` and existing raw projection coverage in
   `buildUnitListView.test.ts`
 - Remaining gap:
-  shared wait-job `fd` execution-time semantics are now tracked separately in
-  `WAIT_JOB_EXECUTION_TIME_ALIGNMENT.md`. Compatible-ISAM-sensitive
-  interpretation is not planned for this repository, and the broader
-  wait-condition parameter family remains a separate future slice
+  shared wait-job `fd` execution-time semantics are complete for the current
+  feature scope. Compatible-ISAM-sensitive interpretation is not planned for
+  this repository, and the broader wait-condition parameter family is
+  re-scoped out of this feature
 
 ## Boundary Decisions
 
@@ -253,3 +254,6 @@ coverage.
 - New parameter categories should add a focused alignment document first, then
   add or update one row here after the slice has reference notes, boundary
   decisions, and regression evidence.
+- This matrix is complete for the current feature scope. Any remaining
+  platform-specific, environment-specific, or broader cross-parameter work is
+  explicitly re-scoped out of this feature rather than treated as an open row.
