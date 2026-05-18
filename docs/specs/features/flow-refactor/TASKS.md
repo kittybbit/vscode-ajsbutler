@@ -12,13 +12,14 @@
 ## Current Status
 
 - Runtime status:
-  PR3 expanded-flow graph/layout extraction is implemented and validated.
+  PR4 `FlowContents.tsx` hook/presentation extraction is implemented and
+  validated and is ready for PR.
 - Active slice:
-  PR4 `FlowContents.tsx` hook/presentation extraction is the next planned
-  slice, pending fresh approval.
+  none on this branch; PR5 cleanup, naming review, and unnecessary export
+  reduction remains the next planned slice on a future approved scope.
 - Open follow-up:
-  request approval for PR4, then keep the remaining structural refactor slices
-  in the agreed PR order.
+  request approval for PR5 before editing runtime code/tests/configuration
+  beyond the completed PR4 scope.
 
 ## Human Approval
 
@@ -48,8 +49,14 @@ active implementation approval remains.
 - [x] Complete PR2 diagnostics rule-set extraction after PR1 lands.
 - [x] Complete PR2 support-module decomposition follow-up.
 - [x] Complete PR3 expanded-flow graph/layout extraction after PR2 lands.
-- [ ] Complete PR4 `FlowContents.tsx` hook/presentation extraction after PR3
-      lands.
+- [x] Refresh PR4 impact investigation for `FlowContents.tsx`
+      hook/presentation extraction and direct type/import dependents.
+- [x] Record human approval for PR4 before creating an implementation branch
+      or editing runtime code/tests/configuration.
+- [x] Complete PR4 `FlowContents.tsx` hook/presentation extraction after PR3
+      lands and PR4 approval is recorded.
+- [x] Fix PR4 flow-node display regression where identical name/comment values
+      rendered duplicate text below expandable nodes.
 - [ ] Complete PR5 cleanup, naming review, and unnecessary export reduction
       after PR4 lands.
 
@@ -60,6 +67,9 @@ active implementation approval remains.
 - [x] Confirm README or user documentation does not need updates because PR2
       changes internal structure only.
 - [x] Run relevant validation for the approved slice.
+- [x] Confirm PR4 preserved desktop and web flow-viewer build/test paths.
+- [x] Confirm duplicate name/comment display regression coverage and
+      validation.
 
 ## Notes
 

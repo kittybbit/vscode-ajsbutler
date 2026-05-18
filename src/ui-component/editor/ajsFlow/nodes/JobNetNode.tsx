@@ -16,7 +16,7 @@ import {
   buildNodeSxProps,
   nodeBadgeSxProps,
   nodeActionsSxProps,
-  NameOrComment,
+  NodeNameAndComment,
   TyTitle,
   handleStyle,
 } from "./AjsNode";
@@ -142,8 +142,7 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
           <Handle type="target" position={Position.Left} style={handleStyle} />
         </>
       )}
-      <NameOrComment value={label} />
-      <NameOrComment value={comment} />
+      <NodeNameAndComment label={label} comment={comment} />
     </>
   );
 };

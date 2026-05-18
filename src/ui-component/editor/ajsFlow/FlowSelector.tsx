@@ -20,7 +20,7 @@ import {
   CurrentUnitIdStateType,
   DrawerWidthStateType,
   FlowMenuStateType,
-} from "./FlowContents";
+} from "./flowContentStateTypes";
 
 type FlowSelectorProps = {
   rootUnits: AjsUnit[];

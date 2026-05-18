@@ -30,7 +30,7 @@ import {
   CurrentUnitIdStateType,
   DrawerWidthStateType,
   FlowMenuStateType,
-} from "./FlowContents";
+} from "./flowContentStateTypes";
 import { localeMap } from "../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";

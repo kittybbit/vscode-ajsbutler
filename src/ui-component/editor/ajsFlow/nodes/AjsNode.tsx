@@ -5,7 +5,10 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import { CurrentUnitIdStateType, DialogDataStateType } from "../FlowContents";
+import {
+  CurrentUnitIdStateType,
+  DialogDataStateType,
+} from "../flowContentStateTypes";
 import { TySymbol } from "../../../../domain/values/AjsType";
 import { tyDefinitionLang } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../../MyContexts";
@@ -220,3 +223,20 @@ export const NameOrComment: React.FC<{
     </Tooltip>
   );
 };
+
+export const shouldRenderNodeComment = (
+  label?: string,
+  comment?: string,
+): boolean => !!comment && comment !== label;
+
+export const NodeNameAndComment: React.FC<{
+  label?: string;
+  comment?: string;
+}> = ({ label, comment }) => (
+  <>
+    <NameOrComment value={label} />
+    {shouldRenderNodeComment(label, comment) && (
+      <NameOrComment value={comment} />
+    )}
+  </>
+);

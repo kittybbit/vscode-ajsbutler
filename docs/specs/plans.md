@@ -132,37 +132,44 @@ rules in `docs/specs/README.md`, not in this file.
    change.
 3. Keep deterministic expanded-flow layout and fit-to-view regression coverage
    visible while real nested-layout examples accumulate.
-4. Request approval for `flow-refactor` PR4 `FlowContents.tsx`
-   hook/presentation extraction before starting flow-viewer composition
-   changes.
+4. Request approval for `flow-refactor` PR5 cleanup, naming review, and
+   unnecessary export reduction before starting the final flow-refactor
+   cleanup slice.
 
 ## Current Branch Plan
 
-- Branch: `codex/flow-refactor-pr3-expanded-flow`
-- Objective: complete the PR3 expanded-flow graph/layout extraction after PR2
-  diagnostics decomposition.
+- Branch: `codex/flow-refactor-pr4-flowcontents-hooks`
+- Objective: complete PR4 `FlowContents.tsx` hook/presentation extraction
+  after PR3 expanded-flow graph/layout extraction.
 - Status: PR3 expanded-flow graph/layout extraction is implemented and
-  validated. PR4 `FlowContents.tsx` hook/presentation extraction is the next
-  planned slice, pending fresh approval in
-  `docs/specs/features/flow-refactor/TASKS.md`.
-- Scope delivered: split expanded-flow result/build context types,
+  validated. PR4 `FlowContents.tsx` hook/presentation extraction is
+  implemented, validated, and ready for PR. PR5 cleanup, naming review, and
+  unnecessary export reduction is the next planned slice, pending fresh
+  approval.
+- Prior scope delivered: split expanded-flow result/build context types,
   nested-node/edge projection helpers, and expanded layout/collision
   orchestration out of `buildExpandedFlowGraph.ts` while keeping the public
   `buildExpandedFlowGraph` entry point, graph DTO shape, expanded layout
   outputs, search/reveal/fit behavior, package configuration, and
   `engines.vscode` unchanged.
+- PR4 delivered scope: extracted flow-viewer state, EventBridge subscriptions,
+  search/reveal handlers, fit-to-view scheduling, and ReactFlow data
+  preparation from `FlowContents.tsx` into presentation-local hooks or support
+  modules while preserving existing user-visible behavior and contracts.
 - Out of scope: new flow-viewer behavior, parser changes, diagnostics changes,
-  `FlowContents.tsx` hook/presentation extraction, dependency updates,
-  `engines.vscode` changes, and user-visible behavior changes.
-- Impact summary: `buildExpandedFlowGraph.ts` now prepares the base graph and
-  delegates nested expansion layout to focused presentation-local modules.
-  `expandedFlowGraphTypes.ts` owns shared result/context/layout types,
-  `expandedFlowGraphNodes.ts` owns nested node and edge DTO projection, and
-  `expandedFlowGraphLayout.ts` owns expansion reveal, occupied bounds,
-  collision resolution, offsets, and panel decoration calculation.
-- Risks and assumptions: validation covered desktop and web flow-viewer build
-  paths plus expanded-flow regression tests; webpack bundle-size warnings
-  remain pre-existing build warnings.
+  graph DTO changes, dependency updates, `engines.vscode` changes,
+  configuration changes, and user-visible behavior changes.
+- Impact summary: `FlowContents.tsx` currently owns viewer state, selected
+  scope preservation, nested expansion, search/reveal state, document-change
+  subscription, DOM overflow setup, ReactFlow fit scheduling, and ReactFlow
+  node/edge preparation. Direct dependents import the component or its state
+  types from `AjsFlowViewerApp.tsx`, `FlowSelector.tsx`, `FlowMenu.tsx`,
+  `Header.tsx`, `flowGraphView.ts`, and `nodes/AjsNode.tsx`.
+- Risks and assumptions: PR4 should stay inside presentation-local flow-viewer
+  modules. Main risks are React dependency drift, search preservation during
+  reveal/scope changes, fit-to-view timing, and exported state-type churn.
+  Validation covered desktop and web flow-viewer build/test paths; webpack
+  bundle-size warnings remain pre-existing build warnings.
 - Alternatives considered: combining PR3 with `FlowContents.tsx` hook
   extraction remains rejected because PR4 is a separate reviewable slice in the
   agreed plan.

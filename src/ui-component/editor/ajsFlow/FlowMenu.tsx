@@ -6,7 +6,10 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
-import { DrawerWidthStateType, FlowMenuStateType } from "./FlowContents";
+import {
+  DrawerWidthStateType,
+  FlowMenuStateType,
+} from "./flowContentStateTypes";
 import { useMyAppContext } from "../MyContexts";
 import { LocaleKeyType, localeMap } from "../../../domain/services/i18n/nls";
 

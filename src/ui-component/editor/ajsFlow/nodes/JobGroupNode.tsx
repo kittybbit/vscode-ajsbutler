@@ -9,7 +9,7 @@ import {
   AjsNode,
   buildNodeSxProps,
   nodeActionsSxProps,
-  NameOrComment,
+  NodeNameAndComment,
   TyTitle,
 } from "./AjsNode";
 import {
@@ -58,8 +58,7 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
           />
         </Box>
       </Stack>
-      <NameOrComment value={label} />
-      <NameOrComment value={comment} />
+      <NodeNameAndComment label={label} comment={comment} />
     </>
   );
 };
