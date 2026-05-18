@@ -12,13 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  PR2 diagnostics rule-set extraction and support-module decomposition are
-  implemented and validated.
+  PR3 expanded-flow graph/layout extraction is implemented and validated.
 - Active slice:
-  PR3 expanded-flow graph/layout extraction is the next planned slice,
-  pending fresh approval.
+  PR4 `FlowContents.tsx` hook/presentation extraction is the next planned
+  slice, pending fresh approval.
 - Open follow-up:
-  request approval for PR3, then keep the remaining structural refactor slices
+  request approval for PR4, then keep the remaining structural refactor slices
   in the agreed PR order.
 
 ## Human Approval
@@ -48,7 +47,7 @@ active implementation approval remains.
       edge prevention.
 - [x] Complete PR2 diagnostics rule-set extraction after PR1 lands.
 - [x] Complete PR2 support-module decomposition follow-up.
-- [ ] Complete PR3 expanded-flow graph/layout extraction after PR2 lands.
+- [x] Complete PR3 expanded-flow graph/layout extraction after PR2 lands.
 - [ ] Complete PR4 `FlowContents.tsx` hook/presentation extraction after PR3
       lands.
 - [ ] Complete PR5 cleanup, naming review, and unnecessary export reduction
