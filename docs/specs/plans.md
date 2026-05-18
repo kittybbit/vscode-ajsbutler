@@ -132,39 +132,40 @@ rules in `docs/specs/README.md`, not in this file.
    change.
 3. Keep deterministic expanded-flow layout and fit-to-view regression coverage
    visible while real nested-layout examples accumulate.
-4. Request approval for `flow-refactor` PR3 expanded-flow graph/layout
-   extraction before starting structural flow-graph changes.
+4. Request approval for `flow-refactor` PR4 `FlowContents.tsx`
+   hook/presentation extraction before starting flow-viewer composition
+   changes.
 
 ## Current Branch Plan
 
-- Branch: `codex/flow-refactor-pr2-diagnostics`
-- Objective: complete the PR2 diagnostics rule-set extraction after PR1
-  characterization coverage.
-- Status: PR2 diagnostics rule-set extraction and support-module
-  decomposition are implemented and validated. PR3 expanded-flow graph/layout
-  extraction is the next planned slice, pending fresh approval in
+- Branch: `codex/flow-refactor-pr3-expanded-flow`
+- Objective: complete the PR3 expanded-flow graph/layout extraction after PR2
+  diagnostics decomposition.
+- Status: PR3 expanded-flow graph/layout extraction is implemented and
+  validated. PR4 `FlowContents.tsx` hook/presentation extraction is the next
+  planned slice, pending fresh approval in
   `docs/specs/features/flow-refactor/TASKS.md`.
-- Scope delivered: extracted diagnostics rule orchestration, declarative rule
-  sets, DTO types, diagnostic core helpers, unit lookup, target-type constants,
-  scalar/string validators, and family-specific helper modules from
-  `buildSyntaxDiagnostics.ts` and the former `syntaxDiagnosticRuleSupport.ts`
-  while keeping parser conversion, DTO shape, messages, positions, and counts
-  unchanged.
-- Out of scope: new diagnostics behavior, parser changes, expanded-flow
-  graph/layout extraction, `FlowContents.tsx` hook/presentation extraction,
-  dependency updates, `engines.vscode` changes, and user-visible behavior
-  changes.
-- Impact summary: `buildSyntaxDiagnostics.ts` is now a thin parser and
-  orchestration entry point. The former support module is removed; diagnostic
-  core helpers, unit lookup, target-type constants, scalar/string validators,
-  transfer/event/file-monitoring/job-end/schedule helpers, rule builders, and
-  declarative rule sets are separate application editor-feedback modules that
-  stay browser-safe.
-- Risks and assumptions: validation covered desktop and web diagnostics paths;
-  webpack bundle-size warnings remain pre-existing build warnings.
-- Alternatives considered: combining PR2 with expanded-flow or React
-  extraction remains rejected because the feature plan keeps those as later
-  reviewable slices.
+- Scope delivered: split expanded-flow result/build context types,
+  nested-node/edge projection helpers, and expanded layout/collision
+  orchestration out of `buildExpandedFlowGraph.ts` while keeping the public
+  `buildExpandedFlowGraph` entry point, graph DTO shape, expanded layout
+  outputs, search/reveal/fit behavior, package configuration, and
+  `engines.vscode` unchanged.
+- Out of scope: new flow-viewer behavior, parser changes, diagnostics changes,
+  `FlowContents.tsx` hook/presentation extraction, dependency updates,
+  `engines.vscode` changes, and user-visible behavior changes.
+- Impact summary: `buildExpandedFlowGraph.ts` now prepares the base graph and
+  delegates nested expansion layout to focused presentation-local modules.
+  `expandedFlowGraphTypes.ts` owns shared result/context/layout types,
+  `expandedFlowGraphNodes.ts` owns nested node and edge DTO projection, and
+  `expandedFlowGraphLayout.ts` owns expansion reveal, occupied bounds,
+  collision resolution, offsets, and panel decoration calculation.
+- Risks and assumptions: validation covered desktop and web flow-viewer build
+  paths plus expanded-flow regression tests; webpack bundle-size warnings
+  remain pre-existing build warnings.
+- Alternatives considered: combining PR3 with `FlowContents.tsx` hook
+  extraction remains rejected because PR4 is a separate reviewable slice in the
+  agreed plan.
 
 ## Build/Test Performance SDD
 
