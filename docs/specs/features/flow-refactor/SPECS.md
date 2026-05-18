@@ -94,6 +94,39 @@ boundaries and sliceability.
   user-visible diagnostic text or positions, flow layout/reveal behavior
   changes, DTO contract changes, parser changes, dependency upgrades, or
   `engines.vscode` changes
+- PR4 approval-sensitive scope:
+  `FlowContents.tsx` hook/presentation extraction may move flow-viewer
+  state, EventBridge subscriptions, search/reveal handlers, fit-to-view
+  scheduling, and ReactFlow data preparation into presentation-local hooks or
+  support modules. It must preserve existing component props, graph DTO
+  contracts, search/reveal behavior, nested-expansion behavior, current unit
+  selection, dialog behavior, desktop/web host assumptions, package
+  configuration, and `engines.vscode`.
+
+### PR4 Impact Investigation
+
+- Primary target:
+  `src/ui-component/editor/ajsFlow/FlowContents.tsx`
+- Direct type/import dependents:
+  `AjsFlowViewerApp.tsx`, `FlowSelector.tsx`, `FlowMenu.tsx`, `Header.tsx`,
+  `flowGraphView.ts`, and `nodes/AjsNode.tsx`
+- Flow behavior dependencies:
+  `buildExpandedFlowGraph.ts`, `flowGraphView.ts`, `flowSearch.ts`,
+  `nestedExpansion.ts`, and `revealUnit.ts`
+- Test impact:
+  existing flow-graph, expanded-flow, flow-search, nested-expansion,
+  flow-view mapping, desktop extension, and web smoke tests remain the
+  validation net. Add focused tests only if extraction creates a pure helper
+  with behavior that is not already covered.
+- Boundary decision:
+  keep extracted code under the flow-viewer presentation area for PR4. Do not
+  move React, XyFlow, EventBridge, or DOM scheduling responsibilities into
+  domain/application layers.
+- Breaking-change risk:
+  low-to-medium internal refactor risk, concentrated around stale React
+  callback dependencies, fit-to-view timing, search preservation across reveal
+  and scope changes, and exported state-type churn for node/header/selector
+  dependents.
 
 ## Compatibility
 

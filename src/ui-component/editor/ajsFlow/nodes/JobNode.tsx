@@ -10,7 +10,7 @@ import {
   AjsNode,
   buildNodeSxProps,
   nodeActionsSxProps,
-  NameOrComment,
+  NodeNameAndComment,
   TyTitle,
   handleStyle,
 } from "./AjsNode";
@@ -76,8 +76,7 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
       </Stack>
       <Handle type="source" position={Position.Right} style={handleStyle} />
       <Handle type="target" position={Position.Left} style={handleStyle} />
-      <NameOrComment value={label} />
-      <NameOrComment value={comment} />
+      <NodeNameAndComment label={label} comment={comment} />
     </>
   );
 };
