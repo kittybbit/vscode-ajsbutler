@@ -118,6 +118,9 @@ Scenario: Current-scope search reveals matches
 - desktop and web presentation layers can convert the DTO into their own graph
   structures without requiring `UnitEntity` reconstruction
 - flow rendering behavior remains unchanged after DTO to XyFlow mapping
+- the completed flow-viewer maintainability refactor kept diagnostics,
+  expanded-flow graph/layout orchestration, `FlowContents` composition, and
+  presentation-local naming/export cleanup inside existing behavior contracts
 - `src/ui-component/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
   presentation-local expanded layout orchestration, including stable expansion
   ordering, occupied-box calculation, subtree movement, and collision
