@@ -21,7 +21,7 @@ import {
   handleKeyDownNavigateToTable,
 } from "./Utils";
 
-export type JobNode = Node<AjsNode, "job">;
+type JobNode = Node<AjsNode, "job">;
 type JobNodeProps = NodeProps<JobNode>;
 const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
   console.log("render JobNode.");

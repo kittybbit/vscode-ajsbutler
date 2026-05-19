@@ -128,6 +128,46 @@ boundaries and sliceability.
   and scope changes, and exported state-type churn for node/header/selector
   dependents.
 
+- PR5 approval-sensitive scope:
+  cleanup, naming review, and unnecessary export reduction may reduce
+  presentation-local exports introduced or kept by PR2 through PR4, rename
+  internal-only helpers for clearer ownership, and align flow-viewer helper
+  names with their current responsibilities. It must preserve public flow
+  behavior, graph DTO contracts, node rendering, nested expansion, search,
+  reveal, fit behavior, package configuration, and `engines.vscode`.
+
+### PR5 Impact Investigation
+
+- Primary targets:
+  `src/ui-component/editor/ajsFlow/*`,
+  `src/ui-component/editor/ajsFlow/nodes/*`, and flow-viewer-focused tests
+  under `src/test/suite/`.
+- Candidate cleanup areas:
+  `useFlowContentsController.ts` currently exports a hook used only by
+  `FlowContents.tsx`; `AjsNode.tsx` exports many node-local style and helper
+  values for sibling node components plus one test-facing predicate;
+  expanded-flow support modules export layout/node helpers used mainly by
+  `buildExpandedFlowGraph.ts` and `expandedFlowGraphLayout.ts`.
+- Direct reference impact:
+  `FlowContents.tsx`, `FlowMenu.tsx`, `FlowSelector.tsx`, `Header.tsx`,
+  `flowGraphView.ts`, `nodes/AjsNode.tsx`, `nodes/ConditionNode.tsx`,
+  `nodes/JobGroupNode.tsx`, `nodes/JobNetNode.tsx`, `nodes/JobNode.tsx`,
+  `buildExpandedFlowGraph.ts`, `expandedFlowGraphLayout.ts`, and tests that
+  import flow-viewer helpers.
+- Boundary decision:
+  keep PR5 inside flow-viewer presentation and test code unless an SDD update
+  explicitly requests re-approval. Do not move behavior to domain/application,
+  do not change graph DTOs, and do not collapse test coverage just to hide an
+  export.
+- Test impact:
+  run existing flow-viewer unit tests, expanded-flow tests, desktop tests, web
+  tests, and production build. Add or adjust focused tests only when a helper
+  rename or export reduction changes the test-facing entry point.
+- Breaking-change risk:
+  low internal refactor risk, concentrated around missed imports after export
+  reduction, accidental test coverage loss, and confusing names that obscure
+  whether helpers are presentation-local or application-facing.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.

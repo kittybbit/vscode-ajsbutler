@@ -11,7 +11,7 @@ import {
   CurrentUnitIdStateType,
   DialogDataStateType,
   NestedExpansionStateType,
-} from "./flowContentStateTypes";
+} from "./flowViewerStateTypes";
 import { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
 import { AjsNode } from "./nodes/AjsNode";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
