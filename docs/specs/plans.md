@@ -132,20 +132,18 @@ rules in `docs/specs/README.md`, not in this file.
    change.
 3. Keep deterministic expanded-flow layout and fit-to-view regression coverage
    visible while real nested-layout examples accumulate.
-4. Request approval for `flow-refactor` PR5 cleanup, naming review, and
-   unnecessary export reduction before starting the final flow-refactor
-   cleanup slice.
+4. Select the next implementation priority after the completed
+   `flow-refactor` five-slice plan.
 
 ## Current Branch Plan
 
-- Branch: `codex/flow-refactor-pr4-flowcontents-hooks`
-- Objective: complete PR4 `FlowContents.tsx` hook/presentation extraction
-  after PR3 expanded-flow graph/layout extraction.
+- Branch: `codex/flow-refactor-pr5-cleanup`
+- Objective: complete PR5 cleanup, naming review, and unnecessary export
+  reduction after PR4 `FlowContents.tsx` hook/presentation extraction.
 - Status: PR3 expanded-flow graph/layout extraction is implemented and
   validated. PR4 `FlowContents.tsx` hook/presentation extraction is
-  implemented, validated, and ready for PR. PR5 cleanup, naming review, and
-  unnecessary export reduction is the next planned slice, pending fresh
-  approval.
+  implemented, validated, and published as PR #265. PR5 cleanup, naming
+  review, and unnecessary export reduction is implemented and validated.
 - Prior scope delivered: split expanded-flow result/build context types,
   nested-node/edge projection helpers, and expanded layout/collision
   orchestration out of `buildExpandedFlowGraph.ts` while keeping the public
@@ -156,20 +154,21 @@ rules in `docs/specs/README.md`, not in this file.
   search/reveal handlers, fit-to-view scheduling, and ReactFlow data
   preparation from `FlowContents.tsx` into presentation-local hooks or support
   modules while preserving existing user-visible behavior and contracts.
+- PR5 delivered scope: reduced unnecessary presentation-local exports, renamed
+  PR4 flow-viewer controller/state modules for clearer ownership, and kept
+  tests pointed at intentional helper entry points without weakening
+  flow-viewer coverage.
 - Out of scope: new flow-viewer behavior, parser changes, diagnostics changes,
   graph DTO changes, dependency updates, `engines.vscode` changes,
   configuration changes, and user-visible behavior changes.
-- Impact summary: `FlowContents.tsx` currently owns viewer state, selected
-  scope preservation, nested expansion, search/reveal state, document-change
-  subscription, DOM overflow setup, ReactFlow fit scheduling, and ReactFlow
-  node/edge preparation. Direct dependents import the component or its state
-  types from `AjsFlowViewerApp.tsx`, `FlowSelector.tsx`, `FlowMenu.tsx`,
-  `Header.tsx`, `flowGraphView.ts`, and `nodes/AjsNode.tsx`.
-- Risks and assumptions: PR4 should stay inside presentation-local flow-viewer
-  modules. Main risks are React dependency drift, search preservation during
-  reveal/scope changes, fit-to-view timing, and exported state-type churn.
-  Validation covered desktop and web flow-viewer build/test paths; webpack
-  bundle-size warnings remain pre-existing build warnings.
+- Impact summary: PR5 was concentrated in `src/ui-component/editor/ajsFlow/*`,
+  `src/ui-component/editor/ajsFlow/nodes/*`, and flow-viewer-focused tests.
+  The cleanup renamed the single-consumer PR4 controller and shared state-type
+  modules, moved node comment display logic to a focused helper, and removed
+  unused node component type exports.
+- Risks and assumptions: validation covered desktop and web flow-viewer
+  build/test paths plus production build; webpack bundle-size warnings remain
+  pre-existing build warnings.
 - Alternatives considered: combining PR3 with `FlowContents.tsx` hook
   extraction remains rejected because PR4 is a separate reviewable slice in the
   agreed plan.

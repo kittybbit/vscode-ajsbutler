@@ -12,14 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  PR4 `FlowContents.tsx` hook/presentation extraction is implemented and
-  validated and is ready for PR.
+  PR5 cleanup, naming review, and unnecessary export reduction is implemented
+  and validated.
 - Active slice:
-  none on this branch; PR5 cleanup, naming review, and unnecessary export
-  reduction remains the next planned slice on a future approved scope.
+  none; the five planned `flow-refactor` slices are complete.
 - Open follow-up:
-  request approval for PR5 before editing runtime code/tests/configuration
-  beyond the completed PR4 scope.
+  none for the current five-slice flow-refactor plan.
 
 ## Human Approval
 
@@ -57,7 +55,11 @@ active implementation approval remains.
       lands and PR4 approval is recorded.
 - [x] Fix PR4 flow-node display regression where identical name/comment values
       rendered duplicate text below expandable nodes.
-- [ ] Complete PR5 cleanup, naming review, and unnecessary export reduction
+- [x] Refresh PR5 impact investigation for cleanup, naming review, and
+      unnecessary export reduction.
+- [x] Record human approval for PR5 before creating an implementation branch
+      or editing runtime code/tests/configuration.
+- [x] Complete PR5 cleanup, naming review, and unnecessary export reduction
       after PR4 lands.
 
 ## Validation
@@ -70,6 +72,8 @@ active implementation approval remains.
 - [x] Confirm PR4 preserved desktop and web flow-viewer build/test paths.
 - [x] Confirm duplicate name/comment display regression coverage and
       validation.
+- [x] Confirm PR5 cleanup preserved desktop and web flow-viewer build/test
+      paths.
 
 ## Notes
 

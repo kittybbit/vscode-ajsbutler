@@ -21,7 +21,7 @@ import JobGroupNode from "./nodes/JobGroupNode";
 import ConditionNode from "./nodes/ConditionNode";
 import Header from "./Header";
 import FlowSelector from "./FlowSelector";
-import { useFlowContentsController } from "./useFlowContentsController";
+import { useFlowViewerController } from "./useFlowViewerController";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 
@@ -67,7 +67,7 @@ const FlowContents: FC = () => {
     setDialogData,
     toggleExpandAllNestedUnits,
     unitById,
-  } = useFlowContentsController({ theme });
+  } = useFlowViewerController({ theme });
 
   return (
     <ThemeProvider theme={theme}>

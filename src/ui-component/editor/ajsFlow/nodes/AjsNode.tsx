@@ -8,10 +8,11 @@ import { UnitDefinitionDialogDto } from "../../../../application/unit-definition
 import {
   CurrentUnitIdStateType,
   DialogDataStateType,
-} from "../flowContentStateTypes";
+} from "../flowViewerStateTypes";
 import { TySymbol } from "../../../../domain/values/AjsType";
 import { tyDefinitionLang } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../../MyContexts";
+import { shouldRenderNodeComment } from "./flowNodeDisplay";
 
 export type AjsNode = {
   nestedPanel?: {
@@ -212,7 +213,7 @@ const nameOrCommentSx: SxProps<Theme> = {
   textOverflow: "ellipsis",
   textAlign: "center",
 };
-export const NameOrComment: React.FC<{
+const NameOrComment: React.FC<{
   value?: string;
 }> = ({ value }) => {
   return (
@@ -223,11 +224,6 @@ export const NameOrComment: React.FC<{
     </Tooltip>
   );
 };
-
-export const shouldRenderNodeComment = (
-  label?: string,
-  comment?: string,
-): boolean => !!comment && comment !== label;
 
 export const NodeNameAndComment: React.FC<{
   label?: string;

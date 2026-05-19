@@ -24,7 +24,7 @@ import {
   DrawerWidthStateType,
   FlowMenuStateType,
   NestedExpansionStateType,
-} from "./flowContentStateTypes";
+} from "./flowViewerStateTypes";
 import { createReactFlowData } from "./flowGraphView";
 import { findFlowSearchResult } from "./flowSearch";
 import {
@@ -33,13 +33,13 @@ import {
   hasExpandedAllNestedUnitIds,
 } from "./nestedExpansion";
 
-type UseFlowContentsControllerParams = {
+type UseFlowViewerControllerParams = {
   theme: Theme;
 };
 
-export const useFlowContentsController = ({
+export const useFlowViewerController = ({
   theme,
-}: UseFlowContentsControllerParams) => {
+}: UseFlowViewerControllerParams) => {
   const [menuStatus, setMenuStatus] = useState({ menuItem1: true });
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();

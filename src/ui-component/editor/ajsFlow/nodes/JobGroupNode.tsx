@@ -20,7 +20,7 @@ import {
 } from "./Utils";
 import classNames from "classnames";
 
-export type JobGroupNode = Node<AjsNode, "jobgroup">;
+type JobGroupNode = Node<AjsNode, "jobgroup">;
 type JobGroupNodeProp = NodeProps<JobGroupNode>;
 const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
   console.log("render JobGroupNode.");

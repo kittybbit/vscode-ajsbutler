@@ -22,7 +22,7 @@ import {
   handleKeyDownNavigateToTable,
 } from "./Utils";
 
-export type ConditionNode = Node<AjsNode, "condition">;
+type ConditionNode = Node<AjsNode, "condition">;
 type ConditionNodeProps = NodeProps<ConditionNode>;
 const ConditionNode: FC<ConditionNodeProps> = ({
   data,

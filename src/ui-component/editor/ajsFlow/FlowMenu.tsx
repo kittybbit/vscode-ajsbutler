@@ -9,7 +9,7 @@ import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 import {
   DrawerWidthStateType,
   FlowMenuStateType,
-} from "./flowContentStateTypes";
+} from "./flowViewerStateTypes";
 import { useMyAppContext } from "../MyContexts";
 import { LocaleKeyType, localeMap } from "../../../domain/services/i18n/nls";
 

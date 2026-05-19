@@ -31,7 +31,7 @@ import {
   handleKeyDownNestedToggle,
 } from "./Utils";
 
-export type JobNetNode = Node<AjsNode, "jobnet">;
+type JobNetNode = Node<AjsNode, "jobnet">;
 type JobNetNodeProps = NodeProps<JobNetNode>;
 
 const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
