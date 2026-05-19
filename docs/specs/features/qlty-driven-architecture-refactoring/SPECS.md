@@ -47,6 +47,10 @@ No user-visible behavior scenarios are introduced.
   `useFlowViewerController` remains consumed only by `FlowContents`, and the
   controller responsibility split stayed within `src/ui-component` without
   application/domain propagation.
+- Slice-1B-A result:
+  `buildNodeSxProps` is consumed by `JobNode`, `JobNetNode`, `JobGroupNode`,
+  and `ConditionNode`; styling helper extraction stayed inside
+  `src/ui-component/editor/ajsFlow/nodes` and did not change node data mapping.
 
 ### Breaking Change Analysis
 
@@ -76,6 +80,10 @@ No user-visible behavior scenarios are introduced.
 - Slice-1A boundary decision:
   split controller orchestration only; do not introduce presenters, change
   graph DTO contracts, or move layout rules across the application boundary.
+- Slice-1B-A boundary decision:
+  extract visual-state/style helpers only; do not change rendered actions,
+  node data flags, expanded nested panel dimensions, search highlighting, or
+  ReactFlow node/edge construction.
 
 ## Compatibility
 
@@ -99,5 +107,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- Should Slice-1B target `Header`/`FlowSelector` component complexity before
-  deeper expanded-layout helpers?
+- After Slice-1B-A, should the next component slice target `Header` or
+  `FlowSelector` before deeper expanded-layout helpers?

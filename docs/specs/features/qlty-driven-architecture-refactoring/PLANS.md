@@ -58,21 +58,24 @@ remaining passive metrics.
 
 ## Current Slice Candidate
 
-Slice-1A is complete. Slice-1B is the next candidate and requires separate
-approval before runtime work starts.
+Slice-1A is complete. Slice-1B-A is approved and implemented.
 
 - Target:
-  reduce remaining flow-viewer component/layout complexity without changing
-  flow-viewer behavior.
+  extract `AjsNode` styling decisions from `buildNodeSxProps` into
+  presentation-local helpers without changing flow-viewer behavior.
 - Reason:
-  targeted Qlty smells still identify `Header`, `FlowSelector`, `AjsNode`, and
-  expanded-flow layout helpers as flow-viewer complexity candidates.
+  targeted Qlty smells identify `buildNodeSxProps` as the highest complexity
+  node-component function, and it is referenced only by flow node components.
 - Boundary:
-  keep parser, generated artifacts, application flow graph DTOs, VS Code
-  compatibility, and `engines.vscode` unchanged.
+  keep parser, generated artifacts, application flow graph DTOs, node data
+  shape, VS Code compatibility, and `engines.vscode` unchanged.
 - Expected impact:
-  lower Qlty complexity for flow-viewer presentation code while preserving the
-  Slice-1A controller split.
+  lower Qlty complexity for `AjsNode.tsx` while preserving the Slice-1A
+  controller split.
+- Status:
+  `buildNodeSxProps` remains exported through `AjsNode.tsx`, with styling
+  decisions extracted to presentation-local helpers in
+  `src/ui-component/editor/ajsFlow/nodes/nodeSxProps.ts`.
 
 ## Risks To Control
 

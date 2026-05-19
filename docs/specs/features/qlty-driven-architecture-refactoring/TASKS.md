@@ -12,11 +12,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1A implementation is complete.
+  Slice-1B-A implementation is complete.
 - Active slice:
-  none; request approval before starting the next runtime slice.
+  none; remaining Slice-1B candidates require separate approval.
 - Open follow-up:
-  choose and approve the next flow-viewer complexity slice.
+  select and approve the next Slice-1B component/layout complexity target.
 
 ## Human Approval
 
@@ -41,7 +41,12 @@ active implementation approval remains.
       implementation candidate.
 - [x] Record human approval for Slice-1A.
 - [x] Complete Slice-1A flow-viewer controller responsibility split.
-- [ ] Complete Slice-1B flow-viewer component/layout complexity work.
+- [x] Select Slice-1B-A `AjsNode` styling extraction as the next
+      implementation candidate.
+- [x] Record human approval for Slice-1B-A.
+- [x] Complete Slice-1B-A `AjsNode` styling extraction.
+- [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
+      work.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -61,5 +66,12 @@ active implementation approval remains.
   and split presentation-local state/effects into focused hooks.
 - `Header`, `FlowSelector`, `AjsNode`, and `expandedFlowGraphLayout` remain
   later flow-viewer complexity candidates.
+- Slice-1B-A targets `AjsNode.tsx` first because `buildNodeSxProps` has high
+  Qlty complexity, is presentation-local, and is referenced only by flow node
+  components.
+- Slice-1B-A kept `buildNodeSxProps` exported from `AjsNode.tsx` and moved the
+  visual-state decisions into `nodes/nodeSxProps.ts`.
+- `Header`, `FlowSelector`, and `expandedFlowGraphLayout` remain later
+  Slice-1B candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

@@ -34,7 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select and request approval for the next Qlty-driven architecture
-   refactoring slice after the completed Slice-1A controller split.
+   refactoring Slice-1B component/layout target after the completed
+   `AjsNode` styling extraction.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -48,8 +49,9 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
   active maintainability-driven architectural refactoring based on Qlty
   complexity, duplication, and code-smell findings. Slice-1A completed the
-  presentation-local flow-viewer controller split; the next slice needs
-  separate approval.
+  presentation-local flow-viewer controller split; Slice-1B-A completed a
+  presentation-local `AjsNode` styling extraction. Remaining Slice-1B
+  candidates need separate approval.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

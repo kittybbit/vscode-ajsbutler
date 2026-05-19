@@ -13,6 +13,7 @@ import { TySymbol } from "../../../../domain/values/AjsType";
 import { tyDefinitionLang } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../../MyContexts";
 import { shouldRenderNodeComment } from "./flowNodeDisplay";
+export { buildNodeSxProps } from "./nodeSxProps";
 
 export type AjsNode = {
   nestedPanel?: {
@@ -40,92 +41,6 @@ export type AjsNode = {
 } & DialogDataStateType &
   CurrentUnitIdStateType &
   Record<string, unknown>;
-
-export const buildNodeSxProps = ({
-  isCurrent,
-  isAncestor,
-  isRootJobnet,
-  isSearchMatch,
-  nestedPanel,
-}: Pick<
-  AjsNode,
-  "isCurrent" | "isAncestor" | "isRootJobnet" | "isSearchMatch" | "nestedPanel"
->): SxProps<Theme> => ({
-  position: "relative",
-  zIndex: 1,
-  overflow: "visible",
-  width: "7.25em",
-  minHeight: "7.25em",
-  paddingX: "0.55em",
-  paddingY: "0.45em",
-  borderRadius: isAncestor ? "1.35em" : "50%",
-  borderWidth: isCurrent ? "3px" : isRootJobnet ? "2px" : "1px",
-  borderStyle: "solid",
-  borderColor: (theme) =>
-    isCurrent
-      ? theme.palette.info.main
-      : isSearchMatch
-        ? theme.palette.success.main
-        : isRootJobnet
-          ? theme.palette.primary.main
-          : theme.palette.divider,
-  background: (theme) => {
-    if (isCurrent) {
-      return `linear-gradient(160deg, ${theme.palette.info.light}22 0%, ${theme.palette.background.paper} 58%, ${theme.palette.background.default} 100%)`;
-    }
-    if (isSearchMatch) {
-      return `linear-gradient(180deg, ${theme.palette.success.light}20 0%, ${theme.palette.background.paper} 100%)`;
-    }
-    if (isAncestor) {
-      return `linear-gradient(180deg, ${theme.palette.warning.light}1f 0%, ${theme.palette.background.paper} 100%)`;
-    }
-    if (isRootJobnet) {
-      return `linear-gradient(180deg, ${theme.palette.primary.light}18 0%, ${theme.palette.background.paper} 100%)`;
-    }
-    return theme.palette.background.paper;
-  },
-  boxShadow: (theme) =>
-    isCurrent
-      ? `0 0 0 4px ${theme.palette.info.light}30, ${theme.shadows[6]}`
-      : isSearchMatch
-        ? `0 0 0 3px ${theme.palette.success.light}30, ${theme.shadows[4]}`
-        : isAncestor
-          ? theme.shadows[4]
-          : theme.shadows[2],
-  justifyContent: "center",
-  alignItems: "center",
-  gap: "0.15em",
-  transition:
-    "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
-  "&:hover": {
-    transform: "translateY(-1px)",
-  },
-  "&::after": nestedPanel
-    ? {
-        content: '""',
-        position: "absolute",
-        left: `${nestedPanel.panelOffsetXPx}px`,
-        top: `${nestedPanel.panelOffsetYPx}px`,
-        width: `${nestedPanel.panelWidthPx}px`,
-        height: `${nestedPanel.panelHeightPx}px`,
-        borderRadius: "1.5em",
-        border: (theme) => `1px solid ${theme.palette.primary.light}`,
-        background: (theme) =>
-          `linear-gradient(180deg, ${theme.palette.primary.light}10 0%, ${theme.palette.background.paper}cc 100%)`,
-        boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.divider}`,
-        pointerEvents: "none",
-        zIndex: -1,
-      }
-    : undefined,
-  "& button": {
-    color: (theme) =>
-      isCurrent
-        ? theme.palette.info.dark
-        : isSearchMatch
-          ? theme.palette.success.dark
-          : theme.palette.text.secondary,
-  },
-});
 
 export const nodeBadgeSxProps: SxProps<Theme> = {
   minWidth: "3.8em",
