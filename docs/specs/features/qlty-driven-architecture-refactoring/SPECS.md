@@ -43,6 +43,10 @@ No user-visible behavior scenarios are introduced.
   documents
 - Propagation decision:
   keep parser, generated artifacts, and user-facing behavior unchanged
+- Slice-1A result:
+  `useFlowViewerController` remains consumed only by `FlowContents`, and the
+  controller responsibility split stayed within `src/ui-component` without
+  application/domain propagation.
 
 ### Breaking Change Analysis
 
@@ -69,6 +73,9 @@ No user-visible behavior scenarios are introduced.
 - Scope changes requiring re-approval:
   runtime behavior changes, parser changes, dependency upgrades, or
   `engines.vscode` changes
+- Slice-1A boundary decision:
+  split controller orchestration only; do not introduce presenters, change
+  graph DTO contracts, or move layout rules across the application boundary.
 
 ## Compatibility
 
@@ -92,4 +99,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- Should flow-viewer extraction stop at hooks, or also introduce presenters?
+- Should Slice-1B target `Header`/`FlowSelector` component complexity before
+  deeper expanded-layout helpers?

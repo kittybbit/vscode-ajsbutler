@@ -43,7 +43,7 @@ remaining passive metrics.
 - Approval status:
   see TASKS.md `Human Approval`
 - Approved scope:
-  start from Slice-0 repository hygiene only
+  none while approval is pending
 - Scope guard:
   stop and request additional approval before changing anything outside the
   approved scope
@@ -51,9 +51,28 @@ remaining passive metrics.
 ## Milestones
 
 1. Slice-0 repository hygiene and baseline cleanup
-2. Slice-1 flow-viewer complexity reduction
-3. Slice-2 application orchestration reduction
-4. Slice-3 domain helper simplification
+2. Slice-1A flow-viewer controller responsibility split
+3. Slice-1B flow-viewer layout/component complexity reduction
+4. Slice-2 application orchestration reduction
+5. Slice-3 domain helper simplification
+
+## Current Slice Candidate
+
+Slice-1A is complete. Slice-1B is the next candidate and requires separate
+approval before runtime work starts.
+
+- Target:
+  reduce remaining flow-viewer component/layout complexity without changing
+  flow-viewer behavior.
+- Reason:
+  targeted Qlty smells still identify `Header`, `FlowSelector`, `AjsNode`, and
+  expanded-flow layout helpers as flow-viewer complexity candidates.
+- Boundary:
+  keep parser, generated artifacts, application flow graph DTOs, VS Code
+  compatibility, and `engines.vscode` unchanged.
+- Expected impact:
+  lower Qlty complexity for flow-viewer presentation code while preserving the
+  Slice-1A controller split.
 
 ## Risks To Control
 

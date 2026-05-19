@@ -12,12 +12,11 @@
 ## Current Status
 
 - Runtime status:
-  investigation is recorded, but implementation has not started.
+  Slice-1A implementation is complete.
 - Active slice:
-  none until approval is granted.
+  none; request approval before starting the next runtime slice.
 - Open follow-up:
-  choose and approve the first refactoring slice, starting from repository
-  hygiene before broader structural work.
+  choose and approve the next flow-viewer complexity slice.
 
 ## Human Approval
 
@@ -38,20 +37,29 @@ active implementation approval remains.
 - [x] Qlty check findings analyzed.
 - [x] Qlty metrics findings analyzed.
 - [x] Qlty smell findings analyzed.
-- [ ] Record human approval for the first implementation slice.
-- [ ] Complete Slice-0 repository hygiene.
-- [ ] Complete Slice-1 flow-viewer complexity work.
+- [x] Select Slice-1A flow-viewer controller responsibility split as the first
+      implementation candidate.
+- [x] Record human approval for Slice-1A.
+- [x] Complete Slice-1A flow-viewer controller responsibility split.
+- [ ] Complete Slice-1B flow-viewer component/layout complexity work.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
 ## Validation
 
-- [ ] Add or update tests where a slice changes behavior or ownership.
-- [ ] Update README or user documentation if user-facing behavior changes.
-- [ ] Run relevant validation for the approved slice.
+- [x] No test updates required because Slice-1A preserves behavior and keeps
+      existing public contracts.
+- [x] No README or user documentation update required because user-facing
+      behavior is unchanged.
+- [x] Run relevant validation for the approved slice.
 
 ## Notes
 
-- Highest complexity currently exists in `FlowContents.tsx`.
+- Current targeted Qlty smell output reports `useFlowViewerController` with
+  lower cognitive complexity after Slice-1A.
+- Slice-1A kept `useFlowViewerController` referenced only by `FlowContents`
+  and split presentation-local state/effects into focused hooks.
+- `Header`, `FlowSelector`, `AjsNode`, and `expandedFlowGraphLayout` remain
+  later flow-viewer complexity candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.
