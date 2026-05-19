@@ -65,6 +65,12 @@ Scenario: Unit-specific defaults are applied only in their documented context
 
 - existing behavior can be preserved incrementally while mismatches against the
   chosen manual are made explicit and corrected in focused slices
+- the repository-supported JP1/AJS3 version 13 alignment scope has been
+  completed for the shared parameter families currently modeled by editor
+  feedback, unit-list projection, and normalized parameter helpers
+- future manual-alignment work should start as a new focused feature when it
+  introduces a new supported parameter family, a new consumer, or a new target
+  product version
 
 ## Risks Or Edge Cases
 
@@ -74,3 +80,6 @@ Scenario: Unit-specific defaults are applied only in their documented context
   schedule-rule alignment
 - version-specific manual behavior must remain visible in docs so future
   upgrades do not silently reinterpret parameters
+- platform-specific transfer-path interpretation, non-default `SCHEDULELIMIT`
+  handling, and broader cross-parameter invalidation remain outside the current
+  repository-supported JP1/AJS3 version 13 interpretation contract

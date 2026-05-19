@@ -28,7 +28,6 @@ Viewer and export behavior:
 Cross-cutting operations:
 
 - record telemetry
-- improve build and test performance
 - search domain unification
 
 Do not use this directory as a task log or implementation notebook.
