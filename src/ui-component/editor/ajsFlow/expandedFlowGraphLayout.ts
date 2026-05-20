@@ -123,16 +123,34 @@ const syncDisplayPosition = (
   }
 };
 
+const isAnchoredToUnit = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+  parentUnitId: string,
+) => context.parentAnchors.get(unitId) === parentUnitId;
+
+const getAnchoredChildUnitIds = (
+  context: ExpandedFlowGraphBuildContext,
+  parentUnitId: string,
+): string[] =>
+  [...context.visibleUnitIds].filter((unitId) =>
+    isAnchoredToUnit(context, unitId, parentUnitId),
+  );
+
+const syncAnchoredChildOverride = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+) => {
+  syncDisplayPosition(context, unitId);
+  syncAnchoredDescendantOverrides(context, unitId);
+};
+
 const syncAnchoredDescendantOverrides = (
   context: ExpandedFlowGraphBuildContext,
   unitId: string,
 ) => {
-  for (const visibleUnitId of context.visibleUnitIds) {
-    if (context.parentAnchors.get(visibleUnitId) !== unitId) {
-      continue;
-    }
-    syncDisplayPosition(context, visibleUnitId);
-    syncAnchoredDescendantOverrides(context, visibleUnitId);
+  for (const anchoredChildUnitId of getAnchoredChildUnitIds(context, unitId)) {
+    syncAnchoredChildOverride(context, anchoredChildUnitId);
   }
 };
 

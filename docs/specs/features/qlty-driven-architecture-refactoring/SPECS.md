@@ -181,6 +181,26 @@ No user-visible behavior scenarios are introduced.
   recursive anchored descendant synchronization. Impact is local to
   `expandedFlowGraphLayout.ts`: the helper is called when visible nodes are
   offset or anchored descendants need to follow a moved parent.
+- Slice-1B-K investigation:
+  `syncAnchoredDescendantOverrides` is called from `addOffset` after a moved
+  unit's own display position is synchronized, then recursively walks visible
+  units whose `parentAnchors` point at the moved unit. For each anchored
+  descendant it recalculates display position via existing position helpers and
+  writes `positionOverrides`. Existing tests in
+  `buildExpandedFlowGraph.test.ts` cover anchored descendants, sibling
+  movement, panel dimensions, `positionOverrides`, and recursive expansion
+  behavior.
+- Slice-1B-K result:
+  `syncAnchoredDescendantOverrides` remains internal to
+  `expandedFlowGraphLayout`, with anchored child discovery, anchored child
+  synchronization, and recursive traversal extracted into focused helpers
+  without changing DTOs, node data, or panel behavior.
+- Slice-1B-L target:
+  `appendExpandedUnitEdges` is the next layout candidate; helper extraction
+  must preserve edge DTO creation through `toEdgeDtos`, `${source}-${target}`
+  edge id generation, duplicate-edge skipping through `edgeIds`, and append
+  order. Impact is local to `expandedFlowGraphLayout.ts`: the helper is called
+  when expanded units reveal nested flow edges.
 
 ### Breaking Change Analysis
 
@@ -294,6 +314,19 @@ No user-visible behavior scenarios are introduced.
   `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
   artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
   compatibility.
+- Slice-1B-K approval-sensitive scope:
+  implementation may extract anchored child discovery, anchored child
+  synchronization, and recursive traversal helpers inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  generated parser artifacts, application flow graph DTOs, ReactFlow node data
+  shape, dependency versions, VS Code compatibility, nested position formulas,
+  offset accumulation, or `engines.vscode` requires separate approval.
+- Slice-1B-L boundary decision:
+  extract expanded-edge append helpers only; do not change edge DTO shape,
+  edge id generation, duplicate filtering, visible edge membership,
+  `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
+  artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
+  compatibility.
 
 ## Compatibility
 
@@ -317,6 +350,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-J, should the next slice target
-  `syncAnchoredDescendantOverrides` before the remaining low-complexity helper
-  cleanup?
+- After Slice-1B-K, should the next slice target `appendExpandedUnitEdges`
+  before the remaining low-complexity helper cleanup?

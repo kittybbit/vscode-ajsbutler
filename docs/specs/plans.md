@@ -34,8 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select and request approval for Qlty-driven architecture refactoring
-   Slice-1B-K: extract `syncAnchoredDescendantOverrides` anchored-descendant
-   update helpers while preserving expanded flow graph layout behavior.
+   Slice-1B-L: extract `appendExpandedUnitEdges` expanded-edge append helpers
+   while preserving expanded flow graph layout behavior.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -59,8 +59,9 @@ rules in `docs/specs/README.md`, not in this file.
   focused `buildExpandedPanelBounds` extraction; Slice-1B-H completed a focused
   `getUpperExpandedPanelMaxRight` extraction; Slice-1B-I completed a focused
   `relayoutExpandedScope` extraction; Slice-1B-J completed a focused
-  `isDescendantOf` extraction. Slice-1B-K targets
-  `syncAnchoredDescendantOverrides` and needs separate approval.
+  `isDescendantOf` extraction; Slice-1B-K completed a focused
+  `syncAnchoredDescendantOverrides` extraction. Slice-1B-L targets
+  `appendExpandedUnitEdges` and needs separate approval.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

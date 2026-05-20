@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-J implementation is complete.
+  Slice-1B-K implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -87,6 +87,12 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-J.
 - [x] Complete Slice-1B-J `isDescendantOf` ancestor-traversal helper
       extraction.
+- [x] Select Slice-1B-K `syncAnchoredDescendantOverrides`
+      anchored-descendant helper extraction as the next implementation
+      candidate.
+- [x] Record human approval for Slice-1B-K.
+- [x] Complete Slice-1B-K `syncAnchoredDescendantOverrides`
+      anchored-descendant helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -227,5 +233,18 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `isDescendantOf` high-complexity
   smell, reduced file total complexity from 128 to 122, and left
   `syncAnchoredDescendantOverrides` as a separate approval candidate.
+- Slice-1B-K targets `syncAnchoredDescendantOverrides` because Qlty reports
+  cognitive complexity 6 after Slice-1B-J, the helper is called from
+  `addOffset` and recursively from itself, and existing expanded-flow tests
+  cover anchored descendants, sibling movement, panel dimensions,
+  `positionOverrides`, and recursive expansion behavior.
+- Slice-1B-K must preserve parent-anchor filtering, missing-position skips,
+  display position recalculation, recursive anchored descendant updates,
+  `positionOverrides`, offsets, and `nodeDecorations`.
+- Slice-1B-K kept anchored descendant synchronization behavior inside
+  `expandedFlowGraphLayout.ts`, removed the
+  `syncAnchoredDescendantOverrides` high-complexity smell, reduced file total
+  complexity from 122 to 118, and left `appendExpandedUnitEdges` as a separate
+  approval candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.
