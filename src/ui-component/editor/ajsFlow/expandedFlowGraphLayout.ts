@@ -476,36 +476,63 @@ const updateExpandedNodeDecoration = (
   );
 };
 
-const getUpperExpandedPanelMaxRight = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedChildren: ReadonlyArray<AjsUnit>,
-  expandedChild: AjsUnit,
-  expandedChildPosition: FlowGraphPosition,
-): number | undefined => {
-  let maxRight: number | undefined;
-  for (const upperCandidate of expandedChildren) {
-    if (upperCandidate.id === expandedChild.id) {
-      continue;
-    }
-    const upperPosition = getDisplayPosition(context, upperCandidate.id);
-    const upperPanelBounds = buildExpandedUnitPanelBounds(
-      context,
-      upperCandidate,
-    );
-    if (
-      !upperPosition ||
-      !upperPanelBounds ||
-      upperPosition.y >= expandedChildPosition.y
-    ) {
-      continue;
-    }
-    maxRight =
-      maxRight === undefined
-        ? upperPanelBounds.maxX
-        : Math.max(maxRight, upperPanelBounds.maxX);
-  }
-  return maxRight;
+type UpperExpandedPanelMaxRightTarget = {
+  context: ExpandedFlowGraphBuildContext;
+  expandedChildren: ReadonlyArray<AjsUnit>;
+  expandedChild: AjsUnit;
+  expandedChildPosition: FlowGraphPosition;
 };
+
+type UpperExpandedPanelCandidateBounds = {
+  position: FlowGraphPosition;
+  bounds: FlowGraphBounds;
+};
+
+const getUpperExpandedPanelCandidateBounds = (
+  context: ExpandedFlowGraphBuildContext,
+  upperCandidate: AjsUnit,
+): UpperExpandedPanelCandidateBounds | undefined => {
+  const position = getDisplayPosition(context, upperCandidate.id);
+  const bounds = buildExpandedUnitPanelBounds(context, upperCandidate);
+  if (!position || !bounds) {
+    return undefined;
+  }
+  return { position, bounds };
+};
+
+const isUpperExpandedPanelCandidate = (
+  candidate: UpperExpandedPanelCandidateBounds,
+  expandedChildPosition: FlowGraphPosition,
+) => candidate.position.y < expandedChildPosition.y;
+
+const includeUpperPanelMaxRight = (
+  maxRight: number | undefined,
+  candidate: UpperExpandedPanelCandidateBounds,
+) =>
+  maxRight === undefined
+    ? candidate.bounds.maxX
+    : Math.max(maxRight, candidate.bounds.maxX);
+
+const hasUpperExpandedPanelCandidateBounds = (
+  candidate: UpperExpandedPanelCandidateBounds | undefined,
+): candidate is UpperExpandedPanelCandidateBounds => !!candidate;
+
+const getUpperExpandedPanelMaxRight = ({
+  context,
+  expandedChildren,
+  expandedChild,
+  expandedChildPosition,
+}: UpperExpandedPanelMaxRightTarget): number | undefined =>
+  expandedChildren
+    .filter((upperCandidate) => upperCandidate.id !== expandedChild.id)
+    .map((upperCandidate) =>
+      getUpperExpandedPanelCandidateBounds(context, upperCandidate),
+    )
+    .filter(hasUpperExpandedPanelCandidateBounds)
+    .filter((candidateBounds) =>
+      isUpperExpandedPanelCandidate(candidateBounds, expandedChildPosition),
+    )
+    .reduce(includeUpperPanelMaxRight, undefined as number | undefined);
 
 const doBoundsOverlapHorizontally = (
   upperBounds: FlowGraphBounds,
@@ -735,12 +762,12 @@ export const relayoutExpandedScope = (
       expandedChildPosition,
       context.metrics,
     );
-    const upperPanelMaxRight = getUpperExpandedPanelMaxRight(
+    const upperPanelMaxRight = getUpperExpandedPanelMaxRight({
       context,
       expandedChildren,
       expandedChild,
       expandedChildPosition,
-    );
+    });
     const horizontalGrowth =
       upperPanelMaxRight === undefined
         ? Math.max(0, panelBounds.maxX - baseBounds.maxX)

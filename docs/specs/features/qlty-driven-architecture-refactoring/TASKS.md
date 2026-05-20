@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-G implementation is complete.
+  Slice-1B-H implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -72,6 +72,11 @@ active implementation approval remains.
       the next implementation candidate.
 - [x] Record human approval for Slice-1B-G.
 - [x] Complete Slice-1B-G `buildExpandedPanelBounds` layout-helper extraction.
+- [x] Select Slice-1B-H `getUpperExpandedPanelMaxRight` layout-helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-H.
+- [x] Complete Slice-1B-H `getUpperExpandedPanelMaxRight` layout-helper
+      extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -173,5 +178,18 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, lowered `buildExpandedPanelBounds` cognitive
   complexity from 17 to 4, and left `getUpperExpandedPanelMaxRight` and
   `relayoutExpandedScope` as separate approval candidates.
+- Slice-1B-H targets `getUpperExpandedPanelMaxRight` because Qlty reports
+  cognitive complexity 14 and many parameters after Slice-1B-G, the helper is
+  referenced only by `relayoutExpandedScope`, and existing expanded-flow tests
+  cover upper/lower panel horizontal growth and expansion-order behavior.
+- Slice-1B-H must preserve upper-candidate iteration order, current expanded
+  child skips, missing position/panel-bound skips, upper-vs-current y filtering,
+  max-right aggregation, horizontal growth offset formulas,
+  `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-H kept upper panel max-right behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `getUpperExpandedPanelMaxRight`
+  high-complexity and many-parameters smells, reduced file total complexity
+  from 138 to 129, and left `relayoutExpandedScope` as a separate approval
+  candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

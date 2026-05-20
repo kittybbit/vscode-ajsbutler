@@ -116,7 +116,29 @@ No user-visible behavior scenarios are introduced.
   extraction must preserve upper expanded panel filtering, max-right
   calculation, expansion-order behavior, panel bounds lookup, and growth offset
   semantics. Impact is local to `expandedFlowGraphLayout.ts`: the helper is
-  referenced by `calculateHorizontalGrowthOffset`, and its behavior flows
+  referenced by `relayoutExpandedScope`, and its behavior flows outward
+  through existing expanded-flow graph layout results and tests.
+- Slice-1B-H investigation:
+  `getUpperExpandedPanelMaxRight` is referenced only by `relayoutExpandedScope`
+  in `expandedFlowGraphLayout.ts`. It reads display positions and expanded
+  panel bounds for expanded siblings above the current expanded child, then
+  returns the greatest upper panel right edge used by horizontal growth
+  calculation. Existing tests in `buildExpandedFlowGraph.test.ts` cover the
+  upper panel covering lower width, lower panel exceeding upper width, and
+  lower expansion after upper scenarios.
+- Slice-1B-H result:
+  `getUpperExpandedPanelMaxRight` remains internal to
+  `expandedFlowGraphLayout`, with candidate bounds lookup, upper-candidate
+  filtering, and max-right aggregation extracted into focused helpers without
+  changing DTOs, node data, or panel behavior.
+- Slice-1B-I target:
+  `relayoutExpandedScope` is the next layout candidate; helper extraction must
+  preserve recursive child reveal/relayout order, decoration refresh timing,
+  lower expanded panel intrusion resolution, immediate visible child target
+  selection, horizontal and vertical growth offset formulas, and final sibling
+  subtree collision resolution. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is called from
+  `buildExpandedFlowGraph` and recursively from itself, and behavior flows
   outward through existing expanded-flow graph layout results and tests.
 
 ### Breaking Change Analysis
@@ -190,6 +212,19 @@ No user-visible behavior scenarios are introduced.
   `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
   artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
   compatibility.
+- Slice-1B-H approval-sensitive scope:
+  implementation may reduce parameter count and split upper panel candidate
+  eligibility or aggregation helpers inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  generated parser artifacts, application flow graph DTOs, ReactFlow node data
+  shape, dependency versions, VS Code compatibility, or `engines.vscode`
+  requires separate approval.
+- Slice-1B-I boundary decision:
+  extract `relayoutExpandedScope` orchestration helpers only; do not change
+  recursive expansion ordering, panel bound calculations, growth offset
+  formulas, collision direction, `positionOverrides`, or `nodeDecorations`. Do
+  not change parser/generated artifacts, graph DTOs, ReactFlow node data shape,
+  dependencies, or VS Code compatibility.
 
 ## Compatibility
 
@@ -213,6 +248,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-G, should the next slice target
-  `getUpperExpandedPanelMaxRight` before the broader
-  `relayoutExpandedScope` orchestration helper?
+- After Slice-1B-H, should the next slice target `relayoutExpandedScope`
+  orchestration now that narrower panel helper candidates have been reduced?
