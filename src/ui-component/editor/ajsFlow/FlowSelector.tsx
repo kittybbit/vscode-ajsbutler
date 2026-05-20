@@ -1,4 +1,11 @@
-import React, { FC, memo, useEffect, useMemo, useRef } from "react";
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import MuiAccordion, { type AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionActions, {
   type AccordionActionsProps,
@@ -28,6 +35,23 @@ type FlowSelectorProps = {
   flowMenuState: FlowMenuStateType;
   currentUnitIdState: CurrentUnitIdStateType;
   drawerWidthState: DrawerWidthStateType;
+};
+
+type FlowSelectorTreeProps = {
+  rootUnits: AjsUnit[];
+  isAncestorOf: (target?: AjsUnit) => boolean;
+  setCurrentUnitId: (unitId: string) => void;
+};
+
+type FlowSelectorUnitProps = {
+  unit: AjsUnit;
+  isAncestorOf: (target?: AjsUnit) => boolean;
+  setCurrentUnitId: (unitId: string) => void;
+};
+
+type FlowSelectorToolbarProps = {
+  drawerRef: React.Ref<HTMLDivElement>;
+  onClose: () => void;
 };
 
 const Accordion = styled((props: AccordionProps) => (
@@ -77,6 +101,212 @@ const AccordionActions = styled((props: AccordionActionsProps) => (
   paddingRight: 0,
 }));
 
+const isRootJobnetUnit = (unit: AjsUnit): boolean =>
+  unit.unitType === "n" && unit.isRootJobnet;
+
+const getParentUnit = (
+  unit: AjsUnit,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): AjsUnit | undefined =>
+  unit.parentId ? unitById.get(unit.parentId) : undefined;
+
+const collectAncestorIds = (
+  current: AjsUnit | undefined,
+  unitById: ReadonlyMap<string, AjsUnit>,
+  ancestorIds: Set<string>,
+): Set<string> => {
+  if (!current) {
+    return ancestorIds;
+  }
+  ancestorIds.add(current.id);
+  return collectAncestorIds(
+    getParentUnit(current, unitById),
+    unitById,
+    ancestorIds,
+  );
+};
+
+const buildAncestorIds = (
+  currentUnitId: string | undefined,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): Set<string> =>
+  collectAncestorIds(
+    currentUnitId ? unitById.get(currentUnitId) : undefined,
+    unitById,
+    new Set<string>(),
+  );
+
+const useAncestorMatcher = (
+  currentUnitId: string | undefined,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): ((target?: AjsUnit) => boolean) => {
+  const ancestorIds = useMemo(
+    () => buildAncestorIds(currentUnitId, unitById),
+    [currentUnitId, unitById],
+  );
+  return useCallback(
+    (target?: AjsUnit) => (target ? ancestorIds.has(target.id) : false),
+    [ancestorIds],
+  );
+};
+
+const useDrawerWidthObserver = (
+  setDrawerWidth: DrawerWidthStateType["setDrawerWidth"],
+) => {
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = drawerRef.current;
+    if (!el) {
+      return () => {};
+    }
+    const observer = new ResizeObserver(([entry]) => {
+      setDrawerWidth(entry.contentRect.width);
+    });
+    observer.observe(el);
+    return () => {
+      observer.unobserve(el);
+      observer.disconnect();
+    };
+  }, [setDrawerWidth]);
+  return drawerRef;
+};
+
+const FlowGroupUnit: FC<FlowSelectorUnitProps> = ({
+  unit,
+  isAncestorOf,
+  setCurrentUnitId,
+}) => (
+  <Accordion
+    key={unit.id}
+    sx={{
+      marginLeft: `${unit.depth * 0.85}em`,
+      marginRight: "0.5em",
+      marginBottom: "0.3em",
+      border: (theme) => `1px solid ${theme.palette.divider}`,
+      backgroundColor: isAncestorOf(unit)
+        ? "action.selected"
+        : "background.paper",
+    }}
+    expanded={isAncestorOf(unit)}
+    onChange={() => setCurrentUnitId(unit.id)}
+  >
+    <AccordionSummary>{unit.name}</AccordionSummary>
+    <FlowSelectorTree
+      rootUnits={unit.children}
+      isAncestorOf={isAncestorOf}
+      setCurrentUnitId={setCurrentUnitId}
+    />
+  </Accordion>
+);
+
+const RootJobnetUnit: FC<FlowSelectorUnitProps> = ({
+  unit,
+  isAncestorOf,
+  setCurrentUnitId,
+}) => {
+  const isAncestor = isAncestorOf(unit);
+  return (
+    <AccordionActions
+      key={unit.id}
+      disableSpacing
+      onClick={() => setCurrentUnitId(unit.id)}
+      sx={{
+        marginLeft: `${unit.depth * 0.85}em`,
+        marginRight: "0.75em",
+        marginBottom: "0.2em",
+        borderRadius: "999px",
+        border: (theme) => `1px solid ${theme.palette.divider}`,
+        backgroundColor: isAncestor ? "action.selected" : "background.paper",
+        paddingX: "0.75em",
+      }}
+    >
+      {isAncestor && (
+        <CheckCircleOutlineIcon
+          fontSize="inherit"
+          sx={{ marginRight: "0.25em" }}
+        />
+      )}
+      {unit.name}
+    </AccordionActions>
+  );
+};
+
+const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
+  unit,
+  isAncestorOf,
+  setCurrentUnitId,
+}) => {
+  if (unit.unitType === "g") {
+    return (
+      <FlowGroupUnit
+        unit={unit}
+        isAncestorOf={isAncestorOf}
+        setCurrentUnitId={setCurrentUnitId}
+      />
+    );
+  }
+  if (isRootJobnetUnit(unit)) {
+    return (
+      <RootJobnetUnit
+        unit={unit}
+        isAncestorOf={isAncestorOf}
+        setCurrentUnitId={setCurrentUnitId}
+      />
+    );
+  }
+  return null;
+};
+
+const FlowSelectorTree: FC<FlowSelectorTreeProps> = ({
+  rootUnits,
+  isAncestorOf,
+  setCurrentUnitId,
+}) => (
+  <>
+    {rootUnits.map((unit) => (
+      <FlowSelectorUnit
+        key={unit.id}
+        unit={unit}
+        isAncestorOf={isAncestorOf}
+        setCurrentUnitId={setCurrentUnitId}
+      />
+    ))}
+  </>
+);
+
+const FlowSelectorToolbar: FC<FlowSelectorToolbarProps> = ({
+  drawerRef,
+  onClose,
+}) => {
+  const theme = useTheme();
+  return (
+    <Toolbar
+      ref={drawerRef}
+      sx={{
+        position: "sticky",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          marginRight: "auto",
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+        }}
+      >
+        FLOW TREE
+      </Typography>
+      <IconButton onClick={onClose}>
+        {theme.direction === "ltr" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+      </IconButton>
+    </Toolbar>
+  );
+};
+
 const FlowSelector: FC<FlowSelectorProps> = ({
   rootUnits,
   unitById,
@@ -90,8 +320,6 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   const { currentUnitId, setCurrentUnitId } = currentUnitIdState;
   const { setDrawerWidth } = drawerWidthState;
 
-  const theme = useTheme();
-
   const handleClose = () => {
     setDrawerWidth(() => 0);
     setMenuStatus((prev) => {
@@ -99,88 +327,8 @@ const FlowSelector: FC<FlowSelectorProps> = ({
     });
   };
 
-  const isAncestorOf = useMemo(() => {
-    const set = new Set<string>();
-    let current = currentUnitId ? unitById.get(currentUnitId) : undefined;
-    while (current) {
-      set.add(current.id);
-      current = current.parentId ? unitById.get(current.parentId) : undefined;
-    }
-    return (target?: AjsUnit) => (target ? set.has(target.id) : false);
-  }, [currentUnitId, unitById]);
-
-  const renderUnitEntity = (
-    units: AjsUnit[],
-    isAncestorOf: (target?: AjsUnit) => boolean,
-    setCurrentUnitId: (unitId: string) => void,
-  ): React.ReactNode[] => {
-    return units.map((unit) => {
-      if (unit.unitType === "g") {
-        return (
-          <Accordion
-            key={unit.id}
-            sx={{
-              marginLeft: `${unit.depth * 0.85}em`,
-              marginRight: "0.5em",
-              marginBottom: "0.3em",
-              border: (theme) => `1px solid ${theme.palette.divider}`,
-              backgroundColor: isAncestorOf(unit)
-                ? "action.selected"
-                : "background.paper",
-            }}
-            expanded={isAncestorOf(unit)}
-            onChange={() => setCurrentUnitId(unit.id)}
-          >
-            <AccordionSummary>{unit.name}</AccordionSummary>
-            {renderUnitEntity(unit.children, isAncestorOf, setCurrentUnitId)}
-          </Accordion>
-        );
-      }
-      if (unit.unitType === "n" && unit.isRootJobnet) {
-        return (
-          <AccordionActions
-            key={unit.id}
-            disableSpacing
-            onClick={() => setCurrentUnitId(unit.id)}
-            sx={{
-              marginLeft: `${unit.depth * 0.85}em`,
-              marginRight: "0.75em",
-              marginBottom: "0.2em",
-              borderRadius: "999px",
-              border: (theme) => `1px solid ${theme.palette.divider}`,
-              backgroundColor: isAncestorOf(unit)
-                ? "action.selected"
-                : "background.paper",
-              paddingX: "0.75em",
-            }}
-          >
-            {isAncestorOf(unit) && (
-              <CheckCircleOutlineIcon
-                fontSize="inherit"
-                sx={{ marginRight: "0.25em" }}
-              />
-            )}
-            {unit.name}
-          </AccordionActions>
-        );
-      }
-      return null;
-    });
-  };
-
-  const drawerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = drawerRef.current;
-    if (!el) return () => {};
-    const observer = new ResizeObserver(([entry]) => {
-      setDrawerWidth(entry.contentRect.width);
-    });
-    observer.observe(el);
-    return () => {
-      observer.unobserve(el);
-      observer.disconnect();
-    };
-  }, [setDrawerWidth]);
+  const isAncestorOf = useAncestorMatcher(currentUnitId, unitById);
+  const drawerRef = useDrawerWidthObserver(setDrawerWidth);
 
   return (
     <>
@@ -200,35 +348,12 @@ const FlowSelector: FC<FlowSelectorProps> = ({
           },
         }}
       >
-        <Toolbar
-          ref={drawerRef}
-          sx={{
-            position: "sticky",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{
-              marginRight: "auto",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-            }}
-          >
-            FLOW TREE
-          </Typography>
-          <IconButton onClick={handleClose}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
-          </IconButton>
-        </Toolbar>
-        {renderUnitEntity(rootUnits, isAncestorOf, setCurrentUnitId)}
+        <FlowSelectorToolbar drawerRef={drawerRef} onClose={handleClose} />
+        <FlowSelectorTree
+          rootUnits={rootUnits}
+          isAncestorOf={isAncestorOf}
+          setCurrentUnitId={setCurrentUnitId}
+        />
       </Drawer>
     </>
   );

@@ -12,11 +12,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-B implementation is complete.
+  Slice-1B-C implementation is complete.
 - Active slice:
   none; remaining Slice-1B candidates require separate approval.
 - Open follow-up:
-  select and approve the next Slice-1B component/layout complexity target.
+  select and approve the next Slice-1B layout complexity target.
 
 ## Human Approval
 
@@ -49,6 +49,10 @@ active implementation approval remains.
       implementation candidate.
 - [x] Record human approval for Slice-1B-B.
 - [x] Complete Slice-1B-B `Header` presentation extraction.
+- [x] Select Slice-1B-C `FlowSelector` presentation extraction as the next
+      implementation candidate.
+- [x] Record human approval for Slice-1B-C.
+- [x] Complete Slice-1B-C `FlowSelector` presentation extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -87,5 +91,16 @@ active implementation approval remains.
   header presentation decisions into local helpers/subcomponents.
 - `FlowSelector` and `expandedFlowGraphLayout` remain later Slice-1B
   candidates.
+- Slice-1B-C targets `FlowSelector.tsx` because Qlty reports cognitive
+  complexity 38, many returns, and nested `renderUnitEntity` complexity 15; it
+  is consumed only by `FlowContents` and can stay presentation-local.
+- Slice-1B-C must preserve drawer open/close behavior, ResizeObserver
+  drawer-width updates, current-unit selection, ancestor expansion, and
+  group/root-jobnet rendering semantics.
+- Slice-1B-C kept `FlowSelector` referenced only by `FlowContents` and
+  extracted tree rendering, ancestor matching, drawer toolbar, and drawer width
+  observation into local helpers/subcomponents.
+- `expandedFlowGraphLayout` remains the later high-risk Slice-1B candidate
+  because it has higher total complexity and broad layout regression coverage.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

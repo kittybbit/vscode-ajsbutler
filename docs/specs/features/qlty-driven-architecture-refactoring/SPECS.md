@@ -56,11 +56,16 @@ No user-visible behavior scenarios are introduced.
   stay inside `src/ui-component/editor/ajsFlow` without changing controller
   state, current-scope search semantics, expanded nested unit state, graph DTOs,
   or ReactFlow node/edge construction.
-- Slice-1B-C target:
+- Slice-1B-C result:
   `FlowSelector` is consumed only by `FlowContents`; drawer/tree helper
-  extraction can stay inside `src/ui-component/editor/ajsFlow` without changing
+  extraction stayed inside `src/ui-component/editor/ajsFlow` without changing
   current unit selection, drawer width state, root unit input, or ancestor
   expansion semantics.
+- Slice-1B-D target:
+  `expandedFlowGraphLayout` is consumed through `buildExpandedFlowGraph`; any
+  helper extraction must preserve the `buildExpandedFlowGraph` result contract,
+  expanded-unit ordering, occupied layout items, collision resolution, panel
+  bounds, and `positionOverrides`/`nodeDecorations` semantics.
 
 ### Breaking Change Analysis
 
@@ -99,6 +104,15 @@ No user-visible behavior scenarios are introduced.
   state, drawer width behavior, breadcrumb navigation, `Cmd/Ctrl+F` focus
   behavior, search submit/clear timing, expand-all enablement, or current-unit
   label semantics.
+- Slice-1B-C boundary decision:
+  extract drawer/tree presentation helpers or subcomponents only; do not change
+  `menuItem1` open/close behavior, ResizeObserver drawer-width updates,
+  selected-current-unit updates, ancestor detection, root-unit filtering, or
+  group/root-jobnet rendering semantics.
+- Slice-1B-D boundary decision:
+  extract layout helpers only; do not change visible node/edge membership,
+  expanded nested unit processing order, subtree movement rules, collision
+  direction, panel dimensions, `positionOverrides`, or `nodeDecorations`.
 
 ## Compatibility
 
