@@ -628,42 +628,81 @@ const resolveSiblingSubtreeCollisions = (
   }
 };
 
+type ExpandedPanelLayoutItem = {
+  unit: AjsUnit;
+  position: FlowGraphPosition;
+  panelBounds: FlowGraphBounds;
+};
+
+const buildExpandedPanelLayoutItem = (
+  context: ExpandedFlowGraphBuildContext,
+  unit: AjsUnit,
+): ExpandedPanelLayoutItem | undefined => {
+  const position = getDisplayPosition(context, unit.id);
+  const panelBounds = buildExpandedUnitPanelBounds(context, unit);
+  return position && panelBounds ? { unit, position, panelBounds } : undefined;
+};
+
+const getLowerPanelIntrusionOffset = (
+  upper: ExpandedPanelLayoutItem,
+  lower: ExpandedPanelLayoutItem,
+): FlowGraphPosition | undefined => {
+  if (
+    upper.position.y >= lower.position.y ||
+    upper.panelBounds.maxY <= lower.panelBounds.minY ||
+    !doBoundsOverlapHorizontally(upper.panelBounds, lower.panelBounds)
+  ) {
+    return undefined;
+  }
+
+  return {
+    x: 0,
+    y: upper.panelBounds.maxY - lower.panelBounds.minY,
+  };
+};
+
+const moveLowerExpandedPanelPastUpper = (
+  context: ExpandedFlowGraphBuildContext,
+  upper: ExpandedPanelLayoutItem,
+  lowerUnit: AjsUnit,
+): void => {
+  const lower = buildExpandedPanelLayoutItem(context, lowerUnit);
+  if (!lower) {
+    return;
+  }
+
+  const offset = getLowerPanelIntrusionOffset(upper, lower);
+  if (offset) {
+    addOffset(context, lower.unit.id, offset);
+  }
+};
+
+const getLowerExpandedPanelCandidates = (
+  upper: ExpandedPanelLayoutItem,
+  expandedChildren: ReadonlyArray<AjsUnit>,
+): AjsUnit[] => expandedChildren.filter((unit) => unit.id !== upper.unit.id);
+
+const resolveUpperExpandedPanelIntrusions = (
+  context: ExpandedFlowGraphBuildContext,
+  upperChild: AjsUnit,
+  expandedChildren: ReadonlyArray<AjsUnit>,
+): void => {
+  const upper = buildExpandedPanelLayoutItem(context, upperChild);
+  if (!upper) {
+    return;
+  }
+
+  getLowerExpandedPanelCandidates(upper, expandedChildren).forEach(
+    (lowerChild) => moveLowerExpandedPanelPastUpper(context, upper, lowerChild),
+  );
+};
+
 const resolveLowerExpandedPanelIntrusions = (
   context: ExpandedFlowGraphBuildContext,
   expandedChildren: ReadonlyArray<AjsUnit>,
 ) => {
   for (const upperChild of expandedChildren) {
-    const upperPosition = getDisplayPosition(context, upperChild.id);
-    const upperPanelBounds = buildExpandedUnitPanelBounds(context, upperChild);
-    if (!upperPosition || !upperPanelBounds) {
-      continue;
-    }
-
-    for (const lowerChild of expandedChildren) {
-      if (upperChild.id === lowerChild.id) {
-        continue;
-      }
-
-      const lowerPosition = getDisplayPosition(context, lowerChild.id);
-      const lowerPanelBounds = buildExpandedUnitPanelBounds(
-        context,
-        lowerChild,
-      );
-      if (
-        !lowerPosition ||
-        !lowerPanelBounds ||
-        upperPosition.y >= lowerPosition.y ||
-        upperPanelBounds.maxY <= lowerPanelBounds.minY ||
-        !doBoundsOverlapHorizontally(upperPanelBounds, lowerPanelBounds)
-      ) {
-        continue;
-      }
-
-      addOffset(context, lowerChild.id, {
-        x: 0,
-        y: upperPanelBounds.maxY - lowerPanelBounds.minY,
-      });
-    }
+    resolveUpperExpandedPanelIntrusions(context, upperChild, expandedChildren);
   }
 };
 

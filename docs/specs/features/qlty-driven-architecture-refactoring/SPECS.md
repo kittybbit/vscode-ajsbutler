@@ -88,7 +88,20 @@ No user-visible behavior scenarios are introduced.
   `resolveLowerExpandedPanelIntrusions` is the next layout candidate; helper
   extraction must preserve upper/lower expanded panel filtering, horizontal
   overlap checks, lower panel vertical movement, and
-  `positionOverrides`/`nodeDecorations` semantics.
+  `positionOverrides`/`nodeDecorations` semantics. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is referenced only by
+  `relayoutExpandedScope`, and its behavior flows outward through
+  `buildExpandedFlowGraph` results and existing expanded-flow graph tests.
+- Slice-1B-F result:
+  `resolveLowerExpandedPanelIntrusions` remains internal to
+  `expandedFlowGraphLayout`, with expanded panel item construction, lower-panel
+  candidate selection, horizontal overlap checks, and vertical push calculation
+  extracted into focused helpers without changing DTOs, node data, or panel
+  behavior.
+- Slice-1B-G target:
+  `buildExpandedPanelBounds` is the next layout candidate; helper extraction
+  must preserve subtree bounds accumulation, parent panel anchoring, panel
+  offsets, panel width/height calculation, and `nodeDecorations` semantics.
 
 ### Breaking Change Analysis
 
@@ -146,7 +159,13 @@ No user-visible behavior scenarios are introduced.
 - Slice-1B-F boundary decision:
   extract lower expanded panel intrusion helpers only; do not change upper/lower
   child ordering, panel bound calculations, horizontal overlap behavior,
-  vertical push distance, `positionOverrides`, or `nodeDecorations`.
+  vertical push distance, `positionOverrides`, or `nodeDecorations`. Do not
+  change parser/generated artifacts, graph DTOs, ReactFlow node data shape,
+  dependencies, or VS Code compatibility.
+- Slice-1B-G boundary decision:
+  extract expanded panel bounds helpers only; do not change visible unit
+  filtering, descendant containment, panel offset constants, panel dimension
+  calculations, `positionOverrides`, or `nodeDecorations`.
 
 ## Compatibility
 

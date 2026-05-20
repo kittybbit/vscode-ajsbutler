@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-E implementation is complete.
+  Slice-1B-F implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -61,6 +61,11 @@ active implementation approval remains.
       extraction as the next implementation candidate.
 - [x] Record human approval for Slice-1B-E.
 - [x] Complete Slice-1B-E `resolveSiblingSubtreeCollisions` layout-helper
+      extraction.
+- [x] Select Slice-1B-F `resolveLowerExpandedPanelIntrusions` layout-helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-F.
+- [x] Complete Slice-1B-F `resolveLowerExpandedPanelIntrusions` layout-helper
       extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
@@ -137,5 +142,18 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, lowered `resolveSiblingSubtreeCollisions`
   cognitive complexity from 24 to 2, and left lower-panel intrusion and panel
   bounds helpers as separate approval candidates.
+- Slice-1B-F targets `resolveLowerExpandedPanelIntrusions` because Qlty reports
+  cognitive complexity 20 after Slice-1B-E, the helper is called only from
+  `relayoutExpandedScope`, and existing expanded-flow tests cover upper/lower
+  expanded panel overlap, vertical panel separation, and expansion-order
+  consistency.
+- Slice-1B-F must preserve upper/lower expanded-child comparison, missing
+  position/panel-bound skips, horizontal overlap filtering, vertical push
+  distance, subtree offset propagation through `addOffset`, and
+  `positionOverrides`/`nodeDecorations`.
+- Slice-1B-F kept lower-panel intrusion behavior inside
+  `expandedFlowGraphLayout.ts`, lowered `resolveLowerExpandedPanelIntrusions`
+  cognitive complexity from 20 to 2, and left `relayoutExpandedScope` and
+  panel bounds helpers as separate approval candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.
