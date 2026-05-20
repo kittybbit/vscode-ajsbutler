@@ -56,9 +56,9 @@ remaining passive metrics.
 4. Slice-2 application orchestration reduction
 5. Slice-3 domain helper simplification
 
-## Current Slice Candidate
+## Completed Slices
 
-Slice-1A is complete. Slice-1B-A is approved and implemented.
+Slice-1A, Slice-1B-A, and Slice-1B-B are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -76,6 +76,30 @@ Slice-1A is complete. Slice-1B-A is approved and implemented.
   `buildNodeSxProps` remains exported through `AjsNode.tsx`, with styling
   decisions extracted to presentation-local helpers in
   `src/ui-component/editor/ajsFlow/nodes/nodeSxProps.ts`.
+  Slice-1B-B kept `Header` consumed only by `FlowContents`, with breadcrumbs,
+  search field state/shortcut handling, expand-all labels, and current-unit
+  badge decisions extracted into presentation-local helpers/subcomponents in
+  `Header.tsx`.
+
+## Current Slice Candidate
+
+Slice-1B-C is the next candidate and requires separate approval before runtime
+work starts.
+
+- Target:
+  extract `FlowSelector` tree rendering and drawer presentation decisions into
+  presentation-local helpers or subcomponents without changing flow-viewer
+  behavior.
+- Reason:
+  targeted Qlty smells identify `FlowSelector` with high component complexity
+  (cognitive 38) and `renderUnitEntity` complexity; it is consumed only by
+  `FlowContents`.
+- Boundary:
+  keep parser, generated artifacts, application flow graph DTOs, node data
+  shape, VS Code compatibility, and `engines.vscode` unchanged.
+- Expected impact:
+  lower Qlty complexity for `FlowSelector.tsx` while preserving drawer open,
+  width observation, current unit selection, and ancestor expansion behavior.
 
 ## Risks To Control
 

@@ -51,6 +51,16 @@ No user-visible behavior scenarios are introduced.
   `buildNodeSxProps` is consumed by `JobNode`, `JobNetNode`, `JobGroupNode`,
   and `ConditionNode`; styling helper extraction stayed inside
   `src/ui-component/editor/ajsFlow/nodes` and did not change node data mapping.
+- Slice-1B-B result:
+  `Header` is consumed only by `FlowContents`; header helper extraction can
+  stay inside `src/ui-component/editor/ajsFlow` without changing controller
+  state, current-scope search semantics, expanded nested unit state, graph DTOs,
+  or ReactFlow node/edge construction.
+- Slice-1B-C target:
+  `FlowSelector` is consumed only by `FlowContents`; drawer/tree helper
+  extraction can stay inside `src/ui-component/editor/ajsFlow` without changing
+  current unit selection, drawer width state, root unit input, or ancestor
+  expansion semantics.
 
 ### Breaking Change Analysis
 
@@ -84,6 +94,11 @@ No user-visible behavior scenarios are introduced.
   extract visual-state/style helpers only; do not change rendered actions,
   node data flags, expanded nested panel dimensions, search highlighting, or
   ReactFlow node/edge construction.
+- Slice-1B-B boundary decision:
+  extract header presentation helpers or subcomponents only; do not change menu
+  state, drawer width behavior, breadcrumb navigation, `Cmd/Ctrl+F` focus
+  behavior, search submit/clear timing, expand-all enablement, or current-unit
+  label semantics.
 
 ## Compatibility
 
@@ -107,5 +122,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-A, should the next component slice target `Header` or
-  `FlowSelector` before deeper expanded-layout helpers?
+- After Slice-1B-C, should the next slice target deeper
+  `expandedFlowGraphLayout` helpers?

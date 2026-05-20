@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-A implementation is complete.
+  Slice-1B-B implementation is complete.
 - Active slice:
   none; remaining Slice-1B candidates require separate approval.
 - Open follow-up:
@@ -45,6 +45,10 @@ active implementation approval remains.
       implementation candidate.
 - [x] Record human approval for Slice-1B-A.
 - [x] Complete Slice-1B-A `AjsNode` styling extraction.
+- [x] Select Slice-1B-B `Header` presentation extraction as the next
+      implementation candidate.
+- [x] Record human approval for Slice-1B-B.
+- [x] Complete Slice-1B-B `Header` presentation extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -73,5 +77,15 @@ active implementation approval remains.
   visual-state decisions into `nodes/nodeSxProps.ts`.
 - `Header`, `FlowSelector`, and `expandedFlowGraphLayout` remain later
   Slice-1B candidates.
+- Slice-1B-B targets `Header.tsx` because Qlty reports cognitive complexity
+  46 and many returns, it is consumed only by `FlowContents`, and the work can
+  stay presentation-local.
+- Slice-1B-B must preserve menu toggle, drawer width behavior, expand/collapse
+  all behavior, current-scope search submit/clear timing, `Cmd/Ctrl+F` focus,
+  breadcrumbs, and current-unit badge semantics.
+- Slice-1B-B kept `Header` referenced only by `FlowContents` and extracted
+  header presentation decisions into local helpers/subcomponents.
+- `FlowSelector` and `expandedFlowGraphLayout` remain later Slice-1B
+  candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

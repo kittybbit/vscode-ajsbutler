@@ -49,6 +49,274 @@ type HeaderProps = {
   onSearchClear: () => void;
 };
 
+type HeaderBreadcrumbsProps = {
+  currentUnit?: AjsUnit;
+  unitById: ReadonlyMap<string, AjsUnit>;
+  setCurrentUnitId: (unitId: string) => void;
+};
+
+type HeaderSearchFieldProps = {
+  isMac: boolean;
+  searchedUnitId?: string;
+  onSearchSubmit: (query: string) => void;
+  onSearchClear: () => void;
+};
+
+type CurrentUnitBadgeProps = {
+  currentUnit?: AjsUnit;
+};
+
+type SearchEndAdornmentProps = {
+  disabled: boolean;
+  onClear: () => void;
+};
+
+const isRootJobnet = (unit: AjsUnit): boolean =>
+  unit.unitType === "n" && unit.isRootJobnet;
+
+const getParentUnit = (
+  unit: AjsUnit,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): AjsUnit | undefined =>
+  unit.parentId ? unitById.get(unit.parentId) : undefined;
+
+const collectBreadcrumbUnits = (
+  currentUnit: AjsUnit | undefined,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): AjsUnit[] => {
+  if (!currentUnit) {
+    return [];
+  }
+  if (isRootJobnet(currentUnit)) {
+    return [currentUnit];
+  }
+  return [
+    ...collectBreadcrumbUnits(getParentUnit(currentUnit, unitById), unitById),
+    currentUnit,
+  ];
+};
+
+const getCurrentUnitLabel = (currentUnit?: AjsUnit): string | undefined => {
+  if (!currentUnit) {
+    return undefined;
+  }
+  if (isRootJobnet(currentUnit)) {
+    return "ROOT JOBNET";
+  }
+  return currentUnit.unitType.toUpperCase();
+};
+
+const getExpandAllLabel = (hasExpandedAllNestedUnits: boolean): string =>
+  hasExpandedAllNestedUnits
+    ? "Collapse all nested jobnets."
+    : "Expand all nested jobnets.";
+
+const getSearchHelperText = (searchedUnitId?: string): string =>
+  searchedUnitId
+    ? "Matched unit is highlighted in the current scope."
+    : "Search current scope by unit name, comment, or path.";
+
+const shouldFocusSearch = (
+  event: globalThis.KeyboardEvent,
+  isMac: boolean,
+): boolean => (isMac ? event.metaKey : event.ctrlKey) && event.key === "f";
+
+const focusSearchFromShortcut = (
+  event: globalThis.KeyboardEvent,
+  isMac: boolean,
+  searchInputRef: React.RefObject<HTMLInputElement | null>,
+): void => {
+  if (!shouldFocusSearch(event, isMac)) {
+    return;
+  }
+  event.preventDefault();
+  searchInputRef.current?.focus();
+};
+
+const useSearchShortcut = (
+  isMac: boolean,
+  searchInputRef: React.RefObject<HTMLInputElement | null>,
+): void => {
+  const handleShortcut = useCallback(
+    (event: globalThis.KeyboardEvent) =>
+      focusSearchFromShortcut(event, isMac, searchInputRef),
+    [isMac, searchInputRef],
+  );
+  useEffect(() => {
+    document.addEventListener("keydown", handleShortcut);
+    return () => document.removeEventListener("keydown", handleShortcut);
+  }, [handleShortcut]);
+};
+
+const useHeaderSearchField = ({
+  isMac,
+  onSearchSubmit,
+  onSearchClear,
+}: Omit<HeaderSearchFieldProps, "searchedUnitId">) => {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchValue, setSearchValue] = useState<string>("");
+  useSearchShortcut(isMac, searchInputRef);
+
+  const handleSearchChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) =>
+      setSearchValue(event.target.value),
+    [],
+  );
+  const handleSearchSubmit = useCallback(() => {
+    onSearchSubmit(searchValue);
+  }, [onSearchSubmit, searchValue]);
+  const handleSearchKeyUp = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+      handleSearchSubmit();
+    },
+    [handleSearchSubmit],
+  );
+  const handleSearchClear = useCallback(() => {
+    setSearchValue("");
+    onSearchClear();
+    searchInputRef.current?.focus();
+  }, [onSearchClear]);
+
+  return {
+    handleSearchChange,
+    handleSearchClear,
+    handleSearchKeyUp,
+    handleSearchSubmit,
+    searchInputRef,
+    searchValue,
+  };
+};
+
+const HeaderBreadcrumbs: FC<HeaderBreadcrumbsProps> = ({
+  currentUnit,
+  unitById,
+  setCurrentUnitId,
+}) => {
+  const breadcrumbUnits = useMemo(
+    () => collectBreadcrumbUnits(currentUnit, unitById),
+    [currentUnit, unitById],
+  );
+  const createCrumb = useCallback(
+    (target: AjsUnit): ReactElement =>
+      target.id === currentUnit?.id ? (
+        <Typography key={target.id} color="inherit">
+          {target.name}
+        </Typography>
+      ) : (
+        <Link
+          key={target.id}
+          color="inherit"
+          onClick={() => setCurrentUnitId(target.id)}
+        >
+          {target.name}
+        </Link>
+      ),
+    [currentUnit?.id, setCurrentUnitId],
+  );
+
+  return (
+    <Breadcrumbs
+      separator="›"
+      aria-label="breadcrumb"
+      sx={{
+        flex: 1,
+        "& .MuiBreadcrumbs-ol": {
+          flexWrap: "nowrap",
+        },
+      }}
+    >
+      {breadcrumbUnits.map(createCrumb)}
+    </Breadcrumbs>
+  );
+};
+
+const SearchStartAdornment: FC = () => (
+  <InputAdornment position="start">
+    <SearchIcon fontSize="small" />
+  </InputAdornment>
+);
+
+const SearchEndAdornment: FC<SearchEndAdornmentProps> = ({
+  disabled,
+  onClear,
+}) => (
+  <InputAdornment position="end">
+    <Tooltip title="Clear flow search.">
+      <span>
+        <IconButton
+          size="small"
+          aria-label="Clear flow search."
+          onClick={onClear}
+          disabled={disabled}
+        >
+          <ClearAllIcon fontSize="inherit" />
+        </IconButton>
+      </span>
+    </Tooltip>
+  </InputAdornment>
+);
+
+const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
+  isMac,
+  searchedUnitId,
+  onSearchSubmit,
+  onSearchClear,
+}) => {
+  const searchHelperText = getSearchHelperText(searchedUnitId);
+  const {
+    handleSearchChange,
+    handleSearchClear,
+    handleSearchKeyUp,
+    handleSearchSubmit,
+    searchInputRef,
+    searchValue,
+  } = useHeaderSearchField({ isMac, onSearchSubmit, onSearchClear });
+
+  return (
+    <TextField
+      size="small"
+      variant="standard"
+      placeholder={`Search current scope...(${isMac ? "\u2318" : "CTRL+"}F)`}
+      helperText={searchHelperText}
+      value={searchValue}
+      onChange={handleSearchChange}
+      onKeyUp={handleSearchKeyUp}
+      onBlur={handleSearchSubmit}
+      inputRef={searchInputRef}
+      sx={{ width: "20rem", maxWidth: "32vw", flexShrink: 0 }}
+      slotProps={{
+        input: {
+          startAdornment: <SearchStartAdornment />,
+          endAdornment: (
+            <SearchEndAdornment
+              onClear={handleSearchClear}
+              disabled={searchValue.length === 0 && !searchedUnitId}
+            />
+          ),
+        },
+      }}
+    />
+  );
+};
+
+const CurrentUnitBadge: FC<CurrentUnitBadgeProps> = ({ currentUnit }) => {
+  const currentUnitLabel = getCurrentUnitLabel(currentUnit);
+  if (!currentUnitLabel) {
+    return null;
+  }
+  return (
+    <Chip
+      size="small"
+      label={currentUnitLabel}
+      color={currentUnit?.isRootJobnet ? "primary" : "default"}
+      variant="outlined"
+    />
+  );
+};
+
 const Header: FC<HeaderProps> = ({
   flowMenuState,
   drawerWidthState,
@@ -69,98 +337,17 @@ const Header: FC<HeaderProps> = ({
   const { setCurrentUnitId } = currentUnitIdState;
   const { lang, os } = useMyAppContext();
   const isMac = os === "darwin";
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchValue, setSearchValue] = useState<string>("");
-
-  const breadcrumbs = useMemo(() => {
-    const crumbs: ReactElement[] = [];
-
-    const build = (unit?: AjsUnit) => {
-      if (!unit) return;
-      const createCrumb = (target: AjsUnit): ReactElement =>
-        target.id === currentUnit?.id ? (
-          <Typography key={target.id} color="inherit">
-            {target.name}
-          </Typography>
-        ) : (
-          <Link
-            key={target.id}
-            color="inherit"
-            onClick={() => setCurrentUnitId(target.id)}
-          >
-            {target.name}
-          </Link>
-        );
-
-      crumbs.push(createCrumb(unit));
-
-      if (unit.unitType !== "n" || !unit.isRootJobnet) {
-        build(unit.parentId ? unitById.get(unit.parentId) : undefined);
-      }
-    };
-
-    build(currentUnit);
-    return crumbs.reverse();
-  }, [currentUnit, setCurrentUnitId, unitById]);
 
   const menuItem1Label = useMemo(
     () => localeMap("flow.menu.menuItem1", lang),
     [lang],
   );
-  const currentUnitLabel = useMemo(() => {
-    if (!currentUnit) {
-      return undefined;
-    }
-    if (currentUnit.unitType === "n" && currentUnit.isRootJobnet) {
-      return "ROOT JOBNET";
-    }
-    return currentUnit.unitType.toUpperCase();
-  }, [currentUnit]);
 
   const handleToggleMenu1 = useCallback(() => {
     setDrawerWidth(0);
     setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
   }, [setDrawerWidth, setMenuStatus]);
-  const handleShortcut = useCallback(
-    (event: globalThis.KeyboardEvent) => {
-      if ((isMac ? event.metaKey : event.ctrlKey) && event.key === "f") {
-        event.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    },
-    [isMac],
-  );
-  useEffect(() => {
-    document.addEventListener("keydown", handleShortcut);
-    return () => document.removeEventListener("keydown", handleShortcut);
-  }, [handleShortcut]);
-  const handleSearchChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) =>
-      setSearchValue(event.target.value),
-    [],
-  );
-  const handleSearchSubmit = useCallback(() => {
-    onSearchSubmit(searchValue);
-  }, [onSearchSubmit, searchValue]);
-  const handleSearchKeyUp = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Enter") {
-        handleSearchSubmit();
-      }
-    },
-    [handleSearchSubmit],
-  );
-  const handleSearchClear = useCallback(() => {
-    setSearchValue("");
-    onSearchClear();
-    searchInputRef.current?.focus();
-  }, [onSearchClear]);
-  const expandAllLabel = hasExpandedAllNestedUnits
-    ? "Collapse all nested jobnets."
-    : "Expand all nested jobnets.";
-  const searchHelperText = searchedUnitId
-    ? "Matched unit is highlighted in the current scope."
-    : "Search current scope by unit name, comment, or path.";
+  const expandAllLabel = getExpandAllLabel(hasExpandedAllNestedUnits);
 
   return (
     <>
@@ -204,63 +391,18 @@ const Header: FC<HeaderProps> = ({
               </IconButton>
             </span>
           </Tooltip>
-          <TextField
-            size="small"
-            variant="standard"
-            placeholder={`Search current scope...(${isMac ? "\u2318" : "CTRL+"}F)`}
-            helperText={searchHelperText}
-            value={searchValue}
-            onChange={handleSearchChange}
-            onKeyUp={handleSearchKeyUp}
-            onBlur={handleSearchSubmit}
-            inputRef={searchInputRef}
-            sx={{ width: "20rem", maxWidth: "32vw", flexShrink: 0 }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Tooltip title="Clear flow search.">
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Clear flow search."
-                          onClick={handleSearchClear}
-                          disabled={searchValue.length === 0 && !searchedUnitId}
-                        >
-                          <ClearAllIcon fontSize="inherit" />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                  </InputAdornment>
-                ),
-              },
-            }}
+          <HeaderSearchField
+            isMac={isMac}
+            searchedUnitId={searchedUnitId}
+            onSearchSubmit={onSearchSubmit}
+            onSearchClear={onSearchClear}
           />
-          <Breadcrumbs
-            separator="›"
-            aria-label="breadcrumb"
-            sx={{
-              flex: 1,
-              "& .MuiBreadcrumbs-ol": {
-                flexWrap: "nowrap",
-              },
-            }}
-          >
-            {breadcrumbs}
-          </Breadcrumbs>
-          {currentUnitLabel && (
-            <Chip
-              size="small"
-              label={currentUnitLabel}
-              color={currentUnit?.isRootJobnet ? "primary" : "default"}
-              variant="outlined"
-            />
-          )}
+          <HeaderBreadcrumbs
+            currentUnit={currentUnit}
+            unitById={unitById}
+            setCurrentUnitId={setCurrentUnitId}
+          />
+          <CurrentUnitBadge currentUnit={currentUnit} />
         </Toolbar>
       </AppBar>
     </>
