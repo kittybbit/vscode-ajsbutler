@@ -1,4 +1,5 @@
 import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphEdgeDto } from "../../../application/flow-graph/buildFlowGraphCore";
 import {
   calculateNestedChildPosition,
   calculateNestedConditionPosition,
@@ -233,17 +234,34 @@ const ensureConditionNodeVisible = (
     calculateNestedConditionPosition({ x: 0, y: 0 }, context.basePx),
   );
 
+const toEdgeId = (edge: FlowGraphEdgeDto): string =>
+  `${edge.source}-${edge.target}`;
+
+const hasExpandedEdge = (
+  context: ExpandedFlowGraphBuildContext,
+  edge: FlowGraphEdgeDto,
+): boolean => context.edgeIds.has(toEdgeId(edge));
+
+const appendExpandedEdge = (
+  context: ExpandedFlowGraphBuildContext,
+  edge: FlowGraphEdgeDto,
+) => {
+  context.edges.push(edge);
+  context.edgeIds.add(toEdgeId(edge));
+};
+
+const getNewExpandedEdges = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnit: AjsUnit,
+): FlowGraphEdgeDto[] =>
+  toEdgeDtos(expandedUnit).filter((edge) => !hasExpandedEdge(context, edge));
+
 const appendExpandedUnitEdges = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnit: AjsUnit,
 ) => {
-  for (const edge of toEdgeDtos(expandedUnit)) {
-    const edgeId = `${edge.source}-${edge.target}`;
-    if (context.edgeIds.has(edgeId)) {
-      continue;
-    }
-    context.edges.push(edge);
-    context.edgeIds.add(edgeId);
+  for (const edge of getNewExpandedEdges(context, expandedUnit)) {
+    appendExpandedEdge(context, edge);
   }
 };
 

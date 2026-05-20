@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-K implementation is complete.
+  Slice-1B-L implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -93,6 +93,11 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-K.
 - [x] Complete Slice-1B-K `syncAnchoredDescendantOverrides`
       anchored-descendant helper extraction.
+- [x] Select Slice-1B-L `appendExpandedUnitEdges` expanded-edge append helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-L.
+- [x] Complete Slice-1B-L `appendExpandedUnitEdges` expanded-edge append
+      helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -246,5 +251,17 @@ active implementation approval remains.
   `syncAnchoredDescendantOverrides` high-complexity smell, reduced file total
   complexity from 122 to 118, and left `appendExpandedUnitEdges` as a separate
   approval candidate.
+- Slice-1B-L targets `appendExpandedUnitEdges` because Qlty reports cognitive
+  complexity 6 after Slice-1B-K, the helper is called only from
+  `revealVisibleNestedUnit`, and expanded-flow tests cover recursive expansion,
+  expanded edge labels, and duplicate-edge avoidance.
+- Slice-1B-L must preserve `toEdgeDtos` edge DTO creation, `${source}-${target}`
+  edge id generation, duplicate filtering through `context.edgeIds`, edge
+  append order, visible edge membership, `positionOverrides`, and
+  `nodeDecorations`.
+- Slice-1B-L kept expanded edge appending behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `appendExpandedUnitEdges`
+  high-complexity smell, reduced file total complexity from 118 to 114, and
+  left `revealVisibleNestedUnit` as a separate approval candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

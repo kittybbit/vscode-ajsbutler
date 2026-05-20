@@ -201,6 +201,21 @@ No user-visible behavior scenarios are introduced.
   edge id generation, duplicate-edge skipping through `edgeIds`, and append
   order. Impact is local to `expandedFlowGraphLayout.ts`: the helper is called
   when expanded units reveal nested flow edges.
+- Slice-1B-L investigation:
+  `appendExpandedUnitEdges` is called only from `revealVisibleNestedUnit` in
+  `expandedFlowGraphLayout.ts`. It converts the expanded nested unit's
+  relations through `toEdgeDtos`, derives the existing edge identity as
+  `${source}-${target}`, skips duplicates already tracked in `context.edgeIds`,
+  appends new edge DTOs to `context.edges`, and records their ids for later
+  expansions. The initial `edgeIds` set is seeded in `buildExpandedFlowGraph`
+  from the base graph using the same identity formula. Existing
+  `buildExpandedFlowGraph.test.ts` coverage asserts recursive expansion,
+  expanded edge labels, and no duplicate expanded edges.
+- Slice-1B-L result:
+  `appendExpandedUnitEdges` remains internal to `expandedFlowGraphLayout`,
+  with edge id creation, duplicate-edge filtering, and append/record behavior
+  extracted into focused helpers without changing DTOs, node data, edge
+  membership, or panel behavior.
 
 ### Breaking Change Analysis
 
@@ -327,6 +342,14 @@ No user-visible behavior scenarios are introduced.
   `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
   artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
   compatibility.
+- Slice-1B-L approval-sensitive scope:
+  implementation may extract edge id creation, duplicate-edge checks, and
+  append/record helpers inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  `toEdgeDtos`, generated parser artifacts, application flow graph DTOs,
+  ReactFlow node data shape, dependency versions, VS Code compatibility,
+  visible node/edge membership, position override behavior, or
+  `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -350,5 +373,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-K, should the next slice target `appendExpandedUnitEdges`
+- After Slice-1B-L, should the next slice target `revealVisibleNestedUnit`
   before the remaining low-complexity helper cleanup?
