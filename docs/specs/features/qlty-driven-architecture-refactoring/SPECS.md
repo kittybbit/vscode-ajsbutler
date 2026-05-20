@@ -140,6 +140,27 @@ No user-visible behavior scenarios are introduced.
   `expandedFlowGraphLayout.ts`: the helper is called from
   `buildExpandedFlowGraph` and recursively from itself, and behavior flows
   outward through existing expanded-flow graph layout results and tests.
+- Slice-1B-I investigation:
+  `relayoutExpandedScope` is called once from `buildExpandedFlowGraph` and once
+  recursively from itself. It filters expanded nested jobnet children, reveals
+  and recursively relayouts each expanded child, refreshes expanded node
+  decorations, resolves lower expanded panel intrusions, calculates
+  per-expanded-child growth offsets against immediate visible siblings, applies
+  those offsets, and finally resolves sibling subtree collisions. Existing
+  tests in `buildExpandedFlowGraph.test.ts` cover recursive expansion,
+  descendant anchoring, panel dimensions, horizontal/vertical growth,
+  lower-panel intrusion, and sibling collision behavior.
+- Slice-1B-I result:
+  `relayoutExpandedScope` remains exported from `expandedFlowGraphLayout`,
+  with expanded child discovery, recursive child relayout/decorate sequencing,
+  growth target selection, and per-child growth application extracted into
+  focused helpers without changing DTOs, node data, or panel behavior.
+- Slice-1B-J target:
+  `isDescendantOf` is the next layout candidate; helper extraction must
+  preserve direct ancestor matching, parent-chain traversal, missing-parent
+  termination, and use of the existing `unitById` map. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is exported for tests and used by
+  descendant anchoring and expanded panel bounds logic.
 
 ### Breaking Change Analysis
 
@@ -225,6 +246,20 @@ No user-visible behavior scenarios are introduced.
   formulas, collision direction, `positionOverrides`, or `nodeDecorations`. Do
   not change parser/generated artifacts, graph DTOs, ReactFlow node data shape,
   dependencies, or VS Code compatibility.
+- Slice-1B-I approval-sensitive scope:
+  implementation may extract expanded child discovery, recursive child
+  relayout/decorate sequencing, growth target id selection, and
+  per-expanded-child growth application helpers inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  generated parser artifacts, application flow graph DTOs, ReactFlow node data
+  shape, dependency versions, VS Code compatibility, growth offset formulas, or
+  `engines.vscode` requires separate approval.
+- Slice-1B-J boundary decision:
+  extract `isDescendantOf` parent-chain traversal helpers only; do not change
+  ancestor matching semantics, missing-parent behavior, visible unit filtering,
+  panel bound calculations, `positionOverrides`, or `nodeDecorations`. Do not
+  change parser/generated artifacts, graph DTOs, ReactFlow node data shape,
+  dependencies, or VS Code compatibility.
 
 ## Compatibility
 
@@ -248,5 +283,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-H, should the next slice target `relayoutExpandedScope`
-  orchestration now that narrower panel helper candidates have been reduced?
+- After Slice-1B-I, should the next slice target `isDescendantOf` before the
+  remaining low-complexity helper cleanup?

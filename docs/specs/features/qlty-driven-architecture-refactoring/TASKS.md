@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-H implementation is complete.
+  Slice-1B-I implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -76,6 +76,11 @@ active implementation approval remains.
       extraction as the next implementation candidate.
 - [x] Record human approval for Slice-1B-H.
 - [x] Complete Slice-1B-H `getUpperExpandedPanelMaxRight` layout-helper
+      extraction.
+- [x] Select Slice-1B-I `relayoutExpandedScope` orchestration-helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-I.
+- [x] Complete Slice-1B-I `relayoutExpandedScope` orchestration-helper
       extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
@@ -190,6 +195,20 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `getUpperExpandedPanelMaxRight`
   high-complexity and many-parameters smells, reduced file total complexity
   from 138 to 129, and left `relayoutExpandedScope` as a separate approval
+  candidate.
+- Slice-1B-I targets `relayoutExpandedScope` because Qlty reports cognitive
+  complexity 13 after Slice-1B-H, the helper is called from
+  `buildExpandedFlowGraph` and recursively from itself, and existing
+  expanded-flow tests cover recursive expansion, panel dimensions, horizontal
+  and vertical growth, lower-panel intrusion, and sibling collision behavior.
+- Slice-1B-I must preserve expanded child filtering and ordering, recursive
+  reveal/relayout/decorate timing, lower-panel intrusion resolution timing,
+  immediate visible child target selection, horizontal and vertical growth
+  formulas, growth offset application, final sibling collision resolution,
+  `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-I kept expanded-scope relayout behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `relayoutExpandedScope`
+  high-complexity smell, and left `isDescendantOf` as a separate approval
   candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

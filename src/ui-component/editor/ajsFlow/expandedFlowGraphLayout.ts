@@ -726,68 +726,144 @@ const resolveLowerExpandedPanelIntrusions = (
   }
 };
 
-export const relayoutExpandedScope = (
-  context: ExpandedFlowGraphBuildContext,
+type ExpandedChildGrowthContext = {
+  context: ExpandedFlowGraphBuildContext;
+  expandedChildren: ReadonlyArray<AjsUnit>;
+  expandedChild: AjsUnit;
+  immediateVisibleChildren: ReadonlyArray<AjsUnit>;
+};
+
+type ExpandedChildGrowthBounds = {
+  position: FlowGraphPosition;
+  panelBounds: FlowGraphBounds;
+};
+
+const getExpandedNestedChildren = (
   containerUnit: AjsUnit,
   expandedUnitIdSet: ReadonlySet<string>,
-) => {
-  const expandedChildren = containerUnit.children
+): AjsUnit[] =>
+  containerUnit.children
     .filter(
       (unit): unit is AjsUnit =>
         expandedUnitIdSet.has(unit.id) && isNestedJobnetUnit(unit),
     )
     .sort(compareExpandedUnits);
 
+const relayoutExpandedChildren = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedChildren: ReadonlyArray<AjsUnit>,
+  expandedUnitIdSet: ReadonlySet<string>,
+) => {
   for (const expandedChild of expandedChildren) {
     revealVisibleNestedUnit(context, expandedChild);
     relayoutExpandedScope(context, expandedChild, expandedUnitIdSet);
     updateExpandedNodeDecoration(context, expandedChild);
   }
+};
 
-  resolveLowerExpandedPanelIntrusions(context, expandedChildren);
+const getExpandedChildGrowthBounds = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedChild: AjsUnit,
+): ExpandedChildGrowthBounds | undefined => {
+  const position = getDisplayPosition(context, expandedChild.id);
+  const panelBounds = buildExpandedUnitPanelBounds(context, expandedChild);
+  if (!position || !panelBounds) {
+    return undefined;
+  }
+  return { position, panelBounds };
+};
 
+const getGrowthTargetUnitIds = (
+  immediateVisibleChildren: ReadonlyArray<AjsUnit>,
+  expandedChild: AjsUnit,
+) =>
+  new Set(
+    immediateVisibleChildren
+      .filter((unit) => unit.id !== expandedChild.id)
+      .map((unit) => unit.id),
+  );
+
+const calculateHorizontalGrowth = (
+  panelBounds: FlowGraphBounds,
+  baseBounds: FlowGraphBounds,
+  upperPanelMaxRight: number | undefined,
+) =>
+  upperPanelMaxRight === undefined
+    ? Math.max(0, panelBounds.maxX - baseBounds.maxX)
+    : Math.max(0, panelBounds.maxX - upperPanelMaxRight);
+
+const applyExpandedChildGrowthOffsets = ({
+  context,
+  expandedChildren,
+  expandedChild,
+  immediateVisibleChildren,
+}: ExpandedChildGrowthContext) => {
+  const growthBounds = getExpandedChildGrowthBounds(context, expandedChild);
+  if (!growthBounds) {
+    return;
+  }
+
+  const baseBounds = buildUnitBaseBounds(
+    growthBounds.position,
+    context.metrics,
+  );
+  const upperPanelMaxRight = getUpperExpandedPanelMaxRight({
+    context,
+    expandedChildren,
+    expandedChild,
+    expandedChildPosition: growthBounds.position,
+  });
+  const horizontalGrowth = calculateHorizontalGrowth(
+    growthBounds.panelBounds,
+    baseBounds,
+    upperPanelMaxRight,
+  );
+  const verticalGrowth = Math.max(
+    0,
+    growthBounds.panelBounds.maxY - baseBounds.maxY,
+  );
+
+  applyGrowthOffsets(
+    context,
+    growthBounds.position,
+    horizontalGrowth,
+    verticalGrowth,
+    getGrowthTargetUnitIds(immediateVisibleChildren, expandedChild),
+  );
+};
+
+const applyExpandedChildrenGrowthOffsets = (
+  context: ExpandedFlowGraphBuildContext,
+  containerUnit: AjsUnit,
+  expandedChildren: ReadonlyArray<AjsUnit>,
+) => {
   const immediateVisibleChildren = getVisibleImmediateChildren(
     context,
     containerUnit.id,
   );
 
   for (const expandedChild of expandedChildren) {
-    const expandedChildPosition = getDisplayPosition(context, expandedChild.id);
-    const panelBounds = buildExpandedUnitPanelBounds(context, expandedChild);
-    if (!expandedChildPosition || !panelBounds) {
-      continue;
-    }
-
-    const baseBounds = buildUnitBaseBounds(
-      expandedChildPosition,
-      context.metrics,
-    );
-    const upperPanelMaxRight = getUpperExpandedPanelMaxRight({
+    applyExpandedChildGrowthOffsets({
       context,
       expandedChildren,
       expandedChild,
-      expandedChildPosition,
+      immediateVisibleChildren,
     });
-    const horizontalGrowth =
-      upperPanelMaxRight === undefined
-        ? Math.max(0, panelBounds.maxX - baseBounds.maxX)
-        : Math.max(0, panelBounds.maxX - upperPanelMaxRight);
-    const verticalGrowth = Math.max(0, panelBounds.maxY - baseBounds.maxY);
-    const targetUnitIds = new Set(
-      immediateVisibleChildren
-        .filter((unit) => unit.id !== expandedChild.id)
-        .map((unit) => unit.id),
-    );
-
-    applyGrowthOffsets(
-      context,
-      expandedChildPosition,
-      horizontalGrowth,
-      verticalGrowth,
-      targetUnitIds,
-    );
   }
+};
 
+export const relayoutExpandedScope = (
+  context: ExpandedFlowGraphBuildContext,
+  containerUnit: AjsUnit,
+  expandedUnitIdSet: ReadonlySet<string>,
+) => {
+  const expandedChildren = getExpandedNestedChildren(
+    containerUnit,
+    expandedUnitIdSet,
+  );
+  relayoutExpandedChildren(context, expandedChildren, expandedUnitIdSet);
+  resolveLowerExpandedPanelIntrusions(context, expandedChildren);
+  applyExpandedChildrenGrowthOffsets(context, containerUnit, expandedChildren);
   resolveSiblingSubtreeCollisions(context, containerUnit.id);
 };
 

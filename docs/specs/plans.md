@@ -34,7 +34,7 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select and request approval for Qlty-driven architecture refactoring
-   Slice-1B-I: extract `relayoutExpandedScope` orchestration helpers while
+   Slice-1B-J: extract `isDescendantOf` ancestor traversal helpers while
    preserving expanded flow graph layout behavior.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
@@ -57,8 +57,9 @@ rules in `docs/specs/README.md`, not in this file.
   `resolveSiblingSubtreeCollisions` extraction; Slice-1B-F completed a focused
   `resolveLowerExpandedPanelIntrusions` extraction; Slice-1B-G completed a
   focused `buildExpandedPanelBounds` extraction; Slice-1B-H completed a focused
-  `getUpperExpandedPanelMaxRight` extraction. Slice-1B-I targets
-  `relayoutExpandedScope` and needs separate approval.
+  `getUpperExpandedPanelMaxRight` extraction; Slice-1B-I completed a focused
+  `relayoutExpandedScope` extraction. Slice-1B-J targets `isDescendantOf` and
+  needs separate approval.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

@@ -59,7 +59,7 @@ remaining passive metrics.
 ## Completed Slices
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
-Slice-1B-F, Slice-1B-G, and Slice-1B-H are complete.
+Slice-1B-F, Slice-1B-G, Slice-1B-H, and Slice-1B-I are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -100,35 +100,38 @@ Slice-1B-F, Slice-1B-G, and Slice-1B-H are complete.
   Slice-1B-H kept upper panel max-right behavior intact while extracting
   candidate bounds lookup, upper-candidate filtering, and max-right aggregation
   into focused layout helpers.
+  Slice-1B-I kept expanded-scope relayout behavior intact while extracting
+  expanded child discovery, recursive child relayout/decorate sequencing,
+  growth target selection, and per-child growth application into focused
+  layout helpers.
 
 ## Current Slice Candidate
 
-Slice-1B-I is the next candidate and requires separate approval before runtime
+Slice-1B-J is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` `relayoutExpandedScope` orchestration
-  complexity by extracting focused expanded-child growth preparation helpers
+  reduce `expandedFlowGraphLayout` `isDescendantOf` ancestor traversal
+  complexity by extracting focused parent lookup/ancestor matching helpers
   without changing expanded graph behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
   multiple high-complexity collision/layout helpers.
-  `relayoutExpandedScope` remains a high-complexity orchestration helper after
-  Slice-1B-H and is now the main remaining expanded panel layout hotspot.
+  `isDescendantOf` remains the highest-complexity helper after Slice-1B-I and
+  is exported for layout tests and used by descendant anchoring and panel
+  bounds checks.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, VS Code compatibility, and `engines.vscode`
   unchanged.
 - Expected impact:
-  lower Qlty complexity for expanded-scope relayout orchestration while
-  preserving recursive expansion order, decoration refresh timing, lower-panel
-  intrusion resolution, growth offset calculations, and sibling collision
-  resolution.
+  lower Qlty complexity for descendant detection while preserving ancestor
+  traversal, missing-parent termination, and direct ancestor matching behavior.
 - Test focus:
-  run the targeted expanded-flow graph tests that assert recursive expansion,
-  panel dimensions, horizontal/vertical growth, lower-panel intrusion, and
-  sibling collision behavior before the full required validation.
+  run the targeted expanded-flow graph tests that assert descendant anchoring,
+  panel dimensions, panel containment, and recursive expansion before the full
+  required validation.
 
 ## Risks To Control
 
