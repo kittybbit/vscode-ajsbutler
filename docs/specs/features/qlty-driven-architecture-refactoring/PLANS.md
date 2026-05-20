@@ -59,7 +59,7 @@ remaining passive metrics.
 ## Completed Slices
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
-Slice-1B-F, Slice-1B-G, Slice-1B-H, and Slice-1B-I are complete.
+Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, and Slice-1B-J are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -104,33 +104,36 @@ Slice-1B-F, Slice-1B-G, Slice-1B-H, and Slice-1B-I are complete.
   expanded child discovery, recursive child relayout/decorate sequencing,
   growth target selection, and per-child growth application into focused
   layout helpers.
+  Slice-1B-J kept descendant detection behavior intact while extracting parent
+  lookup, parent-chain collection, and ancestor matching into focused helpers.
 
 ## Current Slice Candidate
 
-Slice-1B-J is the next candidate and requires separate approval before runtime
+Slice-1B-K is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` `isDescendantOf` ancestor traversal
-  complexity by extracting focused parent lookup/ancestor matching helpers
-  without changing expanded graph behavior.
+  reduce `expandedFlowGraphLayout` `syncAnchoredDescendantOverrides`
+  complexity by extracting focused anchored-descendant update helpers without
+  changing expanded graph behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
   multiple high-complexity collision/layout helpers.
-  `isDescendantOf` remains the highest-complexity helper after Slice-1B-I and
-  is exported for layout tests and used by descendant anchoring and panel
-  bounds checks.
+  `syncAnchoredDescendantOverrides` remains one of the highest-complexity
+  helpers after Slice-1B-J and directly maintains descendant anchors when a
+  parent layout moves.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, VS Code compatibility, and `engines.vscode`
   unchanged.
 - Expected impact:
-  lower Qlty complexity for descendant detection while preserving ancestor
-  traversal, missing-parent termination, and direct ancestor matching behavior.
+  lower Qlty complexity for anchored descendant override synchronization while
+  preserving parent-anchor filtering, missing-position skips, child position
+  recalculation, and recursive anchored descendant updates.
 - Test focus:
   run the targeted expanded-flow graph tests that assert descendant anchoring,
-  panel dimensions, panel containment, and recursive expansion before the full
+  sibling movement, panel dimensions, and recursive expansion before the full
   required validation.
 
 ## Risks To Control

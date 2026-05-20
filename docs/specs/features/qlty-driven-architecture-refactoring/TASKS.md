@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-I implementation is complete.
+  Slice-1B-J implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -81,6 +81,11 @@ active implementation approval remains.
       extraction as the next implementation candidate.
 - [x] Record human approval for Slice-1B-I.
 - [x] Complete Slice-1B-I `relayoutExpandedScope` orchestration-helper
+      extraction.
+- [x] Select Slice-1B-J `isDescendantOf` ancestor-traversal helper extraction
+      as the next implementation candidate.
+- [x] Record human approval for Slice-1B-J.
+- [x] Complete Slice-1B-J `isDescendantOf` ancestor-traversal helper
       extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
@@ -210,5 +215,17 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `relayoutExpandedScope`
   high-complexity smell, and left `isDescendantOf` as a separate approval
   candidate.
+- Slice-1B-J targets `isDescendantOf` because Qlty reports cognitive
+  complexity 10 after Slice-1B-I, the helper is referenced by
+  `buildExpandedFlowGraph` descendant filtering and expanded panel bounds
+  calculation, and existing expanded-flow tests cover descendant anchoring,
+  nested expansion visibility, panel dimensions, and panel containment.
+- Slice-1B-J must preserve direct ancestor matching, parent-chain traversal,
+  missing-parent termination, reuse of the existing `unitById` map, exported
+  helper compatibility for tests, `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-J kept descendant detection behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `isDescendantOf` high-complexity
+  smell, reduced file total complexity from 128 to 122, and left
+  `syncAnchoredDescendantOverrides` as a separate approval candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

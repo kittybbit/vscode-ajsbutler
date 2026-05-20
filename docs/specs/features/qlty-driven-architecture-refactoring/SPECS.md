@@ -161,6 +161,26 @@ No user-visible behavior scenarios are introduced.
   termination, and use of the existing `unitById` map. Impact is local to
   `expandedFlowGraphLayout.ts`: the helper is exported for tests and used by
   descendant anchoring and expanded panel bounds logic.
+- Slice-1B-J investigation:
+  `isDescendantOf` is exported from `expandedFlowGraphLayout.ts`, imported by
+  `buildExpandedFlowGraph.ts`, and also called inside expanded panel bounds
+  logic. It walks a unit's parent chain through the existing `unitById` map,
+  returns true when any parent matches the requested ancestor id, and returns
+  false when the chain ends or a parent lookup is missing. Existing tests in
+  `buildExpandedFlowGraph.test.ts` cover nested expansion visibility,
+  descendant anchoring, panel dimensions, panel containment, and recursive
+  expansion behavior.
+- Slice-1B-J result:
+  `isDescendantOf` remains exported from `expandedFlowGraphLayout`, with
+  parent lookup, parent-chain collection, and ancestor matching extracted into
+  focused helpers without changing DTOs, node data, or panel behavior.
+- Slice-1B-K target:
+  `syncAnchoredDescendantOverrides` is the next layout candidate; helper
+  extraction must preserve parent-anchor filtering, missing-position skips,
+  nested child/condition position recalculation, position override writes, and
+  recursive anchored descendant synchronization. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is called when visible nodes are
+  offset or anchored descendants need to follow a moved parent.
 
 ### Breaking Change Analysis
 
@@ -260,6 +280,20 @@ No user-visible behavior scenarios are introduced.
   panel bound calculations, `positionOverrides`, or `nodeDecorations`. Do not
   change parser/generated artifacts, graph DTOs, ReactFlow node data shape,
   dependencies, or VS Code compatibility.
+- Slice-1B-J approval-sensitive scope:
+  implementation may extract parent lookup, parent-chain advancement, and
+  ancestor matching helpers inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts` while keeping
+  `isDescendantOf` exported with the same signature. Any change to generated
+  parser artifacts, application flow graph DTOs, ReactFlow node data shape,
+  dependency versions, VS Code compatibility, panel bound calculations,
+  position override behavior, or `engines.vscode` requires separate approval.
+- Slice-1B-K boundary decision:
+  extract anchored descendant synchronization helpers only; do not change
+  parent-anchor semantics, nested position formulas, offset behavior,
+  `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
+  artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
+  compatibility.
 
 ## Compatibility
 
@@ -283,5 +317,6 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-I, should the next slice target `isDescendantOf` before the
-  remaining low-complexity helper cleanup?
+- After Slice-1B-J, should the next slice target
+  `syncAnchoredDescendantOverrides` before the remaining low-complexity helper
+  cleanup?

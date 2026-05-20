@@ -20,20 +20,38 @@ import {
   LayoutItem,
 } from "./expandedFlowGraphTypes";
 
+const getParentUnit = (
+  unit: AjsUnit,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): AjsUnit | undefined =>
+  unit.parentId ? unitById.get(unit.parentId) : undefined;
+
+const isAncestorMatch = (unit: AjsUnit, ancestorId: string): boolean =>
+  unit.id === ancestorId;
+
+const collectParentUnits = (
+  unit: AjsUnit,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): AjsUnit[] => {
+  const parents: AjsUnit[] = [];
+  for (
+    let current = getParentUnit(unit, unitById);
+    current;
+    current = getParentUnit(current, unitById)
+  ) {
+    parents.push(current);
+  }
+  return parents;
+};
+
 export const isDescendantOf = (
   unit: AjsUnit,
   ancestorId: string,
   unitById: ReadonlyMap<string, AjsUnit>,
-): boolean => {
-  let current = unit.parentId ? unitById.get(unit.parentId) : undefined;
-  while (current) {
-    if (current.id === ancestorId) {
-      return true;
-    }
-    current = current.parentId ? unitById.get(current.parentId) : undefined;
-  }
-  return false;
-};
+): boolean =>
+  collectParentUnits(unit, unitById).some((parent) =>
+    isAncestorMatch(parent, ancestorId),
+  );
 
 const includeNodeBounds = (
   bounds: FlowGraphBounds,
