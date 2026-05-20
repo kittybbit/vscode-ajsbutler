@@ -312,6 +312,119 @@ const getDisplayPositions = (context: ExpandedFlowGraphBuildContext) => {
   return positions;
 };
 
+type GrowthOffsetTarget = {
+  context: ExpandedFlowGraphBuildContext;
+  unitId: string;
+  displayPosition: FlowGraphPosition;
+  expandedUnitPosition: FlowGraphPosition;
+  horizontalGrowth: number;
+  verticalGrowth: number;
+};
+
+type UnitGrowthOffset = {
+  unitId: string;
+  offset: FlowGraphPosition;
+};
+
+type GrowthOffsetBatch = {
+  context: ExpandedFlowGraphBuildContext;
+  positionsBeforeOffset: ReadonlyMap<string, FlowGraphPosition>;
+  expandedUnitPosition: FlowGraphPosition;
+  horizontalGrowth: number;
+  verticalGrowth: number;
+  targetUnitIds: ReadonlySet<string>;
+};
+
+const isRightOfExpandedUnit = ({
+  displayPosition,
+  expandedUnitPosition,
+}: GrowthOffsetTarget): boolean => displayPosition.x > expandedUnitPosition.x;
+
+const isBelowExpandedUnit = ({
+  displayPosition,
+  expandedUnitPosition,
+}: GrowthOffsetTarget): boolean => displayPosition.y > expandedUnitPosition.y;
+
+const isSameExpandedUnitColumn = ({
+  displayPosition,
+  expandedUnitPosition,
+}: GrowthOffsetTarget): boolean => displayPosition.x === expandedUnitPosition.x;
+
+const isSameExpandedUnitRow = ({
+  displayPosition,
+  expandedUnitPosition,
+}: GrowthOffsetTarget): boolean => displayPosition.y === expandedUnitPosition.y;
+
+const getHorizontalGrowthOffset = (target: GrowthOffsetTarget): number => {
+  if (
+    !isRightOfExpandedUnit(target) ||
+    (!isBelowExpandedUnit(target) && !isSameExpandedUnitRow(target))
+  ) {
+    return 0;
+  }
+  return target.horizontalGrowth;
+};
+
+const getVerticalGrowthOffset = (target: GrowthOffsetTarget): number => {
+  if (
+    !isBelowExpandedUnit(target) ||
+    (!isRightOfExpandedUnit(target) && !isSameExpandedUnitColumn(target))
+  ) {
+    return 0;
+  }
+  return Math.max(
+    0,
+    target.verticalGrowth - getOffset(target.context, target.unitId).y,
+  );
+};
+
+const getGrowthOffset = (target: GrowthOffsetTarget): FlowGraphPosition => ({
+  x: getHorizontalGrowthOffset(target),
+  y: getVerticalGrowthOffset(target),
+});
+
+const hasOffset = (offset: FlowGraphPosition): boolean =>
+  offset.x !== 0 || offset.y !== 0;
+
+const getTargetGrowthOffset = (
+  target: GrowthOffsetTarget,
+): UnitGrowthOffset | undefined => {
+  const offset = getGrowthOffset(target);
+  return hasOffset(offset) ? { unitId: target.unitId, offset } : undefined;
+};
+
+const getTargetGrowthOffsets = ({
+  context,
+  positionsBeforeOffset,
+  expandedUnitPosition,
+  horizontalGrowth,
+  verticalGrowth,
+  targetUnitIds,
+}: GrowthOffsetBatch): UnitGrowthOffset[] =>
+  [...positionsBeforeOffset]
+    .filter(([unitId]) => targetUnitIds.has(unitId))
+    .map(([unitId, displayPosition]) =>
+      getTargetGrowthOffset({
+        context,
+        unitId,
+        displayPosition,
+        expandedUnitPosition,
+        horizontalGrowth,
+        verticalGrowth,
+      }),
+    )
+    .filter((growthOffset): growthOffset is UnitGrowthOffset => !!growthOffset);
+
+const applyUnitGrowthOffsets = (
+  context: ExpandedFlowGraphBuildContext,
+  growthOffsets: ReadonlyArray<UnitGrowthOffset>,
+): boolean =>
+  growthOffsets.reduce(
+    (changed, { unitId, offset }) =>
+      addOffset(context, unitId, offset) || changed,
+    false,
+  );
+
 const applyGrowthOffsets = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnitPosition: FlowGraphPosition,
@@ -324,28 +437,17 @@ const applyGrowthOffsets = (
   }
 
   const positionsBeforeOffset = getDisplayPositions(context);
-
-  let changed = false;
-  for (const [unitId, displayPosition] of positionsBeforeOffset) {
-    if (!targetUnitIds.has(unitId)) {
-      continue;
-    }
-    const isRight = displayPosition.x > expandedUnitPosition.x;
-    const isBelow = displayPosition.y > expandedUnitPosition.y;
-    const isSameX = displayPosition.x === expandedUnitPosition.x;
-    const isSameY = displayPosition.y === expandedUnitPosition.y;
-    const dx = isRight && (isBelow || isSameY) ? horizontalGrowth : 0;
-    const dy =
-      isBelow && (isRight || isSameX)
-        ? Math.max(0, verticalGrowth - getOffset(context, unitId).y)
-        : 0;
-    if (dx === 0 && dy === 0) {
-      continue;
-    }
-    changed = addOffset(context, unitId, { x: dx, y: dy }) || changed;
-  }
-
-  return changed;
+  return applyUnitGrowthOffsets(
+    context,
+    getTargetGrowthOffsets({
+      context,
+      positionsBeforeOffset,
+      expandedUnitPosition,
+      horizontalGrowth,
+      verticalGrowth,
+      targetUnitIds,
+    }),
+  );
 };
 
 const getVisibleImmediateChildren = (

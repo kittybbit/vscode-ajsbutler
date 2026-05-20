@@ -84,27 +84,33 @@ Slice-1A, Slice-1B-A, Slice-1B-B, and Slice-1B-C are complete.
   ancestor matching, drawer width observation, drawer toolbar, and unit tree
   rendering extracted into presentation-local helpers/subcomponents in
   `FlowSelector.tsx`.
+  Slice-1B-D kept `expandedFlowGraphLayout` behavior intact while extracting
+  `applyGrowthOffsets` target eligibility and offset calculations into focused
+  layout helpers.
 
 ## Current Slice Candidate
 
-Slice-1B-D is the next candidate and requires separate approval before runtime
+Slice-1B-E is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` helper complexity by extracting focused
-  layout calculation helpers without changing expanded graph behavior.
+  reduce `expandedFlowGraphLayout` `resolveSiblingSubtreeCollisions`
+  complexity by extracting focused sibling-subtree collision helpers without
+  changing expanded graph behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
   multiple high-complexity collision/layout helpers.
+  `resolveSiblingSubtreeCollisions` remains the highest-complexity helper after
+  Slice-1B-D and is the next focused layout candidate.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, VS Code compatibility, and `engines.vscode`
   unchanged.
 - Expected impact:
-  lower Qlty complexity for selected layout helpers while preserving stable
-  nested expansion ordering, occupied bounds, collision resolution, and panel
-  anchoring behavior.
+  lower Qlty complexity for sibling subtree collision resolution while
+  preserving stable nested expansion ordering, occupied bounds, collision
+  direction, and panel anchoring behavior.
 
 ## Risks To Control
 

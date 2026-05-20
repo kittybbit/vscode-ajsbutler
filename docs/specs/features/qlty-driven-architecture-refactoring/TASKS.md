@@ -12,9 +12,9 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-C implementation is complete.
+  Slice-1B-D implementation is complete.
 - Active slice:
-  none; remaining Slice-1B candidates require separate approval.
+  none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
   select and approve the next Slice-1B layout complexity target.
 
@@ -53,6 +53,10 @@ active implementation approval remains.
       implementation candidate.
 - [x] Record human approval for Slice-1B-C.
 - [x] Complete Slice-1B-C `FlowSelector` presentation extraction.
+- [x] Select Slice-1B-D `applyGrowthOffsets` layout-helper extraction as the
+      next implementation candidate.
+- [x] Record human approval for Slice-1B-D.
+- [x] Complete Slice-1B-D `applyGrowthOffsets` layout-helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -102,5 +106,19 @@ active implementation approval remains.
   observation into local helpers/subcomponents.
 - `expandedFlowGraphLayout` remains the later high-risk Slice-1B candidate
   because it has higher total complexity and broad layout regression coverage.
+- Slice-1B-D targets `applyGrowthOffsets` first because Qlty reports cognitive
+  complexity 24, and existing tests cover horizontal/vertical growth behavior
+  directly.
+- Slice-1B-D must preserve target unit selection, horizontal offset
+  conditions, vertical offset conditions, existing-y-offset subtraction,
+  subtree movement through `addOffset`, `positionOverrides`, and
+  `nodeDecorations`.
+- Slice-1B-D kept growth offset behavior inside
+  `expandedFlowGraphLayout.ts`, lowered `applyGrowthOffsets` cognitive
+  complexity from 24 to 3, and left remaining collision/layout helpers as
+  separate approval candidates.
+- `resolveSiblingSubtreeCollisions`, `resolveLowerExpandedPanelIntrusions`,
+  `relayoutExpandedScope`, and `buildExpandedPanelBounds` remain later layout
+  candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.
