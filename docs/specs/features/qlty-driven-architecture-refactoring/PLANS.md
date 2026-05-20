@@ -58,8 +58,8 @@ remaining passive metrics.
 
 ## Completed Slices
 
-Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E, and
-Slice-1B-F are complete.
+Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
+Slice-1B-F, and Slice-1B-G are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -94,33 +94,39 @@ Slice-1B-F are complete.
   Slice-1B-F kept lower-panel intrusion behavior intact while extracting
   `resolveLowerExpandedPanelIntrusions` panel eligibility, horizontal overlap,
   and vertical push calculation into focused layout helpers.
+  Slice-1B-G kept expanded panel bounds behavior intact while extracting parent
+  panel bounds initialization, visible descendant filtering, and node and
+  decoration bounds accumulation into focused layout helpers.
 
 ## Current Slice Candidate
 
-Slice-1B-G is the next candidate and requires separate approval before runtime
+Slice-1B-H is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` `buildExpandedPanelBounds` complexity by
-  extracting focused panel bounds helpers without changing expanded graph
-  behavior.
+  reduce `expandedFlowGraphLayout` `getUpperExpandedPanelMaxRight` complexity
+  by extracting focused upper-panel max-right helpers without changing expanded
+  graph behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
   multiple high-complexity collision/layout helpers.
-  `buildExpandedPanelBounds` remains a high-complexity panel bounds helper
-  after Slice-1B-F and has a narrower boundary than the orchestration-level
-  `relayoutExpandedScope`.
+  `getUpperExpandedPanelMaxRight` remains a high-complexity layout helper
+  after Slice-1B-G, is narrower than the orchestration-level
+  `relayoutExpandedScope`, and directly feeds expanded panel growth offset
+  calculations.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, VS Code compatibility, and `engines.vscode`
   unchanged.
 - Expected impact:
-  lower Qlty complexity for expanded panel bounds calculation while preserving
-  subtree bounds, panel offsets, panel dimensions, and panel anchoring behavior.
+  lower Qlty complexity for upper panel max-right calculation while preserving
+  horizontal growth propagation, panel overlap semantics, and panel anchoring
+  behavior.
 - Test focus:
-  run the targeted expanded-flow graph tests that assert panel dimensions and
-  descendant containment before the full required validation.
+  run the targeted expanded-flow graph tests that assert upper/lower expanded
+  panel horizontal growth and overlap behavior before the full required
+  validation.
 
 ## Risks To Control
 

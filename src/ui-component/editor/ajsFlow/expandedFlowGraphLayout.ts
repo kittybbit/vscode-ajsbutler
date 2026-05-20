@@ -466,14 +466,7 @@ const updateExpandedNodeDecoration = (
   expandedUnit: AjsUnit,
 ) => {
   const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
-  const panelBounds = buildExpandedPanelBounds(
-    expandedUnit,
-    context.visibleUnitIds,
-    context.unitById,
-    context.positionOverrides,
-    context.nodeDecorations,
-    context.metrics,
-  );
+  const panelBounds = buildExpandedPanelBounds(context, expandedUnit);
   if (!expandedUnitPosition || !panelBounds) {
     return;
   }
@@ -771,48 +764,100 @@ export const relayoutExpandedScope = (
   resolveSiblingSubtreeCollisions(context, containerUnit.id);
 };
 
-const buildExpandedPanelBounds = (
-  expandedUnit: AjsUnit,
-  visibleUnitIds: ReadonlySet<string>,
-  unitById: ReadonlyMap<string, AjsUnit>,
-  positionOverrides: ReadonlyMap<string, FlowGraphPosition>,
-  nodeDecorations: ReadonlyMap<string, ExpandedNodeDecoration>,
+type PanelBoundsLayoutItem = {
+  unit: AjsUnit;
+  position: FlowGraphPosition;
+};
+
+type ExpandedPanelBoundsTarget = {
+  context: ExpandedFlowGraphBuildContext;
+  expandedUnit: AjsUnit;
+  subtreeBounds: FlowGraphBounds;
+  unitId: string;
+};
+
+const buildInitialPanelSubtreeBounds = (
+  parentPosition: FlowGraphPosition,
   metrics: FlowGraphMetrics,
+): FlowGraphBounds => ({
+  minX: parentPosition.x,
+  maxX: parentPosition.x + metrics.width,
+  minY: parentPosition.y,
+  maxY: parentPosition.y + metrics.height,
+});
+
+const getPanelBoundsLayoutItem = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+): PanelBoundsLayoutItem | undefined => {
+  const unit = context.unitById.get(unitId);
+  const position = context.positionOverrides.get(unitId);
+  return unit && position ? { unit, position } : undefined;
+};
+
+const isExpandedPanelBoundsUnit = (
+  context: ExpandedFlowGraphBuildContext,
+  unit: AjsUnit,
+  expandedUnit: AjsUnit,
+): boolean =>
+  unit.id === expandedUnit.id ||
+  isDescendantOf(unit, expandedUnit.id, context.unitById);
+
+const includePanelBoundsLayoutItem = (
+  context: ExpandedFlowGraphBuildContext,
+  subtreeBounds: FlowGraphBounds,
+  item: PanelBoundsLayoutItem,
+): void => {
+  includeNodeBounds(
+    subtreeBounds,
+    item.position,
+    context.metrics.width,
+    context.metrics.height,
+  );
+
+  const decoration = context.nodeDecorations.get(item.unit.id);
+  if (decoration) {
+    includeDecorationBounds(subtreeBounds, item.position, decoration);
+  }
+};
+
+const includeExpandedPanelUnitBounds = ({
+  context,
+  expandedUnit,
+  subtreeBounds,
+  unitId,
+}: ExpandedPanelBoundsTarget): void => {
+  const item = getPanelBoundsLayoutItem(context, unitId);
+  if (item && isExpandedPanelBoundsUnit(context, item.unit, expandedUnit)) {
+    includePanelBoundsLayoutItem(context, subtreeBounds, item);
+  }
+};
+
+const buildExpandedPanelBounds = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnit: AjsUnit,
 ): FlowGraphBounds | undefined => {
-  const parentPosition = positionOverrides.get(expandedUnit.id);
+  const parentPosition = context.positionOverrides.get(expandedUnit.id);
   if (!parentPosition) {
     return undefined;
   }
 
-  const subtreeBounds: FlowGraphBounds = {
-    minX: parentPosition.x,
-    maxX: parentPosition.x + metrics.width,
-    minY: parentPosition.y,
-    maxY: parentPosition.y + metrics.height,
-  };
-
-  for (const unitId of visibleUnitIds) {
-    const unit = unitById.get(unitId);
-    const position = positionOverrides.get(unitId);
-    if (!unit || !position) {
-      continue;
-    }
-    if (
-      unit.id !== expandedUnit.id &&
-      !isDescendantOf(unit, expandedUnit.id, unitById)
-    ) {
-      continue;
-    }
-    includeNodeBounds(subtreeBounds, position, metrics.width, metrics.height);
-    const decoration = nodeDecorations.get(unit.id);
-    if (decoration) {
-      includeDecorationBounds(subtreeBounds, position, decoration);
-    }
+  const subtreeBounds = buildInitialPanelSubtreeBounds(
+    parentPosition,
+    context.metrics,
+  );
+  for (const unitId of context.visibleUnitIds) {
+    includeExpandedPanelUnitBounds({
+      context,
+      expandedUnit,
+      subtreeBounds,
+      unitId,
+    });
   }
 
   return buildPanelBoundsFromSubtreeBounds(
     parentPosition,
     subtreeBounds,
-    metrics,
+    context.metrics,
   );
 };

@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-F implementation is complete.
+  Slice-1B-G implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -23,6 +23,7 @@
 - Status: Pending
 - Approved at:
 - Approved scope:
+  none while approval is pending.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -67,6 +68,10 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-F.
 - [x] Complete Slice-1B-F `resolveLowerExpandedPanelIntrusions` layout-helper
       extraction.
+- [x] Select Slice-1B-G `buildExpandedPanelBounds` layout-helper extraction as
+      the next implementation candidate.
+- [x] Record human approval for Slice-1B-G.
+- [x] Complete Slice-1B-G `buildExpandedPanelBounds` layout-helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -155,5 +160,18 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, lowered `resolveLowerExpandedPanelIntrusions`
   cognitive complexity from 20 to 2, and left `relayoutExpandedScope` and
   panel bounds helpers as separate approval candidates.
+- Slice-1B-G targets `buildExpandedPanelBounds` because Qlty reports cognitive
+  complexity 17 after Slice-1B-F, the helper is called only from
+  `updateExpandedNodeDecoration`, and existing expanded-flow tests cover panel
+  dimensions, descendant containment, panel origin anchoring, and snapshot
+  decoration output.
+- Slice-1B-G must preserve parent-position missing skips, visible-unit
+  filtering, descendant containment checks, node and decoration bounds
+  accumulation, panel offset constants, panel dimension calculation, and
+  `nodeDecorations`.
+- Slice-1B-G kept panel bounds behavior inside
+  `expandedFlowGraphLayout.ts`, lowered `buildExpandedPanelBounds` cognitive
+  complexity from 17 to 4, and left `getUpperExpandedPanelMaxRight` and
+  `relayoutExpandedScope` as separate approval candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

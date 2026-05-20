@@ -102,6 +102,22 @@ No user-visible behavior scenarios are introduced.
   `buildExpandedPanelBounds` is the next layout candidate; helper extraction
   must preserve subtree bounds accumulation, parent panel anchoring, panel
   offsets, panel width/height calculation, and `nodeDecorations` semantics.
+  Impact is local to `expandedFlowGraphLayout.ts`: the helper is referenced
+  only by `updateExpandedNodeDecoration`, and its behavior flows outward through
+  `nodeDecorations` in `buildExpandedFlowGraph` results and existing
+  expanded-flow graph tests.
+- Slice-1B-G result:
+  `buildExpandedPanelBounds` remains internal to `expandedFlowGraphLayout`,
+  with parent panel bounds initialization, visible descendant filtering, and
+  node and decoration bounds accumulation extracted into focused helpers
+  without changing DTOs, node data, or panel behavior.
+- Slice-1B-H target:
+  `getUpperExpandedPanelMaxRight` is the next layout candidate; helper
+  extraction must preserve upper expanded panel filtering, max-right
+  calculation, expansion-order behavior, panel bounds lookup, and growth offset
+  semantics. Impact is local to `expandedFlowGraphLayout.ts`: the helper is
+  referenced by `calculateHorizontalGrowthOffset`, and its behavior flows
+  outward through existing expanded-flow graph layout results and tests.
 
 ### Breaking Change Analysis
 
@@ -165,7 +181,15 @@ No user-visible behavior scenarios are introduced.
 - Slice-1B-G boundary decision:
   extract expanded panel bounds helpers only; do not change visible unit
   filtering, descendant containment, panel offset constants, panel dimension
-  calculations, `positionOverrides`, or `nodeDecorations`.
+  calculations, `positionOverrides`, or `nodeDecorations`. Do not change
+  parser/generated artifacts, graph DTOs, ReactFlow node data shape,
+  dependencies, or VS Code compatibility.
+- Slice-1B-H boundary decision:
+  extract upper panel max-right helpers only; do not change expanded child
+  ordering, panel bound calculations, horizontal growth offset formulas,
+  `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
+  artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
+  compatibility.
 
 ## Compatibility
 
@@ -189,5 +213,6 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-C, should the next slice target deeper
-  `expandedFlowGraphLayout` helpers?
+- After Slice-1B-G, should the next slice target
+  `getUpperExpandedPanelMaxRight` before the broader
+  `relayoutExpandedScope` orchestration helper?
