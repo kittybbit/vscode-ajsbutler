@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-D implementation is complete.
+  Slice-1B-E implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -57,6 +57,11 @@ active implementation approval remains.
       next implementation candidate.
 - [x] Record human approval for Slice-1B-D.
 - [x] Complete Slice-1B-D `applyGrowthOffsets` layout-helper extraction.
+- [x] Select Slice-1B-E `resolveSiblingSubtreeCollisions` layout-helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-E.
+- [x] Complete Slice-1B-E `resolveSiblingSubtreeCollisions` layout-helper
+      extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -120,5 +125,17 @@ active implementation approval remains.
 - `resolveSiblingSubtreeCollisions`, `resolveLowerExpandedPanelIntrusions`,
   `relayoutExpandedScope`, and `buildExpandedPanelBounds` remain later layout
   candidates.
+- Slice-1B-E targets `resolveSiblingSubtreeCollisions` because Qlty reports
+  cognitive complexity 24 after Slice-1B-D, the helper is called only from
+  `relayoutExpandedScope`, and existing expanded-flow tests cover sibling
+  panel collision, descendant anchoring, and parent-row propagation behavior.
+- Slice-1B-E must preserve same-container sibling ordering, occupied-box
+  overlap detection, right/down movement calculation, subtree offset
+  propagation through `addOffset`, refreshed target layout items, and
+  `positionOverrides`/`nodeDecorations`.
+- Slice-1B-E kept sibling collision behavior inside
+  `expandedFlowGraphLayout.ts`, lowered `resolveSiblingSubtreeCollisions`
+  cognitive complexity from 24 to 2, and left lower-panel intrusion and panel
+  bounds helpers as separate approval candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

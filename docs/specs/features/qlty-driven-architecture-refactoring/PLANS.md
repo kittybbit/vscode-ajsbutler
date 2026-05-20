@@ -58,7 +58,8 @@ remaining passive metrics.
 
 ## Completed Slices
 
-Slice-1A, Slice-1B-A, Slice-1B-B, and Slice-1B-C are complete.
+Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, and Slice-1B-E
+are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -87,30 +88,37 @@ Slice-1A, Slice-1B-A, Slice-1B-B, and Slice-1B-C are complete.
   Slice-1B-D kept `expandedFlowGraphLayout` behavior intact while extracting
   `applyGrowthOffsets` target eligibility and offset calculations into focused
   layout helpers.
+  Slice-1B-E kept sibling collision behavior intact while extracting
+  `resolveSiblingSubtreeCollisions` overlap, right/down movement, and target
+  refresh logic into focused layout helpers.
 
 ## Current Slice Candidate
 
-Slice-1B-E is the next candidate and requires separate approval before runtime
+Slice-1B-F is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` `resolveSiblingSubtreeCollisions`
-  complexity by extracting focused sibling-subtree collision helpers without
+  reduce `expandedFlowGraphLayout` `resolveLowerExpandedPanelIntrusions`
+  complexity by extracting focused lower-panel intrusion helpers without
   changing expanded graph behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
   multiple high-complexity collision/layout helpers.
-  `resolveSiblingSubtreeCollisions` remains the highest-complexity helper after
-  Slice-1B-D and is the next focused layout candidate.
+  `resolveLowerExpandedPanelIntrusions` is the next focused layout candidate
+  after Slice-1B-E and is covered by existing expanded-flow tests around upper
+  and lower expanded panels.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, VS Code compatibility, and `engines.vscode`
   unchanged.
 - Expected impact:
-  lower Qlty complexity for sibling subtree collision resolution while
-  preserving stable nested expansion ordering, occupied bounds, collision
-  direction, and panel anchoring behavior.
+  lower Qlty complexity for lower expanded panel intrusion handling while
+  preserving stable nested expansion ordering, occupied bounds, vertical panel
+  separation, and panel anchoring behavior.
+- Test focus:
+  run the targeted expanded-flow graph tests that mention upper/lower expanded
+  panels before the full required validation.
 
 ## Risks To Control
 

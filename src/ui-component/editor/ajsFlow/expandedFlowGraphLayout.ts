@@ -550,6 +550,66 @@ const buildVisibleImmediateChildLayoutItems = (
     .map((unit) => buildOccupiedLayoutItem(context, unit))
     .filter((item): item is LayoutItem => !!item);
 
+const getRightwardCollisionOffset = (
+  fixed: LayoutItem,
+  target: LayoutItem,
+): number =>
+  fixed.position.x < target.position.x
+    ? fixed.occupiedBox.maxX - target.occupiedBox.minX
+    : 0;
+
+const getDownwardCollisionOffset = (
+  fixed: LayoutItem,
+  target: LayoutItem,
+): number =>
+  fixed.position.y < target.position.y
+    ? fixed.occupiedBox.maxY - target.occupiedBox.minY
+    : 0;
+
+const getSiblingCollisionOffset = (
+  fixed: LayoutItem,
+  target: LayoutItem,
+): FlowGraphPosition | undefined => {
+  if (!doBoundsOverlap(fixed.occupiedBox, target.occupiedBox)) {
+    return undefined;
+  }
+
+  const offset = {
+    x: Math.max(0, getRightwardCollisionOffset(fixed, target)),
+    y: Math.max(0, getDownwardCollisionOffset(fixed, target)),
+  };
+  return hasOffset(offset) ? offset : undefined;
+};
+
+const moveSiblingSubtree = (
+  context: ExpandedFlowGraphBuildContext,
+  target: LayoutItem,
+  offset: FlowGraphPosition,
+): LayoutItem => {
+  addOffset(context, target.unit.id, offset);
+  return buildOccupiedLayoutItem(context, target.unit) ?? target;
+};
+
+const moveTargetPastFixedSibling = (
+  context: ExpandedFlowGraphBuildContext,
+  target: LayoutItem,
+  fixed: LayoutItem,
+): LayoutItem => {
+  const offset = getSiblingCollisionOffset(fixed, target);
+  return offset ? moveSiblingSubtree(context, target, offset) : target;
+};
+
+const resolveTargetSiblingCollisions = (
+  context: ExpandedFlowGraphBuildContext,
+  fixedItems: ReadonlyArray<LayoutItem>,
+  target: LayoutItem,
+): LayoutItem =>
+  fixedItems.reduce(
+    (movedTarget, fixed) =>
+      moveTargetPastFixedSibling(context, movedTarget, fixed),
+    target,
+  );
+
 const resolveSiblingSubtreeCollisions = (
   context: ExpandedFlowGraphBuildContext,
   containerUnitId: string,
@@ -560,32 +620,11 @@ const resolveSiblingSubtreeCollisions = (
   );
 
   for (let targetIndex = 0; targetIndex < layoutItems.length; targetIndex++) {
-    let target = layoutItems[targetIndex];
-    for (let fixedIndex = 0; fixedIndex < targetIndex; fixedIndex++) {
-      const fixed = layoutItems[fixedIndex];
-      if (!doBoundsOverlap(fixed.occupiedBox, target.occupiedBox)) {
-        continue;
-      }
-
-      const dx =
-        fixed.position.x < target.position.x
-          ? fixed.occupiedBox.maxX - target.occupiedBox.minX
-          : 0;
-      const dy =
-        fixed.position.y < target.position.y
-          ? fixed.occupiedBox.maxY - target.occupiedBox.minY
-          : 0;
-      if (dx <= 0 && dy <= 0) {
-        continue;
-      }
-
-      addOffset(context, target.unit.id, {
-        x: Math.max(0, dx),
-        y: Math.max(0, dy),
-      });
-      target = buildOccupiedLayoutItem(context, target.unit) ?? target;
-      layoutItems[targetIndex] = target;
-    }
+    layoutItems[targetIndex] = resolveTargetSiblingCollisions(
+      context,
+      layoutItems.slice(0, targetIndex),
+      layoutItems[targetIndex],
+    );
   }
 };
 

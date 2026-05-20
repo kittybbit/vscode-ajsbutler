@@ -75,7 +75,20 @@ No user-visible behavior scenarios are introduced.
   `resolveSiblingSubtreeCollisions` is the next layout candidate; helper
   extraction must preserve sibling subtree movement, collision direction,
   visible-unit membership, occupied bounds, `positionOverrides`, and
-  `nodeDecorations` semantics.
+  `nodeDecorations` semantics. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is referenced only by
+  `relayoutExpandedScope`, and its behavior flows outward through
+  `buildExpandedFlowGraph` results and existing expanded-flow graph tests.
+- Slice-1B-E result:
+  `resolveSiblingSubtreeCollisions` remains internal to
+  `expandedFlowGraphLayout`, with overlap detection, right/down movement, target
+  subtree movement, and refreshed occupied layout item calculation extracted
+  into focused helpers without changing DTOs, node data, or panel behavior.
+- Slice-1B-F target:
+  `resolveLowerExpandedPanelIntrusions` is the next layout candidate; helper
+  extraction must preserve upper/lower expanded panel filtering, horizontal
+  overlap checks, lower panel vertical movement, and
+  `positionOverrides`/`nodeDecorations` semantics.
 
 ### Breaking Change Analysis
 
@@ -128,7 +141,12 @@ No user-visible behavior scenarios are introduced.
   extract sibling-subtree collision helpers only; do not change subtree
   movement rules, same-container sibling filtering, right/down offset behavior,
   occupied item updates, panel dimensions, `positionOverrides`, or
-  `nodeDecorations`.
+  `nodeDecorations`. Do not change parser/generated artifacts, graph DTOs,
+  ReactFlow node data shape, dependencies, or VS Code compatibility.
+- Slice-1B-F boundary decision:
+  extract lower expanded panel intrusion helpers only; do not change upper/lower
+  child ordering, panel bound calculations, horizontal overlap behavior,
+  vertical push distance, `positionOverrides`, or `nodeDecorations`.
 
 ## Compatibility
 
