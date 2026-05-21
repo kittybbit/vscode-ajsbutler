@@ -60,7 +60,7 @@ remaining passive metrics.
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K, and
-Slice-1B-L, Slice-1B-M, Slice-1B-N, and Slice-1B-O are complete.
+Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, and Slice-1B-P are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -119,29 +119,30 @@ Slice-1B-L, Slice-1B-M, Slice-1B-N, and Slice-1B-O are complete.
   visible-unit display-position entry resolution and collection.
   Slice-1B-O kept node bounds accumulation behavior intact while grouping node
   bounds inputs for `includeNodeBounds`.
+  Slice-1B-P kept visible node registration behavior intact while grouping
+  visible node inputs for `addVisibleNode`.
 
 ## Current Slice Candidate
 
-Slice-1B-P is the next candidate and requires separate approval before runtime
+Slice-1B-Q is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` `addVisibleNode` many-parameter pressure by
-  grouping visible-node inputs without changing visible node registration
-  behavior.
+  reduce `expandedFlowGraphLayout` `ensureVisibleNestedNode` many-parameter
+  pressure by grouping nested-node visibility inputs without changing
+  visibility behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
-  remaining many-parameter smells after Slice-1B-O removed
-  `includeNodeBounds`.
+  remaining many-parameter smells after Slice-1B-P removed `addVisibleNode`.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, visible node/edge membership, parent anchor
   behavior, VS Code compatibility, and `engines.vscode` unchanged.
 - Expected impact:
-  remove the `addVisibleNode` many-parameter smell while preserving visible
-  node membership, initial positions, offsets, position overrides, parent
-  anchors, and node DTO shape.
+  remove the `ensureVisibleNestedNode` many-parameter smell while preserving
+  duplicate guards, initial positions, visible node membership, parent anchors,
+  and node DTO shape.
 - Test focus:
   run the targeted expanded-flow graph tests around nested reveal,
   position overrides, recursive expansion, and expanded layout offsets before

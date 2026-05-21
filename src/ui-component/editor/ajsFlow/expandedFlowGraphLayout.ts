@@ -179,10 +179,13 @@ const addOffset = (
 
 const addVisibleNode = (
   context: ExpandedFlowGraphBuildContext,
-  unit: AjsUnit,
-  initialPosition: FlowGraphPosition,
-  parentAnchorId?: string,
+  visibleNode: {
+    unit: AjsUnit;
+    initialPosition: FlowGraphPosition;
+    parentAnchorId?: string;
+  },
 ) => {
+  const { unit, initialPosition, parentAnchorId } = visibleNode;
   context.nodes.push(
     unit.unitType === "rc" ? toConditionNode(unit) : toGridNode(unit),
   );
@@ -210,7 +213,11 @@ const ensureVisibleNestedNode = (
   }
 
   const initialPosition = calculatePosition();
-  addVisibleNode(context, unit, initialPosition, parentUnitId);
+  addVisibleNode(context, {
+    unit,
+    initialPosition,
+    parentAnchorId: parentUnitId,
+  });
   return initialPosition;
 };
 

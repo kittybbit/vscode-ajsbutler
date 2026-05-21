@@ -280,6 +280,27 @@ No user-visible behavior scenarios are introduced.
   bounds inputs grouped into a local object without changing min/max formulas,
   node metric sources, decoration bounds inclusion, panel dimensions, or
   `nodeDecorations`.
+- Slice-1B-P target:
+  `addVisibleNode` is the next layout candidate; helper extraction must remove
+  the many-parameter pressure while preserving visible node registration,
+  initial position registration, optional parent-anchor registration, and final
+  display-position synchronization. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is called only from
+  `ensureVisibleNestedNode` after duplicate/known-position guards.
+- Slice-1B-P investigation:
+  `addVisibleNode` creates either a condition or grid node DTO based on
+  `unit.unitType`, appends it to `context.nodes`, records `nodeIds` and
+  `visibleUnitIds`, stores the `initialPosition`, conditionally records a
+  `parentAnchorId`, and calls `syncDisplayPosition`. Existing
+  `buildExpandedFlowGraph.test.ts` coverage exercises nested reveal,
+  condition-node visibility, recursive expansion, `positionOverrides`, parent
+  anchoring, and expanded layout offsets.
+- Slice-1B-P result:
+  `addVisibleNode` remains internal to `expandedFlowGraphLayout`, with visible
+  node registration inputs grouped into a local object without changing node
+  DTO mapping, node order, visible-unit membership, initial position storage,
+  parent anchors, display-position synchronization, `positionOverrides`, or
+  `nodeDecorations`.
 
 ### Breaking Change Analysis
 
@@ -458,6 +479,21 @@ No user-visible behavior scenarios are introduced.
   shape, dependency versions, VS Code compatibility, bounds formulas, panel
   dimensions, visible node/edge membership, or `engines.vscode` requires
   separate approval.
+- Slice-1B-P boundary decision:
+  extract `addVisibleNode` input grouping only; do not change node DTO
+  creation, node ordering, visible-unit membership, initial position storage,
+  parent anchor semantics, display-position synchronization,
+  `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
+  artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
+  compatibility.
+- Slice-1B-P approval-sensitive scope:
+  implementation may introduce a local input object/type for visible node
+  registration and update the single `ensureVisibleNestedNode` call site inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  generated parser artifacts, application flow graph DTOs, ReactFlow node data
+  shape, dependency versions, VS Code compatibility, node DTO mapping, visible
+  node/edge membership, parent anchor behavior, position override behavior, or
+  `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -481,5 +517,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-O, should the next slice target `addVisibleNode` or
+- After Slice-1B-P, should the next slice target
   `ensureVisibleNestedNode` many-parameter pressure?

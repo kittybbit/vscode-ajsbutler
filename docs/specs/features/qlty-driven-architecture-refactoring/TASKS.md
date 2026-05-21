@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-O implementation is complete.
+  Slice-1B-P implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -112,6 +112,11 @@ active implementation approval remains.
       the next implementation candidate.
 - [x] Record human approval for Slice-1B-O.
 - [x] Complete Slice-1B-O `includeNodeBounds` bounds-input helper extraction.
+- [x] Select Slice-1B-P `addVisibleNode` visible-node input helper extraction
+      as the next implementation candidate.
+- [x] Record human approval for Slice-1B-P.
+- [x] Complete Slice-1B-P `addVisibleNode` visible-node input helper
+      extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -316,5 +321,17 @@ active implementation approval remains.
   many-parameter smell, kept file total complexity at 111, and left
   `addVisibleNode` and `ensureVisibleNestedNode` as separate approval
   candidates.
+- Slice-1B-P targets `addVisibleNode` because Qlty reports a many-parameter
+  smell after Slice-1B-O, the helper is called only from
+  `ensureVisibleNestedNode`, and existing expanded-flow tests cover nested
+  reveal, condition nodes, position overrides, recursive expansion, and
+  expanded layout offsets.
+- Slice-1B-P must preserve grid-vs-condition node DTO creation, `nodeIds`,
+  `visibleUnitIds`, `initialPositions`, optional parent anchor registration,
+  and final display-position synchronization.
+- Slice-1B-P kept visible node registration behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `addVisibleNode`
+  many-parameter smell, kept file total complexity at 111, and left
+  `ensureVisibleNestedNode` as a separate approval candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

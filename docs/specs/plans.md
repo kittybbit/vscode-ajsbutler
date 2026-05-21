@@ -34,7 +34,7 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select and request approval for Qlty-driven architecture refactoring
-   Slice-1B-P: reduce `addVisibleNode` many-parameter pressure while
+   Slice-1B-Q: reduce `ensureVisibleNestedNode` many-parameter pressure while
    preserving expanded flow graph layout behavior.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
@@ -64,8 +64,9 @@ rules in `docs/specs/README.md`, not in this file.
   `appendExpandedUnitEdges` extraction; Slice-1B-M completed a focused
   `revealVisibleNestedUnit` extraction; Slice-1B-N completed a focused
   `getDisplayPositions` extraction; Slice-1B-O completed a focused
-  `includeNodeBounds` extraction. Slice-1B-P targets `addVisibleNode` and
-  needs separate approval.
+  `includeNodeBounds` extraction; Slice-1B-P completed a focused
+  `addVisibleNode` extraction. Slice-1B-Q targets `ensureVisibleNestedNode`
+  and needs separate approval.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
