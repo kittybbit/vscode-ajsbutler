@@ -56,10 +56,13 @@ export const isDescendantOf = (
 
 const includeNodeBounds = (
   bounds: FlowGraphBounds,
-  position: FlowGraphPosition,
-  width: number,
-  height: number,
+  nodeBounds: {
+    position: FlowGraphPosition;
+    width: number;
+    height: number;
+  },
 ) => {
+  const { position, width, height } = nodeBounds;
   bounds.minX = Math.min(bounds.minX, position.x);
   bounds.maxX = Math.max(bounds.maxX, position.x + width);
   bounds.minY = Math.min(bounds.minY, position.y);
@@ -988,12 +991,11 @@ const includePanelBoundsLayoutItem = (
   subtreeBounds: FlowGraphBounds,
   item: PanelBoundsLayoutItem,
 ): void => {
-  includeNodeBounds(
-    subtreeBounds,
-    item.position,
-    context.metrics.width,
-    context.metrics.height,
-  );
+  includeNodeBounds(subtreeBounds, {
+    position: item.position,
+    width: context.metrics.width,
+    height: context.metrics.height,
+  });
 
   const decoration = context.nodeDecorations.get(item.unit.id);
   if (decoration) {

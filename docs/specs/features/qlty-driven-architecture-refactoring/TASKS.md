@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-N implementation is complete.
+  Slice-1B-O implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -108,6 +108,10 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-N.
 - [x] Complete Slice-1B-N `getDisplayPositions` display-position collection
       helper extraction.
+- [x] Select Slice-1B-O `includeNodeBounds` bounds-input helper extraction as
+      the next implementation candidate.
+- [x] Record human approval for Slice-1B-O.
+- [x] Complete Slice-1B-O `includeNodeBounds` bounds-input helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -299,5 +303,18 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `getDisplayPositions`
   high-complexity smell, reduced file total complexity from 114 to 111, and
   left the many-parameter layout helpers as separate approval candidates.
+- Slice-1B-O targets `includeNodeBounds` because Qlty reports a
+  many-parameter smell after Slice-1B-N, the helper is called only from
+  `includePanelBoundsLayoutItem`, and existing expanded-flow tests cover panel
+  dimensions, decoration bounds, recursive expansion, and
+  `nodeDecorations`.
+- Slice-1B-O must preserve min/max bound updates, node width/height usage,
+  panel subtree bounds accumulation, decoration bound inclusion,
+  `nodeDecorations`, and expanded panel dimensions.
+- Slice-1B-O kept node bounds accumulation behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `includeNodeBounds`
+  many-parameter smell, kept file total complexity at 111, and left
+  `addVisibleNode` and `ensureVisibleNestedNode` as separate approval
+  candidates.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

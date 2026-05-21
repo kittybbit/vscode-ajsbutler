@@ -60,7 +60,7 @@ remaining passive metrics.
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K, and
-Slice-1B-L, Slice-1B-M, and Slice-1B-N are complete.
+Slice-1B-L, Slice-1B-M, Slice-1B-N, and Slice-1B-O are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -117,30 +117,33 @@ Slice-1B-L, Slice-1B-M, and Slice-1B-N are complete.
   helpers.
   Slice-1B-N kept display-position snapshot behavior intact while extracting
   visible-unit display-position entry resolution and collection.
+  Slice-1B-O kept node bounds accumulation behavior intact while grouping node
+  bounds inputs for `includeNodeBounds`.
 
 ## Current Slice Candidate
 
-Slice-1B-O is the next candidate and requires separate approval before runtime
+Slice-1B-P is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` many-parameter helper pressure by selecting
-  one focused helper such as `includeNodeBounds`, `addVisibleNode`, or
-  `ensureVisibleNestedNode`.
+  reduce `expandedFlowGraphLayout` `addVisibleNode` many-parameter pressure by
+  grouping visible-node inputs without changing visible node registration
+  behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
-  remaining many-parameter smells after Slice-1B-N removed the last focused
-  high-complexity helper smell.
+  remaining many-parameter smells after Slice-1B-O removed
+  `includeNodeBounds`.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, visible node/edge membership, parent anchor
   behavior, VS Code compatibility, and `engines.vscode` unchanged.
 - Expected impact:
-  reduce one focused Qlty many-parameter smell while preserving layout bounds,
-  visible node membership, parent anchors, offsets, and map insertion order.
+  remove the `addVisibleNode` many-parameter smell while preserving visible
+  node membership, initial positions, offsets, position overrides, parent
+  anchors, and node DTO shape.
 - Test focus:
-  run the targeted expanded-flow graph tests around panel dimensions,
+  run the targeted expanded-flow graph tests around nested reveal,
   position overrides, recursive expansion, and expanded layout offsets before
   the full required validation.
 

@@ -261,6 +261,25 @@ No user-visible behavior scenarios are introduced.
   construction expressed as a visible-unit collection pipeline without changing
   position override precedence, visible-unit order, offset behavior,
   `positionOverrides`, or `nodeDecorations`.
+- Slice-1B-O target:
+  `includeNodeBounds` is the next layout candidate; helper extraction must
+  remove the many-parameter pressure while preserving min/max bounds updates,
+  node width and height usage, and subtree bounds accumulation. Impact is local
+  to `expandedFlowGraphLayout.ts`: the helper is called only from
+  `includePanelBoundsLayoutItem` before optional decoration bounds inclusion.
+- Slice-1B-O investigation:
+  `includeNodeBounds` mutates a `FlowGraphBounds` accumulator by including the
+  node rectangle at `position.x`, `position.y`, `position.x + width`, and
+  `position.y + height`. `includePanelBoundsLayoutItem` passes
+  `context.metrics.width` and `context.metrics.height`, then includes expanded
+  decoration bounds when present. Existing `buildExpandedFlowGraph.test.ts`
+  coverage exercises panel dimensions, recursive expansion, decoration bounds,
+  and `nodeDecorations`.
+- Slice-1B-O result:
+  `includeNodeBounds` remains internal to `expandedFlowGraphLayout`, with node
+  bounds inputs grouped into a local object without changing min/max formulas,
+  node metric sources, decoration bounds inclusion, panel dimensions, or
+  `nodeDecorations`.
 
 ### Breaking Change Analysis
 
@@ -425,6 +444,20 @@ No user-visible behavior scenarios are introduced.
   shape, dependency versions, VS Code compatibility, visible node/edge
   membership, offset formulas, position override precedence, or
   `engines.vscode` requires separate approval.
+- Slice-1B-O boundary decision:
+  extract `includeNodeBounds` input grouping only; do not change bound
+  min/max formulas, node width/height source, decoration bounds inclusion,
+  panel offset constants, panel dimension calculations, `positionOverrides`,
+  or `nodeDecorations`. Do not change parser/generated artifacts, graph DTOs,
+  ReactFlow node data shape, dependencies, or VS Code compatibility.
+- Slice-1B-O approval-sensitive scope:
+  implementation may introduce a local input object/type for node bounds and
+  update the single `includePanelBoundsLayoutItem` call site inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  generated parser artifacts, application flow graph DTOs, ReactFlow node data
+  shape, dependency versions, VS Code compatibility, bounds formulas, panel
+  dimensions, visible node/edge membership, or `engines.vscode` requires
+  separate approval.
 
 ## Compatibility
 
@@ -448,5 +481,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-N, should the next slice target many-parameter helpers such as
-  `includeNodeBounds`, `addVisibleNode`, or `ensureVisibleNestedNode`?
+- After Slice-1B-O, should the next slice target `addVisibleNode` or
+  `ensureVisibleNestedNode` many-parameter pressure?
