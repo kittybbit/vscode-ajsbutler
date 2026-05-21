@@ -34,8 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select and request approval for Qlty-driven architecture refactoring
-   Slice-1B-M: extract `revealVisibleNestedUnit` nested reveal helpers while
-   preserving expanded flow graph layout behavior.
+   Slice-1B-N: extract `getDisplayPositions` display-position collection
+   helpers while preserving expanded flow graph layout behavior.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -61,8 +61,9 @@ rules in `docs/specs/README.md`, not in this file.
   `relayoutExpandedScope` extraction; Slice-1B-J completed a focused
   `isDescendantOf` extraction; Slice-1B-K completed a focused
   `syncAnchoredDescendantOverrides` extraction; Slice-1B-L completed a focused
-  `appendExpandedUnitEdges` extraction. Slice-1B-M targets
-  `revealVisibleNestedUnit` and needs separate approval.
+  `appendExpandedUnitEdges` extraction; Slice-1B-M completed a focused
+  `revealVisibleNestedUnit` extraction. Slice-1B-N targets
+  `getDisplayPositions` and needs separate approval.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

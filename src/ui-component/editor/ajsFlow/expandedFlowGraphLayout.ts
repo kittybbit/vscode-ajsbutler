@@ -316,27 +316,46 @@ const buildUnitPanelBounds = (
       }
     : buildUnitBaseBounds(position, metrics);
 
+const canRevealNestedUnit = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnit: AjsUnit,
+): boolean => !!getDisplayPosition(context, expandedUnit.id);
+
+const getVisibleNestedChildren = (expandedUnit: AjsUnit): AjsUnit[] =>
+  expandedUnit.children.filter((unit) => unit.unitType !== "rc");
+
+const getConditionChild = (expandedUnit: AjsUnit): AjsUnit | undefined =>
+  expandedUnit.children.find((child) => child.unitType === "rc");
+
+const revealNestedChildren = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnit: AjsUnit,
+) => {
+  for (const child of getVisibleNestedChildren(expandedUnit)) {
+    ensureChildNodeVisible(context, child, expandedUnit.id);
+  }
+};
+
+const revealConditionChild = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnit: AjsUnit,
+) => {
+  const conditionUnit = getConditionChild(expandedUnit);
+  if (conditionUnit) {
+    ensureConditionNodeVisible(context, conditionUnit, expandedUnit.id);
+  }
+};
+
 const revealVisibleNestedUnit = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnit: AjsUnit,
 ) => {
-  if (!getDisplayPosition(context, expandedUnit.id)) {
+  if (!canRevealNestedUnit(context, expandedUnit)) {
     return;
   }
 
-  for (const child of expandedUnit.children.filter(
-    (unit) => unit.unitType !== "rc",
-  )) {
-    ensureChildNodeVisible(context, child, expandedUnit.id);
-  }
-
-  const conditionUnit = expandedUnit.children.find(
-    (child) => child.unitType === "rc",
-  );
-  if (conditionUnit) {
-    ensureConditionNodeVisible(context, conditionUnit, expandedUnit.id);
-  }
-
+  revealNestedChildren(context, expandedUnit);
+  revealConditionChild(context, expandedUnit);
   appendExpandedUnitEdges(context, expandedUnit);
 };
 

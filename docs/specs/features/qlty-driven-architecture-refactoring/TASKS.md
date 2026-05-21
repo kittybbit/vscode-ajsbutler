@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-L implementation is complete.
+  Slice-1B-M implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -98,6 +98,11 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-L.
 - [x] Complete Slice-1B-L `appendExpandedUnitEdges` expanded-edge append
       helper extraction.
+- [x] Select Slice-1B-M `revealVisibleNestedUnit` nested reveal helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-M.
+- [x] Complete Slice-1B-M `revealVisibleNestedUnit` nested reveal helper
+      extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -263,5 +268,18 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `appendExpandedUnitEdges`
   high-complexity smell, reduced file total complexity from 118 to 114, and
   left `revealVisibleNestedUnit` as a separate approval candidate.
+- Slice-1B-M targets `revealVisibleNestedUnit` because Qlty reports cognitive
+  complexity 6 after Slice-1B-L, the helper is called only from
+  `relayoutExpandedChildren`, and existing expanded-flow tests cover nested
+  reveal timing, recursive expansion, condition node visibility, edge labels,
+  duplicate-edge avoidance, `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-M must preserve missing-expanded-position skip behavior, non-`rc`
+  child visibility, condition child visibility, parent anchor assignment,
+  nested position formulas, expanded edge appending, visible node/edge
+  membership, `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-M kept nested reveal behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `revealVisibleNestedUnit`
+  high-complexity smell, kept file total complexity at 114, and left
+  `getDisplayPositions` as a separate approval candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

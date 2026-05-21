@@ -216,6 +216,29 @@ No user-visible behavior scenarios are introduced.
   with edge id creation, duplicate-edge filtering, and append/record behavior
   extracted into focused helpers without changing DTOs, node data, edge
   membership, or panel behavior.
+- Slice-1B-M target:
+  `revealVisibleNestedUnit` is the next layout candidate; helper extraction
+  must preserve the missing-position guard, non-condition child reveal,
+  condition child reveal, parent anchors, nested position calculation, and
+  expanded edge append timing. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is called only while
+  `relayoutExpandedChildren` processes expanded nested jobnet children.
+- Slice-1B-M investigation:
+  `revealVisibleNestedUnit` is called only from `relayoutExpandedChildren`,
+  immediately before recursive `relayoutExpandedScope` and decoration refresh.
+  It skips when the expanded unit has no display position, reveals all
+  non-`rc` children via `ensureChildNodeVisible`, reveals the first `rc`
+  condition child via `ensureConditionNodeVisible`, and then calls
+  `appendExpandedUnitEdges`. Existing `buildExpandedFlowGraph.test.ts`
+  coverage exercises nested reveal timing, recursive expansion, condition node
+  visibility, expanded edge labels, duplicate-edge avoidance,
+  `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-M result:
+  `revealVisibleNestedUnit` remains internal to `expandedFlowGraphLayout`,
+  with reveal eligibility, visible child discovery, condition discovery,
+  non-condition child reveal, and condition reveal extracted into focused
+  helpers without changing DTOs, node data, edge membership, parent anchors,
+  position overrides, or panel behavior.
 
 ### Breaking Change Analysis
 
@@ -350,6 +373,21 @@ No user-visible behavior scenarios are introduced.
   ReactFlow node data shape, dependency versions, VS Code compatibility,
   visible node/edge membership, position override behavior, or
   `engines.vscode` requires separate approval.
+- Slice-1B-M boundary decision:
+  extract nested reveal orchestration helpers only; do not change missing
+  expanded-position skip behavior, child filtering, condition selection,
+  parent anchor semantics, nested position formulas, expanded edge append
+  timing, visible node/edge membership, `positionOverrides`, or
+  `nodeDecorations`. Do not change parser/generated artifacts, graph DTOs,
+  ReactFlow node data shape, dependencies, or VS Code compatibility.
+- Slice-1B-M approval-sensitive scope:
+  implementation may extract display-position guard, visible child discovery,
+  condition discovery, and child/condition reveal helpers inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  generated parser artifacts, application flow graph DTOs, ReactFlow node data
+  shape, dependency versions, VS Code compatibility, nested position formulas,
+  expanded edge append order, visible node/edge membership, or
+  `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -373,5 +411,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-L, should the next slice target `revealVisibleNestedUnit`
-  before the remaining low-complexity helper cleanup?
+- After Slice-1B-M, should the next slice target `getDisplayPositions` before
+  the remaining many-parameter helper cleanup?

@@ -60,7 +60,7 @@ remaining passive metrics.
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K, and
-Slice-1B-L are complete.
+Slice-1B-L, and Slice-1B-M are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -112,35 +112,37 @@ Slice-1B-L are complete.
   recursive traversal helpers.
   Slice-1B-L kept expanded edge appending behavior intact while extracting
   edge id creation, duplicate-edge filtering, and append/record helpers.
+  Slice-1B-M kept nested reveal behavior intact while extracting reveal
+  eligibility, visible child discovery, condition discovery, and child reveal
+  helpers.
 
 ## Current Slice Candidate
 
-Slice-1B-M is the next candidate and requires separate approval before runtime
+Slice-1B-N is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` `revealVisibleNestedUnit` complexity by
-  extracting focused visible-child and condition reveal helpers without changing
+  reduce `expandedFlowGraphLayout` `getDisplayPositions` complexity by
+  extracting focused display-position collection helpers without changing
   expanded graph behavior.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
   multiple high-complexity collision/layout helpers.
-  `revealVisibleNestedUnit` remains a high-complexity helper after Slice-1B-L
-  and coordinates nested child visibility, condition visibility, and expanded
-  edge appending.
+  `getDisplayPositions` remains a high-complexity helper after Slice-1B-M and
+  collects display positions for visible units.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
-  shape, expanded layout behavior, visible edge membership, VS Code
-  compatibility, and `engines.vscode` unchanged.
+  shape, expanded layout behavior, visible node/edge membership, parent anchor
+  behavior, VS Code compatibility, and `engines.vscode` unchanged.
 - Expected impact:
-  lower Qlty complexity for nested unit reveal orchestration while preserving
-  visible node membership, parent anchors, expanded edge membership, and
-  original edge DTO shape.
+  lower Qlty complexity for display-position collection while preserving
+  missing-position skips, position override precedence, offsets, and map
+  insertion order.
 - Test focus:
-  run the targeted expanded-flow graph tests that assert nested expanded edges,
-  duplicate avoidance, and recursive expansion before the full required
-  validation.
+  run the targeted expanded-flow graph tests that assert position overrides,
+  recursive expansion, panel dimensions, and expanded layout offsets before the
+  full required validation.
 
 ## Risks To Control
 
