@@ -239,6 +239,28 @@ No user-visible behavior scenarios are introduced.
   non-condition child reveal, and condition reveal extracted into focused
   helpers without changing DTOs, node data, edge membership, parent anchors,
   position overrides, or panel behavior.
+- Slice-1B-N target:
+  `getDisplayPositions` is the next layout candidate; helper extraction must
+  preserve visible-unit iteration order, missing-position skips,
+  `getDisplayPosition` precedence, and the `positionsBeforeOffset` snapshot
+  consumed by growth-offset calculation. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is called only from
+  `applyGrowthOffsets` before `getTargetGrowthOffsets` and
+  `applyUnitGrowthOffsets`.
+- Slice-1B-N investigation:
+  `getDisplayPositions` iterates `context.visibleUnitIds`, resolves each
+  display position via `getDisplayPosition`, skips units without a display
+  position, inserts found positions into a new `Map`, and returns that snapshot
+  for growth-offset decisions. Existing `buildExpandedFlowGraph.test.ts`
+  coverage exercises `positionOverrides`, horizontal and vertical growth
+  offsets, panel dimensions, recursive expansion, sibling movement, and
+  expanded layout offsets.
+- Slice-1B-N result:
+  `getDisplayPositions` remains internal to `expandedFlowGraphLayout`, with
+  display-position entry resolution extracted into a focused helper and map
+  construction expressed as a visible-unit collection pipeline without changing
+  position override precedence, visible-unit order, offset behavior,
+  `positionOverrides`, or `nodeDecorations`.
 
 ### Breaking Change Analysis
 
@@ -388,6 +410,21 @@ No user-visible behavior scenarios are introduced.
   shape, dependency versions, VS Code compatibility, nested position formulas,
   expanded edge append order, visible node/edge membership, or
   `engines.vscode` requires separate approval.
+- Slice-1B-N boundary decision:
+  extract display-position collection helpers only; do not change
+  `getDisplayPosition`, visible-unit membership or ordering, missing-position
+  skip behavior, `positionsBeforeOffset` snapshot semantics, offset formulas,
+  `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
+  artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
+  compatibility.
+- Slice-1B-N approval-sensitive scope:
+  implementation may extract visible-unit display-position resolution and map
+  insertion helpers inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any change to
+  generated parser artifacts, application flow graph DTOs, ReactFlow node data
+  shape, dependency versions, VS Code compatibility, visible node/edge
+  membership, offset formulas, position override precedence, or
+  `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -411,5 +448,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-M, should the next slice target `getDisplayPositions` before
-  the remaining many-parameter helper cleanup?
+- After Slice-1B-N, should the next slice target many-parameter helpers such as
+  `includeNodeBounds`, `addVisibleNode`, or `ensureVisibleNestedNode`?

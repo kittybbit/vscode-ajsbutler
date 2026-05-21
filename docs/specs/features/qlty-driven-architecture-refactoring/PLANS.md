@@ -60,7 +60,7 @@ remaining passive metrics.
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K, and
-Slice-1B-L, and Slice-1B-M are complete.
+Slice-1B-L, Slice-1B-M, and Slice-1B-N are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -115,34 +115,34 @@ Slice-1B-L, and Slice-1B-M are complete.
   Slice-1B-M kept nested reveal behavior intact while extracting reveal
   eligibility, visible child discovery, condition discovery, and child reveal
   helpers.
+  Slice-1B-N kept display-position snapshot behavior intact while extracting
+  visible-unit display-position entry resolution and collection.
 
 ## Current Slice Candidate
 
-Slice-1B-N is the next candidate and requires separate approval before runtime
+Slice-1B-O is the next candidate and requires separate approval before runtime
 work starts.
 
 - Target:
-  reduce `expandedFlowGraphLayout` `getDisplayPositions` complexity by
-  extracting focused display-position collection helpers without changing
-  expanded graph behavior.
+  reduce `expandedFlowGraphLayout` many-parameter helper pressure by selecting
+  one focused helper such as `includeNodeBounds`, `addVisibleNode`, or
+  `ensureVisibleNestedNode`.
 - Reason:
   after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
   the largest flow-viewer complexity hotspot with high total complexity and
-  multiple high-complexity collision/layout helpers.
-  `getDisplayPositions` remains a high-complexity helper after Slice-1B-M and
-  collects display positions for visible units.
+  remaining many-parameter smells after Slice-1B-N removed the last focused
+  high-complexity helper smell.
 - Boundary:
   keep parser, generated artifacts, application flow graph DTOs, node data
   shape, expanded layout behavior, visible node/edge membership, parent anchor
   behavior, VS Code compatibility, and `engines.vscode` unchanged.
 - Expected impact:
-  lower Qlty complexity for display-position collection while preserving
-  missing-position skips, position override precedence, offsets, and map
-  insertion order.
+  reduce one focused Qlty many-parameter smell while preserving layout bounds,
+  visible node membership, parent anchors, offsets, and map insertion order.
 - Test focus:
-  run the targeted expanded-flow graph tests that assert position overrides,
-  recursive expansion, panel dimensions, and expanded layout offsets before the
-  full required validation.
+  run the targeted expanded-flow graph tests around panel dimensions,
+  position overrides, recursive expansion, and expanded layout offsets before
+  the full required validation.
 
 ## Risks To Control
 

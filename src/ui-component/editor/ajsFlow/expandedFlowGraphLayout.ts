@@ -374,16 +374,20 @@ const buildExpandedUnitPanelBounds = (
   );
 };
 
-const getDisplayPositions = (context: ExpandedFlowGraphBuildContext) => {
-  const positions = new Map<string, FlowGraphPosition>();
-  for (const unitId of context.visibleUnitIds) {
-    const displayPosition = getDisplayPosition(context, unitId);
-    if (displayPosition) {
-      positions.set(unitId, displayPosition);
-    }
-  }
-  return positions;
+const getVisibleDisplayPosition = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+): [string, FlowGraphPosition][] => {
+  const displayPosition = getDisplayPosition(context, unitId);
+  return displayPosition ? [[unitId, displayPosition]] : [];
 };
+
+const getDisplayPositions = (context: ExpandedFlowGraphBuildContext) =>
+  new Map(
+    [...context.visibleUnitIds].flatMap((unitId) =>
+      getVisibleDisplayPosition(context, unitId),
+    ),
+  );
 
 type GrowthOffsetTarget = {
   context: ExpandedFlowGraphBuildContext;
