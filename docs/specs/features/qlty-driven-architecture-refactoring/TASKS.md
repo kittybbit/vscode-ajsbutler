@@ -12,11 +12,14 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-S implementation is complete.
+  Slice-1B-T implementation scope needs revision.
 - Active slice:
-  none; remaining Slice-1B layout candidates require separate approval.
+  Slice-1B-T `updateExpandedNodeDecoration` decoration update helper
+  extraction is selected but needs revised approval before runtime work
+  continues.
 - Open follow-up:
-  select and approve the next Slice-1B layout complexity target.
+  revise the Slice-1B-T implementation scope or select a different total
+  complexity target.
 
 ## Human Approval
 
@@ -131,6 +134,11 @@ active implementation approval remains.
       extraction as the next implementation candidate.
 - [x] Record human approval for Slice-1B-S.
 - [x] Complete Slice-1B-S `buildExpandedPanelBounds` panel-subtree bounds
+      helper extraction.
+- [x] Select Slice-1B-T `updateExpandedNodeDecoration` decoration update
+      helper extraction as the next implementation candidate.
+- [ ] Record human approval for Slice-1B-T.
+- [ ] Complete Slice-1B-T `updateExpandedNodeDecoration` decoration update
       helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
@@ -387,5 +395,18 @@ active implementation approval remains.
 - Slice-1B-S kept expanded panel bounds behavior inside
   `expandedFlowGraphLayout.ts`, extracted subtree bounds collection from
   `buildExpandedPanelBounds`, and reduced file total complexity from 111 to 109.
+- Slice-1B-T targets `updateExpandedNodeDecoration` because Qlty reports only
+  high total complexity after Slice-1B-S, the helper is called from
+  `relayoutExpandedChildren`, and existing expanded-flow tests cover expanded
+  node decorations, panel dimensions, recursive expansion, and
+  `positionOverrides`.
+- Slice-1B-T must preserve missing position/panel-bounds skip behavior,
+  `buildExpandedPanelBounds` timing, `toDecorationFromBounds` mapping,
+  `nodeDecorations` keying by expanded unit id, `positionOverrides`, and
+  recursive expansion ordering.
+- Slice-1B-T implementation scope needs revision because local helper
+  extraction attempts around `updateExpandedNodeDecoration` preserved behavior
+  but did not lower Qlty total complexity from 109; no runtime abstraction is
+  retained while approval is pending.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

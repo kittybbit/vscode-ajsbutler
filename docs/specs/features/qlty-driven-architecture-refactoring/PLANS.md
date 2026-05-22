@@ -131,12 +131,32 @@ Slice-1B-R, and Slice-1B-S are complete.
 
 ## Current Slice Candidate
 
-No active runtime slice is approved. The next Slice-1B candidate should be
-selected through a fresh impact investigation and approval gate.
+Slice-1B-T is the next candidate and requires separate approval before runtime
+work starts.
 
-- Candidate:
-  `expandedFlowGraphLayout.ts` still reports high total complexity after
-  Slice-1B-S and may be considered for another small layout slice.
+- Target:
+  reduce `expandedFlowGraphLayout` total complexity by extracting focused
+  decoration update behavior around `updateExpandedNodeDecoration` without
+  changing expanded panel decoration behavior.
+- Reason:
+  Qlty reports only high total complexity for `expandedFlowGraphLayout.ts`
+  after Slice-1B-S. `updateExpandedNodeDecoration` still combines expanded unit
+  position lookup, panel bounds calculation, guard behavior, and
+  `nodeDecorations` write.
+- Boundary:
+  keep parser, generated artifacts, application flow graph DTOs, node data
+  shape, expanded layout behavior, `positionOverrides`, `nodeDecorations`, VS
+  Code compatibility, and `engines.vscode` unchanged.
+- Expected impact:
+  lower `expandedFlowGraphLayout.ts` total complexity while preserving expanded
+  node decoration output.
+- Investigation:
+  Serena/code navigation found one direct call from `relayoutExpandedChildren`;
+  the helper behavior is local to `expandedFlowGraphLayout.ts`.
+- Test focus:
+  run targeted expanded-flow graph tests around panel dimensions, expanded
+  node decorations, recursive expansion, `positionOverrides`, and
+  `nodeDecorations` before the full required validation.
 
 ## Risks To Control
 

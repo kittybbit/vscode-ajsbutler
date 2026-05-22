@@ -370,6 +370,22 @@ No user-visible behavior scenarios are introduced.
   iteration order, expanded panel bounds filtering, node or decoration bounds
   inclusion, panel padding formulas, `positionOverrides`, or
   `nodeDecorations`.
+- Slice-1B-T target:
+  `updateExpandedNodeDecoration` is the next total-complexity candidate;
+  helper extraction must preserve expanded unit position lookup, panel bounds
+  calculation timing, missing position/panel-bounds skip behavior,
+  `toDecorationFromBounds` mapping, and `nodeDecorations` writes. Impact is
+  local to `expandedFlowGraphLayout.ts`: the helper is called during recursive
+  expanded child relayout before lower-panel intrusion and growth offsets are
+  processed.
+- Slice-1B-T investigation:
+  `updateExpandedNodeDecoration` reads `context.positionOverrides` for the
+  expanded unit id, calls `buildExpandedPanelBounds`, skips when either value
+  is unavailable, and stores the decoration under the expanded unit id.
+  Serena found one direct call from `relayoutExpandedChildren`. Existing
+  `buildExpandedFlowGraph.test.ts` coverage exercises expanded node
+  decorations, panel dimensions, recursive expansion, `positionOverrides`, and
+  `nodeDecorations`.
 
 ### Breaking Change Analysis
 
@@ -608,6 +624,21 @@ No user-visible behavior scenarios are introduced.
   graph DTOs, ReactFlow node data shape, dependency versions, VS Code
   compatibility, panel bound formulas, visible node/edge membership,
   position override behavior, or `engines.vscode` requires separate approval.
+- Slice-1B-T boundary decision:
+  extract expanded node decoration update helper(s) only; do not change
+  expanded unit position lookup, panel bounds calculation timing, missing
+  position/panel-bounds skip behavior, decoration mapping formulas,
+  `nodeDecorations` keying, `positionOverrides`, or recursive expansion
+  ordering. Do not change parser/generated artifacts, graph DTOs, ReactFlow
+  node data shape, dependencies, or VS Code compatibility.
+- Slice-1B-T approval-sensitive scope:
+  implementation may extract helper(s) used by `updateExpandedNodeDecoration`
+  inside `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts` to reduce
+  total complexity. Any change to generated parser artifacts, application flow
+  graph DTOs, ReactFlow node data shape, dependency versions, VS Code
+  compatibility, panel bound formulas, visible node/edge membership,
+  `positionOverrides`, `nodeDecorations`, or `engines.vscode` requires
+  separate approval.
 
 ## Compatibility
 
@@ -631,5 +662,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-S, should Slice-1B pause or continue with another
+- After Slice-1B-T, should Slice-1B pause or continue with another
   total-complexity reduction candidate in `expandedFlowGraphLayout.ts`?
