@@ -198,12 +198,17 @@ const addVisibleNode = (
   syncDisplayPosition(context, unit.id);
 };
 
+type VisibleNestedNode = {
+  unit: AjsUnit;
+  parentUnitId: string;
+  calculatePosition: () => FlowGraphPosition;
+};
+
 const ensureVisibleNestedNode = (
   context: ExpandedFlowGraphBuildContext,
-  unit: AjsUnit,
-  parentUnitId: string,
-  calculatePosition: () => FlowGraphPosition,
+  visibleNode: VisibleNestedNode,
 ) => {
+  const { unit, parentUnitId, calculatePosition } = visibleNode;
   const existingPosition = context.initialPositions.get(unit.id);
   if (existingPosition) {
     return existingPosition;
@@ -226,23 +231,29 @@ const ensureChildNodeVisible = (
   child: AjsUnit,
   parentUnitId: string,
 ): FlowGraphPosition | undefined =>
-  ensureVisibleNestedNode(context, child, parentUnitId, () =>
-    calculateNestedChildPosition(
-      { x: 0, y: 0 },
-      child.layout.h,
-      child.layout.v,
-      context.basePx,
-    ),
-  );
+  ensureVisibleNestedNode(context, {
+    unit: child,
+    parentUnitId,
+    calculatePosition: () =>
+      calculateNestedChildPosition(
+        { x: 0, y: 0 },
+        child.layout.h,
+        child.layout.v,
+        context.basePx,
+      ),
+  });
 
 const ensureConditionNodeVisible = (
   context: ExpandedFlowGraphBuildContext,
   conditionUnit: AjsUnit,
   parentUnitId: string,
 ): FlowGraphPosition | undefined =>
-  ensureVisibleNestedNode(context, conditionUnit, parentUnitId, () =>
-    calculateNestedConditionPosition({ x: 0, y: 0 }, context.basePx),
-  );
+  ensureVisibleNestedNode(context, {
+    unit: conditionUnit,
+    parentUnitId,
+    calculatePosition: () =>
+      calculateNestedConditionPosition({ x: 0, y: 0 }, context.basePx),
+  });
 
 const toEdgeId = (edge: FlowGraphEdgeDto): string =>
   `${edge.source}-${edge.target}`;

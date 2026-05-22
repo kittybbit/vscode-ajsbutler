@@ -60,7 +60,8 @@ remaining passive metrics.
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K, and
-Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, and Slice-1B-P are complete.
+Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, and Slice-1B-Q
+are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -121,32 +122,18 @@ Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, and Slice-1B-P are complete.
   bounds inputs for `includeNodeBounds`.
   Slice-1B-P kept visible node registration behavior intact while grouping
   visible node inputs for `addVisibleNode`.
+  Slice-1B-Q kept nested node visibility behavior intact while grouping
+  nested visibility inputs for `ensureVisibleNestedNode`.
 
 ## Current Slice Candidate
 
-Slice-1B-Q is the next candidate and requires separate approval before runtime
-work starts.
+No active runtime slice is approved. The next Slice-1B candidate should be
+selected through a fresh impact investigation and approval gate.
 
-- Target:
-  reduce `expandedFlowGraphLayout` `ensureVisibleNestedNode` many-parameter
-  pressure by grouping nested-node visibility inputs without changing
-  visibility behavior.
-- Reason:
-  after the component-level Slice-1B work, `expandedFlowGraphLayout` remains
-  the largest flow-viewer complexity hotspot with high total complexity and
-  remaining many-parameter smells after Slice-1B-P removed `addVisibleNode`.
-- Boundary:
-  keep parser, generated artifacts, application flow graph DTOs, node data
-  shape, expanded layout behavior, visible node/edge membership, parent anchor
-  behavior, VS Code compatibility, and `engines.vscode` unchanged.
-- Expected impact:
-  remove the `ensureVisibleNestedNode` many-parameter smell while preserving
-  duplicate guards, initial positions, visible node membership, parent anchors,
-  and node DTO shape.
-- Test focus:
-  run the targeted expanded-flow graph tests around nested reveal,
-  position overrides, recursive expansion, and expanded layout offsets before
-  the full required validation.
+- Candidate:
+  `applyGrowthOffsets` is the remaining reported many-parameter helper in
+  `expandedFlowGraphLayout.ts` after Slice-1B-Q and may be considered for the
+  next small layout slice.
 
 ## Risks To Control
 

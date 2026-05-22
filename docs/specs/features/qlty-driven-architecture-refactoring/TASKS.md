@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-P implementation is complete.
+  Slice-1B-Q implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -117,6 +117,11 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-P.
 - [x] Complete Slice-1B-P `addVisibleNode` visible-node input helper
       extraction.
+- [x] Select Slice-1B-Q `ensureVisibleNestedNode` nested-node visibility input
+      helper extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-Q.
+- [x] Complete Slice-1B-Q `ensureVisibleNestedNode` nested-node visibility
+      input helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -333,5 +338,19 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `addVisibleNode`
   many-parameter smell, kept file total complexity at 111, and left
   `ensureVisibleNestedNode` as a separate approval candidate.
+- Slice-1B-Q targets `ensureVisibleNestedNode` because Qlty reports a
+  many-parameter smell after Slice-1B-P, the helper is called from
+  `ensureChildNodeVisible` and `ensureConditionNodeVisible`, and existing
+  expanded-flow tests cover nested reveal, condition nodes, position
+  overrides, parent anchoring, recursive expansion, and expanded layout
+  offsets.
+- Slice-1B-Q must preserve existing-position reuse, duplicate node skip,
+  position calculation timing, `addVisibleNode` registration, `parentAnchorId`
+  semantics, returned position/undefined behavior, `positionOverrides`, and
+  `nodeDecorations`.
+- Slice-1B-Q kept nested node visibility behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `ensureVisibleNestedNode`
+  many-parameter smell, kept file total complexity at 111, and left
+  `applyGrowthOffsets` as a separate approval candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.
