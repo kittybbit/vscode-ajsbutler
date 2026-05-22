@@ -61,7 +61,7 @@ remaining passive metrics.
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
-Slice-1B-R, and Slice-1B-S are complete.
+Slice-1B-R, Slice-1B-S, and Slice-1B-U are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -128,35 +128,17 @@ Slice-1B-R, and Slice-1B-S are complete.
   growth offset inputs for `applyGrowthOffsets`.
   Slice-1B-S kept expanded panel bounds behavior intact while extracting
   visible-unit subtree bounds collection from `buildExpandedPanelBounds`.
+  Slice-1B-T implementation scope was revised after local helper extraction
+  attempts around `updateExpandedNodeDecoration` preserved behavior but did
+  not lower Qlty total complexity from 109.
+  Slice-1B-U kept sibling collision behavior intact while extracting resolved
+  sibling item iteration from `resolveSiblingSubtreeCollisions`.
 
 ## Current Slice Candidate
 
-Slice-1B-T is the next candidate and requires separate approval before runtime
-work starts.
-
-- Target:
-  reduce `expandedFlowGraphLayout` total complexity by extracting focused
-  decoration update behavior around `updateExpandedNodeDecoration` without
-  changing expanded panel decoration behavior.
-- Reason:
-  Qlty reports only high total complexity for `expandedFlowGraphLayout.ts`
-  after Slice-1B-S. `updateExpandedNodeDecoration` still combines expanded unit
-  position lookup, panel bounds calculation, guard behavior, and
-  `nodeDecorations` write.
-- Boundary:
-  keep parser, generated artifacts, application flow graph DTOs, node data
-  shape, expanded layout behavior, `positionOverrides`, `nodeDecorations`, VS
-  Code compatibility, and `engines.vscode` unchanged.
-- Expected impact:
-  lower `expandedFlowGraphLayout.ts` total complexity while preserving expanded
-  node decoration output.
-- Investigation:
-  Serena/code navigation found one direct call from `relayoutExpandedChildren`;
-  the helper behavior is local to `expandedFlowGraphLayout.ts`.
-- Test focus:
-  run targeted expanded-flow graph tests around panel dimensions, expanded
-  node decorations, recursive expansion, `positionOverrides`, and
-  `nodeDecorations` before the full required validation.
+No next candidate is selected. The next Slice-1B step should either pause
+flow-viewer layout work or select another total-complexity reduction target in
+`expandedFlowGraphLayout.ts` with a fresh approval gate.
 
 ## Risks To Control
 

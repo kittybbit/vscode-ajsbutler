@@ -12,14 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-T implementation scope needs revision.
+  Slice-1B-U implementation is complete.
 - Active slice:
-  Slice-1B-T `updateExpandedNodeDecoration` decoration update helper
-  extraction is selected but needs revised approval before runtime work
-  continues.
+  none; Slice-1B-U is complete and the next Slice-1B target is not selected.
 - Open follow-up:
-  revise the Slice-1B-T implementation scope or select a different total
-  complexity target.
+  decide whether to continue Slice-1B with another total-complexity target or
+  pause flow-viewer layout work.
 
 ## Human Approval
 
@@ -137,9 +135,14 @@ active implementation approval remains.
       helper extraction.
 - [x] Select Slice-1B-T `updateExpandedNodeDecoration` decoration update
       helper extraction as the next implementation candidate.
-- [ ] Record human approval for Slice-1B-T.
-- [ ] Complete Slice-1B-T `updateExpandedNodeDecoration` decoration update
-      helper extraction.
+- [x] Revise Slice-1B-T scope after implementation attempts did not lower
+      Qlty total complexity.
+- [x] Select Slice-1B-U `resolveSiblingSubtreeCollisions`
+      sibling-collision iteration helper extraction as the next implementation
+      candidate.
+- [x] Record human approval for Slice-1B-U.
+- [x] Complete Slice-1B-U `resolveSiblingSubtreeCollisions`
+      sibling-collision iteration helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -408,5 +411,23 @@ active implementation approval remains.
   extraction attempts around `updateExpandedNodeDecoration` preserved behavior
   but did not lower Qlty total complexity from 109; no runtime abstraction is
   retained while approval is pending.
+- Slice-1B-U targets `resolveSiblingSubtreeCollisions` because Qlty reports
+  only high total complexity after Slice-1B-T revision, the helper still owns
+  the target-by-target sibling collision iteration, and Serena/code navigation
+  found one direct call from `relayoutExpandedScope`.
+- Slice-1B-U must preserve visible immediate child order, already-resolved
+  fixed sibling semantics, collision movement through
+  `resolveTargetSiblingCollisions`, refreshed target layout items,
+  `positionOverrides`, and `nodeDecorations`.
+- Existing `buildExpandedFlowGraph.test.ts` coverage exercises sibling
+  collision and offsets, recursive expansion, expanded panel dimensions,
+  `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-U was approved by the user at 2026-05-22 20:40 JST for
+  `resolveSiblingSubtreeCollisions` sibling-collision iteration helper
+  extraction only.
+- Slice-1B-U kept sibling collision behavior inside
+  `expandedFlowGraphLayout.ts`, extracted the resolved-item iteration from
+  `resolveSiblingSubtreeCollisions`, and reduced file total complexity from
+  109 to 107.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

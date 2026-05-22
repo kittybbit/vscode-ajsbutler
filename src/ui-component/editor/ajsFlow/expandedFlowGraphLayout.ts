@@ -738,22 +738,27 @@ const resolveTargetSiblingCollisions = (
     target,
   );
 
+const resolveSiblingLayoutItems = (
+  context: ExpandedFlowGraphBuildContext,
+  layoutItems: ReadonlyArray<LayoutItem>,
+) => {
+  const resolvedItems: LayoutItem[] = [];
+
+  layoutItems.forEach((target) => {
+    resolvedItems.push(
+      resolveTargetSiblingCollisions(context, resolvedItems, target),
+    );
+  });
+};
+
 const resolveSiblingSubtreeCollisions = (
   context: ExpandedFlowGraphBuildContext,
   containerUnitId: string,
 ) => {
-  const layoutItems = buildVisibleImmediateChildLayoutItems(
+  resolveSiblingLayoutItems(
     context,
-    containerUnitId,
+    buildVisibleImmediateChildLayoutItems(context, containerUnitId),
   );
-
-  for (let targetIndex = 0; targetIndex < layoutItems.length; targetIndex++) {
-    layoutItems[targetIndex] = resolveTargetSiblingCollisions(
-      context,
-      layoutItems.slice(0, targetIndex),
-      layoutItems[targetIndex],
-    );
-  }
 };
 
 type ExpandedPanelLayoutItem = {

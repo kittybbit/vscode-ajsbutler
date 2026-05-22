@@ -386,6 +386,30 @@ No user-visible behavior scenarios are introduced.
   `buildExpandedFlowGraph.test.ts` coverage exercises expanded node
   decorations, panel dimensions, recursive expansion, `positionOverrides`, and
   `nodeDecorations`.
+- Slice-1B-T revision:
+  local helper extraction attempts around `updateExpandedNodeDecoration`
+  preserved behavior but did not lower Qlty total complexity from 109, so no
+  runtime abstraction is retained and the implementation scope is revised.
+- Slice-1B-U target:
+  `resolveSiblingSubtreeCollisions` is the next total-complexity candidate;
+  helper extraction must preserve visible immediate child ordering, the
+  already-resolved fixed sibling set, target refresh semantics, collision
+  movement, and `positionOverrides`/`nodeDecorations`. Impact is local to
+  `expandedFlowGraphLayout.ts`: the helper is called from
+  `relayoutExpandedScope` after growth offsets are applied.
+- Slice-1B-U investigation:
+  `resolveSiblingSubtreeCollisions` builds visible immediate child layout
+  items, walks them target-by-target, passes the already resolved items to
+  `resolveTargetSiblingCollisions`, and replaces each target with the resolved
+  layout item. Serena found one direct call from `relayoutExpandedScope`.
+  Existing `buildExpandedFlowGraph.test.ts` coverage exercises sibling
+  collision and offsets, recursive expansion, expanded panel dimensions,
+  `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-U result:
+  `resolveSiblingSubtreeCollisions` remains internal to
+  `expandedFlowGraphLayout`, with resolved sibling item iteration extracted
+  into a focused helper without changing target ordering, fixed sibling
+  semantics, subtree movement, DTOs, node data, or panel behavior.
 
 ### Breaking Change Analysis
 
@@ -639,6 +663,21 @@ No user-visible behavior scenarios are introduced.
   compatibility, panel bound formulas, visible node/edge membership,
   `positionOverrides`, `nodeDecorations`, or `engines.vscode` requires
   separate approval.
+- Slice-1B-U boundary decision:
+  extract sibling-collision iteration helper(s) only; do not change visible
+  immediate child selection, target ordering, fixed sibling semantics, movement
+  direction, offset magnitude, subtree movement through `addOffset`,
+  `positionOverrides`, or `nodeDecorations`. Do not change parser/generated
+  artifacts, graph DTOs, ReactFlow node data shape, dependencies, or VS Code
+  compatibility.
+- Slice-1B-U approval-sensitive scope:
+  implementation may extract helper(s) used by
+  `resolveSiblingSubtreeCollisions` inside
+  `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts` to reduce total
+  complexity. Any change to generated parser artifacts, application flow graph
+  DTOs, ReactFlow node data shape, dependency versions, VS Code compatibility,
+  collision formulas, visible node/edge membership, `positionOverrides`,
+  `nodeDecorations`, or `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -662,5 +701,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-T, should Slice-1B pause or continue with another
+- After Slice-1B-U, should Slice-1B pause or continue with another
   total-complexity reduction candidate in `expandedFlowGraphLayout.ts`?
