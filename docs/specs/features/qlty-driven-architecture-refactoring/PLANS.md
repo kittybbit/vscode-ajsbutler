@@ -61,7 +61,7 @@ remaining passive metrics.
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
-Slice-1B-R, Slice-1B-S, and Slice-1B-U are complete.
+Slice-1B-R, Slice-1B-S, and Slice-1B-U are complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -136,9 +136,31 @@ Slice-1B-R, Slice-1B-S, and Slice-1B-U are complete.
 
 ## Current Slice Candidate
 
-No next candidate is selected. The next Slice-1B step should either pause
-flow-viewer layout work or select another total-complexity reduction target in
-`expandedFlowGraphLayout.ts` with a fresh approval gate.
+Slice-2 application orchestration reduction is the next task and starts with
+candidate selection and impact investigation only.
+
+- Target:
+  identify the next application-layer orchestration reduction candidate before
+  any runtime implementation.
+- Reason:
+  Slice-1B has reduced flow-viewer component/layout complexity enough for this
+  branch phase. The remaining roadmap item is application orchestration
+  duplication and complexity.
+- Boundary:
+  keep parser, generated artifacts, presentation behavior, graph/list DTOs,
+  VS Code compatibility, web compatibility, dependencies, and `engines.vscode`
+  unchanged until a specific Slice-2 implementation scope is investigated and
+  approved.
+- Expected impact:
+  select one small application-layer candidate for a future approval-gated
+  slice.
+- Investigation:
+  start with `src/application/flow-graph` and `src/application/unit-list`, then
+  narrow to one candidate based on Qlty findings, references, and existing
+  tests.
+- Test focus:
+  candidate-specific tests under `src/test/suite`, plus desktop/web/build
+  validation once implementation is approved.
 
 ## Risks To Control
 

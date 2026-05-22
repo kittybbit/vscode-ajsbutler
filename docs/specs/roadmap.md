@@ -47,8 +47,9 @@
    - Track active implementation under
      `docs/specs/features/qlty-driven-architecture-refactoring/`.
    - Phase 0 removes repository noise before structural changes.
-   - Phase 1 targets flow-viewer complexity.
-   - Phase 2 targets application orchestration duplication.
+   - Phase 1 flow-viewer complexity work is complete through the current
+     Slice-1B refactor.
+   - Phase 2 targets application orchestration duplication next.
    - Phase 3 targets domain conditional complexity.
    - Every slice must preserve desktop and web extension behavior.
 

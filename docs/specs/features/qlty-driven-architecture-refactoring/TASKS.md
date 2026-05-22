@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-U implementation is complete.
+  Slice-1B flow-viewer component/layout complexity work is complete.
 - Active slice:
-  none; Slice-1B-U is complete and the next Slice-1B target is not selected.
+  Slice-2 application orchestration reduction investigation is the next task.
 - Open follow-up:
-  decide whether to continue Slice-1B with another total-complexity target or
-  pause flow-viewer layout work.
+  select a concrete Slice-2 application orchestration candidate and record its
+  impact before requesting implementation approval.
 
 ## Human Approval
 
@@ -143,8 +143,11 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-U.
 - [x] Complete Slice-1B-U `resolveSiblingSubtreeCollisions`
       sibling-collision iteration helper extraction.
-- [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
+- [x] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
+- [ ] Select Slice-2 application orchestration reduction candidate.
+- [ ] Record Slice-2 impact investigation.
+- [ ] Request human approval for the selected Slice-2 implementation scope.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -429,5 +432,11 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, extracted the resolved-item iteration from
   `resolveSiblingSubtreeCollisions`, and reduced file total complexity from
   109 to 107.
-- `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
+- Slice-1B is complete as a flow-viewer component/layout complexity reduction
+  slice. Further `expandedFlowGraphLayout.ts` total-complexity reductions are
+  deferred unless a future behavior or maintainability need makes a more
+  targeted slice worthwhile.
+- Slice-2 will start with application orchestration candidate selection. Early
+  likely candidates include flow graph builders and unit-list builders under
+  `src/application`, with affected tests under `src/test/suite`.
 - Domain helpers still contain branch-heavy conditional logic.

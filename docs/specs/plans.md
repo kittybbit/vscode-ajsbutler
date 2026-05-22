@@ -21,8 +21,9 @@ rules in `docs/specs/README.md`, not in this file.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
-- Qlty-driven architecture refactoring is eligible to resume as the next
-  maintainability priority after the completed flow-viewer refactor plan.
+- Qlty-driven architecture refactoring has completed the flow-viewer
+  component/layout phase and moves next to application orchestration
+  investigation.
 - Completed feature folders should be removed once their durable requirements
   are represented in `docs/requirements/use-cases/`, `docs/specs/roadmap.md`,
   or `docs/specs/architecture.md`.
@@ -33,9 +34,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Decide whether to continue Qlty-driven architecture refactoring Slice-1B
-   with another `expandedFlowGraphLayout.ts` total-complexity target or pause
-   flow-viewer layout work.
+2. Start Qlty-driven architecture refactoring Slice-2 investigation: select a
+   concrete application orchestration reduction candidate under
+   `src/application` before requesting implementation approval.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -71,7 +72,8 @@ rules in `docs/specs/README.md`, not in this file.
   `buildExpandedPanelBounds` extraction. Slice-1B-T scope revision is recorded
   because it did not lower Qlty total complexity. Slice-1B-U investigation is
   complete and the sibling-collision iteration helper extraction is complete.
-  No next Slice-1B target is selected.
+  Slice-1B is complete. Slice-2 application orchestration investigation is the
+  next task.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

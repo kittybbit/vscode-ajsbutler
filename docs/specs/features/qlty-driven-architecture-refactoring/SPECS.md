@@ -410,6 +410,17 @@ No user-visible behavior scenarios are introduced.
   `expandedFlowGraphLayout`, with resolved sibling item iteration extracted
   into a focused helper without changing target ordering, fixed sibling
   semantics, subtree movement, DTOs, node data, or panel behavior.
+- Slice-1B completion decision:
+  flow-viewer component/layout complexity reduction is complete through
+  Slice-1B-U. Remaining `expandedFlowGraphLayout.ts` total-complexity work is
+  deferred unless a future targeted need appears. The next task moves to
+  Slice-2 application orchestration investigation.
+- Slice-2 next-task impact:
+  candidate selection starts in the application layer, especially
+  `src/application/flow-graph` and `src/application/unit-list`. No runtime
+  implementation is approved yet. A concrete Slice-2 candidate must identify
+  affected callers, DTO contracts, tests, and desktop/web compatibility before
+  implementation approval.
 
 ### Breaking Change Analysis
 
@@ -678,6 +689,13 @@ No user-visible behavior scenarios are introduced.
   DTOs, ReactFlow node data shape, dependency versions, VS Code compatibility,
   collision formulas, visible node/edge membership, `positionOverrides`,
   `nodeDecorations`, or `engines.vscode` requires separate approval.
+- Slice-2 boundary decision:
+  investigation may inspect application orchestration in
+  `src/application/flow-graph` and `src/application/unit-list`, but runtime
+  implementation requires a fresh approval gate with one concrete target.
+  Parser/generated artifacts, presentation behavior, DTO contracts,
+  dependencies, VS Code compatibility, web compatibility, and `engines.vscode`
+  must remain unchanged unless separately approved.
 
 ## Compatibility
 
@@ -701,5 +719,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-U, should Slice-1B pause or continue with another
-  total-complexity reduction candidate in `expandedFlowGraphLayout.ts`?
+- Which application orchestration candidate should become Slice-2-A after
+  Qlty findings and reference impact are reviewed?
