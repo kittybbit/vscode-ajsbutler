@@ -523,13 +523,23 @@ const applyUnitGrowthOffsets = (
     false,
   );
 
+type GrowthOffsetApplication = {
+  expandedUnitPosition: FlowGraphPosition;
+  horizontalGrowth: number;
+  verticalGrowth: number;
+  targetUnitIds: ReadonlySet<string>;
+};
+
 const applyGrowthOffsets = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnitPosition: FlowGraphPosition,
-  horizontalGrowth: number,
-  verticalGrowth: number,
-  targetUnitIds: ReadonlySet<string>,
+  growthOffsetApplication: GrowthOffsetApplication,
 ) => {
+  const {
+    expandedUnitPosition,
+    horizontalGrowth,
+    verticalGrowth,
+    targetUnitIds,
+  } = growthOffsetApplication;
   if (horizontalGrowth === 0 && verticalGrowth === 0) {
     return false;
   }
@@ -921,13 +931,15 @@ const applyExpandedChildGrowthOffsets = ({
     growthBounds.panelBounds.maxY - baseBounds.maxY,
   );
 
-  applyGrowthOffsets(
-    context,
-    growthBounds.position,
+  applyGrowthOffsets(context, {
+    expandedUnitPosition: growthBounds.position,
     horizontalGrowth,
     verticalGrowth,
-    getGrowthTargetUnitIds(immediateVisibleChildren, expandedChild),
-  );
+    targetUnitIds: getGrowthTargetUnitIds(
+      immediateVisibleChildren,
+      expandedChild,
+    ),
+  });
 };
 
 const applyExpandedChildrenGrowthOffsets = (

@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-Q implementation is complete.
+  Slice-1B-R implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -122,6 +122,11 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-Q.
 - [x] Complete Slice-1B-Q `ensureVisibleNestedNode` nested-node visibility
       input helper extraction.
+- [x] Select Slice-1B-R `applyGrowthOffsets` growth-offset input helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-R.
+- [x] Complete Slice-1B-R `applyGrowthOffsets` growth-offset input helper
+      extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -352,5 +357,18 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `ensureVisibleNestedNode`
   many-parameter smell, kept file total complexity at 111, and left
   `applyGrowthOffsets` as a separate approval candidate.
+- Slice-1B-R targets `applyGrowthOffsets` because Qlty reports it as the
+  remaining many-parameter helper after Slice-1B-Q, the helper is called from
+  `applyExpandedChildGrowthOffset`, and existing expanded-flow tests cover
+  horizontal/vertical growth, sibling movement, recursive expansion,
+  `positionOverrides`, and expanded layout offsets.
+- Slice-1B-R must preserve zero-growth no-op behavior, display-position
+  snapshot timing, target unit id filtering, horizontal and vertical offset
+  formulas, offset application through `addOffset`, `positionOverrides`, and
+  `nodeDecorations`.
+- Slice-1B-R kept growth offset application behavior inside
+  `expandedFlowGraphLayout.ts`, removed the `applyGrowthOffsets`
+  many-parameter smell, kept file total complexity at 111, and left total
+  complexity reduction as a separate approval candidate.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

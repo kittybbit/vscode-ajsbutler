@@ -323,6 +323,28 @@ No user-visible behavior scenarios are introduced.
   existing-position reuse, duplicate-node skip behavior, position calculation
   timing, child/condition position formulas, parent anchors, returned
   position/undefined behavior, `positionOverrides`, or `nodeDecorations`.
+- Slice-1B-R target:
+  `applyGrowthOffsets` is the next layout candidate; helper extraction must
+  remove the remaining many-parameter pressure while preserving zero-growth
+  no-op behavior, display-position snapshot timing, target-unit filtering,
+  horizontal and vertical offset formulas, and `addOffset` propagation. Impact
+  is local to `expandedFlowGraphLayout.ts`: the helper is called from
+  `applyExpandedChildGrowthOffset` after expanded-panel growth is calculated.
+- Slice-1B-R investigation:
+  `applyGrowthOffsets` currently takes `context`, `expandedUnitPosition`,
+  `horizontalGrowth`, `verticalGrowth`, and `targetUnitIds`. It first returns
+  false when both growth dimensions are zero, otherwise snapshots display
+  positions with `getDisplayPositions`, builds target offsets through
+  `getTargetGrowthOffsets`, and applies them through `applyUnitGrowthOffsets`.
+  Existing `buildExpandedFlowGraph.test.ts` coverage exercises horizontal and
+  vertical growth offsets, sibling movement, recursive expansion,
+  `positionOverrides`, panel dimensions, and expanded layout offsets.
+- Slice-1B-R result:
+  `applyGrowthOffsets` remains internal to `expandedFlowGraphLayout`, with
+  growth offset application inputs grouped into a local object without changing
+  zero-growth no-op behavior, display-position snapshot timing, target unit
+  filtering, horizontal or vertical offset formulas, offset application through
+  `addOffset`, `positionOverrides`, or `nodeDecorations`.
 
 ### Breaking Change Analysis
 
@@ -532,6 +554,21 @@ No user-visible behavior scenarios are introduced.
   shape, dependency versions, VS Code compatibility, nested position formulas,
   visible node/edge membership, parent anchor behavior, position override
   behavior, or `engines.vscode` requires separate approval.
+- Slice-1B-R boundary decision:
+  extract `applyGrowthOffsets` input grouping only; do not change zero-growth
+  no-op behavior, display-position snapshot timing, target unit selection,
+  horizontal or vertical growth formulas, offset application through
+  `addOffset`, `positionOverrides`, or `nodeDecorations`. Do not change
+  parser/generated artifacts, graph DTOs, ReactFlow node data shape,
+  dependencies, or VS Code compatibility.
+- Slice-1B-R approval-sensitive scope:
+  implementation may introduce a local input object/type for growth offset
+  application and update the single `applyExpandedChildGrowthOffset` call site
+  inside `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Any
+  change to generated parser artifacts, application flow graph DTOs, ReactFlow
+  node data shape, dependency versions, VS Code compatibility, growth
+  calculations, visible node/edge membership, position override behavior, or
+  `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -555,5 +592,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-Q, should the next slice target `applyGrowthOffsets`
-  many-parameter pressure or pause Slice-1B layout cleanup?
+- After Slice-1B-R, should Slice-1B pause or continue with a total-complexity
+  reduction candidate in `expandedFlowGraphLayout.ts`?
