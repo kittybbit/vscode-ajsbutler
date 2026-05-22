@@ -1045,6 +1045,26 @@ const includeExpandedPanelUnitBounds = ({
   }
 };
 
+const buildExpandedPanelSubtreeBounds = (
+  context: ExpandedFlowGraphBuildContext,
+  expandedUnit: AjsUnit,
+  parentPosition: FlowGraphPosition,
+): FlowGraphBounds => {
+  const subtreeBounds = buildInitialPanelSubtreeBounds(
+    parentPosition,
+    context.metrics,
+  );
+  context.visibleUnitIds.forEach((unitId) =>
+    includeExpandedPanelUnitBounds({
+      context,
+      expandedUnit,
+      subtreeBounds,
+      unitId,
+    }),
+  );
+  return subtreeBounds;
+};
+
 const buildExpandedPanelBounds = (
   context: ExpandedFlowGraphBuildContext,
   expandedUnit: AjsUnit,
@@ -1054,22 +1074,9 @@ const buildExpandedPanelBounds = (
     return undefined;
   }
 
-  const subtreeBounds = buildInitialPanelSubtreeBounds(
-    parentPosition,
-    context.metrics,
-  );
-  for (const unitId of context.visibleUnitIds) {
-    includeExpandedPanelUnitBounds({
-      context,
-      expandedUnit,
-      subtreeBounds,
-      unitId,
-    });
-  }
-
   return buildPanelBoundsFromSubtreeBounds(
     parentPosition,
-    subtreeBounds,
+    buildExpandedPanelSubtreeBounds(context, expandedUnit, parentPosition),
     context.metrics,
   );
 };

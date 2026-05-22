@@ -34,7 +34,7 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select the next Qlty-driven architecture refactoring Slice-1B target after
-   Slice-1B-R; `expandedFlowGraphLayout.ts` still reports high total
+   Slice-1B-S; `expandedFlowGraphLayout.ts` still reports high total
    complexity and needs a fresh approval gate before runtime work.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
@@ -67,8 +67,9 @@ rules in `docs/specs/README.md`, not in this file.
   `includeNodeBounds` extraction; Slice-1B-P completed a focused
   `addVisibleNode` extraction; Slice-1B-Q completed a focused
   `ensureVisibleNestedNode` extraction; Slice-1B-R completed a focused
-  `applyGrowthOffsets` extraction. The next Slice-1B target requires a fresh
-  approval gate.
+  `applyGrowthOffsets` extraction; Slice-1B-S completed a focused
+  `buildExpandedPanelBounds` extraction. The next Slice-1B target requires a
+  fresh approval gate.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

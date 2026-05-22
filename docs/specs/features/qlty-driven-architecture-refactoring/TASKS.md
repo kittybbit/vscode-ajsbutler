@@ -12,7 +12,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B-R implementation is complete.
+  Slice-1B-S implementation is complete.
 - Active slice:
   none; remaining Slice-1B layout candidates require separate approval.
 - Open follow-up:
@@ -127,6 +127,11 @@ active implementation approval remains.
 - [x] Record human approval for Slice-1B-R.
 - [x] Complete Slice-1B-R `applyGrowthOffsets` growth-offset input helper
       extraction.
+- [x] Select Slice-1B-S `buildExpandedPanelBounds` panel-subtree bounds helper
+      extraction as the next implementation candidate.
+- [x] Record human approval for Slice-1B-S.
+- [x] Complete Slice-1B-S `buildExpandedPanelBounds` panel-subtree bounds
+      helper extraction.
 - [ ] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
 - [ ] Complete Slice-2 application orchestration work.
@@ -370,5 +375,17 @@ active implementation approval remains.
   `expandedFlowGraphLayout.ts`, removed the `applyGrowthOffsets`
   many-parameter smell, kept file total complexity at 111, and left total
   complexity reduction as a separate approval candidate.
+- Slice-1B-S targets `buildExpandedPanelBounds` because Qlty reports only high
+  total complexity after Slice-1B-R, the helper still owns parent-position
+  guard plus visible-unit subtree bounds iteration, and existing expanded-flow
+  tests cover panel dimensions, decoration bounds, recursive expansion,
+  `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-S must preserve missing parent-position skip behavior, visible-unit
+  iteration order, expanded panel bounds unit filtering, node and decoration
+  bounds accumulation, panel padding formulas, `positionOverrides`, and
+  `nodeDecorations`.
+- Slice-1B-S kept expanded panel bounds behavior inside
+  `expandedFlowGraphLayout.ts`, extracted subtree bounds collection from
+  `buildExpandedPanelBounds`, and reduced file total complexity from 111 to 109.
 - `buildExpandedFlowGraph.ts` shows repeated orchestration complexity.
 - Domain helpers still contain branch-heavy conditional logic.

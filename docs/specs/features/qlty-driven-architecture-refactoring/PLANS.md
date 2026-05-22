@@ -60,8 +60,8 @@ remaining passive metrics.
 
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
-Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q, and
-Slice-1B-R are complete.
+Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
+Slice-1B-R, and Slice-1B-S are complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -126,6 +126,8 @@ Slice-1B-R are complete.
   nested visibility inputs for `ensureVisibleNestedNode`.
   Slice-1B-R kept growth offset application behavior intact while grouping
   growth offset inputs for `applyGrowthOffsets`.
+  Slice-1B-S kept expanded panel bounds behavior intact while extracting
+  visible-unit subtree bounds collection from `buildExpandedPanelBounds`.
 
 ## Current Slice Candidate
 
@@ -134,7 +136,7 @@ selected through a fresh impact investigation and approval gate.
 
 - Candidate:
   `expandedFlowGraphLayout.ts` still reports high total complexity after
-  Slice-1B-R and may be considered for the next small layout slice.
+  Slice-1B-S and may be considered for another small layout slice.
 
 ## Risks To Control
 

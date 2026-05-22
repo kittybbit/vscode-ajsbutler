@@ -345,6 +345,31 @@ No user-visible behavior scenarios are introduced.
   zero-growth no-op behavior, display-position snapshot timing, target unit
   filtering, horizontal or vertical offset formulas, offset application through
   `addOffset`, `positionOverrides`, or `nodeDecorations`.
+- Slice-1B-S target:
+  `buildExpandedPanelBounds` is the next total-complexity candidate; helper
+  extraction must preserve the missing parent-position guard, visible-unit
+  subtree bounds iteration, expanded-panel bounds filtering, node and
+  decoration bounds accumulation, and panel padding formulas. Impact is local
+  to `expandedFlowGraphLayout.ts`: the helper is called while expanded child
+  growth bounds and node decorations are calculated.
+- Slice-1B-S investigation:
+  `buildExpandedPanelBounds` reads the expanded unit's current
+  `positionOverrides` entry, returns undefined when the parent position is
+  missing, initializes subtree bounds with `buildInitialPanelSubtreeBounds`,
+  iterates `context.visibleUnitIds`, delegates each candidate to
+  `includeExpandedPanelUnitBounds`, and converts the subtree bounds to final
+  panel bounds through `buildPanelBoundsFromSubtreeBounds`. Serena found one
+  direct call path through `getExpandedChildGrowthBounds` and
+  `updateExpandedNodeDecoration`. Existing `buildExpandedFlowGraph.test.ts`
+  coverage exercises panel dimensions, decoration bounds, recursive expansion,
+  `positionOverrides`, and `nodeDecorations`.
+- Slice-1B-S result:
+  `buildExpandedPanelBounds` remains internal to `expandedFlowGraphLayout`,
+  with visible-unit subtree bounds collection extracted into a focused helper
+  without changing missing parent-position skip behavior, visible-unit
+  iteration order, expanded panel bounds filtering, node or decoration bounds
+  inclusion, panel padding formulas, `positionOverrides`, or
+  `nodeDecorations`.
 
 ### Breaking Change Analysis
 
@@ -569,6 +594,20 @@ No user-visible behavior scenarios are introduced.
   node data shape, dependency versions, VS Code compatibility, growth
   calculations, visible node/edge membership, position override behavior, or
   `engines.vscode` requires separate approval.
+- Slice-1B-S boundary decision:
+  extract panel-subtree bounds collection helpers only; do not change missing
+  parent-position skip behavior, visible-unit iteration order, expanded panel
+  bounds unit filtering, node or decoration bounds inclusion, panel padding
+  formulas, `positionOverrides`, or `nodeDecorations`. Do not change
+  parser/generated artifacts, graph DTOs, ReactFlow node data shape,
+  dependencies, or VS Code compatibility.
+- Slice-1B-S approval-sensitive scope:
+  implementation may extract helper(s) used by `buildExpandedPanelBounds`
+  inside `src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts` to reduce
+  total complexity. Any change to generated parser artifacts, application flow
+  graph DTOs, ReactFlow node data shape, dependency versions, VS Code
+  compatibility, panel bound formulas, visible node/edge membership,
+  position override behavior, or `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -592,5 +631,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-1B-R, should Slice-1B pause or continue with a total-complexity
-  reduction candidate in `expandedFlowGraphLayout.ts`?
+- After Slice-1B-S, should Slice-1B pause or continue with another
+  total-complexity reduction candidate in `expandedFlowGraphLayout.ts`?
