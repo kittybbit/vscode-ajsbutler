@@ -34,9 +34,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Start Qlty-driven architecture refactoring Slice-2 investigation: select a
-   concrete application orchestration reduction candidate under
-   `src/application` before requesting implementation approval.
+2. Decide the next Qlty-driven architecture refactoring Slice-2 candidate:
+   continue with unit-list helpers or move to editor-feedback diagnostic
+   orchestration findings.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -72,8 +72,9 @@ rules in `docs/specs/README.md`, not in this file.
   `buildExpandedPanelBounds` extraction. Slice-1B-T scope revision is recorded
   because it did not lower Qlty total complexity. Slice-1B-U investigation is
   complete and the sibling-collision iteration helper extraction is complete.
-  Slice-1B is complete. Slice-2 application orchestration investigation is the
-  next task.
+  Slice-1B is complete. Slice-2-A completed the
+  `buildUnitListLinkedUnits` linked-unit projection helper extraction. No next
+  Slice-2 target is selected.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

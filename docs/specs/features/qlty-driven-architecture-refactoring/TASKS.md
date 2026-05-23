@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-1B flow-viewer component/layout complexity work is complete.
+  Slice-2-A implementation is complete.
 - Active slice:
-  Slice-2 application orchestration reduction investigation is the next task.
+  none; Slice-2-A is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  select a concrete Slice-2 application orchestration candidate and record its
-  impact before requesting implementation approval.
+  decide whether to continue Slice-2 with unit-list helpers or move to
+  editor-feedback diagnostic orchestration findings.
 
 ## Human Approval
 
@@ -145,9 +145,13 @@ active implementation approval remains.
       sibling-collision iteration helper extraction.
 - [x] Complete remaining Slice-1B flow-viewer component/layout complexity
       work.
-- [ ] Select Slice-2 application orchestration reduction candidate.
-- [ ] Record Slice-2 impact investigation.
-- [ ] Request human approval for the selected Slice-2 implementation scope.
+- [x] Select Slice-2-A `buildUnitListLinkedUnits` linked-unit projection helper
+      extraction as the next implementation candidate.
+- [x] Record Slice-2-A impact investigation.
+- [x] Request human approval for the selected Slice-2-A implementation scope.
+- [x] Record human approval for Slice-2-A.
+- [x] Complete Slice-2-A `buildUnitListLinkedUnits` linked-unit projection
+      helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -439,4 +443,23 @@ active implementation approval remains.
 - Slice-2 will start with application orchestration candidate selection. Early
   likely candidates include flow graph builders and unit-list builders under
   `src/application`, with affected tests under `src/test/suite`.
+- Slice-2-A targets `buildUnitListLinkedUnits` because Qlty reports duplicated
+  previous/next linked-unit projection blocks and cognitive complexity 6 in a
+  small application use-case helper.
+- Slice-2-A impact is local to
+  `src/application/unit-list/buildUnitListLinkedUnits.ts`, with direct
+  references from `buildUnitListView` and
+  `buildUnitListLinkedUnits.test.ts`.
+- Slice-2-A must preserve parent lookup through `findParentAjsUnit`,
+  previous-unit filtering by `targetUnitId`, next-unit filtering by
+  `sourceUnitId`, relation order, missing related-unit skips, relation type
+  projection, and `UnitListLinkedUnitView` shape.
+- Existing tests cover direct linked-unit projection through
+  `buildUnitListLinkedUnits.test.ts`; `buildUnitListView.test.ts` covers the
+  unit-list row integration that consumes previous/next linked units.
+- Slice-2-A was approved by the user at 2026-05-22 20:52 JST for
+  `buildUnitListLinkedUnits` linked-unit projection helper extraction only.
+- Slice-2-A kept linked-unit behavior inside `buildUnitListLinkedUnits.ts`,
+  extracted direction-aware relation projection helpers, and removed the
+  duplicated previous/next linked-unit projection smell for the target file.
 - Domain helpers still contain branch-heavy conditional logic.

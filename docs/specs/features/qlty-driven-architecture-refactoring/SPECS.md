@@ -421,6 +421,27 @@ No user-visible behavior scenarios are introduced.
   implementation is approved yet. A concrete Slice-2 candidate must identify
   affected callers, DTO contracts, tests, and desktop/web compatibility before
   implementation approval.
+- Slice-2-A target:
+  `buildUnitListLinkedUnits` is the first application orchestration candidate;
+  helper extraction must preserve previous and next linked-unit projection from
+  parent relations without changing `UnitListLinkedUnitView` or
+  `UnitListRowView`.
+- Slice-2-A investigation:
+  Qlty reports duplicated previous/next projection blocks and cognitive
+  complexity 6 in
+  `src/application/unit-list/buildUnitListLinkedUnits.ts`. Serena found direct
+  production use from `buildUnitListView` and direct test use from
+  `buildUnitListLinkedUnits.test.ts`. The helper reads parent relations through
+  `findParentAjsUnit`, filters incoming links by `targetUnitId`, filters
+  outgoing links by `sourceUnitId`, skips missing related units, and projects
+  id, name, absolute path, and relation type. Existing tests cover direct
+  linked-unit projection and unit-list row integration.
+- Slice-2-A result:
+  `buildUnitListLinkedUnits` remains the application helper consumed by
+  `buildUnitListView`, with direction-aware linked-unit projection extracted
+  locally. The implementation keeps parent lookup, previous/next relation
+  direction, relation order, missing-unit skip behavior, DTO shapes, and
+  presentation behavior unchanged.
 
 ### Breaking Change Analysis
 
@@ -696,6 +717,21 @@ No user-visible behavior scenarios are introduced.
   Parser/generated artifacts, presentation behavior, DTO contracts,
   dependencies, VS Code compatibility, web compatibility, and `engines.vscode`
   must remain unchanged unless separately approved.
+- Slice-2-A boundary decision:
+  extract linked-unit projection helper(s) only; do not change parent lookup,
+  relation filtering direction, relation order, missing related-unit skip
+  behavior, relation type projection, `UnitListLinkedUnitView`,
+  `UnitListRowView`, parser/generated artifacts, presentation components,
+  dependencies, VS Code compatibility, web compatibility, or
+  `engines.vscode`.
+- Slice-2-A approval-sensitive scope:
+  implementation may add local helper(s) in
+  `src/application/unit-list/buildUnitListLinkedUnits.ts` and adjust only the
+  internal implementation of `buildUnitListLinkedUnits`. Any change to
+  exported DTO shapes, callers outside the existing function signature,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
 
 ## Compatibility
 
@@ -719,5 +755,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- Which application orchestration candidate should become Slice-2-A after
-  Qlty findings and reference impact are reviewed?
+- After Slice-2-A, should Slice-2 continue with unit-list helpers or move to
+  editor-feedback diagnostic orchestration findings?

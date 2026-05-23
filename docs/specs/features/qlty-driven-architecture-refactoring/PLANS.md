@@ -136,31 +136,36 @@ Slice-1B-R, Slice-1B-S, and Slice-1B-U are complete. Slice-1B is complete.
 
 ## Current Slice Candidate
 
-Slice-2 application orchestration reduction is the next task and starts with
-candidate selection and impact investigation only.
+No next Slice-2 candidate is selected. Slice-2-A is complete.
 
 - Target:
-  identify the next application-layer orchestration reduction candidate before
-  any runtime implementation.
+  reduce `buildUnitListLinkedUnits` duplication by extracting focused
+  linked-unit projection behavior without changing unit-list row output.
 - Reason:
-  Slice-1B has reduced flow-viewer component/layout complexity enough for this
-  branch phase. The remaining roadmap item is application orchestration
-  duplication and complexity.
+  Qlty reports duplicated previous/next relation projection in
+  `buildUnitListLinkedUnits.ts` and cognitive complexity 6. The helper is a
+  small application use-case boundary with focused tests.
 - Boundary:
-  keep parser, generated artifacts, presentation behavior, graph/list DTOs,
-  VS Code compatibility, web compatibility, dependencies, and `engines.vscode`
-  unchanged until a specific Slice-2 implementation scope is investigated and
-  approved.
+  keep parser, generated artifacts, presentation behavior, `UnitListRowView`
+  and `UnitListLinkedUnitView` shapes, VS Code compatibility, web
+  compatibility, dependencies, and `engines.vscode` unchanged.
 - Expected impact:
-  select one small application-layer candidate for a future approval-gated
-  slice.
+  lower duplication and/or complexity in `buildUnitListLinkedUnits.ts` while
+  preserving previous/next linked-unit projection.
 - Investigation:
-  start with `src/application/flow-graph` and `src/application/unit-list`, then
-  narrow to one candidate based on Qlty findings, references, and existing
-  tests.
+  Qlty application findings include larger editor-feedback diagnostic
+  candidates, but Slice-2-A starts with the smaller unit-list orchestration
+  candidate because it has one production caller and direct regression tests.
+  Serena found direct references from `buildUnitListView` and
+  `buildUnitListLinkedUnits.test.ts`.
 - Test focus:
-  candidate-specific tests under `src/test/suite`, plus desktop/web/build
-  validation once implementation is approved.
+  run `buildUnitListLinkedUnits.test.ts` coverage through the desktop test
+  suite, plus `buildUnitListView.test.ts` and the full required validation once
+  implementation is approved.
+- Status:
+  `buildUnitListLinkedUnits` keeps the same exported signature and projects
+  previous/next linked units through direction-aware local helpers. The target
+  file no longer reports the duplicated previous/next projection smell.
 
 ## Risks To Control
 
