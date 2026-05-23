@@ -466,6 +466,27 @@ No user-visible behavior scenarios are introduced.
   `targetUnitTypes` filtering, `pr`/`ni` precedence, `toNiPriority`
   conversion, parent jobnet inheritance, fallback priority `1`, DTO shapes,
   and presentation behavior.
+- Slice-2-C target:
+  `buildUnitListRemainingGroups` is the next unit-list application
+  orchestration candidate; helper extraction must preserve remaining group
+  projection for full unit-list rows without changing exported DTO shapes or
+  presentation behavior.
+- Slice-2-C investigation:
+  Qlty reports high complexity 27 in
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`. Serena found
+  one production caller from `buildUnitListView`, direct test coverage in
+  `buildUnitListRemainingGroups.test.ts`, and no additional production
+  callers. The helper assembles group1, group2, group3, group4, group5,
+  group8, group9, and groups 12 through 19, including previous/next
+  linked-unit passthrough, parent path formatting, unit-type gated fields,
+  default-aware group13/group14 values, and QUEUE transfer-operation hiding.
+- Slice-2-C result:
+  `buildUnitListRemainingGroups` remains the exported application helper
+  consumed by `buildUnitListView`. Remaining group projection was extracted
+  into local group-specific builders while preserving previous/next
+  linked-unit passthrough, parent path formatting, layout formatting,
+  unit-type gated fields, default-aware group13/group14 values, QUEUE
+  transfer-operation hiding, DTO shapes, and presentation behavior.
 
 ### Breaking Change Analysis
 
@@ -771,6 +792,21 @@ No user-visible behavior scenarios are introduced.
   parser/generated artifacts, presentation behavior, dependency versions, VS
   Code compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-C boundary decision:
+  extract group projection helper(s) only; do not change previous/next
+  linked-unit passthrough, parent path and layout formatting, unit-type gated
+  fields, default-aware group13/group14 values, QUEUE transfer-operation
+  hiding, `UnitListRowView`, `UnitListGroup*View`, parser/generated artifacts,
+  presentation behavior, dependencies, VS Code compatibility, web
+  compatibility, or `engines.vscode`.
+- Slice-2-C approval-sensitive scope:
+  implementation may add local helper(s) or local input types inside
+  `src/application/unit-list/buildUnitListRemainingGroups.ts` while preserving
+  `buildUnitListRemainingGroups` exported signature and its callers. Any
+  change to `buildUnitListView`, exported DTO shapes, parser/generated
+  artifacts, presentation behavior, dependency versions, VS Code
+  compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
 
 ## Compatibility
 
@@ -794,5 +830,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-B, should Slice-2 continue with remaining unit-list helpers or
-  move to editor-feedback diagnostic orchestration findings?
+- After Slice-2-C, should Slice-2 continue with remaining unit-list helper
+  smells or move to editor-feedback diagnostic orchestration findings?

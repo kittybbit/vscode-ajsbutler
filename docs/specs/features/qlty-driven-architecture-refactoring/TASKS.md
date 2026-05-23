@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-B implementation is complete.
+  Slice-2-C implementation is complete.
 - Active slice:
-  none; Slice-2-B is complete and the next Slice-2 target is not selected.
+  none; Slice-2-C is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with remaining unit-list helpers or moves
-  to editor-feedback diagnostic findings.
+  decide whether Slice-2 continues with remaining unit-list helper smells or
+  moves to editor-feedback diagnostic findings.
 
 ## Human Approval
 
@@ -160,6 +160,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-B.
 - [x] Complete Slice-2-B `getPriorityForUnitTypes` priority resolution helper
       extraction.
+- [x] Select Slice-2-C `buildUnitListRemainingGroups` group projection helper
+      extraction as the next implementation candidate.
+- [x] Record Slice-2-C impact investigation.
+- [x] Request human approval for the selected Slice-2-C implementation scope.
+- [x] Record human approval for Slice-2-C.
+- [x] Complete Slice-2-C `buildUnitListRemainingGroups` group projection
+      helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -496,4 +503,33 @@ active implementation approval remains.
   removed. The remaining many-parameter smell is retained because the exported
   signature was explicitly preserved; `toNiPriority` and other helper smells
   remain future Slice-2 candidates.
+- Slice-2-C targets `buildUnitListRemainingGroups` because Qlty reports high
+  complexity 27 in a unit-list application projection helper that assembles
+  group1, group2, group3, group4, group5, group8, group9, and groups 12
+  through 19.
+- Slice-2-C impact is local to
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`, with one
+  production call from `buildUnitListView` and direct regression coverage in
+  `buildUnitListRemainingGroups.test.ts`.
+- Slice-2-C must preserve the exported function signature, previous/next
+  linked-unit passthrough, parent path and layout formatting, unit-type gated
+  fields, default-aware group13/group14 values, QUEUE transfer-operation
+  hiding, all `UnitListGroup*View` shapes, parser/generated artifacts,
+  presentation behavior, VS Code compatibility, web compatibility, and
+  `engines.vscode`.
+- Existing tests cover broad remaining group projection, group13 default-aware
+  timeout/file-monitoring/event timeout behavior, group14 JP1 event sending
+  defaults, and group15 QUEUE transfer-operation hiding through
+  `buildUnitListRemainingGroups.test.ts`; `buildUnitListView.test.ts` covers
+  integration through the full unit-list row builder.
+- Slice-2-C was approved by the user at 2026-05-23 15:21 JST for
+  `buildUnitListRemainingGroups` group projection helper extraction only.
+- Slice-2-C kept the exported signature and remaining group behavior intact
+  while extracting group1, group2, group3, group4, group5, group8, group9, and
+  group12 through group19 projection builders. Qlty metrics for
+  `buildUnitListRemainingGroups.ts` improved from total complexity 31 to 27,
+  and the high-complexity smell for `buildUnitListRemainingGroups` was
+  removed. The remaining `findDefaultAwareParameterValue` many-parameter smell
+  and wait-job unit-type binary-expression smell remain future Slice-2
+  candidates.
 - Domain helpers still contain branch-heavy conditional logic.

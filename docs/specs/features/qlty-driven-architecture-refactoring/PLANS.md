@@ -61,8 +61,8 @@ remaining passive metrics.
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
-Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, and Slice-2-B are complete.
-Slice-1B is complete.
+Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, and Slice-2-C are
+complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -140,19 +140,21 @@ Slice-1B is complete.
   Slice-2-B kept unit-list priority behavior intact while extracting explicit
   priority resolution, cache writes, parent inheritance, and fallback
   resolution from `getPriorityForUnitTypes`.
+  Slice-2-C kept remaining group projection behavior intact while extracting
+  group-specific projection builders from `buildUnitListRemainingGroups`.
 
 ## Current Slice Candidate
 
-No current runtime slice is selected. Slice-2 should next choose between
-remaining unit-list helper complexity and editor-feedback diagnostic
-orchestration findings, then request separate approval before runtime work
-starts.
+No current runtime slice is selected. Slice-2 should next choose between the
+remaining `buildUnitListRemainingGroups` helper smells and editor-feedback
+diagnostic orchestration findings, then request separate approval before
+runtime work starts.
 
 - Recent result:
-  Slice-2-B reduced `unitListViewHelpers.ts` total complexity from 65 to 57
-  and removed the high-complexity and many-returns smells from
-  `getPriorityForUnitTypes` while preserving the exported signature and
-  group7/group11 priority semantics.
+  Slice-2-C reduced `buildUnitListRemainingGroups.ts` total complexity from 31
+  to 27 and removed the high-complexity smell from
+  `buildUnitListRemainingGroups` while preserving the exported signature and
+  remaining group projection semantics.
 
 ## Risks To Control
 

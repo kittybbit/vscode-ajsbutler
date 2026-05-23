@@ -111,11 +111,7 @@ const findGroup15TransferOperation = (
 ): string | undefined =>
   isQueueJob(unit) ? undefined : findAjsUnitParameterValue(unit, key);
 
-export const buildUnitListRemainingGroups = (
-  unit: AjsUnit,
-  previousUnits: UnitListLinkedUnitView[],
-  nextUnits: UnitListLinkedUnitView[],
-): {
+type UnitListRemainingGroupsView = {
   group1: UnitListGroup1View;
   group2: UnitListGroup2View;
   group3: UnitListGroup3View;
@@ -131,199 +127,251 @@ export const buildUnitListRemainingGroups = (
   group17: UnitListGroup17View;
   group18: UnitListGroup18View;
   group19: UnitListGroup19View;
-} => ({
-  group1: {
-    name: unit.name,
-    parentAbsolutePath:
-      unit.depth > 0
-        ? unit.absolutePath.split("/").slice(0, -1).join("/") || "/"
-        : "/",
-    parentId: unit.parentId,
-    unitType: unit.unitType,
-    groupType: unit.groupType,
-    cty: findAjsUnitParameterValue(unit, "cty"),
-    layoutHv: unit.depth > 0 ? `+${unit.layout.h}+${unit.layout.v}` : undefined,
-    size: findAjsUnitParameterValue(unit, "sz"),
-  },
-  group2: {
-    comment: unit.comment,
-    previousUnits,
-    nextUnits,
-    executionAgent: findAjsUnitParameterValue(unit, "ex"),
-    nestedConnectionLimit: findAjsUnitParameterValue(unit, "ncl"),
-    nestedConnectionName: findAjsUnitParameterValue(unit, "ncn"),
-    nestedConnectionService: findAjsUnitParameterValue(unit, "ncsv"),
-    nestedConnectionEnabled: findAjsUnitParameterValue(unit, "ncs"),
-    nestedConnectionExternal: findAjsUnitParameterValue(unit, "ncex"),
-    nestedConnectionHost: findAjsUnitParameterValue(unit, "nchn"),
-  },
-  group3: {
-    hardAttribute: findAjsUnitParameterValue(unit, "ha"),
-    isRecovery: unit.isRecovery,
-    jp1Username: unit.jp1Username,
-    jp1ResourceGroup: unit.jp1ResourceGroup,
-  },
-  group4: {
-    managerHost:
-      unit.unitType === "mg" || unit.unitType === "mn"
-        ? findAjsUnitParameterValue(unit, "mh")
-        : undefined,
-    managerUnit:
-      unit.unitType === "mg" || unit.unitType === "mn"
-        ? findAjsUnitParameterValue(unit, "mu")
-        : undefined,
-  },
-  group5: {
-    startDeadlineDate:
-      unit.unitType === "g"
-        ? findAjsUnitParameterValue(unit, "sdd")
-        : undefined,
-    maximumDuration:
-      unit.unitType === "g" ? findAjsUnitParameterValue(unit, "md") : undefined,
-    startTimeType:
-      unit.unitType === "g"
-        ? findAjsUnitParameterValue(unit, "stt")
-        : undefined,
-    jobGroupType: unit.unitType === "g" ? unit.groupType : undefined,
-  },
-  group8: {
-    nestedConnectorRelease:
-      unit.unitType === "nc"
-        ? findAjsUnitParameterValue(unit, "ncr")
-        : undefined,
-  },
-  group9: {
-    startCondition:
-      unit.unitType === "rc"
-        ? findAjsUnitParameterValue(unit, "cond")
-        : undefined,
-  },
-  group12: {
-    endJudgment: findAjsUnitParameterValue(unit, "ej"),
-    judgmentReturnCode: findAjsUnitParameterValue(unit, "ejc"),
-    lowerReturnCode: findAjsUnitParameterValue(unit, "ejl"),
-    lowerJudgmentValue: findAjsUnitParameterValue(unit, "ejs"),
-    upperComparison: findAjsUnitParameterValue(unit, "ejm"),
-    upperReturnCode: findAjsUnitParameterValue(unit, "ejh"),
-    upperJudgmentValue: findAjsUnitParameterValue(unit, "ejg"),
-    lowerComparison: findAjsUnitParameterValue(unit, "eju"),
-    judgmentValueString: findAjsUnitParameterValue(unit, "ejt"),
-    judgmentValueNumeric: findAjsUnitParameterValue(unit, "eji"),
-    variableName: findAjsUnitParameterValue(unit, "ejv"),
-    judgmentFileName: findAjsUnitParameterValue(unit, "ejf"),
-  },
-  group13: {
-    timeoutInterval: findExecutionIntervalControlJobDefaultAwareParameterValue(
-      unit,
-      "tmitv",
-      DEFAULTS.Tmitv,
-    ),
-    eventTimeout: findExecutionIntervalControlJobDefaultAwareParameterValue(
-      unit,
-      "etn",
-      DEFAULTS.Etn,
-    ),
-    monitoredFileName: findAjsUnitParameterValue(unit, "flwf"),
-    monitoredFileCondition: findFileMonitoringJobDefaultAwareParameterValue(
-      unit,
-      "flwc",
-      DEFAULTS.Flwc,
-    ),
-    monitoredFileCloseMode: findFileMonitoringJobDefaultAwareParameterValue(
-      unit,
-      "flco",
-      DEFAULTS.Flco,
-    ),
-    monitoringInterval: findFileMonitoringJobDefaultAwareParameterValue(
-      unit,
-      "flwi",
-      DEFAULTS.Flwi,
-    ),
-    waitEventId: findAjsUnitParameterValue(unit, "evwid"),
-    waitHostName: findAjsUnitParameterValue(unit, "evhst"),
-    waitMessage: findAjsUnitParameterValue(unit, "evwms"),
-    eventTimeoutAction: findGroup13EventTimeoutAction(unit),
-  },
-  group14: {
-    actionEventId: findAjsUnitParameterValue(unit, "evsid"),
-    actionHostName: findAjsUnitParameterValue(unit, "evhst"),
-    actionMessage: findAjsUnitParameterValue(unit, "evsms"),
-    actionSeverity: findEventSendingJobDefaultAwareParameterValue(
-      unit,
-      "evssv",
-      DEFAULTS.Evssv,
-    ),
-    actionStartType: findEventSendingJobDefaultAwareParameterValue(
-      unit,
-      "evsrt",
-      DEFAULTS.Evsrt,
-    ),
-    actionInterval: findEventSendingJobDefaultAwareParameterValue(
-      unit,
-      "evspl",
-      DEFAULTS.Evspl,
-    ),
-    actionCount: findEventSendingJobDefaultAwareParameterValue(
-      unit,
-      "evsrc",
-      DEFAULTS.Evsrc,
-    ),
-    platformMethod: findAjsUnitParameterValue(unit, "pfm"),
-  },
-  group15: {
-    executionUser: findAjsUnitParameterValue(unit, "eu"),
-    executionTimeMonitor: findAjsUnitParameterValue(unit, "etm"),
-    fileDescriptor: findAjsUnitParameterValue(unit, "fd"),
-    jobType: findAjsUnitParameterValue(unit, "jty"),
-    terminationStatus1: findAjsUnitParameterValue(unit, "ts1"),
-    terminationDelay1: findAjsUnitParameterValue(unit, "td1"),
-    terminationOperation1: findGroup15TransferOperation(unit, "top1"),
-    terminationStatus2: findAjsUnitParameterValue(unit, "ts2"),
-    terminationDelay2: findAjsUnitParameterValue(unit, "td2"),
-    terminationOperation2: findGroup15TransferOperation(unit, "top2"),
-    terminationStatus3: findAjsUnitParameterValue(unit, "ts3"),
-    terminationDelay3: findAjsUnitParameterValue(unit, "td3"),
-    terminationOperation3: findGroup15TransferOperation(unit, "top3"),
-    terminationStatus4: findAjsUnitParameterValue(unit, "ts4"),
-    terminationDelay4: findAjsUnitParameterValue(unit, "td4"),
-    terminationOperation4: findGroup15TransferOperation(unit, "top4"),
-  },
-  group16: {
-    endWaitUnitName: findAjsUnitParameterValue(unit, "eun"),
-    waitMode: findAjsUnitParameterValue(unit, "mm"),
-    nestedMessageGeneration: findAjsUnitParameterValue(unit, "nmg"),
-    unitEndMonitoring: findAjsUnitParameterValue(unit, "uem"),
-    executionGenerationAction: findAjsUnitParameterValue(unit, "ega"),
-  },
-  group17: {
-    toolParameters:
-      unit.unitType === "cpj" || unit.unitType === "rcpj"
-        ? findAjsUnitParameterValue(unit, "prm")
-        : undefined,
-    toolEnvironment:
-      unit.unitType === "cpj" || unit.unitType === "rcpj"
-        ? findAjsUnitParameterValue(unit, "env")
-        : undefined,
-  },
-  group18: {
-    destinationAgent: findAjsUnitParameterValue(unit, "da"),
-    flexibleJobGroup: findAjsUnitParameterValue(unit, "fxg"),
-    executionAgent:
-      unit.unitType === "fxj" || unit.unitType === "rfxj"
-        ? findAjsUnitParameterValue(unit, "ex")
-        : undefined,
-  },
-  group19: {
-    httpConnectionConfig: findAjsUnitParameterValue(unit, "htcfl"),
-    httpKind: findAjsUnitParameterValue(unit, "htknd"),
-    httpExecutionMode: findAjsUnitParameterValue(unit, "htexm"),
-    httpRequestFile: findAjsUnitParameterValue(unit, "htrqf"),
-    httpRequestEncoding: findAjsUnitParameterValue(unit, "htrqu"),
-    httpRequestMethod: findAjsUnitParameterValue(unit, "htrqm"),
-    httpStatusFile: findAjsUnitParameterValue(unit, "htstf"),
-    httpStatusPoint: findAjsUnitParameterValue(unit, "htspt"),
-    httpResponseHeaderFile: findAjsUnitParameterValue(unit, "htrhf"),
-    httpResponseBodyFile: findAjsUnitParameterValue(unit, "htrbf"),
-    httpCodeMap: findAjsUnitParameterValue(unit, "htcdm"),
-  },
+};
+
+const isManagerUnit = (unit: AjsUnit): boolean =>
+  unit.unitType === "mg" || unit.unitType === "mn";
+
+const isJobGroup = (unit: AjsUnit): boolean => unit.unitType === "g";
+
+const isNestedConnector = (unit: AjsUnit): boolean => unit.unitType === "nc";
+
+const isStartCondition = (unit: AjsUnit): boolean => unit.unitType === "rc";
+
+const isCustomJob = (unit: AjsUnit): boolean =>
+  unit.unitType === "cpj" || unit.unitType === "rcpj";
+
+const isFlexibleJob = (unit: AjsUnit): boolean =>
+  unit.unitType === "fxj" || unit.unitType === "rfxj";
+
+const parentAbsolutePath = (unit: AjsUnit): string =>
+  unit.depth > 0
+    ? unit.absolutePath.split("/").slice(0, -1).join("/") || "/"
+    : "/";
+
+const layoutHv = (unit: AjsUnit): string | undefined =>
+  unit.depth > 0 ? `+${unit.layout.h}+${unit.layout.v}` : undefined;
+
+const findJobGroupParameterValue = (
+  unit: AjsUnit,
+  key: ParamSymbol,
+): string | undefined =>
+  isJobGroup(unit) ? findAjsUnitParameterValue(unit, key) : undefined;
+
+const buildGroup1View = (unit: AjsUnit): UnitListGroup1View => ({
+  name: unit.name,
+  parentAbsolutePath: parentAbsolutePath(unit),
+  parentId: unit.parentId,
+  unitType: unit.unitType,
+  groupType: unit.groupType,
+  cty: findAjsUnitParameterValue(unit, "cty"),
+  layoutHv: layoutHv(unit),
+  size: findAjsUnitParameterValue(unit, "sz"),
+});
+
+const buildGroup2View = (
+  unit: AjsUnit,
+  previousUnits: UnitListLinkedUnitView[],
+  nextUnits: UnitListLinkedUnitView[],
+): UnitListGroup2View => ({
+  comment: unit.comment,
+  previousUnits,
+  nextUnits,
+  executionAgent: findAjsUnitParameterValue(unit, "ex"),
+  nestedConnectionLimit: findAjsUnitParameterValue(unit, "ncl"),
+  nestedConnectionName: findAjsUnitParameterValue(unit, "ncn"),
+  nestedConnectionService: findAjsUnitParameterValue(unit, "ncsv"),
+  nestedConnectionEnabled: findAjsUnitParameterValue(unit, "ncs"),
+  nestedConnectionExternal: findAjsUnitParameterValue(unit, "ncex"),
+  nestedConnectionHost: findAjsUnitParameterValue(unit, "nchn"),
+});
+
+const buildGroup3View = (unit: AjsUnit): UnitListGroup3View => ({
+  hardAttribute: findAjsUnitParameterValue(unit, "ha"),
+  isRecovery: unit.isRecovery,
+  jp1Username: unit.jp1Username,
+  jp1ResourceGroup: unit.jp1ResourceGroup,
+});
+
+const buildGroup4View = (unit: AjsUnit): UnitListGroup4View => ({
+  managerHost: isManagerUnit(unit)
+    ? findAjsUnitParameterValue(unit, "mh")
+    : undefined,
+  managerUnit: isManagerUnit(unit)
+    ? findAjsUnitParameterValue(unit, "mu")
+    : undefined,
+});
+
+const buildGroup5View = (unit: AjsUnit): UnitListGroup5View => ({
+  startDeadlineDate: findJobGroupParameterValue(unit, "sdd"),
+  maximumDuration: findJobGroupParameterValue(unit, "md"),
+  startTimeType: findJobGroupParameterValue(unit, "stt"),
+  jobGroupType: isJobGroup(unit) ? unit.groupType : undefined,
+});
+
+const buildGroup8View = (unit: AjsUnit): UnitListGroup8View => ({
+  nestedConnectorRelease: isNestedConnector(unit)
+    ? findAjsUnitParameterValue(unit, "ncr")
+    : undefined,
+});
+
+const buildGroup9View = (unit: AjsUnit): UnitListGroup9View => ({
+  startCondition: isStartCondition(unit)
+    ? findAjsUnitParameterValue(unit, "cond")
+    : undefined,
+});
+
+const buildGroup12View = (unit: AjsUnit): UnitListGroup12View => ({
+  endJudgment: findAjsUnitParameterValue(unit, "ej"),
+  judgmentReturnCode: findAjsUnitParameterValue(unit, "ejc"),
+  lowerReturnCode: findAjsUnitParameterValue(unit, "ejl"),
+  lowerJudgmentValue: findAjsUnitParameterValue(unit, "ejs"),
+  upperComparison: findAjsUnitParameterValue(unit, "ejm"),
+  upperReturnCode: findAjsUnitParameterValue(unit, "ejh"),
+  upperJudgmentValue: findAjsUnitParameterValue(unit, "ejg"),
+  lowerComparison: findAjsUnitParameterValue(unit, "eju"),
+  judgmentValueString: findAjsUnitParameterValue(unit, "ejt"),
+  judgmentValueNumeric: findAjsUnitParameterValue(unit, "eji"),
+  variableName: findAjsUnitParameterValue(unit, "ejv"),
+  judgmentFileName: findAjsUnitParameterValue(unit, "ejf"),
+});
+
+const buildGroup13View = (unit: AjsUnit): UnitListGroup13View => ({
+  timeoutInterval: findExecutionIntervalControlJobDefaultAwareParameterValue(
+    unit,
+    "tmitv",
+    DEFAULTS.Tmitv,
+  ),
+  eventTimeout: findExecutionIntervalControlJobDefaultAwareParameterValue(
+    unit,
+    "etn",
+    DEFAULTS.Etn,
+  ),
+  monitoredFileName: findAjsUnitParameterValue(unit, "flwf"),
+  monitoredFileCondition: findFileMonitoringJobDefaultAwareParameterValue(
+    unit,
+    "flwc",
+    DEFAULTS.Flwc,
+  ),
+  monitoredFileCloseMode: findFileMonitoringJobDefaultAwareParameterValue(
+    unit,
+    "flco",
+    DEFAULTS.Flco,
+  ),
+  monitoringInterval: findFileMonitoringJobDefaultAwareParameterValue(
+    unit,
+    "flwi",
+    DEFAULTS.Flwi,
+  ),
+  waitEventId: findAjsUnitParameterValue(unit, "evwid"),
+  waitHostName: findAjsUnitParameterValue(unit, "evhst"),
+  waitMessage: findAjsUnitParameterValue(unit, "evwms"),
+  eventTimeoutAction: findGroup13EventTimeoutAction(unit),
+});
+
+const buildGroup14View = (unit: AjsUnit): UnitListGroup14View => ({
+  actionEventId: findAjsUnitParameterValue(unit, "evsid"),
+  actionHostName: findAjsUnitParameterValue(unit, "evhst"),
+  actionMessage: findAjsUnitParameterValue(unit, "evsms"),
+  actionSeverity: findEventSendingJobDefaultAwareParameterValue(
+    unit,
+    "evssv",
+    DEFAULTS.Evssv,
+  ),
+  actionStartType: findEventSendingJobDefaultAwareParameterValue(
+    unit,
+    "evsrt",
+    DEFAULTS.Evsrt,
+  ),
+  actionInterval: findEventSendingJobDefaultAwareParameterValue(
+    unit,
+    "evspl",
+    DEFAULTS.Evspl,
+  ),
+  actionCount: findEventSendingJobDefaultAwareParameterValue(
+    unit,
+    "evsrc",
+    DEFAULTS.Evsrc,
+  ),
+  platformMethod: findAjsUnitParameterValue(unit, "pfm"),
+});
+
+const buildGroup15View = (unit: AjsUnit): UnitListGroup15View => ({
+  executionUser: findAjsUnitParameterValue(unit, "eu"),
+  executionTimeMonitor: findAjsUnitParameterValue(unit, "etm"),
+  fileDescriptor: findAjsUnitParameterValue(unit, "fd"),
+  jobType: findAjsUnitParameterValue(unit, "jty"),
+  terminationStatus1: findAjsUnitParameterValue(unit, "ts1"),
+  terminationDelay1: findAjsUnitParameterValue(unit, "td1"),
+  terminationOperation1: findGroup15TransferOperation(unit, "top1"),
+  terminationStatus2: findAjsUnitParameterValue(unit, "ts2"),
+  terminationDelay2: findAjsUnitParameterValue(unit, "td2"),
+  terminationOperation2: findGroup15TransferOperation(unit, "top2"),
+  terminationStatus3: findAjsUnitParameterValue(unit, "ts3"),
+  terminationDelay3: findAjsUnitParameterValue(unit, "td3"),
+  terminationOperation3: findGroup15TransferOperation(unit, "top3"),
+  terminationStatus4: findAjsUnitParameterValue(unit, "ts4"),
+  terminationDelay4: findAjsUnitParameterValue(unit, "td4"),
+  terminationOperation4: findGroup15TransferOperation(unit, "top4"),
+});
+
+const buildGroup16View = (unit: AjsUnit): UnitListGroup16View => ({
+  endWaitUnitName: findAjsUnitParameterValue(unit, "eun"),
+  waitMode: findAjsUnitParameterValue(unit, "mm"),
+  nestedMessageGeneration: findAjsUnitParameterValue(unit, "nmg"),
+  unitEndMonitoring: findAjsUnitParameterValue(unit, "uem"),
+  executionGenerationAction: findAjsUnitParameterValue(unit, "ega"),
+});
+
+const buildGroup17View = (unit: AjsUnit): UnitListGroup17View => ({
+  toolParameters: isCustomJob(unit)
+    ? findAjsUnitParameterValue(unit, "prm")
+    : undefined,
+  toolEnvironment: isCustomJob(unit)
+    ? findAjsUnitParameterValue(unit, "env")
+    : undefined,
+});
+
+const buildGroup18View = (unit: AjsUnit): UnitListGroup18View => ({
+  destinationAgent: findAjsUnitParameterValue(unit, "da"),
+  flexibleJobGroup: findAjsUnitParameterValue(unit, "fxg"),
+  executionAgent: isFlexibleJob(unit)
+    ? findAjsUnitParameterValue(unit, "ex")
+    : undefined,
+});
+
+const buildGroup19View = (unit: AjsUnit): UnitListGroup19View => ({
+  httpConnectionConfig: findAjsUnitParameterValue(unit, "htcfl"),
+  httpKind: findAjsUnitParameterValue(unit, "htknd"),
+  httpExecutionMode: findAjsUnitParameterValue(unit, "htexm"),
+  httpRequestFile: findAjsUnitParameterValue(unit, "htrqf"),
+  httpRequestEncoding: findAjsUnitParameterValue(unit, "htrqu"),
+  httpRequestMethod: findAjsUnitParameterValue(unit, "htrqm"),
+  httpStatusFile: findAjsUnitParameterValue(unit, "htstf"),
+  httpStatusPoint: findAjsUnitParameterValue(unit, "htspt"),
+  httpResponseHeaderFile: findAjsUnitParameterValue(unit, "htrhf"),
+  httpResponseBodyFile: findAjsUnitParameterValue(unit, "htrbf"),
+  httpCodeMap: findAjsUnitParameterValue(unit, "htcdm"),
+});
+
+export const buildUnitListRemainingGroups = (
+  unit: AjsUnit,
+  previousUnits: UnitListLinkedUnitView[],
+  nextUnits: UnitListLinkedUnitView[],
+): UnitListRemainingGroupsView => ({
+  group1: buildGroup1View(unit),
+  group2: buildGroup2View(unit, previousUnits, nextUnits),
+  group3: buildGroup3View(unit),
+  group4: buildGroup4View(unit),
+  group5: buildGroup5View(unit),
+  group8: buildGroup8View(unit),
+  group9: buildGroup9View(unit),
+  group12: buildGroup12View(unit),
+  group13: buildGroup13View(unit),
+  group14: buildGroup14View(unit),
+  group15: buildGroup15View(unit),
+  group16: buildGroup16View(unit),
+  group17: buildGroup17View(unit),
+  group18: buildGroup18View(unit),
+  group19: buildGroup19View(unit),
 });

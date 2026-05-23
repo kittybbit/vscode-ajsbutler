@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select the next Qlty-driven architecture refactoring Slice-2 target:
-   continue with remaining unit-list helper complexity or move to
-   editor-feedback diagnostic orchestration findings.
+   continue with remaining unit-list helper smells or move to editor-feedback
+   diagnostic orchestration findings.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -75,7 +75,8 @@ rules in `docs/specs/README.md`, not in this file.
   Slice-1B is complete. Slice-2-A completed the
   `buildUnitListLinkedUnits` linked-unit projection helper extraction.
   Slice-2-B completed the `getPriorityForUnitTypes` priority resolution helper
-  extraction. The next Slice-2 target is not selected yet.
+  extraction. Slice-2-C completed the `buildUnitListRemainingGroups` group
+  projection helper extraction. The next Slice-2 target is not selected yet.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
