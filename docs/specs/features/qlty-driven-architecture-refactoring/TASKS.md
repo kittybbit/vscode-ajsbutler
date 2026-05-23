@@ -12,19 +12,20 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-A implementation is complete.
+  Slice-2-B implementation is complete.
 - Active slice:
-  none; Slice-2-A is complete and the next Slice-2 target is not selected.
+  none; Slice-2-B is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether to continue Slice-2 with unit-list helpers or move to
-  editor-feedback diagnostic orchestration findings.
+  decide whether Slice-2 continues with remaining unit-list helpers or moves
+  to editor-feedback diagnostic findings.
 
 ## Human Approval
 
 - Status: Pending
 - Approved at:
+  none
 - Approved scope:
-  none while approval is pending.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -152,6 +153,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-A.
 - [x] Complete Slice-2-A `buildUnitListLinkedUnits` linked-unit projection
       helper extraction.
+- [x] Select Slice-2-B `getPriorityForUnitTypes` priority resolution helper
+      extraction as the next implementation candidate.
+- [x] Record Slice-2-B impact investigation.
+- [x] Request human approval for the selected Slice-2-B implementation scope.
+- [x] Record human approval for Slice-2-B.
+- [x] Complete Slice-2-B `getPriorityForUnitTypes` priority resolution helper
+      extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -462,4 +470,30 @@ active implementation approval remains.
 - Slice-2-A kept linked-unit behavior inside `buildUnitListLinkedUnits.ts`,
   extracted direction-aware relation projection helpers, and removed the
   duplicated previous/next linked-unit projection smell for the target file.
+- Slice-2-B targets `getPriorityForUnitTypes` because Qlty reports high
+  complexity 24, many returns, and a many-parameter smell in a shared
+  unit-list priority helper.
+- Slice-2-B impact is local to
+  `src/application/unit-list/unitListViewHelpers.ts`, with direct callers from
+  `buildUnitListGroup7View`, `buildUnitListGroup11View`, the helper's parent
+  priority recursion, and `unitListViewHelpers.test.ts`.
+- Slice-2-B must preserve cache lookup and writes through `priorityById`,
+  `targetUnitTypes` eligibility, `pr`/`ni` precedence by parameter position,
+  `ni` conversion through `toNiPriority`, parent jobnet inheritance for
+  `n`/`rn`, fallback priority `1`, and the exported function signature unless
+  separate approval is granted.
+- Existing tests cover `ni`, `pr` precedence, parent inheritance, and
+  queue-job priority conversion through `unitListViewHelpers.test.ts`;
+  `buildUnitListPriorityViews.test.ts` and `buildUnitListView.test.ts` cover
+  integration through group7/group11 views.
+- Slice-2-B was approved by the user at 2026-05-23 14:53 JST for
+  `getPriorityForUnitTypes` priority resolution helper extraction only.
+- Slice-2-B kept the exported signature and priority behavior intact while
+  extracting cache writes, explicit priority resolution, parent-priority
+  inheritance, and fallback resolution into local helpers. Qlty metrics for
+  `unitListViewHelpers.ts` improved from total complexity 65 to 57, and the
+  high-complexity and many-returns smells for `getPriorityForUnitTypes` were
+  removed. The remaining many-parameter smell is retained because the exported
+  signature was explicitly preserved; `toNiPriority` and other helper smells
+  remain future Slice-2 candidates.
 - Domain helpers still contain branch-heavy conditional logic.

@@ -62,6 +62,78 @@ const toNiPriority = (value: string): number => {
   return 1;
 };
 
+const parentPriorityUnitTypes: readonly AjsUnitType[] = ["n", "rn"];
+
+type ExplicitPriority = {
+  priority: number;
+  position: number;
+};
+
+type ParentPriorityInput = {
+  document: AjsDocument;
+  unit: AjsUnit;
+  priorityById: Map<string, number>;
+};
+
+const cachePriority = (
+  priorityById: Map<string, number>,
+  unitId: string,
+  priority: number,
+) => {
+  priorityById.set(unitId, priority);
+  return priority;
+};
+
+const explicitPrPriority = (unit: AjsUnit): ExplicitPriority | undefined => {
+  const pr = findAjsUnitParameter(unit, "pr");
+  return pr?.value !== undefined && pr.value !== ""
+    ? { priority: Number(pr.value), position: pr.position ?? -1 }
+    : undefined;
+};
+
+const explicitNiPriority = (unit: AjsUnit): ExplicitPriority | undefined => {
+  const ni = findAjsUnitParameter(unit, "ni");
+  return ni
+    ? { priority: toNiPriority(ni.value), position: ni.position ?? -1 }
+    : undefined;
+};
+
+const laterExplicitPriority = (
+  pr: ExplicitPriority,
+  ni: ExplicitPriority,
+): number => (pr.position > ni.position ? pr.priority : ni.priority);
+
+const resolveExplicitPriority = (unit: AjsUnit): number | undefined => {
+  const pr = explicitPrPriority(unit);
+  const ni = explicitNiPriority(unit);
+
+  return pr && ni
+    ? laterExplicitPriority(pr, ni)
+    : (pr?.priority ?? ni?.priority);
+};
+
+const isParentPrioritySource = (unit: AjsUnit): boolean =>
+  parentPriorityUnitTypes.includes(unit.unitType);
+
+const resolveParentPriority = ({
+  document,
+  unit,
+  priorityById,
+}: ParentPriorityInput): number | undefined => {
+  const parent = findParentAjsUnit(document, unit);
+  return parent && isParentPrioritySource(parent)
+    ? getPriorityForUnitTypes(
+        document,
+        parent,
+        priorityById,
+        parentPriorityUnitTypes,
+      )
+    : undefined;
+};
+
+const resolveUncachedPriority = (input: ParentPriorityInput): number =>
+  resolveExplicitPriority(input.unit) ?? resolveParentPriority(input) ?? 1;
+
 export const getPriorityForUnitTypes = (
   document: AjsDocument,
   unit: AjsUnit,
@@ -76,45 +148,11 @@ export const getPriorityForUnitTypes = (
     return undefined;
   }
 
-  const pr = findAjsUnitParameter(unit, "pr");
-  const ni = findAjsUnitParameter(unit, "ni");
-
-  const prPriority =
-    pr && pr.value !== undefined && pr.value !== ""
-      ? Number(pr.value)
-      : undefined;
-  const niPriority = ni ? toNiPriority(ni.value) : undefined;
-
-  if (prPriority !== undefined && niPriority !== undefined) {
-    const priority =
-      (pr.position ?? -1) > (ni.position ?? -1) ? prPriority : niPriority;
-    priorityById.set(unit.id, priority);
-    return priority;
-  }
-  if (prPriority !== undefined) {
-    priorityById.set(unit.id, prPriority);
-    return prPriority;
-  }
-  if (niPriority !== undefined) {
-    priorityById.set(unit.id, niPriority);
-    return niPriority;
-  }
-
-  const parent = findParentAjsUnit(document, unit);
-  if (parent && (parent.unitType === "n" || parent.unitType === "rn")) {
-    const parentPriority = getPriorityForUnitTypes(
-      document,
-      parent,
-      priorityById,
-      ["n", "rn"],
-    );
-    if (parentPriority !== undefined) {
-      priorityById.set(unit.id, parentPriority);
-      return parentPriority;
-    }
-  }
-  priorityById.set(unit.id, 1);
-  return 1;
+  return cachePriority(
+    priorityById,
+    unit.id,
+    resolveUncachedPriority({ document, unit, priorityById }),
+  );
 };
 
 export const parseLnParentRule = (value: string): string =>

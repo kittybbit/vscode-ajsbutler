@@ -442,6 +442,30 @@ No user-visible behavior scenarios are introduced.
   locally. The implementation keeps parent lookup, previous/next relation
   direction, relation order, missing-unit skip behavior, DTO shapes, and
   presentation behavior unchanged.
+- Slice-2-B target:
+  `getPriorityForUnitTypes` is the next unit-list application orchestration
+  candidate; helper extraction must preserve priority resolution for group7
+  and group11 unit-list views without changing exported DTO shapes or
+  presentation behavior.
+- Slice-2-B investigation:
+  Qlty reports high complexity 24, many returns, and a many-parameter smell in
+  `src/application/unit-list/unitListViewHelpers.ts`. Serena found direct
+  production callers from `buildUnitListGroup7View` and
+  `buildUnitListGroup11View`, recursive parent-priority lookup from
+  `getPriorityForUnitTypes` itself, and direct test coverage in
+  `unitListViewHelpers.test.ts`. The helper resolves cached priority, skips
+  unsupported target unit types, reads explicit `pr` and `ni` parameters,
+  chooses explicit precedence by parameter position, inherits from parent
+  jobnets of type `n`/`rn`, caches resolved values, and falls back to priority
+  `1`.
+- Slice-2-B result:
+  `getPriorityForUnitTypes` remains the exported application helper consumed
+  by group7 and group11 priority builders. Explicit priority resolution,
+  cache writes, parent-priority inheritance, and fallback resolution were
+  extracted locally while preserving cache lookup/write semantics,
+  `targetUnitTypes` filtering, `pr`/`ni` precedence, `toNiPriority`
+  conversion, parent jobnet inheritance, fallback priority `1`, DTO shapes,
+  and presentation behavior.
 
 ### Breaking Change Analysis
 
@@ -732,6 +756,21 @@ No user-visible behavior scenarios are introduced.
   parser/generated artifacts, presentation behavior, dependency versions, VS
   Code compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-B boundary decision:
+  extract priority resolution helper(s) only; do not change cache lookup/write
+  semantics, supported target unit filtering, `pr`/`ni` parsing and precedence,
+  `toNiPriority` conversion, parent jobnet inheritance, fallback value,
+  exported DTO shapes, parser/generated artifacts, presentation behavior,
+  dependencies, VS Code compatibility, web compatibility, or
+  `engines.vscode`.
+- Slice-2-B approval-sensitive scope:
+  implementation may add local helper(s) or local input types inside
+  `src/application/unit-list/unitListViewHelpers.ts` while preserving
+  `getPriorityForUnitTypes` exported signature and its callers. Any change to
+  `buildUnitListGroup7View`, `buildUnitListGroup11View`, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
 
 ## Compatibility
 
@@ -755,5 +794,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-A, should Slice-2 continue with unit-list helpers or move to
-  editor-feedback diagnostic orchestration findings?
+- After Slice-2-B, should Slice-2 continue with remaining unit-list helpers or
+  move to editor-feedback diagnostic orchestration findings?

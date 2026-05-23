@@ -61,7 +61,8 @@ remaining passive metrics.
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
-Slice-1B-R, Slice-1B-S, and Slice-1B-U are complete. Slice-1B is complete.
+Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, and Slice-2-B are complete.
+Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -133,39 +134,25 @@ Slice-1B-R, Slice-1B-S, and Slice-1B-U are complete. Slice-1B is complete.
   not lower Qlty total complexity from 109.
   Slice-1B-U kept sibling collision behavior intact while extracting resolved
   sibling item iteration from `resolveSiblingSubtreeCollisions`.
+  Slice-2-A kept linked-unit projection behavior intact while extracting
+  direction-aware relation projection helpers from
+  `buildUnitListLinkedUnits`.
+  Slice-2-B kept unit-list priority behavior intact while extracting explicit
+  priority resolution, cache writes, parent inheritance, and fallback
+  resolution from `getPriorityForUnitTypes`.
 
 ## Current Slice Candidate
 
-No next Slice-2 candidate is selected. Slice-2-A is complete.
+No current runtime slice is selected. Slice-2 should next choose between
+remaining unit-list helper complexity and editor-feedback diagnostic
+orchestration findings, then request separate approval before runtime work
+starts.
 
-- Target:
-  reduce `buildUnitListLinkedUnits` duplication by extracting focused
-  linked-unit projection behavior without changing unit-list row output.
-- Reason:
-  Qlty reports duplicated previous/next relation projection in
-  `buildUnitListLinkedUnits.ts` and cognitive complexity 6. The helper is a
-  small application use-case boundary with focused tests.
-- Boundary:
-  keep parser, generated artifacts, presentation behavior, `UnitListRowView`
-  and `UnitListLinkedUnitView` shapes, VS Code compatibility, web
-  compatibility, dependencies, and `engines.vscode` unchanged.
-- Expected impact:
-  lower duplication and/or complexity in `buildUnitListLinkedUnits.ts` while
-  preserving previous/next linked-unit projection.
-- Investigation:
-  Qlty application findings include larger editor-feedback diagnostic
-  candidates, but Slice-2-A starts with the smaller unit-list orchestration
-  candidate because it has one production caller and direct regression tests.
-  Serena found direct references from `buildUnitListView` and
-  `buildUnitListLinkedUnits.test.ts`.
-- Test focus:
-  run `buildUnitListLinkedUnits.test.ts` coverage through the desktop test
-  suite, plus `buildUnitListView.test.ts` and the full required validation once
-  implementation is approved.
-- Status:
-  `buildUnitListLinkedUnits` keeps the same exported signature and projects
-  previous/next linked units through direction-aware local helpers. The target
-  file no longer reports the duplicated previous/next projection smell.
+- Recent result:
+  Slice-2-B reduced `unitListViewHelpers.ts` total complexity from 65 to 57
+  and removed the high-complexity and many-returns smells from
+  `getPriorityForUnitTypes` while preserving the exported signature and
+  group7/group11 priority semantics.
 
 ## Risks To Control
 

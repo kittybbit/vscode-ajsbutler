@@ -22,8 +22,8 @@ rules in `docs/specs/README.md`, not in this file.
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
 - Qlty-driven architecture refactoring has completed the flow-viewer
-  component/layout phase and moves next to application orchestration
-  investigation.
+  component/layout phase and is continuing application orchestration
+  reduction one approved target at a time.
 - Completed feature folders should be removed once their durable requirements
   are represented in `docs/requirements/use-cases/`, `docs/specs/roadmap.md`,
   or `docs/specs/architecture.md`.
@@ -34,9 +34,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Decide the next Qlty-driven architecture refactoring Slice-2 candidate:
-   continue with unit-list helpers or move to editor-feedback diagnostic
-   orchestration findings.
+2. Select the next Qlty-driven architecture refactoring Slice-2 target:
+   continue with remaining unit-list helper complexity or move to
+   editor-feedback diagnostic orchestration findings.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -73,8 +73,9 @@ rules in `docs/specs/README.md`, not in this file.
   because it did not lower Qlty total complexity. Slice-1B-U investigation is
   complete and the sibling-collision iteration helper extraction is complete.
   Slice-1B is complete. Slice-2-A completed the
-  `buildUnitListLinkedUnits` linked-unit projection helper extraction. No next
-  Slice-2 target is selected.
+  `buildUnitListLinkedUnits` linked-unit projection helper extraction.
+  Slice-2-B completed the `getPriorityForUnitTypes` priority resolution helper
+  extraction. The next Slice-2 target is not selected yet.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
