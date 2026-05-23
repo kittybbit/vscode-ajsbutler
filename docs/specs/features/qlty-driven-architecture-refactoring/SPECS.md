@@ -487,6 +487,25 @@ No user-visible behavior scenarios are introduced.
   linked-unit passthrough, parent path formatting, layout formatting,
   unit-type gated fields, default-aware group13/group14 values, QUEUE
   transfer-operation hiding, DTO shapes, and presentation behavior.
+- Slice-2-D target:
+  `buildUnitListRemainingGroups` still has local helper smells after Slice-2-C;
+  default-aware lookup input grouping and wait-job unit-type membership
+  extraction must preserve group13/group14 default-aware projection behavior.
+- Slice-2-D investigation:
+  Qlty reports a many-parameter smell in
+  `findDefaultAwareParameterValue` and a complex binary expression in
+  `isWaitJobWithGroup13TimeoutAction`. Serena found
+  `findDefaultAwareParameterValue` referenced only by local default-aware
+  wrappers and `isWaitJobWithGroup13TimeoutAction` referenced only by
+  `findGroup13EventTimeoutAction`. The behavior flows outward through
+  group13 timeout interval, event timeout, file monitoring defaults, wait-job
+  event timeout action defaults, and group14 event-sending defaults.
+- Slice-2-D result:
+  `buildUnitListRemainingGroups` keeps its exported signature and local
+  group13/group14 projection behavior. Default-aware parameter lookup inputs
+  were grouped into a local input type, and group13 wait-job timeout-action
+  eligibility now uses a local unit-type membership constant while preserving
+  the same unit-type set and fallback defaults.
 
 ### Breaking Change Analysis
 
@@ -807,6 +826,21 @@ No user-visible behavior scenarios are introduced.
   artifacts, presentation behavior, dependency versions, VS Code
   compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-D boundary decision:
+  clean up default-aware helper inputs and group13 wait-job unit-type
+  membership only; do not change default-aware lookup semantics, fallback
+  defaults, wait-job unit-type membership, group13/group14 output,
+  `UnitListRowView`, `UnitListGroup*View`, parser/generated artifacts,
+  presentation behavior, dependencies, VS Code compatibility, web
+  compatibility, or `engines.vscode`.
+- Slice-2-D approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local input
+  types inside `src/application/unit-list/buildUnitListRemainingGroups.ts`
+  while preserving `buildUnitListRemainingGroups` exported signature and its
+  callers. Any change to `buildUnitListView`, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
 
 ## Compatibility
 
@@ -830,5 +864,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-C, should Slice-2 continue with remaining unit-list helper
-  smells or move to editor-feedback diagnostic orchestration findings?
+- After Slice-2-D, should Slice-2 move to editor-feedback diagnostic
+  orchestration findings or another small application helper?

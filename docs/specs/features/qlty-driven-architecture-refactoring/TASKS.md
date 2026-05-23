@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-C implementation is complete.
+  Slice-2-D implementation is complete.
 - Active slice:
-  none; Slice-2-C is complete and the next Slice-2 target is not selected.
+  none; Slice-2-D is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with remaining unit-list helper smells or
-  moves to editor-feedback diagnostic findings.
+  decide whether Slice-2 moves to editor-feedback diagnostic orchestration
+  findings or another small application helper.
 
 ## Human Approval
 
@@ -167,6 +167,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-C.
 - [x] Complete Slice-2-C `buildUnitListRemainingGroups` group projection
       helper extraction.
+- [x] Select Slice-2-D `buildUnitListRemainingGroups` default-aware helper
+      cleanup as the next implementation candidate.
+- [x] Record Slice-2-D impact investigation.
+- [x] Request human approval for the selected Slice-2-D implementation scope.
+- [x] Record human approval for Slice-2-D.
+- [x] Complete Slice-2-D `buildUnitListRemainingGroups` default-aware helper
+      cleanup.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -532,4 +539,29 @@ active implementation approval remains.
   removed. The remaining `findDefaultAwareParameterValue` many-parameter smell
   and wait-job unit-type binary-expression smell remain future Slice-2
   candidates.
+- Slice-2-D targets the remaining local helper smells in
+  `buildUnitListRemainingGroups.ts`: the `findDefaultAwareParameterValue`
+  many-parameter smell and the wait-job unit-type binary expression used by
+  group13 event timeout action defaults.
+- Slice-2-D impact is local to
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`. Serena found
+  `findDefaultAwareParameterValue` referenced only by default-aware wrappers in
+  the same file and `isWaitJobWithGroup13TimeoutAction` referenced only by
+  `findGroup13EventTimeoutAction`.
+- Slice-2-D must preserve default-aware lookup semantics, fallback defaults
+  for group13/group14, wait-job unit-type membership, group13 event timeout
+  action output, exported `buildUnitListRemainingGroups` signature, all
+  `UnitListGroup*View` shapes, parser/generated artifacts, presentation
+  behavior, VS Code compatibility, web compatibility, and `engines.vscode`.
+- Existing tests cover group13 execution-interval, file-monitoring, shared
+  wait-job timeout-action defaults and group14 event-sending defaults through
+  `buildUnitListRemainingGroups.test.ts`; `buildUnitListView.test.ts` covers
+  integration through the full unit-list row builder.
+- Slice-2-D was approved by the user at 2026-05-23 17:08 JST for
+  `buildUnitListRemainingGroups` default-aware helper cleanup only.
+- Slice-2-D preserved default-aware group13/group14 behavior while grouping
+  default-aware lookup inputs and replacing the group13 wait-job unit-type
+  binary expression with a local membership constant. Targeted Qlty smell
+  output for `buildUnitListRemainingGroups.ts` is now empty, and cyclomatic
+  complexity improved from 69 to 42 while total complexity stayed at 27.
 - Domain helpers still contain branch-heavy conditional logic.

@@ -1,5 +1,6 @@
 import {
   AjsUnit,
+  AjsUnitType,
   findAjsUnitParameterValue,
 } from "../../domain/models/ajs/AjsDocument";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
@@ -32,31 +33,42 @@ const isFileMonitoringJob = (unit: AjsUnit): boolean =>
 const isExecutionIntervalControlJob = (unit: AjsUnit): boolean =>
   unit.unitType === "tmwj" || unit.unitType === "rtmwj";
 
+const waitJobTypesWithGroup13TimeoutAction: readonly AjsUnitType[] = [
+  "flwj",
+  "rflwj",
+  "tmwj",
+  "rtmwj",
+  "lfwj",
+  "rlfwj",
+  "mlwj",
+  "rmlwj",
+  "mqwj",
+  "rmqwj",
+  "mswj",
+  "rmswj",
+  "ntwj",
+  "rntwj",
+];
+
 const isWaitJobWithGroup13TimeoutAction = (unit: AjsUnit): boolean =>
-  unit.unitType === "flwj" ||
-  unit.unitType === "rflwj" ||
-  unit.unitType === "tmwj" ||
-  unit.unitType === "rtmwj" ||
-  unit.unitType === "lfwj" ||
-  unit.unitType === "rlfwj" ||
-  unit.unitType === "mlwj" ||
-  unit.unitType === "rmlwj" ||
-  unit.unitType === "mqwj" ||
-  unit.unitType === "rmqwj" ||
-  unit.unitType === "mswj" ||
-  unit.unitType === "rmswj" ||
-  unit.unitType === "ntwj" ||
-  unit.unitType === "rntwj";
+  waitJobTypesWithGroup13TimeoutAction.includes(unit.unitType);
 
 const isQueueJob = (unit: AjsUnit): boolean =>
   unit.unitType === "qj" || unit.unitType === "rq";
 
-const findDefaultAwareParameterValue = (
-  unit: AjsUnit,
-  key: ParamSymbol,
-  defaultValue: string,
-  isDefaultAwareUnit: boolean,
-): string | undefined =>
+type DefaultAwareParameterInput = {
+  unit: AjsUnit;
+  key: ParamSymbol;
+  defaultValue: string;
+  isDefaultAwareUnit: boolean;
+};
+
+const findDefaultAwareParameterValue = ({
+  unit,
+  key,
+  defaultValue,
+  isDefaultAwareUnit,
+}: DefaultAwareParameterInput): string | undefined =>
   isDefaultAwareUnit
     ? (findAjsUnitParameterValue(unit, key) ?? defaultValue)
     : findAjsUnitParameterValue(unit, key);
@@ -66,44 +78,44 @@ const findEventSendingJobDefaultAwareParameterValue = (
   key: ParamSymbol,
   defaultValue: string,
 ): string | undefined =>
-  findDefaultAwareParameterValue(
+  findDefaultAwareParameterValue({
     unit,
     key,
     defaultValue,
-    isEventSendingJob(unit),
-  );
+    isDefaultAwareUnit: isEventSendingJob(unit),
+  });
 
 const findFileMonitoringJobDefaultAwareParameterValue = (
   unit: AjsUnit,
   key: ParamSymbol,
   defaultValue: string,
 ): string | undefined =>
-  findDefaultAwareParameterValue(
+  findDefaultAwareParameterValue({
     unit,
     key,
     defaultValue,
-    isFileMonitoringJob(unit),
-  );
+    isDefaultAwareUnit: isFileMonitoringJob(unit),
+  });
 
 const findExecutionIntervalControlJobDefaultAwareParameterValue = (
   unit: AjsUnit,
   key: ParamSymbol,
   defaultValue: string,
 ): string | undefined =>
-  findDefaultAwareParameterValue(
+  findDefaultAwareParameterValue({
     unit,
     key,
     defaultValue,
-    isExecutionIntervalControlJob(unit),
-  );
+    isDefaultAwareUnit: isExecutionIntervalControlJob(unit),
+  });
 
 const findGroup13EventTimeoutAction = (unit: AjsUnit): string | undefined =>
-  findDefaultAwareParameterValue(
+  findDefaultAwareParameterValue({
     unit,
-    "ets",
-    DEFAULTS.Ets,
-    isWaitJobWithGroup13TimeoutAction(unit),
-  );
+    key: "ets",
+    defaultValue: DEFAULTS.Ets,
+    isDefaultAwareUnit: isWaitJobWithGroup13TimeoutAction(unit),
+  });
 
 const findGroup15TransferOperation = (
   unit: AjsUnit,
