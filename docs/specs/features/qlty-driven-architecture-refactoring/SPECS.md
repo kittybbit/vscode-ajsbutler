@@ -543,6 +543,24 @@ No user-visible behavior scenarios are introduced.
   replaced with local helpers for file-condition parsing, mode membership, and
   quoted file-name byte-length validation while preserving bare `n`/`a`
   handling and allowed file modes `n`, `a`, `d`, and `b`.
+- Slice-2-G target:
+  `isValidExplicitEventReceivingFilterReference` is the next application
+  editor-feedback helper candidate; filter-reference helper extraction must
+  preserve `evwfr` validation without changing diagnostic behavior.
+- Slice-2-G investigation:
+  Qlty reports high complexity 6 in
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`. Serena
+  found the exported helper referenced only from the `evwfr` diagnostic rule
+  in `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`. The
+  behavior flows outward through existing event receiving diagnostics for
+  optional extended attribute filters in
+  `optional-extended-attribute-name:"value"` form.
+- Slice-2-G result:
+  `isValidExplicitEventReceivingFilterReference` keeps its exported signature
+  and `evwfr` diagnostic behavior. The branch-heavy validation was replaced
+  with local helpers for first-colon filter-reference parsing and quoted
+  hash-escaped attribute-value validation while preserving whole-value
+  byte-length and non-empty attribute-name requirements.
 
 ### Breaking Change Analysis
 
@@ -910,6 +928,22 @@ No user-visible behavior scenarios are introduced.
   message text, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, or `engines.vscode`
   requires separate approval.
+- Slice-2-G boundary decision:
+  extract event receiving filter-reference helper(s) only; do not change
+  omitted/empty rejection, whole-value byte-length range 1..2048, first-colon
+  separator behavior, non-empty attribute-name requirement, quoted
+  hash-escaped attribute-value validation, diagnostic messages,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-G approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/editor-feedback/syntaxDiagnosticEventRules.ts` while
+  preserving the exported `isValidExplicitEventReceivingFilterReference`
+  signature and its caller. Any change to
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`, diagnostic
+  message text, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`
+  requires separate approval.
 
 ## Compatibility
 
@@ -933,5 +967,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-F, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-G, should Slice-2 continue with editor-feedback diagnostic
   helper findings or return to remaining unit-list/command-builder helpers?

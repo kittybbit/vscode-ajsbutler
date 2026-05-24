@@ -15,6 +15,35 @@ type EventReceivingTimeoutFileCondition = {
   readonly rawFileName: string;
 };
 
+type EventReceivingFilterReference = {
+  readonly attributeName: string;
+  readonly attributeValue: string;
+};
+
+const parseEventReceivingFilterReference = (
+  rawValue: string,
+): EventReceivingFilterReference | undefined => {
+  const separatorIndex = rawValue.indexOf(":");
+  return separatorIndex > 0
+    ? {
+        attributeName: rawValue.slice(0, separatorIndex),
+        attributeValue: rawValue.slice(separatorIndex + 1),
+      }
+    : undefined;
+};
+
+const isValidEventReceivingFilterReferenceValue = (
+  rawValue: string,
+): boolean => {
+  const reference = parseEventReceivingFilterReference(rawValue);
+  return (
+    reference !== undefined &&
+    reference.attributeName.length > 0 &&
+    parseHashEscapedQuotedStringLiteralContent(reference.attributeValue) !==
+      undefined
+  );
+};
+
 const parseEventReceivingTimeoutFileCondition = (
   rawValue: string,
 ): EventReceivingTimeoutFileCondition | undefined => {
@@ -106,24 +135,10 @@ export const isValidExplicitEventReceivingQuotedString = (
 
 export const isValidExplicitEventReceivingFilterReference = (
   parameter: UnitParameter | undefined,
-): boolean => {
-  const rawValue = parameter?.value;
-  if (!rawValue || !hasValidByteLength(rawValue, 1, 2048)) {
-    return false;
-  }
-
-  const separatorIndex = rawValue.indexOf(":");
-  if (separatorIndex <= 0) {
-    return false;
-  }
-
-  const attributeName = rawValue.slice(0, separatorIndex);
-  const attributeValue = rawValue.slice(separatorIndex + 1);
-  return (
-    attributeName.length > 0 &&
-    parseHashEscapedQuotedStringLiteralContent(attributeValue) !== undefined
-  );
-};
+): boolean =>
+  parameter?.value !== undefined &&
+  hasValidByteLength(parameter.value, 1, 2048) &&
+  isValidEventReceivingFilterReferenceValue(parameter.value);
 
 export const isValidExplicitEventReceivingTimeoutCondition = (
   parameter: UnitParameter | undefined,
