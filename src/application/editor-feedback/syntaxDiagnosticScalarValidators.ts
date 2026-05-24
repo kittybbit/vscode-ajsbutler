@@ -7,16 +7,21 @@ export const parseExplicitDecimalInRange = (
   options: { allowNegative?: boolean } = {},
 ): number | undefined => {
   const rawValue = parameter?.value;
-  const decimalPattern = options.allowNegative ? /^-?\d+$/ : /^\d+$/;
-  if (!rawValue || !decimalPattern.test(rawValue)) {
+  if (!isExplicitDecimalValue(rawValue, options)) {
     return undefined;
   }
 
   const numericValue = Number(rawValue);
-  return numericValue >= minimum && numericValue <= maximum
-    ? numericValue
-    : undefined;
+  return isInRange(numericValue, minimum, maximum) ? numericValue : undefined;
 };
+
+const isExplicitDecimalValue = (
+  value: string | undefined,
+  options: { allowNegative?: boolean },
+): value is string => Boolean(value && decimalPatternFor(options).test(value));
+
+const decimalPatternFor = (options: { allowNegative?: boolean }): RegExp =>
+  options.allowNegative ? /^-?\d+$/ : /^\d+$/;
 
 export const parseExplicitHexadecimalInRange = (
   value: string | undefined,

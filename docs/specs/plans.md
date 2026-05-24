@@ -88,6 +88,8 @@ rules in `docs/specs/README.md`, not in this file.
   `hasInvalidWildcardWithShortMonitoringInterval` file monitoring helper
   extraction and implementation is complete. Slice-2-J investigation is
   complete for the `parseExplicitHexadecimalInRange` hexadecimal scalar helper
+  extraction and implementation is complete. Slice-2-K investigation is
+  complete for the `parseExplicitDecimalInRange` decimal scalar helper
   extraction and implementation is complete. The next Slice-2 target is not
   selected yet.
 

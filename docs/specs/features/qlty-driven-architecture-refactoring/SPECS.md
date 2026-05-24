@@ -615,6 +615,27 @@ No user-visible behavior scenarios are introduced.
   detection and inclusive range checks were extracted into local helpers while
   preserving 1..8 digit validation, case-insensitive parsing, and
   `undefined` for invalid input.
+- Slice-2-K target:
+  `parseExplicitDecimalInRange` is the next application editor-feedback helper
+  candidate; decimal scalar helper extraction must preserve shared decimal
+  diagnostics for range rules, threshold ordering, event receiving timeout
+  seconds, and file monitoring interval validation.
+- Slice-2-K investigation:
+  Qlty reports high complexity 8 and a many-parameter smell in
+  `src/application/editor-feedback/syntaxDiagnosticScalarValidators.ts`.
+  Serena found direct production references from
+  `src/application/editor-feedback/syntaxDiagnosticCore.ts`,
+  `src/application/editor-feedback/syntaxDiagnosticJobEndRules.ts`,
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`, and
+  `src/application/editor-feedback/syntaxDiagnosticFileMonitoringRules.ts`.
+  The behavior flows outward through existing syntax diagnostics that use
+  explicit decimal ranges and optional signed decimal ranges.
+- Slice-2-K result:
+  `parseExplicitDecimalInRange` keeps its exported signature and shared
+  decimal diagnostic behavior. Explicit decimal value detection, decimal
+  pattern selection, and inclusive range checks were extracted into local
+  helpers while preserving optional signed decimal validation and `undefined`
+  for invalid input.
 
 ### Breaking Change Analysis
 
@@ -1047,6 +1068,27 @@ No user-visible behavior scenarios are introduced.
   message text, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, or `engines.vscode`
   requires separate approval.
+- Slice-2-K boundary decision:
+  extract decimal scalar validation helper(s) only; do not change
+  omitted/empty rejection, decimal digit validation, optional negative sign
+  behavior when `allowNegative` is true, inclusive minimum/maximum range
+  checks, returned numeric value for valid input, `undefined` for invalid
+  input, diagnostic messages, parser/generated artifacts, presentation
+  behavior, dependencies, VS Code compatibility, web compatibility, or
+  `engines.vscode`.
+- Slice-2-K approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside
+  `src/application/editor-feedback/syntaxDiagnosticScalarValidators.ts` while
+  preserving the exported `parseExplicitDecimalInRange` signature and its
+  callers. Any change to
+  `src/application/editor-feedback/syntaxDiagnosticCore.ts`,
+  `src/application/editor-feedback/syntaxDiagnosticJobEndRules.ts`,
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`,
+  `src/application/editor-feedback/syntaxDiagnosticFileMonitoringRules.ts`,
+  diagnostic message text, parser/generated artifacts, presentation behavior,
+  dependency versions, VS Code compatibility, web compatibility, or
+  `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -1070,5 +1112,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-J, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-K, should Slice-2 continue with editor-feedback diagnostic
   helper findings or return to remaining unit-list/command-builder helpers?

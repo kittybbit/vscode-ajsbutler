@@ -12,9 +12,9 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-J implementation is complete.
+  Slice-2-K implementation is complete.
 - Active slice:
-  none; Slice-2-J is complete and the next Slice-2 target is not selected.
+  none; Slice-2-K is complete and the next Slice-2 target is not selected.
 - Open follow-up:
   decide whether Slice-2 continues with remaining editor-feedback diagnostic
   helpers or returns to unit-list/command-builder helpers.
@@ -217,6 +217,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-J.
 - [x] Complete Slice-2-J `parseExplicitHexadecimalInRange` hexadecimal scalar
       helper extraction.
+- [x] Select Slice-2-K `parseExplicitDecimalInRange` decimal scalar helper
+      extraction as the next implementation candidate.
+- [x] Record Slice-2-K impact investigation.
+- [x] Request human approval for the selected Slice-2-K implementation scope.
+- [x] Record human approval for Slice-2-K.
+- [x] Complete Slice-2-K `parseExplicitDecimalInRange` decimal scalar helper
+      extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -741,4 +748,29 @@ active implementation approval remains.
   hexadecimal value detection and inclusive range checks into local helpers.
   `syntaxDiagnosticScalarValidators.ts` keeps the exported helper signature
   and diagnostic behavior intact.
+- Slice-2-K targets `parseExplicitDecimalInRange` because Qlty reports high
+  complexity 8 and a many-parameter smell in a shared
+  application/editor-feedback scalar helper.
+- Slice-2-K impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticScalarValidators.ts`, with
+  direct production references from `buildExplicitDecimalRangeRule`,
+  `hasInvalidExplicitThresholdOrdering`,
+  `isValidExplicitEventReceivingTimeoutSeconds`, and
+  `isValidExplicitFileMonitoringInterval`.
+- Slice-2-K must preserve omitted/empty rejection, decimal digit validation,
+  optional negative sign behavior when `allowNegative` is true, inclusive
+  minimum/maximum range checks, returned numeric value for valid input,
+  `undefined` for invalid input, all diagnostic message text,
+  parser/generated artifacts, presentation behavior, VS Code compatibility,
+  web compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises end-judgment
+  range diagnostics (`wth=2147483648`, `tho=-1`), threshold ordering, file
+  monitoring interval `flwi=601`, and event receiving numeric identifiers
+  including invalid `evpid=abc`.
+- Slice-2-K was approved by the user at 2026-05-24 20:36 JST for
+  `parseExplicitDecimalInRange` decimal scalar helper extraction only.
+- Slice-2-K preserved shared decimal scalar validation while extracting
+  explicit decimal value detection, decimal pattern selection, and inclusive
+  range checks into local helpers. `syntaxDiagnosticScalarValidators.ts` keeps
+  the exported helper signature and diagnostic behavior intact.
 - Domain helpers still contain branch-heavy conditional logic.
