@@ -109,14 +109,16 @@ export const isValidExplicitIpv4Address = (
     return false;
   }
 
-  return octets.every((octet) => {
-    if (!/^\d+$/.test(octet)) {
-      return false;
-    }
+  return octets.every(isValidIpv4Octet);
+};
 
-    const numericValue = Number(octet);
-    return numericValue >= 0 && numericValue <= 255;
-  });
+const isValidIpv4Octet = (octet: string): boolean => {
+  if (!/^\d+$/.test(octet)) {
+    return false;
+  }
+
+  const numericValue = Number(octet);
+  return numericValue >= 0 && numericValue <= 255;
 };
 
 export const isValidExplicitEventReceivingQuotedString = (

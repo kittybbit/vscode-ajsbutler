@@ -561,6 +561,22 @@ No user-visible behavior scenarios are introduced.
   with local helpers for first-colon filter-reference parsing and quoted
   hash-escaped attribute-value validation while preserving whole-value
   byte-length and non-empty attribute-name requirements.
+- Slice-2-H target:
+  `isValidExplicitIpv4Address` is the next application editor-feedback helper
+  candidate; IPv4 validator helper extraction must preserve `evipa`
+  validation without changing diagnostic behavior.
+- Slice-2-H investigation:
+  Qlty reports high complexity 8 in
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`. Serena
+  found the exported helper referenced only from the `evipa` diagnostic rule
+  in `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`. The
+  behavior flows outward through existing event receiving diagnostics for
+  dotted-decimal IPv4 values.
+- Slice-2-H result:
+  `isValidExplicitIpv4Address` keeps its exported signature and `evipa`
+  diagnostic behavior. Octet validation was extracted into a local helper
+  while preserving omitted/empty rejection, four-octet parsing, decimal-digit
+  requirements, and octet range checks.
 
 ### Breaking Change Analysis
 
@@ -944,6 +960,21 @@ No user-visible behavior scenarios are introduced.
   message text, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, or `engines.vscode`
   requires separate approval.
+- Slice-2-H boundary decision:
+  extract IPv4 validation helper(s) only; do not change omitted/empty
+  rejection, dotted-decimal four-octet requirement, decimal digits only,
+  numeric range 0..255 for each octet, diagnostic messages, parser/generated
+  artifacts, presentation behavior, dependencies, VS Code compatibility, web
+  compatibility, or `engines.vscode`.
+- Slice-2-H approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/editor-feedback/syntaxDiagnosticEventRules.ts` while
+  preserving the exported `isValidExplicitIpv4Address` signature and its
+  caller. Any change to
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`, diagnostic
+  message text, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`
+  requires separate approval.
 
 ## Compatibility
 
@@ -967,5 +998,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-G, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-H, should Slice-2 continue with editor-feedback diagnostic
   helper findings or return to remaining unit-list/command-builder helpers?

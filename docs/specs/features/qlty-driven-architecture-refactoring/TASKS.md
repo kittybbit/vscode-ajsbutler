@@ -12,9 +12,9 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-G implementation is complete.
+  Slice-2-H implementation is complete.
 - Active slice:
-  none; Slice-2-G is complete and the next Slice-2 target is not selected.
+  none; Slice-2-H is complete and the next Slice-2 target is not selected.
 - Open follow-up:
   decide whether Slice-2 continues with remaining editor-feedback diagnostic
   helpers or returns to unit-list/command-builder helpers.
@@ -196,6 +196,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-G.
 - [x] Complete Slice-2-G `isValidExplicitEventReceivingFilterReference`
       filter-reference helper extraction.
+- [x] Select Slice-2-H `isValidExplicitIpv4Address` IPv4 validator helper
+      extraction as the next implementation candidate.
+- [x] Record Slice-2-H impact investigation.
+- [x] Request human approval for the selected Slice-2-H implementation scope.
+- [x] Record human approval for Slice-2-H.
+- [x] Complete Slice-2-H `isValidExplicitIpv4Address` IPv4 validator helper
+      extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -656,4 +663,22 @@ active implementation approval remains.
   helpers. Targeted Qlty smell output no longer reports
   `isValidExplicitEventReceivingFilterReference`; file total complexity
   improved from 27 to 23.
+- Slice-2-H targets `isValidExplicitIpv4Address` because Qlty reports high
+  complexity 8 in a small application/editor-feedback helper.
+- Slice-2-H impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`, with the
+  exported helper referenced only by the `evipa` rule in
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`.
+- Slice-2-H must preserve omitted/empty rejection, dotted-decimal four-octet
+  requirement, decimal digits only, numeric range 0..255 for each octet,
+  diagnostic message text, parser/generated artifacts, presentation behavior,
+  VS Code compatibility, web compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises valid
+  `evipa=192.168.0.1`, valid `evipa=255.255.255.255`, and invalid
+  `evipa=256.10.0.1` through event receiving diagnostics.
+- Slice-2-H was approved by the user at 2026-05-24 13:14 JST for
+  `isValidExplicitIpv4Address` IPv4 validator helper extraction only.
+- Slice-2-H preserved `evipa` dotted-decimal IPv4 validation while extracting
+  octet validation into a local helper. `syntaxDiagnosticEventRules.ts` keeps
+  the exported helper signature and diagnostic behavior intact.
 - Domain helpers still contain branch-heavy conditional logic.
