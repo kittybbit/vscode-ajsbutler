@@ -61,8 +61,8 @@ remaining passive metrics.
 Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
-Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C, and
-Slice-2-D and Slice-2-E are complete. Slice-1B is complete.
+Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C,
+Slice-2-D, Slice-2-E, and Slice-2-F are complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -154,10 +154,10 @@ findings, or remaining unit-list helper findings, then request separate
 approval before runtime work starts.
 
 - Recent result:
-  Slice-2-E removed the targeted high-complexity and many-returns smells from
-  `syntaxDiagnosticStringValidators.ts`, reducing total complexity from 21 to
-  5 while preserving hash-escaped quoted string parsing for event receiving
-  diagnostics.
+  Slice-2-F removed the targeted high-complexity and many-returns smells from
+  `isValidExplicitEventReceivingTimeoutCondition`, reducing
+  `syntaxDiagnosticEventRules.ts` total complexity from 34 to 27 while
+  preserving `evtmc` validation behavior.
 
 ## Risks To Control
 

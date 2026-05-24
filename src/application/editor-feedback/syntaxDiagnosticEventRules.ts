@@ -7,6 +7,42 @@ import {
 } from "./syntaxDiagnosticScalarValidators";
 import { parseHashEscapedQuotedStringLiteralContent } from "./syntaxDiagnosticStringValidators";
 
+const EVENT_RECEIVING_TIMEOUT_BARE_MODES = new Set(["n", "a"]);
+const EVENT_RECEIVING_TIMEOUT_FILE_MODES = new Set(["n", "a", "d", "b"]);
+
+type EventReceivingTimeoutFileCondition = {
+  readonly mode: string;
+  readonly rawFileName: string;
+};
+
+const parseEventReceivingTimeoutFileCondition = (
+  rawValue: string,
+): EventReceivingTimeoutFileCondition | undefined => {
+  const separatorIndex = rawValue.indexOf(":");
+  return separatorIndex > 0
+    ? {
+        mode: rawValue.slice(0, separatorIndex),
+        rawFileName: rawValue.slice(separatorIndex + 1),
+      }
+    : undefined;
+};
+
+const isValidEventReceivingTimeoutFileName = (rawFileName: string): boolean => {
+  const fileName = parseHashEscapedQuotedStringLiteralContent(rawFileName);
+  return fileName !== undefined && hasValidByteLength(fileName, 1, 256);
+};
+
+const isValidEventReceivingTimeoutFileCondition = (
+  rawValue: string,
+): boolean => {
+  const condition = parseEventReceivingTimeoutFileCondition(rawValue);
+  return (
+    condition !== undefined &&
+    EVENT_RECEIVING_TIMEOUT_FILE_MODES.has(condition.mode) &&
+    isValidEventReceivingTimeoutFileName(condition.rawFileName)
+  );
+};
+
 export const isValidExplicitEventHostValue = (
   parameter: UnitParameter | undefined,
 ): boolean => isValidExplicitByteLengthValue(parameter, 1, 255);
@@ -91,31 +127,10 @@ export const isValidExplicitEventReceivingFilterReference = (
 
 export const isValidExplicitEventReceivingTimeoutCondition = (
   parameter: UnitParameter | undefined,
-): boolean => {
-  const rawValue = parameter?.value;
-  if (!rawValue) {
-    return false;
-  }
-
-  if (rawValue === "n" || rawValue === "a") {
-    return true;
-  }
-
-  const separatorIndex = rawValue.indexOf(":");
-  if (separatorIndex <= 0) {
-    return false;
-  }
-
-  const mode = rawValue.slice(0, separatorIndex);
-  if (!["n", "a", "d", "b"].includes(mode)) {
-    return false;
-  }
-
-  const fileName = parseHashEscapedQuotedStringLiteralContent(
-    rawValue.slice(separatorIndex + 1),
-  );
-  return fileName !== undefined && hasValidByteLength(fileName, 1, 256);
-};
+): boolean =>
+  parameter?.value !== undefined &&
+  (EVENT_RECEIVING_TIMEOUT_BARE_MODES.has(parameter.value) ||
+    isValidEventReceivingTimeoutFileCondition(parameter.value));
 
 export const isValidExplicitEventSearchCondition = (
   parameter: UnitParameter | undefined,

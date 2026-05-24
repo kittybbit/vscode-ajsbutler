@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select the next Qlty-driven architecture refactoring Slice-2 target:
-   continue with editor-feedback diagnostic helper findings, command-builder
-   helper findings, or remaining unit-list helper findings.
+   continue with remaining editor-feedback diagnostic helper findings,
+   command-builder helper findings, or remaining unit-list helper findings.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -79,7 +79,9 @@ rules in `docs/specs/README.md`, not in this file.
   projection helper extraction. Slice-2-D completed the
   `buildUnitListRemainingGroups` default-aware helper cleanup. Slice-2-E
   completed the `parseHashEscapedQuotedStringLiteralContent` string literal
-  parser helper extraction. The next Slice-2 target is not selected yet.
+  parser helper extraction. Slice-2-F completed the
+  `isValidExplicitEventReceivingTimeoutCondition` timeout-condition helper
+  extraction. The next Slice-2 target is not selected yet.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

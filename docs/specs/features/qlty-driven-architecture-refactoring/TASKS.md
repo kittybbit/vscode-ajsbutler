@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-E implementation is complete.
+  Slice-2-F implementation is complete.
 - Active slice:
-  none; Slice-2-E is complete and the next Slice-2 target is not selected.
+  none; Slice-2-F is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with editor-feedback diagnostic helper
-  findings or returns to another small application helper.
+  decide whether Slice-2 continues with remaining editor-feedback diagnostic
+  helpers or returns to unit-list/command-builder helpers.
 
 ## Human Approval
 
@@ -181,6 +181,14 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-E.
 - [x] Complete Slice-2-E `parseHashEscapedQuotedStringLiteralContent` string
       literal parser helper extraction.
+- [x] Select Slice-2-F `isValidExplicitEventReceivingTimeoutCondition`
+      timeout-condition helper extraction as the next implementation
+      candidate.
+- [x] Record Slice-2-F impact investigation.
+- [x] Request human approval for the selected Slice-2-F implementation scope.
+- [x] Record human approval for Slice-2-F.
+- [x] Complete Slice-2-F `isValidExplicitEventReceivingTimeoutCondition`
+      timeout-condition helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -596,4 +604,27 @@ active implementation approval remains.
   Targeted Qlty smell output for `syntaxDiagnosticStringValidators.ts` is now
   empty; file total complexity improved from 21 to 5 and cyclomatic complexity
   improved from 19 to 4.
+- Slice-2-F targets `isValidExplicitEventReceivingTimeoutCondition` because
+  Qlty reports high complexity 10 and many returns 5 in a small
+  application/editor-feedback helper.
+- Slice-2-F impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`, with the
+  exported helper referenced only by the `evtmc` rule in
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`.
+- Slice-2-F must preserve omitted/empty rejection, bare `n` and `a` acceptance,
+  colon-separated mode parsing, allowed modes `n`, `a`, `d`, and `b`, quoted
+  hash-escaped file-name parsing, decoded file-name byte-length range 1..256,
+  diagnostic message text, parser/generated artifacts, presentation behavior,
+  VS Code compatibility, web compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises valid
+  `evtmc=n:"/tmp/result.txt"` and invalid empty file-name `evtmc=d:""` through
+  event receiving string-filter diagnostics.
+- Slice-2-F was approved by the user at 2026-05-24 12:49 JST for
+  `isValidExplicitEventReceivingTimeoutCondition` timeout-condition helper
+  extraction only.
+- Slice-2-F preserved event receiving timeout-condition behavior while
+  extracting file-condition parsing, mode membership, and quoted file-name
+  validation helpers. Targeted Qlty smell output no longer reports
+  `isValidExplicitEventReceivingTimeoutCondition`; file total complexity
+  improved from 34 to 27.
 - Domain helpers still contain branch-heavy conditional logic.

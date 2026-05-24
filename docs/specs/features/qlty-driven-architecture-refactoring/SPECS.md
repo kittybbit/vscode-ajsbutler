@@ -526,6 +526,23 @@ No user-visible behavior scenarios are introduced.
   with content validation and decode helpers that preserve quote-boundary
   validation, `#"` and `##` decoding, trailing `#` before the closing quote,
   invalid escape rejection, and unescaped inner quote rejection.
+- Slice-2-F target:
+  `isValidExplicitEventReceivingTimeoutCondition` is the next application
+  editor-feedback helper candidate; timeout-condition helper extraction must
+  preserve `evtmc` validation without changing diagnostic behavior.
+- Slice-2-F investigation:
+  Qlty reports high complexity 10 and many returns 5 in
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`. Serena
+  found the exported helper referenced only from the `evtmc` diagnostic rule
+  in `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`. The
+  behavior flows outward through existing event receiving diagnostics for bare
+  `n`/`a` timeout conditions and mode-prefixed file-name conditions.
+- Slice-2-F result:
+  `isValidExplicitEventReceivingTimeoutCondition` keeps its exported
+  signature and `evtmc` diagnostic behavior. The branch-heavy validation was
+  replaced with local helpers for file-condition parsing, mode membership, and
+  quoted file-name byte-length validation while preserving bare `n`/`a`
+  handling and allowed file modes `n`, `a`, `d`, and `b`.
 
 ### Breaking Change Analysis
 
@@ -877,6 +894,22 @@ No user-visible behavior scenarios are introduced.
   message text, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, or `engines.vscode`
   requires separate approval.
+- Slice-2-F boundary decision:
+  extract event receiving timeout-condition helper(s) only; do not change
+  omitted/empty rejection, bare `n` and `a` acceptance, colon-separated mode
+  parsing, allowed modes `n`, `a`, `d`, and `b`, quoted hash-escaped file-name
+  parsing, decoded file-name byte-length range 1..256, diagnostic messages,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-F approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/editor-feedback/syntaxDiagnosticEventRules.ts` while
+  preserving the exported `isValidExplicitEventReceivingTimeoutCondition`
+  signature and its caller. Any change to
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`, diagnostic
+  message text, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`
+  requires separate approval.
 
 ## Compatibility
 
@@ -900,5 +933,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-E, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-F, should Slice-2 continue with editor-feedback diagnostic
   helper findings or return to remaining unit-list/command-builder helpers?
