@@ -86,6 +86,8 @@ rules in `docs/specs/README.md`, not in this file.
   extraction. Slice-2-H completed the `isValidExplicitIpv4Address` IPv4
   validator helper extraction. Slice-2-I investigation is complete for the
   `hasInvalidWildcardWithShortMonitoringInterval` file monitoring helper
+  extraction and implementation is complete. Slice-2-J investigation is
+  complete for the `parseExplicitHexadecimalInRange` hexadecimal scalar helper
   extraction and implementation is complete. The next Slice-2 target is not
   selected yet.
 

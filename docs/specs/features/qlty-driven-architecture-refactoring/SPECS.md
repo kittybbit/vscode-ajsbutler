@@ -595,6 +595,26 @@ No user-visible behavior scenarios are introduced.
   checks were extracted into local helpers while preserving wildcard detection,
   `DEFAULTS.Flwi` fallback, decimal-only parsing, and short interval range
   1..9.
+- Slice-2-J target:
+  `parseExplicitHexadecimalInRange` is the next application editor-feedback
+  helper candidate; hexadecimal scalar helper extraction must preserve event
+  sending `evsid` range validation and event receiving colon-separated
+  hexadecimal event id validation.
+- Slice-2-J investigation:
+  Qlty reports high complexity 6 in
+  `src/application/editor-feedback/syntaxDiagnosticScalarValidators.ts`.
+  Serena found direct production references from
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts` for
+  colon-separated hexadecimal event ids and from
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts` for `evsid`
+  event sending ranges. The behavior flows outward through existing event
+  sending and event receiving diagnostics.
+- Slice-2-J result:
+  `parseExplicitHexadecimalInRange` keeps its exported signature and event
+  sending/event receiving diagnostic behavior. Explicit hexadecimal value
+  detection and inclusive range checks were extracted into local helpers while
+  preserving 1..8 digit validation, case-insensitive parsing, and
+  `undefined` for invalid input.
 
 ### Breaking Change Analysis
 
@@ -1009,6 +1029,24 @@ No user-visible behavior scenarios are introduced.
   diagnostic message text, parser/generated artifacts, presentation behavior,
   dependency versions, VS Code compatibility, web compatibility, or
   `engines.vscode` requires separate approval.
+- Slice-2-J boundary decision:
+  extract hexadecimal scalar validation helper(s) only; do not change
+  omitted/empty rejection, 1..8 hexadecimal digit validation, case-insensitive
+  parsing, inclusive minimum/maximum range checks, returned numeric value for
+  valid input, `undefined` for invalid input, diagnostic messages,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-J approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside
+  `src/application/editor-feedback/syntaxDiagnosticScalarValidators.ts` while
+  preserving the exported `parseExplicitHexadecimalInRange` signature and its
+  callers. Any change to
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`,
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`, diagnostic
+  message text, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`
+  requires separate approval.
 
 ## Compatibility
 
@@ -1032,5 +1070,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-I, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-J, should Slice-2 continue with editor-feedback diagnostic
   helper findings or return to remaining unit-list/command-builder helpers?

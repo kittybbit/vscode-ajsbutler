@@ -12,9 +12,9 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-I implementation is complete.
+  Slice-2-J implementation is complete.
 - Active slice:
-  none; Slice-2-I is complete and the next Slice-2 target is not selected.
+  none; Slice-2-J is complete and the next Slice-2 target is not selected.
 - Open follow-up:
   decide whether Slice-2 continues with remaining editor-feedback diagnostic
   helpers or returns to unit-list/command-builder helpers.
@@ -210,6 +210,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-I.
 - [x] Complete Slice-2-I `hasInvalidWildcardWithShortMonitoringInterval` file
       monitoring helper extraction.
+- [x] Select Slice-2-J `parseExplicitHexadecimalInRange` hexadecimal scalar
+      helper extraction as the next implementation candidate.
+- [x] Record Slice-2-J impact investigation.
+- [x] Request human approval for the selected Slice-2-J implementation scope.
+- [x] Record human approval for Slice-2-J.
+- [x] Complete Slice-2-J `parseExplicitHexadecimalInRange` hexadecimal scalar
+      helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -710,4 +717,28 @@ active implementation approval remains.
   extracting effective monitoring interval parsing and short-interval checks
   into local helpers. `syntaxDiagnosticFileMonitoringRules.ts` keeps the
   exported helper signature and diagnostic behavior intact.
+- Slice-2-J targets `parseExplicitHexadecimalInRange` because Qlty reports
+  high complexity 6 in a small shared application/editor-feedback scalar
+  helper.
+- Slice-2-J impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticScalarValidators.ts`, with
+  direct production references from
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts` for
+  colon-separated hexadecimal event ids and from
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts` for `evsid`
+  event sending ranges.
+- Slice-2-J must preserve omitted/empty rejection, 1..8 hexadecimal digit
+  validation, case-insensitive hexadecimal parsing, inclusive minimum/maximum
+  range checks, returned numeric value for valid input, `undefined` for invalid
+  input, diagnostic message text, parser/generated artifacts, presentation
+  behavior, VS Code compatibility, web compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises valid
+  `evsid=1fff`, valid `evsid=7fff8000`, invalid `evsid=ACT-1`, and invalid
+  `evsid=00002000`.
+- Slice-2-J was approved by the user at 2026-05-24 20:18 JST for
+  `parseExplicitHexadecimalInRange` hexadecimal scalar helper extraction only.
+- Slice-2-J preserved hexadecimal scalar validation while extracting explicit
+  hexadecimal value detection and inclusive range checks into local helpers.
+  `syntaxDiagnosticScalarValidators.ts` keeps the exported helper signature
+  and diagnostic behavior intact.
 - Domain helpers still contain branch-heavy conditional logic.

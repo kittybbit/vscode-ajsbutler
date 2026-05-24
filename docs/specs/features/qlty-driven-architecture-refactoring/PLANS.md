@@ -62,8 +62,8 @@ Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
 Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C,
-Slice-2-D, Slice-2-E, Slice-2-F, Slice-2-G, Slice-2-H, and Slice-2-I are
-complete. Slice-1B is complete.
+Slice-2-D, Slice-2-E, Slice-2-F, Slice-2-G, Slice-2-H, Slice-2-I, and
+Slice-2-J are complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -155,10 +155,9 @@ findings, or remaining unit-list helper findings, then request separate
 approval before runtime work starts.
 
 - Recent result:
-  Slice-2-I kept `hasInvalidWildcardWithShortMonitoringInterval` exported and
-  preserved `flwf` wildcard/short-interval validation behavior while
-  extracting effective monitoring interval parsing and short-interval checks
-  into local helpers.
+  Slice-2-J kept `parseExplicitHexadecimalInRange` exported and preserved
+  hexadecimal scalar validation while extracting explicit hexadecimal value
+  detection and inclusive range checks into local helpers.
 
 ## Risks To Control
 
