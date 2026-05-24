@@ -63,7 +63,7 @@ Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
 Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C,
 Slice-2-D, Slice-2-E, Slice-2-F, Slice-2-G, Slice-2-H, Slice-2-I,
-Slice-2-J, and Slice-2-K are complete. Slice-1B is complete.
+Slice-2-J, Slice-2-K, and Slice-2-L are complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -150,14 +150,16 @@ Slice-2-J, and Slice-2-K are complete. Slice-1B is complete.
 ## Current Slice Candidate
 
 No current runtime slice is selected. Slice-2 should next choose between
-remaining editor-feedback diagnostic helper findings, command-builder helper
-findings, or remaining unit-list helper findings, then request separate
-approval before runtime work starts.
+`buildCommandLine`, command-builder duplication, remaining editor-feedback
+diagnostic helper findings, or remaining unit-list helper findings, then
+request separate approval before runtime work starts.
 
 - Recent result:
-  Slice-2-K kept `parseExplicitDecimalInRange` exported and preserved shared
-  decimal scalar validation while extracting explicit decimal value detection,
-  decimal pattern selection, and inclusive range checks into local helpers.
+  Slice-2-L preserved command-builder argument resolution while extracting
+  text-field lookup and trimmed text value resolution into local helpers.
+  Targeted Qlty smell output no longer reports `argumentValue`; remaining
+  command-builder findings include `buildCommandLine` complexity and duplicate
+  select-option blocks.
 
 ## Risks To Control
 

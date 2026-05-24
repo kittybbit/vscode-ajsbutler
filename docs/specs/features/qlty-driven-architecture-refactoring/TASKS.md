@@ -12,12 +12,13 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-K implementation is complete.
+  Slice-2-L implementation is complete.
 - Active slice:
-  none; Slice-2-K is complete and the next Slice-2 target is not selected.
+  none; Slice-2-L is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with remaining editor-feedback diagnostic
-  helpers or returns to unit-list/command-builder helpers.
+  decide whether Slice-2 continues with `buildCommandLine`,
+  command-builder duplication, editor-feedback diagnostic helper findings, or
+  remaining unit-list helper findings.
 
 ## Human Approval
 
@@ -224,6 +225,12 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-K.
 - [x] Complete Slice-2-K `parseExplicitDecimalInRange` decimal scalar helper
       extraction.
+- [x] Select Slice-2-L `argumentValue` command-builder helper extraction as
+      the next implementation candidate.
+- [x] Record Slice-2-L impact investigation.
+- [x] Request human approval for the selected Slice-2-L implementation scope.
+- [x] Record human approval for Slice-2-L.
+- [x] Complete Slice-2-L `argumentValue` command-builder helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -773,4 +780,28 @@ active implementation approval remains.
   explicit decimal value detection, decimal pattern selection, and inclusive
   range checks into local helpers. `syntaxDiagnosticScalarValidators.ts` keeps
   the exported helper signature and diagnostic behavior intact.
+- Slice-2-L targets `argumentValue` because Qlty reports high complexity 5 in
+  a local command-builder helper, while the larger `buildCommandLine`
+  complexity 27 remains a later possible slice.
+- Slice-2-L impact is local to
+  `src/application/unit-definition/buildAjsCommands.ts`; Serena found
+  `argumentValue` is referenced only by the `buildCommandLine` field
+  iteration callback.
+- Slice-2-L must preserve lookup by `argumentFieldId`, non-text or missing
+  argument-field fallback to `""`, `fieldValue` semantics for explicit
+  values and defaults, trimming behavior, optional argument token omission
+  when the resolved value is empty, `formatArgument` quoting/spacing behavior,
+  command token order, exported DTO shapes, parser/generated artifacts,
+  presentation behavior, VS Code compatibility, web compatibility, and
+  `engines.vscode`.
+- Existing `buildUnitDefinition.test.ts` coverage exercises command builder
+  output through `buildCommandLine` and `buildUnitDefinition`, including
+  argument-field based command generation.
+- Slice-2-L was approved by the user at 2026-05-25 08:03 JST for
+  `argumentValue` command-builder helper extraction only.
+- Slice-2-L preserved command-builder argument resolution while extracting
+  text-field lookup and trimmed text value resolution into local helpers.
+  Targeted Qlty smell output no longer reports `argumentValue`; remaining
+  command-builder findings include `buildCommandLine` complexity and duplicate
+  select-option blocks.
 - Domain helpers still contain branch-heavy conditional logic.

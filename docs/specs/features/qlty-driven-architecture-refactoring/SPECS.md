@@ -636,6 +636,22 @@ No user-visible behavior scenarios are introduced.
   pattern selection, and inclusive range checks were extracted into local
   helpers while preserving optional signed decimal validation and `undefined`
   for invalid input.
+- Slice-2-L target:
+  `argumentValue` is the next application command-builder helper candidate;
+  helper extraction must preserve `buildCommandLine` command output for
+  select choices that require an argument field.
+- Slice-2-L investigation:
+  Qlty reports high complexity 5 in
+  `src/application/unit-definition/buildAjsCommands.ts`. Serena found
+  `argumentValue` is a local helper referenced only by the
+  `buildCommandLine` field iteration callback. Existing command-builder tests
+  exercise command output through `buildCommandLine` and
+  `buildUnitDefinition`.
+- Slice-2-L result:
+  `buildCommandLine` keeps its exported signature and command output behavior.
+  `argumentValue` now delegates to local text-field lookup and trimmed text
+  value helpers while preserving missing/non-text fallback, default value
+  resolution, trimming, and empty argument omission.
 
 ### Breaking Change Analysis
 
@@ -1089,6 +1105,23 @@ No user-visible behavior scenarios are introduced.
   diagnostic message text, parser/generated artifacts, presentation behavior,
   dependency versions, VS Code compatibility, web compatibility, or
   `engines.vscode` requires separate approval.
+- Slice-2-L boundary decision:
+  extract command argument resolution helper(s) only; do not change
+  `argumentFieldId` lookup, missing or non-text argument-field fallback,
+  `fieldValue` explicit/default value semantics, value trimming, empty
+  argument omission, `formatArgument` quoting/spacing, command token order,
+  exported DTO shapes, parser/generated artifacts, presentation behavior,
+  dependencies, VS Code compatibility, web compatibility, or
+  `engines.vscode`.
+- Slice-2-L approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-definition/buildAjsCommands.ts` while
+  preserving exported `buildCommandLine` and
+  `UnitDefinitionCommandBuilderDto` contracts. Any change to
+  `src/application/unit-definition/buildUnitDefinition.ts`,
+  `src/ui-component/editor/UnitEntityDialog.tsx`, parser/generated artifacts,
+  presentation behavior, dependency versions, VS Code compatibility, web
+  compatibility, or `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -1112,5 +1145,6 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-K, should Slice-2 continue with editor-feedback diagnostic
-  helper findings or return to remaining unit-list/command-builder helpers?
+- After Slice-2-L, should Slice-2 continue with `buildCommandLine`,
+  command-builder duplication, editor-feedback diagnostic helper findings, or
+  remaining unit-list helper findings?

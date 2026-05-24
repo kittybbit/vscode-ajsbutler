@@ -54,6 +54,11 @@ export type UnitDefinitionCommandBuilderDto = LocalizedTextDto & {
 
 export type CommandBuilderValues = Record<string, string | boolean>;
 
+type TextCommandBuilderFieldDto = Extract<
+  UnitDefinitionCommandBuilderFieldDto,
+  { kind: "text" }
+>;
+
 const manualUrls = {
   ajsshow: {
     labelKey: "commandBuilder.common.commandReference",
@@ -79,17 +84,37 @@ const fieldValue = (
   values: CommandBuilderValues,
 ): string | boolean => values[field.id] ?? field.defaultValue;
 
-const argumentValue = (
+const isTextField = (
+  field: UnitDefinitionCommandBuilderFieldDto | undefined,
+): field is TextCommandBuilderFieldDto => field?.kind === "text";
+
+const findArgumentTextField = (
   argumentFieldId: string,
   builder: UnitDefinitionCommandBuilderDto,
+): TextCommandBuilderFieldDto | undefined => {
+  const field = builder.fields.find(({ id }) => id === argumentFieldId);
+  return isTextField(field) ? field : undefined;
+};
+
+const trimmedTextFieldValue = (
+  field: TextCommandBuilderFieldDto | undefined,
   values: CommandBuilderValues,
 ): string => {
-  const field = builder.fields.find(({ id }) => id === argumentFieldId);
-  if (!field || field.kind !== "text") return "";
+  if (!field) return "";
 
   const value = fieldValue(field, values);
   return typeof value === "string" ? value.trim() : "";
 };
+
+const argumentValue = (
+  argumentFieldId: string,
+  builder: UnitDefinitionCommandBuilderDto,
+  values: CommandBuilderValues,
+): string =>
+  trimmedTextFieldValue(
+    findArgumentTextField(argumentFieldId, builder),
+    values,
+  );
 
 export const buildCommandLine = (
   builder: UnitDefinitionCommandBuilderDto,
