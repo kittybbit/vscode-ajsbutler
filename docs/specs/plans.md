@@ -84,7 +84,10 @@ rules in `docs/specs/README.md`, not in this file.
   extraction. Slice-2-G completed the
   `isValidExplicitEventReceivingFilterReference` filter-reference helper
   extraction. Slice-2-H completed the `isValidExplicitIpv4Address` IPv4
-  validator helper extraction. The next Slice-2 target is not selected yet.
+  validator helper extraction. Slice-2-I investigation is complete for the
+  `hasInvalidWildcardWithShortMonitoringInterval` file monitoring helper
+  extraction and implementation is complete. The next Slice-2 target is not
+  selected yet.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

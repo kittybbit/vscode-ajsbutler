@@ -12,9 +12,9 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-H implementation is complete.
+  Slice-2-I implementation is complete.
 - Active slice:
-  none; Slice-2-H is complete and the next Slice-2 target is not selected.
+  none; Slice-2-I is complete and the next Slice-2 target is not selected.
 - Open follow-up:
   decide whether Slice-2 continues with remaining editor-feedback diagnostic
   helpers or returns to unit-list/command-builder helpers.
@@ -203,6 +203,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-H.
 - [x] Complete Slice-2-H `isValidExplicitIpv4Address` IPv4 validator helper
       extraction.
+- [x] Select Slice-2-I `hasInvalidWildcardWithShortMonitoringInterval` file
+      monitoring helper extraction as the next implementation candidate.
+- [x] Record Slice-2-I impact investigation.
+- [x] Request human approval for the selected Slice-2-I implementation scope.
+- [x] Record human approval for Slice-2-I.
+- [x] Complete Slice-2-I `hasInvalidWildcardWithShortMonitoringInterval` file
+      monitoring helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -681,4 +688,26 @@ active implementation approval remains.
 - Slice-2-H preserved `evipa` dotted-decimal IPv4 validation while extracting
   octet validation into a local helper. `syntaxDiagnosticEventRules.ts` keeps
   the exported helper signature and diagnostic behavior intact.
+- Slice-2-I targets `hasInvalidWildcardWithShortMonitoringInterval` because
+  Qlty reports high complexity 5 in a small application/editor-feedback file
+  monitoring helper.
+- Slice-2-I impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticFileMonitoringRules.ts`,
+  with the exported helper referenced only by the `flwf` rule in
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`.
+- Slice-2-I must preserve wildcard detection for monitored file names,
+  effective `flwi` lookup with `DEFAULTS.Flwi` fallback, decimal-only interval
+  parsing, short interval range 1..9, diagnostic message text,
+  parser/generated artifacts, presentation behavior, VS Code compatibility,
+  web compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises valid wildcard
+  file monitoring with `flwi=10` and invalid wildcard file monitoring with
+  `flwi=9`.
+- Slice-2-I was approved by the user at 2026-05-24 19:42 JST for
+  `hasInvalidWildcardWithShortMonitoringInterval` file monitoring helper
+  extraction only.
+- Slice-2-I preserved `flwf` wildcard/short-interval validation while
+  extracting effective monitoring interval parsing and short-interval checks
+  into local helpers. `syntaxDiagnosticFileMonitoringRules.ts` keeps the
+  exported helper signature and diagnostic behavior intact.
 - Domain helpers still contain branch-heavy conditional logic.

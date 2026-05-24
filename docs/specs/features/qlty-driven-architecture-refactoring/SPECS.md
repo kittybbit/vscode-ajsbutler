@@ -577,6 +577,24 @@ No user-visible behavior scenarios are introduced.
   diagnostic behavior. Octet validation was extracted into a local helper
   while preserving omitted/empty rejection, four-octet parsing, decimal-digit
   requirements, and octet range checks.
+- Slice-2-I target:
+  `hasInvalidWildcardWithShortMonitoringInterval` is the next application
+  editor-feedback helper candidate; file monitoring wildcard/interval helper
+  extraction must preserve `flwf` validation without changing diagnostic
+  behavior.
+- Slice-2-I investigation:
+  Qlty reports high complexity 5 in
+  `src/application/editor-feedback/syntaxDiagnosticFileMonitoringRules.ts`.
+  Serena found the exported helper referenced only from the `flwf` diagnostic
+  rule in `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`. The
+  behavior flows outward through existing file monitoring diagnostics for
+  wildcard monitored file names and effective monitoring intervals.
+- Slice-2-I result:
+  `hasInvalidWildcardWithShortMonitoringInterval` keeps its exported signature
+  and `flwf` diagnostic behavior. Effective `flwi` parsing and short-interval
+  checks were extracted into local helpers while preserving wildcard detection,
+  `DEFAULTS.Flwi` fallback, decimal-only parsing, and short interval range
+  1..9.
 
 ### Breaking Change Analysis
 
@@ -975,6 +993,22 @@ No user-visible behavior scenarios are introduced.
   message text, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, or `engines.vscode`
   requires separate approval.
+- Slice-2-I boundary decision:
+  extract file monitoring wildcard/interval helper(s) only; do not change
+  wildcard detection, effective `flwi` lookup with `DEFAULTS.Flwi` fallback,
+  decimal-only interval parsing, short interval range 1..9, diagnostic
+  messages, parser/generated artifacts, presentation behavior, dependencies,
+  VS Code compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-I approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside
+  `src/application/editor-feedback/syntaxDiagnosticFileMonitoringRules.ts`
+  while preserving the exported
+  `hasInvalidWildcardWithShortMonitoringInterval` signature and its caller.
+  Any change to `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`,
+  diagnostic message text, parser/generated artifacts, presentation behavior,
+  dependency versions, VS Code compatibility, web compatibility, or
+  `engines.vscode` requires separate approval.
 
 ## Compatibility
 
@@ -998,5 +1032,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-H, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-I, should Slice-2 continue with editor-feedback diagnostic
   helper findings or return to remaining unit-list/command-builder helpers?
