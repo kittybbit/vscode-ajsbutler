@@ -12,13 +12,13 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-L implementation is complete.
+  Slice-2-M implementation is complete.
 - Active slice:
-  none; Slice-2-L is complete and the next Slice-2 target is not selected.
+  none; Slice-2-M is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with `buildCommandLine`,
-  command-builder duplication, editor-feedback diagnostic helper findings, or
-  remaining unit-list helper findings.
+  decide whether Slice-2 continues with command-builder duplication,
+  editor-feedback diagnostic helper findings, or remaining unit-list helper
+  findings.
 
 ## Human Approval
 
@@ -231,6 +231,12 @@ active implementation approval remains.
 - [x] Request human approval for the selected Slice-2-L implementation scope.
 - [x] Record human approval for Slice-2-L.
 - [x] Complete Slice-2-L `argumentValue` command-builder helper extraction.
+- [x] Select Slice-2-M `buildCommandLine` token-builder extraction as the next
+      implementation candidate.
+- [x] Record Slice-2-M impact investigation.
+- [x] Request human approval for the selected Slice-2-M implementation scope.
+- [x] Record human approval for Slice-2-M.
+- [x] Complete Slice-2-M `buildCommandLine` token-builder extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -804,4 +810,25 @@ active implementation approval remains.
   Targeted Qlty smell output no longer reports `argumentValue`; remaining
   command-builder findings include `buildCommandLine` complexity and duplicate
   select-option blocks.
+- Slice-2-M targets `buildCommandLine` because Qlty reports high complexity
+  27 and many returns in a command-builder application helper.
+- Slice-2-M impact is local to
+  `src/application/unit-definition/buildAjsCommands.ts`, with production
+  callers from `buildAjsCommands` and `UnitEntityDialog`.
+- Slice-2-M must preserve exported `buildCommandLine` signature, default
+  values handling, checkbox option emission, independent text option and
+  argument emission, select choice lookup, select choice token order,
+  argument-field token emission, target token emission, `formatArgument`
+  quoting/escaping behavior, output token order, command builder DTO shapes,
+  parser/generated artifacts, presentation behavior, VS Code compatibility,
+  web compatibility, and `engines.vscode`.
+- Existing `buildUnitDefinition.test.ts` coverage exercises default command
+  lines, user-selected builder values, generated command DTOs, and
+  `buildUnitDefinitionByPath` command builders.
+- Slice-2-M was approved by the user at 2026-05-25 08:24 JST for
+  `buildCommandLine` token-builder extraction only.
+- Slice-2-M preserved command-builder output while extracting checkbox,
+  independent text, select choice, and target token composition into local
+  helpers. Targeted Qlty smell output no longer reports `buildCommandLine`;
+  remaining command-builder findings are duplicate select-option blocks.
 - Domain helpers still contain branch-heavy conditional logic.

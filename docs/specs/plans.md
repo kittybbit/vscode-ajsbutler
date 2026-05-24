@@ -35,9 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select the next Qlty-driven architecture refactoring Slice-2 target:
-   `buildCommandLine`, command-builder duplication, remaining
-   editor-feedback diagnostic helper findings, or remaining unit-list helper
-   findings.
+   command-builder duplication, remaining editor-feedback diagnostic helper
+   findings, or remaining unit-list helper findings.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -93,7 +92,8 @@ rules in `docs/specs/README.md`, not in this file.
   complete for the `parseExplicitDecimalInRange` decimal scalar helper
   extraction and implementation is complete. Slice-2-L investigation is
   complete for the `argumentValue` command-builder helper extraction and
-  implementation is complete.
+  implementation is complete. Slice-2-M investigation is complete for the
+  `buildCommandLine` token-builder extraction and implementation is complete.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
