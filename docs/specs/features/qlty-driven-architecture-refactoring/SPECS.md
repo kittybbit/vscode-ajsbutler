@@ -506,6 +506,26 @@ No user-visible behavior scenarios are introduced.
   were grouped into a local input type, and group13 wait-job timeout-action
   eligibility now uses a local unit-type membership constant while preserving
   the same unit-type set and fallback defaults.
+- Slice-2-E target:
+  `parseHashEscapedQuotedStringLiteralContent` is the next application
+  editor-feedback helper candidate; string literal parsing helper extraction
+  must preserve event receiving quoted string validation without changing
+  diagnostic behavior.
+- Slice-2-E investigation:
+  Qlty reports high complexity 21 and many returns 4 in
+  `src/application/editor-feedback/syntaxDiagnosticStringValidators.ts`.
+  Serena found direct production references only from
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`, where the
+  helper validates event receiving quoted strings, optional extended attribute
+  filter values, and timeout condition file names. The behavior flows outward
+  through existing diagnostics for `evusr`, `evgrp`, `evwms`, `evdet`,
+  `evwfr`, and `evtmc`.
+- Slice-2-E result:
+  `parseHashEscapedQuotedStringLiteralContent` keeps its exported signature
+  and event receiving diagnostic behavior. The branch-heavy loop was replaced
+  with content validation and decode helpers that preserve quote-boundary
+  validation, `#"` and `##` decoding, trailing `#` before the closing quote,
+  invalid escape rejection, and unescaped inner quote rejection.
 
 ### Breaking Change Analysis
 
@@ -841,6 +861,22 @@ No user-visible behavior scenarios are introduced.
   parser/generated artifacts, presentation behavior, dependency versions, VS
   Code compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-E boundary decision:
+  extract string literal parsing helper(s) only; do not change quote-boundary
+  validation, `#"` and `##` decoding, invalid `#` escape rejection, unescaped
+  inner quote rejection, returned decoded content, diagnostic messages,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-E approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside
+  `src/application/editor-feedback/syntaxDiagnosticStringValidators.ts` while
+  preserving the exported `parseHashEscapedQuotedStringLiteralContent`
+  signature and its callers. Any change to
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts`, diagnostic
+  message text, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`
+  requires separate approval.
 
 ## Compatibility
 
@@ -864,5 +900,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-D, should Slice-2 move to editor-feedback diagnostic
-  orchestration findings or another small application helper?
+- After Slice-2-E, should Slice-2 continue with editor-feedback diagnostic
+  helper findings or return to remaining unit-list/command-builder helpers?

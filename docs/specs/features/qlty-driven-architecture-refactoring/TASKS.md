@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-D implementation is complete.
+  Slice-2-E implementation is complete.
 - Active slice:
-  none; Slice-2-D is complete and the next Slice-2 target is not selected.
+  none; Slice-2-E is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 moves to editor-feedback diagnostic orchestration
-  findings or another small application helper.
+  decide whether Slice-2 continues with editor-feedback diagnostic helper
+  findings or returns to another small application helper.
 
 ## Human Approval
 
@@ -174,6 +174,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-D.
 - [x] Complete Slice-2-D `buildUnitListRemainingGroups` default-aware helper
       cleanup.
+- [x] Select Slice-2-E `parseHashEscapedQuotedStringLiteralContent` string
+      literal parser helper extraction as the next implementation candidate.
+- [x] Record Slice-2-E impact investigation.
+- [x] Request human approval for the selected Slice-2-E implementation scope.
+- [x] Record human approval for Slice-2-E.
+- [x] Complete Slice-2-E `parseHashEscapedQuotedStringLiteralContent` string
+      literal parser helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -564,4 +571,29 @@ active implementation approval remains.
   binary expression with a local membership constant. Targeted Qlty smell
   output for `buildUnitListRemainingGroups.ts` is now empty, and cyclomatic
   complexity improved from 69 to 42 while total complexity stayed at 27.
+- Slice-2-E targets `parseHashEscapedQuotedStringLiteralContent` because Qlty
+  reports high complexity 21 and many returns 4 in a small
+  application/editor-feedback helper.
+- Slice-2-E impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticStringValidators.ts`, with
+  direct production references only from
+  `src/application/editor-feedback/syntaxDiagnosticEventRules.ts` for event
+  receiving quoted string, optional extended attribute filter, and timeout
+  file-name validation.
+- Slice-2-E must preserve quote-boundary validation, `#"` and `##` decoding,
+  rejection of invalid `#` escapes, rejection of unescaped inner quotes,
+  decoded content returned for byte-length checks, parser/generated artifacts,
+  diagnostics messages, presentation behavior, VS Code compatibility, web
+  compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises event
+  receiving valid and invalid string-filter diagnostics, including `evusr`,
+  `evgrp`, `evwms`, `evdet`, `evwfr`, and `evtmc` consumers of the helper.
+- Slice-2-E was approved by the user at 2026-05-23 17:26 JST for
+  `parseHashEscapedQuotedStringLiteralContent` string literal parser helper
+  extraction only.
+- Slice-2-E preserved hash-escaped quoted string behavior while replacing the
+  branch-heavy loop with focused content validation and decode helpers.
+  Targeted Qlty smell output for `syntaxDiagnosticStringValidators.ts` is now
+  empty; file total complexity improved from 21 to 5 and cyclomatic complexity
+  improved from 19 to 4.
 - Domain helpers still contain branch-heavy conditional logic.

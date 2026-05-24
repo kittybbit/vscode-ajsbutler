@@ -62,7 +62,7 @@ Slice-1A, Slice-1B-A, Slice-1B-B, Slice-1B-C, Slice-1B-D, Slice-1B-E,
 Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
 Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C, and
-Slice-2-D are complete. Slice-1B is complete.
+Slice-2-D and Slice-2-E are complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -149,13 +149,15 @@ Slice-2-D are complete. Slice-1B is complete.
 ## Current Slice Candidate
 
 No current runtime slice is selected. Slice-2 should next choose between
-editor-feedback diagnostic orchestration findings and another small application
-helper, then request separate approval before runtime work starts.
+remaining editor-feedback diagnostic helper findings, command-builder helper
+findings, or remaining unit-list helper findings, then request separate
+approval before runtime work starts.
 
 - Recent result:
-  Slice-2-D removed the remaining targeted smells from
-  `buildUnitListRemainingGroups.ts`, reduced cyclomatic complexity from 69 to
-  42, and preserved group13/group14 default-aware projection semantics.
+  Slice-2-E removed the targeted high-complexity and many-returns smells from
+  `syntaxDiagnosticStringValidators.ts`, reducing total complexity from 21 to
+  5 while preserving hash-escaped quoted string parsing for event receiving
+  diagnostics.
 
 ## Risks To Control
 

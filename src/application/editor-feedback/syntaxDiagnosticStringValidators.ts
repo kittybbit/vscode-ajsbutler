@@ -3,37 +3,25 @@ export const hasWildcard = (value: string): boolean => value.includes("*");
 export const isExplicitMacroVariable = (value: string): boolean =>
   /^\?[^?\r\n]+\?$/.test(value);
 
+const HASH_ESCAPED_CONTENT_PATTERN = /^(?:[^"#]|#["#])*#?$/;
+const HASH_ESCAPED_CONTENT_ESCAPE_PATTERN = /#(["#])/g;
+const HASH_ESCAPED_TRAILING_QUOTE_PATTERN = /#$/;
+
+const parseHashEscapedContent = (value: string): string | undefined => {
+  const content = value.slice(1, -1);
+  return HASH_ESCAPED_CONTENT_PATTERN.test(content)
+    ? content
+        .replace(HASH_ESCAPED_CONTENT_ESCAPE_PATTERN, "$1")
+        .replace(HASH_ESCAPED_TRAILING_QUOTE_PATTERN, '"')
+    : undefined;
+};
+
 export const parseHashEscapedQuotedStringLiteralContent = (
   value: string,
-): string | undefined => {
-  if (!value.startsWith('"') || !value.endsWith('"')) {
-    return undefined;
-  }
-
-  let content = "";
-  for (let index = 1; index < value.length - 1; index += 1) {
-    const character = value[index];
-
-    if (character === "#") {
-      const escapedCharacter = value[index + 1];
-      if (escapedCharacter !== '"' && escapedCharacter !== "#") {
-        return undefined;
-      }
-
-      content += escapedCharacter;
-      index += 1;
-      continue;
-    }
-
-    if (character === '"') {
-      return undefined;
-    }
-
-    content += character;
-  }
-
-  return content;
-};
+): string | undefined =>
+  value.startsWith('"') && value.endsWith('"')
+    ? parseHashEscapedContent(value)
+    : undefined;
 
 export const parseQuotedStringLiteralContent = (
   value: string,
