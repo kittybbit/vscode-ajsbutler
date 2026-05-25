@@ -1259,6 +1259,45 @@ No user-visible behavior scenarios are introduced.
   parser/generated artifacts, presentation behavior, dependency versions, VS
   Code compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-Q target:
+  `parseCftd` is the next unit-list helper candidate. Qlty reports high
+  complexity 5, and Serena found production references only from
+  `src/application/unit-list/buildUnitListGroup10View.ts` for `cftd`
+  projection plus direct helper test coverage in
+  `src/test/suite/unitListViewHelpers.test.ts`.
+- Slice-2-Q investigation:
+  `parseCftd` wraps `parseScheduleByDaysFromStartValue` and projects the
+  parsed `cftd` value into group10 `scheduleByDaysFromStart` and
+  `maxShiftableDays` strings. It defaults missing type to `no`, returns
+  `scheduleByDaysFromStart` as `no` for type `no`, returns
+  `${type},${scheduleByDaysFromStart ?? "1"}` for other types, blanks
+  `maxShiftableDays` for `no`, `db`, and `da`, and otherwise defaults missing
+  `maxShiftableDays` to `"10"`. The exported helper shape is used by
+  `buildUnitListGroup10View`, so the refactor should stay local to
+  helper-level output decisions.
+- Slice-2-Q boundary decision:
+  extract schedule-by-days projection helper(s) only; do not change
+  `parseScheduleByDaysFromStartValue` behavior, missing type default `no`,
+  `scheduleByDaysFromStart` formatting, `maxShiftableDays` blank/default
+  rules, `UnitListGroup10View` output shape, parser/generated artifacts,
+  presentation behavior, dependencies, VS Code compatibility, web
+  compatibility, or `engines.vscode`.
+- Slice-2-Q approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-list/unitListViewHelpers.ts` while preserving
+  exported `parseCftd` contract and existing callers. Any change to
+  `src/application/unit-list/buildUnitListGroup10View.ts`,
+  `src/application/unit-list/buildUnitListView.ts`, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
+- Slice-2-Q result:
+  `parseCftd` remains exported from `unitListViewHelpers.ts`, with
+  schedule-by-days formatting, max-shiftable-days blank/default selection, and
+  type membership extracted into local helpers without changing
+  `parseScheduleByDaysFromStartValue` behavior, group10 DTO values, exported
+  shapes, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`.
 
 ## Compatibility
 
@@ -1282,5 +1321,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-P, should Slice-2 continue with editor-feedback diagnostic
-  helper findings or remaining unit-list helper findings?
+- After Slice-2-Q, should Slice-2 continue with `parseSd`,
+  `getPriorityForUnitTypes`, or editor-feedback diagnostic helper findings?

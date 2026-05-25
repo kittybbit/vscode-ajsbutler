@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Select the next Qlty-driven architecture refactoring Slice-2 target:
-   remaining editor-feedback diagnostic helper findings or remaining
-   unit-list helper findings.
+   remaining unit-list helper findings (`parseSd`, `getPriorityForUnitTypes`)
+   or remaining editor-feedback diagnostic helper findings.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -99,6 +99,8 @@ rules in `docs/specs/README.md`, not in this file.
   complete for `toNiPriority` nice-value conversion extraction and
   implementation is complete. Slice-2-P investigation is complete for
   `buildCalendarWeekView` week-state extraction and implementation is
+  complete. Slice-2-Q investigation is complete for `parseCftd`
+  schedule-by-days projection helper extraction and implementation is
   complete.
 
 Completed feature-local folders were removed after their durable behavior

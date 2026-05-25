@@ -15,6 +15,7 @@ import {
   parseShiftDaysValue,
   parseWaitCountValue,
   resolveEffectiveStartConditionMonitoringPair,
+  type ParsedScheduleByDaysFromStartValue,
 } from "../../domain/models/parameters/scheduleRuleHelpers";
 import { WeekSymbol, isWeekSymbol } from "../../domain/values/AjsType";
 
@@ -203,20 +204,34 @@ export const parseSh = (value: string): string =>
 export const parseShd = (value: string): string =>
   parseShiftDaysValue(value)?.value ?? "2";
 
+const cftdTypesWithoutMaxShiftableDays: readonly ParsedScheduleByDaysFromStartValue["type"][] =
+  ["no", "db", "da"];
+
+const cftdScheduleByDaysFromStart = (
+  type: ParsedScheduleByDaysFromStartValue["type"],
+  scheduleByDaysFromStart: string | undefined,
+): string =>
+  type === "no" ? "no" : `${type},${scheduleByDaysFromStart ?? "1"}`;
+
+const cftdMaxShiftableDays = (
+  type: ParsedScheduleByDaysFromStartValue["type"],
+  maxShiftableDays: string | undefined,
+): string =>
+  cftdTypesWithoutMaxShiftableDays.includes(type)
+    ? ""
+    : (maxShiftableDays ?? "10");
+
 export const parseCftd = (
   value: string,
 ): { scheduleByDaysFromStart: string; maxShiftableDays: string } => {
   const parsed = parseScheduleByDaysFromStartValue(value);
   const type = parsed?.type ?? "no";
   return {
-    scheduleByDaysFromStart:
-      type === "no"
-        ? "no"
-        : `${type},${parsed?.scheduleByDaysFromStart ?? "1"}`,
-    maxShiftableDays:
-      type && ["no", "db", "da"].includes(type)
-        ? ""
-        : (parsed?.maxShiftableDays ?? "10"),
+    scheduleByDaysFromStart: cftdScheduleByDaysFromStart(
+      type,
+      parsed?.scheduleByDaysFromStart,
+    ),
+    maxShiftableDays: cftdMaxShiftableDays(type, parsed?.maxShiftableDays),
   };
 };
 

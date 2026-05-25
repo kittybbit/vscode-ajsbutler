@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-P implementation is complete.
+  Slice-2-Q implementation is complete.
 - Active slice:
-  none; Slice-2-P is complete and the next Slice-2 target is not selected.
+  none; Slice-2-Q is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with editor-feedback diagnostic helper
-  findings or remaining unit-list helper findings.
+  decide whether Slice-2 continues with `parseSd`, `getPriorityForUnitTypes`,
+  or editor-feedback diagnostic helper findings.
 
 ## Human Approval
 
@@ -254,6 +254,13 @@ active implementation approval remains.
 - [x] Request human approval for the selected Slice-2-P implementation scope.
 - [x] Record human approval for Slice-2-P.
 - [x] Complete Slice-2-P `buildCalendarWeekView` week-state extraction.
+- [x] Select Slice-2-Q `parseCftd` schedule-by-days projection helper
+      extraction as the next implementation candidate.
+- [x] Record Slice-2-Q impact investigation.
+- [x] Request human approval for the selected Slice-2-Q implementation scope.
+- [x] Record human approval for Slice-2-Q.
+- [x] Complete Slice-2-Q `parseCftd` schedule-by-days projection helper
+      extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -916,4 +923,29 @@ active implementation approval remains.
   smell output no longer reports `buildCalendarWeekView`; remaining unit-list
   helper findings include `getPriorityForUnitTypes`, `parseSd`, and
   `parseCftd`.
+- Slice-2-Q targets `parseCftd` because Qlty reports high complexity 5 in a
+  local unit-list schedule-by-days projection helper, and it is smaller than
+  the remaining `parseSd` complexity/nesting candidate.
+- Slice-2-Q impact is local to
+  `src/application/unit-list/unitListViewHelpers.ts`; Serena found production
+  usage only from `buildUnitListGroup10View` for `cftd`-derived
+  `scheduleByDaysFromStart` and `maxShiftableDays`, plus direct helper test
+  coverage in `unitListViewHelpers.test.ts`.
+- Slice-2-Q must preserve `parseScheduleByDaysFromStartValue` input parsing,
+  default type `no`, `scheduleByDaysFromStart` output `no` for type `no`,
+  non-`no` output `${type},${scheduleByDaysFromStart ?? "1"}`,
+  blank `maxShiftableDays` for types `no`, `db`, and `da`, default
+  `maxShiftableDays` of `"10"` otherwise, group10 DTO shape,
+  parser/generated artifacts, presentation behavior, VS Code compatibility,
+  web compatibility, and `engines.vscode`.
+- Existing `unitListViewHelpers.test.ts` coverage exercises `parseCftd`, and
+  group10 behavior flows through existing unit-list view tests. Add focused
+  helper coverage only if extraction exposes an untested branch.
+- Slice-2-Q was approved by the user at 2026-05-25 23:58 JST for
+  `parseCftd` schedule-by-days projection helper extraction only.
+- Slice-2-Q preserved `cftd` schedule-by-days projection while extracting
+  schedule-by-days formatting, max-shiftable-days blank/default selection, and
+  type membership into local helpers. Targeted Qlty smell output no longer
+  reports `parseCftd`; remaining unit-list helper findings include
+  `getPriorityForUnitTypes` and `parseSd`.
 - Domain helpers still contain branch-heavy conditional logic.
