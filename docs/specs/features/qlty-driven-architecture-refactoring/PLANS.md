@@ -64,7 +64,7 @@ Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
 Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C,
 Slice-2-D, Slice-2-E, Slice-2-F, Slice-2-G, Slice-2-H, Slice-2-I,
 Slice-2-J, Slice-2-K, Slice-2-L, Slice-2-M, Slice-2-N, and Slice-2-O are
-complete. Slice-1B is complete.
+complete. Slice-2-P is complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -155,10 +155,10 @@ remaining editor-feedback diagnostic helper findings or remaining unit-list
 helper findings, then request separate approval before runtime work starts.
 
 - Recent result:
-  Slice-2-O preserved nice-value priority conversion while extracting the
-  threshold checks into local rule data. Targeted Qlty smell output no longer
-  reports `toNiPriority`; remaining unit-list helper findings include
-  `getPriorityForUnitTypes`, `buildCalendarWeekView`, `parseSd`, and
+  Slice-2-P preserved calendar week projection while extracting week-symbol
+  membership and open/close state resolution into local helpers. Targeted Qlty
+  smell output no longer reports `buildCalendarWeekView`; remaining unit-list
+  helper findings include `getPriorityForUnitTypes`, `parseSd`, and
   `parseCftd`.
 
 ## Risks To Control

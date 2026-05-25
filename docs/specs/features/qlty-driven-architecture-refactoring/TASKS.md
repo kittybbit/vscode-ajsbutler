@@ -12,9 +12,9 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-O implementation is complete.
+  Slice-2-P implementation is complete.
 - Active slice:
-  none; Slice-2-O is complete and the next Slice-2 target is not selected.
+  none; Slice-2-P is complete and the next Slice-2 target is not selected.
 - Open follow-up:
   decide whether Slice-2 continues with editor-feedback diagnostic helper
   findings or remaining unit-list helper findings.
@@ -248,6 +248,12 @@ active implementation approval remains.
 - [x] Request human approval for the selected Slice-2-O implementation scope.
 - [x] Record human approval for Slice-2-O.
 - [x] Complete Slice-2-O `toNiPriority` nice-value conversion extraction.
+- [x] Select Slice-2-P `buildCalendarWeekView` week-state extraction as the
+      next implementation candidate.
+- [x] Record Slice-2-P impact investigation.
+- [x] Request human approval for the selected Slice-2-P implementation scope.
+- [x] Record human approval for Slice-2-P.
+- [x] Complete Slice-2-P `buildCalendarWeekView` week-state extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -887,5 +893,27 @@ active implementation approval remains.
   threshold checks into local rule data. Targeted Qlty smell output no longer
   reports `toNiPriority`; remaining unit-list helper findings include
   `getPriorityForUnitTypes`, `buildCalendarWeekView`, `parseSd`, and
+  `parseCftd`.
+- Slice-2-P targets `buildCalendarWeekView` because Qlty reports high
+  complexity 7 in a local unit-list calendar-week projection helper.
+- Slice-2-P impact is local to
+  `src/application/unit-list/unitListViewHelpers.ts`; Serena found production
+  usage only from `buildUnitListGroup6View` and direct test coverage in
+  `unitListViewHelpers.test.ts`.
+- Slice-2-P must preserve week symbol order, open values taking precedence
+  over close values, close-only values mapping to `false`, absent week values
+  mapping to `undefined`, non-week date filtering through
+  `isNonWeekCalendarValue`, group6 DTO shape, parser/generated artifacts,
+  presentation behavior, VS Code compatibility, web compatibility, and
+  `engines.vscode`.
+- Existing `unitListViewHelpers.test.ts` coverage exercises open/close week
+  flags and non-week values; group6 behavior also flows through existing
+  unit-list view tests.
+- Slice-2-P was approved by the user at 2026-05-25 23:51 JST for
+  `buildCalendarWeekView` week-state extraction only.
+- Slice-2-P preserved calendar week projection while extracting week-symbol
+  membership and open/close state resolution into local helpers. Targeted Qlty
+  smell output no longer reports `buildCalendarWeekView`; remaining unit-list
+  helper findings include `getPriorityForUnitTypes`, `parseSd`, and
   `parseCftd`.
 - Domain helpers still contain branch-heavy conditional logic.

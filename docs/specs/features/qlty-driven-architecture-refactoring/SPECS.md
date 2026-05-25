@@ -703,6 +703,22 @@ No user-visible behavior scenarios are introduced.
   `Number(value)` coercion. The threshold checks now use local rule data while
   preserving `ni` conversion, `pr` precedence, parent inheritance, fallback
   priority behavior, and exported `getPriorityForUnitTypes` behavior.
+- Slice-2-P target:
+  `buildCalendarWeekView` is the next unit-list application helper candidate;
+  helper extraction must preserve calendar week-state projection for group6
+  unit-list rows.
+- Slice-2-P investigation:
+  Qlty reports high complexity 7 in
+  `src/application/unit-list/unitListViewHelpers.ts`. Serena found production
+  usage only from `src/application/unit-list/buildUnitListGroup6View.ts` and
+  direct coverage in `src/test/suite/unitListViewHelpers.test.ts`. The
+  behavior maps open/close calendar parameter values to week booleans while
+  leaving non-week values to `isNonWeekCalendarValue` filtering.
+- Slice-2-P result:
+  `buildCalendarWeekView` keeps week symbol order, open-over-close precedence,
+  close-only false mapping, absent undefined mapping, and group6 projection
+  behavior. Week-symbol membership and open/close state resolution now live in
+  local helpers.
 
 ### Breaking Change Analysis
 
@@ -1227,6 +1243,22 @@ No user-visible behavior scenarios are introduced.
   parser/generated artifacts, presentation behavior, dependency versions, VS
   Code compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-P boundary decision:
+  extract calendar week-state helper(s) only; do not change week symbol order,
+  open values taking precedence over close values, close-only values mapping
+  to `false`, absent week values mapping to `undefined`, non-week value
+  filtering through `isNonWeekCalendarValue`, group6 DTO shape,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-P approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-list/unitListViewHelpers.ts` while preserving
+  exported `buildCalendarWeekView` and `isNonWeekCalendarValue` contracts. Any
+  change to `src/application/unit-list/buildUnitListGroup6View.ts`,
+  `src/application/unit-list/buildUnitListView.ts`, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
 
 ## Compatibility
 
@@ -1250,5 +1282,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-O, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-P, should Slice-2 continue with editor-feedback diagnostic
   helper findings or remaining unit-list helper findings?
