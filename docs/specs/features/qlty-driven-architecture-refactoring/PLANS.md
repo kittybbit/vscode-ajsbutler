@@ -63,8 +63,8 @@ Slice-1B-F, Slice-1B-G, Slice-1B-H, Slice-1B-I, Slice-1B-J, Slice-1B-K,
 Slice-1B-L, Slice-1B-M, Slice-1B-N, Slice-1B-O, Slice-1B-P, Slice-1B-Q,
 Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C,
 Slice-2-D, Slice-2-E, Slice-2-F, Slice-2-G, Slice-2-H, Slice-2-I,
-Slice-2-J, Slice-2-K, Slice-2-L, and Slice-2-M are complete. Slice-1B is
-complete.
+Slice-2-J, Slice-2-K, Slice-2-L, Slice-2-M, and Slice-2-N are complete.
+Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -151,15 +151,14 @@ complete.
 ## Current Slice Candidate
 
 No current runtime slice is selected. Slice-2 should next choose between
-command-builder duplication, remaining editor-feedback diagnostic helper
-findings, or remaining unit-list helper findings, then request separate
-approval before runtime work starts.
+remaining editor-feedback diagnostic helper findings or remaining unit-list
+helper findings, then request separate approval before runtime work starts.
 
 - Recent result:
-  Slice-2-M preserved command-builder output while extracting checkbox,
-  independent text, select choice, and target token composition into local
-  helpers. Targeted Qlty smell output no longer reports `buildCommandLine`;
-  remaining command-builder findings are duplicate select-option blocks.
+  Slice-2-N preserved unit-type choice order and command output while
+  extracting common unit-type and ajsprint job-group choice construction into
+  local helpers. Targeted Qlty smell output for `buildAjsCommands.ts` is now
+  empty.
 
 ## Risks To Control
 

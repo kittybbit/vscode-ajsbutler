@@ -669,6 +669,23 @@ No user-visible behavior scenarios are introduced.
   behavior. Field token composition now delegates to local checkbox,
   independent-text, and select-choice helpers while preserving token order,
   default field values, argument resolution, and target formatting.
+- Slice-2-N target:
+  duplicate command-builder unit-type choices are the next application
+  command-builder candidate; helper extraction must preserve ajsshow and
+  ajsprint unit-type select choices and generated command text.
+- Slice-2-N investigation:
+  Qlty reports duplicate 24-line blocks in
+  `src/application/unit-definition/buildAjsCommands.ts` around unit-type
+  select choice definitions. The duplicated data feeds exported
+  `buildAjsCommandBuilders`, `buildAjsCommands`, and `buildCommandLine`, plus
+  `src/ui-component/editor/UnitEntityDialog.tsx` command previews through the
+  existing DTO contract. Existing command-builder tests cover defaults and
+  selected unit-type command output.
+- Slice-2-N result:
+  command-builder unit-type choices keep their order, values, label keys,
+  tokens, default values, and generated command output. Common unit-type and
+  ajsprint job-group choice construction now use local helpers, and targeted
+  Qlty smell output for `buildAjsCommands.ts` is empty.
 
 ### Breaking Change Analysis
 
@@ -1158,6 +1175,24 @@ No user-visible behavior scenarios are introduced.
   parser/generated artifacts, presentation behavior, dependency versions, VS
   Code compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-N boundary decision:
+  extract unit-type choice construction helper(s) only; do not change ajsshow
+  unit-type choices `all`, `jobnet`, and `job`; ajsprint unit-type choices
+  `all`, `job`, `jobnet`, and `jobGroup`; choice order, value ids, label keys,
+  emitted tokens, select default values, exported DTO shapes, generated
+  command text, parser/generated artifacts, presentation behavior,
+  dependencies, VS Code compatibility, web compatibility, or
+  `engines.vscode`.
+- Slice-2-N approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-definition/buildAjsCommands.ts` while
+  preserving exported `buildAjsCommandBuilders`, `buildAjsCommands`,
+  `buildCommandLine`, and `UnitDefinitionCommandBuilderDto` contracts. Any
+  change to `src/application/unit-definition/buildUnitDefinition.ts`,
+  `src/ui-component/editor/UnitEntityDialog.tsx`, command output text,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
 
 ## Compatibility
 
@@ -1181,6 +1216,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-M, should Slice-2 continue with command-builder duplication,
-  editor-feedback diagnostic helper findings, or remaining unit-list helper
-  findings?
+- After Slice-2-N, should Slice-2 continue with editor-feedback diagnostic
+  helper findings or remaining unit-list helper findings?

@@ -70,6 +70,7 @@ type CommandTokenBuildContext = {
   builder: UnitDefinitionCommandBuilderDto;
   values: CommandBuilderValues;
 };
+type CommonUnitTypeChoiceValue = "all" | "job" | "jobnet";
 
 const manualUrls = {
   ajsshow: {
@@ -95,6 +96,33 @@ const fieldValue = (
   field: UnitDefinitionCommandBuilderFieldDto,
   values: CommandBuilderValues,
 ): string | boolean => values[field.id] ?? field.defaultValue;
+
+const commandBuilderChoice = (
+  value: string,
+  labelKey: string,
+  tokens: string[],
+): UnitDefinitionCommandBuilderChoiceDto => ({
+  value,
+  labelKey,
+  tokens,
+});
+
+const commonUnitTypeChoice = (
+  value: CommonUnitTypeChoiceValue,
+  tokens: string[],
+): UnitDefinitionCommandBuilderChoiceDto =>
+  commandBuilderChoice(
+    value,
+    `commandBuilder.common.unitType.${value}`,
+    tokens,
+  );
+
+const ajsprintJobGroupChoice = (): UnitDefinitionCommandBuilderChoiceDto =>
+  commandBuilderChoice(
+    "jobGroup",
+    "commandBuilder.ajsprint.unitType.jobGroup",
+    ["-G"],
+  );
 
 const isTextField = (
   field: UnitDefinitionCommandBuilderFieldDto | undefined,
@@ -331,21 +359,9 @@ export const buildAjsCommandBuilders = (
         descriptionKey: "commandBuilder.ajsshow.unitType.description",
         defaultValue: "all",
         choices: [
-          {
-            value: "all",
-            labelKey: "commandBuilder.common.unitType.all",
-            tokens: [],
-          },
-          {
-            value: "jobnet",
-            labelKey: "commandBuilder.common.unitType.jobnet",
-            tokens: ["-N"],
-          },
-          {
-            value: "job",
-            labelKey: "commandBuilder.common.unitType.job",
-            tokens: ["-J"],
-          },
+          commonUnitTypeChoice("all", []),
+          commonUnitTypeChoice("jobnet", ["-N"]),
+          commonUnitTypeChoice("job", ["-J"]),
         ],
       },
       {
@@ -476,26 +492,10 @@ export const buildAjsCommandBuilders = (
         descriptionKey: "commandBuilder.ajsprint.unitType.description",
         defaultValue: "all",
         choices: [
-          {
-            value: "all",
-            labelKey: "commandBuilder.common.unitType.all",
-            tokens: [],
-          },
-          {
-            value: "job",
-            labelKey: "commandBuilder.common.unitType.job",
-            tokens: ["-J"],
-          },
-          {
-            value: "jobnet",
-            labelKey: "commandBuilder.common.unitType.jobnet",
-            tokens: ["-N"],
-          },
-          {
-            value: "jobGroup",
-            labelKey: "commandBuilder.ajsprint.unitType.jobGroup",
-            tokens: ["-G"],
-          },
+          commonUnitTypeChoice("all", []),
+          commonUnitTypeChoice("job", ["-J"]),
+          commonUnitTypeChoice("jobnet", ["-N"]),
+          ajsprintJobGroupChoice(),
         ],
       },
       {

@@ -12,13 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-M implementation is complete.
+  Slice-2-N implementation is complete.
 - Active slice:
-  none; Slice-2-M is complete and the next Slice-2 target is not selected.
+  none; Slice-2-N is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with command-builder duplication,
-  editor-feedback diagnostic helper findings, or remaining unit-list helper
-  findings.
+  decide whether Slice-2 continues with editor-feedback diagnostic helper
+  findings or remaining unit-list helper findings.
 
 ## Human Approval
 
@@ -237,6 +236,12 @@ active implementation approval remains.
 - [x] Request human approval for the selected Slice-2-M implementation scope.
 - [x] Record human approval for Slice-2-M.
 - [x] Complete Slice-2-M `buildCommandLine` token-builder extraction.
+- [x] Select Slice-2-N command-builder unit-type choice extraction as the next
+      implementation candidate.
+- [x] Record Slice-2-N impact investigation.
+- [x] Request human approval for the selected Slice-2-N implementation scope.
+- [x] Record human approval for Slice-2-N.
+- [x] Complete Slice-2-N command-builder unit-type choice extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -831,4 +836,27 @@ active implementation approval remains.
   independent text, select choice, and target token composition into local
   helpers. Targeted Qlty smell output no longer reports `buildCommandLine`;
   remaining command-builder findings are duplicate select-option blocks.
+- Slice-2-N targets the duplicate command-builder unit-type select choices
+  because Qlty reports duplicate 24-line blocks in
+  `src/application/unit-definition/buildAjsCommands.ts`.
+- Slice-2-N impact is local to
+  `src/application/unit-definition/buildAjsCommands.ts`; the duplicated
+  choices feed `buildAjsCommandBuilders`, `buildAjsCommands`,
+  `buildCommandLine`, and `UnitEntityDialog` command previews through existing
+  DTOs.
+- Slice-2-N must preserve ajsshow unit-type choices `all`, `jobnet`, and
+  `job`; ajsprint unit-type choices `all`, `job`, `jobnet`, and `jobGroup`;
+  choice order, value ids, label keys, emitted tokens, default values,
+  command-builder DTO shapes, generated command text, parser/generated
+  artifacts, presentation behavior, VS Code compatibility, web compatibility,
+  and `engines.vscode`.
+- Existing `buildUnitDefinition.test.ts` coverage exercises command-builder
+  defaults and selected `ajsprint` unit-type output through `buildCommandLine`;
+  add focused coverage only if extraction reveals an untested choice branch.
+- Slice-2-N was approved by the user at 2026-05-25 08:43 JST for
+  command-builder unit-type choice extraction only.
+- Slice-2-N preserved unit-type choice order and command output while
+  extracting common unit-type and ajsprint job-group choice construction into
+  local helpers. Targeted Qlty smell output for `buildAjsCommands.ts` is now
+  empty.
 - Domain helpers still contain branch-heavy conditional logic.
