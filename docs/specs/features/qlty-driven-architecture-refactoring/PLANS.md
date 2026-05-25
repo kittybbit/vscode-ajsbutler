@@ -65,8 +65,8 @@ Slice-1B-R, Slice-1B-S, Slice-1B-U, Slice-2-A, Slice-2-B, Slice-2-C,
 Slice-2-D, Slice-2-E, Slice-2-F, Slice-2-G, Slice-2-H, Slice-2-I,
 Slice-2-J, Slice-2-K, Slice-2-L, Slice-2-M, Slice-2-N, and Slice-2-O are
 complete. Slice-2-P is complete. Slice-2-Q is complete. Slice-2-R is
-complete. Slice-2-S is complete. Slice-2-T is complete. Slice-1B is
-complete.
+complete. Slice-2-S is complete. Slice-2-T is complete. Slice-2-U is
+complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -152,14 +152,14 @@ complete.
 
 ## Current Slice Candidate
 
-No current runtime slice is selected. Slice-2 should next choose whether to
-continue with editor-feedback diagnostic helper findings or close application
-orchestration work and move to the next slice.
+No current runtime slice is selected. Slice-2 should next choose between
+`buildExplicitDecimalRangeRule`, `syntaxDiagnosticRuleBuilders`, or closing
+application orchestration work and moving to the next slice.
 
 - Recent result:
-  Slice-2-T preserved shared unit-list priority resolution while grouping
-  `getPriorityForUnitTypes` inputs. Targeted Qlty smell output for
-  `unitListViewHelpers.ts` and `buildUnitListPriorityViews.ts` is now empty.
+  Slice-2-U preserved transfer-file byte-length diagnostics while grouping
+  `buildExplicitByteLengthRule` inputs. Targeted Qlty smell output no longer
+  reports `buildExplicitByteLengthRule`.
 
 ## Risks To Control
 

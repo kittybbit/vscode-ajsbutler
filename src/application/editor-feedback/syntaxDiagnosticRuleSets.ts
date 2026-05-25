@@ -94,18 +94,18 @@ export const waitJobExecutionTimeDiagnosticRules = [
 
 export const transferFileByteLengthRules: readonly UnitParameterDiagnosticRule[] =
   transferFileIndexes.flatMap((index) => [
-    buildExplicitByteLengthRule(
-      `ts${index}`,
-      1,
-      511,
-      `Transfer source file name (ts${index}) must be between 1 and 511 bytes.`,
-    ),
-    buildExplicitByteLengthRule(
-      `td${index}`,
-      1,
-      511,
-      `Transfer destination file name (td${index}) must be between 1 and 511 bytes.`,
-    ),
+    buildExplicitByteLengthRule({
+      key: `ts${index}`,
+      minimum: 1,
+      maximum: 511,
+      message: `Transfer source file name (ts${index}) must be between 1 and 511 bytes.`,
+    }),
+    buildExplicitByteLengthRule({
+      key: `td${index}`,
+      minimum: 1,
+      maximum: 511,
+      message: `Transfer destination file name (td${index}) must be between 1 and 511 bytes.`,
+    }),
   ]);
 
 export const transferFileValueShapeRules: readonly UnitParameterDiagnosticRule[] =

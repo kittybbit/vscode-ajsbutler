@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-T implementation is complete.
+  Slice-2-U implementation is complete.
 - Active slice:
-  none; Slice-2-T is complete and the next Slice-2 target is not selected.
+  none; Slice-2-U is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 should continue with editor-feedback diagnostic
-  helper findings or be closed as application orchestration work complete.
+  decide whether Slice-2 continues with `buildExplicitDecimalRangeRule`,
+  `syntaxDiagnosticRuleBuilders`, or closes application orchestration work.
 
 ## Human Approval
 
@@ -281,6 +281,12 @@ active implementation approval remains.
 - [x] Request human approval for the selected Slice-2-T implementation scope.
 - [x] Record human approval for Slice-2-T.
 - [x] Complete Slice-2-T `getPriorityForUnitTypes` input grouping.
+- [x] Select Slice-2-U `buildExplicitByteLengthRule` input grouping as the
+      next implementation candidate.
+- [x] Record Slice-2-U impact investigation.
+- [x] Request human approval for the selected Slice-2-U implementation scope.
+- [x] Record human approval for Slice-2-U.
+- [x] Complete Slice-2-U `buildExplicitByteLengthRule` input grouping.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -1036,4 +1042,26 @@ active implementation approval remains.
   `getPriorityForUnitTypes` and updating recursive, Group7, Group11, and
   direct test call sites. Targeted Qlty smell output for
   `unitListViewHelpers.ts` and `buildUnitListPriorityViews.ts` is now empty.
+- Slice-2-U targets `buildExplicitByteLengthRule` because Qlty reports a
+  many-parameters smell in a small editor-feedback diagnostic rule builder.
+- Slice-2-U impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticCore.ts` and
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`; Serena found
+  direct production usage only from transfer-file byte-length rules for `tsN`
+  and `tdN`.
+- Slice-2-U must preserve parameter key assignment, minimum/maximum byte
+  length bounds, diagnostic message text, `isValidExplicitByteLengthValue`
+  validation behavior, transfer-file diagnostics for `tsN`/`tdN`,
+  parser/generated artifacts, presentation behavior, VS Code compatibility,
+  web compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises transfer-file
+  source and destination byte-length diagnostics, including current messages
+  for `ts1` and `td1`.
+- Slice-2-U was approved by the user at 2026-05-26 08:51 JST for
+  `buildExplicitByteLengthRule` input grouping only.
+- Slice-2-U preserved transfer-file byte-length diagnostics while grouping
+  `buildExplicitByteLengthRule` inputs and updating `tsN`/`tdN` call sites.
+  Targeted Qlty smell output no longer reports `buildExplicitByteLengthRule`;
+  remaining editor-feedback findings include `buildExplicitDecimalRangeRule`
+  and larger `syntaxDiagnosticRuleBuilders` complexity.
 - Domain helpers still contain branch-heavy conditional logic.

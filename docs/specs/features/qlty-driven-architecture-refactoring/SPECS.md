@@ -1410,6 +1410,40 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
   inheritance, fallback priority, exported DTO shapes, parser/generated
   artifacts, presentation behavior, dependency versions, VS Code
   compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-U target:
+  `buildExplicitByteLengthRule` is the next editor-feedback diagnostic helper
+  candidate. Qlty reports a many-parameters smell, and Serena found direct
+  production references only from `transferFileByteLengthRules` in
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`.
+- Slice-2-U investigation:
+  `buildExplicitByteLengthRule` constructs a `UnitParameterDiagnosticRule`
+  from a parameter key, minimum byte length, maximum byte length, and message.
+  It delegates validation to `isValidExplicitByteLengthValue`. The only
+  current call sites build transfer-file source/destination byte-length rules
+  for `tsN` and `tdN`, both with bounds `1..511` and stable diagnostic
+  messages.
+- Slice-2-U boundary decision:
+  group byte-length rule inputs only; do not change parameter keys,
+  minimum/maximum byte-length bounds, diagnostic message text,
+  `isValidExplicitByteLengthValue` behavior, transfer-file rule membership,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-U approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/editor-feedback/syntaxDiagnosticCore.ts` and adjust
+  the transfer-file byte-length rule call sites in
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts` while
+  preserving exported diagnostic behavior. Any change to diagnostic message
+  text, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`
+  requires separate approval.
+- Slice-2-U result:
+  `buildExplicitByteLengthRule` remains exported from
+  `syntaxDiagnosticCore.ts`, with parameter key, bounds, and message grouped
+  into a local input type. Transfer-file `tsN`/`tdN` call sites use the
+  grouped shape without changing bounds, diagnostic messages, validation
+  behavior, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, or `engines.vscode`.
 
 ## Compatibility
 
@@ -1433,5 +1467,6 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
 
 ## Open Questions
 
-- After Slice-2-T, should Slice-2 continue with editor-feedback diagnostic
-  helper findings or close Slice-2 application orchestration work?
+- After Slice-2-U, should Slice-2 continue with
+  `buildExplicitDecimalRangeRule`, `syntaxDiagnosticRuleBuilders`, or close
+  application orchestration work?
