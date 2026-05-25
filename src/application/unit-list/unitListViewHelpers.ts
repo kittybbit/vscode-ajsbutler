@@ -86,6 +86,10 @@ type ParentPriorityInput = {
   priorityById: Map<string, number>;
 };
 
+type PriorityForUnitTypesInput = ParentPriorityInput & {
+  targetUnitTypes: readonly AjsUnitType[];
+};
+
 const cachePriority = (
   priorityById: Map<string, number>,
   unitId: string,
@@ -133,24 +137,24 @@ const resolveParentPriority = ({
 }: ParentPriorityInput): number | undefined => {
   const parent = findParentAjsUnit(document, unit);
   return parent && isParentPrioritySource(parent)
-    ? getPriorityForUnitTypes(
+    ? getPriorityForUnitTypes({
         document,
-        parent,
+        unit: parent,
         priorityById,
-        parentPriorityUnitTypes,
-      )
+        targetUnitTypes: parentPriorityUnitTypes,
+      })
     : undefined;
 };
 
 const resolveUncachedPriority = (input: ParentPriorityInput): number =>
   resolveExplicitPriority(input.unit) ?? resolveParentPriority(input) ?? 1;
 
-export const getPriorityForUnitTypes = (
-  document: AjsDocument,
-  unit: AjsUnit,
-  priorityById: Map<string, number>,
-  targetUnitTypes: readonly AjsUnitType[],
-): number | undefined => {
+export const getPriorityForUnitTypes = ({
+  document,
+  unit,
+  priorityById,
+  targetUnitTypes,
+}: PriorityForUnitTypesInput): number | undefined => {
   const cachedPriority = priorityById.get(unit.id);
   if (cachedPriority !== undefined) {
     return cachedPriority;

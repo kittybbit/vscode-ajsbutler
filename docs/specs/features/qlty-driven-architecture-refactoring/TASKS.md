@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-S implementation is complete.
+  Slice-2-T implementation is complete.
 - Active slice:
-  none; Slice-2-S is complete and the next Slice-2 target is not selected.
+  none; Slice-2-T is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with `getPriorityForUnitTypes` or
-  editor-feedback diagnostic helper findings.
+  decide whether Slice-2 should continue with editor-feedback diagnostic
+  helper findings or be closed as application orchestration work complete.
 
 ## Human Approval
 
@@ -275,6 +275,12 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-S.
 - [x] Complete Slice-2-S `buildUnitListGroup7View` supported-field projection
       helper extraction.
+- [x] Select Slice-2-T `getPriorityForUnitTypes` input grouping as the next
+      implementation candidate.
+- [x] Record Slice-2-T impact investigation.
+- [x] Request human approval for the selected Slice-2-T implementation scope.
+- [x] Record human approval for Slice-2-T.
+- [x] Complete Slice-2-T `getPriorityForUnitTypes` input grouping.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -1008,4 +1014,26 @@ active implementation approval remains.
   projection into a local helper and leaving priority lookup unchanged.
   Targeted Qlty smell output for `buildUnitListPriorityViews.ts` is now empty;
   remaining unit-list helper finding is `getPriorityForUnitTypes`.
+- Slice-2-T targets `getPriorityForUnitTypes` because Qlty reports a
+  many-parameters smell on the remaining unit-list priority helper.
+- Slice-2-T impact is local to
+  `src/application/unit-list/unitListViewHelpers.ts` and
+  `src/application/unit-list/buildUnitListPriorityViews.ts`; Serena found
+  direct production calls from Group7 and Group11 priority projections plus
+  the recursive parent-priority path in the same helper file.
+- Slice-2-T must preserve cache lookup/write semantics, target unit-type
+  eligibility, explicit `pr`/`ni` precedence, parent jobnet inheritance,
+  fallback priority `1`, Group7 and Group11 priority values, exported DTO
+  shapes, parser/generated artifacts, presentation behavior, VS Code
+  compatibility, web compatibility, and `engines.vscode`.
+- Existing `unitListViewHelpers.test.ts` coverage exercises explicit
+  priority, `ni`/`pr` precedence, queue-job priority conversion, and parent
+  inheritance. `buildUnitListPriorityViews.test.ts` and
+  `buildUnitListView.test.ts` cover Group7/Group11 integration.
+- Slice-2-T was approved by the user at 2026-05-26 00:18 JST for
+  `getPriorityForUnitTypes` input grouping only.
+- Slice-2-T preserved shared priority resolution while grouping inputs for
+  `getPriorityForUnitTypes` and updating recursive, Group7, Group11, and
+  direct test call sites. Targeted Qlty smell output for
+  `unitListViewHelpers.ts` and `buildUnitListPriorityViews.ts` is now empty.
 - Domain helpers still contain branch-heavy conditional logic.

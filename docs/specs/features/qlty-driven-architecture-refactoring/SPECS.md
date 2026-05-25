@@ -1373,6 +1373,43 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
   `UnitListGroup7View` output shape, parser/generated artifacts, presentation
   behavior, dependency versions, VS Code compatibility, web compatibility, or
   `engines.vscode`.
+- Slice-2-T target:
+  `getPriorityForUnitTypes` is the next unit-list helper candidate. Qlty
+  reports a many-parameters smell, and Serena found production references from
+  Group7 and Group11 priority projections plus the recursive parent-priority
+  path in `unitListViewHelpers.ts`.
+- Slice-2-T investigation:
+  `getPriorityForUnitTypes` first returns a cached priority for the unit id,
+  skips units outside the supplied target unit types, then caches and returns
+  `resolveUncachedPriority`. Parent inheritance uses the same helper
+  recursively with `parentPriorityUnitTypes`. The refactor should group the
+  shared inputs without changing cache lookup/write timing, target unit-type
+  filtering, explicit priority precedence, parent fallback, or fallback value.
+- Slice-2-T boundary decision:
+  group priority-resolution inputs only; do not change cache lookup/write
+  semantics, target unit-type eligibility, explicit `pr`/`ni` precedence,
+  parent jobnet inheritance, fallback priority `1`, Group7/Group11 priority
+  values, exported DTO shapes, parser/generated artifacts, presentation
+  behavior, dependencies, VS Code compatibility, web compatibility, or
+  `engines.vscode`.
+- Slice-2-T approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-list/unitListViewHelpers.ts` and adjust
+  Group7/Group11 call sites in
+  `src/application/unit-list/buildUnitListPriorityViews.ts` while preserving
+  exported behavior. Any change to `src/application/unit-list/buildUnitListView.ts`,
+  exported DTO shapes, parser/generated artifacts, presentation behavior,
+  dependency versions, VS Code compatibility, web compatibility, or
+  `engines.vscode` requires separate approval.
+- Slice-2-T result:
+  `getPriorityForUnitTypes` remains exported from `unitListViewHelpers.ts`,
+  with document, unit, priority cache, and target unit types grouped into a
+  local input type. Recursive parent-priority resolution and Group7/Group11
+  call sites use the same grouped shape without changing cache lookup/write
+  timing, target unit-type filtering, explicit priority precedence, parent
+  inheritance, fallback priority, exported DTO shapes, parser/generated
+  artifacts, presentation behavior, dependency versions, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
 
 ## Compatibility
 
@@ -1396,5 +1433,5 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
 
 ## Open Questions
 
-- After Slice-2-S, should Slice-2 continue with `getPriorityForUnitTypes` or
-  editor-feedback diagnostic helper findings?
+- After Slice-2-T, should Slice-2 continue with editor-feedback diagnostic
+  helper findings or close Slice-2 application orchestration work?

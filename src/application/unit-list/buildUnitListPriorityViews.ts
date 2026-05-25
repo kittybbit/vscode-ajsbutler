@@ -47,12 +47,12 @@ export const buildUnitListGroup7View = (
   priorityById: Map<string, number>,
 ): UnitListGroup7View => ({
   ...group7SupportedFields(unit),
-  priority: getPriorityForUnitTypes(
+  priority: getPriorityForUnitTypes({
     document,
     unit,
     priorityById,
-    group7PriorityUnitTypes,
-  ),
+    targetUnitTypes: group7PriorityUnitTypes,
+  }),
 });
 
 export const buildUnitListGroup11View = (
@@ -74,12 +74,12 @@ export const buildUnitListGroup11View = (
   queueManager: findAjsUnitParameterValue(unit, "qm"),
   queueName: findAjsUnitParameterValue(unit, "qu"),
   requestJobName: findAjsUnitParameterValue(unit, "req"),
-  priority: getPriorityForUnitTypes(
+  priority: getPriorityForUnitTypes({
     document,
     unit,
     priorityById,
-    group11PriorityUnitTypes,
-  ),
+    targetUnitTypes: group11PriorityUnitTypes,
+  }),
   endJudgment: findAjsUnitParameterValue(unit, "jd"),
   waitThreshold: findAjsUnitParameterValue(unit, "wth"),
   timeoutHold: findAjsUnitParameterValue(unit, "tho"),
