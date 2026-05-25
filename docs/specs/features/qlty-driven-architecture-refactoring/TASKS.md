@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-R implementation is complete.
+  Slice-2-S implementation is complete.
 - Active slice:
-  none; Slice-2-R is complete and the next Slice-2 target is not selected.
+  none; Slice-2-S is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with `getPriorityForUnitTypes`, unit-list
-  group7 projection, or editor-feedback diagnostic helper findings.
+  decide whether Slice-2 continues with `getPriorityForUnitTypes` or
+  editor-feedback diagnostic helper findings.
 
 ## Human Approval
 
@@ -268,6 +268,13 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-R.
 - [x] Complete Slice-2-R `parseSd` schedule-date projection helper
       extraction.
+- [x] Select Slice-2-S `buildUnitListGroup7View` supported-field projection
+      helper extraction as the next implementation candidate.
+- [x] Record Slice-2-S impact investigation.
+- [x] Request human approval for the selected Slice-2-S implementation scope.
+- [x] Record human approval for Slice-2-S.
+- [x] Complete Slice-2-S `buildUnitListGroup7View` supported-field projection
+      helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -978,4 +985,27 @@ active implementation approval remains.
   local helpers. Targeted Qlty smell output no longer reports `parseSd`;
   remaining unit-list helper findings include `getPriorityForUnitTypes` and
   `buildUnitListGroup7View`.
+- Slice-2-S targets `buildUnitListGroup7View` because Qlty reports high
+  complexity 12 from repeated `supportsGroup7Fields` checks around local
+  Group7 fields.
+- Slice-2-S impact is local to
+  `src/application/unit-list/buildUnitListPriorityViews.ts`; Serena found the
+  production caller only from `buildUnitListView`, plus direct coverage in
+  `buildUnitListPriorityViews.test.ts`.
+- Slice-2-S must preserve Group7 field gating for unit types `n`, `rn`,
+  `rm`, and `rr`, parameter lookups for `mp`, `rg`, `rh`, `cd`, `ms`, and
+  `fd`, priority lookup via `getPriorityForUnitTypes` and
+  `group7PriorityUnitTypes`, `UnitListGroup7View` shape, parser/generated
+  artifacts, presentation behavior, VS Code compatibility, web compatibility,
+  and `engines.vscode`.
+- Existing `buildUnitListPriorityViews.test.ts` coverage exercises Group7
+  field projection and inherited priority, and `buildUnitListView.test.ts`
+  covers full row integration.
+- Slice-2-S was approved by the user at 2026-05-26 00:10 JST for
+  `buildUnitListGroup7View` supported-field projection helper extraction
+  only.
+- Slice-2-S preserved Group7 projection while extracting supported-field
+  projection into a local helper and leaving priority lookup unchanged.
+  Targeted Qlty smell output for `buildUnitListPriorityViews.ts` is now empty;
+  remaining unit-list helper finding is `getPriorityForUnitTypes`.
 - Domain helpers still contain branch-heavy conditional logic.

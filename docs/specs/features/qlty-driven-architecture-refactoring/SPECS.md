@@ -1336,6 +1336,43 @@ No user-visible behavior scenarios are introduced.
   group10 DTO values, exported shapes, parser/generated artifacts,
   presentation behavior, dependency versions, VS Code compatibility, web
   compatibility, or `engines.vscode`.
+- Slice-2-S target:
+  `buildUnitListGroup7View` is the next unit-list projection candidate. Qlty
+  reports high complexity 12, and Serena found production references only from
+  `src/application/unit-list/buildUnitListView.ts` plus direct coverage in
+  `src/test/suite/buildUnitListPriorityViews.test.ts`.
+- Slice-2-S investigation:
+  `buildUnitListGroup7View` builds the Group7 view by repeatedly checking
+  `supportsGroup7Fields(unit)` before projecting `mp`, `rg`, `rh`, `cd`,
+  `ms`, and `fd`, and always resolving priority through
+  `getPriorityForUnitTypes(document, unit, priorityById,
+group7PriorityUnitTypes)`. The refactor can stay local by computing the
+  supported-field projection once and merging it with the existing priority
+  lookup.
+- Slice-2-S boundary decision:
+  extract Group7 supported-field projection helper(s) only; do not change
+  supported unit types `n`, `rn`, `rm`, and `rr`, parameter keys `mp`, `rg`,
+  `rh`, `cd`, `ms`, and `fd`, priority lookup behavior,
+  `group7PriorityUnitTypes`, `UnitListGroup7View` output shape,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-S approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-list/buildUnitListPriorityViews.ts` while
+  preserving exported `buildUnitListGroup7View` and existing callers. Any
+  change to `src/application/unit-list/buildUnitListView.ts`,
+  `src/application/unit-list/unitListViewHelpers.ts`, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
+- Slice-2-S result:
+  `buildUnitListGroup7View` remains exported from
+  `buildUnitListPriorityViews.ts`, with supported Group7 field projection
+  extracted into a local helper and priority lookup left unchanged. The
+  refactor did not change supported unit types, parameter keys,
+  `UnitListGroup7View` output shape, parser/generated artifacts, presentation
+  behavior, dependency versions, VS Code compatibility, web compatibility, or
+  `engines.vscode`.
 
 ## Compatibility
 
@@ -1359,5 +1396,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-R, should Slice-2 continue with `getPriorityForUnitTypes`,
-  unit-list group7 projection, or editor-feedback diagnostic helper findings?
+- After Slice-2-S, should Slice-2 continue with `getPriorityForUnitTypes` or
+  editor-feedback diagnostic helper findings?
