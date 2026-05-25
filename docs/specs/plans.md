@@ -95,7 +95,9 @@ rules in `docs/specs/README.md`, not in this file.
   implementation is complete. Slice-2-M investigation is complete for the
   `buildCommandLine` token-builder extraction and implementation is complete.
   Slice-2-N investigation is complete for command-builder unit-type choice
-  extraction and implementation is complete.
+  extraction and implementation is complete. Slice-2-O investigation is
+  complete for `toNiPriority` nice-value conversion extraction and
+  implementation is complete.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

@@ -686,6 +686,23 @@ No user-visible behavior scenarios are introduced.
   tokens, default values, and generated command output. Common unit-type and
   ajsprint job-group choice construction now use local helpers, and targeted
   Qlty smell output for `buildAjsCommands.ts` is empty.
+- Slice-2-O target:
+  `toNiPriority` is the next unit-list application helper candidate; helper
+  extraction must preserve nice-value to priority conversion for
+  `getPriorityForUnitTypes`.
+- Slice-2-O investigation:
+  Qlty reports high complexity 8 and many returns in
+  `src/application/unit-list/unitListViewHelpers.ts`. Serena found
+  `toNiPriority` is local and referenced only by `resolveNiPriority`. The
+  behavior flows outward through `getPriorityForUnitTypes`,
+  `buildUnitListGroup7View`, `buildUnitListGroup11View`, and unit-list row
+  projections. Existing tests cover `ni` conversion, `pr` precedence, parent
+  inheritance, and group7/group11 priority projections.
+- Slice-2-O result:
+  nice-value priority conversion keeps the same thresholds and
+  `Number(value)` coercion. The threshold checks now use local rule data while
+  preserving `ni` conversion, `pr` precedence, parent inheritance, fallback
+  priority behavior, and exported `getPriorityForUnitTypes` behavior.
 
 ### Breaking Change Analysis
 
@@ -1193,6 +1210,23 @@ No user-visible behavior scenarios are introduced.
   parser/generated artifacts, presentation behavior, dependency versions, VS
   Code compatibility, web compatibility, or `engines.vscode` requires separate
   approval.
+- Slice-2-O boundary decision:
+  extract nice-value conversion helper(s) only; do not change values greater
+  than 10 mapping to priority 5, values greater than 0 mapping to 4, zero
+  mapping to 3, values greater than -11 mapping to 2, lower values mapping to
+  1, `Number(value)` coercion, `ni`/`pr` precedence, parent priority
+  inheritance, fallback priority behavior, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-O approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-list/unitListViewHelpers.ts` while preserving
+  exported `getPriorityForUnitTypes` and its callers. Any change to
+  `src/application/unit-list/buildUnitListPriorityViews.ts`,
+  `src/application/unit-list/buildUnitListView.ts`, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
 
 ## Compatibility
 
@@ -1216,5 +1250,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-N, should Slice-2 continue with editor-feedback diagnostic
+- After Slice-2-O, should Slice-2 continue with editor-feedback diagnostic
   helper findings or remaining unit-list helper findings?

@@ -45,21 +45,21 @@ export const buildCalendarWeekView = (
 export const isNonWeekCalendarValue = (value: string): boolean =>
   getCalendarWeekSymbol(value) === undefined;
 
+const niPriorityThresholds: readonly {
+  matches: (nice: number) => boolean;
+  priority: number;
+}[] = [
+  { matches: (nice) => nice > 10, priority: 5 },
+  { matches: (nice) => nice > 0, priority: 4 },
+  { matches: (nice) => nice === 0, priority: 3 },
+  { matches: (nice) => nice > -11, priority: 2 },
+];
+
 const toNiPriority = (value: string): number => {
   const nice = Number(value);
-  if (nice > 10) {
-    return 5;
-  }
-  if (nice > 0) {
-    return 4;
-  }
-  if (nice === 0) {
-    return 3;
-  }
-  if (nice > -11) {
-    return 2;
-  }
-  return 1;
+  return (
+    niPriorityThresholds.find(({ matches }) => matches(nice))?.priority ?? 1
+  );
 };
 
 const parentPriorityUnitTypes: readonly AjsUnitType[] = ["n", "rn"];
