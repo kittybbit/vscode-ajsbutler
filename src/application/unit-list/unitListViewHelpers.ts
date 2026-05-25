@@ -169,27 +169,39 @@ export const getPriorityForUnitTypes = (
 export const parseLnParentRule = (value: string): string =>
   parseParentScheduleRuleValue(value)?.value ?? "";
 
+const scheduleDateDayTypePrefixes = ["+", "*", "@"] as const;
+
+const isScheduleDateSpecialDayType = (dayValue: string): boolean =>
+  dayValue === "en" || dayValue === "ud";
+
+const scheduleDateType = (dayValue: string): string => {
+  if (isScheduleDateSpecialDayType(dayValue)) {
+    return dayValue;
+  }
+
+  return (
+    scheduleDateDayTypePrefixes.find((prefix) => dayValue.startsWith(prefix)) ??
+    ""
+  );
+};
+
+const scheduleDateDay = (dayValue: string): string =>
+  dayValue && !isScheduleDateSpecialDayType(dayValue)
+    ? dayValue.replace(/^[+*@]/, "")
+    : "";
+
 export const parseSd = (
   value: string,
 ): { type: string; yearMonth: string; day: string } => {
   const parsed = parseScheduleDateValue(value);
   const yearMonth = parsed?.yearMonth?.slice(0, -1) ?? "";
   const dayValue = parsed?.day ?? "";
-  const type =
-    dayValue === "en" || dayValue === "ud"
-      ? dayValue
-      : dayValue.startsWith("+")
-        ? "+"
-        : dayValue.startsWith("*")
-          ? "*"
-          : dayValue.startsWith("@")
-            ? "@"
-            : "";
-  const day =
-    dayValue && dayValue !== "en" && dayValue !== "ud"
-      ? dayValue.replace(/^[+*@]/, "")
-      : "";
-  return { type, yearMonth, day };
+
+  return {
+    type: scheduleDateType(dayValue),
+    yearMonth,
+    day: scheduleDateDay(dayValue),
+  };
 };
 
 export const parseTimeValue = (value: string, fallback = ""): string =>

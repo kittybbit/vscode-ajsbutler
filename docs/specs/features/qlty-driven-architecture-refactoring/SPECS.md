@@ -1298,6 +1298,44 @@ No user-visible behavior scenarios are introduced.
   `parseScheduleByDaysFromStartValue` behavior, group10 DTO values, exported
   shapes, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-R target:
+  `parseSd` is the next unit-list helper candidate. Qlty reports high
+  complexity 18 and deeply nested control flow, and Serena found production
+  references only from `src/application/unit-list/buildUnitListGroup10View.ts`
+  for `sd` projection plus direct helper test coverage in
+  `src/test/suite/unitListViewHelpers.test.ts`.
+- Slice-2-R investigation:
+  `parseSd` wraps `parseScheduleDateValue` and projects an `sd` value into
+  group10 schedule date type, year/month, and day strings. It trims
+  `yearMonth` with `slice(0, -1)`, maps `en` and `ud` day values directly to
+  type, maps leading `+`, `*`, and `@` day values to those type markers,
+  otherwise emits an empty type, and strips one leading `+`, `*`, or `@` from
+  non-`en`/`ud` day values. The exported helper shape is used by
+  `buildUnitListGroup10View`, so the refactor should stay local to
+  helper-level projection decisions.
+- Slice-2-R boundary decision:
+  extract schedule-date projection helper(s) only; do not change
+  `parseScheduleDateValue` behavior, year/month trimming, type mapping, day
+  stripping, blank day behavior for `en`, `ud`, or missing values,
+  `UnitListGroup10View` output shape, parser/generated artifacts,
+  presentation behavior, dependencies, VS Code compatibility, web
+  compatibility, or `engines.vscode`.
+- Slice-2-R approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/unit-list/unitListViewHelpers.ts` while preserving
+  exported `parseSd` contract and existing callers. Any change to
+  `src/application/unit-list/buildUnitListGroup10View.ts`,
+  `src/application/unit-list/buildUnitListView.ts`, exported DTO shapes,
+  parser/generated artifacts, presentation behavior, dependency versions, VS
+  Code compatibility, web compatibility, or `engines.vscode` requires separate
+  approval.
+- Slice-2-R result:
+  `parseSd` remains exported from `unitListViewHelpers.ts`, with schedule-date
+  special day detection, type marker resolution, and day formatting extracted
+  into local helpers without changing `parseScheduleDateValue` behavior,
+  group10 DTO values, exported shapes, parser/generated artifacts,
+  presentation behavior, dependency versions, VS Code compatibility, web
+  compatibility, or `engines.vscode`.
 
 ## Compatibility
 
@@ -1321,5 +1359,5 @@ No user-visible behavior scenarios are introduced.
 
 ## Open Questions
 
-- After Slice-2-Q, should Slice-2 continue with `parseSd`,
-  `getPriorityForUnitTypes`, or editor-feedback diagnostic helper findings?
+- After Slice-2-R, should Slice-2 continue with `getPriorityForUnitTypes`,
+  unit-list group7 projection, or editor-feedback diagnostic helper findings?

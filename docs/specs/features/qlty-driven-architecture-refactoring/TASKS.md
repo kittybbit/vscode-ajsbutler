@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-Q implementation is complete.
+  Slice-2-R implementation is complete.
 - Active slice:
-  none; Slice-2-Q is complete and the next Slice-2 target is not selected.
+  none; Slice-2-R is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with `parseSd`, `getPriorityForUnitTypes`,
-  or editor-feedback diagnostic helper findings.
+  decide whether Slice-2 continues with `getPriorityForUnitTypes`, unit-list
+  group7 projection, or editor-feedback diagnostic helper findings.
 
 ## Human Approval
 
@@ -260,6 +260,13 @@ active implementation approval remains.
 - [x] Request human approval for the selected Slice-2-Q implementation scope.
 - [x] Record human approval for Slice-2-Q.
 - [x] Complete Slice-2-Q `parseCftd` schedule-by-days projection helper
+      extraction.
+- [x] Select Slice-2-R `parseSd` schedule-date projection helper extraction
+      as the next implementation candidate.
+- [x] Record Slice-2-R impact investigation.
+- [x] Request human approval for the selected Slice-2-R implementation scope.
+- [x] Record human approval for Slice-2-R.
+- [x] Complete Slice-2-R `parseSd` schedule-date projection helper
       extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
@@ -948,4 +955,27 @@ active implementation approval remains.
   type membership into local helpers. Targeted Qlty smell output no longer
   reports `parseCftd`; remaining unit-list helper findings include
   `getPriorityForUnitTypes` and `parseSd`.
+- Slice-2-R targets `parseSd` because Qlty reports high complexity 18 and a
+  deeply nested branch in the local schedule-date projection helper.
+- Slice-2-R impact is local to
+  `src/application/unit-list/unitListViewHelpers.ts`; Serena found production
+  usage only from `buildUnitListGroup10View` for `sd`-derived
+  `scheduleDateTypes`, `scheduleDateYearMonths`, and `scheduleDateDays`, plus
+  direct helper test coverage in `unitListViewHelpers.test.ts`.
+- Slice-2-R must preserve `parseScheduleDateValue` input parsing, `yearMonth`
+  trimming through `slice(0, -1)`, type values `en`, `ud`, `+`, `*`, `@`, or
+  empty string, day stripping of leading `+`, `*`, or `@`, blank day for
+  `en`, `ud`, or missing day values, group10 DTO shape, parser/generated
+  artifacts, presentation behavior, VS Code compatibility, web compatibility,
+  and `engines.vscode`.
+- Existing `unitListViewHelpers.test.ts` coverage exercises `parseSd`; group10
+  and full unit-list behavior are covered by
+  `buildUnitListGroup10View.test.ts` and `buildUnitListView.test.ts`.
+- Slice-2-R was approved by the user at 2026-05-26 00:04 JST for `parseSd`
+  schedule-date projection helper extraction only.
+- Slice-2-R preserved `sd` schedule-date projection while extracting
+  schedule-date type detection, day formatting, and marker membership into
+  local helpers. Targeted Qlty smell output no longer reports `parseSd`;
+  remaining unit-list helper findings include `getPriorityForUnitTypes` and
+  `buildUnitListGroup7View`.
 - Domain helpers still contain branch-heavy conditional logic.
