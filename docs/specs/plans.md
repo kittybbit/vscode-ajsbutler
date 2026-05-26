@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Decide whether Qlty-driven architecture refactoring Slice-2 continues with
-   `syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScalarValidators`, or
-   closes application orchestration work and moves to Slice-3.
+   the `syntaxDiagnosticScalarValidators` many-parameter finding, or closes
+   application orchestration work and moves to Slice-3.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -118,8 +118,11 @@ rules in `docs/specs/README.md`, not in this file.
   `syntaxDiagnosticScheduleRules.ts` smell/metric cluster and implementation
   is complete. Slice-2-Z is complete for the
   `syntaxDiagnosticScheduleRules.ts` residual smell/metric cluster. The next
-  decision is whether Slice-2 continues in `syntaxDiagnosticRuleBuilders` or
-  `syntaxDiagnosticScalarValidators`, or closes application orchestration work.
+  Slice-2-AA implementation is complete for the
+  `syntaxDiagnosticRuleBuilders.ts` same-file high-complexity cluster. The
+  next decision is whether the remaining `syntaxDiagnosticScalarValidators`
+  many-parameter finding is worth another Slice-2 implementation, or whether
+  Slice-2 should close.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

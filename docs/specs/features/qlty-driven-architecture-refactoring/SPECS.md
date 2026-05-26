@@ -211,6 +211,101 @@ Slice-2 value remains in `syntaxDiagnosticRuleBuilders` or
 `syntaxDiagnosticScalarValidators`, or whether application orchestration work
 should close and Slice-3 should start.
 
+### Slice-2-AA Target
+
+Slice-2-AA targets
+`src/application/editor-feedback/syntaxDiagnosticRuleBuilders.ts` as the next
+same-file application-orchestration cluster. This is preferred over
+`syntaxDiagnosticScalarValidators.ts` because Qlty reports multiple
+high-complexity findings in `syntaxDiagnosticRuleBuilders.ts`, while the
+scalar validators currently show one lower-risk many-parameter finding.
+
+Current Qlty evidence:
+
+- `syntaxDiagnosticRuleBuilders.ts` reports high total complexity.
+- Metrics for that file are 18 funcs / cyclo 37 / complexity 56 / LOC 332.
+- Remaining findings include `buildScheduleRuleDiagnostics`,
+  `buildJobEndJudgmentDiagnostics`, and
+  `collectStartConditionDisabledParameterDiagnostics`.
+
+### Slice-2-AA Investigation
+
+`buildScheduleRuleDiagnostics` coordinates schedule rule diagnostics for `g`
+and `n` units by combining `sd` validation, explicit rule diagnostics, and
+weekly-cycle compatibility diagnostics.
+
+`buildJobEndJudgmentDiagnostics` coordinates numeric range diagnostics,
+threshold ordering diagnostics, `jd`/`abr` defaults, automatic retry gating,
+and retry-parameter gating for job-like units.
+
+`collectStartConditionDisabledParameterDiagnostics` is shared by file
+monitoring, execution interval control, and event receiving diagnostics to
+reject parameters that cannot be specified when the unit is defined as a start
+condition.
+
+Direct production use flows through `buildSemanticSyntaxDiagnostics` in
+`src/application/editor-feedback/syntaxDiagnosticRules.ts`. Existing
+`buildSyntaxDiagnostics.test.ts` coverage exercises schedule-rule diagnostics,
+job-end judgment retry and threshold diagnostics, and start-condition
+disabled-parameter diagnostics.
+
+### Slice-2-AA Boundary Decision
+
+Reduce the same-file rule-builder cluster with local helpers or local rule
+tables only.
+
+Do not change:
+
+- exported builder names
+- diagnostic messages
+- target unit types
+- parameter keys
+- default handling for `jd` and `abr`
+- retry gating behavior
+- threshold ordering behavior
+- start-condition disabled-parameter behavior
+- parser/generated artifacts
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-2-AA Approval-Sensitive Scope
+
+Implementation may add local helper functions or local data structures inside
+`src/application/editor-feedback/syntaxDiagnosticRuleBuilders.ts` and rewrite
+`buildScheduleRuleDiagnostics`, `buildJobEndJudgmentDiagnostics`, and
+`collectStartConditionDisabledParameterDiagnostics` as smaller coordinators
+while preserving exported function names and behavior.
+
+Any change to diagnostic messages, target unit types, parameter keys,
+default handling, retry gating, threshold ordering, start-condition
+disabled-parameter behavior, parser/generated artifacts, presentation
+behavior, dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
+### Slice-2-AA Result
+
+`syntaxDiagnosticRuleBuilders.ts` now keeps the public builder exports while
+delegating schedule-rule coordination, job-end judgment context resolution,
+threshold diagnostics, retry gating diagnostics, and optional-parameter
+diagnostic collection to local helpers.
+
+The change preserves diagnostic messages, target unit types, parameter keys,
+default handling for `jd` and `abr`, retry gating behavior, threshold ordering
+behavior, start-condition disabled-parameter behavior, parser/generated
+artifacts, presentation behavior, dependency versions, VS Code compatibility,
+web compatibility, and `engines.vscode`.
+
+Targeted Qlty metrics changed from 18 funcs / cyclo 37 / complexity 56 / LOC
+332 before Slice-2-AA to 30 funcs / cyclo 34 / complexity 26 / LOC 386.
+Targeted smell output reports no findings, and `rtk pnpm run qlty` reports no
+issues. The next decision is whether the remaining
+`syntaxDiagnosticScalarValidators` many-parameter finding is worth another
+Slice-2 implementation or whether application orchestration work should close
+and Slice-3 should start.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -234,6 +329,5 @@ should close and Slice-3 should start.
 
 ## Open Questions
 
-- After Slice-2-Z, should Slice-2 continue with
-  `syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScalarValidators`, or close
-  application orchestration work?
+- After Slice-2-AA, should Slice-2 continue with
+  `syntaxDiagnosticScalarValidators`, or close application orchestration work?

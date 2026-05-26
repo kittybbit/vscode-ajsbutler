@@ -11,13 +11,13 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-Z implementation is complete; Slice-2 continuation decision is
+  Slice-2-AA implementation is complete; Slice-2 continuation decision is
   pending.
 - Active slice:
   none.
 - Open follow-up:
-  decide whether Slice-2 continues with `syntaxDiagnosticRuleBuilders`,
-  `syntaxDiagnosticScalarValidators`, or closes application orchestration work.
+  decide whether Slice-2 continues with `syntaxDiagnosticScalarValidators` or
+  closes application orchestration work.
 
 ## Human Approval
 
@@ -47,14 +47,23 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-2-Z.
 - [x] Complete Slice-2-Z `syntaxDiagnosticScheduleRules.ts` residual
       smell/metric cluster.
-- [ ] Decide whether Slice-2 continues or closes after Slice-2-Z.
+- [x] Decide whether Slice-2 continues or closes after Slice-2-Z.
+- [x] Select Slice-2-AA `syntaxDiagnosticRuleBuilders.ts` same-file
+      high-complexity cluster as the next implementation candidate.
+- [x] Record Slice-2-AA impact investigation.
+- [x] Request human approval for the selected Slice-2-AA implementation scope.
+- [x] Record human approval for Slice-2-AA.
+- [x] Complete Slice-2-AA `syntaxDiagnosticRuleBuilders.ts` same-file
+      high-complexity cluster.
+- [ ] Decide whether Slice-2 continues or closes after Slice-2-AA.
 
 ## Validation
 
 - docs-only changes:
   `rtk pnpm run qlty`
-- Slice-2-Z implementation:
-  targeted schedule-rule diagnostics coverage, then
+- Slice-2-AA implementation:
+  targeted schedule-rule, job-end judgment, threshold-ordering, and
+  start-condition diagnostics coverage, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
 
@@ -69,6 +78,15 @@ Only clear human approval can change Status to Approved.
   46 funcs / cyclo 139 / complexity 72 / LOC 412. Targeted smell output still
   reports file-level high total complexity only; `rtk pnpm run qlty` reports no
   issues.
-- Next decision should consider whether continuing Slice-2 in
-  `syntaxDiagnosticRuleBuilders` or `syntaxDiagnosticScalarValidators` is more
-  valuable than closing application orchestration work and moving to Slice-3.
+- Slice-2-AA preserved schedule-rule, job-end judgment, threshold-ordering,
+  and start-condition disabled-parameter diagnostics while moving rule-builder
+  orchestration into local rule tables, context helpers, and focused
+  diagnostic collectors inside `syntaxDiagnosticRuleBuilders.ts`.
+- Targeted Qlty metrics for `syntaxDiagnosticRuleBuilders.ts` changed from
+  18 funcs / cyclo 37 / complexity 56 / LOC 332 before Slice-2-AA to
+  30 funcs / cyclo 34 / complexity 26 / LOC 386. Targeted smell output reports
+  no findings; `rtk pnpm run qlty` reports no issues.
+- Next decision should consider whether the remaining
+  `syntaxDiagnosticScalarValidators` many-parameter finding is worth another
+  Slice-2 implementation or whether application orchestration work should
+  close and Slice-3 should start.
