@@ -94,9 +94,9 @@ export const isValidScheduleDateYear = (
 export const isValidScheduleDateMonth = (month: number | undefined): boolean =>
   month === undefined || (month >= 1 && month <= 12);
 
-export const isValidScheduleDateDayToken = (
+const isReservedScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
-): boolean => {
+): boolean | undefined => {
   if (parsed.dayValue === "en") {
     return parsed.month === undefined;
   }
@@ -105,55 +105,92 @@ export const isValidScheduleDateDayToken = (
     return parsed.month === undefined;
   }
 
+  return undefined;
+};
+
+const isExplicitCalendarDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean | undefined => {
   const explicitDayMatch = /^(\d{2})$/.exec(parsed.dayValue);
-  if (explicitDayMatch) {
-    const day = Number(explicitDayMatch[1]);
-    return (
-      day >= 1 && day <= getCalendarMonthDayLimit(parsed.year, parsed.month)
-    );
+  if (!explicitDayMatch) {
+    return undefined;
   }
 
+  const day = Number(explicitDayMatch[1]);
+  return day >= 1 && day <= getCalendarMonthDayLimit(parsed.year, parsed.month);
+};
+
+const isRelativeScheduleDateDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean | undefined => {
   const relativeDayMatch = /^([+*@])(\d{2})$/.exec(parsed.dayValue);
-  if (relativeDayMatch) {
-    const day = Number(relativeDayMatch[2]);
-    return day >= 1 && day <= 35;
+  if (!relativeDayMatch) {
+    return undefined;
   }
 
+  const day = Number(relativeDayMatch[2]);
+  return day >= 1 && day <= 35;
+};
+
+const getBackwardScheduleDateOffsetLimit = (
+  parsed: ParsedExplicitScheduleDateValue,
+  direction: string | undefined,
+): number =>
+  direction ? 34 : getCalendarMonthDayLimit(parsed.year, parsed.month) - 1;
+
+const isValidBackwardScheduleDateOffset = (
+  parsed: ParsedExplicitScheduleDateValue,
+  offset: number | undefined,
+  direction: string | undefined,
+): boolean =>
+  offset === undefined ||
+  (offset >= 0 &&
+    offset <= getBackwardScheduleDateOffsetLimit(parsed, direction));
+
+const isBackwardScheduleDateDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean | undefined => {
   const backwardDayMatch = /^([+*@])?b(?:-(\d{2}))?$/.exec(parsed.dayValue);
-  if (backwardDayMatch) {
-    const direction = backwardDayMatch[1];
-    const offset = backwardDayMatch[2]
-      ? Number(backwardDayMatch[2])
-      : undefined;
-
-    if (offset === undefined) {
-      return true;
-    }
-
-    if (direction) {
-      return offset >= 0 && offset <= 34;
-    }
-
-    return (
-      offset >= 0 &&
-      offset <= getCalendarMonthDayLimit(parsed.year, parsed.month) - 1
-    );
+  if (!backwardDayMatch) {
+    return undefined;
   }
 
+  const direction = backwardDayMatch[1];
+  const offset = backwardDayMatch[2] ? Number(backwardDayMatch[2]) : undefined;
+
+  return isValidBackwardScheduleDateOffset(parsed, offset, direction);
+};
+
+const isWeekdayScheduleDateDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean | undefined => {
   const weekdayMatch = /^\+(su|mo|tu|we|th|fr|sa)(?::(\d|b))?$/.exec(
     parsed.dayValue,
   );
-  if (weekdayMatch) {
-    const occurrence = weekdayMatch[2];
-    return (
-      occurrence === undefined ||
-      occurrence === "b" ||
-      (Number(occurrence) >= 1 && Number(occurrence) <= 5)
-    );
+  if (!weekdayMatch) {
+    return undefined;
   }
 
-  return false;
+  const occurrence = weekdayMatch[2];
+  return (
+    occurrence === undefined ||
+    occurrence === "b" ||
+    (Number(occurrence) >= 1 && Number(occurrence) <= 5)
+  );
 };
+
+export const isValidScheduleDateDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean =>
+  [
+    isReservedScheduleDateDayToken,
+    isExplicitCalendarDayToken,
+    isRelativeScheduleDateDayToken,
+    isBackwardScheduleDateDayToken,
+    isWeekdayScheduleDateDayToken,
+  ].find((validateDayToken) => validateDayToken(parsed) !== undefined)?.(
+    parsed,
+  ) ?? false;
 
 export const isValidExplicitScheduleDate = (
   parameter: UnitParameter,

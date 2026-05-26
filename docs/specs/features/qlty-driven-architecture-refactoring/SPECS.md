@@ -1480,6 +1480,43 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
   messages, `allowNegative` behavior, validation behavior, parser/generated
   artifacts, presentation behavior, dependency versions, VS Code
   compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-W target:
+  `isValidScheduleDateDayToken` is the next editor-feedback diagnostic
+  candidate. Qlty reports high complexity and many returns in
+  `src/application/editor-feedback/syntaxDiagnosticScheduleRules.ts`, whose
+  total complexity remains the largest Slice-2 editor-feedback finding after
+  Slice-2-V.
+- Slice-2-W investigation:
+  `isValidScheduleDateDayToken` validates parsed `sd` day tokens for `en`,
+  `ud`, explicit calendar days, relative `+`/`*`/`@` days, backward `b`
+  offsets, and `+weekday[:occurrence]` forms. It is called only by
+  `isValidExplicitScheduleDate`; Serena found no external direct production
+  callers. Existing `buildSyntaxDiagnostics.test.ts` coverage exercises valid
+  and invalid `sd` values including `sd=0,ud`, calendar bounds, relative day
+  bounds, weekday occurrence bounds, and backward-day offsets.
+- Slice-2-W boundary decision:
+  extract local day-token branch helpers only; do not change
+  `parseScheduleDateValue` behavior, `parseExplicitScheduleDateDiagnosticValue`
+  output shape, schedule rule number validation, calendar day limits,
+  accepted token forms, diagnostic message text, parser/generated artifacts,
+  presentation behavior, dependency versions, VS Code compatibility, web
+  compatibility, or `engines.vscode`.
+- Slice-2-W approval-sensitive scope:
+  implementation may add local helper functions inside
+  `src/application/editor-feedback/syntaxDiagnosticScheduleRules.ts` and
+  rewrite `isValidScheduleDateDayToken` as a small dispatcher while preserving
+  exported function names and behavior. Any change to accepted/rejected `sd`
+  token forms, diagnostic messages, parser/generated artifacts, presentation
+  behavior, dependency versions, VS Code compatibility, web compatibility, or
+  `engines.vscode` requires separate approval.
+- Slice-2-W result:
+  `isValidScheduleDateDayToken` remains exported from
+  `syntaxDiagnosticScheduleRules.ts`, with day-token branches delegated to
+  local reserved-token, explicit-calendar-day, relative-day, backward-day, and
+  weekday-token helpers. The change preserves accepted/rejected `sd` token
+  forms, calendar day limits, schedule rule number behavior, diagnostic
+  message text, parser/generated artifacts, presentation behavior, dependency
+  versions, VS Code compatibility, web compatibility, and `engines.vscode`.
 
 ## Compatibility
 
@@ -1503,6 +1540,6 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
 
 ## Open Questions
 
-- After Slice-2-V, should Slice-2 continue with
-  `syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScheduleRules`, or close
-  application orchestration work?
+- After Slice-2-W, should Slice-2 continue with
+  `isValidExplicitScheduleDate`, `isValidExplicitScheduleByDaysFromStart`,
+  `syntaxDiagnosticRuleBuilders`, or close application orchestration work?

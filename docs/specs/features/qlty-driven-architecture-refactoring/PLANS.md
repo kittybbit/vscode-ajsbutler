@@ -153,13 +153,15 @@ complete. Slice-2-V is complete. Slice-1B is complete.
 ## Current Slice Candidate
 
 No current runtime slice is selected. Slice-2 should next choose between
-`syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScheduleRules`, or closing
-application orchestration work and moving to the next slice.
+remaining `syntaxDiagnosticScheduleRules` findings,
+`syntaxDiagnosticRuleBuilders`, or closing application orchestration work and
+moving to the next slice.
 
 - Recent result:
-  Slice-2-V preserved decimal range diagnostics while grouping
-  `buildExplicitDecimalRangeRule` inputs. Targeted Qlty smell output no
-  longer reports `buildExplicitDecimalRangeRule`.
+  Slice-2-W preserved `sd` day-token diagnostics while extracting local
+  helpers for reserved, explicit calendar, relative, backward, and weekday
+  tokens. Targeted Qlty smell output no longer reports
+  `isValidScheduleDateDayToken`.
 
 ## Risks To Control
 
