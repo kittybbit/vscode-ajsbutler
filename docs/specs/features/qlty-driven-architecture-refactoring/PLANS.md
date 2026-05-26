@@ -66,7 +66,7 @@ Slice-2-D, Slice-2-E, Slice-2-F, Slice-2-G, Slice-2-H, Slice-2-I,
 Slice-2-J, Slice-2-K, Slice-2-L, Slice-2-M, Slice-2-N, and Slice-2-O are
 complete. Slice-2-P is complete. Slice-2-Q is complete. Slice-2-R is
 complete. Slice-2-S is complete. Slice-2-T is complete. Slice-2-U is
-complete. Slice-1B is complete.
+complete. Slice-2-V is complete. Slice-1B is complete.
 
 - Target:
   extract `AjsNode` styling decisions from `buildNodeSxProps` into
@@ -153,13 +153,13 @@ complete. Slice-1B is complete.
 ## Current Slice Candidate
 
 No current runtime slice is selected. Slice-2 should next choose between
-`buildExplicitDecimalRangeRule`, `syntaxDiagnosticRuleBuilders`, or closing
+`syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScheduleRules`, or closing
 application orchestration work and moving to the next slice.
 
 - Recent result:
-  Slice-2-U preserved transfer-file byte-length diagnostics while grouping
-  `buildExplicitByteLengthRule` inputs. Targeted Qlty smell output no longer
-  reports `buildExplicitByteLengthRule`.
+  Slice-2-V preserved decimal range diagnostics while grouping
+  `buildExplicitDecimalRangeRule` inputs. Targeted Qlty smell output no
+  longer reports `buildExplicitDecimalRangeRule`.
 
 ## Risks To Control
 

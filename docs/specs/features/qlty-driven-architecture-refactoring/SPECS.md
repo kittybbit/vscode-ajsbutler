@@ -1444,6 +1444,42 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
   grouped shape without changing bounds, diagnostic messages, validation
   behavior, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-V target:
+  `buildExplicitDecimalRangeRule` is the next editor-feedback diagnostic
+  helper candidate. Qlty reports a many-parameters smell, and Serena found
+  direct production references only from decimal range rules in
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`.
+- Slice-2-V investigation:
+  `buildExplicitDecimalRangeRule` constructs a `UnitParameterDiagnosticRule`
+  from a parameter key, minimum, maximum, message, and optional
+  `allowNegative` setting. It delegates validation to
+  `parseExplicitDecimalInRange`. Current call sites cover job end judgment,
+  wait-job execution time, execution interval control, event sending, and
+  event receiving numeric diagnostics, including signed event issue source
+  IDs.
+- Slice-2-V boundary decision:
+  group decimal range rule inputs only; do not change parameter keys,
+  minimum/maximum bounds, optional `allowNegative` behavior, diagnostic
+  message text, `parseExplicitDecimalInRange` behavior, rule membership,
+  parser/generated artifacts, presentation behavior, dependencies, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-V approval-sensitive scope:
+  implementation may add local helper(s), local constants, or local types
+  inside `src/application/editor-feedback/syntaxDiagnosticCore.ts` and adjust
+  decimal range rule call sites in
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts` while
+  preserving exported diagnostic behavior. Any change to diagnostic message
+  text, numeric bounds, `allowNegative` behavior, parser/generated artifacts,
+  presentation behavior, dependency versions, VS Code compatibility, web
+  compatibility, or `engines.vscode` requires separate approval.
+- Slice-2-V result:
+  `buildExplicitDecimalRangeRule` remains exported from
+  `syntaxDiagnosticCore.ts`, with parameter key, numeric bounds, message, and
+  optional `allowNegative` grouped into a local input type. Decimal range rule
+  call sites use the grouped shape without changing bounds, diagnostic
+  messages, `allowNegative` behavior, validation behavior, parser/generated
+  artifacts, presentation behavior, dependency versions, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
 
 ## Compatibility
 
@@ -1467,6 +1503,6 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
 
 ## Open Questions
 
-- After Slice-2-U, should Slice-2 continue with
-  `buildExplicitDecimalRangeRule`, `syntaxDiagnosticRuleBuilders`, or close
+- After Slice-2-V, should Slice-2 continue with
+  `syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScheduleRules`, or close
   application orchestration work?

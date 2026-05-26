@@ -12,12 +12,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-U implementation is complete.
+  Slice-2-V implementation is complete.
 - Active slice:
-  none; Slice-2-U is complete and the next Slice-2 target is not selected.
+  none; Slice-2-V is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  decide whether Slice-2 continues with `buildExplicitDecimalRangeRule`,
-  `syntaxDiagnosticRuleBuilders`, or closes application orchestration work.
+  decide whether Slice-2 continues with `syntaxDiagnosticRuleBuilders`,
+  `syntaxDiagnosticScheduleRules`, or closes application orchestration work.
 
 ## Human Approval
 
@@ -287,6 +287,12 @@ active implementation approval remains.
 - [x] Request human approval for the selected Slice-2-U implementation scope.
 - [x] Record human approval for Slice-2-U.
 - [x] Complete Slice-2-U `buildExplicitByteLengthRule` input grouping.
+- [x] Select Slice-2-V `buildExplicitDecimalRangeRule` input grouping as the
+      next implementation candidate.
+- [x] Record Slice-2-V impact investigation.
+- [x] Request human approval for the selected Slice-2-V implementation scope.
+- [x] Record human approval for Slice-2-V.
+- [x] Complete Slice-2-V `buildExplicitDecimalRangeRule` input grouping.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -1064,4 +1070,28 @@ active implementation approval remains.
   Targeted Qlty smell output no longer reports `buildExplicitByteLengthRule`;
   remaining editor-feedback findings include `buildExplicitDecimalRangeRule`
   and larger `syntaxDiagnosticRuleBuilders` complexity.
+- Slice-2-V targets `buildExplicitDecimalRangeRule` because Qlty reports a
+  many-parameters smell in a shared editor-feedback diagnostic range rule
+  builder.
+- Slice-2-V impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticCore.ts` and
+  `src/application/editor-feedback/syntaxDiagnosticRuleSets.ts`; Serena found
+  direct production usage only from decimal range rule definitions in
+  `syntaxDiagnosticRuleSets.ts`.
+- Slice-2-V must preserve parameter key assignment, minimum/maximum numeric
+  bounds, optional `allowNegative` behavior, diagnostic message text,
+  `parseExplicitDecimalInRange` validation behavior, parser/generated
+  artifacts, presentation behavior, VS Code compatibility, web compatibility,
+  and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises representative
+  decimal range diagnostics for job end judgment, execution interval control,
+  event sending, and event receiving rules including signed ID values.
+- Slice-2-V was approved by the user at 2026-05-26 21:53 JST for
+  `buildExplicitDecimalRangeRule` input grouping only.
+- Slice-2-V preserved decimal range diagnostics while grouping
+  `buildExplicitDecimalRangeRule` inputs and updating range-rule call sites.
+  Targeted Qlty smell output no longer reports
+  `buildExplicitDecimalRangeRule`; remaining editor-feedback findings include
+  larger `syntaxDiagnosticRuleBuilders` and `syntaxDiagnosticScheduleRules`
+  complexity.
 - Domain helpers still contain branch-heavy conditional logic.
