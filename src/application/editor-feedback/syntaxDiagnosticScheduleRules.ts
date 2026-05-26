@@ -18,6 +18,21 @@ export type ParsedExplicitScheduleDateValue = {
   dayValue: string;
 };
 
+const toOptionalNumber = (rawValue: string | undefined): number | undefined =>
+  rawValue === undefined ? undefined : Number(rawValue);
+
+const isNumberInRange = (
+  value: number,
+  minimum: number,
+  maximum: number,
+): boolean => value >= minimum && value <= maximum;
+
+const isOptionalNumberInRange = (
+  value: number | undefined,
+  minimum: number,
+  maximum: number,
+): boolean => value === undefined || isNumberInRange(value, minimum, maximum);
+
 export const parseExplicitScheduleRuleValue = (
   rawValue: string | undefined,
 ): ParsedExplicitScheduleRuleValue | undefined => {
@@ -38,15 +53,14 @@ export const isValidScheduleRuleNumber = (
 ): boolean =>
   parsedValue !== undefined &&
   (!parsedValue.hasExplicitRuleNumber ||
-    (parsedValue.ruleNumber >= 1 && parsedValue.ruleNumber <= 144));
+    isNumberInRange(parsedValue.ruleNumber, 1, 144));
 
 export const normalizeScheduleLimitYear = (
   scheduleLimitYear: number | undefined,
 ): number | undefined =>
   Number.isInteger(scheduleLimitYear) &&
   scheduleLimitYear !== undefined &&
-  scheduleLimitYear >= 2036 &&
-  scheduleLimitYear <= 2099
+  isNumberInRange(scheduleLimitYear, 2036, 2099)
     ? scheduleLimitYear
     : undefined;
 
@@ -62,11 +76,14 @@ export const parseExplicitScheduleDateDiagnosticValue = (
   return {
     hasExplicitRuleNumber: /^\d{1,3},/.test(rawValue ?? ""),
     ruleNumber: parsed.rule,
-    year: yearMonthMatch?.[2] ? Number(yearMonthMatch[2]) : undefined,
-    month: yearMonthMatch ? Number(yearMonthMatch[3]) : undefined,
+    year: toOptionalNumber(yearMonthMatch?.[2]),
+    month: toOptionalNumber(yearMonthMatch?.[3]),
     dayValue: parsed.day,
   };
 };
+
+const getMaximumMonthDayLimit = (month: number): number =>
+  new Date(2020, month, 0).getDate();
 
 export const getCalendarMonthDayLimit = (
   year: number | undefined,
@@ -77,7 +94,7 @@ export const getCalendarMonthDayLimit = (
   }
 
   if (year === undefined) {
-    return month === 2 ? 29 : new Date(2000, month, 0).getDate();
+    return getMaximumMonthDayLimit(month);
   }
 
   return new Date(year, month, 0).getDate();
@@ -88,20 +105,18 @@ export const isValidScheduleDateYear = (
   scheduleLimitYear: number | undefined,
 ): boolean =>
   year === undefined ||
-  (year >= 1994 &&
-    (scheduleLimitYear === undefined || year <= scheduleLimitYear));
+  (isNumberInRange(year, 1994, scheduleLimitYear ?? year) &&
+    isOptionalNumberInRange(scheduleLimitYear, year, scheduleLimitYear));
 
 export const isValidScheduleDateMonth = (month: number | undefined): boolean =>
-  month === undefined || (month >= 1 && month <= 12);
+  isOptionalNumberInRange(month, 1, 12);
+
+const reservedScheduleDateDayTokens = new Set(["en", "ud"]);
 
 const isReservedScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  if (parsed.dayValue === "en") {
-    return parsed.month === undefined;
-  }
-
-  if (parsed.dayValue === "ud") {
+  if (reservedScheduleDateDayTokens.has(parsed.dayValue)) {
     return parsed.month === undefined;
   }
 
@@ -143,9 +158,11 @@ const isValidBackwardScheduleDateOffset = (
   offset: number | undefined,
   direction: string | undefined,
 ): boolean =>
-  offset === undefined ||
-  (offset >= 0 &&
-    offset <= getBackwardScheduleDateOffsetLimit(parsed, direction));
+  isOptionalNumberInRange(
+    offset,
+    0,
+    getBackwardScheduleDateOffsetLimit(parsed, direction),
+  );
 
 const isBackwardScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
@@ -172,11 +189,7 @@ const isWeekdayScheduleDateDayToken = (
   }
 
   const occurrence = weekdayMatch[2];
-  return (
-    occurrence === undefined ||
-    occurrence === "b" ||
-    (Number(occurrence) >= 1 && Number(occurrence) <= 5)
-  );
+  return occurrence === undefined || /^[1-5b]$/.test(occurrence);
 };
 
 export const isValidScheduleDateDayToken = (
@@ -245,10 +258,8 @@ export const isValidHourMinuteRange = (rawValue: string): boolean => {
   const parsed = parseHourMinuteValue(rawValue);
   return (
     parsed !== undefined &&
-    parsed.hours >= 0 &&
-    parsed.hours <= 47 &&
-    parsed.minutes >= 0 &&
-    parsed.minutes <= 59
+    isNumberInRange(parsed.hours, 0, 47) &&
+    isNumberInRange(parsed.minutes, 0, 59)
   );
 };
 
@@ -286,8 +297,35 @@ const isExplicitNumberInRange = (
   maximum: number,
 ): boolean =>
   /^\d{1,3}$/.test(rawValue) &&
-  Number(rawValue) >= minimum &&
-  Number(rawValue) <= maximum;
+  isNumberInRange(Number(rawValue), minimum, maximum);
+
+const maximumExplicitCycleByUnit = {
+  y: 10,
+  m: 12,
+  w: 5,
+  d: 31,
+} as const;
+
+type ExplicitCycleUnit = keyof typeof maximumExplicitCycleByUnit;
+
+const isExplicitCycleUnit = (
+  rawValue: string | undefined,
+): rawValue is ExplicitCycleUnit =>
+  rawValue !== undefined && rawValue in maximumExplicitCycleByUnit;
+
+const parseExplicitCycleValue = (
+  rawValue: string,
+): { cycle: number; unitType: ExplicitCycleUnit } | undefined => {
+  const matched = /^\((\d{1,3}),([ymwd])\)$/.exec(rawValue);
+  if (!isExplicitCycleUnit(matched?.[2])) {
+    return undefined;
+  }
+
+  return {
+    cycle: Number(matched[1]),
+    unitType: matched[2],
+  };
+};
 
 export const isValidExplicitParentScheduleRule = (
   parameter: UnitParameter,
@@ -311,47 +349,30 @@ export const isValidExplicitStartTime = (parameter: UnitParameter): boolean => {
 };
 
 export const isValidExplicitCycle = (parameter: UnitParameter): boolean => {
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
-  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
-    return false;
-  }
-
-  const matched = /^\((\d{1,3}),([ymwd])\)$/.exec(parsed.value);
-  if (!matched) {
-    return false;
-  }
-
-  const cycle = Number(matched[1]);
-  const unitType = matched[2];
-  const maximumByUnit = {
-    y: 10,
-    m: 12,
-    w: 5,
-    d: 31,
-  } as const;
-  return cycle >= 1 && cycle <= maximumByUnit[unitType];
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  const cycle = parsed ? parseExplicitCycleValue(parsed.value) : undefined;
+  return (
+    cycle !== undefined &&
+    isNumberInRange(cycle.cycle, 1, maximumExplicitCycleByUnit[cycle.unitType])
+  );
 };
 
 export const isExplicitWeeklyCycle = (
   parameter: UnitParameter,
 ): ParsedExplicitScheduleRuleValue | undefined => {
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
-  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
-    return undefined;
-  }
-
-  return /^\(\d{1,3},w\)$/.test(parsed.value) ? parsed : undefined;
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  return parsed !== undefined && /^\(\d{1,3},w\)$/.test(parsed.value)
+    ? parsed
+    : undefined;
 };
 
 export const usesOpenOrClosedDaySchedule = (
   parameter: UnitParameter,
 ): ParsedExplicitScheduleRuleValue | undefined => {
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
-  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
-    return undefined;
-  }
-
-  return /^((\d{4}\/)?\d{2}\/)?[*@]/.test(parsed.value) ? parsed : undefined;
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  return parsed !== undefined && /^((\d{4}\/)?\d{2}\/)?[*@]/.test(parsed.value)
+    ? parsed
+    : undefined;
 };
 
 export const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
@@ -370,26 +391,15 @@ export const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
 };
 
 export const isValidExplicitShiftDays = (parameter: UnitParameter): boolean => {
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
-  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
-    return false;
-  }
-
-  if (!/^\d{1,3}$/.test(parsed.value)) {
-    return false;
-  }
-
-  const shiftDays = Number(parsed.value);
-  return shiftDays >= 1 && shiftDays <= 31;
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  return parsed !== undefined && isExplicitNumberInRange(parsed.value, 1, 31);
 };
 
 export const isValidOptionalOneToThirtyOne = (
   rawValue: string | undefined,
 ): boolean =>
   rawValue === undefined ||
-  (/^\d{1,2}$/.test(rawValue) &&
-    Number(rawValue) >= 1 &&
-    Number(rawValue) <= 31);
+  (/^\d{1,2}$/.test(rawValue) && isNumberInRange(Number(rawValue), 1, 31));
 
 const scheduleByDaysFromStartRules = {
   no: { maximumSegments: 1, boundedSegmentIndexes: [] },

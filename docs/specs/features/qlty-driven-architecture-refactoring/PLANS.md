@@ -59,22 +59,23 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 
 ## Current Slice Candidate
 
-No current runtime slice is selected. Slice-2 should next choose between
-`syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScalarValidators`, or closing
-application orchestration work and moving to the next slice.
+No implementation slice is currently approved.
 
 - Recent result:
-  Slice-2-Y preserved `ln`, `cftd`, and `wc` diagnostics while extracting
-  shared explicit schedule-rule parsing, numeric range validation, and `cftd`
-  rule-table validation helpers. Targeted Qlty smell output no longer reports
-  `isValidExplicitParentScheduleRule`, `isValidExplicitScheduleByDaysFromStart`,
-  or `isValidExplicitWaitCount`.
-- Metrics note:
-  `syntaxDiagnosticScheduleRules.ts` changed from 35 funcs / cyclo 193 /
-  complexity 111 / LOC 389 to 40 funcs / cyclo 183 / complexity 93 / LOC 405.
-  The function-count increase is accepted for this slice because it removes
-  the targeted branch-heavy smell cluster and lowers cyclomatic and aggregate
-  complexity.
+  Slice-2-Z preserved schedule date, time, cycle, weekly-cycle,
+  open/closed-day, and shift-day diagnostics while sharing number-range,
+  month-limit, optional parsing, and explicit-cycle helpers inside
+  `syntaxDiagnosticScheduleRules.ts`.
+- Current decision:
+  choose whether Slice-2 continues with `syntaxDiagnosticRuleBuilders`,
+  `syntaxDiagnosticScalarValidators`, or closes application orchestration work
+  and moves to Slice-3.
+- Current evidence:
+  targeted metrics for `syntaxDiagnosticScheduleRules.ts` changed from
+  40 funcs / cyclo 183 / complexity 93 / LOC 405 before Slice-2-Z to
+  46 funcs / cyclo 139 / complexity 72 / LOC 412. Targeted smell output still
+  reports file-level high total complexity only; normal qlty validation reports
+  no issues.
 
 ## Risks To Control
 

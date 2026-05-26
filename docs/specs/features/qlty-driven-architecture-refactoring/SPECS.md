@@ -130,6 +130,87 @@ File metrics changed from 35 funcs / cyclo 193 / complexity 111 / LOC 389 to
 an accepted trade-off for this slice because it removes the targeted
 branch-heavy smell cluster and lowers cyclomatic and aggregate complexity.
 
+### Slice-2-Z Target
+
+Slice-2-Z targets the remaining
+`src/application/editor-feedback/syntaxDiagnosticScheduleRules.ts` residual
+smell/metric cluster. This continues the same-file approach by handling the
+remaining schedule-rule findings together.
+
+Current Qlty evidence:
+
+- `syntaxDiagnosticScheduleRules.ts` still reports high total complexity.
+- Residual findings include `parseExplicitScheduleDateDiagnosticValue`,
+  `getCalendarMonthDayLimit`, `isValidExplicitCycle`,
+  `isExplicitWeeklyCycle`, `usesOpenOrClosedDaySchedule`,
+  `isValidExplicitShiftDays`, and the `isValidHourMinuteRange` binary
+  expression.
+
+### Slice-2-Z Investigation
+
+The residual validators cover schedule-date parsing/month limits, hour-minute
+range checks, cycle validation, weekly/open-day compatibility helpers, and
+shift-day validation. Targeted search found these functions are used within
+`syntaxDiagnosticScheduleRules.ts` and from `buildScheduleRuleDiagnostics` for
+schedule diagnostics such as `st`, `cy`, `shd`, and related weekly-cycle
+compatibility checks.
+
+Existing `buildSyntaxDiagnostics.test.ts` coverage exercises valid and
+invalid schedule-rule diagnostics, including `st`, `cy`, `shd`, and schedule
+date combinations used by weekly-cycle compatibility.
+
+### Slice-2-Z Boundary Decision
+
+Reduce the same-file residual schedule-rule validator cluster with local
+helpers only.
+
+Do not change:
+
+- `parseScheduleDateValue` behavior
+- explicit schedule rule number parsing
+- accepted schedule date, time, cycle, weekly-cycle, open/closed-day, or
+  shift-day forms
+- schedule date month/day limit semantics
+- diagnostic message text
+- parser/generated artifacts
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-2-Z Approval-Sensitive Scope
+
+Implementation may add local helper functions inside
+`src/application/editor-feedback/syntaxDiagnosticScheduleRules.ts` and rewrite
+the residual schedule-rule validators as smaller coordinators while preserving
+exported function names and behavior.
+
+Any change to accepted/rejected schedule-rule forms, diagnostic messages,
+parser/generated artifacts, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, or `engines.vscode` requires separate
+approval.
+
+### Slice-2-Z Result
+
+`syntaxDiagnosticScheduleRules.ts` now shares schedule-rule number-range,
+optional-number, maximum-month-day, and explicit-cycle helpers across the
+residual validators. The exported schedule-date, time, cycle, weekly-cycle,
+open/closed-day, and shift-day validation functions remain behavior-preserving
+coordinators.
+
+The change preserves accepted and rejected schedule-rule forms, diagnostic
+message text, parser/generated artifacts, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty metrics changed from 40 funcs / cyclo 183 / complexity 93 / LOC
+405 before Slice-2-Z to 46 funcs / cyclo 139 / complexity 72 / LOC 412.
+Targeted smell output still reports file-level high total complexity only;
+`rtk pnpm run qlty` reports no issues. The next decision is whether additional
+Slice-2 value remains in `syntaxDiagnosticRuleBuilders` or
+`syntaxDiagnosticScalarValidators`, or whether application orchestration work
+should close and Slice-3 should start.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -153,6 +234,6 @@ branch-heavy smell cluster and lowers cyclomatic and aggregate complexity.
 
 ## Open Questions
 
-- After Slice-2-Y, should Slice-2 continue with
+- After Slice-2-Z, should Slice-2 continue with
   `syntaxDiagnosticRuleBuilders`, `syntaxDiagnosticScalarValidators`, or close
   application orchestration work?
