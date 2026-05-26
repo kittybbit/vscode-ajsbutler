@@ -113,7 +113,9 @@ rules in `docs/specs/README.md`, not in this file.
   `buildExplicitDecimalRangeRule` input grouping and implementation is
   complete. Slice-2-W investigation is complete for
   `isValidScheduleDateDayToken` day-token helper extraction and implementation
-  is complete.
+  is complete. Slice-2-X investigation is complete for
+  `isValidExplicitScheduleDate` helper extraction and implementation is
+  complete.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

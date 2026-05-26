@@ -158,10 +158,10 @@ remaining `syntaxDiagnosticScheduleRules` findings,
 moving to the next slice.
 
 - Recent result:
-  Slice-2-W preserved `sd` day-token diagnostics while extracting local
-  helpers for reserved, explicit calendar, relative, backward, and weekday
-  tokens. Targeted Qlty smell output no longer reports
-  `isValidScheduleDateDayToken`.
+  Slice-2-X preserved `sd` explicit schedule-date diagnostics while extracting
+  local helpers for `sd=0,ud`, explicit rule-number bounds, and combined
+  date-field validation. Targeted Qlty smell output no longer reports
+  `isValidExplicitScheduleDate`.
 
 ## Risks To Control
 

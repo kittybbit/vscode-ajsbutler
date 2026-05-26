@@ -1517,6 +1517,43 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
   forms, calendar day limits, schedule rule number behavior, diagnostic
   message text, parser/generated artifacts, presentation behavior, dependency
   versions, VS Code compatibility, web compatibility, and `engines.vscode`.
+- Slice-2-X target:
+  `isValidExplicitScheduleDate` is the next editor-feedback diagnostic
+  candidate. Qlty still reports high complexity and many returns in
+  `syntaxDiagnosticScheduleRules.ts` after Slice-2-W.
+- Slice-2-X investigation:
+  `isValidExplicitScheduleDate` parses the raw `sd` parameter, handles the
+  special `sd=0,ud` form, rejects explicit rule numbers outside 1..144, and
+  then combines month, schedule-limit year, and day-token validators. Serena
+  found direct production usage only from `buildScheduleRuleDiagnostics` in
+  `src/application/editor-feedback/syntaxDiagnosticRuleBuilders.ts`. Existing
+  `buildSyntaxDiagnostics.test.ts` coverage exercises valid `sd=0,ud`,
+  valid calendar and relative day values, out-of-range rule numbers, schedule
+  limit year violations, invalid leap-day/calendar values, invalid relative
+  day/weekday occurrences, and invalid `ud` usage.
+- Slice-2-X boundary decision:
+  extract local explicit schedule-date helper functions only; do not change
+  `parseScheduleDateValue` behavior, `parseExplicitScheduleDateDiagnosticValue`
+  output shape, `sd=0,ud` semantics, explicit rule number bounds, month/year
+  validation, day-token validation, diagnostic message text, parser/generated
+  artifacts, presentation behavior, dependency versions, VS Code
+  compatibility, web compatibility, or `engines.vscode`.
+- Slice-2-X approval-sensitive scope:
+  implementation may add local helper functions inside
+  `src/application/editor-feedback/syntaxDiagnosticScheduleRules.ts` and
+  rewrite `isValidExplicitScheduleDate` as a smaller coordinator while
+  preserving exported function names and behavior. Any change to accepted or
+  rejected `sd` forms, diagnostic messages, parser/generated artifacts,
+  presentation behavior, dependency versions, VS Code compatibility, web
+  compatibility, or `engines.vscode` requires separate approval.
+- Slice-2-X result:
+  `isValidExplicitScheduleDate` remains exported from
+  `syntaxDiagnosticScheduleRules.ts`, with `sd=0,ud` validation, explicit rule
+  number bounds, and combined date-field validation delegated to local
+  helpers. The change preserves accepted/rejected `sd` forms, schedule-limit
+  behavior, diagnostic message text, parser/generated artifacts, presentation
+  behavior, dependency versions, VS Code compatibility, web compatibility, and
+  `engines.vscode`.
 
 ## Compatibility
 
@@ -1540,6 +1577,6 @@ group7PriorityUnitTypes)`. The refactor can stay local by computing the
 
 ## Open Questions
 
-- After Slice-2-W, should Slice-2 continue with
-  `isValidExplicitScheduleDate`, `isValidExplicitScheduleByDaysFromStart`,
+- After Slice-2-X, should Slice-2 continue with
+  `isValidExplicitScheduleByDaysFromStart`, `isValidExplicitParentScheduleRule`,
   `syntaxDiagnosticRuleBuilders`, or close application orchestration work?

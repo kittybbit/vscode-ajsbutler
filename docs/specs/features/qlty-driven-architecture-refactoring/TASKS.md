@@ -12,13 +12,14 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-W implementation is complete.
+  Slice-2-X implementation is complete.
 - Active slice:
-  none; Slice-2-W is complete and the next Slice-2 target is not selected.
+  none; Slice-2-X is complete and the next Slice-2 target is not selected.
 - Open follow-up:
-  after Slice-2-W, decide whether Slice-2 continues with remaining
-  `syntaxDiagnosticScheduleRules`, shifts back to `syntaxDiagnosticRuleBuilders`,
-  or closes application orchestration work.
+  after Slice-2-X, decide whether Slice-2 continues with
+  `isValidExplicitScheduleByDaysFromStart`, `isValidExplicitParentScheduleRule`,
+  shifts back to `syntaxDiagnosticRuleBuilders`, or closes application
+  orchestration work.
 
 ## Human Approval
 
@@ -301,6 +302,12 @@ active implementation approval remains.
 - [x] Record human approval for Slice-2-W.
 - [x] Complete Slice-2-W `isValidScheduleDateDayToken` day-token helper
       extraction.
+- [x] Select Slice-2-X `isValidExplicitScheduleDate` helper extraction as the
+      next implementation candidate.
+- [x] Record Slice-2-X impact investigation.
+- [x] Request human approval for the selected Slice-2-X implementation scope.
+- [x] Record human approval for Slice-2-X.
+- [x] Complete Slice-2-X `isValidExplicitScheduleDate` helper extraction.
 - [ ] Complete Slice-2 application orchestration work.
 - [ ] Complete Slice-3 domain helper simplification work.
 
@@ -1125,4 +1132,26 @@ active implementation approval remains.
   `isValidExplicitScheduleDate`, `isValidExplicitParentScheduleRule`,
   `isValidExplicitScheduleByDaysFromStart`, `isValidExplicitWaitCount`, and
   total file complexity.
+- Slice-2-X targets `isValidExplicitScheduleDate` because Qlty reports high
+  complexity and many returns in the remaining `sd` schedule-date validator.
+- Slice-2-X impact is local to
+  `src/application/editor-feedback/syntaxDiagnosticScheduleRules.ts`; Serena
+  found direct production usage only from `buildScheduleRuleDiagnostics` in
+  `src/application/editor-feedback/syntaxDiagnosticRuleBuilders.ts`.
+- Slice-2-X must preserve `sd=0,ud` semantics, explicit schedule rule number
+  bounds, month/year/day-token validation, diagnostic message text,
+  parser/generated artifacts, presentation behavior, VS Code compatibility,
+  web compatibility, and `engines.vscode`.
+- Existing `buildSyntaxDiagnostics.test.ts` coverage exercises valid and
+  invalid `sd` diagnostics, including special `ud` handling, schedule-limit
+  year bounds, invalid calendar values, invalid relative day/weekday values,
+  and out-of-range explicit rule numbers.
+- Slice-2-X was approved by the user at 2026-05-26 22:51 JST for
+  `isValidExplicitScheduleDate` helper extraction only.
+- Slice-2-X preserved `sd` explicit schedule-date diagnostics while extracting
+  local helpers for `sd=0,ud`, explicit rule-number bounds, and combined
+  date-field validation. Targeted Qlty smell output no longer reports
+  `isValidExplicitScheduleDate`; remaining schedule-rule findings include
+  `isValidExplicitParentScheduleRule`, `isValidExplicitScheduleByDaysFromStart`,
+  `isValidExplicitWaitCount`, and total file complexity.
 - Domain helpers still contain branch-heavy conditional logic.

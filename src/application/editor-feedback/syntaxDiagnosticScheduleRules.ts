@@ -192,34 +192,38 @@ export const isValidScheduleDateDayToken = (
     parsed,
   ) ?? false;
 
+const isValidUserDefinedScheduleDate = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean =>
+  parsed.hasExplicitRuleNumber &&
+  parsed.ruleNumber === 0 &&
+  parsed.month === undefined;
+
+const isValidExplicitScheduleDateRuleNumber = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean =>
+  !parsed.hasExplicitRuleNumber ||
+  (parsed.ruleNumber >= 1 && parsed.ruleNumber <= 144);
+
+const isValidExplicitScheduleDateFields = (
+  parsed: ParsedExplicitScheduleDateValue,
+  scheduleLimitYear: number | undefined,
+): boolean =>
+  isValidScheduleDateMonth(parsed.month) &&
+  isValidScheduleDateYear(parsed.year, scheduleLimitYear) &&
+  isValidScheduleDateDayToken(parsed);
+
 export const isValidExplicitScheduleDate = (
   parameter: UnitParameter,
   scheduleLimitYear: number | undefined,
 ): boolean => {
   const parsed = parseExplicitScheduleDateDiagnosticValue(parameter.value);
-  if (!parsed) {
-    return false;
-  }
-
-  if (parsed.dayValue === "ud") {
-    return (
-      parsed.hasExplicitRuleNumber &&
-      parsed.ruleNumber === 0 &&
-      parsed.month === undefined
-    );
-  }
-
-  if (
-    parsed.hasExplicitRuleNumber &&
-    (parsed.ruleNumber < 1 || parsed.ruleNumber > 144)
-  ) {
-    return false;
-  }
-
   return (
-    isValidScheduleDateMonth(parsed.month) &&
-    isValidScheduleDateYear(parsed.year, scheduleLimitYear) &&
-    isValidScheduleDateDayToken(parsed)
+    parsed !== undefined &&
+    (parsed.dayValue === "ud"
+      ? isValidUserDefinedScheduleDate(parsed)
+      : isValidExplicitScheduleDateRuleNumber(parsed) &&
+        isValidExplicitScheduleDateFields(parsed, scheduleLimitYear))
   );
 };
 
