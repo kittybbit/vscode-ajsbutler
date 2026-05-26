@@ -37,7 +37,8 @@ For non-trivial changes:
 5. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
    and update that file in the same commit whenever a task is completed,
    reframed, or dropped
-   `TASKS.md` is a current-state execution tracker, not a historical log
+   `TASKS.md` is a current-state execution tracker; retain only execution
+   context that future maintainers need to decide what to do next
 6. document assumptions explicitly
 7. implement in small vertical slices
 8. refresh `docs/specs/plans.md` in the same commit if the active slice or
@@ -143,16 +144,16 @@ Every agent must preserve:
 - approved scope boundaries
 - required validation
 
-Keep feature `TASKS.md` concise:
+Keep feature `TASKS.md` decision-focused:
 
 - keep only the current status, active tasks, current approval state, and
   open follow-up items
-- do not accumulate dated implementation diaries, prior approval transcripts,
-  or long validation histories in `TASKS.md`
+- retain prior implementation, approval, and validation details only when they
+  affect a future decision, re-approval boundary, or unresolved risk
 - move durable decisions to `SPECS.md`
 - move branch/repository priority updates to `plans.md` or `roadmap.md`
-- summarize validation expectations in `TASKS.md`, but keep detailed past run
-  history out unless a failure or risk is still actionable now
+- summarize validation expectations in `TASKS.md`; include past run details
+  only when a failure, warning, or risk remains actionable
 
 Copilot suggestions must be checked against the approved `SPECS.md`,
 `TASKS.md`, and approved scope before adoption. Do not accept Copilot
@@ -369,9 +370,9 @@ Those belong under `docs/specs/`.
 ## When To Remove Feature Docs
 
 Remove a `docs/specs/features/<feature>/` folder when it no longer carries an
-active requirement, durable boundary decision, or useful follow-up. Compress
-completed refactor-only slices into `roadmap.md` or `plans.md` instead of
-keeping a stale feature folder as historical log.
+active requirement, durable boundary decision, or useful follow-up. Preserve
+completed refactor-only information in `roadmap.md` or `plans.md` only when it
+helps future sequencing, risk assessment, or ownership decisions.
 
 ## Sync Cadence
 
@@ -391,11 +392,13 @@ Prefer the smallest useful cadence:
 one completed task or one resolved follow-up is enough reason to sync the
 docs in the same commit.
 
-When syncing, compress instead of accreting:
+When syncing, preserve decision context instead of accumulating entries:
 
 - remove or rewrite completed checklist/history sections when they no longer
-  help current execution
-- keep `TASKS.md` readable from the top without scrolling through old logs
+  help future maintainers understand the current state, remaining risk, or
+  next decision
+- keep `TASKS.md` readable from the top so the current approval state, active
+  tasks, and next decision are immediately visible
 
 ## Document Roles
 

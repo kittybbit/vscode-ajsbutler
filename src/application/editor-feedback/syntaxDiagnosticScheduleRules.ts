@@ -271,26 +271,34 @@ export const isValidWaitMinutesRange = (rawValue: string): boolean => {
   return minutes >= 1 && minutes <= 2879;
 };
 
+const parseValidExplicitScheduleRuleValue = (
+  parameter: UnitParameter,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  return isValidScheduleRuleNumber(parsed) && parsed !== undefined
+    ? parsed
+    : undefined;
+};
+
+const isExplicitNumberInRange = (
+  rawValue: string,
+  minimum: number,
+  maximum: number,
+): boolean =>
+  /^\d{1,3}$/.test(rawValue) &&
+  Number(rawValue) >= minimum &&
+  Number(rawValue) <= maximum;
+
 export const isValidExplicitParentScheduleRule = (
   parameter: UnitParameter,
   unit: Unit,
   rootUnits: readonly Unit[],
 ): boolean => {
-  if (rootUnits.includes(unit)) {
-    return true;
-  }
-
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
-  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
-    return false;
-  }
-
-  if (!/^\d{1,3}$/.test(parsed.value)) {
-    return false;
-  }
-
-  const parentRuleNumber = Number(parsed.value);
-  return parentRuleNumber >= 1 && parentRuleNumber <= 144;
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  return (
+    rootUnits.includes(unit) ||
+    (parsed !== undefined && isExplicitNumberInRange(parsed.value, 1, 144))
+  );
 };
 
 export const isValidExplicitStartTime = (parameter: UnitParameter): boolean => {
@@ -383,35 +391,47 @@ export const isValidOptionalOneToThirtyOne = (
     Number(rawValue) >= 1 &&
     Number(rawValue) <= 31);
 
+const scheduleByDaysFromStartRules = {
+  no: { maximumSegments: 1, boundedSegmentIndexes: [] },
+  be: { maximumSegments: 3, boundedSegmentIndexes: [1, 2] },
+  af: { maximumSegments: 3, boundedSegmentIndexes: [1, 2] },
+  db: { maximumSegments: 2, boundedSegmentIndexes: [1] },
+  da: { maximumSegments: 2, boundedSegmentIndexes: [1] },
+} as const;
+
+const isScheduleByDaysFromStartType = (
+  rawValue: string,
+): rawValue is keyof typeof scheduleByDaysFromStartRules =>
+  rawValue in scheduleByDaysFromStartRules;
+
+const hasNoEmptyScheduleByDaysFromStartSegments = (
+  segments: readonly string[],
+): boolean => segments.every((segment) => segment.length > 0);
+
+const isValidScheduleByDaysFromStartSegments = (
+  segments: readonly string[],
+): boolean => {
+  const scheduleType = segments[0];
+  const rule = isScheduleByDaysFromStartType(scheduleType)
+    ? scheduleByDaysFromStartRules[scheduleType]
+    : undefined;
+  return (
+    rule !== undefined &&
+    hasNoEmptyScheduleByDaysFromStartSegments(segments) &&
+    segments.length <= rule.maximumSegments &&
+    rule.boundedSegmentIndexes.every((index) =>
+      isValidOptionalOneToThirtyOne(segments[index]),
+    )
+  );
+};
+
 export const isValidExplicitScheduleByDaysFromStart = (
   parameter: UnitParameter,
 ): boolean => {
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
-  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
-    return false;
-  }
-
-  const segments = parsed.value.split(",");
-  const scheduleType = segments[0];
-  if (
-    !["no", "be", "af", "db", "da"].includes(scheduleType) ||
-    segments.some((segment) => segment.length === 0)
-  ) {
-    return false;
-  }
-
-  if (scheduleType === "no") {
-    return segments.length === 1;
-  }
-
-  if (scheduleType === "db" || scheduleType === "da") {
-    return segments.length <= 2 && isValidOptionalOneToThirtyOne(segments[1]);
-  }
-
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
   return (
-    segments.length <= 3 &&
-    isValidOptionalOneToThirtyOne(segments[1]) &&
-    isValidOptionalOneToThirtyOne(segments[2])
+    parsed !== undefined &&
+    isValidScheduleByDaysFromStartSegments(parsed.value.split(","))
   );
 };
 
@@ -428,21 +448,13 @@ export const isValidExplicitDelayTime = (parameter: UnitParameter): boolean => {
 };
 
 export const isValidExplicitWaitCount = (parameter: UnitParameter): boolean => {
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
-  if (!isValidScheduleRuleNumber(parsed) || parsed === undefined) {
-    return false;
-  }
-
-  if (parsed.value === "no" || parsed.value === "un") {
-    return true;
-  }
-
-  if (!/^\d{1,3}$/.test(parsed.value)) {
-    return false;
-  }
-
-  const waitCount = Number(parsed.value);
-  return waitCount >= 1 && waitCount <= 999;
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  return (
+    parsed !== undefined &&
+    (parsed.value === "no" ||
+      parsed.value === "un" ||
+      isExplicitNumberInRange(parsed.value, 1, 999))
+  );
 };
 
 export const isValidExplicitWaitTime = (parameter: UnitParameter): boolean => {
