@@ -69,12 +69,12 @@ No implementation slice is currently approved.
   candidates through local helpers while preserving open-calendar precedence,
   close-calendar fallback, and undefined fallback.
 - Current evidence:
-  targeted metrics for `unitGroupStateHelpers.ts` changed from 0 classes /
-  3 funcs / cyclo 14 / complexity 10 / LOC 26 before Slice-3-B to
-  0 classes / 6 funcs / cyclo 12 / complexity 5 / LOC 29. Targeted smell
-  output reports no findings.
+  targeted domain Qlty reports `parseUnitEdge` many-returns and
+  high-complexity findings in `unitEdgeHelpers.ts`. Current metrics are
+  0 classes / 2 funcs / cyclo 11 / complexity 12 / LOC 33.
 - Current decision:
-  choose the next Slice-3 domain-helper candidate.
+  wait for approval before implementing Slice-3-C `unitEdgeHelpers.ts`
+  unit-edge parser helper cleanup.
 
 ## Risks To Control
 

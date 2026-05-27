@@ -525,6 +525,61 @@ complexity 10 / LOC 26 before Slice-3-B to 0 classes / 6 funcs / cyclo 12 /
 complexity 5 / LOC 29. Targeted smell output reports no findings. The next
 planning decision is the next Slice-3 domain-helper candidate.
 
+### Slice-3-C Target
+
+Slice-3-C targets `src/domain/models/parameters/unitEdgeHelpers.ts`.
+
+Current Qlty evidence:
+
+- `parseUnitEdge` reports many-returns and high-complexity findings.
+- Metrics for `unitEdgeHelpers.ts` are 0 classes / 2 funcs / cyclo 11 /
+  complexity 12 / LOC 33.
+
+### Slice-3-C Investigation
+
+`parseUnitEdge` parses `ar` relation parameter values into source name,
+target name, and optional relation type. Production use flows through
+`parseNormalizedRelation` for normalized relation DTOs and through the `Ar`
+parameter getters for source, target, and relation type access.
+
+Existing tests in `unitEdgeHelpers.test.ts`, linked-unit relation tests, and
+unit-list relation projection tests cover relation strings with and without
+relation type, missing target rejection, undefined input, required relation
+type rejection, relation-type normalization, and displayed relation types.
+
+### Slice-3-C Boundary Decision
+
+Reduce only the local unit-edge parser helper shape in `unitEdgeHelpers.ts`.
+
+Do not change:
+
+- public helper exports
+- source name extraction
+- target name extraction
+- optional relation type extraction
+- `requireRelationType` behavior
+- `con` relation normalization
+- default `seq` relation normalization
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-C Approval-Sensitive Scope
+
+Implementation may add local helpers inside
+`src/domain/models/parameters/unitEdgeHelpers.ts` and rewrite
+`parseUnitEdge` as a smaller coordinator while preserving public exports and
+behavior.
+
+Any change to unit-edge parsing semantics, public helper API, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, or `engines.vscode`
+requires separate approval.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.

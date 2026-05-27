@@ -11,11 +11,13 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-B implementation is complete.
+  Slice-3-C investigation is complete; implementation is waiting for approval.
 - Active slice:
-  none.
+  Slice-3-C `src/domain/models/parameters/unitEdgeHelpers.ts` unit-edge parser
+  helper cleanup.
 - Open follow-up:
-  choose the next Slice-3 domain-helper candidate.
+  after Slice-3-C, continue domain-helper simplification from remaining Qlty
+  domain findings.
 
 ## Human Approval
 
@@ -23,7 +25,13 @@
 - Approved at:
   none
 - Approved scope:
-  none
+  planned Slice-3-C scope: refactor only
+  `src/domain/models/parameters/unitEdgeHelpers.ts` to reduce `parseUnitEdge`
+  many-returns/high-complexity findings while preserving public helper exports,
+  source/target extraction, optional relation type extraction,
+  `requireRelationType` behavior, relation-type normalization,
+  parser/generated artifacts, application projections, VS Code/web
+  compatibility, and `engines.vscode`.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -77,7 +85,14 @@ Only clear human approval can change Status to Approved.
 - [x] Request human approval for the selected Slice-3-B implementation scope.
 - [x] Record human approval for Slice-3-B.
 - [x] Complete Slice-3-B `unitGroupStateHelpers.ts` week-state helper cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-B.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-B.
+- [x] Select Slice-3-C `unitEdgeHelpers.ts` unit-edge parser helper cleanup as
+      the next domain-helper candidate.
+- [x] Record Slice-3-C impact investigation.
+- [x] Request human approval for the selected Slice-3-C implementation scope.
+- [ ] Record human approval for Slice-3-C.
+- [ ] Complete Slice-3-C `unitEdgeHelpers.ts` unit-edge parser helper cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-C.
 
 ## Validation
 
@@ -97,6 +112,10 @@ Only clear human approval can change Status to Approved.
   `buildUnitListGroup6View.test.ts`, and `buildUnitListView.test.ts`, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
+- Slice-3-C implementation:
+  targeted `unitEdgeHelpers.test.ts`, relation normalization coverage, and
+  linked-unit/unit-list relation coverage, then `rtk pnpm run qlty`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -170,3 +189,15 @@ Only clear human approval can change Status to Approved.
   0 classes / 3 funcs / cyclo 14 / complexity 10 / LOC 26 before Slice-3-B to
   0 classes / 6 funcs / cyclo 12 / complexity 5 / LOC 29. Targeted smell
   output reports no findings.
+- Slice-3-C targets `unitEdgeHelpers.ts` because targeted domain Qlty reports
+  `parseUnitEdge` many-returns and high-complexity findings. Current file
+  metrics are 0 classes / 2 funcs / cyclo 11 / complexity 12 / LOC 33.
+- Impact is local to unit-edge parsing. Production use flows through
+  `parseNormalizedRelation` for normalized `ar` relations and through `Ar`
+  parameter getters for source, target, and relation type access. Existing
+  tests cover relation strings with and without relation type, missing target,
+  undefined input, required relation type, normalization, linked-unit
+  relation display, and unit-list relation projection.
+- Slice-3-C must preserve source/target extraction, optional relation type
+  extraction, required-relation-type rejection, and `con`/default `seq`
+  normalization.
