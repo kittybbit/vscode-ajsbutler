@@ -11,13 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-D investigation is complete; implementation is waiting for approval.
+  Slice-3-D implementation is complete.
 - Active slice:
-  Slice-3-D `src/domain/models/parameters/PlainString.ts` `Ni.priority`
-  nice-value priority mapping cleanup.
+  none.
 - Open follow-up:
-  after Slice-3-D, continue domain-helper simplification from remaining Qlty
-  domain findings.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -25,12 +23,7 @@
 - Approved at:
   none
 - Approved scope:
-  planned Slice-3-D scope: refactor only
-  `src/domain/models/parameters/PlainString.ts` `Ni.priority` to reduce
-  many-returns/high-complexity findings while preserving public parameter
-  exports, nice-value priority thresholds, default `ni` behavior,
-  unit-priority resolution, parser/generated artifacts, application
-  projections, VS Code/web compatibility, and `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -92,12 +85,12 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-C.
 - [x] Complete Slice-3-C `unitEdgeHelpers.ts` unit-edge parser helper cleanup.
 - [x] Decide the next Slice-3 domain-helper candidate after Slice-3-C.
-- [x] Select Slice-3-D `PlainString.ts` `Ni.priority` nice-value mapping
-      cleanup as the next domain-helper candidate.
+- [x] Select Slice-3-D `PlainString.ts` smell/metric cleanup as the next
+      domain-helper candidate.
 - [x] Record Slice-3-D impact investigation.
 - [x] Request human approval for the selected Slice-3-D implementation scope.
-- [ ] Record human approval for Slice-3-D.
-- [ ] Complete Slice-3-D `PlainString.ts` `Ni.priority` cleanup.
+- [x] Record human approval for Slice-3-D.
+- [x] Complete Slice-3-D `PlainString.ts` smell/metric cleanup.
 - [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-D.
 
 ## Validation
@@ -227,6 +220,10 @@ Only clear human approval can change Status to Approved.
   reports many-returns and high-complexity findings for that getter. Current
   file metrics are 156 classes / 8 funcs / cyclo 14 / complexity 10 /
   LOC 220.
+- Slice-3-D is scoped as a `PlainString.ts` smell/metric cleanup, not a
+  one-smell-only task. The known smell cluster is currently `Ni.priority`;
+  implementation should remove that smell and avoid worsening file-level
+  metrics when practical without broadening behavior or public API changes.
 - Impact is local to `Ni` nice-value priority mapping. Production use flows
   through `unitPriorityHelpers.ts` `getNiPrioritySource` and unit priority
   getters. Existing tests cover inherited/default `ni`, explicit `ni` priority,
@@ -235,3 +232,12 @@ Only clear human approval can change Status to Approved.
 - Slice-3-D must preserve the current thresholds: nice > 10 maps to priority 5,
   nice > 0 maps to 4, nice == 0 maps to 3, nice > -11 maps to 2, and all lower
   values map to 1.
+- Slice-3-D changed `PlainString.ts` to resolve `Ni.priority` through a local
+  threshold-score helper. Public parameter exports, the `Ni.priority` getter,
+  nice-value priority thresholds, default `ni` behavior, unit-priority
+  resolution, parser/generated artifacts, application projections, VS Code/web
+  compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty smell output for `PlainString.ts` reports no findings. Targeted
+  metrics changed from 156 classes / 8 funcs / cyclo 14 / complexity 10 /
+  LOC 220 before Slice-3-D to 156 classes / 9 funcs / cyclo 14 /
+  complexity 5 / LOC 219.

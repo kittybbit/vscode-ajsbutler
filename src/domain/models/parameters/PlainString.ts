@@ -155,20 +155,22 @@ export class Ncn extends PlainString {}
 export class Ncr extends PlainString {}
 export class Ncs extends PlainString {}
 export class Ncsv extends PlainString {}
+
+const DEFAULT_NICE_PRIORITY = 1;
+const LOW_NICE_PRIORITY_THRESHOLD = -11;
+const NEUTRAL_NICE_PRIORITY_THRESHOLD = 0;
+const HIGH_NICE_PRIORITY_THRESHOLD = 10;
+
+const resolveNicePriority = (nice: number): number =>
+  DEFAULT_NICE_PRIORITY +
+  Number(nice > LOW_NICE_PRIORITY_THRESHOLD) +
+  Number(nice >= NEUTRAL_NICE_PRIORITY_THRESHOLD) +
+  Number(nice > NEUTRAL_NICE_PRIORITY_THRESHOLD) +
+  Number(nice > HIGH_NICE_PRIORITY_THRESHOLD);
+
 export class Ni extends PlainString {
   get priority(): number {
-    const nice = Number(this.value());
-    if (nice > 10) {
-      return 5;
-    } else if (nice > 0) {
-      return 4;
-    } else if (nice == 0) {
-      return 3;
-    } else if (nice > -11) {
-      return 2;
-    } else {
-      return 1;
-    }
+    return resolveNicePriority(Number(this.value()));
   }
 }
 export class Nmg extends PlainString {}

@@ -65,16 +65,15 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 No implementation slice is currently approved.
 
 - Recent result:
-  Slice-3-C changed `unitEdgeHelpers.ts` to extract unit-edge names,
-  relation type, and relation-type requirement checks through local helpers
-  while preserving parsing semantics.
+  Slice-3-D changed `PlainString.ts` to resolve `Ni.priority` through a local
+  threshold-score helper while preserving nice-value priority semantics.
 - Current evidence:
-  targeted domain Qlty reports `Ni.priority` many-returns and high-complexity
-  findings in `PlainString.ts`. Current file metrics are 156 classes /
-  8 funcs / cyclo 14 / complexity 10 / LOC 220.
+  targeted smell output for `PlainString.ts` reports no findings. Metrics
+  changed from 156 classes / 8 funcs / cyclo 14 / complexity 10 / LOC 220
+  before Slice-3-D to 156 classes / 9 funcs / cyclo 14 / complexity 5 /
+  LOC 219.
 - Current decision:
-  wait for approval before implementing Slice-3-D `PlainString.ts`
-  `Ni.priority` cleanup.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Risks To Control
 

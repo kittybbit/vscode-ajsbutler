@@ -601,7 +601,8 @@ planning decision is the next Slice-3 domain-helper candidate.
 
 ### Slice-3-D Target
 
-Slice-3-D targets `src/domain/models/parameters/PlainString.ts` `Ni.priority`.
+Slice-3-D targets `src/domain/models/parameters/PlainString.ts` smell/metric
+cleanup. The current concrete smell cluster is `Ni.priority`.
 
 Current Qlty evidence:
 
@@ -622,7 +623,8 @@ jobnet, subnet, job, and queue-job views.
 
 ### Slice-3-D Boundary Decision
 
-Reduce only the local nice-value priority mapping shape in `PlainString.ts`.
+Reduce only the local `PlainString.ts` smell/metric pressure, starting with the
+nice-value priority mapping shape in `Ni.priority`.
 
 Do not change:
 
@@ -646,13 +648,31 @@ Do not change:
 ### Slice-3-D Approval-Sensitive Scope
 
 Implementation may add local helpers or a local threshold table inside
-`src/domain/models/parameters/PlainString.ts` and rewrite `Ni.priority` as a
-smaller coordinator while preserving public exports and behavior.
+`src/domain/models/parameters/PlainString.ts`, rewrite `Ni.priority` as a
+smaller coordinator, and make same-file local adjustments only when they
+directly reduce the current smell/metric pressure while preserving public
+exports and behavior.
 
 Any change to nice-value priority semantics, public parameter API,
 parser/generated artifacts, application projections, presentation behavior,
 dependency versions, VS Code compatibility, web compatibility, or
 `engines.vscode` requires separate approval.
+
+### Slice-3-D Result
+
+`PlainString.ts` now resolves `Ni.priority` with a local threshold-score
+helper instead of a branch-heavy return chain.
+
+The change preserves public parameter exports, the `Ni.priority` getter,
+nice-value priority thresholds, default `ni` behavior, unit-priority
+resolution, parser/generated artifacts, application projections, presentation
+behavior, dependency versions, VS Code compatibility, web compatibility, and
+`engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+156 classes / 8 funcs / cyclo 14 / complexity 10 / LOC 220 before Slice-3-D to
+156 classes / 9 funcs / cyclo 14 / complexity 5 / LOC 219. The next planning
+decision is the next Slice-3 domain-helper candidate.
 
 ## Compatibility
 
