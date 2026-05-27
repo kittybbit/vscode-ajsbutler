@@ -453,6 +453,61 @@ Targeted Qlty metrics changed from 1 class / 6 funcs / cyclo 31 / complexity
 LOC 51. Targeted smell output reports no findings. The next planning decision
 is the next Slice-3 domain-helper candidate.
 
+### Slice-3-B Target
+
+Slice-3-B targets `src/domain/models/units/unitGroupStateHelpers.ts`.
+
+Current Qlty evidence:
+
+- `resolveGroupWeekState` reports many-returns and high-complexity findings.
+- Metrics for `unitGroupStateHelpers.ts` are 0 classes / 3 funcs / cyclo 14 /
+  complexity 10 / LOC 26.
+
+### Slice-3-B Investigation
+
+`resolveGroupWeekState` resolves group weekday open/closed state from open and
+close calendar parameter arrays. Production use flows through
+`G.#resolveWeekState` for the `mo` through `su` getters and then into unit-list
+group6 projections.
+
+Existing tests in `unitGroupStateHelpers.test.ts`, `groupEntity.test.ts`,
+`buildUnitListGroup6View.test.ts`, and `buildUnitListView.test.ts` cover group
+type handling, open-calendar true state, close-calendar false state, open
+calendar precedence when both sources mark a week, and undefined fallback.
+
+### Slice-3-B Boundary Decision
+
+Reduce only the local week-state resolution helper shape in
+`unitGroupStateHelpers.ts`.
+
+Do not change:
+
+- public helper exports
+- group type handling
+- planning group detection
+- open-calendar precedence over close-calendar values
+- close-calendar false fallback
+- undefined fallback
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-B Approval-Sensitive Scope
+
+Implementation may add local helpers inside
+`src/domain/models/units/unitGroupStateHelpers.ts` and rewrite
+`resolveGroupWeekState` as a smaller coordinator while preserving public
+exports and behavior.
+
+Any change to group week-state semantics, public helper API, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, or `engines.vscode`
+requires separate approval.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.

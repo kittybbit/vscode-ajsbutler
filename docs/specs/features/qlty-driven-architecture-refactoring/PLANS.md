@@ -69,12 +69,12 @@ No implementation slice is currently approved.
   sources through local helpers while preserving `pr`/`ni`, parent, and default
   priority semantics.
 - Current evidence:
-  targeted metrics for `unitPriorityHelpers.ts` changed from 1 class /
-  6 funcs / cyclo 31 / complexity 31 / LOC 52 before Slice-3-A to 1 class /
-  8 funcs / cyclo 23 / complexity 10 / LOC 51. Targeted smell output reports
-  no findings.
+  targeted domain Qlty reports `resolveGroupWeekState` many-returns and
+  high-complexity findings in `unitGroupStateHelpers.ts`. Current metrics are
+  0 classes / 3 funcs / cyclo 14 / complexity 10 / LOC 26.
 - Current decision:
-  choose the next Slice-3 domain-helper candidate.
+  wait for approval before implementing Slice-3-B
+  `unitGroupStateHelpers.ts` week-state cleanup.
 
 ## Risks To Control
 
