@@ -753,6 +753,71 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 0 classes / 3 funcs / cyclo 2 / complexity 2 / LOC 36. The next planning
 decision is the next Slice-3 domain-helper candidate.
 
+### Slice-3-F Target
+
+Slice-3-F targets `src/domain/models/parameters/ScheduleRule.ts`.
+
+Current Qlty evidence:
+
+- `Sd.type` reports many-returns and high-complexity findings.
+- Same-file duplication is reported across schedule-rule parameter classes.
+- Metrics for `ScheduleRule.ts` are 8 classes / 24 funcs / cyclo 35 /
+  complexity 16 / LOC 179.
+
+### Slice-3-F Investigation
+
+`ScheduleRule.ts` defines domain parameter objects for schedule rules such as
+`Cftd`, `Cy`, `Ln`, `Sd`, `Sh`, `Shd`, and `Wc`. The current smell cluster is
+local to `Sd.type` classification and duplicated schedule-rule parsing/storage
+shape in the parameter classes.
+
+Production use flows through `ruleParameterBuilders.ts`, `ParameterFactory`,
+`N` schedule getters, and unit-list group 10 schedule projections. Existing
+tests in `parameterFactory.test.ts`, `parameterHelpers.test.ts`,
+`buildUnitListGroup10View.test.ts`, and `buildUnitListView.test.ts` cover
+facade behavior, schedule-rule alignment, `sd` type/value results, `ln`
+parent rules, `sh` substitutes, `shd` shift days, `wc` wait counts, and group
+10 projections.
+
+### Slice-3-F Boundary Decision
+
+Reduce the same-file schedule-rule parameter smell/metric cluster inside
+`ScheduleRule.ts` only.
+
+Do not change:
+
+- public parameter class exports
+- `Sd.type` results for `en`, `ud`, `+`, `*`, `@`, and empty/default cases
+- `Sd.yearMonth`
+- `Sd.day`
+- `Ln.parentRule`
+- `Sh.substitute`
+- `Shd.shiftDays` default `2`
+- `Wc.numberOfTimes` default `1`
+- schedule-rule parsing helper behavior
+- unit-list group 10 projections
+- diagnostics behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-F Approval-Sensitive Scope
+
+Implementation may add local helpers or local base abstractions inside
+`src/domain/models/parameters/ScheduleRule.ts` and rewrite `Sd.type` plus the
+same-file duplicated schedule-rule parameter initialization shape while
+preserving public class names, public getters, and behavior.
+
+Any change to schedule-rule parameter semantics, public parameter API,
+schedule-rule parsing helper behavior, diagnostics, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, or `engines.vscode`
+requires separate approval.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -776,4 +841,4 @@ decision is the next Slice-3 domain-helper candidate.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-E?
+- Whether Slice-3-F is approved for implementation.

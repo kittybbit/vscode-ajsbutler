@@ -62,17 +62,18 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 
 ## Current Slice Candidate
 
-No implementation slice is currently approved.
+Slice-3-F implementation is pending human approval.
 
 - Recent result:
   Slice-3-E changed `transferOperationHelpers.ts` to resolve `topN` default
   raw values through a local source/destination presence table.
 - Current evidence:
-  targeted smell output for `transferOperationHelpers.ts` reports no findings.
-  Metrics changed from 0 classes / 2 funcs / cyclo 5 / complexity 7 / LOC 36
-  before Slice-3-E to 0 classes / 3 funcs / cyclo 2 / complexity 2 / LOC 36.
+  targeted smell output for `ScheduleRule.ts` reports `Sd.type`
+  many-returns/high-complexity findings and same-file duplication in
+  schedule-rule parameter classes. Current metrics are 8 classes / 24 funcs /
+  cyclo 35 / complexity 16 / LOC 179.
 - Current decision:
-  choose the next Slice-3 domain-helper candidate.
+  wait for approval before refactoring `ScheduleRule.ts`.
 
 ## Risks To Control
 

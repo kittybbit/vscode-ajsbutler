@@ -11,11 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-E implementation is complete.
+  Slice-3-F investigation is complete; implementation is waiting for approval.
 - Active slice:
-  none.
+  Slice-3-F `ScheduleRule.ts` schedule-rule parameter smell/metric cleanup.
 - Open follow-up:
-  choose the next Slice-3 domain-helper candidate.
+  none.
 
 ## Human Approval
 
@@ -23,7 +23,13 @@
 - Approved at:
   none
 - Approved scope:
-  none
+  Planned Slice-3-F scope: refactor only
+  `src/domain/models/parameters/ScheduleRule.ts` to reduce the same-file
+  `Sd.type` many-returns/high-complexity smell and the local schedule-rule
+  parameter duplication while preserving public parameter classes, schedule
+  rule parsing semantics, unit-list projections, diagnostics behavior,
+  parser/generated artifacts, VS Code compatibility, web compatibility, and
+  `engines.vscode`.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -99,7 +105,14 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-E.
 - [x] Complete Slice-3-E `transferOperationHelpers.ts` transfer-operation
       default helper cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-E.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-E.
+- [x] Select Slice-3-F `ScheduleRule.ts` schedule-rule parameter
+      smell/metric cleanup as the next domain candidate.
+- [x] Record Slice-3-F impact investigation.
+- [x] Request human approval for the selected Slice-3-F implementation scope.
+- [ ] Record human approval for Slice-3-F.
+- [ ] Complete Slice-3-F `ScheduleRule.ts` schedule-rule parameter
+      smell/metric cleanup.
 
 ## Validation
 
@@ -132,6 +145,11 @@ Only clear human approval can change Status to Approved.
   `buildUnitListRemainingGroups.test.ts` transfer-operation coverage, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
+- Slice-3-F implementation:
+  targeted `parameterFactory.test.ts`, `parameterHelpers.test.ts`,
+  `buildUnitListGroup10View.test.ts`, and `buildUnitListView.test.ts`
+  schedule-rule coverage, then `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -278,3 +296,17 @@ Only clear human approval can change Status to Approved.
   findings. Targeted metrics changed from 0 classes / 2 funcs / cyclo 5 /
   complexity 7 / LOC 36 before Slice-3-E to 0 classes / 3 funcs / cyclo 2 /
   complexity 2 / LOC 36.
+- Slice-3-F targets `ScheduleRule.ts` because targeted domain Qlty reports
+  `Sd.type` many-returns/high-complexity findings and same-file duplication in
+  schedule-rule parameter classes. Current file metrics are 8 classes /
+  24 funcs / cyclo 35 / complexity 16 / LOC 179.
+- Impact is local to domain schedule-rule parameter objects. Production use
+  flows through `ruleParameterBuilders.ts`, `ParameterFactory`, `N` schedule
+  getters, and unit-list group 10 schedule projections. Existing tests cover
+  `sd` type/value facade behavior, `ln` parent rules, `sh` substitutes, `shd`
+  shift days, `wc` wait counts, schedule parameter alignment, and group 10
+  unit-list projections.
+- Slice-3-F must preserve `Sd.type` results for `en`, `ud`, `+`, `*`, `@`, and
+  empty/default cases; `Sd.yearMonth`; `Sd.day`; `Ln.parentRule`;
+  `Sh.substitute`; `Shd.shiftDays` default `2`; `Wc.numberOfTimes` default
+  `1`; and all public parameter class exports.
