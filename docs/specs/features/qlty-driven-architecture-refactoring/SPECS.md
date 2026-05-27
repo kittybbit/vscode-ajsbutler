@@ -599,6 +599,61 @@ complexity trade-off is accepted for this slice because the target
 function-level many-returns/high-complexity findings are removed. The next
 planning decision is the next Slice-3 domain-helper candidate.
 
+### Slice-3-D Target
+
+Slice-3-D targets `src/domain/models/parameters/PlainString.ts` `Ni.priority`.
+
+Current Qlty evidence:
+
+- `Ni.priority` reports many-returns and high-complexity findings.
+- Metrics for `PlainString.ts` are 156 classes / 8 funcs / cyclo 14 /
+  complexity 10 / LOC 220.
+
+### Slice-3-D Investigation
+
+`Ni.priority` maps JP1/AJS nice values to the priority scale consumed by unit
+priority resolution. Production use flows through `getNiPrioritySource` in
+`unitPriorityHelpers.ts` and then through unit priority getters and unit-list
+priority projections.
+
+Existing unit priority and unit-list priority tests cover default `ni`,
+explicit `ni`, inherited priority behavior, and priority projection for
+jobnet, subnet, job, and queue-job views.
+
+### Slice-3-D Boundary Decision
+
+Reduce only the local nice-value priority mapping shape in `PlainString.ts`.
+
+Do not change:
+
+- public parameter exports
+- `Ni.priority` public getter
+- nice > 10 to priority 5
+- nice > 0 to priority 4
+- nice == 0 to priority 3
+- nice > -11 to priority 2
+- lower nice values to priority 1
+- default `ni` behavior
+- unit-priority resolution
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-D Approval-Sensitive Scope
+
+Implementation may add local helpers or a local threshold table inside
+`src/domain/models/parameters/PlainString.ts` and rewrite `Ni.priority` as a
+smaller coordinator while preserving public exports and behavior.
+
+Any change to nice-value priority semantics, public parameter API,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.

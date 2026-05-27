@@ -69,11 +69,12 @@ No implementation slice is currently approved.
   relation type, and relation-type requirement checks through local helpers
   while preserving parsing semantics.
 - Current evidence:
-  targeted smell output for `unitEdgeHelpers.ts` reports no findings. Metrics
-  changed from 0 classes / 2 funcs / cyclo 11 / complexity 12 / LOC 33 before
-  Slice-3-C to 0 classes / 6 funcs / cyclo 13 / complexity 12 / LOC 44.
+  targeted domain Qlty reports `Ni.priority` many-returns and high-complexity
+  findings in `PlainString.ts`. Current file metrics are 156 classes /
+  8 funcs / cyclo 14 / complexity 10 / LOC 220.
 - Current decision:
-  choose the next Slice-3 domain-helper candidate.
+  wait for approval before implementing Slice-3-D `PlainString.ts`
+  `Ni.priority` cleanup.
 
 ## Risks To Control
 

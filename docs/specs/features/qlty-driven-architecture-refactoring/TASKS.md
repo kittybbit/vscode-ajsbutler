@@ -11,11 +11,13 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-C implementation is complete.
+  Slice-3-D investigation is complete; implementation is waiting for approval.
 - Active slice:
-  none.
+  Slice-3-D `src/domain/models/parameters/PlainString.ts` `Ni.priority`
+  nice-value priority mapping cleanup.
 - Open follow-up:
-  choose the next Slice-3 domain-helper candidate.
+  after Slice-3-D, continue domain-helper simplification from remaining Qlty
+  domain findings.
 
 ## Human Approval
 
@@ -23,7 +25,12 @@
 - Approved at:
   none
 - Approved scope:
-  none
+  planned Slice-3-D scope: refactor only
+  `src/domain/models/parameters/PlainString.ts` `Ni.priority` to reduce
+  many-returns/high-complexity findings while preserving public parameter
+  exports, nice-value priority thresholds, default `ni` behavior,
+  unit-priority resolution, parser/generated artifacts, application
+  projections, VS Code/web compatibility, and `engines.vscode`.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -84,7 +91,14 @@ Only clear human approval can change Status to Approved.
 - [x] Request human approval for the selected Slice-3-C implementation scope.
 - [x] Record human approval for Slice-3-C.
 - [x] Complete Slice-3-C `unitEdgeHelpers.ts` unit-edge parser helper cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-C.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-C.
+- [x] Select Slice-3-D `PlainString.ts` `Ni.priority` nice-value mapping
+      cleanup as the next domain-helper candidate.
+- [x] Record Slice-3-D impact investigation.
+- [x] Request human approval for the selected Slice-3-D implementation scope.
+- [ ] Record human approval for Slice-3-D.
+- [ ] Complete Slice-3-D `PlainString.ts` `Ni.priority` cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-D.
 
 ## Validation
 
@@ -108,6 +122,10 @@ Only clear human approval can change Status to Approved.
   targeted `unitEdgeHelpers.test.ts`, relation normalization coverage, and
   linked-unit/unit-list relation coverage, then `rtk pnpm run qlty`,
   `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
+- Slice-3-D implementation:
+  targeted unit priority and unit-list priority coverage, then
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -205,3 +223,15 @@ Only clear human approval can change Status to Approved.
   complexity 12 / LOC 44. The aggregate complexity trade-off is accepted for
   this slice because the target function-level many-returns/high-complexity
   findings are removed while behavior stays covered.
+- Slice-3-D targets `PlainString.ts` `Ni.priority` because targeted domain Qlty
+  reports many-returns and high-complexity findings for that getter. Current
+  file metrics are 156 classes / 8 funcs / cyclo 14 / complexity 10 /
+  LOC 220.
+- Impact is local to `Ni` nice-value priority mapping. Production use flows
+  through `unitPriorityHelpers.ts` `getNiPrioritySource` and unit priority
+  getters. Existing tests cover inherited/default `ni`, explicit `ni` priority,
+  and unit-list priority projection for jobnet, subnet, job, and queue-job
+  views.
+- Slice-3-D must preserve the current thresholds: nice > 10 maps to priority 5,
+  nice > 0 maps to 4, nice == 0 maps to 3, nice > -11 maps to 2, and all lower
+  values map to 1.
