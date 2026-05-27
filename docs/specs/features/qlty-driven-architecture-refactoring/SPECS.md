@@ -674,6 +674,66 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 156 classes / 9 funcs / cyclo 14 / complexity 5 / LOC 219. The next planning
 decision is the next Slice-3 domain-helper candidate.
 
+### Slice-3-E Target
+
+Slice-3-E targets
+`src/domain/models/parameters/transferOperationHelpers.ts`.
+
+Current Qlty evidence:
+
+- `resolveTopDefaultRawValue` reports a high-complexity finding.
+- Metrics for `transferOperationHelpers.ts` are 0 classes / 2 funcs /
+  cyclo 5 / complexity 7 / LOC 36.
+
+### Slice-3-E Investigation
+
+`resolveTopDefaultRawValue` derives implicit `topN` transfer-operation values
+from the presence of matching `tsN` transfer-source and `tdN`
+transfer-destination parameters. Production use flows through
+`buildTopParameter`, `transferOperationParameterBuilders.ts`,
+`ParameterFactory.top1` through `top4`, `J`/`Cj` transfer-operation getters,
+and unit-list group 15 projections.
+
+Existing tests in `parameterHelpers.test.ts`, `parameterFactory.test.ts`, and
+`buildUnitListRemainingGroups.test.ts` cover direct default derivation, facade
+access, explicit `topN` preservation, QUEUE job non-derivation, and group 15
+display behavior.
+
+### Slice-3-E Boundary Decision
+
+Reduce only the local transfer-operation default helper shape in
+`transferOperationHelpers.ts`.
+
+Do not change:
+
+- public helper exports
+- `topN` default derivation
+- source plus destination defaulting to `sav`
+- source without destination defaulting to `del`
+- destination without source deriving no default
+- no transfer-file presence deriving no default
+- explicit `topN` value precedence
+- QUEUE job non-derivation behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-E Approval-Sensitive Scope
+
+Implementation may add local helpers or local data structures inside
+`src/domain/models/parameters/transferOperationHelpers.ts` and rewrite
+`resolveTopDefaultRawValue` as a smaller coordinator while preserving public
+exports and behavior.
+
+Any change to transfer-operation default semantics, public helper API,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -697,4 +757,4 @@ decision is the next Slice-3 domain-helper candidate.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-A?
+- Whether Slice-3-E is approved for implementation.

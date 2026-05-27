@@ -62,18 +62,17 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 
 ## Current Slice Candidate
 
-No implementation slice is currently approved.
+Slice-3-E implementation is pending human approval.
 
 - Recent result:
   Slice-3-D changed `PlainString.ts` to resolve `Ni.priority` through a local
   threshold-score helper while preserving nice-value priority semantics.
 - Current evidence:
-  targeted smell output for `PlainString.ts` reports no findings. Metrics
-  changed from 156 classes / 8 funcs / cyclo 14 / complexity 10 / LOC 220
-  before Slice-3-D to 156 classes / 9 funcs / cyclo 14 / complexity 5 /
-  LOC 219.
+  targeted smell output for `transferOperationHelpers.ts` reports
+  `resolveTopDefaultRawValue` high complexity. Current metrics are
+  0 classes / 2 funcs / cyclo 5 / complexity 7 / LOC 36.
 - Current decision:
-  choose the next Slice-3 domain-helper candidate.
+  wait for approval before refactoring `transferOperationHelpers.ts`.
 
 ## Risks To Control
 

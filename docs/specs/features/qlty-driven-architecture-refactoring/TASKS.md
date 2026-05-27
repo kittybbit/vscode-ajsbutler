@@ -11,11 +11,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-D implementation is complete.
+  Slice-3-E investigation is complete; implementation is waiting for approval.
 - Active slice:
-  none.
+  Slice-3-E `transferOperationHelpers.ts` transfer-operation default helper
+  cleanup.
 - Open follow-up:
-  choose the next Slice-3 domain-helper candidate.
+  none.
 
 ## Human Approval
 
@@ -23,7 +24,12 @@
 - Approved at:
   none
 - Approved scope:
-  none
+  Planned Slice-3-E scope: refactor only
+  `src/domain/models/parameters/transferOperationHelpers.ts` to reduce the
+  `resolveTopDefaultRawValue` high-complexity smell while preserving public
+  helper exports, `topN` default derivation, parser/generated artifacts,
+  application projections, presentation behavior, VS Code compatibility, web
+  compatibility, and `engines.vscode`.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -91,7 +97,14 @@ Only clear human approval can change Status to Approved.
 - [x] Request human approval for the selected Slice-3-D implementation scope.
 - [x] Record human approval for Slice-3-D.
 - [x] Complete Slice-3-D `PlainString.ts` smell/metric cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-D.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-D.
+- [x] Select Slice-3-E `transferOperationHelpers.ts` transfer-operation
+      default helper cleanup as the next domain-helper candidate.
+- [x] Record Slice-3-E impact investigation.
+- [x] Request human approval for the selected Slice-3-E implementation scope.
+- [ ] Record human approval for Slice-3-E.
+- [ ] Complete Slice-3-E `transferOperationHelpers.ts` transfer-operation
+      default helper cleanup.
 
 ## Validation
 
@@ -117,6 +130,11 @@ Only clear human approval can change Status to Approved.
   `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
 - Slice-3-D implementation:
   targeted unit priority and unit-list priority coverage, then
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`
+- Slice-3-E implementation:
+  targeted `parameterHelpers.test.ts`, `parameterFactory.test.ts`, and
+  `buildUnitListRemainingGroups.test.ts` transfer-operation coverage, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
 
@@ -241,3 +259,18 @@ Only clear human approval can change Status to Approved.
   metrics changed from 156 classes / 8 funcs / cyclo 14 / complexity 10 /
   LOC 220 before Slice-3-D to 156 classes / 9 funcs / cyclo 14 /
   complexity 5 / LOC 219.
+- Slice-3-E targets `transferOperationHelpers.ts` because targeted domain
+  Qlty reports a high-complexity finding for `resolveTopDefaultRawValue`.
+  Current file metrics are 0 classes / 2 funcs / cyclo 5 / complexity 7 /
+  LOC 36.
+- Impact is local to `topN` default derivation from matching `tsN`/`tdN`
+  transfer-file presence. Production use flows through
+  `transferOperationParameterBuilders.ts`, `ParameterFactory.top1` through
+  `top4`, `J`/`Cj` transfer-operation getters, and unit-list group 15
+  projections. Existing tests cover direct default derivation, facade access,
+  explicit `topN` preservation, QUEUE job non-derivation, and group 15 display
+  behavior.
+- Slice-3-E must preserve current derivation: source plus destination defaults
+  to `sav`, source without destination defaults to `del`, destination without
+  source does not derive a default, no transfer-file presence does not derive a
+  default, and explicit `topN` values continue to win.
