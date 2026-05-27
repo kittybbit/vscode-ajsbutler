@@ -437,6 +437,22 @@ artifacts, application projections, presentation behavior, dependency
 versions, VS Code compatibility, web compatibility, or `engines.vscode`
 requires separate approval.
 
+### Slice-3-A Result
+
+`unitPriorityHelpers.ts` now represents explicit `pr` and `ni` values as
+positioned priority sources, chooses the later explicit source, and then falls
+back to parent `n`/`rn` priority or default priority 1.
+
+The change preserves public exports, priority precedence, inherited priority
+suppression, parent inheritance, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty metrics changed from 1 class / 6 funcs / cyclo 31 / complexity
+31 / LOC 52 before Slice-3-A to 1 class / 8 funcs / cyclo 23 / complexity 10 /
+LOC 51. Targeted smell output reports no findings. The next planning decision
+is the next Slice-3 domain-helper candidate.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.

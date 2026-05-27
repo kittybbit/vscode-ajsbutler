@@ -34,8 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Complete Slice-3-A `unitPriorityHelpers.ts` priority-resolution cleanup
-   after approval.
+2. Select the next Qlty-driven architecture refactoring Slice-3
+   domain-helper candidate.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -122,8 +122,8 @@ rules in `docs/specs/README.md`, not in this file.
   final Slice-2-AB implementation is complete for
   `syntaxDiagnosticScalarValidators.ts` `parseExplicitDecimalInRange` input
   shaping. Slice-2 application orchestration work is closed. Slice-3-A
-  investigation is complete for `unitPriorityHelpers.ts` priority-resolution
-  cleanup and implementation is waiting for approval.
+  completed `unitPriorityHelpers.ts` priority-resolution cleanup; the next
+  decision is the following Slice-3 domain-helper candidate.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

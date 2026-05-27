@@ -11,13 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-A investigation is complete; implementation is waiting for approval.
+  Slice-3-A implementation is complete.
 - Active slice:
-  Slice-3-A `src/domain/models/units/unitPriorityHelpers.ts` priority
-  resolution helper cleanup.
+  none.
 - Open follow-up:
-  after Slice-3-A, continue domain-helper simplification from remaining Qlty
-  domain findings.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -25,12 +23,7 @@
 - Approved at:
   none
 - Approved scope:
-  planned Slice-3-A scope: refactor only
-  `src/domain/models/units/unitPriorityHelpers.ts` to reduce
-  `resolveUnitPriority` and nested `getPrPriority` complexity while preserving
-  the public `resolveUnitPriority` and `PrioritizableUnit` API, priority
-  precedence, parser/generated artifacts, application projections, VS Code/web
-  compatibility, and `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -74,8 +67,8 @@ Only clear human approval can change Status to Approved.
       cleanup as the first Slice-3 domain-helper candidate.
 - [x] Record Slice-3-A impact investigation.
 - [x] Request human approval for the selected Slice-3-A implementation scope.
-- [ ] Record human approval for Slice-3-A.
-- [ ] Complete Slice-3-A `unitPriorityHelpers.ts` priority-resolution helper
+- [x] Record human approval for Slice-3-A.
+- [x] Complete Slice-3-A `unitPriorityHelpers.ts` priority-resolution helper
       cleanup.
 - [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-A.
 
@@ -135,3 +128,12 @@ Only clear human approval can change Status to Approved.
 - Slice-3-A must preserve priority precedence: when both explicit `pr` and
   `ni` exist, the later source wins; inherited `pr`/`ni` are ignored; `n`/`rn`
   parent priority is inherited; fallback priority remains 1.
+- Slice-3-A changed `unitPriorityHelpers.ts` to resolve explicit `pr`/`ni`
+  sources through small local helpers and then fall back to parent/default
+  priority. Public exports, priority semantics, parser/generated artifacts,
+  application projections, VS Code/web compatibility, and `engines.vscode` are
+  preserved.
+- Targeted Qlty metrics for `unitPriorityHelpers.ts` changed from 1 class /
+  6 funcs / cyclo 31 / complexity 31 / LOC 52 before Slice-3-A to 1 class /
+  8 funcs / cyclo 23 / complexity 10 / LOC 51. Targeted smell output reports
+  no findings.
