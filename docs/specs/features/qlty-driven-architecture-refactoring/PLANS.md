@@ -65,16 +65,16 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 No implementation slice is currently approved.
 
 - Recent result:
-  Slice-3-A changed `unitPriorityHelpers.ts` to resolve explicit priority
-  sources through local helpers while preserving `pr`/`ni`, parent, and default
-  priority semantics.
+  Slice-3-B changed `unitGroupStateHelpers.ts` to resolve week-state
+  candidates through local helpers while preserving open-calendar precedence,
+  close-calendar fallback, and undefined fallback.
 - Current evidence:
-  targeted domain Qlty reports `resolveGroupWeekState` many-returns and
-  high-complexity findings in `unitGroupStateHelpers.ts`. Current metrics are
-  0 classes / 3 funcs / cyclo 14 / complexity 10 / LOC 26.
+  targeted metrics for `unitGroupStateHelpers.ts` changed from 0 classes /
+  3 funcs / cyclo 14 / complexity 10 / LOC 26 before Slice-3-B to
+  0 classes / 6 funcs / cyclo 12 / complexity 5 / LOC 29. Targeted smell
+  output reports no findings.
 - Current decision:
-  wait for approval before implementing Slice-3-B
-  `unitGroupStateHelpers.ts` week-state cleanup.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Risks To Control
 

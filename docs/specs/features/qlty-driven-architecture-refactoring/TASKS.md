@@ -11,13 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-B investigation is complete; implementation is waiting for approval.
+  Slice-3-B implementation is complete.
 - Active slice:
-  Slice-3-B `src/domain/models/units/unitGroupStateHelpers.ts` week-state
-  resolution helper cleanup.
+  none.
 - Open follow-up:
-  after Slice-3-B, continue domain-helper simplification from remaining Qlty
-  domain findings.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -25,12 +23,7 @@
 - Approved at:
   none
 - Approved scope:
-  planned Slice-3-B scope: refactor only
-  `src/domain/models/units/unitGroupStateHelpers.ts` to reduce
-  `resolveGroupWeekState` many-returns/high-complexity findings while
-  preserving public helper exports, open-calendar precedence,
-  close-calendar fallback, undefined fallback, parser/generated artifacts,
-  application projections, VS Code/web compatibility, and `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -82,8 +75,8 @@ Only clear human approval can change Status to Approved.
       the next domain-helper candidate.
 - [x] Record Slice-3-B impact investigation.
 - [x] Request human approval for the selected Slice-3-B implementation scope.
-- [ ] Record human approval for Slice-3-B.
-- [ ] Complete Slice-3-B `unitGroupStateHelpers.ts` week-state helper cleanup.
+- [x] Record human approval for Slice-3-B.
+- [x] Complete Slice-3-B `unitGroupStateHelpers.ts` week-state helper cleanup.
 - [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-B.
 
 ## Validation
@@ -168,3 +161,12 @@ Only clear human approval can change Status to Approved.
 - Slice-3-B must preserve open-calendar precedence over close-calendar values,
   close-calendar false fallback, and undefined when neither calendar source
   marks the requested week.
+- Slice-3-B changed `unitGroupStateHelpers.ts` to resolve week-state candidates
+  through small local helpers while preserving public exports, open-calendar
+  precedence, close-calendar fallback, undefined fallback, parser/generated
+  artifacts, application projections, VS Code/web compatibility, and
+  `engines.vscode`.
+- Targeted Qlty metrics for `unitGroupStateHelpers.ts` changed from
+  0 classes / 3 funcs / cyclo 14 / complexity 10 / LOC 26 before Slice-3-B to
+  0 classes / 6 funcs / cyclo 12 / complexity 5 / LOC 29. Targeted smell
+  output reports no findings.

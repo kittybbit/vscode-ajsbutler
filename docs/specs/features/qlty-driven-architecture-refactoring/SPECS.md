@@ -508,6 +508,23 @@ artifacts, application projections, presentation behavior, dependency
 versions, VS Code compatibility, web compatibility, or `engines.vscode`
 requires separate approval.
 
+### Slice-3-B Result
+
+`unitGroupStateHelpers.ts` now resolves open and close calendar week-state
+candidates through local helpers and returns the first defined candidate. This
+keeps open-calendar state ahead of close-calendar state while preserving false
+as a valid close-calendar result.
+
+The change preserves public exports, group type handling, planning group
+detection, undefined fallback, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty metrics changed from 0 classes / 3 funcs / cyclo 14 /
+complexity 10 / LOC 26 before Slice-3-B to 0 classes / 6 funcs / cyclo 12 /
+complexity 5 / LOC 29. Targeted smell output reports no findings. The next
+planning decision is the next Slice-3 domain-helper candidate.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
