@@ -50,9 +50,10 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 ## Completed Summary
 
 - Slice-1A and Slice-1B are complete.
-- Slice-2 has completed unit-list projection, parser/helper, command-builder,
-  calendar/schedule projection, editor-feedback rule-builder, schedule-date
-  validator, and rule-builder orchestration reductions through Slice-2-AA.
+- Slice-2 is complete. It reduced unit-list projection, parser/helper,
+  command-builder, calendar/schedule projection, editor-feedback rule-builder,
+  schedule-date validator, rule-builder orchestration, and scalar-validator
+  input-shape findings through Slice-2-AB.
 - This plan keeps only completed-scope information that helps future
   sequencing or risk decisions; durable boundaries are kept in SPECS.md and
   current execution state is kept in TASKS.md.
@@ -62,19 +63,16 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 No implementation slice is currently approved.
 
 - Recent result:
-  Slice-2-AA preserved schedule-rule, job-end judgment, threshold-ordering,
-  and start-condition disabled-parameter diagnostics while moving
-  rule-builder orchestration into local rule tables, context helpers, and
-  focused diagnostic collectors inside `syntaxDiagnosticRuleBuilders.ts`.
-- Current decision:
-  choose whether the remaining `syntaxDiagnosticScalarValidators`
-  many-parameter finding is worth another Slice-2 implementation, or whether
-  Slice-2 should close and Slice-3 should start.
+  Slice-2-AB changed `parseExplicitDecimalInRange` to use one input object and
+  updated direct application/editor-feedback call sites while preserving
+  decimal parsing behavior.
 - Current evidence:
-  targeted metrics for `syntaxDiagnosticRuleBuilders.ts` changed from
-  18 funcs / cyclo 37 / complexity 56 / LOC 332 before Slice-2-AA to
-  30 funcs / cyclo 34 / complexity 26 / LOC 386. Targeted smell output reports
-  no findings, and normal qlty validation reports no issues.
+  targeted metrics for `syntaxDiagnosticScalarValidators.ts` changed from
+  9 funcs / cyclo 16 / complexity 13 / LOC 57 before Slice-2-AB to 9 funcs /
+  cyclo 16 / complexity 13 / LOC 63. Targeted smell output reports no
+  findings.
+- Current decision:
+  choose the next Slice-3 domain-helper candidate.
 
 ## Risks To Control
 

@@ -161,5 +161,11 @@ export const isValidExplicitEventSearchCondition = (
     return true;
   }
 
-  return parseExplicitDecimalInRange(parameter, 1, 720) !== undefined;
+  return (
+    parseExplicitDecimalInRange({
+      parameter,
+      minimum: 1,
+      maximum: 720,
+    }) !== undefined
+  );
 };

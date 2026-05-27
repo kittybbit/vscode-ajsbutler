@@ -1,11 +1,18 @@
 import type { UnitParameter } from "../../domain/values/Unit";
 
-export const parseExplicitDecimalInRange = (
-  parameter: UnitParameter | undefined,
-  minimum: number,
-  maximum: number,
-  options: { allowNegative?: boolean } = {},
-): number | undefined => {
+type ExplicitDecimalRangeInput = {
+  parameter: UnitParameter | undefined;
+  minimum: number;
+  maximum: number;
+  options?: { allowNegative?: boolean };
+};
+
+export const parseExplicitDecimalInRange = ({
+  parameter,
+  minimum,
+  maximum,
+  options = {},
+}: ExplicitDecimalRangeInput): number | undefined => {
   const rawValue = parameter?.value;
   if (!isExplicitDecimalValue(rawValue, options)) {
     return undefined;

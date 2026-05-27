@@ -46,7 +46,7 @@ export const buildExplicitDecimalRangeRule = ({
   key,
   message,
   isInvalid: (parameter) =>
-    parseExplicitDecimalInRange(parameter, minimum, maximum, options) ===
+    parseExplicitDecimalInRange({ parameter, minimum, maximum, options }) ===
     undefined,
 });
 

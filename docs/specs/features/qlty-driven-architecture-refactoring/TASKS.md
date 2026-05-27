@@ -11,13 +11,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-AA implementation is complete; Slice-2 continuation decision is
-  pending.
+  Slice-2-AB implementation is complete; Slice-2 application orchestration work
+  is closed.
 - Active slice:
   none.
 - Open follow-up:
-  decide whether Slice-2 continues with `syntaxDiagnosticScalarValidators` or
-  closes application orchestration work.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -55,15 +54,24 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-2-AA.
 - [x] Complete Slice-2-AA `syntaxDiagnosticRuleBuilders.ts` same-file
       high-complexity cluster.
-- [ ] Decide whether Slice-2 continues or closes after Slice-2-AA.
+- [x] Decide whether Slice-2 continues or closes after Slice-2-AA.
+- [x] Select Slice-2-AB `syntaxDiagnosticScalarValidators.ts`
+      `parseExplicitDecimalInRange` input-shape cleanup as the final Slice-2
+      implementation candidate.
+- [x] Record Slice-2-AB impact investigation.
+- [x] Request human approval for the selected Slice-2-AB implementation scope.
+- [x] Record human approval for Slice-2-AB.
+- [x] Complete Slice-2-AB `syntaxDiagnosticScalarValidators.ts`
+      `parseExplicitDecimalInRange` input-shape cleanup.
+- [x] Close Slice-2 application orchestration work after Slice-2-AB.
 
 ## Validation
 
 - docs-only changes:
   `rtk pnpm run qlty`
-- Slice-2-AA implementation:
-  targeted schedule-rule, job-end judgment, threshold-ordering, and
-  start-condition diagnostics coverage, then
+- Slice-2-AB implementation:
+  targeted decimal range, threshold, event search, and file monitoring
+  diagnostics coverage, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
 
@@ -86,7 +94,14 @@ Only clear human approval can change Status to Approved.
   18 funcs / cyclo 37 / complexity 56 / LOC 332 before Slice-2-AA to
   30 funcs / cyclo 34 / complexity 26 / LOC 386. Targeted smell output reports
   no findings; `rtk pnpm run qlty` reports no issues.
-- Next decision should consider whether the remaining
-  `syntaxDiagnosticScalarValidators` many-parameter finding is worth another
-  Slice-2 implementation or whether application orchestration work should
-  close and Slice-3 should start.
+- Slice-2-AB changed `parseExplicitDecimalInRange` to use one input object and
+  updated direct application/editor-feedback call sites. Decimal parsing,
+  optional negative-number support, inclusive range bounds, undefined handling,
+  diagnostic messages, parser/generated artifacts, presentation behavior, VS
+  Code compatibility, web compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty metrics for `syntaxDiagnosticScalarValidators.ts` changed from
+  9 funcs / cyclo 16 / complexity 13 / LOC 57 before Slice-2-AB to 9 funcs /
+  cyclo 16 / complexity 13 / LOC 63. Targeted smell output reports no
+  findings.
+- Slice-2 application orchestration work is closed. The next SDD decision is
+  the first Slice-3 domain-helper candidate.

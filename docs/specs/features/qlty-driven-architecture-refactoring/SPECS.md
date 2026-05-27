@@ -306,6 +306,82 @@ issues. The next decision is whether the remaining
 Slice-2 implementation or whether application orchestration work should close
 and Slice-3 should start.
 
+### Slice-2-AB Target
+
+Slice-2-AB is the final Slice-2 application-orchestration cleanup and targets
+`src/application/editor-feedback/syntaxDiagnosticScalarValidators.ts`.
+
+Current Qlty evidence:
+
+- `parseExplicitDecimalInRange` reports a many-parameter finding.
+- Metrics for `syntaxDiagnosticScalarValidators.ts` are 9 funcs / cyclo 16 /
+  complexity 13 / LOC 57.
+
+### Slice-2-AB Investigation
+
+`parseExplicitDecimalInRange` currently receives a parameter, minimum,
+maximum, and an optional `allowNegative` option. Direct application/editor-
+feedback call sites are limited to:
+
+- `syntaxDiagnosticCore.ts` for reusable explicit decimal range rules
+- `syntaxDiagnosticJobEndRules.ts` for threshold ordering validation
+- `syntaxDiagnosticEventRules.ts` for event search condition validation
+- `syntaxDiagnosticFileMonitoringRules.ts` for monitoring interval validation
+
+The implementation can remove the many-parameter smell by changing the helper
+to accept one input object containing the parameter, inclusive range, and
+options, then updating the direct call sites. This is an internal application
+helper API change only; it does not require behavior or diagnostic-message
+changes.
+
+### Slice-2-AB Boundary Decision
+
+Reduce the scalar-validator input-shape smell with a local object input.
+
+Do not change:
+
+- decimal parsing rules
+- negative-number option behavior
+- inclusive range bounds
+- undefined handling
+- byte-length or hexadecimal helpers
+- diagnostic messages
+- parser/generated artifacts
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-2-AB Approval-Sensitive Scope
+
+Implementation may change `parseExplicitDecimalInRange` to accept a single
+input object and update direct application/editor-feedback call sites. It may
+adjust nearby local type names if needed to keep the call sites readable.
+
+Any change to parsing behavior, validation bounds, diagnostic messages,
+parser/generated artifacts, presentation behavior, dependency versions, VS
+Code compatibility, web compatibility, or `engines.vscode` requires separate
+approval.
+
+### Slice-2-AB Result
+
+`parseExplicitDecimalInRange` now accepts one input object containing the
+parameter, inclusive bounds, and optional parsing flags. Direct
+application/editor-feedback call sites were updated without changing decimal
+parsing behavior.
+
+The change preserves negative-number option behavior, inclusive range bounds,
+undefined handling, byte-length and hexadecimal helpers, diagnostic messages,
+parser/generated artifacts, presentation behavior, dependency versions, VS
+Code compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty metrics for `syntaxDiagnosticScalarValidators.ts` changed from
+9 funcs / cyclo 16 / complexity 13 / LOC 57 before Slice-2-AB to 9 funcs /
+cyclo 16 / complexity 13 / LOC 63. Targeted smell output reports no findings.
+Slice-2 application orchestration work is closed; the next planning decision
+is the first Slice-3 domain-helper candidate.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -329,5 +405,4 @@ and Slice-3 should start.
 
 ## Open Questions
 
-- After Slice-2-AA, should Slice-2 continue with
-  `syntaxDiagnosticScalarValidators`, or close application orchestration work?
+- Which domain helper should start Slice-3?

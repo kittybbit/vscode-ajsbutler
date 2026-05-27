@@ -13,7 +13,9 @@ export const isValidExplicitFileMonitoringFileName = (
 
 export const isValidExplicitFileMonitoringInterval = (
   parameter: UnitParameter | undefined,
-): boolean => parseExplicitDecimalInRange(parameter, 1, 600) !== undefined;
+): boolean =>
+  parseExplicitDecimalInRange({ parameter, minimum: 1, maximum: 600 }) !==
+  undefined;
 
 export const hasInvalidWildcardWithShortMonitoringInterval = (
   parameter: UnitParameter,
