@@ -11,12 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-E investigation is complete; implementation is waiting for approval.
+  Slice-3-E implementation is complete.
 - Active slice:
-  Slice-3-E `transferOperationHelpers.ts` transfer-operation default helper
-  cleanup.
-- Open follow-up:
   none.
+- Open follow-up:
+  choose the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -24,12 +23,7 @@
 - Approved at:
   none
 - Approved scope:
-  Planned Slice-3-E scope: refactor only
-  `src/domain/models/parameters/transferOperationHelpers.ts` to reduce the
-  `resolveTopDefaultRawValue` high-complexity smell while preserving public
-  helper exports, `topN` default derivation, parser/generated artifacts,
-  application projections, presentation behavior, VS Code compatibility, web
-  compatibility, and `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -102,9 +96,10 @@ Only clear human approval can change Status to Approved.
       default helper cleanup as the next domain-helper candidate.
 - [x] Record Slice-3-E impact investigation.
 - [x] Request human approval for the selected Slice-3-E implementation scope.
-- [ ] Record human approval for Slice-3-E.
-- [ ] Complete Slice-3-E `transferOperationHelpers.ts` transfer-operation
+- [x] Record human approval for Slice-3-E.
+- [x] Complete Slice-3-E `transferOperationHelpers.ts` transfer-operation
       default helper cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-E.
 
 ## Validation
 
@@ -274,3 +269,12 @@ Only clear human approval can change Status to Approved.
   to `sav`, source without destination defaults to `del`, destination without
   source does not derive a default, no transfer-file presence does not derive a
   default, and explicit `topN` values continue to win.
+- Slice-3-E changed `transferOperationHelpers.ts` to resolve `topN` default
+  raw values through a local source/destination presence table. Public helper
+  exports, transfer-operation derivation semantics, explicit `topN` value
+  precedence, parser/generated artifacts, application projections, VS Code/web
+  compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty smell output for `transferOperationHelpers.ts` reports no
+  findings. Targeted metrics changed from 0 classes / 2 funcs / cyclo 5 /
+  complexity 7 / LOC 36 before Slice-3-E to 0 classes / 3 funcs / cyclo 2 /
+  complexity 2 / LOC 36.

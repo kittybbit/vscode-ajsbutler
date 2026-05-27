@@ -734,6 +734,25 @@ parser/generated artifacts, application projections, presentation behavior,
 dependency versions, VS Code compatibility, web compatibility, or
 `engines.vscode` requires separate approval.
 
+### Slice-3-E Result
+
+`transferOperationHelpers.ts` now resolves `topN` default raw values through a
+local source/destination presence table instead of branch-heavy conditional
+returns.
+
+The change preserves public helper exports, `topN` default derivation,
+source plus destination defaulting to `sav`, source without destination
+defaulting to `del`, destination without source deriving no default, no
+transfer-file presence deriving no default, explicit `topN` value precedence,
+QUEUE job non-derivation behavior, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 2 funcs / cyclo 5 / complexity 7 / LOC 36 before Slice-3-E to
+0 classes / 3 funcs / cyclo 2 / complexity 2 / LOC 36. The next planning
+decision is the next Slice-3 domain-helper candidate.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -757,4 +776,4 @@ dependency versions, VS Code compatibility, web compatibility, or
 
 ## Open Questions
 
-- Whether Slice-3-E is approved for implementation.
+- Which domain helper should follow Slice-3-E?
