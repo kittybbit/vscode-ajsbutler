@@ -11,12 +11,13 @@
 ## Current Status
 
 - Runtime status:
-  Slice-2-AB implementation is complete; Slice-2 application orchestration work
-  is closed.
+  Slice-3-A investigation is complete; implementation is waiting for approval.
 - Active slice:
-  none.
+  Slice-3-A `src/domain/models/units/unitPriorityHelpers.ts` priority
+  resolution helper cleanup.
 - Open follow-up:
-  choose the next Slice-3 domain-helper candidate.
+  after Slice-3-A, continue domain-helper simplification from remaining Qlty
+  domain findings.
 
 ## Human Approval
 
@@ -24,7 +25,12 @@
 - Approved at:
   none
 - Approved scope:
-  none
+  planned Slice-3-A scope: refactor only
+  `src/domain/models/units/unitPriorityHelpers.ts` to reduce
+  `resolveUnitPriority` and nested `getPrPriority` complexity while preserving
+  the public `resolveUnitPriority` and `PrioritizableUnit` API, priority
+  precedence, parser/generated artifacts, application projections, VS Code/web
+  compatibility, and `engines.vscode`.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -64,6 +70,14 @@ Only clear human approval can change Status to Approved.
 - [x] Complete Slice-2-AB `syntaxDiagnosticScalarValidators.ts`
       `parseExplicitDecimalInRange` input-shape cleanup.
 - [x] Close Slice-2 application orchestration work after Slice-2-AB.
+- [x] Select Slice-3-A `unitPriorityHelpers.ts` priority-resolution helper
+      cleanup as the first Slice-3 domain-helper candidate.
+- [x] Record Slice-3-A impact investigation.
+- [x] Request human approval for the selected Slice-3-A implementation scope.
+- [ ] Record human approval for Slice-3-A.
+- [ ] Complete Slice-3-A `unitPriorityHelpers.ts` priority-resolution helper
+      cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-A.
 
 ## Validation
 
@@ -74,6 +88,10 @@ Only clear human approval can change Status to Approved.
   diagnostics coverage, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
+- Slice-3-A implementation:
+  targeted `unitPriorityHelpers.test.ts` and
+  `unitCapabilityEntities.test.ts`, then `rtk pnpm run qlty`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -105,3 +123,15 @@ Only clear human approval can change Status to Approved.
   findings.
 - Slice-2 application orchestration work is closed. The next SDD decision is
   the first Slice-3 domain-helper candidate.
+- Slice-3-A targets `unitPriorityHelpers.ts` because targeted domain Qlty
+  reports `resolveUnitPriority` many-returns/high-complexity findings and a
+  nested `getPrPriority` high-complexity finding. Current file metrics are
+  1 class / 6 funcs / cyclo 31 / complexity 31 / LOC 52.
+- Impact is local to the domain helper. Direct production use flows through
+  `WaitableUnitEntity.priority` in `unitCapabilityEntities.ts`. Existing
+  `unitPriorityHelpers.test.ts` and `unitCapabilityEntities.test.ts` cover
+  explicit `pr`, explicit `ni`, parent `n`/`rn` inheritance, inherited
+  priority suppression, and default priority.
+- Slice-3-A must preserve priority precedence: when both explicit `pr` and
+  `ni` exist, the later source wins; inherited `pr`/`ni` are ignored; `n`/`rn`
+  parent priority is inherited; fallback priority remains 1.

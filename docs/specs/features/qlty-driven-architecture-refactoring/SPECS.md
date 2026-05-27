@@ -382,6 +382,61 @@ cyclo 16 / complexity 13 / LOC 63. Targeted smell output reports no findings.
 Slice-2 application orchestration work is closed; the next planning decision
 is the first Slice-3 domain-helper candidate.
 
+### Slice-3-A Target
+
+Slice-3-A starts the domain-helper simplification phase and targets
+`src/domain/models/units/unitPriorityHelpers.ts`.
+
+Current Qlty evidence:
+
+- `resolveUnitPriority` reports many-returns and high-complexity findings.
+- The nested `getPrPriority` helper reports a high-complexity finding.
+- Metrics for `unitPriorityHelpers.ts` are 1 class / 6 funcs / cyclo 31 /
+  complexity 31 / LOC 52.
+
+### Slice-3-A Investigation
+
+`resolveUnitPriority` resolves the priority exposed by
+`WaitableUnitEntity.priority`. Direct production use flows through
+`src/domain/models/units/unitCapabilityEntities.ts`.
+
+Existing direct tests in `unitPriorityHelpers.test.ts` and
+`unitCapabilityEntities.test.ts` cover explicit `pr`, explicit `ni`, parent
+`n`/`rn` priority inheritance, inherited priority suppression, and default
+priority fallback.
+
+### Slice-3-A Boundary Decision
+
+Reduce only the local priority-resolution helper shape in
+`unitPriorityHelpers.ts`.
+
+Do not change:
+
+- public `resolveUnitPriority` and `PrioritizableUnit` API
+- explicit `pr` and `ni` precedence where the later source wins
+- inherited `pr`/`ni` suppression
+- `n`/`rn` parent priority inheritance
+- default priority 1
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-A Approval-Sensitive Scope
+
+Implementation may add local helpers or local data structures inside
+`src/domain/models/units/unitPriorityHelpers.ts` and rewrite
+`resolveUnitPriority` as a smaller coordinator while preserving public exports
+and behavior.
+
+Any change to priority semantics, public helper API, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, or `engines.vscode`
+requires separate approval.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -405,4 +460,4 @@ is the first Slice-3 domain-helper candidate.
 
 ## Open Questions
 
-- Which domain helper should start Slice-3?
+- Which domain helper should follow Slice-3-A?

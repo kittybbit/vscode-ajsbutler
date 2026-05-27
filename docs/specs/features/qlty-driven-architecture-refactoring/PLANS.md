@@ -54,6 +54,8 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
   command-builder, calendar/schedule projection, editor-feedback rule-builder,
   schedule-date validator, rule-builder orchestration, and scalar-validator
   input-shape findings through Slice-2-AB.
+- Slice-3 domain-helper simplification has started with
+  `unitPriorityHelpers.ts` as the first investigated candidate.
 - This plan keeps only completed-scope information that helps future
   sequencing or risk decisions; durable boundaries are kept in SPECS.md and
   current execution state is kept in TASKS.md.
@@ -67,12 +69,13 @@ No implementation slice is currently approved.
   updated direct application/editor-feedback call sites while preserving
   decimal parsing behavior.
 - Current evidence:
-  targeted metrics for `syntaxDiagnosticScalarValidators.ts` changed from
-  9 funcs / cyclo 16 / complexity 13 / LOC 57 before Slice-2-AB to 9 funcs /
-  cyclo 16 / complexity 13 / LOC 63. Targeted smell output reports no
-  findings.
+  targeted domain Qlty reports `resolveUnitPriority` many-returns and
+  high-complexity findings plus a nested `getPrPriority` high-complexity
+  finding in `unitPriorityHelpers.ts`. Current metrics are 1 class / 6 funcs /
+  cyclo 31 / complexity 31 / LOC 52.
 - Current decision:
-  choose the next Slice-3 domain-helper candidate.
+  wait for approval before implementing Slice-3-A
+  `unitPriorityHelpers.ts` priority-resolution cleanup.
 
 ## Risks To Control
 

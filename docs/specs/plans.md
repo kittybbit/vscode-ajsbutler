@@ -22,8 +22,8 @@ rules in `docs/specs/README.md`, not in this file.
   smoke verification and enough user feedback are recorded. Beta exit is
   feedback-gated and is not the next active implementation priority.
 - Qlty-driven architecture refactoring has completed the flow-viewer
-  component/layout phase and is continuing application orchestration
-  reduction one approved target at a time.
+  component/layout and application orchestration phases and is starting
+  domain-helper simplification one approved target at a time.
 - Completed feature folders should be removed once their durable requirements
   are represented in `docs/requirements/use-cases/`, `docs/specs/roadmap.md`,
   or `docs/specs/architecture.md`.
@@ -34,8 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Select the first Qlty-driven architecture refactoring Slice-3
-   domain-helper candidate.
+2. Complete Slice-3-A `unitPriorityHelpers.ts` priority-resolution cleanup
+   after approval.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -121,8 +121,9 @@ rules in `docs/specs/README.md`, not in this file.
   `syntaxDiagnosticRuleBuilders.ts` same-file high-complexity cluster. The
   final Slice-2-AB implementation is complete for
   `syntaxDiagnosticScalarValidators.ts` `parseExplicitDecimalInRange` input
-  shaping. Slice-2 application orchestration work is closed; the next decision
-  is the first Slice-3 domain-helper candidate.
+  shaping. Slice-2 application orchestration work is closed. Slice-3-A
+  investigation is complete for `unitPriorityHelpers.ts` priority-resolution
+  cleanup and implementation is waiting for approval.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
