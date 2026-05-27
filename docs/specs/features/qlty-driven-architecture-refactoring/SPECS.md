@@ -580,6 +580,25 @@ artifacts, application projections, presentation behavior, dependency
 versions, VS Code compatibility, web compatibility, or `engines.vscode`
 requires separate approval.
 
+### Slice-3-C Result
+
+`unitEdgeHelpers.ts` now keeps `parseUnitEdge` as a coordinator over local
+helpers for unit-edge name extraction, relation type extraction, and required
+relation-type checks.
+
+The change preserves public exports, source name extraction, target name
+extraction, optional relation type extraction, `requireRelationType` behavior,
+relation-type normalization, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 2 funcs / cyclo 11 / complexity 12 / LOC 33 before Slice-3-C to
+0 classes / 6 funcs / cyclo 13 / complexity 12 / LOC 44. The aggregate
+complexity trade-off is accepted for this slice because the target
+function-level many-returns/high-complexity findings are removed. The next
+planning decision is the next Slice-3 domain-helper candidate.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.

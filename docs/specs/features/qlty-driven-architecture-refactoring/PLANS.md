@@ -65,16 +65,15 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 No implementation slice is currently approved.
 
 - Recent result:
-  Slice-3-B changed `unitGroupStateHelpers.ts` to resolve week-state
-  candidates through local helpers while preserving open-calendar precedence,
-  close-calendar fallback, and undefined fallback.
+  Slice-3-C changed `unitEdgeHelpers.ts` to extract unit-edge names,
+  relation type, and relation-type requirement checks through local helpers
+  while preserving parsing semantics.
 - Current evidence:
-  targeted domain Qlty reports `parseUnitEdge` many-returns and
-  high-complexity findings in `unitEdgeHelpers.ts`. Current metrics are
-  0 classes / 2 funcs / cyclo 11 / complexity 12 / LOC 33.
+  targeted smell output for `unitEdgeHelpers.ts` reports no findings. Metrics
+  changed from 0 classes / 2 funcs / cyclo 11 / complexity 12 / LOC 33 before
+  Slice-3-C to 0 classes / 6 funcs / cyclo 13 / complexity 12 / LOC 44.
 - Current decision:
-  wait for approval before implementing Slice-3-C `unitEdgeHelpers.ts`
-  unit-edge parser helper cleanup.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Risks To Control
 

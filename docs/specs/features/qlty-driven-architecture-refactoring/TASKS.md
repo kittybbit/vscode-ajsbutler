@@ -11,13 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-C investigation is complete; implementation is waiting for approval.
+  Slice-3-C implementation is complete.
 - Active slice:
-  Slice-3-C `src/domain/models/parameters/unitEdgeHelpers.ts` unit-edge parser
-  helper cleanup.
+  none.
 - Open follow-up:
-  after Slice-3-C, continue domain-helper simplification from remaining Qlty
-  domain findings.
+  choose the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -25,13 +23,7 @@
 - Approved at:
   none
 - Approved scope:
-  planned Slice-3-C scope: refactor only
-  `src/domain/models/parameters/unitEdgeHelpers.ts` to reduce `parseUnitEdge`
-  many-returns/high-complexity findings while preserving public helper exports,
-  source/target extraction, optional relation type extraction,
-  `requireRelationType` behavior, relation-type normalization,
-  parser/generated artifacts, application projections, VS Code/web
-  compatibility, and `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -90,8 +82,8 @@ Only clear human approval can change Status to Approved.
       the next domain-helper candidate.
 - [x] Record Slice-3-C impact investigation.
 - [x] Request human approval for the selected Slice-3-C implementation scope.
-- [ ] Record human approval for Slice-3-C.
-- [ ] Complete Slice-3-C `unitEdgeHelpers.ts` unit-edge parser helper cleanup.
+- [x] Record human approval for Slice-3-C.
+- [x] Complete Slice-3-C `unitEdgeHelpers.ts` unit-edge parser helper cleanup.
 - [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-C.
 
 ## Validation
@@ -201,3 +193,15 @@ Only clear human approval can change Status to Approved.
 - Slice-3-C must preserve source/target extraction, optional relation type
   extraction, required-relation-type rejection, and `con`/default `seq`
   normalization.
+- Slice-3-C changed `unitEdgeHelpers.ts` to extract unit-edge names,
+  relation type, and required-relation-type checks through small local helpers.
+  Public exports, source/target extraction, optional relation type extraction,
+  required-relation-type behavior, relation-type normalization,
+  parser/generated artifacts, application projections, VS Code/web
+  compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty smell output for `unitEdgeHelpers.ts` reports no findings.
+  Targeted metrics changed from 0 classes / 2 funcs / cyclo 11 /
+  complexity 12 / LOC 33 before Slice-3-C to 0 classes / 6 funcs / cyclo 13 /
+  complexity 12 / LOC 44. The aggregate complexity trade-off is accepted for
+  this slice because the target function-level many-returns/high-complexity
+  findings are removed while behavior stays covered.

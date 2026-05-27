@@ -34,8 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Complete Slice-3-C `unitEdgeHelpers.ts` unit-edge parser cleanup after
-   approval.
+2. Select the next Qlty-driven architecture refactoring Slice-3
+   domain-helper candidate.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -123,9 +123,9 @@ rules in `docs/specs/README.md`, not in this file.
   `syntaxDiagnosticScalarValidators.ts` `parseExplicitDecimalInRange` input
   shaping. Slice-2 application orchestration work is closed. Slice-3-A
   completed `unitPriorityHelpers.ts` priority-resolution cleanup. Slice-3-B
-  completed `unitGroupStateHelpers.ts` week-state cleanup. Slice-3-C
-  investigation is complete for `unitEdgeHelpers.ts` unit-edge parser cleanup
-  and implementation is waiting for approval.
+  completed `unitGroupStateHelpers.ts` week-state cleanup. Slice-3-C completed
+  `unitEdgeHelpers.ts` unit-edge parser cleanup; the next decision is the
+  following Slice-3 domain-helper candidate.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
