@@ -11,12 +11,19 @@ import {
   resolveNormalizedLayout,
 } from "./unit";
 
-export const buildNormalizedUnit = (
-  unit: Unit,
-  unitType: AjsUnitType,
-  relations: AjsRelation[],
-  children: AjsUnit[],
-): AjsUnit => ({
+export type NormalizedUnitInput = {
+  unit: Unit;
+  unitType: AjsUnitType;
+  relations: AjsRelation[];
+  children: AjsUnit[];
+};
+
+export const buildNormalizedUnit = ({
+  unit,
+  unitType,
+  relations,
+  children,
+}: NormalizedUnitInput): AjsUnit => ({
   id: unit.absolutePath(),
   name: unit.name,
   unitAttribute: unit.unitAttribute,

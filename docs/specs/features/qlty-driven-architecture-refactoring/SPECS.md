@@ -1252,6 +1252,87 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 LOC increases are accepted because the target function-level smell was removed
 without changing relation behavior.
 
+### Slice-3-L Target
+
+Slice-3-L targets `src/domain/models/ajs/normalize/unitBuilder.ts`.
+
+Current Qlty evidence:
+
+- `buildNormalizedUnit` reports a many-parameters finding.
+- Metrics for `unitBuilder.ts` are 0 classes / 1 func / cyclo 2 /
+  complexity 0 / LOC 44.
+
+### Slice-3-L Investigation
+
+`unitBuilder.ts` constructs normalized AJS unit DTOs from a parsed `Unit`, the
+resolved normalized unit type, resolved relation DTOs, and normalized child
+units.
+
+Serena reference lookup found direct production use from `normalizeUnitTree`
+and direct test use from `normalizeUnitBuilder.test.ts`. The direct test
+asserts the complete normalized unit shape, including identity fields,
+metadata, normalized flags, layout, parameter projection, relations, and
+children. Broader normalized tree/document tests cover recursive composition.
+
+### Slice-3-L Boundary Decision
+
+Reduce only the normalized unit builder input shape.
+
+Do not change:
+
+- public normalized unit field names or values
+- child ordering
+- relation ordering
+- parameter projection from parser units
+- unit type and group type resolution
+- comment resolution
+- depth and parent id resolution
+- root, recovery, root-jobnet, schedule, and wait flags
+- layout values
+- normalized document shape
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-L Approval-Sensitive Scope
+
+Implementation may change `buildNormalizedUnit` to accept a grouped input
+object and update direct call sites in `normalizeUnitTree` and
+`normalizeUnitBuilder.test.ts`. It may add local input types or focused helper
+functions/modules under the same normalize boundary when they reduce real
+complexity.
+
+Any change to normalized unit semantics, public normalized DTO fields,
+parameter projection, child/relation ordering, normalized document contracts,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
+### Slice-3-L Result
+
+`buildNormalizedUnit` now accepts a single `NormalizedUnitInput` object
+containing the parsed unit, resolved unit type, normalized relations, and
+normalized children. Direct production and test call sites were updated to use
+the grouped input shape.
+
+The change preserves public normalized unit field names and values, child
+ordering, relation ordering, parameter projection from parser units, unit type
+and group type resolution, comment resolution, depth and parent id resolution,
+root, recovery, root-jobnet, schedule, and wait flags, layout values,
+normalized document shape, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 1 func / cyclo 2 / complexity 0 / LOC 44 before Slice-3-L to
+0 classes / 1 func / cyclo 2 / complexity 0 / LOC 50. The LOC increase is
+accepted because the target many-parameters smell was removed without changing
+normalized unit behavior.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1275,4 +1356,4 @@ without changing relation behavior.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-K.
+- Which domain helper should follow Slice-3-L.

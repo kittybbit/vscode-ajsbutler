@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-K implementation is complete.
+  Slice-3-L implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -146,7 +146,15 @@ Only clear human approval can change Status to Approved.
 - [x] Request human approval for the selected Slice-3-K implementation scope.
 - [x] Record human approval for Slice-3-K.
 - [x] Complete Slice-3-K `relations.ts` normalized relation resolver cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-K.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-K.
+- [x] Select Slice-3-L `unitBuilder.ts` normalized unit builder input cleanup
+      as the next domain-helper candidate.
+- [x] Record Slice-3-L impact investigation.
+- [x] Request human approval for the selected Slice-3-L implementation scope.
+- [x] Record human approval for Slice-3-L.
+- [x] Complete Slice-3-L `unitBuilder.ts` normalized unit builder input
+      cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-L.
 
 ## Validation
 
@@ -199,6 +207,10 @@ Only clear human approval can change Status to Approved.
   expanded flow graph, and unit-list relation coverage, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
+- Slice-3-L implementation:
+  targeted `normalizeUnitBuilder.test.ts`, `normalizeUnitTree.test.ts`, and
+  normalized document coverage, then `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -535,6 +547,34 @@ Only clear human approval can change Status to Approved.
   LOC 91. The function-count and LOC increases are accepted because the
   target function-level smell was removed without changing relation behavior.
 - Slice-3-K validation passed for targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-L targets `unitBuilder.ts` because targeted domain Qlty reports a
+  many-parameters finding for `buildNormalizedUnit`. Current file metrics are
+  0 classes / 1 func / cyclo 2 / complexity 0 / LOC 44.
+- Impact is local to normalized unit DTO construction. Direct production use
+  flows through `normalizeUnitTree`; direct tests call `buildNormalizedUnit`
+  in `normalizeUnitBuilder.test.ts`. Broader normalized document behavior is
+  covered by normalize unit tree and normalized document tests.
+- Slice-3-L must preserve public normalized unit fields, child/relation
+  ordering, parameter projection from parser units, unit type, group type,
+  comment, depth, parent id, root/recovery/root-jobnet/schedule/wait flags,
+  layout values, normalized document shape, parser/generated artifacts,
+  application projections, VS Code/web compatibility, and `engines.vscode`.
+- Slice-3-L changed `buildNormalizedUnit` to accept a single
+  `NormalizedUnitInput` object and updated direct production/test call sites.
+  Public normalized unit fields, child/relation ordering, parameter
+  projection, unit type, group type, comment, depth, parent id,
+  root/recovery/root-jobnet/schedule/wait flags, layout values, normalized
+  document shape, parser/generated artifacts, application projections, VS
+  Code/web compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty smell output for `unitBuilder.ts` reports no findings.
+  Targeted metrics changed from 0 classes / 1 func / cyclo 2 / complexity 0 /
+  LOC 44 before Slice-3-L to 0 classes / 1 func / cyclo 2 / complexity 0 /
+  LOC 50. The LOC increase is accepted because the target many-parameters
+  smell was removed without changing normalized unit behavior.
+- Slice-3-L validation passed for targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.

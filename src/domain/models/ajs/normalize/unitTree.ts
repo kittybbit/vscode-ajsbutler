@@ -14,5 +14,5 @@ export const normalizeUnitTree = (
   );
   const relations = resolveNormalizedRelations(unit, children, warnings);
 
-  return buildNormalizedUnit(unit, unitType, relations, children);
+  return buildNormalizedUnit({ unit, unitType, relations, children });
 };
