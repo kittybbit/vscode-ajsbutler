@@ -11,11 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-F investigation is complete; implementation is waiting for approval.
+  Slice-3-F implementation is complete.
 - Active slice:
-  Slice-3-F `ScheduleRule.ts` schedule-rule parameter smell/metric cleanup.
-- Open follow-up:
   none.
+- Open follow-up:
+  choose the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -23,13 +23,7 @@
 - Approved at:
   none
 - Approved scope:
-  Planned Slice-3-F scope: refactor only
-  `src/domain/models/parameters/ScheduleRule.ts` to reduce the same-file
-  `Sd.type` many-returns/high-complexity smell and the local schedule-rule
-  parameter duplication while preserving public parameter classes, schedule
-  rule parsing semantics, unit-list projections, diagnostics behavior,
-  parser/generated artifacts, VS Code compatibility, web compatibility, and
-  `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -110,9 +104,10 @@ Only clear human approval can change Status to Approved.
       smell/metric cleanup as the next domain candidate.
 - [x] Record Slice-3-F impact investigation.
 - [x] Request human approval for the selected Slice-3-F implementation scope.
-- [ ] Record human approval for Slice-3-F.
-- [ ] Complete Slice-3-F `ScheduleRule.ts` schedule-rule parameter
+- [x] Record human approval for Slice-3-F.
+- [x] Complete Slice-3-F `ScheduleRule.ts` schedule-rule parameter
       smell/metric cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-F.
 
 ## Validation
 
@@ -310,3 +305,18 @@ Only clear human approval can change Status to Approved.
   empty/default cases; `Sd.yearMonth`; `Sd.day`; `Ln.parentRule`;
   `Sh.substitute`; `Shd.shiftDays` default `2`; `Wc.numberOfTimes` default
   `1`; and all public parameter class exports.
+- Slice-3-F changed `ScheduleRule.ts` to resolve `Sd.type` through local
+  literal/prefix tables and to share parsed schedule-rule parameter
+  initialization through a local abstract base class. Public parameter classes,
+  schedule-rule parsing semantics, unit-list projections, diagnostics behavior,
+  parser/generated artifacts, VS Code/web compatibility, and `engines.vscode`
+  are preserved.
+- Targeted Qlty smell output for `ScheduleRule.ts` reports no findings.
+  Targeted metrics changed from 8 classes / 24 funcs / cyclo 35 /
+  complexity 16 / LOC 179 before Slice-3-F to 8 classes / 22 funcs /
+  cyclo 25 / complexity 9 / LOC 153.
+- Slice-3-F validation passed for targeted schedule-rule coverage,
+  `rtk pnpm run qlty`, `rtk pnpm test`, and `rtk pnpm run build`.
+  `rtk pnpm run test:web` completed webpack and TypeScript compile but failed
+  twice on external VS Code web test service connection timeouts
+  (`ETIMEDOUT` to `*:443`), including one rerun with escalated permissions.

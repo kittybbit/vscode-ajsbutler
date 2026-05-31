@@ -818,6 +818,26 @@ artifacts, application projections, presentation behavior, dependency
 versions, VS Code compatibility, web compatibility, or `engines.vscode`
 requires separate approval.
 
+### Slice-3-F Result
+
+`ScheduleRule.ts` now resolves `Sd.type` through local literal and prefix
+tables instead of a branch-heavy return chain. Parsed schedule-rule parameter
+classes now share rule/value initialization through a local abstract base class
+while keeping the public class names and getters unchanged.
+
+The change preserves public parameter class exports, `Sd.type` results for
+`en`, `ud`, `+`, `*`, `@`, and empty/default cases, `Sd.yearMonth`, `Sd.day`,
+`Ln.parentRule`, `Sh.substitute`, `Shd.shiftDays` default `2`,
+`Wc.numberOfTimes` default `1`, schedule-rule parsing helper behavior,
+unit-list group 10 projections, diagnostics behavior, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+8 classes / 24 funcs / cyclo 35 / complexity 16 / LOC 179 before Slice-3-F to
+8 classes / 22 funcs / cyclo 25 / complexity 9 / LOC 153. The next planning
+decision is the next Slice-3 domain-helper candidate.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -841,4 +861,4 @@ requires separate approval.
 
 ## Open Questions
 
-- Whether Slice-3-F is approved for implementation.
+- Which domain helper should follow Slice-3-F?
