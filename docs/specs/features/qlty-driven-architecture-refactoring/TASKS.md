@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-I implementation is complete.
+  Slice-3-J implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -19,11 +19,18 @@
 
 ## Human Approval
 
-- Status: Pending
+- Status: Approved
 - Approved at:
-  none
+  2026-05-31 JST, user replied "approved."
 - Approved scope:
-  none
+  Planned Slice-3-J scope: refactor only
+  `src/domain/models/ajs/AjsDocument.ts` to reduce the same-file
+  `findInheritedAjsUnitParameters` smell/metric cluster while preserving
+  public AjsDocument helper exports, ancestor ordering, nearest-ancestor
+  inherited parameter precedence, duplicate parameter arrays, undefined
+  fallback, normalized document contracts, parser/generated artifacts,
+  application projections, VS Code compatibility, web compatibility, and
+  `engines.vscode`.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -131,8 +138,15 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-I.
 - [x] Complete Slice-3-I `optionalScalarParameterBuilders.ts` optional scalar
       builder helper cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-I.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-H.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-I.
+- [x] Select Slice-3-J `AjsDocument.ts` inherited parameter lookup helper
+      cleanup as the next domain-helper candidate.
+- [x] Record Slice-3-J impact investigation.
+- [x] Request human approval for the selected Slice-3-J implementation scope.
+- [x] Record human approval for Slice-3-J.
+- [x] Complete Slice-3-J `AjsDocument.ts` inherited parameter lookup helper
+      cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-J.
 
 ## Validation
 
@@ -174,6 +188,11 @@ Only clear human approval can change Status to Approved.
   targeted `parameterHelpers.test.ts`, `parameterFactory.test.ts`,
   schedule-rule facade coverage, and unit-list schedule projection coverage,
   then `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`
+- Slice-3-J implementation:
+  targeted normalized document helper, unit-list inherited parameter, linked
+  unit, priority, group 10, and flow graph coverage, then
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
 
 ## Current Investigation Notes
@@ -453,3 +472,32 @@ Only clear human approval can change Status to Approved.
   coverage, `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`. Build completed with
   existing webpack asset-size warnings.
+- Slice-3-J targets `AjsDocument.ts` because targeted domain Qlty reports a
+  high-complexity finding for `findInheritedAjsUnitParameters`. Current file
+  metrics are 0 classes / 12 funcs / cyclo 17 / complexity 10 / LOC 121.
+- Impact is local to normalized AJS document lookup helpers. Direct use of the
+  inherited-parameter array helper funnels through the same-file single-value
+  helper; production behavior reaches unit-list inherited parameter
+  projections such as schedule, linked-unit, and priority views. The shared
+  ancestor helper is also used by flow graph input-node construction.
+- Slice-3-J must preserve public AjsDocument helper exports, parent-to-root
+  ancestor ordering, nearest-ancestor first-hit behavior, duplicate parameter
+  arrays, undefined fallback, root-unit lookup behavior, normalized document
+  shape, parser/generated artifacts, application projections, VS Code/web
+  compatibility, and `engines.vscode`.
+- Slice-3-J changed `AjsDocument.ts` to split inherited parameter lookup into
+  local non-empty-array and first-match helpers. Public helper exports,
+  parent-to-root ancestor ordering, nearest-ancestor first-hit behavior,
+  duplicate parameter arrays, undefined fallback, root-unit lookup behavior,
+  normalized document shape, parser/generated artifacts, application
+  projections, VS Code/web compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty smell output for `AjsDocument.ts` reports no findings.
+  Targeted metrics changed from 0 classes / 12 funcs / cyclo 17 /
+  complexity 10 / LOC 121 before Slice-3-J to 0 classes / 14 funcs /
+  cyclo 17 / complexity 5 / LOC 121. The function-count increase is accepted
+  because the target function-level smell was removed and aggregate complexity
+  decreased.
+- Slice-3-J validation passed for targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.

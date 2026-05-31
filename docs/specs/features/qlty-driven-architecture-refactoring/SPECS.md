@@ -1093,6 +1093,83 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 and LOC increases are accepted because the target function-level smell was
 removed and aggregate complexity decreased.
 
+### Slice-3-J Target
+
+Slice-3-J targets `src/domain/models/ajs/AjsDocument.ts`.
+
+Current Qlty evidence:
+
+- `findInheritedAjsUnitParameters` reports a high-complexity finding.
+- Metrics for `AjsDocument.ts` are 0 classes / 12 funcs / cyclo 17 /
+  complexity 10 / LOC 121.
+
+### Slice-3-J Investigation
+
+`AjsDocument.ts` centralizes normalized AJS document lookup helpers for units,
+parents, ancestors, roots, parameters, and inherited parameter values.
+`findInheritedAjsUnitParameters` currently walks ancestors and returns the
+first non-empty parameter array for the requested key.
+
+Serena reference lookup found direct inherited-array helper usage only from
+the same-file single-parameter helper. Production behavior still reaches
+unit-list inherited parameter projections through the same public helper
+family, including schedule, linked-unit, and priority projections. The shared
+`findAjsUnitAncestors` helper is also used by flow graph input-node
+construction.
+
+### Slice-3-J Boundary Decision
+
+Reduce only the local inherited-parameter lookup shape in `AjsDocument.ts`.
+
+Do not change:
+
+- public AjsDocument helper exports
+- parent-to-root ancestor ordering
+- nearest-ancestor first-hit inherited parameter precedence
+- duplicate parameter arrays
+- undefined fallback behavior
+- root-unit lookup behavior
+- normalized document shape
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-J Approval-Sensitive Scope
+
+Implementation may add local helper functions inside
+`src/domain/models/ajs/AjsDocument.ts` and rewrite
+`findInheritedAjsUnitParameters` as a smaller coordinator while preserving
+public helper exports and behavior.
+
+Any change to inherited parameter lookup semantics, ancestor ordering, public
+helper API, normalized document contracts, parser/generated artifacts,
+application projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, or `engines.vscode` requires separate
+approval.
+
+### Slice-3-J Result
+
+`AjsDocument.ts` now resolves inherited parameter arrays through local
+non-empty-array and first-match helpers, leaving
+`findInheritedAjsUnitParameters` as the public coordinator over ancestor units.
+
+The change preserves public AjsDocument helper exports, parent-to-root
+ancestor ordering, nearest-ancestor first-hit inherited parameter precedence,
+duplicate parameter arrays, undefined fallback behavior, root-unit lookup
+behavior, normalized document shape, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 12 funcs / cyclo 17 / complexity 10 / LOC 121 before Slice-3-J to
+0 classes / 14 funcs / cyclo 17 / complexity 5 / LOC 121. The function-count
+increase is accepted because the target function-level smell was removed and
+aggregate complexity decreased.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1116,4 +1193,4 @@ removed and aggregate complexity decreased.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-I.
+- Which domain helper should follow Slice-3-J.
