@@ -212,21 +212,37 @@ type OptionalScalarBuilderOptions<TUnit extends UnitEntity> = {
   resolveDefaultRawValue?: (unit: TUnit) => string | undefined;
 };
 
+type OptionalScalarBuilderLookup = typeof buildInheritedParameter;
+
+const normalizeOptionalScalarBuilderOptions = (
+  options: OptionalScalarBuilderOptions<UnitEntity> | string,
+): OptionalScalarBuilderOptions<UnitEntity> =>
+  typeof options === "string" ? { defaultRawValue: options } : options;
+
+const resolveOptionalScalarDefaultRawValue = (
+  unit: UnitEntity,
+  options: OptionalScalarBuilderOptions<UnitEntity>,
+): string | undefined =>
+  options.resolveDefaultRawValue?.(unit) ?? options.defaultRawValue;
+
+const selectOptionalScalarBuilderLookup = (
+  options: OptionalScalarBuilderOptions<UnitEntity>,
+): OptionalScalarBuilderLookup =>
+  options.inherit ? buildInheritedParameter : buildOptionalParameter;
+
 const createOptionalScalarBuilder = <T, P extends ParamInternal["parameter"]>(
   parameter: P,
   mapParam: (param: ParamInternal) => T,
   options: OptionalScalarBuilderOptions<UnitEntity> | string = {},
 ) => {
-  const normalizedOptions =
-    typeof options === "string" ? { defaultRawValue: options } : options;
+  const normalizedOptions = normalizeOptionalScalarBuilderOptions(options);
 
   return (unit: UnitEntity): T | undefined => {
-    const defaultRawValue =
-      normalizedOptions.resolveDefaultRawValue?.(unit) ??
-      normalizedOptions.defaultRawValue;
-    const buildParameter = normalizedOptions.inherit
-      ? buildInheritedParameter
-      : buildOptionalParameter;
+    const defaultRawValue = resolveOptionalScalarDefaultRawValue(
+      unit,
+      normalizedOptions,
+    );
+    const buildParameter = selectOptionalScalarBuilderLookup(normalizedOptions);
 
     return buildParameter(
       {

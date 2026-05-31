@@ -1011,6 +1011,88 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 and LOC increases are accepted because the target function-level smell was
 removed and cyclomatic complexity decreased.
 
+### Slice-3-I Target
+
+Slice-3-I targets
+`src/domain/models/parameters/optionalScalarParameterBuilders.ts`.
+
+Current Qlty evidence:
+
+- `createOptionalScalarBuilder` reports a high-complexity finding.
+- Metrics for `optionalScalarParameterBuilders.ts` are 0 classes / 3 funcs /
+  cyclo 5 / complexity 5 / LOC 628.
+
+### Slice-3-I Investigation
+
+`optionalScalarParameterBuilders.ts` centralizes construction of optional
+scalar parameter facade functions. The target helper normalizes option shapes,
+resolves static or dynamic defaults, chooses inherited vs own lookup, and
+forwards unit/parameter/default values to `parameterHelpers`.
+
+Production use flows through `optionalScalarParameterBuilders`,
+`ParameterFactory`, domain unit getters, and unit-list projections. Existing
+tests cover inherited scalar values and defaults (`md`, `ni`, `sdd`, `stt`),
+root-jobnet defaults (`rg`), job-end judgment defaults (`jd`), HTTP connection
+job execution-user defaults (`httpConnectionJobEu`), generic `eu` defaults,
+and explicit value precedence.
+
+### Slice-3-I Boundary Decision
+
+Reduce the same-file optional scalar builder helper smell/metric cluster
+inside `optionalScalarParameterBuilders.ts` only.
+
+Do not change:
+
+- public `optionalScalarParameterBuilders` keys
+- `ParameterFactory` facade behavior
+- option normalization from string defaults
+- resolver default precedence over static defaults
+- inherited-vs-own parameter lookup selection
+- defaultRawValue propagation
+- unit and parameter forwarding
+- runtime default builders for `ncex`, `ncl`, and `ncs`
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-I Approval-Sensitive Scope
+
+Implementation may add local helper functions or local input types inside
+`src/domain/models/parameters/optionalScalarParameterBuilders.ts` and rewrite
+`createOptionalScalarBuilder` as a smaller coordinator while preserving public
+builder exports and behavior.
+
+Any change to builder keys, facade behavior, default selection semantics,
+inherited lookup behavior, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, or `engines.vscode` requires separate
+approval.
+
+### Slice-3-I Result
+
+`optionalScalarParameterBuilders.ts` now splits option normalization, default
+raw-value resolution, and own/inherited lookup selection into focused local
+helpers, leaving `createOptionalScalarBuilder` as the coordinator that builds
+the facade function.
+
+The change preserves public `optionalScalarParameterBuilders` keys,
+`ParameterFactory` facade behavior, option normalization from string defaults,
+resolver default precedence over static defaults, inherited-vs-own parameter
+lookup selection, defaultRawValue propagation, unit and parameter forwarding,
+runtime default builders for `ncex`, `ncl`, and `ncs`, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 3 funcs / cyclo 5 / complexity 5 / LOC 628 before Slice-3-I to
+0 classes / 6 funcs / cyclo 5 / complexity 4 / LOC 640. The function-count
+and LOC increases are accepted because the target function-level smell was
+removed and aggregate complexity decreased.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1034,4 +1116,4 @@ removed and cyclomatic complexity decreased.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-H.
+- Which domain helper should follow Slice-3-I.

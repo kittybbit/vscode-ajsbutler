@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-H implementation is complete.
+  Slice-3-I implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -123,6 +123,15 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-H.
 - [x] Complete Slice-3-H `scheduleRuleHelpers.ts` schedule-by-days parser
       helper cleanup.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-H.
+- [x] Select Slice-3-I `optionalScalarParameterBuilders.ts` optional scalar
+      builder helper cleanup as the next domain-helper candidate.
+- [x] Record Slice-3-I impact investigation.
+- [x] Request human approval for the selected Slice-3-I implementation scope.
+- [x] Record human approval for Slice-3-I.
+- [x] Complete Slice-3-I `optionalScalarParameterBuilders.ts` optional scalar
+      builder helper cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-I.
 - [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-H.
 
 ## Validation
@@ -411,3 +420,36 @@ Only clear human approval can change Status to Approved.
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.
+- Slice-3-I targets `optionalScalarParameterBuilders.ts` because targeted
+  domain Qlty reports a high-complexity finding for
+  `createOptionalScalarBuilder`. Current file metrics are 0 classes / 3 funcs /
+  cyclo 5 / complexity 5 / LOC 628.
+- Impact is local to optional scalar parameter facade construction. Production
+  use flows through `optionalScalarParameterBuilders`, `ParameterFactory`,
+  domain unit getters, and unit-list projections. Existing tests cover
+  inherited scalar values and defaults (`md`, `ni`, `sdd`, `stt`), root-jobnet
+  defaults (`rg`), job-end judgment defaults (`jd`), HTTP connection job
+  execution-user defaults (`httpConnectionJobEu`), generic `eu` defaults, and
+  explicit value precedence.
+- Slice-3-I must preserve option normalization from string defaults, resolver
+  defaults winning over static defaults, inherited-vs-own builder selection,
+  defaultRawValue propagation, unit and parameter forwarding, and all public
+  optional scalar builder keys.
+- Slice-3-I changed `optionalScalarParameterBuilders.ts` to split option
+  normalization, default raw-value resolution, and own/inherited lookup
+  selection into focused local helpers. Public builder exports, optional scalar
+  lookup semantics, inherited scalar behavior, static/runtime default
+  behavior, resolver precedence over static defaults, parameter facade
+  behavior, parser/generated artifacts, VS Code/web compatibility, and
+  `engines.vscode` are preserved.
+- Targeted Qlty smell output for `optionalScalarParameterBuilders.ts` reports
+  no findings. Targeted metrics changed from 0 classes / 3 funcs / cyclo 5 /
+  complexity 5 / LOC 628 before Slice-3-I to 0 classes / 6 funcs /
+  cyclo 5 / complexity 4 / LOC 640. The function-count and LOC increases are
+  accepted because the target function-level smell was removed and aggregate
+  complexity decreased.
+- Slice-3-I validation passed for targeted parameter factory, unit priority,
+  priority projection, job-end judgment, and remaining group projection
+  coverage, `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`. Build completed with
+  existing webpack asset-size warnings.
