@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-M implementation is complete.
+  Slice-3-N implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -161,7 +161,14 @@ Only clear human approval can change Status to Approved.
 - [x] Request human approval for the selected Slice-3-M implementation scope.
 - [x] Record human approval for Slice-3-M.
 - [x] Complete Slice-3-M `Cmsj`/`Tmwj`/`Pwlj` wait-job shared getter cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-M.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-M.
+- [x] Select Slice-3-N `Mqsj`/`Mssj` message-queue shared getter cleanup as
+      the next domain-helper candidate.
+- [x] Record Slice-3-N impact investigation.
+- [x] Request human approval for the selected Slice-3-N implementation scope.
+- [x] Record human approval for Slice-3-N.
+- [x] Complete Slice-3-N `Mqsj`/`Mssj` message-queue shared getter cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-N.
 
 ## Validation
 
@@ -223,6 +230,12 @@ Only clear human approval can change Status to Approved.
   `parameterFactory.test.ts` execution-interval coverage, unit-list remaining
   groups/view coverage, then `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`
+- Slice-3-N implementation:
+  targeted Qlty smell/metrics for `Mqsj.ts`, `Mssj.ts`, and
+  `unitCapabilityEntities.ts`, focused parameter-factory or unit getter
+  coverage for shared message-queue execution getters, then
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -619,6 +632,39 @@ Only clear human approval can change Status to Approved.
   complexity 0 / LOC 111 after. The total LOC increase is accepted because
   target duplication was removed while per-target unit files became smaller.
 - Slice-3-M validation passed targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-N targets the `Mqsj.ts` / `Mssj.ts` duplication cluster because
+  targeted domain Qlty reports 83 similar lines across those two
+  message-queue send job classes. Current target metrics for `Mqsj.ts`,
+  `Mssj.ts`, and `unitCapabilityEntities.ts` are 4 classes / 54 funcs /
+  cyclo 3 / complexity 0 / LOC 196.
+- Impact is local to domain unit getter ownership. Public construction flows
+  through `TyUtils.tyFactory`; Serena reference lookup found direct class
+  references only from recovery subclass inheritance and `TyUtils` imports /
+  mappings. No application, UI, or test code directly references `Mqsj`,
+  `Mssj`, `Rmqsj`, `Rmssj`, or the class-specific `mq*` / `ms*` getters.
+- Slice-3-N must preserve all existing getter names and values:
+  `Mqsj.mqque/mqcor/mqdsc/mqprm/mqmgr/mqmdl/mqpgm/mqmfn/mqmdn/mqhld/mqpri/mqeqn/pfm/etm/fd/ex/ha/eu/jty`
+  and
+  `Mssj.msqpt/msqlb/msrer/mslmt/mshld/msmod/mspri/msjnl/msunr/mstfn/msttp/mslbl/msapl/etm/fd/ex/ha/eu/jty`;
+  public class exports; recovery subclass inheritance; waitable-unit
+  behavior; `tyFactory` mappings; parser/generated artifacts; application
+  projections; VS Code/web compatibility; and `engines.vscode`.
+- Slice-3-N added `JobTypeExecutionWaitJobUnitEntity` in
+  `unitCapabilityEntities.ts`, moved `jty` there, kept
+  `PlatformExecutionWaitJobUnitEntity` as the `pfm` specialization, and moved
+  shared execution/job-type getters out of `Mqsj` and `Mssj`. Public class
+  exports, recovery subclasses, getter names/values, and `tyFactory` mappings
+  are preserved.
+- Targeted Qlty metrics for `Mqsj.ts`, `Mssj.ts`, and
+  `unitCapabilityEntities.ts` changed from 4 classes / 54 funcs / cyclo 3 /
+  complexity 0 / LOC 196 before Slice-3-N to 4 classes / 41 funcs / cyclo 3 /
+  complexity 0 / LOC 159 after. The original `Mqsj`/`Mssj` 83-line
+  duplication cluster is removed; remaining smell output points at separate
+  cross-file unit clusters with `Mqwj`/`Mswj` and `Jdj`/`Pwrj`.
+- Slice-3-N validation passed targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.

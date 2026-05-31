@@ -89,14 +89,16 @@ export abstract class ExecutionWaitJobUnitEntity extends WaitableUnitEntity {
   }
 }
 
-export abstract class PlatformExecutionWaitJobUnitEntity extends ExecutionWaitJobUnitEntity {
-  // [pfm={u|p};]
-  get pfm() {
-    return ParamFactory.pfm(this);
-  }
-
+export abstract class JobTypeExecutionWaitJobUnitEntity extends ExecutionWaitJobUnitEntity {
   // [jty={q|n};]
   get jty() {
     return ParamFactory.jty(this);
+  }
+}
+
+export abstract class PlatformExecutionWaitJobUnitEntity extends JobTypeExecutionWaitJobUnitEntity {
+  // [pfm={u|p};]
+  get pfm() {
+    return ParamFactory.pfm(this);
   }
 }

@@ -1416,6 +1416,90 @@ before Slice-3-M to the four-file cluster 6 classes / 24 funcs / cyclo 4 /
 complexity 0 / LOC 111 after. The total LOC increase is accepted because the
 target duplication was removed and the per-target unit files became smaller.
 
+### Slice-3-N Target
+
+Slice-3-N targets the message-queue send job duplication cluster in:
+
+- `src/domain/models/units/Mqsj.ts`
+- `src/domain/models/units/Mssj.ts`
+
+Current Qlty evidence:
+
+- Qlty reports 83 similar lines across `Mqsj.ts` and `Mssj.ts`.
+- Metrics for `Mqsj.ts`, `Mssj.ts`, and `unitCapabilityEntities.ts` are
+  4 classes / 54 funcs / cyclo 3 / complexity 0 / LOC 196.
+
+### Slice-3-N Investigation
+
+`Mqsj` and `Mssj` are waitable message-queue send job entities with
+class-specific `mq*` / `ms*` parameter getters plus duplicated shared getters
+for execution time, execution duration, execution agent, hard attribute,
+execution user, and job type. `Mqsj` also has the platform parameter getter
+`pfm`.
+
+Serena reference lookup found public class construction through
+`TyUtils.tyFactory`, with direct class references otherwise limited to
+recovery subclass inheritance. Targeted search found no application, UI, or
+test code directly referencing `Mqsj`, `Mssj`, `Rmqsj`, `Rmssj`, or their
+class-specific `mq*` / `ms*` getters.
+
+### Slice-3-N Boundary Decision
+
+Reduce the message-queue send job shared getter duplication with a focused
+abstract base or helper under the domain unit boundary.
+
+Do not change:
+
+- public `Mqsj`, `Rmqsj`, `Mssj`, and `Rmssj` exports
+- `tyFactory` mappings
+- recovery subclass inheritance
+- existing getter names
+- existing `ParamFactory` call targets
+- waitable-unit behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-N Approval-Sensitive Scope
+
+Implementation may add or reuse focused abstract base classes under
+`src/domain/models/units/`, update `Mqsj.ts` and `Mssj.ts` to reuse shared
+getter implementations, and add focused tests when needed to cover preserved
+shared getter behavior.
+
+Any change to public unit class exports, parameter getter names or values,
+`ParamFactory` lookup semantics, recovery class behavior, `tyFactory`
+mappings, parser/generated artifacts, application projections, presentation
+behavior, dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
+### Slice-3-N Result
+
+`unitCapabilityEntities.ts` now provides
+`JobTypeExecutionWaitJobUnitEntity` for execution wait jobs that also expose
+`jty`, while `PlatformExecutionWaitJobUnitEntity` remains the `pfm`
+specialization. `Mqsj` now inherits the platform/job-type shared getters, and
+`Mssj` inherits the job-type shared getters.
+
+The change preserves public `Mqsj`, `Rmqsj`, `Mssj`, and `Rmssj` exports,
+`tyFactory` mappings, recovery subclass inheritance, existing getter names and
+values, `ParamFactory` lookup targets, waitable-unit behavior,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, and
+`engines.vscode`.
+
+Targeted metrics for `Mqsj.ts`, `Mssj.ts`, and `unitCapabilityEntities.ts`
+changed from 4 classes / 54 funcs / cyclo 3 / complexity 0 / LOC 196 before
+Slice-3-N to 4 classes / 41 funcs / cyclo 3 / complexity 0 / LOC 159 after.
+The original `Mqsj`/`Mssj` 83-line duplication cluster is removed. Remaining
+targeted smell output identifies separate cross-file unit clusters involving
+`Mqwj`/`Mswj` and `Jdj`/`Pwrj`; those are candidates for later slices rather
+than part of this approved scope.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1439,4 +1523,4 @@ target duplication was removed and the per-target unit files became smaller.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-M.
+- Which domain helper should follow Slice-3-N.
