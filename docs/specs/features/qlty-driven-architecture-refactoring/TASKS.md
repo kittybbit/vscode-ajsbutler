@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-J implementation is complete.
+  Slice-3-K implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -19,18 +19,11 @@
 
 ## Human Approval
 
-- Status: Approved
+- Status: Pending
 - Approved at:
-  2026-05-31 JST, user replied "approved."
+  none
 - Approved scope:
-  Planned Slice-3-J scope: refactor only
-  `src/domain/models/ajs/AjsDocument.ts` to reduce the same-file
-  `findInheritedAjsUnitParameters` smell/metric cluster while preserving
-  public AjsDocument helper exports, ancestor ordering, nearest-ancestor
-  inherited parameter precedence, duplicate parameter arrays, undefined
-  fallback, normalized document contracts, parser/generated artifacts,
-  application projections, VS Code compatibility, web compatibility, and
-  `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -146,7 +139,14 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-J.
 - [x] Complete Slice-3-J `AjsDocument.ts` inherited parameter lookup helper
       cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-J.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-J.
+- [x] Select Slice-3-K `relations.ts` normalized relation resolver cleanup as
+      the next domain-helper candidate.
+- [x] Record Slice-3-K impact investigation.
+- [x] Request human approval for the selected Slice-3-K implementation scope.
+- [x] Record human approval for Slice-3-K.
+- [x] Complete Slice-3-K `relations.ts` normalized relation resolver cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-K.
 
 ## Validation
 
@@ -192,6 +192,11 @@ Only clear human approval can change Status to Approved.
 - Slice-3-J implementation:
   targeted normalized document helper, unit-list inherited parameter, linked
   unit, priority, group 10, and flow graph coverage, then
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`
+- Slice-3-K implementation:
+  targeted `normalizeRelations.test.ts`, relation normalization, flow graph,
+  expanded flow graph, and unit-list relation coverage, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
 
@@ -498,6 +503,38 @@ Only clear human approval can change Status to Approved.
   because the target function-level smell was removed and aggregate complexity
   decreased.
 - Slice-3-J validation passed for targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-K targets `relations.ts` because targeted domain Qlty reports a
+  high-complexity finding for `resolveNormalizedRelations`. Current file
+  metrics are 0 classes / 2 funcs / cyclo 8 / complexity 9 / LOC 57.
+- Impact is local to normalized relation resolution from `ar` parameters.
+  Direct production use flows through `normalizeUnitTree`; direct tests cover
+  parse results, valid relation output, invalid relation warnings, and missing
+  target warnings. Broader relation behavior is covered by normalized
+  document, flow graph, expanded flow graph, and unit-list relation tests.
+- Slice-3-K must preserve public helper exports, `ar` parameter parsing,
+  invalid-relation warnings, missing-target warnings, child-name-to-id
+  resolution, relation ordering, `seq`/`con` normalization, normalized
+  document shape, parser/generated artifacts, application projections, VS
+  Code/web compatibility, and `engines.vscode`.
+- Slice-3-K approval included the clarification that implementation does not
+  need to stay in one file when a focused file split is appropriate. The final
+  change stayed in `relations.ts` because the helper set remained small.
+- Slice-3-K changed `relations.ts` to build a relation-resolution context,
+  isolate child lookup, warning recording, single-value relation resolution,
+  and resolved DTO construction in local helpers. Public helper exports, `ar`
+  parameter parsing, invalid-relation warnings, missing-target warnings,
+  child-name-to-id resolution, relation ordering, `seq`/`con` normalization,
+  normalized document shape, parser/generated artifacts, application
+  projections, VS Code/web compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty smell output for `relations.ts` reports no findings. Targeted
+  metrics changed from 0 classes / 2 funcs / cyclo 8 / complexity 9 / LOC 57
+  before Slice-3-K to 0 classes / 7 funcs / cyclo 8 / complexity 9 /
+  LOC 91. The function-count and LOC increases are accepted because the
+  target function-level smell was removed without changing relation behavior.
+- Slice-3-K validation passed for targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.

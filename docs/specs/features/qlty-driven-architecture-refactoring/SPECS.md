@@ -1170,6 +1170,88 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 increase is accepted because the target function-level smell was removed and
 aggregate complexity decreased.
 
+### Slice-3-K Target
+
+Slice-3-K targets `src/domain/models/ajs/normalize/relations.ts`.
+
+Current Qlty evidence:
+
+- `resolveNormalizedRelations` reports a high-complexity finding.
+- Metrics for `relations.ts` are 0 classes / 2 funcs / cyclo 8 /
+  complexity 9 / LOC 57.
+
+### Slice-3-K Investigation
+
+`relations.ts` parses normalized `ar` parameter values and resolves them into
+normalized relation DTOs by matching source and target names against already
+normalized child units.
+
+Serena reference lookup found direct production use from `normalizeUnitTree`.
+Direct tests in `normalizeRelations.test.ts` cover parsing, valid relation
+output, invalid relation warnings, and missing target warnings. Broader
+fixtures in normalized document, flow graph, expanded flow graph, and
+unit-list relation tests exercise relation propagation after normalization.
+
+### Slice-3-K Boundary Decision
+
+Reduce only the local normalized relation resolver shape in `relations.ts`.
+
+Do not change:
+
+- public `parseNormalizedRelation` and `resolveNormalizedRelations` exports
+- `ar` parameter parsing behavior
+- invalid-relation warning behavior
+- missing-target warning behavior
+- child-name-to-id lookup behavior
+- relation output ordering
+- `seq`/`con` relation type normalization
+- normalized document shape
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-K Approval-Sensitive Scope
+
+Implementation may add local helper functions, local context types, or a
+focused helper module under the same normalize boundary and rewrite
+`resolveNormalizedRelations` as a smaller coordinator while preserving public
+helper exports and behavior.
+
+Any change to relation parsing semantics, warning semantics, child lookup,
+relation ordering, public helper API, normalized document contracts,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
+### Slice-3-K Result
+
+`relations.ts` now builds an explicit relation-resolution context and resolves
+each `ar` parameter value through local helpers for child lookup, warning
+recording, parsed relation resolution, and normalized DTO construction.
+
+The approval clarified that implementation did not need to stay in one file
+when a focused file split was appropriate. The final change stayed in
+`relations.ts` because the helper set remained small and did not justify a
+new module.
+
+The change preserves public `parseNormalizedRelation` and
+`resolveNormalizedRelations` exports, `ar` parameter parsing behavior,
+invalid-relation warning behavior, missing-target warning behavior,
+child-name-to-id lookup behavior, relation output ordering, `seq`/`con`
+relation type normalization, normalized document shape, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 2 funcs / cyclo 8 / complexity 9 / LOC 57 before Slice-3-K to
+0 classes / 7 funcs / cyclo 8 / complexity 9 / LOC 91. The function-count and
+LOC increases are accepted because the target function-level smell was removed
+without changing relation behavior.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1193,4 +1275,4 @@ aggregate complexity decreased.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-J.
+- Which domain helper should follow Slice-3-K.
