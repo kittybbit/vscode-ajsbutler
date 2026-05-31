@@ -62,19 +62,21 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 
 ## Current Slice Candidate
 
-No implementation slice is currently approved.
+Slice-3-G implementation is pending human approval.
 
 - Recent result:
   Slice-3-F changed `ScheduleRule.ts` to resolve `Sd.type` through local
   literal/prefix tables and to share parsed schedule-rule parameter
   initialization through a local abstract base class.
 - Current evidence:
-  targeted smell output for `ScheduleRule.ts` reports no findings. Metrics
-  changed from 8 classes / 24 funcs / cyclo 35 / complexity 16 / LOC 179
-  before Slice-3-F to 8 classes / 22 funcs / cyclo 25 / complexity 9 /
-  LOC 153.
+  targeted smell output for `parameterHelpers.ts` reports
+  `resolveParameterArray` many-returns/high-complexity,
+  `resolveDefaultRawValue` many-returns,
+  `resolveScopedDefaultRawValue` high-complexity, and
+  `buildSdAlignedScheduleParameters` many-parameters. Current metrics are
+  0 classes / 21 funcs / cyclo 52 / complexity 47 / LOC 338.
 - Current decision:
-  choose the next Slice-3 domain-helper candidate.
+  wait for approval before refactoring `parameterHelpers.ts`.
 
 ## Risks To Control
 

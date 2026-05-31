@@ -838,6 +838,73 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 8 classes / 22 funcs / cyclo 25 / complexity 9 / LOC 153. The next planning
 decision is the next Slice-3 domain-helper candidate.
 
+### Slice-3-G Target
+
+Slice-3-G targets `src/domain/models/parameters/parameterHelpers.ts`.
+
+Current Qlty evidence:
+
+- `resolveParameterArray` reports many-returns and high-complexity findings.
+- `resolveDefaultRawValue` reports a many-returns finding.
+- `resolveScopedDefaultRawValue` reports a high-complexity finding.
+- `buildSdAlignedScheduleParameters` reports a many-parameters finding.
+- Metrics for `parameterHelpers.ts` are 0 classes / 21 funcs / cyclo 52 /
+  complexity 47 / LOC 338.
+
+### Slice-3-G Investigation
+
+`parameterHelpers.ts` centralizes domain parameter lookup, inherited parameter
+fallback, default raw-value application, and schedule-rule array alignment.
+Production use flows through optional/required/inherited parameter builders,
+rule parameter builders, transfer-operation builders, `ParameterFactory`,
+domain unit getters, and unit-list schedule projections.
+
+Existing tests in `parameterHelpers.test.ts`, `parameterFactory.test.ts`, and
+unit-list schedule projection coverage exercise own parameter precedence,
+inherited lookup, default scalar and array fallback behavior, root-jobnet
+defaults, connector-control defaults, singular parameter errors, schedule-rule
+sorting, sd-aligned placeholders, and facade behavior.
+
+### Slice-3-G Boundary Decision
+
+Reduce the same-file parameter resolution and schedule-rule alignment
+smell/metric cluster inside `parameterHelpers.ts` only.
+
+Do not change:
+
+- public helper exports
+- parameter symbol validation
+- own-parameter precedence over inherited and default values
+- parent-chain inherited lookup behavior
+- default array fallback behavior
+- default scalar fallback behavior
+- root-jobnet default values
+- connector-control default values and modes
+- `resolveParameter` singular-array error behavior
+- schedule-rule sorting
+- sd-aligned default/null placeholder behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-G Approval-Sensitive Scope
+
+Implementation may add local helper functions or local input object types
+inside `src/domain/models/parameters/parameterHelpers.ts` and rewrite
+`resolveParameterArray`, default raw-value resolution, and same-file
+schedule-rule alignment coordinators while preserving public helper exports
+and behavior.
+
+Any change to parameter lookup semantics, default application semantics,
+schedule-rule alignment behavior, public helper API, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, or `engines.vscode`
+requires separate approval.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -861,4 +928,4 @@ decision is the next Slice-3 domain-helper candidate.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-F?
+- Whether Slice-3-G is approved for implementation.

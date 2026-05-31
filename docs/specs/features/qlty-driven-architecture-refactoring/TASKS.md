@@ -11,11 +11,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-F implementation is complete.
+  Slice-3-G investigation is complete; implementation is waiting for approval.
 - Active slice:
-  none.
+  Slice-3-G `parameterHelpers.ts` parameter resolution helper smell/metric
+  cleanup.
 - Open follow-up:
-  choose the next Slice-3 domain-helper candidate.
+  none.
 
 ## Human Approval
 
@@ -23,7 +24,12 @@
 - Approved at:
   none
 - Approved scope:
-  none
+  Planned Slice-3-G scope: refactor only
+  `src/domain/models/parameters/parameterHelpers.ts` to reduce the same-file
+  parameter resolution and schedule-rule alignment smell/metric cluster while
+  preserving public helper exports, default application semantics, inheritance
+  lookup behavior, schedule-rule alignment behavior, parser/generated
+  artifacts, VS Code compatibility, web compatibility, and `engines.vscode`.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -107,7 +113,14 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-F.
 - [x] Complete Slice-3-F `ScheduleRule.ts` schedule-rule parameter
       smell/metric cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-F.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-F.
+- [x] Select Slice-3-G `parameterHelpers.ts` parameter resolution helper
+      smell/metric cleanup as the next domain-helper candidate.
+- [x] Record Slice-3-G impact investigation.
+- [x] Request human approval for the selected Slice-3-G implementation scope.
+- [ ] Record human approval for Slice-3-G.
+- [ ] Complete Slice-3-G `parameterHelpers.ts` parameter resolution helper
+      smell/metric cleanup.
 
 ## Validation
 
@@ -145,6 +158,11 @@ Only clear human approval can change Status to Approved.
   `buildUnitListGroup10View.test.ts`, and `buildUnitListView.test.ts`
   schedule-rule coverage, then `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`
+- Slice-3-G implementation:
+  targeted `parameterHelpers.test.ts`, `parameterFactory.test.ts`,
+  schedule-rule facade coverage, and unit-list schedule projection coverage,
+  then `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -320,3 +338,21 @@ Only clear human approval can change Status to Approved.
   `rtk pnpm run test:web` completed webpack and TypeScript compile but failed
   twice on external VS Code web test service connection timeouts
   (`ETIMEDOUT` to `*:443`), including one rerun with escalated permissions.
+- Slice-3-G targets `parameterHelpers.ts` because targeted domain Qlty reports
+  a same-file cluster: `resolveParameterArray` many-returns/high-complexity,
+  `resolveDefaultRawValue` many-returns,
+  `resolveScopedDefaultRawValue` high-complexity, and
+  `buildSdAlignedScheduleParameters` many-parameters. Current file metrics are
+  0 classes / 21 funcs / cyclo 52 / complexity 47 / LOC 338.
+- Impact is local to domain parameter lookup helpers. Production use flows
+  through optional/required/inherited parameter builders, rule parameter
+  builders, transfer-operation builders, `ParameterFactory`, domain unit
+  getters, and unit-list schedule projections. Existing tests cover own,
+  inherited, array default, singular parameter error, root-jobnet defaults,
+  connector-control defaults, schedule-rule alignment, inherited scalar/array
+  helpers, and facade behavior.
+- Slice-3-G must preserve parameter symbol validation, own-parameter
+  precedence over inherited/default values, parent-chain inherited lookup,
+  default array and scalar fallback behavior, default application modes,
+  `resolveParameter` singular-array error behavior, schedule-rule sorting, and
+  sd-aligned default/null placeholder behavior.

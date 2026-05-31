@@ -34,8 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Select the next Qlty-driven architecture refactoring Slice-3
-   domain-helper candidate.
+2. Complete the Qlty-driven architecture refactoring Slice-3-G
+   `parameterHelpers.ts` cleanup after approval.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -128,7 +128,8 @@ rules in `docs/specs/README.md`, not in this file.
   `PlainString.ts` smell/metric cleanup. Slice-3-E completed
   `transferOperationHelpers.ts` transfer-operation default helper cleanup.
   Slice-3-F completed `ScheduleRule.ts` schedule-rule parameter cleanup; the
-  next decision is the following Slice-3 domain-helper candidate.
+  Slice-3-G investigation is complete for `parameterHelpers.ts` parameter
+  resolution helper cleanup and implementation is pending approval.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.
