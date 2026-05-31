@@ -12,35 +12,48 @@ type DefaultApplicationMode = "always" | "root-jobnet-only";
 type RootJobnetDefaultParameter = "rg" | "sd" | "ncl" | "ncs" | "ncex";
 type ConnectorControlDefaultParameter = "ncl" | "ncs" | "ncex";
 
+type ParameterEntry = {
+  parameter: ParamLookupArg["unit"]["parameters"][number];
+  index: number;
+};
+
+type SdAlignedScheduleParametersInput<T extends ScheduleRule> = {
+  params: ParamInternal[] | undefined;
+  sd: Array<Sd> | undefined;
+  mapParam: (param: ParamInternal) => T;
+  buildDefault: (rule: number) => T | null;
+};
+
+const DEFAULT_RAW_VALUE_BY_PARAMETER: Record<
+  RootJobnetDefaultParameter,
+  string
+> = {
+  rg: DEFAULTS.Rg,
+  sd: DEFAULTS.Sd,
+  ncl: DEFAULTS.Ncl,
+  ncs: DEFAULTS.Ncs,
+  ncex: DEFAULTS.Ncex,
+};
+
 const resolveDefaultRawValue = (
   parameter: RootJobnetDefaultParameter,
-): string => {
-  switch (parameter) {
-    case "rg":
-      return DEFAULTS.Rg;
-    case "sd":
-      return DEFAULTS.Sd;
-    case "ncl":
-      return DEFAULTS.Ncl;
-    case "ncs":
-      return DEFAULTS.Ncs;
-    case "ncex":
-      return DEFAULTS.Ncex;
-  }
-};
+): string => DEFAULT_RAW_VALUE_BY_PARAMETER[parameter];
+
+const resolveDefaultForMode = {
+  always: (defaultRawValue: string) => defaultRawValue,
+  "root-jobnet-only": (defaultRawValue: string, isRootJobnet: boolean) =>
+    isRootJobnet ? defaultRawValue : undefined,
+} satisfies Record<
+  DefaultApplicationMode,
+  (defaultRawValue: string, isRootJobnet: boolean) => string | undefined
+>;
 
 const resolveScopedDefaultRawValue = (
   defaultRawValue: string,
   mode: DefaultApplicationMode,
   isRootJobnet: boolean,
-): string | undefined => {
-  switch (mode) {
-    case "always":
-      return defaultRawValue;
-    case "root-jobnet-only":
-      return isRootJobnet ? defaultRawValue : undefined;
-  }
-};
+): string | undefined =>
+  resolveDefaultForMode[mode](defaultRawValue, isRootJobnet);
 
 export const resolveRootJobnetDefaultRawValue = (
   parameter: RootJobnetDefaultParameter,
@@ -145,12 +158,37 @@ export const adjustToSdItemCount = <T extends ScheduleRule>(
   return newParams;
 };
 
+const normalizeSdAlignedScheduleParametersInput = <T extends ScheduleRule>(
+  args:
+    | [SdAlignedScheduleParametersInput<T>]
+    | [
+        ParamInternal[] | undefined,
+        Array<Sd> | undefined,
+        (param: ParamInternal) => T,
+        (rule: number) => T | null,
+      ],
+): SdAlignedScheduleParametersInput<T> =>
+  args.length === 1
+    ? args[0]
+    : {
+        params: args[0],
+        sd: args[1],
+        mapParam: args[2],
+        buildDefault: args[3],
+      };
+
 export const buildSdAlignedScheduleParameters = <T extends ScheduleRule>(
-  params: ParamInternal[] | undefined,
-  sd: Array<Sd> | undefined,
-  mapParam: (param: ParamInternal) => T,
-  buildDefault: (rule: number) => T | null,
+  ...args:
+    | [SdAlignedScheduleParametersInput<T>]
+    | [
+        ParamInternal[] | undefined,
+        Array<Sd> | undefined,
+        (param: ParamInternal) => T,
+        (rule: number) => T | null,
+      ]
 ): Array<T | null> | undefined => {
+  const { params, sd, mapParam, buildDefault } =
+    normalizeSdAlignedScheduleParametersInput(args);
   const values = params
     ? params.map(mapParam).sort((a, b) => a.rule - b.rule)
     : undefined;
@@ -287,70 +325,104 @@ export const buildRootDefaultAwareScheduleRuleParameters = <
     mapParam,
   );
 
+const assertParamSymbol: (
+  parameter: string,
+) => asserts parameter is ParamSymbol = (parameter) => {
+  if (!isParamSymbol(parameter)) {
+    throw new Error(`${parameter} is not unit definition parameter.`);
+  }
+};
+
+const findParameterEntries = (
+  unit: ParamLookupArg["unit"],
+  parameter: ParamSymbol,
+): ParameterEntry[] =>
+  unit.parameters
+    .map((parameter, index) => ({ parameter, index }))
+    .filter((entry) => entry.parameter.key === parameter);
+
+const toParamInternal = (
+  arg: ParamLookupArg,
+  entry: ParameterEntry,
+  inherited: boolean,
+): ParamInternal => ({
+  unit: arg.unit,
+  parameter: arg.parameter as ParamSymbol,
+  inherited: inherited,
+  rawValue: entry.parameter.value,
+  position: inherited ? -1 : entry.index,
+});
+
+const resolveOwnParameterArray = (
+  arg: ParamLookupArg,
+): ParamInternal[] | undefined => {
+  const actualParams = findParameterEntries(
+    arg.unit,
+    arg.parameter as ParamSymbol,
+  ).map((entry) => toParamInternal(arg, entry, false));
+  return actualParams.length > 0 ? actualParams : undefined;
+};
+
+const findInheritedParameterEntries = (
+  unit: ParamLookupArg["unit"] | undefined,
+  parameter: ParamSymbol,
+): ParameterEntry[] | undefined => {
+  if (unit === undefined) {
+    return undefined;
+  }
+  const entries = findParameterEntries(unit, parameter);
+  return entries.length > 0
+    ? entries
+    : findInheritedParameterEntries(unit.parent, parameter);
+};
+
+const resolveInheritedParameterArray = (
+  arg: ParamLookupArg,
+): ParamInternal[] | undefined =>
+  findInheritedParameterEntries(
+    arg.unit.parent,
+    arg.parameter as ParamSymbol,
+  )?.map((entry) => toParamInternal(arg, entry, true));
+
+const toDefaultParamInternal = (
+  arg: ParamLookupArg,
+  defaultRawValue: string,
+): ParamInternal => ({
+  unit: arg.unit,
+  parameter: arg.parameter as ParamSymbol,
+  inherited: false,
+  defaultRawValue: defaultRawValue,
+  position: -1,
+});
+
+const normalizeDefaultRawValues = (
+  defaultRawValue: ParamLookupArg["defaultRawValue"],
+): string[] | undefined => {
+  if (Array.isArray(defaultRawValue)) {
+    return defaultRawValue;
+  }
+  if (!defaultRawValue) {
+    return undefined;
+  }
+  return [defaultRawValue];
+};
+
+const resolveDefaultParameterArray = (
+  arg: ParamLookupArg,
+): ParamInternal[] | undefined =>
+  normalizeDefaultRawValues(arg.defaultRawValue)?.map((rawValue) =>
+    toDefaultParamInternal(arg, rawValue),
+  );
+
 export const resolveParameterArray = (
   arg: ParamLookupArg,
 ): ParamInternal[] | undefined => {
-  if (!isParamSymbol(arg.parameter)) {
-    throw new Error(`${arg.parameter} is not unit definition parameter.`);
-  }
-
-  const actualParams = arg.unit.parameters
-    .map((parameter, index) => ({ parameter, index }))
-    .filter((entry) => entry.parameter.key === arg.parameter)
-    .map((entry) => ({
-      unit: arg.unit,
-      parameter: arg.parameter,
-      inherited: false,
-      rawValue: entry.parameter.value,
-      position: entry.index,
-    }));
-  if (actualParams.length > 0) {
-    return actualParams;
-  }
-
-  if (arg.inherit) {
-    let parent = arg.unit.parent;
-    while (parent) {
-      const inheritedParams = parent.parameters
-        .map((parameter, index) => ({ parameter, index }))
-        .filter((entry) => entry.parameter.key === arg.parameter)
-        .map((entry) => ({
-          unit: arg.unit,
-          parameter: arg.parameter,
-          inherited: true,
-          rawValue: entry.parameter.value,
-          position: -1,
-        }));
-      if (inheritedParams.length > 0) {
-        return inheritedParams;
-      }
-      parent = parent.parent;
-    }
-  }
-
-  if (Array.isArray(arg.defaultRawValue)) {
-    return arg.defaultRawValue.map((rawValue) => ({
-      unit: arg.unit,
-      parameter: arg.parameter,
-      inherited: false,
-      defaultRawValue: rawValue,
-      position: -1,
-    }));
-  }
-
-  if (arg.defaultRawValue) {
-    return [
-      {
-        unit: arg.unit,
-        parameter: arg.parameter,
-        inherited: false,
-        defaultRawValue: arg.defaultRawValue,
-        position: -1,
-      },
-    ];
-  }
-
-  return undefined;
+  assertParamSymbol(arg.parameter);
+  return (
+    resolveOwnParameterArray(arg) ??
+    (arg.inherit ? resolveInheritedParameterArray(arg) : undefined) ??
+    resolveDefaultParameterArray(arg)
+  );
 };
 
 export const resolveParameter = (

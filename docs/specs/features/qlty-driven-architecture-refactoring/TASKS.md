@@ -11,12 +11,11 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-G investigation is complete; implementation is waiting for approval.
+  Slice-3-G implementation is complete.
 - Active slice:
-  Slice-3-G `parameterHelpers.ts` parameter resolution helper smell/metric
-  cleanup.
-- Open follow-up:
   none.
+- Open follow-up:
+  Decide the next Slice-3 domain-helper candidate.
 
 ## Human Approval
 
@@ -24,12 +23,7 @@
 - Approved at:
   none
 - Approved scope:
-  Planned Slice-3-G scope: refactor only
-  `src/domain/models/parameters/parameterHelpers.ts` to reduce the same-file
-  parameter resolution and schedule-rule alignment smell/metric cluster while
-  preserving public helper exports, default application semantics, inheritance
-  lookup behavior, schedule-rule alignment behavior, parser/generated
-  artifacts, VS Code compatibility, web compatibility, and `engines.vscode`.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -118,9 +112,10 @@ Only clear human approval can change Status to Approved.
       smell/metric cleanup as the next domain-helper candidate.
 - [x] Record Slice-3-G impact investigation.
 - [x] Request human approval for the selected Slice-3-G implementation scope.
-- [ ] Record human approval for Slice-3-G.
-- [ ] Complete Slice-3-G `parameterHelpers.ts` parameter resolution helper
+- [x] Record human approval for Slice-3-G.
+- [x] Complete Slice-3-G `parameterHelpers.ts` parameter resolution helper
       smell/metric cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-G.
 
 ## Validation
 
@@ -356,3 +351,21 @@ Only clear human approval can change Status to Approved.
   default array and scalar fallback behavior, default application modes,
   `resolveParameter` singular-array error behavior, schedule-rule sorting, and
   sd-aligned default/null placeholder behavior.
+- Slice-3-G changed `parameterHelpers.ts` to table-drive default raw values
+  and default application modes, normalize sd-aligned schedule helper input
+  while preserving existing four-argument calls, and split own, inherited, and
+  default parameter array resolution into local helpers. Public helper exports,
+  parameter symbol validation, own > inherited > default precedence,
+  parent-chain lookup, default array/scalar fallback, default modes, singular
+  array error behavior, schedule sorting, sd alignment, parser/generated
+  artifacts, VS Code/web compatibility, and `engines.vscode` are preserved.
+- Targeted Qlty smell output for `parameterHelpers.ts` reports no findings.
+  Targeted metrics changed from 0 classes / 21 funcs / cyclo 52 /
+  complexity 47 / LOC 338 before Slice-3-G to 0 classes / 32 funcs /
+  cyclo 48 / complexity 43 / LOC 401. The function-count and LOC increases
+  are accepted because the target smell cluster was removed while cyclomatic
+  and aggregate complexity decreased.
+- Slice-3-G validation passed for targeted parameter helper/factory and
+  unit-list schedule projection coverage, `rtk pnpm run qlty`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`. Build
+  completed with existing webpack asset-size warnings.

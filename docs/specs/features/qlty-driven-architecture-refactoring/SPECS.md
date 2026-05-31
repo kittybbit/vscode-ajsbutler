@@ -905,6 +905,29 @@ artifacts, application projections, presentation behavior, dependency
 versions, VS Code compatibility, web compatibility, or `engines.vscode`
 requires separate approval.
 
+### Slice-3-G Result
+
+`parameterHelpers.ts` now resolves root-jobnet default raw values and default
+application modes through local tables, normalizes sd-aligned schedule helper
+input through a local object shape while preserving existing four-argument
+calls, and delegates own, inherited, and default parameter array resolution to
+focused local helpers.
+
+The change preserves public helper exports, parameter symbol validation, own
+parameter precedence over inherited/default values, parent-chain inherited
+lookup, default array and scalar fallback behavior, root-jobnet defaults,
+connector-control defaults and modes, `resolveParameter` singular-array error
+behavior, schedule-rule sorting, sd-aligned default/null placeholder behavior,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, and
+`engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 21 funcs / cyclo 52 / complexity 47 / LOC 338 before Slice-3-G to
+0 classes / 32 funcs / cyclo 48 / complexity 43 / LOC 401. The function-count
+and LOC increases are accepted because the same-file smell cluster was removed
+while cyclomatic and aggregate complexity decreased.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -928,4 +951,4 @@ requires separate approval.
 
 ## Open Questions
 
-- Whether Slice-3-G is approved for implementation.
+- Which domain helper should follow Slice-3-G.
