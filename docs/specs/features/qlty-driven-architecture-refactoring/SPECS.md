@@ -928,6 +928,89 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 and LOC increases are accepted because the same-file smell cluster was removed
 while cyclomatic and aggregate complexity decreased.
 
+### Slice-3-H Target
+
+Slice-3-H targets
+`src/domain/models/parameters/scheduleRuleHelpers.ts`.
+
+Current Qlty evidence:
+
+- `parseScheduleByDaysFromStartValue` reports a high-complexity finding.
+- Metrics for `scheduleRuleHelpers.ts` are 0 classes / 14 funcs / cyclo 30 /
+  complexity 17 / LOC 124.
+
+### Slice-3-H Investigation
+
+`scheduleRuleHelpers.ts` centralizes schedule-rule fragment parsing for
+schedule dates, cycles, closed-day substitution, shift days, start/wait times,
+wait counts, cftd schedule-by-days values, and effective wc/wt pairing.
+Production use flows through `ScheduleRule.Cftd`, unit-list `parseCftd`,
+parameter factory facade behavior, and schedule diagnostics that consume the
+same helper module.
+
+Existing tests in `scheduleRuleHelpers.test.ts`, `parameterFactory.test.ts`,
+`buildUnitListGroup10View.test.ts`, `buildUnitListView.test.ts`, and
+`buildSyntaxDiagnostics.test.ts` cover supported schedule-rule parsing, cftd
+defaults, cftd mode-specific max-shift fields, unsupported partial parses,
+facade behavior, unit-list projections, and cftd diagnostics.
+
+### Slice-3-H Boundary Decision
+
+Reduce the same-file schedule-by-days parser smell/metric cluster inside
+`scheduleRuleHelpers.ts` only.
+
+Do not change:
+
+- public helper exports
+- schedule rule number parsing or defaulting
+- accepted `cftd` types `no`, `be`, `af`, `db`, and `da`
+- `no` schedule-by-days suppression
+- default `scheduleByDaysFromStart` value `1` for non-`no` cftd types
+- default max-shift value `10` for `be` and `af`
+- no max-shift value for `no`, `db`, and `da`
+- unsupported-shape rejection
+- effective wc/wt pair behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-H Approval-Sensitive Scope
+
+Implementation may add local helper functions or local lookup tables inside
+`src/domain/models/parameters/scheduleRuleHelpers.ts` and rewrite
+`parseScheduleByDaysFromStartValue` as a smaller coordinator while preserving
+public helper exports and behavior.
+
+Any change to accepted/rejected schedule-rule forms, cftd defaults, effective
+wc/wt pair behavior, parser/generated artifacts, application projections,
+presentation behavior, dependency versions, VS Code compatibility, web
+compatibility, or `engines.vscode` requires separate approval.
+
+### Slice-3-H Result
+
+`scheduleRuleHelpers.ts` now parses cftd schedule-by-days matches through a
+typed local helper and resolves schedule-by-days/default max-shift fields
+through focused type-set helpers.
+
+The change preserves public helper exports, schedule rule number parsing and
+defaulting, accepted `cftd` types, `no` schedule-by-days suppression, default
+`scheduleByDaysFromStart` value `1` for non-`no` cftd types, default
+max-shift value `10` for `be` and `af`, no max-shift value for `no`, `db`,
+and `da`, unsupported-shape rejection, effective wc/wt pair behavior,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, and
+`engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Targeted metrics changed from
+0 classes / 14 funcs / cyclo 30 / complexity 17 / LOC 124 before Slice-3-H to
+0 classes / 17 funcs / cyclo 26 / complexity 17 / LOC 154. The function-count
+and LOC increases are accepted because the target function-level smell was
+removed and cyclomatic complexity decreased.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -951,4 +1034,4 @@ while cyclomatic and aggregate complexity decreased.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-G.
+- Which domain helper should follow Slice-3-H.

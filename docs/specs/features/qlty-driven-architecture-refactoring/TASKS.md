@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-G implementation is complete.
+  Slice-3-H implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -115,7 +115,15 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-G.
 - [x] Complete Slice-3-G `parameterHelpers.ts` parameter resolution helper
       smell/metric cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-G.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-G.
+- [x] Select Slice-3-H `scheduleRuleHelpers.ts` schedule-by-days parser helper
+      cleanup as the next domain-helper candidate.
+- [x] Record Slice-3-H impact investigation.
+- [x] Request human approval for the selected Slice-3-H implementation scope.
+- [x] Record human approval for Slice-3-H.
+- [x] Complete Slice-3-H `scheduleRuleHelpers.ts` schedule-by-days parser
+      helper cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-H.
 
 ## Validation
 
@@ -369,3 +377,37 @@ Only clear human approval can change Status to Approved.
   unit-list schedule projection coverage, `rtk pnpm run qlty`,
   `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`. Build
   completed with existing webpack asset-size warnings.
+- Slice-3-H targets `scheduleRuleHelpers.ts` because targeted domain Qlty
+  reports a high-complexity finding for
+  `parseScheduleByDaysFromStartValue`. Current file metrics are 0 classes /
+  14 funcs / cyclo 30 / complexity 17 / LOC 124.
+- Impact is local to schedule-rule parsing helpers. Production use flows
+  through `ScheduleRule.Cftd`, unit-list `parseCftd`, parameter factory
+  facade behavior, and schedule diagnostics that already consume the same
+  schedule-rule helper module. Existing tests cover supported schedule-rule
+  parsing, cftd defaults, cftd mode-specific max-shift fields, unsupported
+  partial parses, parameter factory cftd facades, unit-list group 10
+  projections, and syntax diagnostics for cftd ranges.
+- Slice-3-H must preserve schedule rule number defaulting to 1, accepted cftd
+  types `no`/`be`/`af`/`db`/`da`, `no` suppressing
+  `scheduleByDaysFromStart`, default `scheduleByDaysFromStart` of `1` for
+  non-`no` types, default max-shift `10` for `be`/`af`, no max-shift for
+  `no`/`db`/`da`, unsupported-shape rejection, and current wc/wt effective
+  pair behavior.
+- Slice-3-H changed `scheduleRuleHelpers.ts` to parse cftd matches through a
+  typed local helper and resolve schedule-by-days/default max-shift fields
+  through focused type-set helpers. Public helper exports, schedule rule number
+  defaulting, accepted/rejected cftd shapes, cftd default fields, effective
+  wc/wt pairing, parser/generated artifacts, VS Code/web compatibility, and
+  `engines.vscode` are preserved.
+- Targeted Qlty smell output for `scheduleRuleHelpers.ts` reports no findings.
+  Targeted metrics changed from 0 classes / 14 funcs / cyclo 30 /
+  complexity 17 / LOC 124 before Slice-3-H to 0 classes / 17 funcs /
+  cyclo 26 / complexity 17 / LOC 154. The function-count and LOC increases
+  are accepted because the target function-level smell was removed and
+  cyclomatic complexity decreased.
+- Slice-3-H validation passed for targeted schedule-rule helper, parameter
+  factory, unit-list schedule projection, and syntax diagnostics coverage,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
