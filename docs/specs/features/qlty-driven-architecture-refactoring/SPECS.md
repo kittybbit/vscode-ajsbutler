@@ -1333,6 +1333,89 @@ Targeted Qlty smell output reports no findings. Targeted metrics changed from
 accepted because the target many-parameters smell was removed without changing
 normalized unit behavior.
 
+### Slice-3-M Target
+
+Slice-3-M targets the wait-job unit duplication cluster in:
+
+- `src/domain/models/units/Cmsj.ts`
+- `src/domain/models/units/Tmwj.ts`
+- `src/domain/models/units/Pwlj.ts`
+
+Current Qlty evidence:
+
+- Qlty reports 43 similar lines across `Cmsj.ts`, `Tmwj.ts`, and `Pwlj.ts`.
+- Metrics for the three-file cluster are 6 classes / 27 funcs / cyclo 3 /
+  complexity 0 / LOC 96.
+
+### Slice-3-M Investigation
+
+`Cmsj`, `Tmwj`, and `Pwlj` are waitable unit entities with class-specific
+parameter getters plus duplicated shared getters for common execution,
+agent, hard-attribute, execution-user, platform, and job-type parameters.
+Recovery classes `Rcmsj`, `Rtmwj`, and `Rpwlj` inherit the corresponding
+non-recovery class behavior.
+
+Serena and targeted search found public class construction through
+`TyUtils.tyFactory`, with direct test references for `Tmwj` in
+`parameterFactory.test.ts`. Unit-list projection tests cover shared parameter
+values such as `etm`, `fd`, `ex`, `ha`, `eu`, `pfm`, and `jty`.
+
+### Slice-3-M Boundary Decision
+
+Reduce the wait-job shared getter duplication with a focused helper or base
+class under the domain unit boundary.
+
+Do not change:
+
+- public `Cmsj`, `Rcmsj`, `Tmwj`, `Rtmwj`, `Pwlj`, and `Rpwlj` exports
+- `tyFactory` mappings
+- recovery subclass inheritance
+- existing getter names
+- existing `ParamFactory` call targets
+- waitable-unit behavior
+- unit-list projections
+- diagnostics behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-M Approval-Sensitive Scope
+
+Implementation may add a focused abstract base class or helper module under
+`src/domain/models/units/`, update `Cmsj.ts`, `Tmwj.ts`, and `Pwlj.ts` to
+reuse the shared getter implementation, and adjust imports when needed.
+
+Any change to public unit class exports, parameter getter names or values,
+`ParamFactory` lookup semantics, recovery class behavior, `tyFactory`
+mappings, parser/generated artifacts, application projections, presentation
+behavior, dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
+### Slice-3-M Result
+
+`unitCapabilityEntities.ts` now provides shared
+`ExecutionWaitJobUnitEntity` and `PlatformExecutionWaitJobUnitEntity` bases for
+common wait-job execution, agent, hard-attribute, execution-user, platform, and
+job-type getters. `Cmsj`, `Tmwj`, and `Pwlj` keep only their class-specific
+getters and continue exporting their recovery subclasses.
+
+The change preserves public `Cmsj`, `Rcmsj`, `Tmwj`, `Rtmwj`, `Pwlj`, and
+`Rpwlj` exports, `tyFactory` mappings, recovery subclass inheritance, existing
+getter names and values, `ParamFactory` lookup targets, waitable-unit
+behavior, unit-list projections, diagnostics behavior, parser/generated
+artifacts, application projections, presentation behavior, dependency
+versions, VS Code compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings. Metrics changed from the
+three-file cluster 6 classes / 27 funcs / cyclo 3 / complexity 0 / LOC 96
+before Slice-3-M to the four-file cluster 6 classes / 24 funcs / cyclo 4 /
+complexity 0 / LOC 111 after. The total LOC increase is accepted because the
+target duplication was removed and the per-target unit files became smaller.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1356,4 +1439,4 @@ normalized unit behavior.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-L.
+- Which domain helper should follow Slice-3-M.

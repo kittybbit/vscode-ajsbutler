@@ -61,3 +61,42 @@ export abstract class PrioritizableWaitableUnitEntity
     return resolveUnitPriority(this);
   }
 }
+
+export abstract class ExecutionWaitJobUnitEntity extends WaitableUnitEntity {
+  // [etm=n;]
+  get etm() {
+    return ParamFactory.etm(this);
+  }
+
+  // [fd=time-required-for-execution;]
+  get fd() {
+    return ParamFactory.fd(this);
+  }
+
+  // [ex="execution-agent-name";]
+  get ex() {
+    return ParamFactory.ex(this);
+  }
+
+  // [ha={y|n};]
+  get ha() {
+    return ParamFactory.ha(this);
+  }
+
+  // [eu={ent|def};]
+  get eu() {
+    return ParamFactory.eu(this);
+  }
+}
+
+export abstract class PlatformExecutionWaitJobUnitEntity extends ExecutionWaitJobUnitEntity {
+  // [pfm={u|p};]
+  get pfm() {
+    return ParamFactory.pfm(this);
+  }
+
+  // [jty={q|n};]
+  get jty() {
+    return ParamFactory.jty(this);
+  }
+}

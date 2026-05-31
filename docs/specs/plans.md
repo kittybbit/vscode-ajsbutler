@@ -35,7 +35,7 @@ rules in `docs/specs/README.md`, not in this file.
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
 2. Choose the next Qlty-driven architecture refactoring Slice-3
-   domain-helper candidate after Slice-3-L.
+   domain-helper candidate after Slice-3-M.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -139,7 +139,9 @@ rules in `docs/specs/README.md`, not in this file.
   `relations.ts` normalized relation resolver cleanup and implementation is
   complete. Slice-3-L investigation is complete for `unitBuilder.ts`
   normalized unit builder input cleanup and implementation is complete. The
-  next Slice-3 decision is the following domain-helper candidate.
+  Slice-3-M investigation is complete for `Cmsj`/`Tmwj`/`Pwlj` wait-job
+  shared getter cleanup and implementation is complete. The next decision is
+  the next Slice-3 domain-helper candidate.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

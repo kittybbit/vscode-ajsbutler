@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-L implementation is complete.
+  Slice-3-M implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -21,9 +21,9 @@
 
 - Status: Pending
 - Approved at:
-  none
+  none.
 - Approved scope:
-  none
+  none.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -154,7 +154,14 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-L.
 - [x] Complete Slice-3-L `unitBuilder.ts` normalized unit builder input
       cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-L.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-L.
+- [x] Select Slice-3-M `Cmsj`/`Tmwj`/`Pwlj` wait-job shared getter cleanup as
+      the next domain-helper candidate.
+- [x] Record Slice-3-M impact investigation.
+- [x] Request human approval for the selected Slice-3-M implementation scope.
+- [x] Record human approval for Slice-3-M.
+- [x] Complete Slice-3-M `Cmsj`/`Tmwj`/`Pwlj` wait-job shared getter cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-M.
 
 ## Validation
 
@@ -210,6 +217,11 @@ Only clear human approval can change Status to Approved.
 - Slice-3-L implementation:
   targeted `normalizeUnitBuilder.test.ts`, `normalizeUnitTree.test.ts`, and
   normalized document coverage, then `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`
+- Slice-3-M implementation:
+  targeted Qlty smell/metrics for `Cmsj.ts`, `Tmwj.ts`, and `Pwlj.ts`,
+  `parameterFactory.test.ts` execution-interval coverage, unit-list remaining
+  groups/view coverage, then `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
@@ -575,6 +587,38 @@ Only clear human approval can change Status to Approved.
   LOC 50. The LOC increase is accepted because the target many-parameters
   smell was removed without changing normalized unit behavior.
 - Slice-3-L validation passed for targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-M targets the `Cmsj.ts` / `Tmwj.ts` / `Pwlj.ts` duplication cluster
+  because targeted domain Qlty reports 43 lines of similar code across those
+  three wait-job unit classes. Current cluster metrics are 6 classes /
+  27 funcs / cyclo 3 / complexity 0 / LOC 96.
+- Impact is local to domain unit parameter getter ownership. Production class
+  construction flows through `TyUtils.tyFactory`; direct references preserve
+  public `Cmsj`, `Rcmsj`, `Tmwj`, `Rtmwj`, `Pwlj`, and `Rpwlj` exports.
+  Existing tests cover `Tmwj.tmitv` defaults and explicit values through
+  `parameterFactory.test.ts`, and shared `etm`, `fd`, `ex`, `ha`, `eu`, `pfm`,
+  and `jty` values through unit-list projection coverage.
+- Slice-3-M must preserve all existing getter names and values:
+  `Cmsj.cmsts/cmaif/pfm/etm/fd/ex/ha/eu/jty`,
+  `Tmwj.tmitv/etn/jpoif/etm/fd/ex/ha/eu/ets`, and
+  `Pwlj.pwlt/pwlf/pfm/etm/fd/ex/ha/eu/jty`; public class exports; recovery
+  subclass inheritance; waitable-unit behavior; `tyFactory` mappings;
+  parser/generated artifacts; application projections; VS Code/web
+  compatibility; and `engines.vscode`.
+- Slice-3-M added `ExecutionWaitJobUnitEntity` and
+  `PlatformExecutionWaitJobUnitEntity` in `unitCapabilityEntities.ts`, moving
+  shared `etm`, `fd`, `ex`, `ha`, `eu`, `pfm`, and `jty` getters out of
+  `Cmsj`, `Tmwj`, and `Pwlj`. Class-specific getters and public recovery
+  subclasses remain in their original unit files.
+- Targeted Qlty smell output for `Cmsj.ts`, `Tmwj.ts`, `Pwlj.ts`, and
+  `unitCapabilityEntities.ts` reports no findings. Metrics changed from the
+  three-file cluster 6 classes / 27 funcs / cyclo 3 / complexity 0 / LOC 96
+  before Slice-3-M to the four-file cluster 6 classes / 24 funcs / cyclo 4 /
+  complexity 0 / LOC 111 after. The total LOC increase is accepted because
+  target duplication was removed while per-target unit files became smaller.
+- Slice-3-M validation passed targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.
