@@ -2,6 +2,8 @@ import * as assert from "assert";
 import { Cpj } from "../../domain/models/units/Cpj";
 import { Mqsj } from "../../domain/models/units/Mqsj";
 import { Mssj } from "../../domain/models/units/Mssj";
+import { Mqwj } from "../../domain/models/units/Mqwj";
+import { Mswj } from "../../domain/models/units/Mswj";
 import { N } from "../../domain/models/units/N";
 import { Qj } from "../../domain/models/units/Qj";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
@@ -93,5 +95,49 @@ suite("Unit capability entities", () => {
     assert.strictEqual(mssj.ha?.value(), "n");
     assert.strictEqual(mssj.eu?.value(), "def");
     assert.strictEqual(mssj.jty?.value(), "n");
+  });
+
+  test("keeps shared execution and macro-passing getters on message queue wait jobs", () => {
+    const result = parseAjs(`
+      mqwj=/mq-wait;
+      ty=mqwj;
+      jpoif=macro-a:info-a;
+      etm=7;
+      fd=00:10;
+      ex="agent-a";
+      ha=y;
+      eu=ent;
+      ets=kl;
+
+      mswj=/ms-wait;
+      ty=mswj;
+      jpoif=macro-b:info-b;
+      etm=8;
+      fd=00:20;
+      ex="agent-b";
+      ha=n;
+      eu=def;
+      ets=nr;
+    `);
+
+    assert.deepStrictEqual(result.errors, []);
+    const mqwj = tyFactory(result.rootUnits[0]) as Mqwj;
+    const mswj = tyFactory(result.rootUnits[1]) as Mswj;
+
+    assert.strictEqual(mqwj.jpoif?.[0]?.value(), "macro-a:info-a");
+    assert.strictEqual(mqwj.etm?.value(), "7");
+    assert.strictEqual(mqwj.fd?.value(), "00:10");
+    assert.strictEqual(mqwj.ex?.value(), "agent-a");
+    assert.strictEqual(mqwj.ha?.value(), "y");
+    assert.strictEqual(mqwj.eu?.value(), "ent");
+    assert.strictEqual(mqwj.ets?.value(), "kl");
+
+    assert.strictEqual(mswj.jpoif?.[0]?.value(), "macro-b:info-b");
+    assert.strictEqual(mswj.etm?.value(), "8");
+    assert.strictEqual(mswj.fd?.value(), "00:20");
+    assert.strictEqual(mswj.ex?.value(), "agent-b");
+    assert.strictEqual(mswj.ha?.value(), "n");
+    assert.strictEqual(mswj.eu?.value(), "def");
+    assert.strictEqual(mswj.ets?.value(), "nr");
   });
 });

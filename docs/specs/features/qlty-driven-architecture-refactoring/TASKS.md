@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-N implementation is complete.
+  Slice-3-O implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -168,7 +168,15 @@ Only clear human approval can change Status to Approved.
 - [x] Request human approval for the selected Slice-3-N implementation scope.
 - [x] Record human approval for Slice-3-N.
 - [x] Complete Slice-3-N `Mqsj`/`Mssj` message-queue shared getter cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-N.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-N.
+- [x] Select Slice-3-O `Mqwj`/`Mswj` message-queue wait job shared getter
+      cleanup as the next domain-helper candidate.
+- [x] Record Slice-3-O impact investigation.
+- [x] Request human approval for the selected Slice-3-O implementation scope.
+- [x] Record human approval for Slice-3-O.
+- [x] Complete Slice-3-O `Mqwj`/`Mswj` message-queue wait job shared getter
+      cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-O.
 
 ## Validation
 
@@ -236,6 +244,11 @@ Only clear human approval can change Status to Approved.
   coverage for shared message-queue execution getters, then
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`
+- Slice-3-O implementation:
+  targeted Qlty smell/metrics for `Mqwj.ts`, `Mswj.ts`, and
+  `unitCapabilityEntities.ts`, focused unit getter coverage for shared
+  message-queue wait job getters, then `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
 
@@ -665,6 +678,38 @@ Only clear human approval can change Status to Approved.
   duplication cluster is removed; remaining smell output points at separate
   cross-file unit clusters with `Mqwj`/`Mswj` and `Jdj`/`Pwrj`.
 - Slice-3-N validation passed targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-O targets the `Mqwj.ts` / `Mswj.ts` duplication cluster because
+  targeted domain Qlty reports 55 similar lines across those two
+  message-queue wait job classes and the already-cleaned `Mqsj`. Current
+  target metrics for `Mqwj.ts`, `Mswj.ts`, and `unitCapabilityEntities.ts`
+  are 4 classes / 40 funcs / cyclo 3 / complexity 0 / LOC 156.
+- Impact is local to domain unit getter ownership. Public construction flows
+  through `TyUtils.tyFactory`; Serena reference lookup found direct class
+  references only from recovery subclass inheritance and `TyUtils` imports /
+  mappings. Targeted search found no application, UI, or test code directly
+  referencing `Mqwj`, `Mswj`, `Rmqwj`, `Rmswj`, or the class-specific
+  `mqsfn` / `mssvf` getters.
+- Slice-3-O must preserve all existing getter names and values:
+  `Mqwj.mqcor/mqque/mqdsc/mqmdl/mqsfn/jpoif/etm/fd/ex/ha/eu/ets` and
+  `Mswj.msqpt/msrer/mslbl/msapl/mssvf/jpoif/etm/fd/ex/ha/eu/ets`; public
+  class exports; recovery subclass inheritance; waitable-unit behavior;
+  `tyFactory` mappings; parser/generated artifacts; application projections;
+  VS Code/web compatibility; and `engines.vscode`.
+- Slice-3-O added `MacroPassingExecutionWaitJobUnitEntity` in
+  `unitCapabilityEntities.ts`, moving shared `jpoif`, `etm`, `fd`, `ex`,
+  `ha`, `eu`, and `ets` getters out of `Mqwj` and `Mswj`. Public class
+  exports, recovery subclasses, getter names/values, and `tyFactory` mappings
+  are preserved.
+- Targeted Qlty metrics for `Mqwj.ts`, `Mswj.ts`, and
+  `unitCapabilityEntities.ts` changed from 4 classes / 40 funcs / cyclo 3 /
+  complexity 0 / LOC 156 before Slice-3-O to 4 classes / 28 funcs / cyclo 3 /
+  complexity 0 / LOC 122 after. The original 55-line shared wait-job getter
+  cluster is reduced; remaining smell output reports a smaller 27-line
+  class-specific getter-shape cluster between `Mqwj` and `Mswj`.
+- Slice-3-O validation passed targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.

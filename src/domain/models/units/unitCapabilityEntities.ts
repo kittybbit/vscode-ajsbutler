@@ -89,6 +89,18 @@ export abstract class ExecutionWaitJobUnitEntity extends WaitableUnitEntity {
   }
 }
 
+export abstract class MacroPassingExecutionWaitJobUnitEntity extends ExecutionWaitJobUnitEntity {
+  // [jpoif=macro-variable-name:passing-information-name;]
+  get jpoif() {
+    return ParamFactory.jpoif(this);
+  }
+
+  // [ets={kl|nr|wr|an};]
+  get ets() {
+    return ParamFactory.ets(this);
+  }
+}
+
 export abstract class JobTypeExecutionWaitJobUnitEntity extends ExecutionWaitJobUnitEntity {
   // [jty={q|n};]
   get jty() {
