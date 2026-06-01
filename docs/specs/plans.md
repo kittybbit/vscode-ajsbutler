@@ -34,8 +34,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Choose the next Qlty-driven architecture refactoring Slice-3
-   domain-helper candidate after Slice-3-O.
+2. Select the next Qlty-driven architecture refactoring Slice-3
+   domain-helper candidate after Slice-3-P.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -144,8 +144,9 @@ rules in `docs/specs/README.md`, not in this file.
   investigation is complete for `Mqsj`/`Mssj` message-queue shared getter
   cleanup and implementation is complete. Slice-3-O investigation is complete
   for `Mqwj`/`Mswj` message-queue wait job shared getter cleanup and
-  implementation is complete. The next decision is the next Slice-3
-  domain-helper candidate.
+  implementation is complete. Slice-3-P investigation and implementation are
+  complete for `Fxj`/`Mlwj`/`Ntwj` wait-job shared getter cleanup. The next
+  decision is the following Slice-3 domain-helper candidate.
 
 Completed feature-local folders were removed after their durable behavior
 contracts were compressed into `docs/requirements/use-cases/`.

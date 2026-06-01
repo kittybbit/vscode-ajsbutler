@@ -1584,6 +1584,95 @@ targeted smell output reports a smaller 27-line class-specific getter-shape
 cluster between `Mqwj` and `Mswj`; that remaining cluster is a later candidate
 rather than part of this approved scope.
 
+### Slice-3-P Target
+
+Slice-3-P targets the waitable unit duplication cluster in:
+
+- `src/domain/models/units/Fxj.ts`
+- `src/domain/models/units/Mlwj.ts`
+- `src/domain/models/units/Ntwj.ts`
+
+Current Qlty evidence:
+
+- Qlty reports 75 similar lines across `Fxj.ts`, `Mlwj.ts`, and `Ntwj.ts`.
+- Metrics for `Fxj.ts`, `Mlwj.ts`, `Ntwj.ts`, and
+  `unitCapabilityEntities.ts` are 6 classes / 69 funcs / cyclo 4 /
+  complexity 0 / LOC 250.
+
+### Slice-3-P Investigation
+
+`Fxj`, `Mlwj`, and `Ntwj` are waitable unit entities with class-specific
+parameter getters plus duplicated shared getter shapes. `Mlwj` and `Ntwj`
+share the macro-variable passing execution wait job getter set already
+represented by `MacroPassingExecutionWaitJobUnitEntity`; `Fxj` shares the
+hard-attribute and execution-user getter pair with the same wait-job family.
+
+Serena reference lookup found `Mlwj` and `Ntwj` public construction through
+`TyUtils.tyFactory`, with direct class references otherwise limited to
+recovery subclass inheritance. Targeted search found the same construction and
+recovery pattern for `Fxj`; application projection coverage also references
+the `fxg` parameter through unit-list remaining groups.
+
+### Slice-3-P Boundary Decision
+
+Reduce the wait-job shared getter duplication with focused abstract bases under
+the domain unit boundary. Keep entity-local JP1/AJS parameter getters in their
+own unit classes when they are not shared semantics.
+
+Do not change:
+
+- public `Fxj`, `Rfxj`, `Mlwj`, `Rmlwj`, `Ntwj`, and `Rntwj` exports
+- `tyFactory` mappings
+- recovery subclass inheritance
+- existing getter names
+- existing `ParamFactory` call targets
+- waitable-unit behavior
+- unit-list projections
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-P Approval-Sensitive Scope
+
+Implementation may add or reuse focused abstract base classes under
+`src/domain/models/units/`, update `Fxj.ts`, `Mlwj.ts`, and `Ntwj.ts` to reuse
+shared getter implementations, and add focused tests when needed to cover
+preserved shared getter behavior.
+
+Any change to public unit class exports, parameter getter names or values,
+`ParamFactory` lookup semantics, recovery class behavior, `tyFactory`
+mappings, unit-list projection behavior, parser/generated artifacts,
+application projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, or `engines.vscode` requires separate
+approval.
+
+### Slice-3-P Result
+
+`unitCapabilityEntities.ts` now provides `ExecutionUserWaitableUnitEntity` for
+the shared hard-attribute and execution-user getters. `Fxj` inherits that
+pair, while `Mlwj` and `Ntwj` reuse the existing
+`MacroPassingExecutionWaitJobUnitEntity` for `jpoif`, `etm`, `fd`, `ex`,
+`ha`, `eu`, and `ets`.
+
+The change preserves public `Fxj`, `Rfxj`, `Mlwj`, `Rmlwj`, `Ntwj`, and
+`Rntwj` exports, `tyFactory` mappings, recovery subclass inheritance, existing
+getter names and values, `ParamFactory` lookup targets, waitable-unit
+behavior, unit-list projections, parser/generated artifacts, application
+projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted metrics for `Fxj.ts`, `Mlwj.ts`, `Ntwj.ts`, and
+`unitCapabilityEntities.ts` changed from 6 classes / 69 funcs / cyclo 4 /
+complexity 0 / LOC 250 before Slice-3-P to 6 classes / 53 funcs / cyclo 4 /
+complexity 0 / LOC 204 after. The original 75-line three-file duplication
+cluster is reduced. Remaining targeted smell output identifies separate later
+candidates: a `Fxj`/`Evsj` 67-line cluster and a `Mlwj`/`Ntwj` 47-line
+class-specific getter-shape cluster.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1607,4 +1696,4 @@ rather than part of this approved scope.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-O.
+- Which domain helper should follow Slice-3-P.

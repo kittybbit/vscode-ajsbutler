@@ -1,10 +1,13 @@
 import * as assert from "assert";
 import { Cpj } from "../../domain/models/units/Cpj";
+import { Fxj } from "../../domain/models/units/Fxj";
+import { Mlwj } from "../../domain/models/units/Mlwj";
 import { Mqsj } from "../../domain/models/units/Mqsj";
 import { Mssj } from "../../domain/models/units/Mssj";
 import { Mqwj } from "../../domain/models/units/Mqwj";
 import { Mswj } from "../../domain/models/units/Mswj";
 import { N } from "../../domain/models/units/N";
+import { Ntwj } from "../../domain/models/units/Ntwj";
 import { Qj } from "../../domain/models/units/Qj";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
@@ -139,5 +142,58 @@ suite("Unit capability entities", () => {
     assert.strictEqual(mswj.ha?.value(), "n");
     assert.strictEqual(mswj.eu?.value(), "def");
     assert.strictEqual(mswj.ets?.value(), "nr");
+  });
+
+  test("keeps shared execution-user and macro-passing getters on wait jobs", () => {
+    const result = parseAjs(`
+      fxj=/flex;
+      ty=fxj;
+      ha=y;
+      eu=ent;
+
+      mlwj=/mail-wait;
+      ty=mlwj;
+      jpoif=mail-macro:mail-info;
+      etm=7;
+      fd=00:10;
+      ex="mail-agent";
+      ha=n;
+      eu=def;
+      ets=wr;
+
+      ntwj=/eventlog-wait;
+      ty=ntwj;
+      jpoif=event-macro:event-info;
+      etm=8;
+      fd=00:20;
+      ex="event-agent";
+      ha=y;
+      eu=ent;
+      ets=an;
+    `);
+
+    assert.deepStrictEqual(result.errors, []);
+    const fxj = tyFactory(result.rootUnits[0]) as Fxj;
+    const mlwj = tyFactory(result.rootUnits[1]) as Mlwj;
+    const ntwj = tyFactory(result.rootUnits[2]) as Ntwj;
+
+    assert.strictEqual(fxj.ha?.value(), "y");
+    assert.strictEqual(fxj.eu?.value(), "ent");
+
+    assert.strictEqual(mlwj.jpoif?.[0]?.value(), "mail-macro:mail-info");
+    assert.strictEqual(mlwj.etm?.value(), "7");
+    assert.strictEqual(mlwj.fd?.value(), "00:10");
+    assert.strictEqual(mlwj.ex?.value(), "mail-agent");
+    assert.strictEqual(mlwj.ha?.value(), "n");
+    assert.strictEqual(mlwj.eu?.value(), "def");
+    assert.strictEqual(mlwj.ets?.value(), "wr");
+
+    assert.strictEqual(ntwj.jpoif?.[0]?.value(), "event-macro:event-info");
+    assert.strictEqual(ntwj.etm?.value(), "8");
+    assert.strictEqual(ntwj.fd?.value(), "00:20");
+    assert.strictEqual(ntwj.ex?.value(), "event-agent");
+    assert.strictEqual(ntwj.ha?.value(), "y");
+    assert.strictEqual(ntwj.eu?.value(), "ent");
+    assert.strictEqual(ntwj.ets?.value(), "an");
   });
 });

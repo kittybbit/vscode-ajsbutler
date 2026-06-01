@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-O implementation is complete.
+  Slice-3-P implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -20,10 +20,8 @@
 ## Human Approval
 
 - Status: Pending
-- Approved at:
-  none.
-- Approved scope:
-  none.
+- Approved at: none
+- Approved scope: none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -176,7 +174,14 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-O.
 - [x] Complete Slice-3-O `Mqwj`/`Mswj` message-queue wait job shared getter
       cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-O.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-O.
+- [x] Select Slice-3-P `Fxj`/`Mlwj`/`Ntwj` wait-job shared getter cleanup as
+      the next domain-helper candidate.
+- [x] Record Slice-3-P impact investigation.
+- [x] Request human approval for the selected Slice-3-P implementation scope.
+- [x] Record human approval for Slice-3-P.
+- [x] Complete Slice-3-P `Fxj`/`Mlwj`/`Ntwj` wait-job shared getter cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-P.
 
 ## Validation
 
@@ -248,6 +253,11 @@ Only clear human approval can change Status to Approved.
   targeted Qlty smell/metrics for `Mqwj.ts`, `Mswj.ts`, and
   `unitCapabilityEntities.ts`, focused unit getter coverage for shared
   message-queue wait job getters, then `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`
+- Slice-3-P implementation:
+  targeted Qlty smell/metrics for `Fxj.ts`, `Mlwj.ts`, `Ntwj.ts`, and
+  `unitCapabilityEntities.ts`, focused unit getter coverage for shared wait
+  job getters, then `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
@@ -710,6 +720,43 @@ Only clear human approval can change Status to Approved.
   cluster is reduced; remaining smell output reports a smaller 27-line
   class-specific getter-shape cluster between `Mqwj` and `Mswj`.
 - Slice-3-O validation passed targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-P targets the `Fxj.ts` / `Mlwj.ts` / `Ntwj.ts` duplication cluster
+  because targeted domain Qlty reports 75 similar lines across those three
+  waitable unit classes. Current target metrics for `Fxj.ts`, `Mlwj.ts`,
+  `Ntwj.ts`, and `unitCapabilityEntities.ts` are 6 classes / 69 funcs /
+  cyclo 4 / complexity 0 / LOC 250.
+- Impact is local to domain unit getter ownership. Public construction flows
+  through `TyUtils.tyFactory`; Serena reference lookup found direct class
+  references for `Mlwj` and `Ntwj` only from recovery subclass inheritance and
+  `TyUtils` imports / mappings, while targeted search found the same pattern
+  for `Fxj`. Application projection coverage references `fxg` through
+  unit-list remaining groups.
+- Slice-3-P must preserve all existing getter names and values:
+  `Fxj.ex/da/fxg/sc/prm/env/jd/wth/tho/jdf/abr/rjs/rje/rec/rei/ha/eu`,
+  `Mlwj.pfm/mlprf/mladr/mlsbj/mltxt/mlsav/mllst/mlstx/mlsfd/mlafl/jpoif/etm/fd/ex/ha/eu/ets`,
+  and
+  `Ntwj.ntlgt/ntolg/ntevt/ntnsr/ntsrc/ntncl/ntcls/ntnei/nteid/ntdis/jpoif/etm/fd/ex/ha/eu/ets`;
+  public class exports; recovery subclass inheritance; waitable-unit
+  behavior; `tyFactory` mappings; parser/generated artifacts; application
+  projections; VS Code/web compatibility; and `engines.vscode`.
+- Slice-3-P added `ExecutionUserWaitableUnitEntity`, moved shared `ha`/`eu`
+  there, and made `ExecutionWaitJobUnitEntity` inherit it. `Fxj` now inherits
+  `ha`/`eu`; `Mlwj` and `Ntwj` inherit `jpoif`, `etm`, `fd`, `ex`, `ha`,
+  `eu`, and `ets` from `MacroPassingExecutionWaitJobUnitEntity`. Public class
+  exports, recovery subclasses, getter names and values, `ParamFactory`
+  lookup semantics, `tyFactory`, unit-list projections, parser/generated
+  artifacts, VS Code/web compatibility, and `engines.vscode` are preserved.
+- Targeted metrics for `Fxj.ts`, `Mlwj.ts`, `Ntwj.ts`, and
+  `unitCapabilityEntities.ts` changed from 6 classes / 69 funcs / cyclo 4 /
+  complexity 0 / LOC 250 before Slice-3-P to 6 classes / 53 funcs / cyclo 4 /
+  complexity 0 / LOC 204 after. The original 75-line three-file duplication
+  cluster is reduced; remaining targeted smell output points to a
+  `Fxj`/`Evsj` 67-line cluster and a `Mlwj`/`Ntwj` 47-line class-specific
+  getter-shape cluster.
+- Slice-3-P validation passed targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.

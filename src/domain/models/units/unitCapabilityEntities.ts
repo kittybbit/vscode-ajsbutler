@@ -62,7 +62,19 @@ export abstract class PrioritizableWaitableUnitEntity
   }
 }
 
-export abstract class ExecutionWaitJobUnitEntity extends WaitableUnitEntity {
+export abstract class ExecutionUserWaitableUnitEntity extends WaitableUnitEntity {
+  // [ha={y|n};]
+  get ha() {
+    return ParamFactory.ha(this);
+  }
+
+  // [eu={ent|def};]
+  get eu() {
+    return ParamFactory.eu(this);
+  }
+}
+
+export abstract class ExecutionWaitJobUnitEntity extends ExecutionUserWaitableUnitEntity {
   // [etm=n;]
   get etm() {
     return ParamFactory.etm(this);
@@ -76,16 +88,6 @@ export abstract class ExecutionWaitJobUnitEntity extends WaitableUnitEntity {
   // [ex="execution-agent-name";]
   get ex() {
     return ParamFactory.ex(this);
-  }
-
-  // [ha={y|n};]
-  get ha() {
-    return ParamFactory.ha(this);
-  }
-
-  // [eu={ent|def};]
-  get eu() {
-    return ParamFactory.eu(this);
   }
 }
 
