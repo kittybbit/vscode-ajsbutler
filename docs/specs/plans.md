@@ -45,8 +45,8 @@ rules in `docs/specs/README.md`, not in this file.
   pressure notes.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
   active maintainability-driven architectural refactoring. Slice-1, Slice-2,
-  Slice-3, and Slice-4-A completed behavior-preserving refactors and currently
-  require no use-case updates.
+  Slice-3, Slice-4-A, and Slice-4-B completed behavior-preserving refactors
+  and currently require no use-case updates.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the

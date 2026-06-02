@@ -28,27 +28,44 @@ export class VscodeWebApiCredentialStore
     }
 
     const serialized = await this.#secrets.get(credentialRef);
-    if (!serialized) {
-      return undefined;
-    }
-
-    try {
-      const credential = JSON.parse(
-        serialized,
-      ) as Partial<Jp1Ajs3WebApiCredential>;
-      if (
-        typeof credential.username === "string" &&
-        typeof credential.password === "string"
-      ) {
-        return {
-          username: credential.username,
-          password: credential.password,
-        };
-      }
-    } catch {
-      return undefined;
-    }
-
-    return undefined;
+    return parseStoredCredential(serialized);
   }
 }
+
+const parseStoredCredential = (
+  serialized: string | undefined,
+): Jp1Ajs3WebApiCredential | undefined => {
+  if (!serialized) {
+    return undefined;
+  }
+
+  try {
+    return toCredential(JSON.parse(serialized));
+  } catch {
+    return undefined;
+  }
+};
+
+const toCredential = (value: unknown): Jp1Ajs3WebApiCredential | undefined => {
+  if (!isCredentialLike(value)) {
+    return undefined;
+  }
+
+  return {
+    username: value.username,
+    password: value.password,
+  };
+};
+
+const isCredentialLike = (value: unknown): value is Jp1Ajs3WebApiCredential =>
+  isRecord(value) &&
+  hasStringProperty(value, "username") &&
+  hasStringProperty(value, "password");
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const hasStringProperty = (
+  value: Record<string, unknown>,
+  key: string,
+): boolean => typeof value[key] === "string";

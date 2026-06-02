@@ -12,11 +12,12 @@ longer affects approval, risk, or use-case back-propagation.
 - Active task:
   none.
 - Runtime status:
-  Slice-4-A WebAPI import command orchestration cleanup is complete.
+  Slice-4-B WebAPI credential store resolution cleanup is complete.
 - Use-case reflection:
-  None required. The implementation preserved current beta WebAPI import
-  command semantics, prompt text, credential behavior, request DTO shape,
-  success/error messages, telemetry events, and desktop/web compatibility.
+  None required. The implementation preserved current beta WebAPI credential
+  storage and resolution behavior, including missing/invalid credential
+  fallback, stored JSON shape, secret handling, and authentication-failure
+  behavior.
 
 ## Human Approval
 
@@ -31,7 +32,13 @@ approval can change Status to Approved.
 
 ## Active Tasks
 
-- [x] Complete Slice-4-A WebAPI import command orchestration cleanup.
+- [x] Select Slice-4-B WebAPI credential store resolution cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-4-B.
+- [x] Implement Slice-4-B inside the approved scope.
+- [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
@@ -45,7 +52,7 @@ approval can change Status to Approved.
 
 - None.
 
-Completed Slice-1, Slice-2, Slice-3, and Slice-4-A refactors were
+Completed Slice-1, Slice-2, Slice-3, Slice-4-A, and Slice-4-B refactors were
 behavior-preserving and do not currently require use-case updates. Remaining
 domain-unit duplication clusters should only be reopened when they represent a
 stronger shared JP1/AJS business concept or use-case need than getter-shape
