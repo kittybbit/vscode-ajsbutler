@@ -61,6 +61,27 @@ type ImportInputStep = {
   ) => ImportAjsDefinitionInputOptions;
 };
 
+type ImportCommandEarlyExit =
+  | { kind: "handled"; result: ImportAjsDefinitionResultDto }
+  | { kind: "ready"; host: ImportAjsDefinitionHostKind };
+
+type ImportExecutionPlan =
+  | {
+      kind: "ready";
+      request: ImportAjsDefinitionPortRequestDto;
+      inputs: ImportInputs;
+    }
+  | { kind: "done"; result: ImportAjsDefinitionResultDto };
+
+const IMPORT_INPUT_KEYS: ImportInputKey[] = [
+  "baseUrl",
+  "manager",
+  "serviceName",
+  "location",
+  "username",
+  "password",
+];
+
 const IMPORT_INPUT_STEPS: ImportInputStep[] = [
   {
     key: "baseUrl",
@@ -111,15 +132,47 @@ const IMPORT_INPUT_STEPS: ImportInputStep[] = [
 export const executeImportAjsDefinitionViaWebApiCommand = async (
   deps: ImportAjsDefinitionCommandDeps,
 ): Promise<ImportAjsDefinitionResultDto> => {
-  const host = deps.getHost();
-  const unsupportedHostResult = await rejectUnsupportedHostIfNeeded(deps, host);
-  if (unsupportedHostResult) {
-    return unsupportedHostResult;
+  const earlyExit = await resolveEarlyExit(deps);
+  if (earlyExit.kind === "handled") {
+    return earlyExit.result;
   }
 
+  return executeDesktopImport(deps, earlyExit.host);
+};
+
+const resolveEarlyExit = async (
+  deps: ImportAjsDefinitionCommandDeps,
+): Promise<ImportCommandEarlyExit> => {
+  const host = deps.getHost();
+  const unsupportedHostResult = await rejectUnsupportedHostIfNeeded(deps, host);
+  return unsupportedHostResult
+    ? { kind: "handled", result: unsupportedHostResult }
+    : { kind: "ready", host };
+};
+
+const executeDesktopImport = async (
+  deps: ImportAjsDefinitionCommandDeps,
+  host: ImportAjsDefinitionHostKind,
+): Promise<ImportAjsDefinitionResultDto> => {
+  const plan = await buildImportExecutionPlan(deps, host);
+  if (plan.kind === "done") {
+    return plan.result;
+  }
+
+  await storeImportCredential(deps, plan.request, plan.inputs);
+
+  const result = await deps.importPort.importDefinition(plan.request);
+  await reportImportResult(deps, result);
+  return result;
+};
+
+const buildImportExecutionPlan = async (
+  deps: ImportAjsDefinitionCommandDeps,
+  host: ImportAjsDefinitionHostKind,
+): Promise<ImportExecutionPlan> => {
   const inputs = await collectInputs(deps);
   if (!inputs) {
-    return reportCancelledImport(deps);
+    return { kind: "done", result: reportCancelledImport(deps) };
   }
 
   const request = buildDefinitionOnlyUnitListRequest({
@@ -130,14 +183,13 @@ export const executeImportAjsDefinitionViaWebApiCommand = async (
   });
 
   if ("ok" in request) {
-    return reportRequestBuildFailure(deps, request);
+    return {
+      kind: "done",
+      result: await reportRequestBuildFailure(deps, request),
+    };
   }
 
-  await storeImportCredential(deps, request, inputs);
-
-  const result = await deps.importPort.importDefinition(request);
-  await reportImportResult(deps, result);
-  return result;
+  return { kind: "ready", request, inputs };
 };
 
 const collectInputs = async (
@@ -268,27 +320,25 @@ const collectRequiredInputValues = async (
   deps: ImportAjsDefinitionCommandDeps,
 ): Promise<ImportInputValues | undefined> => {
   const values: Partial<ImportInputValues> = {};
+  let completed = true;
 
   for (const step of IMPORT_INPUT_STEPS) {
     const value = await promptRequired(deps, step.options(values));
-    if (!value) {
-      return undefined;
+    if (value) {
+      values[step.key] = value;
+    } else {
+      completed = false;
+      break;
     }
-    values[step.key] = value;
   }
 
-  return hasImportInputValues(values) ? values : undefined;
+  return completed && hasImportInputValues(values) ? values : undefined;
 };
 
 const hasImportInputValues = (
   values: Partial<ImportInputValues>,
 ): values is ImportInputValues =>
-  typeof values.baseUrl === "string" &&
-  typeof values.manager === "string" &&
-  typeof values.serviceName === "string" &&
-  typeof values.location === "string" &&
-  typeof values.username === "string" &&
-  typeof values.password === "string";
+  IMPORT_INPUT_KEYS.every((key) => typeof values[key] === "string");
 
 const promptRequired = async (
   deps: ImportAjsDefinitionCommandDeps,

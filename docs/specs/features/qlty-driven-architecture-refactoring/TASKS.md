@@ -15,11 +15,11 @@ active feature. Slice progress stays in this file.
 - Active task:
   none.
 - Runtime status:
-  Slice-4-E WebAPI OpenAPI artifact generator type-rendering cleanup is
+  Slice-4-F WebAPI import command input/result orchestration cleanup is
   complete.
 - Use-case reflection:
-  None required. Slice-4-E preserved generated artifacts and beta WebAPI import
-  behavior.
+  None required. Slice-4-F preserved beta WebAPI command behavior and did not
+  change the user-visible import contract.
 
 ## Human Approval
 
@@ -36,14 +36,6 @@ current conversation`; do not copy the approval message.
 
 ## Active Tasks
 
-- [x] Select Slice-4-E WebAPI OpenAPI artifact generator type-rendering cleanup
-      as the next candidate.
-- [x] Record the behavior-preservation and use-case reflection decision.
-- [x] Record the approval-sensitive implementation boundary.
-- [x] Record human approval for Slice-4-E.
-- [x] Implement Slice-4-E inside the approved scope.
-- [x] Run required validation.
-- [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
 
@@ -56,10 +48,11 @@ current conversation`; do not copy the approval message.
 
 - None.
 
-Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C, and
-Slice-4-D refactors were behavior-preserving and do not currently require
-use-case updates. The `buildUnitListView.ts` / WebAPI DTO duplication finding
-is not a current candidate because it appears to be DTO copy-shape similarity
-rather than shared behavior. Remaining domain-unit duplication clusters should
-only be reopened when they represent a stronger shared JP1/AJS business concept
-or use-case need than getter-shape similarity alone.
+Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C,
+Slice-4-D, Slice-4-E, and Slice-4-F refactors were behavior-preserving and do
+not currently require use-case updates. The `buildUnitListView.ts` / WebAPI DTO
+duplication finding is not a current candidate because it appears to be DTO
+copy-shape similarity rather than shared behavior. Remaining domain-unit
+duplication clusters should only be reopened when they represent a stronger
+shared JP1/AJS business concept or use-case need than getter-shape similarity
+alone.
