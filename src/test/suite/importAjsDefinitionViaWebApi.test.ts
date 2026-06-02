@@ -104,18 +104,20 @@ suite("Import AJS definition via WebAPI DTOs", () => {
   });
 
   test("maps manual HTTP statuses and repository-owned failures to structured errors", () => {
-    assert.strictEqual(
-      mapHttpStatusToImportErrorCode(401),
-      "authentication-failed",
-    );
-    assert.strictEqual(
-      mapHttpStatusToImportErrorCode(403),
-      "authorization-failed",
-    );
-    assert.strictEqual(
-      mapHttpStatusToImportErrorCode(412),
-      "web-console-unavailable",
-    );
+    const mappings = [
+      [400, "invalid-request"],
+      [401, "authentication-failed"],
+      [403, "authorization-failed"],
+      [404, "resource-not-found"],
+      [409, "conflict"],
+      [412, "web-console-unavailable"],
+      [500, "server-error"],
+    ] as const;
+
+    mappings.forEach(([status, errorCode]) => {
+      assert.strictEqual(mapHttpStatusToImportErrorCode(status), errorCode);
+    });
+
     assert.strictEqual(
       mapHttpStatusToImportErrorCode(418),
       "unexpected-status",

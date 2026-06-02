@@ -12,12 +12,11 @@ longer affects approval, risk, or use-case back-propagation.
 - Active task:
   none.
 - Runtime status:
-  Slice-4-C WebAPI import adapter execution cleanup is complete.
+  Slice-4-D WebAPI import HTTP status mapping cleanup is complete.
 - Use-case reflection:
-  None required. The implementation preserved current beta WebAPI import
-  adapter behavior, including request URL construction, headers, credential
-  usage, timeout behavior, HTTP error mapping, malformed response handling,
-  imported content mapping, warning semantics, and desktop/web compatibility.
+  None required. The implementation preserved current beta WebAPI HTTP status
+  to import error-code mapping, including all mapped statuses, fallback status
+  behavior, adapter error semantics, and user-visible error behavior.
 
 ## Human Approval
 
@@ -32,12 +31,12 @@ approval can change Status to Approved.
 
 ## Active Tasks
 
-- [x] Select Slice-4-C WebAPI import adapter execution cleanup as the next
+- [x] Select Slice-4-D WebAPI import HTTP status mapping cleanup as the next
       candidate.
 - [x] Record the behavior-preservation and use-case reflection decision.
 - [x] Record the approval-sensitive implementation boundary.
-- [x] Record human approval for Slice-4-C.
-- [x] Implement Slice-4-C inside the approved scope.
+- [x] Record human approval for Slice-4-D.
+- [x] Implement Slice-4-D inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
@@ -52,8 +51,10 @@ approval can change Status to Approved.
 
 - None.
 
-Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, and Slice-4-C
-refactors were behavior-preserving and do not currently require use-case
-updates. Remaining domain-unit duplication clusters should only be reopened
-when they represent a stronger shared JP1/AJS business concept or use-case
-need than getter-shape similarity alone.
+Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C, and
+Slice-4-D refactors were behavior-preserving and do not currently require
+use-case updates. The `buildUnitListView.ts` / WebAPI DTO duplication finding
+is not a current candidate because it appears to be DTO copy-shape similarity
+rather than shared behavior. Remaining domain-unit duplication clusters should
+only be reopened when they represent a stronger shared JP1/AJS business concept
+or use-case need than getter-shape similarity alone.
