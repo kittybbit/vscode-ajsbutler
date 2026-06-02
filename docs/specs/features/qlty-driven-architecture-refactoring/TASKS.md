@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-P implementation is complete.
+  Slice-3-Q implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -181,7 +181,15 @@ Only clear human approval can change Status to Approved.
 - [x] Request human approval for the selected Slice-3-P implementation scope.
 - [x] Record human approval for Slice-3-P.
 - [x] Complete Slice-3-P `Fxj`/`Mlwj`/`Ntwj` wait-job shared getter cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-P.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-P.
+- [x] Select Slice-3-Q `Evsj` event-sending shared execution getter cleanup
+      as the next domain-helper candidate.
+- [x] Record Slice-3-Q impact investigation.
+- [x] Request human approval for the selected Slice-3-Q implementation scope.
+- [x] Record human approval for Slice-3-Q.
+- [x] Complete Slice-3-Q `Evsj` event-sending shared execution getter
+      cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-Q.
 
 ## Validation
 
@@ -258,6 +266,11 @@ Only clear human approval can change Status to Approved.
   targeted Qlty smell/metrics for `Fxj.ts`, `Mlwj.ts`, `Ntwj.ts`, and
   `unitCapabilityEntities.ts`, focused unit getter coverage for shared wait
   job getters, then `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`
+- Slice-3-Q implementation:
+  targeted Qlty smell/metrics for `Evsj.ts`, `Fxj.ts`, and
+  `unitCapabilityEntities.ts`, focused unit getter coverage for event-sending
+  shared execution getters, then `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`
 
 ## Current Investigation Notes
@@ -757,6 +770,45 @@ Only clear human approval can change Status to Approved.
   `Fxj`/`Evsj` 67-line cluster and a `Mlwj`/`Ntwj` 47-line class-specific
   getter-shape cluster.
 - Slice-3-P validation passed targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-Q targets the `Evsj.ts` / `Fxj.ts` duplication cluster because
+  targeted domain Qlty reports 67 similar lines across those two waitable unit
+  classes after Slice-3-P. Current target metrics for `Evsj.ts`, `Fxj.ts`,
+  and `unitCapabilityEntities.ts` are 4 classes / 48 funcs / cyclo 3 /
+  complexity 0 / LOC 184.
+- Impact is local to domain unit getter ownership. `Evsj` public construction
+  flows through `TyUtils.tyFactory`; Serena reference lookup found direct
+  class references from recovery subclass inheritance, `TyUtils`, and
+  `parameterFactory.test.ts`. Application diagnostics and unit-list
+  projections use raw `evsj` / `revsj` unit types or parameter keys, not the
+  `Evsj` class directly.
+- Slice-3-Q should move only `Evsj` shared `pfm`, `etm`, `fd`, `ex`, `ha`,
+  `eu`, and `jty` getter ownership to the existing
+  `PlatformExecutionWaitJobUnitEntity` base. `Fxj.ex` must remain local
+  because its comment and semantics are relay-agent-specific, not
+  execution-agent-specific.
+- Slice-3-Q must preserve all existing getter names and values:
+  `Evsj.evsid/evhst/evsms/evssv/evsfr/pfm/etm/fd/ex/ha/eu/evsrt/evspl/evsrc/jty`
+  and `Fxj.ex/da/fxg/sc/prm/env/jd/wth/tho/jdf/abr/rjs/rje/rec/rei/ha/eu`;
+  public class exports; recovery subclass inheritance; waitable-unit
+  behavior; `tyFactory` mappings; event-sending diagnostics; unit-list
+  projections; parser/generated artifacts; application projections; VS
+  Code/web compatibility; and `engines.vscode`.
+- Slice-3-Q changed `Evsj` to inherit
+  `PlatformExecutionWaitJobUnitEntity`, moving shared `pfm`, `etm`, `fd`,
+  `ex`, `ha`, `eu`, and `jty` getter ownership out of `Evsj`. `Fxj.ex`
+  remains local because its JP1/AJS meaning is relay-agent-specific. Public
+  class exports, recovery subclasses, getter names and values, `ParamFactory`
+  lookup semantics, `tyFactory`, event-sending diagnostics, unit-list
+  projections, parser/generated artifacts, VS Code/web compatibility, and
+  `engines.vscode` are preserved.
+- Targeted Qlty smell output for `Evsj.ts`, `Fxj.ts`, and
+  `unitCapabilityEntities.ts` reports no findings. Targeted metrics changed
+  from 4 classes / 48 funcs / cyclo 3 / complexity 0 / LOC 184 before
+  Slice-3-Q to 4 classes / 41 funcs / cyclo 3 / complexity 0 / LOC 163 after.
+- Slice-3-Q validation passed targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.

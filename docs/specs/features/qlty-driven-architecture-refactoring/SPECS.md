@@ -1673,6 +1673,96 @@ cluster is reduced. Remaining targeted smell output identifies separate later
 candidates: a `Fxj`/`Evsj` 67-line cluster and a `Mlwj`/`Ntwj` 47-line
 class-specific getter-shape cluster.
 
+### Slice-3-Q Target
+
+Slice-3-Q targets the event-sending / flexible-job residual duplication
+cluster in:
+
+- `src/domain/models/units/Evsj.ts`
+- `src/domain/models/units/Fxj.ts`
+
+Current Qlty evidence:
+
+- Qlty reports 67 similar lines across `Evsj.ts` and `Fxj.ts`.
+- Metrics for `Evsj.ts`, `Fxj.ts`, and `unitCapabilityEntities.ts` are
+  4 classes / 48 funcs / cyclo 3 / complexity 0 / LOC 184.
+
+### Slice-3-Q Investigation
+
+`Evsj` is an event-sending waitable unit with event-sending parameter getters
+plus duplicated execution, platform, hard-attribute, execution-user, and
+job-type getters. These shared `Evsj` getters match the existing
+`PlatformExecutionWaitJobUnitEntity` shape.
+
+`Fxj` still participates in the residual duplication cluster, but its `ex`
+getter is relay-agent-specific. `Fxj` should continue to keep relay-agent
+execution semantics local while inheriting only the previously shared
+execution-user pair.
+
+Serena reference lookup found `Evsj` public construction through
+`TyUtils.tyFactory`, direct test coverage in `parameterFactory.test.ts`, and
+recovery subclass inheritance through `Revsj`. Application diagnostics and
+unit-list projections reference raw `evsj` / `revsj` unit types or parameter
+keys rather than the `Evsj` class directly.
+
+### Slice-3-Q Boundary Decision
+
+Reduce `Evsj` shared execution getter duplication by reusing the existing
+domain unit base. Do not move `Fxj.ex` into the execution-agent base because
+its JP1/AJS meaning is relay-agent-specific.
+
+Do not change:
+
+- public `Evsj`, `Revsj`, `Fxj`, and `Rfxj` exports
+- `tyFactory` mappings
+- recovery subclass inheritance
+- existing getter names
+- existing `ParamFactory` call targets
+- event-sending diagnostics
+- unit-list projections
+- waitable-unit behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-Q Approval-Sensitive Scope
+
+Implementation may update `Evsj.ts` to inherit the existing
+`PlatformExecutionWaitJobUnitEntity`, remove only the duplicated shared
+`pfm`, `etm`, `fd`, `ex`, `ha`, `eu`, and `jty` getters from `Evsj`, and add
+focused tests when needed to cover preserved event-sending shared getter
+behavior.
+
+Any change to public unit class exports, parameter getter names or values,
+`ParamFactory` lookup semantics, recovery class behavior, `tyFactory`
+mappings, event-sending diagnostics, unit-list projection behavior,
+parser/generated artifacts, application projections, presentation behavior,
+dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
+### Slice-3-Q Result
+
+`Evsj` now inherits `PlatformExecutionWaitJobUnitEntity` for shared `pfm`,
+`etm`, `fd`, `ex`, `ha`, `eu`, and `jty` getters. Event-sending-specific
+getters remain local to `Evsj`; `Fxj.ex` remains local because its JP1/AJS
+meaning is relay-agent-specific.
+
+The change preserves public `Evsj`, `Revsj`, `Fxj`, and `Rfxj` exports,
+`tyFactory` mappings, recovery subclass inheritance, existing getter names
+and values, `ParamFactory` lookup targets, event-sending diagnostics,
+unit-list projections, waitable-unit behavior, parser/generated artifacts,
+application projections, presentation behavior, dependency versions, VS Code
+compatibility, web compatibility, and `engines.vscode`.
+
+Targeted Qlty smell output reports no findings for `Evsj.ts`, `Fxj.ts`, and
+`unitCapabilityEntities.ts`. Targeted metrics changed from 4 classes /
+48 funcs / cyclo 3 / complexity 0 / LOC 184 before Slice-3-Q to 4 classes /
+41 funcs / cyclo 3 / complexity 0 / LOC 163 after.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1696,4 +1786,4 @@ class-specific getter-shape cluster.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-P.
+- Which domain helper should follow Slice-3-Q.

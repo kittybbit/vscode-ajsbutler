@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import { Cpj } from "../../domain/models/units/Cpj";
+import { Evsj } from "../../domain/models/units/Evsj";
 import { Fxj } from "../../domain/models/units/Fxj";
 import { Mlwj } from "../../domain/models/units/Mlwj";
 import { Mqsj } from "../../domain/models/units/Mqsj";
@@ -195,5 +196,30 @@ suite("Unit capability entities", () => {
     assert.strictEqual(ntwj.ha?.value(), "y");
     assert.strictEqual(ntwj.eu?.value(), "ent");
     assert.strictEqual(ntwj.ets?.value(), "an");
+  });
+
+  test("keeps shared execution and job-type getters on event sending jobs", () => {
+    const result = parseAjs(`
+      evsj=/event-send;
+      ty=evsj;
+      pfm=u;
+      etm=7;
+      fd=00:10;
+      ex="event-agent";
+      ha=y;
+      eu=ent;
+      jty=q;
+    `);
+
+    assert.deepStrictEqual(result.errors, []);
+    const evsj = tyFactory(result.rootUnits[0]) as Evsj;
+
+    assert.strictEqual(evsj.pfm?.value(), "u");
+    assert.strictEqual(evsj.etm?.value(), "7");
+    assert.strictEqual(evsj.fd?.value(), "00:10");
+    assert.strictEqual(evsj.ex?.value(), "event-agent");
+    assert.strictEqual(evsj.ha?.value(), "y");
+    assert.strictEqual(evsj.eu?.value(), "ent");
+    assert.strictEqual(evsj.jty?.value(), "q");
   });
 });
