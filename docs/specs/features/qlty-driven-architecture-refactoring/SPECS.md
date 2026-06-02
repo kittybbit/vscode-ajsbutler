@@ -1857,6 +1857,17 @@ complexity 0 / LOC 195 after. Targeted smell output no longer includes
 `Pwrj`; the residual `Jdj`/`Mssj` 59-line shape-only cluster remains a future
 decision candidate.
 
+### Slice-3 Closure Decision
+
+Slice-3 is complete after Slice-3-R. Remaining domain-unit duplication
+findings are getter-shape clusters in `Jdj`/`Mssj`, `Mlwj`/`Ntwj`, and
+`Mqwj`/`Mswj`. They do not currently justify another implementation slice
+because the shared shape is boilerplate rather than a clear shared JP1/AJS
+business concept.
+
+Future work should reopen this area only when a candidate has stronger
+semantic value than removing getter boilerplate alone.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1880,4 +1891,4 @@ decision candidate.
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-R.
+- Which non-Slice-3 area should be the next Qlty-driven refactoring phase.

@@ -11,11 +11,12 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-R implementation is complete.
+  Slice-3 domain-helper work is complete after Slice-3-R.
 - Active slice:
   none.
 - Open follow-up:
-  Decide the next Slice-3 domain-helper candidate.
+  No strong remaining Slice-3 candidate; do not continue this slice without a
+  new meaningful target.
 
 ## Human Approval
 
@@ -199,7 +200,9 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-R.
 - [x] Complete Slice-3-R `Pwrj` power-control shared execution getter
       cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-R.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-R.
+- [x] Close Slice-3 because the remaining candidates are not strong enough to
+      justify another implementation slice.
 
 ## Validation
 
@@ -868,3 +871,10 @@ Only clear human approval can change Status to Approved.
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.
+- After Slice-3-R, full domain-unit smell output still reports residual
+  getter-shape duplication in `Jdj`/`Mssj`, `Mlwj`/`Ntwj`, and `Mqwj`/`Mswj`.
+  These clusters do not currently represent a clear shared JP1/AJS business
+  concept beyond getter boilerplate. Targeted helper metrics also do not
+  identify a strong enough next target to justify another Slice-3
+  implementation. Slice-3 is therefore closed rather than forcing another
+  refactor.
