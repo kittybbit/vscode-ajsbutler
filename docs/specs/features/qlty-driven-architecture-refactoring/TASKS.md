@@ -12,12 +12,12 @@ longer affects approval, risk, or use-case back-propagation.
 - Active task:
   none.
 - Runtime status:
-  Slice-4-B WebAPI credential store resolution cleanup is complete.
+  Slice-4-C WebAPI import adapter execution cleanup is complete.
 - Use-case reflection:
-  None required. The implementation preserved current beta WebAPI credential
-  storage and resolution behavior, including missing/invalid credential
-  fallback, stored JSON shape, secret handling, and authentication-failure
-  behavior.
+  None required. The implementation preserved current beta WebAPI import
+  adapter behavior, including request URL construction, headers, credential
+  usage, timeout behavior, HTTP error mapping, malformed response handling,
+  imported content mapping, warning semantics, and desktop/web compatibility.
 
 ## Human Approval
 
@@ -32,12 +32,12 @@ approval can change Status to Approved.
 
 ## Active Tasks
 
-- [x] Select Slice-4-B WebAPI credential store resolution cleanup as the next
+- [x] Select Slice-4-C WebAPI import adapter execution cleanup as the next
       candidate.
 - [x] Record the behavior-preservation and use-case reflection decision.
 - [x] Record the approval-sensitive implementation boundary.
-- [x] Record human approval for Slice-4-B.
-- [x] Implement Slice-4-B inside the approved scope.
+- [x] Record human approval for Slice-4-C.
+- [x] Implement Slice-4-C inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
@@ -52,8 +52,8 @@ approval can change Status to Approved.
 
 - None.
 
-Completed Slice-1, Slice-2, Slice-3, Slice-4-A, and Slice-4-B refactors were
-behavior-preserving and do not currently require use-case updates. Remaining
-domain-unit duplication clusters should only be reopened when they represent a
-stronger shared JP1/AJS business concept or use-case need than getter-shape
-similarity alone.
+Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, and Slice-4-C
+refactors were behavior-preserving and do not currently require use-case
+updates. Remaining domain-unit duplication clusters should only be reopened
+when they represent a stronger shared JP1/AJS business concept or use-case
+need than getter-shape similarity alone.

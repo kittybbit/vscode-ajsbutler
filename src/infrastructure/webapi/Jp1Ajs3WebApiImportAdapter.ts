@@ -38,6 +38,8 @@ export type Jp1Ajs3WebApiFetch = (
   json(): Promise<unknown>;
 }>;
 
+type Jp1Ajs3WebApiResponse = Awaited<ReturnType<Jp1Ajs3WebApiFetch>>;
+
 export type Jp1Ajs3WebApiImportAdapterDeps = {
   credentialProvider: Jp1Ajs3WebApiCredentialProvider;
   fetch?: Jp1Ajs3WebApiFetch;
@@ -63,51 +65,76 @@ export class Jp1Ajs3WebApiImportAdapter
       request.credentialRef,
     );
     if (!credential) {
-      return {
-        ok: false,
-        error: createImportAjsDefinitionError(
-          "authentication-failed",
-          "JP1/AJS WebAPI credentials are not available.",
-        ),
-      };
+      return toMissingCredentialResult();
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      request.connection.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    return await importDefinitionWithCredential(
+      this.#fetch,
+      request,
+      credential,
     );
-
-    try {
-      const response = await this.#fetch(buildRequestUrl(request), {
-        method: request.method,
-        headers: buildHeaders(request, credential),
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        return await toErrorResult(response);
-      }
-
-      const body = await response.json();
-      if (!isUnitListResponse(body)) {
-        return {
-          ok: false,
-          error: createImportAjsDefinitionError(
-            "malformed-response",
-            "JP1/AJS WebAPI returned an unexpected unit-list response shape.",
-          ),
-        };
-      }
-
-      return toSuccessResult(request, body);
-    } catch (error) {
-      return toTransportError(error);
-    } finally {
-      clearTimeout(timeout);
-    }
   }
 }
+
+const toMissingCredentialResult = (): ImportAjsDefinitionResultDto => ({
+  ok: false,
+  error: createImportAjsDefinitionError(
+    "authentication-failed",
+    "JP1/AJS WebAPI credentials are not available.",
+  ),
+});
+
+const importDefinitionWithCredential = async (
+  fetch: Jp1Ajs3WebApiFetch,
+  request: ImportAjsDefinitionPortRequestDto,
+  credential: Jp1Ajs3WebApiCredential,
+): Promise<ImportAjsDefinitionResultDto> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    request.connection.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+  );
+
+  try {
+    const response = await fetch(buildRequestUrl(request), {
+      method: request.method,
+      headers: buildHeaders(request, credential),
+      signal: controller.signal,
+    });
+    return await toResponseResult(request, response);
+  } catch (error) {
+    return toTransportError(error);
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const toResponseResult = async (
+  request: ImportAjsDefinitionPortRequestDto,
+  response: Jp1Ajs3WebApiResponse,
+): Promise<ImportAjsDefinitionResultDto> => {
+  if (!response.ok) {
+    return await toErrorResult(response);
+  }
+
+  return toUnitListResult(request, await response.json());
+};
+
+const toUnitListResult = (
+  request: ImportAjsDefinitionPortRequestDto,
+  body: unknown,
+): ImportAjsDefinitionResultDto =>
+  isUnitListResponse(body)
+    ? toSuccessResult(request, body)
+    : toMalformedResponseResult();
+
+const toMalformedResponseResult = (): ImportAjsDefinitionResultDto => ({
+  ok: false,
+  error: createImportAjsDefinitionError(
+    "malformed-response",
+    "JP1/AJS WebAPI returned an unexpected unit-list response shape.",
+  ),
+});
 
 const defaultFetch: Jp1Ajs3WebApiFetch = async (input, init) => {
   const fetchImpl = globalThis.fetch;
