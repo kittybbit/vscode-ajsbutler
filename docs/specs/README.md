@@ -32,13 +32,14 @@ For non-trivial changes:
 3. update or create the relevant use-case spec in
    `docs/requirements/use-cases/` when the behavior contract changes
 4. update or create concise feature docs under
-   `docs/specs/features/<feature>/` when implementation requirements,
-   boundary decisions, or active tasks need tracking
+   `docs/specs/features/<feature>/` when feature-level functional
+   requirements or current task decisions need tracking
 5. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
    and update that file in the same commit whenever a task is completed,
    reframed, or dropped
-   `TASKS.md` is a current-state execution tracker; retain only execution
-   context that future maintainers need to decide what to do next
+   `TASKS.md` is not a complete work log; retain only the task state,
+   approval boundary, unresolved risk, and use-case back-propagation notes
+   that future maintainers need for the next decision
 6. document assumptions explicitly
 7. implement in small vertical slices
 8. refresh `docs/specs/plans.md` in the same commit if the active slice or
@@ -144,13 +145,19 @@ Every agent must preserve:
 - approved scope boundaries
 - required validation
 
-Keep feature `TASKS.md` decision-focused:
+Keep feature documents decision-focused:
 
-- keep only the current status, active tasks, current approval state, and
-  open follow-up items
-- retain prior implementation, approval, and validation details only when they
-  affect a future decision, re-approval boundary, or unresolved risk
-- move durable decisions to `SPECS.md`
+- use feature `SPECS.md` for feature-level functional requirements,
+  compatibility constraints, acceptance criteria, and non-goals
+- do not use feature `SPECS.md` for individual task records, slice histories,
+  approval logs, qlty metric transcripts, or implementation checklists
+- keep feature `TASKS.md` limited to the current status, active tasks, current
+  approval state, unresolved risks, and the minimum record needed to decide
+  whether a completed or active task must be reflected back into a use case
+- remove prior implementation, approval, and validation details once they no
+  longer affect a future decision, re-approval boundary, unresolved risk, or
+  use-case update
+- move durable behavior contracts to `docs/requirements/use-cases/`
 - move branch/repository priority updates to `plans.md` or `roadmap.md`
 - summarize validation expectations in `TASKS.md`; include past run details
   only when a failure, warning, or risk remains actionable
@@ -263,20 +270,26 @@ follow-up decision.
 ## Impact Investigation Records
 
 Use the SDD artifacts by responsibility instead of storing all investigation
-notes in `TASKS.md`.
+notes in feature documents.
 
 - `docs/specs/plans.md`:
   branch-level plan, scope boundary, changed-area summary, likely fix
   candidates, risk summary, and assumptions
 - `docs/specs/features/<feature>/SPECS.md`:
-  durable impact analysis, reference propagation decisions, breaking-change
-  analysis, alternatives, and boundary decisions
+  feature-level functional requirements, compatibility requirements,
+  acceptance criteria, and non-goals
 - `docs/specs/features/<feature>/TASKS.md`:
-  current execution tasks for investigation, approval, implementation, tests,
-  and open follow-up tracking
+  current execution tasks, current approval evidence, unresolved risks, and
+  the minimum notes needed to decide whether behavior must be reflected back
+  into `docs/requirements/use-cases/`
+- `docs/requirements/use-cases/`:
+  durable behavior contracts and observable scenario changes
 
-`TASKS.md` may point to investigation results, but it is not the primary
-record for design decisions, impact analysis, or historical narrative.
+`TASKS.md` may temporarily hold approval-sensitive investigation details while
+the task is active. After the task is completed, re-scoped, or dropped, reduce
+the record to only what still affects future approval, risk, or use-case
+back-propagation. It is not the primary record for design decisions, impact
+analysis, or historical narrative.
 
 When behavior scenarios exist, include the scenario impact in the same
 investigation: changed scenarios, added scenarios, removed scenarios, and
@@ -370,9 +383,10 @@ Those belong under `docs/specs/`.
 ## When To Remove Feature Docs
 
 Remove a `docs/specs/features/<feature>/` folder when it no longer carries an
-active requirement, durable boundary decision, or useful follow-up. Preserve
-completed refactor-only information in `roadmap.md` or `plans.md` only when it
-helps future sequencing, risk assessment, or ownership decisions.
+active feature requirement, active task decision, unresolved risk, or useful
+follow-up. Preserve completed refactor-only information in `roadmap.md`,
+`plans.md`, or use cases only when it helps future sequencing, risk
+assessment, ownership decisions, or behavior understanding.
 
 ## Sync Cadence
 
@@ -381,7 +395,8 @@ notes:
 
 - `docs/specs/features/<feature>/TASKS.md`
   Update immediately when one task or follow-up is completed, re-scoped, or
-  intentionally dropped.
+  intentionally dropped, then remove details that no longer affect approval,
+  risk, or use-case back-propagation.
 - `docs/specs/plans.md`
   Update when that task completion changes the branch summary or next priority.
 - `docs/specs/roadmap.md`
@@ -395,10 +410,12 @@ docs in the same commit.
 When syncing, preserve decision context instead of accumulating entries:
 
 - remove or rewrite completed checklist/history sections when they no longer
-  help future maintainers understand the current state, remaining risk, or
-  next decision
+  help future maintainers understand the current state, remaining risk, next
+  decision, or required use-case update
 - keep `TASKS.md` readable from the top so the current approval state, active
   tasks, and next decision are immediately visible
+- keep feature `SPECS.md` readable as functional requirements rather than as a
+  task archive
 
 ## Document Roles
 

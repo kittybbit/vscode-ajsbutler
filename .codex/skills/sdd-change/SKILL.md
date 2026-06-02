@@ -33,10 +33,11 @@ SDD investigation, approval, evidence, implementation, and validation flow.
      separate approval paths
 5. record findings by responsibility:
    - `docs/specs/plans.md` for branch scope, assumptions, candidates, and risk
-   - feature `SPECS.md` for durable impact analysis, alternatives, and boundary
-     decisions
-   - feature `TASKS.md` for investigation, approval, fixes, tests, and
-     follow-up tasks
+   - feature `SPECS.md` for feature-level functional requirements,
+     compatibility requirements, acceptance criteria, and non-goals
+   - feature `TASKS.md` for current task state, approval evidence, unresolved
+     risks, and the minimum notes needed to decide whether behavior must be
+     reflected back into use cases
 6. update or create the matching use-case spec in
    `docs/requirements/use-cases/`
    when the behavior contract changes
@@ -129,6 +130,11 @@ Keep the notes short and focused on impact, decisions, and validation.
 - preserve desktop and web extension behavior
 - prefer small vertical slices over broad rewrites
 - document assumptions instead of hiding them
+- keep feature `SPECS.md` as functional requirements, not individual task or
+  slice history
+- keep feature `TASKS.md` as a decision aid, not a complete work log; after a
+  task is finished, retain only details that still affect approval, risk, or
+  use-case back-propagation
 - keep KISS and YAGNI ahead of abstraction; avoid over-DRY process or code
 - use a `docs/...` branch name only when the slice stays within the docs-only
   file set used by `.github/workflows/verify.yml`
