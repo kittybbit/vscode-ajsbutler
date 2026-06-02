@@ -2,9 +2,10 @@
 
 ## Purpose
 
-This is the branch-level SDD planning index. Feature-local requirements and
-task decisions live under `docs/specs/features/<feature>/`; repository-level
-behavior contracts live under `docs/requirements/use-cases/`.
+This is the branch-level SDD work plan. It records the feature folders active
+on this branch and branch-wide decisions that apply across those features.
+Feature-local slice tasks live in `docs/specs/features/<feature>/TASKS.md`;
+repository-level behavior contracts live under `docs/requirements/use-cases/`.
 
 Clear branch-specific notes when starting a new branch. Keep stable workflow
 rules in `docs/specs/README.md`, not in this file.
@@ -31,8 +32,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked, but defer beta exit until feedback is sufficient.
-2. Select the next Qlty-driven architecture refactoring candidate only if it
-   has meaningful responsibility, boundary, or use-case value.
+2. Continue Qlty-driven architecture refactoring only when a candidate has
+   meaningful responsibility, boundary, or use-case value.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -44,9 +45,8 @@ rules in `docs/specs/README.md`, not in this file.
   active modernization follow-up for `UnitEntity` hash readiness and bundle
   pressure notes.
 - `docs/specs/features/qlty-driven-architecture-refactoring/`:
-  active maintainability-driven architectural refactoring. Slice-1, Slice-2,
-  Slice-3, Slice-4-A, Slice-4-B, Slice-4-C, and Slice-4-D completed
-  behavior-preserving refactors and currently require no use-case updates.
+  active maintainability-driven architectural refactoring. Current slice state
+  lives in that feature's `TASKS.md`.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the

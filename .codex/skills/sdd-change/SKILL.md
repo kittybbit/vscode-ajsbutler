@@ -32,7 +32,8 @@ SDD investigation, approval, evidence, implementation, and validation flow.
    - check relevant supplemental perspectives below without treating them as
      separate approval paths
 5. record findings by responsibility:
-   - `docs/specs/plans.md` for branch scope, assumptions, candidates, and risk
+   - `docs/specs/plans.md` for branch-level active features, branch-wide
+     assumptions, and repository sequencing only
    - feature `SPECS.md` for feature-level functional requirements,
      compatibility requirements, acceptance criteria, and non-goals
    - feature `TASKS.md` for current task state, approval evidence, unresolved
@@ -44,7 +45,8 @@ SDD investigation, approval, evidence, implementation, and validation flow.
 7. record `TASKS.md` human approval evidence with `Status: Pending`
 8. stop after the investigation and ask for clear human approval before
    editing runtime code, tests, generated artifacts, or configuration
-9. after approval, record the approval text and approved scope in `TASKS.md`
+9. after approval, record only the approval result and approved scope in
+   `TASKS.md`; do not copy the approval message
 10. enumerate all affected references and task the complete fix
 11. implement in small meaningful blocks, checking compile/tests as you go
 12. stop again for additional approval if required changes exceed the approved
@@ -111,7 +113,7 @@ Keep the notes short and focused on impact, decisions, and validation.
 - approval definition, approval evidence, and re-approval rules are centralized
   in `docs/specs/README.md` `Implementation Change Gate`
 - implementation phase starts only when `TASKS.md` records `Status: Approved`
-  and the approval text
+  with `Approved at` and `Approved scope`
 - implementation inside the approved scope may use medium- or lower-cost models
   when model selection is available
 - if implementation reveals a specification change, design decision, destructive
@@ -135,6 +137,8 @@ Keep the notes short and focused on impact, decisions, and validation.
 - keep feature `TASKS.md` as a decision aid, not a complete work log; after a
   task is finished, retain only details that still affect approval, risk, or
   use-case back-propagation
+- keep `docs/specs/plans.md` at branch-feature granularity; do not rewrite it
+  for slice progress inside an already active feature
 - keep KISS and YAGNI ahead of abstraction; avoid over-DRY process or code
 - use a `docs/...` branch name only when the slice stays within the docs-only
   file set used by `.github/workflows/verify.yml`

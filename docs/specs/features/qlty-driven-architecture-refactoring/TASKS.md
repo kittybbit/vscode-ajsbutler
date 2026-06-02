@@ -7,16 +7,19 @@ deciding whether a change must be reflected back into a use case. Do not keep a
 complete work log, per-slice history, or validation transcript after it no
 longer affects approval, risk, or use-case back-propagation.
 
+Update `docs/specs/plans.md` only when the branch starts, stops, or changes an
+active feature. Slice progress stays in this file.
+
 ## Current Status
 
 - Active task:
   none.
 - Runtime status:
-  Slice-4-D WebAPI import HTTP status mapping cleanup is complete.
+  Slice-4-E WebAPI OpenAPI artifact generator type-rendering cleanup is
+  complete.
 - Use-case reflection:
-  None required. The implementation preserved current beta WebAPI HTTP status
-  to import error-code mapping, including all mapped statuses, fallback status
-  behavior, adapter error semantics, and user-visible error behavior.
+  None required. Slice-4-E preserved generated artifacts and beta WebAPI import
+  behavior.
 
 ## Human Approval
 
@@ -28,15 +31,17 @@ longer affects approval, risk, or use-case back-propagation.
 
 Implementation must not start while Status is Pending. Only clear human
 approval can change Status to Approved.
+`Approved at` records the approval result only, such as `none` or `approved in
+current conversation`; do not copy the approval message.
 
 ## Active Tasks
 
-- [x] Select Slice-4-D WebAPI import HTTP status mapping cleanup as the next
-      candidate.
+- [x] Select Slice-4-E WebAPI OpenAPI artifact generator type-rendering cleanup
+      as the next candidate.
 - [x] Record the behavior-preservation and use-case reflection decision.
 - [x] Record the approval-sensitive implementation boundary.
-- [x] Record human approval for Slice-4-D.
-- [x] Implement Slice-4-D inside the approved scope.
+- [x] Record human approval for Slice-4-E.
+- [x] Implement Slice-4-E inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,

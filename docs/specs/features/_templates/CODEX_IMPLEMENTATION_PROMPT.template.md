@@ -49,7 +49,8 @@ Before editing:
   breaking-change risk.
 - When behavior scenarios exist, list changed, added, or removed scenarios and
   affected tests.
-- Record branch scope and risks in PLANS.md.
+- Record branch active-feature changes in docs/specs/plans.md only when the
+  branch starts, stops, or changes an active feature.
 - Record durable impact, propagation, alternatives, and boundary decisions in
   SPECS.md.
 - Record investigation, implementation, test, and follow-up tasks in TASKS.md.
@@ -80,8 +81,8 @@ Implementation will not proceed until approval is given.
 
 After approval:
 
-- Record `Status: Approved`, approval time, and approved scope in TASKS.md
-  before implementation.
+- Record `Status: Approved`, approval result, and approved scope in TASKS.md
+  before implementation. Do not copy the approval message.
 - Do not implement if TASKS.md does not contain `Status: Approved` and
   `Approved scope`.
 - Medium- or lower-cost models may be used for simple implementation inside

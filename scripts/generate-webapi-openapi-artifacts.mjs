@@ -36,6 +36,24 @@ const schemaNameOverrides = new Map([
   ["UnitListResponse", "Jp1Ajs3UnitListResponse"],
 ]);
 
+const primitiveSchemaTypes = new Map([
+  ["boolean", "boolean"],
+  ["integer", "number"],
+  ["number", "number"],
+  ["string", "string"],
+]);
+
+const ajsUnitTypes = new Map([
+  ["g", "GROUP"],
+  ["n", "ROOTNET"],
+  ["j", "PCJOB"],
+]);
+
+const schemaTypeRenderers = new Map([
+  ["array", (schema) => `ReadonlyArray<${typeForSchema(schema.items)}>`],
+  ["object", typeForObjectSchema],
+]);
+
 function typeName(schemaName) {
   return schemaNameOverrides.get(schemaName) ?? `Jp1Ajs3${schemaName}`;
 }
@@ -66,37 +84,43 @@ function literal(value) {
 
 function typeForSchema(schema) {
   const normalized = normalizeSchema(schema);
+  const referenceType = typeForReferenceSchema(schema);
+  return referenceType ?? typeForNormalizedSchema(normalized);
+}
+
+function typeForReferenceSchema(schema) {
+  const reference = schema?.$ref ?? schema?.allOf?.[0]?.$ref;
+  if (!reference) {
+    return undefined;
+  }
+
+  return typeName(refName(reference));
+}
+
+function typeForNormalizedSchema(normalized) {
   if (!normalized) {
     return "unknown";
-  }
-
-  if (schema?.$ref) {
-    return typeName(refName(schema.$ref));
-  }
-
-  if (schema?.allOf?.length === 1 && schema.allOf[0].$ref) {
-    return typeName(refName(schema.allOf[0].$ref));
   }
 
   if (normalized.enum) {
     return normalized.enum.map(literal).join(" | ");
   }
 
-  switch (normalized.type) {
-    case "array":
-      return `ReadonlyArray<${typeForSchema(normalized.items)}>`;
-    case "boolean":
-      return "boolean";
-    case "integer":
-    case "number":
-      return "number";
-    case "object":
-      return typeForObjectSchema(normalized);
-    case "string":
-      return "string";
-    default:
-      return "unknown";
+  const renderType =
+    schemaTypeRenderers.get(normalized.type) ?? typeForScalarSchema;
+  return renderType(normalized);
+}
+
+function typeForScalarSchema(schema) {
+  if (!schema) {
+    return "unknown";
   }
+
+  return (
+    schema.enum?.map(literal).join(" | ") ??
+    primitiveSchemaTypes.get(schema.type) ??
+    "unknown"
+  );
 }
 
 function typeForNullableSchema(schema) {
@@ -107,17 +131,13 @@ function typeForNullableSchema(schema) {
 
 function typeForObjectSchema(schema) {
   if (!schema.properties) {
-    return schema.additionalProperties === true
-      ? "Record<string, unknown>"
-      : "Record<string, never>";
+    return typeForPropertylessObjectSchema(schema);
   }
 
-  const required = new Set(schema.required ?? []);
-  const properties = Object.entries(schema.properties).map(
-    ([name, property]) => {
-      const optional = required.has(name) ? "" : "?";
-      return `${name}${optional}: ${typeForNullableSchema(property)};`;
-    },
+  const properties = renderSchemaProperties(
+    schema,
+    ([name, property, optional]) =>
+      `${name}${optional}: ${typeForNullableSchema(property)};`,
   );
 
   if (schema.additionalProperties === true) {
@@ -125,6 +145,20 @@ function typeForObjectSchema(schema) {
   }
 
   return `{ ${properties.join(" ")} }`;
+}
+
+function typeForPropertylessObjectSchema(schema) {
+  return schema.additionalProperties === true
+    ? "Record<string, unknown>"
+    : "Record<string, never>";
+}
+
+function renderSchemaProperties(schema, renderProperty) {
+  const required = new Set(schema.required ?? []);
+  return Object.entries(schema.properties ?? {}).map(([name, property]) => {
+    const optional = required.has(name) ? "" : "?";
+    return renderProperty(name, property, optional);
+  });
 }
 
 function parameterType(parameterRef) {
@@ -142,15 +176,13 @@ function renderInterface(name, schema) {
     return `export type ${name} = ${typeForSchema(normalized)};\n`;
   }
 
-  const required = new Set(normalized.required ?? []);
   const lines = [`export interface ${name} {`];
-  for (const [propertyName, propertySchema] of Object.entries(
-    normalized.properties ?? {},
-  )) {
-    const optional = required.has(propertyName) ? "" : "?";
-    lines.push(
+  for (const line of renderSchemaProperties(
+    normalized,
+    (propertyName, propertySchema, optional) =>
       `  ${propertyName}${optional}: ${typeForNullableSchema(propertySchema)};`,
-    );
+  )) {
+    lines.push(line);
   }
 
   if (normalized.additionalProperties === true) {
@@ -405,16 +437,7 @@ function extractRootUnit(sampleContent, fileName) {
 }
 
 function mapAjsUnitType(unitType) {
-  switch (unitType) {
-    case "g":
-      return "GROUP";
-    case "n":
-      return "ROOTNET";
-    case "j":
-      return "PCJOB";
-    default:
-      return unitType.toUpperCase();
-  }
+  return ajsUnitTypes.get(unitType) ?? unitType.toUpperCase();
 }
 
 function renderPrismOpenApi() {

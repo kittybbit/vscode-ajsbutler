@@ -3,7 +3,7 @@
 ## Objective
 
 Reduce architectural complexity, duplication, and maintainability risk by
-converting Qlty findings into small, behavior-preserving refactoring slices.
+using Qlty findings as candidate signals for behavior-preserving refactors.
 
 ## Scope
 
@@ -59,24 +59,6 @@ converting Qlty findings into small, behavior-preserving refactoring slices.
 - This plan keeps only completed-scope information that helps future
   sequencing or risk decisions; durable boundaries are kept in SPECS.md and
   current execution state is kept in TASKS.md.
-
-## Current Slice Candidate
-
-Slice-3-G implementation is pending human approval.
-
-- Recent result:
-  Slice-3-F changed `ScheduleRule.ts` to resolve `Sd.type` through local
-  literal/prefix tables and to share parsed schedule-rule parameter
-  initialization through a local abstract base class.
-- Current evidence:
-  targeted smell output for `parameterHelpers.ts` reports
-  `resolveParameterArray` many-returns/high-complexity,
-  `resolveDefaultRawValue` many-returns,
-  `resolveScopedDefaultRawValue` high-complexity, and
-  `buildSdAlignedScheduleParameters` many-parameters. Current metrics are
-  0 classes / 21 funcs / cyclo 52 / complexity 47 / LOC 338.
-- Current decision:
-  wait for approval before refactoring `parameterHelpers.ts`.
 
 ## Risks To Control
 

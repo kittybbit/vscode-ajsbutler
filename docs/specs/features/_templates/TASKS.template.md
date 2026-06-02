@@ -4,8 +4,9 @@
 
 - Update this file in the same commit whenever a task is completed, re-scoped,
   or intentionally dropped.
-- Update `docs/specs/plans.md` or `docs/specs/roadmap.md` in the same commit
-  when branch priorities or repository sequencing change.
+- Update `docs/specs/plans.md` only when the branch starts, stops, or changes
+  an active feature.
+- Update `docs/specs/roadmap.md` when repository sequencing changes.
 - Keep this file focused on current state only; do not retain historical logs,
   prior approvals, or long validation diaries once they stop being actionable.
 
@@ -23,6 +24,8 @@
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
+`Approved at` records the approval result only, such as `none` or `approved in
+current conversation`; do not copy the approval message.
 
 Reset this section back to Pending when the approved slice is complete and no
 active implementation approval remains.

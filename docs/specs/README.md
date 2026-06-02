@@ -42,8 +42,8 @@ For non-trivial changes:
    that future maintainers need for the next decision
 6. document assumptions explicitly
 7. implement in small vertical slices
-8. refresh `docs/specs/plans.md` in the same commit if the active slice or
-   branch priorities change materially
+8. refresh `docs/specs/plans.md` only when the branch starts, stops, or
+   changes an active feature; slice progress stays in the feature `TASKS.md`
 9. refresh `docs/specs/roadmap.md` in the same commit if a completed slice
    changes repository-level ordering, remaining debt, or deferred work
 10. before `git push`, run local validation through `rtk` serially in this
@@ -147,6 +147,11 @@ Every agent must preserve:
 
 Keep feature documents decision-focused:
 
+- use `docs/specs/plans.md` for the branch work plan: active feature folders,
+  branch-wide assumptions, and repository sequencing that applies across
+  features
+- do not update `docs/specs/plans.md` only because a slice inside an already
+  active feature starts, finishes, or changes approval state
 - use feature `SPECS.md` for feature-level functional requirements,
   compatibility constraints, acceptance criteria, and non-goals
 - do not use feature `SPECS.md` for individual task records, slice histories,
@@ -158,7 +163,7 @@ Keep feature documents decision-focused:
   longer affect a future decision, re-approval boundary, unresolved risk, or
   use-case update
 - move durable behavior contracts to `docs/requirements/use-cases/`
-- move branch/repository priority updates to `plans.md` or `roadmap.md`
+- move repository-level sequence changes to `roadmap.md`
 - summarize validation expectations in `TASKS.md`; include past run details
   only when a failure, warning, or risk remains actionable
 
@@ -220,12 +225,15 @@ Each feature `TASKS.md` must include only the current approval evidence:
 - Approved scope:
 ```
 
-Implementation may start only when `Status: Approved` and `Approved scope`
-records the human-approved implementation boundary. Reset the section back to
-`Pending` when that approved slice is finished and no active implementation
-approval remains. If implementation reveals required changes outside the
-approved scope, stop again, update the impact record, and obtain additional
-clear approval before editing those areas.
+`Approved at` records the approval result only, such as `none` or `approved in
+current conversation`; do not copy the human approval message into `TASKS.md`.
+
+Implementation may start only when `Status: Approved`, `Approved at`, and
+`Approved scope` record the human-approved implementation boundary. Reset the
+section back to `Pending` when that approved slice is finished and no active
+implementation approval remains. If implementation reveals required changes
+outside the approved scope, stop again, update the impact record, and obtain
+additional clear approval before editing those areas.
 
 Before approval, Codex must report only this implementation-gate output and
 must not claim that implementation has started or completed:
@@ -273,8 +281,9 @@ Use the SDD artifacts by responsibility instead of storing all investigation
 notes in feature documents.
 
 - `docs/specs/plans.md`:
-  branch-level plan, scope boundary, changed-area summary, likely fix
-  candidates, risk summary, and assumptions
+  branch-level work plan: active feature folders, branch-wide assumptions, and
+  repository sequencing that applies across features. Do not rewrite it for
+  slice-level progress inside an already active feature.
 - `docs/specs/features/<feature>/SPECS.md`:
   feature-level functional requirements, compatibility requirements,
   acceptance criteria, and non-goals
@@ -398,7 +407,7 @@ notes:
   intentionally dropped, then remove details that no longer affect approval,
   risk, or use-case back-propagation.
 - `docs/specs/plans.md`
-  Update when that task completion changes the branch summary or next priority.
+  Update only when the branch starts, stops, or changes an active feature.
 - `docs/specs/roadmap.md`
   Update when that completion changes repository-level sequence, remaining
   debt, or deferred work.
