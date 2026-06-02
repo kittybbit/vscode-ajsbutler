@@ -9,6 +9,7 @@ import { Mqwj } from "../../domain/models/units/Mqwj";
 import { Mswj } from "../../domain/models/units/Mswj";
 import { N } from "../../domain/models/units/N";
 import { Ntwj } from "../../domain/models/units/Ntwj";
+import { Pwrj } from "../../domain/models/units/Pwrj";
 import { Qj } from "../../domain/models/units/Qj";
 import { parseAjs } from "../../domain/services/parser/AjsParser";
 import { tyFactory } from "../../domain/utils/TyUtils";
@@ -221,5 +222,30 @@ suite("Unit capability entities", () => {
     assert.strictEqual(evsj.ha?.value(), "y");
     assert.strictEqual(evsj.eu?.value(), "ent");
     assert.strictEqual(evsj.jty?.value(), "q");
+  });
+
+  test("keeps shared execution and job-type getters on power control jobs", () => {
+    const result = parseAjs(`
+      pwrj=/power-control;
+      ty=pwrj;
+      pfm=p;
+      etm=7;
+      fd=00:10;
+      ex="power-agent";
+      ha=y;
+      eu=ent;
+      jty=n;
+    `);
+
+    assert.deepStrictEqual(result.errors, []);
+    const pwrj = tyFactory(result.rootUnits[0]) as Pwrj;
+
+    assert.strictEqual(pwrj.pfm?.value(), "p");
+    assert.strictEqual(pwrj.etm?.value(), "7");
+    assert.strictEqual(pwrj.fd?.value(), "00:10");
+    assert.strictEqual(pwrj.ex?.value(), "power-agent");
+    assert.strictEqual(pwrj.ha?.value(), "y");
+    assert.strictEqual(pwrj.eu?.value(), "ent");
+    assert.strictEqual(pwrj.jty?.value(), "n");
   });
 });

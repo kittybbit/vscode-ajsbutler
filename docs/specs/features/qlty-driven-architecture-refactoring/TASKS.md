@@ -11,7 +11,7 @@
 ## Current Status
 
 - Runtime status:
-  Slice-3-Q implementation is complete.
+  Slice-3-R implementation is complete.
 - Active slice:
   none.
 - Open follow-up:
@@ -20,8 +20,10 @@
 ## Human Approval
 
 - Status: Pending
-- Approved at: none
-- Approved scope: none
+- Approved at:
+  none.
+- Approved scope:
+  none.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -189,7 +191,15 @@ Only clear human approval can change Status to Approved.
 - [x] Record human approval for Slice-3-Q.
 - [x] Complete Slice-3-Q `Evsj` event-sending shared execution getter
       cleanup.
-- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-Q.
+- [x] Decide the next Slice-3 domain-helper candidate after Slice-3-Q.
+- [x] Select Slice-3-R `Pwrj` power-control shared execution getter cleanup
+      as the next domain-helper candidate.
+- [x] Record Slice-3-R impact investigation.
+- [x] Request human approval for the selected Slice-3-R implementation scope.
+- [x] Record human approval for Slice-3-R.
+- [x] Complete Slice-3-R `Pwrj` power-control shared execution getter
+      cleanup.
+- [ ] Decide the next Slice-3 domain-helper candidate after Slice-3-R.
 
 ## Validation
 
@@ -270,6 +280,11 @@ Only clear human approval can change Status to Approved.
 - Slice-3-Q implementation:
   targeted Qlty smell/metrics for `Evsj.ts`, `Fxj.ts`, and
   `unitCapabilityEntities.ts`, focused unit getter coverage for event-sending
+  shared execution getters, then `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build`
+- Slice-3-R implementation:
+  targeted Qlty smell/metrics for `Jdj.ts`, `Mssj.ts`, `Pwrj.ts`, and
+  `unitCapabilityEntities.ts`, focused unit getter coverage for power-control
   shared execution getters, then `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`
 
@@ -809,6 +824,47 @@ Only clear human approval can change Status to Approved.
   from 4 classes / 48 funcs / cyclo 3 / complexity 0 / LOC 184 before
   Slice-3-Q to 4 classes / 41 funcs / cyclo 3 / complexity 0 / LOC 163 after.
 - Slice-3-Q validation passed targeted Qlty smell/metrics,
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`. Build completed with existing webpack asset-size
+  warnings.
+- Slice-3-R targets the `Jdj.ts` / `Mssj.ts` / `Pwrj.ts` duplication cluster
+  because targeted domain Qlty reports 59 similar lines across those three
+  unit classes after Slice-3-Q. Current target metrics for `Jdj.ts`,
+  `Mssj.ts`, `Pwrj.ts`, and `unitCapabilityEntities.ts` are 6 classes /
+  57 funcs / cyclo 4 / complexity 0 / LOC 216.
+- Impact is local to domain unit getter ownership. Serena reference lookup
+  found `Pwrj` direct class references only from recovery subclass inheritance
+  and `TyUtils` imports / mappings. `Jdj` and `Mssj` share the Qlty getter
+  shape but not the same JP1/AJS semantics; `Mssj` already inherits shared
+  execution/job-type getters, while `Jdj` is a judgment condition unit with
+  mostly `ej*` getters.
+- Slice-3-R should move only `Pwrj` shared `pfm`, `etm`, `fd`, `ex`, `ha`,
+  `eu`, and `jty` getter ownership to the existing
+  `PlatformExecutionWaitJobUnitEntity` base. `Jdj` and `Mssj` should remain
+  unchanged in this slice.
+- Slice-3-R must preserve all existing getter names and values:
+  `Pwrj.pwrh/pwrf/pwrn/pwrr/pwrw/pwrp/pfm/etm/fd/ex/ha/eu/jty`,
+  `Jdj.ej/ejc/ejl/ejh/ejf/ejv/ejt/eji/ejs/ejg/ejm/eju/ha`, and
+  `Mssj.msqpt/msqlb/msrer/mslmt/mshld/msmod/mspri/msjnl/msunr/mstfn/msttp/mslbl/msapl/etm/fd/ex/ha/eu/jty`;
+  public class exports; recovery subclass inheritance; waitable-unit
+  behavior; `tyFactory` mappings; parser/generated artifacts; application
+  projections; VS Code/web compatibility; and `engines.vscode`.
+- Slice-3-R changed `Pwrj` to inherit
+  `PlatformExecutionWaitJobUnitEntity`, moving shared `pfm`, `etm`, `fd`,
+  `ex`, `ha`, `eu`, and `jty` getter ownership out of `Pwrj`. `Jdj` and
+  `Mssj` remain unchanged because their residual Qlty cluster is shape-only
+  duplication rather than the same shared execution semantics.
+- Slice-3-R preserved public unit exports, recovery subclass inheritance,
+  getter names and values, `ParamFactory` lookup semantics, `tyFactory`,
+  parser/generated artifacts, application projections, VS Code/web
+  compatibility, and `engines.vscode`.
+- Targeted metrics for `Jdj.ts`, `Mssj.ts`, `Pwrj.ts`, and
+  `unitCapabilityEntities.ts` changed from 6 classes / 57 funcs / cyclo 4 /
+  complexity 0 / LOC 216 before Slice-3-R to 6 classes / 50 funcs /
+  cyclo 4 / complexity 0 / LOC 195 after. Targeted smell output no longer
+  includes `Pwrj`; the residual `Jdj`/`Mssj` 59-line shape-only cluster
+  remains a future decision candidate.
+- Slice-3-R validation passed targeted Qlty smell/metrics,
   `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
   `rtk pnpm run build`. Build completed with existing webpack asset-size
   warnings.

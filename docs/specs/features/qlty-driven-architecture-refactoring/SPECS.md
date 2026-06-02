@@ -1763,6 +1763,100 @@ Targeted Qlty smell output reports no findings for `Evsj.ts`, `Fxj.ts`, and
 48 funcs / cyclo 3 / complexity 0 / LOC 184 before Slice-3-Q to 4 classes /
 41 funcs / cyclo 3 / complexity 0 / LOC 163 after.
 
+### Slice-3-R Target
+
+Slice-3-R targets the residual unit getter duplication cluster in:
+
+- `src/domain/models/units/Jdj.ts`
+- `src/domain/models/units/Mssj.ts`
+- `src/domain/models/units/Pwrj.ts`
+
+Current Qlty evidence:
+
+- Qlty reports 59 similar lines across `Jdj.ts`, `Mssj.ts`, and `Pwrj.ts`.
+- Metrics for `Jdj.ts`, `Mssj.ts`, `Pwrj.ts`, and
+  `unitCapabilityEntities.ts` are 6 classes / 57 funcs / cyclo 4 /
+  complexity 0 / LOC 216.
+
+### Slice-3-R Investigation
+
+The reported cluster is mostly repeated getter shape, not a single shared
+business concept. `Mssj` already inherits shared execution and job-type
+getters through `JobTypeExecutionWaitJobUnitEntity`; its remaining getters are
+message-queue send-job-specific. `Jdj` is a judgment condition unit with
+`ej*` getters and only `ha` overlapping with existing shared hard-attribute
+semantics.
+
+`Pwrj` is a waitable power-control job with power-control-specific getters
+plus duplicated shared `pfm`, `etm`, `fd`, `ex`, `ha`, `eu`, and `jty`
+getters. Those shared getters match the existing
+`PlatformExecutionWaitJobUnitEntity` shape.
+
+Serena reference lookup found `Pwrj` public construction through
+`TyUtils.tyFactory`, with direct class references otherwise limited to
+recovery subclass inheritance. `Jdj` and `Mssj` should stay unchanged in this
+slice because their remaining duplicated shapes are not the same domain
+semantics as `Pwrj`'s shared execution getter set.
+
+### Slice-3-R Boundary Decision
+
+Reduce only `Pwrj` shared execution getter duplication by reusing the existing
+domain unit base. Do not generalize `Jdj` judgment-condition getters or
+`Mssj` message-queue-specific getters for shape-only duplication.
+
+Do not change:
+
+- public `Pwrj`, `Rpwrj`, `Jdj`, `Rjdj`, `Mssj`, and `Rmssj` exports
+- `tyFactory` mappings
+- recovery subclass inheritance
+- existing getter names
+- existing `ParamFactory` call targets
+- waitable-unit behavior
+- parser/generated artifacts
+- application projections
+- presentation behavior
+- dependency versions
+- VS Code compatibility
+- web compatibility
+- `engines.vscode`
+
+### Slice-3-R Approval-Sensitive Scope
+
+Implementation may update `Pwrj.ts` to inherit the existing
+`PlatformExecutionWaitJobUnitEntity`, remove only the duplicated shared
+`pfm`, `etm`, `fd`, `ex`, `ha`, `eu`, and `jty` getters from `Pwrj`, and add
+focused tests when needed to cover preserved power-control shared getter
+behavior.
+
+Any change to public unit class exports, parameter getter names or values,
+`ParamFactory` lookup semantics, recovery class behavior, `tyFactory`
+mappings, parser/generated artifacts, application projections, presentation
+behavior, dependency versions, VS Code compatibility, web compatibility, or
+`engines.vscode` requires separate approval.
+
+### Slice-3-R Result
+
+`Pwrj` now inherits `PlatformExecutionWaitJobUnitEntity` for shared `pfm`,
+`etm`, `fd`, `ex`, `ha`, `eu`, and `jty` getters. Power-control-specific
+getters remain local to `Pwrj`.
+
+`Jdj` and `Mssj` remain unchanged because their residual similarity is
+shape-only duplication rather than the same shared execution semantics.
+
+The change preserves public `Pwrj`, `Rpwrj`, `Jdj`, `Rjdj`, `Mssj`, and
+`Rmssj` exports, `tyFactory` mappings, recovery subclass inheritance,
+existing getter names and values, `ParamFactory` lookup targets,
+waitable-unit behavior, parser/generated artifacts, application projections,
+presentation behavior, dependency versions, VS Code compatibility, web
+compatibility, and `engines.vscode`.
+
+Targeted metrics for `Jdj.ts`, `Mssj.ts`, `Pwrj.ts`, and
+`unitCapabilityEntities.ts` changed from 6 classes / 57 funcs / cyclo 4 /
+complexity 0 / LOC 216 before Slice-3-R to 6 classes / 50 funcs / cyclo 4 /
+complexity 0 / LOC 195 after. Targeted smell output no longer includes
+`Pwrj`; the residual `Jdj`/`Mssj` 59-line shape-only cluster remains a future
+decision candidate.
+
 ## Compatibility
 
 - VS Code compatibility follows `package.json` `engines.vscode`.
@@ -1786,4 +1880,4 @@ Targeted Qlty smell output reports no findings for `Evsj.ts`, `Fxj.ts`, and
 
 ## Open Questions
 
-- Which domain helper should follow Slice-3-Q.
+- Which domain helper should follow Slice-3-R.
