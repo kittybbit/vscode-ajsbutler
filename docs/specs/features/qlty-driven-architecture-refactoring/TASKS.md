@@ -15,11 +15,12 @@ active feature. Slice progress stays in this file.
 - Active task:
   none.
 - Runtime status:
-  Slice-4-H viewer message routing dispatch cleanup is complete.
+  Slice-4-I diagnostics registration event cleanup is complete.
 - Use-case reflection:
-  None required. Slice-4-H preserved table/flow webview message routing,
-  save validation, optional save-handler behavior, resource/ready/operation/
-  navigation dispatch, panel disposal cleanup, and webview operation telemetry.
+  None required. Slice-4-I preserved JP1/AJS diagnostic registration,
+  update timing for opened and changed documents, cleanup for closed documents,
+  VS Code diagnostic object mapping, and the application diagnostic DTO
+  contract.
 
 ## Human Approval
 
@@ -52,6 +53,14 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-4-H inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select Slice-4-I diagnostics registration event cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-4-I.
+- [x] Implement Slice-4-I inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
 
@@ -65,7 +74,7 @@ current conversation`; do not copy the approval message.
 - None.
 
 Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C,
-Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, and Slice-4-H refactors were
+Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, Slice-4-H, and Slice-4-I refactors were
 behavior-preserving and do not currently require use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO duplication finding is not a current
 candidate because it appears to be DTO copy-shape similarity rather than shared

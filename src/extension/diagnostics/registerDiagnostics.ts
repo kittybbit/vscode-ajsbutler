@@ -22,16 +22,56 @@ const updateDiagnostics = (
   collection: vscode.DiagnosticCollection,
   document: vscode.TextDocument,
 ): void => {
-  if (document.languageId !== LANGUAGE_ID) {
-    return;
-  }
-
   console.log(`invoke checkForErrors. (${document.uri.toString()})`);
   const diagnostics = buildSyntaxDiagnostics(document.getText()).map(
     toVsCodeDiagnostic,
   );
   collection.set(document.uri, diagnostics);
 };
+
+const isAjsDocument = (document: vscode.TextDocument): boolean =>
+  document.languageId === LANGUAGE_ID;
+
+const runForAjsDocument = (
+  document: vscode.TextDocument,
+  eventName: string,
+  action: (document: vscode.TextDocument) => void,
+): void => {
+  if (!isAjsDocument(document)) {
+    return;
+  }
+
+  console.log(`invoke Diagnostic.${eventName}. (${document.uri.toString()})`);
+  action(document);
+};
+
+const createOpenDocumentListener =
+  (collection: vscode.DiagnosticCollection) =>
+  (document: vscode.TextDocument): void => {
+    runForAjsDocument(document, "onDidOpenTextDocument", (targetDocument) => {
+      updateDiagnostics(collection, targetDocument);
+    });
+  };
+
+const createChangeDocumentListener =
+  (collection: vscode.DiagnosticCollection) =>
+  (event: vscode.TextDocumentChangeEvent): void => {
+    runForAjsDocument(
+      event.document,
+      "onDidChangeTextDocument",
+      (targetDocument) => {
+        updateDiagnostics(collection, targetDocument);
+      },
+    );
+  };
+
+const createCloseDocumentListener =
+  (collection: vscode.DiagnosticCollection) =>
+  (document: vscode.TextDocument): void => {
+    runForAjsDocument(document, "onDidCloseTextDocument", (targetDocument) => {
+      collection.delete(targetDocument.uri);
+    });
+  };
 
 export const registerDiagnostics = (): vscode.Disposable => {
   console.log("initialize Diagnostic.");
@@ -40,32 +80,14 @@ export const registerDiagnostics = (): vscode.Disposable => {
 
   return vscode.Disposable.from(
     collection,
-    vscode.workspace.onDidOpenTextDocument((document) => {
-      if (document.languageId !== LANGUAGE_ID) {
-        return;
-      }
-      console.log(
-        `invoke Diagnostic.onDidOpenTextDocument. (${document.uri.toString()})`,
-      );
-      updateDiagnostics(collection, document);
-    }),
-    vscode.workspace.onDidChangeTextDocument((event) => {
-      if (event.document.languageId !== LANGUAGE_ID) {
-        return;
-      }
-      console.log(
-        `invoke Diagnostic.onDidChangeTextDocument. (${event.document.uri.toString()})`,
-      );
-      updateDiagnostics(collection, event.document);
-    }),
-    vscode.workspace.onDidCloseTextDocument((document) => {
-      if (document.languageId !== LANGUAGE_ID) {
-        return;
-      }
-      console.log(
-        `invoke Diagnostic.onDidCloseTextDocument. (${document.uri.toString()})`,
-      );
-      collection.delete(document.uri);
-    }),
+    vscode.workspace.onDidOpenTextDocument(
+      createOpenDocumentListener(collection),
+    ),
+    vscode.workspace.onDidChangeTextDocument(
+      createChangeDocumentListener(collection),
+    ),
+    vscode.workspace.onDidCloseTextDocument(
+      createCloseDocumentListener(collection),
+    ),
   );
 };
