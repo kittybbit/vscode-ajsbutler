@@ -319,20 +319,28 @@ const reportImportFailure = async (
 const collectRequiredInputValues = async (
   deps: ImportAjsDefinitionCommandDeps,
 ): Promise<ImportInputValues | undefined> => {
-  const values: Partial<ImportInputValues> = {};
-  let completed = true;
+  const values = await collectInputSteps(deps);
+  return hasImportInputValues(values) ? values : undefined;
+};
 
-  for (const step of IMPORT_INPUT_STEPS) {
-    const value = await promptRequired(deps, step.options(values));
-    if (value) {
-      values[step.key] = value;
-    } else {
-      completed = false;
-      break;
-    }
-  }
+const collectInputSteps = (
+  deps: ImportAjsDefinitionCommandDeps,
+): Promise<Partial<ImportInputValues> | undefined> =>
+  IMPORT_INPUT_STEPS.reduce<Promise<Partial<ImportInputValues> | undefined>>(
+    async (valuesPromise, step) => {
+      const values = await valuesPromise;
+      return values ? collectInputStep(deps, step, values) : undefined;
+    },
+    Promise.resolve({}),
+  );
 
-  return completed && hasImportInputValues(values) ? values : undefined;
+const collectInputStep = async (
+  deps: ImportAjsDefinitionCommandDeps,
+  step: ImportInputStep,
+  values: Partial<ImportInputValues>,
+): Promise<Partial<ImportInputValues> | undefined> => {
+  const value = await promptRequired(deps, step.options(values));
+  return value ? { ...values, [step.key]: value } : undefined;
 };
 
 const hasImportInputValues = (
