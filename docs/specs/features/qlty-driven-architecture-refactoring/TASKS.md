@@ -13,13 +13,14 @@ active feature. Slice progress stays in this file.
 ## Current Status
 
 - Active task:
-  none.
+  Slice-4-H viewer message routing dispatch cleanup is selected for approval.
 - Runtime status:
   Slice-4-G schedule diagnostic helper decomposition is
   complete.
 - Use-case reflection:
-  None required. Slice-4-G preserved editor-feedback schedule diagnostics and
-  did not change the user-visible diagnostic contract.
+  None expected. Slice-4-H must preserve table/flow webview message routing,
+  save validation, optional save-handler behavior, resource/ready/operation/
+  navigation dispatch, panel disposal cleanup, and webview operation telemetry.
 
 ## Human Approval
 
@@ -44,13 +45,34 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-4-G inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
-- [ ] Select the next candidate only if it has meaningful responsibility,
-      boundary, or use-case value.
+- [x] Select Slice-4-H viewer message routing dispatch cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [ ] Record human approval for Slice-4-H.
+- [ ] Implement Slice-4-H inside the approved scope.
+- [ ] Run required validation.
+- [ ] Reconfirm that use-case reflection is unnecessary.
 
 ## Validation Plan
 
 - For the next code slice, run `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`.
+
+## Approval-Sensitive Scope
+
+Slice-4-H may decompose `createViewerMessageHandler` in
+`src/extension/webview/viewerMessageRouting.ts` into smaller dispatch helpers
+or an equivalent typed route table. The change must be behavior-preserving:
+event type handling, the existing save error message, optional `onSave`
+behavior, operation telemetry forwarding, navigation forwarding, ready/resource
+dispatch, and panel disposal cleanup must remain unchanged.
+
+Expected implementation files are limited to
+`src/extension/webview/viewerMessageRouting.ts` and focused regression coverage
+in `src/test/suite/viewerMessageRouting.test.ts` if needed. No generated
+artifacts, package metadata, VS Code compatibility settings, parser behavior,
+or webview UI components are in scope.
 
 ## Deferred Use-Case Backlog
 
