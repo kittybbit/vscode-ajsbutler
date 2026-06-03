@@ -13,14 +13,14 @@ active feature. Slice progress stays in this file.
 ## Current Status
 
 - Active task:
-  none.
+  Slice-4-J viewer counterpart reveal wiring cleanup is selected for approval.
 - Runtime status:
   Slice-4-I diagnostics registration event cleanup is complete.
 - Use-case reflection:
-  None required. Slice-4-I preserved JP1/AJS diagnostic registration,
-  update timing for opened and changed documents, cleanup for closed documents,
-  VS Code diagnostic object mapping, and the application diagnostic DTO
-  contract.
+  None expected. Slice-4-J must preserve table/flow viewer subscription
+  creation, open command registration, cross-view navigation target resolution,
+  existing counterpart-panel reveal behavior, reveal-unit message posting, and
+  current no-op behavior when the counterpart panel is unavailable.
 
 ## Human Approval
 
@@ -61,13 +61,37 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-4-I inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
-- [ ] Select the next candidate only if it has meaningful responsibility,
-      boundary, or use-case value.
+- [x] Select Slice-4-J viewer counterpart reveal wiring cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [ ] Record human approval for Slice-4-J.
+- [ ] Implement Slice-4-J inside the approved scope.
+- [ ] Run required validation.
+- [ ] Reconfirm that use-case reflection is unnecessary.
 
 ## Validation Plan
 
 - For the next code slice, run `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`.
+
+## Approval-Sensitive Scope
+
+Slice-4-J may decompose counterpart viewer reveal wiring in
+`src/extension/bootstrap/viewerWiring.ts`, including replacing the
+many-parameter `revealExistingCounterpartPanel` call shape with a small
+request/dependency object or equivalent helper. The change must be
+behavior-preserving: table and flow viewer subscriptions, `open.<viewType>`
+command registration, target view type resolution, lookup of an existing panel
+for the same document, `panel.reveal(panel.viewColumn)`, posting
+`createRevealUnitEvent(absolutePath)`, and no-op behavior when no counterpart
+factory or panel exists must remain unchanged.
+
+Expected implementation files are limited to
+`src/extension/bootstrap/viewerWiring.ts` and focused regression coverage in
+`src/test/suite/viewerWiring.test.ts` if needed. No webview UI component,
+application DTO, parser, generated artifact, package metadata, VS Code
+compatibility setting, or command semantics change is in scope.
 
 ## Deferred Use-Case Backlog
 
