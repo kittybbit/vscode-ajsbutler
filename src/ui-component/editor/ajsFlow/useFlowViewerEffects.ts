@@ -22,6 +22,38 @@ type UseFlowViewerFitViewParams = {
   reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>;
 };
 
+type FlowViewerOverflowElements = {
+  body: HTMLElement;
+  documentElement: HTMLElement;
+  root: HTMLElement | null;
+};
+
+type FitViewFrameRef = MutableRefObject<number | undefined>;
+
+const hasFitViewTarget = ({
+  nodes,
+  reactFlowInstanceRef,
+}: UseFlowViewerFitViewParams): boolean =>
+  !!reactFlowInstanceRef.current && nodes.length > 0;
+
+const cancelFitViewFrame = (fitViewFrameRef: FitViewFrameRef) => {
+  if (fitViewFrameRef.current) {
+    window.cancelAnimationFrame(fitViewFrameRef.current);
+    fitViewFrameRef.current = undefined;
+  }
+};
+
+const scheduleFitViewFrame = (
+  fitViewFrameRef: FitViewFrameRef,
+  reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>,
+) => {
+  cancelFitViewFrame(fitViewFrameRef);
+  fitViewFrameRef.current = window.requestAnimationFrame(() => {
+    void reactFlowInstanceRef.current?.fitView({ padding: 0.22 });
+    fitViewFrameRef.current = undefined;
+  });
+};
+
 export const useFlowViewerFitView = ({
   edges,
   nodes,
@@ -30,25 +62,12 @@ export const useFlowViewerFitView = ({
   const fitViewFrameRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (!reactFlowInstanceRef.current || nodes.length === 0) {
+    if (!hasFitViewTarget({ edges, nodes, reactFlowInstanceRef })) {
       return undefined;
     }
 
-    if (fitViewFrameRef.current) {
-      window.cancelAnimationFrame(fitViewFrameRef.current);
-    }
-
-    fitViewFrameRef.current = window.requestAnimationFrame(() => {
-      void reactFlowInstanceRef.current?.fitView({ padding: 0.22 });
-      fitViewFrameRef.current = undefined;
-    });
-
-    return () => {
-      if (fitViewFrameRef.current) {
-        window.cancelAnimationFrame(fitViewFrameRef.current);
-        fitViewFrameRef.current = undefined;
-      }
-    };
+    scheduleFitViewFrame(fitViewFrameRef, reactFlowInstanceRef);
+    return () => cancelFitViewFrame(fitViewFrameRef);
   }, [edges, nodes, reactFlowInstanceRef]);
 };
 
@@ -60,6 +79,37 @@ type UseFlowScopeResetParams = {
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
 };
 
+const clearExpandedUnitIds = (
+  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>,
+) => {
+  setExpandedUnitIds((prev) => (prev.length === 0 ? prev : []));
+};
+
+const shouldPreserveSearchOnScopeChange = (
+  preserveSearchOnNextScopeChange: MutableRefObject<boolean>,
+): boolean => {
+  if (!preserveSearchOnNextScopeChange.current) {
+    return false;
+  }
+
+  preserveSearchOnNextScopeChange.current = false;
+  return true;
+};
+
+const resetFlowScopeState = ({
+  preserveSearchOnNextScopeChange,
+  resetSearch,
+  setExpandedUnitIds,
+}: Pick<
+  UseFlowScopeResetParams,
+  "preserveSearchOnNextScopeChange" | "resetSearch" | "setExpandedUnitIds"
+>) => {
+  clearExpandedUnitIds(setExpandedUnitIds);
+  if (!shouldPreserveSearchOnScopeChange(preserveSearchOnNextScopeChange)) {
+    resetSearch();
+  }
+};
+
 export const useFlowScopeReset = ({
   ajsDocument,
   currentUnitId,
@@ -68,12 +118,11 @@ export const useFlowScopeReset = ({
   setExpandedUnitIds,
 }: UseFlowScopeResetParams) => {
   useEffect(() => {
-    setExpandedUnitIds((prev) => (prev.length === 0 ? prev : []));
-    if (preserveSearchOnNextScopeChange.current) {
-      preserveSearchOnNextScopeChange.current = false;
-      return;
-    }
-    resetSearch();
+    resetFlowScopeState({
+      preserveSearchOnNextScopeChange,
+      resetSearch,
+      setExpandedUnitIds,
+    });
   }, [
     ajsDocument,
     currentUnitId,
@@ -147,23 +196,42 @@ export const useRevealUnitSubscription = ({
   }, [handleRevealUnit]);
 };
 
+const getFlowViewerOverflowElements = (): FlowViewerOverflowElements => ({
+  body: document.body,
+  documentElement: document.documentElement,
+  root: document.getElementById("root"),
+});
+
+const applyFlowViewerOverflow = ({
+  body,
+  documentElement,
+  root,
+}: FlowViewerOverflowElements) => {
+  documentElement.style.overflow = "hidden";
+  body.style.overflow = "hidden";
+  if (root) {
+    root.style.overflow = "hidden";
+    root.style.height = "100%";
+  }
+};
+
+const resetFlowViewerOverflow = ({
+  body,
+  documentElement,
+  root,
+}: FlowViewerOverflowElements) => {
+  documentElement.style.overflow = "";
+  body.style.overflow = "";
+  if (root) {
+    root.style.overflow = "";
+    root.style.height = "";
+  }
+};
+
 export const useFlowViewerOverflow = () => {
   useEffect(() => {
-    const root = document.getElementById("root");
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    if (root) {
-      root.style.overflow = "hidden";
-      root.style.height = "100%";
-    }
-
-    return () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      if (root) {
-        root.style.overflow = "";
-        root.style.height = "";
-      }
-    };
+    const elements = getFlowViewerOverflowElements();
+    applyFlowViewerOverflow(elements);
+    return () => resetFlowViewerOverflow(elements);
   }, []);
 };
