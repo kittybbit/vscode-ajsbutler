@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import type { Theme } from "@mui/material/styles";
 import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import {
   AjsDocument,
+  AjsUnit,
   flattenAjsUnits,
 } from "../../../domain/models/ajs/AjsDocument";
 import {
@@ -30,41 +31,142 @@ type UseFlowViewerControllerParams = {
   theme: Theme;
 };
 
-export const useFlowViewerController = ({
-  theme,
-}: UseFlowViewerControllerParams) => {
-  const [menuStatus, setMenuStatus] = useState({ menuItem1: true });
-  const [drawerWidth, setDrawerWidth] = useState<number>(0);
-  const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
-  const [currentUnitId, setCurrentUnitId] = useState<string>();
-  const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
+const useFlowViewerRefs = () => {
   const reactFlowInstanceRef = useRef<ReactFlowInstance<Node, Edge> | null>(
     null,
   );
   const preserveSearchOnNextScopeChange = useRef<boolean>(false);
   const prevUnitEntityId = useRef<string | undefined>(undefined);
-  const [dialogData, setDialogData] = useState<
-    UnitDefinitionDialogDto | undefined
-  >();
 
+  return {
+    preserveSearchOnNextScopeChange,
+    prevUnitEntityId,
+    reactFlowInstanceRef,
+  };
+};
+
+const flattenDocumentUnits = (
+  ajsDocument: AjsDocument | undefined,
+): AjsUnit[] => (ajsDocument ? flattenAjsUnits(ajsDocument.rootUnits) : []);
+
+const useUnitById = (ajsDocument: AjsDocument | undefined) => {
   const allUnits = useMemo(
-    () => (ajsDocument ? flattenAjsUnits(ajsDocument.rootUnits) : []),
+    () => flattenDocumentUnits(ajsDocument),
     [ajsDocument],
   );
-  const unitById = useMemo(
+  return useMemo(
     () => new Map(allUnits.map((unit) => [unit.id, unit])),
     [allUnits],
   );
-  const unitDefinitionByPath = useMemo(
+};
+
+const useUnitDefinitionByPath = (ajsDocument: AjsDocument | undefined) =>
+  useMemo(
     () =>
       ajsDocument
         ? buildUnitDefinitionByPath(ajsDocument)
         : new Map<string, UnitDefinitionDialogDto>(),
     [ajsDocument],
   );
-  const currentUnit = useMemo(
+
+const useCurrentUnit = (
+  currentUnitId: string | undefined,
+  unitById: ReadonlyMap<string, AjsUnit>,
+) =>
+  useMemo(
     () => (currentUnitId ? unitById.get(currentUnitId) : undefined),
     [currentUnitId, unitById],
+  );
+
+const useFlowDocumentState = (
+  ajsDocument: AjsDocument | undefined,
+  currentUnitId: string | undefined,
+) => {
+  const unitById = useUnitById(ajsDocument);
+  const unitDefinitionByPath = useUnitDefinitionByPath(ajsDocument);
+  const currentUnit = useCurrentUnit(currentUnitId, unitById);
+
+  return {
+    currentUnit,
+    unitById,
+    unitDefinitionByPath,
+  };
+};
+
+const useCurrentUnitIdState = (
+  currentUnitId: string | undefined,
+  setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>,
+) =>
+  useMemo<CurrentUnitIdStateType>(
+    () => ({
+      currentUnitId,
+      setCurrentUnitId,
+    }),
+    [currentUnitId, setCurrentUnitId],
+  );
+
+const useFlowViewerUiState = () => {
+  const [menuStatus, setMenuStatus] = useState({ menuItem1: true });
+  const [drawerWidth, setDrawerWidth] = useState<number>(0);
+  const [dialogData, setDialogData] = useState<
+    UnitDefinitionDialogDto | undefined
+  >();
+  const flowMenuState = useMemo<FlowMenuStateType>(
+    () => ({
+      menuStatus,
+      setMenuStatus,
+    }),
+    [menuStatus],
+  );
+  const drawerWidthState = useMemo<DrawerWidthStateType>(
+    () => ({
+      drawerWidth,
+      setDrawerWidth,
+    }),
+    [drawerWidth],
+  );
+  const dialogDataState = useMemo<DialogDataStateType>(
+    () => ({
+      dialogData,
+      setDialogData,
+    }),
+    [dialogData],
+  );
+
+  return {
+    dialogData,
+    dialogDataState,
+    drawerWidth,
+    drawerWidthState,
+    flowMenuState,
+    menuStatus,
+    setDialogData,
+  };
+};
+
+export const useFlowViewerController = ({
+  theme,
+}: UseFlowViewerControllerParams) => {
+  const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
+  const [currentUnitId, setCurrentUnitId] = useState<string>();
+  const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
+  const {
+    preserveSearchOnNextScopeChange,
+    prevUnitEntityId,
+    reactFlowInstanceRef,
+  } = useFlowViewerRefs();
+  const {
+    dialogData,
+    dialogDataState,
+    drawerWidth,
+    drawerWidthState,
+    flowMenuState,
+    menuStatus,
+    setDialogData,
+  } = useFlowViewerUiState();
+  const { currentUnit, unitById, unitDefinitionByPath } = useFlowDocumentState(
+    ajsDocument,
+    currentUnitId,
   );
 
   const {
@@ -79,19 +181,9 @@ export const useFlowViewerController = ({
     unitById,
   });
 
-  const currentUnitIdState = useMemo<CurrentUnitIdStateType>(
-    () => ({
-      currentUnitId,
-      setCurrentUnitId,
-    }),
-    [currentUnitId],
-  );
-  const dialogDataState = useMemo<DialogDataStateType>(
-    () => ({
-      dialogData,
-      setDialogData,
-    }),
-    [dialogData],
+  const currentUnitIdState = useCurrentUnitIdState(
+    currentUnitId,
+    setCurrentUnitId,
   );
   const {
     handleRevealUnit,
@@ -136,21 +228,6 @@ export const useFlowViewerController = ({
   });
   useRevealUnitSubscription({ handleRevealUnit });
   useFlowViewerOverflow();
-
-  const flowMenuState = useMemo<FlowMenuStateType>(
-    () => ({
-      menuStatus,
-      setMenuStatus,
-    }),
-    [menuStatus],
-  );
-  const drawerWidthState = useMemo<DrawerWidthStateType>(
-    () => ({
-      drawerWidth,
-      setDrawerWidth,
-    }),
-    [drawerWidth],
-  );
 
   return {
     ajsDocument,

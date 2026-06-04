@@ -15,12 +15,12 @@ active feature. Slice progress stays in this file.
 - Active task:
   none.
 - Runtime status:
-  Slice-4-K WebAPI import input collection cleanup is complete.
+  Slice-4-L flow viewer controller state composition cleanup is complete.
 - Use-case reflection:
-  None required. Slice-4-K preserved WebAPI import prompt order, prompt text,
-  placeholder/default values, trimming behavior, cancellation result,
-  unsupported-host behavior, credential storage inputs, request construction,
-  user-facing result messages, and telemetry event properties.
+  None required. Slice-4-L preserved flow viewer document subscription,
+  selected-unit scope, search and reveal behavior, nested expansion state,
+  graph node/edge construction, fit-view timing, overflow handling, dialog
+  behavior, and table/flow navigation contracts.
 
 ## Human Approval
 
@@ -77,6 +77,14 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-4-K inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select Slice-4-L flow viewer controller state composition cleanup as the
+      next candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-4-L.
+- [x] Implement Slice-4-L inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
 
@@ -91,9 +99,10 @@ current conversation`; do not copy the approval message.
 
 Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C,
 Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, Slice-4-H, Slice-4-I, Slice-4-J,
-and Slice-4-K refactors were behavior-preserving and do not currently require
-use-case updates. The `buildUnitListView.ts` / WebAPI DTO duplication finding
-is not a current candidate because it appears to be DTO copy-shape similarity
-rather than shared behavior. Remaining domain-unit duplication clusters should
-only be reopened when they represent a stronger shared JP1/AJS business concept
-or use-case need than getter-shape similarity alone.
+Slice-4-K, and Slice-4-L refactors were behavior-preserving and do not
+currently require use-case updates. The `buildUnitListView.ts` / WebAPI DTO
+duplication finding is not a current candidate because it appears to be DTO
+copy-shape similarity rather than shared behavior. Remaining domain-unit
+duplication clusters should only be reopened when they represent a stronger
+shared JP1/AJS business concept or use-case need than getter-shape similarity
+alone.
