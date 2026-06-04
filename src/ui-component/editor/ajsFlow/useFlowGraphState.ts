@@ -1,9 +1,17 @@
-import { MutableRefObject, useCallback, useEffect, useState } from "react";
+import {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import type { Theme } from "@mui/material/styles";
 import { Edge, Node } from "@xyflow/react";
 import { AjsDocument, AjsUnit } from "../../../domain/models/ajs/AjsDocument";
 import { UnitDefinitionDialogDto } from "../../../application/unit-definition/buildUnitDefinition";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
+import { ExpandedFlowGraphResult } from "./expandedFlowGraphTypes";
 import {
   CurrentUnitIdStateType,
   DialogDataStateType,
@@ -26,10 +34,89 @@ type UseFlowGraphStateParams = {
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
 };
 
-const emptyFlowData = (): { nodes: Node[]; edges: Edge[] } => ({
+type FlowData = { nodes: Node[]; edges: Edge[] };
+
+type FlowGraphDataBuildParams = Omit<
+  UseFlowGraphStateParams,
+  "currentUnitId" | "prevUnitEntityId"
+>;
+
+type ReadyFlowGraphDataBuildParams = FlowGraphDataBuildParams & {
+  ajsDocument: AjsDocument;
+};
+
+const emptyFlowData = (): FlowData => ({
   nodes: [],
   edges: [],
 });
+
+const hasFlowGraphBuildInput = (
+  params: FlowGraphDataBuildParams,
+  selectedUnitId: string | undefined,
+): params is ReadyFlowGraphDataBuildParams =>
+  !!selectedUnitId && !!params.ajsDocument;
+
+const buildExpandedGraphResult = (
+  params: ReadyFlowGraphDataBuildParams,
+  selectedUnitId: string,
+): ExpandedFlowGraphResult =>
+  buildExpandedFlowGraph(
+    params.ajsDocument,
+    selectedUnitId,
+    params.expandedUnitIds,
+    params.theme.typography.htmlFontSize,
+  );
+
+const createReactFlowDataOptions = ({
+  nestedExpansionState,
+  searchedUnitId,
+  searchMatchedUnitIds,
+  unitById,
+}: FlowGraphDataBuildParams) => ({
+  searchMatchedUnitIds: new Set(searchMatchedUnitIds),
+  searchedUnitId,
+  unitById,
+  nestedExpansionState,
+});
+
+const createFlowDataFromExpandedGraph = (
+  params: FlowGraphDataBuildParams,
+  expandedGraph: ExpandedFlowGraphResult,
+): FlowData =>
+  expandedGraph.graph
+    ? createReactFlowData(
+        expandedGraph.graph,
+        params.unitDefinitionByPath,
+        params.theme,
+        params.dialogDataState,
+        params.currentUnitIdState,
+        {
+          ...createReactFlowDataOptions(params),
+          nodeDecorations: expandedGraph.nodeDecorations,
+          positionOverrides: expandedGraph.positionOverrides,
+        },
+      )
+    : emptyFlowData();
+
+const buildFlowData = (
+  params: FlowGraphDataBuildParams,
+  selectedUnitId: string | undefined,
+): FlowData =>
+  hasFlowGraphBuildInput(params, selectedUnitId)
+    ? createFlowDataFromExpandedGraph(
+        params,
+        buildExpandedGraphResult(params, selectedUnitId),
+      )
+    : emptyFlowData();
+
+const updateFlowDataState = (
+  flowData: FlowData,
+  setNodes: Dispatch<SetStateAction<Node[]>>,
+  setEdges: Dispatch<SetStateAction<Edge[]>>,
+) => {
+  setNodes(() => flowData.nodes);
+  setEdges(() => flowData.edges);
+};
 
 export const useFlowGraphState = ({
   ajsDocument,
@@ -49,38 +136,22 @@ export const useFlowGraphState = ({
   const [edges, setEdges] = useState<Edge[]>([]);
 
   const buildNodesAndEdges = useCallback(
-    (selectedUnitId?: string): { nodes: Node[]; edges: Edge[] } => {
-      if (!selectedUnitId || !ajsDocument) {
-        return emptyFlowData();
-      }
-
-      const { graph, positionOverrides, nodeDecorations } =
-        buildExpandedFlowGraph(
-          ajsDocument,
-          selectedUnitId,
-          expandedUnitIds,
-          theme.typography.htmlFontSize,
-        );
-      if (!graph) {
-        return emptyFlowData();
-      }
-
-      return createReactFlowData(
-        graph,
-        unitDefinitionByPath,
-        theme,
-        dialogDataState,
-        currentUnitIdState,
+    (selectedUnitId?: string): FlowData =>
+      buildFlowData(
         {
-          nodeDecorations,
-          searchMatchedUnitIds: new Set(searchMatchedUnitIds),
-          searchedUnitId,
-          unitById,
+          ajsDocument,
+          currentUnitIdState,
+          dialogDataState,
+          expandedUnitIds,
           nestedExpansionState,
-          positionOverrides,
+          searchedUnitId,
+          searchMatchedUnitIds,
+          theme,
+          unitById,
+          unitDefinitionByPath,
         },
-      );
-    },
+        selectedUnitId,
+      ),
     [
       ajsDocument,
       currentUnitIdState,
@@ -97,8 +168,7 @@ export const useFlowGraphState = ({
 
   useEffect(() => {
     const nextFlowData = buildNodesAndEdges(currentUnitId);
-    setNodes(() => nextFlowData.nodes);
-    setEdges(() => nextFlowData.edges);
+    updateFlowDataState(nextFlowData, setNodes, setEdges);
     prevUnitEntityId.current = currentUnitId;
   }, [buildNodesAndEdges, currentUnitId, prevUnitEntityId]);
 
