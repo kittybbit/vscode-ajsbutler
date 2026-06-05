@@ -1,3 +1,5 @@
+import { collectExpandedAncestorUnitIds } from "./ajsFlow/flowExpandedAncestors";
+
 export const getRevealUnitAbsolutePath = (
   data: unknown,
 ): string | undefined => {
@@ -56,22 +58,6 @@ const resolveFlowRevealScopeUnit = (
   return revealedUnit;
 };
 
-const collectExpandedAncestorUnitIds = (
-  unitById: ReadonlyMap<string, FlowRevealUnit>,
-  revealedUnit: FlowRevealUnit,
-  scopeUnit: FlowRevealUnit,
-): string[] => {
-  const expandedAncestorUnitIds: string[] = [];
-  let current = findFlowRevealParentUnit(unitById, revealedUnit);
-  while (current && current.id !== scopeUnit.id) {
-    if (current.unitType === "n" && current.children.length > 0) {
-      expandedAncestorUnitIds.unshift(current.id);
-    }
-    current = findFlowRevealParentUnit(unitById, current);
-  }
-  return expandedAncestorUnitIds;
-};
-
 export const resolveFlowRevealTarget = (
   unitById: ReadonlyMap<string, FlowRevealUnit>,
   absolutePath: string,
@@ -86,11 +72,11 @@ export const resolveFlowRevealTarget = (
   return {
     scopeUnitId: scopeUnit.id,
     revealedUnitId: revealedUnit.id,
-    expandedAncestorUnitIds: collectExpandedAncestorUnitIds(
+    expandedAncestorUnitIds: collectExpandedAncestorUnitIds({
       unitById,
-      revealedUnit,
+      unit: revealedUnit,
       scopeUnit,
-    ),
+    }),
   };
 };
 
