@@ -900,20 +900,23 @@ const calculateHorizontalGrowth = (
   panelBounds: FlowGraphBounds,
   baseBounds: FlowGraphBounds,
   upperPanelMaxRight: number | undefined,
-) =>
-  upperPanelMaxRight === undefined
-    ? Math.max(0, panelBounds.maxX - baseBounds.maxX)
-    : Math.max(0, panelBounds.maxX - upperPanelMaxRight);
+): number =>
+  Math.max(0, panelBounds.maxX - (upperPanelMaxRight ?? baseBounds.maxX));
 
-const applyExpandedChildGrowthOffsets = ({
+const calculateVerticalGrowth = (
+  panelBounds: FlowGraphBounds,
+  baseBounds: FlowGraphBounds,
+): number => Math.max(0, panelBounds.maxY - baseBounds.maxY);
+
+const getExpandedChildGrowthOffsetApplication = ({
   context,
   expandedChildren,
   expandedChild,
   immediateVisibleChildren,
-}: ExpandedChildGrowthContext) => {
+}: ExpandedChildGrowthContext): GrowthOffsetApplication | undefined => {
   const growthBounds = getExpandedChildGrowthBounds(context, expandedChild);
   if (!growthBounds) {
-    return;
+    return undefined;
   }
 
   const baseBounds = buildUnitBaseBounds(
@@ -926,25 +929,33 @@ const applyExpandedChildGrowthOffsets = ({
     expandedChild,
     expandedChildPosition: growthBounds.position,
   });
-  const horizontalGrowth = calculateHorizontalGrowth(
-    growthBounds.panelBounds,
-    baseBounds,
-    upperPanelMaxRight,
-  );
-  const verticalGrowth = Math.max(
-    0,
-    growthBounds.panelBounds.maxY - baseBounds.maxY,
-  );
 
-  applyGrowthOffsets(context, {
+  return {
     expandedUnitPosition: growthBounds.position,
-    horizontalGrowth,
-    verticalGrowth,
+    horizontalGrowth: calculateHorizontalGrowth(
+      growthBounds.panelBounds,
+      baseBounds,
+      upperPanelMaxRight,
+    ),
+    verticalGrowth: calculateVerticalGrowth(
+      growthBounds.panelBounds,
+      baseBounds,
+    ),
     targetUnitIds: getGrowthTargetUnitIds(
       immediateVisibleChildren,
       expandedChild,
     ),
-  });
+  };
+};
+
+const applyExpandedChildGrowthOffsets = (
+  growthContext: ExpandedChildGrowthContext,
+) => {
+  const growthOffsetApplication =
+    getExpandedChildGrowthOffsetApplication(growthContext);
+  if (growthOffsetApplication) {
+    applyGrowthOffsets(growthContext.context, growthOffsetApplication);
+  }
 };
 
 const applyExpandedChildrenGrowthOffsets = (
