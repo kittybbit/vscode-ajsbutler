@@ -15,13 +15,12 @@ active feature. Slice progress stays in this file.
 - Active task:
   none.
 - Runtime status:
-  Slice-4-O flow viewer side-effect cleanup is complete.
+  Slice-4-P flow node visual state style cleanup is complete.
 - Use-case reflection:
-  None required. Slice-4-O preserved flow viewer fit-view scheduling,
-  animation-frame cancellation, scope-change expansion reset, search reset
-  preservation during reveal-driven scope changes, document subscription,
-  reveal-unit subscription, ready message posting, and root/body overflow
-  cleanup.
+  None required. Slice-4-P preserved flow node visual-state priority,
+  current/search/root/ancestor border, background, shadow, button color,
+  nested-panel pseudo element style, and the shape of `buildNodeSxProps`
+  consumed by job, jobnet, jobgroup, and condition nodes.
 
 ## Human Approval
 
@@ -108,6 +107,14 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-4-O inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select Slice-4-P flow node visual state style cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-4-P.
+- [x] Implement Slice-4-P inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
 
@@ -122,7 +129,7 @@ current conversation`; do not copy the approval message.
 
 Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C,
 Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, Slice-4-H, Slice-4-I, Slice-4-J,
-Slice-4-K, Slice-4-L, Slice-4-M, Slice-4-N, and Slice-4-O refactors were
+Slice-4-K, Slice-4-L, Slice-4-M, Slice-4-N, Slice-4-O, and Slice-4-P refactors were
 behavior-preserving and do not currently require use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO duplication finding is not a current
 candidate because it appears to be DTO copy-shape similarity rather than shared

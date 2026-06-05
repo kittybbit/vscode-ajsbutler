@@ -8,62 +8,129 @@ type NodeVisualState = Pick<
 
 type NestedPanel = NonNullable<NodeVisualState["nestedPanel"]>;
 
+type VisualStateSelector = (visualState: NodeVisualState) => boolean;
+type ThemeValue = (theme: Theme) => string;
+type VisualStateRule<Kind extends string> = {
+  readonly kind: Kind;
+  readonly matches: VisualStateSelector;
+};
+
+const currentNodeRule = {
+  kind: "current",
+  matches: ({ isCurrent }: NodeVisualState) => Boolean(isCurrent),
+} as const;
+
+const searchMatchNodeRule = {
+  kind: "searchMatch",
+  matches: ({ isSearchMatch }: NodeVisualState) => Boolean(isSearchMatch),
+} as const;
+
+const ancestorNodeRule = {
+  kind: "ancestor",
+  matches: ({ isAncestor }: NodeVisualState) => Boolean(isAncestor),
+} as const;
+
+const rootJobnetNodeRule = {
+  kind: "rootJobnet",
+  matches: ({ isRootJobnet }: NodeVisualState) => Boolean(isRootJobnet),
+} as const;
+
+const resolveVisualKind = <Kind extends string>(
+  visualState: NodeVisualState,
+  rules: readonly VisualStateRule<Kind>[],
+  defaultKind: Kind,
+): Kind =>
+  rules.find(({ matches }) => matches(visualState))?.kind ?? defaultKind;
+
 const nodeBorderRadius = ({ isAncestor }: NodeVisualState): string =>
   isAncestor ? "1.35em" : "50%";
 
-const nodeBorderWidth = ({
-  isCurrent,
-  isRootJobnet,
-}: NodeVisualState): string =>
-  isCurrent ? "3px" : isRootJobnet ? "2px" : "1px";
+type BorderWidthKind = "current" | "rootJobnet" | "default";
 
-const nodeBorderColor =
-  ({ isCurrent, isSearchMatch, isRootJobnet }: NodeVisualState) =>
-  (theme: Theme): string => {
-    if (isCurrent) {
-      return theme.palette.info.main;
-    }
-    if (isSearchMatch) {
-      return theme.palette.success.main;
-    }
-    if (isRootJobnet) {
-      return theme.palette.primary.main;
-    }
-    return theme.palette.divider;
-  };
+const borderWidthRules: readonly VisualStateRule<BorderWidthKind>[] = [
+  currentNodeRule,
+  rootJobnetNodeRule,
+];
 
-const nodeBackground =
-  ({ isCurrent, isSearchMatch, isAncestor, isRootJobnet }: NodeVisualState) =>
-  (theme: Theme): string => {
-    if (isCurrent) {
-      return `linear-gradient(160deg, ${theme.palette.info.light}22 0%, ${theme.palette.background.paper} 58%, ${theme.palette.background.default} 100%)`;
-    }
-    if (isSearchMatch) {
-      return `linear-gradient(180deg, ${theme.palette.success.light}20 0%, ${theme.palette.background.paper} 100%)`;
-    }
-    if (isAncestor) {
-      return `linear-gradient(180deg, ${theme.palette.warning.light}1f 0%, ${theme.palette.background.paper} 100%)`;
-    }
-    if (isRootJobnet) {
-      return `linear-gradient(180deg, ${theme.palette.primary.light}18 0%, ${theme.palette.background.paper} 100%)`;
-    }
-    return theme.palette.background.paper;
-  };
+const borderWidthByKind: Record<BorderWidthKind, string> = {
+  current: "3px",
+  rootJobnet: "2px",
+  default: "1px",
+};
 
-const nodeBoxShadow =
-  ({ isCurrent, isSearchMatch, isAncestor }: NodeVisualState) =>
-  (theme: Theme): string => {
-    if (isCurrent) {
-      return `0 0 0 4px ${theme.palette.info.light}30, ${theme.shadows[6]}`;
-    }
-    if (isSearchMatch) {
-      return `0 0 0 3px ${theme.palette.success.light}30, ${theme.shadows[4]}`;
-    }
-    if (isAncestor) {
-      return theme.shadows[4];
-    }
-    return theme.shadows[2];
-  };
+const nodeBorderWidth = (visualState: NodeVisualState): string =>
+  borderWidthByKind[
+    resolveVisualKind(visualState, borderWidthRules, "default")
+  ];
+
+type BorderColorKind = "current" | "searchMatch" | "rootJobnet" | "default";
+
+const borderColorRules: readonly VisualStateRule<BorderColorKind>[] = [
+  currentNodeRule,
+  searchMatchNodeRule,
+  rootJobnetNodeRule,
+];
+
+const borderColorByKind: Record<BorderColorKind, ThemeValue> = {
+  current: (theme) => theme.palette.info.main,
+  searchMatch: (theme) => theme.palette.success.main,
+  rootJobnet: (theme) => theme.palette.primary.main,
+  default: (theme) => theme.palette.divider,
+};
+
+const nodeBorderColor = (visualState: NodeVisualState): ThemeValue =>
+  borderColorByKind[
+    resolveVisualKind(visualState, borderColorRules, "default")
+  ];
+
+type BackgroundKind =
+  | "current"
+  | "searchMatch"
+  | "ancestor"
+  | "rootJobnet"
+  | "default";
+
+const backgroundRules: readonly VisualStateRule<BackgroundKind>[] = [
+  currentNodeRule,
+  searchMatchNodeRule,
+  ancestorNodeRule,
+  rootJobnetNodeRule,
+];
+
+const backgroundByKind: Record<BackgroundKind, ThemeValue> = {
+  current: (theme) =>
+    `linear-gradient(160deg, ${theme.palette.info.light}22 0%, ${theme.palette.background.paper} 58%, ${theme.palette.background.default} 100%)`,
+  searchMatch: (theme) =>
+    `linear-gradient(180deg, ${theme.palette.success.light}20 0%, ${theme.palette.background.paper} 100%)`,
+  ancestor: (theme) =>
+    `linear-gradient(180deg, ${theme.palette.warning.light}1f 0%, ${theme.palette.background.paper} 100%)`,
+  rootJobnet: (theme) =>
+    `linear-gradient(180deg, ${theme.palette.primary.light}18 0%, ${theme.palette.background.paper} 100%)`,
+  default: (theme) => theme.palette.background.paper,
+};
+
+const nodeBackground = (visualState: NodeVisualState): ThemeValue =>
+  backgroundByKind[resolveVisualKind(visualState, backgroundRules, "default")];
+
+type BoxShadowKind = "current" | "searchMatch" | "ancestor" | "default";
+
+const boxShadowRules: readonly VisualStateRule<BoxShadowKind>[] = [
+  currentNodeRule,
+  searchMatchNodeRule,
+  ancestorNodeRule,
+];
+
+const boxShadowByKind: Record<BoxShadowKind, ThemeValue> = {
+  current: (theme) =>
+    `0 0 0 4px ${theme.palette.info.light}30, ${theme.shadows[6]}`,
+  searchMatch: (theme) =>
+    `0 0 0 3px ${theme.palette.success.light}30, ${theme.shadows[4]}`,
+  ancestor: (theme) => theme.shadows[4],
+  default: (theme) => theme.shadows[2],
+};
+
+const nodeBoxShadow = (visualState: NodeVisualState): ThemeValue =>
+  boxShadowByKind[resolveVisualKind(visualState, boxShadowRules, "default")];
 
 const nestedPanelSxProps = (nestedPanel?: NestedPanel) => {
   if (!nestedPanel) {
@@ -86,17 +153,23 @@ const nestedPanelSxProps = (nestedPanel?: NestedPanel) => {
   };
 };
 
-const nodeButtonColor =
-  ({ isCurrent, isSearchMatch }: NodeVisualState) =>
-  (theme: Theme): string => {
-    if (isCurrent) {
-      return theme.palette.info.dark;
-    }
-    if (isSearchMatch) {
-      return theme.palette.success.dark;
-    }
-    return theme.palette.text.secondary;
-  };
+type ButtonColorKind = "current" | "searchMatch" | "default";
+
+const buttonColorRules: readonly VisualStateRule<ButtonColorKind>[] = [
+  currentNodeRule,
+  searchMatchNodeRule,
+];
+
+const buttonColorByKind: Record<ButtonColorKind, ThemeValue> = {
+  current: (theme) => theme.palette.info.dark,
+  searchMatch: (theme) => theme.palette.success.dark,
+  default: (theme) => theme.palette.text.secondary,
+};
+
+const nodeButtonColor = (visualState: NodeVisualState): ThemeValue =>
+  buttonColorByKind[
+    resolveVisualKind(visualState, buttonColorRules, "default")
+  ];
 
 export const buildNodeSxProps = (
   visualState: NodeVisualState,
