@@ -1,14 +1,18 @@
 import { collectExpandedAncestorUnitIds } from "./ajsFlow/flowExpandedAncestors";
 
-export const getRevealUnitAbsolutePath = (
-  data: unknown,
+const isObjectRecord = (data: unknown): data is Record<string, unknown> =>
+  !!data && typeof data === "object";
+
+const getStringProperty = (
+  data: Record<string, unknown>,
+  propertyName: string,
 ): string | undefined => {
-  if (!data || typeof data !== "object") {
-    return undefined;
-  }
-  const absolutePath = (data as { absolutePath?: unknown }).absolutePath;
-  return typeof absolutePath === "string" ? absolutePath : undefined;
+  const value = data[propertyName];
+  return typeof value === "string" ? value : undefined;
 };
+
+export const getRevealUnitAbsolutePath = (data: unknown): string | undefined =>
+  isObjectRecord(data) ? getStringProperty(data, "absolutePath") : undefined;
 
 type FlowRevealUnit = {
   id: string;
@@ -38,24 +42,33 @@ const findFlowRevealParentUnit = (
 ): FlowRevealUnit | undefined =>
   unit.parentId ? unitById.get(unit.parentId) : undefined;
 
+const isConditionUnit = (unit: FlowRevealUnit | undefined): boolean =>
+  unit?.unitType === "rc";
+
+const isJobnetUnit = (unit: FlowRevealUnit | undefined): boolean =>
+  unit?.unitType === "n";
+
+const findNearestJobnetAncestor = (
+  unitById: ReadonlyMap<string, FlowRevealUnit>,
+  unit: FlowRevealUnit | undefined,
+): FlowRevealUnit | undefined => {
+  let current = unit;
+  while (current && !isJobnetUnit(current)) {
+    current = findFlowRevealParentUnit(unitById, current);
+  }
+  return current;
+};
+
 const resolveFlowRevealScopeUnit = (
   unitById: ReadonlyMap<string, FlowRevealUnit>,
   revealedUnit: FlowRevealUnit,
 ): FlowRevealUnit => {
   const directParent = findFlowRevealParentUnit(unitById, revealedUnit);
-  if (directParent?.unitType === "rc") {
+  if (isConditionUnit(directParent)) {
     return directParent;
   }
 
-  let current = directParent;
-  while (current) {
-    if (current.unitType === "n") {
-      return current;
-    }
-    current = findFlowRevealParentUnit(unitById, current);
-  }
-
-  return revealedUnit;
+  return findNearestJobnetAncestor(unitById, directParent) ?? revealedUnit;
 };
 
 export const resolveFlowRevealTarget = (
