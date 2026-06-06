@@ -15,12 +15,12 @@ active feature. Slice progress stays in this file.
 - Active task:
   None.
 - Runtime status:
-  Slice-5-H expanded panel subtree bounds helper cleanup is
+  Slice-5-I expanded child growth measurement application helper cleanup is
   complete.
 - Use-case reflection:
-  None required. Slice-5-H preserved expanded unit subtree bounds, occupied
-  rectangle calculation, descendant panel inclusion, and deterministic
-  `nodeDecorations` / `positionOverrides` behavior already covered by
+  None required. Slice-5-I preserved expanded child growth measurement,
+  right/down growth offset application, affected sibling target selection, and
+  deterministic `positionOverrides` behavior already covered by
   `uc-build-flow-graph.md`.
 
 ## Human Approval
@@ -275,6 +275,16 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-5-H inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select the next candidate only if it has meaningful responsibility,
+      boundary, or use-case value.
+- [x] Select Slice-5-I expanded child growth measurement application helper
+      cleanup as the next candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-5-I.
+- [x] Implement Slice-5-I inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 
 ## Validation Plan
 
@@ -290,10 +300,10 @@ Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, Slice-4-H, Slice-4-I, Slice-4-J,
 Slice-4-K, Slice-4-L, Slice-4-M, Slice-4-N, Slice-4-O, Slice-4-P, Slice-4-Q,
 Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, Slice-4-V, Slice-4-W, Slice-4-X,
 Slice-4-Y, Slice-4-Z, Slice-5-A, Slice-5-B, Slice-5-C, Slice-5-D, Slice-5-E,
-Slice-5-F, Slice-5-G, and Slice-5-H refactors were behavior-preserving and do not
-currently require use-case updates. The `buildUnitListView.ts` / WebAPI DTO
-duplication finding is not a current candidate because it appears to be DTO
-copy-shape similarity rather than shared behavior. Remaining domain-unit
-duplication clusters should only be reopened when they represent a stronger
-shared JP1/AJS business concept or use-case need than getter-shape similarity
-alone.
+Slice-5-F, Slice-5-G, Slice-5-H, and Slice-5-I refactors were
+behavior-preserving and do not currently require use-case updates. The
+`buildUnitListView.ts` / WebAPI DTO duplication finding is not a current
+candidate because it appears to be DTO copy-shape similarity rather than shared
+behavior. Remaining domain-unit duplication clusters should only be reopened
+when they represent a stronger shared JP1/AJS business concept or use-case need
+than getter-shape similarity alone.

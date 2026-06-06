@@ -933,12 +933,16 @@ const resolveLowerExpandedPanelIntrusions = (
   }
 };
 
-type ExpandedChildGrowthContext = {
+type ExpandedChildGrowthMeasurementContext = {
   context: ExpandedFlowGraphBuildContext;
   expandedChildren: ReadonlyArray<AjsUnit>;
   expandedChild: AjsUnit;
-  immediateVisibleChildren: ReadonlyArray<AjsUnit>;
 };
+
+type ExpandedChildGrowthApplicationContext =
+  ExpandedChildGrowthMeasurementContext & {
+    immediateVisibleChildren: ReadonlyArray<AjsUnit>;
+  };
 
 type ExpandedChildGrowthBounds = {
   position: FlowGraphPosition;
@@ -1013,7 +1017,9 @@ const getExpandedChildGrowthMeasurement = ({
   context,
   expandedChildren,
   expandedChild,
-}: ExpandedChildGrowthContext): ExpandedChildGrowthMeasurement | undefined => {
+}: ExpandedChildGrowthMeasurementContext):
+  | ExpandedChildGrowthMeasurement
+  | undefined => {
   const growthBounds = getExpandedChildGrowthBounds(context, expandedChild);
   if (!growthBounds) {
     return undefined;
@@ -1051,22 +1057,24 @@ const buildGrowthOffsetApplication = (
 };
 
 const getExpandedChildGrowthOffsetApplication = (
-  growthContext: ExpandedChildGrowthContext,
+  growthContext: ExpandedChildGrowthApplicationContext,
 ): GrowthOffsetApplication | undefined => {
   const measurement = getExpandedChildGrowthMeasurement(growthContext);
-  return measurement
-    ? buildGrowthOffsetApplication(
-        measurement,
-        getGrowthTargetUnitIds(
-          growthContext.immediateVisibleChildren,
-          growthContext.expandedChild,
-        ),
-      )
-    : undefined;
+  if (!measurement) {
+    return undefined;
+  }
+
+  return buildGrowthOffsetApplication(
+    measurement,
+    getGrowthTargetUnitIds(
+      growthContext.immediateVisibleChildren,
+      growthContext.expandedChild,
+    ),
+  );
 };
 
 const applyExpandedChildGrowthOffsets = (
-  growthContext: ExpandedChildGrowthContext,
+  growthContext: ExpandedChildGrowthApplicationContext,
 ) => {
   const growthOffsetApplication =
     getExpandedChildGrowthOffsetApplication(growthContext);
