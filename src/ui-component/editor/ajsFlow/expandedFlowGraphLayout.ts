@@ -689,16 +689,24 @@ const getUpperExpandedPanelMaxRight = ({
     )
     .reduce(includeUpperPanelMaxRight, undefined as number | undefined);
 
+const doHorizontalRangesOverlap = (
+  left: Pick<FlowGraphBounds, "minX" | "maxX">,
+  right: Pick<FlowGraphBounds, "minX" | "maxX">,
+): boolean => left.minX < right.maxX && right.minX < left.maxX;
+
+const doVerticalRangesOverlap = (
+  left: Pick<FlowGraphBounds, "minY" | "maxY">,
+  right: Pick<FlowGraphBounds, "minY" | "maxY">,
+): boolean => left.minY < right.maxY && right.minY < left.maxY;
+
 const doBoundsOverlapHorizontally = (
   upperBounds: FlowGraphBounds,
   lowerBounds: FlowGraphBounds,
-) => upperBounds.minX < lowerBounds.maxX && lowerBounds.minX < upperBounds.maxX;
+): boolean => doHorizontalRangesOverlap(upperBounds, lowerBounds);
 
-const doBoundsOverlap = (left: LayoutBox, right: LayoutBox) =>
-  left.minX < right.maxX &&
-  right.minX < left.maxX &&
-  left.minY < right.maxY &&
-  right.minY < left.maxY;
+const doBoundsOverlap = (left: LayoutBox, right: LayoutBox): boolean =>
+  doHorizontalRangesOverlap(left, right) &&
+  doVerticalRangesOverlap(left, right);
 
 const buildOccupiedLayoutItem = (
   context: ExpandedFlowGraphBuildContext,
