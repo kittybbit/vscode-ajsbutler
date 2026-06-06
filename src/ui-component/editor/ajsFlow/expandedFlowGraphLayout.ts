@@ -987,6 +987,13 @@ type ExpandedChildGrowthMeasurement = {
   upperPanelMaxRight?: number;
 };
 
+type ExpandedScopeRelayoutContext = {
+  context: ExpandedFlowGraphBuildContext;
+  containerUnit: AjsUnit;
+  expandedChildren: ReadonlyArray<AjsUnit>;
+  expandedUnitIdSet: ReadonlySet<string>;
+};
+
 const getExpandedNestedChildren = (
   containerUnit: AjsUnit,
   expandedUnitIdSet: ReadonlySet<string>,
@@ -998,11 +1005,22 @@ const getExpandedNestedChildren = (
     )
     .sort(compareExpandedUnits);
 
-const relayoutExpandedChildren = (
+const buildExpandedScopeRelayoutContext = (
   context: ExpandedFlowGraphBuildContext,
-  expandedChildren: ReadonlyArray<AjsUnit>,
+  containerUnit: AjsUnit,
   expandedUnitIdSet: ReadonlySet<string>,
-) => {
+): ExpandedScopeRelayoutContext => ({
+  context,
+  containerUnit,
+  expandedChildren: getExpandedNestedChildren(containerUnit, expandedUnitIdSet),
+  expandedUnitIdSet,
+});
+
+const relayoutExpandedScopeChildren = ({
+  context,
+  expandedChildren,
+  expandedUnitIdSet,
+}: ExpandedScopeRelayoutContext) => {
   for (const expandedChild of expandedChildren) {
     revealVisibleNestedUnit(context, expandedChild);
     relayoutExpandedScope(context, expandedChild, expandedUnitIdSet);
@@ -1134,19 +1152,49 @@ const applyExpandedChildrenGrowthOffsets = (
   }
 };
 
+const resolveExpandedScopePanelIntrusions = ({
+  context,
+  expandedChildren,
+}: ExpandedScopeRelayoutContext): void => {
+  resolveLowerExpandedPanelIntrusions(context, expandedChildren);
+};
+
+const applyExpandedScopeGrowthOffsets = ({
+  context,
+  containerUnit,
+  expandedChildren,
+}: ExpandedScopeRelayoutContext): void => {
+  applyExpandedChildrenGrowthOffsets(context, containerUnit, expandedChildren);
+};
+
+const resolveExpandedScopeSiblingCollisions = ({
+  context,
+  containerUnit,
+}: ExpandedScopeRelayoutContext): void => {
+  resolveSiblingSubtreeCollisions(context, containerUnit.id);
+};
+
+const relayoutExpandedScopePhases = (
+  relayoutContext: ExpandedScopeRelayoutContext,
+): void => {
+  relayoutExpandedScopeChildren(relayoutContext);
+  resolveExpandedScopePanelIntrusions(relayoutContext);
+  applyExpandedScopeGrowthOffsets(relayoutContext);
+  resolveExpandedScopeSiblingCollisions(relayoutContext);
+};
+
 export const relayoutExpandedScope = (
   context: ExpandedFlowGraphBuildContext,
   containerUnit: AjsUnit,
   expandedUnitIdSet: ReadonlySet<string>,
 ) => {
-  const expandedChildren = getExpandedNestedChildren(
-    containerUnit,
-    expandedUnitIdSet,
+  relayoutExpandedScopePhases(
+    buildExpandedScopeRelayoutContext(
+      context,
+      containerUnit,
+      expandedUnitIdSet,
+    ),
   );
-  relayoutExpandedChildren(context, expandedChildren, expandedUnitIdSet);
-  resolveLowerExpandedPanelIntrusions(context, expandedChildren);
-  applyExpandedChildrenGrowthOffsets(context, containerUnit, expandedChildren);
-  resolveSiblingSubtreeCollisions(context, containerUnit.id);
 };
 
 type PanelBoundsLayoutItem = {
