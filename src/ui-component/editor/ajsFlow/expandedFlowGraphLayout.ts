@@ -1118,8 +1118,6 @@ type PanelBoundsLayoutItem = {
 type ExpandedPanelBoundsTarget = {
   context: ExpandedFlowGraphBuildContext;
   expandedUnit: AjsUnit;
-  subtreeBounds: FlowGraphBounds;
-  unitId: string;
 };
 
 const buildInitialPanelSubtreeBounds = (
@@ -1166,16 +1164,25 @@ const includePanelBoundsLayoutItem = (
   }
 };
 
-const includeExpandedPanelUnitBounds = ({
+const isExpandedPanelLayoutItem =
+  ({ context, expandedUnit }: ExpandedPanelBoundsTarget) =>
+  (item: PanelBoundsLayoutItem): boolean =>
+    isExpandedPanelBoundsUnit(context, item.unit, expandedUnit);
+
+const getExpandedPanelLayoutItems = ({
   context,
   expandedUnit,
-  subtreeBounds,
-  unitId,
-}: ExpandedPanelBoundsTarget): void => {
-  const item = getPanelBoundsLayoutItem(context, unitId);
-  if (item && isExpandedPanelBoundsUnit(context, item.unit, expandedUnit)) {
-    includePanelBoundsLayoutItem(context, subtreeBounds, item);
-  }
+}: ExpandedPanelBoundsTarget): PanelBoundsLayoutItem[] => {
+  const isPanelLayoutItem = isExpandedPanelLayoutItem({
+    context,
+    expandedUnit,
+  });
+  return [...context.visibleUnitIds]
+    .map((unitId) => getPanelBoundsLayoutItem(context, unitId))
+    .filter(
+      (item): item is PanelBoundsLayoutItem =>
+        !!item && isPanelLayoutItem(item),
+    );
 };
 
 const buildExpandedPanelSubtreeBounds = (
@@ -1187,13 +1194,8 @@ const buildExpandedPanelSubtreeBounds = (
     parentPosition,
     context.metrics,
   );
-  context.visibleUnitIds.forEach((unitId) =>
-    includeExpandedPanelUnitBounds({
-      context,
-      expandedUnit,
-      subtreeBounds,
-      unitId,
-    }),
+  getExpandedPanelLayoutItems({ context, expandedUnit }).forEach((item) =>
+    includePanelBoundsLayoutItem(context, subtreeBounds, item),
   );
   return subtreeBounds;
 };
