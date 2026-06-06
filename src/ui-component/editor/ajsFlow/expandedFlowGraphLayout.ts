@@ -945,6 +945,13 @@ type ExpandedChildGrowthBounds = {
   panelBounds: FlowGraphBounds;
 };
 
+type ExpandedChildGrowthMeasurement = {
+  expandedUnitPosition: FlowGraphPosition;
+  panelBounds: FlowGraphBounds;
+  baseBounds: FlowGraphBounds;
+  upperPanelMaxRight?: number;
+};
+
 const getExpandedNestedChildren = (
   containerUnit: AjsUnit,
   expandedUnitIdSet: ReadonlySet<string>,
@@ -1002,44 +1009,60 @@ const calculateVerticalGrowth = (
   baseBounds: FlowGraphBounds,
 ): number => Math.max(0, panelBounds.maxY - baseBounds.maxY);
 
-const getExpandedChildGrowthOffsetApplication = ({
+const getExpandedChildGrowthMeasurement = ({
   context,
   expandedChildren,
   expandedChild,
-  immediateVisibleChildren,
-}: ExpandedChildGrowthContext): GrowthOffsetApplication | undefined => {
+}: ExpandedChildGrowthContext): ExpandedChildGrowthMeasurement | undefined => {
   const growthBounds = getExpandedChildGrowthBounds(context, expandedChild);
   if (!growthBounds) {
     return undefined;
   }
 
-  const baseBounds = buildUnitBaseBounds(
-    growthBounds.position,
-    context.metrics,
-  );
-  const upperPanelMaxRight = getUpperExpandedPanelMaxRight({
-    context,
-    expandedChildren,
-    expandedChild,
-    expandedChildPosition: growthBounds.position,
-  });
-
   return {
     expandedUnitPosition: growthBounds.position,
+    panelBounds: growthBounds.panelBounds,
+    baseBounds: buildUnitBaseBounds(growthBounds.position, context.metrics),
+    upperPanelMaxRight: getUpperExpandedPanelMaxRight({
+      context,
+      expandedChildren,
+      expandedChild,
+      expandedChildPosition: growthBounds.position,
+    }),
+  };
+};
+
+const buildGrowthOffsetApplication = (
+  measurement: ExpandedChildGrowthMeasurement,
+  targetUnitIds: ReadonlySet<string>,
+): GrowthOffsetApplication => {
+  const { expandedUnitPosition, panelBounds, baseBounds, upperPanelMaxRight } =
+    measurement;
+  return {
+    expandedUnitPosition,
     horizontalGrowth: calculateHorizontalGrowth(
-      growthBounds.panelBounds,
+      panelBounds,
       baseBounds,
       upperPanelMaxRight,
     ),
-    verticalGrowth: calculateVerticalGrowth(
-      growthBounds.panelBounds,
-      baseBounds,
-    ),
-    targetUnitIds: getGrowthTargetUnitIds(
-      immediateVisibleChildren,
-      expandedChild,
-    ),
+    verticalGrowth: calculateVerticalGrowth(panelBounds, baseBounds),
+    targetUnitIds,
   };
+};
+
+const getExpandedChildGrowthOffsetApplication = (
+  growthContext: ExpandedChildGrowthContext,
+): GrowthOffsetApplication | undefined => {
+  const measurement = getExpandedChildGrowthMeasurement(growthContext);
+  return measurement
+    ? buildGrowthOffsetApplication(
+        measurement,
+        getGrowthTargetUnitIds(
+          growthContext.immediateVisibleChildren,
+          growthContext.expandedChild,
+        ),
+      )
+    : undefined;
 };
 
 const applyExpandedChildGrowthOffsets = (
