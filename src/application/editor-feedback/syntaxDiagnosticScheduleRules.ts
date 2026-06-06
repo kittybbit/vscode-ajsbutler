@@ -82,23 +82,11 @@ export const parseExplicitScheduleDateDiagnosticValue = (
   };
 };
 
-const getMaximumMonthDayLimit = (month: number): number =>
-  new Date(2020, month, 0).getDate();
-
 export const getCalendarMonthDayLimit = (
   year: number | undefined,
   month: number | undefined,
-): number => {
-  if (month === undefined) {
-    return 31;
-  }
-
-  if (year === undefined) {
-    return getMaximumMonthDayLimit(month);
-  }
-
-  return new Date(year, month, 0).getDate();
-};
+): number =>
+  month === undefined ? 31 : new Date(year ?? 2020, month, 0).getDate();
 
 export const isValidScheduleDateYear = (
   year: number | undefined,
@@ -113,38 +101,50 @@ export const isValidScheduleDateMonth = (month: number | undefined): boolean =>
 
 const reservedScheduleDateDayTokens = new Set(["en", "ud"]);
 
+type ScheduleDateDayTokenValidator = (
+  parsed: ParsedExplicitScheduleDateValue,
+) => boolean | undefined;
+
+const toMatchedNumber = (
+  pattern: RegExp,
+  value: string,
+  groupIndex: number,
+): number | undefined => {
+  const matched = pattern.exec(value);
+  return matched ? Number(matched[groupIndex]) : undefined;
+};
+
 const isReservedScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
-): boolean | undefined => {
-  if (reservedScheduleDateDayTokens.has(parsed.dayValue)) {
-    return parsed.month === undefined;
-  }
-
-  return undefined;
-};
+): boolean | undefined =>
+  reservedScheduleDateDayTokens.has(parsed.dayValue)
+    ? parsed.month === undefined
+    : undefined;
 
 const isExplicitCalendarDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  const explicitDayMatch = /^(\d{2})$/.exec(parsed.dayValue);
-  if (!explicitDayMatch) {
+  const day = toMatchedNumber(/^(\d{2})$/, parsed.dayValue, 1);
+  if (day === undefined) {
     return undefined;
   }
 
-  const day = Number(explicitDayMatch[1]);
-  return day >= 1 && day <= getCalendarMonthDayLimit(parsed.year, parsed.month);
+  return isNumberInRange(
+    day,
+    1,
+    getCalendarMonthDayLimit(parsed.year, parsed.month),
+  );
 };
 
 const isRelativeScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  const relativeDayMatch = /^([+*@])(\d{2})$/.exec(parsed.dayValue);
-  if (!relativeDayMatch) {
+  const day = toMatchedNumber(/^([+*@])(\d{2})$/, parsed.dayValue, 2);
+  if (day === undefined) {
     return undefined;
   }
 
-  const day = Number(relativeDayMatch[2]);
-  return day >= 1 && day <= 35;
+  return isNumberInRange(day, 1, 35);
 };
 
 const getBackwardScheduleDateOffsetLimit = (
@@ -192,18 +192,21 @@ const isWeekdayScheduleDateDayToken = (
   return occurrence === undefined || /^[1-5b]$/.test(occurrence);
 };
 
-export const isValidScheduleDateDayToken = (
-  parsed: ParsedExplicitScheduleDateValue,
-): boolean =>
+const scheduleDateDayTokenValidators: readonly ScheduleDateDayTokenValidator[] =
   [
     isReservedScheduleDateDayToken,
     isExplicitCalendarDayToken,
     isRelativeScheduleDateDayToken,
     isBackwardScheduleDateDayToken,
     isWeekdayScheduleDateDayToken,
-  ].find((validateDayToken) => validateDayToken(parsed) !== undefined)?.(
-    parsed,
-  ) ?? false;
+  ];
+
+export const isValidScheduleDateDayToken = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean =>
+  scheduleDateDayTokenValidators
+    .map((validateDayToken) => validateDayToken(parsed))
+    .find((result) => result !== undefined) ?? false;
 
 const isValidUserDefinedScheduleDate = (
   parsed: ParsedExplicitScheduleDateValue,

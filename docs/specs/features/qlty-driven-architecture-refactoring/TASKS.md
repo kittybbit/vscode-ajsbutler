@@ -13,23 +13,21 @@ active feature. Slice progress stays in this file.
 ## Current Status
 
 - Active task:
-  none.
+  Slice-4-X expanded panel bounds helper cleanup is selected for approval.
 - Runtime status:
-  Slice-4-V flow reveal target helper cleanup is complete.
+  Slice-4-W schedule date day token validation cleanup is complete.
 - Use-case reflection:
-  None required. Slice-4-V preserved reveal event absolute-path extraction,
-  table row lookup, flow reveal target lookup, condition-scope selection,
-  containing-jobnet scope selection, expanded ancestor collection, and
-  current-scope search reveal behavior already covered by
-  `uc-build-flow-graph.md`.
+  None expected. Slice-4-X must preserve expanded flow graph panel bounds,
+  decoration offsets, nested child reveal layout, collision resolution, and
+  viewport fit behavior already covered by `uc-build-flow-graph.md`.
 
 ## Human Approval
 
 - Status: Pending
 - Approved at:
-  none.
+  none
 - Approved scope:
-  none.
+  none
 
 Implementation must not start while Status is Pending. Only clear human
 approval can change Status to Approved.
@@ -164,6 +162,22 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-4-V inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select Slice-4-W schedule date day token validation cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-4-W.
+- [x] Implement Slice-4-W inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select Slice-4-X expanded panel bounds helper cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [ ] Record human approval for Slice-4-X.
+- [ ] Implement Slice-4-X inside the approved scope.
+- [ ] Run required validation.
+- [ ] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
 
@@ -172,6 +186,24 @@ current conversation`; do not copy the approval message.
 - For the next code slice, run `rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, and `rtk pnpm run build`.
 
+## Approval-Sensitive Scope
+
+Slice-4-X may decompose expanded panel bounds helper logic in
+`src/ui-component/editor/ajsFlow/expandedFlowGraphLayout.ts`. Focused
+regression coverage may be adjusted under
+`src/test/suite/buildExpandedFlowGraph.test.ts` if the refactor exposes a
+coverage gap.
+
+The change must be behavior-preserving: preserve expanded unit base bounds,
+decoration-derived panel bounds, subtree-derived panel padding, expanded panel
+decorations, nested child visibility, condition child reveal layout, sibling
+collision handling, growth offset application, viewport fit behavior, and
+existing graph node/edge DTO shapes.
+
+No parser/domain/application behavior, unit-list behavior, diagnostics
+behavior, webview message payload shape, package metadata, generated artifact,
+or VS Code compatibility setting change is in scope.
+
 ## Deferred Use-Case Backlog
 
 - None.
@@ -179,7 +211,7 @@ current conversation`; do not copy the approval message.
 Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C,
 Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, Slice-4-H, Slice-4-I, Slice-4-J,
 Slice-4-K, Slice-4-L, Slice-4-M, Slice-4-N, Slice-4-O, Slice-4-P, Slice-4-Q,
-Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, and Slice-4-V refactors were
+Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, Slice-4-V, and Slice-4-W refactors were
 behavior-preserving and do not currently require use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO
 duplication finding is not a current candidate because it appears to be DTO
