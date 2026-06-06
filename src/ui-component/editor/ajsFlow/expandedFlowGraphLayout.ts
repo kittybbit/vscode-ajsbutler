@@ -823,21 +823,45 @@ const buildExpandedPanelLayoutItem = (
   return position && panelBounds ? { unit, position, panelBounds } : undefined;
 };
 
+const isPanelPositionedAbove = (
+  upper: ExpandedPanelLayoutItem,
+  lower: ExpandedPanelLayoutItem,
+): boolean => upper.position.y < lower.position.y;
+
+const doesUpperPanelIntrudeVertically = (
+  upper: ExpandedPanelLayoutItem,
+  lower: ExpandedPanelLayoutItem,
+): boolean => upper.panelBounds.maxY > lower.panelBounds.minY;
+
+const doExpandedPanelsOverlapHorizontally = (
+  upper: ExpandedPanelLayoutItem,
+  lower: ExpandedPanelLayoutItem,
+): boolean => doBoundsOverlapHorizontally(upper.panelBounds, lower.panelBounds);
+
+const doesUpperPanelIntrudeIntoLowerPanel = (
+  upper: ExpandedPanelLayoutItem,
+  lower: ExpandedPanelLayoutItem,
+): boolean =>
+  isPanelPositionedAbove(upper, lower) &&
+  doesUpperPanelIntrudeVertically(upper, lower) &&
+  doExpandedPanelsOverlapHorizontally(upper, lower);
+
+const getLowerPanelVerticalIntrusion = (
+  upper: ExpandedPanelLayoutItem,
+  lower: ExpandedPanelLayoutItem,
+): number => upper.panelBounds.maxY - lower.panelBounds.minY;
+
 const getLowerPanelIntrusionOffset = (
   upper: ExpandedPanelLayoutItem,
   lower: ExpandedPanelLayoutItem,
 ): FlowGraphPosition | undefined => {
-  if (
-    upper.position.y >= lower.position.y ||
-    upper.panelBounds.maxY <= lower.panelBounds.minY ||
-    !doBoundsOverlapHorizontally(upper.panelBounds, lower.panelBounds)
-  ) {
+  if (!doesUpperPanelIntrudeIntoLowerPanel(upper, lower)) {
     return undefined;
   }
 
   return {
     x: 0,
-    y: upper.panelBounds.maxY - lower.panelBounds.minY,
+    y: getLowerPanelVerticalIntrusion(upper, lower),
   };
 };
 
