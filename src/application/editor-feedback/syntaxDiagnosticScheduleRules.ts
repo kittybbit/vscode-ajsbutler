@@ -466,9 +466,8 @@ const hasValidExplicitScheduleRuleValue = (
   parameter: UnitParameter,
   validators: readonly ExplicitScheduleRuleValueValidator[],
 ): boolean => {
-  const parsed = parseExplicitScheduleRuleValue(parameter.value);
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
   return (
-    isValidScheduleRuleNumber(parsed) &&
     parsed !== undefined &&
     validators.some((validateValue) => validateValue(parsed.value))
   );

@@ -15,12 +15,12 @@ active feature. Slice progress stays in this file.
 - Active task:
   None.
 - Runtime status:
-  Slice-4-Z bounds overlap predicate cleanup is complete.
+  Slice-5-A explicit schedule rule value helper cleanup is complete.
 - Use-case reflection:
-  None required. Slice-4-Z preserved occupied-rectangle overlap detection,
-  horizontal panel overlap checks, sibling collision offsets, expanded panel
-  intrusion checks, and deterministic expanded layout behavior already covered
-  by `uc-build-flow-graph.md`.
+  None required. Slice-5-A preserved schedule-rule number parsing,
+  explicit value validation, `ln`, `st`, `cy`, `shd`, `cftd`, `sy`, `ey`,
+  `wc`, and `wt` diagnostic behavior already covered by
+  `uc-provide-editor-feedback.md`.
 
 ## Human Approval
 
@@ -194,6 +194,16 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-4-Z inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select the next candidate only if it has meaningful responsibility,
+      boundary, or use-case value.
+- [x] Select Slice-5-A explicit schedule rule value helper cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-5-A.
+- [x] Implement Slice-5-A inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
 
@@ -210,8 +220,8 @@ Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C,
 Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, Slice-4-H, Slice-4-I, Slice-4-J,
 Slice-4-K, Slice-4-L, Slice-4-M, Slice-4-N, Slice-4-O, Slice-4-P, Slice-4-Q,
 Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, Slice-4-V, Slice-4-W, Slice-4-X,
-Slice-4-Y, and Slice-4-Z refactors were behavior-preserving and do not
-currently require use-case updates. The
+Slice-4-Y, Slice-4-Z, and Slice-5-A refactors were behavior-preserving and do
+not currently require use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO
 duplication finding is not a current candidate because it appears to be DTO
 copy-shape similarity rather than shared behavior. Remaining domain-unit
