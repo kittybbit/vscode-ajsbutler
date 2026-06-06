@@ -266,24 +266,24 @@ export const isValidHourMinuteRange = (rawValue: string): boolean => {
   );
 };
 
-export const isValidDelayMinutesRange = (rawValue: string): boolean => {
-  const matched = /^[MCU](\d{1,4})$/.exec(rawValue);
+const isValidMinuteRangeValue = (
+  rawValue: string,
+  pattern: RegExp,
+): boolean => {
+  const matched = pattern.exec(rawValue);
   if (!matched) {
     return false;
   }
 
   const minutes = Number(matched[1]);
-  return minutes >= 1 && minutes <= 2879;
+  return isNumberInRange(minutes, 1, 2879);
 };
 
-export const isValidWaitMinutesRange = (rawValue: string): boolean => {
-  if (!/^\d{1,4}$/.test(rawValue)) {
-    return false;
-  }
+export const isValidDelayMinutesRange = (rawValue: string): boolean =>
+  isValidMinuteRangeValue(rawValue, /^[MCU](\d{1,4})$/);
 
-  const minutes = Number(rawValue);
-  return minutes >= 1 && minutes <= 2879;
-};
+export const isValidWaitMinutesRange = (rawValue: string): boolean =>
+  isValidMinuteRangeValue(rawValue, /^(\d{1,4})$/);
 
 const parseValidExplicitScheduleRuleValue = (
   parameter: UnitParameter,
@@ -492,28 +492,33 @@ const hasValidExplicitScheduleRuleValue = (
   );
 };
 
+const delayTimeValueValidators: readonly ExplicitScheduleRuleValueValidator[] =
+  [isValidHourMinuteRange, isValidDelayMinutesRange];
+
 export const isValidExplicitDelayTime = (parameter: UnitParameter): boolean => {
-  return hasValidExplicitScheduleRuleValue(parameter, [
-    isValidHourMinuteRange,
-    isValidDelayMinutesRange,
-  ]);
+  return hasValidExplicitScheduleRuleValue(parameter, delayTimeValueValidators);
 };
 
-const isNoOrUn = (rawValue: string): boolean =>
-  rawValue === "no" || rawValue === "un";
+const waitBypassValues = new Set(["no", "un"]);
+
+const isNoOrUn = (rawValue: string): boolean => waitBypassValues.has(rawValue);
+
+const isValidWaitCountRange = (rawValue: string): boolean =>
+  isExplicitNumberInRange(rawValue, 1, 999);
+
+const waitCountValueValidators: readonly ExplicitScheduleRuleValueValidator[] =
+  [isNoOrUn, isValidWaitCountRange];
 
 export const isValidExplicitWaitCount = (parameter: UnitParameter): boolean => {
-  const parsed = parseValidExplicitScheduleRuleValue(parameter);
-  return (
-    parsed !== undefined &&
-    (isNoOrUn(parsed.value) || isExplicitNumberInRange(parsed.value, 1, 999))
-  );
+  return hasValidExplicitScheduleRuleValue(parameter, waitCountValueValidators);
 };
 
+const waitTimeValueValidators: readonly ExplicitScheduleRuleValueValidator[] = [
+  isNoOrUn,
+  isValidHourMinuteRange,
+  isValidWaitMinutesRange,
+];
+
 export const isValidExplicitWaitTime = (parameter: UnitParameter): boolean => {
-  return hasValidExplicitScheduleRuleValue(parameter, [
-    isNoOrUn,
-    isValidHourMinuteRange,
-    isValidWaitMinutesRange,
-  ]);
+  return hasValidExplicitScheduleRuleValue(parameter, waitTimeValueValidators);
 };
