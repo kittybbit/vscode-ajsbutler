@@ -422,16 +422,18 @@ const scheduleByDaysFromStartRules = {
   da: { maximumSegments: 2, boundedSegmentIndexes: [1] },
 } as const;
 
+type ScheduleByDaysFromStartType = keyof typeof scheduleByDaysFromStartRules;
+type ScheduleByDaysFromStartRule =
+  (typeof scheduleByDaysFromStartRules)[ScheduleByDaysFromStartType];
+
 const isScheduleByDaysFromStartType = (
   rawValue: string,
-): rawValue is keyof typeof scheduleByDaysFromStartRules =>
+): rawValue is ScheduleByDaysFromStartType =>
   rawValue in scheduleByDaysFromStartRules;
 
 const scheduleByDaysFromStartRuleFor = (
   rawValue: string,
-):
-  | (typeof scheduleByDaysFromStartRules)[keyof typeof scheduleByDaysFromStartRules]
-  | undefined =>
+): ScheduleByDaysFromStartRule | undefined =>
   isScheduleByDaysFromStartType(rawValue)
     ? scheduleByDaysFromStartRules[rawValue]
     : undefined;
@@ -442,12 +444,12 @@ const hasNoEmptyScheduleByDaysFromStartSegments = (
 
 const hasValidScheduleByDaysFromStartSegmentCount = (
   segments: readonly string[],
-  rule: (typeof scheduleByDaysFromStartRules)[keyof typeof scheduleByDaysFromStartRules],
+  rule: ScheduleByDaysFromStartRule,
 ): boolean => segments.length <= rule.maximumSegments;
 
 const hasValidScheduleByDaysFromStartBounds = (
   segments: readonly string[],
-  rule: (typeof scheduleByDaysFromStartRules)[keyof typeof scheduleByDaysFromStartRules],
+  rule: ScheduleByDaysFromStartRule,
 ): boolean =>
   rule.boundedSegmentIndexes.every((index) =>
     isValidOptionalOneToThirtyOne(segments[index]),
@@ -465,13 +467,17 @@ const isValidScheduleByDaysFromStartSegments = (
   );
 };
 
+const parseScheduleByDaysFromStartSegments = (
+  parameter: UnitParameter,
+): readonly string[] | undefined =>
+  parseValidExplicitScheduleRuleValue(parameter)?.value.split(",");
+
 export const isValidExplicitScheduleByDaysFromStart = (
   parameter: UnitParameter,
 ): boolean => {
-  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  const segments = parseScheduleByDaysFromStartSegments(parameter);
   return (
-    parsed !== undefined &&
-    isValidScheduleByDaysFromStartSegments(parsed.value.split(","))
+    segments !== undefined && isValidScheduleByDaysFromStartSegments(segments)
   );
 };
 
