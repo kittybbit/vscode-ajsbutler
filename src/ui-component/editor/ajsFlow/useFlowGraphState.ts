@@ -60,12 +60,12 @@ const buildExpandedGraphResult = (
   params: ReadyFlowGraphDataBuildParams,
   selectedUnitId: string,
 ): ExpandedFlowGraphResult =>
-  buildExpandedFlowGraph(
-    params.ajsDocument,
-    selectedUnitId,
-    params.expandedUnitIds,
-    params.theme.typography.htmlFontSize,
-  );
+  buildExpandedFlowGraph({
+    document: params.ajsDocument,
+    currentUnitId: selectedUnitId,
+    expandedUnitIds: params.expandedUnitIds,
+    basePx: params.theme.typography.htmlFontSize,
+  });
 
 const createReactFlowDataOptions = ({
   nestedExpansionState,

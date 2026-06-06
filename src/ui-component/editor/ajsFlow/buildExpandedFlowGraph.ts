@@ -40,6 +40,13 @@ type ExpandedFlowGraphContextArgs = {
   unitById: ReadonlyMap<string, AjsUnit>;
 };
 
+export type BuildExpandedFlowGraphInput = {
+  document: AjsDocument;
+  currentUnitId: string;
+  expandedUnitIds: ReadonlySet<string> | readonly string[];
+  basePx: number;
+};
+
 const createEmptyExpandedFlowGraphResult = (): ExpandedFlowGraphResult => ({
   graph: undefined,
   positionOverrides: new Map<string, FlowGraphPosition>(),
@@ -144,11 +151,9 @@ const createRelayoutExpandedFlowGraphResult = (
 });
 
 export const buildExpandedFlowGraph = (
-  document: AjsDocument,
-  currentUnitId: string,
-  expandedUnitIds: ReadonlySet<string> | readonly string[],
-  basePx: number,
+  input: BuildExpandedFlowGraphInput,
 ): ExpandedFlowGraphResult => {
+  const { document, currentUnitId, expandedUnitIds, basePx } = input;
   const baseGraph = buildFlowGraph(document, currentUnitId);
   if (!baseGraph) {
     return createEmptyExpandedFlowGraphResult();

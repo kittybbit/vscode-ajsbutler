@@ -15,13 +15,12 @@ active feature. Slice progress stays in this file.
 - Active task:
   None.
 - Runtime status:
-  Slice-5-D delay and wait schedule value validator cleanup is complete.
+  Slice-5-E expanded flow graph build input object cleanup is complete.
 - Use-case reflection:
-  None required. Slice-5-D preserved explicit `sy` and `ey` delay-time
-  validation, `wc` wait-count validation, `wt` wait-time validation, schedule
-  rule number handling, `no` / `un` handling, hour-minute bounds, minute
-  ranges, and diagnostic messages already covered by
-  `uc-provide-editor-feedback.md`.
+  None required. Slice-5-E preserved expanded flow graph construction,
+  deterministic nested expansion layout, node decorations, position override
+  outputs, and direct flow viewer call behavior already covered by
+  `uc-build-flow-graph.md`.
 
 ## Human Approval
 
@@ -235,6 +234,16 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-5-D inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select the next candidate only if it has meaningful responsibility,
+      boundary, or use-case value.
+- [x] Select Slice-5-E expanded flow graph build input object cleanup as the
+      next candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-5-E.
+- [x] Implement Slice-5-E inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 - [ ] Select the next candidate only if it has meaningful responsibility,
       boundary, or use-case value.
 
@@ -251,9 +260,9 @@ Completed Slice-1, Slice-2, Slice-3, Slice-4-A, Slice-4-B, Slice-4-C,
 Slice-4-D, Slice-4-E, Slice-4-F, Slice-4-G, Slice-4-H, Slice-4-I, Slice-4-J,
 Slice-4-K, Slice-4-L, Slice-4-M, Slice-4-N, Slice-4-O, Slice-4-P, Slice-4-Q,
 Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, Slice-4-V, Slice-4-W, Slice-4-X,
-Slice-4-Y, Slice-4-Z, Slice-5-A, Slice-5-B, Slice-5-C, and Slice-5-D refactors were
-behavior-preserving and do not currently require use-case updates. The
-`buildUnitListView.ts` / WebAPI DTO
+Slice-4-Y, Slice-4-Z, Slice-5-A, Slice-5-B, Slice-5-C, Slice-5-D, and Slice-5-E
+refactors were behavior-preserving and do not currently require use-case
+updates. The `buildUnitListView.ts` / WebAPI DTO
 duplication finding is not a current candidate because it appears to be DTO
 copy-shape similarity rather than shared behavior. Remaining domain-unit
 duplication clusters should only be reopened when they represent a stronger
