@@ -855,6 +855,11 @@ type ExpandedPanelLayoutItem = {
   panelBounds: FlowGraphBounds;
 };
 
+type ExpandedPanelIntrusionTarget = {
+  upper: ExpandedPanelLayoutItem;
+  lower: ExpandedPanelLayoutItem;
+};
+
 const buildExpandedPanelLayoutItem = (
   context: ExpandedFlowGraphBuildContext,
   unit: AjsUnit,
@@ -880,52 +885,60 @@ const doExpandedPanelsOverlapHorizontally = (
 ): boolean => doBoundsOverlapHorizontally(upper.panelBounds, lower.panelBounds);
 
 const doesUpperPanelIntrudeIntoLowerPanel = (
-  upper: ExpandedPanelLayoutItem,
-  lower: ExpandedPanelLayoutItem,
+  target: ExpandedPanelIntrusionTarget,
 ): boolean =>
-  isPanelPositionedAbove(upper, lower) &&
-  doesUpperPanelIntrudeVertically(upper, lower) &&
-  doExpandedPanelsOverlapHorizontally(upper, lower);
+  isPanelPositionedAbove(target.upper, target.lower) &&
+  doesUpperPanelIntrudeVertically(target.upper, target.lower) &&
+  doExpandedPanelsOverlapHorizontally(target.upper, target.lower);
 
 const getLowerPanelVerticalIntrusion = (
-  upper: ExpandedPanelLayoutItem,
-  lower: ExpandedPanelLayoutItem,
-): number => upper.panelBounds.maxY - lower.panelBounds.minY;
+  target: ExpandedPanelIntrusionTarget,
+): number => target.upper.panelBounds.maxY - target.lower.panelBounds.minY;
 
 const getLowerPanelIntrusionOffset = (
-  upper: ExpandedPanelLayoutItem,
-  lower: ExpandedPanelLayoutItem,
+  target: ExpandedPanelIntrusionTarget,
 ): FlowGraphPosition | undefined => {
-  if (!doesUpperPanelIntrudeIntoLowerPanel(upper, lower)) {
+  if (!doesUpperPanelIntrudeIntoLowerPanel(target)) {
     return undefined;
   }
 
   return {
     x: 0,
-    y: getLowerPanelVerticalIntrusion(upper, lower),
+    y: getLowerPanelVerticalIntrusion(target),
   };
 };
 
 const moveLowerExpandedPanelPastUpper = (
   context: ExpandedFlowGraphBuildContext,
-  upper: ExpandedPanelLayoutItem,
-  lowerUnit: AjsUnit,
+  target: ExpandedPanelIntrusionTarget,
 ): void => {
-  const lower = buildExpandedPanelLayoutItem(context, lowerUnit);
-  if (!lower) {
-    return;
-  }
-
-  const offset = getLowerPanelIntrusionOffset(upper, lower);
+  const offset = getLowerPanelIntrusionOffset(target);
   if (offset) {
-    addOffset(context, lower.unit.id, offset);
+    addOffset(context, target.lower.unit.id, offset);
   }
 };
 
+const buildExpandedPanelIntrusionTarget = (
+  upper: ExpandedPanelLayoutItem,
+  lower: AjsUnit,
+  context: ExpandedFlowGraphBuildContext,
+): ExpandedPanelIntrusionTarget | undefined => {
+  const lowerItem = buildExpandedPanelLayoutItem(context, lower);
+  return lowerItem ? { upper, lower: lowerItem } : undefined;
+};
+
 const getLowerExpandedPanelCandidates = (
+  context: ExpandedFlowGraphBuildContext,
   upper: ExpandedPanelLayoutItem,
   expandedChildren: ReadonlyArray<AjsUnit>,
-): AjsUnit[] => expandedChildren.filter((unit) => unit.id !== upper.unit.id);
+): ExpandedPanelIntrusionTarget[] =>
+  expandedChildren.flatMap((unit) => {
+    if (unit.id === upper.unit.id) {
+      return [];
+    }
+    const target = buildExpandedPanelIntrusionTarget(upper, unit, context);
+    return target ? [target] : [];
+  });
 
 const resolveUpperExpandedPanelIntrusions = (
   context: ExpandedFlowGraphBuildContext,
@@ -937,8 +950,8 @@ const resolveUpperExpandedPanelIntrusions = (
     return;
   }
 
-  getLowerExpandedPanelCandidates(upper, expandedChildren).forEach(
-    (lowerChild) => moveLowerExpandedPanelPastUpper(context, upper, lowerChild),
+  getLowerExpandedPanelCandidates(context, upper, expandedChildren).forEach(
+    (target) => moveLowerExpandedPanelPastUpper(context, target),
   );
 };
 
