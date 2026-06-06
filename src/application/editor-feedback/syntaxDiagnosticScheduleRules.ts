@@ -332,6 +332,22 @@ const parseExplicitCycleValue = (
   };
 };
 
+const isWeeklyCycleValue = (rawValue: string): boolean =>
+  parseExplicitCycleValue(rawValue)?.unitType === "w";
+
+const isOpenOrClosedDayScheduleValue = (rawValue: string): boolean =>
+  /^((\d{4}\/)?\d{2}\/)?[*@]/.test(rawValue);
+
+const parseMatchingExplicitScheduleRuleValue = (
+  parameter: UnitParameter,
+  matchesValue: (rawValue: string) => boolean,
+): ParsedExplicitScheduleRuleValue | undefined => {
+  const parsed = parseValidExplicitScheduleRuleValue(parameter);
+  return parsed !== undefined && matchesValue(parsed.value)
+    ? parsed
+    : undefined;
+};
+
 export const isValidExplicitParentScheduleRule = (
   parameter: UnitParameter,
   unit: Unit,
@@ -360,19 +376,16 @@ export const isValidExplicitCycle = (parameter: UnitParameter): boolean => {
 export const isExplicitWeeklyCycle = (
   parameter: UnitParameter,
 ): ParsedExplicitScheduleRuleValue | undefined => {
-  const parsed = parseValidExplicitScheduleRuleValue(parameter);
-  return parsed !== undefined && /^\(\d{1,3},w\)$/.test(parsed.value)
-    ? parsed
-    : undefined;
+  return parseMatchingExplicitScheduleRuleValue(parameter, isWeeklyCycleValue);
 };
 
 export const usesOpenOrClosedDaySchedule = (
   parameter: UnitParameter,
 ): ParsedExplicitScheduleRuleValue | undefined => {
-  const parsed = parseValidExplicitScheduleRuleValue(parameter);
-  return parsed !== undefined && /^((\d{4}\/)?\d{2}\/)?[*@]/.test(parsed.value)
-    ? parsed
-    : undefined;
+  return parseMatchingExplicitScheduleRuleValue(
+    parameter,
+    isOpenOrClosedDayScheduleValue,
+  );
 };
 
 export const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
