@@ -11,8 +11,10 @@ import {
   findRootJobnet,
   flattenAjsUnits,
 } from "../../../domain/models/ajs/AjsDocument";
-import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
-import { toAjsDocument } from "../../../application/unit-list/unitListDocumentView";
+import {
+  toAjsDocument,
+  UnitListDocumentDto,
+} from "../../../application/unit-list/unitListDocument";
 import { REVEAL_UNIT } from "../../../shared/webviewEvents";
 import { getRevealUnitAbsolutePath } from "../revealUnit";
 

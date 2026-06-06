@@ -34,8 +34,10 @@ import {
   buildUnitListView,
   UnitListRowView,
 } from "../../../application/unit-list/buildUnitListView";
-import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
-import { toAjsDocument } from "../../../application/unit-list/unitListDocumentView";
+import {
+  toAjsDocument,
+  UnitListDocumentDto,
+} from "../../../application/unit-list/unitListDocument";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import {
