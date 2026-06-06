@@ -1,4 +1,8 @@
-import { AjsParameter, AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import {
+  AjsDocument,
+  AjsParameter,
+  AjsUnit,
+} from "../../domain/models/ajs/AjsDocument";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { Unit } from "../../domain/values/Unit";
 
@@ -16,6 +20,12 @@ export const toUnitListRootDto = (unit: AjsUnit): UnitListRootDto => ({
   unitAttribute: unit.unitAttribute,
   parameters: unit.parameters.map((parameter) => ({ ...parameter })),
   children: unit.children.map(toUnitListRootDto),
+});
+
+export const toUnitListDocumentDto = (
+  document: AjsDocument,
+): UnitListDocumentDto => ({
+  rootUnits: document.rootUnits.map(toUnitListRootDto),
 });
 
 const toUnit = (rootUnit: UnitListRootDto, parent?: Unit): Unit => {
