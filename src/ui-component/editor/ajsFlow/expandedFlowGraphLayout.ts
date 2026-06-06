@@ -748,6 +748,11 @@ const buildVisibleImmediateChildLayoutItems = (
     .map((unit) => buildOccupiedLayoutItem(context, unit))
     .filter((item): item is LayoutItem => !!item);
 
+type SiblingCollisionMovement = {
+  target: LayoutItem;
+  offset: FlowGraphPosition;
+};
+
 const getRightwardCollisionOffset = (
   fixed: LayoutItem,
   target: LayoutItem,
@@ -779,6 +784,14 @@ const getSiblingCollisionOffset = (
   return hasOffset(offset) ? offset : undefined;
 };
 
+const getSiblingCollisionMovement = (
+  fixed: LayoutItem,
+  target: LayoutItem,
+): SiblingCollisionMovement | undefined => {
+  const offset = getSiblingCollisionOffset(fixed, target);
+  return offset ? { target, offset } : undefined;
+};
+
 const moveSiblingSubtree = (
   context: ExpandedFlowGraphBuildContext,
   target: LayoutItem,
@@ -788,13 +801,18 @@ const moveSiblingSubtree = (
   return buildOccupiedLayoutItem(context, target.unit) ?? target;
 };
 
+const applySiblingCollisionMovement = (
+  context: ExpandedFlowGraphBuildContext,
+  movement: SiblingCollisionMovement,
+): LayoutItem => moveSiblingSubtree(context, movement.target, movement.offset);
+
 const moveTargetPastFixedSibling = (
   context: ExpandedFlowGraphBuildContext,
   target: LayoutItem,
   fixed: LayoutItem,
 ): LayoutItem => {
-  const offset = getSiblingCollisionOffset(fixed, target);
-  return offset ? moveSiblingSubtree(context, target, offset) : target;
+  const movement = getSiblingCollisionMovement(fixed, target);
+  return movement ? applySiblingCollisionMovement(context, movement) : target;
 };
 
 const resolveTargetSiblingCollisions = (
