@@ -44,11 +44,13 @@ export const resolveNormalizedLayout = (
 export const resolveNormalizedHasWaitedFor = (unit: Unit): boolean =>
   resolveHasWaitedFor(findUnitParameterValues(unit, "eun"));
 
+const isNormalizedJobnet = (unitType: TySymbol): boolean => unitType === "n";
+
 export const resolveNormalizedHasSchedule = (
   unit: Unit,
   unitType: TySymbol,
 ): boolean =>
-  unitType === "n"
+  isNormalizedJobnet(unitType)
     ? resolveHasSchedule(findUnitParameterValues(unit, "sd"))
     : false;
 
@@ -56,6 +58,6 @@ export const resolveNormalizedIsRootJobnet = (
   unit: Unit,
   unitType: TySymbol,
 ): boolean =>
-  unitType === "n"
+  isNormalizedJobnet(unitType)
     ? resolveIsRootJobnet(findUnitParameterValue(unit.parent, "ty"))
     : false;

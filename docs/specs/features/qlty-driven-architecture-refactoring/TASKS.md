@@ -15,13 +15,13 @@ active feature. Slice progress stays in this file.
 - Active task:
   None.
 - Runtime status:
-  Slice-5-N unit-list document view legacy UnitEntity adapter cleanup is
+  Slice-5-O normalized jobnet state gate helper cleanup is
   complete.
 - Use-case reflection:
-  None required. Slice-5-N preserved `UnitListDocumentDto` to normalized-model
-  reuse for table and flow viewers while removing only unused legacy
-  `UnitEntity` document-view adapters, consistent with
-  `uc-build-unit-list-view.md` and `uc-normalize-ajs-document.md`.
+  None required. Slice-5-O preserved normalized jobnet-only schedule and
+  root-jobnet state derivation, missing-unit-type warning behavior, and
+  deterministic normalized unit output already covered by
+  `uc-normalize-ajs-document.md`.
 
 ## Human Approval
 
@@ -335,6 +335,16 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-5-N inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select the next candidate only if it has meaningful responsibility,
+      boundary, or use-case value.
+- [x] Select Slice-5-O normalized jobnet state gate helper cleanup as the next
+      candidate.
+- [x] Record the behavior-preservation and use-case reflection decision.
+- [x] Record the approval-sensitive implementation boundary.
+- [x] Record human approval for Slice-5-O.
+- [x] Implement Slice-5-O inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 
 ## Validation Plan
 
@@ -351,8 +361,8 @@ Slice-4-K, Slice-4-L, Slice-4-M, Slice-4-N, Slice-4-O, Slice-4-P, Slice-4-Q,
 Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, Slice-4-V, Slice-4-W, Slice-4-X,
 Slice-4-Y, Slice-4-Z, Slice-5-A, Slice-5-B, Slice-5-C, Slice-5-D, Slice-5-E,
 Slice-5-F, Slice-5-G, Slice-5-H, Slice-5-I, Slice-5-J, Slice-5-K, Slice-5-L,
-Slice-5-M, and Slice-5-N refactors were behavior-preserving and do not
-currently require use-case updates. The
+Slice-5-M, Slice-5-N, and Slice-5-O refactors were behavior-preserving and do
+not currently require use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO duplication finding is not a current
 candidate because it appears to be DTO copy-shape similarity rather than shared
 behavior. Remaining domain-unit duplication clusters should only be reopened
