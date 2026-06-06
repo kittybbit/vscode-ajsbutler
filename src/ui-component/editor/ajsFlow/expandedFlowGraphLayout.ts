@@ -296,32 +296,84 @@ const toDecorationFromBounds = (
   panelHeightPx: bounds.maxY - bounds.minY,
 });
 
+type PanelPadding = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+};
+
+const toFlowGraphBounds = (
+  min: FlowGraphPosition,
+  max: FlowGraphPosition,
+): FlowGraphBounds => ({
+  minX: min.x,
+  maxX: max.x,
+  minY: min.y,
+  maxY: max.y,
+});
+
+const buildPaddedBounds = (
+  origin: FlowGraphPosition,
+  extent: FlowGraphPosition,
+  padding: PanelPadding,
+): FlowGraphBounds =>
+  toFlowGraphBounds(
+    {
+      x: origin.x - padding.left,
+      y: origin.y - padding.top,
+    },
+    {
+      x: extent.x + padding.right,
+      y: extent.y + padding.bottom,
+    },
+  );
+
+const getExpandedPanelPadding = (metrics: FlowGraphMetrics): PanelPadding => ({
+  left: metrics.width * 0.3,
+  right: metrics.width * 0.3,
+  top: metrics.height * 0.2,
+  bottom: metrics.height * 0.35,
+});
+
 const buildPanelBoundsFromSubtreeBounds = (
   position: FlowGraphPosition,
   bounds: FlowGraphBounds,
   metrics: FlowGraphMetrics,
-): FlowGraphBounds => {
-  const panelPaddingX = metrics.width * 0.3;
-  const panelPaddingTop = metrics.height * 0.2;
-  const panelPaddingBottom = metrics.height * 0.35;
-
-  return {
-    minX: position.x - panelPaddingX,
-    maxX: bounds.maxX + panelPaddingX,
-    minY: position.y - panelPaddingTop,
-    maxY: bounds.maxY + panelPaddingBottom,
-  };
-};
+): FlowGraphBounds =>
+  buildPaddedBounds(
+    position,
+    { x: bounds.maxX, y: bounds.maxY },
+    getExpandedPanelPadding(metrics),
+  );
 
 const buildUnitBaseBounds = (
   position: FlowGraphPosition,
   metrics: FlowGraphMetrics,
-): FlowGraphBounds => ({
-  minX: position.x - metrics.width * 0.3,
-  maxX: position.x + metrics.width * 1.3,
-  minY: position.y - metrics.height * 0.2,
-  maxY: position.y + metrics.height * 1.35,
-});
+): FlowGraphBounds =>
+  buildPaddedBounds(
+    position,
+    {
+      x: position.x + metrics.width,
+      y: position.y + metrics.height,
+    },
+    getExpandedPanelPadding(metrics),
+  );
+
+const buildUnitDecorationBounds = (
+  position: FlowGraphPosition,
+  decoration: ExpandedNodeDecoration,
+): FlowGraphBounds =>
+  toFlowGraphBounds(
+    {
+      x: position.x + decoration.panelOffsetXPx,
+      y: position.y + decoration.panelOffsetYPx,
+    },
+    {
+      x: position.x + decoration.panelOffsetXPx + decoration.panelWidthPx,
+      y: position.y + decoration.panelOffsetYPx + decoration.panelHeightPx,
+    },
+  );
 
 const buildUnitPanelBounds = (
   position: FlowGraphPosition,
@@ -329,12 +381,7 @@ const buildUnitPanelBounds = (
   metrics: FlowGraphMetrics,
 ): FlowGraphBounds =>
   decoration
-    ? {
-        minX: position.x + decoration.panelOffsetXPx,
-        maxX: position.x + decoration.panelOffsetXPx + decoration.panelWidthPx,
-        minY: position.y + decoration.panelOffsetYPx,
-        maxY: position.y + decoration.panelOffsetYPx + decoration.panelHeightPx,
-      }
+    ? buildUnitDecorationBounds(position, decoration)
     : buildUnitBaseBounds(position, metrics);
 
 const canRevealNestedUnit = (
