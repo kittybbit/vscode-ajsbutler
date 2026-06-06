@@ -94,10 +94,33 @@ const addPositions = (
   y: position.y + offset.y,
 });
 
+const hasOffset = (offset: FlowGraphPosition): boolean =>
+  offset.x !== 0 || offset.y !== 0;
+
 const getOffset = (
   context: ExpandedFlowGraphBuildContext,
   unitId: string,
 ): FlowGraphPosition => context.offsets.get(unitId) ?? { x: 0, y: 0 };
+
+const getAnchoredOrigin = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+): FlowGraphPosition => {
+  const parentAnchorId = context.parentAnchors.get(unitId);
+  return parentAnchorId
+    ? (getDisplayPosition(context, parentAnchorId) ?? { x: 0, y: 0 })
+    : { x: 0, y: 0 };
+};
+
+const buildAnchoredDisplayPosition = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+  initialPosition: FlowGraphPosition,
+): FlowGraphPosition =>
+  addPositions(
+    addPositions(getAnchoredOrigin(context, unitId), initialPosition),
+    getOffset(context, unitId),
+  );
 
 const getDisplayPosition = (
   context: ExpandedFlowGraphBuildContext,
@@ -107,14 +130,7 @@ const getDisplayPosition = (
   if (!initialPosition) {
     return undefined;
   }
-  const parentAnchorId = context.parentAnchors.get(unitId);
-  const anchoredOrigin = parentAnchorId
-    ? getDisplayPosition(context, parentAnchorId)
-    : undefined;
-  return addPositions(
-    addPositions(anchoredOrigin ?? { x: 0, y: 0 }, initialPosition),
-    getOffset(context, unitId),
-  );
+  return buildAnchoredDisplayPosition(context, unitId, initialPosition);
 };
 
 const syncDisplayPosition = (
@@ -145,8 +161,7 @@ const syncAnchoredChildOverride = (
   context: ExpandedFlowGraphBuildContext,
   unitId: string,
 ) => {
-  syncDisplayPosition(context, unitId);
-  syncAnchoredDescendantOverrides(context, unitId);
+  syncAnchoredSubtreeOverrides(context, unitId);
 };
 
 const syncAnchoredDescendantOverrides = (
@@ -158,22 +173,25 @@ const syncAnchoredDescendantOverrides = (
   }
 };
 
+const syncAnchoredSubtreeOverrides = (
+  context: ExpandedFlowGraphBuildContext,
+  unitId: string,
+) => {
+  syncDisplayPosition(context, unitId);
+  syncAnchoredDescendantOverrides(context, unitId);
+};
+
 const addOffset = (
   context: ExpandedFlowGraphBuildContext,
   unitId: string,
   delta: FlowGraphPosition,
 ) => {
-  if (delta.x === 0 && delta.y === 0) {
+  if (!hasOffset(delta)) {
     return false;
   }
 
-  const offset = getOffset(context, unitId);
-  context.offsets.set(unitId, {
-    x: offset.x + delta.x,
-    y: offset.y + delta.y,
-  });
-  syncDisplayPosition(context, unitId);
-  syncAnchoredDescendantOverrides(context, unitId);
+  context.offsets.set(unitId, addPositions(getOffset(context, unitId), delta));
+  syncAnchoredSubtreeOverrides(context, unitId);
   return true;
 };
 
@@ -527,9 +545,6 @@ const getGrowthOffset = (target: GrowthOffsetTarget): FlowGraphPosition => ({
   x: getHorizontalGrowthOffset(target),
   y: getVerticalGrowthOffset(target),
 });
-
-const hasOffset = (offset: FlowGraphPosition): boolean =>
-  offset.x !== 0 || offset.y !== 0;
 
 const getTargetGrowthOffset = (
   target: GrowthOffsetTarget,
