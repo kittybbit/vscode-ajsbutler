@@ -14,8 +14,8 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import CssBaseline from "@mui/material/CssBaseline";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { useReactTable } from "@tanstack/react-table";
+import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
+import { type Table as ReactTable, useReactTable } from "@tanstack/react-table";
 import {
   Row,
   SortingState,
@@ -55,6 +55,7 @@ import {
   findRowIndexByAbsolutePath,
   getRevealUnitAbsolutePath,
 } from "../revealUnit";
+import type { MyAppResource } from "../../../shared/MyAppResource";
 
 export type TableMenuStatusType = {
   menuItem1: boolean;
@@ -106,6 +107,25 @@ type TableModelSetupContext = {
   setGlobalFilter: Dispatch<SetStateAction<string>>;
   setSorting: Dispatch<SetStateAction<SortingState>>;
   searchMode: AjsTableSearchMode;
+};
+
+type TableViewerShellProps = {
+  theme: Theme;
+  table: ReactTable<UnitListRowView>;
+  rows: Row<UnitListRowView>[];
+  rowViews: UnitListRowView[] | undefined;
+  menuStatus: TableMenuStatusType;
+  tableMenuState: TableMenuStateType;
+  drawerWidthState: DrawerWidthStateType;
+  drawerWidth: number;
+  searchMode: AjsTableSearchMode;
+  setSearchMode: Dispatch<SetStateAction<AjsTableSearchMode>>;
+  scrollType: MyAppResource["scrollType"];
+  rowIndex: number | undefined;
+  globalFilter: string;
+  parameterSearchValuesByPath: ParameterSearchValuesByPath;
+  dialogData: UnitDefinitionDialogDto | undefined;
+  setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
 };
 
 type ParsedTableDocumentState = {
@@ -288,6 +308,97 @@ const useTableModelSetup = ({
   return { table, parameterSearchValuesByPath };
 };
 
+const useTableViewerTheme = (isDarkMode: boolean): Theme =>
+  useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDarkMode ? "dark" : "light",
+        },
+      }),
+    [isDarkMode],
+  );
+
+const TableViewerShell = ({
+  theme,
+  table,
+  rows,
+  rowViews,
+  menuStatus,
+  tableMenuState,
+  drawerWidthState,
+  drawerWidth,
+  searchMode,
+  setSearchMode,
+  scrollType,
+  rowIndex,
+  globalFilter,
+  parameterSearchValuesByPath,
+  dialogData,
+  setDialogData,
+}: TableViewerShellProps) => (
+  <>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Stack direction="row" spacing={0}>
+        {menuStatus.menuItem1 && (
+          <DisplayColumnSelector
+            table={table}
+            columnVisibility={table.getState().columnVisibility}
+            tableMenuState={tableMenuState}
+            drawerWidthState={drawerWidthState}
+          />
+        )}
+        <Stack
+          direction="column"
+          spacing={0}
+          sx={{
+            marginLeft: `${drawerWidth}px`,
+            width: `calc(100% - ${drawerWidth}px)`,
+            minWidth: 0,
+          }}
+        >
+          <Header
+            table={table}
+            tableMenuState={tableMenuState}
+            drawerWidthState={drawerWidthState}
+            searchMode={searchMode}
+            setSearchMode={setSearchMode}
+          />
+          <VirtualizedTable
+            headerGroups={table.getHeaderGroups()}
+            rows={rows}
+            scrollType={scrollType}
+            rowIndex={rowIndex}
+            searchState={{
+              globalFilter,
+              searchMode,
+              parameterSearchValuesByPath,
+            }}
+          />
+          <Typography align="right">
+            {rows.length} of {rowViews?.length}
+          </Typography>
+        </Stack>
+      </Stack>
+      {dialogData && (
+        <UnitEntityDialog
+          dialogData={dialogData}
+          onClose={() => setDialogData(undefined)}
+        />
+      )}
+    </ThemeProvider>
+    {DEVELOPMENT && (
+      <Accordion>
+        <AccordionSummary>[DEV] TABLE STATE</AccordionSummary>
+        <AccordionDetails>
+          <Typography>{JSON.stringify(table.getState(), null, 2)}</Typography>
+        </AccordionDetails>
+      </Accordion>
+    )}
+  </>
+);
+
 const TableContents = () => {
   console.log("render TableContents.");
 
@@ -365,24 +476,7 @@ const TableContents = () => {
     syncRows(rows);
   }, [rows, syncRows]);
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: isDarkMode ? "dark" : "light",
-        },
-      }),
-    [isDarkMode],
-  );
-
-  const tableStateDev = DEVELOPMENT && (
-    <Accordion>
-      <AccordionSummary>[DEV] TABLE STATE</AccordionSummary>
-      <AccordionDetails>
-        <Typography>{JSON.stringify(table.getState(), null, 2)}</Typography>
-      </AccordionDetails>
-    </Accordion>
-  );
+  const theme = useTableViewerTheme(isDarkMode);
 
   const tableMenuState = useMemo(
     () => ({ menuStatus, setMenuStatus }),
@@ -395,59 +489,24 @@ const TableContents = () => {
   );
 
   return (
-    <>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Stack direction="row" spacing={0}>
-          {menuStatus.menuItem1 && (
-            <DisplayColumnSelector
-              table={table}
-              columnVisibility={table.getState().columnVisibility}
-              tableMenuState={tableMenuState}
-              drawerWidthState={drawerWidthState}
-            />
-          )}
-          <Stack
-            direction="column"
-            spacing={0}
-            sx={{
-              marginLeft: `${drawerWidth}px`,
-              width: `calc(100% - ${drawerWidth}px)`,
-              minWidth: 0,
-            }}
-          >
-            <Header
-              table={table}
-              tableMenuState={tableMenuState}
-              drawerWidthState={drawerWidthState}
-              searchMode={searchMode}
-              setSearchMode={setSearchMode}
-            />
-            <VirtualizedTable
-              headerGroups={table.getHeaderGroups()}
-              rows={rows}
-              scrollType={scrollType}
-              rowIndex={rowIndex}
-              searchState={{
-                globalFilter,
-                searchMode,
-                parameterSearchValuesByPath,
-              }}
-            />
-            <Typography align="right">
-              {rows.length} of {rowViews?.length}
-            </Typography>
-          </Stack>
-        </Stack>
-        {dialogData && (
-          <UnitEntityDialog
-            dialogData={dialogData}
-            onClose={() => setDialogData(undefined)}
-          />
-        )}
-      </ThemeProvider>
-      {tableStateDev}
-    </>
+    <TableViewerShell
+      theme={theme}
+      table={table}
+      rows={rows}
+      rowViews={rowViews}
+      menuStatus={menuStatus}
+      tableMenuState={tableMenuState}
+      drawerWidthState={drawerWidthState}
+      drawerWidth={drawerWidth}
+      searchMode={searchMode}
+      setSearchMode={setSearchMode}
+      scrollType={scrollType}
+      rowIndex={rowIndex}
+      globalFilter={globalFilter}
+      parameterSearchValuesByPath={parameterSearchValuesByPath}
+      dialogData={dialogData}
+      setDialogData={setDialogData}
+    />
   );
 };
 export default memo(TableContents);
