@@ -72,28 +72,42 @@ export type AjsTableSearchState = {
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
 };
 
-const useChangeDocument = (): [
-  UnitListRowView[] | undefined,
-  AjsDocument | undefined,
-  (type: string, data: unknown) => void,
-] => {
+type TableDocumentState = {
+  rowViews: UnitListRowView[] | undefined;
+  ajsDocument: AjsDocument | undefined;
+  changeDocument: (type: string, data: unknown) => void;
+};
+
+type ParsedTableDocumentState = {
+  rowViews: UnitListRowView[];
+  ajsDocument: AjsDocument | undefined;
+};
+
+const parseTableDocumentState = (data: unknown): ParsedTableDocumentState => {
+  const ajsDocument = data
+    ? toAjsDocument(data as UnitListDocumentDto)
+    : undefined;
+  return {
+    ajsDocument,
+    rowViews: ajsDocument ? buildUnitListView(ajsDocument) : [],
+  };
+};
+
+const useChangeDocument = (): TableDocumentState => {
   const [rowViews, setRowViews] = useState<UnitListRowView[]>();
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
-  const changeDocumentFn = useCallback((type: string, data: unknown) => {
+  const changeDocument = useCallback((type: string, data: unknown) => {
     try {
-      const nextDocument = data
-        ? toAjsDocument(data as UnitListDocumentDto)
-        : undefined;
-      const nextRowViews = nextDocument ? buildUnitListView(nextDocument) : [];
-      setAjsDocument(() => nextDocument);
-      setRowViews(() => nextRowViews);
+      const nextState = parseTableDocumentState(data);
+      setAjsDocument(() => nextState.ajsDocument);
+      setRowViews(() => nextState.rowViews);
     } catch (error) {
       console.error("Failed to parse data:", error);
       setAjsDocument(() => undefined);
       setRowViews(() => []);
     }
   }, []);
-  return [rowViews, ajsDocument, changeDocumentFn];
+  return { rowViews, ajsDocument, changeDocument };
 };
 
 const TableContents = () => {
@@ -116,7 +130,7 @@ const TableContents = () => {
   const [revealedAbsolutePath, setRevealedAbsolutePath] = useState<
     string | undefined
   >(undefined);
-  const [rowViews, ajsDocument, changeDocumentFn] = useChangeDocument();
+  const { rowViews, ajsDocument, changeDocument } = useChangeDocument();
 
   const unitDefinitionByPath = useMemo(
     () =>
@@ -141,7 +155,7 @@ const TableContents = () => {
   );
 
   useEffect(() => {
-    window.EventBridge.addCallback("changeDocument", changeDocumentFn);
+    window.EventBridge.addCallback("changeDocument", changeDocument);
     const revealUnitFn = (_type: string, data: unknown) => {
       const absolutePath = getRevealUnitAbsolutePath(data);
       if (!absolutePath) {
@@ -153,7 +167,7 @@ const TableContents = () => {
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     window.vscode.postMessage({ type: "ready" });
     return () => {
-      window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
+      window.EventBridge.removeCallback("changeDocument", changeDocument);
       window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
     };
   }, []); // fire this when mount.
