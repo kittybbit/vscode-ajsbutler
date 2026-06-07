@@ -7,6 +7,7 @@ import {
 import { decodeEncodedString } from "../../parameters/encodedStringHelpers";
 import { resolveGroupType } from "../../units/unitGroupStateHelpers";
 import { resolveIsRootJobnet } from "../../units/unitJobnetStateHelpers";
+import type { UnitLayout } from "../../units/unitLayoutHelpers";
 import { resolveUnitLayout } from "../../units/unitLayoutHelpers";
 import { resolveHasSchedule } from "../../units/unitScheduleStateHelpers";
 import { resolveHasWaitedFor } from "../../units/unitWaitStateHelpers";
@@ -34,12 +35,13 @@ export const resolveNormalizedGroupType = (
 export const resolveNormalizedComment = (unit: Unit): string | undefined =>
   decodeEncodedString(findUnitParameterValue(unit, "cm"));
 
-export const resolveNormalizedLayout = (
-  unit: Unit,
-): { h: number; v: number } =>
-  unit.parent
-    ? resolveUnitLayout(unit.name, findUnitParameterValues(unit.parent, "el"))
-    : { h: 0, v: 0 };
+const ROOT_UNIT_LAYOUT: UnitLayout = { h: 0, v: 0 };
+
+const resolveChildLayout = (unit: Unit, parent: Unit): UnitLayout =>
+  resolveUnitLayout(unit.name, findUnitParameterValues(parent, "el"));
+
+export const resolveNormalizedLayout = (unit: Unit): UnitLayout =>
+  unit.parent ? resolveChildLayout(unit, unit.parent) : ROOT_UNIT_LAYOUT;
 
 export const resolveNormalizedHasWaitedFor = (unit: Unit): boolean =>
   resolveHasWaitedFor(findUnitParameterValues(unit, "eun"));
