@@ -15,12 +15,12 @@ active feature. Slice progress stays in this file.
 - Active task:
   None.
 - Runtime status:
-  Slice-5-T table document state hook return cleanup is complete.
+  Slice-5-U table row reveal state hook cleanup is complete.
 - Use-case reflection:
-  None required. Slice-5-T preserved the existing table viewer document
-  projection contract covered by `uc-build-unit-list-view.md`, including row
-  shape, row ordering, dialog metadata, filtering, jump/reveal behavior, and
-  desktop/web shared row consumption.
+  None required. Slice-5-U preserved the existing table viewer reveal/jump
+  contract covered by `uc-build-unit-list-view.md`, including row identity
+  lookup by id or absolute path, reveal-event handling, filter reset on reveal,
+  and VirtualizedTable row-index focusing.
 
 ## Human Approval
 
@@ -390,6 +390,14 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-5-T inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Select the next candidate only if it has meaningful responsibility,
+      boundary, or use-case value.
+- [x] Record the behavior-preservation and use-case reflection decision for
+      Slice-5-U.
+- [x] Record human approval for Slice-5-U.
+- [x] Implement Slice-5-U inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 
 ## Validation Plan
 
@@ -407,8 +415,8 @@ Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, Slice-4-V, Slice-4-W, Slice-4-X,
 Slice-4-Y, Slice-4-Z, Slice-5-A, Slice-5-B, Slice-5-C, Slice-5-D, Slice-5-E,
 Slice-5-F, Slice-5-G, Slice-5-H, Slice-5-I, Slice-5-J, Slice-5-K, Slice-5-L,
 Slice-5-M, Slice-5-N, Slice-5-O, Slice-5-P, Slice-5-Q, Slice-5-R, Slice-5-S,
-and Slice-5-T refactors were behavior-preserving and do not currently require
-use-case updates. The
+Slice-5-T, and Slice-5-U refactors were behavior-preserving and do not
+currently require use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO duplication finding is not a current
 candidate because it appears to be DTO copy-shape similarity rather than shared
 behavior. Remaining domain-unit duplication clusters should only be reopened

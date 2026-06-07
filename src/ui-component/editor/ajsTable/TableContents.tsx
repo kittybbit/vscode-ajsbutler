@@ -17,6 +17,7 @@ import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useReactTable } from "@tanstack/react-table";
 import {
+  Row,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -78,6 +79,21 @@ type TableDocumentState = {
   changeDocument: (type: string, data: unknown) => void;
 };
 
+type TableRowRevealState = {
+  rowIndex: number | undefined;
+  handleJump: (id: string) => void;
+  revealUnit: (data: unknown) => void;
+  syncRows: (rows: ReadonlyArray<Row<UnitListRowView>>) => void;
+};
+
+type TableRowIndexSyncContext = {
+  rows: ReadonlyArray<Row<UnitListRowView>>;
+  revealedAbsolutePath: string | undefined;
+  rowIndexMapRef: React.MutableRefObject<Map<string, number>>;
+  setRowIndex: Dispatch<SetStateAction<number | undefined>>;
+  setRevealedAbsolutePath: Dispatch<SetStateAction<string | undefined>>;
+};
+
 type ParsedTableDocumentState = {
   rowViews: UnitListRowView[];
   ajsDocument: AjsDocument | undefined;
@@ -110,6 +126,99 @@ const useChangeDocument = (): TableDocumentState => {
   return { rowViews, ajsDocument, changeDocument };
 };
 
+const buildRowIndexMap = (
+  rows: ReadonlyArray<Row<UnitListRowView>>,
+): Map<string, number> => {
+  const map = new Map<string, number>();
+  rows.forEach((row, index) => {
+    map.set(row.original.id, index);
+    map.set(row.original.absolutePath, index);
+  });
+  return map;
+};
+
+const jumpToIndexedRow = (
+  rowIndexMap: ReadonlyMap<string, number>,
+  id: string,
+  setRowIndex: Dispatch<SetStateAction<number | undefined>>,
+) => {
+  const index = rowIndexMap.get(id);
+  if (index !== undefined) {
+    setRowIndex(index);
+  }
+};
+
+const revealTableRow = (
+  data: unknown,
+  setGlobalFilter: Dispatch<SetStateAction<string>>,
+  setRevealedAbsolutePath: Dispatch<SetStateAction<string | undefined>>,
+) => {
+  const absolutePath = getRevealUnitAbsolutePath(data);
+  if (absolutePath) {
+    setGlobalFilter("");
+    setRevealedAbsolutePath(absolutePath);
+  }
+};
+
+const syncTableRowIndexMap = ({
+  rows,
+  revealedAbsolutePath,
+  rowIndexMapRef,
+  setRowIndex,
+  setRevealedAbsolutePath,
+}: TableRowIndexSyncContext) => {
+  const rowIndexMap = buildRowIndexMap(rows);
+  rowIndexMapRef.current = rowIndexMap;
+  const index = revealedAbsolutePath
+    ? findRowIndexByAbsolutePath(rowIndexMap, revealedAbsolutePath)
+    : undefined;
+  if (index !== undefined) {
+    setRowIndex(index);
+    setRevealedAbsolutePath(undefined);
+  }
+};
+
+const useTableRowRevealState = (
+  globalFilter: string,
+  setGlobalFilter: Dispatch<SetStateAction<string>>,
+): TableRowRevealState => {
+  const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
+  const [revealedAbsolutePath, setRevealedAbsolutePath] = useState<
+    string | undefined
+  >(undefined);
+  const rowIndexMapRef = useRef<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    setRowIndex(() => undefined);
+  }, [globalFilter]);
+
+  const handleJump = useCallback((id: string) => {
+    jumpToIndexedRow(rowIndexMapRef.current, id, setRowIndex);
+  }, []);
+
+  const revealUnit = useCallback(
+    (data: unknown) => {
+      revealTableRow(data, setGlobalFilter, setRevealedAbsolutePath);
+    },
+    [setGlobalFilter],
+  );
+
+  const syncRows = useCallback(
+    (rows: ReadonlyArray<Row<UnitListRowView>>) => {
+      syncTableRowIndexMap({
+        rows,
+        revealedAbsolutePath,
+        rowIndexMapRef,
+        setRowIndex,
+        setRevealedAbsolutePath,
+      });
+    },
+    [revealedAbsolutePath],
+  );
+
+  return { rowIndex, handleJump, revealUnit, syncRows };
+};
+
 const TableContents = () => {
   console.log("render TableContents.");
 
@@ -126,11 +235,11 @@ const TableContents = () => {
   const [searchMode, setSearchMode] = useState<AjsTableSearchMode>("value");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
-  const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
-  const [revealedAbsolutePath, setRevealedAbsolutePath] = useState<
-    string | undefined
-  >(undefined);
   const { rowViews, ajsDocument, changeDocument } = useChangeDocument();
+  const { rowIndex, handleJump, revealUnit, syncRows } = useTableRowRevealState(
+    globalFilter,
+    setGlobalFilter,
+  );
 
   const unitDefinitionByPath = useMemo(
     () =>
@@ -157,12 +266,7 @@ const TableContents = () => {
   useEffect(() => {
     window.EventBridge.addCallback("changeDocument", changeDocument);
     const revealUnitFn = (_type: string, data: unknown) => {
-      const absolutePath = getRevealUnitAbsolutePath(data);
-      if (!absolutePath) {
-        return;
-      }
-      setGlobalFilter("");
-      setRevealedAbsolutePath(absolutePath);
+      revealUnit(data);
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     window.vscode.postMessage({ type: "ready" });
@@ -172,12 +276,6 @@ const TableContents = () => {
     };
   }, []); // fire this when mount.
 
-  useEffect(() => {
-    setRowIndex(() => undefined);
-  }, [globalFilter]);
-
-  const handleJumpRef = useRef<(id: string) => void>(() => {});
-  const handleJump = useCallback((id: string) => handleJumpRef.current(id), []);
   const parameterSearchValuesByPath = useMemo(
     () =>
       new Map(
@@ -218,33 +316,9 @@ const TableContents = () => {
 
   const rows = table.getRowModel().rows;
 
-  const rowIndexMap = useMemo(() => {
-    const map = new Map<string, number>();
-    rows.forEach((row, index) => {
-      map.set(row.original.id, index);
-      map.set(row.original.absolutePath, index);
-    });
-    return map;
-  }, [rows]);
-
   useEffect(() => {
-    if (!revealedAbsolutePath) {
-      return;
-    }
-    const index = findRowIndexByAbsolutePath(rowIndexMap, revealedAbsolutePath);
-    if (index === undefined) {
-      return;
-    }
-    setRowIndex(index);
-    setRevealedAbsolutePath(undefined);
-  }, [revealedAbsolutePath, rowIndexMap]);
-
-  useEffect(() => {
-    handleJumpRef.current = (id: string) => {
-      const index = rowIndexMap.get(id);
-      if (index !== undefined) setRowIndex(index);
-    };
-  }, [rowIndexMap]);
+    syncRows(rows);
+  }, [rows, syncRows]);
 
   const theme = useMemo(
     () =>
