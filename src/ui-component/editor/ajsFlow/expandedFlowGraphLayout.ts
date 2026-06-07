@@ -927,18 +927,30 @@ const buildExpandedPanelIntrusionTarget = (
   return lowerItem ? { upper, lower: lowerItem } : undefined;
 };
 
+const isDifferentExpandedPanelUnit = (
+  upper: ExpandedPanelLayoutItem,
+  lower: AjsUnit,
+): boolean => lower.id !== upper.unit.id;
+
+const collectExpandedPanelIntrusionTarget = (
+  context: ExpandedFlowGraphBuildContext,
+  upper: ExpandedPanelLayoutItem,
+  lower: AjsUnit,
+): ExpandedPanelIntrusionTarget[] => {
+  const target = buildExpandedPanelIntrusionTarget(upper, lower, context);
+  return target ? [target] : [];
+};
+
 const getLowerExpandedPanelCandidates = (
   context: ExpandedFlowGraphBuildContext,
   upper: ExpandedPanelLayoutItem,
   expandedChildren: ReadonlyArray<AjsUnit>,
 ): ExpandedPanelIntrusionTarget[] =>
-  expandedChildren.flatMap((unit) => {
-    if (unit.id === upper.unit.id) {
-      return [];
-    }
-    const target = buildExpandedPanelIntrusionTarget(upper, unit, context);
-    return target ? [target] : [];
-  });
+  expandedChildren
+    .filter((unit) => isDifferentExpandedPanelUnit(upper, unit))
+    .flatMap((unit) =>
+      collectExpandedPanelIntrusionTarget(context, upper, unit),
+    );
 
 const resolveUpperExpandedPanelIntrusions = (
   context: ExpandedFlowGraphBuildContext,
