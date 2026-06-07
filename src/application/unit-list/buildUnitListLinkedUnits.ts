@@ -15,20 +15,36 @@ type BuildLinkedUnitsInput = {
   direction: LinkedUnitDirection;
 };
 
+type LinkedUnitDirectionRule = {
+  currentUnitId: (relation: AjsRelation) => string;
+  linkedUnitId: (relation: AjsRelation) => string;
+};
+
+const linkedUnitDirectionRules: Record<
+  LinkedUnitDirection,
+  LinkedUnitDirectionRule
+> = {
+  previous: {
+    currentUnitId: (relation) => relation.targetUnitId,
+    linkedUnitId: (relation) => relation.sourceUnitId,
+  },
+  next: {
+    currentUnitId: (relation) => relation.sourceUnitId,
+    linkedUnitId: (relation) => relation.targetUnitId,
+  },
+};
+
 const matchesLinkedUnitDirection = (
   dependency: AjsRelation,
   unitId: string,
   direction: LinkedUnitDirection,
-) =>
-  direction === "previous"
-    ? dependency.targetUnitId === unitId
-    : dependency.sourceUnitId === unitId;
+): boolean =>
+  linkedUnitDirectionRules[direction].currentUnitId(dependency) === unitId;
 
 const relatedUnitId = (
   dependency: AjsRelation,
   direction: LinkedUnitDirection,
-) =>
-  direction === "previous" ? dependency.sourceUnitId : dependency.targetUnitId;
+): string => linkedUnitDirectionRules[direction].linkedUnitId(dependency);
 
 const toLinkedUnitView = (
   unit: AjsUnit,
