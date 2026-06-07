@@ -94,6 +94,20 @@ type TableRowIndexSyncContext = {
   setRevealedAbsolutePath: Dispatch<SetStateAction<string | undefined>>;
 };
 
+type TableModelSetupContext = {
+  ajsDocument: AjsDocument | undefined;
+  rowViews: UnitListRowView[] | undefined;
+  lang: string;
+  openUnitDefinition: (absolutePath: string) => void;
+  handleJump: (id: string) => void;
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>;
+  globalFilter: string;
+  sorting: SortingState;
+  setGlobalFilter: Dispatch<SetStateAction<string>>;
+  setSorting: Dispatch<SetStateAction<SortingState>>;
+  searchMode: AjsTableSearchMode;
+};
+
 type ParsedTableDocumentState = {
   rowViews: UnitListRowView[];
   ajsDocument: AjsDocument | undefined;
@@ -219,6 +233,61 @@ const useTableRowRevealState = (
   return { rowIndex, handleJump, revealUnit, syncRows };
 };
 
+const useTableModelSetup = ({
+  ajsDocument,
+  rowViews,
+  lang,
+  openUnitDefinition,
+  handleJump,
+  rowViewByPath,
+  globalFilter,
+  sorting,
+  setGlobalFilter,
+  setSorting,
+  searchMode,
+}: TableModelSetupContext) => {
+  const parameterSearchValuesByPath = useMemo(
+    () =>
+      new Map(
+        ajsDocument
+          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
+              unit.absolutePath,
+              unit.parameters,
+            ])
+          : [],
+      ),
+    [ajsDocument],
+  );
+  const globalFilterFn = useMemo(
+    () => createAjsGlobalFilterFn(parameterSearchValuesByPath, searchMode),
+    [parameterSearchValuesByPath, searchMode],
+  );
+  const columns = useMemo(
+    () => tableColumnDef(lang, openUnitDefinition, handleJump, rowViewByPath),
+    [lang, openUnitDefinition, handleJump, rowViewByPath],
+  );
+
+  const table = useReactTable<UnitListRowView>({
+    columns,
+    data: rowViews ?? [],
+    state: {
+      globalFilter,
+      sorting,
+    },
+    getCoreRowModel: getCoreRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    globalFilterFn,
+    getColumnCanGlobalFilter: () => true, // return true for all column
+    defaultColumn: tableDefaultColumnDef,
+    debugAll: DEVELOPMENT,
+  });
+
+  return { table, parameterSearchValuesByPath };
+};
+
 const TableContents = () => {
   console.log("render TableContents.");
 
@@ -276,42 +345,18 @@ const TableContents = () => {
     };
   }, []); // fire this when mount.
 
-  const parameterSearchValuesByPath = useMemo(
-    () =>
-      new Map(
-        ajsDocument
-          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
-              unit.absolutePath,
-              unit.parameters,
-            ])
-          : [],
-      ),
-    [ajsDocument],
-  );
-  const globalFilterFn = useMemo(
-    () => createAjsGlobalFilterFn(parameterSearchValuesByPath, searchMode),
-    [parameterSearchValuesByPath, searchMode],
-  );
-
-  const table = useReactTable<UnitListRowView>({
-    columns: useMemo(
-      () => tableColumnDef(lang, openUnitDefinition, handleJump, rowViewByPath),
-      [lang, openUnitDefinition, handleJump, rowViewByPath],
-    ),
-    data: rowViews ?? [],
-    state: {
-      globalFilter: globalFilter,
-      sorting: sorting,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    globalFilterFn,
-    getColumnCanGlobalFilter: () => true, // return true for all column
-    defaultColumn: tableDefaultColumnDef,
-    debugAll: DEVELOPMENT,
+  const { table, parameterSearchValuesByPath } = useTableModelSetup({
+    ajsDocument,
+    rowViews,
+    lang,
+    openUnitDefinition,
+    handleJump,
+    rowViewByPath,
+    globalFilter,
+    sorting,
+    setGlobalFilter,
+    setSorting,
+    searchMode,
   });
 
   const rows = table.getRowModel().rows;
