@@ -15,13 +15,13 @@ active feature. Slice progress stays in this file.
 - Active task:
   None.
 - Runtime status:
-  Slice-5-Y expanded nested reveal helper extraction is complete.
+  Slice-5-Z expanded layout anchored position state helper extraction is
+  complete.
 - Use-case reflection:
-  None required. Slice-5-Y preserved the expanded flow graph contract covered
-  by `uc-build-flow-graph.md`, including revealing nested jobnet children only
-  when their parent scope is expanded, adding condition nodes consistently,
-  deduplicating expanded edges, and keeping the same visible graph result for
-  the same expanded-unit set.
+  None required. Slice-5-Z preserved the expanded flow graph layout contract
+  covered by `uc-build-flow-graph.md`, including anchored nested panels,
+  deterministic position overrides, right/down-only offset application,
+  whole-subtree movement, and stable descendant relative positions.
 
 ## Human Approval
 
@@ -427,6 +427,12 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-5-Y inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Record the behavior-preservation and use-case reflection decision for
+      Slice-5-Z.
+- [x] Record human approval for Slice-5-Z.
+- [x] Implement Slice-5-Z inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 
 ## Validation Plan
 
@@ -444,13 +450,14 @@ Slice-4-R, Slice-4-S, Slice-4-T, Slice-4-U, Slice-4-V, Slice-4-W, Slice-4-X,
 Slice-4-Y, Slice-4-Z, Slice-5-A, Slice-5-B, Slice-5-C, Slice-5-D, Slice-5-E,
 Slice-5-F, Slice-5-G, Slice-5-H, Slice-5-I, Slice-5-J, Slice-5-K, Slice-5-L,
 Slice-5-M, Slice-5-N, Slice-5-O, Slice-5-P, Slice-5-Q, Slice-5-R, Slice-5-S,
-Slice-5-T, Slice-5-U, Slice-5-V, Slice-5-W, Slice-5-X, and Slice-5-Y refactors
-were behavior-preserving and do not currently require use-case updates. The
+Slice-5-T, Slice-5-U, Slice-5-V, Slice-5-W, Slice-5-X, Slice-5-Y, and
+Slice-5-Z refactors were behavior-preserving and do not currently require
+use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO duplication finding is not a current
 candidate because it appears to be DTO copy-shape similarity rather than shared
 behavior. Remaining domain-unit duplication clusters should only be reopened
 when they represent a stronger shared JP1/AJS business concept or use-case need
 than getter-shape similarity alone. `expandedFlowGraphLayout.ts` still has a
-file-level high total complexity signal after Slice-5-Y, but the geometry and
-nested reveal responsibilities have been separated and the signal dropped from
-106 to 90 in Slice-5-Y.
+file-level high total complexity signal after Slice-5-Z, but the geometry,
+nested reveal, and anchored position state responsibilities have been separated
+and the signal dropped from 90 to 78 in Slice-5-Z.
