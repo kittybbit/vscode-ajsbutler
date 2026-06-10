@@ -13,7 +13,8 @@ active feature. Slice progress stays in this file.
 ## Current Status
 
 - Active task:
-  None.
+  Select Slice-6-B expanded panel intrusion helper cleanup as the next
+  candidate.
 - Runtime status:
   Slice-5-Z expanded layout anchored position state helper extraction is
   complete. Slice-6-A expanded child growth offset helper extraction is
@@ -26,14 +27,14 @@ active feature. Slice progress stays in this file.
 
 ## Human Approval
 
-- Status: Pending
+- Status: Approved
 - Approved at:
-  none
+  approved in current conversation
 - Approved scope:
-  none
+  Slice-6-B expanded panel intrusion helper cleanup
 
-Implementation must not start while Status is Pending. Only clear human
-approval can change Status to Approved.
+Implementation may start while Status is Approved. Only clear human approval
+or a change in scope can change Status from Approved.
 `Approved at` records the approval result only, such as `none` or `approved in
 current conversation`; do not copy the approval message.
 

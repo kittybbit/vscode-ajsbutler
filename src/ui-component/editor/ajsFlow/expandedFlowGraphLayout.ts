@@ -13,7 +13,6 @@ import {
   buildUnitBaseBounds,
   buildUnitPanelBounds,
   doBoundsOverlap,
-  doBoundsOverlapHorizontally,
   includeDecorationBounds,
   includeNodeBounds,
   toDecorationFromBounds,
@@ -26,6 +25,7 @@ import {
   syncDisplayPosition,
 } from "./expandedFlowGraphPositionState";
 import { applyExpandedChildrenGrowthOffsets } from "./expandedFlowGraphGrowthOffsets";
+import { resolveExpandedScopePanelIntrusions } from "./expandedFlowGraphPanelIntrusion";
 
 const getParentUnit = (
   unit: AjsUnit,
@@ -227,133 +227,6 @@ const resolveSiblingSubtreeCollisions = (
   );
 };
 
-type ExpandedPanelLayoutItem = {
-  unit: AjsUnit;
-  position: FlowGraphPosition;
-  panelBounds: FlowGraphBounds;
-};
-
-type ExpandedPanelIntrusionTarget = {
-  upper: ExpandedPanelLayoutItem;
-  lower: ExpandedPanelLayoutItem;
-};
-
-const buildExpandedPanelLayoutItem = (
-  context: ExpandedFlowGraphBuildContext,
-  unit: AjsUnit,
-): ExpandedPanelLayoutItem | undefined => {
-  const position = getDisplayPosition(context, unit.id);
-  const panelBounds = buildExpandedUnitPanelBounds(context, unit);
-  return position && panelBounds ? { unit, position, panelBounds } : undefined;
-};
-
-const isPanelPositionedAbove = (
-  upper: ExpandedPanelLayoutItem,
-  lower: ExpandedPanelLayoutItem,
-): boolean => upper.position.y < lower.position.y;
-
-const doesUpperPanelIntrudeVertically = (
-  upper: ExpandedPanelLayoutItem,
-  lower: ExpandedPanelLayoutItem,
-): boolean => upper.panelBounds.maxY > lower.panelBounds.minY;
-
-const doExpandedPanelsOverlapHorizontally = (
-  upper: ExpandedPanelLayoutItem,
-  lower: ExpandedPanelLayoutItem,
-): boolean => doBoundsOverlapHorizontally(upper.panelBounds, lower.panelBounds);
-
-const doesUpperPanelIntrudeIntoLowerPanel = (
-  target: ExpandedPanelIntrusionTarget,
-): boolean =>
-  isPanelPositionedAbove(target.upper, target.lower) &&
-  doesUpperPanelIntrudeVertically(target.upper, target.lower) &&
-  doExpandedPanelsOverlapHorizontally(target.upper, target.lower);
-
-const getLowerPanelVerticalIntrusion = (
-  target: ExpandedPanelIntrusionTarget,
-): number => target.upper.panelBounds.maxY - target.lower.panelBounds.minY;
-
-const getLowerPanelIntrusionOffset = (
-  target: ExpandedPanelIntrusionTarget,
-): FlowGraphPosition | undefined => {
-  if (!doesUpperPanelIntrudeIntoLowerPanel(target)) {
-    return undefined;
-  }
-
-  return {
-    x: 0,
-    y: getLowerPanelVerticalIntrusion(target),
-  };
-};
-
-const moveLowerExpandedPanelPastUpper = (
-  context: ExpandedFlowGraphBuildContext,
-  target: ExpandedPanelIntrusionTarget,
-): void => {
-  const offset = getLowerPanelIntrusionOffset(target);
-  if (offset) {
-    addOffset(context, target.lower.unit.id, offset);
-  }
-};
-
-const buildExpandedPanelIntrusionTarget = (
-  upper: ExpandedPanelLayoutItem,
-  lower: AjsUnit,
-  context: ExpandedFlowGraphBuildContext,
-): ExpandedPanelIntrusionTarget | undefined => {
-  const lowerItem = buildExpandedPanelLayoutItem(context, lower);
-  return lowerItem ? { upper, lower: lowerItem } : undefined;
-};
-
-const isDifferentExpandedPanelUnit = (
-  upper: ExpandedPanelLayoutItem,
-  lower: AjsUnit,
-): boolean => lower.id !== upper.unit.id;
-
-const collectExpandedPanelIntrusionTarget = (
-  context: ExpandedFlowGraphBuildContext,
-  upper: ExpandedPanelLayoutItem,
-  lower: AjsUnit,
-): ExpandedPanelIntrusionTarget[] => {
-  const target = buildExpandedPanelIntrusionTarget(upper, lower, context);
-  return target ? [target] : [];
-};
-
-const getLowerExpandedPanelCandidates = (
-  context: ExpandedFlowGraphBuildContext,
-  upper: ExpandedPanelLayoutItem,
-  expandedChildren: ReadonlyArray<AjsUnit>,
-): ExpandedPanelIntrusionTarget[] =>
-  expandedChildren
-    .filter((unit) => isDifferentExpandedPanelUnit(upper, unit))
-    .flatMap((unit) =>
-      collectExpandedPanelIntrusionTarget(context, upper, unit),
-    );
-
-const resolveUpperExpandedPanelIntrusions = (
-  context: ExpandedFlowGraphBuildContext,
-  upperChild: AjsUnit,
-  expandedChildren: ReadonlyArray<AjsUnit>,
-): void => {
-  const upper = buildExpandedPanelLayoutItem(context, upperChild);
-  if (!upper) {
-    return;
-  }
-
-  getLowerExpandedPanelCandidates(context, upper, expandedChildren).forEach(
-    (target) => moveLowerExpandedPanelPastUpper(context, target),
-  );
-};
-
-const resolveLowerExpandedPanelIntrusions = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedChildren: ReadonlyArray<AjsUnit>,
-) => {
-  for (const upperChild of expandedChildren) {
-    resolveUpperExpandedPanelIntrusions(context, upperChild, expandedChildren);
-  }
-};
-
 type ExpandedScopeRelayoutContext = {
   context: ExpandedFlowGraphBuildContext;
   containerUnit: AjsUnit;
@@ -402,11 +275,13 @@ const relayoutExpandedScopeChildren = ({
   }
 };
 
-const resolveExpandedScopePanelIntrusions = ({
+const resolveExpandedScopePanelIntrusionsPhase = ({
   context,
   expandedChildren,
 }: ExpandedScopeRelayoutContext): void => {
-  resolveLowerExpandedPanelIntrusions(context, expandedChildren);
+  resolveExpandedScopePanelIntrusions(context, expandedChildren, {
+    buildExpandedUnitPanelBounds,
+  });
 };
 
 const applyExpandedScopeGrowthOffsets = ({
@@ -436,7 +311,7 @@ const relayoutExpandedScopePhases = (
   relayoutContext: ExpandedScopeRelayoutContext,
 ): void => {
   relayoutExpandedScopeChildren(relayoutContext);
-  resolveExpandedScopePanelIntrusions(relayoutContext);
+  resolveExpandedScopePanelIntrusionsPhase(relayoutContext);
   applyExpandedScopeGrowthOffsets(relayoutContext);
   resolveExpandedScopeSiblingCollisions(relayoutContext);
 };
