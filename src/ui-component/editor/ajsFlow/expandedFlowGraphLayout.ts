@@ -1,17 +1,7 @@
 import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";
-import type { FlowGraphEdgeDto } from "../../../application/flow-graph/buildFlowGraphCore";
-import {
-  calculateNestedChildPosition,
-  calculateNestedConditionPosition,
-  FlowGraphPosition,
-} from "./flowGraphPosition";
+import { FlowGraphPosition } from "./flowGraphPosition";
 import { isNestedJobnetUnit } from "./nestedExpansion";
-import {
-  compareExpandedUnits,
-  toConditionNode,
-  toEdgeDtos,
-  toGridNode,
-} from "./expandedFlowGraphNodes";
+import { compareExpandedUnits } from "./expandedFlowGraphNodes";
 import {
   ExpandedFlowGraphBuildContext,
   FlowGraphBounds,
@@ -28,6 +18,7 @@ import {
   includeNodeBounds,
   toDecorationFromBounds,
 } from "./expandedFlowGraphGeometry";
+import { revealVisibleNestedUnit } from "./expandedFlowGraphReveal";
 
 const getParentUnit = (
   unit: AjsUnit,
@@ -169,158 +160,6 @@ const addOffset = (
   context.offsets.set(unitId, addPositions(getOffset(context, unitId), delta));
   syncAnchoredSubtreeOverrides(context, unitId);
   return true;
-};
-
-const addVisibleNode = (
-  context: ExpandedFlowGraphBuildContext,
-  visibleNode: {
-    unit: AjsUnit;
-    initialPosition: FlowGraphPosition;
-    parentAnchorId?: string;
-  },
-) => {
-  const { unit, initialPosition, parentAnchorId } = visibleNode;
-  context.nodes.push(
-    unit.unitType === "rc" ? toConditionNode(unit) : toGridNode(unit),
-  );
-  context.nodeIds.add(unit.id);
-  context.visibleUnitIds.add(unit.id);
-  context.initialPositions.set(unit.id, initialPosition);
-  if (parentAnchorId) {
-    context.parentAnchors.set(unit.id, parentAnchorId);
-  }
-  syncDisplayPosition(context, unit.id);
-};
-
-type VisibleNestedNode = {
-  unit: AjsUnit;
-  parentUnitId: string;
-  calculatePosition: () => FlowGraphPosition;
-};
-
-const ensureVisibleNestedNode = (
-  context: ExpandedFlowGraphBuildContext,
-  visibleNode: VisibleNestedNode,
-) => {
-  const { unit, parentUnitId, calculatePosition } = visibleNode;
-  const existingPosition = context.initialPositions.get(unit.id);
-  if (existingPosition) {
-    return existingPosition;
-  }
-  if (context.nodeIds.has(unit.id)) {
-    return undefined;
-  }
-
-  const initialPosition = calculatePosition();
-  addVisibleNode(context, {
-    unit,
-    initialPosition,
-    parentAnchorId: parentUnitId,
-  });
-  return initialPosition;
-};
-
-const ensureChildNodeVisible = (
-  context: ExpandedFlowGraphBuildContext,
-  child: AjsUnit,
-  parentUnitId: string,
-): FlowGraphPosition | undefined =>
-  ensureVisibleNestedNode(context, {
-    unit: child,
-    parentUnitId,
-    calculatePosition: () =>
-      calculateNestedChildPosition(
-        { x: 0, y: 0 },
-        child.layout.h,
-        child.layout.v,
-        context.basePx,
-      ),
-  });
-
-const ensureConditionNodeVisible = (
-  context: ExpandedFlowGraphBuildContext,
-  conditionUnit: AjsUnit,
-  parentUnitId: string,
-): FlowGraphPosition | undefined =>
-  ensureVisibleNestedNode(context, {
-    unit: conditionUnit,
-    parentUnitId,
-    calculatePosition: () =>
-      calculateNestedConditionPosition({ x: 0, y: 0 }, context.basePx),
-  });
-
-const toEdgeId = (edge: FlowGraphEdgeDto): string =>
-  `${edge.source}-${edge.target}`;
-
-const hasExpandedEdge = (
-  context: ExpandedFlowGraphBuildContext,
-  edge: FlowGraphEdgeDto,
-): boolean => context.edgeIds.has(toEdgeId(edge));
-
-const appendExpandedEdge = (
-  context: ExpandedFlowGraphBuildContext,
-  edge: FlowGraphEdgeDto,
-) => {
-  context.edges.push(edge);
-  context.edgeIds.add(toEdgeId(edge));
-};
-
-const getNewExpandedEdges = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
-): FlowGraphEdgeDto[] =>
-  toEdgeDtos(expandedUnit).filter((edge) => !hasExpandedEdge(context, edge));
-
-const appendExpandedUnitEdges = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
-) => {
-  for (const edge of getNewExpandedEdges(context, expandedUnit)) {
-    appendExpandedEdge(context, edge);
-  }
-};
-
-const canRevealNestedUnit = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
-): boolean => !!getDisplayPosition(context, expandedUnit.id);
-
-const getVisibleNestedChildren = (expandedUnit: AjsUnit): AjsUnit[] =>
-  expandedUnit.children.filter((unit) => unit.unitType !== "rc");
-
-const getConditionChild = (expandedUnit: AjsUnit): AjsUnit | undefined =>
-  expandedUnit.children.find((child) => child.unitType === "rc");
-
-const revealNestedChildren = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
-) => {
-  for (const child of getVisibleNestedChildren(expandedUnit)) {
-    ensureChildNodeVisible(context, child, expandedUnit.id);
-  }
-};
-
-const revealConditionChild = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
-) => {
-  const conditionUnit = getConditionChild(expandedUnit);
-  if (conditionUnit) {
-    ensureConditionNodeVisible(context, conditionUnit, expandedUnit.id);
-  }
-};
-
-const revealVisibleNestedUnit = (
-  context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
-) => {
-  if (!canRevealNestedUnit(context, expandedUnit)) {
-    return;
-  }
-
-  revealNestedChildren(context, expandedUnit);
-  revealConditionChild(context, expandedUnit);
-  appendExpandedUnitEdges(context, expandedUnit);
 };
 
 const buildExpandedUnitPanelBounds = (
@@ -893,7 +732,14 @@ const relayoutExpandedScopeChildren = ({
   expandedUnitIdSet,
 }: ExpandedScopeRelayoutContext) => {
   for (const expandedChild of expandedChildren) {
-    revealVisibleNestedUnit(context, expandedChild);
+    revealVisibleNestedUnit(
+      context,
+      {
+        getDisplayPosition,
+        syncDisplayPosition,
+      },
+      expandedChild,
+    );
     relayoutExpandedScope(context, expandedChild, expandedUnitIdSet);
     updateExpandedNodeDecoration(context, expandedChild);
   }
