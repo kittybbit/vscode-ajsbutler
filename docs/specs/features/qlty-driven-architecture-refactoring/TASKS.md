@@ -13,12 +13,12 @@ active feature. Slice progress stays in this file.
 ## Current Status
 
 - Active task:
-  Select Slice-6-B expanded panel intrusion helper cleanup as the next
-  candidate.
+  Select Slice-6-C expanded flow graph sibling collision helper cleanup as
+  the next candidate.
 - Runtime status:
   Slice-5-Z expanded layout anchored position state helper extraction is
   complete. Slice-6-A expanded child growth offset helper extraction is
-  complete.
+  complete. Slice-6-B expanded panel intrusion helper extraction is complete.
 - Use-case reflection:
   None required. Slice-6-A preserved the expanded flow graph layout contract
   covered by `uc-build-flow-graph.md`, including right/down-only growth
@@ -31,7 +31,7 @@ active feature. Slice progress stays in this file.
 - Approved at:
   approved in current conversation
 - Approved scope:
-  Slice-6-B expanded panel intrusion helper cleanup
+  Slice-6-C expanded flow graph sibling collision helper cleanup
 
 Implementation may start while Status is Approved. Only clear human approval
 or a change in scope can change Status from Approved.
