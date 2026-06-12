@@ -4,8 +4,8 @@
 
 - Status: Proposed
 - Scope:
-  select the next candidate only if it has meaningful responsibility,
-  boundary, or use-case value.
+  decide whether another qlty-driven architecture refactoring slice should be
+  proposed.
 - Acceptance:
   do not continue Qlty-driven refactoring for shape-only smells. Prefer a
   small behavior-preserving slice only when Qlty findings map to a coherent
@@ -41,6 +41,4 @@ approval can change Status from Pending to Approved.
 
 ## Use-Case Back-Propagation
 
-- No new use-case update is expected. Slice-6-D is intended to preserve the
-  existing expanded-flow panel intrusion behavior already covered by
-  `uc-build-flow-graph.md`.
+- No use-case update is currently pending.

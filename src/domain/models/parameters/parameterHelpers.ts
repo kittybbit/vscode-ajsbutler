@@ -1,16 +1,20 @@
 import { ParamSymbol, isParamSymbol } from "../../values/AjsType";
-import { DEFAULTS } from "./Defaults";
+import {
+  resolveRootJobnetDefaultRawValue,
+  type RootJobnetDefaultParameter,
+} from "./parameterDefaultHelpers";
 import { ParamBase, ParamInternal } from "./parameter.types";
 import ScheduleRule, { Sd } from "./ScheduleRule";
+
+export {
+  resolveConnectorControlDefaultRawValue,
+  resolveRootJobnetDefaultRawValue,
+} from "./parameterDefaultHelpers";
 
 export type ParamLookupArg = ParamBase & {
   inherit?: boolean;
   defaultRawValue?: string | string[];
 };
-
-type DefaultApplicationMode = "always" | "root-jobnet-only";
-type RootJobnetDefaultParameter = "rg" | "sd" | "ncl" | "ncs" | "ncex";
-type ConnectorControlDefaultParameter = "ncl" | "ncs" | "ncex";
 
 type ParameterEntry = {
   parameter: ParamLookupArg["unit"]["parameters"][number];
@@ -22,59 +26,6 @@ type SdAlignedScheduleParametersInput<T extends ScheduleRule> = {
   sd: Array<Sd> | undefined;
   mapParam: (param: ParamInternal) => T;
   buildDefault: (rule: number) => T | null;
-};
-
-const DEFAULT_RAW_VALUE_BY_PARAMETER: Record<
-  RootJobnetDefaultParameter,
-  string
-> = {
-  rg: DEFAULTS.Rg,
-  sd: DEFAULTS.Sd,
-  ncl: DEFAULTS.Ncl,
-  ncs: DEFAULTS.Ncs,
-  ncex: DEFAULTS.Ncex,
-};
-
-const resolveDefaultRawValue = (
-  parameter: RootJobnetDefaultParameter,
-): string => DEFAULT_RAW_VALUE_BY_PARAMETER[parameter];
-
-const resolveDefaultForMode = {
-  always: (defaultRawValue: string) => defaultRawValue,
-  "root-jobnet-only": (defaultRawValue: string, isRootJobnet: boolean) =>
-    isRootJobnet ? defaultRawValue : undefined,
-} satisfies Record<
-  DefaultApplicationMode,
-  (defaultRawValue: string, isRootJobnet: boolean) => string | undefined
->;
-
-const resolveScopedDefaultRawValue = (
-  defaultRawValue: string,
-  mode: DefaultApplicationMode,
-  isRootJobnet: boolean,
-): string | undefined =>
-  resolveDefaultForMode[mode](defaultRawValue, isRootJobnet);
-
-export const resolveRootJobnetDefaultRawValue = (
-  parameter: RootJobnetDefaultParameter,
-  isRootJobnet: boolean,
-): string | undefined =>
-  resolveScopedDefaultRawValue(
-    resolveDefaultRawValue(parameter),
-    "root-jobnet-only",
-    isRootJobnet,
-  );
-
-export const resolveConnectorControlDefaultRawValue = (
-  parameter: ConnectorControlDefaultParameter,
-  mode: DefaultApplicationMode,
-  isRootJobnet = true,
-): string | undefined => {
-  return resolveScopedDefaultRawValue(
-    resolveDefaultRawValue(parameter),
-    mode,
-    isRootJobnet,
-  );
 };
 
 export const buildOptionalParameter = <T>(
