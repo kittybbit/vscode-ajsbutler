@@ -1,6 +1,5 @@
 import {
   AjsUnit,
-  AjsUnitType,
   findAjsUnitParameterValue,
 } from "../../domain/models/ajs/AjsDocument";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
@@ -23,105 +22,24 @@ import type {
   UnitListGroup19View,
   UnitListLinkedUnitView,
 } from "./buildUnitListView";
-
-const isEventSendingJob = (unit: AjsUnit): boolean =>
-  unit.unitType === "evsj" || unit.unitType === "revsj";
-
-const isFileMonitoringJob = (unit: AjsUnit): boolean =>
-  unit.unitType === "flwj" || unit.unitType === "rflwj";
-
-const isExecutionIntervalControlJob = (unit: AjsUnit): boolean =>
-  unit.unitType === "tmwj" || unit.unitType === "rtmwj";
-
-const waitJobTypesWithGroup13TimeoutAction: readonly AjsUnitType[] = [
-  "flwj",
-  "rflwj",
-  "tmwj",
-  "rtmwj",
-  "lfwj",
-  "rlfwj",
-  "mlwj",
-  "rmlwj",
-  "mqwj",
-  "rmqwj",
-  "mswj",
-  "rmswj",
-  "ntwj",
-  "rntwj",
-];
-
-const isWaitJobWithGroup13TimeoutAction = (unit: AjsUnit): boolean =>
-  waitJobTypesWithGroup13TimeoutAction.includes(unit.unitType);
-
-const isQueueJob = (unit: AjsUnit): boolean =>
-  unit.unitType === "qj" || unit.unitType === "rq";
-
-type DefaultAwareParameterInput = {
-  unit: AjsUnit;
-  key: ParamSymbol;
-  defaultValue: string;
-  isDefaultAwareUnit: boolean;
-};
-
-const findDefaultAwareParameterValue = ({
-  unit,
-  key,
-  defaultValue,
-  isDefaultAwareUnit,
-}: DefaultAwareParameterInput): string | undefined =>
-  isDefaultAwareUnit
-    ? (findAjsUnitParameterValue(unit, key) ?? defaultValue)
-    : findAjsUnitParameterValue(unit, key);
-
-const findEventSendingJobDefaultAwareParameterValue = (
-  unit: AjsUnit,
-  key: ParamSymbol,
-  defaultValue: string,
-): string | undefined =>
-  findDefaultAwareParameterValue({
-    unit,
-    key,
-    defaultValue,
-    isDefaultAwareUnit: isEventSendingJob(unit),
-  });
-
-const findFileMonitoringJobDefaultAwareParameterValue = (
-  unit: AjsUnit,
-  key: ParamSymbol,
-  defaultValue: string,
-): string | undefined =>
-  findDefaultAwareParameterValue({
-    unit,
-    key,
-    defaultValue,
-    isDefaultAwareUnit: isFileMonitoringJob(unit),
-  });
-
-const findExecutionIntervalControlJobDefaultAwareParameterValue = (
-  unit: AjsUnit,
-  key: ParamSymbol,
-  defaultValue: string,
-): string | undefined =>
-  findDefaultAwareParameterValue({
-    unit,
-    key,
-    defaultValue,
-    isDefaultAwareUnit: isExecutionIntervalControlJob(unit),
-  });
-
-const findGroup13EventTimeoutAction = (unit: AjsUnit): string | undefined =>
-  findDefaultAwareParameterValue({
-    unit,
-    key: "ets",
-    defaultValue: DEFAULTS.Ets,
-    isDefaultAwareUnit: isWaitJobWithGroup13TimeoutAction(unit),
-  });
-
-const findGroup15TransferOperation = (
-  unit: AjsUnit,
-  key: "top1" | "top2" | "top3" | "top4",
-): string | undefined =>
-  isQueueJob(unit) ? undefined : findAjsUnitParameterValue(unit, key);
+import {
+  buildGroup1View,
+  buildGroup2View,
+  buildGroup3View,
+  buildGroup4View,
+  buildGroup5View,
+} from "./buildUnitListGroup1To5View";
+import {
+  buildGroup8View,
+  buildGroup9View,
+} from "./buildUnitListGroup8And9View";
+import {
+  findEventSendingJobDefaultAwareParameterValue,
+  findFileMonitoringJobDefaultAwareParameterValue,
+  findExecutionIntervalControlJobDefaultAwareParameterValue,
+  findGroup13EventTimeoutAction,
+  findGroup15TransferOperation,
+} from "./unitListDefaultAwareHelpers";
 
 type UnitListRemainingGroupsView = {
   group1: UnitListGroup1View;
@@ -141,97 +59,11 @@ type UnitListRemainingGroupsView = {
   group19: UnitListGroup19View;
 };
 
-const isManagerUnit = (unit: AjsUnit): boolean =>
-  unit.unitType === "mg" || unit.unitType === "mn";
-
-const isJobGroup = (unit: AjsUnit): boolean => unit.unitType === "g";
-
-const isNestedConnector = (unit: AjsUnit): boolean => unit.unitType === "nc";
-
-const isStartCondition = (unit: AjsUnit): boolean => unit.unitType === "rc";
-
 const isCustomJob = (unit: AjsUnit): boolean =>
   unit.unitType === "cpj" || unit.unitType === "rcpj";
 
 const isFlexibleJob = (unit: AjsUnit): boolean =>
   unit.unitType === "fxj" || unit.unitType === "rfxj";
-
-const parentAbsolutePath = (unit: AjsUnit): string =>
-  unit.depth > 0
-    ? unit.absolutePath.split("/").slice(0, -1).join("/") || "/"
-    : "/";
-
-const layoutHv = (unit: AjsUnit): string | undefined =>
-  unit.depth > 0 ? `+${unit.layout.h}+${unit.layout.v}` : undefined;
-
-const findJobGroupParameterValue = (
-  unit: AjsUnit,
-  key: ParamSymbol,
-): string | undefined =>
-  isJobGroup(unit) ? findAjsUnitParameterValue(unit, key) : undefined;
-
-const buildGroup1View = (unit: AjsUnit): UnitListGroup1View => ({
-  name: unit.name,
-  parentAbsolutePath: parentAbsolutePath(unit),
-  parentId: unit.parentId,
-  unitType: unit.unitType,
-  groupType: unit.groupType,
-  cty: findAjsUnitParameterValue(unit, "cty"),
-  layoutHv: layoutHv(unit),
-  size: findAjsUnitParameterValue(unit, "sz"),
-});
-
-const buildGroup2View = (
-  unit: AjsUnit,
-  previousUnits: UnitListLinkedUnitView[],
-  nextUnits: UnitListLinkedUnitView[],
-): UnitListGroup2View => ({
-  comment: unit.comment,
-  previousUnits,
-  nextUnits,
-  executionAgent: findAjsUnitParameterValue(unit, "ex"),
-  nestedConnectionLimit: findAjsUnitParameterValue(unit, "ncl"),
-  nestedConnectionName: findAjsUnitParameterValue(unit, "ncn"),
-  nestedConnectionService: findAjsUnitParameterValue(unit, "ncsv"),
-  nestedConnectionEnabled: findAjsUnitParameterValue(unit, "ncs"),
-  nestedConnectionExternal: findAjsUnitParameterValue(unit, "ncex"),
-  nestedConnectionHost: findAjsUnitParameterValue(unit, "nchn"),
-});
-
-const buildGroup3View = (unit: AjsUnit): UnitListGroup3View => ({
-  hardAttribute: findAjsUnitParameterValue(unit, "ha"),
-  isRecovery: unit.isRecovery,
-  jp1Username: unit.jp1Username,
-  jp1ResourceGroup: unit.jp1ResourceGroup,
-});
-
-const buildGroup4View = (unit: AjsUnit): UnitListGroup4View => ({
-  managerHost: isManagerUnit(unit)
-    ? findAjsUnitParameterValue(unit, "mh")
-    : undefined,
-  managerUnit: isManagerUnit(unit)
-    ? findAjsUnitParameterValue(unit, "mu")
-    : undefined,
-});
-
-const buildGroup5View = (unit: AjsUnit): UnitListGroup5View => ({
-  startDeadlineDate: findJobGroupParameterValue(unit, "sdd"),
-  maximumDuration: findJobGroupParameterValue(unit, "md"),
-  startTimeType: findJobGroupParameterValue(unit, "stt"),
-  jobGroupType: isJobGroup(unit) ? unit.groupType : undefined,
-});
-
-const buildGroup8View = (unit: AjsUnit): UnitListGroup8View => ({
-  nestedConnectorRelease: isNestedConnector(unit)
-    ? findAjsUnitParameterValue(unit, "ncr")
-    : undefined,
-});
-
-const buildGroup9View = (unit: AjsUnit): UnitListGroup9View => ({
-  startCondition: isStartCondition(unit)
-    ? findAjsUnitParameterValue(unit, "cond")
-    : undefined,
-});
 
 const buildGroup12View = (unit: AjsUnit): UnitListGroup12View => ({
   endJudgment: findAjsUnitParameterValue(unit, "ej"),

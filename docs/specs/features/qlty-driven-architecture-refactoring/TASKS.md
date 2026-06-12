@@ -42,7 +42,34 @@ approval can change Status from Pending to Approved.
 - `docs/requirements/use-cases/uc-interpret-jp1-parameters.md` already carries
   the durable behavior contract for context-sensitive parameter and
   schedule-rule interpretation.
+- **Slice-3 parameterHelpers.ts Investigation (2026-06-12)**:
+  - Complexity 30 is shape-derived (18 export functions with repeated builder
+    patterns: buildOptional, buildRequired, buildInherited, etc.) not
+    responsibility-driven.
+  - Candidate separation A (Parameter Resolution Logic / builders) would
+    require extraction but all callsites depend on combined resolution +
+    mapping, reducing benefit.
+  - Candidate separation B (builder facades from resolution) adds file
+    coupling without domain concept clarity.
+  - Per TASKS.md guidance, shape-only extraction is not justified when
+    stronger JP1/AJS business concept or maintainability risk is absent.
+  - UC-INTERPRET-JP1-PARAMETERS is already documented; no missing behavior
+    contract.
+  - **Decision**: Skip parameterHelpers.ts as Slice-3 candidate.
+- **Slice-3 Status**: Appears complete. unitPriorityHelpers.ts was the
+  initial domain-helper simplification target; no remaining domain helper
+  extraction has both significant complexity reduction opportunity AND clear
+  JP1/AJS business concept boundary justification.
+- Slice-4A and Slice-4B are complete as behavior-preserving application-layer
+  refactors. Slice-4A split editor-feedback diagnostic builders by rule
+  responsibility; Slice-4B split unit-list row projection helpers and
+  default-aware parameter projection helpers.
+- Slice-4C remains deferred until another candidate maps to a coherent
+  responsibility boundary.
 
 ## Use-Case Back-Propagation
 
-- No use-case update is currently pending.
+- No use-case update is currently pending for Slice-3.
+- No use-case update is pending for Slice-4A or Slice-4B because the changes
+  preserve existing diagnostic DTOs, diagnostic messages, `UnitListRowView`
+  shape, and row projection behavior.
