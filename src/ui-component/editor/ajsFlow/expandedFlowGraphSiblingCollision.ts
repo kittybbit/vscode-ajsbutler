@@ -50,7 +50,7 @@ const getSiblingCollisionMovement = (
   return offset ? { target, offset } : undefined;
 };
 
-const moveSiblingSubtree = (
+const applySiblingSubtreeOffset = (
   context: ExpandedFlowGraphBuildContext,
   target: LayoutItem,
   offset: FlowGraphPosition,
@@ -62,9 +62,10 @@ const moveSiblingSubtree = (
 const applySiblingCollisionMovement = (
   context: ExpandedFlowGraphBuildContext,
   movement: SiblingCollisionMovement,
-): LayoutItem => moveSiblingSubtree(context, movement.target, movement.offset);
+): LayoutItem =>
+  applySiblingSubtreeOffset(context, movement.target, movement.offset);
 
-const moveTargetPastFixedSibling = (
+const resolveTargetAgainstFixedSibling = (
   context: ExpandedFlowGraphBuildContext,
   target: LayoutItem,
   fixed: LayoutItem,
@@ -80,9 +81,19 @@ const resolveTargetSiblingCollisions = (
 ): LayoutItem =>
   fixedItems.reduce(
     (movedTarget, fixed) =>
-      moveTargetPastFixedSibling(context, movedTarget, fixed),
+      resolveTargetAgainstFixedSibling(context, movedTarget, fixed),
     target,
   );
+
+const appendResolvedSiblingLayoutItem = (
+  context: ExpandedFlowGraphBuildContext,
+  resolvedItems: LayoutItem[],
+  target: LayoutItem,
+): void => {
+  resolvedItems.push(
+    resolveTargetSiblingCollisions(context, resolvedItems, target),
+  );
+};
 
 export const resolveSiblingLayoutItems = (
   context: ExpandedFlowGraphBuildContext,
@@ -90,9 +101,7 @@ export const resolveSiblingLayoutItems = (
 ) => {
   const resolvedItems: LayoutItem[] = [];
 
-  layoutItems.forEach((target) => {
-    resolvedItems.push(
-      resolveTargetSiblingCollisions(context, resolvedItems, target),
-    );
-  });
+  layoutItems.forEach((target) =>
+    appendResolvedSiblingLayoutItem(context, resolvedItems, target),
+  );
 };

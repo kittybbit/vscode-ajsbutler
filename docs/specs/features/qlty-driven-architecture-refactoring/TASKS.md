@@ -13,28 +13,29 @@ active feature. Slice progress stays in this file.
 ## Current Status
 
 - Active task:
-  Select Slice-6-C expanded flow graph sibling collision helper cleanup as
-  the next candidate.
+  Select the next candidate only if it has meaningful responsibility,
+  boundary, or use-case value.
 - Runtime status:
   Slice-5-Z expanded layout anchored position state helper extraction is
   complete. Slice-6-A expanded child growth offset helper extraction is
   complete. Slice-6-B expanded panel intrusion helper extraction is complete.
+  Slice-6-C expanded sibling collision helper cleanup is complete.
 - Use-case reflection:
-  None required. Slice-6-A preserved the expanded flow graph layout contract
-  covered by `uc-build-flow-graph.md`, including right/down-only growth
-  propagation, stable upper-left positions, whole-subtree movement,
-  deterministic position overrides, and sibling panel non-overlap.
+  None required. Slice-6-C preserved the expanded flow graph layout contract
+  covered by `uc-build-flow-graph.md`, including sibling panel non-overlap,
+  right/down-only movement, whole-subtree movement, deterministic position
+  overrides, and stable upper-left positions.
 
 ## Human Approval
 
-- Status: Approved
+- Status: Pending
 - Approved at:
-  approved in current conversation
+  none
 - Approved scope:
-  Slice-6-C expanded flow graph sibling collision helper cleanup
+  none
 
-Implementation may start while Status is Approved. Only clear human approval
-or a change in scope can change Status from Approved.
+Implementation must not start while Status is Pending. Only clear human
+approval can change Status from Pending to Approved.
 `Approved at` records the approval result only, such as `none` or `approved in
 current conversation`; do not copy the approval message.
 
@@ -441,6 +442,12 @@ current conversation`; do not copy the approval message.
 - [x] Implement Slice-6-A inside the approved scope.
 - [x] Run required validation.
 - [x] Reconfirm that use-case reflection is unnecessary.
+- [x] Record the behavior-preservation and use-case reflection decision for
+      Slice-6-C.
+- [x] Record human approval for Slice-6-C.
+- [x] Implement Slice-6-C inside the approved scope.
+- [x] Run required validation.
+- [x] Reconfirm that use-case reflection is unnecessary.
 
 ## Validation Plan
 
@@ -459,8 +466,8 @@ Slice-4-Y, Slice-4-Z, Slice-5-A, Slice-5-B, Slice-5-C, Slice-5-D, Slice-5-E,
 Slice-5-F, Slice-5-G, Slice-5-H, Slice-5-I, Slice-5-J, Slice-5-K, Slice-5-L,
 Slice-5-M, Slice-5-N, Slice-5-O, Slice-5-P, Slice-5-Q, Slice-5-R, Slice-5-S,
 Slice-5-T, Slice-5-U, Slice-5-V, Slice-5-W, Slice-5-X, Slice-5-Y, Slice-5-Z,
-and Slice-6-A refactors were behavior-preserving and do not currently require
-use-case updates. The
+Slice-6-A, and Slice-6-C refactors were behavior-preserving and do not
+currently require use-case updates. The
 `buildUnitListView.ts` / WebAPI DTO duplication finding is not a current
 candidate because it appears to be DTO copy-shape similarity rather than shared
 behavior. Remaining domain-unit duplication clusters should only be reopened
@@ -468,3 +475,5 @@ when they represent a stronger shared JP1/AJS business concept or use-case need
 than getter-shape similarity alone. Slice-6-A removed the
 `expandedFlowGraphLayout.ts` file-level high total complexity signal for the
 targeted files by separating the expanded child growth offset responsibility.
+Slice-6-C kept sibling collision resolution API-compatible while clarifying
+the fixed-sibling comparison and subtree offset application steps.
