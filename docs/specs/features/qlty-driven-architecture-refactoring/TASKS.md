@@ -28,16 +28,20 @@ approval can change Status from Pending to Approved.
 
 ## Decision Notes
 
-- Rechecked `rtk qlty metrics --sort complexity` and `rtk qlty smells`.
-- Slice-6-D removed the `expandedFlowGraphPanelIntrusion.ts` "function with
-  many parameters" smells while preserving the public expanded-flow layout
-  contract.
+- Recheck `rtk qlty metrics --sort complexity` and `rtk qlty smells` before
+  selecting any next slice.
+- After Slice-6-F, `rtk qlty metrics --sort complexity` reports
+  `src/domain/models/parameters/parameterHelpers.ts` at complexity 30 and
+  `src/domain/models/parameters/parameterScheduleRuleHelpers.ts` at complexity 11.
 - Remaining reported DTO and domain-unit duplication smells should stay
   candidate signals only. Do not extract shared code from them unless a future
   slice identifies a stronger shared JP1/AJS business concept, use-case need,
   adapter boundary, or maintainability risk than shape similarity alone.
 - `docs/requirements/use-cases/uc-build-flow-graph.md` already carries the
   durable expanded-flow behavior contract preserved by recent layout slices.
+- `docs/requirements/use-cases/uc-interpret-jp1-parameters.md` already carries
+  the durable behavior contract for context-sensitive parameter and
+  schedule-rule interpretation.
 
 ## Use-Case Back-Propagation
 
