@@ -28,9 +28,9 @@ The repository currently mixes legacy and target-oriented structure.
   serialization-boundary coupling across desktop and web hosts
 - webview bundle-size pressure remains visible in roadmap planning, especially
   while shared dependencies continue to grow
-- legacy `UnitEntity` still has a bespoke internal hash, but current
-  application-facing normalized AJS ids use absolute paths; replacing the hash
-  is optional and should wait for a concrete compatibility or maintenance need
+- `UnitEntity` wrapper ids now use deterministic UUID v5 values derived from
+  absolute paths, while current application-facing normalized AJS ids continue
+  to use absolute paths
 - JP1/AJS parameter interpretation and command generation are not yet described
   as explicitly reference-aligned to one target manual edition
 - server-side definition loading through the JP1/AJS WebAPI is not yet part of

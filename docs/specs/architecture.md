@@ -224,14 +224,14 @@ Migration should be incremental and use-case driven.
 ### Identity and hashing
 
 - `UnitEntity.id` is an internal wrapper-layer identity derived from
-  `Unit.absolutePath()` by the current deterministic hash implementation
+  `Unit.absolutePath()` by deterministic UUID v5 generation
 - normalized `AjsUnit.id` and `AjsUnit.parentId` are absolute-path identities,
   so current application-facing list, flow, table, reveal, and graph DTO paths
-  do not depend on the exact `UnitEntity.id` encoded hash value
-- `UnitEntity` identity semantics should remain stable; internal hashing may
-  change only when behavior can be preserved and remaining wrapper consumers do
-  not depend on the current encoded string
-- hash-algorithm changes should remain an implementation detail unless a
+  do not depend on the exact `UnitEntity.id` UUID string
+- `UnitEntity` identity semantics should remain stable; future identity
+  changes may happen only when behavior can be preserved and remaining wrapper
+  consumers do not depend on the current string form
+- identity algorithm changes should remain an implementation detail unless a
   public or persisted identity contract is affected
 
 ### JP1 reference alignment
