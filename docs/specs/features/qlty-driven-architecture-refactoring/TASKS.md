@@ -30,6 +30,17 @@ approval can change Status from Pending to Approved.
 
 - Recheck `rtk qlty metrics --sort complexity` and `rtk qlty smells` before
   selecting any next slice.
+- Slice-5A is complete as a behavior-preserving application-layer refactor.
+  It split `unitListViewHelpers.ts` into focused calendar week projection,
+  unit priority projection, and schedule/start-condition value projection
+  helpers while preserving public helper exports and `UnitListRowView`
+  behavior. Follow-up qlty metrics show the former helper facade at complexity
+  0 and the split helper modules at complexity 15, 13, and 6.
+- Defer `src/application/editor-feedback/syntaxDiagnosticScheduleDateRules.ts`
+  and `src/application/editor-feedback/syntaxDiagnosticScheduleRules.ts` for
+  now. They remain qlty signals, but their current split already follows the
+  editor-feedback rule responsibility and a further split is less clearly tied
+  to a new use-case boundary.
 - After Slice-6-F, `rtk qlty metrics --sort complexity` reports
   `src/domain/models/parameters/parameterHelpers.ts` at complexity 30 and
   `src/domain/models/parameters/parameterScheduleRuleHelpers.ts` at complexity 11.
@@ -74,13 +85,13 @@ approval can change Status from Pending to Approved.
   refactors. Slice-4A split editor-feedback diagnostic builders by rule
   responsibility; Slice-4B split unit-list row projection helpers and
   default-aware parameter projection helpers.
-- Slice-4C is proposed because `buildAjsCommands.ts` currently mixes command
-  builder definition data, shared option construction helpers, token assembly,
-  and default command DTO projection in one application module.
 - Slice-4C is complete as a behavior-preserving application-layer refactor.
   It split command builder DTO types, static ajsshow/ajsprint builder
   definitions, and command-line token assembly while preserving public exports
   and command text.
+- Slice-5A is complete as a behavior-preserving application-layer refactor.
+  It moved calendar, priority, and schedule projection concerns into focused
+  unit-list helper modules.
 
 ## Use-Case Back-Propagation
 
@@ -93,3 +104,7 @@ approval can change Status from Pending to Approved.
   `uc-show-unit-definition.md` before implementation if command text,
   supported options, localization keys, manual links, or dialog behavior
   change.
+- No use-case update is pending for Slice-5A because the changes preserve
+  `UnitListRowView` shape, table values, CSV-visible values, inherited
+  priority behavior, calendar week display, and schedule/start-condition
+  display semantics.

@@ -47,7 +47,8 @@ using Qlty findings as candidate signals for behavior-preserving refactors.
 4. Slice-2 application orchestration reduction
 5. Slice-3 domain helper simplification
 6. Slice-4 application-layer rule building and list orchestration
-7. (deferred) Slice-5+ future domain/application layers only when Qlty findings map to coherent responsibilities and use-case contracts
+7. Slice-5A unit-list helper responsibility split
+8. (deferred) Slice-5+ future domain/application layers only when Qlty findings map to coherent responsibilities and use-case contracts
 
 ## Proposed Slice-4 Candidates
 
@@ -169,6 +170,52 @@ JP1/AJS command-line generation from unit definitions.
 **Status**:
 Implemented as Slice-4C after Slice-4A and Slice-4B completion.
 
+### Candidate D: Unit-List Helper Responsibility Split
+
+**Affected file** (complexity 34):
+
+- `src/application/unit-list/unitListViewHelpers.ts`
+
+**Direct callers**:
+
+- `src/application/unit-list/buildUnitListGroup6View.ts`
+- `src/application/unit-list/buildUnitListGroup10View.ts`
+- `src/application/unit-list/buildUnitListPriorityViews.ts`
+- `src/test/suite/unitListViewHelpers.test.ts`
+
+**Responsibility cluster**:
+Application-layer value projection for the unit-list view. The helper module
+currently combines calendar week rendering, inherited JP1/AJS priority
+resolution, and schedule/start-condition parameter parsing used by unit-list
+row builders.
+
+**Proposed Slice-5A implementation path**:
+
+1. Preserve the `UnitListRowView` contract and keep behavior stable for table
+   and CSV-visible values.
+2. Split calendar week helpers into a focused unit-list calendar projection
+   module used by group6.
+3. Split priority resolution helpers into a focused unit-list priority
+   projection module used by priority view builders.
+4. Split schedule/start-condition parsing helpers into a focused unit-list
+   schedule value projection module used by group10.
+5. Keep public helper exports through `unitListViewHelpers.ts` as a
+   compatibility facade or update only application/test imports inside the
+   unit-list boundary.
+6. Extend or preserve `unitListViewHelpers.test.ts` coverage so extracted
+   helpers keep the same observable values.
+
+**Validation focus**:
+
+- preserve calendar week display for group6
+- preserve priority inheritance/defaulting for priority columns
+- preserve group10 schedule and effective-start-condition values
+- avoid parser, presentation, dependency, generated artifact, telemetry, and
+  VS Code compatibility changes
+
+**Status**:
+Implemented as Slice-5A after Slice-4C completion.
+
 ## Completed Summary
 
 - Slice-1A and Slice-1B are complete.
@@ -186,6 +233,8 @@ Implemented as Slice-4C after Slice-4A and Slice-4B completion.
 - Slice-4C is complete. It split command builder DTO types, ajsshow/ajsprint
   builder definitions, and command-line token assembly without changing
   observable behavior.
+- Slice-5A is complete. It split unit-list calendar, priority, and schedule
+  projection helpers while keeping the unit-list view contract stable.
 - This plan keeps only completed-scope information that helps future
   sequencing or risk decisions; durable boundaries are kept in SPECS.md and
   current execution state is kept in TASKS.md.

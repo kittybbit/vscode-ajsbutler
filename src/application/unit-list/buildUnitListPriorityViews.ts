@@ -8,7 +8,7 @@ import type {
   UnitListGroup11View,
   UnitListGroup7View,
 } from "./buildUnitListView";
-import { getPriorityForUnitTypes } from "./unitListViewHelpers";
+import { getPriorityForUnitTypes } from "./unitListPriorityViewHelpers";
 
 const group7FieldUnitTypes: readonly AjsUnitType[] = ["n", "rn", "rm", "rr"];
 const group7PriorityUnitTypes: readonly AjsUnitType[] = ["n", "rn"];
