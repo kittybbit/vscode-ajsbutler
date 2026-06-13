@@ -12,19 +12,17 @@
 
 ## Current Task
 
-- Status: Proposed
+- Status: Blocked
 - Scope:
-  decide whether a future `UnitEntity` hash implementation replacement is
-  valuable enough to propose as a behavior-preserving implementation slice.
+  no active implementation task remains. Keep remaining modernization
+  follow-ups blocked until a concrete compatibility, startup-time, payload, or
+  maintenance need makes a new slice valuable enough to pass an approval gate.
 - Acceptance:
-  only propose implementation after confirming the replacement preserves
-  wrapper identity expectations and does not affect normalized AJS selection,
-  navigation, flow/table DTO keys, or user-visible behavior. Do not change the
-  hash implementation, dependencies, generated artifacts, runtime code, tests,
-  or `engines.vscode` without a new approval gate.
+  do not change runtime code, tests, dependencies, generated artifacts,
+  configuration, or `engines.vscode` without a new approval gate.
 - Validation:
-  planning changes require `rtk pnpm run qlty`; any future implementation
-  requires the relevant build, unit, web, and package validation checks.
+  planning changes require `rtk pnpm run qlty`; future implementation requires
+  the relevant build, unit, web, and package validation checks.
 
 ## Human Approval
 
@@ -48,15 +46,21 @@ active implementation approval remains.
       documents.
 - [x] Refresh identity and compatibility checks before proposing a hash
       replacement slice.
-- [ ] Request new approval before any `UnitEntity` hash implementation change.
+- [x] Compare the existing custom hash, the previously used `xxhash-wasm`
+      dependency, the already-present `uuid` dependency, and adding another
+      library.
+- [x] Replace the custom `UnitEntity` hash implementation with deterministic
+      `uuid` v5 identity and remove `xxhash-wasm`.
+- [ ] Request new approval before any future runtime-boundary implementation
+      change.
 
 ## Notes
 
 - Current DTO transport does not require cyclic serialization.
 - Bundle-size follow-up remains deferred until a clearer shrinking seam or
   stronger product requirement appears.
-- `UnitEntity.id` is derived from `Unit.absolutePath()` through the current
-  custom deterministic hash inside the wrapper layer.
+- `UnitEntity.id` is derived from `Unit.absolutePath()` through deterministic
+  `uuid` v5 identity inside the wrapper layer.
 - Normalized `AjsUnit.id` and `AjsUnit.parentId` are currently based on
   `absolutePath`, not on the wrapper hash. Current list, flow, table, reveal,
   and graph DTO selection paths reviewed in this investigation use normalized
@@ -64,6 +68,25 @@ active implementation approval remains.
 - Existing list and flow tests use absolute-path-shaped normalized ids; no
   reviewed user-facing selection, navigation, or DTO path depends on the exact
   `UnitEntity.id` encoded hash value.
-- Any future hash replacement should still add or confirm targeted
-  `UnitEntity.id` determinism tests and prove remaining wrapper-only consumers
-  do not rely on the current encoded hash string.
+- The previous custom deterministic hash was dependency-free, synchronous, and
+  worked under the CommonJS test compilation path; the approved replacement
+  keeps deterministic synchronous behavior while reusing the existing `uuid`
+  dependency.
+- `uuid` remains in dependencies and is currently used for webview CSP nonces.
+  A deterministic `uuid` implementation would need `v5`, not `v4`.
+- A `uuid` v5 implementation would be synchronous, browser-capable through the
+  package browser export, and would avoid adding a new dependency, but it would
+  change `UnitEntity.id` from a 16-character hex string to an RFC UUID string.
+- Earlier history used `xxhash-wasm` for `UnitEntity.id`, not `uuid`.
+  Restoring it would be closer to the old hash-purpose dependency, but would
+  reintroduce WebAssembly and initialization concerns into the wrapper layer.
+- Adding a new hash library is not justified because `uuid` already covers the
+  approved deterministic replacement path and the identity remains
+  wrapper-internal.
+- The approved implementation removes `xxhash-wasm` because it is no longer
+  used after the `uuid` v5 replacement.
+- The approved implementation adds targeted `UnitEntity.id` determinism tests
+  and proves remaining reviewed wrapper-only consumers do not rely on the
+  previous encoded hash string.
+- No active modernization implementation approval remains after the completed
+  `uuid` v5 identity slice.

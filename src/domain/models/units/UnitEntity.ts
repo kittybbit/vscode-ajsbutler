@@ -1,23 +1,16 @@
 /** JP1/AJS3 unit entities  */
 
+import { v5 as uuidv5 } from "uuid";
 import { Unit } from "../../values/Unit";
 import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
 import { resolveUnitDepth } from "./unitDepthHelpers";
 import { resolveIsRecovery } from "./unitTypeHelpers";
 
-const hashToString = (value: string): string => {
-  // Use a deterministic sync hash so this module works under CommonJS test compilation.
-  let hash = BigInt("0xcbf29ce484222325");
-  const prime = BigInt("0x100000001b3");
+const UNIT_ENTITY_ID_NAMESPACE = uuidv5.URL;
 
-  for (const char of value) {
-    hash ^= BigInt(char.codePointAt(0) ?? 0);
-    hash = BigInt.asUintN(64, hash * prime);
-  }
-
-  return hash.toString(16).padStart(16, "0");
-};
+const createUnitEntityId = (absolutePath: string): string =>
+  uuidv5(absolutePath, UNIT_ENTITY_ID_NAMESPACE);
 
 /** abstract class of unit unit for decorator */
 export abstract class UnitEntity {
@@ -35,7 +28,7 @@ export abstract class UnitEntity {
   constructor(unit: Unit, parent?: UnitEntity) {
     this.#unit = unit;
     this.#absolutePath = unit.absolutePath();
-    this.#id = hashToString(this.#absolutePath);
+    this.#id = createUnitEntityId(this.#absolutePath);
     this.#parent = parent;
     this.#children = this.#unit.children
       .map((v) => {
