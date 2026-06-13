@@ -64,15 +64,13 @@
    boundary, authentication model, and beta feedback are stable.
 4. Revisit viewer-specific bundle-size reductions only if a future
    compatibility, startup, or payload target creates stronger pressure.
-5. Replace the custom `UnitEntity` hash implementation only after identity and
-   compatibility checks are refreshed.
-6. Consolidate i18n translation files only when duplication is high enough to
+5. Consolidate i18n translation files only when duplication is high enough to
    justify a targeted cleanup.
-7. Add deeper JP1/AJS View interaction parity only after the current visual
+6. Add deeper JP1/AJS View interaction parity only after the current visual
    refresh and nested expansion behavior settle.
-8. Revisit directory structure under `src/extension/webview/` only if the
+7. Revisit directory structure under `src/extension/webview/` only if the
    remaining files stop reading as one cohesive viewer module.
-9. Add more expanded-flow layout regression fixtures only if real-world nested
+8. Add more expanded-flow layout regression fixtures only if real-world nested
    layout examples expose additional collision or refit gaps.
 
 ## Done Criteria For A Slice
