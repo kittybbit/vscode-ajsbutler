@@ -167,7 +167,7 @@ modules while preserving `UnitListRowView` shape.
 JP1/AJS command-line generation from unit definitions.
 
 **Status**:
-Single-file candidate; lower priority after Slice-4A and Slice-4B completion.
+Implemented as Slice-4C after Slice-4A and Slice-4B completion.
 
 ## Completed Summary
 
@@ -183,6 +183,9 @@ Single-file candidate; lower priority after Slice-4A and Slice-4B completion.
 - Slice-4A and Slice-4B are complete. They split editor-feedback diagnostic
   builder responsibilities and unit-list row projection helpers without
   changing observable behavior.
+- Slice-4C is complete. It split command builder DTO types, ajsshow/ajsprint
+  builder definitions, and command-line token assembly without changing
+  observable behavior.
 - This plan keeps only completed-scope information that helps future
   sequencing or risk decisions; durable boundaries are kept in SPECS.md and
   current execution state is kept in TASKS.md.

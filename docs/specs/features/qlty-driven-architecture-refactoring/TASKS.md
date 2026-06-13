@@ -37,6 +37,16 @@ approval can change Status from Pending to Approved.
   candidate signals only. Do not extract shared code from them unless a future
   slice identifies a stronger shared JP1/AJS business concept, use-case need,
   adapter boundary, or maintainability risk than shape similarity alone.
+- After Slice-4A/4B, `rtk qlty metrics --sort complexity` reports
+  `src/application/unit-definition/buildAjsCommands.ts` at complexity 27.
+  The command builder file is lower than WebAPI/import, unit-list helper, and
+  UI flow files, but it maps cleanly to the existing
+  `uc-generate-ajs-commands` application use case and can be sliced without
+  crossing active WebAPI beta or flow-view presentation work.
+- `rtk qlty smells` still reports shape-only domain-unit duplication and one
+  helper parameter-count finding. Those are not selected for the next slice
+  because the current stronger boundary candidate is command-generation
+  definition data versus command-line token assembly.
 - `docs/requirements/use-cases/uc-build-flow-graph.md` already carries the
   durable expanded-flow behavior contract preserved by recent layout slices.
 - `docs/requirements/use-cases/uc-interpret-jp1-parameters.md` already carries
@@ -64,8 +74,13 @@ approval can change Status from Pending to Approved.
   refactors. Slice-4A split editor-feedback diagnostic builders by rule
   responsibility; Slice-4B split unit-list row projection helpers and
   default-aware parameter projection helpers.
-- Slice-4C remains deferred until another candidate maps to a coherent
-  responsibility boundary.
+- Slice-4C is proposed because `buildAjsCommands.ts` currently mixes command
+  builder definition data, shared option construction helpers, token assembly,
+  and default command DTO projection in one application module.
+- Slice-4C is complete as a behavior-preserving application-layer refactor.
+  It split command builder DTO types, static ajsshow/ajsprint builder
+  definitions, and command-line token assembly while preserving public exports
+  and command text.
 
 ## Use-Case Back-Propagation
 
@@ -73,3 +88,8 @@ approval can change Status from Pending to Approved.
 - No use-case update is pending for Slice-4A or Slice-4B because the changes
   preserve existing diagnostic DTOs, diagnostic messages, `UnitListRowView`
   shape, and row projection behavior.
+- No use-case update is expected for Slice-4C if it remains
+  behavior-preserving. Update `uc-generate-ajs-commands.md` and
+  `uc-show-unit-definition.md` before implementation if command text,
+  supported options, localization keys, manual links, or dialog behavior
+  change.
