@@ -52,6 +52,37 @@ suite("Reveal unit helpers", () => {
     );
   });
 
+  test("opens the first root jobnet when revealing a job group", () => {
+    const unitById = new Map([
+      [
+        "job-group",
+        {
+          id: "job-group",
+          absolutePath: "/job-group",
+          unitType: "g",
+          children: [{}],
+        },
+      ],
+      [
+        "root-jobnet",
+        {
+          id: "root-jobnet",
+          absolutePath: "/job-group/root-jobnet",
+          unitType: "n",
+          parentId: "job-group",
+          isRootJobnet: true,
+          children: [],
+        },
+      ],
+    ]);
+
+    assert.deepStrictEqual(resolveFlowRevealTarget(unitById, "/job-group"), {
+      scopeUnitId: "root-jobnet",
+      revealedUnitId: "job-group",
+      expandedAncestorUnitIds: [],
+    });
+  });
+
   test("opens the direct condition scope for units under .condition", () => {
     const unitById = new Map([
       [

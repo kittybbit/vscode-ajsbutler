@@ -18,6 +18,7 @@ type FlowRevealUnit = {
   id: string;
   absolutePath: string;
   unitType: string;
+  isRootJobnet?: boolean;
   parentId?: string;
   children: Array<unknown>;
 };
@@ -48,6 +49,36 @@ const isConditionUnit = (unit: FlowRevealUnit | undefined): boolean =>
 const isJobnetUnit = (unit: FlowRevealUnit | undefined): boolean =>
   unit?.unitType === "n";
 
+const isJobGroupUnit = (unit: FlowRevealUnit | undefined): boolean =>
+  unit?.unitType === "g";
+
+const isRootJobnetUnit = (unit: FlowRevealUnit | undefined): boolean =>
+  unit?.unitType === "n" && unit.isRootJobnet === true;
+
+const isDescendantOf = (
+  unitById: ReadonlyMap<string, FlowRevealUnit>,
+  unit: FlowRevealUnit,
+  ancestor: FlowRevealUnit,
+): boolean => {
+  let current = findFlowRevealParentUnit(unitById, unit);
+  while (current) {
+    if (current.id === ancestor.id) {
+      return true;
+    }
+    current = findFlowRevealParentUnit(unitById, current);
+  }
+  return false;
+};
+
+const findFirstDescendantRootJobnet = (
+  unitById: ReadonlyMap<string, FlowRevealUnit>,
+  unit: FlowRevealUnit,
+): FlowRevealUnit | undefined =>
+  Array.from(unitById.values()).find(
+    (candidate) =>
+      isRootJobnetUnit(candidate) && isDescendantOf(unitById, candidate, unit),
+  );
+
 const findNearestJobnetAncestor = (
   unitById: ReadonlyMap<string, FlowRevealUnit>,
   unit: FlowRevealUnit | undefined,
@@ -63,6 +94,12 @@ const resolveFlowRevealScopeUnit = (
   unitById: ReadonlyMap<string, FlowRevealUnit>,
   revealedUnit: FlowRevealUnit,
 ): FlowRevealUnit => {
+  if (isJobGroupUnit(revealedUnit)) {
+    return (
+      findFirstDescendantRootJobnet(unitById, revealedUnit) ?? revealedUnit
+    );
+  }
+
   const directParent = findFlowRevealParentUnit(unitById, revealedUnit);
   if (isConditionUnit(directParent)) {
     return directParent;

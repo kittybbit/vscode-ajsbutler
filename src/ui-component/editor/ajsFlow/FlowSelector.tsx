@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import MuiAccordion, { type AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionActions, {
@@ -40,13 +41,17 @@ type FlowSelectorProps = {
 type FlowSelectorTreeProps = {
   rootUnits: AjsUnit[];
   isAncestorOf: (target?: AjsUnit) => boolean;
+  isExpandedGroup: (unitId: string) => boolean;
   setCurrentUnitId: (unitId: string) => void;
+  setGroupExpanded: (unitId: string, expanded: boolean) => void;
 };
 
 type FlowSelectorUnitProps = {
   unit: AjsUnit;
   isAncestorOf: (target?: AjsUnit) => boolean;
+  isExpandedGroup: (unitId: string) => boolean;
   setCurrentUnitId: (unitId: string) => void;
+  setGroupExpanded: (unitId: string, expanded: boolean) => void;
 };
 
 type FlowSelectorToolbarProps = {
@@ -103,6 +108,9 @@ const AccordionActions = styled((props: AccordionActionsProps) => (
 
 const isRootJobnetUnit = (unit: AjsUnit): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
+
+export const isSelectableFlowScopeUnit = (unit: AjsUnit): boolean =>
+  isRootJobnetUnit(unit);
 
 const getParentUnit = (
   unit: AjsUnit,
@@ -174,7 +182,9 @@ const useDrawerWidthObserver = (
 const FlowGroupUnit: FC<FlowSelectorUnitProps> = ({
   unit,
   isAncestorOf,
+  isExpandedGroup,
   setCurrentUnitId,
+  setGroupExpanded,
 }) => (
   <Accordion
     key={unit.id}
@@ -187,14 +197,16 @@ const FlowGroupUnit: FC<FlowSelectorUnitProps> = ({
         ? "action.selected"
         : "background.paper",
     }}
-    expanded={isAncestorOf(unit)}
-    onChange={() => setCurrentUnitId(unit.id)}
+    expanded={isAncestorOf(unit) || isExpandedGroup(unit.id)}
+    onChange={(_event, expanded) => setGroupExpanded(unit.id, expanded)}
   >
     <AccordionSummary>{unit.name}</AccordionSummary>
     <FlowSelectorTree
       rootUnits={unit.children}
       isAncestorOf={isAncestorOf}
+      isExpandedGroup={isExpandedGroup}
       setCurrentUnitId={setCurrentUnitId}
+      setGroupExpanded={setGroupExpanded}
     />
   </Accordion>
 );
@@ -235,22 +247,28 @@ const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
   unit,
   isAncestorOf,
   setCurrentUnitId,
+  isExpandedGroup,
+  setGroupExpanded,
 }) => {
   if (unit.unitType === "g") {
     return (
       <FlowGroupUnit
         unit={unit}
         isAncestorOf={isAncestorOf}
+        isExpandedGroup={isExpandedGroup}
         setCurrentUnitId={setCurrentUnitId}
+        setGroupExpanded={setGroupExpanded}
       />
     );
   }
-  if (isRootJobnetUnit(unit)) {
+  if (isSelectableFlowScopeUnit(unit)) {
     return (
       <RootJobnetUnit
         unit={unit}
         isAncestorOf={isAncestorOf}
+        isExpandedGroup={isExpandedGroup}
         setCurrentUnitId={setCurrentUnitId}
+        setGroupExpanded={setGroupExpanded}
       />
     );
   }
@@ -260,7 +278,9 @@ const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
 const FlowSelectorTree: FC<FlowSelectorTreeProps> = ({
   rootUnits,
   isAncestorOf,
+  isExpandedGroup,
   setCurrentUnitId,
+  setGroupExpanded,
 }) => (
   <>
     {rootUnits.map((unit) => (
@@ -268,7 +288,9 @@ const FlowSelectorTree: FC<FlowSelectorTreeProps> = ({
         key={unit.id}
         unit={unit}
         isAncestorOf={isAncestorOf}
+        isExpandedGroup={isExpandedGroup}
         setCurrentUnitId={setCurrentUnitId}
+        setGroupExpanded={setGroupExpanded}
       />
     ))}
   </>
@@ -319,6 +341,9 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   const { menuStatus, setMenuStatus } = flowMenuState;
   const { currentUnitId, setCurrentUnitId } = currentUnitIdState;
   const { setDrawerWidth } = drawerWidthState;
+  const [expandedGroupIds, setExpandedGroupIds] = useState<Set<string>>(
+    () => new Set<string>(),
+  );
 
   const handleClose = () => {
     setDrawerWidth(() => 0);
@@ -328,6 +353,21 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   };
 
   const isAncestorOf = useAncestorMatcher(currentUnitId, unitById);
+  const isExpandedGroup = useCallback(
+    (unitId: string) => expandedGroupIds.has(unitId),
+    [expandedGroupIds],
+  );
+  const setGroupExpanded = useCallback((unitId: string, expanded: boolean) => {
+    setExpandedGroupIds((prev) => {
+      const next = new Set(prev);
+      if (expanded) {
+        next.add(unitId);
+      } else {
+        next.delete(unitId);
+      }
+      return next;
+    });
+  }, []);
   const drawerRef = useDrawerWidthObserver(setDrawerWidth);
 
   return (
@@ -352,7 +392,9 @@ const FlowSelector: FC<FlowSelectorProps> = ({
         <FlowSelectorTree
           rootUnits={rootUnits}
           isAncestorOf={isAncestorOf}
+          isExpandedGroup={isExpandedGroup}
           setCurrentUnitId={setCurrentUnitId}
+          setGroupExpanded={setGroupExpanded}
         />
       </Drawer>
     </>
