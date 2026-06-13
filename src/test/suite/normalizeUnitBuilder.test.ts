@@ -35,9 +35,19 @@ suite("Normalize unit builder helpers", () => {
       targetUnitId: "/root/jobnet/job-a",
       type: "seq" as const,
     };
-    const child = buildNormalizedUnit(jobnet.children[0], "j", [], []);
+    const child = buildNormalizedUnit({
+      unit: jobnet.children[0],
+      unitType: "j",
+      relations: [],
+      children: [],
+    });
 
-    const normalized = buildNormalizedUnit(jobnet, "n", [relation], [child]);
+    const normalized = buildNormalizedUnit({
+      unit: jobnet,
+      unitType: "n",
+      relations: [relation],
+      children: [child],
+    });
 
     assert.deepStrictEqual(normalized, {
       id: "/root/jobnet",

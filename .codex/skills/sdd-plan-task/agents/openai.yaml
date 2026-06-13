@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "SDD Plan Task"
+  short_description: "Plan the next SDD task and feature handoff"
+  default_prompt: >-
+    Use $sdd-plan-task to decide the next SDD task and update TASKS.md.

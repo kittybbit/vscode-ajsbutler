@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "SDD Implement Task"
+  short_description: "Implement an approved SDD task with reviews"
+  default_prompt: >-
+    Use $sdd-implement-task to implement the current TASKS.md item and update
+    completion state.

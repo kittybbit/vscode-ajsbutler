@@ -42,15 +42,17 @@
      application use cases.
    - Preserve current desktop and web extension behavior while migrating.
 
-4. Use Qlty findings as architectural feedback.
+4. Use Qlty findings as architectural feedback when they expose a clear
+   responsibility or boundary concern.
 
-   - Track active implementation under
-     `docs/specs/features/qlty-driven-architecture-refactoring/`.
-   - Phase 0 removes repository noise before structural changes.
-   - Phase 1 targets flow-viewer complexity.
-   - Phase 2 targets application orchestration duplication.
-   - Phase 3 targets domain conditional complexity.
-   - Every slice must preserve desktop and web extension behavior.
+   - The qlty-driven architecture refactoring feature is complete through the
+     focused flow-viewer, application orchestration, domain helper,
+     command-building, diagnostic-builder, and unit-list helper slices.
+   - Remaining shape-only duplication and parameter-helper findings should not
+     drive implementation by themselves.
+   - Open a new focused feature only when a future Qlty finding maps to a
+     meaningful JP1/AJS concept, application use case, adapter boundary, or
+     maintainability risk.
 
 ## Deferred / Optional Slices
 

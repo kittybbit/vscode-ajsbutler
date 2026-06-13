@@ -37,42 +37,42 @@ export const eventTimeoutActionAllowedValues = new Set([
 ]);
 
 export const jobEndJudgmentNumericRangeRules = [
-  buildExplicitDecimalRangeRule(
-    "wth",
-    0,
-    2147483647,
-    "Warning threshold (wth) must be between 0 and 2147483647.",
-  ),
-  buildExplicitDecimalRangeRule(
-    "tho",
-    0,
-    2147483647,
-    "Abnormal threshold (tho) must be between 0 and 2147483647.",
-  ),
-  buildExplicitDecimalRangeRule(
-    "rjs",
-    1,
-    4294967295,
-    "Retry start code (rjs) must be between 1 and 4294967295.",
-  ),
-  buildExplicitDecimalRangeRule(
-    "rje",
-    1,
-    4294967295,
-    "Retry end code (rje) must be between 1 and 4294967295.",
-  ),
-  buildExplicitDecimalRangeRule(
-    "rec",
-    1,
-    12,
-    "Retry count (rec) must be between 1 and 12.",
-  ),
-  buildExplicitDecimalRangeRule(
-    "rei",
-    1,
-    10,
-    "Retry interval (rei) must be between 1 and 10.",
-  ),
+  buildExplicitDecimalRangeRule({
+    key: "wth",
+    minimum: 0,
+    maximum: 2147483647,
+    message: "Warning threshold (wth) must be between 0 and 2147483647.",
+  }),
+  buildExplicitDecimalRangeRule({
+    key: "tho",
+    minimum: 0,
+    maximum: 2147483647,
+    message: "Abnormal threshold (tho) must be between 0 and 2147483647.",
+  }),
+  buildExplicitDecimalRangeRule({
+    key: "rjs",
+    minimum: 1,
+    maximum: 4294967295,
+    message: "Retry start code (rjs) must be between 1 and 4294967295.",
+  }),
+  buildExplicitDecimalRangeRule({
+    key: "rje",
+    minimum: 1,
+    maximum: 4294967295,
+    message: "Retry end code (rje) must be between 1 and 4294967295.",
+  }),
+  buildExplicitDecimalRangeRule({
+    key: "rec",
+    minimum: 1,
+    maximum: 12,
+    message: "Retry count (rec) must be between 1 and 12.",
+  }),
+  buildExplicitDecimalRangeRule({
+    key: "rei",
+    minimum: 1,
+    maximum: 10,
+    message: "Retry interval (rei) must be between 1 and 10.",
+  }),
 ] as const;
 
 export const eventTimeoutActionDiagnosticRules = [
@@ -84,28 +84,28 @@ export const eventTimeoutActionDiagnosticRules = [
 ] as const;
 
 export const waitJobExecutionTimeDiagnosticRules = [
-  buildExplicitDecimalRangeRule(
-    "fd",
-    1,
-    1440,
-    "Execution time (fd) must be between 1 and 1440.",
-  ),
+  buildExplicitDecimalRangeRule({
+    key: "fd",
+    minimum: 1,
+    maximum: 1440,
+    message: "Execution time (fd) must be between 1 and 1440.",
+  }),
 ] as const;
 
 export const transferFileByteLengthRules: readonly UnitParameterDiagnosticRule[] =
   transferFileIndexes.flatMap((index) => [
-    buildExplicitByteLengthRule(
-      `ts${index}`,
-      1,
-      511,
-      `Transfer source file name (ts${index}) must be between 1 and 511 bytes.`,
-    ),
-    buildExplicitByteLengthRule(
-      `td${index}`,
-      1,
-      511,
-      `Transfer destination file name (td${index}) must be between 1 and 511 bytes.`,
-    ),
+    buildExplicitByteLengthRule({
+      key: `ts${index}`,
+      minimum: 1,
+      maximum: 511,
+      message: `Transfer source file name (ts${index}) must be between 1 and 511 bytes.`,
+    }),
+    buildExplicitByteLengthRule({
+      key: `td${index}`,
+      minimum: 1,
+      maximum: 511,
+      message: `Transfer destination file name (td${index}) must be between 1 and 511 bytes.`,
+    }),
   ]);
 
 export const transferFileValueShapeRules: readonly UnitParameterDiagnosticRule[] =
@@ -207,12 +207,12 @@ export const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule
 
 export const executionIntervalControlDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
   [
-    buildExplicitDecimalRangeRule(
-      "tmitv",
-      1,
-      1440,
-      "Execution interval (tmitv) must be between 1 and 1440.",
-    ),
+    buildExplicitDecimalRangeRule({
+      key: "tmitv",
+      minimum: 1,
+      maximum: 1440,
+      message: "Execution interval (tmitv) must be between 1 and 1440.",
+    }),
     buildExplicitAllowedValuesRule(
       "etn",
       new Set(["y", "n"]),
@@ -245,18 +245,19 @@ export const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[]
           0x7fffffff,
         ) === undefined,
     },
-    buildExplicitDecimalRangeRule(
-      "evspl",
-      3,
-      600,
-      "Event arrival check interval (evspl) must be between 3 and 600.",
-    ),
-    buildExplicitDecimalRangeRule(
-      "evsrc",
-      0,
-      999,
-      "Event arrival check count (evsrc) must be between 0 and 999.",
-    ),
+    buildExplicitDecimalRangeRule({
+      key: "evspl",
+      minimum: 3,
+      maximum: 600,
+      message:
+        "Event arrival check interval (evspl) must be between 3 and 600.",
+    }),
+    buildExplicitDecimalRangeRule({
+      key: "evsrc",
+      minimum: 0,
+      maximum: 999,
+      message: "Event arrival check count (evsrc) must be between 0 and 999.",
+    }),
     {
       key: "evsrt",
       message:
@@ -270,39 +271,42 @@ export const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[]
 export const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
   [
     ...waitJobExecutionTimeDiagnosticRules,
-    buildExplicitDecimalRangeRule(
-      "etm",
-      1,
-      1440,
-      "Event timeout period (etm) must be between 1 and 1440.",
-    ),
+    buildExplicitDecimalRangeRule({
+      key: "etm",
+      minimum: 1,
+      maximum: 1440,
+      message: "Event timeout period (etm) must be between 1 and 1440.",
+    }),
     buildExplicitAllowedValuesRule(
       "ha",
       new Set(["y", "n"]),
       "Hold attribute (ha) must be y or n.",
     ),
     ...eventTimeoutActionDiagnosticRules,
-    buildExplicitDecimalRangeRule(
-      "evuid",
-      -1,
-      9999999999,
-      "Event issue source user ID (evuid) must be a signed decimal value between -1 and 9999999999.",
-      { allowNegative: true },
-    ),
-    buildExplicitDecimalRangeRule(
-      "evgid",
-      -1,
-      9999999999,
-      "Event issue source group ID (evgid) must be a signed decimal value between -1 and 9999999999.",
-      { allowNegative: true },
-    ),
-    buildExplicitDecimalRangeRule(
-      "evpid",
-      -1,
-      9999999999,
-      "Event issue source process ID (evpid) must be a signed decimal value between -1 and 9999999999.",
-      { allowNegative: true },
-    ),
+    buildExplicitDecimalRangeRule({
+      key: "evuid",
+      minimum: -1,
+      maximum: 9999999999,
+      message:
+        "Event issue source user ID (evuid) must be a signed decimal value between -1 and 9999999999.",
+      options: { allowNegative: true },
+    }),
+    buildExplicitDecimalRangeRule({
+      key: "evgid",
+      minimum: -1,
+      maximum: 9999999999,
+      message:
+        "Event issue source group ID (evgid) must be a signed decimal value between -1 and 9999999999.",
+      options: { allowNegative: true },
+    }),
+    buildExplicitDecimalRangeRule({
+      key: "evpid",
+      minimum: -1,
+      maximum: 9999999999,
+      message:
+        "Event issue source process ID (evpid) must be a signed decimal value between -1 and 9999999999.",
+      options: { allowNegative: true },
+    }),
     {
       key: "evusr",
       message:

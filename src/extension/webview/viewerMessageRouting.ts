@@ -7,7 +7,10 @@ import {
   RESOURCE,
   SAVE,
   type NavigationEventType,
+  type OperationEventType,
+  type ReadyEventType,
   type ResourceEventType,
+  type SaveEventType,
   type WebviewEventType,
 } from "../../shared/webviewEvents";
 
@@ -31,46 +34,69 @@ type ViewerMessageRoutingDeps = {
   showErrorMessage: (message: string) => Thenable<string | undefined>;
 };
 
-export const createViewerMessageHandler =
-  ({
-    document,
-    panel,
-    telemetry,
-    onReady,
-    onResource,
-    onOperation,
-    onNavigate,
+const SAVE_DATA_ERROR_MESSAGE = "Data is not a string and cannot be saved.";
+
+type ViewerMessageRouteMap = {
+  [RESOURCE]: (event: ResourceEventType) => void;
+  [READY]: (event: ReadyEventType) => void;
+  [SAVE]: (event: SaveEventType) => void;
+  [OPERATION]: (event: OperationEventType) => void;
+  [NAVIGATE]: (event: NavigationEventType) => void;
+};
+
+const handleSaveMessage = (
+  event: SaveEventType,
+  {
     onSave,
     showErrorMessage,
-  }: ViewerMessageRoutingDeps) =>
-  (event: WebviewEventType): void => {
-    switch (event.type) {
-      case RESOURCE: {
-        onResource(event, panel);
-        break;
-      }
-      case READY: {
-        onReady(document, panel);
-        break;
-      }
-      case SAVE: {
-        if (typeof event.data === "string" && onSave) {
-          void onSave(event.data);
-        } else {
-          void showErrorMessage("Data is not a string and cannot be saved.");
-        }
-        break;
-      }
-      case OPERATION: {
-        onOperation(document, panel, telemetry, event.data);
-        break;
-      }
-      case NAVIGATE: {
-        onNavigate(document, event);
-        break;
-      }
-    }
+  }: Pick<ViewerMessageRoutingDeps, "onSave" | "showErrorMessage">,
+): void => {
+  if (typeof event.data === "string" && onSave) {
+    void onSave(event.data);
+    return;
+  }
+
+  void showErrorMessage(SAVE_DATA_ERROR_MESSAGE);
+};
+
+const createViewerMessageRoutes = ({
+  document,
+  panel,
+  telemetry,
+  onReady,
+  onResource,
+  onOperation,
+  onNavigate,
+  onSave,
+  showErrorMessage,
+}: ViewerMessageRoutingDeps): ViewerMessageRouteMap => ({
+  [RESOURCE]: (event) => {
+    onResource(event, panel);
+  },
+  [READY]: () => {
+    onReady(document, panel);
+  },
+  [SAVE]: (event) => {
+    handleSaveMessage(event, { onSave, showErrorMessage });
+  },
+  [OPERATION]: (event) => {
+    onOperation(document, panel, telemetry, event.data);
+  },
+  [NAVIGATE]: (event) => {
+    onNavigate(document, event);
+  },
+});
+
+export const createViewerMessageHandler = (
+  deps: ViewerMessageRoutingDeps,
+): ((event: WebviewEventType) => void) => {
+  const routes = createViewerMessageRoutes(deps);
+
+  return (event: WebviewEventType): void => {
+    const route = routes[event.type] as (event: WebviewEventType) => void;
+    route(event);
   };
+};
 
 type ViewerPanelDisposeDeps = {
   uri: vscode.Uri;

@@ -14,9 +14,10 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import CssBaseline from "@mui/material/CssBaseline";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { useReactTable } from "@tanstack/react-table";
+import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
+import { type Table as ReactTable, useReactTable } from "@tanstack/react-table";
 import {
+  Row,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -34,8 +35,10 @@ import {
   buildUnitListView,
   UnitListRowView,
 } from "../../../application/unit-list/buildUnitListView";
-import { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
-import { toAjsDocument } from "../../../application/unit-list/unitListDocumentView";
+import {
+  toAjsDocument,
+  UnitListDocumentDto,
+} from "../../../application/unit-list/unitListDocument";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import {
@@ -52,6 +55,7 @@ import {
   findRowIndexByAbsolutePath,
   getRevealUnitAbsolutePath,
 } from "../revealUnit";
+import type { MyAppResource } from "../../../shared/MyAppResource";
 
 export type TableMenuStatusType = {
   menuItem1: boolean;
@@ -70,29 +74,330 @@ export type AjsTableSearchState = {
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
 };
 
-const useChangeDocument = (): [
-  UnitListRowView[] | undefined,
-  AjsDocument | undefined,
-  (type: string, data: unknown) => void,
-] => {
+type TableDocumentState = {
+  rowViews: UnitListRowView[] | undefined;
+  ajsDocument: AjsDocument | undefined;
+  changeDocument: (type: string, data: unknown) => void;
+};
+
+type TableRowRevealState = {
+  rowIndex: number | undefined;
+  handleJump: (id: string) => void;
+  revealUnit: (data: unknown) => void;
+  syncRows: (rows: ReadonlyArray<Row<UnitListRowView>>) => void;
+};
+
+type TableRowIndexSyncContext = {
+  rows: ReadonlyArray<Row<UnitListRowView>>;
+  revealedAbsolutePath: string | undefined;
+  rowIndexMapRef: React.MutableRefObject<Map<string, number>>;
+  setRowIndex: Dispatch<SetStateAction<number | undefined>>;
+  setRevealedAbsolutePath: Dispatch<SetStateAction<string | undefined>>;
+};
+
+type TableModelSetupContext = {
+  ajsDocument: AjsDocument | undefined;
+  rowViews: UnitListRowView[] | undefined;
+  lang: string;
+  openUnitDefinition: (absolutePath: string) => void;
+  handleJump: (id: string) => void;
+  rowViewByPath: ReadonlyMap<string, UnitListRowView>;
+  globalFilter: string;
+  sorting: SortingState;
+  setGlobalFilter: Dispatch<SetStateAction<string>>;
+  setSorting: Dispatch<SetStateAction<SortingState>>;
+  searchMode: AjsTableSearchMode;
+};
+
+type TableViewerShellProps = {
+  theme: Theme;
+  table: ReactTable<UnitListRowView>;
+  rows: Row<UnitListRowView>[];
+  rowViews: UnitListRowView[] | undefined;
+  menuStatus: TableMenuStatusType;
+  tableMenuState: TableMenuStateType;
+  drawerWidthState: DrawerWidthStateType;
+  drawerWidth: number;
+  searchMode: AjsTableSearchMode;
+  setSearchMode: Dispatch<SetStateAction<AjsTableSearchMode>>;
+  scrollType: MyAppResource["scrollType"];
+  rowIndex: number | undefined;
+  globalFilter: string;
+  parameterSearchValuesByPath: ParameterSearchValuesByPath;
+  dialogData: UnitDefinitionDialogDto | undefined;
+  setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
+};
+
+type ParsedTableDocumentState = {
+  rowViews: UnitListRowView[];
+  ajsDocument: AjsDocument | undefined;
+};
+
+const parseTableDocumentState = (data: unknown): ParsedTableDocumentState => {
+  const ajsDocument = data
+    ? toAjsDocument(data as UnitListDocumentDto)
+    : undefined;
+  return {
+    ajsDocument,
+    rowViews: ajsDocument ? buildUnitListView(ajsDocument) : [],
+  };
+};
+
+const useChangeDocument = (): TableDocumentState => {
   const [rowViews, setRowViews] = useState<UnitListRowView[]>();
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
-  const changeDocumentFn = useCallback((type: string, data: unknown) => {
+  const changeDocument = useCallback((type: string, data: unknown) => {
     try {
-      const nextDocument = data
-        ? toAjsDocument(data as UnitListDocumentDto)
-        : undefined;
-      const nextRowViews = nextDocument ? buildUnitListView(nextDocument) : [];
-      setAjsDocument(() => nextDocument);
-      setRowViews(() => nextRowViews);
+      const nextState = parseTableDocumentState(data);
+      setAjsDocument(() => nextState.ajsDocument);
+      setRowViews(() => nextState.rowViews);
     } catch (error) {
       console.error("Failed to parse data:", error);
       setAjsDocument(() => undefined);
       setRowViews(() => []);
     }
   }, []);
-  return [rowViews, ajsDocument, changeDocumentFn];
+  return { rowViews, ajsDocument, changeDocument };
 };
+
+const buildRowIndexMap = (
+  rows: ReadonlyArray<Row<UnitListRowView>>,
+): Map<string, number> => {
+  const map = new Map<string, number>();
+  rows.forEach((row, index) => {
+    map.set(row.original.id, index);
+    map.set(row.original.absolutePath, index);
+  });
+  return map;
+};
+
+const jumpToIndexedRow = (
+  rowIndexMap: ReadonlyMap<string, number>,
+  id: string,
+  setRowIndex: Dispatch<SetStateAction<number | undefined>>,
+) => {
+  const index = rowIndexMap.get(id);
+  if (index !== undefined) {
+    setRowIndex(index);
+  }
+};
+
+const revealTableRow = (
+  data: unknown,
+  setGlobalFilter: Dispatch<SetStateAction<string>>,
+  setRevealedAbsolutePath: Dispatch<SetStateAction<string | undefined>>,
+) => {
+  const absolutePath = getRevealUnitAbsolutePath(data);
+  if (absolutePath) {
+    setGlobalFilter("");
+    setRevealedAbsolutePath(absolutePath);
+  }
+};
+
+const syncTableRowIndexMap = ({
+  rows,
+  revealedAbsolutePath,
+  rowIndexMapRef,
+  setRowIndex,
+  setRevealedAbsolutePath,
+}: TableRowIndexSyncContext) => {
+  const rowIndexMap = buildRowIndexMap(rows);
+  rowIndexMapRef.current = rowIndexMap;
+  const index = revealedAbsolutePath
+    ? findRowIndexByAbsolutePath(rowIndexMap, revealedAbsolutePath)
+    : undefined;
+  if (index !== undefined) {
+    setRowIndex(index);
+    setRevealedAbsolutePath(undefined);
+  }
+};
+
+const useTableRowRevealState = (
+  globalFilter: string,
+  setGlobalFilter: Dispatch<SetStateAction<string>>,
+): TableRowRevealState => {
+  const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
+  const [revealedAbsolutePath, setRevealedAbsolutePath] = useState<
+    string | undefined
+  >(undefined);
+  const rowIndexMapRef = useRef<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    setRowIndex(() => undefined);
+  }, [globalFilter]);
+
+  const handleJump = useCallback((id: string) => {
+    jumpToIndexedRow(rowIndexMapRef.current, id, setRowIndex);
+  }, []);
+
+  const revealUnit = useCallback(
+    (data: unknown) => {
+      revealTableRow(data, setGlobalFilter, setRevealedAbsolutePath);
+    },
+    [setGlobalFilter],
+  );
+
+  const syncRows = useCallback(
+    (rows: ReadonlyArray<Row<UnitListRowView>>) => {
+      syncTableRowIndexMap({
+        rows,
+        revealedAbsolutePath,
+        rowIndexMapRef,
+        setRowIndex,
+        setRevealedAbsolutePath,
+      });
+    },
+    [revealedAbsolutePath],
+  );
+
+  return { rowIndex, handleJump, revealUnit, syncRows };
+};
+
+const useTableModelSetup = ({
+  ajsDocument,
+  rowViews,
+  lang,
+  openUnitDefinition,
+  handleJump,
+  rowViewByPath,
+  globalFilter,
+  sorting,
+  setGlobalFilter,
+  setSorting,
+  searchMode,
+}: TableModelSetupContext) => {
+  const parameterSearchValuesByPath = useMemo(
+    () =>
+      new Map(
+        ajsDocument
+          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
+              unit.absolutePath,
+              unit.parameters,
+            ])
+          : [],
+      ),
+    [ajsDocument],
+  );
+  const globalFilterFn = useMemo(
+    () => createAjsGlobalFilterFn(parameterSearchValuesByPath, searchMode),
+    [parameterSearchValuesByPath, searchMode],
+  );
+  const columns = useMemo(
+    () => tableColumnDef(lang, openUnitDefinition, handleJump, rowViewByPath),
+    [lang, openUnitDefinition, handleJump, rowViewByPath],
+  );
+
+  const table = useReactTable<UnitListRowView>({
+    columns,
+    data: rowViews ?? [],
+    state: {
+      globalFilter,
+      sorting,
+    },
+    getCoreRowModel: getCoreRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    globalFilterFn,
+    getColumnCanGlobalFilter: () => true, // return true for all column
+    defaultColumn: tableDefaultColumnDef,
+    debugAll: DEVELOPMENT,
+  });
+
+  return { table, parameterSearchValuesByPath };
+};
+
+const useTableViewerTheme = (isDarkMode: boolean): Theme =>
+  useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDarkMode ? "dark" : "light",
+        },
+      }),
+    [isDarkMode],
+  );
+
+const TableViewerShell = ({
+  theme,
+  table,
+  rows,
+  rowViews,
+  menuStatus,
+  tableMenuState,
+  drawerWidthState,
+  drawerWidth,
+  searchMode,
+  setSearchMode,
+  scrollType,
+  rowIndex,
+  globalFilter,
+  parameterSearchValuesByPath,
+  dialogData,
+  setDialogData,
+}: TableViewerShellProps) => (
+  <>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Stack direction="row" spacing={0}>
+        {menuStatus.menuItem1 && (
+          <DisplayColumnSelector
+            table={table}
+            columnVisibility={table.getState().columnVisibility}
+            tableMenuState={tableMenuState}
+            drawerWidthState={drawerWidthState}
+          />
+        )}
+        <Stack
+          direction="column"
+          spacing={0}
+          sx={{
+            marginLeft: `${drawerWidth}px`,
+            width: `calc(100% - ${drawerWidth}px)`,
+            minWidth: 0,
+          }}
+        >
+          <Header
+            table={table}
+            tableMenuState={tableMenuState}
+            drawerWidthState={drawerWidthState}
+            searchMode={searchMode}
+            setSearchMode={setSearchMode}
+          />
+          <VirtualizedTable
+            headerGroups={table.getHeaderGroups()}
+            rows={rows}
+            scrollType={scrollType}
+            rowIndex={rowIndex}
+            searchState={{
+              globalFilter,
+              searchMode,
+              parameterSearchValuesByPath,
+            }}
+          />
+          <Typography align="right">
+            {rows.length} of {rowViews?.length}
+          </Typography>
+        </Stack>
+      </Stack>
+      {dialogData && (
+        <UnitEntityDialog
+          dialogData={dialogData}
+          onClose={() => setDialogData(undefined)}
+        />
+      )}
+    </ThemeProvider>
+    {DEVELOPMENT && (
+      <Accordion>
+        <AccordionSummary>[DEV] TABLE STATE</AccordionSummary>
+        <AccordionDetails>
+          <Typography>{JSON.stringify(table.getState(), null, 2)}</Typography>
+        </AccordionDetails>
+      </Accordion>
+    )}
+  </>
+);
 
 const TableContents = () => {
   console.log("render TableContents.");
@@ -110,11 +415,11 @@ const TableContents = () => {
   const [searchMode, setSearchMode] = useState<AjsTableSearchMode>("value");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
-  const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
-  const [revealedAbsolutePath, setRevealedAbsolutePath] = useState<
-    string | undefined
-  >(undefined);
-  const [rowViews, ajsDocument, changeDocumentFn] = useChangeDocument();
+  const { rowViews, ajsDocument, changeDocument } = useChangeDocument();
+  const { rowIndex, handleJump, revealUnit, syncRows } = useTableRowRevealState(
+    globalFilter,
+    setGlobalFilter,
+  );
 
   const unitDefinitionByPath = useMemo(
     () =>
@@ -139,115 +444,39 @@ const TableContents = () => {
   );
 
   useEffect(() => {
-    window.EventBridge.addCallback("changeDocument", changeDocumentFn);
+    window.EventBridge.addCallback("changeDocument", changeDocument);
     const revealUnitFn = (_type: string, data: unknown) => {
-      const absolutePath = getRevealUnitAbsolutePath(data);
-      if (!absolutePath) {
-        return;
-      }
-      setGlobalFilter("");
-      setRevealedAbsolutePath(absolutePath);
+      revealUnit(data);
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     window.vscode.postMessage({ type: "ready" });
     return () => {
-      window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
+      window.EventBridge.removeCallback("changeDocument", changeDocument);
       window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
     };
   }, []); // fire this when mount.
 
-  useEffect(() => {
-    setRowIndex(() => undefined);
-  }, [globalFilter]);
-
-  const handleJumpRef = useRef<(id: string) => void>(() => {});
-  const handleJump = useCallback((id: string) => handleJumpRef.current(id), []);
-  const parameterSearchValuesByPath = useMemo(
-    () =>
-      new Map(
-        ajsDocument
-          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
-              unit.absolutePath,
-              unit.parameters,
-            ])
-          : [],
-      ),
-    [ajsDocument],
-  );
-  const globalFilterFn = useMemo(
-    () => createAjsGlobalFilterFn(parameterSearchValuesByPath, searchMode),
-    [parameterSearchValuesByPath, searchMode],
-  );
-
-  const table = useReactTable<UnitListRowView>({
-    columns: useMemo(
-      () => tableColumnDef(lang, openUnitDefinition, handleJump, rowViewByPath),
-      [lang, openUnitDefinition, handleJump, rowViewByPath],
-    ),
-    data: rowViews ?? [],
-    state: {
-      globalFilter: globalFilter,
-      sorting: sorting,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    globalFilterFn,
-    getColumnCanGlobalFilter: () => true, // return true for all column
-    defaultColumn: tableDefaultColumnDef,
-    debugAll: DEVELOPMENT,
+  const { table, parameterSearchValuesByPath } = useTableModelSetup({
+    ajsDocument,
+    rowViews,
+    lang,
+    openUnitDefinition,
+    handleJump,
+    rowViewByPath,
+    globalFilter,
+    sorting,
+    setGlobalFilter,
+    setSorting,
+    searchMode,
   });
 
   const rows = table.getRowModel().rows;
 
-  const rowIndexMap = useMemo(() => {
-    const map = new Map<string, number>();
-    rows.forEach((row, index) => {
-      map.set(row.original.id, index);
-      map.set(row.original.absolutePath, index);
-    });
-    return map;
-  }, [rows]);
-
   useEffect(() => {
-    if (!revealedAbsolutePath) {
-      return;
-    }
-    const index = findRowIndexByAbsolutePath(rowIndexMap, revealedAbsolutePath);
-    if (index === undefined) {
-      return;
-    }
-    setRowIndex(index);
-    setRevealedAbsolutePath(undefined);
-  }, [revealedAbsolutePath, rowIndexMap]);
+    syncRows(rows);
+  }, [rows, syncRows]);
 
-  useEffect(() => {
-    handleJumpRef.current = (id: string) => {
-      const index = rowIndexMap.get(id);
-      if (index !== undefined) setRowIndex(index);
-    };
-  }, [rowIndexMap]);
-
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: isDarkMode ? "dark" : "light",
-        },
-      }),
-    [isDarkMode],
-  );
-
-  const tableStateDev = DEVELOPMENT && (
-    <Accordion>
-      <AccordionSummary>[DEV] TABLE STATE</AccordionSummary>
-      <AccordionDetails>
-        <Typography>{JSON.stringify(table.getState(), null, 2)}</Typography>
-      </AccordionDetails>
-    </Accordion>
-  );
+  const theme = useTableViewerTheme(isDarkMode);
 
   const tableMenuState = useMemo(
     () => ({ menuStatus, setMenuStatus }),
@@ -260,59 +489,24 @@ const TableContents = () => {
   );
 
   return (
-    <>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Stack direction="row" spacing={0}>
-          {menuStatus.menuItem1 && (
-            <DisplayColumnSelector
-              table={table}
-              columnVisibility={table.getState().columnVisibility}
-              tableMenuState={tableMenuState}
-              drawerWidthState={drawerWidthState}
-            />
-          )}
-          <Stack
-            direction="column"
-            spacing={0}
-            sx={{
-              marginLeft: `${drawerWidth}px`,
-              width: `calc(100% - ${drawerWidth}px)`,
-              minWidth: 0,
-            }}
-          >
-            <Header
-              table={table}
-              tableMenuState={tableMenuState}
-              drawerWidthState={drawerWidthState}
-              searchMode={searchMode}
-              setSearchMode={setSearchMode}
-            />
-            <VirtualizedTable
-              headerGroups={table.getHeaderGroups()}
-              rows={rows}
-              scrollType={scrollType}
-              rowIndex={rowIndex}
-              searchState={{
-                globalFilter,
-                searchMode,
-                parameterSearchValuesByPath,
-              }}
-            />
-            <Typography align="right">
-              {rows.length} of {rowViews?.length}
-            </Typography>
-          </Stack>
-        </Stack>
-        {dialogData && (
-          <UnitEntityDialog
-            dialogData={dialogData}
-            onClose={() => setDialogData(undefined)}
-          />
-        )}
-      </ThemeProvider>
-      {tableStateDev}
-    </>
+    <TableViewerShell
+      theme={theme}
+      table={table}
+      rows={rows}
+      rowViews={rowViews}
+      menuStatus={menuStatus}
+      tableMenuState={tableMenuState}
+      drawerWidthState={drawerWidthState}
+      drawerWidth={drawerWidth}
+      searchMode={searchMode}
+      setSearchMode={setSearchMode}
+      scrollType={scrollType}
+      rowIndex={rowIndex}
+      globalFilter={globalFilter}
+      parameterSearchValuesByPath={parameterSearchValuesByPath}
+      dialogData={dialogData}
+      setDialogData={setDialogData}
+    />
   );
 };
 export default memo(TableContents);

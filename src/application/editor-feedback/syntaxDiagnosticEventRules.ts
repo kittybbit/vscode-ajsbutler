@@ -7,6 +7,71 @@ import {
 } from "./syntaxDiagnosticScalarValidators";
 import { parseHashEscapedQuotedStringLiteralContent } from "./syntaxDiagnosticStringValidators";
 
+const EVENT_RECEIVING_TIMEOUT_BARE_MODES = new Set(["n", "a"]);
+const EVENT_RECEIVING_TIMEOUT_FILE_MODES = new Set(["n", "a", "d", "b"]);
+
+type EventReceivingTimeoutFileCondition = {
+  readonly mode: string;
+  readonly rawFileName: string;
+};
+
+type EventReceivingFilterReference = {
+  readonly attributeName: string;
+  readonly attributeValue: string;
+};
+
+const parseEventReceivingFilterReference = (
+  rawValue: string,
+): EventReceivingFilterReference | undefined => {
+  const separatorIndex = rawValue.indexOf(":");
+  return separatorIndex > 0
+    ? {
+        attributeName: rawValue.slice(0, separatorIndex),
+        attributeValue: rawValue.slice(separatorIndex + 1),
+      }
+    : undefined;
+};
+
+const isValidEventReceivingFilterReferenceValue = (
+  rawValue: string,
+): boolean => {
+  const reference = parseEventReceivingFilterReference(rawValue);
+  return (
+    reference !== undefined &&
+    reference.attributeName.length > 0 &&
+    parseHashEscapedQuotedStringLiteralContent(reference.attributeValue) !==
+      undefined
+  );
+};
+
+const parseEventReceivingTimeoutFileCondition = (
+  rawValue: string,
+): EventReceivingTimeoutFileCondition | undefined => {
+  const separatorIndex = rawValue.indexOf(":");
+  return separatorIndex > 0
+    ? {
+        mode: rawValue.slice(0, separatorIndex),
+        rawFileName: rawValue.slice(separatorIndex + 1),
+      }
+    : undefined;
+};
+
+const isValidEventReceivingTimeoutFileName = (rawFileName: string): boolean => {
+  const fileName = parseHashEscapedQuotedStringLiteralContent(rawFileName);
+  return fileName !== undefined && hasValidByteLength(fileName, 1, 256);
+};
+
+const isValidEventReceivingTimeoutFileCondition = (
+  rawValue: string,
+): boolean => {
+  const condition = parseEventReceivingTimeoutFileCondition(rawValue);
+  return (
+    condition !== undefined &&
+    EVENT_RECEIVING_TIMEOUT_FILE_MODES.has(condition.mode) &&
+    isValidEventReceivingTimeoutFileName(condition.rawFileName)
+  );
+};
+
 export const isValidExplicitEventHostValue = (
   parameter: UnitParameter | undefined,
 ): boolean => isValidExplicitByteLengthValue(parameter, 1, 255);
@@ -44,14 +109,16 @@ export const isValidExplicitIpv4Address = (
     return false;
   }
 
-  return octets.every((octet) => {
-    if (!/^\d+$/.test(octet)) {
-      return false;
-    }
+  return octets.every(isValidIpv4Octet);
+};
 
-    const numericValue = Number(octet);
-    return numericValue >= 0 && numericValue <= 255;
-  });
+const isValidIpv4Octet = (octet: string): boolean => {
+  if (!/^\d+$/.test(octet)) {
+    return false;
+  }
+
+  const numericValue = Number(octet);
+  return numericValue >= 0 && numericValue <= 255;
 };
 
 export const isValidExplicitEventReceivingQuotedString = (
@@ -70,52 +137,17 @@ export const isValidExplicitEventReceivingQuotedString = (
 
 export const isValidExplicitEventReceivingFilterReference = (
   parameter: UnitParameter | undefined,
-): boolean => {
-  const rawValue = parameter?.value;
-  if (!rawValue || !hasValidByteLength(rawValue, 1, 2048)) {
-    return false;
-  }
-
-  const separatorIndex = rawValue.indexOf(":");
-  if (separatorIndex <= 0) {
-    return false;
-  }
-
-  const attributeName = rawValue.slice(0, separatorIndex);
-  const attributeValue = rawValue.slice(separatorIndex + 1);
-  return (
-    attributeName.length > 0 &&
-    parseHashEscapedQuotedStringLiteralContent(attributeValue) !== undefined
-  );
-};
+): boolean =>
+  parameter?.value !== undefined &&
+  hasValidByteLength(parameter.value, 1, 2048) &&
+  isValidEventReceivingFilterReferenceValue(parameter.value);
 
 export const isValidExplicitEventReceivingTimeoutCondition = (
   parameter: UnitParameter | undefined,
-): boolean => {
-  const rawValue = parameter?.value;
-  if (!rawValue) {
-    return false;
-  }
-
-  if (rawValue === "n" || rawValue === "a") {
-    return true;
-  }
-
-  const separatorIndex = rawValue.indexOf(":");
-  if (separatorIndex <= 0) {
-    return false;
-  }
-
-  const mode = rawValue.slice(0, separatorIndex);
-  if (!["n", "a", "d", "b"].includes(mode)) {
-    return false;
-  }
-
-  const fileName = parseHashEscapedQuotedStringLiteralContent(
-    rawValue.slice(separatorIndex + 1),
-  );
-  return fileName !== undefined && hasValidByteLength(fileName, 1, 256);
-};
+): boolean =>
+  parameter?.value !== undefined &&
+  (EVENT_RECEIVING_TIMEOUT_BARE_MODES.has(parameter.value) ||
+    isValidEventReceivingTimeoutFileCondition(parameter.value));
 
 export const isValidExplicitEventSearchCondition = (
   parameter: UnitParameter | undefined,
@@ -129,5 +161,11 @@ export const isValidExplicitEventSearchCondition = (
     return true;
   }
 
-  return parseExplicitDecimalInRange(parameter, 1, 720) !== undefined;
+  return (
+    parseExplicitDecimalInRange({
+      parameter,
+      minimum: 1,
+      maximum: 720,
+    }) !== undefined
+  );
 };

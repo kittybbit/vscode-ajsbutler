@@ -1,7 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./unitCapabilityEntities";
+import { ExecutionUserWaitableUnitEntity } from "./unitCapabilityEntities";
 
-export class Fxj extends WaitableUnitEntity {
+export class Fxj extends ExecutionUserWaitableUnitEntity {
   // [ex="relay-agent-name";]
   get ex() {
     return ParamFactory.ex(this);
@@ -61,14 +61,6 @@ export class Fxj extends WaitableUnitEntity {
   // [rei=retry-interval;]
   get rei() {
     return ParamFactory.rei(this);
-  }
-  // [ha={y|n};]
-  get ha() {
-    return ParamFactory.ha(this);
-  }
-  // [eu={ent|def};]
-  get eu() {
-    return ParamFactory.eu(this);
   }
 }
 export class Rfxj extends Fxj {}

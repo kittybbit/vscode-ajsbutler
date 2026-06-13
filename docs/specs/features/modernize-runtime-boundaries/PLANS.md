@@ -18,13 +18,20 @@ Maintain runtime and tooling boundaries without changing extension behavior.
 - Split the shared webview entry into dedicated table and flow bundles.
 - Recorded post-split bundle evidence and rejected a complexity-increasing
   async flow-chrome experiment.
-- Documented `UnitEntity.id` persistence checks before any future hash swap.
+- Documented `UnitEntity.id` compatibility checks before any future hash swap
+  and confirmed normalized AJS selection currently uses absolute-path ids.
 
 ## Current Decision
 
 Do not keep forcing viewer bundle-size work while measured wins are marginal.
 Resume only when a clearer reduction seam or stronger compatibility,
 startup-time, or payload requirement appears.
+
+Do not propose a `UnitEntity` hash implementation replacement only for cleanup.
+The current wrapper hash is isolated from normalized AJS DTO identity in the
+reviewed selection, navigation, table, flow, reveal, and test paths. Revisit
+only when there is a concrete compatibility, dependency, or maintenance reason
+and a new implementation approval gate.
 
 ## Validation
 

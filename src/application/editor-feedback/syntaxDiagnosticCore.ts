@@ -10,6 +10,21 @@ export type UnitParameterDiagnosticRule = {
   isInvalid: (parameter: UnitParameter, unit: Unit) => boolean;
 };
 
+type ExplicitByteLengthRuleInput = {
+  key: string;
+  minimum: number;
+  maximum: number;
+  message: string;
+};
+
+type ExplicitDecimalRangeRuleInput = {
+  key: string;
+  minimum: number;
+  maximum: number;
+  message: string;
+  options?: { allowNegative?: boolean };
+};
+
 export const buildDiagnostic = (
   parameter: UnitParameter,
   message: string,
@@ -21,26 +36,26 @@ export const buildDiagnostic = (
   severity: "error" as const,
 });
 
-export const buildExplicitDecimalRangeRule = (
-  key: string,
-  minimum: number,
-  maximum: number,
-  message: string,
-  options: { allowNegative?: boolean } = {},
-): UnitParameterDiagnosticRule => ({
+export const buildExplicitDecimalRangeRule = ({
+  key,
+  minimum,
+  maximum,
+  message,
+  options = {},
+}: ExplicitDecimalRangeRuleInput): UnitParameterDiagnosticRule => ({
   key,
   message,
   isInvalid: (parameter) =>
-    parseExplicitDecimalInRange(parameter, minimum, maximum, options) ===
+    parseExplicitDecimalInRange({ parameter, minimum, maximum, options }) ===
     undefined,
 });
 
-export const buildExplicitByteLengthRule = (
-  key: string,
-  minimum: number,
-  maximum: number,
-  message: string,
-): UnitParameterDiagnosticRule => ({
+export const buildExplicitByteLengthRule = ({
+  key,
+  minimum,
+  maximum,
+  message,
+}: ExplicitByteLengthRuleInput): UnitParameterDiagnosticRule => ({
   key,
   message,
   isInvalid: (parameter) =>

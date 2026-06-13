@@ -1,9 +1,21 @@
 import { AjsUnit } from "../../../domain/models/ajs/AjsDocument";
+import { collectExpandedAncestorUnitIdsForUnits } from "./flowExpandedAncestors";
 
 export type FlowSearchResult = {
   matchedUnitId: string;
   matchedUnitIds: string[];
   expandedAncestorUnitIds: string[];
+};
+
+type FlowSearchInput = {
+  scopeRoot: AjsUnit;
+  normalizedQuery: string;
+};
+
+type FlowSearchMatch = {
+  scopeRoot: AjsUnit;
+  matchedUnit: AjsUnit;
+  matchedUnits: ReadonlyArray<AjsUnit>;
 };
 
 const normalizeQuery = (query: string): string => query.trim().toLowerCase();
@@ -22,76 +34,83 @@ const collectScopeUnits = (root: AjsUnit): AjsUnit[] => {
   return units;
 };
 
-const collectExpandedAncestorUnitIds = (
+const collectMatchedScopeUnits = (
   scopeRoot: AjsUnit,
-  matchedUnit: AjsUnit,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): string[] => {
-  const expandedAncestorUnitIds: string[] = [];
-  let current = matchedUnit.parentId
-    ? unitById.get(matchedUnit.parentId)
-    : undefined;
+  normalizedQuery: string,
+): AjsUnit[] =>
+  collectScopeUnits(scopeRoot).filter((unit) =>
+    unitSearchText(unit).includes(normalizedQuery),
+  );
 
-  while (current && current.id !== scopeRoot.id) {
-    if (current.unitType === "n" && current.children.length > 0) {
-      expandedAncestorUnitIds.unshift(current.id);
-    }
-    current = current.parentId ? unitById.get(current.parentId) : undefined;
-  }
-
-  return expandedAncestorUnitIds;
-};
-
-const collectExpandedAncestorUnitIdsForMatches = (
+const selectFocusedMatchedUnit = (
   scopeRoot: AjsUnit,
   matchedUnits: ReadonlyArray<AjsUnit>,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): string[] => {
-  const expandedAncestorUnitIds = new Set<string>();
+): AjsUnit | undefined =>
+  matchedUnits.find((unit) => unit.id !== scopeRoot.id) ?? matchedUnits[0];
 
-  for (const matchedUnit of matchedUnits) {
-    for (const ancestorUnitId of collectExpandedAncestorUnitIds(
-      scopeRoot,
-      matchedUnit,
-      unitById,
-    )) {
-      expandedAncestorUnitIds.add(ancestorUnitId);
-    }
+const resolveFlowSearchInput = (
+  scopeRoot: AjsUnit | undefined,
+  query: string,
+): FlowSearchInput | undefined => {
+  const normalizedQuery = normalizeQuery(query);
+  return scopeRoot && normalizedQuery.length > 0
+    ? { scopeRoot, normalizedQuery }
+    : undefined;
+};
+
+const resolveFlowSearchMatch = (
+  input: FlowSearchInput | undefined,
+): FlowSearchMatch | undefined => {
+  if (!input) {
+    return undefined;
   }
 
-  return [...expandedAncestorUnitIds];
+  const matchedUnits = collectMatchedScopeUnits(
+    input.scopeRoot,
+    input.normalizedQuery,
+  );
+  const matchedUnit = selectFocusedMatchedUnit(input.scopeRoot, matchedUnits);
+  return matchedUnit
+    ? { scopeRoot: input.scopeRoot, matchedUnit, matchedUnits }
+    : undefined;
 };
+
+type BuildFlowSearchResultArgs = {
+  scopeRoot: AjsUnit;
+  matchedUnit: AjsUnit;
+  matchedUnits: ReadonlyArray<AjsUnit>;
+  unitById: ReadonlyMap<string, AjsUnit>;
+};
+
+const buildFlowSearchResult = ({
+  scopeRoot,
+  matchedUnit,
+  matchedUnits,
+  unitById,
+}: BuildFlowSearchResultArgs): FlowSearchResult => ({
+  matchedUnitId: matchedUnit.id,
+  matchedUnitIds: matchedUnits.map((unit) => unit.id),
+  expandedAncestorUnitIds: collectExpandedAncestorUnitIdsForUnits({
+    unitById,
+    units: matchedUnits,
+    scopeUnit: scopeRoot,
+  }),
+});
 
 export const findFlowSearchResult = (
   scopeRoot: AjsUnit | undefined,
   query: string,
   unitById: ReadonlyMap<string, AjsUnit>,
 ): FlowSearchResult | undefined => {
-  if (!scopeRoot) {
-    return undefined;
-  }
+  const input = resolveFlowSearchInput(scopeRoot, query);
+  const match = resolveFlowSearchMatch(input);
 
-  const normalizedQuery = normalizeQuery(query);
-  if (normalizedQuery.length === 0) {
-    return undefined;
-  }
-
-  const matchedUnits = collectScopeUnits(scopeRoot).filter((unit) =>
-    unitSearchText(unit).includes(normalizedQuery),
-  );
-  const matchedUnit =
-    matchedUnits.find((unit) => unit.id !== scopeRoot.id) ?? matchedUnits[0];
-  if (!matchedUnit) {
-    return undefined;
-  }
-
-  return {
-    matchedUnitId: matchedUnit.id,
-    matchedUnitIds: matchedUnits.map((unit) => unit.id),
-    expandedAncestorUnitIds: collectExpandedAncestorUnitIdsForMatches(
-      scopeRoot,
-      matchedUnits,
-      unitById,
-    ),
-  };
+  return match
+    ? buildFlowSearchResult({
+        scopeRoot: match.scopeRoot,
+        matchedUnit: match.matchedUnit,
+        matchedUnits: match.matchedUnits,
+        unitById,
+      })
+    : undefined;
 };

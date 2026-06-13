@@ -223,9 +223,14 @@ Migration should be incremental and use-case driven.
 
 ### Identity and hashing
 
-- `UnitEntity` identity semantics should remain stable, but internal hashing
-  should prefer a common, well-understood algorithm instead of repository-local
-  bespoke logic when behavior can be preserved
+- `UnitEntity.id` is an internal wrapper-layer identity derived from
+  `Unit.absolutePath()` by the current deterministic hash implementation
+- normalized `AjsUnit.id` and `AjsUnit.parentId` are absolute-path identities,
+  so current application-facing list, flow, table, reveal, and graph DTO paths
+  do not depend on the exact `UnitEntity.id` encoded hash value
+- `UnitEntity` identity semantics should remain stable; internal hashing may
+  change only when behavior can be preserved and remaining wrapper consumers do
+  not depend on the current encoded string
 - hash-algorithm changes should remain an implementation detail unless a
   public or persisted identity contract is affected
 

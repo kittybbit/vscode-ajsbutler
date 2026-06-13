@@ -4,21 +4,25 @@
 
 - Update this file in the same commit whenever one task or follow-up is
   completed, re-scoped, or intentionally dropped.
-- If that change affects branch priorities or repository sequencing, update
-  `docs/specs/plans.md` and `docs/specs/roadmap.md` in the same commit.
+- Update `docs/specs/plans.md` only when the branch starts, stops, or changes
+  an active feature.
+- Update `docs/specs/roadmap.md` when repository sequencing changes.
 - Keep this file focused on current state only; do not retain historical logs,
   prior approvals, or long validation diaries once they stop being actionable.
 
-## Current Status
+## Current Task
 
-- Runtime status:
-  the first read-only desktop WebAPI import slice is delivered and remains
-  beta.
-- Active slice:
-  none.
-- Open follow-up:
-  record real JP1/AJS3 environment smoke verification and sufficient user
-  feedback before removing the beta framing.
+- Status: Blocked
+- Scope:
+  record real JP1/AJS3 environment smoke verification evidence for the
+  delivered read-only desktop WebAPI import beta.
+- Acceptance:
+  document the product/version context, tested scenario, observed result,
+  host constraints, and whether `searchTarget=DEFINITION` returns enough
+  definition attributes for the current beta scope. Do not remove beta
+  labeling or broaden WebAPI scope in this task.
+- Validation:
+  docs-only evidence recording requires `rtk pnpm run qlty`.
 
 ## Human Approval
 
@@ -28,6 +32,8 @@
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
+`Approved at` records the approval result only, such as `none` or `approved in
+current conversation`; do not copy the approval message.
 
 Reset this section back to Pending when the approved slice is complete and no
 active implementation approval remains.
@@ -50,3 +56,8 @@ active implementation approval remains.
 
 - Keep traceability details in `TRACEABILITY.md`.
 - Keep durable scope and host-boundary decisions in `SPECS.md`.
+- The next task depends on externally supplied real JP1/AJS3 environment
+  smoke evidence or explicit access to such an environment; do not invent
+  verification results from generated mocks.
+- Real-environment smoke verification is currently blocked because no usable
+  JP1/AJS3 WebAPI environment or evidence is available.

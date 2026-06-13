@@ -16,6 +16,47 @@ interface ScheduleRule {
 }
 export default ScheduleRule;
 
+type ParsedScheduleRuleValue<T> = {
+  rule: number;
+  value: T;
+};
+
+abstract class ParsedScheduleRuleParameter<T>
+  extends Parameter
+  implements ScheduleRule
+{
+  _rule;
+  protected _parsedValue;
+
+  constructor(
+    arg: ParamInternal,
+    parseValue: (rawValue: string) => ParsedScheduleRuleValue<T> | undefined,
+  ) {
+    super(arg);
+    const parsed = parseValue(this.value());
+    if (parsed) {
+      this._rule = parsed.rule;
+      this._parsedValue = parsed.value;
+    }
+  }
+
+  get rule() {
+    return this._rule ?? 1;
+  }
+}
+
+const SCHEDULE_DATE_TYPE_BY_LITERAL: Record<string, string> = {
+  en: "en",
+  ud: "ud",
+};
+
+const SCHEDULE_DATE_TYPE_PREFIXES = ["+", "*", "@"] as const;
+
+const resolveScheduleDateType = (day: string | undefined): string =>
+  SCHEDULE_DATE_TYPE_BY_LITERAL[day ?? ""] ??
+  SCHEDULE_DATE_TYPE_PREFIXES.find((prefix) => day?.startsWith(prefix)) ??
+  "";
+
 export class Cftd extends Parameter implements ScheduleRule {
   #_rule = 1;
   #_type = "no";
@@ -51,47 +92,28 @@ export class Cftd extends Parameter implements ScheduleRule {
   }
 }
 
-export class Cy extends Parameter implements ScheduleRule {
-  _rule;
-  _cycle;
-
+export class Cy extends ParsedScheduleRuleParameter<string> {
   constructor(arg: ParamInternal) {
-    super(arg);
-    const parsed = parseCycleValue(this.value());
-    if (parsed) {
-      this._rule = parsed.rule;
-      this._cycle = parsed.value.slice(1, -1);
-    }
-  }
-
-  get rule() {
-    return this._rule ?? 1;
+    super(arg, (rawValue) => {
+      const parsed = parseCycleValue(rawValue);
+      return parsed
+        ? { rule: parsed.rule, value: parsed.value.slice(1, -1) }
+        : undefined;
+    });
   }
 
   get cycle() {
-    return this._cycle;
+    return this._parsedValue;
   }
 }
 
-export class Ln extends Parameter implements ScheduleRule {
-  _rule;
-  _parentRule;
-
+export class Ln extends ParsedScheduleRuleParameter<string> {
   constructor(arg: ParamInternal) {
-    super(arg);
-    const parsed = parseParentScheduleRuleValue(this.value());
-    if (parsed) {
-      this._rule = parsed.rule;
-      this._parentRule = parsed.value;
-    }
-  }
-
-  get rule() {
-    return this._rule ?? 1;
+    super(arg, parseParentScheduleRuleValue);
   }
 
   get parentRule() {
-    return this._parentRule;
+    return this._parsedValue;
   }
 }
 
@@ -101,22 +123,7 @@ export class Sd extends Day implements ScheduleRule {
   }
 
   get type() {
-    if (this._day === "en") {
-      return "en";
-    }
-    if (this._day === "ud") {
-      return "ud";
-    }
-    if (this._day?.startsWith("+")) {
-      return "+";
-    }
-    if (this._day?.startsWith("*")) {
-      return "*";
-    }
-    if (this._day?.startsWith("@")) {
-      return "@";
-    }
-    return "";
+    return resolveScheduleDateType(this._day);
   }
 
   get yearMonth() {
@@ -133,69 +140,33 @@ export class Sd extends Day implements ScheduleRule {
     return undefined;
   }
 }
-export class Sh extends Parameter implements ScheduleRule {
-  _rule;
-  _substitute;
-
+export class Sh extends ParsedScheduleRuleParameter<string> {
   constructor(arg: ParamInternal) {
-    super(arg);
-    const parsed = parseClosedDaySubstitutionValue(this.value());
-    if (parsed) {
-      this._rule = parsed.rule;
-      this._substitute = parsed.value;
-    }
-  }
-
-  get rule() {
-    return this._rule ?? 1;
+    super(arg, parseClosedDaySubstitutionValue);
   }
 
   get substitute() {
-    return this._substitute;
+    return this._parsedValue;
   }
 }
 
-export class Shd extends Parameter implements ScheduleRule {
-  _rule;
-  _shiftDays;
-
+export class Shd extends ParsedScheduleRuleParameter<string> {
   constructor(arg: ParamInternal) {
-    super(arg);
-    const parsed = parseShiftDaysValue(this.value());
-    if (parsed) {
-      this._rule = parsed.rule;
-      this._shiftDays = parsed.value;
-    }
-  }
-
-  get rule() {
-    return this._rule ?? 1;
+    super(arg, parseShiftDaysValue);
   }
 
   get shiftDays() {
-    return this._shiftDays ?? "2";
+    return this._parsedValue ?? "2";
   }
 }
 
-export class Wc extends Parameter implements ScheduleRule {
-  _rule;
-  _numberOfTimes;
-
+export class Wc extends ParsedScheduleRuleParameter<string> {
   constructor(arg: ParamInternal) {
-    super(arg);
-    const parsed = parseWaitCountValue(this.value());
-    if (parsed) {
-      this._rule = parsed.rule;
-      this._numberOfTimes = parsed.value;
-    }
-  }
-
-  get rule() {
-    return this._rule ?? 1;
+    super(arg, parseWaitCountValue);
   }
 
   get numberOfTimes() {
-    return this._numberOfTimes ?? "1";
+    return this._parsedValue ?? "1";
   }
 
   effectiveNumberOfTimes(

@@ -1,7 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./unitCapabilityEntities";
+import { MacroPassingExecutionWaitJobUnitEntity } from "./unitCapabilityEntities";
 
-export class Mlwj extends WaitableUnitEntity {
+export class Mlwj extends MacroPassingExecutionWaitJobUnitEntity {
   // [pfm={u|p};]
   get pfm() {
     return ParamFactory.pfm(this);
@@ -41,34 +41,6 @@ export class Mlwj extends WaitableUnitEntity {
   // [mlafl="name-of-list-file";]
   get mlafl() {
     return ParamFactory.mlafl(this);
-  }
-  // [jpoif=macro-variable-name:passing-information-name;]
-  get jpoif() {
-    return ParamFactory.jpoif(this);
-  }
-  // [etm=n;]
-  get etm() {
-    return ParamFactory.etm(this);
-  }
-  // [fd=time-required-for-execution;]
-  get fd() {
-    return ParamFactory.fd(this);
-  }
-  // [ex="execution-agent-name";]
-  get ex() {
-    return ParamFactory.ex(this);
-  }
-  // [ha={y|n};]
-  get ha() {
-    return ParamFactory.ha(this);
-  }
-  // [eu={ent|def};]
-  get eu() {
-    return ParamFactory.eu(this);
-  }
-  // [ets={kl|nr|wr|an};]
-  get ets() {
-    return ParamFactory.ets(this);
   }
 }
 export class Rmlwj extends Mlwj {}

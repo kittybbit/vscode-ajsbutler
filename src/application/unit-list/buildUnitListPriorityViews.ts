@@ -8,7 +8,7 @@ import type {
   UnitListGroup11View,
   UnitListGroup7View,
 } from "./buildUnitListView";
-import { getPriorityForUnitTypes } from "./unitListViewHelpers";
+import { getPriorityForUnitTypes } from "./unitListPriorityViewHelpers";
 
 const group7FieldUnitTypes: readonly AjsUnitType[] = ["n", "rn", "rm", "rr"];
 const group7PriorityUnitTypes: readonly AjsUnitType[] = ["n", "rn"];
@@ -24,35 +24,35 @@ const group11PriorityUnitTypes: readonly AjsUnitType[] = [
 const supportsGroup7Fields = (unit: AjsUnit): boolean =>
   group7FieldUnitTypes.includes(unit.unitType);
 
+const group7SupportedFields = (
+  unit: AjsUnit,
+): Omit<UnitListGroup7View, "priority"> => {
+  if (!supportsGroup7Fields(unit)) {
+    return {};
+  }
+
+  return {
+    concurrentExecution: findAjsUnitParameterValue(unit, "mp"),
+    retainedGenerationCount: findAjsUnitParameterValue(unit, "rg"),
+    targetManager: findAjsUnitParameterValue(unit, "rh"),
+    timeoutPeriod: findAjsUnitParameterValue(unit, "cd"),
+    scheduleOption: findAjsUnitParameterValue(unit, "ms"),
+    requiredExecutionTime: findAjsUnitParameterValue(unit, "fd"),
+  };
+};
+
 export const buildUnitListGroup7View = (
   document: AjsDocument,
   unit: AjsUnit,
   priorityById: Map<string, number>,
 ): UnitListGroup7View => ({
-  concurrentExecution: supportsGroup7Fields(unit)
-    ? findAjsUnitParameterValue(unit, "mp")
-    : undefined,
-  retainedGenerationCount: supportsGroup7Fields(unit)
-    ? findAjsUnitParameterValue(unit, "rg")
-    : undefined,
-  targetManager: supportsGroup7Fields(unit)
-    ? findAjsUnitParameterValue(unit, "rh")
-    : undefined,
-  priority: getPriorityForUnitTypes(
+  ...group7SupportedFields(unit),
+  priority: getPriorityForUnitTypes({
     document,
     unit,
     priorityById,
-    group7PriorityUnitTypes,
-  ),
-  timeoutPeriod: supportsGroup7Fields(unit)
-    ? findAjsUnitParameterValue(unit, "cd")
-    : undefined,
-  scheduleOption: supportsGroup7Fields(unit)
-    ? findAjsUnitParameterValue(unit, "ms")
-    : undefined,
-  requiredExecutionTime: supportsGroup7Fields(unit)
-    ? findAjsUnitParameterValue(unit, "fd")
-    : undefined,
+    targetUnitTypes: group7PriorityUnitTypes,
+  }),
 });
 
 export const buildUnitListGroup11View = (
@@ -74,12 +74,12 @@ export const buildUnitListGroup11View = (
   queueManager: findAjsUnitParameterValue(unit, "qm"),
   queueName: findAjsUnitParameterValue(unit, "qu"),
   requestJobName: findAjsUnitParameterValue(unit, "req"),
-  priority: getPriorityForUnitTypes(
+  priority: getPriorityForUnitTypes({
     document,
     unit,
     priorityById,
-    group11PriorityUnitTypes,
-  ),
+    targetUnitTypes: group11PriorityUnitTypes,
+  }),
   endJudgment: findAjsUnitParameterValue(unit, "jd"),
   waitThreshold: findAjsUnitParameterValue(unit, "wth"),
   timeoutHold: findAjsUnitParameterValue(unit, "tho"),

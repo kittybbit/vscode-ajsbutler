@@ -1,37 +1,54 @@
 import type { UnitParameter } from "../../domain/values/Unit";
 
-export const parseExplicitDecimalInRange = (
-  parameter: UnitParameter | undefined,
-  minimum: number,
-  maximum: number,
-  options: { allowNegative?: boolean } = {},
-): number | undefined => {
+type ExplicitDecimalRangeInput = {
+  parameter: UnitParameter | undefined;
+  minimum: number;
+  maximum: number;
+  options?: { allowNegative?: boolean };
+};
+
+export const parseExplicitDecimalInRange = ({
+  parameter,
+  minimum,
+  maximum,
+  options = {},
+}: ExplicitDecimalRangeInput): number | undefined => {
   const rawValue = parameter?.value;
-  const decimalPattern = options.allowNegative ? /^-?\d+$/ : /^\d+$/;
-  if (!rawValue || !decimalPattern.test(rawValue)) {
+  if (!isExplicitDecimalValue(rawValue, options)) {
     return undefined;
   }
 
   const numericValue = Number(rawValue);
-  return numericValue >= minimum && numericValue <= maximum
-    ? numericValue
-    : undefined;
+  return isInRange(numericValue, minimum, maximum) ? numericValue : undefined;
 };
+
+const isExplicitDecimalValue = (
+  value: string | undefined,
+  options: { allowNegative?: boolean },
+): value is string => Boolean(value && decimalPatternFor(options).test(value));
+
+const decimalPatternFor = (options: { allowNegative?: boolean }): RegExp =>
+  options.allowNegative ? /^-?\d+$/ : /^\d+$/;
 
 export const parseExplicitHexadecimalInRange = (
   value: string | undefined,
   minimum: number,
   maximum: number,
 ): number | undefined => {
-  if (!value || !/^[0-9a-fA-F]{1,8}$/.test(value)) {
+  if (!isExplicitHexadecimalValue(value)) {
     return undefined;
   }
 
   const numericValue = Number.parseInt(value, 16);
-  return numericValue >= minimum && numericValue <= maximum
-    ? numericValue
-    : undefined;
+  return isInRange(numericValue, minimum, maximum) ? numericValue : undefined;
 };
+
+const isExplicitHexadecimalValue = (
+  value: string | undefined,
+): value is string => Boolean(value && /^[0-9a-fA-F]{1,8}$/.test(value));
+
+const isInRange = (value: number, minimum: number, maximum: number): boolean =>
+  value >= minimum && value <= maximum;
 
 export const getByteLength = (value: string): number =>
   new TextEncoder().encode(value).length;

@@ -567,18 +567,18 @@ suite("Build Expanded Flow Graph", () => {
       expandedUnitNames.map((name) => findUnitByName(rootUnit, name).id),
     );
 
-    const collapsed = buildExpandedFlowGraph(
+    const collapsed = buildExpandedFlowGraph({
       document,
-      currentUnit.id,
-      new Set<string>(),
-      16,
-    );
-    const expanded = buildExpandedFlowGraph(
+      currentUnitId: currentUnit.id,
+      expandedUnitIds: new Set<string>(),
+      basePx: 16,
+    });
+    const expanded = buildExpandedFlowGraph({
       document,
-      currentUnit.id,
+      currentUnitId: currentUnit.id,
       expandedUnitIds,
-      16,
-    );
+      basePx: 16,
+    });
 
     assert.ok(collapsed.graph);
     assert.ok(expanded.graph);
@@ -717,30 +717,30 @@ suite("Build Expanded Flow Graph", () => {
     const leafId =
       document.rootUnits[0].children[0].children[0].children[0].children[0].id;
 
-    const collapsed = buildExpandedFlowGraph(
+    const collapsed = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>(),
-      16,
-    );
-    const childExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>(),
+      basePx: 16,
+    });
+    const childExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([childNetId]),
-      16,
-    );
-    const grandOnlyExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([childNetId]),
+      basePx: 16,
+    });
+    const grandOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([grandNetId]),
-      16,
-    );
-    const fullyExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([grandNetId]),
+      basePx: 16,
+    });
+    const fullyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([childNetId, grandNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([childNetId, grandNetId]),
+      basePx: 16,
+    });
 
     assert.ok(collapsed.graph);
     assert.ok(childExpanded.graph);
@@ -827,18 +827,18 @@ suite("Build Expanded Flow Graph", () => {
     const orjId = document.rootUnits[0].children[0].children[2].id;
     const ntwjId = document.rootUnits[0].children[0].children[3].id;
 
-    const collapsed = buildExpandedFlowGraph(
+    const collapsed = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>(),
-      16,
-    );
-    const expanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>(),
+      basePx: 16,
+    });
+    const expanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([childNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([childNetId]),
+      basePx: 16,
+    });
 
     const decoration = expanded.nodeDecorations.get(childNetId);
     const orjCollapsed = collapsed.positionOverrides.get(orjId);
@@ -879,12 +879,12 @@ suite("Build Expanded Flow Graph", () => {
     const nestedJobId =
       document.rootUnits[0].children[0].children[0].children[1].id;
 
-    const expanded = buildExpandedFlowGraph(
+    const expanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([childNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([childNetId]),
+      basePx: 16,
+    });
 
     const childPosition = expanded.positionOverrides.get(childNetId);
     const grandNetPosition = expanded.positionOverrides.get(grandNetId);
@@ -916,12 +916,17 @@ suite("Build Expanded Flow Graph", () => {
       document.rootUnits[0].children[0].children[0].children[0].children[0]
         .children[0].children[0].id;
 
-    const expanded = buildExpandedFlowGraph(
+    const expanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([level2Id, level3Id, level4Id, level5Id]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([
+        level2Id,
+        level3Id,
+        level4Id,
+        level5Id,
+      ]),
+      basePx: 16,
+    });
 
     assert.ok(expanded.graph);
     assert.strictEqual(
@@ -976,18 +981,18 @@ suite("Build Expanded Flow Graph", () => {
       document.rootUnits[0].children[0].children[0].children[0].children[0].id;
     const siblingId = document.rootUnits[0].children[0].children[1].id;
 
-    const shallowExpanded = buildExpandedFlowGraph(
+    const shallowExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([level2Id]),
-      16,
-    );
-    const deepExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([level2Id]),
+      basePx: 16,
+    });
+    const deepExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([level2Id, level3Id, level4Id]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([level2Id, level3Id, level4Id]),
+      basePx: 16,
+    });
 
     const shallowSiblingPosition =
       shallowExpanded.positionOverrides.get(siblingId);
@@ -1020,18 +1025,18 @@ suite("Build Expanded Flow Graph", () => {
     const level4Id =
       document.rootUnits[0].children[0].children[0].children[0].children[0].id;
 
-    const shallowExpanded = buildExpandedFlowGraph(
+    const shallowExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([level2Id]),
-      16,
-    );
-    const deepExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([level2Id]),
+      basePx: 16,
+    });
+    const deepExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([level2Id, level3Id, level4Id]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([level2Id, level3Id, level4Id]),
+      basePx: 16,
+    });
 
     const shallowLevel2Decoration =
       shallowExpanded.nodeDecorations.get(level2Id);
@@ -1066,12 +1071,12 @@ suite("Build Expanded Flow Graph", () => {
     const leafJobId =
       document.rootUnits[0].children[0].children[0].children[0].id;
 
-    const expanded = buildExpandedFlowGraph(
+    const expanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([recoveryNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([recoveryNetId]),
+      basePx: 16,
+    });
 
     assert.ok(expanded.graph);
     assert.strictEqual(
@@ -1093,18 +1098,18 @@ suite("Build Expanded Flow Graph", () => {
     const rightJobId =
       document.rootUnits[0].children[0].children[1].children[1].id;
 
-    const rightExpandedOnly = buildExpandedFlowGraph(
+    const rightExpandedOnly = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([rightNetId]),
-      16,
-    );
-    const siblingExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([rightNetId]),
+      basePx: 16,
+    });
+    const siblingExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([rightNetId, leftNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([rightNetId, leftNetId]),
+      basePx: 16,
+    });
 
     const rightOnlyParentPosition =
       rightExpandedOnly.positionOverrides.get(rightNetId);
@@ -1156,12 +1161,12 @@ suite("Build Expanded Flow Graph", () => {
     const rightJobId =
       document.rootUnits[0].children[0].children[1].children[1].id;
 
-    const expanded = buildExpandedFlowGraph(
+    const expanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([leftNetId, rightNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([leftNetId, rightNetId]),
+      basePx: 16,
+    });
 
     const rightParentPosition = expanded.positionOverrides.get(rightNetId);
     const rightGrandPosition = expanded.positionOverrides.get(rightGrandId);
@@ -1198,18 +1203,18 @@ suite("Build Expanded Flow Graph", () => {
       document.rootUnits[0].children[0].children[0].children[0].id;
     const siblingRightId = document.rootUnits[0].children[0].children[1].id;
 
-    const parentOnlyExpanded = buildExpandedFlowGraph(
+    const parentOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([parentNetId]),
-      16,
-    );
-    const childExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([parentNetId]),
+      basePx: 16,
+    });
+    const childExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([parentNetId, childNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([parentNetId, childNetId]),
+      basePx: 16,
+    });
 
     const siblingBefore =
       parentOnlyExpanded.positionOverrides.get(siblingRightId);
@@ -1254,18 +1259,18 @@ suite("Build Expanded Flow Graph", () => {
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
     const rightLowerId = document.rootUnits[0].children[0].children[2].id;
 
-    const upperOnlyExpanded = buildExpandedFlowGraph(
+    const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([upperNetId]),
-      16,
-    );
-    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([upperNetId]),
+      basePx: 16,
+    });
+    const upperAndLowerExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([upperNetId, lowerNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([upperNetId, lowerNetId]),
+      basePx: 16,
+    });
 
     const rightLowerBefore =
       upperOnlyExpanded.positionOverrides.get(rightLowerId);
@@ -1310,18 +1315,18 @@ suite("Build Expanded Flow Graph", () => {
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
     const rightLowerId = document.rootUnits[0].children[0].children[2].id;
 
-    const upperOnlyExpanded = buildExpandedFlowGraph(
+    const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([upperNetId]),
-      16,
-    );
-    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([upperNetId]),
+      basePx: 16,
+    });
+    const upperAndLowerExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([upperNetId, lowerNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([upperNetId, lowerNetId]),
+      basePx: 16,
+    });
 
     const rightLowerBefore =
       upperOnlyExpanded.positionOverrides.get(rightLowerId);
@@ -1369,18 +1374,18 @@ suite("Build Expanded Flow Graph", () => {
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
     const rightLowerId = document.rootUnits[0].children[0].children[2].id;
 
-    const upperOnlyExpanded = buildExpandedFlowGraph(
+    const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId],
-      16,
-    );
-    const lowerExpandedAfterUpper = buildExpandedFlowGraph(
+      expandedUnitIds: [upperNetId],
+      basePx: 16,
+    });
+    const lowerExpandedAfterUpper = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId, lowerNetId],
-      16,
-    );
+      expandedUnitIds: [upperNetId, lowerNetId],
+      basePx: 16,
+    });
 
     const rightLowerBefore =
       upperOnlyExpanded.positionOverrides.get(rightLowerId);
@@ -1426,18 +1431,18 @@ suite("Build Expanded Flow Graph", () => {
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
 
-    const lowerOnlyExpanded = buildExpandedFlowGraph(
+    const lowerOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([lowerNetId]),
-      16,
-    );
-    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([lowerNetId]),
+      basePx: 16,
+    });
+    const upperAndLowerExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [lowerNetId, upperNetId],
-      16,
-    );
+      expandedUnitIds: [lowerNetId, upperNetId],
+      basePx: 16,
+    });
 
     const lowerBefore = lowerOnlyExpanded.positionOverrides.get(lowerNetId);
     const upperPosition =
@@ -1472,18 +1477,18 @@ suite("Build Expanded Flow Graph", () => {
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
 
-    const upperOnlyExpanded = buildExpandedFlowGraph(
+    const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId],
-      16,
-    );
-    const lowerExpandedAfterUpper = buildExpandedFlowGraph(
+      expandedUnitIds: [upperNetId],
+      basePx: 16,
+    });
+    const lowerExpandedAfterUpper = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId, lowerNetId],
-      16,
-    );
+      expandedUnitIds: [upperNetId, lowerNetId],
+      basePx: 16,
+    });
 
     const lowerBefore = upperOnlyExpanded.positionOverrides.get(lowerNetId);
     const lowerAfter =
@@ -1494,12 +1499,12 @@ suite("Build Expanded Flow Graph", () => {
       lowerExpandedAfterUpper.nodeDecorations.get(upperNetId);
     const lowerDecoration =
       lowerExpandedAfterUpper.nodeDecorations.get(lowerNetId);
-    const lowerThenUpper = buildExpandedFlowGraph(
+    const lowerThenUpper = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [lowerNetId, upperNetId],
-      16,
-    );
+      expandedUnitIds: [lowerNetId, upperNetId],
+      basePx: 16,
+    });
 
     assert.ok(lowerBefore);
     assert.ok(lowerAfter);
@@ -1534,18 +1539,18 @@ suite("Build Expanded Flow Graph", () => {
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
     const targetJobId = document.rootUnits[0].children[0].children[2].id;
 
-    const upperOnlyExpanded = buildExpandedFlowGraph(
+    const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId],
-      16,
-    );
-    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: [upperNetId],
+      basePx: 16,
+    });
+    const upperAndLowerExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId, lowerNetId],
-      16,
-    );
+      expandedUnitIds: [upperNetId, lowerNetId],
+      basePx: 16,
+    });
 
     const targetBefore = upperOnlyExpanded.positionOverrides.get(targetJobId);
     const targetAfter =
@@ -1581,18 +1586,18 @@ suite("Build Expanded Flow Graph", () => {
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
     const targetJobId = document.rootUnits[0].children[0].children[2].id;
 
-    const upperOnlyExpanded = buildExpandedFlowGraph(
+    const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId],
-      16,
-    );
-    const upperAndLowerExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: [upperNetId],
+      basePx: 16,
+    });
+    const upperAndLowerExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId, lowerNetId],
-      16,
-    );
+      expandedUnitIds: [upperNetId, lowerNetId],
+      basePx: 16,
+    });
 
     const targetBefore = upperOnlyExpanded.positionOverrides.get(targetJobId);
     const targetAfter =
@@ -1646,18 +1651,18 @@ suite("Build Expanded Flow Graph", () => {
       document.rootUnits[0].children[0].children[1].children[0].id;
     const rightLowerId = document.rootUnits[0].children[0].children[2].id;
 
-    const lowerOnlyExpanded = buildExpandedFlowGraph(
+    const lowerOnlyExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId, lowerNetId],
-      16,
-    );
-    const lowerChildExpanded = buildExpandedFlowGraph(
+      expandedUnitIds: [upperNetId, lowerNetId],
+      basePx: 16,
+    });
+    const lowerChildExpanded = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      [upperNetId, lowerNetId, lowerChildId],
-      16,
-    );
+      expandedUnitIds: [upperNetId, lowerNetId, lowerChildId],
+      basePx: 16,
+    });
 
     const rightLowerBefore =
       lowerOnlyExpanded.positionOverrides.get(rightLowerId);
@@ -1701,18 +1706,18 @@ suite("Build Expanded Flow Graph", () => {
     const rightJobId =
       document.rootUnits[0].children[0].children[1].children[1].id;
 
-    const leftThenRight = buildExpandedFlowGraph(
+    const leftThenRight = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([leftNetId, rightNetId]),
-      16,
-    );
-    const rightThenLeft = buildExpandedFlowGraph(
+      expandedUnitIds: new Set<string>([leftNetId, rightNetId]),
+      basePx: 16,
+    });
+    const rightThenLeft = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([rightNetId, leftNetId]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([rightNetId, leftNetId]),
+      basePx: 16,
+    });
 
     assert.deepStrictEqual(
       leftThenRight.positionOverrides.get(rightNetId),
@@ -1744,18 +1749,18 @@ suite("Build Expanded Flow Graph", () => {
       document.rootUnits[0].children[0].children[0].children[0].children[0].id;
 
     const expandedUnitIds = new Set<string>([level2Id, level3Id, level4Id]);
-    const first = buildExpandedFlowGraph(
+    const first = buildExpandedFlowGraph({
       document,
       currentUnitId,
       expandedUnitIds,
-      16,
-    );
-    const second = buildExpandedFlowGraph(
+      basePx: 16,
+    });
+    const second = buildExpandedFlowGraph({
       document,
       currentUnitId,
-      new Set<string>([level2Id, level3Id, level4Id]),
-      16,
-    );
+      expandedUnitIds: new Set<string>([level2Id, level3Id, level4Id]),
+      basePx: 16,
+    });
 
     assert.deepStrictEqual(first.positionOverrides, second.positionOverrides);
     assert.deepStrictEqual(first.nodeDecorations, second.nodeDecorations);

@@ -2,9 +2,10 @@
 
 ## Purpose
 
-This is the branch-level SDD planning index. Feature-local details live under
-`docs/specs/features/<feature>/`; repository-level behavior contracts live
-under `docs/requirements/use-cases/`.
+This is the branch-level SDD work plan. It records the feature folders active
+on this branch and branch-wide decisions that apply across those features.
+Feature-local slice tasks live in `docs/specs/features/<feature>/TASKS.md`;
+repository-level behavior contracts live under `docs/requirements/use-cases/`.
 
 Clear branch-specific notes when starting a new branch. Keep stable workflow
 rules in `docs/specs/README.md`, not in this file.
@@ -14,28 +15,26 @@ rules in `docs/specs/README.md`, not in this file.
 - List search stays presentation-local until another non-table consumer needs
   the same matching semantics.
 - JP1/AJS3 version 13 is the current normative target for new parameter and
-  command semantics. The repository-supported parameter-alignment scope is now
-  represented in use cases, so future manual-alignment work should start as a
-  new focused feature only when it adds a supported parameter family, consumer,
-  or product-version target.
+  command semantics.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
-  smoke verification and enough user feedback are recorded. Beta exit is
-  feedback-gated and is not the next active implementation priority.
-- Qlty-driven architecture refactoring is eligible to resume as the next
-  maintainability priority after the completed flow-viewer refactor plan.
-- Completed feature folders should be removed once their durable requirements
-  are represented in `docs/requirements/use-cases/`, `docs/specs/roadmap.md`,
-  or `docs/specs/architecture.md`.
+  smoke verification and enough user feedback are recorded.
+- Qlty findings remain candidate signals for future behavior-preserving
+  refactors, but completed qlty-driven cleanup no longer has an active feature
+  folder. A new feature should be opened only when a finding maps to a
+  meaningful responsibility or boundary concern.
+- Feature `SPECS.md` files carry feature requirements. Feature `TASKS.md`
+  files carry only current task state and the minimum record needed to decide
+  whether behavior must be reflected back into use cases.
 - Desktop and web compatibility must stay explicit whenever bootstrap,
   preview, parsing, shared adapters, or runtime behavior change.
 
 ## Next Priority Tasks
 
-1. Keep WebAPI import beta feedback and real-environment smoke evidence
-   tracked, but defer beta exit until feedback is sufficient.
-2. Select the next implementation priority from active feature specs, with
-   Qlty-driven architecture refactoring as the current maintainability
-   candidate.
+1. Refresh `UnitEntity` identity and compatibility checks before proposing any
+   hash implementation replacement.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence
+   tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
+   available.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -46,12 +45,10 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/modernize-runtime-boundaries/`:
   active modernization follow-up for `UnitEntity` hash readiness and bundle
   pressure notes.
-- `docs/specs/features/qlty-driven-architecture-refactoring/`:
-  active maintainability-driven architectural refactoring based on Qlty
-  complexity, duplication, and code-smell findings.
 
-Completed feature-local folders were removed after their durable behavior
-contracts were compressed into `docs/requirements/use-cases/`.
+Completed feature-local folders should be removed after their durable behavior
+contracts, active decisions, and unresolved risks have been moved to the
+appropriate use cases, roadmap, or planning index.
 
 ## Branch Validation
 

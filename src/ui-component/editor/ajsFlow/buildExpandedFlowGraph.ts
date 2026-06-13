@@ -1,9 +1,15 @@
 import {
   AjsDocument,
+  AjsUnit,
   findAjsUnitById,
   flattenAjsUnits,
 } from "../../../domain/models/ajs/AjsDocument";
 import { buildFlowGraph } from "../../../application/flow-graph/buildFlowGraph";
+import {
+  FlowGraphDto,
+  FlowGraphEdgeDto,
+  FlowGraphNodeDto,
+} from "../../../application/flow-graph/buildFlowGraphCore";
 import {
   calculateFlowGraphNodePosition,
   createFlowGraphMetrics,
@@ -22,83 +28,155 @@ import {
 
 export type { ExpandedNodeDecoration } from "./expandedFlowGraphTypes";
 
-export const buildExpandedFlowGraph = (
-  document: AjsDocument,
-  currentUnitId: string,
-  expandedUnitIds: ReadonlySet<string> | readonly string[],
-  basePx: number,
-): ExpandedFlowGraphResult => {
-  const baseGraph = buildFlowGraph(document, currentUnitId);
-  if (!baseGraph) {
-    return {
-      graph: undefined,
-      positionOverrides: new Map<string, FlowGraphPosition>(),
-      nodeDecorations: new Map<string, ExpandedNodeDecoration>(),
-    };
-  }
+type FlowGraphPositionState = {
+  initialPositions: Map<string, FlowGraphPosition>;
+  offsets: Map<string, FlowGraphPosition>;
+  positionOverrides: Map<string, FlowGraphPosition>;
+};
 
-  const metrics = createFlowGraphMetrics(basePx);
-  const nodes = [...baseGraph.nodes];
-  const edges = [...baseGraph.edges];
-  const nodeIds = new Set(nodes.map((node) => node.id));
-  const edgeIds = new Set(edges.map((edge) => `${edge.source}-${edge.target}`));
+type ExpandedFlowGraphContextArgs = {
+  baseGraph: FlowGraphDto;
+  basePx: number;
+  unitById: ReadonlyMap<string, AjsUnit>;
+};
+
+export type BuildExpandedFlowGraphInput = {
+  document: AjsDocument;
+  currentUnitId: string;
+  expandedUnitIds: ReadonlySet<string> | readonly string[];
+  basePx: number;
+};
+
+const createEmptyExpandedFlowGraphResult = (): ExpandedFlowGraphResult => ({
+  graph: undefined,
+  positionOverrides: new Map<string, FlowGraphPosition>(),
+  nodeDecorations: new Map<string, ExpandedNodeDecoration>(),
+});
+
+const createFlowGraphPositionState = (
+  nodes: readonly FlowGraphNodeDto[],
+  basePx: number,
+): FlowGraphPositionState => {
   const initialPositions = new Map<string, FlowGraphPosition>();
   const offsets = new Map<string, FlowGraphPosition>();
-  const parentAnchors = new Map<string, string>();
   const positionOverrides = new Map<string, FlowGraphPosition>();
-  const nodeDecorations = new Map<string, ExpandedNodeDecoration>();
 
-  for (const node of baseGraph.nodes) {
+  for (const node of nodes) {
     const initialPosition = calculateFlowGraphNodePosition(node, basePx);
     initialPositions.set(node.id, initialPosition);
     offsets.set(node.id, { x: 0, y: 0 });
     positionOverrides.set(node.id, initialPosition);
   }
 
-  const allUnits = flattenAjsUnits(document.rootUnits);
-  const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
-  const currentUnit = findAjsUnitById(document, currentUnitId);
-  if (!currentUnit) {
-    return { graph: baseGraph, positionOverrides, nodeDecorations };
-  }
+  return { initialPositions, offsets, positionOverrides };
+};
 
-  const visibleUnitIds = new Set(nodes.map((node) => node.id));
-  const context: ExpandedFlowGraphBuildContext = {
+const createExpandedFlowGraphContext = ({
+  baseGraph,
+  basePx,
+  unitById,
+}: ExpandedFlowGraphContextArgs): ExpandedFlowGraphBuildContext => {
+  const nodes: FlowGraphNodeDto[] = [...baseGraph.nodes];
+  const edges: FlowGraphEdgeDto[] = [...baseGraph.edges];
+  const { initialPositions, offsets, positionOverrides } =
+    createFlowGraphPositionState(baseGraph.nodes, basePx);
+
+  return {
     basePx,
     nodes,
     edges,
-    nodeIds,
-    edgeIds,
-    visibleUnitIds,
+    nodeIds: new Set(nodes.map((node) => node.id)),
+    edgeIds: new Set(edges.map((edge) => `${edge.source}-${edge.target}`)),
+    visibleUnitIds: new Set(nodes.map((node) => node.id)),
     initialPositions,
-    parentAnchors,
+    parentAnchors: new Map<string, string>(),
     offsets,
     positionOverrides,
-    nodeDecorations,
+    nodeDecorations: new Map<string, ExpandedNodeDecoration>(),
     unitById,
-    metrics,
+    metrics: createFlowGraphMetrics(basePx),
   };
+};
 
-  const expandedUnitIdSet = new Set(
-    [...expandedUnitIds].filter((unitId) => {
-      const unit = unitById.get(unitId);
-      return (
-        !!unit &&
-        unit.id !== currentUnitId &&
-        isNestedJobnetUnit(unit) &&
-        isDescendantOf(unit, currentUnitId, unitById)
-      );
-    }),
+const createUnitById = (
+  document: AjsDocument,
+): ReadonlyMap<string, AjsUnit> => {
+  const allUnits = flattenAjsUnits(document.rootUnits);
+  return new Map(allUnits.map((unit) => [unit.id, unit]));
+};
+
+const isExpandedNestedUnitInScope = (
+  unitId: string,
+  currentUnitId: string,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): boolean => {
+  const unit = unitById.get(unitId);
+  return (
+    !!unit &&
+    unit.id !== currentUnitId &&
+    isNestedJobnetUnit(unit) &&
+    isDescendantOf(unit, currentUnitId, unitById)
+  );
+};
+
+const createExpandedUnitIdSet = (
+  expandedUnitIds: ReadonlySet<string> | readonly string[],
+  currentUnitId: string,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): Set<string> =>
+  new Set(
+    [...expandedUnitIds].filter((unitId) =>
+      isExpandedNestedUnitInScope(unitId, currentUnitId, unitById),
+    ),
+  );
+
+const createBaseExpandedFlowGraphResult = (
+  graph: FlowGraphDto,
+  context: ExpandedFlowGraphBuildContext,
+): ExpandedFlowGraphResult => ({
+  graph,
+  positionOverrides: context.positionOverrides,
+  nodeDecorations: context.nodeDecorations,
+});
+
+const createRelayoutExpandedFlowGraphResult = (
+  context: ExpandedFlowGraphBuildContext,
+): ExpandedFlowGraphResult => ({
+  graph: {
+    nodes: context.nodes,
+    edges: context.edges,
+  },
+  positionOverrides: context.positionOverrides,
+  nodeDecorations: context.nodeDecorations,
+});
+
+export const buildExpandedFlowGraph = (
+  input: BuildExpandedFlowGraphInput,
+): ExpandedFlowGraphResult => {
+  const { document, currentUnitId, expandedUnitIds, basePx } = input;
+  const baseGraph = buildFlowGraph(document, currentUnitId);
+  if (!baseGraph) {
+    return createEmptyExpandedFlowGraphResult();
+  }
+
+  const unitById = createUnitById(document);
+  const context = createExpandedFlowGraphContext({
+    baseGraph,
+    basePx,
+    unitById,
+  });
+  const currentUnit = findAjsUnitById(document, currentUnitId);
+  if (!currentUnit) {
+    return createBaseExpandedFlowGraphResult(baseGraph, context);
+  }
+
+  const expandedUnitIdSet = createExpandedUnitIdSet(
+    expandedUnitIds,
+    currentUnitId,
+    unitById,
   );
 
   relayoutExpandedScope(context, currentUnit, expandedUnitIdSet);
 
-  return {
-    graph: {
-      nodes,
-      edges,
-    },
-    positionOverrides,
-    nodeDecorations,
-  };
+  return createRelayoutExpandedFlowGraphResult(context);
 };

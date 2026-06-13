@@ -9,21 +9,23 @@ type TopParameterSource = {
   [key in `td${TopParameterIndex}`]?: unknown;
 };
 
+type PresenceIndex = 0 | 1;
+
+const TOP_DEFAULT_RAW_VALUE_BY_PRESENCE = [
+  [undefined, undefined],
+  ["del", "sav"],
+] as const;
+
+const toPresenceIndex = (value: unknown): PresenceIndex =>
+  Number(Boolean(value)) as PresenceIndex;
+
 export const resolveTopDefaultRawValue = (
   unit: TopParameterSource,
   index: TopParameterIndex,
-): string | undefined => {
-  const hasTransferSource = Boolean(unit[`ts${index}`]);
-  const hasTransferDestination = Boolean(unit[`td${index}`]);
-
-  if (hasTransferSource && hasTransferDestination) {
-    return "sav";
-  }
-  if (hasTransferSource) {
-    return "del";
-  }
-  return undefined;
-};
+): string | undefined =>
+  TOP_DEFAULT_RAW_VALUE_BY_PRESENCE[toPresenceIndex(unit[`ts${index}`])][
+    toPresenceIndex(unit[`td${index}`])
+  ];
 
 export const buildTopParameter = <T>(
   arg: Omit<ParamLookupArg, "defaultRawValue"> & {

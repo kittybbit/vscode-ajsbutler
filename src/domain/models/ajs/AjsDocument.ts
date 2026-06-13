@@ -108,19 +108,21 @@ export const findAjsUnitAncestors = (
   return ancestors;
 };
 
+const hasAjsParameters = (parameters: AjsParameter[]): boolean =>
+  parameters.length > 0;
+
+const findFirstAjsUnitParameters = (
+  units: AjsUnit[],
+  key: ParamSymbol,
+): AjsParameter[] | undefined =>
+  units.map((unit) => findAjsUnitParameters(unit, key)).find(hasAjsParameters);
+
 export const findInheritedAjsUnitParameters = (
   document: AjsDocument,
   unit: AjsUnit,
   key: ParamSymbol,
-): AjsParameter[] | undefined => {
-  for (const ancestor of findAjsUnitAncestors(document, unit)) {
-    const parameters = findAjsUnitParameters(ancestor, key);
-    if (parameters.length > 0) {
-      return parameters;
-    }
-  }
-  return undefined;
-};
+): AjsParameter[] | undefined =>
+  findFirstAjsUnitParameters(findAjsUnitAncestors(document, unit), key);
 
 export const findInheritedAjsUnitParameter = (
   document: AjsDocument,

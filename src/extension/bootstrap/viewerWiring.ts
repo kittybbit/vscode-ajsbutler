@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import {
   createRevealUnitEvent,
+  type NavigationEventType,
   type NavigationTargetView,
 } from "../../shared/webviewEvents";
 import {
@@ -54,11 +55,19 @@ const createPreviewCommandDependencies = (
 const resolveTargetViewType = (targetView: NavigationTargetView): string =>
   targetView === "flow" ? AJS_FLOW_VIEWER_TYPE : AJS_TABLE_VIEWER_TYPE;
 
+type CounterpartRevealRequest = {
+  document: vscode.TextDocument;
+  targetViewType: string;
+  absolutePath: string;
+};
+
+type CounterpartRevealDeps = {
+  factoryByViewType: ReadonlyMap<string, ViewerFactory>;
+};
+
 const revealExistingCounterpartPanel = (
-  document: vscode.TextDocument,
-  targetViewType: string,
-  absolutePath: string,
-  factoryByViewType: ReadonlyMap<string, ViewerFactory>,
+  { document, targetViewType, absolutePath }: CounterpartRevealRequest,
+  { factoryByViewType }: CounterpartRevealDeps,
 ): void => {
   const targetFactory = factoryByViewType.get(targetViewType);
   if (!targetFactory) {
@@ -72,6 +81,21 @@ const revealExistingCounterpartPanel = (
 
   panel.reveal(panel.viewColumn);
   panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+};
+
+const revealCounterpartFromNavigation = (
+  document: vscode.TextDocument,
+  event: NavigationEventType,
+  factoryByViewType: ReadonlyMap<string, ViewerFactory>,
+): void => {
+  revealExistingCounterpartPanel(
+    {
+      document,
+      targetViewType: resolveTargetViewType(event.data.targetView),
+      absolutePath: event.data.absolutePath,
+    },
+    { factoryByViewType },
+  );
 };
 
 const createViewerBundle = ({
@@ -100,12 +124,7 @@ const createViewerBundle = ({
     store,
     readyAjsDocument,
     (document, event) => {
-      revealExistingCounterpartPanel(
-        document,
-        resolveTargetViewType(event.data.targetView),
-        event.data.absolutePath,
-        factoryByViewType,
-      );
+      revealCounterpartFromNavigation(document, event, factoryByViewType);
     },
     saveHandler,
   );

@@ -122,23 +122,58 @@ export type ParsedScheduleByDaysFromStartValue = {
   maxShiftableDays?: string;
 };
 
+type ScheduleByDaysFromStartType = ParsedScheduleByDaysFromStartValue["type"];
+
+type ScheduleByDaysFromStartMatch = RegExpExecArray & {
+  2: string | undefined;
+  3: ScheduleByDaysFromStartType;
+  5: string | undefined;
+  7: string | undefined;
+};
+
+const CFTD_TYPES_WITHOUT_SCHEDULE_BY_DAYS =
+  new Set<ScheduleByDaysFromStartType>(["no"]);
+
+const CFTD_TYPES_WITH_MAX_SHIFTABLE_DAYS = new Set<ScheduleByDaysFromStartType>(
+  ["be", "af"],
+);
+
+const parseScheduleByDaysFromStartMatch = (
+  rawValue: string | undefined,
+): ScheduleByDaysFromStartMatch | undefined =>
+  /^((\d{1,3}),)?(no|be|af|db|da)(,(\d{1,2})(,(\d{1,2}))?)?$/.exec(
+    rawValue ?? "",
+  ) as ScheduleByDaysFromStartMatch | null | undefined;
+
+const resolveScheduleByDaysFromStart = (
+  type: ScheduleByDaysFromStartType,
+  rawScheduleByDaysFromStart: string | undefined,
+): string | undefined =>
+  CFTD_TYPES_WITHOUT_SCHEDULE_BY_DAYS.has(type)
+    ? undefined
+    : (rawScheduleByDaysFromStart ?? "1");
+
+const resolveMaxShiftableDays = (
+  type: ScheduleByDaysFromStartType,
+  rawMaxShiftableDays: string | undefined,
+): string | undefined =>
+  CFTD_TYPES_WITH_MAX_SHIFTABLE_DAYS.has(type)
+    ? (rawMaxShiftableDays ?? "10")
+    : undefined;
+
 export const parseScheduleByDaysFromStartValue = (
   rawValue: string | undefined,
 ): ParsedScheduleByDaysFromStartValue | undefined => {
-  const matched =
-    /^((\d{1,3}),)?(no|be|af|db|da)(,(\d{1,2})(,(\d{1,2}))?)?$/.exec(
-      rawValue ?? "",
-    );
+  const matched = parseScheduleByDaysFromStartMatch(rawValue);
   if (!matched) {
     return undefined;
   }
 
-  const type = matched[3] as ParsedScheduleByDaysFromStartValue["type"];
+  const type = matched[3];
   return {
     rule: resolveScheduleRuleNumber(matched[2]),
     type,
-    scheduleByDaysFromStart: type === "no" ? undefined : (matched[5] ?? "1"),
-    maxShiftableDays:
-      type === "be" || type === "af" ? (matched[7] ?? "10") : undefined,
+    scheduleByDaysFromStart: resolveScheduleByDaysFromStart(type, matched[5]),
+    maxShiftableDays: resolveMaxShiftableDays(type, matched[7]),
   };
 };

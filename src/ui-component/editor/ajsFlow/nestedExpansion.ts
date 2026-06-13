@@ -6,19 +6,13 @@ export const isNestedJobnetUnit = (unit: AjsUnit): boolean =>
 export const isExpandableNestedUnit = (unit: AjsUnit): boolean =>
   isNestedJobnetUnit(unit) && unit.children.length > 0;
 
-const appendExpandableDescendants = (
-  unit: AjsUnit,
-  expandableUnitIds: string[],
-) => {
-  for (const child of unit.children) {
-    if (isExpandableNestedUnit(child)) {
-      expandableUnitIds.push(child.id);
-    }
-    if (child.children.length > 0) {
-      appendExpandableDescendants(child, expandableUnitIds);
-    }
-  }
-};
+const expandableNestedUnitId = (unit: AjsUnit): string[] =>
+  isExpandableNestedUnit(unit) ? [unit.id] : [];
+
+const collectChildExpandableNestedUnitIds = (unit: AjsUnit): string[] => [
+  ...expandableNestedUnitId(unit),
+  ...collectExpandableNestedUnitIds(unit),
+];
 
 export const collectExpandableNestedUnitIds = (
   currentUnit?: AjsUnit,
@@ -26,9 +20,7 @@ export const collectExpandableNestedUnitIds = (
   if (!currentUnit) {
     return [];
   }
-  const expandableUnitIds: string[] = [];
-  appendExpandableDescendants(currentUnit, expandableUnitIds);
-  return expandableUnitIds;
+  return currentUnit.children.flatMap(collectChildExpandableNestedUnitIds);
 };
 
 export const collapseExpandedNestedUnitIds = (

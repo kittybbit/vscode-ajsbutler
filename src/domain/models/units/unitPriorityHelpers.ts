@@ -1,7 +1,5 @@
 import type { Ni, Pr } from "../parameters/PlainString";
-import type { J } from "./J";
 import type { N, Rn } from "./N";
-import type { Qj } from "./Qj";
 import type { UnitEntity } from "./UnitEntity";
 
 const DEFAULT_PRIORITY = 1;
@@ -19,46 +17,48 @@ const isN = (entity: UnitEntity | undefined): entity is N =>
 const isRn = (entity: UnitEntity | undefined): entity is Rn =>
   entity !== undefined && entity.ty && entity.ty.value() === "rn";
 
+type ExplicitPrioritySource = {
+  readonly value: number;
+  readonly position: number;
+};
+
+const isDefined = <T>(value: T | undefined): value is T => value !== undefined;
+
+const getPrPrioritySource = (
+  pr: Pr | undefined,
+): ExplicitPrioritySource | undefined => {
+  const value = pr?.inherited === false ? pr.value() : undefined;
+  return value === undefined
+    ? undefined
+    : { value: Number(value), position: pr.position };
+};
+
+const getNiPrioritySource = (
+  ni: Ni | undefined,
+): ExplicitPrioritySource | undefined =>
+  ni === undefined || ni.inherited
+    ? undefined
+    : { value: ni.priority, position: ni.position };
+
+const laterPrioritySource = (
+  prioritySources: readonly (ExplicitPrioritySource | undefined)[],
+): ExplicitPrioritySource | undefined =>
+  prioritySources.filter(isDefined).sort((a, b) => b.position - a.position)[0];
+
+const getParentPriority = (
+  parent: UnitEntity | undefined,
+): number | undefined =>
+  isN(parent) || isRn(parent) ? parent.priority : undefined;
+
 export const resolveUnitPriority = (unitEntity: PrioritizableUnit): number => {
-  const getPrPriority = (): number | undefined => {
-    if (unitEntity.pr && !unitEntity.pr.inherited) {
-      const prValue = unitEntity.pr.value();
-      return prValue !== undefined ? Number(prValue) : undefined;
-    }
-    return undefined;
-  };
+  const explicitPriority = laterPrioritySource([
+    getPrPrioritySource(unitEntity.pr),
+    getNiPrioritySource(unitEntity.ni),
+  ]);
 
-  const getNiPriority = (): number | undefined => {
-    if (unitEntity.ni && !unitEntity.ni.inherited) {
-      return unitEntity.ni.priority;
-    }
-    return undefined;
-  };
-
-  const getParentPriority = (): number | undefined => {
-    const parent = unitEntity.parent;
-    if (isN(parent) || isRn(parent)) {
-      return parent.priority;
-    }
-    return undefined;
-  };
-
-  const prPriority = getPrPriority();
-  const niPriority = getNiPriority();
-
-  if (prPriority !== undefined && niPriority !== undefined) {
-    if (unitEntity.pr && unitEntity.ni) {
-      return unitEntity.pr.position > unitEntity.ni.position
-        ? prPriority
-        : niPriority;
-    }
-  }
-
-  if (prPriority !== undefined) return prPriority;
-  if (niPriority !== undefined) return niPriority;
-
-  const parentPriority = getParentPriority();
-  if (parentPriority !== undefined) return parentPriority;
-
-  return DEFAULT_PRIORITY;
+  return (
+    explicitPriority?.value ??
+    getParentPriority(unitEntity.parent) ??
+    DEFAULT_PRIORITY
+  );
 };

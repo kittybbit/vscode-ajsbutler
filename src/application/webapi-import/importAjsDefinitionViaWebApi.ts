@@ -183,25 +183,20 @@ export const createImportAjsDefinitionError = (
   ...details,
 });
 
+const HTTP_STATUS_IMPORT_ERROR_CODES: Record<
+  number,
+  ImportAjsDefinitionErrorCode
+> = {
+  400: "invalid-request",
+  401: "authentication-failed",
+  403: "authorization-failed",
+  404: "resource-not-found",
+  409: "conflict",
+  412: "web-console-unavailable",
+  500: "server-error",
+};
+
 export const mapHttpStatusToImportErrorCode = (
   httpStatus: number,
-): ImportAjsDefinitionErrorCode => {
-  switch (httpStatus) {
-    case 400:
-      return "invalid-request";
-    case 401:
-      return "authentication-failed";
-    case 403:
-      return "authorization-failed";
-    case 404:
-      return "resource-not-found";
-    case 409:
-      return "conflict";
-    case 412:
-      return "web-console-unavailable";
-    case 500:
-      return "server-error";
-    default:
-      return "unexpected-status";
-  }
-};
+): ImportAjsDefinitionErrorCode =>
+  HTTP_STATUS_IMPORT_ERROR_CODES[httpStatus] ?? "unexpected-status";

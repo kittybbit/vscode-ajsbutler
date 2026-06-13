@@ -1,67 +1,29 @@
 import { ParamSymbol, isParamSymbol } from "../../values/AjsType";
-import { DEFAULTS } from "./Defaults";
+import {
+  resolveRootJobnetDefaultRawValue,
+  type RootJobnetDefaultParameter,
+} from "./parameterDefaultHelpers";
 import { ParamBase, ParamInternal } from "./parameter.types";
-import ScheduleRule, { Sd } from "./ScheduleRule";
+import { createScheduleRuleParameterHelpers } from "./parameterScheduleRuleHelpers";
+
+export {
+  resolveConnectorControlDefaultRawValue,
+  resolveRootJobnetDefaultRawValue,
+} from "./parameterDefaultHelpers";
+export {
+  adjustToSdItemCount,
+  buildSdAlignedScheduleParameters,
+  buildSortedScheduleRuleParameters,
+} from "./parameterScheduleRuleHelpers";
 
 export type ParamLookupArg = ParamBase & {
   inherit?: boolean;
   defaultRawValue?: string | string[];
 };
 
-type DefaultApplicationMode = "always" | "root-jobnet-only";
-type RootJobnetDefaultParameter = "rg" | "sd" | "ncl" | "ncs" | "ncex";
-type ConnectorControlDefaultParameter = "ncl" | "ncs" | "ncex";
-
-const resolveDefaultRawValue = (
-  parameter: RootJobnetDefaultParameter,
-): string => {
-  switch (parameter) {
-    case "rg":
-      return DEFAULTS.Rg;
-    case "sd":
-      return DEFAULTS.Sd;
-    case "ncl":
-      return DEFAULTS.Ncl;
-    case "ncs":
-      return DEFAULTS.Ncs;
-    case "ncex":
-      return DEFAULTS.Ncex;
-  }
-};
-
-const resolveScopedDefaultRawValue = (
-  defaultRawValue: string,
-  mode: DefaultApplicationMode,
-  isRootJobnet: boolean,
-): string | undefined => {
-  switch (mode) {
-    case "always":
-      return defaultRawValue;
-    case "root-jobnet-only":
-      return isRootJobnet ? defaultRawValue : undefined;
-  }
-};
-
-export const resolveRootJobnetDefaultRawValue = (
-  parameter: RootJobnetDefaultParameter,
-  isRootJobnet: boolean,
-): string | undefined =>
-  resolveScopedDefaultRawValue(
-    resolveDefaultRawValue(parameter),
-    "root-jobnet-only",
-    isRootJobnet,
-  );
-
-export const resolveConnectorControlDefaultRawValue = (
-  parameter: ConnectorControlDefaultParameter,
-  mode: DefaultApplicationMode,
-  isRootJobnet = true,
-): string | undefined => {
-  return resolveScopedDefaultRawValue(
-    resolveDefaultRawValue(parameter),
-    mode,
-    isRootJobnet,
-  );
+type ParameterEntry = {
+  parameter: ParamLookupArg["unit"]["parameters"][number];
+  index: number;
 };
 
 export const buildOptionalParameter = <T>(
@@ -113,118 +75,6 @@ export const buildRequiredParameter = <T>(
   return parameter;
 };
 
-/** Create a parameter value map with schedule rule numbers as keys. */
-const mapByScheduleRule = <T extends ScheduleRule>(
-  params: Array<T> | undefined,
-) =>
-  params
-    ? params.reduce(
-        (work, param) => {
-          work[String(param.rule)] = param;
-          return work;
-        },
-        {} as Record<string, T>,
-      )
-    : undefined;
-
-export const adjustToSdItemCount = <T extends ScheduleRule>(
-  sd: Array<Sd> | undefined,
-  param: Array<T> | undefined,
-  buildDefault: (rule: number) => T | null,
-): Array<T | null> | undefined => {
-  const sdMap = mapByScheduleRule(sd);
-  if (sdMap === undefined) {
-    return undefined;
-  }
-  const paramMap = mapByScheduleRule(param);
-  const newParams: Array<T | null> = [];
-  Object.keys(sdMap).forEach((sdRule) => {
-    const rule = sdMap[sdRule].rule;
-    newParams.push((paramMap && paramMap[String(rule)]) ?? buildDefault(rule));
-  });
-  return newParams;
-};
-
-export const buildSdAlignedScheduleParameters = <T extends ScheduleRule>(
-  params: ParamInternal[] | undefined,
-  sd: Array<Sd> | undefined,
-  mapParam: (param: ParamInternal) => T,
-  buildDefault: (rule: number) => T | null,
-): Array<T | null> | undefined => {
-  const values = params
-    ? params.map(mapParam).sort((a, b) => a.rule - b.rule)
-    : undefined;
-  return adjustToSdItemCount(sd, values, buildDefault);
-};
-
-export const resolveSdParameters = (
-  unit: ParamLookupArg["unit"] & { isRoot: boolean },
-): Array<Sd> | undefined =>
-  buildRootDefaultAwareScheduleRuleParameters(
-    {
-      unit: unit,
-      parameter: "sd",
-      isRootJobnet: unit.isRoot,
-      rootDefaultParameter: "sd",
-    },
-    (param) => new Sd(param),
-  );
-
-export const buildSdAlignedEmptyScheduleRuleParameters = <
-  T extends ScheduleRule,
->(
-  arg: Omit<ParamLookupArg, "inherit" | "defaultRawValue">,
-  mapParam: (param: ParamInternal) => T,
-): Array<T | null> | undefined =>
-  buildSdAlignedScheduleParameters(
-    resolveParameterArray({
-      unit: arg.unit,
-      parameter: arg.parameter,
-    }),
-    resolveSdParameters(arg.unit),
-    mapParam,
-    (rule) =>
-      mapParam({
-        unit: arg.unit,
-        parameter: arg.parameter,
-        rawValue: `${rule},`,
-        inherited: false,
-        position: -1,
-      }),
-  );
-
-export const buildSdAlignedDefaultScheduleRuleParameters = <
-  T extends ScheduleRule,
->(
-  arg: Omit<ParamLookupArg, "inherit"> & {
-    buildFallbackRawValue: (rule: number) => string;
-  },
-  mapParam: (param: ParamInternal) => T,
-): Array<T | null> | undefined =>
-  buildSdAlignedScheduleParameters(
-    resolveParameterArray({
-      unit: arg.unit,
-      parameter: arg.parameter,
-      defaultRawValue: arg.defaultRawValue,
-    }),
-    resolveSdParameters(arg.unit),
-    mapParam,
-    (rule) =>
-      mapParam({
-        unit: arg.unit,
-        parameter: arg.parameter,
-        defaultRawValue: arg.buildFallbackRawValue(rule),
-        inherited: false,
-        position: -1,
-      }),
-  );
-
-export const buildSortedScheduleRuleParameters = <T extends ScheduleRule>(
-  params: ParamInternal[] | undefined,
-  mapParam: (param: ParamInternal) => T,
-): Array<T> | undefined =>
-  params ? params.map(mapParam).sort((a, b) => a.rule - b.rule) : undefined;
-
 export const buildInheritedParameter = <T>(
   arg: Omit<ParamLookupArg, "inherit">,
   mapParam: (param: ParamInternal) => T,
@@ -266,91 +116,104 @@ export const buildRootJobnetParameter = <T>(
     mapParam,
   );
 
-export const buildRootDefaultAwareScheduleRuleParameters = <
-  T extends ScheduleRule,
->(
-  arg: Omit<ParamLookupArg, "defaultRawValue" | "inherit"> & {
-    isRootJobnet: boolean;
-    rootDefaultParameter: RootJobnetDefaultParameter;
-  },
-  mapParam: (param: ParamInternal) => T,
-): Array<T> | undefined =>
-  buildSortedScheduleRuleParameters(
-    resolveParameterArray({
-      unit: arg.unit,
-      parameter: arg.parameter,
-      defaultRawValue: resolveRootJobnetDefaultRawValue(
-        arg.rootDefaultParameter,
-        arg.isRootJobnet,
-      ),
-    }),
-    mapParam,
+const assertParamSymbol: (
+  parameter: string,
+) => asserts parameter is ParamSymbol = (parameter) => {
+  if (!isParamSymbol(parameter)) {
+    throw new Error(`${parameter} is not unit definition parameter.`);
+  }
+};
+
+const findParameterEntries = (
+  unit: ParamLookupArg["unit"],
+  parameter: ParamSymbol,
+): ParameterEntry[] =>
+  unit.parameters
+    .map((parameter, index) => ({ parameter, index }))
+    .filter((entry) => entry.parameter.key === parameter);
+
+const toParamInternal = (
+  arg: ParamLookupArg,
+  entry: ParameterEntry,
+  inherited: boolean,
+): ParamInternal => ({
+  unit: arg.unit,
+  parameter: arg.parameter as ParamSymbol,
+  inherited: inherited,
+  rawValue: entry.parameter.value,
+  position: inherited ? -1 : entry.index,
+});
+
+const resolveOwnParameterArray = (
+  arg: ParamLookupArg,
+): ParamInternal[] | undefined => {
+  const actualParams = findParameterEntries(
+    arg.unit,
+    arg.parameter as ParamSymbol,
+  ).map((entry) => toParamInternal(arg, entry, false));
+  return actualParams.length > 0 ? actualParams : undefined;
+};
+
+const findInheritedParameterEntries = (
+  unit: ParamLookupArg["unit"] | undefined,
+  parameter: ParamSymbol,
+): ParameterEntry[] | undefined => {
+  if (unit === undefined) {
+    return undefined;
+  }
+  const entries = findParameterEntries(unit, parameter);
+  return entries.length > 0
+    ? entries
+    : findInheritedParameterEntries(unit.parent, parameter);
+};
+
+const resolveInheritedParameterArray = (
+  arg: ParamLookupArg,
+): ParamInternal[] | undefined =>
+  findInheritedParameterEntries(
+    arg.unit.parent,
+    arg.parameter as ParamSymbol,
+  )?.map((entry) => toParamInternal(arg, entry, true));
+
+const toDefaultParamInternal = (
+  arg: ParamLookupArg,
+  defaultRawValue: string,
+): ParamInternal => ({
+  unit: arg.unit,
+  parameter: arg.parameter as ParamSymbol,
+  inherited: false,
+  defaultRawValue: defaultRawValue,
+  position: -1,
+});
+
+const normalizeDefaultRawValues = (
+  defaultRawValue: ParamLookupArg["defaultRawValue"],
+): string[] | undefined => {
+  if (Array.isArray(defaultRawValue)) {
+    return defaultRawValue;
+  }
+  if (!defaultRawValue) {
+    return undefined;
+  }
+  return [defaultRawValue];
+};
+
+const resolveDefaultParameterArray = (
+  arg: ParamLookupArg,
+): ParamInternal[] | undefined =>
+  normalizeDefaultRawValues(arg.defaultRawValue)?.map((rawValue) =>
+    toDefaultParamInternal(arg, rawValue),
   );
 
 export const resolveParameterArray = (
   arg: ParamLookupArg,
 ): ParamInternal[] | undefined => {
-  if (!isParamSymbol(arg.parameter)) {
-    throw new Error(`${arg.parameter} is not unit definition parameter.`);
-  }
-
-  const actualParams = arg.unit.parameters
-    .map((parameter, index) => ({ parameter, index }))
-    .filter((entry) => entry.parameter.key === arg.parameter)
-    .map((entry) => ({
-      unit: arg.unit,
-      parameter: arg.parameter,
-      inherited: false,
-      rawValue: entry.parameter.value,
-      position: entry.index,
-    }));
-  if (actualParams.length > 0) {
-    return actualParams;
-  }
-
-  if (arg.inherit) {
-    let parent = arg.unit.parent;
-    while (parent) {
-      const inheritedParams = parent.parameters
-        .map((parameter, index) => ({ parameter, index }))
-        .filter((entry) => entry.parameter.key === arg.parameter)
-        .map((entry) => ({
-          unit: arg.unit,
-          parameter: arg.parameter,
-          inherited: true,
-          rawValue: entry.parameter.value,
-          position: -1,
-        }));
-      if (inheritedParams.length > 0) {
-        return inheritedParams;
-      }
-      parent = parent.parent;
-    }
-  }
-
-  if (Array.isArray(arg.defaultRawValue)) {
-    return arg.defaultRawValue.map((rawValue) => ({
-      unit: arg.unit,
-      parameter: arg.parameter,
-      inherited: false,
-      defaultRawValue: rawValue,
-      position: -1,
-    }));
-  }
-
-  if (arg.defaultRawValue) {
-    return [
-      {
-        unit: arg.unit,
-        parameter: arg.parameter,
-        inherited: false,
-        defaultRawValue: arg.defaultRawValue,
-        position: -1,
-      },
-    ];
-  }
-
-  return undefined;
+  assertParamSymbol(arg.parameter);
+  return (
+    resolveOwnParameterArray(arg) ??
+    (arg.inherit ? resolveInheritedParameterArray(arg) : undefined) ??
+    resolveDefaultParameterArray(arg)
+  );
 };
 
 export const resolveParameter = (
@@ -365,3 +228,16 @@ export const resolveParameter = (
   }
   throw new Error(`unexpected array. (${arg.parameter})`);
 };
+
+const scheduleRuleParameterHelpers = createScheduleRuleParameterHelpers(
+  resolveParameterArray,
+);
+
+export const buildRootDefaultAwareScheduleRuleParameters =
+  scheduleRuleParameterHelpers.buildRootDefaultAwareScheduleRuleParameters;
+export const buildSdAlignedDefaultScheduleRuleParameters =
+  scheduleRuleParameterHelpers.buildSdAlignedDefaultScheduleRuleParameters;
+export const buildSdAlignedEmptyScheduleRuleParameters =
+  scheduleRuleParameterHelpers.buildSdAlignedEmptyScheduleRuleParameters;
+export const resolveSdParameters =
+  scheduleRuleParameterHelpers.resolveSdParameters;

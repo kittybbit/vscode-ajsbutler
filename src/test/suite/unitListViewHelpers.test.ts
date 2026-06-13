@@ -88,22 +88,30 @@ suite("Unit List View helpers", () => {
     };
 
     assert.strictEqual(
-      getPriorityForUnitTypes(document, root, new Map(), ["n", "rn"]),
+      getPriorityForUnitTypes({
+        document,
+        unit: root,
+        priorityById: new Map(),
+        targetUnitTypes: ["n", "rn"],
+      }),
       4,
     );
     assert.strictEqual(
-      getPriorityForUnitTypes(document, child, new Map(), ["j", "rj"]),
+      getPriorityForUnitTypes({
+        document,
+        unit: child,
+        priorityById: new Map(),
+        targetUnitTypes: ["j", "rj"],
+      }),
       4,
     );
     assert.strictEqual(
-      getPriorityForUnitTypes(document, qjob, new Map(), [
-        "j",
-        "rj",
-        "pj",
-        "rp",
-        "qj",
-        "rq",
-      ]),
+      getPriorityForUnitTypes({
+        document,
+        unit: qjob,
+        priorityById: new Map(),
+        targetUnitTypes: ["j", "rj", "pj", "rp", "qj", "rq"],
+      }),
       3,
     );
   });

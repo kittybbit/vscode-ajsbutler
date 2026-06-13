@@ -13,7 +13,9 @@ export const isValidExplicitFileMonitoringFileName = (
 
 export const isValidExplicitFileMonitoringInterval = (
   parameter: UnitParameter | undefined,
-): boolean => parseExplicitDecimalInRange(parameter, 1, 600) !== undefined;
+): boolean =>
+  parseExplicitDecimalInRange({ parameter, minimum: 1, maximum: 600 }) !==
+  undefined;
 
 export const hasInvalidWildcardWithShortMonitoringInterval = (
   parameter: UnitParameter,
@@ -23,13 +25,25 @@ export const hasInvalidWildcardWithShortMonitoringInterval = (
     return false;
   }
 
+  return hasShortMonitoringInterval(unit);
+};
+
+const hasShortMonitoringInterval = (unit: Unit): boolean => {
+  const monitoringInterval = parseEffectiveMonitoringInterval(unit);
+  return (
+    monitoringInterval !== undefined &&
+    monitoringInterval >= 1 &&
+    monitoringInterval <= 9
+  );
+};
+
+const parseEffectiveMonitoringInterval = (unit: Unit): number | undefined => {
   const effectiveFlwi = findParameter(unit, "flwi")?.value ?? DEFAULTS.Flwi;
   if (!/^\d+$/.test(effectiveFlwi)) {
-    return false;
+    return undefined;
   }
 
-  const monitoringInterval = Number(effectiveFlwi);
-  return monitoringInterval >= 1 && monitoringInterval <= 9;
+  return Number(effectiveFlwi);
 };
 
 export const splitFileMonitoringConditions = (value: string): Set<string> =>

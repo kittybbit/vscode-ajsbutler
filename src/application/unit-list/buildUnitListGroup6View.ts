@@ -6,7 +6,7 @@ import type { UnitListGroup6View } from "./buildUnitListView";
 import {
   buildCalendarWeekView,
   isNonWeekCalendarValue,
-} from "./unitListViewHelpers";
+} from "./unitListCalendarWeekViewHelpers";
 
 export const buildUnitListGroup6View = (unit: AjsUnit): UnitListGroup6View => {
   if (unit.unitType !== "g") {

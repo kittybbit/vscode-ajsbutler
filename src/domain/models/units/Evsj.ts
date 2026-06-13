@@ -1,7 +1,7 @@
 import { ParamFactory } from "../parameters/ParameterFactory";
-import { WaitableUnitEntity } from "./unitCapabilityEntities";
+import { PlatformExecutionWaitJobUnitEntity } from "./unitCapabilityEntities";
 
-export class Evsj extends WaitableUnitEntity {
+export class Evsj extends PlatformExecutionWaitJobUnitEntity {
   // [evsid=event-ID;]
   get evsid() {
     return ParamFactory.evsid(this);
@@ -22,30 +22,6 @@ export class Evsj extends WaitableUnitEntity {
   get evsfr() {
     return ParamFactory.evsfr(this);
   }
-  // [pfm={u|p};]
-  get pfm() {
-    return ParamFactory.pfm(this);
-  }
-  // [etm=n;]
-  get etm() {
-    return ParamFactory.etm(this);
-  }
-  // [fd=time-required-for-execution;]
-  get fd() {
-    return ParamFactory.fd(this);
-  }
-  // [ex="execution-agent-name";]
-  get ex() {
-    return ParamFactory.ex(this);
-  }
-  // [ha={y|n};]
-  get ha() {
-    return ParamFactory.ha(this);
-  }
-  // [eu={ent|def};]
-  get eu() {
-    return ParamFactory.eu(this);
-  }
   // [evsrt={y|n};]
   get evsrt() {
     return ParamFactory.evsrt(this);
@@ -57,10 +33,6 @@ export class Evsj extends WaitableUnitEntity {
   // [evsrc=check-count;]
   get evsrc() {
     return ParamFactory.evsrc(this);
-  }
-  // [jty={q|n};]
-  get jty() {
-    return ParamFactory.jty(this);
   }
 }
 export class Revsj extends Evsj {}
