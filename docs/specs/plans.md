@@ -18,10 +18,10 @@ rules in `docs/specs/README.md`, not in this file.
   command semantics.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded.
-- Qlty-driven architecture refactoring uses Qlty findings as candidate signals
-  for behavior-preserving refactors. A candidate should improve a meaningful
-  responsibility or boundary concern; shape-only cleanup is not enough by
-  itself.
+- Qlty findings remain candidate signals for future behavior-preserving
+  refactors, but completed qlty-driven cleanup no longer has an active feature
+  folder. A new feature should be opened only when a finding maps to a
+  meaningful responsibility or boundary concern.
 - Feature `SPECS.md` files carry feature requirements. Feature `TASKS.md`
   files carry only current task state and the minimum record needed to decide
   whether behavior must be reflected back into use cases.
@@ -30,10 +30,11 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Keep WebAPI import beta feedback and real-environment smoke evidence
-   tracked, but defer beta exit until feedback is sufficient.
-2. Continue Qlty-driven architecture refactoring only when a candidate has
-   meaningful responsibility, boundary, or use-case value.
+1. Refresh `UnitEntity` identity and compatibility checks before proposing any
+   hash implementation replacement.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence
+   tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
+   available.
 3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
@@ -44,9 +45,6 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/modernize-runtime-boundaries/`:
   active modernization follow-up for `UnitEntity` hash readiness and bundle
   pressure notes.
-- `docs/specs/features/qlty-driven-architecture-refactoring/`:
-  active maintainability-driven architectural refactoring. Current slice state
-  lives in that feature's `TASKS.md`.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the

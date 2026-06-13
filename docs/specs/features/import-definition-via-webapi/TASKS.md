@@ -10,16 +10,19 @@
 - Keep this file focused on current state only; do not retain historical logs,
   prior approvals, or long validation diaries once they stop being actionable.
 
-## Current Status
+## Current Task
 
-- Runtime status:
-  the first read-only desktop WebAPI import slice is delivered and remains
-  beta.
-- Active slice:
-  none.
-- Open follow-up:
-  record real JP1/AJS3 environment smoke verification and sufficient user
-  feedback before removing the beta framing.
+- Status: Blocked
+- Scope:
+  record real JP1/AJS3 environment smoke verification evidence for the
+  delivered read-only desktop WebAPI import beta.
+- Acceptance:
+  document the product/version context, tested scenario, observed result,
+  host constraints, and whether `searchTarget=DEFINITION` returns enough
+  definition attributes for the current beta scope. Do not remove beta
+  labeling or broaden WebAPI scope in this task.
+- Validation:
+  docs-only evidence recording requires `rtk pnpm run qlty`.
 
 ## Human Approval
 
@@ -53,3 +56,8 @@ active implementation approval remains.
 
 - Keep traceability details in `TRACEABILITY.md`.
 - Keep durable scope and host-boundary decisions in `SPECS.md`.
+- The next task depends on externally supplied real JP1/AJS3 environment
+  smoke evidence or explicit access to such an environment; do not invent
+  verification results from generated mocks.
+- Real-environment smoke verification is currently blocked because no usable
+  JP1/AJS3 WebAPI environment or evidence is available.
