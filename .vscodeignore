@@ -11,6 +11,9 @@ antlr/
 # codex
 .codex/
 
+# serena
+.serena/
+
 # github
 .github/
 
