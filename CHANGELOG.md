@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.15.1]
+
+- Excluded local agent cache files from the published extension package.
+
 ## [1.15.0]
 
 - Added broader editor diagnostics for JP1/AJS definition parameters, including
