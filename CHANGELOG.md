@@ -1,5 +1,19 @@
 # Change Log
 
+## [1.15.0]
+
+- Added broader editor diagnostics for JP1/AJS definition parameters, including
+  job retry and end judgment settings, event sending and receiving jobs,
+  schedule rules, file monitoring, transfer jobs, and execution-interval
+  controls.
+- Improved the flow viewer so selectable flow scopes are limited to root
+  jobnets, and revealing a job group opens the first root jobnet while keeping
+  the target highlighted.
+- Stabilized expanded flow graph layout and search behavior for nested jobnets.
+- Improved JP1/AJS WebAPI import beta handling for desktop-only execution,
+  credential storage, HTTP status mapping, and malformed responses.
+- Updated dependencies and security overrides.
+
 ## [1.14.0]
 
 - Added read-only JP1/AJS WebAPI import as a beta command.
