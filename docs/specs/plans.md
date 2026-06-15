@@ -38,10 +38,6 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Active Feature Specs
 
-- `docs/specs/features/separate-ajs-metadata-from-i18n/`:
-  roadmap feature for separating AJS definition metadata from generic i18n
-  resources so table column labels and unit type labels have typed access
-  boundaries.
 - `docs/specs/features/limit-flow-selector-to-root-jobnets/`:
   transient branch feature for keeping flow selector job groups visible while
   limiting selectable flow scopes to root jobnets until job-group flow layout
