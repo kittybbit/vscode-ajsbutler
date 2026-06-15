@@ -38,10 +38,6 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Active Feature Specs
 
-- `docs/specs/features/limit-flow-selector-to-root-jobnets/`:
-  transient branch feature for keeping flow selector job groups visible while
-  limiting selectable flow scopes to root jobnets until job-group flow layout
-  behavior is decided.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 

@@ -59,6 +59,8 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
   show matching units before focusing them
 - when multiple visible units match, every visible match can be highlighted
   while focus remains anchored to a predictable first match
+- flow selector entries may show job groups, but the active flow graph scope
+  must resolve to a root jobnet rather than a job group
 
 ## Behavioral Scenarios (Gherkin)
 
@@ -111,6 +113,12 @@ Scenario: Current-scope search reveals matches
   When current-scope flow search matches a descendant unit
   Then the ancestors needed to show the matching unit are revealed
   And all visible matches are highlighted
+
+Scenario: Job groups remain visible but are not flow scopes
+  Given the flow selector contains job groups and root jobnets
+  When the user selects a visible job group entry
+  Then the job group is not used as the active flow graph scope
+  And selectable flow scopes remain root jobnets
 ```
 
 ## Acceptance Notes
@@ -141,3 +149,6 @@ Scenario: Current-scope search reveals matches
 - search behavior can feel inert if the scope root matches before a more
   visible descendant, so descendant matches may need priority when that
   produces clearer focus behavior
+- explicit job-group flow layout support would require a separate behavior
+  decision because job groups can contain multiple root jobnets without
+  display coordinates for a single job-group-scoped graph
