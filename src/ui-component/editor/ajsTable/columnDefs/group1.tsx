@@ -1,14 +1,14 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
-import * as ty from "@resource/i18n/ty";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
 import Link from "@mui/material/Link";
 import React from "react";
 
 const group1 = (
   columnHelper: ColumnHelper<UnitListRowView>,
   ajsTableColumnHeader: typeof ajscolumn.en,
-  tyDefinition: typeof ty.en,
+  language: string,
   handleJump: (id: string) => void,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> =>
@@ -54,12 +54,11 @@ const group1 = (
           if (!group1) {
             return undefined;
           }
-          if (group1.unitType === "g") {
-            return group1.groupType === "p"
-              ? tyDefinition["g"]["gty"]["p"]
-              : tyDefinition["g"]["gty"]["n"];
-          }
-          return tyDefinition[group1.unitType].name;
+          return unitTypeLabel(
+            group1.unitType,
+            language,
+            group1.groupType ?? "n",
+          );
         },
       },
       {

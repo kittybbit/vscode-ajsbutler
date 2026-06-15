@@ -14,14 +14,14 @@
 
 - Status: Proposed
 - Scope:
-  investigate the i18n and AJS metadata boundary, then propose the first
-  behavior-preserving implementation slice.
+  propose the next behavior-preserving slice for separating AJS table column
+  metadata from flat `ajscolumn` resource keys.
 - Acceptance:
-  impact investigation names affected locale resources, table column
-  definitions, unit type label consumers, tests, compatibility risks, and
-  alternatives before runtime code or tests are edited.
+  impact investigation names the affected table column definitions, column
+  label resources, tests, desktop/web compatibility risks, and alternatives
+  before runtime code or tests are edited.
 - Validation:
-  docs-only feature intake requires `rtk pnpm run qlty`.
+  docs-only planning changes require `rtk pnpm run qlty`.
 
 ## Human Approval
 
@@ -39,29 +39,26 @@ active implementation approval remains.
 
 ## Active Tasks
 
-- [ ] Complete impact investigation for i18n resolver, AJS table column
-      metadata, unit type metadata, and affected UI consumers.
-- [ ] Decide whether unit type codes and label helpers belong in domain,
-      application, or presentation for the first slice.
-- [ ] Request human approval for the first implementation slice before editing
+- [x] Complete the approved unit type label helper slice.
+- [ ] Complete impact investigation for AJS table column metadata and affected
+      table column definition consumers.
+- [ ] Request human approval for the next implementation slice before editing
       runtime code, tests, generated artifacts, or configuration.
-- [ ] Preserve current labels except for explicitly approved data-defect
-      corrections such as unintended leading whitespace.
-- [ ] Update or add focused tests for fallback resolution, structured column
-      metadata access, and unknown unit type fallback behavior after approval.
 
 ## Validation
 
-- [ ] Run `rtk pnpm run qlty` for feature intake.
-- [ ] For implementation slices, run relevant unit tests and the required
-      code-validation sequence from `docs/specs/README.md` unless the approved
-      scope narrows validation with documented rationale.
+- The unit type label helper slice passed `rtk pnpm run qlty`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`.
+- Future implementation slices must run relevant unit tests and the required
+  code-validation sequence from `docs/specs/README.md` unless the approved
+  scope narrows validation with documented rationale.
 
 ## Use-Case Back-Propagation
 
 - No durable use-case update is needed while the feature only changes internal
   metadata boundaries and preserves observable labels.
-- Update `docs/requirements/use-cases/uc-build-unit-list-view.md` or
-  `docs/requirements/use-cases/uc-show-unit-definition.md` if a future slice
-  changes observable column labels, unit type display behavior, or fallback
-  behavior.
+- The completed unit type label helper slice preserves observable labels except
+  for the explicitly approved English leading-whitespace data defect
+  correction, so no use-case update is needed.
+- Update `docs/requirements/use-cases/uc-build-unit-list-view.md` if a future
+  slice changes observable column labels or fallback behavior.

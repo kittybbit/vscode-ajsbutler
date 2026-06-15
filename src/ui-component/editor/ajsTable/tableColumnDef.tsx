@@ -6,7 +6,6 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import {
   ajsTableColumnHeaderLang,
   paramDefinitionLang,
-  tyDefinitionLang,
 } from "../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import { AccessorType, box } from "./columnDefs/common";
@@ -70,8 +69,6 @@ export const tableColumnDef = (
 ) => {
   // column titles
   const ajsTableColumnHeader = ajsTableColumnHeaderLang(language);
-  // tyDefinition
-  const tyDefinition = tyDefinitionLang(language);
   // paramter
   const paramDefinition = paramDefinitionLang(language);
 
@@ -118,7 +115,7 @@ export const tableColumnDef = (
     group1(
       columnHelper,
       ajsTableColumnHeader,
-      tyDefinition,
+      language,
       handleJump,
       rowViewByPath,
     ),
