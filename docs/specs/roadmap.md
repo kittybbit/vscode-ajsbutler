@@ -54,6 +54,17 @@
      meaningful JP1/AJS concept, application use case, adapter boundary, or
      maintainability risk.
 
+5. Separate AJS definition metadata from i18n resources.
+
+   - Keep locale fallback and string resolution in a small shared i18n
+     boundary.
+   - Treat table column labels and unit type labels as AJS metadata consumers,
+     not generic flat translation-table lookups.
+   - Prefer typed metadata structures or accessors over UI components indexing
+     flat keys such as `group1.col3` or raw `ty` shapes such as `g.gty.p`.
+   - Preserve current labels and desktop/web behavior while extracting the
+     boundary; correct only explicit data defects inside an approved slice.
+
 ## Deferred / Optional Slices
 
 1. Build/test output-directory ownership cleanup is deferred until packaging,
@@ -64,8 +75,8 @@
    boundary, authentication model, and beta feedback are stable.
 4. Revisit viewer-specific bundle-size reductions only if a future
    compatibility, startup, or payload target creates stronger pressure.
-5. Consolidate i18n translation files only when duplication is high enough to
-   justify a targeted cleanup.
+5. Revisit broader i18n translation-file consolidation only after the AJS
+   metadata boundary is separated from generic string resolution.
 6. Add deeper JP1/AJS View interaction parity only after the current visual
    refresh and nested expansion behavior settle.
 7. Revisit directory structure under `src/extension/webview/` only if the
