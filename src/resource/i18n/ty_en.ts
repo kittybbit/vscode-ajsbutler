@@ -76,7 +76,7 @@ export const en = {
     name: "email reception monitoring job for recovery",
   },
   mqwj: {
-    name: " message queue reception monitoring job",
+    name: "message queue reception monitoring job",
   },
   rmqwj: {
     name: "message queue reception monitoring job for recovery",

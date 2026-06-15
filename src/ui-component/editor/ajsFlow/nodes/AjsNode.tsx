@@ -10,7 +10,7 @@ import {
   DialogDataStateType,
 } from "../flowViewerStateTypes";
 import { TySymbol } from "../../../../domain/values/AjsType";
-import { tyDefinitionLang } from "../../../../domain/services/i18n/nls";
+import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../../MyContexts";
 import { shouldRenderNodeComment } from "./flowNodeDisplay";
 export { buildNodeSxProps } from "./nodeSxProps";
@@ -79,15 +79,8 @@ export const TyTitle: FC<{
   gty?: "n" | "p";
 }> = ({ ty, gty }) => {
   const { lang = "en" } = useMyAppContext();
-  const tyDefinition = tyDefinitionLang(lang);
   return (
-    <Tooltip
-      title={
-        ty === "g" && gty ? tyDefinition[ty].gty[gty] : tyDefinition[ty].name
-      }
-      arrow={true}
-      placement="top"
-    >
+    <Tooltip title={unitTypeLabel(ty, lang, gty)} arrow={true} placement="top">
       <Box sx={nodeTitleSxProps}>{ty.toUpperCase()}</Box>
     </Tooltip>
   );

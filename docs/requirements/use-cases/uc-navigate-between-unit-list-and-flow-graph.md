@@ -34,6 +34,9 @@ other viewer when that counterpart view is available.
   document context
 - if navigation changes the visible graph bounds or selected row, the target
   viewer should preserve its normal focus and fit behavior
+- when unit-list-to-flow navigation starts from a job group, the target flow
+  viewer should resolve the active flow scope to a descendant root jobnet while
+  still revealing or highlighting the original job group when possible
 
 ## Behavioral Scenarios (Gherkin)
 
@@ -45,6 +48,13 @@ Scenario: Jump from unit list to matching flow scope
   And a flow graph can be built for the same document context
   When the user invokes jump to flow graph
   Then the flow graph opens or focuses the matching unit scope
+
+Scenario: Jump from a job group to a root-jobnet flow scope
+  Given a selected job group in the unit-list viewer
+  And the job group has a descendant root jobnet
+  When the user invokes jump to flow graph
+  Then the flow graph opens or focuses that root-jobnet scope
+  And the original job group remains the revealed target when possible
 
 Scenario: Jump from flow graph to matching unit row
   Given a selected unit in the flow-graph viewer
@@ -71,3 +81,5 @@ Scenario: Counterpart viewer is unavailable
   presentation rules
 - navigation semantics can drift if unit identity differs between list and flow
   DTO mappings
+- a job group with no descendant root jobnet cannot produce a meaningful flow
+  scope without a separate job-group layout behavior decision

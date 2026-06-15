@@ -4,9 +4,8 @@ import { CellContext, createColumnHelper } from "@tanstack/table-core";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import DescriptionIcon from "@mui/icons-material/Description";
 import {
-  ajsTableColumnHeaderLang,
+  ajsTableColumnLabels,
   paramDefinitionLang,
-  tyDefinitionLang,
 } from "../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../application/unit-list/buildUnitListView";
 import { AccessorType, box } from "./columnDefs/common";
@@ -69,9 +68,7 @@ export const tableColumnDef = (
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ) => {
   // column titles
-  const ajsTableColumnHeader = ajsTableColumnHeaderLang(language);
-  // tyDefinition
-  const tyDefinition = tyDefinitionLang(language);
+  const tableColumnLabels = ajsTableColumnLabels(language);
   // paramter
   const paramDefinition = paramDefinitionLang(language);
 
@@ -117,29 +114,34 @@ export const tableColumnDef = (
     }),
     group1(
       columnHelper,
-      ajsTableColumnHeader,
-      tyDefinition,
+      tableColumnLabels.group(1),
+      language,
       handleJump,
       rowViewByPath,
     ),
-    group2(columnHelper, ajsTableColumnHeader, handleJump, rowViewByPath),
-    group3(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group4(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group5(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group6(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group7(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group8(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group9(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group10(columnHelper, ajsTableColumnHeader, paramDefinition, rowViewByPath),
-    group11(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group12(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group13(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group14(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group15(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group16(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group17(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group18(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group19(columnHelper, ajsTableColumnHeader, rowViewByPath),
-    group20(columnHelper, ajsTableColumnHeader),
+    group2(columnHelper, tableColumnLabels.group(2), handleJump, rowViewByPath),
+    group3(columnHelper, tableColumnLabels.group(3), rowViewByPath),
+    group4(columnHelper, tableColumnLabels.group(4), rowViewByPath),
+    group5(columnHelper, tableColumnLabels.group(5), rowViewByPath),
+    group6(columnHelper, tableColumnLabels.group(6), rowViewByPath),
+    group7(columnHelper, tableColumnLabels.group(7), rowViewByPath),
+    group8(columnHelper, tableColumnLabels.group(8), rowViewByPath),
+    group9(columnHelper, tableColumnLabels.group(9), rowViewByPath),
+    group10(
+      columnHelper,
+      tableColumnLabels.group(10),
+      paramDefinition,
+      rowViewByPath,
+    ),
+    group11(columnHelper, tableColumnLabels.group(11), rowViewByPath),
+    group12(columnHelper, tableColumnLabels.group(12), rowViewByPath),
+    group13(columnHelper, tableColumnLabels.group(13), rowViewByPath),
+    group14(columnHelper, tableColumnLabels.group(14), rowViewByPath),
+    group15(columnHelper, tableColumnLabels.group(15), rowViewByPath),
+    group16(columnHelper, tableColumnLabels.group(16), rowViewByPath),
+    group17(columnHelper, tableColumnLabels.group(17), rowViewByPath),
+    group18(columnHelper, tableColumnLabels.group(18), rowViewByPath),
+    group19(columnHelper, tableColumnLabels.group(19), rowViewByPath),
+    group20(columnHelper, tableColumnLabels.group(20)),
   ];
 };
