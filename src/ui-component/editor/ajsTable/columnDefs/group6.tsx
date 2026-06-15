@@ -1,9 +1,6 @@
 import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
-import type {
-  AjsTableColumnLabelAccessor,
-  AjsTableColumnLabelKey,
-} from "../../../../domain/services/i18n/nls";
+import type { AjsTableColumnGroupLabels } from "../../../../domain/services/i18n/nls";
 import { box } from "./common";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { WeekSymbol } from "../../../../domain/values/AjsType";
@@ -12,21 +9,23 @@ import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
 
 const group6 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  ajsTableColumnLabels: AjsTableColumnLabelAccessor,
+  labels: AjsTableColumnGroupLabels,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> => {
+  const standardWeekLabels = labels.subgroup(1);
+
   return columnHelper.group({
     id: "group6", //Calendar definition information
-    header: ajsTableColumnLabels.label("group6"),
+    header: labels.label,
     columns: [
       columnHelper.group({
         id: "group6.group1",
-        header: ajsTableColumnLabels.label("group6.group1"),
+        header: standardWeekLabels.label,
         columns: ["su", "mo", "tu", "we", "th", "fr", "sa"].map((v, i) => {
-          const id = `group6.group1.col${i + 1}` as AjsTableColumnLabelKey;
+          const id = `group6.group1.col${i + 1}`;
           return {
             id: id,
-            header: ajsTableColumnLabels.label(id),
+            header: standardWeekLabels.column(i + 1),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group6[v as WeekSymbol],
             cell: (props) => {
@@ -45,7 +44,7 @@ const group6 = (
       }),
       {
         id: "group6.col1",
-        header: ajsTableColumnLabels.label("group6.col1"),
+        header: labels.column(1),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group6.openDates,
         cell: (props) => {
@@ -57,7 +56,7 @@ const group6 = (
       },
       {
         id: "group6.col2",
-        header: ajsTableColumnLabels.label("group6.col2"),
+        header: labels.column(2),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group6.closeDates,
         cell: (props) => {

@@ -80,16 +80,61 @@ export const ajsTableColumnHeaderLang = (
   );
 };
 
-export type AjsTableColumnLabelKey = keyof typeof ajscolumn.en;
+type AjsTableColumnLabelKey = keyof typeof ajscolumn.en;
+type AjsTableColumnGroupNumbers = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+];
+export type AjsTableColumnGroupNumber = AjsTableColumnGroupNumbers[number];
+export type AjsTableColumnSubgroupLabels = {
+  label: string;
+  column: (column: number) => string;
+};
+export type AjsTableColumnGroupLabels = {
+  label: string;
+  column: (column: number) => string;
+  subgroup: (subgroup: number) => AjsTableColumnSubgroupLabels;
+};
 export type AjsTableColumnLabelAccessor = {
-  label: (key: AjsTableColumnLabelKey) => string;
+  group: (group: AjsTableColumnGroupNumber) => AjsTableColumnGroupLabels;
 };
 
 export const ajsTableColumnLabels = (
   language: string,
 ): AjsTableColumnLabelAccessor => {
   const labels = ajsTableColumnHeaderLang(language);
+
   return {
-    label: (key) => labels[key],
+    group: (group) => ({
+      label: labels[`group${group}` as AjsTableColumnLabelKey],
+      column: (column) =>
+        labels[`group${group}.col${column}` as AjsTableColumnLabelKey],
+      subgroup: (subgroup) => ({
+        label:
+          labels[`group${group}.group${subgroup}` as AjsTableColumnLabelKey],
+        column: (column) =>
+          labels[
+            `group${group}.group${subgroup}.col${column}` as AjsTableColumnLabelKey
+          ],
+      }),
+    }),
   };
 };

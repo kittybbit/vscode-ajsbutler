@@ -12,17 +12,15 @@
 
 ## Current Task
 
-- Status: Complete
+- Status: Pending
 - Scope:
-  no active approved implementation task remains after completing the unit type
-  label accessor slice and the all-group AJS table column label accessor
-  expansion.
+  no active implementation task is approved.
 - Acceptance:
-  future work must start with a fresh impact investigation and approval before
-  editing runtime code, tests, generated artifacts, or configuration.
+  define a new task and obtain approval before editing runtime code, tests,
+  generated artifacts, or configuration.
 - Validation:
-  code changes must continue to follow `docs/specs/README.md`: `rtk pnpm run
-qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`.
+  future implementation slices must follow the validation guidance in
+  `docs/specs/README.md`.
 
 ## Human Approval
 
@@ -46,6 +44,9 @@ active implementation approval remains.
 - [x] Request human approval for the next implementation slice before editing
       runtime code, tests, generated artifacts, or configuration.
 - [x] Complete the approved all-group AJS table column label accessor expansion.
+- [x] Request human approval for removing remaining flat column label key
+      literals from table column definition files.
+- [x] Complete the approved flat table column label key literal removal.
 
 ## Decision Notes
 
@@ -54,12 +55,26 @@ active implementation approval remains.
   `src/ui-component/editor/ajsTable/columnDefs/`; the approved expanded slice
   removes that direct resource access from every group file in one mechanical
   pass.
+- The final table column label slice replaced flat label key lookups in
+  `src/ui-component/editor/ajsTable/columnDefs/group*.ts*` with structured
+  accessors such as `labels.column(1)` and
+  `labels.subgroup(1).column(2)`.
 - Table label accessors remain in the existing shared i18n/resource boundary
   and browser-safe. Moving column metadata into domain remains deferred until a
   later slice proves the metadata expresses JP1/AJS semantics beyond
   presentation labels.
 - The completed slices preserve parser, normalized model, CSV, flow,
   diagnostics, hover, telemetry, WebAPI, and VS Code compatibility behavior.
+- Affected symbols and components:
+  `AjsTableColumnLabelAccessor`, `AjsTableColumnGroupLabels`,
+  `ajsTableColumnLabels`, and table column group definition functions.
+- Compatibility risk:
+  low if the change preserves column ids and label resource values, stays pure
+  TypeScript, avoids new dependencies, and does not touch parser, DTO/schema,
+  host APIs, or runtime behavior outside table column label lookup.
+- Moving all column metadata into domain remains too broad for the current
+  evidence because many columns are presentation table structure rather than
+  JP1/AJS domain concepts.
 - A pre-existing `group10.tsx` column id typo (`grsoup10.col7`) was observed
   during review but left unchanged because it is outside this metadata-boundary
   slice.
@@ -70,6 +85,10 @@ active implementation approval remains.
   `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`.
 - The all-group table column label accessor slice passed `rtk pnpm run qlty`,
   `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`.
+- The flat table column label key literal removal slice passed
+  `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build`; the build retained pre-existing webpack bundle size
+  warnings.
 - Future implementation slices must run relevant unit tests and the required
   code-validation sequence from `docs/specs/README.md` unless the approved
   scope narrows validation with documented rationale.
@@ -83,5 +102,5 @@ active implementation approval remains.
   correction, so no use-case update is needed.
 - Update `docs/requirements/use-cases/uc-build-unit-list-view.md` if a future
   slice changes observable column labels or fallback behavior.
-- No use-case update is needed for the expanded column label accessor slice
-  while it preserves existing observable labels.
+- No use-case update was needed for the flat-key-literal removal because it
+  preserved existing observable column labels and column ids.

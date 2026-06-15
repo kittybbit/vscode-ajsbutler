@@ -21,25 +21,33 @@ suite("NLS", () => {
     );
   });
 
-  test("resolves table column labels through the typed label accessor", () => {
+  test("resolves table column labels through structured accessors", () => {
     assert.strictEqual(
-      ajsTableColumnLabels("en").label("group1.col3"),
+      ajsTableColumnLabels("en").group(1).label,
+      "Unit definition information",
+    );
+    assert.strictEqual(
+      ajsTableColumnLabels("en").group(1).column(3),
       "Unit type",
     );
     assert.strictEqual(
-      ajsTableColumnLabels("ja").label("group1.col3"),
+      ajsTableColumnLabels("ja").group(1).column(3),
       "ユニット種別",
     );
     assert.strictEqual(
-      ajsTableColumnLabels("en").label("group10.group1.col2"),
+      ajsTableColumnLabels("en").group(10).subgroup(1).label,
+      "Start day",
+    );
+    assert.strictEqual(
+      ajsTableColumnLabels("en").group(10).subgroup(1).column(2),
       "Year/Month",
     );
     assert.strictEqual(
-      ajsTableColumnLabels("ja").label("group15.group4.col3"),
+      ajsTableColumnLabels("ja").group(15).subgroup(4).column(3),
       "自動削除",
     );
     assert.strictEqual(
-      ajsTableColumnLabels("unsupported").label("group20.col1"),
+      ajsTableColumnLabels("unsupported").group(20).column(1),
       "Other definition information",
     );
   });

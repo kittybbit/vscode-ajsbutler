@@ -1,29 +1,29 @@
 import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
-import type { AjsTableColumnLabelAccessor } from "../../../../domain/services/i18n/nls";
+import type { AjsTableColumnGroupLabels } from "../../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { box } from "./common";
 import Link from "@mui/material/Link";
 
 const group2 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  ajsTableColumnLabels: AjsTableColumnLabelAccessor,
+  labels: AjsTableColumnGroupLabels,
   handleJump: (id: string) => void,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({
     id: "group2", //Unit common definition information
-    header: ajsTableColumnLabels.label("group2"),
+    header: labels.label,
     columns: [
       {
         id: "group2.col1",
-        header: ajsTableColumnLabels.label("group2.col1"),
+        header: labels.column(1),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.comment,
       },
       {
         id: "group2.col2",
-        header: ajsTableColumnLabels.label("group2.col2"),
+        header: labels.column(2),
         accessorFn: (row) =>
           rowViewByPath
             .get(row.absolutePath)
@@ -52,7 +52,7 @@ const group2 = (
       },
       {
         id: "group2.col3",
-        header: ajsTableColumnLabels.label("group2.col3"),
+        header: labels.column(3),
         accessorFn: (row) =>
           rowViewByPath
             .get(row.absolutePath)
@@ -62,43 +62,43 @@ const group2 = (
       },
       {
         id: "group2.col4",
-        header: ajsTableColumnLabels.label("group2.col4"),
+        header: labels.column(4),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.executionAgent,
       },
       {
         id: "group2.col5",
-        header: ajsTableColumnLabels.label("group2.col5"),
+        header: labels.column(5),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionLimit,
       },
       {
         id: "group2.col6",
-        header: ajsTableColumnLabels.label("group2.col6"),
+        header: labels.column(6),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionName,
       },
       {
         id: "group2.col7",
-        header: ajsTableColumnLabels.label("group2.col7"),
+        header: labels.column(7),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionEnabled,
       },
       {
         id: "group2.col8",
-        header: ajsTableColumnLabels.label("group2.col8"),
+        header: labels.column(8),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionExternal,
       },
       {
         id: "group2.col9",
-        header: ajsTableColumnLabels.label("group2.col9"),
+        header: labels.column(9),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionHost,
       },
       {
         id: "group2.col10",
-        header: ajsTableColumnLabels.label("group2.col10"),
+        header: labels.column(10),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionService,
       },
