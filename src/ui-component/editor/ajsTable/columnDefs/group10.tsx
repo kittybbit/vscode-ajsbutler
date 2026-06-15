@@ -1,47 +1,47 @@
 import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
-import * as ajscolumn from "@resource/i18n/ajscolumn";
+import type { AjsTableColumnLabelAccessor } from "../../../../domain/services/i18n/nls";
 import * as parameter from "@resource/i18n/parameter";
 import { box } from "./common";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group10 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  ajsTableColumnHeader: typeof ajscolumn.en,
+  ajsTableColumnLabels: AjsTableColumnLabelAccessor,
   paramDefinition: typeof parameter.en,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({
     id: "group10", //Schedule definition information
-    header: ajsTableColumnHeader["group10"],
+    header: ajsTableColumnLabels.label("group10"),
     columns: [
       {
         id: "group10.col1",
-        header: ajsTableColumnHeader["group10.col1"],
+        header: ajsTableColumnLabels.label("group10.col1"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.deleteAfterExecution,
       },
       {
         id: "group10.col2",
-        header: ajsTableColumnHeader["group10.col2"],
+        header: ajsTableColumnLabels.label("group10.col2"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.executionDate,
       },
       {
         id: "group10.col3",
-        header: ajsTableColumnHeader["group10.col3"],
+        header: ajsTableColumnLabels.label("group10.col3"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.jobGroupPath,
       },
       {
         id: "group10.col4",
-        header: ajsTableColumnHeader["group10.col4"],
+        header: ajsTableColumnLabels.label("group10.col4"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.exclusiveJobnetName,
       },
       {
         id: "group10.col5",
-        header: ajsTableColumnHeader["group10.col5"],
+        header: ajsTableColumnLabels.label("group10.col5"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.parentRules,
         cell: (props) => {
@@ -53,11 +53,11 @@ const group10 = (
       },
       columnHelper.group({
         id: "group10.group1",
-        header: ajsTableColumnHeader["group10.group1"],
+        header: ajsTableColumnLabels.label("group10.group1"),
         columns: [
           {
             id: "group10.group1.col1",
-            header: ajsTableColumnHeader["group10.group1.col1"],
+            header: ajsTableColumnLabels.label("group10.group1.col1"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group10.scheduleDateTypes,
             cell: (props) => {
@@ -78,7 +78,7 @@ const group10 = (
           },
           {
             id: "group10.group1.col2",
-            header: ajsTableColumnHeader["group10.group1.col2"],
+            header: ajsTableColumnLabels.label("group10.group1.col2"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group10
                 .scheduleDateYearMonths,
@@ -91,7 +91,7 @@ const group10 = (
           },
           {
             id: "group10.group1.col3",
-            header: ajsTableColumnHeader["group10.group1.col3"],
+            header: ajsTableColumnLabels.label("group10.group1.col3"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group10.scheduleDateDays,
             cell: (props) => {
@@ -105,7 +105,7 @@ const group10 = (
       }),
       {
         id: "group10.col6",
-        header: ajsTableColumnHeader["group10.col6"],
+        header: ajsTableColumnLabels.label("group10.col6"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.startTimes,
         cell: (props) => {
@@ -117,7 +117,7 @@ const group10 = (
       },
       {
         id: "grsoup10.col7",
-        header: ajsTableColumnHeader["group10.col7"],
+        header: ajsTableColumnLabels.label("group10.col7"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.cycles,
         cell: (props) => {
@@ -129,7 +129,7 @@ const group10 = (
       },
       {
         id: "group10.col8",
-        header: ajsTableColumnHeader["group10.col8"],
+        header: ajsTableColumnLabels.label("group10.col8"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.substitutes,
         cell: (props) => {
@@ -141,7 +141,7 @@ const group10 = (
       },
       {
         id: "group10.col9",
-        header: ajsTableColumnHeader["group10.col9"],
+        header: ajsTableColumnLabels.label("group10.col9"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.shiftDays,
         cell: (props) => {
@@ -153,7 +153,7 @@ const group10 = (
       },
       {
         id: "group10.col10",
-        header: ajsTableColumnHeader["group10.col10"],
+        header: ajsTableColumnLabels.label("group10.col10"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.scheduleByDaysFromStart,
         cell: (props) => {
@@ -165,7 +165,7 @@ const group10 = (
       },
       {
         id: "group10.col11",
-        header: ajsTableColumnHeader["group10.col11"],
+        header: ajsTableColumnLabels.label("group10.col11"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group10.maxShiftableDays,
         cell: (props) => {
@@ -177,11 +177,11 @@ const group10 = (
       },
       columnHelper.group({
         id: "group10.group2",
-        header: ajsTableColumnHeader["group10.group2"],
+        header: ajsTableColumnLabels.label("group10.group2"),
         columns: [
           {
             id: "group10.group2.col1",
-            header: ajsTableColumnHeader["group10.group2.col1"],
+            header: ajsTableColumnLabels.label("group10.group2.col1"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group10.startRangeTimes,
             cell: (props) => {
@@ -193,7 +193,7 @@ const group10 = (
           },
           {
             id: "group10.group2.col2",
-            header: ajsTableColumnHeader["group10.group2.col2"],
+            header: ajsTableColumnLabels.label("group10.group2.col2"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group10.endRangeTimes,
             cell: (props) => {
@@ -207,11 +207,11 @@ const group10 = (
       }),
       columnHelper.group({
         id: "group10.group3",
-        header: ajsTableColumnHeader["group10.group3"],
+        header: ajsTableColumnLabels.label("group10.group3"),
         columns: [
           {
             id: "group10.group3.col1",
-            header: ajsTableColumnHeader["group10.group3.col1"],
+            header: ajsTableColumnLabels.label("group10.group3.col1"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group10.waitCounts,
             cell: (props) => {
@@ -223,7 +223,7 @@ const group10 = (
           },
           {
             id: "group10.group3.col2",
-            header: ajsTableColumnHeader["group10.group3.col2"],
+            header: ajsTableColumnLabels.label("group10.group3.col2"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group10.waitTimes,
             cell: (props) => {

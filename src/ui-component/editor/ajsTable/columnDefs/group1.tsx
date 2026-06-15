@@ -1,29 +1,31 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
-import * as ajscolumn from "@resource/i18n/ajscolumn";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
+import {
+  AjsTableColumnLabelAccessor,
+  unitTypeLabel,
+} from "../../../../domain/services/i18n/nls";
 import Link from "@mui/material/Link";
 import React from "react";
 
 const group1 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  ajsTableColumnHeader: typeof ajscolumn.en,
+  ajsTableColumnLabels: AjsTableColumnLabelAccessor,
   language: string,
   handleJump: (id: string) => void,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> =>
   columnHelper.group({
     id: "group1", //Unit definition information
-    header: ajsTableColumnHeader["group1"],
+    header: ajsTableColumnLabels.label("group1"),
     columns: [
       {
         id: "group1.col1",
-        header: ajsTableColumnHeader["group1.col1"],
+        header: ajsTableColumnLabels.label("group1.col1"),
         accessorFn: (row) => rowViewByPath.get(row.absolutePath)?.group1.name,
       },
       {
         id: "group1.col2",
-        header: ajsTableColumnHeader["group1.col2"],
+        header: ajsTableColumnLabels.label("group1.col2"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group1.parentAbsolutePath ?? "/",
         cell: (props) => {
@@ -48,7 +50,7 @@ const group1 = (
       },
       {
         id: "group1.col3",
-        header: ajsTableColumnHeader["group1.col3"],
+        header: ajsTableColumnLabels.label("group1.col3"),
         accessorFn: (row) => {
           const group1 = rowViewByPath.get(row.absolutePath)?.group1;
           if (!group1) {
@@ -63,18 +65,18 @@ const group1 = (
       },
       {
         id: "group1.col4",
-        header: ajsTableColumnHeader["group1.col4"],
+        header: ajsTableColumnLabels.label("group1.col4"),
         accessorFn: (row) => rowViewByPath.get(row.absolutePath)?.group1.cty,
       },
       {
         id: "group1.col5",
-        header: ajsTableColumnHeader["group1.col5"],
+        header: ajsTableColumnLabels.label("group1.col5"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group1.layoutHv,
       },
       {
         id: "group1.col6",
-        header: ajsTableColumnHeader["group1.col6"],
+        header: ajsTableColumnLabels.label("group1.col6"),
         accessorFn: (row) => rowViewByPath.get(row.absolutePath)?.group1.size,
       },
     ],

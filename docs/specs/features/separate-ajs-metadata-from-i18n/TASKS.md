@@ -12,16 +12,17 @@
 
 ## Current Task
 
-- Status: Proposed
+- Status: Complete
 - Scope:
-  propose the next behavior-preserving slice for separating AJS table column
-  metadata from flat `ajscolumn` resource keys.
+  no active approved implementation task remains after completing the unit type
+  label accessor slice and the all-group AJS table column label accessor
+  expansion.
 - Acceptance:
-  impact investigation names the affected table column definitions, column
-  label resources, tests, desktop/web compatibility risks, and alternatives
-  before runtime code or tests are edited.
+  future work must start with a fresh impact investigation and approval before
+  editing runtime code, tests, generated artifacts, or configuration.
 - Validation:
-  docs-only planning changes require `rtk pnpm run qlty`.
+  code changes must continue to follow `docs/specs/README.md`: `rtk pnpm run
+qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`.
 
 ## Human Approval
 
@@ -40,14 +41,34 @@ active implementation approval remains.
 ## Active Tasks
 
 - [x] Complete the approved unit type label helper slice.
-- [ ] Complete impact investigation for AJS table column metadata and affected
+- [x] Complete impact investigation for AJS table column metadata and affected
       table column definition consumers.
-- [ ] Request human approval for the next implementation slice before editing
+- [x] Request human approval for the next implementation slice before editing
       runtime code, tests, generated artifacts, or configuration.
+- [x] Complete the approved all-group AJS table column label accessor expansion.
+
+## Decision Notes
+
+- Direct `ajsTableColumnHeader[...]` access appeared in all table
+  column group definition files under
+  `src/ui-component/editor/ajsTable/columnDefs/`; the approved expanded slice
+  removes that direct resource access from every group file in one mechanical
+  pass.
+- Table label accessors remain in the existing shared i18n/resource boundary
+  and browser-safe. Moving column metadata into domain remains deferred until a
+  later slice proves the metadata expresses JP1/AJS semantics beyond
+  presentation labels.
+- The completed slices preserve parser, normalized model, CSV, flow,
+  diagnostics, hover, telemetry, WebAPI, and VS Code compatibility behavior.
+- A pre-existing `group10.tsx` column id typo (`grsoup10.col7`) was observed
+  during review but left unchanged because it is outside this metadata-boundary
+  slice.
 
 ## Validation
 
 - The unit type label helper slice passed `rtk pnpm run qlty`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`.
+- The all-group table column label accessor slice passed `rtk pnpm run qlty`,
   `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`.
 - Future implementation slices must run relevant unit tests and the required
   code-validation sequence from `docs/specs/README.md` unless the approved
@@ -62,3 +83,5 @@ active implementation approval remains.
   correction, so no use-case update is needed.
 - Update `docs/requirements/use-cases/uc-build-unit-list-view.md` if a future
   slice changes observable column labels or fallback behavior.
+- No use-case update is needed for the expanded column label accessor slice
+  while it preserves existing observable labels.

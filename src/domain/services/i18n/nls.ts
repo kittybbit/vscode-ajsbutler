@@ -79,3 +79,17 @@ export const ajsTableColumnHeaderLang = (
     }[language],
   );
 };
+
+export type AjsTableColumnLabelKey = keyof typeof ajscolumn.en;
+export type AjsTableColumnLabelAccessor = {
+  label: (key: AjsTableColumnLabelKey) => string;
+};
+
+export const ajsTableColumnLabels = (
+  language: string,
+): AjsTableColumnLabelAccessor => {
+  const labels = ajsTableColumnHeaderLang(language);
+  return {
+    label: (key) => labels[key],
+  };
+};

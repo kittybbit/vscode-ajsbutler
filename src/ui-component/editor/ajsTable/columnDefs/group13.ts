@@ -1,48 +1,48 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
-import * as ajscolumn from "@resource/i18n/ajscolumn";
+import type { AjsTableColumnLabelAccessor } from "../../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 const group13 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  ajsTableColumnHeader: typeof ajscolumn.en,
+  ajsTableColumnLabels: AjsTableColumnLabelAccessor,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({
     id: "group13", //Event job definition information
-    header: ajsTableColumnHeader["group13"],
+    header: ajsTableColumnLabels.label("group13"),
     columns: [
       {
         id: "group13.col1",
-        header: ajsTableColumnHeader["group13.col1"],
+        header: ajsTableColumnLabels.label("group13.col1"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.timeoutInterval,
       },
       {
         id: "group13.col2",
-        header: ajsTableColumnHeader["group13.col2"],
+        header: ajsTableColumnLabels.label("group13.col2"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.eventTimeout,
       },
       {
         id: "group13.col3",
-        header: ajsTableColumnHeader["group13.col3"],
+        header: ajsTableColumnLabels.label("group13.col3"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.monitoredFileName,
       },
       columnHelper.group({
         id: "group13.group1",
-        header: ajsTableColumnHeader["group13.group1"],
+        header: ajsTableColumnLabels.label("group13.group1"),
         columns: [
           {
             id: "group13.group1.col1",
-            header: ajsTableColumnHeader["group13.group1.col1"],
+            header: ajsTableColumnLabels.label("group13.group1.col1"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group13
                 .monitoredFileCondition,
           },
           {
             id: "group13.group1.col2",
-            header: ajsTableColumnHeader["group13.group1.col2"],
+            header: ajsTableColumnLabels.label("group13.group1.col2"),
             accessorFn: (row) =>
               rowViewByPath.get(row.absolutePath)?.group13
                 .monitoredFileCloseMode,
@@ -51,31 +51,31 @@ const group13 = (
       }),
       {
         id: "group13.col4",
-        header: ajsTableColumnHeader["group13.col4"],
+        header: ajsTableColumnLabels.label("group13.col4"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.monitoringInterval,
       },
       {
         id: "group13.col5",
-        header: ajsTableColumnHeader["group13.col5"],
+        header: ajsTableColumnLabels.label("group13.col5"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.waitEventId,
       },
       {
         id: "group13.col6",
-        header: ajsTableColumnHeader["group13.col6"],
+        header: ajsTableColumnLabels.label("group13.col6"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.waitHostName,
       },
       {
         id: "group13.col7",
-        header: ajsTableColumnHeader["group13.col7"],
+        header: ajsTableColumnLabels.label("group13.col7"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.waitMessage,
       },
       {
         id: "group13.col8",
-        header: ajsTableColumnHeader["group13.col8"],
+        header: ajsTableColumnLabels.label("group13.col8"),
         accessorFn: (row) =>
           rowViewByPath.get(row.absolutePath)?.group13.eventTimeoutAction,
       },
