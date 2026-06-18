@@ -1,15 +1,18 @@
-import { parseAjs } from "../../domain/services/parser/AjsParser";
-import { ANTLRError } from "../../domain/services/parser/SyntaxErrorListener";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { Unit } from "../../domain/values/Unit";
+import type { AjsParserError, AjsParserPort } from "../parsing/AjsParserPort";
 import { toUnitListDocumentDto, UnitListDocumentDto } from "./unitListDocument";
 
 export type BuildUnitListResult = {
   document?: UnitListDocumentDto;
-  errors: ANTLRError[];
+  errors: AjsParserError[];
 };
 
-const buildParserErrorResult = (errors: ANTLRError[]): BuildUnitListResult => ({
+export type BuildUnitList = (content: string) => BuildUnitListResult;
+
+const buildParserErrorResult = (
+  errors: AjsParserError[],
+): BuildUnitListResult => ({
   errors,
 });
 
@@ -20,11 +23,13 @@ const buildUnitListDocumentResult = (
   errors: [],
 });
 
-export const buildUnitList = (content: string): BuildUnitListResult => {
-  const parseResult = parseAjs(content);
-  if (parseResult.errors.length > 0) {
-    return buildParserErrorResult(parseResult.errors);
-  }
+export const createBuildUnitList =
+  (parser: AjsParserPort): BuildUnitList =>
+  (content) => {
+    const parseResult = parser.parse(content);
+    if (parseResult.errors.length > 0) {
+      return buildParserErrorResult(parseResult.errors);
+    }
 
-  return buildUnitListDocumentResult(parseResult.rootUnits);
-};
+    return buildUnitListDocumentResult(parseResult.rootUnits);
+  };

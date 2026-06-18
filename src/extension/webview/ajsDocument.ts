@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
-import { buildUnitList } from "../../application/unit-list/buildUnitList";
+import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
 
 const postAjsDocument = (
+  buildUnitList: BuildUnitList,
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
 ): void => {
@@ -13,16 +14,18 @@ const postAjsDocument = (
   });
 };
 
-export const readyAjsDocument = (
-  document: vscode.TextDocument,
-  panel: vscode.WebviewPanel,
-): void => {
-  console.log(`post a message of ready. (${document.uri.toString()})`);
-  postAjsDocument(document, panel);
-};
+export const createReadyAjsDocument =
+  (buildUnitList: BuildUnitList) =>
+  (document: vscode.TextDocument, panel: vscode.WebviewPanel): void => {
+    console.log(`post a message of ready. (${document.uri.toString()})`);
+    postAjsDocument(buildUnitList, document, panel);
+  };
 
-export function debouncedAjsDocumentChangeFn(delay: number = 300) {
-  const id: Map<string, NodeJS.Timeout> = new Map();
+export function createDebouncedAjsDocumentChange(
+  buildUnitList: BuildUnitList,
+  delay: number = 300,
+) {
+  const id = new Map<string, ReturnType<typeof setTimeout>>();
   return (document: vscode.TextDocument, panel: vscode.WebviewPanel) => {
     if (panel === undefined) {
       return;
@@ -33,7 +36,7 @@ export function debouncedAjsDocumentChangeFn(delay: number = 300) {
       key,
       setTimeout(() => {
         console.log(`post a message of changeDocument. ${key}:${id.get(key)}`);
-        postAjsDocument(document, panel);
+        postAjsDocument(buildUnitList, document, panel);
       }, delay),
     );
   };

@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { buildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
+import type { BuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
 import { LANGUAGE_ID } from "../constant";
 
 const toVsCodeDiagnostic = (
-  diagnostic: ReturnType<typeof buildSyntaxDiagnostics>[number],
+  diagnostic: ReturnType<BuildSyntaxDiagnostics>[number],
 ): vscode.Diagnostic => {
   const startPos = new vscode.Position(diagnostic.line - 1, diagnostic.column);
   const endPos = new vscode.Position(
@@ -19,6 +19,7 @@ const toVsCodeDiagnostic = (
 };
 
 const updateDiagnostics = (
+  buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
   collection: vscode.DiagnosticCollection,
   document: vscode.TextDocument,
 ): void => {
@@ -46,21 +47,27 @@ const runForAjsDocument = (
 };
 
 const createOpenDocumentListener =
-  (collection: vscode.DiagnosticCollection) =>
+  (
+    buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
+    collection: vscode.DiagnosticCollection,
+  ) =>
   (document: vscode.TextDocument): void => {
     runForAjsDocument(document, "onDidOpenTextDocument", (targetDocument) => {
-      updateDiagnostics(collection, targetDocument);
+      updateDiagnostics(buildSyntaxDiagnostics, collection, targetDocument);
     });
   };
 
 const createChangeDocumentListener =
-  (collection: vscode.DiagnosticCollection) =>
+  (
+    buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
+    collection: vscode.DiagnosticCollection,
+  ) =>
   (event: vscode.TextDocumentChangeEvent): void => {
     runForAjsDocument(
       event.document,
       "onDidChangeTextDocument",
       (targetDocument) => {
-        updateDiagnostics(collection, targetDocument);
+        updateDiagnostics(buildSyntaxDiagnostics, collection, targetDocument);
       },
     );
   };
@@ -73,7 +80,9 @@ const createCloseDocumentListener =
     });
   };
 
-export const registerDiagnostics = (): vscode.Disposable => {
+export const registerDiagnostics = (
+  buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
+): vscode.Disposable => {
   console.log("initialize Diagnostic.");
   const collection =
     vscode.languages.createDiagnosticCollection("vscode.ajsbutler");
@@ -81,10 +90,10 @@ export const registerDiagnostics = (): vscode.Disposable => {
   return vscode.Disposable.from(
     collection,
     vscode.workspace.onDidOpenTextDocument(
-      createOpenDocumentListener(collection),
+      createOpenDocumentListener(buildSyntaxDiagnostics, collection),
     ),
     vscode.workspace.onDidChangeTextDocument(
-      createChangeDocumentListener(collection),
+      createChangeDocumentListener(buildSyntaxDiagnostics, collection),
     ),
     vscode.workspace.onDidCloseTextDocument(
       createCloseDocumentListener(collection),

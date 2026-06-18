@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { G } from "../../domain/models/units/G";
 import { J } from "../../domain/models/units/J";

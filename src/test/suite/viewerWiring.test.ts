@@ -11,7 +11,11 @@ suite("Viewer wiring", () => {
       dispose() {},
     };
 
-    const subscriptions = createViewerSubscriptions({ context, telemetry });
+    const subscriptions = createViewerSubscriptions({
+      context,
+      telemetry,
+      buildUnitList: () => ({ errors: [] }),
+    });
 
     assert.strictEqual(subscriptions.length, 4);
     subscriptions.forEach((subscription) => {

@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { buildUnitListGroup6View } from "../../application/unit-list/buildUnitListGroup6View";
 

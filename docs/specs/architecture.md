@@ -19,11 +19,13 @@ Migration should be incremental and use-case driven.
 ## Current Structure
 
 - `src/domain`
-  Contains unit models, value objects, parser orchestration, the normalized AJS
-  model, and some transitional wrapper/event helpers.
+  Contains unit models, value objects, the normalized AJS model, and some
+  transitional wrapper/event helpers.
 - `src/application`
   Contains DTO-oriented use cases and view adapters for unit list, flow graph,
-  editor feedback, telemetry ports, and unit definition building.
+  editor feedback, parser and telemetry ports, and unit definition building.
+- `src/infrastructure`
+  Contains the concrete ANTLR parser and JP1/AJS3 WebAPI adapters.
 - `src/extension`
   Contains extension activation, diagnostics, hover provider registration,
   preview commands, and webview panel orchestration.
@@ -38,17 +40,15 @@ Migration should be incremental and use-case driven.
 
 - grammar source lives in `src/antlr`
 - generated parser code lives in `src/generate/parser`
-- parser orchestration currently lives in
-  `src/domain/services/parser/AjsParser.ts`
-- parse-tree evaluation currently lives in
-  `src/domain/services/parser/AjsEvaluator.ts`
-- syntax error collection currently lives in
-  `src/domain/services/parser/SyntaxErrorListener.ts`
+- the application-owned synchronous parser contract lives in
+  `src/application/parsing/AjsParserPort.ts`
+- ANTLR orchestration, parse-tree evaluation, and syntax error collection live
+  under `src/infrastructure/parser`
 
 ### Where parser output crosses outward
 
-- `src/domain/services/parser/AjsParser.ts` returns `Unit[]` plus syntax errors,
-  which is a reasonable boundary for domain-facing consumers
+- `AjsParserPort` returns `Unit[]` plus repository-owned syntax errors without
+  exposing ANTLR types
 - `src/domain/models/ajs/normalizeAjsDocument.ts` converts raw `Unit[]` into a
   stable normalized model
 - `src/application/unit-list/*` and `src/application/flow-graph/*` can now
@@ -60,7 +60,9 @@ Migration should be incremental and use-case driven.
 ### Boundary assessment
 
 - the grammar and generated parser are already isolated
-- the evaluator-to-`Unit[]` mapping is still the raw seam
+- the infrastructure evaluator-to-`Unit[]` mapping remains the raw seam
+- unit-list and syntax-diagnostic use cases depend on the application parser
+  port and receive the infrastructure adapter from extension bootstrap
 - normalization is now the next stable seam for application-facing use cases
 - unit-list table rendering now depends on an application row/view adapter
   end to end instead of direct wrapper accessors or `UnitEntity` row objects
@@ -274,7 +276,8 @@ normalized model where practical.
 
 ### Current benefits
 
-- moves parser invocation behind a clearer application boundary
+- keeps parser invocation behind an explicit application port and
+  infrastructure adapter
 - removes `vscode` and serialization concerns from domain-side helpers
 - gives the table webview application-projected row/view data instead of
   wrapper-driven accessor logic

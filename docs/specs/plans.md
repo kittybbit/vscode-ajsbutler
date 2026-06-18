@@ -30,22 +30,21 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Keep WebAPI import beta feedback and real-environment smoke evidence
+1. Plan the explicit extension composition-root slice now that parser adapter
+   construction is available at the bootstrap boundary.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
    available.
-2. Keep compatibility risk visible for every shared or extension-runtime
+3. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
 ## Active Feature Specs
 
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
-- `docs/specs/features/extract-parser-adapter-boundary/`:
-  approved roadmap documentation awaiting task planning and implementation
-  approval for the application parser port and infrastructure ANTLR adapter
-  boundary.
 - `docs/specs/features/establish-extension-composition-root/`:
-  roadmap feature awaiting planning after parser-boundary extraction.
+  next roadmap feature awaiting task planning now that parser-boundary
+  extraction is complete.
 - `docs/specs/features/normalize-semantic-diagnostics-input/`:
   roadmap feature awaiting planning for normalized diagnostic inputs.
 - `docs/specs/features/classify-vscode-adapter-layout/`:
