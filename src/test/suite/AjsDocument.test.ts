@@ -1,12 +1,14 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import {
-  debouncedAjsDocumentChangeFn,
-  readyAjsDocument,
+  createDebouncedAjsDocumentChange,
+  createReadyAjsDocument,
 } from "../../extension/webview/ajsDocument";
 import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
 
 suite("ajsDocument", () => {
+  const buildUnitList = () => ({ errors: [], document: undefined });
+
   test("posts the normalized document on ready", () => {
     const posted: Array<{ type: string; data: unknown }> = [];
     const document = {
@@ -23,7 +25,7 @@ suite("ajsDocument", () => {
       },
     } as vscode.WebviewPanel;
 
-    readyAjsDocument(document, panel);
+    createReadyAjsDocument(buildUnitList)(document, panel);
 
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
@@ -45,7 +47,7 @@ suite("ajsDocument", () => {
       },
     } as vscode.WebviewPanel;
 
-    const onChange = debouncedAjsDocumentChangeFn(5);
+    const onChange = createDebouncedAjsDocumentChange(buildUnitList, 5);
     onChange(document, panel);
     onChange(document, panel);
 

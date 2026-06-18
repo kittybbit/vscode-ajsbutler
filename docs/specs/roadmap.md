@@ -38,14 +38,11 @@
 
 3. Introduce stricter parser/infrastructure boundaries.
 
-   - Track the active first slice in
-     `features/extract-parser-adapter-boundary/`.
-   - Define an application-facing parser port for raw definition text.
-   - Move concrete ANTLR orchestration behind an infrastructure adapter while
-     preserving raw `Unit` and parser-error behavior.
-   - Keep generated ANTLR artifacts and parser-specific mechanics out of
-     application use cases.
-   - Preserve current desktop and web extension behavior while migrating.
+   - The application-facing parser port and host-neutral infrastructure ANTLR
+     adapter are implemented for unit-list and syntax-diagnostic consumers.
+   - Raw `Unit` and repository-owned parser-error behavior remain the initial
+     seam; generated ANTLR artifacts and mechanics stay outside application and
+     domain production modules.
    - Defer normalized-only parsing and semantic-diagnostic model migration to
      later single-purpose features.
 

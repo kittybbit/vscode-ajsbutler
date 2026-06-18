@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { v5 as uuidv5 } from "uuid";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
 const UNIT_ENTITY_ID_NAMESPACE = uuidv5.URL;

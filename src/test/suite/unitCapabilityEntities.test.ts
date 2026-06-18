@@ -11,7 +11,7 @@ import { N } from "../../domain/models/units/N";
 import { Ntwj } from "../../domain/models/units/Ntwj";
 import { Pwrj } from "../../domain/models/units/Pwrj";
 import { Qj } from "../../domain/models/units/Qj";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
 suite("Unit capability entities", () => {

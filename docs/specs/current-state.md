@@ -6,11 +6,11 @@ The repository currently mixes legacy folder names with increasingly explicit
 application and adapter boundaries.
 
 - `src/domain` contains raw parsed units, wrapper/interpreter models, normalized
-  AJS models, parameter semantics, and concrete ANTLR parser orchestration
+  AJS models, and parameter semantics
 - `src/application` contains unit-list, flow-graph, unit-definition,
   editor-feedback, telemetry-port, and WebAPI-import use cases or DTOs
-- `src/infrastructure` contains the concrete JP1/AJS3 WebAPI import adapter and
-  generated transport types
+- `src/infrastructure` contains the concrete ANTLR parser adapter, JP1/AJS3
+  WebAPI import adapter, and generated transport types
 - `src/extension` contains VS Code-facing adapters, explicit bootstrap wiring,
   telemetry adapters, WebAPI command wiring, and webview orchestration
 - `src/ui-component` contains React/webview presentation code and
@@ -27,9 +27,9 @@ application and adapter boundaries.
 - bootstrap is now split into lifecycle, runtime, subscription, viewer, and
   WebAPI-import wiring modules, but all VS Code runtime construction still
   converges in the extension adapter layer
-- concrete ANTLR orchestration still lives under `src/domain/services/parser`;
-  application use cases for unit-list building and syntax diagnostics import it
-  directly instead of depending on an application-facing parser port
+- unit-list building and syntax diagnostics now depend on the synchronous
+  application-facing parser port; extension bootstrap supplies the shared
+  host-neutral ANTLR infrastructure adapter
 - raw `Unit` remains intentionally parser-adjacent, but semantic diagnostics
   still operate directly on that raw model while normalized-model adoption is
   further advanced in unit-list and flow-graph paths
@@ -65,11 +65,11 @@ application and adapter boundaries.
 
 The next focused architecture slice should:
 
-- define an application-facing parser port for consumers of raw definition text
-- move concrete ANTLR construction and tree-walking behind an infrastructure
-  adapter
-- preserve raw `Unit` and parser-error behavior at the initial seam
-- keep desktop and web bundles free of new host-specific dependencies
+- establish an explicit extension composition root around the dependencies now
+  constructed in bootstrap
+- preserve current activation, disposal, diagnostics, and viewer behavior
+- keep dependency injection explicit without introducing a service container
+- preserve desktop and web bundles without new host-specific dependencies
 
 ## Fixture Baseline
 

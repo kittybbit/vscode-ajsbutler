@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { buildExpandedFlowGraph } from "../../ui-component/editor/ajsFlow/buildExpandedFlowGraph";
 

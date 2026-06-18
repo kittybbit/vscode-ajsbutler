@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import {
   createRevealUnitEvent,
   type NavigationEventType,
@@ -17,8 +18,8 @@ import {
 } from "../webview/constant";
 import { WebviewStore } from "../webview/WebviewStore";
 import {
-  debouncedAjsDocumentChangeFn,
-  readyAjsDocument,
+  createDebouncedAjsDocumentChange,
+  createReadyAjsDocument,
 } from "../webview/ajsDocument";
 import { mountViewerPanel } from "../webview/mountViewerPanel";
 import { saveText } from "../webview/messageHandlers";
@@ -36,6 +37,7 @@ const viewerConfigs: ViewerConfig[] = [
 export type ViewerWiringDeps = {
   context: vscode.ExtensionContext;
   telemetry: TelemetryPort;
+  buildUnitList: BuildUnitList;
 };
 
 const createPreviewCommandDependencies = (
@@ -101,6 +103,7 @@ const revealCounterpartFromNavigation = (
 const createViewerBundle = ({
   context,
   telemetry,
+  buildUnitList,
   previewDeps,
   factoryByViewType,
   viewType,
@@ -116,13 +119,13 @@ const createViewerBundle = ({
     context,
     viewType,
     store,
-    debouncedAjsDocumentChangeFn(300),
+    createDebouncedAjsDocumentChange(buildUnitList, 300),
   );
   const factory = new ViewerFactory(
     viewType,
     telemetry,
     store,
-    readyAjsDocument,
+    createReadyAjsDocument(buildUnitList),
     (document, event) => {
       revealCounterpartFromNavigation(document, event, factoryByViewType);
     },

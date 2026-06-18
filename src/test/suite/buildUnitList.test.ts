@@ -1,6 +1,9 @@
 import * as assert from "assert";
+import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
 import { toRootUnits } from "../../application/unit-list/unitListDocument";
-import { buildUnitList } from "../../application/unit-list/buildUnitList";
+import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
+import { Unit } from "../../domain/values/Unit";
+import { testAjsParser } from "../support/parseAjs";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -20,6 +23,8 @@ unit=root,,jp1admin,;
 `;
 
 suite("Build Unit List", () => {
+  const buildUnitList = createBuildUnitList(testAjsParser);
+
   test("builds a document DTO without parent references", () => {
     const result = buildUnitList(validDefinition);
 
@@ -58,5 +63,35 @@ suite("Build Unit List", () => {
 
     assert.strictEqual(result.document, undefined);
     assert.ok(result.errors.length > 0);
+  });
+
+  test("builds the DTO through an injected parser port", () => {
+    const root = new Unit("root,,jp1admin,");
+    const parser: AjsParserPort = {
+      parse: () => ({ rootUnits: [root], errors: [] }),
+    };
+
+    const result = createBuildUnitList(parser)("ignored");
+
+    assert.strictEqual(
+      result.document?.rootUnits[0].unitAttribute,
+      "root,,jp1admin,",
+    );
+  });
+
+  test("returns repository-owned errors from an injected parser port", () => {
+    const parser: AjsParserPort = {
+      parse: () => ({
+        rootUnits: [],
+        errors: [{ line: 2, column: 3, message: "invalid syntax" }],
+      }),
+    };
+
+    const result = createBuildUnitList(parser)("ignored");
+
+    assert.deepStrictEqual(result.errors, [
+      { line: 2, column: 3, message: "invalid syntax" },
+    ]);
+    assert.strictEqual(result.document, undefined);
   });
 });

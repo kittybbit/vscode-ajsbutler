@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { buildFlowGraph } from "../../application/flow-graph/buildFlowGraph";
 

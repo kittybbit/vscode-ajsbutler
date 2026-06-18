@@ -8,7 +8,7 @@ import { Htpj } from "../../domain/models/units/Htpj";
 import { N } from "../../domain/models/units/N";
 import { Qj, Rq } from "../../domain/models/units/Qj";
 import { Tmwj } from "../../domain/models/units/Tmwj";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
 const definition = `

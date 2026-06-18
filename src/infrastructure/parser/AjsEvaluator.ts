@@ -4,7 +4,7 @@ import {
   UnitDefinitionContext,
   UnitParameterContext,
 } from "@generate/parser/AjsParser";
-import { Unit } from "../../values/Unit";
+import { Unit } from "../../domain/values/Unit";
 
 export class Ajs3v12Evaluator implements AjsParserListener {
   /** parsed definition */

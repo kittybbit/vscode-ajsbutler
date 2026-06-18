@@ -11,7 +11,10 @@ suite("Extension subscriptions", () => {
       dispose() {},
     };
 
-    const subscriptions = createExtensionSubscriptions(context, telemetry);
+    const subscriptions = createExtensionSubscriptions(context, telemetry, {
+      buildSyntaxDiagnostics: () => [],
+      buildUnitList: () => ({ errors: [] }),
+    });
 
     assert.strictEqual(subscriptions.length, 7);
     subscriptions.forEach((subscription) => {

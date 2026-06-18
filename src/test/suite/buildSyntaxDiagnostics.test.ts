@@ -1,7 +1,32 @@
 import * as assert from "assert";
-import { buildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
+import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
+import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
+import { testAjsParser } from "../support/parseAjs";
+
+const buildSyntaxDiagnostics = createBuildSyntaxDiagnostics(testAjsParser);
 
 suite("Build Syntax Diagnostics", () => {
+  test("maps repository-owned errors from an injected parser port", () => {
+    const parser: AjsParserPort = {
+      parse: () => ({
+        rootUnits: [],
+        errors: [{ line: 4, column: 2, message: "invalid syntax" }],
+      }),
+    };
+
+    const diagnostics = createBuildSyntaxDiagnostics(parser)("ignored");
+
+    assert.deepStrictEqual(diagnostics, [
+      {
+        line: 4,
+        column: 2,
+        length: 1,
+        message: "invalid syntax",
+        severity: "error",
+      },
+    ]);
+  });
+
   test("characterizes mixed diagnostic summaries across parser and domain rules", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

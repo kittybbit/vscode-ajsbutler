@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../../domain/services/parser/AjsParser";
+import { parseAjs } from "../support/parseAjs";
 import { buildNormalizedUnit } from "../../domain/models/ajs/normalize/unitBuilder";
 
 const validDefinition = `
