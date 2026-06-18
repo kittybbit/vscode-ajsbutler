@@ -30,25 +30,25 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Plan the explicit extension composition-root slice now that parser adapter
-   construction is available at the bootstrap boundary.
-2. Keep WebAPI import beta feedback and real-environment smoke evidence
+1. Plan normalized semantic-diagnostic inputs now that the parser adapter
+   boundary is available.
+2. Classify the legacy VS Code adapter layout now that composition ownership
+   is explicit.
+3. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
    available.
-3. Keep compatibility risk visible for every shared or extension-runtime
+4. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
 ## Active Feature Specs
 
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
-- `docs/specs/features/establish-extension-composition-root/`:
-  next roadmap feature awaiting task planning now that parser-boundary
-  extraction is complete.
 - `docs/specs/features/normalize-semantic-diagnostics-input/`:
   roadmap feature awaiting planning for normalized diagnostic inputs.
 - `docs/specs/features/classify-vscode-adapter-layout/`:
-  roadmap feature awaiting composition-root completion and relocation planning.
+  roadmap feature awaiting relocation planning now that composition ownership
+  is explicit.
 - `docs/specs/features/relocate-react-webview-presentation/`:
   roadmap feature awaiting VS Code adapter layout classification.
 

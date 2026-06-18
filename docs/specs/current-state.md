@@ -24,9 +24,9 @@ application and adapter boundaries.
 
 ## Current Architectural Tensions
 
-- bootstrap is now split into lifecycle, runtime, subscription, viewer, and
-  WebAPI-import wiring modules, but all VS Code runtime construction still
-  converges in the extension adapter layer
+- one typed bootstrap composition owner now constructs telemetry, parser-backed
+  application, hover, credential, and WebAPI import dependencies and injects
+  them into lifecycle, subscription, viewer, and command wiring
 - unit-list building and syntax diagnostics now depend on the synchronous
   application-facing parser port; extension bootstrap supplies the shared
   host-neutral ANTLR infrastructure adapter
@@ -65,10 +65,9 @@ application and adapter boundaries.
 
 The next focused architecture slice should:
 
-- establish an explicit extension composition root around the dependencies now
-  constructed in bootstrap
-- preserve current activation, disposal, diagnostics, and viewer behavior
-- keep dependency injection explicit without introducing a service container
+- make semantic diagnostic rules consume normalized AJS inputs
+- preserve existing messages, positions, defaults, and rule decisions
+- keep parser syntax errors and VS Code diagnostic mapping unchanged
 - preserve desktop and web bundles without new host-specific dependencies
 
 ## Fixture Baseline

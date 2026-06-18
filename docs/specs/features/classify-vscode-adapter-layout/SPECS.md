@@ -11,7 +11,7 @@ responsibility.
 - Feature kind: roadmap feature
 - Source: target structure in `AGENTS.md` and `docs/specs/architecture.md`
 - Related plan: `docs/specs/plans.md`
-- Dependency: `features/establish-extension-composition-root/`
+- Dependency: explicit extension composition-root implementation (completed)
 
 ## Requirements
 
