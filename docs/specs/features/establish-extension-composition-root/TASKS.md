@@ -1,16 +1,14 @@
-# Feature Tasks: Establish Extension Composition Root
+# Establish Extension Composition Root Tasks
 
-## Sync Rule
+## Current Task
 
-- Update this file with task decisions, `plans.md` when active features change,
-  and `roadmap.md` when repository sequencing changes.
-- Keep only current approval, risk, validation, and next-decision state.
-
-## Current Status
-
-- Runtime status: not started; implementation approval is pending.
-- Active slice: plan explicit dependency construction and injection.
-- Open follow-up: choose the smallest dependency bundle during planning.
+- Status: Proposed
+- Scope: No further implementation task is apparent. Use `sdd-plan-task` to
+  confirm whether the feature can close and whether any durable information
+  must move before removing the feature folder.
+- Acceptance: Feature requirements and acceptance criteria are represented by
+  the completed composition-root implementation and existing regression tests.
+- Validation: No implementation validation is pending.
 
 ## Human Approval
 
@@ -18,22 +16,17 @@
 - Approved at: none
 - Approved scope: none
 
-Implementation must not start while Status is Pending.
+## Decision Notes
 
-## Active Tasks
+- Concrete telemetry, parser-backed application, hover, credential, and WebAPI
+  import dependencies now have one typed bootstrap construction owner and are
+  injected into VS Code-facing adapters.
+- No unresolved compatibility, lifecycle, telemetry, desktop, or web risk was
+  found during three independent reviews.
+- Existing production-build bundle-size warnings are unchanged and are not a
+  follow-up for this feature.
 
-- [x] Feature boundary and initial impact recorded.
-- [ ] Use `sdd-plan-task` to map construction, injection, and disposal owners.
-- [ ] Obtain implementation approval for the planned slice.
-- [ ] Verify every affected reference after approval.
-- [ ] Implement only the approved composition-root slice.
+## Use-Case Back-Propagation
 
-## Validation
-
-- [ ] Add or update bootstrap and fake-dependency adapter tests.
-- [ ] Run `rtk pnpm run qlty`, desktop tests, web tests, and build.
-
-## Notes
-
-- Docs approval permits a docs-only PR, not runtime implementation.
-- No durable behavior-contract change is expected.
+- None. The implementation preserved existing observable behavior and durable
+  use-case contracts.

@@ -1,10 +1,8 @@
 import * as vscode from "vscode";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { MyExtension } from "../MyExtension";
-import { createTelemetry } from "../telemetry/createTelemetry";
 
 export const createExtensionRuntime = (
   context: vscode.ExtensionContext,
-): MyExtension => {
-  const telemetry = createTelemetry();
-  return MyExtension.init(context, telemetry);
-};
+  telemetry: TelemetryPort,
+): MyExtension => MyExtension.init(context, telemetry);

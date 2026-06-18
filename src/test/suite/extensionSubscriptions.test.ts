@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import type { ExtensionDependencies } from "../../extension/bootstrap/extensionDependencies";
 import { createExtensionSubscriptions } from "../../extension/bootstrap/extensionSubscriptions";
 
 suite("Extension subscriptions", () => {
@@ -10,11 +11,27 @@ suite("Extension subscriptions", () => {
       trackEvent() {},
       dispose() {},
     };
-
-    const subscriptions = createExtensionSubscriptions(context, telemetry, {
+    const dependencies: ExtensionDependencies = {
+      telemetry,
       buildSyntaxDiagnostics: () => [],
       buildUnitList: () => ({ errors: [] }),
-    });
+      findParameterHover: () => undefined,
+      webApiImport: {
+        storeCredential: async () => {},
+        importPort: {
+          importDefinition: async () => ({
+            ok: false,
+            error: {
+              code: "network-failed",
+              message: "not called",
+              recoverable: true,
+            },
+          }),
+        },
+      },
+    };
+
+    const subscriptions = createExtensionSubscriptions(context, dependencies);
 
     assert.strictEqual(subscriptions.length, 7);
     subscriptions.forEach((subscription) => {

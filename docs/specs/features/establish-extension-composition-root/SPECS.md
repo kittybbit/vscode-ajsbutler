@@ -98,8 +98,3 @@ and infrastructure dependencies and injects them into VS Code-facing adapters.
 - Changing parser, diagnostics, viewer, WebAPI, telemetry, or command behavior.
 - Moving source directories into the target presentation layout.
 - Introducing a general-purpose container or plugin system.
-
-## Open Questions
-
-- Planning must choose whether the smallest dependency bundle is a typed object
-  or focused factory functions.

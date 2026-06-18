@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
-import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
-import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
-import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { MyExtension } from "../MyExtension";
+import { createExtensionDependencies } from "./extensionDependencies";
 import {
   reportExtensionActivated,
   reportAndDisposeExtensionRuntime,
@@ -17,18 +15,11 @@ export type ActivatedExtension = {
 export const activateExtension = (
   context: vscode.ExtensionContext,
 ): ActivatedExtension => {
-  const myExtension = createExtensionRuntime(context);
-  const parser = new AntlrAjsParser();
+  const dependencies = createExtensionDependencies(context);
+  const myExtension = createExtensionRuntime(context, dependencies.telemetry);
 
   context.subscriptions.push(
-    ...createExtensionSubscriptions(
-      myExtension.context,
-      myExtension.telemetry,
-      {
-        buildSyntaxDiagnostics: createBuildSyntaxDiagnostics(parser),
-        buildUnitList: createBuildUnitList(parser),
-      },
-    ),
+    ...createExtensionSubscriptions(myExtension.context, dependencies),
   );
 
   reportExtensionActivated(myExtension);

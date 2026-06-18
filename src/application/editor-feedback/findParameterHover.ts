@@ -6,10 +6,12 @@ export type ParameterHoverDto = {
   syntax: string;
 };
 
-export const findParameterHover = (
+export type FindParameterHover = (
   word: string,
   language: string,
-): ParameterHoverDto | undefined => {
+) => ParameterHoverDto | undefined;
+
+export const findParameterHover: FindParameterHover = (word, language) => {
   if (!isParamSymbol(word)) {
     return undefined;
   }

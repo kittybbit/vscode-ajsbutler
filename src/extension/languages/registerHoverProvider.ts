@@ -1,10 +1,16 @@
 import * as vscode from "vscode";
-import { findParameterHover } from "../../application/editor-feedback/findParameterHover";
+import type { FindParameterHover } from "../../application/editor-feedback/findParameterHover";
 import { LANGUAGE_ID } from "../constant";
 
 const SELECTOR: vscode.DocumentSelector = { language: LANGUAGE_ID };
 
 class Ajs3v12HoverProvider implements vscode.HoverProvider {
+  readonly #findParameterHover: FindParameterHover;
+
+  constructor(findParameterHover: FindParameterHover) {
+    this.#findParameterHover = findParameterHover;
+  }
+
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
@@ -17,7 +23,7 @@ class Ajs3v12HoverProvider implements vscode.HoverProvider {
     }
 
     const currentWord = document.getText(wordRange);
-    const hoverDefinition = findParameterHover(
+    const hoverDefinition = this.#findParameterHover(
       currentWord,
       vscode.env.language,
     );
@@ -32,10 +38,16 @@ class Ajs3v12HoverProvider implements vscode.HoverProvider {
   }
 }
 
-export const registerHoverProvider = (): vscode.Disposable => {
+export const createAjsHoverProvider = (
+  findParameterHover: FindParameterHover,
+): vscode.HoverProvider => new Ajs3v12HoverProvider(findParameterHover);
+
+export const registerHoverProvider = (
+  findParameterHover: FindParameterHover,
+): vscode.Disposable => {
   console.log("registered Ajs3v12HoverProvider");
   return vscode.languages.registerHoverProvider(
     SELECTOR,
-    new Ajs3v12HoverProvider(),
+    createAjsHoverProvider(findParameterHover),
   );
 };
