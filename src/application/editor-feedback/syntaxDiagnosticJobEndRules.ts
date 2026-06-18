@@ -1,8 +1,8 @@
-import type { Unit } from "../../domain/values/Unit";
+import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { parseExplicitDecimalInRange } from "./syntaxDiagnosticScalarValidators";
 import { findParameter } from "./syntaxDiagnosticUnitLookup";
 
-export const hasInvalidExplicitThresholdOrdering = (unit: Unit): boolean => {
+export const hasInvalidExplicitThresholdOrdering = (unit: AjsUnit): boolean => {
   const warningThreshold = parseExplicitDecimalInRange({
     parameter: findParameter(unit, "wth"),
     minimum: 0,

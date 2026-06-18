@@ -1,4 +1,5 @@
 import type { AjsParserPort } from "../parsing/AjsParserPort";
+import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { buildSemanticSyntaxDiagnostics } from "./syntaxDiagnosticRules";
 import type {
   BuildSyntaxDiagnosticsOptions,
@@ -32,6 +33,9 @@ export const createBuildSyntaxDiagnostics =
 
     return [
       ...syntaxDiagnostics,
-      ...buildSemanticSyntaxDiagnostics(result.rootUnits, options),
+      ...buildSemanticSyntaxDiagnostics(
+        normalizeAjsDocument(result.rootUnits),
+        options,
+      ),
     ];
   };

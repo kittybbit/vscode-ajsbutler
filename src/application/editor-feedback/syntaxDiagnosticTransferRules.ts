@@ -1,4 +1,4 @@
-import type { UnitParameter } from "../../domain/values/Unit";
+import type { AjsParameter } from "../../domain/models/ajs/AjsDocument";
 import {
   isExplicitMacroVariable,
   parseQuotedStringLiteralContent,
@@ -10,7 +10,7 @@ export const isAbsoluteTransferFilePath = (value: string): boolean =>
   /^[A-Za-z]:[\\/]/.test(value);
 
 export const isValidExplicitTransferFileValue = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean => {
   const rawValue = parameter?.value;
   if (!rawValue) {
@@ -24,7 +24,7 @@ export const isValidExplicitTransferFileValue = (
 };
 
 export const hasInvalidExplicitTransferSourcePath = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean => {
   const rawValue = parameter?.value;
   if (!rawValue) {

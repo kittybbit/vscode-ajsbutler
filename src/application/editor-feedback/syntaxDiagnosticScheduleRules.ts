@@ -1,4 +1,7 @@
-import type { Unit, UnitParameter } from "../../domain/values/Unit";
+import type {
+  AjsParameter,
+  AjsUnit,
+} from "../../domain/models/ajs/AjsDocument";
 import { findParameters } from "./syntaxDiagnosticUnitLookup";
 export {
   getCalendarMonthDayLimit,
@@ -98,7 +101,7 @@ export const isValidWaitMinutesRange = (rawValue: string): boolean =>
   isValidMinuteRangeValue(rawValue, /^(\d{1,4})$/);
 
 const parseValidExplicitScheduleRuleValue = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
 ): ParsedExplicitScheduleRuleValue | undefined => {
   const parsed = parseExplicitScheduleRuleValue(parameter.value);
   return isValidScheduleRuleNumber(parsed) && parsed !== undefined
@@ -151,7 +154,7 @@ const isOpenOrClosedDayScheduleValue = (rawValue: string): boolean =>
   /^((\d{4}\/)?\d{2}\/)?[*@]/.test(rawValue);
 
 const parseMatchingExplicitScheduleRuleValue = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
   matchesValue: (rawValue: string) => boolean,
 ): ParsedExplicitScheduleRuleValue | undefined => {
   const parsed = parseValidExplicitScheduleRuleValue(parameter);
@@ -161,22 +164,21 @@ const parseMatchingExplicitScheduleRuleValue = (
 };
 
 export const isValidExplicitParentScheduleRule = (
-  parameter: UnitParameter,
-  unit: Unit,
-  rootUnits: readonly Unit[],
+  parameter: AjsParameter,
+  unit: AjsUnit,
 ): boolean => {
   const parsed = parseValidExplicitScheduleRuleValue(parameter);
   return (
-    rootUnits.includes(unit) ||
+    unit.isRoot ||
     (parsed !== undefined && isExplicitNumberInRange(parsed.value, 1, 144))
   );
 };
 
-export const isValidExplicitStartTime = (parameter: UnitParameter): boolean => {
+export const isValidExplicitStartTime = (parameter: AjsParameter): boolean => {
   return hasValidExplicitScheduleRuleValue(parameter, [isValidHourMinuteRange]);
 };
 
-export const isValidExplicitCycle = (parameter: UnitParameter): boolean => {
+export const isValidExplicitCycle = (parameter: AjsParameter): boolean => {
   const parsed = parseValidExplicitScheduleRuleValue(parameter);
   const cycle = parsed ? parseExplicitCycleValue(parsed.value) : undefined;
   return (
@@ -186,13 +188,13 @@ export const isValidExplicitCycle = (parameter: UnitParameter): boolean => {
 };
 
 export const isExplicitWeeklyCycle = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
 ): ParsedExplicitScheduleRuleValue | undefined => {
   return parseMatchingExplicitScheduleRuleValue(parameter, isWeeklyCycleValue);
 };
 
 export const usesOpenOrClosedDaySchedule = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
 ): ParsedExplicitScheduleRuleValue | undefined => {
   return parseMatchingExplicitScheduleRuleValue(
     parameter,
@@ -201,8 +203,8 @@ export const usesOpenOrClosedDaySchedule = (
 };
 
 export const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
-  parameter: UnitParameter,
-  unit: Unit,
+  parameter: AjsParameter,
+  unit: AjsUnit,
 ): boolean => {
   const weeklyCycle = isExplicitWeeklyCycle(parameter);
   if (!weeklyCycle) {
@@ -215,7 +217,7 @@ export const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
   });
 };
 
-export const isValidExplicitShiftDays = (parameter: UnitParameter): boolean => {
+export const isValidExplicitShiftDays = (parameter: AjsParameter): boolean => {
   const parsed = parseValidExplicitScheduleRuleValue(parameter);
   return parsed !== undefined && isExplicitNumberInRange(parsed.value, 1, 31);
 };
@@ -280,12 +282,12 @@ const isValidScheduleByDaysFromStartSegments = (
 };
 
 const parseScheduleByDaysFromStartSegments = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
 ): readonly string[] | undefined =>
   parseValidExplicitScheduleRuleValue(parameter)?.value.split(",");
 
 export const isValidExplicitScheduleByDaysFromStart = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
 ): boolean => {
   const segments = parseScheduleByDaysFromStartSegments(parameter);
   return (
@@ -294,7 +296,7 @@ export const isValidExplicitScheduleByDaysFromStart = (
 };
 
 const hasValidExplicitScheduleRuleValue = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
   validators: readonly ExplicitScheduleRuleValueValidator[],
 ): boolean => {
   const parsed = parseValidExplicitScheduleRuleValue(parameter);
@@ -307,7 +309,7 @@ const hasValidExplicitScheduleRuleValue = (
 const delayTimeValueValidators: readonly ExplicitScheduleRuleValueValidator[] =
   [isValidHourMinuteRange, isValidDelayMinutesRange];
 
-export const isValidExplicitDelayTime = (parameter: UnitParameter): boolean => {
+export const isValidExplicitDelayTime = (parameter: AjsParameter): boolean => {
   return hasValidExplicitScheduleRuleValue(parameter, delayTimeValueValidators);
 };
 
@@ -321,7 +323,7 @@ const isValidWaitCountRange = (rawValue: string): boolean =>
 const waitCountValueValidators: readonly ExplicitScheduleRuleValueValidator[] =
   [isNoOrUn, isValidWaitCountRange];
 
-export const isValidExplicitWaitCount = (parameter: UnitParameter): boolean => {
+export const isValidExplicitWaitCount = (parameter: AjsParameter): boolean => {
   return hasValidExplicitScheduleRuleValue(parameter, waitCountValueValidators);
 };
 
@@ -331,6 +333,6 @@ const waitTimeValueValidators: readonly ExplicitScheduleRuleValueValidator[] = [
   isValidWaitMinutesRange,
 ];
 
-export const isValidExplicitWaitTime = (parameter: UnitParameter): boolean => {
+export const isValidExplicitWaitTime = (parameter: AjsParameter): boolean => {
   return hasValidExplicitScheduleRuleValue(parameter, waitTimeValueValidators);
 };

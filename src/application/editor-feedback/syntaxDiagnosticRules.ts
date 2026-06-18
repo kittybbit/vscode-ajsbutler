@@ -1,4 +1,4 @@
-import type { Unit } from "../../domain/values/Unit";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import type {
   BuildSyntaxDiagnosticsOptions,
   SyntaxDiagnosticDto,
@@ -15,15 +15,15 @@ import {
 } from "./syntaxDiagnosticRuleBuilders";
 
 export const buildSemanticSyntaxDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
   options: BuildSyntaxDiagnosticsOptions = {},
 ): SyntaxDiagnosticDto[] => [
-  ...buildScheduleRuleDiagnostics(rootUnits, options),
-  ...buildJobEndJudgmentDiagnostics(rootUnits),
-  ...buildFileMonitoringDiagnostics(rootUnits),
-  ...buildExecutionIntervalControlDiagnostics(rootUnits),
-  ...buildTransferOperationDiagnostics(rootUnits),
-  ...buildQueueTransferFileDiagnostics(rootUnits),
-  ...buildEventSendingDiagnostics(rootUnits),
-  ...buildEventReceivingDiagnostics(rootUnits),
+  ...buildScheduleRuleDiagnostics(document, options),
+  ...buildJobEndJudgmentDiagnostics(document),
+  ...buildFileMonitoringDiagnostics(document),
+  ...buildExecutionIntervalControlDiagnostics(document),
+  ...buildTransferOperationDiagnostics(document),
+  ...buildQueueTransferFileDiagnostics(document),
+  ...buildEventSendingDiagnostics(document),
+  ...buildEventReceivingDiagnostics(document),
 ];

@@ -3,15 +3,15 @@ import {
   isValidExplicitEventReceivingFilterReference,
   isValidExplicitEventReceivingTimeoutCondition,
 } from "../../application/editor-feedback/syntaxDiagnosticEventRules";
-import type { UnitParameter } from "../../domain/values/Unit";
+import type { AjsParameter } from "../../domain/models/ajs/AjsDocument";
 
-const parameter = (key: string, value: string): UnitParameter => ({
+const parameter = (key: string, value: string): AjsParameter => ({
   key,
   value,
 });
 
-const evtmc = (value: string): UnitParameter => parameter("evtmc", value);
-const evwfr = (value: string): UnitParameter => parameter("evwfr", value);
+const evtmc = (value: string): AjsParameter => parameter("evtmc", value);
+const evwfr = (value: string): AjsParameter => parameter("evwfr", value);
 
 suite("Syntax Diagnostic Event Rules", () => {
   test("validates event receiving filter references", () => {

@@ -1,5 +1,8 @@
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
-import type { Unit, UnitParameter } from "../../domain/values/Unit";
+import type {
+  AjsParameter,
+  AjsUnit,
+} from "../../domain/models/ajs/AjsDocument";
 import {
   isValidExplicitByteLengthValue,
   parseExplicitDecimalInRange,
@@ -8,18 +11,18 @@ import { hasWildcard } from "./syntaxDiagnosticStringValidators";
 import { findParameter } from "./syntaxDiagnosticUnitLookup";
 
 export const isValidExplicitFileMonitoringFileName = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean => isValidExplicitByteLengthValue(parameter, 1, 255);
 
 export const isValidExplicitFileMonitoringInterval = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean =>
   parseExplicitDecimalInRange({ parameter, minimum: 1, maximum: 600 }) !==
   undefined;
 
 export const hasInvalidWildcardWithShortMonitoringInterval = (
-  parameter: UnitParameter,
-  unit: Unit,
+  parameter: AjsParameter,
+  unit: AjsUnit,
 ): boolean => {
   if (!hasWildcard(parameter.value)) {
     return false;
@@ -28,7 +31,7 @@ export const hasInvalidWildcardWithShortMonitoringInterval = (
   return hasShortMonitoringInterval(unit);
 };
 
-const hasShortMonitoringInterval = (unit: Unit): boolean => {
+const hasShortMonitoringInterval = (unit: AjsUnit): boolean => {
   const monitoringInterval = parseEffectiveMonitoringInterval(unit);
   return (
     monitoringInterval !== undefined &&
@@ -37,7 +40,9 @@ const hasShortMonitoringInterval = (unit: Unit): boolean => {
   );
 };
 
-const parseEffectiveMonitoringInterval = (unit: Unit): number | undefined => {
+const parseEffectiveMonitoringInterval = (
+  unit: AjsUnit,
+): number | undefined => {
   const effectiveFlwi = findParameter(unit, "flwi")?.value ?? DEFAULTS.Flwi;
   if (!/^\d+$/.test(effectiveFlwi)) {
     return undefined;

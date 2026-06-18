@@ -1,7 +1,7 @@
-import type { UnitParameter } from "../../domain/values/Unit";
+import type { AjsParameter } from "../../domain/models/ajs/AjsDocument";
 
 type ExplicitDecimalRangeInput = {
-  parameter: UnitParameter | undefined;
+  parameter: AjsParameter | undefined;
   minimum: number;
   maximum: number;
   options?: { allowNegative?: boolean };
@@ -63,7 +63,7 @@ export const hasValidByteLength = (
 };
 
 export const isValidExplicitByteLengthValue = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
   minimum: number,
   maximum: number,
 ): boolean => {

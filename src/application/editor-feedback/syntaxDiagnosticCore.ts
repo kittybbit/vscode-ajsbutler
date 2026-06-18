@@ -1,13 +1,16 @@
-import type { Unit, UnitParameter } from "../../domain/values/Unit";
+import type {
+  AjsParameter,
+  AjsUnit,
+} from "../../domain/models/ajs/AjsDocument";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
 import { isValidExplicitByteLengthValue } from "./syntaxDiagnosticScalarValidators";
 import { parseExplicitDecimalInRange } from "./syntaxDiagnosticScalarValidators";
 import { findParameter, findParameters } from "./syntaxDiagnosticUnitLookup";
 
-export type UnitParameterDiagnosticRule = {
+export type AjsParameterDiagnosticRule = {
   key: string;
   message: string;
-  isInvalid: (parameter: UnitParameter, unit: Unit) => boolean;
+  isInvalid: (parameter: AjsParameter, unit: AjsUnit) => boolean;
 };
 
 type ExplicitByteLengthRuleInput = {
@@ -26,7 +29,7 @@ type ExplicitDecimalRangeRuleInput = {
 };
 
 export const buildDiagnostic = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
   message: string,
 ): SyntaxDiagnosticDto => ({
   line: parameter.line ?? 1,
@@ -42,7 +45,7 @@ export const buildExplicitDecimalRangeRule = ({
   maximum,
   message,
   options = {},
-}: ExplicitDecimalRangeRuleInput): UnitParameterDiagnosticRule => ({
+}: ExplicitDecimalRangeRuleInput): AjsParameterDiagnosticRule => ({
   key,
   message,
   isInvalid: (parameter) =>
@@ -55,7 +58,7 @@ export const buildExplicitByteLengthRule = ({
   minimum,
   maximum,
   message,
-}: ExplicitByteLengthRuleInput): UnitParameterDiagnosticRule => ({
+}: ExplicitByteLengthRuleInput): AjsParameterDiagnosticRule => ({
   key,
   message,
   isInvalid: (parameter) =>
@@ -66,7 +69,7 @@ export const buildExplicitAllowedValuesRule = (
   key: string,
   allowedValues: ReadonlySet<string>,
   message: string,
-): UnitParameterDiagnosticRule => ({
+): AjsParameterDiagnosticRule => ({
   key,
   message,
   isInvalid: (parameter) => !allowedValues.has(parameter.value),
@@ -76,15 +79,15 @@ export const buildRequiredParameterRule = (
   key: string,
   requiredKey: string,
   message: string,
-): UnitParameterDiagnosticRule => ({
+): AjsParameterDiagnosticRule => ({
   key,
   message,
   isInvalid: (_parameter, unit) => !findParameter(unit, requiredKey),
 });
 
 export const collectRuleDiagnostics = (
-  unit: Unit,
-  rules: readonly UnitParameterDiagnosticRule[],
+  unit: AjsUnit,
+  rules: readonly AjsParameterDiagnosticRule[],
 ): SyntaxDiagnosticDto[] =>
   rules.flatMap((rule) => {
     const parameters = findParameters(unit, rule.key);

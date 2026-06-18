@@ -1,4 +1,4 @@
-import type { Unit } from "../../domain/values/Unit";
+import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import type {
   BuildSyntaxDiagnosticsOptions,
   SyntaxDiagnosticDto,
@@ -6,7 +6,7 @@ import type {
 import {
   buildDiagnostic,
   collectRuleDiagnostics,
-  type UnitParameterDiagnosticRule,
+  type AjsParameterDiagnosticRule,
 } from "./syntaxDiagnosticCore";
 import {
   DEFAULT_SCHEDULE_LIMIT_YEAR,
@@ -25,69 +25,68 @@ import {
 import { findParameters, findUnitsByTypes } from "./syntaxDiagnosticUnitLookup";
 import { scheduleRuleDiagnosticTargetTypes } from "./syntaxDiagnosticTargetTypes";
 
-const scheduleRuleParameterDiagnosticRules = (
-  rootUnits: Unit[],
-): readonly UnitParameterDiagnosticRule[] => [
-  {
-    key: "ln",
-    message:
-      "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
-    isInvalid: (parameter, currentUnit) =>
-      !isValidExplicitParentScheduleRule(parameter, currentUnit, rootUnits),
-  },
-  {
-    key: "st",
-    message:
-      "Start time (st) must use schedule rule numbers 1..144 and times between 00:00 and 47:59.",
-    isInvalid: (parameter) => !isValidExplicitStartTime(parameter),
-  },
-  {
-    key: "cy",
-    message:
-      "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..10, m=1..12, w=1..5, or d=1..31.",
-    isInvalid: (parameter) => !isValidExplicitCycle(parameter),
-  },
-  {
-    key: "shd",
-    message:
-      "Maximum shift days (shd) must use schedule rule numbers 1..144 and values between 1 and 31.",
-    isInvalid: (parameter) => !isValidExplicitShiftDays(parameter),
-  },
-  {
-    key: "cftd",
-    message:
-      "Days-from-start rule (cftd) must use schedule rule numbers 1..144 with valid no/be/af/db/da ranges.",
-    isInvalid: (parameter) =>
-      !isValidExplicitScheduleByDaysFromStart(parameter),
-  },
-  {
-    key: "sy",
-    message:
-      "Start delay time (sy) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
-    isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
-  },
-  {
-    key: "ey",
-    message:
-      "End delay time (ey) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
-    isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
-  },
-  {
-    key: "wc",
-    message:
-      "Start-condition count (wc) must use schedule rule numbers 1..144 and values no, un, or 1..999.",
-    isInvalid: (parameter) => !isValidExplicitWaitCount(parameter),
-  },
-  {
-    key: "wt",
-    message:
-      "Monitoring end time (wt) must use schedule rule numbers 1..144 and values no, un, 00:00-47:59, or 1..2879 minutes.",
-    isInvalid: (parameter) => !isValidExplicitWaitTime(parameter),
-  },
-];
+const scheduleRuleParameterDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
+  [
+    {
+      key: "ln",
+      message:
+        "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
+      isInvalid: (parameter, currentUnit) =>
+        !isValidExplicitParentScheduleRule(parameter, currentUnit),
+    },
+    {
+      key: "st",
+      message:
+        "Start time (st) must use schedule rule numbers 1..144 and times between 00:00 and 47:59.",
+      isInvalid: (parameter) => !isValidExplicitStartTime(parameter),
+    },
+    {
+      key: "cy",
+      message:
+        "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..10, m=1..12, w=1..5, or d=1..31.",
+      isInvalid: (parameter) => !isValidExplicitCycle(parameter),
+    },
+    {
+      key: "shd",
+      message:
+        "Maximum shift days (shd) must use schedule rule numbers 1..144 and values between 1 and 31.",
+      isInvalid: (parameter) => !isValidExplicitShiftDays(parameter),
+    },
+    {
+      key: "cftd",
+      message:
+        "Days-from-start rule (cftd) must use schedule rule numbers 1..144 with valid no/be/af/db/da ranges.",
+      isInvalid: (parameter) =>
+        !isValidExplicitScheduleByDaysFromStart(parameter),
+    },
+    {
+      key: "sy",
+      message:
+        "Start delay time (sy) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
+      isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
+    },
+    {
+      key: "ey",
+      message:
+        "End delay time (ey) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
+      isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
+    },
+    {
+      key: "wc",
+      message:
+        "Start-condition count (wc) must use schedule rule numbers 1..144 and values no, un, or 1..999.",
+      isInvalid: (parameter) => !isValidExplicitWaitCount(parameter),
+    },
+    {
+      key: "wt",
+      message:
+        "Monitoring end time (wt) must use schedule rule numbers 1..144 and values no, un, 00:00-47:59, or 1..2879 minutes.",
+      isInvalid: (parameter) => !isValidExplicitWaitTime(parameter),
+    },
+  ];
 
 const buildScheduleDateDiagnostics = (
-  unit: Unit,
+  unit: AjsUnit,
   options: BuildSyntaxDiagnosticsOptions,
 ): SyntaxDiagnosticDto[] =>
   findParameters(unit, "sd").flatMap((parameter) =>
@@ -106,7 +105,7 @@ const buildScheduleDateDiagnostics = (
   );
 
 const buildWeeklyCycleCompatibilityDiagnostics = (
-  unit: Unit,
+  unit: AjsUnit,
 ): SyntaxDiagnosticDto[] =>
   findParameters(unit, "cy").flatMap((parameter) =>
     hasInvalidExplicitWeeklyCycleScheduleCompatibility(parameter, unit)
@@ -120,16 +119,13 @@ const buildWeeklyCycleCompatibilityDiagnostics = (
   );
 
 export const buildScheduleRuleDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
   options: BuildSyntaxDiagnosticsOptions,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(rootUnits, scheduleRuleDiagnosticTargetTypes).flatMap(
+  findUnitsByTypes(document, scheduleRuleDiagnosticTargetTypes).flatMap(
     (unit) => [
       ...buildScheduleDateDiagnostics(unit, options),
-      ...collectRuleDiagnostics(
-        unit,
-        scheduleRuleParameterDiagnosticRules(rootUnits),
-      ),
+      ...collectRuleDiagnostics(unit, scheduleRuleParameterDiagnosticRules),
       ...buildWeeklyCycleCompatibilityDiagnostics(unit),
     ],
   );
