@@ -32,9 +32,8 @@
    - JP1/AJS3 version 13 remains the normative product target for future
      parameter and command semantics; future manual-alignment work should start
      as a focused feature when new supported scope is introduced.
-   - Track semantic-diagnostic convergence in
-     `features/normalize-semantic-diagnostics-input/` after parser-boundary
-     extraction.
+   - Semantic diagnostics now consume normalized `AjsDocument` / `AjsUnit`
+     inputs while preserving existing diagnostic behavior and source positions.
 
 3. Introduce stricter parser/infrastructure boundaries.
 
@@ -43,8 +42,8 @@
    - Raw `Unit` and repository-owned parser-error behavior remain the initial
      seam; generated ANTLR artifacts and mechanics stay outside application and
      domain production modules.
-   - Defer normalized-only parsing and semantic-diagnostic model migration to
-     later single-purpose features.
+   - Defer normalized-only parsing to a later single-purpose feature if a
+     concrete consumer requires it.
 
 4. Maintain the explicit extension composition root.
 
