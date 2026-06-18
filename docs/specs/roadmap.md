@@ -32,17 +32,48 @@
    - JP1/AJS3 version 13 remains the normative product target for future
      parameter and command semantics; future manual-alignment work should start
      as a focused feature when new supported scope is introduced.
+   - Track semantic-diagnostic convergence in
+     `features/normalize-semantic-diagnostics-input/` after parser-boundary
+     extraction.
 
 3. Introduce stricter parser/infrastructure boundaries.
 
-   - Define an application-facing parser or document-loading port.
-   - Move concrete parser orchestration behind an adapter boundary when
-     practical.
+   - Track the active first slice in
+     `features/extract-parser-adapter-boundary/`.
+   - Define an application-facing parser port for raw definition text.
+   - Move concrete ANTLR orchestration behind an infrastructure adapter while
+     preserving raw `Unit` and parser-error behavior.
    - Keep generated ANTLR artifacts and parser-specific mechanics out of
      application use cases.
    - Preserve current desktop and web extension behavior while migrating.
+   - Defer normalized-only parsing and semantic-diagnostic model migration to
+     later single-purpose features.
 
-4. Use Qlty findings as architectural feedback when they expose a clear
+4. Establish an explicit extension composition root.
+
+   - Track dependency construction and injection in
+     `features/establish-extension-composition-root/`.
+   - Construct concrete application and infrastructure dependencies in
+     bootstrap and inject them into VS Code-facing adapters.
+   - Preserve lifecycle, disposal, desktop, and web behavior without adding a
+     service container.
+
+5. Classify legacy VS Code adapter layout.
+
+   - Track the relocation in `features/classify-vscode-adapter-layout/`.
+   - Move VS Code-facing modules to presentation, technical adapters to
+     infrastructure, and activation/composition modules to an outer bootstrap
+     boundary after ownership is explicit.
+   - Preserve the desktop and web extension entry points.
+
+6. Relocate React webview presentation.
+
+   - Track the relocation in
+     `features/relocate-react-webview-presentation/`.
+   - Move `src/ui-component` to `src/presentation/webview` without combining
+     relocation with UI or algorithm changes.
+
+7. Use Qlty findings as architectural feedback when they expose a clear
    responsibility or boundary concern.
 
    - The qlty-driven architecture refactoring feature is complete through the
@@ -68,9 +99,7 @@
    translation-resource maintenance creates a concrete blocker.
 6. Add deeper JP1/AJS View interaction parity only after the current visual
    refresh and nested expansion behavior settle.
-7. Revisit directory structure under `src/extension/webview/` only if the
-   remaining files stop reading as one cohesive viewer module.
-8. Add more expanded-flow layout regression fixtures only if real-world nested
+7. Add more expanded-flow layout regression fixtures only if real-world nested
    layout examples expose additional collision or refit gaps.
 
 ## Done Criteria For A Slice

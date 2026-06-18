@@ -40,6 +40,18 @@ rules in `docs/specs/README.md`, not in this file.
 
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
+- `docs/specs/features/extract-parser-adapter-boundary/`:
+  approved roadmap documentation awaiting task planning and implementation
+  approval for the application parser port and infrastructure ANTLR adapter
+  boundary.
+- `docs/specs/features/establish-extension-composition-root/`:
+  roadmap feature awaiting planning after parser-boundary extraction.
+- `docs/specs/features/normalize-semantic-diagnostics-input/`:
+  roadmap feature awaiting planning for normalized diagnostic inputs.
+- `docs/specs/features/classify-vscode-adapter-layout/`:
+  roadmap feature awaiting composition-root completion and relocation planning.
+- `docs/specs/features/relocate-react-webview-presentation/`:
+  roadmap feature awaiting VS Code adapter layout classification.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
