@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
-import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
+import type { BuildUnitList } from "../../../application/unit-list/buildUnitList";
+import { CHANGE_DOCUMENT } from "../../../shared/webviewEvents";
 
 const postAjsDocument = (
   buildUnitList: BuildUnitList,

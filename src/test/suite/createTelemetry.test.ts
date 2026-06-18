@@ -1,7 +1,7 @@
 import * as assert from "assert";
-import { createTelemetry } from "../../extension/telemetry/createTelemetry";
+import { createTelemetry } from "../../bootstrap/extension/createTelemetry";
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { NoopTelemetryAdapter } from "../../extension/telemetry/NoopTelemetryAdapter";
+import { NoopTelemetryAdapter } from "../../infrastructure/telemetry/NoopTelemetryAdapter";
 
 suite("Create Telemetry", () => {
   test("returns a noop adapter when the connection string is missing", () => {

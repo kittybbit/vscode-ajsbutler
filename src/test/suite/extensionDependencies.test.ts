@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { createExtensionDependencies } from "../../extension/bootstrap/extensionDependencies";
+import { createExtensionDependencies } from "../../bootstrap/extension/extensionDependencies";
 
 suite("Extension dependencies", () => {
   test("constructs bootstrap-owned dependencies", () => {

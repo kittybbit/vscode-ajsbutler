@@ -8,7 +8,7 @@ import {
   type ImportAjsDefinitionResultDto,
   type ImportAjsDefinitionScopeDto,
   type ImportAjsDefinitionViaWebApiPort,
-} from "../../application/webapi-import/importAjsDefinitionViaWebApi";
+} from "../../../application/webapi-import/importAjsDefinitionViaWebApi";
 
 export const IMPORT_AJS_DEFINITION_VIA_WEBAPI_COMMAND =
   "ajsbutler.importDefinitionViaWebApiBeta";

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import {
   NAVIGATE,
   OPERATION,
@@ -12,7 +12,7 @@ import {
   type ResourceEventType,
   type SaveEventType,
   type WebviewEventType,
-} from "../../shared/webviewEvents";
+} from "../../../shared/webviewEvents";
 
 type ViewerMessageRoutingDeps = {
   document: vscode.TextDocument;

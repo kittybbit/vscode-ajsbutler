@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import type {
   Jp1Ajs3WebApiCredential,
   Jp1Ajs3WebApiCredentialProvider,
-} from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
+} from "./Jp1Ajs3WebApiImportAdapter";
 
 export class VscodeWebApiCredentialStore
   implements Jp1Ajs3WebApiCredentialProvider

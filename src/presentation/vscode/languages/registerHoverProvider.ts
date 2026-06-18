@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { FindParameterHover } from "../../application/editor-feedback/findParameterHover";
+import type { FindParameterHover } from "../../../application/editor-feedback/findParameterHover";
 import { LANGUAGE_ID } from "../constant";
 
 const SELECTOR: vscode.DocumentSelector = { language: LANGUAGE_ID };

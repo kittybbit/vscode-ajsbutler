@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { ViewerFactory } from "../../extension/webview/ViewerFactory";
+import { ViewerFactory } from "../../presentation/vscode/webview/ViewerFactory";
 import {
   NAVIGATE,
   OPERATION,

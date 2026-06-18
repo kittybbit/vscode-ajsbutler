@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { createAjsHoverProvider } from "../../extension/languages/registerHoverProvider";
+import { createAjsHoverProvider } from "../../presentation/vscode/languages/registerHoverProvider";
 
 suite("Register hover provider", () => {
   test("uses the injected parameter-hover capability", async () => {

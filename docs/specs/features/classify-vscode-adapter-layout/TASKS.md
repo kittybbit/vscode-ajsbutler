@@ -1,16 +1,12 @@
-# Feature Tasks: Classify VS Code Adapter Layout
+# Classify VS Code Adapter Layout Tasks
 
-## Sync Rule
+## Current Task
 
-- Update this file with task decisions, `plans.md` when active features change,
-  and `roadmap.md` when repository sequencing changes.
-- Keep only current approval, risk, validation, and next-decision state.
-
-## Current Status
-
-- Runtime status: not started; implementation approval is pending.
-- Active slice: classify current extension modules and plan relocation.
-- Open follow-up: record the destination of every module before approval.
+- Status: Proposed
+- Scope: no implementation task remains; review the feature for closure.
+- Acceptance: confirm the live architecture paths are documented and no active
+  relocation risk or follow-up remains.
+- Validation: docs-only validation for any closure update.
 
 ## Human Approval
 
@@ -20,21 +16,19 @@
 
 Implementation must not start while Status is Pending.
 
-## Active Tasks
+## Decision Notes
 
-- [x] Feature boundary and initial impact recorded.
-- [ ] Use `sdd-plan-task` to classify every `src/extension` module.
-- [ ] Obtain implementation approval for the exact relocation map.
-- [ ] Verify production, test, webpack, and TypeScript references.
-- [ ] Relocate modules without logic changes.
+- All VS Code presentation modules now live under `src/presentation/vscode/`.
+- Telemetry and credential implementations now live under infrastructure.
+- Activation, dependency construction, lifecycle, and subscription assembly now
+  live under `src/bootstrap/extension/`.
+- The stable `src/extension.ts` desktop/web entry remains unchanged except for
+  its bootstrap import path.
+- The unreferenced case-only duplicate `TextEditorFinder.ts` was removed.
+- No unresolved desktop, web, or VS Code `^1.75.0` compatibility risk remains.
 
-## Validation
+## Use-Case Back-Propagation
 
-- [ ] Confirm no stale imports or production files remain in the
-      `src/extension/` directory while `src/extension.ts` remains resolvable.
-- [ ] Run `rtk pnpm run qlty`, desktop tests, web tests, and build.
-
-## Notes
-
-- Docs approval permits a docs-only PR, not runtime implementation.
-- Relocation must preserve git history where practical and remain reviewable.
+- No use-case changes are required. Existing editor-feedback, telemetry,
+  WebAPI import, and cross-view navigation scenarios remain regression
+  contracts.

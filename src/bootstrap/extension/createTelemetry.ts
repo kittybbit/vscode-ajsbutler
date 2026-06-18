@@ -1,6 +1,6 @@
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { NoopTelemetryAdapter } from "./NoopTelemetryAdapter";
-import { VscodeTelemetryAdapter } from "./VscodeTelemetryAdapter";
+import { NoopTelemetryAdapter } from "../../infrastructure/telemetry/NoopTelemetryAdapter";
+import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 
 export const createTelemetry = (
   connectionString: string = CONNECTION_STRING,

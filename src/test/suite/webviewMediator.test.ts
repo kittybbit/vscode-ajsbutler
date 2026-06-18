@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { WebviewMediator } from "../../extension/webview/WebviewMediator";
+import { WebviewMediator } from "../../presentation/vscode/webview/WebviewMediator";
 
 type Listener<T> = (event: T) => void;
 

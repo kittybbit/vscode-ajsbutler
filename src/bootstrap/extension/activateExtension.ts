@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { MyExtension } from "../MyExtension";
+import { MyExtension } from "./MyExtension";
 import { createExtensionDependencies } from "./extensionDependencies";
 import {
   reportExtensionActivated,

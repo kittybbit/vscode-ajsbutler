@@ -3,7 +3,7 @@ import {
   executeImportAjsDefinitionViaWebApiCommand,
   IMPORT_AJS_DEFINITION_VIA_WEBAPI_COMMAND,
   type ImportAjsDefinitionCommandDeps,
-} from "../../extension/commands/importAjsDefinitionViaWebApiCommand";
+} from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
 import {
   createImportedAjsDefinitionContent,
   type ImportAjsDefinitionPortRequestDto,

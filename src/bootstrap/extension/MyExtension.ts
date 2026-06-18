@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { TelemetryPort } from "../application/telemetry/TelemetryPort";
+import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 
 /**
  * Runtime context of this extension.
