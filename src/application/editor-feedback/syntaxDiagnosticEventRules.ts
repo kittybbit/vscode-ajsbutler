@@ -1,4 +1,4 @@
-import type { UnitParameter } from "../../domain/values/Unit";
+import type { AjsParameter } from "../../domain/models/ajs/AjsDocument";
 import {
   hasValidByteLength,
   isValidExplicitByteLengthValue,
@@ -73,11 +73,11 @@ const isValidEventReceivingTimeoutFileCondition = (
 };
 
 export const isValidExplicitEventHostValue = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean => isValidExplicitByteLengthValue(parameter, 1, 255);
 
 export const isValidExplicitColonSeparatedHexadecimalEventId = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean => {
   const rawValue = parameter?.value;
   if (!rawValue) {
@@ -97,7 +97,7 @@ export const isValidExplicitColonSeparatedHexadecimalEventId = (
 };
 
 export const isValidExplicitIpv4Address = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean => {
   const rawValue = parameter?.value;
   if (!rawValue) {
@@ -122,7 +122,7 @@ const isValidIpv4Octet = (octet: string): boolean => {
 };
 
 export const isValidExplicitEventReceivingQuotedString = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
   minimum: number,
   maximum: number,
 ): boolean => {
@@ -136,21 +136,21 @@ export const isValidExplicitEventReceivingQuotedString = (
 };
 
 export const isValidExplicitEventReceivingFilterReference = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean =>
   parameter?.value !== undefined &&
   hasValidByteLength(parameter.value, 1, 2048) &&
   isValidEventReceivingFilterReferenceValue(parameter.value);
 
 export const isValidExplicitEventReceivingTimeoutCondition = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean =>
   parameter?.value !== undefined &&
   (EVENT_RECEIVING_TIMEOUT_BARE_MODES.has(parameter.value) ||
     isValidEventReceivingTimeoutFileCondition(parameter.value));
 
 export const isValidExplicitEventSearchCondition = (
-  parameter: UnitParameter | undefined,
+  parameter: AjsParameter | undefined,
 ): boolean => {
   const rawValue = parameter?.value;
   if (!rawValue) {

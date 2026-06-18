@@ -63,4 +63,34 @@ suite("Normalize AJS Document", () => {
       ["seq", "con"],
     );
   });
+
+  test("preserves parsed parameter source locations through normalization", () => {
+    const result = parseAjs(validDefinition);
+    assert.deepStrictEqual(result.errors, []);
+
+    const rawParameters = result.rootUnits[0].children[0].parameters.filter(
+      (parameter) => parameter.key === "ar",
+    );
+    const normalizedParameters = normalizeAjsDocument(
+      result.rootUnits,
+    ).rootUnits[0].children[0].parameters.filter(
+      (parameter) => parameter.key === "ar",
+    );
+
+    assert.strictEqual(normalizedParameters.length, 2);
+    assert.deepStrictEqual(
+      normalizedParameters.map(({ position, line, column, length }) => ({
+        position,
+        line,
+        column,
+        length,
+      })),
+      rawParameters.map(({ position, line, column, length }) => ({
+        position,
+        line,
+        column,
+        length,
+      })),
+    );
+  });
 });

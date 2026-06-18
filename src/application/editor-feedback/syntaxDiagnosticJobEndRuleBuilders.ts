@@ -1,5 +1,9 @@
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
-import type { Unit, UnitParameter } from "../../domain/values/Unit";
+import type {
+  AjsDocument,
+  AjsParameter,
+  AjsUnit,
+} from "../../domain/models/ajs/AjsDocument";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
 import {
   buildDiagnostic,
@@ -14,7 +18,7 @@ import {
 import { jobEndJudgmentNumericRangeRules } from "./syntaxDiagnosticRuleSets";
 
 const collectRetryParameterDiagnostics = (
-  unit: Unit,
+  unit: AjsUnit,
   buildMessage: (retryParameterKey: string) => string,
 ): SyntaxDiagnosticDto[] =>
   jobEndJudgmentRetryParameterKeys.flatMap((retryParameterKey) => {
@@ -25,7 +29,7 @@ const collectRetryParameterDiagnostics = (
   });
 
 type OptionalParameterDiagnosticInput = {
-  parameter: UnitParameter | undefined;
+  parameter: AjsParameter | undefined;
   message: string;
 };
 
@@ -44,12 +48,12 @@ const shouldCheckThresholdOrdering = ({
   hasInvalidExplicitThresholdOrdering(unit);
 
 type JobEndJudgmentContext = {
-  unit: Unit;
+  unit: AjsUnit;
   effectiveJobEndJudgment: string;
   effectiveAutomaticRetry: string;
-  abrParameter: UnitParameter | undefined;
-  warningThresholdParameter: UnitParameter | undefined;
-  abnormalThresholdParameter: UnitParameter | undefined;
+  abrParameter: AjsParameter | undefined;
+  warningThresholdParameter: AjsParameter | undefined;
+  abnormalThresholdParameter: AjsParameter | undefined;
 };
 
 const collectThresholdOrderingDiagnostics = (
@@ -74,8 +78,8 @@ const collectThresholdOrderingDiagnostics = (
 };
 
 const collectInvalidEndJudgmentRetryDiagnostics = (
-  unit: Unit,
-  abrParameter: UnitParameter | undefined,
+  unit: AjsUnit,
+  abrParameter: AjsParameter | undefined,
 ): SyntaxDiagnosticDto[] => [
   ...(abrParameter?.value === "y"
     ? [
@@ -93,7 +97,7 @@ const collectInvalidEndJudgmentRetryDiagnostics = (
 ];
 
 const collectAutomaticRetryDisabledDiagnostics = (
-  unit: Unit,
+  unit: AjsUnit,
 ): SyntaxDiagnosticDto[] =>
   collectRetryParameterDiagnostics(
     unit,
@@ -116,7 +120,7 @@ const collectJobEndJudgmentRetryGateDiagnostics = (
     : collectAutomaticRetryDisabledDiagnostics(context.unit);
 };
 
-const getJobEndJudgmentContext = (unit: Unit): JobEndJudgmentContext => {
+const getJobEndJudgmentContext = (unit: AjsUnit): JobEndJudgmentContext => {
   const abrParameter = findParameter(unit, "abr");
   return {
     unit,
@@ -129,7 +133,7 @@ const getJobEndJudgmentContext = (unit: Unit): JobEndJudgmentContext => {
 };
 
 const buildJobEndJudgmentDiagnosticsForUnit = (
-  unit: Unit,
+  unit: AjsUnit,
 ): SyntaxDiagnosticDto[] => {
   const context = getJobEndJudgmentContext(unit);
 
@@ -141,8 +145,8 @@ const buildJobEndJudgmentDiagnosticsForUnit = (
 };
 
 export const buildJobEndJudgmentDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(rootUnits, jobEndJudgmentDiagnosticTargetTypes).flatMap(
+  findUnitsByTypes(document, jobEndJudgmentDiagnosticTargetTypes).flatMap(
     buildJobEndJudgmentDiagnosticsForUnit,
   );

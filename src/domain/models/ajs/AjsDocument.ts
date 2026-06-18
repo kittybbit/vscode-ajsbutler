@@ -1,10 +1,16 @@
 import { ParamSymbol, TySymbol } from "../../values/AjsType";
-import type { UnitParameter } from "../../values/Unit";
 
 export type AjsUnitType = TySymbol;
 export type AjsGroupType = "n" | "p";
 export type AjsRelationType = "seq" | "con";
-export type AjsParameter = Pick<UnitParameter, "key" | "value" | "position">;
+export type AjsParameter = {
+  key: string;
+  value: string;
+  position?: number;
+  line?: number;
+  column?: number;
+  length?: number;
+};
 
 export type AjsRelation = {
   sourceUnitId: string;
@@ -64,7 +70,7 @@ export const findAjsUnitById = (
 
 export const findAjsUnitParameters = (
   unit: AjsUnit,
-  key: ParamSymbol,
+  key: string,
 ): AjsParameter[] =>
   unit.parameters.filter((parameter) => parameter.key === key);
 
@@ -74,7 +80,7 @@ export const findAjsUnitParameters = (
 // `findAjsUnitParameters(...)` instead of this convenience accessor.
 export const findAjsUnitParameter = (
   unit: AjsUnit,
-  key: ParamSymbol,
+  key: string,
 ): AjsParameter | undefined =>
   unit.parameters.find((parameter) => parameter.key === key);
 

@@ -1,30 +1,34 @@
-import type { Unit, UnitParameter } from "../../domain/values/Unit";
-
-export const flattenUnits = (units: Unit[]): Unit[] =>
-  units.reduce<Unit[]>(
-    (allUnits, unit) => [...allUnits, unit, ...flattenUnits(unit.children)],
-    [],
-  );
+import {
+  findAjsUnitParameter,
+  findAjsUnitParameters,
+  flattenAjsUnits,
+  findParentAjsUnit,
+  type AjsDocument,
+  type AjsParameter,
+  type AjsUnit,
+} from "../../domain/models/ajs/AjsDocument";
 
 export const findParameter = (
-  unit: Unit,
+  unit: AjsUnit,
   key: string,
-): UnitParameter | undefined =>
-  unit.parameters.find((parameter) => parameter.key === key);
+): AjsParameter | undefined => findAjsUnitParameter(unit, key);
 
-export const findParameters = (unit: Unit, key: string): UnitParameter[] =>
-  unit.parameters.filter((parameter) => parameter.key === key);
+export const findParameters = (unit: AjsUnit, key: string): AjsParameter[] =>
+  findAjsUnitParameters(unit, key);
 
 export const findUnitsByTypes = (
-  rootUnits: Unit[],
-  targetTypes: Set<string>,
-): Unit[] =>
-  flattenUnits(rootUnits).filter((unit) => {
-    const unitType = findParameter(unit, "ty")?.value;
-    return unitType ? targetTypes.has(unitType) : false;
+  document: AjsDocument,
+  targetTypes: ReadonlySet<string>,
+): AjsUnit[] =>
+  flattenAjsUnits(document.rootUnits).filter((unit) => {
+    const explicitUnitType = findParameter(unit, "ty")?.value;
+    return explicitUnitType ? targetTypes.has(explicitUnitType) : false;
   });
 
-export const hasStartConditionContext = (unit: Unit): boolean =>
-  unit.parent?.children.some(
+export const hasStartConditionContext = (
+  document: AjsDocument,
+  unit: AjsUnit,
+): boolean =>
+  findParentAjsUnit(document, unit)?.children.some(
     (sibling) => findParameter(sibling, "ty")?.value === "rc",
   ) ?? false;

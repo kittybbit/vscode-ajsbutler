@@ -1,5 +1,5 @@
 import { parseScheduleDateValue } from "../../domain/models/parameters/scheduleRuleHelpers";
-import type { UnitParameter } from "../../domain/values/Unit";
+import type { AjsParameter } from "../../domain/models/ajs/AjsDocument";
 
 export type ParsedExplicitScheduleDateValue = {
   hasExplicitRuleNumber: boolean;
@@ -190,7 +190,7 @@ const isValidExplicitScheduleDateFields = (
   isValidScheduleDateDayToken(parsed);
 
 export const isValidExplicitScheduleDate = (
-  parameter: UnitParameter,
+  parameter: AjsParameter,
   scheduleLimitYear: number | undefined,
 ): boolean => {
   const parsed = parseExplicitScheduleDateDiagnosticValue(parameter.value);

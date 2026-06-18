@@ -1,4 +1,4 @@
-import type { Unit } from "../../domain/values/Unit";
+import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
 import {
   buildDiagnostic,
@@ -27,7 +27,7 @@ import {
 } from "./syntaxDiagnosticUnitLookup";
 
 const collectOptionalParameterDiagnostics = (
-  unit: Unit,
+  unit: AjsUnit,
   inputs: readonly { key: string; message: string }[],
 ): SyntaxDiagnosticDto[] =>
   inputs.flatMap(({ key, message }) => {
@@ -36,10 +36,11 @@ const collectOptionalParameterDiagnostics = (
   });
 
 const collectStartConditionDisabledParameterDiagnostics = (
-  unit: Unit,
+  document: AjsDocument,
+  unit: AjsUnit,
   parameterMessages: readonly { key: string; message: string }[],
 ): SyntaxDiagnosticDto[] =>
-  hasStartConditionContext(unit)
+  hasStartConditionContext(document, unit)
     ? collectOptionalParameterDiagnostics(
         unit,
         parameterMessages.map(({ key, message }) => ({ key, message })),
@@ -47,12 +48,12 @@ const collectStartConditionDisabledParameterDiagnostics = (
     : [];
 
 export const buildFileMonitoringDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(rootUnits, fileMonitoringDiagnosticTargetTypes).flatMap(
+  findUnitsByTypes(document, fileMonitoringDiagnosticTargetTypes).flatMap(
     (unit) => [
       ...collectRuleDiagnostics(unit, fileMonitoringDiagnosticRules),
-      ...collectStartConditionDisabledParameterDiagnostics(unit, [
+      ...collectStartConditionDisabledParameterDiagnostics(document, unit, [
         {
           key: "fd",
           message:
@@ -63,15 +64,15 @@ export const buildFileMonitoringDiagnostics = (
   );
 
 export const buildExecutionIntervalControlDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(
-    rootUnits,
+    document,
     executionIntervalControlDiagnosticTargetTypes,
   ).flatMap((unit) => {
     const diagnostics = [
       ...collectRuleDiagnostics(unit, executionIntervalControlDiagnosticRules),
-      ...collectStartConditionDisabledParameterDiagnostics(unit, [
+      ...collectStartConditionDisabledParameterDiagnostics(document, unit, [
         {
           key: "fd",
           message:
@@ -81,7 +82,10 @@ export const buildExecutionIntervalControlDiagnostics = (
     ];
     const endTimingParameter = findParameter(unit, "etn");
 
-    if (endTimingParameter?.value === "y" && !hasStartConditionContext(unit)) {
+    if (
+      endTimingParameter?.value === "y" &&
+      !hasStartConditionContext(document, unit)
+    ) {
       diagnostics.push(
         buildDiagnostic(
           endTimingParameter,
@@ -94,34 +98,34 @@ export const buildExecutionIntervalControlDiagnostics = (
   });
 
 export const buildTransferOperationDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(rootUnits, transferOperationDiagnosticTargetTypes).flatMap(
+  findUnitsByTypes(document, transferOperationDiagnosticTargetTypes).flatMap(
     (unit) => collectRuleDiagnostics(unit, transferOperationDiagnosticRules),
   );
 
 export const buildQueueTransferFileDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(rootUnits, queueTransferFileDiagnosticTargetTypes).flatMap(
+  findUnitsByTypes(document, queueTransferFileDiagnosticTargetTypes).flatMap(
     (unit) => collectRuleDiagnostics(unit, queueTransferFileDiagnosticRules),
   );
 
 export const buildEventSendingDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(rootUnits, eventSendingDiagnosticTargetTypes).flatMap(
+  findUnitsByTypes(document, eventSendingDiagnosticTargetTypes).flatMap(
     (unit) => collectRuleDiagnostics(unit, eventSendingDiagnosticRules),
   );
 
 export const buildEventReceivingDiagnostics = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(rootUnits, eventReceivingDiagnosticTargetTypes).flatMap(
+  findUnitsByTypes(document, eventReceivingDiagnosticTargetTypes).flatMap(
     (unit) => {
       const diagnostics = [
         ...collectRuleDiagnostics(unit, eventReceivingDiagnosticRules),
-        ...collectStartConditionDisabledParameterDiagnostics(unit, [
+        ...collectStartConditionDisabledParameterDiagnostics(document, unit, [
           {
             key: "fd",
             message:
@@ -131,7 +135,7 @@ export const buildEventReceivingDiagnostics = (
       ];
 
       const invalidStartConditionParameters =
-        collectStartConditionDisabledParameterDiagnostics(unit, [
+        collectStartConditionDisabledParameterDiagnostics(document, unit, [
           {
             key: "etm",
             message:

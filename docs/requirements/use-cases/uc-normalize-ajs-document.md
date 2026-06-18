@@ -32,6 +32,8 @@ independent from parser tree mechanics, VS Code APIs, and UI-library types.
   names such as `G`, `N`, or `Rc`
 - normalized output must be deterministic and suitable for unit list, flow
   graph, CSV, and future reuse
+- normalized parameters preserve available parser-independent source line,
+  column, and length data without inventing positions when source data is absent
 - shared JP1/AJS semantics should move into normalized helpers only when the
   same rule is reused across wrappers, normalized paths, or multiple
   application consumers

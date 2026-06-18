@@ -1,5 +1,5 @@
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
-import type { UnitParameterDiagnosticRule } from "./syntaxDiagnosticCore";
+import type { AjsParameterDiagnosticRule } from "./syntaxDiagnosticCore";
 import {
   buildExplicitAllowedValuesRule,
   buildExplicitByteLengthRule,
@@ -92,7 +92,7 @@ export const waitJobExecutionTimeDiagnosticRules = [
   }),
 ] as const;
 
-export const transferFileByteLengthRules: readonly UnitParameterDiagnosticRule[] =
+export const transferFileByteLengthRules: readonly AjsParameterDiagnosticRule[] =
   transferFileIndexes.flatMap((index) => [
     buildExplicitByteLengthRule({
       key: `ts${index}`,
@@ -108,7 +108,7 @@ export const transferFileByteLengthRules: readonly UnitParameterDiagnosticRule[]
     }),
   ]);
 
-export const transferFileValueShapeRules: readonly UnitParameterDiagnosticRule[] =
+export const transferFileValueShapeRules: readonly AjsParameterDiagnosticRule[] =
   transferFileIndexes.flatMap((index) => [
     {
       key: `ts${index}`,
@@ -122,14 +122,14 @@ export const transferFileValueShapeRules: readonly UnitParameterDiagnosticRule[]
     },
   ]);
 
-export const transferSourceFilePathRules: readonly UnitParameterDiagnosticRule[] =
+export const transferSourceFilePathRules: readonly AjsParameterDiagnosticRule[] =
   transferFileIndexes.map((index) => ({
     key: `ts${index}`,
     message: `Transfer source file name (ts${index}) must use a full path when specified as a quoted transfer-file value.`,
     isInvalid: (parameter) => hasInvalidExplicitTransferSourcePath(parameter),
   }));
 
-export const transferOperationDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+export const transferOperationDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
     ...transferFileByteLengthRules,
     ...transferFileValueShapeRules,
@@ -148,7 +148,7 @@ export const transferOperationDiagnosticRules: readonly UnitParameterDiagnosticR
     ]),
   ];
 
-export const queueTransferFileDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+export const queueTransferFileDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
     ...transferFileByteLengthRules,
     ...transferFileValueShapeRules,
@@ -162,7 +162,7 @@ export const queueTransferFileDiagnosticRules: readonly UnitParameterDiagnosticR
     ),
   ];
 
-export const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+export const fileMonitoringDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
     {
       key: "flwf",
@@ -205,7 +205,7 @@ export const fileMonitoringDiagnosticRules: readonly UnitParameterDiagnosticRule
     ...eventTimeoutActionDiagnosticRules,
   ];
 
-export const executionIntervalControlDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+export const executionIntervalControlDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
     buildExplicitDecimalRangeRule({
       key: "tmitv",
@@ -222,7 +222,7 @@ export const executionIntervalControlDiagnosticRules: readonly UnitParameterDiag
     ...eventTimeoutActionDiagnosticRules,
   ];
 
-export const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+export const eventSendingDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
     {
       key: "evhst",
@@ -268,7 +268,7 @@ export const eventSendingDiagnosticRules: readonly UnitParameterDiagnosticRule[]
     },
   ];
 
-export const eventReceivingDiagnosticRules: readonly UnitParameterDiagnosticRule[] =
+export const eventReceivingDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
     ...waitJobExecutionTimeDiagnosticRules,
     buildExplicitDecimalRangeRule({

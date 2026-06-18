@@ -1,11 +1,25 @@
 import * as assert from "assert";
 import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
+import { buildDiagnostic } from "../../application/editor-feedback/syntaxDiagnosticCore";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
 import { testAjsParser } from "../support/parseAjs";
 
 const buildSyntaxDiagnostics = createBuildSyntaxDiagnostics(testAjsParser);
 
 suite("Build Syntax Diagnostics", () => {
+  test("preserves diagnostic position fallback for normalized parameters", () => {
+    assert.deepStrictEqual(
+      buildDiagnostic({ key: "evsid", value: "zz" }, "invalid"),
+      {
+        line: 1,
+        column: 0,
+        length: 5,
+        message: "invalid",
+        severity: "error",
+      },
+    );
+  });
+
   test("maps repository-owned errors from an injected parser port", () => {
     const parser: AjsParserPort = {
       parse: () => ({
@@ -128,6 +142,14 @@ suite("Build Syntax Diagnostics", () => {
   test("returns an empty array for valid input", () => {
     const diagnostics = buildSyntaxDiagnostics(
       "unit=root,,jp1admin,;\n{\n  ty=g;\n}\n",
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("does not infer semantic diagnostic target types during normalization", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      "unit=root,,jp1admin,;\n{\n  st=145,+48:00;\n}\n",
     );
 
     assert.deepStrictEqual(diagnostics, []);
