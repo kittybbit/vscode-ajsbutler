@@ -2,11 +2,21 @@
 
 ## Repository Shape
 
-The repository currently mixes legacy and target-oriented structure.
+The repository currently mixes legacy folder names with increasingly explicit
+application and adapter boundaries.
 
-- `src/domain` exists for emerging domain concepts and services
-- `src/extension` contains VS Code-facing behavior and bootstrap concerns
-- `src/ui-component` contains React/webview-oriented presentation code
+- `src/domain` contains raw parsed units, wrapper/interpreter models, normalized
+  AJS models, parameter semantics, and concrete ANTLR parser orchestration
+- `src/application` contains unit-list, flow-graph, unit-definition,
+  editor-feedback, telemetry-port, and WebAPI-import use cases or DTOs
+- `src/infrastructure` contains the concrete JP1/AJS3 WebAPI import adapter and
+  generated transport types
+- `src/extension` contains VS Code-facing adapters, explicit bootstrap wiring,
+  telemetry adapters, WebAPI command wiring, and webview orchestration
+- `src/ui-component` contains React/webview presentation code and
+  presentation-local flow layout state
+- `src/shared` contains host-neutral webview event contracts and shared app
+  resources
 - `src/generate/parser` contains generated parser artifacts
 - `src/test` contains extension test entry points
 - `sample` contains representative JP1/AJS definition files that can be reused
@@ -14,27 +24,32 @@ The repository currently mixes legacy and target-oriented structure.
 
 ## Current Architectural Tensions
 
-- activation and composition remain concentrated
-- parser-adjacent logic can still leak toward UI-oriented code
-- DTO and use-case boundaries are still being clarified
-- expanded flow layout is still vulnerable to order-sensitive nested-panel
-  collision handling, with layout growth responsibilities concentrated in one
-  presentation file
+- bootstrap is now split into lifecycle, runtime, subscription, viewer, and
+  WebAPI-import wiring modules, but all VS Code runtime construction still
+  converges in the extension adapter layer
+- concrete ANTLR orchestration still lives under `src/domain/services/parser`;
+  application use cases for unit-list building and syntax diagnostics import it
+  directly instead of depending on an application-facing parser port
+- raw `Unit` remains intentionally parser-adjacent, but semantic diagnostics
+  still operate directly on that raw model while normalized-model adoption is
+  further advanced in unit-list and flow-graph paths
+- flow rendering consumes application DTOs, while expanded nested-flow layout
+  remains presentation-local and is now split across focused geometry,
+  collision, growth, position, and reveal helpers
 - old folder names coexist with the target clean-architecture layout
-- package-management and validation workflow now center on `pnpm`, so local
-  docs, CI, and contributor instructions need to stay aligned with the pinned
-  lockfile and `packageManager` metadata
+- package-management and validation workflow center on the pinned `pnpm`
+  version and repository scripts
 - webview payload contracts are now plain DTOs and event objects, reducing
   serialization-boundary coupling across desktop and web hosts
-- webview bundle-size pressure remains visible in roadmap planning, especially
-  while shared dependencies continue to grow
 - `UnitEntity` wrapper ids now use deterministic UUID v5 values derived from
   absolute paths, while current application-facing normalized AJS ids continue
   to use absolute paths
-- JP1/AJS parameter interpretation and command generation are not yet described
-  as explicitly reference-aligned to one target manual edition
-- server-side definition loading through the JP1/AJS WebAPI is not yet part of
-  the documented product boundary
+- JP1/AJS parameter interpretation and command generation are aligned to the
+  version 13 reference for the currently documented slices
+- read-only server-side definition loading through the JP1/AJS WebAPI exists as
+  a desktop beta behind application and infrastructure boundaries; web-host
+  import remains explicitly unsupported and real-environment verification is
+  still pending
 
 ## Constraints To Preserve During Migration
 
@@ -46,14 +61,15 @@ The repository currently mixes legacy and target-oriented structure.
 - dependency upgrades should be routine, but compatibility exceptions must stay
   documented and reviewable
 
-## Immediate Documentation Need
+## Immediate Migration Need
 
-Each meaningful change should identify:
+The next focused architecture slice should:
 
-- the use case being improved
-- the current boundary problem
-- the intended extraction path
-- the checks needed to prove behavior is preserved
+- define an application-facing parser port for consumers of raw definition text
+- move concrete ANTLR construction and tree-walking behind an infrastructure
+  adapter
+- preserve raw `Unit` and parser-error behavior at the initial seam
+- keep desktop and web bundles free of new host-specific dependencies
 
 ## Fixture Baseline
 
@@ -72,7 +88,7 @@ When new parser, normalization, unit-list, or flow-graph tests are added,
 prefer these shared fixtures over ad hoc inline definitions unless the test is
 specifically about a narrow edge case.
 
-## Newly Confirmed Product Direction
+## Confirmed Product Direction
 
 - JP1 reference alignment should target JP1/Automatic Job Management System 3
   version 13 documentation
@@ -80,8 +96,8 @@ specifically about a narrow edge case.
   source
 - generated `ajs` command support should use the Command Reference as the
   normative source
-- JP1/AJS WebAPI support is currently planned as read-only import of server
-  definition data
+- JP1/AJS WebAPI support currently provides read-only desktop import as a beta;
+  broader endpoint and web-host support remain outside the active boundary
 - flow-graph improvements are currently aimed at visual resemblance to
   JP1/AJS View, progressive nested expansion, and explicit navigation between
   list and flow views when both are available
