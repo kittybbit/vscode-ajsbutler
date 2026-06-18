@@ -46,12 +46,10 @@
    - Defer normalized-only parsing and semantic-diagnostic model migration to
      later single-purpose features.
 
-4. Establish an explicit extension composition root.
+4. Maintain the explicit extension composition root.
 
-   - Track dependency construction and injection in
-     `features/establish-extension-composition-root/`.
-   - Construct concrete application and infrastructure dependencies in
-     bootstrap and inject them into VS Code-facing adapters.
+   - Concrete application and infrastructure dependencies are constructed by
+     one typed bootstrap owner and injected into VS Code-facing adapters.
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
