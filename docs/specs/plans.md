@@ -30,8 +30,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Plan the React webview presentation relocation now that VS Code adapters
-   have explicit presentation, infrastructure, and bootstrap owners.
+1. Plan a focused React viewer bridge routing extraction now that the webview
+   presentation modules have an explicit owner. Keep the change
+   behavior-preserving and cover routing branches with focused tests.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
    available.
@@ -40,10 +41,10 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Active Feature Specs
 
+- `docs/specs/features/extract-viewer-event-bridge/`:
+  next roadmap feature, pending approval for its first implementation slice.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
-- `docs/specs/features/relocate-react-webview-presentation/`:
-  next roadmap feature, ready for detailed relocation planning.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
