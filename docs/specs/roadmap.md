@@ -52,12 +52,16 @@
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
-5. Relocate React webview presentation.
+5. Maintain the explicit React viewer bridge routing boundary.
 
-   - Track the relocation in
-     `features/relocate-react-webview-presentation/`.
-   - Move `src/ui-component` to `src/presentation/webview` without combining
-     relocation with UI or algorithm changes.
+   - Browser message validation and callback routing now live in a focused,
+     presentation-local viewer event bridge.
+   - React bootstrap retains VS Code API acquisition, global bridge exposure,
+     listener installation, and application mounting.
+   - Focused tests preserve viewer event-routing branches without changing
+     shared event contracts, bundle topology, or viewer behavior.
+   - Treat declarative component shape metrics as non-actionable unless they
+     expose a separate responsibility or maintenance risk.
 
 6. Use Qlty findings as architectural feedback when they expose a clear
    responsibility or boundary concern.
