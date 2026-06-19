@@ -9,20 +9,20 @@ import {
 import {
   type OpenPreviewCommandDependencies,
   executeOpenPreviewCommand,
-} from "../commands/openPreviewCommand";
-import { ViewerFactory } from "../webview/ViewerFactory";
-import { WebviewMediator } from "../webview/WebviewMediator";
+} from "../../presentation/vscode/commands/openPreviewCommand";
+import { ViewerFactory } from "../../presentation/vscode/webview/ViewerFactory";
+import { WebviewMediator } from "../../presentation/vscode/webview/WebviewMediator";
 import {
   AJS_FLOW_VIEWER_TYPE,
   AJS_TABLE_VIEWER_TYPE,
-} from "../webview/constant";
-import { WebviewStore } from "../webview/WebviewStore";
+} from "../../presentation/vscode/webview/constant";
+import { WebviewStore } from "../../presentation/vscode/webview/WebviewStore";
 import {
   createDebouncedAjsDocumentChange,
   createReadyAjsDocument,
-} from "../webview/ajsDocument";
-import { mountViewerPanel } from "../webview/mountViewerPanel";
-import { saveText } from "../webview/messageHandlers";
+} from "../../presentation/vscode/webview/ajsDocument";
+import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
+import { saveText } from "../../presentation/vscode/webview/messageHandlers";
 
 type ViewerConfig = {
   viewType: string;

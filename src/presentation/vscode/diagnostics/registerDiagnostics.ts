@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { BuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
+import type { BuildSyntaxDiagnostics } from "../../../application/editor-feedback/buildSyntaxDiagnostics";
 import { LANGUAGE_ID } from "../constant";
 
 const toVsCodeDiagnostic = (

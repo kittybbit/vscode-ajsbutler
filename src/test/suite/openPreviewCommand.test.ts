@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { executeOpenPreviewCommand } from "../../extension/commands/openPreviewCommand";
+import { executeOpenPreviewCommand } from "../../presentation/vscode/commands/openPreviewCommand";
 
 suite("Open Preview Command", () => {
   test("shows an error when there is no active editor", () => {

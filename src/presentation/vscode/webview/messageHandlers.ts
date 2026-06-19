@@ -1,8 +1,8 @@
 import * as os from "os";
 import * as vscode from "vscode";
-import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import type { MyAppResource } from "../../shared/MyAppResource";
-import { OPERATION } from "../../shared/webviewEvents";
+import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
+import type { MyAppResource } from "../../../shared/MyAppResource";
+import { OPERATION } from "../../../shared/webviewEvents";
 
 export const postResourceMessage = (
   requestedResource: MyAppResource,

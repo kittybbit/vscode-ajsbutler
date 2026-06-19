@@ -9,7 +9,7 @@ import {
 import {
   createViewerMessageHandler,
   registerViewerPanelDispose,
-} from "../../extension/webview/viewerMessageRouting";
+} from "../../presentation/vscode/webview/viewerMessageRouting";
 
 suite("Viewer message routing", () => {
   test("routes shared webview events through injected handlers", async () => {

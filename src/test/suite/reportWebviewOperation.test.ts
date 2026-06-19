@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { reportWebviewOperation } from "../../extension/webview/messageHandlers";
+import { reportWebviewOperation } from "../../presentation/vscode/webview/messageHandlers";
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { OPERATION } from "../../shared/webviewEvents";
 

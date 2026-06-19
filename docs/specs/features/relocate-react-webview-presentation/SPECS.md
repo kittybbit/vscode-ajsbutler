@@ -10,7 +10,7 @@ Relocate React webview presentation from `src/ui-component` to
 - Feature kind: roadmap feature
 - Source: target structure in `AGENTS.md` and `docs/specs/architecture.md`
 - Related plan: `docs/specs/plans.md`
-- Dependency: `features/classify-vscode-adapter-layout/`
+- Dependency: explicit VS Code adapter layout classification (completed)
 
 ## Requirements
 

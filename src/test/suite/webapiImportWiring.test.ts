@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { createWebApiImportSubscriptions } from "../../extension/bootstrap/webapiImportWiring";
+import { createWebApiImportSubscriptions } from "../../bootstrap/extension/webapiImportWiring";
 
 suite("WebAPI import wiring", () => {
   test("registers the command with injected dependencies", () => {

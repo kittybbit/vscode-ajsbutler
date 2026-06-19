@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { createExtensionRuntime } from "../../extension/bootstrap/extensionRuntime";
+import { createExtensionRuntime } from "../../bootstrap/extension/extensionRuntime";
 
 suite("Extension runtime", () => {
   test("creates MyExtension with telemetry and context", () => {

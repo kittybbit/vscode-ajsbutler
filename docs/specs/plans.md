@@ -30,8 +30,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Classify the legacy VS Code adapter layout now that composition ownership
-   is explicit.
+1. Plan the React webview presentation relocation now that VS Code adapters
+   have explicit presentation, infrastructure, and bootstrap owners.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
    available.
@@ -42,11 +42,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
-- `docs/specs/features/classify-vscode-adapter-layout/`:
-  roadmap feature awaiting relocation planning now that composition ownership
-  is explicit.
 - `docs/specs/features/relocate-react-webview-presentation/`:
-  roadmap feature awaiting VS Code adapter layout classification.
+  next roadmap feature, ready for detailed relocation planning.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the

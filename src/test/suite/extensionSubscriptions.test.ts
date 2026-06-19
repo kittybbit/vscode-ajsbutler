@@ -1,8 +1,8 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import type { ExtensionDependencies } from "../../extension/bootstrap/extensionDependencies";
-import { createExtensionSubscriptions } from "../../extension/bootstrap/extensionSubscriptions";
+import type { ExtensionDependencies } from "../../bootstrap/extension/extensionDependencies";
+import { createExtensionSubscriptions } from "../../bootstrap/extension/extensionSubscriptions";
 
 suite("Extension subscriptions", () => {
   test("creates diagnostics, hover, import, and viewer subscriptions", () => {

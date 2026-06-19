@@ -5,7 +5,7 @@ import {
   AJS_TABLE_VIEWER_BUNDLE_SRC,
   AJS_TABLE_VIEWER_TYPE,
   getViewerBundleSrc,
-} from "../../extension/webview/constant";
+} from "../../presentation/vscode/webview/constant";
 
 suite("Viewer bundle", () => {
   test("maps the table and flow view types to distinct bundles", () => {

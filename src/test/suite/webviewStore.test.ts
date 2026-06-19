@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { WebviewStore } from "../../extension/webview/WebviewStore";
+import { WebviewStore } from "../../presentation/vscode/webview/WebviewStore";
 
 suite("WebviewStore", () => {
   test("keeps add, lookup, removal, and dispose behavior stable", () => {

@@ -26,9 +26,12 @@ Migration should be incremental and use-case driven.
   editor feedback, parser and telemetry ports, and unit definition building.
 - `src/infrastructure`
   Contains the concrete ANTLR parser and JP1/AJS3 WebAPI adapters.
-- `src/extension`
-  Contains extension activation, diagnostics, hover provider registration,
-  preview commands, and webview panel orchestration.
+- `src/bootstrap/extension`
+  Contains extension activation, dependency construction, lifecycle, and
+  subscription assembly.
+- `src/presentation/vscode`
+  Contains diagnostics, hover provider registration, preview commands, and
+  webview panel orchestration.
 - `src/ui-component`
   Contains React-based webview presentation for table and flow views.
 - `src/generate/parser`
@@ -102,20 +105,19 @@ Migration should be incremental and use-case driven.
 ### Correct boundary locations
 
 - `src/extension.ts`
-- `src/extension/commands/*`
-- `src/extension/diagnostics/*`
-- `src/extension/languages/*`
-- `src/extension/webview/*`
+- `src/presentation/vscode/commands/*`
+- `src/presentation/vscode/diagnostics/*`
+- `src/presentation/vscode/languages/*`
+- `src/presentation/vscode/webview/*`
 - `src/test/*`
 
 ### Current boundary leaks
 
-- diagnostics and hover behavior still originate from extension-facing
-  registration modules, but some construction and wiring is still concentrated
-  in bootstrap code
-- webview panel creation, telemetry, and message handling are still grouped
-  under `src/extension/webview`, which is correct for adapter code but still
-  mixes some responsibilities that can be decomposed further
+- diagnostics and hover behavior originate from VS Code presentation adapters,
+  while construction and wiring remain in the outer bootstrap boundary
+- webview panel creation and message handling stay grouped under
+  `src/presentation/vscode/webview`; telemetry SDK and credential adapters live
+  under infrastructure
 
 ### Interpretation
 
@@ -161,17 +163,18 @@ Migration should be incremental and use-case driven.
 
 ### VS Code-facing adapters
 
-- `src/extension/diagnostics/registerDiagnostics.ts` owns
+- `src/presentation/vscode/diagnostics/registerDiagnostics.ts` owns
   `DiagnosticCollection`, document subscriptions, and DTO-to-VS Code mapping
-- `src/extension/languages/registerHoverProvider.ts` owns hover provider
+- `src/presentation/vscode/languages/registerHoverProvider.ts` owns hover provider
   registration and `MarkdownString` construction
-- `src/extension/commands/registerPreviewCommand.ts` owns command registration
+- `src/presentation/vscode/commands/openPreviewCommand.ts` owns command execution
   and active-editor checks
-- `src/extension/webview/messageHandlers.ts` owns save dialogs, theme/env/os
+- `src/presentation/vscode/webview/messageHandlers.ts` owns save dialogs, theme/env/os
   payload enrichment, and telemetry reporting for webview events
-- `src/extension/bootstrap/activateExtension.ts` is the explicit composition
+- `src/bootstrap/extension/activateExtension.ts` is the explicit composition
   root for activation wiring
-- `src/extension/telemetry/*` owns the telemetry SDK adapter and composition
+- `src/infrastructure/telemetry/*` owns telemetry adapter implementations;
+  `src/bootstrap/extension/createTelemetry.ts` owns adapter selection
   of the runtime telemetry implementation
 - `src/ui-component/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
   presentation-local coordinate/layout resolution for nested expansion and
@@ -183,7 +186,7 @@ Migration should be incremental and use-case driven.
 - callers in extension-facing modules request telemetry via
   `TelemetryPort.trackEvent(...)`
 - SDK-specific translation lives only in
-  `src/extension/telemetry/VscodeTelemetryAdapter.ts`
+  `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts`
 - bootstrap wiring creates the telemetry adapter and injects it into the
   extension runtime object
 - event names and payload shapes remain defined by the callers so the refactor
@@ -193,10 +196,10 @@ Migration should be incremental and use-case driven.
 
 - `src/extension.ts` is used for both desktop and browser entry points, so any
   shared import chain can affect both bundles
-- `src/extension/telemetry/VscodeTelemetryAdapter.ts` depends on
+- `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts` depends on
   `@vscode/extension-telemetry`; this still needs continued verification in web
   extension execution
-- `src/extension/webview/messageHandlers.ts` imports `os`; webpack currently
+- `src/presentation/vscode/webview/messageHandlers.ts` imports `os`; webpack currently
   provides a browser fallback, but this remains an environment-specific
   adapter concern that needs continued verification
 - `src/ui-component` receives webview event payloads rebuilt from plain DTO

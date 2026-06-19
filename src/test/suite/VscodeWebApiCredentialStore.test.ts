@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { VscodeWebApiCredentialStore } from "../../extension/webapi/VscodeWebApiCredentialStore";
+import { VscodeWebApiCredentialStore } from "../../infrastructure/webapi/VscodeWebApiCredentialStore";
 
 const createSecretStorage = (
   initialValues: Record<string, string | undefined> = {},

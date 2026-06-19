@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import {
   createDebouncedAjsDocumentChange,
   createReadyAjsDocument,
-} from "../../extension/webview/ajsDocument";
+} from "../../presentation/vscode/webview/ajsDocument";
 import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
 
 suite("ajsDocument", () => {

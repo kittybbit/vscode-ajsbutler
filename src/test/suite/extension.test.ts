@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { LANGUAGE_ID } from "../../extension/constant";
+import { LANGUAGE_ID } from "../../presentation/vscode/constant";
 
 const AJS_TABLE_VIEWER_TYPE = "ajsbutler.tableViewer";
 const AJS_FLOW_VIEWER_TYPE = "ajsbutler.flowViewer";

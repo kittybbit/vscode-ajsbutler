@@ -4,7 +4,7 @@ import {
   IMPORT_AJS_DEFINITION_VIA_WEBAPI_COMMAND,
   type ImportAjsDefinitionCommandDeps,
   executeImportAjsDefinitionViaWebApiCommand,
-} from "../commands/importAjsDefinitionViaWebApiCommand";
+} from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
 
 export type WebApiImportWiringDeps = Pick<
   ImportAjsDefinitionCommandDeps,

@@ -1,5 +1,5 @@
-import { MyExtension } from "../MyExtension";
-import { Telemetry } from "../constant";
+import { Telemetry } from "../../presentation/vscode/constant";
+import { MyExtension } from "./MyExtension";
 
 const DEVELOPMENT_PROPERTY = {
   development: String(DEVELOPMENT),

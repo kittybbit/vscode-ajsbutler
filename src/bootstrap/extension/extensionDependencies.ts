@@ -14,9 +14,9 @@ import {
 } from "../../application/unit-list/buildUnitList";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
-import type { ImportAjsDefinitionCommandDeps } from "../commands/importAjsDefinitionViaWebApiCommand";
-import { createTelemetry } from "../telemetry/createTelemetry";
-import { VscodeWebApiCredentialStore } from "../webapi/VscodeWebApiCredentialStore";
+import type { ImportAjsDefinitionCommandDeps } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
+import { VscodeWebApiCredentialStore } from "../../infrastructure/webapi/VscodeWebApiCredentialStore";
+import { createTelemetry } from "./createTelemetry";
 
 export type ExtensionDependencies = {
   telemetry: TelemetryPort;

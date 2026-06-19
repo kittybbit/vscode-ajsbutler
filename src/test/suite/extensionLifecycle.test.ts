@@ -1,11 +1,11 @@
 import * as assert from "assert";
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { MyExtension } from "../../extension/MyExtension";
+import { MyExtension } from "../../bootstrap/extension/MyExtension";
 import {
   reportExtensionActivated,
   reportAndDisposeExtensionRuntime,
-} from "../../extension/bootstrap/extensionLifecycle";
-import { Telemetry } from "../../extension/constant";
+} from "../../bootstrap/extension/extensionLifecycle";
+import { Telemetry } from "../../presentation/vscode/constant";
 
 suite("Extension lifecycle", () => {
   test("reports activate telemetry", () => {

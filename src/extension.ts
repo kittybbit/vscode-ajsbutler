@@ -3,7 +3,7 @@ import {
   ActivatedExtension,
   activateExtension,
   deactivateExtension,
-} from "./extension/bootstrap/activateExtension";
+} from "./bootstrap/extension/activateExtension";
 
 let activatedExtension: ActivatedExtension | undefined;
 

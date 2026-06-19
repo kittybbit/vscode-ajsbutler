@@ -52,22 +52,14 @@
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
-5. Classify legacy VS Code adapter layout.
-
-   - Track the relocation in `features/classify-vscode-adapter-layout/`.
-   - Move VS Code-facing modules to presentation, technical adapters to
-     infrastructure, and activation/composition modules to an outer bootstrap
-     boundary after ownership is explicit.
-   - Preserve the desktop and web extension entry points.
-
-6. Relocate React webview presentation.
+5. Relocate React webview presentation.
 
    - Track the relocation in
      `features/relocate-react-webview-presentation/`.
    - Move `src/ui-component` to `src/presentation/webview` without combining
      relocation with UI or algorithm changes.
 
-7. Use Qlty findings as architectural feedback when they expose a clear
+6. Use Qlty findings as architectural feedback when they expose a clear
    responsibility or boundary concern.
 
    - The qlty-driven architecture refactoring feature is complete through the
