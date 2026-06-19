@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { Table } from "@tanstack/table-core";
 import Parameter from "../../domain/models/parameters/Parameter";
 import { UnitListRowView } from "../../application/unit-list/buildUnitListView";
-import { exportCsvView } from "../../ui-component/editor/ajsTable/exportCsvView";
+import { exportCsvView } from "../../presentation/webview/editor/ajsTable/exportCsvView";
 
 class TestParameter extends Parameter {}
 

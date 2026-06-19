@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { shouldRenderNodeComment } from "../../ui-component/editor/ajsFlow/nodes/flowNodeDisplay";
+import { shouldRenderNodeComment } from "../../presentation/webview/editor/ajsFlow/nodes/flowNodeDisplay";
 
 suite("flow node display", () => {
   test("does not render duplicate comments matching the label", () => {

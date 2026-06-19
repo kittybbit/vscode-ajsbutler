@@ -2,45 +2,32 @@
 
 ## Current Task
 
-- Status: Approved
-- Scope: move all 74 modules under `src/ui-component/` together to
-  `src/presentation/webview/`, preserving the existing `editor/`, `ajsTable/`,
-  and `ajsFlow/` subtree and changing only paths required by the relocation.
-- Acceptance: update every internal cross-layer relative import, the two
-  webpack viewer entries, direct test imports, and documentation paths; remove
-  the unused `@ui-component/*` TypeScript alias; leave no production file or
-  stale reference under `src/ui-component/`.
-- Validation: run `rtk pnpm run qlty`, `rtk pnpm run test:compile`,
-  `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run build`, and
-  `rtk pnpm run lint:md`.
+- Status: Proposed
+- Scope: no implementation task remains; review the feature for closure.
+- Acceptance: confirm the live presentation paths are documented and no active
+  relocation risk remains.
+- Validation: docs-only validation for any closure update.
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-06-19
-- Approved scope: relocate the complete `src/ui-component/` subtree and update
-  only the paths, references, tests, configuration, and documentation required
-  to preserve existing desktop and web viewer behavior.
+- Status: Pending
+- Approved at: none
+- Approved scope: none
 
 Implementation must not start while Status is Pending.
 
 ## Decision Notes
 
-- The table and flow viewers share bootstrap, context, dialog, and callback
-  modules, so splitting their relocation would create a temporary duplicate or
-  mixed-ownership tree without reducing behavior risk.
-- Fifty-five modules have relative imports into application, domain, shared,
-  or resource code that must gain one parent level after the move.
-- Direct path references exist in ten presentation-focused test files,
-  `webpack.config.js`, `tsconfig.json`, and the WebAPI boundary test allowlist.
-- `@ui-component/*` has no source consumer, so adding a replacement alias would
-  be unnecessary.
-- No command, DTO, event, bundle name, dependency, UI behavior, or VS Code
-  `^1.75.0` compatibility change is approved.
+- All 74 React webview modules now live under `src/presentation/webview/`.
+- Table and flow webpack entries resolve the new paths, and the unused
+  `@ui-component/*` TypeScript alias was removed.
+- Desktop tests, web tests, production build, type compilation, Qlty, and
+  Markdown validation passed after the relocation.
+- No unresolved desktop, web, or VS Code `^1.75.0` compatibility risk remains.
+- Qlty metrics found pre-existing presentation complexity. Any cleanup must be
+  a separate feature; extracting viewer bridge routing is the first candidate.
 
 ## Use-Case Back-Propagation
 
-- No behavioral scenario changes are required. Preserve the existing unit-list,
-  flow-graph, CSV export, cross-view navigation, and unit-definition contracts.
-- Update the presentation-owner path in `uc-build-flow-graph.md`; update live
-  paths in `architecture.md` and `current-state.md` with the relocation.
+- No behavioral scenario changed. The flow-graph presentation-owner path and
+  live architecture/current-state paths were updated.

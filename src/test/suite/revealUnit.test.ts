@@ -3,7 +3,7 @@ import {
   findRowIndexByAbsolutePath,
   getRevealUnitAbsolutePath,
   resolveFlowRevealTarget,
-} from "../../ui-component/editor/revealUnit";
+} from "../../presentation/webview/editor/revealUnit";
 
 suite("Reveal unit helpers", () => {
   test("reads a reveal-unit absolute path from event data", () => {

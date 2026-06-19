@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { flattenAjsUnits } from "../../domain/models/ajs/AjsDocument";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { parseAjs } from "../support/parseAjs";
-import { findFlowSearchResult } from "../../ui-component/editor/ajsFlow/flowSearch";
+import { findFlowSearchResult } from "../../presentation/webview/editor/ajsFlow/flowSearch";
 
 const nestedDefinition = `
 unit=root,,jp1admin,;

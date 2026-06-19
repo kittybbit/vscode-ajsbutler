@@ -17,7 +17,6 @@ suite("WebAPI import boundaries", () => {
       "node:",
       "infrastructure/webapi",
       "generated/jp1Ajs3WebApi",
-      "ui-component",
       "webview",
       "react",
       "Prism",

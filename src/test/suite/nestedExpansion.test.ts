@@ -6,7 +6,7 @@ import {
   collectExpandableNestedUnitIds,
   hasExpandedAllNestedUnitIds,
   isExpandableNestedUnit,
-} from "../../ui-component/editor/ajsFlow/nestedExpansion";
+} from "../../presentation/webview/editor/ajsFlow/nestedExpansion";
 import { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 
 const nestedDefinition = `
