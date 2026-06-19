@@ -30,19 +30,14 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Plan a focused React viewer bridge routing extraction now that the webview
-   presentation modules have an explicit owner. Keep the change
-   behavior-preserving and cover routing branches with focused tests.
-2. Keep WebAPI import beta feedback and real-environment smoke evidence
+1. Keep WebAPI import beta feedback and real-environment smoke evidence
    tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
    available.
-3. Keep compatibility risk visible for every shared or extension-runtime
+2. Keep compatibility risk visible for every shared or extension-runtime
    change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/extract-viewer-event-bridge/`:
-  next roadmap feature, pending approval for its first implementation slice.
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
 

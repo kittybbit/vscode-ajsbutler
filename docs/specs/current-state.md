@@ -14,7 +14,8 @@ application and adapter boundaries.
 - `src/extension` contains VS Code-facing adapters, explicit bootstrap wiring,
   telemetry adapters, WebAPI command wiring, and webview orchestration
 - `src/presentation/webview` contains React/webview presentation code and
-  presentation-local flow layout state
+  presentation-local flow layout state; viewer event routing is separated from
+  React bootstrap wiring
 - `src/shared` contains host-neutral webview event contracts and shared app
   resources
 - `src/generate/parser` contains generated parser artifacts

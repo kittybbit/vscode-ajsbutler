@@ -52,11 +52,13 @@
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
-5. Clarify React viewer bridge routing responsibility.
+5. Maintain the explicit React viewer bridge routing boundary.
 
-   - Extract the routing decisions currently concentrated in the viewer
-     bootstrap into a focused, behavior-preserving presentation boundary.
-   - Add focused tests for viewer event-routing branches without changing
+   - Browser message validation and callback routing now live in a focused,
+     presentation-local viewer event bridge.
+   - React bootstrap retains VS Code API acquisition, global bridge exposure,
+     listener installation, and application mounting.
+   - Focused tests preserve viewer event-routing branches without changing
      shared event contracts, bundle topology, or viewer behavior.
    - Treat declarative component shape metrics as non-actionable unless they
      expose a separate responsibility or maintenance risk.

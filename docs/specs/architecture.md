@@ -180,6 +180,10 @@ Migration should be incremental and use-case driven.
   presentation-local coordinate/layout resolution for nested expansion and
   must preserve deterministic, expanded-set-based layout behavior without
   depending on the last active expansion ID
+- `src/presentation/webview/editor/viewerEventBridge.ts` owns browser message
+  validation and callback routing; `bootstrapViewer.tsx` retains VS Code API
+  acquisition, global bridge exposure, listener installation, and React mount
+  wiring
 
 ## Telemetry Boundary
 
