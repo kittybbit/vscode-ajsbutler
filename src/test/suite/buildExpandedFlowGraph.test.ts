@@ -4,7 +4,7 @@ import { join } from "path";
 import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { parseAjs } from "../support/parseAjs";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { buildExpandedFlowGraph } from "../../ui-component/editor/ajsFlow/buildExpandedFlowGraph";
+import { buildExpandedFlowGraph } from "../../presentation/webview/editor/ajsFlow/buildExpandedFlowGraph";
 
 const readSample = (name: string): string =>
   readFileSync(join(__dirname, "../../../sample", name), "utf8");

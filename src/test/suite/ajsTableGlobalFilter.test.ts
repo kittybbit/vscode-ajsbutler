@@ -13,7 +13,7 @@ import {
   buildParameterSearchValues,
   createAjsGlobalFilterFn,
   isAjsTableSearchHit,
-} from "../../ui-component/editor/ajsTable/globalFilter";
+} from "../../presentation/webview/editor/ajsTable/globalFilter";
 
 const createRow = (
   absolutePath: string,

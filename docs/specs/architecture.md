@@ -32,7 +32,7 @@ Migration should be incremental and use-case driven.
 - `src/presentation/vscode`
   Contains diagnostics, hover provider registration, preview commands, and
   webview panel orchestration.
-- `src/ui-component`
+- `src/presentation/webview`
   Contains React-based webview presentation for table and flow views.
 - `src/generate/parser`
   Contains generated ANTLR parser artifacts.
@@ -176,7 +176,7 @@ Migration should be incremental and use-case driven.
 - `src/infrastructure/telemetry/*` owns telemetry adapter implementations;
   `src/bootstrap/extension/createTelemetry.ts` owns adapter selection
   of the runtime telemetry implementation
-- `src/ui-component/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
+- `src/presentation/webview/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
   presentation-local coordinate/layout resolution for nested expansion and
   must preserve deterministic, expanded-set-based layout behavior without
   depending on the last active expansion ID
@@ -202,7 +202,7 @@ Migration should be incremental and use-case driven.
 - `src/presentation/vscode/webview/messageHandlers.ts` imports `os`; webpack currently
   provides a browser fallback, but this remains an environment-specific
   adapter concern that needs continued verification
-- `src/ui-component` receives webview event payloads rebuilt from plain DTO
+- `src/presentation/webview` receives webview event payloads rebuilt from plain DTO
   documents, so serialization-boundary changes still affect both desktop and
   web viewers even when parsing behavior is unchanged
 

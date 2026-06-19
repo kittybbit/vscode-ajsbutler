@@ -203,8 +203,8 @@ const editorConfig = (env, argv) => {
         development,
         target: "web",
         entry: {
-            tableViewer: "./src/ui-component/editor/tableViewer.tsx",
-            flowViewer: "./src/ui-component/editor/flowViewer.tsx",
+            tableViewer: "./src/presentation/webview/editor/tableViewer.tsx",
+            flowViewer: "./src/presentation/webview/editor/flowViewer.tsx",
         },
         libraryType: "umd",
         externals: {

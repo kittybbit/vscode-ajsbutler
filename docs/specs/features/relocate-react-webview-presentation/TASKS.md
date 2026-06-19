@@ -1,16 +1,12 @@
-# Feature Tasks: Relocate React Webview Presentation
+# Relocate React Webview Presentation Tasks
 
-## Sync Rule
+## Current Task
 
-- Update this file with task decisions, `plans.md` when active features change,
-  and `roadmap.md` when repository sequencing changes.
-- Keep only current approval, risk, validation, and next-decision state.
-
-## Current Status
-
-- Runtime status: not started; implementation approval is pending.
-- Active slice: plan the presentation subtree and path relocation.
-- Open follow-up: none before detailed reference inventory.
+- Status: Proposed
+- Scope: no implementation task remains; review the feature for closure.
+- Acceptance: confirm the live presentation paths are documented and no active
+  relocation risk remains.
+- Validation: docs-only validation for any closure update.
 
 ## Human Approval
 
@@ -20,20 +16,18 @@
 
 Implementation must not start while Status is Pending.
 
-## Active Tasks
+## Decision Notes
 
-- [x] Feature boundary and initial impact recorded.
-- [ ] Use `sdd-plan-task` to inventory source, test, alias, and webpack paths.
-- [ ] Obtain implementation approval for the exact relocation map.
-- [ ] Verify every affected reference after approval.
-- [ ] Relocate presentation files without logic changes.
+- All 74 React webview modules now live under `src/presentation/webview/`.
+- Table and flow webpack entries resolve the new paths, and the unused
+  `@ui-component/*` TypeScript alias was removed.
+- Desktop tests, web tests, production build, type compilation, Qlty, and
+  Markdown validation passed after the relocation.
+- No unresolved desktop, web, or VS Code `^1.75.0` compatibility risk remains.
+- Qlty metrics found pre-existing presentation complexity. Any cleanup must be
+  a separate feature; extracting viewer bridge routing is the first candidate.
 
-## Validation
+## Use-Case Back-Propagation
 
-- [ ] Confirm no stale imports or production files remain in `src/ui-component`.
-- [ ] Run `rtk pnpm run qlty`, desktop tests, web tests, and build.
-
-## Notes
-
-- Docs approval permits a docs-only PR, not runtime implementation.
-- No durable behavior-contract change is expected.
+- No behavioral scenario changed. The flow-graph presentation-owner path and
+  live architecture/current-state paths were updated.

@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { AjsUnit } from "../../domain/models/ajs/AjsDocument";
-import { isSelectableFlowScopeUnit } from "../../ui-component/editor/ajsFlow/FlowSelector";
+import { isSelectableFlowScopeUnit } from "../../presentation/webview/editor/ajsFlow/FlowSelector";
 
 const createUnit = (overrides: Partial<AjsUnit>): AjsUnit => ({
   id: overrides.id ?? "/root/jobnet",

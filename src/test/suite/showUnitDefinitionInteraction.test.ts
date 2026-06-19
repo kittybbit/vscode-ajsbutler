@@ -6,9 +6,9 @@ import {
   handleClickDialogOpen,
   handleKeyDownNestedToggle,
   handleKeyDownDialogOpen,
-} from "../../ui-component/editor/ajsFlow/nodes/Utils";
-import { AjsNode } from "../../ui-component/editor/ajsFlow/nodes/AjsNode";
-import { handleOpenUnitDefinition } from "../../ui-component/editor/ajsTable/tableColumnDef";
+} from "../../presentation/webview/editor/ajsFlow/nodes/Utils";
+import { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import { handleOpenUnitDefinition } from "../../presentation/webview/editor/ajsTable/tableColumnDef";
 
 const dialogData: UnitDefinitionDialogDto = {
   absolutePath: "/root/job1",

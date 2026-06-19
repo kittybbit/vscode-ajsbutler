@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { createTheme } from "@mui/material/styles";
 import { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
-import { createReactFlowData } from "../../ui-component/editor/ajsFlow/flowGraphView";
+import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
 
 suite("Flow Graph View", () => {
   test("maps flow graph DTOs without requiring UnitEntity instances", () => {
