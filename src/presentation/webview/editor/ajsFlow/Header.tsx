@@ -29,6 +29,7 @@ import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import FlowMenu from "./FlowMenu";
 import {
   CurrentUnitIdStateType,
@@ -55,6 +56,8 @@ type HeaderProps = {
   canEnableFocusMode: boolean;
   focusModeEnabled: boolean;
   toggleFocusMode: () => void;
+  showMiniMap: boolean;
+  toggleMiniMap: () => void;
   searchedUnitId?: string;
   searchResultPosition?: FlowSearchResultPosition;
   onSearchNavigate: (query: string, direction: FlowSearchDirection) => void;
@@ -419,6 +422,8 @@ const Header: FC<HeaderProps> = ({
   canEnableFocusMode,
   focusModeEnabled,
   toggleFocusMode,
+  showMiniMap,
+  toggleMiniMap,
   searchedUnitId,
   searchResultPosition,
   onSearchNavigate,
@@ -505,6 +510,17 @@ const Header: FC<HeaderProps> = ({
                 <CenterFocusStrongIcon fontSize="inherit" />
               </IconButton>
             </span>
+          </Tooltip>
+          <Tooltip title={showMiniMap ? "Hide MiniMap." : "Show MiniMap."}>
+            <IconButton
+              size="small"
+              aria-label="Toggle flow graph MiniMap visibility."
+              aria-pressed={showMiniMap}
+              color={showMiniMap ? "primary" : "default"}
+              onClick={toggleMiniMap}
+            >
+              <MapOutlinedIcon fontSize="inherit" />
+            </IconButton>
           </Tooltip>
           <HeaderSearchField
             isMac={isMac}

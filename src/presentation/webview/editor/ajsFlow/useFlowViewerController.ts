@@ -41,6 +41,7 @@ import type { FlowViewportFocusRequest } from "./flowViewportFocus";
 import { applyHoveredUnitToFlowNodes } from "./flowGraphHover";
 import { applyFlowRelationshipFocus } from "./flowRelationshipFocus";
 import { useFlowFocusModeState } from "./useFlowFocusModeState";
+import { useFlowMiniMapState } from "./useFlowMiniMapState";
 
 type UseFlowViewerControllerParams = {
   theme: Theme;
@@ -216,6 +217,7 @@ export const useFlowViewerController = ({
     useSelectedFlowNodeState(ajsDocument, currentUnitId);
   const { canEnableFocusMode, focusModeEnabled, toggleFocusMode } =
     useFlowFocusModeState(ajsDocument, currentUnitId, selectedUnitId);
+  const { showMiniMap, toggleMiniMap } = useFlowMiniMapState();
   const {
     clearGraphHoveredUnit,
     clearTreeHoveredUnit,
@@ -374,11 +376,13 @@ export const useFlowViewerController = ({
     searchResultPosition,
     selectedUnitId,
     selectedNodeDetail,
+    showMiniMap,
     selectFlowNode: selectUnit,
     selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
     toggleFocusMode,
+    toggleMiniMap,
     treeHoveredUnit,
     unitById,
   };

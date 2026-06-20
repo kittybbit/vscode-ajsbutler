@@ -14,6 +14,8 @@ type NodeVisualState = Pick<
   | "nestedPanel"
 >;
 
+export const flowNodeSizeEm = 7.25;
+
 type NestedPanel = NonNullable<NodeVisualState["nestedPanel"]>;
 
 type VisualStateSelector = (visualState: NodeVisualState) => boolean;
@@ -296,8 +298,8 @@ export const buildNodeSxProps = (
   position: "relative",
   zIndex: 1,
   overflow: "visible",
-  width: "7.25em",
-  minHeight: "7.25em",
+  width: `${flowNodeSizeEm}em`,
+  minHeight: `${flowNodeSizeEm}em`,
   paddingX: "0.55em",
   paddingY: "0.45em",
   borderRadius: nodeBorderRadius(visualState),

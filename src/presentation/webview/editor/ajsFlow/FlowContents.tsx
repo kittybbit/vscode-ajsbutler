@@ -1,5 +1,6 @@
 import React, { FC, memo, useMemo } from "react";
 import Box from "@mui/material/Box";
+import GlobalStyles from "@mui/material/GlobalStyles";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -9,6 +10,7 @@ import {
   BackgroundVariant,
   Controls,
   MiniMap,
+  type Node,
   NodeTypes,
   ReactFlow,
   ReactFlowProvider,
@@ -23,8 +25,14 @@ import Header from "./Header";
 import FlowSelector from "./FlowSelector";
 import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
 import { useFlowViewerController } from "./useFlowViewerController";
+import {
+  resolveFlowMiniMapNodeFill,
+  resolveFlowMiniMapNodeStroke,
+} from "./flowMiniMap";
+import type { AjsNode } from "./nodes/AjsNode";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
+const minimumViewportZoom = 0.02;
 
 const nodeTypes: NodeTypes = {
   job: JobNode,
@@ -78,17 +86,42 @@ const FlowContents: FC = () => {
     searchResultPosition,
     selectedUnitId,
     selectedNodeDetail,
+    showMiniMap,
     selectFlowNode,
     selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
     toggleFocusMode,
+    toggleMiniMap,
     treeHoveredUnit,
     unitById,
   } = useFlowViewerController({ theme });
+  const miniMapColors = useMemo(
+    () => ({
+      both: theme.palette.warning.main,
+      currentSearchResult: theme.palette.success.dark,
+      downstream: theme.palette.success.main,
+      hidden: "transparent",
+      normal: theme.palette.action.disabled,
+      searchMatch: theme.palette.success.light,
+      selected: theme.palette.secondary.main,
+      selectedFocus: theme.palette.primary.main,
+      unrelated: theme.palette.action.disabledBackground,
+      upstream: theme.palette.info.main,
+    }),
+    [theme],
+  );
 
   return (
     <ThemeProvider theme={theme}>
+      <GlobalStyles
+        styles={{
+          ".ajs-flow-minimap .react-flow__minimap-node": {
+            vectorEffect: "non-scaling-stroke",
+            strokeLinejoin: "round",
+          },
+        }}
+      />
       <ReactFlowProvider>
         <Stack
           direction="row"
@@ -135,6 +168,8 @@ const FlowContents: FC = () => {
               canEnableFocusMode={canEnableFocusMode}
               focusModeEnabled={focusModeEnabled}
               toggleFocusMode={toggleFocusMode}
+              showMiniMap={showMiniMap}
+              toggleMiniMap={toggleMiniMap}
               searchedUnitId={searchedUnitId}
               searchResultPosition={searchResultPosition}
               onSearchNavigate={handleSearchNavigate}
@@ -193,7 +228,11 @@ const FlowContents: FC = () => {
                       reactFlowInstanceRef.current = instance;
                     }}
                     fitView
-                    fitViewOptions={{ padding: 0.22 }}
+                    minZoom={minimumViewportZoom}
+                    fitViewOptions={{
+                      padding: 0.22,
+                      minZoom: minimumViewportZoom,
+                    }}
                   >
                     <Background
                       variant={BackgroundVariant.Dots}
@@ -210,16 +249,32 @@ const FlowContents: FC = () => {
                         boxShadow: theme.shadows[3],
                       }}
                     />
-                    <MiniMap
-                      pannable
-                      zoomable
-                      style={{
-                        borderRadius: 12,
-                        overflow: "hidden",
-                        opacity: 0.88,
-                        boxShadow: theme.shadows[3],
-                      }}
-                    />
+                    {showMiniMap && (
+                      <MiniMap<Node<AjsNode>>
+                        className="ajs-flow-minimap"
+                        ariaLabel="Flow graph MiniMap"
+                        pannable
+                        zoomable
+                        position="bottom-right"
+                        nodeColor={(node) =>
+                          resolveFlowMiniMapNodeFill(node, miniMapColors)
+                        }
+                        nodeStrokeColor={(node) =>
+                          resolveFlowMiniMapNodeStroke(node, miniMapColors)
+                        }
+                        nodeStrokeWidth={3}
+                        bgColor={theme.palette.background.paper}
+                        maskColor={`${theme.palette.background.default}66`}
+                        maskStrokeColor="transparent"
+                        maskStrokeWidth={0}
+                        style={{
+                          borderRadius: 12,
+                          overflow: "hidden",
+                          opacity: 1,
+                          boxShadow: theme.shadows[3],
+                        }}
+                      />
+                    )}
                   </ReactFlow>
                 </Paper>
                 {selectedNodeDetail && (
