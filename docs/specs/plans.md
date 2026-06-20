@@ -40,6 +40,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
+- `docs/specs/features/remove-unused-package-dependencies/`:
+  transient branch feature to remove only direct dependencies proven unused
+  across source, configuration, tooling, packaging, and desktop/web paths.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
