@@ -50,6 +50,7 @@ const FlowContents: FC = () => {
 
   const {
     ajsDocument,
+    canEnableFocusMode,
     currentUnit,
     currentUnitIdState,
     clearGraphHoveredUnit,
@@ -61,6 +62,7 @@ const FlowContents: FC = () => {
     edges,
     expandableNestedUnitIds,
     flowMenuState,
+    focusModeEnabled,
     handleSearchClear,
     handleSearchNavigate,
     handleSearchSubmit,
@@ -80,6 +82,7 @@ const FlowContents: FC = () => {
     selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
+    toggleFocusMode,
     treeHoveredUnit,
     unitById,
   } = useFlowViewerController({ theme });
@@ -129,6 +132,9 @@ const FlowContents: FC = () => {
               canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
               hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
               toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
+              canEnableFocusMode={canEnableFocusMode}
+              focusModeEnabled={focusModeEnabled}
+              toggleFocusMode={toggleFocusMode}
               searchedUnitId={searchedUnitId}
               searchResultPosition={searchResultPosition}
               onSearchNavigate={handleSearchNavigate}
@@ -222,6 +228,8 @@ const FlowContents: FC = () => {
                     onClose={clearSelectedUnit}
                     onOpenDefinition={openSelectedNodeDefinition}
                     onOpenScope={openSelectedNodeScope}
+                    focusModeEnabled={focusModeEnabled}
+                    onToggleFocusMode={toggleFocusMode}
                   />
                 )}
               </Stack>

@@ -13,6 +13,7 @@ import { TySymbol } from "../../../../../domain/values/AjsType";
 import { unitTypeLabel } from "../../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../../MyContexts";
 import { shouldRenderNodeComment } from "./flowNodeDisplay";
+import type { FlowRelationshipFocusRole } from "../flowRelationshipFocus";
 export { buildNodeSxProps } from "./nodeSxProps";
 
 export type AjsNode = {
@@ -38,6 +39,7 @@ export type AjsNode = {
   isSearchMatch?: boolean;
   isCurrentSearchResult?: boolean;
   isSelected?: boolean;
+  relationshipFocusRole?: FlowRelationshipFocusRole;
   canExpandNested?: boolean;
   isExpandedNested?: boolean;
   toggleExpandedUnitId?: (unitId: string) => void;

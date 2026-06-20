@@ -39,6 +39,8 @@ import { useHoveredFlowNodeState } from "./useHoveredFlowNodeState";
 import { resolveFlowTreeSelectionTarget } from "./flowTreeSelection";
 import type { FlowViewportFocusRequest } from "./flowViewportFocus";
 import { applyHoveredUnitToFlowNodes } from "./flowGraphHover";
+import { applyFlowRelationshipFocus } from "./flowRelationshipFocus";
+import { useFlowFocusModeState } from "./useFlowFocusModeState";
 
 type UseFlowViewerControllerParams = {
   theme: Theme;
@@ -212,6 +214,8 @@ export const useFlowViewerController = ({
   );
   const { clearSelection, selectedUnitId, selectUnit } =
     useSelectedFlowNodeState(ajsDocument, currentUnitId);
+  const { canEnableFocusMode, focusModeEnabled, toggleFocusMode } =
+    useFlowFocusModeState(ajsDocument, currentUnitId, selectedUnitId);
   const {
     clearGraphHoveredUnit,
     clearTreeHoveredUnit,
@@ -273,9 +277,22 @@ export const useFlowViewerController = ({
     unitById,
     unitDefinitionByPath,
   });
+  const focusedFlowData = useMemo(
+    () =>
+      applyFlowRelationshipFocus(nodes, edges, {
+        colors: {
+          both: theme.palette.warning.main,
+          downstream: theme.palette.success.main,
+          upstream: theme.palette.info.main,
+        },
+        enabled: focusModeEnabled,
+        selectedUnitId,
+      }),
+    [edges, focusModeEnabled, nodes, selectedUnitId, theme],
+  );
   const renderedNodes = useMemo(
-    () => applyHoveredUnitToFlowNodes(nodes, treeHoveredUnitId),
-    [nodes, treeHoveredUnitId],
+    () => applyHoveredUnitToFlowNodes(focusedFlowData.nodes, treeHoveredUnitId),
+    [focusedFlowData.nodes, treeHoveredUnitId],
   );
   const selectedNode = useMemo(
     () => nodes.find((node) => node.id === selectedUnitId),
@@ -329,6 +346,7 @@ export const useFlowViewerController = ({
 
   return {
     ajsDocument,
+    canEnableFocusMode,
     currentUnit,
     currentUnitIdState,
     clearGraphHoveredUnit,
@@ -337,9 +355,10 @@ export const useFlowViewerController = ({
     dialogData,
     drawerWidth,
     drawerWidthState,
-    edges,
+    edges: focusedFlowData.edges,
     expandableNestedUnitIds,
     flowMenuState,
+    focusModeEnabled,
     handleSearchClear,
     handleSearchNavigate,
     handleSearchSubmit,
@@ -359,6 +378,7 @@ export const useFlowViewerController = ({
     selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
+    toggleFocusMode,
     treeHoveredUnit,
     unitById,
   };

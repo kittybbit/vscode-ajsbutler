@@ -38,6 +38,7 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
     isSearchMatch,
     isCurrentSearchResult,
     isSelected,
+    relationshipFocusRole,
   } = data;
 
   return (
@@ -52,6 +53,7 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
           isSearchMatch,
           isCurrentSearchResult,
           isSelected,
+          relationshipFocusRole,
         })}
       >
         <TyTitle ty={ty} />

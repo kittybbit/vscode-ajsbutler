@@ -1,5 +1,9 @@
 import * as assert from "assert";
-import { buildNodeHoverDecoration } from "../../presentation/webview/editor/ajsFlow/nodes/nodeSxProps";
+import { createTheme } from "@mui/material/styles";
+import {
+  buildNodeFocusFilter,
+  buildNodeHoverDecoration,
+} from "../../presentation/webview/editor/ajsFlow/nodes/nodeSxProps";
 
 suite("Flow Node Style", () => {
   test("adds an independent outline without moving the hovered node", () => {
@@ -16,5 +20,21 @@ suite("Flow Node Style", () => {
       outlineStyle: "solid",
       outlineOffset: "3px",
     });
+  });
+
+  test("distinguishes relationship focus directions with theme colors", () => {
+    const theme = createTheme();
+    assert.ok(
+      buildNodeFocusFilter("upstream", theme).includes(theme.palette.info.main),
+    );
+    assert.ok(
+      buildNodeFocusFilter("downstream", theme).includes(
+        theme.palette.success.main,
+      ),
+    );
+    assert.ok(
+      buildNodeFocusFilter("both", theme).includes(theme.palette.warning.main),
+    );
+    assert.strictEqual(buildNodeFocusFilter("unrelated", theme), "none");
   });
 });

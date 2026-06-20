@@ -15,6 +15,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
@@ -25,6 +26,8 @@ type FlowNodeDetailPanelProps = {
   onClose: VoidFunction;
   onOpenDefinition: VoidFunction;
   onOpenScope: VoidFunction;
+  focusModeEnabled: boolean;
+  onToggleFocusMode: VoidFunction;
 };
 
 const DetailRow: FC<{ label: string; value: React.ReactNode }> = ({
@@ -61,6 +64,8 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   onClose,
   onOpenDefinition,
   onOpenScope,
+  focusModeEnabled,
+  onToggleFocusMode,
 }) => {
   const { lang = "en" } = useMyAppContext();
   const theme = useTheme();
@@ -178,9 +183,17 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
             active={detail.isCurrentSearchResult}
             label="Current search result"
           />
+          <StateChip active={focusModeEnabled} label="Relationship focus" />
         </Stack>
 
         <Divider />
+        <Button
+          variant={focusModeEnabled ? "contained" : "outlined"}
+          startIcon={<CenterFocusStrongIcon />}
+          onClick={onToggleFocusMode}
+        >
+          {focusModeEnabled ? "Exit relationship focus" : "Focus relationships"}
+        </Button>
         <Button
           variant="outlined"
           startIcon={<DescriptionIcon />}

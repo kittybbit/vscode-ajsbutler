@@ -31,6 +31,7 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
     isSearchMatch,
     isCurrentSearchResult,
     isSelected,
+    relationshipFocusRole,
     label,
     comment,
     ty,
@@ -49,6 +50,7 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
           isSearchMatch,
           isCurrentSearchResult,
           isSelected,
+          relationshipFocusRole,
         })}
         className={classNames({
           ancestor: isAncestor,

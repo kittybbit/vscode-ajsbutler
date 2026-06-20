@@ -37,6 +37,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
     isSearchMatch,
     isCurrentSearchResult,
     isSelected,
+    relationshipFocusRole,
     label,
     comment,
     ty,
@@ -54,6 +55,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
           isSearchMatch,
           isCurrentSearchResult,
           isSelected,
+          relationshipFocusRole,
         })}
         className={isCurrent ? "current" : undefined}
       >

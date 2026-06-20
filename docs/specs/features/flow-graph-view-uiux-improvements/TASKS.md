@@ -3,8 +3,8 @@
 ## Current Task
 
 - Status: None
-- Scope: select the next slice through `sdd-plan-task`; relationship focus mode
-  is the next feature-local candidate.
+- Scope: select the next slice through `sdd-plan-task`; standard MiniMap state
+  and visibility improvements are the next feature-local candidate.
 
 ## Human Approval
 
@@ -16,12 +16,16 @@
 
 - Current-scope multi-result search, selected-node details, tree/graph selection
   and hover synchronization, zoom-preserving tree selection, and responsive or
-  manual detail-panel collapse are complete.
+  manual detail-panel collapse are complete. Relationship focus mode is also
+  complete with Header/detail controls, cycle-safe role calculation, and
+  non-destructive node/edge emphasis.
 - Preserve source-aware hover transitions: graph-origin hover uses native CSS
   without changing React Flow node data, while tree-origin hover decorates only
   the matching graph node. This avoids enter/leave feedback loops and flicker.
-- Relationship focus mode follows this corrective slice; MiniMap state and card
-  redesign remain later slices.
+- Preserve source-aware hover behavior: focus decoration must not add graph
+  enter/leave state updates or recreate the prior flicker loop.
+- Focus roles remain in presentation node data for the standard MiniMap slice;
+  card redesign remains later.
 - Interactive in-app browser smoke was not
   completed because the browser connector rejected the session's sandbox
   metadata; repeat selection, close, search coexistence, dialog, and scope-open

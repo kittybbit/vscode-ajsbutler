@@ -28,6 +28,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import ViewColumn from "@mui/icons-material/ViewColumn";
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import FlowMenu from "./FlowMenu";
 import {
   CurrentUnitIdStateType,
@@ -51,6 +52,9 @@ type HeaderProps = {
   canToggleExpandAllNestedUnits: boolean;
   hasExpandedAllNestedUnits: boolean;
   toggleExpandAllNestedUnits: () => void;
+  canEnableFocusMode: boolean;
+  focusModeEnabled: boolean;
+  toggleFocusMode: () => void;
   searchedUnitId?: string;
   searchResultPosition?: FlowSearchResultPosition;
   onSearchNavigate: (query: string, direction: FlowSearchDirection) => void;
@@ -412,6 +416,9 @@ const Header: FC<HeaderProps> = ({
   canToggleExpandAllNestedUnits,
   hasExpandedAllNestedUnits,
   toggleExpandAllNestedUnits,
+  canEnableFocusMode,
+  focusModeEnabled,
+  toggleFocusMode,
   searchedUnitId,
   searchResultPosition,
   onSearchNavigate,
@@ -476,6 +483,26 @@ const Header: FC<HeaderProps> = ({
                 ) : (
                   <UnfoldMore fontSize="inherit" />
                 )}
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip
+            title={
+              focusModeEnabled
+                ? "Exit relationship focus mode."
+                : "Focus on selected node relationships."
+            }
+          >
+            <span>
+              <IconButton
+                size="small"
+                aria-label="toggleRelationshipFocusMode"
+                aria-pressed={focusModeEnabled}
+                color={focusModeEnabled ? "primary" : "default"}
+                onClick={toggleFocusMode}
+                disabled={!canEnableFocusMode}
+              >
+                <CenterFocusStrongIcon fontSize="inherit" />
               </IconButton>
             </span>
           </Tooltip>

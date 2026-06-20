@@ -10,6 +10,7 @@ type NodeVisualState = Pick<
   | "isSearchMatch"
   | "isCurrentSearchResult"
   | "isSelected"
+  | "relationshipFocusRole"
   | "nestedPanel"
 >;
 
@@ -260,6 +261,29 @@ const nodeButtonColor = (visualState: NodeVisualState): ThemeValue =>
     resolveVisualKind(visualState, buttonColorRules, "default")
   ];
 
+export const buildNodeFocusFilter = (
+  relationshipFocusRole: NodeVisualState["relationshipFocusRole"],
+  theme: Theme,
+): string => {
+  switch (relationshipFocusRole) {
+    case "selected":
+      return `drop-shadow(0 0 5px ${theme.palette.secondary.main})`;
+    case "upstream":
+      return `drop-shadow(0 0 5px ${theme.palette.info.main})`;
+    case "downstream":
+      return `drop-shadow(0 0 5px ${theme.palette.success.main})`;
+    case "both":
+      return `drop-shadow(0 0 5px ${theme.palette.warning.main})`;
+    default:
+      return "none";
+  }
+};
+
+const nodeFocusFilter =
+  ({ relationshipFocusRole }: NodeVisualState): ThemeValue =>
+  (theme) =>
+    buildNodeFocusFilter(relationshipFocusRole, theme);
+
 export const buildNodeHoverDecoration = (isHovered?: boolean) => ({
   outlineWidth: isHovered ? "2px" : "0px",
   outlineStyle: "solid",
@@ -286,11 +310,12 @@ export const buildNodeSxProps = (
     : "transparent",
   background: nodeBackground(visualState),
   boxShadow: nodeBoxShadow(visualState),
+  filter: nodeFocusFilter(visualState),
   justifyContent: "center",
   alignItems: "center",
   gap: "0.15em",
   transition:
-    "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
+    "border-color 160ms ease, box-shadow 160ms ease, filter 160ms ease, transform 160ms ease",
   "&:hover": {
     outlineWidth: "2px",
     outlineColor: (theme) => theme.palette.primary.main,
