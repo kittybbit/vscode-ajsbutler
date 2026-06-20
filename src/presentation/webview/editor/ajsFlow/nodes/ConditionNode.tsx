@@ -29,13 +29,30 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 }: ConditionNodeProps) => {
   console.log("render ConditionNode.");
 
-  const { unitId, isAncestor, isCurrent, label, comment, ty } = data;
+  const {
+    unitId,
+    isAncestor,
+    isCurrent,
+    isSearchMatch,
+    isCurrentSearchResult,
+    isSelected,
+    label,
+    comment,
+    ty,
+  } = data;
 
   return (
     <>
       <Stack
         id={unitId}
-        sx={buildNodeSxProps({ isCurrent, isAncestor, isRootJobnet: false })}
+        sx={buildNodeSxProps({
+          isCurrent,
+          isAncestor,
+          isRootJobnet: false,
+          isSearchMatch,
+          isCurrentSearchResult,
+          isSelected,
+        })}
         className={isCurrent ? "current" : undefined}
       >
         <TyTitle ty={ty} />

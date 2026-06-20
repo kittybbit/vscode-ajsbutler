@@ -24,7 +24,17 @@ type JobGroupNode = Node<AjsNode, "jobgroup">;
 type JobGroupNodeProp = NodeProps<JobGroupNode>;
 const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
   console.log("render JobGroupNode.");
-  const { unitId, isAncestor, label, comment, ty, gty } = data;
+  const {
+    unitId,
+    isAncestor,
+    isSearchMatch,
+    isCurrentSearchResult,
+    isSelected,
+    label,
+    comment,
+    ty,
+    gty,
+  } = data;
 
   return (
     <>
@@ -34,6 +44,9 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
           isCurrent: false,
           isAncestor,
           isRootJobnet: false,
+          isSearchMatch,
+          isCurrentSearchResult,
+          isSelected,
         })}
         className={classNames({
           ancestor: isAncestor,

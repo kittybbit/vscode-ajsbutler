@@ -153,6 +153,7 @@ suite("Flow Graph View", () => {
           "/root/jobnet/child-net/grand-net",
         ]),
         searchedUnitId: "/root/jobnet/child-net/grand-net",
+        selectedUnitId: "/root/jobnet/child-net",
         unitById: new Map([
           [
             "/root/jobnet/child-net",
@@ -285,13 +286,20 @@ suite("Flow Graph View", () => {
     );
     assert.ok(searchMatchNode);
     assert.strictEqual(searchMatchNode.data.isSearchMatch, true);
-    assert.strictEqual(searchMatchNode.selected, true);
+    assert.strictEqual(searchMatchNode.data.isCurrentSearchResult, true);
+    assert.strictEqual(searchMatchNode.data.isSelected, false);
+    assert.strictEqual(searchMatchNode.selected, false);
     const anotherSearchMatchNode = nodes.find(
       (node) => node.id === "/root/jobnet/child-net",
     );
     assert.ok(anotherSearchMatchNode);
     assert.strictEqual(anotherSearchMatchNode.data.isSearchMatch, true);
-    assert.strictEqual(anotherSearchMatchNode.selected, false);
+    assert.strictEqual(
+      anotherSearchMatchNode.data.isCurrentSearchResult,
+      false,
+    );
+    assert.strictEqual(anotherSearchMatchNode.data.isSelected, true);
+    assert.strictEqual(anotherSearchMatchNode.selected, true);
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
     assert.strictEqual(nodes[2].data.canExpandNested, true);

@@ -186,7 +186,3 @@ Scenario: Read node information from card presentation
 
 - Exact card dimensions and detail-panel width within the 320〜380px range must
   be selected after layout fixtures are inspected.
-- Whether `fitView` or `setCenter` gives the least disruptive search/tree reveal
-  behavior must be decided during the first interaction slice.
-- The exact ordering of search results must be documented during task planning
-  while preserving the existing predictable descendant-first focus behavior.

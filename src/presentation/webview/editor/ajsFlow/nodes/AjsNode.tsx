@@ -35,6 +35,8 @@ export type AjsNode = {
   hasSchedule: boolean;
   hasWaitedFor: boolean;
   isSearchMatch?: boolean;
+  isCurrentSearchResult?: boolean;
+  isSelected?: boolean;
   canExpandNested?: boolean;
   isExpandedNested?: boolean;
   toggleExpandedUnitId?: (unitId: string) => void;

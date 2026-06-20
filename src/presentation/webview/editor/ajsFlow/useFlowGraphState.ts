@@ -21,6 +21,7 @@ import {
   NestedExpansionStateType,
 } from "./flowViewerStateTypes";
 import { createReactFlowData } from "./flowGraphView";
+import type { AjsNode } from "./nodes/AjsNode";
 
 type UseFlowGraphStateParams = {
   ajsDocument?: AjsDocument;
@@ -32,12 +33,13 @@ type UseFlowGraphStateParams = {
   prevUnitEntityId: MutableRefObject<string | undefined>;
   searchedUnitId?: string;
   searchMatchedUnitIds: string[];
+  selectedUnitId?: string;
   theme: Theme;
   unitById: ReadonlyMap<string, AjsUnit>;
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
 };
 
-type FlowData = { nodes: Node[]; edges: Edge[] };
+type FlowData = { nodes: Node<AjsNode>[]; edges: Edge[] };
 
 type FlowGraphDataBuildParams = Omit<
   UseFlowGraphStateParams,
@@ -55,17 +57,17 @@ const emptyFlowData = (): FlowData => ({
 
 const hasFlowGraphBuildInput = (
   params: FlowGraphDataBuildParams,
-  selectedUnitId: string | undefined,
+  graphScopeUnitId: string | undefined,
 ): params is ReadyFlowGraphDataBuildParams =>
-  !!selectedUnitId && !!params.ajsDocument;
+  !!graphScopeUnitId && !!params.ajsDocument;
 
 const buildExpandedGraphResult = (
   params: ReadyFlowGraphDataBuildParams,
-  selectedUnitId: string,
+  graphScopeUnitId: string,
 ): ExpandedFlowGraphResult =>
   buildExpandedFlowGraph({
     document: params.ajsDocument,
-    currentUnitId: selectedUnitId,
+    currentUnitId: graphScopeUnitId,
     expandedUnitIds: params.expandedUnitIds,
     basePx: params.theme.typography.htmlFontSize,
   });
@@ -74,10 +76,12 @@ const createReactFlowDataOptions = ({
   nestedExpansionState,
   searchedUnitId,
   searchMatchedUnitIds,
+  selectedUnitId,
   unitById,
 }: FlowGraphDataBuildParams) => ({
   searchMatchedUnitIds: new Set(searchMatchedUnitIds),
   searchedUnitId,
+  selectedUnitId,
   unitById,
   nestedExpansionState,
 });
@@ -103,18 +107,18 @@ const createFlowDataFromExpandedGraph = (
 
 const buildFlowData = (
   params: FlowGraphDataBuildParams,
-  selectedUnitId: string | undefined,
+  graphScopeUnitId: string | undefined,
 ): FlowData =>
-  hasFlowGraphBuildInput(params, selectedUnitId)
+  hasFlowGraphBuildInput(params, graphScopeUnitId)
     ? createFlowDataFromExpandedGraph(
         params,
-        buildExpandedGraphResult(params, selectedUnitId),
+        buildExpandedGraphResult(params, graphScopeUnitId),
       )
     : emptyFlowData();
 
 const updateFlowDataState = (
   flowData: FlowData,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
+  setNodes: Dispatch<SetStateAction<Node<AjsNode>[]>>,
   setEdges: Dispatch<SetStateAction<Edge[]>>,
 ) => {
   setNodes(() => flowData.nodes);
@@ -131,15 +135,16 @@ export const useFlowGraphState = ({
   prevUnitEntityId,
   searchedUnitId,
   searchMatchedUnitIds,
+  selectedUnitId,
   theme,
   unitById,
   unitDefinitionByPath,
 }: UseFlowGraphStateParams) => {
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodes] = useState<Node<AjsNode>[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
 
   const buildNodesAndEdges = useCallback(
-    (selectedUnitId?: string): FlowData =>
+    (graphScopeUnitId?: string): FlowData =>
       buildFlowData(
         {
           ajsDocument,
@@ -149,11 +154,12 @@ export const useFlowGraphState = ({
           nestedExpansionState,
           searchedUnitId,
           searchMatchedUnitIds,
+          selectedUnitId,
           theme,
           unitById,
           unitDefinitionByPath,
         },
-        selectedUnitId,
+        graphScopeUnitId,
       ),
     [
       ajsDocument,
@@ -163,6 +169,7 @@ export const useFlowGraphState = ({
       nestedExpansionState,
       searchedUnitId,
       searchMatchedUnitIds,
+      selectedUnitId,
       theme,
       unitById,
       unitDefinitionByPath,

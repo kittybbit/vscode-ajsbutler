@@ -21,6 +21,7 @@ import JobGroupNode from "./nodes/JobGroupNode";
 import ConditionNode from "./nodes/ConditionNode";
 import Header from "./Header";
 import FlowSelector from "./FlowSelector";
+import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
 import { useFlowViewerController } from "./useFlowViewerController";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
@@ -51,6 +52,7 @@ const FlowContents: FC = () => {
     ajsDocument,
     currentUnit,
     currentUnitIdState,
+    clearSelectedUnit,
     dialogData,
     drawerWidth,
     drawerWidthState,
@@ -63,9 +65,13 @@ const FlowContents: FC = () => {
     hasExpandedAllNestedUnits,
     menuStatus,
     nodes,
+    openSelectedNodeDefinition,
+    openSelectedNodeScope,
     reactFlowInstanceRef,
     searchedUnitId,
     searchResultPosition,
+    selectedNodeDetail,
+    selectFlowNode,
     setDialogData,
     toggleExpandAllNestedUnits,
     unitById,
@@ -130,60 +136,77 @@ const FlowContents: FC = () => {
                 boxSizing: "border-box",
               }}
             >
-              <Paper
-                variant="outlined"
+              <Stack
+                direction="row"
+                spacing={1.25}
                 sx={{
                   width: "100%",
                   height: "100%",
                   minWidth: 0,
                   minHeight: 0,
-                  overflow: "hidden",
-                  borderRadius: 3,
-                  backgroundColor: "background.paper",
                 }}
               >
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  defaultViewport={defaultViewport}
-                  colorMode={theme.palette.mode}
-                  nodeTypes={nodeTypes}
-                  onInit={(instance) => {
-                    reactFlowInstanceRef.current = instance;
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    flex: 1,
+                    height: "100%",
+                    minWidth: 0,
+                    minHeight: 0,
+                    overflow: "hidden",
+                    borderRadius: 3,
+                    backgroundColor: "background.paper",
                   }}
-                  fitView
-                  fitViewOptions={{ padding: 0.22 }}
                 >
-                  <Background
-                    variant={BackgroundVariant.Dots}
-                    gap={20}
-                    size={1}
-                    color={theme.palette.divider}
-                  />
-                  <Controls
-                    position="bottom-left"
-                    showInteractive={false}
-                    style={{
-                      borderRadius: 12,
-                      overflow: "hidden",
-                      boxShadow: theme.shadows[3],
+                  <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    defaultViewport={defaultViewport}
+                    colorMode={theme.palette.mode}
+                    nodeTypes={nodeTypes}
+                    onNodeClick={(_event, node) => selectFlowNode(node.id)}
+                    onInit={(instance) => {
+                      reactFlowInstanceRef.current = instance;
                     }}
+                    fitView
+                    fitViewOptions={{ padding: 0.22 }}
+                  >
+                    <Background
+                      variant={BackgroundVariant.Dots}
+                      gap={20}
+                      size={1}
+                      color={theme.palette.divider}
+                    />
+                    <Controls
+                      position="bottom-left"
+                      showInteractive={false}
+                      style={{
+                        borderRadius: 12,
+                        overflow: "hidden",
+                        boxShadow: theme.shadows[3],
+                      }}
+                    />
+                    <MiniMap
+                      pannable
+                      zoomable
+                      style={{
+                        borderRadius: 12,
+                        overflow: "hidden",
+                        opacity: 0.88,
+                        boxShadow: theme.shadows[3],
+                      }}
+                    />
+                  </ReactFlow>
+                </Paper>
+                {selectedNodeDetail && (
+                  <FlowNodeDetailPanel
+                    detail={selectedNodeDetail}
+                    onClose={clearSelectedUnit}
+                    onOpenDefinition={openSelectedNodeDefinition}
+                    onOpenScope={openSelectedNodeScope}
                   />
-                  <MiniMap
-                    pannable
-                    zoomable
-                    style={{
-                      position: "fixed",
-                      right: 16,
-                      bottom: 16,
-                      borderRadius: 12,
-                      overflow: "hidden",
-                      opacity: 0.88,
-                      boxShadow: theme.shadows[3],
-                    }}
-                  />
-                </ReactFlow>
-              </Paper>
+                )}
+              </Stack>
               {dialogData && (
                 <UnitEntityDialog
                   dialogData={dialogData}

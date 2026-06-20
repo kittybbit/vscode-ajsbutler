@@ -35,6 +35,8 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
     isAncestor,
     isCurrent,
     isSearchMatch,
+    isCurrentSearchResult,
+    isSelected,
   } = data;
 
   return (
@@ -46,6 +48,8 @@ const JobNode: FC<JobNodeProps> = ({ data }: JobNodeProps) => {
           isAncestor,
           isRootJobnet: false,
           isSearchMatch,
+          isCurrentSearchResult,
+          isSelected,
         })}
       >
         <TyTitle ty={ty} />

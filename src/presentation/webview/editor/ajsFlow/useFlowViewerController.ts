@@ -1,4 +1,11 @@
-import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { Theme } from "@mui/material/styles";
 import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import {
@@ -26,6 +33,8 @@ import {
 } from "./useFlowViewerEffects";
 import { useFlowSearchState } from "./useFlowSearchState";
 import { useNestedExpansionState } from "./useNestedExpansionState";
+import { buildFlowNodeDetail } from "./flowNodeDetail";
+import { useSelectedFlowNodeState } from "./useSelectedFlowNodeState";
 
 type UseFlowViewerControllerParams = {
   theme: Theme;
@@ -185,6 +194,8 @@ export const useFlowViewerController = ({
     currentUnitId,
     setCurrentUnitId,
   );
+  const { clearSelection, selectedUnitId, selectUnit } =
+    useSelectedFlowNodeState(ajsDocument, currentUnitId);
   const {
     focusRequestVersion,
     handleRevealUnit,
@@ -212,10 +223,29 @@ export const useFlowViewerController = ({
     prevUnitEntityId,
     searchedUnitId,
     searchMatchedUnitIds,
+    selectedUnitId,
     theme,
     unitById,
     unitDefinitionByPath,
   });
+  const selectedNode = useMemo(
+    () => nodes.find((node) => node.id === selectedUnitId),
+    [nodes, selectedUnitId],
+  );
+  const selectedNodeDetail = useMemo(
+    () => buildFlowNodeDetail(selectedNode, edges, unitById),
+    [edges, selectedNode, unitById],
+  );
+  const openSelectedNodeDefinition = useCallback(() => {
+    if (selectedNode) {
+      setDialogData(selectedNode.data.unitDefinition);
+    }
+  }, [selectedNode, setDialogData]);
+  const openSelectedNodeScope = useCallback(() => {
+    if (selectedUnitId && selectedNodeDetail?.canOpenAsScope) {
+      setCurrentUnitId(selectedUnitId);
+    }
+  }, [selectedNodeDetail?.canOpenAsScope, selectedUnitId]);
   useFlowViewerFitView({
     edges,
     focusRequestVersion,
@@ -242,6 +272,7 @@ export const useFlowViewerController = ({
     ajsDocument,
     currentUnit,
     currentUnitIdState,
+    clearSelectedUnit: clearSelection,
     dialogData,
     drawerWidth,
     drawerWidthState,
@@ -254,9 +285,13 @@ export const useFlowViewerController = ({
     hasExpandedAllNestedUnits,
     menuStatus,
     nodes,
+    openSelectedNodeDefinition,
+    openSelectedNodeScope,
     reactFlowInstanceRef,
     searchedUnitId,
     searchResultPosition,
+    selectedNodeDetail,
+    selectFlowNode: selectUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
     unitById,
