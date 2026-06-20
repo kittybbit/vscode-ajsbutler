@@ -41,12 +41,15 @@ rehydration explicit without changing list or flow-viewer behavior.
 
 ### Dependency Impact
 
-- Expected affected code:
-  `src/application/unit-list/unitListDocument.ts`, table and flow viewer
-  consumers, and `src/test/suite/buildUnitList.test.ts`.
+- Expected direct edits:
+  `src/application/unit-list/unitListDocument.ts` and
+  `src/test/suite/buildUnitList.test.ts`.
+- Production consumers to preserve and validate:
+  `src/presentation/webview/editor/ajsTable/TableContents.tsx` and
+  `src/presentation/webview/editor/ajsFlow/useFlowViewerEffects.ts`.
 - Propagation decision: production `toAjsDocument` behavior remains available;
-  raw `Unit` reconstruction visibility should be reduced only after reference
-  analysis proves no production caller requires it.
+  complete reference analysis found no production caller for `toRootUnits`, so
+  raw `Unit` reconstruction can become an internal implementation detail.
 
 ### Breaking Change Analysis
 
@@ -100,10 +103,3 @@ rehydration explicit without changing list or flow-viewer behavior.
 - Removing `UnitListDocumentDto`
 - Changing normalization semantics, parser output, list rows, flow nodes, or
   user-visible behavior
-- Retiring `docs/specs/current-state.md`
-
-## Open Questions
-
-- Whether `toRootUnits` should become a private implementation detail of
-  `toAjsDocument` or remain exported for a production requirement must be
-  decided from complete reference analysis during task planning.

@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
-import { toRootUnits } from "../../application/unit-list/unitListDocument";
+import { toAjsDocument } from "../../application/unit-list/unitListDocument";
 import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
 import { Unit } from "../../domain/values/Unit";
 import { testAjsParser } from "../support/parseAjs";
@@ -39,20 +39,25 @@ suite("Build Unit List", () => {
     assert.ok(!("parent" in result.document!.rootUnits[0].children[0]));
   });
 
-  test("restores root units from the document DTO", () => {
+  test("restores the normalized document from the document DTO", () => {
     const result = buildUnitList(validDefinition);
     assert.ok(result.document);
 
-    const rootUnits = toRootUnits(result.document!);
+    const document = toAjsDocument(result.document!);
+    const root = document.rootUnits[0];
+    const jobnet = root.children[0];
+    const job = jobnet.children[0];
 
-    assert.strictEqual(rootUnits.length, 1);
-    assert.strictEqual(rootUnits[0].name, "root");
-    assert.strictEqual(rootUnits[0].children[0].name, "jobnet");
-    assert.strictEqual(rootUnits[0].children[0].children[0].name, "job");
-    assert.strictEqual(rootUnits[0].children[0].parent?.name, "root");
+    assert.strictEqual(document.rootUnits.length, 1);
+    assert.strictEqual(root.name, "root");
+    assert.strictEqual(jobnet.name, "jobnet");
+    assert.strictEqual(job.name, "job");
+    assert.strictEqual(jobnet.parentId, root.id);
+    assert.strictEqual(job.parentId, jobnet.id);
+    assert.strictEqual(job.absolutePath, "/root/jobnet/job");
     assert.strictEqual(
-      rootUnits[0].children[0].children[0].parent?.name,
-      "jobnet",
+      job.parameters.find((parameter) => parameter.key === "ty")?.value,
+      "j",
     );
   });
 

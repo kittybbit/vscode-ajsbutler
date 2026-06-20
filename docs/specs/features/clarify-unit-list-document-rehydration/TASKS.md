@@ -10,11 +10,14 @@
 - Keep this file focused on current state only; do not retain historical logs,
   prior approvals, or long validation diaries once they stop being actionable.
 
-## Current Status
+## Current Task
 
-- Runtime status: not started
-- Active slice: investigate and document the production rehydration boundary
-- Open follow-up: decide whether `toRootUnits` needs production visibility
+- Status: Proposed
+- Scope: no implementation task remains; decide whether to close this
+  transient feature.
+- Acceptance: confirm no active requirement, unresolved risk, or use-case
+  back-propagation remains before removing the feature folder.
+- Validation: re-read `plans.md` and `roadmap.md` during feature closure.
 
 ## Human Approval
 
@@ -30,28 +33,15 @@ current conversation`; do not copy the human approval message.
 Reset this section back to Pending when the approved slice is complete and no
 active implementation approval remains.
 
-## Active Tasks
+## Decision Notes
 
-- [ ] Complete reference and call-site analysis for `toRootUnits`,
-      `toAjsDocument`, and `UnitListDocumentDto`.
-- [ ] Confirm why table and flow viewers require DTO rehydration and whether
-      that responsibility remains at the application boundary.
-- [ ] Propose the smallest visibility or documentation change that preserves
-      production behavior.
-- [ ] Record implementation impact and request human approval.
-- [ ] After approval, update focused tests for the retained boundary.
+- `toRootUnits` is private to `unitListDocument.ts`; `toAjsDocument` is the
+  documented public rehydration boundary used by both viewers.
+- `UnitListDocumentDto`, normalization semantics, production consumers, and
+  desktop/web behavior remain unchanged.
+- No unresolved implementation or compatibility risk remains.
 
-## Validation
+## Use-Case Back-Propagation
 
-- [ ] Run `rtk pnpm run qlty`.
-- [ ] Run relevant unit tests.
-- [ ] Run `rtk pnpm run test:web` and `rtk pnpm run build` because both viewer
-      hosts consume the shared DTO boundary.
-
-## Notes
-
-- Initial search confirms production `toAjsDocument` consumers in both table
-  and flow-viewer presentation paths; it must not be moved wholesale to test
-  support.
-- No use-case contract update is expected while DTO shape and observable
-  behavior remain unchanged.
+- None. DTO shape, normalization semantics, and observable build-list and
+  flow-graph scenarios did not change.
