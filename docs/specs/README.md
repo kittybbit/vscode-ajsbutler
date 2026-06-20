@@ -17,9 +17,8 @@ repository.
 2. [Glossary](./glossary.md)
 3. [Context Map](./context-map.md)
 4. [Architecture](./architecture.md)
-5. [Current State](./current-state.md)
-6. [Roadmap](./roadmap.md)
-7. [Requirements Use Cases](../requirements/use-cases/README.md)
+5. [Roadmap](./roadmap.md)
+6. [Requirements Use Cases](../requirements/use-cases/README.md)
 
 ## Working Agreement
 
@@ -432,6 +431,5 @@ When syncing, preserve decision context instead of accumulating entries:
 - `glossary.md`: shared terms
 - `context-map.md`: boundaries and external systems
 - `architecture.md`: target layering and dependency direction
-- `current-state.md`: present-day repository shape and tensions
 - `roadmap.md`: preferred incremental extraction order
 - `features/_templates/`: templates for new repository-native feature docs

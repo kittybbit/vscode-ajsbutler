@@ -40,9 +40,6 @@ rules in `docs/specs/README.md`, not in this file.
 
 - `docs/specs/features/import-definition-via-webapi/`:
   active beta feature with real-environment smoke verification still pending.
-- `docs/specs/features/retire-current-state-snapshot/`:
-  transient documentation feature to relocate current guidance and retire the
-  stale implementation-state snapshot without changing runtime behavior.
 - `docs/specs/features/clarify-unit-list-document-rehydration/`:
   transient boundary feature to document and constrain production rehydration
   from unit-list DTOs to the normalized AJS model without behavior changes.
