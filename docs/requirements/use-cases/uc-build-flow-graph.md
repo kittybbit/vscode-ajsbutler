@@ -64,6 +64,10 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
   distinct viewer concepts even when they temporarily reference the same unit
 - selecting a graph node may expose lightweight relationship and status context
   without automatically opening unit-definition details
+- tree selection may center a rendered node but must preserve the user's current
+  zoom level
+- selected-node context may collapse responsively or manually without clearing
+  the selected node
 - the flow selector and graph may synchronize selection and hover while keeping
   scope changes explicit
 - relationship focus keeps unrelated nodes and edges visible and weakens them
@@ -139,6 +143,18 @@ Scenario: Selected node exposes graph context
   When the user selects that node
   Then lightweight relationship and status context is available
   And unit-definition details remain closed until explicitly requested
+
+Scenario: Tree selection preserves zoom
+  Given a rendered graph node and a user-selected zoom level
+  When the corresponding in-scope flow-tree row is selected
+  Then the viewport centers the rendered node
+  And the zoom level remains unchanged
+
+Scenario: Selected-node context can collapse
+  Given a selected node and its graph-context detail panel
+  When the viewport becomes narrow or the user collapses the panel
+  Then a compact detail action rail remains available
+  And the selected node remains selected
 
 Scenario: Relationship focus preserves the whole graph
   Given a selected node with upstream, downstream, and unrelated elements

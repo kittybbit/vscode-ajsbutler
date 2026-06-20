@@ -8,6 +8,39 @@ export type FlowViewportFocusDecision = {
   targetUnitId?: string;
 };
 
+type FlowNodeBounds = {
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+};
+
+export type FlowNodeCenter = {
+  x: number;
+  y: number;
+};
+
+export type FlowViewportFocusAction =
+  | { kind: "fitView"; targetUnitId?: string }
+  | { kind: "setCenter"; targetUnitId: string };
+
+export const resolveFlowNodeCenter = ({
+  height,
+  width,
+  x,
+  y,
+}: FlowNodeBounds): FlowNodeCenter => ({
+  x: x + width / 2,
+  y: y + height / 2,
+});
+
+export const resolveFlowViewportFocusAction = (
+  decision: FlowViewportFocusDecision,
+): FlowViewportFocusAction =>
+  decision.kind === "selection" && decision.targetUnitId
+    ? { kind: "setCenter", targetUnitId: decision.targetUnitId }
+    : { kind: "fitView", targetUnitId: decision.targetUnitId };
+
 type ResolveFlowViewportFocusDecisionParams = {
   renderedUnitIds: ReadonlySet<string>;
   searchRequest: FlowViewportFocusRequest;

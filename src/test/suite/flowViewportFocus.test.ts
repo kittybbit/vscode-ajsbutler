@@ -1,7 +1,39 @@
 import * as assert from "assert";
-import { resolveFlowViewportFocusDecision } from "../../presentation/webview/editor/ajsFlow/flowViewportFocus";
+import {
+  resolveFlowNodeCenter,
+  resolveFlowViewportFocusAction,
+  resolveFlowViewportFocusDecision,
+} from "../../presentation/webview/editor/ajsFlow/flowViewportFocus";
 
 suite("Flow Viewport Focus", () => {
+  test("resolves the rendered node center without changing viewport zoom", () => {
+    assert.deepStrictEqual(
+      resolveFlowNodeCenter({ x: 120, y: 80, width: 240, height: 100 }),
+      { x: 240, y: 130 },
+    );
+  });
+
+  test("uses center only for selection and fitView for search and layout", () => {
+    assert.deepStrictEqual(
+      resolveFlowViewportFocusAction({
+        kind: "selection",
+        targetUnitId: "selected",
+      }),
+      { kind: "setCenter", targetUnitId: "selected" },
+    );
+    assert.deepStrictEqual(
+      resolveFlowViewportFocusAction({
+        kind: "search",
+        targetUnitId: "matched",
+      }),
+      { kind: "fitView", targetUnitId: "matched" },
+    );
+    assert.deepStrictEqual(resolveFlowViewportFocusAction({ kind: "layout" }), {
+      kind: "fitView",
+      targetUnitId: undefined,
+    });
+  });
+
   test("prioritizes a pending rendered search target", () => {
     assert.deepStrictEqual(
       resolveFlowViewportFocusDecision({

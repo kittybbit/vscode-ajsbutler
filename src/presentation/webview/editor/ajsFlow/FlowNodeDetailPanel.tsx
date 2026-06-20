@@ -8,12 +8,17 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
+import { useFlowNodeDetailPanelCollapse } from "./useFlowNodeDetailPanelCollapse";
 
 type FlowNodeDetailPanelProps = {
   detail: FlowNodeDetail;
@@ -58,9 +63,51 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   onOpenScope,
 }) => {
   const { lang = "en" } = useMyAppContext();
+  const theme = useTheme();
+  const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
+  const { collapse, collapsed, expand } =
+    useFlowNodeDetailPanelCollapse(isNarrow);
   const parent = detail.parentName
     ? `${detail.parentName}${detail.parentPath ? ` (${detail.parentPath})` : ""}`
     : "—";
+
+  if (collapsed) {
+    return (
+      <Paper
+        component="aside"
+        aria-label="Collapsed selected flow node details"
+        variant="outlined"
+        sx={{
+          width: 48,
+          minWidth: 48,
+          height: "100%",
+          borderRadius: 3,
+          boxSizing: "border-box",
+        }}
+      >
+        <Stack spacing={1} alignItems="center" sx={{ paddingY: 1 }}>
+          <Tooltip title="Expand node details" placement="left">
+            <IconButton
+              size="small"
+              aria-label="Expand node details"
+              onClick={expand}
+            >
+              <ChevronLeftIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Close node details" placement="left">
+            <IconButton
+              size="small"
+              aria-label="Close node details"
+              onClick={onClose}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Paper>
+    );
+  }
 
   return (
     <Paper
@@ -89,6 +136,15 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
               {unitTypeLabel(detail.unitType, lang, detail.groupType)}
             </Typography>
           </Box>
+          <Tooltip title="Collapse node details">
+            <IconButton
+              size="small"
+              aria-label="Collapse node details"
+              onClick={collapse}
+            >
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
           <IconButton
             size="small"
             aria-label="Close node details"
