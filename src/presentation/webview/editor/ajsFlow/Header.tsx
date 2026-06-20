@@ -16,11 +16,14 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SearchIcon from "@mui/icons-material/Search";
 import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
@@ -34,6 +37,10 @@ import {
 import { localeMap } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type {
+  FlowSearchDirection,
+  FlowSearchResultPosition,
+} from "./flowSearchState";
 
 type HeaderProps = {
   flowMenuState: FlowMenuStateType;
@@ -45,6 +52,8 @@ type HeaderProps = {
   hasExpandedAllNestedUnits: boolean;
   toggleExpandAllNestedUnits: () => void;
   searchedUnitId?: string;
+  searchResultPosition?: FlowSearchResultPosition;
+  onSearchNavigate: (query: string, direction: FlowSearchDirection) => void;
   onSearchSubmit: (query: string) => void;
   onSearchClear: () => void;
 };
@@ -58,6 +67,8 @@ type HeaderBreadcrumbsProps = {
 type HeaderSearchFieldProps = {
   isMac: boolean;
   searchedUnitId?: string;
+  searchResultPosition?: FlowSearchResultPosition;
+  onSearchNavigate: (query: string, direction: FlowSearchDirection) => void;
   onSearchSubmit: (query: string) => void;
   onSearchClear: () => void;
 };
@@ -67,8 +78,11 @@ type CurrentUnitBadgeProps = {
 };
 
 type SearchEndAdornmentProps = {
-  disabled: boolean;
+  canNavigate: boolean;
+  clearDisabled: boolean;
+  resultPosition?: FlowSearchResultPosition;
   onClear: () => void;
+  onNavigate: (direction: FlowSearchDirection) => void;
 };
 
 const isRootJobnet = (unit: AjsUnit): boolean =>
@@ -111,10 +125,15 @@ const getExpandAllLabel = (hasExpandedAllNestedUnits: boolean): string =>
     ? "Collapse all nested jobnets."
     : "Expand all nested jobnets.";
 
-const getSearchHelperText = (searchedUnitId?: string): string =>
-  searchedUnitId
-    ? "Matched unit is highlighted in the current scope."
-    : "Search current scope by unit name, comment, or path.";
+const getSearchHelperText = (
+  searchedUnitId?: string,
+  resultPosition?: FlowSearchResultPosition,
+): string =>
+  resultPosition?.total === 0
+    ? "No units match in the current scope."
+    : searchedUnitId
+      ? "Matched unit is highlighted in the current scope."
+      : "Search current scope by unit name, comment, or path.";
 
 const shouldFocusSearch = (
   event: globalThis.KeyboardEvent,
@@ -150,9 +169,13 @@ const useSearchShortcut = (
 
 const useHeaderSearchField = ({
   isMac,
+  onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
-}: Omit<HeaderSearchFieldProps, "searchedUnitId">) => {
+}: Pick<
+  HeaderSearchFieldProps,
+  "isMac" | "onSearchNavigate" | "onSearchSubmit" | "onSearchClear"
+>) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   useSearchShortcut(isMac, searchInputRef);
@@ -170,9 +193,10 @@ const useHeaderSearchField = ({
       if (event.key !== "Enter") {
         return;
       }
-      handleSearchSubmit();
+      event.preventDefault();
+      onSearchNavigate(searchValue, event.shiftKey ? "previous" : "next");
     },
-    [handleSearchSubmit],
+    [onSearchNavigate, searchValue],
   );
   const handleSearchClear = useCallback(() => {
     setSearchValue("");
@@ -240,32 +264,81 @@ const SearchStartAdornment: FC = () => (
 );
 
 const SearchEndAdornment: FC<SearchEndAdornmentProps> = ({
-  disabled,
+  canNavigate,
+  clearDisabled,
+  resultPosition,
   onClear,
+  onNavigate,
 }) => (
   <InputAdornment position="end">
-    <Tooltip title="Clear flow search.">
-      <span>
-        <IconButton
-          size="small"
-          aria-label="Clear flow search."
-          onClick={onClear}
-          disabled={disabled}
+    <Stack
+      direction="row"
+      alignItems="center"
+      spacing={0.25}
+      onMouseDown={(event) => event.preventDefault()}
+    >
+      {resultPosition && (
+        <Typography
+          variant="caption"
+          component="span"
+          aria-label={`${resultPosition.current} of ${resultPosition.total} search results`}
+          sx={{ minWidth: "2.75rem", textAlign: "center" }}
         >
-          <ClearAllIcon fontSize="inherit" />
-        </IconButton>
-      </span>
-    </Tooltip>
+          {resultPosition.current}/{resultPosition.total}
+        </Typography>
+      )}
+      <Tooltip title="Previous flow search result (Shift+Enter).">
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Previous flow search result."
+            onClick={() => onNavigate("previous")}
+            disabled={!canNavigate}
+          >
+            <NavigateBeforeIcon fontSize="inherit" />
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip title="Next flow search result (Enter).">
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Next flow search result."
+            onClick={() => onNavigate("next")}
+            disabled={!canNavigate}
+          >
+            <NavigateNextIcon fontSize="inherit" />
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip title="Clear flow search.">
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Clear flow search."
+            onClick={onClear}
+            disabled={clearDisabled}
+          >
+            <ClearAllIcon fontSize="inherit" />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Stack>
   </InputAdornment>
 );
 
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   isMac,
   searchedUnitId,
+  searchResultPosition,
+  onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
 }) => {
-  const searchHelperText = getSearchHelperText(searchedUnitId);
+  const searchHelperText = getSearchHelperText(
+    searchedUnitId,
+    searchResultPosition,
+  );
   const {
     handleSearchChange,
     handleSearchClear,
@@ -273,7 +346,17 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
     handleSearchSubmit,
     searchInputRef,
     searchValue,
-  } = useHeaderSearchField({ isMac, onSearchSubmit, onSearchClear });
+  } = useHeaderSearchField({
+    isMac,
+    onSearchNavigate,
+    onSearchSubmit,
+    onSearchClear,
+  });
+  const handleSearchNavigate = useCallback(
+    (direction: FlowSearchDirection) =>
+      onSearchNavigate(searchValue, direction),
+    [onSearchNavigate, searchValue],
+  );
 
   return (
     <TextField
@@ -292,8 +375,11 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
           startAdornment: <SearchStartAdornment />,
           endAdornment: (
             <SearchEndAdornment
+              resultPosition={searchResultPosition}
+              canNavigate={(searchResultPosition?.total ?? 0) > 0}
               onClear={handleSearchClear}
-              disabled={searchValue.length === 0 && !searchedUnitId}
+              onNavigate={handleSearchNavigate}
+              clearDisabled={searchValue.length === 0 && !searchedUnitId}
             />
           ),
         },
@@ -327,6 +413,8 @@ const Header: FC<HeaderProps> = ({
   hasExpandedAllNestedUnits,
   toggleExpandAllNestedUnits,
   searchedUnitId,
+  searchResultPosition,
+  onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
 }) => {
@@ -394,6 +482,8 @@ const Header: FC<HeaderProps> = ({
           <HeaderSearchField
             isMac={isMac}
             searchedUnitId={searchedUnitId}
+            searchResultPosition={searchResultPosition}
+            onSearchNavigate={onSearchNavigate}
             onSearchSubmit={onSearchSubmit}
             onSearchClear={onSearchClear}
           />

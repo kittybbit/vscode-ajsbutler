@@ -186,12 +186,15 @@ export const useFlowViewerController = ({
     setCurrentUnitId,
   );
   const {
+    focusRequestVersion,
     handleRevealUnit,
     handleSearchClear,
+    handleSearchNavigate,
     handleSearchSubmit,
     resetSearch,
     searchedUnitId,
     searchMatchedUnitIds,
+    searchResultPosition,
   } = useFlowSearchState({
     currentUnit,
     preserveSearchOnNextScopeChange,
@@ -213,7 +216,13 @@ export const useFlowViewerController = ({
     unitById,
     unitDefinitionByPath,
   });
-  useFlowViewerFitView({ edges, nodes, reactFlowInstanceRef });
+  useFlowViewerFitView({
+    edges,
+    focusRequestVersion,
+    nodes,
+    reactFlowInstanceRef,
+    searchedUnitId,
+  });
   useFlowScopeReset({
     ajsDocument,
     currentUnitId,
@@ -240,12 +249,14 @@ export const useFlowViewerController = ({
     expandableNestedUnitIds,
     flowMenuState,
     handleSearchClear,
+    handleSearchNavigate,
     handleSearchSubmit,
     hasExpandedAllNestedUnits,
     menuStatus,
     nodes,
     reactFlowInstanceRef,
     searchedUnitId,
+    searchResultPosition,
     setDialogData,
     toggleExpandAllNestedUnits,
     unitById,

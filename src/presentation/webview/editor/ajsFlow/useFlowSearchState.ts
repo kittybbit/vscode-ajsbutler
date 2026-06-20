@@ -3,12 +3,20 @@ import {
   MutableRefObject,
   SetStateAction,
   useCallback,
-  useMemo,
   useState,
 } from "react";
 import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
 import { FlowRevealTarget, resolveFlowRevealTarget } from "../revealUnit";
 import { findFlowSearchResult, FlowSearchResult } from "./flowSearch";
+import {
+  createEmptyFlowSearchState,
+  createRevealedFlowSearchState,
+  createSubmittedFlowSearchState,
+  getFlowSearchResultPosition,
+  isActiveFlowSearchQuery,
+  moveFlowSearchResult,
+} from "./flowSearchState";
+import type { FlowSearchDirection, FlowSearchState } from "./flowSearchState";
 
 type UseFlowSearchStateParams = {
   currentUnit?: AjsUnit;
@@ -25,21 +33,16 @@ const mergeExpandedAncestorUnitIds = (
   ...new Set([...expandedUnitIds, ...result.expandedAncestorUnitIds]),
 ];
 
-type SearchStateSetters = {
-  setSearchMatchedUnitIds: Dispatch<SetStateAction<string[]>>;
-  setSearchedUnitId: Dispatch<SetStateAction<string | undefined>>;
-};
-
 type SearchSubmitHandlerParams = {
   currentUnit?: AjsUnit;
-  resetSearch: () => void;
-  searchStateSetters: SearchStateSetters;
+  searchState: FlowSearchState;
+  setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
   unitById: ReadonlyMap<string, AjsUnit>;
 };
 
 type RevealTargetApplyParams = {
-  searchStateSetters: SearchStateSetters;
+  setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
 };
@@ -49,67 +52,68 @@ type RevealUnitHandlerParams = RevealTargetApplyParams & {
   unitById: ReadonlyMap<string, AjsUnit>;
 };
 
-const clearSearchState = ({
-  setSearchMatchedUnitIds,
-  setSearchedUnitId,
-}: SearchStateSetters) => {
-  setSearchedUnitId(undefined);
-  setSearchMatchedUnitIds([]);
-};
-
 const applyFlowSearchResult = (
+  query: string,
   result: FlowSearchResult,
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>,
-  searchStateSetters: SearchStateSetters,
+  setSearchState: Dispatch<SetStateAction<FlowSearchState>>,
 ) => {
   setExpandedUnitIds((prev) => mergeExpandedAncestorUnitIds(prev, result));
-  searchStateSetters.setSearchMatchedUnitIds(result.matchedUnitIds);
-  searchStateSetters.setSearchedUnitId(result.matchedUnitId);
+  setSearchState((prev) =>
+    createSubmittedFlowSearchState(query, result, prev.focusRequestVersion + 1),
+  );
 };
 
 const applyFlowRevealTarget = (
   revealTarget: FlowRevealTarget,
   {
-    searchStateSetters,
+    setSearchState,
     setCurrentUnitId,
     setExpandedUnitIds,
   }: RevealTargetApplyParams,
 ) => {
   setExpandedUnitIds(revealTarget.expandedAncestorUnitIds);
   setCurrentUnitId(revealTarget.scopeUnitId);
-  searchStateSetters.setSearchMatchedUnitIds([revealTarget.revealedUnitId]);
-  searchStateSetters.setSearchedUnitId(revealTarget.revealedUnitId);
+  setSearchState((prev) =>
+    createRevealedFlowSearchState(
+      revealTarget.revealedUnitId,
+      prev.focusRequestVersion + 1,
+    ),
+  );
 };
 
 const useSearchSubmitHandler = ({
   currentUnit,
-  resetSearch,
-  searchStateSetters,
+  searchState,
+  setSearchState,
   setExpandedUnitIds,
   unitById,
 }: SearchSubmitHandlerParams) =>
   useCallback(
     (query: string) => {
+      if (isActiveFlowSearchQuery(searchState, query)) {
+        return;
+      }
       const result = findFlowSearchResult(currentUnit, query, unitById);
       if (!result) {
-        resetSearch();
+        setSearchState((prev) =>
+          createSubmittedFlowSearchState(
+            query,
+            undefined,
+            prev.focusRequestVersion,
+          ),
+        );
         return;
       }
 
-      applyFlowSearchResult(result, setExpandedUnitIds, searchStateSetters);
+      applyFlowSearchResult(query, result, setExpandedUnitIds, setSearchState);
     },
-    [
-      currentUnit,
-      resetSearch,
-      searchStateSetters,
-      setExpandedUnitIds,
-      unitById,
-    ],
+    [currentUnit, searchState, setSearchState, setExpandedUnitIds, unitById],
   );
 
 const useRevealUnitHandler = ({
   preserveSearchOnNextScopeChange,
-  searchStateSetters,
+  setSearchState,
   setCurrentUnitId,
   setExpandedUnitIds,
   unitById,
@@ -122,14 +126,14 @@ const useRevealUnitHandler = ({
       }
       preserveSearchOnNextScopeChange.current = true;
       applyFlowRevealTarget(revealTarget, {
-        searchStateSetters,
+        setSearchState,
         setCurrentUnitId,
         setExpandedUnitIds,
       });
     },
     [
       preserveSearchOnNextScopeChange,
-      searchStateSetters,
+      setSearchState,
       setCurrentUnitId,
       setExpandedUnitIds,
       unitById,
@@ -143,43 +147,50 @@ export const useFlowSearchState = ({
   setExpandedUnitIds,
   unitById,
 }: UseFlowSearchStateParams) => {
-  const [searchedUnitId, setSearchedUnitId] = useState<string>();
-  const [searchMatchedUnitIds, setSearchMatchedUnitIds] = useState<string[]>(
-    [],
-  );
-  const searchStateSetters = useMemo(
-    () => ({
-      setSearchMatchedUnitIds,
-      setSearchedUnitId,
-    }),
-    [],
+  const [searchState, setSearchState] = useState<FlowSearchState>(
+    createEmptyFlowSearchState,
   );
 
   const resetSearch = useCallback(() => {
-    clearSearchState(searchStateSetters);
-  }, [searchStateSetters]);
+    setSearchState((prev) =>
+      createEmptyFlowSearchState(prev.focusRequestVersion),
+    );
+  }, []);
 
   const handleSearchSubmit = useSearchSubmitHandler({
     currentUnit,
-    resetSearch,
-    searchStateSetters,
+    searchState,
+    setSearchState,
     setExpandedUnitIds,
     unitById,
   });
   const handleRevealUnit = useRevealUnitHandler({
     preserveSearchOnNextScopeChange,
-    searchStateSetters,
+    setSearchState,
     setCurrentUnitId,
     setExpandedUnitIds,
     unitById,
   });
+  const handleSearchNavigate = useCallback(
+    (query: string, direction: FlowSearchDirection) => {
+      if (!isActiveFlowSearchQuery(searchState, query)) {
+        handleSearchSubmit(query);
+        return;
+      }
+      setSearchState((prev) => moveFlowSearchResult(prev, direction));
+    },
+    [handleSearchSubmit, searchState],
+  );
 
   return {
+    focusRequestVersion: searchState.focusRequestVersion,
     handleRevealUnit,
     handleSearchClear: resetSearch,
+    handleSearchNavigate,
     handleSearchSubmit,
     resetSearch,
-    searchedUnitId,
-    searchMatchedUnitIds,
+    searchedUnitId: searchState.searchedUnitId,
+    searchMatchedUnitIds: searchState.matchedUnitIds,
+    searchResultPosition: getFlowSearchResultPosition(searchState),
   };
 };

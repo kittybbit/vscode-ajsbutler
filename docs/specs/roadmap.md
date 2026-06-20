@@ -6,13 +6,23 @@
 - Refactor in small vertical slices.
 - Prefer one use case per extraction.
 - Keep parser internals away from UI-facing components.
-- Keep active feature docs concise; remove completed feature-local folders
-  after durable requirements are represented in use cases, architecture, or
-  roadmap.
+- Keep active feature docs concise; remove completed feature-local folders after
+  durable requirements are represented in use cases, architecture, or roadmap.
 
 ## Current Roadmap
 
-1. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
+1. Improve flow-graph investigation UI/UX in small vertical slices.
+
+   - Keep graph scope (`currentUnitId`) separate from selected-node state.
+   - Add predictable multi-result search navigation, lightweight node context,
+     tree/graph synchronization, relationship focus, MiniMap state, and card
+     presentation as one coherent viewer experience.
+   - Preserve nested expansion, reveal navigation, explicit unit-definition
+     details, React Flow, and desktop/web compatibility.
+   - Validate node-dimension changes against expanded-flow layout and collision
+     behavior before treating the visual refresh as complete.
+
+2. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
 
    - Keep transport, authentication, and endpoint details in infrastructure.
    - Keep generated OpenAPI mocks and stubs reproducible from repository-local
@@ -22,7 +32,7 @@
    - Offer the feature as beta until smoke verification against a real JP1/AJS3
      environment and enough user feedback are recorded.
 
-2. Maintain normalized-model convergence.
+3. Maintain normalized-model convergence.
 
    - Prefer stable `AjsDocument` / `AjsUnit` contracts for application-facing
      behavior.
@@ -35,7 +45,7 @@
    - Semantic diagnostics now consume normalized `AjsDocument` / `AjsUnit`
      inputs while preserving existing diagnostic behavior and source positions.
 
-3. Introduce stricter parser/infrastructure boundaries.
+4. Introduce stricter parser/infrastructure boundaries.
 
    - The application-facing parser port and host-neutral infrastructure ANTLR
      adapter are implemented for unit-list and syntax-diagnostic consumers.
@@ -45,14 +55,14 @@
    - Defer normalized-only parsing to a later single-purpose feature if a
      concrete consumer requires it.
 
-4. Maintain the explicit extension composition root.
+5. Maintain the explicit extension composition root.
 
-   - Concrete application and infrastructure dependencies are constructed by
-     one typed bootstrap owner and injected into VS Code-facing adapters.
+   - Concrete application and infrastructure dependencies are constructed by one
+     typed bootstrap owner and injected into VS Code-facing adapters.
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
-5. Maintain the explicit React viewer bridge routing boundary.
+6. Maintain the explicit React viewer bridge routing boundary.
 
    - Browser message validation and callback routing now live in a focused,
      presentation-local viewer event bridge.
@@ -63,7 +73,7 @@
    - Treat declarative component shape metrics as non-actionable unless they
      expose a separate responsibility or maintenance risk.
 
-6. Use Qlty findings as architectural feedback when they expose a clear
+7. Use Qlty findings as architectural feedback when they expose a clear
    responsibility or boundary concern.
 
    - The qlty-driven architecture refactoring feature is complete through the

@@ -58,12 +58,14 @@ const FlowContents: FC = () => {
     expandableNestedUnitIds,
     flowMenuState,
     handleSearchClear,
+    handleSearchNavigate,
     handleSearchSubmit,
     hasExpandedAllNestedUnits,
     menuStatus,
     nodes,
     reactFlowInstanceRef,
     searchedUnitId,
+    searchResultPosition,
     setDialogData,
     toggleExpandAllNestedUnits,
     unitById,
@@ -110,6 +112,8 @@ const FlowContents: FC = () => {
               hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
               toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
               searchedUnitId={searchedUnitId}
+              searchResultPosition={searchResultPosition}
+              onSearchNavigate={handleSearchNavigate}
               onSearchSubmit={handleSearchSubmit}
               onSearchClear={handleSearchClear}
             />

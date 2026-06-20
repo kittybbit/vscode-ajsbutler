@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This is the branch-level SDD work plan. It records the feature folders active
-on this branch and branch-wide decisions that apply across those features.
+This is the branch-level SDD work plan. It records the feature folders active on
+this branch and branch-wide decisions that apply across those features.
 Feature-local slice tasks live in `docs/specs/features/<feature>/TASKS.md`;
 repository-level behavior contracts live under `docs/requirements/use-cases/`.
 
@@ -22,24 +22,28 @@ rules in `docs/specs/README.md`, not in this file.
   refactors, but completed qlty-driven cleanup no longer has an active feature
   folder. A new feature should be opened only when a finding maps to a
   meaningful responsibility or boundary concern.
-- Feature `SPECS.md` files carry feature requirements. Feature `TASKS.md`
-  files carry only current task state and the minimum record needed to decide
-  whether behavior must be reflected back into use cases.
-- Desktop and web compatibility must stay explicit whenever bootstrap,
-  preview, parsing, shared adapters, or runtime behavior change.
+- Feature `SPECS.md` files carry feature requirements. Feature `TASKS.md` files
+  carry only current task state and the minimum record needed to decide whether
+  behavior must be reflected back into use cases.
+- Desktop and web compatibility must stay explicit whenever bootstrap, preview,
+  parsing, shared adapters, or runtime behavior change.
 
 ## Next Priority Tasks
 
-1. Keep WebAPI import beta feedback and real-environment smoke evidence
-   tracked when a real JP1/AJS3 WebAPI environment or evidence becomes
-   available.
-2. Keep compatibility risk visible for every shared or extension-runtime
-   change.
+1. Plan the first vertical slice for flow-graph-view UI/UX improvements while
+   preserving existing search reveal, nested expansion, and desktop/web
+   behavior.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+   when a real JP1/AJS3 WebAPI environment or evidence becomes available.
+3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/import-definition-via-webapi/`:
-  active beta feature with real-environment smoke verification still pending.
+- `docs/specs/features/flow-graph-view-uiux-improvements/`: roadmap feature for
+  efficient investigation, review, and impact analysis in large flow graphs;
+  implementation approval is pending per vertical slice.
+- `docs/specs/features/import-definition-via-webapi/`: active beta feature with
+  real-environment smoke verification still pending.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
