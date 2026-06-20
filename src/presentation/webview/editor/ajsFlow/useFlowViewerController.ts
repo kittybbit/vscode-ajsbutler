@@ -35,8 +35,10 @@ import { useFlowSearchState } from "./useFlowSearchState";
 import { useNestedExpansionState } from "./useNestedExpansionState";
 import { buildFlowNodeDetail } from "./flowNodeDetail";
 import { useSelectedFlowNodeState } from "./useSelectedFlowNodeState";
+import { useHoveredFlowNodeState } from "./useHoveredFlowNodeState";
 import { resolveFlowTreeSelectionTarget } from "./flowTreeSelection";
 import type { FlowViewportFocusRequest } from "./flowViewportFocus";
+import { applyHoveredUnitToFlowNodes } from "./flowGraphHover";
 
 type UseFlowViewerControllerParams = {
   theme: Theme;
@@ -210,6 +212,14 @@ export const useFlowViewerController = ({
   );
   const { clearSelection, selectedUnitId, selectUnit } =
     useSelectedFlowNodeState(ajsDocument, currentUnitId);
+  const {
+    clearGraphHoveredUnit,
+    clearTreeHoveredUnit,
+    graphHoveredUnit,
+    hoveredUnitId,
+    treeHoveredUnit,
+    treeHoveredUnitId,
+  } = useHoveredFlowNodeState(ajsDocument, currentUnitId);
   const selectTreeUnit = useCallback(
     (unitId: string) => {
       const target = resolveFlowTreeSelectionTarget(
@@ -263,6 +273,10 @@ export const useFlowViewerController = ({
     unitById,
     unitDefinitionByPath,
   });
+  const renderedNodes = useMemo(
+    () => applyHoveredUnitToFlowNodes(nodes, treeHoveredUnitId),
+    [nodes, treeHoveredUnitId],
+  );
   const selectedNode = useMemo(
     () => nodes.find((node) => node.id === selectedUnitId),
     [nodes, selectedUnitId],
@@ -317,6 +331,8 @@ export const useFlowViewerController = ({
     ajsDocument,
     currentUnit,
     currentUnitIdState,
+    clearGraphHoveredUnit,
+    clearTreeHoveredUnit,
     clearSelectedUnit: clearSelection,
     dialogData,
     drawerWidth,
@@ -328,8 +344,10 @@ export const useFlowViewerController = ({
     handleSearchNavigate,
     handleSearchSubmit,
     hasExpandedAllNestedUnits,
+    hoveredUnitId,
+    graphHoveredUnit,
     menuStatus,
-    nodes,
+    nodes: renderedNodes,
     openSelectedNodeDefinition,
     openSelectedNodeScope,
     reactFlowInstanceRef,
@@ -341,6 +359,7 @@ export const useFlowViewerController = ({
     selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
+    treeHoveredUnit,
     unitById,
   };
 };

@@ -40,7 +40,10 @@ type FlowSelectorProps = {
   flowMenuState: FlowMenuStateType;
   currentUnitIdState: CurrentUnitIdStateType;
   drawerWidthState: DrawerWidthStateType;
+  hoveredUnitId?: string;
   selectedUnitId?: string;
+  onHoverUnit: (unitId: string) => void;
+  onLeaveUnit: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
 };
 
@@ -49,6 +52,9 @@ type FlowSelectorTreeProps = {
   currentPathUnitIds: ReadonlySet<string>;
   currentUnit?: AjsUnit;
   expandedUnitIds: ReadonlySet<string>;
+  hoveredUnitId?: string;
+  onHoverUnit: (unitId: string) => void;
+  onLeaveUnit: (unitId: string) => void;
   onOpenScope: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
   selectedUnitId?: string;
@@ -177,6 +183,9 @@ const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
   currentPathUnitIds,
   currentUnit,
   expandedUnitIds,
+  hoveredUnitId,
+  onHoverUnit,
+  onLeaveUnit,
   onOpenScope,
   onSelectUnit,
   selectedUnitId,
@@ -186,6 +195,7 @@ const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
 }) => {
   const hasChildren = unit.children.length > 0;
   const isExpanded = hasChildren && expandedUnitIds.has(unit.id);
+  const isHovered = hoveredUnitId === unit.id;
   const isSelected = selectedUnitId === unit.id;
   const isCurrent = currentUnit?.id === unit.id;
   const isInCurrentScope = isUnitInCurrentFlowScope(
@@ -201,6 +211,16 @@ const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
         data-flow-tree-unit-id={unit.id}
         direction="row"
         alignItems="center"
+        onMouseEnter={() => {
+          if (isInCurrentScope) {
+            onHoverUnit(unit.id);
+          }
+        }}
+        onMouseLeave={() => {
+          if (isInCurrentScope) {
+            onLeaveUnit(unit.id);
+          }
+        }}
         sx={{
           minHeight: "2.25rem",
           marginX: 0.75,
@@ -209,11 +229,16 @@ const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
           borderRadius: 1.5,
           border: (theme) =>
             `1px solid ${isSelected ? theme.palette.secondary.main : "transparent"}`,
+          outline: (theme) =>
+            isHovered ? `2px solid ${theme.palette.primary.main}` : "none",
+          outlineOffset: "-2px",
           backgroundColor: isSelected
             ? "action.selected"
-            : currentPathUnitIds.has(unit.id)
+            : isHovered
               ? "action.hover"
-              : "transparent",
+              : currentPathUnitIds.has(unit.id)
+                ? "action.hover"
+                : "transparent",
         }}
       >
         {hasChildren ? (
@@ -285,7 +310,10 @@ const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
             currentPathUnitIds={currentPathUnitIds}
             currentUnit={currentUnit}
             expandedUnitIds={expandedUnitIds}
+            hoveredUnitId={hoveredUnitId}
             onOpenScope={onOpenScope}
+            onHoverUnit={onHoverUnit}
+            onLeaveUnit={onLeaveUnit}
             onSelectUnit={onSelectUnit}
             selectedUnitId={selectedUnitId}
             setExpanded={setExpanded}
@@ -339,7 +367,10 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   currentUnitIdState,
   flowMenuState,
   drawerWidthState,
+  hoveredUnitId,
   selectedUnitId,
+  onHoverUnit,
+  onLeaveUnit,
   onSelectUnit,
 }) => {
   console.log("render FlowSelector.");
@@ -393,7 +424,10 @@ const FlowSelector: FC<FlowSelectorProps> = ({
           currentPathUnitIds={currentPathUnitIds}
           currentUnit={currentUnit}
           expandedUnitIds={expandedUnitIds}
+          hoveredUnitId={hoveredUnitId}
           onOpenScope={setCurrentUnitId}
+          onHoverUnit={onHoverUnit}
+          onLeaveUnit={onLeaveUnit}
           onSelectUnit={onSelectUnit}
           selectedUnitId={selectedUnitId}
           setExpanded={setExpanded}

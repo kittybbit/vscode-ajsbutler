@@ -3,6 +3,7 @@ import { createTheme } from "@mui/material/styles";
 import { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
+import { applyHoveredUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphHover";
 
 suite("Flow Graph View", () => {
   test("maps flow graph DTOs without requiring UnitEntity instances", () => {
@@ -300,6 +301,18 @@ suite("Flow Graph View", () => {
     );
     assert.strictEqual(anotherSearchMatchNode.data.isSelected, true);
     assert.strictEqual(anotherSearchMatchNode.selected, true);
+    const hoveredNodes = applyHoveredUnitToFlowNodes(
+      nodes,
+      "/root/jobnet/child-net",
+    );
+    const hoveredSearchMatchNode = hoveredNodes.find(
+      (node) => node.id === "/root/jobnet/child-net",
+    );
+    assert.ok(hoveredSearchMatchNode);
+    assert.strictEqual(hoveredSearchMatchNode.data.isHovered, true);
+    assert.strictEqual(hoveredSearchMatchNode.data.isSelected, true);
+    assert.notStrictEqual(hoveredSearchMatchNode, anotherSearchMatchNode);
+    assert.strictEqual(hoveredNodes[0], nodes[0]);
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
     assert.strictEqual(nodes[2].data.canExpandNested, true);

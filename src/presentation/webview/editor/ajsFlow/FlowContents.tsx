@@ -52,6 +52,8 @@ const FlowContents: FC = () => {
     ajsDocument,
     currentUnit,
     currentUnitIdState,
+    clearGraphHoveredUnit,
+    clearTreeHoveredUnit,
     clearSelectedUnit,
     dialogData,
     drawerWidth,
@@ -63,6 +65,8 @@ const FlowContents: FC = () => {
     handleSearchNavigate,
     handleSearchSubmit,
     hasExpandedAllNestedUnits,
+    hoveredUnitId,
+    graphHoveredUnit,
     menuStatus,
     nodes,
     openSelectedNodeDefinition,
@@ -76,6 +80,7 @@ const FlowContents: FC = () => {
     selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
+    treeHoveredUnit,
     unitById,
   } = useFlowViewerController({ theme });
 
@@ -98,7 +103,10 @@ const FlowContents: FC = () => {
               currentUnitIdState={currentUnitIdState}
               flowMenuState={flowMenuState}
               drawerWidthState={drawerWidthState}
+              hoveredUnitId={hoveredUnitId}
               selectedUnitId={selectedUnitId}
+              onHoverUnit={treeHoveredUnit}
+              onLeaveUnit={clearTreeHoveredUnit}
               onSelectUnit={selectTreeUnit}
             />
           )}
@@ -169,6 +177,12 @@ const FlowContents: FC = () => {
                     colorMode={theme.palette.mode}
                     nodeTypes={nodeTypes}
                     onNodeClick={(_event, node) => selectFlowNode(node.id)}
+                    onNodeMouseEnter={(_event, node) =>
+                      graphHoveredUnit(node.id)
+                    }
+                    onNodeMouseLeave={(_event, node) =>
+                      clearGraphHoveredUnit(node.id)
+                    }
                     onInit={(instance) => {
                       reactFlowInstanceRef.current = instance;
                     }}

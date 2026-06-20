@@ -27,6 +27,7 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
   const {
     unitId,
     isAncestor,
+    isHovered,
     isSearchMatch,
     isCurrentSearchResult,
     isSelected,
@@ -44,6 +45,7 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
           isCurrent: false,
           isAncestor,
           isRootJobnet: false,
+          isHovered,
           isSearchMatch,
           isCurrentSearchResult,
           isSelected,

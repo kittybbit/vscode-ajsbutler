@@ -34,6 +34,7 @@ export type AjsNode = {
   isRootJobnet: boolean;
   hasSchedule: boolean;
   hasWaitedFor: boolean;
+  isHovered?: boolean;
   isSearchMatch?: boolean;
   isCurrentSearchResult?: boolean;
   isSelected?: boolean;

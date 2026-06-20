@@ -6,6 +6,7 @@ type NodeVisualState = Pick<
   | "isCurrent"
   | "isAncestor"
   | "isRootJobnet"
+  | "isHovered"
   | "isSearchMatch"
   | "isCurrentSearchResult"
   | "isSelected"
@@ -259,6 +260,12 @@ const nodeButtonColor = (visualState: NodeVisualState): ThemeValue =>
     resolveVisualKind(visualState, buttonColorRules, "default")
   ];
 
+export const buildNodeHoverDecoration = (isHovered?: boolean) => ({
+  outlineWidth: isHovered ? "2px" : "0px",
+  outlineStyle: "solid",
+  outlineOffset: "3px",
+});
+
 export const buildNodeSxProps = (
   visualState: NodeVisualState,
 ): SxProps<Theme> => ({
@@ -273,6 +280,10 @@ export const buildNodeSxProps = (
   borderWidth: nodeBorderWidth(visualState),
   borderStyle: "solid",
   borderColor: nodeBorderColor(visualState),
+  ...buildNodeHoverDecoration(visualState.isHovered),
+  outlineColor: visualState.isHovered
+    ? (theme) => theme.palette.primary.main
+    : "transparent",
   background: nodeBackground(visualState),
   boxShadow: nodeBoxShadow(visualState),
   justifyContent: "center",
@@ -281,7 +292,8 @@ export const buildNodeSxProps = (
   transition:
     "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
   "&:hover": {
-    transform: "translateY(-1px)",
+    outlineWidth: "2px",
+    outlineColor: (theme) => theme.palette.primary.main,
   },
   "&::after": nestedPanelSxProps(visualState.nestedPanel),
   "& button": {
