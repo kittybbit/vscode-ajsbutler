@@ -35,8 +35,12 @@ const toUnit = (rootUnit: UnitListRootDto, parent?: Unit): Unit => {
   return unit;
 };
 
-export const toRootUnits = (document: UnitListDocumentDto): Unit[] =>
+const toRootUnits = (document: UnitListDocumentDto): Unit[] =>
   document.rootUnits.map((rootUnit) => toUnit(rootUnit));
 
-export const toAjsDocument = (document: UnitListDocumentDto) =>
+/**
+ * Restores the normalized model after its plain DTO crosses the webview
+ * serialization boundary.
+ */
+export const toAjsDocument = (document: UnitListDocumentDto): AjsDocument =>
   normalizeAjsDocument(toRootUnits(document));
