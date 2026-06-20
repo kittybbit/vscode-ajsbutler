@@ -70,8 +70,10 @@ const FlowContents: FC = () => {
     reactFlowInstanceRef,
     searchedUnitId,
     searchResultPosition,
+    selectedUnitId,
     selectedNodeDetail,
     selectFlowNode,
+    selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
     unitById,
@@ -96,6 +98,8 @@ const FlowContents: FC = () => {
               currentUnitIdState={currentUnitIdState}
               flowMenuState={flowMenuState}
               drawerWidthState={drawerWidthState}
+              selectedUnitId={selectedUnitId}
+              onSelectUnit={selectTreeUnit}
             />
           )}
           <Stack

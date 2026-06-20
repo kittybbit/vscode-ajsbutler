@@ -30,9 +30,7 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Plan the next flow-graph UI/UX vertical slice after completed multi-result
-   search navigation and selected-node details; tree/graph selection and hover
-   synchronization is the next candidate.
+1. Plan tree/graph hover synchronization as the next focused flow-viewer slice.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
@@ -41,8 +39,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 - `docs/specs/features/flow-graph-view-uiux-improvements/`: roadmap feature for
   efficient investigation, review, and impact analysis in large flow graphs;
-  multi-result search navigation and selected-node details are complete, with
-  the next vertical slice pending investigation and approval.
+  multi-result search navigation, selected-node details, and tree/graph
+  selection synchronization are complete; hover synchronization is the next
+  candidate slice.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

@@ -17,13 +17,17 @@ import {
 } from "../../../../application/unit-list/unitListDocument";
 import { REVEAL_UNIT } from "../../../../shared/webviewEvents";
 import { getRevealUnitAbsolutePath } from "../revealUnit";
+import { resolveFlowViewportFocusDecision } from "./flowViewportFocus";
 
 type UseFlowViewerFitViewParams = {
   edges: Edge[];
   focusRequestVersion: number;
+  layoutRequestIdentity: object;
   nodes: Node[];
   reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>;
   searchedUnitId?: string;
+  selectionFocusRequestVersion: number;
+  selectionFocusTargetUnitId?: string;
 };
 
 type FlowViewerOverflowElements = {
@@ -71,45 +75,69 @@ const scheduleFitViewFrame = (
   });
 };
 
-const hasRenderedTargetNode = (
-  nodes: readonly Node[],
-  targetUnitId: string,
-): boolean => nodes.some((node) => node.id === targetUnitId);
-
 export const useFlowViewerFitView = ({
   edges,
   focusRequestVersion,
+  layoutRequestIdentity,
   nodes,
   reactFlowInstanceRef,
   searchedUnitId,
+  selectionFocusRequestVersion,
+  selectionFocusTargetUnitId,
 }: UseFlowViewerFitViewParams) => {
   const fitViewFrameRef = useRef<number | undefined>(undefined);
-  const handledFocusRequestVersionRef = useRef(0);
+  const handledSearchFocusVersionRef = useRef(0);
+  const handledSelectionFocusVersionRef = useRef(0);
+  const handledLayoutRequestIdentityRef = useRef<object | undefined>(undefined);
 
   useEffect(() => {
     if (!hasFitViewTarget({ nodes, reactFlowInstanceRef })) {
       return undefined;
     }
 
-    const hasPendingSearchFocus =
-      !!searchedUnitId &&
-      focusRequestVersion > handledFocusRequestVersionRef.current;
-    if (hasPendingSearchFocus) {
-      if (!hasRenderedTargetNode(nodes, searchedUnitId)) {
-        return undefined;
-      }
-      scheduleFitViewFrame(fitViewFrameRef, reactFlowInstanceRef, {
+    const decision = resolveFlowViewportFocusDecision({
+      renderedUnitIds: new Set(nodes.map(({ id }) => id)),
+      searchRequest: {
         targetUnitId: searchedUnitId,
-        onFit: () => {
-          handledFocusRequestVersionRef.current = focusRequestVersion;
-        },
-      });
-      return () => cancelFitViewFrame(fitViewFrameRef);
+        version: focusRequestVersion,
+      },
+      handledSearchVersion: handledSearchFocusVersionRef.current,
+      selectionRequest: {
+        targetUnitId: selectionFocusTargetUnitId,
+        version: selectionFocusRequestVersion,
+      },
+      handledSelectionVersion: handledSelectionFocusVersionRef.current,
+      layoutChanged:
+        handledLayoutRequestIdentityRef.current !== layoutRequestIdentity,
+    });
+    if (!decision) {
+      return undefined;
     }
 
-    scheduleFitViewFrame(fitViewFrameRef, reactFlowInstanceRef);
+    scheduleFitViewFrame(fitViewFrameRef, reactFlowInstanceRef, {
+      targetUnitId: decision.targetUnitId,
+      onFit: () => {
+        if (decision.kind === "search") {
+          handledSearchFocusVersionRef.current = focusRequestVersion;
+        }
+        if (decision.kind === "selection") {
+          handledSelectionFocusVersionRef.current =
+            selectionFocusRequestVersion;
+        }
+        handledLayoutRequestIdentityRef.current = layoutRequestIdentity;
+      },
+    });
     return () => cancelFitViewFrame(fitViewFrameRef);
-  }, [edges, focusRequestVersion, nodes, reactFlowInstanceRef, searchedUnitId]);
+  }, [
+    edges,
+    focusRequestVersion,
+    layoutRequestIdentity,
+    nodes,
+    reactFlowInstanceRef,
+    searchedUnitId,
+    selectionFocusRequestVersion,
+    selectionFocusTargetUnitId,
+  ]);
 };
 
 type UseFlowScopeResetParams = {

@@ -35,6 +35,8 @@ import { useFlowSearchState } from "./useFlowSearchState";
 import { useNestedExpansionState } from "./useNestedExpansionState";
 import { buildFlowNodeDetail } from "./flowNodeDetail";
 import { useSelectedFlowNodeState } from "./useSelectedFlowNodeState";
+import { resolveFlowTreeSelectionTarget } from "./flowTreeSelection";
+import type { FlowViewportFocusRequest } from "./flowViewportFocus";
 
 type UseFlowViewerControllerParams = {
   theme: Theme;
@@ -114,6 +116,16 @@ const useCurrentUnitIdState = (
     [currentUnitId, setCurrentUnitId],
   );
 
+const mergeExpandedUnitIds = (
+  currentUnitIds: string[],
+  requiredUnitIds: readonly string[],
+): string[] => {
+  const mergedUnitIds = [...new Set([...currentUnitIds, ...requiredUnitIds])];
+  return mergedUnitIds.length === currentUnitIds.length
+    ? currentUnitIds
+    : mergedUnitIds;
+};
+
 const useFlowViewerUiState = () => {
   const [menuStatus, setMenuStatus] = useState({ menuItem1: true });
   const [drawerWidth, setDrawerWidth] = useState<number>(0);
@@ -159,6 +171,8 @@ export const useFlowViewerController = ({
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
+  const [selectionFocusRequest, setSelectionFocusRequest] =
+    useState<FlowViewportFocusRequest>({ version: 0 });
   const {
     preserveSearchOnNextScopeChange,
     prevUnitEntityId,
@@ -196,6 +210,27 @@ export const useFlowViewerController = ({
   );
   const { clearSelection, selectedUnitId, selectUnit } =
     useSelectedFlowNodeState(ajsDocument, currentUnitId);
+  const selectTreeUnit = useCallback(
+    (unitId: string) => {
+      const target = resolveFlowTreeSelectionTarget(
+        unitId,
+        currentUnit,
+        unitById,
+      );
+      if (!target) {
+        return;
+      }
+      setExpandedUnitIds((current) =>
+        mergeExpandedUnitIds(current, target.expandedNestedUnitIds),
+      );
+      selectUnit(target.selectedUnitId);
+      setSelectionFocusRequest((current) => ({
+        targetUnitId: target.selectedUnitId,
+        version: current.version + 1,
+      }));
+    },
+    [currentUnit, selectUnit, unitById],
+  );
   const {
     focusRequestVersion,
     handleRevealUnit,
@@ -246,12 +281,22 @@ export const useFlowViewerController = ({
       setCurrentUnitId(selectedUnitId);
     }
   }, [selectedNodeDetail?.canOpenAsScope, selectedUnitId]);
+  const layoutRequestIdentity = useMemo(
+    () => ({}),
+    [ajsDocument, currentUnitId, expandedUnitIds, theme],
+  );
   useFlowViewerFitView({
     edges,
     focusRequestVersion,
+    layoutRequestIdentity,
     nodes,
     reactFlowInstanceRef,
     searchedUnitId,
+    selectionFocusRequestVersion: selectionFocusRequest.version,
+    selectionFocusTargetUnitId:
+      selectionFocusRequest.targetUnitId === selectedUnitId
+        ? selectionFocusRequest.targetUnitId
+        : undefined,
   });
   useFlowScopeReset({
     ajsDocument,
@@ -290,8 +335,10 @@ export const useFlowViewerController = ({
     reactFlowInstanceRef,
     searchedUnitId,
     searchResultPosition,
+    selectedUnitId,
     selectedNodeDetail,
     selectFlowNode: selectUnit,
+    selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
     unitById,
