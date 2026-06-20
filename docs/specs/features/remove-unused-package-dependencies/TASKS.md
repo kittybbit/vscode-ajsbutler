@@ -13,13 +13,13 @@
 ## Current Task
 
 - Status: Proposed
-- Scope: investigate the next tooling-only removal set separately from
-  packaging dependencies.
-- Acceptance: confirm whether direct `@eslint/eslintrc`,
-  `@typescript-eslint/eslint-plugin`, and `@typescript-eslint/parser` entries
-  are redundant when `typescript-eslint` and `eslint` remain installed.
-- Validation: record complete lint configuration and dependency-graph impact
-  before requesting new implementation approval.
+- Scope: investigate whether direct `@vscode/vsce` remains necessary for a
+  repository packaging or publishing workflow.
+- Acceptance: account for package scripts, CI workflows, contributor
+  commands, and implicit VS Code extension packaging expectations before
+  proposing removal or retention.
+- Validation: record packaging impact and the smallest safe next decision
+  before requesting implementation approval.
 
 ## Human Approval
 
@@ -44,6 +44,10 @@ active implementation approval remains.
 - The confirmed-unused `@types/glob`, `@types/react-router-dom`,
   `@types/react-window`, `@types/styled-components`, and `@types/uuid`
   declarations were removed without source or configuration changes.
+- The redundant direct `@eslint/eslintrc`,
+  `@typescript-eslint/eslint-plugin`, and `@typescript-eslint/parser`
+  declarations were removed while their required transitive resolutions and
+  the existing ESLint configuration remained intact.
 - Retain `@types/vscode-webview`: it supplies the global
   `acquireVsCodeApi` declaration used by `bootstrapViewer.tsx`. Retain the
   remaining `@types` entries for Mocha globals, Node APIs, React, ReactDOM, and
@@ -53,9 +57,8 @@ active implementation approval remains.
   `rimraf`, and `webpack-cli`.
 - Retain `@emotion/react` and `@emotion/styled` as required MUI peer/runtime
   dependencies, and retain all webpack browser fallbacks.
-- Follow-up tooling candidates are `@eslint/eslintrc`, the direct
-  `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` entries.
-  `@vscode/vsce` remains a separate packaging candidate.
+- `@vscode/vsce` remains a separate packaging candidate because packaging and
+  publishing expectations must be decided independently from lint tooling.
 - No new dependency removal is approved. Source, configuration, tests,
   generated artifacts, overrides, and `engines.vscode` remain out of scope.
 
