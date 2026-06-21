@@ -13,7 +13,7 @@ suite("Flow Viewport Focus", () => {
     );
   });
 
-  test("uses center only for selection and fitView for search and layout", () => {
+  test("uses zoom-preserving center for search and selection only", () => {
     assert.deepStrictEqual(
       resolveFlowViewportFocusAction({
         kind: "selection",
@@ -26,7 +26,7 @@ suite("Flow Viewport Focus", () => {
         kind: "search",
         targetUnitId: "matched",
       }),
-      { kind: "fitView", targetUnitId: "matched" },
+      { kind: "setCenter", targetUnitId: "matched" },
     );
     assert.deepStrictEqual(resolveFlowViewportFocusAction({ kind: "layout" }), {
       kind: "fitView",

@@ -30,8 +30,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Close the completed flow-graph UI/UX feature through `sdd-plan-task`, then
-   select the next repository roadmap item.
+1. Preserve zoom while traversing flow-search results, then implement the
+   responsive in-layout FlowSelector panel and compact search-first header.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
@@ -44,7 +44,7 @@ rules in `docs/specs/README.md`, not in this file.
   selection and hover synchronization, zoom-preserving tree selection, and
   responsive/manual detail-panel collapse, relationship focus mode, and
   standard MiniMap improvements, and card-based node presentation are complete;
-  the feature is ready for use-case back-propagation and feature-folder closure.
+  zoom-preserving search navigation and left-panel/header refinement remain.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

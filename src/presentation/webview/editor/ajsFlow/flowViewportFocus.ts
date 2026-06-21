@@ -37,7 +37,7 @@ export const resolveFlowNodeCenter = ({
 export const resolveFlowViewportFocusAction = (
   decision: FlowViewportFocusDecision,
 ): FlowViewportFocusAction =>
-  decision.kind === "selection" && decision.targetUnitId
+  decision.kind !== "layout" && decision.targetUnitId
     ? { kind: "setCenter", targetUnitId: decision.targetUnitId }
     : { kind: "fitView", targetUnitId: decision.targetUnitId };
 

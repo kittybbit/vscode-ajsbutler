@@ -60,6 +60,8 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
   while focus remains anchored to a predictable first match
 - users can move predictably among all current-scope search matches and return
   to previous matches without changing the active graph scope
+- moving among search matches centers the rendered target while preserving the
+  user's current zoom level
 - graph scope, selected node, current search result, and hovered node are
   distinct viewer concepts even when they temporarily reference the same unit
 - selecting a graph node may expose lightweight relationship and status context
@@ -70,6 +72,8 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
   the selected node
 - the flow selector and graph may synchronize selection and hover while keeping
   scope changes explicit
+- the flow selector may collapse responsively or manually into a compact left
+  rail without overlaying the graph
 - relationship focus keeps unrelated nodes and edges visible and weakens them
   visually rather than removing them
 - the standard React Flow MiniMap remains optional viewer chrome and may reflect
@@ -136,6 +140,7 @@ Scenario: Current-scope search traverses multiple matches
   When the user moves to the next or previous result
   Then the current result is visually distinct from the other matches
   And the viewport reveals the current result
+  And the current zoom level remains unchanged
   And the active graph scope remains unchanged
 
 Scenario: Selected node exposes graph context
@@ -167,6 +172,12 @@ Scenario: Tree and graph interaction stay synchronized
   When the user selects or hovers a unit in either surface
   Then the corresponding unit is emphasized in the other surface
   And the active graph scope changes only through an explicit scope action
+
+Scenario: Flow tree panel can collapse
+  Given the flow selector is shown beside the graph
+  When the viewport becomes narrow or the user collapses the selector
+  Then a compact left action rail remains available
+  And the selector does not overlay the graph
 
 Scenario: Job groups remain visible but are not flow scopes
   Given the flow selector contains job groups and root jobnets

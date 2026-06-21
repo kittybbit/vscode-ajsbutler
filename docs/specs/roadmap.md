@@ -21,6 +21,9 @@
      details, React Flow, and desktop/web compatibility.
    - Validate node-dimension changes against expanded-flow layout and collision
      behavior before treating the visual refresh as complete.
+   - Preserve user zoom while centering search results, and finish the viewer
+     chrome with a responsive in-layout left tree and compact search-first
+     header before closing the feature.
 
 2. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
 
