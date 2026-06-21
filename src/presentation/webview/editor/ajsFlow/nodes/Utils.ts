@@ -1,17 +1,6 @@
 import { AjsNode } from "./AjsNode";
 import { createNavigationEvent } from "../../../../../shared/webviewEvents";
 
-export const handleClickDialogOpen = (data: AjsNode) => () => {
-  const { unitDefinition, setDialogData } = data;
-  setDialogData(() => unitDefinition);
-};
-
-export const handleKeyDownDialogOpen =
-  (data: AjsNode) => (event: React.KeyboardEvent<HTMLElement>) => {
-    const { unitDefinition, setDialogData } = data;
-    event.key === "Enter" && setDialogData(() => unitDefinition);
-  };
-
 export const handleClickChildOpen = (data: AjsNode) => () => {
   const { unitId, setCurrentUnitId } = data;
   setCurrentUnitId(() => unitId);

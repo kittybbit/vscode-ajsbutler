@@ -1,32 +1,16 @@
 import React, { FC, memo } from "react";
 import { Handle, Node, NodeProps, Position } from "@xyflow/react";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import ScheduleIcon from "@mui/icons-material/Schedule";
 import TableChartIcon from "@mui/icons-material/TableChart";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import classNames from "classnames";
-import {
-  ActionIcon,
-  AjsNode,
-  buildNodeSxProps,
-  nodeBadgeSxProps,
-  nodeActionsSxProps,
-  NodeNameAndComment,
-  TyTitle,
-  handleStyle,
-} from "./AjsNode";
+import { ActionIcon, AjsNode, FlowNodeCard, handleStyle } from "./AjsNode";
 import {
   handleClickChildOpen,
-  handleClickDialogOpen,
   handleClickNavigateToTable,
   handleClickNestedToggle,
   handleKeyDownChildOpen,
-  handleKeyDownDialogOpen,
   handleKeyDownNavigateToTable,
   handleKeyDownNestedToggle,
 } from "./Utils";
@@ -38,72 +22,24 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
   console.log("render JobNetNode.");
 
   const {
-    unitId,
     isAncestor,
     isCurrent,
-    isHovered,
-    hasSchedule,
-    hasWaitedFor,
     isRootJobnet,
-    isSearchMatch,
-    isCurrentSearchResult,
-    isSelected,
-    relationshipFocusRole,
     canExpandNested,
     isExpandedNested,
-    label,
-    comment,
-    ty,
   } = data;
 
   return (
     <>
-      <Stack
-        id={unitId}
-        sx={buildNodeSxProps({
-          isCurrent,
-          isAncestor,
-          isRootJobnet,
-          isHovered,
-          isSearchMatch,
-          isCurrentSearchResult,
-          isSelected,
-          relationshipFocusRole,
-          nestedPanel: data.nestedPanel,
-        })}
+      <FlowNodeCard
+        data={data}
+        kind="jobnet"
         className={classNames({
           current: isCurrent,
           ancestor: isAncestor,
         })}
-      >
-        {isRootJobnet && <Box sx={nodeBadgeSxProps}>ROOT</Box>}
-        <TyTitle ty={ty} />
-        {/* action */}
-        <Box sx={nodeActionsSxProps}>
-          <ActionIcon
-            title="View the unit definition."
-            ariaLabel="View the unit definition."
-            onClick={handleClickDialogOpen(data)}
-            onKeyDown={handleKeyDownDialogOpen(data)}
-            icon={<DescriptionIcon fontSize="inherit" />}
-          />
-          <ActionIcon
-            title="Open the matching unit in the unit list."
-            ariaLabel="Open the matching unit in the unit list."
-            onClick={handleClickNavigateToTable(data)}
-            onKeyDown={handleKeyDownNavigateToTable(data)}
-            icon={<TableChartIcon fontSize="inherit" />}
-          />
-          {!isCurrent && (
-            <ActionIcon
-              title="Open the jobnet."
-              ariaLabel="Open the jobnet."
-              onClick={handleClickChildOpen(data)}
-              onKeyDown={handleKeyDownChildOpen(data)}
-              icon={<FolderOpenIcon fontSize="inherit" />}
-            />
-          )}
-          {!isCurrent && canExpandNested && (
+        headerAction={
+          !isCurrent && canExpandNested ? (
             <ActionIcon
               title={
                 isExpandedNested
@@ -125,32 +61,32 @@ const JobNetNode: FC<JobNetNodeProps> = ({ data }: JobNetNodeProps) => {
                 )
               }
             />
-          )}
-          {hasSchedule && (
-            <ActionIcon
-              title="This job net has schedule."
-              ariaLabel="This job net has schedule."
-              icon={<ScheduleIcon fontSize="inherit" />}
-              disableRipple
-            />
-          )}
-          {hasWaitedFor && (
-            <ActionIcon
-              title="This jobnet will wait for another unit."
-              ariaLabel="This jobnet will wait for another unit."
-              icon={<HourglassEmptyIcon fontSize="inherit" />}
-              disableRipple
-            />
-          )}
-        </Box>
-      </Stack>
+          ) : undefined
+        }
+      >
+        <ActionIcon
+          title="Open the matching unit in the unit list."
+          ariaLabel="Open the matching unit in the unit list."
+          onClick={handleClickNavigateToTable(data)}
+          onKeyDown={handleKeyDownNavigateToTable(data)}
+          icon={<TableChartIcon fontSize="inherit" />}
+        />
+        {!isCurrent && (
+          <ActionIcon
+            title="Open the jobnet."
+            ariaLabel="Open the jobnet."
+            onClick={handleClickChildOpen(data)}
+            onKeyDown={handleKeyDownChildOpen(data)}
+            icon={<FolderOpenIcon fontSize="inherit" />}
+          />
+        )}
+      </FlowNodeCard>
       {!isRootJobnet && !isCurrent && (
         <>
           <Handle type="source" position={Position.Right} style={handleStyle} />
           <Handle type="target" position={Position.Left} style={handleStyle} />
         </>
       )}
-      <NodeNameAndComment label={label} comment={comment} />
     </>
   );
 };

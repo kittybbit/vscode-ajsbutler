@@ -1,4 +1,5 @@
 import { FlowGraphNodeDto } from "../../../../application/flow-graph/buildFlowGraphCore";
+import { createFlowNodeGeometryPx } from "./nodes/flowNodeGeometry";
 
 export type FlowGraphPosition = {
   x: number;
@@ -17,8 +18,7 @@ type FlowGraphMetrics = {
 };
 
 export const createFlowGraphMetrics = (basePx: number): FlowGraphMetrics => {
-  const width = basePx * 6;
-  const height = basePx * 6;
+  const { width, height } = createFlowNodeGeometryPx(basePx);
   return {
     width,
     height,

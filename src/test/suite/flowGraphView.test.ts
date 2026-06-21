@@ -281,7 +281,7 @@ suite("Flow Graph View", () => {
     assert.strictEqual(nodes[0].data.isAncestor, true);
     assert.strictEqual(nodes[0].data.isRootJobnet, true);
     assert.strictEqual(nodes[0].data.canExpandNested, false);
-    assert.strictEqual(nodes[0].initialWidth, 116);
+    assert.strictEqual(nodes[0].initialWidth, 168);
     assert.strictEqual(nodes[0].initialHeight, 116);
     assert.strictEqual(nodes[0].data.isSearchMatch, false);
     const searchMatchNode = nodes.find(

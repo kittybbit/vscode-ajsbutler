@@ -4,8 +4,30 @@ import {
   buildNodeFocusFilter,
   buildNodeHoverDecoration,
 } from "../../presentation/webview/editor/ajsFlow/nodes/nodeSxProps";
+import {
+  createFlowNodeGeometryPx,
+  flowNodeGeometryEm,
+  flowNodeHandleTop,
+} from "../../presentation/webview/editor/ajsFlow/nodes/flowNodeGeometry";
+import { createFlowGraphMetrics } from "../../presentation/webview/editor/ajsFlow/flowGraphPosition";
 
 suite("Flow Node Style", () => {
+  test("uses one landscape geometry for cards, layout, and handles", () => {
+    assert.ok(flowNodeGeometryEm.width > flowNodeGeometryEm.height);
+    assert.deepStrictEqual(createFlowNodeGeometryPx(16), {
+      width: 168,
+      height: 116,
+    });
+    assert.deepStrictEqual(
+      {
+        width: createFlowGraphMetrics(16).width,
+        height: createFlowGraphMetrics(16).height,
+      },
+      createFlowNodeGeometryPx(16),
+    );
+    assert.strictEqual(flowNodeHandleTop, "50%");
+  });
+
   test("adds an independent outline without moving the hovered node", () => {
     assert.deepStrictEqual(buildNodeHoverDecoration(true), {
       outlineWidth: "2px",

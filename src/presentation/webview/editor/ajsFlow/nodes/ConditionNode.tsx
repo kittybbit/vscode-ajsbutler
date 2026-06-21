@@ -1,24 +1,12 @@
 import React, { FC, memo } from "react";
 import { Node, NodeProps } from "@xyflow/react";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import TableChartIcon from "@mui/icons-material/TableChart";
-import {
-  ActionIcon,
-  AjsNode,
-  buildNodeSxProps,
-  nodeActionsSxProps,
-  NodeNameAndComment,
-  TyTitle,
-} from "./AjsNode";
+import { ActionIcon, AjsNode, FlowNodeCard } from "./AjsNode";
 import {
   handleClickChildOpen,
-  handleClickDialogOpen,
   handleClickNavigateToTable,
   handleKeyDownChildOpen,
-  handleKeyDownDialogOpen,
   handleKeyDownNavigateToTable,
 } from "./Utils";
 
@@ -29,65 +17,32 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 }: ConditionNodeProps) => {
   console.log("render ConditionNode.");
 
-  const {
-    unitId,
-    isAncestor,
-    isCurrent,
-    isHovered,
-    isSearchMatch,
-    isCurrentSearchResult,
-    isSelected,
-    relationshipFocusRole,
-    label,
-    comment,
-    ty,
-  } = data;
+  const { isCurrent } = data;
 
   return (
     <>
-      <Stack
-        id={unitId}
-        sx={buildNodeSxProps({
-          isCurrent,
-          isAncestor,
-          isRootJobnet: false,
-          isHovered,
-          isSearchMatch,
-          isCurrentSearchResult,
-          isSelected,
-          relationshipFocusRole,
-        })}
+      <FlowNodeCard
+        data={data}
+        kind="condition"
         className={isCurrent ? "current" : undefined}
       >
-        <TyTitle ty={ty} />
-        {/* action */}
-        <Box sx={nodeActionsSxProps}>
+        <ActionIcon
+          title="Open the matching unit in the unit list."
+          ariaLabel="Open the matching unit in the unit list."
+          onClick={handleClickNavigateToTable(data)}
+          onKeyDown={handleKeyDownNavigateToTable(data)}
+          icon={<TableChartIcon fontSize="inherit" />}
+        />
+        {!isCurrent && (
           <ActionIcon
-            title="View the unit definition."
-            ariaLabel="View the unit definition."
-            onClick={handleClickDialogOpen(data)}
-            onKeyDown={handleKeyDownDialogOpen(data)}
-            icon={<DescriptionIcon fontSize="inherit" />}
+            title="Open the condition."
+            ariaLabel="Open the condition."
+            onClick={handleClickChildOpen(data)}
+            onKeyDown={handleKeyDownChildOpen(data)}
+            icon={<FolderOpenIcon fontSize="inherit" />}
           />
-          <ActionIcon
-            title="Open the matching unit in the unit list."
-            ariaLabel="Open the matching unit in the unit list."
-            onClick={handleClickNavigateToTable(data)}
-            onKeyDown={handleKeyDownNavigateToTable(data)}
-            icon={<TableChartIcon fontSize="inherit" />}
-          />
-          {!isCurrent && (
-            <ActionIcon
-              title="Open the condition."
-              ariaLabel="Open the condition."
-              onClick={handleClickChildOpen(data)}
-              onKeyDown={handleKeyDownChildOpen(data)}
-              icon={<FolderOpenIcon fontSize="inherit" />}
-            />
-          )}
-        </Box>
-      </Stack>
-      <NodeNameAndComment label={label} comment={comment} />
+        )}
+      </FlowNodeCard>
     </>
   );
 };

@@ -14,7 +14,7 @@ import {
 } from "./flowViewerStateTypes";
 import { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
 import { AjsNode } from "./nodes/AjsNode";
-import { flowNodeSizeEm } from "./nodes/nodeSxProps";
+import { createFlowNodeGeometryPx } from "./nodes/flowNodeGeometry";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
 import { isExpandableNestedUnit } from "./nestedExpansion";
 
@@ -145,13 +145,15 @@ export const createReactFlowData = (
   currentUnitIdState: CurrentUnitIdStateType,
   options?: CreateReactFlowDataOptions,
 ): { nodes: Node<AjsNode>[]; edges: Edge[] } => {
-  const initialNodeSize = theme.typography.htmlFontSize * flowNodeSizeEm;
+  const initialNodeGeometry = createFlowNodeGeometryPx(
+    theme.typography.htmlFontSize,
+  );
   const nodes: Node<AjsNode>[] = graph.nodes.map((node) => ({
     id: node.id,
     type: node.type,
     selected: options?.selectedUnitId === node.id,
-    initialWidth: initialNodeSize,
-    initialHeight: initialNodeSize,
+    initialWidth: initialNodeGeometry.width,
+    initialHeight: initialNodeGeometry.height,
     data: toNodeData(
       node,
       unitDefinitionByPath,

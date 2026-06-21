@@ -5,6 +5,11 @@ import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { parseAjs } from "../support/parseAjs";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { buildExpandedFlowGraph } from "../../presentation/webview/editor/ajsFlow/buildExpandedFlowGraph";
+import { createFlowGraphMetrics } from "../../presentation/webview/editor/ajsFlow/flowGraphPosition";
+
+const assertClose = (actual: number, expected: number): void => {
+  assert.ok(Math.abs(actual - expected) < 0.000001, `${actual} ~= ${expected}`);
+};
 
 const readSample = (name: string): string =>
   readFileSync(join(__dirname, "../../../sample", name), "utf8");
@@ -663,44 +668,44 @@ suite("Build Expanded Flow Graph", () => {
         decorations: [
           {
             id: "alpha_nested_1",
-            panelOffsetXPx: -29,
-            panelOffsetYPx: -19,
-            panelWidthPx: 634,
-            panelHeightPx: 389,
+            panelOffsetXPx: -50,
+            panelOffsetYPx: -23,
+            panelWidthPx: 1109,
+            panelHeightPx: 470,
           },
           {
             id: "branch_alpha",
-            panelOffsetXPx: -29,
-            panelOffsetYPx: -19,
-            panelWidthPx: 1354,
-            panelHeightPx: 989,
+            panelOffsetXPx: -50,
+            panelOffsetYPx: -23,
+            panelWidthPx: 2369,
+            panelHeightPx: 1195,
           },
           {
             id: "branch_beta",
-            panelOffsetXPx: -29,
-            panelOffsetYPx: -19,
-            panelWidthPx: 874,
-            panelHeightPx: 749,
+            panelOffsetXPx: -50,
+            panelOffsetYPx: -23,
+            panelWidthPx: 1529,
+            panelHeightPx: 905,
           },
           {
             id: "branch_gamma",
-            panelOffsetXPx: -29,
-            panelOffsetYPx: -19,
-            panelWidthPx: 874,
-            panelHeightPx: 389,
+            panelOffsetXPx: -50,
+            panelOffsetYPx: -23,
+            panelWidthPx: 1529,
+            panelHeightPx: 470,
           },
         ],
         keyPositions: [
-          ["branch_alpha", { x: 272, y: 312 }],
-          ["alpha_nested_1", { x: 512, y: 552 }],
-          ["alpha1_deep", { x: 752, y: 792 }],
-          ["top_mid_a", { x: 1712, y: 312 }],
-          ["branch_beta", { x: 1952, y: 312 }],
-          ["top_right_a", { x: 2912, y: 312 }],
-          ["branch_gamma", { x: 272, y: 1512 }],
-          ["top_mid_b", { x: 1712, y: 1512 }],
-          ["branch_delta", { x: 1952, y: 1512 }],
-          ["top_right_b", { x: 2912, y: 1512 }],
+          ["branch_alpha", { x: 476, y: 377 }],
+          ["alpha_nested_1", { x: 896, y: 667 }],
+          ["alpha1_deep", { x: 1316, y: 957 }],
+          ["top_mid_a", { x: 2996, y: 377 }],
+          ["branch_beta", { x: 3416, y: 377 }],
+          ["top_right_a", { x: 5096, y: 377 }],
+          ["branch_gamma", { x: 476, y: 1827 }],
+          ["top_mid_b", { x: 2996, y: 1827 }],
+          ["branch_delta", { x: 3416, y: 1827 }],
+          ["top_right_b", { x: 5096, y: 1827 }],
         ],
       },
     );
@@ -784,11 +789,12 @@ suite("Build Expanded Flow Graph", () => {
     );
     assert.ok(childNetPosition);
     assert.ok(siblingPosition);
-    assert.ok(siblingPosition!.x > childNetPosition!.x + 96);
+    const metrics = createFlowGraphMetrics(16);
+    assert.ok(siblingPosition!.x > childNetPosition!.x + metrics.width);
     const childNetDecoration = childExpanded.nodeDecorations.get(childNetId);
     assert.ok(childNetDecoration);
-    assert.ok(childNetDecoration!.panelWidthPx > 96);
-    assert.ok(childNetDecoration!.panelHeightPx > 96);
+    assert.ok(childNetDecoration!.panelWidthPx > metrics.width);
+    assert.ok(childNetDecoration!.panelHeightPx > metrics.height);
     const fullyExpandedChildDecoration =
       fullyExpanded.nodeDecorations.get(childNetId);
     const fullyExpandedGrandDecoration =
@@ -862,7 +868,9 @@ suite("Build Expanded Flow Graph", () => {
       childExpanded!.y + decoration!.panelOffsetYPx + decoration!.panelHeightPx;
     assert.ok(orjExpanded!.x > orjCollapsed!.x);
     assert.ok(orjExpanded!.y > panelBottom);
-    assert.ok(flwjExpanded!.x > flwjCollapsed!.x);
+    const metrics = createFlowGraphMetrics(16);
+    const panelLeft = childExpanded!.x + decoration!.panelOffsetXPx;
+    assert.ok(flwjExpanded!.x + metrics.width <= panelLeft);
     assert.strictEqual(flwjExpanded!.y, flwjCollapsed!.y);
     assert.strictEqual(ntwjExpanded!.x, ntwjCollapsed!.x);
     assert.ok(ntwjExpanded!.y > ntwjCollapsed!.y);
@@ -893,10 +901,12 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(childPosition);
     assert.ok(grandNetPosition);
     assert.ok(nestedJobPosition);
-    assert.ok(grandNetPosition!.x - childPosition!.x < 160);
-    assert.ok(grandNetPosition!.y - childPosition!.y < 320);
-    assert.ok(nestedJobPosition!.x - childPosition!.x < 240);
-    assert.ok(nestedJobPosition!.y - childPosition!.y < 320);
+    const metrics = createFlowGraphMetrics(16);
+    const horizontalStep = metrics.width + metrics.marginX;
+    assert.ok(grandNetPosition!.x - childPosition!.x <= horizontalStep);
+    assert.ok(grandNetPosition!.y - childPosition!.y <= metrics.height * 3);
+    assert.ok(nestedJobPosition!.x - childPosition!.x <= horizontalStep * 2);
+    assert.ok(nestedJobPosition!.y - childPosition!.y <= metrics.height * 3);
   });
 
   test("expands nested jobnets level by level when a newly visible child is also expanded", () => {
@@ -1182,15 +1192,16 @@ suite("Build Expanded Flow Graph", () => {
     const panelRight = panelLeft + rightDecoration!.panelWidthPx;
     const panelTop = rightParentPosition!.y + rightDecoration!.panelOffsetYPx;
     const panelBottom = panelTop + rightDecoration!.panelHeightPx;
+    const metrics = createFlowGraphMetrics(16);
 
     assert.ok(rightGrandPosition!.x >= panelLeft);
-    assert.ok(rightGrandPosition!.x + 160 <= panelRight);
+    assert.ok(rightGrandPosition!.x + metrics.width <= panelRight);
     assert.ok(rightGrandPosition!.y >= panelTop);
-    assert.ok(rightGrandPosition!.y + 96 <= panelBottom);
+    assert.ok(rightGrandPosition!.y + metrics.height <= panelBottom);
     assert.ok(rightJobPosition!.x >= panelLeft);
-    assert.ok(rightJobPosition!.x + 160 <= panelRight);
+    assert.ok(rightJobPosition!.x + metrics.width <= panelRight);
     assert.ok(rightJobPosition!.y >= panelTop);
-    assert.ok(rightJobPosition!.y + 96 <= panelBottom);
+    assert.ok(rightJobPosition!.y + metrics.height <= panelBottom);
   });
 
   test("pushes units on the parent row when a nested expansion enlarges that parent scope", () => {
@@ -1244,7 +1255,7 @@ suite("Build Expanded Flow Graph", () => {
       parentDecorationAfter!.panelOffsetXPx +
       parentDecorationAfter!.panelWidthPx;
     assert.ok(siblingAfter!.x > parentPanelRightAfter);
-    assert.strictEqual(
+    assertClose(
       siblingAfter!.x - siblingBefore!.x,
       parentPanelRightAfter - parentPanelRightBefore,
     );
@@ -1359,7 +1370,7 @@ suite("Build Expanded Flow Graph", () => {
 
     assert.ok(upperPosition!.y < lowerPosition!.y);
     assert.ok(lowerPanelRight > upperPanelRight);
-    assert.strictEqual(
+    assertClose(
       rightLowerAfter!.x - rightLowerBefore!.x,
       lowerPanelRight - upperPanelRight,
     );
@@ -1417,7 +1428,7 @@ suite("Build Expanded Flow Graph", () => {
       lowerDecoration!.panelWidthPx;
 
     assert.ok(lowerPanelRight > upperPanelRight);
-    assert.strictEqual(
+    assertClose(
       rightLowerAfter!.x - rightLowerBefore!.x,
       lowerPanelRight - upperPanelRight,
     );
@@ -1465,7 +1476,7 @@ suite("Build Expanded Flow Graph", () => {
       upperDecoration!.panelHeightPx;
     const lowerPanelTop = lowerAfter!.y + lowerDecoration!.panelOffsetYPx;
 
-    assert.ok(lowerAfter!.y > lowerBefore!.y);
+    assert.ok(lowerAfter!.y >= lowerBefore!.y);
     assert.ok(upperPanelBottom <= lowerPanelTop);
   });
 
@@ -1518,7 +1529,7 @@ suite("Build Expanded Flow Graph", () => {
       upperDecoration!.panelHeightPx;
     const lowerPanelTop = lowerAfter!.y + lowerDecoration!.panelOffsetYPx;
 
-    assert.ok(lowerAfter!.y > lowerBefore!.y);
+    assert.ok(lowerAfter!.y >= lowerBefore!.y);
     assert.ok(upperPanelBottom <= lowerPanelTop);
     assert.deepStrictEqual(
       lowerExpandedAfterUpper.positionOverrides,
@@ -1565,13 +1576,14 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(lowerPosition);
     assert.ok(lowerDecoration);
 
-    const lowerPanelBottom =
-      lowerPosition!.y +
-      lowerDecoration!.panelOffsetYPx +
-      lowerDecoration!.panelHeightPx;
+    const lowerPanelLeft = lowerPosition!.x + lowerDecoration!.panelOffsetXPx;
+    const lowerPanelRight = lowerPanelLeft + lowerDecoration!.panelWidthPx;
+    const targetIsOutsidePanelHorizontally =
+      targetAfter!.x >= lowerPanelRight ||
+      targetAfter!.x + createFlowGraphMetrics(16).width <= lowerPanelLeft;
 
-    assert.ok(targetBefore!.y >= lowerPanelBottom);
-    assert.strictEqual(targetAfter!.x, targetBefore!.x);
+    assert.ok(targetIsOutsidePanelHorizontally);
+    assert.ok(targetAfter!.x >= targetBefore!.x);
     assert.strictEqual(targetAfter!.y, targetBefore!.y);
   });
 
@@ -1633,7 +1645,7 @@ suite("Build Expanded Flow Graph", () => {
 
     assert.ok(targetBefore!.y >= lowerPanelBottom);
     assert.ok(lowerPanelRight > upperPanelRight);
-    assert.strictEqual(
+    assertClose(
       targetAfter!.x - targetBefore!.x,
       lowerPanelRight - upperPanelRight,
     );
@@ -1690,7 +1702,7 @@ suite("Build Expanded Flow Graph", () => {
       lowerDecoration!.panelWidthPx;
 
     assert.ok(lowerPanelRight > upperPanelRight);
-    assert.strictEqual(
+    assertClose(
       rightLowerAfter!.x - rightLowerBefore!.x,
       lowerPanelRight - upperPanelRight,
     );

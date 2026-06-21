@@ -1,5 +1,6 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { AjsNode } from "./AjsNode";
+import { flowNodeGeometryEm } from "./flowNodeGeometry";
 
 type NodeVisualState = Pick<
   AjsNode,
@@ -13,8 +14,6 @@ type NodeVisualState = Pick<
   | "relationshipFocusRole"
   | "nestedPanel"
 >;
-
-export const flowNodeSizeEm = 7.25;
 
 type NestedPanel = NonNullable<NodeVisualState["nestedPanel"]>;
 
@@ -69,8 +68,7 @@ const resolveVisualKind = <Kind extends string>(
 ): Kind =>
   rules.find(({ matches }) => matches(visualState))?.kind ?? defaultKind;
 
-const nodeBorderRadius = ({ isAncestor }: NodeVisualState): string =>
-  isAncestor ? "1.35em" : "50%";
+const nodeBorderRadius = (): string => "0.85em";
 
 type BorderWidthKind =
   | "selectedSearchResult"
@@ -298,11 +296,11 @@ export const buildNodeSxProps = (
   position: "relative",
   zIndex: 1,
   overflow: "visible",
-  width: `${flowNodeSizeEm}em`,
-  minHeight: `${flowNodeSizeEm}em`,
-  paddingX: "0.55em",
-  paddingY: "0.45em",
-  borderRadius: nodeBorderRadius(visualState),
+  boxSizing: "border-box",
+  width: `${flowNodeGeometryEm.width}em`,
+  height: `${flowNodeGeometryEm.height}em`,
+  padding: 0,
+  borderRadius: nodeBorderRadius(),
   borderWidth: nodeBorderWidth(visualState),
   borderStyle: "solid",
   borderColor: nodeBorderColor(visualState),
@@ -313,7 +311,7 @@ export const buildNodeSxProps = (
   background: nodeBackground(visualState),
   boxShadow: nodeBoxShadow(visualState),
   filter: nodeFocusFilter(visualState),
-  justifyContent: "center",
+  justifyContent: "flex-start",
   alignItems: "center",
   gap: "0.15em",
   transition:
