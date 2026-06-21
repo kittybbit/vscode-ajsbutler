@@ -17,11 +17,21 @@ import {
 } from "../../../../application/unit-list/unitListDocument";
 import { REVEAL_UNIT } from "../../../../shared/webviewEvents";
 import { getRevealUnitAbsolutePath } from "../revealUnit";
+import {
+  resolveFlowNodeCenter,
+  resolveFlowViewportFocusAction,
+  resolveFlowViewportFocusDecision,
+} from "./flowViewportFocus";
 
 type UseFlowViewerFitViewParams = {
   edges: Edge[];
+  focusRequestVersion: number;
+  layoutRequestIdentity: object;
   nodes: Node[];
   reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>;
+  searchedUnitId?: string;
+  selectionFocusRequestVersion: number;
+  selectionFocusTargetUnitId?: string;
 };
 
 type FlowViewerOverflowElements = {
@@ -35,42 +45,117 @@ type FitViewFrameRef = MutableRefObject<number | undefined>;
 const hasFitViewTarget = ({
   nodes,
   reactFlowInstanceRef,
-}: UseFlowViewerFitViewParams): boolean =>
-  !!reactFlowInstanceRef.current && nodes.length > 0;
+}: Pick<
+  UseFlowViewerFitViewParams,
+  "nodes" | "reactFlowInstanceRef"
+>): boolean => !!reactFlowInstanceRef.current && nodes.length > 0;
 
 const cancelFitViewFrame = (fitViewFrameRef: FitViewFrameRef) => {
-  if (fitViewFrameRef.current) {
+  if (fitViewFrameRef.current !== undefined) {
     window.cancelAnimationFrame(fitViewFrameRef.current);
     fitViewFrameRef.current = undefined;
   }
 };
 
-const scheduleFitViewFrame = (
+type ScheduleViewportFocusFrameOptions = {
+  kind: "search" | "selection" | "layout";
+  onFit?: () => void;
+  targetUnitId?: string;
+};
+
+const scheduleViewportFocusFrame = (
   fitViewFrameRef: FitViewFrameRef,
   reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>,
+  options: ScheduleViewportFocusFrameOptions,
 ) => {
   cancelFitViewFrame(fitViewFrameRef);
   fitViewFrameRef.current = window.requestAnimationFrame(() => {
-    void reactFlowInstanceRef.current?.fitView({ padding: 0.22 });
+    const instance = reactFlowInstanceRef.current;
+    const action = resolveFlowViewportFocusAction(options);
+    if (action.kind === "setCenter" && instance) {
+      const center = resolveFlowNodeCenter(
+        instance.getNodesBounds([action.targetUnitId]),
+      );
+      void instance.setCenter(center.x, center.y, {
+        duration: 250,
+        zoom: instance.getZoom(),
+      });
+    } else {
+      void instance?.fitView({
+        padding: action.targetUnitId ? 0.8 : 0.22,
+        duration: action.targetUnitId ? 250 : undefined,
+        nodes: action.targetUnitId ? [{ id: action.targetUnitId }] : undefined,
+      });
+    }
+    options.onFit?.();
     fitViewFrameRef.current = undefined;
   });
 };
 
 export const useFlowViewerFitView = ({
   edges,
+  focusRequestVersion,
+  layoutRequestIdentity,
   nodes,
   reactFlowInstanceRef,
+  searchedUnitId,
+  selectionFocusRequestVersion,
+  selectionFocusTargetUnitId,
 }: UseFlowViewerFitViewParams) => {
   const fitViewFrameRef = useRef<number | undefined>(undefined);
+  const handledSearchFocusVersionRef = useRef(0);
+  const handledSelectionFocusVersionRef = useRef(0);
+  const handledLayoutRequestIdentityRef = useRef<object | undefined>(undefined);
 
   useEffect(() => {
-    if (!hasFitViewTarget({ edges, nodes, reactFlowInstanceRef })) {
+    if (!hasFitViewTarget({ nodes, reactFlowInstanceRef })) {
       return undefined;
     }
 
-    scheduleFitViewFrame(fitViewFrameRef, reactFlowInstanceRef);
+    const decision = resolveFlowViewportFocusDecision({
+      renderedUnitIds: new Set(nodes.map(({ id }) => id)),
+      searchRequest: {
+        targetUnitId: searchedUnitId,
+        version: focusRequestVersion,
+      },
+      handledSearchVersion: handledSearchFocusVersionRef.current,
+      selectionRequest: {
+        targetUnitId: selectionFocusTargetUnitId,
+        version: selectionFocusRequestVersion,
+      },
+      handledSelectionVersion: handledSelectionFocusVersionRef.current,
+      layoutChanged:
+        handledLayoutRequestIdentityRef.current !== layoutRequestIdentity,
+    });
+    if (!decision) {
+      return undefined;
+    }
+
+    scheduleViewportFocusFrame(fitViewFrameRef, reactFlowInstanceRef, {
+      kind: decision.kind,
+      targetUnitId: decision.targetUnitId,
+      onFit: () => {
+        if (decision.kind === "search") {
+          handledSearchFocusVersionRef.current = focusRequestVersion;
+        }
+        if (decision.kind === "selection") {
+          handledSelectionFocusVersionRef.current =
+            selectionFocusRequestVersion;
+        }
+        handledLayoutRequestIdentityRef.current = layoutRequestIdentity;
+      },
+    });
     return () => cancelFitViewFrame(fitViewFrameRef);
-  }, [edges, nodes, reactFlowInstanceRef]);
+  }, [
+    edges,
+    focusRequestVersion,
+    layoutRequestIdentity,
+    nodes,
+    reactFlowInstanceRef,
+    searchedUnitId,
+    selectionFocusRequestVersion,
+    selectionFocusTargetUnitId,
+  ]);
 };
 
 type UseFlowScopeResetParams = {

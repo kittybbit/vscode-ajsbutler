@@ -2,8 +2,8 @@
 
 ## Goal
 
-Transform normalized unit relationships into flow graph data and viewer
-behavior that can be rendered consistently in desktop and web hosts.
+Transform normalized unit relationships into flow graph data and viewer behavior
+that can be rendered consistently in desktop and web hosts.
 
 ## Trigger
 
@@ -19,46 +19,67 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
 
 - graph DTO with nodes and edges
 - no XyFlow-specific types in use case output
-- visible graph state for the selected scope, including expanded nested
-  jobnets when the viewer requests them
+- visible graph state for the selected scope, including expanded nested jobnets
+  when the viewer requests them
 - search match metadata that presentation layers can use to reveal and focus
   matching units inside the current scope
 
 ## Rules
 
 - graph construction logic must be testable without webview runtime
-- layout intent may be expressed in DTO metadata,
-  but UI-library-specific coordinates stay outside the use case
-  when practical
+- layout intent may be expressed in DTO metadata, but UI-library-specific
+  coordinates stay outside the use case when practical
 - parser internals must not be exposed in the graph DTO
-- visual resemblance to JP1/AJS View is a product direction, but full
-  JP1/AJS View feature parity is not required
+- visual resemblance to JP1/AJS View is a product direction, but full JP1/AJS
+  View feature parity is not required
 - nested jobnets may be revealed progressively in the same viewer without
   changing the selected document
 - nested panels should stay anchored to the expanded unit that owns them and
   should not require reconstructing `UnitEntity` in presentation code
-- expanded nested layout must be recomputed from the selected scope and the
-  full expanded-unit set so the same expanded set always yields the same final
+- expanded nested layout must be recomputed from the selected scope and the full
+  expanded-unit set so the same expanded set always yields the same final
   placement
-- expanded nested units must be processed in stable order by
-  `depth`, `layout.v`, `layout.h`, `absolutePath`
+- expanded nested units must be processed in stable order by `depth`,
+  `layout.v`, `layout.h`, `absolutePath`
 - each expanded unit must be treated as one occupied rectangle covering the
   visible node, its expanded panel, and expanded descendant panels that remain
   inside that subtree
 - sibling subtrees inside the same container must not overlap by occupied
   rectangle after expanded layout is resolved
-- collision resolution for nested expansion may push layout only to the right
-  or downward and must keep unaffected upper-left areas fixed
+- collision resolution for nested expansion may push layout only to the right or
+  downward and must keep unaffected upper-left areas fixed
 - collision resolution must move whole subtrees rather than isolated nodes so
   descendant relative positions stay stable
-- when nested expansion changes visible graph bounds, the viewer must be able
-  to refit the current view to include newly visible nodes
+- when nested expansion changes visible graph bounds, the viewer must be able to
+  refit the current view to include newly visible nodes
 - current-scope flow search uses case-insensitive contiguous partial matching
   across unit name, comment, and path
-- current-scope flow search may reveal collapsed ancestor jobnets needed to
-  show matching units before focusing them
+- current-scope flow search may reveal collapsed ancestor jobnets needed to show
+  matching units before focusing them
 - when multiple visible units match, every visible match can be highlighted
   while focus remains anchored to a predictable first match
+- users can move predictably among all current-scope search matches and return
+  to previous matches without changing the active graph scope
+- moving among search matches centers the rendered target while preserving the
+  user's current zoom level
+- graph scope, selected node, current search result, and hovered node are
+  distinct viewer concepts even when they temporarily reference the same unit
+- selecting a graph node may expose lightweight relationship and status context
+  without automatically opening unit-definition details
+- tree selection may center a rendered node but must preserve the user's current
+  zoom level
+- selected-node context may collapse responsively or manually without clearing
+  the selected node
+- the flow selector and graph may synchronize selection and hover while keeping
+  scope changes explicit
+- the flow selector may collapse responsively or manually into a compact left
+  rail without overlaying the graph
+- relationship focus keeps unrelated nodes and edges visible and weakens them
+  visually rather than removing them
+- the standard React Flow MiniMap remains optional viewer chrome and may reflect
+  selection, search, and relationship-focus states
+- node presentation may become card-based, but node dimensions must remain
+  compatible with deterministic positioning and expanded nested layout
 - flow selector entries may show job groups, but the active flow graph scope
   must resolve to a root jobnet rather than a job group
 
@@ -114,6 +135,50 @@ Scenario: Current-scope search reveals matches
   Then the ancestors needed to show the matching unit are revealed
   And all visible matches are highlighted
 
+Scenario: Current-scope search traverses multiple matches
+  Given multiple units in the current flow scope match the search query
+  When the user moves to the next or previous result
+  Then the current result is visually distinct from the other matches
+  And the viewport reveals the current result
+  And the current zoom level remains unchanged
+  And the active graph scope remains unchanged
+
+Scenario: Selected node exposes graph context
+  Given a visible flow graph node
+  When the user selects that node
+  Then lightweight relationship and status context is available
+  And unit-definition details remain closed until explicitly requested
+
+Scenario: Tree selection preserves zoom
+  Given a rendered graph node and a user-selected zoom level
+  When the corresponding in-scope flow-tree row is selected
+  Then the viewport centers the rendered node
+  And the zoom level remains unchanged
+
+Scenario: Selected-node context can collapse
+  Given a selected node and its graph-context detail panel
+  When the viewport becomes narrow or the user collapses the panel
+  Then a compact detail action rail remains available
+  And the selected node remains selected
+
+Scenario: Relationship focus preserves the whole graph
+  Given a selected node with upstream, downstream, and unrelated elements
+  When relationship focus is enabled
+  Then upstream and downstream elements are distinguishable
+  And unrelated elements remain visible with weaker emphasis
+
+Scenario: Tree and graph interaction stay synchronized
+  Given the flow selector and graph are visible
+  When the user selects or hovers a unit in either surface
+  Then the corresponding unit is emphasized in the other surface
+  And the active graph scope changes only through an explicit scope action
+
+Scenario: Flow tree panel can collapse
+  Given the flow selector is shown beside the graph
+  When the viewport becomes narrow or the user collapses the selector
+  Then a compact left action rail remains available
+  And the selector does not overlay the graph
+
 Scenario: Job groups remain visible but are not flow scopes
   Given the flow selector contains job groups and root jobnets
   When the user selects a visible job group entry
@@ -141,14 +206,15 @@ Scenario: Job groups remain visible but are not flow scopes
 
 ## Risks Or Edge Cases
 
-- selected scope changes must preserve current-node and ancestor rendering semantics
+- selected scope changes must preserve current-node and ancestor rendering
+  semantics
 - large sample definitions should continue to build graph DTOs without
   presentation-layer shortcuts
-- deep expansion can enlarge an ancestor panel, so collision propagation must
-  be checked at each affected container level
-- search behavior can feel inert if the scope root matches before a more
-  visible descendant, so descendant matches may need priority when that
-  produces clearer focus behavior
+- deep expansion can enlarge an ancestor panel, so collision propagation must be
+  checked at each affected container level
+- search behavior can feel inert if the scope root matches before a more visible
+  descendant, so descendant matches may need priority when that produces clearer
+  focus behavior
 - explicit job-group flow layout support would require a separate behavior
-  decision because job groups can contain multiple root jobnets without
-  display coordinates for a single job-group-scoped graph
+  decision because job groups can contain multiple root jobnets without display
+  coordinates for a single job-group-scoped graph

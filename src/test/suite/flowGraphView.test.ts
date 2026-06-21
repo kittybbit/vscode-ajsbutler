@@ -3,6 +3,7 @@ import { createTheme } from "@mui/material/styles";
 import { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
+import { applyHoveredUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphHover";
 
 suite("Flow Graph View", () => {
   test("maps flow graph DTOs without requiring UnitEntity instances", () => {
@@ -153,6 +154,7 @@ suite("Flow Graph View", () => {
           "/root/jobnet/child-net/grand-net",
         ]),
         searchedUnitId: "/root/jobnet/child-net/grand-net",
+        selectedUnitId: "/root/jobnet/child-net",
         unitById: new Map([
           [
             "/root/jobnet/child-net",
@@ -279,19 +281,40 @@ suite("Flow Graph View", () => {
     assert.strictEqual(nodes[0].data.isAncestor, true);
     assert.strictEqual(nodes[0].data.isRootJobnet, true);
     assert.strictEqual(nodes[0].data.canExpandNested, false);
+    assert.strictEqual(nodes[0].initialWidth, 168);
+    assert.strictEqual(nodes[0].initialHeight, 116);
     assert.strictEqual(nodes[0].data.isSearchMatch, false);
     const searchMatchNode = nodes.find(
       (node) => node.id === "/root/jobnet/child-net/grand-net",
     );
     assert.ok(searchMatchNode);
     assert.strictEqual(searchMatchNode.data.isSearchMatch, true);
-    assert.strictEqual(searchMatchNode.selected, true);
+    assert.strictEqual(searchMatchNode.data.isCurrentSearchResult, true);
+    assert.strictEqual(searchMatchNode.data.isSelected, false);
+    assert.strictEqual(searchMatchNode.selected, false);
     const anotherSearchMatchNode = nodes.find(
       (node) => node.id === "/root/jobnet/child-net",
     );
     assert.ok(anotherSearchMatchNode);
     assert.strictEqual(anotherSearchMatchNode.data.isSearchMatch, true);
-    assert.strictEqual(anotherSearchMatchNode.selected, false);
+    assert.strictEqual(
+      anotherSearchMatchNode.data.isCurrentSearchResult,
+      false,
+    );
+    assert.strictEqual(anotherSearchMatchNode.data.isSelected, true);
+    assert.strictEqual(anotherSearchMatchNode.selected, true);
+    const hoveredNodes = applyHoveredUnitToFlowNodes(
+      nodes,
+      "/root/jobnet/child-net",
+    );
+    const hoveredSearchMatchNode = hoveredNodes.find(
+      (node) => node.id === "/root/jobnet/child-net",
+    );
+    assert.ok(hoveredSearchMatchNode);
+    assert.strictEqual(hoveredSearchMatchNode.data.isHovered, true);
+    assert.strictEqual(hoveredSearchMatchNode.data.isSelected, true);
+    assert.notStrictEqual(hoveredSearchMatchNode, anotherSearchMatchNode);
+    assert.strictEqual(hoveredNodes[0], nodes[0]);
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
     assert.strictEqual(nodes[2].data.canExpandNested, true);

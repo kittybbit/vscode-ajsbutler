@@ -1,9 +1,18 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { AjsNode } from "./AjsNode";
+import { flowNodeGeometryEm } from "./flowNodeGeometry";
 
 type NodeVisualState = Pick<
   AjsNode,
-  "isCurrent" | "isAncestor" | "isRootJobnet" | "isSearchMatch" | "nestedPanel"
+  | "isCurrent"
+  | "isAncestor"
+  | "isRootJobnet"
+  | "isHovered"
+  | "isSearchMatch"
+  | "isCurrentSearchResult"
+  | "isSelected"
+  | "relationshipFocusRole"
+  | "nestedPanel"
 >;
 
 type NestedPanel = NonNullable<NodeVisualState["nestedPanel"]>;
@@ -18,6 +27,23 @@ type VisualStateRule<Kind extends string> = {
 const currentNodeRule = {
   kind: "current",
   matches: ({ isCurrent }: NodeVisualState) => Boolean(isCurrent),
+} as const;
+
+const selectedSearchResultNodeRule = {
+  kind: "selectedSearchResult",
+  matches: ({ isSelected, isCurrentSearchResult }: NodeVisualState) =>
+    Boolean(isSelected && isCurrentSearchResult),
+} as const;
+
+const selectedNodeRule = {
+  kind: "selected",
+  matches: ({ isSelected }: NodeVisualState) => Boolean(isSelected),
+} as const;
+
+const currentSearchResultNodeRule = {
+  kind: "currentSearchResult",
+  matches: ({ isCurrentSearchResult }: NodeVisualState) =>
+    Boolean(isCurrentSearchResult),
 } as const;
 
 const searchMatchNodeRule = {
@@ -42,17 +68,28 @@ const resolveVisualKind = <Kind extends string>(
 ): Kind =>
   rules.find(({ matches }) => matches(visualState))?.kind ?? defaultKind;
 
-const nodeBorderRadius = ({ isAncestor }: NodeVisualState): string =>
-  isAncestor ? "1.35em" : "50%";
+const nodeBorderRadius = (): string => "0.85em";
 
-type BorderWidthKind = "current" | "rootJobnet" | "default";
+type BorderWidthKind =
+  | "selectedSearchResult"
+  | "selected"
+  | "currentSearchResult"
+  | "current"
+  | "rootJobnet"
+  | "default";
 
 const borderWidthRules: readonly VisualStateRule<BorderWidthKind>[] = [
+  selectedSearchResultNodeRule,
+  selectedNodeRule,
+  currentSearchResultNodeRule,
   currentNodeRule,
   rootJobnetNodeRule,
 ];
 
 const borderWidthByKind: Record<BorderWidthKind, string> = {
+  selectedSearchResult: "3px",
+  selected: "3px",
+  currentSearchResult: "3px",
   current: "3px",
   rootJobnet: "2px",
   default: "1px",
@@ -63,15 +100,28 @@ const nodeBorderWidth = (visualState: NodeVisualState): string =>
     resolveVisualKind(visualState, borderWidthRules, "default")
   ];
 
-type BorderColorKind = "current" | "searchMatch" | "rootJobnet" | "default";
+type BorderColorKind =
+  | "selectedSearchResult"
+  | "selected"
+  | "currentSearchResult"
+  | "current"
+  | "searchMatch"
+  | "rootJobnet"
+  | "default";
 
 const borderColorRules: readonly VisualStateRule<BorderColorKind>[] = [
+  selectedSearchResultNodeRule,
+  selectedNodeRule,
+  currentSearchResultNodeRule,
   currentNodeRule,
   searchMatchNodeRule,
   rootJobnetNodeRule,
 ];
 
 const borderColorByKind: Record<BorderColorKind, ThemeValue> = {
+  selectedSearchResult: (theme) => theme.palette.secondary.main,
+  selected: (theme) => theme.palette.secondary.main,
+  currentSearchResult: (theme) => theme.palette.success.dark,
   current: (theme) => theme.palette.info.main,
   searchMatch: (theme) => theme.palette.success.main,
   rootJobnet: (theme) => theme.palette.primary.main,
@@ -84,6 +134,9 @@ const nodeBorderColor = (visualState: NodeVisualState): ThemeValue =>
   ];
 
 type BackgroundKind =
+  | "selectedSearchResult"
+  | "selected"
+  | "currentSearchResult"
   | "current"
   | "searchMatch"
   | "ancestor"
@@ -91,6 +144,9 @@ type BackgroundKind =
   | "default";
 
 const backgroundRules: readonly VisualStateRule<BackgroundKind>[] = [
+  selectedSearchResultNodeRule,
+  selectedNodeRule,
+  currentSearchResultNodeRule,
   currentNodeRule,
   searchMatchNodeRule,
   ancestorNodeRule,
@@ -98,6 +154,12 @@ const backgroundRules: readonly VisualStateRule<BackgroundKind>[] = [
 ];
 
 const backgroundByKind: Record<BackgroundKind, ThemeValue> = {
+  selectedSearchResult: (theme) =>
+    `linear-gradient(160deg, ${theme.palette.secondary.light}26 0%, ${theme.palette.success.light}16 48%, ${theme.palette.background.paper} 100%)`,
+  selected: (theme) =>
+    `linear-gradient(160deg, ${theme.palette.secondary.light}24 0%, ${theme.palette.background.paper} 100%)`,
+  currentSearchResult: (theme) =>
+    `linear-gradient(160deg, ${theme.palette.success.light}32 0%, ${theme.palette.background.paper} 100%)`,
   current: (theme) =>
     `linear-gradient(160deg, ${theme.palette.info.light}22 0%, ${theme.palette.background.paper} 58%, ${theme.palette.background.default} 100%)`,
   searchMatch: (theme) =>
@@ -112,15 +174,31 @@ const backgroundByKind: Record<BackgroundKind, ThemeValue> = {
 const nodeBackground = (visualState: NodeVisualState): ThemeValue =>
   backgroundByKind[resolveVisualKind(visualState, backgroundRules, "default")];
 
-type BoxShadowKind = "current" | "searchMatch" | "ancestor" | "default";
+type BoxShadowKind =
+  | "selectedSearchResult"
+  | "selected"
+  | "currentSearchResult"
+  | "current"
+  | "searchMatch"
+  | "ancestor"
+  | "default";
 
 const boxShadowRules: readonly VisualStateRule<BoxShadowKind>[] = [
+  selectedSearchResultNodeRule,
+  selectedNodeRule,
+  currentSearchResultNodeRule,
   currentNodeRule,
   searchMatchNodeRule,
   ancestorNodeRule,
 ];
 
 const boxShadowByKind: Record<BoxShadowKind, ThemeValue> = {
+  selectedSearchResult: (theme) =>
+    `0 0 0 4px ${theme.palette.secondary.light}38, 0 0 0 7px ${theme.palette.success.light}20, ${theme.shadows[7]}`,
+  selected: (theme) =>
+    `0 0 0 4px ${theme.palette.secondary.light}38, ${theme.shadows[7]}`,
+  currentSearchResult: (theme) =>
+    `0 0 0 4px ${theme.palette.success.light}38, ${theme.shadows[6]}`,
   current: (theme) =>
     `0 0 0 4px ${theme.palette.info.light}30, ${theme.shadows[6]}`,
   searchMatch: (theme) =>
@@ -153,14 +231,26 @@ const nestedPanelSxProps = (nestedPanel?: NestedPanel) => {
   };
 };
 
-type ButtonColorKind = "current" | "searchMatch" | "default";
+type ButtonColorKind =
+  | "selectedSearchResult"
+  | "selected"
+  | "currentSearchResult"
+  | "current"
+  | "searchMatch"
+  | "default";
 
 const buttonColorRules: readonly VisualStateRule<ButtonColorKind>[] = [
+  selectedSearchResultNodeRule,
+  selectedNodeRule,
+  currentSearchResultNodeRule,
   currentNodeRule,
   searchMatchNodeRule,
 ];
 
 const buttonColorByKind: Record<ButtonColorKind, ThemeValue> = {
+  selectedSearchResult: (theme) => theme.palette.secondary.dark,
+  selected: (theme) => theme.palette.secondary.dark,
+  currentSearchResult: (theme) => theme.palette.success.dark,
   current: (theme) => theme.palette.info.dark,
   searchMatch: (theme) => theme.palette.success.dark,
   default: (theme) => theme.palette.text.secondary,
@@ -171,29 +261,64 @@ const nodeButtonColor = (visualState: NodeVisualState): ThemeValue =>
     resolveVisualKind(visualState, buttonColorRules, "default")
   ];
 
+export const buildNodeFocusFilter = (
+  relationshipFocusRole: NodeVisualState["relationshipFocusRole"],
+  theme: Theme,
+): string => {
+  switch (relationshipFocusRole) {
+    case "selected":
+      return `drop-shadow(0 0 5px ${theme.palette.secondary.main})`;
+    case "upstream":
+      return `drop-shadow(0 0 5px ${theme.palette.info.main})`;
+    case "downstream":
+      return `drop-shadow(0 0 5px ${theme.palette.success.main})`;
+    case "both":
+      return `drop-shadow(0 0 5px ${theme.palette.warning.main})`;
+    default:
+      return "none";
+  }
+};
+
+const nodeFocusFilter =
+  ({ relationshipFocusRole }: NodeVisualState): ThemeValue =>
+  (theme) =>
+    buildNodeFocusFilter(relationshipFocusRole, theme);
+
+export const buildNodeHoverDecoration = (isHovered?: boolean) => ({
+  outlineWidth: isHovered ? "2px" : "0px",
+  outlineStyle: "solid",
+  outlineOffset: "3px",
+});
+
 export const buildNodeSxProps = (
   visualState: NodeVisualState,
 ): SxProps<Theme> => ({
   position: "relative",
   zIndex: 1,
   overflow: "visible",
-  width: "7.25em",
-  minHeight: "7.25em",
-  paddingX: "0.55em",
-  paddingY: "0.45em",
-  borderRadius: nodeBorderRadius(visualState),
+  boxSizing: "border-box",
+  width: `${flowNodeGeometryEm.width}em`,
+  height: `${flowNodeGeometryEm.height}em`,
+  padding: 0,
+  borderRadius: nodeBorderRadius(),
   borderWidth: nodeBorderWidth(visualState),
   borderStyle: "solid",
   borderColor: nodeBorderColor(visualState),
+  ...buildNodeHoverDecoration(visualState.isHovered),
+  outlineColor: visualState.isHovered
+    ? (theme) => theme.palette.primary.main
+    : "transparent",
   background: nodeBackground(visualState),
   boxShadow: nodeBoxShadow(visualState),
-  justifyContent: "center",
+  filter: nodeFocusFilter(visualState),
+  justifyContent: "flex-start",
   alignItems: "center",
   gap: "0.15em",
   transition:
-    "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
+    "border-color 160ms ease, box-shadow 160ms ease, filter 160ms ease, transform 160ms ease",
   "&:hover": {
-    transform: "translateY(-1px)",
+    outlineWidth: "2px",
+    outlineColor: (theme) => theme.palette.primary.main,
   },
   "&::after": nestedPanelSxProps(visualState.nestedPanel),
   "& button": {

@@ -7,104 +7,65 @@ import React, {
   useRef,
   useState,
 } from "react";
-import MuiAccordion, { type AccordionProps } from "@mui/material/Accordion";
-import MuiAccordionActions, {
-  type AccordionActionsProps,
-} from "@mui/material/AccordionActions";
-import MuiAccordionSummary, {
-  type AccordionSummaryProps,
-} from "@mui/material/AccordionSummary";
-import Drawer from "@mui/material/Drawer";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
-import { styled, useTheme } from "@mui/material/styles";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import { CurrentUnitIdStateType } from "./flowViewerStateTypes";
 import {
-  CurrentUnitIdStateType,
-  DrawerWidthStateType,
-  FlowMenuStateType,
-} from "./flowViewerStateTypes";
+  collectFlowTreeAncestorUnitIds,
+  isUnitInCurrentFlowScope,
+} from "./flowTreeSelection";
+import { useResponsiveFlowPanelCollapse } from "./useResponsiveFlowPanelCollapse";
 
 type FlowSelectorProps = {
   rootUnits: AjsUnit[];
   unitById: ReadonlyMap<string, AjsUnit>;
-  flowMenuState: FlowMenuStateType;
   currentUnitIdState: CurrentUnitIdStateType;
-  drawerWidthState: DrawerWidthStateType;
+  hoveredUnitId?: string;
+  selectedUnitId?: string;
+  onHoverUnit: (unitId: string) => void;
+  onLeaveUnit: (unitId: string) => void;
+  onSelectUnit: (unitId: string) => void;
 };
 
 type FlowSelectorTreeProps = {
-  rootUnits: AjsUnit[];
-  isAncestorOf: (target?: AjsUnit) => boolean;
-  isExpandedGroup: (unitId: string) => boolean;
-  setCurrentUnitId: (unitId: string) => void;
-  setGroupExpanded: (unitId: string, expanded: boolean) => void;
+  units: readonly AjsUnit[];
+  currentPathUnitIds: ReadonlySet<string>;
+  currentUnit?: AjsUnit;
+  expandedUnitIds: ReadonlySet<string>;
+  hoveredUnitId?: string;
+  onHoverUnit: (unitId: string) => void;
+  onLeaveUnit: (unitId: string) => void;
+  onOpenScope: (unitId: string) => void;
+  onSelectUnit: (unitId: string) => void;
+  selectedUnitId?: string;
+  setExpanded: (unitId: string, expanded: boolean) => void;
+  setRowRef: (unitId: string, element: HTMLElement | null) => void;
+  unitById: ReadonlyMap<string, AjsUnit>;
 };
 
-type FlowSelectorUnitProps = {
+type FlowSelectorUnitProps = Omit<FlowSelectorTreeProps, "units"> & {
   unit: AjsUnit;
-  isAncestorOf: (target?: AjsUnit) => boolean;
-  isExpandedGroup: (unitId: string) => boolean;
-  setCurrentUnitId: (unitId: string) => void;
-  setGroupExpanded: (unitId: string, expanded: boolean) => void;
 };
 
 type FlowSelectorToolbarProps = {
-  drawerRef: React.Ref<HTMLDivElement>;
-  onClose: () => void;
+  onCollapse: () => void;
 };
-
-const Accordion = styled((props: AccordionProps) => (
-  <MuiAccordion
-    disableGutters
-    square
-    slotProps={{
-      heading: { component: "div" },
-    }}
-    {...props}
-  />
-))(() => ({
-  "&:not(:last-child)": {
-    borderBottom: 0,
-  },
-  "&::before": {
-    display: "none",
-  },
-  boxShadow: "none",
-}));
-
-const AccordionSummary = styled((props: AccordionSummaryProps) => (
-  <MuiAccordionSummary
-    expandIcon={<ArrowForwardIosSharpIcon fontSize="inherit" />}
-    sx={{ minHeight: "2em" }}
-    {...props}
-  />
-))(({ theme }) => ({
-  flexDirection: "row-reverse",
-  borderRadius: theme.spacing(1),
-  "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
-    transform: "rotate(90deg)",
-  },
-  "& .MuiAccordionSummary-content": {
-    marginTop: theme.spacing(0),
-    marginBottom: theme.spacing(0),
-    marginRight: theme.spacing(1),
-    marginLeft: theme.spacing(1),
-  },
-}));
-
-const AccordionActions = styled((props: AccordionActionsProps) => (
-  <MuiAccordionActions {...props} />
-))(() => ({
-  justifyContent: "flex-start",
-  paddingLeft: 0,
-  paddingRight: 0,
-}));
 
 const isRootJobnetUnit = (unit: AjsUnit): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
@@ -112,217 +73,261 @@ const isRootJobnetUnit = (unit: AjsUnit): boolean =>
 export const isSelectableFlowScopeUnit = (unit: AjsUnit): boolean =>
   isRootJobnetUnit(unit);
 
-const getParentUnit = (
-  unit: AjsUnit,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): AjsUnit | undefined =>
-  unit.parentId ? unitById.get(unit.parentId) : undefined;
-
-const collectAncestorIds = (
-  current: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
-  ancestorIds: Set<string>,
-): Set<string> => {
-  if (!current) {
-    return ancestorIds;
-  }
-  ancestorIds.add(current.id);
-  return collectAncestorIds(
-    getParentUnit(current, unitById),
-    unitById,
-    ancestorIds,
-  );
-};
-
-const buildAncestorIds = (
-  currentUnitId: string | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+const mergeUnitIds = (
+  current: ReadonlySet<string>,
+  requiredUnitIds: readonly (string | undefined)[],
 ): Set<string> =>
-  collectAncestorIds(
-    currentUnitId ? unitById.get(currentUnitId) : undefined,
-    unitById,
-    new Set<string>(),
-  );
+  new Set([
+    ...current,
+    ...requiredUnitIds.filter((unitId): unitId is string => Boolean(unitId)),
+  ]);
 
-const useAncestorMatcher = (
+const useExpandedFlowTreeState = (
   currentUnitId: string | undefined,
+  selectedUnitId: string | undefined,
   unitById: ReadonlyMap<string, AjsUnit>,
-): ((target?: AjsUnit) => boolean) => {
-  const ancestorIds = useMemo(
-    () => buildAncestorIds(currentUnitId, unitById),
-    [currentUnitId, unitById],
-  );
-  return useCallback(
-    (target?: AjsUnit) => (target ? ancestorIds.has(target.id) : false),
-    [ancestorIds],
-  );
-};
-
-const useDrawerWidthObserver = (
-  setDrawerWidth: DrawerWidthStateType["setDrawerWidth"],
 ) => {
-  const drawerRef = useRef<HTMLDivElement>(null);
+  const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(
+    () => new Set<string>(),
+  );
+
   useEffect(() => {
-    const el = drawerRef.current;
-    if (!el) {
-      return () => {};
-    }
-    const observer = new ResizeObserver(([entry]) => {
-      setDrawerWidth(entry.contentRect.width);
+    const requiredUnitIds = [
+      ...collectFlowTreeAncestorUnitIds(currentUnitId, unitById),
+      currentUnitId,
+      ...collectFlowTreeAncestorUnitIds(selectedUnitId, unitById),
+    ];
+    setExpandedUnitIds((current) => mergeUnitIds(current, requiredUnitIds));
+  }, [currentUnitId, selectedUnitId, unitById]);
+
+  const setExpanded = useCallback((unitId: string, expanded: boolean) => {
+    setExpandedUnitIds((current) => {
+      const next = new Set(current);
+      if (expanded) {
+        next.add(unitId);
+      } else {
+        next.delete(unitId);
+      }
+      return next;
     });
-    observer.observe(el);
-    return () => {
-      observer.unobserve(el);
-      observer.disconnect();
-    };
-  }, [setDrawerWidth]);
-  return drawerRef;
+  }, []);
+
+  return { expandedUnitIds, setExpanded };
 };
 
-const FlowGroupUnit: FC<FlowSelectorUnitProps> = ({
-  unit,
-  isAncestorOf,
-  isExpandedGroup,
-  setCurrentUnitId,
-  setGroupExpanded,
-}) => (
-  <Accordion
-    key={unit.id}
-    sx={{
-      marginLeft: `${unit.depth * 0.85}em`,
-      marginRight: "0.5em",
-      marginBottom: "0.3em",
-      border: (theme) => `1px solid ${theme.palette.divider}`,
-      backgroundColor: isAncestorOf(unit)
-        ? "action.selected"
-        : "background.paper",
-    }}
-    expanded={isAncestorOf(unit) || isExpandedGroup(unit.id)}
-    onChange={(_event, expanded) => setGroupExpanded(unit.id, expanded)}
-  >
-    <AccordionSummary>{unit.name}</AccordionSummary>
-    <FlowSelectorTree
-      rootUnits={unit.children}
-      isAncestorOf={isAncestorOf}
-      isExpandedGroup={isExpandedGroup}
-      setCurrentUnitId={setCurrentUnitId}
-      setGroupExpanded={setGroupExpanded}
-    />
-  </Accordion>
-);
-
-const RootJobnetUnit: FC<FlowSelectorUnitProps> = ({
-  unit,
-  isAncestorOf,
-  setCurrentUnitId,
-}) => {
-  const isAncestor = isAncestorOf(unit);
-  return (
-    <AccordionActions
-      key={unit.id}
-      disableSpacing
-      onClick={() => setCurrentUnitId(unit.id)}
-      sx={{
-        marginLeft: `${unit.depth * 0.85}em`,
-        marginRight: "0.75em",
-        marginBottom: "0.2em",
-        borderRadius: "999px",
-        border: (theme) => `1px solid ${theme.palette.divider}`,
-        backgroundColor: isAncestor ? "action.selected" : "background.paper",
-        paddingX: "0.75em",
-      }}
-    >
-      {isAncestor && (
-        <CheckCircleOutlineIcon
-          fontSize="inherit"
-          sx={{ marginRight: "0.25em" }}
-        />
-      )}
-      {unit.name}
-    </AccordionActions>
+const useSelectedTreeRowScroll = (
+  selectedUnitId: string | undefined,
+  expandedUnitIds: ReadonlySet<string>,
+) => {
+  const rowByUnitIdRef = useRef(new Map<string, HTMLElement>());
+  const setRowRef = useCallback(
+    (unitId: string, element: HTMLElement | null) => {
+      if (element) {
+        rowByUnitIdRef.current.set(unitId, element);
+      } else {
+        rowByUnitIdRef.current.delete(unitId);
+      }
+    },
+    [],
   );
+
+  useEffect(() => {
+    if (!selectedUnitId) {
+      return undefined;
+    }
+    let scrollFrameId: number | undefined;
+    const expansionFrameId = window.requestAnimationFrame(() => {
+      scrollFrameId = window.requestAnimationFrame(() => {
+        rowByUnitIdRef.current.get(selectedUnitId)?.scrollIntoView({
+          block: "nearest",
+          inline: "nearest",
+        });
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(expansionFrameId);
+      if (scrollFrameId !== undefined) {
+        window.cancelAnimationFrame(scrollFrameId);
+      }
+    };
+  }, [expandedUnitIds, selectedUnitId]);
+
+  return setRowRef;
 };
 
 const FlowSelectorUnit: FC<FlowSelectorUnitProps> = ({
   unit,
-  isAncestorOf,
-  setCurrentUnitId,
-  isExpandedGroup,
-  setGroupExpanded,
+  currentPathUnitIds,
+  currentUnit,
+  expandedUnitIds,
+  hoveredUnitId,
+  onHoverUnit,
+  onLeaveUnit,
+  onOpenScope,
+  onSelectUnit,
+  selectedUnitId,
+  setExpanded,
+  setRowRef,
+  unitById,
 }) => {
-  if (unit.unitType === "g") {
-    return (
-      <FlowGroupUnit
-        unit={unit}
-        isAncestorOf={isAncestorOf}
-        isExpandedGroup={isExpandedGroup}
-        setCurrentUnitId={setCurrentUnitId}
-        setGroupExpanded={setGroupExpanded}
-      />
-    );
-  }
-  if (isSelectableFlowScopeUnit(unit)) {
-    return (
-      <RootJobnetUnit
-        unit={unit}
-        isAncestorOf={isAncestorOf}
-        isExpandedGroup={isExpandedGroup}
-        setCurrentUnitId={setCurrentUnitId}
-        setGroupExpanded={setGroupExpanded}
-      />
-    );
-  }
-  return null;
+  const hasChildren = unit.children.length > 0;
+  const isExpanded = hasChildren && expandedUnitIds.has(unit.id);
+  const isHovered = hoveredUnitId === unit.id;
+  const isSelected = selectedUnitId === unit.id;
+  const isCurrent = currentUnit?.id === unit.id;
+  const isInCurrentScope = isUnitInCurrentFlowScope(
+    unit,
+    currentUnit,
+    unitById,
+  );
+
+  return (
+    <Box>
+      <Stack
+        ref={(element) => setRowRef(unit.id, element)}
+        data-flow-tree-unit-id={unit.id}
+        direction="row"
+        alignItems="center"
+        onMouseEnter={() => {
+          if (isInCurrentScope) {
+            onHoverUnit(unit.id);
+          }
+        }}
+        onMouseLeave={() => {
+          if (isInCurrentScope) {
+            onLeaveUnit(unit.id);
+          }
+        }}
+        sx={{
+          minHeight: "2.25rem",
+          marginX: 0.75,
+          marginY: 0.15,
+          paddingLeft: `${Math.max(0, unit.depth) * 0.65}rem`,
+          borderRadius: 1.5,
+          border: (theme) =>
+            `1px solid ${isSelected ? theme.palette.secondary.main : "transparent"}`,
+          outline: (theme) =>
+            isHovered ? `2px solid ${theme.palette.primary.main}` : "none",
+          outlineOffset: "-2px",
+          backgroundColor: isSelected
+            ? "action.selected"
+            : isHovered
+              ? "action.hover"
+              : currentPathUnitIds.has(unit.id)
+                ? "action.hover"
+                : "transparent",
+        }}
+      >
+        {hasChildren ? (
+          <IconButton
+            size="small"
+            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${unit.name}`}
+            onClick={() => setExpanded(unit.id, !isExpanded)}
+          >
+            {isExpanded ? (
+              <ExpandMoreIcon fontSize="inherit" />
+            ) : (
+              <ChevronRightIcon fontSize="inherit" />
+            )}
+          </IconButton>
+        ) : (
+          <Box sx={{ width: 28, flexShrink: 0 }} />
+        )}
+        <ButtonBase
+          disabled={!isInCurrentScope}
+          aria-current={isCurrent ? "true" : undefined}
+          aria-pressed={isSelected}
+          onClick={() => onSelectUnit(unit.id)}
+          sx={{
+            minWidth: 0,
+            minHeight: "2rem",
+            flex: 1,
+            justifyContent: "flex-start",
+            borderRadius: 1,
+            paddingX: 0.5,
+            opacity: isInCurrentScope ? 1 : 0.56,
+          }}
+        >
+          {isSelected && (
+            <RadioButtonCheckedIcon
+              color="secondary"
+              fontSize="inherit"
+              sx={{ marginRight: 0.5 }}
+            />
+          )}
+          {isCurrent && (
+            <CheckCircleOutlineIcon
+              color="primary"
+              fontSize="inherit"
+              sx={{ marginRight: 0.5 }}
+            />
+          )}
+          <Tooltip title={unit.absolutePath} placement="right">
+            <Typography variant="body2" noWrap>
+              {unit.name}
+            </Typography>
+          </Tooltip>
+        </ButtonBase>
+        {isSelectableFlowScopeUnit(unit) && (
+          <Tooltip title="Open as graph scope">
+            <IconButton
+              size="small"
+              aria-label={`Open ${unit.name} as graph scope`}
+              onClick={() => onOpenScope(unit.id)}
+            >
+              <FolderOpenIcon fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
+      {hasChildren && (
+        <Collapse in={isExpanded} timeout="auto">
+          <FlowSelectorTree
+            units={unit.children}
+            currentPathUnitIds={currentPathUnitIds}
+            currentUnit={currentUnit}
+            expandedUnitIds={expandedUnitIds}
+            hoveredUnitId={hoveredUnitId}
+            onOpenScope={onOpenScope}
+            onHoverUnit={onHoverUnit}
+            onLeaveUnit={onLeaveUnit}
+            onSelectUnit={onSelectUnit}
+            selectedUnitId={selectedUnitId}
+            setExpanded={setExpanded}
+            setRowRef={setRowRef}
+            unitById={unitById}
+          />
+        </Collapse>
+      )}
+    </Box>
+  );
 };
 
-const FlowSelectorTree: FC<FlowSelectorTreeProps> = ({
-  rootUnits,
-  isAncestorOf,
-  isExpandedGroup,
-  setCurrentUnitId,
-  setGroupExpanded,
-}) => (
+const FlowSelectorTree: FC<FlowSelectorTreeProps> = ({ units, ...props }) => (
   <>
-    {rootUnits.map((unit) => (
-      <FlowSelectorUnit
-        key={unit.id}
-        unit={unit}
-        isAncestorOf={isAncestorOf}
-        isExpandedGroup={isExpandedGroup}
-        setCurrentUnitId={setCurrentUnitId}
-        setGroupExpanded={setGroupExpanded}
-      />
+    {units.map((unit) => (
+      <FlowSelectorUnit key={unit.id} unit={unit} {...props} />
     ))}
   </>
 );
 
-const FlowSelectorToolbar: FC<FlowSelectorToolbarProps> = ({
-  drawerRef,
-  onClose,
-}) => {
+const FlowSelectorToolbar: FC<FlowSelectorToolbarProps> = ({ onCollapse }) => {
   const theme = useTheme();
   return (
     <Toolbar
-      ref={drawerRef}
       sx={{
-        position: "sticky",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+        flexShrink: 0,
+        borderBottom: (currentTheme) =>
+          `1px solid ${currentTheme.palette.divider}`,
       }}
     >
       <Typography
         variant="caption"
-        sx={{
-          marginRight: "auto",
-          fontWeight: 700,
-          letterSpacing: "0.08em",
-        }}
+        sx={{ marginRight: "auto", fontWeight: 700, letterSpacing: "0.08em" }}
       >
         FLOW TREE
       </Typography>
-      <IconButton onClick={onClose}>
+      <IconButton aria-label="Collapse flow tree" onClick={onCollapse}>
         {theme.direction === "ltr" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </IconButton>
     </Toolbar>
@@ -333,71 +338,105 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   rootUnits,
   unitById,
   currentUnitIdState,
-  flowMenuState,
-  drawerWidthState,
+  hoveredUnitId,
+  selectedUnitId,
+  onHoverUnit,
+  onLeaveUnit,
+  onSelectUnit,
 }) => {
   console.log("render FlowSelector.");
 
-  const { menuStatus, setMenuStatus } = flowMenuState;
   const { currentUnitId, setCurrentUnitId } = currentUnitIdState;
-  const { setDrawerWidth } = drawerWidthState;
-  const [expandedGroupIds, setExpandedGroupIds] = useState<Set<string>>(
-    () => new Set<string>(),
+  const theme = useTheme();
+  const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
+  const { collapse, collapsed, expand } =
+    useResponsiveFlowPanelCollapse(isNarrow);
+  const currentUnit = currentUnitId ? unitById.get(currentUnitId) : undefined;
+  const currentPathUnitIds = useMemo(
+    () =>
+      new Set([
+        ...collectFlowTreeAncestorUnitIds(currentUnitId, unitById),
+        ...(currentUnitId ? [currentUnitId] : []),
+      ]),
+    [currentUnitId, unitById],
   );
-
-  const handleClose = () => {
-    setDrawerWidth(() => 0);
-    setMenuStatus((prev) => {
-      return { ...prev, ...{ menuItem1: false } };
-    });
-  };
-
-  const isAncestorOf = useAncestorMatcher(currentUnitId, unitById);
-  const isExpandedGroup = useCallback(
-    (unitId: string) => expandedGroupIds.has(unitId),
-    [expandedGroupIds],
+  const { expandedUnitIds, setExpanded } = useExpandedFlowTreeState(
+    currentUnitId,
+    selectedUnitId,
+    unitById,
   );
-  const setGroupExpanded = useCallback((unitId: string, expanded: boolean) => {
-    setExpandedGroupIds((prev) => {
-      const next = new Set(prev);
-      if (expanded) {
-        next.add(unitId);
-      } else {
-        next.delete(unitId);
-      }
-      return next;
-    });
-  }, []);
-  const drawerRef = useDrawerWidthObserver(setDrawerWidth);
+  const setRowRef = useSelectedTreeRowScroll(selectedUnitId, expandedUnitIds);
 
-  return (
-    <>
-      <Drawer
-        anchor="left"
-        variant="persistent"
-        open={menuStatus.menuItem1}
-        onClose={handleClose}
-        slotProps={{
-          paper: {
-            sx: {
-              width: "18rem",
-              borderRight: (theme) => `1px solid ${theme.palette.divider}`,
-              background: (theme) =>
-                `linear-gradient(180deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-            },
-          },
+  if (collapsed) {
+    return (
+      <Paper
+        component="aside"
+        aria-label="Collapsed flow tree"
+        variant="outlined"
+        sx={{
+          width: 48,
+          minWidth: 48,
+          height: "100%",
+          borderRadius: 3,
+          boxSizing: "border-box",
         }}
       >
-        <FlowSelectorToolbar drawerRef={drawerRef} onClose={handleClose} />
+        <Stack alignItems="center" sx={{ paddingY: 1 }}>
+          <Tooltip title="Expand flow tree" placement="right">
+            <IconButton
+              size="small"
+              aria-label="Expand flow tree"
+              onClick={expand}
+            >
+              {theme.direction === "ltr" ? (
+                <ChevronRightIcon fontSize="small" />
+              ) : (
+                <ChevronLeftIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Paper>
+    );
+  }
+
+  return (
+    <Paper
+      component="aside"
+      aria-label="Flow tree"
+      variant="outlined"
+      sx={{
+        width: "18rem",
+        minWidth: "18rem",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        borderRadius: 3,
+        boxSizing: "border-box",
+        background: (currentTheme) =>
+          `linear-gradient(180deg, ${currentTheme.palette.background.paper} 0%, ${currentTheme.palette.background.default} 100%)`,
+      }}
+    >
+      <FlowSelectorToolbar onCollapse={collapse} />
+      <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", paddingY: 0.5 }}>
         <FlowSelectorTree
-          rootUnits={rootUnits}
-          isAncestorOf={isAncestorOf}
-          isExpandedGroup={isExpandedGroup}
-          setCurrentUnitId={setCurrentUnitId}
-          setGroupExpanded={setGroupExpanded}
+          units={rootUnits}
+          currentPathUnitIds={currentPathUnitIds}
+          currentUnit={currentUnit}
+          expandedUnitIds={expandedUnitIds}
+          hoveredUnitId={hoveredUnitId}
+          onOpenScope={setCurrentUnitId}
+          onHoverUnit={onHoverUnit}
+          onLeaveUnit={onLeaveUnit}
+          onSelectUnit={onSelectUnit}
+          selectedUnitId={selectedUnitId}
+          setExpanded={setExpanded}
+          setRowRef={setRowRef}
+          unitById={unitById}
         />
-      </Drawer>
-    </>
+      </Box>
+    </Paper>
   );
 };
 

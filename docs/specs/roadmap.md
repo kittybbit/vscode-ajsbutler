@@ -6,9 +6,8 @@
 - Refactor in small vertical slices.
 - Prefer one use case per extraction.
 - Keep parser internals away from UI-facing components.
-- Keep active feature docs concise; remove completed feature-local folders
-  after durable requirements are represented in use cases, architecture, or
-  roadmap.
+- Keep active feature docs concise; remove completed feature-local folders after
+  durable requirements are represented in use cases, architecture, or roadmap.
 
 ## Current Roadmap
 
@@ -47,8 +46,8 @@
 
 4. Maintain the explicit extension composition root.
 
-   - Concrete application and infrastructure dependencies are constructed by
-     one typed bootstrap owner and injected into VS Code-facing adapters.
+   - Concrete application and infrastructure dependencies are constructed by one
+     typed bootstrap owner and injected into VS Code-facing adapters.
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
@@ -87,8 +86,8 @@
    compatibility, startup, or payload target creates stronger pressure.
 5. Revisit broader i18n translation-file consolidation only if future
    translation-resource maintenance creates a concrete blocker.
-6. Add deeper JP1/AJS View interaction parity only after the current visual
-   refresh and nested expansion behavior settle.
+6. Add deeper JP1/AJS View interaction parity only when a concrete parity
+   requirement is identified after the completed visual refresh.
 7. Add more expanded-flow layout regression fixtures only if real-world nested
    layout examples expose additional collision or refit gaps.
 

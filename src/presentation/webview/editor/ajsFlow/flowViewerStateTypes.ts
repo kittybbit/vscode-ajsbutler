@@ -6,20 +6,6 @@ export type DialogDataStateType = {
   setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
 };
 
-type FlowMenuStatusType = {
-  menuItem1: boolean;
-};
-
-export type FlowMenuStateType = {
-  menuStatus: FlowMenuStatusType;
-  setMenuStatus: Dispatch<SetStateAction<FlowMenuStatusType>>;
-};
-
-export type DrawerWidthStateType = {
-  drawerWidth: number;
-  setDrawerWidth: Dispatch<SetStateAction<number>>;
-};
-
 export type CurrentUnitIdStateType = {
   currentUnitId?: string;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;

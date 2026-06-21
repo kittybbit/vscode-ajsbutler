@@ -14,6 +14,7 @@ import {
 } from "./flowViewerStateTypes";
 import { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
 import { AjsNode } from "./nodes/AjsNode";
+import { createFlowNodeGeometryPx } from "./nodes/flowNodeGeometry";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
 import { isExpandableNestedUnit } from "./nestedExpansion";
 
@@ -24,6 +25,7 @@ type CreateReactFlowDataOptions = {
   nodeDecorations?: ReadonlyMap<string, ExpandedNodeDecoration>;
   positionOverrides?: ReadonlyMap<string, { x: number; y: number }>;
   searchedUnitId?: string;
+  selectedUnitId?: string;
 };
 
 const nestedPanelBoundsNodeId = (unitId: string): string =>
@@ -59,6 +61,8 @@ const toNodeData = (
     hasSchedule: node.metadata.hasSchedule,
     hasWaitedFor: node.metadata.hasWaitedFor,
     isSearchMatch: options?.searchMatchedUnitIds?.has(node.id) ?? false,
+    isCurrentSearchResult: options?.searchedUnitId === node.id,
+    isSelected: options?.selectedUnitId === node.id,
     canExpandNested:
       !node.metadata.isCurrent &&
       !node.metadata.isAncestor &&
@@ -141,10 +145,15 @@ export const createReactFlowData = (
   currentUnitIdState: CurrentUnitIdStateType,
   options?: CreateReactFlowDataOptions,
 ): { nodes: Node<AjsNode>[]; edges: Edge[] } => {
+  const initialNodeGeometry = createFlowNodeGeometryPx(
+    theme.typography.htmlFontSize,
+  );
   const nodes: Node<AjsNode>[] = graph.nodes.map((node) => ({
     id: node.id,
     type: node.type,
-    selected: options?.searchedUnitId === node.id,
+    selected: options?.selectedUnitId === node.id,
+    initialWidth: initialNodeGeometry.width,
+    initialHeight: initialNodeGeometry.height,
     data: toNodeData(
       node,
       unitDefinitionByPath,

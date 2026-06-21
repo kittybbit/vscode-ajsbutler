@@ -3,9 +3,7 @@ import type { KeyboardEvent } from "react";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 import {
   handleClickNestedToggle,
-  handleClickDialogOpen,
   handleKeyDownNestedToggle,
-  handleKeyDownDialogOpen,
 } from "../../presentation/webview/editor/ajsFlow/nodes/Utils";
 import { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
 import { handleOpenUnitDefinition } from "../../presentation/webview/editor/ajsTable/tableColumnDef";
@@ -56,40 +54,6 @@ suite("Show Unit Definition interaction", () => {
     })();
 
     assert.deepStrictEqual(received, ["/root/job1"]);
-  });
-
-  test("flow action opens the dialog on click", () => {
-    let received: UnitDefinitionDialogDto | undefined;
-    const node = createNode({
-      setDialogData: (nextState) => {
-        received =
-          typeof nextState === "function" ? nextState(undefined) : nextState;
-      },
-    });
-
-    handleClickDialogOpen(node)();
-
-    assert.deepStrictEqual(received, dialogData);
-  });
-
-  test("flow action opens the dialog only on Enter key", () => {
-    let received: UnitDefinitionDialogDto | undefined;
-    const node = createNode({
-      setDialogData: (nextState) => {
-        received =
-          typeof nextState === "function" ? nextState(undefined) : nextState;
-      },
-    });
-
-    handleKeyDownDialogOpen(node)({
-      key: "Space",
-    } as KeyboardEvent<HTMLElement>);
-    assert.strictEqual(received, undefined);
-
-    handleKeyDownDialogOpen(node)({
-      key: "Enter",
-    } as KeyboardEvent<HTMLElement>);
-    assert.deepStrictEqual(received, dialogData);
   });
 
   test("flow nested toggle action expands only on click or Enter key", () => {
