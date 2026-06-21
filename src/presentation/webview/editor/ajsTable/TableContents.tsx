@@ -113,7 +113,7 @@ type TableViewerShellProps = {
   theme: Theme;
   table: ReactTable<UnitListRowView>;
   rows: Row<UnitListRowView>[];
-  rowViews: UnitListRowView[] | undefined;
+  totalRowCount: number;
   menuStatus: TableMenuStatusType;
   tableMenuState: TableMenuStateType;
   drawerWidthState: DrawerWidthStateType;
@@ -323,7 +323,7 @@ const TableViewerShell = ({
   theme,
   table,
   rows,
-  rowViews,
+  totalRowCount,
   menuStatus,
   tableMenuState,
   drawerWidthState,
@@ -364,6 +364,8 @@ const TableViewerShell = ({
             drawerWidthState={drawerWidthState}
             searchMode={searchMode}
             setSearchMode={setSearchMode}
+            visibleRowCount={rows.length}
+            totalRowCount={totalRowCount}
           />
           <VirtualizedTable
             headerGroups={table.getHeaderGroups()}
@@ -376,9 +378,6 @@ const TableViewerShell = ({
               parameterSearchValuesByPath,
             }}
           />
-          <Typography align="right">
-            {rows.length} of {rowViews?.length}
-          </Typography>
         </Stack>
       </Stack>
       {dialogData && (
@@ -493,7 +492,7 @@ const TableContents = () => {
       theme={theme}
       table={table}
       rows={rows}
-      rowViews={rowViews}
+      totalRowCount={rowViews?.length ?? 0}
       menuStatus={menuStatus}
       tableMenuState={tableMenuState}
       drawerWidthState={drawerWidthState}

@@ -15,7 +15,6 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { useTheme } from "@mui/material/styles";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import TableHeader from "./TableHeader";
@@ -87,8 +86,6 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
 }) => {
   console.log("render VirtualizedTable.");
 
-  const theme = useTheme();
-
   const tableComponents = useMemo(
     () => createTableComponents(scrollType, rowIndex),
     [scrollType, rowIndex],
@@ -137,16 +134,14 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     [headerGroups],
   );
 
-  const toolbarHeight = theme.mixins.toolbar.minHeight;
-
   const virtuosoStyle = useMemo(
     () =>
       scrollType === "table"
         ? {
             width: "100%",
             minWidth: 0,
-            height: `calc(100vh - ${toolbarHeight}px - 2em)`,
-            maxHeight: `calc(100vh - ${toolbarHeight}px - 2em)`,
+            height: "calc(100vh - 3.5rem)",
+            maxHeight: "calc(100vh - 3.5rem)",
             boxSizing: "border-box" as const,
           }
         : {
@@ -157,7 +152,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
             overflow: "visible",
             boxSizing: "border-box" as const,
           },
-    [scrollType, toolbarHeight],
+    [scrollType],
   );
 
   useEffect(() => {

@@ -178,7 +178,7 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
           display: "flex",
           alignItems: "center",
           padding: theme.spacing(0, 1),
-          ...theme.mixins.toolbar,
+          minHeight: "3.5rem",
           justifyContent: "flex-end",
         }}
       >
