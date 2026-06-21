@@ -30,23 +30,15 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Confirm closure of the completed flow-graph UI/UX feature and move to the
-   next roadmap feature.
-2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
+2. Select a new focused feature only when a concrete consumer or user-visible
+   requirement makes normalized-model, parser-boundary, or viewer-parity work
+   actionable.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/flow-graph-view-uiux-improvements/`: roadmap feature for
-  efficient investigation, review, and impact analysis in large flow graphs;
-  multi-result search navigation, selected-node details, and tree/graph
-  selection and hover synchronization, zoom-preserving tree selection, and
-  responsive/manual detail-panel collapse, relationship focus mode, and
-  standard MiniMap improvements, card-based node presentation,
-  zoom-preserving search navigation, the responsive in-layout left panel, and
-  the full-width search-first header are complete; feature closure is the next
-  decision.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
