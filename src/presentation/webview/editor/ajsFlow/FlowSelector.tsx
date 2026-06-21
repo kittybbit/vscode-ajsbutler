@@ -10,12 +10,13 @@ import React, {
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Collapse from "@mui/material/Collapse";
-import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -24,22 +25,17 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
-import {
-  CurrentUnitIdStateType,
-  DrawerWidthStateType,
-  FlowMenuStateType,
-} from "./flowViewerStateTypes";
+import { CurrentUnitIdStateType } from "./flowViewerStateTypes";
 import {
   collectFlowTreeAncestorUnitIds,
   isUnitInCurrentFlowScope,
 } from "./flowTreeSelection";
+import { useResponsiveFlowPanelCollapse } from "./useResponsiveFlowPanelCollapse";
 
 type FlowSelectorProps = {
   rootUnits: AjsUnit[];
   unitById: ReadonlyMap<string, AjsUnit>;
-  flowMenuState: FlowMenuStateType;
   currentUnitIdState: CurrentUnitIdStateType;
-  drawerWidthState: DrawerWidthStateType;
   hoveredUnitId?: string;
   selectedUnitId?: string;
   onHoverUnit: (unitId: string) => void;
@@ -68,8 +64,7 @@ type FlowSelectorUnitProps = Omit<FlowSelectorTreeProps, "units"> & {
 };
 
 type FlowSelectorToolbarProps = {
-  drawerRef: React.Ref<HTMLDivElement>;
-  onClose: () => void;
+  onCollapse: () => void;
 };
 
 const isRootJobnetUnit = (unit: AjsUnit): boolean =>
@@ -86,24 +81,6 @@ const mergeUnitIds = (
     ...current,
     ...requiredUnitIds.filter((unitId): unitId is string => Boolean(unitId)),
   ]);
-
-const useDrawerWidthObserver = (
-  setDrawerWidth: DrawerWidthStateType["setDrawerWidth"],
-) => {
-  const drawerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const element = drawerRef.current;
-    if (!element) {
-      return () => {};
-    }
-    const observer = new ResizeObserver(([entry]) => {
-      setDrawerWidth(entry.contentRect.width);
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [setDrawerWidth]);
-  return drawerRef;
-};
 
 const useExpandedFlowTreeState = (
   currentUnitId: string | undefined,
@@ -334,14 +311,10 @@ const FlowSelectorTree: FC<FlowSelectorTreeProps> = ({ units, ...props }) => (
   </>
 );
 
-const FlowSelectorToolbar: FC<FlowSelectorToolbarProps> = ({
-  drawerRef,
-  onClose,
-}) => {
+const FlowSelectorToolbar: FC<FlowSelectorToolbarProps> = ({ onCollapse }) => {
   const theme = useTheme();
   return (
     <Toolbar
-      ref={drawerRef}
       sx={{
         flexShrink: 0,
         borderBottom: (currentTheme) =>
@@ -354,7 +327,7 @@ const FlowSelectorToolbar: FC<FlowSelectorToolbarProps> = ({
       >
         FLOW TREE
       </Typography>
-      <IconButton aria-label="Close flow tree" onClick={onClose}>
+      <IconButton aria-label="Collapse flow tree" onClick={onCollapse}>
         {theme.direction === "ltr" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </IconButton>
     </Toolbar>
@@ -365,8 +338,6 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   rootUnits,
   unitById,
   currentUnitIdState,
-  flowMenuState,
-  drawerWidthState,
   hoveredUnitId,
   selectedUnitId,
   onHoverUnit,
@@ -375,9 +346,11 @@ const FlowSelector: FC<FlowSelectorProps> = ({
 }) => {
   console.log("render FlowSelector.");
 
-  const { menuStatus, setMenuStatus } = flowMenuState;
   const { currentUnitId, setCurrentUnitId } = currentUnitIdState;
-  const { setDrawerWidth } = drawerWidthState;
+  const theme = useTheme();
+  const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
+  const { collapse, collapsed, expand } =
+    useResponsiveFlowPanelCollapse(isNarrow);
   const currentUnit = currentUnitId ? unitById.get(currentUnitId) : undefined;
   const currentPathUnitIds = useMemo(
     () =>
@@ -393,31 +366,59 @@ const FlowSelector: FC<FlowSelectorProps> = ({
     unitById,
   );
   const setRowRef = useSelectedTreeRowScroll(selectedUnitId, expandedUnitIds);
-  const drawerRef = useDrawerWidthObserver(setDrawerWidth);
-  const handleClose = () => {
-    setDrawerWidth(0);
-    setMenuStatus((current) => ({ ...current, menuItem1: false }));
-  };
+
+  if (collapsed) {
+    return (
+      <Paper
+        component="aside"
+        aria-label="Collapsed flow tree"
+        variant="outlined"
+        sx={{
+          width: 48,
+          minWidth: 48,
+          height: "100%",
+          borderRadius: 3,
+          boxSizing: "border-box",
+        }}
+      >
+        <Stack alignItems="center" sx={{ paddingY: 1 }}>
+          <Tooltip title="Expand flow tree" placement="right">
+            <IconButton
+              size="small"
+              aria-label="Expand flow tree"
+              onClick={expand}
+            >
+              {theme.direction === "ltr" ? (
+                <ChevronRightIcon fontSize="small" />
+              ) : (
+                <ChevronLeftIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Paper>
+    );
+  }
 
   return (
-    <Drawer
-      anchor="left"
-      variant="persistent"
-      open={menuStatus.menuItem1}
-      onClose={handleClose}
-      slotProps={{
-        paper: {
-          sx: {
-            width: "18rem",
-            overflow: "hidden",
-            borderRight: (theme) => `1px solid ${theme.palette.divider}`,
-            background: (theme) =>
-              `linear-gradient(180deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-          },
-        },
+    <Paper
+      component="aside"
+      aria-label="Flow tree"
+      variant="outlined"
+      sx={{
+        width: "18rem",
+        minWidth: "18rem",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        borderRadius: 3,
+        boxSizing: "border-box",
+        background: (currentTheme) =>
+          `linear-gradient(180deg, ${currentTheme.palette.background.paper} 0%, ${currentTheme.palette.background.default} 100%)`,
       }}
     >
-      <FlowSelectorToolbar drawerRef={drawerRef} onClose={handleClose} />
+      <FlowSelectorToolbar onCollapse={collapse} />
       <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", paddingY: 0.5 }}>
         <FlowSelectorTree
           units={rootUnits}
@@ -435,7 +436,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
           unitById={unitById}
         />
       </Box>
-    </Drawer>
+    </Paper>
   );
 };
 

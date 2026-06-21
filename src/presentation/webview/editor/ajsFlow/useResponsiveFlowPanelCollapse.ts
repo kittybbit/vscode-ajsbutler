@@ -1,26 +1,26 @@
 import { useCallback, useEffect, useReducer } from "react";
 
-export type FlowNodeDetailPanelCollapseState = {
+export type ResponsiveFlowPanelCollapseState = {
   collapsed: boolean;
   isNarrow: boolean;
 };
 
-export type FlowNodeDetailPanelCollapseAction =
+export type ResponsiveFlowPanelCollapseAction =
   | { type: "collapse" }
   | { type: "expand" }
   | { isNarrow: boolean; type: "viewportChanged" };
 
-export const createFlowNodeDetailPanelCollapseState = (
+export const createResponsiveFlowPanelCollapseState = (
   isNarrow: boolean,
-): FlowNodeDetailPanelCollapseState => ({
+): ResponsiveFlowPanelCollapseState => ({
   collapsed: isNarrow,
   isNarrow,
 });
 
-export const reduceFlowNodeDetailPanelCollapseState = (
-  state: FlowNodeDetailPanelCollapseState,
-  action: FlowNodeDetailPanelCollapseAction,
-): FlowNodeDetailPanelCollapseState => {
+export const reduceResponsiveFlowPanelCollapseState = (
+  state: ResponsiveFlowPanelCollapseState,
+  action: ResponsiveFlowPanelCollapseAction,
+): ResponsiveFlowPanelCollapseState => {
   if (action.type === "collapse") {
     return state.collapsed ? state : { ...state, collapsed: true };
   }
@@ -36,11 +36,11 @@ export const reduceFlowNodeDetailPanelCollapseState = (
   };
 };
 
-export const useFlowNodeDetailPanelCollapse = (isNarrow: boolean) => {
+export const useResponsiveFlowPanelCollapse = (isNarrow: boolean) => {
   const [state, dispatch] = useReducer(
-    reduceFlowNodeDetailPanelCollapseState,
+    reduceResponsiveFlowPanelCollapseState,
     isNarrow,
-    createFlowNodeDetailPanelCollapseState,
+    createResponsiveFlowPanelCollapseState,
   );
 
   useEffect(() => {

@@ -3,8 +3,8 @@
 ## Current Task
 
 - Status: None
-- Scope: use `sdd-plan-task` to approve the remaining left-panel and header
-  refinement slice.
+- Scope: use `sdd-plan-task` to confirm whether the completed feature can be
+  closed and its temporary feature documents removed.
 
 ## Human Approval
 
@@ -14,27 +14,16 @@
 
 ## Decision Notes
 
-- The remaining layout uses a full-width header as the first row and three
-  panes below it: FlowSelector on the left, flow graph in the center, and
-  selected-node details on the right.
-- FlowSelector must use the same in-layout `Paper` panel language as the right
-  detail panel, including manual collapse/expand, compact rail, and automatic
-  collapse below the MUI `md` breakpoint. It must not remain a persistent
-  `Drawer`, overlay the graph, or sit beside the header.
-- The later header refinement places search first, removes the redundant
-  single-item hamburger and breadcrumb hierarchy, and retains a concise current
-  scope label.
-
-## Remaining Risks
-
-- The web smoke runner could not reach the VS Code distribution endpoint in
-  two attempts; web compilation and production web bundling succeeded.
-- Direct Mocha execution exposes an existing `flowSearchState` assertion
-  mismatch around an explicit `undefined` property; the zoom-preservation
-  change does not touch search-state transitions.
+- The full-width header and responsive in-layout FlowSelector, graph, and
+  selected-node detail pane composition are complete.
+- Direct Mocha execution previously exposed a `flowSearchState` expectation
+  mismatch around an explicit `undefined` property; the repository desktop and
+  web test commands pass, and this completed slice did not change search-state
+  transitions.
 - Production builds retain the repository's existing bundle-size warnings.
 
 ## Use-Case Back-Propagation
 
-- `uc-build-flow-graph.md` now requires search-result centering to preserve zoom
-  and records the remaining responsive left-panel behavior.
+- `uc-build-flow-graph.md` already records the durable responsive FlowSelector
+  and graph interaction contracts. Header ordering and chrome remain
+  feature-level presentation choices.

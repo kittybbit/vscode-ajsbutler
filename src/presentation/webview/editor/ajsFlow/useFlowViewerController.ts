@@ -20,8 +20,6 @@ import {
 import {
   CurrentUnitIdStateType,
   DialogDataStateType,
-  DrawerWidthStateType,
-  FlowMenuStateType,
 } from "./flowViewerStateTypes";
 import { useFlowGraphState } from "./useFlowGraphState";
 import {
@@ -132,25 +130,9 @@ const mergeExpandedUnitIds = (
 };
 
 const useFlowViewerUiState = () => {
-  const [menuStatus, setMenuStatus] = useState({ menuItem1: true });
-  const [drawerWidth, setDrawerWidth] = useState<number>(0);
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
   >();
-  const flowMenuState = useMemo<FlowMenuStateType>(
-    () => ({
-      menuStatus,
-      setMenuStatus,
-    }),
-    [menuStatus],
-  );
-  const drawerWidthState = useMemo<DrawerWidthStateType>(
-    () => ({
-      drawerWidth,
-      setDrawerWidth,
-    }),
-    [drawerWidth],
-  );
   const dialogDataState = useMemo<DialogDataStateType>(
     () => ({
       dialogData,
@@ -162,10 +144,6 @@ const useFlowViewerUiState = () => {
   return {
     dialogData,
     dialogDataState,
-    drawerWidth,
-    drawerWidthState,
-    flowMenuState,
-    menuStatus,
     setDialogData,
   };
 };
@@ -183,15 +161,7 @@ export const useFlowViewerController = ({
     prevUnitEntityId,
     reactFlowInstanceRef,
   } = useFlowViewerRefs();
-  const {
-    dialogData,
-    dialogDataState,
-    drawerWidth,
-    drawerWidthState,
-    flowMenuState,
-    menuStatus,
-    setDialogData,
-  } = useFlowViewerUiState();
+  const { dialogData, dialogDataState, setDialogData } = useFlowViewerUiState();
   const { currentUnit, unitById, unitDefinitionByPath } = useFlowDocumentState(
     ajsDocument,
     currentUnitId,
@@ -355,11 +325,8 @@ export const useFlowViewerController = ({
     clearTreeHoveredUnit,
     clearSelectedUnit: clearSelection,
     dialogData,
-    drawerWidth,
-    drawerWidthState,
     edges: focusedFlowData.edges,
     expandableNestedUnitIds,
-    flowMenuState,
     focusModeEnabled,
     handleSearchClear,
     handleSearchNavigate,
@@ -367,7 +334,6 @@ export const useFlowViewerController = ({
     hasExpandedAllNestedUnits,
     hoveredUnitId,
     graphHoveredUnit,
-    menuStatus,
     nodes: renderedNodes,
     openSelectedNodeDefinition,
     openSelectedNodeScope,

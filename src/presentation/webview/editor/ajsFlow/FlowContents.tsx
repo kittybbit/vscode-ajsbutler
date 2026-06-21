@@ -65,11 +65,8 @@ const FlowContents: FC = () => {
     clearTreeHoveredUnit,
     clearSelectedUnit,
     dialogData,
-    drawerWidth,
-    drawerWidthState,
     edges,
     expandableNestedUnitIds,
-    flowMenuState,
     focusModeEnabled,
     handleSearchClear,
     handleSearchNavigate,
@@ -77,7 +74,6 @@ const FlowContents: FC = () => {
     hasExpandedAllNestedUnits,
     hoveredUnitId,
     graphHoveredUnit,
-    menuStatus,
     nodes,
     openSelectedNodeDefinition,
     openSelectedNodeScope,
@@ -124,7 +120,7 @@ const FlowContents: FC = () => {
       />
       <ReactFlowProvider>
         <Stack
-          direction="row"
+          direction="column"
           spacing={0}
           sx={{
             width: "100%",
@@ -132,170 +128,149 @@ const FlowContents: FC = () => {
             overflow: "hidden",
           }}
         >
-          {menuStatus.menuItem1 && (
-            <FlowSelector
-              rootUnits={ajsDocument?.rootUnits ?? []}
-              unitById={unitById}
-              currentUnitIdState={currentUnitIdState}
-              flowMenuState={flowMenuState}
-              drawerWidthState={drawerWidthState}
-              hoveredUnitId={hoveredUnitId}
-              selectedUnitId={selectedUnitId}
-              onHoverUnit={treeHoveredUnit}
-              onLeaveUnit={clearTreeHoveredUnit}
-              onSelectUnit={selectTreeUnit}
-            />
-          )}
-          <Stack
-            direction="column"
+          <Header
+            currentUnit={currentUnit}
+            canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
+            hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
+            toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
+            canEnableFocusMode={canEnableFocusMode}
+            focusModeEnabled={focusModeEnabled}
+            toggleFocusMode={toggleFocusMode}
+            showMiniMap={showMiniMap}
+            toggleMiniMap={toggleMiniMap}
+            searchedUnitId={searchedUnitId}
+            searchResultPosition={searchResultPosition}
+            onSearchNavigate={handleSearchNavigate}
+            onSearchSubmit={handleSearchSubmit}
+            onSearchClear={handleSearchClear}
+          />
+          <Box
             sx={{
-              marginLeft: `${drawerWidth}px`,
-              width: `calc(100% - ${drawerWidth}px)`,
+              width: "100%",
+              flex: 1,
               minWidth: 0,
-              height: "100%",
+              minHeight: 0,
               overflow: "hidden",
+              padding: 1.25,
+              background: (theme) =>
+                `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+              boxSizing: "border-box",
             }}
           >
-            <Header
-              currentUnit={currentUnit}
-              unitById={unitById}
-              currentUnitIdState={currentUnitIdState}
-              flowMenuState={flowMenuState}
-              drawerWidthState={drawerWidthState}
-              canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
-              hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
-              toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
-              canEnableFocusMode={canEnableFocusMode}
-              focusModeEnabled={focusModeEnabled}
-              toggleFocusMode={toggleFocusMode}
-              showMiniMap={showMiniMap}
-              toggleMiniMap={toggleMiniMap}
-              searchedUnitId={searchedUnitId}
-              searchResultPosition={searchResultPosition}
-              onSearchNavigate={handleSearchNavigate}
-              onSearchSubmit={handleSearchSubmit}
-              onSearchClear={handleSearchClear}
-            />
-            <Box
+            <Stack
+              direction="row"
+              spacing={1.25}
               sx={{
                 width: "100%",
-                flex: 1,
+                height: "100%",
                 minWidth: 0,
                 minHeight: 0,
-                overflow: "hidden",
-                padding: 1.25,
-                background: (theme) =>
-                  `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
-                boxSizing: "border-box",
               }}
             >
-              <Stack
-                direction="row"
-                spacing={1.25}
+              <FlowSelector
+                rootUnits={ajsDocument?.rootUnits ?? []}
+                unitById={unitById}
+                currentUnitIdState={currentUnitIdState}
+                hoveredUnitId={hoveredUnitId}
+                selectedUnitId={selectedUnitId}
+                onHoverUnit={treeHoveredUnit}
+                onLeaveUnit={clearTreeHoveredUnit}
+                onSelectUnit={selectTreeUnit}
+              />
+              <Paper
+                variant="outlined"
                 sx={{
-                  width: "100%",
+                  flex: 1,
                   height: "100%",
                   minWidth: 0,
                   minHeight: 0,
+                  overflow: "hidden",
+                  borderRadius: 3,
+                  backgroundColor: "background.paper",
                 }}
               >
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    flex: 1,
-                    height: "100%",
-                    minWidth: 0,
-                    minHeight: 0,
-                    overflow: "hidden",
-                    borderRadius: 3,
-                    backgroundColor: "background.paper",
+                <ReactFlow
+                  nodes={nodes}
+                  edges={edges}
+                  defaultViewport={defaultViewport}
+                  colorMode={theme.palette.mode}
+                  nodeTypes={nodeTypes}
+                  onNodeClick={(_event, node) => selectFlowNode(node.id)}
+                  onNodeMouseEnter={(_event, node) => graphHoveredUnit(node.id)}
+                  onNodeMouseLeave={(_event, node) =>
+                    clearGraphHoveredUnit(node.id)
+                  }
+                  onInit={(instance) => {
+                    reactFlowInstanceRef.current = instance;
+                  }}
+                  fitView
+                  minZoom={minimumViewportZoom}
+                  fitViewOptions={{
+                    padding: 0.22,
+                    minZoom: minimumViewportZoom,
                   }}
                 >
-                  <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    defaultViewport={defaultViewport}
-                    colorMode={theme.palette.mode}
-                    nodeTypes={nodeTypes}
-                    onNodeClick={(_event, node) => selectFlowNode(node.id)}
-                    onNodeMouseEnter={(_event, node) =>
-                      graphHoveredUnit(node.id)
-                    }
-                    onNodeMouseLeave={(_event, node) =>
-                      clearGraphHoveredUnit(node.id)
-                    }
-                    onInit={(instance) => {
-                      reactFlowInstanceRef.current = instance;
+                  <Background
+                    variant={BackgroundVariant.Dots}
+                    gap={20}
+                    size={1}
+                    color={theme.palette.divider}
+                  />
+                  <Controls
+                    position="bottom-left"
+                    showInteractive={false}
+                    style={{
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      boxShadow: theme.shadows[3],
                     }}
-                    fitView
-                    minZoom={minimumViewportZoom}
-                    fitViewOptions={{
-                      padding: 0.22,
-                      minZoom: minimumViewportZoom,
-                    }}
-                  >
-                    <Background
-                      variant={BackgroundVariant.Dots}
-                      gap={20}
-                      size={1}
-                      color={theme.palette.divider}
-                    />
-                    <Controls
-                      position="bottom-left"
-                      showInteractive={false}
+                  />
+                  {showMiniMap && (
+                    <MiniMap<Node<AjsNode>>
+                      className="ajs-flow-minimap"
+                      ariaLabel="Flow graph MiniMap"
+                      pannable
+                      zoomable
+                      position="bottom-right"
+                      nodeColor={(node) =>
+                        resolveFlowMiniMapNodeFill(node, miniMapColors)
+                      }
+                      nodeStrokeColor={(node) =>
+                        resolveFlowMiniMapNodeStroke(node, miniMapColors)
+                      }
+                      nodeStrokeWidth={3}
+                      bgColor={theme.palette.background.paper}
+                      maskColor={`${theme.palette.background.default}66`}
+                      maskStrokeColor="transparent"
+                      maskStrokeWidth={0}
                       style={{
                         borderRadius: 12,
                         overflow: "hidden",
+                        opacity: 1,
                         boxShadow: theme.shadows[3],
                       }}
                     />
-                    {showMiniMap && (
-                      <MiniMap<Node<AjsNode>>
-                        className="ajs-flow-minimap"
-                        ariaLabel="Flow graph MiniMap"
-                        pannable
-                        zoomable
-                        position="bottom-right"
-                        nodeColor={(node) =>
-                          resolveFlowMiniMapNodeFill(node, miniMapColors)
-                        }
-                        nodeStrokeColor={(node) =>
-                          resolveFlowMiniMapNodeStroke(node, miniMapColors)
-                        }
-                        nodeStrokeWidth={3}
-                        bgColor={theme.palette.background.paper}
-                        maskColor={`${theme.palette.background.default}66`}
-                        maskStrokeColor="transparent"
-                        maskStrokeWidth={0}
-                        style={{
-                          borderRadius: 12,
-                          overflow: "hidden",
-                          opacity: 1,
-                          boxShadow: theme.shadows[3],
-                        }}
-                      />
-                    )}
-                  </ReactFlow>
-                </Paper>
-                {selectedNodeDetail && (
-                  <FlowNodeDetailPanel
-                    detail={selectedNodeDetail}
-                    onClose={clearSelectedUnit}
-                    onOpenDefinition={openSelectedNodeDefinition}
-                    onOpenScope={openSelectedNodeScope}
-                    focusModeEnabled={focusModeEnabled}
-                    onToggleFocusMode={toggleFocusMode}
-                  />
-                )}
-              </Stack>
-              {dialogData && (
-                <UnitEntityDialog
-                  dialogData={dialogData}
-                  onClose={() => setDialogData(undefined)}
+                  )}
+                </ReactFlow>
+              </Paper>
+              {selectedNodeDetail && (
+                <FlowNodeDetailPanel
+                  detail={selectedNodeDetail}
+                  onClose={clearSelectedUnit}
+                  onOpenDefinition={openSelectedNodeDefinition}
+                  onOpenScope={openSelectedNodeScope}
+                  focusModeEnabled={focusModeEnabled}
+                  onToggleFocusMode={toggleFocusMode}
                 />
               )}
-            </Box>
-          </Stack>
+            </Stack>
+            {dialogData && (
+              <UnitEntityDialog
+                dialogData={dialogData}
+                onClose={() => setDialogData(undefined)}
+              />
+            )}
+          </Box>
         </Stack>
       </ReactFlowProvider>
     </ThemeProvider>

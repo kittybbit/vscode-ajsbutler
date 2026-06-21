@@ -3,19 +3,15 @@ import React, {
   FC,
   KeyboardEvent,
   memo,
-  ReactElement,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import AppBar from "@mui/material/AppBar";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
-import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
@@ -27,16 +23,8 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SearchIcon from "@mui/icons-material/Search";
 import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
-import ViewColumn from "@mui/icons-material/ViewColumn";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import FlowMenu from "./FlowMenu";
-import {
-  CurrentUnitIdStateType,
-  DrawerWidthStateType,
-  FlowMenuStateType,
-} from "./flowViewerStateTypes";
-import { localeMap } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
 import type {
@@ -45,11 +33,7 @@ import type {
 } from "./flowSearchState";
 
 type HeaderProps = {
-  flowMenuState: FlowMenuStateType;
-  drawerWidthState: DrawerWidthStateType;
   currentUnit?: AjsUnit;
-  unitById: ReadonlyMap<string, AjsUnit>;
-  currentUnitIdState: CurrentUnitIdStateType;
   canToggleExpandAllNestedUnits: boolean;
   hasExpandedAllNestedUnits: boolean;
   toggleExpandAllNestedUnits: () => void;
@@ -63,12 +47,6 @@ type HeaderProps = {
   onSearchNavigate: (query: string, direction: FlowSearchDirection) => void;
   onSearchSubmit: (query: string) => void;
   onSearchClear: () => void;
-};
-
-type HeaderBreadcrumbsProps = {
-  currentUnit?: AjsUnit;
-  unitById: ReadonlyMap<string, AjsUnit>;
-  setCurrentUnitId: (unitId: string) => void;
 };
 
 type HeaderSearchFieldProps = {
@@ -95,29 +73,9 @@ type SearchEndAdornmentProps = {
 const isRootJobnet = (unit: AjsUnit): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
 
-const getParentUnit = (
-  unit: AjsUnit,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): AjsUnit | undefined =>
-  unit.parentId ? unitById.get(unit.parentId) : undefined;
-
-const collectBreadcrumbUnits = (
-  currentUnit: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): AjsUnit[] => {
-  if (!currentUnit) {
-    return [];
-  }
-  if (isRootJobnet(currentUnit)) {
-    return [currentUnit];
-  }
-  return [
-    ...collectBreadcrumbUnits(getParentUnit(currentUnit, unitById), unitById),
-    currentUnit,
-  ];
-};
-
-const getCurrentUnitLabel = (currentUnit?: AjsUnit): string | undefined => {
+export const getCurrentUnitLabel = (
+  currentUnit?: AjsUnit,
+): string | undefined => {
   if (!currentUnit) {
     return undefined;
   }
@@ -219,49 +177,6 @@ const useHeaderSearchField = ({
     searchInputRef,
     searchValue,
   };
-};
-
-const HeaderBreadcrumbs: FC<HeaderBreadcrumbsProps> = ({
-  currentUnit,
-  unitById,
-  setCurrentUnitId,
-}) => {
-  const breadcrumbUnits = useMemo(
-    () => collectBreadcrumbUnits(currentUnit, unitById),
-    [currentUnit, unitById],
-  );
-  const createCrumb = useCallback(
-    (target: AjsUnit): ReactElement =>
-      target.id === currentUnit?.id ? (
-        <Typography key={target.id} color="inherit">
-          {target.name}
-        </Typography>
-      ) : (
-        <Link
-          key={target.id}
-          color="inherit"
-          onClick={() => setCurrentUnitId(target.id)}
-        >
-          {target.name}
-        </Link>
-      ),
-    [currentUnit?.id, setCurrentUnitId],
-  );
-
-  return (
-    <Breadcrumbs
-      separator="›"
-      aria-label="breadcrumb"
-      sx={{
-        flex: 1,
-        "& .MuiBreadcrumbs-ol": {
-          flexWrap: "nowrap",
-        },
-      }}
-    >
-      {breadcrumbUnits.map(createCrumb)}
-    </Breadcrumbs>
-  );
 };
 
 const SearchStartAdornment: FC = () => (
@@ -401,21 +316,29 @@ const CurrentUnitBadge: FC<CurrentUnitBadgeProps> = ({ currentUnit }) => {
     return null;
   }
   return (
-    <Chip
-      size="small"
-      label={currentUnitLabel}
-      color={currentUnit?.isRootJobnet ? "primary" : "default"}
-      variant="outlined"
-    />
+    <Stack
+      direction="row"
+      spacing={0.75}
+      alignItems="center"
+      sx={{ minWidth: 0, marginLeft: "auto" }}
+    >
+      <Tooltip title={currentUnit?.absolutePath ?? currentUnit?.name}>
+        <Typography variant="body2" noWrap sx={{ maxWidth: "16rem" }}>
+          {currentUnit?.name}
+        </Typography>
+      </Tooltip>
+      <Chip
+        size="small"
+        label={currentUnitLabel}
+        color={currentUnit?.isRootJobnet ? "primary" : "default"}
+        variant="outlined"
+      />
+    </Stack>
   );
 };
 
 const Header: FC<HeaderProps> = ({
-  flowMenuState,
-  drawerWidthState,
   currentUnit,
-  unitById,
-  currentUnitIdState,
   canToggleExpandAllNestedUnits,
   hasExpandedAllNestedUnits,
   toggleExpandAllNestedUnits,
@@ -432,21 +355,8 @@ const Header: FC<HeaderProps> = ({
 }) => {
   console.log("render Header.");
 
-  const { setMenuStatus } = flowMenuState;
-  const { setDrawerWidth } = drawerWidthState;
-  const { setCurrentUnitId } = currentUnitIdState;
-  const { lang, os } = useMyAppContext();
+  const { os } = useMyAppContext();
   const isMac = os === "darwin";
-
-  const menuItem1Label = useMemo(
-    () => localeMap("flow.menu.menuItem1", lang),
-    [lang],
-  );
-
-  const handleToggleMenu1 = useCallback(() => {
-    setDrawerWidth(0);
-    setMenuStatus((prev) => ({ ...prev, menuItem1: !prev.menuItem1 }));
-  }, [setDrawerWidth, setMenuStatus]);
   const expandAllLabel = getExpandAllLabel(hasExpandedAllNestedUnits);
 
   return (
@@ -456,25 +366,21 @@ const Header: FC<HeaderProps> = ({
         color="transparent"
         elevation={0}
         sx={{
+          flexShrink: 0,
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
           backgroundColor: (theme) => `${theme.palette.background.paper}f2`,
           backdropFilter: "blur(10px)",
         }}
       >
         <Toolbar sx={{ gap: 1.25, minHeight: "3.5rem" }}>
-          <FlowMenu
-            flowMenuState={flowMenuState}
-            drawerWidthState={drawerWidthState}
+          <HeaderSearchField
+            isMac={isMac}
+            searchedUnitId={searchedUnitId}
+            searchResultPosition={searchResultPosition}
+            onSearchNavigate={onSearchNavigate}
+            onSearchSubmit={onSearchSubmit}
+            onSearchClear={onSearchClear}
           />
-          <Tooltip title={menuItem1Label}>
-            <IconButton
-              size="small"
-              aria-label="toggleMenu1"
-              onClick={handleToggleMenu1}
-            >
-              <ViewColumn fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
           <Tooltip title={expandAllLabel}>
             <span>
               <IconButton
@@ -522,19 +428,6 @@ const Header: FC<HeaderProps> = ({
               <MapOutlinedIcon fontSize="inherit" />
             </IconButton>
           </Tooltip>
-          <HeaderSearchField
-            isMac={isMac}
-            searchedUnitId={searchedUnitId}
-            searchResultPosition={searchResultPosition}
-            onSearchNavigate={onSearchNavigate}
-            onSearchSubmit={onSearchSubmit}
-            onSearchClear={onSearchClear}
-          />
-          <HeaderBreadcrumbs
-            currentUnit={currentUnit}
-            unitById={unitById}
-            setCurrentUnitId={setCurrentUnitId}
-          />
           <CurrentUnitBadge currentUnit={currentUnit} />
         </Toolbar>
       </AppBar>

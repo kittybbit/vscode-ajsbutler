@@ -19,7 +19,7 @@ import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
-import { useFlowNodeDetailPanelCollapse } from "./useFlowNodeDetailPanelCollapse";
+import { useResponsiveFlowPanelCollapse } from "./useResponsiveFlowPanelCollapse";
 
 type FlowNodeDetailPanelProps = {
   detail: FlowNodeDetail;
@@ -71,7 +71,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   const theme = useTheme();
   const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
   const { collapse, collapsed, expand } =
-    useFlowNodeDetailPanelCollapse(isNarrow);
+    useResponsiveFlowPanelCollapse(isNarrow);
   const parent = detail.parentName
     ? `${detail.parentName}${detail.parentPath ? ` (${detail.parentPath})` : ""}`
     : "—";
