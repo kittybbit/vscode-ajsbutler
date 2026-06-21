@@ -2,34 +2,33 @@
 
 ## Current Task
 
-- Status: Proposed
-- Scope: investigate presentation-level search UI sharing as the next slice;
-  no runtime scope is currently approved
-- Acceptance: define the shared interaction boundary while keeping table
-  filtering and flow reveal separate
-- Validation: determine focused component, desktop, and web checks during
-  impact investigation
+- Status: None
+- Scope: Select and investigate the next feature task with `sdd-plan-task`.
 
 ## Human Approval
 
 - Status: Pending
-- Approved at: none
-- Approved scope: none
+- Approved at: Not yet approved
+- Approved scope: None
 
 Implementation must not start while approval is pending.
 
-## Decision Notes
+## Follow-Up
 
-- Use `sdd-plan-task` before starting the search UI slice.
-- A shared application or domain search contract remains outside the next
-  presentation slice unless a new investigation satisfies the search-domain
-  use-case trigger and receives separate approval.
-- Header refresh follow-up: dark-theme and window-scroll visual checks were not
-  completed in the automated browser session. Desktop tests, web smoke tests,
-  build, and a light-theme narrow-width browser check passed.
+- Investigate the next ordered slice: discoverable list-to-flow navigation
+  actions using stable unit identity and the existing viewer bridge contract.
+- Keep shared query semantics outside presentation until a separately approved
+  investigation satisfies `uc-search-domain-unification.md`.
+- The shared-header search task passed automated desktop and web checks, but
+  manual VS Code Web interaction verification remains outstanding because the
+  local viewer URL was blocked by the browser security policy. Recheck
+  Ctrl/Cmd+F, Enter, Shift+Enter, blur, clear, table mode switching, result
+  counts, helper text, and narrow-header layout when a permitted host is
+  available.
 
 ## Use-Case Back-Propagation
 
-- The completed Header slice did not change a durable use-case contract.
-- Revisit `uc-search-domain-unification.md` only if a later investigation
-  proposes shared query semantics outside presentation code.
+- No durable use-case change resulted from the presentation-only shared search
+  extraction.
+- Revisit `uc-search-domain-unification.md` only if a future task requires
+  shared matching, normalization, result navigation, or validation semantics.

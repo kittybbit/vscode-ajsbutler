@@ -1,21 +1,19 @@
 import React, {
-  ChangeEvent,
   FC,
-  KeyboardEvent,
   memo,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
-import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AbcIcon from "@mui/icons-material/Abc";
 import KeyIcon from "@mui/icons-material/Key";
-import SearchIcon from "@mui/icons-material/Search";
 import { Updater } from "@tanstack/table-core";
 import { useMyAppContext } from "../MyContexts";
+import HeaderSearchField from "../shared/HeaderSearchField";
 import { localeMap } from "../../../../domain/services/i18n/nls";
 import { AjsTableSearchMode } from "./globalFilter";
 
@@ -34,44 +32,33 @@ const SearchBox: FC<SearchBoxProps> = ({
 }) => {
   console.log("render SearchBox.");
 
-  const { lang, os } = useMyAppContext();
-  const isMac = () => os === "darwin";
+  const { lang } = useMyAppContext();
 
   const ref = useRef<HTMLInputElement>(null);
-  const handleShortcut = (event: globalThis.KeyboardEvent) => {
-    (isMac() ? event.metaKey : event.ctrlKey) &&
-      event.key === "f" &&
-      ref.current &&
-      ref.current.focus();
-  };
-  useEffect(() => {
-    document.addEventListener("keydown", handleShortcut);
-    return () => document.removeEventListener("keydown", handleShortcut);
-  }, []);
-
   const [value, setValue] = useState<string>("");
   useEffect(() => {
     setValue(() => String(globalFilter ?? ""));
   }, [globalFilter]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
-    setValue(() => e.target.value);
-  const commitSearch = () => {
+  const handleValueChange = useCallback((nextValue: string) => {
+    setValue(nextValue);
+  }, []);
+  const commitSearch = useCallback(() => {
     const nextValue = ref.current?.value ?? value;
     const currentValue = String(globalFilter ?? "");
     if (currentValue !== nextValue || nextValue.length === 0) {
-      setValue(() => nextValue);
+      setValue(nextValue);
       setGlobalFilter(() => nextValue);
     }
-  };
-  const handleKeyUp = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter") {
-      commitSearch();
-    }
-  };
-  const handleBlur = () => {
+  }, [globalFilter, setGlobalFilter, value]);
+  const handleEnter = useCallback(() => {
     commitSearch();
-  };
+  }, [commitSearch]);
+  const handleClear = useCallback(() => {
+    setValue("");
+    setGlobalFilter(() => "");
+    ref.current?.focus();
+  }, [setGlobalFilter]);
   const handleSearchModeChange = (
     _event: React.MouseEvent<HTMLElement>,
     nextMode: AjsTableSearchMode | null,
@@ -85,58 +72,54 @@ const SearchBox: FC<SearchBoxProps> = ({
   };
 
   return (
-    <TextField
+    <HeaderSearchField
       id="search"
-      placeholder={`Search...(${isMac() ? "\u2318" : "CTRL+"}F)`}
+      placeholderLabel="Search"
       helperText={localeMap("table.search.helperText", lang)}
-      slotProps={{
-        input: {
-          startAdornment: <SearchIcon sx={{ marginRight: "0.5em" }} />,
-          endAdornment: (
-            <ToggleButtonGroup
-              exclusive
-              size="small"
-              value={searchMode}
-              onChange={handleSearchModeChange}
-              aria-label={localeMap("table.search.mode", lang)}
-              sx={{
-                marginLeft: 1,
-                "& .MuiToggleButton-root": {
-                  height: 28,
-                  width: 34,
-                  padding: 0,
-                },
-              }}
-            >
-              <Tooltip title={localeMap("table.search.mode.value", lang)}>
-                <ToggleButton
-                  value="value"
-                  aria-label={localeMap("table.search.mode.value", lang)}
-                >
-                  <AbcIcon fontSize="small" />
-                </ToggleButton>
-              </Tooltip>
-              <Tooltip title={localeMap("table.search.mode.keyValue", lang)}>
-                <ToggleButton
-                  value="keyValue"
-                  aria-label={localeMap("table.search.mode.keyValue", lang)}
-                >
-                  <KeyIcon fontSize="small" />
-                </ToggleButton>
-              </Tooltip>
-            </ToggleButtonGroup>
-          ),
-        },
-      }}
-      variant="standard"
-      onChange={handleChange}
-      onKeyUp={handleKeyUp}
-      onBlur={handleBlur}
-      sx={{
-        width: "28em",
-      }}
       inputRef={ref}
-      value={value ?? ""}
+      value={value}
+      onValueChange={handleValueChange}
+      onEnter={handleEnter}
+      onBlur={commitSearch}
+      onClear={handleClear}
+      clearDisabled={
+        value.length === 0 && String(globalFilter ?? "").length === 0
+      }
+      sx={{ width: "28em" }}
+      endAdornment={
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={searchMode}
+          onChange={handleSearchModeChange}
+          aria-label={localeMap("table.search.mode", lang)}
+          sx={{
+            marginLeft: 1,
+            "& .MuiToggleButton-root": {
+              height: 28,
+              width: 34,
+              padding: 0,
+            },
+          }}
+        >
+          <Tooltip title={localeMap("table.search.mode.value", lang)}>
+            <ToggleButton
+              value="value"
+              aria-label={localeMap("table.search.mode.value", lang)}
+            >
+              <AbcIcon fontSize="small" />
+            </ToggleButton>
+          </Tooltip>
+          <Tooltip title={localeMap("table.search.mode.keyValue", lang)}>
+            <ToggleButton
+              value="keyValue"
+              aria-label={localeMap("table.search.mode.keyValue", lang)}
+            >
+              <KeyIcon fontSize="small" />
+            </ToggleButton>
+          </Tooltip>
+        </ToggleButtonGroup>
+      }
     />
   );
 };
