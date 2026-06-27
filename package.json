@@ -57,7 +57,7 @@
         "category": "View",
         "title": "Open JP1/AJS flow viewer",
         "shortTitle": "JP1/AJS flow viewer",
-        "icon": "$(circuit-board)"
+        "icon": "$(type-hierarchy)"
       },
       {
         "enablement": "editorLangId == 'jp1ajs'",
@@ -65,7 +65,7 @@
         "category": "View",
         "title": "Open JP1/AJS table viewer",
         "shortTitle": "JP1/AJS table viewer",
-        "icon": "$(output)"
+        "icon": "$(table)"
       },
       {
         "command": "ajsbutler.importDefinitionViaWebApiBeta",
