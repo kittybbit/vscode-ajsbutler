@@ -3,12 +3,13 @@
 ## Goal
 
 Show unit-definition details and command text for a selected JP1/AJS unit
-without coupling the dialog content directly to parser-adjacent wrapper
+without coupling the presentation content directly to parser-adjacent wrapper
 objects.
 
 ## Trigger
 
-- the user clicks the unit-definition action in the table view
+- the user selects a unit in the table view and opens definition details from
+  the list detail pane
 - the user clicks the unit-definition action in the flow view
 
 ## Inputs
@@ -18,14 +19,14 @@ objects.
 
 ## Outputs
 
-- dialog DTO containing raw parameter text
-- dialog DTO containing command text derived from the selected unit path
+- presentation DTO containing raw parameter text
+- presentation DTO containing command text derived from the selected unit path
 - structured command builder definitions when supported commands expose
   user-selectable options
 
 ## Rules
 
-- the dialog input should not require `UnitEntity` or other wrapper-specific
+- the definition presentation input should not require `UnitEntity` or other wrapper-specific
   objects when a stable application DTO is sufficient
 - table and flow views should be able to open the same definition content for
   the same selected unit
@@ -44,6 +45,12 @@ Scenario: Table and flow views show the same unit definition
   Given the same selected JP1/AJS unit in table and flow contexts
   When unit-definition details are requested
   Then both viewers receive the same raw parameter text
+
+Scenario: Table selection opens definition details from the list pane
+  Given a selected JP1/AJS unit in the table view
+  When the selected-unit detail pane is displayed
+  Then the pane exposes an action for application-provided unit-definition content
+  And table row actions do not need to reconstruct parser wrapper objects
 
 Scenario: Command text uses the selected unit path
   Given a selected JP1/AJS unit with an absolute path
@@ -64,8 +71,8 @@ Scenario: Opening definition details preserves flow navigation
 
 ## Acceptance Notes
 
-- unit-definition dialog content can be extracted without forcing a broader
-  table or flow rewrite
+- unit-definition presentation content can be extracted without forcing a
+  broader table or flow rewrite
 
 ## Risks Or Edge Cases
 

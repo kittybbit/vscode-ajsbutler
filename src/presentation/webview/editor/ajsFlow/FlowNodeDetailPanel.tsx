@@ -1,25 +1,15 @@
-import React, { FC, memo } from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CloseIcon from "@mui/icons-material/Close";
+import React, { FC, memo, useMemo } from "react";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
-import { useResponsiveFlowPanelCollapse } from "./useResponsiveFlowPanelCollapse";
+import SharedUnitDetailPane, {
+  type SharedUnitDetailPaneAction,
+  type SharedUnitDetailPaneChip,
+  type SharedUnitDetailPaneRow,
+} from "../shared/SharedUnitDetailPane";
 
 type FlowNodeDetailPanelProps = {
   detail: FlowNodeDetail;
@@ -30,34 +20,75 @@ type FlowNodeDetailPanelProps = {
   onToggleFocusMode: VoidFunction;
 };
 
-const DetailRow: FC<{ label: string; value: React.ReactNode }> = ({
-  label,
-  value,
-}) => (
-  <Stack direction="row" spacing={1} justifyContent="space-between">
-    <Typography variant="caption" color="text.secondary">
-      {label}
-    </Typography>
-    <Typography
-      variant="body2"
-      sx={{ textAlign: "right", overflowWrap: "anywhere" }}
-    >
-      {value}
-    </Typography>
-  </Stack>
-);
+export const buildFlowNodeDetailRows = (
+  detail: FlowNodeDetail,
+): SharedUnitDetailPaneRow[] => {
+  const parent = detail.parentName
+    ? `${detail.parentName}${detail.parentPath ? ` (${detail.parentPath})` : ""}`
+    : "—";
+  return [
+    { label: "Comment", value: detail.comment || "—" },
+    { label: "Absolute path", value: detail.absolutePath },
+    { label: "Parent unit", value: parent },
+  ];
+};
 
-const StateChip: FC<{ active: boolean; label: string }> = ({
-  active,
-  label,
-}) => (
-  <Chip
-    size="small"
-    color={active ? "primary" : "default"}
-    variant={active ? "filled" : "outlined"}
-    label={`${label}: ${active ? "Yes" : "No"}`}
-  />
-);
+export const buildFlowNodeRelationshipRows = (
+  detail: FlowNodeDetail,
+): SharedUnitDetailPaneRow[] => [
+  { label: "Predecessors", value: detail.predecessorCount },
+  { label: "Successors", value: detail.successorCount },
+  { label: "Upstream", value: detail.upstreamCount },
+  { label: "Downstream", value: detail.downstreamCount },
+];
+
+export const buildFlowNodeDetailChips = (
+  detail: FlowNodeDetail,
+  focusModeEnabled: boolean,
+): SharedUnitDetailPaneChip[] => [
+  { active: detail.hasSchedule, label: "Schedule" },
+  { active: detail.hasWaitedFor, label: "Waited for" },
+  { active: detail.canExpandNested, label: "Nested expandable" },
+  { active: detail.isSearchMatch, label: "Search match" },
+  { active: detail.isCurrentSearchResult, label: "Current search result" },
+  { active: focusModeEnabled, label: "Relationship focus" },
+];
+
+export const buildFlowNodeDetailActions = ({
+  canOpenAsScope,
+  focusModeEnabled,
+  onOpenDefinition,
+  onOpenScope,
+  onToggleFocusMode,
+}: {
+  canOpenAsScope: boolean;
+  focusModeEnabled: boolean;
+  onOpenDefinition: VoidFunction;
+  onOpenScope: VoidFunction;
+  onToggleFocusMode: VoidFunction;
+}): SharedUnitDetailPaneAction[] => [
+  {
+    label: focusModeEnabled ? "Exit relationship focus" : "Focus relationships",
+    icon: <CenterFocusStrongIcon />,
+    onClick: onToggleFocusMode,
+    variant: focusModeEnabled ? "contained" : "outlined",
+  },
+  {
+    label: "Open definition details",
+    icon: <DescriptionIcon />,
+    onClick: onOpenDefinition,
+  },
+  ...(canOpenAsScope
+    ? [
+        {
+          label: "Open as graph scope",
+          icon: <FolderOpenIcon />,
+          onClick: onOpenScope,
+          variant: "contained" as const,
+        },
+      ]
+    : []),
+];
 
 const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   detail,
@@ -68,150 +99,49 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   onToggleFocusMode,
 }) => {
   const { lang = "en" } = useMyAppContext();
-  const theme = useTheme();
-  const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
-  const { collapse, collapsed, expand } =
-    useResponsiveFlowPanelCollapse(isNarrow);
-  const parent = detail.parentName
-    ? `${detail.parentName}${detail.parentPath ? ` (${detail.parentPath})` : ""}`
-    : "—";
-
-  if (collapsed) {
-    return (
-      <Paper
-        component="aside"
-        aria-label="Collapsed selected flow node details"
-        variant="outlined"
-        sx={{
-          width: 48,
-          minWidth: 48,
-          height: "100%",
-          borderRadius: 3,
-          boxSizing: "border-box",
-        }}
-      >
-        <Stack spacing={1} alignItems="center" sx={{ paddingY: 1 }}>
-          <Tooltip title="Expand node details" placement="left">
-            <IconButton
-              size="small"
-              aria-label="Expand node details"
-              onClick={expand}
-            >
-              <ChevronLeftIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Close node details" placement="left">
-            <IconButton
-              size="small"
-              aria-label="Close node details"
-              onClick={onClose}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      </Paper>
-    );
-  }
+  const rows = useMemo(() => buildFlowNodeDetailRows(detail), [detail]);
+  const relationshipRows = useMemo(
+    () => buildFlowNodeRelationshipRows(detail),
+    [detail],
+  );
+  const chips = useMemo(
+    () => buildFlowNodeDetailChips(detail, focusModeEnabled),
+    [detail, focusModeEnabled],
+  );
+  const actions = useMemo(
+    () =>
+      buildFlowNodeDetailActions({
+        canOpenAsScope: detail.canOpenAsScope,
+        focusModeEnabled,
+        onOpenDefinition,
+        onOpenScope,
+        onToggleFocusMode,
+      }),
+    [
+      detail.canOpenAsScope,
+      focusModeEnabled,
+      onOpenDefinition,
+      onOpenScope,
+      onToggleFocusMode,
+    ],
+  );
 
   return (
-    <Paper
-      component="aside"
-      aria-label="Selected flow node details"
-      variant="outlined"
-      sx={{
-        width: 360,
-        minWidth: 320,
-        maxWidth: 380,
-        height: "100%",
-        overflow: "auto",
-        borderRadius: 3,
-        boxSizing: "border-box",
-      }}
-    >
-      <Stack spacing={1.5} sx={{ padding: 2 }}>
-        <Stack direction="row" spacing={1} alignItems="flex-start">
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Tooltip title={detail.name} placement="top-start">
-              <Typography variant="h6" noWrap>
-                {detail.name}
-              </Typography>
-            </Tooltip>
-            <Typography variant="caption" color="text.secondary">
-              {unitTypeLabel(detail.unitType, lang, detail.groupType)}
-            </Typography>
-          </Box>
-          <Tooltip title="Collapse node details">
-            <IconButton
-              size="small"
-              aria-label="Collapse node details"
-              onClick={collapse}
-            >
-              <ChevronRightIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <IconButton
-            size="small"
-            aria-label="Close node details"
-            onClick={onClose}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Stack>
-
-        <Divider />
-        <DetailRow label="Comment" value={detail.comment || "—"} />
-        <DetailRow label="Absolute path" value={detail.absolutePath} />
-        <DetailRow label="Parent unit" value={parent} />
-
-        <Divider />
-        <DetailRow label="Predecessors" value={detail.predecessorCount} />
-        <DetailRow label="Successors" value={detail.successorCount} />
-        <DetailRow label="Upstream" value={detail.upstreamCount} />
-        <DetailRow label="Downstream" value={detail.downstreamCount} />
-
-        <Divider />
-        <Stack direction="row" gap={0.75} flexWrap="wrap">
-          <StateChip active={detail.hasSchedule} label="Schedule" />
-          <StateChip active={detail.hasWaitedFor} label="Waited for" />
-          <StateChip
-            active={detail.canExpandNested}
-            label="Nested expandable"
-          />
-          <StateChip active={detail.isSearchMatch} label="Search match" />
-          <StateChip
-            active={detail.isCurrentSearchResult}
-            label="Current search result"
-          />
-          <StateChip active={focusModeEnabled} label="Relationship focus" />
-        </Stack>
-
-        <Divider />
-        <Button
-          variant={focusModeEnabled ? "contained" : "outlined"}
-          startIcon={<CenterFocusStrongIcon />}
-          onClick={onToggleFocusMode}
-        >
-          {focusModeEnabled ? "Exit relationship focus" : "Focus relationships"}
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<DescriptionIcon />}
-          onClick={onOpenDefinition}
-        >
-          Open definition details
-        </Button>
-        {detail.canOpenAsScope && (
-          <Button
-            variant="contained"
-            startIcon={<FolderOpenIcon />}
-            onClick={onOpenScope}
-          >
-            Open as graph scope
-          </Button>
-        )}
-      </Stack>
-    </Paper>
+    <SharedUnitDetailPane
+      title={detail.name}
+      subtitle={unitTypeLabel(detail.unitType, lang, detail.groupType)}
+      ariaLabel="Selected flow node details"
+      collapsedAriaLabel="Collapsed selected flow node details"
+      closeAriaLabel="Close node details"
+      collapseTooltip="Collapse node details"
+      expandTooltip="Expand node details"
+      closeTooltip="Close node details"
+      onClose={onClose}
+      rows={rows}
+      relationshipRows={relationshipRows}
+      chips={chips}
+      actions={actions}
+    />
   );
 };
 

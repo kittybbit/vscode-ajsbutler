@@ -6,7 +6,13 @@ import {
   collectRelatedUnitIds,
   summarizeFlowNodeRelationships,
 } from "../../presentation/webview/editor/ajsFlow/flowNodeDetail";
+import {
+  buildFlowNodeDetailActions,
+  buildFlowNodeDetailChips,
+  buildFlowNodeDetailRows,
+} from "../../presentation/webview/editor/ajsFlow/FlowNodeDetailPanel";
 import { reduceSelectedFlowNodeId } from "../../presentation/webview/editor/ajsFlow/useSelectedFlowNodeState";
+import { getSharedUnitDetailPaneActionLabels } from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
 import type { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
 
 const edges: Edge[] = [
@@ -178,6 +184,60 @@ suite("Flow Node Detail", () => {
         units,
       )?.canOpenAsScope,
       false,
+    );
+  });
+
+  test("maps flow detail into shared detail pane rows and actions", () => {
+    const detail = {
+      unitId: "b",
+      name: "B",
+      unitType: "n",
+      comment: "summary",
+      absolutePath: "/root/b",
+      parentName: "PARENT",
+      parentPath: "/root/parent",
+      hasSchedule: true,
+      hasWaitedFor: false,
+      canExpandNested: true,
+      isSearchMatch: true,
+      isCurrentSearchResult: false,
+      canOpenAsScope: true,
+      predecessorCount: 1,
+      successorCount: 2,
+      upstreamCount: 3,
+      downstreamCount: 4,
+    } as const;
+
+    assert.deepStrictEqual(buildFlowNodeDetailRows(detail), [
+      { label: "Comment", value: "summary" },
+      { label: "Absolute path", value: "/root/b" },
+      { label: "Parent unit", value: "PARENT (/root/parent)" },
+    ]);
+    assert.deepStrictEqual(
+      buildFlowNodeDetailChips(detail, true).map((chip) => [
+        chip.label,
+        chip.active,
+      ]),
+      [
+        ["Schedule", true],
+        ["Waited for", false],
+        ["Nested expandable", true],
+        ["Search match", true],
+        ["Current search result", false],
+        ["Relationship focus", true],
+      ],
+    );
+    assert.deepStrictEqual(
+      getSharedUnitDetailPaneActionLabels(
+        buildFlowNodeDetailActions({
+          canOpenAsScope: true,
+          focusModeEnabled: false,
+          onOpenDefinition: () => undefined,
+          onOpenScope: () => undefined,
+          onToggleFocusMode: () => undefined,
+        }),
+      ),
+      ["Focus relationships", "Open definition details", "Open as graph scope"],
     );
   });
 });

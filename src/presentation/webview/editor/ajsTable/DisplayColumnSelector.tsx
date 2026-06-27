@@ -1,40 +1,43 @@
-import React, { FC, Fragment, memo, useEffect, useMemo, useRef } from "react";
+import React, { FC, Fragment, memo, useMemo } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
+import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import Drawer from "@mui/material/Drawer";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
+import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
-import Switch from "@mui/material/Switch";
-import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { useTheme } from "@mui/material/styles";
 import {
   Column,
   Table as ReactTable,
   VisibilityState,
 } from "@tanstack/table-core";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
 import ToggleOff from "@mui/icons-material/ToggleOff";
 import ToggleOn from "@mui/icons-material/ToggleOn";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import Switch from "@mui/material/Switch";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../../domain/services/i18n/nls";
-import { DrawerWidthStateType, TableMenuStateType } from "./TableContents";
 
 type DisplayColumnSelectorProps = {
   table: ReactTable<UnitListRowView>;
   columnVisibility: VisibilityState;
-  tableMenuState: TableMenuStateType;
-  drawerWidthState: DrawerWidthStateType;
+  anchorEl: HTMLElement | null;
+  open: boolean;
+  onClose: VoidFunction;
 };
+
+export const getVisibleColumnSelectorColumns = (
+  table: ReactTable<UnitListRowView>,
+): Column<UnitListRowView, unknown>[] =>
+  table.getAllColumns().filter((col) => col.columnDef.enableHiding);
 
 const ColumnSwitch: FC<{
   column: Column<UnitListRowView, unknown>;
@@ -107,7 +110,7 @@ const ColumnDetail: FC<{ column: Column<UnitListRowView, unknown> }> = ({
 const ColumnAccordion: FC<{ column: Column<UnitListRowView, unknown> }> = ({
   column,
 }) => (
-  <Accordion>
+  <Accordion disableGutters>
     <AccordionSummary expandIcon={<ExpandMore />}>
       <Switch
         size="small"
@@ -137,60 +140,53 @@ const ColumnAccordion: FC<{ column: Column<UnitListRowView, unknown> }> = ({
 const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
   table,
   columnVisibility,
-  tableMenuState,
-  drawerWidthState,
+  anchorEl,
+  open,
+  onClose,
 }) => {
   console.log("render DisplayColumnSelector.");
   const { lang } = useMyAppContext();
-  const { menuStatus, setMenuStatus } = tableMenuState;
-  const { setDrawerWidth } = drawerWidthState;
-
-  const theme = useTheme();
-  const drawerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (drawerRef.current) {
-      setDrawerWidth(drawerRef.current.offsetWidth);
-    }
-  }, [setDrawerWidth]);
-
-  const toggleDrawer = (open: boolean) => () => {
-    setDrawerWidth(0);
-    setMenuStatus((prev) => ({ ...prev, menuItem1: open }));
-  };
 
   const visibleColumns = useMemo(
-    () => table.getAllColumns().filter((col) => col.columnDef.enableHiding),
-    [columnVisibility],
+    () => getVisibleColumnSelectorColumns(table),
+    [columnVisibility, table],
   );
 
   return (
-    <Drawer
-      anchor="left"
-      variant="persistent"
-      open={menuStatus?.menuItem1 ?? false}
-      onClose={toggleDrawer(false)}
-      sx={{ flexShrink: 0 }}
+    <Popover
+      anchorEl={anchorEl}
+      open={open}
+      onClose={onClose}
+      anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
+      transformOrigin={{ horizontal: "left", vertical: "top" }}
+      slotProps={{
+        paper: {
+          sx: {
+            width: 380,
+            maxWidth: "calc(100vw - 2rem)",
+            maxHeight: "calc(100vh - 5rem)",
+            overflow: "hidden",
+            borderRadius: 3,
+          },
+        },
+      }}
     >
-      <Toolbar
-        ref={drawerRef}
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          padding: theme.spacing(0, 1),
-          ...theme.mixins.toolbar,
-          justifyContent: "flex-end",
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          paddingX: 1.5,
+          paddingY: 1,
         }}
       >
-        <IconButton onClick={toggleDrawer(false)}>
-          {theme.direction === "ltr" ? (
-            <ChevronLeftIcon />
-          ) : (
-            <ChevronRightIcon />
-          )}
-        </IconButton>
-      </Toolbar>
-      <Stack direction="row" spacing={2} justifyContent="center">
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, letterSpacing: "0.08em", marginRight: "auto" }}
+        >
+          COLUMNS
+        </Typography>
         <Tooltip
           arrow
           title={localeMap("table.columnSelectSidebar.invisibleAll", lang)}
@@ -203,7 +199,7 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
             size="small"
             onClick={() => table.toggleAllColumnsVisible(false)}
           >
-            <ToggleOff fontSize="large" color="disabled" />
+            <ToggleOff fontSize="small" color="disabled" />
           </IconButton>
         </Tooltip>
         <Tooltip
@@ -215,14 +211,23 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
             size="small"
             onClick={() => table.toggleAllColumnsVisible(true)}
           >
-            <ToggleOn fontSize="large" color="primary" />
+            <ToggleOn fontSize="small" color="primary" />
           </IconButton>
         </Tooltip>
+        <IconButton
+          aria-label="Close column selector"
+          size="small"
+          onClick={onClose}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
       </Stack>
-      {visibleColumns.map((column) => (
-        <ColumnAccordion key={column.id} column={column} />
-      ))}
-    </Drawer>
+      <Box sx={{ maxHeight: "calc(100vh - 9rem)", overflow: "auto" }}>
+        {visibleColumns.map((column) => (
+          <ColumnAccordion key={column.id} column={column} />
+        ))}
+      </Box>
+    </Popover>
   );
 };
 

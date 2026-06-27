@@ -1,4 +1,5 @@
 import React, { FC, memo, MouseEvent, useMemo, useState } from "react";
+import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -30,6 +31,10 @@ import { useMyAppContext } from "./MyContexts";
 type UnitEntityDialogProps = {
   dialogData: UnitDefinitionDialogDto | undefined;
   onClose: VoidFunction;
+};
+
+type UnitDefinitionContentProps = {
+  dialogData: UnitDefinitionDialogDto;
 };
 
 const useCopyHandler = () => {
@@ -84,32 +89,20 @@ const UnitEntityDialog: FC<UnitEntityDialogProps> = ({
 }) => {
   if (!dialogData) return null;
 
-  const [tabIndex, setTabIndex] = useState(0);
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabIndex(newValue);
-  };
-
   return (
     <Dialog scroll="paper" open={true} onClose={onClose} fullWidth>
       <DialogTitle sx={{ paddingBottom: "0em" }}>
         <Stack direction="row" justifyContent="space-between">
-          <Tabs value={tabIndex} onChange={handleTabChange}>
-            <Tab label="Raw data" />
-            <Tab label="Command" />
-          </Tabs>
+          <Typography variant="subtitle1">Unit definition</Typography>
           <IconButton aria-label="close" onClick={onClose}>
             <CloseIcon />
           </IconButton>
         </Stack>
         <Typography variant="caption">{dialogData.absolutePath}</Typography>
       </DialogTitle>
-      <TabPanel value={tabIndex} index={0}>
-        <Tab1 dialogData={dialogData} />
-      </TabPanel>
-      <TabPanel value={tabIndex} index={1}>
-        <Tab2 dialogData={dialogData} />
-      </TabPanel>
+      <DialogContent dividers>
+        <UnitDefinitionContent dialogData={dialogData} />
+      </DialogContent>
     </Dialog>
   );
 };
@@ -122,12 +115,38 @@ type TabPanelProps = {
 
 const TabPanel: FC<TabPanelProps> = ({ value, index, children }) => {
   return (
-    <DialogContent
+    <Box
       sx={{ display: value === index ? "block" : "none" }}
-      dividers
+      role="tabpanel"
+      hidden={value !== index}
     >
       {children}
-    </DialogContent>
+    </Box>
+  );
+};
+
+export const UnitDefinitionContent: FC<UnitDefinitionContentProps> = ({
+  dialogData,
+}) => {
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
+  };
+
+  return (
+    <Stack spacing={1.5}>
+      <Tabs value={tabIndex} onChange={handleTabChange}>
+        <Tab label="Raw data" />
+        <Tab label="Command" />
+      </Tabs>
+      <TabPanel value={tabIndex} index={0}>
+        <Tab1 dialogData={dialogData} />
+      </TabPanel>
+      <TabPanel value={tabIndex} index={1}>
+        <Tab2 dialogData={dialogData} />
+      </TabPanel>
+    </Stack>
   );
 };
 

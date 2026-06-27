@@ -7,7 +7,12 @@ import React, {
   useRef,
 } from "react";
 import { flexRender, HeaderGroup, Row } from "@tanstack/react-table";
-import { ItemProps, TableVirtuoso, TableVirtuosoHandle } from "react-virtuoso";
+import {
+  ItemProps,
+  TableComponents,
+  TableVirtuoso,
+  TableVirtuosoHandle,
+} from "react-virtuoso";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -15,21 +20,36 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { useTheme } from "@mui/material/styles";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import TableHeader from "./TableHeader";
-import type { MyAppResource } from "../../../../shared/MyAppResource";
-import type { AjsTableSearchState } from "./TableContents";
+import type { ParameterSearchValuesByPath } from "./globalFilter";
 import { AccessorType } from "./columnDefs/common";
 import { isAjsTableSearchHit } from "./globalFilter";
+import {
+  handleSelectTableRow,
+  handleSelectTableRowKeyDown,
+  isTableRowSelected,
+} from "./navigation";
 
 type VirtualizedTableProps = {
   headerGroups: HeaderGroup<UnitListRowView>[];
   rows: Row<UnitListRowView>[];
-  scrollType: MyAppResource["scrollType"];
   rowIndex?: number;
-  searchState: AjsTableSearchState;
+  searchQuery: string;
+  parameterSearchValuesByPath: ParameterSearchValuesByPath;
+  selectedAbsolutePath?: string;
+  selectRow: (absolutePath: string) => void;
+};
+
+type VirtualizedTableContext = {
+  rowIndex?: number;
+  selectedAbsolutePath?: string;
+  selectRow: (absolutePath: string) => void;
+};
+
+type VirtualizedTableRowProps = ItemProps<Row<UnitListRowView>> & {
+  context: VirtualizedTableContext;
 };
 
 const styleTableCell: SxProps<Theme> = {
@@ -42,56 +62,110 @@ const styleTableCell: SxProps<Theme> = {
   },
 };
 
-const createTableComponents = (scrollType: string, rowIndex?: number) => ({
-  Scroller:
-    scrollType === "table"
-      ? React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
-          return (
-            <TableContainer
-              {...props}
-              ref={ref}
-              component={Paper}
-              elevation={3}
-            />
-          );
-        })
-      : React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
-          return <TableContainer {...props} ref={ref} />;
-        }),
-  Table: (props: object) => <Table {...props} size="small" stickyHeader />,
+export const getFixedTableVirtuosoStyle = () => ({
+  width: "100%",
+  minWidth: 0,
+  height: "100%",
+  maxHeight: "100%",
+  boxSizing: "border-box" as const,
+});
+
+const omitVirtuosoContext = <T extends object>(
+  props: T,
+): Omit<T, "context"> => {
+  const propsWithoutContext = { ...props } as T & {
+    context?: VirtualizedTableContext;
+  };
+  Reflect.deleteProperty(propsWithoutContext, "context");
+  return propsWithoutContext;
+};
+
+const isVirtualizedTableRowSelected = (
+  props: VirtualizedTableRowProps,
+): boolean =>
+  isTableRowSelected(
+    props.item.original.absolutePath,
+    props.context.selectedAbsolutePath,
+    props["data-index"],
+    props.context.rowIndex,
+  );
+
+const VirtualizedTableRow = memo(
+  ({ context, ...props }: VirtualizedTableRowProps) => {
+    const absolutePath = props.item.original.absolutePath;
+    const { rowIndex, selectedAbsolutePath, selectRow } = context;
+    return (
+      <TableRow
+        {...props}
+        hover={true}
+        tabIndex={0}
+        selected={isTableRowSelected(
+          absolutePath,
+          selectedAbsolutePath,
+          props["data-index"],
+          rowIndex,
+        )}
+        onClick={handleSelectTableRow(absolutePath, selectRow)}
+        onKeyDown={handleSelectTableRowKeyDown(absolutePath, selectRow)}
+      />
+    );
+  },
+  (previous, next) =>
+    previous.item === next.item &&
+    previous["data-index"] === next["data-index"] &&
+    previous.context.selectRow === next.context.selectRow &&
+    isVirtualizedTableRowSelected(previous) ===
+      isVirtualizedTableRowSelected(next),
+);
+VirtualizedTableRow.displayName = "VirtualizedTableRow";
+
+const tableComponents: TableComponents<
+  Row<UnitListRowView>,
+  VirtualizedTableContext
+> = {
+  Scroller: React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
+    return (
+      <TableContainer
+        {...omitVirtuosoContext(props)}
+        ref={ref}
+        component={Paper}
+        elevation={3}
+      />
+    );
+  }),
+  Table: (props: object) => {
+    const tableProps = omitVirtuosoContext(props);
+    return <Table {...tableProps} size="small" stickyHeader />;
+  },
   TableHead: React.forwardRef<HTMLTableSectionElement>(
     function tableHead(props, ref) {
-      return <TableHead {...props} ref={ref} />;
+      const tableHeadProps = omitVirtuosoContext(props);
+      return <TableHead {...tableHeadProps} ref={ref} />;
     },
   ),
   TableBody: React.forwardRef<HTMLTableSectionElement>(
     function tableBody(props, ref) {
-      return <TableBody {...props} ref={ref} />;
+      const tableBodyProps = omitVirtuosoContext(props);
+      return <TableBody {...tableBodyProps} ref={ref} />;
     },
   ),
-  TableRow: (props: ItemProps<Row<UnitListRowView>>) => (
-    <TableRow
-      {...props}
-      hover={true}
-      selected={props["data-index"] === rowIndex}
-    />
-  ),
-});
+  TableRow: VirtualizedTableRow,
+};
 
 const VirtualizedTable: FC<VirtualizedTableProps> = ({
   headerGroups,
   rows,
-  scrollType,
   rowIndex,
-  searchState,
+  searchQuery,
+  parameterSearchValuesByPath,
+  selectedAbsolutePath,
+  selectRow,
 }) => {
   console.log("render VirtualizedTable.");
 
-  const theme = useTheme();
-
-  const tableComponents = useMemo(
-    () => createTableComponents(scrollType, rowIndex),
-    [scrollType, rowIndex],
+  const context = useMemo(
+    () => ({ rowIndex, selectedAbsolutePath, selectRow }),
+    [rowIndex, selectedAbsolutePath, selectRow],
   );
 
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
@@ -100,14 +174,11 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     (index: number, data: Row<UnitListRowView>) =>
       data.getVisibleCells().map((cell) => {
         const parameters =
-          searchState.parameterSearchValuesByPath.get(
-            data.original.absolutePath,
-          ) ?? [];
+          parameterSearchValuesByPath.get(data.original.absolutePath) ?? [];
         const isSearchHit = isAjsTableSearchHit(
           cell.getValue<AccessorType | undefined>(),
           parameters,
-          searchState.globalFilter,
-          searchState.searchMode,
+          searchQuery,
         );
         return (
           <TableCell
@@ -126,7 +197,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
           </TableCell>
         );
       }),
-    [searchState],
+    [parameterSearchValuesByPath, searchQuery],
   );
 
   const fixedHeaderContent = useCallback(
@@ -137,28 +208,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     [headerGroups],
   );
 
-  const toolbarHeight = theme.mixins.toolbar.minHeight;
-
-  const virtuosoStyle = useMemo(
-    () =>
-      scrollType === "table"
-        ? {
-            width: "100%",
-            minWidth: 0,
-            height: `calc(100vh - ${toolbarHeight}px - 2em)`,
-            maxHeight: `calc(100vh - ${toolbarHeight}px - 2em)`,
-            boxSizing: "border-box" as const,
-          }
-        : {
-            width: "100%",
-            minWidth: 0,
-            height: "auto",
-            maxHeight: "none",
-            overflow: "visible",
-            boxSizing: "border-box" as const,
-          },
-    [scrollType, toolbarHeight],
-  );
+  const virtuosoStyle = useMemo(() => getFixedTableVirtuosoStyle(), []);
 
   useEffect(() => {
     if (rowIndex !== undefined) {
@@ -174,12 +224,12 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
 
   return (
     <>
-      <TableVirtuoso
+      <TableVirtuoso<Row<UnitListRowView>, VirtualizedTableContext>
         ref={virtuosoRef}
         style={virtuosoStyle}
-        useWindowScroll={scrollType === "window"}
         data={rows}
         components={tableComponents}
+        context={context}
         fixedHeaderContent={fixedHeaderContent}
         itemContent={itemContent}
       />
