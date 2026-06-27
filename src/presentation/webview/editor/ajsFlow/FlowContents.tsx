@@ -25,6 +25,7 @@ import Header from "./Header";
 import FlowSelector from "./FlowSelector";
 import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
 import { useFlowViewerController } from "./useFlowViewerController";
+import { navigateToTable } from "./nodes/Utils";
 import {
   resolveFlowMiniMapNodeFill,
   resolveFlowMiniMapNodeStroke,
@@ -92,6 +93,13 @@ const FlowContents: FC = () => {
     treeHoveredUnit,
     unitById,
   } = useFlowViewerController({ theme });
+  const openSelectedNodeUnitList = useMemo(
+    () =>
+      selectedNodeDetail
+        ? () => navigateToTable(selectedNodeDetail.absolutePath)
+        : () => undefined,
+    [selectedNodeDetail],
+  );
   const miniMapColors = useMemo(
     () => ({
       both: theme.palette.warning.main,
@@ -259,6 +267,7 @@ const FlowContents: FC = () => {
                   onClose={clearSelectedUnit}
                   onOpenDefinition={openSelectedNodeDefinition}
                   onOpenScope={openSelectedNodeScope}
+                  onOpenUnitList={openSelectedNodeUnitList}
                   focusModeEnabled={focusModeEnabled}
                   onToggleFocusMode={toggleFocusMode}
                 />

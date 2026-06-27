@@ -7,7 +7,10 @@ import {
   revealCounterpartPanel,
 } from "../../bootstrap/extension/viewerWiring";
 import { ViewerFactory } from "../../presentation/vscode/webview/ViewerFactory";
-import { AJS_FLOW_VIEWER_TYPE } from "../../presentation/vscode/webview/constant";
+import {
+  AJS_FLOW_VIEWER_TYPE,
+  AJS_TABLE_VIEWER_TYPE,
+} from "../../presentation/vscode/webview/constant";
 
 suite("Viewer wiring", () => {
   test("creates viewer subscriptions for both table and flow viewers", () => {
@@ -126,6 +129,51 @@ suite("Viewer wiring", () => {
       "reveal",
       "document",
       "post:revealUnit:/root/latest",
+    ]);
+  });
+
+  test("opens a missing table panel and reveals after document readiness", () => {
+    const calls: string[] = [];
+    const document = { uri: {} } as vscode.TextDocument;
+    const panel = {
+      viewColumn: vscode.ViewColumn.Beside,
+      reveal: () => calls.push("reveal"),
+      webview: {
+        postMessage: (message: {
+          type: string;
+          data: { absolutePath: string };
+        }) => calls.push(`post:${message.type}:${message.data.absolutePath}`),
+      },
+    } as unknown as vscode.WebviewPanel;
+    const factory = {
+      getExistingPanel: () => undefined,
+      getPanel: () => panel,
+    } as unknown as ViewerFactory;
+    const pendingRevealByPanel = new WeakMap<vscode.WebviewPanel, string>();
+
+    revealCounterpartPanel(
+      {
+        document,
+        targetViewType: AJS_TABLE_VIEWER_TYPE,
+        absolutePath: "/root/job",
+      },
+      {
+        factoryByViewType: new Map([[AJS_TABLE_VIEWER_TYPE, factory]]),
+        mountPanel: () => calls.push("mount"),
+        pendingRevealByPanel,
+      },
+    );
+
+    assert.deepStrictEqual(calls, ["mount", "reveal"]);
+    createViewerReadyHandler(
+      () => calls.push("document"),
+      pendingRevealByPanel,
+    )(document, panel);
+    assert.deepStrictEqual(calls, [
+      "mount",
+      "reveal",
+      "document",
+      "post:revealUnit:/root/job",
     ]);
   });
 

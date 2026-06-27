@@ -234,10 +234,16 @@ suite("Flow Node Detail", () => {
           focusModeEnabled: false,
           onOpenDefinition: () => undefined,
           onOpenScope: () => undefined,
+          onOpenUnitList: () => undefined,
           onToggleFocusMode: () => undefined,
         }),
       ),
-      ["Focus relationships", "Open definition details", "Open as graph scope"],
+      [
+        "Focus relationships",
+        "Open definition details",
+        "Open in unit list",
+        "Open as graph scope",
+      ],
     );
   });
 });

@@ -2,6 +2,7 @@ import React, { FC, memo, useMemo } from "react";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
+import TableChartIcon from "@mui/icons-material/TableChart";
 import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
@@ -16,6 +17,7 @@ type FlowNodeDetailPanelProps = {
   onClose: VoidFunction;
   onOpenDefinition: VoidFunction;
   onOpenScope: VoidFunction;
+  onOpenUnitList: VoidFunction;
   focusModeEnabled: boolean;
   onToggleFocusMode: VoidFunction;
 };
@@ -59,12 +61,14 @@ export const buildFlowNodeDetailActions = ({
   focusModeEnabled,
   onOpenDefinition,
   onOpenScope,
+  onOpenUnitList,
   onToggleFocusMode,
 }: {
   canOpenAsScope: boolean;
   focusModeEnabled: boolean;
   onOpenDefinition: VoidFunction;
   onOpenScope: VoidFunction;
+  onOpenUnitList: VoidFunction;
   onToggleFocusMode: VoidFunction;
 }): SharedUnitDetailPaneAction[] => [
   {
@@ -77,6 +81,11 @@ export const buildFlowNodeDetailActions = ({
     label: "Open definition details",
     icon: <DescriptionIcon />,
     onClick: onOpenDefinition,
+  },
+  {
+    label: "Open in unit list",
+    icon: <TableChartIcon />,
+    onClick: onOpenUnitList,
   },
   ...(canOpenAsScope
     ? [
@@ -95,6 +104,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   onClose,
   onOpenDefinition,
   onOpenScope,
+  onOpenUnitList,
   focusModeEnabled,
   onToggleFocusMode,
 }) => {
@@ -115,6 +125,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
         focusModeEnabled,
         onOpenDefinition,
         onOpenScope,
+        onOpenUnitList,
         onToggleFocusMode,
       }),
     [
@@ -122,6 +133,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
       focusModeEnabled,
       onOpenDefinition,
       onOpenScope,
+      onOpenUnitList,
       onToggleFocusMode,
     ],
   );
