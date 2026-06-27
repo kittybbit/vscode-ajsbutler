@@ -1,9 +1,11 @@
 import * as assert from "assert";
+import { getFlowNodeHeaderItemKinds } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
 import {
-  resolveFlowNodeStatuses,
   resolveFlowNodeHeaderTone,
+  resolveFlowNodeStatuses,
   shouldRenderNodeComment,
 } from "../../presentation/webview/editor/ajsFlow/nodes/flowNodeDisplay";
+import { getJobNetHeaderActionKinds } from "../../presentation/webview/editor/ajsFlow/nodes/JobNetNode";
 
 suite("flow node display", () => {
   test("does not render duplicate comments matching the label", () => {
@@ -49,6 +51,55 @@ suite("flow node display", () => {
         ),
       ),
       ["neutral", "primary", "warning", "info"],
+    );
+  });
+
+  test("places jobnet open-scope before nested expand in the header", () => {
+    assert.deepStrictEqual(
+      getJobNetHeaderActionKinds({
+        canExpandNested: true,
+        isCurrent: false,
+      }),
+      ["openScope", "toggleNested"],
+    );
+    assert.deepStrictEqual(
+      getJobNetHeaderActionKinds({
+        canExpandNested: false,
+        isCurrent: false,
+      }),
+      ["openScope"],
+    );
+    assert.deepStrictEqual(
+      getJobNetHeaderActionKinds({
+        canExpandNested: true,
+        isCurrent: true,
+      }),
+      [],
+    );
+  });
+
+  test("keeps status indicators in the header before node actions", () => {
+    assert.deepStrictEqual(
+      getFlowNodeHeaderItemKinds(
+        {
+          hasSchedule: true,
+          hasWaitedFor: true,
+          isRootJobnet: true,
+        },
+        true,
+      ),
+      ["rootBadge", "schedule", "waitedFor", "action"],
+    );
+    assert.deepStrictEqual(
+      getFlowNodeHeaderItemKinds(
+        {
+          hasSchedule: false,
+          hasWaitedFor: false,
+          isRootJobnet: false,
+        },
+        false,
+      ),
+      [],
     );
   });
 });

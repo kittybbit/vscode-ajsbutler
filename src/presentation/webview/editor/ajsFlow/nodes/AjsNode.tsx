@@ -169,6 +169,10 @@ export const NodeNameAndComment: React.FC<{
       boxSizing: "border-box",
       width: "100%",
       minWidth: 0,
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
       paddingX: "0.6em",
     }}
   >
@@ -212,15 +216,30 @@ const statusPresentation: Record<
   },
 };
 
+export type FlowNodeHeaderItemKind = "rootBadge" | FlowNodeStatus | "action";
+
+export const getFlowNodeHeaderItemKinds = (
+  data: Pick<AjsNode, "hasSchedule" | "hasWaitedFor" | "isRootJobnet">,
+  hasHeaderAction: boolean,
+): FlowNodeHeaderItemKind[] => [
+  ...(data.isRootJobnet
+    ? (["rootBadge"] satisfies FlowNodeHeaderItemKind[])
+    : []),
+  ...resolveFlowNodeStatuses(data),
+  ...(hasHeaderAction ? (["action"] satisfies FlowNodeHeaderItemKind[]) : []),
+];
+
 const NodeStatusIndicators: FC<{ data: AjsNode }> = ({ data }) => {
-  const statuses = resolveFlowNodeStatuses(data);
+  const statuses = getFlowNodeHeaderItemKinds(data, false).filter(
+    (itemKind): itemKind is FlowNodeStatus =>
+      itemKind === "schedule" || itemKind === "waitedFor",
+  );
   if (statuses.length === 0) {
     return null;
   }
   return (
     <Box
       sx={{
-        minHeight: "1em",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -253,7 +272,7 @@ export const FlowNodeCard: FC<{
   kind: FlowNodeKind;
   className?: string;
   headerAction?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }> = ({ data, kind, className, headerAction, children }) => (
   <Stack id={data.unitId} sx={buildNodeSxProps(data)} className={className}>
     <Box
@@ -272,11 +291,11 @@ export const FlowNodeCard: FC<{
       <TyTitle ty={data.ty} gty={data.gty} />
       <Box sx={{ display: "flex", alignItems: "center", gap: "0.25em" }}>
         {data.isRootJobnet && <Box sx={nodeBadgeSxProps}>ROOT</Box>}
+        <NodeStatusIndicators data={data} />
         {headerAction}
       </Box>
     </Box>
     <NodeNameAndComment label={data.label} comment={data.comment} />
-    <NodeStatusIndicators data={data} />
-    <Box sx={nodeActionsSxProps}>{children}</Box>
+    {children && <Box sx={nodeActionsSxProps}>{children}</Box>}
   </Stack>
 );

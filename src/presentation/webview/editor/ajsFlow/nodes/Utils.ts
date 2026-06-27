@@ -25,15 +25,6 @@ export const handleKeyDownNestedToggle =
     }
   };
 
-export const handleClickNavigateToTable = (data: AjsNode) => () => {
-  window.vscode.postMessage(createNavigationEvent("table", data.absolutePath));
+export const navigateToTable = (absolutePath: string): void => {
+  window.vscode.postMessage(createNavigationEvent("table", absolutePath));
 };
-
-export const handleKeyDownNavigateToTable =
-  (data: AjsNode) => (event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Enter") {
-      window.vscode.postMessage(
-        createNavigationEvent("table", data.absolutePath),
-      );
-    }
-  };

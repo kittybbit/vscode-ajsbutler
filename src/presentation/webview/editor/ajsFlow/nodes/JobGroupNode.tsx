@@ -1,11 +1,6 @@
 import React, { FC, memo } from "react";
 import { Node, NodeProps } from "@xyflow/react";
-import TableChartIcon from "@mui/icons-material/TableChart";
-import { ActionIcon, AjsNode, FlowNodeCard } from "./AjsNode";
-import {
-  handleClickNavigateToTable,
-  handleKeyDownNavigateToTable,
-} from "./Utils";
+import { AjsNode, FlowNodeCard } from "./AjsNode";
 import classNames from "classnames";
 
 type JobGroupNode = Node<AjsNode, "jobgroup">;
@@ -22,15 +17,7 @@ const JobGroupNode: FC<JobGroupNodeProp> = ({ data }: JobGroupNodeProp) => {
         className={classNames({
           ancestor: isAncestor,
         })}
-      >
-        <ActionIcon
-          title="Open the matching unit in the unit list."
-          ariaLabel="Open the matching unit in the unit list."
-          onClick={handleClickNavigateToTable(data)}
-          onKeyDown={handleKeyDownNavigateToTable(data)}
-          icon={<TableChartIcon fontSize="inherit" />}
-        />
-      </FlowNodeCard>
+      />
     </>
   );
 };

@@ -34,6 +34,9 @@ other viewer when that counterpart view is available.
   document context
 - if navigation changes the visible graph bounds or selected row, the target
   viewer should preserve its normal focus and fit behavior
+- flow-to-unit-list and unit-list-to-flow navigation should open the counterpart
+  viewer when it is available for the same document but not already open, then
+  reveal the target unit after the viewer is ready
 - when unit-list-to-flow navigation starts from a job group, the target flow
   viewer should resolve the active flow scope to a descendant root jobnet while
   still revealing or highlighting the original job group when possible

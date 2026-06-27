@@ -118,10 +118,6 @@ export const revealCounterpartPanel = (
     return;
   }
 
-  if (targetViewType !== AJS_FLOW_VIEWER_TYPE) {
-    return;
-  }
-
   const newPanel = targetFactory.getPanel(document);
   pendingRevealByPanel.set(newPanel, absolutePath);
   mountPanel(newPanel, targetViewType);

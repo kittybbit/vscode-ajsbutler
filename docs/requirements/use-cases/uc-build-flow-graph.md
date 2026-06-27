@@ -80,6 +80,9 @@ The user opens or refreshes a flow-oriented view for a selected unit scope.
   selection, search, and relationship-focus states
 - node presentation may become card-based, but node dimensions must remain
   compatible with deterministic positioning and expanded nested layout
+- node presentation may use a two-row card structure where the header carries
+  type, status, open-scope, and nested expansion affordances, and the content
+  row keeps the unit name/comment centered in the remaining node body
 - flow selector entries may show job groups, but the active flow graph scope
   must resolve to a root jobnet rather than a job group
 
