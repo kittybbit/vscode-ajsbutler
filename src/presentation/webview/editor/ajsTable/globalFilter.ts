@@ -9,26 +9,23 @@ export type ParameterSearchValuesByPath = ReadonlyMap<
   string,
   readonly AjsParameter[]
 >;
-export type AjsTableSearchMode = "value" | "keyValue";
 
 export const normalizeSearchValue = (value: unknown): string =>
   value instanceof Parameter ? value.value() : String(value);
 
 export const buildParameterSearchValues = (
   parameters: readonly AjsParameter[],
-  mode: AjsTableSearchMode,
-): string[] =>
-  mode === "keyValue"
-    ? parameters.map((parameter) => `${parameter.key}=${parameter.value}`)
-    : parameters.map((parameter) => parameter.value);
+): string[] => parameters.map((parameter) => parameter.value);
 
-const toCellSearchValues = (value: AccessorType | undefined): string[] => {
+export const toCellSearchValues = (
+  value: AccessorType | undefined,
+): string[] => {
   if (value === undefined) return [];
   const values = Array.isArray(value) ? value : [value];
   return values.map(normalizeSearchValue);
 };
 
-const rankSearchValues = (
+export const rankSearchValues = (
   searchValues: readonly string[],
   filterValue: string,
 ): RankingInfo | undefined =>
@@ -38,44 +35,28 @@ const rankSearchValues = (
     )
     .find((rank) => rank.passed);
 
-const matchingParameterValues = (
+export const getAjsTableSearchValues = (
+  cellValue: AccessorType | undefined,
   parameters: readonly AjsParameter[],
-  filterValue: string,
-): string[] =>
-  parameters
-    .filter((parameter) =>
-      rankSearchValues([`${parameter.key}=${parameter.value}`], filterValue),
-    )
-    .map((parameter) => parameter.value);
+): string[] => [
+  ...toCellSearchValues(cellValue),
+  ...buildParameterSearchValues(parameters),
+];
 
 export const isAjsTableSearchHit = (
   cellValue: AccessorType | undefined,
-  parameters: readonly AjsParameter[],
+  _parameters: readonly AjsParameter[],
   filterValue: string,
-  searchMode: AjsTableSearchMode,
 ): boolean => {
-  const cellSearchValues = toCellSearchValues(cellValue);
-  if (cellSearchValues.length === 0 || filterValue.trim().length === 0) {
+  if (filterValue.trim().length === 0) {
     return false;
   }
 
-  if (searchMode === "keyValue") {
-    const parameterValues = matchingParameterValues(parameters, filterValue);
-    return cellSearchValues.some((cellSearchValue) =>
-      parameterValues.some(
-        (parameterValue) => cellSearchValue === parameterValue,
-      ),
-    );
-  }
-
-  return Boolean(rankSearchValues(cellSearchValues, filterValue));
+  return Boolean(rankSearchValues(toCellSearchValues(cellValue), filterValue));
 };
 
 export const createAjsGlobalFilterFn =
-  (
-    parameterSearchValuesByPath: ParameterSearchValuesByPath,
-    searchMode: AjsTableSearchMode,
-  ) =>
+  (parameterSearchValuesByPath: ParameterSearchValuesByPath) =>
   (
     row: Row<UnitListRowView>,
     columnId: string,
@@ -85,14 +66,7 @@ export const createAjsGlobalFilterFn =
     const cellValue = row.getValue<AccessorType>(columnId);
     const parameters =
       parameterSearchValuesByPath.get(row.original.absolutePath) ?? [];
-    const parameterSearchValues = buildParameterSearchValues(
-      parameters,
-      searchMode,
-    );
-    const searchValues =
-      searchMode === "keyValue"
-        ? parameterSearchValues
-        : [...toCellSearchValues(cellValue), ...parameterSearchValues];
+    const searchValues = getAjsTableSearchValues(cellValue, parameters);
 
     const itemRank = rankSearchValues(searchValues, value);
     if (!itemRank) return false;

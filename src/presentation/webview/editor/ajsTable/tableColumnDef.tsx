@@ -32,7 +32,7 @@ import group20 from "./columnDefs/group20";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { createNavigationEvent } from "../../../../shared/webviewEvents";
+import { navigateToFlow } from "./navigation";
 
 // default setting of
 export const tableDefaultColumnDef = {
@@ -58,7 +58,7 @@ export const handleOpenUnitDefinition =
   };
 
 export const handleNavigateToFlow = (absolutePath: string) => () => {
-  window.vscode.postMessage(createNavigationEvent("flow", absolutePath));
+  navigateToFlow(absolutePath);
 };
 
 export const tableColumnDef = (

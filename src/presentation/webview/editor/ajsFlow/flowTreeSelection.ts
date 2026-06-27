@@ -1,4 +1,5 @@
 import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import { collectUnitTreeParentUnitIds } from "../shared/unitTreeSelection";
 import { collectExpandedAncestorUnitIds } from "./flowExpandedAncestors";
 
 export type FlowTreeSelectionTarget = {
@@ -6,28 +7,13 @@ export type FlowTreeSelectionTarget = {
   expandedNestedUnitIds: string[];
 };
 
-const collectParentUnitIds = (
-  unit: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): string[] => {
-  const parentUnitIds: string[] = [];
-  const visited = new Set<string>();
-  let parentId = unit?.parentId;
-
-  while (parentId && !visited.has(parentId)) {
-    visited.add(parentId);
-    parentUnitIds.push(parentId);
-    parentId = unitById.get(parentId)?.parentId;
-  }
-
-  return parentUnitIds;
-};
-
 export const collectFlowTreeAncestorUnitIds = (
   unitId: string | undefined,
   unitById: ReadonlyMap<string, AjsUnit>,
 ): string[] =>
-  unitId ? collectParentUnitIds(unitById.get(unitId), unitById).reverse() : [];
+  unitId
+    ? collectUnitTreeParentUnitIds(unitById.get(unitId), unitById).reverse()
+    : [];
 
 export const isUnitInCurrentFlowScope = (
   unit: AjsUnit,
@@ -38,8 +24,8 @@ export const isUnitInCurrentFlowScope = (
     return Boolean(currentUnit);
   }
   return (
-    collectParentUnitIds(unit, unitById).includes(currentUnit.id) ||
-    collectParentUnitIds(currentUnit, unitById).includes(unit.id)
+    collectUnitTreeParentUnitIds(unit, unitById).includes(currentUnit.id) ||
+    collectUnitTreeParentUnitIds(currentUnit, unitById).includes(unit.id)
   );
 };
 
@@ -57,7 +43,7 @@ export const resolveFlowTreeSelectionTarget = (
     return undefined;
   }
 
-  const isDescendant = collectParentUnitIds(unit, unitById).includes(
+  const isDescendant = collectUnitTreeParentUnitIds(unit, unitById).includes(
     currentUnit.id,
   );
   return {

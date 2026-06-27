@@ -25,11 +25,20 @@ table behavior.
 - Keep existing unit-list capabilities available while relocating search,
   visible/total unit counts, column visibility, and CSV export controls into
   the header.
+- Use a fixed-height, flow-view-like unit-list shell when the unit tree is
+  shown. The table should scroll inside the viewer body; the previous
+  WindowScroll/table-scroll toggle is not part of this layout.
+- Present column visibility as a Header-controlled surface rather than a
+  persistent layout-shifting left Drawer so it does not compete with the unit
+  tree pane.
 - Reuse presentation-level search UI where list and flow behavior is genuinely
   equivalent, including keyboard focus, result count, result navigation,
   clearing, and helper text.
-- Keep table filtering and flow reveal behavior in their respective
-  presentation adapters.
+- Make unit-list Header search behave like flow-view search at the presentation
+  level: next/previous search-result navigation selects the matching table row
+  by stable unit identity and reveals it in the internal table scroll region.
+- Keep unit-list row selection/reveal and flow graph reveal behavior in their
+  respective presentation adapters.
 - Introduce shared application or domain search semantics only in a separately
   investigated and approved slice that satisfies
   `uc-search-domain-unification.md`.
@@ -56,6 +65,18 @@ Scenario: Existing table actions remain available in the refreshed header
   Then search, visible and total counts, and column visibility remain available
   And CSV export remains available
 
+Scenario: Explore units with a stable left unit tree
+  Given a unit list is open
+  When the unit-tree pane is displayed beside the table
+  Then the table scrolls inside the viewer body
+  And the column selector opens from the header without shifting the unit-tree pane
+
+Scenario: Search the unit list with flow-style result navigation
+  Given a unit list is open
+  When the user enters a Header search query and moves to the next result
+  Then the matching row is selected by stable unit identity
+  And the table scrolls that row into view without changing viewer bridge contracts
+
 Scenario: Navigate from a selected list row to the flow graph
   Given a selected unit has a corresponding flow context
   When the user invokes the flow navigation action
@@ -76,8 +97,8 @@ Scenario: Inspect a selected unit without leaving the list
 - Application: retain stable unit identity, navigation, list-view DTO, and unit
   definition contracts; own shared search behavior only when the search use
   case trigger is satisfied.
-- Presentation: own header styling, control layout, table filtering, flow
-  reveal, keyboard interaction, and detail-pane rendering.
+- Presentation: own header styling, control layout, list search row selection,
+  flow reveal, keyboard interaction, and detail-pane rendering.
 - Infrastructure: no planned responsibility change.
 
 ## Impact Analysis
@@ -89,8 +110,9 @@ Scenario: Inspect a selected unit without leaving the list
   viewer bridge navigation, unit definition presentation, component tests,
   browser tests, related use cases, branch plans, and roadmap.
 - Propagation decision: preserve existing DTO and bridge contracts where
-  possible. Treat any shared search contract or application-layer change as a
-  separate slice requiring fresh impact investigation and approval.
+  possible. Treat any shared search contract or application-layer change beyond
+  presentation-level search field reuse as a separate slice requiring fresh
+  impact investigation and approval.
 
 ### Breaking Change Analysis
 
@@ -135,7 +157,12 @@ Scenario: Inspect a selected unit without leaving the list
 - The unit-list header uses the established flow-view visual language without
   removing existing controls.
 - Visible and total unit counts are available in the header.
-- Shared presentation search UI does not couple table filtering to flow reveal.
+- The unit-list body uses an internal table scroll region beside the unit-tree
+  pane; WindowScroll is not exposed in this layout.
+- Column visibility remains available without using a layout-shifting left
+  Drawer.
+- Shared presentation search UI does not couple unit-list row selection to flow
+  reveal.
 - Cross-view actions follow the existing stable-identity navigation contract.
 - The detail pane consumes application-provided definition data rather than
   parser internals or reconstructed wrapper objects.
@@ -145,8 +172,8 @@ Scenario: Inspect a selected unit without leaving the list
 ## Non-Goals
 
 - Rewriting table rendering, parser behavior, or flow layout.
-- Changing CSV contents, unit matching semantics, or unit-definition contents
-  as part of the header slice.
+- Changing CSV contents, application/domain search semantics, or
+  unit-definition contents as part of the header slice.
 - Raising the minimum supported VS Code version.
 - Introducing a service container or a UI-framework dependency into domain or
   application code.

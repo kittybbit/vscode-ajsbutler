@@ -65,11 +65,42 @@ type CounterpartRevealRequest = {
 
 type CounterpartRevealDeps = {
   factoryByViewType: ReadonlyMap<string, ViewerFactory>;
+  mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void;
+  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
 };
 
-const revealExistingCounterpartPanel = (
+export const flushPendingViewerReveal = (
+  panel: vscode.WebviewPanel,
+  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
+): void => {
+  const absolutePath = pendingRevealByPanel.get(panel);
+  if (!absolutePath) {
+    return;
+  }
+  pendingRevealByPanel.delete(panel);
+  panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+};
+
+export const createViewerReadyHandler =
+  (
+    onReady: (
+      document: vscode.TextDocument,
+      panel: vscode.WebviewPanel,
+    ) => void,
+    pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
+  ) =>
+  (document: vscode.TextDocument, panel: vscode.WebviewPanel): void => {
+    onReady(document, panel);
+    flushPendingViewerReveal(panel, pendingRevealByPanel);
+  };
+
+export const revealCounterpartPanel = (
   { document, targetViewType, absolutePath }: CounterpartRevealRequest,
-  { factoryByViewType }: CounterpartRevealDeps,
+  {
+    factoryByViewType,
+    mountPanel,
+    pendingRevealByPanel,
+  }: CounterpartRevealDeps,
 ): void => {
   const targetFactory = factoryByViewType.get(targetViewType);
   if (!targetFactory) {
@@ -77,26 +108,40 @@ const revealExistingCounterpartPanel = (
   }
 
   const panel = targetFactory.getExistingPanel(document);
-  if (!panel) {
+  if (panel) {
+    panel.reveal(panel.viewColumn);
+    if (pendingRevealByPanel.has(panel)) {
+      pendingRevealByPanel.set(panel, absolutePath);
+      return;
+    }
+    panel.webview.postMessage(createRevealUnitEvent(absolutePath));
     return;
   }
 
-  panel.reveal(panel.viewColumn);
-  panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+  if (targetViewType !== AJS_FLOW_VIEWER_TYPE) {
+    return;
+  }
+
+  const newPanel = targetFactory.getPanel(document);
+  pendingRevealByPanel.set(newPanel, absolutePath);
+  mountPanel(newPanel, targetViewType);
+  newPanel.reveal(newPanel.viewColumn);
 };
 
 const revealCounterpartFromNavigation = (
   document: vscode.TextDocument,
   event: NavigationEventType,
   factoryByViewType: ReadonlyMap<string, ViewerFactory>,
+  mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void,
+  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
 ): void => {
-  revealExistingCounterpartPanel(
+  revealCounterpartPanel(
     {
       document,
       targetViewType: resolveTargetViewType(event.data.targetView),
       absolutePath: event.data.absolutePath,
     },
-    { factoryByViewType },
+    { factoryByViewType, mountPanel, pendingRevealByPanel },
   );
 };
 
@@ -108,11 +153,13 @@ const createViewerBundle = ({
   factoryByViewType,
   viewType,
   saveHandler,
+  pendingRevealByPanel,
 }: ViewerWiringDeps & {
   previewDeps: OpenPreviewCommandDependencies;
   factoryByViewType: Map<string, ViewerFactory>;
   viewType: string;
   saveHandler?: (content: string) => Promise<void>;
+  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
 }): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator(
@@ -125,9 +172,18 @@ const createViewerBundle = ({
     viewType,
     telemetry,
     store,
-    createReadyAjsDocument(buildUnitList),
+    createViewerReadyHandler(
+      createReadyAjsDocument(buildUnitList),
+      pendingRevealByPanel,
+    ),
     (document, event) => {
-      revealCounterpartFromNavigation(document, event, factoryByViewType);
+      revealCounterpartFromNavigation(
+        document,
+        event,
+        factoryByViewType,
+        previewDeps.mountPanel,
+        pendingRevealByPanel,
+      );
     },
     saveHandler,
   );
@@ -154,12 +210,14 @@ export const createViewerSubscriptions = (
     deps.telemetry,
   );
   const factoryByViewType = new Map<string, ViewerFactory>();
+  const pendingRevealByPanel = new WeakMap<vscode.WebviewPanel, string>();
 
   return viewerConfigs.flatMap((config) =>
     createViewerBundle({
       ...deps,
       previewDeps,
       factoryByViewType,
+      pendingRevealByPanel,
       ...config,
     }),
   );
