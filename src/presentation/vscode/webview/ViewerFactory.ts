@@ -134,7 +134,7 @@ export class ViewerFactory {
     const panel = this.#deps.createWebviewPanel(
       this.#viewType,
       path.basename(document.fileName),
-      vscode.ViewColumn.Beside,
+      vscode.ViewColumn.Active,
       {
         enableScripts: true,
         retainContextWhenHidden: true,

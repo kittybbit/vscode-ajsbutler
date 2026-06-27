@@ -75,6 +75,9 @@ suite("ViewerFactory", () => {
     let readyArgs:
       | { document: vscode.TextDocument; panel: vscode.WebviewPanel }
       | undefined;
+    let createdShowOptions:
+      | Parameters<typeof vscode.window.createWebviewPanel>[2]
+      | undefined;
 
     const factory = new ViewerFactory(
       "ajsbutler.testViewer",
@@ -94,7 +97,8 @@ suite("ViewerFactory", () => {
       () => {},
       undefined,
       {
-        createWebviewPanel() {
+        createWebviewPanel(_viewType, _title, viewColumn) {
+          createdShowOptions = viewColumn;
           return createdPanel;
         },
       },
@@ -107,6 +111,7 @@ suite("ViewerFactory", () => {
       document,
       panel: createdPanel,
     });
+    assert.strictEqual(createdShowOptions, vscode.ViewColumn.Active);
     assert.deepStrictEqual(added, [{ uri: document.uri, panel: createdPanel }]);
   });
 
