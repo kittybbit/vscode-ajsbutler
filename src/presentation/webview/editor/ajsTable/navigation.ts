@@ -11,10 +11,14 @@ export type TableRowSelectionAction =
   | { type: "documentChanged" };
 
 export const reduceTableRowSelection = (
-  _currentAbsolutePath: string | undefined,
+  currentAbsolutePath: string | undefined,
   action: TableRowSelectionAction,
 ): string | undefined =>
-  action.type === "select" ? action.absolutePath : undefined;
+  action.type === "select"
+    ? action.absolutePath === currentAbsolutePath
+      ? currentAbsolutePath
+      : action.absolutePath
+    : undefined;
 
 export const canNavigateToSelectedUnit = (
   absolutePath: string | undefined,

@@ -1,8 +1,6 @@
 // import * as vscode from 'vscode';
 import React from "react";
 import { CellContext, createColumnHelper } from "@tanstack/table-core";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import DescriptionIcon from "@mui/icons-material/Description";
 import {
   ajsTableColumnLabels,
   paramDefinitionLang,
@@ -30,9 +28,6 @@ import group18 from "./columnDefs/group18";
 import group19 from "./columnDefs/group19";
 import group20 from "./columnDefs/group20";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import { navigateToFlow } from "./navigation";
 
 // default setting of
 export const tableDefaultColumnDef = {
@@ -51,19 +46,8 @@ export const tableDefaultColumnDef = {
   },
 };
 
-export const handleOpenUnitDefinition =
-  (absolutePath: string, openUnitDefinition: (absolutePath: string) => void) =>
-  () => {
-    openUnitDefinition(absolutePath);
-  };
-
-export const handleNavigateToFlow = (absolutePath: string) => () => {
-  navigateToFlow(absolutePath);
-};
-
 export const tableColumnDef = (
   language: string | undefined = "en",
-  openUnitDefinition: (absolutePath: string) => void,
   handleJump: (id: string) => void,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ) => {
@@ -84,27 +68,6 @@ export const tableColumnDef = (
             <span id={props.row.original.id} tabIndex={0}>
               {props.row.index + 1}
             </span>
-            <Tooltip title="View the unit definition">
-              <IconButton
-                size="small"
-                aria-label="View the unit definition"
-                onClick={handleOpenUnitDefinition(
-                  props.row.original.absolutePath,
-                  openUnitDefinition,
-                )}
-              >
-                <DescriptionIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Open the matching unit in the flow graph">
-              <IconButton
-                size="small"
-                aria-label="Open the matching unit in the flow graph"
-                onClick={handleNavigateToFlow(props.row.original.absolutePath)}
-              >
-                <AccountTreeIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
           </Box>
         );
       },

@@ -42,11 +42,11 @@ table behavior.
 - Introduce shared application or domain search semantics only in a separately
   investigated and approved slice that satisfies
   `uc-search-domain-unification.md`.
-- Make list-to-flow navigation discoverable from the unit-list header or
-  selected-row context, using stable unit identity and the existing viewer
-  bridge contract.
-- Allow selected-unit definition content to be shown in a unit-list detail pane
-  without changing the application-owned definition content.
+- Make list-to-flow navigation discoverable from the selected-unit detail pane,
+  using stable unit identity and the existing viewer bridge contract.
+- Allow selected-unit definition details to be opened from a right-side detail
+  pane rendered by a shared detail-pane component used by both list and flow
+  viewers, without changing the application-owned definition content.
 - Deliver the feature as small slices in this order unless impact
   investigation justifies reordering:
   1. header styling and existing-control relocation
@@ -79,14 +79,16 @@ Scenario: Search the unit list with flow-style result navigation
 
 Scenario: Navigate from a selected list row to the flow graph
   Given a selected unit has a corresponding flow context
-  When the user invokes the flow navigation action
+  When the user invokes the flow navigation action from the detail pane
   Then the flow viewer opens or focuses the corresponding unit
   And navigation follows the list and flow navigation use case
 
 Scenario: Inspect a selected unit without leaving the list
   Given a unit row is selected
-  When the user opens unit details
-  Then the detail pane shows the application-provided unit definition content
+  When the shared right-side detail pane is displayed
+  Then the detail pane shows selected-unit context
+  And relationship summary and state chips follow the flow detail pane structure
+  And a pane action can open application-provided unit definition content
   And the current list state remains stable
 ```
 
@@ -165,7 +167,10 @@ Scenario: Inspect a selected unit without leaving the list
   reveal.
 - Cross-view actions follow the existing stable-identity navigation contract.
 - The detail pane consumes application-provided definition data rather than
-  parser internals or reconstructed wrapper objects.
+  parser internals or reconstructed wrapper objects when the user opens
+  definition details from the pane.
+- The list table does not duplicate row-level definition-dialog and flow-graph
+  cross-link buttons once those actions are available from the detail pane.
 - Relevant component, application, desktop, and web checks pass for each
   implemented slice.
 
@@ -181,7 +186,5 @@ Scenario: Inspect a selected unit without leaving the list
 
 ## Open Questions
 
-- Should the detail pane replace the current dialog for the unit-list viewer or
-  coexist with it?
 - Which selection states should enable list-to-flow navigation when no
   meaningful flow scope exists?

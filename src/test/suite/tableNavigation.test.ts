@@ -105,6 +105,15 @@ suite("Table navigation", () => {
     );
   });
 
+  test("keeps row selection state stable when the same path is selected again", () => {
+    const selected = reduceTableRowSelection("/root/job", {
+      type: "select",
+      absolutePath: "/root/job",
+    });
+
+    assert.strictEqual(selected, "/root/job");
+  });
+
   test("maps unit-tree selection and scope opening through stable paths", () => {
     const unit = createUnit("unit-id", "/root/jobnet/job");
     const unitById = new Map([[unit.id, unit]]);

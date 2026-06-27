@@ -13,14 +13,16 @@
 
 1. Improve unit-list usability in small, separately approved slices.
 
-   - Align the unit-list header with the established flow-view visual language
-     while preserving existing search, count, column, and CSV behavior.
-   - Share presentation search UI only where interaction is equivalent; keep
-     table filtering and flow reveal separate.
-   - Add discoverable list-to-flow navigation through the existing stable-unit
-     bridge contract.
-   - Add a selected-unit detail pane using application-provided definition
-     content after its interaction model is decided.
+   - Completed: align the unit-list header with the established flow-view visual
+     language, move controls into the header, use an internal table scroll
+     region, share the unit-tree pane, and add flow-style presentation search
+     navigation.
+   - Completed: add discoverable list-to-flow navigation through the existing
+     stable-unit bridge contract, including deferred reveal for a newly opened
+     flow panel.
+   - Next: add a shared right-side selected-unit detail pane using
+     application-provided definition content, move list-to-flow navigation into
+     that pane, and remove duplicated row-level dialog/cross-link actions.
    - Introduce shared application or domain search semantics only if the
      search-domain use-case trigger is satisfied and separately approved.
 

@@ -26,16 +26,30 @@ Implementation must not start while approval is pending.
 - Completed list-to-flow navigation keeps the existing `NAVIGATE` /
   `REVEAL_UNIT` contracts and can defer reveal delivery until a newly opened
   flow panel is ready.
+- Completed selected-unit detail behavior uses a shared right-side detail pane
+  component for list and flow viewers. The list table no longer exposes
+  row-level definition-dialog or flow-graph cross-link buttons; those actions
+  are available from the selected-unit detail pane.
+- List detail selection uses stable `absolutePath` identity, resolves
+  application-provided `UnitDefinitionDialogDto` only for the pane definition
+  action, keeps the definition dialog inside the active theme provider, and
+  avoids row-selection regressions by keeping table/selector rendering work
+  bounded.
 - A shared domain/application search service remains deferred until
   `uc-search-domain-unification.md` has a separate approved slice.
 - `engines.vscode` remains `^1.75.0`; the implementation must use browser-safe
   webview code and VS Code APIs available at that version.
-- Manual desktop verification of row selection, tree selection/jump, Header
-  controls, column selection, existing-flow focus, and first-open flow reveal
-  remains a useful follow-up when an allowed VS Code host is available.
+- Manual desktop verification of row selection latency, tree selection/jump,
+  Header controls, column selection, pane close/collapse, definition-dialog
+  action, and pane flow-graph navigation remains a useful follow-up when an
+  allowed VS Code host is available.
 
 ## Use-Case Back-Propagation
 
-- No use-case back-propagation is required for the completed slice. Durable
-  behavior is covered by this feature spec and the existing navigation and
-  search-unification use cases.
+- The detail-pane task is covered by `uc-show-unit-definition.md` because it
+  reuses the existing application-provided definition DTO from a pane action.
+  Revisit that use case only if implementation changes definition content,
+  command generation, or table/flow definition parity.
+- `uc-navigate-between-unit-list-and-flow-graph.md` remains the durable bridge
+  contract; revisit it only if moving the list action from row icon to detail
+  pane changes payloads, failure policy, or target-scope behavior.

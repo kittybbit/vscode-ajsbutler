@@ -37,6 +37,7 @@ export type UnitTreeSelectorProps = {
   title?: string;
   ariaLabel?: string;
   collapsedAriaLabel?: string;
+  autoScrollSelectedUnit?: boolean;
   canOpenScopeUnit?: (unit: AjsUnit) => boolean;
   isUnitEnabled?: (unit: AjsUnit) => boolean;
   onHoverUnit?: (unitId: string) => void;
@@ -75,13 +76,19 @@ const defaultCanOpenScopeUnit = (): boolean => false;
 const defaultIsUnitEnabled = (): boolean => true;
 
 const mergeUnitIds = (
-  current: ReadonlySet<string>,
+  current: Set<string>,
   requiredUnitIds: readonly (string | undefined)[],
-): Set<string> =>
-  new Set([
-    ...current,
-    ...requiredUnitIds.filter((unitId): unitId is string => Boolean(unitId)),
-  ]);
+): Set<string> => {
+  let changed = false;
+  const next = new Set(current);
+  requiredUnitIds.forEach((unitId) => {
+    if (unitId && !next.has(unitId)) {
+      changed = true;
+      next.add(unitId);
+    }
+  });
+  return changed ? next : current;
+};
 
 const useExpandedUnitTreeState = (
   currentUnitId: string | undefined,
@@ -117,6 +124,7 @@ const useExpandedUnitTreeState = (
 };
 
 const useSelectedTreeRowScroll = (
+  autoScrollSelectedUnit: boolean,
   selectedUnitId: string | undefined,
   expandedUnitIds: ReadonlySet<string>,
 ) => {
@@ -133,6 +141,9 @@ const useSelectedTreeRowScroll = (
   );
 
   useEffect(() => {
+    if (!autoScrollSelectedUnit) {
+      return undefined;
+    }
     if (!selectedUnitId) {
       return undefined;
     }
@@ -151,7 +162,7 @@ const useSelectedTreeRowScroll = (
         window.cancelAnimationFrame(scrollFrameId);
       }
     };
-  }, [expandedUnitIds, selectedUnitId]);
+  }, [autoScrollSelectedUnit, expandedUnitIds, selectedUnitId]);
 
   return setRowRef;
 };
@@ -351,6 +362,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   title = "UNIT TREE",
   ariaLabel = "Unit tree",
   collapsedAriaLabel = "Collapsed unit tree",
+  autoScrollSelectedUnit = true,
   canOpenScopeUnit = defaultCanOpenScopeUnit,
   isUnitEnabled = defaultIsUnitEnabled,
   onHoverUnit,
@@ -374,7 +386,11 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
     selectedUnitId,
     unitById,
   );
-  const setRowRef = useSelectedTreeRowScroll(selectedUnitId, expandedUnitIds);
+  const setRowRef = useSelectedTreeRowScroll(
+    autoScrollSelectedUnit,
+    selectedUnitId,
+    expandedUnitIds,
+  );
 
   if (collapsed) {
     return (
