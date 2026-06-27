@@ -11,7 +11,7 @@
 
 ## Current Roadmap
 
-1. Improve unit-list usability in small, separately approved slices.
+1. Maintain the completed unit-list usability improvements.
 
    - Completed: align the unit-list header with the established flow-view visual
      language, move controls into the header, use an internal table scroll
@@ -20,9 +20,11 @@
    - Completed: add discoverable list-to-flow navigation through the existing
      stable-unit bridge contract, including deferred reveal for a newly opened
      flow panel.
-   - Next: add a shared right-side selected-unit detail pane using
+   - Completed: add a shared right-side selected-unit detail pane using
      application-provided definition content, move list-to-flow navigation into
      that pane, and remove duplicated row-level dialog/cross-link actions.
+   - The feature-local folder has been closed because no next implementation
+     slice is apparent.
    - Introduce shared application or domain search semantics only if the
      search-domain use-case trigger is satisfied and separately approved.
 
