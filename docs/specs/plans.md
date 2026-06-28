@@ -35,10 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Plan and approve the first qlty regression remediation slice for the
-   temporary quality refactor feature, starting with viewer presentation
-   clusters unless a targeted qlty rerun identifies a smaller higher-value
-   slice.
+1. Reassess remaining qlty regression clusters for the temporary quality
+   refactor feature and decide whether another focused slice is needed.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Select a new focused feature only when a concrete consumer or user-visible
