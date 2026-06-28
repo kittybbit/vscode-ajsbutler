@@ -5,7 +5,7 @@
 - Status: Proposed
 - Scope:
   reassess remaining `v1.15.1..HEAD` qlty smell and metrics clusters after the
-  viewer wiring cleanup, then choose the next small behavior-preserving
+  viewer event bridge cleanup, then choose the next small behavior-preserving
   remediation slice or close the temporary feature if parity is reached.
 - Acceptance:
   record whether another focused slice is needed, keep behavior-preserving
@@ -37,12 +37,18 @@ active implementation approval remains.
 - [x] Apply behavior-preserving counterpart reveal wiring refactors.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
+- [x] Reassess remaining qlty clusters after the viewer wiring slice.
+- [x] Select the viewer event bridge remediation slice.
+- [x] Obtain human implementation approval for the viewer event bridge slice.
+- [x] Apply behavior-preserving viewer event bridge refactors.
+- [x] Update focused tests only if behavior protection needs a new case.
+- [x] Run required validation.
 - [ ] Reassess remaining qlty clusters and decide the next slice or closure.
 
 ## Validation
 
 - [x] During implementation: targeted qlty checks for touched files.
-- [x] During implementation: focused `Viewer wiring` tests.
+- [x] During implementation: focused `Viewer event bridge` tests.
 - [x] After implementation: `CI=true rtk pnpm run qlty`.
 - [x] After implementation: `CI=true rtk pnpm test`.
 - [x] After implementation: `CI=true rtk pnpm run test:web`.
@@ -61,15 +67,13 @@ active implementation approval remains.
 - The user explicitly permits active refactoring beyond the direct changed
   range when needed to meet qlty parity, but behavior preservation and SDD
   approval gates still apply.
-- Remaining `v1.15.1` qlty findings are still broad, but
-  `viewerWiring.ts` has a compact, behavior-significant cluster:
-  `revealCounterpartPanel` high complexity and
-  `revealCounterpartFromNavigation` parameter count.
-- Direct references are limited to `viewerWiring.ts` and
-  `src/test/suite/viewerWiring.test.ts`; the behavior maps to
-  `uc-navigate-between-unit-list-and-flow-graph.md`.
 - The completed viewer wiring slice removed the targeted qlty smells by
   splitting counterpart reveal posting, existing-panel reveal, missing-panel
   open, and navigation dependency passing while preserving viewer event DTOs,
   webview message contracts, command IDs, telemetry payloads, and VS Code
+  compatibility.
+- The completed viewer event bridge slice removed the targeted qlty smells by
+  splitting message validation, payload dispatch, and callback list management
+  while preserving shared event DTOs, the global bridge shape, React bootstrap
+  wiring, VS Code-facing message routing, telemetry payloads, and VS Code
   compatibility.

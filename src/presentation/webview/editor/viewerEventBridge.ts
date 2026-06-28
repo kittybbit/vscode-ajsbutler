@@ -1,33 +1,91 @@
+type ViewerEventCallbacks = Window["EventBridge"]["callbacks"];
+type ViewerEventCallback = ViewerEventCallbacks[string][number];
+
+type ViewerEventPayload = {
+  type: string;
+  data: object;
+};
+
+type ViewerEventPayloadCandidate = {
+  type?: unknown;
+  data?: unknown;
+};
+
+const isViewerEventPayloadCandidate = (
+  value: unknown,
+): value is ViewerEventPayloadCandidate =>
+  Boolean(value) && typeof value === "object";
+
+const toViewerEventPayload = (
+  payload: ViewerEventPayloadCandidate,
+): ViewerEventPayload | undefined =>
+  typeof payload.type === "string"
+    ? { type: payload.type, data: payload.data as object }
+    : undefined;
+
+const resolveViewerEventPayload = (
+  event: MessageEvent,
+): ViewerEventPayload | undefined =>
+  isViewerEventPayloadCandidate(event.data)
+    ? toViewerEventPayload(event.data)
+    : undefined;
+
+const dispatchViewerEventPayload = (
+  callbacksByType: ViewerEventCallbacks,
+  payload: ViewerEventPayload,
+): void => {
+  callbacksByType[payload.type]?.forEach((callback) => {
+    callback(payload.type, payload.data);
+  });
+};
+
+const appendViewerEventCallback = (
+  callbacksByType: ViewerEventCallbacks,
+  type: string,
+  callback: ViewerEventCallback,
+): void => {
+  const callbacks = callbacksByType[type];
+  if (callbacks) {
+    callbacks.push(callback);
+    return;
+  }
+
+  callbacksByType[type] = [callback];
+};
+
+const removeCallbackFromList = (
+  callbacks: ViewerEventCallback[],
+  callback: ViewerEventCallback,
+): ViewerEventCallback[] => {
+  return callbacks.filter((item) => item !== callback);
+};
+
+const removeViewerEventCallback = (
+  callbacksByType: ViewerEventCallbacks,
+  type: string,
+  callback: ViewerEventCallback,
+): void => {
+  const callbacks = callbacksByType[type];
+  if (callbacks) {
+    callbacksByType[type] = removeCallbackFromList(callbacks, callback);
+  }
+};
+
 export const createViewerEventBridge = (): Window["EventBridge"] => {
+  const callbacks: ViewerEventCallbacks = {};
   const bridge: Window["EventBridge"] = {
-    callbacks: {},
+    callbacks,
     dispatch: (event) => {
-      if (!event.data || typeof event.data !== "object") {
-        return;
+      const payload = resolveViewerEventPayload(event);
+      if (payload) {
+        dispatchViewerEventPayload(callbacks, payload);
       }
-
-      const type = event.data.type;
-      if (typeof type !== "string") {
-        return;
-      }
-
-      const callbacks = bridge.callbacks[type];
-      callbacks?.forEach((callback) => {
-        callback(type, event.data.data);
-      });
     },
     addCallback: (type, callback) => {
-      const callbacks = bridge.callbacks[type] ?? [];
-      callbacks.push(callback);
-      bridge.callbacks[type] = callbacks;
+      appendViewerEventCallback(callbacks, type, callback);
     },
     removeCallback: (type, callback) => {
-      const callbacks = bridge.callbacks[type];
-      if (!callbacks) {
-        return;
-      }
-
-      bridge.callbacks[type] = callbacks.filter((item) => item !== callback);
+      removeViewerEventCallback(callbacks, type, callback);
     },
   };
 
