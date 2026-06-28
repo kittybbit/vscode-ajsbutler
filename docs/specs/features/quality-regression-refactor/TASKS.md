@@ -61,46 +61,24 @@ active implementation approval remains.
   viewer wiring, viewer event bridge, unit type label resolver, flow
   relationship-focus classification, flow node detail context, flow tree
   selection target, flow search state construction, and flow viewport-focus
-  decision/scheduling, and shared flow/table header search control.
+  decision/scheduling, shared flow/table header search control, and shared
+  unit-tree selector expansion/scroll/row interaction logic.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
 
-## Completed Slice Evidence
-
-- Shared header search-control package:
-  `src/presentation/webview/editor/shared/HeaderSearchField.tsx`,
-  `src/presentation/webview/editor/ajsFlow/Header.tsx`, and
-  `src/presentation/webview/editor/ajsTable/Header.tsx` now share search input
-  state, helper-text resolution, result counters, and result navigation without
-  behavior changes.
-- Targeted after state:
-  the touched header/search files report no targeted qlty smells; flow/table
-  helper-text functions are cyclomatic 1 / cognitive 0, and flow `Header` is
-  cyclomatic 1 / cognitive 0.
-- Preserved behavior:
-  Ctrl/Cmd+F focus, Enter/Shift+Enter navigation, clear/focus behavior, result
-  counters, helper text, table CSV/column controls, flow
-  expand/focus/minimap controls, and current-scope badge behavior.
-
 ## Validation
 
-- [x] During planning: reused stored upstream qlty smell and metrics evaluation
+- [x] Previous planning: reused stored upstream qlty smell and metrics evaluation
       after `a921539`.
-- [x] During planning: targeted qlty smell and metrics checks for the
-      flow/table/shared header search package.
-- [x] After implementation approval: targeted qlty checks for touched
-      header/search files.
-- [x] After implementation approval: focused header/search tests through
-      `CI=true rtk pnpm test`.
-- [x] After implementation approval: `CI=true rtk pnpm run qlty`,
+- [x] Completed slice: targeted qlty checks for touched unit-tree selector
+      files and focused selector tests through `CI=true rtk pnpm test`.
+- [x] Completed slice: `CI=true rtk pnpm run qlty`,
       `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`, and
       `CI=true rtk pnpm run build`.
-      Production webpack emitted existing bundle-size performance warnings;
-      web test exited successfully with shutdown-time `ECONNRESET` /
-      `ERR_STREAM_PREMATURE_CLOSE` logs.
-- [x] After completion update: `CI=true rtk pnpm run lint:md` and
-      `CI=true rtk pnpm run qlty`.
+      `test:web` required an escalated rerun after sandboxed Chromium failed to
+      register a macOS Mach port. Production webpack emitted existing
+      bundle-size performance warnings.
 
 ## Use-Case Back-Propagation
 
