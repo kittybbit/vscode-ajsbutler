@@ -5,8 +5,9 @@
 - Status: Proposed
 - Scope:
   reassess remaining `v1.15.1..HEAD` qlty smell and metrics clusters after the
-  viewer event bridge cleanup, then choose the next small behavior-preserving
-  remediation slice or close the temporary feature if parity is reached.
+  unit-type label resolver cleanup, then choose the next small
+  behavior-preserving remediation slice or close the temporary feature if
+  parity is reached.
 - Acceptance:
   record whether another focused slice is needed, keep behavior-preserving
   scope explicit, and require fresh human approval before any additional
@@ -43,18 +44,30 @@ active implementation approval remains.
 - [x] Apply behavior-preserving viewer event bridge refactors.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
+- [x] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Select the unit-type label resolver remediation slice.
+- [x] Obtain human implementation approval for the unit-type label resolver
+      slice.
+- [x] Apply behavior-preserving unit-type label resolver refactors.
+- [x] Update focused tests only if behavior protection needs a new case.
+- [x] Run required validation.
 - [ ] Reassess remaining qlty clusters and decide the next slice or closure.
 
 ## Validation
 
+- [x] During planning: baseline qlty smell check against `v1.15.1`.
+- [x] During planning: baseline qlty metrics check against `v1.15.1`.
+- [x] During planning: targeted qlty smell and function metrics checks for
+      candidate files.
 - [x] During implementation: targeted qlty checks for touched files.
-- [x] During implementation: focused `Viewer event bridge` tests.
+- [x] During implementation: focused `NLS` tests.
 - [x] After implementation: `CI=true rtk pnpm run qlty`.
 - [x] After implementation: `CI=true rtk pnpm test`.
+      VS Code version lookup timed out, then the existing VS Code 1.126.0
+      install was used successfully.
 - [x] After implementation: `CI=true rtk pnpm run test:web`.
-      Initial sandbox run failed with Chromium Mach port permission; approved
-      rerun passed.
 - [x] After implementation: `CI=true rtk pnpm run build`.
+      Production webpack emitted existing bundle-size performance warnings.
 
 ## Use-Case Back-Propagation
 
@@ -77,3 +90,23 @@ active implementation approval remains.
   while preserving shared event DTOs, the global bridge shape, React bootstrap
   wiring, VS Code-facing message routing, telemetry payloads, and VS Code
   compatibility.
+- Remaining qlty smells still include broad flow/table presentation clusters
+  and several boundary parameter-list smells. The next selected slice is the
+  compact `unitTypeLabel` complexity smell because it is pure domain/i18n
+  logic, has existing coverage in `nls.test.ts`, and feeds both unit-list and
+  flow presentation without requiring parser, DTO, VS Code API, or webview
+  message contract changes.
+- Targeted qlty evidence for the selected slice: `unitTypeLabel` currently
+  reports cyclomatic complexity 8, cognitive complexity 6, and a high
+  complexity smell count of 6. The intended remediation is to replace branching
+  with explicit lookup/resolver helpers while preserving the current public
+  function signature and fallback behavior.
+- Planning checks used baseline qlty smell/metrics comparisons against
+  `v1.15.1` and targeted qlty checks for `nls.ts` and
+  `flowRelationshipFocus.ts`.
+- The completed unit-type label resolver slice removed the targeted
+  `unitTypeLabel` qlty complexity smell by splitting group-type key resolution,
+  group-label lookup, and known-unit-type dispatch while preserving localized
+  labels, generic group fallback, unknown unit-type fallback, domain
+  independence from presentation frameworks, VS Code compatibility, and web
+  extension compatibility.

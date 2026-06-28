@@ -3,7 +3,7 @@ import * as message from "@resource/i18n/message";
 import * as ty from "@resource/i18n/ty";
 import * as parameter from "@resource/i18n/parameter";
 import * as ajscolumn from "@resource/i18n/ajscolumn";
-import { isTySymbol } from "../../values/AjsType";
+import { isTySymbol, type TySymbol } from "../../values/AjsType";
 
 /** Literal type */
 export type LocaleKeyType = keyof typeof message.en;
@@ -39,22 +39,41 @@ export const tyDefinitionLang = (language: string): typeof ty.en => {
   return withLocaleFallback(ty.en, { en: ty.en, ja: ty.ja }[language]);
 };
 
+type TyDefinitions = typeof ty.en;
+type GroupTypeLabelKey = keyof TyDefinitions["g"]["gty"];
+
+const groupTypeLabelKey = (
+  groupType: string | undefined,
+): GroupTypeLabelKey | undefined =>
+  groupType === "n" || groupType === "p" ? groupType : undefined;
+
+const groupUnitTypeLabel = (
+  definitions: TyDefinitions,
+  groupType: string | undefined,
+): string => {
+  const labelKey = groupTypeLabelKey(groupType);
+  return labelKey === undefined
+    ? definitions.g.name
+    : definitions.g.gty[labelKey];
+};
+
+const knownUnitTypeLabel = (
+  unitType: TySymbol,
+  definitions: TyDefinitions,
+  groupType: string | undefined,
+): string =>
+  unitType === "g"
+    ? groupUnitTypeLabel(definitions, groupType)
+    : definitions[unitType].name;
+
 export const unitTypeLabel = (
   unitType: string,
   language: string = "en",
   groupType?: string,
-): string => {
-  if (!isTySymbol(unitType)) {
-    return unitType;
-  }
-
-  const definitions = tyDefinitionLang(language);
-  if (unitType === "g" && (groupType === "n" || groupType === "p")) {
-    return definitions.g.gty[groupType];
-  }
-
-  return definitions[unitType].name;
-};
+): string =>
+  isTySymbol(unitType)
+    ? knownUnitTypeLabel(unitType, tyDefinitionLang(language), groupType)
+    : unitType;
 
 // parameter
 export const paramDefinitionLang = (language: string): typeof parameter.en => {
