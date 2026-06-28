@@ -4,22 +4,22 @@
 
 - Status: Proposed
 - Scope:
-  reassess remaining `v1.15.1..HEAD` qlty smell and metrics clusters after the
-  flow search state construction cleanup, then choose the next small
-  behavior-preserving remediation slice or close the temporary feature if
-  parity is reached.
+  reassess the stored upstream qlty evaluation and completed targeted
+  remediations to decide whether another focused package slice is still needed
+  or whether the feature can close.
 - Acceptance:
-  record whether another focused slice is needed, keep behavior-preserving
-  scope explicit, and require fresh human approval before any additional
-  runtime, test, generated artifact, or configuration edits.
+  reuse the saved `v1.15.1` comparison where it still matches the repository,
+  refresh upstream only when the trigger below applies, and select at most one
+  coherent category/package slice for the next implementation approval.
 - Validation:
-  planning-only validation until a new implementation slice is approved.
+  planning-only checks are enough unless a new runtime/test/config slice is
+  approved.
 
 ## Human Approval
 
 - Status: Pending
 - Approved at: none
-- Approved scope:
+- Approved scope: none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -31,138 +31,74 @@ active implementation approval remains.
 
 ## Active Tasks
 
-- [x] Reassess remaining `v1.15.1` qlty smell and metrics clusters after the
-      unit-list detail slice.
-- [x] Select the next focused remediation slice.
-- [x] Obtain human implementation approval for the viewer wiring slice.
-- [x] Apply behavior-preserving counterpart reveal wiring refactors.
-- [x] Update focused tests only if behavior protection needs a new case.
-- [x] Run required validation.
-- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
-- [x] Reassess remaining qlty clusters and decide the next slice or closure.
-- [x] Reassess remaining qlty clusters after the viewer wiring slice.
-- [x] Select the viewer event bridge remediation slice.
-- [x] Obtain human implementation approval for the viewer event bridge slice.
-- [x] Apply behavior-preserving viewer event bridge refactors.
-- [x] Update focused tests only if behavior protection needs a new case.
-- [x] Run required validation.
-- [x] Reassess remaining qlty clusters and decide the next slice or closure.
-- [x] Select the unit-type label resolver remediation slice.
-- [x] Obtain human implementation approval for the unit-type label resolver
-      slice.
-- [x] Apply behavior-preserving unit-type label resolver refactors.
-- [x] Update focused tests only if behavior protection needs a new case.
-- [x] Run required validation.
-- [x] Reassess remaining qlty clusters and decide the next slice or closure.
-- [x] Select the flow relationship-focus classification remediation slice.
-- [x] Obtain human implementation approval for the flow relationship-focus
-      classification slice.
-- [x] Apply behavior-preserving relationship-focus role classification
-      refactors.
-- [x] Update focused tests only if behavior protection needs a new case.
-- [x] Run required validation.
-- [x] Reassess remaining qlty clusters and decide the next slice or closure.
-- [x] Select the flow node detail context remediation slice.
-- [x] Obtain human implementation approval for the flow node detail context
-      slice.
-- [x] Apply behavior-preserving flow node detail context refactors.
-- [x] Update focused tests only if behavior protection needs a new case.
-      Existing `flowNodeDetail` coverage protects the preserved traversal,
-      detail row, chip, and action behavior; no new case was needed.
-- [x] Run required validation.
-- [x] Reassess remaining qlty clusters and decide the next slice or closure.
-- [x] Select the flow tree selection target remediation slice.
-- [x] Obtain human implementation approval for the flow tree selection target
-      slice.
-- [x] Apply behavior-preserving flow tree selection target refactors.
-- [x] Update focused tests only if behavior protection needs a new case.
-      Existing `flowSelector` coverage protects the preserved ancestor,
-      in-scope nested expansion, and out-of-scope rejection behavior; no new
-      case was needed.
-- [x] Run required validation.
-- [x] Reassess remaining qlty clusters and decide the next slice or closure.
-- [x] Select the flow search state construction remediation slice.
-- [x] Obtain human implementation approval for the flow search state
-      construction slice.
-- [x] Apply behavior-preserving flow search state construction refactors.
-- [x] Update focused tests only if behavior protection needs a new case.
-      Existing `flowSearchState` and `flowSearch` coverage protects the
-      preserved query normalization, blank reset, match copy, initial focus,
-      result traversal, and hidden-ancestor reveal behavior; no new case was
-      needed.
-- [x] Run required validation.
+- [ ] Reassess whether the stored upstream qlty evaluation still justifies
+      another slice or feature closure.
+
+## Reusable Upstream Evaluation
+
+- Baseline: `v1.15.1`.
+- Last refreshed after commit:
+  `a921539 Refactor flow search state construction`.
+- Refresh triggers:
+  refresh this evaluation only after a committed runtime/test/config change that
+  can affect the broad comparison, when the selected slice fails to match stored
+  evidence, or when explicitly requested. Use targeted checks for just-completed
+  packages instead of refreshing the upstream comparison after every slice.
+- Reusable commands:
+  `rtk qlty smells --include-tests --no-snippets --upstream v1.15.1` and
+  `rtk qlty metrics --dirs --max-depth 4 --sort complexity --limit 80
+--upstream v1.15.1`.
+- Current top-level metrics evidence:
+  `src/presentation/webview/editor` remains the largest changed complexity
+  cluster among active remediation candidates, with changed complexity also
+  present in `src/presentation/vscode`, `src/bootstrap/extension`,
+  `src/application/editor-feedback`, and selected tests.
+- Current smell clusters still useful for selecting future slices:
+  flow presentation helpers and hooks, table presentation and column helpers,
+  VS Code adapter parameter-list shapes, shared tree/detail presentation, CSV
+  cell conversion, selected focused tests, and i18n resource duplication.
+- Recently removed targeted smells:
+  viewer wiring, viewer event bridge, unit type label resolver, flow
+  relationship-focus classification, flow node detail context, flow tree
+  selection target, flow search state construction, and flow viewport-focus
+  decision/scheduling.
+- Non-priority signals unless a concrete maintenance risk appears:
+  generated/resource duplication, shape-only component duplication, and broad
+  test duplication clusters that do not map to a focused behavior boundary.
+
+## Completed Slice Evidence
+
+- Flow viewport-focus package:
+  `src/presentation/webview/editor/ajsFlow/flowViewportFocus.ts` and the
+  related fit-view scheduling in
+  `src/presentation/webview/editor/ajsFlow/useFlowViewerEffects.ts` were
+  refactored without behavior changes.
+- Targeted after state:
+  `resolveTargetRequest` is cyclomatic 3 / cognitive 4,
+  `resolveFlowViewportFocusDecision` is cyclomatic 3 / cognitive 2, and the
+  extracted fit-view scheduling helpers have no targeted smells.
+- Preserved behavior:
+  search focus, tree-selection focus, layout refit, pending unrendered target
+  waiting, animation-frame cancellation, handled-version updates, and
+  zoom-preserving centering.
 
 ## Validation
 
-- [x] During planning: baseline qlty smell check against `v1.15.1`.
-- [x] During planning: baseline qlty metrics check against `v1.15.1`.
-- [x] During planning: targeted qlty smell and function metrics checks for
-      candidate files.
-- [x] During implementation: targeted qlty checks for touched files.
-- [x] During implementation: focused `NLS` tests.
-- [x] After implementation: `CI=true rtk pnpm run qlty`.
-- [x] After implementation: `CI=true rtk pnpm test`.
-      VS Code version lookup timed out, then the existing VS Code 1.126.0
-      install was used successfully.
-- [x] After implementation: `CI=true rtk pnpm run test:web`.
-- [x] After implementation: `CI=true rtk pnpm run build`.
-      Production webpack emitted existing bundle-size performance warnings.
-- [x] During planning: baseline qlty smell check against `v1.15.1` after the
-      flow relationship-focus classification cleanup.
-- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
-      flow relationship-focus classification cleanup.
-- [x] During planning: targeted qlty smell and function metrics checks for
-      `flowNodeDetail.ts` and `FlowNodeDetailPanel.tsx`.
-- [x] During implementation: targeted qlty checks for touched files.
-- [x] During implementation: focused `flowNodeDetail` behavior was covered by
-      `CI=true rtk pnpm test`.
-- [x] After implementation: `CI=true rtk pnpm run qlty`.
-- [x] After implementation: `CI=true rtk pnpm test`.
-- [x] After implementation: `CI=true rtk pnpm run test:web`.
-- [x] After implementation: `CI=true rtk pnpm run build`.
-      Production webpack emitted existing bundle-size performance warnings.
-- [x] During planning: baseline qlty smell check against `v1.15.1` after the
-      flow node detail context cleanup.
-- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
-      flow node detail context cleanup.
+- [x] During planning: reused stored upstream qlty smell and metrics evaluation
+      after `a921539`.
 - [x] During planning: targeted qlty function metrics check for
-      `flowTreeSelection.ts`.
-- [x] During implementation: targeted qlty checks for touched files.
-- [x] During implementation: focused `flowSelector` behavior was covered by
-      `CI=true rtk pnpm test`.
-- [x] After implementation: `CI=true rtk pnpm run qlty`.
-- [x] After implementation: `CI=true rtk pnpm test`.
-- [x] After implementation: `CI=true rtk pnpm run test:web`.
-- [x] After implementation: `CI=true rtk pnpm run build`.
-      Production webpack emitted existing bundle-size performance warnings.
-- [x] During planning: baseline qlty smell check against `v1.15.1` after the
-      flow tree selection target cleanup.
-- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
-      flow tree selection target cleanup.
-- [x] During planning: targeted qlty function metrics check for
-      `flowSearchState.ts`.
-- [x] During implementation: targeted qlty checks for touched flow-search
+      `flowViewportFocus.ts` and `useFlowViewerEffects.ts`.
+- [x] During implementation: targeted qlty checks for touched viewport-focus
       files.
-- [x] During implementation: focused `flowSearchState` and `flowSearch`
-      behavior tests.
+- [x] During implementation: focused `flowViewportFocus` behavior tests through
+      `CI=true rtk pnpm test`.
 - [x] After implementation: `CI=true rtk pnpm run qlty`.
 - [x] After implementation: `CI=true rtk pnpm test`.
 - [x] After implementation: `CI=true rtk pnpm run test:web`.
 - [x] After implementation: `CI=true rtk pnpm run build`.
       Production webpack emitted existing bundle-size performance warnings.
-- [x] During planning: baseline qlty smell check against `v1.15.1` after the
-      unit-type label resolver cleanup.
-- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
-      unit-type label resolver cleanup.
-- [x] During planning: targeted qlty smell and function metrics checks for
-      `flowRelationshipFocus.ts`.
-- [x] During implementation: targeted qlty checks for touched files.
-- [x] During implementation: focused `Flow Relationship Focus` tests.
-- [x] After implementation: `CI=true rtk pnpm run qlty`.
-- [x] After implementation: `CI=true rtk pnpm test`.
-- [x] After implementation: `CI=true rtk pnpm run test:web`.
-- [x] After implementation: `CI=true rtk pnpm run build`.
-      Production webpack emitted existing bundle-size performance warnings.
+- [x] After completion update: `CI=true rtk pnpm run lint:md` and
+      `CI=true rtk pnpm run qlty`.
 
 ## Use-Case Back-Propagation
 
@@ -172,116 +108,8 @@ active implementation approval remains.
 
 ## Decision Notes
 
-- The user explicitly permits active refactoring beyond the direct changed
-  range when needed to meet qlty parity, but behavior preservation and SDD
-  approval gates still apply.
-- The completed viewer wiring slice removed the targeted qlty smells by
-  splitting counterpart reveal posting, existing-panel reveal, missing-panel
-  open, and navigation dependency passing while preserving viewer event DTOs,
-  webview message contracts, command IDs, telemetry payloads, and VS Code
-  compatibility.
-- The completed viewer event bridge slice removed the targeted qlty smells by
-  splitting message validation, payload dispatch, and callback list management
-  while preserving shared event DTOs, the global bridge shape, React bootstrap
-  wiring, VS Code-facing message routing, telemetry payloads, and VS Code
-  compatibility.
-- Remaining qlty smells still include broad flow/table presentation clusters
-  and several boundary parameter-list smells. The next selected slice is the
-  compact `unitTypeLabel` complexity smell because it is pure domain/i18n
-  logic, has existing coverage in `nls.test.ts`, and feeds both unit-list and
-  flow presentation without requiring parser, DTO, VS Code API, or webview
-  message contract changes.
-- Targeted qlty evidence for the selected slice: `unitTypeLabel` currently
-  reports cyclomatic complexity 8, cognitive complexity 6, and a high
-  complexity smell count of 6. The intended remediation is to replace branching
-  with explicit lookup/resolver helpers while preserving the current public
-  function signature and fallback behavior.
-- Planning checks used baseline qlty smell/metrics comparisons against
-  `v1.15.1` and targeted qlty checks for `nls.ts` and
-  `flowRelationshipFocus.ts`.
-- The completed unit-type label resolver slice removed the targeted
-  `unitTypeLabel` qlty complexity smell by splitting group-type key resolution,
-  group-label lookup, and known-unit-type dispatch while preserving localized
-  labels, generic group fallback, unknown unit-type fallback, domain
-  independence from presentation frameworks, VS Code compatibility, and web
-  extension compatibility.
-- Remaining qlty smells after the unit-type label resolver cleanup still center
-  on flow/table presentation and VS Code adapter boundary shapes. The next
-  selected slice is `flowRelationshipFocus.ts` because it is a small
-  presentation-local behavior helper, maps directly to the build-flow-graph
-  relationship-focus use-case scenario, and already has focused tests for
-  cyclic upstream/downstream/both/unrelated classification, decoration, and
-  disabled selection behavior.
-- Targeted qlty evidence for the selected slice: `resolveDirectionalRole`
-  reports cyclomatic complexity 5 and cognitive complexity 7;
-  `resolveFlowEdgeFocusRole` reports cyclomatic complexity 12 and cognitive
-  complexity 6. The intended remediation is to split direction-key resolution
-  and edge-direction predicates into explicit helpers while preserving exported
-  function signatures and `FlowRelationshipFocusRole` values.
-- The completed flow relationship-focus classification slice removed the
-  targeted `resolveDirectionalRole` and `resolveFlowEdgeFocusRole` qlty
-  complexity smells by splitting direction lookup and edge-direction predicates
-  while preserving exported role values, React Flow element shapes,
-  MiniMap/node style contracts, disabled-focus behavior, selected self-loop
-  handling, VS Code compatibility, and web extension compatibility.
-- Remaining qlty smells after the flow relationship-focus classification
-  cleanup still center on flow/table presentation and VS Code adapter boundary
-  shapes. The next selected slice is flow node detail context because it is a
-  compact presentation-local remediation, maps to the build-flow-graph selected
-  node context scenario, and already has focused tests for traversal cycles,
-  lightweight graph details, detail rows, chips, and actions.
-- Targeted qlty evidence for the selected slice: `collectRelatedUnitIdsFromIndex`
-  reports cyclomatic complexity 5 and cognitive complexity 7;
-  `buildFlowNodeDetailRows` reports cyclomatic complexity 4 and cognitive
-  complexity 6; `buildFlowNodeDetailActions` reports cyclomatic complexity 4
-  and cognitive complexity 6. The intended remediation is to split conditional
-  row/action assembly and relationship traversal steps into explicit helpers
-  while preserving exported behavior and shared detail pane inputs.
-- The completed flow node detail context slice removed the targeted
-  `collectRelatedUnitIdsFromIndex`, `buildFlowNodeDetailRows`, and
-  `buildFlowNodeDetailActions` qlty complexity smells by splitting traversal,
-  row assembly, and action assembly helpers while preserving relationship
-  counts, cycle/origin handling, parent row fallback, action order/labels,
-  shared detail pane inputs, VS Code compatibility, and web extension
-  compatibility.
-- Remaining qlty smells after the flow node detail context cleanup still center
-  on flow/table presentation and VS Code adapter boundary shapes. The next
-  selected slice is flow tree selection target resolution because it is a
-  compact presentation-local helper, maps directly to the build-flow-graph
-  tree-selection and graph/tree synchronization scenarios, and already has
-  focused tests for ancestor collection, in-scope nested expansion, and
-  out-of-scope rejection.
-- Targeted qlty evidence for the selected slice:
-  `resolveFlowTreeSelectionTarget` reports cyclomatic complexity 5 and
-  cognitive complexity 5. The intended remediation is to split target lookup,
-  in-scope gating, and required nested expansion resolution into explicit
-  helpers while preserving exported function signatures and selector/controller
-  behavior.
-- The completed flow tree selection target slice removed the targeted
-  `resolveFlowTreeSelectionTarget` qlty complexity smell by splitting selectable
-  target lookup, descendant detection, and required nested-expansion collection
-  while preserving current-scope gating, selected unit IDs, ancestor expansion
-  requirements, selector/controller behavior, VS Code compatibility, and web
-  extension compatibility.
-- Remaining qlty smells after the flow tree selection target cleanup still
-  center on flow/table presentation and VS Code adapter boundary shapes. The
-  next selected slice is flow search state construction because it is a compact
-  presentation-local helper, maps directly to the build-flow-graph
-  current-scope search scenarios, and already has focused state and search
-  tests for query normalization, blank resets, matching, result traversal, and
-  hidden-ancestor reveal behavior.
-- Targeted qlty evidence for the selected slice:
-  `createSubmittedFlowSearchState` reports cyclomatic complexity 4, cognitive
-  complexity 5, and a high complexity smell count of 5. The intended
-  remediation is to split blank-query handling, result-to-state mapping, and
-  match copying into explicit helpers while preserving exported function
-  signatures, `FlowSearchState` shape, focus request version semantics,
-  current-scope search behavior, VS Code compatibility, and web extension
-  compatibility.
-- The implemented flow search state construction slice removed the targeted
-  `createSubmittedFlowSearchState` qlty complexity smell by splitting submitted
-  result state construction and match-list copying while preserving exported
-  function signatures, `FlowSearchState` shape, blank-query reset behavior,
-  query normalization, initial searched-unit selection, focus request version
-  semantics, current-scope search behavior, VS Code compatibility, and web
-  extension compatibility.
+- The user permits active behavior-preserving refactoring beyond the direct
+  `v1.15.1..HEAD` diff when needed to reach qlty parity, but runtime, tests,
+  generated artifacts, and configuration still require approval.
+- Do not run the upstream comparison again for the next planning step unless a
+  refresh trigger in `Reusable Upstream Evaluation` applies.
