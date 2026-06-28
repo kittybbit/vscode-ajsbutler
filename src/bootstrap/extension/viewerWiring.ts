@@ -69,6 +69,13 @@ type CounterpartRevealDeps = {
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
 };
 
+const postRevealUnit = (
+  panel: vscode.WebviewPanel,
+  absolutePath: string,
+): void => {
+  panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+};
+
 export const flushPendingViewerReveal = (
   panel: vscode.WebviewPanel,
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
@@ -78,7 +85,7 @@ export const flushPendingViewerReveal = (
     return;
   }
   pendingRevealByPanel.delete(panel);
-  panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+  postRevealUnit(panel, absolutePath);
 };
 
 export const createViewerReadyHandler =
@@ -94,42 +101,56 @@ export const createViewerReadyHandler =
     flushPendingViewerReveal(panel, pendingRevealByPanel);
   };
 
-export const revealCounterpartPanel = (
-  { document, targetViewType, absolutePath }: CounterpartRevealRequest,
-  {
-    factoryByViewType,
-    mountPanel,
-    pendingRevealByPanel,
-  }: CounterpartRevealDeps,
+const revealExistingCounterpartPanel = (
+  panel: vscode.WebviewPanel,
+  absolutePath: string,
+  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
 ): void => {
-  const targetFactory = factoryByViewType.get(targetViewType);
+  panel.reveal(panel.viewColumn);
+  if (pendingRevealByPanel.has(panel)) {
+    pendingRevealByPanel.set(panel, absolutePath);
+    return;
+  }
+  postRevealUnit(panel, absolutePath);
+};
+
+const openCounterpartPanel = (
+  request: CounterpartRevealRequest,
+  deps: CounterpartRevealDeps,
+  targetFactory: ViewerFactory,
+): void => {
+  const newPanel = targetFactory.getPanel(request.document);
+  deps.pendingRevealByPanel.set(newPanel, request.absolutePath);
+  deps.mountPanel(newPanel, request.targetViewType);
+  newPanel.reveal(newPanel.viewColumn);
+};
+
+export const revealCounterpartPanel = (
+  request: CounterpartRevealRequest,
+  deps: CounterpartRevealDeps,
+): void => {
+  const targetFactory = deps.factoryByViewType.get(request.targetViewType);
   if (!targetFactory) {
     return;
   }
 
-  const panel = targetFactory.getExistingPanel(document);
+  const panel = targetFactory.getExistingPanel(request.document);
   if (panel) {
-    panel.reveal(panel.viewColumn);
-    if (pendingRevealByPanel.has(panel)) {
-      pendingRevealByPanel.set(panel, absolutePath);
-      return;
-    }
-    panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+    revealExistingCounterpartPanel(
+      panel,
+      request.absolutePath,
+      deps.pendingRevealByPanel,
+    );
     return;
   }
 
-  const newPanel = targetFactory.getPanel(document);
-  pendingRevealByPanel.set(newPanel, absolutePath);
-  mountPanel(newPanel, targetViewType);
-  newPanel.reveal(newPanel.viewColumn);
+  openCounterpartPanel(request, deps, targetFactory);
 };
 
 const revealCounterpartFromNavigation = (
   document: vscode.TextDocument,
   event: NavigationEventType,
-  factoryByViewType: ReadonlyMap<string, ViewerFactory>,
-  mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void,
-  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
+  deps: CounterpartRevealDeps,
 ): void => {
   revealCounterpartPanel(
     {
@@ -137,7 +158,7 @@ const revealCounterpartFromNavigation = (
       targetViewType: resolveTargetViewType(event.data.targetView),
       absolutePath: event.data.absolutePath,
     },
-    { factoryByViewType, mountPanel, pendingRevealByPanel },
+    deps,
   );
 };
 
@@ -173,13 +194,11 @@ const createViewerBundle = ({
       pendingRevealByPanel,
     ),
     (document, event) => {
-      revealCounterpartFromNavigation(
-        document,
-        event,
+      revealCounterpartFromNavigation(document, event, {
         factoryByViewType,
-        previewDeps.mountPanel,
+        mountPanel: previewDeps.mountPanel,
         pendingRevealByPanel,
-      );
+      });
     },
     saveHandler,
   );
