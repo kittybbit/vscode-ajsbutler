@@ -179,29 +179,31 @@ const createViewerBundle = ({
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
 }): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
-  const mediator = new WebviewMediator(
+  const mediator = new WebviewMediator({
     context,
     viewType,
     store,
-    createDebouncedAjsDocumentChange(buildUnitList, 300),
-  );
-  const factory = new ViewerFactory(
+    change: createDebouncedAjsDocumentChange(buildUnitList, 300),
+  });
+  const factory = new ViewerFactory({
     viewType,
     telemetry,
     store,
-    createViewerReadyHandler(
-      createReadyAjsDocument(buildUnitList),
-      pendingRevealByPanel,
-    ),
-    (document, event) => {
-      revealCounterpartFromNavigation(document, event, {
-        factoryByViewType,
-        mountPanel: previewDeps.mountPanel,
+    handlers: {
+      onReady: createViewerReadyHandler(
+        createReadyAjsDocument(buildUnitList),
         pendingRevealByPanel,
-      });
+      ),
+      onNavigate: (document, event) => {
+        revealCounterpartFromNavigation(document, event, {
+          factoryByViewType,
+          mountPanel: previewDeps.mountPanel,
+          pendingRevealByPanel,
+        });
+      },
+      onSave: saveHandler,
     },
-    saveHandler,
-  );
+  });
   factoryByViewType.set(viewType, factory);
 
   return [

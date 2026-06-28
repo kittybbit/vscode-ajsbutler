@@ -25,7 +25,12 @@ suite("Report Webview Operation", () => {
       viewType: "ajsbutler.tableViewer",
     } as vscode.WebviewPanel;
 
-    reportWebviewOperation(document, panel, telemetry, "copy.csv");
+    reportWebviewOperation({
+      document,
+      panel,
+      telemetry,
+      operation: "copy.csv",
+    });
 
     assert.deepStrictEqual(events, [
       {

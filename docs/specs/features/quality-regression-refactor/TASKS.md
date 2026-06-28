@@ -62,7 +62,8 @@ active implementation approval remains.
   relationship-focus classification, flow node detail context, flow tree
   selection target, flow search state construction, and flow viewport-focus
   decision/scheduling, shared flow/table header search control, and shared
-  unit-tree selector expansion/scroll/row interaction logic.
+  unit-tree selector expansion/scroll/row interaction logic, and VS Code
+  webview adapter parameter-shape wiring.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
@@ -71,6 +72,15 @@ active implementation approval remains.
 
 - [x] Previous planning: reused stored upstream qlty smell and metrics evaluation
       after `a921539`.
+- [x] Completed slice: targeted qlty checks for touched VS Code webview adapter
+      files and focused adapter tests through `CI=true rtk pnpm test`.
+- [x] Completed slice: `CI=true rtk pnpm run qlty`,
+      `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`, and
+      `CI=true rtk pnpm run build`.
+      `test:web` required an escalated rerun after sandboxed Chromium failed to
+      register a macOS Mach port; the first escalated run then hit a transient
+      external HTTPS timeout and the next rerun passed. Production webpack
+      emitted existing bundle-size performance warnings.
 - [x] Completed slice: targeted qlty checks for touched unit-tree selector
       files and focused selector tests through `CI=true rtk pnpm test`.
 - [x] Completed slice: `CI=true rtk pnpm run qlty`,

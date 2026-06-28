@@ -25,10 +25,10 @@ suite("ViewerFactory", () => {
     let readyCalled = false;
     let createCalled = false;
 
-    const factory = new ViewerFactory(
-      "ajsbutler.testViewer",
+    const factory = new ViewerFactory({
+      viewType: "ajsbutler.testViewer",
       telemetry,
-      {
+      store: {
         panelByUri() {
           return existingPanel;
         },
@@ -37,18 +37,19 @@ suite("ViewerFactory", () => {
         },
         removeByUri() {},
       },
-      () => {
-        readyCalled = true;
+      handlers: {
+        onReady: () => {
+          readyCalled = true;
+        },
+        onNavigate: () => {},
       },
-      () => {},
-      undefined,
-      {
+      deps: {
         createWebviewPanel() {
           createCalled = true;
           throw new Error("panel should not be created");
         },
       },
-    );
+    });
 
     const panel = factory.getPanel(document);
 
@@ -79,10 +80,10 @@ suite("ViewerFactory", () => {
       | Parameters<typeof vscode.window.createWebviewPanel>[2]
       | undefined;
 
-    const factory = new ViewerFactory(
-      "ajsbutler.testViewer",
+    const factory = new ViewerFactory({
+      viewType: "ajsbutler.testViewer",
       telemetry,
-      {
+      store: {
         panelByUri() {
           return undefined;
         },
@@ -91,18 +92,19 @@ suite("ViewerFactory", () => {
         },
         removeByUri() {},
       },
-      (receivedDocument, receivedPanel) => {
-        readyArgs = { document: receivedDocument, panel: receivedPanel };
+      handlers: {
+        onReady: (receivedDocument, receivedPanel) => {
+          readyArgs = { document: receivedDocument, panel: receivedPanel };
+        },
+        onNavigate: () => {},
       },
-      () => {},
-      undefined,
-      {
+      deps: {
         createWebviewPanel(_viewType, _title, viewColumn) {
           createdShowOptions = viewColumn;
           return createdPanel;
         },
       },
-    );
+    });
 
     const panel = factory.getPanel(document);
 
@@ -126,19 +128,21 @@ suite("ViewerFactory", () => {
       uri: { toString: () => "file:///sample.ajs" },
     } as vscode.TextDocument;
 
-    const factory = new ViewerFactory(
-      "ajsbutler.testViewer",
+    const factory = new ViewerFactory({
+      viewType: "ajsbutler.testViewer",
       telemetry,
-      {
+      store: {
         panelByUri() {
           return existingPanel;
         },
         add() {},
         removeByUri() {},
       },
-      () => {},
-      () => {},
-    );
+      handlers: {
+        onReady: () => {},
+        onNavigate: () => {},
+      },
+    });
 
     assert.strictEqual(factory.getExistingPanel(document), existingPanel);
   });
@@ -190,10 +194,10 @@ suite("ViewerFactory", () => {
       panel: vscode.WebviewPanel;
     }> = [];
 
-    const factory = new ViewerFactory(
-      "ajsbutler.testViewer",
+    const factory = new ViewerFactory({
+      viewType: "ajsbutler.testViewer",
       telemetry,
-      {
+      store: {
         removeByUri(uri) {
           removed.push(uri.toString());
         },
@@ -204,23 +208,25 @@ suite("ViewerFactory", () => {
           return undefined;
         },
       },
-      (receivedDocument, receivedPanel) => {
-        calls.push(
-          `ready:${receivedDocument.uri.toString()}:${receivedPanel.viewType}`,
-        );
+      handlers: {
+        onReady: (receivedDocument, receivedPanel) => {
+          calls.push(
+            `ready:${receivedDocument.uri.toString()}:${receivedPanel.viewType}`,
+          );
+        },
+        onNavigate: (_receivedDocument, event) => {
+          navigated.push(`${event.data.targetView}:${event.data.absolutePath}`);
+        },
+        onSave: async (content) => {
+          calls.push(`save:${content}`);
+        },
       },
-      (_receivedDocument, event) => {
-        navigated.push(`${event.data.targetView}:${event.data.absolutePath}`);
-      },
-      async (content) => {
-        calls.push(`save:${content}`);
-      },
-      {
+      deps: {
         createWebviewPanel() {
           return panel;
         },
       },
-    );
+    });
 
     const createdPanel = factory.getPanel(document);
 

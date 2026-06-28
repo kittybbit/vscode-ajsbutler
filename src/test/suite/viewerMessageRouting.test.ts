@@ -31,7 +31,7 @@ suite("Viewer message routing", () => {
       onResource: () => {
         calls.push("resource");
       },
-      onOperation: (_document, _panel, _telemetry, operation) => {
+      onOperation: ({ operation }) => {
         calls.push(`operation:${operation}`);
       },
       onNavigate: (_document, event) => {
