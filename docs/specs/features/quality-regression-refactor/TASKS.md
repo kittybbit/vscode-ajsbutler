@@ -5,7 +5,7 @@
 - Status: Proposed
 - Scope:
   reassess remaining `v1.15.1..HEAD` qlty smell and metrics clusters after the
-  flow node detail context cleanup, then choose the next small
+  flow tree selection target cleanup, then choose the next small
   behavior-preserving remediation slice or close the temporary feature if
   parity is reached.
 - Acceptance:
@@ -38,7 +38,7 @@ active implementation approval remains.
 - [x] Apply behavior-preserving counterpart reveal wiring refactors.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
-- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Reassess remaining qlty clusters and decide the next slice or closure.
 - [x] Reassess remaining qlty clusters after the viewer wiring slice.
 - [x] Select the viewer event bridge remediation slice.
 - [x] Obtain human implementation approval for the viewer event bridge slice.
@@ -69,6 +69,17 @@ active implementation approval remains.
       Existing `flowNodeDetail` coverage protects the preserved traversal,
       detail row, chip, and action behavior; no new case was needed.
 - [x] Run required validation.
+- [x] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Select the flow tree selection target remediation slice.
+- [x] Obtain human implementation approval for the flow tree selection target
+      slice.
+- [x] Apply behavior-preserving flow tree selection target refactors.
+- [x] Update focused tests only if behavior protection needs a new case.
+      Existing `flowSelector` coverage protects the preserved ancestor,
+      in-scope nested expansion, and out-of-scope rejection behavior; no new
+      case was needed.
+- [x] Run required validation.
+- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
 
 ## Validation
 
@@ -93,6 +104,20 @@ active implementation approval remains.
       `flowNodeDetail.ts` and `FlowNodeDetailPanel.tsx`.
 - [x] During implementation: targeted qlty checks for touched files.
 - [x] During implementation: focused `flowNodeDetail` behavior was covered by
+      `CI=true rtk pnpm test`.
+- [x] After implementation: `CI=true rtk pnpm run qlty`.
+- [x] After implementation: `CI=true rtk pnpm test`.
+- [x] After implementation: `CI=true rtk pnpm run test:web`.
+- [x] After implementation: `CI=true rtk pnpm run build`.
+      Production webpack emitted existing bundle-size performance warnings.
+- [x] During planning: baseline qlty smell check against `v1.15.1` after the
+      flow node detail context cleanup.
+- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
+      flow node detail context cleanup.
+- [x] During planning: targeted qlty function metrics check for
+      `flowTreeSelection.ts`.
+- [x] During implementation: targeted qlty checks for touched files.
+- [x] During implementation: focused `flowSelector` behavior was covered by
       `CI=true rtk pnpm test`.
 - [x] After implementation: `CI=true rtk pnpm run qlty`.
 - [x] After implementation: `CI=true rtk pnpm test`.
@@ -193,3 +218,22 @@ active implementation approval remains.
   counts, cycle/origin handling, parent row fallback, action order/labels,
   shared detail pane inputs, VS Code compatibility, and web extension
   compatibility.
+- Remaining qlty smells after the flow node detail context cleanup still center
+  on flow/table presentation and VS Code adapter boundary shapes. The next
+  selected slice is flow tree selection target resolution because it is a
+  compact presentation-local helper, maps directly to the build-flow-graph
+  tree-selection and graph/tree synchronization scenarios, and already has
+  focused tests for ancestor collection, in-scope nested expansion, and
+  out-of-scope rejection.
+- Targeted qlty evidence for the selected slice:
+  `resolveFlowTreeSelectionTarget` reports cyclomatic complexity 5 and
+  cognitive complexity 5. The intended remediation is to split target lookup,
+  in-scope gating, and required nested expansion resolution into explicit
+  helpers while preserving exported function signatures and selector/controller
+  behavior.
+- The completed flow tree selection target slice removed the targeted
+  `resolveFlowTreeSelectionTarget` qlty complexity smell by splitting selectable
+  target lookup, descendant detection, and required nested-expansion collection
+  while preserving current-scope gating, selected unit IDs, ancestor expansion
+  requirements, selector/controller behavior, VS Code compatibility, and web
+  extension compatibility.
