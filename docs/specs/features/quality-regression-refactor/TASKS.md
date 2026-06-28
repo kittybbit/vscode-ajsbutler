@@ -5,7 +5,7 @@
 - Status: Proposed
 - Scope:
   reassess remaining `v1.15.1..HEAD` qlty smell and metrics clusters after the
-  flow relationship-focus classification cleanup, then choose the next small
+  flow node detail context cleanup, then choose the next small
   behavior-preserving remediation slice or close the temporary feature if
   parity is reached.
 - Acceptance:
@@ -38,6 +38,7 @@ active implementation approval remains.
 - [x] Apply behavior-preserving counterpart reveal wiring refactors.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
+- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
 - [x] Reassess remaining qlty clusters after the viewer wiring slice.
 - [x] Select the viewer event bridge remediation slice.
 - [x] Obtain human implementation approval for the viewer event bridge slice.
@@ -51,7 +52,7 @@ active implementation approval remains.
 - [x] Apply behavior-preserving unit-type label resolver refactors.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
-- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Reassess remaining qlty clusters and decide the next slice or closure.
 - [x] Select the flow relationship-focus classification remediation slice.
 - [x] Obtain human implementation approval for the flow relationship-focus
       classification slice.
@@ -59,7 +60,15 @@ active implementation approval remains.
       refactors.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
-- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Select the flow node detail context remediation slice.
+- [x] Obtain human implementation approval for the flow node detail context
+      slice.
+- [x] Apply behavior-preserving flow node detail context refactors.
+- [x] Update focused tests only if behavior protection needs a new case.
+      Existing `flowNodeDetail` coverage protects the preserved traversal,
+      detail row, chip, and action behavior; no new case was needed.
+- [x] Run required validation.
 
 ## Validation
 
@@ -73,6 +82,20 @@ active implementation approval remains.
 - [x] After implementation: `CI=true rtk pnpm test`.
       VS Code version lookup timed out, then the existing VS Code 1.126.0
       install was used successfully.
+- [x] After implementation: `CI=true rtk pnpm run test:web`.
+- [x] After implementation: `CI=true rtk pnpm run build`.
+      Production webpack emitted existing bundle-size performance warnings.
+- [x] During planning: baseline qlty smell check against `v1.15.1` after the
+      flow relationship-focus classification cleanup.
+- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
+      flow relationship-focus classification cleanup.
+- [x] During planning: targeted qlty smell and function metrics checks for
+      `flowNodeDetail.ts` and `FlowNodeDetailPanel.tsx`.
+- [x] During implementation: targeted qlty checks for touched files.
+- [x] During implementation: focused `flowNodeDetail` behavior was covered by
+      `CI=true rtk pnpm test`.
+- [x] After implementation: `CI=true rtk pnpm run qlty`.
+- [x] After implementation: `CI=true rtk pnpm test`.
 - [x] After implementation: `CI=true rtk pnpm run test:web`.
 - [x] After implementation: `CI=true rtk pnpm run build`.
       Production webpack emitted existing bundle-size performance warnings.
@@ -150,3 +173,23 @@ active implementation approval remains.
   while preserving exported role values, React Flow element shapes,
   MiniMap/node style contracts, disabled-focus behavior, selected self-loop
   handling, VS Code compatibility, and web extension compatibility.
+- Remaining qlty smells after the flow relationship-focus classification
+  cleanup still center on flow/table presentation and VS Code adapter boundary
+  shapes. The next selected slice is flow node detail context because it is a
+  compact presentation-local remediation, maps to the build-flow-graph selected
+  node context scenario, and already has focused tests for traversal cycles,
+  lightweight graph details, detail rows, chips, and actions.
+- Targeted qlty evidence for the selected slice: `collectRelatedUnitIdsFromIndex`
+  reports cyclomatic complexity 5 and cognitive complexity 7;
+  `buildFlowNodeDetailRows` reports cyclomatic complexity 4 and cognitive
+  complexity 6; `buildFlowNodeDetailActions` reports cyclomatic complexity 4
+  and cognitive complexity 6. The intended remediation is to split conditional
+  row/action assembly and relationship traversal steps into explicit helpers
+  while preserving exported behavior and shared detail pane inputs.
+- The completed flow node detail context slice removed the targeted
+  `collectRelatedUnitIdsFromIndex`, `buildFlowNodeDetailRows`, and
+  `buildFlowNodeDetailActions` qlty complexity smells by splitting traversal,
+  row assembly, and action assembly helpers while preserving relationship
+  counts, cycle/origin handling, parent row fallback, action order/labels,
+  shared detail pane inputs, VS Code compatibility, and web extension
+  compatibility.

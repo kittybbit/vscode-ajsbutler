@@ -33,6 +33,14 @@ type FlowRelationshipIndex = {
   downstreamByUnitId: ReadonlyMap<string, ReadonlySet<string>>;
 };
 
+type RelationshipTraversal = {
+  direction: RelationshipDirection;
+  index: FlowRelationshipIndex;
+  pending: string[];
+  related: Set<string>;
+  visited: Set<string>;
+};
+
 const addRelatedUnitId = (
   index: Map<string, Set<string>>,
   unitId: string,
@@ -68,26 +76,57 @@ const directlyRelatedUnitIds = (
     : index.downstreamByUnitId
   ).get(unitId) ?? new Set<string>();
 
+const createRelationshipTraversal = (
+  unitId: string,
+  index: FlowRelationshipIndex,
+  direction: RelationshipDirection,
+): RelationshipTraversal => ({
+  direction,
+  index,
+  pending: [],
+  related: new Set<string>(),
+  visited: new Set<string>([unitId]),
+});
+
+const enqueueRelatedUnitId = (
+  unitId: string,
+  traversal: RelationshipTraversal,
+) => {
+  if (traversal.visited.has(unitId)) {
+    return;
+  }
+  traversal.visited.add(unitId);
+  traversal.pending.push(unitId);
+};
+
+const enqueueDirectlyRelatedUnitIds = (
+  unitId: string,
+  traversal: RelationshipTraversal,
+) => {
+  directlyRelatedUnitIds(unitId, traversal.index, traversal.direction).forEach(
+    (relatedUnitId) => enqueueRelatedUnitId(relatedUnitId, traversal),
+  );
+};
+
+const collectPendingRelatedUnitId = (traversal: RelationshipTraversal) => {
+  const unitId = traversal.pending.pop() as string;
+  traversal.related.add(unitId);
+  enqueueDirectlyRelatedUnitIds(unitId, traversal);
+};
+
 const collectRelatedUnitIdsFromIndex = (
   unitId: string,
   index: FlowRelationshipIndex,
   direction: RelationshipDirection,
 ): Set<string> => {
-  const visited = new Set<string>([unitId]);
-  const related = new Set<string>();
-  const pending = [...directlyRelatedUnitIds(unitId, index, direction)];
+  const traversal = createRelationshipTraversal(unitId, index, direction);
 
-  while (pending.length > 0) {
-    const candidate = pending.pop();
-    if (!candidate || visited.has(candidate)) {
-      continue;
-    }
-    visited.add(candidate);
-    related.add(candidate);
-    pending.push(...directlyRelatedUnitIds(candidate, index, direction));
+  enqueueDirectlyRelatedUnitIds(unitId, traversal);
+  while (traversal.pending.length > 0) {
+    collectPendingRelatedUnitId(traversal);
   }
 
-  return related;
+  return traversal.related;
 };
 
 export const collectRelatedUnitIds = (
