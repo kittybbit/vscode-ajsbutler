@@ -47,6 +47,17 @@ type HeaderSearchFieldProps = Pick<
   | "onSearchClear"
 >;
 
+type HeaderCsvActionsProps = {
+  table: Table<UnitListRowView>;
+  copyCsvLabel: string;
+  saveCsvLabel: string;
+};
+
+type HeaderColumnSelectorButtonProps = {
+  label: string;
+  onClick: (event: React.MouseEvent<HTMLElement>) => void;
+};
+
 export const formatUnitCountLabel = (
   visibleRowCount: number,
   totalRowCount: number,
@@ -102,6 +113,67 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   />
 );
 
+const HeaderColumnSelectorButton: FC<HeaderColumnSelectorButtonProps> = ({
+  label,
+  onClick,
+}) => (
+  <Tooltip title={label}>
+    <IconButton size="small" aria-label={label} onClick={onClick}>
+      <DisplaySettingsIcon fontSize="inherit" />
+    </IconButton>
+  </Tooltip>
+);
+
+const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
+  table,
+  copyCsvLabel,
+  saveCsvLabel,
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    const csv = exportCsvView(table);
+    window.vscode.postMessage({ type: OPERATION, data: "copy.csv" });
+    navigator.clipboard.writeText(csv);
+    setOpen(true);
+  }, [table]);
+
+  const handleSave = useCallback(() => {
+    const csv = exportCsvView(table);
+    window.vscode.postMessage({ type: OPERATION, data: "save.csv" });
+    window.vscode.postMessage({ type: SAVE, data: csv });
+  }, [table]);
+
+  return (
+    <>
+      <Tooltip title={copyCsvLabel}>
+        <IconButton aria-label={copyCsvLabel} size="small" onClick={handleCopy}>
+          <ContentCopyIcon fontSize="inherit" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={saveCsvLabel}>
+        <IconButton aria-label={saveCsvLabel} size="small" onClick={handleSave}>
+          <SaveIcon fontSize="inherit" />
+        </IconButton>
+      </Tooltip>
+      <Snackbar
+        sx={{ position: "absolute" }}
+        open={open}
+        autoHideDuration={2500}
+        onClose={() => setOpen(false)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+      >
+        <Alert severity="info" variant="filled">
+          Copied
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};
+
 const Header: FC<HeaderProps> = ({
   table,
   searchedAbsolutePath,
@@ -117,22 +189,8 @@ const Header: FC<HeaderProps> = ({
   const { lang } = useMyAppContext();
   const controlLabels = getAjsTableHeaderControlLabels(lang);
 
-  const [open, setOpen] = useState(false);
   const [columnSelectorAnchor, setColumnSelectorAnchor] =
     useState<HTMLElement | null>(null);
-
-  const handleCopy = useCallback(() => {
-    const csv = exportCsvView(table);
-    window.vscode.postMessage({ type: OPERATION, data: "copy.csv" });
-    navigator.clipboard.writeText(csv);
-    setOpen(true);
-  }, [table]);
-
-  const handleSave = useCallback(() => {
-    const csv = exportCsvView(table);
-    window.vscode.postMessage({ type: OPERATION, data: "save.csv" });
-    window.vscode.postMessage({ type: SAVE, data: csv });
-  }, [table]);
 
   const openColumnSelector = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -166,34 +224,16 @@ const Header: FC<HeaderProps> = ({
             onSearchSubmit={onSearchSubmit}
             onSearchClear={onSearchClear}
           />
-          <Tooltip title={controlLabels.columns}>
-            <IconButton
-              size="small"
-              aria-label={controlLabels.columns}
-              onClick={openColumnSelector}
-            >
-              <DisplaySettingsIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <HeaderColumnSelectorButton
+            label={controlLabels.columns}
+            onClick={openColumnSelector}
+          />
           <Stack flexGrow={1} />
-          <Tooltip title={controlLabels.copyCsv}>
-            <IconButton
-              aria-label={controlLabels.copyCsv}
-              size="small"
-              onClick={handleCopy}
-            >
-              <ContentCopyIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={controlLabels.saveCsv}>
-            <IconButton
-              aria-label={controlLabels.saveCsv}
-              size="small"
-              onClick={handleSave}
-            >
-              <SaveIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <HeaderCsvActions
+            table={table}
+            copyCsvLabel={controlLabels.copyCsv}
+            saveCsvLabel={controlLabels.saveCsv}
+          />
           <Chip
             size="small"
             variant="outlined"
@@ -207,20 +247,6 @@ const Header: FC<HeaderProps> = ({
           open={Boolean(columnSelectorAnchor)}
           onClose={closeColumnSelector}
         />
-        <Snackbar
-          sx={{ position: "absolute" }}
-          open={open}
-          autoHideDuration={2500}
-          onClose={() => setOpen(false)}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-        >
-          <Alert severity="info" variant="filled">
-            Copied
-          </Alert>
-        </Snackbar>
       </AppBar>
     </>
   );

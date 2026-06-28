@@ -5,8 +5,8 @@
 - Status: Proposed
 - Scope:
   reassess the stored upstream qlty evaluation and completed targeted
-  remediations to decide whether another focused package slice is still needed
-  or whether the feature can close.
+  remediations to decide whether another focused package/category slice is
+  still needed or whether the feature can close.
 - Acceptance:
   reuse the saved `v1.15.1` comparison where it still matches the repository,
   refresh upstream only when the trigger below applies, and select at most one
@@ -32,7 +32,7 @@ active implementation approval remains.
 ## Active Tasks
 
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
-      another slice or feature closure.
+      another package/category slice or feature closure.
 
 ## Reusable Upstream Evaluation
 
@@ -62,14 +62,22 @@ active implementation approval remains.
   relationship-focus classification, flow node detail context, flow tree
   selection target, flow search state construction, and flow viewport-focus
   decision/scheduling, shared flow/table header search control, and shared
-  unit-tree selector expansion/scroll/row interaction logic, and VS Code
-  webview adapter parameter-shape wiring.
+  unit-tree selector expansion/scroll/row interaction logic, VS Code webview
+  adapter parameter-shape wiring, and the table interaction shell around row
+  reveal, table search controller, viewer data/index construction, header CSV
+  actions, virtualized row selection, table header rendering, CSV cell
+  conversion, and table navigation helper shapes.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
 
 ## Validation
 
+- [x] Completed slice: targeted qlty checks for touched `ajsTable` interaction
+      shell files report no smells; standard gates passed with
+      `CI=true rtk pnpm run qlty`, `CI=true rtk pnpm test`,
+      `CI=true rtk pnpm run test:web`, and `CI=true rtk pnpm run build`.
+      Production webpack emitted existing bundle-size performance warnings.
 - [x] Previous planning: reused stored upstream qlty smell and metrics evaluation
       after `a921539`.
 - [x] Completed slice: targeted qlty checks for touched VS Code webview adapter

@@ -10,26 +10,36 @@ export type TableRowSelectionAction =
   | { type: "select"; absolutePath: string }
   | { type: "documentChanged" };
 
+export type TableRowSelectionState = {
+  absolutePath: string;
+  selectedAbsolutePath: string | undefined;
+  index: number;
+  revealedRowIndex: number | undefined;
+};
+
 export const reduceTableRowSelection = (
   currentAbsolutePath: string | undefined,
   action: TableRowSelectionAction,
-): string | undefined =>
-  action.type === "select"
-    ? action.absolutePath === currentAbsolutePath
-      ? currentAbsolutePath
-      : action.absolutePath
-    : undefined;
+): string | undefined => {
+  if (action.type === "documentChanged") {
+    return undefined;
+  }
+  if (action.absolutePath === currentAbsolutePath) {
+    return currentAbsolutePath;
+  }
+  return action.absolutePath;
+};
 
 export const canNavigateToSelectedUnit = (
   absolutePath: string | undefined,
 ): absolutePath is string => !!absolutePath;
 
-export const isTableRowSelected = (
-  absolutePath: string,
-  selectedAbsolutePath: string | undefined,
-  index: number,
-  revealedRowIndex: number | undefined,
-): boolean =>
+export const isTableRowSelected = ({
+  absolutePath,
+  selectedAbsolutePath,
+  index,
+  revealedRowIndex,
+}: TableRowSelectionState): boolean =>
   absolutePath === selectedAbsolutePath || index === revealedRowIndex;
 
 export const navigateToFlow = (
@@ -68,6 +78,13 @@ export const handleSelectTableRow =
     selectRow(absolutePath);
   };
 
+const isRowActivationKey = (key: string): boolean =>
+  key === "Enter" || key === " ";
+
+const isOwnRowKeyboardEvent = (
+  event: Pick<KeyboardEvent<HTMLElement>, "currentTarget" | "target">,
+): boolean => event.target === event.currentTarget;
+
 export const handleSelectTableRowKeyDown =
   (absolutePath: string, selectRow: (absolutePath: string) => void) =>
   (
@@ -76,10 +93,7 @@ export const handleSelectTableRowKeyDown =
       "currentTarget" | "key" | "preventDefault" | "target"
     >,
   ): void => {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-    if (event.key !== "Enter" && event.key !== " ") {
+    if (!isOwnRowKeyboardEvent(event) || !isRowActivationKey(event.key)) {
       return;
     }
     event.preventDefault();

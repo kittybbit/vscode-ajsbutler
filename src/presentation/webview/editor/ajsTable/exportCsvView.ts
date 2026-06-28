@@ -7,25 +7,24 @@ import {
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { AccessorType } from "./columnDefs/common";
 
-const toCellString = (value: AccessorType | undefined): string => {
-  if (value === undefined) {
-    return "";
-  }
+const toParameterString = (parameter: Parameter): string =>
+  parameter.value() || "";
 
-  if (Array.isArray(value)) {
-    return value
-      .map((item) =>
-        item instanceof Parameter ? item.value() || "" : String(item),
-      )
-      .join("\n");
-  }
+const toCellItemString = (value: Exclude<AccessorType, unknown[]>): string =>
+  value instanceof Parameter ? toParameterString(value) : String(value);
 
-  if (value instanceof Parameter) {
-    return value.value() || "";
-  }
+const toCellArrayString = (values: unknown[]): string =>
+  values
+    .map((item) =>
+      item instanceof Parameter ? toParameterString(item) : String(item),
+    )
+    .join("\n");
 
-  return String(value);
-};
+const toCellString = (value: AccessorType | undefined): string =>
+  value === undefined ? "" : toDefinedCellString(value);
+
+const toDefinedCellString = (value: AccessorType): string =>
+  Array.isArray(value) ? toCellArrayString(value) : toCellItemString(value);
 
 const toExportInput = (
   table: Table<UnitListRowView>,

@@ -80,15 +80,30 @@ suite("Table navigation", () => {
 
   test("keeps visual selection attached to path when row indices change", () => {
     assert.strictEqual(
-      isTableRowSelected("/root/job", "/root/job", 4, undefined),
+      isTableRowSelected({
+        absolutePath: "/root/job",
+        selectedAbsolutePath: "/root/job",
+        index: 4,
+        revealedRowIndex: undefined,
+      }),
       true,
     );
     assert.strictEqual(
-      isTableRowSelected("/root/other", "/root/job", 4, undefined),
+      isTableRowSelected({
+        absolutePath: "/root/other",
+        selectedAbsolutePath: "/root/job",
+        index: 4,
+        revealedRowIndex: undefined,
+      }),
       false,
     );
     assert.strictEqual(
-      isTableRowSelected("/root/other", "/root/job", 1, 1),
+      isTableRowSelected({
+        absolutePath: "/root/other",
+        selectedAbsolutePath: "/root/job",
+        index: 1,
+        revealedRowIndex: 1,
+      }),
       true,
     );
   });
