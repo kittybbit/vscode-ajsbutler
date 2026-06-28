@@ -27,18 +27,35 @@ type ApplyFlowRelationshipFocusOptions = {
   selectedUnitId?: string;
 };
 
+type DirectionalRole = Exclude<FlowRelationshipFocusRole, "selected">;
+type DirectionKey = "downstream" | "both" | "unrelated" | "upstream";
+type DirectionFlagKey =
+  | "false:false"
+  | "false:true"
+  | "true:false"
+  | "true:true";
+
+const directionalRoleByKey: Record<DirectionKey, DirectionalRole> = {
+  both: "both",
+  downstream: "downstream",
+  unrelated: "unrelated",
+  upstream: "upstream",
+};
+
+const directionKeyByFlags: Record<DirectionFlagKey, DirectionKey> = {
+  "false:false": "unrelated",
+  "false:true": "downstream",
+  "true:false": "upstream",
+  "true:true": "both",
+};
+
+const directionKey = (upstream: boolean, downstream: boolean): DirectionKey =>
+  directionKeyByFlags[`${upstream}:${downstream}` as DirectionFlagKey];
+
 const resolveDirectionalRole = (
   upstream: boolean,
   downstream: boolean,
-): Exclude<FlowRelationshipFocusRole, "selected"> => {
-  if (upstream && downstream) {
-    return "both";
-  }
-  if (upstream) {
-    return "upstream";
-  }
-  return downstream ? "downstream" : "unrelated";
-};
+): DirectionalRole => directionalRoleByKey[directionKey(upstream, downstream)];
 
 export const buildFlowRelationshipFocus = (
   selectedUnitId: string,
@@ -60,25 +77,53 @@ export const resolveFlowNodeFocusRole = (
         focus.downstreamUnitIds.has(unitId),
       );
 
+const isSelectedLoopEdge = (
+  edge: Pick<Edge, "source" | "target">,
+  focus: FlowRelationshipFocus,
+): boolean =>
+  edge.source === focus.selectedUnitId && edge.target === focus.selectedUnitId;
+
+const edgeConnectsUnitSets = (
+  edge: Pick<Edge, "source" | "target">,
+  sourceUnitIds: ReadonlySet<string>,
+  targetUnitIds: ReadonlySet<string>,
+): boolean => sourceUnitIds.has(edge.source) && targetUnitIds.has(edge.target);
+
+const withSelectedUnit = (
+  unitIds: ReadonlySet<string>,
+  selectedUnitId: string,
+): ReadonlySet<string> => new Set([...unitIds, selectedUnitId]);
+
+const isUpstreamEdge = (
+  edge: Pick<Edge, "source" | "target">,
+  focus: FlowRelationshipFocus,
+): boolean =>
+  isSelectedLoopEdge(edge, focus) ||
+  edgeConnectsUnitSets(
+    edge,
+    focus.upstreamUnitIds,
+    withSelectedUnit(focus.upstreamUnitIds, focus.selectedUnitId),
+  );
+
+const isDownstreamEdge = (
+  edge: Pick<Edge, "source" | "target">,
+  focus: FlowRelationshipFocus,
+): boolean =>
+  isSelectedLoopEdge(edge, focus) ||
+  edgeConnectsUnitSets(
+    edge,
+    withSelectedUnit(focus.downstreamUnitIds, focus.selectedUnitId),
+    focus.downstreamUnitIds,
+  );
+
 export const resolveFlowEdgeFocusRole = (
   edge: Pick<Edge, "source" | "target">,
   focus: FlowRelationshipFocus,
-): Exclude<FlowRelationshipFocusRole, "selected"> => {
-  const isSelectedLoop =
-    edge.source === focus.selectedUnitId &&
-    edge.target === focus.selectedUnitId;
-  const isUpstream =
-    isSelectedLoop ||
-    (focus.upstreamUnitIds.has(edge.source) &&
-      (focus.upstreamUnitIds.has(edge.target) ||
-        edge.target === focus.selectedUnitId));
-  const isDownstream =
-    isSelectedLoop ||
-    (focus.downstreamUnitIds.has(edge.target) &&
-      (focus.downstreamUnitIds.has(edge.source) ||
-        edge.source === focus.selectedUnitId));
-  return resolveDirectionalRole(isUpstream, isDownstream);
-};
+): DirectionalRole =>
+  resolveDirectionalRole(
+    isUpstreamEdge(edge, focus),
+    isDownstreamEdge(edge, focus),
+  );
 
 const weakenedOpacity = (opacity: unknown, factor: number): number =>
   typeof opacity === "number" ? opacity * factor : factor;

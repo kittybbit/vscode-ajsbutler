@@ -5,7 +5,7 @@
 - Status: Proposed
 - Scope:
   reassess remaining `v1.15.1..HEAD` qlty smell and metrics clusters after the
-  unit-type label resolver cleanup, then choose the next small
+  flow relationship-focus classification cleanup, then choose the next small
   behavior-preserving remediation slice or close the temporary feature if
   parity is reached.
 - Acceptance:
@@ -52,6 +52,14 @@ active implementation approval remains.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
 - [ ] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Select the flow relationship-focus classification remediation slice.
+- [x] Obtain human implementation approval for the flow relationship-focus
+      classification slice.
+- [x] Apply behavior-preserving relationship-focus role classification
+      refactors.
+- [x] Update focused tests only if behavior protection needs a new case.
+- [x] Run required validation.
+- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
 
 ## Validation
 
@@ -65,6 +73,19 @@ active implementation approval remains.
 - [x] After implementation: `CI=true rtk pnpm test`.
       VS Code version lookup timed out, then the existing VS Code 1.126.0
       install was used successfully.
+- [x] After implementation: `CI=true rtk pnpm run test:web`.
+- [x] After implementation: `CI=true rtk pnpm run build`.
+      Production webpack emitted existing bundle-size performance warnings.
+- [x] During planning: baseline qlty smell check against `v1.15.1` after the
+      unit-type label resolver cleanup.
+- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
+      unit-type label resolver cleanup.
+- [x] During planning: targeted qlty smell and function metrics checks for
+      `flowRelationshipFocus.ts`.
+- [x] During implementation: targeted qlty checks for touched files.
+- [x] During implementation: focused `Flow Relationship Focus` tests.
+- [x] After implementation: `CI=true rtk pnpm run qlty`.
+- [x] After implementation: `CI=true rtk pnpm test`.
 - [x] After implementation: `CI=true rtk pnpm run test:web`.
 - [x] After implementation: `CI=true rtk pnpm run build`.
       Production webpack emitted existing bundle-size performance warnings.
@@ -110,3 +131,22 @@ active implementation approval remains.
   labels, generic group fallback, unknown unit-type fallback, domain
   independence from presentation frameworks, VS Code compatibility, and web
   extension compatibility.
+- Remaining qlty smells after the unit-type label resolver cleanup still center
+  on flow/table presentation and VS Code adapter boundary shapes. The next
+  selected slice is `flowRelationshipFocus.ts` because it is a small
+  presentation-local behavior helper, maps directly to the build-flow-graph
+  relationship-focus use-case scenario, and already has focused tests for
+  cyclic upstream/downstream/both/unrelated classification, decoration, and
+  disabled selection behavior.
+- Targeted qlty evidence for the selected slice: `resolveDirectionalRole`
+  reports cyclomatic complexity 5 and cognitive complexity 7;
+  `resolveFlowEdgeFocusRole` reports cyclomatic complexity 12 and cognitive
+  complexity 6. The intended remediation is to split direction-key resolution
+  and edge-direction predicates into explicit helpers while preserving exported
+  function signatures and `FlowRelationshipFocusRole` values.
+- The completed flow relationship-focus classification slice removed the
+  targeted `resolveDirectionalRole` and `resolveFlowEdgeFocusRole` qlty
+  complexity smells by splitting direction lookup and edge-direction predicates
+  while preserving exported role values, React Flow element shapes,
+  MiniMap/node style contracts, disabled-focus behavior, selected self-loop
+  handling, VS Code compatibility, and web extension compatibility.

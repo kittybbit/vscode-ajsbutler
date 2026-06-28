@@ -14,6 +14,7 @@ const edges: Edge[] = [
   { id: "s-a", source: "s", target: "a" },
   { id: "a-b", source: "a", target: "b" },
   { id: "b-s", source: "b", target: "s" },
+  { id: "s-s", source: "s", target: "s" },
   { id: "x-y", source: "x", target: "y" },
 ];
 
@@ -56,7 +57,8 @@ suite("Flow Relationship Focus", () => {
     assert.strictEqual(resolveFlowEdgeFocusRole(edges[0], focus), "upstream");
     assert.strictEqual(resolveFlowEdgeFocusRole(edges[1], focus), "downstream");
     assert.strictEqual(resolveFlowEdgeFocusRole(edges[3], focus), "both");
-    assert.strictEqual(resolveFlowEdgeFocusRole(edges[5], focus), "unrelated");
+    assert.strictEqual(resolveFlowEdgeFocusRole(edges[5], focus), "both");
+    assert.strictEqual(resolveFlowEdgeFocusRole(edges[6], focus), "unrelated");
   });
 
   test("decorates without deleting elements or replacing existing data", () => {
@@ -84,7 +86,7 @@ suite("Flow Relationship Focus", () => {
     assert.strictEqual(focused.edges[0].style?.stroke, "blue");
     assert.strictEqual(focused.edges[1].style?.stroke, "green");
     assert.strictEqual(focused.edges[1].animated, true);
-    assert.strictEqual(focused.edges[5].style?.opacity, 0.15);
+    assert.strictEqual(focused.edges[6].style?.opacity, 0.15);
   });
 
   test("returns the original graph references while disabled", () => {
