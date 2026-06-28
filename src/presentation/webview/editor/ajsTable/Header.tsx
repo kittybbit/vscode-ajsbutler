@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  Fragment,
-  memo,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import React, { FC, memo, useCallback, useState } from "react";
 import Alert from "@mui/material/Alert";
 import AppBar from "@mui/material/AppBar";
 import Chip from "@mui/material/Chip";
@@ -14,12 +7,9 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SaveIcon from "@mui/icons-material/Save";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Table } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { useMyAppContext } from "../MyContexts";
@@ -27,7 +17,11 @@ import { localeMap } from "../../../../domain/services/i18n/nls";
 import { OPERATION, SAVE } from "../../../../shared/webviewEvents";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
-import SharedHeaderSearchField from "../shared/HeaderSearchField";
+import {
+  HeaderSearchControl,
+  resolveHeaderSearchHelperText,
+} from "../shared/HeaderSearchField";
+import type { HeaderSearchControlLabels } from "../shared/HeaderSearchField";
 import type {
   TableSearchDirection,
   TableSearchResultPosition,
@@ -53,12 +47,6 @@ type HeaderSearchFieldProps = Pick<
   | "onSearchClear"
 >;
 
-type SearchEndAdornmentProps = {
-  canNavigate: boolean;
-  resultPosition?: TableSearchResultPosition;
-  onNavigate: (direction: TableSearchDirection) => void;
-};
-
 export const formatUnitCountLabel = (
   visibleRowCount: number,
   totalRowCount: number,
@@ -70,58 +58,31 @@ export const getAjsTableHeaderControlLabels = (lang: string) => ({
   saveCsv: "Save the contents as csv.",
 });
 
+const tableHeaderSearchLabels: HeaderSearchControlLabels = {
+  helperText: {
+    noResults: "No units match in the list.",
+    matched: "Matched row is selected in the list.",
+    idle: "Search units by visible values, path, comment, or parameter value.",
+  },
+  navigation: {
+    resultAriaLabel: (position) =>
+      `${position.current} of ${position.total} list search results`,
+    previousTooltip: "Previous list search result (Shift+Enter).",
+    previousAriaLabel: "Previous list search result.",
+    nextTooltip: "Next list search result (Enter).",
+    nextAriaLabel: "Next list search result.",
+  },
+};
+
 export const getAjsTableSearchHelperText = (
   searchedAbsolutePath?: string,
   resultPosition?: TableSearchResultPosition,
 ): string =>
-  resultPosition?.total === 0
-    ? "No units match in the list."
-    : searchedAbsolutePath
-      ? "Matched row is selected in the list."
-      : "Search units by visible values, path, comment, or parameter value.";
-
-const SearchEndAdornment: FC<SearchEndAdornmentProps> = ({
-  canNavigate,
-  resultPosition,
-  onNavigate,
-}) => (
-  <Fragment>
-    {resultPosition && (
-      <Typography
-        variant="caption"
-        component="span"
-        aria-label={`${resultPosition.current} of ${resultPosition.total} list search results`}
-        sx={{ minWidth: "2.75rem", textAlign: "center" }}
-      >
-        {resultPosition.current}/{resultPosition.total}
-      </Typography>
-    )}
-    <Tooltip title="Previous list search result (Shift+Enter).">
-      <span>
-        <IconButton
-          size="small"
-          aria-label="Previous list search result."
-          onClick={() => onNavigate("previous")}
-          disabled={!canNavigate}
-        >
-          <NavigateBeforeIcon fontSize="inherit" />
-        </IconButton>
-      </span>
-    </Tooltip>
-    <Tooltip title="Next list search result (Enter).">
-      <span>
-        <IconButton
-          size="small"
-          aria-label="Next list search result."
-          onClick={() => onNavigate("next")}
-          disabled={!canNavigate}
-        >
-          <NavigateNextIcon fontSize="inherit" />
-        </IconButton>
-      </span>
-    </Tooltip>
-  </Fragment>
-);
+  resolveHeaderSearchHelperText(
+    searchedAbsolutePath,
+    resultPosition,
+    tableHeaderSearchLabels.helperText,
+  );
 
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   searchedAbsolutePath,
@@ -129,55 +90,17 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
-}) => {
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchValue, setSearchValue] = useState<string>("");
-  const searchHelperText = getAjsTableSearchHelperText(
-    searchedAbsolutePath,
-    searchResultPosition,
-  );
-
-  const handleSearchSubmit = useCallback(() => {
-    onSearchSubmit(searchValue);
-  }, [onSearchSubmit, searchValue]);
-  const handleSearchEnter = useCallback(
-    (shiftKey: boolean) =>
-      onSearchNavigate(searchValue, shiftKey ? "previous" : "next"),
-    [onSearchNavigate, searchValue],
-  );
-  const handleSearchClear = useCallback(() => {
-    setSearchValue("");
-    onSearchClear();
-    searchInputRef.current?.focus();
-  }, [onSearchClear]);
-  const handleSearchNavigate = useCallback(
-    (direction: TableSearchDirection) =>
-      onSearchNavigate(searchValue, direction),
-    [onSearchNavigate, searchValue],
-  );
-
-  return (
-    <SharedHeaderSearchField
-      placeholderLabel="Search unit list"
-      helperText={searchHelperText}
-      value={searchValue}
-      onValueChange={setSearchValue}
-      onEnter={handleSearchEnter}
-      onBlur={handleSearchSubmit}
-      onClear={handleSearchClear}
-      clearDisabled={searchValue.length === 0 && !searchedAbsolutePath}
-      inputRef={searchInputRef}
-      sx={{ width: "20rem", maxWidth: "32vw", flexShrink: 0 }}
-      endAdornment={
-        <SearchEndAdornment
-          resultPosition={searchResultPosition}
-          canNavigate={(searchResultPosition?.total ?? 0) > 0}
-          onNavigate={handleSearchNavigate}
-        />
-      }
-    />
-  );
-};
+}) => (
+  <HeaderSearchControl<TableSearchDirection>
+    matchedTargetId={searchedAbsolutePath}
+    resultPosition={searchResultPosition}
+    placeholderLabel="Search unit list"
+    labels={tableHeaderSearchLabels}
+    onSearchNavigate={onSearchNavigate}
+    onSearchSubmit={onSearchSubmit}
+    onSearchClear={onSearchClear}
+  />
+);
 
 const Header: FC<HeaderProps> = ({
   table,

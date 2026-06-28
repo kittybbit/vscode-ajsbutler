@@ -61,42 +61,44 @@ active implementation approval remains.
   viewer wiring, viewer event bridge, unit type label resolver, flow
   relationship-focus classification, flow node detail context, flow tree
   selection target, flow search state construction, and flow viewport-focus
-  decision/scheduling.
+  decision/scheduling, and shared flow/table header search control.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
 
 ## Completed Slice Evidence
 
-- Flow viewport-focus package:
-  `src/presentation/webview/editor/ajsFlow/flowViewportFocus.ts` and the
-  related fit-view scheduling in
-  `src/presentation/webview/editor/ajsFlow/useFlowViewerEffects.ts` were
-  refactored without behavior changes.
+- Shared header search-control package:
+  `src/presentation/webview/editor/shared/HeaderSearchField.tsx`,
+  `src/presentation/webview/editor/ajsFlow/Header.tsx`, and
+  `src/presentation/webview/editor/ajsTable/Header.tsx` now share search input
+  state, helper-text resolution, result counters, and result navigation without
+  behavior changes.
 - Targeted after state:
-  `resolveTargetRequest` is cyclomatic 3 / cognitive 4,
-  `resolveFlowViewportFocusDecision` is cyclomatic 3 / cognitive 2, and the
-  extracted fit-view scheduling helpers have no targeted smells.
+  the touched header/search files report no targeted qlty smells; flow/table
+  helper-text functions are cyclomatic 1 / cognitive 0, and flow `Header` is
+  cyclomatic 1 / cognitive 0.
 - Preserved behavior:
-  search focus, tree-selection focus, layout refit, pending unrendered target
-  waiting, animation-frame cancellation, handled-version updates, and
-  zoom-preserving centering.
+  Ctrl/Cmd+F focus, Enter/Shift+Enter navigation, clear/focus behavior, result
+  counters, helper text, table CSV/column controls, flow
+  expand/focus/minimap controls, and current-scope badge behavior.
 
 ## Validation
 
 - [x] During planning: reused stored upstream qlty smell and metrics evaluation
       after `a921539`.
-- [x] During planning: targeted qlty function metrics check for
-      `flowViewportFocus.ts` and `useFlowViewerEffects.ts`.
-- [x] During implementation: targeted qlty checks for touched viewport-focus
-      files.
-- [x] During implementation: focused `flowViewportFocus` behavior tests through
+- [x] During planning: targeted qlty smell and metrics checks for the
+      flow/table/shared header search package.
+- [x] After implementation approval: targeted qlty checks for touched
+      header/search files.
+- [x] After implementation approval: focused header/search tests through
       `CI=true rtk pnpm test`.
-- [x] After implementation: `CI=true rtk pnpm run qlty`.
-- [x] After implementation: `CI=true rtk pnpm test`.
-- [x] After implementation: `CI=true rtk pnpm run test:web`.
-- [x] After implementation: `CI=true rtk pnpm run build`.
-      Production webpack emitted existing bundle-size performance warnings.
+- [x] After implementation approval: `CI=true rtk pnpm run qlty`,
+      `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`, and
+      `CI=true rtk pnpm run build`.
+      Production webpack emitted existing bundle-size performance warnings;
+      web test exited successfully with shutdown-time `ECONNRESET` /
+      `ERR_STREAM_PREMATURE_CLOSE` logs.
 - [x] After completion update: `CI=true rtk pnpm run lint:md` and
       `CI=true rtk pnpm run qlty`.
 
