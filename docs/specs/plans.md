@@ -12,6 +12,11 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Decisions
 
+- Temporary feature `docs/specs/features/quality-regression-refactor/` tracks
+  qlty smells and metrics regressions introduced after `v1.15.1` until they are
+  restored to `v1.15.1` parity or better. The user permits active
+  behavior-preserving refactoring beyond the direct `v1.15.1..HEAD` diff when
+  it helps achieve that objective.
 - List search stays presentation-local until another non-table consumer needs
   the same matching semantics.
 - JP1/AJS3 version 13 is the current normative target for new parameter and
@@ -30,15 +35,21 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+1. Plan and approve the first qlty regression remediation slice for the
+   temporary quality refactor feature, starting with viewer presentation
+   clusters unless a targeted qlty rerun identifies a smaller higher-value
+   slice.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-2. Select a new focused feature only when a concrete consumer or user-visible
+3. Select a new focused feature only when a concrete consumer or user-visible
    requirement makes normalized-model, parser-boundary, or viewer-parity work
    actionable.
-3. Keep compatibility risk visible for every shared or extension-runtime change.
+4. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
+- `docs/specs/features/quality-regression-refactor/`: temporary active
+  refactoring feature for qlty parity against `v1.15.1`.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
