@@ -30,20 +30,35 @@ export const isActiveFlowSearchQuery = (
 ): boolean =>
   state.query !== undefined && state.query === normalizeFlowSearchQuery(query);
 
+const copyFlowSearchMatchedUnitIds = (
+  result: FlowSearchResult | undefined,
+): string[] => [...(result?.matchedUnitIds ?? [])];
+
+const createMatchedFlowSearchState = (
+  normalizedQuery: string,
+  result: FlowSearchResult | undefined,
+  focusRequestVersion: number,
+): FlowSearchState => ({
+  query: normalizedQuery,
+  matchedUnitIds: copyFlowSearchMatchedUnitIds(result),
+  searchedUnitId: result?.matchedUnitId,
+  focusRequestVersion,
+});
+
 export const createSubmittedFlowSearchState = (
   query: string,
   result: FlowSearchResult | undefined,
   focusRequestVersion: number,
 ): FlowSearchState => {
   const normalizedQuery = normalizeFlowSearchQuery(query);
-  return normalizedQuery.length === 0
-    ? createEmptyFlowSearchState(focusRequestVersion)
-    : {
-        query: normalizedQuery,
-        matchedUnitIds: result ? [...result.matchedUnitIds] : [],
-        searchedUnitId: result?.matchedUnitId,
-        focusRequestVersion,
-      };
+  if (normalizedQuery.length === 0) {
+    return createEmptyFlowSearchState(focusRequestVersion);
+  }
+  return createMatchedFlowSearchState(
+    normalizedQuery,
+    result,
+    focusRequestVersion,
+  );
 };
 
 export const createRevealedFlowSearchState = (

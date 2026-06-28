@@ -5,7 +5,7 @@
 - Status: Proposed
 - Scope:
   reassess remaining `v1.15.1..HEAD` qlty smell and metrics clusters after the
-  flow tree selection target cleanup, then choose the next small
+  flow search state construction cleanup, then choose the next small
   behavior-preserving remediation slice or close the temporary feature if
   parity is reached.
 - Acceptance:
@@ -38,6 +38,7 @@ active implementation approval remains.
 - [x] Apply behavior-preserving counterpart reveal wiring refactors.
 - [x] Update focused tests only if behavior protection needs a new case.
 - [x] Run required validation.
+- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
 - [x] Reassess remaining qlty clusters and decide the next slice or closure.
 - [x] Reassess remaining qlty clusters after the viewer wiring slice.
 - [x] Select the viewer event bridge remediation slice.
@@ -79,7 +80,17 @@ active implementation approval remains.
       in-scope nested expansion, and out-of-scope rejection behavior; no new
       case was needed.
 - [x] Run required validation.
-- [ ] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Reassess remaining qlty clusters and decide the next slice or closure.
+- [x] Select the flow search state construction remediation slice.
+- [x] Obtain human implementation approval for the flow search state
+      construction slice.
+- [x] Apply behavior-preserving flow search state construction refactors.
+- [x] Update focused tests only if behavior protection needs a new case.
+      Existing `flowSearchState` and `flowSearch` coverage protects the
+      preserved query normalization, blank reset, match copy, initial focus,
+      result traversal, and hidden-ancestor reveal behavior; no new case was
+      needed.
+- [x] Run required validation.
 
 ## Validation
 
@@ -119,6 +130,21 @@ active implementation approval remains.
 - [x] During implementation: targeted qlty checks for touched files.
 - [x] During implementation: focused `flowSelector` behavior was covered by
       `CI=true rtk pnpm test`.
+- [x] After implementation: `CI=true rtk pnpm run qlty`.
+- [x] After implementation: `CI=true rtk pnpm test`.
+- [x] After implementation: `CI=true rtk pnpm run test:web`.
+- [x] After implementation: `CI=true rtk pnpm run build`.
+      Production webpack emitted existing bundle-size performance warnings.
+- [x] During planning: baseline qlty smell check against `v1.15.1` after the
+      flow tree selection target cleanup.
+- [x] During planning: baseline qlty metrics check against `v1.15.1` after the
+      flow tree selection target cleanup.
+- [x] During planning: targeted qlty function metrics check for
+      `flowSearchState.ts`.
+- [x] During implementation: targeted qlty checks for touched flow-search
+      files.
+- [x] During implementation: focused `flowSearchState` and `flowSearch`
+      behavior tests.
 - [x] After implementation: `CI=true rtk pnpm run qlty`.
 - [x] After implementation: `CI=true rtk pnpm test`.
 - [x] After implementation: `CI=true rtk pnpm run test:web`.
@@ -236,4 +262,26 @@ active implementation approval remains.
   target lookup, descendant detection, and required nested-expansion collection
   while preserving current-scope gating, selected unit IDs, ancestor expansion
   requirements, selector/controller behavior, VS Code compatibility, and web
+  extension compatibility.
+- Remaining qlty smells after the flow tree selection target cleanup still
+  center on flow/table presentation and VS Code adapter boundary shapes. The
+  next selected slice is flow search state construction because it is a compact
+  presentation-local helper, maps directly to the build-flow-graph
+  current-scope search scenarios, and already has focused state and search
+  tests for query normalization, blank resets, matching, result traversal, and
+  hidden-ancestor reveal behavior.
+- Targeted qlty evidence for the selected slice:
+  `createSubmittedFlowSearchState` reports cyclomatic complexity 4, cognitive
+  complexity 5, and a high complexity smell count of 5. The intended
+  remediation is to split blank-query handling, result-to-state mapping, and
+  match copying into explicit helpers while preserving exported function
+  signatures, `FlowSearchState` shape, focus request version semantics,
+  current-scope search behavior, VS Code compatibility, and web extension
+  compatibility.
+- The implemented flow search state construction slice removed the targeted
+  `createSubmittedFlowSearchState` qlty complexity smell by splitting submitted
+  result state construction and match-list copying while preserving exported
+  function signatures, `FlowSearchState` shape, blank-query reset behavior,
+  query normalization, initial searched-unit selection, focus request version
+  semantics, current-scope search behavior, VS Code compatibility, and web
   extension compatibility.
