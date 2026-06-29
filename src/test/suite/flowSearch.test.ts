@@ -3,6 +3,7 @@ import { flattenAjsUnits } from "../../domain/models/ajs/AjsDocument";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { parseAjs } from "../support/parseAjs";
 import { findFlowSearchResult } from "../../presentation/webview/editor/ajsFlow/flowSearch";
+import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 
 const nestedDefinition = `
 unit=root,,jp1admin,;
@@ -45,23 +46,39 @@ unit=root,,jp1admin,;
 }
 `;
 
+type FlowSearchFixture = {
+  childNetId: string;
+  currentUnit: AjsUnit;
+  grandNetId: string;
+  leafJobId: string;
+  unitById: ReadonlyMap<string, AjsUnit>;
+};
+
+const createFlowSearchFixture = (): FlowSearchFixture => {
+  const result = parseAjs(nestedDefinition);
+  assert.deepStrictEqual(result.errors, []);
+  const document = normalizeAjsDocument(result.rootUnits);
+  const allUnits = flattenAjsUnits(document.rootUnits);
+  const currentUnit = document.rootUnits[0].children[0];
+  const childNetId = currentUnit.children[0].id;
+  const grandNetId = currentUnit.children[0].children[0].id;
+  const leafJobId = currentUnit.children[0].children[0].children[0].id;
+
+  return {
+    childNetId,
+    currentUnit,
+    grandNetId,
+    leafJobId,
+    unitById: new Map(allUnits.map((unit) => [unit.id, unit])),
+  };
+};
+
 suite("Flow Search", () => {
   test("finds the first current-scope match and expands ancestor jobnets", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
-    const allUnits = flattenAjsUnits(document.rootUnits);
-    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
-    const currentUnit = document.rootUnits[0].children[0];
-    const childNetId = currentUnit.children[0].id;
-    const grandNetId = currentUnit.children[0].children[0].id;
-    const leafJobId = currentUnit.children[0].children[0].children[0].id;
+    const { childNetId, currentUnit, grandNetId, leafJobId, unitById } =
+      createFlowSearchFixture();
 
-    const searchResult = findFlowSearchResult(
-      currentUnit,
-      "leaf comment",
-      unitById,
-    );
+    const searchResult = findFlowSearchResult(currentUnit, "leaf", unitById);
 
     assert.deepStrictEqual(searchResult, {
       matchedUnitId: leafJobId,
@@ -71,15 +88,8 @@ suite("Flow Search", () => {
   });
 
   test("matches a contiguous query that includes spaces from searchable unit text", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
-    const allUnits = flattenAjsUnits(document.rootUnits);
-    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
-    const currentUnit = document.rootUnits[0].children[0];
-    const childNetId = currentUnit.children[0].id;
-    const grandNetId = currentUnit.children[0].children[0].id;
-    const leafJobId = currentUnit.children[0].children[0].children[0].id;
+    const { childNetId, currentUnit, grandNetId, leafJobId, unitById } =
+      createFlowSearchFixture();
 
     const searchResult = findFlowSearchResult(
       currentUnit,
@@ -95,13 +105,7 @@ suite("Flow Search", () => {
   });
 
   test("prefers the first descendant match when the current scope also matches", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
-    const allUnits = flattenAjsUnits(document.rootUnits);
-    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
-    const currentUnit = document.rootUnits[0].children[0];
-    const childNetId = currentUnit.children[0].id;
+    const { childNetId, currentUnit, unitById } = createFlowSearchFixture();
 
     const searchResult = findFlowSearchResult(currentUnit, "/jobnet", unitById);
 
@@ -138,12 +142,7 @@ suite("Flow Search", () => {
   });
 
   test("returns undefined for blank queries", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
-    const allUnits = flattenAjsUnits(document.rootUnits);
-    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
-    const currentUnit = document.rootUnits[0].children[0];
+    const { currentUnit, unitById } = createFlowSearchFixture();
 
     const searchResult = findFlowSearchResult(currentUnit, "   ", unitById);
 

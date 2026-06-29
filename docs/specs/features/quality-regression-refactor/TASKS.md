@@ -4,16 +4,15 @@
 
 - Status: Proposed
 - Scope:
-  reassess the stored upstream qlty evaluation and completed targeted
-  remediations to decide whether another focused package/category slice is
-  still needed or whether the temporary feature can close.
+  select the next package/category remediation slice using the reusable
+  upstream evaluation below, or propose feature closure if no useful slice
+  remains.
 - Acceptance:
-  reuse the saved `v1.15.1` comparison where it still matches the repository,
-  refresh upstream only when the trigger below applies, and select at most one
-  coherent category/package slice for the next implementation approval.
+  keep the next task package/category-sized, behavior-preserving, and tied to a
+  coherent qlty smell or metrics cluster.
 - Validation:
-  planning-only checks are enough unless a new runtime/test/config slice is
-  approved.
+  run targeted current-head qlty checks for the selected candidate before
+  requesting implementation approval.
 
 ## Human Approval
 
@@ -33,6 +32,12 @@ active implementation approval remains.
 
 - [x] Complete the table column definition package remediation slice.
 - [x] Complete the flow graph rendering-data remediation slice.
+- [x] Reassess whether the stored upstream qlty evaluation still justifies
+      another package/category slice or feature closure.
+- [x] Select the flow interaction controller/search remediation slice.
+- [x] Obtain human implementation approval for the flow interaction
+      controller/search slice.
+- [x] Complete the flow interaction controller/search remediation slice.
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
       another package/category slice or feature closure.
 
@@ -56,10 +61,9 @@ active implementation approval remains.
   present in `src/presentation/vscode`, `src/bootstrap/extension`,
   `src/application/editor-feedback`, and selected tests.
 - Current smell clusters still useful for selecting future slices:
-  remaining flow controller/search hooks, remaining table presentation helpers
-  outside the completed column definition package, VS Code adapter
-  parameter-list shapes, shared detail presentation, selected focused tests,
-  and i18n resource duplication.
+  remaining table presentation helpers outside the completed column definition
+  package, VS Code adapter parameter-list shapes, shared detail presentation,
+  selected focused tests, and i18n resource duplication.
 - Recently removed targeted smells:
   viewer wiring, viewer event bridge, unit type label resolver, flow
   relationship-focus classification, flow node detail context, flow tree
@@ -74,13 +78,24 @@ active implementation approval remains.
   array/rating cell rendering, and schedule column schema preservation, and
   flow graph rendering-data helpers around DTO-to-React Flow mapping, nested
   position parameters, expanded-node type mapping, jobnet node actions, and
-  relationship-focus styling.
+  relationship-focus styling, plus flow interaction controller/search helpers
+  around viewer composition, current-scope search submission, and graph/tree
+  hover state.
+- Current candidate evidence:
+  `DisplayColumnSelector.tsx`, `SharedUnitDetailPane.tsx`,
+  `registerHoverProvider.ts`, VS Code adapter parameter-list shapes, and broad
+  test duplication remain separate candidates.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
 
 ## Validation
 
+- [x] Current planning: reused stored upstream evaluation and ran targeted
+      current-head qlty checks for remaining candidate clusters. Additional
+      targeted qlty rerun for the selected flow interaction file list was
+      blocked by the environment usage limit, so this plan relies on the
+      successful cluster-level checks already captured above.
 - [x] Completed flow graph rendering-data slice: targeted qlty checks for
       touched flow graph rendering files and direct graph tests report no
       smells. Standard gates passed with `CI=true rtk pnpm run qlty`,
@@ -99,11 +114,24 @@ active implementation approval remains.
       bundle-size performance warnings.
 - [x] Stored upstream qlty smell and metrics evaluation remains reusable after
       `a921539` until a refresh trigger applies.
+- [x] Completed flow interaction controller/search slice: targeted qlty checks
+      for the touched flow interaction files and direct flow search/hover tests
+      report no smells. Standard gates passed with
+      `CI=true rtk pnpm run qlty`, `CI=true rtk pnpm test`,
+      `CI=true rtk pnpm run build`, `CI=true rtk pnpm run lint:md`, and
+      `rtk git diff --check`. `CI=true rtk pnpm run test:web` failed twice
+      before local test startup with external HTTPS `ETIMEDOUT`, so this caveat
+      remains for the next validation decision.
 
 ## Use-Case Back-Propagation
 
 - No behavior changes were made for the completed flow graph rendering-data
   slice.
+- No behavior changes were made for the completed flow interaction
+  controller/search slice.
+- Current-scope search, reveal, hover synchronization, selection, relationship
+  focus, MiniMap visibility, and selected-node detail behavior are governed by
+  `docs/requirements/use-cases/uc-build-flow-graph.md`.
 - Flow graph node/edge IDs, node types, positions, nested panel bounds,
   search/selection/hover flags, relationship-focus styling, and jobnet
   open/expand action ordering remain protected by direct flow graph/node tests.

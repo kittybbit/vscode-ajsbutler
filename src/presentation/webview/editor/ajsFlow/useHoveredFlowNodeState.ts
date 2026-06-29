@@ -12,23 +12,51 @@ export type HoveredFlowNodeAction =
   | { type: "leave"; source: FlowHoverSource; unitId: string }
   | { type: "contextChanged" };
 
+type HoveredFlowNodeActionType = HoveredFlowNodeAction["type"];
+type HoveredFlowNodeActionByType<Type extends HoveredFlowNodeActionType> =
+  Extract<HoveredFlowNodeAction, { type: Type }>;
+type HoveredFlowNodeStateReducer<Type extends HoveredFlowNodeActionType> = (
+  state: HoveredFlowNodeState | undefined,
+  action: HoveredFlowNodeActionByType<Type>,
+) => HoveredFlowNodeState | undefined;
+
+const isSameHoveredTarget = (
+  state: HoveredFlowNodeState | undefined,
+  action: Pick<HoveredFlowNodeState, "source" | "unitId">,
+): boolean => state?.source === action.source && state.unitId === action.unitId;
+
+const enterHoveredFlowNode: HoveredFlowNodeStateReducer<"enter"> = (
+  state,
+  action,
+) => (isSameHoveredTarget(state, action) ? state : action);
+
+const leaveHoveredFlowNode: HoveredFlowNodeStateReducer<"leave"> = (
+  state,
+  action,
+) => (isSameHoveredTarget(state, action) ? undefined : state);
+
+const clearHoveredFlowNode: HoveredFlowNodeStateReducer<
+  "contextChanged"
+> = () => undefined;
+
+const hoveredFlowNodeReducers: {
+  readonly [Type in HoveredFlowNodeActionType]: HoveredFlowNodeStateReducer<Type>;
+} = {
+  contextChanged: clearHoveredFlowNode,
+  enter: enterHoveredFlowNode,
+  leave: leaveHoveredFlowNode,
+};
+
 export const reduceHoveredFlowNodeState = (
   state: HoveredFlowNodeState | undefined,
   action: HoveredFlowNodeAction,
-): HoveredFlowNodeState | undefined => {
-  if (action.type === "enter") {
-    if (state?.source === action.source && state.unitId === action.unitId) {
-      return state;
-    }
-    return { source: action.source, unitId: action.unitId };
-  }
-  if (action.type === "leave") {
-    return state?.source === action.source && state.unitId === action.unitId
-      ? undefined
-      : state;
-  }
-  return undefined;
-};
+): HoveredFlowNodeState | undefined =>
+  (
+    hoveredFlowNodeReducers[action.type] as (
+      state: HoveredFlowNodeState | undefined,
+      action: HoveredFlowNodeAction,
+    ) => HoveredFlowNodeState | undefined
+  )(state, action);
 
 export const useHoveredFlowNodeState = (
   documentIdentity: object | undefined,

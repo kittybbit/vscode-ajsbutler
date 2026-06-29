@@ -3,16 +3,18 @@ import Box from "@mui/material/Box";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
 import {
   Background,
   BackgroundVariant,
   Controls,
   MiniMap,
+  type Edge,
   type Node,
   NodeTypes,
   ReactFlow,
+  type ReactFlowInstance,
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -27,6 +29,7 @@ import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
 import { useFlowViewerController } from "./useFlowViewerController";
 import { navigateToTable } from "./nodes/Utils";
 import {
+  type FlowMiniMapColors,
   resolveFlowMiniMapNodeFill,
   resolveFlowMiniMapNodeStroke,
 } from "./flowMiniMap";
@@ -42,12 +45,209 @@ const nodeTypes: NodeTypes = {
   condition: ConditionNode,
 };
 
-const FlowContents: FC = () => {
-  console.log("render FlowContents.");
+type FlowViewerController = ReturnType<typeof useFlowViewerController>;
 
+type FlowGraphPanelProps = Pick<
+  FlowViewerController,
+  | "clearGraphHoveredUnit"
+  | "edges"
+  | "graphHoveredUnit"
+  | "nodes"
+  | "reactFlowInstanceRef"
+  | "selectFlowNode"
+  | "showMiniMap"
+> & {
+  miniMapColors: FlowMiniMapColors;
+  theme: Theme;
+};
+
+const FlowGraphPanel: FC<FlowGraphPanelProps> = ({
+  clearGraphHoveredUnit,
+  edges,
+  graphHoveredUnit,
+  miniMapColors,
+  nodes,
+  reactFlowInstanceRef,
+  selectFlowNode,
+  showMiniMap,
+  theme,
+}) => (
+  <Paper
+    variant="outlined"
+    sx={{
+      flex: 1,
+      height: "100%",
+      minWidth: 0,
+      minHeight: 0,
+      overflow: "hidden",
+      borderRadius: 3,
+      backgroundColor: "background.paper",
+    }}
+  >
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      defaultViewport={defaultViewport}
+      colorMode={theme.palette.mode}
+      nodeTypes={nodeTypes}
+      onNodeClick={(_event, node) => selectFlowNode(node.id)}
+      onNodeMouseEnter={(_event, node) => graphHoveredUnit(node.id)}
+      onNodeMouseLeave={(_event, node) => clearGraphHoveredUnit(node.id)}
+      onInit={(instance: ReactFlowInstance<Node<AjsNode>, Edge>) => {
+        reactFlowInstanceRef.current = instance;
+      }}
+      fitView
+      minZoom={minimumViewportZoom}
+      fitViewOptions={{
+        padding: 0.22,
+        minZoom: minimumViewportZoom,
+      }}
+    >
+      <Background
+        variant={BackgroundVariant.Dots}
+        gap={20}
+        size={1}
+        color={theme.palette.divider}
+      />
+      <Controls
+        position="bottom-left"
+        showInteractive={false}
+        style={{
+          borderRadius: 12,
+          overflow: "hidden",
+          boxShadow: theme.shadows[3],
+        }}
+      />
+      {showMiniMap && (
+        <MiniMap<Node<AjsNode>>
+          className="ajs-flow-minimap"
+          ariaLabel="Flow graph MiniMap"
+          pannable
+          zoomable
+          position="bottom-right"
+          nodeColor={(node) => resolveFlowMiniMapNodeFill(node, miniMapColors)}
+          nodeStrokeColor={(node) =>
+            resolveFlowMiniMapNodeStroke(node, miniMapColors)
+          }
+          nodeStrokeWidth={3}
+          bgColor={theme.palette.background.paper}
+          maskColor={`${theme.palette.background.default}66`}
+          maskStrokeColor="transparent"
+          maskStrokeWidth={0}
+          style={{
+            borderRadius: 12,
+            overflow: "hidden",
+            opacity: 1,
+            boxShadow: theme.shadows[3],
+          }}
+        />
+      )}
+    </ReactFlow>
+  </Paper>
+);
+
+type FlowViewerBodyProps = FlowViewerController & {
+  miniMapColors: FlowMiniMapColors;
+  openSelectedNodeUnitList: () => void;
+  theme: Theme;
+};
+
+const FlowViewerBody: FC<FlowViewerBodyProps> = ({
+  ajsDocument,
+  clearGraphHoveredUnit,
+  clearSelectedUnit,
+  clearTreeHoveredUnit,
+  dialogData,
+  edges,
+  focusModeEnabled,
+  graphHoveredUnit,
+  hoveredUnitId,
+  miniMapColors,
+  nodes,
+  openSelectedNodeDefinition,
+  openSelectedNodeScope,
+  openSelectedNodeUnitList,
+  reactFlowInstanceRef,
+  selectedNodeDetail,
+  selectedUnitId,
+  selectFlowNode,
+  selectTreeUnit,
+  setDialogData,
+  showMiniMap,
+  theme,
+  toggleFocusMode,
+  treeHoveredUnit,
+  unitById,
+  currentUnitIdState,
+}) => (
+  <Box
+    sx={{
+      width: "100%",
+      flex: 1,
+      minWidth: 0,
+      minHeight: 0,
+      overflow: "hidden",
+      padding: 1.25,
+      background: (theme) =>
+        `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+      boxSizing: "border-box",
+    }}
+  >
+    <Stack
+      direction="row"
+      spacing={1.25}
+      sx={{
+        width: "100%",
+        height: "100%",
+        minWidth: 0,
+        minHeight: 0,
+      }}
+    >
+      <FlowSelector
+        rootUnits={ajsDocument?.rootUnits ?? []}
+        unitById={unitById}
+        currentUnitIdState={currentUnitIdState}
+        hoveredUnitId={hoveredUnitId}
+        selectedUnitId={selectedUnitId}
+        onHoverUnit={treeHoveredUnit}
+        onLeaveUnit={clearTreeHoveredUnit}
+        onSelectUnit={selectTreeUnit}
+      />
+      <FlowGraphPanel
+        clearGraphHoveredUnit={clearGraphHoveredUnit}
+        edges={edges}
+        graphHoveredUnit={graphHoveredUnit}
+        miniMapColors={miniMapColors}
+        nodes={nodes}
+        reactFlowInstanceRef={reactFlowInstanceRef}
+        selectFlowNode={selectFlowNode}
+        showMiniMap={showMiniMap}
+        theme={theme}
+      />
+      {selectedNodeDetail && (
+        <FlowNodeDetailPanel
+          detail={selectedNodeDetail}
+          onClose={clearSelectedUnit}
+          onOpenDefinition={openSelectedNodeDefinition}
+          onOpenScope={openSelectedNodeScope}
+          onOpenUnitList={openSelectedNodeUnitList}
+          focusModeEnabled={focusModeEnabled}
+          onToggleFocusMode={toggleFocusMode}
+        />
+      )}
+    </Stack>
+    {dialogData && (
+      <UnitEntityDialog
+        dialogData={dialogData}
+        onClose={() => setDialogData(undefined)}
+      />
+    )}
+  </Box>
+);
+
+const useFlowTheme = (): Theme => {
   const { isDarkMode } = useMyAppContext();
-
-  const theme = useMemo(
+  return useMemo(
     () =>
       createTheme({
         palette: {
@@ -56,6 +256,40 @@ const FlowContents: FC = () => {
       }),
     [isDarkMode],
   );
+};
+
+const useSelectedNodeUnitListAction = (
+  selectedNodeDetail: FlowViewerController["selectedNodeDetail"],
+) =>
+  useMemo(
+    () =>
+      selectedNodeDetail
+        ? () => navigateToTable(selectedNodeDetail.absolutePath)
+        : () => undefined,
+    [selectedNodeDetail],
+  );
+
+const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
+  useMemo(
+    () => ({
+      both: theme.palette.warning.main,
+      currentSearchResult: theme.palette.success.dark,
+      downstream: theme.palette.success.main,
+      hidden: "transparent",
+      normal: theme.palette.action.disabled,
+      searchMatch: theme.palette.success.light,
+      selected: theme.palette.secondary.main,
+      selectedFocus: theme.palette.primary.main,
+      unrelated: theme.palette.action.disabledBackground,
+      upstream: theme.palette.info.main,
+    }),
+    [theme],
+  );
+
+const FlowContents: FC = () => {
+  console.log("render FlowContents.");
+
+  const theme = useFlowTheme();
 
   const {
     ajsDocument,
@@ -93,28 +327,9 @@ const FlowContents: FC = () => {
     treeHoveredUnit,
     unitById,
   } = useFlowViewerController({ theme });
-  const openSelectedNodeUnitList = useMemo(
-    () =>
-      selectedNodeDetail
-        ? () => navigateToTable(selectedNodeDetail.absolutePath)
-        : () => undefined,
-    [selectedNodeDetail],
-  );
-  const miniMapColors = useMemo(
-    () => ({
-      both: theme.palette.warning.main,
-      currentSearchResult: theme.palette.success.dark,
-      downstream: theme.palette.success.main,
-      hidden: "transparent",
-      normal: theme.palette.action.disabled,
-      searchMatch: theme.palette.success.light,
-      selected: theme.palette.secondary.main,
-      selectedFocus: theme.palette.primary.main,
-      unrelated: theme.palette.action.disabledBackground,
-      upstream: theme.palette.info.main,
-    }),
-    [theme],
-  );
+  const openSelectedNodeUnitList =
+    useSelectedNodeUnitListAction(selectedNodeDetail);
+  const miniMapColors = useFlowMiniMapColors(theme);
 
   return (
     <ThemeProvider theme={theme}>
@@ -152,134 +367,45 @@ const FlowContents: FC = () => {
             onSearchSubmit={handleSearchSubmit}
             onSearchClear={handleSearchClear}
           />
-          <Box
-            sx={{
-              width: "100%",
-              flex: 1,
-              minWidth: 0,
-              minHeight: 0,
-              overflow: "hidden",
-              padding: 1.25,
-              background: (theme) =>
-                `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
-              boxSizing: "border-box",
-            }}
-          >
-            <Stack
-              direction="row"
-              spacing={1.25}
-              sx={{
-                width: "100%",
-                height: "100%",
-                minWidth: 0,
-                minHeight: 0,
-              }}
-            >
-              <FlowSelector
-                rootUnits={ajsDocument?.rootUnits ?? []}
-                unitById={unitById}
-                currentUnitIdState={currentUnitIdState}
-                hoveredUnitId={hoveredUnitId}
-                selectedUnitId={selectedUnitId}
-                onHoverUnit={treeHoveredUnit}
-                onLeaveUnit={clearTreeHoveredUnit}
-                onSelectUnit={selectTreeUnit}
-              />
-              <Paper
-                variant="outlined"
-                sx={{
-                  flex: 1,
-                  height: "100%",
-                  minWidth: 0,
-                  minHeight: 0,
-                  overflow: "hidden",
-                  borderRadius: 3,
-                  backgroundColor: "background.paper",
-                }}
-              >
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  defaultViewport={defaultViewport}
-                  colorMode={theme.palette.mode}
-                  nodeTypes={nodeTypes}
-                  onNodeClick={(_event, node) => selectFlowNode(node.id)}
-                  onNodeMouseEnter={(_event, node) => graphHoveredUnit(node.id)}
-                  onNodeMouseLeave={(_event, node) =>
-                    clearGraphHoveredUnit(node.id)
-                  }
-                  onInit={(instance) => {
-                    reactFlowInstanceRef.current = instance;
-                  }}
-                  fitView
-                  minZoom={minimumViewportZoom}
-                  fitViewOptions={{
-                    padding: 0.22,
-                    minZoom: minimumViewportZoom,
-                  }}
-                >
-                  <Background
-                    variant={BackgroundVariant.Dots}
-                    gap={20}
-                    size={1}
-                    color={theme.palette.divider}
-                  />
-                  <Controls
-                    position="bottom-left"
-                    showInteractive={false}
-                    style={{
-                      borderRadius: 12,
-                      overflow: "hidden",
-                      boxShadow: theme.shadows[3],
-                    }}
-                  />
-                  {showMiniMap && (
-                    <MiniMap<Node<AjsNode>>
-                      className="ajs-flow-minimap"
-                      ariaLabel="Flow graph MiniMap"
-                      pannable
-                      zoomable
-                      position="bottom-right"
-                      nodeColor={(node) =>
-                        resolveFlowMiniMapNodeFill(node, miniMapColors)
-                      }
-                      nodeStrokeColor={(node) =>
-                        resolveFlowMiniMapNodeStroke(node, miniMapColors)
-                      }
-                      nodeStrokeWidth={3}
-                      bgColor={theme.palette.background.paper}
-                      maskColor={`${theme.palette.background.default}66`}
-                      maskStrokeColor="transparent"
-                      maskStrokeWidth={0}
-                      style={{
-                        borderRadius: 12,
-                        overflow: "hidden",
-                        opacity: 1,
-                        boxShadow: theme.shadows[3],
-                      }}
-                    />
-                  )}
-                </ReactFlow>
-              </Paper>
-              {selectedNodeDetail && (
-                <FlowNodeDetailPanel
-                  detail={selectedNodeDetail}
-                  onClose={clearSelectedUnit}
-                  onOpenDefinition={openSelectedNodeDefinition}
-                  onOpenScope={openSelectedNodeScope}
-                  onOpenUnitList={openSelectedNodeUnitList}
-                  focusModeEnabled={focusModeEnabled}
-                  onToggleFocusMode={toggleFocusMode}
-                />
-              )}
-            </Stack>
-            {dialogData && (
-              <UnitEntityDialog
-                dialogData={dialogData}
-                onClose={() => setDialogData(undefined)}
-              />
-            )}
-          </Box>
+          <FlowViewerBody
+            ajsDocument={ajsDocument}
+            canEnableFocusMode={canEnableFocusMode}
+            clearGraphHoveredUnit={clearGraphHoveredUnit}
+            clearSelectedUnit={clearSelectedUnit}
+            clearTreeHoveredUnit={clearTreeHoveredUnit}
+            currentUnit={currentUnit}
+            currentUnitIdState={currentUnitIdState}
+            dialogData={dialogData}
+            edges={edges}
+            expandableNestedUnitIds={expandableNestedUnitIds}
+            focusModeEnabled={focusModeEnabled}
+            graphHoveredUnit={graphHoveredUnit}
+            handleSearchClear={handleSearchClear}
+            handleSearchNavigate={handleSearchNavigate}
+            handleSearchSubmit={handleSearchSubmit}
+            hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
+            hoveredUnitId={hoveredUnitId}
+            miniMapColors={miniMapColors}
+            nodes={nodes}
+            openSelectedNodeDefinition={openSelectedNodeDefinition}
+            openSelectedNodeScope={openSelectedNodeScope}
+            openSelectedNodeUnitList={openSelectedNodeUnitList}
+            reactFlowInstanceRef={reactFlowInstanceRef}
+            searchedUnitId={searchedUnitId}
+            searchResultPosition={searchResultPosition}
+            selectedNodeDetail={selectedNodeDetail}
+            selectedUnitId={selectedUnitId}
+            selectFlowNode={selectFlowNode}
+            selectTreeUnit={selectTreeUnit}
+            setDialogData={setDialogData}
+            showMiniMap={showMiniMap}
+            theme={theme}
+            toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
+            toggleFocusMode={toggleFocusMode}
+            toggleMiniMap={toggleMiniMap}
+            treeHoveredUnit={treeHoveredUnit}
+            unitById={unitById}
+          />
         </Stack>
       </ReactFlowProvider>
     </ThemeProvider>
