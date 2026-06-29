@@ -1,9 +1,18 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
-import {
+import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type {
   FlowGraphEdgeDto,
   FlowGraphNodeDto,
   FlowGraphNodeType,
 } from "../../../../application/flow-graph/buildFlowGraphCore";
+
+const nodeTypeByUnitType: Partial<Record<string, FlowGraphNodeType>> = {
+  g: "jobgroup",
+  n: "jobnet",
+  rn: "jobnet",
+  rm: "jobnet",
+  rr: "jobnet",
+  rc: "condition",
+};
 
 export const compareExpandedUnits = (left: AjsUnit, right: AjsUnit): number =>
   left.depth - right.depth ||
@@ -11,21 +20,8 @@ export const compareExpandedUnits = (left: AjsUnit, right: AjsUnit): number =>
   left.layout.h - right.layout.h ||
   left.absolutePath.localeCompare(right.absolutePath);
 
-const toNodeType = (unit: AjsUnit): FlowGraphNodeType => {
-  switch (unit.unitType) {
-    case "g":
-      return "jobgroup";
-    case "n":
-    case "rn":
-    case "rm":
-    case "rr":
-      return "jobnet";
-    case "rc":
-      return "condition";
-    default:
-      return "job";
-  }
-};
+const toNodeType = (unit: AjsUnit): FlowGraphNodeType =>
+  nodeTypeByUnitType[unit.unitType] ?? "job";
 
 export const toGridNode = (unit: AjsUnit): FlowGraphNodeDto => ({
   id: unit.id,

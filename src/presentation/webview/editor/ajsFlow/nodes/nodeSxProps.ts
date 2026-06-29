@@ -261,23 +261,24 @@ const nodeButtonColor = (visualState: NodeVisualState): ThemeValue =>
     resolveVisualKind(visualState, buttonColorRules, "default")
   ];
 
+type RelationshipFocusRole = NonNullable<
+  NodeVisualState["relationshipFocusRole"]
+>;
+
+const relationshipFocusFilterByRole: Record<RelationshipFocusRole, ThemeValue> =
+  {
+    selected: (theme) => `drop-shadow(0 0 5px ${theme.palette.secondary.main})`,
+    upstream: (theme) => `drop-shadow(0 0 5px ${theme.palette.info.main})`,
+    downstream: (theme) => `drop-shadow(0 0 5px ${theme.palette.success.main})`,
+    both: (theme) => `drop-shadow(0 0 5px ${theme.palette.warning.main})`,
+    unrelated: () => "none",
+  };
+
 export const buildNodeFocusFilter = (
   relationshipFocusRole: NodeVisualState["relationshipFocusRole"],
   theme: Theme,
-): string => {
-  switch (relationshipFocusRole) {
-    case "selected":
-      return `drop-shadow(0 0 5px ${theme.palette.secondary.main})`;
-    case "upstream":
-      return `drop-shadow(0 0 5px ${theme.palette.info.main})`;
-    case "downstream":
-      return `drop-shadow(0 0 5px ${theme.palette.success.main})`;
-    case "both":
-      return `drop-shadow(0 0 5px ${theme.palette.warning.main})`;
-    default:
-      return "none";
-  }
-};
+): string =>
+  relationshipFocusFilterByRole[relationshipFocusRole ?? "unrelated"](theme);
 
 const nodeFocusFilter =
   ({ relationshipFocusRole }: NodeVisualState): ThemeValue =>

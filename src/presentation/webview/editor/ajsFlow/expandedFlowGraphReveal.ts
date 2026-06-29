@@ -98,12 +98,12 @@ const ensureChildNodeVisible = ({
     unit: child,
     parentUnitId,
     calculatePosition: () =>
-      calculateNestedChildPosition(
-        { x: 0, y: 0 },
-        child.layout.h,
-        child.layout.v,
-        context.basePx,
-      ),
+      calculateNestedChildPosition({
+        parentPosition: { x: 0, y: 0 },
+        h: child.layout.h,
+        v: child.layout.v,
+        basePx: context.basePx,
+      }),
   });
 
 const ensureConditionNodeVisible = ({

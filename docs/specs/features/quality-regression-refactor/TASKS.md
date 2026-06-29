@@ -32,6 +32,7 @@ active implementation approval remains.
 ## Active Tasks
 
 - [x] Complete the table column definition package remediation slice.
+- [x] Complete the flow graph rendering-data remediation slice.
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
       another package/category slice or feature closure.
 
@@ -55,7 +56,7 @@ active implementation approval remains.
   present in `src/presentation/vscode`, `src/bootstrap/extension`,
   `src/application/editor-feedback`, and selected tests.
 - Current smell clusters still useful for selecting future slices:
-  flow presentation helpers and hooks, remaining table presentation helpers
+  remaining flow controller/search hooks, remaining table presentation helpers
   outside the completed column definition package, VS Code adapter
   parameter-list shapes, shared detail presentation, selected focused tests,
   and i18n resource duplication.
@@ -68,15 +69,25 @@ active implementation approval remains.
   adapter parameter-shape wiring, and the table interaction shell around row
   reveal, table search controller, viewer data/index construction, header CSV
   actions, virtualized row selection, table header rendering, CSV cell
-  conversion, and table navigation helper shapes, and table column definition
+  conversion, and table navigation helper shapes, table column definition
   package helpers around shared row-view column builders, nested group builders,
-  array/rating cell rendering, and schedule column schema preservation.
+  array/rating cell rendering, and schedule column schema preservation, and
+  flow graph rendering-data helpers around DTO-to-React Flow mapping, nested
+  position parameters, expanded-node type mapping, jobnet node actions, and
+  relationship-focus styling.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
 
 ## Validation
 
+- [x] Completed flow graph rendering-data slice: targeted qlty checks for
+      touched flow graph rendering files and direct graph tests report no
+      smells. Standard gates passed with `CI=true rtk pnpm run qlty`,
+      `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`,
+      `CI=true rtk pnpm run build`, and `CI=true rtk pnpm run lint:md`.
+      `test:web` required an escalated run for Chromium/macOS host access.
+      Production webpack emitted existing bundle-size performance warnings.
 - [x] Completed table column definition package slice: targeted qlty checks for
       `ajsTable/columnDefs`, `tableColumnDef.tsx`, and
       `tableColumnDef.test.ts` report no smells. Standard gates passed with
@@ -91,8 +102,11 @@ active implementation approval remains.
 
 ## Use-Case Back-Propagation
 
-- No behavior changes were made for the completed table column definition
+- No behavior changes were made for the completed flow graph rendering-data
   slice.
+- Flow graph node/edge IDs, node types, positions, nested panel bounds,
+  search/selection/hover flags, relationship-focus styling, and jobnet
+  open/expand action ordering remain protected by direct flow graph/node tests.
 - The group10 column id, nesting, and order contract is protected by
   `src/test/suite/tableColumnDef.test.ts`.
 - If implementation reveals an intended or unavoidable behavior change, stop
@@ -105,3 +119,7 @@ active implementation approval remains.
   generated artifacts, and configuration still require approval.
 - Do not run the upstream comparison again for the next planning step unless a
   refresh trigger in `Reusable Upstream Evaluation` applies.
+- Flow graph rendering-data behavior is governed mainly by
+  `docs/requirements/use-cases/uc-build-flow-graph.md` and, for stable unit
+  identity across viewers,
+  `docs/requirements/use-cases/uc-navigate-between-unit-list-and-flow-graph.md`.

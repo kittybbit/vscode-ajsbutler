@@ -91,18 +91,18 @@ const createFlowDataFromExpandedGraph = (
   expandedGraph: ExpandedFlowGraphResult,
 ): FlowData =>
   expandedGraph.graph
-    ? createReactFlowData(
-        expandedGraph.graph,
-        params.unitDefinitionByPath,
-        params.theme,
-        params.dialogDataState,
-        params.currentUnitIdState,
-        {
+    ? createReactFlowData({
+        graph: expandedGraph.graph,
+        unitDefinitionByPath: params.unitDefinitionByPath,
+        theme: params.theme,
+        dialogDataState: params.dialogDataState,
+        currentUnitIdState: params.currentUnitIdState,
+        options: {
           ...createReactFlowDataOptions(params),
           nodeDecorations: expandedGraph.nodeDecorations,
           positionOverrides: expandedGraph.positionOverrides,
         },
-      )
+      })
     : emptyFlowData();
 
 const buildFlowData = (
