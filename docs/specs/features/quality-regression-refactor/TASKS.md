@@ -6,7 +6,7 @@
 - Scope:
   reassess the stored upstream qlty evaluation and completed targeted
   remediations to decide whether another focused package/category slice is
-  still needed or whether the feature can close.
+  still needed or whether the temporary feature can close.
 - Acceptance:
   reuse the saved `v1.15.1` comparison where it still matches the repository,
   refresh upstream only when the trigger below applies, and select at most one
@@ -31,6 +31,7 @@ active implementation approval remains.
 
 ## Active Tasks
 
+- [x] Complete the table column definition package remediation slice.
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
       another package/category slice or feature closure.
 
@@ -54,9 +55,10 @@ active implementation approval remains.
   present in `src/presentation/vscode`, `src/bootstrap/extension`,
   `src/application/editor-feedback`, and selected tests.
 - Current smell clusters still useful for selecting future slices:
-  flow presentation helpers and hooks, table presentation and column helpers,
-  VS Code adapter parameter-list shapes, shared tree/detail presentation, CSV
-  cell conversion, selected focused tests, and i18n resource duplication.
+  flow presentation helpers and hooks, remaining table presentation helpers
+  outside the completed column definition package, VS Code adapter
+  parameter-list shapes, shared detail presentation, selected focused tests,
+  and i18n resource duplication.
 - Recently removed targeted smells:
   viewer wiring, viewer event bridge, unit type label resolver, flow
   relationship-focus classification, flow node detail context, flow tree
@@ -66,41 +68,33 @@ active implementation approval remains.
   adapter parameter-shape wiring, and the table interaction shell around row
   reveal, table search controller, viewer data/index construction, header CSV
   actions, virtualized row selection, table header rendering, CSV cell
-  conversion, and table navigation helper shapes.
+  conversion, and table navigation helper shapes, and table column definition
+  package helpers around shared row-view column builders, nested group builders,
+  array/rating cell rendering, and schedule column schema preservation.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
 
 ## Validation
 
-- [x] Completed slice: targeted qlty checks for touched `ajsTable` interaction
-      shell files report no smells; standard gates passed with
+- [x] Completed table column definition package slice: targeted qlty checks for
+      `ajsTable/columnDefs`, `tableColumnDef.tsx`, and
+      `tableColumnDef.test.ts` report no smells. Standard gates passed with
       `CI=true rtk pnpm run qlty`, `CI=true rtk pnpm test`,
-      `CI=true rtk pnpm run test:web`, and `CI=true rtk pnpm run build`.
-      Production webpack emitted existing bundle-size performance warnings.
-- [x] Previous planning: reused stored upstream qlty smell and metrics evaluation
-      after `a921539`.
-- [x] Completed slice: targeted qlty checks for touched VS Code webview adapter
-      files and focused adapter tests through `CI=true rtk pnpm test`.
-- [x] Completed slice: `CI=true rtk pnpm run qlty`,
-      `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`, and
-      `CI=true rtk pnpm run build`.
-      `test:web` required an escalated rerun after sandboxed Chromium failed to
-      register a macOS Mach port; the first escalated run then hit a transient
-      external HTTPS timeout and the next rerun passed. Production webpack
-      emitted existing bundle-size performance warnings.
-- [x] Completed slice: targeted qlty checks for touched unit-tree selector
-      files and focused selector tests through `CI=true rtk pnpm test`.
-- [x] Completed slice: `CI=true rtk pnpm run qlty`,
-      `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`, and
-      `CI=true rtk pnpm run build`.
+      `CI=true rtk pnpm run test:web`, `CI=true rtk pnpm run build`, and
+      `CI=true rtk pnpm run lint:md`.
       `test:web` required an escalated rerun after sandboxed Chromium failed to
       register a macOS Mach port. Production webpack emitted existing
       bundle-size performance warnings.
+- [x] Stored upstream qlty smell and metrics evaluation remains reusable after
+      `a921539` until a refresh trigger applies.
 
 ## Use-Case Back-Propagation
 
-- No behavior changes are planned.
+- No behavior changes were made for the completed table column definition
+  slice.
+- The group10 column id, nesting, and order contract is protected by
+  `src/test/suite/tableColumnDef.test.ts`.
 - If implementation reveals an intended or unavoidable behavior change, stop
   and update the relevant use case before requesting expanded approval.
 

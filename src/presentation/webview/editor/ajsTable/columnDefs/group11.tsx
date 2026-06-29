@@ -1,8 +1,12 @@
-import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
-import Rating from "@mui/material/Rating";
+import {
+  labeledRowViewColumns,
+  nestedColumnGroup,
+  ratingCell,
+  rowViewColumn,
+} from "./common";
 
 const group11 = (
   columnHelper: ColumnHelper<UnitListRowView>,
@@ -18,191 +22,111 @@ const group11 = (
     id: "group11", //Basic job definition information
     header: labels.label,
     columns: [
-      {
-        id: "group11.col1",
-        header: labels.column(1),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.commandText,
-      },
-      {
-        id: "group11.col2",
-        header: labels.column(2),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.scriptFileName,
-      },
-      {
-        id: "group11.col3",
-        header: labels.column(3),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.parameters,
-      },
-      {
-        id: "group11.col4",
-        header: labels.column(4),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.environmentVariable,
-      },
-      {
-        id: "group11.col5",
-        header: labels.column(5),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.environmentVariableFile,
-      },
-      {
-        id: "group11.col6",
-        header: labels.column(6),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.workPathName,
-      },
-      {
-        id: "group11.col7",
-        header: labels.column(7),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.standardInputFile,
-      },
-      columnHelper.group({
+      ...labeledRowViewColumns({
+        idPrefix: "group11",
+        labels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group11.commandText,
+          (view) => view?.group11.scriptFileName,
+          (view) => view?.group11.parameters,
+          (view) => view?.group11.environmentVariable,
+          (view) => view?.group11.environmentVariableFile,
+          (view) => view?.group11.workPathName,
+          (view) => view?.group11.standardInputFile,
+        ],
+      }),
+      nestedColumnGroup({
+        columnHelper,
         id: "group11.group1",
-        header: standardOutputLabels.label,
-        columns: [
-          {
-            id: "group11.group1.col1",
-            header: standardOutputLabels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.standardOutputFile,
-          },
-          {
-            id: "group11.group1.col2",
-            header: standardOutputLabels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.standardOutputAction,
-          },
+        labels: standardOutputLabels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group11.standardOutputFile,
+          (view) => view?.group11.standardOutputAction,
         ],
       }),
-      columnHelper.group({
+      nestedColumnGroup({
+        columnHelper,
         id: "group11.group2",
-        header: standardErrorLabels.label,
-        columns: [
-          {
-            id: "group11.group2.col1",
-            header: standardErrorLabels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.standardErrorFile,
-          },
-          {
-            id: "group11.group2.col2",
-            header: standardErrorLabels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.standardErrorAction,
-          },
+        labels: standardErrorLabels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group11.standardErrorFile,
+          (view) => view?.group11.standardErrorAction,
         ],
       }),
-      {
+      rowViewColumn({
         id: "group11.col8",
         header: labels.column(8),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.queueManager,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group11.queueManager,
+      }),
+      rowViewColumn({
         id: "group11.col9",
         header: labels.column(9),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.queueName,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group11.queueName,
+      }),
+      rowViewColumn({
         id: "group11.col10",
         header: labels.column(10),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.requestJobName,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group11.requestJobName,
+      }),
+      rowViewColumn({
         id: "group11.col11",
         header: labels.column(11),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.priority,
-        cell: (props) => {
-          const priority = props.getValue<number | undefined>();
-          return priority ? (
-            <Rating
-              value={priority}
-              size="small"
-              sx={{ position: "inherit" }}
-              readOnly
-            />
-          ) : undefined;
-        },
-      },
-      columnHelper.group({
+        rowViewByPath,
+        selectValue: (view) => view?.group11.priority,
+        cell: ratingCell,
+      }),
+      nestedColumnGroup({
+        columnHelper,
         id: "group11.group3",
-        header: endJudgmentLabels.label,
-        columns: [
-          {
-            id: "group11.group3.col1",
-            header: endJudgmentLabels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.endJudgment,
-          },
-          {
-            id: "group11.group3.col2",
-            header: endJudgmentLabels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.waitThreshold,
-          },
-          {
-            id: "group11.group3.col3",
-            header: endJudgmentLabels.column(3),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.timeoutHold,
-          },
-          {
-            id: "group11.group3.col4",
-            header: endJudgmentLabels.column(4),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.judgmentFile,
-          },
+        labels: endJudgmentLabels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group11.endJudgment,
+          (view) => view?.group11.waitThreshold,
+          (view) => view?.group11.timeoutHold,
+          (view) => view?.group11.judgmentFile,
         ],
       }),
-      {
+      rowViewColumn({
         id: "group11.col12",
         header: labels.column(12),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.automaticRetryEnabled,
-      },
-      columnHelper.group({
+        rowViewByPath,
+        selectValue: (view) => view?.group11.automaticRetryEnabled,
+      }),
+      nestedColumnGroup({
+        columnHelper,
         id: "group11.group4",
-        header: retryRangeLabels.label,
-        columns: [
-          {
-            id: "group11.group4.col1",
-            header: retryRangeLabels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.retryStart,
-          },
-          {
-            id: "group11.group4.col2",
-            header: retryRangeLabels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group11.retryEnd,
-          },
+        labels: retryRangeLabels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group11.retryStart,
+          (view) => view?.group11.retryEnd,
         ],
       }),
-      {
+      rowViewColumn({
         id: "group11.col13",
         header: labels.column(13),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.retryCount,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group11.retryCount,
+      }),
+      rowViewColumn({
         id: "group11.col14",
         header: labels.column(14),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.retryInterval,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group11.retryInterval,
+      }),
+      rowViewColumn({
         id: "group11.col15",
         header: labels.column(15),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group11.targetUserName,
-      },
+        rowViewByPath,
+        selectValue: (view) => view?.group11.targetUserName,
+      }),
     ],
   });
 };

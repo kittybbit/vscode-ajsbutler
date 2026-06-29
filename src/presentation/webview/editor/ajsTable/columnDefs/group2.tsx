@@ -1,26 +1,25 @@
 import React from "react";
-import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
-import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
+import { GroupColumnDef } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
-import { box } from "./common";
+import { box, ColumnGroupContext, rowViewColumn } from "./common";
 import Link from "@mui/material/Link";
 
 const group2 = (
-  columnHelper: ColumnHelper<UnitListRowView>,
-  labels: AjsTableColumnGroupLabels,
+  context: ColumnGroupContext,
   handleJump: (id: string) => void,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> => {
+  const { columnHelper, labels, rowViewByPath } = context;
+
   return columnHelper.group({
     id: "group2", //Unit common definition information
     header: labels.label,
     columns: [
-      {
+      rowViewColumn({
         id: "group2.col1",
         header: labels.column(1),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.comment,
-      },
+        rowViewByPath,
+        selectValue: (view) => view?.group2.comment,
+      }),
       {
         id: "group2.col2",
         header: labels.column(2),
@@ -60,48 +59,48 @@ const group2 = (
         cell: (props) =>
           props.getValue<string[]>().map((v: string, i: number) => box(v, i)),
       },
-      {
+      rowViewColumn({
         id: "group2.col4",
         header: labels.column(4),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.executionAgent,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group2.executionAgent,
+      }),
+      rowViewColumn({
         id: "group2.col5",
         header: labels.column(5),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionLimit,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group2.nestedConnectionLimit,
+      }),
+      rowViewColumn({
         id: "group2.col6",
         header: labels.column(6),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionName,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group2.nestedConnectionName,
+      }),
+      rowViewColumn({
         id: "group2.col7",
         header: labels.column(7),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionEnabled,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group2.nestedConnectionEnabled,
+      }),
+      rowViewColumn({
         id: "group2.col8",
         header: labels.column(8),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionExternal,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group2.nestedConnectionExternal,
+      }),
+      rowViewColumn({
         id: "group2.col9",
         header: labels.column(9),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionHost,
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group2.nestedConnectionHost,
+      }),
+      rowViewColumn({
         id: "group2.col10",
         header: labels.column(10),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group2.nestedConnectionService,
-      },
+        rowViewByPath,
+        selectValue: (view) => view?.group2.nestedConnectionService,
+      }),
     ],
   });
 };

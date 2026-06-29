@@ -1,11 +1,30 @@
 import React from "react";
-import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
+import {
+  CellContext,
+  ColumnHelper,
+  GroupColumnDef,
+} from "@tanstack/table-core";
 import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
-import { box } from "./common";
+import { arrayBoxCell, rowViewColumn } from "./common";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
 import { WeekSymbol } from "../../../../../domain/values/AjsType";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
+
+const weekSymbols: WeekSymbol[] = ["su", "mo", "tu", "we", "th", "fr", "sa"];
+const dateArrayCell = arrayBoxCell<string>();
+
+const weekCell = (props: CellContext<UnitListRowView, boolean | undefined>) => {
+  const result = props.getValue<boolean | undefined>();
+  if (result == undefined) {
+    return undefined;
+  }
+  return result ? (
+    <DoneAllIcon fontSize="small" color="primary" />
+  ) : (
+    <RemoveDoneIcon fontSize="small" color="primary" />
+  );
+};
 
 const group6 = (
   columnHelper: ColumnHelper<UnitListRowView>,
@@ -21,51 +40,30 @@ const group6 = (
       columnHelper.group({
         id: "group6.group1",
         header: standardWeekLabels.label,
-        columns: ["su", "mo", "tu", "we", "th", "fr", "sa"].map((v, i) => {
-          const id = `group6.group1.col${i + 1}`;
-          return {
-            id: id,
-            header: standardWeekLabels.column(i + 1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group6[v as WeekSymbol],
-            cell: (props) => {
-              const result = props.getValue<boolean>();
-              if (result == undefined) {
-                return undefined;
-              }
-              return result ? (
-                <DoneAllIcon fontSize="small" color="primary" />
-              ) : (
-                <RemoveDoneIcon fontSize="small" color="primary" />
-              );
-            },
-          };
-        }),
+        columns: weekSymbols.map((weekSymbol, index) =>
+          rowViewColumn({
+            id: `group6.group1.col${index + 1}`,
+            header: standardWeekLabels.column(index + 1),
+            rowViewByPath,
+            selectValue: (view) => view?.group6[weekSymbol],
+            cell: weekCell,
+          }),
+        ),
       }),
-      {
+      rowViewColumn({
         id: "group6.col1",
         header: labels.column(1),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group6.openDates,
-        cell: (props) => {
-          const op = props.getValue<string[] | undefined>();
-          return Array.isArray(op) ? (
-            <>{op.map((v, i) => box(v, i))}</>
-          ) : undefined;
-        },
-      },
-      {
+        rowViewByPath,
+        selectValue: (view) => view?.group6.openDates,
+        cell: dateArrayCell,
+      }),
+      rowViewColumn({
         id: "group6.col2",
         header: labels.column(2),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group6.closeDates,
-        cell: (props) => {
-          const cl = props.getValue<string[] | undefined>();
-          return Array.isArray(cl) ? (
-            <>{cl.map((v, i) => box(v, i))}</>
-          ) : undefined;
-        },
-      },
+        rowViewByPath,
+        selectValue: (view) => view?.group6.closeDates,
+        cell: dateArrayCell,
+      }),
     ],
   });
 };

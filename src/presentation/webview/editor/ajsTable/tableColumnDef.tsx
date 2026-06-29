@@ -6,7 +6,7 @@ import {
   paramDefinitionLang,
 } from "../../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { AccessorType, box } from "./columnDefs/common";
+import { AccessorType, box, columnGroupContext } from "./columnDefs/common";
 import group1 from "./columnDefs/group1";
 import group2 from "./columnDefs/group2";
 import group3 from "./columnDefs/group3";
@@ -76,13 +76,24 @@ export const tableColumnDef = (
       enableGlobalFilter: false,
     }),
     group1(
-      columnHelper,
-      tableColumnLabels.group(1),
-      language,
-      handleJump,
-      rowViewByPath,
+      columnGroupContext(
+        columnHelper,
+        tableColumnLabels.group(1),
+        rowViewByPath,
+      ),
+      {
+        language,
+        handleJump,
+      },
     ),
-    group2(columnHelper, tableColumnLabels.group(2), handleJump, rowViewByPath),
+    group2(
+      columnGroupContext(
+        columnHelper,
+        tableColumnLabels.group(2),
+        rowViewByPath,
+      ),
+      handleJump,
+    ),
     group3(columnHelper, tableColumnLabels.group(3), rowViewByPath),
     group4(columnHelper, tableColumnLabels.group(4), rowViewByPath),
     group5(columnHelper, tableColumnLabels.group(5), rowViewByPath),
@@ -91,10 +102,12 @@ export const tableColumnDef = (
     group8(columnHelper, tableColumnLabels.group(8), rowViewByPath),
     group9(columnHelper, tableColumnLabels.group(9), rowViewByPath),
     group10(
-      columnHelper,
-      tableColumnLabels.group(10),
+      columnGroupContext(
+        columnHelper,
+        tableColumnLabels.group(10),
+        rowViewByPath,
+      ),
       paramDefinition,
-      rowViewByPath,
     ),
     group11(columnHelper, tableColumnLabels.group(11), rowViewByPath),
     group12(columnHelper, tableColumnLabels.group(12), rowViewByPath),

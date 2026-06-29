@@ -1,6 +1,7 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import { nestedColumnGroup } from "./common";
 
 const group17 = (
   columnHelper: ColumnHelper<UnitListRowView>,
@@ -13,22 +14,14 @@ const group17 = (
     id: "group17", //Tool unit definition information
     header: labels.label,
     columns: [
-      columnHelper.group({
+      nestedColumnGroup({
+        columnHelper,
         id: "group17.group1",
-        header: passingInformationLabels.label,
-        columns: [
-          {
-            id: "group17.group1.col1",
-            header: passingInformationLabels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group17.toolParameters,
-          },
-          {
-            id: "group17.group1.col2",
-            header: passingInformationLabels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group17.toolEnvironment,
-          },
+        labels: passingInformationLabels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group17.toolParameters,
+          (view) => view?.group17.toolEnvironment,
         ],
       }),
     ],

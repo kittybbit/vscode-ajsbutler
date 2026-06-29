@@ -1,6 +1,7 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import { labeledRowViewColumns, nestedColumnGroup } from "./common";
 
 const group15 = (
   columnHelper: ColumnHelper<UnitListRowView>,
@@ -16,128 +17,59 @@ const group15 = (
     id: "group15", //Job common attribute information
     header: labels.label,
     columns: [
-      {
-        id: "group15.col1",
-        header: labels.column(1),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group15.executionUser,
-      },
-      {
-        id: "group15.col2",
-        header: labels.column(2),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group15.executionTimeMonitor,
-      },
-      {
-        id: "group15.col3",
-        header: labels.column(3),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group15.fileDescriptor,
-      },
-      {
-        id: "group15.col4",
-        header: labels.column(4),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group15.jobType,
-      },
-      columnHelper.group({
+      ...labeledRowViewColumns({
+        idPrefix: "group15",
+        labels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group15.executionUser,
+          (view) => view?.group15.executionTimeMonitor,
+          (view) => view?.group15.fileDescriptor,
+          (view) => view?.group15.jobType,
+        ],
+      }),
+      nestedColumnGroup({
+        columnHelper,
         id: "group15.group1",
-        header: termination1Labels.label,
-        columns: [
-          {
-            id: "group15.group1.col1",
-            header: termination1Labels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationStatus1,
-          },
-          {
-            id: "group15.group1.col2",
-            header: termination1Labels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationDelay1,
-          },
-          {
-            id: "group15.group1.col3",
-            header: termination1Labels.column(3),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15
-                .terminationOperation1,
-          },
+        labels: termination1Labels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group15.terminationStatus1,
+          (view) => view?.group15.terminationDelay1,
+          (view) => view?.group15.terminationOperation1,
         ],
       }),
-      columnHelper.group({
+      nestedColumnGroup({
+        columnHelper,
         id: "group15.group2",
-        header: termination2Labels.label,
-        columns: [
-          {
-            id: "group15.group2.col1",
-            header: termination2Labels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationStatus2,
-          },
-          {
-            id: "group15.group2.col2",
-            header: termination2Labels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationDelay2,
-          },
-          {
-            id: "group15.group2.col3",
-            header: termination2Labels.column(3),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15
-                .terminationOperation2,
-          },
+        labels: termination2Labels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group15.terminationStatus2,
+          (view) => view?.group15.terminationDelay2,
+          (view) => view?.group15.terminationOperation2,
         ],
       }),
-      columnHelper.group({
+      nestedColumnGroup({
+        columnHelper,
         id: "group15.group3",
-        header: termination3Labels.label,
-        columns: [
-          {
-            id: "group15.group3.col1",
-            header: termination3Labels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationStatus3,
-          },
-          {
-            id: "group15.group3.col2",
-            header: termination3Labels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationDelay3,
-          },
-          {
-            id: "group15.group3.col3",
-            header: termination3Labels.column(3),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15
-                .terminationOperation3,
-          },
+        labels: termination3Labels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group15.terminationStatus3,
+          (view) => view?.group15.terminationDelay3,
+          (view) => view?.group15.terminationOperation3,
         ],
       }),
-      columnHelper.group({
+      nestedColumnGroup({
+        columnHelper,
         id: "group15.group4",
-        header: termination4Labels.label,
-        columns: [
-          {
-            id: "group15.group4.col1",
-            header: termination4Labels.column(1),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationStatus4,
-          },
-          {
-            id: "group15.group4.col2",
-            header: termination4Labels.column(2),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15.terminationDelay4,
-          },
-          {
-            id: "group15.group4.col3",
-            header: termination4Labels.column(3),
-            accessorFn: (row) =>
-              rowViewByPath.get(row.absolutePath)?.group15
-                .terminationOperation4,
-          },
+        labels: termination4Labels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group15.terminationStatus4,
+          (view) => view?.group15.terminationDelay4,
+          (view) => view?.group15.terminationOperation4,
         ],
       }),
     ],
