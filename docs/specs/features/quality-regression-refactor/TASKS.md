@@ -56,6 +56,12 @@ active implementation approval remains.
 - [x] Obtain human implementation approval for the webview editor
       presentation-helper remediation slice.
 - [x] Complete the webview editor presentation-helper remediation slice.
+- [x] Reassess whether the stored upstream qlty evaluation still justifies
+      another package/category slice or feature closure.
+- [x] Select the host callback adapter parameter-shape remediation slice.
+- [x] Obtain human implementation approval for the host callback adapter
+      parameter-shape remediation slice.
+- [x] Complete the host callback adapter parameter-shape remediation slice.
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
       another package/category slice or feature closure.
 
@@ -63,7 +69,7 @@ active implementation approval remains.
 
 - Baseline: `v1.15.1`.
 - Last refreshed after commit:
-  `343ba1e Refactor hover provider adapter shape`.
+  `2b97049 Refactor webview presentation helpers`.
 - Refresh triggers:
   refresh this evaluation only after a committed runtime/test/config change that
   can affect the broad comparison, when the selected slice fails to match stored
@@ -80,9 +86,8 @@ active implementation approval remains.
   selected VS Code command/adapter paths, parser infrastructure, i18n resources,
   and selected tests.
 - Current smell clusters still useful for selecting future slices:
-  webview editor presentation helpers, remaining host adapter callback
-  parameter shapes, broad diagnostics-test duplication, selected focused tests,
-  and i18n resource duplication.
+  remaining host adapter callback parameter shapes, broad diagnostics-test
+  duplication, selected focused tests, and i18n resource duplication.
 - Recently removed targeted smells:
   viewer wiring, viewer event bridge, unit type label resolver, flow
   relationship-focus classification, flow node detail context, flow tree
@@ -104,13 +109,12 @@ active implementation approval remains.
   visibility, and table jump-link selection, and the VS Code hover provider
   adapter parameter shape around word lookup and hover rendering, and webview
   editor presentation helpers around command-builder field rendering and
-  reveal-target traversal.
+  reveal-target traversal, and host callback adapter parameter shapes around
+  ANTLR syntax-error handling and the unused React Profiler callback helper.
 - Current candidate evidence:
-  `SyntaxErrorListener.ts`/`OnRenderCallbacks.tsx` callback parameter-shape
-  smells, broad diagnostics-test duplication, selected focused test
-  duplication outside reveal helpers, and i18n resource duplication remain
-  separate candidates after the selected webview editor presentation-helper
-  slice.
+  broad diagnostics-test duplication, selected focused test duplication, and
+  i18n resource duplication remain separate candidates after the selected host
+  callback adapter parameter-shape slice.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
@@ -191,6 +195,21 @@ active implementation approval remains.
       Desktop test used the already-installed VS Code after version lookup
       timed out. Production webpack emitted existing bundle-size performance
       warnings.
+- [x] Current planning: refreshed upstream qlty smell/metrics after
+      `2b97049` because committed runtime/test changes can affect the broad
+      comparison. Remaining production smells are
+      `SyntaxErrorListener.ts` `syntaxError` and `OnRenderCallbacks.tsx`
+      `onRenderCallback`; targeted current-head qlty confirms the selected
+      host callback adapter parameter-shape slice. Broad diagnostics-test
+      duplication, focused test duplication, and i18n duplication remain
+      separate candidates.
+- [x] Completed host callback adapter parameter-shape slice: targeted qlty
+      checks for the parser/webview callback adapter scope report no smells.
+      Standard gates passed with `CI=true rtk pnpm run qlty`,
+      `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`,
+      `CI=true rtk pnpm run build`, `CI=true rtk pnpm run lint:md`, and
+      `rtk git diff --check`. Production webpack emitted existing bundle-size
+      performance warnings.
 
 ## Use-Case Back-Propagation
 
@@ -207,6 +226,9 @@ active implementation approval remains.
   adapter parameter-shape slice.
 - No behavior changes were made for the completed webview editor
   presentation-helper slice.
+- No behavior changes were made for the completed host callback adapter
+  parameter-shape slice. The unused React Profiler callback helper had no
+  runtime or test references.
 - Current-scope search, reveal, hover synchronization, selection, relationship
   focus, MiniMap visibility, and selected-node detail behavior are governed by
   `docs/requirements/use-cases/uc-build-flow-graph.md`.
@@ -221,6 +243,9 @@ active implementation approval remains.
   `docs/requirements/use-cases/uc-show-unit-definition.md`.
 - Cross-view reveal behavior is governed by
   `docs/requirements/use-cases/uc-navigate-between-unit-list-and-flow-graph.md`.
+- Parser syntax-error behavior is governed by
+  `docs/requirements/use-cases/uc-provide-editor-feedback.md` and normalized
+  parser boundaries in `docs/requirements/use-cases/uc-normalize-ajs-document.md`.
 - Flow graph node/edge IDs, node types, positions, nested panel bounds,
   search/selection/hover flags, relationship-focus styling, and jobnet
   open/expand action ordering remain protected by direct flow graph/node tests.
@@ -239,6 +264,9 @@ active implementation approval remains.
 - The selected webview editor presentation-helper slice is production-code
   first: test duplication cleanup is included only for the focused
   reveal-target helper tests in the same behavior boundary.
+- The selected host callback adapter parameter-shape slice is production-code
+  first and should preserve external callback contracts while adapting their
+  parameter shapes internally.
 - Flow graph rendering-data behavior is governed mainly by
   `docs/requirements/use-cases/uc-build-flow-graph.md` and, for stable unit
   identity across viewers,
