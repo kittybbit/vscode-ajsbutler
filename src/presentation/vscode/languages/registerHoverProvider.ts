@@ -3,6 +3,42 @@ import type { FindParameterHover } from "../../../application/editor-feedback/fi
 import { LANGUAGE_ID } from "../constant";
 
 const SELECTOR: vscode.DocumentSelector = { language: LANGUAGE_ID };
+const PARAMETER_WORD_PATTERN = /[a-zA-Z0-9]+/;
+
+type HoverLookupContext = {
+  document: vscode.TextDocument;
+  findParameterHover: FindParameterHover;
+  language: string;
+  position: vscode.Position;
+};
+
+const findHoverForPosition = ({
+  document,
+  findParameterHover,
+  language,
+  position,
+}: HoverLookupContext): vscode.ProviderResult<vscode.Hover> => {
+  const wordRange = document.getWordRangeAtPosition(
+    position,
+    PARAMETER_WORD_PATTERN,
+  );
+  if (wordRange === undefined) {
+    return undefined;
+  }
+
+  const hoverDefinition = findParameterHover(
+    document.getText(wordRange),
+    language,
+  );
+  if (!hoverDefinition) {
+    return undefined;
+  }
+
+  const content = new vscode.MarkdownString(`**${hoverDefinition.symbol}**\n`)
+    .appendMarkdown("- - -\n")
+    .appendMarkdown(`\`${hoverDefinition.syntax}\``);
+  return new vscode.Hover(content);
+};
 
 class Ajs3v12HoverProvider implements vscode.HoverProvider {
   readonly #findParameterHover: FindParameterHover;
@@ -14,27 +50,13 @@ class Ajs3v12HoverProvider implements vscode.HoverProvider {
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _token: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.Hover> {
-    const wordRange = document.getWordRangeAtPosition(position, /[a-zA-Z0-9]+/);
-    if (wordRange === undefined) {
-      return undefined;
-    }
-
-    const currentWord = document.getText(wordRange);
-    const hoverDefinition = this.#findParameterHover(
-      currentWord,
-      vscode.env.language,
-    );
-    if (!hoverDefinition) {
-      return undefined;
-    }
-
-    const content = new vscode.MarkdownString(`**${hoverDefinition.symbol}**\n`)
-      .appendMarkdown("- - -\n")
-      .appendMarkdown(`\`${hoverDefinition.syntax}\``);
-    return new vscode.Hover(content);
+    return findHoverForPosition({
+      document,
+      findParameterHover: this.#findParameterHover,
+      language: vscode.env.language,
+      position,
+    });
   }
 }
 

@@ -2,17 +2,16 @@
 
 ## Current Task
 
-- Status: Proposed
+- Status: Ready for Planning
 - Scope:
-  select the next package/category remediation slice using the reusable
-  upstream evaluation below, or propose feature closure if no useful slice
-  remains.
+  reassess whether the stored upstream qlty evaluation still justifies another
+  package/category slice or feature closure.
 - Acceptance:
-  keep the next task package/category-sized, behavior-preserving, and tied to a
+  keep any next task package/category-sized, behavior-preserving, and tied to a
   coherent qlty smell or metrics cluster.
 - Validation:
-  run targeted current-head qlty checks for the selected candidate before
-  requesting implementation approval.
+  reuse the stored upstream evaluation unless a refresh trigger applies, and
+  run targeted current-head qlty checks for any selected candidate.
 
 ## Human Approval
 
@@ -45,6 +44,12 @@ active implementation approval remains.
 - [x] Obtain human implementation approval for the webview editor
       detail/selector presentation-controls slice.
 - [x] Complete the webview editor detail/selector presentation-controls slice.
+- [x] Reassess whether the stored upstream qlty evaluation still justifies
+      another package/category slice or feature closure.
+- [x] Select the VS Code editor-feedback adapter parameter-shape slice.
+- [x] Obtain human implementation approval for the VS Code editor-feedback
+      adapter parameter-shape slice.
+- [x] Complete the VS Code editor-feedback adapter parameter-shape slice.
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
       another package/category slice or feature closure.
 
@@ -89,10 +94,12 @@ active implementation approval remains.
   around viewer composition, current-scope search submission, and graph/tree
   hover state, and webview editor detail/selector presentation controls around
   shared detail-pane sections, column selector grouping, controlled column
-  visibility, and table jump-link selection.
+  visibility, and table jump-link selection, and the VS Code hover provider
+  adapter parameter shape around word lookup and hover rendering.
 - Current candidate evidence:
-  `registerHoverProvider.ts`, VS Code adapter parameter-list shapes, broad test
-  duplication, and i18n resource duplication remain separate candidates.
+  broad diagnostics-test duplication, selected focused test duplication, and
+  i18n resource duplication remain separate candidates after the selected VS
+  Code editor-feedback adapter parameter-shape slice.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
@@ -142,6 +149,18 @@ active implementation approval remains.
       `CI=true rtk pnpm run test:web`, `CI=true rtk pnpm run build`,
       `CI=true rtk pnpm run lint:md`, and `rtk git diff --check`.
       Production webpack emitted existing bundle-size performance warnings.
+- [x] Current planning: reused stored upstream evaluation and ran targeted
+      current-head qlty for concrete VS Code/presentation/test candidates.
+      Current concrete production smell is `registerHoverProvider.ts`
+      `provideHover`; broad `buildSyntaxDiagnostics.test.ts` duplication and
+      smaller focused test duplication remain separate candidates.
+- [x] Completed VS Code editor-feedback adapter parameter-shape slice:
+      targeted qlty checks for the touched hover adapter, direct bootstrap
+      caller, and focused hover-provider tests report no smells. Standard gates
+      passed with `CI=true rtk pnpm run qlty`, `CI=true rtk pnpm test`,
+      `CI=true rtk pnpm run test:web`, `CI=true rtk pnpm run build`,
+      `CI=true rtk pnpm run lint:md`, and `rtk git diff --check`.
+      Production webpack emitted existing bundle-size performance warnings.
 
 ## Use-Case Back-Propagation
 
@@ -154,6 +173,8 @@ active implementation approval remains.
   table behavior during refactoring: column visibility is controlled from one
   React state, and table jump links select and scroll to the link target rather
   than leaving a separate reveal highlight.
+- No behavior changes were made for the completed VS Code editor-feedback
+  adapter parameter-shape slice.
 - Current-scope search, reveal, hover synchronization, selection, relationship
   focus, MiniMap visibility, and selected-node detail behavior are governed by
   `docs/requirements/use-cases/uc-build-flow-graph.md`.
@@ -162,6 +183,8 @@ active implementation approval remains.
 - Table column visibility behavior affects
   `docs/requirements/use-cases/uc-build-unit-list-view.md` and CSV hidden-column
   behavior in `docs/requirements/use-cases/uc-export-unit-list-csv.md`.
+- Hover provider behavior is governed by
+  `docs/requirements/use-cases/uc-provide-editor-feedback.md`.
 - Flow graph node/edge IDs, node types, positions, nested panel bounds,
   search/selection/hover flags, relationship-focus styling, and jobnet
   open/expand action ordering remain protected by direct flow graph/node tests.
