@@ -260,60 +260,124 @@ const CommandBuilder: FC<{
   );
 };
 
-const CommandBuilderField: FC<{
+type CommandBuilderFieldProps = {
   field: UnitDefinitionCommandBuilderFieldDto;
   value: string | boolean;
   onChange: (value: string | boolean) => void;
   localize: (key: string) => string;
-}> = ({ field, value, onChange, localize }) => {
+};
+
+type CheckboxCommandBuilderField = Extract<
+  UnitDefinitionCommandBuilderFieldDto,
+  { kind: "checkbox" }
+>;
+
+type SelectCommandBuilderField = Extract<
+  UnitDefinitionCommandBuilderFieldDto,
+  { kind: "select" }
+>;
+
+type TextCommandBuilderField = Extract<
+  UnitDefinitionCommandBuilderFieldDto,
+  { kind: "text" }
+>;
+
+type TypedCommandBuilderFieldProps<TField> = Omit<
+  CommandBuilderFieldProps,
+  "field"
+> & {
+  field: TField;
+};
+
+const toTextFieldValue = (
+  value: string | boolean,
+  defaultValue: string,
+): string => (typeof value === "string" ? value : defaultValue);
+
+const CheckboxCommandBuilderFieldInput: FC<
+  TypedCommandBuilderFieldProps<CheckboxCommandBuilderField>
+> = ({ field, value, onChange, localize }) => (
+  <Stack spacing={0}>
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={value === true}
+          onChange={(event) => onChange(event.target.checked)}
+        />
+      }
+      label={localize(field.labelKey)}
+    />
+    <Typography variant="caption" color="text.secondary">
+      {localize(field.descriptionKey)}
+    </Typography>
+  </Stack>
+);
+
+const SelectCommandBuilderFieldInput: FC<
+  TypedCommandBuilderFieldProps<SelectCommandBuilderField>
+> = ({ field, value, onChange, localize }) => (
+  <TextField
+    select
+    fullWidth
+    size="small"
+    label={localize(field.labelKey)}
+    value={toTextFieldValue(value, field.defaultValue)}
+    helperText={localize(field.descriptionKey)}
+    onChange={(event) => onChange(event.target.value)}
+  >
+    {field.choices.map((choice) => (
+      <MenuItem key={choice.value} value={choice.value}>
+        {localize(choice.labelKey)}
+      </MenuItem>
+    ))}
+  </TextField>
+);
+
+const TextCommandBuilderFieldInput: FC<
+  TypedCommandBuilderFieldProps<TextCommandBuilderField>
+> = ({ field, value, onChange, localize }) => (
+  <TextField
+    fullWidth
+    size="small"
+    label={localize(field.labelKey)}
+    value={toTextFieldValue(value, field.defaultValue)}
+    placeholder={field.placeholder}
+    helperText={localize(field.descriptionKey)}
+    onChange={(event) => onChange(event.target.value)}
+  />
+);
+
+const CommandBuilderField: FC<CommandBuilderFieldProps> = (props) => {
+  const { field, localize, onChange, value } = props;
+
   if (field.kind === "checkbox") {
     return (
-      <Stack spacing={0}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={value === true}
-              onChange={(event) => onChange(event.target.checked)}
-            />
-          }
-          label={localize(field.labelKey)}
-        />
-        <Typography variant="caption" color="text.secondary">
-          {localize(field.descriptionKey)}
-        </Typography>
-      </Stack>
+      <CheckboxCommandBuilderFieldInput
+        field={field}
+        localize={localize}
+        onChange={onChange}
+        value={value}
+      />
     );
   }
 
   if (field.kind === "select") {
     return (
-      <TextField
-        select
-        fullWidth
-        size="small"
-        label={localize(field.labelKey)}
-        value={typeof value === "string" ? value : field.defaultValue}
-        helperText={localize(field.descriptionKey)}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {field.choices.map((choice) => (
-          <MenuItem key={choice.value} value={choice.value}>
-            {localize(choice.labelKey)}
-          </MenuItem>
-        ))}
-      </TextField>
+      <SelectCommandBuilderFieldInput
+        field={field}
+        localize={localize}
+        onChange={onChange}
+        value={value}
+      />
     );
   }
 
   return (
-    <TextField
-      fullWidth
-      size="small"
-      label={localize(field.labelKey)}
-      value={typeof value === "string" ? value : field.defaultValue}
-      placeholder={field.placeholder}
-      helperText={localize(field.descriptionKey)}
-      onChange={(event) => onChange(event.target.value)}
+    <TextCommandBuilderFieldInput
+      field={field}
+      localize={localize}
+      onChange={onChange}
+      value={value}
     />
   );
 };

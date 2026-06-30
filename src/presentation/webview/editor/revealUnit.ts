@@ -55,20 +55,24 @@ const isJobGroupUnit = (unit: FlowRevealUnit | undefined): boolean =>
 const isRootJobnetUnit = (unit: FlowRevealUnit | undefined): boolean =>
   unit?.unitType === "n" && unit.isRootJobnet === true;
 
+const collectAncestorUnitIds = (
+  unitById: ReadonlyMap<string, FlowRevealUnit>,
+  unit: FlowRevealUnit,
+): ReadonlySet<string> => {
+  const ancestorIds = new Set<string>();
+  let current = findFlowRevealParentUnit(unitById, unit);
+  while (current) {
+    ancestorIds.add(current.id);
+    current = findFlowRevealParentUnit(unitById, current);
+  }
+  return ancestorIds;
+};
+
 const isDescendantOf = (
   unitById: ReadonlyMap<string, FlowRevealUnit>,
   unit: FlowRevealUnit,
   ancestor: FlowRevealUnit,
-): boolean => {
-  let current = findFlowRevealParentUnit(unitById, unit);
-  while (current) {
-    if (current.id === ancestor.id) {
-      return true;
-    }
-    current = findFlowRevealParentUnit(unitById, current);
-  }
-  return false;
-};
+): boolean => collectAncestorUnitIds(unitById, unit).has(ancestor.id);
 
 const findFirstDescendantRootJobnet = (
   unitById: ReadonlyMap<string, FlowRevealUnit>,
