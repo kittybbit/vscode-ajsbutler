@@ -4,6 +4,7 @@ import { unitTypeLabel } from "../../../../../domain/services/i18n/nls";
 import Link from "@mui/material/Link";
 import React from "react";
 import { ColumnGroupContext, rowViewColumn, RowViewByPath } from "./common";
+import { handleJumpLinkClick } from "../navigation";
 
 type Group1Options = {
   language: string;
@@ -25,7 +26,7 @@ const parentPathCell = (
           display: "block",
           cursor: "pointer",
         }}
-        onClick={() => handleJump(group1.parentId!)}
+        onClick={handleJumpLinkClick(group1.parentAbsolutePath, handleJump)}
       >
         {group1.parentAbsolutePath}
       </Link>

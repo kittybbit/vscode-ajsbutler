@@ -34,27 +34,74 @@ type DisplayColumnSelectorProps = {
   onClose: VoidFunction;
 };
 
+type UnitListColumn = Column<UnitListRowView, unknown>;
+type ToggleColumnVisibilityParams = {
+  column: UnitListColumn;
+  table: ReactTable<UnitListRowView>;
+  visible: boolean;
+};
+
 export const getVisibleColumnSelectorColumns = (
   table: ReactTable<UnitListRowView>,
-): Column<UnitListRowView, unknown>[] =>
+): UnitListColumn[] =>
   table.getAllColumns().filter((col) => col.columnDef.enableHiding);
 
-const ColumnSwitch: FC<{
-  column: Column<UnitListRowView, unknown>;
-  label: string;
-}> = ({ column, label }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    column
-      .getLeafColumns()
-      .forEach((col) => col.getToggleVisibilityHandler()(event));
-  };
+const getColumnLabel = (column: UnitListColumn): string =>
+  column.columnDef.header as string;
 
-  const isChecked = column.getLeafColumns().some((col) => col.getIsVisible());
+const getHideableSubColumns = (column: UnitListColumn): UnitListColumn[] =>
+  column.columns.filter((col) => col.columnDef.enableHiding);
+
+const hasNestedColumnGroup = (column: UnitListColumn): boolean =>
+  column.columns.length > 1;
+
+const getLeafColumnIds = (column: UnitListColumn): string[] =>
+  column.getLeafColumns().map((leafColumn) => leafColumn.id);
+
+export const createColumnVisibilityUpdate = (
+  columnIds: readonly string[],
+  visible: boolean,
+): VisibilityState =>
+  Object.fromEntries(columnIds.map((columnId) => [columnId, visible]));
+
+const toggleColumnVisibility = ({
+  column,
+  table,
+  visible,
+}: ToggleColumnVisibilityParams) => {
+  const nextVisibility = createColumnVisibilityUpdate(
+    getLeafColumnIds(column),
+    visible,
+  );
+  table.setColumnVisibility((current) => ({
+    ...current,
+    ...nextVisibility,
+  }));
+};
+
+const isAnyLeafColumnVisible = (column: UnitListColumn): boolean =>
+  column.getLeafColumns().some((col) => col.getIsVisible());
+
+const ColumnSwitch: FC<{
+  column: UnitListColumn;
+  label: string;
+  table: ReactTable<UnitListRowView>;
+}> = ({ column, label, table }) => {
+  const handleChange = (
+    _event: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean,
+  ) => {
+    toggleColumnVisibility({ column, table, visible: checked });
+  };
 
   return (
     <FormControlLabel
       control={
-        <Switch size="small" onChange={handleChange} checked={isChecked} />
+        <Switch
+          size="small"
+          onChange={handleChange}
+          checked={isAnyLeafColumnVisible(column)}
+        />
       }
       label={<Typography variant="body2">{label}</Typography>}
       sx={{ width: "100%" }}
@@ -62,10 +109,54 @@ const ColumnSwitch: FC<{
   );
 };
 
-const ColumnDetail: FC<{ column: Column<UnitListRowView, unknown> }> = ({
-  column,
-}) => {
-  const subColumns = column.columns.filter((col) => col.columnDef.enableHiding);
+const ColumnSwitchItem: FC<{
+  column: UnitListColumn;
+  table: ReactTable<UnitListRowView>;
+}> = ({ column, table }) => (
+  <ListItem dense>
+    <ColumnSwitch
+      column={column}
+      label={getColumnLabel(column)}
+      table={table}
+    />
+  </ListItem>
+);
+
+const NestedColumnGroup: FC<{
+  column: UnitListColumn;
+  table: ReactTable<UnitListRowView>;
+}> = ({ column, table }) => (
+  <>
+    <Divider sx={{ marginTop: "0.5em" }}>
+      <Typography variant="body2">{getColumnLabel(column)}</Typography>
+    </Divider>
+    <List sx={{ marginLeft: "0.5em" }}>
+      {getHideableSubColumns(column).map((leafColumn) => (
+        <ColumnSwitchItem
+          key={leafColumn.id}
+          column={leafColumn}
+          table={table}
+        />
+      ))}
+    </List>
+  </>
+);
+
+const ColumnDetailItem: FC<{
+  column: UnitListColumn;
+  table: ReactTable<UnitListRowView>;
+}> = ({ column, table }) =>
+  hasNestedColumnGroup(column) ? (
+    <NestedColumnGroup column={column} table={table} />
+  ) : (
+    <ColumnSwitchItem column={column} table={table} />
+  );
+
+const ColumnDetail: FC<{
+  column: UnitListColumn;
+  table: ReactTable<UnitListRowView>;
+}> = ({ column, table }) => {
+  const subColumns = getHideableSubColumns(column);
 
   if (!subColumns.length) return null;
 
@@ -73,66 +164,36 @@ const ColumnDetail: FC<{ column: Column<UnitListRowView, unknown> }> = ({
     <List sx={{ marginLeft: "0.5em" }}>
       {subColumns.map((subColumn) => (
         <Fragment key={subColumn.id}>
-          {subColumn.columns.length > 1 ? (
-            <>
-              <Divider sx={{ marginTop: "0.5em" }}>
-                <Typography variant="body2">
-                  {subColumn.columnDef.header as string}
-                </Typography>
-              </Divider>
-              <List sx={{ marginLeft: "0.5em" }}>
-                {subColumn.columns
-                  .filter((col) => col.columnDef.enableHiding)
-                  .map((leafColumn) => (
-                    <ListItem key={leafColumn.id} dense>
-                      <ColumnSwitch
-                        column={leafColumn}
-                        label={leafColumn.columnDef.header as string}
-                      />
-                    </ListItem>
-                  ))}
-              </List>
-            </>
-          ) : (
-            <ListItem dense>
-              <ColumnSwitch
-                column={subColumn}
-                label={subColumn.columnDef.header as string}
-              />
-            </ListItem>
-          )}
+          <ColumnDetailItem column={subColumn} table={table} />
         </Fragment>
       ))}
     </List>
   );
 };
 
-const ColumnAccordion: FC<{ column: Column<UnitListRowView, unknown> }> = ({
-  column,
-}) => (
+const ColumnAccordion: FC<{
+  column: UnitListColumn;
+  table: ReactTable<UnitListRowView>;
+}> = ({ column, table }) => (
   <Accordion disableGutters>
     <AccordionSummary expandIcon={<ExpandMore />}>
       <Switch
         size="small"
         onClick={(e) => e.stopPropagation()}
-        onChange={(e) =>
-          column
-            .getLeafColumns()
-            .forEach((col) => col.getToggleVisibilityHandler()(e))
+        onChange={(_event, checked) =>
+          toggleColumnVisibility({ column, table, visible: checked })
         }
-        checked={column.getLeafColumns().some((col) => col.getIsVisible())}
+        checked={isAnyLeafColumnVisible(column)}
       />
       <Divider
         orientation="vertical"
         flexItem
         sx={{ marginLeft: "0.5em", marginRight: "0.5em" }}
       />
-      <Typography variant="body2">
-        {column.columnDef.header as string}
-      </Typography>
+      <Typography variant="body2">{getColumnLabel(column)}</Typography>
     </AccordionSummary>
     <AccordionDetails>
-      <ColumnDetail column={column} />
+      <ColumnDetail column={column} table={table} />
     </AccordionDetails>
   </Accordion>
 );
@@ -224,7 +285,7 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
       </Stack>
       <Box sx={{ maxHeight: "calc(100vh - 9rem)", overflow: "auto" }}>
         {visibleColumns.map((column) => (
-          <ColumnAccordion key={column.id} column={column} />
+          <ColumnAccordion key={column.id} column={column} table={table} />
         ))}
       </Box>
     </Popover>

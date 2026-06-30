@@ -4,7 +4,10 @@ import {
   getAjsTableHeaderControlLabels,
   getAjsTableSearchHelperText,
 } from "../../presentation/webview/editor/ajsTable/Header";
-import { getVisibleColumnSelectorColumns } from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
+import {
+  createColumnVisibilityUpdate,
+  getVisibleColumnSelectorColumns,
+} from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { getFixedTableVirtuosoStyle } from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
 
 suite("AJS Table Header", () => {
@@ -57,5 +60,18 @@ suite("AJS Table Header", () => {
     assert.deepStrictEqual(getVisibleColumnSelectorColumns(table as never), [
       hideableColumn,
     ]);
+  });
+
+  test("builds a single visibility update for grouped column toggles", () => {
+    assert.deepStrictEqual(
+      createColumnVisibilityUpdate(["group.a", "group.b"], false),
+      {
+        "group.a": false,
+        "group.b": false,
+      },
+    );
+    assert.deepStrictEqual(createColumnVisibilityUpdate(["group.a"], true), {
+      "group.a": true,
+    });
   });
 });

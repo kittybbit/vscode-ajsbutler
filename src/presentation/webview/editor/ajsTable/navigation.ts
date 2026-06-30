@@ -1,4 +1,5 @@
 import type { KeyboardEvent } from "react";
+import type { MouseEvent } from "react";
 import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
 import { createNavigationEvent } from "../../../../shared/webviewEvents";
 
@@ -37,10 +38,7 @@ export const canNavigateToSelectedUnit = (
 export const isTableRowSelected = ({
   absolutePath,
   selectedAbsolutePath,
-  index,
-  revealedRowIndex,
-}: TableRowSelectionState): boolean =>
-  absolutePath === selectedAbsolutePath || index === revealedRowIndex;
+}: TableRowSelectionState): boolean => absolutePath === selectedAbsolutePath;
 
 export const navigateToFlow = (
   absolutePath: string,
@@ -76,6 +74,13 @@ export const handleSelectTableRow =
   (absolutePath: string, selectRow: (absolutePath: string) => void) =>
   (): void => {
     selectRow(absolutePath);
+  };
+
+export const handleJumpLinkClick =
+  (targetIdentity: string, handleJump: (identity: string) => void) =>
+  (event: Pick<MouseEvent<HTMLElement>, "stopPropagation">): void => {
+    event.stopPropagation();
+    handleJump(targetIdentity);
   };
 
 const isRowActivationKey = (key: string): boolean =>

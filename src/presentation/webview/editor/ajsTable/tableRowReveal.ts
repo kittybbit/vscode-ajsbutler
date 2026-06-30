@@ -1,16 +1,9 @@
-import {
-  Dispatch,
-  MutableRefObject,
-  SetStateAction,
-  useCallback,
-  useState,
-} from "react";
+import { MutableRefObject, useCallback } from "react";
 import type { Row } from "@tanstack/table-core";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { getRevealUnitAbsolutePath } from "../revealUnit";
 
 export type TableRowRevealState = {
-  rowIndex: number | undefined;
   handleJump: (id: string) => void;
   revealPath: (absolutePath: string) => void;
   revealUnit: (data: unknown) => void;
@@ -18,11 +11,21 @@ export type TableRowRevealState = {
 
 type TableRowRevealContext = {
   rows: ReadonlyArray<Row<UnitListRowView>>;
-  setRowIndex: Dispatch<SetStateAction<number | undefined>>;
   selectRow: (absolutePath: string) => void;
 };
 
-const buildRowIndexMap = (
+const buildRowByIdentity = (
+  rows: ReadonlyArray<Row<UnitListRowView>>,
+): Map<string, Row<UnitListRowView>> => {
+  const map = new Map<string, Row<UnitListRowView>>();
+  rows.forEach((row) => {
+    map.set(row.original.id, row);
+    map.set(row.original.absolutePath, row);
+  });
+  return map;
+};
+
+const buildRowIndexByIdentity = (
   rows: ReadonlyArray<Row<UnitListRowView>>,
 ): Map<string, number> => {
   const map = new Map<string, number>();
@@ -33,21 +36,27 @@ const buildRowIndexMap = (
   return map;
 };
 
-const jumpToIndexedRow = (
-  id: string,
-  { rows, setRowIndex }: Pick<TableRowRevealContext, "rows" | "setRowIndex">,
+export const findRowIndexByIdentity = (
+  rows: ReadonlyArray<Row<UnitListRowView>>,
+  identity: string | undefined,
+): number | undefined => {
+  return identity ? buildRowIndexByIdentity(rows).get(identity) : undefined;
+};
+
+const selectResolvedRow = (
+  identity: string,
+  { rows, selectRow }: TableRowRevealContext,
 ) => {
-  const index = buildRowIndexMap(rows).get(id);
-  if (index !== undefined) {
-    setRowIndex(index);
+  const row = buildRowByIdentity(rows).get(identity);
+  if (row) {
+    selectRow(row.original.absolutePath);
   }
 };
 
 const revealTableRow = (data: unknown, context: TableRowRevealContext) => {
   const absolutePath = getRevealUnitAbsolutePath(data);
   if (absolutePath) {
-    jumpToIndexedRow(absolutePath, context);
-    context.selectRow(absolutePath);
+    selectResolvedRow(absolutePath, context);
   }
 };
 
@@ -55,18 +64,15 @@ export const useTableRowRevealState = (
   selectRow: (absolutePath: string) => void,
   rowsRef: MutableRefObject<ReadonlyArray<Row<UnitListRowView>>>,
 ): TableRowRevealState => {
-  const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
-
   const handleJump = useCallback(
     (id: string) => {
-      jumpToIndexedRow(id, { rows: rowsRef.current, setRowIndex });
+      selectResolvedRow(id, { rows: rowsRef.current, selectRow });
     },
-    [rowsRef],
+    [rowsRef, selectRow],
   );
   const revealPath = useCallback(
     (absolutePath: string) => {
-      jumpToIndexedRow(absolutePath, { rows: rowsRef.current, setRowIndex });
-      selectRow(absolutePath);
+      selectResolvedRow(absolutePath, { rows: rowsRef.current, selectRow });
     },
     [rowsRef, selectRow],
   );
@@ -76,11 +82,10 @@ export const useTableRowRevealState = (
       revealTableRow(data, {
         rows: rowsRef.current,
         selectRow,
-        setRowIndex,
       });
     },
     [rowsRef, selectRow],
   );
 
-  return { rowIndex, handleJump, revealPath, revealUnit };
+  return { handleJump, revealPath, revealUnit };
 };

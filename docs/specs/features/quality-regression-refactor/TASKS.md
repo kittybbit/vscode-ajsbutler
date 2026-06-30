@@ -38,6 +38,13 @@ active implementation approval remains.
 - [x] Obtain human implementation approval for the flow interaction
       controller/search slice.
 - [x] Complete the flow interaction controller/search remediation slice.
+- [x] Reassess whether the stored upstream qlty evaluation still justifies
+      another package/category slice or feature closure.
+- [x] Select the webview editor detail/selector presentation-controls
+      remediation slice.
+- [x] Obtain human implementation approval for the webview editor
+      detail/selector presentation-controls slice.
+- [x] Complete the webview editor detail/selector presentation-controls slice.
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
       another package/category slice or feature closure.
 
@@ -80,11 +87,12 @@ active implementation approval remains.
   position parameters, expanded-node type mapping, jobnet node actions, and
   relationship-focus styling, plus flow interaction controller/search helpers
   around viewer composition, current-scope search submission, and graph/tree
-  hover state.
+  hover state, and webview editor detail/selector presentation controls around
+  shared detail-pane sections, column selector grouping, controlled column
+  visibility, and table jump-link selection.
 - Current candidate evidence:
-  `DisplayColumnSelector.tsx`, `SharedUnitDetailPane.tsx`,
-  `registerHoverProvider.ts`, VS Code adapter parameter-list shapes, and broad
-  test duplication remain separate candidates.
+  `registerHoverProvider.ts`, VS Code adapter parameter-list shapes, broad test
+  duplication, and i18n resource duplication remain separate candidates.
 - Non-priority signals unless a concrete maintenance risk appears:
   generated/resource duplication, shape-only component duplication, and broad
   test duplication clusters that do not map to a focused behavior boundary.
@@ -122,6 +130,18 @@ active implementation approval remains.
       `rtk git diff --check`. `CI=true rtk pnpm run test:web` failed twice
       before local test startup with external HTTPS `ETIMEDOUT`, so this caveat
       remains for the next validation decision.
+- [x] Current planning: reused stored upstream evaluation and ran targeted
+      current-head qlty for remaining concrete candidates. Current smells are
+      `SharedUnitDetailPane.tsx` `StateChip`/`SharedUnitDetailPane`,
+      `DisplayColumnSelector.tsx` `ColumnDetail`, and
+      `registerHoverProvider.ts` `provideHover`.
+- [x] Completed webview editor detail/selector presentation-controls slice:
+      targeted qlty checks for touched detail/selector/table navigation files
+      report no smells. Standard gates passed with
+      `CI=true rtk pnpm run qlty`, `CI=true rtk pnpm test`,
+      `CI=true rtk pnpm run test:web`, `CI=true rtk pnpm run build`,
+      `CI=true rtk pnpm run lint:md`, and `rtk git diff --check`.
+      Production webpack emitted existing bundle-size performance warnings.
 
 ## Use-Case Back-Propagation
 
@@ -129,9 +149,19 @@ active implementation approval remains.
   slice.
 - No behavior changes were made for the completed flow interaction
   controller/search slice.
+- No behavior changes were made for the completed webview editor
+  detail/selector presentation-controls slice beyond preserving the intended
+  table behavior during refactoring: column visibility is controlled from one
+  React state, and table jump links select and scroll to the link target rather
+  than leaving a separate reveal highlight.
 - Current-scope search, reveal, hover synchronization, selection, relationship
   focus, MiniMap visibility, and selected-node detail behavior are governed by
   `docs/requirements/use-cases/uc-build-flow-graph.md`.
+- Selected-unit detail pane behavior is governed by
+  `docs/requirements/use-cases/uc-show-unit-definition.md`.
+- Table column visibility behavior affects
+  `docs/requirements/use-cases/uc-build-unit-list-view.md` and CSV hidden-column
+  behavior in `docs/requirements/use-cases/uc-export-unit-list-csv.md`.
 - Flow graph node/edge IDs, node types, positions, nested panel bounds,
   search/selection/hover flags, relationship-focus styling, and jobnet
   open/expand action ordering remain protected by direct flow graph/node tests.

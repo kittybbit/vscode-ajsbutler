@@ -19,6 +19,7 @@ import { type Table as ReactTable, useReactTable } from "@tanstack/react-table";
 import {
   Row,
   SortingState,
+  VisibilityState,
   getCoreRowModel,
   getSortedRowModel,
 } from "@tanstack/table-core";
@@ -60,7 +61,10 @@ import {
   createUnitListDetailResolver,
   resolveUnitListDetail,
 } from "./unitListDetail";
-import { useTableRowRevealState } from "./tableRowReveal";
+import {
+  findRowIndexByIdentity,
+  useTableRowRevealState,
+} from "./tableRowReveal";
 import { useTableSearchController } from "./tableSearchController";
 import { createTableViewerData, findSelectedUnitId } from "./tableViewerData";
 
@@ -83,6 +87,8 @@ type TableModelSetupContext = {
   rowViewByPath: ReadonlyMap<string, UnitListRowView>;
   sorting: SortingState;
   setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
+  columnVisibility: VisibilityState;
+  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>;
 };
 
 type TableViewerShellProps = {
@@ -96,6 +102,7 @@ type TableViewerShellProps = {
   onSearchSubmit: (query: string) => void;
   onSearchClear: () => void;
   rowIndex: number | undefined;
+  columnVisibility: VisibilityState;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   detailPaneClosed: boolean;
   closeDetailPane: VoidFunction;
@@ -156,6 +163,8 @@ const useTableModelSetup = ({
   rowViewByPath,
   sorting,
   setSorting,
+  columnVisibility,
+  setColumnVisibility,
 }: TableModelSetupContext) => {
   const parameterSearchValuesByPath = useMemo(
     () =>
@@ -178,9 +187,11 @@ const useTableModelSetup = ({
     columns,
     data: rowViews ?? [],
     state: {
+      columnVisibility,
       sorting,
     },
     getCoreRowModel: getCoreRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     defaultColumn: tableDefaultColumnDef,
@@ -212,6 +223,7 @@ const TableViewerShell = ({
   onSearchSubmit,
   onSearchClear,
   rowIndex,
+  columnVisibility,
   parameterSearchValuesByPath,
   detailPaneClosed,
   closeDetailPane,
@@ -241,6 +253,7 @@ const TableViewerShell = ({
       >
         <Header
           table={table}
+          columnVisibility={columnVisibility}
           searchedAbsolutePath={searchState.searchedAbsolutePath}
           searchResultPosition={getTableSearchResultPosition(searchState)}
           onSearchNavigate={onSearchNavigate}
@@ -294,6 +307,7 @@ const TableViewerShell = ({
                 headerGroups={table.getHeaderGroups()}
                 rows={rows}
                 rowIndex={rowIndex}
+                columnVisibility={columnVisibility}
                 searchQuery={searchQuery}
                 parameterSearchValuesByPath={parameterSearchValuesByPath}
                 selectedAbsolutePath={selectedAbsolutePath}
@@ -342,6 +356,7 @@ const TableContents = () => {
     UnitDefinitionDialogDto | undefined
   >();
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [detailPaneClosed, setDetailPaneClosed] = useState(false);
   const [selectedAbsolutePath, dispatchRowSelection] = useReducer(
     reduceTableRowSelection,
@@ -353,8 +368,10 @@ const TableContents = () => {
   }, []);
   const { rowViews, ajsDocument, changeDocument } = useChangeDocument();
   const rowsRef = useRef<ReadonlyArray<Row<UnitListRowView>>>([]);
-  const { rowIndex, handleJump, revealPath, revealUnit } =
-    useTableRowRevealState(selectRow, rowsRef);
+  const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
+    selectRow,
+    rowsRef,
+  );
 
   const viewerData = useMemo(
     () => createTableViewerData(ajsDocument, rowViews),
@@ -382,10 +399,13 @@ const TableContents = () => {
     rowViewByPath: viewerData.rowViewByPath,
     sorting,
     setSorting,
+    columnVisibility,
+    setColumnVisibility,
   });
 
   const rows = table.getRowModel().rows;
   rowsRef.current = rows;
+  const rowIndex = findRowIndexByIdentity(rows, selectedAbsolutePath);
   const selectedUnitId = findSelectedUnitId(
     selectedAbsolutePath,
     viewerData.unitByAbsolutePath,
@@ -448,6 +468,7 @@ const TableContents = () => {
       onSearchSubmit={submitSearch}
       onSearchClear={resetSearch}
       rowIndex={rowIndex}
+      columnVisibility={columnVisibility}
       parameterSearchValuesByPath={parameterSearchValuesByPath}
       detailPaneClosed={detailPaneClosed}
       closeDetailPane={() => setDetailPaneClosed(true)}

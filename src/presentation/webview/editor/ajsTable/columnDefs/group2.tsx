@@ -3,6 +3,7 @@ import { GroupColumnDef } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
 import { box, ColumnGroupContext, rowViewColumn } from "./common";
 import Link from "@mui/material/Link";
+import { handleJumpLinkClick } from "../navigation";
 
 const group2 = (
   context: ColumnGroupContext,
@@ -40,7 +41,7 @@ const group2 = (
                     display: "block",
                     cursor: "pointer",
                   }}
-                  onClick={() => handleJump(value.id)}
+                  onClick={handleJumpLinkClick(value.id, handleJump)}
                 >
                   {value.name}
                 </Link>

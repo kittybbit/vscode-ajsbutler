@@ -8,6 +8,7 @@ import React, {
   useRef,
 } from "react";
 import { flexRender, HeaderGroup, Row } from "@tanstack/react-table";
+import type { VisibilityState } from "@tanstack/table-core";
 import {
   ItemProps,
   TableComponents,
@@ -37,6 +38,7 @@ type VirtualizedTableProps = {
   headerGroups: HeaderGroup<UnitListRowView>[];
   rows: Row<UnitListRowView>[];
   rowIndex?: number;
+  columnVisibility: VisibilityState;
   searchQuery: string;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   selectedAbsolutePath?: string;
@@ -44,6 +46,7 @@ type VirtualizedTableProps = {
 };
 
 type VirtualizedTableContext = {
+  columnVisibilityRevision: string;
   rowIndex?: number;
   selectedAbsolutePath?: string;
   selectRow: (absolutePath: string) => void;
@@ -87,16 +90,6 @@ const omitVirtuosoContext = <T extends object>(
   Reflect.deleteProperty(propsWithoutContext, "context");
   return propsWithoutContext;
 };
-
-const isVirtualizedTableRowSelected = (
-  props: VirtualizedTableRowProps,
-): boolean =>
-  isTableRowSelected({
-    absolutePath: props.item.original.absolutePath,
-    selectedAbsolutePath: props.context.selectedAbsolutePath,
-    index: props["data-index"],
-    revealedRowIndex: props.context.rowIndex,
-  });
 
 const searchHitBackgroundColor = {
   dark: "rgba(255, 214, 102, 0.24)",
@@ -156,14 +149,16 @@ const VirtualizedTableRow = memo(
       />
     );
   },
-  (previous, next) =>
-    previous.item === next.item &&
-    previous["data-index"] === next["data-index"] &&
-    previous.context.selectRow === next.context.selectRow &&
-    isVirtualizedTableRowSelected(previous) ===
-      isVirtualizedTableRowSelected(next),
 );
 VirtualizedTableRow.displayName = "VirtualizedTableRow";
+
+const getColumnVisibilityRevision = (
+  columnVisibility: VisibilityState,
+): string =>
+  Object.entries(columnVisibility)
+    .sort(([previous], [next]) => previous.localeCompare(next))
+    .map(([columnId, visible]) => `${columnId}:${visible}`)
+    .join("|");
 
 const tableComponents: TableComponents<
   Row<UnitListRowView>,
@@ -202,6 +197,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   headerGroups,
   rows,
   rowIndex,
+  columnVisibility,
   searchQuery,
   parameterSearchValuesByPath,
   selectedAbsolutePath,
@@ -209,9 +205,18 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
 }) => {
   console.log("render VirtualizedTable.");
 
+  const columnVisibilityRevision = useMemo(
+    () => getColumnVisibilityRevision(columnVisibility),
+    [columnVisibility],
+  );
   const context = useMemo(
-    () => ({ rowIndex, selectedAbsolutePath, selectRow }),
-    [rowIndex, selectedAbsolutePath, selectRow],
+    () => ({
+      columnVisibilityRevision,
+      rowIndex,
+      selectedAbsolutePath,
+      selectRow,
+    }),
+    [columnVisibilityRevision, rowIndex, selectedAbsolutePath, selectRow],
   );
 
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
@@ -226,7 +231,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
           parameterSearchValuesByPath,
         }),
       ),
-    [parameterSearchValuesByPath, searchQuery],
+    [columnVisibility, parameterSearchValuesByPath, searchQuery],
   );
 
   const fixedHeaderContent = useCallback(

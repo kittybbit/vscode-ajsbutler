@@ -10,7 +10,7 @@ import Tooltip from "@mui/material/Tooltip";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SaveIcon from "@mui/icons-material/Save";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
-import { Table } from "@tanstack/table-core";
+import { Table, VisibilityState } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../../domain/services/i18n/nls";
@@ -29,6 +29,7 @@ import type {
 
 type HeaderProps = {
   table: Table<UnitListRowView>;
+  columnVisibility: VisibilityState;
   searchedAbsolutePath?: string;
   searchResultPosition?: TableSearchResultPosition;
   onSearchNavigate: (query: string, direction: TableSearchDirection) => void;
@@ -176,6 +177,7 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
 
 const Header: FC<HeaderProps> = ({
   table,
+  columnVisibility,
   searchedAbsolutePath,
   searchResultPosition,
   onSearchNavigate,
@@ -242,7 +244,7 @@ const Header: FC<HeaderProps> = ({
         </Toolbar>
         <DisplayColumnSelector
           table={table}
-          columnVisibility={table.getState().columnVisibility}
+          columnVisibility={columnVisibility}
           anchorEl={columnSelectorAnchor}
           open={Boolean(columnSelectorAnchor)}
           onClose={closeColumnSelector}
