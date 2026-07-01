@@ -5,15 +5,14 @@
 - Status: Ready for Planning
 - Scope:
   reassess whether the stored upstream qlty evaluation still justifies another
-  package/category slice or feature closure after the completed diagnostics
-  test fixture/helper slice.
+  package/category slice or feature closure after the completed domain
+  parameter/capability test helper slice.
 - Acceptance:
   keep any next task package/category-sized, behavior-preserving, and tied to a
   coherent qlty smell or metrics cluster.
 - Validation:
-  refresh the upstream evaluation after this commit because a committed test
-  change can affect the broad comparison, then run targeted current-head qlty
-  checks for any selected candidate.
+  use the stored upstream evaluation unless a refresh trigger applies, then run
+  targeted current-head qlty checks for any selected candidate.
 
 ## Human Approval
 
@@ -36,11 +35,15 @@ approval can change Status to Approved.
       slice.
 - [ ] Reassess whether the stored upstream qlty evaluation still justifies
       another package/category slice or feature closure.
+- [x] Select the domain parameter/capability test helper remediation slice.
+- [x] Obtain human implementation approval for the domain
+      parameter/capability test helper slice.
+- [x] Complete the domain parameter/capability test helper remediation slice.
 
 ## Reusable Upstream Evaluation
 
 - Baseline: `v1.15.1`.
-- Last refreshed after commit: `f180918 Refactor host callback adapters`.
+- Last refreshed after commit: `8f27c7b Refactor diagnostics test fixtures`.
 - Refresh triggers:
   refresh this evaluation only after a committed runtime/test/config change that
   can affect the broad comparison, when the selected slice fails to match stored
@@ -55,11 +58,10 @@ approval can change Status to Approved.
   followed by `src/application/editor-feedback`, `src/presentation/vscode`,
   selected bootstrap/adapter paths, parser infrastructure, domain/i18n-related
   paths, and selected tests.
-- Current smell clusters from the last broad upstream refresh:
+- Current smell clusters:
   i18n resource duplication in `src/resource/i18n/ty_en.ts` and `ty_ja.ts`;
   focused test smells in `flowHeader.test.ts`/`flowSelector.test.ts`,
-  `importAjsDefinitionViaWebApiCommand.test.ts`, `parameterHelpers.test.ts`,
-  and `unitCapabilityEntities.test.ts`.
+  and `importAjsDefinitionViaWebApiCommand.test.ts`.
 - Recently removed targeted smells:
   viewer wiring, viewer event bridge, unit type label resolver, flow
   relationship-focus classification, flow node detail context, flow tree
@@ -71,15 +73,16 @@ approval can change Status to Approved.
   interaction controller/search helpers, webview editor detail/selector
   presentation controls, VS Code hover provider adapter shape, webview editor
   presentation helpers, host callback adapter parameter shapes, and diagnostics
-  test fixture/helper duplication.
+  test fixture/helper duplication, and domain parameter/capability test helper
+  duplication.
 - Current candidate evidence:
-  targeted current-head qlty for
-  `src/test/suite/buildSyntaxDiagnostics.test.ts` and
-  `src/test/support/syntaxDiagnostics.ts` reports no smells after the completed
-  diagnostics test fixture/helper slice.
+  targeted current-head qlty for `src/test/suite/parameterHelpers.test.ts` and
+  `src/test/suite/unitCapabilityEntities.test.ts` reports no smells after the
+  completed domain parameter/capability test helper slice.
 - Deferred candidates:
-  i18n resource duplication and the smaller focused test clusters remain
-  separate candidates after refreshing the broad upstream comparison.
+  i18n resource duplication, flow header/selector test duplication, and the
+  WebAPI command dependency factory return-shape smell remain separate
+  candidates.
 
 ## Validation
 
@@ -95,15 +98,38 @@ approval can change Status to Approved.
       `CI=true rtk pnpm run test:web`, `CI=true rtk pnpm run build`,
       `CI=true rtk pnpm run lint:md`, and `rtk git diff --check`. Production
       webpack emitted existing bundle-size performance warnings.
+- [x] Current planning:
+      refreshed upstream qlty smell/metrics after `8f27c7b` because committed
+      test changes can affect the broad comparison. Broad diagnostics-test
+      duplication is gone. Remaining concrete smells are i18n resource
+      duplication, flow header/selector test duplication, WebAPI command test
+      dependency factory returns, and domain parameter/capability test
+      duplication. Targeted current-head qlty confirms the selected
+      parameter/capability test helper slice.
+- [x] Completed domain parameter/capability test helper slice:
+      targeted qlty for `parameterHelpers.test.ts` and
+      `unitCapabilityEntities.test.ts` reports no smells. Standard gates passed
+      with `CI=true rtk pnpm run qlty`, `CI=true rtk pnpm test`,
+      `CI=true rtk pnpm run test:web`, `CI=true rtk pnpm run build`,
+      `CI=true rtk pnpm run lint:md`,
+      `CI=true rtk pnpm exec tsc -p tsconfig.test.json --noEmit`, and
+      `rtk git diff --check`. Production webpack emitted existing bundle-size
+      performance warnings.
 
 ## Use-Case Back-Propagation
 
 - No behavior changes were made for the completed diagnostics test
   fixture/helper slice.
+- No behavior changes were made for the completed domain parameter/capability
+  test helper slice.
 - Editor feedback behavior is governed by
   `docs/requirements/use-cases/uc-provide-editor-feedback.md`, including parser
   syntax diagnostics, semantic parameter diagnostics, JP1/AJS3 v13 rules, and
   UI-independent diagnostic DTO expectations.
+- Domain parameter helper and wrapper capability behavior is governed by
+  `docs/requirements/use-cases/uc-normalize-ajs-document.md`, especially shared
+  parameter lookup and wrapper-derived semantics during normalized-model
+  migration.
 - If implementation reveals an intended or unavoidable behavior change, stop
   and update the relevant use case before requesting expanded approval.
 

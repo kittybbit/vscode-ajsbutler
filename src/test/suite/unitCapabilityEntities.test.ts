@@ -1,6 +1,5 @@
 import * as assert from "assert";
 import { Cpj } from "../../domain/models/units/Cpj";
-import { Evsj } from "../../domain/models/units/Evsj";
 import { Fxj } from "../../domain/models/units/Fxj";
 import { Mlwj } from "../../domain/models/units/Mlwj";
 import { Mqsj } from "../../domain/models/units/Mqsj";
@@ -9,10 +8,63 @@ import { Mqwj } from "../../domain/models/units/Mqwj";
 import { Mswj } from "../../domain/models/units/Mswj";
 import { N } from "../../domain/models/units/N";
 import { Ntwj } from "../../domain/models/units/Ntwj";
-import { Pwrj } from "../../domain/models/units/Pwrj";
 import { Qj } from "../../domain/models/units/Qj";
 import { parseAjs } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
+
+type ValueGetter = {
+  value: () => string;
+};
+
+type ExecutionAndJobTypeUnit = {
+  pfm?: ValueGetter;
+  etm?: ValueGetter;
+  fd?: ValueGetter;
+  ex?: ValueGetter;
+  ha?: ValueGetter;
+  eu?: ValueGetter;
+  jty?: ValueGetter;
+};
+
+type ExpectedExecutionAndJobTypeValues = {
+  pfm: string;
+  etm: string;
+  fd: string;
+  ex: string;
+  ha: string;
+  eu: string;
+  jty: string;
+};
+
+type ExecutionAndJobTypeCase = {
+  definition: string;
+  expected: ExpectedExecutionAndJobTypeValues;
+};
+
+const assertExecutionAndJobTypeValues = (
+  unit: ExecutionAndJobTypeUnit,
+  expected: ExpectedExecutionAndJobTypeValues,
+): void => {
+  assert.strictEqual(unit.pfm?.value(), expected.pfm);
+  assert.strictEqual(unit.etm?.value(), expected.etm);
+  assert.strictEqual(unit.fd?.value(), expected.fd);
+  assert.strictEqual(unit.ex?.value(), expected.ex);
+  assert.strictEqual(unit.ha?.value(), expected.ha);
+  assert.strictEqual(unit.eu?.value(), expected.eu);
+  assert.strictEqual(unit.jty?.value(), expected.jty);
+};
+
+const assertSingleExecutionAndJobTypeCase = ({
+  definition,
+  expected,
+}: ExecutionAndJobTypeCase): void => {
+  const result = parseAjs(definition);
+  assert.deepStrictEqual(result.errors, []);
+  assertExecutionAndJobTypeValues(
+    tyFactory(result.rootUnits[0]) as ExecutionAndJobTypeUnit,
+    expected,
+  );
+};
 
 suite("Unit capability entities", () => {
   test("keeps shared wait-state getters on waitable wrappers", () => {
@@ -199,53 +251,54 @@ suite("Unit capability entities", () => {
     assert.strictEqual(ntwj.ets?.value(), "an");
   });
 
-  test("keeps shared execution and job-type getters on event sending jobs", () => {
-    const result = parseAjs(`
-      evsj=/event-send;
-      ty=evsj;
-      pfm=u;
-      etm=7;
-      fd=00:10;
-      ex="event-agent";
-      ha=y;
-      eu=ent;
-      jty=q;
-    `);
-
-    assert.deepStrictEqual(result.errors, []);
-    const evsj = tyFactory(result.rootUnits[0]) as Evsj;
-
-    assert.strictEqual(evsj.pfm?.value(), "u");
-    assert.strictEqual(evsj.etm?.value(), "7");
-    assert.strictEqual(evsj.fd?.value(), "00:10");
-    assert.strictEqual(evsj.ex?.value(), "event-agent");
-    assert.strictEqual(evsj.ha?.value(), "y");
-    assert.strictEqual(evsj.eu?.value(), "ent");
-    assert.strictEqual(evsj.jty?.value(), "q");
-  });
-
-  test("keeps shared execution and job-type getters on power control jobs", () => {
-    const result = parseAjs(`
-      pwrj=/power-control;
-      ty=pwrj;
-      pfm=p;
-      etm=7;
-      fd=00:10;
-      ex="power-agent";
-      ha=y;
-      eu=ent;
-      jty=n;
-    `);
-
-    assert.deepStrictEqual(result.errors, []);
-    const pwrj = tyFactory(result.rootUnits[0]) as Pwrj;
-
-    assert.strictEqual(pwrj.pfm?.value(), "p");
-    assert.strictEqual(pwrj.etm?.value(), "7");
-    assert.strictEqual(pwrj.fd?.value(), "00:10");
-    assert.strictEqual(pwrj.ex?.value(), "power-agent");
-    assert.strictEqual(pwrj.ha?.value(), "y");
-    assert.strictEqual(pwrj.eu?.value(), "ent");
-    assert.strictEqual(pwrj.jty?.value(), "n");
+  test("keeps shared execution and job-type getters on single shared-job wrappers", () => {
+    for (const testCase of [
+      {
+        definition: `
+          evsj=/event-send;
+          ty=evsj;
+          pfm=u;
+          etm=7;
+          fd=00:10;
+          ex="event-agent";
+          ha=y;
+          eu=ent;
+          jty=q;
+        `,
+        expected: {
+          pfm: "u",
+          etm: "7",
+          fd: "00:10",
+          ex: "event-agent",
+          ha: "y",
+          eu: "ent",
+          jty: "q",
+        },
+      },
+      {
+        definition: `
+          pwrj=/power-control;
+          ty=pwrj;
+          pfm=p;
+          etm=7;
+          fd=00:10;
+          ex="power-agent";
+          ha=y;
+          eu=ent;
+          jty=n;
+        `,
+        expected: {
+          pfm: "p",
+          etm: "7",
+          fd: "00:10",
+          ex: "power-agent",
+          ha: "y",
+          eu: "ent",
+          jty: "n",
+        },
+      },
+    ] satisfies ExecutionAndJobTypeCase[]) {
+      assertSingleExecutionAndJobTypeCase(testCase);
+    }
   });
 });
