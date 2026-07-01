@@ -9,79 +9,118 @@ import {
   type ImportAjsDefinitionPortRequestDto,
 } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
 
-const createDeps = (
-  answers: string[],
-  overrides: Partial<ImportAjsDefinitionCommandDeps> = {},
-) => {
-  const prompts: Array<{ prompt: string; value?: string }> = [];
-  const credentials: Array<{
+type ImportAjsDefinitionCommandObservations = {
+  prompts: Array<{ prompt: string; value?: string }>;
+  credentials: Array<{
     credentialRef: string;
     username: string;
     password: string;
-  }> = [];
-  const imports: ImportAjsDefinitionPortRequestDto[] = [];
-  const informationMessages: string[] = [];
-  const errorMessages: string[] = [];
-  const events: Array<{
+  }>;
+  imports: ImportAjsDefinitionPortRequestDto[];
+  informationMessages: string[];
+  errorMessages: string[];
+  events: Array<{
     eventName: string;
     properties?: Record<string, string>;
-  }> = [];
-
-  const deps: ImportAjsDefinitionCommandDeps = {
-    getHost: () => "desktop",
-    getLanguage: () => "ja",
-    async showInputBox(options) {
-      prompts.push({ prompt: options.prompt, value: options.value });
-      return answers.shift();
-    },
-    async showInformationMessage(message) {
-      informationMessages.push(message);
-      return undefined;
-    },
-    async showErrorMessage(message) {
-      errorMessages.push(message);
-      return undefined;
-    },
-    async storeCredential(credentialRef, credential) {
-      credentials.push({
-        credentialRef,
-        username: credential.username,
-        password: credential.password,
-      });
-    },
-    importPort: {
-      async importDefinition(request) {
-        imports.push(request);
-        return {
-          ok: true,
-          content: createImportedAjsDefinitionContent(
-            {
-              manager: request.query.manager,
-              serviceName: request.query.serviceName,
-              location: request.query.location,
-              all: true,
-            },
-            [{ unitName: "/JobGroup/Jobnet" }],
-          ),
-        };
-      },
-    },
-    trackEvent(eventName, properties) {
-      events.push({ eventName, properties });
-    },
-    ...overrides,
-  };
-
-  return {
-    deps,
-    prompts,
-    credentials,
-    imports,
-    informationMessages,
-    errorMessages,
-    events,
-  };
+  }>;
 };
+
+class ImportAjsDefinitionCommandHarness {
+  readonly observed: ImportAjsDefinitionCommandObservations = {
+    prompts: [],
+    credentials: [],
+    imports: [],
+    informationMessages: [],
+    errorMessages: [],
+    events: [],
+  };
+
+  readonly deps: ImportAjsDefinitionCommandDeps;
+
+  private readonly answers: string[];
+
+  constructor(
+    answers: string[],
+    overrides: Partial<ImportAjsDefinitionCommandDeps> = {},
+  ) {
+    this.answers = [...answers];
+    this.deps = {
+      getHost: () => "desktop",
+      getLanguage: () => "ja",
+      showInputBox: (options) => this.showInputBox(options),
+      showInformationMessage: (message) => this.showInformationMessage(message),
+      showErrorMessage: (message) => this.showErrorMessage(message),
+      storeCredential: (credentialRef, credential) =>
+        this.storeCredential(credentialRef, credential),
+      importPort: {
+        importDefinition: (request) => this.importDefinition(request),
+      },
+      trackEvent: (eventName, properties) =>
+        this.trackEvent(eventName, properties),
+      ...overrides,
+    };
+  }
+
+  private async showInputBox(
+    options: Parameters<ImportAjsDefinitionCommandDeps["showInputBox"]>[0],
+  ): Promise<string | undefined> {
+    this.observed.prompts.push({
+      prompt: options.prompt,
+      value: options.value,
+    });
+    return this.answers.shift();
+  }
+
+  private async showInformationMessage(message: string): Promise<undefined> {
+    this.observed.informationMessages.push(message);
+    return undefined;
+  }
+
+  private async showErrorMessage(message: string): Promise<undefined> {
+    this.observed.errorMessages.push(message);
+    return undefined;
+  }
+
+  private async storeCredential(
+    credentialRef: string,
+    credential: { username: string; password: string },
+  ): Promise<void> {
+    this.observed.credentials.push({
+      credentialRef,
+      username: credential.username,
+      password: credential.password,
+    });
+  }
+
+  private async importDefinition(request: ImportAjsDefinitionPortRequestDto) {
+    this.observed.imports.push(request);
+    return {
+      ok: true as const,
+      content: createImportedAjsDefinitionContent(
+        {
+          manager: request.query.manager,
+          serviceName: request.query.serviceName,
+          location: request.query.location,
+          all: true,
+        },
+        [{ unitName: "/JobGroup/Jobnet" }],
+      ),
+    };
+  }
+
+  private trackEvent(
+    eventName: string,
+    properties?: Record<string, string>,
+  ): void {
+    this.observed.events.push({ eventName, properties });
+  }
+}
+
+const createDeps = (
+  answers: string[],
+  overrides: Partial<ImportAjsDefinitionCommandDeps> = {},
+): ImportAjsDefinitionCommandHarness =>
+  new ImportAjsDefinitionCommandHarness(answers, overrides);
 
 suite("Import AJS definition via WebAPI command", () => {
   test("uses the contributed beta command id", () => {
@@ -104,7 +143,7 @@ suite("Import AJS definition via WebAPI command", () => {
     const result = await executeImportAjsDefinitionViaWebApiCommand(state.deps);
 
     assert.strictEqual(result.ok, true);
-    assert.deepStrictEqual(state.prompts, [
+    assert.deepStrictEqual(state.observed.prompts, [
       { prompt: "JP1/AJS Web Console URL", value: undefined },
       {
         prompt: "JP1/AJS manager host",
@@ -118,8 +157,8 @@ suite("Import AJS definition via WebAPI command", () => {
       { prompt: "JP1/AJS user name", value: undefined },
       { prompt: "JP1/AJS password", value: undefined },
     ]);
-    assert.strictEqual(state.imports.length, 1);
-    assert.deepStrictEqual(state.imports[0].query, {
+    assert.strictEqual(state.observed.imports.length, 1);
+    assert.deepStrictEqual(state.observed.imports[0].query, {
       mode: "search",
       manager: "manager.example.com",
       serviceName: "AJSROOT1",
@@ -127,14 +166,20 @@ suite("Import AJS definition via WebAPI command", () => {
       searchLowerUnits: "YES",
       searchTarget: "DEFINITION",
     });
-    assert.strictEqual(state.imports[0].connection.acceptLanguage, "ja");
-    assert.strictEqual(state.credentials.length, 1);
-    assert.strictEqual(state.credentials[0].username, "jp1admin");
-    assert.strictEqual(state.credentials[0].password, "secret");
-    assert.deepStrictEqual(state.informationMessages, [
+    assert.strictEqual(
+      state.observed.imports[0].connection.acceptLanguage,
+      "ja",
+    );
+    assert.strictEqual(state.observed.credentials.length, 1);
+    assert.strictEqual(state.observed.credentials[0].username, "jp1admin");
+    assert.strictEqual(state.observed.credentials[0].password, "secret");
+    assert.deepStrictEqual(state.observed.informationMessages, [
       "JP1/AJS WebAPI import beta loaded 1 unit(s).",
     ]);
-    assert.strictEqual(state.events.at(-1)?.properties?.result, "success");
+    assert.strictEqual(
+      state.observed.events.at(-1)?.properties?.result,
+      "success",
+    );
   });
 
   test("returns cancelled without storing credentials when input is cancelled", async () => {
@@ -147,8 +192,8 @@ suite("Import AJS definition via WebAPI command", () => {
       throw new Error("Expected cancelled result.");
     }
     assert.strictEqual(result.error.code, "cancelled");
-    assert.deepStrictEqual(state.credentials, []);
-    assert.deepStrictEqual(state.imports, []);
+    assert.deepStrictEqual(state.observed.credentials, []);
+    assert.deepStrictEqual(state.observed.imports, []);
   });
 
   test("falls back to en when VS Code language is not supported by WebAPI", async () => {
@@ -168,7 +213,10 @@ suite("Import AJS definition via WebAPI command", () => {
 
     await executeImportAjsDefinitionViaWebApiCommand(state.deps);
 
-    assert.strictEqual(state.imports[0].connection.acceptLanguage, "en");
+    assert.strictEqual(
+      state.observed.imports[0].connection.acceptLanguage,
+      "en",
+    );
   });
 
   test("reports unsupported host before prompting in web execution", async () => {
@@ -183,8 +231,8 @@ suite("Import AJS definition via WebAPI command", () => {
       throw new Error("Expected unsupported host result.");
     }
     assert.strictEqual(result.error.code, "unsupported-host");
-    assert.deepStrictEqual(state.prompts, []);
-    assert.deepStrictEqual(state.errorMessages, [
+    assert.deepStrictEqual(state.observed.prompts, []);
+    assert.deepStrictEqual(state.observed.errorMessages, [
       "JP1/AJS WebAPI import beta is available only in the desktop extension host.",
     ]);
   });
