@@ -64,10 +64,30 @@ suite("NLS", () => {
     assert.strictEqual(unitTypeLabel("unknown", "en"), "unknown");
   });
 
+  test("falls back to English unit type definitions for unsupported languages", () => {
+    assert.strictEqual(
+      unitTypeLabel("g", "unsupported", "p"),
+      "planning group",
+    );
+    assert.strictEqual(
+      unitTypeLabel("mqwj", "unsupported"),
+      "message queue reception monitoring job",
+    );
+  });
+
   test("resolves the corrected English message queue monitoring job label", () => {
     assert.strictEqual(
       unitTypeLabel("mqwj", "en"),
       "message queue reception monitoring job",
     );
+  });
+
+  test("preserves Japanese unit type labels", () => {
+    assert.strictEqual(unitTypeLabel("j", "ja"), "UNIXジョブ");
+    assert.strictEqual(
+      unitTypeLabel("mqwj", "ja"),
+      " メッセージキュー受信監視ジョブ",
+    );
+    assert.strictEqual(unitTypeLabel("nc", "ja"), "ジョブネットコネクタ");
   });
 });

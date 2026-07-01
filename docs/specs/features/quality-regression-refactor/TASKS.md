@@ -4,16 +4,16 @@
 
 - Status: Ready for Planning
 - Scope:
-  reassess whether the stored upstream qlty evaluation still justifies another
-  package/category slice or feature closure after the completed WebAPI command
-  test dependency factory slice.
+  reassess whether the quality-regression-refactor feature can close after the
+  completed unit-type i18n resource remediation slice, or whether remaining
+  metrics evidence justifies another package/category slice.
 - Acceptance:
-  keep any next task package/category-sized, behavior-preserving, and tied to a
-  coherent qlty smell or metrics cluster.
+  keep any next task package/category-sized, behavior-preserving, and backed by
+  current qlty evidence. Prefer feature closure if no concrete smell or
+  actionable metrics regression remains.
 - Validation:
-  refresh the stored upstream evaluation after this commit because a committed
-  test change can affect the broad comparison, then run targeted current-head
-  qlty checks for any selected candidate.
+  refresh reusable qlty evidence only when the committed unit-type i18n slice
+  changes the broad comparison or when selecting another implementation slice.
 
 ## Human Approval
 
@@ -52,11 +52,19 @@ approval can change Status to Approved.
 - [x] Obtain human implementation approval for the WebAPI command test
       dependency factory slice.
 - [x] Complete the WebAPI command test dependency factory remediation slice.
+- [x] Reassess whether the stored upstream qlty evaluation still justifies
+      another package/category slice or feature closure.
+- [x] Select the unit-type i18n resource remediation slice.
+- [x] Obtain human implementation approval for the unit-type i18n resource
+      slice.
+- [x] Complete the unit-type i18n resource remediation slice.
+- [ ] Reassess whether the feature can close or needs another package/category
+      slice after the committed unit-type i18n resource remediation.
 
 ## Reusable Upstream Evaluation
 
 - Baseline: `v1.15.1`.
-- Last refreshed after commit: `d420357 Refactor flow selector test fixtures`.
+- Last refreshed after commit: `5c126ba Refactor WebAPI command test harness`.
 - Refresh triggers:
   refresh this evaluation only after a committed runtime/test/config change that
   can affect the broad comparison, when the selected slice fails to match stored
@@ -72,7 +80,9 @@ approval can change Status to Approved.
   selected bootstrap/adapter paths, parser infrastructure, domain/i18n-related
   paths, and selected tests.
 - Current smell clusters:
-  i18n resource duplication in `src/resource/i18n/ty_en.ts` and `ty_ja.ts`.
+  none known after the unit-type i18n resource remediation working tree. The
+  next planning pass should refresh after the commit if another implementation
+  slice is considered.
 - Recently removed targeted smells:
   viewer wiring, viewer event bridge, unit type label resolver, flow
   relationship-focus classification, flow node detail context, flow tree
@@ -85,16 +95,17 @@ approval can change Status to Approved.
   presentation controls, VS Code hover provider adapter shape, webview editor
   presentation helpers, host callback adapter parameter shapes, and diagnostics
   test fixture/helper duplication, and domain parameter/capability test helper
-  duplication, flow header/selector test fixture duplication, and WebAPI
-  command test dependency factory return-shape smell.
+  duplication, flow header/selector test fixture duplication, WebAPI command
+  test dependency factory return-shape smell, and unit-type i18n resource
+  duplication.
 - Current candidate evidence:
-  targeted current-head qlty for
-  `src/test/suite/importAjsDefinitionViaWebApiCommand.test.ts` reports no
-  smells after the completed WebAPI command test dependency factory slice.
+  post-implementation upstream qlty smell comparison reported no smells, and
+  targeted qlty for the consolidated unit-type i18n resource scope reported no
+  smells.
 - Deferred candidates:
-  i18n resource duplication remains the only stored smell candidate and changes
-  production resource shape, so it needs separate approval and focused
-  validation before implementation.
+  none after the unit-type i18n resource slice unless implementation reveals a
+  necessary follow-up or the post-slice upstream refresh still reports a
+  concrete qlty regression.
 
 ## Validation
 
@@ -159,6 +170,26 @@ approval can change Status to Approved.
       `rtk git diff --check`. `test:web` required an elevated rerun because the
       first run hit an external connection timeout. Production webpack emitted
       existing bundle-size performance warnings.
+- [x] Current planning:
+      refreshed upstream qlty smell/metrics after `5c126ba` because committed
+      test changes affected the broad comparison. The only remaining broad
+      smell is unit-type i18n resource duplication in `ty_en.ts`/`ty_ja.ts`.
+      Targeted current-head qlty confirms the selected unit-type i18n resource
+      slice.
+- [x] Completed unit-type i18n resource slice:
+      consolidated unit-type labels into `src/resource/i18n/ty.ts`, removed
+      obsolete `ty_en.ts`/`ty_ja.ts` shims after confirming no repository
+      imports require them, and added focused `NLS` assertions for unsupported
+      language fallback and Japanese label preservation. Targeted qlty reports
+      no smells, upstream qlty smells reports no smells, and generated
+      English/Japanese label objects match the previous resources exactly.
+      Standard gates passed with `CI=true rtk pnpm run qlty`,
+      `CI=true rtk pnpm test`, `CI=true rtk pnpm run test:web`,
+      `CI=true rtk pnpm run build`, `CI=true rtk pnpm run lint:md`,
+      `CI=true rtk pnpm exec tsc -p tsconfig.test.json --noEmit`, and
+      `rtk git diff --check`. Production webpack emitted existing bundle-size
+      performance warnings. One earlier `test:web` rerun was needed because an
+      external connection timed out.
 
 ## Use-Case Back-Propagation
 
@@ -170,6 +201,9 @@ approval can change Status to Approved.
   fixture slice.
 - No behavior changes were made for the completed WebAPI command test
   dependency factory slice.
+- The completed unit-type i18n resource slice preserved observable unit-type
+  labels for flow nodes, flow details, unit-list type cells, and unit-list
+  details.
 - Editor feedback behavior is governed by
   `docs/requirements/use-cases/uc-provide-editor-feedback.md`, including parser
   syntax diagnostics, semantic parameter diagnostics, JP1/AJS3 v13 rules, and
@@ -187,6 +221,11 @@ approval can change Status to Approved.
   especially desktop-only availability, read-only import request construction,
   stable unsupported-host errors, and no secret leakage in user-facing errors
   or telemetry.
+- Unit-type label behavior is governed by
+  `docs/requirements/use-cases/uc-build-flow-graph.md`,
+  `docs/requirements/use-cases/uc-build-unit-list-view.md`, and existing
+  `NLS` tests, because labels are rendered in flow nodes/details and unit-list
+  type/detail surfaces.
 - If implementation reveals an intended or unavoidable behavior change, stop
   and update the relevant use case before requesting expanded approval.
 
