@@ -39,7 +39,8 @@ Explain why this option was chosen.
 
 ## Related Documents
 
-- {{PLANS.md}}
-- {{SPECS.md}}
-- {{TASKS.md}}
-- {{Use Case}}
+- Branch plan: {{docs/specs/plans.md}}
+- Feature spec: {{SPECS.md}}
+- Slice plan: {{TASKS.md}}
+- Traceability: {{TRACEABILITY.md or "not required"}}
+- Use case: {{Use Case}}

@@ -36,7 +36,7 @@ Add a read-only JP1/AJS WebAPI import path for server-side definition data.
 - implement request, authentication, response, and error handling according to
   the JP1/AJS3 version 13 API chapters before adding repository-local
   assumptions
-- present the feature as beta in command labels, release notes, or user-facing
+- present the feature as beta in command labels, CHANGELOG, or user-facing
   documentation until the beta exit criteria are met
 - use OpenAPI as a derived, testable contract for the subset of JP1/AJS3 WebAPI
   endpoints this extension supports; do not treat it as a replacement for the

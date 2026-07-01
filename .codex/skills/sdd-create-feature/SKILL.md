@@ -9,8 +9,8 @@ description: Use when creating a new vscode-ajsbutler SDD feature folder, clarif
 
 Create one well-scoped SDD feature entry for `vscode-ajsbutler` while keeping
 the existing implementation gate intact. Use this skill only for feature
-intake and documentation setup; hand off task selection to `sdd-plan-task` and
-approved implementation to `sdd-implement-task`.
+intake and documentation setup; hand off feature implementation planning to
+`sdd-plan-task` and approved implementation slices to `sdd-implement-task`.
 
 ## Inputs
 
@@ -36,6 +36,10 @@ Before creating or editing feature docs, explicitly establish:
 - feature name and slug
 - one concrete purpose
 - source use case, roadmap item, bug, risk, or branch goal
+- JP1/AJS source reference:
+  - command reference
+  - definition/config reference
+  - undocumented or inferred behavior
 - expected behavior or boundary decision
 - non-goals
 - desktop and web compatibility expectations
@@ -49,6 +53,10 @@ Ask the user to choose the feature kind when it is not already explicit:
   durable decisions move to use cases, roadmap, or plans
 
 Do not infer the kind from tone, size, or urgency.
+
+If the feature depends on JP1/AJS behavior, record the reference basis. Use
+`undocumented or inferred behavior` only when no command or definition/config
+reference is available, and keep the inference explicit.
 
 ## Scope Gate
 
@@ -81,34 +89,75 @@ Too broad for one feature:
 1. Confirm the intake and scope gates.
 2. Choose a lowercase hyphenated slug under `docs/specs/features/<slug>/`.
 3. Check that the slug does not duplicate an active feature folder.
+   Also inspect related use cases and active features, then record the
+   duplicate/overlap decision in the final intake summary.
 4. Create the feature folder from the repository templates:
    - `SPECS.md` from `SPECS.template.md`
    - `TASKS.md` from `TASKS.template.md`
-5. Fill `SPECS.md` with only feature-level purpose, origin, requirements,
+5. Create `TRACEABILITY.md` when the feature needs explicit traceability.
+6. Fill `SPECS.md` with only feature-level purpose, origin, requirements,
    architecture boundaries, compatibility, acceptance criteria, non-goals, and
    open questions.
-6. Fill `TASKS.md` with current status, approval state, active planning tasks,
+7. Fill `TASKS.md` with current status, approval state, active planning tasks,
    validation expectations, unresolved risks, and use-case back-propagation
    notes. Keep `Human Approval` pending unless the user has already given
    clear approval for a specific implementation scope in the current
    conversation.
-7. Update `docs/specs/plans.md` when the branch starts, stops, or changes an
+8. Update `docs/specs/plans.md` when the branch starts, stops, or changes an
    active feature.
-8. Update `docs/specs/roadmap.md` only for `roadmap feature` work or when the
+9. Update `docs/specs/roadmap.md` only for `roadmap feature` work or when the
    new feature changes repository-level ordering, remaining debt, or deferred
    work.
-9. Update or create `docs/requirements/use-cases/` only when the new feature
-   changes a durable behavior contract.
-10. Run docs-only validation through `rtk`.
+10. Update or create `docs/requirements/use-cases/` only when the new feature
+    changes a durable behavior contract.
+11. Run docs-only validation through `rtk`.
+
+## Traceability
+
+Create or update `docs/specs/features/<feature>/TRACEABILITY.md` when the
+feature:
+
+- changes user-visible behavior
+- affects JP1/AJS definition-file interpretation or compatibility
+- is likely to split into multiple implementation slices
+- needs explicit use-case correspondence
+
+Do not create `TRACEABILITY.md` for purely temporary investigations or minor
+docs-only changes where use-case, requirement, slice, and validation mapping is
+obvious and short-lived.
+
+When created, `TRACEABILITY.md` must map at least:
+
+- Use Case
+- Requirement
+- `SPECS.md` section
+- Implementation Slice
+- Test file or validation plan
+
+## Completion Checklist
+
+Before finishing, verify:
+
+- no template placeholder remains
+- `Purpose` contains one concrete observable result or boundary decision
+- `Requirements` are testable
+- `Architecture` maps responsibilities to Domain, Application, Presentation,
+  and Infrastructure
+- `Compatibility` mentions both desktop and web
+- `Acceptance Criteria` can be validated
+- `Human Approval` remains `Pending` unless explicit approval exists
 
 ## Document Responsibilities
 
 - `SPECS.md`: durable feature requirements, architecture boundaries,
   compatibility notes, acceptance criteria, alternatives, non-goals, and open
   questions.
-- `TASKS.md`: current executable planning state, current approval evidence,
-  validation expectations, unresolved risks, and follow-up that affects the
-  next decision.
+- `TASKS.md`: feature implementation-slice plan, current approval evidence,
+  validation expectations, unresolved risks, feature exit readiness, and
+  follow-up that affects implementation or closure decisions.
+- `TRACEABILITY.md`: feature-level mapping from use cases and requirements to
+  `SPECS.md`, implementation slices, and tests or validation plans. Create it
+  only when the Traceability rules require it.
 - `docs/specs/plans.md`: branch-level active features and branch-wide
   assumptions.
 - `docs/specs/roadmap.md`: repository-level sequence, roadmap-visible
@@ -134,16 +183,25 @@ Before finishing, report:
 - Feature folder:
 - Purpose:
 - Source:
+- JP1/AJS source reference:
+  - Command reference:
+  - Definition/config reference:
+  - Undocumented or inferred behavior:
+- Duplicate/overlap check:
+- Existing related features:
+- Existing related use cases:
 - Scope split considered:
 - Ambiguities resolved:
 - Roadmap impact:
 - Plans impact:
 - Use-case impact:
+- Traceability:
 - Validation:
 
 ## Next Step
 
-Use `sdd-plan-task` to investigate and propose the first implementation slice.
+Use `sdd-plan-task` to decompose the feature into implementation slices and
+prepare the feature-level implementation plan.
 ```
 
 ## Validation

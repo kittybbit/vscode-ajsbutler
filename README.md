@@ -50,18 +50,37 @@ To use this extension:
 
 ## Development
 
-This repository is incrementally adopting Specification-Driven Development
-(SDD) and cleaner application boundaries.
+This repository uses Specification-Driven Development (SDD) as the standard
+process for non-trivial changes.
 
 - SDD guidance starts in `docs/specs/README.md`.
+- Feature work starts with `sdd-create-feature`.
+- Feature implementation plans are created or revised with `sdd-plan-task`.
+- Plans are reviewed with `sdd-review-plan`.
+- Runtime code, tests, generated artifacts, and configuration are edited only
+  after Human Approval.
+- `sdd-implement-task` implements one approved implementation slice at a time.
+- Feature closure follows the Feature Definition of Done in
+  `docs/specs/README.md`.
 - Repository-level use-case contracts live in
   `docs/requirements/use-cases/`.
 - Branch-level planning is tracked in `docs/specs/plans.md`.
-- `PLANS.md` is the root index that points to the active SDD documents.
 - Codex-specific repository guidance lives in `AGENTS.md`.
 - Docs-only work should use a `docs/...` branch name and stay within the
   docs-only file set used by `.github/workflows/verify.yml`:
   `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md`.
+
+SDD artifact roles:
+
+- Use cases: durable behavior contracts.
+- `SPECS.md`: feature requirements, boundaries, and acceptance criteria.
+- `TASKS.md`: implementation-slice plan, approval state, validation, risks,
+  and feature exit readiness.
+- `TRACEABILITY.md`: use case or requirement to validation mapping when
+  required.
+- `docs/specs/plans.md`: branch-level active features and branch-wide
+  decisions.
+- `docs/specs/roadmap.md`: repository-level direction and sequencing.
 
 Recent refactoring work introduced:
 
@@ -169,6 +188,10 @@ proxy exists, for example `rtk git status --short --branch`,
 `rtk pnpm run qlty`, or `rtk pnpm run build`. Use native commands only when
 `rtk` has no suitable proxy, exact unfiltered output is required, or the
 command is interactive.
+
+Agent development rules are centralized in `AGENTS.md` and `docs/specs/`.
+README intentionally stays at overview level to avoid duplicating the SDD
+workflow.
 
 ## Telemetry
 

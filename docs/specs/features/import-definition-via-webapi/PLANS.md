@@ -188,7 +188,7 @@ hover, or unit-definition features remains a follow-up integration slice.
   product version and tested scenario
 - enough user feedback is recorded to show that the supported read-only import
   path behaves predictably outside mock and local test environments
-- release notes or user documentation no longer need to warn that the feature
+- CHANGELOG or user documentation no longer need to warn that the feature
   has limited real-environment validation or limited beta feedback
 
 ## Validation

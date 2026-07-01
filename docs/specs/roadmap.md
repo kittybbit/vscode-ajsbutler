@@ -3,7 +3,8 @@
 ## Principles
 
 - Preserve behavior first.
-- Refactor in small vertical slices.
+- Refactor in meaningful implementation slices that can be reviewed, tested,
+  approved, and committed independently.
 - Prefer one use case per extraction.
 - Keep parser internals away from UI-facing components.
 - Keep active feature docs concise; remove completed feature-local folders after

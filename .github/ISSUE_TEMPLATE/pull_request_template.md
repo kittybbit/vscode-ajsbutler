@@ -22,7 +22,9 @@
 ## SDD (Software Design Document)
 
 - [ ] related spec updated
-- [ ] `PLANS.md` updated for non-trivial work
+- [ ] `TASKS.md` slice plan/status updated when non-trivial work changed
+- [ ] `TRACEABILITY.md` updated or not required
+- [ ] Feature Exit / Definition of Done considered when completing a feature
 
 ## Validation
 
@@ -31,6 +33,8 @@
 - [ ] tests
 - [ ] desktop scenario checked
 - [ ] web scenario checked if relevant
+- [ ] Production readiness reviewed
+- [ ] CHANGELOG update need evaluated
 
 ## Risks
 
