@@ -137,6 +137,65 @@ const parseRootDefaultJobnet = (): N => {
   return root.children[0] as N;
 };
 
+type OptionalParameterInput = Parameters<typeof buildOptionalParameter>[0];
+type DefaultableParameterInput = Parameters<
+  typeof buildDefaultableParameter
+>[0];
+type ParameterMapperInput = Parameters<
+  Parameters<typeof buildOptionalParameter>[1]
+>[0];
+type ParameterValueCase = {
+  label: string;
+  build: () => string | string[] | undefined;
+  expected: string | string[] | undefined;
+};
+type ParameterValueCaseInput<TInput> = {
+  label: string;
+  input: TInput;
+  build: (input: TInput) => string | string[] | undefined;
+  expected: string | string[] | undefined;
+};
+
+const rawOrDefaultValue = (param: ParameterMapperInput): string | undefined =>
+  param.rawValue ?? param.defaultRawValue;
+
+const defaultOrRawValue = (param: ParameterMapperInput): string | undefined =>
+  param.defaultRawValue ?? param.rawValue;
+
+const buildOptionalRawValue = (
+  input: OptionalParameterInput,
+): string | undefined => buildOptionalParameter(input, rawOrDefaultValue);
+
+const buildOptionalDefaultValue = (
+  input: OptionalParameterInput,
+): string | undefined => buildOptionalParameter(input, defaultOrRawValue);
+
+const buildOptionalRawValues = (
+  input: OptionalParameterInput,
+): string[] | undefined =>
+  buildOptionalParameterArray(input, rawOrDefaultValue);
+
+const buildDefaultableRawValue = (
+  input: DefaultableParameterInput,
+): string | undefined => buildDefaultableParameter(input, rawOrDefaultValue);
+
+const parameterValueCase = <TInput>({
+  label,
+  input,
+  build,
+  expected,
+}: ParameterValueCaseInput<TInput>): ParameterValueCase => ({
+  label,
+  build: () => build(input),
+  expected,
+});
+
+const assertParameterValueCases = (cases: readonly ParameterValueCase[]) => {
+  for (const { label, build, expected } of cases) {
+    assert.deepStrictEqual(build(), expected, label);
+  }
+};
+
 suite("Parameter helpers", () => {
   test("resolves own, inherited, default, and singular parameters", () => {
     const { jobnet, subnet } = parseJobnets();
@@ -368,102 +427,104 @@ suite("Parameter helpers", () => {
     assert.strictEqual(explicitTop4, "keep");
   });
 
-  test("builds optional scalar parameters with explicit, default, and missing values", () => {
+  test("builds optional and defaultable scalar parameters with explicit, default, and missing values", () => {
     const { jobnet } = parseJobnets();
 
-    const explicitRg = buildOptionalParameter(
-      {
-        unit: jobnet,
-        parameter: "rg",
-        defaultRawValue: "9",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.strictEqual(explicitRg, "3");
-
-    const defaultAb = buildOptionalParameter(
-      {
-        unit: jobnet,
-        parameter: "ab",
-        defaultRawValue: "no",
-      },
-      (param) => param.defaultRawValue ?? param.rawValue,
-    );
-    assert.strictEqual(defaultAb, "no");
-
-    const missingCm = buildOptionalParameter(
-      {
-        unit: jobnet,
-        parameter: "cm",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.strictEqual(missingCm, undefined);
+    assertParameterValueCases([
+      parameterValueCase({
+        label: "explicit rg",
+        build: buildOptionalRawValue,
+        input: {
+          unit: jobnet,
+          parameter: "rg",
+          defaultRawValue: "9",
+        },
+        expected: "3",
+      }),
+      parameterValueCase({
+        label: "default ab",
+        build: buildOptionalDefaultValue,
+        input: {
+          unit: jobnet,
+          parameter: "ab",
+          defaultRawValue: "no",
+        },
+        expected: "no",
+      }),
+      parameterValueCase({
+        label: "missing cm",
+        build: buildOptionalRawValue,
+        input: {
+          unit: jobnet,
+          parameter: "cm",
+        },
+        expected: undefined,
+      }),
+      parameterValueCase({
+        label: "explicit ncl",
+        build: buildDefaultableRawValue,
+        input: {
+          unit: jobnet,
+          parameter: "ncl",
+          defaultRawValue: "y",
+        },
+        expected: "y",
+      }),
+      parameterValueCase({
+        label: "supplied ncs",
+        build: buildDefaultableRawValue,
+        input: {
+          unit: jobnet,
+          parameter: "ncs",
+          defaultRawValue: "n",
+        },
+        expected: "n",
+      }),
+      parameterValueCase({
+        label: "missing ncex",
+        build: buildDefaultableRawValue,
+        input: {
+          unit: jobnet,
+          parameter: "ncex",
+        },
+        expected: undefined,
+      }),
+    ]);
   });
 
   test("builds optional array parameters with explicit and missing values", () => {
     const { jobnet } = parseJobnets();
     const root = parseRootGroup();
 
-    const explicitSd = buildOptionalParameterArray(
-      {
-        unit: jobnet,
-        parameter: "sd",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.deepStrictEqual(explicitSd, ["ud", "2,en"]);
-
-    const explicitEl = buildOptionalParameterArray(
-      {
-        unit: root,
-        parameter: "el",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.deepStrictEqual(explicitEl, ["jobnet,n,+0+0"]);
-
-    const missingEnv = buildOptionalParameterArray(
-      {
-        unit: jobnet,
-        parameter: "env",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.strictEqual(missingEnv, undefined);
-  });
-
-  test("builds defaultable scalar parameters with explicit, supplied, and missing defaults", () => {
-    const { jobnet } = parseJobnets();
-
-    const explicitNcl = buildDefaultableParameter(
-      {
-        unit: jobnet,
-        parameter: "ncl",
-        defaultRawValue: "y",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.strictEqual(explicitNcl, "y");
-
-    const suppliedNcs = buildDefaultableParameter(
-      {
-        unit: jobnet,
-        parameter: "ncs",
-        defaultRawValue: "n",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.strictEqual(suppliedNcs, "n");
-
-    const missingNcex = buildDefaultableParameter(
-      {
-        unit: jobnet,
-        parameter: "ncex",
-      },
-      (param) => param.rawValue ?? param.defaultRawValue,
-    );
-    assert.strictEqual(missingNcex, undefined);
+    assertParameterValueCases([
+      parameterValueCase({
+        label: "explicit sd",
+        build: buildOptionalRawValues,
+        input: {
+          unit: jobnet,
+          parameter: "sd",
+        },
+        expected: ["ud", "2,en"],
+      }),
+      parameterValueCase({
+        label: "explicit el",
+        build: buildOptionalRawValues,
+        input: {
+          unit: root,
+          parameter: "el",
+        },
+        expected: ["jobnet,n,+0+0"],
+      }),
+      parameterValueCase({
+        label: "missing env",
+        build: buildOptionalRawValues,
+        input: {
+          unit: jobnet,
+          parameter: "env",
+        },
+        expected: undefined,
+      }),
+    ]);
   });
 
   test("builds sd-aligned empty schedule-rule parameters with synthesized rule placeholders", () => {

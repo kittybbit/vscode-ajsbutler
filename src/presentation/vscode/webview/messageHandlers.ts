@@ -1,8 +1,8 @@
 import * as os from "os";
 import * as vscode from "vscode";
-import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import type { MyAppResource } from "../../../shared/MyAppResource";
 import { OPERATION } from "../../../shared/webviewEvents";
+import type { ViewerOperationRequest } from "./viewerMessageRouting";
 
 export const postResourceMessage = (
   requestedResource: MyAppResource,
@@ -36,12 +36,12 @@ export const saveText = async (content: string): Promise<void> => {
   });
 };
 
-export const reportWebviewOperation = (
-  document: vscode.TextDocument,
-  panel: vscode.WebviewPanel,
-  telemetry: TelemetryPort,
-  operation: string,
-): void => {
+export const reportWebviewOperation = ({
+  document,
+  panel,
+  telemetry,
+  operation,
+}: ViewerOperationRequest): void => {
   console.log(
     `post a message of operation. (${document.uri.toString()}, ${operation})`,
   );

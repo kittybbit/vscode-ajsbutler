@@ -1,40 +1,21 @@
 import * as assert from "assert";
-import { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { isSelectableFlowScopeUnit } from "../../presentation/webview/editor/ajsFlow/FlowSelector";
 import {
   collectFlowTreeAncestorUnitIds,
   isUnitInCurrentFlowScope,
   resolveFlowTreeSelectionTarget,
 } from "../../presentation/webview/editor/ajsFlow/flowTreeSelection";
-
-const createUnit = (overrides: Partial<AjsUnit>): AjsUnit => ({
-  id: overrides.id ?? "/root/jobnet",
-  name: overrides.name ?? "jobnet",
-  unitAttribute: "",
-  unitType: overrides.unitType ?? "n",
-  groupType: overrides.groupType,
-  absolutePath: overrides.absolutePath ?? "/root/jobnet",
-  depth: overrides.depth ?? 1,
-  parentId: overrides.parentId,
-  isRoot: overrides.isRoot ?? false,
-  isRootJobnet: overrides.isRootJobnet ?? true,
-  hasSchedule: false,
-  hasWaitedFor: false,
-  layout: { h: 0, v: 0 },
-  parameters: [],
-  relations: [],
-  children: [],
-});
+import { createFlowTestUnit } from "../support/flowUnits";
 
 suite("Flow Selector", () => {
   test("allows only root jobnets as selectable flow scopes", () => {
-    const rootJobnet = createUnit({
+    const rootJobnet = createFlowTestUnit({
       id: "/root/jobnet",
       name: "jobnet",
       unitType: "n",
       isRootJobnet: true,
     });
-    const jobGroup = createUnit({
+    const jobGroup = createFlowTestUnit({
       id: "/root",
       name: "root",
       unitType: "g",
@@ -42,7 +23,7 @@ suite("Flow Selector", () => {
       isRoot: true,
       isRootJobnet: false,
     });
-    const nestedJobnet = createUnit({
+    const nestedJobnet = createFlowTestUnit({
       id: "/root/jobnet/nested",
       name: "nested",
       unitType: "n",
@@ -56,25 +37,25 @@ suite("Flow Selector", () => {
   });
 
   test("resolves tree ancestors and in-scope nested expansion", () => {
-    const rootGroup = createUnit({
+    const rootGroup = createFlowTestUnit({
       id: "/root",
       name: "root",
       unitType: "g",
       isRoot: true,
       isRootJobnet: false,
     });
-    const rootJobnet = createUnit({
+    const rootJobnet = createFlowTestUnit({
       id: "/root/jobnet",
       parentId: rootGroup.id,
       isRootJobnet: true,
     });
-    const nestedJobnet = createUnit({
+    const nestedJobnet = createFlowTestUnit({
       id: "/root/jobnet/nested",
       parentId: rootJobnet.id,
       isRootJobnet: false,
       children: [],
     });
-    const leaf = createUnit({
+    const leaf = createFlowTestUnit({
       id: "/root/jobnet/nested/leaf",
       name: "leaf",
       unitType: "j",
@@ -114,9 +95,9 @@ suite("Flow Selector", () => {
   });
 
   test("rejects selection outside the current root jobnet", () => {
-    const current = createUnit({ id: "/root/current" });
-    const another = createUnit({ id: "/root/another" });
-    const anotherJob = createUnit({
+    const current = createFlowTestUnit({ id: "/root/current" });
+    const another = createFlowTestUnit({ id: "/root/another" });
+    const anotherJob = createFlowTestUnit({
       id: "/root/another/job",
       unitType: "j",
       parentId: another.id,

@@ -1,9 +1,16 @@
-import { FlowGraphNodeDto } from "../../../../application/flow-graph/buildFlowGraphCore";
+import type { FlowGraphNodeDto } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { createFlowNodeGeometryPx } from "./nodes/flowNodeGeometry";
 
 export type FlowGraphPosition = {
   x: number;
   y: number;
+};
+
+export type NestedChildPositionParams = {
+  parentPosition: FlowGraphPosition;
+  h: number;
+  v: number;
+  basePx: number;
 };
 
 type FlowGraphMetrics = {
@@ -56,12 +63,12 @@ export const calculateFlowGraphNodePosition = (
   };
 };
 
-export const calculateNestedChildPosition = (
-  parentPosition: FlowGraphPosition,
-  h: number,
-  v: number,
-  basePx: number,
-): FlowGraphPosition => {
+export const calculateNestedChildPosition = ({
+  parentPosition,
+  h,
+  v,
+  basePx,
+}: NestedChildPositionParams): FlowGraphPosition => {
   const metrics = createFlowGraphMetrics(basePx);
   return {
     x: parentPosition.x + (metrics.width + metrics.marginX) * ((h - 240) / 160),

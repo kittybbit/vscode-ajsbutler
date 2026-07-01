@@ -1,7 +1,5 @@
 import React, {
-  Dispatch,
   memo,
-  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -21,6 +19,7 @@ import { type Table as ReactTable, useReactTable } from "@tanstack/react-table";
 import {
   Row,
   SortingState,
+  VisibilityState,
   getCoreRowModel,
   getSortedRowModel,
 } from "@tanstack/table-core";
@@ -29,10 +28,7 @@ import {
   AjsUnit,
   flattenAjsUnits,
 } from "../../../../domain/models/ajs/AjsDocument";
-import {
-  buildUnitDefinitionByPath,
-  UnitDefinitionDialogDto,
-} from "../../../../application/unit-definition/buildUnitDefinition";
+import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import {
   buildUnitListView,
   UnitListRowView,
@@ -48,7 +44,6 @@ import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
 import UnitEntityDialog from "../UnitEntityDialog";
 import { REVEAL_UNIT } from "../../../../shared/webviewEvents";
-import { getRevealUnitAbsolutePath } from "../revealUnit";
 import UnitTreeSelector from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
@@ -56,13 +51,8 @@ import {
   reduceTableRowSelection,
   selectUnitTreeUnitInTable,
 } from "./navigation";
-import {
-  createEmptyTableSearchState,
-  createSubmittedTableSearchState,
-  findTableSearchMatchingAbsolutePaths,
-  getTableSearchResultPosition,
-  isActiveTableSearchQuery,
-  moveTableSearchResult,
+import { getTableSearchResultPosition } from "./tableSearchState";
+import type {
   TableSearchDirection,
   TableSearchState,
 } from "./tableSearchState";
@@ -71,6 +61,12 @@ import {
   createUnitListDetailResolver,
   resolveUnitListDetail,
 } from "./unitListDetail";
+import {
+  findRowIndexByIdentity,
+  useTableRowRevealState,
+} from "./tableRowReveal";
+import { useTableSearchController } from "./tableSearchController";
+import { createTableViewerData, findSelectedUnitId } from "./tableViewerData";
 
 export type AjsTableSearchState = {
   query: string;
@@ -83,13 +79,6 @@ type TableDocumentState = {
   changeDocument: (type: string, data: unknown) => void;
 };
 
-type TableRowRevealState = {
-  rowIndex: number | undefined;
-  handleJump: (id: string) => void;
-  revealPath: (absolutePath: string) => void;
-  revealUnit: (data: unknown) => void;
-};
-
 type TableModelSetupContext = {
   ajsDocument: AjsDocument | undefined;
   rowViews: UnitListRowView[] | undefined;
@@ -97,7 +86,9 @@ type TableModelSetupContext = {
   handleJump: (id: string) => void;
   rowViewByPath: ReadonlyMap<string, UnitListRowView>;
   sorting: SortingState;
-  setSorting: Dispatch<SetStateAction<SortingState>>;
+  setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
+  columnVisibility: VisibilityState;
+  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>;
 };
 
 type TableViewerShellProps = {
@@ -111,11 +102,14 @@ type TableViewerShellProps = {
   onSearchSubmit: (query: string) => void;
   onSearchClear: () => void;
   rowIndex: number | undefined;
+  columnVisibility: VisibilityState;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   detailPaneClosed: boolean;
   closeDetailPane: VoidFunction;
   dialogData: UnitDefinitionDialogDto | undefined;
-  setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
+  setDialogData: React.Dispatch<
+    React.SetStateAction<UnitDefinitionDialogDto | undefined>
+  >;
   selectedAbsolutePath: string | undefined;
   selectedDetail: ReturnType<typeof resolveUnitListDetail>;
   selectedUnitId: string | undefined;
@@ -161,72 +155,6 @@ const useChangeDocument = (): TableDocumentState => {
   return { rowViews, ajsDocument, changeDocument };
 };
 
-const buildRowIndexMap = (
-  rows: ReadonlyArray<Row<UnitListRowView>>,
-): Map<string, number> => {
-  const map = new Map<string, number>();
-  rows.forEach((row, index) => {
-    map.set(row.original.id, index);
-    map.set(row.original.absolutePath, index);
-  });
-  return map;
-};
-
-const jumpToIndexedRow = (
-  rows: ReadonlyArray<Row<UnitListRowView>>,
-  id: string,
-  setRowIndex: Dispatch<SetStateAction<number | undefined>>,
-) => {
-  const rowIndexMap = buildRowIndexMap(rows);
-  const index = rowIndexMap.get(id);
-  if (index !== undefined) {
-    setRowIndex(index);
-  }
-};
-
-const revealTableRow = (
-  data: unknown,
-  rows: ReadonlyArray<Row<UnitListRowView>>,
-  setRowIndex: Dispatch<SetStateAction<number | undefined>>,
-  selectRow: (absolutePath: string) => void,
-) => {
-  const absolutePath = getRevealUnitAbsolutePath(data);
-  if (absolutePath) {
-    jumpToIndexedRow(rows, absolutePath, setRowIndex);
-    selectRow(absolutePath);
-  }
-};
-
-const useTableRowRevealState = (
-  selectRow: (absolutePath: string) => void,
-  rowsRef: React.MutableRefObject<ReadonlyArray<Row<UnitListRowView>>>,
-): TableRowRevealState => {
-  const [rowIndex, setRowIndex] = useState<number | undefined>(undefined);
-
-  const handleJump = useCallback(
-    (id: string) => {
-      jumpToIndexedRow(rowsRef.current, id, setRowIndex);
-    },
-    [rowsRef],
-  );
-  const revealPath = useCallback(
-    (absolutePath: string) => {
-      jumpToIndexedRow(rowsRef.current, absolutePath, setRowIndex);
-      selectRow(absolutePath);
-    },
-    [rowsRef, selectRow],
-  );
-
-  const revealUnit = useCallback(
-    (data: unknown) => {
-      revealTableRow(data, rowsRef.current, setRowIndex, selectRow);
-    },
-    [rowsRef, selectRow],
-  );
-
-  return { rowIndex, handleJump, revealPath, revealUnit };
-};
-
 const useTableModelSetup = ({
   ajsDocument,
   rowViews,
@@ -235,6 +163,8 @@ const useTableModelSetup = ({
   rowViewByPath,
   sorting,
   setSorting,
+  columnVisibility,
+  setColumnVisibility,
 }: TableModelSetupContext) => {
   const parameterSearchValuesByPath = useMemo(
     () =>
@@ -257,9 +187,11 @@ const useTableModelSetup = ({
     columns,
     data: rowViews ?? [],
     state: {
+      columnVisibility,
       sorting,
     },
     getCoreRowModel: getCoreRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     defaultColumn: tableDefaultColumnDef,
@@ -291,6 +223,7 @@ const TableViewerShell = ({
   onSearchSubmit,
   onSearchClear,
   rowIndex,
+  columnVisibility,
   parameterSearchValuesByPath,
   detailPaneClosed,
   closeDetailPane,
@@ -320,6 +253,7 @@ const TableViewerShell = ({
       >
         <Header
           table={table}
+          columnVisibility={columnVisibility}
           searchedAbsolutePath={searchState.searchedAbsolutePath}
           searchResultPosition={getTableSearchResultPosition(searchState)}
           onSearchNavigate={onSearchNavigate}
@@ -373,6 +307,7 @@ const TableViewerShell = ({
                 headerGroups={table.getHeaderGroups()}
                 rows={rows}
                 rowIndex={rowIndex}
+                columnVisibility={columnVisibility}
                 searchQuery={searchQuery}
                 parameterSearchValuesByPath={parameterSearchValuesByPath}
                 selectedAbsolutePath={selectedAbsolutePath}
@@ -417,14 +352,11 @@ const TableContents = () => {
 
   const { isDarkMode, lang } = useMyAppContext();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchState, setSearchState] = useState<TableSearchState>(
-    createEmptyTableSearchState,
-  );
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
   >();
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [detailPaneClosed, setDetailPaneClosed] = useState(false);
   const [selectedAbsolutePath, dispatchRowSelection] = useReducer(
     reduceTableRowSelection,
@@ -436,47 +368,27 @@ const TableContents = () => {
   }, []);
   const { rowViews, ajsDocument, changeDocument } = useChangeDocument();
   const rowsRef = useRef<ReadonlyArray<Row<UnitListRowView>>>([]);
-  const { rowIndex, handleJump, revealPath, revealUnit } =
-    useTableRowRevealState(selectRow, rowsRef);
+  const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
+    selectRow,
+    rowsRef,
+  );
 
-  const unitDefinitionByPath = useMemo(
-    () =>
-      ajsDocument
-        ? buildUnitDefinitionByPath(ajsDocument)
-        : new Map<string, UnitDefinitionDialogDto>(),
-    [ajsDocument],
-  );
-  const rowViewByPath = useMemo(
-    () =>
-      new Map(
-        (rowViews ?? []).map((rowView) => [rowView.absolutePath, rowView]),
-      ),
-    [rowViews],
-  );
-  const allUnits = useMemo(
-    () => (ajsDocument ? flattenAjsUnits(ajsDocument.rootUnits) : []),
-    [ajsDocument],
-  );
-  const unitById = useMemo(
-    () => new Map(allUnits.map((unit) => [unit.id, unit])),
-    [allUnits],
-  );
-  const unitByAbsolutePath = useMemo(
-    () => new Map(allUnits.map((unit) => [unit.absolutePath, unit])),
-    [allUnits],
+  const viewerData = useMemo(
+    () => createTableViewerData(ajsDocument, rowViews),
+    [ajsDocument, rowViews],
   );
 
   const selectTreeUnit = useCallback(
     (unitId: string) => {
-      selectUnitTreeUnitInTable(unitId, unitById, revealPath);
+      selectUnitTreeUnitInTable(unitId, viewerData.unitById, revealPath);
     },
-    [revealPath, unitById],
+    [revealPath, viewerData.unitById],
   );
   const openTreeUnitScope = useCallback(
     (unitId: string) => {
-      openUnitTreeUnitInFlow(unitId, unitById);
+      openUnitTreeUnitInFlow(unitId, viewerData.unitById);
     },
-    [unitById],
+    [viewerData.unitById],
   );
 
   const { table, parameterSearchValuesByPath } = useTableModelSetup({
@@ -484,69 +396,49 @@ const TableContents = () => {
     rowViews,
     lang,
     handleJump,
-    rowViewByPath,
+    rowViewByPath: viewerData.rowViewByPath,
     sorting,
     setSorting,
+    columnVisibility,
+    setColumnVisibility,
   });
 
   const rows = table.getRowModel().rows;
   rowsRef.current = rows;
-  const selectedUnitId = selectedAbsolutePath
-    ? unitByAbsolutePath.get(selectedAbsolutePath)?.id
-    : undefined;
+  const rowIndex = findRowIndexByIdentity(rows, selectedAbsolutePath);
+  const selectedUnitId = findSelectedUnitId(
+    selectedAbsolutePath,
+    viewerData.unitByAbsolutePath,
+  );
   const resolveSelectedDetail = useMemo(
-    () => createUnitListDetailResolver(rowViewByPath, unitDefinitionByPath),
-    [rowViewByPath, unitDefinitionByPath],
+    () =>
+      createUnitListDetailResolver(
+        viewerData.rowViewByPath,
+        viewerData.unitDefinitionByPath,
+      ),
+    [viewerData.rowViewByPath, viewerData.unitDefinitionByPath],
   );
   const selectedDetail = useMemo(
     () => resolveSelectedDetail(selectedAbsolutePath),
     [resolveSelectedDetail, selectedAbsolutePath],
   );
 
-  const resetSearch = useCallback(() => {
-    setSearchQuery("");
-    setSearchState(createEmptyTableSearchState());
-  }, []);
+  const {
+    searchQuery,
+    searchState,
+    navigateSearch,
+    submitSearch,
+    resetSearch,
+  } = useTableSearchController({
+    rows,
+    parameterSearchValuesByPath,
+    revealPath,
+  });
 
   useEffect(() => {
     dispatchRowSelection({ type: "documentChanged" });
     resetSearch();
   }, [ajsDocument, resetSearch]);
-
-  const submitSearch = useCallback(
-    (query: string) => {
-      const matchedAbsolutePaths = findTableSearchMatchingAbsolutePaths(
-        rows,
-        parameterSearchValuesByPath,
-        query,
-      );
-      const nextState = createSubmittedTableSearchState(
-        query,
-        matchedAbsolutePaths,
-      );
-      setSearchQuery(query);
-      setSearchState(nextState);
-      if (nextState.searchedAbsolutePath) {
-        revealPath(nextState.searchedAbsolutePath);
-      }
-    },
-    [parameterSearchValuesByPath, revealPath, rows],
-  );
-
-  const navigateSearch = useCallback(
-    (query: string, direction: TableSearchDirection) => {
-      if (!isActiveTableSearchQuery(searchState, query)) {
-        submitSearch(query);
-        return;
-      }
-      const nextState = moveTableSearchResult(searchState, direction);
-      setSearchState(nextState);
-      if (nextState.searchedAbsolutePath) {
-        revealPath(nextState.searchedAbsolutePath);
-      }
-    },
-    [revealPath, searchState, submitSearch],
-  );
 
   useEffect(() => {
     window.EventBridge.addCallback("changeDocument", changeDocument);
@@ -576,6 +468,7 @@ const TableContents = () => {
       onSearchSubmit={submitSearch}
       onSearchClear={resetSearch}
       rowIndex={rowIndex}
+      columnVisibility={columnVisibility}
       parameterSearchValuesByPath={parameterSearchValuesByPath}
       detailPaneClosed={detailPaneClosed}
       closeDetailPane={() => setDetailPaneClosed(true)}
@@ -585,8 +478,8 @@ const TableContents = () => {
       selectedDetail={selectedDetail}
       selectedUnitId={selectedUnitId}
       selectRow={selectRow}
-      rootUnits={ajsDocument?.rootUnits ?? []}
-      unitById={unitById}
+      rootUnits={viewerData.rootUnits}
+      unitById={viewerData.unitById}
       selectTreeUnit={selectTreeUnit}
       openTreeUnitScope={openTreeUnitScope}
     />

@@ -12,6 +12,10 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Current Decisions
 
+- Temporary qlty parity work against `v1.15.1` is closed. Broad upstream qlty
+  smell comparison reports no smells after the final unit-type i18n resource
+  slice; remaining metrics deltas are not currently tied to a concrete
+  responsibility, boundary, compatibility, or user-visible regression.
 - List search stays presentation-local until another non-table consumer needs
   the same matching semantics.
 - JP1/AJS3 version 13 is the current normative target for new parameter and

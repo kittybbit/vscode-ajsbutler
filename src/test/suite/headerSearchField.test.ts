@@ -3,6 +3,7 @@ import {
   focusHeaderSearchFromShortcut,
   formatHeaderSearchPlaceholder,
   isHeaderSearchShortcut,
+  resolveHeaderSearchHelperText,
 } from "../../presentation/webview/editor/shared/HeaderSearchField";
 
 suite("Header Search Field", () => {
@@ -67,5 +68,30 @@ suite("Header Search Field", () => {
     assert.strictEqual(handled, true);
     assert.strictEqual(prevented, true);
     assert.strictEqual(focused, true);
+  });
+
+  test("resolves helper text from shared search state", () => {
+    const labels = {
+      noResults: "No results.",
+      matched: "Matched target.",
+      idle: "Search targets.",
+    };
+
+    assert.strictEqual(
+      resolveHeaderSearchHelperText(undefined, undefined, labels),
+      "Search targets.",
+    );
+    assert.strictEqual(
+      resolveHeaderSearchHelperText(
+        undefined,
+        { current: 0, total: 0 },
+        labels,
+      ),
+      "No results.",
+    );
+    assert.strictEqual(
+      resolveHeaderSearchHelperText("target", { current: 1, total: 3 }, labels),
+      "Matched target.",
+    );
   });
 });

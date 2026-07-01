@@ -14,21 +14,13 @@ const assertClose = (actual: number, expected: number): void => {
 const readSample = (name: string): string =>
   readFileSync(join(__dirname, "../../../sample", name), "utf8");
 
-const tryFindUnitByName = (
-  unit: AjsUnit,
-  name: string,
-): AjsUnit | undefined => {
-  if (unit.name === name) {
-    return unit;
-  }
-  for (const child of unit.children) {
-    const found = tryFindUnitByName(child, name);
-    if (found) {
-      return found;
-    }
-  }
-  return undefined;
-};
+const flattenUnits = (unit: AjsUnit): AjsUnit[] => [
+  unit,
+  ...unit.children.flatMap(flattenUnits),
+];
+
+const tryFindUnitByName = (unit: AjsUnit, name: string): AjsUnit | undefined =>
+  flattenUnits(unit).find((item) => item.name === name);
 
 const findUnitByName = (unit: AjsUnit, name: string): AjsUnit => {
   const found = tryFindUnitByName(unit, name);

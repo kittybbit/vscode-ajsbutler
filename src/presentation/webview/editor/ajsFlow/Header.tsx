@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  Fragment,
-  memo,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import React, { FC, memo } from "react";
 import AppBar from "@mui/material/AppBar";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
@@ -13,14 +6,16 @@ import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import SharedHeaderSearchField from "../shared/HeaderSearchField";
+import {
+  HeaderSearchControl,
+  resolveHeaderSearchHelperText,
+} from "../shared/HeaderSearchField";
 import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { HeaderSearchControlLabels } from "../shared/HeaderSearchField";
 import type {
   FlowSearchDirection,
   FlowSearchResultPosition,
@@ -55,14 +50,41 @@ type CurrentUnitBadgeProps = {
   currentUnit?: AjsUnit;
 };
 
-type SearchEndAdornmentProps = {
-  canNavigate: boolean;
-  resultPosition?: FlowSearchResultPosition;
-  onNavigate: (direction: FlowSearchDirection) => void;
+type ExpandAllNestedUnitsButtonProps = {
+  canToggle: boolean;
+  expanded: boolean;
+  onToggle: () => void;
+};
+
+type RelationshipFocusButtonProps = {
+  canEnable: boolean;
+  enabled: boolean;
+  onToggle: () => void;
+};
+
+type MiniMapButtonProps = {
+  shown: boolean;
+  onToggle: () => void;
 };
 
 const isRootJobnet = (unit: AjsUnit): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
+
+const flowHeaderSearchLabels: HeaderSearchControlLabels = {
+  helperText: {
+    noResults: "No units match in the current scope.",
+    matched: "Matched unit is highlighted in the current scope.",
+    idle: "Search current scope by unit name, comment, or path.",
+  },
+  navigation: {
+    resultAriaLabel: (position) =>
+      `${position.current} of ${position.total} search results`,
+    previousTooltip: "Previous flow search result (Shift+Enter).",
+    previousAriaLabel: "Previous flow search result.",
+    nextTooltip: "Next flow search result (Enter).",
+    nextAriaLabel: "Next flow search result.",
+  },
+};
 
 export const getCurrentUnitLabel = (
   currentUnit?: AjsUnit,
@@ -85,92 +107,11 @@ const getSearchHelperText = (
   searchedUnitId?: string,
   resultPosition?: FlowSearchResultPosition,
 ): string =>
-  resultPosition?.total === 0
-    ? "No units match in the current scope."
-    : searchedUnitId
-      ? "Matched unit is highlighted in the current scope."
-      : "Search current scope by unit name, comment, or path.";
-
-const useHeaderSearchField = ({
-  onSearchNavigate,
-  onSearchSubmit,
-  onSearchClear,
-}: Pick<
-  HeaderSearchFieldProps,
-  "onSearchNavigate" | "onSearchSubmit" | "onSearchClear"
->) => {
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchValue, setSearchValue] = useState<string>("");
-
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchValue(value);
-  }, []);
-  const handleSearchSubmit = useCallback(() => {
-    onSearchSubmit(searchValue);
-  }, [onSearchSubmit, searchValue]);
-  const handleSearchEnter = useCallback(
-    (shiftKey: boolean) =>
-      onSearchNavigate(searchValue, shiftKey ? "previous" : "next"),
-    [onSearchNavigate, searchValue],
+  resolveHeaderSearchHelperText(
+    searchedUnitId,
+    resultPosition,
+    flowHeaderSearchLabels.helperText,
   );
-  const handleSearchClear = useCallback(() => {
-    setSearchValue("");
-    onSearchClear();
-    searchInputRef.current?.focus();
-  }, [onSearchClear]);
-
-  return {
-    handleSearchChange,
-    handleSearchClear,
-    handleSearchEnter,
-    handleSearchSubmit,
-    searchInputRef,
-    searchValue,
-  };
-};
-
-const SearchEndAdornment: FC<SearchEndAdornmentProps> = ({
-  canNavigate,
-  resultPosition,
-  onNavigate,
-}) => (
-  <Fragment>
-    {resultPosition && (
-      <Typography
-        variant="caption"
-        component="span"
-        aria-label={`${resultPosition.current} of ${resultPosition.total} search results`}
-        sx={{ minWidth: "2.75rem", textAlign: "center" }}
-      >
-        {resultPosition.current}/{resultPosition.total}
-      </Typography>
-    )}
-    <Tooltip title="Previous flow search result (Shift+Enter).">
-      <span>
-        <IconButton
-          size="small"
-          aria-label="Previous flow search result."
-          onClick={() => onNavigate("previous")}
-          disabled={!canNavigate}
-        >
-          <NavigateBeforeIcon fontSize="inherit" />
-        </IconButton>
-      </span>
-    </Tooltip>
-    <Tooltip title="Next flow search result (Enter).">
-      <span>
-        <IconButton
-          size="small"
-          aria-label="Next flow search result."
-          onClick={() => onNavigate("next")}
-          disabled={!canNavigate}
-        >
-          <NavigateNextIcon fontSize="inherit" />
-        </IconButton>
-      </span>
-    </Tooltip>
-  </Fragment>
-);
 
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   searchedUnitId,
@@ -178,51 +119,81 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
-}) => {
-  const searchHelperText = getSearchHelperText(
-    searchedUnitId,
-    searchResultPosition,
-  );
-  const {
-    handleSearchChange,
-    handleSearchClear,
-    handleSearchEnter,
-    handleSearchSubmit,
-    searchInputRef,
-    searchValue,
-  } = useHeaderSearchField({
-    onSearchNavigate,
-    onSearchSubmit,
-    onSearchClear,
-  });
-  const handleSearchNavigate = useCallback(
-    (direction: FlowSearchDirection) =>
-      onSearchNavigate(searchValue, direction),
-    [onSearchNavigate, searchValue],
-  );
+}) => (
+  <HeaderSearchControl<FlowSearchDirection>
+    matchedTargetId={searchedUnitId}
+    resultPosition={searchResultPosition}
+    placeholderLabel="Search current scope"
+    labels={flowHeaderSearchLabels}
+    onSearchNavigate={onSearchNavigate}
+    onSearchSubmit={onSearchSubmit}
+    onSearchClear={onSearchClear}
+  />
+);
 
-  return (
-    <SharedHeaderSearchField
-      placeholderLabel="Search current scope"
-      helperText={searchHelperText}
-      value={searchValue}
-      onValueChange={handleSearchChange}
-      onEnter={handleSearchEnter}
-      onBlur={handleSearchSubmit}
-      onClear={handleSearchClear}
-      clearDisabled={searchValue.length === 0 && !searchedUnitId}
-      inputRef={searchInputRef}
-      sx={{ width: "20rem", maxWidth: "32vw", flexShrink: 0 }}
-      endAdornment={
-        <SearchEndAdornment
-          resultPosition={searchResultPosition}
-          canNavigate={(searchResultPosition?.total ?? 0) > 0}
-          onNavigate={handleSearchNavigate}
-        />
-      }
-    />
-  );
-};
+const ExpandAllNestedUnitsButton: FC<ExpandAllNestedUnitsButtonProps> = ({
+  canToggle,
+  expanded,
+  onToggle,
+}) => (
+  <Tooltip title={getExpandAllLabel(expanded)}>
+    <span>
+      <IconButton
+        size="small"
+        aria-label="toggleExpandAllNestedJobnets"
+        onClick={onToggle}
+        disabled={!canToggle}
+      >
+        {expanded ? (
+          <UnfoldLess fontSize="inherit" />
+        ) : (
+          <UnfoldMore fontSize="inherit" />
+        )}
+      </IconButton>
+    </span>
+  </Tooltip>
+);
+
+const RelationshipFocusButton: FC<RelationshipFocusButtonProps> = ({
+  canEnable,
+  enabled,
+  onToggle,
+}) => (
+  <Tooltip
+    title={
+      enabled
+        ? "Exit relationship focus mode."
+        : "Focus on selected node relationships."
+    }
+  >
+    <span>
+      <IconButton
+        size="small"
+        aria-label="toggleRelationshipFocusMode"
+        aria-pressed={enabled}
+        color={enabled ? "primary" : "default"}
+        onClick={onToggle}
+        disabled={!canEnable}
+      >
+        <CenterFocusStrongIcon fontSize="inherit" />
+      </IconButton>
+    </span>
+  </Tooltip>
+);
+
+const MiniMapButton: FC<MiniMapButtonProps> = ({ shown, onToggle }) => (
+  <Tooltip title={shown ? "Hide MiniMap." : "Show MiniMap."}>
+    <IconButton
+      size="small"
+      aria-label="Toggle flow graph MiniMap visibility."
+      aria-pressed={shown}
+      color={shown ? "primary" : "default"}
+      onClick={onToggle}
+    >
+      <MapOutlinedIcon fontSize="inherit" />
+    </IconButton>
+  </Tooltip>
+);
 
 const CurrentUnitBadge: FC<CurrentUnitBadgeProps> = ({ currentUnit }) => {
   const currentUnitLabel = getCurrentUnitLabel(currentUnit);
@@ -269,8 +240,6 @@ const Header: FC<HeaderProps> = ({
 }) => {
   console.log("render Header.");
 
-  const expandAllLabel = getExpandAllLabel(hasExpandedAllNestedUnits);
-
   return (
     <>
       <AppBar
@@ -292,53 +261,17 @@ const Header: FC<HeaderProps> = ({
             onSearchSubmit={onSearchSubmit}
             onSearchClear={onSearchClear}
           />
-          <Tooltip title={expandAllLabel}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="toggleExpandAllNestedJobnets"
-                onClick={toggleExpandAllNestedUnits}
-                disabled={!canToggleExpandAllNestedUnits}
-              >
-                {hasExpandedAllNestedUnits ? (
-                  <UnfoldLess fontSize="inherit" />
-                ) : (
-                  <UnfoldMore fontSize="inherit" />
-                )}
-              </IconButton>
-            </span>
-          </Tooltip>
-          <Tooltip
-            title={
-              focusModeEnabled
-                ? "Exit relationship focus mode."
-                : "Focus on selected node relationships."
-            }
-          >
-            <span>
-              <IconButton
-                size="small"
-                aria-label="toggleRelationshipFocusMode"
-                aria-pressed={focusModeEnabled}
-                color={focusModeEnabled ? "primary" : "default"}
-                onClick={toggleFocusMode}
-                disabled={!canEnableFocusMode}
-              >
-                <CenterFocusStrongIcon fontSize="inherit" />
-              </IconButton>
-            </span>
-          </Tooltip>
-          <Tooltip title={showMiniMap ? "Hide MiniMap." : "Show MiniMap."}>
-            <IconButton
-              size="small"
-              aria-label="Toggle flow graph MiniMap visibility."
-              aria-pressed={showMiniMap}
-              color={showMiniMap ? "primary" : "default"}
-              onClick={toggleMiniMap}
-            >
-              <MapOutlinedIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <ExpandAllNestedUnitsButton
+            canToggle={canToggleExpandAllNestedUnits}
+            expanded={hasExpandedAllNestedUnits}
+            onToggle={toggleExpandAllNestedUnits}
+          />
+          <RelationshipFocusButton
+            canEnable={canEnableFocusMode}
+            enabled={focusModeEnabled}
+            onToggle={toggleFocusMode}
+          />
+          <MiniMapButton shown={showMiniMap} onToggle={toggleMiniMap} />
           <CurrentUnitBadge currentUnit={currentUnit} />
         </Toolbar>
       </AppBar>

@@ -36,10 +36,10 @@ suite("WebviewMediator", () => {
       },
     } as vscode.WebviewPanel;
 
-    const mediator = new WebviewMediator(
+    const mediator = new WebviewMediator({
       context,
-      "ajsbutler.testViewer",
-      {
+      viewType: "ajsbutler.testViewer",
+      store: {
         panelByUri(receivedUri) {
           return receivedUri.toString() === document.uri.toString()
             ? panel
@@ -53,10 +53,10 @@ suite("WebviewMediator", () => {
           storeDisposed = true;
         },
       },
-      (receivedDocument) => {
+      change: (receivedDocument) => {
         changed.push(receivedDocument.uri.toString());
       },
-      {
+      deps: {
         onDidChangeTextDocument(listener) {
           onChangeTextDocument = listener;
           return { dispose() {} };
@@ -77,7 +77,7 @@ suite("WebviewMediator", () => {
           mounted.push(viewType);
         },
       },
-    );
+    });
 
     onChangeTextDocument?.({ document } as vscode.TextDocumentChangeEvent);
     onCloseTextDocument?.(document);

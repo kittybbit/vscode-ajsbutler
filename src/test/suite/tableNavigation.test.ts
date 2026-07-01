@@ -3,12 +3,14 @@ import {
   canNavigateToSelectedUnit,
   handleSelectTableRow,
   handleSelectTableRowKeyDown,
+  handleJumpLinkClick,
   isTableRowSelected,
   navigateToFlow,
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
+import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
 import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 
 const createUnit = (id: string, absolutePath: string): AjsUnit =>
@@ -78,18 +80,45 @@ suite("Table navigation", () => {
     assert.strictEqual(prevented, 2);
   });
 
-  test("keeps visual selection attached to path when row indices change", () => {
+  test("jump links select their target without selecting the source row", () => {
+    const jumped: string[] = [];
+    let stopped = 0;
+
+    handleJumpLinkClick("/root/parent", (identity) => jumped.push(identity))({
+      stopPropagation: () => stopped++,
+    });
+
+    assert.deepStrictEqual(jumped, ["/root/parent"]);
+    assert.strictEqual(stopped, 1);
+  });
+
+  test("keeps visual selection attached only to the selected path", () => {
     assert.strictEqual(
-      isTableRowSelected("/root/job", "/root/job", 4, undefined),
+      isTableRowSelected({
+        absolutePath: "/root/job",
+        selectedAbsolutePath: "/root/job",
+        index: 4,
+        revealedRowIndex: undefined,
+      }),
       true,
     );
     assert.strictEqual(
-      isTableRowSelected("/root/other", "/root/job", 4, undefined),
+      isTableRowSelected({
+        absolutePath: "/root/other",
+        selectedAbsolutePath: "/root/job",
+        index: 4,
+        revealedRowIndex: undefined,
+      }),
       false,
     );
     assert.strictEqual(
-      isTableRowSelected("/root/other", "/root/job", 1, 1),
-      true,
+      isTableRowSelected({
+        absolutePath: "/root/other",
+        selectedAbsolutePath: "/root/job",
+        index: 1,
+        revealedRowIndex: 1,
+      }),
+      false,
     );
   });
 
@@ -135,5 +164,23 @@ suite("Table navigation", () => {
 
     assert.deepStrictEqual(revealed, ["/root/jobnet/job"]);
     assert.deepStrictEqual(navigated, ["/root/jobnet/job"]);
+  });
+
+  test("resolves the scroll target from the selected row identity", () => {
+    const rows = [
+      { original: { id: "root", absolutePath: "/root" } },
+      { original: { id: "job", absolutePath: "/root/job" } },
+    ];
+
+    assert.strictEqual(findRowIndexByIdentity(rows as never, "job"), 1);
+    assert.strictEqual(findRowIndexByIdentity(rows as never, "/root/job"), 1);
+    assert.strictEqual(
+      findRowIndexByIdentity(rows as never, "missing"),
+      undefined,
+    );
+    assert.strictEqual(
+      findRowIndexByIdentity(rows as never, undefined),
+      undefined,
+    );
   });
 });

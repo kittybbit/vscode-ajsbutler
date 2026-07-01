@@ -1,9 +1,32 @@
 import * as assert from "assert";
 import { createTheme } from "@mui/material/styles";
-import { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
-import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
+import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import type { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
+import type { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
 import { applyHoveredUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphHover";
+
+type TestUnitParams = Pick<
+  AjsUnit,
+  "id" | "name" | "unitType" | "absolutePath" | "depth" | "parentId" | "layout"
+> & {
+  children?: AjsUnit[];
+};
+
+const createTestUnit = ({
+  children = [],
+  ...params
+}: TestUnitParams): AjsUnit => ({
+  unitAttribute: "",
+  isRoot: false,
+  isRootJobnet: false,
+  hasSchedule: false,
+  hasWaitedFor: false,
+  parameters: [],
+  relations: [],
+  children,
+  ...params,
+});
 
 suite("Flow Graph View", () => {
   test("maps flow graph DTOs without requiring UnitEntity instances", () => {
@@ -135,20 +158,49 @@ suite("Flow Graph View", () => {
         },
       ],
     ]);
+    const leafUnit = createTestUnit({
+      id: "/root/jobnet/child-net/grand-net/leaf",
+      name: "leaf",
+      unitType: "j",
+      absolutePath: "/root/jobnet/child-net/grand-net/leaf",
+      depth: 4,
+      parentId: "/root/jobnet/child-net/grand-net",
+      layout: { h: 720, v: 336 },
+    });
+    const grandNetUnit = createTestUnit({
+      id: "/root/jobnet/child-net/grand-net",
+      name: "grand-net",
+      unitType: "n",
+      absolutePath: "/root/jobnet/child-net/grand-net",
+      depth: 3,
+      parentId: "/root/jobnet/child-net",
+      layout: { h: 560, v: 240 },
+      children: [leafUnit],
+    });
+    const childNetUnit = createTestUnit({
+      id: "/root/jobnet/child-net",
+      name: "child-net",
+      unitType: "rn",
+      absolutePath: "/root/jobnet/child-net",
+      depth: 2,
+      parentId: "/root/jobnet",
+      layout: { h: 400, v: 144 },
+      children: [grandNetUnit],
+    });
 
-    const { nodes, edges } = createReactFlowData(
+    const { nodes, edges } = createReactFlowData({
       graph,
       unitDefinitionByPath,
-      createTheme(),
-      {
+      theme: createTheme(),
+      dialogDataState: {
         dialogData: undefined,
         setDialogData: () => undefined,
       },
-      {
+      currentUnitIdState: {
         currentUnitId: "/root/jobnet",
         setCurrentUnitId: () => undefined,
       },
-      {
+      options: {
         searchMatchedUnitIds: new Set([
           "/root/jobnet/child-net",
           "/root/jobnet/child-net/grand-net",
@@ -156,100 +208,8 @@ suite("Flow Graph View", () => {
         searchedUnitId: "/root/jobnet/child-net/grand-net",
         selectedUnitId: "/root/jobnet/child-net",
         unitById: new Map([
-          [
-            "/root/jobnet/child-net",
-            {
-              id: "/root/jobnet/child-net",
-              name: "child-net",
-              unitAttribute: "",
-              unitType: "rn",
-              absolutePath: "/root/jobnet/child-net",
-              depth: 2,
-              parentId: "/root/jobnet",
-              isRoot: false,
-              isRootJobnet: false,
-              hasSchedule: false,
-              hasWaitedFor: false,
-              layout: { h: 400, v: 144 },
-              parameters: [],
-              relations: [],
-              children: [
-                {
-                  id: "/root/jobnet/child-net/grand-net",
-                  name: "grand-net",
-                  unitAttribute: "",
-                  unitType: "n",
-                  absolutePath: "/root/jobnet/child-net/grand-net",
-                  depth: 3,
-                  parentId: "/root/jobnet/child-net",
-                  isRoot: false,
-                  isRootJobnet: false,
-                  hasSchedule: false,
-                  hasWaitedFor: false,
-                  layout: { h: 560, v: 240 },
-                  parameters: [],
-                  relations: [],
-                  children: [
-                    {
-                      id: "/root/jobnet/child-net/grand-net/leaf",
-                      name: "leaf",
-                      unitAttribute: "",
-                      unitType: "j",
-                      absolutePath: "/root/jobnet/child-net/grand-net/leaf",
-                      depth: 4,
-                      parentId: "/root/jobnet/child-net/grand-net",
-                      isRoot: false,
-                      isRootJobnet: false,
-                      hasSchedule: false,
-                      hasWaitedFor: false,
-                      layout: { h: 720, v: 336 },
-                      parameters: [],
-                      relations: [],
-                      children: [],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          [
-            "/root/jobnet/child-net/grand-net",
-            {
-              id: "/root/jobnet/child-net/grand-net",
-              name: "grand-net",
-              unitAttribute: "",
-              unitType: "n",
-              absolutePath: "/root/jobnet/child-net/grand-net",
-              depth: 3,
-              parentId: "/root/jobnet/child-net",
-              isRoot: false,
-              isRootJobnet: false,
-              hasSchedule: false,
-              hasWaitedFor: false,
-              layout: { h: 560, v: 240 },
-              parameters: [],
-              relations: [],
-              children: [
-                {
-                  id: "/root/jobnet/child-net/grand-net/leaf",
-                  name: "leaf",
-                  unitAttribute: "",
-                  unitType: "j",
-                  absolutePath: "/root/jobnet/child-net/grand-net/leaf",
-                  depth: 4,
-                  parentId: "/root/jobnet/child-net/grand-net",
-                  isRoot: false,
-                  isRootJobnet: false,
-                  hasSchedule: false,
-                  hasWaitedFor: false,
-                  layout: { h: 720, v: 336 },
-                  parameters: [],
-                  relations: [],
-                  children: [],
-                },
-              ],
-            },
-          ],
+          [childNetUnit.id, childNetUnit],
+          [grandNetUnit.id, grandNetUnit],
         ]),
         nestedExpansionState: {
           expandedUnitIds: new Set<string>(),
@@ -270,7 +230,7 @@ suite("Flow Graph View", () => {
           ["/root/jobnet/child-net", { x: 400, y: 144 }],
         ]),
       },
-    );
+    });
 
     assert.strictEqual(nodes[0].data.unitId, "/root/jobnet");
     assert.strictEqual(

@@ -5,6 +5,56 @@ import {
   resolveFlowRevealTarget,
 } from "../../presentation/webview/editor/revealUnit";
 
+type FlowRevealUnit =
+  Parameters<typeof resolveFlowRevealTarget>[0] extends ReadonlyMap<
+    string,
+    infer T
+  >
+    ? T
+    : never;
+
+type FlowRevealUnitFixture = Omit<FlowRevealUnit, "children"> & {
+  children?: Array<unknown>;
+};
+
+const createFlowRevealUnit = ({
+  children = [],
+  ...unit
+}: FlowRevealUnitFixture): FlowRevealUnit => ({
+  ...unit,
+  children,
+});
+
+const createUnitById = (
+  ...units: FlowRevealUnitFixture[]
+): Map<string, FlowRevealUnit> =>
+  new Map(
+    units.map(createFlowRevealUnit).map((unit) => [unit.id, unit] as const),
+  );
+
+const createRootScopedTargetUnits = (
+  scope: Pick<FlowRevealUnitFixture, "id" | "absolutePath" | "unitType">,
+): Map<string, FlowRevealUnit> =>
+  createUnitById(
+    {
+      id: "root",
+      absolutePath: "/root",
+      unitType: "n",
+      children: [{}],
+    },
+    {
+      ...scope,
+      parentId: "root",
+      children: [{}],
+    },
+    {
+      id: "job",
+      absolutePath: `${scope.absolutePath}/job`,
+      unitType: "j",
+      parentId: scope.id,
+    },
+  );
+
 suite("Reveal unit helpers", () => {
   test("reads a reveal-unit absolute path from event data", () => {
     assert.strictEqual(
@@ -19,27 +69,20 @@ suite("Reveal unit helpers", () => {
   });
 
   test("opens the containing jobnet and highlights the revealed unit", () => {
-    const unitById = new Map([
-      [
-        "root",
-        {
-          id: "root",
-          absolutePath: "/root",
-          unitType: "n",
-          children: [{}],
-        },
-      ],
-      [
-        "job",
-        {
-          id: "job",
-          absolutePath: "/root/job",
-          unitType: "j",
-          parentId: "root",
-          children: [],
-        },
-      ],
-    ]);
+    const unitById = createUnitById(
+      {
+        id: "root",
+        absolutePath: "/root",
+        unitType: "n",
+        children: [{}],
+      },
+      {
+        id: "job",
+        absolutePath: "/root/job",
+        unitType: "j",
+        parentId: "root",
+      },
+    );
 
     assert.deepStrictEqual(resolveFlowRevealTarget(unitById, "/root/job"), {
       scopeUnitId: "root",
@@ -53,28 +96,21 @@ suite("Reveal unit helpers", () => {
   });
 
   test("opens the first root jobnet when revealing a job group", () => {
-    const unitById = new Map([
-      [
-        "job-group",
-        {
-          id: "job-group",
-          absolutePath: "/job-group",
-          unitType: "g",
-          children: [{}],
-        },
-      ],
-      [
-        "root-jobnet",
-        {
-          id: "root-jobnet",
-          absolutePath: "/job-group/root-jobnet",
-          unitType: "n",
-          parentId: "job-group",
-          isRootJobnet: true,
-          children: [],
-        },
-      ],
-    ]);
+    const unitById = createUnitById(
+      {
+        id: "job-group",
+        absolutePath: "/job-group",
+        unitType: "g",
+        children: [{}],
+      },
+      {
+        id: "root-jobnet",
+        absolutePath: "/job-group/root-jobnet",
+        unitType: "n",
+        parentId: "job-group",
+        isRootJobnet: true,
+      },
+    );
 
     assert.deepStrictEqual(resolveFlowRevealTarget(unitById, "/job-group"), {
       scopeUnitId: "root-jobnet",
@@ -84,37 +120,11 @@ suite("Reveal unit helpers", () => {
   });
 
   test("opens the direct condition scope for units under .condition", () => {
-    const unitById = new Map([
-      [
-        "root",
-        {
-          id: "root",
-          absolutePath: "/root",
-          unitType: "n",
-          children: [{}],
-        },
-      ],
-      [
-        "condition",
-        {
-          id: "condition",
-          absolutePath: "/root/.condition",
-          unitType: "rc",
-          parentId: "root",
-          children: [{}],
-        },
-      ],
-      [
-        "job",
-        {
-          id: "job",
-          absolutePath: "/root/.condition/job",
-          unitType: "j",
-          parentId: "condition",
-          children: [],
-        },
-      ],
-    ]);
+    const unitById = createRootScopedTargetUnits({
+      id: "condition",
+      absolutePath: "/root/.condition",
+      unitType: "rc",
+    });
 
     assert.deepStrictEqual(
       resolveFlowRevealTarget(unitById, "/root/.condition/job"),
@@ -127,37 +137,11 @@ suite("Reveal unit helpers", () => {
   });
 
   test("expands nested jobnets needed to reveal the target unit", () => {
-    const unitById = new Map([
-      [
-        "root",
-        {
-          id: "root",
-          absolutePath: "/root",
-          unitType: "n",
-          children: [{}],
-        },
-      ],
-      [
-        "child-net",
-        {
-          id: "child-net",
-          absolutePath: "/root/child-net",
-          unitType: "n",
-          parentId: "root",
-          children: [{}],
-        },
-      ],
-      [
-        "job",
-        {
-          id: "job",
-          absolutePath: "/root/child-net/job",
-          unitType: "j",
-          parentId: "child-net",
-          children: [],
-        },
-      ],
-    ]);
+    const unitById = createRootScopedTargetUnits({
+      id: "child-net",
+      absolutePath: "/root/child-net",
+      unitType: "n",
+    });
 
     assert.deepStrictEqual(
       resolveFlowRevealTarget(unitById, "/root/child-net/job"),

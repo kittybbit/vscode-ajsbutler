@@ -29,31 +29,64 @@ export const isUnitInCurrentFlowScope = (
   );
 };
 
+const isSelectableFlowTreeTarget = (
+  unit: AjsUnit | undefined,
+  currentUnit: AjsUnit | undefined,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): unit is AjsUnit =>
+  Boolean(
+    currentUnit &&
+      unit &&
+      isUnitInCurrentFlowScope(unit, currentUnit, unitById),
+  );
+
+const resolveSelectableFlowTreeUnit = (
+  unitId: string,
+  currentUnit: AjsUnit | undefined,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): AjsUnit | undefined => {
+  const unit = unitById.get(unitId);
+  return isSelectableFlowTreeTarget(unit, currentUnit, unitById)
+    ? unit
+    : undefined;
+};
+
+const isDescendantOfCurrentFlowScope = (
+  unit: AjsUnit,
+  currentUnit: AjsUnit,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): boolean =>
+  collectUnitTreeParentUnitIds(unit, unitById).includes(currentUnit.id);
+
+const collectRequiredExpandedNestedUnitIds = (
+  unit: AjsUnit,
+  currentUnit: AjsUnit,
+  unitById: ReadonlyMap<string, AjsUnit>,
+): string[] =>
+  isDescendantOfCurrentFlowScope(unit, currentUnit, unitById)
+    ? collectExpandedAncestorUnitIds({
+        scopeUnit: currentUnit,
+        unit,
+        unitById,
+      })
+    : [];
+
 export const resolveFlowTreeSelectionTarget = (
   unitId: string,
   currentUnit: AjsUnit | undefined,
   unitById: ReadonlyMap<string, AjsUnit>,
 ): FlowTreeSelectionTarget | undefined => {
-  const unit = unitById.get(unitId);
-  if (
-    !unit ||
-    !currentUnit ||
-    !isUnitInCurrentFlowScope(unit, currentUnit, unitById)
-  ) {
+  const unit = resolveSelectableFlowTreeUnit(unitId, currentUnit, unitById);
+  if (!unit || !currentUnit) {
     return undefined;
   }
 
-  const isDescendant = collectUnitTreeParentUnitIds(unit, unitById).includes(
-    currentUnit.id,
-  );
   return {
     selectedUnitId: unit.id,
-    expandedNestedUnitIds: isDescendant
-      ? collectExpandedAncestorUnitIds({
-          scopeUnit: currentUnit,
-          unit,
-          unitById,
-        })
-      : [],
+    expandedNestedUnitIds: collectRequiredExpandedNestedUnitIds(
+      unit,
+      currentUnit,
+      unitById,
+    ),
   };
 };

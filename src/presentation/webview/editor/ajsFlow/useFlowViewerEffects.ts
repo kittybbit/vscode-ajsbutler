@@ -22,6 +22,10 @@ import {
   resolveFlowViewportFocusAction,
   resolveFlowViewportFocusDecision,
 } from "./flowViewportFocus";
+import type {
+  FlowViewportFocusAction,
+  FlowViewportFocusDecision,
+} from "./flowViewportFocus";
 
 type UseFlowViewerFitViewParams = {
   edges: Edge[];
@@ -41,6 +45,13 @@ type FlowViewerOverflowElements = {
 };
 
 type FitViewFrameRef = MutableRefObject<number | undefined>;
+
+type FlowViewerFitViewRefs = {
+  fitViewFrameRef: FitViewFrameRef;
+  handledLayoutRequestIdentityRef: MutableRefObject<object | undefined>;
+  handledSearchFocusVersionRef: MutableRefObject<number>;
+  handledSelectionFocusVersionRef: MutableRefObject<number>;
+};
 
 const hasFitViewTarget = ({
   nodes,
@@ -63,6 +74,61 @@ type ScheduleViewportFocusFrameOptions = {
   targetUnitId?: string;
 };
 
+const applySetCenterAction = (
+  instance: ReactFlowInstance<Node, Edge>,
+  targetUnitId: string,
+) => {
+  const center = resolveFlowNodeCenter(instance.getNodesBounds([targetUnitId]));
+  void instance.setCenter(center.x, center.y, {
+    duration: 250,
+    zoom: instance.getZoom(),
+  });
+};
+
+const resolveFitViewPadding = (targetUnitId?: string): number =>
+  targetUnitId ? 0.8 : 0.22;
+
+const resolveFitViewDuration = (targetUnitId?: string): number | undefined =>
+  targetUnitId ? 250 : undefined;
+
+const resolveFitViewNodes = (
+  targetUnitId?: string,
+): Array<{ id: string }> | undefined =>
+  targetUnitId ? [{ id: targetUnitId }] : undefined;
+
+const applyFitViewAction = (
+  instance: ReactFlowInstance<Node, Edge> | null,
+  targetUnitId?: string,
+) => {
+  void instance?.fitView({
+    padding: resolveFitViewPadding(targetUnitId),
+    duration: resolveFitViewDuration(targetUnitId),
+    nodes: resolveFitViewNodes(targetUnitId),
+  });
+};
+
+const applyViewportFocusAction = (
+  instance: ReactFlowInstance<Node, Edge> | null,
+  action: FlowViewportFocusAction,
+) => {
+  if (action.kind === "setCenter" && instance) {
+    applySetCenterAction(instance, action.targetUnitId);
+    return;
+  }
+  applyFitViewAction(instance, action.targetUnitId);
+};
+
+const runViewportFocusFrame = (
+  fitViewFrameRef: FitViewFrameRef,
+  reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>,
+  options: ScheduleViewportFocusFrameOptions,
+) => {
+  const action = resolveFlowViewportFocusAction(options);
+  applyViewportFocusAction(reactFlowInstanceRef.current, action);
+  options.onFit?.();
+  fitViewFrameRef.current = undefined;
+};
+
 const scheduleViewportFocusFrame = (
   fitViewFrameRef: FitViewFrameRef,
   reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>,
@@ -70,26 +136,112 @@ const scheduleViewportFocusFrame = (
 ) => {
   cancelFitViewFrame(fitViewFrameRef);
   fitViewFrameRef.current = window.requestAnimationFrame(() => {
-    const instance = reactFlowInstanceRef.current;
-    const action = resolveFlowViewportFocusAction(options);
-    if (action.kind === "setCenter" && instance) {
-      const center = resolveFlowNodeCenter(
-        instance.getNodesBounds([action.targetUnitId]),
-      );
-      void instance.setCenter(center.x, center.y, {
-        duration: 250,
-        zoom: instance.getZoom(),
-      });
-    } else {
-      void instance?.fitView({
-        padding: action.targetUnitId ? 0.8 : 0.22,
-        duration: action.targetUnitId ? 250 : undefined,
-        nodes: action.targetUnitId ? [{ id: action.targetUnitId }] : undefined,
-      });
-    }
-    options.onFit?.();
-    fitViewFrameRef.current = undefined;
+    runViewportFocusFrame(fitViewFrameRef, reactFlowInstanceRef, options);
   });
+};
+
+const toRenderedUnitIds = (nodes: readonly Node[]): ReadonlySet<string> =>
+  new Set(nodes.map(({ id }) => id));
+
+const resolveCurrentViewportFocusDecision = (
+  {
+    focusRequestVersion,
+    layoutRequestIdentity,
+    nodes,
+    searchedUnitId,
+    selectionFocusRequestVersion,
+    selectionFocusTargetUnitId,
+  }: UseFlowViewerFitViewParams,
+  {
+    handledLayoutRequestIdentityRef,
+    handledSearchFocusVersionRef,
+    handledSelectionFocusVersionRef,
+  }: Pick<
+    FlowViewerFitViewRefs,
+    | "handledLayoutRequestIdentityRef"
+    | "handledSearchFocusVersionRef"
+    | "handledSelectionFocusVersionRef"
+  >,
+): FlowViewportFocusDecision | null | undefined =>
+  resolveFlowViewportFocusDecision({
+    renderedUnitIds: toRenderedUnitIds(nodes),
+    searchRequest: {
+      targetUnitId: searchedUnitId,
+      version: focusRequestVersion,
+    },
+    handledSearchVersion: handledSearchFocusVersionRef.current,
+    selectionRequest: {
+      targetUnitId: selectionFocusTargetUnitId,
+      version: selectionFocusRequestVersion,
+    },
+    handledSelectionVersion: handledSelectionFocusVersionRef.current,
+    layoutChanged:
+      handledLayoutRequestIdentityRef.current !== layoutRequestIdentity,
+  });
+
+const updateHandledViewportFocus = (
+  decision: FlowViewportFocusDecision,
+  {
+    focusRequestVersion,
+    layoutRequestIdentity,
+    selectionFocusRequestVersion,
+  }: Pick<
+    UseFlowViewerFitViewParams,
+    | "focusRequestVersion"
+    | "layoutRequestIdentity"
+    | "selectionFocusRequestVersion"
+  >,
+  {
+    handledLayoutRequestIdentityRef,
+    handledSearchFocusVersionRef,
+    handledSelectionFocusVersionRef,
+  }: Pick<
+    FlowViewerFitViewRefs,
+    | "handledLayoutRequestIdentityRef"
+    | "handledSearchFocusVersionRef"
+    | "handledSelectionFocusVersionRef"
+  >,
+) => {
+  if (decision.kind === "search") {
+    handledSearchFocusVersionRef.current = focusRequestVersion;
+  }
+  if (decision.kind === "selection") {
+    handledSelectionFocusVersionRef.current = selectionFocusRequestVersion;
+  }
+  handledLayoutRequestIdentityRef.current = layoutRequestIdentity;
+};
+
+const scheduleResolvedViewportFocus = (
+  decision: FlowViewportFocusDecision,
+  params: UseFlowViewerFitViewParams,
+  refs: FlowViewerFitViewRefs,
+) => {
+  scheduleViewportFocusFrame(
+    refs.fitViewFrameRef,
+    params.reactFlowInstanceRef,
+    {
+      kind: decision.kind,
+      targetUnitId: decision.targetUnitId,
+      onFit: () => updateHandledViewportFocus(decision, params, refs),
+    },
+  );
+};
+
+const runFlowViewerFitViewEffect = (
+  params: UseFlowViewerFitViewParams,
+  refs: FlowViewerFitViewRefs,
+): (() => void) | undefined => {
+  if (!hasFitViewTarget(params)) {
+    return undefined;
+  }
+
+  const decision = resolveCurrentViewportFocusDecision(params, refs);
+  if (!decision) {
+    return undefined;
+  }
+
+  scheduleResolvedViewportFocus(decision, params, refs);
+  return () => cancelFitViewFrame(refs.fitViewFrameRef);
 };
 
 export const useFlowViewerFitView = ({
@@ -108,44 +260,24 @@ export const useFlowViewerFitView = ({
   const handledLayoutRequestIdentityRef = useRef<object | undefined>(undefined);
 
   useEffect(() => {
-    if (!hasFitViewTarget({ nodes, reactFlowInstanceRef })) {
-      return undefined;
-    }
-
-    const decision = resolveFlowViewportFocusDecision({
-      renderedUnitIds: new Set(nodes.map(({ id }) => id)),
-      searchRequest: {
-        targetUnitId: searchedUnitId,
-        version: focusRequestVersion,
+    return runFlowViewerFitViewEffect(
+      {
+        edges,
+        focusRequestVersion,
+        layoutRequestIdentity,
+        nodes,
+        reactFlowInstanceRef,
+        searchedUnitId,
+        selectionFocusRequestVersion,
+        selectionFocusTargetUnitId,
       },
-      handledSearchVersion: handledSearchFocusVersionRef.current,
-      selectionRequest: {
-        targetUnitId: selectionFocusTargetUnitId,
-        version: selectionFocusRequestVersion,
+      {
+        fitViewFrameRef,
+        handledLayoutRequestIdentityRef,
+        handledSearchFocusVersionRef,
+        handledSelectionFocusVersionRef,
       },
-      handledSelectionVersion: handledSelectionFocusVersionRef.current,
-      layoutChanged:
-        handledLayoutRequestIdentityRef.current !== layoutRequestIdentity,
-    });
-    if (!decision) {
-      return undefined;
-    }
-
-    scheduleViewportFocusFrame(fitViewFrameRef, reactFlowInstanceRef, {
-      kind: decision.kind,
-      targetUnitId: decision.targetUnitId,
-      onFit: () => {
-        if (decision.kind === "search") {
-          handledSearchFocusVersionRef.current = focusRequestVersion;
-        }
-        if (decision.kind === "selection") {
-          handledSelectionFocusVersionRef.current =
-            selectionFocusRequestVersion;
-        }
-        handledLayoutRequestIdentityRef.current = layoutRequestIdentity;
-      },
-    });
-    return () => cancelFitViewFrame(fitViewFrameRef);
+    );
   }, [
     edges,
     focusRequestVersion,

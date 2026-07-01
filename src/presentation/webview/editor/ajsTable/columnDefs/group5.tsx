@@ -1,8 +1,27 @@
 import React from "react";
-import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
+import {
+  CellContext,
+  ColumnHelper,
+  GroupColumnDef,
+} from "@tanstack/table-core";
 import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
 import Chip from "@mui/material/Chip";
+import { labeledRowViewColumns, rowViewColumn } from "./common";
+
+const jobGroupTypeCell = (
+  param: CellContext<UnitListRowView, "n" | "p" | undefined>,
+) => {
+  const jobGroupType = param.getValue<"n" | "p" | undefined>();
+  if (jobGroupType === undefined) {
+    return undefined;
+  }
+  return jobGroupType === "n" ? (
+    <Chip color="primary" label="Normal" />
+  ) : (
+    <Chip color="secondary" label="Planning" />
+  );
+};
 
 const group5 = (
   columnHelper: ColumnHelper<UnitListRowView>,
@@ -13,41 +32,23 @@ const group5 = (
     id: "group5", //Job group definition information
     header: labels.label,
     columns: [
-      {
-        id: "group5.col1",
-        header: labels.column(1),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group5.startDeadlineDate,
-      },
-      {
-        id: "group5.col2",
-        header: labels.column(2),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group5.maximumDuration,
-      },
-      {
-        id: "group5.col3",
-        header: labels.column(3),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group5.startTimeType,
-      },
-      {
+      ...labeledRowViewColumns({
+        idPrefix: "group5",
+        labels,
+        rowViewByPath,
+        selectors: [
+          (view) => view?.group5.startDeadlineDate,
+          (view) => view?.group5.maximumDuration,
+          (view) => view?.group5.startTimeType,
+        ],
+      }),
+      rowViewColumn({
         id: "group5.col4",
         header: labels.column(4),
-        accessorFn: (row) =>
-          rowViewByPath.get(row.absolutePath)?.group5.jobGroupType,
-        cell: (param) => {
-          const gty = param.getValue<"n" | "p" | undefined>();
-          if (gty === undefined) {
-            return undefined;
-          }
-          return gty === "n" ? (
-            <Chip color="primary" label="Normal" />
-          ) : (
-            <Chip color="secondary" label="Planning" />
-          );
-        },
-      },
+        rowViewByPath,
+        selectValue: (view) => view?.group5.jobGroupType,
+        cell: jobGroupTypeCell,
+      }),
     ],
   });
 };

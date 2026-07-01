@@ -22,18 +22,39 @@ type FlowNodeDetailPanelProps = {
   onToggleFocusMode: VoidFunction;
 };
 
+type FlowNodeDetailActionOptions = {
+  canOpenAsScope: boolean;
+  focusModeEnabled: boolean;
+  onOpenDefinition: VoidFunction;
+  onOpenScope: VoidFunction;
+  onOpenUnitList: VoidFunction;
+  onToggleFocusMode: VoidFunction;
+};
+
+const missingValueLabel = "—";
+
+const flowNodeDetailRow = (
+  label: string,
+  value: SharedUnitDetailPaneRow["value"],
+): SharedUnitDetailPaneRow => ({ label, value });
+
+const formatParentUnit = ({
+  parentName,
+  parentPath,
+}: FlowNodeDetail): string => {
+  if (!parentName) {
+    return missingValueLabel;
+  }
+  return parentPath ? `${parentName} (${parentPath})` : parentName;
+};
+
 export const buildFlowNodeDetailRows = (
   detail: FlowNodeDetail,
-): SharedUnitDetailPaneRow[] => {
-  const parent = detail.parentName
-    ? `${detail.parentName}${detail.parentPath ? ` (${detail.parentPath})` : ""}`
-    : "—";
-  return [
-    { label: "Comment", value: detail.comment || "—" },
-    { label: "Absolute path", value: detail.absolutePath },
-    { label: "Parent unit", value: parent },
-  ];
-};
+): SharedUnitDetailPaneRow[] => [
+  flowNodeDetailRow("Comment", detail.comment || missingValueLabel),
+  flowNodeDetailRow("Absolute path", detail.absolutePath),
+  flowNodeDetailRow("Parent unit", formatParentUnit(detail)),
+];
 
 export const buildFlowNodeRelationshipRows = (
   detail: FlowNodeDetail,
@@ -56,48 +77,71 @@ export const buildFlowNodeDetailChips = (
   { active: focusModeEnabled, label: "Relationship focus" },
 ];
 
-export const buildFlowNodeDetailActions = ({
-  canOpenAsScope,
+const buildRelationshipFocusAction = ({
   focusModeEnabled,
-  onOpenDefinition,
-  onOpenScope,
-  onOpenUnitList,
   onToggleFocusMode,
-}: {
-  canOpenAsScope: boolean;
-  focusModeEnabled: boolean;
-  onOpenDefinition: VoidFunction;
-  onOpenScope: VoidFunction;
-  onOpenUnitList: VoidFunction;
-  onToggleFocusMode: VoidFunction;
-}): SharedUnitDetailPaneAction[] => [
-  {
-    label: focusModeEnabled ? "Exit relationship focus" : "Focus relationships",
-    icon: <CenterFocusStrongIcon />,
-    onClick: onToggleFocusMode,
-    variant: focusModeEnabled ? "contained" : "outlined",
-  },
-  {
-    label: "Open definition details",
-    icon: <DescriptionIcon />,
-    onClick: onOpenDefinition,
-  },
-  {
-    label: "Open in unit list",
-    icon: <TableChartIcon />,
-    onClick: onOpenUnitList,
-  },
-  ...(canOpenAsScope
+}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
+  label: focusModeEnabled ? "Exit relationship focus" : "Focus relationships",
+  icon: <CenterFocusStrongIcon />,
+  onClick: onToggleFocusMode,
+  variant: focusModeEnabled ? "contained" : "outlined",
+});
+
+const buildOpenDefinitionAction = ({
+  onOpenDefinition,
+}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
+  label: "Open definition details",
+  icon: <DescriptionIcon />,
+  onClick: onOpenDefinition,
+});
+
+const buildOpenUnitListAction = ({
+  onOpenUnitList,
+}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
+  label: "Open in unit list",
+  icon: <TableChartIcon />,
+  onClick: onOpenUnitList,
+});
+
+const buildOpenScopeActions = ({
+  canOpenAsScope,
+  onOpenScope,
+}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction[] =>
+  canOpenAsScope
     ? [
         {
           label: "Open as graph scope",
           icon: <FolderOpenIcon />,
           onClick: onOpenScope,
-          variant: "contained" as const,
+          variant: "contained",
         },
       ]
-    : []),
+    : [];
+
+export const buildFlowNodeDetailActions = (
+  options: FlowNodeDetailActionOptions,
+): SharedUnitDetailPaneAction[] => [
+  buildRelationshipFocusAction(options),
+  buildOpenDefinitionAction(options),
+  buildOpenUnitListAction(options),
+  ...buildOpenScopeActions(options),
 ];
+
+const buildFlowNodeDetailActionOptions = ({
+  detail,
+  focusModeEnabled,
+  onOpenDefinition,
+  onOpenScope,
+  onOpenUnitList,
+  onToggleFocusMode,
+}: Omit<FlowNodeDetailPanelProps, "onClose">): FlowNodeDetailActionOptions => ({
+  canOpenAsScope: detail.canOpenAsScope,
+  focusModeEnabled,
+  onOpenDefinition,
+  onOpenScope,
+  onOpenUnitList,
+  onToggleFocusMode,
+});
 
 const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   detail,
@@ -120,14 +164,16 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   );
   const actions = useMemo(
     () =>
-      buildFlowNodeDetailActions({
-        canOpenAsScope: detail.canOpenAsScope,
-        focusModeEnabled,
-        onOpenDefinition,
-        onOpenScope,
-        onOpenUnitList,
-        onToggleFocusMode,
-      }),
+      buildFlowNodeDetailActions(
+        buildFlowNodeDetailActionOptions({
+          detail,
+          onOpenDefinition,
+          onOpenScope,
+          onOpenUnitList,
+          focusModeEnabled,
+          onToggleFocusMode,
+        }),
+      ),
     [
       detail.canOpenAsScope,
       focusModeEnabled,

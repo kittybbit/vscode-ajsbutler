@@ -31,6 +31,25 @@ type ViewerNavigateHandler = (
   event: NavigationEventType,
 ) => void;
 
+type ViewerFactoryHandlers = {
+  onReady: ViewerReadyHandler;
+  onNavigate: ViewerNavigateHandler;
+  onSave?: (content: string) => Promise<void>;
+};
+
+type ViewerFactoryOptions = {
+  viewType: string;
+  telemetry: TelemetryPort;
+  store: ViewerFactoryStore;
+  handlers: ViewerFactoryHandlers;
+  deps?: ViewerFactoryDeps;
+};
+
+type ViewerCustomizeRequest = {
+  document: vscode.TextDocument;
+  panel: vscode.WebviewPanel;
+};
+
 /**
  * PanelFactory is responsible for creating and managing webview panels.
  * It ensures that only one panel exists for a given URI, reusing existing panels when possible.
@@ -39,26 +58,20 @@ export class ViewerFactory {
   #store: ViewerFactoryStore;
   #viewType: string;
   #telemetry: TelemetryPort;
-  #onReady: ViewerReadyHandler;
-  #onNavigate: ViewerNavigateHandler;
-  #onSave?: (content: string) => Promise<void>;
+  #handlers: ViewerFactoryHandlers;
   #deps: ViewerFactoryDeps;
 
-  public constructor(
-    viewType: string,
-    telemetry: TelemetryPort,
-    store: ViewerFactoryStore,
-    onReady: ViewerReadyHandler,
-    onNavigate: ViewerNavigateHandler,
-    onSave?: (content: string) => Promise<void>,
-    deps: ViewerFactoryDeps = defaultDeps,
-  ) {
+  public constructor({
+    viewType,
+    telemetry,
+    store,
+    handlers,
+    deps = defaultDeps,
+  }: ViewerFactoryOptions) {
     this.#viewType = viewType;
     this.#telemetry = telemetry;
     this.#store = store;
-    this.#onReady = onReady;
-    this.#onNavigate = onNavigate;
-    this.#onSave = onSave;
+    this.#handlers = handlers;
     this.#deps = deps;
   }
 
@@ -84,27 +97,22 @@ export class ViewerFactory {
     return this.#store.panelByUri(document.uri);
   }
 
-  private registerStandardViewerCustomize(
-    document: vscode.TextDocument,
-    panel: vscode.WebviewPanel,
-    onReady: (
-      document: vscode.TextDocument,
-      panel: vscode.WebviewPanel,
-    ) => void,
-    onSave?: (content: string) => Promise<void>,
-  ): void {
+  private registerStandardViewerCustomize({
+    document,
+    panel,
+  }: ViewerCustomizeRequest): void {
     const onDidReceiveMessage = createViewerMessageHandler({
       document,
       panel,
       telemetry: this.#telemetry,
-      onReady,
+      onReady: this.#handlers.onReady,
       onResource: (event, receivedPanel) => {
         console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
         postResourceMessage(event.data, receivedPanel);
       },
       onOperation: reportWebviewOperation,
-      onNavigate: this.#onNavigate,
-      onSave,
+      onNavigate: this.#handlers.onNavigate,
+      onSave: this.#handlers.onSave,
       showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     });
     const receiveMessageDispose =
@@ -120,12 +128,10 @@ export class ViewerFactory {
   }
 
   private customize(document: vscode.TextDocument, panel: vscode.WebviewPanel) {
-    this.registerStandardViewerCustomize(
+    this.registerStandardViewerCustomize({
       document,
       panel,
-      this.#onReady,
-      this.#onSave,
-    );
+    });
   }
 
   private createAndStorePanel(

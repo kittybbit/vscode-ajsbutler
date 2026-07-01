@@ -1,19 +1,19 @@
 import type { Theme } from "@mui/material/styles";
 import { Edge, MarkerType, Node } from "@xyflow/react";
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
-import {
+import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type {
   FlowGraphDto,
   FlowGraphEdgeDto,
   FlowGraphNodeDto,
 } from "../../../../application/flow-graph/buildFlowGraphCore";
-import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import {
+import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
+import type {
   CurrentUnitIdStateType,
   DialogDataStateType,
   NestedExpansionStateType,
 } from "./flowViewerStateTypes";
-import { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
-import { AjsNode } from "./nodes/AjsNode";
+import type { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
+import type { AjsNode } from "./nodes/AjsNode";
 import { createFlowNodeGeometryPx } from "./nodes/flowNodeGeometry";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
 import { isExpandableNestedUnit } from "./nestedExpansion";
@@ -28,16 +28,30 @@ type CreateReactFlowDataOptions = {
   selectedUnitId?: string;
 };
 
+type CreateReactFlowDataParams = {
+  graph: FlowGraphDto;
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
+  theme: Theme;
+  dialogDataState: DialogDataStateType;
+  currentUnitIdState: CurrentUnitIdStateType;
+  options?: CreateReactFlowDataOptions;
+};
+
+type FlowNodeDataBuildContext = Omit<CreateReactFlowDataParams, "graph">;
+type ReactFlowNodeBuildContext = FlowNodeDataBuildContext & {
+  basePx: number;
+  initialNodeGeometry: ReturnType<typeof createFlowNodeGeometryPx>;
+};
+
 const nestedPanelBoundsNodeId = (unitId: string): string =>
   `${unitId}::nested-panel-bounds`;
 
 const toNodeData = (
   node: FlowGraphNodeDto,
-  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
-  dialogDataState: DialogDataStateType,
-  currentUnitIdState: CurrentUnitIdStateType,
-  options?: CreateReactFlowDataOptions,
+  context: FlowNodeDataBuildContext,
 ): AjsNode => {
+  const { unitDefinitionByPath, dialogDataState, currentUnitIdState, options } =
+    context;
   const unitDefinition = unitDefinitionByPath.get(node.metadata.absolutePath);
   if (!unitDefinition) {
     throw new Error(
@@ -98,6 +112,29 @@ const toEdge = (edge: FlowGraphEdgeDto): Edge => ({
   animated: edge.type === "con",
 });
 
+const toNodePosition = (
+  node: FlowGraphNodeDto,
+  basePx: number,
+  options?: CreateReactFlowDataOptions,
+): { x: number; y: number } =>
+  options?.positionOverrides?.get(node.id) ??
+  calculateFlowGraphNodePosition(node, basePx);
+
+const toReactFlowNode = (
+  node: FlowGraphNodeDto,
+  context: ReactFlowNodeBuildContext,
+): Node<AjsNode> => {
+  return {
+    id: node.id,
+    type: node.type,
+    selected: context.options?.selectedUnitId === node.id,
+    initialWidth: context.initialNodeGeometry.width,
+    initialHeight: context.initialNodeGeometry.height,
+    data: toNodeData(node, context),
+    position: toNodePosition(node, context.basePx, context.options),
+  };
+};
+
 const toNestedPanelBoundsNode = (
   node: Node<AjsNode>,
 ): Node<AjsNode> | undefined => {
@@ -137,34 +174,19 @@ const toNestedPanelBoundsNode = (
   };
 };
 
-export const createReactFlowData = (
-  graph: FlowGraphDto,
-  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
-  theme: Theme,
-  dialogDataState: DialogDataStateType,
-  currentUnitIdState: CurrentUnitIdStateType,
-  options?: CreateReactFlowDataOptions,
-): { nodes: Node<AjsNode>[]; edges: Edge[] } => {
-  const initialNodeGeometry = createFlowNodeGeometryPx(
-    theme.typography.htmlFontSize,
+export const createReactFlowData = ({
+  graph,
+  ...context
+}: CreateReactFlowDataParams): { nodes: Node<AjsNode>[]; edges: Edge[] } => {
+  const basePx = context.theme.typography.htmlFontSize;
+  const nodeContext = {
+    ...context,
+    basePx,
+    initialNodeGeometry: createFlowNodeGeometryPx(basePx),
+  };
+  const nodes: Node<AjsNode>[] = graph.nodes.map((node) =>
+    toReactFlowNode(node, nodeContext),
   );
-  const nodes: Node<AjsNode>[] = graph.nodes.map((node) => ({
-    id: node.id,
-    type: node.type,
-    selected: options?.selectedUnitId === node.id,
-    initialWidth: initialNodeGeometry.width,
-    initialHeight: initialNodeGeometry.height,
-    data: toNodeData(
-      node,
-      unitDefinitionByPath,
-      dialogDataState,
-      currentUnitIdState,
-      options,
-    ),
-    position:
-      options?.positionOverrides?.get(node.id) ??
-      calculateFlowGraphNodePosition(node, theme.typography.htmlFontSize),
-  }));
   const nestedPanelBoundsNodes = nodes
     .map(toNestedPanelBoundsNode)
     .filter((node): node is Node<AjsNode> => !!node);

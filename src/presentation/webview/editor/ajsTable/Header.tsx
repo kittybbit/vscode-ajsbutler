@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  Fragment,
-  memo,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import React, { FC, memo, useCallback, useState } from "react";
 import Alert from "@mui/material/Alert";
 import AppBar from "@mui/material/AppBar";
 import Chip from "@mui/material/Chip";
@@ -14,20 +7,21 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SaveIcon from "@mui/icons-material/Save";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { Table } from "@tanstack/table-core";
+import { Table, VisibilityState } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../../domain/services/i18n/nls";
 import { OPERATION, SAVE } from "../../../../shared/webviewEvents";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
-import SharedHeaderSearchField from "../shared/HeaderSearchField";
+import {
+  HeaderSearchControl,
+  resolveHeaderSearchHelperText,
+} from "../shared/HeaderSearchField";
+import type { HeaderSearchControlLabels } from "../shared/HeaderSearchField";
 import type {
   TableSearchDirection,
   TableSearchResultPosition,
@@ -35,6 +29,7 @@ import type {
 
 type HeaderProps = {
   table: Table<UnitListRowView>;
+  columnVisibility: VisibilityState;
   searchedAbsolutePath?: string;
   searchResultPosition?: TableSearchResultPosition;
   onSearchNavigate: (query: string, direction: TableSearchDirection) => void;
@@ -53,10 +48,15 @@ type HeaderSearchFieldProps = Pick<
   | "onSearchClear"
 >;
 
-type SearchEndAdornmentProps = {
-  canNavigate: boolean;
-  resultPosition?: TableSearchResultPosition;
-  onNavigate: (direction: TableSearchDirection) => void;
+type HeaderCsvActionsProps = {
+  table: Table<UnitListRowView>;
+  copyCsvLabel: string;
+  saveCsvLabel: string;
+};
+
+type HeaderColumnSelectorButtonProps = {
+  label: string;
+  onClick: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
 export const formatUnitCountLabel = (
@@ -70,58 +70,31 @@ export const getAjsTableHeaderControlLabels = (lang: string) => ({
   saveCsv: "Save the contents as csv.",
 });
 
+const tableHeaderSearchLabels: HeaderSearchControlLabels = {
+  helperText: {
+    noResults: "No units match in the list.",
+    matched: "Matched row is selected in the list.",
+    idle: "Search units by visible values, path, comment, or parameter value.",
+  },
+  navigation: {
+    resultAriaLabel: (position) =>
+      `${position.current} of ${position.total} list search results`,
+    previousTooltip: "Previous list search result (Shift+Enter).",
+    previousAriaLabel: "Previous list search result.",
+    nextTooltip: "Next list search result (Enter).",
+    nextAriaLabel: "Next list search result.",
+  },
+};
+
 export const getAjsTableSearchHelperText = (
   searchedAbsolutePath?: string,
   resultPosition?: TableSearchResultPosition,
 ): string =>
-  resultPosition?.total === 0
-    ? "No units match in the list."
-    : searchedAbsolutePath
-      ? "Matched row is selected in the list."
-      : "Search units by visible values, path, comment, or parameter value.";
-
-const SearchEndAdornment: FC<SearchEndAdornmentProps> = ({
-  canNavigate,
-  resultPosition,
-  onNavigate,
-}) => (
-  <Fragment>
-    {resultPosition && (
-      <Typography
-        variant="caption"
-        component="span"
-        aria-label={`${resultPosition.current} of ${resultPosition.total} list search results`}
-        sx={{ minWidth: "2.75rem", textAlign: "center" }}
-      >
-        {resultPosition.current}/{resultPosition.total}
-      </Typography>
-    )}
-    <Tooltip title="Previous list search result (Shift+Enter).">
-      <span>
-        <IconButton
-          size="small"
-          aria-label="Previous list search result."
-          onClick={() => onNavigate("previous")}
-          disabled={!canNavigate}
-        >
-          <NavigateBeforeIcon fontSize="inherit" />
-        </IconButton>
-      </span>
-    </Tooltip>
-    <Tooltip title="Next list search result (Enter).">
-      <span>
-        <IconButton
-          size="small"
-          aria-label="Next list search result."
-          onClick={() => onNavigate("next")}
-          disabled={!canNavigate}
-        >
-          <NavigateNextIcon fontSize="inherit" />
-        </IconButton>
-      </span>
-    </Tooltip>
-  </Fragment>
-);
+  resolveHeaderSearchHelperText(
+    searchedAbsolutePath,
+    resultPosition,
+    tableHeaderSearchLabels.helperText,
+  );
 
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   searchedAbsolutePath,
@@ -129,74 +102,35 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
-}) => {
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchValue, setSearchValue] = useState<string>("");
-  const searchHelperText = getAjsTableSearchHelperText(
-    searchedAbsolutePath,
-    searchResultPosition,
-  );
+}) => (
+  <HeaderSearchControl<TableSearchDirection>
+    matchedTargetId={searchedAbsolutePath}
+    resultPosition={searchResultPosition}
+    placeholderLabel="Search unit list"
+    labels={tableHeaderSearchLabels}
+    onSearchNavigate={onSearchNavigate}
+    onSearchSubmit={onSearchSubmit}
+    onSearchClear={onSearchClear}
+  />
+);
 
-  const handleSearchSubmit = useCallback(() => {
-    onSearchSubmit(searchValue);
-  }, [onSearchSubmit, searchValue]);
-  const handleSearchEnter = useCallback(
-    (shiftKey: boolean) =>
-      onSearchNavigate(searchValue, shiftKey ? "previous" : "next"),
-    [onSearchNavigate, searchValue],
-  );
-  const handleSearchClear = useCallback(() => {
-    setSearchValue("");
-    onSearchClear();
-    searchInputRef.current?.focus();
-  }, [onSearchClear]);
-  const handleSearchNavigate = useCallback(
-    (direction: TableSearchDirection) =>
-      onSearchNavigate(searchValue, direction),
-    [onSearchNavigate, searchValue],
-  );
+const HeaderColumnSelectorButton: FC<HeaderColumnSelectorButtonProps> = ({
+  label,
+  onClick,
+}) => (
+  <Tooltip title={label}>
+    <IconButton size="small" aria-label={label} onClick={onClick}>
+      <DisplaySettingsIcon fontSize="inherit" />
+    </IconButton>
+  </Tooltip>
+);
 
-  return (
-    <SharedHeaderSearchField
-      placeholderLabel="Search unit list"
-      helperText={searchHelperText}
-      value={searchValue}
-      onValueChange={setSearchValue}
-      onEnter={handleSearchEnter}
-      onBlur={handleSearchSubmit}
-      onClear={handleSearchClear}
-      clearDisabled={searchValue.length === 0 && !searchedAbsolutePath}
-      inputRef={searchInputRef}
-      sx={{ width: "20rem", maxWidth: "32vw", flexShrink: 0 }}
-      endAdornment={
-        <SearchEndAdornment
-          resultPosition={searchResultPosition}
-          canNavigate={(searchResultPosition?.total ?? 0) > 0}
-          onNavigate={handleSearchNavigate}
-        />
-      }
-    />
-  );
-};
-
-const Header: FC<HeaderProps> = ({
+const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
   table,
-  searchedAbsolutePath,
-  searchResultPosition,
-  onSearchNavigate,
-  onSearchSubmit,
-  onSearchClear,
-  visibleRowCount,
-  totalRowCount,
+  copyCsvLabel,
+  saveCsvLabel,
 }) => {
-  console.log("render Header.");
-
-  const { lang } = useMyAppContext();
-  const controlLabels = getAjsTableHeaderControlLabels(lang);
-
   const [open, setOpen] = useState(false);
-  const [columnSelectorAnchor, setColumnSelectorAnchor] =
-    useState<HTMLElement | null>(null);
 
   const handleCopy = useCallback(() => {
     const csv = exportCsvView(table);
@@ -210,6 +144,55 @@ const Header: FC<HeaderProps> = ({
     window.vscode.postMessage({ type: OPERATION, data: "save.csv" });
     window.vscode.postMessage({ type: SAVE, data: csv });
   }, [table]);
+
+  return (
+    <>
+      <Tooltip title={copyCsvLabel}>
+        <IconButton aria-label={copyCsvLabel} size="small" onClick={handleCopy}>
+          <ContentCopyIcon fontSize="inherit" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={saveCsvLabel}>
+        <IconButton aria-label={saveCsvLabel} size="small" onClick={handleSave}>
+          <SaveIcon fontSize="inherit" />
+        </IconButton>
+      </Tooltip>
+      <Snackbar
+        sx={{ position: "absolute" }}
+        open={open}
+        autoHideDuration={2500}
+        onClose={() => setOpen(false)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+      >
+        <Alert severity="info" variant="filled">
+          Copied
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};
+
+const Header: FC<HeaderProps> = ({
+  table,
+  columnVisibility,
+  searchedAbsolutePath,
+  searchResultPosition,
+  onSearchNavigate,
+  onSearchSubmit,
+  onSearchClear,
+  visibleRowCount,
+  totalRowCount,
+}) => {
+  console.log("render Header.");
+
+  const { lang } = useMyAppContext();
+  const controlLabels = getAjsTableHeaderControlLabels(lang);
+
+  const [columnSelectorAnchor, setColumnSelectorAnchor] =
+    useState<HTMLElement | null>(null);
 
   const openColumnSelector = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -243,34 +226,16 @@ const Header: FC<HeaderProps> = ({
             onSearchSubmit={onSearchSubmit}
             onSearchClear={onSearchClear}
           />
-          <Tooltip title={controlLabels.columns}>
-            <IconButton
-              size="small"
-              aria-label={controlLabels.columns}
-              onClick={openColumnSelector}
-            >
-              <DisplaySettingsIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <HeaderColumnSelectorButton
+            label={controlLabels.columns}
+            onClick={openColumnSelector}
+          />
           <Stack flexGrow={1} />
-          <Tooltip title={controlLabels.copyCsv}>
-            <IconButton
-              aria-label={controlLabels.copyCsv}
-              size="small"
-              onClick={handleCopy}
-            >
-              <ContentCopyIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={controlLabels.saveCsv}>
-            <IconButton
-              aria-label={controlLabels.saveCsv}
-              size="small"
-              onClick={handleSave}
-            >
-              <SaveIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <HeaderCsvActions
+            table={table}
+            copyCsvLabel={controlLabels.copyCsv}
+            saveCsvLabel={controlLabels.saveCsv}
+          />
           <Chip
             size="small"
             variant="outlined"
@@ -279,25 +244,11 @@ const Header: FC<HeaderProps> = ({
         </Toolbar>
         <DisplayColumnSelector
           table={table}
-          columnVisibility={table.getState().columnVisibility}
+          columnVisibility={columnVisibility}
           anchorEl={columnSelectorAnchor}
           open={Boolean(columnSelectorAnchor)}
           onClose={closeColumnSelector}
         />
-        <Snackbar
-          sx={{ position: "absolute" }}
-          open={open}
-          autoHideDuration={2500}
-          onClose={() => setOpen(false)}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-        >
-          <Alert severity="info" variant="filled">
-            Copied
-          </Alert>
-        </Snackbar>
       </AppBar>
     </>
   );

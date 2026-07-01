@@ -22,6 +22,14 @@ type WebviewMediatorDeps = {
   mountPanel: typeof mountViewerPanel;
 };
 
+type WebviewMediatorOptions = {
+  context: vscode.ExtensionContext;
+  viewType: string;
+  store: WebviewMediatorStore;
+  change: DocumentChangeHandler;
+  deps?: WebviewMediatorDeps;
+};
+
 const defaultDeps: WebviewMediatorDeps = {
   onDidChangeTextDocument: vscode.workspace.onDidChangeTextDocument,
   onDidCloseTextDocument: vscode.workspace.onDidCloseTextDocument,
@@ -38,13 +46,13 @@ export class WebviewMediator implements vscode.Disposable {
   #deps: WebviewMediatorDeps;
   #subscriptions: vscode.Disposable;
 
-  constructor(
-    context: vscode.ExtensionContext,
-    viewType: string,
-    store: WebviewMediatorStore,
-    change: DocumentChangeHandler,
-    deps: WebviewMediatorDeps = defaultDeps,
-  ) {
+  constructor({
+    context,
+    viewType,
+    store,
+    change,
+    deps = defaultDeps,
+  }: WebviewMediatorOptions) {
     console.log(`invoke WebviewMediator.constructor. (${viewType})`);
 
     this.#viewType = viewType;

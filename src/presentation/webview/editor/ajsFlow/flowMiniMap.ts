@@ -1,4 +1,5 @@
 import type { Node } from "@xyflow/react";
+import type { FlowRelationshipFocusRole } from "./flowRelationshipFocus";
 import type { AjsNode } from "./nodes/AjsNode";
 
 export type FlowMiniMapColors = {
@@ -17,62 +18,58 @@ export type FlowMiniMapColors = {
 const isHiddenLayoutNode = (node: Node<AjsNode>): boolean =>
   node.type === "group" && node.domAttributes?.["aria-hidden"] === true;
 
+const relationshipFocusColorKeys: Record<
+  FlowRelationshipFocusRole,
+  keyof FlowMiniMapColors
+> = {
+  both: "both",
+  downstream: "downstream",
+  selected: "selectedFocus",
+  unrelated: "unrelated",
+  upstream: "upstream",
+};
+
+const colorWhen = (
+  condition: boolean | undefined,
+  color: string,
+): string | undefined => (condition ? color : undefined);
+
+const resolveRelationshipFocusColor = (
+  role: FlowRelationshipFocusRole | undefined,
+  colors: FlowMiniMapColors,
+): string | undefined =>
+  role ? colors[relationshipFocusColorKeys[role]] : undefined;
+
+const resolveVisibleFlowMiniMapNodeColor = (
+  node: Node<AjsNode>,
+  colors: FlowMiniMapColors,
+  defaultColor: string,
+): string => {
+  const color = [
+    colorWhen(node.data.isCurrentSearchResult, colors.currentSearchResult),
+    colorWhen(node.selected || node.data.isSelected, colors.selected),
+    resolveRelationshipFocusColor(node.data.relationshipFocusRole, colors),
+    colorWhen(node.data.isSearchMatch, colors.searchMatch),
+  ].find((candidate): candidate is string => candidate !== undefined);
+
+  return color ?? defaultColor;
+};
+
+const resolveFlowMiniMapNodeColor = (
+  node: Node<AjsNode>,
+  colors: FlowMiniMapColors,
+  defaultColor: string,
+): string =>
+  isHiddenLayoutNode(node)
+    ? colors.hidden
+    : resolveVisibleFlowMiniMapNodeColor(node, colors, defaultColor);
+
 export const resolveFlowMiniMapNodeFill = (
   node: Node<AjsNode>,
   colors: FlowMiniMapColors,
-): string => {
-  if (isHiddenLayoutNode(node)) {
-    return colors.hidden;
-  }
-  if (node.data.isCurrentSearchResult) {
-    return colors.currentSearchResult;
-  }
-  if (node.selected || node.data.isSelected) {
-    return colors.selected;
-  }
-
-  switch (node.data.relationshipFocusRole) {
-    case "selected":
-      return colors.selectedFocus;
-    case "upstream":
-      return colors.upstream;
-    case "downstream":
-      return colors.downstream;
-    case "both":
-      return colors.both;
-    case "unrelated":
-      return colors.unrelated;
-    default:
-      return node.data.isSearchMatch ? colors.searchMatch : colors.normal;
-  }
-};
+): string => resolveFlowMiniMapNodeColor(node, colors, colors.normal);
 
 export const resolveFlowMiniMapNodeStroke = (
   node: Node<AjsNode>,
   colors: FlowMiniMapColors,
-): string => {
-  if (isHiddenLayoutNode(node)) {
-    return colors.hidden;
-  }
-  if (node.data.isCurrentSearchResult) {
-    return colors.currentSearchResult;
-  }
-  if (node.selected || node.data.isSelected) {
-    return colors.selected;
-  }
-
-  switch (node.data.relationshipFocusRole) {
-    case "selected":
-      return colors.selectedFocus;
-    case "upstream":
-      return colors.upstream;
-    case "downstream":
-      return colors.downstream;
-    case "both":
-      return colors.both;
-    case "unrelated":
-      return colors.unrelated;
-    default:
-      return node.data.isSearchMatch ? colors.searchMatch : colors.hidden;
-  }
-};
+): string => resolveFlowMiniMapNodeColor(node, colors, colors.hidden);

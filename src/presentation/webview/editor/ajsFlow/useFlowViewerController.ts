@@ -7,20 +7,21 @@ import {
   useState,
 } from "react";
 import type { Theme } from "@mui/material/styles";
-import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
-import {
+import type { Edge, Node, ReactFlowInstance } from "@xyflow/react";
+import type {
   AjsDocument,
   AjsUnit,
-  flattenAjsUnits,
 } from "../../../../domain/models/ajs/AjsDocument";
+import { flattenAjsUnits } from "../../../../domain/models/ajs/AjsDocument";
 import {
   buildUnitDefinitionByPath,
-  UnitDefinitionDialogDto,
+  type UnitDefinitionDialogDto,
 } from "../../../../application/unit-definition/buildUnitDefinition";
-import {
+import type {
   CurrentUnitIdStateType,
   DialogDataStateType,
 } from "./flowViewerStateTypes";
+import type { AjsNode } from "./nodes/AjsNode";
 import { useFlowGraphState } from "./useFlowGraphState";
 import {
   useFlowDocumentSubscription,
@@ -148,14 +149,237 @@ const useFlowViewerUiState = () => {
   };
 };
 
+type FlowTreeSelectionStateParams = {
+  currentUnit?: AjsUnit;
+  selectUnit: (unitId: string) => void;
+  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
+  unitById: ReadonlyMap<string, AjsUnit>;
+};
+
+const useFlowTreeSelectionState = ({
+  currentUnit,
+  selectUnit,
+  setExpandedUnitIds,
+  unitById,
+}: FlowTreeSelectionStateParams) => {
+  const [selectionFocusRequest, setSelectionFocusRequest] =
+    useState<FlowViewportFocusRequest>({ version: 0 });
+  const selectTreeUnit = useCallback(
+    (unitId: string) => {
+      const target = resolveFlowTreeSelectionTarget(
+        unitId,
+        currentUnit,
+        unitById,
+      );
+      if (!target) {
+        return;
+      }
+      setExpandedUnitIds((current) =>
+        mergeExpandedUnitIds(current, target.expandedNestedUnitIds),
+      );
+      selectUnit(target.selectedUnitId);
+      setSelectionFocusRequest((current) => ({
+        targetUnitId: target.selectedUnitId,
+        version: current.version + 1,
+      }));
+    },
+    [currentUnit, selectUnit, setExpandedUnitIds, unitById],
+  );
+
+  return { selectTreeUnit, selectionFocusRequest };
+};
+
+type FocusedFlowDataParams = {
+  edges: Edge[];
+  focusModeEnabled: boolean;
+  nodes: Node<AjsNode>[];
+  selectedUnitId?: string;
+  theme: Theme;
+  treeHoveredUnitId?: string;
+};
+
+const useFocusedFlowData = ({
+  edges,
+  focusModeEnabled,
+  nodes,
+  selectedUnitId,
+  theme,
+  treeHoveredUnitId,
+}: FocusedFlowDataParams) => {
+  const focusedFlowData = useMemo(
+    () =>
+      applyFlowRelationshipFocus(nodes, edges, {
+        colors: {
+          both: theme.palette.warning.main,
+          downstream: theme.palette.success.main,
+          upstream: theme.palette.info.main,
+        },
+        enabled: focusModeEnabled,
+        selectedUnitId,
+      }),
+    [edges, focusModeEnabled, nodes, selectedUnitId, theme],
+  );
+  const renderedNodes = useMemo(
+    () => applyHoveredUnitToFlowNodes(focusedFlowData.nodes, treeHoveredUnitId),
+    [focusedFlowData.nodes, treeHoveredUnitId],
+  );
+
+  return { focusedFlowData, renderedNodes };
+};
+
+type SelectedFlowNodeDetailStateParams = {
+  edges: Edge[];
+  nodes: Node<AjsNode>[];
+  selectedUnitId?: string;
+  setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
+  setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
+  unitById: ReadonlyMap<string, AjsUnit>;
+};
+
+const useSelectedFlowNode = (
+  nodes: Node<AjsNode>[],
+  selectedUnitId: string | undefined,
+) =>
+  useMemo(
+    () => nodes.find((node) => node.id === selectedUnitId),
+    [nodes, selectedUnitId],
+  );
+
+const useOpenSelectedNodeDefinition = (
+  selectedNode: Node<AjsNode> | undefined,
+  setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>,
+) =>
+  useCallback(() => {
+    if (selectedNode) {
+      setDialogData(selectedNode.data.unitDefinition);
+    }
+  }, [selectedNode, setDialogData]);
+
+const useOpenSelectedNodeScope = (
+  selectedNodeDetail: ReturnType<typeof buildFlowNodeDetail>,
+  selectedUnitId: string | undefined,
+  setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>,
+) =>
+  useCallback(() => {
+    if (selectedUnitId && selectedNodeDetail?.canOpenAsScope) {
+      setCurrentUnitId(selectedUnitId);
+    }
+  }, [selectedNodeDetail?.canOpenAsScope, selectedUnitId, setCurrentUnitId]);
+
+const useSelectedFlowNodeDetailState = ({
+  edges,
+  nodes,
+  selectedUnitId,
+  setCurrentUnitId,
+  setDialogData,
+  unitById,
+}: SelectedFlowNodeDetailStateParams) => {
+  const selectedNode = useSelectedFlowNode(nodes, selectedUnitId);
+  const selectedNodeDetail = useMemo(
+    () => buildFlowNodeDetail(selectedNode, edges, unitById),
+    [edges, selectedNode, unitById],
+  );
+  const openSelectedNodeDefinition = useOpenSelectedNodeDefinition(
+    selectedNode,
+    setDialogData,
+  );
+  const openSelectedNodeScope = useOpenSelectedNodeScope(
+    selectedNodeDetail,
+    selectedUnitId,
+    setCurrentUnitId,
+  );
+
+  return {
+    openSelectedNodeDefinition,
+    openSelectedNodeScope,
+    selectedNodeDetail,
+  };
+};
+
+type FlowViewerLifecycleParams = {
+  ajsDocument?: AjsDocument;
+  currentUnitId?: string;
+  edges: Edge[];
+  expandedUnitIds: readonly string[];
+  focusRequestVersion: number;
+  handleRevealUnit: (absolutePath: string) => void;
+  nodes: Node<AjsNode>[];
+  preserveSearchOnNextScopeChange: ReturnType<
+    typeof useFlowViewerRefs
+  >["preserveSearchOnNextScopeChange"];
+  prevUnitEntityId: ReturnType<typeof useFlowViewerRefs>["prevUnitEntityId"];
+  reactFlowInstanceRef: ReturnType<
+    typeof useFlowViewerRefs
+  >["reactFlowInstanceRef"];
+  resetSearch: () => void;
+  searchedUnitId?: string;
+  selectedUnitId?: string;
+  selectionFocusRequest: FlowViewportFocusRequest;
+  setAjsDocument: Dispatch<SetStateAction<AjsDocument | undefined>>;
+  setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
+  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
+  theme: Theme;
+};
+
+const useFlowViewerLifecycle = ({
+  ajsDocument,
+  currentUnitId,
+  edges,
+  expandedUnitIds,
+  focusRequestVersion,
+  handleRevealUnit,
+  nodes,
+  preserveSearchOnNextScopeChange,
+  prevUnitEntityId,
+  reactFlowInstanceRef,
+  resetSearch,
+  searchedUnitId,
+  selectedUnitId,
+  selectionFocusRequest,
+  setAjsDocument,
+  setCurrentUnitId,
+  setExpandedUnitIds,
+  theme,
+}: FlowViewerLifecycleParams) => {
+  const layoutRequestIdentity = useMemo(
+    () => ({}),
+    [ajsDocument, currentUnitId, expandedUnitIds, theme],
+  );
+  useFlowViewerFitView({
+    edges,
+    focusRequestVersion,
+    layoutRequestIdentity,
+    nodes,
+    reactFlowInstanceRef,
+    searchedUnitId,
+    selectionFocusRequestVersion: selectionFocusRequest.version,
+    selectionFocusTargetUnitId:
+      selectionFocusRequest.targetUnitId === selectedUnitId
+        ? selectionFocusRequest.targetUnitId
+        : undefined,
+  });
+  useFlowScopeReset({
+    ajsDocument,
+    currentUnitId,
+    preserveSearchOnNextScopeChange,
+    resetSearch,
+    setExpandedUnitIds,
+  });
+  useFlowDocumentSubscription({
+    prevUnitEntityId,
+    setAjsDocument,
+    setCurrentUnitId,
+  });
+  useRevealUnitSubscription({ handleRevealUnit });
+  useFlowViewerOverflow();
+};
+
 export const useFlowViewerController = ({
   theme,
 }: UseFlowViewerControllerParams) => {
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
-  const [selectionFocusRequest, setSelectionFocusRequest] =
-    useState<FlowViewportFocusRequest>({ version: 0 });
   const {
     preserveSearchOnNextScopeChange,
     prevUnitEntityId,
@@ -196,27 +420,12 @@ export const useFlowViewerController = ({
     treeHoveredUnit,
     treeHoveredUnitId,
   } = useHoveredFlowNodeState(ajsDocument, currentUnitId);
-  const selectTreeUnit = useCallback(
-    (unitId: string) => {
-      const target = resolveFlowTreeSelectionTarget(
-        unitId,
-        currentUnit,
-        unitById,
-      );
-      if (!target) {
-        return;
-      }
-      setExpandedUnitIds((current) =>
-        mergeExpandedUnitIds(current, target.expandedNestedUnitIds),
-      );
-      selectUnit(target.selectedUnitId);
-      setSelectionFocusRequest((current) => ({
-        targetUnitId: target.selectedUnitId,
-        version: current.version + 1,
-      }));
-    },
-    [currentUnit, selectUnit, unitById],
-  );
+  const { selectTreeUnit, selectionFocusRequest } = useFlowTreeSelectionState({
+    currentUnit,
+    selectUnit,
+    setExpandedUnitIds,
+    unitById,
+  });
   const {
     focusRequestVersion,
     handleRevealUnit,
@@ -249,72 +458,46 @@ export const useFlowViewerController = ({
     unitById,
     unitDefinitionByPath,
   });
-  const focusedFlowData = useMemo(
-    () =>
-      applyFlowRelationshipFocus(nodes, edges, {
-        colors: {
-          both: theme.palette.warning.main,
-          downstream: theme.palette.success.main,
-          upstream: theme.palette.info.main,
-        },
-        enabled: focusModeEnabled,
-        selectedUnitId,
-      }),
-    [edges, focusModeEnabled, nodes, selectedUnitId, theme],
-  );
-  const renderedNodes = useMemo(
-    () => applyHoveredUnitToFlowNodes(focusedFlowData.nodes, treeHoveredUnitId),
-    [focusedFlowData.nodes, treeHoveredUnitId],
-  );
-  const selectedNode = useMemo(
-    () => nodes.find((node) => node.id === selectedUnitId),
-    [nodes, selectedUnitId],
-  );
-  const selectedNodeDetail = useMemo(
-    () => buildFlowNodeDetail(selectedNode, edges, unitById),
-    [edges, selectedNode, unitById],
-  );
-  const openSelectedNodeDefinition = useCallback(() => {
-    if (selectedNode) {
-      setDialogData(selectedNode.data.unitDefinition);
-    }
-  }, [selectedNode, setDialogData]);
-  const openSelectedNodeScope = useCallback(() => {
-    if (selectedUnitId && selectedNodeDetail?.canOpenAsScope) {
-      setCurrentUnitId(selectedUnitId);
-    }
-  }, [selectedNodeDetail?.canOpenAsScope, selectedUnitId]);
-  const layoutRequestIdentity = useMemo(
-    () => ({}),
-    [ajsDocument, currentUnitId, expandedUnitIds, theme],
-  );
-  useFlowViewerFitView({
+  const { focusedFlowData, renderedNodes } = useFocusedFlowData({
     edges,
-    focusRequestVersion,
-    layoutRequestIdentity,
+    focusModeEnabled,
     nodes,
-    reactFlowInstanceRef,
-    searchedUnitId,
-    selectionFocusRequestVersion: selectionFocusRequest.version,
-    selectionFocusTargetUnitId:
-      selectionFocusRequest.targetUnitId === selectedUnitId
-        ? selectionFocusRequest.targetUnitId
-        : undefined,
+    selectedUnitId,
+    theme,
+    treeHoveredUnitId,
   });
-  useFlowScopeReset({
+  const {
+    openSelectedNodeDefinition,
+    openSelectedNodeScope,
+    selectedNodeDetail,
+  } = useSelectedFlowNodeDetailState({
+    edges,
+    nodes,
+    selectedUnitId,
+    setCurrentUnitId,
+    setDialogData,
+    unitById,
+  });
+  useFlowViewerLifecycle({
     ajsDocument,
     currentUnitId,
+    edges,
+    expandedUnitIds,
+    focusRequestVersion,
+    handleRevealUnit,
+    nodes,
     preserveSearchOnNextScopeChange,
-    resetSearch,
-    setExpandedUnitIds,
-  });
-  useFlowDocumentSubscription({
     prevUnitEntityId,
+    reactFlowInstanceRef,
+    resetSearch,
+    searchedUnitId,
+    selectedUnitId,
+    selectionFocusRequest,
     setAjsDocument,
     setCurrentUnitId,
+    setExpandedUnitIds,
+    theme,
   });
-  useRevealUnitSubscription({ handleRevealUnit });
-  useFlowViewerOverflow();
 
   return {
     ajsDocument,

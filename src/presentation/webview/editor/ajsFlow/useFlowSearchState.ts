@@ -52,16 +52,75 @@ type RevealUnitHandlerParams = RevealTargetApplyParams & {
   unitById: ReadonlyMap<string, AjsUnit>;
 };
 
-const applyFlowSearchResult = (
-  query: string,
-  result: FlowSearchResult,
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>,
-  setSearchState: Dispatch<SetStateAction<FlowSearchState>>,
-) => {
+type FlowSearchResultApplyParams = {
+  query: string;
+  result: FlowSearchResult;
+  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
+  setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
+};
+
+type FlowSearchSubmitContext = Pick<
+  SearchSubmitHandlerParams,
+  | "currentUnit"
+  | "searchState"
+  | "setExpandedUnitIds"
+  | "setSearchState"
+  | "unitById"
+>;
+
+type FlowSearchSubmission =
+  | { kind: "current" }
+  | { kind: "empty"; query: string }
+  | { kind: "matched"; query: string; result: FlowSearchResult };
+
+const applyFlowSearchResult = ({
+  query,
+  result,
+  setExpandedUnitIds,
+  setSearchState,
+}: FlowSearchResultApplyParams) => {
   setExpandedUnitIds((prev) => mergeExpandedAncestorUnitIds(prev, result));
   setSearchState((prev) =>
     createSubmittedFlowSearchState(query, result, prev.focusRequestVersion + 1),
   );
+};
+
+const resolveFlowSearchSubmission = (
+  query: string,
+  { currentUnit, searchState, unitById }: FlowSearchSubmitContext,
+): FlowSearchSubmission => {
+  if (isActiveFlowSearchQuery(searchState, query)) {
+    return { kind: "current" };
+  }
+
+  const result = findFlowSearchResult(currentUnit, query, unitById);
+  return result ? { kind: "matched", query, result } : { kind: "empty", query };
+};
+
+const applyEmptyFlowSearchResult = (
+  query: string,
+  setSearchState: Dispatch<SetStateAction<FlowSearchState>>,
+) => {
+  setSearchState((prev) =>
+    createSubmittedFlowSearchState(query, undefined, prev.focusRequestVersion),
+  );
+};
+
+const applyFlowSearchSubmission = (
+  submission: FlowSearchSubmission,
+  { setExpandedUnitIds, setSearchState }: FlowSearchSubmitContext,
+) => {
+  if (submission.kind === "matched") {
+    applyFlowSearchResult({
+      query: submission.query,
+      result: submission.result,
+      setExpandedUnitIds,
+      setSearchState,
+    });
+  }
+  if (submission.kind === "empty") {
+    applyEmptyFlowSearchResult(submission.query, setSearchState);
+  }
 };
 
 const applyFlowRevealTarget = (
@@ -91,22 +150,22 @@ const useSearchSubmitHandler = ({
 }: SearchSubmitHandlerParams) =>
   useCallback(
     (query: string) => {
-      if (isActiveFlowSearchQuery(searchState, query)) {
-        return;
-      }
-      const result = findFlowSearchResult(currentUnit, query, unitById);
-      if (!result) {
-        setSearchState((prev) =>
-          createSubmittedFlowSearchState(
-            query,
-            undefined,
-            prev.focusRequestVersion,
-          ),
-        );
-        return;
-      }
-
-      applyFlowSearchResult(query, result, setExpandedUnitIds, setSearchState);
+      applyFlowSearchSubmission(
+        resolveFlowSearchSubmission(query, {
+          currentUnit,
+          searchState,
+          setExpandedUnitIds,
+          setSearchState,
+          unitById,
+        }),
+        {
+          currentUnit,
+          searchState,
+          setExpandedUnitIds,
+          setSearchState,
+          unitById,
+        },
+      );
     },
     [currentUnit, searchState, setSearchState, setExpandedUnitIds, unitById],
   );

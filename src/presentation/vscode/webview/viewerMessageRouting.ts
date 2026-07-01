@@ -20,18 +20,20 @@ type ViewerMessageRoutingDeps = {
   telemetry: TelemetryPort;
   onReady: (document: vscode.TextDocument, panel: vscode.WebviewPanel) => void;
   onResource: (event: ResourceEventType, panel: vscode.WebviewPanel) => void;
-  onOperation: (
-    document: vscode.TextDocument,
-    panel: vscode.WebviewPanel,
-    telemetry: TelemetryPort,
-    operation: string,
-  ) => void;
+  onOperation: (request: ViewerOperationRequest) => void;
   onNavigate: (
     document: vscode.TextDocument,
     event: NavigationEventType,
   ) => void;
   onSave?: (content: string) => Promise<void>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
+};
+
+export type ViewerOperationRequest = {
+  document: vscode.TextDocument;
+  panel: vscode.WebviewPanel;
+  telemetry: TelemetryPort;
+  operation: string;
 };
 
 const SAVE_DATA_ERROR_MESSAGE = "Data is not a string and cannot be saved.";
@@ -80,7 +82,7 @@ const createViewerMessageRoutes = ({
     handleSaveMessage(event, { onSave, showErrorMessage });
   },
   [OPERATION]: (event) => {
-    onOperation(document, panel, telemetry, event.data);
+    onOperation({ document, panel, telemetry, operation: event.data });
   },
   [NAVIGATE]: (event) => {
     onNavigate(document, event);

@@ -1,12 +1,14 @@
 import React, {
   FC,
   memo,
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
 } from "react";
 import { flexRender, HeaderGroup, Row } from "@tanstack/react-table";
+import type { VisibilityState } from "@tanstack/table-core";
 import {
   ItemProps,
   TableComponents,
@@ -36,6 +38,7 @@ type VirtualizedTableProps = {
   headerGroups: HeaderGroup<UnitListRowView>[];
   rows: Row<UnitListRowView>[];
   rowIndex?: number;
+  columnVisibility: VisibilityState;
   searchQuery: string;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   selectedAbsolutePath?: string;
@@ -43,6 +46,7 @@ type VirtualizedTableProps = {
 };
 
 type VirtualizedTableContext = {
+  columnVisibilityRevision: string;
   rowIndex?: number;
   selectedAbsolutePath?: string;
   selectRow: (absolutePath: string) => void;
@@ -50,6 +54,13 @@ type VirtualizedTableContext = {
 
 type VirtualizedTableRowProps = ItemProps<Row<UnitListRowView>> & {
   context: VirtualizedTableContext;
+};
+
+type VisibleTableCellRenderContext = {
+  cell: ReturnType<Row<UnitListRowView>["getVisibleCells"]>[number];
+  row: Row<UnitListRowView>;
+  searchQuery: string;
+  parameterSearchValuesByPath: ParameterSearchValuesByPath;
 };
 
 const styleTableCell: SxProps<Theme> = {
@@ -80,15 +91,43 @@ const omitVirtuosoContext = <T extends object>(
   return propsWithoutContext;
 };
 
-const isVirtualizedTableRowSelected = (
-  props: VirtualizedTableRowProps,
-): boolean =>
-  isTableRowSelected(
-    props.item.original.absolutePath,
-    props.context.selectedAbsolutePath,
-    props["data-index"],
-    props.context.rowIndex,
+const searchHitBackgroundColor = {
+  dark: "rgba(255, 214, 102, 0.24)",
+  light: "rgba(255, 214, 102, 0.36)",
+};
+
+const getSearchHitCellSx = (isSearchHit: boolean) => {
+  if (!isSearchHit) {
+    return undefined;
+  }
+  return {
+    backgroundColor: (theme: Theme) =>
+      searchHitBackgroundColor[theme.palette.mode],
+  };
+};
+
+const renderVisibleTableCell = ({
+  cell,
+  row,
+  searchQuery,
+  parameterSearchValuesByPath,
+}: VisibleTableCellRenderContext): ReactNode => {
+  const parameters =
+    parameterSearchValuesByPath.get(row.original.absolutePath) ?? [];
+  const isSearchHit = isAjsTableSearchHit(
+    cell.getValue<AccessorType | undefined>(),
+    parameters,
+    searchQuery,
   );
+  return (
+    <TableCell
+      key={cell.id}
+      sx={[styleTableCell, getSearchHitCellSx(isSearchHit)]}
+    >
+      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+    </TableCell>
+  );
+};
 
 const VirtualizedTableRow = memo(
   ({ context, ...props }: VirtualizedTableRowProps) => {
@@ -99,25 +138,27 @@ const VirtualizedTableRow = memo(
         {...props}
         hover={true}
         tabIndex={0}
-        selected={isTableRowSelected(
+        selected={isTableRowSelected({
           absolutePath,
           selectedAbsolutePath,
-          props["data-index"],
-          rowIndex,
-        )}
+          index: props["data-index"],
+          revealedRowIndex: rowIndex,
+        })}
         onClick={handleSelectTableRow(absolutePath, selectRow)}
         onKeyDown={handleSelectTableRowKeyDown(absolutePath, selectRow)}
       />
     );
   },
-  (previous, next) =>
-    previous.item === next.item &&
-    previous["data-index"] === next["data-index"] &&
-    previous.context.selectRow === next.context.selectRow &&
-    isVirtualizedTableRowSelected(previous) ===
-      isVirtualizedTableRowSelected(next),
 );
 VirtualizedTableRow.displayName = "VirtualizedTableRow";
+
+const getColumnVisibilityRevision = (
+  columnVisibility: VisibilityState,
+): string =>
+  Object.entries(columnVisibility)
+    .sort(([previous], [next]) => previous.localeCompare(next))
+    .map(([columnId, visible]) => `${columnId}:${visible}`)
+    .join("|");
 
 const tableComponents: TableComponents<
   Row<UnitListRowView>,
@@ -156,6 +197,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   headerGroups,
   rows,
   rowIndex,
+  columnVisibility,
   searchQuery,
   parameterSearchValuesByPath,
   selectedAbsolutePath,
@@ -163,41 +205,33 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
 }) => {
   console.log("render VirtualizedTable.");
 
+  const columnVisibilityRevision = useMemo(
+    () => getColumnVisibilityRevision(columnVisibility),
+    [columnVisibility],
+  );
   const context = useMemo(
-    () => ({ rowIndex, selectedAbsolutePath, selectRow }),
-    [rowIndex, selectedAbsolutePath, selectRow],
+    () => ({
+      columnVisibilityRevision,
+      rowIndex,
+      selectedAbsolutePath,
+      selectRow,
+    }),
+    [columnVisibilityRevision, rowIndex, selectedAbsolutePath, selectRow],
   );
 
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   const itemContent = useCallback(
     (index: number, data: Row<UnitListRowView>) =>
-      data.getVisibleCells().map((cell) => {
-        const parameters =
-          parameterSearchValuesByPath.get(data.original.absolutePath) ?? [];
-        const isSearchHit = isAjsTableSearchHit(
-          cell.getValue<AccessorType | undefined>(),
-          parameters,
+      data.getVisibleCells().map((cell) =>
+        renderVisibleTableCell({
+          cell,
+          row: data,
           searchQuery,
-        );
-        return (
-          <TableCell
-            key={cell.id}
-            sx={[
-              styleTableCell,
-              isSearchHit && {
-                backgroundColor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 214, 102, 0.24)"
-                    : "rgba(255, 214, 102, 0.36)",
-              },
-            ]}
-          >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          </TableCell>
-        );
-      }),
-    [parameterSearchValuesByPath, searchQuery],
+          parameterSearchValuesByPath,
+        }),
+      ),
+    [columnVisibility, parameterSearchValuesByPath, searchQuery],
   );
 
   const fixedHeaderContent = useCallback(

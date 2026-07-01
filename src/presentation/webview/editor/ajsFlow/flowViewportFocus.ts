@@ -8,6 +8,8 @@ export type FlowViewportFocusDecision = {
   targetUnitId?: string;
 };
 
+type TargetFocusKind = Exclude<FlowViewportFocusDecision["kind"], "layout">;
+
 type FlowNodeBounds = {
   height: number;
   width: number;
@@ -50,22 +52,53 @@ type ResolveFlowViewportFocusDecisionParams = {
   layoutChanged: boolean;
 };
 
-const resolveTargetRequest = (
-  kind: "search" | "selection",
+type TargetRequestParams = {
+  handledVersion: number;
+  kind: TargetFocusKind;
+  renderedUnitIds: ReadonlySet<string>;
+  request: FlowViewportFocusRequest;
+};
+
+const hasUnhandledFocusRequest = (
   request: FlowViewportFocusRequest,
   handledVersion: number,
+): boolean => request.version > handledVersion;
+
+const resolveRenderedTargetDecision = (
+  kind: TargetFocusKind,
+  targetUnitId: string,
   renderedUnitIds: ReadonlySet<string>,
-): FlowViewportFocusDecision | null | undefined => {
-  if (request.version <= handledVersion) {
+): FlowViewportFocusDecision | null =>
+  renderedUnitIds.has(targetUnitId) ? { kind, targetUnitId } : null;
+
+const resolveTargetRequest = ({
+  kind,
+  request,
+  handledVersion,
+  renderedUnitIds,
+}: TargetRequestParams): FlowViewportFocusDecision | null | undefined => {
+  if (!hasUnhandledFocusRequest(request, handledVersion)) {
     return undefined;
   }
   if (!request.targetUnitId) {
     return undefined;
   }
-  return renderedUnitIds.has(request.targetUnitId)
-    ? { kind, targetUnitId: request.targetUnitId }
-    : null;
+  return resolveRenderedTargetDecision(
+    kind,
+    request.targetUnitId,
+    renderedUnitIds,
+  );
 };
+
+const firstTargetDecision = (
+  decisions: ReadonlyArray<FlowViewportFocusDecision | null | undefined>,
+): FlowViewportFocusDecision | null | undefined =>
+  decisions.find((decision) => decision !== undefined);
+
+const resolveLayoutFocusDecision = (
+  layoutChanged: boolean,
+): FlowViewportFocusDecision | undefined =>
+  layoutChanged ? { kind: "layout" } : undefined;
 
 export const resolveFlowViewportFocusDecision = ({
   renderedUnitIds,
@@ -78,25 +111,21 @@ export const resolveFlowViewportFocusDecision = ({
   | FlowViewportFocusDecision
   | null
   | undefined => {
-  const searchDecision = resolveTargetRequest(
-    "search",
-    searchRequest,
-    handledSearchVersion,
-    renderedUnitIds,
-  );
-  if (searchDecision !== undefined) {
-    return searchDecision;
-  }
-
-  const selectionDecision = resolveTargetRequest(
-    "selection",
-    selectionRequest,
-    handledSelectionVersion,
-    renderedUnitIds,
-  );
-  if (selectionDecision !== undefined) {
-    return selectionDecision;
-  }
-
-  return layoutChanged ? { kind: "layout" } : undefined;
+  const targetDecision = firstTargetDecision([
+    resolveTargetRequest({
+      kind: "search",
+      request: searchRequest,
+      handledVersion: handledSearchVersion,
+      renderedUnitIds,
+    }),
+    resolveTargetRequest({
+      kind: "selection",
+      request: selectionRequest,
+      handledVersion: handledSelectionVersion,
+      renderedUnitIds,
+    }),
+  ]);
+  return targetDecision !== undefined
+    ? targetDecision
+    : resolveLayoutFocusDecision(layoutChanged);
 };

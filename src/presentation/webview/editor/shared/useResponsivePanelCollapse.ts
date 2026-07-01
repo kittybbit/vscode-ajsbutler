@@ -17,23 +17,35 @@ export const createResponsivePanelCollapseState = (
   isNarrow,
 });
 
+const setResponsivePanelCollapsed = (
+  state: ResponsivePanelCollapseState,
+  collapsed: boolean,
+): ResponsivePanelCollapseState =>
+  state.collapsed === collapsed ? state : { ...state, collapsed };
+
+const reduceViewportChanged = (
+  state: ResponsivePanelCollapseState,
+  isNarrow: boolean,
+): ResponsivePanelCollapseState =>
+  isNarrow === state.isNarrow
+    ? state
+    : {
+        collapsed: isNarrow || state.collapsed,
+        isNarrow,
+      };
+
 export const reduceResponsivePanelCollapseState = (
   state: ResponsivePanelCollapseState,
   action: ResponsivePanelCollapseAction,
 ): ResponsivePanelCollapseState => {
-  if (action.type === "collapse") {
-    return state.collapsed ? state : { ...state, collapsed: true };
+  switch (action.type) {
+    case "collapse":
+      return setResponsivePanelCollapsed(state, true);
+    case "expand":
+      return setResponsivePanelCollapsed(state, false);
+    case "viewportChanged":
+      return reduceViewportChanged(state, action.isNarrow);
   }
-  if (action.type === "expand") {
-    return state.collapsed ? { ...state, collapsed: false } : state;
-  }
-  if (action.isNarrow === state.isNarrow) {
-    return state;
-  }
-  return {
-    collapsed: action.isNarrow ? true : state.collapsed,
-    isNarrow: action.isNarrow,
-  };
 };
 
 export const useResponsivePanelCollapse = (isNarrow: boolean) => {
