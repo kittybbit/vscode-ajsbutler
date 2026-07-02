@@ -55,6 +55,14 @@ slices, and validation plans.
 - Test File Or Validation Plan:
   lifecycle, open preview command, viewer factory, viewer mediator, and viewer
   wiring tests; `rtk pnpm test`; `rtk pnpm run test:web`; `rtk pnpm run qlty`.
+- Validation Result:
+  `extensionLifecycle.test.ts`, `openPreviewCommand.test.ts`,
+  `viewerFactory.test.ts`, `viewerMessageRouting.test.ts`,
+  `viewerWiring.test.ts`, and `viewerTelemetry.test.ts` pass through
+  `rtk pnpm test`; `rtk pnpm run test:web`, `rtk pnpm run qlty`, and
+  `rtk pnpm run build` pass. Production build reports existing webpack bundle
+  size warnings. README telemetry wording and CHANGELOG are updated because
+  telemetry policy now covers anonymous lifecycle and viewer metadata.
 
 ### WebAPI Import Workflow
 

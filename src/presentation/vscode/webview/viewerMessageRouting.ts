@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
+import { createViewerClosedEvent } from "../../../application/telemetry/viewerTelemetry";
+import { getTelemetryHost } from "../telemetryHost";
 import {
   NAVIGATE,
   OPERATION,
@@ -104,6 +106,7 @@ type ViewerPanelDisposeDeps = {
   uri: vscode.Uri;
   panel: vscode.WebviewPanel;
   viewType: string;
+  telemetry: TelemetryPort;
   store: {
     removeByUri(uri: vscode.Uri): void;
   };
@@ -116,9 +119,17 @@ export const registerViewerPanelDispose = ({
   viewType,
   store,
   receiveMessageDispose,
+  telemetry,
 }: ViewerPanelDisposeDeps): void => {
   panel.onDidDispose(() => {
     console.log(`invoke panel.onDidDispose. (${viewType}, ${uri.toString()})`);
+    const event = createViewerClosedEvent({
+      viewType,
+      host: getTelemetryHost(),
+    });
+    if (event) {
+      telemetry.trackEvent(event.name, event.properties);
+    }
     store.removeByUri(uri);
     receiveMessageDispose.dispose();
   });

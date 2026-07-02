@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import {
+  createViewerOpenStartedEvent,
+  createViewerReadyEvent,
+} from "../../application/telemetry/viewerTelemetry";
 import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import {
   createRevealUnitEvent,
@@ -16,6 +20,7 @@ import {
   AJS_FLOW_VIEWER_TYPE,
   AJS_TABLE_VIEWER_TYPE,
 } from "../../presentation/vscode/webview/constant";
+import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import { WebviewStore } from "../../presentation/vscode/webview/WebviewStore";
 import {
   createDebouncedAjsDocumentChange,
@@ -66,6 +71,7 @@ type CounterpartRevealRequest = {
 type CounterpartRevealDeps = {
   factoryByViewType: ReadonlyMap<string, ViewerFactory>;
   mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void;
+  onOpenStarted?: (targetViewType: string) => void;
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
 };
 
@@ -95,9 +101,19 @@ export const createViewerReadyHandler =
       panel: vscode.WebviewPanel,
     ) => void,
     pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
+    onViewerReady: (
+      document: vscode.TextDocument,
+      panel: vscode.WebviewPanel,
+      source: "command" | "navigation",
+    ) => void = () => {},
   ) =>
   (document: vscode.TextDocument, panel: vscode.WebviewPanel): void => {
     onReady(document, panel);
+    onViewerReady(
+      document,
+      panel,
+      pendingRevealByPanel.has(panel) ? "navigation" : "command",
+    );
     flushPendingViewerReveal(panel, pendingRevealByPanel);
   };
 
@@ -121,6 +137,7 @@ const openCounterpartPanel = (
 ): void => {
   const newPanel = targetFactory.getPanel(request.document);
   deps.pendingRevealByPanel.set(newPanel, request.absolutePath);
+  deps.onOpenStarted?.(request.targetViewType);
   deps.mountPanel(newPanel, request.targetViewType);
   newPanel.reveal(newPanel.viewColumn);
 };
@@ -193,11 +210,33 @@ const createViewerBundle = ({
       onReady: createViewerReadyHandler(
         createReadyAjsDocument(buildUnitList),
         pendingRevealByPanel,
+        (_document, _panel, source) => {
+          const event = createViewerReadyEvent({
+            viewType,
+            source,
+            result: "success",
+            host: getTelemetryHost(),
+          });
+          if (event) {
+            telemetry.trackEvent(event.name, event.properties);
+          }
+        },
       ),
       onNavigate: (document, event) => {
         revealCounterpartFromNavigation(document, event, {
           factoryByViewType,
           mountPanel: previewDeps.mountPanel,
+          onOpenStarted: (targetViewType) => {
+            const openEvent = createViewerOpenStartedEvent({
+              viewType: targetViewType,
+              source: "navigation",
+              result: "success",
+              host: getTelemetryHost(),
+            });
+            if (openEvent) {
+              telemetry.trackEvent(openEvent.name, openEvent.properties);
+            }
+          },
           pendingRevealByPanel,
         });
       },

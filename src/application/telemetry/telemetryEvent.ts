@@ -127,6 +127,68 @@ export const telemetryEvents = {
       telemetryPropertyKeys.errorCode,
     ],
   },
+  viewerTableOpenStarted: {
+    name: "viewer.table.open_started",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.source,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  viewerTableReady: {
+    name: "viewer.table.ready",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.source,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.unitCountBucket,
+      telemetryPropertyKeys.rowCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  viewerTableClosed: {
+    name: "viewer.table.closed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.source,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowOpenStarted: {
+    name: "viewer.flow.open_started",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.source,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  viewerFlowReady: {
+    name: "viewer.flow.ready",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.source,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.nodeCountBucket,
+      telemetryPropertyKeys.edgeCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  viewerFlowClosed: {
+    name: "viewer.flow.closed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.source,
+      telemetryPropertyKeys.result,
+    ],
+  },
 } as const satisfies Record<string, TelemetryEventDefinition>;
 
 export const createTelemetryEvent = <Name extends string>(

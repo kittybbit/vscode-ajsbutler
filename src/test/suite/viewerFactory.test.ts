@@ -253,7 +253,11 @@ suite("ViewerFactory", () => {
     assert.strictEqual(createdPanel, panel);
     assert.deepStrictEqual(added, [{ uri: document.uri, panel }]);
     assert.deepStrictEqual(navigated, ["table:/root/unit"]);
-    assert.deepStrictEqual(telemetryEvents, [OPERATION]);
+    assert.deepStrictEqual(telemetryEvents, [
+      "viewer.table.ready",
+      OPERATION,
+      "viewer.table.closed",
+    ]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
     assert.strictEqual(receiverDisposed, true);
   });

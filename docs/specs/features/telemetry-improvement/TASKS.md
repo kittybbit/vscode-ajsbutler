@@ -23,7 +23,7 @@
 - Human approval:
   approved for Slice 1 through Slice 8.
 - Active implementation slice:
-  Slice 2: Lifecycle And Viewer Readiness Telemetry.
+  Slice 3: WebAPI Import Workflow Telemetry.
 
 ## Human Approval
 
@@ -100,7 +100,7 @@ active implementation approval remains.
 
 ### Slice 2: Lifecycle And Viewer Readiness Telemetry
 
-- Status: Approved
+- Status: Complete
 - Scope:
   migrate lifecycle and preview open telemetry to schema-owned events and add
   privacy-safe viewer readiness and close workflow signals for table and flow
@@ -496,8 +496,8 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready. Implementation slices are planned but not reviewed, approved, or
-  complete.
+  not ready. Slices 1 and 2 are complete; Slices 3 through 8 remain approved
+  for implementation.
 - Durable documentation updates:
   `uc-record-telemetry.md`, `docs/specs/plans.md`, and `docs/specs/roadmap.md`
   were updated during feature intake; later slices must keep them synchronized

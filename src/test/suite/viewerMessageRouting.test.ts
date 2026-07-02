@@ -106,6 +106,12 @@ suite("Viewer message routing", () => {
       uri: document.uri as never,
       panel: panel as never,
       viewType: "ajsbutler.flowViewer",
+      telemetry: {
+        trackEvent: (eventName) => {
+          removed.push(`event:${eventName}`);
+        },
+        dispose() {},
+      },
       store: {
         removeByUri: (receivedUri) => {
           removed.push(receivedUri.toString());
@@ -120,7 +126,10 @@ suite("Viewer message routing", () => {
 
     onDidDispose?.();
 
-    assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
+    assert.deepStrictEqual(removed, [
+      "event:viewer.flow.closed",
+      "file:///sample.ajs",
+    ]);
     assert.strictEqual(receiverDisposed, true);
   });
 });

@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- Expanded privacy-conscious telemetry to include anonymous extension lifecycle
+  and viewer readiness or close metadata.
+
 ## [1.15.1]
 
 - Excluded local agent cache files from the published extension package.

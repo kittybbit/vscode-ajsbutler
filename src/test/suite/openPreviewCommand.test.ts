@@ -5,7 +5,10 @@ suite("Open Preview Command", () => {
   test("shows an error when there is no active editor", () => {
     const errors: string[] = [];
     let mounted = false;
-    let tracked = false;
+    const tracked: Array<{
+      viewType: string;
+      properties: Record<string, string>;
+    }> = [];
 
     executeOpenPreviewCommand({
       viewType: "ajsbutler.tableViewer",
@@ -23,15 +26,19 @@ suite("Open Preview Command", () => {
         mountPanel: () => {
           mounted = true;
         },
-        trackEvent: () => {
-          tracked = true;
+        trackEvent: (viewType, properties) => {
+          tracked.push({ viewType, properties });
         },
       },
     });
 
     assert.deepStrictEqual(errors, ["No active editor found to open."]);
     assert.strictEqual(mounted, false);
-    assert.strictEqual(tracked, false);
+    assert.strictEqual(tracked.length, 1);
+    assert.strictEqual(tracked[0].viewType, "viewer.table.open_started");
+    assert.strictEqual(tracked[0].properties.source, "command");
+    assert.strictEqual(tracked[0].properties.result, "failed");
+    assert.strictEqual(tracked[0].properties.errorCode, "no_active_editor");
   });
 
   test("opens and mounts the preview for the active editor", () => {
@@ -69,8 +76,13 @@ suite("Open Preview Command", () => {
     assert.deepStrictEqual(mounted, [
       { panel, viewType: "ajsbutler.flowViewer" },
     ]);
-    assert.strictEqual(tracked.length, 1);
-    assert.strictEqual(tracked[0].viewType, "ajsbutler.flowViewer");
-    assert.ok("development" in tracked[0].properties);
+    assert.strictEqual(tracked.length, 2);
+    assert.deepStrictEqual(
+      tracked.map((event) => event.viewType),
+      ["viewer.flow.open_started", "ajsbutler.flowViewer"],
+    );
+    assert.strictEqual(tracked[0].properties.source, "command");
+    assert.strictEqual(tracked[0].properties.result, "success");
+    assert.ok("development" in tracked[1].properties);
   });
 });

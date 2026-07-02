@@ -19,7 +19,10 @@ suite("Extension lifecycle", () => {
 
     reportExtensionActivated(extension);
 
-    assert.deepStrictEqual(events, [Telemetry.ExtensionActivate]);
+    assert.deepStrictEqual(events, [
+      Telemetry.ExtensionActivate,
+      "extension.lifecycle.activated",
+    ]);
     extension.dispose();
   });
 
@@ -38,7 +41,10 @@ suite("Extension lifecycle", () => {
 
     reportAndDisposeExtensionRuntime(extension);
 
-    assert.deepStrictEqual(events, [Telemetry.ExtensionDeactivate]);
+    assert.deepStrictEqual(events, [
+      Telemetry.ExtensionDeactivate,
+      "extension.lifecycle.deactivated",
+    ]);
     assert.strictEqual(disposed, true);
   });
 

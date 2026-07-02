@@ -101,11 +101,16 @@ suite("Viewer wiring", () => {
           opened = true;
           calls.push("mount");
         },
+        onOpenStarted: (viewType) => calls.push(`open:${viewType}`),
         pendingRevealByPanel,
       },
     );
 
-    assert.deepStrictEqual(calls, ["mount", "reveal"]);
+    assert.deepStrictEqual(calls, [
+      `open:${AJS_FLOW_VIEWER_TYPE}`,
+      "mount",
+      "reveal",
+    ]);
     revealCounterpartPanel(
       {
         document,
@@ -118,12 +123,18 @@ suite("Viewer wiring", () => {
         pendingRevealByPanel,
       },
     );
-    assert.deepStrictEqual(calls, ["mount", "reveal", "reveal"]);
+    assert.deepStrictEqual(calls, [
+      `open:${AJS_FLOW_VIEWER_TYPE}`,
+      "mount",
+      "reveal",
+      "reveal",
+    ]);
     createViewerReadyHandler(
       () => calls.push("document"),
       pendingRevealByPanel,
     )(document, panel);
     assert.deepStrictEqual(calls, [
+      `open:${AJS_FLOW_VIEWER_TYPE}`,
       "mount",
       "reveal",
       "reveal",
