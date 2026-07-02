@@ -1,7 +1,9 @@
 import * as os from "os";
 import * as vscode from "vscode";
+import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
 import type { MyAppResource } from "../../../shared/MyAppResource";
 import { OPERATION } from "../../../shared/webviewEvents";
+import { getTelemetryHost } from "../telemetryHost";
 import type { ViewerOperationRequest } from "./viewerMessageRouting";
 
 export const postResourceMessage = (
@@ -50,4 +52,16 @@ export const reportWebviewOperation = ({
     viewType: panel.viewType,
     operation,
   });
+  const event = createViewerActionEvent({
+    viewType: panel.viewType,
+    operation,
+    host: getTelemetryHost(),
+  });
+  if (event) {
+    try {
+      telemetry.trackEvent(event.name, event.properties);
+    } catch {
+      // Viewer action telemetry must not block webview operation handling.
+    }
+  }
 };

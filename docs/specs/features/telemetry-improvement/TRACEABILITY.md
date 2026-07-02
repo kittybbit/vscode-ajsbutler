@@ -102,6 +102,14 @@ slices, and validation plans.
 - Test File Or Validation Plan:
   report webview operation, viewer message routing, viewer factory,
   navigation, table, flow controller, web smoke, and telemetry tests.
+- Validation Result:
+  `reportWebviewOperation.test.ts`, `viewerFactory.test.ts`,
+  `viewerActionTelemetry.test.ts`, `tableNavigation.test.ts`, and related
+  viewer routing tests pass through `rtk pnpm test`; `rtk pnpm run test:web`,
+  `rtk pnpm run qlty`, and `rtk pnpm run build` pass. Production build reports
+  existing webpack bundle size warnings. README telemetry wording and
+  CHANGELOG are updated because telemetry policy now covers anonymous viewer
+  action metadata.
 
 ### Search Failure
 

@@ -45,6 +45,13 @@ export const createRevealUnitEvent = (
   data: { absolutePath },
 });
 
+export const createOperationEvent = (
+  operation: string,
+): OperationEventType => ({
+  type: OPERATION,
+  data: operation,
+});
+
 export type WebviewEventType =
   | ResourceEventType
   | ReadyEventType

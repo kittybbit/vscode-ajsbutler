@@ -14,7 +14,7 @@ import { Table, VisibilityState } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../../domain/services/i18n/nls";
-import { OPERATION, SAVE } from "../../../../shared/webviewEvents";
+import { SAVE, createOperationEvent } from "../../../../shared/webviewEvents";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
 import {
@@ -134,14 +134,14 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
 
   const handleCopy = useCallback(() => {
     const csv = exportCsvView(table);
-    window.vscode.postMessage({ type: OPERATION, data: "copy.csv" });
+    window.vscode.postMessage(createOperationEvent("copy.csv"));
     navigator.clipboard.writeText(csv);
     setOpen(true);
   }, [table]);
 
   const handleSave = useCallback(() => {
     const csv = exportCsvView(table);
-    window.vscode.postMessage({ type: OPERATION, data: "save.csv" });
+    window.vscode.postMessage(createOperationEvent("save.csv"));
     window.vscode.postMessage({ type: SAVE, data: csv });
   }, [table]);
 

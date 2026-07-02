@@ -244,6 +244,114 @@ export const telemetryEvents = {
       telemetryPropertyKeys.errorCode,
     ],
   },
+  viewerTableCsvCopied: {
+    name: "viewer.table.csv_copied",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerTableCsvSaved: {
+    name: "viewer.table.csv_saved",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerTableUnitSelected: {
+    name: "viewer.table.unit_selected",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerTableDefinitionOpened: {
+    name: "viewer.table.definition_opened",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerTableNavigateToFlow: {
+    name: "viewer.table.navigate_to_flow",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowUnitSelected: {
+    name: "viewer.flow.unit_selected",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowDefinitionOpened: {
+    name: "viewer.flow.definition_opened",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowScopeOpened: {
+    name: "viewer.flow.scope_opened",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowNestedExpansionToggled: {
+    name: "viewer.flow.nested_expansion_toggled",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowRelationshipFocusToggled: {
+    name: "viewer.flow.relationship_focus_toggled",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowMiniMapToggled: {
+    name: "viewer.flow.minimap_toggled",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  viewerFlowNavigateToTable: {
+    name: "viewer.flow.navigate_to_table",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.view,
+      telemetryPropertyKeys.result,
+    ],
+  },
 } as const satisfies Record<string, TelemetryEventDefinition>;
 
 export const createTelemetryEvent = <Name extends string>(

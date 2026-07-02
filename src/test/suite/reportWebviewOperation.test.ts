@@ -41,6 +41,15 @@ suite("Report Webview Operation", () => {
           operation: "copy.csv",
         },
       },
+      {
+        eventName: "viewer.table.csv_copied",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          view: "table",
+          result: "success",
+        },
+      },
     ]);
   });
 });

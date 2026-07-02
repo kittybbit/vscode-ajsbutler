@@ -256,6 +256,7 @@ suite("ViewerFactory", () => {
     assert.deepStrictEqual(telemetryEvents, [
       "viewer.table.ready",
       OPERATION,
+      "viewer.table.csv_copied",
       "viewer.table.closed",
     ]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);

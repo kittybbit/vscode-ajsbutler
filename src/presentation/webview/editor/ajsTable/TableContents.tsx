@@ -43,7 +43,10 @@ import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
 import UnitEntityDialog from "../UnitEntityDialog";
-import { REVEAL_UNIT } from "../../../../shared/webviewEvents";
+import {
+  REVEAL_UNIT,
+  createOperationEvent,
+} from "../../../../shared/webviewEvents";
 import UnitTreeSelector from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
@@ -212,6 +215,10 @@ const useTableViewerTheme = (isDarkMode: boolean): Theme =>
     [isDarkMode],
   );
 
+const reportTableOperation = (operation: string): void => {
+  window.vscode.postMessage(createOperationEvent(operation));
+};
+
 const TableViewerShell = ({
   theme,
   table,
@@ -318,9 +325,10 @@ const TableViewerShell = ({
               <UnitListDetailPanel
                 detail={selectedDetail}
                 onClose={closeDetailPane}
-                onOpenDefinition={() =>
-                  setDialogData(selectedDetail.definition)
-                }
+                onOpenDefinition={() => {
+                  reportTableOperation("definition.open");
+                  setDialogData(selectedDetail.definition);
+                }}
                 onOpenFlow={() =>
                   navigateToFlow(selectedDetail.row.absolutePath)
                 }
@@ -380,6 +388,7 @@ const TableContents = () => {
 
   const selectTreeUnit = useCallback(
     (unitId: string) => {
+      reportTableOperation("unit.select");
       selectUnitTreeUnitInTable(unitId, viewerData.unitById, revealPath);
     },
     [revealPath, viewerData.unitById],

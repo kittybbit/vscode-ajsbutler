@@ -23,7 +23,7 @@
 - Human approval:
   approved for Slice 1 through Slice 8.
 - Active implementation slice:
-  Slice 4: Viewer Action Telemetry.
+  Slice 5: Search Outcome Telemetry.
 
 ## Human Approval
 
@@ -205,7 +205,7 @@ active implementation approval remains.
 
 ### Slice 4: Viewer Action Telemetry
 
-- Status: Approved
+- Status: Complete
 - Scope:
   add schema-owned telemetry for current table and flow viewer actions:
   CSV copy/save, unit selection, unit-definition opening, list-to-flow and
@@ -496,7 +496,7 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready. Slices 1 through 3 are complete; Slices 4 through 8 remain approved
+  not ready. Slices 1 through 4 are complete; Slices 5 through 8 remain approved
   for implementation.
 - Durable documentation updates:
   `uc-record-telemetry.md`, `docs/specs/plans.md`, and `docs/specs/roadmap.md`

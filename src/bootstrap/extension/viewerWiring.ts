@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { createViewerNavigationActionEvent } from "../../application/telemetry/viewerActionTelemetry";
 import {
   createViewerOpenStartedEvent,
   createViewerReadyEvent,
@@ -223,6 +224,21 @@ const createViewerBundle = ({
         },
       ),
       onNavigate: (document, event) => {
+        const navigationEvent = createViewerNavigationActionEvent({
+          viewType,
+          targetView: event.data.targetView,
+          host: getTelemetryHost(),
+        });
+        if (navigationEvent) {
+          try {
+            telemetry.trackEvent(
+              navigationEvent.name,
+              navigationEvent.properties,
+            );
+          } catch {
+            // Viewer action telemetry must not block counterpart navigation.
+          }
+        }
         revealCounterpartFromNavigation(document, event, {
           factoryByViewType,
           mountPanel: previewDeps.mountPanel,
