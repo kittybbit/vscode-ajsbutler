@@ -85,20 +85,10 @@ the active feature must have an approved implementation slice recorded in
 right SDD artifact and stop for clarification or approval instead of making
 hidden assumptions.
 
-Document responsibilities:
-
-- Use Case: durable behavior contract.
-- `SPECS.md`: feature requirements, boundaries, compatibility, and acceptance.
-- `TASKS.md`: implementation-slice plan, approval state, validation, risks,
-  and feature exit readiness.
-- `TRACEABILITY.md`: mapping from use case or requirement through `SPECS.md`,
-  slice, and test or validation when required.
-- `docs/specs/plans.md`: branch-level active features and branch-wide
-  decisions.
-- `docs/specs/roadmap.md`: repository-level direction, sequence, remaining
-  debt, and deferred work.
-- README: user/developer overview and command reference.
-- AGENTS: agent-facing repository rules and SDD entrypoint.
+Document roles are defined only in `docs/specs/README.md`. Use that file as
+the Single Source of Truth for SDD artifact responsibilities, including
+`SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, `docs/specs/plans.md`, and
+`docs/specs/roadmap.md`.
 
 ## Branch Naming
 

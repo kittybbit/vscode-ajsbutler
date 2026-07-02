@@ -13,7 +13,8 @@
 
 ## Plan Status
 
-- Status: Proposed | Review Needed | Pending Approval | Approved | In Progress | Replan Required | Complete
+- Status: Proposed | Review Needed | Pending Approval | Approved | In Progress |
+  Replan Required | Complete
 - Planning scope:
 - Review status:
 - Human approval:

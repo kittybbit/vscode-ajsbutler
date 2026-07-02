@@ -25,9 +25,22 @@ repository.
 SDD is the standard process for non-trivial changes. Use the Codex SDD skills
 as the operational workflow:
 
-```md
-sdd-create-feature -> sdd-plan-task -> sdd-review-plan -> Human Approval -> sdd-implement-task -> Feature Exit
+```mermaid
+flowchart TD
+    A["Investigation"] --> B["Feature Creation<br/>sdd-create-feature"]
+    B --> C["Planning<br/>sdd-plan-task"]
+    C --> D["Plan Review<br/>sdd-review-plan"]
+    D --> E["Human Approval<br/>required before implementation"]
+    E --> F["Implementation<br/>sdd-implement-task"]
+    F --> G["Completion Approval"]
+    G --> H["Feature Exit Review<br/>sdd-plan-task Feature Exit Mode"]
+    H --> I["Feature Close"]
+    F -. "exception only: new slice, scope change, design decision,<br/>wider impact, or approval-boundary change" .-> C
 ```
+
+Human Approval is required before implementation starts. Replanning is an
+exception flow, not the normal path between approved implementation slices.
+Feature Exit runs only after the Feature Definition of Done is satisfied.
 
 For non-trivial changes:
 
@@ -140,21 +153,9 @@ Every agent must preserve:
 - approved scope boundaries
 - required validation
 
-Keep feature documents decision-focused:
-
-- use `docs/specs/plans.md` for active feature folders, branch-wide
-  assumptions, and repository sequencing that applies across features
-- use feature `SPECS.md` for feature-level functional requirements,
-  compatibility constraints, acceptance criteria, and non-goals
-- use feature `TASKS.md` for the implementation-slice plan, approval state,
-  validation expectations, production readiness, unresolved risks, and feature
-  exit readiness
-- use feature `TRACEABILITY.md` when required to map use cases or requirements
-  through `SPECS.md`, implementation slices, and tests or validation plans
-- move durable behavior contracts to `docs/requirements/use-cases/`
-- move repository-level sequence changes to `roadmap.md`
-- remove implementation history once it no longer affects future approval,
-  risk, traceability, or durable documentation
+Keep feature documents decision-focused and follow the Document Roles section
+below as the Single Source of Truth. Remove implementation history once it no
+longer affects future approval, risk, traceability, or durable documentation.
 
 Copilot suggestions must be checked against the approved `SPECS.md`,
 `TASKS.md`, and approved scope before adoption. Do not accept Copilot
@@ -258,23 +259,8 @@ follow-up decision.
 ## Impact Investigation Records
 
 Use the SDD artifacts by responsibility instead of storing all investigation
-notes in feature documents.
-
-- `docs/specs/plans.md`:
-  branch-level work plan: active feature folders, branch-wide assumptions, and
-  repository sequencing that applies across features. Do not rewrite it for
-  slice-level progress inside an already active feature.
-- `docs/specs/features/<feature>/SPECS.md`:
-  feature-level functional requirements, compatibility requirements,
-  acceptance criteria, and non-goals
-- `docs/specs/features/<feature>/TASKS.md`:
-  implementation-slice plan, approval state, validation expectations,
-  production readiness, unresolved risks, and feature exit readiness
-- `docs/specs/features/<feature>/TRACEABILITY.md`:
-  required mapping from use case or requirement through `SPECS.md`,
-  implementation slice, and test or validation plan
-- `docs/requirements/use-cases/`:
-  durable behavior contracts and observable scenario changes
+notes in feature documents. See Document Roles below for the authoritative
+responsibility boundaries.
 
 `TASKS.md` is not a historical work log. After a slice is completed,
 re-scoped, or dropped, reduce the record to what still affects future
@@ -453,9 +439,37 @@ When syncing, preserve decision context instead of accumulating entries:
 
 ## Document Roles
 
-- `vision.md`: product purpose and values
-- `glossary.md`: shared terms
-- `context-map.md`: boundaries and external systems
-- `architecture.md`: target layering and dependency direction
-- `roadmap.md`: preferred incremental extraction order
-- `features/_templates/`: templates for new repository-native feature docs
+This section is the Single Source of Truth for SDD document responsibilities.
+Other repository docs should link here instead of repeating these details.
+
+- `vision.md`: product purpose and values.
+- `glossary.md`: shared terms.
+- `context-map.md`: boundaries and external systems.
+- `architecture.md`: target layering and dependency direction.
+- `features/_templates/`: templates for new repository-native feature docs.
+- `docs/requirements/use-cases/`: durable behavior contracts and observable
+  scenario changes that remain meaningful when modules, adapters, or file
+  layout change.
+- `docs/specs/features/<feature>/SPECS.md`: feature-level requirements,
+  boundaries, compatibility constraints, acceptance criteria, and non-goals.
+- `docs/specs/features/<feature>/TASKS.md`: the full implementation-slice
+  plan, slice order, dependencies, approval state, validation expectations,
+  production readiness, unresolved risks, and feature exit readiness.
+- `docs/specs/features/<feature>/TRACEABILITY.md`: required mapping from use
+  case or requirement through `SPECS.md`, implementation slice, and test or
+  validation plan.
+- `docs/specs/plans.md`: current branch work management. Keep active features,
+  current priorities, unfinished work, and the next intended action here.
+  Do not keep completed slice history, implementation logs, work diaries,
+  resolved issues, or information used only after feature closure here.
+- `docs/specs/roadmap.md`: repository-wide medium- and long-term planning.
+  Keep future features, repository direction, and planned improvements here.
+  Do not keep current branch work, feature progress, slice history, or
+  implementation status here.
+- `README.md`: repository entry point, user/developer overview, setup, basic
+  commands, and links to detailed docs.
+- `AGENTS.md`: agent-facing repository rules, architecture constraints, and
+  routing entry point.
+
+`docs/specs/plans.md` and `docs/specs/roadmap.md` are not places to store
+implementation history.

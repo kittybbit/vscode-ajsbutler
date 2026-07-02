@@ -53,43 +53,15 @@ To use this extension:
 This repository uses Specification-Driven Development (SDD) as the standard
 process for non-trivial changes.
 
-- SDD guidance starts in `docs/specs/README.md`.
-- Feature work starts with `sdd-create-feature`.
-- Feature implementation plans are created or revised with `sdd-plan-task`.
-- Plans are reviewed with `sdd-review-plan`.
-- Runtime code, tests, generated artifacts, and configuration are edited only
-  after Human Approval.
-- `sdd-implement-task` implements one approved implementation slice at a time.
-- Feature closure follows the Feature Definition of Done in
-  `docs/specs/README.md`.
-- Repository-level use-case contracts live in
-  `docs/requirements/use-cases/`.
-- Branch-level planning is tracked in `docs/specs/plans.md`.
-- Codex-specific repository guidance lives in `AGENTS.md`.
-- Docs-only work should use a `docs/...` branch name and stay within the
-  docs-only file set used by `.github/workflows/verify.yml`:
-  `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md`.
+- SDD workflow and document roles: `docs/specs/README.md`
+- Agent-facing repository rules and routing: `AGENTS.md`
+- Durable behavior contracts: `docs/requirements/use-cases/`
+- Copilot CLI entry point: `.github/copilot-instructions.md`
+- Codex workflows: `.codex/skills/`
 
-SDD artifact roles:
-
-- Use cases: durable behavior contracts.
-- `SPECS.md`: feature requirements, boundaries, and acceptance criteria.
-- `TASKS.md`: implementation-slice plan, approval state, validation, risks,
-  and feature exit readiness.
-- `TRACEABILITY.md`: use case or requirement to validation mapping when
-  required.
-- `docs/specs/plans.md`: branch-level active features and branch-wide
-  decisions.
-- `docs/specs/roadmap.md`: repository-level direction and sequencing.
-
-Recent refactoring work introduced:
-
-- a normalized AJS model for application-facing use cases
-- application use cases for unit list, flow graph, CSV export, and unit
-  definition building
-- a table row/view adapter so the table UI consumes application view data
-  instead of `UnitEntity` wrapper accessors
-- repeatable web-extension verification via `pnpm run test:web`
+Keep README as an overview and command reference. Detailed development rules,
+approval gates, feature artifact responsibilities, and agent routing live in
+the documents above.
 
 Browser-based extension testing uses `@vscode/test-web`, which currently
 requires Node.js 20 or later.
@@ -153,45 +125,9 @@ misses remain valid.
 
 ## For AI Agents
 
-This repository supports both **Copilot CLI** and **Codex** (VS Code Copilot).
-Agents should coordinate using a shared routing guide rather than separate
-configurations.
-
-### Quick Reference
-
-| Agent           | Primary Strength                       | Fallback Available | Configuration                     |
-| --------------- | -------------------------------------- | ------------------ | --------------------------------- |
-| **Codex**       | Live coding, SDD workflow, interactive | Yes (Copilot CLI)  | `.codex/skills/`                  |
-| **Copilot CLI** | Automation, git ops, batch work        | Yes (Codex)        | `.github/copilot-instructions.md` |
-
-**Note**: If a Primary agent reaches token limit or session loss, use the Fallback agent.
-Both agents stay coordinated through a single routing guide (see below).
-
-### Routing Guide (Single Source of Truth)
-
-For detailed task-to-agent assignment with Primary/Fallback options:
-
-- **See** `AGENTS.md` § "AI Agent Routing Guide"
-- **See** `.agent.md` for lightweight coordination index
-- All rules reference **AGENTS.md**, never duplicate
-
-### Key Files
-
-- `AGENTS.md` - Architecture rules and agent routing (authoritative)
-- `.agent.md` - Multi-agent coordination index
-- `docs/specs/` - Specification-driven development documentation
-- `.github/copilot-instructions.md` - Copilot CLI entry point
-- `.codex/skills/` - Codex-specific workflows
-
-AI agents should run CLI commands through `rtk` by default when a matching
-proxy exists, for example `rtk git status --short --branch`,
-`rtk pnpm run qlty`, or `rtk pnpm run build`. Use native commands only when
-`rtk` has no suitable proxy, exact unfiltered output is required, or the
-command is interactive.
-
-Agent development rules are centralized in `AGENTS.md` and `docs/specs/`.
-README intentionally stays at overview level to avoid duplicating the SDD
-workflow.
+Agent development rules are centralized in `AGENTS.md` and
+`docs/specs/README.md`. README intentionally stays at overview level to avoid
+duplicating the SDD workflow.
 
 ## Telemetry
 
