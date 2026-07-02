@@ -1,6 +1,7 @@
 ---
 interface:
   display_name: "SDD Plan Task"
-  short_description: "Plan the next SDD task and feature handoff"
+  short_description: "Plan feature implementation slices"
   default_prompt: >-
-    Use $sdd-plan-task to decide the next SDD task and update TASKS.md.
+    Use $sdd-plan-task to decompose the active SDD feature into implementation
+    slices and update TASKS.md.

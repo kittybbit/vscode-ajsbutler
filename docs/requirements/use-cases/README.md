@@ -56,12 +56,14 @@ That belongs in `docs/specs/`.
   Repository-level behavior contract.
 - `docs/specs/features/<feature>/SPECS.md`
   Feature-local implementation requirements and boundary decisions.
-- `docs/specs/features/<feature>/PLANS.md`
-  Feature-local design and milestone notes.
 - `docs/specs/features/<feature>/TASKS.md`
-  Execution checklist for the current slice.
+  Feature implementation-slice plan, approval state, validation, risks, and
+  feature exit readiness.
+- `docs/specs/features/<feature>/TRACEABILITY.md`
+  Mapping from use case or requirement through `SPECS.md`, implementation
+  slice, and test or validation when required.
 - `docs/specs/plans.md`
-  Branch-level summary, current task, and next priorities.
+  Branch-level active features and branch-wide decisions.
 
 ## Decision Rule
 

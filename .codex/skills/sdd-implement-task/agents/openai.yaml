@@ -1,7 +1,7 @@
 ---
 interface:
   display_name: "SDD Implement Task"
-  short_description: "Implement an approved SDD task with reviews"
+  short_description: "Implement one approved SDD slice"
   default_prompt: >-
-    Use $sdd-implement-task to implement the current TASKS.md item and update
-    completion state.
+    Use $sdd-implement-task to implement one approved TASKS.md slice and update
+    its completion state.

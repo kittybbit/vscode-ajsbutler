@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Map the use case, behavioral scenarios, feature requirements, implementation,
-tasks, and tests when that mapping is not obvious from SPECS.md and TASKS.md
-alone.
+Map use cases or requirements to feature requirements, implementation slices,
+and tests or validation plans when that mapping is required by the SDD
+workflow.
 
 ## Mapping
 
@@ -12,9 +12,9 @@ alone.
 - Scenario: SCN-{{ID}}-1
 - Requirement: FR-{{ID}}
 - Spec: {{section}}
-- Implementation: {{path}}
-- Task: {{task}}
-- Test: TEST-{{ID}}
+- SPECS section: {{section}}
+- Implementation Slice: {{slice}}
+- Test file or validation plan: {{test-or-validation}}
 
 ## Coverage
 

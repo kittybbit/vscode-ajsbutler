@@ -22,37 +22,70 @@ repository.
 
 ## Working Agreement
 
+SDD is the standard process for non-trivial changes. Use the Codex SDD skills
+as the operational workflow:
+
+```mermaid
+flowchart TD
+    A["Investigation"] --> B["Feature Creation<br/>sdd-create-feature"]
+    B --> C["Planning<br/>sdd-plan-task"]
+    C --> D["Plan Review<br/>sdd-review-plan"]
+    D --> E["Human Approval<br/>required before implementation"]
+    E --> F["Implementation<br/>sdd-implement-task"]
+    F --> G["Completion Approval"]
+    G --> H["Feature Exit Review<br/>sdd-plan-task Feature Exit Mode"]
+    H --> I["Feature Close"]
+    F -. "exception only: new slice, scope change, design decision,<br/>wider impact, or approval-boundary change" .-> C
+```
+
+Human Approval is required before implementation starts. Replanning is an
+exception flow, not the normal path between approved implementation slices.
+Feature Exit runs only after the Feature Definition of Done is satisfied.
+
+## Trivial Change Criteria
+
+Use this section as the Single Source of Truth for deciding whether SDD feature
+creation may be skipped.
+
+A change is trivial only when it does not change any of these:
+
+- runtime behavior
+- tests or validation expectations
+- generated artifacts
+- configuration
+- desktop, web, VS Code, JP1/AJS, or definition-file compatibility
+- durable documentation responsibilities or document roles
+
+Examples that may be trivial:
+
+- typo fixes
+- formatting-only markdown cleanup
+- comment wording that does not change behavior, policy, or responsibility
+- broken link fixes that do not change document meaning
+
+When any item above changes, or when impact is uncertain, treat the work as
+non-trivial and start with `sdd-create-feature`.
+
 For non-trivial changes:
 
-1. create a dedicated git branch before implementation work starts
-   and use `docs/...` only for docs-only slices
-2. prefer quality assurance, KISS, DRY/YAGNI, then SOLID in that order;
-   do not add abstractions unless they reduce real complexity
-3. update or create the relevant use-case spec in
-   `docs/requirements/use-cases/` when the behavior contract changes
-4. update or create concise feature docs under
-   `docs/specs/features/<feature>/` when feature-level functional
-   requirements or current task decisions need tracking
-5. track execution tasks in `docs/specs/features/<feature>/TASKS.md`
-   and update that file in the same commit whenever a task is completed,
-   reframed, or dropped
-   `TASKS.md` is not a complete work log; retain only the task state,
-   approval boundary, unresolved risk, and use-case back-propagation notes
-   that future maintainers need for the next decision
-6. document assumptions explicitly
-7. implement in small vertical slices
-8. refresh `docs/specs/plans.md` only when the branch starts, stops, or
-   changes an active feature; slice progress stays in the feature `TASKS.md`
-9. refresh `docs/specs/roadmap.md` in the same commit if a completed slice
-   changes repository-level ordering, remaining debt, or deferred work
-10. before `git push`, run local validation through `rtk` serially in this
-    order for code changes: `rtk pnpm run qlty`, `rtk pnpm test`,
-    `rtk pnpm run test:web`, `rtk pnpm run build`
-11. run any additional task-specific checks before finishing
-12. avoid anemic domain models: extract only cross-unit or cross-layer
-    semantics into helpers/interfaces, and keep entity identity plus
-    unit-local behavior in the entity when that behavior is part of the
-    JP1/AJS concept itself
+1. create a dedicated git branch before implementation work starts and use
+   `docs/...` only for docs-only slices
+2. start feature intake with `sdd-create-feature`
+3. create or revise the full implementation-slice plan with `sdd-plan-task`
+   in exactly one mode: Planning Mode, Replanning Mode, or Feature Exit Mode
+4. review the plan with `sdd-review-plan`
+5. obtain clear Human Approval before editing runtime code, tests, generated
+   artifacts, or configuration
+6. implement only approved slices with `sdd-implement-task`
+7. return to `sdd-plan-task` only when a new slice, scope change, design
+   decision, wider impact, approval-boundary change, or Feature Exit review is
+   required
+8. close a feature only after Feature Exit Mode confirms the Feature
+   Definition of Done
+
+Prefer quality assurance, readability, KISS, DRY/YAGNI, then SOLID in that
+order. Do not add abstractions unless they reduce real complexity. Keep diffs
+inside the approved slice scope.
 
 For docs-only changes:
 
@@ -64,6 +97,33 @@ For docs-only changes:
 
 Run validation commands through `rtk` by default. `rtk` is a cost-control and
 execution-efficiency tool; it is not a reason to skip required validation.
+
+## CHANGELOG Update Criteria
+
+Use this section as the Single Source of Truth for deciding whether a
+CHANGELOG update is required.
+
+Update `CHANGELOG.md` when a change affects externally observable extension
+behavior, including:
+
+- user-visible behavior
+- compatibility
+- commands
+- configuration
+- diagnostics
+- user workflow
+- documented extension behavior
+
+Do not update `CHANGELOG.md` for changes that are only:
+
+- internal refactoring
+- implementation cleanup
+- tests with no externally observable behavior change
+- documentation maintenance that does not change documented extension behavior
+- other changes with no externally observable behavior
+
+When uncertain, record the evaluation in the feature plan or implementation
+summary and ask for the human decision before closing the slice or feature.
 
 ## Semantic Code Navigation
 
@@ -144,27 +204,9 @@ Every agent must preserve:
 - approved scope boundaries
 - required validation
 
-Keep feature documents decision-focused:
-
-- use `docs/specs/plans.md` for the branch work plan: active feature folders,
-  branch-wide assumptions, and repository sequencing that applies across
-  features
-- do not update `docs/specs/plans.md` only because a slice inside an already
-  active feature starts, finishes, or changes approval state
-- use feature `SPECS.md` for feature-level functional requirements,
-  compatibility constraints, acceptance criteria, and non-goals
-- do not use feature `SPECS.md` for individual task records, slice histories,
-  approval logs, qlty metric transcripts, or implementation checklists
-- keep feature `TASKS.md` limited to the current status, active tasks, current
-  approval state, unresolved risks, and the minimum record needed to decide
-  whether a completed or active task must be reflected back into a use case
-- remove prior implementation, approval, and validation details once they no
-  longer affect a future decision, re-approval boundary, unresolved risk, or
-  use-case update
-- move durable behavior contracts to `docs/requirements/use-cases/`
-- move repository-level sequence changes to `roadmap.md`
-- summarize validation expectations in `TASKS.md`; include past run details
-  only when a failure, warning, or risk remains actionable
+Keep feature documents decision-focused and follow the Document Roles section
+below as the Single Source of Truth. Remove implementation history once it no
+longer affects future approval, risk, traceability, or durable documentation.
 
 Copilot suggestions must be checked against the approved `SPECS.md`,
 `TASKS.md`, and approved scope before adoption. Do not accept Copilot
@@ -214,7 +256,8 @@ While approval is pending, Codex may only:
 - organize alternatives
 - present the approval request
 
-Each feature `TASKS.md` must include only the current approval evidence:
+Each feature `TASKS.md` must include approval evidence for the approved plan
+or active slice:
 
 ```md
 ## Human Approval
@@ -228,11 +271,10 @@ Each feature `TASKS.md` must include only the current approval evidence:
 current conversation`; do not copy the human approval message into `TASKS.md`.
 
 Implementation may start only when `Status: Approved`, `Approved at`, and
-`Approved scope` record the human-approved implementation boundary. Reset the
-section back to `Pending` when that approved slice is finished and no active
-implementation approval remains. If implementation reveals required changes
-outside the approved scope, stop again, update the impact record, and obtain
-additional clear approval before editing those areas.
+`Approved scope` record the human-approved implementation boundary for the
+slice. If implementation reveals required changes outside the approved scope,
+stop, use `sdd-plan-task` Replanning Mode, update the impact record, and
+obtain additional clear approval before editing those areas.
 
 Before approval, Codex must report only this implementation-gate output and
 must not claim that implementation has started or completed:
@@ -257,19 +299,10 @@ generated artifacts, or configuration.
 Implementation will not proceed until approval is given.
 ```
 
-After approval, expand the investigation into a complete reference impact
-check, list every required fix, and task the work before implementation.
-Use Serena or another semantic code navigation tool when available to verify
-affected references, call sites, transitive references, and dependency impact.
-Do not finish with only a subset of affected references updated.
-
-Implementation should then proceed in small meaningful blocks:
-
-1. implement one coherent block
-2. compile or run the closest fast check
-3. repair affected references in order
-4. run relevant unit tests
-5. after all fixes, run non-unit validation required by the change
+After approval, `sdd-implement-task` implements exactly one approved slice.
+Implementation should use staged validation: nearest fast check, related
+tests, qlty, needed web tests, and build only when required for final
+confidence.
 
 Do not leave failing checks unexplained or deferred without an explicit
 follow-up decision.
@@ -277,27 +310,12 @@ follow-up decision.
 ## Impact Investigation Records
 
 Use the SDD artifacts by responsibility instead of storing all investigation
-notes in feature documents.
+notes in feature documents. See Document Roles below for the authoritative
+responsibility boundaries.
 
-- `docs/specs/plans.md`:
-  branch-level work plan: active feature folders, branch-wide assumptions, and
-  repository sequencing that applies across features. Do not rewrite it for
-  slice-level progress inside an already active feature.
-- `docs/specs/features/<feature>/SPECS.md`:
-  feature-level functional requirements, compatibility requirements,
-  acceptance criteria, and non-goals
-- `docs/specs/features/<feature>/TASKS.md`:
-  current execution tasks, current approval evidence, unresolved risks, and
-  the minimum notes needed to decide whether behavior must be reflected back
-  into `docs/requirements/use-cases/`
-- `docs/requirements/use-cases/`:
-  durable behavior contracts and observable scenario changes
-
-`TASKS.md` may temporarily hold approval-sensitive investigation details while
-the task is active. After the task is completed, re-scoped, or dropped, reduce
-the record to only what still affects future approval, risk, or use-case
-back-propagation. It is not the primary record for design decisions, impact
-analysis, or historical narrative.
+`TASKS.md` is not a historical work log. After a slice is completed,
+re-scoped, or dropped, reduce the record to what still affects future
+approval, risk, traceability, production readiness, or feature exit.
 
 When behavior scenarios exist, include the scenario impact in the same
 investigation: changed scenarios, added scenarios, removed scenarios, and
@@ -390,11 +408,75 @@ Those belong under `docs/specs/`.
 
 ## When To Remove Feature Docs
 
-Remove a `docs/specs/features/<feature>/` folder when it no longer carries an
-active feature requirement, active task decision, unresolved risk, or useful
-follow-up. Preserve completed refactor-only information in `roadmap.md`,
-`plans.md`, or use cases only when it helps future sequencing, risk
-assessment, ownership decisions, or behavior understanding.
+Remove a `docs/specs/features/<feature>/` folder only in Feature Exit Mode
+after the Feature Definition of Done passes and the human approves closure.
+Preserve information in durable docs only when it passes the Durable
+Documentation Gate.
+
+## Feature Definition Of Done
+
+A feature is complete only when:
+
+- every implementation slice is complete
+- feature requirements and acceptance criteria are satisfied
+- required validation is complete
+- non-functional quality and production readiness are preserved or justified
+- required `TRACEABILITY.md` updates are complete, or not required with a
+  clear reason
+- durable use-case, `plans.md`, and `roadmap.md` updates are complete when
+  needed
+- unresolved risks are resolved, accepted, or recorded as follow-up
+
+## Feature Exit Review Output
+
+Report Feature Exit Review using this standard output:
+
+```md
+## Feature Exit Review
+
+- Feature:
+- Completed slices:
+- Acceptance status:
+- Validation:
+- Traceability:
+- Production readiness:
+- Durable documentation:
+- Remaining risks:
+- Closure recommendation: Close | Do not close | Human decision needed
+```
+
+Use `Closure recommendation: Close` only when the Feature Definition of Done is
+satisfied. Use `Human decision needed` when the evidence is complete but the
+closure decision still requires explicit approval.
+
+## Durable Documentation Gate
+
+Before updating long-lived docs, verify the content:
+
+- is reusable beyond one feature
+- describes durable behavior, specification, design policy, or repository
+  operating policy
+- helps future planning or implementation
+- does not duplicate another durable document
+- is not a temporary investigation result
+- is not implementation history
+- is not review commentary
+- is not a record of a resolved issue
+
+Update the smallest necessary durable document surface.
+
+## Production Readiness Gate
+
+For code slices, confirm:
+
+- failure modes are intentional
+- user-facing errors, diagnostics, or fallback behavior are understandable
+- existing JP1/AJS definition files remain compatible unless explicitly
+  changed by the approved scope
+- large, malformed, or edge-case inputs avoid preventable slowdowns or crashes
+- desktop and web behavior are considered
+- README or user docs are updated only when user-facing behavior changes
+- CHANGELOG update need is evaluated using the CHANGELOG Update Criteria
 
 ## Sync Cadence
 
@@ -402,9 +484,11 @@ Treat the following docs as required sync artifacts, not optional catch-up
 notes:
 
 - `docs/specs/features/<feature>/TASKS.md`
-  Update immediately when one task or follow-up is completed, re-scoped, or
-  intentionally dropped, then remove details that no longer affect approval,
-  risk, or use-case back-propagation.
+  Update when the implementation-slice plan, approval state, slice status,
+  validation, risk, or feature exit readiness changes.
+- `docs/specs/features/<feature>/TRACEABILITY.md`
+  Update when required traceability changes or when an implemented slice's
+  validation result must be reflected.
 - `docs/specs/plans.md`
   Update only when the branch starts, stops, or changes an active feature.
 - `docs/specs/roadmap.md`
@@ -412,7 +496,7 @@ notes:
   debt, or deferred work.
 
 Prefer the smallest useful cadence:
-one completed task or one resolved follow-up is enough reason to sync the
+one completed slice or one resolved follow-up is enough reason to sync the
 docs in the same commit.
 
 When syncing, preserve decision context instead of accumulating entries:
@@ -420,16 +504,44 @@ When syncing, preserve decision context instead of accumulating entries:
 - remove or rewrite completed checklist/history sections when they no longer
   help future maintainers understand the current state, remaining risk, next
   decision, or required use-case update
-- keep `TASKS.md` readable from the top so the current approval state, active
-  tasks, and next decision are immediately visible
+- keep `TASKS.md` readable from the top so the plan status, approval state,
+  active slice, and next decision are immediately visible
 - keep feature `SPECS.md` readable as functional requirements rather than as a
   task archive
 
 ## Document Roles
 
-- `vision.md`: product purpose and values
-- `glossary.md`: shared terms
-- `context-map.md`: boundaries and external systems
-- `architecture.md`: target layering and dependency direction
-- `roadmap.md`: preferred incremental extraction order
-- `features/_templates/`: templates for new repository-native feature docs
+This section is the Single Source of Truth for SDD document responsibilities.
+Other repository docs should link here instead of repeating these details.
+
+- `vision.md`: product purpose and values.
+- `glossary.md`: shared terms.
+- `context-map.md`: boundaries and external systems.
+- `architecture.md`: target layering and dependency direction.
+- `features/_templates/`: templates for new repository-native feature docs.
+- `docs/requirements/use-cases/`: durable behavior contracts and observable
+  scenario changes that remain meaningful when modules, adapters, or file
+  layout change.
+- `docs/specs/features/<feature>/SPECS.md`: feature-level requirements,
+  boundaries, compatibility constraints, acceptance criteria, and non-goals.
+- `docs/specs/features/<feature>/TASKS.md`: the full implementation-slice
+  plan, slice order, dependencies, approval state, validation expectations,
+  production readiness, unresolved risks, and feature exit readiness.
+- `docs/specs/features/<feature>/TRACEABILITY.md`: required mapping from use
+  case or requirement through `SPECS.md`, implementation slice, and test or
+  validation plan.
+- `docs/specs/plans.md`: current branch work management. Keep active features,
+  current priorities, unfinished work, and the next intended action here.
+  Do not keep completed slice history, implementation logs, work diaries,
+  resolved issues, or information used only after feature closure here.
+- `docs/specs/roadmap.md`: repository-wide medium- and long-term planning.
+  Keep future features, repository direction, and planned improvements here.
+  Do not keep current branch work, feature progress, slice history, or
+  implementation status here.
+- `README.md`: repository entry point, user/developer overview, setup, basic
+  commands, and links to detailed docs.
+- `AGENTS.md`: agent-facing repository rules, architecture constraints, and
+  routing entry point.
+
+`docs/specs/plans.md` and `docs/specs/roadmap.md` are not places to store
+implementation history.

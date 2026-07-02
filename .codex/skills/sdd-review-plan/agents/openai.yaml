@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "SDD Review Plan"
+  short_description: "Review a feature implementation plan"
+  default_prompt: >-
+    Use $sdd-review-plan to review a prepared SDD feature implementation plan
+    before human approval.

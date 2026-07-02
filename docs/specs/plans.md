@@ -27,8 +27,9 @@ rules in `docs/specs/README.md`, not in this file.
   folder. A new feature should be opened only when a finding maps to a
   meaningful responsibility or boundary concern.
 - Feature `SPECS.md` files carry feature requirements. Feature `TASKS.md` files
-  carry only current task state and the minimum record needed to decide whether
-  behavior must be reflected back into use cases.
+  carry implementation-slice plans, approval state, validation, risk, and
+  feature exit readiness. Feature `TRACEABILITY.md` files carry
+  requirement-to-validation mapping when required.
 - Desktop and web compatibility must stay explicit whenever bootstrap, preview,
   parsing, shared adapters, or runtime behavior change.
 

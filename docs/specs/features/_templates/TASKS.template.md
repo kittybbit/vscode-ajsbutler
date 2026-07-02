@@ -7,14 +7,18 @@
 - Update `docs/specs/plans.md` only when the branch starts, stops, or changes
   an active feature.
 - Update `docs/specs/roadmap.md` when repository sequencing changes.
-- Keep this file focused on current state only; do not retain historical logs,
+- Keep this file focused on the implementation-slice plan, approval state,
+  validation, risk, and feature exit readiness. Do not retain historical logs,
   prior approvals, or long validation diaries once they stop being actionable.
 
-## Current Status
+## Plan Status
 
-- Runtime status:
-- Active slice:
-- Open follow-up:
+- Status: Proposed | Review Needed | Pending Approval | Approved | In Progress |
+  Replan Required | Complete
+- Planning scope:
+- Review status:
+- Human approval:
+- Active implementation slice:
 
 ## Human Approval
 
@@ -30,14 +34,38 @@ current conversation`; do not copy the approval message.
 Reset this section back to Pending when the approved slice is complete and no
 active implementation approval remains.
 
-## Active Tasks
+## Implementation Slices
 
-- [ ] Impact investigation completed and recorded in PLANS/SPECS/TASKS by
-      responsibility
-- [ ] Human approval recorded
-- [ ] Implementation scope matches approved scope
-- [ ] Fix targets tracked to completion
-- [ ] {{implementation task}}
+### Slice 1: {{slice name}}
+
+- Status: Proposed | Approved | In Progress | Complete | Blocked | Replan Required
+- Scope:
+- User / Domain Value:
+- Cohesive Change Group:
+- Acceptance:
+- Validation:
+- Production Readiness:
+  - Failure mode:
+  - JP1/AJS compatibility:
+  - Large or malformed input risk:
+  - Desktop/web impact:
+  - README/docs impact:
+  - CHANGELOG impact:
+- Approval Boundary:
+- Dependencies:
+- Risks:
+- Out of Scope:
+
+## Traceability
+
+- TRACEABILITY.md required: yes | no
+- Reason:
+
+## Feature Exit
+
+- Definition of Done status:
+- Durable documentation updates:
+- Open risks:
 
 ## Validation
 
@@ -47,6 +75,6 @@ active implementation approval remains.
 
 ## Notes
 
-- Keep investigation details in PLANS.md or SPECS.md when they describe scope,
-  risk, alternatives, or boundary decisions.
-- Use this file for current executable tasks and open follow-up tracking only.
+- Keep feature requirements and boundary decisions in SPECS.md.
+- Use this file for implementation-slice planning, approval state, validation,
+  risk, and feature exit readiness only.

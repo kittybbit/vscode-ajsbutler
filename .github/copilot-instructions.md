@@ -26,8 +26,8 @@ Read these in order before making changes
 
    - `plans.md` - Branch status and priorities
    - `features/*/SPECS.md` - Feature requirements
-   - `features/*/PLANS.md` - Implementation design
-   - `features/*/TASKS.md` - Execution checklist
+   - `features/*/TASKS.md` - Implementation-slice plan and approval state
+   - `features/*/TRACEABILITY.md` - Requirement to validation mapping when required
 
 3. **`README.md`** - Build/test commands and quick reference
 
@@ -81,7 +81,8 @@ or adapter boundaries:
 - Add or update unit/integration tests
 - Run `rtk pnpm run qlty`, `rtk pnpm test`, and
   `rtk pnpm run test:web`
-- For docs-only changes, `rtk pnpm run lint:md` is sufficient
+- For docs-only changes, run `rtk pnpm run qlty`; add
+  `rtk pnpm run lint:md` when markdown-specific validation is useful
 
 ## Key Constraints
 
@@ -128,8 +129,12 @@ routing matrix first.
 ## Next Steps
 
 - For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
-- Refer to `docs/specs/features/` for use-case examples
-- Keep assumptions and design decisions documented in feature `PLANS.md`
+- Refer to `docs/specs/README.md` and `.codex/skills/` for the authoritative
+  SDD gates
+- Keep assumptions and design decisions in the responsible SDD artifact:
+  use cases for durable behavior, `SPECS.md` for feature requirements,
+  `TASKS.md` for slice plans, and `TRACEABILITY.md` for requirement-to-test
+  mapping when required
 - Run full validation (`rtk pnpm run qlty`, `rtk pnpm test`,
   `rtk pnpm run test:web`, `rtk pnpm run build`) before pushing
 

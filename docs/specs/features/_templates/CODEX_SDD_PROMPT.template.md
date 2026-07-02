@@ -6,7 +6,6 @@ Follow the existing repository documentation structure:
 
 - docs/specs/roadmap.md
 - docs/requirements/use-cases/\_template.md
-- docs/specs/features/\_templates/PLANS.template.md
 - docs/specs/features/\_templates/SPECS.template.md
 - docs/specs/features/\_templates/TASKS.template.md
 - docs/specs/features/\_templates/ADR.template.md
@@ -27,11 +26,11 @@ Instructions:
 3. Create feature documents under:
    docs/specs/features/{{feature-slug}}/
 4. Generate:
-   - PLANS.md
    - SPECS.md
    - TASKS.md
    - ADR.md if an architectural decision is needed
-   - TRACEABILITY.md if requirements mapping is useful
+   - TRACEABILITY.md when required for use case / requirement / slice /
+     validation mapping
 5. Keep documents concise, repository-specific, and implementation-ready.
 6. Align with DDD and Clean Architecture.
 7. Preserve VS Code compatibility declared in `package.json` when relevant.

@@ -9,7 +9,8 @@ Primary goals of this repository:
 
 1. Keep VS Code compatibility stable.
 2. Modernize dependencies without breaking extension behavior.
-3. Incrementally migrate to Specification-Driven Development (SDD).
+3. Use Specification-Driven Development (SDD) as the standard development
+   process for non-trivial work.
 4. Refactor toward Domain-Driven Design (DDD) and Clean Architecture.
 5. Preserve behavior for parser, list view, flow view, CSV export, diagnostics, hover, and telemetry.
 
@@ -62,22 +63,34 @@ Good first slices:
 
 ## SDD Workflow
 
-For non-trivial changes, follow this order:
+SDD is the only standard process for non-trivial changes. Do not use an
+alternate implementation flow when SDD applies.
+Use `docs/specs/README.md` as the Single Source of Truth for deciding whether
+a change is trivial enough to skip SDD feature creation.
 
-1. Read `docs/specs/README.md` first, especially the
-   Implementation Change Gate.
-2. Read relevant feature and roadmap docs in `docs/specs/`.
-3. Follow the semantic code navigation guidance in `docs/specs/README.md`
-   when Serena or an equivalent tool is available.
-4. Update or create the relevant use-case spec.
-5. Write or update a short implementation plan in `PLANS.md`.
-6. Confirm acceptance criteria and required approval gates before editing
-   runtime code, tests, generated artifacts, or configuration.
-7. Implement.
-8. Run quality checks.
-9. Summarize impact and remaining risks.
+Follow this lifecycle:
 
-If the requested change is ambiguous, prefer documenting assumptions explicitly in `PLANS.md` instead of making hidden assumptions.
+1. Start feature intake with `sdd-create-feature`.
+2. Create or revise the feature implementation-slice plan with
+   `sdd-plan-task`.
+3. Review the plan with `sdd-review-plan`.
+4. Obtain clear Human Approval for the reviewed plan and approved slice scope.
+5. Implement only approved slices with `sdd-implement-task`.
+6. Replan with `sdd-plan-task` only when scope, design decisions, impact, or
+   approval boundaries change.
+7. Close the feature only through Feature Exit Mode after the Feature
+   Definition of Done passes.
+
+Before editing runtime code, tests, generated artifacts, or configuration,
+the active feature must have an approved implementation slice recorded in
+`TASKS.md`. If the requested change is ambiguous, document assumptions in the
+right SDD artifact and stop for clarification or approval instead of making
+hidden assumptions.
+
+Document roles are defined only in `docs/specs/README.md`. Use that file as
+the Single Source of Truth for SDD artifact responsibilities, including
+`SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, `docs/specs/plans.md`, and
+`docs/specs/roadmap.md`.
 
 ## Branch Naming
 
@@ -96,15 +109,22 @@ If the requested change is ambiguous, prefer documenting assumptions explicitly 
 - Avoid unnecessary framework coupling.
 - Prefer pure functions in domain/application layers.
 - Keep functions small.
+- Prefer readability and maintainability over brevity, DRY-only extraction, or
+  generic abstraction.
 - Do not mix UI formatting logic with parsing/domain logic.
 - Avoid large files when extracting new use cases or adapters is practical.
 - Keep naming aligned with JP1/AJS business concepts.
+- Keep implementation diffs limited to the approved slice scope.
+- Do not plan new work during implementation; return to `sdd-plan-task` when
+  replanning is required.
 
 ## Testing Policy
 
 Before finishing a task, run the most relevant checks available.
 
-For docs-only changes, markdown lint is sufficient.
+For docs-only changes, run `rtk pnpm run qlty`; add
+`rtk pnpm run lint:md` when markdown structure or links need focused
+validation.
 
 Minimum expectation for meaningful code changes:
 
@@ -121,6 +141,28 @@ Recommended test layers:
 - DTO/view model mapping tests
 - VS Code integration tests for desktop
 - web extension smoke tests
+
+Production readiness checks must cover failure modes, understandable
+diagnostics or fallback behavior, JP1/AJS definition-file compatibility, large
+or malformed input risk, desktop/web behavior, README or user-doc impact, and
+CHANGELOG update need according to `docs/specs/README.md`.
+
+## Durable Documentation Gate
+
+Before updating long-lived docs such as use cases, README, AGENTS,
+`plans.md`, `roadmap.md`, or design/development guides, verify the content:
+
+- is reusable beyond one feature
+- describes durable behavior, specification, design policy, or repository
+  operating policy
+- helps future planning or implementation
+- does not duplicate another durable document
+- is not a temporary investigation result
+- is not implementation history
+- is not review commentary
+- is not a record of a resolved issue
+
+Update the smallest necessary durable document surface.
 
 ## VS Code Compatibility Policy
 
@@ -281,7 +323,8 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 **Source of Truth** (all agents reference, never duplicate):
 
 - `AGENTS.md` - Architecture rules and agent routing (you are here)
-- `docs/specs/` - SDD specifications and use cases
+- `docs/specs/` and `docs/requirements/use-cases/` - SDD workflow,
+  feature artifacts, and durable behavior contracts
 - `README.md` - Build/test commands and quick reference
 
 **Agent-Specific Configuration** (agent instructions, not rules):
@@ -296,13 +339,13 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 
    - `.github/copilot-instructions.md` → points to this section
    - `AGENTS.md` (this routing guide) → determines task type
-   - `docs/specs/` → gets SDD context
+   - `docs/specs/` and `docs/requirements/use-cases/` → gets SDD context
    - `README.md` → gets build/test commands
 
 2. **Codex** reads:
    - `.codex/skills/*/SKILL.md` → references `AGENTS.md` routing
    - `AGENTS.md` (this routing guide) → determines task type
-   - `docs/specs/` → gets SDD context
+   - `docs/specs/` and `docs/requirements/use-cases/` → gets SDD context
    - Editor context → live analysis
 
 ### Best Practices for Multi-Agent Work

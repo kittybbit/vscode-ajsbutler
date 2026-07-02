@@ -8,7 +8,6 @@ Feature:
 Read these documents first:
 
 - docs/requirements/use-cases/{{use-case-file}}.md
-- docs/specs/features/{{feature-slug}}/PLANS.md
 - docs/specs/features/{{feature-slug}}/SPECS.md
 - docs/specs/features/{{feature-slug}}/TASKS.md
 - docs/specs/features/{{feature-slug}}/ADR.md if present
@@ -24,7 +23,7 @@ Implementation rules:
    commits, implementation refactors, or incidental fixes.
 5. Stop for clear human approval before implementation.
 6. After approval, enumerate all affected references and track the complete fix.
-7. Follow TASKS.md in small safe steps.
+7. Implement exactly one approved TASKS.md slice.
 8. Do not rewrite unrelated code.
 9. Preserve existing behavior unless SPECS.md explicitly changes it.
 10. Respect DDD and Clean Architecture boundaries.
@@ -53,10 +52,13 @@ Before editing:
   branch starts, stops, or changes an active feature.
 - Record durable impact, propagation, alternatives, and boundary decisions in
   SPECS.md.
-- Record investigation, implementation, test, and follow-up tasks in TASKS.md.
+- Record implementation-slice plan, validation, risk, production readiness,
+  approval state, and feature exit readiness in TASKS.md.
+- Update TRACEABILITY.md when required.
 - Record the TASKS.md `Human Approval` section with `Status: Pending`.
-- Keep TASKS.md focused on current status and active tasks; do not accumulate
-  historical logs, prior approvals, or long validation histories there.
+- Keep TASKS.md focused on slice plan/status, approval, validation, risks, and
+  feature exit readiness; do not accumulate historical logs, prior approvals,
+  or long validation histories there.
 - Report only this approval request, then wait for approval:
 
 ```md
@@ -104,4 +106,5 @@ After editing:
 - Run available build/test commands through `rtk` by default.
 - Summarize changed files.
 - Summarize behavior compatibility.
+- Summarize production readiness and CHANGELOG impact.
 - List follow-up tasks.
