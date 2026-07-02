@@ -92,6 +92,21 @@
      meaningful JP1/AJS concept, application use case, adapter boundary, or
      maintainability risk.
 
+8. Improve telemetry as a privacy-preserving product capability.
+
+   - Design telemetry to answer product-improvement questions rather than only
+     usage counts.
+   - Preserve the narrow telemetry adapter boundary while adding schema-owned
+     event names, allowlisted properties, duration and size buckets, error
+     categories, diagnostic categories, and workflow stages.
+   - Do not collect job names, unit names, comments, commands, definition
+     contents, file paths, search text, user names, organization names,
+     credentials, prompts, responses, raw errors, or server identifiers.
+   - Use telemetry evidence to support prioritization for current viewers,
+     diagnostics, search, WebAPI import, and future roadmap capabilities such
+     as unified search, semantic definition comparison, dependency analysis,
+     review support, and AI-assisted features.
+
 ## Deferred / Optional Slices
 
 1. Build/test output-directory ownership cleanup is deferred until packaging,

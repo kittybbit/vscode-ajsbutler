@@ -35,15 +35,20 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+1. Review the revised `telemetry-improvement` implementation-slice plan before
+   human approval and implementation.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-2. Select a new focused feature only when a concrete consumer or user-visible
+3. Select a new focused feature only when a concrete consumer or user-visible
    requirement makes normalized-model, parser-boundary, or viewer-parity work
    actionable.
-3. Keep compatibility risk visible for every shared or extension-runtime change.
+4. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
+- `docs/specs/features/telemetry-improvement/`: roadmap feature intake for a
+  privacy-preserving telemetry product capability. The implementation-slice
+  plan is revised after review and ready for `sdd-review-plan`.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
