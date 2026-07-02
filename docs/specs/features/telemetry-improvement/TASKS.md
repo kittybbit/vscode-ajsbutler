@@ -23,7 +23,7 @@
 - Human approval:
   approved for Slice 1 through Slice 8.
 - Active implementation slice:
-  Slice 3: WebAPI Import Workflow Telemetry.
+  Slice 4: Viewer Action Telemetry.
 
 ## Human Approval
 
@@ -154,7 +154,7 @@ active implementation approval remains.
 
 ### Slice 3: WebAPI Import Workflow Telemetry
 
-- Status: Approved
+- Status: Complete
 - Scope:
   convert WebAPI import beta telemetry from the existing `webapiImport` result
   events into schema-owned workflow stage events for started, input-step
@@ -496,7 +496,7 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready. Slices 1 and 2 are complete; Slices 3 through 8 remain approved
+  not ready. Slices 1 through 3 are complete; Slices 4 through 8 remain approved
   for implementation.
 - Durable documentation updates:
   `uc-record-telemetry.md`, `docs/specs/plans.md`, and `docs/specs/roadmap.md`

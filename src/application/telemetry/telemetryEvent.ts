@@ -189,6 +189,61 @@ export const telemetryEvents = {
       telemetryPropertyKeys.result,
     ],
   },
+  webApiImportWorkflowStarted: {
+    name: "webapi_import.workflow.started",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.stage,
+      telemetryPropertyKeys.result,
+    ],
+  },
+  webApiImportWorkflowCancelled: {
+    name: "webapi_import.workflow.cancelled",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.stage,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.inputStep,
+    ],
+  },
+  webApiImportWorkflowFailed: {
+    name: "webapi_import.workflow.failed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.stage,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.errorCode,
+      telemetryPropertyKeys.httpStatusCategory,
+    ],
+  },
+  webApiImportWorkflowCompleted: {
+    name: "webapi_import.workflow.completed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.stage,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.unitCountBucket,
+      telemetryPropertyKeys.all,
+    ],
+  },
+  webApiImportWorkflowUnsupportedHost: {
+    name: "webapi_import.workflow.unsupported_host",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.stage,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
 } as const satisfies Record<string, TelemetryEventDefinition>;
 
 export const createTelemetryEvent = <Name extends string>(

@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- Expanded privacy-conscious telemetry to include anonymous extension lifecycle
-  and viewer readiness or close metadata.
+- Expanded privacy-conscious telemetry to include anonymous extension
+  lifecycle, viewer readiness or close, and WebAPI import workflow metadata.
 
 ## [1.15.1]
 

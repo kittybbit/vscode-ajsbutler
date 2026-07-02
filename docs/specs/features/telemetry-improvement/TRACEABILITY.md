@@ -78,6 +78,14 @@ slices, and validation plans.
 - Test File Or Validation Plan:
   WebAPI import command tests, WebAPI import wiring tests, telemetry schema
   tests, `rtk pnpm test`, and `rtk pnpm run qlty`.
+- Validation Result:
+  `importAjsDefinitionViaWebApiCommand.test.ts`,
+  `webapiImportWiring.test.ts`, `webApiImportTelemetry.test.ts`, and telemetry
+  schema/bucket tests pass through `rtk pnpm test`; `rtk pnpm run test:web`,
+  `rtk pnpm run qlty`, and `rtk pnpm run build` pass. Production build reports
+  existing webpack bundle size warnings. README telemetry wording and
+  CHANGELOG are updated because telemetry policy now covers anonymous WebAPI
+  import workflow metadata.
 
 ### Viewer Feature Usage
 

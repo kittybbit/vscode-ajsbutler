@@ -133,11 +133,11 @@ duplicating the SDD workflow.
 
 This extension collects telemetry data to improve the experience of using this
 extension with VS Code. We collect anonymous operational metadata such as
-extension lifecycle, command usage, and viewer readiness or close events. We do
-not collect names, addresses, paths, definition contents, search text,
-commands, or other personal identifiers. The extension respects the
-telemetry.enableTelemetry setting. You can learn more about that setting in our
-[FAQ][telemetry-faq].
+extension lifecycle, command usage, viewer readiness or close events, and
+WebAPI import workflow outcomes. We do not collect names, addresses, paths,
+definition contents, search text, commands, server names, credentials, or other
+personal identifiers. The extension respects the telemetry.enableTelemetry
+setting. You can learn more about that setting in our [FAQ][telemetry-faq].
 
 ## License
 
