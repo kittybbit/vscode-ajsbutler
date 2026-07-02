@@ -45,7 +45,7 @@ Evaluate at least these dimensions:
   `SPECS.md` sections, implementation slices, and tests or validation plans
 - Production Readiness: failure modes, diagnostics, JP1/AJS compatibility,
   large or malformed input risk, desktop/web readiness, README/docs impact,
-  and CHANGELOG impact can be validated by later slices
+  and CHANGELOG impact can be evaluated using `docs/specs/README.md`
 - Cross-Slice Architectural Consistency: naming, DTOs, view models, entities,
   public interfaces, layer responsibilities, dependencies, and architecture
   boundaries remain consistent across the whole feature
@@ -88,7 +88,8 @@ Evaluate at least these dimensions:
    - JP1/AJS command/config reference impact
    - definition-file compatibility risk
    - large or malformed input validation need
-   - README, user docs, or CHANGELOG update need
+   - README or user docs impact
+   - CHANGELOG update need using `docs/specs/README.md`
    - undocumented behavior or assumptions
    - breaking-change and VS Code compatibility risk
 7. Check traceability artifact quality:
@@ -175,3 +176,5 @@ approved slice scope.
 - Preserve `engines.vscode` unless explicitly approved.
 - Keep the review focused on plan quality, not code style.
 - Send unclear or changed scope back to `sdd-plan-task`.
+- Use `docs/specs/README.md` as the Single Source of Truth for CHANGELOG
+  update criteria and trivial-change classification.

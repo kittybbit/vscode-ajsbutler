@@ -34,7 +34,7 @@
 - [ ] desktop scenario checked
 - [ ] web scenario checked if relevant
 - [ ] Production readiness reviewed
-- [ ] CHANGELOG update need evaluated
+- [ ] CHANGELOG update need evaluated against `docs/specs/README.md`
 
 ## Risks
 

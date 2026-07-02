@@ -77,7 +77,8 @@ Use Planning Mode to create the initial full feature implementation plan.
    - JP1/AJS command/config reference impact
    - definition-file compatibility risk
    - large or malformed input risk
-   - README, user docs, or CHANGELOG update need
+   - README or user docs impact
+   - CHANGELOG update need using `docs/specs/README.md`
    - undocumented behavior or assumption
    - changed, added, or removed behavior scenarios when scenarios exist
    - breaking-change and VS Code compatibility risk
@@ -120,8 +121,10 @@ Use Feature Exit Mode only when implementation slices appear complete.
 4. Apply the Durable Documentation Gate before updating long-lived docs.
 5. Summarize evidence from `SPECS.md`, `TASKS.md`, `TRACEABILITY.md` when
    present, use cases, plans, and roadmap.
-6. Ask for explicit approval to close the feature.
-7. After approval, close the feature as described below.
+6. Report the Feature Exit Review using the standard output template in
+   `docs/specs/README.md`.
+7. Ask for explicit approval to close the feature.
+8. After approval, close the feature as described below.
 
 Do not perform Planning Mode or Replanning Mode work during Feature Exit Mode.
 
@@ -172,7 +175,8 @@ Before updating `TASKS.md`, explicitly establish:
   - JP1/AJS compatibility
   - large or malformed input risk
   - desktop/web impact
-  - README, user docs, or CHANGELOG update need
+  - README or user docs impact
+  - CHANGELOG update need using `docs/specs/README.md`
 - risks and unresolved assumptions
 - out-of-scope changes
 
@@ -287,8 +291,10 @@ When all planned slices appear complete, switch to Feature Exit Mode:
 2. Apply the Feature Definition of Done as the only completion standard.
 3. Summarize the evidence from `SPECS.md`, `TASKS.md`, use cases, plans, and
    roadmap.
-4. Ask for explicit approval to close the feature.
-5. Do not remove the feature folder before approval.
+4. Report the Feature Exit Review using the standard output template in
+   `docs/specs/README.md`.
+5. Ask for explicit approval to close the feature.
+6. Do not remove the feature folder before approval.
 
 ## Feature Definition of Done
 
@@ -413,6 +419,8 @@ implementation.
 - Keep use cases and other durable docs concise, reusable, and free of
   implementation history.
 - Apply the Durable Documentation Gate before updating long-lived docs.
+- Use `docs/specs/README.md` as the Single Source of Truth for Feature Exit
+  Review output and CHANGELOG update criteria.
 - Plan the feature as a whole; do not plan only the next edit unless
   replanning is explicitly scoped to one discovered gap.
 - Do not decompose by file, layer, or mechanical edit without standalone

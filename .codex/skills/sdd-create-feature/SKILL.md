@@ -28,6 +28,11 @@ Read these first:
 Inspect existing feature folders under `docs/specs/features/` to avoid
 duplicate or overlapping feature entries.
 
+Use `docs/specs/README.md` as the Single Source of Truth for Trivial Change
+Criteria. Skip feature creation only when that section says the change is
+trivial; when uncertain, treat the request as non-trivial and continue feature
+intake.
+
 ## Intake Gate
 
 Before creating or editing feature docs, explicitly establish:
@@ -218,6 +223,7 @@ need focused validation.
 ## Rules
 
 - Preserve the `docs/specs/README.md` Implementation Change Gate.
+- Preserve the `docs/specs/README.md` Trivial Change Criteria.
 - Do not create a feature until the feature kind is explicit.
 - Do not create a feature until it has one concrete purpose.
 - Do not infer missing behavior, compatibility scope, or roadmap intent.

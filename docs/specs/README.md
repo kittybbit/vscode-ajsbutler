@@ -42,6 +42,30 @@ Human Approval is required before implementation starts. Replanning is an
 exception flow, not the normal path between approved implementation slices.
 Feature Exit runs only after the Feature Definition of Done is satisfied.
 
+## Trivial Change Criteria
+
+Use this section as the Single Source of Truth for deciding whether SDD feature
+creation may be skipped.
+
+A change is trivial only when it does not change any of these:
+
+- runtime behavior
+- tests or validation expectations
+- generated artifacts
+- configuration
+- desktop, web, VS Code, JP1/AJS, or definition-file compatibility
+- durable documentation responsibilities or document roles
+
+Examples that may be trivial:
+
+- typo fixes
+- formatting-only markdown cleanup
+- comment wording that does not change behavior, policy, or responsibility
+- broken link fixes that do not change document meaning
+
+When any item above changes, or when impact is uncertain, treat the work as
+non-trivial and start with `sdd-create-feature`.
+
 For non-trivial changes:
 
 1. create a dedicated git branch before implementation work starts and use
@@ -73,6 +97,33 @@ For docs-only changes:
 
 Run validation commands through `rtk` by default. `rtk` is a cost-control and
 execution-efficiency tool; it is not a reason to skip required validation.
+
+## CHANGELOG Update Criteria
+
+Use this section as the Single Source of Truth for deciding whether a
+CHANGELOG update is required.
+
+Update `CHANGELOG.md` when a change affects externally observable extension
+behavior, including:
+
+- user-visible behavior
+- compatibility
+- commands
+- configuration
+- diagnostics
+- user workflow
+- documented extension behavior
+
+Do not update `CHANGELOG.md` for changes that are only:
+
+- internal refactoring
+- implementation cleanup
+- tests with no externally observable behavior change
+- documentation maintenance that does not change documented extension behavior
+- other changes with no externally observable behavior
+
+When uncertain, record the evaluation in the feature plan or implementation
+summary and ask for the human decision before closing the slice or feature.
 
 ## Semantic Code Navigation
 
@@ -376,6 +427,28 @@ A feature is complete only when:
   needed
 - unresolved risks are resolved, accepted, or recorded as follow-up
 
+## Feature Exit Review Output
+
+Report Feature Exit Review using this standard output:
+
+```md
+## Feature Exit Review
+
+- Feature:
+- Completed slices:
+- Acceptance status:
+- Validation:
+- Traceability:
+- Production readiness:
+- Durable documentation:
+- Remaining risks:
+- Closure recommendation: Close | Do not close | Human decision needed
+```
+
+Use `Closure recommendation: Close` only when the Feature Definition of Done is
+satisfied. Use `Human decision needed` when the evidence is complete but the
+closure decision still requires explicit approval.
+
 ## Durable Documentation Gate
 
 Before updating long-lived docs, verify the content:
@@ -403,8 +476,7 @@ For code slices, confirm:
 - large, malformed, or edge-case inputs avoid preventable slowdowns or crashes
 - desktop and web behavior are considered
 - README or user docs are updated only when user-facing behavior changes
-- CHANGELOG update need is evaluated for user-facing behavior, compatibility,
-  or workflow changes
+- CHANGELOG update need is evaluated using the CHANGELOG Update Criteria
 
 ## Sync Cadence
 

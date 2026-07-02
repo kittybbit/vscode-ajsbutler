@@ -144,8 +144,7 @@ Before completion, verify:
 - desktop and web behavior are both considered
 - README or user documentation is updated only when user-facing behavior
   changes
-- CHANGELOG update need is evaluated when user-facing behavior,
-  compatibility, or workflow changes
+- CHANGELOG update need is evaluated using `docs/specs/README.md`
 
 ### Non-Functional Quality
 
@@ -346,8 +345,8 @@ When implementation, reviews, fixes, and validation are complete:
   necessary.
 - Preserve production readiness unless a justified approved tradeoff is
   necessary.
-- Evaluate CHANGELOG update need when user-facing behavior, compatibility, or
-  workflow changes.
+- Evaluate CHANGELOG update need using `docs/specs/README.md` as the Single
+  Source of Truth.
 - Prefer readability and maintainability over brevity, DRY-only extraction, or
   generic abstraction.
 - Keep diffs minimal and tied to the approved slice.

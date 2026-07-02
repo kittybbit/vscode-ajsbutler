@@ -65,6 +65,8 @@ Good first slices:
 
 SDD is the only standard process for non-trivial changes. Do not use an
 alternate implementation flow when SDD applies.
+Use `docs/specs/README.md` as the Single Source of Truth for deciding whether
+a change is trivial enough to skip SDD feature creation.
 
 Follow this lifecycle:
 
@@ -143,8 +145,7 @@ Recommended test layers:
 Production readiness checks must cover failure modes, understandable
 diagnostics or fallback behavior, JP1/AJS definition-file compatibility, large
 or malformed input risk, desktop/web behavior, README or user-doc impact, and
-CHANGELOG update need when user-visible behavior, compatibility, or workflow
-changes.
+CHANGELOG update need according to `docs/specs/README.md`.
 
 ## Durable Documentation Gate
 
