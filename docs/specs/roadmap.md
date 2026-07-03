@@ -113,6 +113,10 @@
      operational metadata and must never include prompts, responses,
      definition content, generated content, provider account identifiers, raw
      model errors, or stack traces.
+   - Revisit telemetry dashboard compatibility, exact bucket boundaries,
+     diagnostic rule IDs, and observable abandonment semantics only when
+     analytics usage, product reporting, or a future feature makes those
+     decisions concrete.
 
 ## Deferred / Optional Slices
 
