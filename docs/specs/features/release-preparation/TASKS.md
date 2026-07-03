@@ -12,7 +12,7 @@
 - Human approval:
   Approved.
 - Active implementation slice:
-  Slice 2: Apply approved release-facing updates.
+  Slice 3: Validate release candidate and prepare feature exit.
 
 ## Human Approval
 
@@ -20,12 +20,12 @@
 - Approved at: approved in current conversation
 - Approved scope:
   all planned release-preparation slices are approved. Implement one slice at a
-  time in dependency order. The active approval boundary is Slice 2:
-  `pnpm version minor --no-git-tag-version`, `CHANGELOG.md` release section
-  updates based on `v1.15.1..HEAD`, and release-preparation SDD status/risk
-  updates only. No runtime behavior, dependency modernization, generated parser
-  artifacts, compatibility contract changes, packaging, or publishing are
-  included in this active slice.
+  time in dependency order. Slice 2 is complete. The active approval boundary
+  is Slice 3: run approved release-candidate validation, run
+  `pnpm exec vsce package`, inspect package contents, and update SDD validation
+  evidence only. Publishing, runtime behavior changes, dependency
+  modernization, generated parser artifacts, compatibility contract changes,
+  and unplanned metadata edits are outside this active slice.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -165,7 +165,7 @@ implementation approval remains.
 
 ### Slice 2: Apply approved release-facing updates
 
-- Status: Approved
+- Status: Complete
 - Scope:
   apply only the release-facing updates approved after Slice 1, such as
   package version via `pnpm version`, CHANGELOG release section, README or
@@ -237,6 +237,35 @@ implementation approval remains.
 - Out of Scope:
   publishing, packaging execution, runtime fixes, dependency updates, new
   features, beta exit, and changes to `engines.vscode`.
+
+## Slice 2 Release-Facing Update Record
+
+- CHANGELOG:
+  converted `Unreleased` into `[1.16.0]` and selected only externally
+  observable entries from `v1.15.1..HEAD`: privacy-conscious telemetry
+  expansion, active-pane viewer opening, flow viewer investigation and node
+  action refinements, unit-list usability improvements, and dependency/security
+  maintenance items. Internal SDD workflow, architecture relocation, qlty, and
+  refactor-only changes were excluded under the CHANGELOG Update Criteria.
+- Package version:
+  updated `package.json` from `1.15.1` to `1.16.0` with
+  `pnpm version minor --no-git-tag-version` after the release notes were
+  prepared.
+- Compatibility:
+  retained `engines.vscode` at `^1.75.0`, retained WebAPI import beta wording,
+  and made no runtime, dependency, generated artifact, `.vscodeignore`,
+  README, packaging, or publish changes.
+- Validation:
+  inspected the release-facing diff, ran `CI=true rtk pnpm run qlty` after qlty
+  needed sandbox permission for log creation, and ran
+  `CI=true rtk pnpm run lint:md` after the non-CI markdown lint attempt stopped
+  on pnpm's non-TTY dependency purge prompt. Slice 3 remains responsible for
+  build, desktop test, web test, and `vsce package` verification on the final
+  release candidate.
+- Implementation feedback:
+  `pnpm version minor --no-git-tag-version` requires a clean working tree, so
+  release-note and SDD approval updates may need to be committed before the
+  version command can run without weakening the approved command form.
 
 ### Slice 3: Validate release candidate and prepare feature exit
 
@@ -402,7 +431,7 @@ implementation approval remains.
 
 ## Feature-Level Risks
 
-- The release version is proposed as `1.16.0`; target date is not yet recorded.
+- The release version is `1.16.0`; target date is not yet recorded.
 - Package and publish command authority is recorded in the Slice 1 release
   readiness record, but Marketplace credentials are not yet verified.
 - The previous-release diff baseline is confirmed as `v1.15.1..HEAD`.
@@ -410,9 +439,7 @@ implementation approval remains.
   packaging verification finds an issue.
 - Web extension support must remain explicit because the package has both
   `main` and `browser` entry points.
-- `CHANGELOG.md` already has an `Unreleased` entry; Slice 2 should convert it
-  into the target release section and add missing externally observable entries
-  from the previous-release diff.
+- `CHANGELOG.md` has been prepared as `[1.16.0]` from the previous-release diff.
 - Marketplace publishing may require credentials that are unavailable to the
   implementation agent; if unavailable, Slice 4 must stop with the exact
   missing prerequisite.
@@ -434,6 +461,5 @@ implementation approval remains.
   none expected unless release work reveals reusable policy or repository-level
   sequencing that passes the Durable Documentation Gate.
 - Open risks:
-  target date, package verification expectation, Marketplace credential
-  availability, package acceptance of current metadata, and final validation
-  environment are unresolved.
+  target date, Marketplace credential availability, package acceptance of
+  current metadata, and final validation environment are unresolved.
