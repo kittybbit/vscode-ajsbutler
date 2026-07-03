@@ -2,7 +2,7 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: Replan Required
 - Planning scope:
   replan the temporary release-readiness work so CHANGELOG decisions come from
   the previous-release diff, approved version changes use `pnpm version`, and
@@ -12,7 +12,7 @@
 - Human approval:
   Approved.
 - Active implementation slice:
-  Slice 3: Validate release candidate and prepare feature exit.
+  none.
 
 ## Human Approval
 
@@ -20,12 +20,10 @@
 - Approved at: approved in current conversation
 - Approved scope:
   all planned release-preparation slices are approved. Implement one slice at a
-  time in dependency order. Slice 2 is complete. The active approval boundary
-  is Slice 3: run approved release-candidate validation, run
-  `pnpm exec vsce package`, inspect package contents, and update SDD validation
-  evidence only. Publishing, runtime behavior changes, dependency
-  modernization, generated parser artifacts, compatibility contract changes,
-  and unplanned metadata edits are outside this active slice.
+  time in dependency order. Slice 3 is complete. Implementation is paused
+  because default `vsce` dependency detection fails under the current pnpm
+  install layout, and publishing with `--no-dependencies` would change the
+  Slice 4 approval boundary.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -269,7 +267,7 @@ implementation approval remains.
 
 ### Slice 3: Validate release candidate and prepare feature exit
 
-- Status: Approved
+- Status: Complete
 - Scope:
   run and record the release-candidate validation approved for the release,
   including quality, markdown lint where useful, production build, compiled
@@ -339,6 +337,43 @@ implementation approval remains.
 - Out of Scope:
   publish execution, release blocker fixes, dependency modernization, generated
   parser changes, and feature closure before the publish result is known.
+
+## Slice 3 Release-Candidate Validation Record
+
+- Quality and docs:
+  `CI=true rtk pnpm run qlty` passed, and
+  `CI=true rtk pnpm run lint:md` passed.
+- Build:
+  `rtk pnpm run build` passed. Webpack reported existing bundle-size
+  performance warnings for `tableViewer.js`, `flowViewer.js`, and `web.js`;
+  no compilation failure occurred.
+- Desktop validation:
+  `rtk pnpm test` passed against VS Code `1.127.0`. Electron logged a macOS
+  `task_name_for_pid` message, but the test runner exited with code 0.
+- Web validation:
+  `rtk pnpm run test:web` passed. The web test server logged the expected
+  development-extension `package.nls.json` 404 and extension startup logs.
+- Package verification:
+  `rtk pnpm exec vsce package --out /private/tmp/vscode-ajsbutler-1.16.0.vsix`
+  built successfully but failed during `vsce` dependency detection because
+  `npm list --production --parseable --depth=99999 --loglevel=error` reported
+  many missing or invalid dependencies under the pnpm `node_modules` layout.
+  `rtk pnpm exec vsce package --no-dependencies --out <tmp-vsix>` succeeded
+  and produced `/private/tmp/vscode-ajsbutler-1.16.0.vsix`.
+- Package contents:
+  the successful VSIX contains `extension/package.json` version `1.16.0`,
+  `engines.vscode` `^1.75.0`, `main` `./out/extension.js`, `browser`
+  `./out/web.js`, README, CHANGELOG, LICENSE, language and syntax files, image
+  assets, production `out/` bundles, `pnpm-workspace.yaml`, and
+  `scripts/generate-webapi-openapi-artifacts.mjs`. `src/`, `docs/`,
+  `.vscode/`, `.github/`, `node_modules/`, `.codex/`, `.vscodeignore`, and
+  lockfiles are excluded by `.vscodeignore`.
+- Publish readiness:
+  release-candidate validation passed except for default `vsce` dependency
+  detection under pnpm. Slice 4 must not assume plain
+  `pnpm exec vsce publish` will succeed until the human either approves a
+  `--no-dependencies` publish command form or separately fixes the dependency
+  detection/package metadata issue.
 
 ### Slice 4: Publish approved release with vsce
 
@@ -443,6 +478,9 @@ implementation approval remains.
 - Marketplace publishing may require credentials that are unavailable to the
   implementation agent; if unavailable, Slice 4 must stop with the exact
   missing prerequisite.
+- Default `vsce package` dependency detection fails under the current pnpm
+  install layout; `vsce package --no-dependencies` succeeds. Publish requires a
+  human decision before running an equivalent `vsce publish` command.
 
 ## Use-Case Back-Propagation
 
@@ -455,11 +493,13 @@ implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  pending review, human approval, slice implementation, required validation,
-  and Feature Exit Mode.
+  pending replanning for Slice 4 publish command authority, publish result, and
+  Feature Exit Mode.
 - Durable documentation updates:
   none expected unless release work reveals reusable policy or repository-level
   sequencing that passes the Durable Documentation Gate.
 - Open risks:
-  target date, Marketplace credential availability, package acceptance of
-  current metadata, and final validation environment are unresolved.
+  target date, Marketplace credential availability, default `vsce` dependency
+  detection under pnpm, package contents acceptance for
+  `scripts/generate-webapi-openapi-artifacts.mjs` and `pnpm-workspace.yaml`,
+  and final publish environment are unresolved.
