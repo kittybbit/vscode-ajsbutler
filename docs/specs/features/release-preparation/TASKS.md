@@ -2,28 +2,32 @@
 
 ## Plan Status
 
-- Status: Replan Required
+- Status: Approved
 - Planning scope:
-  replan the temporary release-readiness work so CHANGELOG decisions come from
-  the previous-release diff, approved version changes use `pnpm version`, and
-  approved Marketplace packaging and publishing use `vsce`.
+  replan Slice 4 so Marketplace publishing uses the package command form proven
+  by Slice 3, and release publication also considers creating and pushing the
+  release tag after publish succeeds.
 - Review status:
   Reviewed.
 - Human approval:
   Approved.
 - Active implementation slice:
-  none.
+  Slice 4: Publish approved release and push release tag.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: approved in current conversation
 - Approved scope:
-  all planned release-preparation slices are approved. Implement one slice at a
-  time in dependency order. Slice 3 is complete. Implementation is paused
-  because default `vsce` dependency detection fails under the current pnpm
-  install layout, and publishing with `--no-dependencies` would change the
-  Slice 4 approval boundary.
+  revised Slice 4 boundary: run `pnpm exec vsce publish --no-dependencies`,
+  verify the published `1.16.0` result, create annotated tag `v1.16.0` at the
+  checked approved release commit, push `HEAD` explicitly to `origin/main` with
+  `git push origin HEAD:main`, push `v1.16.0` with
+  `git push origin v1.16.0`, and record publish/tag/push evidence in
+  release-preparation SDD docs. Runtime behavior changes, version changes,
+  package rebuilds after file changes, dependency fixes, GitHub release
+  creation, Marketplace metadata correction, retrying with a different version,
+  and feature closure are out of scope.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -375,49 +379,70 @@ implementation approval remains.
   `--no-dependencies` publish command form or separately fixes the dependency
   detection/package metadata issue.
 
-### Slice 4: Publish approved release with vsce
+### Slice 4: Publish approved release and push release tag
 
 - Status: Approved
 - Scope:
-  after Slice 3 validation passes and the human explicitly approves publish,
-  publish the release through the approved `vsce` command, record the publish
-  result, and prepare the feature for Feature Exit Mode. This slice may update
-  release-preparation SDD docs with concise publish evidence only.
+  after Slice 3 validation passes and the revised plan is reviewed and approved,
+  publish the release through the `vsce` command form that matches the validated
+  package flow, then create and push the approved release tag only after
+  Marketplace publish succeeds. Record publish, tag, push, and exit-readiness
+  evidence in release-preparation SDD docs.
 - User / Domain Value:
-  the reviewed and validated release candidate is actually published through
-  the repository's VS Code Marketplace toolchain.
+  the reviewed and validated release candidate is published through the VS Code
+  Marketplace toolchain and the repository remote receives an explicit release
+  marker for the same version.
 - Smallest Useful Slice:
-  Marketplace publishing has distinct credentials, irreversibility, and failure
-  modes, so it must be separately approvable from local validation and package
-  generation.
+  Marketplace publishing, release tagging, and tag push are distinct but belong
+  to one release-publication decision because the tag should not be created or
+  pushed unless the corresponding Marketplace release succeeds.
 - Cohesive Change Group:
-  `pnpm exec vsce publish` or the Slice 1 approved equivalent, publish command
-  output, Marketplace result URL or version evidence when available, and
+  `pnpm exec vsce publish --no-dependencies` or another reviewed `vsce` publish
+  command, publish command output, Marketplace result URL or version evidence
+  when available, release tag creation, remote branch/tag push evidence, and
   `docs/specs/features/release-preparation/TASKS.md` publish/exit readiness
   notes.
 - Acceptance:
   - Slice 3 validation evidence is recorded and has no unresolved release
-    blockers
-  - human publish approval is recorded in `Human Approval` before the command
-    runs
-  - publish command uses `pnpm exec vsce publish` unless Slice 1 records a
-    different approved `vsce` command
+    blockers except the reviewed `--no-dependencies` publish decision and any
+    explicitly accepted package-contents risk
+  - human approval for publish, tag creation, and push is recorded in
+    `Human Approval` before any publish, tag, or push command runs
+  - publish command uses `pnpm exec vsce publish --no-dependencies` unless the
+    reviewed plan records a different approved `vsce` command
   - publish result, published version, and any Marketplace URL or confirmation
     evidence are recorded
-  - failed publish attempts stop the feature for a decision without runtime,
-    dependency, or unplanned metadata edits
+  - `HEAD` is checked before publish and before tagging so the release tag
+    points at the approved release commit that contains `package.json` version
+    `1.16.0`, `CHANGELOG.md` section `[1.16.0]`, and the reviewed Slice 4
+    approval evidence
+  - release tag uses `v1.16.0` unless the human approves a different explicit
+    tag name before implementation
+  - tag creation uses `git tag -a v1.16.0 -m "v1.16.0"` unless the human
+    approves a different tagging convention before implementation
+  - branch push and tag push use explicit remote targets, expected forms
+    `git push origin HEAD:main` and `git push origin v1.16.0`
+  - publish, tag, or push failure stops the feature for a decision without
+    runtime, dependency, version, or unplanned metadata edits
 - Validation:
-  inspect the published version/result evidence and run `rtk pnpm run qlty`
-  after SDD publish evidence is recorded. Do not rerun the full release
-  candidate baseline unless publish changes files or the human requests it.
+  inspect published version/result evidence, inspect local and remote tag/push
+  evidence when available, and run `CI=true rtk pnpm run qlty` plus
+  `CI=true rtk pnpm run lint:md` after SDD publish evidence is recorded. Do not
+  rerun the full release-candidate baseline unless publish/tag/push changes
+  files or the human requests it.
 - Traceability:
   supports the SPECS requirement that approved publishing uses `vsce` and the
-  acceptance criterion for publishing only after approval. Validation is the
-  recorded `vsce publish` result and SDD evidence update.
+  acceptance criterion for publishing only after approval, plus the SPECS
+  requirement that tag and push authority is explicit before execution.
+  Validation is the recorded `vsce publish` result, `git rev-parse HEAD` tag
+  target evidence, remote branch/tag push evidence, and SDD evidence update.
 - Production Readiness:
   - Failure mode:
     authentication, authorization, duplicate version, package validation, or
-    Marketplace service failures are recorded and escalated for decision.
+    Marketplace service failures are recorded and escalated for decision. Tag
+    conflicts, protected branch push rejection, remote authentication failure,
+    or partial publish-without-tag states are recorded and escalated without
+    retrying under a different version.
   - JP1/AJS compatibility:
     no runtime behavior or definition interpretation change is allowed.
   - Large or malformed input risk:
@@ -430,20 +455,29 @@ implementation approval remains.
     final publish evidence must match the version and release notes validated
     in earlier slices.
 - Approval Boundary:
-  only approved `vsce publish` execution and SDD evidence recording. Any
-  version change, package rebuild after file changes, runtime fix, dependency
-  change, tag creation, GitHub release, or Marketplace metadata correction
-  requires replanning or separate approval.
+  only the approved `vsce publish --no-dependencies` execution, release tag
+  creation at the checked approved release commit, explicit
+  `git push origin HEAD:main`, explicit `git push origin v1.16.0`, and SDD
+  evidence recording. Any version change, package rebuild after file changes,
+  runtime fix, dependency change, retry with a different version, GitHub
+  release, or Marketplace metadata correction requires replanning or separate
+  approval.
 - Dependencies:
-  Slice 1 command authority, Slice 2 release-facing updates when needed, Slice
-  3 validation/package evidence, and explicit human publish approval.
+  Slice 1 command authority, Slice 2 release-facing updates, Slice 3
+  validation/package evidence, reviewed `--no-dependencies` publish decision,
+  clean working tree, no existing conflicting `v1.16.0` tag, and explicit human
+  approval for publish/tag/push.
 - Risks:
   publish may be irreversible for a version, may require unavailable
-  credentials, and may fail because the version already exists.
+  credentials, and may fail because the version already exists. The approved
+  `--no-dependencies` publish command bypasses `vsce` dependency detection, so
+  package-content acceptance relies on Slice 3 package inspection. Git tag or
+  push may fail because the tag already exists, the remote rejects direct
+  pushes, or credentials are unavailable.
 - Out of Scope:
-  tag creation, GitHub release creation, retrying with a different version,
-  runtime fixes, dependency updates, and feature folder removal before Feature
-  Exit Mode.
+  GitHub release creation, retrying with a different version, runtime fixes,
+  dependency updates, package metadata correction, and feature folder removal
+  before Feature Exit Mode.
 
 ## Traceability
 
@@ -461,23 +495,24 @@ implementation approval remains.
 - Slice 2 must complete before Slice 3 when release-facing files change so the
   final validation evidence matches the release candidate.
 - Slice 3 must complete before Feature Exit Mode can recommend closure.
-- Slice 4 must complete or be explicitly dropped by human decision before
+- Revised Slice 4 must be reviewed and approved before publish, tag, or push
+  can run. It must complete or be explicitly dropped by human decision before
   Feature Exit Mode can recommend closure for a publish-ready release.
 
 ## Feature-Level Risks
 
 - The release version is `1.16.0`; target date is not yet recorded.
-- Package and publish command authority is recorded in the Slice 1 release
-  readiness record, but Marketplace credentials are not yet verified.
+- Package command authority is recorded in the Slice 1 release readiness record.
+  Revised publish, tag, and push command authority requires review and approval.
 - The previous-release diff baseline is confirmed as `v1.15.1..HEAD`.
 - `.vscodeignore` affects published contents and must be handled carefully if
   packaging verification finds an issue.
 - Web extension support must remain explicit because the package has both
   `main` and `browser` entry points.
 - `CHANGELOG.md` has been prepared as `[1.16.0]` from the previous-release diff.
-- Marketplace publishing may require credentials that are unavailable to the
-  implementation agent; if unavailable, Slice 4 must stop with the exact
-  missing prerequisite.
+- Marketplace publishing and git push may require credentials that are
+  unavailable to the implementation agent; if unavailable, Slice 4 must stop
+  with the exact missing prerequisite.
 - Default `vsce package` dependency detection fails under the current pnpm
   install layout; `vsce package --no-dependencies` succeeds. Publish requires a
   human decision before running an equivalent `vsce publish` command.
@@ -493,13 +528,14 @@ implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  pending replanning for Slice 4 publish command authority, publish result, and
-  Feature Exit Mode.
+  pending review and approval for revised Slice 4 publish/tag/push authority,
+  publish result, and Feature Exit Mode.
 - Durable documentation updates:
   none expected unless release work reveals reusable policy or repository-level
   sequencing that passes the Durable Documentation Gate.
 - Open risks:
-  target date, Marketplace credential availability, default `vsce` dependency
-  detection under pnpm, package contents acceptance for
+  target date, Marketplace credential availability, git push credential and
+  branch/tag protection behavior, default `vsce` dependency detection under
+  pnpm, package contents acceptance for
   `scripts/generate-webapi-openapi-artifacts.mjs` and `pnpm-workspace.yaml`,
-  and final publish environment are unresolved.
+  release tag convention, and final publish environment are unresolved.

@@ -24,6 +24,8 @@ without changing extension behavior.
 - Confirm that required validation for the release candidate is explicit before
   packaging or publishing work starts.
 - Use `vsce` for approved package verification and Marketplace publishing.
+- Confirm the approved release tag and push sequence before tagging or pushing
+  release evidence to the remote repository.
 - Preserve existing parser, list view, flow view, CSV export, diagnostics,
   hover, WebAPI beta, and telemetry behavior unless a separate approved feature
   changes them.
@@ -101,6 +103,7 @@ without changing extension behavior.
 - CHANGELOG contents are checked against the previous released tag diff.
 - Approved version changes use `pnpm version`.
 - Approved package verification and publish steps use `vsce`.
+- Approved tag creation and push steps are recorded before execution.
 - VS Code desktop and web compatibility risks are evaluated before feature
   exit.
 - No runtime behavior change is included in this feature.
@@ -113,9 +116,12 @@ without changing extension behavior.
 - Raising the minimum supported VS Code version.
 - Exiting the WebAPI import beta.
 - Publishing the release without a separately approved implementation slice.
+- Creating or pushing release tags without the approved release-publish slice.
 
 ## Open Questions
 
 - Which release version and target date should this temporary feature prepare?
 - Which packaging or publishing command sequence is the release authority for
   this repository?
+- Should release publication create and push an annotated `v1.16.0` tag from
+  the release commit, or use another repository-owned tagging convention?
