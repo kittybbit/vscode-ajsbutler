@@ -8,6 +8,7 @@ export const OPERATION = "operation";
 export const NAVIGATE = "navigate";
 export const REVEAL_UNIT = "revealUnit";
 export const SEARCH = "search";
+export const PERFORMANCE = "performance";
 
 export type NavigationTargetView = "flow" | "table";
 export type NavigationEventData = {
@@ -33,6 +34,25 @@ export type SearchEventData = {
   scope: "visible_rows" | "current_flow_scope";
 };
 export type SearchEventType = { type: typeof SEARCH; data: SearchEventData };
+export type PerformanceEventData = {
+  operation:
+    | "unit_list_build"
+    | "flow_graph_build"
+    | "table_render"
+    | "flow_render"
+    | "csv_export";
+  result: "success" | "failed";
+  durationBucket?: string;
+  unitCountBucket?: string;
+  rowCountBucket?: string;
+  nodeCountBucket?: string;
+  edgeCountBucket?: string;
+  errorCode?: string;
+};
+export type PerformanceEventType = {
+  type: typeof PERFORMANCE;
+  data: PerformanceEventData;
+};
 export type NavigationEventType = {
   type: typeof NAVIGATE;
   data: NavigationEventData;
@@ -69,10 +89,18 @@ export const createSearchEvent = (data: SearchEventData): SearchEventType => ({
   data,
 });
 
+export const createPerformanceEvent = (
+  data: PerformanceEventData,
+): PerformanceEventType => ({
+  type: PERFORMANCE,
+  data,
+});
+
 export type WebviewEventType =
   | ResourceEventType
   | ReadyEventType
   | SaveEventType
   | OperationEventType
   | SearchEventType
+  | PerformanceEventType
   | NavigationEventType;

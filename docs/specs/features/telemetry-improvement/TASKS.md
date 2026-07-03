@@ -23,7 +23,7 @@
 - Human approval:
   approved for Slice 1 through Slice 8.
 - Active implementation slice:
-  Slice 7: Performance Telemetry.
+  Slice 8: Roadmap Telemetry Readiness.
 
 ## Human Approval
 
@@ -356,7 +356,7 @@ active implementation approval remains.
 
 ### Slice 7: Performance Telemetry
 
-- Status: Approved
+- Status: Complete
 - Scope:
   add coarse performance telemetry around parse, unit-list build, flow-graph
   build, table readiness, flow readiness, CSV export, and other approved
@@ -496,7 +496,7 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready. Slices 1 through 6 are complete; Slices 7 through 8 remain approved
+  not ready. Slices 1 through 7 are complete; Slice 8 remains approved
   for implementation.
 - Durable documentation updates:
   `uc-record-telemetry.md`, `docs/specs/plans.md`, and `docs/specs/roadmap.md`

@@ -2,6 +2,7 @@ import * as assert from "assert";
 import {
   NAVIGATE,
   OPERATION,
+  PERFORMANCE,
   READY,
   RESOURCE,
   SAVE,
@@ -76,6 +77,15 @@ suite("Viewer message routing", () => {
         scope: "visible_rows",
       },
     });
+    handler({
+      type: PERFORMANCE,
+      data: {
+        operation: "csv_export",
+        result: "success",
+        durationBucket: "lt100ms",
+        rowCountBucket: "2_9",
+      },
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepStrictEqual(calls, [
@@ -98,6 +108,17 @@ suite("Viewer message routing", () => {
           resultCountBucket: "0",
           durationBucket: "lt100ms",
           scope: "visible_rows",
+        },
+      },
+      {
+        eventName: "performance.csv_export.completed",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          operation: "csv_export",
+          result: "success",
+          durationBucket: "lt100ms",
+          rowCountBucket: "2_9",
         },
       },
     ]);

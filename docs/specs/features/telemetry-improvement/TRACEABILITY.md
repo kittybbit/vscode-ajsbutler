@@ -168,6 +168,16 @@ slices, and validation plans.
 - Test File Or Validation Plan:
   bucket helper tests, injected-clock timing tests, viewer/application event
   tests, desktop tests, web tests, and qlty.
+- Validation Result:
+  `performanceTelemetry.test.ts`, `viewerMessageRouting.test.ts`, and
+  `AjsDocument.test.ts`, plus parser instrumentation coverage in
+  `extensionDependencies.test.ts`, pass through focused `rtk pnpm test`; full
+  `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run build`,
+  `rtk pnpm run lint:md`, and `rtk pnpm run qlty` pass. Production build
+  reports existing webpack bundle size warnings. Performance telemetry uses
+  duration and count buckets for parse, unit-list build, flow-graph build,
+  table and flow render readiness, and CSV export without emitting definition
+  contents, file paths, CSV contents, unit names, or raw errors.
 
 ### Roadmap Capability Readiness
 

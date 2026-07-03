@@ -136,7 +136,8 @@ extension with VS Code. We collect anonymous operational metadata such as
 extension lifecycle, command usage, viewer readiness or close events, and
 anonymous viewer action and search outcomes such as CSV export, navigation, or
 no-match searches, anonymous diagnostic categories and hover outcomes, and
-WebAPI import workflow outcomes. We do not collect names, addresses, paths,
+coarse performance buckets for operations such as parsing, unit-list build,
+flow graph build, and CSV export. We do not collect names, addresses, paths,
 definition contents, diagnostic messages, hover token text, search text,
 commands, server names, credentials, or other personal identifiers. The
 extension respects the telemetry.enableTelemetry setting. You can learn more

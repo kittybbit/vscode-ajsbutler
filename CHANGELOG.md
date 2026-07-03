@@ -4,7 +4,7 @@
 
 - Expanded privacy-conscious telemetry to include anonymous extension
   lifecycle, viewer readiness or close, viewer action, search outcome, and
-  diagnostic, hover, and WebAPI import workflow metadata.
+  diagnostic, hover, performance, and WebAPI import workflow metadata.
 
 ## [1.15.1]
 

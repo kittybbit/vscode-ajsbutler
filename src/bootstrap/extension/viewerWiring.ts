@@ -201,7 +201,7 @@ const createViewerBundle = ({
     context,
     viewType,
     store,
-    change: createDebouncedAjsDocumentChange(buildUnitList, 300),
+    change: createDebouncedAjsDocumentChange(buildUnitList, 300, telemetry),
   });
   const factory = new ViewerFactory({
     viewType,
@@ -209,7 +209,7 @@ const createViewerBundle = ({
     store,
     handlers: {
       onReady: createViewerReadyHandler(
-        createReadyAjsDocument(buildUnitList),
+        createReadyAjsDocument(buildUnitList, telemetry),
         pendingRevealByPanel,
         (_document, _panel, source) => {
           const event = createViewerReadyEvent({

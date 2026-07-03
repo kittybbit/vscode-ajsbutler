@@ -476,6 +476,81 @@ export const telemetryEvents = {
       telemetryPropertyKeys.errorCode,
     ],
   },
+  performanceUnitListBuildCompleted: {
+    name: "performance.unit_list_build.completed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.operation,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.unitCountBucket,
+      telemetryPropertyKeys.rowCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  performanceParseCompleted: {
+    name: "performance.parse.completed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.operation,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.diagnosticCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  performanceFlowGraphBuildCompleted: {
+    name: "performance.flow_graph_build.completed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.operation,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.nodeCountBucket,
+      telemetryPropertyKeys.edgeCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  performanceTableRenderReady: {
+    name: "performance.table_render.ready",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.operation,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.rowCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  performanceFlowRenderReady: {
+    name: "performance.flow_render.ready",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.operation,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.nodeCountBucket,
+      telemetryPropertyKeys.edgeCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  performanceCsvExportCompleted: {
+    name: "performance.csv_export.completed",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.operation,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.rowCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
 } as const satisfies Record<string, TelemetryEventDefinition>;
 
 export const createTelemetryEvent = <Name extends string>(

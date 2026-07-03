@@ -1,6 +1,11 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { createExtensionDependencies } from "../../bootstrap/extension/extensionDependencies";
+import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
+import {
+  createExtensionDependencies,
+  instrumentParserPerformance,
+} from "../../bootstrap/extension/extensionDependencies";
+import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 
 suite("Extension dependencies", () => {
   test("constructs bootstrap-owned dependencies", () => {
@@ -29,5 +34,47 @@ suite("Extension dependencies", () => {
     );
 
     dependencies.telemetry.dispose();
+  });
+
+  test("instruments parser performance without exposing content", () => {
+    const events: Array<{
+      eventName: string;
+      properties?: TelemetryProperties;
+    }> = [];
+    const parser = instrumentParserPerformance(
+      {
+        parse: () => ({
+          rootUnits: [],
+          errors: [],
+        }),
+      },
+      {
+        trackEvent: (eventName, properties) => {
+          events.push({ eventName, properties });
+        },
+        dispose() {},
+      },
+    );
+
+    assert.deepStrictEqual(parser.parse("raw definition content"), {
+      rootUnits: [],
+      errors: [],
+    });
+    assert.deepStrictEqual(
+      {
+        ...events[0]?.properties,
+        durationBucket: "<bucket>",
+      },
+      {
+        development: String(DEVELOPMENT),
+        host: getTelemetryHost(),
+        operation: "parse",
+        result: "success",
+        durationBucket: "<bucket>",
+        diagnosticCountBucket: "0",
+      },
+    );
+    assert.strictEqual(events[0]?.eventName, "performance.parse.completed");
+    assert.ok(events[0]?.properties?.durationBucket);
   });
 });

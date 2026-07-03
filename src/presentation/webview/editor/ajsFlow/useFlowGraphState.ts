@@ -12,7 +12,12 @@ import {
   AjsDocument,
   AjsUnit,
 } from "../../../../domain/models/ajs/AjsDocument";
+import {
+  toCountBucket,
+  toDurationBucket,
+} from "../../../../application/telemetry/telemetryBuckets";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
+import { createPerformanceEvent } from "../../../../shared/webviewEvents";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
 import { ExpandedFlowGraphResult } from "./expandedFlowGraphTypes";
 import {
@@ -177,10 +182,22 @@ export const useFlowGraphState = ({
   );
 
   useEffect(() => {
+    const startedAt = performance.now();
     const nextFlowData = buildNodesAndEdges(currentUnitId);
+    if (ajsDocument && currentUnitId) {
+      window.vscode.postMessage(
+        createPerformanceEvent({
+          operation: "flow_graph_build",
+          result: "success",
+          durationBucket: toDurationBucket(performance.now() - startedAt),
+          nodeCountBucket: toCountBucket(nextFlowData.nodes.length),
+          edgeCountBucket: toCountBucket(nextFlowData.edges.length),
+        }),
+      );
+    }
     updateFlowDataState(nextFlowData, setNodes, setEdges);
     prevUnitEntityId.current = currentUnitId;
-  }, [buildNodesAndEdges, currentUnitId, prevUnitEntityId]);
+  }, [ajsDocument, buildNodesAndEdges, currentUnitId, prevUnitEntityId]);
 
   return { edges, nodes };
 };

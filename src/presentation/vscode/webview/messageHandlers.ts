@@ -1,9 +1,14 @@
 import * as os from "os";
 import * as vscode from "vscode";
+import { createPerformanceTelemetryEvent } from "../../../application/telemetry/performanceTelemetry";
 import { createSearchTelemetryEvent } from "../../../application/telemetry/searchTelemetry";
 import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
 import type { MyAppResource } from "../../../shared/MyAppResource";
-import { OPERATION, type SearchEventType } from "../../../shared/webviewEvents";
+import {
+  OPERATION,
+  type PerformanceEventType,
+  type SearchEventType,
+} from "../../../shared/webviewEvents";
 import { getTelemetryHost } from "../telemetryHost";
 import type { ViewerOperationRequest } from "./viewerMessageRouting";
 
@@ -79,5 +84,20 @@ export const reportWebviewSearch = (
     telemetry.trackEvent(telemetryEvent.name, telemetryEvent.properties);
   } catch {
     // Search telemetry must not block webview message handling.
+  }
+};
+
+export const reportWebviewPerformance = (
+  telemetry: ViewerOperationRequest["telemetry"],
+  event: PerformanceEventType,
+): void => {
+  const telemetryEvent = createPerformanceTelemetryEvent({
+    ...event.data,
+    host: getTelemetryHost(),
+  });
+  try {
+    telemetry.trackEvent(telemetryEvent.name, telemetryEvent.properties);
+  } catch {
+    // Performance telemetry must not block webview message handling.
   }
 };
