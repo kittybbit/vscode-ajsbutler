@@ -106,6 +106,13 @@
      diagnostics, search, WebAPI import, and future roadmap capabilities such
      as unified search, semantic definition comparison, dependency analysis,
      review support, and AI-assisted features.
+   - For roadmap capabilities, document event families and privacy constraints
+     before implementation pressure appears, but add runtime telemetry only
+     with the corresponding approved feature behavior.
+   - AI-assisted feature telemetry must remain limited to anonymous
+     operational metadata and must never include prompts, responses,
+     definition content, generated content, provider account identifiers, raw
+     model errors, or stack traces.
 
 ## Deferred / Optional Slices
 

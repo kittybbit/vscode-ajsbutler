@@ -275,10 +275,16 @@ Allowed properties:
 
 - `compare.semantic.started`
 - `compare.semantic.completed`
+- `compare.semantic.cancelled`
+- `compare.semantic.failed`
 - `dependency_analysis.started`
 - `dependency_analysis.completed`
+- `dependency_analysis.cancelled`
+- `dependency_analysis.failed`
 - `review_support.started`
 - `review_support.completed`
+- `review_support.cancelled`
+- `review_support.failed`
 - `ai_assist.started`
 - `ai_assist.completed`
 - `ai_assist.cancelled`
@@ -296,6 +302,44 @@ Allowed properties:
 - `providerCategory`
 - `safetyCategory`
 - `errorCode`
+
+Roadmap capability telemetry is readiness guidance only until the corresponding
+feature exists. Do not add runtime event constants, builders, or emitted events
+for these capabilities before an approved implementation slice introduces the
+feature behavior.
+
+Future unified search should use the `search.unified.*` family above. It may
+report only search mode, scope, query-length bucket, result-count bucket,
+duration bucket, result category, and repository-owned error code. It must not
+report raw search text, matched unit identity, matched definition text, file
+path, or names.
+
+Semantic definition comparison should use `compare.semantic.*`. It may report
+only capability, result, duration bucket, input-size bucket, finding-count
+bucket, output-size bucket when the output is an anonymous count bucket, safety
+category, and repository-owned error code. It must not report compared
+definition contents, diff text, job or unit names, commands, comments, paths,
+or matched identifiers.
+
+Dependency analysis should use `dependency_analysis.*`. It may report only
+capability, result, duration bucket, input-size bucket, finding-count bucket,
+output-size bucket when it represents an anonymous graph-size bucket, safety
+category, and repository-owned error code. It must not report unit names,
+dependency edge identities, paths, commands, comments, or definition content.
+
+Review support should use `review_support.*`. It may report only capability,
+result, duration bucket, input-size bucket, finding-count bucket, safety
+category, and repository-owned error code. It must not report review comments,
+source excerpts, definition contents, generated command text, unit names, file
+paths, or personal identifiers.
+
+AI-assisted features should use `ai_assist.*`. They may report only capability,
+result, duration bucket, input-size bucket, output-size bucket when represented
+as an anonymous count bucket, provider category, safety category, and
+repository-owned error code. They must never report prompts, responses,
+definition content, generated content, commands, comments, unit names, file
+paths, user names, organization names, provider account identifiers, raw model
+errors, or stack traces.
 
 ## Architecture
 

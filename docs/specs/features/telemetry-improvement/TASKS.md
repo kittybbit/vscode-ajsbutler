@@ -21,17 +21,19 @@
 - Review status:
   reviewed and ready for implementation.
 - Human approval:
-  approved for Slice 1 through Slice 8.
+  none; Slice 1 through Slice 8 are complete and no implementation slice
+  remains active.
 - Active implementation slice:
-  Slice 8: Roadmap Telemetry Readiness.
+  none; all approved implementation slices are complete and Feature Exit Mode
+  is next.
 
 ## Human Approval
 
-- Status: Approved
+- Status: Pending
 - Approved at:
-  approved in current conversation
+  none
 - Approved scope:
-  Slice 1 through Slice 8 in this implementation plan.
+  none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -402,7 +404,7 @@ active implementation approval remains.
 
 ### Slice 8: Roadmap Telemetry Readiness
 
-- Status: Approved
+- Status: Complete
 - Scope:
   document telemetry guidance for unified search, semantic definition
   comparison, dependency analysis, review support, and AI-assisted features
@@ -496,8 +498,7 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready. Slices 1 through 7 are complete; Slice 8 remains approved
-  for implementation.
+  ready for Feature Exit Mode. Slices 1 through 8 are complete.
 - Durable documentation updates:
   `uc-record-telemetry.md`, `docs/specs/plans.md`, and `docs/specs/roadmap.md`
   were updated during feature intake; later slices must keep them synchronized
@@ -508,10 +509,10 @@ active implementation approval remains.
 
 ## Validation
 
-- [ ] Tests added or updated for each approved implementation slice
-- [ ] Update README or user documentation if user-facing telemetry policy
+- [x] Tests added or updated for each approved implementation slice
+- [x] Update README or user documentation if user-facing telemetry policy
       changes
-- [ ] Run relevant validation for each approved slice
+- [x] Run relevant validation for each approved slice
 
 ## Notes
 

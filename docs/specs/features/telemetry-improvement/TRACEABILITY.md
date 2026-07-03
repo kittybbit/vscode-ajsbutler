@@ -194,6 +194,11 @@ slices, and validation plans.
   docs validation with `rtk pnpm run lint:md` and `rtk pnpm run qlty`; schema
   tests are out of scope unless future runtime schema reservations are approved
   in another slice.
+- Slice 8 Result:
+  roadmap telemetry readiness is documented in SPECS, roadmap, and the durable
+  telemetry use case without adding runtime event constants, builders, or
+  emitted events for non-existent features. Validation passes with
+  `rtk pnpm run lint:md` and `rtk pnpm run qlty`.
 
 ### Forbidden Content
 

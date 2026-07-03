@@ -55,6 +55,15 @@ user content outside the outer adapter layer.
   outcomes but must not report the search query or matched unit identity
 - performance telemetry may report duration buckets and size buckets but must
   not inspect or emit definition contents
+- roadmap capability telemetry must name future event families and privacy
+  constraints in durable docs, but runtime events should be introduced only
+  with the corresponding approved feature behavior
+- semantic comparison, dependency analysis, review support, and AI-assisted
+  telemetry may use only anonymous capability, result, safety, provider,
+  duration, count, size, and repository-owned error metadata
+- AI-assisted telemetry must never include prompts, responses, definition
+  content, generated content, provider account identifiers, raw model errors,
+  or stack traces
 - telemetry failures must not affect user workflows
 - desktop and web extension entry points must share the same telemetry
   contract, with Noop fallback when telemetry cannot initialize
@@ -103,6 +112,13 @@ Scenario: Workflow telemetry records safe cancellation or failure
   Then telemetry records the workflow stage and anonymous result metadata
   And raw credentials, server details, prompts, responses, file paths, and
     definition contents are not submitted
+
+Scenario: Roadmap capability telemetry is introduced with feature behavior
+  Given a roadmap feature such as semantic comparison, dependency analysis,
+    review support, or AI assistance is not implemented yet
+  When telemetry guidance is documented for that feature family
+  Then runtime event constants and emitted events are not added in advance
+  And the future feature remains constrained to anonymous operational metadata
 
 Scenario: Telemetry payload remains privacy-conscious
   Given telemetry event payload properties
