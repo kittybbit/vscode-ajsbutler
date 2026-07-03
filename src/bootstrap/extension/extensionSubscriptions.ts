@@ -9,8 +9,14 @@ export const createExtensionSubscriptions = (
   context: vscode.ExtensionContext,
   dependencies: ExtensionDependencies,
 ): vscode.Disposable[] => [
-  registerDiagnostics(dependencies.buildSyntaxDiagnostics),
-  registerHoverProvider(dependencies.findParameterHover),
+  registerDiagnostics(
+    dependencies.buildSyntaxDiagnostics,
+    dependencies.telemetry,
+  ),
+  registerHoverProvider(
+    dependencies.findParameterHover,
+    dependencies.telemetry,
+  ),
   ...createWebApiImportSubscriptions({
     telemetry: dependencies.telemetry,
     ...dependencies.webApiImport,

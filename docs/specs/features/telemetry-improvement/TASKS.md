@@ -23,7 +23,7 @@
 - Human approval:
   approved for Slice 1 through Slice 8.
 - Active implementation slice:
-  Slice 6: Diagnostics And Hover Telemetry.
+  Slice 7: Performance Telemetry.
 
 ## Human Approval
 
@@ -307,7 +307,7 @@ active implementation approval remains.
 
 ### Slice 6: Diagnostics And Hover Telemetry
 
-- Status: Approved
+- Status: Complete
 - Scope:
   add privacy-safe editor feedback telemetry for diagnostic evaluation,
   diagnostic reported categories or rule IDs, hover requests, and hover
@@ -496,7 +496,7 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready. Slices 1 through 5 are complete; Slices 6 through 8 remain approved
+  not ready. Slices 1 through 6 are complete; Slices 7 through 8 remain approved
   for implementation.
 - Durable documentation updates:
   `uc-record-telemetry.md`, `docs/specs/plans.md`, and `docs/specs/roadmap.md`

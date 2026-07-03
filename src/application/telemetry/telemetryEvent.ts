@@ -434,6 +434,48 @@ export const telemetryEvents = {
       telemetryPropertyKeys.scope,
     ],
   },
+  editorDiagnosticsEvaluated: {
+    name: "editor.diagnostics.evaluated",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.diagnosticCountBucket,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
+  editorDiagnosticsReported: {
+    name: "editor.diagnostics.reported",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.diagnosticCountBucket,
+      telemetryPropertyKeys.diagnosticRuleId,
+      telemetryPropertyKeys.diagnosticCategory,
+    ],
+  },
+  editorHoverRequested: {
+    name: "editor.hover.requested",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.hoverTargetCategory,
+    ],
+  },
+  editorHoverResolved: {
+    name: "editor.hover.resolved",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.host,
+      telemetryPropertyKeys.result,
+      telemetryPropertyKeys.durationBucket,
+      telemetryPropertyKeys.hoverTargetCategory,
+      telemetryPropertyKeys.errorCode,
+    ],
+  },
 } as const satisfies Record<string, TelemetryEventDefinition>;
 
 export const createTelemetryEvent = <Name extends string>(

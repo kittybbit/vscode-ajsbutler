@@ -145,6 +145,15 @@ slices, and validation plans.
   syntax diagnostics tests if rule IDs are added, hover provider tests,
   diagnostics adapter tests, telemetry tests, desktop tests, and web tests when
   shared editor feedback wiring changes.
+- Validation Result:
+  `editorFeedbackTelemetry.test.ts`, `registerDiagnostics.test.ts`,
+  `registerHoverProvider.test.ts`, and `buildSyntaxDiagnostics.test.ts` pass
+  through focused `rtk pnpm test`; full `rtk pnpm test`,
+  `rtk pnpm run test:web`, `rtk pnpm run build`, `rtk pnpm run lint:md`, and
+  `rtk pnpm run qlty` pass. Production build reports existing webpack bundle
+  size warnings. Slice 6 uses stable anonymous diagnostic categories instead
+  of message-derived rule IDs, so diagnostic messages, source text, paths,
+  parameter values, and hover token text are not emitted.
 
 ### Slow Operations
 
