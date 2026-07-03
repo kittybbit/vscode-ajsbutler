@@ -1,10 +1,19 @@
 # Change Log
 
-## Unreleased
+## [1.16.0]
 
 - Expanded privacy-conscious telemetry to include anonymous extension
   lifecycle, viewer readiness or close, viewer action, search outcome, and
   diagnostic, hover, performance, and WebAPI import workflow metadata.
+- Improved viewer commands so table and flow viewers open in the active editor
+  pane.
+- Improved flow viewer investigation and node actions, including focused node
+  details, relationship navigation, panel behavior, and minimap/search
+  interaction refinements.
+- Improved unit-list usability around search, navigation, detail display, and
+  responsive viewer controls.
+- Updated dependencies and package metadata to resolve dependency and security
+  maintenance items.
 
 ## [1.15.1]
 
