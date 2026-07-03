@@ -7,6 +7,7 @@ export const CHANGE_DOCUMENT = "changeDocument";
 export const OPERATION = "operation";
 export const NAVIGATE = "navigate";
 export const REVEAL_UNIT = "revealUnit";
+export const SEARCH = "search";
 
 export type NavigationTargetView = "flow" | "table";
 export type NavigationEventData = {
@@ -21,6 +22,17 @@ export type ResourceEventType = { type: typeof RESOURCE; data: MyAppResource };
 export type ReadyEventType = { type: typeof READY };
 export type SaveEventType = { type: typeof SAVE; data: string };
 export type OperationEventType = { type: typeof OPERATION; data: string };
+export type SearchEventData = {
+  surface: "table" | "flow";
+  action: "submitted" | "navigated" | "cleared";
+  result: "matched" | "no_match" | "cleared";
+  mode: "partial";
+  queryLengthBucket?: string;
+  resultCountBucket?: string;
+  durationBucket?: string;
+  scope: "visible_rows" | "current_flow_scope";
+};
+export type SearchEventType = { type: typeof SEARCH; data: SearchEventData };
 export type NavigationEventType = {
   type: typeof NAVIGATE;
   data: NavigationEventData;
@@ -52,9 +64,15 @@ export const createOperationEvent = (
   data: operation,
 });
 
+export const createSearchEvent = (data: SearchEventData): SearchEventType => ({
+  type: SEARCH,
+  data,
+});
+
 export type WebviewEventType =
   | ResourceEventType
   | ReadyEventType
   | SaveEventType
   | OperationEventType
+  | SearchEventType
   | NavigationEventType;

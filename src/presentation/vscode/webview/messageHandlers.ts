@@ -1,8 +1,9 @@
 import * as os from "os";
 import * as vscode from "vscode";
+import { createSearchTelemetryEvent } from "../../../application/telemetry/searchTelemetry";
 import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
 import type { MyAppResource } from "../../../shared/MyAppResource";
-import { OPERATION } from "../../../shared/webviewEvents";
+import { OPERATION, type SearchEventType } from "../../../shared/webviewEvents";
 import { getTelemetryHost } from "../telemetryHost";
 import type { ViewerOperationRequest } from "./viewerMessageRouting";
 
@@ -63,5 +64,20 @@ export const reportWebviewOperation = ({
     } catch {
       // Viewer action telemetry must not block webview operation handling.
     }
+  }
+};
+
+export const reportWebviewSearch = (
+  telemetry: ViewerOperationRequest["telemetry"],
+  event: SearchEventType,
+): void => {
+  const telemetryEvent = createSearchTelemetryEvent({
+    ...event.data,
+    host: getTelemetryHost(),
+  });
+  try {
+    telemetry.trackEvent(telemetryEvent.name, telemetryEvent.properties);
+  } catch {
+    // Search telemetry must not block webview message handling.
   }
 };

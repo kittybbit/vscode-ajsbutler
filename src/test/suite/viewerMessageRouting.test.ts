@@ -5,6 +5,7 @@ import {
   READY,
   RESOURCE,
   SAVE,
+  SEARCH,
 } from "../../shared/webviewEvents";
 import {
   createViewerMessageHandler,
@@ -14,6 +15,10 @@ import {
 suite("Viewer message routing", () => {
   test("routes shared webview events through injected handlers", async () => {
     const calls: string[] = [];
+    const telemetryEvents: Array<{
+      eventName: string;
+      properties?: Record<string, string>;
+    }> = [];
     const document = {
       uri: { toString: () => "file:///sample.ajs" },
     };
@@ -24,7 +29,12 @@ suite("Viewer message routing", () => {
     const handler = createViewerMessageHandler({
       document: document as never,
       panel: panel as never,
-      telemetry: {} as never,
+      telemetry: {
+        trackEvent: (eventName, properties) => {
+          telemetryEvents.push({ eventName, properties });
+        },
+        dispose() {},
+      },
       onReady: () => {
         calls.push("ready");
       },
@@ -53,6 +63,19 @@ suite("Viewer message routing", () => {
       type: NAVIGATE,
       data: { targetView: "flow", absolutePath: "/root/unit" },
     });
+    handler({
+      type: SEARCH,
+      data: {
+        surface: "table",
+        action: "submitted",
+        result: "no_match",
+        mode: "partial",
+        queryLengthBucket: "2_9",
+        resultCountBucket: "0",
+        durationBucket: "lt100ms",
+        scope: "visible_rows",
+      },
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepStrictEqual(calls, [
@@ -61,6 +84,22 @@ suite("Viewer message routing", () => {
       "save:body",
       "operation:copy.csv",
       "navigate:flow:/root/unit",
+    ]);
+    assert.deepStrictEqual(telemetryEvents, [
+      {
+        eventName: "search.table.submitted",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          surface: "table",
+          mode: "partial",
+          result: "no_match",
+          queryLengthBucket: "2_9",
+          resultCountBucket: "0",
+          durationBucket: "lt100ms",
+          scope: "visible_rows",
+        },
+      },
     ]);
   });
 

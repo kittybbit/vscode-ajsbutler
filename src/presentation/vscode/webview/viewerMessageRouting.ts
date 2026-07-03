@@ -2,17 +2,20 @@ import * as vscode from "vscode";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import { createViewerClosedEvent } from "../../../application/telemetry/viewerTelemetry";
 import { getTelemetryHost } from "../telemetryHost";
+import { reportWebviewSearch } from "./messageHandlers";
 import {
   NAVIGATE,
   OPERATION,
   READY,
   RESOURCE,
   SAVE,
+  SEARCH,
   type NavigationEventType,
   type OperationEventType,
   type ReadyEventType,
   type ResourceEventType,
   type SaveEventType,
+  type SearchEventType,
   type WebviewEventType,
 } from "../../../shared/webviewEvents";
 
@@ -45,6 +48,7 @@ type ViewerMessageRouteMap = {
   [READY]: (event: ReadyEventType) => void;
   [SAVE]: (event: SaveEventType) => void;
   [OPERATION]: (event: OperationEventType) => void;
+  [SEARCH]: (event: SearchEventType) => void;
   [NAVIGATE]: (event: NavigationEventType) => void;
 };
 
@@ -85,6 +89,9 @@ const createViewerMessageRoutes = ({
   },
   [OPERATION]: (event) => {
     onOperation({ document, panel, telemetry, operation: event.data });
+  },
+  [SEARCH]: (event) => {
+    reportWebviewSearch(telemetry, event);
   },
   [NAVIGATE]: (event) => {
     onNavigate(document, event);

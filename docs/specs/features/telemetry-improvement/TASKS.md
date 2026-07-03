@@ -23,7 +23,7 @@
 - Human approval:
   approved for Slice 1 through Slice 8.
 - Active implementation slice:
-  Slice 5: Search Outcome Telemetry.
+  Slice 6: Diagnostics And Hover Telemetry.
 
 ## Human Approval
 
@@ -257,7 +257,7 @@ active implementation approval remains.
 
 ### Slice 5: Search Outcome Telemetry
 
-- Status: Approved
+- Status: Complete
 - Scope:
   add privacy-safe search telemetry for current table and flow search submit,
   navigation, clear, no-match, and failure outcomes using query-length,
@@ -496,7 +496,7 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready. Slices 1 through 4 are complete; Slices 5 through 8 remain approved
+  not ready. Slices 1 through 5 are complete; Slices 6 through 8 remain approved
   for implementation.
 - Durable documentation updates:
   `uc-record-telemetry.md`, `docs/specs/plans.md`, and `docs/specs/roadmap.md`

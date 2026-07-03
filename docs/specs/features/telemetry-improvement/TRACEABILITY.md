@@ -123,6 +123,13 @@ slices, and validation plans.
   Slice 5: Search Outcome Telemetry.
 - Test File Or Validation Plan:
   table search, flow search, header search, telemetry, desktop, and web tests.
+- Validation Result:
+  `searchTelemetry.test.ts`, `viewerMessageRouting.test.ts`, table search,
+  flow search, and header search tests pass through `rtk pnpm test`;
+  `rtk pnpm run test:web`, `rtk pnpm run qlty`, and `rtk pnpm run build` pass.
+  Production build reports existing webpack bundle size warnings. README
+  telemetry wording and CHANGELOG are updated because telemetry policy now
+  covers anonymous search outcome metadata.
 
 ### Diagnostic Frequency
 
