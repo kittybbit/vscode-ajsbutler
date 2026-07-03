@@ -1,6 +1,7 @@
 import type { AjsParserPort } from "../parsing/AjsParserPort";
 import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { buildSemanticSyntaxDiagnostics } from "./syntaxDiagnosticRules";
+import { syntaxDiagnosticCategories } from "./syntaxDiagnosticTypes";
 import type {
   BuildSyntaxDiagnosticsOptions,
   SyntaxDiagnosticDto,
@@ -26,6 +27,7 @@ export const createBuildSyntaxDiagnostics =
       length: 1,
       message: error.message,
       severity: "error" as const,
+      category: syntaxDiagnosticCategories.parserSyntax,
     }));
     if (syntaxDiagnostics.length > 0) {
       return syntaxDiagnostics;

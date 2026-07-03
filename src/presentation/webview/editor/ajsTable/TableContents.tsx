@@ -34,6 +34,10 @@ import {
   UnitListRowView,
 } from "../../../../application/unit-list/buildUnitListView";
 import {
+  toCountBucket,
+  toDurationBucket,
+} from "../../../../application/telemetry/telemetryBuckets";
+import {
   toAjsDocument,
   UnitListDocumentDto,
 } from "../../../../application/unit-list/unitListDocument";
@@ -43,7 +47,11 @@ import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
 import UnitEntityDialog from "../UnitEntityDialog";
-import { REVEAL_UNIT } from "../../../../shared/webviewEvents";
+import {
+  REVEAL_UNIT,
+  createOperationEvent,
+  createPerformanceEvent,
+} from "../../../../shared/webviewEvents";
 import UnitTreeSelector from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
@@ -212,6 +220,10 @@ const useTableViewerTheme = (isDarkMode: boolean): Theme =>
     [isDarkMode],
   );
 
+const reportTableOperation = (operation: string): void => {
+  window.vscode.postMessage(createOperationEvent(operation));
+};
+
 const TableViewerShell = ({
   theme,
   table,
@@ -318,9 +330,10 @@ const TableViewerShell = ({
               <UnitListDetailPanel
                 detail={selectedDetail}
                 onClose={closeDetailPane}
-                onOpenDefinition={() =>
-                  setDialogData(selectedDetail.definition)
-                }
+                onOpenDefinition={() => {
+                  reportTableOperation("definition.open");
+                  setDialogData(selectedDetail.definition);
+                }}
                 onOpenFlow={() =>
                   navigateToFlow(selectedDetail.row.absolutePath)
                 }
@@ -351,6 +364,7 @@ const TableContents = () => {
   console.log("render TableContents.");
 
   const { isDarkMode, lang } = useMyAppContext();
+  const renderReadyStartedAt = useRef(performance.now());
 
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
@@ -380,6 +394,7 @@ const TableContents = () => {
 
   const selectTreeUnit = useCallback(
     (unitId: string) => {
+      reportTableOperation("unit.select");
       selectUnitTreeUnitInTable(unitId, viewerData.unitById, revealPath);
     },
     [revealPath, viewerData.unitById],
@@ -447,6 +462,16 @@ const TableContents = () => {
       revealUnit(data);
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
+    window.vscode.postMessage(
+      createPerformanceEvent({
+        operation: "table_render",
+        result: "success",
+        durationBucket: toDurationBucket(
+          performance.now() - renderReadyStartedAt.current,
+        ),
+        rowCountBucket: toCountBucket(rowViews?.length ?? 0),
+      }),
+    );
     window.vscode.postMessage({ type: "ready" });
     return () => {
       window.EventBridge.removeCallback("changeDocument", changeDocument);

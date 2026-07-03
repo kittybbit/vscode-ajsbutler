@@ -122,6 +122,7 @@ export class ViewerFactory {
       uri: document.uri,
       panel,
       viewType: this.#viewType,
+      telemetry: this.#telemetry,
       store: this.#store,
       receiveMessageDispose,
     });

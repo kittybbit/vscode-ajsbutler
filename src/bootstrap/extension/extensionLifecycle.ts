@@ -1,4 +1,9 @@
+import {
+  createTelemetryEvent,
+  telemetryEvents,
+} from "../../application/telemetry/telemetryEvent";
 import { Telemetry } from "../../presentation/vscode/constant";
+import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import { MyExtension } from "./MyExtension";
 
 const DEVELOPMENT_PROPERTY = {
@@ -10,6 +15,15 @@ export const reportExtensionActivated = (myExtension: MyExtension): void => {
     Telemetry.ExtensionActivate,
     DEVELOPMENT_PROPERTY,
   );
+  const event = createTelemetryEvent(
+    telemetryEvents.extensionLifecycleActivated,
+    {
+      development: DEVELOPMENT,
+      host: getTelemetryHost(),
+      result: "success",
+    },
+  );
+  myExtension.telemetry.trackEvent(event.name, event.properties);
 };
 
 export const reportAndDisposeExtensionRuntime = (
@@ -23,5 +37,14 @@ export const reportAndDisposeExtensionRuntime = (
     Telemetry.ExtensionDeactivate,
     DEVELOPMENT_PROPERTY,
   );
+  const event = createTelemetryEvent(
+    telemetryEvents.extensionLifecycleDeactivated,
+    {
+      development: DEVELOPMENT,
+      host: getTelemetryHost(),
+      result: "success",
+    },
+  );
+  myExtension.telemetry.trackEvent(event.name, event.properties);
   myExtension.dispose();
 };

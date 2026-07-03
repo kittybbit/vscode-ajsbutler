@@ -12,9 +12,17 @@ import SaveIcon from "@mui/icons-material/Save";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
 import { Table, VisibilityState } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import {
+  toCountBucket,
+  toDurationBucket,
+} from "../../../../application/telemetry/telemetryBuckets";
 import { useMyAppContext } from "../MyContexts";
 import { localeMap } from "../../../../domain/services/i18n/nls";
-import { OPERATION, SAVE } from "../../../../shared/webviewEvents";
+import {
+  SAVE,
+  createOperationEvent,
+  createPerformanceEvent,
+} from "../../../../shared/webviewEvents";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
 import {
@@ -132,18 +140,32 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
 
-  const handleCopy = useCallback(() => {
+  const exportCsvWithPerformanceTelemetry = useCallback(() => {
+    const startedAt = performance.now();
     const csv = exportCsvView(table);
-    window.vscode.postMessage({ type: OPERATION, data: "copy.csv" });
-    navigator.clipboard.writeText(csv);
-    setOpen(true);
+    window.vscode.postMessage(
+      createPerformanceEvent({
+        operation: "csv_export",
+        result: "success",
+        durationBucket: toDurationBucket(performance.now() - startedAt),
+        rowCountBucket: toCountBucket(table.getRowModel().rows.length),
+      }),
+    );
+    return csv;
   }, [table]);
 
+  const handleCopy = useCallback(() => {
+    const csv = exportCsvWithPerformanceTelemetry();
+    window.vscode.postMessage(createOperationEvent("copy.csv"));
+    navigator.clipboard.writeText(csv);
+    setOpen(true);
+  }, [exportCsvWithPerformanceTelemetry]);
+
   const handleSave = useCallback(() => {
-    const csv = exportCsvView(table);
-    window.vscode.postMessage({ type: OPERATION, data: "save.csv" });
+    const csv = exportCsvWithPerformanceTelemetry();
+    window.vscode.postMessage(createOperationEvent("save.csv"));
     window.vscode.postMessage({ type: SAVE, data: csv });
-  }, [table]);
+  }, [exportCsvWithPerformanceTelemetry]);
 
   return (
     <>

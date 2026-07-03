@@ -94,7 +94,7 @@ the Single Source of Truth for SDD artifact responsibilities, including
 
 ## Branch Naming
 
-- Use a dedicated git branch for each slice.
+- Use a dedicated git branch for each feature.
 - Reserve `docs/...` branch names for docs-only changes.
 - Treat "docs-only" the same way as the `Verify` workflow:
   only `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md` may

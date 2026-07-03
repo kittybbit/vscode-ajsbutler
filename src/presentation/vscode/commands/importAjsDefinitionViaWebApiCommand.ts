@@ -1,4 +1,8 @@
 import {
+  createWebApiImportWorkflowEvent,
+  type WebApiImportTelemetryInputStep,
+} from "../../../application/telemetry/webApiImportTelemetry";
+import {
   buildDefinitionOnlyUnitListRequest,
   createImportAjsDefinitionError,
   type ImportAjsDefinitionConnectionDto,
@@ -33,6 +37,7 @@ export type ImportAjsDefinitionCommandDeps = {
     credential: { username: string; password: string },
   ) => Promise<void>;
   importPort: ImportAjsDefinitionViaWebApiPort;
+  now: () => number;
   trackEvent: (eventName: string, properties?: Record<string, string>) => void;
 };
 
@@ -54,6 +59,10 @@ type ImportInputValues = {
 
 type ImportInputKey = keyof ImportInputValues;
 
+type ImportInputCollection =
+  | { kind: "ready"; inputs: ImportInputs }
+  | { kind: "cancelled"; inputStep: WebApiImportTelemetryInputStep };
+
 type ImportInputStep = {
   key: ImportInputKey;
   options: (
@@ -63,13 +72,14 @@ type ImportInputStep = {
 
 type ImportCommandEarlyExit =
   | { kind: "handled"; result: ImportAjsDefinitionResultDto }
-  | { kind: "ready"; host: ImportAjsDefinitionHostKind };
+  | { kind: "ready"; host: ImportAjsDefinitionHostKind; startedAt: number };
 
 type ImportExecutionPlan =
   | {
       kind: "ready";
       request: ImportAjsDefinitionPortRequestDto;
       inputs: ImportInputs;
+      startedAt: number;
     }
   | { kind: "done"; result: ImportAjsDefinitionResultDto };
 
@@ -137,24 +147,44 @@ export const executeImportAjsDefinitionViaWebApiCommand = async (
     return earlyExit.result;
   }
 
-  return executeDesktopImport(deps, earlyExit.host);
+  return executeDesktopImport(deps, earlyExit);
 };
 
 const resolveEarlyExit = async (
   deps: ImportAjsDefinitionCommandDeps,
 ): Promise<ImportCommandEarlyExit> => {
   const host = deps.getHost();
-  const unsupportedHostResult = await rejectUnsupportedHostIfNeeded(deps, host);
+  const startedAt = deps.now();
+  reportImportStarted(deps, host);
+  const unsupportedHostResult = await rejectUnsupportedHostIfNeeded(
+    deps,
+    host,
+    startedAt,
+  );
   return unsupportedHostResult
     ? { kind: "handled", result: unsupportedHostResult }
-    : { kind: "ready", host };
+    : { kind: "ready", host, startedAt };
+};
+
+const reportImportStarted = (
+  deps: ImportAjsDefinitionCommandDeps,
+  host: ImportAjsDefinitionHostKind,
+): void => {
+  reportWebApiImportEvent(
+    deps,
+    createWebApiImportWorkflowEvent({
+      host,
+      stage: "started",
+      result: "started",
+    }),
+  );
 };
 
 const executeDesktopImport = async (
   deps: ImportAjsDefinitionCommandDeps,
-  host: ImportAjsDefinitionHostKind,
+  { host, startedAt }: Extract<ImportCommandEarlyExit, { kind: "ready" }>,
 ): Promise<ImportAjsDefinitionResultDto> => {
-  const plan = await buildImportExecutionPlan(deps, host);
+  const plan = await buildImportExecutionPlan(deps, host, startedAt);
   if (plan.kind === "done") {
     return plan.result;
   }
@@ -162,19 +192,24 @@ const executeDesktopImport = async (
   await storeImportCredential(deps, plan.request, plan.inputs);
 
   const result = await deps.importPort.importDefinition(plan.request);
-  await reportImportResult(deps, result);
+  await reportImportResult(deps, result, plan.startedAt);
   return result;
 };
 
 const buildImportExecutionPlan = async (
   deps: ImportAjsDefinitionCommandDeps,
   host: ImportAjsDefinitionHostKind,
+  startedAt: number,
 ): Promise<ImportExecutionPlan> => {
-  const inputs = await collectInputs(deps);
-  if (!inputs) {
-    return { kind: "done", result: reportCancelledImport(deps) };
+  const inputCollection = await collectInputs(deps);
+  if (inputCollection.kind === "cancelled") {
+    return {
+      kind: "done",
+      result: reportCancelledImport(deps, startedAt, inputCollection.inputStep),
+    };
   }
 
+  const inputs = inputCollection.inputs;
   const request = buildDefinitionOnlyUnitListRequest({
     host,
     connection: inputs.connection,
@@ -185,40 +220,44 @@ const buildImportExecutionPlan = async (
   if ("ok" in request) {
     return {
       kind: "done",
-      result: await reportRequestBuildFailure(deps, request),
+      result: await reportRequestBuildFailure(deps, request, startedAt),
     };
   }
 
-  return { kind: "ready", request, inputs };
+  return { kind: "ready", request, inputs, startedAt };
 };
 
 const collectInputs = async (
   deps: ImportAjsDefinitionCommandDeps,
-): Promise<ImportInputs | undefined> => {
-  const values = await collectRequiredInputValues(deps);
-  if (!values) {
-    return undefined;
+): Promise<ImportInputCollection> => {
+  const inputValues = await collectRequiredInputValues(deps);
+  if (inputValues.kind === "cancelled") {
+    return inputValues;
   }
 
   return {
-    connection: {
-      baseUrl: values.baseUrl,
-      acceptLanguage: toWebApiLanguage(deps.getLanguage()),
+    kind: "ready",
+    inputs: {
+      connection: {
+        baseUrl: inputValues.values.baseUrl,
+        acceptLanguage: toWebApiLanguage(deps.getLanguage()),
+      },
+      scope: {
+        manager: inputValues.values.manager,
+        serviceName: inputValues.values.serviceName,
+        location: inputValues.values.location,
+        searchLowerUnits: true,
+      },
+      username: inputValues.values.username,
+      password: inputValues.values.password,
     },
-    scope: {
-      manager: values.manager,
-      serviceName: values.serviceName,
-      location: values.location,
-      searchLowerUnits: true,
-    },
-    username: values.username,
-    password: values.password,
   };
 };
 
 const rejectUnsupportedHostIfNeeded = async (
   deps: ImportAjsDefinitionCommandDeps,
   host: ImportAjsDefinitionHostKind,
+  startedAt: number,
 ): Promise<ImportAjsDefinitionResultDto | undefined> => {
   if (host !== "web") {
     return undefined;
@@ -232,14 +271,23 @@ const rejectUnsupportedHostIfNeeded = async (
     ),
   };
   await deps.showErrorMessage(result.error.message);
-  deps.trackEvent("webapiImport", {
-    result: "unsupported-host",
-  });
+  reportWebApiImportEvent(
+    deps,
+    createWebApiImportWorkflowEvent({
+      host,
+      stage: "unsupported_host",
+      result: "unsupported_host",
+      durationMs: deps.now() - startedAt,
+      errorCode: result.error.code,
+    }),
+  );
   return result;
 };
 
 const reportCancelledImport = (
   deps: ImportAjsDefinitionCommandDeps,
+  startedAt: number,
+  inputStep: WebApiImportTelemetryInputStep,
 ): ImportAjsDefinitionResultDto => {
   const result: ImportAjsDefinitionResultDto = {
     ok: false,
@@ -248,20 +296,26 @@ const reportCancelledImport = (
       "JP1/AJS WebAPI import was cancelled.",
     ),
   };
-  deps.trackEvent("webapiImport", {
-    result: "cancelled",
-  });
+  reportWebApiImportEvent(
+    deps,
+    createWebApiImportWorkflowEvent({
+      host: deps.getHost(),
+      stage: "cancelled",
+      result: "cancelled",
+      durationMs: deps.now() - startedAt,
+      inputStep,
+    }),
+  );
   return result;
 };
 
 const reportRequestBuildFailure = async (
   deps: ImportAjsDefinitionCommandDeps,
   result: ImportAjsDefinitionFailureDto,
+  startedAt: number,
 ): Promise<ImportAjsDefinitionFailureDto> => {
   await deps.showErrorMessage(result.error.message);
-  deps.trackEvent("webapiImport", {
-    result: result.error.code,
-  });
+  reportWebApiImportFailure(deps, result, startedAt);
   return result;
 };
 
@@ -279,60 +333,111 @@ const storeImportCredential = async (
 const reportImportResult = async (
   deps: ImportAjsDefinitionCommandDeps,
   result: ImportAjsDefinitionResultDto,
+  startedAt: number,
 ): Promise<void> => {
   if (result.ok) {
-    await reportImportSuccess(deps, result);
+    await reportImportSuccess(deps, result, startedAt);
     return;
   }
 
   if (isFailure(result)) {
-    await reportImportFailure(deps, result);
+    await reportImportFailure(deps, result, startedAt);
   }
 };
 
 const reportImportSuccess = async (
   deps: ImportAjsDefinitionCommandDeps,
   result: Extract<ImportAjsDefinitionResultDto, { ok: true }>,
+  startedAt: number,
 ): Promise<void> => {
   await deps.showInformationMessage(
     `JP1/AJS WebAPI import beta loaded ${result.content.units.length} unit(s).`,
   );
-  deps.trackEvent("webapiImport", {
-    result: "success",
-    unitCount: String(result.content.units.length),
-    all: String(result.content.source.all),
-  });
+  reportWebApiImportEvent(
+    deps,
+    createWebApiImportWorkflowEvent({
+      host: deps.getHost(),
+      stage: "completed",
+      result: "success",
+      durationMs: deps.now() - startedAt,
+      unitCount: result.content.units.length,
+      all: result.content.source.all,
+    }),
+  );
 };
 
 const reportImportFailure = async (
   deps: ImportAjsDefinitionCommandDeps,
   result: ImportAjsDefinitionFailureDto,
+  startedAt: number,
 ): Promise<void> => {
-  const error = result.error;
-  await deps.showErrorMessage(error.message);
-  deps.trackEvent("webapiImport", {
-    result: error.code,
-    httpStatus: error.httpStatus ? String(error.httpStatus) : "none",
-  });
+  await deps.showErrorMessage(result.error.message);
+  reportWebApiImportFailure(deps, result, startedAt);
+};
+
+const reportWebApiImportFailure = (
+  deps: ImportAjsDefinitionCommandDeps,
+  result: ImportAjsDefinitionFailureDto,
+  startedAt: number,
+): void => {
+  reportWebApiImportEvent(
+    deps,
+    createWebApiImportWorkflowEvent({
+      host: deps.getHost(),
+      stage: "failed",
+      result: "failed",
+      durationMs: deps.now() - startedAt,
+      errorCode: result.error.code,
+      httpStatus: result.error.httpStatus,
+    }),
+  );
+};
+
+const reportWebApiImportEvent = (
+  deps: ImportAjsDefinitionCommandDeps,
+  event: ReturnType<typeof createWebApiImportWorkflowEvent>,
+): void => {
+  try {
+    deps.trackEvent(event.name, event.properties);
+  } catch {
+    // Telemetry must not change the WebAPI import workflow outcome.
+  }
 };
 
 const collectRequiredInputValues = async (
   deps: ImportAjsDefinitionCommandDeps,
-): Promise<ImportInputValues | undefined> => {
-  const values = await collectInputSteps(deps);
-  return hasImportInputValues(values) ? values : undefined;
+): Promise<
+  | { kind: "ready"; values: ImportInputValues }
+  | { kind: "cancelled"; inputStep: WebApiImportTelemetryInputStep }
+> => {
+  const inputSteps = await collectInputSteps(deps);
+  if (inputSteps.kind === "cancelled") {
+    return inputSteps;
+  }
+  if (hasImportInputValues(inputSteps.values)) {
+    return { kind: "ready", values: inputSteps.values };
+  }
+
+  return { kind: "cancelled", inputStep: "password" };
 };
 
-const collectInputSteps = (
+const collectInputSteps = async (
   deps: ImportAjsDefinitionCommandDeps,
-): Promise<Partial<ImportInputValues> | undefined> =>
-  IMPORT_INPUT_STEPS.reduce<Promise<Partial<ImportInputValues> | undefined>>(
-    async (valuesPromise, step) => {
-      const values = await valuesPromise;
-      return values ? collectInputStep(deps, step, values) : undefined;
-    },
-    Promise.resolve({}),
-  );
+): Promise<
+  | { kind: "ready"; values: Partial<ImportInputValues> }
+  | { kind: "cancelled"; inputStep: WebApiImportTelemetryInputStep }
+> => {
+  let values: Partial<ImportInputValues> = {};
+  for (const step of IMPORT_INPUT_STEPS) {
+    const collected = await collectInputStep(deps, step, values);
+    if (!collected) {
+      return { kind: "cancelled", inputStep: toTelemetryInputStep(step.key) };
+    }
+    values = collected;
+  }
+
+  return { kind: "ready", values };
+};
 
 const collectInputStep = async (
   deps: ImportAjsDefinitionCommandDeps,
@@ -347,6 +452,19 @@ const hasImportInputValues = (
   values: Partial<ImportInputValues>,
 ): values is ImportInputValues =>
   IMPORT_INPUT_KEYS.every((key) => typeof values[key] === "string");
+
+const toTelemetryInputStep = (
+  key: ImportInputKey,
+): WebApiImportTelemetryInputStep => {
+  switch (key) {
+    case "baseUrl":
+      return "base_url";
+    case "serviceName":
+      return "service_name";
+    default:
+      return key;
+  }
+};
 
 const promptRequired = async (
   deps: ImportAjsDefinitionCommandDeps,

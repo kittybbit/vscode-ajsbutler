@@ -15,7 +15,11 @@ import {
   toAjsDocument,
   UnitListDocumentDto,
 } from "../../../../application/unit-list/unitListDocument";
-import { REVEAL_UNIT } from "../../../../shared/webviewEvents";
+import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
+import {
+  createPerformanceEvent,
+  REVEAL_UNIT,
+} from "../../../../shared/webviewEvents";
 import { getRevealUnitAbsolutePath } from "../revealUnit";
 import {
   resolveFlowNodeCenter,
@@ -375,6 +379,7 @@ export const useFlowDocumentSubscription = ({
   setAjsDocument,
   setCurrentUnitId,
 }: UseFlowDocumentSubscriptionParams) => {
+  const renderReadyStartedAt = useRef(performance.now());
   useEffect(() => {
     const changeDocumentFn = (_type: string, data: unknown) => {
       const nextDocument = data
@@ -386,6 +391,15 @@ export const useFlowDocumentSubscription = ({
       );
     };
     window.EventBridge.addCallback("changeDocument", changeDocumentFn);
+    window.vscode.postMessage(
+      createPerformanceEvent({
+        operation: "flow_render",
+        result: "success",
+        durationBucket: toDurationBucket(
+          performance.now() - renderReadyStartedAt.current,
+        ),
+      }),
+    );
     window.vscode.postMessage({ type: "ready" });
     return () => {
       window.EventBridge.removeCallback("changeDocument", changeDocumentFn);

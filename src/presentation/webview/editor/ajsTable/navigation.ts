@@ -71,8 +71,13 @@ export const openUnitTreeUnitInFlow = (
 };
 
 export const handleSelectTableRow =
-  (absolutePath: string, selectRow: (absolutePath: string) => void) =>
+  (
+    absolutePath: string,
+    selectRow: (absolutePath: string) => void,
+    reportOperation?: () => void,
+  ) =>
   (): void => {
+    reportOperation?.();
     selectRow(absolutePath);
   };
 
@@ -91,7 +96,11 @@ const isOwnRowKeyboardEvent = (
 ): boolean => event.target === event.currentTarget;
 
 export const handleSelectTableRowKeyDown =
-  (absolutePath: string, selectRow: (absolutePath: string) => void) =>
+  (
+    absolutePath: string,
+    selectRow: (absolutePath: string) => void,
+    reportOperation?: () => void,
+  ) =>
   (
     event: Pick<
       KeyboardEvent<HTMLElement>,
@@ -102,5 +111,6 @@ export const handleSelectTableRowKeyDown =
       return;
     }
     event.preventDefault();
+    reportOperation?.();
     selectRow(absolutePath);
   };

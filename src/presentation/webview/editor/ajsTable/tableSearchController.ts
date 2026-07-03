@@ -1,6 +1,11 @@
 import { useCallback, useState } from "react";
 import type { Row } from "@tanstack/table-core";
+import {
+  toCountBucket,
+  toDurationBucket,
+} from "../../../../application/telemetry/telemetryBuckets";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import { createSearchEvent } from "../../../../shared/webviewEvents";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
 import {
   createEmptyTableSearchState,
@@ -35,6 +40,37 @@ const revealSearchedPath = (
   }
 };
 
+const postTableSearchEvent = ({
+  action,
+  query,
+  resultCount,
+  durationMs,
+}: {
+  action: "submitted" | "navigated" | "cleared";
+  query: string;
+  resultCount: number;
+  durationMs?: number;
+}): void => {
+  window.vscode.postMessage(
+    createSearchEvent({
+      surface: "table",
+      action,
+      result:
+        action === "cleared"
+          ? "cleared"
+          : resultCount > 0
+            ? "matched"
+            : "no_match",
+      mode: "partial",
+      queryLengthBucket: toCountBucket(query.trim().length),
+      resultCountBucket: toCountBucket(resultCount),
+      durationBucket:
+        durationMs === undefined ? undefined : toDurationBucket(durationMs),
+      scope: "visible_rows",
+    }),
+  );
+};
+
 export const useTableSearchController = ({
   rows,
   parameterSearchValuesByPath,
@@ -46,17 +82,37 @@ export const useTableSearchController = ({
   );
 
   const resetSearch = useCallback(() => {
+    if (searchState.query !== undefined) {
+      postTableSearchEvent({
+        action: "cleared",
+        query: searchQuery,
+        resultCount: searchState.matchedAbsolutePaths.length,
+      });
+    }
     setSearchQuery("");
     setSearchState(createEmptyTableSearchState());
-  }, []);
+  }, [searchQuery, searchState.matchedAbsolutePaths.length, searchState.query]);
 
   const submitSearch = useCallback(
     (query: string) => {
+      if (query.trim().length === 0) {
+        setSearchQuery(query);
+        setSearchState(createEmptyTableSearchState());
+        return;
+      }
+
+      const startedAt = performance.now();
       const matchedAbsolutePaths = findTableSearchMatchingAbsolutePaths(
         rows,
         parameterSearchValuesByPath,
         query,
       );
+      postTableSearchEvent({
+        action: "submitted",
+        query,
+        resultCount: matchedAbsolutePaths.length,
+        durationMs: performance.now() - startedAt,
+      });
       const nextState = createSubmittedTableSearchState(
         query,
         matchedAbsolutePaths,
@@ -75,6 +131,12 @@ export const useTableSearchController = ({
         return;
       }
       const nextState = moveTableSearchResult(searchState, direction);
+      postTableSearchEvent({
+        action: "navigated",
+        query,
+        resultCount: nextState.matchedAbsolutePaths.length,
+        durationMs: 0,
+      });
       setSearchState(nextState);
       revealSearchedPath(nextState, revealPath);
     },

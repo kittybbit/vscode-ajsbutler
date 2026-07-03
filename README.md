@@ -132,8 +132,14 @@ duplicating the SDD workflow.
 ## Telemetry
 
 This extension collects telemetry data to improve the experience of using this
-extension with VS Code. We only collect data on which commands are executed.
-We do not collect any information about names, addresses, paths, etc. The
+extension with VS Code. We collect anonymous operational metadata such as
+extension lifecycle, command usage, viewer readiness or close events, and
+anonymous viewer action and search outcomes such as CSV export, navigation, or
+no-match searches, anonymous diagnostic categories and hover outcomes, and
+coarse performance buckets for operations such as parsing, unit-list build,
+flow graph build, and CSV export. We do not collect names, addresses, paths,
+definition contents, diagnostic messages, hover token text, search text,
+commands, server names, credentials, or other personal identifiers. The
 extension respects the telemetry.enableTelemetry setting. You can learn more
 about that setting in our [FAQ][telemetry-faq].
 

@@ -2,9 +2,11 @@ import * as assert from "assert";
 import {
   NAVIGATE,
   OPERATION,
+  PERFORMANCE,
   READY,
   RESOURCE,
   SAVE,
+  SEARCH,
 } from "../../shared/webviewEvents";
 import {
   createViewerMessageHandler,
@@ -14,6 +16,10 @@ import {
 suite("Viewer message routing", () => {
   test("routes shared webview events through injected handlers", async () => {
     const calls: string[] = [];
+    const telemetryEvents: Array<{
+      eventName: string;
+      properties?: Record<string, string>;
+    }> = [];
     const document = {
       uri: { toString: () => "file:///sample.ajs" },
     };
@@ -24,7 +30,12 @@ suite("Viewer message routing", () => {
     const handler = createViewerMessageHandler({
       document: document as never,
       panel: panel as never,
-      telemetry: {} as never,
+      telemetry: {
+        trackEvent: (eventName, properties) => {
+          telemetryEvents.push({ eventName, properties });
+        },
+        dispose() {},
+      },
       onReady: () => {
         calls.push("ready");
       },
@@ -53,6 +64,28 @@ suite("Viewer message routing", () => {
       type: NAVIGATE,
       data: { targetView: "flow", absolutePath: "/root/unit" },
     });
+    handler({
+      type: SEARCH,
+      data: {
+        surface: "table",
+        action: "submitted",
+        result: "no_match",
+        mode: "partial",
+        queryLengthBucket: "2_9",
+        resultCountBucket: "0",
+        durationBucket: "lt100ms",
+        scope: "visible_rows",
+      },
+    });
+    handler({
+      type: PERFORMANCE,
+      data: {
+        operation: "csv_export",
+        result: "success",
+        durationBucket: "lt100ms",
+        rowCountBucket: "2_9",
+      },
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepStrictEqual(calls, [
@@ -61,6 +94,33 @@ suite("Viewer message routing", () => {
       "save:body",
       "operation:copy.csv",
       "navigate:flow:/root/unit",
+    ]);
+    assert.deepStrictEqual(telemetryEvents, [
+      {
+        eventName: "search.table.submitted",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          surface: "table",
+          mode: "partial",
+          result: "no_match",
+          queryLengthBucket: "2_9",
+          resultCountBucket: "0",
+          durationBucket: "lt100ms",
+          scope: "visible_rows",
+        },
+      },
+      {
+        eventName: "performance.csv_export.completed",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          operation: "csv_export",
+          result: "success",
+          durationBucket: "lt100ms",
+          rowCountBucket: "2_9",
+        },
+      },
     ]);
   });
 
@@ -106,6 +166,12 @@ suite("Viewer message routing", () => {
       uri: document.uri as never,
       panel: panel as never,
       viewType: "ajsbutler.flowViewer",
+      telemetry: {
+        trackEvent: (eventName) => {
+          removed.push(`event:${eventName}`);
+        },
+        dispose() {},
+      },
       store: {
         removeByUri: (receivedUri) => {
           removed.push(receivedUri.toString());
@@ -120,7 +186,10 @@ suite("Viewer message routing", () => {
 
     onDidDispose?.();
 
-    assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
+    assert.deepStrictEqual(removed, [
+      "event:viewer.flow.closed",
+      "file:///sample.ajs",
+    ]);
     assert.strictEqual(receiverDisposed, true);
   });
 });

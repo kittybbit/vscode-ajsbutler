@@ -24,6 +24,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import { createOperationEvent } from "../../../../shared/webviewEvents";
 import TableHeader from "./TableHeader";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
 import { AccessorType } from "./columnDefs/common";
@@ -47,6 +48,7 @@ type VirtualizedTableProps = {
 
 type VirtualizedTableContext = {
   columnVisibilityRevision: string;
+  reportRowSelected: () => void;
   rowIndex?: number;
   selectedAbsolutePath?: string;
   selectRow: (absolutePath: string) => void;
@@ -132,7 +134,8 @@ const renderVisibleTableCell = ({
 const VirtualizedTableRow = memo(
   ({ context, ...props }: VirtualizedTableRowProps) => {
     const absolutePath = props.item.original.absolutePath;
-    const { rowIndex, selectedAbsolutePath, selectRow } = context;
+    const { reportRowSelected, rowIndex, selectedAbsolutePath, selectRow } =
+      context;
     return (
       <TableRow
         {...props}
@@ -144,8 +147,16 @@ const VirtualizedTableRow = memo(
           index: props["data-index"],
           revealedRowIndex: rowIndex,
         })}
-        onClick={handleSelectTableRow(absolutePath, selectRow)}
-        onKeyDown={handleSelectTableRowKeyDown(absolutePath, selectRow)}
+        onClick={handleSelectTableRow(
+          absolutePath,
+          selectRow,
+          reportRowSelected,
+        )}
+        onKeyDown={handleSelectTableRowKeyDown(
+          absolutePath,
+          selectRow,
+          reportRowSelected,
+        )}
       />
     );
   },
@@ -212,6 +223,8 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   const context = useMemo(
     () => ({
       columnVisibilityRevision,
+      reportRowSelected: () =>
+        window.vscode.postMessage(createOperationEvent("unit.select")),
       rowIndex,
       selectedAbsolutePath,
       selectRow,

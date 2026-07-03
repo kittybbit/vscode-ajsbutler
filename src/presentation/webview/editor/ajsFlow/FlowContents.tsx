@@ -1,4 +1,4 @@
-import React, { FC, memo, useMemo } from "react";
+import React, { FC, memo, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import Paper from "@mui/material/Paper";
@@ -19,6 +19,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import UnitEntityDialog from "../UnitEntityDialog";
+import { createOperationEvent } from "../../../../shared/webviewEvents";
 import JobNode from "./nodes/JobNode";
 import JobNetNode from "./nodes/JobNetNode";
 import JobGroupNode from "./nodes/JobGroupNode";
@@ -286,6 +287,10 @@ const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
     [theme],
   );
 
+const reportFlowOperation = (operation: string): void => {
+  window.vscode.postMessage(createOperationEvent(operation));
+};
+
 const FlowContents: FC = () => {
   console.log("render FlowContents.");
 
@@ -330,6 +335,40 @@ const FlowContents: FC = () => {
   const openSelectedNodeUnitList =
     useSelectedNodeUnitListAction(selectedNodeDetail);
   const miniMapColors = useFlowMiniMapColors(theme);
+  const selectFlowNodeWithTelemetry = useCallback(
+    (unitId: string) => {
+      reportFlowOperation("unit.select");
+      selectFlowNode(unitId);
+    },
+    [selectFlowNode],
+  );
+  const selectTreeUnitWithTelemetry = useCallback(
+    (unitId: string) => {
+      reportFlowOperation("unit.select");
+      selectTreeUnit(unitId);
+    },
+    [selectTreeUnit],
+  );
+  const openSelectedNodeDefinitionWithTelemetry = useCallback(() => {
+    reportFlowOperation("definition.open");
+    openSelectedNodeDefinition();
+  }, [openSelectedNodeDefinition]);
+  const openSelectedNodeScopeWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.scope.open");
+    openSelectedNodeScope();
+  }, [openSelectedNodeScope]);
+  const toggleExpandAllNestedUnitsWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.nested.toggle");
+    toggleExpandAllNestedUnits();
+  }, [toggleExpandAllNestedUnits]);
+  const toggleFocusModeWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.relationship_focus.toggle");
+    toggleFocusMode();
+  }, [toggleFocusMode]);
+  const toggleMiniMapWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.minimap.toggle");
+    toggleMiniMap();
+  }, [toggleMiniMap]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -355,12 +394,12 @@ const FlowContents: FC = () => {
             currentUnit={currentUnit}
             canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
             hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
-            toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
+            toggleExpandAllNestedUnits={toggleExpandAllNestedUnitsWithTelemetry}
             canEnableFocusMode={canEnableFocusMode}
             focusModeEnabled={focusModeEnabled}
-            toggleFocusMode={toggleFocusMode}
+            toggleFocusMode={toggleFocusModeWithTelemetry}
             showMiniMap={showMiniMap}
-            toggleMiniMap={toggleMiniMap}
+            toggleMiniMap={toggleMiniMapWithTelemetry}
             searchedUnitId={searchedUnitId}
             searchResultPosition={searchResultPosition}
             onSearchNavigate={handleSearchNavigate}
@@ -387,22 +426,22 @@ const FlowContents: FC = () => {
             hoveredUnitId={hoveredUnitId}
             miniMapColors={miniMapColors}
             nodes={nodes}
-            openSelectedNodeDefinition={openSelectedNodeDefinition}
-            openSelectedNodeScope={openSelectedNodeScope}
+            openSelectedNodeDefinition={openSelectedNodeDefinitionWithTelemetry}
+            openSelectedNodeScope={openSelectedNodeScopeWithTelemetry}
             openSelectedNodeUnitList={openSelectedNodeUnitList}
             reactFlowInstanceRef={reactFlowInstanceRef}
             searchedUnitId={searchedUnitId}
             searchResultPosition={searchResultPosition}
             selectedNodeDetail={selectedNodeDetail}
             selectedUnitId={selectedUnitId}
-            selectFlowNode={selectFlowNode}
-            selectTreeUnit={selectTreeUnit}
+            selectFlowNode={selectFlowNodeWithTelemetry}
+            selectTreeUnit={selectTreeUnitWithTelemetry}
             setDialogData={setDialogData}
             showMiniMap={showMiniMap}
             theme={theme}
-            toggleExpandAllNestedUnits={toggleExpandAllNestedUnits}
-            toggleFocusMode={toggleFocusMode}
-            toggleMiniMap={toggleMiniMap}
+            toggleExpandAllNestedUnits={toggleExpandAllNestedUnitsWithTelemetry}
+            toggleFocusMode={toggleFocusModeWithTelemetry}
+            toggleMiniMap={toggleMiniMapWithTelemetry}
             treeHoveredUnit={treeHoveredUnit}
             unitById={unitById}
           />

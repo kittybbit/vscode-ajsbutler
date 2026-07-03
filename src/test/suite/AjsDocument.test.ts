@@ -1,9 +1,11 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
+import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
 import {
   createDebouncedAjsDocumentChange,
   createReadyAjsDocument,
 } from "../../presentation/vscode/webview/ajsDocument";
+import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
 
 suite("ajsDocument", () => {
@@ -11,6 +13,10 @@ suite("ajsDocument", () => {
 
   test("posts the normalized document on ready", () => {
     const posted: Array<{ type: string; data: unknown }> = [];
+    const telemetryEvents: Array<{
+      eventName: string;
+      properties?: TelemetryProperties;
+    }> = [];
     const document = {
       getText() {
         return "";
@@ -25,10 +31,33 @@ suite("ajsDocument", () => {
       },
     } as vscode.WebviewPanel;
 
-    createReadyAjsDocument(buildUnitList)(document, panel);
+    createReadyAjsDocument(buildUnitList, {
+      trackEvent: (eventName, properties) => {
+        telemetryEvents.push({ eventName, properties });
+      },
+      dispose() {},
+    })(document, panel);
 
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
+    assert.deepStrictEqual(
+      {
+        ...telemetryEvents[0]?.properties,
+        durationBucket: "<bucket>",
+      },
+      {
+        development: String(DEVELOPMENT),
+        host: getTelemetryHost(),
+        operation: "unit_list_build",
+        result: "success",
+        durationBucket: "<bucket>",
+      },
+    );
+    assert.strictEqual(
+      telemetryEvents[0]?.eventName,
+      "performance.unit_list_build.completed",
+    );
+    assert.ok(telemetryEvents[0]?.properties?.durationBucket);
   });
 
   test("debounces repeated change events for the same document", async () => {

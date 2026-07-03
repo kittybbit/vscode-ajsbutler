@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
 import { buildDiagnostic } from "../../application/editor-feedback/syntaxDiagnosticCore";
+import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
 import { testAjsParser } from "../support/parseAjs";
 import {
@@ -92,6 +93,7 @@ suite("Build Syntax Diagnostics", () => {
         length: 1,
         message: "invalid syntax",
         severity: "error",
+        category: syntaxDiagnosticCategories.parserSyntax,
       },
     ]);
   });
@@ -177,6 +179,16 @@ suite("Build Syntax Diagnostics", () => {
           message:
             "Event message filter (evwms) must be a quoted string between 1 and 1024 bytes.",
         },
+      ],
+    );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.category),
+      [
+        syntaxDiagnosticCategories.scheduleRule,
+        syntaxDiagnosticCategories.scheduleRule,
+        syntaxDiagnosticCategories.eventSending,
+        syntaxDiagnosticCategories.eventSending,
+        syntaxDiagnosticCategories.eventReceiving,
       ],
     );
   });

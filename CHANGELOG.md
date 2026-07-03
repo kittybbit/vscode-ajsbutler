@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased
+
+- Expanded privacy-conscious telemetry to include anonymous extension
+  lifecycle, viewer readiness or close, viewer action, search outcome, and
+  diagnostic, hover, performance, and WebAPI import workflow metadata.
+
 ## [1.15.1]
 
 - Excluded local agent cache files from the published extension package.
