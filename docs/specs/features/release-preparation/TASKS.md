@@ -2,7 +2,7 @@
 
 ## Plan Status
 
-- Status: Pending Approval
+- Status: Approved
 - Planning scope:
   replan the temporary release-readiness work so CHANGELOG decisions come from
   the previous-release diff, approved version changes use `pnpm version`, and
@@ -10,23 +10,31 @@
 - Review status:
   Reviewed.
 - Human approval:
-  Pending.
+  Approved.
 - Active implementation slice:
-  none.
+  Slice 2: Apply approved release-facing updates.
 
 ## Human Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope:
+  all planned release-preparation slices are approved. Implement one slice at a
+  time in dependency order. The active approval boundary is Slice 2:
+  `pnpm version minor --no-git-tag-version`, `CHANGELOG.md` release section
+  updates based on `v1.15.1..HEAD`, and release-preparation SDD status/risk
+  updates only. No runtime behavior, dependency modernization, generated parser
+  artifacts, compatibility contract changes, packaging, or publishing are
+  included in this active slice.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
 `Approved at` records the approval result only, such as `none` or `approved in
 current conversation`; do not copy the approval message.
 
-Reset this section back to Pending when the approved slice is complete and no
-active implementation approval remains.
+Keep this section Approved while approved slices remain. Reset this section
+back to Pending when the approved slice is complete and no active
+implementation approval remains.
 
 ## Implementation Slices
 
@@ -157,7 +165,7 @@ active implementation approval remains.
 
 ### Slice 2: Apply approved release-facing updates
 
-- Status: Proposed
+- Status: Approved
 - Scope:
   apply only the release-facing updates approved after Slice 1, such as
   package version via `pnpm version`, CHANGELOG release section, README or
@@ -232,7 +240,7 @@ active implementation approval remains.
 
 ### Slice 3: Validate release candidate and prepare feature exit
 
-- Status: Proposed
+- Status: Approved
 - Scope:
   run and record the release-candidate validation approved for the release,
   including quality, markdown lint where useful, production build, compiled
@@ -305,7 +313,7 @@ active implementation approval remains.
 
 ### Slice 4: Publish approved release with vsce
 
-- Status: Proposed
+- Status: Approved
 - Scope:
   after Slice 3 validation passes and the human explicitly approves publish,
   publish the release through the approved `vsce` command, record the publish
