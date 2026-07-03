@@ -2,7 +2,7 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: Complete
 - Planning scope:
   replan Slice 4 so Marketplace publishing uses the package command form proven
   by Slice 3, and release publication also considers creating and pushing the
@@ -10,24 +10,15 @@
 - Review status:
   Reviewed.
 - Human approval:
-  Approved.
+  Pending for Feature Exit Mode.
 - Active implementation slice:
-  Slice 4: Publish approved release and push release tag.
+  none.
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
-- Approved scope:
-  revised Slice 4 boundary: run `pnpm exec vsce publish --no-dependencies`,
-  verify the published `1.16.0` result, create annotated tag `v1.16.0` at the
-  checked approved release commit, push `HEAD` explicitly to `origin/main` with
-  `git push origin HEAD:main`, push `v1.16.0` with
-  `git push origin v1.16.0`, and record publish/tag/push evidence in
-  release-preparation SDD docs. Runtime behavior changes, version changes,
-  package rebuilds after file changes, dependency fixes, GitHub release
-  creation, Marketplace metadata correction, retrying with a different version,
-  and feature closure are out of scope.
+- Status: Pending
+- Approved at: none
+- Approved scope: none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -381,7 +372,7 @@ implementation approval remains.
 
 ### Slice 4: Publish approved release and push release tag
 
-- Status: Approved
+- Status: Complete
 - Scope:
   after Slice 3 validation passes and the revised plan is reviewed and approved,
   publish the release through the `vsce` command form that matches the validated
@@ -479,6 +470,43 @@ implementation approval remains.
   dependency updates, package metadata correction, and feature folder removal
   before Feature Exit Mode.
 
+## Slice 4 Publish / Tag / Push Evidence
+
+- Baseline:
+  started from a clean working tree on `main` at
+  `2ade92a309e1f44875d047ac532bda297afcfc1e`, with no existing local or remote
+  `v1.16.0` tag.
+- Publish:
+  the first `rtk pnpm exec vsce publish --no-dependencies` attempt stopped
+  before `vsce` execution because pnpm requested non-TTY module purge
+  confirmation. `CI=true rtk pnpm exec vsce publish --no-dependencies`
+  completed successfully and published `kittybbit.vscode-ajsbutler v1.16.0`.
+  VSCE reported Marketplace URL
+  `https://marketplace.visualstudio.com/items?itemName=kittybbit.vscode-ajsbutler`
+  and Hub URL
+  `https://marketplace.visualstudio.com/manage/publishers/kittybbit/extensions/vscode-ajsbutler/hub`.
+- Publish warnings:
+  `vsce` warned that it could not open the credential store and fell back to
+  storing secrets clear-text in `/Users/jconee/.vsce`. Webpack repeated the
+  existing bundle-size performance warnings during prepublish build.
+- Tag:
+  created annotated tag `v1.16.0` with message `v1.16.0`.
+- Push:
+  `rtk git push origin HEAD:main` succeeded and advanced `origin/main` from
+  `009842e2` to `2ade92a3`. GitHub reported bypassed branch rule violations
+  for direct `main` push and pending CodeQL results.
+  `rtk git push origin v1.16.0` succeeded and created the remote tag. GitHub
+  reported bypassed tag creation restrictions.
+- Remote evidence:
+  `rtk git ls-remote origin <main-and-v1.16.0-refs>` reported
+  `refs/heads/main` and peeled `refs/tags/v1.16.0^{}` at
+  `2ade92a309e1f44875d047ac532bda297afcfc1e`; annotated tag object
+  `refs/tags/v1.16.0` is `c3cb817efe7ec5ebe4b7870b6f73b773cf7c4db3`.
+- Implementation feedback:
+  release publication succeeded, but future planning should account for pnpm's
+  non-TTY dependency confirmation in publish commands and for GitHub branch/tag
+  rule bypass messages when pushing release evidence directly to `main`.
+
 ## Traceability
 
 - TRACEABILITY.md required: no
@@ -528,14 +556,12 @@ implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  pending review and approval for revised Slice 4 publish/tag/push authority,
-  publish result, and Feature Exit Mode.
+  pending Feature Exit Mode.
 - Durable documentation updates:
   none expected unless release work reveals reusable policy or repository-level
   sequencing that passes the Durable Documentation Gate.
 - Open risks:
-  target date, Marketplace credential availability, git push credential and
-  branch/tag protection behavior, default `vsce` dependency detection under
-  pnpm, package contents acceptance for
-  `scripts/generate-webapi-openapi-artifacts.mjs` and `pnpm-workspace.yaml`,
-  release tag convention, and final publish environment are unresolved.
+  feature closure and durable documentation propagation remain pending Feature
+  Exit Mode. Publication completed with recorded warnings for pnpm non-TTY
+  confirmation, VSCE credential-store fallback, and GitHub branch/tag rule
+  bypass messages.
