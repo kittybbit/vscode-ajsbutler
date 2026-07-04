@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "Release Extension"
+  short_description: "Prepare and publish VS Code extension releases"
+  default_prompt: >-
+    Use $release-extension to prepare a VS Code extension release, update
+    CHANGELOG, bump version with pnpm, publish with vsce, and open the PR.
