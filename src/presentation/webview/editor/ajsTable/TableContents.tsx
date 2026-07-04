@@ -37,10 +37,7 @@ import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
-import {
-  toAjsDocument,
-  UnitListDocumentDto,
-} from "../../../../application/unit-list/unitListDocument";
+import { toAjsDocument } from "../../../../application/unit-list/unitListDocument";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import { ParameterSearchValuesByPath } from "./globalFilter";
@@ -137,9 +134,7 @@ const isSelectableTableFlowScopeUnit = (unit: AjsUnit): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
 
 const parseTableDocumentState = (data: unknown): ParsedTableDocumentState => {
-  const ajsDocument = data
-    ? toAjsDocument(data as UnitListDocumentDto)
-    : undefined;
+  const ajsDocument = data ? toAjsDocument(data) : undefined;
   return {
     ajsDocument,
     rowViews: ajsDocument ? buildUnitListView(ajsDocument) : [],

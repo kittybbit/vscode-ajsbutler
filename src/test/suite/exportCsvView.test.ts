@@ -15,6 +15,10 @@ suite("Export CSV View", () => {
       inherited: false,
       position: 0,
     });
+    const row = {
+      id: "job-id",
+      absolutePath: "/root/job",
+    } as UnitListRowView;
     const table = {
       getHeaderGroups: () => [
         {
@@ -34,23 +38,35 @@ suite("Export CSV View", () => {
               isPlaceholder: false,
               column: { columnDef: { header: "Flags" } },
             },
+            {
+              colSpan: 2,
+              isPlaceholder: true,
+              column: { columnDef: { header: "Hidden group" } },
+            },
           ],
+        },
+      ],
+      getVisibleLeafColumns: () => [
+        {
+          columnDef: { header: "#" },
+        },
+        {
+          columnDef: {
+            header: "Command",
+            accessorFn: () => parameter,
+          },
+        },
+        {
+          columnDef: {
+            header: "Flags",
+            accessorFn: () => ["one", "two"],
+          },
         },
       ],
       getRowModel: () => ({
         rows: [
           {
-            getVisibleCells: () => [
-              {
-                getValue: () => undefined,
-              },
-              {
-                getValue: () => parameter,
-              },
-              {
-                getValue: () => ["one", "two"],
-              },
-            ],
+            original: row,
           },
         ],
       }),
@@ -60,7 +76,7 @@ suite("Export CSV View", () => {
 
     assert.strictEqual(
       csv,
-      '"#","Command","Flags"\n"1","line1\nline2","one\ntwo"',
+      '"#","Command","Flags","",""\n"1","line1\nline2","one\ntwo"',
     );
   });
 });

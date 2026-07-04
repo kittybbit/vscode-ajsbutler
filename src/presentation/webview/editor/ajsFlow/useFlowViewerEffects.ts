@@ -11,10 +11,7 @@ import {
   findRootJobnet,
   flattenAjsUnits,
 } from "../../../../domain/models/ajs/AjsDocument";
-import {
-  toAjsDocument,
-  UnitListDocumentDto,
-} from "../../../../application/unit-list/unitListDocument";
+import { toAjsDocument } from "../../../../application/unit-list/unitListDocument";
 import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
 import {
   createPerformanceEvent,
@@ -382,9 +379,7 @@ export const useFlowDocumentSubscription = ({
   const renderReadyStartedAt = useRef(performance.now());
   useEffect(() => {
     const changeDocumentFn = (_type: string, data: unknown) => {
-      const nextDocument = data
-        ? toAjsDocument(data as UnitListDocumentDto)
-        : undefined;
+      const nextDocument = data ? toAjsDocument(data) : undefined;
       setAjsDocument(() => nextDocument);
       setCurrentUnitId(() =>
         resolveNextCurrentUnitId(nextDocument, prevUnitEntityId.current),

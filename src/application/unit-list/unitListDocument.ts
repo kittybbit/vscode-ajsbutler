@@ -1,46 +1,128 @@
-import {
+import type {
+  AjsNormalizationWarning,
   AjsDocument,
   AjsParameter,
+  AjsRelation,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { Unit } from "../../domain/values/Unit";
 
-export type UnitListRootDto = {
-  unitAttribute: string;
+export type UnitListRootDto = Omit<
+  AjsUnit,
+  "layout" | "parameters" | "relations" | "children"
+> & {
+  layout: {
+    h: number;
+    v: number;
+  };
   parameters: AjsParameter[];
+  relations: AjsRelation[];
   children: UnitListRootDto[];
 };
 
 export type UnitListDocumentDto = {
   rootUnits: UnitListRootDto[];
+  warnings: AjsNormalizationWarning[];
 };
 
-export const toUnitListRootDto = (unit: AjsUnit): UnitListRootDto => ({
-  unitAttribute: unit.unitAttribute,
-  parameters: unit.parameters.map((parameter) => ({ ...parameter })),
-  children: unit.children.map(toUnitListRootDto),
+const copyParameter = (parameter: AjsParameter): AjsParameter => ({
+  ...parameter,
 });
+
+const copyRelation = (relation: AjsRelation): AjsRelation => ({
+  ...relation,
+});
+
+const copyWarning = (
+  warning: AjsNormalizationWarning,
+): AjsNormalizationWarning => ({
+  ...warning,
+});
+
+export const toUnitListRootDto = (unit: AjsUnit): UnitListRootDto => {
+  const dto: UnitListRootDto = {
+    id: unit.id,
+    name: unit.name,
+    unitAttribute: unit.unitAttribute,
+    unitType: unit.unitType,
+    absolutePath: unit.absolutePath,
+    depth: unit.depth,
+    isRoot: unit.isRoot,
+    isRootJobnet: unit.isRootJobnet,
+    hasSchedule: unit.hasSchedule,
+    hasWaitedFor: unit.hasWaitedFor,
+    layout: { ...unit.layout },
+    parameters: unit.parameters.map(copyParameter),
+    relations: unit.relations.map(copyRelation),
+    children: unit.children.map(toUnitListRootDto),
+  };
+
+  if (unit.permission !== undefined) {
+    dto.permission = unit.permission;
+  }
+  if (unit.jp1Username !== undefined) {
+    dto.jp1Username = unit.jp1Username;
+  }
+  if (unit.jp1ResourceGroup !== undefined) {
+    dto.jp1ResourceGroup = unit.jp1ResourceGroup;
+  }
+  if (unit.groupType !== undefined) {
+    dto.groupType = unit.groupType;
+  }
+  if (unit.comment !== undefined) {
+    dto.comment = unit.comment;
+  }
+  if (unit.parentId !== undefined) {
+    dto.parentId = unit.parentId;
+  }
+  if (unit.isRecovery !== undefined) {
+    dto.isRecovery = unit.isRecovery;
+  }
+
+  return dto;
+};
 
 export const toUnitListDocumentDto = (
   document: AjsDocument,
 ): UnitListDocumentDto => ({
   rootUnits: document.rootUnits.map(toUnitListRootDto),
+  warnings: document.warnings.map(copyWarning),
 });
 
-const toUnit = (rootUnit: UnitListRootDto, parent?: Unit): Unit => {
-  const unit = new Unit(rootUnit.unitAttribute, parent);
-  unit.parameters = rootUnit.parameters.map((parameter) => ({ ...parameter }));
-  unit.children = rootUnit.children.map((child) => toUnit(child, unit));
-  return unit;
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-const toRootUnits = (document: UnitListDocumentDto): Unit[] =>
-  document.rootUnits.map((rootUnit) => toUnit(rootUnit));
+const isUnitListDocumentDto = (
+  document: unknown,
+): document is UnitListDocumentDto =>
+  isRecord(document) && Array.isArray(document.rootUnits);
+
+const toAjsUnit = (unit: UnitListRootDto): AjsUnit => ({
+  ...unit,
+  layout: { ...unit.layout },
+  parameters: unit.parameters.map(copyParameter),
+  relations: unit.relations.map(copyRelation),
+  children: unit.children.map(toAjsUnit),
+});
 
 /**
  * Restores the normalized model after its plain DTO crosses the webview
  * serialization boundary.
  */
-export const toAjsDocument = (document: UnitListDocumentDto): AjsDocument =>
-  normalizeAjsDocument(toRootUnits(document));
+export function toAjsDocument(document: UnitListDocumentDto): AjsDocument;
+export function toAjsDocument(document: unknown): AjsDocument | undefined;
+export function toAjsDocument(document: unknown): AjsDocument | undefined {
+  if (!isUnitListDocumentDto(document)) {
+    return undefined;
+  }
+
+  try {
+    return {
+      rootUnits: document.rootUnits.map(toAjsUnit),
+      warnings: Array.isArray(document.warnings)
+        ? document.warnings.map(copyWarning)
+        : [],
+    };
+  } catch {
+    return undefined;
+  }
+}

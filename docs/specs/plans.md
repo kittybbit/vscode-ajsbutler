@@ -37,10 +37,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-2. Select a new focused feature only when a concrete consumer or user-visible
-   requirement makes normalized-model, parser-boundary, or viewer-parity work
-   actionable.
-3. Keep compatibility risk visible for every shared or extension-runtime change.
+2. Keep compatibility risk visible for every shared or extension-runtime change.
+3. Pick the next roadmap feature only when a concrete boundary, compatibility,
+   or user-visible improvement needs a new SDD feature folder.
 
 ## Active Feature Specs
 

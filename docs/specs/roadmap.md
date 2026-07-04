@@ -43,6 +43,9 @@
 
    - Prefer stable `AjsDocument` / `AjsUnit` contracts for application-facing
      behavior.
+   - Completed: unit-list document serialization now crosses the webview
+     boundary as a normalized DTO, and CSV export now uses application-facing
+     row input before presentation copy/save actions.
    - Keep unit-local JP1/AJS behavior on wrappers when it is not reused across
      consumers.
    - Promote only cross-consumer semantics into normalized helpers.
@@ -56,6 +59,9 @@
 
    - The application-facing parser port and host-neutral infrastructure ANTLR
      adapter are implemented for unit-list and syntax-diagnostic consumers.
+   - A scoped architecture dependency test now checks high-value domain,
+     application, and presentation import boundaries through the existing
+     desktop test path.
    - Raw `Unit` and repository-owned parser-error behavior remain the initial
      seam; generated ANTLR artifacts and mechanics stay outside application and
      domain production modules.
