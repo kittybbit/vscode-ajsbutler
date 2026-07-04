@@ -12,7 +12,7 @@
 - Human approval:
   Approved for all proposed implementation slices
 - Active implementation slice:
-  Slice 2 CSV Export Uses Application-Facing Row Input
+  Slice 3 Scoped Architecture Dependency Rule Test
 
 ## Human Approval
 
@@ -111,7 +111,7 @@ active implementation approval remains.
 
 ### Slice 2: CSV Export Uses Application-Facing Row Input
 
-- Status: Approved
+- Status: Complete
 - Scope:
   move CSV export input construction away from direct TanStack table traversal
   by introducing an application-facing export input built from visible
@@ -179,6 +179,10 @@ active implementation approval remains.
   changing CSV format, changing telemetry event names or payloads, changing
   table search/filter semantics, and moving table-specific formatting into
   domain.
+- Implementation Feedback:
+  the slice boundary was appropriate. Presentation still reads visible
+  TanStack state to build a small DTO, while application CSV helpers now work
+  from row data and column value providers without React Table dependencies.
 
 ### Slice 3: Scoped Architecture Dependency Rule Test
 
