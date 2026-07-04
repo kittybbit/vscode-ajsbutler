@@ -2,7 +2,7 @@
 
 ## Plan Status
 
-- Status: In Progress
+- Status: Implementation Complete
 - Planning scope:
   strengthen normalized-model application boundaries for the unit-list and CSV
   path first, then add a scoped dependency-rule test that is enforced by the
@@ -12,7 +12,7 @@
 - Human approval:
   Approved for all proposed implementation slices
 - Active implementation slice:
-  Slice 3 Scoped Architecture Dependency Rule Test
+  None
 
 ## Human Approval
 
@@ -186,7 +186,7 @@ active implementation approval remains.
 
 ### Slice 3: Scoped Architecture Dependency Rule Test
 
-- Status: Approved
+- Status: Complete
 - Scope:
   add a focused dependency-rule test that scans production `src` imports for
   the current high-value architecture constraints and runs under the existing
@@ -247,6 +247,10 @@ active implementation approval remains.
   adding third-party architecture tooling, changing CI workflow files, fixing
   unrelated legacy violations, or blocking on broad dependency rules not
   covered by this feature.
+- Implementation Feedback:
+  the scoped rule set matched existing code without requiring unrelated
+  refactors. The test is enforced through the existing desktop test path, so no
+  CI workflow change or durable architecture doc update was needed.
 
 ## Cross-Slice Dependencies
 
@@ -291,13 +295,13 @@ active implementation approval remains.
 ## Feature Exit
 
 - Definition of Done status:
-  not ready; implementation slices are proposed and require review plus clear
-  human approval before implementation.
+  implementation slices are complete; Feature Exit Mode is still required
+  before closing the feature folder.
 - Durable documentation updates:
-  pending slice outcomes and the Durable Documentation Gate.
+  no durable documentation update has been identified before Feature Exit.
 - Open risks:
-  normalized DTO completeness, CSV output compatibility, and dependency-rule
-  false positives.
+  Feature Exit should confirm whether any follow-up belongs in durable use
+  cases, roadmap, or architecture documentation.
 
 ## Validation
 
