@@ -43,6 +43,10 @@
 
    - Prefer stable `AjsDocument` / `AjsUnit` contracts for application-facing
      behavior.
+   - Active feature:
+     `docs/specs/features/architecture-boundaries-normalized-ajs-model/`
+     tracks the next boundary-strengthening work, with Unit List / CSV Export
+     as the preferred first planning candidate.
    - Keep unit-local JP1/AJS behavior on wrappers when it is not reused across
      consumers.
    - Promote only cross-consumer semantics into normalized helpers.
@@ -56,6 +60,8 @@
 
    - The application-facing parser port and host-neutral infrastructure ANTLR
      adapter are implemented for unit-list and syntax-diagnostic consumers.
+   - Evaluate mechanical dependency-rule checks through the active
+     normalized-model boundary feature before introducing blocking CI behavior.
    - Raw `Unit` and repository-owned parser-error behavior remain the initial
      seam; generated ANTLR artifacts and mechanics stay outside application and
      domain production modules.

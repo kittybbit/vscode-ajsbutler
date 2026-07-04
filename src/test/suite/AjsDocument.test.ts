@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
+import type { UnitListDocumentDto } from "../../application/unit-list/unitListDocument";
 import {
   createDebouncedAjsDocumentChange,
   createReadyAjsDocument,
@@ -10,6 +11,33 @@ import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
 
 suite("ajsDocument", () => {
   const buildUnitList = () => ({ errors: [], document: undefined });
+  const documentDto: UnitListDocumentDto = {
+    rootUnits: [
+      {
+        id: "root-id",
+        name: "root",
+        unitAttribute: "root,,jp1admin,",
+        unitType: "n",
+        absolutePath: "/root",
+        depth: 0,
+        isRoot: true,
+        isRootJobnet: true,
+        hasSchedule: false,
+        hasWaitedFor: false,
+        layout: { h: 0, v: 0 },
+        parameters: [{ key: "ty", value: "n" }],
+        relations: [],
+        children: [],
+      },
+    ],
+    warnings: [
+      {
+        code: "missing_relation_target",
+        message: "relation target was not found",
+        unitPath: "/root",
+      },
+    ],
+  };
 
   test("posts the normalized document on ready", () => {
     const posted: Array<{ type: string; data: unknown }> = [];
@@ -30,8 +58,9 @@ suite("ajsDocument", () => {
         },
       },
     } as vscode.WebviewPanel;
+    const buildDocument = () => ({ errors: [], document: documentDto });
 
-    createReadyAjsDocument(buildUnitList, {
+    createReadyAjsDocument(buildDocument, {
       trackEvent: (eventName, properties) => {
         telemetryEvents.push({ eventName, properties });
       },
@@ -40,6 +69,7 @@ suite("ajsDocument", () => {
 
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
+    assert.deepStrictEqual(posted[0]?.data, documentDto);
     assert.deepStrictEqual(
       {
         ...telemetryEvents[0]?.properties,
