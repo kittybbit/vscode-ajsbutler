@@ -6,14 +6,17 @@
 - Planning scope: initial full implementation-slice plan for JP1/AJS3
   semantic diff.
 - Review status: Reviewed
-- Human approval: Pending
-- Active implementation slice: None
+- Human approval: Approved
+- Active implementation slice: Slice 4, VS Code Command And Report Export
+  Surface
 
 ## Human Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: all remaining semantic-diff implementation slices; active
+  implementation is limited to Slice 4, VS Code Command And Report Export
+  Surface
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -144,7 +147,7 @@ active implementation approval remains.
 
 ### Slice 3: Markdown Report Renderer
 
-- Status: Proposed
+- Status: Complete
 - Smallest Useful Slice: delivers one user-facing artifact format while still
   avoiding command/UI wiring.
 - Scope: render `SemanticChangeSet` output to Markdown including summary,
@@ -191,7 +194,7 @@ active implementation approval remains.
 
 ### Slice 4: VS Code Command And Report Export Surface
 
-- Status: Proposed
+- Status: Approved
 - Smallest Useful Slice: delivers one user workflow: run Phase 1 comparison
   from VS Code and obtain a Markdown report.
 - Scope: add a VS Code command that compares the active JP1/AJS editor as the
@@ -265,7 +268,7 @@ active implementation approval remains.
 
 ### Slice 5: Start And Wait Confirmation Checks
 
-- Status: Proposed
+- Status: Approved
 - Smallest Useful Slice: delivers one domain meaning: confirmation-required
   start/wait risk signals based on already matched semantic elements.
 - Scope: compare supported relation conditions, start conditions, end judgment,
@@ -324,7 +327,7 @@ active implementation approval remains.
 
 ### Slice 6: Flow Diff Highlighting Hooks
 
-- Status: Proposed
+- Status: Approved
 - Smallest Useful Slice: delivers one presentation value: show already computed
   condition/structural semantic diff emphasis in the flow viewer without moving
   comparison logic into UI code.
@@ -390,7 +393,7 @@ active implementation approval remains.
 
 ### Slice 7: Schedule Diff
 
-- Status: Proposed
+- Status: Approved
 - Smallest Useful Slice: delivers one domain meaning: bounded-period schedule
   comparison for an explicitly supported JP1/AJS3 schedule subset.
 - Scope: calculate and compare run schedules over a user-provided period for

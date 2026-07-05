@@ -79,6 +79,13 @@ implementation slices, and validation plans.
 - Implementation Slice: Slice 3, Markdown Report Renderer
 - Test File Or Validation Plan: report snapshot or approval-style tests for
   no-change, structural-change, rename/move, ambiguous, and limitation cases.
+- Validation Result: `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  added for deterministic no-change output and report sections covering
+  structural changes, ambiguous candidates, attribute categories, matching
+  rationale, confirmation-required constraints, unsupported items, and
+  limitations; `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`,
+  and `rtk pnpm run build` passed during Slice 3 implementation. Production
+  build still reports existing webpack asset-size warnings.
 
 ### Command And Export Workflow
 
