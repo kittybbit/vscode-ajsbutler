@@ -1,9 +1,14 @@
 # Change Log
 
-## [1.16.0]
+## Unreleased
 
 - Added a JP1/AJS semantic diff command that compares the active definition
   with a selected before definition and copies or saves a Markdown report.
+- Added confirmation-required semantic diff report notes for supported
+  condition, wait, timeout-removal, and conditional-relation changes.
+
+## [1.16.0]
+
 - Expanded privacy-conscious telemetry to include anonymous extension
   lifecycle, viewer readiness or close, viewer action, search outcome, and
   diagnostic, hover, performance, and WebAPI import workflow metadata.

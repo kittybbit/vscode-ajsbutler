@@ -7,15 +7,14 @@
   semantic diff.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 5, Start And Wait Confirmation Checks
-  Surface
+- Active implementation slice: Slice 6, Flow Diff Highlighting Hooks
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: approved in current conversation
 - Approved scope: all remaining semantic-diff implementation slices; active
-  implementation is limited to Slice 5, Start And Wait Confirmation Checks
+  implementation is limited to Slice 6, Flow Diff Highlighting Hooks
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -267,7 +266,7 @@ active implementation approval remains.
 
 ### Slice 5: Start And Wait Confirmation Checks
 
-- Status: Approved
+- Status: Complete
 - Smallest Useful Slice: delivers one domain meaning: confirmation-required
   start/wait risk signals based on already matched semantic elements.
 - Scope: compare supported relation conditions, start conditions, end judgment,

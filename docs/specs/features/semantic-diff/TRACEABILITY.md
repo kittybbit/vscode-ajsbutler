@@ -119,6 +119,19 @@ implementation slices, and validation plans.
 - Implementation Slice: Slice 5, Start And Wait Confirmation Checks
 - Test File Or Validation Plan: condition-rule tests, confirmation-required
   DTO tests, negative tests, and report wording tests.
+- Validation Result: `src/test/suite/semanticDiffConditions.test.ts` added for
+  conditional relation confirmation, non-problem plain predecessor removal,
+  wait release-source changes, timeout removal, supported end-judgment changes,
+  file/event wait target changes, external constraint report wording, and
+  uninterpretable file-monitoring condition handling. README and CHANGELOG
+  were updated because command report output gains user-visible
+  confirmation-required notes.
+- Supported Rule Basis: JP1/AJS3 v13 unit definition parameters for `ar`
+  relation type, `eun` wait release source, `jd`/`wth`/`tho`/`jdf` job end
+  judgment, `flwf`/`flwc`/`fd` file monitoring, and
+  `evwid`/`evwfr`/`evhst`/`evwms`/`evdet`/`evusr`/`evgrp`/`evuid`/`evgid`/
+  `evpid`/`evipa`/`evesc`/`etm` event receiving. The implementation reports
+  runtime, external file, and external event facts as unverified constraints.
 
 ### Non-Problem Structures
 

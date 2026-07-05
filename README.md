@@ -27,7 +27,8 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
 - Compare the active JP1/AJS definition with a selected before definition and
-  copy or save a semantic Markdown diff report.
+  copy or save a semantic Markdown diff report, including confirmation-required
+  notes for supported condition and wait changes.
 - Supports web extensions.
 
 ## Recent Updates
