@@ -2,6 +2,8 @@
 
 ## [1.16.0]
 
+- Added a JP1/AJS semantic diff command that compares the active definition
+  with a selected before definition and copies or saves a Markdown report.
 - Expanded privacy-conscious telemetry to include anonymous extension
   lifecycle, viewer readiness or close, viewer action, search outcome, and
   diagnostic, hover, performance, and WebAPI import workflow metadata.

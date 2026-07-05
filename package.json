@@ -73,6 +73,14 @@
         "title": "Import JP1/AJS Definition via WebAPI (Beta)",
         "shortTitle": "Import via WebAPI (Beta)",
         "icon": "$(cloud-download)"
+      },
+      {
+        "enablement": "editorLangId == 'jp1ajs'",
+        "command": "ajsbutler.compareSemanticDiff",
+        "category": "JP1/AJS",
+        "title": "Compare JP1/AJS Semantic Diff",
+        "shortTitle": "Semantic Diff",
+        "icon": "$(diff)"
       }
     ],
     "menus": {
@@ -113,6 +121,7 @@
     ]
   },
   "activationEvents": [
+    "onCommand:ajsbutler.compareSemanticDiff",
     "onCommand:ajsbutler.importDefinitionViaWebApiBeta",
     "onWebviewPanel:ajsbutler.tableViewer",
     "onWebviewPanel:ajsbutler.flowViewer"

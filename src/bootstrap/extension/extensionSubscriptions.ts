@@ -4,6 +4,7 @@ import { registerHoverProvider } from "../../presentation/vscode/languages/regis
 import type { ExtensionDependencies } from "./extensionDependencies";
 import { createWebApiImportSubscriptions } from "./webapiImportWiring";
 import { createViewerSubscriptions } from "./viewerWiring";
+import { createSemanticDiffSubscriptions } from "./semanticDiffWiring";
 
 export const createExtensionSubscriptions = (
   context: vscode.ExtensionContext,
@@ -21,6 +22,7 @@ export const createExtensionSubscriptions = (
     telemetry: dependencies.telemetry,
     ...dependencies.webApiImport,
   }),
+  ...createSemanticDiffSubscriptions(dependencies.semanticDiff),
   ...createViewerSubscriptions({
     context,
     telemetry: dependencies.telemetry,

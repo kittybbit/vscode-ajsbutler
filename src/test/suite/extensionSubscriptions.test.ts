@@ -16,6 +16,9 @@ suite("Extension subscriptions", () => {
       buildSyntaxDiagnostics: () => [],
       buildUnitList: () => ({ errors: [] }),
       findParameterHover: () => undefined,
+      semanticDiff: {
+        buildSemanticDiffReport: () => ({ ok: true, report: "" }),
+      },
       webApiImport: {
         storeCredential: async () => {},
         importPort: {
@@ -33,7 +36,7 @@ suite("Extension subscriptions", () => {
 
     const subscriptions = createExtensionSubscriptions(context, dependencies);
 
-    assert.strictEqual(subscriptions.length, 7);
+    assert.strictEqual(subscriptions.length, 8);
     subscriptions.forEach((subscription) => {
       assert.strictEqual(typeof subscription.dispose, "function");
       subscription.dispose();

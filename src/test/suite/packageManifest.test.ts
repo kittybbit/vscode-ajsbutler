@@ -8,6 +8,7 @@ type CommandContribution = {
 };
 
 type PackageJson = {
+  activationEvents: string[];
   contributes: {
     commands: CommandContribution[];
   };
@@ -33,6 +34,26 @@ suite("Package manifest", () => {
     assert.strictEqual(
       byCommand.get("open.ajsbutler.tableViewer")?.icon,
       "$(table)",
+    );
+  });
+
+  test("contributes semantic diff command and activation event", () => {
+    const manifest = readPackageJson();
+    const byCommand = new Map(
+      manifest.contributes.commands.map((command) => [
+        command.command,
+        command,
+      ]),
+    );
+
+    assert.strictEqual(
+      byCommand.get("ajsbutler.compareSemanticDiff")?.icon,
+      "$(diff)",
+    );
+    assert.ok(
+      manifest.activationEvents.includes(
+        "onCommand:ajsbutler.compareSemanticDiff",
+      ),
     );
   });
 });

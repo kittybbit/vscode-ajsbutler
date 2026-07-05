@@ -7,7 +7,7 @@
   semantic diff.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 4, VS Code Command And Report Export
+- Active implementation slice: Slice 5, Start And Wait Confirmation Checks
   Surface
 
 ## Human Approval
@@ -15,8 +15,7 @@
 - Status: Approved
 - Approved at: approved in current conversation
 - Approved scope: all remaining semantic-diff implementation slices; active
-  implementation is limited to Slice 4, VS Code Command And Report Export
-  Surface
+  implementation is limited to Slice 5, Start And Wait Confirmation Checks
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -194,7 +193,7 @@ active implementation approval remains.
 
 ### Slice 4: VS Code Command And Report Export Surface
 
-- Status: Approved
+- Status: Complete
 - Smallest Useful Slice: delivers one user workflow: run Phase 1 comparison
   from VS Code and obtain a Markdown report.
 - Scope: add a VS Code command that compares the active JP1/AJS editor as the
