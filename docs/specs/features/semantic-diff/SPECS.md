@@ -8,8 +8,8 @@ relation, condition, and schedule changes instead of raw text differences.
 ## Origin
 
 - Source use case:
-  docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
-- Roadmap item: semantic definition comparison
+  docs/requirements/use-cases/uc-compare-semantic-diff.md
+- Roadmap item: semantic diff
 - Branch plan: docs/specs/plans.md
 - Implementation-slice plan: TASKS.md
 - Source instruction: user-provided semantic diff implementation guidance
@@ -44,10 +44,10 @@ relation, condition, and schedule changes instead of raw text differences.
 ## Behavioral Scenarios
 
 ```gherkin
-Feature: Semantic job-group comparison
+Feature: Semantic diff
 
 Scenario: Order-only changes produce no semantic diff
-  Given two JP1/AJS3 job-group definitions with the same jobnets, units,
+  Given two JP1/AJS3 definitions with the same jobnets, units,
     relations, and attributes
   And only the definition-file order differs
   When semantic comparison is requested
@@ -114,7 +114,7 @@ Scenario: Wait timeout removal requires confirmation
   direct `vscode`, filesystem, process, and Node-only imports; host-specific
   report persistence must be isolated.
 - Changed scenarios: adds semantic comparison scenarios in
-  docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md.
+  docs/requirements/use-cases/uc-compare-semantic-diff.md.
 
 ### Alternative Considerations
 

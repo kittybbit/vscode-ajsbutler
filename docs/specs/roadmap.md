@@ -110,7 +110,7 @@
      credentials, prompts, responses, raw errors, or server identifiers.
    - Use telemetry evidence to support prioritization for current viewers,
      diagnostics, search, WebAPI import, and future roadmap capabilities such
-     as unified search, semantic definition comparison, dependency analysis,
+     as unified search, semantic diff, dependency analysis,
      review support, and AI-assisted features.
    - For roadmap capabilities, document event families and privacy constraints
      before implementation pressure appears, but add runtime telemetry only
@@ -124,11 +124,11 @@
      analytics usage, product reporting, or a future feature makes those
      decisions concrete.
 
-9. Add semantic JP1/AJS3 job-group comparison.
+9. Add semantic diff for JP1/AJS3 definitions.
 
-   - Compare before and after job-group definitions by semantic jobnet, unit,
-     relation, execution-attribute, condition, wait, and schedule changes
-     rather than raw text differences.
+   - Compare before and after JP1/AJS3 job-group definitions by semantic
+     jobnet, unit, relation, execution-attribute, condition, wait, and
+     schedule changes rather than raw text differences.
    - Keep comparison logic in domain/application boundaries and expose
      presentation/report behavior through DTOs so desktop and web hosts remain
      compatible.

@@ -32,8 +32,8 @@ rules in `docs/specs/README.md`, not in this file.
   requirement-to-validation mapping when required.
 - Desktop and web compatibility must stay explicit whenever bootstrap, preview,
   parsing, shared adapters, or runtime behavior change.
-- `semantic-diff` is a roadmap feature for semantic JP1/AJS3
-  job-group comparison; implementation must start with reviewed slice planning
+- `semantic-diff` is a roadmap feature for JP1/AJS3 semantic diff;
+  implementation must start with reviewed slice planning
   before runtime code, tests, generated artifacts, or configuration change.
 
 ## Next Priority Tasks

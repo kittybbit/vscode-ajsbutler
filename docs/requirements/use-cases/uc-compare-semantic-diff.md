@@ -1,4 +1,4 @@
-# UC: Compare Job Group Semantic Diff
+# UC: Build Semantic Diff
 
 ## Goal
 
@@ -73,10 +73,10 @@ definition for the same review scope.
 ## Behavioral Scenarios (Gherkin)
 
 ```gherkin
-Feature: Compare job group semantic diff
+Feature: Build semantic diff
 
 Scenario: Reordered definitions do not create semantic changes
-  Given two job-group definitions contain the same jobnets, units, relations,
+  Given two JP1/AJS3 definitions contain the same jobnets, units, relations,
     and attributes
   And only their definition-file order differs
   When the semantic diff is built

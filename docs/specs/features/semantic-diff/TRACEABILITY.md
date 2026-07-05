@@ -7,7 +7,7 @@ implementation slices, and validation plans.
 
 ### Comparison Contracts
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: expose host-neutral semantic diff inputs, outputs,
   limitations, and report-ready result categories.
 - SPECS.md Section: Requirements, Architecture, Compatibility
@@ -15,10 +15,14 @@ implementation slices, and validation plans.
   Scope
 - Test File Or Validation Plan: contract tests, architecture dependency tests,
   and build validation when production module exports change.
+- Validation Result: `src/test/suite/semanticDiffContracts.test.ts` added;
+  `rtk pnpm run qlty`, `rtk pnpm test`, and `rtk pnpm run build` passed during
+  Slice 1 implementation. Production build still reports the existing webpack
+  asset-size warnings.
 
-### Job-Group Scope And Ordering
+### Comparison Scope And Ordering
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: compare definitions at job-group scope and ignore order-only
   changes.
 - SPECS.md Section: Requirements, Acceptance Criteria
@@ -29,7 +33,7 @@ implementation slices, and validation plans.
 
 ### Deterministic Identity
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: confirm identity deterministically without persistent JP1/AJS
   IDs.
 - SPECS.md Section: Requirements, Behavioral Scenarios, Acceptance Criteria
@@ -40,7 +44,7 @@ implementation slices, and validation plans.
 
 ### Rename And Move Rationale
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: distinguish confirmed rename or move results from ambiguous
   candidates and show rationale.
 - SPECS.md Section: Requirements, Acceptance Criteria
@@ -51,7 +55,7 @@ implementation slices, and validation plans.
 
 ### Attribute Categories
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: display execution attribute changes in user-facing categories.
 - SPECS.md Section: Requirements, Acceptance Criteria
 - Implementation Slice: Slice 2, Structural Diff And Deterministic Identity
@@ -61,7 +65,7 @@ implementation slices, and validation plans.
 
 ### Markdown Report
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: export a reviewable Markdown report.
 - SPECS.md Section: Requirements, Acceptance Criteria
 - Implementation Slice: Slice 3, Markdown Report Renderer
@@ -70,7 +74,7 @@ implementation slices, and validation plans.
 
 ### Command And Export Workflow
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: allow users to request semantic comparison from the active
   after-definition editor, select a before definition through a VS Code file
   picker, and obtain a Markdown report through extension-safe host adapters.
@@ -82,7 +86,7 @@ implementation slices, and validation plans.
 
 ### Start And Wait Confirmation
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: detect start-condition strictness, wait-condition changes,
   release-source disappearance, and timeout removal as confirmation-required
   items.
@@ -93,7 +97,7 @@ implementation slices, and validation plans.
 
 ### Non-Problem Structures
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: avoid problem judgments for missing predecessors, missing
   successors, disconnected relations, or external systems by themselves.
 - SPECS.md Section: Requirements, Non-Goals, Acceptance Criteria
@@ -114,7 +118,7 @@ implementation slices, and validation plans.
 
 ### Schedule Diff
 
-- Use Case: docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
 - Requirement: compare run schedules for a specified period and report zero or
   uncalculated schedules.
 - SPECS.md Section: Requirements, Acceptance Criteria

@@ -2,10 +2,10 @@
 
 ## Plan Status
 
-- Status: Review Needed
-- Planning scope: initial full implementation-slice plan for semantic
-  JP1/AJS3 job-group comparison.
-- Review status: Revised after first `sdd-review-plan`; ready for review
+- Status: Pending Approval
+- Planning scope: initial full implementation-slice plan for JP1/AJS3
+  semantic diff.
+- Review status: Reviewed
 - Human approval: Pending
 - Active implementation slice: None
 
@@ -27,11 +27,11 @@ active implementation approval remains.
 
 ### Slice 1: Comparison Contracts And Normalized Input Scope
 
-- Status: Proposed
+- Status: Complete
 - Smallest Useful Slice: defines one architecture responsibility: stable
   semantic-diff domain/application DTO contracts and input boundaries without
   user-facing command behavior.
-- Scope: add repository-owned comparison types for job-group inputs, identity
+- Scope: add repository-owned comparison types for definition inputs, identity
   keys, semantic changes, attribute categories, confirmation levels,
   unsupported items, report sections, and parse/normalization limitations;
   expose a host-neutral application entry point shape that accepts already
@@ -95,8 +95,8 @@ active implementation approval remains.
   case.
 - Cohesive Change Group:
   - likely files: `src/domain/models/semantic-diff/*`,
-    `src/application/semantic-diff/compareJobGroupSemanticDiff.ts`
-  - likely tests: `src/test/suite/compareJobGroupSemanticDiff.test.ts`,
+    `src/application/semantic-diff/compareSemanticDiff.ts`
+  - likely tests: `src/test/suite/compareSemanticDiff.test.ts`,
     fixture additions under `sample/` or test fixtures
   - related existing files:
     `src/domain/models/ajs/AjsDocument.ts`,
@@ -490,7 +490,7 @@ active implementation approval remains.
 
 ## Use-Case Back-Propagation
 
-- `docs/requirements/use-cases/uc-compare-job-group-semantic-diff.md` already
+- `docs/requirements/use-cases/uc-compare-semantic-diff.md` already
   carries the durable behavior contract and should be updated only when review
   or implementation changes accepted behavior, supported subsets, or
   limitations.
