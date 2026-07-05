@@ -2,7 +2,7 @@
 
 ## Plan Status
 
-- Status: Pending Approval
+- Status: In Progress
 - Planning scope: initial full implementation-slice plan for JP1/AJS3
   semantic diff.
 - Review status: Reviewed
@@ -83,7 +83,7 @@ active implementation approval remains.
 
 ### Slice 2: Structural Diff And Deterministic Identity Matching
 
-- Status: Proposed
+- Status: Complete
 - Smallest Useful Slice: delivers one domain meaning: deterministic semantic
   structure comparison without UI/report integration.
 - Scope: implement job-group-scoped comparison for order-insensitive jobnet,
