@@ -16,6 +16,7 @@ import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
+import type { FlowGraphSemanticDiffHighlights } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import { createPerformanceEvent } from "../../../../shared/webviewEvents";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
@@ -38,6 +39,7 @@ type UseFlowGraphStateParams = {
   prevUnitEntityId: MutableRefObject<string | undefined>;
   searchedUnitId?: string;
   searchMatchedUnitIds: string[];
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
   selectedUnitId?: string;
   theme: Theme;
   unitById: ReadonlyMap<string, AjsUnit>;
@@ -75,6 +77,7 @@ const buildExpandedGraphResult = (
     currentUnitId: graphScopeUnitId,
     expandedUnitIds: params.expandedUnitIds,
     basePx: params.theme.typography.htmlFontSize,
+    semanticDiffHighlights: params.semanticDiffHighlights,
   });
 
 const createReactFlowDataOptions = ({
@@ -140,6 +143,7 @@ export const useFlowGraphState = ({
   prevUnitEntityId,
   searchedUnitId,
   searchMatchedUnitIds,
+  semanticDiffHighlights,
   selectedUnitId,
   theme,
   unitById,
@@ -159,6 +163,7 @@ export const useFlowGraphState = ({
           nestedExpansionState,
           searchedUnitId,
           searchMatchedUnitIds,
+          semanticDiffHighlights,
           selectedUnitId,
           theme,
           unitById,
@@ -174,6 +179,7 @@ export const useFlowGraphState = ({
       nestedExpansionState,
       searchedUnitId,
       searchMatchedUnitIds,
+      semanticDiffHighlights,
       selectedUnitId,
       theme,
       unitById,

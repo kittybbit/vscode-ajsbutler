@@ -2,6 +2,20 @@ import { AjsUnitType } from "../../domain/models/ajs/AjsDocument";
 
 export type FlowGraphNodeType = "job" | "jobnet" | "jobgroup" | "condition";
 export type FlowGraphEdgeType = "seq" | "con";
+export type FlowGraphSemanticDiffHighlightKind =
+  | "changed"
+  | "confirmation-required";
+
+export type FlowGraphSemanticDiffHighlight = {
+  kind: FlowGraphSemanticDiffHighlightKind;
+  changeIds: string[];
+  confirmationIds: string[];
+};
+
+export type FlowGraphSemanticDiffHighlights = {
+  nodes: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>;
+  edges: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>;
+};
 
 export type FlowGraphNodeLayout =
   | {
@@ -24,6 +38,7 @@ export type FlowGraphNodeMetadata = {
   isRootJobnet: boolean;
   hasSchedule: boolean;
   hasWaitedFor: boolean;
+  semanticDiffHighlight?: FlowGraphSemanticDiffHighlight;
   layout: FlowGraphNodeLayout;
 };
 
@@ -38,6 +53,7 @@ export type FlowGraphEdgeDto = {
   source: string;
   target: string;
   type: FlowGraphEdgeType;
+  semanticDiffHighlight?: FlowGraphSemanticDiffHighlight;
 };
 
 export type FlowGraphDto = {
@@ -66,6 +82,7 @@ export type FlowGraphInput = {
   childNodes: FlowGraphInputNode[];
   conditionNode?: FlowGraphInputNode;
   edges: FlowGraphEdgeDto[];
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
 };
 
 const tyTypeMap: Partial<Record<AjsUnitType, FlowGraphNodeType>> = {
@@ -80,7 +97,14 @@ const tyTypeMap: Partial<Record<AjsUnitType, FlowGraphNodeType>> = {
 const toNodeType = (ty: AjsUnitType): FlowGraphNodeType =>
   tyTypeMap[ty] ?? "job";
 
-const toGridNode = (node: FlowGraphInputNode): FlowGraphNodeDto => ({
+export const flowGraphEdgeSemanticDiffKey = (
+  edge: Pick<FlowGraphEdgeDto, "source" | "target" | "type">,
+): string => `${edge.source}->${edge.target}:${edge.type}`;
+
+const toGridNode = (
+  node: FlowGraphInputNode,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
+): FlowGraphNodeDto => ({
   id: node.id,
   label: node.label,
   type: toNodeType(node.ty),
@@ -94,6 +118,7 @@ const toGridNode = (node: FlowGraphInputNode): FlowGraphNodeDto => ({
     isRootJobnet: node.isRootJobnet,
     hasSchedule: node.hasSchedule,
     hasWaitedFor: node.hasWaitedFor,
+    semanticDiffHighlight: semanticDiffHighlights?.nodes.get(node.id),
     layout: {
       kind: "grid",
       h: node.h,
@@ -105,6 +130,7 @@ const toGridNode = (node: FlowGraphInputNode): FlowGraphNodeDto => ({
 const toAncestorNode = (
   node: FlowGraphInputNode,
   isCurrent: boolean,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
 ): FlowGraphNodeDto => ({
   id: node.id,
   label: node.label,
@@ -119,6 +145,7 @@ const toAncestorNode = (
     isRootJobnet: node.isRootJobnet,
     hasSchedule: node.hasSchedule,
     hasWaitedFor: node.hasWaitedFor,
+    semanticDiffHighlight: semanticDiffHighlights?.nodes.get(node.id),
     layout: {
       kind: "ancestor",
       depth: node.depth,
@@ -129,15 +156,30 @@ const toAncestorNode = (
 export const buildFlowGraphFromInput = (
   input: FlowGraphInput,
 ): FlowGraphDto => {
-  const nodes: FlowGraphNodeDto[] = input.childNodes.map(toGridNode);
-  nodes.push(...input.ancestorNodes.map((node) => toAncestorNode(node, false)));
-  nodes.push(toAncestorNode(input.currentNode, true));
+  const nodes: FlowGraphNodeDto[] = input.childNodes.map((node) =>
+    toGridNode(node, input.semanticDiffHighlights),
+  );
+  nodes.push(
+    ...input.ancestorNodes.map((node) =>
+      toAncestorNode(node, false, input.semanticDiffHighlights),
+    ),
+  );
+  nodes.push(
+    toAncestorNode(input.currentNode, true, input.semanticDiffHighlights),
+  );
   if (input.conditionNode) {
-    nodes.push(toAncestorNode(input.conditionNode, false));
+    nodes.push(
+      toAncestorNode(input.conditionNode, false, input.semanticDiffHighlights),
+    );
   }
 
   return {
     nodes,
-    edges: input.edges,
+    edges: input.edges.map((edge) => ({
+      ...edge,
+      semanticDiffHighlight: input.semanticDiffHighlights?.edges.get(
+        flowGraphEdgeSemanticDiffKey(edge),
+      ),
+    })),
   };
 };

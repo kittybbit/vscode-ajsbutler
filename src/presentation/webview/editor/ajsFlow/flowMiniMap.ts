@@ -4,6 +4,8 @@ import type { AjsNode } from "./nodes/AjsNode";
 
 export type FlowMiniMapColors = {
   both: string;
+  changed: string;
+  confirmationRequired: string;
   currentSearchResult: string;
   downstream: string;
   hidden: string;
@@ -49,6 +51,14 @@ const resolveVisibleFlowMiniMapNodeColor = (
     colorWhen(node.data.isCurrentSearchResult, colors.currentSearchResult),
     colorWhen(node.selected || node.data.isSelected, colors.selected),
     resolveRelationshipFocusColor(node.data.relationshipFocusRole, colors),
+    colorWhen(
+      node.data.semanticDiffHighlight?.kind === "confirmation-required",
+      colors.confirmationRequired,
+    ),
+    colorWhen(
+      node.data.semanticDiffHighlight?.kind === "changed",
+      colors.changed,
+    ),
     colorWhen(node.data.isSearchMatch, colors.searchMatch),
   ].find((candidate): candidate is string => candidate !== undefined);
 

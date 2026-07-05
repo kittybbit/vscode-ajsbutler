@@ -7,14 +7,14 @@
   semantic diff.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 6, Flow Diff Highlighting Hooks
+- Active implementation slice: Slice 7, Schedule Diff
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: approved in current conversation
 - Approved scope: all remaining semantic-diff implementation slices; active
-  implementation is limited to Slice 6, Flow Diff Highlighting Hooks
+  implementation is limited to Slice 7, Schedule Diff
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -325,7 +325,7 @@ active implementation approval remains.
 
 ### Slice 6: Flow Diff Highlighting Hooks
 
-- Status: Approved
+- Status: Complete
 - Smallest Useful Slice: delivers one presentation value: show already computed
   condition/structural semantic diff emphasis in the flow viewer without moving
   comparison logic into UI code.

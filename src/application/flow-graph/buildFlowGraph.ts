@@ -10,6 +10,7 @@ import {
   FlowGraphEdgeDto,
   FlowGraphInput,
   FlowGraphInputNode,
+  FlowGraphSemanticDiffHighlights,
 } from "./buildFlowGraphCore";
 
 const toInputNode = (unit: AjsUnit): FlowGraphInputNode => ({
@@ -40,7 +41,11 @@ const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
     type: relation.type,
   }));
 
-const toInput = (document: AjsDocument, unit: AjsUnit): FlowGraphInput => {
+const toInput = (
+  document: AjsDocument,
+  unit: AjsUnit,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
+): FlowGraphInput => {
   const conditionUnit = unit.children.find((child) => child.unitType === "rc");
   return {
     currentNode: toInputNode(unit),
@@ -50,16 +55,20 @@ const toInput = (document: AjsDocument, unit: AjsUnit): FlowGraphInput => {
       .map(toInputNode),
     conditionNode: conditionUnit ? toInputNode(conditionUnit) : undefined,
     edges: toEdgeDtos(unit),
+    semanticDiffHighlights,
   };
 };
 
 export const buildFlowGraph = (
   document: AjsDocument,
   currentUnitId: string,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
 ): FlowGraphDto | undefined => {
   const unit = findAjsUnitById(document, currentUnitId);
   if (!unit) {
     return undefined;
   }
-  return buildFlowGraphFromInput(toInput(document, unit));
+  return buildFlowGraphFromInput(
+    toInput(document, unit, semanticDiffHighlights),
+  );
 };

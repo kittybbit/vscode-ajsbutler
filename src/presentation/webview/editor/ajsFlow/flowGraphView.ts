@@ -5,6 +5,7 @@ import type {
   FlowGraphDto,
   FlowGraphEdgeDto,
   FlowGraphNodeDto,
+  FlowGraphSemanticDiffHighlight,
 } from "../../../../application/flow-graph/buildFlowGraphCore";
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import type {
@@ -74,6 +75,7 @@ const toNodeData = (
     isRootJobnet: node.metadata.isRootJobnet,
     hasSchedule: node.metadata.hasSchedule,
     hasWaitedFor: node.metadata.hasWaitedFor,
+    semanticDiffHighlight: node.metadata.semanticDiffHighlight,
     isSearchMatch: options?.searchMatchedUnitIds?.has(node.id) ?? false,
     isCurrentSearchResult: options?.searchedUnitId === node.id,
     isSelected: options?.selectedUnitId === node.id,
@@ -91,11 +93,36 @@ const toNodeData = (
   };
 };
 
-const toEdge = (edge: FlowGraphEdgeDto): Edge => ({
+const edgeStrokeColor = (
+  highlight: FlowGraphSemanticDiffHighlight | undefined,
+  theme: Theme,
+): string | undefined => {
+  if (highlight?.kind === "confirmation-required") {
+    return theme.palette.warning.main;
+  }
+  if (highlight?.kind === "changed") {
+    return theme.palette.info.main;
+  }
+  return undefined;
+};
+
+const toEdge = (edge: FlowGraphEdgeDto, theme: Theme): Edge => ({
   id: `${edge.source}-${edge.target}`,
   type: "smoothstep",
   source: edge.source,
   target: edge.target,
+  data: edge.semanticDiffHighlight
+    ? {
+        semanticDiffHighlight: edge.semanticDiffHighlight,
+      }
+    : undefined,
+  style: edge.semanticDiffHighlight
+    ? {
+        stroke: edgeStrokeColor(edge.semanticDiffHighlight, theme),
+        strokeWidth:
+          edge.semanticDiffHighlight.kind === "confirmation-required" ? 4 : 3,
+      }
+    : undefined,
   markerStart:
     edge.type === "con"
       ? {
@@ -108,8 +135,11 @@ const toEdge = (edge: FlowGraphEdgeDto): Edge => ({
     type: MarkerType.ArrowClosed,
     width: 20,
     height: 20,
+    color: edgeStrokeColor(edge.semanticDiffHighlight, theme),
   },
-  animated: edge.type === "con",
+  animated:
+    edge.type === "con" ||
+    edge.semanticDiffHighlight?.kind === "confirmation-required",
 });
 
 const toNodePosition = (
@@ -191,7 +221,7 @@ export const createReactFlowData = ({
     .map(toNestedPanelBoundsNode)
     .filter((node): node is Node<AjsNode> => !!node);
 
-  const edges: Edge[] = graph.edges.map(toEdge);
+  const edges: Edge[] = graph.edges.map((edge) => toEdge(edge, context.theme));
 
   return { nodes: [...nodes, ...nestedPanelBoundsNodes], edges };
 };

@@ -13,6 +13,8 @@ import {
 
 const colors: FlowMiniMapColors = {
   both: "both",
+  changed: "changed",
+  confirmationRequired: "confirmation-required",
   currentSearchResult: "current-search",
   downstream: "downstream",
   hidden: "transparent",
@@ -45,6 +47,36 @@ suite("Flow MiniMap", () => {
     assert.strictEqual(
       resolveFlowMiniMapNodeFill(node({ isSearchMatch: true }), colors),
       "search-match",
+    );
+  });
+
+  test("uses semantic diff highlight colors before search matches", () => {
+    assert.strictEqual(
+      resolveFlowMiniMapNodeFill(
+        node({
+          isSearchMatch: true,
+          semanticDiffHighlight: {
+            kind: "changed",
+            changeIds: ["change"],
+            confirmationIds: [],
+          },
+        }),
+        colors,
+      ),
+      "changed",
+    );
+    assert.strictEqual(
+      resolveFlowMiniMapNodeFill(
+        node({
+          semanticDiffHighlight: {
+            kind: "confirmation-required",
+            changeIds: ["change"],
+            confirmationIds: ["confirm"],
+          },
+        }),
+        colors,
+      ),
+      "confirmation-required",
     );
   });
 

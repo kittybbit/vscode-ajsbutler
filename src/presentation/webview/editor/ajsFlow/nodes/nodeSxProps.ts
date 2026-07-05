@@ -13,6 +13,7 @@ type NodeVisualState = Pick<
   | "isSelected"
   | "relationshipFocusRole"
   | "nestedPanel"
+  | "semanticDiffHighlight"
 >;
 
 type NestedPanel = NonNullable<NodeVisualState["nestedPanel"]>;
@@ -49,6 +50,18 @@ const currentSearchResultNodeRule = {
 const searchMatchNodeRule = {
   kind: "searchMatch",
   matches: ({ isSearchMatch }: NodeVisualState) => Boolean(isSearchMatch),
+} as const;
+
+const semanticConfirmationNodeRule = {
+  kind: "semanticConfirmation",
+  matches: ({ semanticDiffHighlight }: NodeVisualState) =>
+    semanticDiffHighlight?.kind === "confirmation-required",
+} as const;
+
+const semanticChangedNodeRule = {
+  kind: "semanticChanged",
+  matches: ({ semanticDiffHighlight }: NodeVisualState) =>
+    semanticDiffHighlight?.kind === "changed",
 } as const;
 
 const ancestorNodeRule = {
@@ -105,6 +118,8 @@ type BorderColorKind =
   | "selected"
   | "currentSearchResult"
   | "current"
+  | "semanticConfirmation"
+  | "semanticChanged"
   | "searchMatch"
   | "rootJobnet"
   | "default";
@@ -114,6 +129,8 @@ const borderColorRules: readonly VisualStateRule<BorderColorKind>[] = [
   selectedNodeRule,
   currentSearchResultNodeRule,
   currentNodeRule,
+  semanticConfirmationNodeRule,
+  semanticChangedNodeRule,
   searchMatchNodeRule,
   rootJobnetNodeRule,
 ];
@@ -123,6 +140,8 @@ const borderColorByKind: Record<BorderColorKind, ThemeValue> = {
   selected: (theme) => theme.palette.secondary.main,
   currentSearchResult: (theme) => theme.palette.success.dark,
   current: (theme) => theme.palette.info.main,
+  semanticConfirmation: (theme) => theme.palette.warning.main,
+  semanticChanged: (theme) => theme.palette.info.main,
   searchMatch: (theme) => theme.palette.success.main,
   rootJobnet: (theme) => theme.palette.primary.main,
   default: (theme) => theme.palette.divider,
@@ -138,6 +157,8 @@ type BackgroundKind =
   | "selected"
   | "currentSearchResult"
   | "current"
+  | "semanticConfirmation"
+  | "semanticChanged"
   | "searchMatch"
   | "ancestor"
   | "rootJobnet"
@@ -148,6 +169,8 @@ const backgroundRules: readonly VisualStateRule<BackgroundKind>[] = [
   selectedNodeRule,
   currentSearchResultNodeRule,
   currentNodeRule,
+  semanticConfirmationNodeRule,
+  semanticChangedNodeRule,
   searchMatchNodeRule,
   ancestorNodeRule,
   rootJobnetNodeRule,
@@ -162,6 +185,10 @@ const backgroundByKind: Record<BackgroundKind, ThemeValue> = {
     `linear-gradient(160deg, ${theme.palette.success.light}32 0%, ${theme.palette.background.paper} 100%)`,
   current: (theme) =>
     `linear-gradient(160deg, ${theme.palette.info.light}22 0%, ${theme.palette.background.paper} 58%, ${theme.palette.background.default} 100%)`,
+  semanticConfirmation: (theme) =>
+    `linear-gradient(180deg, ${theme.palette.warning.light}30 0%, ${theme.palette.background.paper} 100%)`,
+  semanticChanged: (theme) =>
+    `linear-gradient(180deg, ${theme.palette.info.light}24 0%, ${theme.palette.background.paper} 100%)`,
   searchMatch: (theme) =>
     `linear-gradient(180deg, ${theme.palette.success.light}20 0%, ${theme.palette.background.paper} 100%)`,
   ancestor: (theme) =>
@@ -179,6 +206,8 @@ type BoxShadowKind =
   | "selected"
   | "currentSearchResult"
   | "current"
+  | "semanticConfirmation"
+  | "semanticChanged"
   | "searchMatch"
   | "ancestor"
   | "default";
@@ -188,6 +217,8 @@ const boxShadowRules: readonly VisualStateRule<BoxShadowKind>[] = [
   selectedNodeRule,
   currentSearchResultNodeRule,
   currentNodeRule,
+  semanticConfirmationNodeRule,
+  semanticChangedNodeRule,
   searchMatchNodeRule,
   ancestorNodeRule,
 ];
@@ -201,6 +232,10 @@ const boxShadowByKind: Record<BoxShadowKind, ThemeValue> = {
     `0 0 0 4px ${theme.palette.success.light}38, ${theme.shadows[6]}`,
   current: (theme) =>
     `0 0 0 4px ${theme.palette.info.light}30, ${theme.shadows[6]}`,
+  semanticConfirmation: (theme) =>
+    `0 0 0 4px ${theme.palette.warning.light}38, ${theme.shadows[5]}`,
+  semanticChanged: (theme) =>
+    `0 0 0 3px ${theme.palette.info.light}32, ${theme.shadows[4]}`,
   searchMatch: (theme) =>
     `0 0 0 3px ${theme.palette.success.light}30, ${theme.shadows[4]}`,
   ancestor: (theme) => theme.shadows[4],
@@ -236,6 +271,8 @@ type ButtonColorKind =
   | "selected"
   | "currentSearchResult"
   | "current"
+  | "semanticConfirmation"
+  | "semanticChanged"
   | "searchMatch"
   | "default";
 
@@ -244,6 +281,8 @@ const buttonColorRules: readonly VisualStateRule<ButtonColorKind>[] = [
   selectedNodeRule,
   currentSearchResultNodeRule,
   currentNodeRule,
+  semanticConfirmationNodeRule,
+  semanticChangedNodeRule,
   searchMatchNodeRule,
 ];
 
@@ -252,6 +291,8 @@ const buttonColorByKind: Record<ButtonColorKind, ThemeValue> = {
   selected: (theme) => theme.palette.secondary.dark,
   currentSearchResult: (theme) => theme.palette.success.dark,
   current: (theme) => theme.palette.info.dark,
+  semanticConfirmation: (theme) => theme.palette.warning.dark,
+  semanticChanged: (theme) => theme.palette.info.dark,
   searchMatch: (theme) => theme.palette.success.dark,
   default: (theme) => theme.palette.text.secondary,
 };

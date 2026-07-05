@@ -133,4 +133,47 @@ suite("Build Flow Graph", () => {
     );
     assert.deepStrictEqual(graph.edges, input.edges);
   });
+
+  test("carries optional semantic diff highlight metadata", () => {
+    const graph = buildFlowGraphFromInput({
+      ...input,
+      semanticDiffHighlights: {
+        nodes: new Map([
+          [
+            "job-a",
+            {
+              kind: "confirmation-required",
+              changeIds: [],
+              confirmationIds: ["confirm:job-a"],
+            },
+          ],
+        ]),
+        edges: new Map([
+          [
+            "job-a->job-b:seq",
+            {
+              kind: "changed",
+              changeIds: ["relation:job-a->job-b"],
+              confirmationIds: [],
+            },
+          ],
+        ]),
+      },
+    });
+
+    assert.deepStrictEqual(
+      graph.nodes.find((node) => node.id === "job-a")?.metadata
+        .semanticDiffHighlight,
+      {
+        kind: "confirmation-required",
+        changeIds: [],
+        confirmationIds: ["confirm:job-a"],
+      },
+    );
+    assert.deepStrictEqual(graph.edges[0].semanticDiffHighlight, {
+      kind: "changed",
+      changeIds: ["relation:job-a->job-b"],
+      confirmationIds: [],
+    });
+  });
 });

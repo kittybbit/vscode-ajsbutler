@@ -153,6 +153,13 @@ implementation slices, and validation plans.
 - Implementation Slice: Slice 6, Flow Diff Highlighting Hooks
 - Test File Or Validation Plan: flow DTO/view-model tests and presentation
   tests for changed-node, changed-edge, and confirmation-required states.
+- Validation Result: `src/test/suite/semanticDiffFlowHighlights.test.ts`
+  added for mapping semantic diff DTOs to after-side flow node and edge
+  highlights while keeping before-only removals and ambiguous candidates
+  report-only. `src/test/suite/buildFlowGraph.test.ts`,
+  `src/test/suite/flowGraphView.test.ts`, and
+  `src/test/suite/flowMiniMap.test.ts` were updated for highlight DTO
+  propagation and presentation states.
 
 ### Schedule Diff
 
