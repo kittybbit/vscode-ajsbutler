@@ -31,6 +31,8 @@ definition for the same review scope.
   and their reasons
 - Markdown report suitable for pull requests, change-control records, and
   release approval material
+- displayed report surface for reviewing the generated Markdown inside VS Code
+- explicit Markdown copy action from the displayed report surface
 
 ## Rules
 
@@ -67,6 +69,10 @@ definition for the same review scope.
   execution history, are not verified by standard semantic comparison
 - unsupported or uncalculated portions must be visible in the comparison result
   and report
+- the command must not implicitly overwrite the clipboard when semantic diff
+  finishes
+- copying the Markdown report to the clipboard must be an explicit user action
+  from the displayed report surface
 - relation cycles, cyclic waits, and terminal reachability-only judgments are
   out of scope unless a separate approved feature changes that boundary
 
@@ -133,6 +139,14 @@ Scenario: Schedule comparison reports no generated runs
   When the semantic diff is built
   Then the result includes a confirmation-required schedule item
   And the result displays the comparison period
+
+Scenario: Semantic diff opens a report before copying Markdown
+  Given the semantic diff command builds a Markdown report
+  When the command completes
+  Then the report is displayed in VS Code
+  And the clipboard is not changed automatically
+  When the user requests Markdown copy from the report surface
+  Then the displayed Markdown report is copied to the clipboard
 ```
 
 ## Acceptance Notes
@@ -144,6 +158,8 @@ Scenario: Schedule comparison reports no generated runs
   application DTOs and host-specific adapters.
 - Markdown report output should preserve enough rationale for review without
   requiring users to inspect parser internals.
+- Command presentation should use VS Code-native editor, document, command,
+  and menu surfaces where practical before adding a custom visual diff view.
 - Flow-view highlighting, when added, should consume semantic diff DTOs rather
   than re-implementing comparison rules in presentation code.
 - Schedule comparison must display the comparison period and must distinguish

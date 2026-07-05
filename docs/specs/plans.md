@@ -32,24 +32,27 @@ rules in `docs/specs/README.md`, not in this file.
   requirement-to-validation mapping when required.
 - Desktop and web compatibility must stay explicit whenever bootstrap, preview,
   parsing, shared adapters, or runtime behavior change.
-- `semantic-diff` has completed all approved implementation slices; Feature
-  Exit Review is the next SDD step.
+- `semantic-diff` is being replanned before Feature Exit to add editor-title
+  discoverability, displayed report workflow with explicit Markdown copy, and
+  semantic diff evaluation sample coverage.
 
 ## Next Priority Tasks
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 2. Keep compatibility risk visible for every shared or extension-runtime change.
-3. Run `sdd-plan-task` Feature Exit Mode for `semantic-diff` and decide whether
-   the feature is ready to close.
+3. Review the replanned `semantic-diff` Slice 8 through Slice 10 scope with
+   `sdd-review-plan`, then obtain human approval before implementation
+   resumes.
 
 ## Active Feature Specs
 
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 - `docs/specs/features/semantic-diff/`: active semantic JP1/AJS3 job-group
-  comparison feature; all approved implementation slices are complete and
-  Feature Exit Review is pending.
+  comparison feature; Slice 8 through Slice 10 are proposed for command
+  discoverability, report display/copy workflow, and sample coverage before
+  Feature Exit Review resumes.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the

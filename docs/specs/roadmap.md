@@ -135,6 +135,9 @@
    - Implement in reviewed slices: structure and deterministic identity
      matching first, start/wait confirmation checks second, and schedule
      comparison after the supported schedule scope is narrowed.
+   - Complete the user workflow with editor-title discoverability, displayed
+     Markdown report review, explicit Markdown copy, and reusable semantic diff
+     sample coverage before feature exit.
    - Keep confirmation-required wording constrained to possible definition
      impacts and explicitly state when runtime environment facts are not
      verified.

@@ -40,6 +40,11 @@ relation, condition, and schedule changes instead of raw text differences.
   calculation limitations.
 - Export a Markdown report at a reviewable granularity for pull requests,
   change-control records, and release approval material.
+- Make the semantic diff command discoverable from the JP1/AJS editor title.
+- Display semantic diff results in a VS Code editor/report surface instead of
+  implicitly leaving the report on the clipboard.
+- Allow users to copy the displayed Markdown report to the clipboard from the
+  report surface.
 
 ## Behavioral Scenarios
 
@@ -88,8 +93,8 @@ Scenario: Wait timeout removal requires confirmation
 - Presentation: provide commands, views, flow highlighting, and report actions
   using application DTOs without parsing raw AJS grammar output directly.
 - Infrastructure: adapt local files or imported definition sources into
-  normalized inputs, provide Markdown report writing or copy/save integration,
-  and isolate any host-specific desktop/web capabilities.
+  normalized inputs, provide Markdown report display/copy integration, and
+  isolate any host-specific desktop/web capabilities.
 
 ## Impact Analysis
 
@@ -180,6 +185,12 @@ Scenario: Wait timeout removal requires confirmation
 - Markdown reports include semantic changes, confirmation-required items,
   matching rationale, unsupported items, calculation constraints, and the
   comparison period when schedule comparison is in scope.
+- The semantic diff command is available from the JP1/AJS editor title.
+- Running semantic diff displays the generated Markdown report in VS Code
+  without automatically writing it to the clipboard.
+- The displayed report surface provides an explicit Markdown copy action.
+- Repository sample definitions cover the implemented semantic diff evaluation
+  categories for parser-to-report validation.
 
 ## Non-Goals
 
@@ -200,7 +211,9 @@ Scenario: Wait timeout removal requires confirmation
   calculation?
 - Which later command or UI surfaces, beyond the initial active-editor plus
   before-file picker workflow, should be considered after Phase 1?
-- Should Phase 1 Markdown report export be copy-only, save-to-file, or both
-  for desktop and web hosts?
+- Should a later workflow add save-to-file or report-history behavior in
+  addition to displayed Markdown plus explicit copy?
+- Should semantic diff later add a dedicated visual comparison surface beyond
+  the Markdown report document?
 - Which schedule elements beyond the first explicit-date schedule subset should
   be supported later, and which should remain explicitly uncalculated?
