@@ -124,6 +124,24 @@
      analytics usage, product reporting, or a future feature makes those
      decisions concrete.
 
+9. Add semantic JP1/AJS3 job-group comparison.
+
+   - Compare before and after job-group definitions by semantic jobnet, unit,
+     relation, execution-attribute, condition, wait, and schedule changes
+     rather than raw text differences.
+   - Keep comparison logic in domain/application boundaries and expose
+     presentation/report behavior through DTOs so desktop and web hosts remain
+     compatible.
+   - Implement in reviewed slices: structure and deterministic identity
+     matching first, start/wait confirmation checks second, and schedule
+     comparison after the supported schedule scope is narrowed.
+   - Keep confirmation-required wording constrained to possible definition
+     impacts and explicitly state when runtime environment facts are not
+     verified.
+   - Track the active feature in
+     `docs/specs/features/semantic-diff/` until feature exit moves
+     durable behavior into use cases or roadmap entries.
+
 ## Deferred / Optional Slices
 
 1. Build/test output-directory ownership cleanup is deferred until packaging,

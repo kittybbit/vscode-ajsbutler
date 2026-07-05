@@ -32,19 +32,25 @@ rules in `docs/specs/README.md`, not in this file.
   requirement-to-validation mapping when required.
 - Desktop and web compatibility must stay explicit whenever bootstrap, preview,
   parsing, shared adapters, or runtime behavior change.
+- `semantic-diff` is a roadmap feature for semantic JP1/AJS3
+  job-group comparison; implementation must start with reviewed slice planning
+  before runtime code, tests, generated artifacts, or configuration change.
 
 ## Next Priority Tasks
 
 1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 2. Keep compatibility risk visible for every shared or extension-runtime change.
-3. Pick the next roadmap feature only when a concrete boundary, compatibility,
-   or user-visible improvement needs a new SDD feature folder.
+3. Review `semantic-diff` with `sdd-review-plan`, then obtain human
+   approval before any implementation slice starts.
 
 ## Active Feature Specs
 
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
+- `docs/specs/features/semantic-diff/`: roadmap feature intake for
+  semantic JP1/AJS3 job-group comparison; implementation-slice plan is ready
+  for review.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
