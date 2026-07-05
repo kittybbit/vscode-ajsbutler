@@ -4,6 +4,7 @@ import type {
   SemanticDiffChangeSet,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffLimitation,
+  SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
   SemanticDiffUnsupportedItem,
 } from "../../domain/models/semantic-diff/SemanticDiff";
@@ -235,16 +236,64 @@ const renderLimitations = (limitations: SemanticDiffLimitation[]): string[] =>
       ),
   );
 
+const renderScheduleRunChange = (
+  change: SemanticDiffScheduleRunChange,
+): string[] => {
+  const lines = [
+    bulletLine(`[${change.kind}] ${escapeMarkdown(change.summary)}`),
+  ];
+  if (change.before) {
+    lines.push(
+      indentedLine(
+        `Before: ${escapeMarkdown(`${change.before.date} ${change.before.time} rule ${change.before.rule}`)}`,
+      ),
+    );
+  }
+  if (change.after) {
+    lines.push(
+      indentedLine(
+        `After: ${escapeMarkdown(`${change.after.date} ${change.after.time} rule ${change.after.rule}`)}`,
+      ),
+    );
+  }
+  return lines;
+};
+
+const renderScheduleComparison = (
+  changeSet: SemanticDiffChangeSet,
+): string[] => {
+  if (!changeSet.scheduleComparison) {
+    return [];
+  }
+
+  return [
+    "## Schedule Changes",
+    "",
+    bulletLine(
+      `Comparison period: ${escapeMarkdown(changeSet.scheduleComparison.period.from)} to ${escapeMarkdown(changeSet.scheduleComparison.period.to)} (exclusive)`,
+    ),
+    ...sectionOrNone(
+      [...changeSet.scheduleComparison.runChanges]
+        .sort((left, right) => compareStrings(left.id, right.id))
+        .flatMap(renderScheduleRunChange),
+    ),
+    "",
+  ];
+};
+
 const renderSummary = (changeSet: SemanticDiffChangeSet): string[] => {
   const beforeScope = changeSet.inputs.before.jobGroupPath;
   const afterScope = changeSet.inputs.after.jobGroupPath;
+  const scheduleChangeCount =
+    changeSet.scheduleComparison?.runChanges.length ?? 0;
   const hasAnyFinding =
     changeSet.changes.length > 0 ||
     changeSet.confirmationRequired.length > 0 ||
     changeSet.unsupportedItems.length > 0 ||
-    changeSet.limitations.length > 0;
+    changeSet.limitations.length > 0 ||
+    scheduleChangeCount > 0;
 
-  return [
+  const lines = [
     bulletLine(`Before scope: ${escapeMarkdown(optionalText(beforeScope))}`),
     bulletLine(`After scope: ${escapeMarkdown(optionalText(afterScope))}`),
     bulletLine(pluralize(changeSet.changes.length, "semantic change")),
@@ -258,12 +307,26 @@ const renderSummary = (changeSet: SemanticDiffChangeSet): string[] => {
       pluralize(changeSet.unsupportedItems.length, "unsupported item"),
     ),
     bulletLine(pluralize(changeSet.limitations.length, "limitation")),
+  ];
+
+  if (changeSet.scheduleComparison) {
+    lines.push(
+      bulletLine(
+        `Schedule comparison period: ${escapeMarkdown(changeSet.scheduleComparison.period.from)} to ${escapeMarkdown(changeSet.scheduleComparison.period.to)} (exclusive)`,
+      ),
+      bulletLine(pluralize(scheduleChangeCount, "schedule run change")),
+    );
+  }
+
+  lines.push(
     bulletLine(
       hasAnyFinding
         ? "Result: semantic differences or review notes are present."
         : "Result: no semantic changes detected.",
     ),
-  ];
+  );
+
+  return lines;
 };
 
 export const renderSemanticDiffMarkdown = (
@@ -283,6 +346,7 @@ export const renderSemanticDiffMarkdown = (
     "## Attribute Changes",
     "",
     ...renderAttributeChanges(changeSet.changes),
+    ...renderScheduleComparison(changeSet),
     "## Confirmation Required",
     "",
     ...renderConfirmationRequired(changeSet.confirmationRequired),

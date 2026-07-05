@@ -168,8 +168,23 @@ implementation slices, and validation plans.
   uncalculated schedules.
 - SPECS.md Section: Requirements, Acceptance Criteria
 - Implementation Slice: Slice 7, Schedule Diff
-- Test File Or Validation Plan: schedule-rule tests with supported JP1/AJS3
-  fixtures and report tests for unsupported or uncalculated cases.
+- Test File Or Validation Plan: `src/test/suite/semanticDiffSchedule.test.ts`
+  for application-only bounded-period schedule comparison over the first
+  supported subset: root and nested schedule-defined jobnet explicit schedule
+  dates from directly defined `sd` paired with normal `st` start times. Report
+  tests must cover comparison period display, added runs, removed runs,
+  changed-time runs, zero-run confirmation-required items, and uncalculated
+  schedule elements such as open-day, week-day, cycle, shift, inherited-rule,
+  day-crossing, 48-hour, calendar, and malformed schedule values.
+- Validation Result: `src/test/suite/semanticDiffSchedule.test.ts` added for
+  bounded explicit-date schedule comparison, root and nested schedule-defined
+  jobnets, added/removed/changed-time runs, zero-run confirmation-required
+  items, uncalculated schedule elements, missing `sd` / `st` pairs, and invalid
+  period handling. `src/test/suite/renderSemanticDiffMarkdown.test.ts` was
+  updated for schedule period and run-change report output. `rtk pnpm run
+qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
+  passed during Slice 7 implementation. Production build still reports the
+  existing webpack asset-size warnings.
 
 ### Normalized Inputs
 

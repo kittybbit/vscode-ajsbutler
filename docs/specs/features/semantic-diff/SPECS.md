@@ -173,8 +173,8 @@ Scenario: Wait timeout removal requires confirmation
   environment changes without asserting target-host existence, permission, or
   resource contention failures.
 - Schedule comparison, when implemented, displays the comparison period,
-  added/deleted/changed run schedules, root jobnets with no calculated run
-  schedules, and calculation-failure reasons.
+  added/deleted/changed run schedules, schedule-defined jobnets with no
+  calculated run schedules, and calculation-failure reasons.
 - Unsupported attributes and uncalculated schedules are summarized in the
   comparison result and report.
 - Markdown reports include semantic changes, confirmation-required items,
@@ -202,5 +202,5 @@ Scenario: Wait timeout removal requires confirmation
   before-file picker workflow, should be considered after Phase 1?
 - Should Phase 1 Markdown report export be copy-only, save-to-file, or both
   for desktop and web hosts?
-- Which schedule elements are supported in the first schedule-comparison slice,
-  and which are explicitly reported as uncalculated?
+- Which schedule elements beyond the first explicit-date schedule subset should
+  be supported later, and which should remain explicitly uncalculated?

@@ -128,7 +128,8 @@ Scenario: Execution environment changes are not asserted as failures
 
 Scenario: Schedule comparison reports no generated runs
   Given schedule comparison is requested for a period
-  And a root jobnet no longer has any calculated run schedule in that period
+  And a schedule-defined jobnet no longer has any calculated run schedule in
+    that period
   When the semantic diff is built
   Then the result includes a confirmation-required schedule item
   And the result displays the comparison period

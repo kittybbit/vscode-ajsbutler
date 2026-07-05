@@ -249,4 +249,54 @@ suite("Render Semantic Diff Markdown", () => {
 - [normalization:missing_relation_target] before /root/jobnet/job-a relation target was not found`,
     );
   });
+
+  test("renders schedule comparison period and run changes when present", () => {
+    const result = renderSemanticDiffMarkdown(
+      changeSet({
+        scheduleComparison: {
+          period: {
+            from: "2026-04-01",
+            to: "2026-05-01",
+          },
+          runChanges: [
+            {
+              id: "schedule:changed-time:/root/jobnet:2026-04-10",
+              kind: "changed-time",
+              unitPath: "/root/jobnet",
+              date: "2026-04-10",
+              before: {
+                unitPath: "/root/jobnet",
+                unitName: "jobnet",
+                rule: 1,
+                date: "2026-04-10",
+                time: "09:00",
+              },
+              after: {
+                unitPath: "/root/jobnet",
+                unitName: "jobnet",
+                rule: 1,
+                date: "2026-04-10",
+                time: "10:00",
+              },
+              summary:
+                "/root/jobnet run on 2026-04-10 changed from 09:00 to 10:00",
+            },
+          ],
+        },
+      }),
+    );
+
+    assert.ok(
+      result.includes(
+        "- Schedule comparison period: 2026-04-01 to 2026-05-01 (exclusive)",
+      ),
+    );
+    assert.ok(result.includes("- 1 schedule run change"));
+    assert.ok(result.includes("## Schedule Changes"));
+    assert.ok(
+      result.includes(
+        "- [changed-time] /root/jobnet run on 2026-04-10 changed from 09:00 to 10:00",
+      ),
+    );
+  });
 });

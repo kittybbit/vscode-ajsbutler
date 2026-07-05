@@ -3,18 +3,17 @@
 ## Plan Status
 
 - Status: In Progress
-- Planning scope: initial full implementation-slice plan for JP1/AJS3
-  semantic diff.
+- Planning scope: all approved implementation slices are complete; Feature Exit
+  Review is pending.
 - Review status: Reviewed
-- Human approval: Approved
-- Active implementation slice: Slice 7, Schedule Diff
+- Human approval: Pending
+- Active implementation slice: none
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: all remaining semantic-diff implementation slices; active
-  implementation is limited to Slice 7, Schedule Diff
+- Status: Pending
+- Approved at: none
+- Approved scope: none
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -391,20 +390,47 @@ active implementation approval remains.
 
 ### Slice 7: Schedule Diff
 
-- Status: Approved
+- Status: Complete
 - Smallest Useful Slice: delivers one domain meaning: bounded-period schedule
-  comparison for an explicitly supported JP1/AJS3 schedule subset.
-- Scope: calculate and compare run schedules over a user-provided period for
-  supported schedule elements; report added, removed, changed-time schedules,
-  root jobnets with zero calculated runs, supported/unsupported elements, and
-  calculation-failure reasons.
+  comparison for one explicitly supported JP1/AJS3 schedule subset without
+  widening command or UI input behavior.
+- Replanning Gap: implementation could not continue because the previous Slice
+  7 approval boundary required schedule calculation but did not name the first
+  supported schedule element set, the uncalculated element set, or whether
+  period input belonged to the command surface.
+- Supported Schedule Subset:
+  - schedule-defined jobnet units, including root and nested jobnets, when the
+    jobnet has directly defined schedule parameters in the compared definition
+  - explicit schedule dates whose `sd` day is a concrete calendar day in
+    `YYYY/MM/DD`, `MM/DD`, or `DD` form
+  - default or explicit schedule-rule number pairing between `sd` and `st`
+  - normal start times parsed by `st` in `HH:MM` form
+  - schedule generation limited to an inclusive `from` / exclusive `to`
+    comparison period supplied through application options
+  - no command prompt, settings, webview input, or persisted period state in
+    this slice
+- Uncalculated Schedule Elements:
+  - open-day, closed-day, week-day, month-end, base-day, relative-day, cycle,
+    shift, closed-day substitution, start-time offset, delay time,
+    day-crossing, 48-hour, calendar, and inherited parent-rule semantics
+  - schedule rules with missing or unparsable `sd` / `st` pairs
+  - jobnets that rely only on parent schedule inheritance without directly
+    defined schedule parameters
+- Scope: add host-neutral schedule comparison options and report-ready result
+  data, calculate the supported directly defined jobnet run schedule subset
+  over the bounded period, compare added, removed, and changed-time runs, add
+  confirmation-required items when an after-side schedule-defined jobnet has
+  zero calculated runs for the period, and report uncalculated schedule
+  elements with reasons.
 - User / Domain Value: reviewers can see whether a definition change removes
-  or changes expected execution opportunities in a defined review period.
+  or changes supported directly defined jobnet execution opportunities in a
+  defined review period, while unsupported schedule semantics remain visible
+  instead of being guessed.
 - Cohesive Change Group:
-  - likely files: new schedule-diff modules under
-    `src/domain/models/semantic-diff/` or `src/application/semantic-diff/`,
-    focused reusable schedule helpers under `src/domain/models/parameters/`
-    only where they are reference-backed
+  - likely files: `src/domain/models/semantic-diff/SemanticDiff.ts`,
+    `src/application/semantic-diff/compareSemanticDiff.ts`,
+    `src/application/semantic-diff/renderSemanticDiffMarkdown.ts`, and one
+    focused schedule calculator module under `src/application/semantic-diff/`
   - likely tests: `src/test/suite/semanticDiffSchedule.test.ts`,
     report tests for schedule sections
   - related existing files:
@@ -414,39 +440,73 @@ active implementation approval remains.
     `sample/sample_ref_schedule_utf8`
 - Acceptance:
   - comparison period is displayed
-  - added/deleted/changed run schedules are listed for supported rules
-  - zero-run root jobnets are confirmation-required
-  - uncalculated schedules include target and reason
-  - unsupported schedule elements are summarized in result and report
+  - supported explicit-date schedule-defined jobnet schedules list added and
+    removed run times within the bounded period
+  - same-date schedule-defined jobnet runs with changed start times are
+    represented as changed-time schedule differences instead of unrelated
+    delete/add entries
+  - zero calculated runs for an after-side schedule-defined jobnet are
+    confirmation-required
+  - supported before-side runs disappearing from the after definition are
+    visible in the schedule report
+  - uncalculated schedule elements include target, side, parameter key or rule,
+    and reason
+  - unsupported or uncalculated schedule elements are summarized in the result
+    and Markdown report
+  - no VS Code command contribution, command prompt, webview UI, settings,
+    telemetry, or persistence behavior changes in this slice
 - Validation:
-  - reference-backed schedule fixtures for supported elements
-  - tests for unsupported elements, uncalculated reasons, zero-run detection,
-    48-hour/day-crossing behavior only if included in approved scope
+  - reference-backed tests for explicit-date `sd` plus `st` root and nested
+    jobnet runs in the bounded comparison period
+  - tests for added, removed, and changed-time supported schedule runs
+  - tests for zero-run confirmation-required items
+  - tests for uncalculated open-day, week-day, cycle/shift/day-crossing or
+    unparsable schedule values
   - report tests for schedule sections
   - `rtk pnpm run qlty`
   - `rtk pnpm test`
   - `rtk pnpm run test:web`
-  - `rtk pnpm run build` if command period inputs or UI are added
+  - `rtk pnpm run build`
 - Production Readiness:
   - Failure mode: unsupported combinations produce calculation limitations
     rather than incorrect schedules.
-  - JP1/AJS compatibility: supported schedule subset must cite JP1/AJS3 v13
-    definition/config references before approval.
+  - JP1/AJS compatibility: supported subset is limited to JP1/AJS3 v13
+    unit-definition schedule parameters `sd` and `st`; all calendar,
+    inherited-rule, closed-day, cycle, offset, day-crossing, and 48-hour
+    semantics remain uncalculated.
   - Large or malformed input risk: period calculation must be bounded and avoid
-    unbounded loops.
-  - Desktop/web impact: calculation logic stays host-neutral; period input
-    adapters must be host-safe.
-  - README/docs impact: required if users configure schedule comparison
-    periods.
-  - CHANGELOG impact: required when schedule comparison is user-visible.
-- Approval Boundary: supported schedule subset, schedule calculation,
-  comparison/report output, period input/presentation if included, and tests.
-- Dependencies: Slice 2 and Slice 3; Slice 4 if user period input is exposed
-  through the command.
-- Risks: schedule semantics are broad; approval must explicitly narrow the
-  first supported element set and list uncalculated elements.
+    unbounded loops; missing or malformed period options must skip schedule
+    calculation and report an understandable limitation.
+  - Desktop/web impact: calculation and Markdown rendering stay host-neutral;
+    no Node-only, VS Code, or webview APIs are added.
+  - README/docs impact: no README change because users cannot configure the
+    period through the command or settings in this slice.
+  - CHANGELOG impact: required if command output now includes schedule
+    findings by default; not required if schedule comparison only runs when an
+    application caller supplies a period and the current command does not.
+- Approval Boundary: application/domain DTO extensions for schedule period and
+  schedule findings, supported explicit-date `sd` plus `st` calculation,
+  uncalculated schedule reporting, Markdown schedule report output, and focused
+  tests for root and nested schedule-defined jobnets. Command period input, UI,
+  settings, persistence, and telemetry are not approved.
+- Dependencies: Slice 2 and Slice 3. Slice 4 is not a dependency for this
+  revised scope because user period input is not exposed through the command.
+- Risks: this first subset intentionally under-reports broad JP1/AJS schedule
+  semantics; unsupported and uncalculated reasons must be prominent enough that
+  users do not mistake omitted semantics for no schedule impact.
+- Implementation Feedback:
+  - The slice boundary was appropriate: schedule comparison can remain
+    application-only when the comparison period is supplied through options,
+    so command prompts, settings, persistence, and telemetry are still outside
+    this slice.
+  - Future schedule slices should decide whether inherited parent-rule
+    schedules are calculated or remain explicitly uncalculated before adding
+    command period input.
 - Out of Scope: real scheduler integration, runtime execution history,
-  external calendar sources outside compared definitions, AI advice.
+  external calendar sources outside compared definitions, command period
+  prompts, VS Code settings, webview schedule UI, persisted comparison period,
+  calendar/holiday semantics, day-crossing and 48-hour calculations, telemetry,
+  AI advice.
 
 ## Cross-Slice Dependencies
 
@@ -461,8 +521,8 @@ active implementation approval remains.
 - Slice 6 depends on Slice 5 when confirmation-required highlighting is in
   scope; it can be narrowed to structural highlighting after Slice 2 only if
   review explicitly changes the scope.
-- Slice 7 depends on Slice 2 and Slice 3; it may also depend on Slice 4 if the
-  comparison period is collected through the command surface.
+- Slice 7 depends on Slice 2 and Slice 3; the replanned scope explicitly avoids
+  command period input, so Slice 4 command changes are not part of Slice 7.
 
 ## Traceability
 
@@ -470,19 +530,21 @@ active implementation approval remains.
 - Reason: feature changes user-visible behavior, JP1/AJS definition-file
   interpretation and compatibility, and is split into multiple independently
   approvable slices.
-- Status: updated for Planning Mode slice boundaries.
+- Status: updated for the approved Slice 7 schedule comparison scope.
 
 ## Feature-Level Risks
 
-- JP1/AJS3 manual references are still unresolved for relation conditions,
-  wait units, event units, and schedule calculation.
+- JP1/AJS3 manual references are still incomplete for later broad schedule
+  calculation; Slice 7 is narrowed to directly defined jobnet `sd` and `st`
+  schedule parameters and must report other schedule semantics as uncalculated.
 - Initial command UX is narrowed to active after editor plus before-file picker;
   broader comparison input workflows require a future approved slice.
 - Flow highlighting is narrowed to existing after-definition flow viewer
   metadata; before-only and ambiguous elements remain report-only unless a
   dedicated comparison view is separately approved.
-- Schedule comparison can become too broad; Slice 7 must approve a narrow
-  supported subset first.
+- Schedule comparison can become too broad; Slice 7 is narrowed to explicit
+  directly defined jobnet schedule dates and normal start times, with broader
+  calendar, cycle, day-crossing, and inherited-rule semantics deferred.
 - Telemetry should not be added speculatively; runtime semantic-diff telemetry
   requires a separately approved slice or explicit inclusion in a user-visible
   slice, with anonymous metadata only.
@@ -508,8 +570,8 @@ active implementation approval remains.
 - Definition of Done status: Not started
 - Durable documentation updates: use case and roadmap entries exist; update
   only when implemented behavior or accepted limitations change.
-- Open risks: JP1/AJS manual references, web report persistence, and first
-  schedule subset.
+- Open risks: broad JP1/AJS schedule semantics beyond the Slice 7 supported
+  subset, web report persistence, and feature exit documentation propagation.
 
 ## Validation
 

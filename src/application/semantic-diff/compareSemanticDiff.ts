@@ -7,6 +7,7 @@ import {
   type AjsUnitType,
 } from "../../domain/models/ajs/AjsDocument";
 import type {
+  SemanticDiffComparisonPeriod,
   SemanticDiffAttributeCategory,
   SemanticDiffChange,
   SemanticDiffChangeSet,
@@ -23,9 +24,11 @@ import type {
   SemanticDiffUnitIdentityKey,
   SemanticDiffUnsupportedItem,
 } from "../../domain/models/semantic-diff/SemanticDiff";
+import { compareScheduleDiff } from "./compareScheduleDiff";
 
 export type CompareSemanticDiffOptions = {
   jobGroupPath?: string;
+  scheduleComparisonPeriod?: SemanticDiffComparisonPeriod;
 };
 
 export type CompareSemanticDiffInput = {
@@ -43,6 +46,7 @@ export type SemanticDiffChangeSetParts = {
   confirmationRequired?: SemanticDiffConfirmationRequiredItem[];
   unsupportedItems?: SemanticDiffUnsupportedItem[];
   limitations?: SemanticDiffLimitation[];
+  scheduleComparison?: SemanticDiffChangeSet["scheduleComparison"];
   reportSections?: SemanticDiffReportSection[];
 };
 
@@ -1032,6 +1036,7 @@ export const createSemanticDiffChangeSet = (
     ...toNormalizationLimitations("after", input.after),
     ...(parts.limitations ?? []),
   ],
+  scheduleComparison: parts.scheduleComparison,
   reportSections: parts.reportSections ?? [],
 });
 
@@ -1104,10 +1109,28 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
     afterUnitById,
     input.options?.jobGroupPath,
   );
+  const scheduleDiff = compareScheduleDiff({
+    beforeUnits,
+    afterUnits,
+    beforeUnitById,
+    afterUnitById,
+    matches,
+    period: input.options?.scheduleComparisonPeriod,
+    toUnitTarget: (unit, unitById) =>
+      toUnitTarget(unit, unitById, input.options?.jobGroupPath),
+  });
 
   return createSemanticDiffChangeSet(input, {
     changes: changes.sort((left, right) => compareStrings(left.id, right.id)),
-    confirmationRequired,
-    unsupportedItems,
+    confirmationRequired: [
+      ...confirmationRequired,
+      ...scheduleDiff.confirmationRequired,
+    ].sort((left, right) => compareStrings(left.id, right.id)),
+    unsupportedItems: [
+      ...unsupportedItems,
+      ...scheduleDiff.unsupportedItems,
+    ].sort((left, right) => compareStrings(left.id, right.id)),
+    limitations: scheduleDiff.limitations,
+    scheduleComparison: scheduleDiff.scheduleComparison,
   });
 };

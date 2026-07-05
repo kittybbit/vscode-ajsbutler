@@ -177,11 +177,45 @@ export type SemanticDiffReportSection = {
   limitationCodes: string[];
 };
 
+export type SemanticDiffComparisonPeriod = {
+  from: string;
+  to: string;
+};
+
+export type SemanticDiffScheduleRun = {
+  unitPath: string;
+  unitName: string;
+  rule: number;
+  date: string;
+  time: string;
+};
+
+export type SemanticDiffScheduleRunChangeKind =
+  | "added"
+  | "removed"
+  | "changed-time";
+
+export type SemanticDiffScheduleRunChange = {
+  id: string;
+  kind: SemanticDiffScheduleRunChangeKind;
+  unitPath: string;
+  date: string;
+  before?: SemanticDiffScheduleRun;
+  after?: SemanticDiffScheduleRun;
+  summary: string;
+};
+
+export type SemanticDiffScheduleComparison = {
+  period: SemanticDiffComparisonPeriod;
+  runChanges: SemanticDiffScheduleRunChange[];
+};
+
 export type SemanticDiffChangeSet = {
   inputs: SemanticDiffInputPair;
   changes: SemanticDiffChange[];
   confirmationRequired: SemanticDiffConfirmationRequiredItem[];
   unsupportedItems: SemanticDiffUnsupportedItem[];
   limitations: SemanticDiffLimitation[];
+  scheduleComparison?: SemanticDiffScheduleComparison;
   reportSections: SemanticDiffReportSection[];
 };
