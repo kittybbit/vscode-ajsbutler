@@ -4,6 +4,7 @@
 
 - Added a JP1/AJS semantic diff command that compares the active definition
   with a selected before definition and copies or saves a Markdown report.
+- Added a JP1/AJS editor-title entry for the semantic diff command.
 - Added confirmation-required semantic diff report notes for supported
   condition, wait, timeout-removal, and conditional-relation changes.
 

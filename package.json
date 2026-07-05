@@ -94,6 +94,11 @@
           "when": "editorLangId == 'jp1ajs'",
           "command": "open.ajsbutler.tableViewer",
           "group": "navigation"
+        },
+        {
+          "when": "editorLangId == 'jp1ajs'",
+          "command": "ajsbutler.compareSemanticDiff",
+          "group": "navigation"
         }
       ]
     },

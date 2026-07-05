@@ -2,18 +2,22 @@
 
 ## Plan Status
 
-- Status: In Progress
-- Planning scope: all approved implementation slices are complete; Feature Exit
-  Review is pending.
+- Status: Approved
+- Planning scope: Replanning Mode for additional semantic diff command
+  discoverability, report-display workflow, and evaluation sample coverage
+  before Feature Exit Review.
 - Review status: Reviewed
-- Human approval: Pending
-- Active implementation slice: none
+- Human approval: Approved for Slice 8 through Slice 10
+- Active implementation slice: Slice 9, Report Document Display And Explicit
+  Markdown Copy
 
 ## Human Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: Slice 8 through Slice 10: editor-title semantic diff command
+  entry, displayed report workflow with explicit Markdown copy, and semantic
+  diff evaluation sample fixtures.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -21,7 +25,8 @@ Only clear human approval can change Status to Approved.
 current conversation`; do not copy the approval message.
 
 Reset this section back to Pending when the approved slice is complete and no
-active implementation approval remains.
+active implementation approval remains. Preserve it while approved Slice 9 and
+Slice 10 remain pending.
 
 ## Implementation Slices
 
@@ -508,6 +513,213 @@ active implementation approval remains.
   calendar/holiday semantics, day-crossing and 48-hour calculations, telemetry,
   AI advice.
 
+### Slice 8: Editor Title Command Entry
+
+- Status: Complete
+- Replanning Gap: after the initial command workflow was implemented, the
+  feature still required better command discoverability from the JP1/AJS editor
+  itself before Feature Exit.
+- Smallest Useful Slice: delivers one user value: users can start semantic diff
+  from the editor title next to the existing JP1/AJS viewer actions.
+- Scope: add the existing `ajsbutler.compareSemanticDiff` command to the
+  `editor/title` menu for JP1/AJS editors with an appropriate navigation group
+  placement, preserving the existing command id, title, icon, activation event,
+  and command behavior.
+- User / Domain Value: reduces command-palette friction without changing the
+  semantic comparison model or report content.
+- Cohesive Change Group:
+  - likely files: `package.json`
+  - likely tests: `src/test/suite/packageManifest.test.ts`
+  - related existing files: `src/test/suite/extension.test.ts`
+- Acceptance:
+  - semantic diff appears as an editor-title icon for `editorLangId == 'jp1ajs'`
+  - existing flow/table editor-title entries remain unchanged
+  - command id, icon, activation event, and command behavior remain unchanged
+  - no new VS Code API beyond the existing manifest contribution model
+- Validation:
+  - package manifest test for the semantic diff `editor/title` contribution
+  - `rtk pnpm run qlty`
+  - `rtk pnpm test`
+  - `rtk pnpm run test:web`
+  - `rtk pnpm run build`
+- Production Readiness:
+  - Failure mode: if the command cannot run, existing command error handling
+    still reports no active editor, cancellation, read failure, or parse
+    failure.
+  - JP1/AJS compatibility: no definition interpretation changes.
+  - Large or malformed input risk: unchanged from the existing command.
+  - Desktop/web impact: manifest menu contribution applies to both hosts and
+    uses the existing command path.
+  - README/docs impact: update command usage wording if the editor-title entry
+    changes discoverability documentation.
+  - CHANGELOG impact: required because a user-visible command entry point is
+    added.
+- Approval Boundary: package manifest menu contribution, focused manifest
+  tests, README/CHANGELOG wording only if needed for the new entry point.
+- Dependencies: Slice 4.
+- Risks: editor title can become crowded; place semantic diff consistently with
+  the existing JP1/AJS viewer commands.
+- Implementation Feedback:
+  - The slice boundary was appropriate: the editor-title contribution, manifest
+    test, CHANGELOG note, and traceability update could be implemented and
+    validated without changing command behavior or report output.
+- Out of Scope: changing comparison behavior, report output, report display,
+  command period input, telemetry, or dedicated visual diff UI.
+
+### Slice 9: Report Document Display And Explicit Markdown Copy
+
+- Status: Approved
+- Replanning Gap: the current command implicitly writes the generated Markdown
+  report to the clipboard and then offers save behavior, but the desired
+  workflow is to display the result in VS Code and copy Markdown only after an
+  explicit user action from that report surface.
+- Smallest Useful Slice: delivers one user workflow: review semantic diff
+  output in a VS Code-native report document, then explicitly copy the Markdown
+  from that displayed report.
+- Scope: replace implicit clipboard write and save prompt in the command with
+  a VS Code-native Markdown report display surface, using a host-safe
+  presentation adapter such as a readonly virtual Markdown document or
+  equivalent editor document surface; add a report-surface command to copy the
+  displayed Markdown to the clipboard; contribute the copy command only for the
+  semantic diff report surface; preserve existing parser, comparison, renderer,
+  and report text behavior.
+- User / Domain Value: users can inspect results before choosing to copy, and
+  the clipboard changes only through an explicit action.
+- Cohesive Change Group:
+  - likely files: `package.json`,
+    `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+    `src/bootstrap/extension/semanticDiffWiring.ts`, and a focused report
+    document/provider module under `src/presentation/vscode/commands/` or
+    `src/presentation/vscode/semantic-diff/`
+  - likely tests: `src/test/suite/semanticDiffCommand.test.ts`,
+    `src/test/suite/packageManifest.test.ts`,
+    `src/test/suite/extensionSubscriptions.test.ts`
+  - related docs: README and CHANGELOG
+- Acceptance:
+  - running semantic diff opens or reveals a VS Code report document/surface
+    containing the generated Markdown report
+  - running semantic diff does not automatically write the report to the
+    clipboard
+  - the report surface provides an explicit command/menu action to copy the
+    displayed Markdown
+  - copy action copies the exact displayed Markdown report
+  - parse/read/cancellation failures still produce understandable messages
+    without exposing definition contents
+  - desktop and web hosts do not use Node-only filesystem/process APIs for the
+    report display or copy action
+  - existing application/domain comparison and Markdown rendering logic are not
+    moved into presentation code
+- Validation:
+  - command tests for successful report display without clipboard writes
+  - command tests for explicit copy action and copy failure handling
+  - manifest tests for report-copy command contribution and context/menu guard
+  - subscription tests for registering the report provider/copy command
+  - existing parse/cancel/read-failure command tests remain passing
+  - `rtk pnpm run qlty`
+  - `rtk pnpm test`
+  - `rtk pnpm run test:web`
+  - `rtk pnpm run build`
+- Production Readiness:
+  - Failure mode: report-display failure and clipboard-copy failure produce
+    understandable messages and do not lose the generated report silently.
+  - JP1/AJS compatibility: no definition interpretation changes.
+  - Large or malformed input risk: large reports should be displayed through a
+    document/editor surface rather than custom recursive rendering; parse
+    failures remain recoverable.
+  - Desktop/web impact: use VS Code APIs compatible with `engines.vscode`
+    `^1.75.0` and avoid Node-only APIs in the command path.
+  - README/docs impact: required because the command workflow changes from
+    implicit clipboard/save to displayed report plus explicit copy.
+  - CHANGELOG impact: required because command workflow and clipboard behavior
+    change externally.
+- Approval Boundary: command/report presentation adapter, report copy command,
+  manifest contributions/context guards, command wiring, focused command and
+  manifest tests, README/CHANGELOG updates for the changed workflow.
+- Dependencies: Slice 4 and Slice 8. Slice 8 is not technically required for
+  the report display, but implementing the discoverability entry first keeps
+  command-surface manifest changes easier to review.
+- Risks:
+  - A custom webview could overreach the requested VS Code-native workflow; use
+    a text/document surface unless implementation review identifies a concrete
+    blocker.
+  - Virtual report documents need deterministic identifiers and lifecycle
+    handling so stale copy actions do not copy the wrong report.
+- Out of Scope: dedicated visual diff UI, side-by-side comparison editor,
+  persisted report history, automatic clipboard writes, save prompts,
+  schedule-period UI, telemetry, or changing Markdown report content.
+
+### Slice 10: Semantic Diff Evaluation Sample Fixtures
+
+- Status: Approved
+- Replanning Gap: the feature has focused unit tests for each semantic diff
+  behavior, but lacks reusable JP1/AJS sample definitions that exercise the
+  implemented evaluation categories through the parser/normalizer/report path.
+- Smallest Useful Slice: delivers one validation asset: a reusable before/after
+  sample pair that demonstrates the implemented semantic diff evaluations.
+- Scope: add repository sample JP1/AJS definition files for semantic diff
+  before/after comparison and a focused parser-to-report coverage test that
+  verifies the sample pair exercises the implemented evaluation categories:
+  structural add/remove, rename or move rationale, ambiguous candidates,
+  execution attribute category changes, relation changes, confirmation-required
+  condition/wait/timeout cases, unsupported or uninterpretable items, schedule
+  run changes, zero calculated runs, and uncalculated schedule elements.
+- User / Domain Value: maintainers and reviewers have a concrete JP1/AJS sample
+  pair for manual and automated semantic diff verification.
+- Cohesive Change Group:
+  - likely files: new sample files under `sample/`, such as
+    `sample/semantic_diff_before_utf8` and
+    `sample/semantic_diff_after_utf8`
+  - likely tests: `src/test/suite/semanticDiffSampleCoverage.test.ts`
+  - related existing tests: `src/test/suite/buildSemanticDiffReport.test.ts`,
+    `src/test/suite/compareSemanticDiff.test.ts`,
+    `src/test/suite/semanticDiffConditions.test.ts`,
+    `src/test/suite/semanticDiffSchedule.test.ts`
+- Acceptance:
+  - sample before/after definitions parse through the repository parser
+  - normalization succeeds without requiring parser-internal assertions in UI
+    code
+  - sample comparison plus Markdown rendering covers all implemented semantic
+    diff evaluation categories listed in this slice
+  - the sample pair is small enough for review and does not duplicate the
+    large generic samples
+  - sample coverage remains deterministic and host-neutral
+- Validation:
+  - parser-to-report sample coverage test
+  - `rtk pnpm run qlty`
+  - `rtk pnpm test`
+  - `rtk pnpm run test:web` if sample coverage touches shared bundles or
+    command behavior
+  - `rtk pnpm run build` if test or sample import paths affect production
+    bundling
+- Production Readiness:
+  - Failure mode: malformed sample definitions fail the focused sample coverage
+    test before they can become misleading fixtures.
+  - JP1/AJS compatibility: sample syntax must use existing parser-supported
+    JP1/AJS definition forms and JP1/AJS3 v13 parameter assumptions already
+    used by the feature.
+  - Large or malformed input risk: sample remains review-sized; broader stress
+    testing stays in existing or future performance fixtures.
+  - Desktop/web impact: sample coverage is test/fixture-only and does not
+    introduce host APIs.
+  - README/docs impact: update README sample-directory wording only if the
+    sample becomes a recommended manual verification fixture.
+  - CHANGELOG impact: not required for test/sample-only validation assets.
+- Approval Boundary: semantic diff sample before/after files, focused sample
+  coverage test, and SDD traceability updates for sample validation.
+- Dependencies: Slices 1 through 7. It can be implemented after Slice 8 or 9;
+  it does not depend on the report display workflow unless the approved test
+  explicitly includes command-surface verification.
+- Risks:
+  - A single sample can become too dense to understand; keep it as a focused
+    semantic-diff fixture rather than a replacement for unit-level behavior
+    tests.
+  - Some evaluation categories may require multiple jobnets or units with
+    similar fingerprints; tests should assert category coverage instead of
+    relying on fragile full-report snapshots.
+- Out of Scope: changing semantic diff algorithms, adding new evaluation
+  categories, performance stress samples, generated fixtures, or manual
+  screenshot assets.
+
 ## Cross-Slice Dependencies
 
 - Slice 1 must precede all implementation slices because it defines stable
@@ -523,6 +735,14 @@ active implementation approval remains.
   review explicitly changes the scope.
 - Slice 7 depends on Slice 2 and Slice 3; the replanned scope explicitly avoids
   command period input, so Slice 4 command changes are not part of Slice 7.
+- Slice 8 depends on Slice 4 because it contributes an additional entry point
+  for the existing semantic diff command.
+- Slice 9 depends on Slice 4 and should follow Slice 8 so command-surface
+  manifest changes stay reviewable before replacing the command result
+  workflow.
+- Slice 10 depends on Slices 1 through 7 for implemented semantic evaluation
+  coverage; it can be implemented after Slice 8 or Slice 9 because it is a
+  validation fixture slice rather than a command workflow dependency.
 
 ## Traceability
 
@@ -530,7 +750,8 @@ active implementation approval remains.
 - Reason: feature changes user-visible behavior, JP1/AJS definition-file
   interpretation and compatibility, and is split into multiple independently
   approvable slices.
-- Status: updated for the approved Slice 7 schedule comparison scope.
+- Status: updated for the approved additional Slice 8 through Slice 10 plan;
+  Slice 8 validation is recorded.
 
 ## Feature-Level Risks
 
@@ -545,6 +766,11 @@ active implementation approval remains.
 - Schedule comparison can become too broad; Slice 7 is narrowed to explicit
   directly defined jobnet schedule dates and normal start times, with broader
   calendar, cycle, day-crossing, and inherited-rule semantics deferred.
+- Report presentation can become a custom visual diff surface too early; Slice
+  9 is limited to displaying the generated Markdown and explicitly copying it.
+- A comprehensive sample can become hard to maintain; Slice 10 must remain a
+  review-sized fixture that complements focused unit tests instead of replacing
+  them.
 - Telemetry should not be added speculatively; runtime semantic-diff telemetry
   requires a separately approved slice or explicit inclusion in a user-visible
   slice, with anonymous metadata only.
@@ -553,10 +779,9 @@ active implementation approval remains.
 
 ## Use-Case Back-Propagation
 
-- `docs/requirements/use-cases/uc-compare-semantic-diff.md` already
-  carries the durable behavior contract and should be updated only when review
-  or implementation changes accepted behavior, supported subsets, or
-  limitations.
+- `docs/requirements/use-cases/uc-compare-semantic-diff.md` is updated for the
+  additional displayed-report and explicit-copy behavior. Revisit it only if
+  review changes the approved report-surface contract.
 - `docs/requirements/use-cases/uc-normalize-ajs-document.md` needs an update
   only if semantic diff introduces reusable normalized helpers or changes the
   normalized model contract.
@@ -567,11 +792,13 @@ active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: Not started
+- Definition of Done status: paused; additional Slice 8 through Slice 10 plan
+  needs review and approval before Feature Exit can resume.
 - Durable documentation updates: use case and roadmap entries exist; update
   only when implemented behavior or accepted limitations change.
 - Open risks: broad JP1/AJS schedule semantics beyond the Slice 7 supported
-  subset, web report persistence, and feature exit documentation propagation.
+  subset, report display lifecycle, sample maintainability, and feature exit
+  documentation propagation.
 
 ## Validation
 

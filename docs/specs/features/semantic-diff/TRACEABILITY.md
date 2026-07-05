@@ -186,6 +186,52 @@ qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
   passed during Slice 7 implementation. Production build still reports the
   existing webpack asset-size warnings.
 
+### Editor Title Command Entry
+
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
+- Requirement: make the semantic diff command discoverable from the JP1/AJS
+  editor title.
+- SPECS.md Section: Requirements, Acceptance Criteria
+- Implementation Slice: Slice 8, Editor Title Command Entry
+- Test File Or Validation Result:
+  `src/test/suite/packageManifest.test.ts` verifies the semantic diff
+  `editor/title` contribution, command id, icon, activation event, and
+  unchanged viewer entries. `rtk pnpm test`, `rtk pnpm run qlty`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build` passed during Slice 8
+  implementation. Production build still reports the existing webpack
+  asset-size warnings.
+
+### Report Display And Explicit Copy
+
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
+- Requirement: display the generated Markdown report in VS Code and copy it to
+  the clipboard only through an explicit report-surface action.
+- SPECS.md Section: Requirements, Architecture, Compatibility, Acceptance
+  Criteria
+- Implementation Slice: Slice 9, Report Document Display And Explicit
+  Markdown Copy
+- Test File Or Validation Plan: command tests for report display without
+  implicit clipboard writes, explicit copy action, copy/display failure
+  handling, and existing parse/cancel/read-failure paths; package manifest and
+  subscription tests for report-surface copy command contribution and
+  registration; README and CHANGELOG checks for the changed workflow; desktop,
+  web, and build validation.
+
+### Semantic Diff Evaluation Samples
+
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
+- Requirement: provide reusable JP1/AJS sample definitions that exercise the
+  implemented semantic diff evaluation categories through parser,
+  normalization, comparison, and Markdown rendering.
+- SPECS.md Section: Acceptance Criteria
+- Implementation Slice: Slice 10, Semantic Diff Evaluation Sample Fixtures
+- Test File Or Validation Plan:
+  `src/test/suite/semanticDiffSampleCoverage.test.ts` using semantic diff
+  before/after sample files under `sample/` to verify structural,
+  match-rationale, ambiguous-candidate, attribute-category,
+  confirmation-required, unsupported, schedule, zero-run, and uncalculated
+  coverage.
+
 ### Normalized Inputs
 
 - Use Case: docs/requirements/use-cases/uc-normalize-ajs-document.md
