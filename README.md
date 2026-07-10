@@ -52,8 +52,8 @@ To use this extension:
 3. Switch the editor to enable either a list-style or flow-style display.
 4. Run `JP1/AJS: Compare JP1/AJS Semantic Diff` from a JP1/AJS editor to
    compare the active definition against a selected before definition. The
-   generated Markdown report is copied to the clipboard, with an option to
-   save it.
+   generated Markdown report opens in VS Code, and the report editor provides
+   a command to copy the displayed Markdown to the clipboard.
 
 ## Development
 

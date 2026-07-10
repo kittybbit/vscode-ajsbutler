@@ -81,6 +81,14 @@
         "title": "Compare JP1/AJS Semantic Diff",
         "shortTitle": "Semantic Diff",
         "icon": "$(diff)"
+      },
+      {
+        "enablement": "resourceScheme == 'ajsbutler-semantic-diff'",
+        "command": "ajsbutler.copySemanticDiffMarkdown",
+        "category": "JP1/AJS",
+        "title": "Copy Semantic Diff Markdown",
+        "shortTitle": "Copy Markdown",
+        "icon": "$(copy)"
       }
     ],
     "menus": {
@@ -98,6 +106,11 @@
         {
           "when": "editorLangId == 'jp1ajs'",
           "command": "ajsbutler.compareSemanticDiff",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceScheme == 'ajsbutler-semantic-diff'",
+          "command": "ajsbutler.copySemanticDiffMarkdown",
           "group": "navigation"
         }
       ]

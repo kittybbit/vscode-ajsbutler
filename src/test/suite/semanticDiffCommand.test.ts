@@ -9,11 +9,9 @@ import {
 
 type SemanticDiffCommandObservations = {
   openDialogCount: number;
-  saveDialogCount: number;
   readFiles: vscode.Uri[];
-  writtenFiles: Array<{ uri: vscode.Uri; content: string }>;
+  openedReports: string[];
   clipboardWrites: string[];
-  informationMessages: Array<{ message: string; items: string[] }>;
   errorMessages: string[];
   reportInputs: BuildSemanticDiffReportInput[];
 };
@@ -21,39 +19,30 @@ type SemanticDiffCommandObservations = {
 class SemanticDiffCommandHarness {
   readonly observed: SemanticDiffCommandObservations = {
     openDialogCount: 0,
-    saveDialogCount: 0,
     readFiles: [],
-    writtenFiles: [],
+    openedReports: [],
     clipboardWrites: [],
-    informationMessages: [],
     errorMessages: [],
     reportInputs: [],
   };
 
   readonly beforeUri = vscode.Uri.parse("untitled:before.ajs");
-  readonly saveUri = vscode.Uri.parse("untitled:semantic-diff.md");
   readonly deps: SemanticDiffCommandDeps;
 
   private readonly encoder = new TextEncoder();
-  private readonly decoder = new TextDecoder("utf-8");
   private readonly beforeContent: string;
   private readonly afterContent: string;
-  private readonly informationResponses: Array<string | undefined>;
 
   constructor(
     overrides: Partial<SemanticDiffCommandDeps> & {
       beforeContent?: string;
       afterContent?: string;
-      informationResponses?: Array<string | undefined>;
       openDialogResult?: vscode.Uri[];
-      saveDialogResult?: vscode.Uri;
     } = {},
   ) {
     this.beforeContent = overrides.beforeContent ?? "unit=before,,jp1admin,;";
     this.afterContent = overrides.afterContent ?? "unit=after,,jp1admin,;";
-    this.informationResponses = [...(overrides.informationResponses ?? [])];
     const openDialogResult = overrides.openDialogResult ?? [this.beforeUri];
-    const saveDialogResult = overrides.saveDialogResult ?? this.saveUri;
 
     this.deps = {
       getActiveEditor: () =>
@@ -64,14 +53,6 @@ class SemanticDiffCommandHarness {
         this.observed.openDialogCount += 1;
         return openDialogResult;
       },
-      showSaveDialog: async () => {
-        this.observed.saveDialogCount += 1;
-        return saveDialogResult;
-      },
-      showInformationMessage: async (message, ...items) => {
-        this.observed.informationMessages.push({ message, items });
-        return this.informationResponses.shift();
-      },
       showErrorMessage: async (message) => {
         this.observed.errorMessages.push(message);
         return undefined;
@@ -80,14 +61,8 @@ class SemanticDiffCommandHarness {
         this.observed.readFiles.push(uri);
         return this.encoder.encode(this.beforeContent);
       },
-      writeFile: async (uri, content) => {
-        this.observed.writtenFiles.push({
-          uri,
-          content: this.decoder.decode(content),
-        });
-      },
-      writeClipboard: async (text) => {
-        this.observed.clipboardWrites.push(text);
+      openReport: async (report) => {
+        this.observed.openedReports.push(report);
       },
       buildSemanticDiffReport: (input) => this.buildSemanticDiffReport(input),
       ...overrides,
@@ -120,12 +95,17 @@ suite("Semantic diff command", () => {
     );
   });
 
-  test("reads selected before definition and copies generated report", async () => {
+  test("reads selected before definition and opens generated report", async () => {
     const harness = new SemanticDiffCommandHarness();
 
     const result = await executeCompareSemanticDiffCommand(harness.deps);
 
     assert.strictEqual(result.ok, true);
+    assert.deepStrictEqual(result, {
+      ok: true,
+      report: "rendered semantic diff",
+      action: "displayed",
+    });
     assert.deepStrictEqual(harness.observed.readFiles, [harness.beforeUri]);
     assert.deepStrictEqual(harness.observed.reportInputs, [
       {
@@ -133,36 +113,30 @@ suite("Semantic diff command", () => {
         afterContent: "unit=after,,jp1admin,;",
       },
     ]);
-    assert.deepStrictEqual(harness.observed.clipboardWrites, [
+    assert.deepStrictEqual(harness.observed.openedReports, [
       "rendered semantic diff",
     ]);
-    assert.deepStrictEqual(harness.observed.informationMessages, [
-      {
-        message: "Semantic diff report copied to clipboard.",
-        items: ["Save"],
-      },
-    ]);
-    assert.deepStrictEqual(harness.observed.writtenFiles, []);
+    assert.deepStrictEqual(harness.observed.clipboardWrites, []);
   });
 
-  test("saves copied report when requested", async () => {
+  test("reports display failure without writing clipboard", async () => {
     const harness = new SemanticDiffCommandHarness({
-      informationResponses: ["Save"],
+      openReport: async () => {
+        throw new Error("display failed");
+      },
     });
 
     const result = await executeCompareSemanticDiffCommand(harness.deps);
 
-    assert.strictEqual(result.ok, true);
-    assert.deepStrictEqual(harness.observed.writtenFiles, [
-      { uri: harness.saveUri, content: "rendered semantic diff" },
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected display failure.");
+    }
+    assert.strictEqual(result.error.code, "display-failed");
+    assert.deepStrictEqual(harness.observed.clipboardWrites, []);
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Semantic diff report could not be displayed.",
     ]);
-    assert.deepStrictEqual(
-      harness.observed.informationMessages.map(({ message }) => message),
-      [
-        "Semantic diff report copied to clipboard.",
-        "Semantic diff report saved.",
-      ],
-    );
   });
 
   test("returns cancelled when the before definition picker is cancelled", async () => {

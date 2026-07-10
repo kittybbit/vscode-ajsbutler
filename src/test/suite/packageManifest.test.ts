@@ -59,6 +59,10 @@ suite("Package manifest", () => {
       byCommand.get("ajsbutler.compareSemanticDiff")?.icon,
       "$(diff)",
     );
+    assert.strictEqual(
+      byCommand.get("ajsbutler.copySemanticDiffMarkdown")?.icon,
+      "$(copy)",
+    );
     assert.ok(
       manifest.activationEvents.includes(
         "onCommand:ajsbutler.compareSemanticDiff",
@@ -92,6 +96,24 @@ suite("Package manifest", () => {
         {
           when: "editorLangId == 'jp1ajs'",
           command: "ajsbutler.compareSemanticDiff",
+          group: "navigation",
+        },
+      ],
+    );
+  });
+
+  test("contributes Markdown copy command only for semantic diff reports", () => {
+    const editorTitleItems =
+      readPackageJson().contributes.menus["editor/title"];
+
+    assert.deepStrictEqual(
+      editorTitleItems.filter(
+        (item) => item.command === "ajsbutler.copySemanticDiffMarkdown",
+      ),
+      [
+        {
+          when: "resourceScheme == 'ajsbutler-semantic-diff'",
+          command: "ajsbutler.copySemanticDiffMarkdown",
           group: "navigation",
         },
       ],

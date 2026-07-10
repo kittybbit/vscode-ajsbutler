@@ -210,12 +210,18 @@ qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
   Criteria
 - Implementation Slice: Slice 9, Report Document Display And Explicit
   Markdown Copy
-- Test File Or Validation Plan: command tests for report display without
-  implicit clipboard writes, explicit copy action, copy/display failure
-  handling, and existing parse/cancel/read-failure paths; package manifest and
-  subscription tests for report-surface copy command contribution and
-  registration; README and CHANGELOG checks for the changed workflow; desktop,
-  web, and build validation.
+- Test File Or Validation Result:
+  `src/test/suite/semanticDiffCommand.test.ts` verifies report display without
+  implicit clipboard writes and existing parse/cancel/read-failure paths.
+  `src/test/suite/semanticDiffReportDocument.test.ts` verifies explicit copy,
+  copy failure, active/explicit report URI handling, and displayed report
+  preservation. `src/test/suite/packageManifest.test.ts` and
+  `src/test/suite/extensionSubscriptions.test.ts` verify the report-surface
+  copy command contribution and registration. README and CHANGELOG were
+  updated for the changed workflow. `rtk pnpm test`, `rtk pnpm run qlty`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build` passed during Slice 9
+  implementation. Production build still reports the existing webpack
+  asset-size warnings.
 
 ### Semantic Diff Evaluation Samples
 

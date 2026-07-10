@@ -3,7 +3,7 @@ import type { BuildSemanticDiffReport } from "../../../application/semantic-diff
 
 export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
 
-export type SemanticDiffReportAction = "copied" | "saved" | "cancelled";
+export type SemanticDiffReportAction = "displayed";
 
 export type SemanticDiffCommandResult =
   | {
@@ -19,8 +19,7 @@ export type SemanticDiffCommandResult =
           | "cancelled"
           | "read-failed"
           | "parse-failed"
-          | "copy-failed"
-          | "save-failed";
+          | "display-failed";
         message: string;
       };
     };
@@ -30,23 +29,13 @@ export type SemanticDiffCommandDeps = {
   showOpenDialog: (
     options: vscode.OpenDialogOptions,
   ) => Thenable<vscode.Uri[] | undefined>;
-  showSaveDialog: (
-    options: vscode.SaveDialogOptions,
-  ) => Thenable<vscode.Uri | undefined>;
-  showInformationMessage: (
-    message: string,
-    ...items: string[]
-  ) => Thenable<string | undefined>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   readFile: (uri: vscode.Uri) => Thenable<Uint8Array>;
-  writeFile: (uri: vscode.Uri, content: Uint8Array) => Thenable<void>;
-  writeClipboard: (text: string) => Thenable<void>;
+  openReport: (report: string) => Thenable<void>;
   buildSemanticDiffReport: BuildSemanticDiffReport;
 };
 
 const textDecoder = new TextDecoder("utf-8");
-const textEncoder = new TextEncoder();
-const SAVE_ACTION = "Save";
 
 const commandError = (
   code: Extract<SemanticDiffCommandResult, { ok: false }>["error"]["code"],
@@ -91,37 +80,6 @@ const readBeforeDefinition = async (
   }
 };
 
-const saveReportIfRequested = async (
-  deps: SemanticDiffCommandDeps,
-  report: string,
-): Promise<SemanticDiffCommandResult> => {
-  const action = await deps.showInformationMessage(
-    "Semantic diff report copied to clipboard.",
-    SAVE_ACTION,
-  );
-  if (action !== SAVE_ACTION) {
-    return { ok: true, report, action: "copied" };
-  }
-
-  const saveUri = await deps.showSaveDialog({
-    saveLabel: "Save Semantic Diff Report",
-    filters: { Markdown: ["md"] },
-  });
-  if (!saveUri) {
-    return { ok: true, report, action: "cancelled" };
-  }
-
-  try {
-    await deps.writeFile(saveUri, textEncoder.encode(report));
-    await deps.showInformationMessage("Semantic diff report saved.");
-    return { ok: true, report, action: "saved" };
-  } catch {
-    const message = "Semantic diff report could not be saved.";
-    await safeShowErrorMessage(deps, message);
-    return commandError("save-failed", message);
-  }
-};
-
 export const executeCompareSemanticDiffCommand = async (
   deps: SemanticDiffCommandDeps,
 ): Promise<SemanticDiffCommandResult> => {
@@ -155,12 +113,12 @@ export const executeCompareSemanticDiffCommand = async (
   const report = reportResult.report;
 
   try {
-    await deps.writeClipboard(report);
+    await deps.openReport(report);
   } catch {
-    const message = "Semantic diff report could not be copied.";
+    const message = "Semantic diff report could not be displayed.";
     await safeShowErrorMessage(deps, message);
-    return commandError("copy-failed", message);
+    return commandError("display-failed", message);
   }
 
-  return saveReportIfRequested(deps, report);
+  return { ok: true, report, action: "displayed" };
 };
