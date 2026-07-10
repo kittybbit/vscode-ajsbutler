@@ -1,0 +1,103 @@
+unit=semantic_diff_sample,,jp1admin,;
+{
+        ty=g;
+        cm="semantic diff coverage before";
+        el=main,n,+0+0;
+        el=ambiguous,n,+0+480;
+        el=schedule,n,+0+960;
+        unit=main,,jp1admin,;
+        {
+                ty=n;
+                cm="main before";
+                sz=12x8;
+                el=stable,j,+240+144;
+                el=rename_old,j,+560+144;
+                el=removed_job,j,+880+144;
+                el=source,j,+240+336;
+                el=target,j,+560+336;
+                el=wait_release_a,j,+240+528;
+                el=event_wait,evwj,+560+528;
+                el=file_watch,flwj,+880+528;
+                ar=(f=source,t=target,con);
+                ar=(f=stable,t=target,seq);
+                unit=stable,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo before";
+                        prm="before";
+                        eu=before_user;
+                        evsid=before_event;
+                        jd=cod;
+                        wth=10;
+                        tho=20;
+                        ab=stop;
+                }
+                unit=rename_old,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo rename";
+                        prm="same";
+                }
+                unit=removed_job,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo removed";
+                        prm="removed";
+                }
+                unit=source,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo source";
+                }
+                unit=target,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo target";
+                }
+                unit=wait_release_a,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo release";
+                }
+                unit=event_wait,,jp1admin,;
+                {
+                        ty=evwj;
+                        eun=wait_release_a;
+                        evwid=00000001:00000002;
+                        etm=30;
+                }
+                unit=file_watch,,jp1admin,;
+                {
+                        ty=flwj;
+                        flwf="/var/before.dat";
+                        flwc=c;
+                        fd=20;
+                }
+        }
+        unit=ambiguous,,jp1admin,;
+        {
+                ty=n;
+                cm="ambiguous before";
+                sz=8x4;
+                el=amb_before_a,j,+240+144;
+                el=amb_before_b,j,+560+144;
+                unit=amb_before_a,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo ambiguous";
+                }
+                unit=amb_before_b,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo ambiguous";
+                }
+        }
+        unit=schedule,,jp1admin,;
+        {
+                ty=n;
+                cm="schedule before";
+                sz=4x2;
+                sd=2026/04/10;
+                st=09:00;
+        }
+}

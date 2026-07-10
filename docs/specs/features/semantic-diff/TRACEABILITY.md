@@ -231,12 +231,16 @@ qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
   normalization, comparison, and Markdown rendering.
 - SPECS.md Section: Acceptance Criteria
 - Implementation Slice: Slice 10, Semantic Diff Evaluation Sample Fixtures
-- Test File Or Validation Plan:
-  `src/test/suite/semanticDiffSampleCoverage.test.ts` using semantic diff
-  before/after sample files under `sample/` to verify structural,
-  match-rationale, ambiguous-candidate, attribute-category,
-  confirmation-required, unsupported, schedule, zero-run, and uncalculated
-  coverage.
+- Test File Or Validation Result:
+  `src/test/suite/semanticDiffSampleCoverage.test.ts` uses
+  `sample/semantic_diff_before_utf8` and `sample/semantic_diff_after_utf8` to
+  verify parser success, normalization, comparison, and Markdown rendering for
+  structural add/remove, rename rationale, ambiguous candidates, relation
+  changes, all implemented attribute categories, confirmation-required
+  condition/wait/timeout items, uninterpretable items, schedule run changes,
+  zero calculated runs, and uncalculated schedule elements. `rtk pnpm test`,
+  `rtk pnpm run qlty`, and `rtk pnpm run lint:md` passed during Slice 10
+  implementation.
 
 ### Normalized Inputs
 
