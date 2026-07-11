@@ -514,6 +514,25 @@ When syncing, preserve decision context instead of accumulating entries:
 This section is the Single Source of Truth for SDD document responsibilities.
 Other repository docs should link here instead of repeating these details.
 
+## Feature Context And Traceability
+
+Do not create a per-feature `CONTEXT.md`. Keep only the actionable context at
+the top of the existing feature documents:
+
+- `SPECS.md` begins with the feature purpose and origin, then records only the
+  durable requirements, boundaries, compatibility, acceptance criteria, and
+  non-goals needed to decide the feature.
+- `TASKS.md` begins with an `Agent Brief` of roughly ten lines: purpose,
+  approved or active slice, prohibitions, and the smallest reading and
+  validation set. It points to this SSOT rather than restating it.
+- `TRACEABILITY.md`, when required, is a compact table mapping use case or
+  requirement, `SPECS.md` section, slice, and test or validation plan. Keep
+  feature-specific design notes in `SPECS.md`, not in traceability.
+
+Do not add task history, broad repository summaries, transcripts, or material
+that does not affect the next decision, approval, risk, validation, or feature
+exit.
+
 - `vision.md`: product purpose and values.
 - `glossary.md`: shared terms.
 - `context-map.md`: boundaries and external systems.

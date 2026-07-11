@@ -1,5 +1,18 @@
 # Feature Tasks: {{Feature Name}}
 
+## Agent Brief
+
+- Purpose: {{one-sentence outcome}}
+- Approved or active slice: {{slice and status}}
+- Do not: {{scope prohibition}}
+- Do not: {{scope prohibition}}
+- Read first: `SPECS.md`, this file, and {{smallest required file or "none"}}.
+- Read `TRACEABILITY.md` only when required for the active slice.
+- Validate: {{smallest validation set}}.
+- Approval policy: see `docs/specs/README.md`.
+- Document roles: see `docs/specs/README.md`.
+- Next decision: {{approval, implementation, replan, or feature exit}}.
+
 ## Sync Rule
 
 - Update this file in the same commit whenever a task is completed, re-scoped,

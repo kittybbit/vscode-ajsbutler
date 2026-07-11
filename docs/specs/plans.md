@@ -41,6 +41,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Active Feature Specs
 
+- `docs/specs/features/sdd-efficient-quality-governance/`: transient docs-only
+  feature for concise SDD context and proportionate quality-evidence gates.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

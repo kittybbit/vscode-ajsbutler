@@ -1,26 +1,9 @@
 # Requirements Traceability: {{Feature Name}}
 
-## Purpose
+<!-- markdownlint-disable MD013 -->
 
-Map use cases or requirements to feature requirements, implementation slices,
-and tests or validation plans when that mapping is required by the SDD
-workflow.
+| Use case / requirement      | SPECS.md section | Implementation slice | Test or validation     |
+| --------------------------- | ---------------- | -------------------- | ---------------------- |
+| {{use case or requirement}} | {{section}}      | {{slice}}            | {{test-or-validation}} |
 
-## Mapping
-
-- UC: UC-{{ID}}
-- Scenario: SCN-{{ID}}-1
-- Requirement: FR-{{ID}}
-- Spec: {{section}}
-- SPECS section: {{section}}
-- Implementation Slice: {{slice}}
-- Test file or validation plan: {{test-or-validation}}
-
-## Coverage
-
-- Covered: {{covered item}}
-- Gaps: {{gap or "None"}}
-
-## Notes
-
-- {{durable note}}
+<!-- markdownlint-enable MD013 -->
