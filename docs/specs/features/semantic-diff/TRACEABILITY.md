@@ -291,11 +291,27 @@ qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
 - SPECS.md Section: Requirements, Architecture, Acceptance Criteria
 - Implementation Slice: Slice 12, Localized Report Renderer Complexity
   Refactoring
-- Test File Or Validation Plan: exact-string renderer tests for English,
-  `ja`, `ja-JP`, and unsupported-language fallback; `rtk qlty metrics` and
-  `rtk qlty smells` must show the current renderer-local complexity findings
-  are removed or reduced; full qlty, desktop, web, and production-build
-  validation.
+- Test File Or Validation Plan: `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  must use the same no-change and representative full-result inputs for English
+  default, `ja`, `ja-JP`, and unsupported-language fallback such as `fr`, with
+  exact-string assertions for headings, ordering, escaping, structural and
+  attribute changes, rationale, confirmation-required items, schedule runs,
+  targets, unsupported items, limitations, raw JP1/AJS values, and
+  parser-provided messages. `rtk qlty metrics
+src/application/semantic-diff/renderSemanticDiffMarkdown.ts` must record the
+  baseline complexity 112. `rtk qlty smells
+src/application/semantic-diff/renderSemanticDiffMarkdown.ts` must report
+  neither `High total complexity` nor `Function with high complexity` for the
+  current renderer-local localization, target, confirmation-required,
+  schedule-run, summary, or pluralization helpers. Run full qlty, desktop,
+  web, and production-build validation.
+- Validation Result: `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  verifies exact no-change output for English, `ja`, `ja-JP`, and `fr`
+  fallback, plus representative structural, attribute, confirmation-required,
+  unsupported, limitation, and raw parser-message output language behavior.
+  Renderer complexity decreased from 112 to 13; scoped Qlty smells report no
+  findings. `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build` passed. Production asset-size warnings are unchanged.
 
 ### Normalized Inputs
 

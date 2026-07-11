@@ -54,7 +54,8 @@ const changeSet = (
 
 suite("Render Semantic Diff Markdown", () => {
   test("renders deterministic no-change report", () => {
-    const result = renderSemanticDiffMarkdown(changeSet());
+    const input = changeSet();
+    const result = renderSemanticDiffMarkdown(input);
 
     assert.strictEqual(
       result,
@@ -90,6 +91,44 @@ suite("Render Semantic Diff Markdown", () => {
 
 - None`,
     );
+
+    const japanese = renderSemanticDiffMarkdown(input, "ja");
+    assert.strictEqual(
+      japanese,
+      `# 意味差分レポート
+
+## 概要
+
+- 変更前スコープ: /root
+- 変更後スコープ: /root
+- 意味上の変更: 0件
+- 確認が必要な項目: 0件
+- 未対応項目: 0件
+- 制限事項: 0件
+- 結果: 意味上の変更は検出されませんでした。
+
+## 構造変更
+
+- なし
+
+## 属性変更
+
+- なし
+
+## 確認が必要
+
+- なし
+
+## 未対応項目
+
+- なし
+
+## 制限事項
+
+- なし`,
+    );
+    assert.strictEqual(renderSemanticDiffMarkdown(input, "ja-JP"), japanese);
+    assert.strictEqual(renderSemanticDiffMarkdown(input, "fr"), result);
   });
 
   test("renders Japanese headings for ja and regional Japanese language tags", () => {
@@ -178,77 +217,75 @@ suite("Render Semantic Diff Markdown", () => {
       category: "execution-environment",
     };
 
-    const result = renderSemanticDiffMarkdown(
-      changeSet({
-        changes: [
-          {
-            id: "unit:renamed:/root/jobnet/job-a:/root/jobnet/job-b",
-            kind: "renamed",
-            elementKind: "unit",
-            confirmationLevel: "confirmed",
-            before: { kind: "unit", unit: beforeJob },
-            after: { kind: "unit", unit: afterJob },
-            summary: "job-a renamed to job-b",
-            rationale: "one-to-one identity fingerprint match",
+    const input = changeSet({
+      changes: [
+        {
+          id: "unit:renamed:/root/jobnet/job-a:/root/jobnet/job-b",
+          kind: "renamed",
+          elementKind: "unit",
+          confirmationLevel: "confirmed",
+          before: { kind: "unit", unit: beforeJob },
+          after: { kind: "unit", unit: afterJob },
+          summary: "job-a renamed to job-b",
+          rationale: "one-to-one identity fingerprint match",
+        },
+        {
+          id: "unit:changed:/root/jobnet/job-x:/root/jobnet/job-y",
+          kind: "changed",
+          elementKind: "unit",
+          confirmationLevel: "candidate",
+          before: { kind: "unit", unit: beforeCandidate },
+          after: { kind: "unit", unit: afterCandidate },
+          summary: "job-x has ambiguous rename or move candidates",
+          rationale: "identity fingerprint matched 2 before and 2 after units",
+        },
+        {
+          id: "attribute:eu:/root/jobnet/job-a:/root/jobnet/job-b",
+          kind: "changed",
+          elementKind: "attribute",
+          confirmationLevel: "confirmed",
+          before: {
+            kind: "attribute",
+            unit: beforeJob,
+            parameterKey: "eu",
+            category: "execution-environment",
           },
-          {
-            id: "unit:changed:/root/jobnet/job-x:/root/jobnet/job-y",
-            kind: "changed",
-            elementKind: "unit",
-            confirmationLevel: "candidate",
-            before: { kind: "unit", unit: beforeCandidate },
-            after: { kind: "unit", unit: afterCandidate },
-            summary: "job-x has ambiguous rename or move candidates",
-            rationale:
-              "identity fingerprint matched 2 before and 2 after units",
-          },
-          {
-            id: "attribute:eu:/root/jobnet/job-a:/root/jobnet/job-b",
-            kind: "changed",
-            elementKind: "attribute",
-            confirmationLevel: "confirmed",
-            before: {
-              kind: "attribute",
-              unit: beforeJob,
-              parameterKey: "eu",
-              category: "execution-environment",
-            },
-            after: afterAttribute,
-            attributeCategory: "execution-environment",
-            summary: "job-a eu changed",
-            rationale: "exact identity match",
-          },
-        ],
-        confirmationRequired: [
-          {
-            id: "confirm:start:/root/jobnet/job-b",
-            target: { kind: "unit", unit: afterJob },
-            changeContent: "start condition changed",
-            rationale: "previous branch path may no longer be available",
-            relatedTargets: [{ kind: "unit", unit: afterTail }],
-            constraints: ["runtime history is not verified"],
-          },
-        ],
-        unsupportedItems: [
-          {
-            id: "unsupported:condition:/root/jobnet/job-b",
-            kind: "uninterpretable",
-            side: "after",
-            target: afterAttribute,
-            message: "condition expression is not supported",
-          },
-        ],
-        limitations: [
-          {
-            code: "missing_relation_target",
-            kind: "normalization",
-            side: "before",
-            message: "relation target was not found",
-            unitPath: "/root/jobnet/job-a",
-          },
-        ],
-      }),
-    );
+          after: afterAttribute,
+          attributeCategory: "execution-environment",
+          summary: "job-a eu changed",
+          rationale: "exact identity match",
+        },
+      ],
+      confirmationRequired: [
+        {
+          id: "confirm:start:/root/jobnet/job-b",
+          target: { kind: "unit", unit: afterJob },
+          changeContent: "start condition changed",
+          rationale: "previous branch path may no longer be available",
+          relatedTargets: [{ kind: "unit", unit: afterTail }],
+          constraints: ["runtime history is not verified"],
+        },
+      ],
+      unsupportedItems: [
+        {
+          id: "unsupported:condition:/root/jobnet/job-b",
+          kind: "uninterpretable",
+          side: "after",
+          target: afterAttribute,
+          message: "condition expression is not supported",
+        },
+      ],
+      limitations: [
+        {
+          code: "missing_relation_target",
+          kind: "normalization",
+          side: "before",
+          message: "relation target was not found",
+          unitPath: "/root/jobnet/job-a",
+        },
+      ],
+    });
+    const result = renderSemanticDiffMarkdown(input);
 
     assert.strictEqual(
       result,
@@ -301,6 +338,16 @@ suite("Render Semantic Diff Markdown", () => {
 
 - [normalization:missing_relation_target] before /root/jobnet/job-a relation target was not found`,
     );
+    assert.strictEqual(renderSemanticDiffMarkdown(input, "fr"), result);
+    assert.strictEqual(
+      renderSemanticDiffMarkdown(input, "ja-JP"),
+      renderSemanticDiffMarkdown(input, "ja"),
+    );
+    const japanese = renderSemanticDiffMarkdown(input, "ja");
+    assert.ok(japanese.includes("## 構造変更"));
+    assert.ok(japanese.includes("## 確認が必要"));
+    assert.ok(japanese.includes("### 実行環境"));
+    assert.ok(japanese.includes("relation target was not found"));
   });
 
   test("renders schedule comparison period and run changes when present", () => {

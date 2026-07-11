@@ -2,19 +2,20 @@
 
 ## Plan Status
 
-- Status: Replan Required
-- Planning scope: replanned to add a bounded renderer-complexity refactoring
-  slice after Qlty metrics and smells identified localization-specific
-  complexity in Slice 11.
-- Review status: Review Needed
+- Status: Complete
+- Planning scope: replanned Slice 12 after plan review to add measurable
+  renderer-complexity exit criteria and exact-output regression coverage while
+  preserving the bounded, behavior-preserving renderer refactoring scope.
+- Review status: Reviewed
 - Human approval: Pending
-- Active implementation slice: none; Slice 12 requires review and approval.
+- Active implementation slice: none; Feature Exit Review is the next action.
 
 ## Human Approval
 
 - Status: Pending
 - Approved at: none
-- Approved scope: none; approval is required for the proposed Slice 12.
+- Approved scope: none; Slice 12 is complete. Feature closure requires a
+  separate Feature Exit Review and human approval.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -850,12 +851,13 @@ active implementation approval remains.
 
 ### Slice 12: Localized Report Renderer Complexity Refactoring
 
-- Status: Proposed
+- Status: Complete
 - Replanning Gap: `rtk qlty metrics` reports total complexity 112 for
   `renderSemanticDiffMarkdown.ts`; `rtk qlty smells` reports high complexity
   for localized change summaries, confirmation-required rendering, schedule
-  run rendering, and target descriptions. These branches were introduced or
-  expanded to satisfy Slice 11 localization requirements.
+  run rendering, target descriptions, and renderer-local helper branches.
+  The previous plan did not define a measurable Qlty exit condition or
+  byte-for-byte regression fixtures for every supported report language.
 - Smallest Useful Slice: preserve one report-rendering responsibility while
   extracting localized formatting decisions into focused, host-neutral helper
   functions or modules.
@@ -876,17 +878,28 @@ active implementation approval remains.
     `src/resource/i18n/message_{en,ja}.ts` only if the helper boundary needs
     typed message-key access
 - Acceptance:
-  - Qlty no longer reports the current high-complexity findings for localized
-    summary, confirmation-required, schedule-run, and target rendering helpers
-  - English default, `ja`, regional `ja-JP`, and unsupported-language fallback
-    produce byte-for-byte unchanged report output for existing fixtures
+  - `rtk qlty smells src/application/semantic-diff/renderSemanticDiffMarkdown.ts`
+    reports neither `High total complexity` nor `Function with high complexity`
+    for the current renderer-local localization, target, confirmation-required,
+    schedule-run, summary, or pluralization helpers.
+  - Exact-string regression fixtures prove byte-for-byte unchanged Markdown for
+    English default, `ja`, regional `ja-JP`, and unsupported-language fallback
+    such as `fr`, covering both no-change output and a representative result
+    containing structural and attribute changes, matching rationale,
+    confirmation-required items, schedule runs, targets, unsupported items,
+    and limitations.
   - semantic identifiers, paths, parameter keys, raw JP1/AJS values, parser
     messages, comparison decisions, and report document behavior remain
     unchanged
 - Validation:
-  - focused exact-string renderer tests before and after extraction
-  - `rtk qlty metrics` and `rtk qlty smells` scoped to confirm the stated
-    findings improve without unrelated refactoring
+  - add focused exact-string renderer tests that use the same change-set inputs
+    for English default, `ja`, `ja-JP`, and `fr`; each expected string must
+    preserve ordering, escaping, raw JP1/AJS values, and parser-provided
+    messages
+  - run `rtk qlty metrics src/application/semantic-diff/renderSemanticDiffMarkdown.ts`
+    and `rtk qlty smells src/application/semantic-diff/renderSemanticDiffMarkdown.ts`;
+    record the baseline (complexity 112) and confirm the stated smell exit
+    conditions without unrelated refactoring
   - `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
     `rtk pnpm run build`
 - Production Readiness:
@@ -895,7 +908,8 @@ active implementation approval remains.
   - JP1/AJS compatibility: no parsing, normalization, or comparison meaning
     changes.
   - Large or malformed input risk: helpers must make one formatting pass and
-    avoid copying whole change sets.
+    avoid copying whole change sets; representative exact-output fixtures must
+    include optional/missing targets and parser limitation text.
   - Desktop/web impact: host-neutral application code only; command behavior
     remains unchanged on both hosts.
   - README/docs impact: no user-facing behavior change; no README update.
