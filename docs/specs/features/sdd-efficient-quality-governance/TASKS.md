@@ -25,7 +25,7 @@
   validation, review timing, template, and lightweight-check policy.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 5
+- Active implementation slice: none; Feature Exit review required
 
 ## Human Approval
 
@@ -141,7 +141,7 @@
 
 ### Slice 5: Document lightweight SDD checks
 
-- Status: Approved
+- Status: Complete
 - Scope: add documented `rtk` checks for Agent Brief presence and `CONTEXT.md`
   absence; run docs-only validation.
 - User / Domain Value: documentation-structure drift is caught cheaply before

@@ -572,6 +572,20 @@ Do not add task history, broad repository summaries, transcripts, or material
 that does not affect the next decision, approval, risk, validation, or feature
 exit.
 
+## Lightweight Feature Structure Check
+
+Before reviewing a docs-only SDD change, run these `rtk` checks:
+
+```bash
+rtk rg "^## Agent Brief" docs/specs/features --glob "TASKS.md"
+rtk rg --files docs/specs/features --glob "CONTEXT.md"
+```
+
+The first command should report one Agent Brief for every feature `TASKS.md`.
+The second should produce no file paths and may return a no-match exit status
+when no `CONTEXT.md` exists; that is the expected result. This is a local drift
+check, not a CI gate or a replacement for required docs-only validation.
+
 - `vision.md`: product purpose and values.
 - `glossary.md`: shared terms.
 - `context-map.md`: boundaries and external systems.
