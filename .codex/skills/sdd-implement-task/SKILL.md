@@ -12,17 +12,18 @@ slice from feature `TASKS.md`. Do not plan new slices. Stop and return to
 `sdd-plan-task` when the approved plan or approval boundary is no longer
 sufficient.
 
-## Preconditions
+## Minimum Context
 
-Read these first:
+Read first:
 
-1. `AGENTS.md`
-2. `package.json`
-3. `docs/specs/README.md`
-4. `docs/specs/plans.md`
-5. the relevant feature `SPECS.md`
-6. the relevant feature `TASKS.md`
-7. the relevant use-case files under `docs/requirements/use-cases/`
+1. `AGENTS.md`, `package.json`, and `docs/specs/README.md`
+2. `docs/specs/plans.md` and the active feature's `SPECS.md` and `TASKS.md`
+
+Read only when needed:
+
+- use cases that define changed observable behavior
+- `TRACEABILITY.md` when the feature requires it
+- concrete symbols, tests, hosts, or adapters affected by the approved slice
 
 Implementation may start only when feature `TASKS.md` records:
 
@@ -70,6 +71,10 @@ from existing problems:
 - known risks from `TASKS.md`, `SPECS.md`, and related use cases
 - current quality issues in the touched area when visible from existing
   diagnostics, qlty output, tests, or code inspection
+
+For a source-code slice, identify whether new smell evidence or metric movement
+is relevant to the changed responsibility. Do not turn metric-only movement
+into an unplanned refactor.
 
 Do not expand scope to fix baseline issues unless they are required by the
 approved slice.

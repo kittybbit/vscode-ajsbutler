@@ -6,8 +6,8 @@
 | -------------------------------- | ---------------- | -------------------- | -------------------------------------- |
 | SDD SSOT and no `CONTEXT.md`     | Requirements 1–2 | Slice 1              | Passed: lint; template structure check |
 | Table-first traceability         | Requirement 3    | Slice 1              | Passed: lint; template review          |
-| Phase-specific context           | Requirement 4    | Slice 2              | Markdown lint; SSOT comparison         |
-| Smell and metric evidence policy | Requirement 5    | Slice 2              | Markdown lint; command review          |
+| Phase-specific context           | Requirement 4    | Slice 2              | Passed: lint; SSOT comparison          |
+| Smell and metric evidence policy | Requirement 5    | Slice 2              | Passed: lint; command review           |
 | Risk-based validation ladder     | Requirement 6    | Slice 3              | Markdown lint; workflow trace          |
 | Integrated implementation review | Requirement 7    | Slice 3              | Markdown lint; workflow trace          |
 | Bounded subagent delegation      | Requirement 8    | Slice 4              | Markdown lint; workflow trace          |

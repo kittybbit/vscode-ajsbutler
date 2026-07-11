@@ -12,18 +12,22 @@ the existing implementation gate intact. Use this skill only for feature
 intake and documentation setup; hand off feature implementation planning to
 `sdd-plan-task` and approved implementation slices to `sdd-implement-task`.
 
-## Inputs
+## Minimum Context
 
-Read these first:
+Read first:
 
 1. `AGENTS.md`
 2. `docs/specs/README.md`
-3. `docs/specs/plans.md`
-4. `docs/specs/roadmap.md`
-5. `docs/specs/features/_templates/SPECS.template.md`
-6. `docs/specs/features/_templates/TASKS.template.md`
-7. related `docs/requirements/use-cases/` files when the proposed feature
-   changes observable behavior
+3. `docs/specs/plans.md` and `docs/specs/roadmap.md`
+4. `docs/specs/features/_templates/SPECS.template.md` and `TASKS.template.md`
+
+Read only when needed:
+
+- related `docs/requirements/use-cases/` files for observable behavior changes
+- existing feature folders to decide overlap or duplicate scope
+
+Use `docs/specs/README.md` for document roles and approval policy; do not copy
+those rules into the new feature.
 
 Inspect existing feature folders under `docs/specs/features/` to avoid
 duplicate or overlapping feature entries.

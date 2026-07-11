@@ -25,7 +25,7 @@
   validation, review timing, template, and lightweight-check policy.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 2
+- Active implementation slice: Slice 3
 
 ## Human Approval
 
@@ -59,7 +59,7 @@
 
 ### Slice 2: Add phase-specific context and quality evidence
 
-- Status: Approved
+- Status: Complete
 - Scope: update SDD skills and the active feature's `TASKS.md` to use compact
   briefs, phase-specific reading sets, and proportionate Qlty evidence.
 - User / Domain Value: agents avoid broad reading while making smell and metric
