@@ -240,6 +240,23 @@ necessary, stop and return to investigation and re-approval.
 When Codex orchestrates work across agents, Codex owns consistency of the SDD
 documents, approval evidence, scope tracking, and validation record.
 
+## Bounded Subagent Delegation
+
+Use a subagent only when an independent investigation, review, or explicitly
+approved mechanical task materially reduces uncertainty or elapsed time. Do not
+delegate a local task whose handoff would cost more context than it saves.
+
+Before delegating, give a concise brief with the question, target files or
+symbols, constraints, no-change rule unless mechanical editing is explicitly
+approved, and a short evidence-based output format. Ask for findings, risks,
+unknowns, and a recommended next action—not a decision or a transcript.
+
+The coordinating agent alone owns feature selection, SDD artifact updates,
+approval evidence, scope and design decisions, integration, validation records,
+and final user communication. Do not delegate human approval, feature exit,
+scope expansion, or final validation. Avoid overlapping file ownership and
+broad repository exploration; consolidate delegated findings before acting.
+
 ## Implementation Change Gate
 
 Before editing runtime code, tests, generated artifacts, or configuration:

@@ -237,3 +237,5 @@ need focused validation.
   the top.
 - Prefer `rtk` for file inspection, search, git, package scripts, and
   validation.
+- Apply `docs/specs/README.md` `Bounded Subagent Delegation` when a focused
+  overlap investigation is materially useful.

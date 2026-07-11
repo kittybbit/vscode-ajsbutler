@@ -25,7 +25,7 @@
   validation, review timing, template, and lightweight-check policy.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 4
+- Active implementation slice: Slice 5
 
 ## Human Approval
 
@@ -115,7 +115,7 @@
 
 ### Slice 4: Define bounded subagent delegation
 
-- Status: Approved
+- Status: Complete
 - Scope: document when independent investigation, review, or approved
   mechanical work may use a subagent, its concise input/output contract, and
   work retained by the coordinating agent.

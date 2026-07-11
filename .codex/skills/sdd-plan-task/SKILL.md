@@ -434,3 +434,5 @@ implementation.
 - Run docs-only validation through `rtk` before finishing; use
   `rtk pnpm run qlty`, and add `rtk pnpm run lint:md` when markdown scope
   benefits from it.
+- Apply `docs/specs/README.md` `Bounded Subagent Delegation` only to focused,
+  independent impact investigation or plan evidence.

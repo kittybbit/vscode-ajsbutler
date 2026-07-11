@@ -10,7 +10,7 @@
 | Smell and metric evidence policy | Requirement 5    | Slice 2              | Passed: lint; command review           |
 | Risk-based validation ladder     | Requirement 6    | Slice 3              | Passed: lint; workflow trace           |
 | Integrated implementation review | Requirement 7    | Slice 3              | Passed: lint; workflow trace           |
-| Bounded subagent delegation      | Requirement 8    | Slice 4              | Markdown lint; workflow trace          |
+| Bounded subagent delegation      | Requirement 8    | Slice 4              | Passed: lint; workflow trace           |
 | Lightweight drift detection      | Requirement 9    | Slice 5              | Structure check; docs-only validation  |
 
 <!-- markdownlint-enable MD013 -->

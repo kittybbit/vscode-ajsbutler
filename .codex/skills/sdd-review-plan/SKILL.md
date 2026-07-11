@@ -181,3 +181,5 @@ approved slice scope.
 - Send unclear or changed scope back to `sdd-plan-task`.
 - Use `docs/specs/README.md` as the Single Source of Truth for CHANGELOG
   update criteria and trivial-change classification.
+- Apply `docs/specs/README.md` `Bounded Subagent Delegation` only for focused,
+  read-only evidence gathering; the reviewer keeps the verdict.

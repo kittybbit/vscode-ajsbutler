@@ -345,5 +345,8 @@ When implementation, reviews, fixes, and validation are complete:
   identifiers.
 - Prefer `rtk` for file inspection, search, git, GitHub, package scripts,
   tests, builds, and type checks.
+- Apply `docs/specs/README.md` `Bounded Subagent Delegation`; the coordinating
+  agent retains the approved scope, integration, validation, and completion
+  record.
 - Use native commands only when `rtk` has no suitable proxy, exact raw output
   is required, or an `rtk` proxy fails.
