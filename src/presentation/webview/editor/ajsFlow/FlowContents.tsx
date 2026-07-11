@@ -274,6 +274,8 @@ const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
   useMemo(
     () => ({
       both: theme.palette.warning.main,
+      changed: theme.palette.info.main,
+      confirmationRequired: theme.palette.warning.main,
       currentSearchResult: theme.palette.success.dark,
       downstream: theme.palette.success.main,
       hidden: "transparent",

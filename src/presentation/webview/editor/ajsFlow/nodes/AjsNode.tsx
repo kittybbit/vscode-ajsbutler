@@ -26,6 +26,7 @@ import {
 import type { FlowRelationshipFocusRole } from "../flowRelationshipFocus";
 import { buildNodeSxProps } from "./nodeSxProps";
 import { flowNodeHandleTop } from "./flowNodeGeometry";
+import type { FlowGraphSemanticDiffHighlight } from "../../../../../application/flow-graph/buildFlowGraphCore";
 export { buildNodeSxProps } from "./nodeSxProps";
 
 export type AjsNode = {
@@ -47,6 +48,7 @@ export type AjsNode = {
   isRootJobnet: boolean;
   hasSchedule: boolean;
   hasWaitedFor: boolean;
+  semanticDiffHighlight?: FlowGraphSemanticDiffHighlight;
   isHovered?: boolean;
   isSearchMatch?: boolean;
   isCurrentSearchResult?: boolean;

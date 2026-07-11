@@ -26,6 +26,9 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   ![unit-list](images/unit-flow.png)
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
+- Compare the active JP1/AJS definition with a selected before definition and
+  copy or save a semantic Markdown diff report, including confirmation-required
+  notes for supported condition and wait changes.
 - Supports web extensions.
 
 ## Recent Updates
@@ -47,6 +50,10 @@ To use this extension:
 2. Set the editor’s language mode to ‘jp1ajs’ to view the formatted
    definitions.
 3. Switch the editor to enable either a list-style or flow-style display.
+4. Run `JP1/AJS: Compare JP1/AJS Semantic Diff` from a JP1/AJS editor to
+   compare the active definition against a selected before definition. The
+   generated Markdown report opens in VS Code, and the report editor provides
+   a command to copy the displayed Markdown to the clipboard.
 
 ## Development
 

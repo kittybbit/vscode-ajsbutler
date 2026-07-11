@@ -18,6 +18,10 @@ import {
   createBuildUnitList,
   type BuildUnitList,
 } from "../../application/unit-list/buildUnitList";
+import {
+  createBuildSemanticDiffReport,
+  type BuildSemanticDiffReport,
+} from "../../application/semantic-diff/buildSemanticDiffReport";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
 import type { ImportAjsDefinitionCommandDeps } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
@@ -30,6 +34,9 @@ export type ExtensionDependencies = {
   buildSyntaxDiagnostics: BuildSyntaxDiagnostics;
   buildUnitList: BuildUnitList;
   findParameterHover: FindParameterHover;
+  semanticDiff: {
+    buildSemanticDiffReport: BuildSemanticDiffReport;
+  };
   webApiImport: Pick<
     ImportAjsDefinitionCommandDeps,
     "storeCredential" | "importPort"
@@ -71,6 +78,9 @@ export const createExtensionDependencies = (
     buildSyntaxDiagnostics: createBuildSyntaxDiagnostics(parser),
     buildUnitList: createBuildUnitList(parser),
     findParameterHover,
+    semanticDiff: {
+      buildSemanticDiffReport: createBuildSemanticDiffReport(parser),
+    },
     webApiImport: {
       storeCredential: (credentialRef, credential) =>
         credentialStore.storeCredential(credentialRef, credential),

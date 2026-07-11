@@ -64,6 +64,11 @@ suite("Flow Graph View", () => {
             isRootJobnet: false,
             hasSchedule: false,
             hasWaitedFor: true,
+            semanticDiffHighlight: {
+              kind: "confirmation-required",
+              changeIds: [],
+              confirmationIds: ["confirm:job-a"],
+            },
             layout: {
               kind: "grid",
               h: 240,
@@ -117,6 +122,11 @@ suite("Flow Graph View", () => {
           source: "/root/jobnet",
           target: "/root/jobnet/job-a",
           type: "seq",
+          semanticDiffHighlight: {
+            kind: "changed",
+            changeIds: ["relation:added"],
+            confirmationIds: [],
+          },
         },
       ],
     };
@@ -277,6 +287,11 @@ suite("Flow Graph View", () => {
     assert.strictEqual(hoveredNodes[0], nodes[0]);
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
+    assert.deepStrictEqual(nodes[1].data.semanticDiffHighlight, {
+      kind: "confirmation-required",
+      changeIds: [],
+      confirmationIds: ["confirm:job-a"],
+    });
     assert.strictEqual(nodes[2].data.canExpandNested, true);
     assert.strictEqual(nodes[3].data.canExpandNested, true);
     const childNetBoundsNode = nodes.find(
@@ -296,5 +311,13 @@ suite("Flow Graph View", () => {
     assert.strictEqual(childNetBoundsNode.connectable, false);
     assert.strictEqual(edges[0].source, "/root/jobnet");
     assert.strictEqual(edges[0].target, "/root/jobnet/job-a");
+    assert.strictEqual(edges[0].style?.strokeWidth, 3);
+    assert.deepStrictEqual(edges[0].data, {
+      semanticDiffHighlight: {
+        kind: "changed",
+        changeIds: ["relation:added"],
+        confirmationIds: [],
+      },
+    });
   });
 });

@@ -9,6 +9,7 @@ import {
   FlowGraphDto,
   FlowGraphEdgeDto,
   FlowGraphNodeDto,
+  FlowGraphSemanticDiffHighlights,
 } from "../../../../application/flow-graph/buildFlowGraphCore";
 import {
   calculateFlowGraphNodePosition,
@@ -45,6 +46,7 @@ export type BuildExpandedFlowGraphInput = {
   currentUnitId: string;
   expandedUnitIds: ReadonlySet<string> | readonly string[];
   basePx: number;
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
 };
 
 const createEmptyExpandedFlowGraphResult = (): ExpandedFlowGraphResult => ({
@@ -153,8 +155,18 @@ const createRelayoutExpandedFlowGraphResult = (
 export const buildExpandedFlowGraph = (
   input: BuildExpandedFlowGraphInput,
 ): ExpandedFlowGraphResult => {
-  const { document, currentUnitId, expandedUnitIds, basePx } = input;
-  const baseGraph = buildFlowGraph(document, currentUnitId);
+  const {
+    document,
+    currentUnitId,
+    expandedUnitIds,
+    basePx,
+    semanticDiffHighlights,
+  } = input;
+  const baseGraph = buildFlowGraph(
+    document,
+    currentUnitId,
+    semanticDiffHighlights,
+  );
   if (!baseGraph) {
     return createEmptyExpandedFlowGraphResult();
   }

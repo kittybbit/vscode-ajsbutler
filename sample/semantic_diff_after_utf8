@@ -1,0 +1,122 @@
+unit=semantic_diff_sample,,jp1admin,;
+{
+        ty=g;
+        cm="semantic diff coverage after";
+        el=main,n,+0+0;
+        el=ambiguous,n,+0+480;
+        el=schedule,n,+0+960;
+        el=zero_run,n,+480+960;
+        el=uncalculated,n,+960+960;
+        unit=main,,jp1admin,;
+        {
+                ty=n;
+                cm="main after";
+                sz=12x8;
+                el=stable,j,+240+144;
+                el=rename_new,j,+560+144;
+                el=added_job,j,+880+144;
+                el=source,j,+240+336;
+                el=target,j,+560+336;
+                el=wait_release_b,j,+240+528;
+                el=event_wait,evwj,+560+528;
+                el=file_watch,flwj,+880+528;
+                ar=(f=stable,t=target,con);
+                unit=stable,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo after";
+                        prm="after";
+                        eu=after_user;
+                        evsid=after_event;
+                        jd=ab;
+                        wth=10;
+                        tho=20;
+                        ab=retry;
+                }
+                unit=rename_new,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo rename";
+                        prm="same";
+                }
+                unit=added_job,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo added";
+                        prm="added";
+                }
+                unit=source,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo source";
+                }
+                unit=target,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo target";
+                }
+                unit=wait_release_b,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo release";
+                }
+                unit=event_wait,,jp1admin,;
+                {
+                        ty=evwj;
+                        eun=wait_release_b;
+                        evwid=00000001:00000003;
+                }
+                unit=file_watch,,jp1admin,;
+                {
+                        ty=flwj;
+                        flwf="/var/after.dat";
+                        flwc=s:m;
+                }
+        }
+        unit=ambiguous,,jp1admin,;
+        {
+                ty=n;
+                cm="ambiguous after";
+                sz=8x4;
+                el=amb_after_a,j,+240+144;
+                el=amb_after_b,j,+560+144;
+                unit=amb_after_a,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo ambiguous";
+                }
+                unit=amb_after_b,,jp1admin,;
+                {
+                        ty=j;
+                        sc="echo ambiguous";
+                }
+        }
+        unit=schedule,,jp1admin,;
+        {
+                ty=n;
+                cm="schedule after";
+                sz=4x2;
+                sd=2026/04/10;
+                st=10:00;
+        }
+        unit=zero_run,,jp1admin,;
+        {
+                ty=n;
+                cm="zero run after";
+                sz=4x2;
+                sd=2026/06/01;
+                st=09:00;
+        }
+        unit=uncalculated,,jp1admin,;
+        {
+                ty=n;
+                cm="uncalculated after";
+                sz=4x2;
+                cy=(1,d);
+                ln=1;
+                sd=2,2026/04/10;
+                sd=2026/04/31;
+                st=+27:03;
+                st=3,11:00;
+        }
+}

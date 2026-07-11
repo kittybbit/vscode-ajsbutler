@@ -34,6 +34,19 @@ export const localeMap = (
   language: string = "en",
 ): string => localeString(key, language);
 
+export const semanticDiffReportText = (
+  key: string,
+  language: string | undefined,
+  values: Record<string, string> = {},
+): string =>
+  Object.entries(values).reduce(
+    (message, [name, value]) => message.replaceAll(`{${name}}`, value),
+    localeString(
+      `semanticDiff.${key}`,
+      language?.toLowerCase().split("-")[0] ?? "en",
+    ),
+  );
+
 // ty name
 export const tyDefinitionLang = (language: string): typeof ty.en => {
   return withLocaleFallback(ty.en, { en: ty.en, ja: ty.ja }[language]);

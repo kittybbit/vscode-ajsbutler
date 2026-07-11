@@ -110,7 +110,7 @@
      credentials, prompts, responses, raw errors, or server identifiers.
    - Use telemetry evidence to support prioritization for current viewers,
      diagnostics, search, WebAPI import, and future roadmap capabilities such
-     as unified search, semantic definition comparison, dependency analysis,
+     as unified search, semantic diff, dependency analysis,
      review support, and AI-assisted features.
    - For roadmap capabilities, document event families and privacy constraints
      before implementation pressure appears, but add runtime telemetry only
@@ -123,6 +123,25 @@
      diagnostic rule IDs, and observable abandonment semantics only when
      analytics usage, product reporting, or a future feature makes those
      decisions concrete.
+
+9. Semantic diff for JP1/AJS3 definitions (complete).
+
+   - Compare before and after JP1/AJS3 job-group definitions by semantic
+     jobnet, unit, relation, execution-attribute, condition, wait, and
+     schedule changes rather than raw text differences.
+   - Keep comparison logic in domain/application boundaries and expose
+     presentation/report behavior through DTOs so desktop and web hosts remain
+     compatible.
+   - Implement in reviewed slices: structure and deterministic identity
+     matching first, start/wait confirmation checks second, and schedule
+     comparison after the supported schedule scope is narrowed.
+   - Complete the user workflow with editor-title discoverability, displayed
+     Markdown report review, explicit Markdown copy, reusable semantic diff
+     sample coverage, and Japanese report wording when VS Code display
+     language is Japanese before feature exit.
+   - Keep confirmation-required wording constrained to possible definition
+     impacts and explicitly state when runtime environment facts are not
+     verified.
 
 ## Deferred / Optional Slices
 

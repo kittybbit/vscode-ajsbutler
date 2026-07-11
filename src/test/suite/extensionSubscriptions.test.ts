@@ -5,7 +5,7 @@ import type { ExtensionDependencies } from "../../bootstrap/extension/extensionD
 import { createExtensionSubscriptions } from "../../bootstrap/extension/extensionSubscriptions";
 
 suite("Extension subscriptions", () => {
-  test("creates diagnostics, hover, import, and viewer subscriptions", () => {
+  test("creates diagnostics, hover, import, semantic diff, and viewer subscriptions", () => {
     const context = { subscriptions: [] } as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {
       trackEvent() {},
@@ -16,6 +16,9 @@ suite("Extension subscriptions", () => {
       buildSyntaxDiagnostics: () => [],
       buildUnitList: () => ({ errors: [] }),
       findParameterHover: () => undefined,
+      semanticDiff: {
+        buildSemanticDiffReport: () => ({ ok: true, report: "" }),
+      },
       webApiImport: {
         storeCredential: async () => {},
         importPort: {
@@ -33,7 +36,7 @@ suite("Extension subscriptions", () => {
 
     const subscriptions = createExtensionSubscriptions(context, dependencies);
 
-    assert.strictEqual(subscriptions.length, 7);
+    assert.strictEqual(subscriptions.length, 10);
     subscriptions.forEach((subscription) => {
       assert.strictEqual(typeof subscription.dispose, "function");
       subscription.dispose();

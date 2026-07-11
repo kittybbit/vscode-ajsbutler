@@ -25,6 +25,10 @@ suite("Extension dependencies", () => {
     assert.strictEqual(typeof dependencies.buildUnitList, "function");
     assert.strictEqual(typeof dependencies.findParameterHover, "function");
     assert.strictEqual(
+      typeof dependencies.semanticDiff.buildSemanticDiffReport,
+      "function",
+    );
+    assert.strictEqual(
       typeof dependencies.webApiImport.storeCredential,
       "function",
     );

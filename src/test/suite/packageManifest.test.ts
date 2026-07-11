@@ -7,9 +7,19 @@ type CommandContribution = {
   icon?: string;
 };
 
+type MenuContribution = {
+  command: string;
+  group?: string;
+  when?: string;
+};
+
 type PackageJson = {
+  activationEvents: string[];
   contributes: {
     commands: CommandContribution[];
+    menus: {
+      "editor/title": MenuContribution[];
+    };
   };
 };
 
@@ -33,6 +43,80 @@ suite("Package manifest", () => {
     assert.strictEqual(
       byCommand.get("open.ajsbutler.tableViewer")?.icon,
       "$(table)",
+    );
+  });
+
+  test("contributes semantic diff command and activation event", () => {
+    const manifest = readPackageJson();
+    const byCommand = new Map(
+      manifest.contributes.commands.map((command) => [
+        command.command,
+        command,
+      ]),
+    );
+
+    assert.strictEqual(
+      byCommand.get("ajsbutler.compareSemanticDiff")?.icon,
+      "$(diff)",
+    );
+    assert.strictEqual(
+      byCommand.get("ajsbutler.copySemanticDiffMarkdown")?.icon,
+      "$(copy)",
+    );
+    assert.ok(
+      manifest.activationEvents.includes(
+        "onCommand:ajsbutler.compareSemanticDiff",
+      ),
+    );
+  });
+
+  test("contributes semantic diff command to JP1/AJS editor title", () => {
+    const editorTitleItems =
+      readPackageJson().contributes.menus["editor/title"];
+
+    assert.deepStrictEqual(
+      editorTitleItems.filter((item) =>
+        [
+          "open.ajsbutler.flowViewer",
+          "open.ajsbutler.tableViewer",
+          "ajsbutler.compareSemanticDiff",
+        ].includes(item.command),
+      ),
+      [
+        {
+          when: "editorLangId == 'jp1ajs'",
+          command: "open.ajsbutler.flowViewer",
+          group: "navigation",
+        },
+        {
+          when: "editorLangId == 'jp1ajs'",
+          command: "open.ajsbutler.tableViewer",
+          group: "navigation",
+        },
+        {
+          when: "editorLangId == 'jp1ajs'",
+          command: "ajsbutler.compareSemanticDiff",
+          group: "navigation",
+        },
+      ],
+    );
+  });
+
+  test("contributes Markdown copy command only for semantic diff reports", () => {
+    const editorTitleItems =
+      readPackageJson().contributes.menus["editor/title"];
+
+    assert.deepStrictEqual(
+      editorTitleItems.filter(
+        (item) => item.command === "ajsbutler.copySemanticDiffMarkdown",
+      ),
+      [
+        {
+          when: "resourceScheme == 'ajsbutler-semantic-diff'",
+          command: "ajsbutler.copySemanticDiffMarkdown",
+          group: "navigation",
+        },
+      ],
     );
   });
 });
