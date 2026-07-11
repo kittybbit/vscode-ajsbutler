@@ -1,5 +1,18 @@
 # TASKS: import-definition-via-webapi
 
+## Agent Brief
+
+- Purpose: record real-environment evidence for the delivered WebAPI beta.
+- Active slice: blocked pending usable JP1/AJS3 WebAPI evidence.
+- Do not remove beta labeling or broaden WebAPI scope.
+- Do not invent smoke results from generated mocks.
+- Do not edit runtime code, tests, generated artifacts, or configuration.
+- Read first: `SPECS.md`, this file, and `TRACEABILITY.md`.
+- Read OpenAPI notes only when the evidence concerns the supported endpoint.
+- Validate evidence records with `rtk pnpm run qlty`.
+- Approval policy and feature exit: see `docs/specs/README.md`.
+- Next decision: obtain real-environment evidence or keep the task blocked.
+
 ## Sync Rule
 
 - Update this file in the same commit whenever one task or follow-up is

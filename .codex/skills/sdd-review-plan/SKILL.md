@@ -11,17 +11,18 @@ Review a prepared feature implementation plan before human approval and
 implementation. Use this skill after `sdd-plan-task` creates or revises the
 full slice plan, and before `sdd-implement-task` implements any slice.
 
-## Inputs
+## Minimum Context
 
-Read these first:
+Read first:
 
-1. `AGENTS.md`
-2. `docs/specs/README.md`
-3. `docs/specs/plans.md`
-4. the relevant `docs/specs/features/<feature>/SPECS.md`
-5. the relevant `docs/specs/features/<feature>/TASKS.md`
-6. related `docs/requirements/use-cases/` files when behavior contracts may
-   be affected
+1. `AGENTS.md`, `docs/specs/README.md`, and `docs/specs/plans.md`
+2. the active feature's `SPECS.md` and `TASKS.md`
+
+Read only when needed:
+
+- related use cases for observable behavior contracts
+- `TRACEABILITY.md` when the feature requires it
+- concrete code references needed to verify a plan claim
 
 Inspect referenced code symbols, components, adapters, commands, tests, or docs
 only enough to validate the plan's claims. Do not edit runtime code, tests,
@@ -46,6 +47,8 @@ Evaluate at least these dimensions:
 - Production Readiness: failure modes, diagnostics, JP1/AJS compatibility,
   large or malformed input risk, desktop/web readiness, README/docs impact,
   and CHANGELOG impact can be evaluated using `docs/specs/README.md`
+- Quality Evidence: code slices name the required qlty result and distinguish
+  actionable new smells from metrics-only review signals
 - Cross-Slice Architectural Consistency: naming, DTOs, view models, entities,
   public interfaces, layer responsibilities, dependencies, and architecture
   boundaries remain consistent across the whole feature
@@ -178,3 +181,5 @@ approved slice scope.
 - Send unclear or changed scope back to `sdd-plan-task`.
 - Use `docs/specs/README.md` as the Single Source of Truth for CHANGELOG
   update criteria and trivial-change classification.
+- Apply `docs/specs/README.md` `Bounded Subagent Delegation` only for focused,
+  read-only evidence gathering; the reviewer keeps the verdict.

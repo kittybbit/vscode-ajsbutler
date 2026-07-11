@@ -98,6 +98,30 @@ For docs-only changes:
 Run validation commands through `rtk` by default. `rtk` is a cost-control and
 execution-efficiency tool; it is not a reason to skip required validation.
 
+## Risk-Based Validation And Review
+
+Select validation from the changed surface, starting with the nearest useful
+check. Do not repeat an unchanged check merely because a later workflow stage
+has begun.
+
+- Docs-only: run `rtk pnpm run qlty`; add `rtk pnpm run lint:md` when Markdown
+  structure or links need focused validation.
+- Isolated code: run the nearest relevant test and `rtk pnpm run qlty`; add a
+  build when the change affects compilation, bundling, packaging, or final
+  confidence requires it.
+- Parser, shared contracts, extension hosts, entry points, generated artifacts,
+  or configuration: add the relevant desktop or web tests and build evidence.
+
+For code slices, a passing qlty result is required. Resolve new smell findings
+or record an approved, actionable follow-up. Treat metrics-only movement as a
+review signal, not an automatic refactor or merge failure.
+
+Plan review is the pre-approval scope gate. After implementation and final
+validation, perform one integrated review of scope, acceptance, quality, and
+production readiness. Add an independent second review only for the higher-risk
+surface above or when the first review finds a concern. Feature Exit remains a
+separate completion review.
+
 ## CHANGELOG Update Criteria
 
 Use this section as the Single Source of Truth for deciding whether a
@@ -216,6 +240,23 @@ necessary, stop and return to investigation and re-approval.
 When Codex orchestrates work across agents, Codex owns consistency of the SDD
 documents, approval evidence, scope tracking, and validation record.
 
+## Bounded Subagent Delegation
+
+Use a subagent only when an independent investigation, review, or explicitly
+approved mechanical task materially reduces uncertainty or elapsed time. Do not
+delegate a local task whose handoff would cost more context than it saves.
+
+Before delegating, give a concise brief with the question, target files or
+symbols, constraints, no-change rule unless mechanical editing is explicitly
+approved, and a short evidence-based output format. Ask for findings, risks,
+unknowns, and a recommended next action—not a decision or a transcript.
+
+The coordinating agent alone owns feature selection, SDD artifact updates,
+approval evidence, scope and design decisions, integration, validation records,
+and final user communication. Do not delegate human approval, feature exit,
+scope expansion, or final validation. Avoid overlapping file ownership and
+broad repository exploration; consolidate delegated findings before acting.
+
 ## Implementation Change Gate
 
 Before editing runtime code, tests, generated artifacts, or configuration:
@@ -299,10 +340,8 @@ generated artifacts, or configuration.
 Implementation will not proceed until approval is given.
 ```
 
-After approval, `sdd-implement-task` implements exactly one approved slice.
-Implementation should use staged validation: nearest fast check, related
-tests, qlty, needed web tests, and build only when required for final
-confidence.
+After approval, `sdd-implement-task` implements exactly one approved slice
+using the Risk-Based Validation And Review policy above.
 
 Do not leave failing checks unexplained or deferred without an explicit
 follow-up decision.
@@ -513,6 +552,39 @@ When syncing, preserve decision context instead of accumulating entries:
 
 This section is the Single Source of Truth for SDD document responsibilities.
 Other repository docs should link here instead of repeating these details.
+
+## Feature Context And Traceability
+
+Do not create a per-feature `CONTEXT.md`. Keep only the actionable context at
+the top of the existing feature documents:
+
+- `SPECS.md` begins with the feature purpose and origin, then records only the
+  durable requirements, boundaries, compatibility, acceptance criteria, and
+  non-goals needed to decide the feature.
+- `TASKS.md` begins with an `Agent Brief` of roughly ten lines: purpose,
+  approved or active slice, prohibitions, and the smallest reading and
+  validation set. It points to this SSOT rather than restating it.
+- `TRACEABILITY.md`, when required, is a compact table mapping use case or
+  requirement, `SPECS.md` section, slice, and test or validation plan. Keep
+  feature-specific design notes in `SPECS.md`, not in traceability.
+
+Do not add task history, broad repository summaries, transcripts, or material
+that does not affect the next decision, approval, risk, validation, or feature
+exit.
+
+## Lightweight Feature Structure Check
+
+Before reviewing a docs-only SDD change, run these `rtk` checks:
+
+```bash
+rtk rg "^## Agent Brief" docs/specs/features --glob "TASKS.md"
+rtk rg --files docs/specs/features --glob "CONTEXT.md"
+```
+
+The first command should report one Agent Brief for every feature `TASKS.md`.
+The second should produce no file paths and may return a no-match exit status
+when no `CONTEXT.md` exists; that is the expected result. This is a local drift
+check, not a CI gate or a replacement for required docs-only validation.
 
 - `vision.md`: product purpose and values.
 - `glossary.md`: shared terms.

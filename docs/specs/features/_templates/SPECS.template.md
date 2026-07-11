@@ -4,6 +4,14 @@
 
 {{What behavior or implementation boundary this feature defines.}}
 
+## Minimal Context
+
+- Current decision: {{the decision this feature needs to make or deliver}}
+- Read first: this file and `TASKS.md`; read `TRACEABILITY.md` only when it
+  exists and the next decision needs it.
+- Do not create `CONTEXT.md`; link to `docs/specs/README.md` instead of
+  duplicating SDD policy.
+
 ## Origin
 
 - Source use case: {{docs/requirements/use-cases/uc-*.md}}

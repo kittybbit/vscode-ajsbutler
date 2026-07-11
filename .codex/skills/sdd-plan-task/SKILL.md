@@ -11,19 +11,19 @@ Create or revise the full implementation plan for one active SDD feature, or
 run Feature Exit when implementation is complete. Use exactly one explicit
 mode per run: Planning Mode, Replanning Mode, or Feature Exit Mode.
 
-## Inputs
+## Minimum Context
 
-Read these first:
+Read first:
 
-1. `AGENTS.md`
-2. `package.json`
-3. `docs/specs/README.md`
-4. `docs/specs/plans.md`
-5. `docs/specs/roadmap.md`
-6. the relevant `docs/specs/features/<feature>/SPECS.md`
-7. the relevant `docs/specs/features/<feature>/TASKS.md`
-8. the relevant `docs/requirements/use-cases/` files when behavior contracts
-   may be affected
+1. `AGENTS.md`, `package.json`, and `docs/specs/README.md`
+2. `docs/specs/plans.md`, `docs/specs/roadmap.md`, and the active feature's
+   `SPECS.md` and `TASKS.md`
+
+Read only when needed:
+
+- related use cases for observable behavior contracts
+- concrete symbols or components for impact confirmation
+- `TRACEABILITY.md` when required by the feature or its slices
 
 Use semantic code navigation from `docs/specs/README.md` only when a concrete
 symbol, component, command, adapter, or use case needs impact confirmation.
@@ -177,6 +177,10 @@ Before updating `TASKS.md`, explicitly establish:
   - desktop/web impact
   - README or user docs impact
   - CHANGELOG update need using `docs/specs/README.md`
+- Qlty evidence for code slices:
+  - `rtk pnpm run qlty`
+  - new smell findings, if source changes make them relevant
+  - metric movement only when it informs a concrete responsibility or risk
 - risks and unresolved assumptions
 - out-of-scope changes
 
@@ -430,3 +434,5 @@ implementation.
 - Run docs-only validation through `rtk` before finishing; use
   `rtk pnpm run qlty`, and add `rtk pnpm run lint:md` when markdown scope
   benefits from it.
+- Apply `docs/specs/README.md` `Bounded Subagent Delegation` only to focused,
+  independent impact investigation or plan evidence.
