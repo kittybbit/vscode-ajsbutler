@@ -124,7 +124,7 @@
      analytics usage, product reporting, or a future feature makes those
      decisions concrete.
 
-9. Add semantic diff for JP1/AJS3 definitions.
+9. Semantic diff for JP1/AJS3 definitions (complete).
 
    - Compare before and after JP1/AJS3 job-group definitions by semantic
      jobnet, unit, relation, execution-attribute, condition, wait, and
@@ -142,9 +142,6 @@
    - Keep confirmation-required wording constrained to possible definition
      impacts and explicitly state when runtime environment facts are not
      verified.
-   - Track the active feature in
-     `docs/specs/features/semantic-diff/` until feature exit moves
-     durable behavior into use cases or roadmap entries.
 
 ## Deferred / Optional Slices
 
