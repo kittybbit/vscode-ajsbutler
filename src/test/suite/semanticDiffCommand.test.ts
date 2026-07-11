@@ -119,6 +119,14 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(harness.observed.clipboardWrites, []);
   });
 
+  test("passes the VS Code display language to report building", async () => {
+    const harness = new SemanticDiffCommandHarness({ language: "ja-JP" });
+
+    await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(harness.observed.reportInputs[0].language, "ja-JP");
+  });
+
   test("reports display failure without writing clipboard", async () => {
     const harness = new SemanticDiffCommandHarness({
       openReport: async () => {

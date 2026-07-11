@@ -32,6 +32,7 @@ export type SemanticDiffCommandDeps = {
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   readFile: (uri: vscode.Uri) => Thenable<Uint8Array>;
   openReport: (report: string) => Thenable<void>;
+  language?: string;
   buildSemanticDiffReport: BuildSemanticDiffReport;
 };
 
@@ -100,10 +101,12 @@ export const executeCompareSemanticDiffCommand = async (
     return commandError("read-failed", message);
   }
 
-  const reportResult = deps.buildSemanticDiffReport({
+  const reportInput = {
     beforeContent: beforeDefinition.content,
     afterContent: activeEditor.document.getText(),
-  });
+    ...(deps.language ? { language: deps.language } : {}),
+  };
+  const reportResult = deps.buildSemanticDiffReport(reportInput);
   if (!reportResult.ok) {
     const message =
       "Semantic diff could not parse one or both JP1/AJS definitions.";

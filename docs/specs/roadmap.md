@@ -136,8 +136,9 @@
      matching first, start/wait confirmation checks second, and schedule
      comparison after the supported schedule scope is narrowed.
    - Complete the user workflow with editor-title discoverability, displayed
-     Markdown report review, explicit Markdown copy, and reusable semantic diff
-     sample coverage before feature exit.
+     Markdown report review, explicit Markdown copy, reusable semantic diff
+     sample coverage, and Japanese report wording when VS Code display
+     language is Japanese before feature exit.
    - Keep confirmation-required wording constrained to possible definition
      impacts and explicitly state when runtime environment facts are not
      verified.

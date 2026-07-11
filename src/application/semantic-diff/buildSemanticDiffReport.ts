@@ -9,6 +9,7 @@ import { renderSemanticDiffMarkdown } from "./renderSemanticDiffMarkdown";
 export type BuildSemanticDiffReportInput = {
   beforeContent: string;
   afterContent: string;
+  language?: string;
 };
 
 export type BuildSemanticDiffReportResult =
@@ -34,9 +35,10 @@ export const createBuildSemanticDiffReport =
     compare: CompareSemanticDiff = compareSemanticDiff,
     render: (
       changeSet: ReturnType<CompareSemanticDiff>,
+      language?: string,
     ) => string = renderSemanticDiffMarkdown,
   ): BuildSemanticDiffReport =>
-  ({ beforeContent, afterContent }) => {
+  ({ beforeContent, afterContent, language }) => {
     const beforeParse = parser.parse(beforeContent);
     const afterParse = parser.parse(afterContent);
 
@@ -57,6 +59,7 @@ export const createBuildSemanticDiffReport =
           before: normalizeAjsDocument(beforeParse.rootUnits),
           after: normalizeAjsDocument(afterParse.rootUnits),
         }),
+        language,
       ),
     };
   };

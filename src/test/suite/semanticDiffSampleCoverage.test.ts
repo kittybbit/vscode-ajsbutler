@@ -30,8 +30,11 @@ suite("Semantic diff sample coverage", () => {
       },
     });
     const report = renderSemanticDiffMarkdown(result);
+    const japaneseReport = renderSemanticDiffMarkdown(result, "ja-JP");
 
     assert.ok(report.includes("# Semantic Diff Report"));
+    assert.ok(japaneseReport.includes("# 意味差分レポート"));
+    assert.ok(japaneseReport.includes("## スケジュール変更"));
     assert.ok(result.changes.some((change) => change.kind === "added"));
     assert.ok(result.changes.some((change) => change.kind === "removed"));
     assert.ok(result.changes.some((change) => change.kind === "renamed"));

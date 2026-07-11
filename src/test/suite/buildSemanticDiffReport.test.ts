@@ -12,6 +12,7 @@ type BuildSemanticDiffReportObservations = {
   parsedContents: string[];
   comparedInputs: CompareSemanticDiffInput[];
   renderedChangeSets: SemanticDiffChangeSet[];
+  renderedLanguages: (string | undefined)[];
 };
 
 const createParser = (
@@ -56,8 +57,9 @@ const createCompare =
 
 const createRender =
   (observations: BuildSemanticDiffReportObservations) =>
-  (changeSet: SemanticDiffChangeSet): string => {
+  (changeSet: SemanticDiffChangeSet, language?: string): string => {
     observations.renderedChangeSets.push(changeSet);
+    observations.renderedLanguages.push(language);
     return "rendered semantic diff";
   };
 
@@ -66,6 +68,7 @@ const createHarness = () => {
     parsedContents: [],
     comparedInputs: [],
     renderedChangeSets: [],
+    renderedLanguages: [],
   };
   const build = createBuildSemanticDiffReport(
     createParser(observations),
@@ -91,10 +94,23 @@ suite("Build Semantic Diff Report", () => {
     ]);
     assert.strictEqual(observations.comparedInputs.length, 1);
     assert.strictEqual(observations.renderedChangeSets.length, 1);
+    assert.deepStrictEqual(observations.renderedLanguages, [undefined]);
     assert.deepStrictEqual(result, {
       ok: true,
       report: "rendered semantic diff",
     });
+  });
+
+  test("passes the requested report language to the renderer", () => {
+    const { observations, build } = createHarness();
+
+    build({
+      beforeContent: "unit=before,,jp1admin,;",
+      afterContent: "unit=after,,jp1admin,;",
+      language: "ja-JP",
+    });
+
+    assert.deepStrictEqual(observations.renderedLanguages, ["ja-JP"]);
   });
 
   test("returns parse errors without comparing or rendering", () => {

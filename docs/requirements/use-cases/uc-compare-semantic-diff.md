@@ -17,6 +17,8 @@ definition for the same review scope.
 - after JP1/AJS3 job-group definition
 - comparison options, including comparison period when schedule comparison is
   in scope
+- report language, derived from the host display language when the command
+  builds the report
 - normalized jobnet, unit, relation, parameter, and schedule data available
   from the repository parser/normalization path
 
@@ -69,6 +71,12 @@ definition for the same review scope.
   execution history, are not verified by standard semantic comparison
 - unsupported or uncalculated portions must be visible in the comparison result
   and report
+- generated report wording follows the selected report language for headings,
+  labels, summaries, rationale, unsupported or limitation notes,
+  confirmation-required items, schedule sections, and empty states
+- semantic identifiers, paths, parameter keys, and raw JP1/AJS values are not
+  translated
+- unsupported report languages fall back to English
 - the command must not implicitly overwrite the clipboard when semantic diff
   finishes
 - copying the Markdown report to the clipboard must be an explicit user action
@@ -147,6 +155,16 @@ Scenario: Semantic diff opens a report before copying Markdown
   And the clipboard is not changed automatically
   When the user requests Markdown copy from the report surface
   Then the displayed Markdown report is copied to the clipboard
+
+Scenario: Japanese display language renders Japanese semantic diff report
+  Given VS Code display language is Japanese
+  And the semantic diff command builds a Markdown report
+  When the command completes
+  Then generated report headings, labels, structural change wording,
+    rationale wording, unsupported notes, limitations, confirmation-required
+    items, schedule wording, and empty states are displayed in Japanese
+  And semantic identifiers, paths, parameter keys, and raw JP1/AJS values stay
+    unchanged
 ```
 
 ## Acceptance Notes
@@ -158,6 +176,8 @@ Scenario: Semantic diff opens a report before copying Markdown
   application DTOs and host-specific adapters.
 - Markdown report output should preserve enough rationale for review without
   requiring users to inspect parser internals.
+- Report localization should be a presentation/reporting concern and should
+  not change semantic comparison DTO meanings or raw JP1/AJS values.
 - Command presentation should use VS Code-native editor, document, command,
   and menu surfaces where practical before adding a custom visual diff view.
 - Flow-view highlighting, when added, should consume semantic diff DTOs rather

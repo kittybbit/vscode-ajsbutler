@@ -45,6 +45,9 @@ relation, condition, and schedule changes instead of raw text differences.
   implicitly leaving the report on the clipboard.
 - Allow users to copy the displayed Markdown report to the clipboard from the
   report surface.
+- Render semantic diff report wording in Japanese when the VS Code display
+  language is Japanese, while preserving English fallback for unsupported
+  languages.
 
 ## Behavioral Scenarios
 
@@ -80,6 +83,15 @@ Scenario: Wait timeout removal requires confirmation
     unbounded wait
   And the result states that the comparison does not verify external runtime
     conditions
+
+Scenario: Japanese display language renders Japanese report wording
+  Given VS Code display language is Japanese
+  And semantic comparison finds structural changes
+  When semantic comparison is requested from the command
+  Then the displayed Markdown report uses Japanese headings, labels,
+    structural change wording, rationale wording, and fallback messages
+  And semantic identifiers, paths, parameter keys, and raw JP1/AJS values are
+    preserved without translation
 ```
 
 ## Architecture
@@ -191,6 +203,11 @@ Scenario: Wait timeout removal requires confirmation
 - The displayed report surface provides an explicit Markdown copy action.
 - Repository sample definitions cover the implemented semantic diff evaluation
   categories for parser-to-report validation.
+- Markdown report wording follows the selected report language for generated
+  headings, labels, summaries, rationale text, limitations, unsupported-item
+  wording, confirmation-required wording, schedule wording, and empty states.
+- Unsupported report languages fall back to English without changing semantic
+  comparison results or JP1/AJS raw values.
 
 ## Non-Goals
 

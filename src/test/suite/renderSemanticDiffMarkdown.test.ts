@@ -92,6 +92,59 @@ suite("Render Semantic Diff Markdown", () => {
     );
   });
 
+  test("renders Japanese headings for ja and regional Japanese language tags", () => {
+    const japanese = renderSemanticDiffMarkdown(changeSet(), "ja");
+    const regionalJapanese = renderSemanticDiffMarkdown(changeSet(), "ja-JP");
+    const fallback = renderSemanticDiffMarkdown(changeSet(), "fr");
+
+    assert.ok(japanese.includes("# 意味差分レポート"));
+    assert.ok(regionalJapanese.includes("## 構造変更"));
+    assert.ok(fallback.includes("# Semantic Diff Report"));
+  });
+
+  test("localizes generated wording while preserving raw JP1/AJS values and parser messages", () => {
+    const job = unit({
+      name: "LOAD",
+      absolutePath: "/root/jobnet/LOAD",
+    });
+    const rawMessage = "relation target was not found";
+    const result = renderSemanticDiffMarkdown(
+      changeSet({
+        changes: [
+          {
+            id: "attribute:eu:/root/jobnet/LOAD",
+            kind: "changed",
+            elementKind: "attribute",
+            confirmationLevel: "confirmed",
+            after: {
+              kind: "attribute",
+              unit: job,
+              parameterKey: "eu",
+              category: "execution-environment",
+            },
+            attributeCategory: "execution-environment",
+            summary: "LOAD eu changed",
+            rationale: "exact identity match",
+          },
+        ],
+        limitations: [
+          {
+            code: "missing_relation_target",
+            kind: "normalization",
+            message: rawMessage,
+          },
+        ],
+      }),
+      "ja-JP",
+    );
+
+    assert.ok(result.includes("### 実行環境"));
+    assert.ok(result.includes("LOAD の eu を変更"));
+    assert.ok(result.includes("完全一致の識別子により対応付けました"));
+    assert.ok(result.includes("/root/jobnet/LOAD"));
+    assert.ok(result.includes(rawMessage));
+  });
+
   test("renders structural changes, rationale, constraints, and limitations", () => {
     const beforeJob = unit({
       id: "/root/jobnet/job-a",

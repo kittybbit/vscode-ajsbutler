@@ -41,6 +41,7 @@ export const createSemanticDiffSubscriptions = (
         showErrorMessage: (message) => vscode.window.showErrorMessage(message),
         readFile: (uri) => vscode.workspace.fs.readFile(uri),
         openReport: (report) => reportDocuments.openReport(report),
+        language: vscode.env.language,
         buildSemanticDiffReport: deps.buildSemanticDiffReport,
       }),
     ),

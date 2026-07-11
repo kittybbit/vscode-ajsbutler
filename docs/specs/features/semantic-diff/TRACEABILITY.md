@@ -242,6 +242,61 @@ qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run build`
   `rtk pnpm run qlty`, and `rtk pnpm run lint:md` passed during Slice 10
   implementation.
 
+### Localized Semantic Diff Report
+
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
+- Requirement: render generated semantic diff Markdown report wording in
+  Japanese when the host display language is Japanese, and fall back to
+  English for unsupported languages.
+- SPECS.md Section: Requirements, Behavioral Scenarios, Acceptance Criteria
+- Implementation Slice: Slice 11, Localized Semantic Diff Report
+- Test File Or Validation Plan:
+  `src/test/suite/renderSemanticDiffMarkdown.test.ts` should verify English
+  default output, `ja` and regional `ja-JP` Japanese output, unsupported
+  language fallback such as `fr`, localized structural change
+  summaries/rationale, preservation of raw identifiers and JP1/AJS values, and
+  verbatim parser-provided limitation or unsupported-item messages. `src/test/suite/compareSemanticDiff.test.ts`,
+  `src/test/suite/semanticDiffConditions.test.ts`, or
+  `src/test/suite/semanticDiffSchedule.test.ts` should verify that any
+  `SemanticDiff` DTO message-code/parameter or structured-message refactor in
+  `src/domain/models/semantic-diff/SemanticDiff.ts`,
+  `src/application/semantic-diff/compareSemanticDiff.ts`, and
+  `src/application/semantic-diff/compareScheduleDiff.ts` preserves semantic
+  change IDs, kinds, targets, confirmation-required categories, unsupported
+  items, limitations, matching decisions, and schedule decisions.
+  `src/test/suite/buildSemanticDiffReport.test.ts` and
+  `src/test/suite/semanticDiffCommand.test.ts` should verify language wiring
+  from the VS Code command/report build path.
+  `src/test/suite/semanticDiffSampleCoverage.test.ts` should verify the
+  reusable sample can render Japanese report wording from the same semantic
+  result data without changing semantic comparison categories. Expected checks
+  are `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build` because the slice touches command behavior, shared
+  report rendering, comparison DTO representation, and production
+  exports/bundling.
+- Validation Result: `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  verifies English default output, `ja` / `ja-JP` Japanese output, unsupported
+  language fallback, localized generated wording, and raw JP1/AJS values plus
+  parser limitations preserved verbatim. `src/test/suite/nls.test.ts` verifies
+  NLS regional-Japanese resolution and English fallback; command, report-build,
+  and sample coverage tests verify language wiring and the parser-to-report
+  path. `rtk pnpm run qlty`, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run build` passed. Production asset-size warnings are unchanged.
+
+### Localized Report Renderer Complexity
+
+- Use Case: docs/requirements/use-cases/uc-compare-semantic-diff.md
+- Requirement: generated report wording follows the selected report language
+  while semantic identifiers and raw JP1/AJS values stay unchanged.
+- SPECS.md Section: Requirements, Architecture, Acceptance Criteria
+- Implementation Slice: Slice 12, Localized Report Renderer Complexity
+  Refactoring
+- Test File Or Validation Plan: exact-string renderer tests for English,
+  `ja`, `ja-JP`, and unsupported-language fallback; `rtk qlty metrics` and
+  `rtk qlty smells` must show the current renderer-local complexity findings
+  are removed or reduced; full qlty, desktop, web, and production-build
+  validation.
+
 ### Normalized Inputs
 
 - Use Case: docs/requirements/use-cases/uc-normalize-ajs-document.md

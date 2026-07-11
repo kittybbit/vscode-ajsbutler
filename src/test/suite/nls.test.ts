@@ -4,6 +4,7 @@ import {
   localeString,
   paramDefinitionLang,
   unitTypeLabel,
+  semanticDiffReportText,
 } from "../../domain/services/i18n/nls";
 
 suite("NLS", () => {
@@ -11,6 +12,17 @@ suite("NLS", () => {
     assert.strictEqual(
       localeString("commandBuilder.common.command", "unsupported"),
       "Command",
+    );
+  });
+
+  test("resolves semantic diff report resources for regional Japanese", () => {
+    assert.strictEqual(
+      semanticDiffReportText("report.title", "ja-JP"),
+      "意味差分レポート",
+    );
+    assert.strictEqual(
+      semanticDiffReportText("report.title", "fr"),
+      "Semantic Diff Report",
     );
   });
 
