@@ -122,15 +122,9 @@ the Single Source of Truth for SDD artifact responsibilities, including
 
 Before finishing a task, run the most relevant checks available.
 
-For docs-only changes, run `rtk pnpm run qlty`; add
-`rtk pnpm run lint:md` when markdown structure or links need focused
-validation.
-
-Minimum expectation for meaningful code changes:
-
-- build succeeds
-- lint/quality checks pass
-- relevant unit/integration tests pass
+Use `docs/specs/README.md` `Risk-Based Validation And Review` as the SSOT for
+validation selection and review timing. Do not add a second default sequence
+here.
 
 When touching parser, list, flow, CSV, or adapter boundaries, add/update tests.
 

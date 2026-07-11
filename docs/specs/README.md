@@ -98,6 +98,30 @@ For docs-only changes:
 Run validation commands through `rtk` by default. `rtk` is a cost-control and
 execution-efficiency tool; it is not a reason to skip required validation.
 
+## Risk-Based Validation And Review
+
+Select validation from the changed surface, starting with the nearest useful
+check. Do not repeat an unchanged check merely because a later workflow stage
+has begun.
+
+- Docs-only: run `rtk pnpm run qlty`; add `rtk pnpm run lint:md` when Markdown
+  structure or links need focused validation.
+- Isolated code: run the nearest relevant test and `rtk pnpm run qlty`; add a
+  build when the change affects compilation, bundling, packaging, or final
+  confidence requires it.
+- Parser, shared contracts, extension hosts, entry points, generated artifacts,
+  or configuration: add the relevant desktop or web tests and build evidence.
+
+For code slices, a passing qlty result is required. Resolve new smell findings
+or record an approved, actionable follow-up. Treat metrics-only movement as a
+review signal, not an automatic refactor or merge failure.
+
+Plan review is the pre-approval scope gate. After implementation and final
+validation, perform one integrated review of scope, acceptance, quality, and
+production readiness. Add an independent second review only for the higher-risk
+surface above or when the first review finds a concern. Feature Exit remains a
+separate completion review.
+
 ## CHANGELOG Update Criteria
 
 Use this section as the Single Source of Truth for deciding whether a
@@ -299,10 +323,8 @@ generated artifacts, or configuration.
 Implementation will not proceed until approval is given.
 ```
 
-After approval, `sdd-implement-task` implements exactly one approved slice.
-Implementation should use staged validation: nearest fast check, related
-tests, qlty, needed web tests, and build only when required for final
-confidence.
+After approval, `sdd-implement-task` implements exactly one approved slice
+using the Risk-Based Validation And Review policy above.
 
 Do not leave failing checks unexplained or deferred without an explicit
 follow-up decision.

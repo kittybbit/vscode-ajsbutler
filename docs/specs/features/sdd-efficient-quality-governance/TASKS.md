@@ -25,7 +25,7 @@
   validation, review timing, template, and lightweight-check policy.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 3
+- Active implementation slice: Slice 4
 
 ## Human Approval
 
@@ -82,7 +82,7 @@
 
 ### Slice 3: Streamline validation and review timing
 
-- Status: Approved
+- Status: Complete
 - Scope: define one risk-based validation ladder and one integrated final
   implementation review; align SDD skills and agent-facing guidance to it.
   The ladder distinguishes docs-only work, isolated code, and changes to

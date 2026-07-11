@@ -1,6 +1,6 @@
 ---
 name: sdd-implement-task
-description: Use when implementing exactly one approved vscode-ajsbutler SDD implementation slice from docs/specs/features/<feature>/TASKS.md after the feature plan has been created, reviewed, and human-approved, including baseline checks, scoped implementation, staged validation, production readiness gates, non-functional quality gates, readability and diff-minimality checks, TRACEABILITY.md updates, implementation feedback capture, knowledge propagation decisions, three independent self-reviews, applying review fixes, updating slice status after human completion approval, committing the work, and confirming a clean workspace. This skill must not plan new slices or change approval boundaries.
+description: Use when implementing exactly one approved vscode-ajsbutler SDD implementation slice from docs/specs/features/<feature>/TASKS.md after the feature plan has been created, reviewed, and human-approved, including baseline checks, risk-based validation, production readiness gates, final review, TRACEABILITY.md updates, implementation feedback capture, knowledge propagation decisions, applying review fixes, updating slice status after human completion approval, committing the work, and confirming a clean workspace. This skill must not plan new slices or change approval boundaries.
 ---
 
 # sdd-implement-task
@@ -103,26 +103,9 @@ approved slice.
 
 ## Validation Execution Strategy
 
-Run validation progressively, balancing confidence and feedback speed:
-
-1. nearest fast validation for the changed code
-2. tests related to the approved slice
-3. `rtk pnpm run qlty`
-4. needed web tests
-5. build
-
-Use the full default validation order for meaningful code changes when the
-slice risk justifies it:
-
-```bash
-rtk pnpm run qlty
-rtk pnpm test
-rtk pnpm run test:web
-rtk pnpm run build
-```
-
-For docs-only changes, run `rtk pnpm run qlty`; add `rtk pnpm run lint:md`
-when markdown structure or links need focused validation.
+Use `docs/specs/README.md` `Risk-Based Validation And Review` as the SSOT.
+Start with the nearest useful check, then add only the tests, web checks, or
+build evidence required by the changed surface and recorded risks.
 
 Avoid:
 
@@ -262,19 +245,15 @@ Before updating durable docs, verify the knowledge:
 Do not update durable docs just because implementation happened. Update them
 only when leaving the knowledge out would make future work worse.
 
-## Independent Reviews
+## Final Review
 
-After implementation and initial validation, review the work three times.
-Each review must be independent:
+After final validation, perform one integrated review of the final diff against
+the approved slice scope, acceptance criteria, architecture rules, quality, and
+production readiness. Add an independent second review only when the slice has
+the higher-risk surface defined by `docs/specs/README.md`, or the first review
+finds a concern.
 
-1. Review pass 1: inspect the final diff against the approved slice scope,
-   acceptance criteria, and architecture rules.
-2. Review pass 2: start fresh from `TASKS.md`, related specs, and the final
-   diff; do not refer to pass 1 results while finding issues.
-3. Review pass 3: start fresh again; do not refer to pass 1 or pass 2 results
-   while finding issues.
-
-For each pass, look for:
+For each required review, look for:
 
 - behavior regressions
 - missing tests or weak validation
@@ -295,8 +274,8 @@ For each pass, look for:
 - durable documentation updates that fail the Durable Documentation Gate
 - out-of-scope changes
 
-After all three passes, merge duplicate findings, apply required fixes, and
-rerun the relevant validation.
+Merge findings, apply required fixes, and rerun only the validation affected by
+those fixes.
 
 ## Completion Workflow
 
