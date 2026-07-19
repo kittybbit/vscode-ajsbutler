@@ -651,6 +651,60 @@ suite("Build Syntax Diagnostics", () => {
     ]);
   });
 
+  test("reports end-judgment and retry diagnostics for normal and recovery QUEUE jobs", () => {
+    for (const type of ["qj", "rq"]) {
+      const dependencyDiagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "queue1",
+            type,
+            parameters: [
+              "jd=ab;",
+              "abr=y;",
+              "rjs=0;",
+              "rje=4294967296;",
+              "rec=13;",
+              "rei=0;",
+            ],
+          },
+        ]),
+      );
+      const dependencyMessages = dependencyDiagnostics.map(
+        (diagnostic) => diagnostic.message,
+      );
+
+      assert.deepStrictEqual(dependencyMessages, [
+        "Retry start code (rjs) must be between 1 and 4294967295.",
+        "Retry end code (rje) must be between 1 and 4294967295.",
+        "Retry count (rec) must be between 1 and 12.",
+        "Retry interval (rei) must be between 1 and 10.",
+        "Automatic retry (abr=y) requires end judgment (jd) to be cod.",
+        "Retry parameter (rjs) requires end judgment (jd) to be cod.",
+        "Retry parameter (rje) requires end judgment (jd) to be cod.",
+        "Retry parameter (rec) requires end judgment (jd) to be cod.",
+        "Retry parameter (rei) requires end judgment (jd) to be cod.",
+      ]);
+
+      const thresholdDiagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "queue1",
+            type,
+            parameters: ["jd=cod;", "abr=y;", "wth=20;", "tho=10;"],
+          },
+        ]),
+      );
+
+      assert.deepStrictEqual(
+        thresholdDiagnostics.map((diagnostic) => diagnostic.message),
+        [
+          "Warning threshold (wth) must be less than abnormal threshold (tho).",
+          "Abnormal threshold (tho) must be greater than warning threshold (wth).",
+        ],
+      );
+    }
+  });
+
   test("does not report threshold-ordering diagnostics for omitted or ordered explicit end-judgment thresholds", () => {
     const diagnostics = buildSyntaxDiagnostics(
       buildRootUnitDefinition([

@@ -5,6 +5,8 @@ export const jobEndJudgmentDiagnosticTargetTypes = new Set([
   "rp",
   "cj",
   "rcj",
+  "qj",
+  "rq",
 ]);
 
 export const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];

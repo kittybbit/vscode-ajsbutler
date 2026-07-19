@@ -86,3 +86,6 @@ JP1/AJS behavior is part of this revised plan.
   `tsN`, and `tdN` content accepted at exact limits, ASCII and UTF-8 multibyte
   overages diagnosed, and outer quotes excluded; `rtk pnpm run qlty` passed
   with no issues.
+- S4 / `VAL-QUEUE` (2026-07-20): `rtk pnpm test` passed with `qj` and `rq`
+  receiving numeric range, `jd`/`abr`, retry dependency, and threshold-ordering
+  diagnostics; `rtk pnpm run qlty` passed with no issues.

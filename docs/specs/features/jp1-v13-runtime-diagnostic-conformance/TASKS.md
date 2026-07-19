@@ -4,7 +4,7 @@
 
 - Purpose: make runtime semantic diagnostics conform to the currently
   supported JP1/AJS3 version 13 parameter rules.
-- Approved slices: S1-S6; active implementation slice: S4.
+- Approved slices: S1-S6; active implementation slice: S5.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives clear approval.
 - Do not: expand coverage to unsupported parameter families or change parser,
@@ -15,7 +15,7 @@
 - Validate each code slice with focused desktop evidence and
   `rtk pnpm run qlty`; run final desktop/web/build validation after Slice 6.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next action: implement Slice 4 with `sdd-implement-task`.
+- Next action: implement Slice 5 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -33,7 +33,7 @@
   conformance gaps in `SPECS.md`.
 - Review status: Reviewed; revised six-slice plan is ready for implementation
 - Human approval: Approved for S1-S6
-- Active implementation slice: S4
+- Active implementation slice: S5
 
 ## Human Approval
 
@@ -202,7 +202,7 @@ and fresh approval.
 
 ### Slice 4: Include QUEUE jobs in end-judgment and retry diagnostics
 
-- Status: Approved
+- Status: Complete
 - Scope: add `qj` and `rq` to the existing end-judgment range, dependency,
   retry, and threshold-ordering target set; add target-matrix tests and extend
   the CHANGELOG entry.
@@ -388,7 +388,8 @@ and fresh approval.
 - [x] Slice 1 focused desktop tests and qlty pass
 - [x] Slice 2 focused desktop tests and qlty pass
 - [x] Slice 3 focused desktop tests and qlty pass
-- [ ] Slices 4-6 focused desktop tests and qlty pass
+- [x] Slice 4 focused desktop tests and qlty pass
+- [ ] Slices 5-6 focused desktop tests and qlty pass
 - [ ] Final web tests and production build pass
 - [ ] Integrated implementation review completed
 - [ ] TRACEABILITY.md updated with implementation evidence
