@@ -1,16 +1,17 @@
 # Traceability: Use-Case Responsibility Reorganization
 
-| Source | SPECS          | Slice | Validation                 |
-| ------ | -------------- | ----- | -------------------------- |
-| D1     | R1, R2, R4-R6  | 1     | Passed: paths/qlty/lint    |
-| U1     | R3-R6          | 2     | Passed: scenarios/rules    |
-| E1     | R3-R6          | 3     | Passed: scenarios/rule IDs |
-| F1     | R2, R3, R5, R6 | 4     | Passed: scenarios/details  |
-| S1     | R3, R5, R6     | 5     | Passed: scenarios/paths    |
-| U2     | R4, R7, R8     | 6     | Passed: six IDs/consumers  |
-| E2     | R4, R7, R8     | 7     | Passed: IDs/gap inventory  |
-| F2     | R2, R5, R9     | 8     | Passed: ownership matrix   |
-| V2     | R5, R6, R10    | 9     | Passed: matrix/evidence    |
+| Source | SPECS              | Slice | Validation                 |
+| ------ | ------------------ | ----- | -------------------------- |
+| D1     | R1, R2, R4-R6      | 1     | Passed: paths/qlty/lint    |
+| U1     | R3-R6              | 2     | Passed: scenarios/rules    |
+| E1     | R3-R6              | 3     | Passed: scenarios/rule IDs |
+| F1     | R2, R3, R5, R6     | 4     | Passed: scenarios/details  |
+| S1     | R3, R5, R6         | 5     | Passed: scenarios/paths    |
+| U2     | R4, R7, R8         | 6     | Passed: six IDs/consumers  |
+| E2     | R4, R7, R8         | 7     | Passed: IDs/gap inventory  |
+| F2     | R2, R5, R9         | 8     | Passed: ownership matrix   |
+| V2     | R5, R6, R10        | 9     | Passed: matrix/evidence    |
+| Q1     | R1, R4-R6, R8, R10 | 10    | Planned: ownership/ID sets |
 
 ## Source Mapping
 
@@ -46,6 +47,13 @@
 - F2: review RF2 for Flow application/presentation ownership.
 - V2: review RF5, RF6, and RF7 for migration proof, validation, and current
   state.
+- Q1: additional-review R1-R6 for the QUEUE projection owner, deleted-ID
+  integrity, explicit `ULV-S07` mapping, and refreshed final evidence.
+
+The Slice 9 candidate evidence below remains a valid record of the completed
+pre-correction state, but it is superseded for Feature Exit purposes by
+proposed Slice 10. Feature Exit must record and validate the post-Slice-10
+commit SHA.
 
 ## Requirement-Level Migration Evidence
 

@@ -5,8 +5,8 @@
 - Purpose: reorganize requirement documents by stable responsibility without
   changing runtime behavior, while correcting durable parameter requirements
   to the authoritative version 13 manual.
-- Approved or active slice: Slices 1 through 9 are complete; no implementation
-  slice remains active.
+- Approved or active slice: Slices 1 through 9 are complete; Slice 10 is
+  approved and active.
 - Do not: edit runtime code, tests, configuration, or generated artifacts.
 - Do not: change existing JP1/AJS runtime or extension behavior; implementation
   conformance is independent follow-up.
@@ -17,9 +17,9 @@
   full docs-only validation before feature exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Review state: the Feature Exit review was reopened after RF1-RF7 identified
-  normative, boundary, and verification gaps.
-- Next decision: run Feature Exit Review with `sdd-plan-task`.
+- Review state: an additional review reopened Feature Exit because a Unit List
+  projection rule is incorrectly owned as a shared Domain Rule.
+- Next decision: implement Slice 10 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -35,19 +35,19 @@
 ## Plan Status
 
 - Status: Approved
-- Planning scope: preserve completed Slices 1 through 6 and correct review
-  findings RF1-RF7 through deterministic parameter rules, explicit consumer
-  references, a flow ownership boundary, and reproducible migration evidence.
-- Review status: Reviewed
-- Human approval: Slice 9 completion approved
-- Active implementation slice: none; Feature Exit Review is next
+- Planning scope: preserve completed Slices 1 through 9 and correct the
+  additional QUEUE transfer-projection ownership finding without changing
+  runtime behavior or JP1/AJS interpretation.
+- Review status: Reviewed for proposed Slice 10
+- Human approval: Approved for Slice 10
+- Active implementation slice: Slice 10
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: Slice 9 completion approved in the current conversation
-- Approved scope: Slices 1 through 9 are complete within their recorded
-  boundaries.
+- Approved at: Slice 10 approved in the current conversation
+- Approved scope: Slice 10 within its recorded approval boundary; Slices 1
+  through 9 remain complete.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -68,6 +68,14 @@ Only clear human approval can change Status to Approved.
 - Human decision: official version 13 requirements are authoritative. Durable
   rules must state the official value; every implementation mismatch is
   deferred to an independent conformance feature rather than fixed here.
+- Additional source: `Use-Case Responsibility Reorganization
+追加レビュー修正指示書`.
+- Additional gap: `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001` describes only the
+  Unit List field projection and therefore violates the shared-meaning Domain
+  Rule boundary established by Slice 1 and Slice 6.
+- Replanning decision: add one docs-only ownership-correction slice, preserve
+  completed Slices 1 through 9, and rerun Feature Exit only after the revised
+  rule-ID totals and migration evidence are complete.
 
 ## Implementation Slices
 
@@ -568,12 +576,81 @@ Only clear human approval can change Status to Approved.
 - Out of Scope: permanent migration-history documentation, runtime code/tests,
   generated artifacts, configuration, or unrelated wording cleanup.
 
+### Slice 10: Correct QUEUE Transfer Projection Ownership
+
+- Status: Approved
+- Scope:
+  - remove `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001` and its presentation-only
+    normative body from `interpret-jp1-parameters.md`
+  - remove that ID from the Unit List consumed-rule list and scenario
+  - state the unchanged QUEUE and recovery QUEUE source/destination inclusion
+    and transfer-operation exclusion as Unit List projection rules
+  - preserve the existing QUEUE projection scenario without a shared rule-ID
+    dependency
+  - split the `ULV-S07` migration evidence from its grouped matrix row so Unit
+    List is the explicit consumer-specific owner
+  - refresh the Unit List consumer count from six IDs to five and the complete
+    Domain Rule count from 31 to 30
+  - mark the Slice 9 candidate evidence superseded; Feature Exit must validate
+    the post-Slice-10 commit SHA
+- User / Domain Value: shared Domain Rules contain only reusable JP1/AJS
+  meaning, while Unit List owns its consumer-specific display projection.
+- Cohesive Change Group: the obsolete Domain Rule definition, its sole consumer
+  reference, the preserved Unit List projection contract, and evidence proving
+  unique ownership and zero orphaned IDs.
+- Acceptance:
+  - the deleted ID has zero definitions and zero consumer references in durable
+    requirements; feature-local review history is excluded from the rule set
+  - Unit List rules and the existing scenario explicitly preserve source and
+    destination display while excluding transfer-operation display for `qj`
+    and `rq`
+  - no new Domain Rule is created solely for display-column inclusion
+  - Unit List consumes exactly five shared Domain Rule IDs and the complete
+    defined/reference set contains exactly 30 IDs
+  - undefined, duplicate-owner, and unreferenced Domain Rule IDs are zero
+  - `ULV-S07` has an explicit Consolidated or Moved mapping to Unit List and
+    total migrated, removed, deferred, and unmapped counts remain consistent
+  - prior candidate evidence is not presented as final after durable docs
+    change
+- Validation:
+  - exact search for the deleted ID across durable Domain Rules and Use Cases
+  - exact definition/reference/duplicate/unreferenced rule-ID set comparison
+  - targeted review of Unit List rules and QUEUE scenario for `qj` and `rq`
+  - migration-matrix row and total comparison, including zero unmapped items
+  - repository-local Markdown link-target check
+  - `rtk pnpm run qlty`; `rtk pnpm run lint:md`; `rtk git diff --check`
+  - confirm the branch diff remains docs-only
+- Traceability: additional review R1-R6 to SPECS normative-owner, shared-
+  semantic, consumer-reference, behavior-preservation, and reproducible-
+  evidence requirements; proven by Unit List text, zero deleted-ID references,
+  rule-ID set equality, and updated `ULV-S07` mapping.
+- Production Readiness:
+  - Failure mode: removing the ID without preserving the projection contract,
+    or leaving stale evidence and references
+  - JP1/AJS compatibility: no meaning changes; transfer syntax, validity,
+    dependency, and diagnostic rules remain untouched
+  - Large or malformed input risk: none; documentation-only
+  - Desktop/web impact: none; both hosts retain the same documented projection
+  - README/docs impact: two durable requirement documents and feature-local
+    evidence/state only
+  - CHANGELOG impact: none; observable behavior and documented output remain
+    unchanged
+- Approval Boundary: `interpret-jp1-parameters.md`, `uc-view-unit-list.md`,
+  feature `TASKS.md` and `TRACEABILITY.md`, and only minimal reference/evidence
+  corrections required to reach zero integrity failures.
+- Dependencies: completed Slices 6 and 9
+- Risks: removing one ID changes the recorded definition/reference totals and
+  invalidates the prior final-candidate SHA even though behavior is unchanged.
+- Out of Scope: runtime code, DTOs, tests, columns, parser behavior, transfer
+  validity-rule design, diagnostics, official-manual conformance fixes, new
+  Domain Rule IDs, or changes to visible values.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
 - Reason: completed Slices 1 through 5 moved, consolidated, or split durable
-  contracts; review findings now require requirement-level mapping and
-  reproducible evidence through Slices 6 through 9.
+  contracts; review findings require requirement-level mapping and
+  reproducible evidence through proposed Slice 10.
 
 ## Cross-Slice Dependencies
 
@@ -590,7 +667,9 @@ Only clear human approval can change Status to Approved.
 - Slice 8 is independent of parameter work after completed Slice 4, but runs
   before final evidence so its ownership mapping is included.
 - Slice 9 depends on Slices 6 through 8 and is the only slice that may restore
-  Feature Exit readiness.
+  Feature Exit readiness before the additional review.
+- Slice 10 depends on the Slice 6 ownership boundary and Slice 9 migration
+  evidence; it must complete before Feature Exit is rerun.
 
 ## Feature-Level Risks
 
@@ -606,23 +685,26 @@ Only clear human approval can change Status to Approved.
   than concealed or fixed inside this docs-only feature.
 - Migration totals are meaningless unless Slice 9 defines the counting unit
   before recording results.
+- Removing the presentation-only rule ID without refreshing exact-set evidence
+  could leave Feature Exit relying on a stale candidate and stale totals.
 
 ## Use-Case Back-Propagation
 
 - This feature's implementation is the durable documentation update itself.
 - Deterministic parameter meaning and Flow ownership remain durable; migration
   history and validation counts remain transient until closure.
+- QUEUE transfer column inclusion and exclusion are consumer-specific Unit List
+  behavior, not shared parameter meaning.
 - `docs/specs/roadmap.md` retains the shared-search trigger and records
   independent runtime-conformance work discovered while making official
   parameter requirements deterministic.
 
 ## Feature Exit
 
-- Definition of Done status: implementation slices complete; Feature Exit
-  Review pending
-- Durable documentation updates: Slices 1 through 9 complete
-- Open risk: none from implementation; closure evidence awaits Feature Exit
-  Review
+- Definition of Done status: not satisfied; proposed Slice 10 requires review,
+  approval, implementation, and completion approval
+- Durable documentation updates: Slices 1 through 9 complete; Slice 10 pending
+- Open risk: stale QUEUE projection ownership and final-validation evidence
 
 ## Validation
 
@@ -630,7 +712,8 @@ Only clear human approval can change Status to Approved.
 - [ ] Complete Flow ownership clarification.
 - [ ] Complete requirement-level migration mapping.
 - [ ] Record reproducible final validation evidence for the final commit.
-- [ ] Re-run Feature Exit after Slices 6 through 9 complete.
+- [ ] Correct QUEUE projection ownership and refresh final evidence in Slice 10.
+- [ ] Re-run Feature Exit after Slice 10 completes.
 
 ## Notes
 
