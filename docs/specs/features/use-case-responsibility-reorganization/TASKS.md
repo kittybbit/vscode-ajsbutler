@@ -5,8 +5,8 @@
 - Purpose: reorganize requirement documents by stable responsibility without
   changing runtime behavior, while correcting durable parameter requirements
   to the authoritative version 13 manual.
-- Approved or active slice: Slices 1 through 6 are complete; revised Slice 7 is
-  approved and active; Slices 8 and 9 retain their prior approval.
+- Approved or active slice: Slices 1 through 7 are complete; Slice 8 is
+  approved and active; Slice 9 retains its prior approval.
 - Do not: edit runtime code, tests, configuration, or generated artifacts.
 - Do not: change existing JP1/AJS runtime or extension behavior; implementation
   conformance is independent follow-up.
@@ -19,7 +19,7 @@
 - Document roles: see `docs/specs/README.md`.
 - Review state: the Feature Exit review was reopened after RF1-RF7 identified
   normative, boundary, and verification gaps.
-- Next decision: implement revised Slice 7 with `sdd-implement-task`.
+- Next decision: implement Slice 8 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -39,18 +39,17 @@
   findings RF1-RF7 through deterministic parameter rules, explicit consumer
   references, a flow ownership boundary, and reproducible migration evidence.
 - Review status: Reviewed
-- Human approval: Approved for revised Slice 7; prior approval remains for
+- Human approval: Slice 7 completion approved; prior approval remains for
   Slices 8 and 9
-- Active implementation slice: Slice 7
+- Active implementation slice: Slice 8
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: revised Slice 7 approved in the current conversation after its
   normative-source and roadmap boundary changed
-- Approved scope: Slices 1 through 5 remain completed under their prior
-  approval; Slice 6 is complete; Slices 8 and 9 retain approval within their
-  recorded boundaries.
+- Approved scope: Slices 1 through 7 are complete; Slices 8 and 9 retain
+  approval within their recorded boundaries.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -388,7 +387,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 7: Complete Supported Diagnostic Contracts
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - make all 25 IDs under `Diagnostic Interpretation Rules` deterministic using
     exact unit families, parameters, conditions, values, ranges, byte lengths,
@@ -449,6 +448,10 @@ Only clear human approval can change Status to Approved.
   that one current rule ID combines multiple unit-specific meanings. Each
   mismatch must be recorded, and any documentation-only ID split still
   requires review when the approved boundary no longer covers it.
+- Implementation Feedback: separating the 25 diagnostic rules into one family-
+  organized normative file kept rule IDs uniquely owned without overloading the
+  shared interpretation overview. Official-first comparison exposed the yearly
+  cycle mismatch early and made the independent conformance boundary explicit.
 - Out of Scope: new diagnostics, changed diagnostic behavior or messages,
   runtime code, tests, compatible-ISAM support, or new product-version scope.
 

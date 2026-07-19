@@ -168,6 +168,19 @@
    - First confirmed gap: yearly schedule cycle `cy=(n,y)` is `1..9` in the
      version 13 Command Reference, while current diagnostics accept `1..10` and
      present that range in the diagnostic message.
+   - Event-reception `evwfr` has a 2,048-byte aggregate limit across repeated
+     definitions, while current diagnostics validate each value independently.
+   - UNIX/PC transfer-file macro variables require the queuing attribute
+     `jty=q`, while current diagnostics accept the macro shape without checking
+     that context.
+   - Transfer-file parameters are unavailable to custom PC jobs, while current
+     diagnostics target generic custom-job types without checking the custom
+     job class.
+   - End-judgment and automatic-retry parameters also apply to QUEUE and
+     recovery QUEUE jobs, while current diagnostics omit those unit types.
+   - File-monitoring and transfer-file byte-length checks currently measure
+     serialized quoted values, including the quote characters, instead of the
+     parameter content governed by the official limits.
    - The conformance feature must update implementation and tests from the
      durable parameter rule; it must not weaken the Use Case to preserve an
      incorrect implementation value.

@@ -11,6 +11,7 @@ Current domain rules:
 
 - [Normalize AJS Document](./normalize-ajs-document.md)
 - [Interpret JP1 Parameters](./interpret-jp1-parameters.md)
+- [JP1 Diagnostic Parameters](./jp1-diagnostic-parameter-rules.md)
 - [Generate AJS Commands](./generate-ajs-commands.md)
 
 User/application workflows belong under `docs/requirements/use-cases/`.

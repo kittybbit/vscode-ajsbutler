@@ -37,6 +37,34 @@ opened definition and provide precise, host-neutral diagnostic information.
   coordinate convention required by the editor
 - desktop and web entry points share the same diagnostic decisions
 
+## Consumed Domain Rules
+
+- `JP1-PARAM-FILE-MONITOR-CONDITION-001`
+- `JP1-PARAM-FILE-MONITOR-OUTPUT-001`
+- `JP1-PARAM-RETRY-ABR-DEPENDENCY-001`
+- `JP1-PARAM-JOB-END-RANGE-001`
+- `JP1-PARAM-JOB-END-THRESHOLD-001`
+- `JP1-PARAM-SCHEDULE-RANGE-001`
+- `JP1-PARAM-SCHEDULE-WEEKLY-DAY-001`
+- `JP1-PARAM-SCHEDULE-START-DATE-001`
+- `JP1-PARAM-EVENT-ARRIVAL-HOST-001`
+- `JP1-PARAM-EVENT-ARRIVAL-RANGE-001`
+- `JP1-PARAM-EVENT-SEND-ID-RANGE-001`
+- `JP1-PARAM-EVENT-RECEIVE-SCOPE-001`
+- `JP1-PARAM-EVENT-RECEIVE-FORMAT-001`
+- `JP1-PARAM-EVENT-RECEIVE-NUMERIC-ID-001`
+- `JP1-PARAM-EVENT-RECEIVE-FILTER-001`
+- `JP1-PARAM-EVENT-RECEIVE-TIMEOUT-001`
+- `JP1-PARAM-EVENT-HOST-LENGTH-001`
+- `JP1-PARAM-WAIT-ETS-VALUE-001`
+- `JP1-PARAM-WAIT-FD-CONTEXT-001`
+- `JP1-PARAM-INTERVAL-CONTROL-RANGE-001`
+- `JP1-PARAM-INTERVAL-CONTROL-END-CONTEXT-001`
+- `JP1-PARAM-STRING-FAMILY-CONSTRAINT-001`
+- `JP1-PARAM-TRANSFER-FILE-FORM-001`
+- `JP1-PARAM-TRANSFER-FILE-PATH-001`
+- `JP1-PARAM-STRING-MACRO-ALLOWANCE-001`
+
 ## Behavioral Scenarios
 
 ```gherkin
@@ -68,7 +96,7 @@ Scenario: Application diagnostics remain host neutral
 ## Supported Semantic Rule Families
 
 Diagnostics cover the rule IDs listed under `Diagnostic Interpretation Rules`
-in the shared parameter contract, including:
+in the shared parameter contract and enumerated above, including:
 
 - file-monitoring conditions and output dependencies
 - automatic-retry dependencies, ranges, and threshold ordering
@@ -80,8 +108,11 @@ in the shared parameter contract, including:
 
 ## Acceptance Notes
 
-- every semantic rule violation is reported without changing normalized or raw
-  evidence
+- every violation of a supported diagnostic rule ID is reported without
+  changing normalized or raw evidence
+- the Use Case does not guarantee diagnostics for every JP1/AJS3 manual rule
+- absence of a diagnostic for an unsupported rule does not establish that the
+  definition is valid under that rule
 - compatible-ISAM-specific diagnostics remain outside the supported scope
 
 ## Risks Or Edge Cases
