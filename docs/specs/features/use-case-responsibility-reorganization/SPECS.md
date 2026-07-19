@@ -120,9 +120,5 @@ specifications, and future design decisions each have one clear document home.
 
 ## Open Questions
 
-- The implementation-slice plan must decide whether command generation remains
-  a separately indexed domain rule or is documented only as part of unit
-  definition display while preserving its reusable contract.
-- The implementation-slice plan must select the smallest durable home for the
-  search-unification decision without creating a broader architecture taxonomy
-  than this feature needs.
+- None. Command generation remains a shared domain rule, and the future shared-
+  search trigger is owned by `docs/specs/roadmap.md`.

@@ -334,15 +334,13 @@ Only clear human approval can change Status to Approved.
 ## Use-Case Back-Propagation
 
 - This feature's implementation is the durable documentation update itself.
-- Feature Exit must confirm that no reusable taxonomy decision remains only in
-  the feature folder.
+- No reusable taxonomy decision remains only in the feature folder.
 - `docs/specs/roadmap.md` changes only to retain the shared-search trigger as a
   future decision; repository sequencing otherwise remains unchanged.
 
 ## Feature Exit
 
-- Definition of Done status: Implementation slices complete; Feature Exit
-  review pending
+- Definition of Done status: Satisfied; human closure approval pending
 - Durable documentation updates: Complete for Slices 1 through 5
 - Open risks: none identified after final content and reference review
 
