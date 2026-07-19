@@ -26,8 +26,9 @@
      that pane, and remove duplicated row-level dialog/cross-link actions.
    - The feature-local folder has been closed because no next implementation
      slice is apparent.
-   - Introduce shared application or domain search semantics only if the
-     search-domain use-case trigger is satisfied and separately approved.
+   - Introduce shared application or domain search semantics only when at least
+     two non-table consumers require equivalent matching or result-navigation
+     behavior and a focused feature is separately approved.
 
 2. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
 
@@ -147,8 +148,10 @@
 
 1. Build/test output-directory ownership cleanup is deferred until packaging,
    caching, or stale output issues make it a concrete blocker.
-2. Introduce a shared search use case only if list, flow, or another non-table
-   consumer needs common query semantics.
+2. Introduce a shared search use case only when at least two non-table
+   consumers need equivalent matching or result-navigation semantics. Keep
+   rendering, React Flow camera behavior, and TanStack ranking outside that
+   future contract.
 3. Extend JP1/AJS WebAPI support beyond read-only import only after the initial
    boundary, authentication model, and beta feedback are stable.
 4. Revisit viewer-specific bundle-size reductions only if a future

@@ -6,13 +6,10 @@ Use this directory when the behavior being described is a stable product or
 application use case that may survive refactors of modules, adapters, or file
 layout.
 
-Use cases are grouped by requirement area:
+Current user and application use cases are grouped by behavior area:
 
-Core definition interpretation:
+Definition acquisition:
 
-- normalize AJS document
-- interpret JP1 parameters
-- generate AJS commands
 - import AJS definition via WebAPI
 
 Viewer and export behavior:
@@ -27,8 +24,13 @@ Viewer and export behavior:
 
 Cross-cutting operations:
 
-- record telemetry
-- search domain unification
+- compare semantic diff
+
+Shared JP1/AJS meaning belongs in
+[`domain-rules/`](../domain-rules/README.md). Privacy, quality, and operational
+policy belongs in [`cross-cutting/`](../cross-cutting/README.md). Future design
+decisions belong in `docs/specs/roadmap.md` or a focused feature specification,
+not in this directory.
 
 Do not use this directory as a task log or implementation notebook.
 That belongs in `docs/specs/`.
@@ -54,6 +56,10 @@ That belongs in `docs/specs/`.
 
 - `docs/requirements/use-cases/`
   Repository-level behavior contract.
+- `docs/requirements/domain-rules/`
+  Shared normative JP1/AJS meaning consumed by multiple use cases.
+- `docs/requirements/cross-cutting/`
+  Durable quality, privacy, and operational requirements.
 - `docs/specs/features/<feature>/SPECS.md`
   Feature-local implementation requirements and boundary decisions.
 - `docs/specs/features/<feature>/TASKS.md`
@@ -75,3 +81,7 @@ Ask two questions:
 2. Is this describing how the current branch will implement, sequence, or
    validate the change?
    If yes, it belongs in `docs/specs/`, not here.
+
+If the behavior is shared domain meaning rather than a triggered workflow, it
+belongs in `domain-rules/`. If it constrains multiple workflows as a quality,
+privacy, security, or operational policy, it belongs in `cross-cutting/`.
