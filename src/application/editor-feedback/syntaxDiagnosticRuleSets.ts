@@ -4,6 +4,7 @@ import {
   buildExplicitAllowedValuesRule,
   buildExplicitByteLengthRule,
   buildExplicitDecimalRangeRule,
+  buildExplicitGovernedByteLengthRule,
   buildRequiredParameterRule,
 } from "./syntaxDiagnosticCore";
 import {
@@ -17,6 +18,7 @@ import {
 } from "./syntaxDiagnosticEventRules";
 import {
   hasInvalidWildcardWithShortMonitoringInterval,
+  isValidExplicitFileMonitoringConditions,
   isValidExplicitFileMonitoringFileName,
   isValidExplicitFileMonitoringInterval,
   splitFileMonitoringConditions,
@@ -94,13 +96,13 @@ export const waitJobExecutionTimeDiagnosticRules = [
 
 export const transferFileByteLengthRules: readonly AjsParameterDiagnosticRule[] =
   transferFileIndexes.flatMap((index) => [
-    buildExplicitByteLengthRule({
+    buildExplicitGovernedByteLengthRule({
       key: `ts${index}`,
       minimum: 1,
       maximum: 511,
       message: `Transfer source file name (ts${index}) must be between 1 and 511 bytes.`,
     }),
-    buildExplicitByteLengthRule({
+    buildExplicitGovernedByteLengthRule({
       key: `td${index}`,
       minimum: 1,
       maximum: 511,
@@ -112,13 +114,15 @@ export const transferFileValueShapeRules: readonly AjsParameterDiagnosticRule[] 
   transferFileIndexes.flatMap((index) => [
     {
       key: `ts${index}`,
-      message: `Transfer source file name (ts${index}) must be a quoted transfer-file value or macro-variable form.`,
-      isInvalid: (parameter) => !isValidExplicitTransferFileValue(parameter),
+      message: `Transfer source file name (ts${index}) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.`,
+      isInvalid: (parameter, unit) =>
+        !isValidExplicitTransferFileValue(parameter, unit),
     },
     {
       key: `td${index}`,
-      message: `Transfer destination file name (td${index}) must be a quoted transfer-file value or macro-variable form.`,
-      isInvalid: (parameter) => !isValidExplicitTransferFileValue(parameter),
+      message: `Transfer destination file name (td${index}) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.`,
+      isInvalid: (parameter, unit) =>
+        !isValidExplicitTransferFileValue(parameter, unit),
     },
   ]);
 
@@ -185,11 +189,10 @@ export const fileMonitoringDiagnosticRules: readonly AjsParameterDiagnosticRule[
     },
     {
       key: "flwc",
-      message: "File monitoring condition (flwc) cannot specify both s and m.",
-      isInvalid: (parameter) => {
-        const flwcConditions = splitFileMonitoringConditions(parameter.value);
-        return flwcConditions.has("s") && flwcConditions.has("m");
-      },
+      message:
+        "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
+      isInvalid: (parameter) =>
+        !isValidExplicitFileMonitoringConditions(parameter),
     },
     {
       key: "flco",
@@ -356,7 +359,7 @@ export const eventReceivingDiagnosticRules: readonly AjsParameterDiagnosticRule[
     {
       key: "evwfr",
       message:
-        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format within 2048 bytes.',
+        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format.',
       isInvalid: (parameter) =>
         !isValidExplicitEventReceivingFilterReference(parameter),
     },

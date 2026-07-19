@@ -27,6 +27,12 @@ suite("Syntax Diagnostic Event Rules", () => {
       ),
       true,
     );
+    assert.strictEqual(
+      isValidExplicitEventReceivingFilterReference(
+        evwfr(`${"a".repeat(2049)}:"value"`),
+      ),
+      true,
+    );
   });
 
   test("rejects invalid event receiving filter references", () => {
@@ -44,12 +50,6 @@ suite("Syntax Diagnostic Event Rules", () => {
     );
     assert.strictEqual(
       isValidExplicitEventReceivingFilterReference(evwfr(':"value"')),
-      false,
-    );
-    assert.strictEqual(
-      isValidExplicitEventReceivingFilterReference(
-        evwfr(`${"a".repeat(2049)}:"value"`),
-      ),
       false,
     );
   });

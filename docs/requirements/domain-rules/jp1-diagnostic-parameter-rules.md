@@ -154,7 +154,10 @@ These rules apply to JP1 event reception-monitoring and recovery jobs (`evwj`,
   `evwms` and `evdet` content is `1..1024` bytes.
 - `evwfr` is
   `optional-extended-attribute-name:"value"`; each explicit value is non-empty,
-  and all repeated `evwfr` definitions total at most `2048` bytes.
+  and all repeated definitions total at most `2048` bytes when measured in the
+  canonical `evwfr=optional-extended-attribute-name:"value";` format. The
+  parameter key, `=`, and terminating `;` are part of that aggregate limit;
+  indentation and line endings are not.
 - `evtmc` is `n`, `a`, `n:"file-name"`, `a:"file-name"`,
   `d:"file-name"`, or `b:"file-name"`; file-name content is `1..256` bytes.
 - Source: [Command Reference 5.2.9](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0224.HTM).

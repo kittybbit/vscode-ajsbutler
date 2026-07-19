@@ -4,7 +4,7 @@ import type {
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import {
-  isValidExplicitByteLengthValue,
+  isValidExplicitGovernedByteLengthValue,
   parseExplicitDecimalInRange,
 } from "./syntaxDiagnosticScalarValidators";
 import { hasWildcard } from "./syntaxDiagnosticStringValidators";
@@ -12,13 +12,17 @@ import { findParameter } from "./syntaxDiagnosticUnitLookup";
 
 export const isValidExplicitFileMonitoringFileName = (
   parameter: AjsParameter | undefined,
-): boolean => isValidExplicitByteLengthValue(parameter, 1, 255);
+): boolean => isValidExplicitGovernedByteLengthValue(parameter, 1, 255);
 
 export const isValidExplicitFileMonitoringInterval = (
   parameter: AjsParameter | undefined,
 ): boolean =>
   parseExplicitDecimalInRange({ parameter, minimum: 1, maximum: 600 }) !==
   undefined;
+
+export const isValidExplicitFileMonitoringConditions = (
+  parameter: AjsParameter,
+): boolean => /^c(?::d(?::[sm])?)?$/.test(parameter.value);
 
 export const hasInvalidWildcardWithShortMonitoringInterval = (
   parameter: AjsParameter,

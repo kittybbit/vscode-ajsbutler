@@ -5,6 +5,8 @@ export const jobEndJudgmentDiagnosticTargetTypes = new Set([
   "rp",
   "cj",
   "rcj",
+  "qj",
+  "rq",
 ]);
 
 export const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
@@ -29,8 +31,24 @@ export const transferOperationDiagnosticTargetTypes = new Set([
   "rp",
   "cj",
   "rcj",
+  "cpj",
+  "rcpj",
 ]);
 
 export const queueTransferFileDiagnosticTargetTypes = new Set(["qj", "rq"]);
+
+export const transferMacroQueuingTargetTypes = new Set(["j", "rj", "pj", "rp"]);
+
+export const transferMacroAllowedTargetTypes = new Set([
+  "cj",
+  "rcj",
+  "qj",
+  "rq",
+]);
+
+export const customPcTransferFileProhibitedTargetTypes = new Set([
+  "cpj",
+  "rcpj",
+]);
 
 export const transferFileIndexes = [1, 2, 3, 4] as const;

@@ -139,7 +139,6 @@ export const isValidExplicitEventReceivingFilterReference = (
   parameter: AjsParameter | undefined,
 ): boolean =>
   parameter?.value !== undefined &&
-  hasValidByteLength(parameter.value, 1, 2048) &&
   isValidEventReceivingFilterReferenceValue(parameter.value);
 
 export const isValidExplicitEventReceivingTimeoutCondition = (

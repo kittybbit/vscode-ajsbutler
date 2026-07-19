@@ -231,6 +231,7 @@ suite("Build Syntax Diagnostics", () => {
         "  ln=1,999;",
         "  st=144,+47:59;",
         "  cy=143,(12,m);",
+        "  cy=142,(9,y);",
         "  shd=142,31;",
         "  cftd=141,af,31,31;",
         "  sy=140,U2879;",
@@ -281,7 +282,7 @@ suite("Build Syntax Diagnostics", () => {
         "  ty=g;",
         "  ln=1,999;",
         "  st=145,+48:00;",
-        "  cy=1,(13,m);",
+        "  cy=1,(10,y);",
         "  shd=1,0;",
         "  cftd=1,no,2;",
         "  sy=1,C2880;",
@@ -306,7 +307,7 @@ suite("Build Syntax Diagnostics", () => {
       ),
       expectedSyntaxDiagnostic(
         [6, 2, 2],
-        "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..10, m=1..12, w=1..5, or d=1..31.",
+        "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..9, m=1..12, w=1..5, or d=1..31.",
       ),
       expectedSyntaxDiagnostic(
         [7, 2, 3],
@@ -650,6 +651,60 @@ suite("Build Syntax Diagnostics", () => {
     ]);
   });
 
+  test("reports end-judgment and retry diagnostics for normal and recovery QUEUE jobs", () => {
+    for (const type of ["qj", "rq"]) {
+      const dependencyDiagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "queue1",
+            type,
+            parameters: [
+              "jd=ab;",
+              "abr=y;",
+              "rjs=0;",
+              "rje=4294967296;",
+              "rec=13;",
+              "rei=0;",
+            ],
+          },
+        ]),
+      );
+      const dependencyMessages = dependencyDiagnostics.map(
+        (diagnostic) => diagnostic.message,
+      );
+
+      assert.deepStrictEqual(dependencyMessages, [
+        "Retry start code (rjs) must be between 1 and 4294967295.",
+        "Retry end code (rje) must be between 1 and 4294967295.",
+        "Retry count (rec) must be between 1 and 12.",
+        "Retry interval (rei) must be between 1 and 10.",
+        "Automatic retry (abr=y) requires end judgment (jd) to be cod.",
+        "Retry parameter (rjs) requires end judgment (jd) to be cod.",
+        "Retry parameter (rje) requires end judgment (jd) to be cod.",
+        "Retry parameter (rec) requires end judgment (jd) to be cod.",
+        "Retry parameter (rei) requires end judgment (jd) to be cod.",
+      ]);
+
+      const thresholdDiagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "queue1",
+            type,
+            parameters: ["jd=cod;", "abr=y;", "wth=20;", "tho=10;"],
+          },
+        ]),
+      );
+
+      assert.deepStrictEqual(
+        thresholdDiagnostics.map((diagnostic) => diagnostic.message),
+        [
+          "Warning threshold (wth) must be less than abnormal threshold (tho).",
+          "Abnormal threshold (tho) must be greater than warning threshold (wth).",
+        ],
+      );
+    }
+  });
+
   test("does not report threshold-ordering diagnostics for omitted or ordered explicit end-judgment thresholds", () => {
     const diagnostics = buildSyntaxDiagnostics(
       buildRootUnitDefinition([
@@ -713,12 +768,36 @@ suite("Build Syntax Diagnostics", () => {
         {
           name: "file2",
           type: "rflwj",
-          parameters: ["flwc=c:d:s;", "flco=n;"],
+          parameters: ["flwc=c;", "flco=n;"],
         },
+        { name: "file3", type: "flwj", parameters: ["flwc=c:d;"] },
+        { name: "file4", type: "flwj", parameters: ["flwc=c:d:s;"] },
+        { name: "file5", type: "rflwj", parameters: ["flwc=c:d:m;"] },
       ]),
     );
 
     assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports file monitoring diagnostics for malformed condition forms", () => {
+    const invalidConditions = ["d", "d:c", "c::s", "c:d:s:x", "c:d:s:m"];
+
+    for (const condition of invalidConditions) {
+      const diagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "file1",
+            type: "flwj",
+            parameters: [`flwc=${condition};`],
+          },
+        ]),
+      );
+
+      assert.deepStrictEqual(
+        diagnostics.map((diagnostic) => diagnostic.message),
+        ["File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m."],
+      );
+    }
   });
 
   test("does not report file monitoring target-pattern diagnostics for valid explicit values", () => {
@@ -738,6 +817,45 @@ suite("Build Syntax Diagnostics", () => {
     );
 
     assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("measures quoted file monitoring names by content bytes", () => {
+    const exactAsciiContent = "a".repeat(255);
+    const overAsciiContent = "a".repeat(256);
+    const exactMultibyteContent = "あ".repeat(85);
+    const overMultibyteContent = "あ".repeat(86);
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "file1",
+          type: "flwj",
+          parameters: [`flwf="${exactAsciiContent}";`],
+        },
+        {
+          name: "file2",
+          type: "flwj",
+          parameters: [`flwf="${overAsciiContent}";`],
+        },
+        {
+          name: "file3",
+          type: "flwj",
+          parameters: [`flwf="${exactMultibyteContent}";`],
+        },
+        {
+          name: "file4",
+          type: "flwj",
+          parameters: [`flwf="${overMultibyteContent}";`],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.message),
+      [
+        "Monitored file name (flwf) must be between 1 and 255 bytes.",
+        "Monitored file name (flwf) must be between 1 and 255 bytes.",
+      ],
+    );
   });
 
   test("reports file monitoring target-pattern diagnostics for explicit out-of-range values and wildcard short intervals", () => {
@@ -818,7 +936,11 @@ suite("Build Syntax Diagnostics", () => {
     assertSyntaxDiagnostics(diagnostics, [
       expectedSyntaxDiagnostic(
         [9, 4, 4],
-        "File monitoring condition (flwc) cannot specify both s and m.",
+        "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
+      ),
+      expectedSyntaxDiagnostic(
+        [15, 4, 4],
+        "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
       ),
       expectedSyntaxDiagnostic(
         [15, 4, 4],
@@ -1040,6 +1162,76 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("accepts transfer-file macros only in supported unit and queuing contexts", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        { name: "job", type: "j", parameters: ["ts1=?SRC?;"] },
+        {
+          name: "recovery-job",
+          type: "rj",
+          parameters: ["jty=q;", "ts1=?SRC?;"],
+        },
+        { name: "pc-job", type: "pj", parameters: ["ts1=?SRC?;"] },
+        {
+          name: "recovery-pc-job",
+          type: "rp",
+          parameters: ["jty=q;", "ts1=?SRC?;"],
+        },
+        { name: "custom", type: "cj", parameters: ["ts1=?SRC?;"] },
+        { name: "recovery-custom", type: "rcj", parameters: ["ts1=?SRC?;"] },
+        { name: "queue", type: "qj", parameters: ["ts1=?SRC?;"] },
+        { name: "recovery-queue", type: "rq", parameters: ["ts1=?SRC?;"] },
+      ]),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+
+    for (const type of ["j", "rj", "pj", "rp"]) {
+      const nonQueuingDiagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "job",
+            type,
+            parameters: ["jty=n;", "ts1=?SRC?;", "td1=?DST?;"],
+          },
+        ]),
+      );
+
+      assert.deepStrictEqual(
+        nonQueuingDiagnostics.map((diagnostic) => diagnostic.message),
+        [
+          "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
+          "Transfer destination file name (td1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
+        ],
+      );
+    }
+  });
+
+  test("reports every transfer-file parameter index on custom PC jobs", () => {
+    const parameters = [1, 2, 3, 4].flatMap((index) => [
+      `ts${index}="C:/source-${index}";`,
+      `td${index}="destination-${index}";`,
+      `top${index}=sav;`,
+    ]);
+    const expectedMessages = [1, 2, 3, 4].flatMap((index) =>
+      ["ts", "td", "top"].map(
+        (prefix) =>
+          `Transfer-file parameter (${prefix}${index}) cannot be specified for custom PC jobs.`,
+      ),
+    );
+
+    for (const type of ["cpj", "rcpj"]) {
+      const diagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([{ name: "custom-pc", type, parameters }]),
+      );
+
+      assert.deepStrictEqual(
+        diagnostics.map((diagnostic) => diagnostic.message),
+        expectedMessages,
+      );
+    }
+  });
+
   test("reports transfer-file byte-length diagnostics for explicit out-of-range values", () => {
     const tooLongFileName = "a".repeat(512);
     const diagnostics = buildSyntaxDiagnostics(
@@ -1077,6 +1269,41 @@ suite("Build Syntax Diagnostics", () => {
     ]);
   });
 
+  test("measures quoted transfer file names by content bytes", () => {
+    const exactSourceContent = `/${"a".repeat(510)}`;
+    const overSourceContent = `/${"a".repeat(511)}`;
+    const exactDestinationContent = "a".repeat(511);
+    const overMultibyteDestinationContent = "あ".repeat(171);
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "job1",
+          type: "j",
+          parameters: [
+            `ts1="${exactSourceContent}";`,
+            `td1="${exactDestinationContent}";`,
+          ],
+        },
+        {
+          name: "job2",
+          type: "j",
+          parameters: [
+            `ts1="${overSourceContent}";`,
+            `td1="${overMultibyteDestinationContent}";`,
+          ],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.message),
+      [
+        "Transfer source file name (ts1) must be between 1 and 511 bytes.",
+        "Transfer destination file name (td1) must be between 1 and 511 bytes.",
+      ],
+    );
+  });
+
   test("reports transfer-source path diagnostics for quoted relative paths", () => {
     const diagnostics = buildSyntaxDiagnostics(
       buildTransferFileDefinition(
@@ -1102,15 +1329,15 @@ suite("Build Syntax Diagnostics", () => {
     assertSyntaxDiagnostics(diagnostics, [
       expectedSyntaxDiagnostic(
         [9, 4, 3],
-        "Transfer source file name (ts1) must be a quoted transfer-file value or macro-variable form.",
+        "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
       expectedSyntaxDiagnostic(
         [10, 4, 3],
-        "Transfer destination file name (td1) must be a quoted transfer-file value or macro-variable form.",
+        "Transfer destination file name (td1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
       expectedSyntaxDiagnostic(
         [15, 4, 3],
-        "Transfer source file name (ts1) must be a quoted transfer-file value or macro-variable form.",
+        "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
     ]);
   });
@@ -1119,7 +1346,7 @@ suite("Build Syntax Diagnostics", () => {
     const diagnostics = buildSyntaxDiagnostics(
       buildTransferFileDefinition(
         ["td1=dest-only;", "top1=del;"],
-        ["td1=queue-dest-only;"],
+        ["td1=queue-dest-only;", "top1=del;"],
       ),
     );
 
@@ -1519,13 +1746,90 @@ suite("Build Syntax Diagnostics", () => {
       ),
       expectedSyntaxDiagnostic(
         [32, 4, 5],
-        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format within 2048 bytes.',
+        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format.',
       ),
       expectedSyntaxDiagnostic(
         [37, 4, 5],
         'End judgment condition (evtmc) must be n, a, n:"file-name", a:"file-name", d:"file-name", or b:"file-name" with a file name between 1 and 256 bytes.',
       ),
     ]);
+  });
+
+  test("enforces canonical repeated evwfr aggregate bytes at the first crossing parameter", () => {
+    const exactContent = "a".repeat(1013);
+    const overContent = "a".repeat(1014);
+    const exactMultibyteContent = `${"あ".repeat(337)}aa`;
+    const exactDiagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "evwj",
+          parameters: [
+            `evwfr=a:"${exactContent}";`,
+            `evwfr=b:"${exactContent}";`,
+          ],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(exactDiagnostics, []);
+
+    const overDiagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "evwj",
+          parameters: [
+            `evwfr=a:"${exactContent}";`,
+            `evwfr=b:"${overContent}";`,
+            'evwfr=c:"later";',
+          ],
+        },
+      ]),
+    );
+
+    assertSyntaxDiagnostics(overDiagnostics, [
+      expectedSyntaxDiagnostic(
+        [10, 4, 5],
+        "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
+      ),
+    ]);
+
+    const multibyteDiagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "revwj",
+          parameters: [
+            `evwfr=a:"${exactContent}";`,
+            `evwfr=b:"${exactMultibyteContent}a";`,
+          ],
+        },
+      ]),
+    );
+
+    assert.strictEqual(multibyteDiagnostics.length, 1);
+    assert.strictEqual(multibyteDiagnostics[0].line, 10);
+  });
+
+  test("keeps evwfr shape and aggregate diagnostics separate for malformed values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "evwj",
+          parameters: [`evwfr=${"a".repeat(2042)};`],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.message),
+      [
+        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format.',
+        "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
+      ],
+    );
   });
 
   test("does not report event receiving numeric-identifier diagnostics for omitted and boundary values", () => {

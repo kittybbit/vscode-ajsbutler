@@ -5,11 +5,13 @@ import {
   collectRuleDiagnostics,
 } from "./syntaxDiagnosticCore";
 import {
+  customPcTransferFileProhibitedTargetTypes,
   eventReceivingDiagnosticTargetTypes,
   eventSendingDiagnosticTargetTypes,
   executionIntervalControlDiagnosticTargetTypes,
   fileMonitoringDiagnosticTargetTypes,
   queueTransferFileDiagnosticTargetTypes,
+  transferFileIndexes,
   transferOperationDiagnosticTargetTypes,
 } from "./syntaxDiagnosticTargetTypes";
 import {
@@ -20,11 +22,35 @@ import {
   queueTransferFileDiagnosticRules,
   transferOperationDiagnosticRules,
 } from "./syntaxDiagnosticRuleSets";
+import { getByteLength } from "./syntaxDiagnosticScalarValidators";
 import {
   findParameter,
+  findParameters,
   findUnitsByTypes,
   hasStartConditionContext,
 } from "./syntaxDiagnosticUnitLookup";
+
+const EVENT_RECEIVING_FILTER_AGGREGATE_MAXIMUM_BYTES = 2048;
+
+const collectEventReceivingFilterAggregateDiagnostics = (
+  unit: AjsUnit,
+): SyntaxDiagnosticDto[] => {
+  let aggregateBytes = 0;
+
+  for (const parameter of findParameters(unit, "evwfr")) {
+    aggregateBytes += getByteLength(`evwfr=${parameter.value};`);
+    if (aggregateBytes > EVENT_RECEIVING_FILTER_AGGREGATE_MAXIMUM_BYTES) {
+      return [
+        buildDiagnostic(
+          parameter,
+          "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
+        ),
+      ];
+    }
+  }
+
+  return [];
+};
 
 const collectOptionalParameterDiagnostics = (
   unit: AjsUnit,
@@ -101,7 +127,21 @@ export const buildTransferOperationDiagnostics = (
   document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(document, transferOperationDiagnosticTargetTypes).flatMap(
-    (unit) => collectRuleDiagnostics(unit, transferOperationDiagnosticRules),
+    (unit) =>
+      customPcTransferFileProhibitedTargetTypes.has(unit.unitType)
+        ? collectOptionalParameterDiagnostics(
+            unit,
+            transferFileIndexes.flatMap((index) =>
+              ["ts", "td", "top"].map((prefix) => {
+                const key = `${prefix}${index}`;
+                return {
+                  key,
+                  message: `Transfer-file parameter (${key}) cannot be specified for custom PC jobs.`,
+                };
+              }),
+            ),
+          )
+        : collectRuleDiagnostics(unit, transferOperationDiagnosticRules),
   );
 
 export const buildQueueTransferFileDiagnostics = (
@@ -125,6 +165,7 @@ export const buildEventReceivingDiagnostics = (
     (unit) => {
       const diagnostics = [
         ...collectRuleDiagnostics(unit, eventReceivingDiagnosticRules),
+        ...collectEventReceivingFilterAggregateDiagnostics(unit),
         ...collectStartConditionDisabledParameterDiagnostics(document, unit, [
           {
             key: "fd",
