@@ -39,6 +39,15 @@ specifications, and future design decisions each have one clear document home.
   ownership and references.
 - Keep relative links and the requirements index consistent after moves,
   renames, splits, and consolidations.
+- Make every published `JP1-PARAM-*` rule deterministic by stating its exact
+  target parameters and unit types, preconditions, effective values, defaults,
+  ranges or allowed forms, exclusions, and official JP1/AJS3 version 13 source.
+- Make each consumer enumerate the exact rule IDs it consumes, or explicitly
+  state that it has no current rule-ID dependency.
+- Define the flow layout boundary so application-owned constraints and
+  presentation-owned coordinates, bounds, and dimensions cannot be confused.
+- Preserve requirement-level migration evidence and reproducible final
+  validation until the transient feature is approved for closure.
 
 ## Architecture
 
@@ -93,8 +102,9 @@ specifications, and future design decisions each have one clear document home.
 - Web extension compatibility: unchanged because this is documentation-only.
 - Desktop extension compatibility: unchanged because this is
   documentation-only.
-- JP1/AJS source reference: none; no JP1/AJS rule or supported behavior is
-  changed.
+- JP1/AJS source reference: official Hitachi JP1/AJS3 version 13 manual pages
+  are used to make the existing documentation deterministic; no JP1/AJS rule,
+  supported behavior, or product-version scope is changed.
 
 ## Acceptance Criteria
 
@@ -109,6 +119,17 @@ specifications, and future design decisions each have one clear document home.
   the reviewed consolidation or split boundaries.
 - Repository-local Markdown references resolve after the reorganization.
 - Required docs-only validation passes.
+- Every defined rule ID has one deterministic normative body and every
+  referenced rule ID resolves to it.
+- Diagnostics guarantee only violations of explicitly supported diagnostic
+  rule IDs and do not imply complete JP1/AJS3 manual coverage.
+- Flow construction owns deterministic structure and placement constraints;
+  presentation owns absolute coordinates, rendered bounds, panel dimensions,
+  and UI-library layout values.
+- Every old scenario and rule maps to a new owner or an explained intentional
+  removal, with zero unmapped requirements.
+- Final validation records the commit, commands, mapping totals, stale-link
+  count, and undefined or unreferenced rule-ID counts.
 
 ## Non-Goals
 
@@ -120,5 +141,7 @@ specifications, and future design decisions each have one clear document home.
 
 ## Open Questions
 
-- None. Command generation remains a shared domain rule, and the future shared-
-  search trigger is owned by `docs/specs/roadmap.md`.
+- None. Command generation remains a shared domain rule, the future shared-
+  search trigger is owned by `docs/specs/roadmap.md`, and official Hitachi
+  JP1/AJS3 version 13 Command Reference pages are the source basis for
+  parameter-rule completion.

@@ -37,6 +37,15 @@ presentation.
 - row and field meaning used by CSV export remains stable unless a separate
   behavior change is approved
 
+## Consumed Domain Rules
+
+- `JP1-PARAM-SCHEDULE-WC-WT-001`
+- `JP1-PARAM-WAIT-ETS-DEFAULT-001`
+- `JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001`
+- `JP1-PARAM-FILE-MONITOR-DEFAULT-001`
+- `JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001`
+- `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001`
+
 ## Behavioral Scenarios
 
 ```gherkin
@@ -79,8 +88,9 @@ Scenario: Wait timeout-action defaults are displayed
   Then it displays the effective value returned by that rule
 
 Scenario: Unit-family defaults are displayed
-  Given interpreted values under the supported event, file-monitoring, or
-    interval-control default rule
+  Given interpreted values under JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001,
+    JP1-PARAM-FILE-MONITOR-DEFAULT-001, or
+    JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001
   When the unit list displays the corresponding fields
   Then omitted values use the effective JP1/AJS3 version 13 defaults
   And explicit values remain visible

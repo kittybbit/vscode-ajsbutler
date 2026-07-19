@@ -55,36 +55,59 @@ wording or a diagnostic message.
 
 ### `JP1-PARAM-SCHEDULE-WC-WT-001`
 
-Start-condition monitoring count (`wc`) and time (`wt`) form an effective pair.
-When either value disables monitoring for the pair, both effective display
-values are empty. Raw values remain available.
+- Applies to: each schedule-rule-number pair of `wc` and `wt` in a jobnet
+  definition.
+- Raw values: `wc={no|1..999|un}` and
+  `wt={no|00:00..47:59|1..2879|un}`; omission defaults each parameter to `no`.
+- Effective display rule: if either member is omitted or is `no`, both display
+  values are empty. Otherwise, the explicit count and time remain effective.
+- Raw values remain available even when the effective display pair is empty.
+- Source: [Command Reference 5.2.4, `wc` and `wt`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM).
 
 ### `JP1-PARAM-WAIT-ETS-DEFAULT-001`
 
-When a currently supported wait-job family omits `ets`, interpretation returns
-the documented JP1/AJS3 version 13 timeout-action default for that family.
+- Applies to `ets` on file-monitoring (`flwj`, `rflwj`), execution-interval
+  control (`tmwj`, `rtmwj`), log-file (`lfwj`, `rlfwj`), email-reception
+  (`mlwj`, `rmlwj`), message-queue (`mqwj`, `rmqwj`), MSMQ (`mswj`, `rmswj`),
+  and Windows-event-log (`ntwj`, `rntwj`) monitoring jobs.
+- When omitted, the effective timeout action is `kl`. An explicit supported
+  value in `{kl|nr|wr|an}` remains effective.
+- Other unit types receive no default from this rule.
+- Source: [Command Reference 5.2 definition index](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0001.HTM).
 
 ### `JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001`
 
-Omitted arrival-check parameters for a supported JP1 event sending job receive
-their documented JP1/AJS3 version 13 defaults. Explicit values remain
-effective.
+- Applies to JP1 event sending jobs (`evsj`, `revsj`).
+- When omitted, effective values are `evssv=no`, `evsrt=n`, `evspl=10`, and
+  `evsrc=10`. Explicit values remain effective.
+- Other unit types receive no default from this rule.
+- Source: [Command Reference 5.2.17, JP1 event sending job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0232.HTM).
 
 ### `JP1-PARAM-FILE-MONITOR-DEFAULT-001`
 
-Omitted supported file-monitoring parameters receive their documented
-JP1/AJS3 version 13 defaults. Explicit values remain effective.
+- Applies to file-monitoring jobs (`flwj`, `rflwj`).
+- When omitted, effective values are `flwc=c`, `flco=n`, and `flwi=60`.
+  Explicit values remain effective.
+- Other unit types receive no default from this rule.
+- Source: [Command Reference 5.2.10, file monitoring job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0225.HTM).
 
 ### `JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001`
 
-Omitted supported execution-interval control parameters receive their
-documented JP1/AJS3 version 13 defaults. Explicit values remain effective.
+- Applies to execution-interval control jobs (`tmwj`, `rtmwj`).
+- When omitted, effective values are `tmitv=10` and `etn=n`. Explicit values
+  remain effective.
+- Other unit types receive no default from this rule.
+- Source: [Command Reference 5.2.16, execution-interval control job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0231.HTM).
 
 ### `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001`
 
-QUEUE jobs expose transfer source and destination values but do not expose
-transfer operation values. Non-QUEUE transfer-operation interpretation remains
-unchanged.
+- Applies to the Unit List projection of transfer parameters `ts1` through
+  `ts4`, `td1` through `td4`, and `top1` through `top4`.
+- QUEUE and recovery QUEUE jobs (`qj`, `rq`) expose explicit source and
+  destination values but no transfer-operation value.
+- For other unit types, explicit transfer-operation values remain available;
+  this rule supplies no default.
+- Source: [Command Reference 5.2.7, QUEUE job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0222.HTM) and [5.2.6, UNIX/PC job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0221.HTM).
 
 ## Diagnostic Interpretation Rules
 

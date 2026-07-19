@@ -4,8 +4,8 @@
 
 - Purpose: reorganize requirement documents by stable responsibility without
   changing observable behavior.
-- Approved or active slice: none; the full plan is awaiting review and human
-  approval.
+- Approved or active slice: Slices 1 through 6 are complete; Slice 7 is active,
+  and Slices 8 and 9 remain approved.
 - Do not: edit runtime code, tests, configuration, or generated artifacts.
 - Do not: change existing JP1/AJS or extension behavior while moving text.
 - Read first: `SPECS.md`, this file, and
@@ -15,7 +15,9 @@
   full docs-only validation before feature exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: plan review, then human approval of one or more slices.
+- Review state: the Feature Exit review was reopened after RF1-RF7 identified
+  normative, boundary, and verification gaps.
+- Next decision: implement Slice 7 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -30,23 +32,35 @@
 
 ## Plan Status
 
-- Status: Complete
-- Planning scope: reclassify non-use-case requirements, consolidate or split
-  the identified use cases, establish one normative owner for JP1 parameter
-  semantics, and repair repository-local references.
+- Status: Approved
+- Planning scope: preserve completed Slices 1 through 5 and correct review
+  findings RF1-RF7 through deterministic parameter rules, explicit consumer
+  references, a flow ownership boundary, and reproducible migration evidence.
 - Review status: Reviewed
-- Human approval: Approved
-- Active implementation slice: None
+- Human approval: Approved for revised Slices 6 through 9
+- Active implementation slice: Slice 7
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: Slices 1 through 5 as reviewed; each slice remains limited to
-  its recorded docs-only approval boundary.
+- Approved at: approved in the current conversation
+- Approved scope: Slices 1 through 5 remain completed under their prior
+  approval; revised Slices 6 through 9 are approved within their recorded
+  docs-only approval boundaries.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
+
+## Replanning Trigger
+
+- Source: `Use-Case Responsibility Reorganization レビュー修正指示書`
+- Finding labels: RF1 through RF7 refer to that review document; R1 through
+  R10 in `TRACEABILITY.md` refer to feature requirements in `SPECS.md`.
+- Gap: the initial Feature Exit evidence did not prove deterministic rule
+  meaning, exact consumer dependencies, flow layout ownership, or
+  requirement-level migration completeness.
+- Decision: reopen Feature Exit and add only the four correction slices below;
+  preserve completed Slices 1 through 5 unchanged.
 
 ## Implementation Slices
 
@@ -306,11 +320,224 @@ Only clear human approval can change Status to Approved.
   clipboard behavior, schedule support expansion, CLI, GitHub Action, or
   Webview additions.
 
+### Slice 6: Complete Unit-List Parameter Contracts
+
+- Status: Complete
+- Scope:
+  - make the six Unit List projection rule IDs deterministic with exact
+    parameters, unit types, applicability, exclusions, raw/effective behavior,
+    defaults or supported fields, and official JP1/AJS3 version 13 references
+  - add an explicit `Consumed Domain Rules` list to `uc-view-unit-list.md`
+  - remove generic event, file-monitoring, and interval-control rule references
+    from Unit List scenarios without duplicating normative values
+  - correct `uc-show-parameter-hover.md` to state that current hover returns
+    localized syntax and consumes no `JP1-PARAM-*` effective-value rule IDs
+- User / Domain Value: list projections have deterministic, reviewable JP1/AJS
+  meaning, while Hover no longer claims a semantic dependency it does not use.
+- Cohesive Change Group: the six list-related rules, Unit List consumption, and
+  the current Hover boundary.
+- Acceptance:
+  - `JP1-PARAM-SCHEDULE-WC-WT-001`,
+    `JP1-PARAM-WAIT-ETS-DEFAULT-001`,
+    `JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001`,
+    `JP1-PARAM-FILE-MONITOR-DEFAULT-001`,
+    `JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001`, and
+    `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001` are self-contained and source-backed
+  - Unit List explicitly references all six IDs and redefines none of them
+  - Hover explicitly records no current rule-ID dependency
+- Validation:
+  - compare each rule with the official Hitachi JP1/AJS3 version 13 Command
+    Reference and current repository behavior evidence
+  - verify all six definitions and Unit List references by exact-ID search
+  - verify Hover implementation and tests remain syntax-only by read-only
+    inspection
+  - `rtk pnpm run lint:md`; `rtk git diff --check`
+- Traceability: review RF1 and RF4 to SPECS deterministic-rule and explicit-
+  consumer requirements; proven by six rule records, source links, and exact-ID
+  reference checks.
+- Production Readiness:
+  - Failure mode: documenting a value or unit family broader than current
+    behavior or the official manual
+  - JP1/AJS compatibility: documentation must preserve current v13 behavior;
+    any source/implementation mismatch stops the slice for human decision
+  - Large or malformed input risk: none; documentation-only
+  - Desktop/web impact: none
+  - README/docs impact: domain rule, Unit List, Hover, and traceability only
+  - CHANGELOG impact: none unless review discovers an actual behavior mismatch
+- Approval Boundary: the six named rule records, `uc-view-unit-list.md`,
+  `uc-show-parameter-hover.md`, and feature traceability/evidence.
+- Dependencies: completed Slices 1 through 5
+- Risks: official wording may distinguish unit families more narrowly than
+  current generalized rule IDs.
+- Implementation Feedback: the six-rule boundary matched the Unit List's
+  current default-aware projections. Read-only implementation inspection also
+  confirmed that Hover is syntax-only, so recording no current rule-ID
+  dependency avoided inventing a semantic consumer.
+- Out of Scope: runtime defaults, list projection code, hover code, tests,
+  additional parameter families, or behavior correction.
+
+### Slice 7: Complete Supported Diagnostic Contracts
+
+- Status: Approved
+- Scope:
+  - make all 25 IDs under `Diagnostic Interpretation Rules` deterministic using
+    exact unit families, parameters, conditions, values, ranges, byte lengths,
+    exceptions, and official JP1/AJS3 version 13 references
+  - split the durable parameter rule into family files only if needed for
+    readability while preserving one ID-to-body owner and one index
+  - add an explicit consumed-ID inventory to
+    `uc-diagnose-ajs-definition.md`
+  - limit diagnostic guarantees to supported rule IDs, state that unsupported
+    rules are not validated, and preserve compatible-ISAM exclusions
+- User / Domain Value: every supported diagnostic has one deterministic JP1/AJS
+  rule, and the diagnostic guarantee cannot be mistaken for full manual
+  coverage.
+- Cohesive Change Group: the complete supported diagnostic rule registry and
+  the Use Case that reports those violations.
+- Acceptance:
+  - all 25 diagnostic IDs have one source-backed normative body
+  - every diagnostic ID is explicitly referenced by the Diagnose Use Case
+  - no `documented range`, `supported family`, or equivalent placeholder is
+    left without exact content or a direct normative subdocument reference
+  - Goal, Outputs, Rules, scenarios, supported families, and acceptance notes
+    consistently limit coverage to supported rule IDs
+- Validation:
+  - compare each ID against official v13 manual sections and existing
+    diagnostic rules/tests by read-only inspection
+  - exact-ID checks for defined, referenced, duplicate, and undefined IDs
+  - content review for concrete values, unit types, exceptions, and sources
+  - `rtk pnpm run lint:md`; `rtk git diff --check`
+- Traceability: review RF1, RF3, and RF4 to SPECS deterministic-rule, diagnostic-
+  scope, and explicit-consumer requirements; proven by the 25-ID inventory and
+  diagnostic mapping.
+- Production Readiness:
+  - Failure mode: specification drift from current diagnostics or the manual
+  - JP1/AJS compatibility: no runtime behavior change; mismatches stop for
+    human decision rather than silently changing the contract
+  - Large or malformed input risk: existing diagnostic safety wording remains
+  - Desktop/web impact: none
+  - README/docs impact: parameter rule files/index, Diagnose Use Case, and
+    traceability only
+  - CHANGELOG impact: none unless an actual behavior mismatch is discovered
+- Approval Boundary: the 25 existing diagnostic rule IDs, optional family
+  files and their index under `docs/requirements/domain-rules/`, Diagnose Use
+  Case, and feature traceability/evidence.
+- Dependencies: Slice 6 establishes the deterministic rule format
+- Risks: manual sections may reveal that one current rule ID combines multiple
+  unit-specific meanings and needs a documentation-only ID split; that split
+  requires review but not runtime change when semantics remain identical.
+- Out of Scope: new diagnostics, changed diagnostic behavior or messages,
+  runtime code, tests, compatible-ISAM support, or new product-version scope.
+
+### Slice 8: Define Flow Layout Ownership
+
+- Status: Approved
+- Scope:
+  - adopt ownership Policy A in `uc-build-flow-graph.md`
+  - define application-owned stable graph structure, containment, ordering,
+    placement constraints, and affected-subtree scope
+  - define presentation-owned absolute coordinates, rendered bounds, panel
+    dimensions, viewport fitting, and UI-library layout values
+  - keep non-overlap, unaffected-region stability, and subtree-relative-
+    position behavior observable without duplicating exploration ownership
+  - adjust `uc-explore-flow-graph.md` only where viewport ownership must be
+    cross-referenced
+- User / Domain Value: implementers can place layout logic at the correct
+  boundary without weakening user-visible expansion stability.
+- Cohesive Change Group: Flow construction constraints and the corresponding
+  exploration/viewer obligations.
+- Acceptance:
+  - application and presentation ownership are explicit and non-overlapping
+  - no UI library, DOM, component, or implementation-file ownership appears
+  - observable non-overlap and position stability remain intact
+  - Explore owns user interaction and viewport behavior, not graph constraints
+- Validation:
+  - responsibility matrix review across both Flow use cases
+  - targeted search for UI-library, DOM, component, and file-path details
+  - scenario comparison against the pre-reorganization Flow contract
+  - `rtk pnpm run lint:md`; `rtk git diff --check`
+- Traceability: review RF2 to SPECS flow-boundary requirement; proven by the
+  ownership matrix and preserved scenario mapping.
+- Production Readiness:
+  - Failure mode: assigning the same layout guarantee to both layers or dropping
+    a user-visible invariant
+  - JP1/AJS compatibility: no definition or scope behavior change
+  - Large or malformed input risk: existing large/deep graph constraints remain
+  - Desktop/web impact: the same boundary applies to both hosts
+  - README/docs impact: two Flow use cases and traceability only
+  - CHANGELOG impact: none; responsibility clarification only
+- Approval Boundary: `uc-build-flow-graph.md`, the minimum corresponding
+  `uc-explore-flow-graph.md` text, and feature evidence.
+- Dependencies: completed Slice 4
+- Risks: placement constraints must stay abstract enough to avoid restating the
+  current presentation algorithm.
+- Out of Scope: graph DTO/code changes, layout implementation, tests, viewer
+  behavior, coordinates, styling, or new graph capabilities.
+
+### Slice 9: Prove Requirement Migration And Final Validation
+
+- Status: Approved
+- Scope:
+  - replace file-level migration evidence with requirement-level mappings for
+    Unit List, Editor Feedback, Flow Graph, Semantic Diff, and Parameter
+    Interpretation
+  - classify each old scenario/rule/detail as Equivalent, Moved, Consolidated,
+    Split, Reworded without semantic change, Intentionally removed as
+    implementation detail, or Deferred as a future design decision
+  - define the counting unit and record old requirements reviewed, migrated,
+    intentionally removed, and unmapped totals
+  - record the validated candidate commit SHA, validation commands/results,
+    stale-link/path count, undefined referenced rule IDs, unreferenced defined
+    rule IDs, and duplicate normative rule owners
+  - permit one evidence-only commit after the validated candidate; that commit
+    may change only feature-local evidence and state, and must identify the
+    candidate SHA it records
+  - synchronize Agent Brief, plan state, and Feature Exit readiness
+- User / Domain Value: reviewers can reproduce the claim that reorganization
+  preserved behavior and left no orphaned or ambiguous requirement.
+- Cohesive Change Group: transient migration matrix, reproducible validation
+  evidence, and current SDD state.
+- Acceptance:
+  - every old scenario and rule has exactly one disposition and owner
+  - intentional removals and deferrals include reasons
+  - unmapped requirements, broken durable links, undefined referenced IDs, and
+    duplicate normative owners are zero
+  - validation evidence names the exact validated candidate commit and counting
+    method; any later evidence-only commit is explicitly distinguished
+  - TASKS current-state sections agree
+- Validation:
+  - compare baseline commit `1fc23fed` with the final branch documents
+  - run exact old-path, link-target, rule-ID definition/reference, and duplicate-
+    owner checks
+  - `rtk pnpm run qlty`; `rtk pnpm run lint:md`; `rtk git diff --check`
+  - confirm `git diff --name-only main...HEAD` stays docs-only
+- Traceability: review RF5, RF6, and RF7 to SPECS migration-evidence and
+  reproducible-validation requirements; proven by the completed matrix and
+  validation record.
+- Production Readiness:
+  - Failure mode: false completion caused by an undefined counting unit or
+    stale validation target
+  - JP1/AJS compatibility: zero semantic changes must be confirmed by the
+    migration matrix
+  - Large or malformed input risk: none; documentation-only
+  - Desktop/web impact: zero runtime impact confirmed by docs-only diff
+  - README/docs impact: feature-local evidence and any final link corrections
+  - CHANGELOG impact: none unless a preceding slice discovers behavior drift
+- Approval Boundary: feature-local SDD evidence/state, an evidence-only commit
+  after the validated candidate, and minimal durable-link corrections required
+  to reach zero unresolved references.
+- Dependencies: Slices 6 through 8
+- Risks: a previously missed requirement or source mismatch triggers another
+  focused replan rather than being forced into an incorrect mapping.
+- Out of Scope: permanent migration-history documentation, runtime code/tests,
+  generated artifacts, configuration, or unrelated wording cleanup.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
-- Reason: five slices move, consolidate, or split durable requirement contracts
-  and need an explicit old-to-new document and validation mapping.
+- Reason: completed Slices 1 through 5 moved, consolidated, or split durable
+  contracts; review findings now require requirement-level mapping and
+  reproducible evidence through Slices 6 through 9.
 
 ## Cross-Slice Dependencies
 
@@ -321,6 +548,13 @@ Only clear human approval can change Status to Approved.
   simple.
 - Slice 5 performs the final repository-wide stale-reference and taxonomy check
   after all preceding document paths are settled.
+- Slice 6 establishes the deterministic rule-record format and corrects Unit
+  List and Hover consumer boundaries.
+- Slice 7 completes the diagnostic rule registry using the Slice 6 format.
+- Slice 8 is independent of parameter work after completed Slice 4, but runs
+  before final evidence so its ownership mapping is included.
+- Slice 9 depends on Slices 6 through 8 and is the only slice that may restore
+  Feature Exit readiness.
 
 ## Feature-Level Risks
 
@@ -330,27 +564,35 @@ Only clear human approval can change Status to Approved.
 - Markdown links or plain-text document references could remain stale.
 - A docs-only branch must not acquire runtime, test, configuration, or
   generated-artifact changes.
+- Official manual wording may expose a mismatch between current implementation
+  and the provisional durable rule; implementation must stop for a human
+  decision instead of changing behavior or concealing the mismatch.
+- Migration totals are meaningless unless Slice 9 defines the counting unit
+  before recording results.
 
 ## Use-Case Back-Propagation
 
 - This feature's implementation is the durable documentation update itself.
-- No reusable taxonomy decision remains only in the feature folder.
+- Deterministic parameter meaning and Flow ownership remain durable; migration
+  history and validation counts remain transient until closure.
 - `docs/specs/roadmap.md` changes only to retain the shared-search trigger as a
   future decision; repository sequencing otherwise remains unchanged.
 
 ## Feature Exit
 
-- Definition of Done status: Satisfied; human closure approval pending
-- Durable documentation updates: Complete for Slices 1 through 5
-- Open risks: none identified after final content and reference review
+- Definition of Done status: Not satisfied; review corrections pending
+- Durable documentation updates: Slices 1 through 6 complete; Slices 7 through
+  9 approved and pending implementation
+- Open risks: provisional parameter rules, ambiguous Flow ownership, and
+  insufficient migration/validation evidence
 
 ## Validation
 
-- [x] Run targeted old-path and implementation-detail searches per slice.
-- [x] Run `rtk pnpm run qlty` after the final slice.
-- [x] Run `rtk pnpm run lint:md` per slice and after the final slice.
-- [x] Run `rtk git diff --check` per slice and after the final slice.
-- [x] Confirm only docs-only paths changed.
+- [ ] Complete deterministic definitions and exact consumer references.
+- [ ] Complete Flow ownership clarification.
+- [ ] Complete requirement-level migration mapping.
+- [ ] Record reproducible final validation evidence for the final commit.
+- [ ] Re-run Feature Exit after Slices 6 through 9 complete.
 
 ## Notes
 
