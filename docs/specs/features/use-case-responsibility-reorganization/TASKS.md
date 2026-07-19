@@ -36,7 +36,7 @@
   semantics, and repair repository-local references.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 4
+- Active implementation slice: Slice 5
 
 ## Human Approval
 
@@ -202,7 +202,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 4: Separate Flow Construction From Exploration
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - narrow `uc-build-flow-graph.md` to scope resolution, deterministic graph
     content, nodes, edges, nesting information, and observable layout
@@ -244,6 +244,10 @@ Only clear human approval can change Status to Approved.
 - Dependencies: Slice 1
 - Risks: misclassifying an observable interaction as removable UI detail;
   duplicating search semantics with the deferred search decision.
+- Implementation Feedback: construction and exploration separated without
+  ambiguity once observable layout invariants stayed with graph construction.
+  Responsive collapse remained a user interaction while rail and card details
+  were safely removed as presentation specifications.
 - Out of Scope: graph DTOs, layout code, React components, search runtime,
   viewer styling, or new interaction behavior.
 

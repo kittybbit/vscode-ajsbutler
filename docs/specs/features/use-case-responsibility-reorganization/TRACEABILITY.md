@@ -5,7 +5,7 @@
 | D1     | R1, R2, R4-R6  | 1     | Passed: paths/qlty/lint    |
 | U1     | R3-R6          | 2     | Passed: scenarios/rules    |
 | E1     | R3-R6          | 3     | Passed: scenarios/rule IDs |
-| F1     | R2, R3, R5, R6 | 4     | Scenarios; detail search   |
+| F1     | R2, R3, R5, R6 | 4     | Passed: scenarios/details  |
 | S1     | R3, R5, R6     | 5     | Scenarios; paths; qlty     |
 
 ## Source Mapping

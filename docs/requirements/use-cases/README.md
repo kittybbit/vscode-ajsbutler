@@ -16,6 +16,7 @@ Viewer and export behavior:
 
 - view unit list
 - build flow graph
+- explore flow graph
 - show unit definition
 - export unit list CSV
 - diagnose AJS definition
@@ -39,7 +40,7 @@ That belongs in `docs/specs/`.
 
 1. Start from `_template.md`.
 2. Create or update one `uc-*.md` file per use case, using hyphenated
-   filenames such as `uc-build-flow-graph.md`.
+   filenames such as `uc-explore-flow-graph.md`.
 3. Write the use case in terms of trigger, inputs, outputs, rules, and
    acceptance notes.
 4. Keep UI framework details, VS Code adapter details, and file-level refactor
