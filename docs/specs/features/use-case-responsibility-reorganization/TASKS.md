@@ -36,7 +36,7 @@
   semantics, and repair repository-local references.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 3
+- Active implementation slice: Slice 4
 
 ## Human Approval
 
@@ -154,7 +154,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 3: Split Diagnostics From Parameter Hover
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - replace `uc-provide-editor-feedback.md` with
     `uc-diagnose-ajs-definition.md` and `uc-show-parameter-hover.md`
@@ -193,6 +193,10 @@ Only clear human approval can change Status to Approved.
 - Dependencies: Slice 1
 - Risks: incomplete migration of the large diagnostic rule set; overloading
   rule IDs with presentation-specific wording.
+- Implementation Feedback: separating the triggers was straightforward, but
+  preserving the large semantic set required explicit domain-rule IDs. The
+  planned family-level grouping was sufficient and did not require separate
+  use cases or a scope change.
 - Out of Scope: diagnostic or hover runtime logic, new validation rules, VS
   Code adapters, localization resources, or executable specifications.
 

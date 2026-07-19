@@ -86,6 +86,105 @@ QUEUE jobs expose transfer source and destination values but do not expose
 transfer operation values. Non-QUEUE transfer-operation interpretation remains
 unchanged.
 
+## Diagnostic Interpretation Rules
+
+These rules define parameter meaning. Diagnostic use cases decide how a
+violation is reported without redefining the rule.
+
+### File Monitoring
+
+- `JP1-PARAM-FILE-MONITOR-CONDITION-001`: `flwc` must not combine size-change
+  monitoring with modification-time monitoring.
+- `JP1-PARAM-FILE-MONITOR-OUTPUT-001`: `flco` requires effective `flwc` to
+  include file-creation monitoring.
+
+### Job End Judgment And Retry
+
+- `JP1-PARAM-RETRY-ABR-DEPENDENCY-001`: `rjs`, `rje`, `rec`, and `rei` require
+  effective `abr` to enable automatic retry for a UNIX/PC job.
+- `JP1-PARAM-JOB-END-RANGE-001`: explicit `wth` and `tho` are within
+  `0..2147483647`; `rjs` and `rje` are within `1..4294967295`; `rec` is within
+  `1..12`; and `rei` is within `1..10`.
+- `JP1-PARAM-JOB-END-THRESHOLD-001`: when effective `jd` selects threshold
+  judgment, explicit `wth` and `tho` preserve the documented warning-to-
+  abnormal threshold order.
+
+### Schedule Rules
+
+- `JP1-PARAM-SCHEDULE-RANGE-001`: explicit `ln`, `st`, `cy`, `shd`, `cftd`,
+  `sy`, `ey`, `wc`, and `wt` stay within their JP1/AJS3 version 13 ranges.
+- `JP1-PARAM-SCHEDULE-WEEKLY-DAY-001`: a weekly `cy=(n,w)` schedule does not
+  use open-day or closed-day semantics in its matching `sd` rule.
+- `JP1-PARAM-SCHEDULE-START-DATE-001`: `sd` uses a schedule-rule number within
+  `1..144`, a documented day form and range, and a year within `1994..2036`.
+  The year rule follows the official default `SCHEDULELIMIT=2036`; site-specific
+  overrides are outside the supported contract.
+
+### JP1 Event Sending
+
+- `JP1-PARAM-EVENT-ARRIVAL-HOST-001`: when effective `evsrt` enables arrival
+  checking, `evhst` is required.
+- `JP1-PARAM-EVENT-ARRIVAL-RANGE-001`: explicit `evspl` is within `3..600` and
+  explicit `evsrc` is within `0..999`.
+- `JP1-PARAM-EVENT-SEND-ID-RANGE-001`: explicit `evsid` is within hexadecimal
+  range `00000000..00001FFF` or `7FFF8000..7FFFFFFF`.
+
+### JP1 Event Reception Monitoring
+
+- `JP1-PARAM-EVENT-RECEIVE-SCOPE-001`: explicit `evesc` is `no` or within
+  `1..720`.
+- `JP1-PARAM-EVENT-RECEIVE-FORMAT-001`: explicit `evwid` follows the
+  hexadecimal event-ID format and range `00000000:00000000` through
+  `FFFFFFFF:FFFFFFFF`; explicit `evipa` is within IPv4 dotted-decimal range
+  `0.0.0.0` through `255.255.255.255`.
+- `JP1-PARAM-EVENT-RECEIVE-NUMERIC-ID-001`: explicit `evuid`, `evgid`, and
+  `evpid` are within signed-decimal range `-1..9999999999`.
+- `JP1-PARAM-EVENT-RECEIVE-FILTER-001`: explicit `evusr`, `evgrp`, `evwms`, and
+  `evdet` stay within their documented byte-length ranges; `evwfr` follows the
+  `optional-extended-attribute-name:"value"` form and total byte-length range;
+  and `evtmc` follows its allowed forms and filename byte-length range.
+- `JP1-PARAM-EVENT-RECEIVE-TIMEOUT-001`: explicit `etm` is within `1..1440`,
+  `ha` is in `{y|n}`, and `ets` is in `{kl|nr|wr|an}`. Parameters `etm`, `ha`,
+  and `ets` are not effective where the version 13 rules disable them in a
+  start-condition context.
+
+### Shared Event And Wait Values
+
+- `JP1-PARAM-EVENT-HOST-LENGTH-001`: explicit `evhst` for supported event
+  sending and reception-monitoring jobs is within `1..255` bytes.
+- `JP1-PARAM-WAIT-ETS-VALUE-001`: explicit `ets` for supported file-monitoring
+  and execution-interval control jobs is in `{kl|nr|wr|an}`.
+- `JP1-PARAM-WAIT-FD-CONTEXT-001`: explicit `fd` for supported file-monitoring,
+  execution-interval control, and event-reception jobs is within `1..1440` and
+  is not effective where version 13 disables it in a start-condition context.
+
+### Execution-Interval Control
+
+- `JP1-PARAM-INTERVAL-CONTROL-RANGE-001`: explicit `tmitv` is within `1..1440`
+  and explicit `etn` is in `{y|n}`.
+- `JP1-PARAM-INTERVAL-CONTROL-END-CONTEXT-001`: explicit `etn=y` follows the
+  documented execution-interval and start-condition context restriction.
+
+### Shared String And Transfer-File Forms
+
+- `JP1-PARAM-STRING-FAMILY-CONSTRAINT-001`: filename-like and host-like values
+  stay within the byte-length and combination rules documented for their
+  parameter family.
+- `JP1-PARAM-TRANSFER-FILE-FORM-001`: explicit `tsN` and `tdN` for supported
+  UNIX/PC, custom, QUEUE, and recovery QUEUE jobs use a quoted transfer-file
+  value or an accepted macro-variable form rather than an unsupported bare
+  string.
+- `JP1-PARAM-TRANSFER-FILE-PATH-001`: quoted `tsN` and `tdN` values follow the
+  shared JP1/AJS3 version 13 filename and path constraints for the supported
+  transfer-file families.
+- `JP1-PARAM-STRING-MACRO-ALLOWANCE-001`: a value is not invalid merely because
+  it uses a macro-variable or regular-expression form explicitly allowed by its
+  parameter family.
+
+Compatible-ISAM-specific interpretation is outside this repository's supported
+contract because compatible ISAM is limited to legacy migration environments
+that the extension does not model explicitly.
+
 ## Behavioral Scenarios
 
 ```gherkin

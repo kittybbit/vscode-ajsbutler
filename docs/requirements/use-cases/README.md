@@ -18,7 +18,8 @@ Viewer and export behavior:
 - build flow graph
 - show unit definition
 - export unit list CSV
-- provide editor feedback
+- diagnose AJS definition
+- show parameter hover
 - navigate between unit list and flow graph
 
 Cross-cutting operations:
