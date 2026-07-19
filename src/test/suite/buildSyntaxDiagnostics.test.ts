@@ -714,12 +714,36 @@ suite("Build Syntax Diagnostics", () => {
         {
           name: "file2",
           type: "rflwj",
-          parameters: ["flwc=c:d:s;", "flco=n;"],
+          parameters: ["flwc=c;", "flco=n;"],
         },
+        { name: "file3", type: "flwj", parameters: ["flwc=c:d;"] },
+        { name: "file4", type: "flwj", parameters: ["flwc=c:d:s;"] },
+        { name: "file5", type: "rflwj", parameters: ["flwc=c:d:m;"] },
       ]),
     );
 
     assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("reports file monitoring diagnostics for malformed condition forms", () => {
+    const invalidConditions = ["d", "d:c", "c::s", "c:d:s:x", "c:d:s:m"];
+
+    for (const condition of invalidConditions) {
+      const diagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "file1",
+            type: "flwj",
+            parameters: [`flwc=${condition};`],
+          },
+        ]),
+      );
+
+      assert.deepStrictEqual(
+        diagnostics.map((diagnostic) => diagnostic.message),
+        ["File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m."],
+      );
+    }
   });
 
   test("does not report file monitoring target-pattern diagnostics for valid explicit values", () => {
@@ -819,7 +843,11 @@ suite("Build Syntax Diagnostics", () => {
     assertSyntaxDiagnostics(diagnostics, [
       expectedSyntaxDiagnostic(
         [9, 4, 4],
-        "File monitoring condition (flwc) cannot specify both s and m.",
+        "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
+      ),
+      expectedSyntaxDiagnostic(
+        [15, 4, 4],
+        "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
       ),
       expectedSyntaxDiagnostic(
         [15, 4, 4],

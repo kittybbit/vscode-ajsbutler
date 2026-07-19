@@ -20,6 +20,10 @@ export const isValidExplicitFileMonitoringInterval = (
   parseExplicitDecimalInRange({ parameter, minimum: 1, maximum: 600 }) !==
   undefined;
 
+export const isValidExplicitFileMonitoringConditions = (
+  parameter: AjsParameter,
+): boolean => /^c(?::d(?::[sm])?)?$/.test(parameter.value);
+
 export const hasInvalidWildcardWithShortMonitoringInterval = (
   parameter: AjsParameter,
   unit: AjsUnit,

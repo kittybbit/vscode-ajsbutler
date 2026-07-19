@@ -4,7 +4,7 @@
 
 - Purpose: make runtime semantic diagnostics conform to the currently
   supported JP1/AJS3 version 13 parameter rules.
-- Approved slices: S1-S6; active implementation slice: S2.
+- Approved slices: S1-S6; active implementation slice: S3.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives clear approval.
 - Do not: expand coverage to unsupported parameter families or change parser,
@@ -15,7 +15,7 @@
 - Validate each code slice with focused desktop evidence and
   `rtk pnpm run qlty`; run final desktop/web/build validation after Slice 6.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next action: implement Slice 2 with `sdd-implement-task`.
+- Next action: implement Slice 3 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -33,7 +33,7 @@
   conformance gaps in `SPECS.md`.
 - Review status: Reviewed; revised six-slice plan is ready for implementation
 - Human approval: Approved for S1-S6
-- Active implementation slice: S2
+- Active implementation slice: S3
 
 ## Human Approval
 
@@ -118,7 +118,7 @@ and fresh approval.
 
 ### Slice 2: Conform file-monitoring condition forms
 
-- Status: Approved
+- Status: Complete
 - Scope: validate only the complete `flwc=c[:d[:{s|m}]]` forms, add a focused
   diagnostic message and form matrix, and extend the CHANGELOG entry.
 - User / Domain Value: malformed monitoring conditions are identified without
@@ -386,7 +386,8 @@ and fresh approval.
 - [x] Revised plan reviewed with `sdd-review-plan`
 - [x] Human approval recorded for S1-S6
 - [x] Slice 1 focused desktop tests and qlty pass
-- [ ] Slices 2-6 focused desktop tests and qlty pass
+- [x] Slice 2 focused desktop tests and qlty pass
+- [ ] Slices 3-6 focused desktop tests and qlty pass
 - [ ] Final web tests and production build pass
 - [ ] Integrated implementation review completed
 - [ ] TRACEABILITY.md updated with implementation evidence

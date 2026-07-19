@@ -17,6 +17,7 @@ import {
 } from "./syntaxDiagnosticEventRules";
 import {
   hasInvalidWildcardWithShortMonitoringInterval,
+  isValidExplicitFileMonitoringConditions,
   isValidExplicitFileMonitoringFileName,
   isValidExplicitFileMonitoringInterval,
   splitFileMonitoringConditions,
@@ -185,11 +186,10 @@ export const fileMonitoringDiagnosticRules: readonly AjsParameterDiagnosticRule[
     },
     {
       key: "flwc",
-      message: "File monitoring condition (flwc) cannot specify both s and m.",
-      isInvalid: (parameter) => {
-        const flwcConditions = splitFileMonitoringConditions(parameter.value);
-        return flwcConditions.has("s") && flwcConditions.has("m");
-      },
+      message:
+        "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
+      isInvalid: (parameter) =>
+        !isValidExplicitFileMonitoringConditions(parameter),
     },
     {
       key: "flco",

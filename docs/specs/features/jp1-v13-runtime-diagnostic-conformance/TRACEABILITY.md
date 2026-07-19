@@ -79,3 +79,6 @@ JP1/AJS behavior is part of this revised plan.
 - S1 / `VAL-CY` (2026-07-20): `rtk pnpm test` passed with yearly cycle 9
   accepted, cycle 10 diagnosed, and the message constrained to `y=1..9`;
   `rtk pnpm run qlty` passed with no issues.
+- S2 / `VAL-FLWC` (2026-07-20): `rtk pnpm test` passed with all four supported
+  `flwc` forms accepted and missing, reordered, empty, extra, and conflicting
+  segments diagnosed; `rtk pnpm run qlty` passed with no issues.
