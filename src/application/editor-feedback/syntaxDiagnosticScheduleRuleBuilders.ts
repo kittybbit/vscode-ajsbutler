@@ -43,7 +43,7 @@ const scheduleRuleParameterDiagnosticRules: readonly AjsParameterDiagnosticRule[
     {
       key: "cy",
       message:
-        "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..10, m=1..12, w=1..5, or d=1..31.",
+        "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..9, m=1..12, w=1..5, or d=1..31.",
       isInvalid: (parameter) => !isValidExplicitCycle(parameter),
     },
     {

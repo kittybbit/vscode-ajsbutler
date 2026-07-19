@@ -231,6 +231,7 @@ suite("Build Syntax Diagnostics", () => {
         "  ln=1,999;",
         "  st=144,+47:59;",
         "  cy=143,(12,m);",
+        "  cy=142,(9,y);",
         "  shd=142,31;",
         "  cftd=141,af,31,31;",
         "  sy=140,U2879;",
@@ -281,7 +282,7 @@ suite("Build Syntax Diagnostics", () => {
         "  ty=g;",
         "  ln=1,999;",
         "  st=145,+48:00;",
-        "  cy=1,(13,m);",
+        "  cy=1,(10,y);",
         "  shd=1,0;",
         "  cftd=1,no,2;",
         "  sy=1,C2880;",
@@ -306,7 +307,7 @@ suite("Build Syntax Diagnostics", () => {
       ),
       expectedSyntaxDiagnostic(
         [6, 2, 2],
-        "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..10, m=1..12, w=1..5, or d=1..31.",
+        "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..9, m=1..12, w=1..5, or d=1..31.",
       ),
       expectedSyntaxDiagnostic(
         [7, 2, 3],

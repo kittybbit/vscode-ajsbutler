@@ -118,7 +118,7 @@ const isExplicitNumberInRange = (
   isNumberInRange(Number(rawValue), minimum, maximum);
 
 const maximumExplicitCycleByUnit = {
-  y: 10,
+  y: 9,
   m: 12,
   w: 5,
   d: 31,

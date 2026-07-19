@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
+  including the yearly schedule cycle range.
 - Added a JP1/AJS semantic diff command that compares the active definition
   with a selected before definition, displays the Markdown report in VS Code,
   and copies the report only through an explicit copy action.
