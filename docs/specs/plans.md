@@ -20,10 +20,6 @@ rules in `docs/specs/README.md`, not in this file.
   the same matching semantics.
 - JP1/AJS3 version 13 is the current normative target for new parameter and
   command semantics.
-- Runtime semantic diagnostics will be audited and corrected against the
-  currently supported JP1/AJS3 version 13 parameter-rule contract. This work
-  does not expand coverage to every manual parameter or change syntax parsing,
-  hover, list, or flow behavior.
 - Read-only JP1/AJS WebAPI import stays beta until real JP1/AJS3 environment
   smoke verification and enough user feedback are recorded.
 - Qlty findings remain candidate signals for future behavior-preserving
@@ -39,17 +35,12 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Run Feature Exit Review for the JP1/AJS3 version 13 runtime diagnostic
-   conformance feature with `sdd-plan-task`.
-2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-3. Keep compatibility risk visible for every shared or extension-runtime change.
+2. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/jp1-v13-runtime-diagnostic-conformance/`: roadmap
-  feature with all six implementation slices and final desktop/web/build
-  validation complete; Feature Exit Review is pending.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

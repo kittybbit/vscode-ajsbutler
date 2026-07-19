@@ -144,24 +144,6 @@
      impacts and explicitly state when runtime environment facts are not
      verified.
 
-10. Align runtime diagnostics with authoritative JP1/AJS3 version 13 parameter
-    requirements.
-
-    - Limit conformance work to rule IDs already promised by the diagnosis Use
-      Case; comprehensive coverage of every version 13 parameter is outside the
-      feature.
-    - Correct the confirmed yearly schedule, repeated event-filter aggregate,
-      transfer-file context, QUEUE/recovery QUEUE target, and governed-content
-      byte-length gaps.
-    - Keep diagnostic decisions host neutral and shared by desktop and web
-      entry points without changing syntax parsing, hover, list, or flow
-      behavior.
-    - Treat the durable parameter rule as normative when implementation and
-      documentation differ; do not weaken the rule to preserve an incorrect
-      runtime value.
-    - Active feature:
-      `docs/specs/features/jp1-v13-runtime-diagnostic-conformance/`.
-
 ## Deferred / Optional Slices
 
 1. Build/test output-directory ownership cleanup is deferred until packaging,
