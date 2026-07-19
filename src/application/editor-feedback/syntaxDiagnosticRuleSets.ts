@@ -4,6 +4,7 @@ import {
   buildExplicitAllowedValuesRule,
   buildExplicitByteLengthRule,
   buildExplicitDecimalRangeRule,
+  buildExplicitGovernedByteLengthRule,
   buildRequiredParameterRule,
 } from "./syntaxDiagnosticCore";
 import {
@@ -95,13 +96,13 @@ export const waitJobExecutionTimeDiagnosticRules = [
 
 export const transferFileByteLengthRules: readonly AjsParameterDiagnosticRule[] =
   transferFileIndexes.flatMap((index) => [
-    buildExplicitByteLengthRule({
+    buildExplicitGovernedByteLengthRule({
       key: `ts${index}`,
       minimum: 1,
       maximum: 511,
       message: `Transfer source file name (ts${index}) must be between 1 and 511 bytes.`,
     }),
-    buildExplicitByteLengthRule({
+    buildExplicitGovernedByteLengthRule({
       key: `td${index}`,
       minimum: 1,
       maximum: 511,

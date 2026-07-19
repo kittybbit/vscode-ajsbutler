@@ -4,7 +4,7 @@
 
 - Purpose: make runtime semantic diagnostics conform to the currently
   supported JP1/AJS3 version 13 parameter rules.
-- Approved slices: S1-S6; active implementation slice: S3.
+- Approved slices: S1-S6; active implementation slice: S4.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives clear approval.
 - Do not: expand coverage to unsupported parameter families or change parser,
@@ -15,7 +15,7 @@
 - Validate each code slice with focused desktop evidence and
   `rtk pnpm run qlty`; run final desktop/web/build validation after Slice 6.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next action: implement Slice 3 with `sdd-implement-task`.
+- Next action: implement Slice 4 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -33,7 +33,7 @@
   conformance gaps in `SPECS.md`.
 - Review status: Reviewed; revised six-slice plan is ready for implementation
 - Human approval: Approved for S1-S6
-- Active implementation slice: S3
+- Active implementation slice: S4
 
 ## Human Approval
 
@@ -153,7 +153,7 @@ and fresh approval.
 
 ### Slice 3: Measure governed quoted-string content bytes
 
-- Status: Approved
+- Status: Complete
 - Scope: introduce one exact application helper path that selects quoted
   content or preserves an unquoted raw value, use it for `flwf` and
   `ts1..4`/`td1..4` byte rules, and add exact/multibyte boundaries.
@@ -387,7 +387,8 @@ and fresh approval.
 - [x] Human approval recorded for S1-S6
 - [x] Slice 1 focused desktop tests and qlty pass
 - [x] Slice 2 focused desktop tests and qlty pass
-- [ ] Slices 3-6 focused desktop tests and qlty pass
+- [x] Slice 3 focused desktop tests and qlty pass
+- [ ] Slices 4-6 focused desktop tests and qlty pass
 - [ ] Final web tests and production build pass
 - [ ] Integrated implementation review completed
 - [ ] TRACEABILITY.md updated with implementation evidence

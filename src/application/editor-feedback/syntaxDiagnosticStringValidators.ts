@@ -29,3 +29,8 @@ export const parseQuotedStringLiteralContent = (
   const matched = /^"((?:\\.|[^"\\])*)"$/.exec(value);
   return matched?.[1];
 };
+
+export const selectQuotedContentOrRawValue = (value: string): string =>
+  value.length >= 2 && value.startsWith('"') && value.endsWith('"')
+    ? value.slice(1, -1)
+    : value;

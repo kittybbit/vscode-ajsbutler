@@ -1,4 +1,5 @@
 import type { AjsParameter } from "../../domain/models/ajs/AjsDocument";
+import { selectQuotedContentOrRawValue } from "./syntaxDiagnosticStringValidators";
 
 type ExplicitDecimalRangeInput = {
   parameter: AjsParameter | undefined;
@@ -73,4 +74,21 @@ export const isValidExplicitByteLengthValue = (
   }
 
   return hasValidByteLength(rawValue, minimum, maximum);
+};
+
+export const isValidExplicitGovernedByteLengthValue = (
+  parameter: AjsParameter | undefined,
+  minimum: number,
+  maximum: number,
+): boolean => {
+  const rawValue = parameter?.value;
+  if (rawValue === undefined) {
+    return false;
+  }
+
+  return hasValidByteLength(
+    selectQuotedContentOrRawValue(rawValue),
+    minimum,
+    maximum,
+  );
 };

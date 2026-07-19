@@ -82,3 +82,7 @@ JP1/AJS behavior is part of this revised plan.
 - S2 / `VAL-FLWC` (2026-07-20): `rtk pnpm test` passed with all four supported
   `flwc` forms accepted and missing, reordered, empty, extra, and conflicting
   segments diagnosed; `rtk pnpm run qlty` passed with no issues.
+- S3 / `VAL-BYTES` (2026-07-20): `rtk pnpm test` passed with quoted `flwf`,
+  `tsN`, and `tdN` content accepted at exact limits, ASCII and UTF-8 multibyte
+  overages diagnosed, and outer quotes excluded; `rtk pnpm run qlty` passed
+  with no issues.

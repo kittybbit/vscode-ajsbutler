@@ -4,6 +4,7 @@ import type {
 } from "../../domain/models/ajs/AjsDocument";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
 import { isValidExplicitByteLengthValue } from "./syntaxDiagnosticScalarValidators";
+import { isValidExplicitGovernedByteLengthValue } from "./syntaxDiagnosticScalarValidators";
 import { parseExplicitDecimalInRange } from "./syntaxDiagnosticScalarValidators";
 import { findParameter, findParameters } from "./syntaxDiagnosticUnitLookup";
 
@@ -63,6 +64,18 @@ export const buildExplicitByteLengthRule = ({
   message,
   isInvalid: (parameter) =>
     !isValidExplicitByteLengthValue(parameter, minimum, maximum),
+});
+
+export const buildExplicitGovernedByteLengthRule = ({
+  key,
+  minimum,
+  maximum,
+  message,
+}: ExplicitByteLengthRuleInput): AjsParameterDiagnosticRule => ({
+  key,
+  message,
+  isInvalid: (parameter) =>
+    !isValidExplicitGovernedByteLengthValue(parameter, minimum, maximum),
 });
 
 export const buildExplicitAllowedValuesRule = (

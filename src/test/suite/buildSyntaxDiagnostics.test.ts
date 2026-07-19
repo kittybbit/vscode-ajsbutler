@@ -765,6 +765,45 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("measures quoted file monitoring names by content bytes", () => {
+    const exactAsciiContent = "a".repeat(255);
+    const overAsciiContent = "a".repeat(256);
+    const exactMultibyteContent = "あ".repeat(85);
+    const overMultibyteContent = "あ".repeat(86);
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "file1",
+          type: "flwj",
+          parameters: [`flwf="${exactAsciiContent}";`],
+        },
+        {
+          name: "file2",
+          type: "flwj",
+          parameters: [`flwf="${overAsciiContent}";`],
+        },
+        {
+          name: "file3",
+          type: "flwj",
+          parameters: [`flwf="${exactMultibyteContent}";`],
+        },
+        {
+          name: "file4",
+          type: "flwj",
+          parameters: [`flwf="${overMultibyteContent}";`],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.message),
+      [
+        "Monitored file name (flwf) must be between 1 and 255 bytes.",
+        "Monitored file name (flwf) must be between 1 and 255 bytes.",
+      ],
+    );
+  });
+
   test("reports file monitoring target-pattern diagnostics for explicit out-of-range values and wildcard short intervals", () => {
     const tooLongFileName = "a".repeat(256);
     const diagnostics = buildSyntaxDiagnostics(
@@ -1104,6 +1143,41 @@ suite("Build Syntax Diagnostics", () => {
         "Transfer destination file name (td1) must be between 1 and 511 bytes.",
       ),
     ]);
+  });
+
+  test("measures quoted transfer file names by content bytes", () => {
+    const exactSourceContent = `/${"a".repeat(510)}`;
+    const overSourceContent = `/${"a".repeat(511)}`;
+    const exactDestinationContent = "a".repeat(511);
+    const overMultibyteDestinationContent = "あ".repeat(171);
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "job1",
+          type: "j",
+          parameters: [
+            `ts1="${exactSourceContent}";`,
+            `td1="${exactDestinationContent}";`,
+          ],
+        },
+        {
+          name: "job2",
+          type: "j",
+          parameters: [
+            `ts1="${overSourceContent}";`,
+            `td1="${overMultibyteDestinationContent}";`,
+          ],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.message),
+      [
+        "Transfer source file name (ts1) must be between 1 and 511 bytes.",
+        "Transfer destination file name (td1) must be between 1 and 511 bytes.",
+      ],
+    );
   });
 
   test("reports transfer-source path diagnostics for quoted relative paths", () => {
