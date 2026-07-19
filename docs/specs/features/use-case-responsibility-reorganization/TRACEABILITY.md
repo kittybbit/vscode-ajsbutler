@@ -8,7 +8,7 @@
 | F1     | R2, R3, R5, R6 | 4     | Passed: scenarios/details  |
 | S1     | R3, R5, R6     | 5     | Passed: scenarios/paths    |
 | U2     | R4, R7, R8     | 6     | Passed: six IDs/consumers  |
-| E2     | R4, R7, R8     | 7     | Planned: 25 IDs/diagnosis  |
+| E2     | R4, R7, R8     | 7     | Planned: IDs/gap inventory |
 | F2     | R2, R5, R9     | 8     | Planned: ownership matrix  |
 | V2     | R5, R6, R10    | 9     | Planned: matrix/evidence   |
 
@@ -27,7 +27,8 @@
 - R2: move other responsibilities to the correct document category.
 - R3: consolidate or split files around user/application purposes.
 - R4: make parameter interpretation the normative semantic owner.
-- R5: preserve all currently documented observable behavior.
+- R5: preserve documented observable behavior except official-source
+  corrections, whose runtime gaps are deferred explicitly.
 - R6: keep indexes and repository-local links consistent.
 - R7: make every parameter rule deterministic and source-backed.
 - R8: enumerate exact consumer rule IDs or an explicit no-dependency boundary.
@@ -40,7 +41,8 @@
   `Use-Case Responsibility Reorganization レビュー修正指示書`; they are
   distinct from SPECS requirements R1-R10 above.
 - U2: review RF1 and RF4 for Unit List rules and the Hover no-ID boundary.
-- E2: review RF1, RF3, and RF4 for supported diagnostic rules and coverage.
+- E2: review RF1, RF3, and RF4 for supported diagnostic rules, official-manual
+  precedence, consumer coverage, and independent conformance follow-up.
 - F2: review RF2 for Flow application/presentation ownership.
 - V2: review RF5, RF6, and RF7 for migration proof, validation, and current
   state.

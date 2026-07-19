@@ -162,6 +162,17 @@
    requirement outside the active unit-list usability feature is identified.
 7. Add more expanded-flow layout regression fixtures only if real-world nested
    layout examples expose additional collision or refit gaps.
+8. Align runtime diagnostics with authoritative JP1/AJS3 version 13 parameter
+   requirements in an independent conformance feature.
+
+   - First confirmed gap: yearly schedule cycle `cy=(n,y)` is `1..9` in the
+     version 13 Command Reference, while current diagnostics accept `1..10` and
+     present that range in the diagnostic message.
+   - The conformance feature must update implementation and tests from the
+     durable parameter rule; it must not weaken the Use Case to preserve an
+     incorrect implementation value.
+   - Add further confirmed gaps from parameter-rule completion to the same
+     focused intake evidence before creating the feature.
 
 ## Done Criteria For A Slice
 

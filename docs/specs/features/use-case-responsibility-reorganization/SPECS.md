@@ -36,7 +36,9 @@ specifications, and future design decisions each have one clear document home.
   parameter semantics and remove duplicated normative ownership from
   consumers.
 - Preserve all currently documented observable behavior while reorganizing its
-  ownership and references.
+  ownership and references, except where an official version 13 source proves
+  a provisional parameter value incorrect; correct that durable requirement
+  and defer runtime conformance explicitly.
 - Keep relative links and the requirements index consistent after moves,
   renames, splits, and consolidations.
 - Make every published `JP1-PARAM-*` rule deterministic by stating its exact
@@ -48,6 +50,11 @@ specifications, and future design decisions each have one clear document home.
   presentation-owned coordinates, bounds, and dimensions cannot be confused.
 - Preserve requirement-level migration evidence and reproducible final
   validation until the transient feature is approved for closure.
+- Treat the official Hitachi JP1/AJS3 version 13 manual as authoritative when
+  durable parameter requirements and the current implementation disagree.
+- Record each discovered implementation mismatch as actionable deferred work
+  for an independent conformance feature without changing runtime behavior in
+  this docs-only feature.
 
 ## Architecture
 
@@ -73,11 +80,15 @@ specifications, and future design decisions each have one clear document home.
 
 ### Breaking Change Analysis
 
-- User-visible behavior: none.
+- User-visible runtime behavior: none.
+- Durable requirement correction: parameter meaning follows the official
+  version 13 manual even when the current implementation does not yet conform.
 - API/DTO/schema compatibility: none.
 - VS Code/web extension compatibility: none.
 - Changed scenarios: none; scenarios may move between documents without
-  changing their behavioral meaning.
+  changing their behavioral meaning, except that an incorrect provisional
+  value is corrected to the official version 13 contract and its runtime gap is
+  deferred explicitly.
 
 ### Alternative Considerations
 
@@ -103,8 +114,9 @@ specifications, and future design decisions each have one clear document home.
 - Desktop extension compatibility: unchanged because this is
   documentation-only.
 - JP1/AJS source reference: official Hitachi JP1/AJS3 version 13 manual pages
-  are used to make the existing documentation deterministic; no JP1/AJS rule,
-  supported behavior, or product-version scope is changed.
+  are authoritative for deterministic requirements. Runtime behavior and
+  product-version scope are unchanged in this feature; implementation gaps are
+  deferred to independent conformance features.
 
 ## Acceptance Criteria
 
@@ -130,12 +142,16 @@ specifications, and future design decisions each have one clear document home.
   removal, with zero unmapped requirements.
 - Final validation records the commit, commands, mapping totals, stale-link
   count, and undefined or unreferenced rule-ID counts.
+- Every implementation/manual mismatch discovered during rule completion is
+  traceable to an actionable independent-feature entry and is not normalized
+  into the durable requirement as if the implementation were authoritative.
 
 ## Non-Goals
 
 - Changing extension behavior, JP1/AJS interpretation, diagnostics, viewers,
   report output, telemetry collection, or WebAPI import.
 - Refactoring runtime modules to match the new documentation taxonomy.
+- Correcting runtime diagnostics or tests to conform to the official manual.
 - Adding new search, command-generation, semantic-diff, or telemetry behavior.
 - Rewriting unrelated durable documentation.
 

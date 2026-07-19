@@ -3,11 +3,13 @@
 ## Agent Brief
 
 - Purpose: reorganize requirement documents by stable responsibility without
-  changing observable behavior.
-- Approved or active slice: Slices 1 through 6 are complete; Slice 7 is active,
-  and Slices 8 and 9 remain approved.
+  changing runtime behavior, while correcting durable parameter requirements
+  to the authoritative version 13 manual.
+- Approved or active slice: Slices 1 through 6 are complete; revised Slice 7 is
+  approved and active; Slices 8 and 9 retain their prior approval.
 - Do not: edit runtime code, tests, configuration, or generated artifacts.
-- Do not: change existing JP1/AJS or extension behavior while moving text.
+- Do not: change existing JP1/AJS runtime or extension behavior; implementation
+  conformance is independent follow-up.
 - Read first: `SPECS.md`, this file, and
   `docs/requirements/use-cases/README.md`.
 - Read `TRACEABILITY.md` when checking slice coverage and moved references.
@@ -17,7 +19,7 @@
 - Document roles: see `docs/specs/README.md`.
 - Review state: the Feature Exit review was reopened after RF1-RF7 identified
   normative, boundary, and verification gaps.
-- Next decision: implement Slice 7 with `sdd-implement-task`.
+- Next decision: implement revised Slice 7 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -33,20 +35,22 @@
 ## Plan Status
 
 - Status: Approved
-- Planning scope: preserve completed Slices 1 through 5 and correct review
+- Planning scope: preserve completed Slices 1 through 6 and correct review
   findings RF1-RF7 through deterministic parameter rules, explicit consumer
   references, a flow ownership boundary, and reproducible migration evidence.
 - Review status: Reviewed
-- Human approval: Approved for revised Slices 6 through 9
+- Human approval: Approved for revised Slice 7; prior approval remains for
+  Slices 8 and 9
 - Active implementation slice: Slice 7
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in the current conversation
+- Approved at: revised Slice 7 approved in the current conversation after its
+  normative-source and roadmap boundary changed
 - Approved scope: Slices 1 through 5 remain completed under their prior
-  approval; revised Slices 6 through 9 are approved within their recorded
-  docs-only approval boundaries.
+  approval; Slice 6 is complete; Slices 8 and 9 retain approval within their
+  recorded boundaries.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -61,6 +65,12 @@ Only clear human approval can change Status to Approved.
   requirement-level migration completeness.
 - Decision: reopen Feature Exit and add only the four correction slices below;
   preserve completed Slices 1 through 5 unchanged.
+- Slice 7 discovery: the official version 13 Command Reference defines the
+  yearly `cy=(n,y)` range as `1..9`, while current diagnostics accept and report
+  `1..10`.
+- Human decision: official version 13 requirements are authoritative. Durable
+  rules must state the official value; every implementation mismatch is
+  deferred to an independent conformance feature rather than fixed here.
 
 ## Implementation Slices
 
@@ -389,6 +399,11 @@ Only clear human approval can change Status to Approved.
     `uc-diagnose-ajs-definition.md`
   - limit diagnostic guarantees to supported rule IDs, state that unsupported
     rules are not validated, and preserve compatible-ISAM exclusions
+  - use the official version 13 manual as the normative source when current
+    diagnostics differ
+  - record every discovered implementation mismatch, beginning with yearly
+    `cy=(n,y)` accepting `1..10` instead of official `1..9`, as an actionable
+    independent-feature entry in `docs/specs/roadmap.md`
 - User / Domain Value: every supported diagnostic has one deterministic JP1/AJS
   rule, and the diagnostic guarantee cannot be mistaken for full manual
   coverage.
@@ -401,9 +416,13 @@ Only clear human approval can change Status to Approved.
     left without exact content or a direct normative subdocument reference
   - Goal, Outputs, Rules, scenarios, supported families, and acceptance notes
     consistently limit coverage to supported rule IDs
+  - durable rule values match the official version 13 source even when current
+    runtime behavior differs
+  - every discovered runtime mismatch names the parameter, official rule,
+    current implementation evidence, and independent-feature outcome
 - Validation:
-  - compare each ID against official v13 manual sections and existing
-    diagnostic rules/tests by read-only inspection
+  - compare each ID first against official v13 manual sections, then inspect
+    existing diagnostic rules/tests to inventory conformance gaps
   - exact-ID checks for defined, referenced, duplicate, and undefined IDs
   - content review for concrete values, unit types, exceptions, and sources
   - `rtk pnpm run lint:md`; `rtk git diff --check`
@@ -411,21 +430,25 @@ Only clear human approval can change Status to Approved.
   scope, and explicit-consumer requirements; proven by the 25-ID inventory and
   diagnostic mapping.
 - Production Readiness:
-  - Failure mode: specification drift from current diagnostics or the manual
-  - JP1/AJS compatibility: no runtime behavior change; mismatches stop for
-    human decision rather than silently changing the contract
+  - Failure mode: allowing current implementation behavior to override the
+    official contract, or discovering a mismatch without recording follow-up
+  - JP1/AJS compatibility: requirements target official version 13; runtime is
+    unchanged here, and each mismatch becomes independent conformance work
   - Large or malformed input risk: existing diagnostic safety wording remains
   - Desktop/web impact: none
   - README/docs impact: parameter rule files/index, Diagnose Use Case, and
     traceability only
-  - CHANGELOG impact: none unless an actual behavior mismatch is discovered
+  - CHANGELOG impact: none in this docs-only slice; the independent runtime-
+    conformance feature evaluates its user-visible diagnostic correction
 - Approval Boundary: the 25 existing diagnostic rule IDs, optional family
   files and their index under `docs/requirements/domain-rules/`, Diagnose Use
-  Case, and feature traceability/evidence.
+  Case, the minimum actionable conformance entry in `docs/specs/roadmap.md`,
+  and feature traceability/evidence.
 - Dependencies: Slice 6 establishes the deterministic rule format
-- Risks: manual sections may reveal that one current rule ID combines multiple
-  unit-specific meanings and needs a documentation-only ID split; that split
-  requires review but not runtime change when semantics remain identical.
+- Risks: manual sections may reveal additional implementation mismatches or
+  that one current rule ID combines multiple unit-specific meanings. Each
+  mismatch must be recorded, and any documentation-only ID split still
+  requires review when the approved boundary no longer covers it.
 - Out of Scope: new diagnostics, changed diagnostic behavior or messages,
   runtime code, tests, compatible-ISAM support, or new product-version scope.
 
@@ -507,6 +530,8 @@ Only clear human approval can change Status to Approved.
   - TASKS current-state sections agree
 - Validation:
   - compare baseline commit `1fc23fed` with the final branch documents
+  - distinguish responsibility-preserving moves from official-contract
+    corrections and their deferred runtime conformance entries
   - run exact old-path, link-target, rule-ID definition/reference, and duplicate-
     owner checks
   - `rtk pnpm run qlty`; `rtk pnpm run lint:md`; `rtk git diff --check`
@@ -517,8 +542,9 @@ Only clear human approval can change Status to Approved.
 - Production Readiness:
   - Failure mode: false completion caused by an undefined counting unit or
     stale validation target
-  - JP1/AJS compatibility: zero semantic changes must be confirmed by the
-    migration matrix
+  - JP1/AJS compatibility: the migration matrix must distinguish unchanged
+    semantics from official-contract corrections and link every runtime gap to
+    deferred conformance work
   - Large or malformed input risk: none; documentation-only
   - Desktop/web impact: zero runtime impact confirmed by docs-only diff
   - README/docs impact: feature-local evidence and any final link corrections
@@ -565,8 +591,9 @@ Only clear human approval can change Status to Approved.
 - A docs-only branch must not acquire runtime, test, configuration, or
   generated-artifact changes.
 - Official manual wording may expose a mismatch between current implementation
-  and the provisional durable rule; implementation must stop for a human
-  decision instead of changing behavior or concealing the mismatch.
+  and the provisional durable rule. The official rule remains normative; each
+  implementation gap must be made actionable as independent follow-up rather
+  than concealed or fixed inside this docs-only feature.
 - Migration totals are meaningless unless Slice 9 defines the counting unit
   before recording results.
 
@@ -575,8 +602,9 @@ Only clear human approval can change Status to Approved.
 - This feature's implementation is the durable documentation update itself.
 - Deterministic parameter meaning and Flow ownership remain durable; migration
   history and validation counts remain transient until closure.
-- `docs/specs/roadmap.md` changes only to retain the shared-search trigger as a
-  future decision; repository sequencing otherwise remains unchanged.
+- `docs/specs/roadmap.md` retains the shared-search trigger and records
+  independent runtime-conformance work discovered while making official
+  parameter requirements deterministic.
 
 ## Feature Exit
 
