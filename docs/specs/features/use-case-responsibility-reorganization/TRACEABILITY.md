@@ -1,17 +1,17 @@
 # Traceability: Use-Case Responsibility Reorganization
 
-| Source | SPECS              | Slice | Validation                 |
-| ------ | ------------------ | ----- | -------------------------- |
-| D1     | R1, R2, R4-R6      | 1     | Passed: paths/qlty/lint    |
-| U1     | R3-R6              | 2     | Passed: scenarios/rules    |
-| E1     | R3-R6              | 3     | Passed: scenarios/rule IDs |
-| F1     | R2, R3, R5, R6     | 4     | Passed: scenarios/details  |
-| S1     | R3, R5, R6         | 5     | Passed: scenarios/paths    |
-| U2     | R4, R7, R8         | 6     | Passed: six IDs/consumers  |
-| E2     | R4, R7, R8         | 7     | Passed: IDs/gap inventory  |
-| F2     | R2, R5, R9         | 8     | Passed: ownership matrix   |
-| V2     | R5, R6, R10        | 9     | Passed: matrix/evidence    |
-| Q1     | R1, R4-R6, R8, R10 | 10    | Planned: ownership/ID sets |
+| Source | SPECS              | Slice | Validation                  |
+| ------ | ------------------ | ----- | --------------------------- |
+| D1     | R1, R2, R4-R6      | 1     | Passed: paths/qlty/lint     |
+| U1     | R3-R6              | 2     | Passed: scenarios/rules     |
+| E1     | R3-R6              | 3     | Passed: scenarios/rule IDs  |
+| F1     | R2, R3, R5, R6     | 4     | Passed: scenarios/details   |
+| S1     | R3, R5, R6         | 5     | Passed: scenarios/paths     |
+| U2     | R4, R7, R8         | 6     | Passed: five IDs/projection |
+| E2     | R4, R7, R8         | 7     | Passed: IDs/gap inventory   |
+| F2     | R2, R5, R9         | 8     | Passed: ownership matrix    |
+| V2     | R5, R6, R10        | 9     | Passed: matrix/evidence     |
+| Q1     | R1, R4-R6, R8, R10 | 10    | Passed: ownership/ID sets   |
 
 ## Source Mapping
 
@@ -97,7 +97,8 @@ commit SHA.
 | UBL-O01-O02, S01-S05, A01-A03               |    10 | Consolidated                     | Unit List                                                                 |
 | UBL-R01-R02, K01-K02                        |     4 | Reworded without semantic change | Unit List                                                                 |
 | UBL-R03                                     |     1 | Moved                            | Parameter Rules                                                           |
-| ULV-O01-O02, R04, S01-S07, A01              |    11 | Consolidated                     | Unit List                                                                 |
+| ULV-O01-O02, R04, S01-S06, A01              |    10 | Consolidated                     | Unit List                                                                 |
+| ULV-S07                                     |     1 | Consolidated                     | Unit List QUEUE transfer-field projection                                 |
 | ULV-R01                                     |     1 | Reworded without semantic change | Unit List                                                                 |
 | ULV-R02-R03, R05, K01-K02                   |     5 | Intentionally removed            | Migration and table-framework implementation details                      |
 | EF-O01, R04, S01, S04-S29, A02-A03, K01     |    32 | Moved                            | Diagnose                                                                  |
@@ -152,7 +153,7 @@ the confirmed yearly-cycle, repeated `evwfr`, transfer-macro context, custom-PC
 transfer, QUEUE retry, and quoted byte-length gaps. No runtime correction is
 part of this feature.
 
-## Candidate Validation Evidence
+## Superseded Slice 9 Candidate Evidence
 
 - Validated candidate:
   `04b891e69485366ffbca53524ba97a3b3794dde0`.
@@ -174,6 +175,32 @@ part of this feature.
 | Rule IDs          | definition/reference set comparison                         | Passed: 31 defined and referenced |
 | Rule-ID integrity | duplicate/undefined/unreferenced checks                     | Passed: 0/0/0                     |
 | Migration         | baseline item inventory and matrix total                    | Passed: 200 reviewed, 0 unmapped  |
+
+<!-- markdownlint-enable MD013 -->
+
+## Slice 10 Pre-Commit Validation Evidence
+
+- Working-tree base: `7b41cf9b`.
+- Changed surface: the two approved durable requirements and the two approved
+  feature-local evidence/state files.
+- The Slice 10 commit SHA does not exist before completion approval. Feature
+  Exit must validate and record that post-commit SHA as the final candidate.
+
+<!-- markdownlint-disable MD013 -->
+
+| Check               | Result                                                   |
+| ------------------- | -------------------------------------------------------- |
+| Deleted durable ID  | Passed: 0 definitions, 0 consumer references             |
+| Unit List consumers | Passed: 5 shared IDs plus QUEUE projection rules         |
+| Rule IDs            | Passed: 30 defined and referenced                        |
+| Rule-ID integrity   | Passed: 0 duplicate, undefined, or unreferenced IDs      |
+| QUEUE scenario      | Passed: `qj` and `rq` behavior preserved without rule ID |
+| Migration matrix    | Passed: 24 rows, 200 reviewed, 0 unmapped                |
+| Durable links       | Passed: 0 broken targets                                 |
+| Quality             | Passed: no issues                                        |
+| Markdown            | Passed: 29 files, 0 errors                               |
+| Whitespace          | Passed: `git diff --check`                               |
+| Docs-only branch    | Passed: 0 non-doc paths                                  |
 
 <!-- markdownlint-enable MD013 -->
 

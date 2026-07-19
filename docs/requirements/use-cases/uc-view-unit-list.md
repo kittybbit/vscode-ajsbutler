@@ -34,6 +34,10 @@ presentation.
 - raw parameter evidence remains distinguishable from effective values
 - displayed effective parameter values come from
   [Interpret JP1 Parameters](../domain-rules/interpret-jp1-parameters.md)
+- for QUEUE and recovery QUEUE jobs (`qj`, `rq`), transfer source and
+  destination values are included in the Unit List projection
+- transfer-operation values are not included in the Unit List projection for
+  QUEUE and recovery QUEUE jobs (`qj`, `rq`)
 - row and field meaning used by CSV export remains stable unless a separate
   behavior change is approved
 
@@ -44,7 +48,6 @@ presentation.
 - `JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001`
 - `JP1-PARAM-FILE-MONITOR-DEFAULT-001`
 - `JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001`
-- `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001`
 
 ## Behavioral Scenarios
 
@@ -96,10 +99,10 @@ Scenario: Unit-family defaults are displayed
   And explicit values remain visible
 
 Scenario: QUEUE transfer fields use the supported parameter set
-  Given interpreted QUEUE values under JP1-PARAM-TRANSFER-QUEUE-OPERATION-001
+  Given a QUEUE or recovery QUEUE job with transfer parameters
   When the unit list displays transfer fields
   Then transfer source and destination values are displayed
-  And transfer operation values are not displayed for QUEUE jobs
+  And transfer operation values are not displayed
 ```
 
 ## Acceptance Notes

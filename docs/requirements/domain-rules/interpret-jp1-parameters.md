@@ -99,18 +99,6 @@ wording or a diagnostic message.
 - Other unit types receive no default from this rule.
 - Source: [Command Reference 5.2.16, execution-interval control job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0231.HTM).
 
-### `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001`
-
-- Applies to the Unit List projection of transfer parameters `ts1` through
-  `ts4`, `td1` through `td4`, and `top1` through `top4`.
-- QUEUE and recovery QUEUE jobs (`qj`, `rq`) expose explicit source and
-  destination values but no transfer-operation value.
-- For other unit types, explicit transfer-operation values remain available;
-  this rule supplies no default.
-- Sources:
-  - [Command Reference 5.2.7, QUEUE job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0222.HTM)
-  - [Command Reference 5.2.6, UNIX/PC job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0221.HTM)
-
 ## Diagnostic Interpretation Rules
 
 The unique normative bodies for all diagnostic rule IDs are in

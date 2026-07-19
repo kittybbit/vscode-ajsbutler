@@ -5,8 +5,8 @@
 - Purpose: reorganize requirement documents by stable responsibility without
   changing runtime behavior, while correcting durable parameter requirements
   to the authoritative version 13 manual.
-- Approved or active slice: Slices 1 through 9 are complete; Slice 10 is
-  approved and active.
+- Approved or active slice: Slices 1 through 10 are complete; no implementation
+  slice remains active.
 - Do not: edit runtime code, tests, configuration, or generated artifacts.
 - Do not: change existing JP1/AJS runtime or extension behavior; implementation
   conformance is independent follow-up.
@@ -19,7 +19,7 @@
 - Document roles: see `docs/specs/README.md`.
 - Review state: an additional review reopened Feature Exit because a Unit List
   projection rule is incorrectly owned as a shared Domain Rule.
-- Next decision: implement Slice 10 with `sdd-implement-task`.
+- Next decision: run Feature Exit Review with `sdd-plan-task`.
 
 ## Sync Rule
 
@@ -39,15 +39,15 @@
   additional QUEUE transfer-projection ownership finding without changing
   runtime behavior or JP1/AJS interpretation.
 - Review status: Reviewed for proposed Slice 10
-- Human approval: Approved for Slice 10
-- Active implementation slice: Slice 10
+- Human approval: Slice 10 completion approved
+- Active implementation slice: none; Feature Exit Review is next
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: Slice 10 approved in the current conversation
-- Approved scope: Slice 10 within its recorded approval boundary; Slices 1
-  through 9 remain complete.
+- Approved at: Slice 10 completion approved in the current conversation
+- Approved scope: Slices 1 through 10 are complete within their recorded
+  boundaries.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -339,7 +339,7 @@ Only clear human approval can change Status to Approved.
 
 - Status: Complete
 - Scope:
-  - make the six Unit List projection rule IDs deterministic with exact
+  - make the five shared Unit List parameter rule IDs deterministic with exact
     parameters, unit types, applicability, exclusions, raw/effective behavior,
     defaults or supported fields, and official JP1/AJS3 version 13 references
   - add an explicit `Consumed Domain Rules` list to `uc-view-unit-list.md`
@@ -349,27 +349,29 @@ Only clear human approval can change Status to Approved.
     localized syntax and consumes no `JP1-PARAM-*` effective-value rule IDs
 - User / Domain Value: list projections have deterministic, reviewable JP1/AJS
   meaning, while Hover no longer claims a semantic dependency it does not use.
-- Cohesive Change Group: the six list-related rules, Unit List consumption, and
+- Cohesive Change Group: the five shared list-related rules, Unit List
+  consumption, the consumer-specific QUEUE projection, and
   the current Hover boundary.
 - Acceptance:
   - `JP1-PARAM-SCHEDULE-WC-WT-001`,
     `JP1-PARAM-WAIT-ETS-DEFAULT-001`,
     `JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001`,
-    `JP1-PARAM-FILE-MONITOR-DEFAULT-001`,
-    `JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001`, and
-    `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001` are self-contained and source-backed
-  - Unit List explicitly references all six IDs and redefines none of them
+    `JP1-PARAM-FILE-MONITOR-DEFAULT-001`, and
+    `JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001` are self-contained and source-backed
+  - Unit List explicitly references all five shared IDs and redefines none of
+    them
+  - Unit List owns its consumer-specific QUEUE transfer-field projection
   - Hover explicitly records no current rule-ID dependency
 - Validation:
   - compare each rule with the official Hitachi JP1/AJS3 version 13 Command
     Reference and current repository behavior evidence
-  - verify all six definitions and Unit List references by exact-ID search
+  - verify all five definitions and Unit List references by exact-ID search
   - verify Hover implementation and tests remain syntax-only by read-only
     inspection
   - `rtk pnpm run lint:md`; `rtk git diff --check`
 - Traceability: review RF1 and RF4 to SPECS deterministic-rule and explicit-
-  consumer requirements; proven by six rule records, source links, and exact-ID
-  reference checks.
+  consumer requirements; proven by five shared rule records, source links,
+  exact-ID reference checks, and the consumer-specific QUEUE projection.
 - Production Readiness:
   - Failure mode: documenting a value or unit family broader than current
     behavior or the official manual
@@ -379,15 +381,18 @@ Only clear human approval can change Status to Approved.
   - Desktop/web impact: none
   - README/docs impact: domain rule, Unit List, Hover, and traceability only
   - CHANGELOG impact: none unless review discovers an actual behavior mismatch
-- Approval Boundary: the six named rule records, `uc-view-unit-list.md`,
+- Approval Boundary: the five named shared rule records, the Unit List QUEUE
+  projection, `uc-view-unit-list.md`,
   `uc-show-parameter-hover.md`, and feature traceability/evidence.
 - Dependencies: completed Slices 1 through 5
 - Risks: official wording may distinguish unit families more narrowly than
   current generalized rule IDs.
-- Implementation Feedback: the six-rule boundary matched the Unit List's
-  current default-aware projections. Read-only implementation inspection also
-  confirmed that Hover is syntax-only, so recording no current rule-ID
-  dependency avoided inventing a semantic consumer.
+- Implementation Feedback: the five shared rules match the Unit List's current
+  default-aware projections. The QUEUE transfer-field selection is a consumer-
+  specific projection rather than shared parameter meaning. Read-only
+  implementation inspection also confirmed that Hover is syntax-only, so
+  recording no current rule-ID dependency avoided inventing a semantic
+  consumer.
 - Out of Scope: runtime defaults, list projection code, hover code, tests,
   additional parameter families, or behavior correction.
 
@@ -578,7 +583,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 10: Correct QUEUE Transfer Projection Ownership
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - remove `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001` and its presentation-only
     normative body from `interpret-jp1-parameters.md`
@@ -641,6 +646,10 @@ Only clear human approval can change Status to Approved.
 - Dependencies: completed Slices 6 and 9
 - Risks: removing one ID changes the recorded definition/reference totals and
   invalidates the prior final-candidate SHA even though behavior is unchanged.
+- Implementation Feedback: the approved four-document boundary covered every
+  affected durable owner and evidence record. Separating the display projection
+  reduced the shared Unit List rule set from six IDs to five without requiring
+  a replacement rule or any runtime investigation.
 - Out of Scope: runtime code, DTOs, tests, columns, parser behavior, transfer
   validity-rule design, diagnostics, official-manual conformance fixes, new
   Domain Rule IDs, or changes to visible values.
@@ -701,10 +710,11 @@ Only clear human approval can change Status to Approved.
 
 ## Feature Exit
 
-- Definition of Done status: not satisfied; proposed Slice 10 requires review,
-  approval, implementation, and completion approval
-- Durable documentation updates: Slices 1 through 9 complete; Slice 10 pending
-- Open risk: stale QUEUE projection ownership and final-validation evidence
+- Definition of Done status: implementation slices complete; Feature Exit
+  Review pending
+- Durable documentation updates: Slices 1 through 10 complete
+- Open risk: none from implementation; final candidate evidence awaits Feature
+  Exit Review
 
 ## Validation
 
