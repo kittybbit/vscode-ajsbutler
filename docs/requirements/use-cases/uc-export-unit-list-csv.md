@@ -2,8 +2,8 @@
 
 ## Goal
 
-Convert visible unit-list data into CSV text without coupling CSV generation to
-React table internals or webview event handling.
+Convert visible unit-list data into CSV text that desktop and web hosts can copy
+or save without changing its contents.
 
 ## Trigger
 
@@ -21,13 +21,12 @@ React table internals or webview event handling.
 
 ## Rules
 
-- CSV generation belongs to an application-facing use case rather than a React
-  component
-- export logic must not depend on VS Code APIs, clipboard APIs, or save-dialog
-  APIs
+- CSV generation uses stable application-facing rows and visible-column
+  metadata
+- export logic remains independent of host clipboard and save mechanisms
 - CSV escaping and column ordering must preserve current user-visible behavior
-- export input should use application-facing row data rather than
-  `UnitEntity`-typed table rows
+- export input does not expose parser-adjacent, presentation-framework, or
+  host-specific objects
 
 ## Behavioral Scenarios (Gherkin)
 
@@ -59,5 +58,5 @@ Scenario: Escaped values preserve current CSV behavior
 
 ## Risks Or Edge Cases
 
-- the current implementation depends on React Table structures, so extracting a
-  stable export input DTO must avoid accidental column-order regressions
+- column-order or visibility drift can change the exported payload even when
+  the underlying unit data is unchanged
