@@ -4,7 +4,7 @@
 
 - Purpose: make runtime semantic diagnostics conform to the currently
   supported JP1/AJS3 version 13 parameter rules.
-- Approved slices: S1-S6; active implementation slice: S6.
+- Approved slices: S1-S6; all implementation slices are complete.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives clear approval.
 - Do not: expand coverage to unsupported parameter families or change parser,
@@ -15,7 +15,7 @@
 - Validate each code slice with focused desktop evidence and
   `rtk pnpm run qlty`; run final desktop/web/build validation after Slice 6.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next action: implement Slice 6 with `sdd-implement-task`.
+- Next action: run Feature Exit Review with `sdd-plan-task`.
 
 ## Sync Rule
 
@@ -33,7 +33,7 @@
   conformance gaps in `SPECS.md`.
 - Review status: Reviewed; revised six-slice plan is ready for implementation
 - Human approval: Approved for S1-S6
-- Active implementation slice: S6
+- Active implementation slice: None; Feature Exit Review pending
 
 ## Human Approval
 
@@ -283,7 +283,7 @@ and fresh approval.
 
 ### Slice 6: Enforce canonical repeated evwfr aggregate bytes
 
-- Status: Approved
+- Status: Complete
 - Scope: keep per-value shape validation separate; linearly sum each canonical
   `evwfr=<raw-value>;` UTF-8 contribution including `evwfr=`, the raw value, and
   `;`; diagnose the first parameter that crosses 2,048 bytes; add boundaries,
@@ -371,12 +371,14 @@ and fresh approval.
 
 ## Feature Exit
 
-- Definition of Done status: Not evaluated; all six slices are Approved but
-  not yet implemented.
+- Definition of Done status: Pending Feature Exit Review; all six slices and
+  their required implementation validation are complete.
 - Durable documentation updates: event-filter aggregate clarification complete;
-  CHANGELOG and traceability remain implementation sync work.
-- Open risks: implementation must preserve the approved boundaries and produce
-  the validation evidence required by each slice.
+  CHANGELOG and traceability implementation sync are complete.
+- Implementation feedback: planned boundaries and dependencies held; no new
+  slice, architecture decision, or durable knowledge propagation was needed.
+- Open risks: production build retains webpack asset-size warnings; this
+  feature adds no UI dependency or rendering path, and the build succeeds.
 
 ## Validation
 
@@ -390,8 +392,8 @@ and fresh approval.
 - [x] Slice 3 focused desktop tests and qlty pass
 - [x] Slice 4 focused desktop tests and qlty pass
 - [x] Slice 5 focused desktop tests and qlty pass
-- [ ] Slice 6 focused desktop tests and qlty pass
-- [ ] Final web tests and production build pass
-- [ ] Integrated implementation review completed
-- [ ] TRACEABILITY.md updated with implementation evidence
+- [x] Slice 6 focused desktop tests and qlty pass
+- [x] Final web tests and production build pass
+- [x] Integrated implementation review completed
+- [x] TRACEABILITY.md updated with implementation evidence
 - [ ] Feature Exit Review completed after all slices

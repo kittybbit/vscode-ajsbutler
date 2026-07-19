@@ -39,8 +39,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement approved Slice 1 of the JP1/AJS3 version 13 runtime diagnostic
-   conformance feature with `sdd-implement-task`.
+1. Run Feature Exit Review for the JP1/AJS3 version 13 runtime diagnostic
+   conformance feature with `sdd-plan-task`.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
@@ -48,9 +48,8 @@ rules in `docs/specs/README.md`, not in this file.
 ## Active Feature Specs
 
 - `docs/specs/features/jp1-v13-runtime-diagnostic-conformance/`: roadmap
-  feature with its reviewed six-slice plan approved; Slice 1 is the active
-  implementation slice for aligning supported runtime semantic diagnostics
-  with authoritative JP1/AJS3 version 13 parameter rules.
+  feature with all six implementation slices and final desktop/web/build
+  validation complete; Feature Exit Review is pending.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

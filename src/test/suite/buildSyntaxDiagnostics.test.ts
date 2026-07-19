@@ -1746,13 +1746,90 @@ suite("Build Syntax Diagnostics", () => {
       ),
       expectedSyntaxDiagnostic(
         [32, 4, 5],
-        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format within 2048 bytes.',
+        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format.',
       ),
       expectedSyntaxDiagnostic(
         [37, 4, 5],
         'End judgment condition (evtmc) must be n, a, n:"file-name", a:"file-name", d:"file-name", or b:"file-name" with a file name between 1 and 256 bytes.',
       ),
     ]);
+  });
+
+  test("enforces canonical repeated evwfr aggregate bytes at the first crossing parameter", () => {
+    const exactContent = "a".repeat(1013);
+    const overContent = "a".repeat(1014);
+    const exactMultibyteContent = `${"あ".repeat(337)}aa`;
+    const exactDiagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "evwj",
+          parameters: [
+            `evwfr=a:"${exactContent}";`,
+            `evwfr=b:"${exactContent}";`,
+          ],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(exactDiagnostics, []);
+
+    const overDiagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "evwj",
+          parameters: [
+            `evwfr=a:"${exactContent}";`,
+            `evwfr=b:"${overContent}";`,
+            'evwfr=c:"later";',
+          ],
+        },
+      ]),
+    );
+
+    assertSyntaxDiagnostics(overDiagnostics, [
+      expectedSyntaxDiagnostic(
+        [10, 4, 5],
+        "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
+      ),
+    ]);
+
+    const multibyteDiagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "revwj",
+          parameters: [
+            `evwfr=a:"${exactContent}";`,
+            `evwfr=b:"${exactMultibyteContent}a";`,
+          ],
+        },
+      ]),
+    );
+
+    assert.strictEqual(multibyteDiagnostics.length, 1);
+    assert.strictEqual(multibyteDiagnostics[0].line, 10);
+  });
+
+  test("keeps evwfr shape and aggregate diagnostics separate for malformed values", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        {
+          name: "wait1",
+          type: "evwj",
+          parameters: [`evwfr=${"a".repeat(2042)};`],
+        },
+      ]),
+    );
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.message),
+      [
+        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format.',
+        "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
+      ],
+    );
   });
 
   test("does not report event receiving numeric-identifier diagnostics for omitted and boundary values", () => {

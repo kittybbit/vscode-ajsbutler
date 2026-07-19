@@ -93,3 +93,10 @@ JP1/AJS behavior is part of this revised plan.
   recovery UNIX/PC, custom UNIX, QUEUE, and custom PC contexts; effective
   `jty=q` defaults, explicit `jty=n`, all four transfer indexes, custom PC
   prohibition, and QUEUE dependency differences are covered; qlty passed.
+- S6 / `VAL-EVWFR` (2026-07-20): `rtk pnpm test` passed with canonical exact
+  2,048-byte and 2,049-byte boundaries, UTF-8 multibyte contributions,
+  malformed shape separation, and first-crossing source location covered.
+- S1-S6 / `VAL-ALL` and `VAL-HOST` (2026-07-20): desktop tests and
+  `rtk pnpm run qlty` passed for every slice; final `rtk pnpm run test:web` and
+  `rtk pnpm run build` passed. Production build reported webpack asset-size
+  warnings but no compilation or host-compatibility failure.

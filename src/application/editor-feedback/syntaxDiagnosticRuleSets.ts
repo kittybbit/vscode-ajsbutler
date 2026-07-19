@@ -359,7 +359,7 @@ export const eventReceivingDiagnosticRules: readonly AjsParameterDiagnosticRule[
     {
       key: "evwfr",
       message:
-        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format within 2048 bytes.',
+        'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format.',
       isInvalid: (parameter) =>
         !isValidExplicitEventReceivingFilterReference(parameter),
     },
