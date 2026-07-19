@@ -23,9 +23,10 @@ Viewer and export behavior:
 - show parameter hover
 - navigate between unit list and flow graph
 
-Cross-cutting operations:
+Comparison and reporting:
 
-- compare semantic diff
+- build semantic diff
+- present semantic diff report
 
 Shared JP1/AJS meaning belongs in
 [`domain-rules/`](../domain-rules/README.md). Privacy, quality, and operational

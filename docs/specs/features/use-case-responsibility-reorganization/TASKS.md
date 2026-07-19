@@ -30,13 +30,13 @@
 
 ## Plan Status
 
-- Status: In Progress
+- Status: Complete
 - Planning scope: reclassify non-use-case requirements, consolidate or split
   the identified use cases, establish one normative owner for JP1 parameter
   semantics, and repair repository-local references.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 5
+- Active implementation slice: None
 
 ## Human Approval
 
@@ -253,7 +253,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 5: Separate Semantic Comparison From Report Presentation
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - rename `uc-compare-semantic-diff.md` to
     `uc-build-semantic-diff.md` for identity matching, differences,
@@ -298,6 +298,10 @@ Only clear human approval can change Status to Approved.
 - Dependencies: Slices 1 through 4
 - Risks: losing report-specific safeguards during extraction; overlooking a
   stale repository-local link.
+- Implementation Feedback: comparison and report scenarios separated cleanly.
+  Adding explicit English fallback, unsupported-content, and empty-state report
+  scenarios made the existing presentation rules easier to verify without
+  expanding runtime behavior.
 - Out of Scope: semantic-diff implementation, report renderer, commands,
   clipboard behavior, schedule support expansion, CLI, GitHub Action, or
   Webview additions.
@@ -337,18 +341,18 @@ Only clear human approval can change Status to Approved.
 
 ## Feature Exit
 
-- Definition of Done status: Not started
-- Durable documentation updates: Planned in Slices 1 through 5
-- Open risks: requirement loss, semantic duplication, misclassification, and
-  stale references.
+- Definition of Done status: Implementation slices complete; Feature Exit
+  review pending
+- Durable documentation updates: Complete for Slices 1 through 5
+- Open risks: none identified after final content and reference review
 
 ## Validation
 
-- [ ] Run targeted old-path and implementation-detail searches per slice.
-- [ ] Run `rtk pnpm run qlty` after the final slice.
-- [ ] Run `rtk pnpm run lint:md` per slice and after the final slice.
-- [ ] Run `rtk git diff --check` per slice and after the final slice.
-- [ ] Confirm only docs-only paths changed.
+- [x] Run targeted old-path and implementation-detail searches per slice.
+- [x] Run `rtk pnpm run qlty` after the final slice.
+- [x] Run `rtk pnpm run lint:md` per slice and after the final slice.
+- [x] Run `rtk git diff --check` per slice and after the final slice.
+- [x] Confirm only docs-only paths changed.
 
 ## Notes
 
