@@ -5,7 +5,8 @@
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization
-  quotes, with QUEUE jobs included in end-judgment and retry checks.
+  quotes, with QUEUE jobs included in end-judgment and retry checks and
+  transfer-file parameters constrained by job context.
 - Added a JP1/AJS semantic diff command that compares the active definition
   with a selected before definition, displays the Markdown report in VS Code,
   and copies the report only through an explicit copy action.

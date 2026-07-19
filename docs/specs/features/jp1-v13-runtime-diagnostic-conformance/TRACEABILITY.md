@@ -89,3 +89,7 @@ JP1/AJS behavior is part of this revised plan.
 - S4 / `VAL-QUEUE` (2026-07-20): `rtk pnpm test` passed with `qj` and `rq`
   receiving numeric range, `jd`/`abr`, retry dependency, and threshold-ordering
   diagnostics; `rtk pnpm run qlty` passed with no issues.
+- S5 / `VAL-TRANSFER` (2026-07-20): `rtk pnpm test` passed across normal and
+  recovery UNIX/PC, custom UNIX, QUEUE, and custom PC contexts; effective
+  `jty=q` defaults, explicit `jty=n`, all four transfer indexes, custom PC
+  prohibition, and QUEUE dependency differences are covered; qlty passed.

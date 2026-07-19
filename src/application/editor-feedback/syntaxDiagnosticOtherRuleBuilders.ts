@@ -5,11 +5,13 @@ import {
   collectRuleDiagnostics,
 } from "./syntaxDiagnosticCore";
 import {
+  customPcTransferFileProhibitedTargetTypes,
   eventReceivingDiagnosticTargetTypes,
   eventSendingDiagnosticTargetTypes,
   executionIntervalControlDiagnosticTargetTypes,
   fileMonitoringDiagnosticTargetTypes,
   queueTransferFileDiagnosticTargetTypes,
+  transferFileIndexes,
   transferOperationDiagnosticTargetTypes,
 } from "./syntaxDiagnosticTargetTypes";
 import {
@@ -101,7 +103,21 @@ export const buildTransferOperationDiagnostics = (
   document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(document, transferOperationDiagnosticTargetTypes).flatMap(
-    (unit) => collectRuleDiagnostics(unit, transferOperationDiagnosticRules),
+    (unit) =>
+      customPcTransferFileProhibitedTargetTypes.has(unit.unitType)
+        ? collectOptionalParameterDiagnostics(
+            unit,
+            transferFileIndexes.flatMap((index) =>
+              ["ts", "td", "top"].map((prefix) => {
+                const key = `${prefix}${index}`;
+                return {
+                  key,
+                  message: `Transfer-file parameter (${key}) cannot be specified for custom PC jobs.`,
+                };
+              }),
+            ),
+          )
+        : collectRuleDiagnostics(unit, transferOperationDiagnosticRules),
   );
 
 export const buildQueueTransferFileDiagnostics = (

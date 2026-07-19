@@ -114,13 +114,15 @@ export const transferFileValueShapeRules: readonly AjsParameterDiagnosticRule[] 
   transferFileIndexes.flatMap((index) => [
     {
       key: `ts${index}`,
-      message: `Transfer source file name (ts${index}) must be a quoted transfer-file value or macro-variable form.`,
-      isInvalid: (parameter) => !isValidExplicitTransferFileValue(parameter),
+      message: `Transfer source file name (ts${index}) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.`,
+      isInvalid: (parameter, unit) =>
+        !isValidExplicitTransferFileValue(parameter, unit),
     },
     {
       key: `td${index}`,
-      message: `Transfer destination file name (td${index}) must be a quoted transfer-file value or macro-variable form.`,
-      isInvalid: (parameter) => !isValidExplicitTransferFileValue(parameter),
+      message: `Transfer destination file name (td${index}) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.`,
+      isInvalid: (parameter, unit) =>
+        !isValidExplicitTransferFileValue(parameter, unit),
     },
   ]);
 

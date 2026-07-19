@@ -1162,6 +1162,76 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("accepts transfer-file macros only in supported unit and queuing contexts", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition([
+        { name: "job", type: "j", parameters: ["ts1=?SRC?;"] },
+        {
+          name: "recovery-job",
+          type: "rj",
+          parameters: ["jty=q;", "ts1=?SRC?;"],
+        },
+        { name: "pc-job", type: "pj", parameters: ["ts1=?SRC?;"] },
+        {
+          name: "recovery-pc-job",
+          type: "rp",
+          parameters: ["jty=q;", "ts1=?SRC?;"],
+        },
+        { name: "custom", type: "cj", parameters: ["ts1=?SRC?;"] },
+        { name: "recovery-custom", type: "rcj", parameters: ["ts1=?SRC?;"] },
+        { name: "queue", type: "qj", parameters: ["ts1=?SRC?;"] },
+        { name: "recovery-queue", type: "rq", parameters: ["ts1=?SRC?;"] },
+      ]),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+
+    for (const type of ["j", "rj", "pj", "rp"]) {
+      const nonQueuingDiagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([
+          {
+            name: "job",
+            type,
+            parameters: ["jty=n;", "ts1=?SRC?;", "td1=?DST?;"],
+          },
+        ]),
+      );
+
+      assert.deepStrictEqual(
+        nonQueuingDiagnostics.map((diagnostic) => diagnostic.message),
+        [
+          "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
+          "Transfer destination file name (td1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
+        ],
+      );
+    }
+  });
+
+  test("reports every transfer-file parameter index on custom PC jobs", () => {
+    const parameters = [1, 2, 3, 4].flatMap((index) => [
+      `ts${index}="C:/source-${index}";`,
+      `td${index}="destination-${index}";`,
+      `top${index}=sav;`,
+    ]);
+    const expectedMessages = [1, 2, 3, 4].flatMap((index) =>
+      ["ts", "td", "top"].map(
+        (prefix) =>
+          `Transfer-file parameter (${prefix}${index}) cannot be specified for custom PC jobs.`,
+      ),
+    );
+
+    for (const type of ["cpj", "rcpj"]) {
+      const diagnostics = buildSyntaxDiagnostics(
+        buildRootUnitDefinition([{ name: "custom-pc", type, parameters }]),
+      );
+
+      assert.deepStrictEqual(
+        diagnostics.map((diagnostic) => diagnostic.message),
+        expectedMessages,
+      );
+    }
+  });
+
   test("reports transfer-file byte-length diagnostics for explicit out-of-range values", () => {
     const tooLongFileName = "a".repeat(512);
     const diagnostics = buildSyntaxDiagnostics(
@@ -1259,15 +1329,15 @@ suite("Build Syntax Diagnostics", () => {
     assertSyntaxDiagnostics(diagnostics, [
       expectedSyntaxDiagnostic(
         [9, 4, 3],
-        "Transfer source file name (ts1) must be a quoted transfer-file value or macro-variable form.",
+        "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
       expectedSyntaxDiagnostic(
         [10, 4, 3],
-        "Transfer destination file name (td1) must be a quoted transfer-file value or macro-variable form.",
+        "Transfer destination file name (td1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
       expectedSyntaxDiagnostic(
         [15, 4, 3],
-        "Transfer source file name (ts1) must be a quoted transfer-file value or macro-variable form.",
+        "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
     ]);
   });
@@ -1276,7 +1346,7 @@ suite("Build Syntax Diagnostics", () => {
     const diagnostics = buildSyntaxDiagnostics(
       buildTransferFileDefinition(
         ["td1=dest-only;", "top1=del;"],
-        ["td1=queue-dest-only;"],
+        ["td1=queue-dest-only;", "top1=del;"],
       ),
     );
 
