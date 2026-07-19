@@ -24,12 +24,20 @@ flow scope while preserving predictable navigation and viewport state.
 - visible nested-jobnet state
 - current search matches and active result
 - selected, hovered, and relationship-focused units
-- reveal or centering requests that preserve the current graph scope
+- viewport fitting, reveal, or centering requests that preserve the current
+  graph scope
 
 ## Rules
 
 - expansion reveals nested jobnets in the same viewer and active graph scope
-- after expansion, the viewer can include newly visible graph bounds
+- expansion supplies the new visible nested set to Build Flow Graph; it does
+  not redefine graph placement constraints
+- presentation maps those constraints to absolute coordinates, rendered
+  bounds, and rendered-surface dimensions while preserving non-overlap,
+  unaffected-region stability, and relative positions within repositioned
+  subtrees
+- after expansion geometry is available, the viewer can fit the viewport to
+  include newly visible rendered bounds
 - current-scope search uses case-insensitive contiguous partial matching across
   unit name, comment, and path
 - search may reveal collapsed ancestors required to display a matching unit
@@ -60,7 +68,8 @@ Scenario: Nested jobnet expands in the current scope
   Given a visible nested jobnet
   When the user expands it
   Then its graph is revealed without changing the active root-jobnet scope
-  And the viewer can include the newly visible bounds
+  And presentation realizes the graph placement constraints without overlap
+  And the viewer can include the newly visible rendered bounds
 
 Scenario: Search reveals a collapsed descendant match
   Given a matching unit below collapsed ancestor jobnets
@@ -110,6 +119,8 @@ Scenario: Supporting panels collapse without losing state
 - desktop and web viewers preserve the same exploration semantics
 - expansion, search, selection, hover, and focus remain predictable without
   requiring a shared search implementation
+- viewport behavior uses presentation-computed geometry and does not own graph
+  placement constraints
 
 ## Risks Or Edge Cases
 

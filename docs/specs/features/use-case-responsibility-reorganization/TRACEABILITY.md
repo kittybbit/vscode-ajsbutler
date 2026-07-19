@@ -9,7 +9,7 @@
 | S1     | R3, R5, R6     | 5     | Passed: scenarios/paths    |
 | U2     | R4, R7, R8     | 6     | Passed: six IDs/consumers  |
 | E2     | R4, R7, R8     | 7     | Passed: IDs/gap inventory  |
-| F2     | R2, R5, R9     | 8     | Planned: ownership matrix  |
+| F2     | R2, R5, R9     | 8     | Passed: ownership matrix   |
 | V2     | R5, R6, R10    | 9     | Planned: matrix/evidence   |
 
 ## Source Mapping

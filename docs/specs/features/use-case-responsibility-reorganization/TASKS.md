@@ -5,8 +5,8 @@
 - Purpose: reorganize requirement documents by stable responsibility without
   changing runtime behavior, while correcting durable parameter requirements
   to the authoritative version 13 manual.
-- Approved or active slice: Slices 1 through 7 are complete; Slice 8 is
-  approved and active; Slice 9 retains its prior approval.
+- Approved or active slice: Slices 1 through 8 are complete; Slice 9 is
+  approved and active.
 - Do not: edit runtime code, tests, configuration, or generated artifacts.
 - Do not: change existing JP1/AJS runtime or extension behavior; implementation
   conformance is independent follow-up.
@@ -19,7 +19,7 @@
 - Document roles: see `docs/specs/README.md`.
 - Review state: the Feature Exit review was reopened after RF1-RF7 identified
   normative, boundary, and verification gaps.
-- Next decision: implement Slice 8 with `sdd-implement-task`.
+- Next decision: implement Slice 9 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -39,17 +39,17 @@
   findings RF1-RF7 through deterministic parameter rules, explicit consumer
   references, a flow ownership boundary, and reproducible migration evidence.
 - Review status: Reviewed
-- Human approval: Slice 7 completion approved; prior approval remains for
-  Slices 8 and 9
-- Active implementation slice: Slice 8
+- Human approval: Slice 8 completion approved; prior approval remains for
+  Slice 9
+- Active implementation slice: Slice 9
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: revised Slice 7 approved in the current conversation after its
   normative-source and roadmap boundary changed
-- Approved scope: Slices 1 through 7 are complete; Slices 8 and 9 retain
-  approval within their recorded boundaries.
+- Approved scope: Slices 1 through 8 are complete; Slice 9 retains approval
+  within its recorded boundary.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -457,7 +457,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 8: Define Flow Layout Ownership
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - adopt ownership Policy A in `uc-build-flow-graph.md`
   - define application-owned stable graph structure, containment, ordering,
@@ -497,6 +497,10 @@ Only clear human approval can change Status to Approved.
 - Dependencies: completed Slice 4
 - Risks: placement constraints must stay abstract enough to avoid restating the
   current presentation algorithm.
+- Implementation Feedback: the three-owner matrix was sufficient to preserve
+  the old expansion invariants while separating application constraints from
+  presentation geometry and exploration-owned viewport behavior. No additional
+  Viewer specification or approval boundary was needed.
 - Out of Scope: graph DTO/code changes, layout implementation, tests, viewer
   behavior, coordinates, styling, or new graph capabilities.
 
@@ -612,10 +616,9 @@ Only clear human approval can change Status to Approved.
 ## Feature Exit
 
 - Definition of Done status: Not satisfied; review corrections pending
-- Durable documentation updates: Slices 1 through 6 complete; Slices 7 through
-  9 approved and pending implementation
-- Open risks: provisional parameter rules, ambiguous Flow ownership, and
-  insufficient migration/validation evidence
+- Durable documentation updates: Slices 1 through 8 complete; Slice 9 approved
+  and pending implementation
+- Open risk: insufficient migration and final-validation evidence
 
 ## Validation
 
