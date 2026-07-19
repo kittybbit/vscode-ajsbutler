@@ -3,7 +3,7 @@
 | Source | SPECS          | Slice | Validation                |
 | ------ | -------------- | ----- | ------------------------- |
 | D1     | R1, R2, R4-R6  | 1     | Passed: paths/qlty/lint   |
-| U1     | R3-R6          | 2     | Scenarios; rules; lint    |
+| U1     | R3-R6          | 2     | Passed: scenarios/rules   |
 | E1     | R3-R6          | 3     | Scenarios; rule IDs; lint |
 | F1     | R2, R3, R5, R6 | 4     | Scenarios; detail search  |
 | S1     | R3, R5, R6     | 5     | Scenarios; paths; qlty    |

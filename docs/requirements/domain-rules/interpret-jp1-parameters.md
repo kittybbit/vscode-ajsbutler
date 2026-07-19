@@ -51,6 +51,41 @@ Specific shared rules and their stable IDs are recorded here as consumer
 documents are consolidated. A rule ID identifies meaning, not presentation
 wording or a diagnostic message.
 
+## Supported Shared Rules
+
+### `JP1-PARAM-SCHEDULE-WC-WT-001`
+
+Start-condition monitoring count (`wc`) and time (`wt`) form an effective pair.
+When either value disables monitoring for the pair, both effective display
+values are empty. Raw values remain available.
+
+### `JP1-PARAM-WAIT-ETS-DEFAULT-001`
+
+When a currently supported wait-job family omits `ets`, interpretation returns
+the documented JP1/AJS3 version 13 timeout-action default for that family.
+
+### `JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001`
+
+Omitted arrival-check parameters for a supported JP1 event sending job receive
+their documented JP1/AJS3 version 13 defaults. Explicit values remain
+effective.
+
+### `JP1-PARAM-FILE-MONITOR-DEFAULT-001`
+
+Omitted supported file-monitoring parameters receive their documented
+JP1/AJS3 version 13 defaults. Explicit values remain effective.
+
+### `JP1-PARAM-INTERVAL-CONTROL-DEFAULT-001`
+
+Omitted supported execution-interval control parameters receive their
+documented JP1/AJS3 version 13 defaults. Explicit values remain effective.
+
+### `JP1-PARAM-TRANSFER-QUEUE-OPERATION-001`
+
+QUEUE jobs expose transfer source and destination values but do not expose
+transfer operation values. Non-QUEUE transfer-operation interpretation remains
+unchanged.
+
 ## Behavioral Scenarios
 
 ```gherkin

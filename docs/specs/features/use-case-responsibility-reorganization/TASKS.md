@@ -36,7 +36,7 @@
   semantics, and repair repository-local references.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 2
+- Active implementation slice: Slice 3
 
 ## Human Approval
 
@@ -105,7 +105,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 2: Consolidate The Unit-List Use Case
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - replace `uc-build-unit-list.md` and `uc-build-unit-list-view.md` with
     `uc-view-unit-list.md`
@@ -146,6 +146,9 @@ Only clear human approval can change Status to Approved.
 - Dependencies: Slice 1
 - Risks: losing a table-visible scenario or leaving internal model names as
   normative outputs.
+- Implementation Feedback: the two-stage document/view split consolidated
+  cleanly around one trigger; preserving every projection scenario required six
+  stable parameter rule IDs, but no new requirement or dependency was needed.
 - Out of Scope: list runtime code, DTO schemas, columns, filtering, CSV logic,
   or viewer UI.
 

@@ -14,8 +14,7 @@ Definition acquisition:
 
 Viewer and export behavior:
 
-- build unit list
-- build unit list view
+- view unit list
 - build flow graph
 - show unit definition
 - export unit list CSV
