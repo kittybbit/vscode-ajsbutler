@@ -265,7 +265,7 @@ Migration should be incremental and use-case driven.
 
 ### Recommended slice
 
-Build Unit List
+View Unit List
 
 ### Why this slice was first
 

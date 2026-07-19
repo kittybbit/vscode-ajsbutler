@@ -75,8 +75,8 @@ Scenario: Counterpart viewer is unavailable
 
 ## Acceptance Notes
 
-- the action does not require `UnitEntity` reconstruction in the presentation
-  layer if stable normalized or DTO identity is sufficient
+- navigation uses stable application-facing identity without reconstructing
+  parser-adjacent or presentation-specific objects
 
 ## Risks Or Edge Cases
 

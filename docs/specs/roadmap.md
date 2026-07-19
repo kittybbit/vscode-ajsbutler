@@ -26,8 +26,9 @@
      that pane, and remove duplicated row-level dialog/cross-link actions.
    - The feature-local folder has been closed because no next implementation
      slice is apparent.
-   - Introduce shared application or domain search semantics only if the
-     search-domain use-case trigger is satisfied and separately approved.
+   - Introduce shared application or domain search semantics only when at least
+     two non-table consumers require equivalent matching or result-navigation
+     behavior and a focused feature is separately approved.
 
 2. Keep read-only JP1/AJS WebAPI import in beta while feedback is limited.
 
@@ -147,8 +148,10 @@
 
 1. Build/test output-directory ownership cleanup is deferred until packaging,
    caching, or stale output issues make it a concrete blocker.
-2. Introduce a shared search use case only if list, flow, or another non-table
-   consumer needs common query semantics.
+2. Introduce a shared search use case only when at least two non-table
+   consumers need equivalent matching or result-navigation semantics. Keep
+   rendering, React Flow camera behavior, and TanStack ranking outside that
+   future contract.
 3. Extend JP1/AJS WebAPI support beyond read-only import only after the initial
    boundary, authentication model, and beta feedback are stable.
 4. Revisit viewer-specific bundle-size reductions only if a future
@@ -159,6 +162,30 @@
    requirement outside the active unit-list usability feature is identified.
 7. Add more expanded-flow layout regression fixtures only if real-world nested
    layout examples expose additional collision or refit gaps.
+8. Align runtime diagnostics with authoritative JP1/AJS3 version 13 parameter
+   requirements in an independent conformance feature.
+
+   - First confirmed gap: yearly schedule cycle `cy=(n,y)` is `1..9` in the
+     version 13 Command Reference, while current diagnostics accept `1..10` and
+     present that range in the diagnostic message.
+   - Event-reception `evwfr` has a 2,048-byte aggregate limit across repeated
+     definitions, while current diagnostics validate each value independently.
+   - UNIX/PC transfer-file macro variables require the queuing attribute
+     `jty=q`, while current diagnostics accept the macro shape without checking
+     that context.
+   - Transfer-file parameters are unavailable to custom PC jobs, while current
+     diagnostics target generic custom-job types without checking the custom
+     job class.
+   - End-judgment and automatic-retry parameters also apply to QUEUE and
+     recovery QUEUE jobs, while current diagnostics omit those unit types.
+   - File-monitoring and transfer-file byte-length checks currently measure
+     serialized quoted values, including the quote characters, instead of the
+     parameter content governed by the official limits.
+   - The conformance feature must update implementation and tests from the
+     durable parameter rule; it must not weaken the Use Case to preserve an
+     incorrect implementation value.
+   - Add further confirmed gaps from parameter-rule completion to the same
+     focused intake evidence before creating the feature.
 
 ## Done Criteria For A Slice
 

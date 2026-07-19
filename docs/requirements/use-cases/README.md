@@ -6,29 +6,33 @@ Use this directory when the behavior being described is a stable product or
 application use case that may survive refactors of modules, adapters, or file
 layout.
 
-Use cases are grouped by requirement area:
+Current user and application use cases are grouped by behavior area:
 
-Core definition interpretation:
+Definition acquisition:
 
-- normalize AJS document
-- interpret JP1 parameters
-- generate AJS commands
 - import AJS definition via WebAPI
 
 Viewer and export behavior:
 
-- build unit list
-- build unit list view
+- view unit list
 - build flow graph
+- explore flow graph
 - show unit definition
 - export unit list CSV
-- provide editor feedback
+- diagnose AJS definition
+- show parameter hover
 - navigate between unit list and flow graph
 
-Cross-cutting operations:
+Comparison and reporting:
 
-- record telemetry
-- search domain unification
+- build semantic diff
+- present semantic diff report
+
+Shared JP1/AJS meaning belongs in
+[`domain-rules/`](../domain-rules/README.md). Privacy, quality, and operational
+policy belongs in [`cross-cutting/`](../cross-cutting/README.md). Future design
+decisions belong in `docs/specs/roadmap.md` or a focused feature specification,
+not in this directory.
 
 Do not use this directory as a task log or implementation notebook.
 That belongs in `docs/specs/`.
@@ -37,7 +41,7 @@ That belongs in `docs/specs/`.
 
 1. Start from `_template.md`.
 2. Create or update one `uc-*.md` file per use case, using hyphenated
-   filenames such as `uc-build-flow-graph.md`.
+   filenames such as `uc-explore-flow-graph.md`.
 3. Write the use case in terms of trigger, inputs, outputs, rules, and
    acceptance notes.
 4. Keep UI framework details, VS Code adapter details, and file-level refactor
@@ -54,6 +58,10 @@ That belongs in `docs/specs/`.
 
 - `docs/requirements/use-cases/`
   Repository-level behavior contract.
+- `docs/requirements/domain-rules/`
+  Shared normative JP1/AJS meaning consumed by multiple use cases.
+- `docs/requirements/cross-cutting/`
+  Durable quality, privacy, and operational requirements.
 - `docs/specs/features/<feature>/SPECS.md`
   Feature-local implementation requirements and boundary decisions.
 - `docs/specs/features/<feature>/TASKS.md`
@@ -75,3 +83,7 @@ Ask two questions:
 2. Is this describing how the current branch will implement, sequence, or
    validate the change?
    If yes, it belongs in `docs/specs/`, not here.
+
+If the behavior is shared domain meaning rather than a triggered workflow, it
+belongs in `domain-rules/`. If it constrains multiple workflows as a quality,
+privacy, security, or operational policy, it belongs in `cross-cutting/`.
