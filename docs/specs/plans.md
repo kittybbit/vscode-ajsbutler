@@ -43,9 +43,6 @@ rules in `docs/specs/README.md`, not in this file.
 
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
-- `docs/specs/features/use-case-responsibility-reorganization/`: transient
-  docs-only feature to reclassify durable requirement documents by stable
-  responsibility without changing runtime or JP1/AJS behavior.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
