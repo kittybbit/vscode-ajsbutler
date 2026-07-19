@@ -5,8 +5,8 @@
 - Purpose: reorganize requirement documents by stable responsibility without
   changing runtime behavior, while correcting durable parameter requirements
   to the authoritative version 13 manual.
-- Approved or active slice: Slices 1 through 8 are complete; Slice 9 is
-  approved and active.
+- Approved or active slice: Slices 1 through 9 are complete; no implementation
+  slice remains active.
 - Do not: edit runtime code, tests, configuration, or generated artifacts.
 - Do not: change existing JP1/AJS runtime or extension behavior; implementation
   conformance is independent follow-up.
@@ -19,7 +19,7 @@
 - Document roles: see `docs/specs/README.md`.
 - Review state: the Feature Exit review was reopened after RF1-RF7 identified
   normative, boundary, and verification gaps.
-- Next decision: implement Slice 9 with `sdd-implement-task`.
+- Next decision: run Feature Exit Review with `sdd-plan-task`.
 
 ## Sync Rule
 
@@ -39,17 +39,15 @@
   findings RF1-RF7 through deterministic parameter rules, explicit consumer
   references, a flow ownership boundary, and reproducible migration evidence.
 - Review status: Reviewed
-- Human approval: Slice 8 completion approved; prior approval remains for
-  Slice 9
-- Active implementation slice: Slice 9
+- Human approval: Slice 9 completion approved
+- Active implementation slice: none; Feature Exit Review is next
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: revised Slice 7 approved in the current conversation after its
-  normative-source and roadmap boundary changed
-- Approved scope: Slices 1 through 8 are complete; Slice 9 retains approval
-  within its recorded boundary.
+- Approved at: Slice 9 completion approved in the current conversation
+- Approved scope: Slices 1 through 9 are complete within their recorded
+  boundaries.
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -506,7 +504,7 @@ Only clear human approval can change Status to Approved.
 
 ### Slice 9: Prove Requirement Migration And Final Validation
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - replace file-level migration evidence with requirement-level mappings for
     Unit List, Editor Feedback, Flow Graph, Semantic Diff, and Parameter
@@ -562,6 +560,11 @@ Only clear human approval can change Status to Approved.
 - Dependencies: Slices 6 through 8
 - Risks: a previously missed requirement or source mismatch triggers another
   focused replan rather than being forced into an incorrect mapping.
+- Implementation Feedback: defining the counting unit before classification
+  made the migration total reproducible and separated responsibility-preserving
+  moves from official-contract corrections. The existing Slice 8 commit was a
+  sufficient validation candidate, so Slice 9 required only feature-local
+  evidence and no durable-link correction.
 - Out of Scope: permanent migration-history documentation, runtime code/tests,
   generated artifacts, configuration, or unrelated wording cleanup.
 
@@ -615,10 +618,11 @@ Only clear human approval can change Status to Approved.
 
 ## Feature Exit
 
-- Definition of Done status: Not satisfied; review corrections pending
-- Durable documentation updates: Slices 1 through 8 complete; Slice 9 approved
-  and pending implementation
-- Open risk: insufficient migration and final-validation evidence
+- Definition of Done status: implementation slices complete; Feature Exit
+  Review pending
+- Durable documentation updates: Slices 1 through 9 complete
+- Open risk: none from implementation; closure evidence awaits Feature Exit
+  Review
 
 ## Validation
 
