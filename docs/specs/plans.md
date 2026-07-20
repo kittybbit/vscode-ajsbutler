@@ -35,15 +35,19 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Use `sdd-plan-task` to prepare the implementation-slice plan for
-   `complete-normalized-domain-model`, the next dependency in the Clean
-   Architecture migration sequence.
+1. Use `sdd-implement-task` to implement approved Slice 2 of
+   `complete-normalized-domain-model`. Slice 1 is complete with 80 exact remaining
+   legacy-wrapper allowances; implement only the obsolete table `Parameter`
+   compatibility removal in Slice 2.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
+- `docs/specs/features/complete-normalized-domain-model/`: three-slice plan is
+  approved; Slice 1 is complete, Slice 2 is approved and next, and Slice 3 remains
+  approved after Slices 1 and 2.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

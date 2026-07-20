@@ -1,10 +1,10 @@
 import type { AjsGroupType } from "../ajs/AjsDocument";
+import { resolveAjsGroupType } from "../ajs/AjsUnitState";
 import type { WeekSymbol } from "../../values/AjsType";
 
 export const resolveGroupType = (
   groupTypeValue: string | undefined,
-): AjsGroupType | undefined =>
-  groupTypeValue === "n" || groupTypeValue === "p" ? groupTypeValue : undefined;
+): AjsGroupType | undefined => resolveAjsGroupType(groupTypeValue);
 
 export const resolveIsPlanning = (
   groupTypeValue: string | undefined,

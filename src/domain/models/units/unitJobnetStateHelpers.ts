@@ -1,3 +1,1 @@
-export const resolveIsRootJobnet = (
-  parentUnitType: string | undefined,
-): boolean => parentUnitType !== "n";
+export { resolveAjsUnitIsRootJobnet as resolveIsRootJobnet } from "../ajs/AjsUnitState";

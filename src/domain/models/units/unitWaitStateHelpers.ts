@@ -1,4 +1,5 @@
 import type { Eun } from "../parameters";
+import { resolveAjsUnitHasWaitedFor } from "../ajs/AjsUnitState";
 
 type WaitStateSource = Eun | string;
 
@@ -21,7 +22,9 @@ export const resolveHasWaitedFor = (
 ): boolean =>
   (waitedUnits ?? []).some((waitedUnit) => {
     const value = resolveWaitStateValue(waitedUnit);
-    return value !== undefined && value.length > 0;
+    return resolveAjsUnitHasWaitedFor(
+      value === undefined ? undefined : [value],
+    );
   });
 
 export const resolveUnitHasWaitedFor = (unit: WaitableUnitLike): boolean =>

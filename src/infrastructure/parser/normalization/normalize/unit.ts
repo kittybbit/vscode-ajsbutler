@@ -5,16 +5,18 @@ import {
   findUnitParameterValues,
 } from "../rawUnitParameterLookup";
 import { decodeEncodedString } from "../../../../domain/models/parameters/encodedStringHelpers";
-import { resolveGroupType } from "../../../../domain/models/units/unitGroupStateHelpers";
-import { resolveIsRootJobnet } from "../../../../domain/models/units/unitJobnetStateHelpers";
-import type { UnitLayout } from "../../../../domain/models/units/unitLayoutHelpers";
-import { resolveUnitLayout } from "../../../../domain/models/units/unitLayoutHelpers";
-import { resolveHasSchedule } from "../../../../domain/models/units/unitScheduleStateHelpers";
-import { resolveHasWaitedFor } from "../../../../domain/models/units/unitWaitStateHelpers";
 import {
   AjsGroupType,
   AjsNormalizationWarning,
+  AjsUnitLayout,
 } from "../../../../domain/models/ajs/AjsDocument";
+import {
+  resolveAjsGroupType,
+  resolveAjsUnitHasSchedule,
+  resolveAjsUnitHasWaitedFor,
+  resolveAjsUnitIsRootJobnet,
+  resolveAjsUnitLayout,
+} from "../../../../domain/models/ajs/AjsUnitState";
 import { buildMissingUnitTypeWarning } from "./warnings";
 
 export const resolveNormalizedUnitType = (
@@ -33,23 +35,26 @@ export const resolveNormalizedUnitType = (
 export const resolveNormalizedGroupType = (
   unit: AjsRawUnit,
 ): AjsGroupType | undefined =>
-  resolveGroupType(findUnitParameterValue(unit, "gty"));
+  resolveAjsGroupType(findUnitParameterValue(unit, "gty"));
 
 export const resolveNormalizedComment = (
   unit: AjsRawUnit,
 ): string | undefined =>
   decodeEncodedString(findUnitParameterValue(unit, "cm"));
 
-const ROOT_UNIT_LAYOUT: UnitLayout = { h: 0, v: 0 };
+const ROOT_UNIT_LAYOUT: AjsUnitLayout = { h: 0, v: 0 };
 
-const resolveChildLayout = (unit: AjsRawUnit, parent: AjsRawUnit): UnitLayout =>
-  resolveUnitLayout(unit.name, findUnitParameterValues(parent, "el"));
+const resolveChildLayout = (
+  unit: AjsRawUnit,
+  parent: AjsRawUnit,
+): AjsUnitLayout =>
+  resolveAjsUnitLayout(unit.name, findUnitParameterValues(parent, "el"));
 
-export const resolveNormalizedLayout = (unit: AjsRawUnit): UnitLayout =>
+export const resolveNormalizedLayout = (unit: AjsRawUnit): AjsUnitLayout =>
   unit.parent ? resolveChildLayout(unit, unit.parent) : ROOT_UNIT_LAYOUT;
 
 export const resolveNormalizedHasWaitedFor = (unit: AjsRawUnit): boolean =>
-  resolveHasWaitedFor(findUnitParameterValues(unit, "eun"));
+  resolveAjsUnitHasWaitedFor(findUnitParameterValues(unit, "eun"));
 
 const isNormalizedJobnet = (unitType: TySymbol): boolean => unitType === "n";
 
@@ -58,7 +63,7 @@ export const resolveNormalizedHasSchedule = (
   unitType: TySymbol,
 ): boolean =>
   isNormalizedJobnet(unitType)
-    ? resolveHasSchedule(findUnitParameterValues(unit, "sd"))
+    ? resolveAjsUnitHasSchedule(findUnitParameterValues(unit, "sd"))
     : false;
 
 export const resolveNormalizedIsRootJobnet = (
@@ -66,5 +71,5 @@ export const resolveNormalizedIsRootJobnet = (
   unitType: TySymbol,
 ): boolean =>
   isNormalizedJobnet(unitType)
-    ? resolveIsRootJobnet(findUnitParameterValue(unit.parent, "ty"))
+    ? resolveAjsUnitIsRootJobnet(findUnitParameterValue(unit.parent, "ty"))
     : false;

@@ -1,2 +1,1 @@
-export const resolveUnitDepth = (absolutePath: string): number =>
-  absolutePath.split("/").filter(Boolean).length - 1;
+export { resolveAjsUnitDepth as resolveUnitDepth } from "../ajs/AjsUnitState";

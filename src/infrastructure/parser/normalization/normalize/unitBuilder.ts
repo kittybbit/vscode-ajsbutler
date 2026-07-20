@@ -1,6 +1,8 @@
 import { AjsRawUnit } from "../../raw/AjsRawUnit";
-import { resolveUnitDepth } from "../../../../domain/models/units/unitDepthHelpers";
-import { resolveIsRecovery } from "../../../../domain/models/units/unitTypeHelpers";
+import {
+  resolveAjsUnitDepth,
+  resolveAjsUnitIsRecovery,
+} from "../../../../domain/models/ajs/AjsUnitState";
 import {
   AjsRelation,
   AjsUnit,
@@ -38,10 +40,10 @@ export const buildNormalizedUnit = ({
   groupType: resolveNormalizedGroupType(unit),
   comment: resolveNormalizedComment(unit),
   absolutePath: unit.absolutePath(),
-  depth: resolveUnitDepth(unit.absolutePath()),
+  depth: resolveAjsUnitDepth(unit.absolutePath()),
   parentId: unit.parent?.absolutePath(),
   isRoot: unit.isRoot(),
-  isRecovery: resolveIsRecovery(unitType),
+  isRecovery: resolveAjsUnitIsRecovery(unitType),
   isRootJobnet: resolveNormalizedIsRootJobnet(unit, unitType),
   hasSchedule: resolveNormalizedHasSchedule(unit, unitType),
   hasWaitedFor: resolveNormalizedHasWaitedFor(unit),

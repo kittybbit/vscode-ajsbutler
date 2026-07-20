@@ -24,6 +24,11 @@ export type AjsNormalizationWarning = {
   unitPath?: string;
 };
 
+export type AjsUnitLayout = {
+  h: number;
+  v: number;
+};
+
 export type AjsUnit = {
   id: string;
   name: string;
@@ -42,10 +47,7 @@ export type AjsUnit = {
   isRootJobnet: boolean;
   hasSchedule: boolean;
   hasWaitedFor: boolean;
-  layout: {
-    h: number;
-    v: number;
-  };
+  layout: AjsUnitLayout;
   parameters: AjsParameter[];
   relations: AjsRelation[];
   children: AjsUnit[];
