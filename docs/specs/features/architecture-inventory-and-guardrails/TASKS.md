@@ -3,14 +3,14 @@
 ## Agent Brief
 
 - Purpose: establish the complete dependency inventory and enforceable baseline.
-- Approved or active slice: Slice 1 is complete; Slice 2 is active.
+- Approved or active slice: Slices 1 and 2 are complete; Slice 3 is active.
 - Do not remove, relocate, or rewrite production dependencies.
 - Do not weaken existing checks or create broad/permanent exceptions.
 - Read first: `SPECS.md`, this file, and `docs/specs/architecture.md`.
 - Read `TRACEABILITY.md` for requirement, use-case, and downstream ownership.
 - Validate each slice as specified below; qlty is required for code slices.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement Slice 2 with `sdd-implement-task`.
+- Next decision: implement Slice 3 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -28,7 +28,7 @@
   rule baseline, temporary allowlist, and detection evidence.
 - Review status: reviewed and ready for approval; no blocking findings.
 - Human approval: approved for the full plan and all three slices.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 
 ## Human Approval
 
@@ -97,7 +97,7 @@ Implementation may proceed one slice at a time in dependency order.
 
 ### Slice 2: Production Dependency And Use-Case Inventory
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Use the Slice 1 collector plus targeted reference checks to enumerate every
     production import covered by R1.
@@ -250,6 +250,18 @@ Implementation may proceed one slice at a time in dependency order.
   shared source roots; browser execution of the scanner remains unnecessary.
 - No feedback from Slice 1 passes the Durable Documentation Gate; the details
   remain feature-local for Slice 2 and Slice 3.
+- Slice 2's docs-only boundary was appropriate. The collector reconciled all
+  categories without requiring production, test, configuration, or durable
+  architecture changes.
+- The inventory distinguishes five raw-`Unit` migration findings from six
+  legitimate parser/normalizer references. This prevents Slice 3 from
+  allowlisting dependencies that the target seam intentionally retains.
+- Existing outer-layer direction violations are zero. The owned debt is
+  concentrated in wrapper dependencies, presentation-to-domain imports, and
+  two explicit Node/browser compatibility risks.
+- No Slice 2 feedback passes the Durable Documentation Gate. The inventory and
+  handoff conditions remain feature-local inputs to Slice 3 and the downstream
+  roadmap features.
 
 ## Feature Exit
 
@@ -262,7 +274,7 @@ Implementation may proceed one slice at a time in dependency order.
 ## Validation
 
 - [x] Slice 1 collector and current-rule tests pass.
-- [ ] Slice 2 inventory and eleven use-case mappings are complete and reproducible.
+- [x] Slice 2 inventory and eleven use-case mappings are complete and reproducible.
 - [ ] Slice 3 full rules, violation fixtures, and exact allowlist tests pass.
 - [ ] `rtk pnpm test` passes for the final integrated plan.
 - [ ] `rtk pnpm run test:web` passes for final cross-host confidence.
