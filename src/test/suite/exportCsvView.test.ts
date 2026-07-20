@@ -1,20 +1,10 @@
 import * as assert from "assert";
 import { Table } from "@tanstack/table-core";
-import Parameter from "../../domain/models/parameters/Parameter";
 import { UnitListRowView } from "../../application/unit-list/buildUnitListView";
 import { exportCsvView } from "../../presentation/webview/editor/ajsTable/exportCsvView";
 
-class TestParameter extends Parameter {}
-
 suite("Export CSV View", () => {
   test("exports table cells from UnitListRowView data without changing CSV output", () => {
-    const parameter = new TestParameter({
-      unit: {} as never,
-      parameter: "prm",
-      rawValue: '"line1\nline2"',
-      inherited: false,
-      position: 0,
-    });
     const row = {
       id: "job-id",
       absolutePath: "/root/job",
@@ -53,7 +43,7 @@ suite("Export CSV View", () => {
         {
           columnDef: {
             header: "Command",
-            accessorFn: () => parameter,
+            accessorFn: () => "line1\nline2",
           },
         },
         {

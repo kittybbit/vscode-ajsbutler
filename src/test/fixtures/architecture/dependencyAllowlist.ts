@@ -685,12 +685,6 @@ const unitPresentationAllowances = ownedBy(
   [
     {
       source: "src/presentation/webview/editor/ajsTable/columnDefs/common.tsx",
-      target: "src/domain/models/parameters/Parameter",
-      kind: "import",
-      ruleId: "presentation-domain-dependency",
-    },
-    {
-      source: "src/presentation/webview/editor/ajsTable/columnDefs/common.tsx",
       target: "src/domain/services/i18n/nls",
       kind: "import-type",
       ruleId: "presentation-domain-dependency",
@@ -817,20 +811,8 @@ const unitPresentationAllowances = ownedBy(
       ruleId: "presentation-domain-dependency",
     },
     {
-      source: "src/presentation/webview/editor/ajsTable/exportCsvView.ts",
-      target: "src/domain/models/parameters/Parameter",
-      kind: "import",
-      ruleId: "presentation-domain-dependency",
-    },
-    {
       source: "src/presentation/webview/editor/ajsTable/globalFilter.ts",
       target: "src/domain/models/ajs/AjsDocument",
-      kind: "import",
-      ruleId: "presentation-domain-dependency",
-    },
-    {
-      source: "src/presentation/webview/editor/ajsTable/globalFilter.ts",
-      target: "src/domain/models/parameters/Parameter",
       kind: "import",
       ruleId: "presentation-domain-dependency",
     },

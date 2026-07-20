@@ -243,9 +243,9 @@ suite("Architecture dependency rules", () => {
     assert.deepStrictEqual(violationsByRule, {
       [architectureRuleIds.legacyWrapperDependency]: 80,
       [architectureRuleIds.nodeBuiltinBrowserBoundary]: 2,
-      [architectureRuleIds.presentationDomainDependency]: 57,
+      [architectureRuleIds.presentationDomainDependency]: 54,
     });
-    assert.strictEqual(dependencyAllowlist.length, 139);
+    assert.strictEqual(dependencyAllowlist.length, 136);
     assert.deepStrictEqual(
       validateDependencyAllowlist(violations, dependencyAllowlist),
       [],

@@ -3,7 +3,6 @@ import { CellContext, ColumnHelper } from "@tanstack/table-core";
 import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
-import Parameter from "../../../../../domain/models/parameters/Parameter";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
 
 type PrimitiveType =
@@ -30,7 +29,7 @@ const isPrimitiveType = (value: unknown): value is PrimitiveType => {
       return false;
   }
 };
-type BoxType = Parameter | PrimitiveType;
+type BoxType = PrimitiveType;
 export type AccessorType = BoxType | BoxType[];
 export type RowViewByPath = ReadonlyMap<string, UnitListRowView>;
 export type TableColumnHelper = ColumnHelper<UnitListRowView>;
@@ -158,23 +157,6 @@ export const ratingCell = (
   ) : undefined;
 };
 
-const parameterBox = (param: Parameter, index: number): JSX.Element => {
-  const parameterSx = () =>
-    param.isDefault || param.inherited ? { color: "text.disabled" } : {};
-  return (
-    <Box
-      key={index}
-      data-param={param.parameter}
-      data-raw={param.rawValue}
-      data-inherited={param.inherited}
-      data-defalut={param.isDefault}
-      sx={parameterSx}
-    >
-      {param.value()}
-    </Box>
-  );
-};
-
 const primitiveBox = (param: PrimitiveType, index: number): JSX.Element => (
   <Box
     key={index}
@@ -188,9 +170,6 @@ const primitiveBox = (param: PrimitiveType, index: number): JSX.Element => (
 );
 
 const defaultFn = <T,>(param: T, index: number): JSX.Element => {
-  if (param instanceof Parameter) {
-    return parameterBox(param, index);
-  }
   return isPrimitiveType(param) ? primitiveBox(param, index) : <></>;
 };
 

@@ -5,14 +5,14 @@
 ## Agent Brief
 
 - Purpose: make normalized AJS concepts the only live domain model.
-- Approved or active slice: Slice 1 is complete; Slice 2 is approved and next.
+- Approved or active slice: Slices 1 and 2 are complete; Slice 3 is approved and next.
 - Preserve identity, hierarchy, parameters, relations, state, warnings, and UI output.
 - Do not recreate wrapper-only APIs without a production consumer or durable rule.
 - Consumer DTO migration remains in the named downstream features.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, and normalization rules.
 - Validate each slice with focused tests, qlty, desktop tests, and web tests.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement only Slice 2 with `sdd-implement-task`.
+- Next decision: implement only Slice 3 with `sdd-implement-task`.
 
 ## Plan Status
 
@@ -22,7 +22,7 @@
 - Review status: Reviewed; revised plan passed with no blocking findings.
 - Human approval: Approved on 2026-07-20 for the revised full plan and all three
   implementation slices.
-- Active implementation slice: Slice 2 (approved; not started).
+- Active implementation slice: Slice 3 (approved; not started).
 
 ## Replanning Reason
 
@@ -140,7 +140,7 @@ search semantics, CSV content, or broader downstream feature ownership.
 
 ### Slice 2: Remove obsolete table `Parameter` compatibility
 
-- Status: Approved
+- Status: Complete
 - Scope: prove that table accessors receive primitive `UnitListRowView` values or arrays
   and remove the unused `Parameter` union, `instanceof Parameter`, rendering, search,
   and CSV stringification fallbacks from `columnDefs/common.tsx`, `globalFilter.ts`, and
@@ -242,7 +242,8 @@ search semantics, CSV content, or broader downstream feature ownership.
 - `TRACEABILITY.md` required: yes.
 - Reason: this non-trivial feature changes shared domain ownership and removes a large
   compatibility graph while preserving several user-visible workflows.
-- Status: revised mappings recorded; implementation evidence remains pending.
+- Status: revised mappings and Slice 1-2 implementation evidence recorded; Slice 3
+  evidence remains pending.
 
 ## Cross-Slice Dependencies
 
@@ -285,5 +286,5 @@ search semantics, CSV content, or broader downstream feature ownership.
 - Definition of Done status: not started.
 - Durable documentation updates: only if implementation disproves an existing
   normalization or parameter contract; final architecture wording remains downstream.
-- Open risks: stale table fallback proof, wrapper-test classification, malformed/large
-  input parity, and desktop/web regression evidence.
+- Open risks: wrapper-test classification, malformed/large input parity, and final
+  desktop/web regression evidence.

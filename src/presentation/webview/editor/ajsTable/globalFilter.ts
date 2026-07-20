@@ -1,7 +1,6 @@
 import { rankItem, rankings, RankingInfo } from "@tanstack/match-sorter-utils";
 import { FilterMeta, Row } from "@tanstack/table-core";
 import { AjsParameter } from "../../../../domain/models/ajs/AjsDocument";
-import Parameter from "../../../../domain/models/parameters/Parameter";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { AccessorType } from "./columnDefs/common";
 
@@ -10,8 +9,7 @@ export type ParameterSearchValuesByPath = ReadonlyMap<
   readonly AjsParameter[]
 >;
 
-export const normalizeSearchValue = (value: unknown): string =>
-  value instanceof Parameter ? value.value() : String(value);
+export const normalizeSearchValue = (value: unknown): string => String(value);
 
 export const buildParameterSearchValues = (
   parameters: readonly AjsParameter[],

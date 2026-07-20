@@ -28,3 +28,17 @@
   allowances, and no unexplained or stale entry.
 - Final validation: `rtk pnpm run qlty`, `rtk pnpm test`, and
   `rtk pnpm run test:web` completed successfully.
+
+## Slice 2 Implementation Evidence
+
+- Primitive accessor contract: `tableColumnDef.test.ts` exercised every leaf accessor
+  against normalized `UnitListRowView` rows and rejected non-primitive values or array
+  elements.
+- Presentation behavior: `ajsTableGlobalFilter.test.ts` and `exportCsvView.test.ts`
+  preserved rendered-value search, parameter-value search, multiline cells, array
+  joining, CSV escaping, header order, and output content.
+- Architecture guardrail: all three obsolete `Parameter` imports and their exact
+  allowances are absent; 54 presentation-domain violations match the remaining 136
+  total allowances with no validation error.
+- Final validation: `rtk pnpm run qlty`, `rtk pnpm test`, and
+  `rtk pnpm run test:web` completed successfully on 2026-07-20.

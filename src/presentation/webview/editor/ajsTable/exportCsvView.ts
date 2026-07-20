@@ -1,5 +1,4 @@
 import type { Column, Table } from "@tanstack/table-core";
-import Parameter from "../../../../domain/models/parameters/Parameter";
 import {
   type ExportUnitListCsvColumnInput,
   exportUnitListCsvRows,
@@ -14,18 +13,11 @@ type ExportableColumnDef = {
   ) => AccessorType | undefined;
 };
 
-const toParameterString = (parameter: Parameter): string =>
-  parameter.value() || "";
-
 const toCellItemString = (value: Exclude<AccessorType, unknown[]>): string =>
-  value instanceof Parameter ? toParameterString(value) : String(value);
+  String(value);
 
 const toCellArrayString = (values: unknown[]): string =>
-  values
-    .map((item) =>
-      item instanceof Parameter ? toParameterString(item) : String(item),
-    )
-    .join("\n");
+  values.map(String).join("\n");
 
 const toCellString = (value: AccessorType | undefined): string =>
   value === undefined ? "" : toDefinedCellString(value);
