@@ -58,17 +58,19 @@
 
 4. Introduce stricter parser/infrastructure boundaries.
 
-   - The application-facing parser port and host-neutral infrastructure ANTLR
-     adapter are implemented for unit-list and syntax-diagnostic consumers.
+   - Completed: the application-facing parser port returns either a normalized
+     `AjsDocument` or repository-owned syntax errors, and all production
+     consumers use that boundary.
+   - Completed: generated parser access, ANTLR orchestration, the raw
+     `AjsRawUnit` tree, and raw-to-normalized conversion are confined to
+     `src/infrastructure/parser/**`.
    - A deterministic architecture dependency collector and full rule catalog
      now guard layer, parser/raw, wrapper, host/framework, Node/browser,
      telemetry SDK, and composition boundaries. Current migration debt is an
      exact, owned, stale-checked allowlist rather than a wildcard exception.
-   - Raw `Unit` and repository-owned parser-error behavior remain the initial
-     seam; generated ANTLR artifacts and mechanics stay outside application and
-     domain production modules.
-   - Defer normalized-only parsing to a later single-purpose feature if a
-     concrete consumer requires it.
+   - Continue normalized-model convergence through
+     `complete-normalized-domain-model`; legacy wrapper semantics remain
+     outside the parser boundary and retain their exact downstream ownership.
 
 5. Maintain the explicit extension composition root.
 
@@ -151,8 +153,9 @@
     1. Completed: `architecture-inventory-and-guardrails` classified production
        dependencies and all eleven use-case boundaries, then established
        guardrails with exact ownership for every current violation.
-    2. `isolate-parser-boundary`: confine generated parser, ANTLR, and raw parser
-       data to the parser/normalization boundary.
+    2. Completed: `isolate-parser-boundary` confined generated parser, ANTLR,
+       raw parser data, and raw normalization to infrastructure while exposing
+       normalized parser results to application consumers.
     3. `complete-normalized-domain-model`: make normalized domain concepts and
        shared JP1/AJS rules sufficient for downstream use cases.
     4. After normalized identity and semantics are stable, the following
