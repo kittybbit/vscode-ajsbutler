@@ -144,6 +144,41 @@
      impacts and explicitly state when runtime environment facts are not
      verified.
 
+10. Complete the DDD/Clean Architecture migration through independently
+    reviewable roadmap features.
+
+    1. `architecture-inventory-and-guardrails`: classify every production
+       dependency and use-case boundary, then establish guardrails without
+       hiding current violations.
+    2. `isolate-parser-boundary`: confine generated parser, ANTLR, and raw parser
+       data to the parser/normalization boundary.
+    3. `complete-normalized-domain-model`: make normalized domain concepts and
+       shared JP1/AJS rules sufficient for downstream use cases.
+    4. After normalized identity and semantics are stable, the following
+       vertical features may be planned independently where their dependency
+       evidence permits:
+       - `migrate-unit-information-boundaries`
+       - `migrate-flow-graph-and-navigation-boundaries`
+       - `migrate-diagnostics-and-hover-boundaries`
+       - `complete-webapi-infrastructure-boundaries`
+       - `migrate-semantic-diff-and-report-boundaries`
+       - `isolate-telemetry-adapter-boundary`
+    5. `standardize-serialization-and-composition-root`: converge the completed
+       application/adaptor contracts into plain transport DTOs and bootstrap-only
+       composition.
+    6. `remove-legacy-and-enforce-clean-architecture`: remove superseded paths,
+       reduce temporary allowlists to zero, enforce all dependency rules, and
+       rewrite durable architecture policy to describe verified invariants.
+
+    - Preserve all existing parser, list, graph, CSV, definition, diagnostics,
+      hover, navigation, semantic diff/report, telemetry privacy, desktop/web,
+      and minimum VS Code compatibility behavior throughout the sequence.
+    - The existing `import-definition-via-webapi` feature continues to own beta
+      scope and real-environment evidence; the new WebAPI architecture feature
+      owns only dependency, port/adapter, and composition boundaries.
+    - Do not start implementation from these intake documents. Each feature
+      requires `sdd-plan-task`, `sdd-review-plan`, and explicit human approval.
+
 ## Deferred / Optional Slices
 
 1. Build/test output-directory ownership cleanup is deferred until packaging,
