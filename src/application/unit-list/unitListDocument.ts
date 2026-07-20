@@ -5,6 +5,10 @@ import type {
   AjsRelation,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
+import {
+  buildUnitDefinitions,
+  type UnitDefinitionDialogDto,
+} from "../unit-definition/buildUnitDefinition";
 
 export type UnitListRootDto = Omit<
   AjsUnit,
@@ -22,6 +26,7 @@ export type UnitListRootDto = Omit<
 export type UnitListDocumentDto = {
   rootUnits: UnitListRootDto[];
   warnings: AjsNormalizationWarning[];
+  unitDefinitions: UnitDefinitionDialogDto[];
 };
 
 const copyParameter = (parameter: AjsParameter): AjsParameter => ({
@@ -86,6 +91,7 @@ export const toUnitListDocumentDto = (
 ): UnitListDocumentDto => ({
   rootUnits: document.rootUnits.map(toUnitListRootDto),
   warnings: document.warnings.map(copyWarning),
+  unitDefinitions: buildUnitDefinitions(document),
 });
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

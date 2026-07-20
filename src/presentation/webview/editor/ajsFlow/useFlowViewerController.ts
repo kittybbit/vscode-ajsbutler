@@ -13,10 +13,7 @@ import type {
   AjsUnit,
 } from "../../../../domain/models/ajs/AjsDocument";
 import { flattenAjsUnits } from "../../../../domain/models/ajs/AjsDocument";
-import {
-  buildUnitDefinitionByPath,
-  type UnitDefinitionDialogDto,
-} from "../../../../application/unit-definition/buildUnitDefinition";
+import { type UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import type {
   CurrentUnitIdStateType,
   DialogDataStateType,
@@ -75,15 +72,6 @@ const useUnitById = (ajsDocument: AjsDocument | undefined) => {
   );
 };
 
-const useUnitDefinitionByPath = (ajsDocument: AjsDocument | undefined) =>
-  useMemo(
-    () =>
-      ajsDocument
-        ? buildUnitDefinitionByPath(ajsDocument)
-        : new Map<string, UnitDefinitionDialogDto>(),
-    [ajsDocument],
-  );
-
 const useCurrentUnit = (
   currentUnitId: string | undefined,
   unitById: ReadonlyMap<string, AjsUnit>,
@@ -96,9 +84,9 @@ const useCurrentUnit = (
 const useFlowDocumentState = (
   ajsDocument: AjsDocument | undefined,
   currentUnitId: string | undefined,
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
 ) => {
   const unitById = useUnitById(ajsDocument);
-  const unitDefinitionByPath = useUnitDefinitionByPath(ajsDocument);
   const currentUnit = useCurrentUnit(currentUnitId, unitById);
 
   return {
@@ -250,7 +238,7 @@ const useOpenSelectedNodeDefinition = (
   setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>,
 ) =>
   useCallback(() => {
-    if (selectedNode) {
+    if (selectedNode?.data.unitDefinition) {
       setDialogData(selectedNode.data.unitDefinition);
     }
   }, [selectedNode, setDialogData]);
@@ -318,6 +306,9 @@ type FlowViewerLifecycleParams = {
   setAjsDocument: Dispatch<SetStateAction<AjsDocument | undefined>>;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
+  setUnitDefinitionByPath: Dispatch<
+    SetStateAction<ReadonlyMap<string, UnitDefinitionDialogDto>>
+  >;
   theme: Theme;
 };
 
@@ -339,6 +330,7 @@ const useFlowViewerLifecycle = ({
   setAjsDocument,
   setCurrentUnitId,
   setExpandedUnitIds,
+  setUnitDefinitionByPath,
   theme,
 }: FlowViewerLifecycleParams) => {
   const layoutRequestIdentity = useMemo(
@@ -369,6 +361,7 @@ const useFlowViewerLifecycle = ({
     prevUnitEntityId,
     setAjsDocument,
     setCurrentUnitId,
+    setUnitDefinitionByPath,
   });
   useRevealUnitSubscription({ handleRevealUnit });
   useFlowViewerOverflow();
@@ -380,6 +373,9 @@ export const useFlowViewerController = ({
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
+  const [documentUnitDefinitionByPath, setUnitDefinitionByPath] = useState<
+    ReadonlyMap<string, UnitDefinitionDialogDto>
+  >(new Map());
   const {
     preserveSearchOnNextScopeChange,
     prevUnitEntityId,
@@ -389,6 +385,7 @@ export const useFlowViewerController = ({
   const { currentUnit, unitById, unitDefinitionByPath } = useFlowDocumentState(
     ajsDocument,
     currentUnitId,
+    documentUnitDefinitionByPath,
   );
 
   const {
@@ -496,6 +493,7 @@ export const useFlowViewerController = ({
     setAjsDocument,
     setCurrentUnitId,
     setExpandedUnitIds,
+    setUnitDefinitionByPath,
     theme,
   });
 

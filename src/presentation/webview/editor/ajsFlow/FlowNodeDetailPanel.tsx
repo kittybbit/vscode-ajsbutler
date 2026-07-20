@@ -24,6 +24,7 @@ type FlowNodeDetailPanelProps = {
 
 type FlowNodeDetailActionOptions = {
   canOpenAsScope: boolean;
+  canOpenDefinition: boolean;
   focusModeEnabled: boolean;
   onOpenDefinition: VoidFunction;
   onOpenScope: VoidFunction;
@@ -87,13 +88,19 @@ const buildRelationshipFocusAction = ({
   variant: focusModeEnabled ? "contained" : "outlined",
 });
 
-const buildOpenDefinitionAction = ({
+const buildOpenDefinitionActions = ({
+  canOpenDefinition,
   onOpenDefinition,
-}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
-  label: "Open definition details",
-  icon: <DescriptionIcon />,
-  onClick: onOpenDefinition,
-});
+}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction[] =>
+  canOpenDefinition
+    ? [
+        {
+          label: "Open definition details",
+          icon: <DescriptionIcon />,
+          onClick: onOpenDefinition,
+        },
+      ]
+    : [];
 
 const buildOpenUnitListAction = ({
   onOpenUnitList,
@@ -122,7 +129,7 @@ export const buildFlowNodeDetailActions = (
   options: FlowNodeDetailActionOptions,
 ): SharedUnitDetailPaneAction[] => [
   buildRelationshipFocusAction(options),
-  buildOpenDefinitionAction(options),
+  ...buildOpenDefinitionActions(options),
   buildOpenUnitListAction(options),
   ...buildOpenScopeActions(options),
 ];
@@ -136,6 +143,7 @@ const buildFlowNodeDetailActionOptions = ({
   onToggleFocusMode,
 }: Omit<FlowNodeDetailPanelProps, "onClose">): FlowNodeDetailActionOptions => ({
   canOpenAsScope: detail.canOpenAsScope,
+  canOpenDefinition: detail.canOpenDefinition,
   focusModeEnabled,
   onOpenDefinition,
   onOpenScope,
@@ -176,6 +184,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
       ),
     [
       detail.canOpenAsScope,
+      detail.canOpenDefinition,
       focusModeEnabled,
       onOpenDefinition,
       onOpenScope,

@@ -352,9 +352,12 @@ const FlowContents: FC = () => {
     [selectTreeUnit],
   );
   const openSelectedNodeDefinitionWithTelemetry = useCallback(() => {
+    if (!selectedNodeDetail?.canOpenDefinition) {
+      return;
+    }
     reportFlowOperation("definition.open");
     openSelectedNodeDefinition();
-  }, [openSelectedNodeDefinition]);
+  }, [openSelectedNodeDefinition, selectedNodeDetail?.canOpenDefinition]);
   const openSelectedNodeScopeWithTelemetry = useCallback(() => {
     reportFlowOperation("flow.scope.open");
     openSelectedNodeScope();

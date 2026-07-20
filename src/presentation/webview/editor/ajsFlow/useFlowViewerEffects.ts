@@ -12,6 +12,8 @@ import {
   flattenAjsUnits,
 } from "../../../../domain/models/ajs/AjsDocument";
 import { toAjsDocument } from "../../../../application/unit-list/unitListDocument";
+import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
+import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
 import {
   createPerformanceEvent,
@@ -356,6 +358,9 @@ type UseFlowDocumentSubscriptionParams = {
   prevUnitEntityId: MutableRefObject<string | undefined>;
   setAjsDocument: Dispatch<SetStateAction<AjsDocument | undefined>>;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
+  setUnitDefinitionByPath: Dispatch<
+    SetStateAction<ReadonlyMap<string, UnitDefinitionDialogDto>>
+  >;
 };
 
 const resolveNextCurrentUnitId = (
@@ -371,19 +376,34 @@ const resolveNextCurrentUnitId = (
     : findRootJobnet(nextDocument)?.id;
 };
 
+export const resolveFlowDocumentChange = (
+  data: unknown,
+  previousUnitId: string | undefined,
+) => {
+  const ajsDocument = data ? toAjsDocument(data) : undefined;
+  return {
+    ajsDocument,
+    currentUnitId: resolveNextCurrentUnitId(ajsDocument, previousUnitId),
+    unitDefinitionByPath: toUnitDefinitionByPath(data),
+  };
+};
+
 export const useFlowDocumentSubscription = ({
   prevUnitEntityId,
   setAjsDocument,
   setCurrentUnitId,
+  setUnitDefinitionByPath,
 }: UseFlowDocumentSubscriptionParams) => {
   const renderReadyStartedAt = useRef(performance.now());
   useEffect(() => {
     const changeDocumentFn = (_type: string, data: unknown) => {
-      const nextDocument = data ? toAjsDocument(data) : undefined;
-      setAjsDocument(() => nextDocument);
-      setCurrentUnitId(() =>
-        resolveNextCurrentUnitId(nextDocument, prevUnitEntityId.current),
+      const nextState = resolveFlowDocumentChange(
+        data,
+        prevUnitEntityId.current,
       );
+      setAjsDocument(() => nextState.ajsDocument);
+      setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
+      setCurrentUnitId(() => nextState.currentUnitId);
     };
     window.EventBridge.addCallback("changeDocument", changeDocumentFn);
     window.vscode.postMessage(
@@ -399,7 +419,12 @@ export const useFlowDocumentSubscription = ({
     return () => {
       window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
     };
-  }, [prevUnitEntityId, setAjsDocument, setCurrentUnitId]);
+  }, [
+    prevUnitEntityId,
+    setAjsDocument,
+    setCurrentUnitId,
+    setUnitDefinitionByPath,
+  ]);
 };
 
 type UseRevealUnitSubscriptionParams = {

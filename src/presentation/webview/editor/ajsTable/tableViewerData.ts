@@ -3,10 +3,7 @@ import {
   AjsUnit,
   flattenAjsUnits,
 } from "../../../../domain/models/ajs/AjsDocument";
-import {
-  buildUnitDefinitionByPath,
-  UnitDefinitionDialogDto,
-} from "../../../../application/unit-definition/buildUnitDefinition";
+import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 
 export type TableViewerData = {
@@ -16,13 +13,6 @@ export type TableViewerData = {
   unitById: ReadonlyMap<string, AjsUnit>;
   unitByAbsolutePath: ReadonlyMap<string, AjsUnit>;
 };
-
-const createUnitDefinitionByPath = (
-  ajsDocument: AjsDocument | undefined,
-): ReadonlyMap<string, UnitDefinitionDialogDto> =>
-  ajsDocument
-    ? buildUnitDefinitionByPath(ajsDocument)
-    : new Map<string, UnitDefinitionDialogDto>();
 
 const createRowViewByPath = (
   rowViews: UnitListRowView[] | undefined,
@@ -38,11 +28,12 @@ const createUnitByAbsolutePath = (units: ReadonlyArray<AjsUnit>) =>
 export const createTableViewerData = (
   ajsDocument: AjsDocument | undefined,
   rowViews: UnitListRowView[] | undefined,
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
 ): TableViewerData => {
   const rootUnits = ajsDocument?.rootUnits ?? [];
   const allUnits = ajsDocument ? flattenAjsUnits(rootUnits) : [];
   return {
-    unitDefinitionByPath: createUnitDefinitionByPath(ajsDocument),
+    unitDefinitionByPath,
     rowViewByPath: createRowViewByPath(rowViews),
     rootUnits,
     unitById: createUnitById(allUnits),

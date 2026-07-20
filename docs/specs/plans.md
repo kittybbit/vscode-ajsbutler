@@ -35,15 +35,16 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Use `sdd-plan-task` Planning Mode to prepare
-   `migrate-unit-information-boundaries`, now that normalized-domain completion has
-   removed its prerequisite legacy wrapper graph.
+1. Decide whether to seek implementation approval for Slice 2 of
+   `migrate-unit-information-boundaries`; Slice 1 is complete.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
+- `docs/specs/features/migrate-unit-information-boundaries/`: active approved
+  feature; Slice 1 is complete and no later slice has implementation approval.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

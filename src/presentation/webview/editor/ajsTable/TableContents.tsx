@@ -38,6 +38,7 @@ import {
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import { toAjsDocument } from "../../../../application/unit-list/unitListDocument";
+import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import { ParameterSearchValuesByPath } from "./globalFilter";
@@ -81,6 +82,7 @@ export type AjsTableSearchState = {
 type TableDocumentState = {
   rowViews: UnitListRowView[] | undefined;
   ajsDocument: AjsDocument | undefined;
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
   changeDocument: (type: string, data: unknown) => void;
 };
 
@@ -128,34 +130,43 @@ type TableViewerShellProps = {
 type ParsedTableDocumentState = {
   rowViews: UnitListRowView[];
   ajsDocument: AjsDocument | undefined;
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
 };
 
 const isSelectableTableFlowScopeUnit = (unit: AjsUnit): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
 
-const parseTableDocumentState = (data: unknown): ParsedTableDocumentState => {
+export const parseTableDocumentState = (
+  data: unknown,
+): ParsedTableDocumentState => {
   const ajsDocument = data ? toAjsDocument(data) : undefined;
   return {
     ajsDocument,
     rowViews: ajsDocument ? buildUnitListView(ajsDocument) : [],
+    unitDefinitionByPath: toUnitDefinitionByPath(data),
   };
 };
 
 const useChangeDocument = (): TableDocumentState => {
   const [rowViews, setRowViews] = useState<UnitListRowView[]>();
   const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
+  const [unitDefinitionByPath, setUnitDefinitionByPath] = useState<
+    ReadonlyMap<string, UnitDefinitionDialogDto>
+  >(new Map());
   const changeDocument = useCallback((type: string, data: unknown) => {
     try {
       const nextState = parseTableDocumentState(data);
       setAjsDocument(() => nextState.ajsDocument);
       setRowViews(() => nextState.rowViews);
+      setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
     } catch (error) {
       console.error("Failed to parse data:", error);
       setAjsDocument(() => undefined);
       setRowViews(() => []);
+      setUnitDefinitionByPath(() => new Map());
     }
   }, []);
-  return { rowViews, ajsDocument, changeDocument };
+  return { rowViews, ajsDocument, unitDefinitionByPath, changeDocument };
 };
 
 const useTableModelSetup = ({
@@ -375,7 +386,8 @@ const TableContents = () => {
     setDetailPaneClosed(false);
     dispatchRowSelection({ type: "select", absolutePath });
   }, []);
-  const { rowViews, ajsDocument, changeDocument } = useChangeDocument();
+  const { rowViews, ajsDocument, unitDefinitionByPath, changeDocument } =
+    useChangeDocument();
   const rowsRef = useRef<ReadonlyArray<Row<UnitListRowView>>>([]);
   const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
     selectRow,
@@ -383,8 +395,8 @@ const TableContents = () => {
   );
 
   const viewerData = useMemo(
-    () => createTableViewerData(ajsDocument, rowViews),
-    [ajsDocument, rowViews],
+    () => createTableViewerData(ajsDocument, rowViews, unitDefinitionByPath),
+    [ajsDocument, rowViews, unitDefinitionByPath],
   );
 
   const selectTreeUnit = useCallback(

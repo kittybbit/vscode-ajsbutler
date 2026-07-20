@@ -37,6 +37,14 @@ suite("ajsDocument", () => {
         unitPath: "/root",
       },
     ],
+    unitDefinitions: [
+      {
+        absolutePath: "/root",
+        rawData: "ty=n",
+        commands: [],
+        commandBuilders: [],
+      },
+    ],
   };
 
   test("posts the normalized document on ready", () => {
@@ -70,6 +78,10 @@ suite("ajsDocument", () => {
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
     assert.deepStrictEqual(posted[0]?.data, documentDto);
+    assert.deepStrictEqual(
+      JSON.parse(JSON.stringify(posted[0]?.data)),
+      documentDto,
+    );
     assert.deepStrictEqual(
       {
         ...telemetryEvents[0]?.properties,

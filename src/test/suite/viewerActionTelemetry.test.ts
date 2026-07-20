@@ -39,6 +39,40 @@ suite("Viewer action telemetry", () => {
         },
       },
     );
+
+    assert.deepStrictEqual(
+      createViewerActionEvent({
+        viewType: "ajsbutler.tableViewer",
+        operation: "definition.open",
+        host: "desktop",
+      }),
+      {
+        name: "viewer.table.definition_opened",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          view: "table",
+          result: "success",
+        },
+      },
+    );
+
+    assert.deepStrictEqual(
+      createViewerActionEvent({
+        viewType: "ajsbutler.flowViewer",
+        operation: "definition.open",
+        host: "web",
+      }),
+      {
+        name: "viewer.flow.definition_opened",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "web",
+          view: "flow",
+          result: "success",
+        },
+      },
+    );
   });
 
   test("maps navigation to source-view action events", () => {

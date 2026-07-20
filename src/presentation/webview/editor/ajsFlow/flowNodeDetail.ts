@@ -24,6 +24,7 @@ export type FlowNodeDetail = FlowNodeRelationshipSummary & {
   isSearchMatch: boolean;
   isCurrentSearchResult: boolean;
   canOpenAsScope: boolean;
+  canOpenDefinition: boolean;
 };
 
 type RelationshipDirection = "upstream" | "downstream";
@@ -185,6 +186,7 @@ export const buildFlowNodeDetail = (
     isSearchMatch: Boolean(node.data.isSearchMatch),
     isCurrentSearchResult: Boolean(node.data.isCurrentSearchResult),
     canOpenAsScope: canOpenNodeAsScope(node),
+    canOpenDefinition: Boolean(node.data.unitDefinition),
     ...summarizeFlowNodeRelationships(node.id, edges),
   };
 };

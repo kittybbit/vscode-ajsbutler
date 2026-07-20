@@ -54,11 +54,6 @@ const toNodeData = (
   const { unitDefinitionByPath, dialogDataState, currentUnitIdState, options } =
     context;
   const unitDefinition = unitDefinitionByPath.get(node.metadata.absolutePath);
-  if (!unitDefinition) {
-    throw new Error(
-      `Unit definition not found for flow graph node ${node.metadata.absolutePath}`,
-    );
-  }
 
   const unit = options?.unitById?.get(node.id);
   return {

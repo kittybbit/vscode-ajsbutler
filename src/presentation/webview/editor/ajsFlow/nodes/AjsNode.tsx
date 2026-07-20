@@ -38,7 +38,7 @@ export type AjsNode = {
   };
   unitId: string;
   absolutePath: string;
-  unitDefinition: UnitDefinitionDialogDto;
+  unitDefinition?: UnitDefinitionDialogDto;
   label: string;
   comment?: string;
   ty: TySymbol;

@@ -5,6 +5,7 @@ import {
   toUnitListDocumentDto,
 } from "../../application/unit-list/unitListDocument";
 import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
+import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import { testAjsParser } from "../support/parseAjs";
 
@@ -41,6 +42,11 @@ suite("Build Unit List", () => {
     assert.ok(!("parent" in result.document!.rootUnits[0]));
     assert.ok(!("parent" in result.document!.rootUnits[0].children[0]));
     assert.strictEqual(result.document?.warnings.length, 0);
+    assert.strictEqual(result.document?.unitDefinitions.length, 3);
+    assert.strictEqual(
+      toUnitDefinitionByPath(result.document).get("/root/jobnet/job")?.rawData,
+      "ty=j",
+    );
     assert.ok(result.document?.rootUnits[0].id);
     assert.deepStrictEqual(
       JSON.parse(JSON.stringify(result.document)),
@@ -127,7 +133,18 @@ suite("Build Unit List", () => {
     const dto = toUnitListDocumentDto(document);
     const restored = toAjsDocument(dto);
 
-    assert.deepStrictEqual(dto, document);
+    assert.deepStrictEqual(dto.rootUnits, document.rootUnits);
+    assert.deepStrictEqual(dto.warnings, document.warnings);
+    assert.deepStrictEqual(
+      dto.unitDefinitions.map(({ absolutePath, rawData }) => ({
+        absolutePath,
+        rawData,
+      })),
+      [
+        { absolutePath: "/root", rawData: "ty=n" },
+        { absolutePath: "/root/child", rawData: "ty=j" },
+      ],
+    );
     assert.deepStrictEqual(restored, document);
     assert.notStrictEqual(restored.rootUnits[0], document.rootUnits[0]);
     assert.notStrictEqual(
@@ -145,6 +162,27 @@ suite("Build Unit List", () => {
       }),
       undefined,
     );
+  });
+
+  test("restores list data when serialized definitions are malformed", () => {
+    const payload = {
+      rootUnits: [],
+      warnings: [],
+      unitDefinitions: [
+        {
+          absolutePath: "/root/broken",
+          rawData: "ty=j",
+          commands: [{ id: "ajsshow" }],
+          commandBuilders: [],
+        },
+      ],
+    };
+
+    assert.deepStrictEqual(toAjsDocument(payload), {
+      rootUnits: [],
+      warnings: [],
+    });
+    assert.strictEqual(toUnitDefinitionByPath(payload).size, 0);
   });
 
   test("returns no document when the parser reports errors", () => {
