@@ -46,7 +46,7 @@ suite("AJS table search state", () => {
     assert.deepStrictEqual(
       findTableSearchMatchingAbsolutePaths(
         rows,
-        new Map([["/root/job", [{ key: "prm", value: "--target" }]]]),
+        new Map([["/root/job", ["--target"]]]),
         "--target",
       ),
       ["/root/job"],

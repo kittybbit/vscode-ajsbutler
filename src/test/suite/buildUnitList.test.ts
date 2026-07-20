@@ -3,6 +3,7 @@ import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
 import {
   toAjsDocument,
   toUnitListDocumentDto,
+  toUnitListTableData,
 } from "../../application/unit-list/unitListDocument";
 import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
 import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
@@ -43,6 +44,20 @@ suite("Build Unit List", () => {
     assert.ok(!("parent" in result.document!.rootUnits[0].children[0]));
     assert.strictEqual(result.document?.warnings.length, 0);
     assert.strictEqual(result.document?.unitDefinitions.length, 3);
+    assert.strictEqual(result.document?.unitList.rows.length, 3);
+    assert.deepStrictEqual(
+      result.document?.unitList.units.map(
+        ({ absolutePath, parameterSearchValues }) => ({
+          absolutePath,
+          parameterSearchValues,
+        }),
+      ),
+      [
+        { absolutePath: "/root", parameterSearchValues: ["g"] },
+        { absolutePath: "/root/jobnet", parameterSearchValues: ["n"] },
+        { absolutePath: "/root/jobnet/job", parameterSearchValues: ["j"] },
+      ],
+    );
     assert.strictEqual(
       toUnitDefinitionByPath(result.document).get("/root/jobnet/job")?.rawData,
       "ty=j",
@@ -183,6 +198,98 @@ suite("Build Unit List", () => {
       warnings: [],
     });
     assert.strictEqual(toUnitDefinitionByPath(payload).size, 0);
+  });
+
+  test("rejects incomplete or reordered table projections", () => {
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const document = result.document!;
+
+    assert.strictEqual(
+      toUnitListTableData({
+        ...document,
+        unitList: {
+          ...document.unitList,
+          rows: document.unitList.rows.slice(1),
+        },
+      }),
+      undefined,
+    );
+    assert.strictEqual(
+      toUnitListTableData({
+        ...document,
+        unitList: {
+          ...document.unitList,
+          units: [...document.unitList.units].reverse(),
+        },
+      }),
+      undefined,
+    );
+  });
+
+  test("rejects corrupt fields and inconsistent projection metadata", () => {
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const cloneDocument = () =>
+      JSON.parse(JSON.stringify(result.document)) as typeof result.document;
+
+    const invalidComment = cloneDocument()!;
+    invalidComment.unitList.rows[0].group2.comment = {} as string;
+    assert.strictEqual(toUnitListTableData(invalidComment), undefined);
+
+    const invalidRecoveryFlag = cloneDocument()!;
+    invalidRecoveryFlag.unitList.rows[0].group3.isRecovery = {} as boolean;
+    assert.strictEqual(toUnitListTableData(invalidRecoveryFlag), undefined);
+
+    const invalidUnitType = cloneDocument()!;
+    invalidUnitType.unitList.units[0].unitType = "invalid" as "g";
+    assert.strictEqual(toUnitListTableData(invalidUnitType), undefined);
+
+    const inconsistentName = cloneDocument()!;
+    inconsistentName.unitList.units[0].name = "different-root";
+    assert.strictEqual(toUnitListTableData(inconsistentName), undefined);
+
+    const inconsistentParent = cloneDocument()!;
+    inconsistentParent.unitList.units[1].parentId = "different-parent";
+    assert.strictEqual(toUnitListTableData(inconsistentParent), undefined);
+
+    const inconsistentGroupType = cloneDocument()!;
+    inconsistentGroupType.unitList.rows[0].group1.groupType = "n";
+    assert.strictEqual(toUnitListTableData(inconsistentGroupType), undefined);
+
+    const inconsistentRecovery = cloneDocument()!;
+    inconsistentRecovery.unitList.rows[0].group3.isRecovery = true;
+    assert.strictEqual(toUnitListTableData(inconsistentRecovery), undefined);
+
+    const inconsistentParentPath = cloneDocument()!;
+    inconsistentParentPath.unitList.rows[1].group1.parentAbsolutePath = "/bad";
+    assert.strictEqual(toUnitListTableData(inconsistentParentPath), undefined);
+  });
+
+  test("keeps a representative large projection deterministic", () => {
+    const childCount = 500;
+    const childDefinitions = Array.from(
+      { length: childCount },
+      (_, index) => `unit=job-${index},,jp1admin,;{ty=j;}`,
+    ).join("\n");
+    const definition = `unit=root,,jp1admin,;{ty=g;${childDefinitions}}`;
+
+    const result = buildUnitList(definition);
+
+    assert.deepStrictEqual(result.errors, []);
+    assert.strictEqual(result.document?.unitList.rows.length, childCount + 1);
+    assert.strictEqual(
+      result.document?.unitList.rows[0]?.absolutePath,
+      "/root",
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows.at(-1)?.absolutePath,
+      `/root/job-${childCount - 1}`,
+    );
+    assert.deepStrictEqual(
+      JSON.parse(JSON.stringify(result.document?.unitList)),
+      result.document?.unitList,
+    );
   });
 
   test("returns no document when the parser reports errors", () => {

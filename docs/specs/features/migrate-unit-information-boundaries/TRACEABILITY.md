@@ -23,8 +23,8 @@
 
 ## Slice 1 Implementation Evidence
 
-- Status: implementation and required validation complete; human completion
-  approval pending.
+- Status: complete; implementation, required validation, final review, and
+  human completion approval are recorded.
 - Shared definition contract: `buildUnitDefinitions` adds plain definition
   DTOs to the existing normalized document payload, and
   `toUnitDefinitionByPath` validates and indexes that same payload for table
@@ -41,3 +41,37 @@
   `rtk pnpm run build`, and `rtk pnpm run qlty` passed on 2026-07-20.
 - Build note: production build reported only the repository's existing bundle
   size warnings; no new build error or host-specific dependency was found.
+
+## Slice 2 Implementation Evidence
+
+- Status: complete; implementation, required validation, final review, and
+  human completion approval are recorded.
+- Unit-list contract: `buildUnitListProjection` produces deterministic plain
+  rows and unit metadata, and `toUnitListTableData` validates and indexes the
+  serialized payload without reconstructing domain objects in the table.
+- Failure behavior: malformed, reordered, duplicate, or incomplete projection
+  data is rejected as an empty table state instead of exposing a partial list;
+  the flow payload and definition lookup remain available independently.
+- Regression evidence: `buildUnitList.test.ts`,
+  `buildUnitListView.test.ts`, `AjsDocument.test.ts`,
+  `unitDefinitionDocumentState.test.ts`, `tableViewerData.test.ts`,
+  `ajsTableGlobalFilter.test.ts`, `tableNavigation.test.ts`,
+  `tableSearchState.test.ts`, `tableRenderTelemetry.test.ts`, and
+  `unitListEncoding.test.ts` cover projection shape and order, JSON round-trip,
+  search and selection metadata, complete malformed-field and cross-projection
+  consistency rejection, table-render telemetry buckets, a generated
+  500-child definition, and UTF-8/Shift_JIS input read through the VS Code
+  desktop host path.
+- Architecture evidence: the table no longer imports `AjsDocument`, `AjsUnit`,
+  or `AjsParameter`, performs domain reconstruction, or traverses domain
+  objects. The four approved exact allowlist entries were removed, and the
+  architecture dependency suite passed.
+- Compatibility evidence: existing unit-list build telemetry remains covered
+  by `AjsDocument.test.ts`; `tableRenderTelemetry.test.ts` fixes the existing
+  table-render operation, result, duration bucket, and row-count bucket schema.
+  Desktop and web validation found no Node-only dependency in shared execution
+  paths.
+- Validation result: `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run build`, and `rtk pnpm run qlty` passed on 2026-07-20.
+- Build note: production build reported only the repository's existing bundle
+  size warnings; no new build error or compatibility change was found.

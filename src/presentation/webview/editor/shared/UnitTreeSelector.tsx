@@ -30,7 +30,7 @@ import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
 
 export type UnitTreeSelectorProps = {
   rootUnits: AjsUnit[];
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>;
   currentUnitId?: string;
   hoveredUnitId?: string;
   selectedUnitId?: string;
@@ -154,7 +154,7 @@ export const mergeUnitIds = (
 const collectRequiredExpandedUnitIds = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>,
 ): readonly (string | undefined)[] => [
   ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
   currentUnitId,
@@ -163,7 +163,7 @@ const collectRequiredExpandedUnitIds = (
 
 const collectCurrentPathUnitIds = (
   currentUnitId: string | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>,
 ): ReadonlySet<string> =>
   new Set([
     ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
@@ -187,7 +187,7 @@ const setUnitExpanded = (
 const useExpandedUnitTreeState = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>,
 ) => {
   const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(
     () => new Set<string>(),

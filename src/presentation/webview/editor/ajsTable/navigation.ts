@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from "react";
 import type { MouseEvent } from "react";
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { UnitListUnitMetadataDto } from "../../../../application/unit-list/buildUnitListView";
 import { createNavigationEvent } from "../../../../shared/webviewEvents";
 
 type PostViewerMessage = (
@@ -50,7 +50,7 @@ export const navigateToFlow = (
 
 export const selectUnitTreeUnitInTable = (
   unitId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>,
   revealPath: (absolutePath: string) => void,
 ): void => {
   const unit = unitById.get(unitId);
@@ -61,7 +61,7 @@ export const selectUnitTreeUnitInTable = (
 
 export const openUnitTreeUnitInFlow = (
   unitId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>,
   navigate: (absolutePath: string) => void = navigateToFlow,
 ): void => {
   const unit = unitById.get(unitId);

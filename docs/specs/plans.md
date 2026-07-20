@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Decide whether to seek implementation approval for Slice 2 of
-   `migrate-unit-information-boundaries`; Slice 1 is complete.
+1. Implement approved Slice 3 of `migrate-unit-information-boundaries` with
+   `sdd-implement-task`; Slices 1-2 are complete and Slices 3-4 are approved.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
@@ -44,7 +44,8 @@ rules in `docs/specs/README.md`, not in this file.
 ## Active Feature Specs
 
 - `docs/specs/features/migrate-unit-information-boundaries/`: active approved
-  feature; Slice 1 is complete and no later slice has implementation approval.
+  feature; Slices 1-2 are complete, Slices 3-4 are approved, and Slice 3 is the
+  active implementation slice.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

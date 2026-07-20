@@ -258,6 +258,21 @@ export type UnitListRowView = {
   group9: UnitListGroup9View;
 };
 
+export type UnitListUnitMetadataDto = {
+  id: string;
+  name: string;
+  absolutePath: string;
+  parentId?: string;
+  unitType: AjsUnitType;
+  isRootJobnet: boolean;
+  parameterSearchValues: string[];
+};
+
+export type UnitListProjectionDto = {
+  rows: UnitListRowView[];
+  units: UnitListUnitMetadataDto[];
+};
+
 export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
   const units = flattenAjsUnits(document.rootUnits);
   const unitById = new Map(units.map((unit) => [unit.id, unit]));
@@ -288,3 +303,18 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
     };
   });
 };
+
+export const buildUnitListProjection = (
+  document: AjsDocument,
+): UnitListProjectionDto => ({
+  rows: buildUnitListView(document),
+  units: flattenAjsUnits(document.rootUnits).map((unit) => ({
+    id: unit.id,
+    name: unit.name,
+    absolutePath: unit.absolutePath,
+    ...(unit.parentId === undefined ? {} : { parentId: unit.parentId }),
+    unitType: unit.unitType,
+    isRootJobnet: unit.isRootJobnet,
+    parameterSearchValues: unit.parameters.map((parameter) => parameter.value),
+  })),
+});

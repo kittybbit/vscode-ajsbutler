@@ -322,38 +322,14 @@ const unitPresentationAllowances = ownedBy(
       ruleId: "presentation-domain-dependency",
     },
     {
-      source: "src/presentation/webview/editor/ajsTable/globalFilter.ts",
-      target: "src/domain/models/ajs/AjsDocument",
-      kind: "import",
-      ruleId: "presentation-domain-dependency",
-    },
-    {
       source: "src/presentation/webview/editor/ajsTable/Header.tsx",
       target: "src/domain/services/i18n/nls",
       kind: "import",
       ruleId: "presentation-domain-dependency",
     },
     {
-      source: "src/presentation/webview/editor/ajsTable/navigation.ts",
-      target: "src/domain/models/ajs/AjsDocument",
-      kind: "import-type",
-      ruleId: "presentation-domain-dependency",
-    },
-    {
       source: "src/presentation/webview/editor/ajsTable/tableColumnDef.tsx",
       target: "src/domain/services/i18n/nls",
-      kind: "import",
-      ruleId: "presentation-domain-dependency",
-    },
-    {
-      source: "src/presentation/webview/editor/ajsTable/TableContents.tsx",
-      target: "src/domain/models/ajs/AjsDocument",
-      kind: "import",
-      ruleId: "presentation-domain-dependency",
-    },
-    {
-      source: "src/presentation/webview/editor/ajsTable/tableViewerData.ts",
-      target: "src/domain/models/ajs/AjsDocument",
       kind: "import",
       ruleId: "presentation-domain-dependency",
     },

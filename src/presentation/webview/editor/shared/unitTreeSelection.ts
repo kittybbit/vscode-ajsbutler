@@ -1,8 +1,10 @@
 import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
 
+type UnitTreeLookupUnit = Pick<AjsUnit, "id" | "parentId">;
+
 export const collectUnitTreeParentUnitIds = (
-  unit: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unit: UnitTreeLookupUnit | undefined,
+  unitById: ReadonlyMap<string, UnitTreeLookupUnit>,
 ): string[] => {
   const parentUnitIds: string[] = [];
   const visited = new Set<string>();
@@ -19,7 +21,7 @@ export const collectUnitTreeParentUnitIds = (
 
 export const collectUnitTreeAncestorUnitIds = (
   unitId: string | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, UnitTreeLookupUnit>,
 ): string[] =>
   unitId
     ? collectUnitTreeParentUnitIds(unitById.get(unitId), unitById).reverse()

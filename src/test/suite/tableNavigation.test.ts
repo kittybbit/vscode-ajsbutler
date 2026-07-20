@@ -11,16 +11,19 @@ import {
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
 import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import type { UnitListUnitMetadataDto } from "../../application/unit-list/buildUnitListView";
 
-const createUnit = (id: string, absolutePath: string): AjsUnit =>
-  ({
-    id,
-    absolutePath,
-    name: id,
-    unitType: "j",
-    children: [],
-  }) as AjsUnit;
+const createUnit = (
+  id: string,
+  absolutePath: string,
+): UnitListUnitMetadataDto => ({
+  id,
+  absolutePath,
+  name: id,
+  unitType: "j",
+  isRootJobnet: false,
+  parameterSearchValues: [],
+});
 
 suite("Table navigation", () => {
   test("enables flow navigation only for a selected stable path", () => {

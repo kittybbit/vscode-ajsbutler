@@ -4,8 +4,8 @@
 
 - Purpose: complete one normalized application boundary for unit list, CSV,
   and unit definition without changing visible behavior.
-- Approved or active slice: Slice 1 is complete; no later slice has
-  implementation approval.
+- Approved or active slice: Slices 1-2 are complete; Slices 3-4 have
+  implementation approval and Slice 3 is active.
 - Implement in order: Definition DTO, Unit List projection, CSV contract, then
   presentation dependency closure.
 - Do not change columns, ordering, formatting, commands, copy/save behavior,
@@ -17,8 +17,7 @@
   cases.
 - Validate every code slice with `rtk pnpm run qlty` plus its risk-based checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: obtain explicit implementation approval before starting Slice
-  2; Slices 2-4 remain proposed.
+- Next decision: implement only Slice 3 with `sdd-implement-task`.
 
 ## Plan Status
 
@@ -26,23 +25,25 @@
 - Planning scope: the complete unit-list, CSV-export, and unit-definition
   domain-to-application-DTO boundary, including its table and definition
   presentation consumers.
-- Review status: Ready for approval; final plan review completed 2026-07-20
-  with no blocking findings.
-- Human approval: received 2026-07-20 for the reviewed plan and Slice 1 scope.
-- Active implementation slice: none; Slice 1 is complete and Slice 2 remains
-  proposed.
+- Review status: Reviewed; final plan review completed 2026-07-20 with no
+  blocking findings.
+- Human approval: received 2026-07-20 for the reviewed plan and all four slice
+  approval boundaries.
+- Active implementation slice: Slice 3 approved and ready.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-07-20
-- Approval evidence: user response `approved.` following the final
-  `sdd-review-plan` request for approval of the reviewed plan and Slice 1
-  approval boundary.
-- Approved scope: the complete reviewed four-slice plan and implementation of
-  Slice 1 exactly within its recorded Approval Boundary.
-- Not approved: implementation of Slices 2-4, scope expansion, visible behavior
-  changes, or work outside the recorded feature and Slice 1 boundaries.
+- Approval evidence:
+  - user response `approved.` following the final `sdd-review-plan` request
+    approved the reviewed plan and Slice 1 implementation boundary
+  - user response `sliceを全部承認します。` approved implementation of the
+    remaining reviewed Slices 2-4
+- Approved scope: implementation of Slices 1-4 exactly within each recorded
+  Approval Boundary and dependency order.
+- Not approved: scope expansion, visible behavior changes, or work outside the
+  recorded feature and slice boundaries.
 
 ## Replanning Decision
 
@@ -181,7 +182,9 @@
 
 ### Slice 2: Deliver A Serializable Unit-List Projection
 
-- Status: Proposed
+- Status: Complete
+- Completion approval: received 2026-07-21 through the user response
+  `approved.` after implementation, validation, and final review.
 - Scope: extend the application unit-list entry point so one successful parse
   produces deterministic plain row data and the unit identity, hierarchy,
   parameter-search, and selection metadata required by the table viewer. Switch
@@ -279,7 +282,7 @@
 
 ### Slice 3: Stabilize The Plain CSV Export Contract
 
-- Status: Proposed
+- Status: Approved
 - Scope: replace the callback-bearing generic CSV input with an explicit plain
   visible-row/visible-column value contract derived from Slice 2 rows. Keep
   TanStack visibility, ordering, header extraction, and cell stringification in
@@ -344,7 +347,7 @@
 
 ### Slice 4: Close Unit-Information Presentation Dependencies
 
-- Status: Proposed
+- Status: Approved
 - Scope: introduce focused presentation-local unit-information localization
   adapters and presentation-owned label value types backed directly by existing
   resource data. Application DTOs continue to expose semantic values and label
@@ -421,7 +424,8 @@
 - `TRACEABILITY.md` required: yes.
 - Reason: the feature spans three user-visible use cases, four slices, a shared
   serialized contract, compatibility evidence, and architecture allowances.
-- Status: updated for the revised plan; implementation evidence remains pending.
+- Status: implementation evidence is recorded for Slices 1-2 and remains
+  pending for Slices 3-4.
 
 ## Cross-Slice Dependencies
 

@@ -39,7 +39,7 @@ suite("Unit definition document state", () => {
       tableState.unitDefinitionByPath.get("/root"),
       flowState.unitDefinitionByPath.get("/root"),
     );
-    assert.strictEqual(tableState.rowViews.length, 1);
+    assert.strictEqual(tableState.tableData?.rows.length, 1);
     assert.strictEqual(flowState.ajsDocument?.rootUnits.length, 1);
     assert.strictEqual(flowState.currentUnitId, "root-id");
   });
@@ -53,9 +53,24 @@ suite("Unit definition document state", () => {
     const tableState = parseTableDocumentState(payload);
     const flowState = resolveFlowDocumentChange(payload, undefined);
 
-    assert.strictEqual(tableState.rowViews.length, 1);
+    assert.strictEqual(tableState.tableData?.rows.length, 1);
     assert.strictEqual(flowState.ajsDocument?.rootUnits.length, 1);
     assert.strictEqual(tableState.unitDefinitionByPath.size, 0);
     assert.strictEqual(flowState.unitDefinitionByPath.size, 0);
+  });
+
+  test("malformed table projection fails closed without breaking flow state", () => {
+    const validPayload = toUnitListDocumentDto(document);
+    const payload = {
+      ...validPayload,
+      unitList: { ...validPayload.unitList, rows: [] },
+    };
+
+    const tableState = parseTableDocumentState(payload);
+    const flowState = resolveFlowDocumentChange(payload, undefined);
+
+    assert.strictEqual(tableState.tableData, undefined);
+    assert.strictEqual(flowState.ajsDocument?.rootUnits.length, 1);
+    assert.strictEqual(flowState.currentUnitId, "root-id");
   });
 });
