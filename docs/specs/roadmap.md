@@ -162,7 +162,9 @@
     4. After normalized identity and semantics are stable, the following
        vertical features may be planned independently where their dependency
        evidence permits:
-       - `migrate-unit-information-boundaries`
+       - Completed: `migrate-unit-information-boundaries` established shared
+         unit-definition DTOs, a serializable unit-list projection, a plain CSV
+         contract, and presentation-owned unit-information localization.
        - `migrate-flow-graph-and-navigation-boundaries`
        - `migrate-diagnostics-and-hover-boundaries`
        - `complete-webapi-infrastructure-boundaries`

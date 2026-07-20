@@ -35,17 +35,15 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Run Feature Exit Review for `migrate-unit-information-boundaries` with
-   `sdd-plan-task`; all four approved implementation slices are complete.
+1. Prepare the full implementation-slice plan for
+   `migrate-flow-graph-and-navigation-boundaries` with `sdd-plan-task`
+   Planning Mode before review or implementation approval.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/migrate-unit-information-boundaries/`: active approved
-  feature; all four implementation slices are complete and Feature Exit Review
-  is next.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
