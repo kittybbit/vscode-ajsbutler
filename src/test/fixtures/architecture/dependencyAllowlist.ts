@@ -39,24 +39,6 @@ const rawUnitAllowances = ownedBy(
       kind: "import",
       ruleId: "raw-unit-outside-parser-normalizer",
     },
-    {
-      source: "src/domain/models/units/UnitEntity.ts",
-      target: "src/domain/values/Unit",
-      kind: "import",
-      ruleId: "raw-unit-outside-parser-normalizer",
-    },
-    {
-      source: "src/domain/utils/TyUtils.ts",
-      target: "src/domain/values/Unit",
-      kind: "import",
-      ruleId: "raw-unit-outside-parser-normalizer",
-    },
-    {
-      source: "src/domain/values/unitParameterLookupHelpers.ts",
-      target: "src/domain/values/Unit",
-      kind: "import",
-      ruleId: "raw-unit-outside-parser-normalizer",
-    },
   ],
 );
 

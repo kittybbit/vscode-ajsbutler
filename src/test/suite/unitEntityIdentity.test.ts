@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { v5 as uuidv5 } from "uuid";
 import { parseAjs } from "../support/parseAjs";
+import type { LegacyUnitSource } from "../../domain/models/units/LegacyUnitSource";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
 const UNIT_ENTITY_ID_NAMESPACE = uuidv5.URL;
@@ -32,6 +33,26 @@ const parseRootAndChildIds = (): { rootId: string; childId: string } => {
 };
 
 suite("Unit entity identity", () => {
+  test("accepts the wrapper-specific source contract", () => {
+    const source: LegacyUnitSource = {
+      unitAttribute: "root,,jp1admin,",
+      parameters: [{ key: "ty", value: "g" }],
+      children: [],
+      name: "root",
+      permission: undefined,
+      jp1Username: "jp1admin",
+      jp1ResourceGroup: undefined,
+      absolutePath: () => "/root",
+      isRoot: () => true,
+    };
+
+    const entity = tyFactory(source);
+
+    assert.strictEqual(entity.name, "root");
+    assert.strictEqual(entity.absolutePath, "/root");
+    assert.strictEqual(entity.jp1Username, "jp1admin");
+  });
+
   test("derives deterministic UUID v5 ids from unit absolute paths", () => {
     const first = parseRootAndChildIds();
     const second = parseRootAndChildIds();

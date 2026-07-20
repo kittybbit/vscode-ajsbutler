@@ -1,5 +1,5 @@
 import { isTySymbol } from "../values/AjsType";
-import { Unit } from "../values/Unit";
+import type { LegacyUnitSource } from "../models/units/LegacyUnitSource";
 import { UnitEntity } from "../models/units/UnitEntity";
 import { G } from "../models/units/G";
 import { Cj, Rcj } from "../models/units/Cj";
@@ -91,7 +91,7 @@ const tyClasses = {
 } as const;
 
 export const tyFactory = <T extends UnitEntity>(
-  unit: Unit,
+  unit: LegacyUnitSource,
   parent?: UnitEntity,
 ): T => {
   const tyValue = unit.parameters.find((v) => v.key === "ty")?.value;

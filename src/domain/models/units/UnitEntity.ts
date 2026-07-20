@@ -1,9 +1,9 @@
 /** JP1/AJS3 unit entities  */
 
 import { v5 as uuidv5 } from "uuid";
-import { Unit } from "../../values/Unit";
 import { tyFactory } from "../../utils/TyUtils";
 import { ParamFactory } from "../parameters/ParameterFactory";
+import type { LegacyUnitSource } from "./LegacyUnitSource";
 import { resolveUnitDepth } from "./unitDepthHelpers";
 import { resolveIsRecovery } from "./unitTypeHelpers";
 
@@ -14,8 +14,8 @@ const createUnitEntityId = (absolutePath: string): string =>
 
 /** abstract class of unit unit for decorator */
 export abstract class UnitEntity {
-  /** raw unit */
-  readonly #unit: Unit;
+  /** source data used by the transitional wrapper */
+  readonly #unit: LegacyUnitSource;
 
   /** attributes */
   #id: string;
@@ -25,7 +25,7 @@ export abstract class UnitEntity {
   #children: UnitEntity[];
   #isRecovery?: boolean;
 
-  constructor(unit: Unit, parent?: UnitEntity) {
+  constructor(unit: LegacyUnitSource, parent?: UnitEntity) {
     this.#unit = unit;
     this.#absolutePath = unit.absolutePath();
     this.#id = createUnitEntityId(this.#absolutePath);

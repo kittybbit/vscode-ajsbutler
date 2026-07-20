@@ -18,6 +18,20 @@ unit = root,,jp1admin, ;
 `;
 
 suite("Unit Parameter Lookup Helpers", () => {
+  test("accepts a parameter-only source", () => {
+    const source = {
+      parameters: [
+        { key: "op", value: "mo:1", position: 1 },
+        { key: "op", value: "2024/01/01", position: 2 },
+      ],
+    };
+
+    assert.deepStrictEqual(findUnitParameterValues(source, "op"), [
+      "mo:1",
+      "2024/01/01",
+    ]);
+  });
+
   test("finds raw unit parameters and values", () => {
     const result = parseAjs(validDefinition);
     assert.deepStrictEqual(result.errors, []);
