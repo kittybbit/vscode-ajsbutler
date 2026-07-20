@@ -20,25 +20,6 @@ suite("Unit Edge Helpers", () => {
     assert.strictEqual(parseUnitEdge(undefined), undefined);
   });
 
-  test("can require a relation type for wrapper-compatible parsing", () => {
-    assert.deepStrictEqual(
-      parseUnitEdge("(f=job-a,t=job-b,con)", {
-        requireRelationType: true,
-      }),
-      {
-        sourceName: "job-a",
-        targetName: "job-b",
-        relationType: "con",
-      },
-    );
-    assert.strictEqual(
-      parseUnitEdge("(f=job-a,t=job-b)", {
-        requireRelationType: true,
-      }),
-      undefined,
-    );
-  });
-
   test("normalizes unit edge types for the normalized model", () => {
     assert.strictEqual(normalizeAjsRelationType("con"), "con");
     assert.strictEqual(normalizeAjsRelationType("seq"), "seq");

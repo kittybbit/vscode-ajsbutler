@@ -5,14 +5,14 @@
 ## Agent Brief
 
 - Purpose: make normalized AJS concepts the only live domain model.
-- Approved or active slice: Slices 1 and 2 are complete; Slice 3 is approved and next.
+- Approved or active slice: all three implementation slices are complete.
 - Preserve identity, hierarchy, parameters, relations, state, warnings, and UI output.
 - Do not recreate wrapper-only APIs without a production consumer or durable rule.
 - Consumer DTO migration remains in the named downstream features.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, and normalization rules.
 - Validate each slice with focused tests, qlty, desktop tests, and web tests.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement only Slice 3 with `sdd-implement-task`.
+- Next decision: run Feature Exit Review with `sdd-plan-task`.
 
 ## Plan Status
 
@@ -22,7 +22,7 @@
 - Review status: Reviewed; revised plan passed with no blocking findings.
 - Human approval: Approved on 2026-07-20 for the revised full plan and all three
   implementation slices.
-- Active implementation slice: Slice 3 (approved; not started).
+- Active implementation slice: none; all approved slices are complete.
 
 ## Replanning Reason
 
@@ -186,7 +186,7 @@ search semantics, CSV content, or broader downstream feature ownership.
 
 ### Slice 3: Retire the unreachable legacy wrapper graph
 
-- Status: Approved
+- Status: Complete
 - Scope: after Slices 1 and 2 remove every live edge, delete the cohesive wrapper graph:
   `UnitEntity`, `LegacyUnitSource`, typed unit/capability classes, wrapper priority and
   relation traversal, `TyUtils`, `ParamFactory`, wrapper-only typed parameter classes
@@ -242,8 +242,7 @@ search semantics, CSV content, or broader downstream feature ownership.
 - `TRACEABILITY.md` required: yes.
 - Reason: this non-trivial feature changes shared domain ownership and removes a large
   compatibility graph while preserving several user-visible workflows.
-- Status: revised mappings and Slice 1-2 implementation evidence recorded; Slice 3
-  evidence remains pending.
+- Status: mappings and implementation evidence are recorded for all three slices.
 
 ## Cross-Slice Dependencies
 
@@ -283,8 +282,8 @@ search semantics, CSV content, or broader downstream feature ownership.
 
 ## Feature Exit
 
-- Definition of Done status: not started.
+- Definition of Done status: ready for Feature Exit Review.
 - Durable documentation updates: only if implementation disproves an existing
   normalization or parameter contract; final architecture wording remains downstream.
-- Open risks: wrapper-test classification, malformed/large input parity, and final
-  desktop/web regression evidence.
+- Open risks: none discovered during implementation; closure remains subject to Feature
+  Exit Review.

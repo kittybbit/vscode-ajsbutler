@@ -6,10 +6,6 @@ export type ParsedUnitEdge = {
   relationType?: string;
 };
 
-type UnitEdgeParseOptions = {
-  requireRelationType?: boolean;
-};
-
 const UNIT_EDGE_NAMES_PATTERN = /(?=.*f=([^,)\s]+))(?=.*t=([^,)\s]+))/;
 
 const extractUnitEdgeNames = (
@@ -26,28 +22,16 @@ const extractRelationType = (value: string): string | undefined => {
   return parts.length > 2 ? parts.at(-1)?.replace(/\)$/, "") : undefined;
 };
 
-const hasRequiredRelationType = (
-  relationType: string | undefined,
-  options: UnitEdgeParseOptions | undefined,
-): boolean =>
-  options?.requireRelationType !== true || relationType !== undefined;
-
-const parseDefinedUnitEdge = (
-  value: string,
-  options: UnitEdgeParseOptions | undefined,
-): ParsedUnitEdge | undefined => {
+const parseDefinedUnitEdge = (value: string): ParsedUnitEdge | undefined => {
   const names = extractUnitEdgeNames(value);
   const relationType = extractRelationType(value);
-  return names && hasRequiredRelationType(relationType, options)
-    ? { ...names, relationType }
-    : undefined;
+  return names ? { ...names, relationType } : undefined;
 };
 
 export const parseUnitEdge = (
   value: string | undefined,
-  options?: UnitEdgeParseOptions,
 ): ParsedUnitEdge | undefined =>
-  value ? parseDefinedUnitEdge(value, options) : undefined;
+  value ? parseDefinedUnitEdge(value) : undefined;
 
 export const normalizeAjsRelationType = (
   relationType: string | undefined,

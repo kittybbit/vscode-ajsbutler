@@ -42,3 +42,21 @@
   total allowances with no validation error.
 - Final validation: `rtk pnpm run qlty`, `rtk pnpm test`, and
   `rtk pnpm run test:web` completed successfully on 2026-07-20.
+
+## Slice 3 Implementation Evidence
+
+- Wrapper retirement: production and test imports of `UnitEntity`,
+  `LegacyUnitSource`, typed unit wrappers, `ParamFactory`, `tyFactory`, wrapper
+  priority, and wrapper relation traversal are absent. The wrapper-only source and
+  test graph was removed without a replacement compatibility API.
+- Preserved rules: normalized unit-state, encoded-string, schedule, relation-edge,
+  parameter-default, HTTP execution-user default, job-end judgment, transfer-operation,
+  list, flow, diagnostics, and semantic-diff coverage passed through focused and full
+  suites. Pure default and transfer-operation assertions were moved out of wrapper
+  suites before deletion.
+- Architecture guardrail: zero `legacy-wrapper-dependency` production violations and
+  allowances remain; the 54 presentation and two Node/browser allowances account for
+  all 56 remaining entries with no unexplained or stale allowance.
+- Final validation: `rtk pnpm run qlty`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run build` completed successfully on
+  2026-07-20. Production build emitted only the existing bundle-size warnings.

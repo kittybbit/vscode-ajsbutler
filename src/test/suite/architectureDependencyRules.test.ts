@@ -241,11 +241,10 @@ suite("Architecture dependency rules", () => {
     );
 
     assert.deepStrictEqual(violationsByRule, {
-      [architectureRuleIds.legacyWrapperDependency]: 80,
       [architectureRuleIds.nodeBuiltinBrowserBoundary]: 2,
       [architectureRuleIds.presentationDomainDependency]: 54,
     });
-    assert.strictEqual(dependencyAllowlist.length, 136);
+    assert.strictEqual(dependencyAllowlist.length, 56);
     assert.deepStrictEqual(
       validateDependencyAllowlist(violations, dependencyAllowlist),
       [],
@@ -265,20 +264,12 @@ suite("Architecture dependency rules", () => {
       .sort();
 
     assert.deepStrictEqual(rawHelperImporters, [
-      "groupEntity.test.ts",
-      "jobnetEntity.test.ts",
       "normalizeAjsDocument.test.ts",
       "normalizeRelations.test.ts",
       "normalizeUnit.test.ts",
       "normalizeUnitBuilder.test.ts",
       "normalizeUnitTree.test.ts",
-      "parameterFactory.test.ts",
-      "parameterHelpers.test.ts",
-      "unitCapabilityEntities.test.ts",
-      "unitEntityIdentity.test.ts",
       "unitParameterLookupHelpers.test.ts",
-      "unitPriorityHelpers.test.ts",
-      "unitRelationHelpers.test.ts",
     ]);
   });
 
