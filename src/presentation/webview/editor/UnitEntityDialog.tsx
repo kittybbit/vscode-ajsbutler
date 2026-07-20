@@ -15,7 +15,7 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import { LocaleKeyType, localeMap } from "../../../domain/services/i18n/nls";
+import { unitInformationMessage } from "./unitInformationLocalization";
 import {
   buildCommandLine,
   CommandBuilderValues,
@@ -36,6 +36,11 @@ type UnitEntityDialogProps = {
 type UnitDefinitionContentProps = {
   dialogData: UnitDefinitionDialogDto;
 };
+
+export const localizeUnitDefinitionLabel = (
+  key: string,
+  language: string,
+): string => unitInformationMessage(key, language);
 
 const useCopyHandler = () => {
   const [tooltipMsg, setTooltipMsg] = useState<string>("");
@@ -204,7 +209,7 @@ const CommandBuilder: FC<{
     builder.manualUrl.urlByLang[lang === "ja" ? "ja" : "en"] ??
     builder.manualUrl.urlByLang.en;
   const localize = (key: string): string =>
-    localeMap(key as LocaleKeyType, lang);
+    localizeUnitDefinitionLabel(key, lang);
 
   const updateValue = (fieldId: string, value: string | boolean) => {
     setValuesByBuilder((current) => ({

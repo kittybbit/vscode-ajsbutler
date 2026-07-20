@@ -5,6 +5,7 @@ import { parseAjsDocumentForTest } from "../support/parseAjs";
 
 type ColumnLike = {
   id?: string;
+  header?: unknown;
   columns?: ColumnLike[];
   accessorFn?: (row: unknown, index: number) => unknown;
 };
@@ -53,6 +54,19 @@ const collectLeafColumns = (columns: ColumnLike[]): ColumnLike[] =>
   );
 
 suite("Table Column Definition", () => {
+  test("preserves English, Japanese, and fallback column labels", () => {
+    const group1 = (language: string): ColumnLike =>
+      tableColumnDef(language, () => undefined, new Map())[1] as ColumnLike;
+
+    assert.strictEqual(group1("en").header, "Unit definition information");
+    assert.strictEqual(group1("ja").header, "ユニット定義情報");
+    assert.strictEqual(
+      group1("unsupported").header,
+      "Unit definition information",
+    );
+    assert.strictEqual(group1("ja").columns?.[2]?.header, "ユニット種別");
+  });
+
   test("preserves schedule definition column ids and nesting order", () => {
     const columns = tableColumnDef("en", () => undefined, new Map());
     const scheduleGroup = columns.find(

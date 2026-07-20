@@ -17,7 +17,7 @@ import {
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import { useMyAppContext } from "../MyContexts";
-import { localeMap } from "../../../../domain/services/i18n/nls";
+import { unitInformationMessage } from "../unitInformationLocalization";
 import {
   SAVE,
   createOperationEvent,
@@ -73,7 +73,7 @@ export const formatUnitCountLabel = (
 ): string => `${visibleRowCount} / ${totalRowCount} units`;
 
 export const getAjsTableHeaderControlLabels = (lang: string) => ({
-  columns: localeMap("table.menu.menuItem1", lang),
+  columns: unitInformationMessage("table.menu.menuItem1", lang),
   copyCsv: "Copy the contents to clipbord as csv.",
   saveCsv: "Save the contents as csv.",
 });

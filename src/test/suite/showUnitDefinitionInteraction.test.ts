@@ -15,6 +15,7 @@ import {
   buildUnitListDetailChips,
   buildUnitListRelationshipRows,
   buildUnitListDetailRows,
+  getUnitListDetailSubtitle,
 } from "../../presentation/webview/editor/ajsTable/UnitListDetailPanel";
 import {
   createUnitListDetailResolver,
@@ -263,6 +264,12 @@ suite("Show Unit Definition interaction", () => {
         ["Waited for", false],
         ["Nested expandable", false],
       ],
+    );
+    assert.strictEqual(getUnitListDetailSubtitle(detail, "en"), "Unix job");
+    assert.strictEqual(getUnitListDetailSubtitle(detail, "ja"), "UNIXジョブ");
+    assert.strictEqual(
+      getUnitListDetailSubtitle(detail, "unsupported"),
+      "Unix job",
     );
   });
 

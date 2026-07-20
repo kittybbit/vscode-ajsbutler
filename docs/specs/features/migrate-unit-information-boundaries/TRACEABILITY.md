@@ -104,3 +104,35 @@
   sufficient and required no replanning or new dependency. The durable CSV use
   case already records the reusable contract, so no additional long-lived
   documentation or CHANGELOG entry is needed.
+
+## Slice 4 Implementation Evidence
+
+- Status: complete; implementation, required validation, final review, and
+  human completion approval are recorded.
+- Presentation localization boundary: `unitInformationLocalization.ts`
+  resolves messages, unit types, parameter descriptions, and structured table
+  column labels directly from existing resource data. Unit-list and
+  unit-definition presentation consumers use this adapter and presentation-
+  owned label types without importing the domain localization service or
+  `AjsType`.
+- Regression evidence: `unitInformationLocalization.test.ts`,
+  `ajsTableHeader.test.ts`, `tableColumnDef.test.ts`, and
+  `showUnitDefinitionInteraction.test.ts` cover English, Japanese, unsupported
+  locale, unknown key/type, group-type fallback, table headers, display-column
+  controls, parameter definitions, list-detail unit types, and definition
+  dialog labels.
+- Architecture evidence: all 25 exact allowances owned by
+  `migrate-unit-information-boundaries` were removed. The architecture suite
+  confirms zero direct domain imports from unit-information presentation, no
+  stale or duplicate allowance, and preserves the 25 flow-owned presentation
+  allowances plus two Node-boundary allowances for later features.
+- Validation result: `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run build`, and `rtk pnpm run qlty` passed on 2026-07-21.
+- Production evidence: localization remains a definition-size-independent,
+  browser-safe resource lookup with no new dependency or host API. Definition
+  actions and other unit-information telemetry code were unchanged. Production
+  build reported only the repository's existing bundle-size warnings.
+- Implementation feedback: the approved presentation-local adapter boundary
+  was sufficient and required no replanning. Existing use cases and architecture
+  guidance already describe the durable ownership, so no README, architecture,
+  or CHANGELOG update is needed.

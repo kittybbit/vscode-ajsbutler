@@ -2,7 +2,7 @@ import React, { JSX } from "react";
 import { CellContext, ColumnHelper } from "@tanstack/table-core";
 import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
-import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
+import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
 
 type PrimitiveType =
@@ -35,7 +35,7 @@ export type RowViewByPath = ReadonlyMap<string, UnitListRowView>;
 export type TableColumnHelper = ColumnHelper<UnitListRowView>;
 export type ColumnGroupContext = {
   columnHelper: TableColumnHelper;
-  labels: AjsTableColumnGroupLabels;
+  labels: UnitInformationColumnGroupLabels;
   rowViewByPath: RowViewByPath;
 };
 type ColumnCell<TValue> = (
@@ -71,7 +71,7 @@ type NestedColumnGroupOptions<TValue> = {
 
 export const columnGroupContext = (
   columnHelper: TableColumnHelper,
-  labels: AjsTableColumnGroupLabels,
+  labels: UnitInformationColumnGroupLabels,
   rowViewByPath: RowViewByPath,
 ): ColumnGroupContext => ({ columnHelper, labels, rowViewByPath });
 

@@ -4,14 +4,13 @@ import {
   ColumnHelper,
   GroupColumnDef,
 } from "@tanstack/table-core";
-import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
+import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
 import { arrayBoxCell, rowViewColumn } from "./common";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
-import { WeekSymbol } from "../../../../../domain/values/AjsType";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
 
-const weekSymbols: WeekSymbol[] = ["su", "mo", "tu", "we", "th", "fr", "sa"];
+const weekSymbols = ["su", "mo", "tu", "we", "th", "fr", "sa"] as const;
 const dateArrayCell = arrayBoxCell<string>();
 
 const weekCell = (props: CellContext<UnitListRowView, boolean | undefined>) => {
@@ -28,7 +27,7 @@ const weekCell = (props: CellContext<UnitListRowView, boolean | undefined>) => {
 
 const group6 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  labels: AjsTableColumnGroupLabels,
+  labels: UnitInformationColumnGroupLabels,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> => {
   const standardWeekLabels = labels.subgroup(1);

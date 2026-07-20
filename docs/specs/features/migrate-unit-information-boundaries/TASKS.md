@@ -4,8 +4,8 @@
 
 - Purpose: complete one normalized application boundary for unit list, CSV,
   and unit definition without changing visible behavior.
-- Approved or active slice: Slices 1-3 are complete; Slice 4 has implementation
-  approval and is active.
+- Approved or active slice: Slices 1-4 are complete; no implementation slice
+  remains active.
 - Implement in order: Definition DTO, Unit List projection, CSV contract, then
   presentation dependency closure.
 - Do not change columns, ordering, formatting, commands, copy/save behavior,
@@ -17,7 +17,7 @@
   cases.
 - Validate every code slice with `rtk pnpm run qlty` plus its risk-based checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement only Slice 4 with `sdd-implement-task`.
+- Next decision: run Feature Exit Review with `sdd-plan-task`.
 
 ## Plan Status
 
@@ -29,7 +29,8 @@
   blocking findings.
 - Human approval: received 2026-07-20 for the reviewed plan and all four slice
   approval boundaries.
-- Active implementation slice: Slice 4 approved and ready.
+- Active implementation slice: none; all approved slices are complete and the
+  feature awaits Feature Exit Review.
 
 ## Human Approval
 
@@ -349,7 +350,9 @@
 
 ### Slice 4: Close Unit-Information Presentation Dependencies
 
-- Status: Approved
+- Status: Complete
+- Completion approval: received 2026-07-21 through the user response
+  `approved.` after implementation, validation, and final review.
 - Scope: introduce focused presentation-local unit-information localization
   adapters and presentation-owned label value types backed directly by existing
   resource data. Application DTOs continue to expose semantic values and label
@@ -426,8 +429,7 @@
 - `TRACEABILITY.md` required: yes.
 - Reason: the feature spans three user-visible use cases, four slices, a shared
   serialized contract, compatibility evidence, and architecture allowances.
-- Status: implementation evidence is recorded for Slices 1-3 and remains
-  pending for Slice 4.
+- Status: implementation evidence is recorded for Slices 1-4.
 
 ## Cross-Slice Dependencies
 

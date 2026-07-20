@@ -24,7 +24,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import Switch from "@mui/material/Switch";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { useMyAppContext } from "../MyContexts";
-import { localeMap } from "../../../../domain/services/i18n/nls";
+import { unitInformationMessage } from "../unitInformationLocalization";
 
 type DisplayColumnSelectorProps = {
   table: ReactTable<UnitListRowView>;
@@ -63,6 +63,17 @@ export const createColumnVisibilityUpdate = (
   visible: boolean,
 ): VisibilityState =>
   Object.fromEntries(columnIds.map((columnId) => [columnId, visible]));
+
+export const getDisplayColumnSelectorControlLabels = (language: string) => ({
+  hideAll: unitInformationMessage(
+    "table.columnSelectSidebar.invisibleAll",
+    language,
+  ),
+  showAll: unitInformationMessage(
+    "table.columnSelectSidebar.visibleAll",
+    language,
+  ),
+});
 
 const toggleColumnVisibility = ({
   column,
@@ -207,6 +218,7 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
 }) => {
   console.log("render DisplayColumnSelector.");
   const { lang } = useMyAppContext();
+  const controlLabels = getDisplayColumnSelectorControlLabels(lang);
 
   const visibleColumns = useMemo(
     () => getVisibleColumnSelectorColumns(table),
@@ -248,27 +260,18 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
         >
           COLUMNS
         </Typography>
-        <Tooltip
-          arrow
-          title={localeMap("table.columnSelectSidebar.invisibleAll", lang)}
-        >
+        <Tooltip arrow title={controlLabels.hideAll}>
           <IconButton
-            aria-label={localeMap(
-              "table.columnSelectSidebar.invisibleAll",
-              lang,
-            )}
+            aria-label={controlLabels.hideAll}
             size="small"
             onClick={() => table.toggleAllColumnsVisible(false)}
           >
             <ToggleOff fontSize="small" color="disabled" />
           </IconButton>
         </Tooltip>
-        <Tooltip
-          arrow
-          title={localeMap("table.columnSelectSidebar.visibleAll", lang)}
-        >
+        <Tooltip arrow title={controlLabels.showAll}>
           <IconButton
-            aria-label={localeMap("table.columnSelectSidebar.visibleAll", lang)}
+            aria-label={controlLabels.showAll}
             size="small"
             onClick={() => table.toggleAllColumnsVisible(true)}
           >

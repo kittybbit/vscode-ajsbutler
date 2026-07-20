@@ -1,11 +1,11 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
-import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
+import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
 import { nestedColumnGroup } from "./common";
 
 const group9 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  labels: AjsTableColumnGroupLabels,
+  labels: UnitInformationColumnGroupLabels,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> =>
   nestedColumnGroup({

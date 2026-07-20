@@ -2,9 +2,9 @@
 import React from "react";
 import { CellContext, createColumnHelper } from "@tanstack/table-core";
 import {
-  ajsTableColumnLabels,
-  paramDefinitionLang,
-} from "../../../../domain/services/i18n/nls";
+  unitInformationParameterDefinitions,
+  unitInformationTableColumnLabels,
+} from "../unitInformationLocalization";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { AccessorType, box, columnGroupContext } from "./columnDefs/common";
 import group1 from "./columnDefs/group1";
@@ -52,9 +52,9 @@ export const tableColumnDef = (
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ) => {
   // column titles
-  const tableColumnLabels = ajsTableColumnLabels(language);
+  const tableColumnLabels = unitInformationTableColumnLabels(language);
   // paramter
-  const paramDefinition = paramDefinitionLang(language);
+  const paramDefinition = unitInformationParameterDefinitions(language);
 
   const columnHelper = createColumnHelper<UnitListRowView>();
 
