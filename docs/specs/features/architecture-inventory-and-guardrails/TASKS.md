@@ -3,14 +3,14 @@
 ## Agent Brief
 
 - Purpose: establish the complete dependency inventory and enforceable baseline.
-- Approved or active slice: Slices 1 and 2 are complete; Slice 3 is active.
+- Approved or active slice: all three slices are complete; Feature Exit remains.
 - Do not remove, relocate, or rewrite production dependencies.
 - Do not weaken existing checks or create broad/permanent exceptions.
 - Read first: `SPECS.md`, this file, and `docs/specs/architecture.md`.
 - Read `TRACEABILITY.md` for requirement, use-case, and downstream ownership.
 - Validate each slice as specified below; qlty is required for code slices.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement Slice 3 with `sdd-implement-task`.
+- Next decision: run Feature Exit Review with `sdd-plan-task`.
 
 ## Sync Rule
 
@@ -28,7 +28,7 @@
   rule baseline, temporary allowlist, and detection evidence.
 - Review status: reviewed and ready for approval; no blocking findings.
 - Human approval: approved for the full plan and all three slices.
-- Active implementation slice: Slice 3.
+- Active implementation slice: none; all approved slices are complete.
 
 ## Human Approval
 
@@ -149,7 +149,7 @@ Implementation may proceed one slice at a time in dependency order.
 
 ### Slice 3: Full Guardrail Baseline And Owned Temporary Allowlist
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Encode stable rule IDs for domain, application, presentation,
     infrastructure, bootstrap/composition, generated parser, raw model, legacy
@@ -262,20 +262,33 @@ Implementation may proceed one slice at a time in dependency order.
 - No Slice 2 feedback passes the Durable Documentation Gate. The inventory and
   handoff conditions remain feature-local inputs to Slice 3 and the downstream
   roadmap features.
+- Slice 3's boundary was appropriate. The full rule catalog, literal allowlist,
+  fixtures, and reconciliation stayed inside test support without production,
+  package, or configuration changes.
+- The exact production baseline is 150 entries. Grouping repeated ownership and
+  removal text while retaining literal source, target, import kind, and rule ID
+  keeps the fixture reviewable without weakening stale detection.
+- Restricting `ownerFeature` to the ten named downstream features prevents a
+  typo or invented owner from satisfying the typed allowlist contract.
+- No Slice 3 feedback passes the Durable Documentation Gate. The guardrail
+  mechanics and temporary debt remain feature-local until Feature Exit decides
+  what, if anything, belongs in durable architecture documentation.
 
 ## Feature Exit
 
-- Definition of Done status: not started.
+- Definition of Done status: implementation and validation complete; Feature
+  Exit Review is required before closure.
 - Durable documentation updates: none expected; roadmap and plans already carry
   the active sequence.
-- Open risks: incomplete collector coverage, ownerless findings, false-positive
-  rules, or non-expiring temporary entries block feature exit.
+- Open risks: the 150 exact entries remain intentional migration debt. Each is
+  owned and stale-checked, and final removal remains assigned to
+  `remove-legacy-and-enforce-clean-architecture`.
 
 ## Validation
 
 - [x] Slice 1 collector and current-rule tests pass.
 - [x] Slice 2 inventory and eleven use-case mappings are complete and reproducible.
-- [ ] Slice 3 full rules, violation fixtures, and exact allowlist tests pass.
-- [ ] `rtk pnpm test` passes for the final integrated plan.
-- [ ] `rtk pnpm run test:web` passes for final cross-host confidence.
-- [ ] `rtk pnpm run qlty`, Markdown lint, and diff check pass.
+- [x] Slice 3 full rules, violation fixtures, and exact allowlist tests pass.
+- [x] `rtk pnpm test` passes for the final integrated plan.
+- [x] `rtk pnpm run test:web` passes for final cross-host confidence.
+- [x] `rtk pnpm run qlty`, Markdown lint, and diff check pass.

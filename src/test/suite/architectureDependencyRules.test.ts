@@ -1,11 +1,19 @@
 import * as assert from "assert";
 import * as path from "path";
+import { dependencyAllowlist } from "../fixtures/architecture/dependencyAllowlist";
 import {
+  architectureRuleIds,
   collectImportReferencesFromSource,
   collectProductionImportReferences,
+  findArchitectureRuleViolations,
   findCurrentRuleViolations,
   formatViolation,
+  getDependencyTarget,
   resolveImportPath,
+  validateDependencyAllowlist,
+  type ArchitectureRuleId,
+  type DependencyAllowance,
+  type RuleViolation,
 } from "../support/architectureDependencyRules";
 
 const repoRoot = path.resolve(__dirname, "../../..");
@@ -135,4 +143,173 @@ suite("Architecture dependency rules", () => {
 
     assert.deepStrictEqual(violations.map(formatViolation), []);
   });
+
+  test("detects every architecture rule family with in-memory fixtures", () => {
+    const stableRuleIds = Object.values(architectureRuleIds);
+    assert.strictEqual(stableRuleIds.length, 12);
+    assert.strictEqual(new Set(stableRuleIds).size, stableRuleIds.length);
+
+    const fixtures: ReadonlyArray<{
+      ruleId: ArchitectureRuleId;
+      file: string;
+      source: string;
+    }> = [
+      {
+        ruleId: architectureRuleIds.domainOuterDependency,
+        file: "src/domain/example.ts",
+        source: 'import "../presentation/example";',
+      },
+      {
+        ruleId: architectureRuleIds.applicationOuterDependency,
+        file: "src/application/example.ts",
+        source: 'import "../infrastructure/example";',
+      },
+      {
+        ruleId: architectureRuleIds.presentationOuterImplementation,
+        file: "src/presentation/example.ts",
+        source: 'import "../infrastructure/example";',
+      },
+      {
+        ruleId: architectureRuleIds.infrastructureOuterDependency,
+        file: "src/infrastructure/example.ts",
+        source: 'import "../presentation/example";',
+      },
+      {
+        ruleId: architectureRuleIds.concreteInfrastructureOutsideComposition,
+        file: "src/shared/example.ts",
+        source: 'import "../infrastructure/example";',
+      },
+      {
+        ruleId: architectureRuleIds.generatedParserOutsideInfrastructure,
+        file: "src/application/example.ts",
+        source: 'import "@generate/parser/AjsParser";',
+      },
+      {
+        ruleId: architectureRuleIds.rawUnitOutsideParserNormalizer,
+        file: "src/application/example.ts",
+        source: 'import "../domain/values/Unit";',
+      },
+      {
+        ruleId: architectureRuleIds.legacyWrapperDependency,
+        file: "src/domain/example.ts",
+        source: 'import "./models/units/UnitEntity";',
+      },
+      {
+        ruleId: architectureRuleIds.presentationDomainDependency,
+        file: "src/presentation/example.ts",
+        source: 'import "../domain/example";',
+      },
+      {
+        ruleId: architectureRuleIds.hostFrameworkOutsidePresentation,
+        file: "src/application/example.ts",
+        source: 'import "react";',
+      },
+      {
+        ruleId: architectureRuleIds.nodeBuiltinBrowserBoundary,
+        file: "src/presentation/vscode/example.ts",
+        source: 'import "os";',
+      },
+      {
+        ruleId: architectureRuleIds.telemetrySdkOutsideAdapter,
+        file: "src/bootstrap/example.ts",
+        source: 'import "@vscode/extension-telemetry";',
+      },
+    ];
+
+    fixtures.forEach(({ ruleId, file, source }) => {
+      const violations = findArchitectureRuleViolations(
+        collectImportReferencesFromSource(file, source),
+      );
+      assert.ok(
+        violations.some((violation) => violation.ruleId === ruleId),
+        `${ruleId} must detect its representative violation`,
+      );
+    });
+  });
+
+  test("matches every production violation to one exact owned allowance", () => {
+    const violations = findArchitectureRuleViolations(
+      collectProductionImportReferences(repoRoot),
+    );
+    const violationsByRule = violations.reduce<Record<string, number>>(
+      (counts, { ruleId }) => ({
+        ...counts,
+        [ruleId]: (counts[ruleId] ?? 0) + 1,
+      }),
+      {},
+    );
+
+    assert.deepStrictEqual(violationsByRule, {
+      [architectureRuleIds.rawUnitOutsideParserNormalizer]: 5,
+      [architectureRuleIds.legacyWrapperDependency]: 86,
+      [architectureRuleIds.nodeBuiltinBrowserBoundary]: 2,
+      [architectureRuleIds.presentationDomainDependency]: 57,
+    });
+    assert.strictEqual(dependencyAllowlist.length, 150);
+    assert.deepStrictEqual(
+      validateDependencyAllowlist(violations, dependencyAllowlist),
+      [],
+    );
+  });
+
+  test("rejects unexplained, stale, duplicate, incomplete, and wildcard entries", () => {
+    const [violation] = findArchitectureRuleViolations(
+      collectImportReferencesFromSource(
+        "src/application/example.ts",
+        'import "../domain/values/Unit";',
+      ),
+    );
+    assert.ok(violation);
+    const allowance = allowanceFor(violation);
+
+    assertIssue(validateDependencyAllowlist([violation], []), "unexplained");
+    assertIssue(validateDependencyAllowlist([], [allowance]), "stale");
+    assertIssue(
+      validateDependencyAllowlist([violation], [allowance, allowance]),
+      "duplicate",
+    );
+    assertIssue(
+      validateDependencyAllowlist(
+        [violation],
+        [
+          {
+            ...allowance,
+            ownerFeature: "" as DependencyAllowance["ownerFeature"],
+            removalCondition: "",
+          },
+        ],
+      ),
+      "missing",
+    );
+    assertIssue(
+      validateDependencyAllowlist(
+        [violation],
+        [{ ...allowance, source: "src/application/*" }],
+      ),
+      "wildcards",
+    );
+    assertIssue(
+      validateDependencyAllowlist(
+        [violation],
+        [{ ...allowance, kind: "import-type" }],
+      ),
+      "stale",
+    );
+  });
 });
+
+const allowanceFor = (violation: RuleViolation): DependencyAllowance => ({
+  source: violation.file,
+  target: getDependencyTarget(violation),
+  kind: violation.kind,
+  ruleId: violation.ruleId,
+  ownerFeature: "isolate-parser-boundary",
+  removalCondition: "Remove the exact dependency.",
+});
+
+const assertIssue = (issues: readonly string[], expected: string): void => {
+  assert.ok(
+    issues.some((issue) => issue.startsWith(expected)),
+    `expected ${expected} issue, received:\n${issues.join("\n")}`,
+  );
+};

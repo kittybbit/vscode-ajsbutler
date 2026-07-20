@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { builtinModules } from "module";
 import * as path from "path";
 import * as ts from "typescript";
 
@@ -18,8 +19,53 @@ export type ImportReference = {
   kind: ImportReferenceKind;
 };
 
+export const architectureRuleIds = {
+  domainOuterDependency: "domain-outer-dependency",
+  applicationOuterDependency: "application-outer-dependency",
+  presentationOuterImplementation: "presentation-outer-implementation",
+  infrastructureOuterDependency: "infrastructure-outer-dependency",
+  concreteInfrastructureOutsideComposition:
+    "concrete-infrastructure-outside-composition",
+  generatedParserOutsideInfrastructure:
+    "generated-parser-outside-infrastructure",
+  rawUnitOutsideParserNormalizer: "raw-unit-outside-parser-normalizer",
+  legacyWrapperDependency: "legacy-wrapper-dependency",
+  presentationDomainDependency: "presentation-domain-dependency",
+  hostFrameworkOutsidePresentation: "host-framework-outside-presentation",
+  nodeBuiltinBrowserBoundary: "node-builtin-browser-boundary",
+  telemetrySdkOutsideAdapter: "telemetry-sdk-outside-adapter",
+} as const;
+
+export type ArchitectureRuleId =
+  (typeof architectureRuleIds)[keyof typeof architectureRuleIds];
+
+export const downstreamFeatureOwners = [
+  "isolate-parser-boundary",
+  "complete-normalized-domain-model",
+  "migrate-unit-information-boundaries",
+  "migrate-flow-graph-and-navigation-boundaries",
+  "migrate-diagnostics-and-hover-boundaries",
+  "complete-webapi-infrastructure-boundaries",
+  "migrate-semantic-diff-and-report-boundaries",
+  "isolate-telemetry-adapter-boundary",
+  "standardize-serialization-and-composition-root",
+  "remove-legacy-and-enforce-clean-architecture",
+] as const;
+
+export type DownstreamFeatureOwner = (typeof downstreamFeatureOwners)[number];
+
 export type RuleViolation = ImportReference & {
+  ruleId: ArchitectureRuleId;
   rule: string;
+};
+
+export type DependencyAllowance = {
+  source: string;
+  target: string;
+  kind: ImportReferenceKind;
+  ruleId: ArchitectureRuleId;
+  ownerFeature: DownstreamFeatureOwner;
+  removalCondition: string;
 };
 
 const productionSourceDirs = [
@@ -200,70 +246,307 @@ export const collectProductionImportReferences = (
 const startsWithAny = (value: string, prefixes: readonly string[]): boolean =>
   prefixes.some((prefix) => value === prefix || value.startsWith(`${prefix}/`));
 
-const isForbiddenDomainImport = (reference: ImportReference): boolean => {
-  const resolvedPath = reference.resolvedPath ?? reference.specifier;
-  return (
-    reference.specifier === "vscode" ||
-    reference.specifier === "react" ||
-    reference.specifier.startsWith("@mui/") ||
-    reference.specifier.startsWith("@xyflow/") ||
-    startsWithAny(resolvedPath, [
-      "src/presentation/webview",
-      "src/generate/parser",
-    ])
-  );
+export const getDependencyTarget = (reference: ImportReference): string =>
+  reference.resolvedPath ?? reference.specifier;
+
+const ruleMessages: Record<ArchitectureRuleId, string> = {
+  [architectureRuleIds.domainOuterDependency]:
+    "domain must not import an outer layer or host framework",
+  [architectureRuleIds.applicationOuterDependency]:
+    "application must not import infrastructure, presentation, or bootstrap",
+  [architectureRuleIds.presentationOuterImplementation]:
+    "presentation must not import infrastructure or bootstrap",
+  [architectureRuleIds.infrastructureOuterDependency]:
+    "infrastructure must not import presentation or bootstrap",
+  [architectureRuleIds.concreteInfrastructureOutsideComposition]:
+    "concrete infrastructure must be referenced only by infrastructure or bootstrap",
+  [architectureRuleIds.generatedParserOutsideInfrastructure]:
+    "generated parser and ANTLR runtime must remain in parser infrastructure",
+  [architectureRuleIds.rawUnitOutsideParserNormalizer]:
+    "raw Unit must remain inside the parser and normalizer seam",
+  [architectureRuleIds.legacyWrapperDependency]:
+    "legacy unit wrappers are temporary normalized-model migration dependencies",
+  [architectureRuleIds.presentationDomainDependency]:
+    "presentation must consume application DTOs instead of domain objects",
+  [architectureRuleIds.hostFrameworkOutsidePresentation]:
+    "host and UI frameworks must remain in an allowed outer adapter",
+  [architectureRuleIds.nodeBuiltinBrowserBoundary]:
+    "Node built-ins in extension paths require an explicit browser-safe boundary",
+  [architectureRuleIds.telemetrySdkOutsideAdapter]:
+    "the telemetry SDK must remain inside its infrastructure adapter",
 };
 
-const isApplicationBoundaryImport = (reference: ImportReference): boolean =>
-  reference.resolvedPath
-    ? startsWithAny(reference.resolvedPath, [
-        "src/presentation",
+const layerOf = (file: string): string | undefined => {
+  const match = /^src\/([^/]+)\//.exec(file);
+  return match?.[1];
+};
+
+const isLayerTarget = (
+  reference: ImportReference,
+  layers: readonly string[],
+): boolean => {
+  const targetLayer = reference.resolvedPath
+    ? layerOf(reference.resolvedPath)
+    : undefined;
+  return targetLayer ? layers.includes(targetLayer) : false;
+};
+
+const isGeneratedParserDependency = (reference: ImportReference): boolean =>
+  startsWithAny(getDependencyTarget(reference), ["src/generate/parser"]) ||
+  reference.specifier === "antlr4ts" ||
+  reference.specifier.startsWith("antlr4ts/");
+
+const isRawUnitDependency = (reference: ImportReference): boolean =>
+  getDependencyTarget(reference) === "src/domain/values/Unit";
+
+const isAllowedRawUnitSource = (file: string): boolean =>
+  file.startsWith("src/domain/models/ajs/normalize/") ||
+  file === "src/domain/models/ajs/normalizeAjsDocument.ts" ||
+  file.startsWith("src/infrastructure/parser/");
+
+const isLegacyWrapperDependency = (reference: ImportReference): boolean =>
+  startsWithAny(getDependencyTarget(reference), ["src/domain/models/units"]);
+
+const isHostFrameworkDependency = (specifier: string): boolean =>
+  specifier === "vscode" ||
+  specifier === "react" ||
+  specifier.startsWith("react-") ||
+  specifier.startsWith("@mui/") ||
+  specifier.startsWith("@xyflow/") ||
+  specifier.startsWith("@tanstack/") ||
+  specifier === "classnames";
+
+const nodeBuiltins = new Set(
+  builtinModules
+    .map((specifier) => specifier.replace(/^node:/, ""))
+    .concat("process"),
+);
+
+const isNodeBuiltinDependency = (specifier: string): boolean =>
+  nodeBuiltins.has(specifier.replace(/^node:/, ""));
+
+const isAllowedHostFrameworkSource = (reference: ImportReference): boolean => {
+  if (reference.specifier === "vscode") {
+    return (
+      reference.file === "src/extension.ts" ||
+      startsWithAny(reference.file, [
+        "src/bootstrap",
         "src/infrastructure",
+        "src/presentation/vscode",
       ])
-    : false;
-
-const isPresentationParserImport = (reference: ImportReference): boolean => {
-  const resolvedPath = reference.resolvedPath ?? reference.specifier;
-  return startsWithAny(resolvedPath, ["src/generate/parser"]);
+    );
+  }
+  return reference.file.startsWith("src/presentation/webview/");
 };
 
-export const findCurrentRuleViolations = (
+const addViolation = (
+  violations: RuleViolation[],
+  reference: ImportReference,
+  ruleId: ArchitectureRuleId,
+): void => {
+  violations.push({ ...reference, ruleId, rule: ruleMessages[ruleId] });
+};
+
+export const findArchitectureRuleViolations = (
   references: readonly ImportReference[],
 ): RuleViolation[] =>
   references.flatMap((reference) => {
     const violations: RuleViolation[] = [];
+    const sourceLayer = layerOf(reference.file);
+
     if (
-      reference.file.startsWith("src/domain/") &&
-      isForbiddenDomainImport(reference)
+      sourceLayer === "domain" &&
+      (isLayerTarget(reference, [
+        "application",
+        "infrastructure",
+        "presentation",
+        "bootstrap",
+      ]) ||
+        isHostFrameworkDependency(reference.specifier))
     ) {
-      violations.push({
-        ...reference,
-        rule: "domain must not import presentation/webview, parser, vscode, React, MUI, or XyFlow",
-      });
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.domainOuterDependency,
+      );
     }
     if (
-      reference.file.startsWith("src/application/") &&
-      isApplicationBoundaryImport(reference)
+      sourceLayer === "application" &&
+      isLayerTarget(reference, ["infrastructure", "presentation", "bootstrap"])
     ) {
-      violations.push({
-        ...reference,
-        rule: "application must not import presentation or infrastructure",
-      });
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.applicationOuterDependency,
+      );
     }
     if (
-      reference.file.startsWith("src/presentation/") &&
-      isPresentationParserImport(reference)
+      sourceLayer === "presentation" &&
+      isLayerTarget(reference, ["infrastructure", "bootstrap"])
     ) {
-      violations.push({
-        ...reference,
-        rule: "presentation must not import generated parser modules directly",
-      });
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.presentationOuterImplementation,
+      );
     }
+    if (
+      sourceLayer === "infrastructure" &&
+      isLayerTarget(reference, ["presentation", "bootstrap"])
+    ) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.infrastructureOuterDependency,
+      );
+    }
+    if (
+      isLayerTarget(reference, ["infrastructure"]) &&
+      sourceLayer !== "infrastructure" &&
+      sourceLayer !== "bootstrap"
+    ) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.concreteInfrastructureOutsideComposition,
+      );
+    }
+    if (
+      isGeneratedParserDependency(reference) &&
+      !reference.file.startsWith("src/infrastructure/parser/")
+    ) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.generatedParserOutsideInfrastructure,
+      );
+    }
+    if (
+      isRawUnitDependency(reference) &&
+      !isAllowedRawUnitSource(reference.file)
+    ) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.rawUnitOutsideParserNormalizer,
+      );
+    }
+    if (isLegacyWrapperDependency(reference)) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.legacyWrapperDependency,
+      );
+    }
+    if (
+      sourceLayer === "presentation" &&
+      isLayerTarget(reference, ["domain"])
+    ) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.presentationDomainDependency,
+      );
+    }
+    if (
+      isHostFrameworkDependency(reference.specifier) &&
+      !isAllowedHostFrameworkSource(reference)
+    ) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.hostFrameworkOutsidePresentation,
+      );
+    }
+    if (isNodeBuiltinDependency(reference.specifier)) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.nodeBuiltinBrowserBoundary,
+      );
+    }
+    if (
+      reference.specifier === "@vscode/extension-telemetry" &&
+      reference.file !==
+        "src/infrastructure/telemetry/VscodeTelemetryAdapter.ts"
+    ) {
+      addViolation(
+        violations,
+        reference,
+        architectureRuleIds.telemetrySdkOutsideAdapter,
+      );
+    }
+
     return violations;
   });
+
+export const findCurrentRuleViolations = (
+  references: readonly ImportReference[],
+): RuleViolation[] => {
+  const currentRuleIds = new Set<ArchitectureRuleId>([
+    architectureRuleIds.domainOuterDependency,
+    architectureRuleIds.applicationOuterDependency,
+    architectureRuleIds.generatedParserOutsideInfrastructure,
+  ]);
+  return findArchitectureRuleViolations(references).filter(({ ruleId }) =>
+    currentRuleIds.has(ruleId),
+  );
+};
+
+const violationKey = (violation: RuleViolation): string =>
+  [
+    violation.file,
+    getDependencyTarget(violation),
+    violation.kind,
+    violation.ruleId,
+  ].join("\0");
+
+const allowanceKey = ({
+  source,
+  target,
+  kind,
+  ruleId,
+}: DependencyAllowance): string => [source, target, kind, ruleId].join("\0");
+
+export const validateDependencyAllowlist = (
+  violations: readonly RuleViolation[],
+  allowances: readonly DependencyAllowance[],
+): string[] => {
+  const issues: string[] = [];
+  const violationKeys = new Set(violations.map(violationKey));
+  const allowanceKeys = new Set<string>();
+
+  allowances.forEach((allowance) => {
+    const key = allowanceKey(allowance);
+    if (allowanceKeys.has(key)) {
+      issues.push(`duplicate allowlist entry: ${key}`);
+    }
+    allowanceKeys.add(key);
+    if (!allowance.ownerFeature.trim() || !allowance.removalCondition.trim()) {
+      issues.push(`missing allowlist ownership or removal condition: ${key}`);
+    }
+    if (/[?*]/.test(`${allowance.source}\0${allowance.target}`)) {
+      issues.push(`wildcards are forbidden in allowlist entries: ${key}`);
+    }
+    if (!violationKeys.has(key)) {
+      issues.push(`stale allowlist entry: ${key}`);
+    }
+  });
+
+  violations.forEach((violation) => {
+    const key = violationKey(violation);
+    if (!allowanceKeys.has(key)) {
+      issues.push(`unexplained architecture violation: ${key}`);
+    }
+  });
+
+  return issues.sort((left, right) => left.localeCompare(right));
+};
 
 export const formatViolation = ({
   file,
   specifier,
+  ruleId,
   rule,
-}: RuleViolation): string => `${file} imports ${specifier} (${rule})`;
+}: RuleViolation): string =>
+  `${file} imports ${specifier} [${ruleId}] (${rule})`;

@@ -8,9 +8,9 @@
 | Current rules        | R4     | Requirements   | S1    | Passed             |
 | Dependency inventory | R1/R2  | Requirements   | S2    | Passed             |
 | Use-case inventory   | R3/AC1 | Req/Acceptance | S2    | Passed             |
-| Rule catalog         | R4/AC2 | Req/Acceptance | S3    | Violation fixtures |
-| Temporary entries    | R5/AC3 | Req/Acceptance | S3    | Exact/stale checks |
-| Host coverage        | AC1    | Compatibility  | S2/S3 | Map passed; smoke  |
+| Rule catalog         | R4/AC2 | Req/Acceptance | S3    | Passed             |
+| Temporary entries    | R5/AC3 | Req/Acceptance | S3    | Passed             |
+| Host coverage        | AC1    | Compatibility  | S2/S3 | Map/smoke passed   |
 
 Slice 1 evidence:
 
@@ -447,10 +447,49 @@ pipelines without changing that ownership.
 - `remove-legacy-and-enforce-clean-architecture` owns final allowlist removal.
   Exit requires an empty allowlist and full guardrail pass.
 
-## Slice 3 Inputs
+## Slice 3 Guardrail Baseline
 
-Slice 3 must encode stable rule IDs and an exact allowlist for only the
-**migration** and **compatibility risk** references above. Legitimate imports
-are rule-positive fixtures or permitted boundary predicates, never allowlist
-entries. Every exact entry must carry its primary owner and the removal or
-retention condition stated here; deleted matches must fail as stale.
+`architectureRuleIds` defines these 12 stable rule IDs:
+
+- `domain-outer-dependency`
+- `application-outer-dependency`
+- `presentation-outer-implementation`
+- `infrastructure-outer-dependency`
+- `concrete-infrastructure-outside-composition`
+- `generated-parser-outside-infrastructure`
+- `raw-unit-outside-parser-normalizer`
+- `legacy-wrapper-dependency`
+- `presentation-domain-dependency`
+- `host-framework-outside-presentation`
+- `node-builtin-browser-boundary`
+- `telemetry-sdk-outside-adapter`
+
+In-memory fixtures prove every rule family detects a representative violation.
+The pre-existing high-value checks remain as a filtered view of the same full
+catalog and still report zero production violations.
+
+The exact typed allowlist contains 150 literal source/target/kind/rule entries:
+
+- 5 raw-`Unit` entries owned by `isolate-parser-boundary`.
+- 86 wrapper entries owned by `complete-normalized-domain-model`.
+- 25 flow/navigation presentation entries owned by
+  `migrate-flow-graph-and-navigation-boundaries`.
+- 32 list/CSV/definition presentation entries owned by
+  `migrate-unit-information-boundaries`.
+- 2 Node/browser entries owned by
+  `standardize-serialization-and-composition-root`.
+
+Owners are restricted to the ten named downstream features by a TypeScript
+union. Validation rejects unexplained violations, stale or duplicate entries,
+missing ownership/removal conditions, wildcard paths, and import-kind drift.
+Legitimate dependencies use explicit permitted-boundary predicates and are not
+allowlisted.
+
+Slice 3 validation evidence:
+
+- Production reconciliation: 150 violations, 150 exact allowances, zero
+  unexplained or stale entries.
+- `rtk pnpm test` passed the desktop build, test compilation, architecture
+  checks, and complete desktop suite.
+- `rtk pnpm run test:web` passed the web build and browser smoke suite.
+- `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and `git diff --check` passed.

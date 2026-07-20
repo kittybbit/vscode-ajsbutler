@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement Slice 3 of `architecture-inventory-and-guardrails` by encoding the
-   full rule baseline and exact owned temporary allowlist.
+1. Run Feature Exit Review for `architecture-inventory-and-guardrails`; all
+   approved implementation slices and required validation are complete.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
@@ -44,7 +44,7 @@ rules in `docs/specs/README.md`, not in this file.
 ## Active Feature Specs
 
 - `docs/specs/features/architecture-inventory-and-guardrails/`: active roadmap
-  feature with Slices 1 and 2 complete and Slice 3 active.
+  feature with all three slices complete and Feature Exit Review pending.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
