@@ -4,8 +4,8 @@
 
 - Purpose: complete one normalized application boundary for unit list, CSV,
   and unit definition without changing visible behavior.
-- Approved or active slice: Slices 1-2 are complete; Slices 3-4 have
-  implementation approval and Slice 3 is active.
+- Approved or active slice: Slices 1-3 are complete; Slice 4 has implementation
+  approval and is active.
 - Implement in order: Definition DTO, Unit List projection, CSV contract, then
   presentation dependency closure.
 - Do not change columns, ordering, formatting, commands, copy/save behavior,
@@ -17,7 +17,7 @@
   cases.
 - Validate every code slice with `rtk pnpm run qlty` plus its risk-based checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement only Slice 3 with `sdd-implement-task`.
+- Next decision: implement only Slice 4 with `sdd-implement-task`.
 
 ## Plan Status
 
@@ -29,7 +29,7 @@
   blocking findings.
 - Human approval: received 2026-07-20 for the reviewed plan and all four slice
   approval boundaries.
-- Active implementation slice: Slice 3 approved and ready.
+- Active implementation slice: Slice 4 approved and ready.
 
 ## Human Approval
 
@@ -282,7 +282,9 @@
 
 ### Slice 3: Stabilize The Plain CSV Export Contract
 
-- Status: Approved
+- Status: Complete
+- Completion approval: received 2026-07-21 through the user response
+  `approved.` after implementation, validation, and final review.
 - Scope: replace the callback-bearing generic CSV input with an explicit plain
   visible-row/visible-column value contract derived from Slice 2 rows. Keep
   TanStack visibility, ordering, header extraction, and cell stringification in
@@ -424,8 +426,8 @@
 - `TRACEABILITY.md` required: yes.
 - Reason: the feature spans three user-visible use cases, four slices, a shared
   serialized contract, compatibility evidence, and architecture allowances.
-- Status: implementation evidence is recorded for Slices 1-2 and remains
-  pending for Slices 3-4.
+- Status: implementation evidence is recorded for Slices 1-3 and remains
+  pending for Slice 4.
 
 ## Cross-Slice Dependencies
 

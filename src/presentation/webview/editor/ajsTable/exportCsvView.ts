@@ -1,7 +1,7 @@
 import type { Column, Table } from "@tanstack/table-core";
 import {
-  type ExportUnitListCsvColumnInput,
-  exportUnitListCsvRows,
+  type ExportUnitListCsvInput,
+  exportUnitListCsv,
 } from "../../../../application/unit-list/exportUnitListCsv";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import type { AccessorType } from "./columnDefs/common";
@@ -44,16 +44,19 @@ const toHeaderRows = (table: Table<UnitListRowView>): string[][] =>
 const getColumnAccessor = (column: Column<UnitListRowView, unknown>) =>
   (column.columnDef as ExportableColumnDef).accessorFn;
 
-const toExportColumn = (
-  column: Column<UnitListRowView, unknown>,
-): ExportUnitListCsvColumnInput<UnitListRowView> => ({
-  value: (row, rowIndex) =>
-    toCellString(getColumnAccessor(column)?.(row, rowIndex)),
-});
+export const toExportUnitListCsvInput = (
+  table: Table<UnitListRowView>,
+): ExportUnitListCsvInput => {
+  const visibleColumns = table.getVisibleLeafColumns().slice(1);
+  return {
+    headerRows: toHeaderRows(table),
+    rows: table.getRowModel().rows.map((row, rowIndex) => ({
+      values: visibleColumns.map((column) =>
+        toCellString(getColumnAccessor(column)?.(row.original, rowIndex)),
+      ),
+    })),
+  };
+};
 
 export const exportCsvView = (table: Table<UnitListRowView>): string =>
-  exportUnitListCsvRows({
-    headerRows: toHeaderRows(table),
-    rows: table.getRowModel().rows.map((row) => row.original),
-    columns: table.getVisibleLeafColumns().slice(1).map(toExportColumn),
-  });
+  exportUnitListCsv(toExportUnitListCsvInput(table));

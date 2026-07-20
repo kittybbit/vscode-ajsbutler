@@ -9,6 +9,23 @@ suite("Viewer action telemetry", () => {
     assert.deepStrictEqual(
       createViewerActionEvent({
         viewType: "ajsbutler.tableViewer",
+        operation: "copy.csv",
+        host: "web",
+      }),
+      {
+        name: "viewer.table.csv_copied",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "web",
+          view: "table",
+          result: "success",
+        },
+      },
+    );
+
+    assert.deepStrictEqual(
+      createViewerActionEvent({
+        viewType: "ajsbutler.tableViewer",
         operation: "save.csv",
         host: "desktop",
       }),

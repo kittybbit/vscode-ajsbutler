@@ -1,14 +1,39 @@
 import * as assert from "assert";
 import { Table } from "@tanstack/table-core";
-import { UnitListRowView } from "../../application/unit-list/buildUnitListView";
-import { exportCsvView } from "../../presentation/webview/editor/ajsTable/exportCsvView";
+import {
+  buildUnitListProjection,
+  UnitListRowView,
+} from "../../application/unit-list/buildUnitListView";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
+import {
+  exportCsvView,
+  toExportUnitListCsvInput,
+} from "../../presentation/webview/editor/ajsTable/exportCsvView";
 
 suite("Export CSV View", () => {
-  test("exports table cells from UnitListRowView data without changing CSV output", () => {
-    const row = {
-      id: "job-id",
-      absolutePath: "/root/job",
-    } as UnitListRowView;
+  test("exports visible reordered Slice 2 row values for copy and save", () => {
+    const document: AjsDocument = {
+      rootUnits: [
+        {
+          id: "job-id",
+          name: "job",
+          unitAttribute: "job,,jp1admin,",
+          unitType: "j",
+          absolutePath: "/job",
+          depth: 0,
+          isRoot: true,
+          isRootJobnet: false,
+          hasSchedule: false,
+          hasWaitedFor: false,
+          layout: { h: 0, v: 0 },
+          parameters: [{ key: "ty", value: "j" }],
+          relations: [],
+          children: [],
+        },
+      ],
+      warnings: [],
+    };
+    const row = buildUnitListProjection(document).rows[0];
     const table = {
       getHeaderGroups: () => [
         {
@@ -21,12 +46,17 @@ suite("Export CSV View", () => {
             {
               colSpan: 1,
               isPlaceholder: false,
+              column: { columnDef: { header: "Flags" } },
+            },
+            {
+              colSpan: 1,
+              isPlaceholder: false,
               column: { columnDef: { header: "Command" } },
             },
             {
               colSpan: 1,
               isPlaceholder: false,
-              column: { columnDef: { header: "Flags" } },
+              column: { columnDef: { header: "Empty" } },
             },
             {
               colSpan: 2,
@@ -42,14 +72,20 @@ suite("Export CSV View", () => {
         },
         {
           columnDef: {
-            header: "Command",
-            accessorFn: () => "line1\nline2",
+            header: "Flags",
+            accessorFn: () => ["one", "two"],
           },
         },
         {
           columnDef: {
-            header: "Flags",
-            accessorFn: () => ["one", "two"],
+            header: "Command",
+            accessorFn: (unit: UnitListRowView) => `${unit.group1.name}\nline2`,
+          },
+        },
+        {
+          columnDef: {
+            header: "Empty",
+            accessorFn: () => undefined,
           },
         },
       ],
@@ -62,11 +98,19 @@ suite("Export CSV View", () => {
       }),
     } as Table<UnitListRowView>;
 
-    const csv = exportCsvView(table);
+    const input = toExportUnitListCsvInput(table);
+    const copyCsv = exportCsvView(table);
+    const saveCsv = exportCsvView(table);
 
+    assert.deepStrictEqual(input, {
+      headerRows: [["#", "Flags", "Command", "Empty", "", ""]],
+      rows: [{ values: ["one\ntwo", "job\nline2", ""] }],
+    });
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(input)), input);
     assert.strictEqual(
-      csv,
-      '"#","Command","Flags","",""\n"1","line1\nline2","one\ntwo"',
+      copyCsv,
+      '"#","Flags","Command","Empty","",""\n"1","one\ntwo","job\nline2",""',
     );
+    assert.strictEqual(saveCsv, copyCsv);
   });
 });

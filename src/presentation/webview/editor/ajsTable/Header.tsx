@@ -104,6 +104,17 @@ export const getAjsTableSearchHelperText = (
     tableHeaderSearchLabels.helperText,
   );
 
+export const createCsvExportPerformanceEvent = (
+  durationMs: number,
+  rowCount: number,
+) =>
+  createPerformanceEvent({
+    operation: "csv_export",
+    result: "success",
+    durationBucket: toDurationBucket(durationMs),
+    rowCountBucket: toCountBucket(rowCount),
+  });
+
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   searchedAbsolutePath,
   searchResultPosition,
@@ -144,12 +155,10 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
     const startedAt = performance.now();
     const csv = exportCsvView(table);
     window.vscode.postMessage(
-      createPerformanceEvent({
-        operation: "csv_export",
-        result: "success",
-        durationBucket: toDurationBucket(performance.now() - startedAt),
-        rowCountBucket: toCountBucket(table.getRowModel().rows.length),
-      }),
+      createCsvExportPerformanceEvent(
+        performance.now() - startedAt,
+        table.getRowModel().rows.length,
+      ),
     );
     return csv;
   }, [table]);

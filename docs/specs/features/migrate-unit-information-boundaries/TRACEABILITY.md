@@ -75,3 +75,32 @@
   `rtk pnpm run build`, and `rtk pnpm run qlty` passed on 2026-07-20.
 - Build note: production build reported only the repository's existing bundle
   size warnings; no new build error or compatibility change was found.
+
+## Slice 3 Implementation Evidence
+
+- Status: complete; implementation, required validation, final review, and
+  human completion approval are recorded.
+- CSV contract: `exportUnitListCsv` accepts only plain header rows and visible
+  row values. The application use case owns one-based numbering, quoting,
+  escaping, and CSV assembly; `toExportUnitListCsvInput` keeps TanStack column
+  visibility/order, header extraction, accessor evaluation, and cell
+  stringification in presentation.
+- Regression evidence: `exportUnitListCsv.test.ts` covers ordering, numbering,
+  quotes, multiline and empty values, empty/header-only output, and a generated
+  500-row by 20-column export. `exportCsvView.test.ts` covers Slice 2 rows,
+  visible reordered columns, placeholders, arrays, undefined values, JSON
+  round-trip, and identical copy/save pipeline output.
+- Telemetry evidence: `csvExportTelemetry.test.ts`,
+  `viewerMessageRouting.test.ts`, and `viewerActionTelemetry.test.ts` preserve
+  `csv_export`, `copy.csv`, and `save.csv` event names, properties, buckets,
+  routing, and existing emission points without adding content or path data.
+- Validation result: `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run build`, and `rtk pnpm run qlty` passed on 2026-07-21.
+- Production evidence: processing and memory remain proportional to visible
+  rows and columns with no domain-tree traversal; the shared implementation
+  introduces no Node-only API or dependency. Production build reported only
+  the repository's existing bundle-size warnings.
+- Implementation feedback: the approved adapter/use-case boundary was
+  sufficient and required no replanning or new dependency. The durable CSV use
+  case already records the reusable contract, so no additional long-lived
+  documentation or CHANGELOG entry is needed.
