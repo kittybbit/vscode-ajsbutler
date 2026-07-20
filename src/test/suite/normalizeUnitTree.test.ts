@@ -1,7 +1,7 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { AjsNormalizationWarning } from "../../domain/models/ajs/AjsDocument";
-import { normalizeUnitTree } from "../../domain/models/ajs/normalize/unitTree";
+import { normalizeUnitTree } from "../../infrastructure/parser/normalization/normalize/unitTree";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -31,7 +31,7 @@ unit=root,,jp1admin,;
 
 suite("Normalize unit tree helpers", () => {
   test("normalizes a unit tree recursively", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const warnings: AjsNormalizationWarning[] = [];

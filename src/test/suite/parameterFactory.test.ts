@@ -8,7 +8,7 @@ import { Htpj } from "../../domain/models/units/Htpj";
 import { N } from "../../domain/models/units/N";
 import { Qj, Rq } from "../../domain/models/units/Qj";
 import { Tmwj } from "../../domain/models/units/Tmwj";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
 const definition = `
@@ -374,21 +374,21 @@ unit=root,,jp1admin,;
 `;
 
 const parseJob = (): J => {
-  const result = parseAjs(definition);
+  const result = parseRawAjsForTest(definition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
 };
 
 const parseArrayJob = (): J => {
-  const result = parseAjs(arrayDefinition);
+  const result = parseRawAjsForTest(arrayDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
 };
 
 const parseInheritedJobnet = (): N => {
-  const result = parseAjs(inheritedDefinition);
+  const result = parseRawAjsForTest(inheritedDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   const jobnet = root.children[0] as N;
@@ -396,49 +396,49 @@ const parseInheritedJobnet = (): N => {
 };
 
 const parseScheduleJobnet = (): N => {
-  const result = parseAjs(scheduleDefinition);
+  const result = parseRawAjsForTest(scheduleDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
 };
 
 const parseScheduleDefaultJobnet = (): N => {
-  const result = parseAjs(scheduleDefaultDefinition);
+  const result = parseRawAjsForTest(scheduleDefaultDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
 };
 
 const parseExplicitRuleOneScheduleJobnet = (): N => {
-  const result = parseAjs(explicitRuleOneScheduleDefinition);
+  const result = parseRawAjsForTest(explicitRuleOneScheduleDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
 };
 
 const parseUndefinedScheduleJobnet = (): N => {
-  const result = parseAjs(undefinedScheduleDefinition);
+  const result = parseRawAjsForTest(undefinedScheduleDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
 };
 
 const parseScheduleRelativeTimeJobnet = (): N => {
-  const result = parseAjs(scheduleRelativeTimeDefinition);
+  const result = parseRawAjsForTest(scheduleRelativeTimeDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
 };
 
 const parseScheduleWaitPairingJobnet = (): N => {
-  const result = parseAjs(scheduleWaitPairingDefinition);
+  const result = parseRawAjsForTest(scheduleWaitPairingDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
 };
 
 const parseNestedScheduleJobnets = (): { jobnet: N; subnet: N } => {
-  const result = parseAjs(nestedScheduleDefinition);
+  const result = parseRawAjsForTest(nestedScheduleDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   const jobnet = root.children[0] as N;
@@ -447,27 +447,27 @@ const parseNestedScheduleJobnets = (): { jobnet: N; subnet: N } => {
 };
 
 const parseRootDefaultJobnet = (): N => {
-  const result = parseAjs(rootDefaultDefinition);
+  const result = parseRawAjsForTest(rootDefaultDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
 };
 
 const parseRootGroup = () => {
-  const result = parseAjs(groupDefinition);
+  const result = parseRawAjsForTest(groupDefinition);
   assert.deepStrictEqual(result.errors, []);
   return tyFactory(result.rootUnits[0]);
 };
 
 const parseTransferJob = (): J => {
-  const result = parseAjs(transferDefinition);
+  const result = parseRawAjsForTest(transferDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
 };
 
 const parseQueueTransferJobs = (): { queueJob: Qj; recoveryQueueJob: Rq } => {
-  const result = parseAjs(queueTransferDefinition);
+  const result = parseRawAjsForTest(queueTransferDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return {
@@ -477,7 +477,7 @@ const parseQueueTransferJobs = (): { queueJob: Qj; recoveryQueueJob: Rq } => {
 };
 
 const parseJobEndJudgmentUnits = (): { job: J; customJob: Cj } => {
-  const result = parseAjs(jobEndJudgmentDefinition);
+  const result = parseRawAjsForTest(jobEndJudgmentDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return {
@@ -487,7 +487,7 @@ const parseJobEndJudgmentUnits = (): { job: J; customJob: Cj } => {
 };
 
 const parseExplicitJobEndJudgmentJob = (): J => {
-  const result = parseAjs(explicitJobEndJudgmentDefinition);
+  const result = parseRawAjsForTest(explicitJobEndJudgmentDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
@@ -497,7 +497,7 @@ const parseWthKeyMappingJobs = (): {
   explicitWthJob: J;
   scheduleWtOnlyJob: J;
 } => {
-  const result = parseAjs(wthKeyMappingDefinition);
+  const result = parseRawAjsForTest(wthKeyMappingDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return {
@@ -510,7 +510,7 @@ const parseHttpConnectionJobs = (): {
   httpJob: Htpj;
   explicitHttpJob: Htpj;
 } => {
-  const result = parseAjs(httpConnectionJobDefaultDefinition);
+  const result = parseRawAjsForTest(httpConnectionJobDefaultDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return {
@@ -523,7 +523,7 @@ const parseEventSendingJobs = (): {
   eventJob: Evsj;
   explicitEventJob: Evsj;
 } => {
-  const result = parseAjs(eventSendingJobDefaultDefinition);
+  const result = parseRawAjsForTest(eventSendingJobDefaultDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return {
@@ -536,7 +536,9 @@ const parseExecutionIntervalControlJobs = (): {
   intervalJob: Tmwj;
   explicitIntervalJob: Tmwj;
 } => {
-  const result = parseAjs(executionIntervalControlJobDefaultDefinition);
+  const result = parseRawAjsForTest(
+    executionIntervalControlJobDefaultDefinition,
+  );
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return {

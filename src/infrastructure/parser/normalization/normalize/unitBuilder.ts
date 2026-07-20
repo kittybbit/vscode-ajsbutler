@@ -1,7 +1,11 @@
-import { Unit } from "../../../values/Unit";
-import { resolveUnitDepth } from "../../units/unitDepthHelpers";
-import { resolveIsRecovery } from "../../units/unitTypeHelpers";
-import { AjsRelation, AjsUnit, AjsUnitType } from "../AjsDocument";
+import { AjsRawUnit } from "../../raw/AjsRawUnit";
+import { resolveUnitDepth } from "../../../../domain/models/units/unitDepthHelpers";
+import { resolveIsRecovery } from "../../../../domain/models/units/unitTypeHelpers";
+import {
+  AjsRelation,
+  AjsUnit,
+  AjsUnitType,
+} from "../../../../domain/models/ajs/AjsDocument";
 import {
   resolveNormalizedComment,
   resolveNormalizedGroupType,
@@ -12,7 +16,7 @@ import {
 } from "./unit";
 
 export type NormalizedUnitInput = {
-  unit: Unit;
+  unit: AjsRawUnit;
   unitType: AjsUnitType;
   relations: AjsRelation[];
   children: AjsUnit[];

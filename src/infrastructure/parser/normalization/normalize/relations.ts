@@ -1,10 +1,14 @@
-import { findUnitParameterValues } from "../../../values/unitParameterLookupHelpers";
-import { Unit } from "../../../values/Unit";
+import { AjsRawUnit } from "../../raw/AjsRawUnit";
+import { findUnitParameterValues } from "../rawUnitParameterLookup";
 import {
   normalizeAjsRelationType,
   parseUnitEdge,
-} from "../../parameters/unitEdgeHelpers";
-import { AjsNormalizationWarning, AjsRelation, AjsUnit } from "../AjsDocument";
+} from "../../../../domain/models/parameters/unitEdgeHelpers";
+import {
+  AjsNormalizationWarning,
+  AjsRelation,
+  AjsUnit,
+} from "../../../../domain/models/ajs/AjsDocument";
 import {
   buildInvalidRelationWarning,
   buildMissingRelationTargetWarning,
@@ -90,7 +94,7 @@ const resolveNormalizedRelationValue = (
 };
 
 export const resolveNormalizedRelations = (
-  unit: Unit,
+  unit: AjsRawUnit,
   children: AjsUnit[],
   warnings: AjsNormalizationWarning[],
 ): AjsRelation[] => {

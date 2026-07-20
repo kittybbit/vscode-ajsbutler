@@ -42,17 +42,26 @@ AC = Acceptance Criteria.
   and privacy assertions. Slice 2 result: success/error counts and privacy
   assertions passed.
 - V7: `AntlrAjsParser.test.ts`, architecture dependency-rule tests, and
-  production raw/generated/ANTLR scans.
+  production raw/generated/ANTLR scans. Slice 3 result: the raw model and
+  normalizer are owned by `src/infrastructure/parser/**`; production scans and
+  the exact stale-allowlist validation passed with zero raw/generated/ANTLR
+  references in domain, application, or presentation.
 - V8: `normalizeAjsDocument.test.ts`, parser golden tests, and
   relation/parameter/warning/source-position suites. Slice 2 result: the public
   adapter normalizes once and preserves normalized warnings; final physical
-  ownership remains in Slice 3.
+  ownership remains in Slice 3. Slice 3 result: the same normalization suites
+  passed after physical relocation, with identities, parameters,
+  parent/child relationships, relations, warnings, and source evidence
+  preserved.
 - V9: classify all 91 `parseAjs` calls across 24 suites; downstream suites use
   the normalized helper, intentionally raw suites use the named raw helper, and
-  an exact importer scan rejects unclassified raw-helper use.
+  an exact importer scan rejects unclassified raw-helper use. Slice 3 result:
+  migration completed; the exact 14-suite raw-helper importer assertion passed
+  and downstream suites have no direct normalizer import.
 - V10: full desktop tests, `rtk pnpm run test:web`, `rtk pnpm run build`, and
   `rtk pnpm run qlty`. Slice 2 result: all passed; existing web-test 404 logging
-  and webpack bundle-size warnings remained non-failing baseline output.
+  and webpack bundle-size warnings remained non-failing baseline output. Slice
+  3 result: all passed again; the same baseline warnings remained non-failing.
 
 ## Slice Coverage
 

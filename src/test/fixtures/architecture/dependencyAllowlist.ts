@@ -23,60 +23,56 @@ const ownedBy = (
     removalCondition,
   }));
 
-const rawUnitAllowances = ownedBy(
-  "isolate-parser-boundary",
-  "Raw Unit is confined to the parser and normalizer seam.",
-  [],
-);
-
 const legacyWrapperAllowances = ownedBy(
   "complete-normalized-domain-model",
   "The legacy wrapper dependency is removed or explicitly reclassified.",
   [
     {
-      source: "src/domain/models/ajs/normalize/unit.ts",
+      source: "src/infrastructure/parser/normalization/normalize/unit.ts",
       target: "src/domain/models/units/unitGroupStateHelpers",
       kind: "import",
       ruleId: "legacy-wrapper-dependency",
     },
     {
-      source: "src/domain/models/ajs/normalize/unit.ts",
+      source: "src/infrastructure/parser/normalization/normalize/unit.ts",
       target: "src/domain/models/units/unitJobnetStateHelpers",
       kind: "import",
       ruleId: "legacy-wrapper-dependency",
     },
     {
-      source: "src/domain/models/ajs/normalize/unit.ts",
+      source: "src/infrastructure/parser/normalization/normalize/unit.ts",
       target: "src/domain/models/units/unitLayoutHelpers",
       kind: "import",
       ruleId: "legacy-wrapper-dependency",
     },
     {
-      source: "src/domain/models/ajs/normalize/unit.ts",
+      source: "src/infrastructure/parser/normalization/normalize/unit.ts",
       target: "src/domain/models/units/unitLayoutHelpers",
       kind: "import-type",
       ruleId: "legacy-wrapper-dependency",
     },
     {
-      source: "src/domain/models/ajs/normalize/unit.ts",
+      source: "src/infrastructure/parser/normalization/normalize/unit.ts",
       target: "src/domain/models/units/unitScheduleStateHelpers",
       kind: "import",
       ruleId: "legacy-wrapper-dependency",
     },
     {
-      source: "src/domain/models/ajs/normalize/unit.ts",
+      source: "src/infrastructure/parser/normalization/normalize/unit.ts",
       target: "src/domain/models/units/unitWaitStateHelpers",
       kind: "import",
       ruleId: "legacy-wrapper-dependency",
     },
     {
-      source: "src/domain/models/ajs/normalize/unitBuilder.ts",
+      source:
+        "src/infrastructure/parser/normalization/normalize/unitBuilder.ts",
       target: "src/domain/models/units/unitDepthHelpers",
       kind: "import",
       ruleId: "legacy-wrapper-dependency",
     },
     {
-      source: "src/domain/models/ajs/normalize/unitBuilder.ts",
+      source:
+        "src/infrastructure/parser/normalization/normalize/unitBuilder.ts",
       target: "src/domain/models/units/unitTypeHelpers",
       kind: "import",
       ruleId: "legacy-wrapper-dependency",
@@ -942,7 +938,6 @@ const nodeBoundaryAllowances = ownedBy(
 );
 
 export const dependencyAllowlist: readonly DependencyAllowance[] = [
-  ...rawUnitAllowances,
   ...legacyWrapperAllowances,
   ...flowPresentationAllowances,
   ...unitPresentationAllowances,

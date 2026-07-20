@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { J } from "../../domain/models/units/J";
 import { N } from "../../domain/models/units/N";
@@ -10,7 +10,7 @@ import {
 
 suite("Unit priority helpers", () => {
   test("prefers explicit pr over inherited parent priority", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       pj=/root;
       ty=n;
       ni=7;
@@ -28,7 +28,7 @@ suite("Unit priority helpers", () => {
   });
 
   test("inherits parent priority when no explicit child priority exists", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       pj=/root;
       ty=n;
       ni=7;
@@ -45,7 +45,7 @@ suite("Unit priority helpers", () => {
   });
 
   test("falls back to the default priority when no source is present", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       pj=/root;
       ty=n;
       {

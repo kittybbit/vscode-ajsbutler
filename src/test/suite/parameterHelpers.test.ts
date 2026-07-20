@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { G } from "../../domain/models/units/G";
 import { J } from "../../domain/models/units/J";
@@ -52,7 +52,7 @@ unit=root,,jp1admin,;
 `;
 
 const parseJobnets = (): { jobnet: N; subnet: N } => {
-  const result = parseAjs(validDefinition);
+  const result = parseRawAjsForTest(validDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   const jobnet = root.children[0] as N;
@@ -61,7 +61,7 @@ const parseJobnets = (): { jobnet: N; subnet: N } => {
 };
 
 const parseRootGroup = (): G => {
-  const result = parseAjs(validDefinition);
+  const result = parseRawAjsForTest(validDefinition);
   assert.deepStrictEqual(result.errors, []);
   return tyFactory(result.rootUnits[0]) as G;
 };
@@ -84,7 +84,7 @@ unit=root,,jp1admin,;
 `;
 
 const parseTransferJob = (): J => {
-  const result = parseAjs(transferDefinition);
+  const result = parseRawAjsForTest(transferDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as J;
@@ -110,7 +110,7 @@ unit=root,,jp1admin,;
 `;
 
 const parseInheritedJobnets = (): { jobnet: N; subnet: N } => {
-  const result = parseAjs(inheritedDefinition);
+  const result = parseRawAjsForTest(inheritedDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   const jobnet = root.children[0] as N;
@@ -131,7 +131,7 @@ unit=root,,jp1admin,;
 `;
 
 const parseRootDefaultJobnet = (): N => {
-  const result = parseAjs(rootDefaultDefinition);
+  const result = parseRawAjsForTest(rootDefaultDefinition);
   assert.deepStrictEqual(result.errors, []);
   const root = tyFactory(result.rootUnits[0]);
   return root.children[0] as N;
@@ -707,7 +707,7 @@ unit=root,,jp1admin,;
 }
 `;
 
-    const result = parseAjs(rootDefinition);
+    const result = parseRawAjsForTest(rootDefinition);
     assert.deepStrictEqual(result.errors, []);
     const root = tyFactory(result.rootUnits[0]) as N;
 

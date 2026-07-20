@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import {
   collapseExpandedNestedUnitIds,
   collectExpandableNestedUnitIds,
@@ -50,9 +49,7 @@ unit=root,,jp1admin,;
 
 suite("Nested Expansion", () => {
   test("collects every expandable nested jobnet in the current scope", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(nestedDefinition);
     const currentUnit = document.rootUnits[0].children[0];
     const childNetId = currentUnit.children[0].id;
     const grandNetId = currentUnit.children[0].children[0].id;
@@ -104,9 +101,7 @@ suite("Nested Expansion", () => {
   });
 
   test("collapsing a nested jobnet also clears expanded descendants", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(nestedDefinition);
     const currentUnit = document.rootUnits[0].children[0];
     const childNet = currentUnit.children[0];
     const grandNet = childNet.children[0];

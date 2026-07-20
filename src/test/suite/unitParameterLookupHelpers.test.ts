@@ -1,11 +1,11 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import {
   findUnitParameter,
   findUnitParameters,
   findUnitParameterValue,
   findUnitParameterValues,
-} from "../../domain/values/unitParameterLookupHelpers";
+} from "../../infrastructure/parser/normalization/rawUnitParameterLookup";
 
 const validDefinition = `
 unit = root,,jp1admin, ;
@@ -33,7 +33,7 @@ suite("Unit Parameter Lookup Helpers", () => {
   });
 
   test("finds raw unit parameters and values", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
     const unit = result.rootUnits[0];
 

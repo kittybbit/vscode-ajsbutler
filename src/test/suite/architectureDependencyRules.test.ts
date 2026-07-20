@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import * as fs from "fs";
 import * as path from "path";
 import { dependencyAllowlist } from "../fixtures/architecture/dependencyAllowlist";
 import {
@@ -187,7 +188,7 @@ suite("Architecture dependency rules", () => {
       {
         ruleId: architectureRuleIds.rawUnitOutsideParserNormalizer,
         file: "src/application/example.ts",
-        source: 'import "../domain/values/Unit";',
+        source: 'import "../infrastructure/parser/raw/AjsRawUnit";',
       },
       {
         ruleId: architectureRuleIds.legacyWrapperDependency,
@@ -251,11 +252,41 @@ suite("Architecture dependency rules", () => {
     );
   });
 
+  test("keeps raw parser test access confined to the exact approved suites", () => {
+    const suiteDirectory = path.join(repoRoot, "src/test/suite");
+    const rawHelperImporters = fs
+      .readdirSync(suiteDirectory)
+      .filter((file) => file.endsWith(".test.ts"))
+      .filter((file) =>
+        /import\s*\{\s*parseRawAjsForTest\s*\}\s*from\s*"\.\.\/support\/parseAjs";/u.test(
+          fs.readFileSync(path.join(suiteDirectory, file), "utf8"),
+        ),
+      )
+      .sort();
+
+    assert.deepStrictEqual(rawHelperImporters, [
+      "groupEntity.test.ts",
+      "jobnetEntity.test.ts",
+      "normalizeAjsDocument.test.ts",
+      "normalizeRelations.test.ts",
+      "normalizeUnit.test.ts",
+      "normalizeUnitBuilder.test.ts",
+      "normalizeUnitTree.test.ts",
+      "parameterFactory.test.ts",
+      "parameterHelpers.test.ts",
+      "unitCapabilityEntities.test.ts",
+      "unitEntityIdentity.test.ts",
+      "unitParameterLookupHelpers.test.ts",
+      "unitPriorityHelpers.test.ts",
+      "unitRelationHelpers.test.ts",
+    ]);
+  });
+
   test("rejects unexplained, stale, duplicate, incomplete, and wildcard entries", () => {
     const [violation] = findArchitectureRuleViolations(
       collectImportReferencesFromSource(
         "src/application/example.ts",
-        'import "../domain/values/Unit";',
+        'import "../infrastructure/parser/raw/AjsRawUnit";',
       ),
     );
     assert.ok(violation);

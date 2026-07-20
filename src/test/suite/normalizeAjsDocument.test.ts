@@ -1,6 +1,6 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseRawAjsForTest } from "../support/parseAjs";
+import { normalizeAjsDocument } from "../../infrastructure/parser/normalization/normalizeAjsDocument";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -36,7 +36,7 @@ unit=root,,jp1admin,;
 
 suite("Normalize AJS Document", () => {
   test("creates a stable document model with units and relations", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const document = normalizeAjsDocument(result.rootUnits);
@@ -65,7 +65,7 @@ suite("Normalize AJS Document", () => {
   });
 
   test("preserves parsed parameter source locations through normalization", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const rawParameters = result.rootUnits[0].children[0].parameters.filter(

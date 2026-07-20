@@ -1,9 +1,9 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import {
   parseNormalizedRelation,
   resolveNormalizedRelations,
-} from "../../domain/models/ajs/normalize/relations";
+} from "../../infrastructure/parser/normalization/normalize/relations";
 import {
   AjsNormalizationWarning,
   AjsUnit,
@@ -70,7 +70,7 @@ suite("Normalize relation helpers", () => {
   });
 
   test("resolves normalized relations and records relation warnings", () => {
-    const validResult = parseAjs(validDefinition);
+    const validResult = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(validResult.errors, []);
     const validJobnet = validResult.rootUnits[0].children[0];
     const validChildren = validJobnet.children.map(
@@ -113,7 +113,7 @@ suite("Normalize relation helpers", () => {
     );
     assert.deepStrictEqual(validWarnings, []);
 
-    const invalidResult = parseAjs(invalidDefinition);
+    const invalidResult = parseRawAjsForTest(invalidDefinition);
     assert.deepStrictEqual(invalidResult.errors, []);
     const invalidJobnet = invalidResult.rootUnits[0].children[0];
     const invalidChildren = [

@@ -50,23 +50,24 @@ Migration should be incremental and use-case driven.
 
 ### Where parser output crosses outward
 
-- `AjsParserPort` returns `Unit[]` plus repository-owned syntax errors without
-  exposing ANTLR types
-- `src/domain/models/ajs/normalizeAjsDocument.ts` converts raw `Unit[]` into a
-  stable normalized model
-- `src/application/unit-list/*` and `src/application/flow-graph/*` can now
-  consume normalized units instead of raw parser-adjacent trees for selected
-  slices
+- `AjsParserPort` returns either a normalized `AjsDocument` or
+  repository-owned syntax errors without exposing ANTLR or raw parser types
+- `src/infrastructure/parser/normalization/normalizeAjsDocument.ts` converts
+  the infrastructure-owned raw tree into the stable normalized model
+- application consumers receive normalized documents through the parser port
+  instead of composing raw parsing and normalization themselves
 - VS Code-facing diagnostics and webview adapters remain outside the parser
   boundary
 
 ### Boundary assessment
 
 - the grammar and generated parser are already isolated
-- the infrastructure evaluator-to-`Unit[]` mapping remains the raw seam
+- the infrastructure evaluator-to-`AjsRawUnit[]` mapping is an internal raw
+  seam under `src/infrastructure/parser`
 - unit-list and syntax-diagnostic use cases depend on the application parser
   port and receive the infrastructure adapter from extension bootstrap
-- normalization is now the next stable seam for application-facing use cases
+- normalization is part of the concrete parser adapter; the normalized parser
+  result is the stable application-facing seam
 - unit-list table rendering now depends on an application row/view adapter
   end to end instead of direct wrapper accessors or `UnitEntity` row objects
 - flow rendering now depends on flow-graph DTOs plus normalized AJS state and
@@ -79,13 +80,18 @@ Migration should be incremental and use-case driven.
 
 ### Raw parsed model
 
-- `src/domain/values/Unit.ts` remains the parser-adjacent raw unit tree
+- `src/infrastructure/parser/raw/AjsRawUnit.ts` owns the parser-adjacent raw
+  unit tree
 - this model keeps source-oriented structure such as `unitAttribute`,
   free-form parameters, parent links, and child nesting
+- production references to this model are confined to
+  `src/infrastructure/parser/**`
 
 ### Interpreter / wrapper layer
 
-- `src/domain/models/units/*` remains an interpretation layer over raw `Unit`
+- `src/domain/models/units/*` remains a transitional interpretation layer that
+  accepts narrow legacy structural inputs instead of the concrete raw parser
+  type
 - this layer derives JP1/AJS semantics such as schedule flags, root jobnet
   detection, layout hints, and relation traversal
 - these wrappers are still useful during migration, but they are not the final
@@ -95,10 +101,10 @@ Migration should be incremental and use-case driven.
 
 - normalized AJS concepts should live behind stable names such as
   `AjsDocument`, `AjsUnit`, and `AjsDependency`
-- the normalizer may use the current wrapper layer internally while producing a
-  stable model for application use cases
+- the infrastructure normalizer may use domain interpretation helpers while
+  producing the stable model for application use cases
 - application slices should gradually depend on the normalized model instead of
-  raw `Unit` or wrapper-specific classes
+  parser internals or wrapper-specific classes
 
 ## VS Code API Boundaries
 
@@ -297,8 +303,8 @@ normalized model where practical.
    normalized model instead of staying in view adapters
 2. Continue moving non-table presentation paths toward explicit DTO/view-model
    boundaries
-3. Reduce residual raw-`Unit` / wrapper usage where application slices already
-   provide stable models
+3. Reduce residual wrapper usage where application slices already provide
+   stable normalized models
 4. Simplify viewer serialization and dependency weight where adapter contracts
    are still broader than necessary
 5. Add application and infrastructure seams for JP1/AJS3 version 13

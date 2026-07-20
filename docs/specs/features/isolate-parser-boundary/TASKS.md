@@ -4,7 +4,7 @@
 
 - Purpose: isolate parser mechanics and raw data behind one normalized parser
   port.
-- Approved or active slice: Slices 1-2 are complete; approved Slice 3 is next.
+- Approved or active slice: Slice 3 is complete; Feature Exit review is next.
 - Implement slices in order; each slice is a separate approval and commit
   boundary.
 - Do not change grammar, evaluator meaning, JP1/AJS interpretation, normalized
@@ -23,7 +23,7 @@
 - Planning scope: the entire `isolate-parser-boundary` feature.
 - Review status: repeat review passed; ready plan approved.
 - Human approval: approved for the full plan and all three slices.
-- Active implementation slice: Slice 3.
+- Active implementation slice: none; Feature Exit review is next.
 
 ## Human Approval
 
@@ -180,7 +180,7 @@
 
 ### Slice 3: Move Raw Model And Normalization Into Infrastructure
 
-- Status: Approved
+- Status: Complete
 - Scope: relocate the concrete raw unit tree and raw-to-normalized mapping from
   domain paths into `src/infrastructure/parser/raw/` and
   `src/infrastructure/parser/normalization/`; update evaluator/parser and
@@ -257,6 +257,19 @@
   architecture tests must distinguish test-only access from production rules.
 - Out of Scope: normalized model completion, legacy wrapper migration,
   presentation boundaries, serialization/composition cleanup, grammar changes.
+- Completion Evidence: the raw model, normalization collaborators, and raw
+  parameter lookup moved under `src/infrastructure/parser/**`; superseded
+  domain paths were removed; all 91 helper calls were classified between the
+  normalized and explicitly raw test helpers; exact importer and production
+  boundary scans passed. Full desktop and web tests, production build,
+  TypeScript compilation, Markdown lint, and qlty passed. Existing webpack
+  bundle-size warnings and web-test `package.nls.json` 404 logging remained
+  non-failing baseline output.
+- Implementation Feedback: the approved slice boundary covered the move and
+  caller classification without replanning. The exact raw-helper importer set
+  is 14 suites; downstream behavior suites no longer compose raw parsing with
+  normalization. No new dependency, host difference, or JP1/AJS behavior was
+  discovered.
 
 ## Traceability
 

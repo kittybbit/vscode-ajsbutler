@@ -9,7 +9,7 @@ import { Mswj } from "../../domain/models/units/Mswj";
 import { N } from "../../domain/models/units/N";
 import { Ntwj } from "../../domain/models/units/Ntwj";
 import { Qj } from "../../domain/models/units/Qj";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
 type ValueGetter = {
@@ -58,7 +58,7 @@ const assertSingleExecutionAndJobTypeCase = ({
   definition,
   expected,
 }: ExecutionAndJobTypeCase): void => {
-  const result = parseAjs(definition);
+  const result = parseRawAjsForTest(definition);
   assert.deepStrictEqual(result.errors, []);
   assertExecutionAndJobTypeValues(
     tyFactory(result.rootUnits[0]) as ExecutionAndJobTypeUnit,
@@ -68,7 +68,7 @@ const assertSingleExecutionAndJobTypeCase = ({
 
 suite("Unit capability entities", () => {
   test("keeps shared wait-state getters on waitable wrappers", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       pj=/root;
       ty=n;
       {
@@ -91,7 +91,7 @@ suite("Unit capability entities", () => {
   });
 
   test("keeps shared priority and wait-state behavior on prioritizable wrappers", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       pj=/root;
       ty=n;
       ni=7;
@@ -113,7 +113,7 @@ suite("Unit capability entities", () => {
   });
 
   test("keeps shared execution and job-type getters on message queue send jobs", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       mqsj=/mq-send;
       ty=mqsj;
       etm=7;
@@ -155,7 +155,7 @@ suite("Unit capability entities", () => {
   });
 
   test("keeps shared execution and macro-passing getters on message queue wait jobs", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       mqwj=/mq-wait;
       ty=mqwj;
       jpoif=macro-a:info-a;
@@ -199,7 +199,7 @@ suite("Unit capability entities", () => {
   });
 
   test("keeps shared execution-user and macro-passing getters on wait jobs", () => {
-    const result = parseAjs(`
+    const result = parseRawAjsForTest(`
       fxj=/flex;
       ty=fxj;
       ha=y;

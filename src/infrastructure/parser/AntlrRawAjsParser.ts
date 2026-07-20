@@ -4,12 +4,12 @@ import { CharStreams } from "antlr4ts/CharStreams";
 import { CommonTokenStream } from "antlr4ts/CommonTokenStream";
 import { ParseTreeWalker } from "antlr4ts/tree/ParseTreeWalker";
 import type { AjsParserError } from "../../application/parsing/AjsParserPort";
-import type { Unit } from "../../domain/values/Unit";
 import { Ajs3v12Evaluator } from "./AjsEvaluator";
+import type { AjsRawUnit } from "./raw/AjsRawUnit";
 import { SyntaxErrorListener } from "./SyntaxErrorListener";
 
 export type RawParseAjsResult = {
-  rootUnits: Unit[];
+  rootUnits: AjsRawUnit[];
   errors: AjsParserError[];
 };
 

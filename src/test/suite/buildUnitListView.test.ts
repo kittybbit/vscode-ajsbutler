@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { buildUnitListView } from "../../application/unit-list/buildUnitListView";
 
 const validDefinition = `
@@ -239,9 +238,7 @@ unit=root,,jp1admin,;
 
 suite("Build Unit List View", () => {
   test("projects group fields from the normalized model", () => {
-    const result = parseAjs(validDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(validDefinition);
 
     const rows = buildUnitListView(document);
     const root = rows.find((row) => row.absolutePath === "/root");
@@ -450,9 +447,7 @@ suite("Build Unit List View", () => {
   });
 
   test("projects shared wait-job timeout-action defaults in group 13 rows", () => {
-    const result = parseAjs(waitJobTimeoutActionDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(waitJobTimeoutActionDefinition);
 
     const rows = buildUnitListView(document);
     const logFileDefaults = rows.find(

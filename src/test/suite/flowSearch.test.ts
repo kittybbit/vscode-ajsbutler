@@ -1,7 +1,6 @@
 import * as assert from "assert";
 import { flattenAjsUnits } from "../../domain/models/ajs/AjsDocument";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { parseAjs } from "../support/parseAjs";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { findFlowSearchResult } from "../../presentation/webview/editor/ajsFlow/flowSearch";
 import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 
@@ -55,9 +54,7 @@ type FlowSearchFixture = {
 };
 
 const createFlowSearchFixture = (): FlowSearchFixture => {
-  const result = parseAjs(nestedDefinition);
-  assert.deepStrictEqual(result.errors, []);
-  const document = normalizeAjsDocument(result.rootUnits);
+  const document = parseAjsDocumentForTest(nestedDefinition);
   const allUnits = flattenAjsUnits(document.rootUnits);
   const currentUnit = document.rootUnits[0].children[0];
   const childNetId = currentUnit.children[0].id;
@@ -125,9 +122,7 @@ suite("Flow Search", () => {
   });
 
   test("matches by absolute path and stays inside the current scope", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(nestedDefinition);
     const allUnits = flattenAjsUnits(document.rootUnits);
     const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
     const currentUnit = document.rootUnits[0].children[0].children[0];

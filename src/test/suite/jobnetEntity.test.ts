@@ -1,10 +1,10 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { N } from "../../domain/models/units/N";
 
 const parseJobnets = (): { jobnet: N; subnet: N } => {
-  const result = parseAjs(`
+  const result = parseRawAjsForTest(`
     unit=root,,jp1admin,;
     {
       ty=g;

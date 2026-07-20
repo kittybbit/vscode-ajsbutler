@@ -1,10 +1,10 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { G } from "../../domain/models/units/G";
 
 const parseRootGroup = (): G => {
-  const result = parseAjs(`
+  const result = parseRawAjsForTest(`
     unit=root,,jp1admin,;
     {
       ty=g;

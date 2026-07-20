@@ -2,8 +2,7 @@ import * as assert from "assert";
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { buildExpandedFlowGraph } from "../../presentation/webview/editor/ajsFlow/buildExpandedFlowGraph";
 import { createFlowGraphMetrics } from "../../presentation/webview/editor/ajsFlow/flowGraphPosition";
 
@@ -549,9 +548,9 @@ unit=root,,jp1admin,;
 
 suite("Build Expanded Flow Graph", () => {
   test("characterizes deep sample graph summaries for collapsed and expanded states", () => {
-    const result = parseAjs(readSample("sample_ref_deep_jobnets_utf8"));
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      readSample("sample_ref_deep_jobnets_utf8"),
+    );
     const rootUnit = document.rootUnits[0];
     const currentUnit = findUnitByName(rootUnit, "top_main");
     const expandedUnitNames = [
@@ -704,9 +703,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("reveals nested jobnets only after their parent scope is expanded", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(nestedDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const childNetId = document.rootUnits[0].children[0].children[0].id;
     const grandNetId =
@@ -816,9 +813,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("adds offsets by row, column, and lower-right position around the expanded node", () => {
-    const result = parseAjs(overlappingSiblingDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(overlappingSiblingDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const childNetId = document.rootUnits[0].children[0].children[0].id;
     const flwjId = document.rootUnits[0].children[0].children[1].id;
@@ -869,9 +864,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps revealed children anchored near the expanded node origin", () => {
-    const result = parseAjs(overlappingSiblingDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(overlappingSiblingDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const childNetId = document.rootUnits[0].children[0].children[0].id;
     const grandNetId =
@@ -902,9 +895,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("expands nested jobnets level by level when a newly visible child is also expanded", () => {
-    const result = parseAjs(deepNestedJobnetDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(deepNestedJobnetDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const level2Id = document.rootUnits[0].children[0].children[0].id;
     const level3Id =
@@ -972,9 +963,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("repositions parent-level siblings after a deeper nested panel enlarges its ancestor", () => {
-    const result = parseAjs(deepNestedWithSiblingDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(deepNestedWithSiblingDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const level2Id = document.rootUnits[0].children[0].children[0].id;
     const level3Id =
@@ -1017,9 +1006,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps panel origin anchored to the expanded unit while deeper descendants grow it", () => {
-    const result = parseAjs(deepNestedJobnetDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(deepNestedJobnetDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const level2Id = document.rootUnits[0].children[0].children[0].id;
     const level3Id =
@@ -1065,9 +1052,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("expands recovery jobnet variants with nested children", () => {
-    const result = parseAjs(recoveryJobnetDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(recoveryJobnetDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const recoveryNetId = document.rootUnits[0].children[0].children[0].id;
     const leafJobId =
@@ -1089,9 +1074,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps expanded descendants anchored when a sibling expansion later moves their parent", () => {
-    const result = parseAjs(siblingExpandedJobnetsDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(siblingExpandedJobnetsDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const leftNetId = document.rootUnits[0].children[0].children[0].id;
     const rightNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1152,9 +1135,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps a later expanded sibling panel aligned with descendants after sibling offsets", () => {
-    const result = parseAjs(siblingExpandedJobnetsDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(siblingExpandedJobnetsDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const leftNetId = document.rootUnits[0].children[0].children[0].id;
     const rightNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1197,9 +1178,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("pushes units on the parent row when a nested expansion enlarges that parent scope", () => {
-    const result = parseAjs(parentRowPropagationDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(parentRowPropagationDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const parentNetId = document.rootUnits[0].children[0].children[0].id;
     const childNetId =
@@ -1254,9 +1233,9 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("does not propagate horizontal growth when an upper expanded panel already covers it", () => {
-    const result = parseAjs(upperPanelCoversLowerWidthDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      upperPanelCoversLowerWidthDefinition,
+    );
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1310,9 +1289,9 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("propagates only the horizontal growth beyond the upper expanded panel", () => {
-    const result = parseAjs(lowerPanelExceedsUpperWidthDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      lowerPanelExceedsUpperWidthDefinition,
+    );
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1369,9 +1348,9 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("propagates horizontal growth beyond the upper panel when lower is expanded after upper", () => {
-    const result = parseAjs(lowerPanelExceedsUpperWidthDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      lowerPanelExceedsUpperWidthDefinition,
+    );
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1427,9 +1406,9 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("pushes a lower expanded panel origin when an upper expanded panel intrudes into it", () => {
-    const result = parseAjs(upperPanelIntrudesLowerPanelDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      upperPanelIntrudesLowerPanelDefinition,
+    );
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1473,9 +1452,9 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("pushes a lower panel origin consistently when expansion order changes", () => {
-    const result = parseAjs(upperPanelIntrudesLowerPanelDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      upperPanelIntrudesLowerPanelDefinition,
+    );
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1534,9 +1513,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("does not apply vertical growth again when a target already has enough y offset", () => {
-    const result = parseAjs(alreadyOffsetTargetDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(alreadyOffsetTargetDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1580,11 +1557,9 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps horizontal growth when vertical growth is already covered", () => {
-    const result = parseAjs(
+    const document = parseAjsDocumentForTest(
       verticallyOffsetTargetNeedsHorizontalOffsetDefinition,
     );
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1645,9 +1620,9 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("propagates horizontal growth when a nested expansion makes the parent exceed the upper panel", () => {
-    const result = parseAjs(nestedExpansionExceedsUpperWidthDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      nestedExpansionExceedsUpperWidthDefinition,
+    );
     const currentUnitId = document.rootUnits[0].children[0].id;
     const upperNetId = document.rootUnits[0].children[0].children[0].id;
     const lowerNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1701,9 +1676,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps the same layout when the same-depth expanded order changes", () => {
-    const result = parseAjs(siblingExpandedJobnetsDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(siblingExpandedJobnetsDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const leftNetId = document.rootUnits[0].children[0].children[0].id;
     const rightNetId = document.rootUnits[0].children[0].children[1].id;
@@ -1742,9 +1715,7 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("rebuilding the same expanded state keeps panel bounds stable", () => {
-    const result = parseAjs(deepNestedJobnetDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(deepNestedJobnetDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
     const level2Id = document.rootUnits[0].children[0].children[0].id;
     const level3Id =

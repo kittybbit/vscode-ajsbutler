@@ -4,17 +4,17 @@ import {
   UnitDefinitionContext,
   UnitParameterContext,
 } from "@generate/parser/AjsParser";
-import { Unit } from "../../domain/values/Unit";
+import { AjsRawUnit } from "./raw/AjsRawUnit";
 
 export class Ajs3v12Evaluator implements AjsParserListener {
   /** parsed definition */
-  #allUnits: Array<Unit> = [];
+  #allUnits: Array<AjsRawUnit> = [];
 
   /** parsing context */
-  #unitStack: Array<Unit> = [];
+  #unitStack: Array<AjsRawUnit> = [];
 
   /** current unit object */
-  #currentUnit?: Unit;
+  #currentUnit?: AjsRawUnit;
 
   get allUnits() {
     return this.#allUnits;
@@ -34,7 +34,10 @@ export class Ajs3v12Evaluator implements AjsParserListener {
   };
 
   enterUnitAttribute = (ctx: UnitAttributeContext) => {
-    const newUnit = new Unit(ctx._value.text as string, this.#currentUnit);
+    const newUnit = new AjsRawUnit(
+      ctx._value.text as string,
+      this.#currentUnit,
+    );
     this.#currentUnit?.children.push(newUnit);
     this.#currentUnit = newUnit;
     this.#unitStack.push(newUnit);

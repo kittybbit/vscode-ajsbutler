@@ -263,7 +263,7 @@ const ruleMessages: Record<ArchitectureRuleId, string> = {
   [architectureRuleIds.generatedParserOutsideInfrastructure]:
     "generated parser and ANTLR runtime must remain in parser infrastructure",
   [architectureRuleIds.rawUnitOutsideParserNormalizer]:
-    "raw Unit must remain inside the parser and normalizer seam",
+    "AjsRawUnit must remain inside parser infrastructure",
   [architectureRuleIds.legacyWrapperDependency]:
     "legacy unit wrappers are temporary normalized-model migration dependencies",
   [architectureRuleIds.presentationDomainDependency]:
@@ -297,11 +297,9 @@ const isGeneratedParserDependency = (reference: ImportReference): boolean =>
   reference.specifier.startsWith("antlr4ts/");
 
 const isRawUnitDependency = (reference: ImportReference): boolean =>
-  getDependencyTarget(reference) === "src/domain/values/Unit";
+  getDependencyTarget(reference) === "src/infrastructure/parser/raw/AjsRawUnit";
 
 const isAllowedRawUnitSource = (file: string): boolean =>
-  file.startsWith("src/domain/models/ajs/normalize/") ||
-  file === "src/domain/models/ajs/normalizeAjsDocument.ts" ||
   file.startsWith("src/infrastructure/parser/");
 
 const isLegacyWrapperDependency = (reference: ImportReference): boolean =>

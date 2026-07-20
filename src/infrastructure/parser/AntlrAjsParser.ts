@@ -2,8 +2,8 @@ import type {
   AjsParserPort,
   ParseAjsResult,
 } from "../../application/parsing/AjsParserPort";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import { AntlrRawAjsParser } from "./AntlrRawAjsParser";
+import { normalizeAjsDocument } from "./normalization/normalizeAjsDocument";
 
 export class AntlrAjsParser implements AjsParserPort {
   readonly #rawParser = new AntlrRawAjsParser();

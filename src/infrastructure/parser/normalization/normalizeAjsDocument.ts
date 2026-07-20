@@ -1,8 +1,11 @@
-import { Unit } from "../../values/Unit";
-import { AjsDocument, AjsNormalizationWarning } from "./AjsDocument";
+import {
+  AjsDocument,
+  AjsNormalizationWarning,
+} from "../../../domain/models/ajs/AjsDocument";
+import { AjsRawUnit } from "../raw/AjsRawUnit";
 import { normalizeUnitTree } from "./normalize/unitTree";
 
-export const normalizeAjsDocument = (rootUnits: Unit[]): AjsDocument => {
+export const normalizeAjsDocument = (rootUnits: AjsRawUnit[]): AjsDocument => {
   const warnings: AjsNormalizationWarning[] = [];
   return {
     rootUnits: rootUnits.map((rootUnit) =>

@@ -3,7 +3,7 @@ import {
   buildInvalidRelationWarning,
   buildMissingRelationTargetWarning,
   buildMissingUnitTypeWarning,
-} from "../../domain/models/ajs/normalize/warnings";
+} from "../../infrastructure/parser/normalization/normalize/warnings";
 
 suite("Normalize warning helpers", () => {
   test("builds missing-unit-type warnings", () => {

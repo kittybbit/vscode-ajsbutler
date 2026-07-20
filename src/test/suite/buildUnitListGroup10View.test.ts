@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { buildUnitListGroup10View } from "../../application/unit-list/buildUnitListGroup10View";
 
 const definition = `
@@ -66,9 +65,7 @@ unit=root,,jp1admin,;
 
 suite("Build Unit List Group 10 View", () => {
   test("projects schedule-related group10 fields from unit parameters", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
     const root = document.rootUnits[0];
 
     const view = buildUnitListGroup10View(root);
@@ -94,9 +91,7 @@ suite("Build Unit List Group 10 View", () => {
   });
 
   test("returns empty arrays for units without schedule parameters", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
     const jobnet = document.rootUnits[0]?.children[0];
 
     assert.ok(jobnet);
@@ -120,9 +115,7 @@ suite("Build Unit List Group 10 View", () => {
   });
 
   test("ignores parent rules on the root jobnet only", () => {
-    const result = parseAjs(rootJobnetLnDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(rootJobnetLnDefinition);
     const jobnet = document.rootUnits[0]?.children[0];
     const subnet = jobnet?.children[0];
 
@@ -134,9 +127,9 @@ suite("Build Unit List Group 10 View", () => {
   });
 
   test("projects effective start-condition monitoring pairs", () => {
-    const result = parseAjs(startConditionMonitoringDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      startConditionMonitoringDefinition,
+    );
     const root = document.rootUnits[0];
 
     const view = buildUnitListGroup10View(root);

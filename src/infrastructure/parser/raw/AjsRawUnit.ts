@@ -1,4 +1,4 @@
-export type UnitParameter = {
+export type AjsRawUnitParameter = {
   key: string;
   value: string;
   position?: number;
@@ -10,20 +10,20 @@ export type UnitParameter = {
 /**
  * raw object of unit
  */
-export class Unit {
+export class AjsRawUnit {
   /** unit attribute parameter */
   unitAttribute: string;
 
   /** definition parameters */
-  parameters: UnitParameter[];
+  parameters: AjsRawUnitParameter[];
 
   /** parent */
-  parent?: Unit;
+  parent?: AjsRawUnit;
 
   /** children (el parameters) */
-  children: Array<Unit>;
+  children: Array<AjsRawUnit>;
 
-  constructor(unitAttribute: string, parent?: Unit) {
+  constructor(unitAttribute: string, parent?: AjsRawUnit) {
     this.unitAttribute = unitAttribute;
     this.parent = parent;
     this.parameters = [];
@@ -61,14 +61,14 @@ export class Unit {
   }
 
   /** Create a Unit instance from a JSON object. */
-  static createFromJSON(rootUnitOfJSON: Unit): Unit {
+  static createFromJSON(rootUnitOfJSON: AjsRawUnit): AjsRawUnit {
     if (rootUnitOfJSON.parent) {
       throw new Error(
         `This unit is not root unit. (${rootUnitOfJSON.unitAttribute})`,
       );
     }
     const rootUnit = Object.assign(
-      new Unit(rootUnitOfJSON.unitAttribute),
+      new AjsRawUnit(rootUnitOfJSON.unitAttribute),
       rootUnitOfJSON,
     );
     rootUnit.children = rootUnitOfJSON.children.map((child) =>
@@ -77,9 +77,12 @@ export class Unit {
     return rootUnit;
   }
 
-  static #createFromJSON(unitOfJSON: Unit, parent: Unit): Unit {
+  static #createFromJSON(
+    unitOfJSON: AjsRawUnit,
+    parent: AjsRawUnit,
+  ): AjsRawUnit {
     const childUnit = Object.assign(
-      new Unit(unitOfJSON.unitAttribute),
+      new AjsRawUnit(unitOfJSON.unitAttribute),
       unitOfJSON,
     );
     childUnit.parent = parent;

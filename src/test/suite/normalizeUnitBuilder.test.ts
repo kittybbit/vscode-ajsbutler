@@ -1,6 +1,6 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { buildNormalizedUnit } from "../../domain/models/ajs/normalize/unitBuilder";
+import { parseRawAjsForTest } from "../support/parseAjs";
+import { buildNormalizedUnit } from "../../infrastructure/parser/normalization/normalize/unitBuilder";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -25,7 +25,7 @@ unit=root,,jp1admin,;
 
 suite("Normalize unit builder helpers", () => {
   test("builds normalized units from resolved inputs", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const root = result.rootUnits[0];

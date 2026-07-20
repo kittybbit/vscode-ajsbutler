@@ -1,21 +1,24 @@
-import { TySymbol, isTySymbol } from "../../../values/AjsType";
-import { Unit } from "../../../values/Unit";
+import { TySymbol, isTySymbol } from "../../../../domain/values/AjsType";
+import { AjsRawUnit } from "../../raw/AjsRawUnit";
 import {
   findUnitParameterValue,
   findUnitParameterValues,
-} from "../../../values/unitParameterLookupHelpers";
-import { decodeEncodedString } from "../../parameters/encodedStringHelpers";
-import { resolveGroupType } from "../../units/unitGroupStateHelpers";
-import { resolveIsRootJobnet } from "../../units/unitJobnetStateHelpers";
-import type { UnitLayout } from "../../units/unitLayoutHelpers";
-import { resolveUnitLayout } from "../../units/unitLayoutHelpers";
-import { resolveHasSchedule } from "../../units/unitScheduleStateHelpers";
-import { resolveHasWaitedFor } from "../../units/unitWaitStateHelpers";
-import { AjsGroupType, AjsNormalizationWarning } from "../AjsDocument";
+} from "../rawUnitParameterLookup";
+import { decodeEncodedString } from "../../../../domain/models/parameters/encodedStringHelpers";
+import { resolveGroupType } from "../../../../domain/models/units/unitGroupStateHelpers";
+import { resolveIsRootJobnet } from "../../../../domain/models/units/unitJobnetStateHelpers";
+import type { UnitLayout } from "../../../../domain/models/units/unitLayoutHelpers";
+import { resolveUnitLayout } from "../../../../domain/models/units/unitLayoutHelpers";
+import { resolveHasSchedule } from "../../../../domain/models/units/unitScheduleStateHelpers";
+import { resolveHasWaitedFor } from "../../../../domain/models/units/unitWaitStateHelpers";
+import {
+  AjsGroupType,
+  AjsNormalizationWarning,
+} from "../../../../domain/models/ajs/AjsDocument";
 import { buildMissingUnitTypeWarning } from "./warnings";
 
 export const resolveNormalizedUnitType = (
-  unit: Unit,
+  unit: AjsRawUnit,
   warnings: AjsNormalizationWarning[],
 ): TySymbol => {
   const tyValue = findUnitParameterValue(unit, "ty");
@@ -28,28 +31,30 @@ export const resolveNormalizedUnitType = (
 };
 
 export const resolveNormalizedGroupType = (
-  unit: Unit,
+  unit: AjsRawUnit,
 ): AjsGroupType | undefined =>
   resolveGroupType(findUnitParameterValue(unit, "gty"));
 
-export const resolveNormalizedComment = (unit: Unit): string | undefined =>
+export const resolveNormalizedComment = (
+  unit: AjsRawUnit,
+): string | undefined =>
   decodeEncodedString(findUnitParameterValue(unit, "cm"));
 
 const ROOT_UNIT_LAYOUT: UnitLayout = { h: 0, v: 0 };
 
-const resolveChildLayout = (unit: Unit, parent: Unit): UnitLayout =>
+const resolveChildLayout = (unit: AjsRawUnit, parent: AjsRawUnit): UnitLayout =>
   resolveUnitLayout(unit.name, findUnitParameterValues(parent, "el"));
 
-export const resolveNormalizedLayout = (unit: Unit): UnitLayout =>
+export const resolveNormalizedLayout = (unit: AjsRawUnit): UnitLayout =>
   unit.parent ? resolveChildLayout(unit, unit.parent) : ROOT_UNIT_LAYOUT;
 
-export const resolveNormalizedHasWaitedFor = (unit: Unit): boolean =>
+export const resolveNormalizedHasWaitedFor = (unit: AjsRawUnit): boolean =>
   resolveHasWaitedFor(findUnitParameterValues(unit, "eun"));
 
 const isNormalizedJobnet = (unitType: TySymbol): boolean => unitType === "n";
 
 export const resolveNormalizedHasSchedule = (
-  unit: Unit,
+  unit: AjsRawUnit,
   unitType: TySymbol,
 ): boolean =>
   isNormalizedJobnet(unitType)
@@ -57,7 +62,7 @@ export const resolveNormalizedHasSchedule = (
     : false;
 
 export const resolveNormalizedIsRootJobnet = (
-  unit: Unit,
+  unit: AjsRawUnit,
   unitType: TySymbol,
 ): boolean =>
   isNormalizedJobnet(unitType)

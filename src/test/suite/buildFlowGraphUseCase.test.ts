@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { buildFlowGraph } from "../../application/flow-graph/buildFlowGraph";
 
 const validDefinition = `
@@ -35,9 +34,7 @@ unit=root,,jp1admin,;
 
 suite("Build Flow Graph Use Case", () => {
   test("builds a flow graph from the normalized model", () => {
-    const result = parseAjs(validDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(validDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
 
     const graph = buildFlowGraph(document, currentUnitId);

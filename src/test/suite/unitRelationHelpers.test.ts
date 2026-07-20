@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import { tyFactory } from "../../domain/utils/TyUtils";
 import { N } from "../../domain/models/units/N";
 import { J } from "../../domain/models/units/J";
@@ -43,7 +43,7 @@ unit=root,,jp1admin,;
 `;
 
 const parseJobnet = (): { jobnet: N; jobA: J; jobB: Qj; condition: Rc } => {
-  const result = parseAjs(validDefinition);
+  const result = parseRawAjsForTest(validDefinition);
   assert.deepStrictEqual(result.errors, []);
 
   const root = tyFactory(result.rootUnits[0]);

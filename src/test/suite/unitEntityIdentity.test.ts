@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { v5 as uuidv5 } from "uuid";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import type { LegacyUnitSource } from "../../domain/models/units/LegacyUnitSource";
 import { tyFactory } from "../../domain/utils/TyUtils";
 
@@ -9,7 +9,7 @@ const UUID_V5_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 const parseRootAndChildIds = (): { rootId: string; childId: string } => {
-  const result = parseAjs(`
+  const result = parseRawAjsForTest(`
     unit=root,,jp1admin,;
     {
       ty=g;
