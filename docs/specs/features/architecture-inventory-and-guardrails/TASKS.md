@@ -3,14 +3,14 @@
 ## Agent Brief
 
 - Purpose: establish the complete dependency inventory and enforceable baseline.
-- Approved or active slice: Slice 1 is active; all three slices are approved.
+- Approved or active slice: Slice 1 is complete; Slice 2 is active.
 - Do not remove, relocate, or rewrite production dependencies.
 - Do not weaken existing checks or create broad/permanent exceptions.
 - Read first: `SPECS.md`, this file, and `docs/specs/architecture.md`.
 - Read `TRACEABILITY.md` for requirement, use-case, and downstream ownership.
 - Validate each slice as specified below; qlty is required for code slices.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement Slice 1 with `sdd-implement-task`.
+- Next decision: implement Slice 2 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -23,12 +23,12 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: In Progress
 - Planning scope: the complete import collector, dependency/use-case inventory,
   rule baseline, temporary allowlist, and detection evidence.
 - Review status: reviewed and ready for approval; no blocking findings.
 - Human approval: approved for the full plan and all three slices.
-- Active implementation slice: Slice 1.
+- Active implementation slice: Slice 2.
 
 ## Human Approval
 
@@ -43,7 +43,7 @@ Implementation may proceed one slice at a time in dependency order.
 
 ### Slice 1: Deterministic Dependency Collection And Rule Harness
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Replace the test-local regular-expression scanner with a TypeScript-aware,
     reusable dependency collector.
@@ -241,6 +241,16 @@ Implementation may proceed one slice at a time in dependency order.
 - If investigation proves an existing use case is factually wrong about user
   behavior, stop and replan rather than editing it in this inventory feature.
 
+## Implementation Feedback
+
+- Slice 1's boundary was appropriate: the existing TypeScript dev dependency
+  and `src/test/**/*.ts` compilation scope supported the collector without
+  package or configuration changes.
+- The desktop filesystem test can deterministically inspect desktop, web, and
+  shared source roots; browser execution of the scanner remains unnecessary.
+- No feedback from Slice 1 passes the Durable Documentation Gate; the details
+  remain feature-local for Slice 2 and Slice 3.
+
 ## Feature Exit
 
 - Definition of Done status: not started.
@@ -251,7 +261,7 @@ Implementation may proceed one slice at a time in dependency order.
 
 ## Validation
 
-- [ ] Slice 1 collector and current-rule tests pass.
+- [x] Slice 1 collector and current-rule tests pass.
 - [ ] Slice 2 inventory and eleven use-case mappings are complete and reproducible.
 - [ ] Slice 3 full rules, violation fixtures, and exact allowlist tests pass.
 - [ ] `rtk pnpm test` passes for the final integrated plan.

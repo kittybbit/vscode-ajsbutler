@@ -4,8 +4,8 @@
 
 | Scope                | Req    | Spec           | Slice | Test or validation |
 | -------------------- | ------ | -------------- | ----- | ------------------ |
-| Import collector     | R1/R4  | Requirements   | S1    | Collector fixtures |
-| Current rules        | R4     | Requirements   | S1    | Architecture test  |
+| Import collector     | R1/R4  | Requirements   | S1    | Passed             |
+| Current rules        | R4     | Requirements   | S1    | Passed             |
 | Dependency inventory | R1/R2  | Requirements   | S2    | Scan and `rtk rg`  |
 | Use-case inventory   | R3/AC1 | Req/Acceptance | S2    | UC/test review     |
 | Rule catalog         | R4/AC2 | Req/Acceptance | S3    | Violation fixtures |
@@ -15,6 +15,15 @@
 S1 changes the architecture test and new test support. S2 records inventory in
 this file. S3 changes the same test/support, adds the typed allowlist fixture,
 and completes the guardrail evidence here.
+
+Slice 1 evidence:
+
+- `src/test/support/architectureDependencyRules.ts` collects and normalizes all
+  planned TypeScript dependency forms and production roots.
+- `src/test/suite/architectureDependencyRules.test.ts` proves syntax coverage,
+  alias/relative resolution, deterministic root collection, intentional current
+  rule violations, and preservation of the existing production rules.
+- `rtk pnpm test`, `rtk pnpm run test:compile`, and `rtk pnpm run qlty` passed.
 
 ## Use-Case Mapping Plan
 

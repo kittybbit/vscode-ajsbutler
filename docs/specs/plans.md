@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement Slice 1 of `architecture-inventory-and-guardrails` within its
-   approved test-support and architecture-test boundary.
+1. Implement Slice 2 of `architecture-inventory-and-guardrails` by recording the
+   complete production dependency and eleven-use-case inventory.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
@@ -44,7 +44,7 @@ rules in `docs/specs/README.md`, not in this file.
 ## Active Feature Specs
 
 - `docs/specs/features/architecture-inventory-and-guardrails/`: active roadmap
-  feature with all three slices approved and Slice 1 active.
+  feature with Slice 1 complete, Slice 2 active, and Slice 3 approved.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

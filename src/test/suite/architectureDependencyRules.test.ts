@@ -1,127 +1,137 @@
 import * as assert from "assert";
-import * as fs from "fs";
 import * as path from "path";
-
-type ImportReference = {
-  file: string;
-  specifier: string;
-};
-
-type RuleViolation = ImportReference & {
-  rule: string;
-};
+import {
+  collectImportReferencesFromSource,
+  collectProductionImportReferences,
+  findCurrentRuleViolations,
+  formatViolation,
+  resolveImportPath,
+} from "../support/architectureDependencyRules";
 
 const repoRoot = path.resolve(__dirname, "../../..");
-const srcRoot = path.join(repoRoot, "src");
-
-const productionSourceDirs = ["domain", "application", "presentation"].map(
-  (directory) => path.join(srcRoot, directory),
-);
-
-const sourceExtensions = new Set([".ts", ".tsx"]);
-
-const importPattern =
-  /\b(?:import|export)\s+(?:type\s+)?(?:[^'"]*?\s+from\s+)?["']([^"']+)["']/g;
-
-const toRelativePath = (filePath: string): string =>
-  path.relative(repoRoot, filePath).split(path.sep).join("/");
-
-const walkSourceFiles = (directory: string): string[] => {
-  const entries = fs.readdirSync(directory, { withFileTypes: true });
-  return entries.flatMap((entry) => {
-    const entryPath = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      return walkSourceFiles(entryPath);
-    }
-    return sourceExtensions.has(path.extname(entry.name)) ? [entryPath] : [];
-  });
-};
-
-const readImportReferences = (filePath: string): ImportReference[] => {
-  const source = fs.readFileSync(filePath, "utf8");
-  return [...source.matchAll(importPattern)].map((match) => ({
-    file: toRelativePath(filePath),
-    specifier: match[1],
-  }));
-};
-
-const resolveImportPath = (reference: ImportReference): string | undefined => {
-  if (!reference.specifier.startsWith(".")) {
-    return undefined;
-  }
-  return toRelativePath(
-    path.resolve(repoRoot, path.dirname(reference.file), reference.specifier),
-  );
-};
-
-const startsWithAny = (value: string, prefixes: readonly string[]): boolean =>
-  prefixes.some((prefix) => value === prefix || value.startsWith(`${prefix}/`));
-
-const isForbiddenDomainImport = (reference: ImportReference): boolean => {
-  const resolvedPath = resolveImportPath(reference) ?? reference.specifier;
-  return (
-    reference.specifier === "vscode" ||
-    reference.specifier === "react" ||
-    reference.specifier.startsWith("@mui/") ||
-    reference.specifier.startsWith("@xyflow/") ||
-    startsWithAny(resolvedPath, [
-      "src/presentation/webview",
-      "src/generate/parser",
-    ])
-  );
-};
-
-const isApplicationBoundaryImport = (reference: ImportReference): boolean => {
-  const resolvedPath = resolveImportPath(reference);
-  return resolvedPath
-    ? startsWithAny(resolvedPath, ["src/presentation", "src/infrastructure"])
-    : false;
-};
-
-const isPresentationParserImport = (reference: ImportReference): boolean => {
-  const resolvedPath = resolveImportPath(reference) ?? reference.specifier;
-  return startsWithAny(resolvedPath, ["src/generate/parser"]);
-};
-
-const formatViolation = ({ file, specifier, rule }: RuleViolation): string =>
-  `${file} imports ${specifier} (${rule})`;
-
-const collectImportReferences = (): ImportReference[] =>
-  productionSourceDirs.flatMap(walkSourceFiles).flatMap(readImportReferences);
 
 suite("Architecture dependency rules", () => {
-  test("keeps high-value layer boundaries free of forbidden imports", () => {
-    const violations = collectImportReferences().flatMap((reference) => {
-      const violationsForReference: RuleViolation[] = [];
-      if (
-        reference.file.startsWith("src/domain/") &&
-        isForbiddenDomainImport(reference)
-      ) {
-        violationsForReference.push({
-          ...reference,
-          rule: "domain must not import presentation/webview, parser, vscode, React, MUI, or XyFlow",
-        });
-      }
-      if (
-        reference.file.startsWith("src/application/") &&
-        isApplicationBoundaryImport(reference)
-      ) {
-        violationsForReference.push({
-          ...reference,
-          rule: "application must not import presentation or infrastructure",
-        });
-      }
-      if (
-        reference.file.startsWith("src/presentation/") &&
-        isPresentationParserImport(reference)
-      ) {
-        violationsForReference.push({
-          ...reference,
-          rule: "presentation must not import generated parser modules directly",
-        });
-      }
-      return violationsForReference;
+  test("collects supported TypeScript dependency syntax", () => {
+    const references = collectImportReferencesFromSource(
+      "src/application/example.ts",
+      `
+        import value from "./value";
+        import type { Input } from "./input";
+        import "./sideEffect";
+        export { output } from "./output";
+        export type { Result } from "./result";
+        const dynamicValue = import("@generate/parser/AjsParser");
+        const commonJsValue = require("legacy-package");
+        import equalsValue = require("./equalsValue");
+      `,
+    );
+
+    assert.deepStrictEqual(
+      references.map(({ kind, specifier }) => ({ kind, specifier })),
+      [
+        { kind: "import", specifier: "./value" },
+        { kind: "import-type", specifier: "./input" },
+        { kind: "import", specifier: "./sideEffect" },
+        { kind: "export", specifier: "./output" },
+        { kind: "export-type", specifier: "./result" },
+        { kind: "dynamic-import", specifier: "@generate/parser/AjsParser" },
+        { kind: "require", specifier: "legacy-package" },
+        { kind: "import-equals", specifier: "./equalsValue" },
+      ],
+    );
+  });
+
+  test("resolves relative and repository-alias imports", () => {
+    assert.strictEqual(
+      resolveImportPath("src/application/example.ts", "../domain/value"),
+      "src/domain/value",
+    );
+    assert.strictEqual(
+      resolveImportPath(
+        "src/infrastructure/parser/example.ts",
+        "@generate/parser/AjsParser",
+      ),
+      "src/generate/parser/AjsParser",
+    );
+    assert.strictEqual(
+      resolveImportPath(
+        "src/presentation/example.ts",
+        "@resource/i18n/message",
+      ),
+      "src/resource/i18n/message",
+    );
+    assert.strictEqual(
+      resolveImportPath("src/application/example.ts", "vscode"),
+      undefined,
+    );
+  });
+
+  test("collects all production roots in deterministic order", () => {
+    const references = collectProductionImportReferences(repoRoot);
+    const sortedReferences = [...references].sort((left, right) =>
+      `${left.file}\0${left.specifier}\0${left.kind}`.localeCompare(
+        `${right.file}\0${right.specifier}\0${right.kind}`,
+      ),
+    );
+
+    assert.deepStrictEqual(references, sortedReferences);
+    assert.ok(
+      references.some(({ file }) => file === "src/extension.ts"),
+      "extension.ts must be scanned",
+    );
+    [
+      "application",
+      "bootstrap",
+      "domain",
+      "infrastructure",
+      "presentation",
+      "resource",
+      "shared",
+    ].forEach((directory) => {
+      assert.ok(
+        references.some(({ file }) => file.startsWith(`src/${directory}/`)),
+        `${directory} production sources must be scanned`,
+      );
     });
+    assert.ok(
+      references.every(
+        ({ file }) =>
+          !file.startsWith("src/test/") && !file.startsWith("src/generate/"),
+      ),
+      "test and generated sources must not be dependency owners",
+    );
+  });
+
+  test("detects representative violations for the current rules", () => {
+    const references = [
+      ...collectImportReferencesFromSource(
+        "src/domain/example.ts",
+        'import * as vscode from "vscode";',
+      ),
+      ...collectImportReferencesFromSource(
+        "src/application/example.ts",
+        'import { Adapter } from "../infrastructure/Adapter";',
+      ),
+      ...collectImportReferencesFromSource(
+        "src/presentation/example.ts",
+        'import { AjsParser } from "@generate/parser/AjsParser";',
+      ),
+    ];
+
+    assert.deepStrictEqual(
+      findCurrentRuleViolations(references).map(({ file }) => file),
+      [
+        "src/domain/example.ts",
+        "src/application/example.ts",
+        "src/presentation/example.ts",
+      ],
+    );
+  });
+
+  test("keeps high-value layer boundaries free of forbidden imports", () => {
+    const violations = findCurrentRuleViolations(
+      collectProductionImportReferences(repoRoot),
+    );
 
     assert.deepStrictEqual(violations.map(formatViolation), []);
   });
