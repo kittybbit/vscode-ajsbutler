@@ -4,7 +4,7 @@
 
 - Purpose: isolate parser mechanics and raw data behind one normalized parser
   port.
-- Approved or active slice: Slice 1 is complete; approved Slice 2 is next.
+- Approved or active slice: Slices 1-2 are complete; approved Slice 3 is next.
 - Implement slices in order; each slice is a separate approval and commit
   boundary.
 - Do not change grammar, evaluator meaning, JP1/AJS interpretation, normalized
@@ -23,7 +23,7 @@
 - Planning scope: the entire `isolate-parser-boundary` feature.
 - Review status: repeat review passed; ready plan approved.
 - Human approval: approved for the full plan and all three slices.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 
 ## Human Approval
 
@@ -97,7 +97,7 @@
 
 ### Slice 2: Cut Application Consumers Over To The Normalized Parser Port
 
-- Status: Approved
+- Status: Complete
 - Scope: make `AjsParserPort` return an explicit normalized-document success or
   repository-owned syntax-error failure; split raw ANTLR evaluation into an
   infrastructure-internal parser seam; normalize exactly once in
@@ -167,6 +167,16 @@
   branch.
 - Out of Scope: raw model/normalizer relocation, grammar/evaluator changes, new
   consumers, diagnostic-rule changes, presentation migration.
+- Completion Evidence: TypeScript compilation, full desktop and web tests,
+  production build, architecture exact-allowlist validation, Markdown lint,
+  and qlty passed. General application raw/normalizer imports and all five
+  feature-owned raw allowances are now zero; normalized warnings, independent
+  semantic-diff failures, syntax positions, and telemetry counts are covered.
+- Implementation Feedback: one direct semantic-diff sample consumer required
+  normalized-result migration with the port cutover, reducing Slice 3's
+  remaining direct parse-then-normalize baseline without changing its approval
+  boundary. Explicit `ok === false` checks are required for reliable narrowing
+  under the repository TypeScript configuration.
 
 ### Slice 3: Move Raw Model And Normalization Into Infrastructure
 
@@ -192,8 +202,8 @@
     a normalized document helper for downstream application/presentation/flow
     behavior tests and a clearly named raw helper only for parser/normalizer and
     legacy-wrapper tests
-  - migrate the current 91 helper call sites across 24 suites; the current 47
-    direct normalization calls across 12 suites are the baseline for removing
+  - migrate the current 91 helper call sites across 24 suites; the remaining 45
+    direct normalization calls across 11 suites are the baseline for removing
     redundant parse-then-normalize usage where the normalizer itself is not the
     subject under test
   - keep raw access only in parser/normalizer suites and wrapper-focused suites
@@ -239,9 +249,9 @@
   - CHANGELOG impact: none for the verified behavior-neutral internal move
 - Approval Boundary: the raw model, normalizer and direct collaborators,
   evaluator/parser imports, `src/test/support/parseAjs.ts`, all 24 current
-  parser-helper consumer suites and semantic-diff sample normalization support,
-  the exact intentionally raw test set, parser/raw architecture enforcement,
-  and the smallest durable architecture update.
+  parser-helper consumer suites, the exact intentionally raw test set,
+  parser/raw architecture enforcement, and the smallest durable architecture
+  update. Semantic-diff sample normalization was completed with Slice 2.
 - Dependencies: Slices 1 and 2 complete.
 - Risks: import-path churn across tests can hide accidental API exposure;
   architecture tests must distinguish test-only access from production rules.
@@ -277,8 +287,6 @@
 - Test-only raw fixtures must not become a supported production boundary.
 - The temporary legacy wrapper input must not absorb work owned by
   `complete-normalized-domain-model`.
-- The current branch name belongs to the completed inventory feature; runtime
-  implementation requires a dedicated feature branch.
 - New qlty smells must be resolved or carried only as an explicit, approved,
   actionable follow-up. Metrics-only movement does not expand slice scope
   unless it identifies a concrete responsibility or production risk.

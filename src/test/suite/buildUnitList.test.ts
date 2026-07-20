@@ -6,7 +6,6 @@ import {
 } from "../../application/unit-list/unitListDocument";
 import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
-import { Unit } from "../../domain/values/Unit";
 import { testAjsParser } from "../support/parseAjs";
 
 const validDefinition = `
@@ -158,9 +157,10 @@ suite("Build Unit List", () => {
   });
 
   test("builds the DTO through an injected parser port", () => {
-    const root = new Unit("root,,jp1admin,");
+    const parseResult = testAjsParser.parse(validDefinition);
+    assert.strictEqual(parseResult.ok, true);
     const parser: AjsParserPort = {
-      parse: () => ({ rootUnits: [root], errors: [] }),
+      parse: () => parseResult,
     };
 
     const result = createBuildUnitList(parser)("ignored");
@@ -174,7 +174,7 @@ suite("Build Unit List", () => {
   test("returns repository-owned errors from an injected parser port", () => {
     const parser: AjsParserPort = {
       parse: () => ({
-        rootUnits: [],
+        ok: false,
         errors: [{ line: 2, column: 3, message: "invalid syntax" }],
       }),
     };

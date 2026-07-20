@@ -35,8 +35,8 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement approved Slice 2 of `isolate-parser-boundary` with
-   `sdd-implement-task` after the completed Slice 1 commit is clean.
+1. Implement approved Slice 3 of `isolate-parser-boundary` with
+   `sdd-implement-task` after the completed Slice 2 commit is clean.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
@@ -44,8 +44,8 @@ rules in `docs/specs/README.md`, not in this file.
 ## Active Feature Specs
 
 - `docs/specs/features/isolate-parser-boundary/`: active planning feature with
-  a reviewed and human-approved three-slice parser-boundary plan; Slice 1 is
-  complete and Slice 2 is next.
+  a reviewed and human-approved three-slice parser-boundary plan; Slices 1-2
+  are complete and Slice 3 is next.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

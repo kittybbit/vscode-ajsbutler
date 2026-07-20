@@ -25,24 +25,34 @@ AC = Acceptance Criteria.
   result: TypeScript compilation, full desktop tests, exact architecture
   validation, and qlty passed; raw-unit allowances decreased from five to two.
 - V2: `AntlrAjsParser.test.ts`, `buildUnitList.test.ts`, parser
-  golden/malformed fixtures, desktop tests, and web tests.
+  golden/malformed fixtures, desktop tests, and web tests. Slice 2 result:
+  normalized success, no-partial-document failure, desktop, and web tests
+  passed.
 - V3: `buildSyntaxDiagnostics.test.ts`, parser error/source-position tests,
   `uc-diagnose-ajs-definition.md` scenario review, desktop tests, and web tests.
+  Slice 2 result: syntax/semantic diagnostics and durable evidence wording
+  passed review and validation.
 - V4: `buildSemanticDiffReport.test.ts`, semantic comparison regression tests,
-  and before/after parser-error tests for `uc-build-semantic-diff.md`.
+  and before/after parser-error tests for `uc-build-semantic-diff.md`. Slice 2
+  result: independent failures and normalized comparison inputs passed.
 - V5: `buildSemanticDiffReport.test.ts`, semantic diff sample/report coverage,
   and report-content compatibility for `uc-present-semantic-diff-report.md`.
+  Slice 2 result: sample and report regression coverage passed.
 - V6: `extensionDependencies.test.ts`, including success/error classification
-  and privacy assertions.
+  and privacy assertions. Slice 2 result: success/error counts and privacy
+  assertions passed.
 - V7: `AntlrAjsParser.test.ts`, architecture dependency-rule tests, and
   production raw/generated/ANTLR scans.
 - V8: `normalizeAjsDocument.test.ts`, parser golden tests, and
-  relation/parameter/warning/source-position suites.
+  relation/parameter/warning/source-position suites. Slice 2 result: the public
+  adapter normalizes once and preserves normalized warnings; final physical
+  ownership remains in Slice 3.
 - V9: classify all 91 `parseAjs` calls across 24 suites; downstream suites use
   the normalized helper, intentionally raw suites use the named raw helper, and
   an exact importer scan rejects unclassified raw-helper use.
 - V10: full desktop tests, `rtk pnpm run test:web`, `rtk pnpm run build`, and
-  `rtk pnpm run qlty`.
+  `rtk pnpm run qlty`. Slice 2 result: all passed; existing web-test 404 logging
+  and webpack bundle-size warnings remained non-failing baseline output.
 
 ## Slice Coverage
 

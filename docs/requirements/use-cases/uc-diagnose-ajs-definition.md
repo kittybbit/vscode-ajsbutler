@@ -27,8 +27,8 @@ opened definition and provide precise, host-neutral diagnostic information.
   `vscode.Range`, and other VS Code API objects
 - the VS Code adapter maps application diagnostics into editor objects
 - existing parser syntax messages remain unchanged
-- semantic diagnostics preserve raw parsed data and do not rewrite parser
-  output
+- semantic diagnostics preserve normalized parameter and source-position
+  evidence without exposing or rewriting raw parser objects
 - shared JP1/AJS meaning comes from
   [Interpret JP1 Parameters](../domain-rules/interpret-jp1-parameters.md)
 - each supported semantic diagnostic refers to a stable `JP1-PARAM-*` rule ID
@@ -80,7 +80,8 @@ Scenario: A supported semantic violation produces a focused diagnostic
   And a parameter violates a supported JP1-PARAM rule
   When diagnostics are evaluated
   Then a diagnostic identifies that semantic violation
-  And raw parser output remains available to downstream consumers
+  And normalized parameter and source-position evidence remains available to
+    downstream consumers
 
 Scenario: Allowed explicit forms do not produce false positives
   Given a macro-variable or regular-expression form allowed by its parameter rule
@@ -109,7 +110,7 @@ in the shared parameter contract and enumerated above, including:
 ## Acceptance Notes
 
 - every violation of a supported diagnostic rule ID is reported without
-  changing normalized or raw evidence
+  changing normalized parameter or source-position evidence
 - the Use Case does not guarantee diagnostics for every JP1/AJS3 manual rule
 - absence of a diagnostic for an unsupported rule does not establish that the
   definition is valid under that rule

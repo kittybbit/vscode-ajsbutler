@@ -6,7 +6,7 @@ import {
 } from "../../application/semantic-diff/buildSemanticDiffReport";
 import type { CompareSemanticDiffInput } from "../../application/semantic-diff/compareSemanticDiff";
 import type { SemanticDiffChangeSet } from "../../domain/models/semantic-diff/SemanticDiff";
-import type { Unit } from "../../domain/values/Unit";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 
 type BuildSemanticDiffReportObservations = {
   parsedContents: string[];
@@ -22,7 +22,7 @@ const createParser = (
     observations.parsedContents.push(content);
     return content.includes("parse-error")
       ? {
-          rootUnits: [] as Unit[],
+          ok: false,
           errors: [
             {
               line: 1,
@@ -32,8 +32,11 @@ const createParser = (
           ],
         }
       : {
-          rootUnits: [] as Unit[],
-          errors: [],
+          ok: true,
+          document: {
+            rootUnits: [],
+            warnings: [],
+          } satisfies AjsDocument,
         };
   },
 });

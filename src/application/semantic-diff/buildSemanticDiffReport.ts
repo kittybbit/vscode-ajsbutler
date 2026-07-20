@@ -1,5 +1,4 @@
 import type { AjsParserError, AjsParserPort } from "../parsing/AjsParserPort";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
 import {
   compareSemanticDiff,
   type CompareSemanticDiff,
@@ -42,12 +41,12 @@ export const createBuildSemanticDiffReport =
     const beforeParse = parser.parse(beforeContent);
     const afterParse = parser.parse(afterContent);
 
-    if (beforeParse.errors.length > 0 || afterParse.errors.length > 0) {
+    if (beforeParse.ok === false || afterParse.ok === false) {
       return {
         ok: false,
         errors: {
-          before: beforeParse.errors,
-          after: afterParse.errors,
+          before: beforeParse.ok === true ? [] : beforeParse.errors,
+          after: afterParse.ok === true ? [] : afterParse.errors,
         },
       };
     }
@@ -56,8 +55,8 @@ export const createBuildSemanticDiffReport =
       ok: true,
       report: render(
         compare({
-          before: normalizeAjsDocument(beforeParse.rootUnits),
-          after: normalizeAjsDocument(afterParse.rootUnits),
+          before: beforeParse.document,
+          after: afterParse.document,
         }),
         language,
       ),

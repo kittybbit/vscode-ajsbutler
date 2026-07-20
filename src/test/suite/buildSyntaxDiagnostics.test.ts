@@ -79,7 +79,7 @@ suite("Build Syntax Diagnostics", () => {
   test("maps repository-owned errors from an injected parser port", () => {
     const parser: AjsParserPort = {
       parse: () => ({
-        rootUnits: [],
+        ok: false,
         errors: [{ line: 4, column: 2, message: "invalid syntax" }],
       }),
     };

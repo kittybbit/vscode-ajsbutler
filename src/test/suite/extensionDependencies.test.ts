@@ -48,8 +48,8 @@ suite("Extension dependencies", () => {
     const parser = instrumentParserPerformance(
       {
         parse: () => ({
-          rootUnits: [],
-          errors: [],
+          ok: true,
+          document: { rootUnits: [], warnings: [] },
         }),
       },
       {
@@ -61,8 +61,8 @@ suite("Extension dependencies", () => {
     );
 
     assert.deepStrictEqual(parser.parse("raw definition content"), {
-      rootUnits: [],
-      errors: [],
+      ok: true,
+      document: { rootUnits: [], warnings: [] },
     });
     assert.deepStrictEqual(
       {
@@ -80,5 +80,31 @@ suite("Extension dependencies", () => {
     );
     assert.strictEqual(events[0]?.eventName, "performance.parse.completed");
     assert.ok(events[0]?.properties?.durationBucket);
+  });
+
+  test("preserves parser failures while reporting their count", () => {
+    const events: Array<{
+      eventName: string;
+      properties?: TelemetryProperties;
+    }> = [];
+    const failure = {
+      ok: false as const,
+      errors: [{ line: 1, column: 2, message: "invalid syntax" }],
+    };
+    const parser = instrumentParserPerformance(
+      { parse: () => failure },
+      {
+        trackEvent: (eventName, properties) => {
+          events.push({ eventName, properties });
+        },
+        dispose() {},
+      },
+    );
+
+    assert.deepStrictEqual(parser.parse("raw definition content"), failure);
+    assert.strictEqual(events[0]?.properties?.result, "failed");
+    assert.strictEqual(events[0]?.properties?.diagnosticCountBucket, "1");
+    assert.ok(!JSON.stringify(events[0]).includes("invalid syntax"));
+    assert.ok(!JSON.stringify(events[0]).includes("raw definition content"));
   });
 });

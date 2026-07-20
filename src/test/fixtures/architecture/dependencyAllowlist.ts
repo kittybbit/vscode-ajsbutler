@@ -26,20 +26,7 @@ const ownedBy = (
 const rawUnitAllowances = ownedBy(
   "isolate-parser-boundary",
   "Raw Unit is confined to the parser and normalizer seam.",
-  [
-    {
-      source: "src/application/parsing/AjsParserPort.ts",
-      target: "src/domain/values/Unit",
-      kind: "import-type",
-      ruleId: "raw-unit-outside-parser-normalizer",
-    },
-    {
-      source: "src/application/unit-list/buildUnitList.ts",
-      target: "src/domain/values/Unit",
-      kind: "import",
-      ruleId: "raw-unit-outside-parser-normalizer",
-    },
-  ],
+  [],
 );
 
 const legacyWrapperAllowances = ownedBy(

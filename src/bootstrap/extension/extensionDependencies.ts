@@ -51,12 +51,13 @@ export const instrumentParserPerformance = (
     const startedAt = performance.now();
     const result = parser.parse(content);
     try {
+      const errorCount = result.ok === true ? 0 : result.errors.length;
       const event = createPerformanceTelemetryEvent({
         operation: "parse",
-        result: result.errors.length > 0 ? "failed" : "success",
+        result: result.ok ? "success" : "failed",
         host: getTelemetryHost(),
         durationBucket: toDurationBucket(performance.now() - startedAt),
-        diagnosticCountBucket: toCountBucket(result.errors.length),
+        diagnosticCountBucket: toCountBucket(errorCount),
       });
       telemetry.trackEvent(event.name, event.properties);
     } catch {
