@@ -10,7 +10,9 @@ evidence, and unsupported-state semantics without transitional wrappers.
 
 - Current decision: define the reusable JP1/AJS concepts required by downstream
   application pipelines.
-- Read first: this file, `TASKS.md`, and inventory/parser traceability.
+- Read first: this file, `TASKS.md`, the wrapper entries in
+  `src/test/fixtures/architecture/dependencyAllowlist.ts`, and parser-feature
+  traceability when available.
 - Do not create `CONTEXT.md`.
 
 ## Origin
@@ -20,7 +22,7 @@ evidence, and unsupported-state semantics without transitional wrappers.
 - JP1/AJS source reference: JP1/AJS3 version 13 definition/config semantics
   already recorded in durable domain rules and use cases; repository-observed
   wrapper behavior remains compatibility evidence where undocumented.
-- Dependencies: inventory and parser-boundary features.
+- Dependencies: completed guardrail baseline and the parser-boundary feature.
 
 ## Requirements
 
@@ -91,5 +93,5 @@ evidence, and unsupported-state semantics without transitional wrappers.
 
 ## Open Questions
 
-- Inventory must determine which wrapper semantics are shared domain rules and
-  which belong to projections or presentation.
+- Planning must classify each owned wrapper allowance as shared domain meaning,
+  projection behavior, or removable legacy structure.

@@ -9,7 +9,9 @@ boundaries as tested repository invariants and accurate durable documentation.
 ## Minimal Context
 
 - Current decision: provide the final zero-legacy, zero-exception migration exit.
-- Read first: this file, `TASKS.md`, and the complete inventory traceability.
+- Read first: this file, `TASKS.md`,
+  `src/test/support/architectureDependencyRules.ts`, and
+  `src/test/fixtures/architecture/dependencyAllowlist.ts`.
 - Do not create `CONTEXT.md`.
 
 ## Origin

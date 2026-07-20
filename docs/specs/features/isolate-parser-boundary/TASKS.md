@@ -3,13 +3,13 @@
 ## Agent Brief
 
 - Purpose: isolate parser mechanics and raw data behind normalization.
-- Approved or active slice: none; blocked on inventory and planning.
+- Approved or active slice: none; ready for planning.
 - Do not change grammar or JP1/AJS interpretation.
 - Do not fill normalized-model gaps with presentation-facing raw fields.
-- Read first: `SPECS.md`, this file, and the parser inventory mapping.
+- Read first: `SPECS.md`, this file, and the owned raw/parser allowances.
 - Validate: docs intake with `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: plan after `architecture-inventory-and-guardrails`.
+- Next decision: create the full implementation-slice plan with `sdd-plan-task`.
 
 ## Plan Status
 
@@ -27,7 +27,7 @@
 
 ## Implementation Slices
 
-- Not yet decomposed; use `sdd-plan-task` after the dependency inventory.
+- Not yet decomposed; use `sdd-plan-task` with the completed guardrail evidence.
 
 ## Traceability
 

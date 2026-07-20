@@ -6,7 +6,8 @@
 - Approved or active slice: none; blocked on all predecessor features.
 - Do not remove code until replacements and zero consumers are proven.
 - Do not defer an unmet migration criterion or rewrite docs ahead of evidence.
-- Read first: `SPECS.md`, this file, and full migration traceability.
+- Read first: `SPECS.md`, this file, the rule catalog, the exact allowlist, and
+  predecessor traceability.
 - Validate: docs intake with `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
 - Next decision: plan only after predecessor feature exits are evidenced.

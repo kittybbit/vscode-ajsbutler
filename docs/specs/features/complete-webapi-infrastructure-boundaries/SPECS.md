@@ -95,5 +95,5 @@ application-owned import port and DTO boundary.
 
 ## Open Questions
 
-- Inventory must confirm whether any remaining Node-only shared import or raw
-  server response leakage exists.
+- The guardrail baseline found no WebAPI-owned import violation. Planning must
+  still confirm whether raw server response semantics leak across the adapter.

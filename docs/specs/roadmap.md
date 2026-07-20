@@ -60,9 +60,10 @@
 
    - The application-facing parser port and host-neutral infrastructure ANTLR
      adapter are implemented for unit-list and syntax-diagnostic consumers.
-   - A scoped architecture dependency test now checks high-value domain,
-     application, and presentation import boundaries through the existing
-     desktop test path.
+   - A deterministic architecture dependency collector and full rule catalog
+     now guard layer, parser/raw, wrapper, host/framework, Node/browser,
+     telemetry SDK, and composition boundaries. Current migration debt is an
+     exact, owned, stale-checked allowlist rather than a wildcard exception.
    - Raw `Unit` and repository-owned parser-error behavior remain the initial
      seam; generated ANTLR artifacts and mechanics stay outside application and
      domain production modules.
@@ -147,9 +148,9 @@
 10. Complete the DDD/Clean Architecture migration through independently
     reviewable roadmap features.
 
-    1. `architecture-inventory-and-guardrails`: classify every production
-       dependency and use-case boundary, then establish guardrails without
-       hiding current violations.
+    1. Completed: `architecture-inventory-and-guardrails` classified production
+       dependencies and all eleven use-case boundaries, then established
+       guardrails with exact ownership for every current violation.
     2. `isolate-parser-boundary`: confine generated parser, ANTLR, and raw parser
        data to the parser/normalization boundary.
     3. `complete-normalized-domain-model`: make normalized domain concepts and
@@ -176,8 +177,9 @@
     - The existing `import-definition-via-webapi` feature continues to own beta
       scope and real-environment evidence; the new WebAPI architecture feature
       owns only dependency, port/adapter, and composition boundaries.
-    - Do not start implementation from these intake documents. Each feature
-      requires `sdd-plan-task`, `sdd-review-plan`, and explicit human approval.
+    - Do not start implementation from these intake documents. Each remaining
+      feature requires `sdd-plan-task`, `sdd-review-plan`, and explicit human
+      approval.
 
 ## Deferred / Optional Slices
 

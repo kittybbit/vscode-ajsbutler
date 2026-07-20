@@ -10,8 +10,8 @@ application use cases, and presentation registrations.
 
 - Current decision: complete the outer runtime boundary shared by desktop and
   web hosts.
-- Read first: this file, `TASKS.md`, inventory traceability, and architecture
-  serialization/bootstrap sections.
+- Read first: this file, `TASKS.md`, the architecture rule/allowlist sources,
+  and architecture serialization/bootstrap sections.
 - Do not create `CONTEXT.md`.
 
 ## Origin
@@ -98,4 +98,6 @@ application use cases, and presentation registrations.
 
 ## Open Questions
 
-- Inventory must identify every payload and construction site before planning.
+- The guardrail baseline identifies import-level Node and construction evidence;
+  planning must additionally inspect every payload and runtime construction
+  site.

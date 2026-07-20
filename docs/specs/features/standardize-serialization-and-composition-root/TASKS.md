@@ -6,7 +6,7 @@
 - Approved or active slice: none; planning and dependencies pending.
 - Do not change message semantics, activation, lifecycle, or viewer behavior.
 - Do not introduce a service container or domain-object reconstruction.
-- Read first: `SPECS.md`, this file, and inventory traceability.
+- Read first: `SPECS.md`, this file, and the Node/composition guardrail evidence.
 - Validate: docs intake with `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
 - Next decision: plan after upstream DTO and adapter boundaries stabilize.

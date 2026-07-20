@@ -35,22 +35,20 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Run Feature Exit Review for `architecture-inventory-and-guardrails`; all
-   approved implementation slices and required validation are complete.
+1. Create the full implementation-slice plan for `isolate-parser-boundary`,
+   then send it through `sdd-review-plan` before approval.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/architecture-inventory-and-guardrails/`: active roadmap
-  feature with all three slices complete and Feature Exit Review pending.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
 The remaining Clean Architecture migration feature folders are roadmap-queued,
-not active branch implementation work. Their dependency order is maintained in
-`docs/specs/roadmap.md`.
+not active branch implementation work. `isolate-parser-boundary` is next for
+planning, and the dependency order is maintained in `docs/specs/roadmap.md`.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the

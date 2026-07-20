@@ -3,13 +3,15 @@
 ## Agent Brief
 
 - Purpose: isolate telemetry SDK, schema translation, construction, and failure.
-- Approved or active slice: none; planning and inventory pending.
+- Approved or active slice: none; upstream dependencies and planning pending.
 - Do not add events/properties or weaken privacy.
 - Do not make telemetry required for any use case.
-- Read first: `SPECS.md`, this file, and architecture/roadmap telemetry sections.
+- Read first: `SPECS.md`, this file, the architecture rule catalog, and
+  architecture/roadmap telemetry sections.
 - Validate: docs intake with `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: plan after telemetry dependency inventory.
+- Next decision: plan after parser/domain prerequisites, using the verified SDK
+  boundary as impact evidence.
 
 ## Plan Status
 
@@ -27,7 +29,7 @@
 
 ## Implementation Slices
 
-- Not yet decomposed; use `sdd-plan-task` after inventory.
+- Not yet decomposed; use `sdd-plan-task` after upstream prerequisites.
 
 ## Traceability
 

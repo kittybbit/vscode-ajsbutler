@@ -16,9 +16,10 @@
 | Transport/root    | F10 | Req  | TBD  | JSON/host              |
 | Legacy/rules/docs | F11 | Req  | TBD  | Zero refs/full suite   |
 
-Feature IDs follow roadmap order from
-`architecture-inventory-and-guardrails` through this feature. Each ID maps to
-the corresponding folder listed in roadmap item 10.
+F1 is the guardrail baseline in
+`src/test/support/architectureDependencyRules.ts` and
+`src/test/fixtures/architecture/dependencyAllowlist.ts`. F2 through F11 follow
+the remaining feature order in roadmap item 10.
 
 ## Required Feature Exit Evidence
 

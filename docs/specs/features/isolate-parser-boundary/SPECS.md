@@ -9,8 +9,9 @@ cannot consume parser-adjacent structures.
 ## Minimal Context
 
 - Current decision: establish the sole raw-to-normalized conversion boundary.
-- Read first: this file, `TASKS.md`, and the parser findings in the inventory
-  feature traceability.
+- Read first: this file, `TASKS.md`, the raw/parser allowances in
+  `src/test/fixtures/architecture/dependencyAllowlist.ts`, and the rule catalog
+  in `src/test/support/architectureDependencyRules.ts`.
 - Do not create `CONTEXT.md`.
 
 ## Origin
@@ -19,7 +20,7 @@ cannot consume parser-adjacent structures.
 - Source use cases: all use cases that parse or import AJS definitions.
 - JP1/AJS source reference: existing grammar and parser golden behavior are the
   definition/config reference; no grammar or rule-coverage change is intended.
-- Dependency: `architecture-inventory-and-guardrails`.
+- Dependency: the architecture inventory and guardrail baseline is complete.
 
 ## Requirements
 
@@ -89,4 +90,4 @@ cannot consume parser-adjacent structures.
 ## Open Questions
 
 - Exact raw boundary type location and parser-port return contract require
-  planning after the inventory is complete.
+  planning against the owned raw/parser allowances.

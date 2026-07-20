@@ -9,7 +9,8 @@
 - Read first: `SPECS.md`, this file, and relevant domain-rule/use-case files.
 - Validate: docs intake with `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: plan after parser and wrapper inventory decisions are known.
+- Next decision: plan after the parser boundary completes, using the owned
+  wrapper allowances as impact evidence.
 
 ## Plan Status
 

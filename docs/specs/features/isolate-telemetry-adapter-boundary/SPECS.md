@@ -90,5 +90,6 @@ change use-case behavior.
 
 ## Open Questions
 
-- Inventory must establish whether event schemas are currently duplicated or
-  owned implicitly by callers.
+- The guardrail baseline proves the SDK import is infrastructure-only. Planning
+  must establish whether event schemas are duplicated or owned implicitly by
+  callers.

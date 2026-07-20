@@ -4,13 +4,14 @@
 
 - Purpose: finish WebAPI port/adapter/bootstrap ownership without changing beta
   scope.
-- Approved or active slice: none; planning and inventory pending.
+- Approved or active slice: none; upstream dependencies and planning pending.
 - Do not change endpoints, beta labeling, credentials, or host availability.
 - Do not duplicate real-environment evidence work.
 - Read first: `SPECS.md`, this file, and the existing import feature docs.
 - Validate: docs intake with `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: plan only if inventory finds residual boundary work.
+- Next decision: plan after parser/domain prerequisites, using the completed
+  guardrail baseline to verify residual boundary work.
 
 ## Plan Status
 
@@ -28,7 +29,7 @@
 
 ## Implementation Slices
 
-- Not yet decomposed; inventory may prove some requirements already satisfied.
+- Not yet decomposed; planning may prove some requirements already satisfied.
 
 ## Traceability
 
