@@ -79,5 +79,3 @@ Scenario: Opening definition details preserves flow navigation
 
 - raw parameter text must preserve the current key/value ordering expected by
   users
-- legacy wrapper-only semantics may still be needed elsewhere, so this slice
-  should extract dialog content without forcing a broader table or flow rewrite

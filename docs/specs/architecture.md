@@ -19,8 +19,8 @@ Migration should be incremental and use-case driven.
 ## Current Structure
 
 - `src/domain`
-  Contains unit models, value objects, the normalized AJS model, and some
-  transitional wrapper/event helpers.
+  Contains the normalized AJS model, domain values, and reusable JP1/AJS rule
+  helpers.
 - `src/application`
   Contains DTO-oriented use cases and view adapters for unit list, flow graph,
   editor feedback, parser and telemetry ports, and unit definition building.
@@ -87,24 +87,16 @@ Migration should be incremental and use-case driven.
 - production references to this model are confined to
   `src/infrastructure/parser/**`
 
-### Interpreter / wrapper layer
-
-- `src/domain/models/units/*` remains a transitional interpretation layer that
-  accepts narrow legacy structural inputs instead of the concrete raw parser
-  type
-- this layer derives JP1/AJS semantics such as schedule flags, root jobnet
-  detection, layout hints, and relation traversal
-- these wrappers are still useful during migration, but they are not the final
-  stable application-facing model
-
 ### Normalized model
 
-- normalized AJS concepts should live behind stable names such as
-  `AjsDocument`, `AjsUnit`, and `AjsDependency`
+- normalized AJS concepts live behind stable names such as `AjsDocument`,
+  `AjsUnit`, and `AjsDependency`
+- focused domain rules own reusable JP1/AJS meaning without a transitional unit
+  wrapper hierarchy
 - the infrastructure normalizer may use domain interpretation helpers while
   producing the stable model for application use cases
-- application slices should gradually depend on the normalized model instead of
-  parser internals or wrapper-specific classes
+- application slices depend on the normalized model instead of parser internals
+  or wrapper-specific classes
 
 ## VS Code API Boundaries
 

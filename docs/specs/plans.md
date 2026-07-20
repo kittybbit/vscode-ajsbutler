@@ -35,18 +35,15 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Use `sdd-plan-task` Feature Exit Mode to review
-   `complete-normalized-domain-model`. All three implementation slices are complete;
-   confirm the Feature Definition of Done and durable knowledge disposition before
-   closure.
+1. Use `sdd-plan-task` Planning Mode to prepare
+   `migrate-unit-information-boundaries`, now that normalized-domain completion has
+   removed its prerequisite legacy wrapper graph.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/complete-normalized-domain-model/`: three-slice plan is
-  approved and all slices are complete; Feature Exit Review is next.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

@@ -47,8 +47,8 @@
    - Completed: unit-list document serialization now crosses the webview
      boundary as a normalized DTO, and CSV export now uses application-facing
      row input before presentation copy/save actions.
-   - Keep unit-local JP1/AJS behavior on wrappers when it is not reused across
-     consumers.
+   - Keep consumer-specific projection and presentation choices outside the
+     normalized domain model.
    - Promote only cross-consumer semantics into normalized helpers.
    - JP1/AJS3 version 13 remains the normative product target for future
      parameter and command semantics; future manual-alignment work should start
@@ -68,9 +68,9 @@
      now guard layer, parser/raw, wrapper, host/framework, Node/browser,
      telemetry SDK, and composition boundaries. Current migration debt is an
      exact, owned, stale-checked allowlist rather than a wildcard exception.
-   - Continue normalized-model convergence through
-     `complete-normalized-domain-model`; legacy wrapper semantics remain
-     outside the parser boundary and retain their exact downstream ownership.
+   - Completed: `complete-normalized-domain-model` made normalized structure and
+     state the single live domain model, removed the legacy wrapper graph, and
+     reduced its exact dependency allowances to zero.
 
 5. Maintain the explicit extension composition root.
 
@@ -156,8 +156,9 @@
     2. Completed: `isolate-parser-boundary` confined generated parser, ANTLR,
        raw parser data, and raw normalization to infrastructure while exposing
        normalized parser results to application consumers.
-    3. `complete-normalized-domain-model`: make normalized domain concepts and
-       shared JP1/AJS rules sufficient for downstream use cases.
+    3. Completed: `complete-normalized-domain-model` made normalized domain
+       concepts and shared JP1/AJS rules sufficient for downstream use cases and
+       retired the legacy wrapper graph.
     4. After normalized identity and semantics are stable, the following
        vertical features may be planned independently where their dependency
        evidence permits:
