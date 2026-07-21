@@ -4,7 +4,7 @@
 
 - Purpose: complete one normalized flow graph, exploration, and navigation
   boundary without changing visible behavior.
-- Approved or active slice: Slices 1 and 2 are complete; Slice 3 is active. All
+- Approved or active slice: Slices 1-3 are complete; Slice 4 is active. All
   four reviewed slices were human-approved on 2026-07-21.
 - Implement in order: serialized flow document/base graph, flow exploration DTO
   consumers, expanded placement constraints, then cross-view navigation.
@@ -17,7 +17,7 @@
   cases.
 - Validate every code slice with `rtk pnpm run qlty` and its risk-based checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement approved Slice 3 with `sdd-implement-task`.
+- Next decision: implement approved Slice 4 with `sdd-implement-task`.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: revised four-slice plan reviewed and found Ready for approval
   on 2026-07-21.
 - Human approval: Approved on 2026-07-21 for all four slices.
-- Active implementation slice: Slice 3.
+- Active implementation slice: Slice 4.
 
 ## Human Approval
 
@@ -254,7 +254,8 @@
 
 ### Slice 3: Expose Deterministic Expanded-Graph Placement Constraints
 
-- Status: Approved
+- Status: Complete
+- Completion approved: 2026-07-22.
 - Scope: make the application graph builder accept the active scope and complete
   visible nested-unit set, then return deterministic expanded nodes/edges plus
   plain containment, stable sibling order, placement-constraint, and affected-
@@ -343,6 +344,14 @@
 - Risks: the current geometry pipeline interleaves structure, growth offsets,
   panel intrusion, and collision phases. The split must preserve phase ordering
   while preventing either side from silently redefining the other's contract.
+- Implementation Feedback: application-owned containment ranges and separate
+  horizontal/vertical affected-sibling memberships allowed presentation to
+  preserve the existing geometry phase order without recomputing structural
+  scope from rendered coordinates. The original all-sibling candidate contract
+  was rejected during independent review because it left membership ownership
+  in presentation; the corrected directional contract passed the focused
+  re-review and unchanged exact-coordinate regressions. This is feature-local
+  implementation evidence and requires no durable documentation update.
 - Out of Scope: alternative layout engines, layout optimization for its own
   sake, persistence of viewport/expansion state, shared search semantics,
   navigation routing, and semantic-diff ownership changes.

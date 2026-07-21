@@ -1,9 +1,10 @@
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
-import {
-  FlowGraphDto,
-  FlowGraphEdgeDto,
-  FlowGraphNodeDto,
-} from "../../../../application/flow-graph/buildFlowGraphCore";
+import type {
+  ExpandedFlowGraphConstraintsDto,
+  ExpandedFlowGraphScopeConstraintDto,
+  ExpandedUnitPlacementConstraintDto,
+} from "../../../../application/flow-graph/buildExpandedFlowGraph";
+import { FlowGraphDto } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { createFlowGraphMetrics, FlowGraphPosition } from "./flowGraphPosition";
 
 export type ExpandedNodeDecoration = {
@@ -38,10 +39,6 @@ export type FlowGraphMetrics = ReturnType<typeof createFlowGraphMetrics>;
 
 export type ExpandedFlowGraphBuildContext = {
   basePx: number;
-  nodes: FlowGraphNodeDto[];
-  edges: FlowGraphEdgeDto[];
-  nodeIds: Set<string>;
-  edgeIds: Set<string>;
   visibleUnitIds: Set<string>;
   initialPositions: Map<string, FlowGraphPosition>;
   parentAnchors: Map<string, string>;
@@ -49,5 +46,8 @@ export type ExpandedFlowGraphBuildContext = {
   positionOverrides: Map<string, FlowGraphPosition>;
   nodeDecorations: Map<string, ExpandedNodeDecoration>;
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
+  constraints: ExpandedFlowGraphConstraintsDto;
+  scopeByContainerId: ReadonlyMap<string, ExpandedFlowGraphScopeConstraintDto>;
+  expandedUnitById: ReadonlyMap<string, ExpandedUnitPlacementConstraintDto>;
   metrics: FlowGraphMetrics;
 };
