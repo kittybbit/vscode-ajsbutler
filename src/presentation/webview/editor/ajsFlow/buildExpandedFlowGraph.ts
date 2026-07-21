@@ -1,10 +1,8 @@
-import {
-  AjsDocument,
-  AjsUnit,
-  findAjsUnitById,
-  flattenAjsUnits,
-} from "../../../../domain/models/ajs/AjsDocument";
-import { buildFlowGraph } from "../../../../application/flow-graph/buildFlowGraph";
+import { buildFlowGraphFromValidatedDocument } from "../../../../application/flow-graph/buildFlowGraph";
+import type {
+  FlowGraphUnitDto,
+  ValidatedFlowGraphDocument,
+} from "../../../../application/flow-graph/flowGraphDocument";
 import {
   FlowGraphDto,
   FlowGraphEdgeDto,
@@ -38,11 +36,11 @@ type FlowGraphPositionState = {
 type ExpandedFlowGraphContextArgs = {
   baseGraph: FlowGraphDto;
   basePx: number;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 export type BuildExpandedFlowGraphInput = {
-  document: AjsDocument;
+  document: ValidatedFlowGraphDocument;
   currentUnitId: string;
   expandedUnitIds: ReadonlySet<string> | readonly string[];
   basePx: number;
@@ -100,17 +98,10 @@ const createExpandedFlowGraphContext = ({
   };
 };
 
-const createUnitById = (
-  document: AjsDocument,
-): ReadonlyMap<string, AjsUnit> => {
-  const allUnits = flattenAjsUnits(document.rootUnits);
-  return new Map(allUnits.map((unit) => [unit.id, unit]));
-};
-
 const isExpandedNestedUnitInScope = (
   unitId: string,
   currentUnitId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): boolean => {
   const unit = unitById.get(unitId);
   return (
@@ -124,7 +115,7 @@ const isExpandedNestedUnitInScope = (
 const createExpandedUnitIdSet = (
   expandedUnitIds: ReadonlySet<string> | readonly string[],
   currentUnitId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): Set<string> =>
   new Set(
     [...expandedUnitIds].filter((unitId) =>
@@ -162,22 +153,23 @@ export const buildExpandedFlowGraph = (
     basePx,
     semanticDiffHighlights,
   } = input;
-  const baseGraph = buildFlowGraph(
+  const baseGraphResult = buildFlowGraphFromValidatedDocument(
     document,
     currentUnitId,
     semanticDiffHighlights,
   );
-  if (!baseGraph) {
+  if (baseGraphResult.status === "unavailable") {
     return createEmptyExpandedFlowGraphResult();
   }
+  const baseGraph = baseGraphResult.graph;
 
-  const unitById = createUnitById(document);
+  const unitById = document.index.unitById;
   const context = createExpandedFlowGraphContext({
     baseGraph,
     basePx,
     unitById,
   });
-  const currentUnit = findAjsUnitById(document, currentUnitId);
+  const currentUnit = unitById.get(currentUnitId);
   if (!currentUnit) {
     return createBaseExpandedFlowGraphResult(baseGraph, context);
   }

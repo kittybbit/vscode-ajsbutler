@@ -7,11 +7,9 @@ import {
 } from "react";
 import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import {
-  AjsDocument,
-  findRootJobnet,
-  flattenAjsUnits,
-} from "../../../../domain/models/ajs/AjsDocument";
-import { toAjsDocument } from "../../../../application/unit-list/unitListDocument";
+  type ValidatedFlowGraphDocument,
+  validateFlowGraphDocument,
+} from "../../../../application/flow-graph/flowGraphDocument";
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
@@ -294,7 +292,7 @@ export const useFlowViewerFitView = ({
 };
 
 type UseFlowScopeResetParams = {
-  ajsDocument?: AjsDocument;
+  documentIdentity?: object;
   currentUnitId?: string;
   preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
   resetSearch: () => void;
@@ -333,7 +331,7 @@ const resetFlowScopeState = ({
 };
 
 export const useFlowScopeReset = ({
-  ajsDocument,
+  documentIdentity,
   currentUnitId,
   preserveSearchOnNextScopeChange,
   resetSearch,
@@ -346,7 +344,7 @@ export const useFlowScopeReset = ({
       setExpandedUnitIds,
     });
   }, [
-    ajsDocument,
+    documentIdentity,
     currentUnitId,
     preserveSearchOnNextScopeChange,
     resetSearch,
@@ -356,7 +354,9 @@ export const useFlowScopeReset = ({
 
 type UseFlowDocumentSubscriptionParams = {
   prevUnitEntityId: MutableRefObject<string | undefined>;
-  setAjsDocument: Dispatch<SetStateAction<AjsDocument | undefined>>;
+  setFlowDocument: Dispatch<
+    SetStateAction<ValidatedFlowGraphDocument | undefined>
+  >;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setUnitDefinitionByPath: Dispatch<
     SetStateAction<ReadonlyMap<string, UnitDefinitionDialogDto>>
@@ -364,33 +364,40 @@ type UseFlowDocumentSubscriptionParams = {
 };
 
 const resolveNextCurrentUnitId = (
-  nextDocument: AjsDocument | undefined,
+  nextDocument: ValidatedFlowGraphDocument | undefined,
   prevUnitId: string | undefined,
 ): string | undefined => {
   if (!nextDocument) {
     return undefined;
   }
-  const units = flattenAjsUnits(nextDocument.rootUnits);
-  return prevUnitId
-    ? units.find((unit) => unit.id === prevUnitId)?.id
-    : findRootJobnet(nextDocument)?.id;
+  if (prevUnitId) {
+    return nextDocument.index.unitById.get(prevUnitId)?.id;
+  }
+  for (const unit of nextDocument.index.unitById.values()) {
+    if (unit.unitType === "n" && unit.isRootJobnet) {
+      return unit.id;
+    }
+  }
+  return undefined;
 };
 
 export const resolveFlowDocumentChange = (
   data: unknown,
   previousUnitId: string | undefined,
 ) => {
-  const ajsDocument = data ? toAjsDocument(data) : undefined;
+  const validation = data ? validateFlowGraphDocument(data) : undefined;
+  const flowDocument =
+    validation?.status === "available" ? validation : undefined;
   return {
-    ajsDocument,
-    currentUnitId: resolveNextCurrentUnitId(ajsDocument, previousUnitId),
+    flowDocument,
+    currentUnitId: resolveNextCurrentUnitId(flowDocument, previousUnitId),
     unitDefinitionByPath: toUnitDefinitionByPath(data),
   };
 };
 
 export const useFlowDocumentSubscription = ({
   prevUnitEntityId,
-  setAjsDocument,
+  setFlowDocument,
   setCurrentUnitId,
   setUnitDefinitionByPath,
 }: UseFlowDocumentSubscriptionParams) => {
@@ -401,7 +408,7 @@ export const useFlowDocumentSubscription = ({
         data,
         prevUnitEntityId.current,
       );
-      setAjsDocument(() => nextState.ajsDocument);
+      setFlowDocument(() => nextState.flowDocument);
       setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
       setCurrentUnitId(() => nextState.currentUnitId);
     };
@@ -421,7 +428,7 @@ export const useFlowDocumentSubscription = ({
     };
   }, [
     prevUnitEntityId,
-    setAjsDocument,
+    setFlowDocument,
     setCurrentUnitId,
     setUnitDefinitionByPath,
   ]);

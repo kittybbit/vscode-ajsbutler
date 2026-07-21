@@ -24,13 +24,13 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { collectUnitTreeAncestorUnitIds } from "./unitTreeSelection";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
 
 export type UnitTreeSelectorProps = {
-  rootUnits: AjsUnit[];
-  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>;
+  rootUnits: FlowGraphUnitDto[];
+  unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>;
   currentUnitId?: string;
   hoveredUnitId?: string;
   selectedUnitId?: string;
@@ -38,8 +38,8 @@ export type UnitTreeSelectorProps = {
   ariaLabel?: string;
   collapsedAriaLabel?: string;
   autoScrollSelectedUnit?: boolean;
-  canOpenScopeUnit?: (unit: AjsUnit) => boolean;
-  isUnitEnabled?: (unit: AjsUnit) => boolean;
+  canOpenScopeUnit?: (unit: FlowGraphUnitDto) => boolean;
+  isUnitEnabled?: (unit: FlowGraphUnitDto) => boolean;
   onHoverUnit?: (unitId: string) => void;
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
@@ -47,13 +47,13 @@ export type UnitTreeSelectorProps = {
 };
 
 type UnitTreeSelectorTreeProps = {
-  units: readonly AjsUnit[];
-  canOpenScopeUnit: (unit: AjsUnit) => boolean;
+  units: readonly FlowGraphUnitDto[];
+  canOpenScopeUnit: (unit: FlowGraphUnitDto) => boolean;
   currentPathUnitIds: ReadonlySet<string>;
   currentUnitId?: string;
   expandedUnitIds: ReadonlySet<string>;
   hoveredUnitId?: string;
-  isUnitEnabled: (unit: AjsUnit) => boolean;
+  isUnitEnabled: (unit: FlowGraphUnitDto) => boolean;
   onHoverUnit?: (unitId: string) => void;
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
@@ -64,7 +64,7 @@ type UnitTreeSelectorTreeProps = {
 };
 
 type UnitTreeSelectorUnitProps = Omit<UnitTreeSelectorTreeProps, "units"> & {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
 };
 
 type UnitTreeRowState = {
@@ -82,7 +82,7 @@ type UnitTreeExpandControlProps = Pick<
   UnitTreeRowState,
   "hasChildren" | "isExpanded"
 > & {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   onToggle: () => void;
 };
 
@@ -90,19 +90,19 @@ type UnitTreeRowButtonProps = Pick<
   UnitTreeRowState,
   "isCurrent" | "isEnabled" | "isSelected"
 > & {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   onSelect: () => void;
 };
 
 type UnitTreeOpenScopeActionProps = Pick<UnitTreeRowState, "canOpenScope"> & {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   onOpenScope?: (unitId: string) => void;
 };
 
 type UnitTreeRowFrameProps = Pick<UnitTreeSelectorUnitProps, "setRowRef"> & {
   children: React.ReactNode;
   rowState: UnitTreeRowState;
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 };
@@ -112,7 +112,7 @@ type UnitTreeNestedChildrenProps = Pick<
   "hasChildren" | "isExpanded"
 > &
   Omit<UnitTreeSelectorTreeProps, "units"> & {
-    unit: AjsUnit;
+    unit: FlowGraphUnitDto;
   };
 
 type UnitTreeSelectorToolbarProps = {
@@ -130,7 +130,7 @@ type CollapsedUnitTreeRailProps = {
 type ExpandedUnitTreePanelProps = Omit<UnitTreeSelectorTreeProps, "units"> & {
   ariaLabel: string;
   onCollapse: () => void;
-  rootUnits: readonly AjsUnit[];
+  rootUnits: readonly FlowGraphUnitDto[];
   title: string;
 };
 
@@ -154,7 +154,7 @@ export const mergeUnitIds = (
 const collectRequiredExpandedUnitIds = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
-  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>,
+  unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
 ): readonly (string | undefined)[] => [
   ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
   currentUnitId,
@@ -163,7 +163,7 @@ const collectRequiredExpandedUnitIds = (
 
 const collectCurrentPathUnitIds = (
   currentUnitId: string | undefined,
-  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>,
+  unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
 ): ReadonlySet<string> =>
   new Set([
     ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
@@ -187,7 +187,7 @@ const setUnitExpanded = (
 const useExpandedUnitTreeState = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
-  unitById: ReadonlyMap<string, Pick<AjsUnit, "id" | "parentId">>,
+  unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
 ) => {
   const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(
     () => new Set<string>(),
@@ -276,7 +276,7 @@ const useSelectedTreeRowScroll = (
 };
 
 const resolveUnitTreeRowState = (
-  unit: AjsUnit,
+  unit: FlowGraphUnitDto,
   props: Pick<
     UnitTreeSelectorUnitProps,
     | "canOpenScopeUnit"

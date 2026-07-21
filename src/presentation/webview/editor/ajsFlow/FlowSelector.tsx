@@ -1,12 +1,12 @@
 import React, { FC, memo, useCallback, useMemo } from "react";
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import UnitTreeSelector from "../shared/UnitTreeSelector";
 import { CurrentUnitIdStateType } from "./flowViewerStateTypes";
 import { isUnitInCurrentFlowScope } from "./flowTreeSelection";
 
 type FlowSelectorProps = {
-  rootUnits: AjsUnit[];
-  unitById: ReadonlyMap<string, AjsUnit>;
+  rootUnits: FlowGraphUnitDto[];
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
   currentUnitIdState: CurrentUnitIdStateType;
   hoveredUnitId?: string;
   selectedUnitId?: string;
@@ -15,10 +15,10 @@ type FlowSelectorProps = {
   onSelectUnit: (unitId: string) => void;
 };
 
-const isRootJobnetUnit = (unit: AjsUnit): boolean =>
+const isRootJobnetUnit = (unit: FlowGraphUnitDto): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
 
-export const isSelectableFlowScopeUnit = (unit: AjsUnit): boolean =>
+export const isSelectableFlowScopeUnit = (unit: FlowGraphUnitDto): boolean =>
   isRootJobnetUnit(unit);
 
 const FlowSelector: FC<FlowSelectorProps> = ({
@@ -36,7 +36,8 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   const { currentUnitId, setCurrentUnitId } = currentUnitIdState;
   const currentUnit = currentUnitId ? unitById.get(currentUnitId) : undefined;
   const isUnitEnabled = useCallback(
-    (unit: AjsUnit) => isUnitInCurrentFlowScope(unit, currentUnit, unitById),
+    (unit: FlowGraphUnitDto) =>
+      isUnitInCurrentFlowScope(unit, currentUnit, unitById),
     [currentUnit, unitById],
   );
   const canOpenScopeUnit = useMemo(() => isSelectableFlowScopeUnit, []);

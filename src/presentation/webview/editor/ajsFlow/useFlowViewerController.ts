@@ -9,10 +9,9 @@ import {
 import type { Theme } from "@mui/material/styles";
 import type { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import type {
-  AjsDocument,
-  AjsUnit,
-} from "../../../../domain/models/ajs/AjsDocument";
-import { flattenAjsUnits } from "../../../../domain/models/ajs/AjsDocument";
+  FlowGraphUnitDto,
+  ValidatedFlowGraphDocument,
+} from "../../../../application/flow-graph/flowGraphDocument";
 import { type UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import type {
   CurrentUnitIdStateType,
@@ -43,6 +42,8 @@ type UseFlowViewerControllerParams = {
   theme: Theme;
 };
 
+const emptyFlowUnitById: ReadonlyMap<string, FlowGraphUnitDto> = new Map();
+
 const useFlowViewerRefs = () => {
   const reactFlowInstanceRef = useRef<ReactFlowInstance<Node, Edge> | null>(
     null,
@@ -57,24 +58,9 @@ const useFlowViewerRefs = () => {
   };
 };
 
-const flattenDocumentUnits = (
-  ajsDocument: AjsDocument | undefined,
-): AjsUnit[] => (ajsDocument ? flattenAjsUnits(ajsDocument.rootUnits) : []);
-
-const useUnitById = (ajsDocument: AjsDocument | undefined) => {
-  const allUnits = useMemo(
-    () => flattenDocumentUnits(ajsDocument),
-    [ajsDocument],
-  );
-  return useMemo(
-    () => new Map(allUnits.map((unit) => [unit.id, unit])),
-    [allUnits],
-  );
-};
-
 const useCurrentUnit = (
   currentUnitId: string | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ) =>
   useMemo(
     () => (currentUnitId ? unitById.get(currentUnitId) : undefined),
@@ -82,11 +68,11 @@ const useCurrentUnit = (
   );
 
 const useFlowDocumentState = (
-  ajsDocument: AjsDocument | undefined,
+  flowDocument: ValidatedFlowGraphDocument | undefined,
   currentUnitId: string | undefined,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
 ) => {
-  const unitById = useUnitById(ajsDocument);
+  const unitById = flowDocument?.index.unitById ?? emptyFlowUnitById;
   const currentUnit = useCurrentUnit(currentUnitId, unitById);
 
   return {
@@ -138,10 +124,10 @@ const useFlowViewerUiState = () => {
 };
 
 type FlowTreeSelectionStateParams = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
   selectUnit: (unitId: string) => void;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 const useFlowTreeSelectionState = ({
@@ -221,7 +207,7 @@ type SelectedFlowNodeDetailStateParams = {
   selectedUnitId?: string;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 const useSelectedFlowNode = (
@@ -285,7 +271,7 @@ const useSelectedFlowNodeDetailState = ({
 };
 
 type FlowViewerLifecycleParams = {
-  ajsDocument?: AjsDocument;
+  flowDocument?: ValidatedFlowGraphDocument;
   currentUnitId?: string;
   edges: Edge[];
   expandedUnitIds: readonly string[];
@@ -303,7 +289,9 @@ type FlowViewerLifecycleParams = {
   searchedUnitId?: string;
   selectedUnitId?: string;
   selectionFocusRequest: FlowViewportFocusRequest;
-  setAjsDocument: Dispatch<SetStateAction<AjsDocument | undefined>>;
+  setFlowDocument: Dispatch<
+    SetStateAction<ValidatedFlowGraphDocument | undefined>
+  >;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
   setUnitDefinitionByPath: Dispatch<
@@ -313,7 +301,7 @@ type FlowViewerLifecycleParams = {
 };
 
 const useFlowViewerLifecycle = ({
-  ajsDocument,
+  flowDocument,
   currentUnitId,
   edges,
   expandedUnitIds,
@@ -327,7 +315,7 @@ const useFlowViewerLifecycle = ({
   searchedUnitId,
   selectedUnitId,
   selectionFocusRequest,
-  setAjsDocument,
+  setFlowDocument,
   setCurrentUnitId,
   setExpandedUnitIds,
   setUnitDefinitionByPath,
@@ -335,7 +323,7 @@ const useFlowViewerLifecycle = ({
 }: FlowViewerLifecycleParams) => {
   const layoutRequestIdentity = useMemo(
     () => ({}),
-    [ajsDocument, currentUnitId, expandedUnitIds, theme],
+    [flowDocument, currentUnitId, expandedUnitIds, theme],
   );
   useFlowViewerFitView({
     edges,
@@ -351,7 +339,7 @@ const useFlowViewerLifecycle = ({
         : undefined,
   });
   useFlowScopeReset({
-    ajsDocument,
+    documentIdentity: flowDocument,
     currentUnitId,
     preserveSearchOnNextScopeChange,
     resetSearch,
@@ -359,7 +347,7 @@ const useFlowViewerLifecycle = ({
   });
   useFlowDocumentSubscription({
     prevUnitEntityId,
-    setAjsDocument,
+    setFlowDocument,
     setCurrentUnitId,
     setUnitDefinitionByPath,
   });
@@ -370,7 +358,9 @@ const useFlowViewerLifecycle = ({
 export const useFlowViewerController = ({
   theme,
 }: UseFlowViewerControllerParams) => {
-  const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
+  const [flowDocument, setFlowDocument] =
+    useState<ValidatedFlowGraphDocument>();
+  const flowDocumentDto = flowDocument?.document;
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
   const [documentUnitDefinitionByPath, setUnitDefinitionByPath] = useState<
@@ -383,7 +373,7 @@ export const useFlowViewerController = ({
   } = useFlowViewerRefs();
   const { dialogData, dialogDataState, setDialogData } = useFlowViewerUiState();
   const { currentUnit, unitById, unitDefinitionByPath } = useFlowDocumentState(
-    ajsDocument,
+    flowDocument,
     currentUnitId,
     documentUnitDefinitionByPath,
   );
@@ -405,9 +395,9 @@ export const useFlowViewerController = ({
     setCurrentUnitId,
   );
   const { clearSelection, selectedUnitId, selectUnit } =
-    useSelectedFlowNodeState(ajsDocument, currentUnitId);
+    useSelectedFlowNodeState(flowDocument, currentUnitId);
   const { canEnableFocusMode, focusModeEnabled, toggleFocusMode } =
-    useFlowFocusModeState(ajsDocument, currentUnitId, selectedUnitId);
+    useFlowFocusModeState(flowDocument, currentUnitId, selectedUnitId);
   const { showMiniMap, toggleMiniMap } = useFlowMiniMapState();
   const {
     clearGraphHoveredUnit,
@@ -416,7 +406,7 @@ export const useFlowViewerController = ({
     hoveredUnitId,
     treeHoveredUnit,
     treeHoveredUnitId,
-  } = useHoveredFlowNodeState(ajsDocument, currentUnitId);
+  } = useHoveredFlowNodeState(flowDocument, currentUnitId);
   const { selectTreeUnit, selectionFocusRequest } = useFlowTreeSelectionState({
     currentUnit,
     selectUnit,
@@ -441,7 +431,7 @@ export const useFlowViewerController = ({
     unitById,
   });
   const { edges, nodes } = useFlowGraphState({
-    ajsDocument,
+    flowDocument,
     currentUnitId,
     currentUnitIdState,
     dialogDataState,
@@ -476,7 +466,7 @@ export const useFlowViewerController = ({
     unitById,
   });
   useFlowViewerLifecycle({
-    ajsDocument,
+    flowDocument,
     currentUnitId,
     edges,
     expandedUnitIds,
@@ -490,7 +480,7 @@ export const useFlowViewerController = ({
     searchedUnitId,
     selectedUnitId,
     selectionFocusRequest,
-    setAjsDocument,
+    setFlowDocument,
     setCurrentUnitId,
     setExpandedUnitIds,
     setUnitDefinitionByPath,
@@ -498,7 +488,7 @@ export const useFlowViewerController = ({
   });
 
   return {
-    ajsDocument,
+    flowDocumentDto,
     canEnableFocusMode,
     currentUnit,
     currentUnitIdState,

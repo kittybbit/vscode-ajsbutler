@@ -40,7 +40,7 @@ suite("Unit definition document state", () => {
       flowState.unitDefinitionByPath.get("/root"),
     );
     assert.strictEqual(tableState.tableData?.rows.length, 1);
-    assert.strictEqual(flowState.ajsDocument?.rootUnits.length, 1);
+    assert.strictEqual(flowState.flowDocument?.document.rootUnits.length, 1);
     assert.strictEqual(flowState.currentUnitId, "root-id");
   });
 
@@ -54,7 +54,7 @@ suite("Unit definition document state", () => {
     const flowState = resolveFlowDocumentChange(payload, undefined);
 
     assert.strictEqual(tableState.tableData?.rows.length, 1);
-    assert.strictEqual(flowState.ajsDocument?.rootUnits.length, 1);
+    assert.strictEqual(flowState.flowDocument?.document.rootUnits.length, 1);
     assert.strictEqual(tableState.unitDefinitionByPath.size, 0);
     assert.strictEqual(flowState.unitDefinitionByPath.size, 0);
   });
@@ -70,7 +70,20 @@ suite("Unit definition document state", () => {
     const flowState = resolveFlowDocumentChange(payload, undefined);
 
     assert.strictEqual(tableState.tableData, undefined);
-    assert.strictEqual(flowState.ajsDocument?.rootUnits.length, 1);
+    assert.strictEqual(flowState.flowDocument?.document.rootUnits.length, 1);
     assert.strictEqual(flowState.currentUnitId, "root-id");
+  });
+
+  test("invalid flow hierarchy leaves the flow presentation unavailable", () => {
+    const validPayload = toUnitListDocumentDto(document);
+    const payload = {
+      ...validPayload,
+      rootUnits: [{ ...validPayload.rootUnits[0], depth: 1 }],
+    };
+
+    const flowState = resolveFlowDocumentChange(payload, "root-id");
+
+    assert.strictEqual(flowState.flowDocument, undefined);
+    assert.strictEqual(flowState.currentUnitId, undefined);
   });
 });

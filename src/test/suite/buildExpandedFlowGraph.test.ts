@@ -1,8 +1,13 @@
 import * as assert from "assert";
 import { readFileSync } from "fs";
 import { join } from "path";
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { parseAjsDocumentForTest } from "../support/parseAjs";
+import {
+  type FlowGraphUnitDto,
+  type ValidatedFlowGraphDocument,
+  toFlowGraphDocumentDto,
+  validateFlowGraphDocument,
+} from "../../application/flow-graph/flowGraphDocument";
 import { buildExpandedFlowGraph } from "../../presentation/webview/editor/ajsFlow/buildExpandedFlowGraph";
 import { createFlowGraphMetrics } from "../../presentation/webview/editor/ajsFlow/flowGraphPosition";
 
@@ -13,15 +18,31 @@ const assertClose = (actual: number, expected: number): void => {
 const readSample = (name: string): string =>
   readFileSync(join(__dirname, "../../../sample", name), "utf8");
 
-const flattenUnits = (unit: AjsUnit): AjsUnit[] => [
+const parseFlowGraphDocumentForTest = (
+  content: string,
+): ValidatedFlowGraphDocument => {
+  const result = validateFlowGraphDocument(
+    toFlowGraphDocumentDto(parseAjsDocumentForTest(content)),
+  );
+  assert.strictEqual(result.status, "available");
+  return result as ValidatedFlowGraphDocument;
+};
+
+const flattenUnits = (unit: FlowGraphUnitDto): FlowGraphUnitDto[] => [
   unit,
   ...unit.children.flatMap(flattenUnits),
 ];
 
-const tryFindUnitByName = (unit: AjsUnit, name: string): AjsUnit | undefined =>
+const tryFindUnitByName = (
+  unit: FlowGraphUnitDto,
+  name: string,
+): FlowGraphUnitDto | undefined =>
   flattenUnits(unit).find((item) => item.name === name);
 
-const findUnitByName = (unit: AjsUnit, name: string): AjsUnit => {
+const findUnitByName = (
+  unit: FlowGraphUnitDto,
+  name: string,
+): FlowGraphUnitDto => {
   const found = tryFindUnitByName(unit, name);
   if (found) {
     return found;
@@ -548,10 +569,10 @@ unit=root,,jp1admin,;
 
 suite("Build Expanded Flow Graph", () => {
   test("characterizes deep sample graph summaries for collapsed and expanded states", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       readSample("sample_ref_deep_jobnets_utf8"),
     );
-    const rootUnit = document.rootUnits[0];
+    const rootUnit = document.document.rootUnits[0];
     const currentUnit = findUnitByName(rootUnit, "top_main");
     const expandedUnitNames = [
       "branch_alpha",
@@ -703,13 +724,15 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("reveals nested jobnets only after their parent scope is expanded", () => {
-    const document = parseAjsDocumentForTest(nestedDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const childNetId = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(nestedDefinition);
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const childNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
     const grandNetId =
-      document.rootUnits[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
     const leafId =
-      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0]
+        .children[0].id;
 
     const collapsed = buildExpandedFlowGraph({
       document,
@@ -813,12 +836,15 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("adds offsets by row, column, and lower-right position around the expanded node", () => {
-    const document = parseAjsDocumentForTest(overlappingSiblingDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const childNetId = document.rootUnits[0].children[0].children[0].id;
-    const flwjId = document.rootUnits[0].children[0].children[1].id;
-    const orjId = document.rootUnits[0].children[0].children[2].id;
-    const ntwjId = document.rootUnits[0].children[0].children[3].id;
+    const document = parseFlowGraphDocumentForTest(
+      overlappingSiblingDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const childNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const flwjId = document.document.rootUnits[0].children[0].children[1].id;
+    const orjId = document.document.rootUnits[0].children[0].children[2].id;
+    const ntwjId = document.document.rootUnits[0].children[0].children[3].id;
 
     const collapsed = buildExpandedFlowGraph({
       document,
@@ -864,13 +890,16 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps revealed children anchored near the expanded node origin", () => {
-    const document = parseAjsDocumentForTest(overlappingSiblingDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const childNetId = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(
+      overlappingSiblingDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const childNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
     const grandNetId =
-      document.rootUnits[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
     const nestedJobId =
-      document.rootUnits[0].children[0].children[0].children[1].id;
+      document.document.rootUnits[0].children[0].children[0].children[1].id;
 
     const expanded = buildExpandedFlowGraph({
       document,
@@ -895,19 +924,20 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("expands nested jobnets level by level when a newly visible child is also expanded", () => {
-    const document = parseAjsDocumentForTest(deepNestedJobnetDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(deepNestedJobnetDefinition);
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const level2Id = document.document.rootUnits[0].children[0].children[0].id;
     const level3Id =
-      document.rootUnits[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
     const level4Id =
-      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
-    const level5Id =
-      document.rootUnits[0].children[0].children[0].children[0].children[0]
+      document.document.rootUnits[0].children[0].children[0].children[0]
         .children[0].id;
-    const leafJobId =
-      document.rootUnits[0].children[0].children[0].children[0].children[0]
+    const level5Id =
+      document.document.rootUnits[0].children[0].children[0].children[0]
         .children[0].children[0].id;
+    const leafJobId =
+      document.document.rootUnits[0].children[0].children[0].children[0]
+        .children[0].children[0].children[0].id;
 
     const expanded = buildExpandedFlowGraph({
       document,
@@ -963,14 +993,17 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("repositions parent-level siblings after a deeper nested panel enlarges its ancestor", () => {
-    const document = parseAjsDocumentForTest(deepNestedWithSiblingDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(
+      deepNestedWithSiblingDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const level2Id = document.document.rootUnits[0].children[0].children[0].id;
     const level3Id =
-      document.rootUnits[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
     const level4Id =
-      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
-    const siblingId = document.rootUnits[0].children[0].children[1].id;
+      document.document.rootUnits[0].children[0].children[0].children[0]
+        .children[0].id;
+    const siblingId = document.document.rootUnits[0].children[0].children[1].id;
 
     const shallowExpanded = buildExpandedFlowGraph({
       document,
@@ -1006,13 +1039,14 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps panel origin anchored to the expanded unit while deeper descendants grow it", () => {
-    const document = parseAjsDocumentForTest(deepNestedJobnetDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(deepNestedJobnetDefinition);
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const level2Id = document.document.rootUnits[0].children[0].children[0].id;
     const level3Id =
-      document.rootUnits[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
     const level4Id =
-      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0]
+        .children[0].id;
 
     const shallowExpanded = buildExpandedFlowGraph({
       document,
@@ -1052,11 +1086,12 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("expands recovery jobnet variants with nested children", () => {
-    const document = parseAjsDocumentForTest(recoveryJobnetDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const recoveryNetId = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(recoveryJobnetDefinition);
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const recoveryNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
     const leafJobId =
-      document.rootUnits[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
 
     const expanded = buildExpandedFlowGraph({
       document,
@@ -1074,14 +1109,17 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps expanded descendants anchored when a sibling expansion later moves their parent", () => {
-    const document = parseAjsDocumentForTest(siblingExpandedJobnetsDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const leftNetId = document.rootUnits[0].children[0].children[0].id;
-    const rightNetId = document.rootUnits[0].children[0].children[1].id;
+    const document = parseFlowGraphDocumentForTest(
+      siblingExpandedJobnetsDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const leftNetId = document.document.rootUnits[0].children[0].children[0].id;
+    const rightNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
     const rightGrandId =
-      document.rootUnits[0].children[0].children[1].children[0].id;
+      document.document.rootUnits[0].children[0].children[1].children[0].id;
     const rightJobId =
-      document.rootUnits[0].children[0].children[1].children[1].id;
+      document.document.rootUnits[0].children[0].children[1].children[1].id;
 
     const rightExpandedOnly = buildExpandedFlowGraph({
       document,
@@ -1135,14 +1173,17 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps a later expanded sibling panel aligned with descendants after sibling offsets", () => {
-    const document = parseAjsDocumentForTest(siblingExpandedJobnetsDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const leftNetId = document.rootUnits[0].children[0].children[0].id;
-    const rightNetId = document.rootUnits[0].children[0].children[1].id;
+    const document = parseFlowGraphDocumentForTest(
+      siblingExpandedJobnetsDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const leftNetId = document.document.rootUnits[0].children[0].children[0].id;
+    const rightNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
     const rightGrandId =
-      document.rootUnits[0].children[0].children[1].children[0].id;
+      document.document.rootUnits[0].children[0].children[1].children[0].id;
     const rightJobId =
-      document.rootUnits[0].children[0].children[1].children[1].id;
+      document.document.rootUnits[0].children[0].children[1].children[1].id;
 
     const expanded = buildExpandedFlowGraph({
       document,
@@ -1178,12 +1219,16 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("pushes units on the parent row when a nested expansion enlarges that parent scope", () => {
-    const document = parseAjsDocumentForTest(parentRowPropagationDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const parentNetId = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(
+      parentRowPropagationDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const parentNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
     const childNetId =
-      document.rootUnits[0].children[0].children[0].children[0].id;
-    const siblingRightId = document.rootUnits[0].children[0].children[1].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
+    const siblingRightId =
+      document.document.rootUnits[0].children[0].children[1].id;
 
     const parentOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1233,13 +1278,16 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("does not propagate horizontal growth when an upper expanded panel already covers it", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       upperPanelCoversLowerWidthDefinition,
     );
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
-    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
+    const rightLowerId =
+      document.document.rootUnits[0].children[0].children[2].id;
 
     const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1289,13 +1337,16 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("propagates only the horizontal growth beyond the upper expanded panel", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       lowerPanelExceedsUpperWidthDefinition,
     );
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
-    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
+    const rightLowerId =
+      document.document.rootUnits[0].children[0].children[2].id;
 
     const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1348,13 +1399,16 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("propagates horizontal growth beyond the upper panel when lower is expanded after upper", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       lowerPanelExceedsUpperWidthDefinition,
     );
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
-    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
+    const rightLowerId =
+      document.document.rootUnits[0].children[0].children[2].id;
 
     const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1406,12 +1460,14 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("pushes a lower expanded panel origin when an upper expanded panel intrudes into it", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       upperPanelIntrudesLowerPanelDefinition,
     );
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
 
     const lowerOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1452,12 +1508,14 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("pushes a lower panel origin consistently when expansion order changes", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       upperPanelIntrudesLowerPanelDefinition,
     );
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
 
     const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1513,11 +1571,16 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("does not apply vertical growth again when a target already has enough y offset", () => {
-    const document = parseAjsDocumentForTest(alreadyOffsetTargetDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
-    const targetJobId = document.rootUnits[0].children[0].children[2].id;
+    const document = parseFlowGraphDocumentForTest(
+      alreadyOffsetTargetDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
+    const targetJobId =
+      document.document.rootUnits[0].children[0].children[2].id;
 
     const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1557,13 +1620,16 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps horizontal growth when vertical growth is already covered", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       verticallyOffsetTargetNeedsHorizontalOffsetDefinition,
     );
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
-    const targetJobId = document.rootUnits[0].children[0].children[2].id;
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
+    const targetJobId =
+      document.document.rootUnits[0].children[0].children[2].id;
 
     const upperOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1620,15 +1686,18 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("propagates horizontal growth when a nested expansion makes the parent exceed the upper panel", () => {
-    const document = parseAjsDocumentForTest(
+    const document = parseFlowGraphDocumentForTest(
       nestedExpansionExceedsUpperWidthDefinition,
     );
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const upperNetId = document.rootUnits[0].children[0].children[0].id;
-    const lowerNetId = document.rootUnits[0].children[0].children[1].id;
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const upperNetId =
+      document.document.rootUnits[0].children[0].children[0].id;
+    const lowerNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
     const lowerChildId =
-      document.rootUnits[0].children[0].children[1].children[0].id;
-    const rightLowerId = document.rootUnits[0].children[0].children[2].id;
+      document.document.rootUnits[0].children[0].children[1].children[0].id;
+    const rightLowerId =
+      document.document.rootUnits[0].children[0].children[2].id;
 
     const lowerOnlyExpanded = buildExpandedFlowGraph({
       document,
@@ -1676,12 +1745,15 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("keeps the same layout when the same-depth expanded order changes", () => {
-    const document = parseAjsDocumentForTest(siblingExpandedJobnetsDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const leftNetId = document.rootUnits[0].children[0].children[0].id;
-    const rightNetId = document.rootUnits[0].children[0].children[1].id;
+    const document = parseFlowGraphDocumentForTest(
+      siblingExpandedJobnetsDefinition,
+    );
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const leftNetId = document.document.rootUnits[0].children[0].children[0].id;
+    const rightNetId =
+      document.document.rootUnits[0].children[0].children[1].id;
     const rightJobId =
-      document.rootUnits[0].children[0].children[1].children[1].id;
+      document.document.rootUnits[0].children[0].children[1].children[1].id;
 
     const leftThenRight = buildExpandedFlowGraph({
       document,
@@ -1715,13 +1787,14 @@ suite("Build Expanded Flow Graph", () => {
   });
 
   test("rebuilding the same expanded state keeps panel bounds stable", () => {
-    const document = parseAjsDocumentForTest(deepNestedJobnetDefinition);
-    const currentUnitId = document.rootUnits[0].children[0].id;
-    const level2Id = document.rootUnits[0].children[0].children[0].id;
+    const document = parseFlowGraphDocumentForTest(deepNestedJobnetDefinition);
+    const currentUnitId = document.document.rootUnits[0].children[0].id;
+    const level2Id = document.document.rootUnits[0].children[0].children[0].id;
     const level3Id =
-      document.rootUnits[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0].id;
     const level4Id =
-      document.rootUnits[0].children[0].children[0].children[0].children[0].id;
+      document.document.rootUnits[0].children[0].children[0].children[0]
+        .children[0].id;
 
     const expandedUnitIds = new Set<string>([level2Id, level3Id, level4Id]);
     const first = buildExpandedFlowGraph({

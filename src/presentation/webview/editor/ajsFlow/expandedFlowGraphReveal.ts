@@ -1,4 +1,4 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type { FlowGraphEdgeDto } from "../../../../application/flow-graph/buildFlowGraphCore";
 import {
   calculateNestedChildPosition,
@@ -27,7 +27,7 @@ const addVisibleNode = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedFlowGraphRevealDeps,
   visibleNode: {
-    unit: AjsUnit;
+    unit: FlowGraphUnitDto;
     initialPosition: FlowGraphPosition;
     parentAnchorId?: string;
   },
@@ -46,7 +46,7 @@ const addVisibleNode = (
 };
 
 type VisibleNestedNode = {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   parentUnitId: string;
   calculatePosition: () => FlowGraphPosition;
 };
@@ -54,14 +54,14 @@ type VisibleNestedNode = {
 type NestedChildRevealTarget = {
   context: ExpandedFlowGraphBuildContext;
   deps: ExpandedFlowGraphRevealDeps;
-  child: AjsUnit;
+  child: FlowGraphUnitDto;
   parentUnitId: string;
 };
 
 type ConditionChildRevealTarget = {
   context: ExpandedFlowGraphBuildContext;
   deps: ExpandedFlowGraphRevealDeps;
-  conditionUnit: AjsUnit;
+  conditionUnit: FlowGraphUnitDto;
   parentUnitId: string;
 };
 
@@ -137,13 +137,13 @@ const appendExpandedEdge = (
 
 const getNewExpandedEdges = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ): FlowGraphEdgeDto[] =>
   toEdgeDtos(expandedUnit).filter((edge) => !hasExpandedEdge(context, edge));
 
 const appendExpandedUnitEdges = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ) => {
   for (const edge of getNewExpandedEdges(context, expandedUnit)) {
     appendExpandedEdge(context, edge);
@@ -153,19 +153,23 @@ const appendExpandedUnitEdges = (
 const canRevealNestedUnit = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedFlowGraphRevealDeps,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ): boolean => !!deps.getDisplayPosition(context, expandedUnit.id);
 
-const getVisibleNestedChildren = (expandedUnit: AjsUnit): AjsUnit[] =>
+const getVisibleNestedChildren = (
+  expandedUnit: FlowGraphUnitDto,
+): FlowGraphUnitDto[] =>
   expandedUnit.children.filter((unit) => unit.unitType !== "rc");
 
-const getConditionChild = (expandedUnit: AjsUnit): AjsUnit | undefined =>
+const getConditionChild = (
+  expandedUnit: FlowGraphUnitDto,
+): FlowGraphUnitDto | undefined =>
   expandedUnit.children.find((child) => child.unitType === "rc");
 
 const revealNestedChildren = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedFlowGraphRevealDeps,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ) => {
   for (const child of getVisibleNestedChildren(expandedUnit)) {
     ensureChildNodeVisible({
@@ -180,7 +184,7 @@ const revealNestedChildren = (
 const revealConditionChild = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedFlowGraphRevealDeps,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ) => {
   const conditionUnit = getConditionChild(expandedUnit);
   if (conditionUnit) {
@@ -196,7 +200,7 @@ const revealConditionChild = (
 export const revealVisibleNestedUnit = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedFlowGraphRevealDeps,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ) => {
   if (!canRevealNestedUnit(context, deps, expandedUnit)) {
     return;

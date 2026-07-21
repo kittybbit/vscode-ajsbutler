@@ -1,4 +1,4 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { collectExpandedAncestorUnitIdsForUnits } from "./flowExpandedAncestors";
 
 export type FlowSearchResult = {
@@ -8,26 +8,26 @@ export type FlowSearchResult = {
 };
 
 type FlowSearchInput = {
-  scopeRoot: AjsUnit;
+  scopeRoot: FlowGraphUnitDto;
   normalizedQuery: string;
 };
 
 type FlowSearchMatch = {
-  scopeRoot: AjsUnit;
-  matchedUnit: AjsUnit;
-  matchedUnits: ReadonlyArray<AjsUnit>;
+  scopeRoot: FlowGraphUnitDto;
+  matchedUnit: FlowGraphUnitDto;
+  matchedUnits: ReadonlyArray<FlowGraphUnitDto>;
 };
 
 const normalizeQuery = (query: string): string => query.trim().toLowerCase();
 
-const unitSearchText = (unit: AjsUnit): string =>
+const unitSearchText = (unit: FlowGraphUnitDto): string =>
   [unit.name, unit.comment, unit.absolutePath]
     .filter((value): value is string => typeof value === "string")
     .join("\n")
     .toLowerCase();
 
-const collectScopeUnits = (root: AjsUnit): AjsUnit[] => {
-  const units: AjsUnit[] = [root];
+const collectScopeUnits = (root: FlowGraphUnitDto): FlowGraphUnitDto[] => {
+  const units: FlowGraphUnitDto[] = [root];
   for (const child of root.children) {
     units.push(...collectScopeUnits(child));
   }
@@ -35,21 +35,21 @@ const collectScopeUnits = (root: AjsUnit): AjsUnit[] => {
 };
 
 const collectMatchedScopeUnits = (
-  scopeRoot: AjsUnit,
+  scopeRoot: FlowGraphUnitDto,
   normalizedQuery: string,
-): AjsUnit[] =>
+): FlowGraphUnitDto[] =>
   collectScopeUnits(scopeRoot).filter((unit) =>
     unitSearchText(unit).includes(normalizedQuery),
   );
 
 const selectFocusedMatchedUnit = (
-  scopeRoot: AjsUnit,
-  matchedUnits: ReadonlyArray<AjsUnit>,
-): AjsUnit | undefined =>
+  scopeRoot: FlowGraphUnitDto,
+  matchedUnits: ReadonlyArray<FlowGraphUnitDto>,
+): FlowGraphUnitDto | undefined =>
   matchedUnits.find((unit) => unit.id !== scopeRoot.id) ?? matchedUnits[0];
 
 const resolveFlowSearchInput = (
-  scopeRoot: AjsUnit | undefined,
+  scopeRoot: FlowGraphUnitDto | undefined,
   query: string,
 ): FlowSearchInput | undefined => {
   const normalizedQuery = normalizeQuery(query);
@@ -76,10 +76,10 @@ const resolveFlowSearchMatch = (
 };
 
 type BuildFlowSearchResultArgs = {
-  scopeRoot: AjsUnit;
-  matchedUnit: AjsUnit;
-  matchedUnits: ReadonlyArray<AjsUnit>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  scopeRoot: FlowGraphUnitDto;
+  matchedUnit: FlowGraphUnitDto;
+  matchedUnits: ReadonlyArray<FlowGraphUnitDto>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 const buildFlowSearchResult = ({
@@ -98,9 +98,9 @@ const buildFlowSearchResult = ({
 });
 
 export const findFlowSearchResult = (
-  scopeRoot: AjsUnit | undefined,
+  scopeRoot: FlowGraphUnitDto | undefined,
   query: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): FlowSearchResult | undefined => {
   const input = resolveFlowSearchInput(scopeRoot, query);
   const match = resolveFlowSearchMatch(input);

@@ -35,7 +35,7 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement approved Slice 2 for
+1. Implement approved Slice 3 for
    `migrate-flow-graph-and-navigation-boundaries` with `sdd-implement-task`.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
@@ -44,8 +44,8 @@ rules in `docs/specs/README.md`, not in this file.
 ## Active Feature Specs
 
 - `docs/specs/features/migrate-flow-graph-and-navigation-boundaries/`: active
-  feature with all four reviewed slices approved, Slice 1 complete, and Slice 2
-  active.
+  feature with all four reviewed slices approved, Slices 1 and 2 complete, and
+  Slice 3 active.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 

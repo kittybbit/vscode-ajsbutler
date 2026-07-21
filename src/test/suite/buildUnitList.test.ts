@@ -1,10 +1,10 @@
 import * as assert from "assert";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
 import {
-  toAjsDocument,
   toUnitListDocumentDto,
   toUnitListTableData,
 } from "../../application/unit-list/unitListDocument";
+import { validateFlowGraphDocument } from "../../application/flow-graph/flowGraphDocument";
 import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
 import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
@@ -69,11 +69,14 @@ suite("Build Unit List", () => {
     );
   });
 
-  test("restores the normalized document from the document DTO", () => {
+  test("validates the flow document from the shared document DTO", () => {
     const result = buildUnitList(validDefinition);
     assert.ok(result.document);
 
-    const document = toAjsDocument(result.document!);
+    const validation = validateFlowGraphDocument(result.document);
+    assert.strictEqual(validation.status, "available");
+    assert.ok(validation.status === "available");
+    const document = validation.document;
     const root = document.rootUnits[0];
     const jobnet = root.children[0];
     const job = jobnet.children[0];
@@ -146,7 +149,10 @@ suite("Build Unit List", () => {
     };
 
     const dto = toUnitListDocumentDto(document);
-    const restored = toAjsDocument(dto);
+    const validation = validateFlowGraphDocument(dto);
+    assert.strictEqual(validation.status, "available");
+    assert.ok(validation.status === "available");
+    const restored = validation.document;
 
     assert.deepStrictEqual(dto.rootUnits, document.rootUnits);
     assert.deepStrictEqual(dto.warnings, document.warnings);
@@ -160,7 +166,7 @@ suite("Build Unit List", () => {
         { absolutePath: "/root/child", rawData: "ty=j" },
       ],
     );
-    assert.deepStrictEqual(restored, document);
+    assert.deepStrictEqual(restored.rootUnits, document.rootUnits);
     assert.notStrictEqual(restored.rootUnits[0], document.rootUnits[0]);
     assert.notStrictEqual(
       restored.rootUnits[0].children[0],
@@ -168,14 +174,14 @@ suite("Build Unit List", () => {
     );
   });
 
-  test("returns undefined for malformed document payloads", () => {
-    assert.strictEqual(toAjsDocument({}), undefined);
+  test("returns unavailable for malformed flow document payloads", () => {
+    assert.strictEqual(validateFlowGraphDocument({}).status, "unavailable");
     assert.strictEqual(
-      toAjsDocument({
+      validateFlowGraphDocument({
         rootUnits: [{ unitAttribute: "root,,jp1admin," }],
         warnings: [],
-      }),
-      undefined,
+      }).status,
+      "unavailable",
     );
   });
 
@@ -193,10 +199,10 @@ suite("Build Unit List", () => {
       ],
     };
 
-    assert.deepStrictEqual(toAjsDocument(payload), {
-      rootUnits: [],
-      warnings: [],
-    });
+    const validation = validateFlowGraphDocument(payload);
+    assert.strictEqual(validation.status, "available");
+    assert.ok(validation.status === "available");
+    assert.deepStrictEqual(validation.document, { rootUnits: [] });
     assert.strictEqual(toUnitDefinitionByPath(payload).size, 0);
   });
 

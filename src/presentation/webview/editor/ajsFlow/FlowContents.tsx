@@ -154,7 +154,7 @@ type FlowViewerBodyProps = FlowViewerController & {
 };
 
 const FlowViewerBody: FC<FlowViewerBodyProps> = ({
-  ajsDocument,
+  flowDocumentDto,
   clearGraphHoveredUnit,
   clearSelectedUnit,
   clearTreeHoveredUnit,
@@ -205,7 +205,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
       }}
     >
       <FlowSelector
-        rootUnits={ajsDocument?.rootUnits ?? []}
+        rootUnits={flowDocumentDto?.rootUnits ?? []}
         unitById={unitById}
         currentUnitIdState={currentUnitIdState}
         hoveredUnitId={hoveredUnitId}
@@ -299,7 +299,7 @@ const FlowContents: FC = () => {
   const theme = useFlowTheme();
 
   const {
-    ajsDocument,
+    flowDocumentDto,
     canEnableFocusMode,
     currentUnit,
     currentUnitIdState,
@@ -412,7 +412,7 @@ const FlowContents: FC = () => {
             onSearchClear={handleSearchClear}
           />
           <FlowViewerBody
-            ajsDocument={ajsDocument}
+            flowDocumentDto={flowDocumentDto}
             canEnableFocusMode={canEnableFocusMode}
             clearGraphHoveredUnit={clearGraphHoveredUnit}
             clearSelectedUnit={clearSelectedUnit}

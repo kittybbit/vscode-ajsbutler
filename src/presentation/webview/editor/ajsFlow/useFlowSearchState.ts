@@ -9,7 +9,7 @@ import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { createSearchEvent } from "../../../../shared/webviewEvents";
 import { FlowRevealTarget, resolveFlowRevealTarget } from "../revealUnit";
 import { findFlowSearchResult, FlowSearchResult } from "./flowSearch";
@@ -24,11 +24,11 @@ import {
 import type { FlowSearchDirection, FlowSearchState } from "./flowSearchState";
 
 type UseFlowSearchStateParams = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
   preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 const mergeExpandedAncestorUnitIds = (
@@ -39,11 +39,11 @@ const mergeExpandedAncestorUnitIds = (
 ];
 
 type SearchSubmitHandlerParams = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
   searchState: FlowSearchState;
   setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 type RevealTargetApplyParams = {
@@ -54,7 +54,7 @@ type RevealTargetApplyParams = {
 
 type RevealUnitHandlerParams = RevealTargetApplyParams & {
   preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 type FlowSearchResultApplyParams = {

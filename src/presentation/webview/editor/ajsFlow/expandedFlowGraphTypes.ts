@@ -1,4 +1,4 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import {
   FlowGraphDto,
   FlowGraphEdgeDto,
@@ -27,7 +27,7 @@ export type LayoutBox = {
 };
 
 export type LayoutItem = {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   position: FlowGraphPosition;
   occupiedBox: LayoutBox;
 };
@@ -48,6 +48,6 @@ export type ExpandedFlowGraphBuildContext = {
   offsets: Map<string, FlowGraphPosition>;
   positionOverrides: Map<string, FlowGraphPosition>;
   nodeDecorations: Map<string, ExpandedNodeDecoration>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
   metrics: FlowGraphMetrics;
 };

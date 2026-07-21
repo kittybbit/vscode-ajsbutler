@@ -1,8 +1,8 @@
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 
 export const createFlowTestUnit = (
-  overrides: Partial<AjsUnit> = {},
-): AjsUnit => ({
+  overrides: Partial<FlowGraphUnitDto> = {},
+): FlowGraphUnitDto => ({
   id: overrides.id ?? "/root/jobnet",
   name: overrides.name ?? "jobnet",
   unitAttribute: overrides.unitAttribute ?? "",

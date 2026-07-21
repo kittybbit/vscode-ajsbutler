@@ -1,4 +1,4 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { FlowGraphPosition } from "./flowGraphPosition";
 import {
   ExpandedFlowGraphBuildContext,
@@ -11,7 +11,7 @@ import {
 } from "./expandedFlowGraphPositionState";
 
 type ExpandedPanelLayoutItem = {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   position: FlowGraphPosition;
   panelBounds: FlowGraphBounds;
 };
@@ -24,7 +24,7 @@ type ExpandedPanelIntrusionTarget = {
 type ExpandedPanelIntrusionDeps = {
   buildExpandedUnitPanelBounds: (
     context: ExpandedFlowGraphBuildContext,
-    expandedUnit: AjsUnit,
+    expandedUnit: FlowGraphUnitDto,
   ) => FlowGraphBounds | undefined;
 };
 
@@ -36,14 +36,14 @@ type ExpandedPanelIntrusionScan = {
 
 type UpperExpandedPanelIntrusionRequest = {
   context: ExpandedFlowGraphBuildContext;
-  upperChild: AjsUnit;
-  expandedChildren: ReadonlyArray<AjsUnit>;
+  upperChild: FlowGraphUnitDto;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
   deps: ExpandedPanelIntrusionDeps;
 };
 
 const buildExpandedPanelLayoutItem = (
   context: ExpandedFlowGraphBuildContext,
-  unit: AjsUnit,
+  unit: FlowGraphUnitDto,
   deps: ExpandedPanelIntrusionDeps,
 ): ExpandedPanelLayoutItem | undefined => {
   const position = getDisplayPosition(context, unit.id);
@@ -102,7 +102,7 @@ const moveLowerExpandedPanelPastUpper = (
 
 const buildExpandedPanelIntrusionTarget = (
   scan: ExpandedPanelIntrusionScan,
-  lower: AjsUnit,
+  lower: FlowGraphUnitDto,
 ): ExpandedPanelIntrusionTarget | undefined => {
   const lowerItem = buildExpandedPanelLayoutItem(
     scan.context,
@@ -114,12 +114,12 @@ const buildExpandedPanelIntrusionTarget = (
 
 const isDifferentExpandedPanelUnit = (
   upper: ExpandedPanelLayoutItem,
-  lower: AjsUnit,
+  lower: FlowGraphUnitDto,
 ): boolean => lower.id !== upper.unit.id;
 
 const collectExpandedPanelIntrusionTarget = (
   scan: ExpandedPanelIntrusionScan,
-  lower: AjsUnit,
+  lower: FlowGraphUnitDto,
 ): ExpandedPanelIntrusionTarget[] => {
   const target = buildExpandedPanelIntrusionTarget(scan, lower);
   return target ? [target] : [];
@@ -127,7 +127,7 @@ const collectExpandedPanelIntrusionTarget = (
 
 const getLowerExpandedPanelCandidates = (
   scan: ExpandedPanelIntrusionScan,
-  expandedChildren: ReadonlyArray<AjsUnit>,
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>,
 ): ExpandedPanelIntrusionTarget[] =>
   expandedChildren
     .filter((unit) => isDifferentExpandedPanelUnit(scan.upper, unit))
@@ -159,7 +159,7 @@ const resolveUpperExpandedPanelIntrusions = (
 
 export const resolveExpandedScopePanelIntrusions = (
   context: ExpandedFlowGraphBuildContext,
-  expandedChildren: ReadonlyArray<AjsUnit>,
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>,
   deps: ExpandedPanelIntrusionDeps,
 ): void => {
   for (const upperChild of expandedChildren) {

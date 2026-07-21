@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { NestedExpansionStateType } from "./flowViewerStateTypes";
 import {
   collapseExpandedNestedUnitIds,
@@ -8,16 +8,16 @@ import {
 } from "./nestedExpansion";
 
 type UseNestedExpansionStateParams = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
   expandedUnitIds: string[];
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 const toggleNestedUnitId = (
   expandedUnitIds: readonly string[],
   unitId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): string[] =>
   expandedUnitIds.includes(unitId)
     ? collapseExpandedNestedUnitIds(

@@ -1,22 +1,22 @@
 import * as assert from "assert";
 import { createTheme } from "@mui/material/styles";
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 import type { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
 import { indexUnitDefinitionsByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
 import { applyHoveredUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphHover";
 
 type TestUnitParams = Pick<
-  AjsUnit,
+  FlowGraphUnitDto,
   "id" | "name" | "unitType" | "absolutePath" | "depth" | "parentId" | "layout"
 > & {
-  children?: AjsUnit[];
+  children?: FlowGraphUnitDto[];
 };
 
 const createTestUnit = ({
   children = [],
   ...params
-}: TestUnitParams): AjsUnit => ({
+}: TestUnitParams): FlowGraphUnitDto => ({
   unitAttribute: "",
   isRoot: false,
   isRootJobnet: false,

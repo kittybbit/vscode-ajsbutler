@@ -1,4 +1,4 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { FlowGraphPosition } from "./flowGraphPosition";
 import {
   ExpandedFlowGraphBuildContext,
@@ -45,8 +45,8 @@ type GrowthOffsetApplication = {
 
 type UpperExpandedPanelMaxRightTarget = {
   context: ExpandedFlowGraphBuildContext;
-  expandedChildren: ReadonlyArray<AjsUnit>;
-  expandedChild: AjsUnit;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
+  expandedChild: FlowGraphUnitDto;
   expandedChildPosition: FlowGraphPosition;
 };
 
@@ -69,30 +69,30 @@ type ExpandedChildGrowthMeasurement = {
 
 type ExpandedChildGrowthMeasurementContext = {
   context: ExpandedFlowGraphBuildContext;
-  expandedChildren: ReadonlyArray<AjsUnit>;
-  expandedChild: AjsUnit;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
+  expandedChild: FlowGraphUnitDto;
 };
 
 type ExpandedChildGrowthApplicationContext =
   ExpandedChildGrowthMeasurementContext & {
-    immediateVisibleChildren: ReadonlyArray<AjsUnit>;
+    immediateVisibleChildren: ReadonlyArray<FlowGraphUnitDto>;
   };
 
 export type ExpandedChildGrowthOffsetDeps = {
   buildExpandedUnitPanelBounds: (
     context: ExpandedFlowGraphBuildContext,
-    expandedUnit: AjsUnit,
+    expandedUnit: FlowGraphUnitDto,
   ) => FlowGraphBounds | undefined;
   getVisibleImmediateChildren: (
     context: ExpandedFlowGraphBuildContext,
     containerUnitId: string,
-  ) => AjsUnit[];
+  ) => FlowGraphUnitDto[];
 };
 
 type ExpandedChildrenGrowthOffsetsTarget = {
   context: ExpandedFlowGraphBuildContext;
-  containerUnit: AjsUnit;
-  expandedChildren: ReadonlyArray<AjsUnit>;
+  containerUnit: FlowGraphUnitDto;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
   deps: ExpandedChildGrowthOffsetDeps;
 };
 
@@ -214,7 +214,7 @@ const applyGrowthOffsets = (
 const getUpperExpandedPanelCandidateBounds = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedChildGrowthOffsetDeps,
-  upperCandidate: AjsUnit,
+  upperCandidate: FlowGraphUnitDto,
 ): UpperExpandedPanelCandidateBounds | undefined => {
   const position = getDisplayPosition(context, upperCandidate.id);
   const bounds = deps.buildExpandedUnitPanelBounds(context, upperCandidate);
@@ -264,7 +264,7 @@ const getUpperExpandedPanelMaxRight = (
 const getExpandedChildGrowthBounds = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedChildGrowthOffsetDeps,
-  expandedChild: AjsUnit,
+  expandedChild: FlowGraphUnitDto,
 ): ExpandedChildGrowthBounds | undefined => {
   const position = getDisplayPosition(context, expandedChild.id);
   const panelBounds = deps.buildExpandedUnitPanelBounds(context, expandedChild);
@@ -275,8 +275,8 @@ const getExpandedChildGrowthBounds = (
 };
 
 const getGrowthTargetUnitIds = (
-  immediateVisibleChildren: ReadonlyArray<AjsUnit>,
-  expandedChild: AjsUnit,
+  immediateVisibleChildren: ReadonlyArray<FlowGraphUnitDto>,
+  expandedChild: FlowGraphUnitDto,
 ) =>
   new Set(
     immediateVisibleChildren

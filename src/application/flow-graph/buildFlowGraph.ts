@@ -10,7 +10,6 @@ import {
   type FlowGraphDocumentDto,
   type FlowGraphDocumentIndex,
   type FlowGraphDocumentIssue,
-  type FlowGraphDocumentValidationResult,
   type FlowGraphUnitDto,
   type ValidatedFlowGraphDocument,
   validateFlowGraphDocument,
@@ -150,47 +149,4 @@ export const buildFlowGraphResult = (
         semanticDiffHighlights,
       )
     : validation;
-};
-
-const compatibilityValidationByDocument = new WeakMap<
-  object,
-  ValidatedFlowGraphDocument
->();
-
-const validateCompatibilityDocument = (
-  document: unknown,
-): FlowGraphDocumentValidationResult => {
-  if (typeof document !== "object" || document === null) {
-    return validateFlowGraphDocument(document);
-  }
-  const cached = compatibilityValidationByDocument.get(document);
-  if (cached) return cached;
-  const validation = validateFlowGraphDocument(document);
-  if (validation.status === "available") {
-    compatibilityValidationByDocument.set(document, validation);
-  }
-  return validation;
-};
-
-/**
- * Temporary compatibility adapter for presentation consumers migrated in
- * Slice 2. Rebuilding for one document should validate once and call
- * buildFlowGraphFromValidatedDocument with the retained application contract.
- */
-export const buildFlowGraph = (
-  document: unknown,
-  currentUnitId: string,
-  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
-): FlowGraphDto | undefined => {
-  // Existing presentation replaces the normalized document instead of
-  // mutating it. Cache only this compatibility path until Slice 2 retains the
-  // validated application contract directly.
-  const validation = validateCompatibilityDocument(document);
-  if (validation.status === "unavailable") return undefined;
-  const result = buildFlowGraphFromValidatedDocument(
-    validation,
-    currentUnitId,
-    semanticDiffHighlights,
-  );
-  return result.status === "available" ? result.graph : undefined;
 };

@@ -3,7 +3,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import TableChartIcon from "@mui/icons-material/TableChart";
-import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
+import { unitInformationUnitTypeLabel } from "../unitInformationLocalization";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
 import SharedUnitDetailPane, {
@@ -196,7 +196,11 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   return (
     <SharedUnitDetailPane
       title={detail.name}
-      subtitle={unitTypeLabel(detail.unitType, lang, detail.groupType)}
+      subtitle={unitInformationUnitTypeLabel(
+        detail.unitType,
+        lang,
+        detail.groupType,
+      )}
       ariaLabel="Selected flow node details"
       collapsedAriaLabel="Collapsed selected flow node details"
       closeAriaLabel="Close node details"

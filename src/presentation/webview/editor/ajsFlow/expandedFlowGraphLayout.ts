@@ -1,4 +1,4 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { FlowGraphPosition } from "./flowGraphPosition";
 import { isNestedJobnetUnit } from "./nestedExpansion";
 import { compareExpandedUnits } from "./expandedFlowGraphNodes";
@@ -26,19 +26,19 @@ import { resolveExpandedScopePanelIntrusions } from "./expandedFlowGraphPanelInt
 import { resolveSiblingLayoutItems } from "./expandedFlowGraphSiblingCollision";
 
 const getParentUnit = (
-  unit: AjsUnit,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): AjsUnit | undefined =>
+  unit: FlowGraphUnitDto,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+): FlowGraphUnitDto | undefined =>
   unit.parentId ? unitById.get(unit.parentId) : undefined;
 
-const isAncestorMatch = (unit: AjsUnit, ancestorId: string): boolean =>
+const isAncestorMatch = (unit: FlowGraphUnitDto, ancestorId: string): boolean =>
   unit.id === ancestorId;
 
 const collectParentUnits = (
-  unit: AjsUnit,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): AjsUnit[] => {
-  const parents: AjsUnit[] = [];
+  unit: FlowGraphUnitDto,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+): FlowGraphUnitDto[] => {
+  const parents: FlowGraphUnitDto[] = [];
   for (
     let current = getParentUnit(unit, unitById);
     current;
@@ -50,9 +50,9 @@ const collectParentUnits = (
 };
 
 export const isDescendantOf = (
-  unit: AjsUnit,
+  unit: FlowGraphUnitDto,
   ancestorId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): boolean =>
   collectParentUnits(unit, unitById).some((parent) =>
     isAncestorMatch(parent, ancestorId),
@@ -60,7 +60,7 @@ export const isDescendantOf = (
 
 const buildExpandedUnitPanelBounds = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ): FlowGraphBounds | undefined => {
   const expandedUnitPosition = getDisplayPosition(context, expandedUnit.id);
   if (!expandedUnitPosition) {
@@ -76,17 +76,18 @@ const buildExpandedUnitPanelBounds = (
 const getVisibleImmediateChildren = (
   context: ExpandedFlowGraphBuildContext,
   containerUnitId: string,
-): AjsUnit[] =>
+): FlowGraphUnitDto[] =>
   [...context.visibleUnitIds]
     .map((unitId) => context.unitById.get(unitId))
     .filter(
-      (unit): unit is AjsUnit => !!unit && unit.parentId === containerUnitId,
+      (unit): unit is FlowGraphUnitDto =>
+        !!unit && unit.parentId === containerUnitId,
     )
     .sort(compareExpandedUnits);
 
 const updateExpandedNodeDecoration = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ) => {
   const expandedUnitPosition = context.positionOverrides.get(expandedUnit.id);
   const panelBounds = buildExpandedPanelBounds(context, expandedUnit);
@@ -101,7 +102,7 @@ const updateExpandedNodeDecoration = (
 
 const buildOccupiedLayoutItem = (
   context: ExpandedFlowGraphBuildContext,
-  unit: AjsUnit,
+  unit: FlowGraphUnitDto,
 ): LayoutItem | undefined => {
   const position = getDisplayPosition(context, unit.id);
   if (!position) {
@@ -136,25 +137,25 @@ const resolveSiblingSubtreeCollisions = (
 
 type ExpandedScopeRelayoutContext = {
   context: ExpandedFlowGraphBuildContext;
-  containerUnit: AjsUnit;
-  expandedChildren: ReadonlyArray<AjsUnit>;
+  containerUnit: FlowGraphUnitDto;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
   expandedUnitIdSet: ReadonlySet<string>;
 };
 
 const getExpandedNestedChildren = (
-  containerUnit: AjsUnit,
+  containerUnit: FlowGraphUnitDto,
   expandedUnitIdSet: ReadonlySet<string>,
-): AjsUnit[] =>
+): FlowGraphUnitDto[] =>
   containerUnit.children
     .filter(
-      (unit): unit is AjsUnit =>
+      (unit): unit is FlowGraphUnitDto =>
         expandedUnitIdSet.has(unit.id) && isNestedJobnetUnit(unit),
     )
     .sort(compareExpandedUnits);
 
 const buildExpandedScopeRelayoutContext = (
   context: ExpandedFlowGraphBuildContext,
-  containerUnit: AjsUnit,
+  containerUnit: FlowGraphUnitDto,
   expandedUnitIdSet: ReadonlySet<string>,
 ): ExpandedScopeRelayoutContext => ({
   context,
@@ -225,7 +226,7 @@ const relayoutExpandedScopePhases = (
 
 export const relayoutExpandedScope = (
   context: ExpandedFlowGraphBuildContext,
-  containerUnit: AjsUnit,
+  containerUnit: FlowGraphUnitDto,
   expandedUnitIdSet: ReadonlySet<string>,
 ) => {
   relayoutExpandedScopePhases(
@@ -238,13 +239,13 @@ export const relayoutExpandedScope = (
 };
 
 type PanelBoundsLayoutItem = {
-  unit: AjsUnit;
+  unit: FlowGraphUnitDto;
   position: FlowGraphPosition;
 };
 
 type ExpandedPanelBoundsTarget = {
   context: ExpandedFlowGraphBuildContext;
-  expandedUnit: AjsUnit;
+  expandedUnit: FlowGraphUnitDto;
 };
 
 const buildInitialPanelSubtreeBounds = (
@@ -268,8 +269,8 @@ const getPanelBoundsLayoutItem = (
 
 const isExpandedPanelBoundsUnit = (
   context: ExpandedFlowGraphBuildContext,
-  unit: AjsUnit,
-  expandedUnit: AjsUnit,
+  unit: FlowGraphUnitDto,
+  expandedUnit: FlowGraphUnitDto,
 ): boolean =>
   unit.id === expandedUnit.id ||
   isDescendantOf(unit, expandedUnit.id, context.unitById);
@@ -314,7 +315,7 @@ const getExpandedPanelLayoutItems = ({
 
 const buildExpandedPanelSubtreeBounds = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
   parentPosition: FlowGraphPosition,
 ): FlowGraphBounds => {
   const subtreeBounds = buildInitialPanelSubtreeBounds(
@@ -329,7 +330,7 @@ const buildExpandedPanelSubtreeBounds = (
 
 const buildExpandedPanelBounds = (
   context: ExpandedFlowGraphBuildContext,
-  expandedUnit: AjsUnit,
+  expandedUnit: FlowGraphUnitDto,
 ): FlowGraphBounds | undefined => {
   const parentPosition = context.positionOverrides.get(expandedUnit.id);
   if (!parentPosition) {

@@ -4,8 +4,8 @@
 
 - Purpose: complete one normalized flow graph, exploration, and navigation
   boundary without changing visible behavior.
-- Approved or active slice: Slice 1 is complete; Slice 2 is active. All four
-  reviewed slices were human-approved on 2026-07-21.
+- Approved or active slice: Slices 1 and 2 are complete; Slice 3 is active. All
+  four reviewed slices were human-approved on 2026-07-21.
 - Implement in order: serialized flow document/base graph, flow exploration DTO
   consumers, expanded placement constraints, then cross-view navigation.
 - Do not change nodes, edges, layout, expansion, search, selection, zoom, or
@@ -17,7 +17,7 @@
   cases.
 - Validate every code slice with `rtk pnpm run qlty` and its risk-based checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: review the full plan with `sdd-review-plan`.
+- Next decision: implement approved Slice 3 with `sdd-implement-task`.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: revised four-slice plan reviewed and found Ready for approval
   on 2026-07-21.
 - Human approval: Approved on 2026-07-21 for all four slices.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 
 ## Human Approval
 
@@ -168,7 +168,8 @@
 
 ### Slice 2: Migrate Flow Exploration Consumers To Application DTOs
 
-- Status: Approved
+- Status: Complete
+- Completion approved: 2026-07-22
 - Scope: make flow tree, search, detail, selection, expansion state,
   controller/effects, nodes, React graph mapping, and shared
   `UnitTreeSelector` consume the Slice 1 flow document/index instead of
@@ -242,6 +243,11 @@
   input type must preserve table identity/order and callback behavior. Removing
   allowances before every matching import is gone would make the catalog
   incomplete.
+- Implementation Feedback: retaining the complete validated Slice 1 document
+  and index in the flow controller removed duplicate presentation indexes and
+  gives Slice 3 one reusable input for base and expanded graph work. The slice
+  boundary was appropriate; this handoff is feature-specific and does not
+  require durable documentation outside the feature artifacts.
 - Out of Scope: expanded placement constraints, host navigation routing,
   semantic-diff/report migration, repository-wide localization, serialization
   redesign, and removal of normalized fields needed by later features.

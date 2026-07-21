@@ -1,6 +1,6 @@
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 
-type UnitTreeLookupUnit = Pick<AjsUnit, "id" | "parentId">;
+type UnitTreeLookupUnit = Pick<FlowGraphUnitDto, "id" | "parentId">;
 
 export const collectUnitTreeParentUnitIds = (
   unit: UnitTreeLookupUnit | undefined,

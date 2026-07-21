@@ -1,5 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type { AjsNode } from "./nodes/AjsNode";
 
 export type FlowNodeRelationshipSummary = {
@@ -163,7 +163,7 @@ const canOpenNodeAsScope = (node: Node<AjsNode>): boolean =>
 export const buildFlowNodeDetail = (
   node: Node<AjsNode> | undefined,
   edges: readonly Edge[],
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): FlowNodeDetail | undefined => {
   if (!node) {
     return undefined;

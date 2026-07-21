@@ -1,4 +1,4 @@
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type {
   FlowGraphEdgeDto,
   FlowGraphNodeDto,
@@ -14,16 +14,19 @@ const nodeTypeByUnitType: Partial<Record<string, FlowGraphNodeType>> = {
   rc: "condition",
 };
 
-export const compareExpandedUnits = (left: AjsUnit, right: AjsUnit): number =>
+export const compareExpandedUnits = (
+  left: FlowGraphUnitDto,
+  right: FlowGraphUnitDto,
+): number =>
   left.depth - right.depth ||
   left.layout.v - right.layout.v ||
   left.layout.h - right.layout.h ||
   left.absolutePath.localeCompare(right.absolutePath);
 
-const toNodeType = (unit: AjsUnit): FlowGraphNodeType =>
+const toNodeType = (unit: FlowGraphUnitDto): FlowGraphNodeType =>
   nodeTypeByUnitType[unit.unitType] ?? "job";
 
-export const toGridNode = (unit: AjsUnit): FlowGraphNodeDto => ({
+export const toGridNode = (unit: FlowGraphUnitDto): FlowGraphNodeDto => ({
   id: unit.id,
   label: unit.name,
   type: toNodeType(unit),
@@ -45,7 +48,7 @@ export const toGridNode = (unit: AjsUnit): FlowGraphNodeDto => ({
   },
 });
 
-export const toConditionNode = (unit: AjsUnit): FlowGraphNodeDto => ({
+export const toConditionNode = (unit: FlowGraphUnitDto): FlowGraphNodeDto => ({
   id: unit.id,
   label: unit.name,
   type: "condition",
@@ -66,7 +69,7 @@ export const toConditionNode = (unit: AjsUnit): FlowGraphNodeDto => ({
   },
 });
 
-export const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
+export const toEdgeDtos = (unit: FlowGraphUnitDto): FlowGraphEdgeDto[] =>
   unit.relations.map((relation) => ({
     source: relation.sourceUnitId,
     target: relation.targetUnitId,

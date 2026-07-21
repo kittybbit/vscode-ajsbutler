@@ -8,12 +8,12 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitDefinitionDialogDto } from "../../../../../application/unit-definition/buildUnitDefinition";
+import type { FlowGraphUnitDto } from "../../../../../application/flow-graph/flowGraphDocument";
 import {
   CurrentUnitIdStateType,
   DialogDataStateType,
 } from "../flowViewerStateTypes";
-import { TySymbol } from "../../../../../domain/values/AjsType";
-import { unitTypeLabel } from "../../../../../domain/services/i18n/nls";
+import { unitInformationUnitTypeLabel } from "../../unitInformationLocalization";
 import { useMyAppContext } from "../../MyContexts";
 import {
   FlowNodeStatus,
@@ -41,7 +41,7 @@ export type AjsNode = {
   unitDefinition?: UnitDefinitionDialogDto;
   label: string;
   comment?: string;
-  ty: TySymbol;
+  ty: FlowGraphUnitDto["unitType"];
   gty?: "n" | "p";
   isAncestor: boolean;
   isCurrent: boolean;
@@ -103,12 +103,16 @@ export const nodeActionsSxProps: SxProps<Theme> = {
 };
 
 export const TyTitle: FC<{
-  ty: TySymbol;
+  ty: FlowGraphUnitDto["unitType"];
   gty?: "n" | "p";
 }> = ({ ty, gty }) => {
   const { lang = "en" } = useMyAppContext();
   return (
-    <Tooltip title={unitTypeLabel(ty, lang, gty)} arrow={true} placement="top">
+    <Tooltip
+      title={unitInformationUnitTypeLabel(ty, lang, gty)}
+      arrow={true}
+      placement="top"
+    >
       <Box sx={nodeTitleSxProps}>{ty.toUpperCase()}</Box>
     </Tooltip>
   );

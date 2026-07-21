@@ -1,12 +1,15 @@
 import * as assert from "assert";
 import { parseAjsDocumentForTest } from "../support/parseAjs";
 import {
+  type FlowGraphUnitDto,
+  toFlowGraphDocumentDto,
+} from "../../application/flow-graph/flowGraphDocument";
+import {
   collapseExpandedNestedUnitIds,
   collectExpandableNestedUnitIds,
   hasExpandedAllNestedUnitIds,
   isExpandableNestedUnit,
 } from "../../presentation/webview/editor/ajsFlow/nestedExpansion";
-import { AjsUnit } from "../../domain/models/ajs/AjsDocument";
 
 const nestedDefinition = `
 unit=root,,jp1admin,;
@@ -49,7 +52,9 @@ unit=root,,jp1admin,;
 
 suite("Nested Expansion", () => {
   test("collects every expandable nested jobnet in the current scope", () => {
-    const document = parseAjsDocumentForTest(nestedDefinition);
+    const document = toFlowGraphDocumentDto(
+      parseAjsDocumentForTest(nestedDefinition),
+    );
     const currentUnit = document.rootUnits[0].children[0];
     const childNetId = currentUnit.children[0].id;
     const grandNetId = currentUnit.children[0].children[0].id;
@@ -61,7 +66,7 @@ suite("Nested Expansion", () => {
   });
 
   test("treats recovery jobnet variants as expandable nested jobnets", () => {
-    const unit: AjsUnit = {
+    const unit: FlowGraphUnitDto = {
       id: "/root/jobnet/recovery-net",
       name: "recovery-net",
       unitAttribute: "",
@@ -101,7 +106,9 @@ suite("Nested Expansion", () => {
   });
 
   test("collapsing a nested jobnet also clears expanded descendants", () => {
-    const document = parseAjsDocumentForTest(nestedDefinition);
+    const document = toFlowGraphDocumentDto(
+      parseAjsDocumentForTest(nestedDefinition),
+    );
     const currentUnit = document.rootUnits[0].children[0];
     const childNet = currentUnit.children[0];
     const grandNet = childNet.children[0];

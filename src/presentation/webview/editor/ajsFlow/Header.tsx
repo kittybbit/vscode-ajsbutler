@@ -14,7 +14,7 @@ import {
   HeaderSearchControl,
   resolveHeaderSearchHelperText,
 } from "../shared/HeaderSearchField";
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type { HeaderSearchControlLabels } from "../shared/HeaderSearchField";
 import type {
   FlowSearchDirection,
@@ -22,7 +22,7 @@ import type {
 } from "./flowSearchState";
 
 type HeaderProps = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
   canToggleExpandAllNestedUnits: boolean;
   hasExpandedAllNestedUnits: boolean;
   toggleExpandAllNestedUnits: () => void;
@@ -47,7 +47,7 @@ type HeaderSearchFieldProps = {
 };
 
 type CurrentUnitBadgeProps = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
 };
 
 type ExpandAllNestedUnitsButtonProps = {
@@ -67,7 +67,7 @@ type MiniMapButtonProps = {
   onToggle: () => void;
 };
 
-const isRootJobnet = (unit: AjsUnit): boolean =>
+const isRootJobnet = (unit: FlowGraphUnitDto): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
 
 const flowHeaderSearchLabels: HeaderSearchControlLabels = {
@@ -87,7 +87,7 @@ const flowHeaderSearchLabels: HeaderSearchControlLabels = {
 };
 
 export const getCurrentUnitLabel = (
-  currentUnit?: AjsUnit,
+  currentUnit?: FlowGraphUnitDto,
 ): string | undefined => {
   if (!currentUnit) {
     return undefined;

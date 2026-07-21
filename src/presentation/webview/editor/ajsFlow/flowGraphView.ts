@@ -1,6 +1,6 @@
 import type { Theme } from "@mui/material/styles";
 import { Edge, MarkerType, Node } from "@xyflow/react";
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type {
   FlowGraphDto,
   FlowGraphEdgeDto,
@@ -21,7 +21,7 @@ import { isExpandableNestedUnit } from "./nestedExpansion";
 
 type CreateReactFlowDataOptions = {
   searchMatchedUnitIds?: ReadonlySet<string>;
-  unitById?: ReadonlyMap<string, AjsUnit>;
+  unitById?: ReadonlyMap<string, FlowGraphUnitDto>;
   nestedExpansionState?: NestedExpansionStateType;
   nodeDecorations?: ReadonlyMap<string, ExpandedNodeDecoration>;
   positionOverrides?: ReadonlyMap<string, { x: number; y: number }>;

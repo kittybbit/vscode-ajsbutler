@@ -3,7 +3,6 @@ import type {
   AjsDocument,
   AjsParameter,
   AjsRelation,
-  AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import { isTySymbol } from "../../domain/values/AjsType";
 import {
@@ -34,14 +33,6 @@ export type UnitListTableDataDto = UnitListProjectionDto & {
   rootUnits: UnitListRootDto[];
 };
 
-const copyParameter = (parameter: AjsParameter): AjsParameter => ({
-  ...parameter,
-});
-
-const copyRelation = (relation: AjsRelation): AjsRelation => ({
-  ...relation,
-});
-
 const copyWarning = (
   warning: AjsNormalizationWarning,
 ): AjsNormalizationWarning => ({
@@ -61,11 +52,6 @@ export const toUnitListDocumentDto = (
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
-
-const isUnitListDocumentDto = (
-  document: unknown,
-): document is UnitListDocumentDto =>
-  isRecord(document) && Array.isArray(document.rootUnits);
 
 const unitListRowGroupKeys = [
   "group1",
@@ -548,34 +534,3 @@ export const toUnitListTableData = (
   }
   return { rootUnits, rows, units };
 };
-
-const toAjsUnit = (unit: UnitListRootDto): AjsUnit => ({
-  ...unit,
-  layout: { ...unit.layout },
-  parameters: unit.parameters.map(copyParameter),
-  relations: unit.relations.map(copyRelation),
-  children: unit.children.map(toAjsUnit),
-});
-
-/**
- * Restores the normalized model after its plain DTO crosses the webview
- * serialization boundary.
- */
-export function toAjsDocument(document: UnitListDocumentDto): AjsDocument;
-export function toAjsDocument(document: unknown): AjsDocument | undefined;
-export function toAjsDocument(document: unknown): AjsDocument | undefined {
-  if (!isUnitListDocumentDto(document)) {
-    return undefined;
-  }
-
-  try {
-    return {
-      rootUnits: document.rootUnits.map(toAjsUnit),
-      warnings: Array.isArray(document.warnings)
-        ? document.warnings.map(copyWarning)
-        : [],
-    };
-  } catch {
-    return undefined;
-  }
-}

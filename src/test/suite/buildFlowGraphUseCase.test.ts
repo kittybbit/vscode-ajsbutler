@@ -1,9 +1,6 @@
 import * as assert from "assert";
 import { parseAjsDocumentForTest } from "../support/parseAjs";
-import {
-  buildFlowGraph,
-  buildFlowGraphResult,
-} from "../../application/flow-graph/buildFlowGraph";
+import { buildFlowGraphResult } from "../../application/flow-graph/buildFlowGraph";
 import { toFlowGraphDocumentDto } from "../../application/flow-graph/flowGraphDocument";
 
 const validDefinition = `
@@ -41,10 +38,14 @@ suite("Build Flow Graph Use Case", () => {
     const document = parseAjsDocumentForTest(validDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
 
-    const graph = buildFlowGraph(document, currentUnitId);
+    const result = buildFlowGraphResult(
+      toFlowGraphDocumentDto(document),
+      currentUnitId,
+    );
 
-    assert.ok(graph);
-    assert.deepStrictEqual(graph?.edges, [
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.deepStrictEqual(result.graph.edges, [
       {
         source: "/root/jobnet/job-a",
         target: "/root/jobnet/job-b",
@@ -57,7 +58,7 @@ suite("Build Flow Graph Use Case", () => {
       },
     ]);
     assert.deepStrictEqual(
-      graph?.nodes.map((node) => node.id),
+      result.graph.nodes.map((node) => node.id),
       [
         document.rootUnits[0].children[0].children[0].id,
         document.rootUnits[0].children[0].children[1].id,
@@ -78,10 +79,13 @@ suite("Build Flow Graph Use Case", () => {
 
     assert.strictEqual(result.status, "available");
     if (result.status !== "available") return;
-    assert.deepStrictEqual(
-      result.graph,
-      buildFlowGraph(normalized, currentUnitId),
+    const normalizedResult = buildFlowGraphResult(
+      toFlowGraphDocumentDto(normalized),
+      currentUnitId,
     );
+    assert.strictEqual(normalizedResult.status, "available");
+    if (normalizedResult.status !== "available") return;
+    assert.deepStrictEqual(result.graph, normalizedResult.graph);
     assert.strictEqual(
       result.index.unitById.get(currentUnitId)?.name,
       "jobnet",
