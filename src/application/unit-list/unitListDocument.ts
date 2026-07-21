@@ -7,6 +7,10 @@ import type {
 } from "../../domain/models/ajs/AjsDocument";
 import { isTySymbol } from "../../domain/values/AjsType";
 import {
+  type FlowGraphUnitDto,
+  toFlowGraphUnitDto,
+} from "../flow-graph/flowGraphDocument";
+import {
   buildUnitDefinitions,
   type UnitDefinitionDialogDto,
 } from "../unit-definition/buildUnitDefinition";
@@ -17,18 +21,7 @@ import {
   type UnitListUnitMetadataDto,
 } from "./buildUnitListView";
 
-export type UnitListRootDto = Omit<
-  AjsUnit,
-  "layout" | "parameters" | "relations" | "children"
-> & {
-  layout: {
-    h: number;
-    v: number;
-  };
-  parameters: AjsParameter[];
-  relations: AjsRelation[];
-  children: UnitListRootDto[];
-};
+export type UnitListRootDto = FlowGraphUnitDto;
 
 export type UnitListDocumentDto = {
   rootUnits: UnitListRootDto[];
@@ -55,48 +48,7 @@ const copyWarning = (
   ...warning,
 });
 
-export const toUnitListRootDto = (unit: AjsUnit): UnitListRootDto => {
-  const dto: UnitListRootDto = {
-    id: unit.id,
-    name: unit.name,
-    unitAttribute: unit.unitAttribute,
-    unitType: unit.unitType,
-    absolutePath: unit.absolutePath,
-    depth: unit.depth,
-    isRoot: unit.isRoot,
-    isRootJobnet: unit.isRootJobnet,
-    hasSchedule: unit.hasSchedule,
-    hasWaitedFor: unit.hasWaitedFor,
-    layout: { ...unit.layout },
-    parameters: unit.parameters.map(copyParameter),
-    relations: unit.relations.map(copyRelation),
-    children: unit.children.map(toUnitListRootDto),
-  };
-
-  if (unit.permission !== undefined) {
-    dto.permission = unit.permission;
-  }
-  if (unit.jp1Username !== undefined) {
-    dto.jp1Username = unit.jp1Username;
-  }
-  if (unit.jp1ResourceGroup !== undefined) {
-    dto.jp1ResourceGroup = unit.jp1ResourceGroup;
-  }
-  if (unit.groupType !== undefined) {
-    dto.groupType = unit.groupType;
-  }
-  if (unit.comment !== undefined) {
-    dto.comment = unit.comment;
-  }
-  if (unit.parentId !== undefined) {
-    dto.parentId = unit.parentId;
-  }
-  if (unit.isRecovery !== undefined) {
-    dto.isRecovery = unit.isRecovery;
-  }
-
-  return dto;
-};
+export const toUnitListRootDto = toFlowGraphUnitDto;
 
 export const toUnitListDocumentDto = (
   document: AjsDocument,
