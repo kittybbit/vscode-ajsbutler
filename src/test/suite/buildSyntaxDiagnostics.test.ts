@@ -848,6 +848,10 @@ suite("Build Syntax Diagnostics", () => {
         diagnostics.map((diagnostic) => diagnostic.message),
         ["File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m."],
       );
+      assert.strictEqual(
+        diagnostics[0]?.ruleId,
+        diagnosticRuleIds.fileMonitorCondition,
+      );
     }
   });
 
@@ -958,6 +962,14 @@ suite("Build Syntax Diagnostics", () => {
         "Monitored file name (flwf) cannot use wildcard (*) when monitoring interval (flwi) is between 1 and 9.",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.ruleId),
+      [
+        diagnosticRuleIds.stringFamilyConstraint,
+        diagnosticRuleIds.stringFamilyConstraint,
+        diagnosticRuleIds.stringFamilyConstraint,
+      ],
+    );
   });
 
   test("reports file monitoring diagnostics for explicit invalid condition combinations", () => {
@@ -998,6 +1010,14 @@ suite("Build Syntax Diagnostics", () => {
         "File close option (flco) requires file creation monitoring (flwc=c).",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.ruleId),
+      [
+        diagnosticRuleIds.fileMonitorCondition,
+        diagnosticRuleIds.fileMonitorCondition,
+        diagnosticRuleIds.fileMonitorOutput,
+      ],
+    );
   });
 
   test("reports file monitoring fd diagnostics for explicit out-of-range values and start-condition usage", () => {
@@ -1013,6 +1033,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedStartConditionExecutionTimeDiagnostic([14, 4, 4]),
       expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitFdContext,
+      ),
+    );
   });
 
   test("does not report event timeout action diagnostics for omitted defaults and valid explicit values", () => {
@@ -1050,6 +1075,11 @@ suite("Build Syntax Diagnostics", () => {
         message: "Event timeout action (ets) must be one of kl, nr, wr, or an.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitEtsValue,
+      ),
+    );
   });
 
   test("does not report execution-interval control diagnostics for valid start-condition values", () => {
@@ -1107,6 +1137,10 @@ suite("Build Syntax Diagnostics", () => {
         "End timing (etn=y) can be specified only for execution-interval control jobs defined as start conditions.",
       ),
     ]);
+    assert.strictEqual(
+      diagnostics[0]?.ruleId,
+      diagnosticRuleIds.intervalControlEndContext,
+    );
   });
 
   test("reports execution-interval control diagnostics for explicit invalid tmitv and etn values", () => {
@@ -1160,6 +1194,12 @@ suite("Build Syntax Diagnostics", () => {
         message: "End timing (etn) must be y or n.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.intervalControlRange,
+      ),
+    );
   });
 
   test("reports execution-interval control fd diagnostics for explicit out-of-range values and start-condition usage", () => {
@@ -1175,6 +1215,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedStartConditionExecutionTimeDiagnostic([14, 4, 7]),
       expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitFdContext,
+      ),
+    );
   });
 
   test("does not report transfer-file diagnostics for valid explicit values and macro variables", () => {
@@ -2004,6 +2049,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedStartConditionExecutionTimeDiagnostic([14, 4, 4]),
       expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitFdContext,
+      ),
+    );
   });
 
   test("reports event-host diagnostics for explicit out-of-range evhst values", () => {

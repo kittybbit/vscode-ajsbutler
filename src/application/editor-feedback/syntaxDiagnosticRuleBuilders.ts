@@ -1,10 +1,12 @@
 import { buildJobEndJudgmentDiagnostics } from "./syntaxDiagnosticJobEndRuleBuilders";
+import {
+  buildExecutionIntervalControlDiagnostics,
+  buildFileMonitoringDiagnostics,
+} from "./syntaxDiagnosticMonitoringWaitRuleBuilders";
 import { buildScheduleRuleDiagnostics } from "./syntaxDiagnosticScheduleRuleBuilders";
 import {
   buildEventReceivingDiagnostics,
   buildEventSendingDiagnostics,
-  buildExecutionIntervalControlDiagnostics,
-  buildFileMonitoringDiagnostics,
   buildQueueTransferFileDiagnostics,
   buildTransferOperationDiagnostics,
 } from "./syntaxDiagnosticOtherRuleBuilders";

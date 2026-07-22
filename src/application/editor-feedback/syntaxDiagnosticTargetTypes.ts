@@ -1,10 +1,3 @@
-export const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
-
-export const executionIntervalControlDiagnosticTargetTypes = new Set([
-  "tmwj",
-  "rtmwj",
-]);
-
 export const eventSendingDiagnosticTargetTypes = new Set(["evsj", "revsj"]);
 
 export const eventReceivingDiagnosticTargetTypes = new Set(["evwj", "revwj"]);

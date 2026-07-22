@@ -16,13 +16,6 @@ import {
   isValidExplicitEventSearchCondition,
   isValidExplicitIpv4Address,
 } from "./syntaxDiagnosticEventRules";
-import {
-  hasInvalidWildcardWithShortMonitoringInterval,
-  isValidExplicitFileMonitoringConditions,
-  isValidExplicitFileMonitoringFileName,
-  isValidExplicitFileMonitoringInterval,
-  splitFileMonitoringConditions,
-} from "./syntaxDiagnosticFileMonitoringRules";
 import { parseExplicitHexadecimalInRange } from "./syntaxDiagnosticScalarValidators";
 import { transferFileIndexes } from "./syntaxDiagnosticTargetTypes";
 import {
@@ -44,15 +37,6 @@ export const eventTimeoutActionDiagnosticRules = [
     eventTimeoutActionAllowedValues,
     "Event timeout action (ets) must be one of kl, nr, wr, or an.",
   ),
-] as const;
-
-export const waitJobExecutionTimeDiagnosticRules = [
-  buildExplicitDecimalRangeRule({
-    key: "fd",
-    minimum: 1,
-    maximum: 1440,
-    message: "Execution time (fd) must be between 1 and 1440.",
-  }),
 ] as const;
 
 export const transferFileByteLengthRules: readonly AjsParameterDiagnosticRule[] =
@@ -127,65 +111,6 @@ export const queueTransferFileDiagnosticRules: readonly AjsParameterDiagnosticRu
     ),
   ];
 
-export const fileMonitoringDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
-  [
-    {
-      key: "flwf",
-      message: "Monitored file name (flwf) must be between 1 and 255 bytes.",
-      isInvalid: (parameter) =>
-        !isValidExplicitFileMonitoringFileName(parameter),
-    },
-    {
-      key: "flwi",
-      message: "Monitoring interval (flwi) must be between 1 and 600.",
-      isInvalid: (parameter) =>
-        !isValidExplicitFileMonitoringInterval(parameter),
-    },
-    {
-      key: "flwf",
-      message:
-        "Monitored file name (flwf) cannot use wildcard (*) when monitoring interval (flwi) is between 1 and 9.",
-      isInvalid: (parameter, unit) =>
-        hasInvalidWildcardWithShortMonitoringInterval(parameter, unit),
-    },
-    {
-      key: "flwc",
-      message:
-        "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
-      isInvalid: (parameter) =>
-        !isValidExplicitFileMonitoringConditions(parameter),
-    },
-    {
-      key: "flco",
-      message:
-        "File close option (flco) requires file creation monitoring (flwc=c).",
-      isInvalid: (_parameter, unit) => {
-        const effectiveFlwc =
-          findParameter(unit, "flwc")?.value ?? DEFAULTS.Flwc;
-        return !splitFileMonitoringConditions(effectiveFlwc).has("c");
-      },
-    },
-    ...waitJobExecutionTimeDiagnosticRules,
-    ...eventTimeoutActionDiagnosticRules,
-  ];
-
-export const executionIntervalControlDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
-  [
-    buildExplicitDecimalRangeRule({
-      key: "tmitv",
-      minimum: 1,
-      maximum: 1440,
-      message: "Execution interval (tmitv) must be between 1 and 1440.",
-    }),
-    buildExplicitAllowedValuesRule(
-      "etn",
-      new Set(["y", "n"]),
-      "End timing (etn) must be y or n.",
-    ),
-    ...waitJobExecutionTimeDiagnosticRules,
-    ...eventTimeoutActionDiagnosticRules,
-  ];
-
 export const eventSendingDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
     {
@@ -234,7 +159,6 @@ export const eventSendingDiagnosticRules: readonly AjsParameterDiagnosticRule[] 
 
 export const eventReceivingDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
   [
-    ...waitJobExecutionTimeDiagnosticRules,
     buildExplicitDecimalRangeRule({
       key: "etm",
       minimum: 1,

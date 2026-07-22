@@ -1,4 +1,9 @@
 import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import {
+  evaluateEventReceivingExecutionTimeContextViolations,
+  evaluateEventReceivingExecutionTimeRangeViolations,
+} from "../../domain/services/diagnostics/evaluateMonitoringWaitDiagnosticViolations";
+import { mapMonitoringWaitDiagnosticViolation } from "./syntaxDiagnosticMonitoringWaitRuleBuilders";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
 import {
   buildDiagnostic,
@@ -8,8 +13,6 @@ import {
   customPcTransferFileProhibitedTargetTypes,
   eventReceivingDiagnosticTargetTypes,
   eventSendingDiagnosticTargetTypes,
-  executionIntervalControlDiagnosticTargetTypes,
-  fileMonitoringDiagnosticTargetTypes,
   queueTransferFileDiagnosticTargetTypes,
   transferFileIndexes,
   transferOperationDiagnosticTargetTypes,
@@ -17,8 +20,6 @@ import {
 import {
   eventReceivingDiagnosticRules,
   eventSendingDiagnosticRules,
-  executionIntervalControlDiagnosticRules,
-  fileMonitoringDiagnosticRules,
   queueTransferFileDiagnosticRules,
   transferOperationDiagnosticRules,
 } from "./syntaxDiagnosticRuleSets";
@@ -73,56 +74,6 @@ const collectStartConditionDisabledParameterDiagnostics = (
       )
     : [];
 
-export const buildFileMonitoringDiagnostics = (
-  document: AjsDocument,
-): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(document, fileMonitoringDiagnosticTargetTypes).flatMap(
-    (unit) => [
-      ...collectRuleDiagnostics(unit, fileMonitoringDiagnosticRules),
-      ...collectStartConditionDisabledParameterDiagnostics(document, unit, [
-        {
-          key: "fd",
-          message:
-            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
-        },
-      ]),
-    ],
-  );
-
-export const buildExecutionIntervalControlDiagnostics = (
-  document: AjsDocument,
-): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(
-    document,
-    executionIntervalControlDiagnosticTargetTypes,
-  ).flatMap((unit) => {
-    const diagnostics = [
-      ...collectRuleDiagnostics(unit, executionIntervalControlDiagnosticRules),
-      ...collectStartConditionDisabledParameterDiagnostics(document, unit, [
-        {
-          key: "fd",
-          message:
-            "Execution time (fd) cannot be specified for jobs defined as start conditions.",
-        },
-      ]),
-    ];
-    const endTimingParameter = findParameter(unit, "etn");
-
-    if (
-      endTimingParameter?.value === "y" &&
-      !hasStartConditionContext(document, unit)
-    ) {
-      diagnostics.push(
-        buildDiagnostic(
-          endTimingParameter,
-          "End timing (etn=y) can be specified only for execution-interval control jobs defined as start conditions.",
-        ),
-      );
-    }
-
-    return diagnostics;
-  });
-
 export const buildTransferOperationDiagnostics = (
   document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
@@ -164,15 +115,15 @@ export const buildEventReceivingDiagnostics = (
   findUnitsByTypes(document, eventReceivingDiagnosticTargetTypes).flatMap(
     (unit) => {
       const diagnostics = [
+        ...evaluateEventReceivingExecutionTimeRangeViolations(unit).map(
+          mapMonitoringWaitDiagnosticViolation,
+        ),
         ...collectRuleDiagnostics(unit, eventReceivingDiagnosticRules),
         ...collectEventReceivingFilterAggregateDiagnostics(unit),
-        ...collectStartConditionDisabledParameterDiagnostics(document, unit, [
-          {
-            key: "fd",
-            message:
-              "Execution time (fd) cannot be specified for jobs defined as start conditions.",
-          },
-        ]),
+        ...evaluateEventReceivingExecutionTimeContextViolations(
+          document,
+          unit,
+        ).map(mapMonitoringWaitDiagnosticViolation),
       ];
 
       const invalidStartConditionParameters =
