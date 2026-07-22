@@ -1539,6 +1539,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventSendIdRange,
+      ),
+    );
   });
 
   test("does not report event sending range diagnostics for omitted defaults and valid explicit ranges", () => {
@@ -1576,6 +1582,12 @@ suite("Build Syntax Diagnostics", () => {
         message: "Event arrival check count (evsrc) must be between 0 and 999.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventArrivalRange,
+      ),
+    );
   });
 
   test("reports event sending diagnostics when arrival checking omits evhst", () => {
@@ -1611,6 +1623,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event arrival check (evsrt=y) requires an event destination host (evhst).",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventArrivalHost,
+      ),
+    );
   });
 
   test("does not report event-host diagnostics for valid explicit evhst values", () => {
@@ -1744,6 +1762,16 @@ suite("Build Syntax Diagnostics", () => {
         "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.ruleId),
+      [
+        diagnosticRuleIds.eventReceiveScope,
+        diagnosticRuleIds.eventReceiveScope,
+        diagnosticRuleIds.eventReceiveScope,
+        diagnosticRuleIds.eventReceiveFormat,
+        diagnosticRuleIds.eventReceiveFormat,
+      ],
+    );
   });
 
   test("does not report event receiving string-filter diagnostics for omitted and valid explicit values", () => {
@@ -1849,6 +1877,12 @@ suite("Build Syntax Diagnostics", () => {
         'End judgment condition (evtmc) must be n, a, n:"file-name", a:"file-name", d:"file-name", or b:"file-name" with a file name between 1 and 256 bytes.',
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventReceiveFilter,
+      ),
+    );
   });
 
   test("enforces canonical repeated evwfr aggregate bytes at the first crossing parameter", () => {
@@ -1890,6 +1924,10 @@ suite("Build Syntax Diagnostics", () => {
         "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
       ),
     ]);
+    assert.strictEqual(
+      overDiagnostics[0]?.ruleId,
+      diagnosticRuleIds.eventReceiveFilter,
+    );
 
     const multibyteDiagnostics = buildSyntaxDiagnostics(
       buildRootUnitDefinition([
@@ -1966,6 +2004,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event issue source process ID (evpid) must be a signed decimal value between -1 and 9999999999.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventReceiveNumericId,
+      ),
+    );
   });
 
   test("does not report event receiving timeout-control diagnostics for valid explicit values outside start-condition context", () => {
@@ -2034,6 +2078,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventReceiveTimeout,
+      ),
+    );
   });
 
   test("reports event receiving fd diagnostics for explicit out-of-range values and start-condition usage", () => {
@@ -2120,5 +2170,10 @@ suite("Build Syntax Diagnostics", () => {
         message: "Event host (evhst) must be between 1 and 255 bytes.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.eventHostLength,
+      ),
+    );
   });
 });

@@ -1,9 +1,4 @@
 import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
-import {
-  evaluateEventReceivingExecutionTimeContextViolations,
-  evaluateEventReceivingExecutionTimeRangeViolations,
-} from "../../domain/services/diagnostics/evaluateMonitoringWaitDiagnosticViolations";
-import { mapMonitoringWaitDiagnosticViolation } from "./syntaxDiagnosticMonitoringWaitRuleBuilders";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
 import {
   buildDiagnostic,
@@ -11,47 +6,15 @@ import {
 } from "./syntaxDiagnosticCore";
 import {
   customPcTransferFileProhibitedTargetTypes,
-  eventReceivingDiagnosticTargetTypes,
-  eventSendingDiagnosticTargetTypes,
   queueTransferFileDiagnosticTargetTypes,
   transferFileIndexes,
   transferOperationDiagnosticTargetTypes,
 } from "./syntaxDiagnosticTargetTypes";
 import {
-  eventReceivingDiagnosticRules,
-  eventSendingDiagnosticRules,
   queueTransferFileDiagnosticRules,
   transferOperationDiagnosticRules,
 } from "./syntaxDiagnosticRuleSets";
-import { getByteLength } from "./syntaxDiagnosticScalarValidators";
-import {
-  findParameter,
-  findParameters,
-  findUnitsByTypes,
-  hasStartConditionContext,
-} from "./syntaxDiagnosticUnitLookup";
-
-const EVENT_RECEIVING_FILTER_AGGREGATE_MAXIMUM_BYTES = 2048;
-
-const collectEventReceivingFilterAggregateDiagnostics = (
-  unit: AjsUnit,
-): SyntaxDiagnosticDto[] => {
-  let aggregateBytes = 0;
-
-  for (const parameter of findParameters(unit, "evwfr")) {
-    aggregateBytes += getByteLength(`evwfr=${parameter.value};`);
-    if (aggregateBytes > EVENT_RECEIVING_FILTER_AGGREGATE_MAXIMUM_BYTES) {
-      return [
-        buildDiagnostic(
-          parameter,
-          "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
-        ),
-      ];
-    }
-  }
-
-  return [];
-};
+import { findParameter, findUnitsByTypes } from "./syntaxDiagnosticUnitLookup";
 
 const collectOptionalParameterDiagnostics = (
   unit: AjsUnit,
@@ -61,18 +24,6 @@ const collectOptionalParameterDiagnostics = (
     const parameter = findParameter(unit, key);
     return parameter ? [buildDiagnostic(parameter, message)] : [];
   });
-
-const collectStartConditionDisabledParameterDiagnostics = (
-  document: AjsDocument,
-  unit: AjsUnit,
-  parameterMessages: readonly { key: string; message: string }[],
-): SyntaxDiagnosticDto[] =>
-  hasStartConditionContext(document, unit)
-    ? collectOptionalParameterDiagnostics(
-        unit,
-        parameterMessages.map(({ key, message }) => ({ key, message })),
-      )
-    : [];
 
 export const buildTransferOperationDiagnostics = (
   document: AjsDocument,
@@ -100,53 +51,4 @@ export const buildQueueTransferFileDiagnostics = (
 ): SyntaxDiagnosticDto[] =>
   findUnitsByTypes(document, queueTransferFileDiagnosticTargetTypes).flatMap(
     (unit) => collectRuleDiagnostics(unit, queueTransferFileDiagnosticRules),
-  );
-
-export const buildEventSendingDiagnostics = (
-  document: AjsDocument,
-): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(document, eventSendingDiagnosticTargetTypes).flatMap(
-    (unit) => collectRuleDiagnostics(unit, eventSendingDiagnosticRules),
-  );
-
-export const buildEventReceivingDiagnostics = (
-  document: AjsDocument,
-): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(document, eventReceivingDiagnosticTargetTypes).flatMap(
-    (unit) => {
-      const diagnostics = [
-        ...evaluateEventReceivingExecutionTimeRangeViolations(unit).map(
-          mapMonitoringWaitDiagnosticViolation,
-        ),
-        ...collectRuleDiagnostics(unit, eventReceivingDiagnosticRules),
-        ...collectEventReceivingFilterAggregateDiagnostics(unit),
-        ...evaluateEventReceivingExecutionTimeContextViolations(
-          document,
-          unit,
-        ).map(mapMonitoringWaitDiagnosticViolation),
-      ];
-
-      const invalidStartConditionParameters =
-        collectStartConditionDisabledParameterDiagnostics(document, unit, [
-          {
-            key: "etm",
-            message:
-              "Event timeout period (etm) cannot be specified for jobs defined as start conditions.",
-          },
-          {
-            key: "ha",
-            message:
-              "Hold attribute (ha) cannot be specified for jobs defined as start conditions.",
-          },
-          {
-            key: "ets",
-            message:
-              "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
-          },
-        ]);
-
-      diagnostics.push(...invalidStartConditionParameters);
-
-      return diagnostics;
-    },
   );

@@ -1,37 +1,37 @@
 import * as assert from "assert";
-import { parseHashEscapedQuotedStringLiteralContent } from "../../application/editor-feedback/syntaxDiagnosticStringValidators";
+import { parseHashEscapedQuotedEventStringContent } from "../../domain/services/diagnostics/EventDiagnosticRules";
 
 suite("Syntax Diagnostic String Validators", () => {
   test("parses hash-escaped quoted string content", () => {
     assert.strictEqual(
-      parseHashEscapedQuotedStringLiteralContent('"plain"'),
+      parseHashEscapedQuotedEventStringContent('"plain"'),
       "plain",
     );
     assert.strictEqual(
-      parseHashEscapedQuotedStringLiteralContent('"quote#""'),
+      parseHashEscapedQuotedEventStringContent('"quote#""'),
       'quote"',
     );
     assert.strictEqual(
-      parseHashEscapedQuotedStringLiteralContent('"hash##"'),
+      parseHashEscapedQuotedEventStringContent('"hash##"'),
       "hash#",
     );
     assert.strictEqual(
-      parseHashEscapedQuotedStringLiteralContent('"trailing#"'),
+      parseHashEscapedQuotedEventStringContent('"trailing#"'),
       'trailing"',
     );
   });
 
   test("rejects invalid hash-escaped quoted string content", () => {
     assert.strictEqual(
-      parseHashEscapedQuotedStringLiteralContent("plain"),
+      parseHashEscapedQuotedEventStringContent("plain"),
       undefined,
     );
     assert.strictEqual(
-      parseHashEscapedQuotedStringLiteralContent('"bad#x"'),
+      parseHashEscapedQuotedEventStringContent('"bad#x"'),
       undefined,
     );
     assert.strictEqual(
-      parseHashEscapedQuotedStringLiteralContent('"bad"quote"'),
+      parseHashEscapedQuotedEventStringContent('"bad"quote"'),
       undefined,
     );
   });

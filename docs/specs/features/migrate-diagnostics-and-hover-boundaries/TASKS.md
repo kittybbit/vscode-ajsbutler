@@ -3,8 +3,8 @@
 ## Agent Brief
 
 - Purpose: complete host-neutral diagnostic and hover application boundaries.
-- Approved or active slice: Slices 1-4 are complete; Slice 5 is active;
-  Slices 5-7 remain approved.
+- Approved or active slice: Slices 1-5 are complete; Slice 6 is active;
+  Slices 6-7 remain approved.
 - Do not change messages, positions, severity, localization, rule coverage,
   telemetry payloads, or host availability.
 - Do not expose VS Code, ANTLR, or raw parser types in domain/application APIs.
@@ -14,7 +14,7 @@
 - Final host validation also runs `rtk pnpm run test:web` and
   `rtk pnpm run build`.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement approved Slice 5 without changing its approval
+- Next decision: implement approved Slice 6 without changing its approval
   boundary.
 
 ## Sync Rule
@@ -42,7 +42,7 @@
   ownership was ambiguous, and final boundary validation was not explicit
   enough for approval.
 - Human approval: all seven slices approved in the current conversation.
-- Active implementation slice: Slice 5.
+- Active implementation slice: Slice 6.
 
 ## Human Approval
 
@@ -230,7 +230,7 @@ active implementation approval remains.
 
 ### Slice 5: Move JP1 Event Diagnostic Meaning Into Domain
 
-- Status: Approved
+- Status: Complete
 - Scope: move event sending/receiving, host, filter, identifier, timeout, and
   repeated-filter aggregate validation to domain services using the shared
   violation contract.
