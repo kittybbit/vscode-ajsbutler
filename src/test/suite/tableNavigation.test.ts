@@ -11,6 +11,7 @@ import {
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
 import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
+import { revealTableRow } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
 import type { UnitListUnitMetadataDto } from "../../application/unit-list/buildUnitListView";
 
 const createUnit = (
@@ -185,5 +186,27 @@ suite("Table navigation", () => {
       findRowIndexByIdentity(rows as never, undefined),
       undefined,
     );
+  });
+
+  test("reveals only a valid row request and leaves selection stable otherwise", () => {
+    const rows = [
+      { original: { id: "job", absolutePath: "/root/job" } },
+    ] as never;
+    const selected: string[] = [];
+    const context = {
+      rows,
+      selectRow: (absolutePath: string) => selected.push(absolutePath),
+    };
+
+    assert.strictEqual(
+      revealTableRow({ absolutePath: "/root/job" }, context),
+      true,
+    );
+    assert.strictEqual(
+      revealTableRow({ absolutePath: "/missing" }, context),
+      false,
+    );
+    assert.strictEqual(revealTableRow({ absolutePath: 1 }, context), false);
+    assert.deepStrictEqual(selected, ["/root/job"]);
   });
 });

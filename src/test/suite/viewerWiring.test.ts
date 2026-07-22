@@ -204,4 +204,31 @@ suite("Viewer wiring", () => {
     );
     assert.deepStrictEqual(calls, []);
   });
+
+  test("keeps state stable when the counterpart context cannot create a panel", () => {
+    const calls: string[] = [];
+    const factory = {
+      getExistingPanel: () => undefined,
+      getPanel: () => {
+        throw new Error("context unavailable");
+      },
+    } as unknown as ViewerFactory;
+
+    assert.doesNotThrow(() =>
+      revealCounterpartPanel(
+        {
+          document: { uri: {} } as vscode.TextDocument,
+          targetViewType: AJS_FLOW_VIEWER_TYPE,
+          absolutePath: "/root/job",
+        },
+        {
+          factoryByViewType: new Map([[AJS_FLOW_VIEWER_TYPE, factory]]),
+          mountPanel: () => calls.push("mount"),
+          onOpenStarted: () => calls.push("open"),
+          pendingRevealByPanel: new WeakMap(),
+        },
+      ),
+    );
+    assert.deepStrictEqual(calls, []);
+  });
 });

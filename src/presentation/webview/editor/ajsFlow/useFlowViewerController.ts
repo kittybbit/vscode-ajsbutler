@@ -13,6 +13,7 @@ import type {
   ValidatedFlowGraphDocument,
 } from "../../../../application/flow-graph/flowGraphDocument";
 import { type UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
+import type { NavigationRequestDto } from "../../../../application/navigation/resolveNavigationTarget";
 import type {
   CurrentUnitIdStateType,
   DialogDataStateType,
@@ -276,7 +277,7 @@ type FlowViewerLifecycleParams = {
   edges: Edge[];
   expandedUnitIds: readonly string[];
   focusRequestVersion: number;
-  handleRevealUnit: (absolutePath: string) => void;
+  handleRevealUnit: (request: NavigationRequestDto) => void;
   nodes: Node<AjsNode>[];
   preserveSearchOnNextScopeChange: ReturnType<
     typeof useFlowViewerRefs
@@ -425,6 +426,7 @@ export const useFlowViewerController = ({
     searchResultPosition,
   } = useFlowSearchState({
     currentUnit,
+    flowDocument,
     preserveSearchOnNextScopeChange,
     setCurrentUnitId,
     setExpandedUnitIds,

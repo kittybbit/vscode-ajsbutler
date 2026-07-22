@@ -10,6 +10,7 @@ import {
   NAVIGATE,
   OPERATION,
   PERFORMANCE,
+  parseNavigationEventData,
   READY,
   RESOURCE,
   SAVE,
@@ -103,7 +104,8 @@ const createViewerMessageRoutes = ({
     reportWebviewPerformance(telemetry, event);
   },
   [NAVIGATE]: (event) => {
-    onNavigate(document, event);
+    const data = parseNavigationEventData(event.data);
+    if (data) onNavigate(document, { type: NAVIGATE, data });
   },
 });
 

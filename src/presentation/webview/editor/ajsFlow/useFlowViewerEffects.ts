@@ -15,9 +15,10 @@ import { toUnitDefinitionByPath } from "../../../../application/unit-definition/
 import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
 import {
   createPerformanceEvent,
+  parseRevealUnitEventData,
   REVEAL_UNIT,
+  type RevealUnitEventData,
 } from "../../../../shared/webviewEvents";
-import { getRevealUnitAbsolutePath } from "../revealUnit";
 import {
   resolveFlowNodeCenter,
   resolveFlowViewportFocusAction,
@@ -435,7 +436,7 @@ export const useFlowDocumentSubscription = ({
 };
 
 type UseRevealUnitSubscriptionParams = {
-  handleRevealUnit: (absolutePath: string) => void;
+  handleRevealUnit: (request: RevealUnitEventData) => void;
 };
 
 export const useRevealUnitSubscription = ({
@@ -443,11 +444,8 @@ export const useRevealUnitSubscription = ({
 }: UseRevealUnitSubscriptionParams) => {
   useEffect(() => {
     const revealUnitFn = (_type: string, data: unknown) => {
-      const absolutePath = getRevealUnitAbsolutePath(data);
-      if (!absolutePath) {
-        return;
-      }
-      handleRevealUnit(absolutePath);
+      const request = parseRevealUnitEventData(data);
+      if (request) handleRevealUnit(request);
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     return () => {

@@ -459,8 +459,7 @@ const TableContents = () => {
   useEffect(() => {
     window.EventBridge.addCallback("changeDocument", changeDocument);
     const revealUnitFn = (_type: string, data: unknown) => {
-      resetSearch();
-      revealUnit(data);
+      if (revealUnit(data)) resetSearch();
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     window.vscode.postMessage(

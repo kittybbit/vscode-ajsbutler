@@ -134,9 +134,8 @@ const revealExistingCounterpartPanel = (
 const openCounterpartPanel = (
   request: CounterpartRevealRequest,
   deps: CounterpartRevealDeps,
-  targetFactory: ViewerFactory,
+  newPanel: vscode.WebviewPanel,
 ): void => {
-  const newPanel = targetFactory.getPanel(request.document);
   deps.pendingRevealByPanel.set(newPanel, request.absolutePath);
   deps.onOpenStarted?.(request.targetViewType);
   deps.mountPanel(newPanel, request.targetViewType);
@@ -152,7 +151,12 @@ export const revealCounterpartPanel = (
     return;
   }
 
-  const panel = targetFactory.getExistingPanel(request.document);
+  let panel: vscode.WebviewPanel | undefined;
+  try {
+    panel = targetFactory.getExistingPanel(request.document);
+  } catch {
+    return;
+  }
   if (panel) {
     revealExistingCounterpartPanel(
       panel,
@@ -162,7 +166,13 @@ export const revealCounterpartPanel = (
     return;
   }
 
-  openCounterpartPanel(request, deps, targetFactory);
+  let newPanel: vscode.WebviewPanel;
+  try {
+    newPanel = targetFactory.getPanel(request.document);
+  } catch {
+    return;
+  }
+  openCounterpartPanel(request, deps, newPanel);
 };
 
 const revealCounterpartFromNavigation = (

@@ -149,6 +149,32 @@ suite("Viewer message routing", () => {
     ]);
   });
 
+  test("ignores invalid navigation payloads without invoking the host adapter", () => {
+    const calls: string[] = [];
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: {} as never,
+      onReady: () => {},
+      onResource: () => {},
+      onOperation: () => {},
+      onNavigate: () => calls.push("navigate"),
+      showErrorMessage: async () => undefined,
+    });
+
+    handler({ type: NAVIGATE, data: undefined } as never);
+    handler({
+      type: NAVIGATE,
+      data: { targetView: "unknown", absolutePath: "/root/job" },
+    } as never);
+    handler({
+      type: NAVIGATE,
+      data: { targetView: "flow", absolutePath: "" },
+    } as never);
+
+    assert.deepStrictEqual(calls, []);
+  });
+
   test("cleans up store and message subscription when the panel is disposed", () => {
     const removed: string[] = [];
     let receiverDisposed = false;

@@ -1,4 +1,8 @@
 import type { MyAppResource } from "./MyAppResource";
+import {
+  parseNavigationRequest,
+  type NavigationRequestDto,
+} from "../application/navigation/resolveNavigationTarget";
 
 export const RESOURCE = "resource";
 export const READY = "ready";
@@ -11,13 +15,10 @@ export const SEARCH = "search";
 export const PERFORMANCE = "performance";
 
 export type NavigationTargetView = "flow" | "table";
-export type NavigationEventData = {
+export type NavigationEventData = NavigationRequestDto & {
   targetView: NavigationTargetView;
-  absolutePath: string;
 };
-export type RevealUnitEventData = {
-  absolutePath: string;
-};
+export type RevealUnitEventData = NavigationRequestDto;
 
 export type ResourceEventType = { type: typeof RESOURCE; data: MyAppResource };
 export type ReadyEventType = { type: typeof READY };
@@ -76,6 +77,24 @@ export const createRevealUnitEvent = (
   type: REVEAL_UNIT,
   data: { absolutePath },
 });
+
+export const parseRevealUnitEventData = (
+  data: unknown,
+): NavigationRequestDto | undefined => {
+  const result = parseNavigationRequest(data);
+  return result.status === "available" ? result.request : undefined;
+};
+
+export const parseNavigationEventData = (
+  data: unknown,
+): NavigationEventData | undefined => {
+  const request = parseRevealUnitEventData(data);
+  if (!request || typeof data !== "object" || data === null) return undefined;
+  const targetView = (data as Record<string, unknown>).targetView;
+  return targetView === "flow" || targetView === "table"
+    ? { targetView, ...request }
+    : undefined;
+};
 
 export const createOperationEvent = (
   operation: string,

@@ -4,7 +4,7 @@
 
 - Purpose: complete one normalized flow graph, exploration, and navigation
   boundary without changing visible behavior.
-- Approved or active slice: Slices 1-3 are complete; Slice 4 is active. All
+- Approved or active slice: Slices 1-4 are complete. All
   four reviewed slices were human-approved on 2026-07-21.
 - Implement in order: serialized flow document/base graph, flow exploration DTO
   consumers, expanded placement constraints, then cross-view navigation.
@@ -17,7 +17,8 @@
   cases.
 - Validate every code slice with `rtk pnpm run qlty` and its risk-based checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement approved Slice 4 with `sdd-implement-task`.
+- Next decision: evaluate feature completion with `sdd-plan-task` Feature Exit
+  Mode.
 
 ## Plan Status
 
@@ -28,7 +29,7 @@
 - Review status: revised four-slice plan reviewed and found Ready for approval
   on 2026-07-21.
 - Human approval: Approved on 2026-07-21 for all four slices.
-- Active implementation slice: Slice 4.
+- Active implementation slice: none; all approved slices are complete.
 
 ## Human Approval
 
@@ -358,7 +359,8 @@
 
 ### Slice 4: Stabilize Cross-View Navigation And Reveal Contracts
 
-- Status: Approved
+- Status: Complete
+- Completion approved: 2026-07-22.
 - Scope: introduce an application-owned plain navigation request/target result
   for stable absolute-path identity, active flow scope, revealed unit, required
   expanded ancestors, and unavailable results. Move flow reveal target
@@ -442,6 +444,12 @@
 - Risks: readiness timing and WeakMap pending state encode latest-request
   behavior; changing event ownership without preserving adapter order can drop
   or duplicate reveal requests.
+- Implementation Feedback: the validated document index provides stable path
+  and unit lookup but does not precompute each job group's first descendant
+  root jobnet. A document-scoped weak lookup, including cached misses, kept
+  repeated navigation bounded without changing the serialized DTO or Slice 1
+  index contract. The slice boundary was otherwise appropriate, and the
+  durable navigation use case already captures the reusable behavior contract.
 - Out of Scope: new navigation UI, cross-document targets, persisted navigation
   history, new diagnostics, host lifecycle redesign, and removal of the two
   Node-boundary allowances owned by the serialization/composition feature.
