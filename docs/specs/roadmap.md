@@ -165,7 +165,10 @@
        - Completed: `migrate-unit-information-boundaries` established shared
          unit-definition DTOs, a serializable unit-list projection, a plain CSV
          contract, and presentation-owned unit-information localization.
-       - `migrate-flow-graph-and-navigation-boundaries`
+       - Completed: `migrate-flow-graph-and-navigation-boundaries` established
+         host-neutral base and expanded graph contracts, application-owned
+         structural placement constraints, presentation-owned geometry, and a
+         stable application navigation contract for the list and flow viewers.
        - `migrate-diagnostics-and-hover-boundaries`
        - `complete-webapi-infrastructure-boundaries`
        - `migrate-semantic-diff-and-report-boundaries`

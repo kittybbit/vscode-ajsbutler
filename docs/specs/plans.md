@@ -35,17 +35,12 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Run Feature Exit Review for
-   `migrate-flow-graph-and-navigation-boundaries` with `sdd-plan-task`.
-2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-3. Keep compatibility risk visible for every shared or extension-runtime change.
+2. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/migrate-flow-graph-and-navigation-boundaries/`: all four
-  approved slices are complete and the active feature awaits Feature Exit
-  Review.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
