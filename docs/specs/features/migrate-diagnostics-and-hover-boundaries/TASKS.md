@@ -3,8 +3,8 @@
 ## Agent Brief
 
 - Purpose: complete host-neutral diagnostic and hover application boundaries.
-- Approved or active slice: Slices 1-6 are complete; Slice 7 is active and
-  approved.
+- Approved or active slice: Slices 1-7 are complete; no implementation slice
+  remains active.
 - Do not change messages, positions, severity, localization, rule coverage,
   telemetry payloads, or host availability.
 - Do not expose VS Code, ANTLR, or raw parser types in domain/application APIs.
@@ -14,8 +14,8 @@
 - Final host validation also runs `rtk pnpm run test:web` and
   `rtk pnpm run build`.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement approved Slice 7 without changing its approval
-  boundary.
+- Next decision: run `sdd-plan-task` in Feature Exit Mode after the approved
+  Slice 7 commit is complete and the workspace is clean.
 
 ## Sync Rule
 
@@ -33,24 +33,23 @@
 - Planning scope: host-neutral diagnostic contracts, domain-owned diagnostic
   rule families, application mapping, hover localization port/adapter, VS Code
   adapters, composition, and regression coverage.
-- Review status: reviewed, human-approved, and in implementation; no blocking
-  findings.
+- Review status: reviewed and implemented with no blocking findings; Feature
+  Exit Review remains pending.
 - Replanning reason: reviews found that the shared domain result contract needed
   the correct dependency owner and a typed violation-reason discriminator, two
   diagnostic slices contained independent domain meanings, the shared macro/
   regular-expression rule needed cross-slice traceability, hover adapter
   ownership was ambiguous, and final boundary validation was not explicit
   enough for approval.
-- Human approval: all seven slices approved in the current conversation.
-- Active implementation slice: Slice 7.
+- Human approval: all seven slices were approved and completed in the current
+  conversation.
+- Active implementation slice: none; Feature Exit Review is next.
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: full seven-slice implementation plan and Slices 1-7 within
-  each recorded approval boundary, dependency order, validation plan, risks,
-  and out-of-scope constraints.
+- Status: Pending
+- Approved at: none
+- Approved scope: none; no implementation slice remains active.
 
 Implementation may proceed only within the recorded approved scope.
 Only clear human approval can change or expand that scope.
@@ -311,7 +310,7 @@ active implementation approval remains.
 
 ### Slice 7: Isolate Parameter Hover Localization And Complete Composition
 
-- Status: Approved
+- Status: Complete
 - Scope: define an application-owned parameter-syntax lookup port, implement it
   as a browser-safe infrastructure resource adapter, construct it in bootstrap,
   keep parameter-symbol recognition and hover decisions in application, and

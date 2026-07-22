@@ -111,6 +111,20 @@ suite("Architecture dependency rules", () => {
     );
   });
 
+  test("keeps editor-feedback application independent from localization implementations", () => {
+    const forbiddenReferences = collectProductionImportReferences(repoRoot)
+      .filter(({ file }) => file.startsWith("src/application/editor-feedback/"))
+      .filter(
+        ({ resolvedPath, specifier }) =>
+          resolvedPath?.startsWith("src/domain/services/i18n/") ||
+          resolvedPath?.startsWith("src/resource/") ||
+          specifier === "vscode",
+      )
+      .map(({ file, specifier }) => ({ file, specifier }));
+
+    assert.deepStrictEqual(forbiddenReferences, []);
+  });
+
   test("detects representative violations for the current rules", () => {
     const references = [
       ...collectImportReferencesFromSource(

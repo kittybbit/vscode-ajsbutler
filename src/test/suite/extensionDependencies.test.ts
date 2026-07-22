@@ -24,6 +24,15 @@ suite("Extension dependencies", () => {
     assert.strictEqual(typeof dependencies.buildSyntaxDiagnostics, "function");
     assert.strictEqual(typeof dependencies.buildUnitList, "function");
     assert.strictEqual(typeof dependencies.findParameterHover, "function");
+    assert.deepStrictEqual(dependencies.findParameterHover("ty", "en"), {
+      symbol: "ty",
+      syntax:
+        "{g|mg|n|rn|rm|rr|rc|mn|j|rj|pj|rp|qj|rq|jdj|rjdj|orj|rorj|evwj|revwj|flwj|rflwj|mlwj|rmlwj|mqwj|rmqwj|mswj|rmswj|lfwj|rlfwj|ntwj|rntwj|tmwj|rtmwj|evsj|revsj|mlsj|rmlsj|mqsj|rmqsj|mssj|rmssj|cmsj|rcmsj|pwlj|rpwlj|pwrj|rpwrj|cj|rcj|cpj|rcpj|fxj|rfxj|htpj|rhtpj|nc}",
+    });
+    assert.strictEqual(
+      dependencies.findParameterHover("not-a-param", "en"),
+      undefined,
+    );
     assert.strictEqual(
       typeof dependencies.semanticDiff.buildSemanticDiffReport,
       "function",

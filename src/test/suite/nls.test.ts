@@ -6,6 +6,7 @@ import {
   unitTypeLabel,
   semanticDiffReportText,
 } from "../../domain/services/i18n/nls";
+import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
 
 suite("NLS", () => {
   test("falls back to English message resources for unsupported languages", () => {
@@ -31,6 +32,22 @@ suite("NLS", () => {
       paramDefinitionLang("unsupported").ty.syntax,
       "{g|mg|n|rn|rm|rr|rc|mn|j|rj|pj|rp|qj|rq|jdj|rjdj|orj|rorj|evwj|revwj|flwj|rflwj|mlwj|rmlwj|mqwj|rmqwj|mswj|rmswj|lfwj|rlfwj|ntwj|rntwj|tmwj|rtmwj|evsj|revsj|mlsj|rmlsj|mqsj|rmqsj|mssj|rmssj|cmsj|rcmsj|pwlj|rpwlj|pwrj|rpwrj|cj|rcj|cpj|rcpj|fxj|rfxj|htpj|rhtpj|nc}",
     );
+  });
+
+  test("resolves hover parameter syntax with localized and English fallback resources", () => {
+    const adapter = new ParameterSyntaxResourceAdapter();
+
+    for (const language of ["en", "ja", "ja-JP", "unsupported"]) {
+      assert.strictEqual(
+        adapter.findSyntax("ty", language),
+        paramDefinitionLang(language).ty.syntax,
+      );
+      assert.strictEqual(
+        adapter.findSyntax("sd", language),
+        paramDefinitionLang(language).sd.syntax,
+      );
+    }
+    assert.strictEqual(adapter.findSyntax("not-a-param", "en"), undefined);
   });
 
   test("resolves table column labels through structured accessors", () => {

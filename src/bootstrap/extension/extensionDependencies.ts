@@ -10,7 +10,7 @@ import {
   type BuildSyntaxDiagnostics,
 } from "../../application/editor-feedback/buildSyntaxDiagnostics";
 import {
-  findParameterHover,
+  createFindParameterHover,
   type FindParameterHover,
 } from "../../application/editor-feedback/findParameterHover";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
@@ -23,6 +23,7 @@ import {
   type BuildSemanticDiffReport,
 } from "../../application/semantic-diff/buildSemanticDiffReport";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
+import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
 import type { ImportAjsDefinitionCommandDeps } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
 import { VscodeWebApiCredentialStore } from "../../infrastructure/webapi/VscodeWebApiCredentialStore";
@@ -73,12 +74,13 @@ export const createExtensionDependencies = (
   const telemetry = createTelemetry();
   const parser = instrumentParserPerformance(new AntlrAjsParser(), telemetry);
   const credentialStore = new VscodeWebApiCredentialStore(context.secrets);
+  const parameterSyntaxLookup = new ParameterSyntaxResourceAdapter();
 
   return {
     telemetry,
     buildSyntaxDiagnostics: createBuildSyntaxDiagnostics(parser),
     buildUnitList: createBuildUnitList(parser),
-    findParameterHover,
+    findParameterHover: createFindParameterHover(parameterSyntaxLookup),
     semanticDiff: {
       buildSemanticDiffReport: createBuildSemanticDiffReport(parser),
     },
