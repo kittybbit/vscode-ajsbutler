@@ -33,8 +33,9 @@ opened definition and provide precise, host-neutral diagnostic information.
   [Interpret JP1 Parameters](../domain-rules/interpret-jp1-parameters.md)
 - each supported semantic diagnostic refers to a stable `JP1-PARAM-*` rule ID
   from that contract
-- diagnostic positions remain 1-based until a host adapter maps them to the
-  coordinate convention required by the editor
+- diagnostic lines remain 1-based, columns remain 0-based, and lengths retain
+  the current parameter-key or parser-fallback span until a host adapter maps
+  them to the coordinate convention required by the editor
 - desktop and web entry points share the same diagnostic decisions
 
 ## Consumed Domain Rules

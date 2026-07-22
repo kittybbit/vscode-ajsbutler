@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
+import { diagnosticRuleIds } from "../../domain/services/diagnostics/DiagnosticRuleId";
 import type { TelemetryEvent } from "../../application/telemetry/telemetryEvent";
 import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
@@ -36,6 +37,7 @@ suite("Register diagnostics", () => {
           message: "diagnostic message with raw-looking value",
           severity: "error",
           category: syntaxDiagnosticCategories.eventSending,
+          ruleId: diagnosticRuleIds.eventArrivalHost,
         },
         {
           line: 2,
@@ -52,6 +54,14 @@ suite("Register diagnostics", () => {
     );
 
     assert.strictEqual(captured.diagnostics?.length, 2);
+    assert.deepStrictEqual(captured.diagnostics?.[0].range.start, {
+      line: 0,
+      character: 2,
+    });
+    assert.deepStrictEqual(captured.diagnostics?.[0].range.end, {
+      line: 0,
+      character: 5,
+    });
     assert.deepStrictEqual(
       trackedEvents.map((event) => event.name),
       ["editor.diagnostics.evaluated", "editor.diagnostics.reported"],

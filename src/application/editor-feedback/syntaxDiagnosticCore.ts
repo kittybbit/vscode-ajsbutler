@@ -3,6 +3,7 @@ import type {
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
+import { toDiagnosticSourceRange } from "./diagnosticSourceRange";
 import { isValidExplicitByteLengthValue } from "./syntaxDiagnosticScalarValidators";
 import { isValidExplicitGovernedByteLengthValue } from "./syntaxDiagnosticScalarValidators";
 import { parseExplicitDecimalInRange } from "./syntaxDiagnosticScalarValidators";
@@ -33,9 +34,7 @@ export const buildDiagnostic = (
   parameter: AjsParameter,
   message: string,
 ): SyntaxDiagnosticDto => ({
-  line: parameter.line ?? 1,
-  column: parameter.column ?? 0,
-  length: parameter.length ?? parameter.key.length,
+  ...toDiagnosticSourceRange(parameter, parameter.key.length),
   message,
   severity: "error" as const,
 });

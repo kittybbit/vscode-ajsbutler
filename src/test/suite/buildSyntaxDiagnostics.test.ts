@@ -80,7 +80,10 @@ suite("Build Syntax Diagnostics", () => {
     const parser: AjsParserPort = {
       parse: () => ({
         ok: false,
-        errors: [{ line: 4, column: 2, message: "invalid syntax" }],
+        errors: [
+          { line: 4, column: 2, message: "invalid syntax" },
+          { line: 8, column: 0, message: "unexpected end" },
+        ],
       }),
     };
 
@@ -92,6 +95,14 @@ suite("Build Syntax Diagnostics", () => {
         column: 2,
         length: 1,
         message: "invalid syntax",
+        severity: "error",
+        category: syntaxDiagnosticCategories.parserSyntax,
+      },
+      {
+        line: 8,
+        column: 0,
+        length: 1,
+        message: "unexpected end",
         severity: "error",
         category: syntaxDiagnosticCategories.parserSyntax,
       },

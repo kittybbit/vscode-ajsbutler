@@ -25,7 +25,16 @@ host-neutral application DTOs across the boundary.
 
 - Application owns diagnostic and hover entry points, DTOs, and host-neutral
   errors.
+- Application diagnostic DTOs expose a host-neutral source range with a
+  one-based line, zero-based column, and token length; only the VS Code adapter
+  converts that range to editor coordinates.
 - Domain owns shared JP1/AJS semantic rules used by editor feedback.
+- Domain diagnostic evaluation reports stable `JP1-PARAM-*` rule IDs, typed
+  non-localized violation reasons, and normalized parameter/source evidence
+  without owning diagnostic wording, severity, telemetry, or VS Code objects.
+- A shared domain violation contract is established before any diagnostic rule
+  family moves so each family slice can depend on the same rule-ID and evidence
+  shape independently.
 - Presentation owns VS Code `Diagnostic`, `Range`, `Hover`, and Markdown mapping.
 - Parser mechanics and VS Code types do not cross into domain/application
   decisions.
@@ -45,7 +54,9 @@ host-neutral application DTOs across the boundary.
 ### Dependency Impact
 
 - Affected surface: parser adapter, editor-feedback use cases/DTOs, diagnostic
-  registration, hover provider, localization, and tests.
+  rule modules, diagnostic registration, hover provider, localization adapter,
+  extension composition, telemetry type references, architecture checks, and
+  tests.
 - Propagation decision: new semantic hover content and diagnostic rules are out
   of scope.
 
@@ -73,6 +84,9 @@ host-neutral application DTOs across the boundary.
 
 - Preserve `engines.vscode`, desktop/web support, malformed-input behavior,
   diagnostic output, hover output, and localization.
+- Preserve the existing parser coordinate convention: line numbers are
+  one-based, columns are zero-based, and diagnostic lengths continue to cover
+  the current parameter key or parser fallback span.
 
 ## Acceptance Criteria
 
@@ -84,6 +98,24 @@ host-neutral application DTOs across the boundary.
 
 - New diagnostic parameters, semantic hover content, or UI changes.
 
-## Open Questions
+## Planning Decisions
 
-- Planning must decide the host-neutral source-range and error contracts.
+- Use a repository-owned source-range value in the application diagnostic DTO;
+  do not expose ANTLR tokens, parser contexts, or VS Code positions.
+- Keep parser failures as repository-owned application-port errors and map them
+  to the same diagnostic DTO as semantic violations.
+- Domain semantic evaluation returns stable rule IDs, typed violation reasons,
+  and normalized evidence. The reason discriminates distinct failures under the
+  same rule and target without containing display wording. Application mapping
+  uses that result to retain the existing English diagnostic messages,
+  categories, severity, ordering, and fallback positions without repeating
+  domain validation.
+- Adding rule IDs to repository-owned results does not add them to telemetry;
+  existing telemetry names and payloads remain unchanged.
+- Keep the current hover result (`symbol` and localized `syntax`) as the
+  application-facing value. Define its lookup port in application, implement a
+  browser-safe resource adapter in infrastructure, and construct that adapter
+  in bootstrap so application no longer imports the domain localization service
+  directly.
+- The feature does not relocate unrelated list, semantic-diff, or table
+  localization helpers.

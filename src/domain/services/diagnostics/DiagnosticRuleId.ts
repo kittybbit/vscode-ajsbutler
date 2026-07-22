@@ -1,0 +1,30 @@
+export const diagnosticRuleIds = {
+  scheduleRange: "JP1-PARAM-SCHEDULE-RANGE-001",
+  scheduleWeeklyDay: "JP1-PARAM-SCHEDULE-WEEKLY-DAY-001",
+  scheduleStartDate: "JP1-PARAM-SCHEDULE-START-DATE-001",
+  retryAbrDependency: "JP1-PARAM-RETRY-ABR-DEPENDENCY-001",
+  jobEndRange: "JP1-PARAM-JOB-END-RANGE-001",
+  jobEndThreshold: "JP1-PARAM-JOB-END-THRESHOLD-001",
+  fileMonitorCondition: "JP1-PARAM-FILE-MONITOR-CONDITION-001",
+  fileMonitorOutput: "JP1-PARAM-FILE-MONITOR-OUTPUT-001",
+  stringFamilyConstraint: "JP1-PARAM-STRING-FAMILY-CONSTRAINT-001",
+  waitEtsValue: "JP1-PARAM-WAIT-ETS-VALUE-001",
+  waitFdContext: "JP1-PARAM-WAIT-FD-CONTEXT-001",
+  intervalControlRange: "JP1-PARAM-INTERVAL-CONTROL-RANGE-001",
+  intervalControlEndContext: "JP1-PARAM-INTERVAL-CONTROL-END-CONTEXT-001",
+  eventArrivalHost: "JP1-PARAM-EVENT-ARRIVAL-HOST-001",
+  eventArrivalRange: "JP1-PARAM-EVENT-ARRIVAL-RANGE-001",
+  eventSendIdRange: "JP1-PARAM-EVENT-SEND-ID-RANGE-001",
+  eventHostLength: "JP1-PARAM-EVENT-HOST-LENGTH-001",
+  eventReceiveScope: "JP1-PARAM-EVENT-RECEIVE-SCOPE-001",
+  eventReceiveFormat: "JP1-PARAM-EVENT-RECEIVE-FORMAT-001",
+  eventReceiveNumericId: "JP1-PARAM-EVENT-RECEIVE-NUMERIC-ID-001",
+  eventReceiveFilter: "JP1-PARAM-EVENT-RECEIVE-FILTER-001",
+  eventReceiveTimeout: "JP1-PARAM-EVENT-RECEIVE-TIMEOUT-001",
+  stringMacroAllowance: "JP1-PARAM-STRING-MACRO-ALLOWANCE-001",
+  transferFileForm: "JP1-PARAM-TRANSFER-FILE-FORM-001",
+  transferFilePath: "JP1-PARAM-TRANSFER-FILE-PATH-001",
+} as const;
+
+export type DiagnosticRuleId =
+  (typeof diagnosticRuleIds)[keyof typeof diagnosticRuleIds];
