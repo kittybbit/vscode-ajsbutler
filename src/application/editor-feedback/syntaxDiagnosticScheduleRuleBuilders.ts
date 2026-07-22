@@ -1,131 +1,83 @@
-import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
+import {
+  evaluateScheduleDiagnosticViolations,
+  scheduleRangeViolationReasons,
+  scheduleStartDateViolationReasons,
+  scheduleWeeklyDayViolationReasons,
+  type ScheduleDiagnosticViolationReason,
+} from "../../domain/services/diagnostics/evaluateScheduleDiagnosticViolations";
+import { createMapDiagnosticViolation } from "./mapDiagnosticViolation";
 import type {
   BuildSyntaxDiagnosticsOptions,
   SyntaxDiagnosticDto,
 } from "./syntaxDiagnosticTypes";
-import {
-  buildDiagnostic,
-  collectRuleDiagnostics,
-  type AjsParameterDiagnosticRule,
-} from "./syntaxDiagnosticCore";
-import {
-  DEFAULT_SCHEDULE_LIMIT_YEAR,
-  hasInvalidExplicitWeeklyCycleScheduleCompatibility,
-  isValidExplicitCycle,
-  isValidExplicitDelayTime,
-  isValidExplicitParentScheduleRule,
-  isValidExplicitScheduleByDaysFromStart,
-  isValidExplicitScheduleDate,
-  isValidExplicitShiftDays,
-  isValidExplicitStartTime,
-  isValidExplicitWaitCount,
-  isValidExplicitWaitTime,
-  normalizeScheduleLimitYear,
-} from "./syntaxDiagnosticScheduleRules";
-import { findParameters, findUnitsByTypes } from "./syntaxDiagnosticUnitLookup";
-import { scheduleRuleDiagnosticTargetTypes } from "./syntaxDiagnosticTargetTypes";
+import { syntaxDiagnosticCategories } from "./syntaxDiagnosticTypes";
 
-const scheduleRuleParameterDiagnosticRules: readonly AjsParameterDiagnosticRule[] =
-  [
-    {
-      key: "ln",
+const scheduleRuleCategory = syntaxDiagnosticCategories.scheduleRule;
+
+const mapScheduleDiagnosticViolation =
+  createMapDiagnosticViolation<ScheduleDiagnosticViolationReason>({
+    [scheduleRangeViolationReasons.invalidParentScheduleRule]: {
       message:
         "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
-      isInvalid: (parameter, currentUnit) =>
-        !isValidExplicitParentScheduleRule(parameter, currentUnit),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "st",
+    [scheduleRangeViolationReasons.invalidStartTime]: {
       message:
         "Start time (st) must use schedule rule numbers 1..144 and times between 00:00 and 47:59.",
-      isInvalid: (parameter) => !isValidExplicitStartTime(parameter),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "cy",
+    [scheduleRangeViolationReasons.invalidCycle]: {
       message:
         "Cycle value (cy) must use schedule rule numbers 1..144 and cycle ranges y=1..9, m=1..12, w=1..5, or d=1..31.",
-      isInvalid: (parameter) => !isValidExplicitCycle(parameter),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "shd",
+    [scheduleRangeViolationReasons.invalidShiftDays]: {
       message:
         "Maximum shift days (shd) must use schedule rule numbers 1..144 and values between 1 and 31.",
-      isInvalid: (parameter) => !isValidExplicitShiftDays(parameter),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "cftd",
+    [scheduleRangeViolationReasons.invalidDaysFromStart]: {
       message:
         "Days-from-start rule (cftd) must use schedule rule numbers 1..144 with valid no/be/af/db/da ranges.",
-      isInvalid: (parameter) =>
-        !isValidExplicitScheduleByDaysFromStart(parameter),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "sy",
+    [scheduleRangeViolationReasons.invalidStartDelayTime]: {
       message:
         "Start delay time (sy) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
-      isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "ey",
+    [scheduleRangeViolationReasons.invalidEndDelayTime]: {
       message:
         "End delay time (ey) must use schedule rule numbers 1..144 and either 00:00-47:59 or M/C/U minutes between 1 and 2879.",
-      isInvalid: (parameter) => !isValidExplicitDelayTime(parameter),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "wc",
+    [scheduleRangeViolationReasons.invalidStartConditionCount]: {
       message:
         "Start-condition count (wc) must use schedule rule numbers 1..144 and values no, un, or 1..999.",
-      isInvalid: (parameter) => !isValidExplicitWaitCount(parameter),
+      category: scheduleRuleCategory,
     },
-    {
-      key: "wt",
+    [scheduleRangeViolationReasons.invalidMonitoringEndTime]: {
       message:
         "Monitoring end time (wt) must use schedule rule numbers 1..144 and values no, un, 00:00-47:59, or 1..2879 minutes.",
-      isInvalid: (parameter) => !isValidExplicitWaitTime(parameter),
+      category: scheduleRuleCategory,
     },
-  ];
-
-const buildScheduleDateDiagnostics = (
-  unit: AjsUnit,
-  options: BuildSyntaxDiagnosticsOptions,
-): SyntaxDiagnosticDto[] =>
-  findParameters(unit, "sd").flatMap((parameter) =>
-    isValidExplicitScheduleDate(
-      parameter,
-      normalizeScheduleLimitYear(options.scheduleLimitYear) ??
-        DEFAULT_SCHEDULE_LIMIT_YEAR,
-    )
-      ? []
-      : [
-          buildDiagnostic(
-            parameter,
-            "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
-          ),
-        ],
-  );
-
-const buildWeeklyCycleCompatibilityDiagnostics = (
-  unit: AjsUnit,
-): SyntaxDiagnosticDto[] =>
-  findParameters(unit, "cy").flatMap((parameter) =>
-    hasInvalidExplicitWeeklyCycleScheduleCompatibility(parameter, unit)
-      ? [
-          buildDiagnostic(
-            parameter,
-            "Weekly cycle (cy=(n,w)) cannot be specified when execution-start date (sd) uses open-day (*) or closed-day (@) scheduling for the same rule.",
-          ),
-        ]
-      : [],
-  );
+    [scheduleStartDateViolationReasons.invalidStartDate]: {
+      message:
+        "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+      category: scheduleRuleCategory,
+    },
+    [scheduleWeeklyDayViolationReasons.openOrClosedDayConflict]: {
+      message:
+        "Weekly cycle (cy=(n,w)) cannot be specified when execution-start date (sd) uses open-day (*) or closed-day (@) scheduling for the same rule.",
+      category: scheduleRuleCategory,
+    },
+  });
 
 export const buildScheduleRuleDiagnostics = (
   document: AjsDocument,
   options: BuildSyntaxDiagnosticsOptions,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(document, scheduleRuleDiagnosticTargetTypes).flatMap(
-    (unit) => [
-      ...buildScheduleDateDiagnostics(unit, options),
-      ...collectRuleDiagnostics(unit, scheduleRuleParameterDiagnosticRules),
-      ...buildWeeklyCycleCompatibilityDiagnostics(unit),
-    ],
+  evaluateScheduleDiagnosticViolations(document, options).map(
+    mapScheduleDiagnosticViolation,
   );

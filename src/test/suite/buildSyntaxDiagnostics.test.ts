@@ -3,6 +3,7 @@ import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/
 import { buildDiagnostic } from "../../application/editor-feedback/syntaxDiagnosticCore";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
+import { diagnosticRuleIds } from "../../domain/services/diagnostics/DiagnosticRuleId";
 import { testAjsParser } from "../support/parseAjs";
 import {
   assertSyntaxDiagnostics,
@@ -349,6 +350,11 @@ suite("Build Syntax Diagnostics", () => {
         "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.scheduleRange,
+      ),
+    );
   });
 
   test("reports sd diagnostics for explicit out-of-range rule and date values", () => {
@@ -416,6 +422,12 @@ suite("Build Syntax Diagnostics", () => {
         "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.scheduleStartDate,
+      ),
+    );
   });
 
   test("does not report sd/cy compatibility diagnostics for valid explicit schedule combinations", () => {
@@ -465,6 +477,12 @@ suite("Build Syntax Diagnostics", () => {
         "Weekly cycle (cy=(n,w)) cannot be specified when execution-start date (sd) uses open-day (*) or closed-day (@) scheduling for the same rule.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.scheduleWeeklyDay,
+      ),
+    );
   });
 
   test("does not report end-judgment diagnostics for omitted defaults", () => {

@@ -1,8 +1,5 @@
-import type {
-  AjsParameter,
-  AjsUnit,
-} from "../../domain/models/ajs/AjsDocument";
-import { findParameters } from "./syntaxDiagnosticUnitLookup";
+import type { AjsParameter, AjsUnit } from "../../models/ajs/AjsDocument";
+import { findAjsUnitParameters } from "../../models/ajs/AjsDocument";
 export {
   getCalendarMonthDayLimit,
   isValidExplicitScheduleDate,
@@ -11,7 +8,7 @@ export {
   isValidScheduleDateYear,
   parseExplicitScheduleDateDiagnosticValue,
   type ParsedExplicitScheduleDateValue,
-} from "./syntaxDiagnosticScheduleDateRules";
+} from "./ScheduleDateRules";
 
 export const DEFAULT_SCHEDULE_LIMIT_YEAR = 2036;
 
@@ -211,7 +208,7 @@ export const hasInvalidExplicitWeeklyCycleScheduleCompatibility = (
     return false;
   }
 
-  return findParameters(unit, "sd").some((scheduleDateParameter) => {
+  return findAjsUnitParameters(unit, "sd").some((scheduleDateParameter) => {
     const scheduleDate = usesOpenOrClosedDaySchedule(scheduleDateParameter);
     return scheduleDate?.ruleNumber === weeklyCycle.ruleNumber;
   });

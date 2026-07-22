@@ -1,5 +1,5 @@
-import { parseScheduleDateValue } from "../../domain/models/parameters/scheduleRuleHelpers";
-import type { AjsParameter } from "../../domain/models/ajs/AjsDocument";
+import type { AjsParameter } from "../../models/ajs/AjsDocument";
+import { parseScheduleDateValue } from "../../models/parameters/scheduleRuleHelpers";
 
 export type ParsedExplicitScheduleDateValue = {
   hasExplicitRuleNumber: boolean;

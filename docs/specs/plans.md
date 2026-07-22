@@ -35,7 +35,7 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement approved Slice 2 of `migrate-diagnostics-and-hover-boundaries`,
+1. Implement approved Slice 3 of `migrate-diagnostics-and-hover-boundaries`,
    continuing with one approved slice at a time on the dedicated feature
    branch.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
@@ -45,7 +45,7 @@ rules in `docs/specs/README.md`, not in this file.
 ## Active Feature Specs
 
 - `docs/specs/features/migrate-diagnostics-and-hover-boundaries/`: active
-  Implementation Mode feature; Slice 1 is complete and Slice 2 is the next
+  Implementation Mode feature; Slices 1-2 are complete and Slice 3 is the next
   approved implementation slice.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.

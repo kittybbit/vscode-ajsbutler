@@ -29,10 +29,7 @@ export const buildSemanticSyntaxDiagnostics = (
   document: AjsDocument,
   options: BuildSyntaxDiagnosticsOptions = {},
 ): SyntaxDiagnosticDto[] => [
-  ...withDiagnosticCategory(
-    buildScheduleRuleDiagnostics(document, options),
-    syntaxDiagnosticCategories.scheduleRule,
-  ),
+  ...buildScheduleRuleDiagnostics(document, options),
   ...withDiagnosticCategory(
     buildJobEndJudgmentDiagnostics(document),
     syntaxDiagnosticCategories.jobEndJudgment,

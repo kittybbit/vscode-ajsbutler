@@ -22,8 +22,6 @@ export const eventSendingDiagnosticTargetTypes = new Set(["evsj", "revsj"]);
 
 export const eventReceivingDiagnosticTargetTypes = new Set(["evwj", "revwj"]);
 
-export const scheduleRuleDiagnosticTargetTypes = new Set(["g", "n"]);
-
 export const transferOperationDiagnosticTargetTypes = new Set([
   "j",
   "rj",
