@@ -3,8 +3,8 @@
 ## Agent Brief
 
 - Purpose: complete host-neutral diagnostic and hover application boundaries.
-- Approved or active slice: Slices 1-2 are complete; Slices 3-7 remain
-  approved, with Slice 3 active next.
+- Approved or active slice: Slices 1-3 are complete; Slice 4 is active;
+  Slices 4-7 remain approved.
 - Do not change messages, positions, severity, localization, rule coverage,
   telemetry payloads, or host availability.
 - Do not expose VS Code, ANTLR, or raw parser types in domain/application APIs.
@@ -14,7 +14,8 @@
 - Final host validation also runs `rtk pnpm run test:web` and
   `rtk pnpm run build`.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement approved Slice 3 with `sdd-implement-task`.
+- Next decision: implement approved Slice 4 without changing its approval
+  boundary.
 
 ## Sync Rule
 
@@ -41,7 +42,7 @@
   ownership was ambiguous, and final boundary validation was not explicit
   enough for approval.
 - Human approval: all seven slices approved in the current conversation.
-- Active implementation slice: Slice 3.
+- Active implementation slice: Slice 4.
 
 ## Human Approval
 
@@ -157,7 +158,7 @@ active implementation approval remains.
 
 ### Slice 3: Move Job-End And Retry Diagnostic Meaning Into Domain
 
-- Status: Approved
+- Status: Complete
 - Scope: move automatic-retry dependencies, job-end numeric ranges, and
   threshold ordering to domain services using the shared violation contract.
 - User / Domain Value: the related `jd`, `abr`, retry, and threshold semantics

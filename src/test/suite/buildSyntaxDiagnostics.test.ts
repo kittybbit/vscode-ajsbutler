@@ -588,6 +588,11 @@ suite("Build Syntax Diagnostics", () => {
         message: "Retry interval (rei) must be between 1 and 10.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.jobEndRange,
+      ),
+    );
   });
 
   test("reports end-judgment diagnostics for explicit invalid retry combinations", () => {
@@ -602,6 +607,12 @@ suite("Build Syntax Diagnostics", () => {
       expectedAutomaticRetryEndJudgmentDiagnostic([10, 4, 3]),
       expectedAutomaticRetryEndJudgmentDiagnostic([16, 4, 3]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.retryAbrDependency,
+      ),
+    );
   });
 
   test("reports retry parameter diagnostics for explicit invalid end-judgment combinations", () => {
@@ -678,6 +689,12 @@ suite("Build Syntax Diagnostics", () => {
         "Retry parameter (rei) requires automatic retry (abr) to be y.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.retryAbrDependency,
+      ),
+    );
   });
 
   test("reports end-judgment and retry diagnostics for normal and recovery QUEUE jobs", () => {
@@ -788,6 +805,11 @@ suite("Build Syntax Diagnostics", () => {
         "Abnormal threshold (tho) must be greater than warning threshold (wth).",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.jobEndThreshold,
+      ),
+    );
   });
 
   test("does not report file monitoring diagnostics for omitted defaults and valid explicit combinations", () => {

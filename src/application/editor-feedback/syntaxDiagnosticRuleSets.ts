@@ -38,45 +38,6 @@ export const eventTimeoutActionAllowedValues = new Set([
   "an",
 ]);
 
-export const jobEndJudgmentNumericRangeRules = [
-  buildExplicitDecimalRangeRule({
-    key: "wth",
-    minimum: 0,
-    maximum: 2147483647,
-    message: "Warning threshold (wth) must be between 0 and 2147483647.",
-  }),
-  buildExplicitDecimalRangeRule({
-    key: "tho",
-    minimum: 0,
-    maximum: 2147483647,
-    message: "Abnormal threshold (tho) must be between 0 and 2147483647.",
-  }),
-  buildExplicitDecimalRangeRule({
-    key: "rjs",
-    minimum: 1,
-    maximum: 4294967295,
-    message: "Retry start code (rjs) must be between 1 and 4294967295.",
-  }),
-  buildExplicitDecimalRangeRule({
-    key: "rje",
-    minimum: 1,
-    maximum: 4294967295,
-    message: "Retry end code (rje) must be between 1 and 4294967295.",
-  }),
-  buildExplicitDecimalRangeRule({
-    key: "rec",
-    minimum: 1,
-    maximum: 12,
-    message: "Retry count (rec) must be between 1 and 12.",
-  }),
-  buildExplicitDecimalRangeRule({
-    key: "rei",
-    minimum: 1,
-    maximum: 10,
-    message: "Retry interval (rei) must be between 1 and 10.",
-  }),
-] as const;
-
 export const eventTimeoutActionDiagnosticRules = [
   buildExplicitAllowedValuesRule(
     "ets",

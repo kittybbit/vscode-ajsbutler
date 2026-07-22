@@ -30,10 +30,7 @@ export const buildSemanticSyntaxDiagnostics = (
   options: BuildSyntaxDiagnosticsOptions = {},
 ): SyntaxDiagnosticDto[] => [
   ...buildScheduleRuleDiagnostics(document, options),
-  ...withDiagnosticCategory(
-    buildJobEndJudgmentDiagnostics(document),
-    syntaxDiagnosticCategories.jobEndJudgment,
-  ),
+  ...buildJobEndJudgmentDiagnostics(document),
   ...withDiagnosticCategory(
     buildFileMonitoringDiagnostics(document),
     syntaxDiagnosticCategories.fileMonitoring,

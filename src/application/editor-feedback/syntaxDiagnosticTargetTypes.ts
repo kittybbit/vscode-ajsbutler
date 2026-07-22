@@ -1,16 +1,3 @@
-export const jobEndJudgmentDiagnosticTargetTypes = new Set([
-  "j",
-  "rj",
-  "pj",
-  "rp",
-  "cj",
-  "rcj",
-  "qj",
-  "rq",
-]);
-
-export const jobEndJudgmentRetryParameterKeys = ["rjs", "rje", "rec", "rei"];
-
 export const fileMonitoringDiagnosticTargetTypes = new Set(["flwj", "rflwj"]);
 
 export const executionIntervalControlDiagnosticTargetTypes = new Set([
