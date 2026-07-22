@@ -25,7 +25,8 @@ Migration should be incremental and use-case driven.
   Contains DTO-oriented use cases and view adapters for unit list, flow graph,
   editor feedback, parser and telemetry ports, and unit definition building.
 - `src/infrastructure`
-  Contains the concrete ANTLR parser and JP1/AJS3 WebAPI adapters.
+  Contains the concrete ANTLR parser, JP1/AJS3 WebAPI adapters, telemetry
+  adapters, and browser-safe localization resource adapters.
 - `src/bootstrap/extension`
   Contains extension activation, dependency construction, lifecycle, and
   subscription assembly.
@@ -137,7 +138,9 @@ Migration should be incremental and use-case driven.
 - `src/application/editor-feedback/buildSyntaxDiagnostics.ts` exposes
   parse-error decisions without `vscode` types
 - `src/application/editor-feedback/findParameterHover.ts` exposes parameter
-  hover decisions without `vscode` types
+  hover decisions without `vscode` types and depends on an application-owned
+  parameter-syntax lookup port rather than localization resource
+  implementations
 - `src/application/telemetry/TelemetryPort.ts` exposes a small telemetry
   contract without SDK-specific types
 - normalized AJS use cases should depend on `AjsDocument` and `AjsUnit`
@@ -174,6 +177,10 @@ Migration should be incremental and use-case driven.
 - `src/infrastructure/telemetry/*` owns telemetry adapter implementations;
   `src/bootstrap/extension/createTelemetry.ts` owns adapter selection
   of the runtime telemetry implementation
+- `src/infrastructure/i18n/ParameterSyntaxResourceAdapter.ts` owns access to
+  bundled parameter-syntax resources; extension bootstrap injects it into the
+  application hover use case, while VS Code Markdown construction remains in
+  the presentation hover provider
 - `src/presentation/webview/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
   presentation-local coordinate/layout resolution for nested expansion and
   must preserve deterministic, expanded-set-based layout behavior without

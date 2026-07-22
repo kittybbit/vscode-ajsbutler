@@ -35,24 +35,20 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement approved Slice 3 of `migrate-diagnostics-and-hover-boundaries`,
-   continuing with one approved slice at a time on the dedicated feature
-   branch.
+1. Plan `complete-webapi-infrastructure-boundaries` as the next independently
+   reviewable Clean Architecture feature when implementation work resumes.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/migrate-diagnostics-and-hover-boundaries/`: active
-  Implementation Mode feature; Slices 1-2 are complete and Slice 3 is the next
-  approved implementation slice.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
-The other remaining Clean Architecture migration feature folders are roadmap-
-queued, not active branch implementation work. The dependency order is
-maintained in `docs/specs/roadmap.md`.
+The remaining Clean Architecture migration feature folders are roadmap-queued,
+not active branch implementation work. The dependency order is maintained in
+`docs/specs/roadmap.md`; `complete-webapi-infrastructure-boundaries` is next.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the

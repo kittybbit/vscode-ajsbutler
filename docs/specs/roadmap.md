@@ -76,6 +76,9 @@
 
    - Concrete application and infrastructure dependencies are constructed by one
      typed bootstrap owner and injected into VS Code-facing adapters.
+   - Parameter hover localization now uses an application-owned lookup port, a
+     browser-safe infrastructure resource adapter, bootstrap composition, and
+     presentation-owned VS Code Markdown mapping.
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
@@ -169,7 +172,10 @@
          host-neutral base and expanded graph contracts, application-owned
          structural placement constraints, presentation-owned geometry, and a
          stable application navigation contract for the list and flow viewers.
-       - `migrate-diagnostics-and-hover-boundaries`
+       - Completed: `migrate-diagnostics-and-hover-boundaries` established
+         host-neutral diagnostic contracts, domain-owned supported semantic
+         rules, application message/hover decisions, presentation-owned VS Code
+         mapping, and browser-safe hover localization composition.
        - `complete-webapi-infrastructure-boundaries`
        - `migrate-semantic-diff-and-report-boundaries`
        - `isolate-telemetry-adapter-boundary`
