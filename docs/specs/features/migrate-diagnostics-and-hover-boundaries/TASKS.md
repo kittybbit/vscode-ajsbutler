@@ -3,8 +3,8 @@
 ## Agent Brief
 
 - Purpose: complete host-neutral diagnostic and hover application boundaries.
-- Approved or active slice: Slices 1-5 are complete; Slice 6 is active;
-  Slices 6-7 remain approved.
+- Approved or active slice: Slices 1-6 are complete; Slice 7 is active and
+  approved.
 - Do not change messages, positions, severity, localization, rule coverage,
   telemetry payloads, or host availability.
 - Do not expose VS Code, ANTLR, or raw parser types in domain/application APIs.
@@ -14,7 +14,7 @@
 - Final host validation also runs `rtk pnpm run test:web` and
   `rtk pnpm run build`.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement approved Slice 6 without changing its approval
+- Next decision: implement approved Slice 7 without changing its approval
   boundary.
 
 ## Sync Rule
@@ -42,7 +42,7 @@
   ownership was ambiguous, and final boundary validation was not explicit
   enough for approval.
 - Human approval: all seven slices approved in the current conversation.
-- Active implementation slice: Slice 6.
+- Active implementation slice: Slice 7.
 
 ## Human Approval
 
@@ -268,7 +268,7 @@ active implementation approval remains.
 
 ### Slice 6: Move Transfer Diagnostic Meaning Into Domain
 
-- Status: Approved
+- Status: Complete
 - Scope: move transfer-file form/path, QUEUE applicability, macro allowance,
   and transfer byte-length validation to domain services; remove only the
   application diagnostic rule modules superseded after Slices 2-6 are complete.

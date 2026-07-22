@@ -11,7 +11,7 @@ import { buildScheduleRuleDiagnostics } from "./syntaxDiagnosticScheduleRuleBuil
 import {
   buildQueueTransferFileDiagnostics,
   buildTransferOperationDiagnostics,
-} from "./syntaxDiagnosticOtherRuleBuilders";
+} from "./syntaxDiagnosticTransferRuleBuilders";
 
 export {
   buildScheduleRuleDiagnostics,

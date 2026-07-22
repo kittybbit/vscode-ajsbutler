@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
-import { buildDiagnostic } from "../../application/editor-feedback/syntaxDiagnosticCore";
+import { toDiagnosticSourceRange } from "../../application/editor-feedback/diagnosticSourceRange";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
 import { diagnosticRuleIds } from "../../domain/services/diagnostics/DiagnosticRuleId";
@@ -66,13 +66,11 @@ const buildTransferFileDefinition = (
 suite("Build Syntax Diagnostics", () => {
   test("preserves diagnostic position fallback for normalized parameters", () => {
     assert.deepStrictEqual(
-      buildDiagnostic({ key: "evsid", value: "zz" }, "invalid"),
+      toDiagnosticSourceRange({ length: undefined }, "evsid".length),
       {
         line: 1,
         column: 0,
         length: 5,
-        message: "invalid",
-        severity: "error",
       },
     );
   });
@@ -1363,6 +1361,10 @@ suite("Build Syntax Diagnostics", () => {
         "Transfer destination file name (td1) must be between 1 and 511 bytes.",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map(({ ruleId }) => ruleId),
+      [diagnosticRuleIds.transferFilePath, diagnosticRuleIds.transferFilePath],
+    );
   });
 
   test("measures quoted transfer file names by content bytes", () => {
@@ -1412,6 +1414,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedTransferSourceFullPathDiagnostic([9, 4, 3]),
       expectedTransferSourceFullPathDiagnostic([15, 4, 3]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        ({ ruleId }) => ruleId === diagnosticRuleIds.transferFilePath,
+      ),
+    );
   });
 
   test("reports transfer-file value-shape diagnostics for explicit bare strings", () => {
@@ -1436,6 +1443,11 @@ suite("Build Syntax Diagnostics", () => {
         "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        ({ ruleId }) => ruleId === diagnosticRuleIds.transferFileForm,
+      ),
+    );
   });
 
   test("reports transfer-file invalid-combination diagnostics when source files are omitted", () => {
@@ -1460,6 +1472,11 @@ suite("Build Syntax Diagnostics", () => {
         "Transfer destination file name (td1) requires transfer source file name (ts1).",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        ({ ruleId }) => ruleId === diagnosticRuleIds.transferFilePath,
+      ),
+    );
   });
 
   test("does not report event sending diagnostics for omitted evsrt defaults", () => {
