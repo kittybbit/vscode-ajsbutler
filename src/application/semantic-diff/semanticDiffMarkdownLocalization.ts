@@ -5,7 +5,7 @@ import type {
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+} from "./semanticDiffDto";
 import { semanticDiffReportText } from "../../domain/services/i18n/nls";
 
 const labelKeys: Record<string, string> = {
@@ -85,10 +85,9 @@ export const indentedLine = (value: string): string => `  - ${value}`;
 
 const describeRelationTarget = (target: SemanticDiffTarget): string => {
   if (target.kind !== "relation") return "";
-  const source =
-    target.sourceUnit?.absolutePath ?? target.relation.sourceUnitId;
+  const source = target.relation.sourceUnitPath ?? target.relation.sourceUnitId;
   const destination =
-    target.targetUnit?.absolutePath ?? target.relation.targetUnitId;
+    target.relation.targetUnitPath ?? target.relation.targetUnitId;
   return `${source} -> ${destination} (${target.relation.type})`;
 };
 

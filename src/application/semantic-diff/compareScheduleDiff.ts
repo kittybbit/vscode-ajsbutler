@@ -10,7 +10,7 @@ import type {
   SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
   SemanticDiffUnsupportedItem,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+} from "./semanticDiffDto";
 import {
   evaluateSemanticDiffSchedule,
   type SemanticDiffScheduleRunDecision,
@@ -31,14 +31,9 @@ export type ScheduleDiffMatchedUnit = Pick<
 export type ScheduleDiffInput = {
   beforeUnits: AjsUnit[];
   afterUnits: AjsUnit[];
-  beforeUnitById: Map<string, AjsUnit>;
-  afterUnitById: Map<string, AjsUnit>;
   matches: ScheduleDiffMatchedUnit[];
   period?: ScheduleDiffPeriodOption;
-  toUnitTarget: (
-    unit: AjsUnit,
-    unitById: Map<string, AjsUnit>,
-  ) => SemanticDiffTarget;
+  toUnitTarget: (unit: AjsUnit) => SemanticDiffTarget;
 };
 
 export type ScheduleDiffResult = {
@@ -85,7 +80,6 @@ const unsupportedScheduleMessage = (
 
 const createUnsupportedItem = (
   decision: SemanticDiffScheduleUnsupportedDecision,
-  unitById: Map<string, AjsUnit>,
   toUnitTarget: ScheduleDiffInput["toUnitTarget"],
 ): SemanticDiffUnsupportedItem => ({
   id: [
@@ -97,7 +91,7 @@ const createUnsupportedItem = (
   ].join(":"),
   kind: "uncalculated",
   side: decision.side,
-  target: toUnitTarget(decision.unit, unitById),
+  target: toUnitTarget(decision.unit),
   message: `${decision.unit.absolutePath} ${decision.parameter.key}=${
     decision.parameter.value
   }: ${unsupportedScheduleMessage(decision)}`,
@@ -107,11 +101,10 @@ const createPeriodUnsupportedItem = (
   unit: AjsUnit | undefined,
   period: ScheduleDiffPeriodOption,
   toUnitTarget: ScheduleDiffInput["toUnitTarget"],
-  unitById: Map<string, AjsUnit>,
 ): SemanticDiffUnsupportedItem => ({
   id: "uncalculated:schedule:period",
   kind: "uncalculated",
-  target: unit ? toUnitTarget(unit, unitById) : undefined,
+  target: unit ? toUnitTarget(unit) : undefined,
   message: `schedule comparison period is invalid: from=${period.from}, to=${period.to}`,
 });
 
@@ -153,12 +146,11 @@ const toScheduleRunChange = (
 
 const createZeroRunConfirmation = (
   unit: AjsUnit,
-  unitById: Map<string, AjsUnit>,
   period: SemanticDiffComparisonPeriod,
   toUnitTarget: ScheduleDiffInput["toUnitTarget"],
 ): SemanticDiffConfirmationRequiredItem => ({
   id: `confirm:schedule-zero-runs:${unit.id}`,
-  target: toUnitTarget(unit, unitById),
+  target: toUnitTarget(unit),
   changeContent: `${unit.name} has no calculated runs in the schedule comparison period`,
   rationale:
     "a schedule-defined jobnet may no longer have an execution opportunity in the compared period",
@@ -195,7 +187,6 @@ export const compareScheduleDiff = (
           input.afterUnits.find(isSemanticDiffJobnetUnit),
           evaluation.period,
           input.toUnitTarget,
-          input.afterUnitById,
         ),
       ],
       limitations: [createPeriodLimitation(evaluation.period)],
@@ -208,19 +199,10 @@ export const compareScheduleDiff = (
       runChanges: evaluation.runDecisions.map(toScheduleRunChange),
     },
     confirmationRequired: evaluation.zeroRunCandidates.map((unit) =>
-      createZeroRunConfirmation(
-        unit,
-        input.afterUnitById,
-        evaluation.period,
-        input.toUnitTarget,
-      ),
+      createZeroRunConfirmation(unit, evaluation.period, input.toUnitTarget),
     ),
     unsupportedItems: evaluation.unsupportedDecisions.map((decision) =>
-      createUnsupportedItem(
-        decision,
-        decision.side === "before" ? input.beforeUnitById : input.afterUnitById,
-        input.toUnitTarget,
-      ),
+      createUnsupportedItem(decision, input.toUnitTarget),
     ),
     limitations: [],
   };

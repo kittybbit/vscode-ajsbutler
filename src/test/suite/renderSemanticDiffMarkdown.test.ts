@@ -1,13 +1,13 @@
 import * as assert from "assert";
 import type {
-  AjsDocument,
   AjsParameter,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import type {
   SemanticDiffChangeSet,
   SemanticDiffTarget,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+  SemanticDiffUnitReference,
+} from "../../application/semantic-diff/semanticDiffDto";
 import { renderSemanticDiffMarkdown } from "../../application/semantic-diff/renderSemanticDiffMarkdown";
 
 const params = (values: Record<string, string>): AjsParameter[] =>
@@ -32,17 +32,29 @@ const unit = (overrides: Partial<AjsUnit>): AjsUnit => ({
   ...overrides,
 });
 
-const document = (): AjsDocument => ({
-  rootUnits: [],
-  warnings: [],
+const unitReference = (item: AjsUnit): SemanticDiffUnitReference => ({
+  id: item.id,
+  name: item.name,
+  absolutePath: item.absolutePath,
+  unitType: item.unitType,
 });
 
 const changeSet = (
   overrides: Partial<SemanticDiffChangeSet> = {},
 ): SemanticDiffChangeSet => ({
   inputs: {
-    before: { side: "before", document: document(), jobGroupPath: "/root" },
-    after: { side: "after", document: document(), jobGroupPath: "/root" },
+    before: {
+      side: "before",
+      jobGroupPath: "/root",
+      unitIds: [],
+      relations: [],
+    },
+    after: {
+      side: "after",
+      jobGroupPath: "/root",
+      unitIds: [],
+      relations: [],
+    },
   },
   changes: [],
   confirmationRequired: [],
@@ -157,9 +169,10 @@ suite("Render Semantic Diff Markdown", () => {
             confirmationLevel: "confirmed",
             after: {
               kind: "attribute",
-              unit: job,
+              unit: unitReference(job),
               parameterKey: "eu",
               category: "execution-environment",
+              values: ["jp1admin"],
             },
             attributeCategory: "execution-environment",
             summary: "LOAD eu changed",
@@ -212,9 +225,10 @@ suite("Render Semantic Diff Markdown", () => {
     });
     const afterAttribute: SemanticDiffTarget = {
       kind: "attribute",
-      unit: afterJob,
+      unit: unitReference(afterJob),
       parameterKey: "eu",
       category: "execution-environment",
+      values: ["user-after"],
     };
 
     const input = changeSet({
@@ -224,8 +238,8 @@ suite("Render Semantic Diff Markdown", () => {
           kind: "renamed",
           elementKind: "unit",
           confirmationLevel: "confirmed",
-          before: { kind: "unit", unit: beforeJob },
-          after: { kind: "unit", unit: afterJob },
+          before: { kind: "unit", unit: unitReference(beforeJob) },
+          after: { kind: "unit", unit: unitReference(afterJob) },
           summary: "job-a renamed to job-b",
           rationale: "one-to-one identity fingerprint match",
         },
@@ -234,8 +248,8 @@ suite("Render Semantic Diff Markdown", () => {
           kind: "changed",
           elementKind: "unit",
           confirmationLevel: "candidate",
-          before: { kind: "unit", unit: beforeCandidate },
-          after: { kind: "unit", unit: afterCandidate },
+          before: { kind: "unit", unit: unitReference(beforeCandidate) },
+          after: { kind: "unit", unit: unitReference(afterCandidate) },
           summary: "job-x has ambiguous rename or move candidates",
           rationale: "identity fingerprint matched 2 before and 2 after units",
         },
@@ -246,9 +260,10 @@ suite("Render Semantic Diff Markdown", () => {
           confirmationLevel: "confirmed",
           before: {
             kind: "attribute",
-            unit: beforeJob,
+            unit: unitReference(beforeJob),
             parameterKey: "eu",
             category: "execution-environment",
+            values: ["user-before"],
           },
           after: afterAttribute,
           attributeCategory: "execution-environment",
@@ -259,10 +274,10 @@ suite("Render Semantic Diff Markdown", () => {
       confirmationRequired: [
         {
           id: "confirm:start:/root/jobnet/job-b",
-          target: { kind: "unit", unit: afterJob },
+          target: { kind: "unit", unit: unitReference(afterJob) },
           changeContent: "start condition changed",
           rationale: "previous branch path may no longer be available",
-          relatedTargets: [{ kind: "unit", unit: afterTail }],
+          relatedTargets: [{ kind: "unit", unit: unitReference(afterTail) }],
           constraints: ["runtime history is not verified"],
         },
       ],

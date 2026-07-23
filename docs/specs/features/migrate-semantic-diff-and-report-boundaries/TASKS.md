@@ -4,8 +4,8 @@
 
 - Purpose: complete the normalized semantic-diff and application-report
   boundary without changing comparison or report behavior.
-- Approved or active slice: all four slices are approved; Slices 1 and 2 are
-  complete and Slice 3 is active.
+- Approved or active slice: all four slices are approved; Slices 1 through 3
+  are complete and Slice 4 is active.
 - Do not change comparison results, wording, localization, schedule scope, or
   copy workflow.
 - Keep definition evidence distinct from unverified runtime facts.
@@ -17,7 +17,7 @@
 - Shared contracts and host wiring also require build, desktop, and web
   evidence.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement only Slice 3 with `sdd-implement-task`.
+- Next decision: implement only Slice 4 with `sdd-implement-task`.
 
 ## Plan Status
 
@@ -30,7 +30,7 @@
   with presentation report migration and left domain-entity projection as an
   implementation-time design decision, so its approval boundary was too broad.
 - Human approval: all four slices approved.
-- Active implementation slice: Slice 3.
+- Active implementation slice: Slice 4.
 
 ## Human Approval
 
@@ -204,7 +204,7 @@
 
 ### Slice 3: Establish The Application-Owned Semantic Diff DTO
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Define application-owned comparison inputs/options, semantic changes,
     confirmation items, unsupported/limitation data, schedule result data, and
@@ -399,6 +399,9 @@
 - Dependencies:
   - Slice 3, because presentation must render the application-owned scalar DTO
     rather than domain entities.
+  - Reuse `semanticDiffDto.ts` directly: the current renderer and localization
+    already consume this scalar contract, so Slice 4 must move presentation
+    ownership without adding another report-specific projection.
 - Risks:
   - Moving language selection can alter fallback wording or accidentally
     translate raw JP1/AJS data.

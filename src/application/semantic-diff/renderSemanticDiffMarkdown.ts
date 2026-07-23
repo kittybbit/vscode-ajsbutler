@@ -4,7 +4,7 @@ import type {
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffLimitation,
   SemanticDiffUnsupportedItem,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+} from "./semanticDiffDto";
 import { semanticDiffReportText } from "../../domain/services/i18n/nls";
 import {
   bulletLine,

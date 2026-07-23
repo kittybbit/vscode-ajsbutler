@@ -1,14 +1,15 @@
 import * as assert from "assert";
 import type {
-  AjsDocument,
   AjsParameter,
   AjsRelation,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import type {
   SemanticDiffChangeSet,
+  SemanticDiffRelationReference,
   SemanticDiffTarget,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+  SemanticDiffUnitReference,
+} from "../../application/semantic-diff/semanticDiffDto";
 import { buildSemanticDiffFlowHighlights } from "../../application/flow-graph/buildSemanticDiffFlowHighlights";
 
 const params = (values: Record<string, string>): AjsParameter[] =>
@@ -43,40 +44,46 @@ const relation = (
   type,
 });
 
-const document = (children: AjsUnit[]): AjsDocument => ({
-  rootUnits: [
-    unit({
-      id: "/root",
-      name: "root",
-      unitType: "g",
-      absolutePath: "/root",
-      depth: 0,
-      parentId: undefined,
-      isRoot: true,
-      children: [
-        unit({
-          id: "/root/jobnet",
-          name: "jobnet",
-          unitType: "n",
-          absolutePath: "/root/jobnet",
-          depth: 1,
-          parentId: "/root",
-          children,
-        }),
-      ],
-    }),
-  ],
-  warnings: [],
+const unitReference = (item: AjsUnit): SemanticDiffUnitReference => ({
+  id: item.id,
+  name: item.name,
+  absolutePath: item.absolutePath,
+  unitType: item.unitType,
+});
+
+const relationReference = (
+  item: AjsRelation,
+  units: AjsUnit[],
+): SemanticDiffRelationReference => ({
+  ...item,
+  sourceUnitPath: units.find((unit) => unit.id === item.sourceUnitId)
+    ?.absolutePath,
+  targetUnitPath: units.find((unit) => unit.id === item.targetUnitId)
+    ?.absolutePath,
 });
 
 const changeSet = (
-  before: AjsDocument,
-  after: AjsDocument,
+  before: AjsUnit[],
+  after: AjsUnit[],
   overrides: Partial<SemanticDiffChangeSet>,
 ): SemanticDiffChangeSet => ({
   inputs: {
-    before: { side: "before", document: before, jobGroupPath: "/root" },
-    after: { side: "after", document: after, jobGroupPath: "/root" },
+    before: {
+      side: "before",
+      jobGroupPath: "/root",
+      unitIds: before.map((unit) => unit.id),
+      relations: before.flatMap((unit) =>
+        unit.relations.map((relation) => relationReference(relation, before)),
+      ),
+    },
+    after: {
+      side: "after",
+      jobGroupPath: "/root",
+      unitIds: after.map((unit) => unit.id),
+      relations: after.flatMap((unit) =>
+        unit.relations.map((relation) => relationReference(relation, after)),
+      ),
+    },
   },
   changes: [],
   confirmationRequired: [],
@@ -107,18 +114,18 @@ suite("Semantic diff flow highlights", () => {
     afterJob.relations = [afterRelation];
     const afterJobTarget: SemanticDiffTarget = {
       kind: "unit",
-      unit: afterJob,
+      unit: unitReference(afterJob),
     };
 
     const highlights = buildSemanticDiffFlowHighlights(
-      changeSet(document([beforeJob]), document([afterJob, afterTail]), {
+      changeSet([beforeJob], [afterJob, afterTail], {
         changes: [
           {
             id: "unit:renamed",
             kind: "renamed",
             elementKind: "unit",
             confirmationLevel: "confirmed",
-            before: { kind: "unit", unit: beforeJob },
+            before: { kind: "unit", unit: unitReference(beforeJob) },
             after: afterJobTarget,
             summary: "job renamed",
           },
@@ -129,9 +136,7 @@ suite("Semantic diff flow highlights", () => {
             confirmationLevel: "confirmed",
             after: {
               kind: "relation",
-              relation: afterRelation,
-              sourceUnit: afterJob,
-              targetUnit: afterTail,
+              relation: relationReference(afterRelation, [afterJob, afterTail]),
             },
             summary: "relation added",
           },
@@ -177,14 +182,14 @@ suite("Semantic diff flow highlights", () => {
     });
 
     const highlights = buildSemanticDiffFlowHighlights(
-      changeSet(document([beforeJob]), document([afterJob]), {
+      changeSet([beforeJob], [afterJob], {
         changes: [
           {
             id: "unit:removed",
             kind: "removed",
             elementKind: "unit",
             confirmationLevel: "confirmed",
-            before: { kind: "unit", unit: beforeJob },
+            before: { kind: "unit", unit: unitReference(beforeJob) },
             summary: "job removed",
           },
           {
@@ -192,8 +197,8 @@ suite("Semantic diff flow highlights", () => {
             kind: "changed",
             elementKind: "unit",
             confirmationLevel: "candidate",
-            before: { kind: "unit", unit: beforeJob },
-            after: { kind: "unit", unit: afterJob },
+            before: { kind: "unit", unit: unitReference(beforeJob) },
+            after: { kind: "unit", unit: unitReference(afterJob) },
             summary: "candidate",
           },
         ],

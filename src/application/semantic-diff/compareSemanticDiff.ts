@@ -11,13 +11,15 @@ import type {
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffElementKind,
   SemanticDiffInputPair,
-  SemanticDiffJobGroupInput,
   SemanticDiffLimitation,
+  SemanticDiffRelationReference,
   SemanticDiffReportSection,
+  SemanticDiffScope,
   SemanticDiffSide,
   SemanticDiffTarget,
+  SemanticDiffUnitReference,
   SemanticDiffUnsupportedItem,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+} from "./semanticDiffDto";
 import {
   evaluateSemanticDiffEvidence,
   type SemanticDiffConfirmationEvidenceDecision,
@@ -28,10 +30,8 @@ import {
   compareSemanticDiffAttributes,
   compareSemanticDiffRelations,
   isSemanticDiffJobnetUnit,
-  semanticDiffJobnetIdentityKey,
+  semanticDiffParameterValuesByKey,
   semanticDiffParentJobnetPath,
-  semanticDiffRelationIdentityKey,
-  semanticDiffUnitIdentityKey,
   type SemanticDiffCandidateGroup,
   type SemanticDiffRelationDecision,
   type SemanticDiffUnitMatch,
@@ -69,23 +69,6 @@ const externalConstraint =
 const manualBasisConstraint =
   "Rule basis: JP1/AJS3 v13 unit definition parameters for relations, wait units, event receiving, file monitoring, and job end judgment.";
 
-const toJobGroupInput = (
-  side: SemanticDiffSide,
-  document: AjsDocument,
-  options?: CompareSemanticDiffOptions,
-): SemanticDiffJobGroupInput => ({
-  side,
-  document,
-  jobGroupPath: options?.jobGroupPath,
-});
-
-const toInputPair = (
-  input: CompareSemanticDiffInput,
-): SemanticDiffInputPair => ({
-  before: toJobGroupInput("before", input.before, input.options),
-  after: toJobGroupInput("after", input.after, input.options),
-});
-
 const sortStrings = (values: string[]): string[] => [...values].sort();
 
 const compareStrings = (left: string, right: string): number =>
@@ -108,16 +91,52 @@ const scopedUnits = (document: AjsDocument, jobGroupPath?: string): AjsUnit[] =>
 const buildUnitById = (units: AjsUnit[]): Map<string, AjsUnit> =>
   new Map(units.map((unit) => [unit.id, unit]));
 
-const toUnitTarget = (
-  unit: AjsUnit,
+const toUnitReference = (unit: AjsUnit): SemanticDiffUnitReference => ({
+  id: unit.id,
+  name: unit.name,
+  absolutePath: unit.absolutePath,
+  unitType: unit.unitType,
+});
+
+const toRelationReference = (
+  relation: AjsRelation,
   unitById: Map<string, AjsUnit>,
+): SemanticDiffRelationReference => ({
+  sourceUnitId: relation.sourceUnitId,
+  targetUnitId: relation.targetUnitId,
+  type: relation.type,
+  sourceUnitPath: unitById.get(relation.sourceUnitId)?.absolutePath,
+  targetUnitPath: unitById.get(relation.targetUnitId)?.absolutePath,
+});
+
+const toScope = (
+  side: SemanticDiffSide,
+  units: AjsUnit[],
   jobGroupPath?: string,
-): SemanticDiffTarget => ({
+): SemanticDiffScope => {
+  const unitById = buildUnitById(units);
+  return {
+    side,
+    jobGroupPath,
+    unitIds: units.map((unit) => unit.id),
+    relations: units.flatMap((unit) =>
+      unit.relations.map((relation) => toRelationReference(relation, unitById)),
+    ),
+  };
+};
+
+const toInputPair = (
+  input: CompareSemanticDiffInput,
+  beforeUnits: AjsUnit[],
+  afterUnits: AjsUnit[],
+): SemanticDiffInputPair => ({
+  before: toScope("before", beforeUnits, input.options?.jobGroupPath),
+  after: toScope("after", afterUnits, input.options?.jobGroupPath),
+});
+
+const toUnitTarget = (unit: AjsUnit): SemanticDiffTarget => ({
   kind: isSemanticDiffJobnetUnit(unit) ? "jobnet" : "unit",
-  unit,
-  identityKey: isSemanticDiffJobnetUnit(unit)
-    ? semanticDiffJobnetIdentityKey(unit, jobGroupPath)
-    : semanticDiffUnitIdentityKey(unit, unitById),
+  unit: toUnitReference(unit),
 });
 
 const changeId = (...parts: string[]): string => parts.join(":");
@@ -130,9 +149,6 @@ const createUnitChange = ({
   confirmationLevel,
   before,
   after,
-  beforeUnitById,
-  afterUnitById,
-  jobGroupPath,
   summary,
   rationale,
 }: {
@@ -140,9 +156,6 @@ const createUnitChange = ({
   confirmationLevel: SemanticDiffChange["confirmationLevel"];
   before?: AjsUnit;
   after?: AjsUnit;
-  beforeUnitById: Map<string, AjsUnit>;
-  afterUnitById: Map<string, AjsUnit>;
-  jobGroupPath?: string;
   summary: string;
   rationale?: string;
 }): SemanticDiffChange => ({
@@ -155,10 +168,8 @@ const createUnitChange = ({
   kind,
   elementKind: elementKindForUnit(before ?? after!),
   confirmationLevel,
-  before: before
-    ? toUnitTarget(before, beforeUnitById, jobGroupPath)
-    : undefined,
-  after: after ? toUnitTarget(after, afterUnitById, jobGroupPath) : undefined,
+  before: before ? toUnitTarget(before) : undefined,
+  after: after ? toUnitTarget(after) : undefined,
   summary,
   rationale,
 });
@@ -167,7 +178,6 @@ const createFingerprintMatchChanges = (
   matches: SemanticDiffUnitMatch[],
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
 ): SemanticDiffChange[] =>
   matches.flatMap((match) => {
     const beforeParent = semanticDiffParentJobnetPath(
@@ -190,9 +200,6 @@ const createFingerprintMatchChanges = (
           confirmationLevel: "confirmed",
           before: match.before,
           after: match.after,
-          beforeUnitById,
-          afterUnitById,
-          jobGroupPath,
           summary: `${match.before.name} renamed to ${match.after.name}`,
           rationale,
         }),
@@ -205,9 +212,6 @@ const createFingerprintMatchChanges = (
           confirmationLevel: "confirmed",
           before: match.before,
           after: match.after,
-          beforeUnitById,
-          afterUnitById,
-          jobGroupPath,
           summary: `${match.before.name} moved from ${beforeParent} to ${afterParent}`,
           rationale,
         }),
@@ -218,9 +222,6 @@ const createFingerprintMatchChanges = (
 
 const createCandidateChanges = (
   candidates: SemanticDiffCandidateGroup[],
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
 ): SemanticDiffChange[] =>
   candidates.flatMap((candidate) =>
     candidate.before.map((beforeUnit) =>
@@ -229,9 +230,6 @@ const createCandidateChanges = (
         confirmationLevel: "candidate",
         before: beforeUnit,
         after: candidate.after[0],
-        beforeUnitById,
-        afterUnitById,
-        jobGroupPath,
         summary: `${beforeUnit.name} has ambiguous rename or move candidates`,
         rationale: `identity fingerprint matched ${candidate.before.length} before and ${candidate.after.length} after units`,
       }),
@@ -241,18 +239,12 @@ const createCandidateChanges = (
 const createAddedRemovedChanges = (
   removedUnits: AjsUnit[],
   addedUnits: AjsUnit[],
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
 ): SemanticDiffChange[] => {
   const removed = removedUnits.map((unit) =>
     createUnitChange({
       kind: "removed",
       confirmationLevel: "confirmed",
       before: unit,
-      beforeUnitById,
-      afterUnitById,
-      jobGroupPath,
       summary: `${unit.name} removed`,
     }),
   );
@@ -261,9 +253,6 @@ const createAddedRemovedChanges = (
       kind: "added",
       confirmationLevel: "confirmed",
       after: unit,
-      beforeUnitById,
-      afterUnitById,
-      jobGroupPath,
       summary: `${unit.name} added`,
     }),
   );
@@ -287,15 +276,21 @@ const createAttributeChanges = (
         confirmationLevel: "confirmed",
         before: {
           kind: "attribute",
-          unit: match.before,
+          unit: toUnitReference(match.before),
           parameterKey: decision.key,
           category: decision.category,
+          values:
+            semanticDiffParameterValuesByKey(match.before).get(decision.key) ??
+            [],
         },
         after: {
           kind: "attribute",
-          unit: match.after,
+          unit: toUnitReference(match.after),
           parameterKey: decision.key,
           category: decision.category,
+          values:
+            semanticDiffParameterValuesByKey(match.after).get(decision.key) ??
+            [],
         },
         attributeCategory: decision.category,
         summary: `${match.before.name} ${decision.key} changed`,
@@ -312,10 +307,7 @@ const relationTarget = (
   unitById: Map<string, AjsUnit>,
 ): SemanticDiffTarget => ({
   kind: "relation",
-  relation,
-  sourceUnit: unitById.get(relation.sourceUnitId),
-  targetUnit: unitById.get(relation.targetUnitId),
-  identityKey: semanticDiffRelationIdentityKey(relation),
+  relation: toRelationReference(relation, unitById),
 });
 
 const createRelationChanges = (
@@ -367,30 +359,25 @@ const createConfirmationRequiredItem = ({
   constraints: [manualBasisConstraint, ...constraints],
 });
 
-const unitConfirmationTarget = (
-  unit: AjsUnit,
-  unitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
-): SemanticDiffTarget => toUnitTarget(unit, unitById, jobGroupPath);
+const unitConfirmationTarget = (unit: AjsUnit): SemanticDiffTarget =>
+  toUnitTarget(unit);
 
 const resolveRelatedUnitsByNames = (
   names: string[],
   unit: AjsUnit,
   unitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
 ): SemanticDiffTarget[] => {
   const parentPath = unit.parentId ? `${unit.parentId}/` : "";
   return sortStrings(names)
     .map((name) => unitById.get(`${parentPath}${name}`))
     .filter((relatedUnit): relatedUnit is AjsUnit => relatedUnit !== undefined)
-    .map((relatedUnit) => toUnitTarget(relatedUnit, unitById, jobGroupPath));
+    .map((relatedUnit) => toUnitTarget(relatedUnit));
 };
 
 const createEvidenceConfirmation = (
   decision: SemanticDiffConfirmationEvidenceDecision,
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
 ): SemanticDiffConfirmationRequiredItem => {
   if (decision.kind === "conditional-relation-removed") {
     return createConfirmationRequiredItem({
@@ -404,7 +391,7 @@ const createEvidenceConfirmation = (
   }
 
   const unit = decision.match.after;
-  const target = unitConfirmationTarget(unit, afterUnitById, jobGroupPath);
+  const target = unitConfirmationTarget(unit);
   switch (decision.kind) {
     case "wait-release-source-changed":
       return createConfirmationRequiredItem({
@@ -422,7 +409,6 @@ const createEvidenceConfirmation = (
           decision.removedSources,
           unit,
           afterUnitById,
-          jobGroupPath,
         ),
         constraints: [runtimeConstraint],
       });
@@ -468,8 +454,6 @@ const createEvidenceConfirmation = (
 
 const createUnsupportedEvidenceItem = (
   decision: SemanticDiffUnsupportedEvidenceDecision,
-  afterUnitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
 ): SemanticDiffUnsupportedItem => ({
   id: changeId(
     "unsupported",
@@ -478,11 +462,7 @@ const createUnsupportedEvidenceItem = (
   ),
   kind: "uninterpretable",
   side: "after",
-  target: unitConfirmationTarget(
-    decision.match.after,
-    afterUnitById,
-    jobGroupPath,
-  ),
+  target: unitConfirmationTarget(decision.match.after),
   message:
     "file monitoring condition flwc is not interpreted because it combines mutually exclusive conditions",
 });
@@ -497,14 +477,20 @@ const toNormalizationLimitations = (
     side,
     message: warning.message,
     unitPath: warning.unitPath,
-    warning,
   }));
 
 export const createSemanticDiffChangeSet = (
   input: CompareSemanticDiffInput,
   parts: SemanticDiffChangeSetParts = {},
+  units: {
+    before: AjsUnit[];
+    after: AjsUnit[];
+  } = {
+    before: scopedUnits(input.before, input.options?.jobGroupPath),
+    after: scopedUnits(input.after, input.options?.jobGroupPath),
+  },
 ): SemanticDiffChangeSet => ({
-  inputs: toInputPair(input),
+  inputs: toInputPair(input, units.before, units.after),
   changes: parts.changes ?? [],
   confirmationRequired: parts.confirmationRequired ?? [],
   unsupportedItems: parts.unsupportedItems ?? [],
@@ -535,20 +521,11 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
       correspondence.fingerprintMatches,
       beforeUnitById,
       afterUnitById,
-      input.options?.jobGroupPath,
     ),
-    ...createCandidateChanges(
-      correspondence.candidates,
-      beforeUnitById,
-      afterUnitById,
-      input.options?.jobGroupPath,
-    ),
+    ...createCandidateChanges(correspondence.candidates),
     ...createAddedRemovedChanges(
       correspondence.removedUnits,
       correspondence.addedUnits,
-      beforeUnitById,
-      afterUnitById,
-      input.options?.jobGroupPath,
     ),
     ...createAttributeChanges(matches),
     ...createRelationChanges(
@@ -572,43 +549,35 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   });
   const confirmationRequired = evidence.confirmationDecisions
     .map((decision) =>
-      createEvidenceConfirmation(
-        decision,
-        beforeUnitById,
-        afterUnitById,
-        input.options?.jobGroupPath,
-      ),
+      createEvidenceConfirmation(decision, beforeUnitById, afterUnitById),
     )
     .sort((left, right) => compareStrings(left.id, right.id));
-  const unsupportedItems = evidence.unsupportedDecisions.map((decision) =>
-    createUnsupportedEvidenceItem(
-      decision,
-      afterUnitById,
-      input.options?.jobGroupPath,
-    ),
+  const unsupportedItems = evidence.unsupportedDecisions.map(
+    createUnsupportedEvidenceItem,
   );
   const scheduleDiff = compareScheduleDiff({
     beforeUnits,
     afterUnits,
-    beforeUnitById,
-    afterUnitById,
     matches,
     period: input.options?.scheduleComparisonPeriod,
-    toUnitTarget: (unit, unitById) =>
-      toUnitTarget(unit, unitById, input.options?.jobGroupPath),
+    toUnitTarget,
   });
 
-  return createSemanticDiffChangeSet(input, {
-    changes: changes.sort((left, right) => compareStrings(left.id, right.id)),
-    confirmationRequired: [
-      ...confirmationRequired,
-      ...scheduleDiff.confirmationRequired,
-    ].sort((left, right) => compareStrings(left.id, right.id)),
-    unsupportedItems: [
-      ...unsupportedItems,
-      ...scheduleDiff.unsupportedItems,
-    ].sort((left, right) => compareStrings(left.id, right.id)),
-    limitations: scheduleDiff.limitations,
-    scheduleComparison: scheduleDiff.scheduleComparison,
-  });
+  return createSemanticDiffChangeSet(
+    input,
+    {
+      changes: changes.sort((left, right) => compareStrings(left.id, right.id)),
+      confirmationRequired: [
+        ...confirmationRequired,
+        ...scheduleDiff.confirmationRequired,
+      ].sort((left, right) => compareStrings(left.id, right.id)),
+      unsupportedItems: [
+        ...unsupportedItems,
+        ...scheduleDiff.unsupportedItems,
+      ].sort((left, right) => compareStrings(left.id, right.id)),
+      limitations: scheduleDiff.limitations,
+      scheduleComparison: scheduleDiff.scheduleComparison,
+    },
+    { before: beforeUnits, after: afterUnits },
+  );
 };

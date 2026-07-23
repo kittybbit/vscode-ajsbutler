@@ -1,9 +1,10 @@
-import type { AjsParserError, AjsParserPort } from "../parsing/AjsParserPort";
+import type { AjsParserPort } from "../parsing/AjsParserPort";
 import {
   compareSemanticDiff,
   type CompareSemanticDiff,
 } from "./compareSemanticDiff";
 import { renderSemanticDiffMarkdown } from "./renderSemanticDiffMarkdown";
+import type { SemanticDiffParserError } from "./semanticDiffDto";
 
 export type BuildSemanticDiffReportInput = {
   beforeContent: string;
@@ -19,14 +20,19 @@ export type BuildSemanticDiffReportResult =
   | {
       ok: false;
       errors: {
-        before: AjsParserError[];
-        after: AjsParserError[];
+        before: SemanticDiffParserError[];
+        after: SemanticDiffParserError[];
       };
     };
 
 export type BuildSemanticDiffReport = (
   input: BuildSemanticDiffReportInput,
 ) => BuildSemanticDiffReportResult;
+
+const toParserErrors = (
+  errors: SemanticDiffParserError[],
+): SemanticDiffParserError[] =>
+  errors.map(({ line, column, message }) => ({ line, column, message }));
 
 export const createBuildSemanticDiffReport =
   (
@@ -45,8 +51,10 @@ export const createBuildSemanticDiffReport =
       return {
         ok: false,
         errors: {
-          before: beforeParse.ok === true ? [] : beforeParse.errors,
-          after: afterParse.ok === true ? [] : afterParse.errors,
+          before:
+            beforeParse.ok === true ? [] : toParserErrors(beforeParse.errors),
+          after:
+            afterParse.ok === true ? [] : toParserErrors(afterParse.errors),
         },
       };
     }

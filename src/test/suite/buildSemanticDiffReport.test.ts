@@ -5,7 +5,7 @@ import {
   type BuildSemanticDiffReportInput,
 } from "../../application/semantic-diff/buildSemanticDiffReport";
 import type { CompareSemanticDiffInput } from "../../application/semantic-diff/compareSemanticDiff";
-import type { SemanticDiffChangeSet } from "../../domain/models/semantic-diff/SemanticDiff";
+import type { SemanticDiffChangeSet } from "../../application/semantic-diff/semanticDiffDto";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 
 type BuildSemanticDiffReportObservations = {
@@ -47,8 +47,8 @@ const createCompare =
     observations.comparedInputs.push(input);
     return {
       inputs: {
-        before: { side: "before", document: input.before },
-        after: { side: "after", document: input.after },
+        before: { side: "before", unitIds: [], relations: [] },
+        after: { side: "after", unitIds: [], relations: [] },
       },
       changes: [],
       confirmationRequired: [],
@@ -128,7 +128,13 @@ suite("Build Semantic Diff Report", () => {
     if (result.ok) {
       throw new Error("Expected parse failure result.");
     }
-    assert.strictEqual(result.errors.before.length, 1);
+    assert.deepStrictEqual(result.errors.before, [
+      {
+        line: 1,
+        column: 1,
+        message: "synthetic parse error",
+      },
+    ]);
     assert.strictEqual(result.errors.after.length, 0);
     assert.deepStrictEqual(observations.comparedInputs, []);
     assert.deepStrictEqual(observations.renderedChangeSets, []);
