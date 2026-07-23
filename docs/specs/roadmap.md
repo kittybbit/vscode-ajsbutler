@@ -176,7 +176,11 @@
          host-neutral diagnostic contracts, domain-owned supported semantic
          rules, application message/hover decisions, presentation-owned VS Code
          mapping, and browser-safe hover localization composition.
-       - `complete-webapi-infrastructure-boundaries`
+       - Completed: `complete-webapi-infrastructure-boundaries` established an
+         application-owned host-neutral import contract, infrastructure-owned
+         SC-009 transport and credential mapping, bootstrap-owned desktop/web
+         capability selection, and presentation delegation without changing
+         beta behavior.
        - `migrate-semantic-diff-and-report-boundaries`
        - `isolate-telemetry-adapter-boundary`
     5. `standardize-serialization-and-composition-root`: converge the completed
@@ -190,8 +194,8 @@
       hover, navigation, semantic diff/report, telemetry privacy, desktop/web,
       and minimum VS Code compatibility behavior throughout the sequence.
     - The existing `import-definition-via-webapi` feature continues to own beta
-      scope and real-environment evidence; the new WebAPI architecture feature
-      owns only dependency, port/adapter, and composition boundaries.
+      scope and real-environment evidence; the completed WebAPI architecture
+      feature owns only dependency, port/adapter, and composition boundaries.
     - Do not start implementation from these intake documents. Each remaining
       feature requires `sdd-plan-task`, `sdd-review-plan`, and explicit human
       approval.

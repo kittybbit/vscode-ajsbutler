@@ -35,18 +35,15 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Run Feature Exit Review for `complete-webapi-infrastructure-boundaries`;
-   Slice 1 completion was approved with the pre-existing stale Prism
-   generated-artifact validation caveat recorded.
+1. Replan `import-definition-via-webapi` with a focused generated-artifact
+   reproducibility slice before correcting the checked-in stale Prism artifact
+   reported by `rtk pnpm run openapi:check`.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
 3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/complete-webapi-infrastructure-boundaries/`: single-slice
-  architecture implementation complete; Feature Exit Review is next, with the
-  pre-existing `openapi:check` caveat retained.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
