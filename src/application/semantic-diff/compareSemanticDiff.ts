@@ -1,29 +1,40 @@
 import {
   flattenAjsUnits,
   type AjsDocument,
-  type AjsParameter,
   type AjsRelation,
   type AjsUnit,
   type AjsUnitType,
 } from "../../domain/models/ajs/AjsDocument";
 import type {
   SemanticDiffComparisonPeriod,
-  SemanticDiffAttributeCategory,
   SemanticDiffChange,
   SemanticDiffChangeSet,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffElementKind,
   SemanticDiffInputPair,
-  SemanticDiffJobnetIdentityKey,
   SemanticDiffJobGroupInput,
   SemanticDiffLimitation,
-  SemanticDiffRelationIdentityKey,
   SemanticDiffReportSection,
   SemanticDiffSide,
   SemanticDiffTarget,
-  SemanticDiffUnitIdentityKey,
   SemanticDiffUnsupportedItem,
 } from "../../domain/models/semantic-diff/SemanticDiff";
+import {
+  buildSemanticDiffRelationPairMaps,
+  buildSemanticDiffUnitCorrespondence,
+  compareSemanticDiffAttributes,
+  compareSemanticDiffRelations,
+  isSemanticDiffJobnetUnit,
+  semanticDiffJobnetIdentityKey,
+  semanticDiffParameterChangeKeys,
+  semanticDiffParameterValuesByKey,
+  semanticDiffParentJobnetPath,
+  semanticDiffRelationIdentityKey,
+  semanticDiffUnitIdentityKey,
+  type SemanticDiffCandidateGroup,
+  type SemanticDiffRelationDecision,
+  type SemanticDiffUnitMatch,
+} from "../../domain/services/semantic-diff/semanticDiffStructuralRules";
 import { compareScheduleDiff } from "./compareScheduleDiff";
 
 export type CompareSemanticDiffOptions = {
@@ -49,54 +60,6 @@ export type SemanticDiffChangeSetParts = {
   scheduleComparison?: SemanticDiffChangeSet["scheduleComparison"];
   reportSections?: SemanticDiffReportSection[];
 };
-
-type UnitMatch = {
-  before: AjsUnit;
-  after: AjsUnit;
-  kind: "exact" | "fingerprint";
-};
-
-type CandidateGroup = {
-  fingerprint: string;
-  before: AjsUnit[];
-  after: AjsUnit[];
-};
-
-const jobnetTypes = new Set<AjsUnitType>(["n", "rn", "rm", "rr"]);
-
-const ignoredFingerprintParameterKeys = new Set(["unit", "el"]);
-
-const executionEnvironmentKeys = new Set(["eu", "un", "rg", "qu"]);
-const startConditionKeys = new Set(["eun", "cond", "ar"]);
-const endControlKeys = new Set(["ej", "ejc", "ejf", "jdf"]);
-const abnormalEndControlKeys = new Set(["ab", "abr", "rec"]);
-const waitConditionKeys = new Set([
-  "evwid",
-  "evwfr",
-  "evhst",
-  "evwms",
-  "evdet",
-  "evtmc",
-  "evesc",
-  "flwf",
-  "flwc",
-  "wkp",
-  "wt",
-  "fd",
-  "etm",
-  "wth",
-]);
-const externalIntegrationKeys = new Set([
-  "evhst",
-  "evsrc",
-  "evsid",
-  "evusr",
-  "mqmgr",
-  "mqque",
-  "mladr",
-  "ntsrc",
-]);
-const scheduleKeys = new Set(["sd", "st", "cy", "sh", "sc"]);
 
 const runtimeConstraint =
   "Runtime history and external conditions are not verified by this comparison.";
@@ -152,17 +115,12 @@ const toInputPair = (
   after: toJobGroupInput("after", input.after, input.options),
 });
 
-const isJobnetUnit = (unit: AjsUnit): boolean => jobnetTypes.has(unit.unitType);
-
 const sortStrings = (values: string[]): string[] => [...values].sort();
 
 const compareStrings = (left: string, right: string): number =>
   left.localeCompare(right);
 
 const unitSortKey = (unit: AjsUnit): string => unit.absolutePath;
-
-const relationSortKey = (relation: AjsRelation): string =>
-  `${relation.sourceUnitId}->${relation.targetUnitId}:${relation.type}`;
 
 const scopedUnits = (document: AjsDocument, jobGroupPath?: string): AjsUnit[] =>
   flattenAjsUnits(document.rootUnits)
@@ -179,237 +137,22 @@ const scopedUnits = (document: AjsDocument, jobGroupPath?: string): AjsUnit[] =>
 const buildUnitById = (units: AjsUnit[]): Map<string, AjsUnit> =>
   new Map(units.map((unit) => [unit.id, unit]));
 
-const findParentJobnetPath = (
-  unit: AjsUnit,
-  unitById: Map<string, AjsUnit>,
-): string => {
-  let current = unit.parentId ? unitById.get(unit.parentId) : undefined;
-  while (current) {
-    if (isJobnetUnit(current)) {
-      return current.absolutePath;
-    }
-    current = current.parentId ? unitById.get(current.parentId) : undefined;
-  }
-  return "";
-};
-
-const toRelativePath = (absolutePath: string, jobGroupPath?: string): string =>
-  jobGroupPath && absolutePath.startsWith(jobGroupPath)
-    ? absolutePath.slice(jobGroupPath.length).replace(/^\//, "")
-    : absolutePath.replace(/^\//, "");
-
-const toJobnetIdentityKey = (
-  unit: AjsUnit,
-  jobGroupPath?: string,
-): SemanticDiffJobnetIdentityKey => ({
-  kind: "jobnet",
-  jobGroupRelativePath: toRelativePath(unit.absolutePath, jobGroupPath),
-  unitType: unit.unitType,
-});
-
-const toUnitIdentityKey = (
-  unit: AjsUnit,
-  unitById: Map<string, AjsUnit>,
-): SemanticDiffUnitIdentityKey => ({
-  kind: "unit",
-  parentJobnetPath: findParentJobnetPath(unit, unitById),
-  unitName: unit.name,
-  unitType: unit.unitType,
-});
-
 const toUnitTarget = (
   unit: AjsUnit,
   unitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffTarget => ({
-  kind: isJobnetUnit(unit) ? "jobnet" : "unit",
+  kind: isSemanticDiffJobnetUnit(unit) ? "jobnet" : "unit",
   unit,
-  identityKey: isJobnetUnit(unit)
-    ? toJobnetIdentityKey(unit, jobGroupPath)
-    : toUnitIdentityKey(unit, unitById),
+  identityKey: isSemanticDiffJobnetUnit(unit)
+    ? semanticDiffJobnetIdentityKey(unit, jobGroupPath)
+    : semanticDiffUnitIdentityKey(unit, unitById),
 });
-
-const unitExactKey = (
-  unit: AjsUnit,
-  unitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
-): string =>
-  isJobnetUnit(unit)
-    ? `jobnet:${toRelativePath(unit.absolutePath, jobGroupPath)}:${unit.unitType}`
-    : `unit:${findParentJobnetPath(unit, unitById)}:${unit.name}:${unit.unitType}`;
-
-const parameterValueKey = (parameter: AjsParameter): string =>
-  `${parameter.key}=${parameter.value}`;
-
-const parameterFingerprint = (parameters: AjsParameter[]): string =>
-  sortStrings(
-    parameters
-      .filter(
-        (parameter) => !ignoredFingerprintParameterKeys.has(parameter.key),
-      )
-      .map(parameterValueKey),
-  ).join("|");
-
-const unitFingerprint = (unit: AjsUnit): string =>
-  [
-    unit.unitType,
-    unit.groupType ?? "",
-    unit.permission ?? "",
-    unit.jp1Username ?? "",
-    unit.jp1ResourceGroup ?? "",
-    parameterFingerprint(unit.parameters),
-  ].join("::");
-
-const groupBy = <T>(
-  values: T[],
-  getKey: (value: T) => string,
-): Map<string, T[]> => {
-  const groups = new Map<string, T[]>();
-  values.forEach((value) => {
-    const key = getKey(value);
-    groups.set(key, [...(groups.get(key) ?? []), value]);
-  });
-  return groups;
-};
-
-const matchExactUnits = (
-  beforeUnits: AjsUnit[],
-  afterUnits: AjsUnit[],
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
-): UnitMatch[] => {
-  const beforeByKey = groupBy(beforeUnits, (unit) =>
-    unitExactKey(unit, beforeUnitById, jobGroupPath),
-  );
-  const afterByKey = groupBy(afterUnits, (unit) =>
-    unitExactKey(unit, afterUnitById, jobGroupPath),
-  );
-
-  return [...beforeByKey.entries()].flatMap(([key, beforeMatches]) => {
-    const afterMatches = afterByKey.get(key) ?? [];
-    return beforeMatches.length === 1 && afterMatches.length === 1
-      ? [{ before: beforeMatches[0], after: afterMatches[0], kind: "exact" }]
-      : [];
-  });
-};
-
-const buildBeforeMatchedIdSet = (matches: UnitMatch[]): Set<string> =>
-  new Set(matches.map((match) => match.before.id));
-
-const buildAfterMatchedIdSet = (matches: UnitMatch[]): Set<string> =>
-  new Set(matches.map((match) => match.after.id));
-
-const matchFingerprintUnits = (
-  beforeUnits: AjsUnit[],
-  afterUnits: AjsUnit[],
-): {
-  matches: UnitMatch[];
-  candidates: CandidateGroup[];
-} => {
-  const beforeByFingerprint = groupBy(beforeUnits, unitFingerprint);
-  const afterByFingerprint = groupBy(afterUnits, unitFingerprint);
-  const matches: UnitMatch[] = [];
-  const candidates: CandidateGroup[] = [];
-
-  [...beforeByFingerprint.entries()]
-    .sort(([left], [right]) => compareStrings(left, right))
-    .forEach(([fingerprint, beforeMatches]) => {
-      const afterMatches = afterByFingerprint.get(fingerprint) ?? [];
-      if (beforeMatches.length === 1 && afterMatches.length === 1) {
-        matches.push({
-          before: beforeMatches[0],
-          after: afterMatches[0],
-          kind: "fingerprint",
-        });
-      } else if (beforeMatches.length > 0 && afterMatches.length > 0) {
-        candidates.push({
-          fingerprint,
-          before: beforeMatches,
-          after: afterMatches,
-        });
-      }
-    });
-
-  return { matches, candidates };
-};
-
-const attributeCategory = (key: string): SemanticDiffAttributeCategory => {
-  if (executionEnvironmentKeys.has(key)) {
-    return "execution-environment";
-  }
-  if (startConditionKeys.has(key)) {
-    return "start-condition";
-  }
-  if (endControlKeys.has(key)) {
-    return "end-control";
-  }
-  if (abnormalEndControlKeys.has(key)) {
-    return "abnormal-end-control";
-  }
-  if (waitConditionKeys.has(key)) {
-    return "wait-condition";
-  }
-  if (externalIntegrationKeys.has(key)) {
-    return "external-integration";
-  }
-  if (scheduleKeys.has(key)) {
-    return "schedule";
-  }
-  return "execution-definition";
-};
-
-const parameterValuesByKey = (unit: AjsUnit): Map<string, string[]> => {
-  const values = new Map<string, string[]>();
-  unit.parameters.forEach((parameter) => {
-    values.set(parameter.key, [
-      ...(values.get(parameter.key) ?? []),
-      parameter.value,
-    ]);
-  });
-  return values;
-};
-
-const valuesEqual = (beforeValues: string[], afterValues: string[]): boolean =>
-  sortStrings(beforeValues).join("\u0000") ===
-  sortStrings(afterValues).join("\u0000");
-
-const parameterChangeKeys = (before: AjsUnit, after: AjsUnit): string[] => {
-  const beforeValues = parameterValuesByKey(before);
-  const afterValues = parameterValuesByKey(after);
-  return sortStrings([
-    ...new Set([...beforeValues.keys(), ...afterValues.keys()]),
-  ]).filter(
-    (key) =>
-      !valuesEqual(beforeValues.get(key) ?? [], afterValues.get(key) ?? []),
-  );
-};
-
-const scalarAttributeChangeKeys = (before: AjsUnit, after: AjsUnit): string[] =>
-  [
-    ["unitAttribute", before.unitAttribute, after.unitAttribute],
-    ["permission", before.permission ?? "", after.permission ?? ""],
-    ["jp1Username", before.jp1Username ?? "", after.jp1Username ?? ""],
-    [
-      "jp1ResourceGroup",
-      before.jp1ResourceGroup ?? "",
-      after.jp1ResourceGroup ?? "",
-    ],
-    ["comment", before.comment ?? "", after.comment ?? ""],
-  ]
-    .filter(([, beforeValue, afterValue]) => beforeValue !== afterValue)
-    .map(([key]) => key);
-
-const changedAttributeKeys = (before: AjsUnit, after: AjsUnit): string[] =>
-  sortStrings([
-    ...scalarAttributeChangeKeys(before, after),
-    ...parameterChangeKeys(before, after),
-  ]);
 
 const changeId = (...parts: string[]): string => parts.join(":");
 
 const elementKindForUnit = (unit: AjsUnit): SemanticDiffElementKind =>
-  isJobnetUnit(unit) ? "jobnet" : "unit";
+  isSemanticDiffJobnetUnit(unit) ? "jobnet" : "unit";
 
 const createUnitChange = ({
   kind,
@@ -450,14 +193,20 @@ const createUnitChange = ({
 });
 
 const createFingerprintMatchChanges = (
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffChange[] =>
   matches.flatMap((match) => {
-    const beforeParent = findParentJobnetPath(match.before, beforeUnitById);
-    const afterParent = findParentJobnetPath(match.after, afterUnitById);
+    const beforeParent = semanticDiffParentJobnetPath(
+      match.before,
+      beforeUnitById,
+    );
+    const afterParent = semanticDiffParentJobnetPath(
+      match.after,
+      afterUnitById,
+    );
     const renamed = match.before.name !== match.after.name;
     const moved = beforeParent !== afterParent;
     const rationale = "one-to-one identity fingerprint match";
@@ -497,7 +246,7 @@ const createFingerprintMatchChanges = (
   });
 
 const createCandidateChanges = (
-  candidates: CandidateGroup[],
+  candidates: SemanticDiffCandidateGroup[],
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
@@ -519,93 +268,73 @@ const createCandidateChanges = (
   );
 
 const createAddedRemovedChanges = (
-  beforeUnits: AjsUnit[],
-  afterUnits: AjsUnit[],
-  matches: UnitMatch[],
-  candidates: CandidateGroup[],
+  removedUnits: AjsUnit[],
+  addedUnits: AjsUnit[],
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffChange[] => {
-  const beforeMatchedIds = buildBeforeMatchedIdSet(matches);
-  const afterMatchedIds = buildAfterMatchedIdSet(matches);
-  const candidateBeforeIds = new Set(
-    candidates.flatMap((candidate) => candidate.before.map((unit) => unit.id)),
+  const removed = removedUnits.map((unit) =>
+    createUnitChange({
+      kind: "removed",
+      confirmationLevel: "confirmed",
+      before: unit,
+      beforeUnitById,
+      afterUnitById,
+      jobGroupPath,
+      summary: `${unit.name} removed`,
+    }),
   );
-  const candidateAfterIds = new Set(
-    candidates.flatMap((candidate) => candidate.after.map((unit) => unit.id)),
+  const added = addedUnits.map((unit) =>
+    createUnitChange({
+      kind: "added",
+      confirmationLevel: "confirmed",
+      after: unit,
+      beforeUnitById,
+      afterUnitById,
+      jobGroupPath,
+      summary: `${unit.name} added`,
+    }),
   );
-  const removed = beforeUnits
-    .filter(
-      (unit) =>
-        !beforeMatchedIds.has(unit.id) && !candidateBeforeIds.has(unit.id),
-    )
-    .map((unit) =>
-      createUnitChange({
-        kind: "removed",
-        confirmationLevel: "confirmed",
-        before: unit,
-        beforeUnitById,
-        afterUnitById,
-        jobGroupPath,
-        summary: `${unit.name} removed`,
-      }),
-    );
-  const added = afterUnits
-    .filter(
-      (unit) =>
-        !afterMatchedIds.has(unit.id) && !candidateAfterIds.has(unit.id),
-    )
-    .map((unit) =>
-      createUnitChange({
-        kind: "added",
-        confirmationLevel: "confirmed",
-        after: unit,
-        beforeUnitById,
-        afterUnitById,
-        jobGroupPath,
-        summary: `${unit.name} added`,
-      }),
-    );
   return [...removed, ...added];
 };
 
-const createAttributeChanges = (matches: UnitMatch[]): SemanticDiffChange[] =>
+const createAttributeChanges = (
+  matches: SemanticDiffUnitMatch[],
+): SemanticDiffChange[] =>
   matches.flatMap((match) =>
-    changedAttributeKeys(match.before, match.after).map((key) => ({
-      id: changeId("attribute", key, match.before.id, match.after.id),
-      kind: "changed",
-      elementKind: "attribute",
-      confirmationLevel: "confirmed",
-      before: {
-        kind: "attribute",
-        unit: match.before,
-        parameterKey: key,
-        category: attributeCategory(key),
-      },
-      after: {
-        kind: "attribute",
-        unit: match.after,
-        parameterKey: key,
-        category: attributeCategory(key),
-      },
-      attributeCategory: attributeCategory(key),
-      summary: `${match.before.name} ${key} changed`,
-      rationale:
-        match.kind === "exact"
-          ? "exact identity match"
-          : "one-to-one identity fingerprint match",
-    })),
+    compareSemanticDiffAttributes(match.before, match.after).map(
+      (decision) => ({
+        id: changeId(
+          "attribute",
+          decision.key,
+          match.before.id,
+          match.after.id,
+        ),
+        kind: "changed",
+        elementKind: "attribute",
+        confirmationLevel: "confirmed",
+        before: {
+          kind: "attribute",
+          unit: match.before,
+          parameterKey: decision.key,
+          category: decision.category,
+        },
+        after: {
+          kind: "attribute",
+          unit: match.after,
+          parameterKey: decision.key,
+          category: decision.category,
+        },
+        attributeCategory: decision.category,
+        summary: `${match.before.name} ${decision.key} changed`,
+        rationale:
+          match.kind === "exact"
+            ? "exact identity match"
+            : "one-to-one identity fingerprint match",
+      }),
+    ),
   );
-
-const relationIdentityKey = (
-  relation: AjsRelation,
-): SemanticDiffRelationIdentityKey => ({
-  kind: "relation",
-  sourceUnitId: relation.sourceUnitId,
-  targetUnitId: relation.targetUnitId,
-  relationType: relation.type,
-});
 
 const relationTarget = (
   relation: AjsRelation,
@@ -615,118 +344,44 @@ const relationTarget = (
   relation,
   sourceUnit: unitById.get(relation.sourceUnitId),
   targetUnit: unitById.get(relation.targetUnitId),
-  identityKey: relationIdentityKey(relation),
+  identityKey: semanticDiffRelationIdentityKey(relation),
 });
 
-const scopedRelations = (
-  units: AjsUnit[],
-  unitById: Map<string, AjsUnit>,
-): AjsRelation[] =>
-  units
-    .flatMap((unit) => unit.relations)
-    .filter(
-      (relation) =>
-        unitById.has(relation.sourceUnitId) &&
-        unitById.has(relation.targetUnitId),
-    )
-    .sort((left, right) =>
-      compareStrings(relationSortKey(left), relationSortKey(right)),
-    );
-
-const buildUnitCorrespondence = (matches: UnitMatch[]): Map<string, string> =>
-  new Map(matches.map((match) => [match.before.id, match.after.id]));
-
-const relationPairKey = (
-  relation: AjsRelation,
-  correspondence?: Map<string, string>,
-): string | undefined => {
-  const sourceUnitId =
-    correspondence?.get(relation.sourceUnitId) ?? relation.sourceUnitId;
-  const targetUnitId =
-    correspondence?.get(relation.targetUnitId) ?? relation.targetUnitId;
-  return sourceUnitId && targetUnitId
-    ? `${sourceUnitId}->${targetUnitId}`
-    : undefined;
-};
-
-const relationMapByPair = (
-  relations: AjsRelation[],
-  correspondence?: Map<string, string>,
-): Map<string, AjsRelation[]> => {
-  const relationsByPair = new Map<string, AjsRelation[]>();
-  relations.forEach((relation) => {
-    const key = relationPairKey(relation, correspondence);
-    if (key) {
-      relationsByPair.set(key, [...(relationsByPair.get(key) ?? []), relation]);
-    }
-  });
-  return relationsByPair;
-};
-
 const createRelationChanges = (
-  beforeUnits: AjsUnit[],
-  afterUnits: AjsUnit[],
+  decisions: SemanticDiffRelationDecision[],
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
-  matches: UnitMatch[],
-): SemanticDiffChange[] => {
-  const beforeRelationsByPair = relationMapByPair(
-    scopedRelations(beforeUnits, beforeUnitById),
-    buildUnitCorrespondence(matches),
-  );
-  const afterRelationsByPair = relationMapByPair(
-    scopedRelations(afterUnits, afterUnitById),
-  );
-
-  return sortStrings([
-    ...beforeRelationsByPair.keys(),
-    ...afterRelationsByPair.keys(),
-  ]).flatMap((pairKey): SemanticDiffChange[] => {
-    const beforeRelations = beforeRelationsByPair.get(pairKey) ?? [];
-    const afterRelations = afterRelationsByPair.get(pairKey) ?? [];
-    const beforeTypes = new Set(
-      beforeRelations.map((relation) => relation.type),
-    );
-    const afterTypes = new Set(afterRelations.map((relation) => relation.type));
-
-    const removed = beforeRelations
-      .filter((relation) => !afterTypes.has(relation.type))
-      .map(
-        (relation): SemanticDiffChange => ({
-          id: changeId("relation", "removed", pairKey, relation.type),
-          kind: "removed",
-          elementKind: "relation",
-          confirmationLevel: "confirmed",
-          before: relationTarget(relation, beforeUnitById),
-          summary: `${pairKey} relation removed`,
-        }),
-      );
-    const added = afterRelations
-      .filter((relation) => !beforeTypes.has(relation.type))
-      .map(
-        (relation): SemanticDiffChange => ({
-          id: changeId("relation", "added", pairKey, relation.type),
-          kind: "added",
-          elementKind: "relation",
-          confirmationLevel: "confirmed",
-          after: relationTarget(relation, afterUnitById),
-          summary: `${pairKey} relation added`,
-        }),
-      );
-
-    return [...removed, ...added];
-  });
-};
+): SemanticDiffChange[] =>
+  decisions.map((decision) => ({
+    id: changeId(
+      "relation",
+      decision.kind,
+      decision.pairKey,
+      decision.relation.type,
+    ),
+    kind: decision.kind,
+    elementKind: "relation",
+    confirmationLevel: "confirmed",
+    before:
+      decision.kind === "removed"
+        ? relationTarget(decision.relation, beforeUnitById)
+        : undefined,
+    after:
+      decision.kind === "added"
+        ? relationTarget(decision.relation, afterUnitById)
+        : undefined,
+    summary: `${decision.pairKey} relation ${decision.kind}`,
+  }));
 
 const hasAnyParameterValue = (unit: AjsUnit, key: string): boolean =>
-  (parameterValuesByKey(unit).get(key) ?? []).length > 0;
+  (semanticDiffParameterValuesByKey(unit).get(key) ?? []).length > 0;
 
 const changedSupportedKeys = (
   before: AjsUnit,
   after: AjsUnit,
   keys: Set<string>,
 ): string[] =>
-  parameterChangeKeys(before, after).filter((key) => keys.has(key));
+  semanticDiffParameterChangeKeys(before, after).filter((key) => keys.has(key));
 
 const createConfirmationRequiredItem = ({
   id,
@@ -775,13 +430,15 @@ const removedOrChangedValues = (
   after: AjsUnit,
   key: string,
 ): string[] => {
-  const beforeValues = parameterValuesByKey(before).get(key) ?? [];
-  const afterValues = new Set(parameterValuesByKey(after).get(key) ?? []);
+  const beforeValues = semanticDiffParameterValuesByKey(before).get(key) ?? [];
+  const afterValues = new Set(
+    semanticDiffParameterValuesByKey(after).get(key) ?? [],
+  );
   return sortStrings(beforeValues.filter((value) => !afterValues.has(value)));
 };
 
 const createWaitReleaseSourceConfirmations = (
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffConfirmationRequiredItem[] =>
@@ -826,7 +483,7 @@ const timeoutKeysForUnit = (unit: AjsUnit): string[] => {
 };
 
 const createTimeoutRemovalConfirmations = (
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffConfirmationRequiredItem[] =>
@@ -854,7 +511,7 @@ const createTimeoutRemovalConfirmations = (
   );
 
 const createConditionJudgmentConfirmations = (
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffConfirmationRequiredItem[] =>
@@ -887,7 +544,7 @@ const waitTargetKeysForUnit = (unit: AjsUnit): Set<string> | undefined => {
 };
 
 const createWaitTargetConfirmations = (
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffConfirmationRequiredItem[] =>
@@ -918,20 +575,20 @@ const createConditionalRelationConfirmations = (
   afterUnits: AjsUnit[],
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
 ): SemanticDiffConfirmationRequiredItem[] => {
-  const beforeRelationsByPair = relationMapByPair(
-    scopedRelations(beforeUnits, beforeUnitById),
-    buildUnitCorrespondence(matches),
-  );
-  const afterRelationsByPair = relationMapByPair(
-    scopedRelations(afterUnits, afterUnitById),
-  );
+  const relationPairs = buildSemanticDiffRelationPairMaps({
+    beforeUnits,
+    afterUnits,
+    beforeUnitById,
+    afterUnitById,
+    matches,
+  });
 
-  return [...beforeRelationsByPair.entries()].flatMap(
+  return [...relationPairs.before.entries()].flatMap(
     ([pairKey, beforeRelations]) => {
       const afterTypes = new Set(
-        (afterRelationsByPair.get(pairKey) ?? []).map(
+        (relationPairs.after.get(pairKey) ?? []).map(
           (relation) => relation.type,
         ),
       );
@@ -953,7 +610,7 @@ const createConditionalRelationConfirmations = (
 };
 
 const hasUninterpretableFileMonitoringCondition = (unit: AjsUnit): boolean =>
-  (parameterValuesByKey(unit).get("flwc") ?? []).some((value) => {
+  (semanticDiffParameterValuesByKey(unit).get("flwc") ?? []).some((value) => {
     const conditions = new Set(
       value.split(":").filter((condition) => condition.length > 0),
     );
@@ -961,7 +618,7 @@ const hasUninterpretableFileMonitoringCondition = (unit: AjsUnit): boolean =>
   });
 
 const createUnsupportedConditionItems = (
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
   afterUnitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): SemanticDiffUnsupportedItem[] =>
@@ -985,7 +642,7 @@ const createConfirmationRequiredItems = (
   afterUnits: AjsUnit[],
   beforeUnitById: Map<string, AjsUnit>,
   afterUnitById: Map<string, AjsUnit>,
-  matches: UnitMatch[],
+  matches: SemanticDiffUnitMatch[],
   jobGroupPath?: string,
 ): SemanticDiffConfirmationRequiredItem[] =>
   [
@@ -1045,55 +702,45 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   const afterUnits = scopedUnits(input.after, input.options?.jobGroupPath);
   const beforeUnitById = buildUnitById(beforeUnits);
   const afterUnitById = buildUnitById(afterUnits);
-  const exactMatches = matchExactUnits(
+  const correspondence = buildSemanticDiffUnitCorrespondence({
     beforeUnits,
     afterUnits,
     beforeUnitById,
     afterUnitById,
-    input.options?.jobGroupPath,
-  );
-  const exactBeforeMatchedIds = buildBeforeMatchedIdSet(exactMatches);
-  const exactAfterMatchedIds = buildAfterMatchedIdSet(exactMatches);
-  const unmatchedBeforeUnits = beforeUnits.filter(
-    (unit) => !exactBeforeMatchedIds.has(unit.id),
-  );
-  const unmatchedAfterUnits = afterUnits.filter(
-    (unit) => !exactAfterMatchedIds.has(unit.id),
-  );
-  const fingerprintResult = matchFingerprintUnits(
-    unmatchedBeforeUnits,
-    unmatchedAfterUnits,
-  );
-  const matches = [...exactMatches, ...fingerprintResult.matches];
+    jobGroupPath: input.options?.jobGroupPath,
+  });
+  const matches = correspondence.matches;
   const changes = [
     ...createFingerprintMatchChanges(
-      fingerprintResult.matches,
+      correspondence.fingerprintMatches,
       beforeUnitById,
       afterUnitById,
       input.options?.jobGroupPath,
     ),
     ...createCandidateChanges(
-      fingerprintResult.candidates,
+      correspondence.candidates,
       beforeUnitById,
       afterUnitById,
       input.options?.jobGroupPath,
     ),
     ...createAddedRemovedChanges(
-      beforeUnits,
-      afterUnits,
-      matches,
-      fingerprintResult.candidates,
+      correspondence.removedUnits,
+      correspondence.addedUnits,
       beforeUnitById,
       afterUnitById,
       input.options?.jobGroupPath,
     ),
     ...createAttributeChanges(matches),
     ...createRelationChanges(
-      beforeUnits,
-      afterUnits,
+      compareSemanticDiffRelations({
+        beforeUnits,
+        afterUnits,
+        beforeUnitById,
+        afterUnitById,
+        matches,
+      }),
       beforeUnitById,
       afterUnitById,
-      matches,
     ),
   ];
   const confirmationRequired = createConfirmationRequiredItems(

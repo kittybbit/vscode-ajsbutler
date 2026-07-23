@@ -1,9 +1,16 @@
 # Traceability: Migrate Semantic Diff And Report Boundaries
 
-| Scope             | Req                  | Spec   | Plan | Test        |
-| ----------------- | -------------------- | ------ | ---- | ----------- |
-| Build Diff        | Domain/app result    | Req    | TBD  | Fixtures    |
-| Present Report    | DTO to Markdown      | Req    | TBD  | Report/i18n |
-| Identity/schedule | One domain owner     | Arch   | TBD  | Domain      |
-| Evidence kinds    | Explicit distinction | Req    | TBD  | Wording     |
-| Host parity       | Host adapters only   | Compat | TBD  | Host/build  |
+<!-- markdownlint-disable MD013 -->
+
+| Use Case / Requirement                                                                                                                                    | `SPECS.md` Section                               | Slice      | Test Or Validation Plan                                                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Build Semantic Diff: deterministic jobnet/unit identity, stable fingerprint matching, ambiguity, relation correspondence, and parameter/scalar comparison | Requirements; Architecture; Acceptance Criteria  | Slice 1    | Implemented by `semanticDiffStructuralRules.test.ts`; compare, contract, sample, architecture, Qlty, production build, and desktop test validation passed on 2026-07-23 |
+| Build Semantic Diff: confirmation-required start/wait/condition evidence remains distinct from unverified runtime facts                                   | Requirements; Compatibility; Acceptance Criteria | Slice 2    | New `semanticDiffEvidenceRules.test.ts`, `semanticDiffConditions.test.ts`, evidence sample coverage, compare regressions                                                |
+| Build Semantic Diff: supported, unsupported, and uncalculated schedule meaning preserves the requested period                                             | Requirements; Compatibility; Non-Goals           | Slice 2    | New `semanticDiffScheduleRules.test.ts`, `semanticDiffSchedule.test.ts`, schedule report regressions, desktop/web build                                                 |
+| Build Semantic Diff: application entry point exposes normalized, host-neutral change, confirmation, limitation, unsupported, schedule, and error data     | Requirements; Architecture; Acceptance Criteria  | Slice 3    | DTO mapping/contract coverage, `semanticDiffContracts.test.ts`, `buildSemanticDiffReport.test.ts`, targeted no-domain-reference check                                   |
+| Build Semantic Diff: future flow consumers reuse semantic results rather than comparison rules                                                            | Requirements; Impact Analysis                    | Slice 3    | `semanticDiffFlowHighlights.test.ts`, flow graph regressions                                                                                                            |
+| Present Semantic Diff Report: localized Markdown preserves rationale, limitations, raw identifiers/values, Japanese wording, and English fallback         | Requirements; Compatibility; Acceptance Criteria | Slice 4    | `renderSemanticDiffMarkdown.test.ts`, `nls.test.ts`, sample/report regressions                                                                                          |
+| Present Semantic Diff Report: display occurs before explicit copy and comparison never mutates the clipboard                                              | Requirements; Compatibility                      | Slice 4    | `semanticDiffCommand.test.ts`, `semanticDiffReportDocument.test.ts`, extension subscription/dependency tests                                                            |
+| Preserve desktop, web, VS Code `^1.75.0`, JP1/AJS version 13 definition behavior, and user-visible output                                                 | Compatibility; Non-Goals                         | Slices 1-4 | Focused suites per slice, `rtk pnpm run qlty`, architecture dependency suite, production build; desktop and web tests in Slice 4                                        |
+
+<!-- markdownlint-enable MD013 -->
