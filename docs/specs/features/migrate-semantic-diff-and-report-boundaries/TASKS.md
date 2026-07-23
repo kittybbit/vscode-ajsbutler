@@ -4,8 +4,8 @@
 
 - Purpose: complete the normalized semantic-diff and application-report
   boundary without changing comparison or report behavior.
-- Approved or active slice: all four slices are approved; Slice 1 is complete
-  and Slice 2 is active.
+- Approved or active slice: all four slices are approved; Slices 1 and 2 are
+  complete and Slice 3 is active.
 - Do not change comparison results, wording, localization, schedule scope, or
   copy workflow.
 - Keep definition evidence distinct from unverified runtime facts.
@@ -17,7 +17,7 @@
 - Shared contracts and host wiring also require build, desktop, and web
   evidence.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement only Slice 2 with `sdd-implement-task`.
+- Next decision: implement only Slice 3 with `sdd-implement-task`.
 
 ## Plan Status
 
@@ -30,7 +30,7 @@
   with presentation report migration and left domain-entity projection as an
   implementation-time design decision, so its approval boundary was too broad.
 - Human approval: all four slices approved.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 
 ## Human Approval
 
@@ -121,7 +121,7 @@
 
 ### Slice 2: Establish Domain-Owned Confirmation And Schedule Evidence
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Move start-condition, wait-release, timeout, wait-target, conditional
     relation, unsupported-condition, and supported schedule evaluation meaning
@@ -291,6 +291,9 @@
 - Dependencies:
   - Slices 1 and 2, so application DTOs map completed domain decisions rather
     than preserving application-owned comparison rules.
+  - Reuse Slice 2's discriminated confirmation, unsupported-schedule, and
+    schedule-run decisions; preserve application wording and constraints by
+    mapping those decisions instead of reinterpreting domain parameters.
 - Risks:
   - Current `SemanticDiffTarget` variants embed normalized domain objects;
     projection must include every scalar needed by both report and flow

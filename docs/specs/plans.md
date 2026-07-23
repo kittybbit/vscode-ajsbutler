@@ -35,7 +35,7 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Start approved Slice 2 of
+1. Start approved Slice 3 of
    `migrate-semantic-diff-and-report-boundaries` with `sdd-implement-task` on a
    dedicated non-doc feature branch.
 2. Replan `import-definition-via-webapi` with a focused generated-artifact
