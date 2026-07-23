@@ -20,17 +20,14 @@ suite("Extension subscriptions", () => {
         buildSemanticDiffReport: () => ({ ok: true, report: "" }),
       },
       webApiImport: {
-        storeCredential: async () => {},
-        importPort: {
-          importDefinition: async () => ({
-            ok: false,
-            error: {
-              code: "network-failed",
-              message: "not called",
-              recoverable: true,
-            },
-          }),
-        },
+        importDefinition: async () => ({
+          ok: false,
+          error: {
+            code: "network-failed",
+            message: "not called",
+            recoverable: true,
+          },
+        }),
       },
     };
 

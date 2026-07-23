@@ -14,6 +14,7 @@ import {
   type FindParameterHover,
 } from "../../application/editor-feedback/findParameterHover";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { createImportAjsDefinitionViaWebApi } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
 import {
   createBuildUnitList,
   type BuildUnitList,
@@ -25,7 +26,7 @@ import {
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
-import type { ImportAjsDefinitionCommandDeps } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
+import type { ImportAjsDefinitionCapability } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
 import { VscodeWebApiCredentialStore } from "../../infrastructure/webapi/VscodeWebApiCredentialStore";
 import { createTelemetry } from "./createTelemetry";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
@@ -38,10 +39,7 @@ export type ExtensionDependencies = {
   semanticDiff: {
     buildSemanticDiffReport: BuildSemanticDiffReport;
   };
-  webApiImport: Pick<
-    ImportAjsDefinitionCommandDeps,
-    "storeCredential" | "importPort"
-  >;
+  webApiImport: Pick<ImportAjsDefinitionCapability, "importDefinition">;
 };
 
 export const instrumentParserPerformance = (
@@ -75,6 +73,11 @@ export const createExtensionDependencies = (
   const parser = instrumentParserPerformance(new AntlrAjsParser(), telemetry);
   const credentialStore = new VscodeWebApiCredentialStore(context.secrets);
   const parameterSyntaxLookup = new ParameterSyntaxResourceAdapter();
+  const importAjsDefinitionViaWebApi = createImportAjsDefinitionViaWebApi(
+    new Jp1Ajs3WebApiImportAdapter({
+      credentialProvider: credentialStore,
+    }),
+  );
 
   return {
     telemetry,
@@ -85,11 +88,18 @@ export const createExtensionDependencies = (
       buildSemanticDiffReport: createBuildSemanticDiffReport(parser),
     },
     webApiImport: {
-      storeCredential: (credentialRef, credential) =>
-        credentialStore.storeCredential(credentialRef, credential),
-      importPort: new Jp1Ajs3WebApiImportAdapter({
-        credentialProvider: credentialStore,
-      }),
+      importDefinition: async ({ connection, scope, credential }) => {
+        const credentialRef = await credentialStore.storeCredentialForImport(
+          connection,
+          scope,
+          credential,
+        );
+        return await importAjsDefinitionViaWebApi({
+          connection,
+          scope,
+          credentialRef,
+        });
+      },
     },
   };
 };

@@ -38,11 +38,7 @@ suite("Extension dependencies", () => {
       "function",
     );
     assert.strictEqual(
-      typeof dependencies.webApiImport.storeCredential,
-      "function",
-    );
-    assert.strictEqual(
-      typeof dependencies.webApiImport.importPort.importDefinition,
+      typeof dependencies.webApiImport.importDefinition,
       "function",
     );
 

@@ -31,26 +31,9 @@ export type ImportAjsDefinitionConnectionDto = {
 };
 
 export type ImportAjsDefinitionRequestDto = {
-  host: ImportAjsDefinitionHostKind;
   connection: ImportAjsDefinitionConnectionDto;
   scope: ImportAjsDefinitionScopeDto;
   credentialRef?: string;
-};
-
-export type ImportAjsDefinitionPortRequestDto = {
-  endpoint: "unit-list";
-  method: "GET";
-  path: "/ajs/api/v1/objects/statuses";
-  connection: ImportAjsDefinitionConnectionDto;
-  credentialRef?: string;
-  query: {
-    mode: "search";
-    manager: string;
-    serviceName: string;
-    location: string;
-    searchLowerUnits: "YES" | "NO";
-    searchTarget: "DEFINITION";
-  };
 };
 
 export type ImportedAjsDefinitionSourceDto = {
@@ -119,39 +102,22 @@ export type ImportAjsDefinitionResultDto =
 
 export interface ImportAjsDefinitionViaWebApiPort {
   importDefinition(
-    request: ImportAjsDefinitionPortRequestDto,
+    request: ImportAjsDefinitionRequestDto,
   ): Promise<ImportAjsDefinitionResultDto>;
 }
 
-export const buildDefinitionOnlyUnitListRequest = (
+export type ImportAjsDefinitionViaWebApi = (
   request: ImportAjsDefinitionRequestDto,
-): ImportAjsDefinitionPortRequestDto | ImportAjsDefinitionFailureDto => {
-  if (request.host === "web") {
-    return {
-      ok: false,
-      error: createImportAjsDefinitionError(
-        "unsupported-host",
-        "JP1/AJS WebAPI import is not supported in the web extension host yet.",
-      ),
-    };
-  }
+) => Promise<ImportAjsDefinitionResultDto>;
 
-  return {
-    endpoint: "unit-list",
-    method: "GET",
-    path: "/ajs/api/v1/objects/statuses",
-    connection: { ...request.connection },
-    credentialRef: request.credentialRef,
-    query: {
-      mode: "search",
-      manager: request.scope.manager,
-      serviceName: request.scope.serviceName,
-      location: request.scope.location,
-      searchLowerUnits: request.scope.searchLowerUnits === false ? "NO" : "YES",
-      searchTarget: "DEFINITION",
-    },
-  };
-};
+export const createImportAjsDefinitionViaWebApi =
+  (port: ImportAjsDefinitionViaWebApiPort): ImportAjsDefinitionViaWebApi =>
+  async (request) =>
+    await port.importDefinition({
+      connection: { ...request.connection },
+      scope: { ...request.scope },
+      credentialRef: request.credentialRef,
+    });
 
 export const createImportedAjsDefinitionContent = (
   source: Omit<
@@ -182,21 +148,3 @@ export const createImportAjsDefinitionError = (
   recoverable: true,
   ...details,
 });
-
-const HTTP_STATUS_IMPORT_ERROR_CODES: Record<
-  number,
-  ImportAjsDefinitionErrorCode
-> = {
-  400: "invalid-request",
-  401: "authentication-failed",
-  403: "authorization-failed",
-  404: "resource-not-found",
-  409: "conflict",
-  412: "web-console-unavailable",
-  500: "server-error",
-};
-
-export const mapHttpStatusToImportErrorCode = (
-  httpStatus: number,
-): ImportAjsDefinitionErrorCode =>
-  HTTP_STATUS_IMPORT_ERROR_CODES[httpStatus] ?? "unexpected-status";
