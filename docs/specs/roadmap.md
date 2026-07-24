@@ -181,7 +181,10 @@
          SC-009 transport and credential mapping, bootstrap-owned desktop/web
          capability selection, and presentation delegation without changing
          beta behavior.
-       - `migrate-semantic-diff-and-report-boundaries`
+       - Completed: `migrate-semantic-diff-and-report-boundaries` established
+         domain-owned semantic correspondence/evidence, an application-owned
+         scalar semantic-diff DTO, and presentation-owned localized Markdown,
+         display, and explicit-copy workflow.
        - `isolate-telemetry-adapter-boundary`
     5. `standardize-serialization-and-composition-root`: converge the completed
        application/adaptor contracts into plain transport DTOs and bootstrap-only
