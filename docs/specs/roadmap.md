@@ -185,7 +185,10 @@
          domain-owned semantic correspondence/evidence, an application-owned
          scalar semantic-diff DTO, and presentation-owned localized Markdown,
          display, and explicit-copy workflow.
-       - `isolate-telemetry-adapter-boundary`
+       - Completed: `isolate-telemetry-adapter-boundary` established an
+         application-owned validated-event catalog and privacy allowlist,
+         infrastructure-owned SDK translation and failure isolation, and
+         bootstrap-owned adapter selection without changing emitted meaning.
     5. `standardize-serialization-and-composition-root`: converge the completed
        application/adaptor contracts into plain transport DTOs and bootstrap-only
        composition.

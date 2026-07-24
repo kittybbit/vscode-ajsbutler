@@ -192,14 +192,19 @@ Migration should be incremental and use-case driven.
 
 ## Telemetry Boundary
 
-- callers in extension-facing modules request telemetry via
-  `TelemetryPort.trackEvent(...)`
+- application-owned event definitions and builders create nominally validated,
+  readonly telemetry events through the repository privacy allowlist
+- callers in extension-facing modules report only validated events through
+  `TelemetryPort.report(...)`; the port exposes no SDK-specific types or raw
+  event-name/property-map reporting surface
 - SDK-specific translation lives only in
   `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts`
 - bootstrap wiring creates the telemetry adapter and injects it into the
   extension runtime object
-- event names and payload shapes remain defined by the callers so the refactor
-  preserves existing collection scope
+- the SDK adapter contains reporting and disposal failures, while bootstrap
+  falls back to the no-op adapter when construction is unavailable
+- existing event names and payload meaning remain preserved; expanding
+  collection requires a separately approved telemetry feature
 
 ## Web Extension Risks
 

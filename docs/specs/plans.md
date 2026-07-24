@@ -35,19 +35,17 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Run Feature Exit Mode for `isolate-telemetry-adapter-boundary` with
-   `sdd-plan-task`.
-2. Replan `import-definition-via-webapi` with a focused generated-artifact
+1. Replan `import-definition-via-webapi` with a focused generated-artifact
    reproducibility slice before correcting the checked-in stale Prism artifact
    reported by `rtk pnpm run openapi:check`.
-3. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
+3. Start `standardize-serialization-and-composition-root` as the next Clean
+   Architecture migration feature after the current branch work is closed.
 4. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
-- `docs/specs/features/isolate-telemetry-adapter-boundary/`: Slice 1 complete;
-  Feature Exit review pending.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 
