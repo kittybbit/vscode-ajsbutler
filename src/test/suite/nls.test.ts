@@ -4,9 +4,9 @@ import {
   localeString,
   paramDefinitionLang,
   unitTypeLabel,
-  semanticDiffReportText,
 } from "../../domain/services/i18n/nls";
 import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
+import { semanticDiffReportText } from "../../presentation/semantic-diff/semanticDiffReportText";
 
 suite("NLS", () => {
   test("falls back to English message resources for unsupported languages", () => {

@@ -5,8 +5,8 @@ import type {
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
-} from "./semanticDiffDto";
-import { semanticDiffReportText } from "../../domain/services/i18n/nls";
+} from "../../application/semantic-diff/semanticDiffDto";
+import { semanticDiffReportText } from "./semanticDiffReportText";
 
 const labelKeys: Record<string, string> = {
   "Semantic Diff Report": "report.title",

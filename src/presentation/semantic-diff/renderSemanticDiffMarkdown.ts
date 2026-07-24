@@ -4,8 +4,8 @@ import type {
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffLimitation,
   SemanticDiffUnsupportedItem,
-} from "./semanticDiffDto";
-import { semanticDiffReportText } from "../../domain/services/i18n/nls";
+} from "../../application/semantic-diff/semanticDiffDto";
+import { semanticDiffReportText } from "./semanticDiffReportText";
 import {
   bulletLine,
   describeTarget,

@@ -20,9 +20,9 @@ import {
   type BuildUnitList,
 } from "../../application/unit-list/buildUnitList";
 import {
-  createBuildSemanticDiffReport,
-  type BuildSemanticDiffReport,
-} from "../../application/semantic-diff/buildSemanticDiffReport";
+  createBuildSemanticDiffReportData,
+  type BuildSemanticDiffReportData,
+} from "../../application/semantic-diff/buildSemanticDiffReportData";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
@@ -37,7 +37,7 @@ export type ExtensionDependencies = {
   buildUnitList: BuildUnitList;
   findParameterHover: FindParameterHover;
   semanticDiff: {
-    buildSemanticDiffReport: BuildSemanticDiffReport;
+    buildSemanticDiffReportData: BuildSemanticDiffReportData;
   };
   webApiImport: Pick<ImportAjsDefinitionCapability, "importDefinition">;
 };
@@ -85,7 +85,7 @@ export const createExtensionDependencies = (
     buildUnitList: createBuildUnitList(parser),
     findParameterHover: createFindParameterHover(parameterSyntaxLookup),
     semanticDiff: {
-      buildSemanticDiffReport: createBuildSemanticDiffReport(parser),
+      buildSemanticDiffReportData: createBuildSemanticDiffReportData(parser),
     },
     webApiImport: {
       importDefinition: async ({ connection, scope, credential }) => {

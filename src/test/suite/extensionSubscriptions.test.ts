@@ -17,7 +17,20 @@ suite("Extension subscriptions", () => {
       buildUnitList: () => ({ errors: [] }),
       findParameterHover: () => undefined,
       semanticDiff: {
-        buildSemanticDiffReport: () => ({ ok: true, report: "" }),
+        buildSemanticDiffReportData: () => ({
+          ok: true,
+          changeSet: {
+            inputs: {
+              before: { side: "before", unitIds: [], relations: [] },
+              after: { side: "after", unitIds: [], relations: [] },
+            },
+            changes: [],
+            confirmationRequired: [],
+            unsupportedItems: [],
+            limitations: [],
+            reportSections: [],
+          },
+        }),
       },
       webApiImport: {
         importDefinition: async () => ({

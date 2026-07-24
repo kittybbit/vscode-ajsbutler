@@ -7,7 +7,7 @@ import type {
   AjsUnitType,
 } from "../../domain/models/ajs/AjsDocument";
 import { compareSemanticDiff } from "../../application/semantic-diff/compareSemanticDiff";
-import { renderSemanticDiffMarkdown } from "../../application/semantic-diff/renderSemanticDiffMarkdown";
+import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
 
 const relation = (
   sourceUnitId: string,

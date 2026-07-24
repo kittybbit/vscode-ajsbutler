@@ -8,7 +8,7 @@ import type {
   SemanticDiffTarget,
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
-import { renderSemanticDiffMarkdown } from "../../application/semantic-diff/renderSemanticDiffMarkdown";
+import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
 
 const params = (values: Record<string, string>): AjsParameter[] =>
   Object.entries(values).map(([key, value]) => ({ key, value }));

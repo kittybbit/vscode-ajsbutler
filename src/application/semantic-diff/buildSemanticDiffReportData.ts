@@ -3,19 +3,20 @@ import {
   compareSemanticDiff,
   type CompareSemanticDiff,
 } from "./compareSemanticDiff";
-import { renderSemanticDiffMarkdown } from "./renderSemanticDiffMarkdown";
-import type { SemanticDiffParserError } from "./semanticDiffDto";
+import type {
+  SemanticDiffChangeSet,
+  SemanticDiffParserError,
+} from "./semanticDiffDto";
 
-export type BuildSemanticDiffReportInput = {
+export type BuildSemanticDiffReportDataInput = {
   beforeContent: string;
   afterContent: string;
-  language?: string;
 };
 
-export type BuildSemanticDiffReportResult =
+export type BuildSemanticDiffReportDataResult =
   | {
       ok: true;
-      report: string;
+      changeSet: SemanticDiffChangeSet;
     }
   | {
       ok: false;
@@ -25,25 +26,21 @@ export type BuildSemanticDiffReportResult =
       };
     };
 
-export type BuildSemanticDiffReport = (
-  input: BuildSemanticDiffReportInput,
-) => BuildSemanticDiffReportResult;
+export type BuildSemanticDiffReportData = (
+  input: BuildSemanticDiffReportDataInput,
+) => BuildSemanticDiffReportDataResult;
 
 const toParserErrors = (
   errors: SemanticDiffParserError[],
 ): SemanticDiffParserError[] =>
   errors.map(({ line, column, message }) => ({ line, column, message }));
 
-export const createBuildSemanticDiffReport =
+export const createBuildSemanticDiffReportData =
   (
     parser: AjsParserPort,
     compare: CompareSemanticDiff = compareSemanticDiff,
-    render: (
-      changeSet: ReturnType<CompareSemanticDiff>,
-      language?: string,
-    ) => string = renderSemanticDiffMarkdown,
-  ): BuildSemanticDiffReport =>
-  ({ beforeContent, afterContent, language }) => {
+  ): BuildSemanticDiffReportData =>
+  ({ beforeContent, afterContent }) => {
     const beforeParse = parser.parse(beforeContent);
     const afterParse = parser.parse(afterContent);
 
@@ -61,12 +58,9 @@ export const createBuildSemanticDiffReport =
 
     return {
       ok: true,
-      report: render(
-        compare({
-          before: beforeParse.document,
-          after: afterParse.document,
-        }),
-        language,
-      ),
+      changeSet: compare({
+        before: beforeParse.document,
+        after: afterParse.document,
+      }),
     };
   };

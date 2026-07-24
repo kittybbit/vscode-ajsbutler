@@ -34,7 +34,7 @@ suite("Extension dependencies", () => {
       undefined,
     );
     assert.strictEqual(
-      typeof dependencies.semanticDiff.buildSemanticDiffReport,
+      typeof dependencies.semanticDiff.buildSemanticDiffReportData,
       "function",
     );
     assert.strictEqual(

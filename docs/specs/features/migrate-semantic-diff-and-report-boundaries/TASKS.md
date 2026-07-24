@@ -4,8 +4,8 @@
 
 - Purpose: complete the normalized semantic-diff and application-report
   boundary without changing comparison or report behavior.
-- Approved or active slice: all four slices are approved; Slices 1 through 3
-  are complete and Slice 4 is active.
+- Approved or active slice: all four approved implementation slices are
+  complete.
 - Do not change comparison results, wording, localization, schedule scope, or
   copy workflow.
 - Keep definition evidence distinct from unverified runtime facts.
@@ -17,7 +17,7 @@
 - Shared contracts and host wiring also require build, desktop, and web
   evidence.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement only Slice 4 with `sdd-implement-task`.
+- Next decision: run Feature Exit Review with `sdd-plan-task`.
 
 ## Plan Status
 
@@ -30,7 +30,7 @@
   with presentation report migration and left domain-entity projection as an
   implementation-time design decision, so its approval boundary was too broad.
 - Human approval: all four slices approved.
-- Active implementation slice: Slice 4.
+- Active implementation slice: none; all approved slices are complete.
 
 ## Human Approval
 
@@ -308,7 +308,7 @@
 
 ### Slice 4: Move Report Rendering And Host Workflow To Presentation
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Replace the application `BuildSemanticDiffReport` string-producing
     contract with `BuildSemanticDiffReportData` /

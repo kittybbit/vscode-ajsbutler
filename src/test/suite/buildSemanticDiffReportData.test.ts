@@ -1,22 +1,20 @@
 import * as assert from "assert";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
 import {
-  createBuildSemanticDiffReport,
-  type BuildSemanticDiffReportInput,
-} from "../../application/semantic-diff/buildSemanticDiffReport";
+  createBuildSemanticDiffReportData,
+  type BuildSemanticDiffReportDataInput,
+} from "../../application/semantic-diff/buildSemanticDiffReportData";
 import type { CompareSemanticDiffInput } from "../../application/semantic-diff/compareSemanticDiff";
 import type { SemanticDiffChangeSet } from "../../application/semantic-diff/semanticDiffDto";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 
-type BuildSemanticDiffReportObservations = {
+type BuildSemanticDiffReportDataObservations = {
   parsedContents: string[];
   comparedInputs: CompareSemanticDiffInput[];
-  renderedChangeSets: SemanticDiffChangeSet[];
-  renderedLanguages: (string | undefined)[];
 };
 
 const createParser = (
-  observations: BuildSemanticDiffReportObservations,
+  observations: BuildSemanticDiffReportDataObservations,
 ): AjsParserPort => ({
   parse: (content) => {
     observations.parsedContents.push(content);
@@ -42,7 +40,7 @@ const createParser = (
 });
 
 const createCompare =
-  (observations: BuildSemanticDiffReportObservations) =>
+  (observations: BuildSemanticDiffReportDataObservations) =>
   (input: CompareSemanticDiffInput): SemanticDiffChangeSet => {
     observations.comparedInputs.push(input);
     return {
@@ -58,33 +56,22 @@ const createCompare =
     };
   };
 
-const createRender =
-  (observations: BuildSemanticDiffReportObservations) =>
-  (changeSet: SemanticDiffChangeSet, language?: string): string => {
-    observations.renderedChangeSets.push(changeSet);
-    observations.renderedLanguages.push(language);
-    return "rendered semantic diff";
-  };
-
 const createHarness = () => {
-  const observations: BuildSemanticDiffReportObservations = {
+  const observations: BuildSemanticDiffReportDataObservations = {
     parsedContents: [],
     comparedInputs: [],
-    renderedChangeSets: [],
-    renderedLanguages: [],
   };
-  const build = createBuildSemanticDiffReport(
+  const build = createBuildSemanticDiffReportData(
     createParser(observations),
     createCompare(observations),
-    createRender(observations),
   );
   return { observations, build };
 };
 
-suite("Build Semantic Diff Report", () => {
-  test("parses both definitions, compares normalized documents, and renders markdown", () => {
+suite("Build Semantic Diff Report Data", () => {
+  test("parses both definitions and returns the compared application DTO", () => {
     const { observations, build } = createHarness();
-    const input: BuildSemanticDiffReportInput = {
+    const input: BuildSemanticDiffReportDataInput = {
       beforeContent: "unit=before,,jp1admin,;",
       afterContent: "unit=after,,jp1admin,;",
     };
@@ -96,27 +83,23 @@ suite("Build Semantic Diff Report", () => {
       "unit=after,,jp1admin,;",
     ]);
     assert.strictEqual(observations.comparedInputs.length, 1);
-    assert.strictEqual(observations.renderedChangeSets.length, 1);
-    assert.deepStrictEqual(observations.renderedLanguages, [undefined]);
     assert.deepStrictEqual(result, {
       ok: true,
-      report: "rendered semantic diff",
+      changeSet: {
+        inputs: {
+          before: { side: "before", unitIds: [], relations: [] },
+          after: { side: "after", unitIds: [], relations: [] },
+        },
+        changes: [],
+        confirmationRequired: [],
+        unsupportedItems: [],
+        limitations: [],
+        reportSections: [],
+      },
     });
   });
 
-  test("passes the requested report language to the renderer", () => {
-    const { observations, build } = createHarness();
-
-    build({
-      beforeContent: "unit=before,,jp1admin,;",
-      afterContent: "unit=after,,jp1admin,;",
-      language: "ja-JP",
-    });
-
-    assert.deepStrictEqual(observations.renderedLanguages, ["ja-JP"]);
-  });
-
-  test("returns parse errors without comparing or rendering", () => {
+  test("returns host-neutral parse errors without comparing", () => {
     const { observations, build } = createHarness();
 
     const result = build({
@@ -137,6 +120,5 @@ suite("Build Semantic Diff Report", () => {
     ]);
     assert.strictEqual(result.errors.after.length, 0);
     assert.deepStrictEqual(observations.comparedInputs, []);
-    assert.deepStrictEqual(observations.renderedChangeSets, []);
   });
 });

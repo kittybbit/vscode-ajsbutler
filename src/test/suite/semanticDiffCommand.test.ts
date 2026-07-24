@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { BuildSemanticDiffReportInput } from "../../application/semantic-diff/buildSemanticDiffReport";
+import type { BuildSemanticDiffReportDataInput } from "../../application/semantic-diff/buildSemanticDiffReportData";
+import type { SemanticDiffChangeSet } from "../../application/semantic-diff/semanticDiffDto";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -13,8 +14,23 @@ type SemanticDiffCommandObservations = {
   openedReports: string[];
   clipboardWrites: string[];
   errorMessages: string[];
-  reportInputs: BuildSemanticDiffReportInput[];
+  reportInputs: BuildSemanticDiffReportDataInput[];
+  renderedChangeSets: SemanticDiffChangeSet[];
+  renderedLanguages: (string | undefined)[];
+  reportSteps: string[];
 };
+
+const emptyChangeSet = (): SemanticDiffChangeSet => ({
+  inputs: {
+    before: { side: "before", unitIds: [], relations: [] },
+    after: { side: "after", unitIds: [], relations: [] },
+  },
+  changes: [],
+  confirmationRequired: [],
+  unsupportedItems: [],
+  limitations: [],
+  reportSections: [],
+});
 
 class SemanticDiffCommandHarness {
   readonly observed: SemanticDiffCommandObservations = {
@@ -24,6 +40,9 @@ class SemanticDiffCommandHarness {
     clipboardWrites: [],
     errorMessages: [],
     reportInputs: [],
+    renderedChangeSets: [],
+    renderedLanguages: [],
+    reportSteps: [],
   };
 
   readonly beforeUri = vscode.Uri.parse("untitled:before.ajs");
@@ -62,14 +81,19 @@ class SemanticDiffCommandHarness {
         return this.encoder.encode(this.beforeContent);
       },
       openReport: async (report) => {
+        this.observed.reportSteps.push("display");
         this.observed.openedReports.push(report);
       },
-      buildSemanticDiffReport: (input) => this.buildSemanticDiffReport(input),
+      buildSemanticDiffReportData: (input) =>
+        this.buildSemanticDiffReportData(input),
+      renderSemanticDiffMarkdown: (changeSet, language) =>
+        this.renderSemanticDiffMarkdown(changeSet, language),
       ...overrides,
     };
   }
 
-  private buildSemanticDiffReport(input: BuildSemanticDiffReportInput) {
+  private buildSemanticDiffReportData(input: BuildSemanticDiffReportDataInput) {
+    this.observed.reportSteps.push("build-data");
     this.observed.reportInputs.push(input);
     return input.beforeContent.includes("parse-error") ||
       input.afterContent.includes("parse-error")
@@ -82,8 +106,18 @@ class SemanticDiffCommandHarness {
         }
       : {
           ok: true as const,
-          report: "rendered semantic diff",
+          changeSet: emptyChangeSet(),
         };
+  }
+
+  private renderSemanticDiffMarkdown(
+    changeSet: SemanticDiffChangeSet,
+    language?: string,
+  ): string {
+    this.observed.reportSteps.push("render");
+    this.observed.renderedChangeSets.push(changeSet);
+    this.observed.renderedLanguages.push(language);
+    return "rendered semantic diff";
   }
 }
 
@@ -116,15 +150,26 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(harness.observed.openedReports, [
       "rendered semantic diff",
     ]);
+    assert.deepStrictEqual(harness.observed.reportSteps, [
+      "build-data",
+      "render",
+      "display",
+    ]);
     assert.deepStrictEqual(harness.observed.clipboardWrites, []);
   });
 
-  test("passes the VS Code display language to report building", async () => {
+  test("passes the VS Code display language only to presentation rendering", async () => {
     const harness = new SemanticDiffCommandHarness({ language: "ja-JP" });
 
     await executeCompareSemanticDiffCommand(harness.deps);
 
-    assert.strictEqual(harness.observed.reportInputs[0].language, "ja-JP");
+    assert.deepStrictEqual(harness.observed.reportInputs, [
+      {
+        beforeContent: "unit=before,,jp1admin,;",
+        afterContent: "unit=after,,jp1admin,;",
+      },
+    ]);
+    assert.deepStrictEqual(harness.observed.renderedLanguages, ["ja-JP"]);
   });
 
   test("reports display failure without writing clipboard", async () => {
@@ -178,6 +223,7 @@ suite("Semantic diff command", () => {
       "Semantic diff could not parse one or both JP1/AJS definitions.",
     ]);
     assert.ok(!harness.observed.errorMessages[0].includes("secret-content"));
+    assert.deepStrictEqual(harness.observed.renderedChangeSets, []);
     assert.deepStrictEqual(harness.observed.clipboardWrites, []);
   });
 
