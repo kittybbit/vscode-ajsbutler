@@ -8,7 +8,7 @@ suite("Extension subscriptions", () => {
   test("creates diagnostics, hover, import, semantic diff, and viewer subscriptions", () => {
     const context = { subscriptions: [] } as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
     const dependencies: ExtensionDependencies = {

@@ -31,8 +31,11 @@ suite("Viewer message routing", () => {
       document: document as never,
       panel: panel as never,
       telemetry: {
-        trackEvent: (eventName, properties) => {
-          telemetryEvents.push({ eventName, properties });
+        report: (event) => {
+          telemetryEvents.push({
+            eventName: event.name,
+            properties: event.properties,
+          });
         },
         dispose() {},
       },
@@ -193,8 +196,8 @@ suite("Viewer message routing", () => {
       panel: panel as never,
       viewType: "ajsbutler.flowViewer",
       telemetry: {
-        trackEvent: (eventName) => {
-          removed.push(`event:${eventName}`);
+        report: (event) => {
+          removed.push(`event:${event.name}`);
         },
         dispose() {},
       },

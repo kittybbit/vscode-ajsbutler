@@ -146,7 +146,7 @@ export const registerViewerPanelDispose = ({
       host: getTelemetryHost(),
     });
     if (event) {
-      telemetry.trackEvent(event.name, event.properties);
+      telemetry.report(event);
     }
     store.removeByUri(uri);
     receiveMessageDispose.dispose();

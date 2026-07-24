@@ -13,7 +13,7 @@ import {
 suite("ViewerFactory", () => {
   test("reuses an existing panel before creating a new one", () => {
     const telemetry: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
@@ -61,7 +61,7 @@ suite("ViewerFactory", () => {
 
   test("creates, customizes, and stores a new panel when missing", () => {
     const telemetry: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
     const createdPanel = { id: "new" } as unknown as vscode.WebviewPanel;
@@ -119,7 +119,7 @@ suite("ViewerFactory", () => {
 
   test("returns an existing panel without creating a new one", () => {
     const telemetry: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
@@ -159,8 +159,8 @@ suite("ViewerFactory", () => {
     let onDidDispose: (() => void) | undefined;
 
     const telemetry: TelemetryPort = {
-      trackEvent(eventName) {
-        telemetryEvents.push(eventName);
+      report(event) {
+        telemetryEvents.push(event.name);
       },
       dispose() {},
     };

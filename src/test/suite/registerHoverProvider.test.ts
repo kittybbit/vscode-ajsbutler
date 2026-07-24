@@ -1,10 +1,8 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryEvent } from "../../application/telemetry/telemetryEvent";
-import type {
-  TelemetryPort,
-  TelemetryProperties,
-} from "../../application/telemetry/TelemetryPort";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 import { createAjsHoverProvider } from "../../presentation/vscode/languages/registerHoverProvider";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 
@@ -41,9 +39,7 @@ suite("Register hover provider", () => {
   test("maps parameter-hover output to a markdown hover", async () => {
     const trackedEvents: TelemetryEvent[] = [];
     const telemetry: TelemetryPort = {
-      trackEvent: (name: string, properties: TelemetryProperties = {}) => {
-        trackedEvents.push({ name, properties });
-      },
+      report: (event) => trackedEvents.push(event),
       dispose() {},
     };
     const provider = createAjsHoverProvider(
@@ -92,9 +88,7 @@ suite("Register hover provider", () => {
   test("reports a no-match hover without exposing the token", async () => {
     const trackedEvents: TelemetryEvent[] = [];
     const provider = createAjsHoverProvider(() => undefined, {
-      trackEvent: (name: string, properties: TelemetryProperties = {}) => {
-        trackedEvents.push({ name, properties });
-      },
+      report: (event) => trackedEvents.push(event),
       dispose() {},
     });
 
@@ -119,5 +113,26 @@ suite("Register hover provider", () => {
       },
     );
     assert.ok(trackedEvents[1].properties.durationBucket);
+  });
+
+  test("keeps hover results available when the SDK reporter fails", async () => {
+    const telemetry = new VscodeTelemetryAdapter("test", () => ({
+      sendTelemetryEvent: () => {
+        throw new Error("telemetry failed");
+      },
+      dispose() {},
+    }));
+    const provider = createAjsHoverProvider(
+      () => ({ symbol: "ty", syntax: "ty=n;" }),
+      telemetry,
+    );
+
+    const hover = await provider.provideHover(
+      createTextDocument(new vscode.Range(0, 0, 0, 2), "ty"),
+      new vscode.Position(0, 0),
+      {} as vscode.CancellationToken,
+    );
+
+    assert.ok(hover instanceof vscode.Hover);
   });
 });

@@ -5,14 +5,15 @@ import {
   reportExtensionActivated,
   reportAndDisposeExtensionRuntime,
 } from "../../bootstrap/extension/extensionLifecycle";
-import { Telemetry } from "../../presentation/vscode/constant";
+import { telemetryEvents } from "../../application/telemetry/telemetryEvent";
+import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 
 suite("Extension lifecycle", () => {
   test("reports activate telemetry", () => {
     const events: string[] = [];
     const extension = MyExtension.init({} as never, {
-      trackEvent(eventName) {
-        events.push(eventName);
+      report(event) {
+        events.push(event.name);
       },
       dispose() {},
     });
@@ -20,7 +21,7 @@ suite("Extension lifecycle", () => {
     reportExtensionActivated(extension);
 
     assert.deepStrictEqual(events, [
-      Telemetry.ExtensionActivate,
+      telemetryEvents.legacyExtensionActivated.name,
       "extension.lifecycle.activated",
     ]);
     extension.dispose();
@@ -30,8 +31,8 @@ suite("Extension lifecycle", () => {
     const events: string[] = [];
     let disposed = false;
     const telemetry: TelemetryPort = {
-      trackEvent(eventName) {
-        events.push(eventName);
+      report(event) {
+        events.push(event.name);
       },
       dispose() {
         disposed = true;
@@ -42,7 +43,7 @@ suite("Extension lifecycle", () => {
     reportAndDisposeExtensionRuntime(extension);
 
     assert.deepStrictEqual(events, [
-      Telemetry.ExtensionDeactivate,
+      telemetryEvents.legacyExtensionDeactivated.name,
       "extension.lifecycle.deactivated",
     ]);
     assert.strictEqual(disposed, true);
@@ -51,5 +52,20 @@ suite("Extension lifecycle", () => {
   test("ignores missing runtime on deactivate", () => {
     reportAndDisposeExtensionRuntime(undefined);
     assert.ok(true);
+  });
+
+  test("keeps lifecycle reporting and disposal non-throwing when the SDK fails", () => {
+    const telemetry = new VscodeTelemetryAdapter("test", () => ({
+      sendTelemetryEvent() {
+        throw new Error("telemetry failed");
+      },
+      dispose() {
+        throw new Error("telemetry disposal failed");
+      },
+    }));
+    const extension = MyExtension.init({} as never, telemetry);
+
+    assert.doesNotThrow(() => reportExtensionActivated(extension));
+    assert.doesNotThrow(() => reportAndDisposeExtensionRuntime(extension));
   });
 });

@@ -55,9 +55,7 @@ const createPreviewCommandDependencies = (
   mountPanel: (panel, viewType) => {
     mountViewerPanel(context, panel, viewType);
   },
-  trackEvent: (viewType, properties) => {
-    telemetry.trackEvent(viewType, properties);
-  },
+  reportTelemetry: (event) => telemetry.report(event),
 });
 
 const resolveTargetViewType = (targetView: NavigationTargetView): string =>
@@ -229,7 +227,7 @@ const createViewerBundle = ({
             host: getTelemetryHost(),
           });
           if (event) {
-            telemetry.trackEvent(event.name, event.properties);
+            telemetry.report(event);
           }
         },
       ),
@@ -240,14 +238,7 @@ const createViewerBundle = ({
           host: getTelemetryHost(),
         });
         if (navigationEvent) {
-          try {
-            telemetry.trackEvent(
-              navigationEvent.name,
-              navigationEvent.properties,
-            );
-          } catch {
-            // Viewer action telemetry must not block counterpart navigation.
-          }
+          telemetry.report(navigationEvent);
         }
         revealCounterpartFromNavigation(document, event, {
           factoryByViewType,
@@ -260,7 +251,7 @@ const createViewerBundle = ({
               host: getTelemetryHost(),
             });
             if (openEvent) {
-              telemetry.trackEvent(openEvent.name, openEvent.properties);
+              telemetry.report(openEvent);
             }
           },
           pendingRevealByPanel,

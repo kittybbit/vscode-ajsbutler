@@ -38,8 +38,7 @@ export const createWebApiImportSubscriptions = ({
             vscode.window.showErrorMessage(message),
           importCapability,
           now: () => Date.now(),
-          trackEvent: (eventName, properties) =>
-            telemetry.trackEvent(eventName, properties),
+          reportTelemetry: (event) => telemetry.report(event),
         }),
     ),
   ];

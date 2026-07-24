@@ -6,6 +6,7 @@ import {
   architectureRuleIds,
   collectImportReferencesFromSource,
   collectProductionImportReferences,
+  collectProductionSourceFiles,
   findArchitectureRuleViolations,
   findCurrentRuleViolations,
   formatViolation,
@@ -157,6 +158,17 @@ suite("Architecture dependency rules", () => {
     );
 
     assert.deepStrictEqual(violations.map(formatViolation), []);
+  });
+
+  test("keeps raw telemetry reporting calls out of production sources", () => {
+    const rawReportingCallers = collectProductionSourceFiles(repoRoot)
+      .filter((filePath) =>
+        /\btrackEvent\s*(?:\(|:)/u.test(fs.readFileSync(filePath, "utf8")),
+      )
+      .map((filePath) => path.relative(repoRoot, filePath))
+      .sort();
+
+    assert.deepStrictEqual(rawReportingCallers, []);
   });
 
   test("detects every architecture rule family with in-memory fixtures", () => {

@@ -2,6 +2,7 @@ import {
   createWebApiImportWorkflowEvent,
   type WebApiImportTelemetryInputStep,
 } from "../../../application/telemetry/webApiImportTelemetry";
+import type { TelemetryEvent } from "../../../application/telemetry/telemetryEvent";
 import {
   createImportAjsDefinitionError,
   type ImportAjsDefinitionConnectionDto,
@@ -47,7 +48,7 @@ export type ImportAjsDefinitionCommandDeps = {
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   importCapability: ImportAjsDefinitionCapability;
   now: () => number;
-  trackEvent: (eventName: string, properties?: Record<string, string>) => void;
+  reportTelemetry: (event: TelemetryEvent) => void;
 };
 
 type ImportInputValues = {
@@ -321,11 +322,7 @@ const reportWebApiImportEvent = (
   deps: ImportAjsDefinitionCommandDeps,
   event: ReturnType<typeof createWebApiImportWorkflowEvent>,
 ): void => {
-  try {
-    deps.trackEvent(event.name, event.properties);
-  } catch {
-    // Telemetry must not change the WebAPI import workflow outcome.
-  }
+  deps.reportTelemetry(event);
 };
 
 const collectRequiredInputValues = async (

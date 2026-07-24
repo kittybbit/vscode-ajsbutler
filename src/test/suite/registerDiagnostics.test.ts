@@ -3,8 +3,8 @@ import * as vscode from "vscode";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import { diagnosticRuleIds } from "../../domain/services/diagnostics/DiagnosticRuleId";
 import type { TelemetryEvent } from "../../application/telemetry/telemetryEvent";
-import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 import { updateDiagnostics } from "../../presentation/vscode/diagnostics/registerDiagnostics";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 
@@ -12,9 +12,7 @@ suite("Register diagnostics", () => {
   test("reports anonymous diagnostic evaluation and category counts", () => {
     const trackedEvents: TelemetryEvent[] = [];
     const telemetry: TelemetryPort = {
-      trackEvent: (name: string, properties: TelemetryProperties = {}) => {
-        trackedEvents.push({ name, properties });
-      },
+      report: (event) => trackedEvents.push(event),
       dispose() {},
     };
     const captured: { diagnostics?: vscode.Diagnostic[] } = {};
@@ -99,12 +97,12 @@ suite("Register diagnostics", () => {
       uri: vscode.Uri.parse("untitled:diagnostic-test"),
       getText: () => "raw definition text",
     } as vscode.TextDocument;
-    const telemetry: TelemetryPort = {
-      trackEvent: () => {
+    const telemetry = new VscodeTelemetryAdapter("test", () => ({
+      sendTelemetryEvent: () => {
         throw new Error("telemetry failed");
       },
       dispose() {},
-    };
+    }));
 
     assert.doesNotThrow(() => {
       updateDiagnostics(

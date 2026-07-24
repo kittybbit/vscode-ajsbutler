@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
-import { createViewerOpenStartedEvent } from "../../../application/telemetry/viewerTelemetry";
+import type { TelemetryEvent } from "../../../application/telemetry/telemetryEvent";
+import {
+  createLegacyViewerOpenedEvent,
+  createViewerOpenStartedEvent,
+} from "../../../application/telemetry/viewerTelemetry";
 import { getTelemetryHost } from "../telemetryHost";
 
 export type PreviewPanelFactory = {
@@ -10,7 +14,7 @@ export type OpenPreviewCommandDependencies = {
   getActiveEditor: () => vscode.TextEditor | undefined;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void;
-  trackEvent: (viewType: string, properties: Record<string, string>) => void;
+  reportTelemetry: (event: TelemetryEvent) => void;
 };
 
 type ExecuteOpenPreviewCommandArgs = {
@@ -37,9 +41,10 @@ export const executeOpenPreviewCommand = ({
   const panel = panelFactory.getPanel(activeEditor.document);
   deps.mountPanel(panel, viewType);
   reportViewerOpenStarted(deps, viewType, "success");
-  deps.trackEvent(viewType, {
-    development: String(DEVELOPMENT),
-  });
+  const legacyEvent = createLegacyViewerOpenedEvent(viewType);
+  if (legacyEvent) {
+    deps.reportTelemetry(legacyEvent);
+  }
 };
 
 const reportViewerOpenStarted = (
@@ -59,5 +64,5 @@ const reportViewerOpenStarted = (
     return;
   }
 
-  deps.trackEvent(event.name, event.properties);
+  deps.reportTelemetry(event);
 };

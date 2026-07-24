@@ -49,19 +49,15 @@ export const instrumentParserPerformance = (
   parse: (content) => {
     const startedAt = performance.now();
     const result = parser.parse(content);
-    try {
-      const errorCount = result.ok === true ? 0 : result.errors.length;
-      const event = createPerformanceTelemetryEvent({
-        operation: "parse",
-        result: result.ok ? "success" : "failed",
-        host: getTelemetryHost(),
-        durationBucket: toDurationBucket(performance.now() - startedAt),
-        diagnosticCountBucket: toCountBucket(errorCount),
-      });
-      telemetry.trackEvent(event.name, event.properties);
-    } catch {
-      // Performance telemetry must not affect parsing.
-    }
+    const errorCount = result.ok === true ? 0 : result.errors.length;
+    const event = createPerformanceTelemetryEvent({
+      operation: "parse",
+      result: result.ok ? "success" : "failed",
+      host: getTelemetryHost(),
+      durationBucket: toDurationBucket(performance.now() - startedAt),
+      diagnosticCountBucket: toCountBucket(errorCount),
+    });
+    telemetry.report(event);
     return result;
   },
 });

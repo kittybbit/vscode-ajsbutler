@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
+import type { TelemetryProperties } from "../../application/telemetry/telemetryEvent";
 import {
   createExtensionDependencies,
   instrumentParserPerformance,
@@ -20,7 +20,7 @@ suite("Extension dependencies", () => {
 
     const dependencies = createExtensionDependencies(context);
 
-    assert.strictEqual(typeof dependencies.telemetry.trackEvent, "function");
+    assert.strictEqual(typeof dependencies.telemetry.report, "function");
     assert.strictEqual(typeof dependencies.buildSyntaxDiagnostics, "function");
     assert.strictEqual(typeof dependencies.buildUnitList, "function");
     assert.strictEqual(typeof dependencies.findParameterHover, "function");
@@ -58,8 +58,8 @@ suite("Extension dependencies", () => {
         }),
       },
       {
-        trackEvent: (eventName, properties) => {
-          events.push({ eventName, properties });
+        report: (event) => {
+          events.push({ eventName: event.name, properties: event.properties });
         },
         dispose() {},
       },
@@ -99,8 +99,8 @@ suite("Extension dependencies", () => {
     const parser = instrumentParserPerformance(
       { parse: () => failure },
       {
-        trackEvent: (eventName, properties) => {
-          events.push({ eventName, properties });
+        report: (event) => {
+          events.push({ eventName: event.name, properties: event.properties });
         },
         dispose() {},
       },

@@ -8,7 +8,7 @@ import {
 suite("WebAPI import wiring", () => {
   test("registers the command with injected dependencies", () => {
     const telemetry: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
 

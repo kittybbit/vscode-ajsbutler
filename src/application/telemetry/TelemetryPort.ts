@@ -1,6 +1,6 @@
-export type TelemetryProperties = Record<string, string>;
+import type { ValidatedTelemetryEvent } from "./telemetryEvent";
 
 export interface TelemetryPort {
-  trackEvent(eventName: string, properties?: TelemetryProperties): void;
+  report(event: ValidatedTelemetryEvent): void;
   dispose(): void;
 }

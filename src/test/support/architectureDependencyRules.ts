@@ -224,15 +224,17 @@ const compareImportReferences = (
   left.specifier.localeCompare(right.specifier) ||
   left.kind.localeCompare(right.kind);
 
-export const collectProductionImportReferences = (
-  repoRoot: string,
-): ImportReference[] => {
+export const collectProductionSourceFiles = (repoRoot: string): string[] => {
   const srcRoot = path.join(repoRoot, "src");
-  const sourceFiles = productionSourceDirs
+  return productionSourceDirs
     .flatMap((directory) => walkSourceFiles(path.join(srcRoot, directory)))
     .concat(path.join(srcRoot, "extension.ts"));
+};
 
-  return sourceFiles
+export const collectProductionImportReferences = (
+  repoRoot: string,
+): ImportReference[] =>
+  collectProductionSourceFiles(repoRoot)
     .flatMap((filePath) => {
       const file = toRelativePath(repoRoot, filePath);
       return collectImportReferencesFromSource(
@@ -241,7 +243,6 @@ export const collectProductionImportReferences = (
       );
     })
     .sort(compareImportReferences);
-};
 
 const startsWithAny = (value: string, prefixes: readonly string[]): boolean =>
   prefixes.some((prefix) => value === prefix || value.startsWith(`${prefix}/`));

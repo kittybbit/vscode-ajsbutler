@@ -2,10 +2,13 @@ import * as os from "os";
 import * as vscode from "vscode";
 import { createPerformanceTelemetryEvent } from "../../../application/telemetry/performanceTelemetry";
 import { createSearchTelemetryEvent } from "../../../application/telemetry/searchTelemetry";
+import {
+  createTelemetryEvent,
+  telemetryEvents,
+} from "../../../application/telemetry/telemetryEvent";
 import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
 import type { MyAppResource } from "../../../shared/MyAppResource";
 import {
-  OPERATION,
   type PerformanceEventType,
   type SearchEventType,
 } from "../../../shared/webviewEvents";
@@ -53,22 +56,20 @@ export const reportWebviewOperation = ({
   console.log(
     `post a message of operation. (${document.uri.toString()}, ${operation})`,
   );
-  telemetry.trackEvent(OPERATION, {
-    development: String(DEVELOPMENT),
-    viewType: panel.viewType,
-    operation,
-  });
+  telemetry.report(
+    createTelemetryEvent(telemetryEvents.legacyWebviewOperation, {
+      development: DEVELOPMENT,
+      viewType: panel.viewType,
+      operation,
+    }),
+  );
   const event = createViewerActionEvent({
     viewType: panel.viewType,
     operation,
     host: getTelemetryHost(),
   });
   if (event) {
-    try {
-      telemetry.trackEvent(event.name, event.properties);
-    } catch {
-      // Viewer action telemetry must not block webview operation handling.
-    }
+    telemetry.report(event);
   }
 };
 
@@ -80,11 +81,7 @@ export const reportWebviewSearch = (
     ...event.data,
     host: getTelemetryHost(),
   });
-  try {
-    telemetry.trackEvent(telemetryEvent.name, telemetryEvent.properties);
-  } catch {
-    // Search telemetry must not block webview message handling.
-  }
+  telemetry.report(telemetryEvent);
 };
 
 export const reportWebviewPerformance = (
@@ -95,9 +92,5 @@ export const reportWebviewPerformance = (
     ...event.data,
     host: getTelemetryHost(),
   });
-  try {
-    telemetry.trackEvent(telemetryEvent.name, telemetryEvent.properties);
-  } catch {
-    // Performance telemetry must not block webview message handling.
-  }
+  telemetry.report(telemetryEvent);
 };

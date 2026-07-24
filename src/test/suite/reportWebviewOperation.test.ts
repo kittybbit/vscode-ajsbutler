@@ -12,8 +12,11 @@ suite("Report Webview Operation", () => {
     }> = [];
 
     const telemetry: TelemetryPort = {
-      trackEvent(eventName, properties) {
-        events.push({ eventName, properties });
+      report(event) {
+        events.push({
+          eventName: event.name,
+          properties: event.properties,
+        });
       },
       dispose() {},
     };

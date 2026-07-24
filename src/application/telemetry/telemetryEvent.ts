@@ -1,4 +1,4 @@
-import type { TelemetryProperties } from "./TelemetryPort";
+export type TelemetryProperties = Readonly<Record<string, string>>;
 
 export const telemetryPropertyKeys = {
   all: "all",
@@ -35,6 +35,7 @@ export const telemetryPropertyKeys = {
   targetUnitType: "targetUnitType",
   unitCountBucket: "unitCountBucket",
   view: "view",
+  viewType: "viewType",
   visibleColumnCountBucket: "visibleColumnCountBucket",
 } as const;
 
@@ -60,10 +61,16 @@ export type TelemetryEventDefinition<
   allowedProperties: readonly Key[];
 }>;
 
-export type TelemetryEvent<Name extends string = string> = Readonly<{
+declare const validatedTelemetryEventBrand: unique symbol;
+
+export type ValidatedTelemetryEvent<Name extends string = string> = Readonly<{
   name: Name;
   properties: TelemetryProperties;
+  readonly [validatedTelemetryEventBrand]: true;
 }>;
+
+export type TelemetryEvent<Name extends string = string> =
+  ValidatedTelemetryEvent<Name>;
 
 const forbiddenTelemetryPropertyKeys = new Set<string>([
   "baseUrl",
@@ -102,6 +109,30 @@ const forbiddenTelemetryPropertyKeys = new Set<string>([
 ]);
 
 export const telemetryEvents = {
+  legacyExtensionActivated: {
+    name: "ext.activate",
+    allowedProperties: [telemetryPropertyKeys.development],
+  },
+  legacyExtensionDeactivated: {
+    name: "ext.deactivate",
+    allowedProperties: [telemetryPropertyKeys.development],
+  },
+  legacyTableViewerOpened: {
+    name: "ajsbutler.tableViewer",
+    allowedProperties: [telemetryPropertyKeys.development],
+  },
+  legacyFlowViewerOpened: {
+    name: "ajsbutler.flowViewer",
+    allowedProperties: [telemetryPropertyKeys.development],
+  },
+  legacyWebviewOperation: {
+    name: "operation",
+    allowedProperties: [
+      telemetryPropertyKeys.development,
+      telemetryPropertyKeys.viewType,
+      telemetryPropertyKeys.operation,
+    ],
+  },
   extensionLifecycleActivated: {
     name: "extension.lifecycle.activated",
     allowedProperties: [
@@ -556,20 +587,21 @@ export const telemetryEvents = {
 export const createTelemetryEvent = <Name extends string>(
   definition: TelemetryEventDefinition<Name>,
   inputProperties: TelemetryPropertyInput = {},
-): TelemetryEvent<Name> => ({
-  name: definition.name,
-  properties: allowTelemetryProperties(
-    definition.allowedProperties,
-    inputProperties,
-  ),
-});
+): ValidatedTelemetryEvent<Name> =>
+  ({
+    name: definition.name,
+    properties: allowTelemetryProperties(
+      definition.allowedProperties,
+      inputProperties,
+    ),
+  }) as ValidatedTelemetryEvent<Name>;
 
 export const allowTelemetryProperties = (
   allowedProperties: readonly TelemetryPropertyKey[],
   inputProperties: TelemetryPropertyInput,
 ): TelemetryProperties => {
   const allowed = new Set<string>(allowedProperties);
-  const properties: TelemetryProperties = {};
+  const properties: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(inputProperties)) {
     if (!allowed.has(key) || forbiddenTelemetryPropertyKeys.has(key)) {

@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 import { executeOpenPreviewCommand } from "../../presentation/vscode/commands/openPreviewCommand";
 
 suite("Open Preview Command", () => {
@@ -26,8 +27,8 @@ suite("Open Preview Command", () => {
         mountPanel: () => {
           mounted = true;
         },
-        trackEvent: (viewType, properties) => {
-          tracked.push({ viewType, properties });
+        reportTelemetry: (event) => {
+          tracked.push({ viewType: event.name, properties: event.properties });
         },
       },
     });
@@ -67,8 +68,8 @@ suite("Open Preview Command", () => {
         mountPanel: (receivedPanel, viewType) => {
           mounted.push({ panel: receivedPanel, viewType });
         },
-        trackEvent: (viewType, properties) => {
-          tracked.push({ viewType, properties });
+        reportTelemetry: (event) => {
+          tracked.push({ viewType: event.name, properties: event.properties });
         },
       },
     });
@@ -84,5 +85,37 @@ suite("Open Preview Command", () => {
     assert.strictEqual(tracked[0].properties.source, "command");
     assert.strictEqual(tracked[0].properties.result, "success");
     assert.ok("development" in tracked[1].properties);
+  });
+
+  test("keeps preview opening available when the SDK reporter fails", () => {
+    const telemetry = new VscodeTelemetryAdapter("test", () => ({
+      sendTelemetryEvent() {
+        throw new Error("telemetry failed");
+      },
+      dispose() {},
+    }));
+    const panel = {};
+    const document = {
+      uri: { toString: () => "file:///sample.ajs" },
+    };
+    let mounted = false;
+
+    assert.doesNotThrow(() =>
+      executeOpenPreviewCommand({
+        viewType: "ajsbutler.tableViewer",
+        panelFactory: {
+          getPanel: () => panel as never,
+        },
+        deps: {
+          getActiveEditor: () => ({ document }) as never,
+          showErrorMessage: async () => undefined,
+          mountPanel: () => {
+            mounted = true;
+          },
+          reportTelemetry: (event) => telemetry.report(event),
+        },
+      }),
+    );
+    assert.strictEqual(mounted, true);
   });
 });

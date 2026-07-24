@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
+import type { TelemetryProperties } from "../../application/telemetry/telemetryEvent";
 import { toUnitListDocumentDto } from "../../application/unit-list/unitListDocument";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import {
@@ -63,8 +63,11 @@ suite("ajsDocument", () => {
     const buildDocument = () => ({ errors: [], document: documentDto });
 
     createReadyAjsDocument(buildDocument, {
-      trackEvent: (eventName, properties) => {
-        telemetryEvents.push({ eventName, properties });
+      report: (event) => {
+        telemetryEvents.push({
+          eventName: event.name,
+          properties: event.properties,
+        });
       },
       dispose() {},
     })(document, panel);

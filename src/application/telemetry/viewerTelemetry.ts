@@ -38,6 +38,24 @@ export const resolveViewerTelemetryKind = (
   return "unknown";
 };
 
+export const createLegacyViewerOpenedEvent = (
+  viewType: string,
+): TelemetryEvent | undefined => {
+  const kind = resolveViewerTelemetryKind(viewType);
+  const definition =
+    kind === "table"
+      ? telemetryEvents.legacyTableViewerOpened
+      : kind === "flow"
+        ? telemetryEvents.legacyFlowViewerOpened
+        : undefined;
+
+  return definition
+    ? createTelemetryEvent(definition, {
+        [telemetryPropertyKeys.development]: DEVELOPMENT,
+      })
+    : undefined;
+};
+
 export const createViewerOpenStartedEvent = ({
   viewType,
   source,

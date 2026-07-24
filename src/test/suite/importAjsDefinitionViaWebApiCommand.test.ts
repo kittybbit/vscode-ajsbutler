@@ -9,6 +9,8 @@ import {
   createImportedAjsDefinitionContent,
   createImportAjsDefinitionError,
 } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
+import type { TelemetryEvent } from "../../application/telemetry/telemetryEvent";
+import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 
 type ImportAjsDefinitionCommandObservations = {
   prompts: Array<{ prompt: string; value?: string }>;
@@ -49,8 +51,7 @@ class ImportAjsDefinitionCommandHarness {
         importDefinition: (request) => this.importDefinition(request),
       },
       now: () => 0,
-      trackEvent: (eventName, properties) =>
-        this.trackEvent(eventName, properties),
+      reportTelemetry: (event) => this.reportTelemetry(event),
       ...overrides,
     };
   }
@@ -91,11 +92,11 @@ class ImportAjsDefinitionCommandHarness {
     };
   }
 
-  private trackEvent(
-    eventName: string,
-    properties?: Record<string, string>,
-  ): void {
-    this.observed.events.push({ eventName, properties });
+  private reportTelemetry(event: TelemetryEvent): void {
+    this.observed.events.push({
+      eventName: event.name,
+      properties: event.properties,
+    });
   }
 }
 
@@ -228,10 +229,14 @@ suite("Import AJS definition via WebAPI command", () => {
   });
 
   test("does not let telemetry failures block the import workflow", async () => {
-    const state = createDeps(successfulAnswers, {
-      trackEvent: () => {
+    const telemetry = new VscodeTelemetryAdapter("test", () => ({
+      sendTelemetryEvent: () => {
         throw new Error("telemetry failed");
       },
+      dispose() {},
+    }));
+    const state = createDeps(successfulAnswers, {
+      reportTelemetry: (event) => telemetry.report(event),
     });
 
     const result = await executeImportAjsDefinitionViaWebApiCommand(state.deps);
@@ -240,6 +245,20 @@ suite("Import AJS definition via WebAPI command", () => {
     assert.deepStrictEqual(state.observed.informationMessages, [
       "JP1/AJS WebAPI import beta loaded 1 unit(s).",
     ]);
+  });
+
+  test("does not swallow non-adapter reporting errors", async () => {
+    const expected = new Error("invalid reporting dependency");
+    const state = createDeps(successfulAnswers, {
+      reportTelemetry: () => {
+        throw expected;
+      },
+    });
+
+    await assert.rejects(
+      executeImportAjsDefinitionViaWebApiCommand(state.deps),
+      (error) => error === expected,
+    );
   });
 
   test("reports injected unsupported-host capability before prompting", async () => {

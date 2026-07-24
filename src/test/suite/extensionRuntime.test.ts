@@ -9,7 +9,7 @@ suite("Extension runtime", () => {
       subscriptions: [],
     } as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
 

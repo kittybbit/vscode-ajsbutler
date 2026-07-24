@@ -26,11 +26,7 @@ const reportHoverTelemetry = (
     return;
   }
 
-  try {
-    telemetry.trackEvent(event.name, event.properties);
-  } catch {
-    // Telemetry must not suppress hover results.
-  }
+  telemetry.report(event);
 };
 
 const findHoverForPosition = ({

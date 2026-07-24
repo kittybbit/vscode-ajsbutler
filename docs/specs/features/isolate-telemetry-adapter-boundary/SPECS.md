@@ -70,8 +70,12 @@ change use-case behavior.
 ### Approval Impact Decisions
 
 - Approval evidence owner: `TASKS.md`.
+- Registering event names and property keys that production already emits is
+  boundary migration, not new telemetry collection. The plan must enumerate
+  those legacy names and keys and preserve their exact emitted meaning.
 - New events, properties, bucket semantics, or privacy scope require separate
-  planning and approval.
+  planning and approval when they would expand production collection beyond
+  that enumerated legacy baseline.
 
 ## Compatibility
 
@@ -90,6 +94,9 @@ change use-case behavior.
 
 ## Open Questions
 
-- The guardrail baseline proves the SDK import is infrastructure-only. Planning
-  must establish whether event schemas are duplicated or owned implicitly by
-  callers.
+- Resolved during planning: the current allowlisted event catalog is
+  application-owned, but legacy lifecycle, preview, and webview operation
+  events remain defined directly by bootstrap/presentation callers and the raw
+  port still permits arbitrary names and properties. The implementation plan
+  preserves all current emitted meaning while moving every reporting path
+  through the same repository-owned privacy boundary.

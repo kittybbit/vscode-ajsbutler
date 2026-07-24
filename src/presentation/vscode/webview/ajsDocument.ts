@@ -15,17 +15,13 @@ const reportUnitListBuildPerformance = (
     return;
   }
 
-  try {
-    const event = createPerformanceTelemetryEvent({
-      operation: "unit_list_build",
-      result,
-      host: getTelemetryHost(),
-      durationBucket: toDurationBucket(durationMs),
-    });
-    telemetry.trackEvent(event.name, event.properties);
-  } catch {
-    // Performance telemetry must not block document posting.
-  }
+  const event = createPerformanceTelemetryEvent({
+    operation: "unit_list_build",
+    result,
+    host: getTelemetryHost(),
+    durationBucket: toDurationBucket(durationMs),
+  });
+  telemetry.report(event);
 };
 
 const postAjsDocument = (

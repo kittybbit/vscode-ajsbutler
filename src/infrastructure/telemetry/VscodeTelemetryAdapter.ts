@@ -1,21 +1,45 @@
 import { TelemetryReporter } from "@vscode/extension-telemetry";
-import {
-  TelemetryPort,
-  TelemetryProperties,
-} from "../../application/telemetry/TelemetryPort";
+import type { ValidatedTelemetryEvent } from "../../application/telemetry/telemetryEvent";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+
+type TelemetrySdkReporter = {
+  sendTelemetryEvent(
+    eventName: string,
+    properties?: Record<string, string>,
+  ): void;
+  dispose(): void | Promise<unknown>;
+};
+
+type CreateTelemetrySdkReporter = (
+  connectionString: string,
+) => TelemetrySdkReporter;
 
 export class VscodeTelemetryAdapter implements TelemetryPort {
-  #reporter: TelemetryReporter;
+  readonly #reporter: TelemetrySdkReporter;
 
-  constructor(connectionString: string) {
-    this.#reporter = new TelemetryReporter(connectionString);
+  constructor(
+    connectionString: string,
+    createReporter: CreateTelemetrySdkReporter = (value) =>
+      new TelemetryReporter(value),
+  ) {
+    this.#reporter = createReporter(connectionString);
   }
 
-  trackEvent(eventName: string, properties: TelemetryProperties = {}): void {
-    this.#reporter.sendTelemetryEvent(eventName, properties);
+  report(event: ValidatedTelemetryEvent): void {
+    try {
+      this.#reporter.sendTelemetryEvent(event.name, event.properties);
+    } catch {
+      // Telemetry reporting must never change extension behavior.
+    }
   }
 
   dispose(): void {
-    this.#reporter.dispose();
+    try {
+      void Promise.resolve(this.#reporter.dispose()).catch(() => {
+        // Telemetry disposal must never change extension shutdown behavior.
+      });
+    } catch {
+      // Telemetry disposal must never change extension shutdown behavior.
+    }
   }
 }
