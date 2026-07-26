@@ -100,69 +100,79 @@
   intentional violation, reports retired-wrapper reintroduction as forbidden,
   preserves composition-root pass/fail checks, and remains in the standard
   desktop test path. Desktop tests, Markdown lint, and qlty passed.
-- F3: complete P1 through P10, U1 through U11, and C1 through C4; run
-  `test:full`, build, qlty, Markdown lint, and diff checks.
+- Slice 3 certification date: 2026-07-26. Passed rows below were exercised by
+  `rtk pnpm run test:full` unless a narrower repository check is named.
+- F3 (passed 2026-07-26): P1 through P10, U1 through U11, and C1 through C4
+  were certified. Desktop and web tests, production build, qlty, Markdown lint,
+  diff checks, and the Slice 1 and 2 zero-reference scans passed.
 - F4: cross-check every durable invariant against F2 and F3; run Markdown lint,
   qlty, diff, Agent Brief, and no-`CONTEXT.md` checks.
-- P1 (`architecture-inventory-and-guardrails`): full rule-catalog source scan,
-  intentional-violation fixtures, and zero production violations.
-- P2 (`isolate-parser-boundary`): parser/raw rules, `AjsParserPort`,
-  `AntlrAjsParser.test.ts`, and normalization suites.
-- P3 (`complete-normalized-domain-model`): retired-wrapper rule,
-  `AjsDocument.test.ts`, `AjsUnitState.test.ts`, and downstream use-case rows.
-- P4 (`migrate-unit-information-boundaries`): U1, U4, U5, unit-information
-  localization, and serialized unit-document tests.
-- P5 (`migrate-flow-graph-and-navigation-boundaries`): U2, U3, U8, graph DTO,
-  expanded-layout, and viewer-routing tests.
-- P6 (`migrate-diagnostics-and-hover-boundaries`): U6, U7, diagnostic mapping,
-  hover provider, and localization adapter tests.
-- P7 (`complete-webapi-infrastructure-boundaries`): U9, WebAPI boundary/wiring,
-  structured-error, credential, and host-capability tests.
-- P8 (`migrate-semantic-diff-and-report-boundaries`): U10, U11, semantic DTO,
-  report localization, display, and explicit-copy tests.
-- P9 (`isolate-telemetry-adapter-boundary`): C2, telemetry port/catalog,
-  privacy, adapter-failure, and SDK architecture-rule tests.
-- P10 (`standardize-serialization-and-composition-root`): plain viewer message
-  contracts, host resolution, bootstrap construction, lifecycle, desktop/web,
-  and composition-root rule tests.
-- U1 (`uc-view-unit-list`): `buildUnitList.test.ts`,
+- P1 (`architecture-inventory-and-guardrails`) (passed): the full rule-catalog
+  source scan reported zero production violations, and every intentional-
+  violation fixture was rejected.
+- P2 (`isolate-parser-boundary`) (passed): parser/raw rules, `AjsParserPort`,
+  `AntlrAjsParser.test.ts`, and normalization suites passed.
+- P3 (`complete-normalized-domain-model`) (passed): the retired-wrapper rule,
+  `AjsDocument.test.ts`, `AjsUnitState.test.ts`, and downstream use-case rows
+  passed.
+- P4 (`migrate-unit-information-boundaries`) (passed): U1, U4, U5,
+  unit-information localization, and serialized unit-document tests passed.
+- P5 (`migrate-flow-graph-and-navigation-boundaries`) (passed): U2, U3, U8,
+  graph DTO, expanded-layout, and viewer-routing tests passed.
+- P6 (`migrate-diagnostics-and-hover-boundaries`) (passed): U6, U7, diagnostic
+  mapping, hover provider, and localization adapter tests passed.
+- P7 (`complete-webapi-infrastructure-boundaries`) (passed for repository
+  evidence): U9 boundary/wiring, structured-error, credential, and host-
+  capability tests passed. No real JP1/AJS3 environment result is claimed.
+- P8 (`migrate-semantic-diff-and-report-boundaries`) (passed): U10, U11,
+  semantic DTO, report localization, display, and explicit-copy tests passed.
+- P9 (`isolate-telemetry-adapter-boundary`) (passed): C2, telemetry
+  port/catalog, privacy, adapter-failure, and SDK architecture-rule tests
+  passed.
+- P10 (`standardize-serialization-and-composition-root`) (passed): plain viewer
+  message contracts, host resolution, bootstrap construction, lifecycle,
+  desktop/web, and composition-root rule tests passed.
+- U1 (`uc-view-unit-list`) (passed): `buildUnitList.test.ts`,
   `buildUnitListView.test.ts`, `unitListEncoding.test.ts`,
   `tableViewerData.test.ts`, and desktop/web runs.
-- U2 (`uc-build-flow-graph`): `buildFlowGraph.test.ts`,
+- U2 (`uc-build-flow-graph`) (passed): `buildFlowGraph.test.ts`,
   `buildFlowGraphUseCase.test.ts`, and
   `buildExpandedFlowGraphUseCase.test.ts`.
-- U3 (`uc-explore-flow-graph`): `nestedExpansion.test.ts`,
+- U3 (`uc-explore-flow-graph`) (passed): `nestedExpansion.test.ts`,
   `flowSearch.test.ts`, `flowViewportFocus.test.ts`, focused flow-view suites,
   and desktop/web runs.
-- U4 (`uc-show-unit-definition`): `buildUnitDefinition.test.ts`,
+- U4 (`uc-show-unit-definition`) (passed): `buildUnitDefinition.test.ts`,
   `unitDefinitionDocumentState.test.ts`, and
   `showUnitDefinitionInteraction.test.ts`.
-- U5 (`uc-export-unit-list-csv`): `exportUnitListCsv.test.ts`,
+- U5 (`uc-export-unit-list-csv`) (passed): `exportUnitListCsv.test.ts`,
   `exportCsvView.test.ts`, and `csvExportTelemetry.test.ts`.
-- U6 (`uc-diagnose-ajs-definition`): `buildSyntaxDiagnostics.test.ts`,
+- U6 (`uc-diagnose-ajs-definition`) (passed): `buildSyntaxDiagnostics.test.ts`,
   diagnostic-rule suites, `registerDiagnostics.test.ts`, and desktop/web runs.
-- U7 (`uc-show-parameter-hover`): `findParameterHover.test.ts`,
+- U7 (`uc-show-parameter-hover`) (passed): `findParameterHover.test.ts`,
   `registerHoverProvider.test.ts`, and `nls.test.ts`.
-- U8 (`uc-navigate-between-unit-list-and-flow-graph`): `revealUnit.test.ts`,
-  `tableNavigation.test.ts`, `viewerMessageRouting.test.ts`, and
-  `viewerWiring.test.ts`.
-- U9 (`uc-import-ajs-definition-via-webapi`):
+- U8 (`uc-navigate-between-unit-list-and-flow-graph`) (passed):
+  `revealUnit.test.ts`, `tableNavigation.test.ts`,
+  `viewerMessageRouting.test.ts`, and `viewerWiring.test.ts`.
+- U9 (`uc-import-ajs-definition-via-webapi`) (passed for repository evidence):
   `importAjsDefinitionViaWebApi.test.ts`,
   `Jp1Ajs3WebApiImportAdapter.test.ts`, `webapiImportBoundary.test.ts`,
-  `webapiImportWiring.test.ts`, and desktop/web runs.
-- U10 (`uc-build-semantic-diff`): `compareSemanticDiff.test.ts` plus the
-  semantic-diff contract, structural, condition, evidence, and schedule suites.
-- U11 (`uc-present-semantic-diff-report`):
+  `webapiImportWiring.test.ts`, and desktop/web runs passed. Real-environment
+  smoke evidence remains owned by the active WebAPI beta feature.
+- U10 (`uc-build-semantic-diff`) (passed): `compareSemanticDiff.test.ts` plus
+  the semantic-diff contract, structural, condition, evidence, and schedule
+  suites.
+- U11 (`uc-present-semantic-diff-report`) (passed):
   `renderSemanticDiffMarkdown.test.ts`, `semanticDiffReportDocument.test.ts`,
   `semanticDiffCommand.test.ts`, and desktop/web runs.
-- C1: architecture rules, parser/normalization suites, and representative
-  malformed and encoding fixtures.
-- C2: `telemetryEvent.test.ts`, `telemetryAdapter.test.ts`, telemetry workflow
-  suites, and the architecture SDK rule.
-- C3: `test:full`, build, `packageManifest.test.ts`, the host/Node architecture
-  rules, and confirmation that `engines.vscode` remains `^1.75.0`.
-- C4: cross-check the active `import-definition-via-webapi` tasks, plans, and
-  roadmap without claiming unavailable live-environment evidence.
+- C1 (passed): architecture rules, parser/normalization suites, and
+  representative malformed and encoding fixtures passed.
+- C2 (passed): `telemetryEvent.test.ts`, `telemetryAdapter.test.ts`, telemetry
+  workflow suites, and the architecture SDK rule passed.
+- C3 (passed): `test:full`, build, `packageManifest.test.ts`, and the host/Node
+  architecture rules passed; `engines.vscode` remains `^1.75.0`.
+- C4 (repository evidence passed; live smoke not applicable): the active
+  `import-definition-via-webapi` tasks, plans, and roadmap continue to own the
+  blocked real-environment smoke evidence. No unavailable result is claimed.
 
 ## Evidence Recording Rule
 

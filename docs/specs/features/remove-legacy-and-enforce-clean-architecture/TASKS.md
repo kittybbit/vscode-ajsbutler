@@ -4,7 +4,8 @@
 
 - Purpose: finish the migration with zero retired wrapper paths and permanent
   zero-exception architecture enforcement.
-- Approved slices: all four; Slices 1 and 2 are complete and Slice 3 is active.
+- Approved slices: all four; Slices 1 through 3 are complete and Slice 4 is
+  active.
 - Implement one approved slice at a time in the dependency order below.
 - Do not remove parser-internal raw types or compatibility-preserving telemetry
   event names.
@@ -15,7 +16,7 @@
 - Validate every code slice with its focused checks and
   `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement and validate Slice 3 within its approved boundary.
+- Next decision: implement and validate Slice 4 within its approved boundary.
 
 ## Plan Status
 
@@ -26,7 +27,7 @@
   verified evidence.
 - Review status: Reviewed; final verdict was ready for approval.
 - Human approval: Approved.
-- Active implementation slice: Slice 3.
+- Active implementation slice: Slice 4.
 
 ## Human Approval
 
@@ -282,7 +283,7 @@
 
 ### Slice 3: Certify Migrated Use Cases And Host Compatibility
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - verify every completed migration predecessor boundary recorded in roadmap
     item 10 against current rules, ports, DTOs, composition, and regression
@@ -317,6 +318,20 @@
   - `rtk pnpm run lint:md`;
   - `rtk git diff --check`;
   - targeted zero-reference scans from Slices 1 and 2.
+- Implementation Evidence:
+  - on 2026-07-26, all 40 named regression test files and the planned
+    application, domain, port, adapter, and presentation entry points were
+    present;
+  - P1 through P10, U1 through U11, and C1 through C4 passed their recorded
+    repository validation. C4 live-environment evidence was explicitly not
+    applicable to this slice and remains owned by the active WebAPI beta
+    feature;
+  - `test:full` passed for desktop and web, and the production build passed
+    with only the existing bundle-size threshold warnings;
+  - qlty, Markdown lint, diff checks, and the Slice 1 and 2 zero-reference scans
+    passed;
+  - no runtime, test-expectation, generated-artifact, or configuration change
+    was needed, and `engines.vscode` remains `^1.75.0`.
 - Production Readiness:
   - Failure mode: any failed workflow, host, privacy, or compatibility check
     makes this slice `Replan Required`; the failure is assigned to its actual
@@ -339,6 +354,7 @@
 - Risks: the active WebAPI beta feature's unavailable live-environment evidence
   is not falsely claimed here; this slice certifies its repository-owned
   architecture, structured failure, and desktop/web capability boundaries only.
+  No unresolved Slice 3 risk was found during implementation.
 - Out of Scope: real JP1/AJS3 WebAPI smoke verification, beta exit, stale
   generated Prism artifact correction, and new regression coverage unless a
   separately reviewed replan authorizes it.
