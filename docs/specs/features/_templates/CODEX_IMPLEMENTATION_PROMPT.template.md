@@ -48,12 +48,13 @@ Before editing:
   breaking-change risk.
 - When behavior scenarios exist, list changed, added, or removed scenarios and
   affected tests.
-- Record branch active-feature changes in docs/specs/plans.md only when the
-  branch starts, stops, or changes an active feature.
 - Record durable impact, propagation, alternatives, and boundary decisions in
   SPECS.md.
 - Record implementation-slice plan, validation, risk, production readiness,
-  approval state, and feature exit readiness in TASKS.md.
+  approval state, selected-feature branch state, and Feature Exit readiness in
+  TASKS.md. Do not create a second branch-level plan.
+- Resolve the selected feature using `docs/specs/README.md`, keep it fixed for
+  the run, and exclude inherited feature state from the approval boundary.
 - Update TRACEABILITY.md when required.
 - Record the TASKS.md `Human Approval` section with `Status: Pending`.
 - Keep TASKS.md focused on slice plan/status, approval, validation, risks, and
@@ -87,6 +88,8 @@ After approval:
   before implementation. Do not copy the approval message.
 - Do not implement if TASKS.md does not contain `Status: Approved` and
   `Approved scope`.
+- Do not switch to another feature because its inherited folder has pending or
+  approved work.
 - Medium- or lower-cost models may be used for simple implementation inside
   the approved scope.
 - Keep Copilot or other supporting-agent suggestions inside the approved

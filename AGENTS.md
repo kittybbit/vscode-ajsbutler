@@ -107,15 +107,17 @@ Follow this lifecycle:
    Definition of Done passes.
 
 Before editing runtime code, tests, generated artifacts, or configuration,
-the active feature must have an approved implementation slice recorded in
+the selected feature must have an approved implementation slice recorded in
 `TASKS.md`. If the requested change is ambiguous, document assumptions in the
 right SDD artifact and stop for clarification or approval instead of making
 hidden assumptions.
 
 Document roles are defined only in `docs/specs/README.md`. Use that file as
 the Single Source of Truth for SDD artifact responsibilities, including
-`SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, `docs/specs/plans.md`, and
-`docs/specs/roadmap.md`.
+temporary feature documents, durable documentation, and
+`docs/specs/roadmap.md`. One feature branch owns one selected feature even when
+inherited feature folders coexist. Each `TASKS.md` owns only its feature, and
+only the selected feature's `TASKS.md` owns active branch implementation work.
 
 ## Branch Naming
 
@@ -169,7 +171,7 @@ CHANGELOG update need according to `docs/specs/README.md`.
 ## Durable Documentation Gate
 
 Before updating long-lived docs such as use cases, README, AGENTS,
-`plans.md`, `roadmap.md`, or design/development guides, verify the content:
+`roadmap.md`, or design/development guides, verify the content:
 
 - is reusable beyond one feature
 - describes durable behavior, specification, design policy, or repository

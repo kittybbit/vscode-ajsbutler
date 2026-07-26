@@ -24,7 +24,9 @@
 - [ ] related spec updated
 - [ ] `TASKS.md` slice plan/status updated when non-trivial work changed
 - [ ] `TRACEABILITY.md` updated or not required
-- [ ] Feature Exit / Definition of Done considered when completing a feature
+- [ ] durable knowledge propagated to its owning document when needed
+- [ ] Feature Exit approved and only the selected feature folder removed when
+      completing a feature
 
 ## Validation
 

@@ -52,7 +52,7 @@ That belongs in `docs/specs/`.
 6. When implementation changes but the behavior contract does not, update
    `docs/specs/` and leave the use-case file stable.
 7. When the actual behavior contract changes, update the use-case file first,
-   then align specs, plans, tasks, tests, and code.
+   then align feature specs, feature tasks, tests, and code.
 
 ## Relationship To `docs/specs/`
 
@@ -70,8 +70,8 @@ That belongs in `docs/specs/`.
 - `docs/specs/features/<feature>/TRACEABILITY.md`
   Mapping from use case or requirement through `SPECS.md`, implementation
   slice, and test or validation when required.
-- `docs/specs/plans.md`
-  Branch-level active features and branch-wide decisions.
+- `docs/specs/roadmap.md`
+  Unfinished repository-level future work and entry conditions.
 
 ## Decision Rule
 
@@ -82,7 +82,9 @@ Ask two questions:
    If yes, it belongs in a use-case file.
 2. Is this describing how the current branch will implement, sequence, or
    validate the change?
-   If yes, it belongs in `docs/specs/`, not here.
+   If yes, it belongs in the selected feature's `TASKS.md`, not here. Resolve
+   the selected feature using `docs/specs/README.md`; inherited feature folders
+   do not become active by presence alone.
 
 If the behavior is shared domain meaning rather than a triggered workflow, it
 belongs in `domain-rules/`. If it constrains multiple workflows as a quality,

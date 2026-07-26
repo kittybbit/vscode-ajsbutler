@@ -18,19 +18,22 @@ Read first:
 
 1. `AGENTS.md`
 2. `docs/specs/README.md`
-3. `docs/specs/plans.md` and `docs/specs/roadmap.md`
+3. `docs/specs/roadmap.md`
 4. `docs/specs/features/_templates/SPECS.template.md` and `TASKS.template.md`
 
 Read only when needed:
 
 - related `docs/requirements/use-cases/` files for observable behavior changes
-- existing feature folders to decide overlap or duplicate scope
+- existing feature folders to decide overlap or duplicate scope; their
+  presence does not make them selected
 
 Use `docs/specs/README.md` for document roles and approval policy; do not copy
 those rules into the new feature.
 
 Inspect existing feature folders under `docs/specs/features/` to avoid
-duplicate or overlapping feature entries.
+duplicate or overlapping feature entries. Unrelated inherited feature folders
+do not block creation. Create exactly one branch-owned feature folder for the
+requested purpose and do not modify inherited feature folders.
 
 Use `docs/specs/README.md` as the Single Source of Truth for Trivial Change
 Criteria. Skip feature creation only when that section says the change is
@@ -58,8 +61,8 @@ Ask the user to choose the feature kind when it is not already explicit:
 - `roadmap feature`: durable work that should remain visible in
   `docs/specs/roadmap.md` or repository sequencing after the branch
 - `transient branch feature`: temporary branch-local work tracked in
-  `docs/specs/features/<feature>/` and `docs/specs/plans.md`, removed after
-  durable decisions move to use cases, roadmap, or plans
+  `docs/specs/features/<feature>/`, removed after reusable knowledge moves to
+  its durable owner and Feature Exit is approved
 
 Do not infer the kind from tone, size, or urgency.
 
@@ -97,26 +100,26 @@ Too broad for one feature:
 
 1. Confirm the intake and scope gates.
 2. Choose a lowercase hyphenated slug under `docs/specs/features/<slug>/`.
-3. Check that the slug does not duplicate an active feature folder.
-   Also inspect related use cases and active features, then record the
+3. Check that the slug does not duplicate an existing feature folder.
+   Also inspect related use cases and existing features, then record the
    duplicate/overlap decision in the final intake summary.
 4. Create the feature folder from the repository templates:
    - `SPECS.md` from `SPECS.template.md`
    - `TASKS.md` from `TASKS.template.md`
-5. Create `TRACEABILITY.md` when the feature needs explicit traceability.
-6. Fill `SPECS.md` with only feature-level purpose, origin, requirements,
+5. Treat this explicitly requested new folder as the selected feature for the
+   current run; inherited folders remain unselected.
+6. Create `TRACEABILITY.md` when the feature needs explicit traceability.
+7. Fill `SPECS.md` with only feature-level purpose, origin, requirements,
    architecture boundaries, compatibility, acceptance criteria, non-goals, and
    open questions.
-7. Fill `TASKS.md` with current status, approval state, active planning tasks,
+8. Fill `TASKS.md` with current status, approval state, active planning tasks,
    validation expectations, unresolved risks, and use-case back-propagation
    notes. Keep `Human Approval` pending unless the user has already given
    clear approval for a specific implementation scope in the current
    conversation.
-8. Update `docs/specs/plans.md` when the branch starts, stops, or changes an
-   active feature.
 9. Update `docs/specs/roadmap.md` only for `roadmap feature` work or when the
-   new feature changes repository-level ordering, remaining debt, or deferred
-   work.
+   new feature changes unfinished repository-level work, ordering, entry
+   conditions, or unresolved product concerns.
 10. Update or create `docs/requirements/use-cases/` only when the new feature
     changes a durable behavior contract.
 11. Run docs-only validation through `rtk`.
@@ -158,24 +161,24 @@ Before finishing, verify:
 
 ## Document Responsibilities
 
-- `SPECS.md`: durable feature requirements, architecture boundaries,
+- `SPECS.md`: temporary feature-local requirements, architecture boundaries,
   compatibility notes, acceptance criteria, alternatives, non-goals, and open
   questions.
-- `TASKS.md`: feature implementation-slice plan, current approval evidence,
-  validation expectations, unresolved risks, feature exit readiness, and
-  follow-up that affects implementation or closure decisions.
+- `TASKS.md`: sole plan and current-state owner for its feature, including the
+  implementation-slice plan, approval evidence, validation, unresolved risks,
+  production readiness, Feature Exit readiness, and actionable follow-up. Only
+  the selected feature's `TASKS.md` owns active branch implementation work.
 - `TRACEABILITY.md`: feature-level mapping from use cases and requirements to
   `SPECS.md`, implementation slices, and tests or validation plans. Create it
   only when the Traceability rules require it.
-- `docs/specs/plans.md`: branch-level active features and branch-wide
-  assumptions.
-- `docs/specs/roadmap.md`: repository-level sequence, roadmap-visible
-  features, remaining debt, and deferred work.
+- `docs/specs/roadmap.md`: unfinished repository-level future work, ordering,
+  entry conditions, and unresolved product concerns.
 - `docs/requirements/use-cases/`: durable behavior contracts that should
   survive feature-folder removal.
 
-Do not store implementation logs, long transcripts, or speculative design
-history in feature docs.
+Feature documents are temporary. Do not store completed history, long
+transcripts, or speculative design logs in them, and do not create a second
+branch-level plan.
 
 ## Approval Boundary
 
@@ -202,7 +205,7 @@ Before finishing, report:
 - Scope split considered:
 - Ambiguities resolved:
 - Roadmap impact:
-- Plans impact:
+- Feature `TASKS.md` impact:
 - Use-case impact:
 - Traceability:
 - Validation:

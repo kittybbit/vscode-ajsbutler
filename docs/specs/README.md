@@ -443,14 +443,37 @@ Poor fit:
 - implementation notes tied to the current refactor
 - file-by-file execution checklists
 
-Those belong under `docs/specs/`.
+Those belong in the selected feature's `TASKS.md`.
 
 ## When To Remove Feature Docs
 
-Remove a `docs/specs/features/<feature>/` folder only in Feature Exit Mode
-after the Feature Definition of Done passes and the human approves closure.
-Preserve information in durable docs only when it passes the Durable
-Documentation Gate.
+Feature `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md` are temporary
+change-management documents. They are not a completed-feature catalog or a
+substitute for Git and pull-request history.
+
+Remove the selected `docs/specs/features/<feature>/` folder only in Feature
+Exit Mode, after all of these conditions are met:
+
+1. Observable behavior changes are reflected in the owning use cases when
+   needed.
+2. Durable architecture, external-boundary, or terminology decisions are
+   reflected in architecture, context map, or glossary documents when needed.
+3. README and CHANGELOG impact has been evaluated and required updates are
+   complete.
+4. Valuable unfinished work has an explicit owner in `roadmap.md` or a new
+   feature folder.
+5. Remaining risks are resolved, accepted, or assigned to an explicit owner.
+6. No reusable knowledge exists only in the feature folder.
+7. Required validation, traceability, and the Feature Definition of Done are
+   complete.
+8. The human explicitly approves Feature Exit.
+
+After approval, delete the whole selected feature folder together. Do not
+retain `SPECS.md`, `TASKS.md`, or `TRACEABILITY.md` as implementation history.
+Preserve inherited feature folders, and do not treat their pending tasks or
+unresolved risks as completion conditions for the selected feature. Stop and
+replan only when closing the selected feature would damage or invalidate
+another feature.
 
 ## Feature Definition Of Done
 
@@ -462,8 +485,9 @@ A feature is complete only when:
 - non-functional quality and production readiness are preserved or justified
 - required `TRACEABILITY.md` updates are complete, or not required with a
   clear reason
-- durable use-case, `plans.md`, and `roadmap.md` updates are complete when
-  needed
+- required durable-document propagation is complete
+- `roadmap.md` is updated when unfinished repository-level future work,
+  ordering, entry conditions, or unresolved product concerns changed
 - unresolved risks are resolved, accepted, or recorded as follow-up
 
 ## Feature Exit Review Output
@@ -517,10 +541,48 @@ For code slices, confirm:
 - README or user docs are updated only when user-facing behavior changes
 - CHANGELOG update need is evaluated using the CHANGELOG Update Criteria
 
+## Selected Feature Ownership
+
+Use these terms consistently:
+
+- A **feature folder** is a temporary SDD folder under
+  `docs/specs/features/<feature>/`. A working tree may contain unfinished
+  feature folders inherited from its base branch.
+- The **selected feature** is the one feature chosen for the current branch
+  work.
+- The **branch-owned feature** is the selected feature that the current branch
+  adds, changes, implements, or closes.
+- The **active feature** is the selected feature for the current agent run.
+  Folder presence alone does not make a feature active.
+
+Resolve the selected feature in this order:
+
+1. a feature explicitly named by the user
+2. the single feature folder created by the current branch
+3. the single feature folder changed by the current branch
+4. an unambiguous match between the branch purpose or name and feature name
+
+For branch-created or branch-changed evidence, compare with a user-specified
+base when present; otherwise use the repository default branch's merge-base.
+If the base cannot be resolved or the applicable step has multiple candidates,
+stop and ask the user to select the feature. Do not guess from folder presence,
+pending tasks, or approval state. A policy-only compatibility edit to an
+inherited feature does not transfer selection or branch ownership.
+
+Once selected for an agent run, keep the feature fixed across planning, review,
+implementation, and Feature Exit. Changing it requires Replanning Mode,
+separation into another feature branch, or deferral outside the current
+feature.
+
+Each feature `TASKS.md` is the sole plan and current-state owner for that
+feature. Only the selected feature's `TASKS.md` owns the current branch's active
+implementation plan. Do not create or maintain a separate branch-level plan or
+active-feature index.
+
 ## Sync Cadence
 
-Treat the following docs as required sync artifacts, not optional catch-up
-notes:
+Treat the following documents as required sync artifacts, not optional
+catch-up notes:
 
 - `docs/specs/features/<feature>/TASKS.md`
   Update when the implementation-slice plan, approval state, slice status,
@@ -528,15 +590,14 @@ notes:
 - `docs/specs/features/<feature>/TRACEABILITY.md`
   Update when required traceability changes or when an implemented slice's
   validation result must be reflected.
-- `docs/specs/plans.md`
-  Update only when the branch starts, stops, or changes an active feature.
 - `docs/specs/roadmap.md`
-  Update when that completion changes repository-level sequence, remaining
-  debt, or deferred work.
+  Update only when unfinished repository-level future work, ordering, entry
+  conditions, or unresolved product concerns change.
 
-Prefer the smallest useful cadence:
-one completed slice or one resolved follow-up is enough reason to sync the
-docs in the same commit.
+Update an artifact only when information it owns becomes stale. A completed
+slice or resolved follow-up requires a `TASKS.md` or `TRACEABILITY.md` update
+when it changes their owned state or evidence; it does not by itself require a
+roadmap update.
 
 When syncing, preserve decision context instead of accumulating entries:
 
@@ -553,26 +614,65 @@ When syncing, preserve decision context instead of accumulating entries:
 This section is the Single Source of Truth for SDD document responsibilities.
 Other repository docs should link here instead of repeating these details.
 
-## Feature Context And Traceability
+### Temporary Feature Documents
 
 Do not create a per-feature `CONTEXT.md`. Keep only the actionable context at
 the top of the existing feature documents:
 
 - `SPECS.md` begins with the feature purpose and origin, then records only the
-  durable requirements, boundaries, compatibility, acceptance criteria, and
-  non-goals needed to decide the feature.
+  feature-local requirements, decision boundaries, compatibility, acceptance
+  criteria, and non-goals needed to decide the feature. It does not own task
+  sequencing, progress, work logs, or completed history.
 - `TASKS.md` begins with an `Agent Brief` of roughly ten lines: purpose,
   approved or active slice, prohibitions, and the smallest reading and
-  validation set. It points to this SSOT rather than restating it.
+  validation set. It is the only owner of its feature plan, slice order,
+  dependencies, approval state, active slice, impact, validation, risks,
+  production readiness, and Feature Exit readiness. Only the selected
+  feature's `TASKS.md` owns the branch's active implementation plan.
 - `TRACEABILITY.md`, when required, is a compact table mapping use case or
   requirement, `SPECS.md` section, slice, and test or validation plan. Keep
-  feature-specific design notes in `SPECS.md`, not in traceability.
+  feature-specific design notes in `SPECS.md`, not in traceability. It does not
+  become a work log or a second status document.
 
 Do not add task history, broad repository summaries, transcripts, or material
 that does not affect the next decision, approval, risk, validation, or feature
 exit.
 
-## Lightweight Feature Structure Check
+### Durable Documents
+
+- `vision.md`: current product purpose and values.
+- `glossary.md`: current shared terms.
+- `context-map.md`: current boundaries and external systems.
+- `architecture.md`: current layering, responsibilities, and dependency
+  direction.
+- `docs/requirements/use-cases/`: durable observable behavior contracts that
+  survive implementation and file-layout changes.
+- `README.md`: repository and product overview, setup, usage, basic commands,
+  and links to detailed documentation.
+- `CHANGELOG.md`: externally observable changes organized by release.
+- `docs/specs/roadmap.md`: unfinished repository-level future work, ordering,
+  entry conditions, and unresolved product concerns.
+- `AGENTS.md`: concise agent-facing repository rules, architecture
+  constraints, gates, and routing entry points.
+
+Durable documents describe current reusable knowledge or unfinished future
+work. They do not store implementation history, temporary investigation,
+review conversation, resolved findings, active branch state, or completed
+feature folders. Git and pull requests retain that history.
+
+### Feature Lifecycle Ownership
+
+- Feature intake creates or selects one branch-owned feature. Inherited
+  unfinished feature folders may coexist without becoming selected or active.
+- Planning and replanning update the selected feature's `TASKS.md`; no shared
+  branch index or second plan is maintained.
+- Implementation updates only the approved slice state and its validation
+  evidence.
+- Feature Exit propagates only knowledge that passes the Durable Documentation
+  Gate, obtains human approval, and removes only the complete selected feature
+  folder.
+
+### Lightweight Feature Structure Check
 
 Before reviewing a docs-only SDD change, run these `rtk` checks:
 
@@ -585,35 +685,3 @@ The first command should report one Agent Brief for every feature `TASKS.md`.
 The second should produce no file paths and may return a no-match exit status
 when no `CONTEXT.md` exists; that is the expected result. This is a local drift
 check, not a CI gate or a replacement for required docs-only validation.
-
-- `vision.md`: product purpose and values.
-- `glossary.md`: shared terms.
-- `context-map.md`: boundaries and external systems.
-- `architecture.md`: target layering and dependency direction.
-- `features/_templates/`: templates for new repository-native feature docs.
-- `docs/requirements/use-cases/`: durable behavior contracts and observable
-  scenario changes that remain meaningful when modules, adapters, or file
-  layout change.
-- `docs/specs/features/<feature>/SPECS.md`: feature-level requirements,
-  boundaries, compatibility constraints, acceptance criteria, and non-goals.
-- `docs/specs/features/<feature>/TASKS.md`: the full implementation-slice
-  plan, slice order, dependencies, approval state, validation expectations,
-  production readiness, unresolved risks, and feature exit readiness.
-- `docs/specs/features/<feature>/TRACEABILITY.md`: required mapping from use
-  case or requirement through `SPECS.md`, implementation slice, and test or
-  validation plan.
-- `docs/specs/plans.md`: current branch work management. Keep active features,
-  current priorities, unfinished work, and the next intended action here.
-  Do not keep completed slice history, implementation logs, work diaries,
-  resolved issues, or information used only after feature closure here.
-- `docs/specs/roadmap.md`: repository-wide medium- and long-term planning.
-  Keep future features, repository direction, and planned improvements here.
-  Do not keep current branch work, feature progress, slice history, or
-  implementation status here.
-- `README.md`: repository entry point, user/developer overview, setup, basic
-  commands, and links to detailed docs.
-- `AGENTS.md`: agent-facing repository rules, architecture constraints, and
-  routing entry point.
-
-`docs/specs/plans.md` and `docs/specs/roadmap.md` are not places to store
-implementation history.
