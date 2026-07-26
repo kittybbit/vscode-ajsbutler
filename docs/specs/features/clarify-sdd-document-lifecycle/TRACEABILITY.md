@@ -58,10 +58,30 @@ workflow responsibilities rather than files under
   feature `CONTEXT.md` exists, no non-template placeholder remains, and
   `rtk git diff --check` passed.
 
+## Slice 2 Validation Results
+
+- V4 passed: current roadmap items 1, 3–7, 9, and 10 were removed according to
+  their recorded dispositions; unfinished WebAPI beta-exit and telemetry
+  product-learning decisions remain.
+- V4 passed for deferred work: all seven candidates remain with concrete entry
+  conditions, and JP1/AJS View parity no longer refers to a closed active
+  feature.
+- Focused searches found no completion history, maintenance catalog, active
+  feature or slice state, current-branch progress, slice status, process
+  principles, or done criteria in `roadmap.md`.
+- V5 passed for Slice 2: only `docs/specs/roadmap.md` was changed as durable
+  documentation; root README, CHANGELOG, architecture, context map, glossary,
+  use cases, and cross-cutting requirements remain unchanged.
+- Durable-source comparison passed against the WebAPI use case and active
+  feature, architecture compatibility contract, and telemetry cross-cutting
+  requirement.
+- `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and
+  `rtk git diff --check` passed.
+
 ## Current Status
 
 - Feature intake: complete.
 - Planning: reviewed and human-approved for Slice 1 and Slice 2.
-- Implementation: Slice 1 complete; Slice 2 approved and not started.
-- Validation results: Slice 1 results and completion approval are recorded;
-  Slice 2 validation is pending.
+- Implementation: Slice 1 and Slice 2 complete.
+- Validation results: both slice results and completion approvals are
+  recorded; Feature Exit Review is pending.

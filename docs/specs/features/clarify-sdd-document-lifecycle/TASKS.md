@@ -3,7 +3,7 @@
 ## Agent Brief
 
 - Purpose: establish one unambiguous SDD document ownership and exit lifecycle.
-- Approved or active slice: Slice 2 is approved and ready.
+- Approved or active slice: all approved slices are complete.
 - Do not edit runtime code, tests, generated artifacts, or configuration.
 - Do not create a replacement branch-level plan or preserve completed-work
   history in durable documents.
@@ -14,7 +14,7 @@
 - Treat historical and non-effective references separately from active rules.
 - Validate with qlty, Markdown lint, structure checks, and focused searches.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement Slice 2 with `sdd-implement-task`.
+- Next decision: run Feature Exit Review with `sdd-plan-task`.
 
 ## Plan Status
 
@@ -24,7 +24,7 @@
   normalize the roadmap to unfinished repository-level future work.
 - Review status: Reviewed; ready for implementation
 - Human approval: Approved
-- Active implementation slice: Slice 2
+- Active implementation slice: none; Feature Exit Review required
 
 ## Human Approval
 
@@ -276,7 +276,7 @@ Implementation must proceed one approved slice at a time through
 
 ### Slice 2: Normalize Roadmap To Unfinished Future Work
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Rewrite `docs/specs/roadmap.md` to contain only the retained unfinished
     WebAPI, telemetry, and deferred future candidates described above.
@@ -386,6 +386,15 @@ Implementation must proceed one approved slice at a time through
 - No additional dependency, design decision, JP1/AJS knowledge, or validation
   layer was discovered.
 
+## Slice 2 Implementation Feedback
+
+- The single-roadmap-file boundary was appropriate because every existing item
+  needed one consistent future-work classification.
+- Item-by-item disposition plus positive entry-condition counting was more
+  reliable than keyword searches alone for detecting lost deferred work.
+- No additional dependency, design decision, JP1/AJS knowledge, or durable
+  documentation update was discovered.
+
 ## Feature Exit
 
 - Definition of Done status: Not started
@@ -394,8 +403,8 @@ Implementation must proceed one approved slice at a time through
   - concise agent routing in `AGENTS.md`
   - unfinished repository work in `docs/specs/roadmap.md`
 - Open risks:
-  - implementation validation must confirm no effective retired-file reference
-    remains
+  - none identified by Slice 1 or Slice 2 implementation; Feature Exit review
+    is still required
 - Closure rule:
   after both slices are complete, validation and traceability are current, and
   the human approves Feature Exit, remove this entire feature folder. Do not
