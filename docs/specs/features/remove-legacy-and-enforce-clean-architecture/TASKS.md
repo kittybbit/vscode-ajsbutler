@@ -4,7 +4,7 @@
 
 - Purpose: finish the migration with zero retired wrapper paths and permanent
   zero-exception architecture enforcement.
-- Approved slices: all four; Slice 1 is complete and Slice 2 is active.
+- Approved slices: all four; Slices 1 and 2 are complete and Slice 3 is active.
 - Implement one approved slice at a time in the dependency order below.
 - Do not remove parser-internal raw types or compatibility-preserving telemetry
   event names.
@@ -15,7 +15,7 @@
 - Validate every code slice with its focused checks and
   `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement and validate Slice 2 within its approved boundary.
+- Next decision: implement and validate Slice 3 within its approved boundary.
 
 ## Plan Status
 
@@ -26,7 +26,7 @@
   verified evidence.
 - Review status: Reviewed; final verdict was ready for approval.
 - Human approval: Approved.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 
 ## Human Approval
 
@@ -70,8 +70,8 @@
 - Baseline evidence:
   - `src/domain/models/units/**` no longer exists and production imports of the
     retired wrapper graph are zero.
-  - `dependencyAllowlist` is empty and the full architecture catalog currently
-    reports zero production violations in its repository test.
+  - the full architecture catalog reports zero production violations in its
+    repository test; Slice 2 makes that direct result the only dependency gate.
   - remaining `UnitEntity` production names are presentation-local names for
     DTO-based code, not wrapper instances.
   - `AjsRawUnit.createFromJSON` and its private recursive helper have no caller
@@ -197,7 +197,7 @@
 
 ### Slice 2: Make The Full Architecture Catalog A Permanent Zero-Exception Gate
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - remove the empty migration allowlist fixture and the allowance ownership,
     removal-condition, stale-entry, and wildcard machinery that exists only to
@@ -241,6 +241,19 @@
     architecture suite remains in the standard CI path;
   - `rtk pnpm run lint:md`;
   - `rtk pnpm run qlty`, including review of any new smell findings.
+- Implementation Evidence:
+  - on 2026-07-26, zero-reference scans confirmed removal of the allowlist
+    fixture, allowance ownership and validation APIs, and the transitional
+    three-rule subset;
+  - the permanent repository assertion evaluates all twelve dependency rule
+    families directly with zero violations, while representative violation
+    fixtures and composition-root pass/fail checks remain; the retired-wrapper
+    rule explicitly reports reintroduction as forbidden;
+  - the source collector still covers `src/extension.ts`, every production
+    root, supported TypeScript dependency syntax, and repository aliases;
+  - the test index glob and Verify workflow continue to compile and execute the
+    architecture suite through the standard desktop test step;
+  - desktop tests, Markdown lint, and qlty passed.
 - Production Readiness:
   - Failure mode: a rule false positive can block valid development; a missed
     syntax/root can permit a forbidden dependency. Collector coverage and
@@ -263,7 +276,7 @@
   the dependency is sequencing evidence, not an import-rule requirement.
 - Risks: removing migration machinery must not accidentally remove the
   permanent rule that prevents wrapper reintroduction or narrow scanned source
-  roots.
+  roots. No unresolved Slice 2 risk was found during implementation.
 - Out of Scope: adding new architecture layers, changing permitted dependency
   direction, runtime refactors, CI redesign, or permanent exceptions.
 

@@ -93,9 +93,13 @@
   legacy-wrapper test wording. No superseded production compatibility adapter
   remained; compatibility-preserving `legacy*` telemetry identifiers were
   retained. Desktop tests, web smoke, production build, and qlty passed.
-- F2: run `architectureDependencyRules.test.ts`, scan for removed allowance and
-  transitional APIs, and prove every intentional rule fixture fails while the
-  repository has zero violations.
+- F2 (passed 2026-07-26): the allowlist fixture, allowance ownership and
+  validation APIs, and transitional three-rule subset have zero references.
+  `architectureDependencyRules.test.ts` directly reports zero production
+  violations across all twelve rule families, rejects every representative
+  intentional violation, reports retired-wrapper reintroduction as forbidden,
+  preserves composition-root pass/fail checks, and remains in the standard
+  desktop test path. Desktop tests, Markdown lint, and qlty passed.
 - F3: complete P1 through P10, U1 through U11, and C1 through C4; run
   `test:full`, build, qlty, Markdown lint, and diff checks.
 - F4: cross-check every durable invariant against F2 and F3; run Markdown lint,

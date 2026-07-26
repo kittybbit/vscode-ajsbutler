@@ -11,7 +11,7 @@ boundaries as tested repository invariants and accurate durable documentation.
 - Current decision: provide the final zero-legacy, zero-exception migration exit.
 - Read first: this file, `TASKS.md`,
   `src/test/support/architectureDependencyRules.ts`, and
-  `src/test/fixtures/architecture/dependencyAllowlist.ts`.
+  `src/test/suite/architectureDependencyRules.test.ts`.
 - Do not create `CONTEXT.md`.
 
 ## Origin

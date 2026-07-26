@@ -1,7 +1,6 @@
 import * as assert from "assert";
 import * as fs from "fs";
 import * as path from "path";
-import { dependencyAllowlist } from "../fixtures/architecture/dependencyAllowlist";
 import {
   architectureRuleIds,
   collectFunctionFactoryDefinitionsFromSource,
@@ -13,14 +12,9 @@ import {
   collectProductionSourceFiles,
   findArchitectureRuleViolations,
   findCompositionRootViolations,
-  findCurrentRuleViolations,
   formatViolation,
-  getDependencyTarget,
   resolveImportPath,
-  validateDependencyAllowlist,
   type ArchitectureRuleId,
-  type DependencyAllowance,
-  type RuleViolation,
 } from "../support/architectureDependencyRules";
 
 const repoRoot = path.resolve(__dirname, "../../..");
@@ -188,34 +182,8 @@ suite("Architecture dependency rules", () => {
     assert.deepStrictEqual(forbiddenReferences, []);
   });
 
-  test("detects representative violations for the current rules", () => {
-    const references = [
-      ...collectImportReferencesFromSource(
-        "src/domain/example.ts",
-        'import * as vscode from "vscode";',
-      ),
-      ...collectImportReferencesFromSource(
-        "src/application/example.ts",
-        'import { Adapter } from "../infrastructure/Adapter";',
-      ),
-      ...collectImportReferencesFromSource(
-        "src/presentation/example.ts",
-        'import { AjsParser } from "@generate/parser/AjsParser";',
-      ),
-    ];
-
-    assert.deepStrictEqual(
-      findCurrentRuleViolations(references).map(({ file }) => file),
-      [
-        "src/domain/example.ts",
-        "src/application/example.ts",
-        "src/presentation/example.ts",
-      ],
-    );
-  });
-
-  test("keeps high-value layer boundaries free of forbidden imports", () => {
-    const violations = findCurrentRuleViolations(
+  test("keeps every production dependency rule at zero violations", () => {
+    const violations = findArchitectureRuleViolations(
       collectProductionImportReferences(repoRoot),
     );
 
@@ -316,23 +284,18 @@ suite("Architecture dependency rules", () => {
     });
   });
 
-  test("matches every production violation to one exact owned allowance", () => {
-    const violations = findArchitectureRuleViolations(
-      collectProductionImportReferences(repoRoot),
-    );
-    const violationsByRule = violations.reduce<Record<string, number>>(
-      (counts, { ruleId }) => ({
-        ...counts,
-        [ruleId]: (counts[ruleId] ?? 0) + 1,
-      }),
-      {},
+  test("reports retired wrapper dependencies as permanent violations", () => {
+    const [violation] = findArchitectureRuleViolations(
+      collectImportReferencesFromSource(
+        "src/domain/example.ts",
+        'import "./models/units/UnitEntity";',
+      ),
     );
 
-    assert.deepStrictEqual(violationsByRule, {});
-    assert.strictEqual(dependencyAllowlist.length, 0);
-    assert.deepStrictEqual(
-      validateDependencyAllowlist(violations, dependencyAllowlist),
-      [],
+    assert.ok(violation);
+    assert.strictEqual(
+      violation.rule,
+      "retired unit wrapper dependencies are forbidden and must not be reintroduced",
     );
   });
 
@@ -416,65 +379,4 @@ suite("Architecture dependency rules", () => {
       "unitParameterLookupHelpers.test.ts",
     ]);
   });
-
-  test("rejects unexplained, stale, duplicate, incomplete, and wildcard entries", () => {
-    const [violation] = findArchitectureRuleViolations(
-      collectImportReferencesFromSource(
-        "src/application/example.ts",
-        'import "../infrastructure/parser/raw/AjsRawUnit";',
-      ),
-    );
-    assert.ok(violation);
-    const allowance = allowanceFor(violation);
-
-    assertIssue(validateDependencyAllowlist([violation], []), "unexplained");
-    assertIssue(validateDependencyAllowlist([], [allowance]), "stale");
-    assertIssue(
-      validateDependencyAllowlist([violation], [allowance, allowance]),
-      "duplicate",
-    );
-    assertIssue(
-      validateDependencyAllowlist(
-        [violation],
-        [
-          {
-            ...allowance,
-            ownerFeature: "" as DependencyAllowance["ownerFeature"],
-            removalCondition: "",
-          },
-        ],
-      ),
-      "missing",
-    );
-    assertIssue(
-      validateDependencyAllowlist(
-        [violation],
-        [{ ...allowance, source: "src/application/*" }],
-      ),
-      "wildcards",
-    );
-    assertIssue(
-      validateDependencyAllowlist(
-        [violation],
-        [{ ...allowance, kind: "import-type" }],
-      ),
-      "stale",
-    );
-  });
 });
-
-const allowanceFor = (violation: RuleViolation): DependencyAllowance => ({
-  source: violation.file,
-  target: getDependencyTarget(violation),
-  kind: violation.kind,
-  ruleId: violation.ruleId,
-  ownerFeature: "isolate-parser-boundary",
-  removalCondition: "Remove the exact dependency.",
-});
-
-const assertIssue = (issues: readonly string[], expected: string): void => {
-  assert.ok(
-    issues.some((issue) => issue.startsWith(expected)),
-    `expected ${expected} issue, received:\n${issues.join("\n")}`,
-  );
-};

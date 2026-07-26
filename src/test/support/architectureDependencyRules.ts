@@ -59,33 +59,9 @@ export const architectureRuleIds = {
 export type ArchitectureRuleId =
   (typeof architectureRuleIds)[keyof typeof architectureRuleIds];
 
-export const downstreamFeatureOwners = [
-  "isolate-parser-boundary",
-  "complete-normalized-domain-model",
-  "migrate-unit-information-boundaries",
-  "migrate-flow-graph-and-navigation-boundaries",
-  "migrate-diagnostics-and-hover-boundaries",
-  "complete-webapi-infrastructure-boundaries",
-  "migrate-semantic-diff-and-report-boundaries",
-  "isolate-telemetry-adapter-boundary",
-  "standardize-serialization-and-composition-root",
-  "remove-legacy-and-enforce-clean-architecture",
-] as const;
-
-export type DownstreamFeatureOwner = (typeof downstreamFeatureOwners)[number];
-
 export type RuleViolation = ImportReference & {
   ruleId: ArchitectureRuleId;
   rule: string;
-};
-
-export type DependencyAllowance = {
-  source: string;
-  target: string;
-  kind: ImportReferenceKind;
-  ruleId: ArchitectureRuleId;
-  ownerFeature: DownstreamFeatureOwner;
-  removalCondition: string;
 };
 
 const productionSourceDirs = [
@@ -480,7 +456,7 @@ export const collectProductionApplicationFactoryDefinitions = (
 const startsWithAny = (value: string, prefixes: readonly string[]): boolean =>
   prefixes.some((prefix) => value === prefix || value.startsWith(`${prefix}/`));
 
-export const getDependencyTarget = (reference: ImportReference): string =>
+const getDependencyTarget = (reference: ImportReference): string =>
   reference.resolvedPath ?? reference.specifier;
 
 const ruleMessages: Record<ArchitectureRuleId, string> = {
@@ -499,7 +475,7 @@ const ruleMessages: Record<ArchitectureRuleId, string> = {
   [architectureRuleIds.rawUnitOutsideParserNormalizer]:
     "AjsRawUnit must remain inside parser infrastructure",
   [architectureRuleIds.legacyWrapperDependency]:
-    "legacy unit wrappers are temporary normalized-model migration dependencies",
+    "retired unit wrapper dependencies are forbidden and must not be reintroduced",
   [architectureRuleIds.presentationDomainDependency]:
     "presentation must consume application DTOs instead of domain objects",
   [architectureRuleIds.hostFrameworkOutsidePresentation]:
@@ -753,69 +729,6 @@ export const findArchitectureRuleViolations = (
 
     return violations;
   });
-
-export const findCurrentRuleViolations = (
-  references: readonly ImportReference[],
-): RuleViolation[] => {
-  const currentRuleIds = new Set<ArchitectureRuleId>([
-    architectureRuleIds.domainOuterDependency,
-    architectureRuleIds.applicationOuterDependency,
-    architectureRuleIds.generatedParserOutsideInfrastructure,
-  ]);
-  return findArchitectureRuleViolations(references).filter(({ ruleId }) =>
-    currentRuleIds.has(ruleId),
-  );
-};
-
-const violationKey = (violation: RuleViolation): string =>
-  [
-    violation.file,
-    getDependencyTarget(violation),
-    violation.kind,
-    violation.ruleId,
-  ].join("\0");
-
-const allowanceKey = ({
-  source,
-  target,
-  kind,
-  ruleId,
-}: DependencyAllowance): string => [source, target, kind, ruleId].join("\0");
-
-export const validateDependencyAllowlist = (
-  violations: readonly RuleViolation[],
-  allowances: readonly DependencyAllowance[],
-): string[] => {
-  const issues: string[] = [];
-  const violationKeys = new Set(violations.map(violationKey));
-  const allowanceKeys = new Set<string>();
-
-  allowances.forEach((allowance) => {
-    const key = allowanceKey(allowance);
-    if (allowanceKeys.has(key)) {
-      issues.push(`duplicate allowlist entry: ${key}`);
-    }
-    allowanceKeys.add(key);
-    if (!allowance.ownerFeature.trim() || !allowance.removalCondition.trim()) {
-      issues.push(`missing allowlist ownership or removal condition: ${key}`);
-    }
-    if (/[?*]/.test(`${allowance.source}\0${allowance.target}`)) {
-      issues.push(`wildcards are forbidden in allowlist entries: ${key}`);
-    }
-    if (!violationKeys.has(key)) {
-      issues.push(`stale allowlist entry: ${key}`);
-    }
-  });
-
-  violations.forEach((violation) => {
-    const key = violationKey(violation);
-    if (!allowanceKeys.has(key)) {
-      issues.push(`unexplained architecture violation: ${key}`);
-    }
-  });
-
-  return issues.sort((left, right) => left.localeCompare(right));
-};
 
 export const formatViolation = ({
   file,

@@ -35,9 +35,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement and validate approved Slice 2 of
-   `remove-legacy-and-enforce-clean-architecture` as the permanent
-   zero-exception architecture gate.
+1. Implement and validate approved Slice 3 of
+   `remove-legacy-and-enforce-clean-architecture` across migrated use cases and
+   both extension hosts.
 2. Replan `import-definition-via-webapi` with a focused generated-artifact
    reproducibility slice before correcting the checked-in stale Prism artifact
    reported by `rtk pnpm run openapi:check`.
@@ -50,7 +50,7 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 - `docs/specs/features/remove-legacy-and-enforce-clean-architecture/`: active
-  approved migration-closure feature; Slice 2 is the current implementation
+  approved migration-closure feature; Slice 3 is the current implementation
   boundary.
 
 The final remaining Clean Architecture migration feature is active on this
