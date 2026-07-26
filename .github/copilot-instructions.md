@@ -26,7 +26,8 @@ Read these in order before making changes
 
    - `README.md` - SDD lifecycle and document-role Single Source of Truth
    - `features/*/SPECS.md` - Temporary feature requirements and boundaries
-   - `features/*/TASKS.md` - Sole feature branch plan and current state
+   - `features/*/TASKS.md` - Sole plan and current state for its feature; the
+     selected feature owns active branch implementation work
    - `features/*/TRACEABILITY.md` - Requirement to validation mapping when required
    - `roadmap.md` - Unfinished repository-level future work
 

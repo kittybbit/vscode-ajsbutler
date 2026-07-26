@@ -16,8 +16,8 @@ full slice plan, and before `sdd-implement-task` implements any slice.
 Read first:
 
 1. `AGENTS.md` and `docs/specs/README.md`
-2. the active feature's `SPECS.md` and `TASKS.md`; identify the active feature
-   from the user request or feature folders
+2. the selected feature's `SPECS.md` and `TASKS.md`; resolve it once using
+   `docs/specs/README.md`
 
 Read only when needed:
 
@@ -28,6 +28,11 @@ Read only when needed:
 Inspect referenced code symbols, components, adapters, commands, tests, or docs
 only enough to validate the plan's claims. Do not edit runtime code, tests,
 generated artifacts, configuration, or implementation branches.
+
+Keep the selected feature fixed for the review. Do not switch to an inherited
+feature because its folder exists or its tasks are pending or approved, and do
+not mix another feature's documents into the review target. Stop for explicit
+selection when the SSOT resolution evidence is ambiguous.
 
 ## Review Criteria
 
@@ -56,7 +61,7 @@ Evaluate at least these dimensions:
 
 ## Review Workflow
 
-1. Identify the active feature and full implementation-slice plan from
+1. Identify the selected feature and full implementation-slice plan from
    `TASKS.md`.
 2. Check whether the plan covers the feature requirements and acceptance
    criteria without unrelated scope.

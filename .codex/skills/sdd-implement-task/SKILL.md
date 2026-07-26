@@ -17,7 +17,7 @@ sufficient.
 Read first:
 
 1. `AGENTS.md`, `package.json`, and `docs/specs/README.md`
-2. the active feature's `SPECS.md` and `TASKS.md`
+2. the selected feature's `SPECS.md` and `TASKS.md`
 
 Read only when needed:
 
@@ -45,6 +45,11 @@ Implementation may start only when feature `TASKS.md` records:
 If approval is missing, stale, ambiguous, narrower than the required work, or
 not tied to a specific slice, stop. Use `sdd-plan-task` for replanning or
 `sdd-review-plan` for plan-quality review before implementation resumes.
+
+Resolve the selected feature once using `docs/specs/README.md` and keep it
+fixed for the run. Do not switch because an inherited feature folder has
+pending or approved work. If the selection or comparison base is ambiguous,
+stop before editing.
 
 ## Replanning Boundary
 

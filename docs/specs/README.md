@@ -443,7 +443,7 @@ Poor fit:
 - implementation notes tied to the current refactor
 - file-by-file execution checklists
 
-Those belong in the active feature's `TASKS.md`.
+Those belong in the selected feature's `TASKS.md`.
 
 ## When To Remove Feature Docs
 
@@ -451,7 +451,7 @@ Feature `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md` are temporary
 change-management documents. They are not a completed-feature catalog or a
 substitute for Git and pull-request history.
 
-Remove the complete `docs/specs/features/<feature>/` folder only in Feature
+Remove the selected `docs/specs/features/<feature>/` folder only in Feature
 Exit Mode, after all of these conditions are met:
 
 1. Observable behavior changes are reflected in the owning use cases when
@@ -468,8 +468,12 @@ Exit Mode, after all of these conditions are met:
    complete.
 8. The human explicitly approves Feature Exit.
 
-After approval, delete the whole feature folder together. Do not retain
-`SPECS.md`, `TASKS.md`, or `TRACEABILITY.md` as implementation history.
+After approval, delete the whole selected feature folder together. Do not
+retain `SPECS.md`, `TASKS.md`, or `TRACEABILITY.md` as implementation history.
+Preserve inherited feature folders, and do not treat their pending tasks or
+unresolved risks as completion conditions for the selected feature. Stop and
+replan only when closing the selected feature would damage or invalidate
+another feature.
 
 ## Feature Definition Of Done
 
@@ -537,15 +541,45 @@ For code slices, confirm:
 - README or user docs are updated only when user-facing behavior changes
 - CHANGELOG update need is evaluated using the CHANGELOG Update Criteria
 
+## Selected Feature Ownership
+
+Use these terms consistently:
+
+- A **feature folder** is a temporary SDD folder under
+  `docs/specs/features/<feature>/`. A working tree may contain unfinished
+  feature folders inherited from its base branch.
+- The **selected feature** is the one feature chosen for the current branch
+  work.
+- The **branch-owned feature** is the selected feature that the current branch
+  adds, changes, implements, or closes.
+- The **active feature** is the selected feature for the current agent run.
+  Folder presence alone does not make a feature active.
+
+Resolve the selected feature in this order:
+
+1. a feature explicitly named by the user
+2. the single feature folder created by the current branch
+3. the single feature folder changed by the current branch
+4. an unambiguous match between the branch purpose or name and feature name
+
+For branch-created or branch-changed evidence, compare with a user-specified
+base when present; otherwise use the repository default branch's merge-base.
+If the base cannot be resolved or the applicable step has multiple candidates,
+stop and ask the user to select the feature. Do not guess from folder presence,
+pending tasks, or approval state. A policy-only compatibility edit to an
+inherited feature does not transfer selection or branch ownership.
+
+Once selected for an agent run, keep the feature fixed across planning, review,
+implementation, and Feature Exit. Changing it requires Replanning Mode,
+separation into another feature branch, or deferral outside the current
+feature.
+
+Each feature `TASKS.md` is the sole plan and current-state owner for that
+feature. Only the selected feature's `TASKS.md` owns the current branch's active
+implementation plan. Do not create or maintain a separate branch-level plan or
+active-feature index.
+
 ## Sync Cadence
-
-The active feature's `TASKS.md` is the sole feature branch plan and
-current-state owner. Do not create or maintain a separate branch-level plan.
-Use this ownership rule:
-
-```text
-one feature branch = one active feature folder = one feature TASKS.md
-```
 
 Treat the following documents as required sync artifacts, not optional
 catch-up notes:
@@ -560,9 +594,10 @@ catch-up notes:
   Update only when unfinished repository-level future work, ordering, entry
   conditions, or unresolved product concerns change.
 
-Prefer the smallest useful cadence:
-one completed slice or one resolved follow-up is enough reason to sync the
-docs in the same commit.
+Update an artifact only when information it owns becomes stale. A completed
+slice or resolved follow-up requires a `TASKS.md` or `TRACEABILITY.md` update
+when it changes their owned state or evidence; it does not by itself require a
+roadmap update.
 
 When syncing, preserve decision context instead of accumulating entries:
 
@@ -590,9 +625,10 @@ the top of the existing feature documents:
   sequencing, progress, work logs, or completed history.
 - `TASKS.md` begins with an `Agent Brief` of roughly ten lines: purpose,
   approved or active slice, prohibitions, and the smallest reading and
-  validation set. It is the only owner of the feature branch plan, slice
-  order, dependencies, approval state, active slice, impact, validation,
-  risks, production readiness, and Feature Exit readiness.
+  validation set. It is the only owner of its feature plan, slice order,
+  dependencies, approval state, active slice, impact, validation, risks,
+  production readiness, and Feature Exit readiness. Only the selected
+  feature's `TASKS.md` owns the branch's active implementation plan.
 - `TRACEABILITY.md`, when required, is a compact table mapping use case or
   requirement, `SPECS.md` section, slice, and test or validation plan. Keep
   feature-specific design notes in `SPECS.md`, not in traceability. It does not
@@ -626,13 +662,15 @@ feature folders. Git and pull requests retain that history.
 
 ### Feature Lifecycle Ownership
 
-- Feature intake creates one active feature folder for one feature branch.
-- Planning and replanning update that folder's `TASKS.md`; no shared branch
-  index or second plan is maintained.
+- Feature intake creates or selects one branch-owned feature. Inherited
+  unfinished feature folders may coexist without becoming selected or active.
+- Planning and replanning update the selected feature's `TASKS.md`; no shared
+  branch index or second plan is maintained.
 - Implementation updates only the approved slice state and its validation
   evidence.
 - Feature Exit propagates only knowledge that passes the Durable Documentation
-  Gate, obtains human approval, and removes the complete feature folder.
+  Gate, obtains human approval, and removes only the complete selected feature
+  folder.
 
 ### Lightweight Feature Structure Check
 

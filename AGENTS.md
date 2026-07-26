@@ -107,7 +107,7 @@ Follow this lifecycle:
    Definition of Done passes.
 
 Before editing runtime code, tests, generated artifacts, or configuration,
-the active feature must have an approved implementation slice recorded in
+the selected feature must have an approved implementation slice recorded in
 `TASKS.md`. If the requested change is ambiguous, document assumptions in the
 right SDD artifact and stop for clarification or approval instead of making
 hidden assumptions.
@@ -115,8 +115,9 @@ hidden assumptions.
 Document roles are defined only in `docs/specs/README.md`. Use that file as
 the Single Source of Truth for SDD artifact responsibilities, including
 temporary feature documents, durable documentation, and
-`docs/specs/roadmap.md`. One feature branch has one active feature folder, and
-that feature's `TASKS.md` is the sole plan and current-state owner.
+`docs/specs/roadmap.md`. One feature branch owns one selected feature even when
+inherited feature folders coexist. Each `TASKS.md` owns only its feature, and
+only the selected feature's `TASKS.md` owns active branch implementation work.
 
 ## Branch Naming
 

@@ -17,7 +17,9 @@
 
 - Update this file in the same commit whenever one task or follow-up is
   completed, re-scoped, or intentionally dropped.
-- This file is the sole plan and current-state owner for this feature branch.
+- This file is the sole plan and current-state owner for this feature. Folder
+  presence or policy-only compatibility edits do not select it for unrelated
+  branch work.
 - Update `docs/specs/roadmap.md` only when unfinished repository-level future
   work, ordering, entry conditions, or unresolved product concerns change.
 - Keep this file focused on current state only; do not retain historical logs,

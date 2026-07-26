@@ -7,7 +7,7 @@ description: Use when creating or revising the full implementation-slice plan fo
 
 ## Purpose
 
-Create or revise the full implementation plan for one active SDD feature, or
+Create or revise the full implementation plan for one selected SDD feature, or
 run Feature Exit when implementation is complete. Use exactly one explicit
 mode per run: Planning Mode, Replanning Mode, or Feature Exit Mode.
 
@@ -16,7 +16,7 @@ mode per run: Planning Mode, Replanning Mode, or Feature Exit Mode.
 Read first:
 
 1. `AGENTS.md`, `package.json`, and `docs/specs/README.md`
-2. the active feature's `SPECS.md` and `TASKS.md`
+2. the selected feature's `SPECS.md` and `TASKS.md`
 3. `docs/specs/roadmap.md` when repository-level sequencing, unfinished work,
    or Feature Exit follow-up is relevant
 
@@ -28,6 +28,11 @@ Read only when needed:
 
 Use semantic code navigation from `docs/specs/README.md` only when a concrete
 symbol, component, command, adapter, or use case needs impact confirmation.
+
+Resolve the selected feature once using `docs/specs/README.md` and keep it
+fixed for this run. Do not select a feature from folder presence, pending work,
+or approval state, and do not mix inherited feature state into the selected
+feature.
 
 ## SDD Workflow
 
@@ -61,8 +66,10 @@ Do not mix Planning Mode, Replanning Mode, and Feature Exit Mode in one run.
 
 Use Planning Mode to create the initial full feature implementation plan.
 
-1. Identify the active feature from the user request or feature folders under
-   `docs/specs/features/`; confirm its `TASKS.md` is the branch plan.
+1. Resolve the selected feature using the priority and branch-base rules in
+   `docs/specs/README.md`; confirm its `TASKS.md` owns the feature plan and the
+   current branch's active implementation plan. Stop when selection is
+   ambiguous or the comparison base cannot be resolved.
 2. Compare feature `SPECS.md`, feature `TASKS.md`, related use cases,
    and `roadmap.md` when repository-level future work is relevant.
 3. Decompose the whole feature into implementation slices that cover the
@@ -126,7 +133,8 @@ Use Feature Exit Mode only when implementation slices appear complete.
 7. Report the Feature Exit Review using the standard output template in
    `docs/specs/README.md`.
 8. Ask for explicit approval to close the feature.
-9. After approval, remove the complete feature folder as described below.
+9. After approval, remove only the complete selected feature folder as
+   described below.
 
 Do not perform Planning Mode or Replanning Mode work during Feature Exit Mode.
 
@@ -158,7 +166,7 @@ pieces cannot be validated meaningfully or do not provide standalone value.
 
 Before updating `TASKS.md`, explicitly establish:
 
-- active feature folder
+- selected feature folder and selection evidence
 - feature-level requirements and acceptance criteria covered by the plan
 - implementation slice list
 - implementation order
@@ -300,7 +308,7 @@ When all planned slices appear complete, switch to Feature Exit Mode:
 4. Report the Feature Exit Review using the standard output template in
    `docs/specs/README.md`.
 5. Ask for explicit approval to close the feature.
-6. Do not remove the feature folder before approval.
+6. Do not remove the selected feature folder before approval.
 
 ## Feature Definition of Done
 
@@ -334,7 +342,7 @@ Before closing a feature, verify:
 - use-case propagation is complete
 - required `TRACEABILITY.md` is updated
 - `roadmap.md` propagation is complete when needed
-- the feature folder can be removed without losing active requirements,
+- the selected feature folder can be removed without losing active requirements,
   approval decisions, unresolved risks, or reusable knowledge
 
 Feature Close may happen only after this review passes and the human approves
@@ -374,7 +382,8 @@ Before requesting approval to close the feature:
 
 After approval to close the feature:
 
-1. Remove the complete feature folder.
+1. Remove only the complete selected feature folder; preserve inherited feature
+   folders.
 2. Re-read `roadmap.md`, then propose the next feature when appropriate.
 
 ## Approval Boundary

@@ -40,6 +40,6 @@ Explain why this option was chosen.
 ## Related Documents
 
 - Feature spec: {{SPECS.md}}
-- Feature branch plan: {{TASKS.md}}
+- Feature plan: {{TASKS.md}}
 - Traceability: {{TRACEABILITY.md or "not required"}}
 - Use case: {{Use Case}}

@@ -38,10 +38,13 @@ folder after required knowledge propagation.
 - R2: Feature `SPECS.md`, `TASKS.md`, and optional `TRACEABILITY.md` are defined
   as temporary change-management documents that are removed together after an
   approved Feature Exit.
-- R3: A feature `TASKS.md` is the sole owner of its feature branch plan, current
-  state, approval, validation, risks, production readiness, and exit readiness;
-  root `PLANS.md` and `docs/specs/plans.md` are retired without replacement by
-  another branch-level plan.
+- R3: A feature `TASKS.md` is the sole owner of that feature's plan, current
+  state, approval, validation, risks, production readiness, and exit readiness.
+  When the feature is selected by the current branch, its `TASKS.md` also owns
+  the branch's active implementation plan; root `PLANS.md`,
+  `docs/specs/plans.md`, and legacy feature-local `PLANS.md` files remain
+  retired without replacement after their reusable or unfinished information
+  is assigned through the Durable Documentation Gate.
 - R4: `docs/specs/roadmap.md` contains only unfinished repository-level future
   work, ordering, entry conditions, and unresolved product concerns; completed
   results, active branch state, and current architecture descriptions are
@@ -52,8 +55,35 @@ folder after required knowledge propagation.
   conversations remain in Git and pull-request history.
 - R6: Templates, active feature documents, agent instructions, skills, and
   repository guidance no longer require or link to retired planning files.
-- R7: The resulting rules preserve the one-feature-branch, one-active-feature-
-  folder, one-feature-`TASKS.md` ownership model.
+- R7: One feature branch owns exactly one branch-selected feature, while other
+  unfinished feature folders inherited from the base branch may remain in the
+  working tree without becoming active or branch-owned. Policy-only
+  compatibility edits to an inherited feature do not transfer selection or
+  branch ownership.
+- R8: Planning, review, implementation, and Feature Exit resolve the same
+  selected feature deterministically from explicit user selection,
+  a single branch-created folder, a single branch-changed folder, or an
+  unambiguous branch-name match; folder existence alone is never selection
+  evidence, and ambiguous or unresolved-base selection stops the workflow.
+- R9: Once selected for an agent run, the active feature cannot change
+  implicitly. Feature Exit evaluates and removes only the selected feature
+  folder and ignores another inherited feature's pending work unless the
+  current feature would damage or invalidate it.
+- R10: Each SDD artifact is synchronized only when its owned information
+  becomes stale; completing a slice does not by itself require a roadmap
+  update.
+
+## Ownership Terms
+
+- Feature folder: temporary SDD documents under
+  `docs/specs/features/<feature>/`; unfinished folders may be inherited from a
+  base branch.
+- Selected feature: the feature explicitly or deterministically selected for
+  the current branch work.
+- Branch-owned feature: the one selected feature that the current branch adds,
+  changes, implements, or closes.
+- Active feature: the selected feature for the current agent run. Mere folder
+  presence does not make a feature active.
 
 ## Architecture
 
@@ -62,8 +92,9 @@ folder after required knowledge propagation.
 - Presentation: no runtime responsibility or dependency-boundary change.
 - Infrastructure: no runtime responsibility or dependency-boundary change.
 - Repository documentation: `docs/specs/README.md` owns SDD lifecycle policy;
-  each feature `TASKS.md` owns its branch execution plan; durable documents own
-  only their current reusable contracts and decisions.
+  each feature `TASKS.md` owns its feature plan, and the selected feature's
+  `TASKS.md` owns the branch's active implementation plan; durable documents
+  own only their current reusable contracts and decisions.
 
 ## Impact Analysis
 
@@ -83,7 +114,8 @@ folder after required knowledge propagation.
 - API/DTO/schema compatibility: none.
 - VS Code/web extension compatibility: none.
 - Repository workflow: intentional removal of two redundant planning files and
-  reassignment of their valid responsibilities.
+  reassignment of their valid responsibilities, plus deterministic
+  branch-selected feature ownership when inherited feature folders coexist.
 - Changed behavior scenarios: none.
 
 ### Alternative Considerations
@@ -96,13 +128,20 @@ folder after required knowledge propagation.
   pull requests retain history.
 - Copy detailed document roles into `AGENTS.md`: rejected because it would
   recreate multiple policy sources and future drift.
+- Treat every existing feature folder as active: rejected because inherited
+  unfinished folders can coexist and do not identify the feature selected by
+  the current branch.
+- Reintroduce a shared active-feature index: rejected because deterministic
+  branch context is sufficient and a shared index would recreate the retired
+  conflict-prone planning surface.
 
 ### Approval Impact Decisions
 
 - Approval evidence owner: `TASKS.md` `Human Approval`.
 - Scope changes requiring re-approval: runtime, test, generated-artifact, or
   configuration edits; architecture-boundary changes; user-visible behavior
-  changes; or a new planning system outside the documented SDD files.
+  changes; a new planning system outside the documented SDD files; or changing
+  the selected-feature resolution order or branch-ownership model.
 
 ## Compatibility
 
@@ -118,10 +157,14 @@ folder after required knowledge propagation.
 
 - Root `PLANS.md` and `docs/specs/plans.md` are deleted, no effective rule
   depends on them, and no replacement branch-level plan is introduced.
+- Legacy feature-local `PLANS.md` content is assessed through the Durable
+  Documentation Gate, any reusable or unfinished information is assigned to
+  its proper owner, and the redundant plan file is removed.
 - `docs/specs/README.md` defines the authoritative SDD document roles and the
   lifecycle from feature intake through approved Feature Exit.
 - A feature `TASKS.md` is defined as the only plan and current-state document
-  for its feature branch.
+  for its feature, and only the selected feature's `TASKS.md` owns the current
+  branch's active implementation plan.
 - Feature documents are explicitly temporary, and the complete feature folder
   is removed only after required durable knowledge propagation, validation,
   risk disposition, and approved Feature Exit.
@@ -131,6 +174,18 @@ folder after required knowledge propagation.
   removed or moved entry has a documented planning-time disposition.
 - Templates, active feature documents, skills, and agent guidance do not rely
   on retired planning files.
+- Feature folder, selected feature, branch-owned feature, and active feature
+  are distinguished; multiple inherited unfinished feature folders may coexist
+  without becoming branch-owned, and a policy-only compatibility edit does not
+  transfer their ownership.
+- Selected-feature resolution follows one deterministic priority order and
+  stops for explicit selection when the evidence or comparison base is
+  ambiguous.
+- Planning, review, implementation, and Feature Exit keep the same selected
+  feature; Feature Exit removes only its folder and does not treat unrelated
+  inherited work as a closure blocker.
+- Sync guidance updates each artifact only when its owned information becomes
+  stale and does not make slice completion alone a roadmap-update trigger.
 - Markdown quality and focused reference checks pass, or every remaining match
   is explained as consistent with the new ownership model.
 - The change remains docs-only and preserves runtime, build, desktop, web,

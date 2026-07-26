@@ -31,4 +31,5 @@ Feature docs should be concise and decision-oriented. Completed refactor-only
 slices are not retained as long-lived feature folders. During Feature Exit,
 propagate only reusable current knowledge to its durable owner and move
 valuable unfinished repository-level work to `docs/specs/roadmap.md`. After
-closure approval, remove the complete feature folder.
+closure approval, remove only the complete selected feature folder and preserve
+inherited feature folders.
