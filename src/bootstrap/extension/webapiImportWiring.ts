@@ -10,20 +10,17 @@ import {
   executeImportAjsDefinitionViaWebApiCommand,
 } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
 
-export type WebApiImportWiringDeps = Pick<
-  ImportAjsDefinitionCapability,
-  "importDefinition"
-> & {
+export type WebApiImportWiringDeps = {
+  host: ImportAjsDefinitionHostKind;
+  importCapability: ImportAjsDefinitionCapability;
   telemetry: TelemetryPort;
 };
 
 export const createWebApiImportSubscriptions = ({
+  host,
+  importCapability,
   telemetry,
-  importDefinition,
 }: WebApiImportWiringDeps): vscode.Disposable[] => {
-  const host = getWebApiImportHost();
-  const importCapability = createWebApiImportCapability(host, importDefinition);
-
   return [
     vscode.commands.registerCommand(
       IMPORT_AJS_DEFINITION_VIA_WEBAPI_COMMAND,
@@ -46,10 +43,10 @@ export const createWebApiImportSubscriptions = ({
 
 export const createWebApiImportCapability = (
   host: ImportAjsDefinitionHostKind,
-  importDefinition: ImportAjsDefinitionCapability["importDefinition"],
+  createDesktopCapability: () => ImportAjsDefinitionCapability,
 ): ImportAjsDefinitionCapability => {
   if (host === "desktop") {
-    return { importDefinition };
+    return createDesktopCapability();
   }
 
   const unavailable = {
@@ -64,6 +61,3 @@ export const createWebApiImportCapability = (
     importDefinition: async () => unavailable,
   };
 };
-
-const getWebApiImportHost = (): ImportAjsDefinitionHostKind =>
-  vscode.env.uiKind === vscode.UIKind.Web ? "web" : "desktop";

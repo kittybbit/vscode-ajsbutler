@@ -19,8 +19,9 @@ export const createExtensionSubscriptions = (
     dependencies.telemetry,
   ),
   ...createWebApiImportSubscriptions({
+    host: dependencies.host,
+    importCapability: dependencies.webApiImport,
     telemetry: dependencies.telemetry,
-    ...dependencies.webApiImport,
   }),
   ...createSemanticDiffSubscriptions(dependencies.semanticDiff),
   ...createViewerSubscriptions({

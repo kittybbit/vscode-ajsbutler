@@ -18,8 +18,9 @@ suite("Extension dependencies", () => {
       },
     } as unknown as vscode.ExtensionContext;
 
-    const dependencies = createExtensionDependencies(context);
+    const dependencies = createExtensionDependencies(context, "desktop");
 
+    assert.strictEqual(dependencies.host, "desktop");
     assert.strictEqual(typeof dependencies.telemetry.report, "function");
     assert.strictEqual(typeof dependencies.buildSyntaxDiagnostics, "function");
     assert.strictEqual(typeof dependencies.buildUnitList, "function");
@@ -42,6 +43,28 @@ suite("Extension dependencies", () => {
       "function",
     );
 
+    dependencies.telemetry.dispose();
+  });
+
+  test("does not construct desktop-only import dependencies for web", () => {
+    let desktopFactoryCalls = 0;
+    const dependencies = createExtensionDependencies(
+      {} as vscode.ExtensionContext,
+      "web",
+      {
+        createDesktopWebApiImportCapability: () => {
+          desktopFactoryCalls += 1;
+          throw new Error("desktop capability must not be constructed");
+        },
+      },
+    );
+
+    assert.strictEqual(dependencies.host, "web");
+    assert.strictEqual(desktopFactoryCalls, 0);
+    assert.strictEqual(
+      dependencies.webApiImport.unavailable?.error.code,
+      "unsupported-host",
+    );
     dependencies.telemetry.dispose();
   });
 

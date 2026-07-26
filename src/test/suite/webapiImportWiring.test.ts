@@ -13,15 +13,18 @@ suite("WebAPI import wiring", () => {
     };
 
     const subscriptions = createWebApiImportSubscriptions({
+      host: "desktop",
       telemetry,
-      importDefinition: async () => ({
-        ok: false,
-        error: {
-          code: "network-failed",
-          message: "not called",
-          recoverable: true,
-        },
-      }),
+      importCapability: {
+        importDefinition: async () => ({
+          ok: false,
+          error: {
+            code: "network-failed",
+            message: "not called",
+            recoverable: true,
+          },
+        }),
+      },
     });
 
     assert.strictEqual(subscriptions.length, 1);
@@ -38,10 +41,9 @@ suite("WebAPI import wiring", () => {
       },
     });
 
-    const capability = createWebApiImportCapability(
-      "desktop",
+    const capability = createWebApiImportCapability("desktop", () => ({
       importDefinition,
-    );
+    }));
 
     assert.strictEqual(capability.importDefinition, importDefinition);
     assert.strictEqual(capability.unavailable, undefined);
@@ -49,9 +51,9 @@ suite("WebAPI import wiring", () => {
 
   test("selects a stable unsupported-host capability for web", async () => {
     let desktopCalls = 0;
-    const capability = createWebApiImportCapability("web", async () => {
+    const capability = createWebApiImportCapability("web", () => {
       desktopCalls += 1;
-      throw new Error("desktop import must not run");
+      throw new Error("desktop capability must not be constructed");
     });
 
     assert.strictEqual(capability.unavailable?.error.code, "unsupported-host");

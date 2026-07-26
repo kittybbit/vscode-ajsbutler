@@ -4,10 +4,15 @@ import * as path from "path";
 import { dependencyAllowlist } from "../fixtures/architecture/dependencyAllowlist";
 import {
   architectureRuleIds,
+  collectFunctionFactoryDefinitionsFromSource,
   collectImportReferencesFromSource,
+  collectImportedConstructionReferencesFromSource,
+  collectProductionApplicationFactoryDefinitions,
+  collectProductionConstructionReferences,
   collectProductionImportReferences,
   collectProductionSourceFiles,
   findArchitectureRuleViolations,
+  findCompositionRootViolations,
   findCurrentRuleViolations,
   formatViolation,
   getDependencyTarget,
@@ -76,12 +81,70 @@ suite("Architecture dependency rules", () => {
     );
   });
 
+  test("collects imported factory calls and concrete construction", () => {
+    const references = collectImportedConstructionReferencesFromSource(
+      "src/presentation/example.ts",
+      `
+        import { createUseCase as createFeature } from "../application/useCase";
+        import { Adapter } from "../infrastructure/Adapter";
+        import * as infrastructure from "../infrastructure/factories";
+        import type { Port } from "../application/Port";
+
+        createFeature();
+        new Adapter();
+        infrastructure.createAdapter();
+      `,
+    );
+
+    assert.deepStrictEqual(references, [
+      {
+        file: "src/presentation/example.ts",
+        target: "src/application/useCase",
+        symbol: "createUseCase",
+        kind: "call",
+      },
+      {
+        file: "src/presentation/example.ts",
+        target: "src/infrastructure/Adapter",
+        symbol: "Adapter",
+        kind: "new",
+      },
+      {
+        file: "src/presentation/example.ts",
+        target: "src/infrastructure/factories",
+        symbol: "createAdapter",
+        kind: "call",
+      },
+    ]);
+  });
+
+  test("detects exported function factories without relying on their names", () => {
+    assert.deepStrictEqual(
+      collectFunctionFactoryDefinitionsFromSource(
+        "src/application/example.ts",
+        `
+          export const assemble = (port: unknown) => (input: unknown) => input;
+          export function connect() {
+            return () => undefined;
+          }
+          export const value = (input: unknown) => input;
+          const internal = () => () => undefined;
+        `,
+      ),
+      [
+        { file: "src/application/example", symbol: "assemble" },
+        { file: "src/application/example", symbol: "connect" },
+      ],
+    );
+  });
+
   test("collects all production roots in deterministic order", () => {
     const references = collectProductionImportReferences(repoRoot);
-    const sortedReferences = [...references].sort((left, right) =>
-      `${left.file}\0${left.specifier}\0${left.kind}`.localeCompare(
-        `${right.file}\0${right.specifier}\0${right.kind}`,
-      ),
+    const sortedReferences = [...references].sort(
+      (left, right) =>
+        left.file.localeCompare(right.file) ||
+        left.specifier.localeCompare(right.specifier) ||
+        left.kind.localeCompare(right.kind),
     );
 
     assert.deepStrictEqual(references, sortedReferences);
@@ -96,7 +159,6 @@ suite("Architecture dependency rules", () => {
       "infrastructure",
       "presentation",
       "resource",
-      "shared",
     ].forEach((directory) => {
       assert.ok(
         references.some(({ file }) => file.startsWith(`src/${directory}/`)),
@@ -271,6 +333,65 @@ suite("Architecture dependency rules", () => {
     assert.deepStrictEqual(
       validateDependencyAllowlist(violations, dependencyAllowlist),
       [],
+    );
+  });
+
+  test("keeps application factory calls and concrete adapter construction in bootstrap", () => {
+    const references = collectProductionConstructionReferences(repoRoot);
+    const applicationFactories =
+      collectProductionApplicationFactoryDefinitions(repoRoot);
+    const applicationFactoryKeys = new Set(
+      applicationFactories.map(({ file, symbol }) => `${file}:${symbol}`),
+    );
+    const applicationFactoryCalls = references
+      .filter(({ target, symbol }) =>
+        applicationFactoryKeys.has(`${target}:${symbol}`),
+      )
+      .filter(({ file }) => !file.startsWith("src/application/"));
+    const infrastructureConstruction = references.filter(
+      ({ kind, target, file }) =>
+        kind === "new" &&
+        target.startsWith("src/infrastructure/") &&
+        !file.startsWith("src/infrastructure/"),
+    );
+
+    assert.ok(applicationFactoryCalls.length > 0);
+    assert.ok(infrastructureConstruction.length > 0);
+    assert.ok(
+      applicationFactoryCalls.every(({ file }) =>
+        file.startsWith("src/bootstrap/extension/"),
+      ),
+    );
+    assert.ok(
+      infrastructureConstruction.every(({ file }) =>
+        file.startsWith("src/bootstrap/extension/"),
+      ),
+    );
+    assert.deepStrictEqual(
+      findCompositionRootViolations(references, applicationFactories),
+      [],
+    );
+  });
+
+  test("rejects application factories and concrete adapters outside bootstrap", () => {
+    const references = collectImportedConstructionReferencesFromSource(
+      "src/presentation/example.ts",
+      `
+        import { assemble } from "../application/example";
+        import { Adapter } from "../infrastructure/Adapter";
+        assemble();
+        new Adapter();
+      `,
+    );
+
+    assert.deepStrictEqual(
+      findCompositionRootViolations(references, [
+        { file: "src/application/example", symbol: "assemble" },
+      ]).map(({ reason }) => reason),
+      [
+        "application-factory-outside-bootstrap",
+        "infrastructure-construction-outside-bootstrap",
+      ],
     );
   });
 

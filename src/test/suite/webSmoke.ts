@@ -19,11 +19,16 @@ export async function run(): Promise<void> {
   await activateExtension();
 
   const commands = await vscode.commands.getCommands(true);
-  if (!commands.includes("open.ajsbutler.tableViewer")) {
-    throw new Error("Table viewer command not registered");
-  }
-  if (!commands.includes("open.ajsbutler.flowViewer")) {
-    throw new Error("Flow viewer command not registered");
+  for (const command of [
+    "open.ajsbutler.tableViewer",
+    "open.ajsbutler.flowViewer",
+    "ajsbutler.importDefinitionViaWebApiBeta",
+    "ajsbutler.compareSemanticDiff",
+    "ajsbutler.copySemanticDiffMarkdown",
+  ]) {
+    if (!commands.includes(command)) {
+      throw new Error(`Expected command to be registered: ${command}`);
+    }
   }
 
   const invalidDocument = await vscode.workspace.openTextDocument({

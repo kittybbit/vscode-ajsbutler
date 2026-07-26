@@ -12,6 +12,7 @@ suite("Extension subscriptions", () => {
       dispose() {},
     };
     const dependencies: ExtensionDependencies = {
+      host: "desktop",
       telemetry,
       buildSyntaxDiagnostics: () => [],
       buildUnitList: () => ({ errors: [] }),
@@ -47,6 +48,12 @@ suite("Extension subscriptions", () => {
     const subscriptions = createExtensionSubscriptions(context, dependencies);
 
     assert.strictEqual(subscriptions.length, 10);
+    assert.strictEqual(new Set(subscriptions).size, subscriptions.length);
+    assert.deepStrictEqual(
+      context.subscriptions,
+      [],
+      "activation remains the owner that adds registrations to the context",
+    );
     subscriptions.forEach((subscription) => {
       assert.strictEqual(typeof subscription.dispose, "function");
       subscription.dispose();

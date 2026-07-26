@@ -29,13 +29,13 @@ suite("Extension lifecycle", () => {
 
   test("reports deactivate telemetry and disposes runtime", () => {
     const events: string[] = [];
-    let disposed = false;
+    let disposeCount = 0;
     const telemetry: TelemetryPort = {
       report(event) {
         events.push(event.name);
       },
       dispose() {
-        disposed = true;
+        disposeCount += 1;
       },
     };
     const extension = MyExtension.init({} as never, telemetry);
@@ -46,7 +46,7 @@ suite("Extension lifecycle", () => {
       telemetryEvents.legacyExtensionDeactivated.name,
       "extension.lifecycle.deactivated",
     ]);
-    assert.strictEqual(disposed, true);
+    assert.strictEqual(disposeCount, 1);
   });
 
   test("ignores missing runtime on deactivate", () => {

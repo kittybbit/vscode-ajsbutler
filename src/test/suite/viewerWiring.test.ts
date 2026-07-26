@@ -27,6 +27,8 @@ suite("Viewer wiring", () => {
     });
 
     assert.strictEqual(subscriptions.length, 4);
+    assert.strictEqual(new Set(subscriptions).size, subscriptions.length);
+    assert.deepStrictEqual(context.subscriptions, []);
     subscriptions.forEach((subscription) => {
       assert.strictEqual(typeof subscription.dispose, "function");
       subscription.dispose();
