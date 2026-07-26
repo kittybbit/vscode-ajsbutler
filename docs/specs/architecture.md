@@ -1,315 +1,179 @@
 # Architecture
 
-## Target layering
+## Architectural Baseline
 
-- Domain
-- Application
-- Infrastructure
-- Presentation
+The repository uses Domain-Driven Design and Clean Architecture boundaries for
+all production code. The architecture dependency test enforces the complete
+rule catalog with zero exceptions.
 
-## Dependency direction
+Behavior remains compatible across the parser, unit list, flow graph, CSV
+export, unit definition, diagnostics, hover, navigation, WebAPI import,
+semantic diff/report, and telemetry workflows.
 
-Domain <- Application <- Infrastructure / Presentation
-
-## Transitional note
-
-The repository currently contains mixed responsibilities.
-Migration should be incremental and use-case driven.
-
-## Current Structure
+## Source Layout
 
 - `src/domain`
-  Contains the normalized AJS model, domain values, and reusable JP1/AJS rule
-  helpers.
+  Owns the normalized JP1/AJS model, values, and reusable business rules.
 - `src/application`
-  Contains DTO-oriented use cases and view adapters for unit list, flow graph,
-  editor feedback, parser and telemetry ports, and unit definition building.
+  Owns host-neutral use cases, ports, DTOs, and view-model projections.
 - `src/infrastructure`
-  Contains the concrete ANTLR parser, JP1/AJS3 WebAPI adapters, telemetry
-  adapters, and browser-safe localization resource adapters.
-- `src/bootstrap/extension`
-  Contains extension activation, dependency construction, lifecycle, and
-  subscription assembly.
+  Implements parser, WebAPI, localization-resource, and telemetry adapters.
 - `src/presentation/vscode`
-  Contains diagnostics, hover provider registration, preview commands, and
-  webview panel orchestration.
+  Maps application results and commands to the VS Code host API.
 - `src/presentation/webview`
-  Contains React-based webview presentation for table and flow views.
+  Renders table and flow DTOs with React and browser-side UI libraries.
+- `src/bootstrap`
+  Owns extension composition, capability selection, activation, and lifecycle.
+- `src/shared`
+  Contains host-neutral contracts shared across outer boundaries.
+- `src/resource`
+  Contains repository-owned static resources.
+- `src/antlr`
+  Contains the parser grammar source.
 - `src/generate/parser`
   Contains generated ANTLR parser artifacts.
 
-## Parser Boundaries
+`src/extension.ts` is the desktop and browser extension entry point. It
+delegates dependency construction and activation to bootstrap.
 
-### Stable parser-adjacent boundary
+## Dependency Rules
 
-- grammar source lives in `src/antlr`
-- generated parser code lives in `src/generate/parser`
-- the application-owned synchronous parser contract lives in
-  `src/application/parsing/AjsParserPort.ts`
-- ANTLR orchestration, parse-tree evaluation, and syntax error collection live
-  under `src/infrastructure/parser`
+The following rules are mandatory:
 
-### Where parser output crosses outward
+- Domain does not import application, infrastructure, presentation, bootstrap,
+  VS Code, React, MUI, XyFlow, TanStack, or other host/UI frameworks.
+- Application does not import infrastructure, presentation, or bootstrap.
+- Presentation does not import domain, infrastructure, or bootstrap. It
+  consumes application DTOs, view models, use cases, and neutral contracts.
+- Infrastructure does not import presentation or bootstrap. It may implement
+  application ports and use domain concepts.
+- Concrete infrastructure dependencies are referenced only from infrastructure
+  or bootstrap.
+- Retired unit-wrapper dependencies under `src/domain/models/units` are
+  forbidden.
 
-- `AjsParserPort` returns either a normalized `AjsDocument` or
-  repository-owned syntax errors without exposing ANTLR or raw parser types
-- `src/infrastructure/parser/normalization/normalizeAjsDocument.ts` converts
-  the infrastructure-owned raw tree into the stable normalized model
-- application consumers receive normalized documents through the parser port
-  instead of composing raw parsing and normalization themselves
-- VS Code-facing diagnostics and webview adapters remain outside the parser
-  boundary
+These rules apply to static imports, type imports, exports, dynamic imports,
+`require`, and import-equals references across all production source roots.
 
-### Boundary assessment
+## Composition
 
-- the grammar and generated parser are already isolated
-- the infrastructure evaluator-to-`AjsRawUnit[]` mapping is an internal raw
-  seam under `src/infrastructure/parser`
-- unit-list and syntax-diagnostic use cases depend on the application parser
-  port and receive the infrastructure adapter from extension bootstrap
-- normalization is part of the concrete parser adapter; the normalized parser
-  result is the stable application-facing seam
-- unit-list table rendering now depends on an application row/view adapter
-  end to end instead of direct wrapper accessors or `UnitEntity` row objects
-- flow rendering now depends on flow-graph DTOs plus normalized AJS state and
-  unit-definition DTOs instead of reconstructing `UnitEntity` for selection and
-  node interaction
-- the remaining migration work is to move more non-table use cases from raw or
-  wrapper-oriented structures onto the normalized model
+`src/bootstrap/extension/activateExtension.ts` and its bootstrap collaborators
+form the explicit composition root.
 
-## Model Layers
+- Bootstrap constructs infrastructure adapters and application use cases.
+- VS Code presentation receives already-constructed dependencies.
+- Application factory functions are invoked only from application or bootstrap.
+- Infrastructure classes are constructed only from infrastructure or
+  bootstrap.
+- Capability selection, including desktop-only WebAPI availability, occurs in
+  bootstrap before presentation commands are registered.
+- Activation returns explicit lifecycle ownership; disposables are registered
+  with the extension context.
 
-### Raw parsed model
+The repository does not use a service container.
 
-- `src/infrastructure/parser/raw/AjsRawUnit.ts` owns the parser-adjacent raw
-  unit tree
-- this model keeps source-oriented structure such as `unitAttribute`,
-  free-form parameters, parent links, and child nesting
-- production references to this model are confined to
-  `src/infrastructure/parser/**`
+## Parser And Model Boundary
 
-### Normalized model
+- Generated parser code and the ANTLR runtime are used only under
+  `src/infrastructure/parser`.
+- `AjsRawUnit` is confined to parser infrastructure.
+- Infrastructure normalizes parser-adjacent raw data into `AjsDocument`,
+  `AjsUnit`, and related domain concepts.
+- `AjsParserPort` returns either a normalized document or repository-owned
+  syntax errors.
+- Application, presentation, and bootstrap code do not consume generated
+  parser types or raw parser data.
+- The normalized model is the only production domain model for downstream use
+  cases.
 
-- normalized AJS concepts live behind stable names such as `AjsDocument`,
-  `AjsUnit`, and `AjsDependency`
-- focused domain rules own reusable JP1/AJS meaning without a transitional unit
-  wrapper hierarchy
-- the infrastructure normalizer may use domain interpretation helpers while
-  producing the stable model for application use cases
-- application slices depend on the normalized model instead of parser internals
-  or wrapper-specific classes
+JP1/AJS3 version 13 is the normative target for new parameter and command
+semantics. Consumer-specific formatting remains in application projections or
+presentation; only reusable business meaning belongs in domain.
 
-## VS Code API Boundaries
+## Application And Presentation Boundaries
 
-### Correct boundary locations
+Application owns the host-neutral behavior and data contracts for:
 
-- `src/extension.ts`
-- `src/presentation/vscode/commands/*`
-- `src/presentation/vscode/diagnostics/*`
-- `src/presentation/vscode/languages/*`
-- `src/presentation/vscode/webview/*`
-- `src/test/*`
+- unit-list construction and table row projections
+- base and expanded flow-graph DTOs
+- unit-definition DTOs
+- ordered CSV export input
+- syntax diagnostics and parameter hover results
+- stable list/flow navigation identity
+- WebAPI import through an application port
+- semantic diff and scalar report data
+- validated telemetry events
 
-### Current boundary leaks
+Presentation owns host and rendering concerns:
 
-- diagnostics and hover behavior originate from VS Code presentation adapters,
-  while construction and wiring remain in the outer bootstrap boundary
-- webview panel creation and message handling stay grouped under
-  `src/presentation/vscode/webview`; telemetry SDK and credential adapters live
-  under infrastructure
+- VS Code commands, diagnostics, hover Markdown, panels, and document providers
+- save dialogs, clipboard operations, active-editor checks, and message routing
+- React component state, table formatting, graph geometry, viewport behavior,
+  search, selection, and expansion
+- localization and display of application results
 
-### Interpretation
+UI components consume DTOs and view models. They do not parse AJS grammar
+output or import domain objects.
 
-- the extension layer is already the natural adapter boundary
-- diagnostics should depend on an application use case that returns diagnostic
-  DTOs
-- hover should depend on an application use case that returns hover DTOs
-- webview message constants and payload types should live in a neutral shared
-  module rather than in domain
+## Host And Framework Boundaries
 
-## Adapter Boundary Clarifications
+- `vscode` imports are limited to `src/extension.ts`, bootstrap,
+  infrastructure, and `src/presentation/vscode`.
+- React, MUI, XyFlow, TanStack, and other UI-framework imports are limited to
+  `src/presentation/webview`.
+- Production source does not import Node built-ins. Host-specific behavior uses
+  injected capabilities or browser-safe adapters.
+- Shared code must remain safe for both the desktop and browser bundles.
 
-### Application-facing logic
+## Transport And Serialization
 
-- `src/application/unit-list/*` exposes DTO-oriented unit-list building
-- `src/application/unit-list/buildUnitListView.ts` projects normalized units
-  into stable table row/view data for the table presentation
-- `src/application/flow-graph/*` exposes DTO-oriented flow graph building
-- `src/application/editor-feedback/buildSyntaxDiagnostics.ts` exposes
-  parse-error decisions without `vscode` types
-- `src/application/editor-feedback/findParameterHover.ts` exposes parameter
-  hover decisions without `vscode` types and depends on an application-owned
-  parameter-syntax lookup port rather than localization resource
-  implementations
-- `src/application/telemetry/TelemetryPort.ts` exposes a small telemetry
-  contract without SDK-specific types
-- normalized AJS use cases should depend on `AjsDocument` and `AjsUnit`
-  instead of directly on `Unit` or `UnitEntity` where migration is practical
+- Extension-to-viewer documents and viewer-to-extension events use
+  direction-specific plain DTO contracts.
+- Webview payloads are serializable with standard JSON and do not rely on
+  cyclic object graphs or wrapper reconstruction.
+- Browser message input is validated before presentation callbacks run.
+- Host information is resolved at the outer boundary and sent as plain data.
 
-### Semantics that can remain in view adapters
-
-- normalized helpers should expose reusable lookup and traversal semantics, but
-  they do not need to absorb every table-specific formatting rule
-- `src/application/unit-list/buildUnitListView.ts` may continue to parse and
-  reshape schedule-oriented parameter strings such as `sd`, `cy`, `sh`, `cftd`,
-  `sy`, `ey`, `wc`, and `wt` into table-specific group fields because that
-  logic is about presentation-facing view structure rather than shared domain
-  meaning
-- CSV export may continue to depend on visible column order and rendered cell
-  stringification because those concerns belong to the export adapter boundary,
-  not to normalized AJS semantics
-- future normalization work should focus on semantics that are reused by
-  multiple consumers, such as lookup, inheritance, dependency interpretation,
-  root defaults, and rule-aware parameter alignment
-
-### VS Code-facing adapters
-
-- `src/presentation/vscode/diagnostics/registerDiagnostics.ts` owns
-  `DiagnosticCollection`, document subscriptions, and DTO-to-VS Code mapping
-- `src/presentation/vscode/languages/registerHoverProvider.ts` owns hover provider
-  registration and `MarkdownString` construction
-- `src/presentation/vscode/commands/openPreviewCommand.ts` owns command execution
-  and active-editor checks
-- `src/presentation/vscode/webview/messageHandlers.ts` owns save dialogs, theme/env/os
-  payload enrichment, and telemetry reporting for webview events
-- `src/bootstrap/extension/activateExtension.ts` is the explicit composition
-  root for activation wiring
-- `src/infrastructure/telemetry/*` owns telemetry adapter implementations;
-  `src/bootstrap/extension/createTelemetry.ts` owns adapter selection
-  of the runtime telemetry implementation
-- `src/infrastructure/i18n/ParameterSyntaxResourceAdapter.ts` owns access to
-  bundled parameter-syntax resources; extension bootstrap injects it into the
-  application hover use case, while VS Code Markdown construction remains in
-  the presentation hover provider
-- `src/presentation/webview/editor/ajsFlow/buildExpandedFlowGraph.ts` owns
-  presentation-local coordinate/layout resolution for nested expansion and
-  must preserve deterministic, expanded-set-based layout behavior without
-  depending on the last active expansion ID
-- `src/presentation/webview/editor/viewerEventBridge.ts` owns browser message
-  validation and callback routing; `bootstrapViewer.tsx` retains VS Code API
-  acquisition, global bridge exposure, listener installation, and React mount
-  wiring
+Changes to shared DTOs, viewer messages, bootstrap, or extension entry points
+require explicit desktop and web validation.
 
 ## Telemetry Boundary
 
-- application-owned event definitions and builders create nominally validated,
-  readonly telemetry events through the repository privacy allowlist
-- callers in extension-facing modules report only validated events through
-  `TelemetryPort.report(...)`; the port exposes no SDK-specific types or raw
-  event-name/property-map reporting surface
-- SDK-specific translation lives only in
-  `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts`
-- bootstrap wiring creates the telemetry adapter and injects it into the
-  extension runtime object
-- the SDK adapter contains reporting and disposal failures, while bootstrap
-  falls back to the no-op adapter when construction is unavailable
-- existing event names and payload meaning remain preserved; expanding
-  collection requires a separately approved telemetry feature
+- Application owns `TelemetryPort`, the event catalog, event builders, and the
+  privacy allowlist.
+- Callers report only validated events and cannot send arbitrary event names or
+  property maps.
+- `@vscode/extension-telemetry` is imported only by
+  `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts`.
+- Infrastructure translates validated events to the SDK and contains reporting
+  and disposal failures.
+- Bootstrap selects the SDK-backed or no-op adapter.
+- Telemetry never includes definition content, file paths, credentials, search
+  text, personal identifiers, or raw errors.
 
-## Web Extension Risks
+Existing event names and payload meaning are compatibility contracts. New
+collection requires an approved feature with an explicit privacy decision.
 
-- `src/extension.ts` is used for both desktop and browser entry points, so any
-  shared import chain can affect both bundles
-- `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts` depends on
-  `@vscode/extension-telemetry`; this still needs continued verification in web
-  extension execution
-- `src/presentation/vscode/webview/messageHandlers.ts` imports `os`; webpack currently
-  provides a browser fallback, but this remains an environment-specific
-  adapter concern that needs continued verification
-- `src/presentation/webview` receives webview event payloads rebuilt from plain DTO
-  documents, so serialization-boundary changes still affect both desktop and
-  web viewers even when parsing behavior is unchanged
+## Compatibility Contracts
 
-## Planned Boundary Tightening
+- `package.json` `engines.vscode` defines the minimum supported VS Code version.
+- Desktop and browser entry points must remain buildable and testable.
+- Parser and normalized-model changes must preserve supported JP1/AJS
+  definition-file behavior or document an explicitly approved compatibility
+  change.
+- Large, malformed, and encoded input risks remain owned by the relevant use
+  cases and regression suites.
+- Read-only JP1/AJS WebAPI import remains beta until its owning feature records
+  real-environment evidence and enough user feedback.
 
-### Package manager and toolchain
+## Change Policy
 
-- the repository now uses `pnpm`, but package-manager changes must stay
-  outside domain/application behavior contracts
-- build, test, and docs validation commands should remain explicit in SDD docs
-  so contributors can tell whether instructions describe the live toolchain
-  and lockfile expectations
-
-### Serialization boundary
-
-- viewer payloads should stay on plain DTO and event-object transport
-  contracts instead of reintroducing `flatted`-style implicit serialization
-  assumptions
-- presentation payloads should prefer DTOs that can be serialized by standard
-  JSON boundaries without circular-reference assumptions
-- serialization simplification is expected to support bundle-size reduction,
-  but the primary architectural goal is a clearer adapter boundary
-
-### Identity and hashing
-
-- `UnitEntity.id` is an internal wrapper-layer identity derived from
-  `Unit.absolutePath()` by deterministic UUID v5 generation
-- normalized `AjsUnit.id` and `AjsUnit.parentId` are absolute-path identities,
-  so current application-facing list, flow, table, reveal, and graph DTO paths
-  do not depend on the exact `UnitEntity.id` UUID string
-- `UnitEntity` identity semantics should remain stable; future identity
-  changes may happen only when behavior can be preserved and remaining wrapper
-  consumers do not depend on the current string form
-- identity algorithm changes should remain an implementation detail unless a
-  public or persisted identity contract is affected
-
-### JP1 reference alignment
-
-- JP1/AJS3 version 13 is the current normative product target for new
-  parameter-parsing and command-generation slices
-- manual-aligned parsing rules belong in domain/application seams that are
-  reusable by hover, definition rendering, navigation, and future import paths
-- command generation should be isolated behind an application-facing service or
-  use case instead of remaining embedded in a presentation-oriented
-  unit-definition builder
-
-### JP1/AJS WebAPI integration
-
-- JP1/AJS WebAPI access should sit behind infrastructure adapters with
-  application-facing DTOs or use cases
-- initial scope is read-only import of server-side definition information
-- WebAPI transport details, authentication, and endpoint wiring should stay
-  outside domain logic and outside webview presentation modules
-
-## First Good Vertical Slice
-
-### Recommended slice
-
-View Unit List
-
-### Why this slice was first
-
-- it already has a documented use case
-- it sits closest to the existing parser-to-domain seam
-- it is shared by diagnostics-adjacent parsing and table-view presentation needs
-- it can reduce current coupling without forcing an immediate flow-graph
-  redesign
-
-### Slice outcome
-
-The repository now has application-facing unit-list, CSV export, flow-graph,
-unit-definition, and table row/view adapter slices built on top of the
-normalized model where practical.
-
-### Current benefits
-
-- keeps parser invocation behind an explicit application port and
-  infrastructure adapter
-- removes `vscode` and serialization concerns from domain-side helpers
-- gives the table webview application-projected row/view data instead of
-  wrapper-driven accessor logic
-- creates a repeatable pattern for later slices such as CSV export and flow
-  graph building
-
-## Remaining extraction priority
-
-1. Reconcile any remaining wrapper-derived semantics that should move into the
-   normalized model instead of staying in view adapters
-2. Continue moving non-table presentation paths toward explicit DTO/view-model
-   boundaries
-3. Reduce residual wrapper usage where application slices already provide
-   stable normalized models
-4. Simplify viewer serialization and dependency weight where adapter contracts
-   are still broader than necessary
-5. Add application and infrastructure seams for JP1/AJS3 version 13
-   reference-aligned parameter, command, and WebAPI work
+- Preserve behavior before restructuring.
+- Plan non-trivial work through SDD and implement one approved vertical slice
+  at a time.
+- Add or update the nearest boundary tests when changing parser, application,
+  adapter, presentation, telemetry, or transport contracts.
+- Do not add architecture exceptions. A required rule change is an architecture
+  decision that must be planned, reviewed, and approved.
+- Keep framework, host, transport, and formatting concerns at the outer
+  boundary.

@@ -105,8 +105,11 @@
 - F3 (passed 2026-07-26): P1 through P10, U1 through U11, and C1 through C4
   were certified. Desktop and web tests, production build, qlty, Markdown lint,
   diff checks, and the Slice 1 and 2 zero-reference scans passed.
-- F4: cross-check every durable invariant against F2 and F3; run Markdown lint,
-  qlty, diff, Agent Brief, and no-`CONTEXT.md` checks.
+- F4 (passed 2026-07-26): `architecture.md`, `AGENTS.md`, plans, and roadmap now
+  describe the F2 zero-exception catalog and F3 compatibility evidence as
+  current policy. Qlty, repository-scoped Markdown lint, diff, heading, added-
+  line length, Agent Brief, no-`CONTEXT.md`, and invariant checks passed. The
+  active WebAPI beta evidence remains with its owning feature.
 - P1 (`architecture-inventory-and-guardrails`) (passed): the full rule-catalog
   source scan reported zero production violations, and every intentional-
   violation fixture was rejected.

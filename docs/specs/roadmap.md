@@ -56,21 +56,17 @@
    - Semantic diagnostics now consume normalized `AjsDocument` / `AjsUnit`
      inputs while preserving existing diagnostic behavior and source positions.
 
-4. Introduce stricter parser/infrastructure boundaries.
+4. Maintain the enforced parser and infrastructure boundaries.
 
-   - Completed: the application-facing parser port returns either a normalized
-     `AjsDocument` or repository-owned syntax errors, and all production
-     consumers use that boundary.
-   - Completed: generated parser access, ANTLR orchestration, the raw
-     `AjsRawUnit` tree, and raw-to-normalized conversion are confined to
-     `src/infrastructure/parser/**`.
-   - A deterministic architecture dependency collector and full rule catalog
-     now guard layer, parser/raw, wrapper, host/framework, Node/browser,
-     telemetry SDK, and composition boundaries. Current migration debt is an
-     exact, owned, stale-checked allowlist rather than a wildcard exception.
-   - Completed: `complete-normalized-domain-model` made normalized structure and
-     state the single live domain model, removed the legacy wrapper graph, and
-     reduced its exact dependency allowances to zero.
+   - The application-facing parser port returns either a normalized
+     `AjsDocument` or repository-owned syntax errors.
+   - Generated parser access, ANTLR orchestration, `AjsRawUnit`, and
+     raw-to-normalized conversion remain confined to parser infrastructure.
+   - The normalized model remains the only production domain model used by
+     downstream application behavior.
+   - The permanent architecture rule catalog enforces layer, parser/raw,
+     retired-wrapper, host/framework, Node/browser, telemetry SDK, and
+     composition boundaries with zero exceptions.
 
 5. Maintain the explicit extension composition root.
 
@@ -150,63 +146,21 @@
      impacts and explicitly state when runtime environment facts are not
      verified.
 
-10. Complete the DDD/Clean Architecture migration through independently
-    reviewable roadmap features.
+10. Maintain the verified DDD/Clean Architecture baseline.
 
-    1. Completed: `architecture-inventory-and-guardrails` classified production
-       dependencies and all eleven use-case boundaries, then established
-       guardrails with exact ownership for every current violation.
-    2. Completed: `isolate-parser-boundary` confined generated parser, ANTLR,
-       raw parser data, and raw normalization to infrastructure while exposing
-       normalized parser results to application consumers.
-    3. Completed: `complete-normalized-domain-model` made normalized domain
-       concepts and shared JP1/AJS rules sufficient for downstream use cases and
-       retired the legacy wrapper graph.
-    4. After normalized identity and semantics are stable, the following
-       vertical features may be planned independently where their dependency
-       evidence permits:
-       - Completed: `migrate-unit-information-boundaries` established shared
-         unit-definition DTOs, a serializable unit-list projection, a plain CSV
-         contract, and presentation-owned unit-information localization.
-       - Completed: `migrate-flow-graph-and-navigation-boundaries` established
-         host-neutral base and expanded graph contracts, application-owned
-         structural placement constraints, presentation-owned geometry, and a
-         stable application navigation contract for the list and flow viewers.
-       - Completed: `migrate-diagnostics-and-hover-boundaries` established
-         host-neutral diagnostic contracts, domain-owned supported semantic
-         rules, application message/hover decisions, presentation-owned VS Code
-         mapping, and browser-safe hover localization composition.
-       - Completed: `complete-webapi-infrastructure-boundaries` established an
-         application-owned host-neutral import contract, infrastructure-owned
-         SC-009 transport and credential mapping, bootstrap-owned desktop/web
-         capability selection, and presentation delegation without changing
-         beta behavior.
-       - Completed: `migrate-semantic-diff-and-report-boundaries` established
-         domain-owned semantic correspondence/evidence, an application-owned
-         scalar semantic-diff DTO, and presentation-owned localized Markdown,
-         display, and explicit-copy workflow.
-       - Completed: `isolate-telemetry-adapter-boundary` established an
-         application-owned validated-event catalog and privacy allowlist,
-         infrastructure-owned SDK translation and failure isolation, and
-         bootstrap-owned adapter selection without changing emitted meaning.
-    5. Completed: `standardize-serialization-and-composition-root` established
-       direction-specific plain-JSON viewer transport, browser-safe viewer host
-       data, host-first capability selection, and deterministic bootstrap-only
-       construction guardrails while preserving lifecycle and desktop/web
-       behavior.
-    6. `remove-legacy-and-enforce-clean-architecture`: remove superseded paths,
-       reduce temporary allowlists to zero, enforce all dependency rules, and
-       rewrite durable architecture policy to describe verified invariants.
-
-    - Preserve all existing parser, list, graph, CSV, definition, diagnostics,
-      hover, navigation, semantic diff/report, telemetry privacy, desktop/web,
-      and minimum VS Code compatibility behavior throughout the sequence.
-    - The existing `import-definition-via-webapi` feature continues to own beta
-      scope and real-environment evidence; the completed WebAPI architecture
-      feature owns only dependency, port/adapter, and composition boundaries.
-    - Do not start implementation from these intake documents. Each remaining
-      feature requires `sdd-plan-task`, `sdd-review-plan`, and explicit human
-      approval.
+    - Keep normalized domain concepts and reusable JP1/AJS rules as the only
+      production domain model.
+    - Keep application behavior host-neutral through ports, DTOs, and scalar
+      result contracts.
+    - Keep infrastructure implementations, presentation adapters, plain viewer
+      transport, and bootstrap composition in their enforced outer boundaries.
+    - Preserve parser, list, graph, CSV, definition, diagnostics, hover,
+      navigation, semantic diff/report, telemetry privacy, desktop/web, and
+      minimum VS Code compatibility when extending the product.
+    - Change an enforced boundary only through a separately planned, reviewed,
+      and approved architecture decision; do not introduce exceptions.
+    - The active `import-definition-via-webapi` feature continues to own beta
+      scope, generated-artifact reproducibility, and real-environment evidence.
 
 ## Deferred / Optional Slices
 

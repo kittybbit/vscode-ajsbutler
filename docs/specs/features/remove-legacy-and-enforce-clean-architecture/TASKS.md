@@ -4,8 +4,7 @@
 
 - Purpose: finish the migration with zero retired wrapper paths and permanent
   zero-exception architecture enforcement.
-- Approved slices: all four; Slices 1 through 3 are complete and Slice 4 is
-  active.
+- Approved slices: all four; Slices 1 through 4 are complete.
 - Implement one approved slice at a time in the dependency order below.
 - Do not remove parser-internal raw types or compatibility-preserving telemetry
   event names.
@@ -16,7 +15,8 @@
 - Validate every code slice with its focused checks and
   `rtk pnpm run qlty`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: implement and validate Slice 4 within its approved boundary.
+- Next decision: run `sdd-plan-task` in Feature Exit Mode without deleting the
+  feature folder before human closure approval.
 
 ## Plan Status
 
@@ -27,7 +27,7 @@
   verified evidence.
 - Review status: Reviewed; final verdict was ready for approval.
 - Human approval: Approved.
-- Active implementation slice: Slice 4.
+- Active implementation slice: none; Feature Exit review is required.
 
 ## Human Approval
 
@@ -361,7 +361,7 @@
 
 ### Slice 4: Rewrite Durable Architecture Policy From Verified Invariants
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - rewrite `docs/specs/architecture.md` to describe the verified current
     structure, dependency direction, composition ownership, parser/raw,
@@ -403,6 +403,24 @@
   - lightweight Agent Brief and no-`CONTEXT.md` structure checks from
     `docs/specs/README.md`;
   - cross-check every durable invariant against Slice 2/3 evidence.
+- Implementation Evidence:
+  - on 2026-07-26, `architecture.md` was rewritten from the Slice 2 zero-
+    exception catalog and Slice 3 compatibility evidence; `AGENTS.md` now
+    states the same enforced layer, parser/raw, host/framework, Node/browser,
+    telemetry SDK, composition, DTO, and desktop/web rules;
+  - `roadmap.md` now retains the verified architecture baseline and active
+    WebAPI beta ownership without the completed migration sequence;
+    `plans.md` identifies completion approval and Feature Exit review as the
+    next actions;
+  - no use-case update was needed because Slice 3 confirmed every durable
+    contract without finding an inaccurate behavior requirement;
+  - qlty, repository-scoped Markdown lint, diff checks, heading review, added-
+    line length review, Agent Brief structure, no-`CONTEXT.md`, and invariant
+    cross-checks passed;
+  - direct Markdown lint outside the repository script still reports 20
+    pre-existing `AGENTS.md` line-length findings; no changed line adds one;
+  - no runtime, test, generated-artifact, configuration, README, CHANGELOG, or
+    user-workflow change was made.
 - Production Readiness:
   - Failure mode: overstated policy can block valid work or conceal remaining
     debt; every statement must be backed by enforcement or validation.
@@ -423,7 +441,7 @@
 - Risks: removing migration history must not remove an unresolved risk, active
   beta constraint, or reusable compatibility rule. The scoped `lint:md` result
   must not be represented as coverage of durable documents outside that
-  script.
+  script. No unresolved Slice 4 risk was found during implementation.
 - Out of Scope: new architecture abstractions, user documentation rewrites,
   feature closure, unrelated roadmap reprioritization, and cleanup of
   pre-existing direct-Markdownlint findings outside the repository script

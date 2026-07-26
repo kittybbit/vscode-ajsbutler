@@ -35,9 +35,9 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Implement and validate approved Slice 4 of
-   `remove-legacy-and-enforce-clean-architecture` by rewriting durable
-   architecture policy from the verified Slice 2 and 3 invariants.
+1. Review and obtain completion approval for Slice 4 of
+   `remove-legacy-and-enforce-clean-architecture`, then run its separate Feature
+   Exit review.
 2. Replan `import-definition-via-webapi` with a focused generated-artifact
    reproducibility slice before correcting the checked-in stale Prism artifact
    reported by `rtk pnpm run openapi:check`.
@@ -50,12 +50,12 @@ rules in `docs/specs/README.md`, not in this file.
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
 - `docs/specs/features/remove-legacy-and-enforce-clean-architecture/`: active
-  approved migration-closure feature; Slice 4 is the current implementation
-  boundary.
+  migration-closure feature with all approved slices complete; Feature Exit
+  review is the next boundary.
 
-The final remaining Clean Architecture migration feature is active on this
-branch. Its four approved slices retain the dependency order recorded in the
-feature `TASKS.md`.
+The final Clean Architecture migration feature remains active on this branch
+until a separate Feature Exit review passes and human closure approval is
+recorded.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
