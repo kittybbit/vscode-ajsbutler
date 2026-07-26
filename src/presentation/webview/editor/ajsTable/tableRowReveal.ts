@@ -1,7 +1,7 @@
 import { MutableRefObject, useCallback } from "react";
 import type { Row } from "@tanstack/table-core";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { parseRevealUnitEventData } from "../../../../shared/webviewEvents";
+import { parseNavigationRequest } from "../../../../application/navigation/resolveNavigationTarget";
 
 export type TableRowRevealState = {
   handleJump: (id: string) => void;
@@ -59,8 +59,10 @@ export const revealTableRow = (
   data: unknown,
   context: TableRowRevealContext,
 ): boolean => {
-  const request = parseRevealUnitEventData(data);
-  return request ? selectResolvedRow(request.absolutePath, context) : false;
+  const result = parseNavigationRequest(data);
+  return result.status === "available"
+    ? selectResolvedRow(result.request.absolutePath, context)
+    : false;
 };
 
 export const useTableRowRevealState = (

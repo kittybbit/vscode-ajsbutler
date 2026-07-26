@@ -7,10 +7,8 @@ import {
 export const RESOURCE = "resource";
 export const READY = "ready";
 export const SAVE = "save";
-export const CHANGE_DOCUMENT = "changeDocument";
 export const OPERATION = "operation";
 export const NAVIGATE = "navigate";
-export const REVEAL_UNIT = "revealUnit";
 export const SEARCH = "search";
 export const PERFORMANCE = "performance";
 
@@ -18,7 +16,6 @@ export type NavigationTargetView = "flow" | "table";
 export type NavigationEventData = NavigationRequestDto & {
   targetView: NavigationTargetView;
 };
-export type RevealUnitEventData = NavigationRequestDto;
 
 export type ResourceEventType = { type: typeof RESOURCE; data: MyAppResource };
 export type ReadyEventType = { type: typeof READY };
@@ -58,10 +55,6 @@ export type NavigationEventType = {
   type: typeof NAVIGATE;
   data: NavigationEventData;
 };
-export type RevealUnitEventType = {
-  type: typeof REVEAL_UNIT;
-  data: RevealUnitEventData;
-};
 
 export const createNavigationEvent = (
   targetView: NavigationTargetView,
@@ -71,28 +64,20 @@ export const createNavigationEvent = (
   data: { targetView, absolutePath },
 });
 
-export const createRevealUnitEvent = (
-  absolutePath: string,
-): RevealUnitEventType => ({
-  type: REVEAL_UNIT,
-  data: { absolutePath },
-});
-
-export const parseRevealUnitEventData = (
-  data: unknown,
-): NavigationRequestDto | undefined => {
-  const result = parseNavigationRequest(data);
-  return result.status === "available" ? result.request : undefined;
-};
-
 export const parseNavigationEventData = (
   data: unknown,
 ): NavigationEventData | undefined => {
-  const request = parseRevealUnitEventData(data);
-  if (!request || typeof data !== "object" || data === null) return undefined;
+  const result = parseNavigationRequest(data);
+  if (
+    result.status !== "available" ||
+    typeof data !== "object" ||
+    data === null
+  ) {
+    return undefined;
+  }
   const targetView = (data as Record<string, unknown>).targetView;
   return targetView === "flow" || targetView === "table"
-    ? { targetView, ...request }
+    ? { targetView, ...result.request }
     : undefined;
 };
 

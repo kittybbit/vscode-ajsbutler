@@ -8,6 +8,8 @@ import { validateFlowGraphDocument } from "../../application/flow-graph/flowGrap
 import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
 import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
+import { createViewerDocumentChangedMessage } from "../../presentation/webview/viewerHostMessages";
+import { assertPlainJsonValue } from "../support/plainJson";
 import { testAjsParser } from "../support/parseAjs";
 
 const validDefinition = `
@@ -292,10 +294,10 @@ suite("Build Unit List", () => {
       result.document?.unitList.rows.at(-1)?.absolutePath,
       `/root/job-${childCount - 1}`,
     );
-    assert.deepStrictEqual(
-      JSON.parse(JSON.stringify(result.document?.unitList)),
-      result.document?.unitList,
-    );
+    const message = createViewerDocumentChangedMessage(result.document);
+    assertPlainJsonValue(message);
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(message)), message);
+    assert.strictEqual(message.data?.unitList.rows.length, childCount + 1);
   });
 
   test("returns no document when the parser reports errors", () => {

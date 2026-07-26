@@ -273,6 +273,34 @@ export type UnitListProjectionDto = {
   units: UnitListUnitMetadataDto[];
 };
 
+const omitUndefinedFields = <Value extends object>(value: Value): Value =>
+  Object.fromEntries(
+    Object.entries(value).filter(([, field]) => field !== undefined),
+  ) as Value;
+
+const omitUndefinedGroupFields = (row: UnitListRowView): UnitListRowView => ({
+  ...row,
+  group1: omitUndefinedFields(row.group1),
+  group2: omitUndefinedFields(row.group2),
+  group3: omitUndefinedFields(row.group3),
+  group4: omitUndefinedFields(row.group4),
+  group5: omitUndefinedFields(row.group5),
+  group6: omitUndefinedFields(row.group6),
+  group7: omitUndefinedFields(row.group7),
+  group8: omitUndefinedFields(row.group8),
+  group9: omitUndefinedFields(row.group9),
+  group10: omitUndefinedFields(row.group10),
+  group11: omitUndefinedFields(row.group11),
+  group12: omitUndefinedFields(row.group12),
+  group13: omitUndefinedFields(row.group13),
+  group14: omitUndefinedFields(row.group14),
+  group15: omitUndefinedFields(row.group15),
+  group16: omitUndefinedFields(row.group16),
+  group17: omitUndefinedFields(row.group17),
+  group18: omitUndefinedFields(row.group18),
+  group19: omitUndefinedFields(row.group19),
+});
+
 export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
   const units = flattenAjsUnits(document.rootUnits);
   const unitById = new Map(units.map((unit) => [unit.id, unit]));
@@ -292,7 +320,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
       nextUnits,
     );
 
-    return {
+    return omitUndefinedGroupFields({
       id: unit.id,
       absolutePath: unit.absolutePath,
       ...remainingGroups,
@@ -300,7 +328,7 @@ export const buildUnitListView = (document: AjsDocument): UnitListRowView[] => {
       group7: buildUnitListGroup7View(document, unit, group7PriorityById),
       group10: buildUnitListGroup10View(unit),
       group11: buildUnitListGroup11View(document, unit, group11PriorityById),
-    };
+    });
   });
 };
 

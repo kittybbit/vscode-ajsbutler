@@ -1,0 +1,107 @@
+import * as assert from "assert";
+import { toUnitListDocumentDto } from "../../application/unit-list/unitListDocument";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
+import {
+  createViewerDocumentChangedMessage,
+  createViewerResourceStateMessage,
+  createViewerRevealUnitMessage,
+  parseViewerHostMessage,
+  viewerHostMessageTypes,
+  type ViewerHostMessage,
+} from "../../presentation/webview/viewerHostMessages";
+import { assertPlainJsonValue } from "../support/plainJson";
+
+const document: AjsDocument = {
+  rootUnits: [
+    {
+      id: "root-id",
+      name: "root",
+      unitAttribute: "root,,jp1admin,",
+      unitType: "n",
+      absolutePath: "/root",
+      depth: 0,
+      isRoot: true,
+      isRootJobnet: true,
+      hasSchedule: false,
+      hasWaitedFor: false,
+      layout: { h: 0, v: 0 },
+      parameters: [{ key: "ty", value: "n" }],
+      relations: [],
+      children: [],
+    },
+  ],
+  warnings: [],
+};
+
+const createEveryViewerHostMessage = (): ViewerHostMessage[] => [
+  createViewerResourceStateMessage({
+    isDarkMode: true,
+    lang: "ja",
+    os: "darwin",
+    scrollType: "table",
+  }),
+  createViewerDocumentChangedMessage(toUnitListDocumentDto(document)),
+  createViewerRevealUnitMessage("/root"),
+];
+
+suite("Viewer host messages", () => {
+  test("inventories every builder and round-trips plain JSON", () => {
+    const messages = createEveryViewerHostMessage();
+
+    assert.deepStrictEqual(
+      messages.map(({ type }) => type),
+      viewerHostMessageTypes,
+    );
+    messages.forEach((message) => {
+      assertPlainJsonValue(message);
+      const restored = JSON.parse(JSON.stringify(message)) as unknown;
+      assert.deepStrictEqual(restored, message);
+      assert.deepStrictEqual(parseViewerHostMessage(restored), message);
+    });
+  });
+
+  test("uses explicit null for an unavailable document", () => {
+    const message = createViewerDocumentChangedMessage(undefined);
+
+    assert.deepStrictEqual(message, { type: "changeDocument", data: null });
+    assertPlainJsonValue(message);
+    assert.deepStrictEqual(parseViewerHostMessage(message), message);
+  });
+
+  test("rejects unknown, malformed, and non-plain envelopes", () => {
+    class MessageEnvelope {
+      readonly type = "revealUnit";
+      readonly data = { absolutePath: "/root" };
+    }
+
+    for (const value of [
+      undefined,
+      { type: "unknown", data: {} },
+      { type: "revealUnit", data: {} },
+      { type: "resource", data: {} },
+      { type: "changeDocument", data: [] },
+      { type: "changeDocument", data: {} },
+      new MessageEnvelope(),
+    ]) {
+      assert.strictEqual(parseViewerHostMessage(value), undefined);
+    }
+  });
+
+  test("plain JSON assertion rejects prohibited runtime values", () => {
+    class Payload {}
+    const circular: { self?: unknown } = {};
+    circular.self = circular;
+
+    for (const value of [
+      { value: undefined },
+      { value: Number.NaN },
+      { value: BigInt(1) },
+      { value: () => undefined },
+      { value: Symbol("value") },
+      { value: new Payload() },
+      circular,
+    ]) {
+      assert.throws(() => assertPlainJsonValue(value));
+    }
+  });
+});

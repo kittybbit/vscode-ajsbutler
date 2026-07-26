@@ -1,38 +1,14 @@
+import {
+  parseViewerHostMessage,
+  type ViewerHostMessage,
+  type ViewerHostMessageType,
+} from "../viewerHostMessages";
+
 type ViewerEventCallbacks = Window["EventBridge"]["callbacks"];
-type ViewerEventCallback = ViewerEventCallbacks[string][number];
-
-type ViewerEventPayload = {
-  type: string;
-  data: object;
-};
-
-type ViewerEventPayloadCandidate = {
-  type?: unknown;
-  data?: unknown;
-};
-
-const isViewerEventPayloadCandidate = (
-  value: unknown,
-): value is ViewerEventPayloadCandidate =>
-  Boolean(value) && typeof value === "object";
-
-const toViewerEventPayload = (
-  payload: ViewerEventPayloadCandidate,
-): ViewerEventPayload | undefined =>
-  typeof payload.type === "string"
-    ? { type: payload.type, data: payload.data as object }
-    : undefined;
-
-const resolveViewerEventPayload = (
-  event: MessageEvent,
-): ViewerEventPayload | undefined =>
-  isViewerEventPayloadCandidate(event.data)
-    ? toViewerEventPayload(event.data)
-    : undefined;
 
 const dispatchViewerEventPayload = (
   callbacksByType: ViewerEventCallbacks,
-  payload: ViewerEventPayload,
+  payload: ViewerHostMessage,
 ): void => {
   callbacksByType[payload.type]?.forEach((callback) => {
     callback(payload.type, payload.data);
@@ -41,7 +17,7 @@ const dispatchViewerEventPayload = (
 
 const appendViewerEventCallback = (
   callbacksByType: ViewerEventCallbacks,
-  type: string,
+  type: ViewerHostMessageType,
   callback: ViewerEventCallback,
 ): void => {
   const callbacks = callbacksByType[type];
@@ -62,7 +38,7 @@ const removeCallbackFromList = (
 
 const removeViewerEventCallback = (
   callbacksByType: ViewerEventCallbacks,
-  type: string,
+  type: ViewerHostMessageType,
   callback: ViewerEventCallback,
 ): void => {
   const callbacks = callbacksByType[type];
@@ -76,7 +52,7 @@ export const createViewerEventBridge = (): Window["EventBridge"] => {
   const bridge: Window["EventBridge"] = {
     callbacks,
     dispatch: (event) => {
-      const payload = resolveViewerEventPayload(event);
+      const payload = parseViewerHostMessage(event.data);
       if (payload) {
         dispatchViewerEventPayload(callbacks, payload);
       }

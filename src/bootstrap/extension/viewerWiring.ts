@@ -7,10 +7,10 @@ import {
 } from "../../application/telemetry/viewerTelemetry";
 import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import {
-  createRevealUnitEvent,
   type NavigationEventType,
   type NavigationTargetView,
 } from "../../shared/webviewEvents";
+import { createViewerRevealUnitMessage } from "../../presentation/webview/viewerHostMessages";
 import {
   type OpenPreviewCommandDependencies,
   executeOpenPreviewCommand,
@@ -78,7 +78,7 @@ const postRevealUnit = (
   panel: vscode.WebviewPanel,
   absolutePath: string,
 ): void => {
-  panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+  panel.webview.postMessage(createViewerRevealUnitMessage(absolutePath));
 };
 
 export const flushPendingViewerReveal = (

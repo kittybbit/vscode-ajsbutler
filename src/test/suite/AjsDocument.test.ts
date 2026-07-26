@@ -8,7 +8,7 @@ import {
   createReadyAjsDocument,
 } from "../../presentation/vscode/webview/ajsDocument";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
-import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
+import { CHANGE_DOCUMENT } from "../../presentation/webview/viewerHostMessages";
 
 suite("ajsDocument", () => {
   const buildUnitList = () => ({ errors: [], document: undefined });
@@ -131,5 +131,6 @@ suite("ajsDocument", () => {
 
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
+    assert.strictEqual(posted[0]?.data, null);
   });
 });

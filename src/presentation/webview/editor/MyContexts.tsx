@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import type { MyAppResource } from "../../../shared/MyAppResource";
+import { parseViewerResourceState, RESOURCE } from "../viewerHostMessages";
 
 export type { MyAppResource } from "../../../shared/MyAppResource";
 
@@ -34,14 +35,15 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
   const setMyAppResource = (myAppResource: SetStateAction<MyAppResource>) =>
     startTransition(() => setMyAppResourceInternal(myAppResource));
 
-  const resourceCallbackFn = (type: string, data: Partial<MyAppResource>) => {
-    updateMyAppResource(data);
+  const resourceCallbackFn: ViewerEventCallback = (_type, data) => {
+    const resource = parseViewerResourceState(data);
+    if (resource) updateMyAppResource(resource);
   };
   useEffect(() => {
-    window.EventBridge.addCallback("resource", resourceCallbackFn);
+    window.EventBridge.addCallback(RESOURCE, resourceCallbackFn);
     window.vscode.postMessage({ type: "resource", data: myAppResource });
     return () => {
-      window.EventBridge.removeCallback("resource", resourceCallbackFn);
+      window.EventBridge.removeCallback(RESOURCE, resourceCallbackFn);
     };
   }, []);
 

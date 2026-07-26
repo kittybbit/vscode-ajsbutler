@@ -9,7 +9,10 @@ import {
   toFlowGraphDocumentDto,
   validateFlowGraphDocument,
 } from "../../application/flow-graph/flowGraphDocument";
+import { toUnitListDocumentDto } from "../../application/unit-list/unitListDocument";
+import { createViewerDocumentChangedMessage } from "../../presentation/webview/viewerHostMessages";
 import { parseAjsDocumentForTest } from "../support/parseAjs";
+import { assertPlainJsonValue } from "../support/plainJson";
 
 const definition = `
 unit=root,,jp1admin,;
@@ -243,6 +246,16 @@ suite("Flow Graph Document", () => {
     assert.strictEqual(
       result.index.unitById.get(`nested-${depth}`)?.depth,
       depth,
+    );
+    const message = createViewerDocumentChangedMessage(
+      toUnitListDocumentDto({ rootUnits: source.rootUnits, warnings: [] }),
+    );
+    assertPlainJsonValue(message);
+    const restored = JSON.parse(JSON.stringify(message)) as typeof message;
+    assert.strictEqual(restored.data?.unitList.rows.length, depth + 1);
+    assert.strictEqual(
+      restored.data?.unitList.rows.at(-1)?.absolutePath,
+      parentPath,
     );
   });
 });

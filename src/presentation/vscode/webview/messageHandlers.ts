@@ -9,6 +9,10 @@ import {
 import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
 import type { MyAppResource } from "../../../shared/MyAppResource";
 import {
+  createViewerResourceStateMessage,
+  type ViewerResourceStateDto,
+} from "../../webview/viewerHostMessages";
+import {
   type PerformanceEventType,
   type SearchEventType,
 } from "../../../shared/webviewEvents";
@@ -20,17 +24,14 @@ export const postResourceMessage = (
   panel: vscode.WebviewPanel,
 ): void => {
   console.log(`post a message of resource. (${panel.title})`);
-  const data: MyAppResource = {
+  const data: ViewerResourceStateDto = {
     ...requestedResource,
     isDarkMode:
       vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark,
     lang: vscode.env.language,
     os: os.platform().toLowerCase(),
   };
-  panel.webview.postMessage({
-    type: "resource",
-    data,
-  });
+  panel.webview.postMessage(createViewerResourceStateMessage(data));
 };
 
 export const saveText = async (content: string): Promise<void> => {

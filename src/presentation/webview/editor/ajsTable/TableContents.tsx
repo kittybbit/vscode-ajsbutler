@@ -45,10 +45,10 @@ import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
 import UnitEntityDialog from "../UnitEntityDialog";
 import {
-  REVEAL_UNIT,
   createOperationEvent,
   createPerformanceEvent,
 } from "../../../../shared/webviewEvents";
+import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
 import UnitTreeSelector from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
@@ -457,7 +457,7 @@ const TableContents = () => {
   }, [tableData, resetSearch]);
 
   useEffect(() => {
-    window.EventBridge.addCallback("changeDocument", changeDocument);
+    window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocument);
     const revealUnitFn = (_type: string, data: unknown) => {
       if (revealUnit(data)) resetSearch();
     };
@@ -470,7 +470,7 @@ const TableContents = () => {
     );
     window.vscode.postMessage({ type: "ready" });
     return () => {
-      window.EventBridge.removeCallback("changeDocument", changeDocument);
+      window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocument);
       window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
     };
   }, [changeDocument, resetSearch, revealUnit]); // fire this when mount.

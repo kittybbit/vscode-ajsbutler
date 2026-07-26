@@ -3,7 +3,7 @@ import { createPerformanceTelemetryEvent } from "../../../application/telemetry/
 import { toDurationBucket } from "../../../application/telemetry/telemetryBuckets";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import type { BuildUnitList } from "../../../application/unit-list/buildUnitList";
-import { CHANGE_DOCUMENT } from "../../../shared/webviewEvents";
+import { createViewerDocumentChangedMessage } from "../../webview/viewerHostMessages";
 import { getTelemetryHost } from "../telemetryHost";
 
 const reportUnitListBuildPerformance = (
@@ -37,10 +37,9 @@ const postAjsDocument = (
     performance.now() - startedAt,
     result.errors.length > 0 ? "failed" : "success",
   );
-  panel.webview.postMessage({
-    type: CHANGE_DOCUMENT,
-    data: result.document,
-  });
+  panel.webview.postMessage(
+    createViewerDocumentChangedMessage(result.document),
+  );
 };
 
 export const createReadyAjsDocument =

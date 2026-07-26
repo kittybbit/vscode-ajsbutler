@@ -13,12 +13,12 @@ import {
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
+import { createPerformanceEvent } from "../../../../shared/webviewEvents";
 import {
-  createPerformanceEvent,
-  parseRevealUnitEventData,
-  REVEAL_UNIT,
-  type RevealUnitEventData,
-} from "../../../../shared/webviewEvents";
+  parseNavigationRequest,
+  type NavigationRequestDto,
+} from "../../../../application/navigation/resolveNavigationTarget";
+import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
 import {
   resolveFlowNodeCenter,
   resolveFlowViewportFocusAction,
@@ -413,7 +413,7 @@ export const useFlowDocumentSubscription = ({
       setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
       setCurrentUnitId(() => nextState.currentUnitId);
     };
-    window.EventBridge.addCallback("changeDocument", changeDocumentFn);
+    window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocumentFn);
     window.vscode.postMessage(
       createPerformanceEvent({
         operation: "flow_render",
@@ -425,7 +425,7 @@ export const useFlowDocumentSubscription = ({
     );
     window.vscode.postMessage({ type: "ready" });
     return () => {
-      window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
+      window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocumentFn);
     };
   }, [
     prevUnitEntityId,
@@ -436,7 +436,7 @@ export const useFlowDocumentSubscription = ({
 };
 
 type UseRevealUnitSubscriptionParams = {
-  handleRevealUnit: (request: RevealUnitEventData) => void;
+  handleRevealUnit: (request: NavigationRequestDto) => void;
 };
 
 export const useRevealUnitSubscription = ({
@@ -444,8 +444,8 @@ export const useRevealUnitSubscription = ({
 }: UseRevealUnitSubscriptionParams) => {
   useEffect(() => {
     const revealUnitFn = (_type: string, data: unknown) => {
-      const request = parseRevealUnitEventData(data);
-      if (request) handleRevealUnit(request);
+      const result = parseNavigationRequest(data);
+      if (result.status === "available") handleRevealUnit(result.request);
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     return () => {
