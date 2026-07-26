@@ -35,27 +35,17 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Review and obtain completion approval for Slice 4 of
-   `remove-legacy-and-enforce-clean-architecture`, then run its separate Feature
-   Exit review.
-2. Replan `import-definition-via-webapi` with a focused generated-artifact
+1. Replan `import-definition-via-webapi` with a focused generated-artifact
    reproducibility slice before correcting the checked-in stale Prism artifact
    reported by `rtk pnpm run openapi:check`.
-3. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-4. Keep compatibility risk visible for every shared or extension-runtime change.
+3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
-- `docs/specs/features/remove-legacy-and-enforce-clean-architecture/`: active
-  migration-closure feature with all approved slices complete; Feature Exit
-  review is the next boundary.
-
-The final Clean Architecture migration feature remains active on this branch
-until a separate Feature Exit review passes and human closure approval is
-recorded.
 
 Completed feature-local folders should be removed after their durable behavior
 contracts, active decisions, and unresolved risks have been moved to the
