@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import type { ViewerNavigationRequest } from "../../webview/viewerRequestMessages";
 import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
@@ -48,6 +47,13 @@ type ViewerFactoryOptions = {
 type ViewerCustomizeRequest = {
   document: vscode.TextDocument;
   panel: vscode.WebviewPanel;
+};
+
+export const resolveViewerPanelTitle = (
+  uri: Pick<vscode.Uri, "authority" | "path" | "scheme">,
+): string => {
+  const pathSegments = uri.path.split("/").filter(Boolean);
+  return pathSegments[pathSegments.length - 1] ?? (uri.authority || uri.scheme);
 };
 
 /**
@@ -140,7 +146,7 @@ export class ViewerFactory {
   ): vscode.WebviewPanel {
     const panel = this.#deps.createWebviewPanel(
       this.#viewType,
-      path.basename(document.fileName),
+      resolveViewerPanelTitle(document.uri),
       vscode.ViewColumn.Active,
       {
         enableScripts: true,

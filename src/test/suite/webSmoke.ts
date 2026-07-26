@@ -59,4 +59,14 @@ export async function run(): Promise<void> {
   await vscode.commands.executeCommand("open.ajsbutler.tableViewer");
   await vscode.commands.executeCommand("open.ajsbutler.flowViewer");
   await waitFor(200);
+
+  const expectedPanelTitle =
+    previewDocument.uri.path.split("/").filter(Boolean).pop() ??
+    previewDocument.uri.scheme;
+  const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+  if (activeTab?.label !== expectedPanelTitle) {
+    throw new Error(
+      `Expected active viewer title ${expectedPanelTitle}, received ${activeTab?.label ?? "none"}`,
+    );
+  }
 }

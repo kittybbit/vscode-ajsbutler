@@ -19,7 +19,6 @@ export type ViewerHostMessageType = (typeof viewerHostMessageTypes)[number];
 export type ViewerResourceStateDto = {
   isDarkMode: boolean;
   lang: string;
-  os: string;
   scrollType: "window" | "table";
 };
 
@@ -63,7 +62,6 @@ export const parseViewerResourceState = (
     !isPlainRecord(value) ||
     typeof value.isDarkMode !== "boolean" ||
     typeof value.lang !== "string" ||
-    typeof value.os !== "string" ||
     (value.scrollType !== "window" && value.scrollType !== "table")
   ) {
     return undefined;
@@ -71,7 +69,6 @@ export const parseViewerResourceState = (
   return {
     isDarkMode: value.isDarkMode,
     lang: value.lang,
-    os: value.os,
     scrollType: value.scrollType,
   };
 };

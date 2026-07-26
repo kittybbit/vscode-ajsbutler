@@ -1,4 +1,3 @@
-import * as os from "os";
 import * as vscode from "vscode";
 import { createPerformanceTelemetryEvent } from "../../../application/telemetry/performanceTelemetry";
 import { createSearchTelemetryEvent } from "../../../application/telemetry/searchTelemetry";
@@ -29,7 +28,6 @@ export const postResourceMessage = (
     isDarkMode:
       vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark,
     lang: vscode.env.language,
-    os: os.platform().toLowerCase(),
   };
   panel.webview.postMessage(createViewerResourceStateMessage(data));
 };

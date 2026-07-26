@@ -25,7 +25,6 @@ type MyAppContext = MyAppResource & {
 const myAppContext = createContext<MyAppContext>({
   isDarkMode: undefined,
   lang: undefined,
-  os: undefined,
   scrollType: "table",
   updateMyAppResource: () => {},
 });
@@ -36,7 +35,6 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
   const [myAppResource, setMyAppResourceInternal] = useState<MyAppResource>({
     isDarkMode: undefined,
     lang: undefined,
-    os: undefined,
     scrollType: "table",
   });
   const setMyAppResource = (myAppResource: SetStateAction<MyAppResource>) =>

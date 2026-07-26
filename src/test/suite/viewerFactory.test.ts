@@ -1,7 +1,10 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { ViewerFactory } from "../../presentation/vscode/webview/ViewerFactory";
+import {
+  resolveViewerPanelTitle,
+  ViewerFactory,
+} from "../../presentation/vscode/webview/ViewerFactory";
 import {
   NAVIGATE,
   OPERATION,
@@ -11,6 +14,21 @@ import {
 } from "../../presentation/webview/viewerRequestMessages";
 
 suite("ViewerFactory", () => {
+  test("resolves filename-equivalent and stable URI panel titles", () => {
+    assert.strictEqual(
+      resolveViewerPanelTitle(vscode.Uri.parse("file:///tmp/sample.ajs")),
+      "sample.ajs",
+    );
+    assert.strictEqual(
+      resolveViewerPanelTitle(vscode.Uri.parse("custom://server/folder/")),
+      "folder",
+    );
+    assert.strictEqual(
+      resolveViewerPanelTitle(vscode.Uri.parse("untitled:")),
+      "untitled",
+    );
+  });
+
   test("reuses an existing panel before creating a new one", () => {
     const telemetry: TelemetryPort = {
       report() {},
@@ -19,7 +37,7 @@ suite("ViewerFactory", () => {
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
-      uri: { toString: () => "file:///sample.ajs" },
+      uri: vscode.Uri.parse("file:///sample.ajs"),
     } as vscode.TextDocument;
     let addCalled = false;
     let readyCalled = false;
@@ -67,7 +85,7 @@ suite("ViewerFactory", () => {
     const createdPanel = { id: "new" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
-      uri: { toString: () => "file:///sample.ajs" },
+      uri: vscode.Uri.parse("file:///sample.ajs"),
     } as vscode.TextDocument;
     const added: Array<{
       uri: vscode.Uri;
@@ -79,6 +97,7 @@ suite("ViewerFactory", () => {
     let createdShowOptions:
       | Parameters<typeof vscode.window.createWebviewPanel>[2]
       | undefined;
+    let createdTitle: string | undefined;
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
@@ -99,7 +118,8 @@ suite("ViewerFactory", () => {
         onNavigate: () => {},
       },
       deps: {
-        createWebviewPanel(_viewType, _title, viewColumn) {
+        createWebviewPanel(_viewType, title, viewColumn) {
+          createdTitle = title;
           createdShowOptions = viewColumn;
           return createdPanel;
         },
@@ -113,6 +133,7 @@ suite("ViewerFactory", () => {
       document,
       panel: createdPanel,
     });
+    assert.strictEqual(createdTitle, "sample.ajs");
     assert.strictEqual(createdShowOptions, vscode.ViewColumn.Active);
     assert.deepStrictEqual(added, [{ uri: document.uri, panel: createdPanel }]);
   });
@@ -125,7 +146,7 @@ suite("ViewerFactory", () => {
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
-      uri: { toString: () => "file:///sample.ajs" },
+      uri: vscode.Uri.parse("file:///sample.ajs"),
     } as vscode.TextDocument;
 
     const factory = new ViewerFactory({
@@ -166,7 +187,7 @@ suite("ViewerFactory", () => {
     };
     const document = {
       fileName: "/tmp/sample.ajs",
-      uri: { toString: () => "file:///sample.ajs" },
+      uri: vscode.Uri.parse("file:///sample.ajs"),
     } as vscode.TextDocument;
     const panel = {
       title: "sample.ajs",

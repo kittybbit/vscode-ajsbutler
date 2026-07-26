@@ -37,7 +37,6 @@ const createEveryViewerHostMessage = (): ViewerHostMessage[] => [
   createViewerResourceStateMessage({
     isDarkMode: true,
     lang: "ja",
-    os: "darwin",
     scrollType: "table",
   }),
   createViewerDocumentChangedMessage(toUnitListDocumentDto(document)),

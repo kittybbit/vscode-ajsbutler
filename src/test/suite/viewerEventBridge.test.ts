@@ -68,7 +68,6 @@ suite("Viewer event bridge", () => {
         data: {
           isDarkMode: true,
           lang: "ja",
-          os: "darwin",
           scrollType: "table",
         },
       }),

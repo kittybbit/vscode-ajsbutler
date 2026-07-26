@@ -4,8 +4,7 @@
 
 - Purpose: standardize plain viewer transport and bootstrap-only composition.
 - Approved or active slice:
-  Slices 1-2 are complete; Slice 3 is active and approved; Slice 4 is approved
-  and queued.
+  Slices 1-3 are complete; Slice 4 is active and approved.
 - Do not change message meaning, activation, lifecycle, or viewer behavior.
 - Do not introduce a service container or reconstruct domain objects in viewers.
 - Read first: `SPECS.md`, this file, and the exact architecture allowlist.
@@ -14,7 +13,7 @@
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
 - Next decision:
-  implement Slice 3 with `sdd-implement-task`.
+  implement Slice 4 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -36,7 +35,7 @@
   focused replan reviewed with verdict `Ready for approval`; no blocking
   findings remain.
 - Human approval: approved for the full plan and all four slices.
-- Active implementation slice: Slice 3.
+- Active implementation slice: Slice 4.
 
 ## Replanning Record
 
@@ -261,7 +260,7 @@ active implementation approval remains.
 
 ### Slice 3: Remove Node-Dependent Viewer Host Data
 
-- Status: Approved
+- Status: Complete
 - Scope:
   replace the `os`-derived shortcut platform payload with a browser-safe
   presentation source, replace `path.basename` panel naming with a VS Code/
@@ -469,10 +468,10 @@ active implementation approval remains.
       payload leaks in both directions.
 - [x] Existing 500-unit and 1,500-level document cases round-trip through the
       final host-to-viewer contract with stable identity and counts.
-- [ ] Slice 3 browser-safe host data tests and zero exact allowlist.
+- [x] Slice 3 browser-safe host data tests and zero exact allowlist.
 - [ ] Slice 4 composition/lifecycle guardrails and desktop/web integration.
-- [x] `rtk pnpm run qlty` for Slices 1-2.
-- [x] New qlty smells for Slices 1-2 resolved; no actionable follow-up remains;
+- [x] `rtk pnpm run qlty` for Slices 1-3.
+- [x] New qlty smells for Slices 1-3 resolved; no actionable follow-up remains;
       metric movement recorded only when tied to a concrete responsibility or
       compatibility risk.
 - [x] Slice 1 integrated production-readiness review and separate
@@ -503,6 +502,18 @@ active implementation approval remains.
   resource-handshake risks.
 - Final review found no remaining scope, compatibility, architecture,
   privacy, performance, or production-readiness issue for Slice 2.
+- Slice 3 boundary was appropriate. Browser platform detection belongs in the
+  webview presentation surface, while URI panel-title resolution remains at
+  the VS Code presentation boundary.
+- Privacy-reduced or unavailable browser platform data now deterministically
+  retains the non-macOS Control-F fallback; no additional host capability or
+  transport field was needed.
+- No durable-document propagation is needed for Slice 3. The platform and URI
+  compatibility behavior was already specified, and implementation introduced
+  no new cross-feature policy.
+- Final integrated and independent compatibility reviews found no remaining
+  scope, behavior, architecture, privacy, performance, VS Code 1.75, or
+  production-readiness issue for Slice 3.
 
 ## Notes
 

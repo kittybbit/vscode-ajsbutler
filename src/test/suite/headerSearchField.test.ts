@@ -3,10 +3,19 @@ import {
   focusHeaderSearchFromShortcut,
   formatHeaderSearchPlaceholder,
   isHeaderSearchShortcut,
+  isMacBrowserPlatform,
   resolveHeaderSearchHelperText,
 } from "../../presentation/webview/editor/shared/HeaderSearchField";
 
 suite("Header Search Field", () => {
+  test("recognizes macOS browser platforms and otherwise falls back safely", () => {
+    assert.strictEqual(isMacBrowserPlatform("MacIntel"), true);
+    assert.strictEqual(isMacBrowserPlatform("macOS"), true);
+    assert.strictEqual(isMacBrowserPlatform("Win32"), false);
+    assert.strictEqual(isMacBrowserPlatform(""), false);
+    assert.strictEqual(isMacBrowserPlatform(undefined), false);
+  });
+
   test("uses the platform shortcut without intercepting other keys", () => {
     assert.strictEqual(
       isHeaderSearchShortcut(

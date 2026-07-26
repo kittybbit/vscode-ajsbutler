@@ -89,7 +89,6 @@ suite("Viewer request messages", () => {
         data: {
           isDarkMode: true,
           lang: "ja",
-          os: "darwin",
           scrollType: "table",
         },
       },
