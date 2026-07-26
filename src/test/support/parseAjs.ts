@@ -18,6 +18,6 @@ export const parseAjsDocumentForTest = (content: string): AjsDocument => {
   return result.document;
 };
 
-/** Internal raw access for parser, normalizer, and legacy-wrapper tests only. */
+/** Internal raw access for parser and normalization tests only. */
 export const parseRawAjsForTest = (content: string): RawParseAjsResult =>
   testRawAjsParser.parse(content);

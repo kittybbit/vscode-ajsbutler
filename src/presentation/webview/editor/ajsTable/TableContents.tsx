@@ -43,7 +43,7 @@ import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
-import UnitEntityDialog from "../UnitEntityDialog";
+import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
 import {
   createViewerOperationRequest,
@@ -345,7 +345,7 @@ const TableViewerShell = ({
         </Box>
       </Stack>
       {dialogData && (
-        <UnitEntityDialog
+        <UnitDefinitionDialog
           dialogData={dialogData}
           onClose={() => setDialogData(undefined)}
         />

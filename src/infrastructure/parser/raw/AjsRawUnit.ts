@@ -59,36 +59,4 @@ export class AjsRawUnit {
       ? `/${this.name}`
       : `${this.parent?.absolutePath()}/${this.name}`;
   }
-
-  /** Create a Unit instance from a JSON object. */
-  static createFromJSON(rootUnitOfJSON: AjsRawUnit): AjsRawUnit {
-    if (rootUnitOfJSON.parent) {
-      throw new Error(
-        `This unit is not root unit. (${rootUnitOfJSON.unitAttribute})`,
-      );
-    }
-    const rootUnit = Object.assign(
-      new AjsRawUnit(rootUnitOfJSON.unitAttribute),
-      rootUnitOfJSON,
-    );
-    rootUnit.children = rootUnitOfJSON.children.map((child) =>
-      this.#createFromJSON(child, rootUnit),
-    );
-    return rootUnit;
-  }
-
-  static #createFromJSON(
-    unitOfJSON: AjsRawUnit,
-    parent: AjsRawUnit,
-  ): AjsRawUnit {
-    const childUnit = Object.assign(
-      new AjsRawUnit(unitOfJSON.unitAttribute),
-      unitOfJSON,
-    );
-    childUnit.parent = parent;
-    childUnit.children = unitOfJSON.children.map((v) =>
-      this.#createFromJSON(v, childUnit),
-    );
-    return childUnit;
-  }
 }

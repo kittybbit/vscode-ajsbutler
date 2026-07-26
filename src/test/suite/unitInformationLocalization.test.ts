@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { localizeUnitDefinitionLabel } from "../../presentation/webview/editor/UnitEntityDialog";
+import { localizeUnitDefinitionLabel } from "../../presentation/webview/editor/UnitDefinitionDialog";
 import {
   unitInformationMessage,
   unitInformationParameterDefinitions,

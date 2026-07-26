@@ -357,7 +357,7 @@ export const useFlowScopeReset = ({
 };
 
 type UseFlowDocumentSubscriptionParams = {
-  prevUnitEntityId: MutableRefObject<string | undefined>;
+  previousUnitIdRef: MutableRefObject<string | undefined>;
   setFlowDocument: Dispatch<
     SetStateAction<ValidatedFlowGraphDocument | undefined>
   >;
@@ -400,7 +400,7 @@ export const resolveFlowDocumentChange = (
 };
 
 export const useFlowDocumentSubscription = ({
-  prevUnitEntityId,
+  previousUnitIdRef,
   setFlowDocument,
   setCurrentUnitId,
   setUnitDefinitionByPath,
@@ -410,7 +410,7 @@ export const useFlowDocumentSubscription = ({
     const changeDocumentFn = (_type: string, data: unknown) => {
       const nextState = resolveFlowDocumentChange(
         data,
-        prevUnitEntityId.current,
+        previousUnitIdRef.current,
       );
       setFlowDocument(() => nextState.flowDocument);
       setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
@@ -431,7 +431,7 @@ export const useFlowDocumentSubscription = ({
       window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocumentFn);
     };
   }, [
-    prevUnitEntityId,
+    previousUnitIdRef,
     setFlowDocument,
     setCurrentUnitId,
     setUnitDefinitionByPath,

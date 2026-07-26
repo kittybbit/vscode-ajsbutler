@@ -50,11 +50,11 @@ const useFlowViewerRefs = () => {
     null,
   );
   const preserveSearchOnNextScopeChange = useRef<boolean>(false);
-  const prevUnitEntityId = useRef<string | undefined>(undefined);
+  const previousUnitIdRef = useRef<string | undefined>(undefined);
 
   return {
     preserveSearchOnNextScopeChange,
-    prevUnitEntityId,
+    previousUnitIdRef,
     reactFlowInstanceRef,
   };
 };
@@ -282,7 +282,7 @@ type FlowViewerLifecycleParams = {
   preserveSearchOnNextScopeChange: ReturnType<
     typeof useFlowViewerRefs
   >["preserveSearchOnNextScopeChange"];
-  prevUnitEntityId: ReturnType<typeof useFlowViewerRefs>["prevUnitEntityId"];
+  previousUnitIdRef: ReturnType<typeof useFlowViewerRefs>["previousUnitIdRef"];
   reactFlowInstanceRef: ReturnType<
     typeof useFlowViewerRefs
   >["reactFlowInstanceRef"];
@@ -310,7 +310,7 @@ const useFlowViewerLifecycle = ({
   handleRevealUnit,
   nodes,
   preserveSearchOnNextScopeChange,
-  prevUnitEntityId,
+  previousUnitIdRef,
   reactFlowInstanceRef,
   resetSearch,
   searchedUnitId,
@@ -347,7 +347,7 @@ const useFlowViewerLifecycle = ({
     setExpandedUnitIds,
   });
   useFlowDocumentSubscription({
-    prevUnitEntityId,
+    previousUnitIdRef,
     setFlowDocument,
     setCurrentUnitId,
     setUnitDefinitionByPath,
@@ -369,7 +369,7 @@ export const useFlowViewerController = ({
   >(new Map());
   const {
     preserveSearchOnNextScopeChange,
-    prevUnitEntityId,
+    previousUnitIdRef,
     reactFlowInstanceRef,
   } = useFlowViewerRefs();
   const { dialogData, dialogDataState, setDialogData } = useFlowViewerUiState();
@@ -439,7 +439,7 @@ export const useFlowViewerController = ({
     dialogDataState,
     expandedUnitIds,
     nestedExpansionState,
-    prevUnitEntityId,
+    previousUnitIdRef,
     searchedUnitId,
     searchMatchedUnitIds,
     selectedUnitId,
@@ -476,7 +476,7 @@ export const useFlowViewerController = ({
     handleRevealUnit,
     nodes,
     preserveSearchOnNextScopeChange,
-    prevUnitEntityId,
+    previousUnitIdRef,
     reactFlowInstanceRef,
     resetSearch,
     searchedUnitId,

@@ -36,7 +36,7 @@ type UseFlowGraphStateParams = {
   dialogDataState: DialogDataStateType;
   expandedUnitIds: string[];
   nestedExpansionState: NestedExpansionStateType;
-  prevUnitEntityId: MutableRefObject<string | undefined>;
+  previousUnitIdRef: MutableRefObject<string | undefined>;
   searchedUnitId?: string;
   searchMatchedUnitIds: string[];
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
@@ -50,7 +50,7 @@ type FlowData = { nodes: Node<AjsNode>[]; edges: Edge[] };
 
 type FlowGraphDataBuildParams = Omit<
   UseFlowGraphStateParams,
-  "currentUnitId" | "prevUnitEntityId"
+  "currentUnitId" | "previousUnitIdRef"
 >;
 
 type ReadyFlowGraphDataBuildParams = FlowGraphDataBuildParams & {
@@ -140,7 +140,7 @@ export const useFlowGraphState = ({
   dialogDataState,
   expandedUnitIds,
   nestedExpansionState,
-  prevUnitEntityId,
+  previousUnitIdRef,
   searchedUnitId,
   searchMatchedUnitIds,
   semanticDiffHighlights,
@@ -202,8 +202,8 @@ export const useFlowGraphState = ({
       );
     }
     updateFlowDataState(nextFlowData, setNodes, setEdges);
-    prevUnitEntityId.current = currentUnitId;
-  }, [flowDocument, buildNodesAndEdges, currentUnitId, prevUnitEntityId]);
+    previousUnitIdRef.current = currentUnitId;
+  }, [flowDocument, buildNodesAndEdges, currentUnitId, previousUnitIdRef]);
 
   return { edges, nodes };
 };

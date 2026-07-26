@@ -28,7 +28,7 @@ import {
 } from "../../../application/unit-definition/buildUnitDefinition";
 import { useMyAppContext } from "./MyContexts";
 
-type UnitEntityDialogProps = {
+type UnitDefinitionDialogProps = {
   dialogData: UnitDefinitionDialogDto | undefined;
   onClose: VoidFunction;
 };
@@ -88,7 +88,7 @@ const CopyableTextField: FC<CopyableTextFieldProps> = ({
   );
 };
 
-const UnitEntityDialog: FC<UnitEntityDialogProps> = ({
+const UnitDefinitionDialog: FC<UnitDefinitionDialogProps> = ({
   dialogData,
   onClose,
 }) => {
@@ -387,4 +387,4 @@ const CommandBuilderField: FC<CommandBuilderFieldProps> = (props) => {
   );
 };
 
-export default memo(UnitEntityDialog);
+export default memo(UnitDefinitionDialog);

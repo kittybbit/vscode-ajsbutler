@@ -18,7 +18,7 @@ import {
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import UnitEntityDialog from "../UnitEntityDialog";
+import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import JobNode from "./nodes/JobNode";
 import JobNetNode from "./nodes/JobNetNode";
@@ -238,7 +238,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
       )}
     </Stack>
     {dialogData && (
-      <UnitEntityDialog
+      <UnitDefinitionDialog
         dialogData={dialogData}
         onClose={() => setDialogData(undefined)}
       />
