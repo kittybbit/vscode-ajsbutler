@@ -40,18 +40,12 @@ rules in `docs/specs/README.md`, not in this file.
    reported by `rtk pnpm run openapi:check`.
 2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-3. Start approved Slice 1 of
-   `standardize-serialization-and-composition-root` on a dedicated non-`docs/`
-   feature branch with `sdd-implement-task`.
-4. Keep compatibility risk visible for every shared or extension-runtime change.
+3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 
 - `docs/specs/features/import-definition-via-webapi/`: active beta feature with
   real-environment smoke verification still pending.
-- `docs/specs/features/standardize-serialization-and-composition-root/`:
-  full plan and all four slices approved; Slice 1 is the next implementation
-  boundary.
 
 The final remaining Clean Architecture migration feature folder is
 roadmap-queued, not active branch implementation work. The dependency order is

@@ -189,9 +189,11 @@
          application-owned validated-event catalog and privacy allowlist,
          infrastructure-owned SDK translation and failure isolation, and
          bootstrap-owned adapter selection without changing emitted meaning.
-    5. `standardize-serialization-and-composition-root`: converge the completed
-       application/adaptor contracts into plain transport DTOs and bootstrap-only
-       composition.
+    5. Completed: `standardize-serialization-and-composition-root` established
+       direction-specific plain-JSON viewer transport, browser-safe viewer host
+       data, host-first capability selection, and deterministic bootstrap-only
+       construction guardrails while preserving lifecycle and desktop/web
+       behavior.
     6. `remove-legacy-and-enforce-clean-architecture`: remove superseded paths,
        reduce temporary allowlists to zero, enforce all dependency rules, and
        rewrite durable architecture policy to describe verified invariants.
