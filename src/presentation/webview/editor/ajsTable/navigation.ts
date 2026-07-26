@@ -1,10 +1,10 @@
 import type { KeyboardEvent } from "react";
 import type { MouseEvent } from "react";
 import type { UnitListUnitMetadataDto } from "../../../../application/unit-list/buildUnitListView";
-import { createNavigationEvent } from "../../../../shared/webviewEvents";
+import { createViewerNavigationRequest } from "../../viewerRequestMessages";
 
 type PostViewerMessage = (
-  message: ReturnType<typeof createNavigationEvent>,
+  message: ReturnType<typeof createViewerNavigationRequest>,
 ) => void | PromiseLike<boolean>;
 
 export type TableRowSelectionAction =
@@ -45,7 +45,7 @@ export const navigateToFlow = (
   postMessage: PostViewerMessage = (message) =>
     window.vscode.postMessage(message),
 ): void => {
-  postMessage(createNavigationEvent("flow", absolutePath));
+  postMessage(createViewerNavigationRequest("flow", absolutePath));
 };
 
 export const selectUnitTreeUnitInTable = (

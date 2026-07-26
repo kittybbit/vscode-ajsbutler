@@ -7,9 +7,9 @@ import {
 } from "../../application/telemetry/viewerTelemetry";
 import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import {
-  type NavigationEventType,
+  type ViewerNavigationRequest,
   type NavigationTargetView,
-} from "../../shared/webviewEvents";
+} from "../../presentation/webview/viewerRequestMessages";
 import { createViewerRevealUnitMessage } from "../../presentation/webview/viewerHostMessages";
 import {
   type OpenPreviewCommandDependencies,
@@ -175,7 +175,7 @@ export const revealCounterpartPanel = (
 
 const revealCounterpartFromNavigation = (
   document: vscode.TextDocument,
-  event: NavigationEventType,
+  event: ViewerNavigationRequest,
   deps: CounterpartRevealDeps,
 ): void => {
   revealCounterpartPanel(

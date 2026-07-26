@@ -24,7 +24,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { createOperationEvent } from "../../../../shared/webviewEvents";
+import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import TableHeader from "./TableHeader";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
 import { AccessorType } from "./columnDefs/common";
@@ -224,7 +224,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     () => ({
       columnVisibilityRevision,
       reportRowSelected: () =>
-        window.vscode.postMessage(createOperationEvent("unit.select")),
+        window.vscode.postMessage(createViewerOperationRequest("unit.select")),
       rowIndex,
       selectedAbsolutePath,
       selectRow,

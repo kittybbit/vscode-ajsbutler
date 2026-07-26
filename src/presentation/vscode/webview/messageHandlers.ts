@@ -7,20 +7,20 @@ import {
   telemetryEvents,
 } from "../../../application/telemetry/telemetryEvent";
 import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
-import type { MyAppResource } from "../../../shared/MyAppResource";
 import {
   createViewerResourceStateMessage,
   type ViewerResourceStateDto,
 } from "../../webview/viewerHostMessages";
 import {
-  type PerformanceEventType,
-  type SearchEventType,
-} from "../../../shared/webviewEvents";
+  type ViewerPerformanceRequest,
+  type ViewerResourceRequestData,
+  type ViewerSearchRequest,
+} from "../../webview/viewerRequestMessages";
 import { getTelemetryHost } from "../telemetryHost";
-import type { ViewerOperationRequest } from "./viewerMessageRouting";
+import type { ViewerOperationHostRequest } from "./viewerMessageRouting";
 
 export const postResourceMessage = (
-  requestedResource: MyAppResource,
+  requestedResource: ViewerResourceRequestData,
   panel: vscode.WebviewPanel,
 ): void => {
   console.log(`post a message of resource. (${panel.title})`);
@@ -53,7 +53,7 @@ export const reportWebviewOperation = ({
   panel,
   telemetry,
   operation,
-}: ViewerOperationRequest): void => {
+}: ViewerOperationHostRequest): void => {
   console.log(
     `post a message of operation. (${document.uri.toString()}, ${operation})`,
   );
@@ -75,8 +75,8 @@ export const reportWebviewOperation = ({
 };
 
 export const reportWebviewSearch = (
-  telemetry: ViewerOperationRequest["telemetry"],
-  event: SearchEventType,
+  telemetry: ViewerOperationHostRequest["telemetry"],
+  event: ViewerSearchRequest,
 ): void => {
   const telemetryEvent = createSearchTelemetryEvent({
     ...event.data,
@@ -86,8 +86,8 @@ export const reportWebviewSearch = (
 };
 
 export const reportWebviewPerformance = (
-  telemetry: ViewerOperationRequest["telemetry"],
-  event: PerformanceEventType,
+  telemetry: ViewerOperationHostRequest["telemetry"],
+  event: ViewerPerformanceRequest,
 ): void => {
   const telemetryEvent = createPerformanceTelemetryEvent({
     ...event.data,

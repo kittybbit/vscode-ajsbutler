@@ -18,7 +18,7 @@ import {
   type FlowNavigationTargetDto,
   type NavigationRequestDto,
 } from "../../../../application/navigation/resolveNavigationTarget";
-import { createSearchEvent } from "../../../../shared/webviewEvents";
+import { createViewerSearchRequest } from "../../viewerRequestMessages";
 import { findFlowSearchResult, FlowSearchResult } from "./flowSearch";
 import {
   createEmptyFlowSearchState,
@@ -148,7 +148,7 @@ const postFlowSearchEvent = ({
   durationMs?: number;
 }) => {
   window.vscode.postMessage(
-    createSearchEvent({
+    createViewerSearchRequest({
       surface: "flow",
       action,
       result:

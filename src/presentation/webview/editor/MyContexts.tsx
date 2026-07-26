@@ -7,10 +7,17 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import type { MyAppResource } from "../../../shared/MyAppResource";
-import { parseViewerResourceState, RESOURCE } from "../viewerHostMessages";
+import {
+  parseViewerResourceState,
+  RESOURCE,
+  type ViewerResourceStateDto,
+} from "../viewerHostMessages";
+import { createViewerResourceRequest } from "../viewerRequestMessages";
 
-export type { MyAppResource } from "../../../shared/MyAppResource";
+export type MyAppResource = Partial<
+  Omit<ViewerResourceStateDto, "scrollType">
+> &
+  Pick<ViewerResourceStateDto, "scrollType">;
 
 type MyAppContext = MyAppResource & {
   updateMyAppResource: (newValue: Partial<MyAppResource>) => void;
@@ -41,7 +48,9 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
   };
   useEffect(() => {
     window.EventBridge.addCallback(RESOURCE, resourceCallbackFn);
-    window.vscode.postMessage({ type: "resource", data: myAppResource });
+    window.vscode.postMessage(
+      createViewerResourceRequest(myAppResource.scrollType),
+    );
     return () => {
       window.EventBridge.removeCallback(RESOURCE, resourceCallbackFn);
     };

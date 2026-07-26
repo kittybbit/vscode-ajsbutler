@@ -19,7 +19,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import UnitEntityDialog from "../UnitEntityDialog";
-import { createOperationEvent } from "../../../../shared/webviewEvents";
+import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import JobNode from "./nodes/JobNode";
 import JobNetNode from "./nodes/JobNetNode";
 import JobGroupNode from "./nodes/JobGroupNode";
@@ -289,8 +289,10 @@ const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
     [theme],
   );
 
-const reportFlowOperation = (operation: string): void => {
-  window.vscode.postMessage(createOperationEvent(operation));
+const reportFlowOperation = (
+  operation: Parameters<typeof createViewerOperationRequest>[0],
+): void => {
+  window.vscode.postMessage(createViewerOperationRequest(operation));
 };
 
 const FlowContents: FC = () => {

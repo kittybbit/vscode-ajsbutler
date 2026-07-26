@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import { reportWebviewOperation } from "../../presentation/vscode/webview/messageHandlers";
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
-import { OPERATION } from "../../shared/webviewEvents";
+import { OPERATION } from "../../presentation/webview/viewerRequestMessages";
 
 suite("Report Webview Operation", () => {
   test("keeps the existing telemetry event name and payload shape", () => {

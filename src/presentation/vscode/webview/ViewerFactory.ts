@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
-import type { NavigationEventType } from "../../../shared/webviewEvents";
+import type { ViewerNavigationRequest } from "../../webview/viewerRequestMessages";
 import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
 import {
   createViewerMessageHandler,
@@ -28,7 +28,7 @@ type ViewerReadyHandler = (
 ) => void;
 type ViewerNavigateHandler = (
   document: vscode.TextDocument,
-  event: NavigationEventType,
+  event: ViewerNavigationRequest,
 ) => void;
 
 type ViewerFactoryHandlers = {

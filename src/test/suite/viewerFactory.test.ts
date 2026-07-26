@@ -8,7 +8,7 @@ import {
   READY,
   RESOURCE,
   SAVE,
-} from "../../shared/webviewEvents";
+} from "../../presentation/webview/viewerRequestMessages";
 
 suite("ViewerFactory", () => {
   test("reuses an existing panel before creating a new one", () => {

@@ -4,7 +4,7 @@
 
 - Purpose: standardize plain viewer transport and bootstrap-only composition.
 - Approved or active slice:
-  Slice 1 is complete; Slice 2 is active and approved; Slices 3-4 are approved
+  Slices 1-2 are complete; Slice 3 is active and approved; Slice 4 is approved
   and queued.
 - Do not change message meaning, activation, lifecycle, or viewer behavior.
 - Do not introduce a service container or reconstruct domain objects in viewers.
@@ -14,7 +14,7 @@
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
 - Next decision:
-  implement Slice 2 with `sdd-implement-task`.
+  implement Slice 3 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -36,7 +36,7 @@
   focused replan reviewed with verdict `Ready for approval`; no blocking
   findings remain.
 - Human approval: approved for the full plan and all four slices.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 
 ## Replanning Record
 
@@ -189,7 +189,7 @@ active implementation approval remains.
 
 ### Slice 2: Validate Viewer-To-Host Requests
 
-- Status: Approved
+- Status: Complete
 - Scope:
   define distinct plain request DTOs and runtime parsers for resource readiness,
   save, operation, search, performance, and navigation; migrate every webview
@@ -463,21 +463,24 @@ active implementation approval remains.
 ## Validation
 
 - [x] Slice 1 host-to-viewer transport tests and desktop/web checks.
-- [ ] Slice 2 viewer-to-host request tests and desktop/web checks.
-- [ ] Exhaustive message-builder inventories and recursive plain-JSON assertions
+- [x] Slice 2 viewer-to-host request tests and desktop/web checks.
+- [x] Exhaustive message-builder inventories and recursive plain-JSON assertions
       prove zero class/prototype/non-JSON/raw/wrapper/VS Code/infrastructure
       payload leaks in both directions.
 - [x] Existing 500-unit and 1,500-level document cases round-trip through the
       final host-to-viewer contract with stable identity and counts.
 - [ ] Slice 3 browser-safe host data tests and zero exact allowlist.
 - [ ] Slice 4 composition/lifecycle guardrails and desktop/web integration.
-- [x] `rtk pnpm run qlty` for Slice 1.
-- [ ] New qlty smells resolved or recorded as an approved actionable follow-up;
+- [x] `rtk pnpm run qlty` for Slices 1-2.
+- [x] New qlty smells for Slices 1-2 resolved; no actionable follow-up remains;
       metric movement recorded only when tied to a concrete responsibility or
       compatibility risk.
 - [x] Slice 1 integrated production-readiness review and separate
       higher-risk contract/host review after final validation; later slices
       retain their own review gates.
+- [x] Slice 2 integrated production-readiness review and separate higher-risk
+      contract/host review after final validation; later slices retain their
+      own review gates.
 
 ## Implementation Feedback
 
@@ -490,6 +493,16 @@ active implementation approval remains.
   tests, and traceability evidence.
 - Final review found no remaining scope, compatibility, architecture,
   performance, or production-readiness issue for Slice 1.
+- Slice 2 boundary was appropriate. Separating small application-owned
+  navigation/telemetry meaning from the presentation envelope prevented the
+  viewer bundle from importing telemetry reporting definitions.
+- The direction-specific `resource` shapes required an exact request field set
+  because request and response intentionally retain the same event name.
+- No durable-document propagation is needed for Slice 2. These findings are
+  implementation evidence for the already-approved transport ownership and
+  resource-handshake risks.
+- Final review found no remaining scope, compatibility, architecture,
+  privacy, performance, or production-readiness issue for Slice 2.
 
 ## Notes
 

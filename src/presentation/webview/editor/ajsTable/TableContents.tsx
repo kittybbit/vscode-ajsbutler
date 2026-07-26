@@ -44,11 +44,12 @@ import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
 import UnitEntityDialog from "../UnitEntityDialog";
-import {
-  createOperationEvent,
-  createPerformanceEvent,
-} from "../../../../shared/webviewEvents";
 import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
+import {
+  createViewerOperationRequest,
+  createViewerPerformanceRequest,
+  createViewerReadyRequest,
+} from "../../viewerRequestMessages";
 import UnitTreeSelector from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
@@ -208,15 +209,17 @@ const useTableViewerTheme = (isDarkMode: boolean): Theme =>
     [isDarkMode],
   );
 
-const reportTableOperation = (operation: string): void => {
-  window.vscode.postMessage(createOperationEvent(operation));
+const reportTableOperation = (
+  operation: Parameters<typeof createViewerOperationRequest>[0],
+): void => {
+  window.vscode.postMessage(createViewerOperationRequest(operation));
 };
 
 export const createTableRenderReadyEvent = (
   durationMs: number,
   rowCount: number,
 ) =>
-  createPerformanceEvent({
+  createViewerPerformanceRequest({
     operation: "table_render",
     result: "success",
     durationBucket: toDurationBucket(durationMs),
@@ -468,7 +471,7 @@ const TableContents = () => {
         rowViews?.length ?? 0,
       ),
     );
-    window.vscode.postMessage({ type: "ready" });
+    window.vscode.postMessage(createViewerReadyRequest());
     return () => {
       window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocument);
       window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);

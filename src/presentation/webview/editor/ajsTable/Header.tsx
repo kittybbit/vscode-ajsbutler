@@ -19,10 +19,10 @@ import {
 import { useMyAppContext } from "../MyContexts";
 import { unitInformationMessage } from "../unitInformationLocalization";
 import {
-  SAVE,
-  createOperationEvent,
-  createPerformanceEvent,
-} from "../../../../shared/webviewEvents";
+  createViewerOperationRequest,
+  createViewerPerformanceRequest,
+  createViewerSaveRequest,
+} from "../../viewerRequestMessages";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
 import {
@@ -108,7 +108,7 @@ export const createCsvExportPerformanceEvent = (
   durationMs: number,
   rowCount: number,
 ) =>
-  createPerformanceEvent({
+  createViewerPerformanceRequest({
     operation: "csv_export",
     result: "success",
     durationBucket: toDurationBucket(durationMs),
@@ -165,15 +165,15 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
 
   const handleCopy = useCallback(() => {
     const csv = exportCsvWithPerformanceTelemetry();
-    window.vscode.postMessage(createOperationEvent("copy.csv"));
+    window.vscode.postMessage(createViewerOperationRequest("copy.csv"));
     navigator.clipboard.writeText(csv);
     setOpen(true);
   }, [exportCsvWithPerformanceTelemetry]);
 
   const handleSave = useCallback(() => {
     const csv = exportCsvWithPerformanceTelemetry();
-    window.vscode.postMessage(createOperationEvent("save.csv"));
-    window.vscode.postMessage({ type: SAVE, data: csv });
+    window.vscode.postMessage(createViewerOperationRequest("save.csv"));
+    window.vscode.postMessage(createViewerSaveRequest(csv));
   }, [exportCsvWithPerformanceTelemetry]);
 
   return (

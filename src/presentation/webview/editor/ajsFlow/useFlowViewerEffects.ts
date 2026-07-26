@@ -13,12 +13,15 @@ import {
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
-import { createPerformanceEvent } from "../../../../shared/webviewEvents";
 import {
   parseNavigationRequest,
   type NavigationRequestDto,
 } from "../../../../application/navigation/resolveNavigationTarget";
 import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
+import {
+  createViewerPerformanceRequest,
+  createViewerReadyRequest,
+} from "../../viewerRequestMessages";
 import {
   resolveFlowNodeCenter,
   resolveFlowViewportFocusAction,
@@ -415,7 +418,7 @@ export const useFlowDocumentSubscription = ({
     };
     window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocumentFn);
     window.vscode.postMessage(
-      createPerformanceEvent({
+      createViewerPerformanceRequest({
         operation: "flow_render",
         result: "success",
         durationBucket: toDurationBucket(
@@ -423,7 +426,7 @@ export const useFlowDocumentSubscription = ({
         ),
       }),
     );
-    window.vscode.postMessage({ type: "ready" });
+    window.vscode.postMessage(createViewerReadyRequest());
     return () => {
       window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocumentFn);
     };

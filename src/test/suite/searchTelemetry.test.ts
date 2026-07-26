@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import { createSearchTelemetryEvent } from "../../application/telemetry/searchTelemetry";
+import { isSearchTelemetryData } from "../../application/telemetry/searchTelemetryData";
 
 suite("Search telemetry", () => {
   test("creates privacy-safe search events from bucketed metadata", () => {
@@ -29,6 +30,31 @@ suite("Search telemetry", () => {
           scope: "current_flow_scope",
         },
       },
+    );
+  });
+
+  test("accepts only allowlisted search meaning and bucket values", () => {
+    assert.strictEqual(
+      isSearchTelemetryData({
+        surface: "flow",
+        action: "navigated",
+        result: "matched",
+        mode: "partial",
+        queryLengthBucket: "10_99",
+        scope: "current_flow_scope",
+      }),
+      true,
+    );
+    assert.strictEqual(
+      isSearchTelemetryData({
+        surface: "flow",
+        action: "navigated",
+        result: "matched",
+        mode: "partial",
+        queryLengthBucket: "raw query",
+        scope: "current_flow_scope",
+      }),
+      false,
     );
   });
 });

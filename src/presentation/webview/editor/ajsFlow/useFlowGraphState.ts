@@ -18,7 +18,7 @@ import {
 } from "../../../../application/telemetry/telemetryBuckets";
 import type { FlowGraphSemanticDiffHighlights } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import { createPerformanceEvent } from "../../../../shared/webviewEvents";
+import { createViewerPerformanceRequest } from "../../viewerRequestMessages";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
 import { ExpandedFlowGraphResult } from "./expandedFlowGraphTypes";
 import {
@@ -192,7 +192,7 @@ export const useFlowGraphState = ({
     const nextFlowData = buildNodesAndEdges(currentUnitId);
     if (flowDocument && currentUnitId) {
       window.vscode.postMessage(
-        createPerformanceEvent({
+        createViewerPerformanceRequest({
           operation: "flow_graph_build",
           result: "success",
           durationBucket: toDurationBucket(performance.now() - startedAt),

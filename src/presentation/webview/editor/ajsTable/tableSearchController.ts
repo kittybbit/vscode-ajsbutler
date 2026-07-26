@@ -5,7 +5,7 @@ import {
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { createSearchEvent } from "../../../../shared/webviewEvents";
+import { createViewerSearchRequest } from "../../viewerRequestMessages";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
 import {
   createEmptyTableSearchState,
@@ -52,7 +52,7 @@ const postTableSearchEvent = ({
   durationMs?: number;
 }): void => {
   window.vscode.postMessage(
-    createSearchEvent({
+    createViewerSearchRequest({
       surface: "table",
       action,
       result:

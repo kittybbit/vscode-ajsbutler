@@ -6,6 +6,7 @@ import {
   type TelemetryEventDefinition,
 } from "./telemetryEvent";
 import type { TelemetryHost } from "./viewerTelemetry";
+import type { PerformanceTelemetryResult } from "./viewerPerformanceTelemetryData";
 
 export type PerformanceTelemetryOperation =
   | "parse"
@@ -14,8 +15,6 @@ export type PerformanceTelemetryOperation =
   | "table_render"
   | "flow_render"
   | "csv_export";
-
-export type PerformanceTelemetryResult = "success" | "failed";
 
 const performanceEvents: Record<
   PerformanceTelemetryOperation,
