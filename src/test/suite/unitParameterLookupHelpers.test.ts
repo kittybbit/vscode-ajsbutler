@@ -1,11 +1,11 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import {
   findUnitParameter,
   findUnitParameters,
   findUnitParameterValue,
   findUnitParameterValues,
-} from "../../domain/values/unitParameterLookupHelpers";
+} from "../../infrastructure/parser/normalization/rawUnitParameterLookup";
 
 const validDefinition = `
 unit = root,,jp1admin, ;
@@ -18,8 +18,22 @@ unit = root,,jp1admin, ;
 `;
 
 suite("Unit Parameter Lookup Helpers", () => {
+  test("accepts a parameter-only source", () => {
+    const source = {
+      parameters: [
+        { key: "op", value: "mo:1", position: 1 },
+        { key: "op", value: "2024/01/01", position: 2 },
+      ],
+    };
+
+    assert.deepStrictEqual(findUnitParameterValues(source, "op"), [
+      "mo:1",
+      "2024/01/01",
+    ]);
+  });
+
   test("finds raw unit parameters and values", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
     const unit = result.rootUnits[0];
 

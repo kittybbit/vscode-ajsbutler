@@ -3,7 +3,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import TableChartIcon from "@mui/icons-material/TableChart";
-import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
+import { unitInformationUnitTypeLabel } from "../unitInformationLocalization";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
 import SharedUnitDetailPane, {
@@ -24,6 +24,7 @@ type FlowNodeDetailPanelProps = {
 
 type FlowNodeDetailActionOptions = {
   canOpenAsScope: boolean;
+  canOpenDefinition: boolean;
   focusModeEnabled: boolean;
   onOpenDefinition: VoidFunction;
   onOpenScope: VoidFunction;
@@ -87,13 +88,19 @@ const buildRelationshipFocusAction = ({
   variant: focusModeEnabled ? "contained" : "outlined",
 });
 
-const buildOpenDefinitionAction = ({
+const buildOpenDefinitionActions = ({
+  canOpenDefinition,
   onOpenDefinition,
-}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
-  label: "Open definition details",
-  icon: <DescriptionIcon />,
-  onClick: onOpenDefinition,
-});
+}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction[] =>
+  canOpenDefinition
+    ? [
+        {
+          label: "Open definition details",
+          icon: <DescriptionIcon />,
+          onClick: onOpenDefinition,
+        },
+      ]
+    : [];
 
 const buildOpenUnitListAction = ({
   onOpenUnitList,
@@ -122,7 +129,7 @@ export const buildFlowNodeDetailActions = (
   options: FlowNodeDetailActionOptions,
 ): SharedUnitDetailPaneAction[] => [
   buildRelationshipFocusAction(options),
-  buildOpenDefinitionAction(options),
+  ...buildOpenDefinitionActions(options),
   buildOpenUnitListAction(options),
   ...buildOpenScopeActions(options),
 ];
@@ -136,6 +143,7 @@ const buildFlowNodeDetailActionOptions = ({
   onToggleFocusMode,
 }: Omit<FlowNodeDetailPanelProps, "onClose">): FlowNodeDetailActionOptions => ({
   canOpenAsScope: detail.canOpenAsScope,
+  canOpenDefinition: detail.canOpenDefinition,
   focusModeEnabled,
   onOpenDefinition,
   onOpenScope,
@@ -176,6 +184,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
       ),
     [
       detail.canOpenAsScope,
+      detail.canOpenDefinition,
       focusModeEnabled,
       onOpenDefinition,
       onOpenScope,
@@ -187,7 +196,11 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   return (
     <SharedUnitDetailPane
       title={detail.name}
-      subtitle={unitTypeLabel(detail.unitType, lang, detail.groupType)}
+      subtitle={unitInformationUnitTypeLabel(
+        detail.unitType,
+        lang,
+        detail.groupType,
+      )}
       ariaLabel="Selected flow node details"
       collapsedAriaLabel="Collapsed selected flow node details"
       closeAriaLabel="Close node details"

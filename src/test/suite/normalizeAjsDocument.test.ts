@@ -1,6 +1,6 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseRawAjsForTest } from "../support/parseAjs";
+import { normalizeAjsDocument } from "../../infrastructure/parser/normalization/normalizeAjsDocument";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -36,7 +36,7 @@ unit=root,,jp1admin,;
 
 suite("Normalize AJS Document", () => {
   test("creates a stable document model with units and relations", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const document = normalizeAjsDocument(result.rootUnits);
@@ -45,11 +45,23 @@ suite("Normalize AJS Document", () => {
     assert.strictEqual(document.rootUnits.length, 1);
     const root = document.rootUnits[0];
     assert.strictEqual(root.name, "root");
+    assert.strictEqual(root.id, "/root");
+    assert.strictEqual(root.absolutePath, "/root");
+    assert.strictEqual(root.depth, 0);
+    assert.strictEqual(root.parentId, undefined);
     assert.strictEqual(root.unitType, "g");
     assert.strictEqual(root.groupType, "n");
+    assert.strictEqual(root.isRoot, true);
     assert.strictEqual(root.children[0].isRecovery, false);
     assert.strictEqual(root.children[0].name, "jobnet");
+    assert.strictEqual(root.children[0].id, "/root/jobnet");
+    assert.strictEqual(root.children[0].parentId, "/root");
+    assert.strictEqual(root.children[0].depth, 1);
     assert.strictEqual(root.children[0].isRootJobnet, true);
+    assert.deepStrictEqual(
+      root.children[0].children.map((unit) => unit.name),
+      ["job-a", "job-b", ".CONDITION"],
+    );
     assert.strictEqual(root.children[0].children[0].comment, 'first""#note');
     assert.deepStrictEqual(root.children[0].children[0].layout, {
       h: 240,
@@ -65,7 +77,7 @@ suite("Normalize AJS Document", () => {
   });
 
   test("preserves parsed parameter source locations through normalization", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const rawParameters = result.rootUnits[0].children[0].parameters.filter(

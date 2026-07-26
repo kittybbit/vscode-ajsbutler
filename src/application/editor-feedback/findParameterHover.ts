@@ -1,5 +1,5 @@
-import { paramDefinitionLang } from "../../domain/services/i18n/nls";
 import { isParamSymbol } from "../../domain/values/AjsType";
+import type { ParameterSyntaxLookupPort } from "./ParameterSyntaxLookupPort";
 
 export type ParameterHoverDto = {
   symbol: string;
@@ -11,18 +11,20 @@ export type FindParameterHover = (
   language: string,
 ) => ParameterHoverDto | undefined;
 
-export const findParameterHover: FindParameterHover = (word, language) => {
-  if (!isParamSymbol(word)) {
-    return undefined;
-  }
+export const createFindParameterHover =
+  (parameterSyntaxLookup: ParameterSyntaxLookupPort): FindParameterHover =>
+  (word, language) => {
+    if (!isParamSymbol(word)) {
+      return undefined;
+    }
 
-  const definition = paramDefinitionLang(language)[word];
-  if (!definition) {
-    return undefined;
-  }
+    const syntax = parameterSyntaxLookup.findSyntax(word, language);
+    if (!syntax) {
+      return undefined;
+    }
 
-  return {
-    symbol: word,
-    syntax: definition.syntax,
+    return {
+      symbol: word,
+      syntax,
+    };
   };
-};

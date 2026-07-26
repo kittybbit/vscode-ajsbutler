@@ -1,171 +1,360 @@
 import * as assert from "assert";
 import {
-  findRowIndexByAbsolutePath,
-  getRevealUnitAbsolutePath,
-  resolveFlowRevealTarget,
-} from "../../presentation/webview/editor/revealUnit";
+  parseNavigationRequest,
+  resolveFlowNavigationTarget,
+} from "../../application/navigation/resolveNavigationTarget";
+import type {
+  FlowGraphUnitDto,
+  ValidatedFlowGraphDocument,
+} from "../../application/flow-graph/flowGraphDocument";
+import { createFlowTestUnit } from "../support/flowUnits";
 
-type FlowRevealUnit =
-  Parameters<typeof resolveFlowRevealTarget>[0] extends ReadonlyMap<
-    string,
-    infer T
-  >
-    ? T
-    : never;
-
-type FlowRevealUnitFixture = Omit<FlowRevealUnit, "children"> & {
-  children?: Array<unknown>;
+const createValidatedDocument = (
+  rootUnits: FlowGraphUnitDto[],
+): ValidatedFlowGraphDocument => {
+  const unitById = new Map<string, FlowGraphUnitDto>();
+  const unitByAbsolutePath = new Map<string, FlowGraphUnitDto>();
+  const pending = [...rootUnits];
+  const visited = new Set<string>();
+  while (pending.length > 0) {
+    const unit = pending.pop() as FlowGraphUnitDto;
+    if (visited.has(unit.id)) continue;
+    visited.add(unit.id);
+    unitById.set(unit.id, unit);
+    unitByAbsolutePath.set(unit.absolutePath, unit);
+    pending.push(...unit.children);
+  }
+  return {
+    status: "available",
+    document: { rootUnits },
+    index: { unitById, unitByAbsolutePath },
+    issues: [],
+  };
 };
 
-const createFlowRevealUnit = ({
-  children = [],
-  ...unit
-}: FlowRevealUnitFixture): FlowRevealUnit => ({
-  ...unit,
-  children,
-});
+const createRootWithJob = (): ValidatedFlowGraphDocument => {
+  const job = createFlowTestUnit({
+    id: "job",
+    absolutePath: "/root/job",
+    unitType: "j",
+    parentId: "root",
+    depth: 1,
+    isRootJobnet: false,
+  });
+  const root = createFlowTestUnit({
+    id: "root",
+    absolutePath: "/root",
+    depth: 0,
+    parentId: undefined,
+    isRoot: true,
+    children: [job],
+  });
+  return createValidatedDocument([root]);
+};
 
-const createUnitById = (
-  ...units: FlowRevealUnitFixture[]
-): Map<string, FlowRevealUnit> =>
-  new Map(
-    units.map(createFlowRevealUnit).map((unit) => [unit.id, unit] as const),
-  );
-
-const createRootScopedTargetUnits = (
-  scope: Pick<FlowRevealUnitFixture, "id" | "absolutePath" | "unitType">,
-): Map<string, FlowRevealUnit> =>
-  createUnitById(
-    {
-      id: "root",
-      absolutePath: "/root",
-      unitType: "n",
-      children: [{}],
-    },
-    {
-      ...scope,
-      parentId: "root",
-      children: [{}],
-    },
-    {
-      id: "job",
-      absolutePath: `${scope.absolutePath}/job`,
-      unitType: "j",
-      parentId: scope.id,
-    },
-  );
-
-suite("Reveal unit helpers", () => {
-  test("reads a reveal-unit absolute path from event data", () => {
-    assert.strictEqual(
-      getRevealUnitAbsolutePath({ absolutePath: "/root/jobnet/job" }),
-      "/root/jobnet/job",
+suite("Resolve navigation target", () => {
+  test("parses a JSON-safe stable-path navigation request", () => {
+    const parsed = parseNavigationRequest(
+      JSON.parse(JSON.stringify({ absolutePath: "/root/job" })),
     );
-    assert.strictEqual(
-      getRevealUnitAbsolutePath({ absolutePath: 1 }),
+    assert.deepStrictEqual(parsed, {
+      status: "available",
+      request: { absolutePath: "/root/job" },
+    });
+    for (const value of [
       undefined,
-    );
-    assert.strictEqual(getRevealUnitAbsolutePath(undefined), undefined);
+      {},
+      { absolutePath: 1 },
+      { absolutePath: "" },
+    ]) {
+      assert.strictEqual(parseNavigationRequest(value).status, "unavailable");
+    }
   });
 
-  test("opens the containing jobnet and highlights the revealed unit", () => {
-    const unitById = createUnitById(
-      {
-        id: "root",
-        absolutePath: "/root",
-        unitType: "n",
-        children: [{}],
-      },
-      {
-        id: "job",
+  test("opens the containing jobnet and retains the revealed unit", () => {
+    const document = createRootWithJob();
+    const result = resolveFlowNavigationTarget(document, {
+      absolutePath: "/root/job",
+    });
+    assert.deepStrictEqual(result, {
+      status: "available",
+      target: {
         absolutePath: "/root/job",
-        unitType: "j",
-        parentId: "root",
+        activeFlowScopeUnitId: "root",
+        revealedUnitId: "job",
+        requiredExpandedAncestorUnitIds: [],
       },
-    );
-
-    assert.deepStrictEqual(resolveFlowRevealTarget(unitById, "/root/job"), {
-      scopeUnitId: "root",
-      revealedUnitId: "job",
-      expandedAncestorUnitIds: [],
+      issues: [],
     });
-    assert.strictEqual(
-      resolveFlowRevealTarget(unitById, "/missing"),
-      undefined,
-    );
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(result)), result);
+
+    const rootResult = resolveFlowNavigationTarget(document, {
+      absolutePath: "/root",
+    });
+    assert.strictEqual(rootResult.status, "available");
+    if (rootResult.status !== "available") return;
+    assert.strictEqual(rootResult.target.activeFlowScopeUnitId, "root");
+    assert.strictEqual(rootResult.target.revealedUnitId, "root");
   });
 
-  test("opens the first root jobnet when revealing a job group", () => {
-    const unitById = createUnitById(
-      {
-        id: "job-group",
-        absolutePath: "/job-group",
-        unitType: "g",
-        children: [{}],
-      },
-      {
-        id: "root-jobnet",
-        absolutePath: "/job-group/root-jobnet",
-        unitType: "n",
-        parentId: "job-group",
-        isRootJobnet: true,
-      },
-    );
-
-    assert.deepStrictEqual(resolveFlowRevealTarget(unitById, "/job-group"), {
-      scopeUnitId: "root-jobnet",
-      revealedUnitId: "job-group",
-      expandedAncestorUnitIds: [],
+  test("opens the first descendant root jobnet in stable tree order", () => {
+    const first = createFlowTestUnit({
+      id: "first-root",
+      absolutePath: "/group/branch/first-root",
+      parentId: "branch",
+      depth: 2,
+      isRootJobnet: true,
     });
+    const branch = createFlowTestUnit({
+      id: "branch",
+      absolutePath: "/group/branch",
+      unitType: "g",
+      parentId: "group",
+      depth: 1,
+      isRootJobnet: false,
+      children: [first],
+    });
+    const second = createFlowTestUnit({
+      id: "second-root",
+      absolutePath: "/group/second-root",
+      parentId: "group",
+      depth: 1,
+      isRootJobnet: true,
+    });
+    const group = createFlowTestUnit({
+      id: "group",
+      absolutePath: "/group",
+      unitType: "g",
+      depth: 0,
+      isRoot: true,
+      isRootJobnet: false,
+      children: [branch, second],
+    });
+    const document = createValidatedDocument([group]);
+
+    const result = resolveFlowNavigationTarget(document, {
+      absolutePath: "/group",
+    });
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.strictEqual(result.target.activeFlowScopeUnitId, "first-root");
+    assert.strictEqual(result.target.revealedUnitId, "group");
   });
 
-  test("opens the direct condition scope for units under .condition", () => {
-    const unitById = createRootScopedTargetUnits({
+  test("opens a direct condition parent as the active scope", () => {
+    const job = createFlowTestUnit({
+      id: "job",
+      absolutePath: "/root/.condition/job",
+      unitType: "j",
+      parentId: "condition",
+      depth: 2,
+      isRootJobnet: false,
+    });
+    const condition = createFlowTestUnit({
       id: "condition",
       absolutePath: "/root/.condition",
       unitType: "rc",
+      parentId: "root",
+      depth: 1,
+      isRootJobnet: false,
+      children: [job],
+    });
+    const root = createFlowTestUnit({
+      id: "root",
+      absolutePath: "/root",
+      depth: 0,
+      isRoot: true,
+      children: [condition],
     });
 
-    assert.deepStrictEqual(
-      resolveFlowRevealTarget(unitById, "/root/.condition/job"),
+    const result = resolveFlowNavigationTarget(
+      createValidatedDocument([root]),
       {
-        scopeUnitId: "condition",
-        revealedUnitId: "job",
-        expandedAncestorUnitIds: [],
+        absolutePath: "/root/.condition/job",
       },
     );
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.strictEqual(result.target.activeFlowScopeUnitId, "condition");
   });
 
-  test("expands nested jobnets needed to reveal the target unit", () => {
-    const unitById = createRootScopedTargetUnits({
-      id: "child-net",
-      absolutePath: "/root/child-net",
-      unitType: "n",
+  test("keeps nearest nested jobnet scope and ancestor order deterministic", () => {
+    const job = createFlowTestUnit({
+      id: "job",
+      absolutePath: "/root/child/job",
+      unitType: "j",
+      parentId: "child",
+      depth: 2,
+      isRootJobnet: false,
+    });
+    const child = createFlowTestUnit({
+      id: "child",
+      absolutePath: "/root/child",
+      parentId: "root",
+      depth: 1,
+      isRootJobnet: false,
+      children: [job],
+    });
+    const root = createFlowTestUnit({
+      id: "root",
+      absolutePath: "/root",
+      depth: 0,
+      isRoot: true,
+      children: [child],
     });
 
-    assert.deepStrictEqual(
-      resolveFlowRevealTarget(unitById, "/root/child-net/job"),
+    const result = resolveFlowNavigationTarget(
+      createValidatedDocument([root]),
       {
-        scopeUnitId: "child-net",
-        revealedUnitId: "job",
-        expandedAncestorUnitIds: [],
+        absolutePath: "/root/child/job",
       },
     );
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.strictEqual(result.target.activeFlowScopeUnitId, "child");
+    assert.deepStrictEqual(result.target.requiredExpandedAncestorUnitIds, []);
   });
 
-  test("finds a table row index from a stable absolute path", () => {
-    const rowIndexByAbsolutePath = new Map<string, number>([
-      ["/root", 0],
-      ["/root/job", 3],
-    ]);
+  test("returns typed unavailable results for missing targets and scopes", () => {
+    const missing = resolveFlowNavigationTarget(createRootWithJob(), {
+      absolutePath: "/missing",
+    });
+    assert.strictEqual(missing.status, "unavailable");
+    assert.strictEqual(missing.issues[0]?.code, "navigation_target_not_found");
 
+    const group = createFlowTestUnit({
+      id: "group",
+      absolutePath: "/group",
+      unitType: "g",
+      depth: 0,
+      isRoot: true,
+      isRootJobnet: false,
+    });
+    const noScope = resolveFlowNavigationTarget(
+      createValidatedDocument([group]),
+      { absolutePath: "/group" },
+    );
+    assert.strictEqual(noScope.status, "unavailable");
+    assert.strictEqual(noScope.issues[0]?.code, "flow_scope_unavailable");
+  });
+
+  test("guards a malformed cyclic parent chain", () => {
+    const first = createFlowTestUnit({
+      id: "first",
+      absolutePath: "/first",
+      unitType: "j",
+      parentId: "second",
+      isRootJobnet: false,
+    });
+    const second = createFlowTestUnit({
+      id: "second",
+      absolutePath: "/second",
+      unitType: "j",
+      parentId: "first",
+      isRootJobnet: false,
+    });
+    const document = createValidatedDocument([first, second]);
+
+    const result = resolveFlowNavigationTarget(document, {
+      absolutePath: "/first",
+    });
+    assert.strictEqual(result.status, "unavailable");
+    assert.strictEqual(result.issues[0]?.code, "navigation_parent_cycle");
+  });
+
+  test("resolves a representative deep hierarchy without recursive traversal", () => {
+    const depth = 400;
+    const root = createFlowTestUnit({
+      id: "root",
+      absolutePath: "/root",
+      depth: 0,
+      isRoot: true,
+      children: [],
+    });
+    let parent = root;
+    let parentPath = root.absolutePath;
+    for (let index = 1; index <= depth; index++) {
+      const absolutePath = `${parentPath}/group-${index}`;
+      const group = createFlowTestUnit({
+        id: `group-${index}`,
+        absolutePath,
+        unitType: "g",
+        parentId: parent.id,
+        depth: index,
+        isRootJobnet: false,
+        children: [],
+      });
+      parent.children = [group];
+      parent = group;
+      parentPath = absolutePath;
+    }
+    const job = createFlowTestUnit({
+      id: "deep-job",
+      absolutePath: `${parentPath}/job`,
+      unitType: "j",
+      parentId: parent.id,
+      depth: depth + 1,
+      isRootJobnet: false,
+    });
+    parent.children = [job];
+
+    const result = resolveFlowNavigationTarget(
+      createValidatedDocument([root]),
+      {
+        absolutePath: job.absolutePath,
+      },
+    );
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.strictEqual(result.target.activeFlowScopeUnitId, "root");
+    assert.strictEqual(result.target.revealedUnitId, "deep-job");
+  });
+
+  test("reuses a missing root-jobnet lookup for a large job group", () => {
+    const depth = 400;
+    const group = createFlowTestUnit({
+      id: "group",
+      absolutePath: "/group",
+      unitType: "g",
+      depth: 0,
+      isRoot: true,
+      isRootJobnet: false,
+      children: [],
+    });
+    let parent = group;
+    for (let index = 1; index <= depth; index++) {
+      const child = createFlowTestUnit({
+        id: `branch-${index}`,
+        absolutePath: `/group/branch-${index}`,
+        unitType: "g",
+        parentId: parent.id,
+        depth: index,
+        isRootJobnet: false,
+        children: [],
+      });
+      parent.children = [child];
+      parent = child;
+    }
+    const document = createValidatedDocument([group]);
+    const children = group.children;
+    let rootChildrenReads = 0;
+    Object.defineProperty(group, "children", {
+      configurable: true,
+      get: () => {
+        rootChildrenReads++;
+        return children;
+      },
+    });
+
+    const request = { absolutePath: "/group" };
     assert.strictEqual(
-      findRowIndexByAbsolutePath(rowIndexByAbsolutePath, "/root/job"),
-      3,
+      resolveFlowNavigationTarget(document, request).status,
+      "unavailable",
     );
     assert.strictEqual(
-      findRowIndexByAbsolutePath(rowIndexByAbsolutePath, "/missing"),
-      undefined,
+      resolveFlowNavigationTarget(document, request).status,
+      "unavailable",
     );
+    assert.strictEqual(rootChildrenReads, 1);
   });
 });

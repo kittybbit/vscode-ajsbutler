@@ -1,7 +1,7 @@
 import React, { FC, memo, useMemo } from "react";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { unitTypeLabel } from "../../../../domain/services/i18n/nls";
+import { unitInformationUnitTypeLabel } from "../unitInformationLocalization";
 import { useMyAppContext } from "../MyContexts";
 import SharedUnitDetailPane, {
   type SharedUnitDetailPaneAction,
@@ -60,6 +60,16 @@ export const buildUnitListDetailActions = (
   },
 ];
 
+export const getUnitListDetailSubtitle = (
+  detail: UnitListDetail,
+  language: string,
+): string =>
+  unitInformationUnitTypeLabel(
+    detail.row.group1.unitType,
+    language,
+    detail.row.group1.groupType ?? "n",
+  );
+
 const UnitListDetailPanel: FC<UnitListDetailPanelProps> = ({
   detail,
   onClose,
@@ -82,11 +92,7 @@ const UnitListDetailPanel: FC<UnitListDetailPanelProps> = ({
       ),
     [detail.definition, onOpenDefinition, onOpenFlow],
   );
-  const subtitle = unitTypeLabel(
-    detail.row.group1.unitType,
-    lang,
-    detail.row.group1.groupType ?? "n",
-  );
+  const subtitle = getUnitListDetailSubtitle(detail, lang);
 
   return (
     <SharedUnitDetailPane

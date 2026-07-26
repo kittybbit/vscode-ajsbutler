@@ -1,18 +1,20 @@
 import {
   createImportedAjsDefinitionContent,
   createImportAjsDefinitionError,
-  mapHttpStatusToImportErrorCode,
-  type ImportAjsDefinitionPortRequestDto,
+  type ImportAjsDefinitionErrorCode,
+  type ImportAjsDefinitionRequestDto,
   type ImportAjsDefinitionResultDto,
   type ImportAjsDefinitionViaWebApiPort,
   type ImportedAjsUnitDefinitionDto,
 } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
 import type {
+  Jp1Ajs3GetUnitListRequest,
   Jp1Ajs3StatusMonitoringResource,
   Jp1Ajs3UnitDefinitionInformation,
   Jp1Ajs3UnitListResponse,
   Jp1Ajs3WebApiError,
 } from "./generated/jp1Ajs3WebApi.generated";
+import { jp1Ajs3GetUnitListOperation } from "./generated/jp1Ajs3WebApi.generated";
 
 export type Jp1Ajs3WebApiCredential = {
   username: string;
@@ -59,7 +61,7 @@ export class Jp1Ajs3WebApiImportAdapter
   }
 
   async importDefinition(
-    request: ImportAjsDefinitionPortRequestDto,
+    request: ImportAjsDefinitionRequestDto,
   ): Promise<ImportAjsDefinitionResultDto> {
     const credential = await this.#credentialProvider.resolveCredential(
       request.credentialRef,
@@ -86,7 +88,7 @@ const toMissingCredentialResult = (): ImportAjsDefinitionResultDto => ({
 
 const importDefinitionWithCredential = async (
   fetch: Jp1Ajs3WebApiFetch,
-  request: ImportAjsDefinitionPortRequestDto,
+  request: ImportAjsDefinitionRequestDto,
   credential: Jp1Ajs3WebApiCredential,
 ): Promise<ImportAjsDefinitionResultDto> => {
   const controller = new AbortController();
@@ -97,7 +99,7 @@ const importDefinitionWithCredential = async (
 
   try {
     const response = await fetch(buildRequestUrl(request), {
-      method: request.method,
+      method: jp1Ajs3GetUnitListOperation.method,
       headers: buildHeaders(request, credential),
       signal: controller.signal,
     });
@@ -110,7 +112,7 @@ const importDefinitionWithCredential = async (
 };
 
 const toResponseResult = async (
-  request: ImportAjsDefinitionPortRequestDto,
+  request: ImportAjsDefinitionRequestDto,
   response: Jp1Ajs3WebApiResponse,
 ): Promise<ImportAjsDefinitionResultDto> => {
   if (!response.ok) {
@@ -121,7 +123,7 @@ const toResponseResult = async (
 };
 
 const toUnitListResult = (
-  request: ImportAjsDefinitionPortRequestDto,
+  request: ImportAjsDefinitionRequestDto,
   body: unknown,
 ): ImportAjsDefinitionResultDto =>
   isUnitListResponse(body)
@@ -145,24 +147,35 @@ const defaultFetch: Jp1Ajs3WebApiFetch = async (input, init) => {
   return fetchImpl(input, init);
 };
 
-const buildRequestUrl = (
-  request: ImportAjsDefinitionPortRequestDto,
-): string => {
+const buildRequestUrl = (request: ImportAjsDefinitionRequestDto): string => {
   const url = new URL(
-    request.path,
+    jp1Ajs3GetUnitListOperation.path,
     ensureTrailingSlash(request.connection.baseUrl),
   );
-  Object.entries(request.query).forEach(([key, value]) => {
-    url.searchParams.set(key, value);
-  });
+  Object.entries(toDefinitionOnlyUnitListQuery(request)).forEach(
+    ([key, value]) => {
+      url.searchParams.set(key, value);
+    },
+  );
   return url.toString();
 };
+
+const toDefinitionOnlyUnitListQuery = (
+  request: ImportAjsDefinitionRequestDto,
+): Jp1Ajs3GetUnitListRequest["query"] => ({
+  mode: "search",
+  manager: request.scope.manager,
+  serviceName: request.scope.serviceName,
+  location: request.scope.location,
+  searchLowerUnits: request.scope.searchLowerUnits === false ? "NO" : "YES",
+  searchTarget: jp1Ajs3GetUnitListOperation.initialSearchTarget,
+});
 
 const ensureTrailingSlash = (baseUrl: string): string =>
   baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
 
 const buildHeaders = (
-  request: ImportAjsDefinitionPortRequestDto,
+  request: ImportAjsDefinitionRequestDto,
   credential: Jp1Ajs3WebApiCredential,
 ): Record<string, string> => {
   const headers: Record<string, string> = {
@@ -207,7 +220,7 @@ const safeJson = async (response: { json(): Promise<unknown> }) => {
 };
 
 const toSuccessResult = (
-  request: ImportAjsDefinitionPortRequestDto,
+  request: ImportAjsDefinitionRequestDto,
   response: Jp1Ajs3UnitListResponse,
 ): ImportAjsDefinitionResultDto => {
   const units = response.statuses
@@ -246,9 +259,9 @@ const toSuccessResult = (
     ok: true,
     content: createImportedAjsDefinitionContent(
       {
-        manager: request.query.manager,
-        serviceName: request.query.serviceName,
-        location: request.query.location,
+        manager: request.scope.manager,
+        serviceName: request.scope.serviceName,
+        location: request.scope.location,
         all: response.all,
       },
       units,
@@ -276,6 +289,24 @@ const toTransportError = (error: unknown): ImportAjsDefinitionResultDto => {
     ),
   };
 };
+
+const HTTP_STATUS_IMPORT_ERROR_CODES: Record<
+  number,
+  ImportAjsDefinitionErrorCode
+> = {
+  400: "invalid-request",
+  401: "authentication-failed",
+  403: "authorization-failed",
+  404: "resource-not-found",
+  409: "conflict",
+  412: "web-console-unavailable",
+  500: "server-error",
+};
+
+const mapHttpStatusToImportErrorCode = (
+  httpStatus: number,
+): ImportAjsDefinitionErrorCode =>
+  HTTP_STATUS_IMPORT_ERROR_CODES[httpStatus] ?? "unexpected-status";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;

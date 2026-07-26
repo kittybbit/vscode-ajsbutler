@@ -1,9 +1,11 @@
 import * as assert from "assert";
-import { flattenAjsUnits } from "../../domain/models/ajs/AjsDocument";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { parseAjs } from "../support/parseAjs";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { findFlowSearchResult } from "../../presentation/webview/editor/ajsFlow/flowSearch";
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import {
+  type FlowGraphUnitDto,
+  toFlowGraphDocumentDto,
+  validateFlowGraphDocument,
+} from "../../application/flow-graph/flowGraphDocument";
 
 const nestedDefinition = `
 unit=root,,jp1admin,;
@@ -48,18 +50,19 @@ unit=root,,jp1admin,;
 
 type FlowSearchFixture = {
   childNetId: string;
-  currentUnit: AjsUnit;
+  currentUnit: FlowGraphUnitDto;
   grandNetId: string;
   leafJobId: string;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 const createFlowSearchFixture = (): FlowSearchFixture => {
-  const result = parseAjs(nestedDefinition);
-  assert.deepStrictEqual(result.errors, []);
-  const document = normalizeAjsDocument(result.rootUnits);
-  const allUnits = flattenAjsUnits(document.rootUnits);
-  const currentUnit = document.rootUnits[0].children[0];
+  const validation = validateFlowGraphDocument(
+    toFlowGraphDocumentDto(parseAjsDocumentForTest(nestedDefinition)),
+  );
+  assert.strictEqual(validation.status, "available");
+  assert.ok(validation.status === "available");
+  const currentUnit = validation.document.rootUnits[0].children[0];
   const childNetId = currentUnit.children[0].id;
   const grandNetId = currentUnit.children[0].children[0].id;
   const leafJobId = currentUnit.children[0].children[0].children[0].id;
@@ -69,7 +72,7 @@ const createFlowSearchFixture = (): FlowSearchFixture => {
     currentUnit,
     grandNetId,
     leafJobId,
-    unitById: new Map(allUnits.map((unit) => [unit.id, unit])),
+    unitById: validation.index.unitById,
   };
 };
 
@@ -125,12 +128,14 @@ suite("Flow Search", () => {
   });
 
   test("matches by absolute path and stays inside the current scope", () => {
-    const result = parseAjs(nestedDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
-    const allUnits = flattenAjsUnits(document.rootUnits);
-    const unitById = new Map(allUnits.map((unit) => [unit.id, unit]));
-    const currentUnit = document.rootUnits[0].children[0].children[0];
+    const validation = validateFlowGraphDocument(
+      toFlowGraphDocumentDto(parseAjsDocumentForTest(nestedDefinition)),
+    );
+    assert.strictEqual(validation.status, "available");
+    assert.ok(validation.status === "available");
+    const unitById = validation.index.unitById;
+    const currentUnit =
+      validation.document.rootUnits[0].children[0].children[0];
 
     const searchResult = findFlowSearchResult(
       currentUnit,

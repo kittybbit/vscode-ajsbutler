@@ -1,5 +1,6 @@
 import type * as vscode from "vscode";
-import type { BuildSemanticDiffReport } from "../../../application/semantic-diff/buildSemanticDiffReport";
+import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
+import type { SemanticDiffChangeSet } from "../../../application/semantic-diff/semanticDiffDto";
 
 export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
 
@@ -33,7 +34,11 @@ export type SemanticDiffCommandDeps = {
   readFile: (uri: vscode.Uri) => Thenable<Uint8Array>;
   openReport: (report: string) => Thenable<void>;
   language?: string;
-  buildSemanticDiffReport: BuildSemanticDiffReport;
+  buildSemanticDiffReportData: BuildSemanticDiffReportData;
+  renderSemanticDiffMarkdown: (
+    changeSet: SemanticDiffChangeSet,
+    language?: string,
+  ) => string;
 };
 
 const textDecoder = new TextDecoder("utf-8");
@@ -104,16 +109,18 @@ export const executeCompareSemanticDiffCommand = async (
   const reportInput = {
     beforeContent: beforeDefinition.content,
     afterContent: activeEditor.document.getText(),
-    ...(deps.language ? { language: deps.language } : {}),
   };
-  const reportResult = deps.buildSemanticDiffReport(reportInput);
+  const reportResult = deps.buildSemanticDiffReportData(reportInput);
   if (!reportResult.ok) {
     const message =
       "Semantic diff could not parse one or both JP1/AJS definitions.";
     await safeShowErrorMessage(deps, message);
     return commandError("parse-failed", message);
   }
-  const report = reportResult.report;
+  const report = deps.renderSemanticDiffMarkdown(
+    reportResult.changeSet,
+    deps.language,
+  );
 
   try {
     await deps.openReport(report);

@@ -8,8 +8,9 @@ import type {
   SemanticDiffChange,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffReportSection,
+  SemanticDiffUnitReference,
   SemanticDiffUnsupportedItem,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+} from "../../application/semantic-diff/semanticDiffDto";
 import {
   createSemanticDiffChangeSet,
   type CompareSemanticDiff,
@@ -66,6 +67,13 @@ const afterDocument: AjsDocument = {
   warnings: [],
 };
 
+const unitReference = (unit: AjsUnit): SemanticDiffUnitReference => ({
+  id: unit.id,
+  name: unit.name,
+  absolutePath: unit.absolutePath,
+  unitType: unit.unitType,
+});
+
 suite("Semantic Diff Contracts", () => {
   test("creates a host-neutral change set from normalized documents", () => {
     const input: CompareSemanticDiffInput = {
@@ -76,9 +84,16 @@ suite("Semantic Diff Contracts", () => {
 
     const changeSet = createSemanticDiffChangeSet(input);
 
-    assert.strictEqual(changeSet.inputs.before.document, beforeDocument);
-    assert.strictEqual(changeSet.inputs.after.document, afterDocument);
     assert.strictEqual(changeSet.inputs.before.jobGroupPath, "/root");
+    assert.deepStrictEqual(changeSet.inputs.before.unitIds, [beforeUnit.id]);
+    assert.deepStrictEqual(changeSet.inputs.after.unitIds, [afterUnit.id]);
+    assert.deepStrictEqual(changeSet.inputs.before.relations, [
+      {
+        ...relation,
+        sourceUnitPath: beforeUnit.absolutePath,
+        targetUnitPath: undefined,
+      },
+    ]);
     assert.deepStrictEqual(changeSet.changes, []);
     assert.deepStrictEqual(changeSet.confirmationRequired, []);
     assert.deepStrictEqual(changeSet.unsupportedItems, []);
@@ -90,12 +105,16 @@ suite("Semantic Diff Contracts", () => {
         side: "before",
         message: "relation target was not found",
         unitPath: "/root/jobnet/job-a",
-        warning: beforeDocument.warnings[0],
       },
     ]);
+    const serialized = JSON.stringify(changeSet);
+    assert.strictEqual(serialized.includes("rootUnits"), false);
+    assert.strictEqual(serialized.includes("unitAttribute"), false);
+    assert.strictEqual(serialized.includes("parameters"), false);
+    assert.strictEqual(serialized.includes('"warning"'), false);
   });
 
-  test("represents semantic categories without parser or host objects", () => {
+  test("constructs scalar report and flow DTOs without domain objects", () => {
     const change: SemanticDiffChange = {
       id: "change-1",
       kind: "changed",
@@ -105,24 +124,28 @@ suite("Semantic Diff Contracts", () => {
       summary: "execution definition changed",
       before: {
         kind: "attribute",
-        unit: beforeUnit,
+        unit: unitReference(beforeUnit),
         parameterKey: "sc",
         category: "execution-definition",
+        values: ["echo before"],
       },
       after: {
         kind: "attribute",
-        unit: afterUnit,
+        unit: unitReference(afterUnit),
         parameterKey: "sc",
         category: "execution-definition",
+        values: ["echo after"],
       },
     };
     const confirmationRequired: SemanticDiffConfirmationRequiredItem = {
       id: "confirmation-1",
       target: {
         kind: "relation",
-        relation,
-        sourceUnit: beforeUnit,
-        targetUnit: afterUnit,
+        relation: {
+          ...relation,
+          sourceUnitPath: beforeUnit.absolutePath,
+          targetUnitPath: afterUnit.absolutePath,
+        },
       },
       changeContent: "start condition changed",
       rationale: "previous start path may no longer be available",
@@ -132,7 +155,7 @@ suite("Semantic Diff Contracts", () => {
     const unsupportedItem: SemanticDiffUnsupportedItem = {
       id: "unsupported-1",
       kind: "unsupported",
-      target: { kind: "unit", unit: beforeUnit },
+      target: { kind: "unit", unit: unitReference(beforeUnit) },
       message: "unit type is not supported yet",
     };
     const reportSection: SemanticDiffReportSection = {
@@ -149,6 +172,25 @@ suite("Semantic Diff Contracts", () => {
         confirmationRequired: [confirmationRequired],
         unsupportedItems: [unsupportedItem],
         reportSections: [reportSection],
+        scheduleComparison: {
+          period: { from: "2026-04-01", to: "2026-05-01" },
+          runChanges: [
+            {
+              id: "schedule:added:/root/jobnet:2026-04-10:09:00",
+              kind: "added",
+              unitPath: "/root/jobnet",
+              date: "2026-04-10",
+              after: {
+                unitPath: "/root/jobnet",
+                unitName: "jobnet",
+                rule: 1,
+                date: "2026-04-10",
+                time: "09:00",
+              },
+              summary: "/root/jobnet run added",
+            },
+          ],
+        },
       },
     );
 
@@ -156,6 +198,10 @@ suite("Semantic Diff Contracts", () => {
     assert.strictEqual(changeSet.confirmationRequired[0], confirmationRequired);
     assert.strictEqual(changeSet.unsupportedItems[0], unsupportedItem);
     assert.strictEqual(changeSet.reportSections[0], reportSection);
+    assert.deepStrictEqual(changeSet.scheduleComparison?.period, {
+      from: "2026-04-01",
+      to: "2026-05-01",
+    });
   });
 
   test("exposes a comparison entry point shape for later slices", () => {

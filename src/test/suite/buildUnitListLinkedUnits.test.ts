@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { buildUnitListLinkedUnits } from "../../application/unit-list/buildUnitListLinkedUnits";
 
 const definition = `
@@ -26,9 +25,7 @@ unit=root,,jp1admin,;
 
 suite("Build Unit List Linked Units", () => {
   test("projects previous and next linked units from parent relations", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
 
     const units = document.rootUnits[0]?.children;
     assert.ok(units);

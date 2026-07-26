@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
 import { buildUnitListRemainingGroups } from "../../application/unit-list/buildUnitListRemainingGroups";
 
@@ -186,9 +185,7 @@ unit=root,,jp1admin,;
 
 suite("Build Unit List Remaining Groups", () => {
   test("projects all remaining group fields from unit parameters", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
     const root = document.rootUnits[0];
     const jobnet = document.rootUnits[0]?.children[0];
     const manager = document.rootUnits[0]?.children[1];
@@ -249,9 +246,7 @@ suite("Build Unit List Remaining Groups", () => {
   });
 
   test("projects JP1 event sending job arrival-check defaults for group 14", () => {
-    const result = parseAjs(eventSendingJobDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(eventSendingJobDefinition);
     const eventDefaults = document.rootUnits[0]?.children[0];
     const eventExplicit = document.rootUnits[0]?.children[1];
     const regularJob = document.rootUnits[0]?.children[2];
@@ -281,9 +276,7 @@ suite("Build Unit List Remaining Groups", () => {
   });
 
   test("projects file monitoring job defaults for group 13", () => {
-    const result = parseAjs(fileMonitoringJobDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(fileMonitoringJobDefinition);
     const fileDefaults = document.rootUnits[0]?.children[0];
     const fileExplicit = document.rootUnits[0]?.children[1];
     const regularJob = document.rootUnits[0]?.children[2];
@@ -321,9 +314,9 @@ suite("Build Unit List Remaining Groups", () => {
   });
 
   test("projects execution-interval control job defaults for group 13", () => {
-    const result = parseAjs(executionIntervalControlJobDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(
+      executionIntervalControlJobDefinition,
+    );
     const intervalDefaults = document.rootUnits[0]?.children[0];
     const intervalExplicit = document.rootUnits[0]?.children[1];
     const regularJob = document.rootUnits[0]?.children[2];
@@ -350,9 +343,7 @@ suite("Build Unit List Remaining Groups", () => {
   });
 
   test("projects shared wait-job timeout-action defaults for group 13", () => {
-    const result = parseAjs(waitJobTimeoutActionDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(waitJobTimeoutActionDefinition);
     const logFileDefaults = document.rootUnits[0]?.children[0];
     const mailDefaults = document.rootUnits[0]?.children[1];
     const mqDefaults = document.rootUnits[0]?.children[2];
@@ -407,9 +398,7 @@ suite("Build Unit List Remaining Groups", () => {
   });
 
   test("hides QUEUE job transfer operations in group 15", () => {
-    const result = parseAjs(queueGroup15Definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(queueGroup15Definition);
     const queueJob = document.rootUnits[0]?.children[0];
     const recoveryQueueJob = document.rootUnits[0]?.children[1];
     const regularJob = document.rootUnits[0]?.children[2];

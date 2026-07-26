@@ -1,58 +1,59 @@
-import {
-  AjsDocument,
-  AjsUnit,
-  flattenAjsUnits,
-} from "../../../../domain/models/ajs/AjsDocument";
-import {
-  buildUnitDefinitionByPath,
-  UnitDefinitionDialogDto,
-} from "../../../../application/unit-definition/buildUnitDefinition";
-import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
+import type {
+  UnitListRowView,
+  UnitListUnitMetadataDto,
+} from "../../../../application/unit-list/buildUnitListView";
+import type {
+  UnitListRootDto,
+  UnitListTableDataDto,
+} from "../../../../application/unit-list/unitListDocument";
 
 export type TableViewerData = {
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
   rowViewByPath: ReadonlyMap<string, UnitListRowView>;
-  rootUnits: AjsUnit[];
-  unitById: ReadonlyMap<string, AjsUnit>;
-  unitByAbsolutePath: ReadonlyMap<string, AjsUnit>;
+  rootUnits: UnitListRootDto[];
+  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
+  unitByAbsolutePath: ReadonlyMap<string, UnitListUnitMetadataDto>;
+  parameterSearchValuesByPath: ReadonlyMap<string, readonly string[]>;
 };
-
-const createUnitDefinitionByPath = (
-  ajsDocument: AjsDocument | undefined,
-): ReadonlyMap<string, UnitDefinitionDialogDto> =>
-  ajsDocument
-    ? buildUnitDefinitionByPath(ajsDocument)
-    : new Map<string, UnitDefinitionDialogDto>();
 
 const createRowViewByPath = (
   rowViews: UnitListRowView[] | undefined,
 ): ReadonlyMap<string, UnitListRowView> =>
   new Map((rowViews ?? []).map((rowView) => [rowView.absolutePath, rowView]));
 
-const createUnitById = (units: ReadonlyArray<AjsUnit>) =>
+const createUnitById = (units: ReadonlyArray<UnitListUnitMetadataDto>) =>
   new Map(units.map((unit) => [unit.id, unit]));
 
-const createUnitByAbsolutePath = (units: ReadonlyArray<AjsUnit>) =>
-  new Map(units.map((unit) => [unit.absolutePath, unit]));
+const createUnitByAbsolutePath = (
+  units: ReadonlyArray<UnitListUnitMetadataDto>,
+) => new Map(units.map((unit) => [unit.absolutePath, unit]));
+
+const createParameterSearchValuesByPath = (
+  units: ReadonlyArray<UnitListUnitMetadataDto>,
+) =>
+  new Map(units.map((unit) => [unit.absolutePath, unit.parameterSearchValues]));
 
 export const createTableViewerData = (
-  ajsDocument: AjsDocument | undefined,
-  rowViews: UnitListRowView[] | undefined,
+  tableData: UnitListTableDataDto | undefined,
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
 ): TableViewerData => {
-  const rootUnits = ajsDocument?.rootUnits ?? [];
-  const allUnits = ajsDocument ? flattenAjsUnits(rootUnits) : [];
+  const rootUnits = tableData?.rootUnits ?? [];
+  const rows = tableData?.rows ?? [];
+  const units = tableData?.units ?? [];
   return {
-    unitDefinitionByPath: createUnitDefinitionByPath(ajsDocument),
-    rowViewByPath: createRowViewByPath(rowViews),
+    unitDefinitionByPath,
+    rowViewByPath: createRowViewByPath(rows),
     rootUnits,
-    unitById: createUnitById(allUnits),
-    unitByAbsolutePath: createUnitByAbsolutePath(allUnits),
+    unitById: createUnitById(units),
+    unitByAbsolutePath: createUnitByAbsolutePath(units),
+    parameterSearchValuesByPath: createParameterSearchValuesByPath(units),
   };
 };
 
 export const findSelectedUnitId = (
   selectedAbsolutePath: string | undefined,
-  unitByAbsolutePath: ReadonlyMap<string, AjsUnit>,
+  unitByAbsolutePath: ReadonlyMap<string, UnitListUnitMetadataDto>,
 ): string | undefined =>
   selectedAbsolutePath
     ? unitByAbsolutePath.get(selectedAbsolutePath)?.id

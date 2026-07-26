@@ -7,17 +7,21 @@ import {
 } from "react";
 import { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import {
-  AjsDocument,
-  findRootJobnet,
-  flattenAjsUnits,
-} from "../../../../domain/models/ajs/AjsDocument";
-import { toAjsDocument } from "../../../../application/unit-list/unitListDocument";
+  type ValidatedFlowGraphDocument,
+  validateFlowGraphDocument,
+} from "../../../../application/flow-graph/flowGraphDocument";
+import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
+import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
 import {
-  createPerformanceEvent,
-  REVEAL_UNIT,
-} from "../../../../shared/webviewEvents";
-import { getRevealUnitAbsolutePath } from "../revealUnit";
+  parseNavigationRequest,
+  type NavigationRequestDto,
+} from "../../../../application/navigation/resolveNavigationTarget";
+import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
+import {
+  createViewerPerformanceRequest,
+  createViewerReadyRequest,
+} from "../../viewerRequestMessages";
 import {
   resolveFlowNodeCenter,
   resolveFlowViewportFocusAction,
@@ -292,7 +296,7 @@ export const useFlowViewerFitView = ({
 };
 
 type UseFlowScopeResetParams = {
-  ajsDocument?: AjsDocument;
+  documentIdentity?: object;
   currentUnitId?: string;
   preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
   resetSearch: () => void;
@@ -331,7 +335,7 @@ const resetFlowScopeState = ({
 };
 
 export const useFlowScopeReset = ({
-  ajsDocument,
+  documentIdentity,
   currentUnitId,
   preserveSearchOnNextScopeChange,
   resetSearch,
@@ -344,7 +348,7 @@ export const useFlowScopeReset = ({
       setExpandedUnitIds,
     });
   }, [
-    ajsDocument,
+    documentIdentity,
     currentUnitId,
     preserveSearchOnNextScopeChange,
     resetSearch,
@@ -353,41 +357,68 @@ export const useFlowScopeReset = ({
 };
 
 type UseFlowDocumentSubscriptionParams = {
-  prevUnitEntityId: MutableRefObject<string | undefined>;
-  setAjsDocument: Dispatch<SetStateAction<AjsDocument | undefined>>;
+  previousUnitIdRef: MutableRefObject<string | undefined>;
+  setFlowDocument: Dispatch<
+    SetStateAction<ValidatedFlowGraphDocument | undefined>
+  >;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
+  setUnitDefinitionByPath: Dispatch<
+    SetStateAction<ReadonlyMap<string, UnitDefinitionDialogDto>>
+  >;
 };
 
 const resolveNextCurrentUnitId = (
-  nextDocument: AjsDocument | undefined,
+  nextDocument: ValidatedFlowGraphDocument | undefined,
   prevUnitId: string | undefined,
 ): string | undefined => {
   if (!nextDocument) {
     return undefined;
   }
-  const units = flattenAjsUnits(nextDocument.rootUnits);
-  return prevUnitId
-    ? units.find((unit) => unit.id === prevUnitId)?.id
-    : findRootJobnet(nextDocument)?.id;
+  if (prevUnitId) {
+    return nextDocument.index.unitById.get(prevUnitId)?.id;
+  }
+  for (const unit of nextDocument.index.unitById.values()) {
+    if (unit.unitType === "n" && unit.isRootJobnet) {
+      return unit.id;
+    }
+  }
+  return undefined;
+};
+
+export const resolveFlowDocumentChange = (
+  data: unknown,
+  previousUnitId: string | undefined,
+) => {
+  const validation = data ? validateFlowGraphDocument(data) : undefined;
+  const flowDocument =
+    validation?.status === "available" ? validation : undefined;
+  return {
+    flowDocument,
+    currentUnitId: resolveNextCurrentUnitId(flowDocument, previousUnitId),
+    unitDefinitionByPath: toUnitDefinitionByPath(data),
+  };
 };
 
 export const useFlowDocumentSubscription = ({
-  prevUnitEntityId,
-  setAjsDocument,
+  previousUnitIdRef,
+  setFlowDocument,
   setCurrentUnitId,
+  setUnitDefinitionByPath,
 }: UseFlowDocumentSubscriptionParams) => {
   const renderReadyStartedAt = useRef(performance.now());
   useEffect(() => {
     const changeDocumentFn = (_type: string, data: unknown) => {
-      const nextDocument = data ? toAjsDocument(data) : undefined;
-      setAjsDocument(() => nextDocument);
-      setCurrentUnitId(() =>
-        resolveNextCurrentUnitId(nextDocument, prevUnitEntityId.current),
+      const nextState = resolveFlowDocumentChange(
+        data,
+        previousUnitIdRef.current,
       );
+      setFlowDocument(() => nextState.flowDocument);
+      setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
+      setCurrentUnitId(() => nextState.currentUnitId);
     };
-    window.EventBridge.addCallback("changeDocument", changeDocumentFn);
+    window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocumentFn);
     window.vscode.postMessage(
-      createPerformanceEvent({
+      createViewerPerformanceRequest({
         operation: "flow_render",
         result: "success",
         durationBucket: toDurationBucket(
@@ -395,15 +426,20 @@ export const useFlowDocumentSubscription = ({
         ),
       }),
     );
-    window.vscode.postMessage({ type: "ready" });
+    window.vscode.postMessage(createViewerReadyRequest());
     return () => {
-      window.EventBridge.removeCallback("changeDocument", changeDocumentFn);
+      window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocumentFn);
     };
-  }, [prevUnitEntityId, setAjsDocument, setCurrentUnitId]);
+  }, [
+    previousUnitIdRef,
+    setFlowDocument,
+    setCurrentUnitId,
+    setUnitDefinitionByPath,
+  ]);
 };
 
 type UseRevealUnitSubscriptionParams = {
-  handleRevealUnit: (absolutePath: string) => void;
+  handleRevealUnit: (request: NavigationRequestDto) => void;
 };
 
 export const useRevealUnitSubscription = ({
@@ -411,11 +447,8 @@ export const useRevealUnitSubscription = ({
 }: UseRevealUnitSubscriptionParams) => {
   useEffect(() => {
     const revealUnitFn = (_type: string, data: unknown) => {
-      const absolutePath = getRevealUnitAbsolutePath(data);
-      if (!absolutePath) {
-        return;
-      }
-      handleRevealUnit(absolutePath);
+      const result = parseNavigationRequest(data);
+      if (result.status === "available") handleRevealUnit(result.request);
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     return () => {

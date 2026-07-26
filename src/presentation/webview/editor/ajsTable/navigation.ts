@@ -1,10 +1,10 @@
 import type { KeyboardEvent } from "react";
 import type { MouseEvent } from "react";
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
-import { createNavigationEvent } from "../../../../shared/webviewEvents";
+import type { UnitListUnitMetadataDto } from "../../../../application/unit-list/buildUnitListView";
+import { createViewerNavigationRequest } from "../../viewerRequestMessages";
 
 type PostViewerMessage = (
-  message: ReturnType<typeof createNavigationEvent>,
+  message: ReturnType<typeof createViewerNavigationRequest>,
 ) => void | PromiseLike<boolean>;
 
 export type TableRowSelectionAction =
@@ -45,12 +45,12 @@ export const navigateToFlow = (
   postMessage: PostViewerMessage = (message) =>
     window.vscode.postMessage(message),
 ): void => {
-  postMessage(createNavigationEvent("flow", absolutePath));
+  postMessage(createViewerNavigationRequest("flow", absolutePath));
 };
 
 export const selectUnitTreeUnitInTable = (
   unitId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>,
   revealPath: (absolutePath: string) => void,
 ): void => {
   const unit = unitById.get(unitId);
@@ -61,7 +61,7 @@ export const selectUnitTreeUnitInTable = (
 
 export const openUnitTreeUnitInFlow = (
   unitId: string,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>,
   navigate: (absolutePath: string) => void = navigateToFlow,
 ): void => {
   const unit = unitById.get(unitId);

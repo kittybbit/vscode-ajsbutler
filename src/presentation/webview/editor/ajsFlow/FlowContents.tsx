@@ -18,8 +18,8 @@ import {
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import UnitEntityDialog from "../UnitEntityDialog";
-import { createOperationEvent } from "../../../../shared/webviewEvents";
+import UnitDefinitionDialog from "../UnitDefinitionDialog";
+import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import JobNode from "./nodes/JobNode";
 import JobNetNode from "./nodes/JobNetNode";
 import JobGroupNode from "./nodes/JobGroupNode";
@@ -154,7 +154,7 @@ type FlowViewerBodyProps = FlowViewerController & {
 };
 
 const FlowViewerBody: FC<FlowViewerBodyProps> = ({
-  ajsDocument,
+  flowDocumentDto,
   clearGraphHoveredUnit,
   clearSelectedUnit,
   clearTreeHoveredUnit,
@@ -205,7 +205,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
       }}
     >
       <FlowSelector
-        rootUnits={ajsDocument?.rootUnits ?? []}
+        rootUnits={flowDocumentDto?.rootUnits ?? []}
         unitById={unitById}
         currentUnitIdState={currentUnitIdState}
         hoveredUnitId={hoveredUnitId}
@@ -238,7 +238,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
       )}
     </Stack>
     {dialogData && (
-      <UnitEntityDialog
+      <UnitDefinitionDialog
         dialogData={dialogData}
         onClose={() => setDialogData(undefined)}
       />
@@ -289,8 +289,10 @@ const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
     [theme],
   );
 
-const reportFlowOperation = (operation: string): void => {
-  window.vscode.postMessage(createOperationEvent(operation));
+const reportFlowOperation = (
+  operation: Parameters<typeof createViewerOperationRequest>[0],
+): void => {
+  window.vscode.postMessage(createViewerOperationRequest(operation));
 };
 
 const FlowContents: FC = () => {
@@ -299,7 +301,7 @@ const FlowContents: FC = () => {
   const theme = useFlowTheme();
 
   const {
-    ajsDocument,
+    flowDocumentDto,
     canEnableFocusMode,
     currentUnit,
     currentUnitIdState,
@@ -352,9 +354,12 @@ const FlowContents: FC = () => {
     [selectTreeUnit],
   );
   const openSelectedNodeDefinitionWithTelemetry = useCallback(() => {
+    if (!selectedNodeDetail?.canOpenDefinition) {
+      return;
+    }
     reportFlowOperation("definition.open");
     openSelectedNodeDefinition();
-  }, [openSelectedNodeDefinition]);
+  }, [openSelectedNodeDefinition, selectedNodeDetail?.canOpenDefinition]);
   const openSelectedNodeScopeWithTelemetry = useCallback(() => {
     reportFlowOperation("flow.scope.open");
     openSelectedNodeScope();
@@ -409,7 +414,7 @@ const FlowContents: FC = () => {
             onSearchClear={handleSearchClear}
           />
           <FlowViewerBody
-            ajsDocument={ajsDocument}
+            flowDocumentDto={flowDocumentDto}
             canEnableFocusMode={canEnableFocusMode}
             clearGraphHoveredUnit={clearGraphHoveredUnit}
             clearSelectedUnit={clearSelectedUnit}

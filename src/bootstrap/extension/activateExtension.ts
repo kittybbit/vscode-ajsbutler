@@ -5,7 +5,10 @@ import {
   reportExtensionActivated,
   reportAndDisposeExtensionRuntime,
 } from "./extensionLifecycle";
-import { createExtensionRuntime } from "./extensionRuntime";
+import {
+  createExtensionRuntime,
+  resolveExtensionHost,
+} from "./extensionRuntime";
 import { createExtensionSubscriptions } from "./extensionSubscriptions";
 
 export type ActivatedExtension = {
@@ -15,7 +18,8 @@ export type ActivatedExtension = {
 export const activateExtension = (
   context: vscode.ExtensionContext,
 ): ActivatedExtension => {
-  const dependencies = createExtensionDependencies(context);
+  const host = resolveExtensionHost(vscode.env.uiKind);
+  const dependencies = createExtensionDependencies(context, host);
   const myExtension = createExtensionRuntime(context, dependencies.telemetry);
 
   context.subscriptions.push(

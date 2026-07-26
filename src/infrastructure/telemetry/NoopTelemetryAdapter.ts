@@ -1,12 +1,9 @@
-import {
-  TelemetryPort,
-  TelemetryProperties,
-} from "../../application/telemetry/TelemetryPort";
+import type { ValidatedTelemetryEvent } from "../../application/telemetry/telemetryEvent";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 
 export class NoopTelemetryAdapter implements TelemetryPort {
-  trackEvent(_eventName: string, _properties?: TelemetryProperties): void {
-    void _eventName;
-    void _properties;
+  report(_event: ValidatedTelemetryEvent): void {
+    void _event;
   }
 
   dispose(): void {}

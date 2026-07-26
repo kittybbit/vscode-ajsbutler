@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import { createPerformanceTelemetryEvent } from "../../application/telemetry/performanceTelemetry";
+import { isViewerPerformanceTelemetryData } from "../../application/telemetry/viewerPerformanceTelemetryData";
 
 suite("Performance telemetry", () => {
   test("creates privacy-safe performance events from bucketed metadata", () => {
@@ -24,6 +25,32 @@ suite("Performance telemetry", () => {
           edgeCountBucket: "2_9",
         },
       },
+    );
+  });
+
+  test("accepts only viewer operations and bucket values", () => {
+    assert.strictEqual(
+      isViewerPerformanceTelemetryData({
+        operation: "flow_graph_build",
+        result: "success",
+        nodeCountBucket: "10_99",
+      }),
+      true,
+    );
+    assert.strictEqual(
+      isViewerPerformanceTelemetryData({
+        operation: "parse",
+        result: "success",
+      }),
+      false,
+    );
+    assert.strictEqual(
+      isViewerPerformanceTelemetryData({
+        operation: "flow_graph_build",
+        result: "success",
+        nodeCountBucket: "raw count",
+      }),
+      false,
     );
   });
 });

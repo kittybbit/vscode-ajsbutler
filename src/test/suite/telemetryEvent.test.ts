@@ -4,10 +4,78 @@ import {
   createTelemetryEvent,
   telemetryEvents,
   telemetryPropertyKeys,
+  type TelemetryProperties,
   type TelemetryPropertyKey,
+  type ValidatedTelemetryEvent,
 } from "../../application/telemetry/telemetryEvent";
 
+type RawTelemetryEvent = Readonly<{
+  name: string;
+  properties: TelemetryProperties;
+}>;
+
+type RawEventIsValidated = RawTelemetryEvent extends ValidatedTelemetryEvent
+  ? true
+  : false;
+
 suite("Telemetry event schema", () => {
+  test("requires factory validation for telemetry event assignment", () => {
+    const rawEventIsValidated: RawEventIsValidated = false;
+    const mutateValidatedProperties = (
+      event: ValidatedTelemetryEvent,
+    ): void => {
+      // @ts-expect-error Validated properties must remain immutable after filtering.
+      event.properties.filePath = "/secret/example.ajs";
+    };
+
+    assert.strictEqual(rawEventIsValidated, false);
+    assert.strictEqual(typeof mutateValidatedProperties, "function");
+  });
+
+  test("preserves the exact legacy event and property baseline", () => {
+    const events = [
+      createTelemetryEvent(telemetryEvents.legacyExtensionActivated, {
+        development: false,
+      }),
+      createTelemetryEvent(telemetryEvents.legacyExtensionDeactivated, {
+        development: false,
+      }),
+      createTelemetryEvent(telemetryEvents.legacyTableViewerOpened, {
+        development: false,
+      }),
+      createTelemetryEvent(telemetryEvents.legacyFlowViewerOpened, {
+        development: false,
+      }),
+      createTelemetryEvent(telemetryEvents.legacyWebviewOperation, {
+        development: false,
+        viewType: "ajsbutler.tableViewer",
+        operation: "copy.csv",
+        filePath: "/secret/example.ajs",
+      }),
+    ];
+
+    assert.deepStrictEqual(events, [
+      { name: "ext.activate", properties: { development: "false" } },
+      { name: "ext.deactivate", properties: { development: "false" } },
+      {
+        name: "ajsbutler.tableViewer",
+        properties: { development: "false" },
+      },
+      {
+        name: "ajsbutler.flowViewer",
+        properties: { development: "false" },
+      },
+      {
+        name: "operation",
+        properties: {
+          development: "false",
+          viewType: "ajsbutler.tableViewer",
+          operation: "copy.csv",
+        },
+      },
+    ]);
+  });
+
   test("creates an event with only allowlisted string properties", () => {
     const event = createTelemetryEvent(
       telemetryEvents.extensionLifecycleActivated,

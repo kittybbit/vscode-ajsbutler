@@ -9,6 +9,23 @@ suite("Viewer action telemetry", () => {
     assert.deepStrictEqual(
       createViewerActionEvent({
         viewType: "ajsbutler.tableViewer",
+        operation: "copy.csv",
+        host: "web",
+      }),
+      {
+        name: "viewer.table.csv_copied",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "web",
+          view: "table",
+          result: "success",
+        },
+      },
+    );
+
+    assert.deepStrictEqual(
+      createViewerActionEvent({
+        viewType: "ajsbutler.tableViewer",
         operation: "save.csv",
         host: "desktop",
       }),
@@ -31,6 +48,40 @@ suite("Viewer action telemetry", () => {
       }),
       {
         name: "viewer.flow.minimap_toggled",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "web",
+          view: "flow",
+          result: "success",
+        },
+      },
+    );
+
+    assert.deepStrictEqual(
+      createViewerActionEvent({
+        viewType: "ajsbutler.tableViewer",
+        operation: "definition.open",
+        host: "desktop",
+      }),
+      {
+        name: "viewer.table.definition_opened",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          view: "table",
+          result: "success",
+        },
+      },
+    );
+
+    assert.deepStrictEqual(
+      createViewerActionEvent({
+        viewType: "ajsbutler.flowViewer",
+        operation: "definition.open",
+        host: "web",
+      }),
+      {
+        name: "viewer.flow.definition_opened",
         properties: {
           development: String(DEVELOPMENT),
           host: "web",

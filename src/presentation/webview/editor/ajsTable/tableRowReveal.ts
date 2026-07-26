@@ -1,12 +1,12 @@
 import { MutableRefObject, useCallback } from "react";
 import type { Row } from "@tanstack/table-core";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { getRevealUnitAbsolutePath } from "../revealUnit";
+import { parseNavigationRequest } from "../../../../application/navigation/resolveNavigationTarget";
 
 export type TableRowRevealState = {
   handleJump: (id: string) => void;
   revealPath: (absolutePath: string) => void;
-  revealUnit: (data: unknown) => void;
+  revealUnit: (data: unknown) => boolean;
 };
 
 type TableRowRevealContext = {
@@ -46,18 +46,23 @@ export const findRowIndexByIdentity = (
 const selectResolvedRow = (
   identity: string,
   { rows, selectRow }: TableRowRevealContext,
-) => {
+): boolean => {
   const row = buildRowByIdentity(rows).get(identity);
   if (row) {
     selectRow(row.original.absolutePath);
+    return true;
   }
+  return false;
 };
 
-const revealTableRow = (data: unknown, context: TableRowRevealContext) => {
-  const absolutePath = getRevealUnitAbsolutePath(data);
-  if (absolutePath) {
-    selectResolvedRow(absolutePath, context);
-  }
+export const revealTableRow = (
+  data: unknown,
+  context: TableRowRevealContext,
+): boolean => {
+  const result = parseNavigationRequest(data);
+  return result.status === "available"
+    ? selectResolvedRow(result.request.absolutePath, context)
+    : false;
 };
 
 export const useTableRowRevealState = (
@@ -78,12 +83,11 @@ export const useTableRowRevealState = (
   );
 
   const revealUnit = useCallback(
-    (data: unknown) => {
+    (data: unknown): boolean =>
       revealTableRow(data, {
         rows: rowsRef.current,
         selectRow,
-      });
-    },
+      }),
     [rowsRef, selectRow],
   );
 

@@ -1,152 +1,81 @@
-import { DEFAULTS } from "../../domain/models/parameters/Defaults";
-import type {
-  AjsDocument,
-  AjsParameter,
-  AjsUnit,
-} from "../../domain/models/ajs/AjsDocument";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
+import {
+  retryAbrDependencyViolationReasons,
+  type DiagnosticParameterEvidence,
+} from "../../domain/services/diagnostics/DiagnosticViolation";
+import {
+  evaluateJobEndDiagnosticViolations,
+  jobEndRangeViolationReasons,
+  jobEndThresholdViolationReasons,
+  type JobEndDiagnosticViolationReason,
+} from "../../domain/services/diagnostics/evaluateJobEndDiagnosticViolations";
+import { toDiagnosticSourceRange } from "./diagnosticSourceRange";
 import type { SyntaxDiagnosticDto } from "./syntaxDiagnosticTypes";
-import {
-  buildDiagnostic,
-  collectRuleDiagnostics,
-} from "./syntaxDiagnosticCore";
-import { hasInvalidExplicitThresholdOrdering } from "./syntaxDiagnosticJobEndRules";
-import { findParameter, findUnitsByTypes } from "./syntaxDiagnosticUnitLookup";
-import {
-  jobEndJudgmentDiagnosticTargetTypes,
-  jobEndJudgmentRetryParameterKeys,
-} from "./syntaxDiagnosticTargetTypes";
-import { jobEndJudgmentNumericRangeRules } from "./syntaxDiagnosticRuleSets";
+import { syntaxDiagnosticCategories } from "./syntaxDiagnosticTypes";
 
-const collectRetryParameterDiagnostics = (
-  unit: AjsUnit,
-  buildMessage: (retryParameterKey: string) => string,
-): SyntaxDiagnosticDto[] =>
-  jobEndJudgmentRetryParameterKeys.flatMap((retryParameterKey) => {
-    const retryParameter = findParameter(unit, retryParameterKey);
-    return retryParameter
-      ? [buildDiagnostic(retryParameter, buildMessage(retryParameterKey))]
-      : [];
-  });
+type JobEndDiagnosticMessageBuilder = (
+  evidence: DiagnosticParameterEvidence,
+) => string;
 
-type OptionalParameterDiagnosticInput = {
-  parameter: AjsParameter | undefined;
-  message: string;
-};
+const staticMessage =
+  (message: string): JobEndDiagnosticMessageBuilder =>
+  () =>
+    message;
 
-const collectOptionalParameterDiagnostics = (
-  inputs: readonly OptionalParameterDiagnosticInput[],
-): SyntaxDiagnosticDto[] =>
-  inputs.flatMap(({ parameter, message }) =>
-    parameter ? [buildDiagnostic(parameter, message)] : [],
-  );
-
-const shouldCheckThresholdOrdering = ({
-  unit,
-  effectiveJobEndJudgment,
-}: JobEndJudgmentContext): boolean =>
-  effectiveJobEndJudgment === DEFAULTS.Jd &&
-  hasInvalidExplicitThresholdOrdering(unit);
-
-type JobEndJudgmentContext = {
-  unit: AjsUnit;
-  effectiveJobEndJudgment: string;
-  effectiveAutomaticRetry: string;
-  abrParameter: AjsParameter | undefined;
-  warningThresholdParameter: AjsParameter | undefined;
-  abnormalThresholdParameter: AjsParameter | undefined;
-};
-
-const collectThresholdOrderingDiagnostics = (
-  context: JobEndJudgmentContext,
-): SyntaxDiagnosticDto[] => {
-  if (!shouldCheckThresholdOrdering(context)) {
-    return [];
-  }
-
-  return collectOptionalParameterDiagnostics([
-    {
-      parameter: context.warningThresholdParameter,
-      message:
-        "Warning threshold (wth) must be less than abnormal threshold (tho).",
-    },
-    {
-      parameter: context.abnormalThresholdParameter,
-      message:
-        "Abnormal threshold (tho) must be greater than warning threshold (wth).",
-    },
-  ]);
-};
-
-const collectInvalidEndJudgmentRetryDiagnostics = (
-  unit: AjsUnit,
-  abrParameter: AjsParameter | undefined,
-): SyntaxDiagnosticDto[] => [
-  ...(abrParameter?.value === "y"
-    ? [
-        buildDiagnostic(
-          abrParameter,
-          "Automatic retry (abr=y) requires end judgment (jd) to be cod.",
-        ),
-      ]
-    : []),
-  ...collectRetryParameterDiagnostics(
-    unit,
-    (retryParameterKey) =>
-      `Retry parameter (${retryParameterKey}) requires end judgment (jd) to be cod.`,
+const jobEndDiagnosticMessageBuilders: Readonly<
+  Record<JobEndDiagnosticViolationReason, JobEndDiagnosticMessageBuilder>
+> = {
+  [jobEndRangeViolationReasons.invalidWarningThreshold]: staticMessage(
+    "Warning threshold (wth) must be between 0 and 2147483647.",
   ),
-];
-
-const collectAutomaticRetryDisabledDiagnostics = (
-  unit: AjsUnit,
-): SyntaxDiagnosticDto[] =>
-  collectRetryParameterDiagnostics(
-    unit,
-    (retryParameterKey) =>
-      `Retry parameter (${retryParameterKey}) requires automatic retry (abr) to be y.`,
-  );
-
-const collectJobEndJudgmentRetryGateDiagnostics = (
-  context: JobEndJudgmentContext,
-): SyntaxDiagnosticDto[] => {
-  if (context.effectiveJobEndJudgment !== DEFAULTS.Jd) {
-    return collectInvalidEndJudgmentRetryDiagnostics(
-      context.unit,
-      context.abrParameter,
-    );
-  }
-
-  return context.effectiveAutomaticRetry === "y"
-    ? []
-    : collectAutomaticRetryDisabledDiagnostics(context.unit);
-};
-
-const getJobEndJudgmentContext = (unit: AjsUnit): JobEndJudgmentContext => {
-  const abrParameter = findParameter(unit, "abr");
-  return {
-    unit,
-    effectiveJobEndJudgment: findParameter(unit, "jd")?.value ?? DEFAULTS.Jd,
-    effectiveAutomaticRetry: abrParameter?.value ?? DEFAULTS.Abr,
-    abrParameter,
-    warningThresholdParameter: findParameter(unit, "wth"),
-    abnormalThresholdParameter: findParameter(unit, "tho"),
-  };
-};
-
-const buildJobEndJudgmentDiagnosticsForUnit = (
-  unit: AjsUnit,
-): SyntaxDiagnosticDto[] => {
-  const context = getJobEndJudgmentContext(unit);
-
-  return [
-    ...collectRuleDiagnostics(unit, jobEndJudgmentNumericRangeRules),
-    ...collectThresholdOrderingDiagnostics(context),
-    ...collectJobEndJudgmentRetryGateDiagnostics(context),
-  ];
+  [jobEndRangeViolationReasons.invalidAbnormalThreshold]: staticMessage(
+    "Abnormal threshold (tho) must be between 0 and 2147483647.",
+  ),
+  [jobEndRangeViolationReasons.invalidRetryStartCode]: staticMessage(
+    "Retry start code (rjs) must be between 1 and 4294967295.",
+  ),
+  [jobEndRangeViolationReasons.invalidRetryEndCode]: staticMessage(
+    "Retry end code (rje) must be between 1 and 4294967295.",
+  ),
+  [jobEndRangeViolationReasons.invalidRetryCount]: staticMessage(
+    "Retry count (rec) must be between 1 and 12.",
+  ),
+  [jobEndRangeViolationReasons.invalidRetryInterval]: staticMessage(
+    "Retry interval (rei) must be between 1 and 10.",
+  ),
+  [jobEndThresholdViolationReasons.warningNotLessThanAbnormal]: staticMessage(
+    "Warning threshold (wth) must be less than abnormal threshold (tho).",
+  ),
+  [jobEndThresholdViolationReasons.abnormalNotGreaterThanWarning]:
+    staticMessage(
+      "Abnormal threshold (tho) must be greater than warning threshold (wth).",
+    ),
+  [retryAbrDependencyViolationReasons.automaticRetryRequiresCodeEndJudgment]:
+    staticMessage(
+      "Automatic retry (abr=y) requires end judgment (jd) to be cod.",
+    ),
+  [retryAbrDependencyViolationReasons.retryParameterRequiresCodeEndJudgment]: (
+    evidence,
+  ) =>
+    `Retry parameter (${evidence.key}) requires end judgment (jd) to be cod.`,
+  [retryAbrDependencyViolationReasons.retryParameterRequiresAutomaticRetry]: (
+    evidence,
+  ) =>
+    `Retry parameter (${evidence.key}) requires automatic retry (abr) to be y.`,
 };
 
 export const buildJobEndJudgmentDiagnostics = (
   document: AjsDocument,
 ): SyntaxDiagnosticDto[] =>
-  findUnitsByTypes(document, jobEndJudgmentDiagnosticTargetTypes).flatMap(
-    buildJobEndJudgmentDiagnosticsForUnit,
-  );
+  evaluateJobEndDiagnosticViolations(document).map((violation) => ({
+    ...toDiagnosticSourceRange(
+      violation.evidence,
+      violation.evidence.key.length,
+    ),
+    message: jobEndDiagnosticMessageBuilders[violation.reason](
+      violation.evidence,
+    ),
+    severity: "error",
+    category: syntaxDiagnosticCategories.jobEndJudgment,
+    ruleId: violation.ruleId,
+  }));

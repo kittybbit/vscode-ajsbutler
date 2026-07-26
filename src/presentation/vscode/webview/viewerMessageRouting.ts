@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
+import type { ViewerOperationId } from "../../../application/telemetry/viewerOperation";
 import { createViewerClosedEvent } from "../../../application/telemetry/viewerTelemetry";
 import { getTelemetryHost } from "../telemetryHost";
 import {
@@ -7,59 +8,64 @@ import {
   reportWebviewSearch,
 } from "./messageHandlers";
 import {
+  isInvalidViewerSaveRequest,
   NAVIGATE,
   OPERATION,
   PERFORMANCE,
+  parseViewerRequest,
   READY,
   RESOURCE,
   SAVE,
   SEARCH,
-  type NavigationEventType,
-  type OperationEventType,
-  type PerformanceEventType,
-  type ReadyEventType,
-  type ResourceEventType,
-  type SaveEventType,
-  type SearchEventType,
-  type WebviewEventType,
-} from "../../../shared/webviewEvents";
+  type ViewerNavigationRequest,
+  type ViewerOperationRequest,
+  type ViewerPerformanceRequest,
+  type ViewerReadyRequest,
+  type ViewerRequest,
+  type ViewerResourceRequest,
+  type ViewerSaveRequest,
+  type ViewerSearchRequest,
+} from "../../webview/viewerRequestMessages";
 
 type ViewerMessageRoutingDeps = {
   document: vscode.TextDocument;
   panel: vscode.WebviewPanel;
   telemetry: TelemetryPort;
   onReady: (document: vscode.TextDocument, panel: vscode.WebviewPanel) => void;
-  onResource: (event: ResourceEventType, panel: vscode.WebviewPanel) => void;
-  onOperation: (request: ViewerOperationRequest) => void;
+  onResource: (
+    event: ViewerResourceRequest,
+    panel: vscode.WebviewPanel,
+  ) => void;
+  onOperation: (request: ViewerOperationHostRequest) => void;
   onNavigate: (
     document: vscode.TextDocument,
-    event: NavigationEventType,
+    event: ViewerNavigationRequest,
   ) => void;
   onSave?: (content: string) => Promise<void>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
 };
 
-export type ViewerOperationRequest = {
+export type ViewerOperationHostRequest = {
   document: vscode.TextDocument;
   panel: vscode.WebviewPanel;
   telemetry: TelemetryPort;
-  operation: string;
+  operation: ViewerOperationId;
 };
 
 const SAVE_DATA_ERROR_MESSAGE = "Data is not a string and cannot be saved.";
 
 type ViewerMessageRouteMap = {
-  [RESOURCE]: (event: ResourceEventType) => void;
-  [READY]: (event: ReadyEventType) => void;
-  [SAVE]: (event: SaveEventType) => void;
-  [OPERATION]: (event: OperationEventType) => void;
-  [SEARCH]: (event: SearchEventType) => void;
-  [PERFORMANCE]: (event: PerformanceEventType) => void;
-  [NAVIGATE]: (event: NavigationEventType) => void;
+  [RESOURCE]: (event: ViewerResourceRequest) => void;
+  [READY]: (event: ViewerReadyRequest) => void;
+  [SAVE]: (event: ViewerSaveRequest) => void;
+  [OPERATION]: (event: ViewerOperationRequest) => void;
+  [SEARCH]: (event: ViewerSearchRequest) => void;
+  [PERFORMANCE]: (event: ViewerPerformanceRequest) => void;
+  [NAVIGATE]: (event: ViewerNavigationRequest) => void;
 };
 
 const handleSaveMessage = (
-  event: SaveEventType,
+  event: ViewerSaveRequest,
   {
     onSave,
     showErrorMessage,
@@ -107,14 +113,48 @@ const createViewerMessageRoutes = ({
   },
 });
 
+const dispatchViewerRequest = (
+  routes: ViewerMessageRouteMap,
+  event: ViewerRequest,
+): void => {
+  switch (event.type) {
+    case RESOURCE:
+      routes[RESOURCE](event);
+      return;
+    case READY:
+      routes[READY](event);
+      return;
+    case SAVE:
+      routes[SAVE](event);
+      return;
+    case OPERATION:
+      routes[OPERATION](event);
+      return;
+    case SEARCH:
+      routes[SEARCH](event);
+      return;
+    case PERFORMANCE:
+      routes[PERFORMANCE](event);
+      return;
+    case NAVIGATE:
+      routes[NAVIGATE](event);
+  }
+};
+
 export const createViewerMessageHandler = (
   deps: ViewerMessageRoutingDeps,
-): ((event: WebviewEventType) => void) => {
+): ((value: unknown) => void) => {
   const routes = createViewerMessageRoutes(deps);
 
-  return (event: WebviewEventType): void => {
-    const route = routes[event.type] as (event: WebviewEventType) => void;
-    route(event);
+  return (value: unknown): void => {
+    const event = parseViewerRequest(value);
+    if (!event) {
+      if (isInvalidViewerSaveRequest(value)) {
+        void deps.showErrorMessage(SAVE_DATA_ERROR_MESSAGE);
+      }
+      return;
+    }
+    dispatchViewerRequest(routes, event);
   };
 };
 
@@ -144,7 +184,7 @@ export const registerViewerPanelDispose = ({
       host: getTelemetryHost(),
     });
     if (event) {
-      telemetry.trackEvent(event.name, event.properties);
+      telemetry.report(event);
     }
     store.removeByUri(uri);
     receiveMessageDispose.dispose();

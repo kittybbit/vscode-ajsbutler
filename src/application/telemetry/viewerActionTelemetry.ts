@@ -6,17 +6,7 @@ import {
   type TelemetryEventDefinition,
 } from "./telemetryEvent";
 import type { TelemetryHost } from "./viewerTelemetry";
-
-export const viewerOperationIds = {
-  copyCsv: "copy.csv",
-  saveCsv: "save.csv",
-  unitSelect: "unit.select",
-  definitionOpen: "definition.open",
-  flowScopeOpen: "flow.scope.open",
-  flowNestedToggle: "flow.nested.toggle",
-  flowRelationshipFocusToggle: "flow.relationship_focus.toggle",
-  flowMiniMapToggle: "flow.minimap.toggle",
-} as const;
+import { viewerOperationIds } from "./viewerOperation";
 
 type ViewerActionView = "table" | "flow";
 

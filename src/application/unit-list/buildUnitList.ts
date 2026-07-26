@@ -1,5 +1,4 @@
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { Unit } from "../../domain/values/Unit";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import type { AjsParserError, AjsParserPort } from "../parsing/AjsParserPort";
 import { toUnitListDocumentDto, UnitListDocumentDto } from "./unitListDocument";
 
@@ -17,9 +16,9 @@ const buildParserErrorResult = (
 });
 
 const buildUnitListDocumentResult = (
-  rootUnits: Unit[],
+  document: AjsDocument,
 ): BuildUnitListResult => ({
-  document: toUnitListDocumentDto(normalizeAjsDocument(rootUnits)),
+  document: toUnitListDocumentDto(document),
   errors: [],
 });
 
@@ -27,9 +26,9 @@ export const createBuildUnitList =
   (parser: AjsParserPort): BuildUnitList =>
   (content) => {
     const parseResult = parser.parse(content);
-    if (parseResult.errors.length > 0) {
+    if (parseResult.ok === false) {
       return buildParserErrorResult(parseResult.errors);
     }
 
-    return buildUnitListDocumentResult(parseResult.rootUnits);
+    return buildUnitListDocumentResult(parseResult.document);
   };

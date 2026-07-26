@@ -11,8 +11,11 @@ Primary goals of this repository:
 2. Modernize dependencies without breaking extension behavior.
 3. Use Specification-Driven Development (SDD) as the standard development
    process for non-trivial work.
-4. Refactor toward Domain-Driven Design (DDD) and Clean Architecture.
-5. Preserve behavior for parser, list view, flow view, CSV export, diagnostics, hover, and telemetry.
+4. Maintain the verified Domain-Driven Design (DDD) and Clean Architecture
+   boundaries.
+5. Preserve behavior for parser, list view, flow view, CSV export, unit
+   definition, diagnostics, hover, navigation, WebAPI import, semantic
+   diff/report, and telemetry.
 
 ## Product Constraints
 
@@ -20,28 +23,49 @@ Primary goals of this repository:
 - Do not casually raise the minimum VS Code version.
 - Do not introduce APIs that are unavailable in the declared minimum VS Code version.
 - Do not break web extension support.
-- Do not introduce Node-only behavior into paths shared with the web extension unless guarded and tested.
+- Do not import Node built-ins from production source. Use injected capabilities
+  or browser-safe adapters for host-specific behavior.
 
 ## Architecture Rules
 
 Follow these dependency rules strictly:
 
-- `domain` must not import `vscode`.
-- `domain` must not depend on React, MUI, XyFlow, or webview code.
-- `application` may depend on `domain`.
-- `presentation` may depend on `application`.
-- `infrastructure` may depend on `application` and `domain`.
-- `presentation` must not directly parse raw AJS grammar output when an application use case exists.
+- `domain` must not import outer layers, `vscode`, or UI frameworks.
+- `application` must not import `infrastructure`, `presentation`, or
+  `bootstrap`.
+- `presentation` must not import `domain`, `infrastructure`, or `bootstrap`.
+- `infrastructure` must not import `presentation` or `bootstrap`.
+- Concrete infrastructure dependencies may be referenced only by
+  `infrastructure` and `bootstrap`.
+- Generated parser code and ANTLR may be consumed only under
+  `src/infrastructure/parser`; `AjsRawUnit` must remain inside parser
+  infrastructure.
+- Retired unit-wrapper dependencies under `src/domain/models/units` must not be
+  reintroduced.
+- `vscode` imports are limited to `src/extension.ts`, `bootstrap`,
+  `infrastructure`, and `presentation/vscode`.
+- UI-framework imports are limited to `presentation/webview`.
 - UI components must consume DTOs/view models, not parser internals.
-- VS Code API usage must be isolated near extension/presentation/infrastructure boundaries.
-- Telemetry must be wrapped behind an interface where practical.
+- Production source must not import Node built-ins.
+- The telemetry SDK must remain in its infrastructure adapter.
+- Application factory functions may be invoked only by application or
+  bootstrap.
+- Infrastructure implementations may be constructed only by infrastructure or
+  bootstrap.
 
-Preferred target structure:
+Production source structure:
 
 - `src/domain`
 - `src/application`
 - `src/infrastructure`
 - `src/presentation`
+- `src/bootstrap`
+- `src/shared`
+- `src/resource`
+
+See `docs/specs/architecture.md` for the durable boundary definitions. The
+architecture dependency test enforces the complete catalog with zero
+exceptions.
 
 ## Refactoring Policy
 
@@ -53,13 +77,14 @@ When refactoring:
 4. Extract one use case at a time.
 5. Keep pull requests small and reviewable.
 
-Good first slices:
+Choose vertical slices around one behavior or boundary, such as:
 
 - Build unit list
-- Filter/search unit list
 - Export CSV
 - Build flow graph DTO
-- Show unit definition
+- Build diagnostics or hover results
+- Import through an application port
+- Build a semantic diff report
 
 ## SDD Workflow
 
@@ -173,7 +198,8 @@ Update the smallest necessary durable document surface.
 This repository has a browser entry point.
 When changing shared code:
 
-- verify it does not depend on Node-only modules unless bundled safely
+- keep production imports free of Node built-ins
+- use injected capabilities or browser-safe adapters for host-specific behavior
 - verify browser build assumptions
 - avoid filesystem/process assumptions in shared layers
 
@@ -198,6 +224,8 @@ Suggested order:
 
 Telemetry must remain minimal and privacy-conscious.
 Do not add telemetry containing file content, file paths, or personal identifiers.
+Report only application-catalog events through `TelemetryPort`; do not expose
+raw event-name or property-map reporting.
 
 ## Output Expectations for Agents
 
@@ -245,6 +273,7 @@ Do not:
 - silently raise `engines.vscode`
 - mix parser internals directly into UI components
 - add direct `vscode` imports into domain
+- add an architecture-rule exception or allowlist entry
 - rewrite large areas without a migration plan
 - remove existing user-visible behavior unless explicitly requested
 - skip tests for non-trivial architectural changes
@@ -354,8 +383,13 @@ This repository is designed to work seamlessly with multiple AI agents, each wit
 
 Current important concerns in this repository:
 
-- activation/bootstrap logic is concentrated and should gradually move toward explicit composition
-- parser/application/UI boundaries should be clarified
-- flow rendering should depend on graph DTOs, not UI-library-specific data too early
-- CSV export should be an application use case, not a UI concern
-- diagnostics, hover, and preview/commands should stay close to adapters and presentation boundaries
+- Keep the zero-exception architecture rule catalog synchronized with durable
+  policy whenever an approved architecture decision changes a boundary.
+- Keep read-only WebAPI import in beta until its owning feature records real
+  JP1/AJS3 environment evidence and enough user feedback.
+- Preserve normalized domain, application DTO, plain transport, and explicit
+  composition boundaries when adding behavior.
+- Keep diagnostics, hover, commands, panels, and rendering concerns in
+  presentation adapters.
+- Validate desktop and web behavior whenever shared contracts, bootstrap, or
+  extension entry points change.

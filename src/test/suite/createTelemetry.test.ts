@@ -1,4 +1,8 @@
 import * as assert from "assert";
+import {
+  createTelemetryEvent,
+  telemetryEvents,
+} from "../../application/telemetry/telemetryEvent";
 import { createTelemetry } from "../../bootstrap/extension/createTelemetry";
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { NoopTelemetryAdapter } from "../../infrastructure/telemetry/NoopTelemetryAdapter";
@@ -9,7 +13,11 @@ suite("Create Telemetry", () => {
 
     assert.ok(telemetry instanceof NoopTelemetryAdapter);
     assert.doesNotThrow(() => {
-      telemetry.trackEvent("sample.event", { development: "false" });
+      telemetry.report(
+        createTelemetryEvent(telemetryEvents.legacyExtensionActivated, {
+          development: false,
+        }),
+      );
       telemetry.dispose();
     });
   });
@@ -21,17 +29,18 @@ suite("Create Telemetry", () => {
 
     assert.ok(telemetry instanceof NoopTelemetryAdapter);
     assert.doesNotThrow(() => {
-      telemetry.trackEvent("sample.event", {
-        entryPoint: "browser",
-        fallback: "true",
-      });
+      telemetry.report(
+        createTelemetryEvent(telemetryEvents.legacyExtensionActivated, {
+          development: false,
+        }),
+      );
       telemetry.dispose();
     });
   });
 
   test("uses the vscode telemetry adapter when initialization succeeds", () => {
     const expected: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
 
@@ -52,24 +61,28 @@ suite("Create Telemetry", () => {
     const telemetry = createTelemetry(
       "sample-connection-string",
       (): TelemetryPort => ({
-        trackEvent(eventName, properties) {
-          events.push({ name: eventName, properties });
+        report(event) {
+          events.push(event);
         },
         dispose() {},
       }),
     );
 
-    telemetry.trackEvent("preview.open", {
-      host: "web",
-      surface: "flow",
-    });
+    telemetry.report(
+      createTelemetryEvent(telemetryEvents.viewerFlowOpenStarted, {
+        host: "web",
+        source: "restore",
+        result: "success",
+      }),
+    );
 
     assert.deepStrictEqual(events, [
       {
-        name: "preview.open",
+        name: "viewer.flow.open_started",
         properties: {
           host: "web",
-          surface: "flow",
+          source: "restore",
+          result: "success",
         },
       },
     ]);

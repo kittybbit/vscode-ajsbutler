@@ -17,12 +17,12 @@ import {
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import { useMyAppContext } from "../MyContexts";
-import { localeMap } from "../../../../domain/services/i18n/nls";
+import { unitInformationMessage } from "../unitInformationLocalization";
 import {
-  SAVE,
-  createOperationEvent,
-  createPerformanceEvent,
-} from "../../../../shared/webviewEvents";
+  createViewerOperationRequest,
+  createViewerPerformanceRequest,
+  createViewerSaveRequest,
+} from "../../viewerRequestMessages";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
 import {
@@ -73,7 +73,7 @@ export const formatUnitCountLabel = (
 ): string => `${visibleRowCount} / ${totalRowCount} units`;
 
 export const getAjsTableHeaderControlLabels = (lang: string) => ({
-  columns: localeMap("table.menu.menuItem1", lang),
+  columns: unitInformationMessage("table.menu.menuItem1", lang),
   copyCsv: "Copy the contents to clipbord as csv.",
   saveCsv: "Save the contents as csv.",
 });
@@ -103,6 +103,17 @@ export const getAjsTableSearchHelperText = (
     resultPosition,
     tableHeaderSearchLabels.helperText,
   );
+
+export const createCsvExportPerformanceEvent = (
+  durationMs: number,
+  rowCount: number,
+) =>
+  createViewerPerformanceRequest({
+    operation: "csv_export",
+    result: "success",
+    durationBucket: toDurationBucket(durationMs),
+    rowCountBucket: toCountBucket(rowCount),
+  });
 
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   searchedAbsolutePath,
@@ -144,27 +155,25 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
     const startedAt = performance.now();
     const csv = exportCsvView(table);
     window.vscode.postMessage(
-      createPerformanceEvent({
-        operation: "csv_export",
-        result: "success",
-        durationBucket: toDurationBucket(performance.now() - startedAt),
-        rowCountBucket: toCountBucket(table.getRowModel().rows.length),
-      }),
+      createCsvExportPerformanceEvent(
+        performance.now() - startedAt,
+        table.getRowModel().rows.length,
+      ),
     );
     return csv;
   }, [table]);
 
   const handleCopy = useCallback(() => {
     const csv = exportCsvWithPerformanceTelemetry();
-    window.vscode.postMessage(createOperationEvent("copy.csv"));
+    window.vscode.postMessage(createViewerOperationRequest("copy.csv"));
     navigator.clipboard.writeText(csv);
     setOpen(true);
   }, [exportCsvWithPerformanceTelemetry]);
 
   const handleSave = useCallback(() => {
     const csv = exportCsvWithPerformanceTelemetry();
-    window.vscode.postMessage(createOperationEvent("save.csv"));
-    window.vscode.postMessage({ type: SAVE, data: csv });
+    window.vscode.postMessage(createViewerOperationRequest("save.csv"));
+    window.vscode.postMessage(createViewerSaveRequest(csv));
   }, [exportCsvWithPerformanceTelemetry]);
 
   return (

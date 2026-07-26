@@ -1,18 +1,32 @@
-import { Webview } from "vscode";
+import type {
+    ViewerHostMessageData,
+    ViewerHostMessageType,
+    ViewerPostMessagePort,
+} from "./src/presentation/webview/viewerHostMessages";
 
 export { };
 
 declare global {
+    type ViewerEventCallback = (
+        type: ViewerHostMessageType,
+        data: ViewerHostMessageData,
+    ) => void;
+
     interface Window {
-        vscode: Webview<unknown>;
+        vscode: ViewerPostMessagePort;
         EventBridge: {
-            callbacks: { [type: string]: ((type: string, data: object) => void)[] };
-            addCallback: (type: string, fn: (type: string, data: object) => void) => void;
-            removeCallback: (type: string, fn: (type: string, data: object) => void) => void;
+            callbacks: Partial<Record<ViewerHostMessageType, ViewerEventCallback[]>>;
+            addCallback: (
+                type: ViewerHostMessageType,
+                fn: ViewerEventCallback,
+            ) => void;
+            removeCallback: (
+                type: ViewerHostMessageType,
+                fn: ViewerEventCallback,
+            ) => void;
             dispatch: (event: MessageEvent) => void;
         };
     };
     const DEVELOPMENT: boolean;
     const CONNECTION_STRING: string;
 }
-

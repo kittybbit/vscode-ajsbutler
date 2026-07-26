@@ -7,9 +7,17 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import type { MyAppResource } from "../../../shared/MyAppResource";
+import {
+  parseViewerResourceState,
+  RESOURCE,
+  type ViewerResourceStateDto,
+} from "../viewerHostMessages";
+import { createViewerResourceRequest } from "../viewerRequestMessages";
 
-export type { MyAppResource } from "../../../shared/MyAppResource";
+export type MyAppResource = Partial<
+  Omit<ViewerResourceStateDto, "scrollType">
+> &
+  Pick<ViewerResourceStateDto, "scrollType">;
 
 type MyAppContext = MyAppResource & {
   updateMyAppResource: (newValue: Partial<MyAppResource>) => void;
@@ -17,7 +25,6 @@ type MyAppContext = MyAppResource & {
 const myAppContext = createContext<MyAppContext>({
   isDarkMode: undefined,
   lang: undefined,
-  os: undefined,
   scrollType: "table",
   updateMyAppResource: () => {},
 });
@@ -28,20 +35,22 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
   const [myAppResource, setMyAppResourceInternal] = useState<MyAppResource>({
     isDarkMode: undefined,
     lang: undefined,
-    os: undefined,
     scrollType: "table",
   });
   const setMyAppResource = (myAppResource: SetStateAction<MyAppResource>) =>
     startTransition(() => setMyAppResourceInternal(myAppResource));
 
-  const resourceCallbackFn = (type: string, data: Partial<MyAppResource>) => {
-    updateMyAppResource(data);
+  const resourceCallbackFn: ViewerEventCallback = (_type, data) => {
+    const resource = parseViewerResourceState(data);
+    if (resource) updateMyAppResource(resource);
   };
   useEffect(() => {
-    window.EventBridge.addCallback("resource", resourceCallbackFn);
-    window.vscode.postMessage({ type: "resource", data: myAppResource });
+    window.EventBridge.addCallback(RESOURCE, resourceCallbackFn);
+    window.vscode.postMessage(
+      createViewerResourceRequest(myAppResource.scrollType),
+    );
     return () => {
-      window.EventBridge.removeCallback("resource", resourceCallbackFn);
+      window.EventBridge.removeCallback(RESOURCE, resourceCallbackFn);
     };
   }, []);
 

@@ -47,8 +47,8 @@
    - Completed: unit-list document serialization now crosses the webview
      boundary as a normalized DTO, and CSV export now uses application-facing
      row input before presentation copy/save actions.
-   - Keep unit-local JP1/AJS behavior on wrappers when it is not reused across
-     consumers.
+   - Keep consumer-specific projection and presentation choices outside the
+     normalized domain model.
    - Promote only cross-consumer semantics into normalized helpers.
    - JP1/AJS3 version 13 remains the normative product target for future
      parameter and command semantics; future manual-alignment work should start
@@ -56,23 +56,25 @@
    - Semantic diagnostics now consume normalized `AjsDocument` / `AjsUnit`
      inputs while preserving existing diagnostic behavior and source positions.
 
-4. Introduce stricter parser/infrastructure boundaries.
+4. Maintain the enforced parser and infrastructure boundaries.
 
-   - The application-facing parser port and host-neutral infrastructure ANTLR
-     adapter are implemented for unit-list and syntax-diagnostic consumers.
-   - A scoped architecture dependency test now checks high-value domain,
-     application, and presentation import boundaries through the existing
-     desktop test path.
-   - Raw `Unit` and repository-owned parser-error behavior remain the initial
-     seam; generated ANTLR artifacts and mechanics stay outside application and
-     domain production modules.
-   - Defer normalized-only parsing to a later single-purpose feature if a
-     concrete consumer requires it.
+   - The application-facing parser port returns either a normalized
+     `AjsDocument` or repository-owned syntax errors.
+   - Generated parser access, ANTLR orchestration, `AjsRawUnit`, and
+     raw-to-normalized conversion remain confined to parser infrastructure.
+   - The normalized model remains the only production domain model used by
+     downstream application behavior.
+   - The permanent architecture rule catalog enforces layer, parser/raw,
+     retired-wrapper, host/framework, Node/browser, telemetry SDK, and
+     composition boundaries with zero exceptions.
 
 5. Maintain the explicit extension composition root.
 
    - Concrete application and infrastructure dependencies are constructed by one
      typed bootstrap owner and injected into VS Code-facing adapters.
+   - Parameter hover localization now uses an application-owned lookup port, a
+     browser-safe infrastructure resource adapter, bootstrap composition, and
+     presentation-owned VS Code Markdown mapping.
    - Preserve lifecycle, disposal, desktop, and web behavior without adding a
      service container.
 
@@ -143,6 +145,22 @@
    - Keep confirmation-required wording constrained to possible definition
      impacts and explicitly state when runtime environment facts are not
      verified.
+
+10. Maintain the verified DDD/Clean Architecture baseline.
+
+    - Keep normalized domain concepts and reusable JP1/AJS rules as the only
+      production domain model.
+    - Keep application behavior host-neutral through ports, DTOs, and scalar
+      result contracts.
+    - Keep infrastructure implementations, presentation adapters, plain viewer
+      transport, and bootstrap composition in their enforced outer boundaries.
+    - Preserve parser, list, graph, CSV, definition, diagnostics, hover,
+      navigation, semantic diff/report, telemetry privacy, desktop/web, and
+      minimum VS Code compatibility when extending the product.
+    - Change an enforced boundary only through a separately planned, reviewed,
+      and approved architecture decision; do not introduce exceptions.
+    - The active `import-definition-via-webapi` feature continues to own beta
+      scope, generated-artifact reproducibility, and real-environment evidence.
 
 ## Deferred / Optional Slices
 

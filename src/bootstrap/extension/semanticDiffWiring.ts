@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import type { BuildSemanticDiffReport } from "../../application/semantic-diff/buildSemanticDiffReport";
+import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
+import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -11,7 +12,7 @@ import {
 } from "../../presentation/vscode/semantic-diff/semanticDiffReportDocument";
 
 export type SemanticDiffWiringDeps = {
-  buildSemanticDiffReport: BuildSemanticDiffReport;
+  buildSemanticDiffReportData: BuildSemanticDiffReportData;
 };
 
 export const createSemanticDiffSubscriptions = (
@@ -42,7 +43,8 @@ export const createSemanticDiffSubscriptions = (
         readFile: (uri) => vscode.workspace.fs.readFile(uri),
         openReport: (report) => reportDocuments.openReport(report),
         language: vscode.env.language,
-        buildSemanticDiffReport: deps.buildSemanticDiffReport,
+        buildSemanticDiffReportData: deps.buildSemanticDiffReportData,
+        renderSemanticDiffMarkdown,
       }),
     ),
     vscode.commands.registerCommand(

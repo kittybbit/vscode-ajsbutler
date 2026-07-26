@@ -1,128 +1,382 @@
 import * as assert from "assert";
 import * as fs from "fs";
 import * as path from "path";
-
-type ImportReference = {
-  file: string;
-  specifier: string;
-};
-
-type RuleViolation = ImportReference & {
-  rule: string;
-};
+import {
+  architectureRuleIds,
+  collectFunctionFactoryDefinitionsFromSource,
+  collectImportReferencesFromSource,
+  collectImportedConstructionReferencesFromSource,
+  collectProductionApplicationFactoryDefinitions,
+  collectProductionConstructionReferences,
+  collectProductionImportReferences,
+  collectProductionSourceFiles,
+  findArchitectureRuleViolations,
+  findCompositionRootViolations,
+  formatViolation,
+  resolveImportPath,
+  type ArchitectureRuleId,
+} from "../support/architectureDependencyRules";
 
 const repoRoot = path.resolve(__dirname, "../../..");
-const srcRoot = path.join(repoRoot, "src");
-
-const productionSourceDirs = ["domain", "application", "presentation"].map(
-  (directory) => path.join(srcRoot, directory),
-);
-
-const sourceExtensions = new Set([".ts", ".tsx"]);
-
-const importPattern =
-  /\b(?:import|export)\s+(?:type\s+)?(?:[^'"]*?\s+from\s+)?["']([^"']+)["']/g;
-
-const toRelativePath = (filePath: string): string =>
-  path.relative(repoRoot, filePath).split(path.sep).join("/");
-
-const walkSourceFiles = (directory: string): string[] => {
-  const entries = fs.readdirSync(directory, { withFileTypes: true });
-  return entries.flatMap((entry) => {
-    const entryPath = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      return walkSourceFiles(entryPath);
-    }
-    return sourceExtensions.has(path.extname(entry.name)) ? [entryPath] : [];
-  });
-};
-
-const readImportReferences = (filePath: string): ImportReference[] => {
-  const source = fs.readFileSync(filePath, "utf8");
-  return [...source.matchAll(importPattern)].map((match) => ({
-    file: toRelativePath(filePath),
-    specifier: match[1],
-  }));
-};
-
-const resolveImportPath = (reference: ImportReference): string | undefined => {
-  if (!reference.specifier.startsWith(".")) {
-    return undefined;
-  }
-  return toRelativePath(
-    path.resolve(repoRoot, path.dirname(reference.file), reference.specifier),
-  );
-};
-
-const startsWithAny = (value: string, prefixes: readonly string[]): boolean =>
-  prefixes.some((prefix) => value === prefix || value.startsWith(`${prefix}/`));
-
-const isForbiddenDomainImport = (reference: ImportReference): boolean => {
-  const resolvedPath = resolveImportPath(reference) ?? reference.specifier;
-  return (
-    reference.specifier === "vscode" ||
-    reference.specifier === "react" ||
-    reference.specifier.startsWith("@mui/") ||
-    reference.specifier.startsWith("@xyflow/") ||
-    startsWithAny(resolvedPath, [
-      "src/presentation/webview",
-      "src/generate/parser",
-    ])
-  );
-};
-
-const isApplicationBoundaryImport = (reference: ImportReference): boolean => {
-  const resolvedPath = resolveImportPath(reference);
-  return resolvedPath
-    ? startsWithAny(resolvedPath, ["src/presentation", "src/infrastructure"])
-    : false;
-};
-
-const isPresentationParserImport = (reference: ImportReference): boolean => {
-  const resolvedPath = resolveImportPath(reference) ?? reference.specifier;
-  return startsWithAny(resolvedPath, ["src/generate/parser"]);
-};
-
-const formatViolation = ({ file, specifier, rule }: RuleViolation): string =>
-  `${file} imports ${specifier} (${rule})`;
-
-const collectImportReferences = (): ImportReference[] =>
-  productionSourceDirs.flatMap(walkSourceFiles).flatMap(readImportReferences);
 
 suite("Architecture dependency rules", () => {
-  test("keeps high-value layer boundaries free of forbidden imports", () => {
-    const violations = collectImportReferences().flatMap((reference) => {
-      const violationsForReference: RuleViolation[] = [];
-      if (
-        reference.file.startsWith("src/domain/") &&
-        isForbiddenDomainImport(reference)
-      ) {
-        violationsForReference.push({
-          ...reference,
-          rule: "domain must not import presentation/webview, parser, vscode, React, MUI, or XyFlow",
-        });
-      }
-      if (
-        reference.file.startsWith("src/application/") &&
-        isApplicationBoundaryImport(reference)
-      ) {
-        violationsForReference.push({
-          ...reference,
-          rule: "application must not import presentation or infrastructure",
-        });
-      }
-      if (
-        reference.file.startsWith("src/presentation/") &&
-        isPresentationParserImport(reference)
-      ) {
-        violationsForReference.push({
-          ...reference,
-          rule: "presentation must not import generated parser modules directly",
-        });
-      }
-      return violationsForReference;
+  test("collects supported TypeScript dependency syntax", () => {
+    const references = collectImportReferencesFromSource(
+      "src/application/example.ts",
+      `
+        import value from "./value";
+        import type { Input } from "./input";
+        import "./sideEffect";
+        export { output } from "./output";
+        export type { Result } from "./result";
+        const dynamicValue = import("@generate/parser/AjsParser");
+        const commonJsValue = require("legacy-package");
+        import equalsValue = require("./equalsValue");
+      `,
+    );
+
+    assert.deepStrictEqual(
+      references.map(({ kind, specifier }) => ({ kind, specifier })),
+      [
+        { kind: "import", specifier: "./value" },
+        { kind: "import-type", specifier: "./input" },
+        { kind: "import", specifier: "./sideEffect" },
+        { kind: "export", specifier: "./output" },
+        { kind: "export-type", specifier: "./result" },
+        { kind: "dynamic-import", specifier: "@generate/parser/AjsParser" },
+        { kind: "require", specifier: "legacy-package" },
+        { kind: "import-equals", specifier: "./equalsValue" },
+      ],
+    );
+  });
+
+  test("resolves relative and repository-alias imports", () => {
+    assert.strictEqual(
+      resolveImportPath("src/application/example.ts", "../domain/value"),
+      "src/domain/value",
+    );
+    assert.strictEqual(
+      resolveImportPath(
+        "src/infrastructure/parser/example.ts",
+        "@generate/parser/AjsParser",
+      ),
+      "src/generate/parser/AjsParser",
+    );
+    assert.strictEqual(
+      resolveImportPath(
+        "src/presentation/example.ts",
+        "@resource/i18n/message",
+      ),
+      "src/resource/i18n/message",
+    );
+    assert.strictEqual(
+      resolveImportPath("src/application/example.ts", "vscode"),
+      undefined,
+    );
+  });
+
+  test("collects imported factory calls and concrete construction", () => {
+    const references = collectImportedConstructionReferencesFromSource(
+      "src/presentation/example.ts",
+      `
+        import { createUseCase as createFeature } from "../application/useCase";
+        import { Adapter } from "../infrastructure/Adapter";
+        import * as infrastructure from "../infrastructure/factories";
+        import type { Port } from "../application/Port";
+
+        createFeature();
+        new Adapter();
+        infrastructure.createAdapter();
+      `,
+    );
+
+    assert.deepStrictEqual(references, [
+      {
+        file: "src/presentation/example.ts",
+        target: "src/application/useCase",
+        symbol: "createUseCase",
+        kind: "call",
+      },
+      {
+        file: "src/presentation/example.ts",
+        target: "src/infrastructure/Adapter",
+        symbol: "Adapter",
+        kind: "new",
+      },
+      {
+        file: "src/presentation/example.ts",
+        target: "src/infrastructure/factories",
+        symbol: "createAdapter",
+        kind: "call",
+      },
+    ]);
+  });
+
+  test("detects exported function factories without relying on their names", () => {
+    assert.deepStrictEqual(
+      collectFunctionFactoryDefinitionsFromSource(
+        "src/application/example.ts",
+        `
+          export const assemble = (port: unknown) => (input: unknown) => input;
+          export function connect() {
+            return () => undefined;
+          }
+          export const value = (input: unknown) => input;
+          const internal = () => () => undefined;
+        `,
+      ),
+      [
+        { file: "src/application/example", symbol: "assemble" },
+        { file: "src/application/example", symbol: "connect" },
+      ],
+    );
+  });
+
+  test("collects all production roots in deterministic order", () => {
+    const references = collectProductionImportReferences(repoRoot);
+    const sortedReferences = [...references].sort(
+      (left, right) =>
+        left.file.localeCompare(right.file) ||
+        left.specifier.localeCompare(right.specifier) ||
+        left.kind.localeCompare(right.kind),
+    );
+
+    assert.deepStrictEqual(references, sortedReferences);
+    assert.ok(
+      references.some(({ file }) => file === "src/extension.ts"),
+      "extension.ts must be scanned",
+    );
+    [
+      "application",
+      "bootstrap",
+      "domain",
+      "infrastructure",
+      "presentation",
+      "resource",
+    ].forEach((directory) => {
+      assert.ok(
+        references.some(({ file }) => file.startsWith(`src/${directory}/`)),
+        `${directory} production sources must be scanned`,
+      );
     });
+    assert.ok(
+      references.every(
+        ({ file }) =>
+          !file.startsWith("src/test/") && !file.startsWith("src/generate/"),
+      ),
+      "test and generated sources must not be dependency owners",
+    );
+  });
+
+  test("keeps editor-feedback application independent from localization implementations", () => {
+    const forbiddenReferences = collectProductionImportReferences(repoRoot)
+      .filter(({ file }) => file.startsWith("src/application/editor-feedback/"))
+      .filter(
+        ({ resolvedPath, specifier }) =>
+          resolvedPath?.startsWith("src/domain/services/i18n/") ||
+          resolvedPath?.startsWith("src/resource/") ||
+          specifier === "vscode",
+      )
+      .map(({ file, specifier }) => ({ file, specifier }));
+
+    assert.deepStrictEqual(forbiddenReferences, []);
+  });
+
+  test("keeps every production dependency rule at zero violations", () => {
+    const violations = findArchitectureRuleViolations(
+      collectProductionImportReferences(repoRoot),
+    );
 
     assert.deepStrictEqual(violations.map(formatViolation), []);
+  });
+
+  test("keeps raw telemetry reporting calls out of production sources", () => {
+    const rawReportingCallers = collectProductionSourceFiles(repoRoot)
+      .filter((filePath) =>
+        /\btrackEvent\s*(?:\(|:)/u.test(fs.readFileSync(filePath, "utf8")),
+      )
+      .map((filePath) => path.relative(repoRoot, filePath))
+      .sort();
+
+    assert.deepStrictEqual(rawReportingCallers, []);
+  });
+
+  test("detects every architecture rule family with in-memory fixtures", () => {
+    const stableRuleIds = Object.values(architectureRuleIds);
+    assert.strictEqual(stableRuleIds.length, 12);
+    assert.strictEqual(new Set(stableRuleIds).size, stableRuleIds.length);
+
+    const fixtures: ReadonlyArray<{
+      ruleId: ArchitectureRuleId;
+      file: string;
+      source: string;
+    }> = [
+      {
+        ruleId: architectureRuleIds.domainOuterDependency,
+        file: "src/domain/example.ts",
+        source: 'import "../presentation/example";',
+      },
+      {
+        ruleId: architectureRuleIds.applicationOuterDependency,
+        file: "src/application/example.ts",
+        source: 'import "../infrastructure/example";',
+      },
+      {
+        ruleId: architectureRuleIds.presentationOuterImplementation,
+        file: "src/presentation/example.ts",
+        source: 'import "../infrastructure/example";',
+      },
+      {
+        ruleId: architectureRuleIds.infrastructureOuterDependency,
+        file: "src/infrastructure/example.ts",
+        source: 'import "../presentation/example";',
+      },
+      {
+        ruleId: architectureRuleIds.concreteInfrastructureOutsideComposition,
+        file: "src/shared/example.ts",
+        source: 'import "../infrastructure/example";',
+      },
+      {
+        ruleId: architectureRuleIds.generatedParserOutsideInfrastructure,
+        file: "src/application/example.ts",
+        source: 'import "@generate/parser/AjsParser";',
+      },
+      {
+        ruleId: architectureRuleIds.rawUnitOutsideParserNormalizer,
+        file: "src/application/example.ts",
+        source: 'import "../infrastructure/parser/raw/AjsRawUnit";',
+      },
+      {
+        ruleId: architectureRuleIds.legacyWrapperDependency,
+        file: "src/domain/example.ts",
+        source: 'import "./models/units/UnitEntity";',
+      },
+      {
+        ruleId: architectureRuleIds.presentationDomainDependency,
+        file: "src/presentation/example.ts",
+        source: 'import "../domain/example";',
+      },
+      {
+        ruleId: architectureRuleIds.hostFrameworkOutsidePresentation,
+        file: "src/application/example.ts",
+        source: 'import "react";',
+      },
+      {
+        ruleId: architectureRuleIds.nodeBuiltinBrowserBoundary,
+        file: "src/presentation/vscode/example.ts",
+        source: 'import "os";',
+      },
+      {
+        ruleId: architectureRuleIds.telemetrySdkOutsideAdapter,
+        file: "src/bootstrap/example.ts",
+        source: 'import "@vscode/extension-telemetry";',
+      },
+    ];
+
+    fixtures.forEach(({ ruleId, file, source }) => {
+      const violations = findArchitectureRuleViolations(
+        collectImportReferencesFromSource(file, source),
+      );
+      assert.ok(
+        violations.some((violation) => violation.ruleId === ruleId),
+        `${ruleId} must detect its representative violation`,
+      );
+    });
+  });
+
+  test("reports retired wrapper dependencies as permanent violations", () => {
+    const [violation] = findArchitectureRuleViolations(
+      collectImportReferencesFromSource(
+        "src/domain/example.ts",
+        'import "./models/units/UnitEntity";',
+      ),
+    );
+
+    assert.ok(violation);
+    assert.strictEqual(
+      violation.rule,
+      "retired unit wrapper dependencies are forbidden and must not be reintroduced",
+    );
+  });
+
+  test("keeps application factory calls and concrete adapter construction in bootstrap", () => {
+    const references = collectProductionConstructionReferences(repoRoot);
+    const applicationFactories =
+      collectProductionApplicationFactoryDefinitions(repoRoot);
+    const applicationFactoryKeys = new Set(
+      applicationFactories.map(({ file, symbol }) => `${file}:${symbol}`),
+    );
+    const applicationFactoryCalls = references
+      .filter(({ target, symbol }) =>
+        applicationFactoryKeys.has(`${target}:${symbol}`),
+      )
+      .filter(({ file }) => !file.startsWith("src/application/"));
+    const infrastructureConstruction = references.filter(
+      ({ kind, target, file }) =>
+        kind === "new" &&
+        target.startsWith("src/infrastructure/") &&
+        !file.startsWith("src/infrastructure/"),
+    );
+
+    assert.ok(applicationFactoryCalls.length > 0);
+    assert.ok(infrastructureConstruction.length > 0);
+    assert.ok(
+      applicationFactoryCalls.every(({ file }) =>
+        file.startsWith("src/bootstrap/extension/"),
+      ),
+    );
+    assert.ok(
+      infrastructureConstruction.every(({ file }) =>
+        file.startsWith("src/bootstrap/extension/"),
+      ),
+    );
+    assert.deepStrictEqual(
+      findCompositionRootViolations(references, applicationFactories),
+      [],
+    );
+  });
+
+  test("rejects application factories and concrete adapters outside bootstrap", () => {
+    const references = collectImportedConstructionReferencesFromSource(
+      "src/presentation/example.ts",
+      `
+        import { assemble } from "../application/example";
+        import { Adapter } from "../infrastructure/Adapter";
+        assemble();
+        new Adapter();
+      `,
+    );
+
+    assert.deepStrictEqual(
+      findCompositionRootViolations(references, [
+        { file: "src/application/example", symbol: "assemble" },
+      ]).map(({ reason }) => reason),
+      [
+        "application-factory-outside-bootstrap",
+        "infrastructure-construction-outside-bootstrap",
+      ],
+    );
+  });
+
+  test("keeps raw parser test access confined to the exact approved suites", () => {
+    const suiteDirectory = path.join(repoRoot, "src/test/suite");
+    const rawHelperImporters = fs
+      .readdirSync(suiteDirectory)
+      .filter((file) => file.endsWith(".test.ts"))
+      .filter((file) =>
+        /import\s*\{\s*parseRawAjsForTest\s*\}\s*from\s*"\.\.\/support\/parseAjs";/u.test(
+          fs.readFileSync(path.join(suiteDirectory, file), "utf8"),
+        ),
+      )
+      .sort();
+
+    assert.deepStrictEqual(rawHelperImporters, [
+      "normalizeAjsDocument.test.ts",
+      "normalizeRelations.test.ts",
+      "normalizeUnit.test.ts",
+      "normalizeUnitBuilder.test.ts",
+      "normalizeUnitTree.test.ts",
+      "unitParameterLookupHelpers.test.ts",
+    ]);
   });
 });

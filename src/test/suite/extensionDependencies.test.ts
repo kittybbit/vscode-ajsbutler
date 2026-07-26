@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
+import type { TelemetryProperties } from "../../application/telemetry/telemetryEvent";
 import {
   createExtensionDependencies,
   instrumentParserPerformance,
@@ -18,25 +18,53 @@ suite("Extension dependencies", () => {
       },
     } as unknown as vscode.ExtensionContext;
 
-    const dependencies = createExtensionDependencies(context);
+    const dependencies = createExtensionDependencies(context, "desktop");
 
-    assert.strictEqual(typeof dependencies.telemetry.trackEvent, "function");
+    assert.strictEqual(dependencies.host, "desktop");
+    assert.strictEqual(typeof dependencies.telemetry.report, "function");
     assert.strictEqual(typeof dependencies.buildSyntaxDiagnostics, "function");
     assert.strictEqual(typeof dependencies.buildUnitList, "function");
     assert.strictEqual(typeof dependencies.findParameterHover, "function");
+    assert.deepStrictEqual(dependencies.findParameterHover("ty", "en"), {
+      symbol: "ty",
+      syntax:
+        "{g|mg|n|rn|rm|rr|rc|mn|j|rj|pj|rp|qj|rq|jdj|rjdj|orj|rorj|evwj|revwj|flwj|rflwj|mlwj|rmlwj|mqwj|rmqwj|mswj|rmswj|lfwj|rlfwj|ntwj|rntwj|tmwj|rtmwj|evsj|revsj|mlsj|rmlsj|mqsj|rmqsj|mssj|rmssj|cmsj|rcmsj|pwlj|rpwlj|pwrj|rpwrj|cj|rcj|cpj|rcpj|fxj|rfxj|htpj|rhtpj|nc}",
+    });
     assert.strictEqual(
-      typeof dependencies.semanticDiff.buildSemanticDiffReport,
+      dependencies.findParameterHover("not-a-param", "en"),
+      undefined,
+    );
+    assert.strictEqual(
+      typeof dependencies.semanticDiff.buildSemanticDiffReportData,
       "function",
     );
     assert.strictEqual(
-      typeof dependencies.webApiImport.storeCredential,
-      "function",
-    );
-    assert.strictEqual(
-      typeof dependencies.webApiImport.importPort.importDefinition,
+      typeof dependencies.webApiImport.importDefinition,
       "function",
     );
 
+    dependencies.telemetry.dispose();
+  });
+
+  test("does not construct desktop-only import dependencies for web", () => {
+    let desktopFactoryCalls = 0;
+    const dependencies = createExtensionDependencies(
+      {} as vscode.ExtensionContext,
+      "web",
+      {
+        createDesktopWebApiImportCapability: () => {
+          desktopFactoryCalls += 1;
+          throw new Error("desktop capability must not be constructed");
+        },
+      },
+    );
+
+    assert.strictEqual(dependencies.host, "web");
+    assert.strictEqual(desktopFactoryCalls, 0);
+    assert.strictEqual(
+      dependencies.webApiImport.unavailable?.error.code,
+      "unsupported-host",
+    );
     dependencies.telemetry.dispose();
   });
 
@@ -48,21 +76,21 @@ suite("Extension dependencies", () => {
     const parser = instrumentParserPerformance(
       {
         parse: () => ({
-          rootUnits: [],
-          errors: [],
+          ok: true,
+          document: { rootUnits: [], warnings: [] },
         }),
       },
       {
-        trackEvent: (eventName, properties) => {
-          events.push({ eventName, properties });
+        report: (event) => {
+          events.push({ eventName: event.name, properties: event.properties });
         },
         dispose() {},
       },
     );
 
     assert.deepStrictEqual(parser.parse("raw definition content"), {
-      rootUnits: [],
-      errors: [],
+      ok: true,
+      document: { rootUnits: [], warnings: [] },
     });
     assert.deepStrictEqual(
       {
@@ -80,5 +108,31 @@ suite("Extension dependencies", () => {
     );
     assert.strictEqual(events[0]?.eventName, "performance.parse.completed");
     assert.ok(events[0]?.properties?.durationBucket);
+  });
+
+  test("preserves parser failures while reporting their count", () => {
+    const events: Array<{
+      eventName: string;
+      properties?: TelemetryProperties;
+    }> = [];
+    const failure = {
+      ok: false as const,
+      errors: [{ line: 1, column: 2, message: "invalid syntax" }],
+    };
+    const parser = instrumentParserPerformance(
+      { parse: () => failure },
+      {
+        report: (event) => {
+          events.push({ eventName: event.name, properties: event.properties });
+        },
+        dispose() {},
+      },
+    );
+
+    assert.deepStrictEqual(parser.parse("raw definition content"), failure);
+    assert.strictEqual(events[0]?.properties?.result, "failed");
+    assert.strictEqual(events[0]?.properties?.diagnosticCountBucket, "1");
+    assert.ok(!JSON.stringify(events[0]).includes("invalid syntax"));
+    assert.ok(!JSON.stringify(events[0]).includes("raw definition content"));
   });
 });

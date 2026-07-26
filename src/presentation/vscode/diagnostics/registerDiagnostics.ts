@@ -42,48 +42,44 @@ const reportDiagnosticsTelemetry = (
     return;
   }
 
-  try {
+  trackTelemetryEvent(
+    telemetry,
+    createDiagnosticsEvaluatedTelemetryEvent({
+      host: getTelemetryHost(),
+      result: "success",
+      durationBucket: toDurationBucket(durationMs),
+      diagnosticCountBucket: toCountBucket(diagnostics.length),
+    }),
+  );
+
+  const categoryCounts = new Map<SyntaxDiagnosticCategory, number>();
+  diagnostics.forEach((diagnostic) => {
+    if (diagnostic.category) {
+      categoryCounts.set(
+        diagnostic.category,
+        (categoryCounts.get(diagnostic.category) ?? 0) + 1,
+      );
+    }
+  });
+
+  categoryCounts.forEach((count, diagnosticCategory) => {
     trackTelemetryEvent(
       telemetry,
-      createDiagnosticsEvaluatedTelemetryEvent({
+      createDiagnosticsReportedTelemetryEvent({
         host: getTelemetryHost(),
-        result: "success",
-        durationBucket: toDurationBucket(durationMs),
-        diagnosticCountBucket: toCountBucket(diagnostics.length),
+        result: "reported",
+        diagnosticCategory,
+        diagnosticCountBucket: toCountBucket(count),
       }),
     );
-
-    const categoryCounts = new Map<SyntaxDiagnosticCategory, number>();
-    diagnostics.forEach((diagnostic) => {
-      if (diagnostic.category) {
-        categoryCounts.set(
-          diagnostic.category,
-          (categoryCounts.get(diagnostic.category) ?? 0) + 1,
-        );
-      }
-    });
-
-    categoryCounts.forEach((count, diagnosticCategory) => {
-      trackTelemetryEvent(
-        telemetry,
-        createDiagnosticsReportedTelemetryEvent({
-          host: getTelemetryHost(),
-          result: "reported",
-          diagnosticCategory,
-          diagnosticCountBucket: toCountBucket(count),
-        }),
-      );
-    });
-  } catch {
-    // Telemetry must not suppress editor diagnostics.
-  }
+  });
 };
 
 const trackTelemetryEvent = (
   telemetry: TelemetryPort,
   event: TelemetryEvent,
 ): void => {
-  telemetry.trackEvent(event.name, event.properties);
+  telemetry.report(event);
 };
 
 export const updateDiagnostics = (

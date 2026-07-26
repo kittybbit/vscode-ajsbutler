@@ -1,77 +1,90 @@
 import * as assert from "assert";
 import {
-  buildDefinitionOnlyUnitListRequest,
   createImportedAjsDefinitionContent,
   createImportAjsDefinitionError,
-  mapHttpStatusToImportErrorCode,
+  createImportAjsDefinitionViaWebApi,
+  type ImportAjsDefinitionRequestDto,
   type ImportAjsDefinitionViaWebApiPort,
 } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
 
-suite("Import AJS definition via WebAPI DTOs", () => {
-  test("builds a definition-only desktop port request", () => {
-    const portRequest = buildDefinitionOnlyUnitListRequest({
-      host: "desktop",
-      connection: {
-        baseUrl: "https://web-console.example.com:22252",
-        acceptLanguage: "en",
-        timeoutMs: 10000,
-      },
-      credentialRef: "jp1-webapi:default",
-      scope: {
-        manager: "manager.example.com",
-        serviceName: "AJSROOT1",
-        location: "/JobGroup",
-      },
-    });
+const baseRequest: ImportAjsDefinitionRequestDto = {
+  connection: {
+    baseUrl: "https://web-console.example.com:22252",
+    acceptLanguage: "en",
+    timeoutMs: 10000,
+  },
+  scope: {
+    manager: "manager.example.com",
+    serviceName: "AJSROOT1",
+    location: "/JobGroup",
+    searchLowerUnits: false,
+  },
+  credentialRef: "jp1-webapi:default",
+};
 
-    assert.strictEqual("ok" in portRequest, false);
-    assert.deepStrictEqual(portRequest, {
-      endpoint: "unit-list",
-      method: "GET",
-      path: "/ajs/api/v1/objects/statuses",
-      connection: {
-        baseUrl: "https://web-console.example.com:22252",
-        acceptLanguage: "en",
-        timeoutMs: 10000,
+suite("Import AJS definition via WebAPI application boundary", () => {
+  test("invokes a host-neutral port without transport fields", async () => {
+    const requests: ImportAjsDefinitionRequestDto[] = [];
+    const port: ImportAjsDefinitionViaWebApiPort = {
+      async importDefinition(request) {
+        requests.push(request);
+        return {
+          ok: true,
+          content: createImportedAjsDefinitionContent(
+            {
+              manager: request.scope.manager,
+              serviceName: request.scope.serviceName,
+              location: request.scope.location,
+              all: true,
+            },
+            [{ unitName: request.scope.location }],
+          ),
+        };
       },
-      credentialRef: "jp1-webapi:default",
-      query: {
-        mode: "search",
-        manager: "manager.example.com",
-        serviceName: "AJSROOT1",
-        location: "/JobGroup",
-        searchLowerUnits: "YES",
-        searchTarget: "DEFINITION",
-      },
-    });
+    };
+
+    const result = await createImportAjsDefinitionViaWebApi(port)(baseRequest);
+
+    assert.strictEqual(result.ok, true);
+    assert.deepStrictEqual(requests, [baseRequest]);
+    const serializedRequest = JSON.stringify(requests[0]);
+    assert.ok(!serializedRequest.includes('"method"'));
+    assert.ok(!serializedRequest.includes('"path"'));
+    assert.ok(!serializedRequest.includes('"endpoint"'));
+    assert.ok(!serializedRequest.includes('"searchTarget"'));
+    assert.ok(!serializedRequest.includes('"username"'));
+    assert.ok(!serializedRequest.includes('"password"'));
   });
 
-  test("returns an unsupported-host result for web extension execution", () => {
-    const result = buildDefinitionOnlyUnitListRequest({
-      host: "web",
-      connection: {
-        baseUrl: "https://web-console.example.com:22252",
-      },
-      scope: {
-        manager: "manager.example.com",
-        serviceName: "AJSROOT1",
-        location: "/JobGroup",
+  test("copies request DTOs before invoking the port", async () => {
+    let observed: ImportAjsDefinitionRequestDto | undefined;
+    const importDefinition = createImportAjsDefinitionViaWebApi({
+      async importDefinition(request) {
+        observed = request;
+        return {
+          ok: true,
+          content: createImportedAjsDefinitionContent(
+            {
+              manager: request.scope.manager,
+              serviceName: request.scope.serviceName,
+              location: request.scope.location,
+              all: true,
+            },
+            [],
+          ),
+        };
       },
     });
 
-    assert.strictEqual("ok" in result, true);
-    assert.deepStrictEqual(result, {
-      ok: false,
-      error: {
-        code: "unsupported-host",
-        message:
-          "JP1/AJS WebAPI import is not supported in the web extension host yet.",
-        recoverable: true,
-      },
-    });
+    await importDefinition(baseRequest);
+
+    assert.ok(observed);
+    assert.notStrictEqual(observed.connection, baseRequest.connection);
+    assert.notStrictEqual(observed.scope, baseRequest.scope);
+    assert.deepStrictEqual(observed, baseRequest);
   });
 
-  test("creates normalized import content without exposing transport response objects", () => {
+  test("creates imported content without exposing transport response objects", () => {
     const content = createImportedAjsDefinitionContent(
       {
         manager: "manager.example.com",
@@ -103,26 +116,7 @@ suite("Import AJS definition via WebAPI DTOs", () => {
     assert.deepStrictEqual(content.warnings, []);
   });
 
-  test("maps manual HTTP statuses and repository-owned failures to structured errors", () => {
-    const mappings = [
-      [400, "invalid-request"],
-      [401, "authentication-failed"],
-      [403, "authorization-failed"],
-      [404, "resource-not-found"],
-      [409, "conflict"],
-      [412, "web-console-unavailable"],
-      [500, "server-error"],
-    ] as const;
-
-    mappings.forEach(([status, errorCode]) => {
-      assert.strictEqual(mapHttpStatusToImportErrorCode(status), errorCode);
-    });
-
-    assert.strictEqual(
-      mapHttpStatusToImportErrorCode(418),
-      "unexpected-status",
-    );
-
+  test("creates repository-owned structured errors", () => {
     assert.deepStrictEqual(
       createImportAjsDefinitionError("timeout", "The request timed out.", {
         messageId: "timeout",
@@ -134,47 +128,5 @@ suite("Import AJS definition via WebAPI DTOs", () => {
         messageId: "timeout",
       },
     );
-  });
-
-  test("defines an application import port without infrastructure types", async () => {
-    const port: ImportAjsDefinitionViaWebApiPort = {
-      async importDefinition(request) {
-        return {
-          ok: true,
-          content: createImportedAjsDefinitionContent(
-            {
-              manager: request.query.manager,
-              serviceName: request.query.serviceName,
-              location: request.query.location,
-              all: true,
-            },
-            [{ unitName: request.query.location }],
-          ),
-        };
-      },
-    };
-
-    const request = buildDefinitionOnlyUnitListRequest({
-      host: "desktop",
-      connection: { baseUrl: "https://web-console.example.com:22252" },
-      scope: {
-        manager: "manager.example.com",
-        serviceName: "AJSROOT1",
-        location: "/JobGroup",
-        searchLowerUnits: false,
-      },
-    });
-    assert.strictEqual("ok" in request, false);
-    if ("ok" in request) {
-      throw new Error("Expected a desktop port request.");
-    }
-
-    const result = await port.importDefinition(request);
-
-    assert.strictEqual(result.ok, true);
-    if (!result.ok) {
-      throw new Error("Expected a successful import result.");
-    }
-    assert.strictEqual(result.content.units[0].unitName, "/JobGroup");
   });
 });

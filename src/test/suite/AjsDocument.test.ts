@@ -1,17 +1,18 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { TelemetryProperties } from "../../application/telemetry/TelemetryPort";
-import type { UnitListDocumentDto } from "../../application/unit-list/unitListDocument";
+import type { TelemetryProperties } from "../../application/telemetry/telemetryEvent";
+import { toUnitListDocumentDto } from "../../application/unit-list/unitListDocument";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import {
   createDebouncedAjsDocumentChange,
   createReadyAjsDocument,
 } from "../../presentation/vscode/webview/ajsDocument";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
-import { CHANGE_DOCUMENT } from "../../shared/webviewEvents";
+import { CHANGE_DOCUMENT } from "../../presentation/webview/viewerHostMessages";
 
 suite("ajsDocument", () => {
   const buildUnitList = () => ({ errors: [], document: undefined });
-  const documentDto: UnitListDocumentDto = {
+  const normalizedDocument: AjsDocument = {
     rootUnits: [
       {
         id: "root-id",
@@ -38,6 +39,7 @@ suite("ajsDocument", () => {
       },
     ],
   };
+  const documentDto = toUnitListDocumentDto(normalizedDocument);
 
   test("posts the normalized document on ready", () => {
     const posted: Array<{ type: string; data: unknown }> = [];
@@ -61,8 +63,11 @@ suite("ajsDocument", () => {
     const buildDocument = () => ({ errors: [], document: documentDto });
 
     createReadyAjsDocument(buildDocument, {
-      trackEvent: (eventName, properties) => {
-        telemetryEvents.push({ eventName, properties });
+      report: (event) => {
+        telemetryEvents.push({
+          eventName: event.name,
+          properties: event.properties,
+        });
       },
       dispose() {},
     })(document, panel);
@@ -70,6 +75,18 @@ suite("ajsDocument", () => {
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
     assert.deepStrictEqual(posted[0]?.data, documentDto);
+    assert.deepStrictEqual(
+      documentDto.unitList.rows.map((row) => row.id),
+      ["root-id"],
+    );
+    assert.deepStrictEqual(
+      documentDto.unitList.units[0]?.parameterSearchValues,
+      ["n"],
+    );
+    assert.deepStrictEqual(
+      JSON.parse(JSON.stringify(posted[0]?.data)),
+      documentDto,
+    );
     assert.deepStrictEqual(
       {
         ...telemetryEvents[0]?.properties,
@@ -114,5 +131,6 @@ suite("ajsDocument", () => {
 
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
+    assert.strictEqual(posted[0]?.data, null);
   });
 });

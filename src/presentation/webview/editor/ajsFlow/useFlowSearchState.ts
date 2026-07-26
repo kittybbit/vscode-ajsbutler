@@ -9,9 +9,16 @@ import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
-import { createSearchEvent } from "../../../../shared/webviewEvents";
-import { FlowRevealTarget, resolveFlowRevealTarget } from "../revealUnit";
+import type {
+  FlowGraphUnitDto,
+  ValidatedFlowGraphDocument,
+} from "../../../../application/flow-graph/flowGraphDocument";
+import {
+  resolveFlowNavigationTarget,
+  type FlowNavigationTargetDto,
+  type NavigationRequestDto,
+} from "../../../../application/navigation/resolveNavigationTarget";
+import { createViewerSearchRequest } from "../../viewerRequestMessages";
 import { findFlowSearchResult, FlowSearchResult } from "./flowSearch";
 import {
   createEmptyFlowSearchState,
@@ -24,11 +31,12 @@ import {
 import type { FlowSearchDirection, FlowSearchState } from "./flowSearchState";
 
 type UseFlowSearchStateParams = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
+  flowDocument?: ValidatedFlowGraphDocument;
   preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 const mergeExpandedAncestorUnitIds = (
@@ -39,11 +47,11 @@ const mergeExpandedAncestorUnitIds = (
 ];
 
 type SearchSubmitHandlerParams = {
-  currentUnit?: AjsUnit;
+  currentUnit?: FlowGraphUnitDto;
   searchState: FlowSearchState;
   setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 type RevealTargetApplyParams = {
@@ -53,8 +61,8 @@ type RevealTargetApplyParams = {
 };
 
 type RevealUnitHandlerParams = RevealTargetApplyParams & {
+  flowDocument?: ValidatedFlowGraphDocument;
   preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
-  unitById: ReadonlyMap<string, AjsUnit>;
 };
 
 type FlowSearchResultApplyParams = {
@@ -140,7 +148,7 @@ const postFlowSearchEvent = ({
   durationMs?: number;
 }) => {
   window.vscode.postMessage(
-    createSearchEvent({
+    createViewerSearchRequest({
       surface: "flow",
       action,
       result:
@@ -160,15 +168,15 @@ const postFlowSearchEvent = ({
 };
 
 const applyFlowRevealTarget = (
-  revealTarget: FlowRevealTarget,
+  revealTarget: FlowNavigationTargetDto,
   {
     setSearchState,
     setCurrentUnitId,
     setExpandedUnitIds,
   }: RevealTargetApplyParams,
 ) => {
-  setExpandedUnitIds(revealTarget.expandedAncestorUnitIds);
-  setCurrentUnitId(revealTarget.scopeUnitId);
+  setExpandedUnitIds(revealTarget.requiredExpandedAncestorUnitIds);
+  setCurrentUnitId(revealTarget.activeFlowScopeUnitId);
   setSearchState((prev) =>
     createRevealedFlowSearchState(
       revealTarget.revealedUnitId,
@@ -232,20 +240,21 @@ const useSearchSubmitHandler = ({
   );
 
 const useRevealUnitHandler = ({
+  flowDocument,
   preserveSearchOnNextScopeChange,
   setSearchState,
   setCurrentUnitId,
   setExpandedUnitIds,
-  unitById,
 }: RevealUnitHandlerParams) =>
   useCallback(
-    (absolutePath: string) => {
-      const revealTarget = resolveFlowRevealTarget(unitById, absolutePath);
-      if (!revealTarget) {
+    (request: NavigationRequestDto) => {
+      if (!flowDocument) return;
+      const result = resolveFlowNavigationTarget(flowDocument, request);
+      if (result.status === "unavailable") {
         return;
       }
       preserveSearchOnNextScopeChange.current = true;
-      applyFlowRevealTarget(revealTarget, {
+      applyFlowRevealTarget(result.target, {
         setSearchState,
         setCurrentUnitId,
         setExpandedUnitIds,
@@ -253,15 +262,16 @@ const useRevealUnitHandler = ({
     },
     [
       preserveSearchOnNextScopeChange,
+      flowDocument,
       setSearchState,
       setCurrentUnitId,
       setExpandedUnitIds,
-      unitById,
     ],
   );
 
 export const useFlowSearchState = ({
   currentUnit,
+  flowDocument,
   preserveSearchOnNextScopeChange,
   setCurrentUnitId,
   setExpandedUnitIds,
@@ -292,11 +302,11 @@ export const useFlowSearchState = ({
     unitById,
   });
   const handleRevealUnit = useRevealUnitHandler({
+    flowDocument,
     preserveSearchOnNextScopeChange,
     setSearchState,
     setCurrentUnitId,
     setExpandedUnitIds,
-    unitById,
   });
   const handleSearchNavigate = useCallback(
     (query: string, direction: FlowSearchDirection) => {

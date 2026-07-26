@@ -4,7 +4,7 @@ import {
   ColumnHelper,
   GroupColumnDef,
 } from "@tanstack/table-core";
-import type { AjsTableColumnGroupLabels } from "../../../../../domain/services/i18n/nls";
+import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
 import Chip from "@mui/material/Chip";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
 import { rowViewColumn } from "./common";
@@ -25,7 +25,7 @@ const recoveryCell = (
 
 const group3 = (
   columnHelper: ColumnHelper<UnitListRowView>,
-  labels: AjsTableColumnGroupLabels,
+  labels: UnitInformationColumnGroupLabels,
   rowViewByPath: ReadonlyMap<string, UnitListRowView>,
 ): GroupColumnDef<UnitListRowView, unknown> => {
   return columnHelper.group({

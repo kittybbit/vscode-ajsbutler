@@ -1,22 +1,22 @@
 import * as assert from "assert";
 import { createTheme } from "@mui/material/styles";
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 import type { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
-import type { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
+import { indexUnitDefinitionsByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
 import { applyHoveredUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphHover";
 
 type TestUnitParams = Pick<
-  AjsUnit,
+  FlowGraphUnitDto,
   "id" | "name" | "unitType" | "absolutePath" | "depth" | "parentId" | "layout"
 > & {
-  children?: AjsUnit[];
+  children?: FlowGraphUnitDto[];
 };
 
 const createTestUnit = ({
   children = [],
   ...params
-}: TestUnitParams): AjsUnit => ({
+}: TestUnitParams): FlowGraphUnitDto => ({
   unitAttribute: "",
   isRoot: false,
   isRootJobnet: false,
@@ -130,43 +130,31 @@ suite("Flow Graph View", () => {
         },
       ],
     };
-    const unitDefinitionByPath = new Map<string, UnitDefinitionDialogDto>([
-      [
-        "/root/jobnet",
-        {
-          absolutePath: "/root/jobnet",
-          rawData: "ty=n",
-          commands: [],
-          commandBuilders: [],
-        },
-      ],
-      [
-        "/root/jobnet/job-a",
-        {
-          absolutePath: "/root/jobnet/job-a",
-          rawData: "ty=j",
-          commands: [],
-          commandBuilders: [],
-        },
-      ],
-      [
-        "/root/jobnet/child-net",
-        {
-          absolutePath: "/root/jobnet/child-net",
-          rawData: "ty=n",
-          commands: [],
-          commandBuilders: [],
-        },
-      ],
-      [
-        "/root/jobnet/child-net/grand-net",
-        {
-          absolutePath: "/root/jobnet/child-net/grand-net",
-          rawData: "ty=n",
-          commands: [],
-          commandBuilders: [],
-        },
-      ],
+    const unitDefinitionByPath = indexUnitDefinitionsByPath([
+      {
+        absolutePath: "/root/jobnet",
+        rawData: "ty=n",
+        commands: [],
+        commandBuilders: [],
+      },
+      {
+        absolutePath: "/root/jobnet/job-a",
+        rawData: "ty=j",
+        commands: [],
+        commandBuilders: [],
+      },
+      {
+        absolutePath: "/root/jobnet/child-net",
+        rawData: "ty=n",
+        commands: [],
+        commandBuilders: [],
+      },
+      {
+        absolutePath: "/root/jobnet/child-net/grand-net",
+        rawData: "ty=n",
+        commands: [],
+        commandBuilders: [],
+      },
     ]);
     const leafUnit = createTestUnit({
       id: "/root/jobnet/child-net/grand-net/leaf",
@@ -319,5 +307,25 @@ suite("Flow Graph View", () => {
         confirmationIds: [],
       },
     });
+
+    const flowDataWithoutDefinitions = createReactFlowData({
+      graph,
+      unitDefinitionByPath: new Map(),
+      theme: createTheme(),
+      dialogDataState: {
+        dialogData: undefined,
+        setDialogData: () => undefined,
+      },
+      currentUnitIdState: {
+        currentUnitId: "/root/jobnet",
+        setCurrentUnitId: () => undefined,
+      },
+    });
+
+    assert.strictEqual(flowDataWithoutDefinitions.nodes.length, 2);
+    assert.strictEqual(
+      flowDataWithoutDefinitions.nodes[0].data.unitDefinition,
+      undefined,
+    );
   });
 });

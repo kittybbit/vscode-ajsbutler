@@ -1,7 +1,7 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { buildFlowGraph } from "../../application/flow-graph/buildFlowGraph";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
+import { buildFlowGraphResult } from "../../application/flow-graph/buildFlowGraph";
+import { toFlowGraphDocumentDto } from "../../application/flow-graph/flowGraphDocument";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -35,15 +35,17 @@ unit=root,,jp1admin,;
 
 suite("Build Flow Graph Use Case", () => {
   test("builds a flow graph from the normalized model", () => {
-    const result = parseAjs(validDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(validDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
 
-    const graph = buildFlowGraph(document, currentUnitId);
+    const result = buildFlowGraphResult(
+      toFlowGraphDocumentDto(document),
+      currentUnitId,
+    );
 
-    assert.ok(graph);
-    assert.deepStrictEqual(graph?.edges, [
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.deepStrictEqual(result.graph.edges, [
       {
         source: "/root/jobnet/job-a",
         target: "/root/jobnet/job-b",
@@ -56,7 +58,7 @@ suite("Build Flow Graph Use Case", () => {
       },
     ]);
     assert.deepStrictEqual(
-      graph?.nodes.map((node) => node.id),
+      result.graph.nodes.map((node) => node.id),
       [
         document.rootUnits[0].children[0].children[0].id,
         document.rootUnits[0].children[0].children[1].id,
@@ -65,5 +67,62 @@ suite("Build Flow Graph Use Case", () => {
         document.rootUnits[0].children[0].children[2].id,
       ],
     );
+  });
+
+  test("builds the same graph from a JSON-round-tripped flow document", () => {
+    const normalized = parseAjsDocumentForTest(validDefinition);
+    const currentUnitId = normalized.rootUnits[0].children[0].id;
+    const dto = toFlowGraphDocumentDto(normalized);
+    const serialized = JSON.parse(JSON.stringify(dto)) as unknown;
+
+    const result = buildFlowGraphResult(serialized, currentUnitId);
+
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    const normalizedResult = buildFlowGraphResult(
+      toFlowGraphDocumentDto(normalized),
+      currentUnitId,
+    );
+    assert.strictEqual(normalizedResult.status, "available");
+    if (normalizedResult.status !== "available") return;
+    assert.deepStrictEqual(result.graph, normalizedResult.graph);
+    assert.strictEqual(
+      result.index.unitById.get(currentUnitId)?.name,
+      "jobnet",
+    );
+    assert.deepStrictEqual(result.issues, []);
+  });
+
+  test("returns a typed unavailable result for a missing scope", () => {
+    const document = parseAjsDocumentForTest(validDefinition);
+
+    const result = buildFlowGraphResult(document, "missing-scope");
+
+    assert.deepStrictEqual(result, {
+      status: "unavailable",
+      issues: [
+        {
+          code: "scope_not_found",
+          message: "Flow graph scope was not found: missing-scope",
+        },
+      ],
+    });
+  });
+
+  test("returns unavailable for an existing unit that is not a flow scope", () => {
+    const document = parseAjsDocumentForTest(validDefinition);
+    const jobId = document.rootUnits[0].children[0].children[0].id;
+
+    const result = buildFlowGraphResult(document, jobId);
+
+    assert.deepStrictEqual(result, {
+      status: "unavailable",
+      issues: [
+        {
+          code: "invalid_scope",
+          message: `Unit is not a flow graph scope: ${jobId}`,
+        },
+      ],
+    });
   });
 });

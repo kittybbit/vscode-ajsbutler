@@ -6,6 +6,7 @@ import {
 } from "../../presentation/webview/editor/ajsTable/Header";
 import {
   createColumnVisibilityUpdate,
+  getDisplayColumnSelectorControlLabels,
   getVisibleColumnSelectorColumns,
 } from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { getFixedTableVirtuosoStyle } from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
@@ -23,6 +24,14 @@ suite("AJS Table Header", () => {
       copyCsv: "Copy the contents to clipbord as csv.",
       saveCsv: "Save the contents as csv.",
     });
+    assert.strictEqual(
+      getAjsTableHeaderControlLabels("ja").columns,
+      "表示するカラムを選択する。",
+    );
+    assert.strictEqual(
+      getAjsTableHeaderControlLabels("unsupported").columns,
+      "Select display columns.",
+    );
   });
 
   test("describes flow-style list search state", () => {
@@ -73,5 +82,20 @@ suite("AJS Table Header", () => {
     assert.deepStrictEqual(createColumnVisibilityUpdate(["group.a"], true), {
       "group.a": true,
     });
+  });
+
+  test("preserves localized display-column controls and fallback", () => {
+    assert.deepStrictEqual(getDisplayColumnSelectorControlLabels("en"), {
+      hideAll: "All columns to invisible.",
+      showAll: "All columns to visible.",
+    });
+    assert.deepStrictEqual(getDisplayColumnSelectorControlLabels("ja"), {
+      hideAll: "全てのカラムを非表示にする。",
+      showAll: "全てのカラムを表示にする。",
+    });
+    assert.deepStrictEqual(
+      getDisplayColumnSelectorControlLabels("unsupported"),
+      getDisplayColumnSelectorControlLabels("en"),
+    );
   });
 });

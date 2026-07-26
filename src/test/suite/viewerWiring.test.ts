@@ -16,7 +16,7 @@ suite("Viewer wiring", () => {
   test("creates viewer subscriptions for both table and flow viewers", () => {
     const context = { subscriptions: [] } as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {
-      trackEvent() {},
+      report() {},
       dispose() {},
     };
 
@@ -27,6 +27,8 @@ suite("Viewer wiring", () => {
     });
 
     assert.strictEqual(subscriptions.length, 4);
+    assert.strictEqual(new Set(subscriptions).size, subscriptions.length);
+    assert.deepStrictEqual(context.subscriptions, []);
     subscriptions.forEach((subscription) => {
       assert.strictEqual(typeof subscription.dispose, "function");
       subscription.dispose();
@@ -201,6 +203,33 @@ suite("Viewer wiring", () => {
         mountPanel: () => calls.push("mount"),
         pendingRevealByPanel: new WeakMap(),
       },
+    );
+    assert.deepStrictEqual(calls, []);
+  });
+
+  test("keeps state stable when the counterpart context cannot create a panel", () => {
+    const calls: string[] = [];
+    const factory = {
+      getExistingPanel: () => undefined,
+      getPanel: () => {
+        throw new Error("context unavailable");
+      },
+    } as unknown as ViewerFactory;
+
+    assert.doesNotThrow(() =>
+      revealCounterpartPanel(
+        {
+          document: { uri: {} } as vscode.TextDocument,
+          targetViewType: AJS_FLOW_VIEWER_TYPE,
+          absolutePath: "/root/job",
+        },
+        {
+          factoryByViewType: new Map([[AJS_FLOW_VIEWER_TYPE, factory]]),
+          mountPanel: () => calls.push("mount"),
+          onOpenStarted: () => calls.push("open"),
+          pendingRevealByPanel: new WeakMap(),
+        },
+      ),
     );
     assert.deepStrictEqual(calls, []);
   });

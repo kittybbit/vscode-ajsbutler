@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import type { Edge, Node } from "@xyflow/react";
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 import {
   buildFlowNodeDetail,
   collectRelatedUnitIds,
@@ -23,7 +23,7 @@ const edges: Edge[] = [
   { id: "b-b", source: "b", target: "b" },
 ];
 
-const unit = (id: string, parentId?: string): AjsUnit => ({
+const unit = (id: string, parentId?: string): FlowGraphUnitDto => ({
   id,
   name: id.toUpperCase(),
   unitAttribute: "",
@@ -77,7 +77,7 @@ suite("Flow Node Detail", () => {
   });
 
   test("builds lightweight graph context without definition contents", () => {
-    const units = new Map<string, AjsUnit>([
+    const units = new Map<string, FlowGraphUnitDto>([
       ["parent", unit("parent")],
       ["b", { ...unit("b", "parent"), unitType: "n" }],
     ]);
@@ -202,6 +202,7 @@ suite("Flow Node Detail", () => {
       isSearchMatch: true,
       isCurrentSearchResult: false,
       canOpenAsScope: true,
+      canOpenDefinition: true,
       predecessorCount: 1,
       successorCount: 2,
       upstreamCount: 3,
@@ -231,6 +232,7 @@ suite("Flow Node Detail", () => {
       getSharedUnitDetailPaneActionLabels(
         buildFlowNodeDetailActions({
           canOpenAsScope: true,
+          canOpenDefinition: true,
           focusModeEnabled: false,
           onOpenDefinition: () => undefined,
           onOpenScope: () => undefined,
@@ -244,6 +246,20 @@ suite("Flow Node Detail", () => {
         "Open in unit list",
         "Open as graph scope",
       ],
+    );
+    assert.deepStrictEqual(
+      getSharedUnitDetailPaneActionLabels(
+        buildFlowNodeDetailActions({
+          canOpenAsScope: false,
+          canOpenDefinition: false,
+          focusModeEnabled: false,
+          onOpenDefinition: () => undefined,
+          onOpenScope: () => undefined,
+          onOpenUnitList: () => undefined,
+          onToggleFocusMode: () => undefined,
+        }),
+      ),
+      ["Focus relationships", "Open in unit list"],
     );
   });
 });

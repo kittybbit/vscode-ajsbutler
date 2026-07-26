@@ -1,9 +1,9 @@
-import type { AjsRelation, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import type {
   SemanticDiffChangeSet,
   SemanticDiffConfirmationLevel,
+  SemanticDiffRelationReference,
   SemanticDiffTarget,
-} from "../../domain/models/semantic-diff/SemanticDiff";
+} from "../semantic-diff/semanticDiffDto";
 import {
   flowGraphEdgeSemanticDiffKey,
   type FlowGraphEdgeDto,
@@ -79,7 +79,7 @@ const unitTargetId = (
   return undefined;
 };
 
-const relationEdgeKey = (relation: AjsRelation): string =>
+const relationEdgeKey = (relation: SemanticDiffRelationReference): string =>
   flowGraphEdgeSemanticDiffKey({
     source: relation.sourceUnitId,
     target: relation.targetUnitId,
@@ -123,23 +123,12 @@ const targetExistsInAfterDocument = (
   return edgeKey ? afterEdgeKeys.has(edgeKey) : false;
 };
 
-const collectUnitIds = (units: AjsUnit[]): string[] =>
-  units.flatMap((unit) => [unit.id, ...collectUnitIds(unit.children)]);
-
-const collectRelationKeys = (units: AjsUnit[]): string[] =>
-  units.flatMap((unit) => [
-    ...unit.relations.map(relationEdgeKey),
-    ...collectRelationKeys(unit.children),
-  ]);
-
 export const buildSemanticDiffFlowHighlights = (
   changeSet: SemanticDiffChangeSet,
 ): FlowGraphSemanticDiffHighlights => {
-  const afterUnitIds = new Set(
-    collectUnitIds(changeSet.inputs.after.document.rootUnits),
-  );
+  const afterUnitIds = new Set(changeSet.inputs.after.unitIds);
   const afterEdgeKeys = new Set(
-    collectRelationKeys(changeSet.inputs.after.document.rootUnits),
+    changeSet.inputs.after.relations.map(relationEdgeKey),
   );
   const nodeHighlights = new Map<string, MutableFlowHighlight>();
   const edgeHighlights = new Map<string, MutableFlowHighlight>();

@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { buildUnitListGroup6View } from "../../application/unit-list/buildUnitListGroup6View";
 
 const definition = `
@@ -20,9 +19,7 @@ unit=root,,jp1admin,;
 
 suite("Build Unit List Group 6 View", () => {
   test("projects calendar week flags and non-week dates for group units", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
     const root = document.rootUnits[0];
 
     const view = buildUnitListGroup6View(root);
@@ -35,9 +32,7 @@ suite("Build Unit List Group 6 View", () => {
   });
 
   test("returns empty date arrays for non-group units", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
     const jobnet = document.rootUnits[0]?.children[0];
 
     assert.ok(jobnet);

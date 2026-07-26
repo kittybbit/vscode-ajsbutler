@@ -8,17 +8,17 @@ import {
 } from "react";
 import type { Theme } from "@mui/material/styles";
 import { Edge, Node } from "@xyflow/react";
-import {
-  AjsDocument,
-  AjsUnit,
-} from "../../../../domain/models/ajs/AjsDocument";
+import type {
+  FlowGraphUnitDto,
+  ValidatedFlowGraphDocument,
+} from "../../../../application/flow-graph/flowGraphDocument";
 import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import type { FlowGraphSemanticDiffHighlights } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import { createPerformanceEvent } from "../../../../shared/webviewEvents";
+import { createViewerPerformanceRequest } from "../../viewerRequestMessages";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
 import { ExpandedFlowGraphResult } from "./expandedFlowGraphTypes";
 import {
@@ -30,19 +30,19 @@ import { createReactFlowData } from "./flowGraphView";
 import type { AjsNode } from "./nodes/AjsNode";
 
 type UseFlowGraphStateParams = {
-  ajsDocument?: AjsDocument;
+  flowDocument?: ValidatedFlowGraphDocument;
   currentUnitId?: string;
   currentUnitIdState: CurrentUnitIdStateType;
   dialogDataState: DialogDataStateType;
   expandedUnitIds: string[];
   nestedExpansionState: NestedExpansionStateType;
-  prevUnitEntityId: MutableRefObject<string | undefined>;
+  previousUnitIdRef: MutableRefObject<string | undefined>;
   searchedUnitId?: string;
   searchMatchedUnitIds: string[];
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
   selectedUnitId?: string;
   theme: Theme;
-  unitById: ReadonlyMap<string, AjsUnit>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
 };
 
@@ -50,11 +50,11 @@ type FlowData = { nodes: Node<AjsNode>[]; edges: Edge[] };
 
 type FlowGraphDataBuildParams = Omit<
   UseFlowGraphStateParams,
-  "currentUnitId" | "prevUnitEntityId"
+  "currentUnitId" | "previousUnitIdRef"
 >;
 
 type ReadyFlowGraphDataBuildParams = FlowGraphDataBuildParams & {
-  ajsDocument: AjsDocument;
+  flowDocument: ValidatedFlowGraphDocument;
 };
 
 const emptyFlowData = (): FlowData => ({
@@ -66,14 +66,14 @@ const hasFlowGraphBuildInput = (
   params: FlowGraphDataBuildParams,
   graphScopeUnitId: string | undefined,
 ): params is ReadyFlowGraphDataBuildParams =>
-  !!graphScopeUnitId && !!params.ajsDocument;
+  !!graphScopeUnitId && !!params.flowDocument;
 
 const buildExpandedGraphResult = (
   params: ReadyFlowGraphDataBuildParams,
   graphScopeUnitId: string,
 ): ExpandedFlowGraphResult =>
   buildExpandedFlowGraph({
-    document: params.ajsDocument,
+    document: params.flowDocument,
     currentUnitId: graphScopeUnitId,
     expandedUnitIds: params.expandedUnitIds,
     basePx: params.theme.typography.htmlFontSize,
@@ -134,13 +134,13 @@ const updateFlowDataState = (
 };
 
 export const useFlowGraphState = ({
-  ajsDocument,
+  flowDocument,
   currentUnitId,
   currentUnitIdState,
   dialogDataState,
   expandedUnitIds,
   nestedExpansionState,
-  prevUnitEntityId,
+  previousUnitIdRef,
   searchedUnitId,
   searchMatchedUnitIds,
   semanticDiffHighlights,
@@ -156,7 +156,7 @@ export const useFlowGraphState = ({
     (graphScopeUnitId?: string): FlowData =>
       buildFlowData(
         {
-          ajsDocument,
+          flowDocument,
           currentUnitIdState,
           dialogDataState,
           expandedUnitIds,
@@ -172,7 +172,7 @@ export const useFlowGraphState = ({
         graphScopeUnitId,
       ),
     [
-      ajsDocument,
+      flowDocument,
       currentUnitIdState,
       dialogDataState,
       expandedUnitIds,
@@ -190,9 +190,9 @@ export const useFlowGraphState = ({
   useEffect(() => {
     const startedAt = performance.now();
     const nextFlowData = buildNodesAndEdges(currentUnitId);
-    if (ajsDocument && currentUnitId) {
+    if (flowDocument && currentUnitId) {
       window.vscode.postMessage(
-        createPerformanceEvent({
+        createViewerPerformanceRequest({
           operation: "flow_graph_build",
           result: "success",
           durationBucket: toDurationBucket(performance.now() - startedAt),
@@ -202,8 +202,8 @@ export const useFlowGraphState = ({
       );
     }
     updateFlowDataState(nextFlowData, setNodes, setEdges);
-    prevUnitEntityId.current = currentUnitId;
-  }, [ajsDocument, buildNodesAndEdges, currentUnitId, prevUnitEntityId]);
+    previousUnitIdRef.current = currentUnitId;
+  }, [flowDocument, buildNodesAndEdges, currentUnitId, previousUnitIdRef]);
 
   return { edges, nodes };
 };

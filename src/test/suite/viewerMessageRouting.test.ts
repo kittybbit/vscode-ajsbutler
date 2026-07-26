@@ -1,5 +1,12 @@
 import * as assert from "assert";
 import {
+  createViewerNavigationRequest,
+  createViewerOperationRequest,
+  createViewerPerformanceRequest,
+  createViewerReadyRequest,
+  createViewerResourceRequest,
+  createViewerSaveRequest,
+  createViewerSearchRequest,
   NAVIGATE,
   OPERATION,
   PERFORMANCE,
@@ -7,7 +14,7 @@ import {
   RESOURCE,
   SAVE,
   SEARCH,
-} from "../../shared/webviewEvents";
+} from "../../presentation/webview/viewerRequestMessages";
 import {
   createViewerMessageHandler,
   registerViewerPanelDispose,
@@ -31,8 +38,11 @@ suite("Viewer message routing", () => {
       document: document as never,
       panel: panel as never,
       telemetry: {
-        trackEvent: (eventName, properties) => {
-          telemetryEvents.push({ eventName, properties });
+        report: (event) => {
+          telemetryEvents.push({
+            eventName: event.name,
+            properties: event.properties,
+          });
         },
         dispose() {},
       },
@@ -56,17 +66,13 @@ suite("Viewer message routing", () => {
       showErrorMessage: async () => undefined,
     });
 
-    handler({ type: RESOURCE, data: {} as never });
-    handler({ type: READY });
-    handler({ type: SAVE, data: "body" });
-    handler({ type: OPERATION, data: "copy.csv" });
-    handler({
-      type: NAVIGATE,
-      data: { targetView: "flow", absolutePath: "/root/unit" },
-    });
-    handler({
-      type: SEARCH,
-      data: {
+    handler(createViewerResourceRequest("table"));
+    handler(createViewerReadyRequest());
+    handler(createViewerSaveRequest("body"));
+    handler(createViewerOperationRequest("copy.csv"));
+    handler(createViewerNavigationRequest("flow", "/root/unit"));
+    handler(
+      createViewerSearchRequest({
         surface: "table",
         action: "submitted",
         result: "no_match",
@@ -75,17 +81,16 @@ suite("Viewer message routing", () => {
         resultCountBucket: "0",
         durationBucket: "lt100ms",
         scope: "visible_rows",
-      },
-    });
-    handler({
-      type: PERFORMANCE,
-      data: {
+      }),
+    );
+    handler(
+      createViewerPerformanceRequest({
         operation: "csv_export",
         result: "success",
         durationBucket: "lt100ms",
         rowCountBucket: "2_9",
-      },
-    });
+      }),
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepStrictEqual(calls, [
@@ -149,6 +154,67 @@ suite("Viewer message routing", () => {
     ]);
   });
 
+  test("ignores invalid navigation payloads without invoking the host adapter", () => {
+    const calls: string[] = [];
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: {} as never,
+      onReady: () => {},
+      onResource: () => {},
+      onOperation: () => {},
+      onNavigate: () => calls.push("navigate"),
+      showErrorMessage: async () => undefined,
+    });
+
+    handler({ type: NAVIGATE, data: undefined } as never);
+    handler({
+      type: NAVIGATE,
+      data: { targetView: "unknown", absolutePath: "/root/job" },
+    } as never);
+    handler({
+      type: NAVIGATE,
+      data: { targetView: "flow", absolutePath: "" },
+    } as never);
+
+    assert.deepStrictEqual(calls, []);
+  });
+
+  test("ignores unknown and malformed requests without invoking handlers", () => {
+    const calls: string[] = [];
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: { report: () => calls.push("telemetry") } as never,
+      onReady: () => calls.push("ready"),
+      onResource: () => calls.push("resource"),
+      onOperation: () => calls.push("operation"),
+      onNavigate: () => calls.push("navigate"),
+      onSave: async () => {
+        calls.push("save");
+      },
+      showErrorMessage: async () => {
+        calls.push("error");
+        return undefined;
+      },
+    });
+
+    for (const value of [
+      undefined,
+      { type: "unknown", data: {} },
+      { type: READY, data: {} },
+      { type: RESOURCE, data: {} },
+      { type: OPERATION, data: "unknown.operation" },
+      { type: SEARCH, data: {} },
+      { type: PERFORMANCE, data: {} },
+      { type: NAVIGATE, data: { targetView: "flow", absolutePath: "" } },
+    ]) {
+      assert.doesNotThrow(() => handler(value));
+    }
+
+    assert.deepStrictEqual(calls, []);
+  });
+
   test("cleans up store and message subscription when the panel is disposed", () => {
     const removed: string[] = [];
     let receiverDisposed = false;
@@ -167,8 +233,8 @@ suite("Viewer message routing", () => {
       panel: panel as never,
       viewType: "ajsbutler.flowViewer",
       telemetry: {
-        trackEvent: (eventName) => {
-          removed.push(`event:${eventName}`);
+        report: (event) => {
+          removed.push(`event:${event.name}`);
         },
         dispose() {},
       },

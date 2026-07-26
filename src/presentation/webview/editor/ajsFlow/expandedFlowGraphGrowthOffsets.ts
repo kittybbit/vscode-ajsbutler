@@ -1,4 +1,5 @@
-import { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
+import type { ExpandedUnitPlacementConstraintDto } from "../../../../application/flow-graph/buildExpandedFlowGraph";
 import { FlowGraphPosition } from "./flowGraphPosition";
 import {
   ExpandedFlowGraphBuildContext,
@@ -8,7 +9,6 @@ import { buildUnitBaseBounds } from "./expandedFlowGraphGeometry";
 import {
   addOffset,
   getDisplayPosition,
-  getDisplayPositions,
   getOffset,
   hasOffset,
 } from "./expandedFlowGraphPositionState";
@@ -16,10 +16,10 @@ import {
 type GrowthOffsetTarget = {
   context: ExpandedFlowGraphBuildContext;
   unitId: string;
-  displayPosition: FlowGraphPosition;
-  expandedUnitPosition: FlowGraphPosition;
   horizontalGrowth: number;
   verticalGrowth: number;
+  horizontalAffected: boolean;
+  verticalAffected: boolean;
 };
 
 type UnitGrowthOffset = {
@@ -29,24 +29,23 @@ type UnitGrowthOffset = {
 
 type GrowthOffsetBatch = {
   context: ExpandedFlowGraphBuildContext;
-  positionsBeforeOffset: ReadonlyMap<string, FlowGraphPosition>;
-  expandedUnitPosition: FlowGraphPosition;
   horizontalGrowth: number;
   verticalGrowth: number;
-  targetUnitIds: ReadonlySet<string>;
+  horizontalTargetUnitIds: ReadonlySet<string>;
+  verticalTargetUnitIds: ReadonlySet<string>;
 };
 
 type GrowthOffsetApplication = {
-  expandedUnitPosition: FlowGraphPosition;
   horizontalGrowth: number;
   verticalGrowth: number;
-  targetUnitIds: ReadonlySet<string>;
+  horizontalTargetUnitIds: ReadonlySet<string>;
+  verticalTargetUnitIds: ReadonlySet<string>;
 };
 
 type UpperExpandedPanelMaxRightTarget = {
   context: ExpandedFlowGraphBuildContext;
-  expandedChildren: ReadonlyArray<AjsUnit>;
-  expandedChild: AjsUnit;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
+  expandedChild: FlowGraphUnitDto;
   expandedChildPosition: FlowGraphPosition;
 };
 
@@ -61,7 +60,6 @@ type ExpandedChildGrowthBounds = {
 };
 
 type ExpandedChildGrowthMeasurement = {
-  expandedUnitPosition: FlowGraphPosition;
   panelBounds: FlowGraphBounds;
   baseBounds: FlowGraphBounds;
   upperPanelMaxRight?: number;
@@ -69,74 +67,41 @@ type ExpandedChildGrowthMeasurement = {
 
 type ExpandedChildGrowthMeasurementContext = {
   context: ExpandedFlowGraphBuildContext;
-  expandedChildren: ReadonlyArray<AjsUnit>;
-  expandedChild: AjsUnit;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
+  expandedChild: FlowGraphUnitDto;
 };
 
 type ExpandedChildGrowthApplicationContext =
   ExpandedChildGrowthMeasurementContext & {
-    immediateVisibleChildren: ReadonlyArray<AjsUnit>;
+    horizontalAffectedSiblingUnitIds: readonly string[];
+    verticalAffectedSiblingUnitIds: readonly string[];
   };
 
 export type ExpandedChildGrowthOffsetDeps = {
   buildExpandedUnitPanelBounds: (
     context: ExpandedFlowGraphBuildContext,
-    expandedUnit: AjsUnit,
+    expandedUnit: FlowGraphUnitDto,
   ) => FlowGraphBounds | undefined;
-  getVisibleImmediateChildren: (
-    context: ExpandedFlowGraphBuildContext,
-    containerUnitId: string,
-  ) => AjsUnit[];
 };
 
 type ExpandedChildrenGrowthOffsetsTarget = {
   context: ExpandedFlowGraphBuildContext;
-  containerUnit: AjsUnit;
-  expandedChildren: ReadonlyArray<AjsUnit>;
+  expandedChildren: ReadonlyArray<FlowGraphUnitDto>;
+  expandedUnitConstraints: ReadonlyArray<ExpandedUnitPlacementConstraintDto>;
   deps: ExpandedChildGrowthOffsetDeps;
 };
 
-const isRightOfExpandedUnit = ({
-  displayPosition,
-  expandedUnitPosition,
-}: GrowthOffsetTarget): boolean => displayPosition.x > expandedUnitPosition.x;
-
-const isBelowExpandedUnit = ({
-  displayPosition,
-  expandedUnitPosition,
-}: GrowthOffsetTarget): boolean => displayPosition.y > expandedUnitPosition.y;
-
-const isSameExpandedUnitColumn = ({
-  displayPosition,
-  expandedUnitPosition,
-}: GrowthOffsetTarget): boolean => displayPosition.x === expandedUnitPosition.x;
-
-const isSameExpandedUnitRow = ({
-  displayPosition,
-  expandedUnitPosition,
-}: GrowthOffsetTarget): boolean => displayPosition.y === expandedUnitPosition.y;
-
 const getHorizontalGrowthOffset = (target: GrowthOffsetTarget): number => {
-  if (
-    !isRightOfExpandedUnit(target) ||
-    (!isBelowExpandedUnit(target) && !isSameExpandedUnitRow(target))
-  ) {
-    return 0;
-  }
-  return target.horizontalGrowth;
+  return target.horizontalAffected ? target.horizontalGrowth : 0;
 };
 
 const getVerticalGrowthOffset = (target: GrowthOffsetTarget): number => {
-  if (
-    !isBelowExpandedUnit(target) ||
-    (!isRightOfExpandedUnit(target) && !isSameExpandedUnitColumn(target))
-  ) {
-    return 0;
-  }
-  return Math.max(
-    0,
-    target.verticalGrowth - getOffset(target.context, target.unitId).y,
-  );
+  return target.verticalAffected
+    ? Math.max(
+        0,
+        target.verticalGrowth - getOffset(target.context, target.unitId).y,
+      )
+    : 0;
 };
 
 const getGrowthOffset = (target: GrowthOffsetTarget): FlowGraphPosition => ({
@@ -153,22 +118,20 @@ const getTargetGrowthOffset = (
 
 const getTargetGrowthOffsets = ({
   context,
-  positionsBeforeOffset,
-  expandedUnitPosition,
   horizontalGrowth,
   verticalGrowth,
-  targetUnitIds,
+  horizontalTargetUnitIds,
+  verticalTargetUnitIds,
 }: GrowthOffsetBatch): UnitGrowthOffset[] =>
-  [...positionsBeforeOffset]
-    .filter(([unitId]) => targetUnitIds.has(unitId))
-    .map(([unitId, displayPosition]) =>
+  [...new Set([...horizontalTargetUnitIds, ...verticalTargetUnitIds])]
+    .map((unitId) =>
       getTargetGrowthOffset({
         context,
         unitId,
-        displayPosition,
-        expandedUnitPosition,
         horizontalGrowth,
         verticalGrowth,
+        horizontalAffected: horizontalTargetUnitIds.has(unitId),
+        verticalAffected: verticalTargetUnitIds.has(unitId),
       }),
     )
     .filter((growthOffset): growthOffset is UnitGrowthOffset => !!growthOffset);
@@ -188,25 +151,23 @@ const applyGrowthOffsets = (
   growthOffsetApplication: GrowthOffsetApplication,
 ) => {
   const {
-    expandedUnitPosition,
     horizontalGrowth,
     verticalGrowth,
-    targetUnitIds,
+    horizontalTargetUnitIds,
+    verticalTargetUnitIds,
   } = growthOffsetApplication;
   if (horizontalGrowth === 0 && verticalGrowth === 0) {
     return false;
   }
 
-  const positionsBeforeOffset = getDisplayPositions(context);
   return applyUnitGrowthOffsets(
     context,
     getTargetGrowthOffsets({
       context,
-      positionsBeforeOffset,
-      expandedUnitPosition,
       horizontalGrowth,
       verticalGrowth,
-      targetUnitIds,
+      horizontalTargetUnitIds,
+      verticalTargetUnitIds,
     }),
   );
 };
@@ -214,7 +175,7 @@ const applyGrowthOffsets = (
 const getUpperExpandedPanelCandidateBounds = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedChildGrowthOffsetDeps,
-  upperCandidate: AjsUnit,
+  upperCandidate: FlowGraphUnitDto,
 ): UpperExpandedPanelCandidateBounds | undefined => {
   const position = getDisplayPosition(context, upperCandidate.id);
   const bounds = deps.buildExpandedUnitPanelBounds(context, upperCandidate);
@@ -264,7 +225,7 @@ const getUpperExpandedPanelMaxRight = (
 const getExpandedChildGrowthBounds = (
   context: ExpandedFlowGraphBuildContext,
   deps: ExpandedChildGrowthOffsetDeps,
-  expandedChild: AjsUnit,
+  expandedChild: FlowGraphUnitDto,
 ): ExpandedChildGrowthBounds | undefined => {
   const position = getDisplayPosition(context, expandedChild.id);
   const panelBounds = deps.buildExpandedUnitPanelBounds(context, expandedChild);
@@ -273,16 +234,6 @@ const getExpandedChildGrowthBounds = (
   }
   return { position, panelBounds };
 };
-
-const getGrowthTargetUnitIds = (
-  immediateVisibleChildren: ReadonlyArray<AjsUnit>,
-  expandedChild: AjsUnit,
-) =>
-  new Set(
-    immediateVisibleChildren
-      .filter((unit) => unit.id !== expandedChild.id)
-      .map((unit) => unit.id),
-  );
 
 const calculateHorizontalGrowth = (
   panelBounds: FlowGraphBounds,
@@ -314,7 +265,6 @@ const getExpandedChildGrowthMeasurement = (
   }
 
   return {
-    expandedUnitPosition: growthBounds.position,
     panelBounds: growthBounds.panelBounds,
     baseBounds: buildUnitBaseBounds(growthBounds.position, context.metrics),
     upperPanelMaxRight: getUpperExpandedPanelMaxRight(
@@ -331,19 +281,19 @@ const getExpandedChildGrowthMeasurement = (
 
 const buildGrowthOffsetApplication = (
   measurement: ExpandedChildGrowthMeasurement,
-  targetUnitIds: ReadonlySet<string>,
+  horizontalTargetUnitIds: ReadonlySet<string>,
+  verticalTargetUnitIds: ReadonlySet<string>,
 ): GrowthOffsetApplication => {
-  const { expandedUnitPosition, panelBounds, baseBounds, upperPanelMaxRight } =
-    measurement;
+  const { panelBounds, baseBounds, upperPanelMaxRight } = measurement;
   return {
-    expandedUnitPosition,
     horizontalGrowth: calculateHorizontalGrowth(
       panelBounds,
       baseBounds,
       upperPanelMaxRight,
     ),
     verticalGrowth: calculateVerticalGrowth(panelBounds, baseBounds),
-    targetUnitIds,
+    horizontalTargetUnitIds,
+    verticalTargetUnitIds,
   };
 };
 
@@ -358,10 +308,8 @@ const getExpandedChildGrowthOffsetApplication = (
 
   return buildGrowthOffsetApplication(
     measurement,
-    getGrowthTargetUnitIds(
-      growthContext.immediateVisibleChildren,
-      growthContext.expandedChild,
-    ),
+    new Set(growthContext.horizontalAffectedSiblingUnitIds),
+    new Set(growthContext.verticalAffectedSiblingUnitIds),
   );
 };
 
@@ -380,22 +328,29 @@ const applyExpandedChildGrowthOffsets = (
 
 export const applyExpandedChildrenGrowthOffsets = ({
   context,
-  containerUnit,
   expandedChildren,
+  expandedUnitConstraints,
   deps,
 }: ExpandedChildrenGrowthOffsetsTarget) => {
-  const immediateVisibleChildren = deps.getVisibleImmediateChildren(
-    context,
-    containerUnit.id,
+  const constraintByUnitId = new Map(
+    expandedUnitConstraints.map((constraint) => [
+      constraint.unitId,
+      constraint,
+    ]),
   );
 
   for (const expandedChild of expandedChildren) {
+    const constraint = constraintByUnitId.get(expandedChild.id);
+    if (!constraint) continue;
     applyExpandedChildGrowthOffsets(
       {
         context,
         expandedChildren,
         expandedChild,
-        immediateVisibleChildren,
+        horizontalAffectedSiblingUnitIds:
+          constraint.horizontalAffectedSiblingUnitIds,
+        verticalAffectedSiblingUnitIds:
+          constraint.verticalAffectedSiblingUnitIds,
       },
       deps,
     );

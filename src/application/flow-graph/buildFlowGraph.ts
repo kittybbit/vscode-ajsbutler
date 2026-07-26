@@ -1,19 +1,45 @@
 import {
-  AjsDocument,
-  AjsUnit,
-  findAjsUnitAncestors,
-  findAjsUnitById,
-} from "../../domain/models/ajs/AjsDocument";
-import {
   buildFlowGraphFromInput,
-  FlowGraphDto,
-  FlowGraphEdgeDto,
-  FlowGraphInput,
-  FlowGraphInputNode,
-  FlowGraphSemanticDiffHighlights,
+  type FlowGraphDto,
+  type FlowGraphEdgeDto,
+  type FlowGraphInput,
+  type FlowGraphInputNode,
+  type FlowGraphSemanticDiffHighlights,
 } from "./buildFlowGraphCore";
+import {
+  type FlowGraphDocumentDto,
+  type FlowGraphDocumentIndex,
+  type FlowGraphDocumentIssue,
+  type FlowGraphUnitDto,
+  type ValidatedFlowGraphDocument,
+  validateFlowGraphDocument,
+} from "./flowGraphDocument";
 
-const toInputNode = (unit: AjsUnit): FlowGraphInputNode => ({
+export type FlowGraphBuildIssue =
+  | FlowGraphDocumentIssue
+  | {
+      code: "scope_not_found";
+      message: string;
+    }
+  | {
+      code: "invalid_scope";
+      message: string;
+    };
+
+export type FlowGraphBuildResult =
+  | {
+      status: "available";
+      graph: FlowGraphDto;
+      document: FlowGraphDocumentDto;
+      index: FlowGraphDocumentIndex;
+      issues: FlowGraphBuildIssue[];
+    }
+  | {
+      status: "unavailable";
+      issues: FlowGraphBuildIssue[];
+    };
+
+const toInputNode = (unit: FlowGraphUnitDto): FlowGraphInputNode => ({
   id: unit.id,
   label: unit.name,
   absolutePath: unit.absolutePath,
@@ -29,12 +55,21 @@ const toInputNode = (unit: AjsUnit): FlowGraphInputNode => ({
 });
 
 const toAncestorNodes = (
-  document: AjsDocument,
-  unit: AjsUnit,
-): FlowGraphInputNode[] =>
-  findAjsUnitAncestors(document, unit).map(toInputNode);
+  index: FlowGraphDocumentIndex,
+  unit: FlowGraphUnitDto,
+): FlowGraphInputNode[] => {
+  const ancestors: FlowGraphInputNode[] = [];
+  let parentId = unit.parentId;
+  while (parentId) {
+    const parent = index.unitById.get(parentId);
+    if (!parent) break;
+    ancestors.push(toInputNode(parent));
+    parentId = parent.parentId;
+  }
+  return ancestors;
+};
 
-const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
+const toEdgeDtos = (unit: FlowGraphUnitDto): FlowGraphEdgeDto[] =>
   unit.relations.map((relation) => ({
     source: relation.sourceUnitId,
     target: relation.targetUnitId,
@@ -42,14 +77,14 @@ const toEdgeDtos = (unit: AjsUnit): FlowGraphEdgeDto[] =>
   }));
 
 const toInput = (
-  document: AjsDocument,
-  unit: AjsUnit,
+  index: FlowGraphDocumentIndex,
+  unit: FlowGraphUnitDto,
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
 ): FlowGraphInput => {
   const conditionUnit = unit.children.find((child) => child.unitType === "rc");
   return {
     currentNode: toInputNode(unit),
-    ancestorNodes: toAncestorNodes(document, unit),
+    ancestorNodes: toAncestorNodes(index, unit),
     childNodes: unit.children
       .filter((child) => child.unitType !== "rc")
       .map(toInputNode),
@@ -59,16 +94,59 @@ const toInput = (
   };
 };
 
-export const buildFlowGraph = (
-  document: AjsDocument,
+export const buildFlowGraphFromValidatedDocument = (
+  validation: ValidatedFlowGraphDocument,
   currentUnitId: string,
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
-): FlowGraphDto | undefined => {
-  const unit = findAjsUnitById(document, currentUnitId);
+): FlowGraphBuildResult => {
+  const unit = validation.index.unitById.get(currentUnitId);
   if (!unit) {
-    return undefined;
+    return {
+      status: "unavailable",
+      issues: [
+        ...validation.issues,
+        {
+          code: "scope_not_found",
+          message: `Flow graph scope was not found: ${currentUnitId}`,
+        },
+      ],
+    };
   }
-  return buildFlowGraphFromInput(
-    toInput(document, unit, semanticDiffHighlights),
-  );
+  if (unit.unitType !== "n" && unit.unitType !== "rc") {
+    return {
+      status: "unavailable",
+      issues: [
+        ...validation.issues,
+        {
+          code: "invalid_scope",
+          message: `Unit is not a flow graph scope: ${currentUnitId}`,
+        },
+      ],
+    };
+  }
+
+  return {
+    status: "available",
+    graph: buildFlowGraphFromInput(
+      toInput(validation.index, unit, semanticDiffHighlights),
+    ),
+    document: validation.document,
+    index: validation.index,
+    issues: validation.issues,
+  };
+};
+
+export const buildFlowGraphResult = (
+  document: unknown,
+  currentUnitId: string,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
+): FlowGraphBuildResult => {
+  const validation = validateFlowGraphDocument(document);
+  return validation.status === "available"
+    ? buildFlowGraphFromValidatedDocument(
+        validation,
+        currentUnitId,
+        semanticDiffHighlights,
+      )
+    : validation;
 };

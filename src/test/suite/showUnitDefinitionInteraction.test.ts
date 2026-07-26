@@ -2,6 +2,7 @@ import * as assert from "assert";
 import React from "react";
 import type { KeyboardEvent } from "react";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
+import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import type { UnitListRowView } from "../../application/unit-list/buildUnitListView";
 import {
   handleClickNestedToggle,
@@ -14,6 +15,7 @@ import {
   buildUnitListDetailChips,
   buildUnitListRelationshipRows,
   buildUnitListDetailRows,
+  getUnitListDetailSubtitle,
 } from "../../presentation/webview/editor/ajsTable/UnitListDetailPanel";
 import {
   createUnitListDetailResolver,
@@ -119,7 +121,7 @@ suite("Show Unit Definition interaction", () => {
     const detail = resolveUnitListDetail(
       "/root/job1",
       new Map([["/root/job1", rowView]]),
-      new Map([["/root/job1", dialogData]]),
+      toUnitDefinitionByPath({ unitDefinitions: [dialogData] }),
     );
 
     assert.strictEqual(detail?.row.absolutePath, "/root/job1");
@@ -180,7 +182,7 @@ suite("Show Unit Definition interaction", () => {
     ]);
     const resolveDetail = createUnitListDetailResolver(
       new Map([job0, job1, job2, job3].map((row) => [row.absolutePath, row])),
-      new Map([["/root/job1", dialogData]]),
+      toUnitDefinitionByPath({ unitDefinitions: [dialogData] }),
     );
 
     const detail = resolveDetail("/root/job1");
@@ -230,7 +232,7 @@ suite("Show Unit Definition interaction", () => {
     const detail = resolveUnitListDetail(
       "/root/job1",
       new Map([["/root/job1", rowView]]),
-      new Map([["/root/job1", dialogData]]),
+      toUnitDefinitionByPath({ unitDefinitions: [dialogData] }),
     );
     assert.ok(detail);
 
@@ -262,6 +264,12 @@ suite("Show Unit Definition interaction", () => {
         ["Waited for", false],
         ["Nested expandable", false],
       ],
+    );
+    assert.strictEqual(getUnitListDetailSubtitle(detail, "en"), "Unix job");
+    assert.strictEqual(getUnitListDetailSubtitle(detail, "ja"), "UNIXジョブ");
+    assert.strictEqual(
+      getUnitListDetailSubtitle(detail, "unsupported"),
+      "Unix job",
     );
   });
 

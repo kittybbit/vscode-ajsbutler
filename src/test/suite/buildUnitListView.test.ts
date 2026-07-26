@@ -1,7 +1,9 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { buildUnitListView } from "../../application/unit-list/buildUnitListView";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
+import {
+  buildUnitListProjection,
+  buildUnitListView,
+} from "../../application/unit-list/buildUnitListView";
 
 const validDefinition = `
 unit=root,,jp1admin,;
@@ -239,11 +241,10 @@ unit=root,,jp1admin,;
 
 suite("Build Unit List View", () => {
   test("projects group fields from the normalized model", () => {
-    const result = parseAjs(validDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(validDefinition);
 
-    const rows = buildUnitListView(document);
+    const projection = buildUnitListProjection(document);
+    const rows = projection.rows;
     const root = rows.find((row) => row.absolutePath === "/root");
     const jobnet = rows.find((row) => row.absolutePath === "/root/jobnet");
     const job = rows.find((row) => row.absolutePath === "/root/jobnet/job");
@@ -269,6 +270,35 @@ suite("Build Unit List View", () => {
 
     assert.ok(root?.id);
     assert.ok(jobnet?.id);
+    assert.deepStrictEqual(
+      projection.units.find((unit) => unit.absolutePath === "/root/jobnet/job")
+        ?.parameterSearchValues,
+      [
+        "rj",
+        '"run.sh"',
+        '"script.ksh"',
+        "--job",
+        '"ENV=1"',
+        '"envfile.env"',
+        '"/tmp"',
+        '"stdin.txt"',
+        '"stdout.txt"',
+        "add",
+        '"stderr.txt"',
+        "new",
+        "2",
+        "nm",
+        "20",
+        "5",
+        '"judge.txt"',
+        "y",
+        "1",
+        "9",
+        "3",
+        "60",
+        "target-user",
+      ],
+    );
 
     assert.strictEqual(root?.group1.parentAbsolutePath, "/");
     assert.strictEqual(root?.group5.startDeadlineDate, "20240101");
@@ -450,9 +480,7 @@ suite("Build Unit List View", () => {
   });
 
   test("projects shared wait-job timeout-action defaults in group 13 rows", () => {
-    const result = parseAjs(waitJobTimeoutActionDefinition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(waitJobTimeoutActionDefinition);
 
     const rows = buildUnitListView(document);
     const logFileDefaults = rows.find(

@@ -1,8 +1,9 @@
 import * as assert from "assert";
 import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
-import { buildDiagnostic } from "../../application/editor-feedback/syntaxDiagnosticCore";
+import { toDiagnosticSourceRange } from "../../application/editor-feedback/diagnosticSourceRange";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
+import { diagnosticRuleIds } from "../../domain/services/diagnostics/DiagnosticRuleId";
 import { testAjsParser } from "../support/parseAjs";
 import {
   assertSyntaxDiagnostics,
@@ -65,13 +66,11 @@ const buildTransferFileDefinition = (
 suite("Build Syntax Diagnostics", () => {
   test("preserves diagnostic position fallback for normalized parameters", () => {
     assert.deepStrictEqual(
-      buildDiagnostic({ key: "evsid", value: "zz" }, "invalid"),
+      toDiagnosticSourceRange({ length: undefined }, "evsid".length),
       {
         line: 1,
         column: 0,
         length: 5,
-        message: "invalid",
-        severity: "error",
       },
     );
   });
@@ -79,8 +78,11 @@ suite("Build Syntax Diagnostics", () => {
   test("maps repository-owned errors from an injected parser port", () => {
     const parser: AjsParserPort = {
       parse: () => ({
-        rootUnits: [],
-        errors: [{ line: 4, column: 2, message: "invalid syntax" }],
+        ok: false,
+        errors: [
+          { line: 4, column: 2, message: "invalid syntax" },
+          { line: 8, column: 0, message: "unexpected end" },
+        ],
       }),
     };
 
@@ -92,6 +94,14 @@ suite("Build Syntax Diagnostics", () => {
         column: 2,
         length: 1,
         message: "invalid syntax",
+        severity: "error",
+        category: syntaxDiagnosticCategories.parserSyntax,
+      },
+      {
+        line: 8,
+        column: 0,
+        length: 1,
+        message: "unexpected end",
         severity: "error",
         category: syntaxDiagnosticCategories.parserSyntax,
       },
@@ -338,6 +348,11 @@ suite("Build Syntax Diagnostics", () => {
         "Parent schedule rule (ln) must use schedule rule numbers between 1 and 144.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.scheduleRange,
+      ),
+    );
   });
 
   test("reports sd diagnostics for explicit out-of-range rule and date values", () => {
@@ -405,6 +420,12 @@ suite("Build Syntax Diagnostics", () => {
         "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.scheduleStartDate,
+      ),
+    );
   });
 
   test("does not report sd/cy compatibility diagnostics for valid explicit schedule combinations", () => {
@@ -454,6 +475,12 @@ suite("Build Syntax Diagnostics", () => {
         "Weekly cycle (cy=(n,w)) cannot be specified when execution-start date (sd) uses open-day (*) or closed-day (@) scheduling for the same rule.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.scheduleWeeklyDay,
+      ),
+    );
   });
 
   test("does not report end-judgment diagnostics for omitted defaults", () => {
@@ -559,6 +586,11 @@ suite("Build Syntax Diagnostics", () => {
         message: "Retry interval (rei) must be between 1 and 10.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.jobEndRange,
+      ),
+    );
   });
 
   test("reports end-judgment diagnostics for explicit invalid retry combinations", () => {
@@ -573,6 +605,12 @@ suite("Build Syntax Diagnostics", () => {
       expectedAutomaticRetryEndJudgmentDiagnostic([10, 4, 3]),
       expectedAutomaticRetryEndJudgmentDiagnostic([16, 4, 3]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.retryAbrDependency,
+      ),
+    );
   });
 
   test("reports retry parameter diagnostics for explicit invalid end-judgment combinations", () => {
@@ -649,6 +687,12 @@ suite("Build Syntax Diagnostics", () => {
         "Retry parameter (rei) requires automatic retry (abr) to be y.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.retryAbrDependency,
+      ),
+    );
   });
 
   test("reports end-judgment and retry diagnostics for normal and recovery QUEUE jobs", () => {
@@ -759,6 +803,11 @@ suite("Build Syntax Diagnostics", () => {
         "Abnormal threshold (tho) must be greater than warning threshold (wth).",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.jobEndThreshold,
+      ),
+    );
   });
 
   test("does not report file monitoring diagnostics for omitted defaults and valid explicit combinations", () => {
@@ -796,6 +845,10 @@ suite("Build Syntax Diagnostics", () => {
       assert.deepStrictEqual(
         diagnostics.map((diagnostic) => diagnostic.message),
         ["File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m."],
+      );
+      assert.strictEqual(
+        diagnostics[0]?.ruleId,
+        diagnosticRuleIds.fileMonitorCondition,
       );
     }
   });
@@ -907,6 +960,14 @@ suite("Build Syntax Diagnostics", () => {
         "Monitored file name (flwf) cannot use wildcard (*) when monitoring interval (flwi) is between 1 and 9.",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.ruleId),
+      [
+        diagnosticRuleIds.stringFamilyConstraint,
+        diagnosticRuleIds.stringFamilyConstraint,
+        diagnosticRuleIds.stringFamilyConstraint,
+      ],
+    );
   });
 
   test("reports file monitoring diagnostics for explicit invalid condition combinations", () => {
@@ -947,6 +1008,14 @@ suite("Build Syntax Diagnostics", () => {
         "File close option (flco) requires file creation monitoring (flwc=c).",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.ruleId),
+      [
+        diagnosticRuleIds.fileMonitorCondition,
+        diagnosticRuleIds.fileMonitorCondition,
+        diagnosticRuleIds.fileMonitorOutput,
+      ],
+    );
   });
 
   test("reports file monitoring fd diagnostics for explicit out-of-range values and start-condition usage", () => {
@@ -962,6 +1031,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedStartConditionExecutionTimeDiagnostic([14, 4, 4]),
       expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitFdContext,
+      ),
+    );
   });
 
   test("does not report event timeout action diagnostics for omitted defaults and valid explicit values", () => {
@@ -999,6 +1073,11 @@ suite("Build Syntax Diagnostics", () => {
         message: "Event timeout action (ets) must be one of kl, nr, wr, or an.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitEtsValue,
+      ),
+    );
   });
 
   test("does not report execution-interval control diagnostics for valid start-condition values", () => {
@@ -1056,6 +1135,10 @@ suite("Build Syntax Diagnostics", () => {
         "End timing (etn=y) can be specified only for execution-interval control jobs defined as start conditions.",
       ),
     ]);
+    assert.strictEqual(
+      diagnostics[0]?.ruleId,
+      diagnosticRuleIds.intervalControlEndContext,
+    );
   });
 
   test("reports execution-interval control diagnostics for explicit invalid tmitv and etn values", () => {
@@ -1109,6 +1192,12 @@ suite("Build Syntax Diagnostics", () => {
         message: "End timing (etn) must be y or n.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.intervalControlRange,
+      ),
+    );
   });
 
   test("reports execution-interval control fd diagnostics for explicit out-of-range values and start-condition usage", () => {
@@ -1124,6 +1213,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedStartConditionExecutionTimeDiagnostic([14, 4, 7]),
       expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitFdContext,
+      ),
+    );
   });
 
   test("does not report transfer-file diagnostics for valid explicit values and macro variables", () => {
@@ -1267,6 +1361,10 @@ suite("Build Syntax Diagnostics", () => {
         "Transfer destination file name (td1) must be between 1 and 511 bytes.",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map(({ ruleId }) => ruleId),
+      [diagnosticRuleIds.transferFilePath, diagnosticRuleIds.transferFilePath],
+    );
   });
 
   test("measures quoted transfer file names by content bytes", () => {
@@ -1316,6 +1414,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedTransferSourceFullPathDiagnostic([9, 4, 3]),
       expectedTransferSourceFullPathDiagnostic([15, 4, 3]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        ({ ruleId }) => ruleId === diagnosticRuleIds.transferFilePath,
+      ),
+    );
   });
 
   test("reports transfer-file value-shape diagnostics for explicit bare strings", () => {
@@ -1340,6 +1443,11 @@ suite("Build Syntax Diagnostics", () => {
         "Transfer source file name (ts1) must be quoted, or use a macro-variable form allowed by the unit class and effective jty=q.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        ({ ruleId }) => ruleId === diagnosticRuleIds.transferFileForm,
+      ),
+    );
   });
 
   test("reports transfer-file invalid-combination diagnostics when source files are omitted", () => {
@@ -1364,6 +1472,11 @@ suite("Build Syntax Diagnostics", () => {
         "Transfer destination file name (td1) requires transfer source file name (ts1).",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        ({ ruleId }) => ruleId === diagnosticRuleIds.transferFilePath,
+      ),
+    );
   });
 
   test("does not report event sending diagnostics for omitted evsrt defaults", () => {
@@ -1443,6 +1556,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventSendIdRange,
+      ),
+    );
   });
 
   test("does not report event sending range diagnostics for omitted defaults and valid explicit ranges", () => {
@@ -1480,6 +1599,12 @@ suite("Build Syntax Diagnostics", () => {
         message: "Event arrival check count (evsrc) must be between 0 and 999.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventArrivalRange,
+      ),
+    );
   });
 
   test("reports event sending diagnostics when arrival checking omits evhst", () => {
@@ -1515,6 +1640,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event arrival check (evsrt=y) requires an event destination host (evhst).",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventArrivalHost,
+      ),
+    );
   });
 
   test("does not report event-host diagnostics for valid explicit evhst values", () => {
@@ -1648,6 +1779,16 @@ suite("Build Syntax Diagnostics", () => {
         "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
       ),
     ]);
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.ruleId),
+      [
+        diagnosticRuleIds.eventReceiveScope,
+        diagnosticRuleIds.eventReceiveScope,
+        diagnosticRuleIds.eventReceiveScope,
+        diagnosticRuleIds.eventReceiveFormat,
+        diagnosticRuleIds.eventReceiveFormat,
+      ],
+    );
   });
 
   test("does not report event receiving string-filter diagnostics for omitted and valid explicit values", () => {
@@ -1753,6 +1894,12 @@ suite("Build Syntax Diagnostics", () => {
         'End judgment condition (evtmc) must be n, a, n:"file-name", a:"file-name", d:"file-name", or b:"file-name" with a file name between 1 and 256 bytes.',
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventReceiveFilter,
+      ),
+    );
   });
 
   test("enforces canonical repeated evwfr aggregate bytes at the first crossing parameter", () => {
@@ -1794,6 +1941,10 @@ suite("Build Syntax Diagnostics", () => {
         "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
       ),
     ]);
+    assert.strictEqual(
+      overDiagnostics[0]?.ruleId,
+      diagnosticRuleIds.eventReceiveFilter,
+    );
 
     const multibyteDiagnostics = buildSyntaxDiagnostics(
       buildRootUnitDefinition([
@@ -1870,6 +2021,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event issue source process ID (evpid) must be a signed decimal value between -1 and 9999999999.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventReceiveNumericId,
+      ),
+    );
   });
 
   test("does not report event receiving timeout-control diagnostics for valid explicit values outside start-condition context", () => {
@@ -1938,6 +2095,12 @@ suite("Build Syntax Diagnostics", () => {
         "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
       ),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) =>
+          diagnostic.ruleId === diagnosticRuleIds.eventReceiveTimeout,
+      ),
+    );
   });
 
   test("reports event receiving fd diagnostics for explicit out-of-range values and start-condition usage", () => {
@@ -1953,6 +2116,11 @@ suite("Build Syntax Diagnostics", () => {
       expectedStartConditionExecutionTimeDiagnostic([14, 4, 4]),
       expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.waitFdContext,
+      ),
+    );
   });
 
   test("reports event-host diagnostics for explicit out-of-range evhst values", () => {
@@ -2019,5 +2187,10 @@ suite("Build Syntax Diagnostics", () => {
         message: "Event host (evhst) must be between 1 and 255 bytes.",
       },
     ]);
+    assert.ok(
+      diagnostics.every(
+        (diagnostic) => diagnostic.ruleId === diagnosticRuleIds.eventHostLength,
+      ),
+    );
   });
 });

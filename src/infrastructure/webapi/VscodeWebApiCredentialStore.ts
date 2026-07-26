@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
 import type {
+  ImportAjsDefinitionConnectionDto,
+  ImportAjsDefinitionScopeDto,
+} from "../../application/webapi-import/importAjsDefinitionViaWebApi";
+import type {
   Jp1Ajs3WebApiCredential,
   Jp1Ajs3WebApiCredentialProvider,
 } from "./Jp1Ajs3WebApiImportAdapter";
@@ -13,11 +17,14 @@ export class VscodeWebApiCredentialStore
     this.#secrets = secrets;
   }
 
-  async storeCredential(
-    credentialRef: string,
+  async storeCredentialForImport(
+    connection: ImportAjsDefinitionConnectionDto,
+    scope: ImportAjsDefinitionScopeDto,
     credential: Jp1Ajs3WebApiCredential,
-  ): Promise<void> {
+  ): Promise<string> {
+    const credentialRef = buildCredentialRef(connection, scope);
     await this.#secrets.store(credentialRef, JSON.stringify(credential));
+    return credentialRef;
   }
 
   async resolveCredential(
@@ -31,6 +38,20 @@ export class VscodeWebApiCredentialStore
     return parseStoredCredential(serialized);
   }
 }
+
+export const buildCredentialRef = (
+  connection: ImportAjsDefinitionConnectionDto,
+  scope: ImportAjsDefinitionScopeDto,
+): string =>
+  [
+    "jp1-ajs-webapi",
+    normalizeCredentialRefPart(connection.baseUrl),
+    normalizeCredentialRefPart(scope.manager),
+    normalizeCredentialRefPart(scope.serviceName),
+  ].join(":");
+
+const normalizeCredentialRefPart = (value: string): string =>
+  encodeURIComponent(value.trim().toLowerCase());
 
 const parseStoredCredential = (
   serialized: string | undefined,

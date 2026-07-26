@@ -35,6 +35,7 @@ suite("Extension Test Suite", () => {
     assert.ok(commands.includes("open.ajsbutler.flowViewer"));
     assert.ok(commands.includes("ajsbutler.importDefinitionViaWebApiBeta"));
     assert.ok(commands.includes("ajsbutler.compareSemanticDiff"));
+    assert.ok(commands.includes("ajsbutler.copySemanticDiffMarkdown"));
   });
 
   test("provides diagnostics for invalid jp1ajs documents", async () => {

@@ -1,21 +1,18 @@
 import { rankItem, rankings, RankingInfo } from "@tanstack/match-sorter-utils";
 import { FilterMeta, Row } from "@tanstack/table-core";
-import { AjsParameter } from "../../../../domain/models/ajs/AjsDocument";
-import Parameter from "../../../../domain/models/parameters/Parameter";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import { AccessorType } from "./columnDefs/common";
 
 export type ParameterSearchValuesByPath = ReadonlyMap<
   string,
-  readonly AjsParameter[]
+  readonly string[]
 >;
 
-export const normalizeSearchValue = (value: unknown): string =>
-  value instanceof Parameter ? value.value() : String(value);
+export const normalizeSearchValue = (value: unknown): string => String(value);
 
 export const buildParameterSearchValues = (
-  parameters: readonly AjsParameter[],
-): string[] => parameters.map((parameter) => parameter.value);
+  parameterValues: readonly string[],
+): string[] => [...parameterValues];
 
 export const toCellSearchValues = (
   value: AccessorType | undefined,
@@ -37,15 +34,15 @@ export const rankSearchValues = (
 
 export const getAjsTableSearchValues = (
   cellValue: AccessorType | undefined,
-  parameters: readonly AjsParameter[],
+  parameterValues: readonly string[],
 ): string[] => [
   ...toCellSearchValues(cellValue),
-  ...buildParameterSearchValues(parameters),
+  ...buildParameterSearchValues(parameterValues),
 ];
 
 export const isAjsTableSearchHit = (
   cellValue: AccessorType | undefined,
-  _parameters: readonly AjsParameter[],
+  _parameterValues: readonly string[],
   filterValue: string,
 ): boolean => {
   if (filterValue.trim().length === 0) {
@@ -64,9 +61,9 @@ export const createAjsGlobalFilterFn =
     addMeta: (meta: FilterMeta) => void,
   ): boolean => {
     const cellValue = row.getValue<AccessorType>(columnId);
-    const parameters =
+    const parameterValues =
       parameterSearchValuesByPath.get(row.original.absolutePath) ?? [];
-    const searchValues = getAjsTableSearchValues(cellValue, parameters);
+    const searchValues = getAjsTableSearchValues(cellValue, parameterValues);
 
     const itemRank = rankSearchValues(searchValues, value);
     if (!itemRank) return false;

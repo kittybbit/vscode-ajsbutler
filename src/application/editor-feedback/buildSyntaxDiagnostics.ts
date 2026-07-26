@@ -1,5 +1,5 @@
-import type { AjsParserPort } from "../parsing/AjsParserPort";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
+import type { AjsParserError, AjsParserPort } from "../parsing/AjsParserPort";
+import { toDiagnosticSourceRange } from "./diagnosticSourceRange";
 import { buildSemanticSyntaxDiagnostics } from "./syntaxDiagnosticRules";
 import { syntaxDiagnosticCategories } from "./syntaxDiagnosticTypes";
 import type {
@@ -17,27 +17,22 @@ export type BuildSyntaxDiagnostics = (
   options?: BuildSyntaxDiagnosticsOptions,
 ) => SyntaxDiagnosticDto[];
 
+export const mapParserErrorToSyntaxDiagnostic = (
+  error: AjsParserError,
+): SyntaxDiagnosticDto => ({
+  ...toDiagnosticSourceRange(error, 1),
+  message: error.message,
+  severity: "error",
+  category: syntaxDiagnosticCategories.parserSyntax,
+});
+
 export const createBuildSyntaxDiagnostics =
   (parser: AjsParserPort): BuildSyntaxDiagnostics =>
   (content, options = {}) => {
     const result = parser.parse(content);
-    const syntaxDiagnostics = result.errors.map((error) => ({
-      line: error.line,
-      column: error.column,
-      length: 1,
-      message: error.message,
-      severity: "error" as const,
-      category: syntaxDiagnosticCategories.parserSyntax,
-    }));
-    if (syntaxDiagnostics.length > 0) {
-      return syntaxDiagnostics;
+    if (result.ok === false) {
+      return result.errors.map(mapParserErrorToSyntaxDiagnostic);
     }
 
-    return [
-      ...syntaxDiagnostics,
-      ...buildSemanticSyntaxDiagnostics(
-        normalizeAjsDocument(result.rootUnits),
-        options,
-      ),
-    ];
+    return buildSemanticSyntaxDiagnostics(result.document, options);
   };

@@ -1,4 +1,6 @@
 import * as assert from "assert";
+import * as fs from "fs";
+import * as path from "path";
 import {
   AJS_FLOW_VIEWER_BUNDLE_SRC,
   AJS_FLOW_VIEWER_TYPE,
@@ -24,5 +26,20 @@ suite("Viewer bundle", () => {
       () => getViewerBundleSrc("ajsbutler.unknownViewer"),
       /Unknown viewer bundle/,
     );
+  });
+
+  test("uses browser platform data in both search-enabled viewer bundles", () => {
+    const repositoryRoot = path.resolve(__dirname, "../../..");
+
+    for (const bundleSource of [
+      AJS_TABLE_VIEWER_BUNDLE_SRC,
+      AJS_FLOW_VIEWER_BUNDLE_SRC,
+    ]) {
+      const bundle = fs.readFileSync(
+        path.resolve(repositoryRoot, bundleSource),
+        "utf8",
+      );
+      assert.match(bundle, /navigator\.platform/u);
+    }
   });
 });

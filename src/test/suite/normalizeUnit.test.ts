@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { parseAjs } from "../support/parseAjs";
+import { parseRawAjsForTest } from "../support/parseAjs";
 import {
   resolveNormalizedComment,
   resolveNormalizedGroupType,
@@ -8,7 +8,7 @@ import {
   resolveNormalizedIsRootJobnet,
   resolveNormalizedLayout,
   resolveNormalizedUnitType,
-} from "../../domain/models/ajs/normalize/unit";
+} from "../../infrastructure/parser/normalization/normalize/unit";
 import { AjsNormalizationWarning } from "../../domain/models/ajs/AjsDocument";
 
 const validDefinition = `
@@ -49,7 +49,7 @@ unit=root,,jp1admin,;
 
 suite("Normalize unit helpers", () => {
   test("resolve normalized helper values from units", () => {
-    const result = parseAjs(validDefinition);
+    const result = parseRawAjsForTest(validDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const root = result.rootUnits[0];
@@ -72,7 +72,7 @@ suite("Normalize unit helpers", () => {
   });
 
   test("defaults unit type to g and records a warning when ty is missing", () => {
-    const result = parseAjs(missingTypeDefinition);
+    const result = parseRawAjsForTest(missingTypeDefinition);
     assert.deepStrictEqual(result.errors, []);
 
     const missingTypeUnit = result.rootUnits[0].children[0];

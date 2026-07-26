@@ -10,37 +10,45 @@ import {
   type BuildSyntaxDiagnostics,
 } from "../../application/editor-feedback/buildSyntaxDiagnostics";
 import {
-  findParameterHover,
+  createFindParameterHover,
   type FindParameterHover,
 } from "../../application/editor-feedback/findParameterHover";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { createImportAjsDefinitionViaWebApi } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
 import {
   createBuildUnitList,
   type BuildUnitList,
 } from "../../application/unit-list/buildUnitList";
 import {
-  createBuildSemanticDiffReport,
-  type BuildSemanticDiffReport,
-} from "../../application/semantic-diff/buildSemanticDiffReport";
+  createBuildSemanticDiffReportData,
+  type BuildSemanticDiffReportData,
+} from "../../application/semantic-diff/buildSemanticDiffReportData";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
+import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
-import type { ImportAjsDefinitionCommandDeps } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
+import type { ImportAjsDefinitionCapability } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
 import { VscodeWebApiCredentialStore } from "../../infrastructure/webapi/VscodeWebApiCredentialStore";
 import { createTelemetry } from "./createTelemetry";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
+import type { ExtensionHostKind } from "./extensionRuntime";
+import { createWebApiImportCapability } from "./webapiImportWiring";
 
 export type ExtensionDependencies = {
+  host: ExtensionHostKind;
   telemetry: TelemetryPort;
   buildSyntaxDiagnostics: BuildSyntaxDiagnostics;
   buildUnitList: BuildUnitList;
   findParameterHover: FindParameterHover;
   semanticDiff: {
-    buildSemanticDiffReport: BuildSemanticDiffReport;
+    buildSemanticDiffReportData: BuildSemanticDiffReportData;
   };
-  webApiImport: Pick<
-    ImportAjsDefinitionCommandDeps,
-    "storeCredential" | "importPort"
-  >;
+  webApiImport: ImportAjsDefinitionCapability;
+};
+
+type ExtensionDependencyFactories = {
+  createDesktopWebApiImportCapability: (
+    context: vscode.ExtensionContext,
+  ) => ImportAjsDefinitionCapability;
 };
 
 export const instrumentParserPerformance = (
@@ -50,43 +58,68 @@ export const instrumentParserPerformance = (
   parse: (content) => {
     const startedAt = performance.now();
     const result = parser.parse(content);
-    try {
-      const event = createPerformanceTelemetryEvent({
-        operation: "parse",
-        result: result.errors.length > 0 ? "failed" : "success",
-        host: getTelemetryHost(),
-        durationBucket: toDurationBucket(performance.now() - startedAt),
-        diagnosticCountBucket: toCountBucket(result.errors.length),
-      });
-      telemetry.trackEvent(event.name, event.properties);
-    } catch {
-      // Performance telemetry must not affect parsing.
-    }
+    const errorCount = result.ok === true ? 0 : result.errors.length;
+    const event = createPerformanceTelemetryEvent({
+      operation: "parse",
+      result: result.ok ? "success" : "failed",
+      host: getTelemetryHost(),
+      durationBucket: toDurationBucket(performance.now() - startedAt),
+      diagnosticCountBucket: toCountBucket(errorCount),
+    });
+    telemetry.report(event);
     return result;
   },
 });
 
+const createDesktopWebApiImportCapability = (
+  context: vscode.ExtensionContext,
+): ImportAjsDefinitionCapability => {
+  const credentialStore = new VscodeWebApiCredentialStore(context.secrets);
+  const importAjsDefinitionViaWebApi = createImportAjsDefinitionViaWebApi(
+    new Jp1Ajs3WebApiImportAdapter({
+      credentialProvider: credentialStore,
+    }),
+  );
+
+  return {
+    importDefinition: async ({ connection, scope, credential }) => {
+      const credentialRef = await credentialStore.storeCredentialForImport(
+        connection,
+        scope,
+        credential,
+      );
+      return await importAjsDefinitionViaWebApi({
+        connection,
+        scope,
+        credentialRef,
+      });
+    },
+  };
+};
+
 export const createExtensionDependencies = (
   context: vscode.ExtensionContext,
+  host: ExtensionHostKind,
+  factories: ExtensionDependencyFactories = {
+    createDesktopWebApiImportCapability,
+  },
 ): ExtensionDependencies => {
   const telemetry = createTelemetry();
   const parser = instrumentParserPerformance(new AntlrAjsParser(), telemetry);
-  const credentialStore = new VscodeWebApiCredentialStore(context.secrets);
+  const parameterSyntaxLookup = new ParameterSyntaxResourceAdapter();
+  const webApiImport = createWebApiImportCapability(host, () =>
+    factories.createDesktopWebApiImportCapability(context),
+  );
 
   return {
+    host,
     telemetry,
     buildSyntaxDiagnostics: createBuildSyntaxDiagnostics(parser),
     buildUnitList: createBuildUnitList(parser),
-    findParameterHover,
+    findParameterHover: createFindParameterHover(parameterSyntaxLookup),
     semanticDiff: {
-      buildSemanticDiffReport: createBuildSemanticDiffReport(parser),
+      buildSemanticDiffReportData: createBuildSemanticDiffReportData(parser),
     },
-    webApiImport: {
-      storeCredential: (credentialRef, credential) =>
-        credentialStore.storeCredential(credentialRef, credential),
-      importPort: new Jp1Ajs3WebApiImportAdapter({
-        credentialProvider: credentialStore,
-      }),
-    },
+    webApiImport,
   };
 };

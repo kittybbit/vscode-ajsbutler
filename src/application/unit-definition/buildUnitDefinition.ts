@@ -33,12 +33,17 @@ export const buildUnitDefinition = (
   commandBuilders: buildAjsCommandBuilders(unit),
 });
 
+export const buildUnitDefinitions = (
+  document: AjsDocument,
+): UnitDefinitionDialogDto[] =>
+  flattenAjsUnits(document.rootUnits).map(buildUnitDefinition);
+
 export const buildUnitDefinitionByPath = (
   document: AjsDocument,
 ): ReadonlyMap<string, UnitDefinitionDialogDto> =>
   new Map(
-    flattenAjsUnits(document.rootUnits).map((unit) => [
-      unit.absolutePath,
-      buildUnitDefinition(unit),
+    buildUnitDefinitions(document).map((definition) => [
+      definition.absolutePath,
+      definition,
     ]),
   );

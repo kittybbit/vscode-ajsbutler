@@ -35,9 +35,12 @@ rules in `docs/specs/README.md`, not in this file.
 
 ## Next Priority Tasks
 
-1. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
+1. Replan `import-definition-via-webapi` with a focused generated-artifact
+   reproducibility slice before correcting the checked-in stale Prism artifact
+   reported by `rtk pnpm run openapi:check`.
+2. Keep WebAPI import beta feedback and real-environment smoke evidence tracked
    when a real JP1/AJS3 WebAPI environment or evidence becomes available.
-2. Keep compatibility risk visible for every shared or extension-runtime change.
+3. Keep compatibility risk visible for every shared or extension-runtime change.
 
 ## Active Feature Specs
 

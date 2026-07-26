@@ -11,16 +11,20 @@ import {
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
 import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
-import type { AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import { revealTableRow } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
+import type { UnitListUnitMetadataDto } from "../../application/unit-list/buildUnitListView";
 
-const createUnit = (id: string, absolutePath: string): AjsUnit =>
-  ({
-    id,
-    absolutePath,
-    name: id,
-    unitType: "j",
-    children: [],
-  }) as AjsUnit;
+const createUnit = (
+  id: string,
+  absolutePath: string,
+): UnitListUnitMetadataDto => ({
+  id,
+  absolutePath,
+  name: id,
+  unitType: "j",
+  isRootJobnet: false,
+  parameterSearchValues: [],
+});
 
 suite("Table navigation", () => {
   test("enables flow navigation only for a selected stable path", () => {
@@ -182,5 +186,27 @@ suite("Table navigation", () => {
       findRowIndexByIdentity(rows as never, undefined),
       undefined,
     );
+  });
+
+  test("reveals only a valid row request and leaves selection stable otherwise", () => {
+    const rows = [
+      { original: { id: "job", absolutePath: "/root/job" } },
+    ] as never;
+    const selected: string[] = [];
+    const context = {
+      rows,
+      selectRow: (absolutePath: string) => selected.push(absolutePath),
+    };
+
+    assert.strictEqual(
+      revealTableRow({ absolutePath: "/root/job" }, context),
+      true,
+    );
+    assert.strictEqual(
+      revealTableRow({ absolutePath: "/missing" }, context),
+      false,
+    );
+    assert.strictEqual(revealTableRow({ absolutePath: 1 }, context), false);
+    assert.deepStrictEqual(selected, ["/root/job"]);
   });
 });

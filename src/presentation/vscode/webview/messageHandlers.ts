@@ -1,33 +1,35 @@
-import * as os from "os";
 import * as vscode from "vscode";
 import { createPerformanceTelemetryEvent } from "../../../application/telemetry/performanceTelemetry";
 import { createSearchTelemetryEvent } from "../../../application/telemetry/searchTelemetry";
-import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
-import type { MyAppResource } from "../../../shared/MyAppResource";
 import {
-  OPERATION,
-  type PerformanceEventType,
-  type SearchEventType,
-} from "../../../shared/webviewEvents";
+  createTelemetryEvent,
+  telemetryEvents,
+} from "../../../application/telemetry/telemetryEvent";
+import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
+import {
+  createViewerResourceStateMessage,
+  type ViewerResourceStateDto,
+} from "../../webview/viewerHostMessages";
+import {
+  type ViewerPerformanceRequest,
+  type ViewerResourceRequestData,
+  type ViewerSearchRequest,
+} from "../../webview/viewerRequestMessages";
 import { getTelemetryHost } from "../telemetryHost";
-import type { ViewerOperationRequest } from "./viewerMessageRouting";
+import type { ViewerOperationHostRequest } from "./viewerMessageRouting";
 
 export const postResourceMessage = (
-  requestedResource: MyAppResource,
+  requestedResource: ViewerResourceRequestData,
   panel: vscode.WebviewPanel,
 ): void => {
   console.log(`post a message of resource. (${panel.title})`);
-  const data: MyAppResource = {
+  const data: ViewerResourceStateDto = {
     ...requestedResource,
     isDarkMode:
       vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark,
     lang: vscode.env.language,
-    os: os.platform().toLowerCase(),
   };
-  panel.webview.postMessage({
-    type: "resource",
-    data,
-  });
+  panel.webview.postMessage(createViewerResourceStateMessage(data));
 };
 
 export const saveText = async (content: string): Promise<void> => {
@@ -49,55 +51,45 @@ export const reportWebviewOperation = ({
   panel,
   telemetry,
   operation,
-}: ViewerOperationRequest): void => {
+}: ViewerOperationHostRequest): void => {
   console.log(
     `post a message of operation. (${document.uri.toString()}, ${operation})`,
   );
-  telemetry.trackEvent(OPERATION, {
-    development: String(DEVELOPMENT),
-    viewType: panel.viewType,
-    operation,
-  });
+  telemetry.report(
+    createTelemetryEvent(telemetryEvents.legacyWebviewOperation, {
+      development: DEVELOPMENT,
+      viewType: panel.viewType,
+      operation,
+    }),
+  );
   const event = createViewerActionEvent({
     viewType: panel.viewType,
     operation,
     host: getTelemetryHost(),
   });
   if (event) {
-    try {
-      telemetry.trackEvent(event.name, event.properties);
-    } catch {
-      // Viewer action telemetry must not block webview operation handling.
-    }
+    telemetry.report(event);
   }
 };
 
 export const reportWebviewSearch = (
-  telemetry: ViewerOperationRequest["telemetry"],
-  event: SearchEventType,
+  telemetry: ViewerOperationHostRequest["telemetry"],
+  event: ViewerSearchRequest,
 ): void => {
   const telemetryEvent = createSearchTelemetryEvent({
     ...event.data,
     host: getTelemetryHost(),
   });
-  try {
-    telemetry.trackEvent(telemetryEvent.name, telemetryEvent.properties);
-  } catch {
-    // Search telemetry must not block webview message handling.
-  }
+  telemetry.report(telemetryEvent);
 };
 
 export const reportWebviewPerformance = (
-  telemetry: ViewerOperationRequest["telemetry"],
-  event: PerformanceEventType,
+  telemetry: ViewerOperationHostRequest["telemetry"],
+  event: ViewerPerformanceRequest,
 ): void => {
   const telemetryEvent = createPerformanceTelemetryEvent({
     ...event.data,
     host: getTelemetryHost(),
   });
-  try {
-    telemetry.trackEvent(telemetryEvent.name, telemetryEvent.properties);
-  } catch {
-    // Performance telemetry must not block webview message handling.
-  }
+  telemetry.report(telemetryEvent);
 };

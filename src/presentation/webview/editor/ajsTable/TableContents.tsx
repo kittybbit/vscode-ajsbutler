@@ -23,32 +23,33 @@ import {
   getCoreRowModel,
   getSortedRowModel,
 } from "@tanstack/table-core";
-import {
-  AjsDocument,
-  AjsUnit,
-  flattenAjsUnits,
-} from "../../../../domain/models/ajs/AjsDocument";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import {
-  buildUnitListView,
+import type {
   UnitListRowView,
+  UnitListUnitMetadataDto,
 } from "../../../../application/unit-list/buildUnitListView";
 import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
-import { toAjsDocument } from "../../../../application/unit-list/unitListDocument";
+import {
+  toUnitListTableData,
+  type UnitListRootDto,
+  type UnitListTableDataDto,
+} from "../../../../application/unit-list/unitListDocument";
+import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
-import UnitEntityDialog from "../UnitEntityDialog";
+import UnitDefinitionDialog from "../UnitDefinitionDialog";
+import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
 import {
-  REVEAL_UNIT,
-  createOperationEvent,
-  createPerformanceEvent,
-} from "../../../../shared/webviewEvents";
+  createViewerOperationRequest,
+  createViewerPerformanceRequest,
+  createViewerReadyRequest,
+} from "../../viewerRequestMessages";
 import UnitTreeSelector from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
@@ -79,14 +80,14 @@ export type AjsTableSearchState = {
 };
 
 type TableDocumentState = {
-  rowViews: UnitListRowView[] | undefined;
-  ajsDocument: AjsDocument | undefined;
+  tableData: UnitListTableDataDto | undefined;
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
   changeDocument: (type: string, data: unknown) => void;
 };
 
 type TableModelSetupContext = {
-  ajsDocument: AjsDocument | undefined;
   rowViews: UnitListRowView[] | undefined;
+  parameterSearchValuesByPath: ParameterSearchValuesByPath;
   lang: string;
   handleJump: (id: string) => void;
   rowViewByPath: ReadonlyMap<string, UnitListRowView>;
@@ -119,48 +120,53 @@ type TableViewerShellProps = {
   selectedDetail: ReturnType<typeof resolveUnitListDetail>;
   selectedUnitId: string | undefined;
   selectRow: (absolutePath: string) => void;
-  rootUnits: AjsUnit[];
-  unitById: ReadonlyMap<string, AjsUnit>;
+  rootUnits: UnitListRootDto[];
+  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
   selectTreeUnit: (unitId: string) => void;
   openTreeUnitScope: (unitId: string) => void;
 };
 
 type ParsedTableDocumentState = {
-  rowViews: UnitListRowView[];
-  ajsDocument: AjsDocument | undefined;
+  tableData: UnitListTableDataDto | undefined;
+  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
 };
 
-const isSelectableTableFlowScopeUnit = (unit: AjsUnit): boolean =>
-  unit.unitType === "n" && unit.isRootJobnet;
+const isSelectableTableFlowScopeUnit = (unit: {
+  unitType: string;
+  isRootJobnet: boolean;
+}): boolean => unit.unitType === "n" && unit.isRootJobnet;
 
-const parseTableDocumentState = (data: unknown): ParsedTableDocumentState => {
-  const ajsDocument = data ? toAjsDocument(data) : undefined;
+export const parseTableDocumentState = (
+  data: unknown,
+): ParsedTableDocumentState => {
   return {
-    ajsDocument,
-    rowViews: ajsDocument ? buildUnitListView(ajsDocument) : [],
+    tableData: toUnitListTableData(data),
+    unitDefinitionByPath: toUnitDefinitionByPath(data),
   };
 };
 
 const useChangeDocument = (): TableDocumentState => {
-  const [rowViews, setRowViews] = useState<UnitListRowView[]>();
-  const [ajsDocument, setAjsDocument] = useState<AjsDocument>();
+  const [tableData, setTableData] = useState<UnitListTableDataDto>();
+  const [unitDefinitionByPath, setUnitDefinitionByPath] = useState<
+    ReadonlyMap<string, UnitDefinitionDialogDto>
+  >(new Map());
   const changeDocument = useCallback((type: string, data: unknown) => {
     try {
       const nextState = parseTableDocumentState(data);
-      setAjsDocument(() => nextState.ajsDocument);
-      setRowViews(() => nextState.rowViews);
+      setTableData(() => nextState.tableData);
+      setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
     } catch (error) {
       console.error("Failed to parse data:", error);
-      setAjsDocument(() => undefined);
-      setRowViews(() => []);
+      setTableData(() => undefined);
+      setUnitDefinitionByPath(() => new Map());
     }
   }, []);
-  return { rowViews, ajsDocument, changeDocument };
+  return { tableData, unitDefinitionByPath, changeDocument };
 };
 
 const useTableModelSetup = ({
-  ajsDocument,
   rowViews,
+  parameterSearchValuesByPath,
   lang,
   handleJump,
   rowViewByPath,
@@ -169,18 +175,6 @@ const useTableModelSetup = ({
   columnVisibility,
   setColumnVisibility,
 }: TableModelSetupContext) => {
-  const parameterSearchValuesByPath = useMemo(
-    () =>
-      new Map(
-        ajsDocument
-          ? flattenAjsUnits(ajsDocument.rootUnits).map((unit) => [
-              unit.absolutePath,
-              unit.parameters,
-            ])
-          : [],
-      ),
-    [ajsDocument],
-  );
   const columns = useMemo(
     () => tableColumnDef(lang, handleJump, rowViewByPath),
     [lang, handleJump, rowViewByPath],
@@ -215,9 +209,22 @@ const useTableViewerTheme = (isDarkMode: boolean): Theme =>
     [isDarkMode],
   );
 
-const reportTableOperation = (operation: string): void => {
-  window.vscode.postMessage(createOperationEvent(operation));
+const reportTableOperation = (
+  operation: Parameters<typeof createViewerOperationRequest>[0],
+): void => {
+  window.vscode.postMessage(createViewerOperationRequest(operation));
 };
+
+export const createTableRenderReadyEvent = (
+  durationMs: number,
+  rowCount: number,
+) =>
+  createViewerPerformanceRequest({
+    operation: "table_render",
+    result: "success",
+    durationBucket: toDurationBucket(durationMs),
+    rowCountBucket: toCountBucket(rowCount),
+  });
 
 const TableViewerShell = ({
   theme,
@@ -338,7 +345,7 @@ const TableViewerShell = ({
         </Box>
       </Stack>
       {dialogData && (
-        <UnitEntityDialog
+        <UnitDefinitionDialog
           dialogData={dialogData}
           onClose={() => setDialogData(undefined)}
         />
@@ -375,7 +382,9 @@ const TableContents = () => {
     setDetailPaneClosed(false);
     dispatchRowSelection({ type: "select", absolutePath });
   }, []);
-  const { rowViews, ajsDocument, changeDocument } = useChangeDocument();
+  const { tableData, unitDefinitionByPath, changeDocument } =
+    useChangeDocument();
+  const rowViews = tableData?.rows;
   const rowsRef = useRef<ReadonlyArray<Row<UnitListRowView>>>([]);
   const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
     selectRow,
@@ -383,8 +392,8 @@ const TableContents = () => {
   );
 
   const viewerData = useMemo(
-    () => createTableViewerData(ajsDocument, rowViews),
-    [ajsDocument, rowViews],
+    () => createTableViewerData(tableData, unitDefinitionByPath),
+    [tableData, unitDefinitionByPath],
   );
 
   const selectTreeUnit = useCallback(
@@ -402,8 +411,8 @@ const TableContents = () => {
   );
 
   const { table, parameterSearchValuesByPath } = useTableModelSetup({
-    ajsDocument,
     rowViews,
+    parameterSearchValuesByPath: viewerData.parameterSearchValuesByPath,
     lang,
     handleJump,
     rowViewByPath: viewerData.rowViewByPath,
@@ -448,28 +457,23 @@ const TableContents = () => {
   useEffect(() => {
     dispatchRowSelection({ type: "documentChanged" });
     resetSearch();
-  }, [ajsDocument, resetSearch]);
+  }, [tableData, resetSearch]);
 
   useEffect(() => {
-    window.EventBridge.addCallback("changeDocument", changeDocument);
+    window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocument);
     const revealUnitFn = (_type: string, data: unknown) => {
-      resetSearch();
-      revealUnit(data);
+      if (revealUnit(data)) resetSearch();
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
     window.vscode.postMessage(
-      createPerformanceEvent({
-        operation: "table_render",
-        result: "success",
-        durationBucket: toDurationBucket(
-          performance.now() - renderReadyStartedAt.current,
-        ),
-        rowCountBucket: toCountBucket(rowViews?.length ?? 0),
-      }),
+      createTableRenderReadyEvent(
+        performance.now() - renderReadyStartedAt.current,
+        rowViews?.length ?? 0,
+      ),
     );
-    window.vscode.postMessage({ type: "ready" });
+    window.vscode.postMessage(createViewerReadyRequest());
     return () => {
-      window.EventBridge.removeCallback("changeDocument", changeDocument);
+      window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocument);
       window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
     };
   }, [changeDocument, resetSearch, revealUnit]); // fire this when mount.

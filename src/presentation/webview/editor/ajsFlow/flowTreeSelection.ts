@@ -1,4 +1,4 @@
-import type { AjsUnit } from "../../../../domain/models/ajs/AjsDocument";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { collectUnitTreeParentUnitIds } from "../shared/unitTreeSelection";
 import { collectExpandedAncestorUnitIds } from "./flowExpandedAncestors";
 
@@ -9,16 +9,16 @@ export type FlowTreeSelectionTarget = {
 
 export const collectFlowTreeAncestorUnitIds = (
   unitId: string | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): string[] =>
   unitId
     ? collectUnitTreeParentUnitIds(unitById.get(unitId), unitById).reverse()
     : [];
 
 export const isUnitInCurrentFlowScope = (
-  unit: AjsUnit,
-  currentUnit: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unit: FlowGraphUnitDto,
+  currentUnit: FlowGraphUnitDto | undefined,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): boolean => {
   if (!currentUnit || unit.id === currentUnit.id) {
     return Boolean(currentUnit);
@@ -30,10 +30,10 @@ export const isUnitInCurrentFlowScope = (
 };
 
 const isSelectableFlowTreeTarget = (
-  unit: AjsUnit | undefined,
-  currentUnit: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): unit is AjsUnit =>
+  unit: FlowGraphUnitDto | undefined,
+  currentUnit: FlowGraphUnitDto | undefined,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+): unit is FlowGraphUnitDto =>
   Boolean(
     currentUnit &&
       unit &&
@@ -42,9 +42,9 @@ const isSelectableFlowTreeTarget = (
 
 const resolveSelectableFlowTreeUnit = (
   unitId: string,
-  currentUnit: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
-): AjsUnit | undefined => {
+  currentUnit: FlowGraphUnitDto | undefined,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+): FlowGraphUnitDto | undefined => {
   const unit = unitById.get(unitId);
   return isSelectableFlowTreeTarget(unit, currentUnit, unitById)
     ? unit
@@ -52,16 +52,16 @@ const resolveSelectableFlowTreeUnit = (
 };
 
 const isDescendantOfCurrentFlowScope = (
-  unit: AjsUnit,
-  currentUnit: AjsUnit,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unit: FlowGraphUnitDto,
+  currentUnit: FlowGraphUnitDto,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): boolean =>
   collectUnitTreeParentUnitIds(unit, unitById).includes(currentUnit.id);
 
 const collectRequiredExpandedNestedUnitIds = (
-  unit: AjsUnit,
-  currentUnit: AjsUnit,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  unit: FlowGraphUnitDto,
+  currentUnit: FlowGraphUnitDto,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): string[] =>
   isDescendantOfCurrentFlowScope(unit, currentUnit, unitById)
     ? collectExpandedAncestorUnitIds({
@@ -73,8 +73,8 @@ const collectRequiredExpandedNestedUnitIds = (
 
 export const resolveFlowTreeSelectionTarget = (
   unitId: string,
-  currentUnit: AjsUnit | undefined,
-  unitById: ReadonlyMap<string, AjsUnit>,
+  currentUnit: FlowGraphUnitDto | undefined,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): FlowTreeSelectionTarget | undefined => {
   const unit = resolveSelectableFlowTreeUnit(unitId, currentUnit, unitById);
   if (!unit || !currentUnit) {

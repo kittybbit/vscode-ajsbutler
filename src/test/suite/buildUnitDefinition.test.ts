@@ -7,7 +7,9 @@ import {
 import {
   buildUnitDefinition,
   buildUnitDefinitionByPath,
+  buildUnitDefinitions,
 } from "../../application/unit-definition/buildUnitDefinition";
+import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { localeString } from "../../domain/services/i18n/nls";
 
@@ -220,6 +222,40 @@ suite("Build Unit Definition", () => {
         buildCommandLine(builder),
       ),
       ["ajsshow -R /root/job1/job2", "ajsprint -a -R /root/job1/job2"],
+    );
+
+    const serializedDefinitions = JSON.parse(
+      JSON.stringify({ unitDefinitions: buildUnitDefinitions(document) }),
+    ) as unknown;
+    const serializedDefinitionByPath = toUnitDefinitionByPath(
+      serializedDefinitions,
+    );
+    assert.deepStrictEqual(
+      serializedDefinitionByPath.get("/root/job1/job2"),
+      childDefinition,
+    );
+  });
+
+  test("ignores absent and malformed serialized definitions", () => {
+    assert.strictEqual(toUnitDefinitionByPath({}).size, 0);
+    assert.strictEqual(
+      toUnitDefinitionByPath({
+        unitDefinitions: [
+          {
+            absolutePath: "/root/job1",
+            rawData: "ty=j",
+            commands: [],
+            commandBuilders: [],
+          },
+          {
+            absolutePath: "/root/broken",
+            rawData: "ty=j",
+            commands: [{ id: "ajsshow" }],
+            commandBuilders: [],
+          },
+        ],
+      }).size,
+      1,
     );
   });
 });

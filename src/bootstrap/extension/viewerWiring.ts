@@ -7,10 +7,10 @@ import {
 } from "../../application/telemetry/viewerTelemetry";
 import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import {
-  createRevealUnitEvent,
-  type NavigationEventType,
+  type ViewerNavigationRequest,
   type NavigationTargetView,
-} from "../../shared/webviewEvents";
+} from "../../presentation/webview/viewerRequestMessages";
+import { createViewerRevealUnitMessage } from "../../presentation/webview/viewerHostMessages";
 import {
   type OpenPreviewCommandDependencies,
   executeOpenPreviewCommand,
@@ -55,9 +55,7 @@ const createPreviewCommandDependencies = (
   mountPanel: (panel, viewType) => {
     mountViewerPanel(context, panel, viewType);
   },
-  trackEvent: (viewType, properties) => {
-    telemetry.trackEvent(viewType, properties);
-  },
+  reportTelemetry: (event) => telemetry.report(event),
 });
 
 const resolveTargetViewType = (targetView: NavigationTargetView): string =>
@@ -80,7 +78,7 @@ const postRevealUnit = (
   panel: vscode.WebviewPanel,
   absolutePath: string,
 ): void => {
-  panel.webview.postMessage(createRevealUnitEvent(absolutePath));
+  panel.webview.postMessage(createViewerRevealUnitMessage(absolutePath));
 };
 
 export const flushPendingViewerReveal = (
@@ -134,9 +132,8 @@ const revealExistingCounterpartPanel = (
 const openCounterpartPanel = (
   request: CounterpartRevealRequest,
   deps: CounterpartRevealDeps,
-  targetFactory: ViewerFactory,
+  newPanel: vscode.WebviewPanel,
 ): void => {
-  const newPanel = targetFactory.getPanel(request.document);
   deps.pendingRevealByPanel.set(newPanel, request.absolutePath);
   deps.onOpenStarted?.(request.targetViewType);
   deps.mountPanel(newPanel, request.targetViewType);
@@ -152,7 +149,12 @@ export const revealCounterpartPanel = (
     return;
   }
 
-  const panel = targetFactory.getExistingPanel(request.document);
+  let panel: vscode.WebviewPanel | undefined;
+  try {
+    panel = targetFactory.getExistingPanel(request.document);
+  } catch {
+    return;
+  }
   if (panel) {
     revealExistingCounterpartPanel(
       panel,
@@ -162,12 +164,18 @@ export const revealCounterpartPanel = (
     return;
   }
 
-  openCounterpartPanel(request, deps, targetFactory);
+  let newPanel: vscode.WebviewPanel;
+  try {
+    newPanel = targetFactory.getPanel(request.document);
+  } catch {
+    return;
+  }
+  openCounterpartPanel(request, deps, newPanel);
 };
 
 const revealCounterpartFromNavigation = (
   document: vscode.TextDocument,
-  event: NavigationEventType,
+  event: ViewerNavigationRequest,
   deps: CounterpartRevealDeps,
 ): void => {
   revealCounterpartPanel(
@@ -219,7 +227,7 @@ const createViewerBundle = ({
             host: getTelemetryHost(),
           });
           if (event) {
-            telemetry.trackEvent(event.name, event.properties);
+            telemetry.report(event);
           }
         },
       ),
@@ -230,14 +238,7 @@ const createViewerBundle = ({
           host: getTelemetryHost(),
         });
         if (navigationEvent) {
-          try {
-            telemetry.trackEvent(
-              navigationEvent.name,
-              navigationEvent.properties,
-            );
-          } catch {
-            // Viewer action telemetry must not block counterpart navigation.
-          }
+          telemetry.report(navigationEvent);
         }
         revealCounterpartFromNavigation(document, event, {
           factoryByViewType,
@@ -250,7 +251,7 @@ const createViewerBundle = ({
               host: getTelemetryHost(),
             });
             if (openEvent) {
-              telemetry.trackEvent(openEvent.name, openEvent.properties);
+              telemetry.report(openEvent);
             }
           },
           pendingRevealByPanel,

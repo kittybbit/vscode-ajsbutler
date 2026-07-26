@@ -19,10 +19,7 @@ const createRow = (
 
 suite("AJS table global filter", () => {
   test("builds parameter value search candidates", () => {
-    assert.deepStrictEqual(
-      buildParameterSearchValues([{ key: "prm", value: "--job" }]),
-      ["--job"],
-    );
+    assert.deepStrictEqual(buildParameterSearchValues(["--job"]), ["--job"]);
   });
 
   test("preserves existing rendered cell matching", () => {
@@ -44,7 +41,7 @@ suite("AJS table global filter", () => {
 
   test("matches parameter values outside rendered cells in value mode", () => {
     const filterFn = createAjsGlobalFilterFn(
-      new Map([["/root/job", [{ key: "prm", value: "--job" }]]]),
+      new Map([["/root/job", ["--job"]]]),
     );
 
     assert.strictEqual(
@@ -63,35 +60,18 @@ suite("AJS table global filter", () => {
 
   test("identifies matching cells in value mode", () => {
     assert.strictEqual(
-      isAjsTableSearchHit(
-        "rendered job",
-        [{ key: "prm", value: "--job" }],
-        "job",
-      ),
+      isAjsTableSearchHit("rendered job", ["--job"], "job"),
       true,
     );
     assert.strictEqual(
-      isAjsTableSearchHit(
-        "rendered job",
-        [{ key: "prm", value: "--job" }],
-        "prm",
-      ),
+      isAjsTableSearchHit("rendered job", ["--job"], "prm"),
       false,
     );
   });
 
   test("identifies rendered cells by visible value and parameter value", () => {
-    assert.strictEqual(
-      isAjsTableSearchHit("--job", [{ key: "prm", value: "--job" }], "job"),
-      true,
-    );
-    assert.strictEqual(
-      isAjsTableSearchHit("other", [{ key: "prm", value: "--job" }], "job"),
-      false,
-    );
-    assert.strictEqual(
-      isAjsTableSearchHit("other", [{ key: "prm", value: "--job" }], "prm"),
-      false,
-    );
+    assert.strictEqual(isAjsTableSearchHit("--job", ["--job"], "job"), true);
+    assert.strictEqual(isAjsTableSearchHit("other", ["--job"], "job"), false);
+    assert.strictEqual(isAjsTableSearchHit("other", ["--job"], "prm"), false);
   });
 });

@@ -1,5 +1,10 @@
 import * as assert from "assert";
 import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
+import {
+  CHANGE_DOCUMENT,
+  RESOURCE,
+  REVEAL_UNIT,
+} from "../../presentation/webview/viewerHostMessages";
 
 const messageEvent = (data: unknown): MessageEvent =>
   ({ data }) as MessageEvent;
@@ -10,11 +15,15 @@ suite("Viewer event bridge", () => {
     const calls: string[] = [];
     const data = { absolutePath: "/root/job" };
 
-    bridge.addCallback("revealUnit", (type, receivedData) => {
-      calls.push(`first:${type}:${receivedData === data}`);
+    bridge.addCallback(REVEAL_UNIT, (type, receivedData) => {
+      calls.push(
+        `first:${type}:${JSON.stringify(receivedData) === JSON.stringify(data)}`,
+      );
     });
-    bridge.addCallback("revealUnit", (type, receivedData) => {
-      calls.push(`second:${type}:${receivedData === data}`);
+    bridge.addCallback(REVEAL_UNIT, (type, receivedData) => {
+      calls.push(
+        `second:${type}:${JSON.stringify(receivedData) === JSON.stringify(data)}`,
+      );
     });
 
     bridge.dispatch(messageEvent({ type: "revealUnit", data }));
@@ -29,7 +38,7 @@ suite("Viewer event bridge", () => {
   test("ignores messages without object data or a string type", () => {
     const bridge = createViewerEventBridge();
     let callCount = 0;
-    bridge.addCallback("changeDocument", () => {
+    bridge.addCallback(CHANGE_DOCUMENT, () => {
       callCount += 1;
     });
 
@@ -50,11 +59,19 @@ suite("Viewer event bridge", () => {
       calls.push("retained");
     };
 
-    bridge.addCallback("resource", removed);
-    bridge.addCallback("resource", retained);
-    bridge.removeCallback("resource", removed);
-    bridge.removeCallback("missing", removed);
-    bridge.dispatch(messageEvent({ type: "resource", data: {} }));
+    bridge.addCallback(RESOURCE, removed);
+    bridge.addCallback(RESOURCE, retained);
+    bridge.removeCallback(RESOURCE, removed);
+    bridge.dispatch(
+      messageEvent({
+        type: RESOURCE,
+        data: {
+          isDarkMode: true,
+          lang: "ja",
+          scrollType: "table",
+        },
+      }),
+    );
 
     assert.deepStrictEqual(calls, ["retained"]);
   });

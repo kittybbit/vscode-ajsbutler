@@ -25,18 +25,57 @@ const createSecretStorage = (
 };
 
 suite("VS Code WebAPI credential store", () => {
-  test("stores credentials as JSON and resolves valid stored credentials", async () => {
+  test("derives the stable import reference, stores credentials, and resolves them", async () => {
     const store = new VscodeWebApiCredentialStore(createSecretStorage());
 
-    await store.storeCredential("credential-ref", {
-      username: "jp1admin",
-      password: "secret",
-    });
+    const credentialRef = await store.storeCredentialForImport(
+      { baseUrl: " HTTPS://Web-Console.Example.com:22252 " },
+      {
+        manager: " Manager.Example.com ",
+        serviceName: " AJSROOT1 ",
+        location: "/JobGroup",
+      },
+      {
+        username: "jp1admin",
+        password: "secret",
+      },
+    );
 
-    assert.deepStrictEqual(await store.resolveCredential("credential-ref"), {
+    assert.strictEqual(
+      credentialRef,
+      "jp1-ajs-webapi:https%3A%2F%2Fweb-console.example.com%3A22252:manager.example.com:ajsroot1",
+    );
+    assert.deepStrictEqual(await store.resolveCredential(credentialRef), {
       username: "jp1admin",
       password: "secret",
     });
+  });
+
+  test("preserves credential-store write rejections", async () => {
+    const expected = new Error("secret storage unavailable");
+    const store = new VscodeWebApiCredentialStore({
+      async get() {
+        return undefined;
+      },
+      async store() {
+        throw expected;
+      },
+      async delete() {},
+      onDidChange: () => ({ dispose() {} }),
+    } as vscode.SecretStorage);
+
+    await assert.rejects(
+      store.storeCredentialForImport(
+        { baseUrl: "https://web-console.example.com:22252" },
+        {
+          manager: "manager.example.com",
+          serviceName: "AJSROOT1",
+          location: "/JobGroup",
+        },
+        { username: "jp1admin", password: "secret" },
+      ),
+      (error) => error === expected,
+    );
   });
 
   test("returns undefined for missing refs, missing secrets, malformed JSON, and invalid shapes", async () => {

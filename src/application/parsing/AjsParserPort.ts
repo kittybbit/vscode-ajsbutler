@@ -1,4 +1,4 @@
-import type { Unit } from "../../domain/values/Unit";
+import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 
 export type AjsParserError = {
   line: number;
@@ -6,10 +6,15 @@ export type AjsParserError = {
   message: string;
 };
 
-export type ParseAjsResult = {
-  rootUnits: Unit[];
-  errors: AjsParserError[];
-};
+export type ParseAjsResult =
+  | {
+      ok: true;
+      document: AjsDocument;
+    }
+  | {
+      ok: false;
+      errors: AjsParserError[];
+    };
 
 export interface AjsParserPort {
   parse(content: string): ParseAjsResult;

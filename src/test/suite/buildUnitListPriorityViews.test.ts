@@ -1,6 +1,5 @@
 import * as assert from "assert";
-import { normalizeAjsDocument } from "../../domain/models/ajs/normalizeAjsDocument";
-import { parseAjs } from "../support/parseAjs";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 import {
   buildUnitListGroup11View,
   buildUnitListGroup7View,
@@ -63,9 +62,7 @@ unit=root,,jp1admin,;
 
 suite("Build Unit List Priority Views", () => {
   test("projects group7 fields and inherits priority for child jobnets", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
     const jobnet = document.rootUnits[0]?.children[0];
     const subnet = jobnet?.children[0];
 
@@ -87,9 +84,7 @@ suite("Build Unit List Priority Views", () => {
   });
 
   test("projects group11 fields and reuses shared priority lookup", () => {
-    const result = parseAjs(definition);
-    assert.deepStrictEqual(result.errors, []);
-    const document = normalizeAjsDocument(result.rootUnits);
+    const document = parseAjsDocumentForTest(definition);
     const jobnet = document.rootUnits[0]?.children[0];
     const job = jobnet?.children[1];
     const qjob = jobnet?.children[2];

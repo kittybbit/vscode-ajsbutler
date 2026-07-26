@@ -6,12 +6,11 @@ import {
   type TelemetryEventDefinition,
 } from "./telemetryEvent";
 import type { TelemetryHost } from "./viewerTelemetry";
-
-export type SearchTelemetrySurface = "table" | "flow";
-export type SearchTelemetryAction = "submitted" | "navigated" | "cleared";
-export type SearchTelemetryResult = "matched" | "no_match" | "cleared";
-export type SearchTelemetryMode = "partial";
-export type SearchTelemetryScope = "visible_rows" | "current_flow_scope";
+import type {
+  SearchTelemetryAction,
+  SearchTelemetryData,
+  SearchTelemetrySurface,
+} from "./searchTelemetryData";
 
 const searchEvents: Record<
   SearchTelemetrySurface,
@@ -39,16 +38,8 @@ export const createSearchTelemetryEvent = ({
   resultCountBucket,
   durationBucket,
   scope,
-}: {
-  surface: SearchTelemetrySurface;
-  action: SearchTelemetryAction;
-  result: SearchTelemetryResult;
+}: SearchTelemetryData & {
   host?: TelemetryHost;
-  mode: SearchTelemetryMode;
-  queryLengthBucket?: string;
-  resultCountBucket?: string;
-  durationBucket?: string;
-  scope: SearchTelemetryScope;
 }): TelemetryEvent =>
   createTelemetryEvent(searchEvents[surface][action], {
     [telemetryPropertyKeys.development]: DEVELOPMENT,

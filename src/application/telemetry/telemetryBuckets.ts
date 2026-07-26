@@ -1,20 +1,26 @@
-export type TelemetryDurationBucket =
-  | "unknown"
-  | "lt100ms"
-  | "100_499ms"
-  | "500_999ms"
-  | "1_4s"
-  | "5_14s"
-  | "15s_plus";
+export const telemetryDurationBuckets = [
+  "unknown",
+  "lt100ms",
+  "100_499ms",
+  "500_999ms",
+  "1_4s",
+  "5_14s",
+  "15s_plus",
+] as const;
 
-export type TelemetryCountBucket =
-  | "unknown"
-  | "0"
-  | "1"
-  | "2_9"
-  | "10_99"
-  | "100_999"
-  | "1000_plus";
+export type TelemetryDurationBucket = (typeof telemetryDurationBuckets)[number];
+
+export const telemetryCountBuckets = [
+  "unknown",
+  "0",
+  "1",
+  "2_9",
+  "10_99",
+  "100_999",
+  "1000_plus",
+] as const;
+
+export type TelemetryCountBucket = (typeof telemetryCountBuckets)[number];
 
 export type TelemetryHttpStatusCategory =
   | "unknown"
@@ -24,6 +30,16 @@ export type TelemetryHttpStatusCategory =
   | "3xx"
   | "4xx"
   | "5xx";
+
+export const isTelemetryDurationBucket = (
+  value: unknown,
+): value is TelemetryDurationBucket =>
+  telemetryDurationBuckets.includes(value as TelemetryDurationBucket);
+
+export const isTelemetryCountBucket = (
+  value: unknown,
+): value is TelemetryCountBucket =>
+  telemetryCountBuckets.includes(value as TelemetryCountBucket);
 
 export const toDurationBucket = (
   durationMs: number,

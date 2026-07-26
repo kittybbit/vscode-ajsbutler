@@ -1,6 +1,6 @@
 import { CellContext, GroupColumnDef } from "@tanstack/table-core";
 import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
-import { unitTypeLabel } from "../../../../../domain/services/i18n/nls";
+import { unitInformationUnitTypeLabel } from "../../unitInformationLocalization";
 import Link from "@mui/material/Link";
 import React from "react";
 import { ColumnGroupContext, rowViewColumn, RowViewByPath } from "./common";
@@ -43,7 +43,11 @@ const resolveUnitTypeLabel =
     if (!group1) {
       return undefined;
     }
-    return unitTypeLabel(group1.unitType, language, group1.groupType ?? "n");
+    return unitInformationUnitTypeLabel(
+      group1.unitType,
+      language,
+      group1.groupType ?? "n",
+    );
   };
 
 const group1 = (
