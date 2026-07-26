@@ -17,9 +17,9 @@
 
 - Update this file in the same commit whenever one task or follow-up is
   completed, re-scoped, or intentionally dropped.
-- Update `docs/specs/plans.md` only when the branch starts, stops, or changes
-  an active feature.
-- Update `docs/specs/roadmap.md` when repository sequencing changes.
+- This file is the sole plan and current-state owner for this feature branch.
+- Update `docs/specs/roadmap.md` only when unfinished repository-level future
+  work, ordering, entry conditions, or unresolved product concerns change.
 - Keep this file focused on current state only; do not retain historical logs,
   prior approvals, or long validation diaries once they stop being actionable.
 
@@ -74,3 +74,7 @@ active implementation approval remains.
   verification results from generated mocks.
 - Real-environment smoke verification is currently blocked because no usable
   JP1/AJS3 WebAPI environment or evidence is available.
+- Before correcting the stale checked-in Prism artifact reported by
+  `rtk pnpm run openapi:check`, use Replanning Mode to define and review a
+  focused generated-artifact reproducibility slice. This note does not approve
+  that work or change the blocked real-environment evidence task.

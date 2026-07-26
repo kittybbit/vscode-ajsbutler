@@ -15,7 +15,6 @@
 ## Origin
 
 - Source use case: {{docs/requirements/use-cases/uc-*.md}}
-- Branch plan: {{docs/specs/plans.md}}
 - Implementation-slice plan: {{TASKS.md}}
 
 ## Requirements

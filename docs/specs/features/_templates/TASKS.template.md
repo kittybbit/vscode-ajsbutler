@@ -17,12 +17,13 @@
 
 - Update this file in the same commit whenever a task is completed, re-scoped,
   or intentionally dropped.
-- Update `docs/specs/plans.md` only when the branch starts, stops, or changes
-  an active feature.
-- Update `docs/specs/roadmap.md` when repository sequencing changes.
-- Keep this file focused on the implementation-slice plan, approval state,
-  validation, risk, and feature exit readiness. Do not retain historical logs,
-  prior approvals, or long validation diaries once they stop being actionable.
+- This file is the sole feature branch plan and current-state owner.
+- Update `docs/specs/roadmap.md` only when unfinished repository-level future
+  work, ordering, entry conditions, or unresolved product concerns change.
+- Keep this file focused on implementation slices, approval, validation, risk,
+  production readiness, and Feature Exit readiness. Do not retain historical
+  logs, prior approvals, or long validation diaries once they stop being
+  actionable.
 
 ## Plan Status
 

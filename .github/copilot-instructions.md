@@ -24,10 +24,11 @@ Read these in order before making changes
 
 2. **`docs/specs/`** - Specification-driven development documentation
 
-   - `plans.md` - Branch status and priorities
-   - `features/*/SPECS.md` - Feature requirements
-   - `features/*/TASKS.md` - Implementation-slice plan and approval state
+   - `README.md` - SDD lifecycle and document-role Single Source of Truth
+   - `features/*/SPECS.md` - Temporary feature requirements and boundaries
+   - `features/*/TASKS.md` - Sole feature branch plan and current state
    - `features/*/TRACEABILITY.md` - Requirement to validation mapping when required
+   - `roadmap.md` - Unfinished repository-level future work
 
 3. **`README.md`** - Build/test commands and quick reference
 

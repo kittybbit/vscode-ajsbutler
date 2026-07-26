@@ -1,6 +1,6 @@
 ---
 name: sdd-plan-task
-description: Use when creating or revising the full implementation-slice plan for an active vscode-ajsbutler SDD feature, including mode-selecting Planning/Replanning/Feature Exit work, decomposing the feature into approval-ready implementation slices, ordering dependencies, updating feature TASKS.md and TRACEABILITY.md, deciding whether replanning is required, performing Feature Exit Review, applying the Feature Definition of Done, moving durable completed feature knowledge into use cases or other long-lived docs, removing completed feature docs, or proposing the next feature from roadmap.md and plans.md. This planning skill stops before runtime code, tests, generated artifacts, or configuration changes.
+description: Use when creating or revising the full implementation-slice plan for an active vscode-ajsbutler SDD feature, including mode-selecting Planning/Replanning/Feature Exit work, decomposing the feature into approval-ready implementation slices, ordering dependencies, updating feature TASKS.md and TRACEABILITY.md, deciding whether replanning is required, performing Feature Exit Review, applying the Feature Definition of Done, moving durable completed feature knowledge into use cases or other long-lived docs, removing completed feature docs, or proposing the next feature from roadmap.md. This planning skill stops before runtime code, tests, generated artifacts, or configuration changes.
 ---
 
 # sdd-plan-task
@@ -16,8 +16,9 @@ mode per run: Planning Mode, Replanning Mode, or Feature Exit Mode.
 Read first:
 
 1. `AGENTS.md`, `package.json`, and `docs/specs/README.md`
-2. `docs/specs/plans.md`, `docs/specs/roadmap.md`, and the active feature's
-   `SPECS.md` and `TASKS.md`
+2. the active feature's `SPECS.md` and `TASKS.md`
+3. `docs/specs/roadmap.md` when repository-level sequencing, unfinished work,
+   or Feature Exit follow-up is relevant
 
 Read only when needed:
 
@@ -60,10 +61,10 @@ Do not mix Planning Mode, Replanning Mode, and Feature Exit Mode in one run.
 
 Use Planning Mode to create the initial full feature implementation plan.
 
-1. Identify the active feature from the user request, `docs/specs/plans.md`,
-   or feature folders under `docs/specs/features/`.
+1. Identify the active feature from the user request or feature folders under
+   `docs/specs/features/`; confirm its `TASKS.md` is the branch plan.
 2. Compare feature `SPECS.md`, feature `TASKS.md`, related use cases,
-   `roadmap.md`, and `plans.md`.
+   and `roadmap.md` when repository-level future work is relevant.
 3. Decompose the whole feature into implementation slices that cover the
    feature-level requirements and acceptance criteria.
 4. Order slices by dependency and value. Prefer early slices that reduce
@@ -88,11 +89,9 @@ Use Planning Mode to create the initial full feature implementation plan.
 7. Create or update `TRACEABILITY.md` when required.
 8. Keep feature `SPECS.md` focused on feature-level functional requirements,
    compatibility requirements, acceptance criteria, and non-goals.
-9. Update `docs/specs/plans.md` only when the active feature set, branch-wide
-   assumptions, or repository sequencing changes.
-10. Update `docs/specs/roadmap.md` only when repository-level ordering,
-    remaining debt, or deferred work changes.
-11. Hand off the completed plan to `sdd-review-plan` before implementation
+9. Update `docs/specs/roadmap.md` only when unfinished repository-level work,
+   ordering, entry conditions, or unresolved product concerns change.
+10. Hand off the completed plan to `sdd-review-plan` before implementation
     approval.
 
 ## Replanning Mode
@@ -118,13 +117,16 @@ Use Feature Exit Mode only when implementation slices appear complete.
 1. Run the Feature Exit Review.
 2. Apply the Feature Definition of Done as the only completion standard.
 3. Confirm required `TRACEABILITY.md` updates are complete.
-4. Apply the Durable Documentation Gate before updating long-lived docs.
-5. Summarize evidence from `SPECS.md`, `TASKS.md`, `TRACEABILITY.md` when
-   present, use cases, plans, and roadmap.
-6. Report the Feature Exit Review using the standard output template in
+4. Apply the Durable Documentation Gate and complete required durable-document
+   propagation before requesting closure approval.
+5. Confirm no reusable knowledge or valuable unfinished work exists only in
+   the feature folder.
+6. Summarize evidence from `SPECS.md`, `TASKS.md`, `TRACEABILITY.md` when
+   present, use cases, and relevant durable documents.
+7. Report the Feature Exit Review using the standard output template in
    `docs/specs/README.md`.
-7. Ask for explicit approval to close the feature.
-8. After approval, close the feature as described below.
+8. Ask for explicit approval to close the feature.
+9. After approval, remove the complete feature folder as described below.
 
 Do not perform Planning Mode or Replanning Mode work during Feature Exit Mode.
 
@@ -293,8 +295,8 @@ When all planned slices appear complete, switch to Feature Exit Mode:
 
 1. Run the Feature Exit Review.
 2. Apply the Feature Definition of Done as the only completion standard.
-3. Summarize the evidence from `SPECS.md`, `TASKS.md`, use cases, plans, and
-   roadmap.
+3. Summarize the evidence from `SPECS.md`, `TASKS.md`, use cases, and relevant
+   durable documents.
 4. Report the Feature Exit Review using the standard output template in
    `docs/specs/README.md`.
 5. Ask for explicit approval to close the feature.
@@ -309,12 +311,11 @@ A feature is complete only when all of these are true:
 - feature requirements are satisfied
 - required validation is complete
 - non-functional quality is preserved or justified
-- durable use-case updates are complete
+- required durable-document propagation is complete
 - required `TRACEABILITY.md` updates are complete, or not required with a clear
   reason
-- `docs/specs/plans.md` is updated
 - `docs/specs/roadmap.md` is updated when repository-level sequencing,
-  remaining debt, or deferred work changed
+  unfinished future work, entry conditions, or unresolved concerns changed
 - unresolved risks are resolved, accepted, or recorded as follow-up
 
 Do not close a feature by partial evidence, elapsed effort, or lack of obvious
@@ -332,7 +333,6 @@ Before closing a feature, verify:
 - unresolved risks are organized
 - use-case propagation is complete
 - required `TRACEABILITY.md` is updated
-- `plans.md` propagation is complete
 - `roadmap.md` propagation is complete when needed
 - the feature folder can be removed without losing active requirements,
   approval decisions, unresolved risks, or reusable knowledge
@@ -342,7 +342,7 @@ closure.
 
 ## Durable Documentation Gate
 
-Before moving feature knowledge into use cases, `plans.md`, `roadmap.md`,
+Before moving feature knowledge into use cases, `roadmap.md`,
 README, AGENTS, design guides, development guides, or other long-lived docs,
 verify the information:
 
@@ -360,15 +360,22 @@ Update only the smallest necessary durable document surface. Leave
 feature-specific work notes in feature docs until closure, then remove them
 with the feature folder.
 
-After approval to close the feature:
+Before requesting approval to close the feature:
 
 1. Move only knowledge that passes the Durable Documentation Gate into the
    relevant durable docs.
-2. Move repository-level sequencing, remaining debt, or deferred work into
-   `roadmap.md` or `plans.md` only when it passes the gate.
-3. Remove the completed feature folder when it no longer carries active
-   requirements, active task decisions, unresolved risk, or useful follow-up.
-4. Re-read `roadmap.md` and `plans.md`, then propose the next feature.
+2. Move unfinished repository-level future work, ordering, entry conditions,
+   or unresolved product concerns into `roadmap.md` only when it passes the
+   gate.
+3. Confirm README and CHANGELOG impact and propagate required current
+   behavior, architecture, boundary, or terminology knowledge.
+4. Confirm the Feature Definition of Done passes and the folder can be removed
+   without losing reusable knowledge, unfinished work, or owned risks.
+
+After approval to close the feature:
+
+1. Remove the complete feature folder.
+2. Re-read `roadmap.md`, then propose the next feature when appropriate.
 
 ## Approval Boundary
 

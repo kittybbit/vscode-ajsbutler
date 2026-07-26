@@ -114,8 +114,9 @@ hidden assumptions.
 
 Document roles are defined only in `docs/specs/README.md`. Use that file as
 the Single Source of Truth for SDD artifact responsibilities, including
-`SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, `docs/specs/plans.md`, and
-`docs/specs/roadmap.md`.
+temporary feature documents, durable documentation, and
+`docs/specs/roadmap.md`. One feature branch has one active feature folder, and
+that feature's `TASKS.md` is the sole plan and current-state owner.
 
 ## Branch Naming
 
@@ -169,7 +170,7 @@ CHANGELOG update need according to `docs/specs/README.md`.
 ## Durable Documentation Gate
 
 Before updating long-lived docs such as use cases, README, AGENTS,
-`plans.md`, `roadmap.md`, or design/development guides, verify the content:
+`roadmap.md`, or design/development guides, verify the content:
 
 - is reusable beyond one feature
 - describes durable behavior, specification, design policy, or repository

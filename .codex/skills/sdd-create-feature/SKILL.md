@@ -18,7 +18,7 @@ Read first:
 
 1. `AGENTS.md`
 2. `docs/specs/README.md`
-3. `docs/specs/plans.md` and `docs/specs/roadmap.md`
+3. `docs/specs/roadmap.md`
 4. `docs/specs/features/_templates/SPECS.template.md` and `TASKS.template.md`
 
 Read only when needed:
@@ -58,8 +58,8 @@ Ask the user to choose the feature kind when it is not already explicit:
 - `roadmap feature`: durable work that should remain visible in
   `docs/specs/roadmap.md` or repository sequencing after the branch
 - `transient branch feature`: temporary branch-local work tracked in
-  `docs/specs/features/<feature>/` and `docs/specs/plans.md`, removed after
-  durable decisions move to use cases, roadmap, or plans
+  `docs/specs/features/<feature>/`, removed after reusable knowledge moves to
+  its durable owner and Feature Exit is approved
 
 Do not infer the kind from tone, size, or urgency.
 
@@ -112,14 +112,12 @@ Too broad for one feature:
    notes. Keep `Human Approval` pending unless the user has already given
    clear approval for a specific implementation scope in the current
    conversation.
-8. Update `docs/specs/plans.md` when the branch starts, stops, or changes an
-   active feature.
-9. Update `docs/specs/roadmap.md` only for `roadmap feature` work or when the
-   new feature changes repository-level ordering, remaining debt, or deferred
-   work.
-10. Update or create `docs/requirements/use-cases/` only when the new feature
-    changes a durable behavior contract.
-11. Run docs-only validation through `rtk`.
+8. Update `docs/specs/roadmap.md` only for `roadmap feature` work or when the
+   new feature changes unfinished repository-level work, ordering, entry
+   conditions, or unresolved product concerns.
+9. Update or create `docs/requirements/use-cases/` only when the new feature
+   changes a durable behavior contract.
+10. Run docs-only validation through `rtk`.
 
 ## Traceability
 
@@ -158,24 +156,23 @@ Before finishing, verify:
 
 ## Document Responsibilities
 
-- `SPECS.md`: durable feature requirements, architecture boundaries,
+- `SPECS.md`: temporary feature-local requirements, architecture boundaries,
   compatibility notes, acceptance criteria, alternatives, non-goals, and open
   questions.
-- `TASKS.md`: feature implementation-slice plan, current approval evidence,
-  validation expectations, unresolved risks, feature exit readiness, and
-  follow-up that affects implementation or closure decisions.
+- `TASKS.md`: sole feature branch plan and current-state owner, including the
+  implementation-slice plan, approval evidence, validation, unresolved risks,
+  production readiness, Feature Exit readiness, and actionable follow-up.
 - `TRACEABILITY.md`: feature-level mapping from use cases and requirements to
   `SPECS.md`, implementation slices, and tests or validation plans. Create it
   only when the Traceability rules require it.
-- `docs/specs/plans.md`: branch-level active features and branch-wide
-  assumptions.
-- `docs/specs/roadmap.md`: repository-level sequence, roadmap-visible
-  features, remaining debt, and deferred work.
+- `docs/specs/roadmap.md`: unfinished repository-level future work, ordering,
+  entry conditions, and unresolved product concerns.
 - `docs/requirements/use-cases/`: durable behavior contracts that should
   survive feature-folder removal.
 
-Do not store implementation logs, long transcripts, or speculative design
-history in feature docs.
+Feature documents are temporary. Do not store completed history, long
+transcripts, or speculative design logs in them, and do not create a second
+branch-level plan.
 
 ## Approval Boundary
 
@@ -202,7 +199,7 @@ Before finishing, report:
 - Scope split considered:
 - Ambiguities resolved:
 - Roadmap impact:
-- Plans impact:
+- Feature `TASKS.md` impact:
 - Use-case impact:
 - Traceability:
 - Validation:

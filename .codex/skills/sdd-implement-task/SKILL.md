@@ -17,7 +17,7 @@ sufficient.
 Read first:
 
 1. `AGENTS.md`, `package.json`, and `docs/specs/README.md`
-2. `docs/specs/plans.md` and the active feature's `SPECS.md` and `TASKS.md`
+2. the active feature's `SPECS.md` and `TASKS.md`
 
 Read only when needed:
 

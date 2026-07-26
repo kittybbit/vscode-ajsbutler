@@ -15,8 +15,9 @@ full slice plan, and before `sdd-implement-task` implements any slice.
 
 Read first:
 
-1. `AGENTS.md`, `docs/specs/README.md`, and `docs/specs/plans.md`
-2. the active feature's `SPECS.md` and `TASKS.md`
+1. `AGENTS.md` and `docs/specs/README.md`
+2. the active feature's `SPECS.md` and `TASKS.md`; identify the active feature
+   from the user request or feature folders
 
 Read only when needed:
 

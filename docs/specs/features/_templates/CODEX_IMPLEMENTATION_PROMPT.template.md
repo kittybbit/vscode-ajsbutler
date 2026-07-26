@@ -48,12 +48,11 @@ Before editing:
   breaking-change risk.
 - When behavior scenarios exist, list changed, added, or removed scenarios and
   affected tests.
-- Record branch active-feature changes in docs/specs/plans.md only when the
-  branch starts, stops, or changes an active feature.
 - Record durable impact, propagation, alternatives, and boundary decisions in
   SPECS.md.
 - Record implementation-slice plan, validation, risk, production readiness,
-  approval state, and feature exit readiness in TASKS.md.
+  approval state, current feature branch state, and Feature Exit readiness in
+  TASKS.md. Do not create a second branch-level plan.
 - Update TRACEABILITY.md when required.
 - Record the TASKS.md `Human Approval` section with `Status: Pending`.
 - Keep TASKS.md focused on slice plan/status, approval, validation, risks, and
