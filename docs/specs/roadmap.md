@@ -3,6 +3,22 @@
 This roadmap contains only unfinished repository-level future work and the
 entry conditions that make planning each item useful.
 
+## Planned Features
+
+### Accessible List And Flow Graph Exploration
+
+- Feature:
+  [`accessible-list-and-flow-graph-exploration`](./features/accessible-list-and-flow-graph-exploration/SPECS.md)
+- Purpose: make unit search, selection, relationship traversal, and detail
+  inspection practical in the unit-list and flow-graph viewers through
+  keyboard, assistive-technology, and high-contrast paths.
+- Entry condition: the feature's complete presentation-layer implementation
+  slice plan resolves the interaction model, focus fallback, semantic state,
+  notification, and desktop/web validation decisions; the reviewed plan then
+  receives Human Approval.
+- Keep extension-wide WCAG certification, JP1/AJS interpretation changes, and
+  Domain, Application, parser, or host changes outside this feature.
+
 ## Product Decisions
 
 ### WebAPI Import Beta Exit

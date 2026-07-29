@@ -19,6 +19,11 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   ![unit-list](images/unit-list.png)
 - Select which items to display in the unit list.
   ![column-selector](images/column-selector.png)
+- Explore the unit list as a keyboard data grid. Tab enters or leaves the grid;
+  Arrow keys move between visible cells, Page Up and Page Down move by the
+  visible page, Home and End move across a row, and Control+Home or Control+End
+  move to the grid boundaries. Enter or Space changes sorting on a sortable
+  column header.
 - View unit definitions.
   ![unit-dialog](images/unit-dialog.png)
 - Save data in CSV format.

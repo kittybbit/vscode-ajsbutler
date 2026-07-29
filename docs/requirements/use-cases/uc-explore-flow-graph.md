@@ -56,6 +56,18 @@ flow scope while preserving predictable navigation and viewport state.
 - supporting tree and detail panels may collapse responsively or explicitly
   without clearing selection, hiding access to their actions, or overlaying the
   graph
+- keyboard and non-visual interaction can traverse predecessor, successor,
+  parent, and child relationships using existing graph meaning rather than
+  visual position alone
+- root-jobnet scope selection, detail inspection, and return preserve a
+  meaningful selected node and focus destination
+- selection, relationship, search-result, and scope state remain available
+  without relying only on graph lines, position, hover, color, or tooltip
+  content
+- necessary graph state and operation outcomes are exposed semantically and
+  follow the current localization context
+- graph rerendering or scope changes restore focus to the corresponding unit or
+  a defined meaningful fallback
 - this presentation-local search behavior does not create a shared search
   domain contract
 
@@ -112,6 +124,12 @@ Scenario: Supporting panels collapse without losing state
   When the viewport narrows or the user collapses a panel
   Then its actions remain accessible without overlaying the graph
   And the selected unit remains selected
+
+Scenario: Non-visual navigation follows flow relationships
+  Given a selected flow node with known JP1/AJS relationships
+  When a user traverses the graph without relying on its visual layout
+  Then predecessor, successor, parent, and child targets can be selected
+  And the selected target and relationship are exposed semantically
 ```
 
 ## Acceptance Notes
@@ -121,6 +139,8 @@ Scenario: Supporting panels collapse without losing state
   requiring a shared search implementation
 - viewport behavior uses presentation-computed geometry and does not own graph
   placement constraints
+- keyboard behavior, semantic state, and meaningful focus restoration remain
+  usable in supported desktop and web viewers and in high-contrast themes
 
 ## Risks Or Edge Cases
 
@@ -130,3 +150,5 @@ Scenario: Supporting panels collapse without losing state
   during later navigation
 - selection synchronization can cause accidental scope changes unless scope
   actions remain explicit
+- graph rerendering or scope changes can lose focus unless stable unit identity
+  and a defined fallback are preserved

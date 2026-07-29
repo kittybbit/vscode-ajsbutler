@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added keyboard data-grid navigation and logical table semantics to the unit
+  list, including stable cell focus across sorting and virtualized rows.
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization

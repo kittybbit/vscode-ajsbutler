@@ -10,6 +10,7 @@ import {
   getVisibleColumnSelectorColumns,
 } from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { getFixedTableVirtuosoStyle } from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
+import { getTableHeaderAriaSort } from "../../presentation/webview/editor/ajsTable/TableHeader";
 
 suite("AJS Table Header", () => {
   test("formats visible and total unit counts", () => {
@@ -57,6 +58,27 @@ suite("AJS Table Header", () => {
       maxHeight: "100%",
       boxSizing: "border-box",
     });
+  });
+
+  test("exposes sortable header state with ARIA values", () => {
+    const header = (canSort: boolean, sort: false | "asc" | "desc") =>
+      ({
+        column: {
+          getCanSort: () => canSort,
+          getIsSorted: () => sort,
+        },
+      }) as never;
+
+    assert.strictEqual(getTableHeaderAriaSort(header(true, false)), "none");
+    assert.strictEqual(
+      getTableHeaderAriaSort(header(true, "asc")),
+      "ascending",
+    );
+    assert.strictEqual(
+      getTableHeaderAriaSort(header(true, "desc")),
+      "descending",
+    );
+    assert.strictEqual(getTableHeaderAriaSort(header(false, false)), undefined);
   });
 
   test("filters column selector options to hideable columns", () => {
