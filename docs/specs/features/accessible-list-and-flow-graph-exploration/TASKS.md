@@ -4,18 +4,19 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slice 1 is complete; Slice 2 is approved and not
-  started.
+- Approved or active slice: Slices 1 and 2 are complete; the revised plan is
+  approved, and Slice 3 is the next approved implementation slice.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
 - Do not: add extension-wide WCAG certification, printable-character
-  shortcuts, Domain, Application, Infrastructure, parser, DTO, or host changes.
+  shortcuts beyond the planned `H`, `D`, `R`, and `L`, Domain, Application,
+  Infrastructure, parser, DTO, or host changes.
 - Read first: `SPECS.md`, this file, and the two owning use cases.
 - Read `TRACEABILITY.md` when reviewing or implementing a slice.
 - Validate every code slice with its focused tests and
   `rtk pnpm run qlty`; run final cross-platform evidence in Slice 7.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: implement Slice 2 with `sdd-implement-task`.
+- Next decision: implement Slice 3 with `sdd-implement-task`.
 
 ## Sync Rule
 
@@ -37,16 +38,28 @@
   ordered presentation and resource slices.
 - Review status: reviewed; verdict Ready for approval
 - Human approval: Approved
-- Active implementation slice: Slice 2, Unit-List Workflow Focus Continuity
+- Active implementation slice: Slice 3, Flow Relationship Navigation
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: Slices 1 through 7 in the recorded implementation order,
-  including each slice's tests, documentation, validation, production
+- Approved at: 2026-07-30 in the current conversation
+- Approved scope: the reviewed seven-slice plan in the recorded implementation
+  order, including each slice's tests, documentation, validation, production
   readiness work, approval boundary, dependencies, risks, and out-of-scope
   constraints.
+- Replanning gap: the approved plan intentionally excluded the Notion
+  candidate's single-character `H`, `D`, `R`, and `L` shortcuts. During Slice
+  2 verification, the user confirmed that a closed detail pane had no direct
+  keyboard reopening path and requested that the candidate shortcuts be
+  reflected in the slices.
+- Flow-map refinement: the user then moved the candidate's Tab/Shift+Tab
+  traversal to Down/Up and its Down/Up expansion behavior to
+  Shift+Down/Shift+Up, retaining normal Tab traversal.
+- Approval retained: completed Slice 1 and unchanged Slice 4.
+- Renewed approval granted: revised Slices 2, 3, 5, and 6 plus Slice 7's
+  expanded integrated validation. Slice 6 explicitly owns localized
+  instructions for the revised flow key map.
 
 Implementation may proceed only inside the approved slice boundaries and only
 after switching from `main` to a dedicated non-doc feature branch.
@@ -66,6 +79,28 @@ on Slice 1. Slice 4 establishes the shared selector contract consumed by
 Slice 5, while Slice 5 also depends on Slice 3. Slice 6 consumes the completed
 selection and focus events from Slices 1 through 5. Slice 7 verifies and styles
 the complete state model.
+
+## Notion Candidate Key Reconciliation
+
+- Already reflected: list cell arrows, Page Up/Down, Home/End, sortable-header
+  arrows and Enter/Space, and normal list Tab exit.
+- Partially reflected with a deliberate selector design change: Notion limits
+  Up/Down and Enter to eligible root jobnets. Slice 4 instead applies shared
+  tree Up/Down and Enter/Space semantics to visible enabled rows, while Slice
+  5 keeps root-scope opening as an explicit eligible action and uses `L` to
+  focus the current or first eligible root-jobnet target.
+- Added by this replan: list `H`, `D`, `R`, and paired `Escape` behavior in
+  Slice 2; flow `D`, `L`, `R`, and paired `Escape` behavior in Slice 5; their
+  localized instructions in Slice 6; and integrated assistive-technology and
+  editable-control checks in Slice 7.
+- Revised flow map: Tab and Shift+Tab keep normal Webview focus traversal. The
+  candidate's Tab/Shift+Tab next/previous shared-predecessor behavior moves to
+  Down/Up, with sibling fallback. The candidate's Down/Up expand/collapse
+  behavior moves to Shift+Down/Shift+Up. Enter moves to the first child and
+  Escape returns to the parent.
+- Existing-cell action compatibility: Enter may still invoke an approved
+  pre-existing nested cell action from Slice 1, but Enter and Space do not
+  become generic detail-pane shortcuts.
 
 ## Implementation Slices
 
@@ -141,17 +176,21 @@ the complete state model.
 - Out of Scope: editable cells, column selection shortcuts, printable-character
   shortcuts, parser or DTO changes, and replacement of table frameworks.
 
-### Slice 2: Unit-List Workflow Focus Continuity
+### Slice 2: Unit-List Workflow Focus And Shortcut Continuity
 
-- Status: Approved
+- Status: Complete
 - Scope: connect the current grid cell to search reveal, detail-pane entry and
   closure, and definition-dialog return. Restore focus by stable absolute path
   and visible column, with a documented grid fallback when the target is
-  filtered, hidden, or unmounted.
+  filtered, hidden, or unmounted. Add the candidate list shortcuts: `H` moves
+  from a data cell to its current column header, header `Escape` returns to the
+  saved cell, `D` opens or enters selected-unit details, detail `R` returns to
+  the saved cell without closing, and detail `Escape` closes and returns.
 - User / Domain Value: a keyboard-only user can search, select, inspect a
   unit's details, close nested UI, and return without losing position.
 - Cohesive Change Group:
-  `ajsTable/TableContents.tsx`, `ajsTable/UnitListDetailPanel.tsx`,
+  `ajsTable/TableContents.tsx`, `ajsTable/VirtualizedTable.tsx`,
+  `ajsTable/TableHeader.tsx`, `ajsTable/UnitListDetailPanel.tsx`,
   `ajsTable/Header.tsx`, `shared/SharedUnitDetailPane.tsx`,
   `UnitDefinitionDialog.tsx`, table reveal/search state, and focused list
   search, detail, dialog, and header tests.
@@ -159,6 +198,17 @@ the complete state model.
   - Search reveal preserves stable selected-unit identity and restores a
     meaningful cell when it still exists.
   - The detail pane and its actions are reachable through normal focus order.
+  - From a data cell, unmodified `H` focuses the same column's header and
+    remembers the originating cell; header `Escape` returns to that cell or
+    the documented grid fallback.
+  - From a data cell, unmodified `D` reopens the selected unit's closed detail
+    pane when necessary and focuses its heading or first enabled action.
+  - In list details, unmodified `R` restores the saved cell without closing the
+    pane. `Escape` closes the definition dialog first or, when no dialog is
+    open, closes the detail pane and restores the saved cell.
+  - `H`, `D`, and `R` do not run for modified keys or events from editable or
+    nested interactive controls. Enter and Space retain the approved Slice 1
+    behavior and do not become generic detail shortcuts.
   - Closing the detail pane returns to the saved current cell.
   - MUI Dialog's existing focus restoration is verified first. Change dialog
     behavior only if focused tests prove the default does not return to the
@@ -167,8 +217,36 @@ the complete state model.
     or the grid entry target without focusing unrelated content.
 - Validation:
   extend table search/header and detail-pane tests with filter, close, dialog
-  default restoration, target-removed, and fallback cases; `rtk pnpm test`;
-  `rtk pnpm run test:web`; `rtk pnpm run qlty` with no new smell findings.
+  default restoration, target-removed, fallback, `H` header round trip, `D`
+  pane reopen/entry, `R` return-without-close, `Escape` precedence, uppercase
+  and lowercase keys, modifier rejection, and editable/nested-control event
+  exclusion; `rtk pnpm test`; `rtk pnpm run test:web`;
+  `rtk pnpm run qlty` with no new smell findings.
+- Implementation Evidence:
+  - Focused tests cover restoration to the same visible column, hidden-column
+    fallback, removed and empty targets, explicit same-path search reveal, and
+    MUI Dialog's enabled default focus restoration.
+  - Focused shortcut tests cover uppercase and lowercase `H`, `D`, and `R`,
+    header `Escape`, detail-pane `Escape`, modifier rejection, nested-control
+    exclusion, and non-sortable leaf headers as valid grid focus targets.
+  - Search, unit-tree, host, and in-table jump reveals issue an explicit focus
+    request after resolving a valid stable absolute path. Closing the detail
+    pane issues the same request for the selected unit, while the definition
+    dialog retains MUI's invoking-element restoration.
+  - Focus requests are separate from row selection so reselecting the same
+    search result is not lost to React state equality. The request revision
+    also lets the newest reveal replace an older pending virtualized target
+    without mounting or scanning the full table.
+  - `rtk pnpm test`, `rtk pnpm run test:web`, and
+    `rtk pnpm run qlty` passed on 2026-07-30. After the independent review fix
+    for detail-action `Escape`, the focused desktop tests and full web suite
+    passed again. Desktop and web bundles compiled without adding VS Code,
+    Node, parser, DTO, or host dependencies.
+  - The repository has no Webview DOM test harness. React/Virtuoso focus
+    integration therefore received final-diff review and is covered by pure
+    restoration-target tests plus desktop and web builds. This evidence covers
+    the automated portion of the slice. Human interaction verification and
+    slice completion were approved on 2026-07-30.
 - Production Readiness:
   - Failure mode: a stale path or column resolves to the documented fallback
     and never throws or focuses a detached element.
@@ -177,15 +255,19 @@ the complete state model.
   - Large or malformed input risk: restoration must not scan or mount the full
     table; malformed input remains outside presentation.
   - Desktop/web impact: use browser focus APIs available in both extension
-    hosts; do not add VS Code or Node APIs.
-  - README/docs impact: document detail entry, closure, and return behavior.
+    hosts; shortcut event filtering must behave the same in both hosts and must
+    not add VS Code or Node APIs.
+  - README/docs impact: document `H`, `D`, `R`, `Escape`, detail entry,
+    closure, and return behavior.
   - CHANGELOG impact: required because focus restoration changes user workflow.
-- Approval Boundary: unit-list search, detail, and dialog focus continuity
-  plus tests/docs. Sorting remains owned by Slice 1. Flow and cross-view
-  announcements/themes are excluded.
+- Approval Boundary: unit-list search, detail, dialog and `H`/`D`/`R`/Escape
+  focus continuity plus tests/docs. Sorting remains owned by Slice 1. Flow and
+  cross-view announcements/themes are excluded.
 - Dependencies: Slice 1.
 - Risks: multiple pending reveal and focus requests may race; a column may
-  become hidden between saving and restoring focus.
+  become hidden between saving and restoring focus; printable shortcuts may
+  conflict with assistive technology, speech input, or text entry unless event
+  ownership and editable-control exclusions are exact.
 - Out of Scope: changing search matching, row identity, detail content,
   definition-dialog semantics, or cross-view navigation commands.
 
@@ -193,11 +275,14 @@ the complete state model.
 
 - Status: Approved
 - Scope: add a presentation-local pure relationship target resolver and connect
-  it to keyboard-focused React Flow nodes. Left/Right/Up/Down traverse
-  predecessor/successor/parent/child, update selection and DOM focus, and
-  reveal the target without conflating DOM focus with viewport fitting.
-  Disable read-only node dragging and edge Tab stops and align node wrapper
-  semantics with the actual interaction.
+  it to keyboard-focused React Flow nodes. Left/Right traverse
+  predecessor/successor. Down/Up traverse the next/previous node sharing the
+  deterministic primary predecessor with sibling fallback.
+  Shift+Down/Shift+Up expand/collapse the current nested jobnet, Enter moves to
+  the first child, and Escape returns to the parent. Valid movement updates
+  selection and DOM focus and reveals the target without conflating DOM focus
+  with viewport fitting. Disable read-only node dragging and edge Tab stops and
+  align node wrapper semantics with the actual interaction.
 - User / Domain Value: a keyboard-only or non-visual user can follow the
   business relationships represented by the graph rather than its pixel
   layout.
@@ -205,11 +290,30 @@ the complete state model.
   new `ajsFlow/flowKeyboardNavigation.ts`,
   `ajsFlow/FlowContents.tsx`, `ajsFlow/flowGraphView.ts`,
   `ajsFlow/useFlowViewerController.ts`,
-  `ajsFlow/useFlowViewerEffects.ts`, flow node components, existing flow
-  relationship/viewport tests, and a focused flow-keyboard-navigation test.
+  `ajsFlow/useFlowViewerEffects.ts`, `ajsFlow/nodes/AjsNode.tsx`, nested-toggle
+  utilities and flow node components, existing flow relationship, expansion,
+  and viewport tests, and a focused flow-keyboard-navigation test.
 - Acceptance:
   - Relation resolution uses existing rendered nodes, edges, hierarchy, and
     deterministic rendered order without changing graph meaning.
+  - When a node has multiple predecessors, the first predecessor in
+    deterministic rendered order is the primary predecessor used to form its
+    Down/Up traversal group.
+  - Left and Right select and focus the deterministic predecessor or successor.
+  - Down and Up select and focus the next or previous node sharing the
+    deterministic primary predecessor, falling back to the next or previous
+    sibling when no such candidate exists.
+  - Shift+Down expands the current nested jobnet and Shift+Up collapses it
+    without applying Down/Up traversal. Existing explicit expansion controls
+    remain available.
+  - After a successful expansion or collapse rerenders React Flow, the current
+    node remains selected and regains DOM focus by stable unit ID without
+    changing scope or zoom. If it is no longer rendered, focus moves to the
+    graph region's single entry target without changing node selection, graph
+    scope, zoom, or viewport position.
+  - Enter selects and focuses the first rendered child; Escape selects and
+    focuses the parent. Missing child, parent, group, sibling, or expansion
+    target leaves selection, focus, and viewport unchanged.
   - A valid target becomes selected, receives DOM focus, and is scrolled or
     centered into view.
   - Relationship keys run only for key events owned by the node wrapper.
@@ -219,31 +323,42 @@ the complete state model.
   - Node wrappers expose meaningful semantics; read-only nodes cannot be moved
     with React Flow's default keyboard behavior and edges are not Tab stops.
 - Validation:
-  pure tests for each relationship, multiple targets, cycles, collapsed or
-  absent targets, inverse movement, and descendant-control event exclusion;
-  flow node display and viewport-focus regression tests; `rtk pnpm test`;
-  `rtk pnpm run test:web`; `rtk pnpm run qlty` with no new smells.
+  pure tests for predecessor/successor, shared-primary-predecessor ordering,
+  sibling fallback, inverse Down/Up movement, Enter-child, Escape-parent,
+  Shift+Down/Up expansion, multiple targets, cycles, collapsed or absent
+  targets, Tab non-capture, modifier separation, and descendant-control event
+  exclusion; flow node display, nested expansion, post-rerender stable-ID focus
+  restoration, graph-region entry fallback with unchanged selection,
+  zoom/scope/viewport, and viewport-focus regression tests; `rtk pnpm test`;
+  `rtk pnpm run test:web`;
+  `rtk pnpm run qlty` with no new smells.
 - Production Readiness:
-  - Failure mode: stale or non-rendered targets produce no movement and preserve
-    the current node.
+  - Failure mode: stale navigation/expansion targets produce no movement and
+    preserve the current node and expansion state. A node unavailable after a
+    successful rerender focuses the graph region's entry target without false
+    selection, scope change, zoom reset, or viewport movement.
   - JP1/AJS compatibility: existing predecessor, successor, parent, and child
     projections are consumed without reinterpretation.
-  - Large or malformed input risk: build bounded lookup maps when graph inputs
-    change rather than scanning the graph on every keydown.
+  - Large or malformed input risk: build bounded relationship, primary
+    predecessor, sibling, and hierarchy lookup maps when graph inputs change
+    rather than scanning the graph on every keydown.
   - Desktop/web impact: React Flow and browser APIs only; verify the same
     behavior in desktop and web bundles.
   - README/docs impact: document the accepted relationship keys.
   - CHANGELOG impact: required for new graph keyboard navigation.
 - Approval Boundary: presentation-local relation resolution, node focus,
-  viewport reveal, read-only React Flow keyboard configuration, and tests/docs.
-  Selector/detail/announcement/theme work is excluded.
+  viewport reveal, nested expand/collapse shortcuts, read-only React Flow
+  keyboard configuration, and tests/docs. Selector/detail/announcement/theme
+  work is excluded.
 - Dependencies: none; implementation follows Slice 2 to finish one viewer
   journey before starting the other.
 - Risks: React Flow's internal keyboard handlers may run before or after custom
   handlers; nested-panel bounds nodes must never become navigation targets;
-  rendered order can change after expansion.
+  rendered order can change after expansion; Shift+Arrow handling must not
+  trigger both traversal and expansion; successful expansion can temporarily
+  unmount the current node before stable-ID focus restoration runs.
 - Out of Scope: graph layout changes, relationship-focus semantics, new DTO
-  fields, edge editing, node dragging, and Tab-based sibling traversal.
+  fields, edge editing, node dragging, and Tab capture inside the graph.
 
 ### Slice 4: Shared Unit-Tree Keyboard Semantics
 
@@ -297,13 +412,15 @@ the complete state model.
 - Out of Scope: changing hierarchy data, eligibility, automatic full-tree
   expansion, flow scope rules, or printable-character shortcuts.
 
-### Slice 5: Flow Scope And Detail Focus Continuity
+### Slice 5: Flow Scope, Detail, And Shortcut Focus Continuity
 
 - Status: Approved
 - Scope: connect the shared selector and keyboard-focused graph to root-jobnet
   scope changes, selected-node details, panel closure, and definition-dialog
   return. Focus the opened scope's rendered root node and restore the invoking
-  graph node when leaving selector or details.
+  graph node when leaving selector or details. Add `D` to open or enter node
+  details, `L` to open or enter the flow selector, `R` to return from details
+  without closing, and `Escape` return/closure behavior.
 - User / Domain Value: a keyboard-only user can choose a flow scope, inspect
   the selected node, and return to the graph without losing context.
 - Cohesive Change Group:
@@ -315,8 +432,22 @@ the complete state model.
 - Acceptance:
   - Activating an existing root-jobnet scope action focuses its rendered root
     node after the graph is ready.
+  - From an owned graph focus target, unmodified `D` opens or focuses the
+    selected-node detail pane at its heading or first enabled action.
+  - From an owned flow-viewer or graph focus target, unmodified `L` opens or
+    focuses the selector at the current scope root, falling back to the first
+    eligible root jobnet. Selector `Escape` returns to the saved graph node
+    without changing scope.
+  - In flow details, unmodified `R` restores the saved graph node without
+    closing the pane. `Escape` closes the definition dialog first or, when no
+    dialog is open, closes the detail pane and restores the saved graph node.
+  - `D`, `L`, and `R` do not run for modified keys or events from editable or
+    nested interactive controls. Shared tree arrows and activation remain
+    owned by Slice 4.
   - Leaving the selector without changing scope and closing details restore the
-    previously focused graph node or the documented graph fallback.
+    previously focused graph node or the graph region's single entry target
+    without selecting another node or changing scope, zoom, or viewport
+    position.
   - MUI Dialog's default focus restoration is verified first. Dialog code
     changes only when tests prove the invoking detail action is not restored.
   - Flow scope timing and focus requests remain separate from shared tree
@@ -324,26 +455,39 @@ the complete state model.
 - Validation:
   extend `flowSelector.test.ts`, `flowNodeDetailPanelCollapse.test.ts`, flow
   viewport-focus, stale-target, asynchronous scope readiness, and dialog
-  default-restoration coverage; `rtk pnpm test`; `rtk pnpm run test:web`;
-  `rtk pnpm run qlty` with no new smell findings.
+  default-restoration coverage with `D`, `L`, `R`, `Escape` precedence,
+  uppercase and lowercase keys, modifier rejection, editable/nested-control
+  exclusion, current-scope and first-eligible selector targets, and
+  return-without-scope-change cases; missing saved-node restoration verifies
+  the shared graph-region entry fallback with unchanged selection,
+  scope/zoom/viewport; `rtk pnpm test`;
+  `rtk pnpm run test:web`; `rtk pnpm run qlty` with no new smell findings.
 - Production Readiness:
-  - Failure mode: unavailable scope or node uses the selector or graph region
-    entry fallback and exposes no false selection.
+  - Failure mode: an unavailable selector target uses the first eligible root
+    jobnet. An unavailable saved graph node focuses the graph region's entry
+    target without false selection, scope change, zoom reset, or viewport
+    movement.
   - JP1/AJS compatibility: existing root-jobnet eligibility and scope rules are
     unchanged.
   - Large or malformed input risk: scope changes do not expand all nested units
     and focus lookup remains bounded.
   - Desktop/web impact: asynchronous graph readiness and browser focus are
-    verified in both hosts without VS Code or Node APIs.
-  - README/docs impact: document scope, detail, and return behavior.
+    verified in both hosts without VS Code or Node APIs; shortcut event
+    filtering must remain browser-safe.
+  - README/docs impact: document `D`, `L`, `R`, `Escape`, scope, detail, and
+    return behavior.
   - CHANGELOG impact: required for the expanded keyboard workflow.
-- Approval Boundary: flow-specific scope and detail focus continuity, tests,
-  and docs only. Shared tree semantics remain owned by Slice 4.
+- Approval Boundary: flow-specific scope/detail focus continuity,
+  `D`/`L`/`R`/Escape handling, tests, and docs only. Shared tree semantics
+  remain owned by Slice 4.
 - Dependencies: Slices 3 and 4.
 - Risks: scope rerender timing may race focus; responsive panel collapse may
-  occur while focused; the invoking dialog action may unmount.
+  occur while focused; the invoking dialog action may unmount; printable
+  shortcuts may conflict with assistive technology, speech input, or text
+  entry unless event ownership is exact.
 - Out of Scope: changing scope eligibility, hierarchy semantics, graph layout,
-  automatically expanding nested units, or pane shortcuts.
+  automatically expanding nested units, relationship navigation keys, or
+  shortcuts beyond `D`, `L`, `R`, and the paired `Escape` behavior.
 
 ### Slice 6: Localized Semantic State And Announcements
 
@@ -352,7 +496,8 @@ the complete state model.
   announcements for both viewers. Cover search results, selection, sort,
   relationship and scope changes, copy completion, and errors while excluding
   hover and layout chatter. Localize React Flow accessibility descriptions to
-  match the approved read-only navigation model.
+  match the revised read-only navigation model, including Left/Right,
+  Down/Up, Shift+Down/Shift+Up, Enter/Escape, and normal Tab traversal.
 - User / Domain Value: a screen-reader user can understand what changed and
   which unit or relationship is current in English or Japanese.
 - Cohesive Change Group:
@@ -368,16 +513,20 @@ the complete state model.
     error outcomes announce once with an appropriate polite or assertive level.
   - Hover, graph layout, camera motion, and redundant selection do not announce.
   - English fallback remains deterministic for unsupported locale values.
+  - English and Japanese React Flow instructions describe the revised flow key
+    map and do not retain the rejected Tab/Shift+Tab relationship traversal or
+    unmodified Down/Up expand/collapse instructions.
   - React Flow built-in instructions do not describe dragging, deletion, or
     other disabled behavior.
 - Validation:
   unit tests for English/Japanese labels, interpolation, fallback, announcement
-  deduplication, politeness, and excluded events; header, node display, search,
-  and detail regressions; `rtk pnpm test`; `rtk pnpm run test:web`;
-  `rtk pnpm run qlty` with no new smell findings.
+  deduplication, politeness, excluded events, the exact revised flow key map,
+  normal Tab traversal, and absence of the rejected key instructions; header,
+  node display, search, and detail regressions; `rtk pnpm test`;
+  `rtk pnpm run test:web`; `rtk pnpm run qlty` with no new smell findings.
 - Production Readiness:
   - Failure mode: missing localization keys fall back to English and never
-    announce raw identifiers as instructions.
+    announce raw identifiers or stale key mappings as instructions.
   - JP1/AJS compatibility: unit names and existing relationship terms are
     presented but not reinterpreted.
   - Large or malformed input risk: announcements describe the active event and
@@ -392,7 +541,8 @@ the complete state model.
   protocol changes.
 - Dependencies: Slices 1 through 5.
 - Risks: MUI Alert/Snackbar and React Flow live regions can cause duplicate or
-  overly assertive announcements; translated strings may omit needed context.
+  overly assertive announcements; translated strings may omit needed context
+  or retain instructions for the superseded key map.
 - Out of Scope: announcing hover/layout, adding telemetry, changing extension
   localization infrastructure, and extension-wide translation cleanup.
 
@@ -419,13 +569,17 @@ the complete state model.
     dark, and high-contrast themes.
   - Windows desktop with NVDA, macOS desktop with VoiceOver, VS Code Web in a
     Chromium browser, Windows high contrast, and a large or deeply nested
-    definition complete the search/select/traverse/detail/return workflow.
+    definition complete the search/select/traverse/detail/return workflow,
+    including flow Down/Up, Shift+Down/Up, Enter, Escape, normal Tab exit, and
+    `H`, `D`, `R`, and `L` with editable-control exclusions.
   - Full desktop and web tests, production build, qlty, README, and CHANGELOG
     evidence are complete.
 - Validation:
   focused style resolver/component tests; `rtk pnpm test`;
   `rtk pnpm run test:web`; `rtk pnpm run build`; `rtk pnpm run qlty` with no
-  new smell findings; manual matrix recorded before completion.
+  new smell findings; manual matrix records the full shortcut round trips,
+  flow modifier separation, normal Tab and text entry, nested native controls,
+  and screen-reader interaction before completion.
 - Production Readiness:
   - Failure mode: unsupported theme variables fall back to visible borders,
     text, or icons rather than transparent state.
@@ -466,6 +620,8 @@ the complete state model.
   continuity work in Slice 5.
 - Shared detail-pane changes in Slices 2 and 5 must preserve both viewers; the
   later slice extends the reviewed contract rather than replacing it.
+- Slices 2 and 5 establish the viewer-owned shortcut event guards consumed by
+  Slice 7's cross-platform and assistive-technology validation.
 - Slice 6 must avoid duplicate announcements from MUI and React Flow.
 - Slice 7 validates the integrated state model but does not own fixes for
   earlier behavior. Changed design or approval boundaries require Replanning
@@ -481,6 +637,9 @@ the complete state model.
   tests alone.
 - Required Windows/NVDA and macOS/VoiceOver evidence may need coordinated human
   validation before Feature Exit.
+- Single-character shortcuts can conflict with screen-reader quick navigation,
+  speech input, editable fields, or nested native controls if their owning
+  focus region and event exclusions are too broad.
 
 ## Implementation Feedback
 
@@ -503,6 +662,32 @@ the complete state model.
   column's right edge as the effective visible boundary. Browser
   `scrollIntoView` considers a cell visible even while that cell is occluded by
   the sticky column.
+- Slice 2 confirmed that row selection equality cannot be used as a focus
+  restoration signal: selecting the current search result again leaves the
+  selected path unchanged. Workflow focus therefore needs an explicit request
+  separate from selection state. This is feature-specific planning feedback,
+  not a new repository-wide architecture rule.
+- Slice 2 verification exposed that normal Tab reachability alone does not
+  provide a direct keyboard path to reopen and enter the current selection's
+  closed detail pane. The Notion candidate had proposed `H`, `D`, `R`, and `L`,
+  but the initial feature plan explicitly excluded them. Replanning adds those
+  shortcuts with strict event ownership and editable-control exclusions while
+  retaining normal Tab and Shift+Tab traversal.
+- Slice 2 confirmed that the shared detail pane can expose an opt-in
+  focus-request and return-focus contract. The list viewer enables that
+  contract now, while the flow viewer remains unchanged until Slice 5. This
+  preserves the approved cross-slice boundary and does not require a new
+  durable architecture rule.
+- Human follow-up refined the flow candidate map without capturing Tab:
+  next/previous shared-predecessor traversal moves from Tab/Shift+Tab to
+  Down/Up, while expand/collapse moves from Down/Up to
+  Shift+Down/Shift+Up. Enter-child and Escape-parent complete the parent/child
+  relationship path in Slice 3.
+- Plan review found that the graph-node restoration fallback was referenced but
+  not defined, and that Slice 6's localized React Flow instructions necessarily
+  change with the revised key map. Replanning defines the shared graph-region
+  entry fallback and returns Slice 6 to renewed review and approval without
+  changing slice count or order.
 
 ## Assumptions And Compatibility
 

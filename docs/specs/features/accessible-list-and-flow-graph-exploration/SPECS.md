@@ -106,15 +106,27 @@ Scenario: Viewer state remains perceivable without color
   headers use Enter or Space, and focus returns by stable unit identity after
   sorting or virtualization.
 - Flow nodes expose meaningful labels and remain keyboard focus targets.
-  Left, Right, Up, and Down traverse predecessor, successor, parent, and child
-  relationships respectively; a missing target leaves selection and focus
+  Left and Right traverse predecessor and successor relationships. Down and Up
+  move to the next or previous node with the same deterministic primary
+  predecessor, defined as the first predecessor in rendered order, falling
+  back to the next or previous sibling. Shift+Down and Shift+Up expand and
+  collapse the current nested jobnet. Enter moves to the first child, and
+  Escape returns to the parent; a missing target leaves selection and focus
   unchanged.
+- Successful nested expansion or collapse preserves the current node by stable
+  identity, restores DOM focus after React Flow rerendering, and does not
+  change graph scope or zoom. If that node is unavailable after rendering,
+  focus moves to the graph region's single entry target without changing node
+  selection, graph scope, zoom, or viewport position. This graph-region entry
+  target is the shared fallback for graph-node restoration throughout the
+  feature.
 - Flow relationship keys run only when the node wrapper itself owns focus.
   Events originating from nested buttons, links, or inputs keep their native
   behavior and do not trigger graph traversal.
-- Multiple flow-navigation targets use deterministic rendered order. Nested
-  expansion, scope opening, and detail actions remain explicit focusable
-  controls instead of overloading relationship keys.
+- Multiple flow-navigation targets use deterministic rendered order. The
+  Shift+Up/Down expansion shortcuts supplement the existing explicit nested
+  controls; scope opening and detail actions remain explicit focusable
+  controls.
 - The shared unit selector uses one `tree`/`treeitem` contract with roving row
   focus. Up and Down move between visible enabled rows, Right expands or enters
   children, Left collapses or returns to a parent, and Home and End move to the
@@ -123,11 +135,25 @@ Scenario: Viewer state remains perceivable without color
   Tab, Enter, and Space behavior.
 - React Flow node dragging and edge Tab stops are not part of this read-only
   viewer. Built-in accessibility descriptions are localized and aligned with
-  the viewer's actual keyboard behavior.
-- The proposed single-character `H`, `D`, `R`, and `L` shortcuts are excluded
-  from the initial plan. Equivalent actions remain keyboard reachable through
-  the grid, graph, selector, and detail controls without adding a shortcut
-  disable or remap preference.
+  the viewer's actual keyboard behavior. They describe Left/Right, Down/Up,
+  Shift+Down/Shift+Up, Enter, Escape, and normal Tab traversal without
+  retaining instructions for the rejected Tab-based relationship map.
+- In the unit-list grid, unmodified `H` moves from a data cell to its current
+  column header and header `Escape` returns to the saved cell. Unmodified `D`
+  opens the selected unit's detail pane when necessary and moves focus to its
+  heading or first action.
+- In either viewer's detail pane, unmodified `R` returns to the saved cell or
+  graph node without closing the pane. `Escape` closes the active definition
+  dialog first, otherwise closes the pane, and restores the invoking detail
+  action or saved viewer target respectively.
+- In the flow graph, unmodified `D` opens or focuses the selected-node detail
+  pane. Unmodified `L` opens or focuses the flow selector at the current scope
+  root, or the first eligible root-jobnet fallback. Selector `Escape` returns
+  to the saved graph node without changing scope.
+- Single-character shortcuts run only when their owning composite or pane has
+  focus and the event does not originate from an input, textarea, select,
+  contenteditable element, or nested interactive control. Modified keys and
+  native control behavior are not intercepted.
 - Focus movement and selection are separate state transitions. Camera
   centering or fitting does not count as DOM focus restoration.
 
@@ -140,7 +166,8 @@ Scenario: Viewer state remains perceivable without color
   unit tree, and shared detail-pane behavior.
 - Likely focused tests include table navigation and header behavior, flow
   selector, flow search and viewport focus, relationship focus, unit-tree
-  selection, and detail-panel focus restoration.
+  selection, detail-panel focus restoration, and shortcut event-boundary
+  handling.
 - Durable behavior changes are propagated to `uc-view-unit-list.md` and
   `uc-explore-flow-graph.md`. Parser, Domain, Application, CSV, diagnostics,
   and cross-view command behavior remain unchanged.
@@ -169,10 +196,12 @@ Scenario: Viewer state remains perceivable without color
   technology conflicts, native Webview focus order, and ARIA pattern selection
   require focused planning and validation.
 - Reassign Tab and Shift+Tab to flow siblings: rejected because the keys retain
-  their normal role of moving between Webview components.
-- Add single-character pane shortcuts: rejected for the initial plan because
-  the same actions can remain keyboard reachable without adding shortcut
-  preferences or speech-input activation risk.
+  their normal role of moving between Webview components. The candidate's
+  next/previous shared-predecessor behavior uses Down and Up instead.
+- Omit single-character pane shortcuts: rejected during replanning because
+  keyboard users otherwise have no direct way to reopen and enter a closed
+  detail pane for the current selection. Event ownership and editable-control
+  exclusions limit speech-input and native-control activation risk.
 
 ### Approval Impact Decisions
 

@@ -10,6 +10,8 @@ import {
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
   resolveTableGridFocus,
+  resolveTableGridRestorationFocus,
+  resolveUnitListGridShortcut,
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
 import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
@@ -63,6 +65,16 @@ suite("Table navigation", () => {
     );
     assert.deepStrictEqual(
       resolveTableGridFocus(
+        { kind: "header", columnId: "#" },
+        undefined,
+        rows,
+        columns,
+        sortable,
+      ),
+      { kind: "header", columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridFocus(
         { kind: "cell", absolutePath: "/root/b", columnId: "comment" },
         "/root/b",
         ["/root/b", "/root/a"],
@@ -79,6 +91,47 @@ suite("Table navigation", () => {
         ["#"],
         [],
       ),
+      undefined,
+    );
+  });
+
+  test("restores workflow focus by stable path and visible column", () => {
+    const rows = ["/root/a", "/root/b"];
+    const columns = ["#", "name", "comment"];
+    const sortable = ["name", "comment"];
+
+    assert.deepStrictEqual(
+      resolveTableGridRestorationFocus(
+        { kind: "cell", absolutePath: "/root/a", columnId: "comment" },
+        "/root/b",
+        rows,
+        columns,
+        sortable,
+      ),
+      { kind: "cell", absolutePath: "/root/b", columnId: "comment" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridRestorationFocus(
+        { kind: "cell", absolutePath: "/root/b", columnId: "hidden" },
+        "/root/b",
+        rows,
+        ["#", "name"],
+        ["name"],
+      ),
+      { kind: "cell", absolutePath: "/root/b", columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridRestorationFocus(
+        { kind: "cell", absolutePath: "/removed", columnId: "comment" },
+        "/removed",
+        rows,
+        columns,
+        sortable,
+      ),
+      { kind: "header", columnId: "name" },
+    );
+    assert.strictEqual(
+      resolveTableGridRestorationFocus(undefined, "/removed", [], [], []),
       undefined,
     );
   });
@@ -175,10 +228,30 @@ suite("Table navigation", () => {
     assert.deepStrictEqual(
       moveTableGridFocus({
         ...base,
+        current: { kind: "header", columnId: "#" },
+        key: "ArrowRight",
+      }),
+      { kind: "header", columnId: "name" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
         current: { kind: "header", columnId: "name" },
         key: "ArrowRight",
       }),
       { kind: "header", columnId: "comment" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: {
+          kind: "cell",
+          absolutePath: "/root/a",
+          columnId: "#",
+        },
+        key: "ArrowUp",
+      }),
+      { kind: "header", columnId: "#" },
     );
     assert.deepStrictEqual(
       moveTableGridFocus({
@@ -203,6 +276,52 @@ suite("Table navigation", () => {
     assert.strictEqual(isTableGridNavigationKey("Tab"), false);
     assert.strictEqual(isTableGridNavigationKey("Home"), true);
     assert.strictEqual(isTableGridNavigationKey("End", true), true);
+  });
+
+  test("resolves list grid shortcuts only for their owned focus target", () => {
+    const cell = {
+      kind: "cell" as const,
+      absolutePath: "/root/job",
+      columnId: "name",
+    };
+    const header = { kind: "header" as const, columnId: "name" };
+
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "h" }),
+      "focusColumnHeader",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "H" }),
+      "focusColumnHeader",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "d" }),
+      "openDetails",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "D" }),
+      "openDetails",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: header, key: "Escape" }),
+      "returnToSavedCell",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: header, key: "d" }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "h", shiftKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "d", ctrlKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "d", metaKey: true }),
+      undefined,
+    );
   });
 
   test("reveals a cell that would otherwise sit behind the sticky index column", () => {
@@ -320,9 +439,11 @@ suite("Table navigation", () => {
       { original: { id: "job", absolutePath: "/root/job" } },
     ] as never;
     const selected: string[] = [];
+    const focused: string[] = [];
     const context = {
       rows,
       selectRow: (absolutePath: string) => selected.push(absolutePath),
+      requestFocus: (absolutePath: string) => focused.push(absolutePath),
     };
 
     assert.strictEqual(
@@ -335,5 +456,6 @@ suite("Table navigation", () => {
     );
     assert.strictEqual(revealTableRow({ absolutePath: 1 }, context), false);
     assert.deepStrictEqual(selected, ["/root/job"]);
+    assert.deepStrictEqual(focused, ["/root/job"]);
   });
 });

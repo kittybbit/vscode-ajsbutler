@@ -1,4 +1,12 @@
-import React, { FC, ReactNode, memo } from "react";
+import React, {
+  FC,
+  KeyboardEvent,
+  ReactNode,
+  RefObject,
+  memo,
+  useEffect,
+  useRef,
+} from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -44,12 +52,59 @@ type SharedUnitDetailPaneProps = {
   expandTooltip?: string;
   closeTooltip?: string;
   onClose: VoidFunction;
+  onReturnFocus?: VoidFunction;
+  focusRequestRevision?: number;
+  onFocusRequestHandled?: (revision: number) => void;
   rows?: readonly SharedUnitDetailPaneRow[];
   relationshipRows?: readonly SharedUnitDetailPaneRow[];
   chips?: readonly SharedUnitDetailPaneChip[];
   actions?: readonly SharedUnitDetailPaneAction[];
   children?: ReactNode;
   sx?: SxProps<Theme>;
+};
+
+export type DetailPaneShortcut = "close" | "return";
+
+type DetailPaneShortcutContext = {
+  key: string;
+  altKey?: boolean;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  shiftKey?: boolean;
+};
+
+const excludedShortcutTargetSelector =
+  'a[href], button, input, select, textarea, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"]';
+
+export const isDetailPaneShortcutTargetExcluded = (
+  target: EventTarget | null,
+): boolean => {
+  const candidate = target as
+    | { closest?: (selector: string) => unknown }
+    | undefined;
+  return Boolean(candidate?.closest?.(excludedShortcutTargetSelector));
+};
+
+export const resolveDetailPaneShortcut = ({
+  key,
+  altKey = false,
+  ctrlKey = false,
+  metaKey = false,
+  shiftKey = false,
+}: DetailPaneShortcutContext): DetailPaneShortcut | undefined => {
+  if (altKey || ctrlKey || metaKey || shiftKey) return undefined;
+  if (key.toLowerCase() === "r") return "return";
+  return key === "Escape" ? "close" : undefined;
+};
+
+export const resolveDetailPaneShortcutForTarget = (
+  context: DetailPaneShortcutContext,
+  target: EventTarget | null,
+): DetailPaneShortcut | undefined => {
+  const shortcut = resolveDetailPaneShortcut(context);
+  return shortcut === "return" && isDetailPaneShortcutTargetExcluded(target)
+    ? undefined
+    : shortcut;
 };
 
 const paneWidth = 360;
@@ -72,7 +127,10 @@ type SharedUnitDetailPaneLayoutProps = Pick<
   | "expandTooltip"
   | "onClose"
   | "sx"
->;
+> & {
+  focusTargetRef?: RefObject<HTMLElement | null>;
+  onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
+};
 
 type SharedUnitDetailPaneContentProps = Pick<
   SharedUnitDetailPaneProps,
@@ -168,6 +226,7 @@ const DetailPaneHeader: FC<
     SharedUnitDetailPaneProps,
     "closeAriaLabel" | "collapseTooltip" | "onClose" | "subtitle" | "title"
   > & {
+    focusTargetRef?: RefObject<HTMLElement | null>;
     onCollapse: VoidFunction;
   }
 > = ({
@@ -177,11 +236,12 @@ const DetailPaneHeader: FC<
   onCollapse,
   subtitle,
   title,
+  focusTargetRef,
 }) => (
   <Stack direction="row" spacing={1} alignItems="flex-start">
     <Box sx={{ minWidth: 0, flex: 1 }}>
       <Tooltip title={title} placement="top-start">
-        <Typography variant="h6" noWrap>
+        <Typography ref={focusTargetRef} variant="h6" noWrap tabIndex={-1}>
           {title}
         </Typography>
       </Tooltip>
@@ -292,11 +352,14 @@ const ExpandedDetailPane: FC<
   subtitle,
   sx,
   title,
+  focusTargetRef,
+  onKeyDown,
 }) => (
   <Paper
     component="aside"
     aria-label={ariaLabel}
     variant="outlined"
+    onKeyDown={onKeyDown}
     sx={[
       {
         width: paneWidth,
@@ -318,6 +381,7 @@ const ExpandedDetailPane: FC<
         onCollapse={onCollapse}
         subtitle={subtitle}
         title={title}
+        focusTargetRef={focusTargetRef}
       />
       <DetailRowsSection rows={rows} />
       <DetailRowsSection rows={relationshipRows} />
@@ -332,6 +396,32 @@ const SharedUnitDetailPane: FC<SharedUnitDetailPaneProps> = (props) => {
   const theme = useTheme();
   const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
   const { collapse, collapsed, expand } = useResponsivePanelCollapse(isNarrow);
+  const focusTargetRef = useRef<HTMLElement>(null);
+  const focusRequestRevision = props.focusRequestRevision ?? 0;
+
+  useEffect(() => {
+    if (focusRequestRevision <= 0) return;
+    if (collapsed) {
+      expand();
+      return;
+    }
+    if (!focusTargetRef.current) return;
+    focusTargetRef.current.focus();
+    props.onFocusRequestHandled?.(focusRequestRevision);
+  }, [collapsed, expand, focusRequestRevision, props.onFocusRequestHandled]);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!props.onReturnFocus) return;
+    const shortcut = resolveDetailPaneShortcutForTarget(event, event.target);
+    if (!shortcut) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (shortcut === "return") {
+      props.onReturnFocus?.();
+      return;
+    }
+    props.onClose();
+  };
 
   return collapsed ? (
     <CollapsedDetailPane
@@ -347,6 +437,8 @@ const SharedUnitDetailPane: FC<SharedUnitDetailPaneProps> = (props) => {
       {...props}
       closeAriaLabel={props.closeAriaLabel ?? "Close details"}
       collapseTooltip={props.collapseTooltip ?? "Collapse details"}
+      focusTargetRef={focusTargetRef}
+      onKeyDown={handleKeyDown}
       onCollapse={collapse}
     />
   );

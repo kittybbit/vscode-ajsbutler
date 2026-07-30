@@ -21,7 +21,13 @@ import {
   createUnitListDetailResolver,
   resolveUnitListDetail,
 } from "../../presentation/webview/editor/ajsTable/unitListDetail";
-import { getSharedUnitDetailPaneActionLabels } from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
+import {
+  getSharedUnitDetailPaneActionLabels,
+  isDetailPaneShortcutTargetExcluded,
+  resolveDetailPaneShortcut,
+  resolveDetailPaneShortcutForTarget,
+} from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
+import { UnitDefinitionDialog } from "../../presentation/webview/editor/UnitDefinitionDialog";
 
 const dialogData: UnitDefinitionDialogDto = {
   absolutePath: "/root/job1",
@@ -270,6 +276,52 @@ suite("Show Unit Definition interaction", () => {
     assert.strictEqual(
       getUnitListDetailSubtitle(detail, "unsupported"),
       "Unix job",
+    );
+  });
+
+  test("definition dialog keeps MUI default focus restoration enabled", () => {
+    const dialog = UnitDefinitionDialog({
+      dialogData,
+      onClose: () => undefined,
+    }) as React.ReactElement;
+
+    const props = dialog.props as { disableRestoreFocus?: boolean };
+    assert.strictEqual(props.disableRestoreFocus, undefined);
+  });
+
+  test("detail pane handles return and close only outside nested controls", () => {
+    const nestedButton = {
+      closest: () => ({ tagName: "BUTTON" }),
+    } as never;
+    assert.strictEqual(resolveDetailPaneShortcut({ key: "r" }), "return");
+    assert.strictEqual(resolveDetailPaneShortcut({ key: "R" }), "return");
+    assert.strictEqual(resolveDetailPaneShortcut({ key: "Escape" }), "close");
+    assert.strictEqual(
+      resolveDetailPaneShortcut({ key: "r", altKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveDetailPaneShortcut({ key: "Escape", shiftKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveDetailPaneShortcut({ key: "r", metaKey: true }),
+      undefined,
+    );
+    assert.strictEqual(isDetailPaneShortcutTargetExcluded(nestedButton), true);
+    assert.strictEqual(
+      resolveDetailPaneShortcutForTarget({ key: "r" }, nestedButton),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveDetailPaneShortcutForTarget({ key: "Escape" }, nestedButton),
+      "close",
+    );
+    assert.strictEqual(
+      isDetailPaneShortcutTargetExcluded({
+        closest: () => null,
+      } as never),
+      false,
     );
   });
 

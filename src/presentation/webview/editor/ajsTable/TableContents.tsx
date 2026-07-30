@@ -56,6 +56,7 @@ import {
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
   selectUnitTreeUnitInTable,
+  type TableGridFocusRequest,
 } from "./navigation";
 import { getTableSearchResultPosition } from "./tableSearchState";
 import type {
@@ -112,6 +113,7 @@ type TableViewerShellProps = {
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   detailPaneClosed: boolean;
   closeDetailPane: VoidFunction;
+  detailFocusRequestRevision: number;
   dialogData: UnitDefinitionDialogDto | undefined;
   setDialogData: React.Dispatch<
     React.SetStateAction<UnitDefinitionDialogDto | undefined>
@@ -120,6 +122,10 @@ type TableViewerShellProps = {
   selectedDetail: ReturnType<typeof resolveUnitListDetail>;
   selectedUnitId: string | undefined;
   selectRow: (absolutePath: string) => void;
+  openDetailPane: (absolutePath: string) => void;
+  handleDetailFocusRequest: (revision: number) => void;
+  returnToGrid: VoidFunction;
+  restoreGridFocusRequest: TableGridFocusRequest;
   rootUnits: UnitListRootDto[];
   unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
   selectTreeUnit: (unitId: string) => void;
@@ -241,11 +247,16 @@ const TableViewerShell = ({
   parameterSearchValuesByPath,
   detailPaneClosed,
   closeDetailPane,
+  detailFocusRequestRevision,
   dialogData,
   setDialogData,
   selectedAbsolutePath,
   selectedDetail,
   selectRow,
+  openDetailPane,
+  handleDetailFocusRequest,
+  returnToGrid,
+  restoreGridFocusRequest,
   selectedUnitId,
   rootUnits,
   unitById,
@@ -326,12 +337,16 @@ const TableViewerShell = ({
                 parameterSearchValuesByPath={parameterSearchValuesByPath}
                 selectedAbsolutePath={selectedAbsolutePath}
                 selectRow={selectRow}
+                openDetailPane={openDetailPane}
+                restoreFocusRequest={restoreGridFocusRequest}
               />
             </Box>
             {selectedDetail && !detailPaneClosed && (
               <UnitListDetailPanel
                 detail={selectedDetail}
+                focusRequestRevision={detailFocusRequestRevision}
                 onClose={closeDetailPane}
+                onFocusRequestHandled={handleDetailFocusRequest}
                 onOpenDefinition={() => {
                   reportTableOperation("definition.open");
                   setDialogData(selectedDetail.definition);
@@ -339,6 +354,7 @@ const TableViewerShell = ({
                 onOpenFlow={() =>
                   navigateToFlow(selectedDetail.row.absolutePath)
                 }
+                onReturnFocus={returnToGrid}
               />
             )}
           </Stack>
@@ -374,6 +390,10 @@ const TableContents = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [detailPaneClosed, setDetailPaneClosed] = useState(false);
+  const [detailFocusRequestRevision, setDetailFocusRequestRevision] =
+    useState(0);
+  const [restoreGridFocusRequest, setRestoreGridFocusRequest] =
+    useState<TableGridFocusRequest>({ revision: 0 });
   const [selectedAbsolutePath, dispatchRowSelection] = useReducer(
     reduceTableRowSelection,
     undefined,
@@ -382,6 +402,31 @@ const TableContents = () => {
     setDetailPaneClosed(false);
     dispatchRowSelection({ type: "select", absolutePath });
   }, []);
+  const requestGridFocus = useCallback((absolutePath?: string) => {
+    setRestoreGridFocusRequest((request) => ({
+      revision: request.revision + 1,
+      absolutePath,
+    }));
+  }, []);
+  const closeDetailPane = useCallback(() => {
+    setDetailPaneClosed(true);
+    requestGridFocus(selectedAbsolutePath);
+  }, [requestGridFocus, selectedAbsolutePath]);
+  const openDetailPane = useCallback(
+    (absolutePath: string) => {
+      selectRow(absolutePath);
+      setDetailFocusRequestRevision((revision) => revision + 1);
+    },
+    [selectRow],
+  );
+  const handleDetailFocusRequest = useCallback((revision: number) => {
+    setDetailFocusRequestRevision((current) =>
+      current === revision ? 0 : current,
+    );
+  }, []);
+  const returnToGrid = useCallback(() => {
+    requestGridFocus(selectedAbsolutePath);
+  }, [requestGridFocus, selectedAbsolutePath]);
   const { tableData, unitDefinitionByPath, changeDocument } =
     useChangeDocument();
   const rowViews = tableData?.rows;
@@ -389,6 +434,7 @@ const TableContents = () => {
   const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
     selectRow,
     rowsRef,
+    requestGridFocus,
   );
 
   const viewerData = useMemo(
@@ -495,13 +541,18 @@ const TableContents = () => {
       columnVisibility={columnVisibility}
       parameterSearchValuesByPath={parameterSearchValuesByPath}
       detailPaneClosed={detailPaneClosed}
-      closeDetailPane={() => setDetailPaneClosed(true)}
+      closeDetailPane={closeDetailPane}
+      detailFocusRequestRevision={detailFocusRequestRevision}
       dialogData={dialogData}
       setDialogData={setDialogData}
       selectedAbsolutePath={selectedAbsolutePath}
       selectedDetail={selectedDetail}
       selectedUnitId={selectedUnitId}
       selectRow={selectRow}
+      openDetailPane={openDetailPane}
+      handleDetailFocusRequest={handleDetailFocusRequest}
+      returnToGrid={returnToGrid}
+      restoreGridFocusRequest={restoreGridFocusRequest}
       rootUnits={viewerData.rootUnits}
       unitById={viewerData.unitById}
       selectTreeUnit={selectTreeUnit}

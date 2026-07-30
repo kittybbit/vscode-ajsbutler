@@ -35,8 +35,16 @@ const sortLabelSx: SxProps<Theme> = {
   "&:focus-visible": { outline: "-webkit-focus-ring-color auto 1px" },
 };
 
+const headerCellFocusSx: SxProps<Theme> = {
+  "&:focus-visible": { outline: "-webkit-focus-ring-color auto 1px" },
+};
+
 const canRenderSortableHeader = (header: Header<UnitListRowView, unknown>) =>
   header.subHeaders.length === 0 && header.column.getCanSort();
+
+export const canFocusTableHeader = (
+  header: Pick<Header<UnitListRowView, unknown>, "subHeaders">,
+): boolean => header.subHeaders.length === 0;
 
 export const getTableHeaderAriaSort = (
   header: Pick<Header<UnitListRowView, unknown>, "column">,
@@ -94,14 +102,34 @@ const renderHeaderCell = (
 ): React.ReactNode => {
   const firstLeafColumnId = header.getLeafHeaders()[0]?.column.id;
   const columnIndex = props.visibleColumnIds.indexOf(firstLeafColumnId);
+  const focus: TableGridFocus = {
+    kind: "header",
+    columnId: header.column.id,
+  };
+  const focusTableCell =
+    canFocusTableHeader(header) && !canRenderSortableHeader(header);
+  const isCurrent =
+    props.currentFocus?.kind === "header" &&
+    props.currentFocus.columnId === header.column.id;
   return (
     <TableCell
+      ref={
+        focusTableCell
+          ? (element) =>
+              props.registerFocusElement(focus, element as HTMLElement | null)
+          : undefined
+      }
       key={header.id}
       role="columnheader"
       aria-colindex={columnIndex >= 0 ? columnIndex + 1 : undefined}
       aria-sort={getTableHeaderAriaSort(header)}
       colSpan={header.colSpan}
-      sx={styleTableCell}
+      tabIndex={focusTableCell ? (isCurrent ? 0 : -1) : undefined}
+      onFocus={focusTableCell ? () => props.onFocus(focus) : undefined}
+      onKeyDown={
+        focusTableCell ? (event) => props.onKeyDown(event, focus) : undefined
+      }
+      sx={[styleTableCell, focusTableCell ? headerCellFocusSx : undefined]}
     >
       {header.isPlaceholder ? undefined : renderHeaderContent(header, props)}
     </TableCell>

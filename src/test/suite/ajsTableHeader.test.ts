@@ -10,7 +10,10 @@ import {
   getVisibleColumnSelectorColumns,
 } from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { getFixedTableVirtuosoStyle } from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
-import { getTableHeaderAriaSort } from "../../presentation/webview/editor/ajsTable/TableHeader";
+import {
+  canFocusTableHeader,
+  getTableHeaderAriaSort,
+} from "../../presentation/webview/editor/ajsTable/TableHeader";
 
 suite("AJS Table Header", () => {
   test("formats visible and total unit counts", () => {
@@ -79,6 +82,14 @@ suite("AJS Table Header", () => {
       "descending",
     );
     assert.strictEqual(getTableHeaderAriaSort(header(false, false)), undefined);
+  });
+
+  test("keeps every leaf column header available as a grid focus target", () => {
+    assert.strictEqual(canFocusTableHeader({ subHeaders: [] } as never), true);
+    assert.strictEqual(
+      canFocusTableHeader({ subHeaders: [{}] } as never),
+      false,
+    );
   });
 
   test("filters column selector options to hideable columns", () => {

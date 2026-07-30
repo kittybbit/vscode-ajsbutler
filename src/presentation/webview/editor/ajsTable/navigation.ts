@@ -21,6 +21,11 @@ export type TableGridFocus =
   | { kind: "header"; columnId: string }
   | { kind: "cell"; absolutePath: string; columnId: string };
 
+export type TableGridFocusRequest = {
+  revision: number;
+  absolutePath?: string;
+};
+
 export type TableGridNavigationContext = {
   current: TableGridFocus | undefined;
   key: string;
@@ -29,6 +34,41 @@ export type TableGridNavigationContext = {
   rowAbsolutePaths: readonly string[];
   visibleColumnIds: readonly string[];
   sortableColumnIds: readonly string[];
+};
+
+export type UnitListGridShortcut =
+  | "focusColumnHeader"
+  | "openDetails"
+  | "returnToSavedCell";
+
+type UnitListGridShortcutContext = {
+  focus: TableGridFocus;
+  key: string;
+  altKey?: boolean;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  shiftKey?: boolean;
+};
+
+export const resolveUnitListGridShortcut = ({
+  focus,
+  key,
+  altKey = false,
+  ctrlKey = false,
+  metaKey = false,
+  shiftKey = false,
+}: UnitListGridShortcutContext): UnitListGridShortcut | undefined => {
+  if (altKey || ctrlKey || metaKey || shiftKey) return undefined;
+  const normalizedKey = key.toLowerCase();
+  if (focus.kind === "cell" && normalizedKey === "h") {
+    return "focusColumnHeader";
+  }
+  if (focus.kind === "cell" && normalizedKey === "d") {
+    return "openDetails";
+  }
+  return focus.kind === "header" && key === "Escape"
+    ? "returnToSavedCell"
+    : undefined;
 };
 
 const areTableGridFocusesEqual = (
@@ -58,7 +98,7 @@ export const resolveTableGridFocus = (
 ): TableGridFocus | undefined => {
   if (
     current?.kind === "header" &&
-    sortableColumnIds.includes(current.columnId)
+    visibleColumnIds.includes(current.columnId)
   ) {
     return current;
   }
@@ -93,6 +133,37 @@ export const resolveTableGridFocus = (
   return undefined;
 };
 
+export const resolveTableGridRestorationFocus = (
+  current: TableGridFocus | undefined,
+  targetAbsolutePath: string | undefined,
+  rowAbsolutePaths: readonly string[],
+  visibleColumnIds: readonly string[],
+  sortableColumnIds: readonly string[],
+): TableGridFocus | undefined => {
+  if (
+    targetAbsolutePath &&
+    rowAbsolutePaths.includes(targetAbsolutePath) &&
+    visibleColumnIds.length > 0
+  ) {
+    const preferredColumnId = current?.columnId;
+    return {
+      kind: "cell",
+      absolutePath: targetAbsolutePath,
+      columnId:
+        preferredColumnId && visibleColumnIds.includes(preferredColumnId)
+          ? preferredColumnId
+          : visibleColumnIds[0],
+    };
+  }
+  return resolveTableGridFocus(
+    undefined,
+    undefined,
+    rowAbsolutePaths,
+    visibleColumnIds,
+    sortableColumnIds,
+  );
+};
+
 const clampIndex = (index: number, itemCount: number): number =>
   Math.max(0, Math.min(index, itemCount - 1));
 
@@ -115,10 +186,8 @@ const moveHeaderFocus = ({
   ctrlKey,
   rowAbsolutePaths,
   visibleColumnIds,
-  sortableColumnIds,
 }: TableGridNavigationContext): TableGridFocus | undefined => {
   if (current?.kind !== "header") return current;
-  const sortableIndex = sortableColumnIds.indexOf(current.columnId);
   const visibleIndex = visibleColumnIds.indexOf(current.columnId);
 
   if (ctrlKey && key === "End") {
@@ -130,16 +199,16 @@ const moveHeaderFocus = ({
     );
   }
   if (key === "ArrowLeft" || key === "Home") {
-    const nextIndex = key === "Home" ? 0 : sortableIndex - 1;
+    const nextIndex = key === "Home" ? 0 : visibleIndex - 1;
     const columnId =
-      sortableColumnIds[clampIndex(nextIndex, sortableColumnIds.length)];
+      visibleColumnIds[clampIndex(nextIndex, visibleColumnIds.length)];
     return columnId ? { kind: "header", columnId } : current;
   }
   if (key === "ArrowRight" || key === "End") {
     const nextIndex =
-      key === "End" ? sortableColumnIds.length - 1 : sortableIndex + 1;
+      key === "End" ? visibleColumnIds.length - 1 : visibleIndex + 1;
     const columnId =
-      sortableColumnIds[clampIndex(nextIndex, sortableColumnIds.length)];
+      visibleColumnIds[clampIndex(nextIndex, visibleColumnIds.length)];
     return columnId ? { kind: "header", columnId } : current;
   }
   if (
@@ -203,9 +272,7 @@ const moveCellFocus = ({
     );
   }
   if (key === "ArrowUp" && rowIndex === 0) {
-    return sortableColumnIds.includes(current.columnId)
-      ? { kind: "header", columnId: current.columnId }
-      : current;
+    return { kind: "header", columnId: current.columnId };
   }
   if (
     key === "ArrowUp" ||

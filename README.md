@@ -23,7 +23,12 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   Arrow keys move between visible cells, Page Up and Page Down move by the
   visible page, Home and End move across a row, and Control+Home or Control+End
   move to the grid boundaries. Enter or Space changes sorting on a sortable
-  column header.
+  column header. From a data cell, H moves to the same column header and D
+  opens or enters the selected unit's detail pane. Escape returns from the
+  header to the saved cell. In the detail pane, R returns to the saved cell
+  without closing the pane, while Escape closes it and returns. Search results
+  restore the corresponding grid cell, and closing definition details returns
+  to the action that opened the dialog.
 - View unit definitions.
   ![unit-dialog](images/unit-dialog.png)
 - Save data in CSV format.

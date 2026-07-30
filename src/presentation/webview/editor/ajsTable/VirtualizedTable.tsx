@@ -38,8 +38,11 @@ import {
   isTableGridNavigationKey,
   isTableRowSelected,
   moveTableGridFocus,
+  resolveUnitListGridShortcut,
   resolveTableGridFocus,
+  resolveTableGridRestorationFocus,
   type TableGridFocus,
+  type TableGridFocusRequest,
 } from "./navigation";
 
 type VirtualizedTableProps = {
@@ -51,6 +54,8 @@ type VirtualizedTableProps = {
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   selectedAbsolutePath?: string;
   selectRow: (absolutePath: string) => void;
+  openDetailPane: (absolutePath: string) => void;
+  restoreFocusRequest: TableGridFocusRequest;
 };
 
 type VirtualizedTableContext = {
@@ -289,6 +294,8 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   parameterSearchValuesByPath,
   selectedAbsolutePath,
   selectRow,
+  openDetailPane,
+  restoreFocusRequest,
 }) => {
   console.log("render VirtualizedTable.");
 
@@ -321,8 +328,10 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   gridFocus.current = currentFocus;
   const [pageSize, setPageSize] = useState(10);
   const focusElements = useRef(new Map<string, HTMLElement>());
+  const headerReturnFocus = useRef<TableGridFocus | undefined>(undefined);
   const pendingFocusKey = useRef<string | undefined>(undefined);
-  const skipSelectedRowScrollPath = useRef<string | undefined>(undefined);
+  const observedSelectedAbsolutePath = useRef(selectedAbsolutePath);
+  const observedRestoreFocusRevision = useRef(restoreFocusRequest.revision);
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   const reportRowSelected = useCallback(
@@ -371,16 +380,80 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         focus.absolutePath !== selectedAbsolutePathRef.current
       ) {
         selectedAbsolutePathRef.current = focus.absolutePath;
-        skipSelectedRowScrollPath.current = focus.absolutePath;
         reportRowSelected();
         selectRow(focus.absolutePath);
       }
     },
     [applyRovingFocus, reportRowSelected, selectRow],
   );
+  const focusGridTarget = useCallback(
+    (nextFocus: TableGridFocus | undefined) => {
+      if (!nextFocus) return;
+      const nextKey = getTableGridFocusKey(nextFocus);
+      applyRovingFocus(nextFocus);
+      const mountedElement = nextKey
+        ? focusElements.current.get(nextKey)
+        : undefined;
+      if (mountedElement) {
+        pendingFocusKey.current = undefined;
+        revealGridFocusElement(mountedElement);
+        return;
+      }
+      if (nextFocus.kind !== "cell") return;
+
+      pendingFocusKey.current = nextKey;
+      const nextRowIndex = rowAbsolutePaths.indexOf(nextFocus.absolutePath);
+      if (nextRowIndex >= 0) {
+        virtuosoRef.current?.scrollToIndex({
+          index: nextRowIndex,
+          align: "center",
+          behavior: "auto",
+        });
+      }
+    },
+    [applyRovingFocus, rowAbsolutePaths],
+  );
   const handleGridKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => {
       if (event.target !== event.currentTarget) return;
+      const shortcut = resolveUnitListGridShortcut({
+        focus,
+        key: event.key,
+        altKey: event.altKey,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        shiftKey: event.shiftKey,
+      });
+      if (shortcut === "focusColumnHeader" && focus.kind === "cell") {
+        event.preventDefault();
+        headerReturnFocus.current = focus;
+        focusGridTarget({ kind: "header", columnId: focus.columnId });
+        return;
+      }
+      if (shortcut === "openDetails" && focus.kind === "cell") {
+        event.preventDefault();
+        openDetailPane(focus.absolutePath);
+        return;
+      }
+      if (shortcut === "returnToSavedCell") {
+        const returnFocus = headerReturnFocus.current;
+        if (returnFocus) {
+          event.preventDefault();
+          headerReturnFocus.current = undefined;
+          focusGridTarget(
+            resolveTableGridRestorationFocus(
+              returnFocus,
+              returnFocus.kind === "cell"
+                ? returnFocus.absolutePath
+                : undefined,
+              rowAbsolutePaths,
+              visibleColumnIds,
+              sortableColumnIds,
+            ),
+          );
+        }
+        return;
+      }
       if (!isTableGridNavigationKey(event.key, event.ctrlKey)) {
         if (focus.kind === "cell" && event.key === "Enter") {
           const action = event.currentTarget.querySelector<HTMLElement>(
@@ -406,28 +479,11 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       });
       const nextKey = getTableGridFocusKey(nextFocus);
       if (!nextFocus || nextKey === getTableGridFocusKey(focus)) return;
-
-      applyRovingFocus(nextFocus);
-      const mountedElement = nextKey
-        ? focusElements.current.get(nextKey)
-        : undefined;
-      if (mountedElement) {
-        pendingFocusKey.current = undefined;
-        revealGridFocusElement(mountedElement);
-      } else if (nextFocus.kind === "cell") {
-        pendingFocusKey.current = nextKey;
-        const nextRowIndex = rowAbsolutePaths.indexOf(nextFocus.absolutePath);
-        if (nextRowIndex >= 0) {
-          virtuosoRef.current?.scrollToIndex({
-            index: nextRowIndex,
-            align: "center",
-            behavior: "auto",
-          });
-        }
-      }
+      focusGridTarget(nextFocus);
     },
     [
-      applyRovingFocus,
+      focusGridTarget,
+      openDetailPane,
       pageSize,
       rowAbsolutePaths,
       sortableColumnIds,
@@ -517,12 +573,8 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   const virtuosoStyle = useMemo(() => getFixedTableVirtuosoStyle(), []);
 
   useEffect(() => {
+    if (observedSelectedAbsolutePath.current !== selectedAbsolutePath) return;
     if (rowIndex !== undefined) {
-      const selectedRowPath = rowAbsolutePaths[rowIndex];
-      if (skipSelectedRowScrollPath.current === selectedRowPath) {
-        skipSelectedRowScrollPath.current = undefined;
-        return;
-      }
       setTimeout(() => {
         virtuosoRef.current?.scrollToIndex({
           index: rowIndex,
@@ -531,7 +583,34 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         });
       }, 0);
     }
-  }, [rowAbsolutePaths, rowIndex]);
+  }, [rowIndex, selectedAbsolutePath]);
+
+  useEffect(() => {
+    observedSelectedAbsolutePath.current = selectedAbsolutePath;
+  }, [selectedAbsolutePath]);
+
+  useEffect(() => {
+    if (observedRestoreFocusRevision.current === restoreFocusRequest.revision) {
+      return;
+    }
+    observedRestoreFocusRevision.current = restoreFocusRequest.revision;
+    focusGridTarget(
+      resolveTableGridRestorationFocus(
+        gridFocus.current,
+        restoreFocusRequest.absolutePath ?? selectedAbsolutePath,
+        rowAbsolutePaths,
+        visibleColumnIds,
+        sortableColumnIds,
+      ),
+    );
+  }, [
+    focusGridTarget,
+    restoreFocusRequest,
+    rowAbsolutePaths,
+    selectedAbsolutePath,
+    sortableColumnIds,
+    visibleColumnIds,
+  ]);
 
   return (
     <>

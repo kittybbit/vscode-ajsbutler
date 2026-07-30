@@ -3,7 +3,9 @@
 ## Unreleased
 
 - Added keyboard data-grid navigation and logical table semantics to the unit
-  list, including stable cell focus across sorting and virtualized rows.
+  list, including stable cell focus across sorting, virtualized rows, search,
+  detail-pane closure, definition-dialog return, and H, D, R, and Escape
+  shortcuts for header and detail-pane round trips.
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization

@@ -12,9 +12,12 @@ import type { UnitListDetail } from "./unitListDetail";
 
 type UnitListDetailPanelProps = {
   detail: UnitListDetail;
+  focusRequestRevision: number;
   onClose: VoidFunction;
+  onFocusRequestHandled: (revision: number) => void;
   onOpenDefinition: VoidFunction;
   onOpenFlow: VoidFunction;
+  onReturnFocus: VoidFunction;
 };
 
 export const buildUnitListDetailRows = (
@@ -72,9 +75,12 @@ export const getUnitListDetailSubtitle = (
 
 const UnitListDetailPanel: FC<UnitListDetailPanelProps> = ({
   detail,
+  focusRequestRevision,
   onClose,
+  onFocusRequestHandled,
   onOpenDefinition,
   onOpenFlow,
+  onReturnFocus,
 }) => {
   const { lang = "en" } = useMyAppContext();
   const rows = useMemo(() => buildUnitListDetailRows(detail), [detail]);
@@ -104,7 +110,10 @@ const UnitListDetailPanel: FC<UnitListDetailPanelProps> = ({
       collapseTooltip="Collapse list unit details"
       expandTooltip="Expand list unit details"
       closeTooltip="Close list unit details"
+      focusRequestRevision={focusRequestRevision}
       onClose={onClose}
+      onFocusRequestHandled={onFocusRequestHandled}
+      onReturnFocus={onReturnFocus}
       rows={rows}
       relationshipRows={relationshipRows}
       chips={chips}
