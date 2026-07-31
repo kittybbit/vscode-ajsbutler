@@ -1018,7 +1018,21 @@ the complete state model.
 
 ## Feature Exit
 
-- Definition of Done status: not started
-- Durable documentation updates: owning use cases updated during intake;
-  README and CHANGELOG planned in implementation slices.
-- Open risks: all feature-level risks remain open.
+- Definition of Done status: conditionally ready for closure approval; all
+  seven slices, automated validation, available-host checks, and required
+  documentation are complete.
+- Durable documentation updates: `uc-view-unit-list.md` and
+  `uc-explore-flow-graph.md` own the durable interaction contracts; README and
+  CHANGELOG contain the user-visible keyboard and state guidance; the roadmap
+  no longer lists this completed feature.
+- Open risks: Windows/NVDA, macOS/VoiceOver, Windows high-contrast, and
+  large-definition manual evidence could not be reproduced in this
+  environment. Slice completion was approved with that limitation recorded;
+  Feature Exit still requires explicit human acceptance of the remaining
+  evidence gap.
+- Feature Exit Review (2026-08-01): all implementation slices are Complete;
+  feature requirements and acceptance behavior are represented in the two
+  owning use cases; desktop/Web tests, production build, TypeScript
+  compilation, qlty, Markdown lint, and diff checks pass; no new dependency,
+  VS Code engine, parser, domain, application, infrastructure, or host change
+  was introduced. Closure recommendation: Human decision needed.

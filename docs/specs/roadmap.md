@@ -3,22 +3,6 @@
 This roadmap contains only unfinished repository-level future work and the
 entry conditions that make planning each item useful.
 
-## Planned Features
-
-### Accessible List And Flow Graph Exploration
-
-- Feature:
-  [`accessible-list-and-flow-graph-exploration`](./features/accessible-list-and-flow-graph-exploration/SPECS.md)
-- Purpose: make unit search, selection, relationship traversal, and detail
-  inspection practical in the unit-list and flow-graph viewers through
-  keyboard, assistive-technology, and high-contrast paths.
-- Entry condition: the feature's complete presentation-layer implementation
-  slice plan resolves the interaction model, focus fallback, semantic state,
-  notification, and desktop/web validation decisions; the reviewed plan then
-  receives Human Approval.
-- Keep extension-wide WCAG certification, JP1/AJS interpretation changes, and
-  Domain, Application, parser, or host changes outside this feature.
-
 ## Product Decisions
 
 ### WebAPI Import Beta Exit
@@ -86,3 +70,11 @@ entry conditions that make planning each item useful.
 - Entry condition: real-world nested layouts expose an additional collision or
   refit gap.
 - Candidate: add focused regression fixtures for the observed layout case.
+
+### Viewer Accessibility Platform Verification
+
+- Entry condition: Windows/NVDA, macOS/VoiceOver, Windows high-contrast, and
+  a large-definition verification environment become available.
+- Candidate: complete the final manual accessibility matrix for the delivered
+  list and flow viewers; this is validation follow-up, not a new interaction
+  design or runtime scope.
