@@ -43,6 +43,11 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   their normal Webview focus behavior.
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
+- Navigate the shared unit tree with a roving keyboard focus. Up and Down move
+  through visible enabled rows, Right expands or enters children, Left
+  collapses or returns to a parent, Home and End move to the visible
+  boundaries, and Enter or Space selects the focused row. Expand and
+  scope-opening buttons retain their native keyboard behavior.
 - Compare the active JP1/AJS definition with a selected before definition and
   copy or save a semantic Markdown diff report, including confirmation-required
   notes for supported condition and wait changes.

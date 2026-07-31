@@ -4,8 +4,8 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 3 are complete; Slice 4 is the
-  next approved implementation slice.
+- Approved or active slice: Slices 1 through 4 are complete; Slice 5 is the
+  next pending implementation slice.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
 - Do not: add extension-wide WCAG certification, printable-character
@@ -38,9 +38,10 @@
 - Planning scope: implement `ACC-VIEW-001` through `ACC-VIEW-008` in seven
   ordered presentation and resource slices.
 - Review status: Reviewed; revised Slice 3 is approved for implementation
-- Human approval: Approved for revised Slice 3; revised Slices 5, 6, and 7
-  remain pending
-- Active implementation slice: Slice 4, Shared Unit-Tree Keyboard Semantics
+- Human approval: Approved for revised Slice 3 and Slice 4 completion; revised
+  Slices 5, 6, and 7 remain pending
+- Active implementation slice: None; Slice 4 is complete and Slice 5 requires
+  its own plan approval
 
 ## Human Approval
 
@@ -413,7 +414,7 @@ the complete state model.
 
 ### Slice 4: Shared Unit-Tree Keyboard Semantics
 
-- Status: Approved
+- Status: Complete
 - Scope: give the shared unit selector one explicit `tree`/`treeitem` contract
   and roving row focus. Implement Up/Down visible-row movement, Right
   expand-or-enter-child, Left collapse-or-return-parent, Home/End boundaries,
@@ -440,6 +441,25 @@ the complete state model.
   boundaries, nested actions, disabled rows, collapse, and both consumers;
   `rtk pnpm test`; `rtk pnpm run test:web`; `rtk pnpm run qlty` with no new
   smell findings.
+- Implementation Evidence:
+  - `unitTreeNavigation.ts` provides pure visible-row flattening and key
+    resolution for enabled-row traversal, hierarchy expansion/collapse,
+    selection, boundaries, and modifier separation. `unitTreeSelector.test.ts`
+    covers those boundaries and disabled-row behavior.
+  - `UnitTreeSelector` now exposes one `tree` container with roving
+    `treeitem` focus, semantic current/selected/expanded/disabled state, and
+    native nested expand/scope action controls. Focus restoration falls back
+    to the selected or first visible enabled row when a focused row is removed.
+  - Focus transitions keep the active row identity in a ref and update only
+    the previous and next row `tabIndex` plus immediate target DOM focus.
+    Arrow-key movement therefore does not wait for or trigger a React render.
+    Focus events from nested child treeitems are ignored by ancestors, and
+    scrolling and focus outlines target the visible row rather than its entire
+    descendant subtree.
+  - `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run qlty`, Markdown lint,
+    and diff checks passed on 2026-08-01. The repository has no Webview DOM
+    test harness, so DOM and assistive-technology interaction remain the human
+    completion gate.
 - Production Readiness:
   - Failure mode: an unavailable target retains the current tree row and
     reports no false selection.
@@ -823,6 +843,21 @@ the complete state model.
   to the focused node's parent instead of the containing flow scope. This was
   already captured by the revised scope-navigation plan and requires no new
   durable architecture rule.
+- Slice 4 implementation confirmed that tree navigation must flatten only
+  expanded branches while retaining disabled rows for rendering. Navigation
+  filters disabled rows, whereas expand and scope buttons remain native
+  controls outside row-owned key handling. This is feature-specific interaction
+  guidance and does not require a durable repository-wide rule.
+- Slice 4 follow-up confirmed that roving-focus identity is transient DOM
+  state. Keeping it in React state rerenders every visible tree row on each
+  arrow key, so the active row ref and previous/next `tabIndex` updates remain
+  local to the shared selector. This is feature-specific performance guidance.
+- Slice 4 regression follow-up confirmed that a ref-only focus request must
+  focus an already-rendered destination immediately; otherwise no render
+  occurs to run a deferred focus effect. Because nested `treeitem` focus events
+  bubble, only exact-target focus may update the active-row identity, and row
+  scrolling/styling must target the row frame rather than the parent treeitem's
+  full subtree. This remains feature-specific interaction guidance.
 
 ## Assumptions And Compatibility
 

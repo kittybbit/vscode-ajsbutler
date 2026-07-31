@@ -122,6 +122,19 @@ names that exist in those files.
 - `SPECS.md`: Requirements; Interaction Model Decisions; Acceptance Criteria
 - Validation: `unitTreeSelector.test.ts`, list and flow consumer regressions,
   disabled/nested-action/collapse cases, desktop tests, and Web tests
+- Current implementation validation (2026-08-01): `unitTreeNavigation.ts`
+  covers visible-row flattening, disabled-row skipping, Up/Down/Home/End
+  boundaries, Right expand-or-enter, Left collapse-or-parent, Enter/Space
+  selection, and modifier separation. The shared selector now exposes
+  tree/treeitem semantics with roving row focus and keeps nested action buttons
+  outside row key handling. `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run qlty`, Markdown lint, and diff checks passed. DOM-level
+  assistive-technology verification remains the human completion gate. The
+  follow-up focus regression keeps active-row identity in a ref and updates
+  only the previous/next row DOM state while focusing the rendered destination
+  immediately, avoiding a React rerender or deferred-render wait for arrow
+  movement. Nested treeitem focus bubbling cannot overwrite the active child,
+  and row scrolling is limited to the visible row frame.
 
 ## Slice 5: Flow Scope, Detail, And Shortcut Focus Continuity
 

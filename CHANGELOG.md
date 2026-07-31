@@ -10,6 +10,9 @@
   direction for arrow movement, N/RC flow-scope entry and return, and
   nested-jobnet expansion while preserving normal Tab traversal and viewport
   zoom.
+- Added shared unit-tree keyboard navigation with roving row focus, visible
+  row Up/Down movement, Right/Left expand and parent navigation, Home/End
+  boundaries, Enter/Space selection, and tree semantics in both viewers.
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization
