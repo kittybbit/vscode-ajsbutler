@@ -8,6 +8,8 @@ flow scope while preserving predictable navigation and viewport state.
 ## Trigger
 
 - the user expands or collapses a nested jobnet
+- the user enters an N or RC unit's internal flow or returns to its containing
+  flow scope
 - the user searches within the current flow scope
 - the user selects or hovers a graph or flow-tree unit
 - the user changes relationship focus or collapses supporting panels
@@ -22,6 +24,8 @@ flow scope while preserving predictable navigation and viewport state.
 ## Outputs
 
 - visible nested-jobnet state
+- active N or RC flow scope and a meaningful scope-entry or scope-return focus
+  destination
 - current search matches and active result
 - selected, hovered, and relationship-focused units
 - viewport fitting, reveal, or centering requests that preserve the current
@@ -56,9 +60,20 @@ flow scope while preserving predictable navigation and viewport state.
 - supporting tree and detail panels may collapse responsively or explicitly
   without clearing selection, hiding access to their actions, or overlaying the
   graph
-- keyboard and non-visual interaction can traverse predecessor, successor,
-  parent, and child relationships using existing graph meaning rather than
-  visual position alone
+- keyboard interaction can move to the center-to-center nearest rendered node
+  above, below, left, or right of the current node without depending on
+  predecessor or successor relationships; equal distances prefer the upper
+  then left candidate
+- Enter on a focused N or RC node with internal units opens that unit as the
+  active flow scope; it does not select a child by parser or rendered order
+- Escape from a nested N or RC flow scope returns to the nearest containing N
+  or RC scope; a root-jobnet scope has no Escape target
+- after Enter, the opened scope's rendered root node is selected and focused;
+  after Escape, the scope that was left is selected and focused in its
+  containing scope
+- Enter and Escape use the existing flow-scope transition behavior, while
+  Shift+Down and Shift+Up remain same-scope inline nested-jobnet expansion and
+  collapse operations
 - root-jobnet scope selection, detail inspection, and return preserve a
   meaningful selected node and focus destination
 - selection, relationship, search-result, and scope state remain available
@@ -125,11 +140,24 @@ Scenario: Supporting panels collapse without losing state
   Then its actions remain accessible without overlaying the graph
   And the selected unit remains selected
 
-Scenario: Non-visual navigation follows flow relationships
-  Given a selected flow node with known JP1/AJS relationships
-  When a user traverses the graph without relying on its visual layout
-  Then predecessor, successor, parent, and child targets can be selected
-  And the selected target and relationship are exposed semantically
+Scenario: Keyboard navigation follows rendered spatial direction
+  Given a selected flow node and other rendered flow nodes
+  When the user presses an unmodified arrow key
+  Then the nearest node in that rendered direction is selected and focused
+  And equal center-to-center distances prefer the upper then left node
+  And an unavailable direction leaves selection and focus unchanged
+
+Scenario: Keyboard navigation enters an internal flow scope
+  Given a focused N or RC node with internal units
+  When the user presses Enter
+  Then that unit becomes the active flow scope
+  And its rendered root node is selected and focused after the graph is ready
+
+Scenario: Keyboard navigation returns to a containing flow scope
+  Given an active nested N or RC flow scope
+  When the user presses Escape from a focused graph node
+  Then the nearest containing N or RC scope becomes active
+  And the scope that was left is selected and focused
 ```
 
 ## Acceptance Notes
@@ -152,3 +180,5 @@ Scenario: Non-visual navigation follows flow relationships
   actions remain explicit
 - graph rerendering or scope changes can lose focus unless stable unit identity
   and a defined fallback are preserved
+- Enter and Escape can race asynchronous scope rendering unless focus targets
+  are resolved only after the destination graph is ready

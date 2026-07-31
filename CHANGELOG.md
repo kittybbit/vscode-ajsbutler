@@ -6,6 +6,10 @@
   list, including stable cell focus across sorting, virtualized rows, search,
   detail-pane closure, definition-dialog return, and H, D, R, and Escape
   shortcuts for header and detail-pane round trips.
+- Added read-only flow-node keyboard navigation using rendered spatial
+  direction for arrow movement, N/RC flow-scope entry and return, and
+  nested-jobnet expansion while preserving normal Tab traversal and viewport
+  zoom.
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization

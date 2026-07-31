@@ -26,6 +26,19 @@ export type FlowViewportFocusAction =
   | { kind: "fitView"; targetUnitId?: string }
   | { kind: "setCenter"; targetUnitId: string };
 
+type PreserveFlowViewportContext = {
+  requestVersion: number;
+  handledVersion: number;
+  layoutChanged: boolean;
+};
+
+export const shouldPreserveFlowViewport = ({
+  requestVersion,
+  handledVersion,
+  layoutChanged,
+}: PreserveFlowViewportContext): boolean =>
+  layoutChanged && requestVersion > handledVersion;
+
 export const resolveFlowNodeCenter = ({
   height,
   width,

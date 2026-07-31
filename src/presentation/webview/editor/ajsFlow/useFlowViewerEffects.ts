@@ -26,6 +26,7 @@ import {
   resolveFlowNodeCenter,
   resolveFlowViewportFocusAction,
   resolveFlowViewportFocusDecision,
+  shouldPreserveFlowViewport,
 } from "./flowViewportFocus";
 import type {
   FlowViewportFocusAction,
@@ -37,6 +38,7 @@ type UseFlowViewerFitViewParams = {
   focusRequestVersion: number;
   layoutRequestIdentity: object;
   nodes: Node[];
+  preserveViewportRequestVersion: number;
   reactFlowInstanceRef: MutableRefObject<ReactFlowInstance<Node, Edge> | null>;
   searchedUnitId?: string;
   selectionFocusRequestVersion: number;
@@ -54,6 +56,7 @@ type FitViewFrameRef = MutableRefObject<number | undefined>;
 type FlowViewerFitViewRefs = {
   fitViewFrameRef: FitViewFrameRef;
   handledLayoutRequestIdentityRef: MutableRefObject<object | undefined>;
+  handledPreserveViewportVersionRef: MutableRefObject<number>;
   handledSearchFocusVersionRef: MutableRefObject<number>;
   handledSelectionFocusVersionRef: MutableRefObject<number>;
 };
@@ -184,6 +187,31 @@ const resolveCurrentViewportFocusDecision = (
       handledLayoutRequestIdentityRef.current !== layoutRequestIdentity,
   });
 
+const preservePendingKeyboardExpansionViewport = (
+  params: UseFlowViewerFitViewParams,
+  refs: Pick<
+    FlowViewerFitViewRefs,
+    "handledLayoutRequestIdentityRef" | "handledPreserveViewportVersionRef"
+  >,
+): boolean => {
+  const layoutChanged =
+    refs.handledLayoutRequestIdentityRef.current !==
+    params.layoutRequestIdentity;
+  if (
+    !shouldPreserveFlowViewport({
+      requestVersion: params.preserveViewportRequestVersion,
+      handledVersion: refs.handledPreserveViewportVersionRef.current,
+      layoutChanged,
+    })
+  ) {
+    return false;
+  }
+  refs.handledPreserveViewportVersionRef.current =
+    params.preserveViewportRequestVersion;
+  refs.handledLayoutRequestIdentityRef.current = params.layoutRequestIdentity;
+  return true;
+};
+
 const updateHandledViewportFocus = (
   decision: FlowViewportFocusDecision,
   {
@@ -239,6 +267,9 @@ const runFlowViewerFitViewEffect = (
   if (!hasFitViewTarget(params)) {
     return undefined;
   }
+  if (preservePendingKeyboardExpansionViewport(params, refs)) {
+    return undefined;
+  }
 
   const decision = resolveCurrentViewportFocusDecision(params, refs);
   if (!decision) {
@@ -254,6 +285,7 @@ export const useFlowViewerFitView = ({
   focusRequestVersion,
   layoutRequestIdentity,
   nodes,
+  preserveViewportRequestVersion,
   reactFlowInstanceRef,
   searchedUnitId,
   selectionFocusRequestVersion,
@@ -262,6 +294,7 @@ export const useFlowViewerFitView = ({
   const fitViewFrameRef = useRef<number | undefined>(undefined);
   const handledSearchFocusVersionRef = useRef(0);
   const handledSelectionFocusVersionRef = useRef(0);
+  const handledPreserveViewportVersionRef = useRef(0);
   const handledLayoutRequestIdentityRef = useRef<object | undefined>(undefined);
 
   useEffect(() => {
@@ -271,6 +304,7 @@ export const useFlowViewerFitView = ({
         focusRequestVersion,
         layoutRequestIdentity,
         nodes,
+        preserveViewportRequestVersion,
         reactFlowInstanceRef,
         searchedUnitId,
         selectionFocusRequestVersion,
@@ -279,6 +313,7 @@ export const useFlowViewerFitView = ({
       {
         fitViewFrameRef,
         handledLayoutRequestIdentityRef,
+        handledPreserveViewportVersionRef,
         handledSearchFocusVersionRef,
         handledSelectionFocusVersionRef,
       },
@@ -288,6 +323,7 @@ export const useFlowViewerFitView = ({
     focusRequestVersion,
     layoutRequestIdentity,
     nodes,
+    preserveViewportRequestVersion,
     reactFlowInstanceRef,
     searchedUnitId,
     selectionFocusRequestVersion,

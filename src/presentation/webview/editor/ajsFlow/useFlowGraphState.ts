@@ -40,7 +40,6 @@ type UseFlowGraphStateParams = {
   searchedUnitId?: string;
   searchMatchedUnitIds: string[];
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
-  selectedUnitId?: string;
   theme: Theme;
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
@@ -84,12 +83,10 @@ const createReactFlowDataOptions = ({
   nestedExpansionState,
   searchedUnitId,
   searchMatchedUnitIds,
-  selectedUnitId,
   unitById,
 }: FlowGraphDataBuildParams) => ({
   searchMatchedUnitIds: new Set(searchMatchedUnitIds),
   searchedUnitId,
-  selectedUnitId,
   unitById,
   nestedExpansionState,
 });
@@ -144,7 +141,6 @@ export const useFlowGraphState = ({
   searchedUnitId,
   searchMatchedUnitIds,
   semanticDiffHighlights,
-  selectedUnitId,
   theme,
   unitById,
   unitDefinitionByPath,
@@ -164,7 +160,6 @@ export const useFlowGraphState = ({
           searchedUnitId,
           searchMatchedUnitIds,
           semanticDiffHighlights,
-          selectedUnitId,
           theme,
           unitById,
           unitDefinitionByPath,
@@ -180,7 +175,6 @@ export const useFlowGraphState = ({
       searchedUnitId,
       searchMatchedUnitIds,
       semanticDiffHighlights,
-      selectedUnitId,
       theme,
       unitById,
       unitDefinitionByPath,

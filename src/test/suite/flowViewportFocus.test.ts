@@ -3,6 +3,7 @@ import {
   resolveFlowNodeCenter,
   resolveFlowViewportFocusAction,
   resolveFlowViewportFocusDecision,
+  shouldPreserveFlowViewport,
 } from "../../presentation/webview/editor/ajsFlow/flowViewportFocus";
 
 suite("Flow Viewport Focus", () => {
@@ -98,6 +99,33 @@ suite("Flow Viewport Focus", () => {
         layoutChanged: true,
       }),
       { kind: "layout" },
+    );
+  });
+
+  test("preserves the viewport only for a new keyboard expansion layout", () => {
+    assert.strictEqual(
+      shouldPreserveFlowViewport({
+        requestVersion: 2,
+        handledVersion: 1,
+        layoutChanged: true,
+      }),
+      true,
+    );
+    assert.strictEqual(
+      shouldPreserveFlowViewport({
+        requestVersion: 2,
+        handledVersion: 2,
+        layoutChanged: true,
+      }),
+      false,
+    );
+    assert.strictEqual(
+      shouldPreserveFlowViewport({
+        requestVersion: 2,
+        handledVersion: 1,
+        layoutChanged: false,
+      }),
+      false,
     );
   });
 });

@@ -46,23 +46,70 @@ names that exist in those files.
   DOM test harness. Human interaction verification and slice completion were
   approved on 2026-07-30.
 
-## Slice 3: Flow Relationship Navigation
+## Slice 3: Flow Spatial And Scope Navigation
 
 - Use Case:
   `uc-explore-flow-graph.md` —
-  `Non-visual navigation follows flow relationships`
+  `Keyboard navigation follows rendered spatial direction`;
+  `Keyboard navigation enters an internal flow scope`;
+  `Keyboard navigation returns to a containing flow scope`
 - Requirement: `ACC-VIEW-003`, `ACC-VIEW-007`, `ACC-VIEW-008`
 - `SPECS.md`: Requirements; Interaction Model Decisions; Behavioral Scenarios
-- Implementation Slice: Slice 3, Flow Relationship Navigation
+- Implementation Slice: Slice 3, Flow Spatial And Scope Navigation
 - Tests: `flowKeyboardNavigation.test.ts`, `flowViewportFocus.test.ts`,
-  `flowNodeDisplay.test.ts`, `showUnitDefinitionInteraction.test.ts`
-- Validation: pure Left/Right predecessor/successor, Down/Up
-  shared-primary-predecessor and sibling-fallback, Shift+Down/Up
-  expand/collapse, Enter-child, Escape-parent, Tab non-capture, modifier and
-  descendant-event-boundary tests; post-rerender stable-ID focus restoration,
-  missing-node focus on the graph-region entry target with unchanged
-  selection/zoom/scope/viewport, flow node display, nested expansion, viewport,
-  desktop, and Web tests
+  `flowNodeDisplay.test.ts`, `flowGraphView.test.ts`
+- Revised validation plan: pure four-direction center-coordinate targeting,
+  strict boundaries, nearest center-to-center Euclidean distance,
+  upper/left/stable-order ties, edge-independence, measured/initial dimensions,
+  expanded-layout positions, geometry-cache invalidation, excluded bounds
+  nodes, 10,000-node scan, no-target default and propagation suppression,
+  same-scope Shift+Down/Up expansion/collapse, Enter on N and RC scopes, empty
+  and ineligible Enter no-op, Escape from nested N and RC scopes, root Escape
+  no-op, nearest containing flow-scope resolution, explicit open-scope
+  eligibility/reset consistency, modifier and descendant-event boundaries;
+  asynchronous destination readiness, entered-scope root focus,
+  returned-container focus, missing-node graph-entry fallback, flow node
+  display, nested expansion, viewport, desktop, and Web tests.
+- Prior validation result (2026-07-30): superseded relationship-arrow resolver
+  tests passed, but interaction verification invalidated that target-selection
+  design. Focus restoration, read-only node/edge behavior, nested expansion,
+  viewport preservation, event ownership, and normal Tab evidence remain
+  reusable subject to revised-plan review.
+- Partially reusable validation result (2026-07-31): focused four-direction,
+  center-to-center distance, upper/left/rendered-order tie, measured/initial
+  dimension, invalid-geometry, geometry-cache, 10,000-node, no-target
+  suppression, modifier, wrapper-ownership, nested-expansion,
+  graph-entry-fallback, read-only node/edge, same-selected-target, and
+  viewport-preservation tests passed. `rtk pnpm test`,
+  `rtk pnpm run test:web`, and `rtk pnpm run qlty` passed. Independent
+  final-diff review found no actionable issue. React Flow DOM event ordering,
+  visual direction, and perceived large-graph responsiveness remain the human
+  interaction completion gate. The passing Enter-child/Escape-parent tests are
+  superseded and are not evidence for the corrected scope behavior.
+- Flicker follow-up (2026-07-31): selection was removed from base expanded-graph
+  construction so selection-only movement does not recreate every node and
+  edge. `flowGraphView.test.ts` verifies that selection decoration changes only
+  the selected node while unrelated node identities remain stable. The flow
+  graph panel is memoized and selection-only updates synchronize only the
+  previous and next React Flow nodes through the instance API, so arrow-key
+  movement does not replace the controlled node array. Full desktop tests, Web
+  tests, qlty, Markdown lint, and diff checks passed after the follow-up.
+  Corrected Enter/Escape behavior intentionally changes graph scope and must
+  instead verify one destination render without repeated intermediate flashes.
+- Replanning gap (2026-07-31): the implementation interpreted "enter the first
+  child" as selection-only traversal using child-array order. The corrected
+  contract opens a focused N or RC unit with internal units as the active flow
+  scope and returns with Escape to its nearest containing N or RC scope. Slice
+  3 and affected downstream Slices 5 through 7 require review and renewed
+  approval before implementation resumes. Slice 3 has since received renewed
+  human approval; revised downstream Slices 5 through 7 remain pending.
+- Current implementation validation (2026-07-31): `flowKeyboardNavigation.test.ts`
+  covers N/RC entry, active-scope-based containing-scope return, empty and
+  ineligible no-op behavior, root Escape, async destination readiness, stale
+  transition cancellation, and graph-entry fallback. Focused TypeScript tests,
+  `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run qlty`, Markdown lint,
+  and diff checks passed. Manual React Flow interaction verification was
+  completed, and human slice-completion approval was received on 2026-08-01.
 
 ## Slice 4: Shared Unit-Tree Keyboard Semantics
 
@@ -89,7 +136,8 @@ names that exist in those files.
   default-restoration, stale-target, asynchronous scope, `D`/`L`/`R`/Escape
   event-boundary and round-trip behavior, current/fallback selector targets,
   missing saved-node focus on the shared graph-region entry target with
-  unchanged selection/zoom/scope/viewport, desktop, and Web tests
+  unchanged selection/zoom/scope/viewport, entry from nested N and RC scopes,
+  graph-node Escape ownership remaining in Slice 3, desktop, and Web tests
 
 ## Slice 6: Localized Semantic State And Announcements
 
@@ -103,10 +151,13 @@ names that exist in those files.
 - Tests: localization and announcement tests, node-display regressions, and
   React Flow accessibility-description tests
 - Revised validation plan: English/Japanese labels, fallback, live-region
-  deduplication, politeness, excluded events, exact Left/Right, Down/Up,
-  Shift+Down/Shift+Up, Enter/Escape and normal-Tab instructions, rejection of
-  the superseded Tab-relationship and unmodified-arrow expansion descriptions,
-  desktop, and Web tests
+  deduplication, politeness, excluded events, spatial movement without false
+  predecessor/successor wording, independent relationship-focus wording, exact
+  spatial Left/Right/Down/Up, inline Shift+Down/Shift+Up, Enter N/RC scope
+  entry, Escape containing-scope return, and normal-Tab instructions;
+  rejection of relationship-based arrows, selection-only child/parent,
+  superseded Tab-relationship, and unmodified-arrow expansion descriptions;
+  desktop and Web tests
 
 ## Slice 7: Non-Color State, High Contrast, And Compatibility Validation
 
@@ -118,6 +169,8 @@ names that exist in those files.
   Acceptance Criteria
 - Validation: focused style-state tests, desktop and Web suites, production
   build, Windows/NVDA, macOS/VoiceOver, Windows high contrast, and
-  large-definition manual checks, including flow Down/Up,
-  Shift+Down/Shift+Up, Enter/Escape, normal Tab exit,
-  `H`/`D`/`R`/`L` round trips, and editable/native-control exclusions
+  large-definition manual checks, including spatial flow Left/Right/Down/Up,
+  inline Shift+Down/Shift+Up, Enter into N and RC scopes, Escape to containing
+  scopes, root/empty no-op, normal Tab exit,
+  `H`/`D`/`R`/`L` round trips, editable/native-control exclusions, and
+  responsive movement on a large rendered graph

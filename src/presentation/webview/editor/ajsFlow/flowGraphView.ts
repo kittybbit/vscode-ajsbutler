@@ -106,6 +106,10 @@ const toEdge = (edge: FlowGraphEdgeDto, theme: Theme): Edge => ({
   type: "smoothstep",
   source: edge.source,
   target: edge.target,
+  focusable: false,
+  selectable: false,
+  reconnectable: false,
+  deletable: false,
   data: edge.semanticDiffHighlight
     ? {
         semanticDiffHighlight: edge.semanticDiffHighlight,
@@ -149,10 +153,21 @@ const toReactFlowNode = (
   node: FlowGraphNodeDto,
   context: ReactFlowNodeBuildContext,
 ): Node<AjsNode> => {
+  const selected = context.options?.selectedUnitId === node.id;
   return {
     id: node.id,
     type: node.type,
-    selected: context.options?.selectedUnitId === node.id,
+    selected,
+    selectable: false,
+    draggable: false,
+    connectable: false,
+    deletable: false,
+    focusable: true,
+    ariaRole: "group",
+    ariaLabel: node.label,
+    domAttributes: {
+      "aria-current": node.metadata.isCurrent ? "true" : undefined,
+    },
     initialWidth: context.initialNodeGeometry.width,
     initialHeight: context.initialNodeGeometry.height,
     data: toNodeData(node, context),

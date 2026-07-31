@@ -279,6 +279,7 @@ type FlowViewerLifecycleParams = {
   focusRequestVersion: number;
   handleRevealUnit: (request: NavigationRequestDto) => void;
   nodes: Node<AjsNode>[];
+  preserveViewportRequestVersion: number;
   preserveSearchOnNextScopeChange: ReturnType<
     typeof useFlowViewerRefs
   >["preserveSearchOnNextScopeChange"];
@@ -309,6 +310,7 @@ const useFlowViewerLifecycle = ({
   focusRequestVersion,
   handleRevealUnit,
   nodes,
+  preserveViewportRequestVersion,
   preserveSearchOnNextScopeChange,
   previousUnitIdRef,
   reactFlowInstanceRef,
@@ -331,6 +333,7 @@ const useFlowViewerLifecycle = ({
     focusRequestVersion,
     layoutRequestIdentity,
     nodes,
+    preserveViewportRequestVersion,
     reactFlowInstanceRef,
     searchedUnitId,
     selectionFocusRequestVersion: selectionFocusRequest.version,
@@ -364,6 +367,10 @@ export const useFlowViewerController = ({
   const flowDocumentDto = flowDocument?.document;
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
+  const [
+    keyboardExpansionPreserveViewportVersion,
+    setKeyboardExpansionPreserveViewportVersion,
+  ] = useState(0);
   const [documentUnitDefinitionByPath, setUnitDefinitionByPath] = useState<
     ReadonlyMap<string, UnitDefinitionDialogDto>
   >(new Map());
@@ -397,6 +404,14 @@ export const useFlowViewerController = ({
   );
   const { clearSelection, selectedUnitId, selectUnit } =
     useSelectedFlowNodeState(flowDocument, currentUnitId);
+  const toggleExpandedFlowNodeFromKeyboard = useCallback(
+    (unitId: string) => {
+      selectUnit(unitId);
+      setKeyboardExpansionPreserveViewportVersion((version) => version + 1);
+      nestedExpansionState.toggleExpandedUnitId(unitId);
+    },
+    [nestedExpansionState, selectUnit],
+  );
   const { canEnableFocusMode, focusModeEnabled, toggleFocusMode } =
     useFlowFocusModeState(flowDocument, currentUnitId, selectedUnitId);
   const { showMiniMap, toggleMiniMap } = useFlowMiniMapState();
@@ -442,7 +457,6 @@ export const useFlowViewerController = ({
     previousUnitIdRef,
     searchedUnitId,
     searchMatchedUnitIds,
-    selectedUnitId,
     theme,
     unitById,
     unitDefinitionByPath,
@@ -475,6 +489,7 @@ export const useFlowViewerController = ({
     focusRequestVersion,
     handleRevealUnit,
     nodes,
+    preserveViewportRequestVersion: keyboardExpansionPreserveViewportVersion,
     preserveSearchOnNextScopeChange,
     previousUnitIdRef,
     reactFlowInstanceRef,
@@ -520,6 +535,7 @@ export const useFlowViewerController = ({
     selectTreeUnit,
     setDialogData,
     toggleExpandAllNestedUnits,
+    toggleExpandedFlowNodeFromKeyboard,
     toggleFocusMode,
     toggleMiniMap,
     treeHoveredUnit,

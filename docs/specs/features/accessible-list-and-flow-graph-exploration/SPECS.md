@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Make unit search, selection, relationship traversal, and detail inspection
-practical in both the unit-list and flow-graph viewers through keyboard and
-assistive-technology paths, without relying on color alone.
+Make unit search, selection, spatial and hierarchical traversal, and detail
+inspection practical in both the unit-list and flow-graph viewers through
+keyboard and assistive-technology paths, without relying on color alone.
 
 ## Minimal Context
 
@@ -34,8 +34,10 @@ assistive-technology paths, without relying on color alone.
   rerendering restore focus to a meaningful control or selected unit without
   losing stable unit identity.
 - `ACC-VIEW-003`: A keyboard-only or non-visual user can select a flow node,
-  traverse predecessor, successor, parent, and child relationships, choose a
-  root-jobnet scope, inspect details, and return to the selected node.
+  move among rendered nodes by their spatial direction, enter an N or RC unit
+  that owns internal units as the active flow scope, return to its containing
+  flow scope, choose a root-jobnet scope, inspect details, and return to the
+  selected node.
 - `ACC-VIEW-004`: Search results, selection, sort state, relationship type,
   scope changes, completed copy actions, and errors expose the semantic state
   or necessary status notification without depending only on graph lines,
@@ -63,11 +65,23 @@ Scenario: Keyboard-only unit-list exploration preserves context
   Then the intended unit and meaningful cell remain selected and focused
   And the user can leave the table through the normal Webview focus order
 
-Scenario: Non-visual flow exploration follows unit relationships
-  Given a selected flow node with known JP1/AJS relationships
-  When a user traverses the graph without relying on its visual layout
-  Then predecessor, successor, parent, and child targets can be selected
-  And the selected target and relationship are exposed semantically
+Scenario: Keyboard flow exploration follows rendered spatial direction
+  Given a selected flow node and other rendered flow nodes
+  When a user presses an unmodified arrow key
+  Then the nearest node in that rendered direction is selected and focused
+  And an unavailable direction leaves selection and focus unchanged
+
+Scenario: Keyboard flow exploration enters an internal flow scope
+  Given a focused N or RC flow node that owns internal units
+  When the user presses Enter
+  Then that unit becomes the active flow scope and its internal units are shown
+  And focus moves to the opened scope's rendered root node after it is ready
+
+Scenario: Keyboard flow exploration returns to a containing flow scope
+  Given an active nested N or RC flow scope
+  When the user presses Escape from a focused graph node
+  Then the containing N or RC scope is shown
+  And the unit that was closed is selected and focused in that scope
 
 Scenario: Rerendering preserves a meaningful focus destination
   Given focus within a virtualized list or rendered flow graph
@@ -100,19 +114,34 @@ Scenario: Viewer state remains perceivable without color
   Webview Tab sequence; arrow keys, Page Up, Page Down, Home, End, Control+Home,
   and Control+End move within the grid.
 - Normal Tab and Shift+Tab behavior moves between the grid or graph and other
-  Webview controls. These keys are not reassigned to row, sibling, or
-  relationship traversal.
+  Webview controls. These keys are not reassigned to row, sibling, or graph
+  traversal.
 - Moving between unit-list data cells updates the selected row. Sortable
   headers use Enter or Space, and focus returns by stable unit identity after
   sorting or virtualization.
 - Flow nodes expose meaningful labels and remain keyboard focus targets.
-  Left and Right traverse predecessor and successor relationships. Down and Up
-  move to the next or previous node with the same deterministic primary
-  predecessor, defined as the first predecessor in rendered order, falling
-  back to the next or previous sibling. Shift+Down and Shift+Up expand and
-  collapse the current nested jobnet. Enter moves to the first child, and
-  Escape returns to the parent; a missing target leaves selection and focus
-  unchanged.
+  Unmodified Left, Right, Up, and Down move by rendered spatial position
+  without consulting predecessor or successor relationships. A node is a
+  directional candidate when its rendered center lies strictly on the
+  requested side of the current node's rendered center. The candidate with
+  the shortest center-to-center Euclidean distance wins; equal-distance
+  candidates are ordered topmost first, then leftmost, then by stable rendered
+  order.
+  Shift+Down and Shift+Up expand and collapse the current nested jobnet inline
+  without changing graph scope. Enter on an N or RC node with internal units
+  opens that unit through the existing flow-scope path. Escape from a nested N
+  or RC scope opens its nearest containing N or RC scope. Enter on an
+  ineligible or empty unit and Escape from a root-jobnet scope leave scope,
+  selection, focus, and viewport unchanged while still suppressing React
+  Flow's built-in behavior.
+- Enter and Escape are scope transitions, not child-array traversal. Enter
+  uses the same scope eligibility and reset behavior as the existing explicit
+  open-scope action. After Enter, the opened scope's rendered root node is
+  selected and focused. After Escape, the scope being left is selected and
+  focused in the containing scope. Both wait for the target graph to be ready
+  and use the existing scope-change viewport behavior; a missing rendered
+  focus target uses the graph region's single entry target without selecting
+  an unrelated unit.
 - Successful nested expansion or collapse preserves the current node by stable
   identity, restores DOM focus after React Flow rerendering, and does not
   change graph scope or zoom. If that node is unavailable after rendering,
@@ -120,13 +149,17 @@ Scenario: Viewer state remains perceivable without color
   selection, graph scope, zoom, or viewport position. This graph-region entry
   target is the shared fallback for graph-node restoration throughout the
   feature.
-- Flow relationship keys run only when the node wrapper itself owns focus.
+- Flow navigation keys run only when the node wrapper itself owns focus.
   Events originating from nested buttons, links, or inputs keep their native
   behavior and do not trigger graph traversal.
-- Multiple flow-navigation targets use deterministic rendered order. The
-  Shift+Up/Down expansion shortcuts supplement the existing explicit nested
-  controls; scope opening and detail actions remain explicit focusable
-  controls.
+- Spatial navigation uses final presentation coordinates after expanded nested
+  layout is applied and excludes non-unit bounds nodes. A node center uses its
+  measured dimensions when available and otherwise uses the existing initial
+  fixed node dimensions. Geometry caches ignore selection and hover decoration
+  but invalidate when a unit ID, position, measured or initial dimension, or
+  rendered order changes. The Shift+Up/Down expansion shortcuts supplement the
+  existing explicit nested controls. Existing explicit scope-opening and
+  detail actions remain focusable alternatives to the Enter shortcut.
 - The shared unit selector uses one `tree`/`treeitem` contract with roving row
   focus. Up and Down move between visible enabled rows, Right expands or enters
   children, Left collapses or returns to a parent, and Home and End move to the
@@ -135,9 +168,11 @@ Scenario: Viewer state remains perceivable without color
   Tab, Enter, and Space behavior.
 - React Flow node dragging and edge Tab stops are not part of this read-only
   viewer. Built-in accessibility descriptions are localized and aligned with
-  the viewer's actual keyboard behavior. They describe Left/Right, Down/Up,
-  Shift+Down/Shift+Up, Enter, Escape, and normal Tab traversal without
-  retaining instructions for the rejected Tab-based relationship map.
+  the viewer's actual keyboard behavior. They describe spatial
+  Left/Right/Down/Up, Shift+Down/Shift+Up, Enter scope entry, Escape scope
+  return, and normal Tab traversal without retaining instructions for
+  relationship-based arrow movement, child-array traversal, or the rejected
+  Tab-based relationship map.
 - In the unit-list grid, unmodified `H` moves from a data cell to its current
   column header and header `Escape` returns to the saved cell. Unmodified `D`
   opens the selected unit's detail pane when necessary and moves focus to its
@@ -196,8 +231,16 @@ Scenario: Viewer state remains perceivable without color
   technology conflicts, native Webview focus order, and ARIA pattern selection
   require focused planning and validation.
 - Reassign Tab and Shift+Tab to flow siblings: rejected because the keys retain
-  their normal role of moving between Webview components. The candidate's
-  next/previous shared-predecessor behavior uses Down and Up instead.
+  their normal role of moving between Webview components.
+- Keep arrow movement bound to predecessor and successor relationships:
+  rejected after interaction verification because the resulting direction did
+  not match the visible graph layout. Arrow movement now uses presentation
+  coordinates only.
+- Interpret Enter and Escape as selection-only child/parent traversal:
+  rejected after interaction verification. The candidate wording "enter the
+  first child" meant opening an N or RC unit's internal flow and returning to
+  its containing flow scope, not selecting the first child in parser or
+  rendered order.
 - Omit single-character pane shortcuts: rejected during replanning because
   keyboard users otherwise have no direct way to reopen and enter a closed
   detail pane for the current selection. Event ownership and editable-control
@@ -229,8 +272,8 @@ Scenario: Viewer state remains perceivable without color
 
 - Unit-list search, navigation, selection, sorting, detail inspection, and
   return can be completed with a keyboard while maintaining meaningful focus.
-- Flow search or tree selection can lead to keyboard and non-visual traversal
-  of predecessor, successor, parent, and child relationships, root scope
+- Flow search or tree selection can lead to keyboard spatial traversal among
+  rendered nodes, N/RC scope entry and containing-scope return, root scope
   selection, detail inspection, and return.
 - Virtualization, sorting, panel transitions, scope changes, and graph
   rerendering do not leave focus lost or on an unrelated unit.

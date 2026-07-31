@@ -34,6 +34,13 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
 - Save data in CSV format.
 - Switch the editor to enable a flow-style display of the information.
   ![unit-list](images/unit-flow.png)
+- Explore the rendered flow from a focused node. Arrow keys move to the
+  center-nearest node in the pressed visual direction, with equal distances
+  preferring the upper then left node. Shift+Down and Shift+Up expand or
+  collapse a nested jobnet without changing scope. Enter opens a focused N or
+  RC unit with internal units as the active flow scope, and Escape returns from
+  a nested N or RC scope to its containing scope. Tab and Shift+Tab retain
+  their normal Webview focus behavior.
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
 - Compare the active JP1/AJS definition with a selected before definition and
