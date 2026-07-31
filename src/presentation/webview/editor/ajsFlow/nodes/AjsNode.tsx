@@ -15,6 +15,7 @@ import {
 } from "../flowViewerStateTypes";
 import { unitInformationUnitTypeLabel } from "../../unitInformationLocalization";
 import { useMyAppContext } from "../../MyContexts";
+import { unitInformationMessage } from "../../unitInformationLocalization";
 import {
   FlowNodeStatus,
   FlowNodeKind,
@@ -236,6 +237,7 @@ export const getFlowNodeHeaderItemKinds = (
 ];
 
 const NodeStatusIndicators: FC<{ data: AjsNode }> = ({ data }) => {
+  const { lang = "en" } = useMyAppContext();
   const statuses = getFlowNodeHeaderItemKinds(data, false).filter(
     (itemKind): itemKind is FlowNodeStatus =>
       itemKind === "schedule" || itemKind === "waitedFor",
@@ -257,11 +259,24 @@ const NodeStatusIndicators: FC<{ data: AjsNode }> = ({ data }) => {
       {statuses.map((status) => {
         const presentation = statusPresentation[status];
         return (
-          <Tooltip key={status} title={presentation.title}>
+          <Tooltip
+            key={status}
+            title={unitInformationMessage(
+              status === "schedule"
+                ? "a11y.flow.node.hasSchedule"
+                : "a11y.flow.node.hasWaitedFor",
+              lang,
+            )}
+          >
             <Box
               component="span"
               role="img"
-              aria-label={presentation.title}
+              aria-label={unitInformationMessage(
+                status === "schedule"
+                  ? "a11y.flow.node.hasSchedule"
+                  : "a11y.flow.node.hasWaitedFor",
+                lang,
+              )}
               sx={{ display: "inline-flex" }}
             >
               {presentation.icon}

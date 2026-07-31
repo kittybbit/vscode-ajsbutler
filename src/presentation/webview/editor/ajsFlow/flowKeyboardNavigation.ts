@@ -423,6 +423,30 @@ export const getOwnedFlowNodeId = (
     : undefined;
 };
 
+type FlowNodeTarget = {
+  classList?: { contains: (className: string) => boolean };
+  closest?: (selector: string) => unknown;
+  dataset?: { id?: string };
+};
+
+export const getFlowNodeIdFromTarget = (
+  target: EventTarget | null,
+): string | undefined => {
+  const candidate = target as FlowNodeTarget | null;
+  const owner = candidate?.classList?.contains("react-flow__node")
+    ? candidate
+    : (candidate?.closest?.(".react-flow__node") as FlowNodeTarget | null);
+  return owner?.classList?.contains("react-flow__node")
+    ? owner.dataset?.id
+    : undefined;
+};
+
+export const isFlowSpatialNavigationKey = (key: string): boolean =>
+  key === "ArrowLeft" ||
+  key === "ArrowRight" ||
+  key === "ArrowDown" ||
+  key === "ArrowUp";
+
 type FlowNodeFocusRoot = {
   querySelector: (
     selector: string,

@@ -10,16 +10,38 @@ const withEnglishFallback = <T extends Record<string, unknown>>(
 
 export type UnitInformationMessageKey = keyof typeof messageResources.en;
 
+const messageCache = new Map<string, Record<string, string>>();
+
+const messagesForLanguage = (language: string): Record<string, string> => {
+  const cached = messageCache.get(language);
+  if (cached) {
+    return cached;
+  }
+  const messages = withEnglishFallback(
+    messageResources.en,
+    { en: messageResources.en, ja: messageResources.ja }[language],
+  );
+  messageCache.set(language, messages);
+  return messages;
+};
+
 export const unitInformationMessage = (
   key: string,
   language: string = "en",
 ): string => {
-  const messages: Record<string, string> = withEnglishFallback(
-    messageResources.en,
-    { en: messageResources.en, ja: messageResources.ja }[language],
-  );
+  const messages = messagesForLanguage(language);
   return messages[key] || key;
 };
+
+export const formatUnitInformationMessage = (
+  key: string,
+  language: string = "en",
+  values: Readonly<Record<string, string | number>> = {},
+): string =>
+  unitInformationMessage(key, language).replace(
+    /\{([^}]+)\}/g,
+    (_match, name: string) => String(values[name] ?? `{${name}}`),
+  );
 
 type UnitTypeDefinitions = typeof unitTypeResources.en;
 type UnitTypeKey = keyof UnitTypeDefinitions;

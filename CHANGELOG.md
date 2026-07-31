@@ -15,6 +15,9 @@
 - Added shared unit-tree keyboard navigation with roving row focus, visible
   row Up/Down movement, Right/Left expand and parent navigation, Home/End
   boundaries, Enter/Space selection, and tree semantics in both viewers.
+- Added localized accessible names, state announcements, and React Flow
+  keyboard instructions for English and Japanese, while preserving native
+  link and button activation during viewer movement.
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization

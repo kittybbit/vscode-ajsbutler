@@ -4,7 +4,7 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 5 are complete; Slice 6 is the
+- Approved or active slice: Slices 1 through 6 are complete; Slice 7 is the
   next pending implementation slice.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
@@ -16,7 +16,7 @@
 - Validate every code slice with its focused tests and
   `rtk pnpm run qlty`; run final cross-platform evidence in Slice 7.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: begin Slice 6 implementation under its existing approval
+- Next decision: begin Slice 7 implementation under its existing approval
   boundary.
 
 ## Sync Rule
@@ -41,8 +41,8 @@
   implementation
 - Human approval: All seven slices approved; Slice 5 completion is recorded
   and implementation may proceed with Slice 6
-- Active implementation slice: Slice 6, Localized Semantic State And
-  Announcements
+- Active implementation slice: Slice 7, Non-Color State, High Contrast, And
+  Compatibility Validation
 
 ## Human Approval
 
@@ -68,8 +68,8 @@
   Slice 3's hierarchy resolver, asynchronous focus restoration, validation,
   and approval boundary, plus the scope-continuity, localized-instruction, and
   integrated-validation responsibilities in Slices 5 through 7.
-- Approval invalidated only for revised, incomplete Slices 3, 5, 6, and 7.
-  Completed Slices 1 and 2 and unchanged Slice 4 remain preserved.
+- Revised Slices 3, 5, 6, and 7 received renewed approval. Slices 1 through 6
+  now have completion approval; Slice 7 remains the next implementation slice.
 
 Implementation may proceed only inside the approved slice boundaries and only
 after switching from `main` to a dedicated non-doc feature branch.
@@ -596,7 +596,7 @@ the complete state model.
 
 ### Slice 6: Localized Semantic State And Announcements
 
-- Status: Approved
+- Status: Complete
 - Scope: expose localized names, descriptions, state, and restrained status
   announcements for both viewers. Cover search results, selection, sort,
   spatial selection, relationship-focus and scope changes, copy completion,
@@ -642,6 +642,29 @@ the complete state model.
   instructions; header,
   node display, search, and detail regressions; `rtk pnpm test`;
   `rtk pnpm run test:web`; `rtk pnpm run qlty` with no new smell findings.
+- Implementation Evidence:
+  - `unitInformationLocalization.ts` now formats localized placeholders with
+    deterministic English fallback. Table and flow controls, selectors,
+    detail panes, state chips, node actions, grid semantics, and search
+    controls consume the English/Japanese resource entries.
+  - A shared presentation live-region host suppresses repeated event keys and
+    keeps announcement state outside the viewer render tree. Table selection,
+    search, sort, and CSV-copy events and flow selection, spatial movement,
+    nested expansion, search, scope, and relationship-focus events use concise
+    polite status messages.
+  - React Flow `ariaLabelConfig` describes the approved spatial Left/Right/Up/
+    Down map, Shift+Down/Shift+Up inline expansion, Enter N/RC scope entry,
+    Escape containing-scope return, D/L actions, and normal Tab traversal in
+    both languages without relationship, dragging, or deletion instructions.
+  - Added focused localization, announcement deduplication, and React Flow
+    accessibility-description tests. `rtk pnpm test`, `rtk pnpm run test:web`,
+    `rtk pnpm run qlty:check`, TypeScript compilation, and diff checks passed
+    on 2026-08-01. The repository has no Webview DOM test harness, so live
+    region timing and screen-reader output remain Slice 7's manual gate. A
+    cross-component focus audit also added movement-key ownership helpers for
+    table jump links and React Flow node actions, with focused pure tests;
+    native link/button activation and viewer shortcut exclusions remain
+    unchanged.
 - Production Readiness:
   - Failure mode: missing localization keys fall back to English and never
     announce raw identifiers or stale key mappings as instructions.
@@ -663,6 +686,7 @@ the complete state model.
   or retain instructions for the superseded key map.
 - Out of Scope: announcing hover/layout, adding telemetry, changing extension
   localization infrastructure, and extension-wide translation cleanup.
+- Completion: Human slice-completion approval received on 2026-08-01.
 
 ### Slice 7: Non-Color State, High Contrast, And Compatibility Validation
 
@@ -893,6 +917,35 @@ the complete state model.
   expand request. The flow viewer now uses the shared one-shot acknowledgment
   contract already used by the list viewer; no durable architecture change is
   needed.
+- Slice 6 implementation confirmed that live-region state must be hosted in a
+  child component exposed through an imperative announcement handle. Keeping
+  announcement text in the table or flow parent would rerender the complete
+  viewer for every status message and risk reintroducing focus flicker. This
+  is feature-specific performance guidance; no durable architecture change is
+  needed.
+- Slice 6 implementation also confirmed that localized React Flow instructions
+  must be supplied through `ariaLabelConfig` while the graph remains read-only;
+  manually overriding only the graph region label leaves built-in node and
+  control descriptions stale. This is feature-specific accessibility guidance.
+- Slice 6 follow-up exposed that row selection can invoke localized detail
+  labels on every vertical move. Caching the language-specific message table
+  and updating one existing live-region node avoids repeated resource-map
+  copies and unnecessary accessibility-tree replacement. This preserves the
+  announcement contract without reintroducing list movement latency.
+- Slice 6 interaction follow-up exposed that a flow-tree disclosure or scope
+  action button can retain DOM focus after normal Tab or pointer use. The
+  shared row handler now delegates only unmodified tree-navigation keys from
+  an action inside its owning row, while Enter and Space remain native button
+  activation. FlowSelector also forwards the localized selector labels to the
+  shared tree instead of silently dropping them. This is a presentation
+  interaction fix within the approved tree contract; no new slice or protocol
+  change is required.
+- Cross-component interaction review found the same focus hand-off gap in
+  table jump links and React Flow node action buttons. Movement keys now route
+  to the owning grid cell or node, while link/button activation and viewer
+  shortcuts remain native or excluded as before. The shared ownership helpers
+  are covered by focused pure tests; no protocol, DTO, or host-specific change
+  was needed.
 
 ## Assumptions And Compatibility
 

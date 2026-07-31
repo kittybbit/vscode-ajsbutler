@@ -22,6 +22,8 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
+import { useMyAppContext } from "../MyContexts";
+import { unitInformationMessage } from "../unitInformationLocalization";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
 
 export type SharedUnitDetailPaneRow = {
@@ -163,17 +165,20 @@ const getStateChipColor = (active: boolean): "primary" | "default" =>
 const getStateChipVariant = (active: boolean): "filled" | "outlined" =>
   active ? "filled" : "outlined";
 
-const formatStateChipLabel = ({ active, label }: SharedUnitDetailPaneChip) =>
-  `${label}: ${active ? "Yes" : "No"}`;
-
-const StateChip: FC<SharedUnitDetailPaneChip> = ({ active, label }) => (
-  <Chip
-    size="small"
-    color={getStateChipColor(active)}
-    variant={getStateChipVariant(active)}
-    label={formatStateChipLabel({ active, label })}
-  />
-);
+const StateChip: FC<SharedUnitDetailPaneChip> = ({ active, label }) => {
+  const { lang = "en" } = useMyAppContext();
+  return (
+    <Chip
+      size="small"
+      color={getStateChipColor(active)}
+      variant={getStateChipVariant(active)}
+      label={`${label}: ${unitInformationMessage(
+        active ? "a11y.state.yes" : "a11y.state.no",
+        lang,
+      )}`}
+    />
+  );
+};
 
 const CollapsedDetailPane: FC<
   Pick<

@@ -25,8 +25,8 @@ suite("AJS Table Header", () => {
   test("keeps header controls directly discoverable", () => {
     assert.deepStrictEqual(getAjsTableHeaderControlLabels("en"), {
       columns: "Select display columns.",
-      copyCsv: "Copy the contents to clipbord as csv.",
-      saveCsv: "Save the contents as csv.",
+      copyCsv: "Copy the contents to clipboard as CSV.",
+      saveCsv: "Save the contents as CSV.",
     });
     assert.strictEqual(
       getAjsTableHeaderControlLabels("ja").columns,

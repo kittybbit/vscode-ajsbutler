@@ -35,6 +35,7 @@ import { isAjsTableSearchHit } from "./globalFilter";
 import {
   getStickyColumnRevealScrollLeft,
   getTableGridFocusKey,
+  isTableGridNavigationEventOwnedByCell,
   isTableGridNavigationKey,
   isTableRowSelected,
   moveTableGridFocus,
@@ -56,6 +57,7 @@ type VirtualizedTableProps = {
   selectRow: (absolutePath: string) => void;
   openDetailPane: (absolutePath: string) => void;
   restoreFocusRequest: TableGridFocusRequest;
+  gridAriaLabel?: string;
 };
 
 type VirtualizedTableContext = {
@@ -65,6 +67,7 @@ type VirtualizedTableContext = {
   rowCount: number;
   rowIndex?: number;
   selectedAbsolutePath?: string;
+  gridAriaLabel?: string;
 };
 
 type VirtualizedTableRowProps = ItemProps<Row<UnitListRowView>> & {
@@ -265,6 +268,7 @@ const tableComponents: TableComponents<
           context ? context.headerRowCount + context.rowCount : undefined
         }
         aria-colcount={context?.columnCount}
+        aria-label={context?.gridAriaLabel}
         size="small"
         stickyHeader
       />
@@ -296,6 +300,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   selectRow,
   openDetailPane,
   restoreFocusRequest,
+  gridAriaLabel,
 }) => {
   console.log("render VirtualizedTable.");
 
@@ -415,7 +420,16 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   );
   const handleGridKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => {
-      if (event.target !== event.currentTarget) return;
+      if (
+        !isTableGridNavigationEventOwnedByCell(
+          event.target,
+          event.currentTarget,
+          event.key,
+          event.ctrlKey,
+        )
+      ) {
+        return;
+      }
       const shortcut = resolveUnitListGridShortcut({
         focus,
         key: event.key,
@@ -506,6 +520,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       rowCount: rows.length,
       rowIndex,
       selectedAbsolutePath,
+      gridAriaLabel,
     }),
     [
       columnVisibilityRevision,
@@ -513,6 +528,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       rowIndex,
       rows.length,
       selectedAbsolutePath,
+      gridAriaLabel,
       visibleColumnIds.length,
     ],
   );

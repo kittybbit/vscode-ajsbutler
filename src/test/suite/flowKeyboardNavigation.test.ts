@@ -2,8 +2,10 @@ import * as assert from "assert";
 import {
   buildFlowKeyboardNavigationIndex,
   focusRenderedFlowNode,
+  getFlowNodeIdFromTarget,
   getOwnedFlowNodeId,
   isFlowKeyboardNavigationKey,
+  isFlowSpatialNavigationKey,
   resolveFlowKeyboardFocusTarget,
   resolveFlowKeyboardNavigationAction,
   resolveFlowKeyboardNavigationIndexCache,
@@ -415,6 +417,27 @@ suite("Flow Keyboard Navigation", () => {
       } as never),
       undefined,
     );
+  });
+
+  test("resolves a nested node action to its owning node for spatial keys", () => {
+    const nodeElement = {
+      classList: {
+        contains: (className: string) => className === "react-flow__node",
+      },
+      dataset: { id: "owned-node" },
+    };
+    const nestedAction = {
+      classList: { contains: () => false },
+      closest: (selector: string) =>
+        selector === ".react-flow__node" ? nodeElement : undefined,
+    };
+
+    assert.strictEqual(
+      getFlowNodeIdFromTarget(nestedAction as never),
+      "owned-node",
+    );
+    assert.strictEqual(isFlowSpatialNavigationKey("ArrowRight"), true);
+    assert.strictEqual(isFlowSpatialNavigationKey("Enter"), false);
   });
 
   test("focuses an already-selected navigation target without a rerender", () => {

@@ -324,6 +324,20 @@ export const isTableGridNavigationKey = (
   key === "End" ||
   (ctrlKey && (key === "Home" || key === "End"));
 
+export const isTableGridNavigationEventOwnedByCell = (
+  target: EventTarget | null,
+  currentTarget: EventTarget | null,
+  key: string,
+  ctrlKey = false,
+): boolean => {
+  if (target === currentTarget) return true;
+  if (!isTableGridNavigationKey(key, ctrlKey)) return false;
+  const candidate = target as
+    | { closest?: (selector: string) => unknown }
+    | undefined;
+  return candidate?.closest?.('[role="gridcell"]') === currentTarget;
+};
+
 export const getStickyColumnRevealScrollLeft = (
   currentScrollLeft: number,
   targetLeft: number,

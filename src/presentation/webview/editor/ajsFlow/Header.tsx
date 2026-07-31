@@ -20,9 +20,11 @@ import type {
   FlowSearchDirection,
   FlowSearchResultPosition,
 } from "./flowSearchState";
+import { unitInformationMessage } from "../unitInformationLocalization";
 
 type HeaderProps = {
   currentUnit?: FlowGraphUnitDto;
+  language: string;
   canToggleExpandAllNestedUnits: boolean;
   hasExpandedAllNestedUnits: boolean;
   toggleExpandAllNestedUnits: () => void;
@@ -39,6 +41,7 @@ type HeaderProps = {
 };
 
 type HeaderSearchFieldProps = {
+  language: string;
   searchedUnitId?: string;
   searchResultPosition?: FlowSearchResultPosition;
   onSearchNavigate: (query: string, direction: FlowSearchDirection) => void;
@@ -51,18 +54,21 @@ type CurrentUnitBadgeProps = {
 };
 
 type ExpandAllNestedUnitsButtonProps = {
+  language: string;
   canToggle: boolean;
   expanded: boolean;
   onToggle: () => void;
 };
 
 type RelationshipFocusButtonProps = {
+  language: string;
   canEnable: boolean;
   enabled: boolean;
   onToggle: () => void;
 };
 
 type MiniMapButtonProps = {
+  language: string;
   shown: boolean;
   onToggle: () => void;
 };
@@ -70,50 +76,60 @@ type MiniMapButtonProps = {
 const isRootJobnet = (unit: FlowGraphUnitDto): boolean =>
   unit.unitType === "n" && unit.isRootJobnet;
 
-const flowHeaderSearchLabels: HeaderSearchControlLabels = {
+const getFlowHeaderSearchLabels = (
+  language: string,
+): HeaderSearchControlLabels => ({
   helperText: {
-    noResults: "No units match in the current scope.",
-    matched: "Matched unit is highlighted in the current scope.",
-    idle: "Search current scope by unit name, comment, or path.",
+    noResults: unitInformationMessage("a11y.flow.search.noResults", language),
+    matched: unitInformationMessage("a11y.flow.search.matched", language),
+    idle: unitInformationMessage("a11y.flow.search.idle", language),
   },
   navigation: {
-    resultAriaLabel: (position) =>
-      `${position.current} of ${position.total} search results`,
-    previousTooltip: "Previous flow search result (Shift+Enter).",
-    previousAriaLabel: "Previous flow search result.",
-    nextTooltip: "Next flow search result (Enter).",
-    nextAriaLabel: "Next flow search result.",
+    resultAriaLabel: (position) => `${position.current} / ${position.total}`,
+    previousTooltip: unitInformationMessage("a11y.search.previous", language),
+    previousAriaLabel: unitInformationMessage("a11y.search.previous", language),
+    nextTooltip: unitInformationMessage("a11y.search.next", language),
+    nextAriaLabel: unitInformationMessage("a11y.search.next", language),
   },
-};
+});
 
 export const getCurrentUnitLabel = (
   currentUnit?: FlowGraphUnitDto,
+  language = "en",
 ): string | undefined => {
   if (!currentUnit) {
     return undefined;
   }
   if (isRootJobnet(currentUnit)) {
-    return "ROOT JOBNET";
+    return unitInformationMessage("a11y.flow.rootJobnet", language);
   }
   return currentUnit.unitType.toUpperCase();
 };
 
-const getExpandAllLabel = (hasExpandedAllNestedUnits: boolean): string =>
-  hasExpandedAllNestedUnits
-    ? "Collapse all nested jobnets."
-    : "Expand all nested jobnets.";
+const getExpandAllLabel = (
+  hasExpandedAllNestedUnits: boolean,
+  language: string,
+): string =>
+  unitInformationMessage(
+    hasExpandedAllNestedUnits
+      ? "a11y.flow.controls.collapseAll"
+      : "a11y.flow.controls.expandAll",
+    language,
+  );
 
 const getSearchHelperText = (
   searchedUnitId?: string,
   resultPosition?: FlowSearchResultPosition,
+  language = "en",
 ): string =>
   resolveHeaderSearchHelperText(
     searchedUnitId,
     resultPosition,
-    flowHeaderSearchLabels.helperText,
+    getFlowHeaderSearchLabels(language).helperText,
   );
 
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
+  language,
   searchedUnitId,
   searchResultPosition,
   onSearchNavigate,
@@ -123,8 +139,11 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   <HeaderSearchControl<FlowSearchDirection>
     matchedTargetId={searchedUnitId}
     resultPosition={searchResultPosition}
-    placeholderLabel="Search current scope"
-    labels={flowHeaderSearchLabels}
+    placeholderLabel={unitInformationMessage(
+      "a11y.flow.search.placeholder",
+      language,
+    )}
+    labels={getFlowHeaderSearchLabels(language)}
     onSearchNavigate={onSearchNavigate}
     onSearchSubmit={onSearchSubmit}
     onSearchClear={onSearchClear}
@@ -132,15 +151,16 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
 );
 
 const ExpandAllNestedUnitsButton: FC<ExpandAllNestedUnitsButtonProps> = ({
+  language,
   canToggle,
   expanded,
   onToggle,
 }) => (
-  <Tooltip title={getExpandAllLabel(expanded)}>
+  <Tooltip title={getExpandAllLabel(expanded, language)}>
     <span>
       <IconButton
         size="small"
-        aria-label="toggleExpandAllNestedJobnets"
+        aria-label={getExpandAllLabel(expanded, language)}
         onClick={onToggle}
         disabled={!canToggle}
       >
@@ -155,6 +175,7 @@ const ExpandAllNestedUnitsButton: FC<ExpandAllNestedUnitsButtonProps> = ({
 );
 
 const RelationshipFocusButton: FC<RelationshipFocusButtonProps> = ({
+  language,
   canEnable,
   enabled,
   onToggle,
@@ -162,14 +183,30 @@ const RelationshipFocusButton: FC<RelationshipFocusButtonProps> = ({
   <Tooltip
     title={
       enabled
-        ? "Exit relationship focus mode."
-        : "Focus on selected node relationships."
+        ? unitInformationMessage(
+            "a11y.flow.controls.exitRelationships",
+            language,
+          )
+        : unitInformationMessage(
+            "a11y.flow.controls.focusRelationships",
+            language,
+          )
     }
   >
     <span>
       <IconButton
         size="small"
-        aria-label="toggleRelationshipFocusMode"
+        aria-label={
+          enabled
+            ? unitInformationMessage(
+                "a11y.flow.controls.exitRelationships",
+                language,
+              )
+            : unitInformationMessage(
+                "a11y.flow.controls.focusRelationships",
+                language,
+              )
+        }
         aria-pressed={enabled}
         color={enabled ? "primary" : "default"}
         onClick={onToggle}
@@ -181,22 +218,35 @@ const RelationshipFocusButton: FC<RelationshipFocusButtonProps> = ({
   </Tooltip>
 );
 
-const MiniMapButton: FC<MiniMapButtonProps> = ({ shown, onToggle }) => (
-  <Tooltip title={shown ? "Hide MiniMap." : "Show MiniMap."}>
-    <IconButton
-      size="small"
-      aria-label="Toggle flow graph MiniMap visibility."
-      aria-pressed={shown}
-      color={shown ? "primary" : "default"}
-      onClick={onToggle}
-    >
-      <MapOutlinedIcon fontSize="inherit" />
-    </IconButton>
-  </Tooltip>
-);
+const MiniMapButton: FC<MiniMapButtonProps> = ({
+  language,
+  shown,
+  onToggle,
+}) => {
+  const label = unitInformationMessage(
+    shown ? "a11y.flow.controls.hideMinimap" : "a11y.flow.controls.showMinimap",
+    language,
+  );
+  return (
+    <Tooltip title={label}>
+      <IconButton
+        size="small"
+        aria-label={label}
+        aria-pressed={shown}
+        color={shown ? "primary" : "default"}
+        onClick={onToggle}
+      >
+        <MapOutlinedIcon fontSize="inherit" />
+      </IconButton>
+    </Tooltip>
+  );
+};
 
-const CurrentUnitBadge: FC<CurrentUnitBadgeProps> = ({ currentUnit }) => {
-  const currentUnitLabel = getCurrentUnitLabel(currentUnit);
+const CurrentUnitBadge: FC<CurrentUnitBadgeProps & { language: string }> = ({
+  currentUnit,
+  language,
+}) => {
+  const currentUnitLabel = getCurrentUnitLabel(currentUnit, language);
   if (!currentUnitLabel) {
     return null;
   }
@@ -224,6 +274,7 @@ const CurrentUnitBadge: FC<CurrentUnitBadgeProps> = ({ currentUnit }) => {
 
 const Header: FC<HeaderProps> = ({
   currentUnit,
+  language,
   canToggleExpandAllNestedUnits,
   hasExpandedAllNestedUnits,
   toggleExpandAllNestedUnits,
@@ -255,6 +306,7 @@ const Header: FC<HeaderProps> = ({
       >
         <Toolbar sx={{ gap: 1.25, minHeight: "3.5rem" }}>
           <HeaderSearchField
+            language={language}
             searchedUnitId={searchedUnitId}
             searchResultPosition={searchResultPosition}
             onSearchNavigate={onSearchNavigate}
@@ -262,17 +314,23 @@ const Header: FC<HeaderProps> = ({
             onSearchClear={onSearchClear}
           />
           <ExpandAllNestedUnitsButton
+            language={language}
             canToggle={canToggleExpandAllNestedUnits}
             expanded={hasExpandedAllNestedUnits}
             onToggle={toggleExpandAllNestedUnits}
           />
           <RelationshipFocusButton
+            language={language}
             canEnable={canEnableFocusMode}
             enabled={focusModeEnabled}
             onToggle={toggleFocusMode}
           />
-          <MiniMapButton shown={showMiniMap} onToggle={toggleMiniMap} />
-          <CurrentUnitBadge currentUnit={currentUnit} />
+          <MiniMapButton
+            language={language}
+            shown={showMiniMap}
+            onToggle={toggleMiniMap}
+          />
+          <CurrentUnitBadge currentUnit={currentUnit} language={language} />
         </Toolbar>
       </AppBar>
     </>

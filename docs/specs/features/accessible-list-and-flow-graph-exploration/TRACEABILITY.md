@@ -184,6 +184,27 @@ names that exist in those files.
   rejection of relationship-based arrows, selection-only child/parent,
   superseded Tab-relationship, and unmodified-arrow expansion descriptions;
   desktop and Web tests
+- Current implementation validation (2026-08-01): focused localization,
+  interpolation, live-region deduplication/politeness, and React Flow
+  accessibility-description tests passed. Table and flow labels, detail state,
+  search/sort/selection/copy announcements, spatial direction wording, and
+  revised keyboard instructions are wired through the shared browser-safe
+  presentation path. `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run qlty:check`, TypeScript compilation, and diff checks passed.
+  The repository has no Webview DOM test harness; live-region timing,
+  duplicate output from assistive technology, and English/Japanese screen
+  reader pronunciation remain the Slice 7 manual completion gate. A follow-up
+  performance fix caches localized message maps and reuses the live-region DOM
+  node so vertical row movement does not repeat full resource copies. A flow
+  tree interaction follow-up also keeps Arrow/Home/End navigation available
+  when focus is on a nested disclosure or scope action button, while preserving
+  native Enter/Space activation; localized selector labels are now forwarded
+  through the flow consumer. The same ownership rule is now applied to table
+  jump links and React Flow node actions for movement keys only, with focused
+  pure ownership tests and unchanged native activation behavior. Human
+  slice-completion approval was received on 2026-08-01; live-region timing,
+  screen-reader output, high contrast, and large-definition checks remain
+  Slice 7's final cross-platform gate.
 
 ## Slice 7: Non-Color State, High Contrast, And Compatibility Validation
 

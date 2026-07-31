@@ -25,6 +25,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
+import { useMyAppContext } from "../MyContexts";
+import {
+  formatUnitInformationMessage,
+  unitInformationMessage,
+} from "../unitInformationLocalization";
 import { collectUnitTreeAncestorUnitIds } from "./unitTreeSelection";
 import {
   resolveUnitTreeNavigationKey,
@@ -155,6 +160,14 @@ const defaultIsUnitEnabled = (): boolean => true;
 
 const isDefinedUnitId = (unitId: string | undefined): unitId is string =>
   unitId !== undefined && unitId.length > 0;
+
+const isTreeNavigationKey = (key: string): boolean =>
+  key === "ArrowDown" ||
+  key === "ArrowUp" ||
+  key === "ArrowLeft" ||
+  key === "ArrowRight" ||
+  key === "Home" ||
+  key === "End";
 
 export const mergeUnitIds = (
   current: Set<string>,
@@ -385,13 +398,18 @@ const UnitTreeExpandControl: FC<UnitTreeExpandControlProps> = ({
   unit,
   onToggle,
 }) => {
+  const { lang = "en" } = useMyAppContext();
   if (!hasChildren) {
     return <Box sx={{ width: 28, flexShrink: 0 }} />;
   }
   return (
     <IconButton
       size="small"
-      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${unit.name}`}
+      aria-label={formatUnitInformationMessage(
+        isExpanded ? "a11y.tree.collapse" : "a11y.tree.expand",
+        lang,
+        { title: unit.name },
+      )}
       onClick={onToggle}
     >
       <UnitTreeExpandIcon isExpanded={isExpanded} />
@@ -466,18 +484,24 @@ const UnitTreeOpenScopeAction: FC<UnitTreeOpenScopeActionProps> = ({
   canOpenScope,
   unit,
   onOpenScope,
-}) =>
-  canOpenScope && onOpenScope ? (
-    <Tooltip title="Open as graph scope">
+}) => {
+  const { lang = "en" } = useMyAppContext();
+  if (!canOpenScope || !onOpenScope) return null;
+  const label = formatUnitInformationMessage("a11y.tree.openScope", lang, {
+    name: unit.name,
+  });
+  return (
+    <Tooltip title={label}>
       <IconButton
         size="small"
-        aria-label={`Open ${unit.name} as graph scope`}
+        aria-label={label}
         onClick={() => onOpenScope(unit.id)}
       >
         <FolderOpenIcon fontSize="inherit" />
       </IconButton>
     </Tooltip>
-  ) : null;
+  );
+};
 
 const UnitTreeNestedChildren: FC<UnitTreeNestedChildrenProps> = ({
   hasChildren,
@@ -653,6 +677,12 @@ const UnitTreeSelectorToolbar: FC<UnitTreeSelectorToolbarProps> = ({
   title,
 }) => {
   const theme = useTheme();
+  const { lang = "en" } = useMyAppContext();
+  const collapseLabel = formatUnitInformationMessage(
+    "a11y.tree.collapse",
+    lang,
+    { title: title.toLowerCase() },
+  );
   return (
     <Toolbar
       sx={{
@@ -667,10 +697,7 @@ const UnitTreeSelectorToolbar: FC<UnitTreeSelectorToolbarProps> = ({
       >
         {title}
       </Typography>
-      <IconButton
-        aria-label={`Collapse ${title.toLowerCase()}`}
-        onClick={onCollapse}
-      >
+      <IconButton aria-label={collapseLabel} onClick={onCollapse}>
         {theme.direction === "ltr" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </IconButton>
     </Toolbar>
@@ -695,13 +722,25 @@ const CollapsedUnitTreeRail: FC<CollapsedUnitTreeRailProps> = ({
       boxSizing: "border-box",
     }}
   >
+    <LocalizedCollapsedTreeExpand
+      direction={direction}
+      onExpand={onExpand}
+      title={title}
+    />
+  </Paper>
+);
+
+const LocalizedCollapsedTreeExpand: FC<
+  Pick<CollapsedUnitTreeRailProps, "direction" | "onExpand" | "title">
+> = ({ direction, onExpand, title }) => {
+  const { lang = "en" } = useMyAppContext();
+  const label = formatUnitInformationMessage("a11y.tree.expand", lang, {
+    title: title.toLowerCase(),
+  });
+  return (
     <Stack alignItems="center" sx={{ paddingY: 1 }}>
-      <Tooltip title={`Expand ${title.toLowerCase()}`} placement="right">
-        <IconButton
-          size="small"
-          aria-label={`Expand ${title.toLowerCase()}`}
-          onClick={onExpand}
-        >
+      <Tooltip title={label} placement="right">
+        <IconButton size="small" aria-label={label} onClick={onExpand}>
           {direction === "ltr" ? (
             <ChevronRightIcon fontSize="small" />
           ) : (
@@ -710,8 +749,8 @@ const CollapsedUnitTreeRail: FC<CollapsedUnitTreeRailProps> = ({
         </IconButton>
       </Tooltip>
     </Stack>
-  </Paper>
-);
+  );
+};
 
 const ExpandedUnitTreePanel: FC<ExpandedUnitTreePanelProps> = ({
   ariaLabel,
@@ -758,9 +797,9 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   currentUnitId,
   hoveredUnitId,
   selectedUnitId,
-  title = "UNIT TREE",
-  ariaLabel = "Unit tree",
-  collapsedAriaLabel = "Collapsed unit tree",
+  title,
+  ariaLabel,
+  collapsedAriaLabel,
   autoScrollSelectedUnit = true,
   focusRequest,
   canOpenScopeUnit = defaultCanOpenScopeUnit,
@@ -772,6 +811,13 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   onSelectUnit,
 }) => {
   const theme = useTheme();
+  const { lang = "en" } = useMyAppContext();
+  const resolvedTitle =
+    title ?? unitInformationMessage("a11y.tree.title", lang);
+  const resolvedAriaLabel =
+    ariaLabel ?? unitInformationMessage("a11y.tree.label", lang);
+  const resolvedCollapsedAriaLabel =
+    collapsedAriaLabel ?? unitInformationMessage("a11y.tree.collapsed", lang);
   const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
   const { collapse, collapsed, expand } = useResponsivePanelCollapse(isNarrow);
   const currentPathUnitIds = useMemo(
@@ -896,9 +942,8 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
     [setActiveRow],
   );
 
-  const handleRowKeyDown = useCallback(
+  const handleUnitTreeKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>, unitId: string) => {
-      if (event.target !== event.currentTarget) return;
       if (
         event.key === "Escape" &&
         !event.altKey &&
@@ -940,6 +985,22 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
     [onEscape, onSelectUnit, requestRowFocus, setExpanded, visibleRows],
   );
 
+  const handleRowKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
+      const target = event.target as HTMLElement | null;
+      const owningTreeItem = target?.closest?.('[role="treeitem"]');
+      if (owningTreeItem !== event.currentTarget) return;
+      if (
+        event.target !== event.currentTarget &&
+        !isTreeNavigationKey(event.key)
+      ) {
+        return;
+      }
+      handleUnitTreeKeyDown(event, unitId);
+    },
+    [handleUnitTreeKeyDown],
+  );
+
   const handleSelectorKeyDownCapture = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
       if (
@@ -963,9 +1024,9 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
 
   const expandedPanel = (
     <ExpandedUnitTreePanel
-      ariaLabel={ariaLabel}
+      ariaLabel={resolvedAriaLabel}
       rootUnits={rootUnits}
-      title={title}
+      title={resolvedTitle}
       treeTabIndex={enabledVisibleRows.length > 0 ? -1 : 0}
       canOpenScopeUnit={canOpenScopeUnit}
       currentPathUnitIds={currentPathUnitIds}
@@ -989,9 +1050,9 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   );
   const collapsedRail = (
     <CollapsedUnitTreeRail
-      collapsedAriaLabel={collapsedAriaLabel}
+      collapsedAriaLabel={resolvedCollapsedAriaLabel}
       direction={theme.direction}
-      title={title}
+      title={resolvedTitle}
       onExpand={expand}
     />
   );

@@ -47,7 +47,9 @@ import {
 import type { AjsNode } from "./nodes/AjsNode";
 import {
   focusRenderedFlowNode,
+  getFlowNodeIdFromTarget,
   getOwnedFlowNodeId,
+  isFlowSpatialNavigationKey,
   readOnlyFlowInteractionProps,
   resolveFlowKeyboardFocusTarget,
   resolveFlowKeyboardScopeFocusDecision,
@@ -63,6 +65,16 @@ import {
 } from "./flowViewportFocus";
 import { resolveFlowViewerShortcut } from "./flowViewerShortcuts";
 import { resolveFlowSelectorFocusTarget } from "./FlowSelector";
+import { flowAriaLabelConfig } from "./flowAccessibility";
+import type { FlowKeyboardNavigationMovement } from "./flowKeyboardNavigation";
+import {
+  ViewerAnnouncementHost,
+  type ViewerAnnouncementHostHandle,
+} from "../shared/viewerAnnouncements";
+import {
+  formatUnitInformationMessage,
+  unitInformationMessage,
+} from "../unitInformationLocalization";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 const minimumViewportZoom = 0.02;
@@ -93,6 +105,14 @@ type FlowGraphPanelProps = Pick<
   miniMapColors: FlowMiniMapColors;
   onFocusDetail: (unitId: string) => void;
   onFocusSelector: (unitId?: string) => void;
+  onNestedExpansion?: (unitId: string, expanded: boolean) => void;
+  onNodeSelected?: (unitId: string) => void;
+  onSpatialMove?: (
+    unitId: string,
+    direction: FlowKeyboardNavigationMovement,
+  ) => void;
+  language: string;
+  graphAriaLabel: string;
   theme: Theme;
 };
 
@@ -143,6 +163,11 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   nodes,
   onFocusDetail,
   onFocusSelector,
+  onNestedExpansion,
+  onNodeSelected,
+  onSpatialMove,
+  language,
+  graphAriaLabel,
   reactFlowInstanceRef,
   selectFlowNode,
   showMiniMap,
@@ -201,6 +226,10 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
     navigationNodes,
   );
   const navigationIndex = navigationIndexCacheRef.current.index;
+  const ariaLabelConfig = useMemo(
+    () => flowAriaLabelConfig(language),
+    [language],
+  );
 
   useEffect(() => {
     const request = pendingFocusRequestRef.current;
@@ -294,8 +323,11 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   );
 
   const handleNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node<AjsNode>) => selectFlowNode(node.id),
-    [selectFlowNode],
+    (_event: React.MouseEvent, node: Node<AjsNode>) => {
+      selectFlowNode(node.id);
+      onNodeSelected?.(node.id);
+    },
+    [onNodeSelected, selectFlowNode],
   );
   const handleNodeMouseEnter = useCallback(
     (_event: React.MouseEvent, node: Node<AjsNode>) =>
@@ -316,7 +348,13 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
 
   const handleFlowNodeKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      const currentUnitId = getOwnedFlowNodeId(event.target);
+      const currentUnitId = getFlowNodeIdFromTarget(event.target);
+      const isNestedNodeTarget =
+        currentUnitId !== undefined &&
+        getOwnedFlowNodeId(event.target) === undefined;
+      if (isNestedNodeTarget && !isFlowSpatialNavigationKey(event.key)) {
+        return;
+      }
       const shortcut = resolveFlowViewerShortcut({
         altKey: event.altKey,
         ctrlKey: event.ctrlKey,
@@ -363,6 +401,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
           action.targetUnitId,
           CSS.escape,
         );
+        onSpatialMove?.(action.targetUnitId, action.movement);
         return;
       }
       if (action.kind === "enter-scope" || action.kind === "return-scope") {
@@ -384,6 +423,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         targetUnitId: action.targetUnitId,
       };
       toggleExpandedFlowNodeFromKeyboard(action.targetUnitId);
+      onNestedExpansion?.(action.targetUnitId, action.kind === "expand");
     },
     [
       navigationIndex,
@@ -392,6 +432,9 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
       onFocusSelector,
       revealFlowNode,
       selectFlowNode,
+      onNestedExpansion,
+      onNodeSelected,
+      onSpatialMove,
       currentUnitIdState,
       scopeUnitById,
       toggleExpandedFlowNodeFromKeyboard,
@@ -402,7 +445,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
     <Paper
       ref={graphEntryRef}
       role="region"
-      aria-label="Flow graph"
+      aria-label={graphAriaLabel}
       tabIndex={0}
       onKeyDownCapture={handleFlowNodeKeyDown}
       variant="outlined"
@@ -426,6 +469,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         onNodeMouseEnter={handleNodeMouseEnter}
         onNodeMouseLeave={handleNodeMouseLeave}
         onInit={handleReactFlowInit}
+        ariaLabelConfig={ariaLabelConfig}
         {...readOnlyFlowInteractionProps}
         fitView
         minZoom={minimumViewportZoom}
@@ -452,7 +496,10 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         {showMiniMap && (
           <MiniMap<Node<AjsNode>>
             className="ajs-flow-minimap"
-            ariaLabel="Flow graph MiniMap"
+            ariaLabel={unitInformationMessage(
+              "a11y.flow.reactFlow.minimap",
+              language,
+            )}
             pannable
             zoomable
             position="bottom-right"
@@ -492,10 +539,17 @@ type FlowViewerBodyProps = FlowViewerController & {
   onDetailFocusRequestHandled: (revision: number) => void;
   onFocusDetail: (unitId: string) => void;
   onFocusSelector: (unitId?: string) => void;
+  onNestedExpansion?: (unitId: string, expanded: boolean) => void;
+  onNodeSelected?: (unitId: string) => void;
+  onSpatialMove?: (
+    unitId: string,
+    direction: FlowKeyboardNavigationMovement,
+  ) => void;
   onOpenFlowScope: (unitId: string) => void;
   onReturnFromDetail: (unitId: string) => void;
   onSelectorEscape: VoidFunction;
   openSelectedNodeUnitList: () => void;
+  language: string;
   theme: Theme;
 };
 
@@ -517,12 +571,16 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   onDetailFocusRequestHandled,
   onFocusDetail,
   onFocusSelector,
+  onNestedExpansion,
+  onNodeSelected,
+  onSpatialMove,
   onOpenFlowScope,
   onReturnFromDetail,
   onSelectorEscape,
   openSelectedNodeDefinition,
   openSelectedNodeScope,
   openSelectedNodeUnitList,
+  language,
   reactFlowInstanceRef,
   selectedNodeDetail,
   selectedUnitId,
@@ -575,6 +633,12 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
           onEscape={onSelectorEscape}
           onOpenScope={onOpenFlowScope}
           onSelectUnit={selectTreeUnit}
+          ariaLabel={unitInformationMessage("a11y.flow.selector", language)}
+          collapsedAriaLabel={unitInformationMessage(
+            "a11y.flow.selector.collapsed",
+            language,
+          )}
+          title={unitInformationMessage("a11y.tree.title", language)}
         />
         <FlowGraphPanel
           clearGraphHoveredUnit={clearGraphHoveredUnit}
@@ -586,6 +650,11 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
           nodes={nodes}
           onFocusDetail={onFocusDetail}
           onFocusSelector={onFocusSelector}
+          onNestedExpansion={onNestedExpansion}
+          onNodeSelected={onNodeSelected}
+          onSpatialMove={onSpatialMove}
+          language={language}
+          graphAriaLabel={unitInformationMessage("a11y.flow.graph", language)}
           reactFlowInstanceRef={reactFlowInstanceRef}
           selectFlowNode={selectFlowNode}
           showMiniMap={showMiniMap}
@@ -673,6 +742,8 @@ const FlowContents: FC = () => {
   console.log("render FlowContents.");
 
   const theme = useFlowTheme();
+  const { lang = "en" } = useMyAppContext();
+  const announcementHostRef = useRef<ViewerAnnouncementHostHandle>(null);
 
   const {
     flowDocumentDto,
@@ -838,9 +909,142 @@ const FlowContents: FC = () => {
     reportFlowOperation("flow.minimap.toggle");
     toggleMiniMap();
   }, [toggleMiniMap]);
+  const announceFlow = useCallback((eventKey: string, message: string) => {
+    announcementHostRef.current?.announce({ eventKey, message });
+  }, []);
+  const getFlowUnitName = useCallback(
+    (unitId: string): string => unitById.get(unitId)?.name ?? unitId,
+    [unitById],
+  );
+  const announceFlowSelection = useCallback(
+    (unitId: string) => {
+      announceFlow(
+        `flow:selected:${unitId}`,
+        formatUnitInformationMessage("a11y.announce.selected", lang, {
+          unit: getFlowUnitName(unitId),
+        }),
+      );
+    },
+    [announceFlow, getFlowUnitName, lang],
+  );
+  const announceFlowSpatialMove = useCallback(
+    (unitId: string, direction: FlowKeyboardNavigationMovement) => {
+      announceFlow(
+        `flow:moved:${unitId}:${direction}`,
+        formatUnitInformationMessage("a11y.announce.moved", lang, {
+          direction: formatUnitInformationMessage(
+            `a11y.direction.${direction}`,
+            lang,
+          ),
+          unit: getFlowUnitName(unitId),
+        }),
+      );
+    },
+    [announceFlow, getFlowUnitName, lang],
+  );
+  const announceFlowNestedExpansion = useCallback(
+    (unitId: string, expanded: boolean) => {
+      announceFlow(
+        `flow:nested:${unitId}:${expanded ? "expanded" : "collapsed"}`,
+        formatUnitInformationMessage(
+          expanded ? "a11y.announce.expanded" : "a11y.announce.collapsed",
+          lang,
+          { unit: getFlowUnitName(unitId) },
+        ),
+      );
+    },
+    [announceFlow, getFlowUnitName, lang],
+  );
+  const selectTreeUnitWithAnnouncement = useCallback(
+    (unitId: string) => {
+      selectTreeUnitWithTelemetry(unitId);
+      announceFlowSelection(unitId);
+    },
+    [announceFlowSelection, selectTreeUnitWithTelemetry],
+  );
+
+  const previousScopeIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const scopeId = currentUnit?.id;
+    if (previousScopeIdRef.current === undefined) {
+      previousScopeIdRef.current = scopeId;
+      return;
+    }
+    if (scopeId && previousScopeIdRef.current !== scopeId) {
+      announceFlow(
+        `flow:scope:${scopeId}`,
+        formatUnitInformationMessage("a11y.announce.scopeChanged", lang, {
+          unit: getFlowUnitName(scopeId),
+        }),
+      );
+    }
+    previousScopeIdRef.current = scopeId;
+  }, [announceFlow, currentUnit?.id, getFlowUnitName, lang]);
+
+  const previousSearchSignatureRef = useRef<string | undefined>(undefined);
+  const hasObservedSearchRef = useRef(false);
+  useEffect(() => {
+    const signature = searchResultPosition
+      ? `${searchedUnitId ?? ""}:${searchResultPosition.current}:${searchResultPosition.total}`
+      : undefined;
+    if (!hasObservedSearchRef.current) {
+      hasObservedSearchRef.current = true;
+      previousSearchSignatureRef.current = signature;
+      return;
+    }
+    if (!searchResultPosition) {
+      announceFlow(
+        "flow:search:cleared",
+        unitInformationMessage("a11y.announce.searchCleared", lang),
+      );
+    } else if (searchResultPosition.total === 0) {
+      announceFlow(
+        "flow:search:no-results",
+        unitInformationMessage("a11y.announce.searchNoResults", lang),
+      );
+    } else if (searchedUnitId) {
+      announceFlow(
+        `flow:search:${signature}`,
+        formatUnitInformationMessage("a11y.announce.searchResults", lang, {
+          count: searchResultPosition.total,
+          current: searchResultPosition.current,
+          total: searchResultPosition.total,
+          unit: getFlowUnitName(searchedUnitId),
+        }),
+      );
+    }
+    previousSearchSignatureRef.current = signature;
+  }, [
+    announceFlow,
+    getFlowUnitName,
+    lang,
+    searchResultPosition,
+    searchedUnitId,
+  ]);
+
+  const previousFocusModeRef = useRef<boolean | undefined>(undefined);
+  useEffect(() => {
+    if (previousFocusModeRef.current === undefined) {
+      previousFocusModeRef.current = focusModeEnabled;
+      return;
+    }
+    if (previousFocusModeRef.current !== focusModeEnabled) {
+      announceFlow(
+        `flow:relationships:${focusModeEnabled ? "on" : "off"}`,
+        unitInformationMessage(
+          focusModeEnabled
+            ? "a11y.announce.relationshipsOn"
+            : "a11y.announce.relationshipsOff",
+          lang,
+        ),
+      );
+      previousFocusModeRef.current = focusModeEnabled;
+    }
+  }, [announceFlow, focusModeEnabled, lang]);
 
   return (
     <ThemeProvider theme={theme}>
+      <ViewerAnnouncementHost ref={announcementHostRef} />
       <GlobalStyles
         styles={{
           ".ajs-flow-minimap .react-flow__minimap-node": {
@@ -861,6 +1065,7 @@ const FlowContents: FC = () => {
         >
           <Header
             currentUnit={currentUnit}
+            language={lang}
             canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
             hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
             toggleExpandAllNestedUnits={toggleExpandAllNestedUnitsWithTelemetry}
@@ -901,19 +1106,23 @@ const FlowContents: FC = () => {
             onDetailFocusRequestHandled={handleDetailFocusRequestHandled}
             onFocusDetail={handleFocusDetail}
             onFocusSelector={handleFocusSelector}
+            onNestedExpansion={announceFlowNestedExpansion}
+            onNodeSelected={announceFlowSelection}
+            onSpatialMove={announceFlowSpatialMove}
             onOpenFlowScope={handleOpenFlowScope}
             onReturnFromDetail={handleReturnFromDetail}
             onSelectorEscape={handleSelectorEscape}
             openSelectedNodeDefinition={openSelectedNodeDefinitionWithTelemetry}
             openSelectedNodeScope={openSelectedNodeScopeWithTelemetry}
             openSelectedNodeUnitList={openSelectedNodeUnitList}
+            language={lang}
             reactFlowInstanceRef={reactFlowInstanceRef}
             searchedUnitId={searchedUnitId}
             searchResultPosition={searchResultPosition}
             selectedNodeDetail={selectedNodeDetail}
             selectedUnitId={selectedUnitId}
             selectFlowNode={selectFlowNodeWithTelemetry}
-            selectTreeUnit={selectTreeUnitWithTelemetry}
+            selectTreeUnit={selectTreeUnitWithAnnouncement}
             setDialogData={setDialogData}
             showMiniMap={showMiniMap}
             theme={theme}

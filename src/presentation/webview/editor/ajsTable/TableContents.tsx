@@ -74,6 +74,14 @@ import {
 } from "./tableRowReveal";
 import { useTableSearchController } from "./tableSearchController";
 import { createTableViewerData, findSelectedUnitId } from "./tableViewerData";
+import {
+  ViewerAnnouncementHost,
+  type ViewerAnnouncementHostHandle,
+} from "../shared/viewerAnnouncements";
+import {
+  formatUnitInformationMessage,
+  unitInformationMessage,
+} from "../unitInformationLocalization";
 
 export type AjsTableSearchState = {
   query: string;
@@ -130,6 +138,9 @@ type TableViewerShellProps = {
   unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
   selectTreeUnit: (unitId: string) => void;
   openTreeUnitScope: (unitId: string) => void;
+  onCopied: () => void;
+  announcementHostRef: React.RefObject<ViewerAnnouncementHostHandle | null>;
+  gridAriaLabel: string;
 };
 
 type ParsedTableDocumentState = {
@@ -262,9 +273,13 @@ const TableViewerShell = ({
   unitById,
   selectTreeUnit,
   openTreeUnitScope,
+  onCopied,
+  announcementHostRef,
+  gridAriaLabel,
 }: TableViewerShellProps) => (
   <>
     <ThemeProvider theme={theme}>
+      <ViewerAnnouncementHost ref={announcementHostRef} />
       <CssBaseline />
       <Stack
         direction="column"
@@ -284,6 +299,7 @@ const TableViewerShell = ({
           onSearchNavigate={onSearchNavigate}
           onSearchSubmit={onSearchSubmit}
           onSearchClear={onSearchClear}
+          onCopied={onCopied}
           visibleRowCount={rows.length}
           totalRowCount={totalRowCount}
         />
@@ -339,6 +355,7 @@ const TableViewerShell = ({
                 selectRow={selectRow}
                 openDetailPane={openDetailPane}
                 restoreFocusRequest={restoreGridFocusRequest}
+                gridAriaLabel={gridAriaLabel}
               />
             </Box>
             {selectedDetail && !detailPaneClosed && (
@@ -383,6 +400,10 @@ const TableContents = () => {
 
   const { isDarkMode, lang } = useMyAppContext();
   const renderReadyStartedAt = useRef(performance.now());
+  const announcementHostRef = useRef<ViewerAnnouncementHostHandle>(null);
+  const announceTable = useCallback((eventKey: string, message: string) => {
+    announcementHostRef.current?.announce({ eventKey, message });
+  }, []);
 
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
@@ -488,6 +509,31 @@ const TableContents = () => {
     [resolveSelectedDetail, selectedAbsolutePath],
   );
 
+  const getTableUnitName = useCallback(
+    (absolutePath: string): string =>
+      viewerData.unitByAbsolutePath.get(absolutePath)?.name ?? absolutePath,
+    [viewerData.unitByAbsolutePath],
+  );
+
+  const previousSelectedPathRef = useRef<string | undefined>(undefined);
+  const hasObservedSelectedPathRef = useRef(false);
+  useEffect(() => {
+    if (!hasObservedSelectedPathRef.current) {
+      hasObservedSelectedPathRef.current = true;
+      previousSelectedPathRef.current = selectedAbsolutePath;
+      return;
+    }
+    if (selectedAbsolutePath) {
+      announceTable(
+        `table:selected:${selectedAbsolutePath}`,
+        formatUnitInformationMessage("a11y.announce.selected", lang, {
+          unit: getTableUnitName(selectedAbsolutePath),
+        }),
+      );
+    }
+    previousSelectedPathRef.current = selectedAbsolutePath;
+  }, [announceTable, getTableUnitName, lang, selectedAbsolutePath]);
+
   const {
     searchQuery,
     searchState,
@@ -499,6 +545,79 @@ const TableContents = () => {
     parameterSearchValuesByPath,
     revealPath,
   });
+
+  const previousSearchSignatureRef = useRef<string | undefined>(undefined);
+  const hasObservedSearchRef = useRef(false);
+  useEffect(() => {
+    const position = getTableSearchResultPosition(searchState);
+    const signature = position
+      ? `${searchState.searchedAbsolutePath ?? ""}:${position.current}:${position.total}`
+      : undefined;
+    if (!hasObservedSearchRef.current) {
+      hasObservedSearchRef.current = true;
+      previousSearchSignatureRef.current = signature;
+      return;
+    }
+    if (!position) {
+      announceTable(
+        "table:search:cleared",
+        unitInformationMessage("a11y.announce.searchCleared", lang),
+      );
+    } else if (position.total === 0) {
+      announceTable(
+        "table:search:no-results",
+        unitInformationMessage("a11y.announce.searchNoResults", lang),
+      );
+    } else if (searchState.searchedAbsolutePath) {
+      announceTable(
+        `table:search:${signature}`,
+        formatUnitInformationMessage("a11y.announce.searchResults", lang, {
+          count: position.total,
+          current: position.current,
+          total: position.total,
+          unit: getTableUnitName(searchState.searchedAbsolutePath),
+        }),
+      );
+    }
+    previousSearchSignatureRef.current = signature;
+  }, [announceTable, getTableUnitName, lang, searchState]);
+
+  const previousSortingSignatureRef = useRef<string | undefined>(undefined);
+  const hasObservedSortingRef = useRef(false);
+  useEffect(() => {
+    const sort = sorting[0];
+    const signature = sort
+      ? `${sort.id}:${sort.desc ? "desc" : "asc"}`
+      : undefined;
+    if (!hasObservedSortingRef.current) {
+      hasObservedSortingRef.current = true;
+      previousSortingSignatureRef.current = signature;
+      return;
+    }
+    announceTable(
+      `table:sort:${signature ?? "none"}`,
+      formatUnitInformationMessage("a11y.announce.sorted", lang, {
+        direction: unitInformationMessage(
+          sort
+            ? sort.desc
+              ? "a11y.sort.descending"
+              : "a11y.sort.ascending"
+            : "a11y.sort.none",
+          lang,
+        ),
+      }),
+    );
+    previousSortingSignatureRef.current = signature;
+  }, [announceTable, lang, sorting]);
+
+  const copiedAnnouncementRevisionRef = useRef(0);
+  const handleCopied = useCallback(() => {
+    copiedAnnouncementRevisionRef.current += 1;
+    announceTable(
+      `table:copied:${copiedAnnouncementRevisionRef.current}`,
+      unitInformationMessage("a11y.announce.csvCopied", lang),
+    );
+  }, [announceTable, lang]);
 
   useEffect(() => {
     dispatchRowSelection({ type: "documentChanged" });
@@ -557,6 +676,9 @@ const TableContents = () => {
       unitById={viewerData.unitById}
       selectTreeUnit={selectTreeUnit}
       openTreeUnitScope={openTreeUnitScope}
+      onCopied={handleCopied}
+      announcementHostRef={announcementHostRef}
+      gridAriaLabel={unitInformationMessage("a11y.table.grid", lang)}
     />
   );
 };

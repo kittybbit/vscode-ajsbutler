@@ -4,6 +4,7 @@ import {
   handleJumpLinkClick,
   getStickyColumnRevealScrollLeft,
   isTableRowSelected,
+  isTableGridNavigationEventOwnedByCell,
   isTableGridNavigationKey,
   moveTableGridFocus,
   navigateToFlow,
@@ -276,6 +277,28 @@ suite("Table navigation", () => {
     assert.strictEqual(isTableGridNavigationKey("Tab"), false);
     assert.strictEqual(isTableGridNavigationKey("Home"), true);
     assert.strictEqual(isTableGridNavigationKey("End", true), true);
+
+    const cell = {};
+    const nestedLink = {
+      closest: (selector: string) =>
+        selector === '[role="gridcell"]' ? cell : undefined,
+    };
+    assert.strictEqual(
+      isTableGridNavigationEventOwnedByCell(
+        nestedLink as never,
+        cell as never,
+        "ArrowDown",
+      ),
+      true,
+    );
+    assert.strictEqual(
+      isTableGridNavigationEventOwnedByCell(
+        nestedLink as never,
+        cell as never,
+        "Enter",
+      ),
+      false,
+    );
   });
 
   test("resolves list grid shortcuts only for their owned focus target", () => {

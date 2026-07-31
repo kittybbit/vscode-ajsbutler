@@ -13,6 +13,9 @@ type FlowSelectorProps = {
   focusRequest?: UnitTreeFocusRequest;
   hoveredUnitId?: string;
   selectedUnitId?: string;
+  title?: string;
+  ariaLabel?: string;
+  collapsedAriaLabel?: string;
   onHoverUnit: (unitId: string) => void;
   onLeaveUnit: (unitId: string) => void;
   onEscape?: VoidFunction;
@@ -53,6 +56,9 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   focusRequest,
   hoveredUnitId,
   selectedUnitId,
+  title,
+  ariaLabel,
+  collapsedAriaLabel,
   onHoverUnit,
   onLeaveUnit,
   onEscape,
@@ -78,6 +84,9 @@ const FlowSelector: FC<FlowSelectorProps> = ({
       focusRequest={focusRequest}
       hoveredUnitId={hoveredUnitId}
       selectedUnitId={selectedUnitId}
+      title={title}
+      ariaLabel={ariaLabel}
+      collapsedAriaLabel={collapsedAriaLabel}
       canOpenScopeUnit={canOpenScopeUnit}
       isUnitEnabled={isUnitEnabled}
       onHoverUnit={onHoverUnit}
