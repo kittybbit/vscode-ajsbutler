@@ -36,6 +36,11 @@ import {
   resolveVisibleUnitTreeRows,
 } from "./unitTreeNavigation";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
+import {
+  viewerFocusBorder,
+  viewerPathBorder,
+  viewerSelectionBorder,
+} from "./viewerThemeStyles";
 
 export type UnitTreeSelectorProps = {
   rootUnits: FlowGraphUnitDto[];
@@ -378,6 +383,15 @@ const resolveUnitTreeRowBorderColor = (
   selectedColor: string,
 ): string => (rowState.isSelected ? selectedColor : "transparent");
 
+export const resolveUnitTreeRowBorderStyle = (
+  rowState: Pick<UnitTreeRowState, "isSelected" | "isInCurrentPath">,
+): "double" | "dashed" | "solid" =>
+  rowState.isSelected
+    ? "double"
+    : rowState.isInCurrentPath
+      ? "dashed"
+      : "solid";
+
 const resolveUnitTreeRowOutline = (
   rowState: UnitTreeRowState,
   hoveredColor: string,
@@ -539,12 +553,26 @@ const UnitTreeRowFrame: FC<UnitTreeRowFrameProps> = ({
       border: (theme) =>
         `1px solid ${resolveUnitTreeRowBorderColor(
           rowState,
-          theme.palette.secondary.main,
+          viewerSelectionBorder(theme),
         )}`,
+      borderStyle: resolveUnitTreeRowBorderStyle(rowState),
+      borderWidth: rowState.isSelected ? 2 : 1,
+      borderInlineStart: (theme) =>
+        rowState.isInCurrentPath
+          ? `3px dashed ${viewerPathBorder(theme)}`
+          : undefined,
       outline: (theme) =>
         resolveUnitTreeRowOutline(rowState, theme.palette.primary.main),
       outlineOffset: "-2px",
       backgroundColor: resolveUnitTreeRowBackgroundColor(rowState),
+      "@media (forced-colors: active)": {
+        backgroundColor: "Canvas",
+        borderColor: rowState.isSelected ? "CanvasText" : "Canvas",
+        borderInlineStartColor: rowState.isInCurrentPath
+          ? "Highlight"
+          : undefined,
+        outlineColor: rowState.isHovered ? "Highlight" : undefined,
+      },
     }}
   >
     {children}
@@ -606,8 +634,11 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
       onKeyDown={(event) => onRowKeyDown(event, unit.id)}
       sx={{
         "&:focus-visible > [data-unit-tree-row]": {
-          outline: (theme) => `2px solid ${theme.palette.primary.main}`,
+          outline: (theme) => `2px solid ${viewerFocusBorder(theme)}`,
           outlineOffset: "-2px",
+          "@media (forced-colors: active)": {
+            outline: "2px solid Highlight",
+          },
         },
       }}
     >
@@ -776,6 +807,9 @@ const ExpandedUnitTreePanel: FC<ExpandedUnitTreePanelProps> = ({
       boxSizing: "border-box",
       background: (currentTheme) =>
         `linear-gradient(180deg, ${currentTheme.palette.background.paper} 0%, ${currentTheme.palette.background.default} 100%)`,
+      "body.vscode-high-contrast &": {
+        background: "var(--vscode-editor-background, Canvas)",
+      },
     }}
   >
     <UnitTreeSelectorToolbar onCollapse={onCollapse} title={title} />

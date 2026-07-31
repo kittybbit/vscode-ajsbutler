@@ -38,6 +38,7 @@ import FlowSelector from "./FlowSelector";
 import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
 import { useFlowViewerController } from "./useFlowViewerController";
 import type { UnitTreeFocusRequest } from "../shared/UnitTreeSelector";
+import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
 import { navigateToTable } from "./nodes/Utils";
 import {
   type FlowMiniMapColors,
@@ -416,6 +417,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         currentUnitIdState.setCurrentUnitId(action.targetScopeId);
         return;
       }
+      if (action.kind !== "expand" && action.kind !== "collapse") return;
       pendingFocusRequestRef.current = {
         expectedExpanded: action.kind === "expand",
         fallbackToGraphEntry: true,
@@ -608,6 +610,9 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
         padding: 1.25,
         background: (theme) =>
           `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+        "body.vscode-high-contrast &": {
+          background: "var(--vscode-editor-background, Canvas)",
+        },
         boxSizing: "border-box",
       }}
     >
@@ -1047,6 +1052,7 @@ const FlowContents: FC = () => {
       <ViewerAnnouncementHost ref={announcementHostRef} />
       <GlobalStyles
         styles={{
+          ...viewerThemeGlobalStyles,
           ".ajs-flow-minimap .react-flow__minimap-node": {
             vectorEffect: "non-scaling-stroke",
             strokeLinejoin: "round",
@@ -1087,6 +1093,7 @@ const FlowContents: FC = () => {
             clearTreeHoveredUnit={clearTreeHoveredUnit}
             currentUnit={currentUnit}
             currentUnitIdState={currentUnitIdState}
+            clearSelectedUnit={clearSelectedUnit}
             detailFocusRequestRevision={detailFocusRequestRevision}
             dialogData={dialogData}
             edges={edges}

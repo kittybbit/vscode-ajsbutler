@@ -1,5 +1,8 @@
 import * as assert from "assert";
-import { mergeUnitIds } from "../../presentation/webview/editor/shared/UnitTreeSelector";
+import {
+  mergeUnitIds,
+  resolveUnitTreeRowBorderStyle,
+} from "../../presentation/webview/editor/shared/UnitTreeSelector";
 import {
   resolveUnitTreeNavigationKey,
   resolveVisibleUnitTreeRows,
@@ -202,6 +205,30 @@ suite("Unit Tree Selector", () => {
     assert.deepStrictEqual(
       resolveUnitTreeNavigationKey(rows, "/enabled", { key: "ArrowUp" }),
       { suppressDefault: true },
+    );
+  });
+
+  test("uses border patterns for tree selection and current-path state", () => {
+    assert.strictEqual(
+      resolveUnitTreeRowBorderStyle({
+        isSelected: true,
+        isInCurrentPath: true,
+      }),
+      "double",
+    );
+    assert.strictEqual(
+      resolveUnitTreeRowBorderStyle({
+        isSelected: false,
+        isInCurrentPath: true,
+      }),
+      "dashed",
+    );
+    assert.strictEqual(
+      resolveUnitTreeRowBorderStyle({
+        isSelected: false,
+        isInCurrentPath: false,
+      }),
+      "solid",
     );
   });
 });

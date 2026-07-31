@@ -18,6 +18,10 @@
 - Added localized accessible names, state announcements, and React Flow
   keyboard instructions for English and Japanese, while preserving native
   link and button activation during viewer movement.
+- Added non-color focus, selection, search, relationship, and scope cues for
+  light, dark, and high-contrast themes in the list and flow viewers.
+- Fixed list and flow searches being cleared immediately after submission,
+  restoring list match cues and flow-node search highlighting.
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization

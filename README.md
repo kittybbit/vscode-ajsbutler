@@ -45,6 +45,9 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   Tab and Shift+Tab retain their normal Webview focus behavior.
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
+- Keeps focus, selection, search matches, relationship focus, and scope state
+  distinguishable with borders, outlines, icons, text, and VS Code theme or
+  high-contrast colors in both viewers.
 - Navigate the shared unit tree with a roving keyboard focus. Up and Down move
   through visible enabled rows, Right expands or enters children, Left
   collapses or returns to a parent, Home and End move to the visible

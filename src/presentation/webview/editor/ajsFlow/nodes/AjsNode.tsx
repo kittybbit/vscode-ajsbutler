@@ -74,6 +74,11 @@ export const nodeBadgeSxProps: SxProps<Theme> = {
   letterSpacing: "0.08em",
   lineHeight: 1.2,
   textAlign: "center",
+  "@media (forced-colors: active)": {
+    color: "CanvasText",
+    borderColor: "CanvasText",
+    backgroundColor: "Canvas",
+  },
 };
 
 export const handleStyle = {
@@ -91,6 +96,10 @@ const nodeTitleSxProps: SxProps<Theme> = {
   letterSpacing: "0.08em",
   lineHeight: 1.2,
   textAlign: "center",
+  "@media (forced-colors: active)": {
+    color: "CanvasText",
+    backgroundColor: "Canvas",
+  },
 };
 
 export const nodeActionsSxProps: SxProps<Theme> = {
@@ -101,6 +110,10 @@ export const nodeActionsSxProps: SxProps<Theme> = {
   paddingX: "0.35em",
   borderTop: (theme) => `1px solid ${theme.palette.divider}`,
   textAlign: "center",
+  "@media (forced-colors: active)": {
+    borderTopColor: "CanvasText",
+    color: "CanvasText",
+  },
 };
 
 export const TyTitle: FC<{
@@ -307,6 +320,16 @@ export const FlowNodeCard: FC<{
         justifyContent: "space-between",
         borderBottom: "2px solid",
         ...headerSxByTone[resolveFlowNodeHeaderTone(kind)],
+        "@media (forced-colors: active)": {
+          borderColor: "CanvasText",
+          backgroundColor: "Canvas",
+          color: "CanvasText",
+        },
+        "body.vscode-high-contrast &": {
+          borderColor: "var(--vscode-foreground, CanvasText)",
+          backgroundColor: "var(--vscode-editor-background, Canvas)",
+          color: "var(--vscode-foreground, CanvasText)",
+        },
       }}
     >
       <TyTitle ty={data.ty} gty={data.gty} />

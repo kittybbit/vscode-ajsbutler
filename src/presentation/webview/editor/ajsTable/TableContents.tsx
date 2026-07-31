@@ -12,6 +12,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
+import GlobalStyles from "@mui/material/GlobalStyles";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
@@ -78,6 +79,7 @@ import {
   ViewerAnnouncementHost,
   type ViewerAnnouncementHostHandle,
 } from "../shared/viewerAnnouncements";
+import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
 import {
   formatUnitInformationMessage,
   unitInformationMessage,
@@ -281,6 +283,7 @@ const TableViewerShell = ({
     <ThemeProvider theme={theme}>
       <ViewerAnnouncementHost ref={announcementHostRef} />
       <CssBaseline />
+      <GlobalStyles styles={viewerThemeGlobalStyles} />
       <Stack
         direction="column"
         spacing={0}
@@ -313,6 +316,9 @@ const TableViewerShell = ({
             padding: 1.25,
             background: (theme) =>
               `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+            "body.vscode-high-contrast &": {
+              background: "var(--vscode-editor-background, Canvas)",
+            },
             boxSizing: "border-box",
           }}
         >

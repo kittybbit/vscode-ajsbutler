@@ -33,6 +33,11 @@ import type { ParameterSearchValuesByPath } from "./globalFilter";
 import { AccessorType } from "./columnDefs/common";
 import { isAjsTableSearchHit } from "./globalFilter";
 import {
+  viewerFocusIndicatorSx,
+  viewerSearchBorder,
+  viewerSelectionBorder,
+} from "../shared/viewerThemeStyles";
+import {
   getStickyColumnRevealScrollLeft,
   getTableGridFocusKey,
   isTableGridNavigationEventOwnedByCell,
@@ -100,6 +105,20 @@ const styleTableCell: SxProps<Theme> = {
   },
 };
 
+export const tableGridFocusSx = viewerFocusIndicatorSx;
+
+export const tableRowStateSx = {
+  '&[aria-selected="true"] > td': {
+    boxShadow: (theme) =>
+      `inset 0 2px 0 ${viewerSelectionBorder(theme)}, inset 0 -2px 0 ${viewerSelectionBorder(theme)}`,
+  },
+  "@media (forced-colors: active)": {
+    '&[aria-selected="true"] > td': {
+      boxShadow: "inset 0 2px 0 CanvasText, inset 0 -2px 0 CanvasText",
+    },
+  },
+};
+
 export const getFixedTableVirtuosoStyle = () => ({
   width: "100%",
   minWidth: 0,
@@ -123,13 +142,18 @@ const searchHitBackgroundColor = {
   light: "rgba(255, 214, 102, 0.36)",
 };
 
-const getSearchHitCellSx = (isSearchHit: boolean) => {
+export const getSearchHitCellSx = (isSearchHit: boolean) => {
   if (!isSearchHit) {
     return undefined;
   }
   return {
     backgroundColor: (theme: Theme) =>
       searchHitBackgroundColor[theme.palette.mode],
+    borderBottom: (theme: Theme) => `2px dotted ${viewerSearchBorder(theme)}`,
+    "@media (forced-colors: active)": {
+      backgroundColor: "Canvas",
+      borderBottom: "2px dotted Highlight",
+    },
   };
 };
 
@@ -203,7 +227,7 @@ const renderVisibleTableCell = ({
       onClick={(event) => event.currentTarget.focus()}
       onFocus={() => onFocus(focus)}
       onKeyDown={(event) => onKeyDown(event, focus)}
-      sx={[styleTableCell, getSearchHitCellSx(isSearchHit)]}
+      sx={[styleTableCell, tableGridFocusSx, getSearchHitCellSx(isSearchHit)]}
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
     </TableCell>
@@ -228,6 +252,7 @@ const VirtualizedTableRow = memo(
         aria-selected={isSelected}
         hover={true}
         selected={isSelected}
+        sx={tableRowStateSx}
       />
     );
   },

@@ -7,6 +7,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
 import type { TableGridFocus } from "./navigation";
+import { viewerFocusIndicatorSx } from "../shared/viewerThemeStyles";
 
 const styleTableCell: SxProps<Theme> = {
   whiteSpace: "nowrap",
@@ -31,13 +32,9 @@ type TableHeaderProps = {
   ) => void;
 };
 
-const sortLabelSx: SxProps<Theme> = {
-  "&:focus-visible": { outline: "-webkit-focus-ring-color auto 1px" },
-};
+const sortLabelSx = viewerFocusIndicatorSx;
 
-const headerCellFocusSx: SxProps<Theme> = {
-  "&:focus-visible": { outline: "-webkit-focus-ring-color auto 1px" },
-};
+const headerCellFocusSx = viewerFocusIndicatorSx;
 
 const canRenderSortableHeader = (header: Header<UnitListRowView, unknown>) =>
   header.subHeaders.length === 0 && header.column.getCanSort();

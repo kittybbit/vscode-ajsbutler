@@ -3,6 +3,7 @@ import {
   MutableRefObject,
   SetStateAction,
   useCallback,
+  useRef,
   useState,
 } from "react";
 import {
@@ -280,19 +281,22 @@ export const useFlowSearchState = ({
   const [searchState, setSearchState] = useState<FlowSearchState>(
     createEmptyFlowSearchState,
   );
+  const searchStateRef = useRef(searchState);
+  searchStateRef.current = searchState;
 
   const resetSearch = useCallback(() => {
-    if (searchState.query !== undefined) {
+    const currentSearchState = searchStateRef.current;
+    if (currentSearchState.query !== undefined) {
       postFlowSearchEvent({
         action: "cleared",
-        query: searchState.query,
-        resultCount: searchState.matchedUnitIds.length,
+        query: currentSearchState.query,
+        resultCount: currentSearchState.matchedUnitIds.length,
       });
     }
     setSearchState((prev) =>
       createEmptyFlowSearchState(prev.focusRequestVersion),
     );
-  }, [searchState.matchedUnitIds.length, searchState.query]);
+  }, []);
 
   const handleSearchSubmit = useSearchSubmitHandler({
     currentUnit,

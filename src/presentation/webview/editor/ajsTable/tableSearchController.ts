@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { Row } from "@tanstack/table-core";
 import {
   toCountBucket,
@@ -80,18 +80,23 @@ export const useTableSearchController = ({
   const [searchState, setSearchState] = useState<TableSearchState>(
     createEmptyTableSearchState,
   );
+  const searchQueryRef = useRef(searchQuery);
+  const searchStateRef = useRef(searchState);
+  searchQueryRef.current = searchQuery;
+  searchStateRef.current = searchState;
 
   const resetSearch = useCallback(() => {
-    if (searchState.query !== undefined) {
+    const currentSearchState = searchStateRef.current;
+    if (currentSearchState.query !== undefined) {
       postTableSearchEvent({
         action: "cleared",
-        query: searchQuery,
-        resultCount: searchState.matchedAbsolutePaths.length,
+        query: searchQueryRef.current,
+        resultCount: currentSearchState.matchedAbsolutePaths.length,
       });
     }
     setSearchQuery("");
     setSearchState(createEmptyTableSearchState());
-  }, [searchQuery, searchState.matchedAbsolutePaths.length, searchState.query]);
+  }, []);
 
   const submitSearch = useCallback(
     (query: string) => {

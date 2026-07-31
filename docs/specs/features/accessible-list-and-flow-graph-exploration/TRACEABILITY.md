@@ -221,3 +221,15 @@ names that exist in those files.
   scopes, root/empty no-op, normal Tab exit,
   `H`/`D`/`R`/`L` round trips, editable/native-control exclusions, and
   responsive movement on a large rendered graph
+- Current implementation validation (2026-08-01): focused node, tree, grid,
+  and shared theme style tests passed. `rtk pnpm test`,
+  `rtk pnpm run test:web`, `rtk pnpm run build`, `rtk pnpm run qlty`, and
+  `rtk pnpm run test:compile` passed. The production build initially exposed
+  two existing FlowContents type/wiring gaps; minimal behavior-preserving
+  fixes restored the approved build gate. Windows/NVDA, macOS/VoiceOver,
+  Windows high-contrast, and large-definition manual evidence remains the
+  human completion gate because those platform combinations are unavailable in
+  this environment.
+  Integrated search validation also confirmed that stable reset callbacks in
+  the table and flow search hooks preserve submitted queries across normal
+  state updates, restoring list match cues and flow-node search highlighting.

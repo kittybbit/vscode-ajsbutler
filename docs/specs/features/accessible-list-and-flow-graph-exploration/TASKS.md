@@ -4,8 +4,8 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 6 are complete; Slice 7 is the
-  next pending implementation slice.
+- Approved or active slice: Slices 1 through 7 are complete; Feature Exit
+  Review is the next pending decision.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
 - Do not: add extension-wide WCAG certification, printable-character
@@ -16,8 +16,8 @@
 - Validate every code slice with its focused tests and
   `rtk pnpm run qlty`; run final cross-platform evidence in Slice 7.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: begin Slice 7 implementation under its existing approval
-  boundary.
+- Next decision: run Feature Exit Mode under `sdd-plan-task` after the Slice 7
+  completion approval.
 
 ## Sync Rule
 
@@ -39,10 +39,9 @@
   ordered presentation and resource slices.
 - Review status: Reviewed; revised Slices 3, 5, 6, and 7 are approved for
   implementation
-- Human approval: All seven slices approved; Slice 5 completion is recorded
-  and implementation may proceed with Slice 6
-- Active implementation slice: Slice 7, Non-Color State, High Contrast, And
-  Compatibility Validation
+- Human approval: All seven slices approved; Slice 7 completion approval was
+  received on 2026-08-01
+- Active implementation slice: none; Feature Exit Review is pending
 
 ## Human Approval
 
@@ -68,8 +67,8 @@
   Slice 3's hierarchy resolver, asynchronous focus restoration, validation,
   and approval boundary, plus the scope-continuity, localized-instruction, and
   integrated-validation responsibilities in Slices 5 through 7.
-- Revised Slices 3, 5, 6, and 7 received renewed approval. Slices 1 through 6
-  now have completion approval; Slice 7 remains the next implementation slice.
+- Revised Slices 3, 5, 6, and 7 received renewed approval. Slices 1 through 7
+  now have completion approval; Feature Exit Review remains pending.
 
 Implementation may proceed only inside the approved slice boundaries and only
 after switching from `main` to a dedicated non-doc feature branch.
@@ -690,7 +689,7 @@ the complete state model.
 
 ### Slice 7: Non-Color State, High Contrast, And Compatibility Validation
 
-- Status: Approved
+- Status: Complete
 - Scope: make focus, selection, search result, relationship, and scope state
   distinguishable without color alone using VS Code theme variables,
   high-contrast body classes, borders, outlines, text, or icons. Complete the
@@ -725,6 +724,31 @@ the complete state model.
   flow modifier separation, N/RC scope round trips, normal Tab and text entry,
   nested native controls, screen-reader interaction, and responsive spatial
   movement on a large rendered graph before completion.
+- Implementation Evidence:
+  - Shared VS Code theme tokens and high-contrast body/forced-colors rules now
+    remove decorative gradients and preserve visible focus, selection, search,
+    relationship, scope-path, and detail-state cues through outlines, border
+    patterns, icons, and explicit state text.
+  - The virtualized grid marks selected rows with an inset boundary, search
+    hits with a dotted boundary, and cells/headers with a theme-aware focus
+    ring. Flow nodes use distinct border patterns for selection, current node,
+    search, relationship focus, semantic state, and root scope; the shared tree
+    and detail pane use matching path, focus, and state-chip cues.
+  - Added focused style tests for node, tree, grid, and shared theme helpers.
+    `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run build`,
+    `rtk pnpm run qlty`, `rtk pnpm run test:compile`, and Markdown/diff checks
+    pass on 2026-08-01. The production build initially exposed two existing
+    FlowContents type/wiring gaps; the minimal narrowing and controller-prop
+    connection required for the approved build gate are now fixed without
+    changing viewer behavior.
+  - Integrated search validation exposed an unstable reset callback in both
+    viewers: document/scope reset effects could treat a search-state update as
+    a document change and clear the just-submitted query. Reset callbacks now
+    keep a stable identity while reading current state, preserving list match
+    cues and flow-node search highlighting without changing search matching.
+  - Windows/NVDA, macOS/VoiceOver, Windows high-contrast, and large-definition
+    interaction evidence remain the human completion gate because this
+    environment cannot provide those platform combinations.
 - Production Readiness:
   - Failure mode: unsupported theme variables fall back to visible borders,
     text, or icons rather than transparent state.
@@ -946,6 +970,18 @@ the complete state model.
   shortcuts remain native or excluded as before. The shared ownership helpers
   are covered by focused pure tests; no protocol, DTO, or host-specific change
   was needed.
+- Search reset callbacks used by document and scope lifecycle effects must be
+  referentially stable. Reading the current query and result state through a
+  ref prevents a normal search-state update from being mistaken for a source
+  document change; this is feature-specific planning feedback, not a new
+  repository-wide state-management rule.
+- Slice 7 confirmed that state colors alone were insufficient for the two
+  viewers. A shared theme-token and forced-colors style surface keeps the
+  presentation boundary cohesive while letting each composite widget choose
+  its own border or focus cue. Production-build validation also caught two
+  pre-existing FlowContents type/wiring gaps that were fixed with no behavior
+  change; future slice plans should include the production entry-point build,
+  not only the test TypeScript project.
 
 ## Assumptions And Compatibility
 

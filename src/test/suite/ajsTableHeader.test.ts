@@ -9,7 +9,12 @@ import {
   getDisplayColumnSelectorControlLabels,
   getVisibleColumnSelectorColumns,
 } from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
-import { getFixedTableVirtuosoStyle } from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
+import {
+  getFixedTableVirtuosoStyle,
+  getSearchHitCellSx,
+  tableGridFocusSx,
+  tableRowStateSx,
+} from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
 import {
   canFocusTableHeader,
   getTableHeaderAriaSort,
@@ -130,5 +135,14 @@ suite("AJS Table Header", () => {
       getDisplayColumnSelectorControlLabels("unsupported"),
       getDisplayColumnSelectorControlLabels("en"),
     );
+  });
+
+  test("adds non-color cues for grid focus, selection, and search hits", () => {
+    assert.ok(tableGridFocusSx["&:focus-visible"]);
+    assert.ok(tableRowStateSx['&[aria-selected="true"] > td']);
+    const searchHitSx = getSearchHitCellSx(true);
+    assert.ok(searchHitSx);
+    assert.ok(searchHitSx?.borderBottom);
+    assert.strictEqual(getSearchHitCellSx(false), undefined);
   });
 });

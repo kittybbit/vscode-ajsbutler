@@ -25,6 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useMyAppContext } from "../MyContexts";
 import { unitInformationMessage } from "../unitInformationLocalization";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
+import { viewerFocusTargetSx, viewerPanelBorder } from "./viewerThemeStyles";
 
 export type SharedUnitDetailPaneRow = {
   label: string;
@@ -172,6 +173,15 @@ const StateChip: FC<SharedUnitDetailPaneChip> = ({ active, label }) => {
       size="small"
       color={getStateChipColor(active)}
       variant={getStateChipVariant(active)}
+      sx={{
+        borderWidth: active ? 2 : 1,
+        borderStyle: active ? "double" : "dashed",
+        "@media (forced-colors: active)": {
+          color: "CanvasText",
+          borderColor: "CanvasText",
+          backgroundColor: "Canvas",
+        },
+      }}
       label={`${label}: ${unitInformationMessage(
         active ? "a11y.state.yes" : "a11y.state.no",
         lang,
@@ -246,7 +256,13 @@ const DetailPaneHeader: FC<
   <Stack direction="row" spacing={1} alignItems="flex-start">
     <Box sx={{ minWidth: 0, flex: 1 }}>
       <Tooltip title={title} placement="top-start">
-        <Typography ref={focusTargetRef} variant="h6" noWrap tabIndex={-1}>
+        <Typography
+          ref={focusTargetRef}
+          variant="h6"
+          noWrap
+          tabIndex={-1}
+          sx={viewerFocusTargetSx}
+        >
           {title}
         </Typography>
       </Tooltip>
@@ -374,6 +390,11 @@ const ExpandedDetailPane: FC<
         overflow: "auto",
         borderRadius: 3,
         boxSizing: "border-box",
+        borderColor: (theme) => viewerPanelBorder(theme),
+        "@media (forced-colors: active)": {
+          backgroundColor: "Canvas",
+          borderColor: "CanvasText",
+        },
       },
       ...normalizeDetailPaneSx(sx),
     ]}

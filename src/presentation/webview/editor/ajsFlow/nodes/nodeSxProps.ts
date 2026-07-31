@@ -1,6 +1,7 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { AjsNode } from "./AjsNode";
 import { flowNodeGeometryEm } from "./flowNodeGeometry";
+import { viewerFocusBorder } from "../../shared/viewerThemeStyles";
 
 type NodeVisualState = Pick<
   AjsNode,
@@ -112,6 +113,52 @@ const nodeBorderWidth = (visualState: NodeVisualState): string =>
   borderWidthByKind[
     resolveVisualKind(visualState, borderWidthRules, "default")
   ];
+
+type BorderStyleKind =
+  | "selectedSearchResult"
+  | "selected"
+  | "currentSearchResult"
+  | "current"
+  | "semanticConfirmation"
+  | "semanticChanged"
+  | "searchMatch"
+  | "rootJobnet"
+  | "default";
+
+const borderStyleByKind: Record<BorderStyleKind, string> = {
+  selectedSearchResult: "double",
+  selected: "double",
+  currentSearchResult: "dotted",
+  current: "dashed",
+  semanticConfirmation: "dashed",
+  semanticChanged: "dotted",
+  searchMatch: "dotted",
+  rootJobnet: "double",
+  default: "solid",
+};
+
+const relationshipFocusBorderStyle: Record<
+  NonNullable<NodeVisualState["relationshipFocusRole"]>,
+  string
+> = {
+  selected: "double",
+  upstream: "dashed",
+  downstream: "dotted",
+  both: "double",
+  unrelated: "solid",
+};
+
+export const resolveNodeBorderStyle = (
+  visualState: NodeVisualState,
+): string => {
+  const relationshipRole = visualState.relationshipFocusRole;
+  if (relationshipRole && relationshipRole !== "unrelated") {
+    return relationshipFocusBorderStyle[relationshipRole];
+  }
+  return borderStyleByKind[
+    resolveVisualKind(visualState, borderColorRules, "default")
+  ];
+};
 
 type BorderColorKind =
   | "selectedSearchResult"
@@ -344,7 +391,7 @@ export const buildNodeSxProps = (
   padding: 0,
   borderRadius: nodeBorderRadius(),
   borderWidth: nodeBorderWidth(visualState),
-  borderStyle: "solid",
+  borderStyle: resolveNodeBorderStyle(visualState),
   borderColor: nodeBorderColor(visualState),
   ...buildNodeHoverDecoration(visualState.isHovered),
   outlineColor: visualState.isHovered
@@ -361,6 +408,47 @@ export const buildNodeSxProps = (
   "&:hover": {
     outlineWidth: "2px",
     outlineColor: (theme) => theme.palette.primary.main,
+  },
+  "@media (forced-colors: active)": {
+    borderColor: "CanvasText",
+    background: "Canvas",
+    boxShadow: "none",
+    filter: "none",
+    outlineColor: "Highlight",
+    "&::after": {
+      borderColor: "CanvasText",
+      background: "Canvas",
+      boxShadow: "none",
+    },
+    "& button": {
+      color: "ButtonText",
+    },
+  },
+  "body.vscode-high-contrast &": {
+    borderColor: (theme) => viewerFocusBorder(theme),
+    outlineColor: "var(--vscode-focusBorder, Highlight)",
+    background: "var(--vscode-editor-background, Canvas)",
+    boxShadow: "none",
+    filter: "none",
+    "&::after": {
+      borderColor: "var(--vscode-foreground, CanvasText)",
+      background: "var(--vscode-editor-background, Canvas)",
+      boxShadow: "none",
+    },
+  },
+  "body.vscode-high-contrast-light &": {
+    borderColor: (theme) => viewerFocusBorder(theme),
+    outlineColor: "var(--vscode-focusBorder, Highlight)",
+    background: "var(--vscode-editor-background, Canvas)",
+    boxShadow: "none",
+    filter: "none",
+  },
+  "body.vscode-high-contrast-dark &": {
+    borderColor: (theme) => viewerFocusBorder(theme),
+    outlineColor: "var(--vscode-focusBorder, Highlight)",
+    background: "var(--vscode-editor-background, Canvas)",
+    boxShadow: "none",
+    filter: "none",
   },
   "&::after": nestedPanelSxProps(visualState.nestedPanel),
   "& button": {
