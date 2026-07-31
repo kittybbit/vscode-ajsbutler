@@ -38,10 +38,10 @@
 - Planning scope: implement `ACC-VIEW-001` through `ACC-VIEW-008` in seven
   ordered presentation and resource slices.
 - Review status: Reviewed; revised Slice 3 is approved for implementation
-- Human approval: Approved for revised Slice 3 and Slice 4 completion; revised
-  Slices 5, 6, and 7 remain pending
-- Active implementation slice: None; Slice 4 is complete and Slice 5 requires
-  its own plan approval
+- Human approval: All seven slices approved; Slice 4 completion is recorded
+  and implementation may proceed with Slice 5
+- Active implementation slice: Slice 5, Flow Scope, Detail, And Shortcut Focus
+  Continuity
 
 ## Human Approval
 
@@ -486,7 +486,7 @@ the complete state model.
 
 ### Slice 5: Flow Scope, Detail, And Shortcut Focus Continuity
 
-- Status: Proposed
+- Status: Approved
 - Scope: connect the shared selector and keyboard-focused graph to root-jobnet
   scope changes, selected-node details, panel closure, and definition-dialog
   return. Focus the opened scope's rendered root node and restore the invoking
@@ -574,7 +574,7 @@ the complete state model.
 
 ### Slice 6: Localized Semantic State And Announcements
 
-- Status: Proposed
+- Status: Approved
 - Scope: expose localized names, descriptions, state, and restrained status
   announcements for both viewers. Cover search results, selection, sort,
   spatial selection, relationship-focus and scope changes, copy completion,
@@ -644,7 +644,7 @@ the complete state model.
 
 ### Slice 7: Non-Color State, High Contrast, And Compatibility Validation
 
-- Status: Proposed
+- Status: Approved
 - Scope: make focus, selection, search result, relationship, and scope state
   distinguishable without color alone using VS Code theme variables,
   high-contrast body classes, borders, outlines, text, or icons. Complete the
