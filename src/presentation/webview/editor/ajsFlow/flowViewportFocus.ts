@@ -22,6 +22,34 @@ export type FlowNodeCenter = {
   y: number;
 };
 
+export type FlowGraphFocusRequest = {
+  revision: number;
+  targetUnitId?: string;
+  expectedScopeUnitId?: string;
+  selectTarget?: boolean;
+};
+
+export type FlowGraphFocusRequestDecision =
+  | { kind: "node"; targetUnitId: string }
+  | { kind: "graphEntry" }
+  | { kind: "wait" };
+
+export const resolveFlowGraphFocusRequest = (
+  request: FlowGraphFocusRequest,
+  currentScopeUnitId: string | undefined,
+  renderedUnitIds: ReadonlySet<string>,
+): FlowGraphFocusRequestDecision => {
+  if (
+    request.expectedScopeUnitId &&
+    request.expectedScopeUnitId !== currentScopeUnitId
+  ) {
+    return { kind: "wait" };
+  }
+  return request.targetUnitId && renderedUnitIds.has(request.targetUnitId)
+    ? { kind: "node", targetUnitId: request.targetUnitId }
+    : { kind: "graphEntry" };
+};
+
 export type FlowViewportFocusAction =
   | { kind: "fitView"; targetUnitId?: string }
   | { kind: "setCenter"; targetUnitId: string };

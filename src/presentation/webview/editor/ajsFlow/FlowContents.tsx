@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import Box from "@mui/material/Box";
 import GlobalStyles from "@mui/material/GlobalStyles";
@@ -36,6 +37,7 @@ import Header from "./Header";
 import FlowSelector from "./FlowSelector";
 import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
 import { useFlowViewerController } from "./useFlowViewerController";
+import type { UnitTreeFocusRequest } from "../shared/UnitTreeSelector";
 import { navigateToTable } from "./nodes/Utils";
 import {
   type FlowMiniMapColors,
@@ -54,7 +56,13 @@ import {
   resolveFlowKeyboardNodeGeometry,
   type FlowKeyboardNavigationIndexCache,
 } from "./flowKeyboardNavigation";
-import { resolveFlowNodeCenter } from "./flowViewportFocus";
+import {
+  resolveFlowGraphFocusRequest,
+  resolveFlowNodeCenter,
+  type FlowGraphFocusRequest,
+} from "./flowViewportFocus";
+import { resolveFlowViewerShortcut } from "./flowViewerShortcuts";
+import { resolveFlowSelectorFocusTarget } from "./FlowSelector";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 const minimumViewportZoom = 0.02;
@@ -81,7 +89,10 @@ type FlowGraphPanelProps = Pick<
   | "toggleExpandedFlowNodeFromKeyboard"
   | "unitById"
 > & {
+  focusRequest: FlowGraphFocusRequest;
   miniMapColors: FlowMiniMapColors;
+  onFocusDetail: (unitId: string) => void;
+  onFocusSelector: (unitId?: string) => void;
   theme: Theme;
 };
 
@@ -126,9 +137,12 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   clearGraphHoveredUnit,
   currentUnitIdState,
   edges,
+  focusRequest,
   graphHoveredUnit,
   miniMapColors,
   nodes,
+  onFocusDetail,
+  onFocusSelector,
   reactFlowInstanceRef,
   selectFlowNode,
   showMiniMap,
@@ -139,6 +153,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   const graphEntryRef = useRef<HTMLDivElement>(null);
   const navigationIndexCacheRef =
     useRef<FlowKeyboardNavigationIndexCache>(undefined);
+  const handledFocusRequestRevisionRef = useRef(0);
   const pendingFocusRequestRef = useRef<
     | {
         fallbackToGraphEntry: boolean;
@@ -236,6 +251,35 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
     pendingFocusRequestRef.current = undefined;
   }, [currentUnitIdState, nodes, selectFlowNode]);
 
+  useEffect(() => {
+    if (focusRequest.revision <= handledFocusRequestRevisionRef.current) {
+      return;
+    }
+    const renderedUnitIds = new Set(
+      nodes.flatMap((node) => (node.data.unitId === node.id ? [node.id] : [])),
+    );
+    const decision = resolveFlowGraphFocusRequest(
+      focusRequest,
+      currentUnitIdState.currentUnitId,
+      renderedUnitIds,
+    );
+    if (decision.kind === "wait") return;
+    if (decision.kind === "node") {
+      const focused = focusRenderedFlowNode(
+        graphEntryRef.current,
+        decision.targetUnitId,
+        CSS.escape,
+      );
+      if (!focused) return;
+      if (focusRequest.selectTarget) {
+        selectFlowNode(decision.targetUnitId);
+      }
+    } else {
+      graphEntryRef.current?.focus({ preventScroll: true });
+    }
+    handledFocusRequestRevisionRef.current = focusRequest.revision;
+  }, [currentUnitIdState, focusRequest, nodes, selectFlowNode]);
+
   const revealFlowNode = useCallback(
     (unitId: string) => {
       const instance = reactFlowInstanceRef.current;
@@ -273,6 +317,28 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   const handleFlowNodeKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
       const currentUnitId = getOwnedFlowNodeId(event.target);
+      const shortcut = resolveFlowViewerShortcut({
+        altKey: event.altKey,
+        ctrlKey: event.ctrlKey,
+        key: event.key,
+        metaKey: event.metaKey,
+        shiftKey: event.shiftKey,
+      });
+      if (shortcut === "detail" && currentUnitId) {
+        event.preventDefault();
+        event.stopPropagation();
+        onFocusDetail(currentUnitId);
+        return;
+      }
+      if (
+        shortcut === "selector" &&
+        (currentUnitId || event.target === event.currentTarget)
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        onFocusSelector(currentUnitId);
+        return;
+      }
       if (!currentUnitId) return;
       const result = resolveFlowKeyboardNavigationKeyResult(navigationIndex, {
         currentUnitId,
@@ -322,6 +388,8 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
     [
       navigationIndex,
       nodes,
+      onFocusDetail,
+      onFocusSelector,
       revealFlowNode,
       selectFlowNode,
       currentUnitIdState,
@@ -416,7 +484,17 @@ FlowGraphPanelComponent.displayName = "FlowGraphPanel";
 const FlowGraphPanel = memo(FlowGraphPanelComponent);
 
 type FlowViewerBodyProps = FlowViewerController & {
+  detailFocusRequestRevision: number;
+  focusGraphRequest: FlowGraphFocusRequest;
+  focusSelectorRequest: UnitTreeFocusRequest;
   miniMapColors: FlowMiniMapColors;
+  onCloseDetail: (unitId: string) => void;
+  onDetailFocusRequestHandled: (revision: number) => void;
+  onFocusDetail: (unitId: string) => void;
+  onFocusSelector: (unitId?: string) => void;
+  onOpenFlowScope: (unitId: string) => void;
+  onReturnFromDetail: (unitId: string) => void;
+  onSelectorEscape: VoidFunction;
   openSelectedNodeUnitList: () => void;
   theme: Theme;
 };
@@ -424,15 +502,24 @@ type FlowViewerBodyProps = FlowViewerController & {
 const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   flowDocumentDto,
   clearGraphHoveredUnit,
-  clearSelectedUnit,
   clearTreeHoveredUnit,
   dialogData,
+  detailFocusRequestRevision,
   edges,
+  focusGraphRequest,
+  focusSelectorRequest,
   focusModeEnabled,
   graphHoveredUnit,
   hoveredUnitId,
   miniMapColors,
   nodes,
+  onCloseDetail,
+  onDetailFocusRequestHandled,
+  onFocusDetail,
+  onFocusSelector,
+  onOpenFlowScope,
+  onReturnFromDetail,
+  onSelectorEscape,
   openSelectedNodeDefinition,
   openSelectedNodeScope,
   openSelectedNodeUnitList,
@@ -480,19 +567,25 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
           rootUnits={flowDocumentDto?.rootUnits ?? []}
           unitById={unitById}
           currentUnitIdState={currentUnitIdState}
+          focusRequest={focusSelectorRequest}
           hoveredUnitId={hoveredUnitId}
           selectedUnitId={selectedUnitId}
           onHoverUnit={treeHoveredUnit}
           onLeaveUnit={clearTreeHoveredUnit}
+          onEscape={onSelectorEscape}
+          onOpenScope={onOpenFlowScope}
           onSelectUnit={selectTreeUnit}
         />
         <FlowGraphPanel
           clearGraphHoveredUnit={clearGraphHoveredUnit}
           currentUnitIdState={currentUnitIdState}
           edges={edges}
+          focusRequest={focusGraphRequest}
           graphHoveredUnit={graphHoveredUnit}
           miniMapColors={miniMapColors}
           nodes={nodes}
+          onFocusDetail={onFocusDetail}
+          onFocusSelector={onFocusSelector}
           reactFlowInstanceRef={reactFlowInstanceRef}
           selectFlowNode={selectFlowNode}
           showMiniMap={showMiniMap}
@@ -505,10 +598,13 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
         {selectedNodeDetail && (
           <FlowNodeDetailPanel
             detail={selectedNodeDetail}
-            onClose={clearSelectedUnit}
+            onClose={() => onCloseDetail(selectedNodeDetail.unitId)}
             onOpenDefinition={openSelectedNodeDefinition}
             onOpenScope={openSelectedNodeScope}
             onOpenUnitList={openSelectedNodeUnitList}
+            onReturnFocus={() => onReturnFromDetail(selectedNodeDetail.unitId)}
+            focusRequestRevision={detailFocusRequestRevision}
+            onFocusRequestHandled={onDetailFocusRequestHandled}
             focusModeEnabled={focusModeEnabled}
             onToggleFocusMode={toggleFocusMode}
           />
@@ -618,6 +714,13 @@ const FlowContents: FC = () => {
   const openSelectedNodeUnitList =
     useSelectedNodeUnitListAction(selectedNodeDetail);
   const miniMapColors = useFlowMiniMapColors(theme);
+  const [detailFocusRequestRevision, setDetailFocusRequestRevision] =
+    useState(0);
+  const [focusGraphRequest, setFocusGraphRequest] =
+    useState<FlowGraphFocusRequest>({ revision: 0 });
+  const [focusSelectorRequest, setFocusSelectorRequest] =
+    useState<UnitTreeFocusRequest>({ revision: 0 });
+  const savedGraphFocusUnitIdRef = useRef<string | undefined>(undefined);
   const selectFlowNodeWithTelemetry = useCallback(
     (unitId: string) => {
       reportFlowOperation("unit.select");
@@ -631,6 +734,79 @@ const FlowContents: FC = () => {
       selectTreeUnit(unitId);
     },
     [selectTreeUnit],
+  );
+  const requestGraphFocus = useCallback(
+    (
+      targetUnitId: string | undefined,
+      options: Pick<
+        FlowGraphFocusRequest,
+        "expectedScopeUnitId" | "selectTarget"
+      > = {},
+    ) => {
+      setFocusGraphRequest((current) => ({
+        ...options,
+        revision: current.revision + 1,
+        targetUnitId,
+      }));
+    },
+    [],
+  );
+  const handleFocusDetail = useCallback(
+    (unitId: string) => {
+      savedGraphFocusUnitIdRef.current = unitId;
+      if (selectedUnitId !== unitId) {
+        selectFlowNodeWithTelemetry(unitId);
+      }
+      setDetailFocusRequestRevision((revision) => revision + 1);
+    },
+    [selectedUnitId, selectFlowNodeWithTelemetry],
+  );
+  const handleDetailFocusRequestHandled = useCallback((revision: number) => {
+    setDetailFocusRequestRevision((currentRevision) =>
+      currentRevision === revision ? 0 : currentRevision,
+    );
+  }, []);
+  const handleFocusSelector = useCallback(
+    (unitId?: string) => {
+      savedGraphFocusUnitIdRef.current = unitId;
+      const targetUnitId = resolveFlowSelectorFocusTarget(
+        currentUnitIdState.currentUnitId,
+        flowDocumentDto?.rootUnits ?? [],
+        unitById,
+      );
+      setFocusSelectorRequest((current) => ({
+        revision: current.revision + 1,
+        targetUnitId,
+      }));
+    },
+    [currentUnitIdState, flowDocumentDto?.rootUnits, unitById],
+  );
+  const handleSelectorEscape = useCallback(() => {
+    requestGraphFocus(savedGraphFocusUnitIdRef.current);
+  }, [requestGraphFocus]);
+  const handleOpenFlowScope = useCallback(
+    (unitId: string) => {
+      reportFlowOperation("flow.scope.open");
+      currentUnitIdState.setCurrentUnitId(unitId);
+      requestGraphFocus(unitId, {
+        expectedScopeUnitId: unitId,
+        selectTarget: true,
+      });
+    },
+    [currentUnitIdState, requestGraphFocus],
+  );
+  const handleReturnFromDetail = useCallback(
+    (unitId: string) => {
+      requestGraphFocus(unitId);
+    },
+    [requestGraphFocus],
+  );
+  const handleCloseDetail = useCallback(
+    (unitId: string) => {
+      clearSelectedUnit();
+      requestGraphFocus(unitId);
+    },
+    [clearSelectedUnit, requestGraphFocus],
   );
   const openSelectedNodeDefinitionWithTelemetry = useCallback(() => {
     if (!selectedNodeDetail?.canOpenDefinition) {
@@ -703,13 +879,15 @@ const FlowContents: FC = () => {
             flowDocumentDto={flowDocumentDto}
             canEnableFocusMode={canEnableFocusMode}
             clearGraphHoveredUnit={clearGraphHoveredUnit}
-            clearSelectedUnit={clearSelectedUnit}
             clearTreeHoveredUnit={clearTreeHoveredUnit}
             currentUnit={currentUnit}
             currentUnitIdState={currentUnitIdState}
+            detailFocusRequestRevision={detailFocusRequestRevision}
             dialogData={dialogData}
             edges={edges}
             expandableNestedUnitIds={expandableNestedUnitIds}
+            focusGraphRequest={focusGraphRequest}
+            focusSelectorRequest={focusSelectorRequest}
             focusModeEnabled={focusModeEnabled}
             graphHoveredUnit={graphHoveredUnit}
             handleSearchClear={handleSearchClear}
@@ -719,6 +897,13 @@ const FlowContents: FC = () => {
             hoveredUnitId={hoveredUnitId}
             miniMapColors={miniMapColors}
             nodes={nodes}
+            onCloseDetail={handleCloseDetail}
+            onDetailFocusRequestHandled={handleDetailFocusRequestHandled}
+            onFocusDetail={handleFocusDetail}
+            onFocusSelector={handleFocusSelector}
+            onOpenFlowScope={handleOpenFlowScope}
+            onReturnFromDetail={handleReturnFromDetail}
+            onSelectorEscape={handleSelectorEscape}
             openSelectedNodeDefinition={openSelectedNodeDefinitionWithTelemetry}
             openSelectedNodeScope={openSelectedNodeScopeWithTelemetry}
             openSelectedNodeUnitList={openSelectedNodeUnitList}

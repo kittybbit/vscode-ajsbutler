@@ -10,6 +10,8 @@
   direction for arrow movement, N/RC flow-scope entry and return, and
   nested-jobnet expansion while preserving normal Tab traversal and viewport
   zoom.
+- Added flow-viewer D, L, R, and Escape focus continuity for node details,
+  selector scope actions, saved graph-node return, and missing-target fallback.
 - Added shared unit-tree keyboard navigation with roving row focus, visible
   row Up/Down movement, Right/Left expand and parent navigation, Home/End
   boundaries, Enter/Space selection, and tree semantics in both viewers.

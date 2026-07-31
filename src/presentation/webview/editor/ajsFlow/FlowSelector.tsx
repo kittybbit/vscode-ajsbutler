@@ -1,6 +1,8 @@
 import React, { FC, memo, useCallback, useMemo } from "react";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
-import UnitTreeSelector from "../shared/UnitTreeSelector";
+import UnitTreeSelector, {
+  type UnitTreeFocusRequest,
+} from "../shared/UnitTreeSelector";
 import { CurrentUnitIdStateType } from "./flowViewerStateTypes";
 import { isUnitInCurrentFlowScope } from "./flowTreeSelection";
 
@@ -8,10 +10,13 @@ type FlowSelectorProps = {
   rootUnits: FlowGraphUnitDto[];
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
   currentUnitIdState: CurrentUnitIdStateType;
+  focusRequest?: UnitTreeFocusRequest;
   hoveredUnitId?: string;
   selectedUnitId?: string;
   onHoverUnit: (unitId: string) => void;
   onLeaveUnit: (unitId: string) => void;
+  onEscape?: VoidFunction;
+  onOpenScope?: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
 };
 
@@ -21,14 +26,37 @@ const isRootJobnetUnit = (unit: FlowGraphUnitDto): boolean =>
 export const isSelectableFlowScopeUnit = (unit: FlowGraphUnitDto): boolean =>
   isRootJobnetUnit(unit);
 
+const findFirstSelectableFlowScopeUnit = (
+  units: readonly FlowGraphUnitDto[],
+): FlowGraphUnitDto | undefined => {
+  for (const unit of units) {
+    if (isSelectableFlowScopeUnit(unit)) return unit;
+    const descendant = findFirstSelectableFlowScopeUnit(unit.children);
+    if (descendant) return descendant;
+  }
+  return undefined;
+};
+
+export const resolveFlowSelectorFocusTarget = (
+  currentUnitId: string | undefined,
+  rootUnits: readonly FlowGraphUnitDto[],
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+): string | undefined =>
+  currentUnitId && unitById.has(currentUnitId)
+    ? currentUnitId
+    : findFirstSelectableFlowScopeUnit(rootUnits)?.id;
+
 const FlowSelector: FC<FlowSelectorProps> = ({
   rootUnits,
   unitById,
   currentUnitIdState,
+  focusRequest,
   hoveredUnitId,
   selectedUnitId,
   onHoverUnit,
   onLeaveUnit,
+  onEscape,
+  onOpenScope,
   onSelectUnit,
 }) => {
   console.log("render FlowSelector.");
@@ -47,13 +75,15 @@ const FlowSelector: FC<FlowSelectorProps> = ({
       rootUnits={rootUnits}
       unitById={unitById}
       currentUnitId={currentUnitId}
+      focusRequest={focusRequest}
       hoveredUnitId={hoveredUnitId}
       selectedUnitId={selectedUnitId}
       canOpenScopeUnit={canOpenScopeUnit}
       isUnitEnabled={isUnitEnabled}
       onHoverUnit={onHoverUnit}
       onLeaveUnit={onLeaveUnit}
-      onOpenScope={setCurrentUnitId}
+      onEscape={onEscape}
+      onOpenScope={onOpenScope ?? setCurrentUnitId}
       onSelectUnit={onSelectUnit}
     />
   );

@@ -42,12 +42,19 @@ export type UnitTreeSelectorProps = {
   ariaLabel?: string;
   collapsedAriaLabel?: string;
   autoScrollSelectedUnit?: boolean;
+  focusRequest?: UnitTreeFocusRequest;
   canOpenScopeUnit?: (unit: FlowGraphUnitDto) => boolean;
   isUnitEnabled?: (unit: FlowGraphUnitDto) => boolean;
   onHoverUnit?: (unitId: string) => void;
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
+  onEscape?: VoidFunction;
   onSelectUnit: (unitId: string) => void;
+};
+
+export type UnitTreeFocusRequest = {
+  revision: number;
+  targetUnitId?: string;
 };
 
 type UnitTreeSelectorTreeProps = {
@@ -61,6 +68,7 @@ type UnitTreeSelectorTreeProps = {
   onHoverUnit?: (unitId: string) => void;
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
+  onEscape?: VoidFunction;
   onRowFocus: (unitId: string) => void;
   onRowKeyDown: (event: KeyboardEvent<HTMLElement>, unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
@@ -136,6 +144,7 @@ type CollapsedUnitTreeRailProps = {
 type ExpandedUnitTreePanelProps = Omit<UnitTreeSelectorTreeProps, "units"> & {
   ariaLabel: string;
   onCollapse: () => void;
+  onKeyDownCapture?: (event: KeyboardEvent<HTMLElement>) => void;
   rootUnits: readonly FlowGraphUnitDto[];
   treeTabIndex: 0 | -1;
   title: string;
@@ -161,11 +170,13 @@ export const mergeUnitIds = (
 const collectRequiredExpandedUnitIds = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
+  focusUnitId: string | undefined,
   unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
 ): readonly (string | undefined)[] => [
   ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
   currentUnitId,
   ...collectUnitTreeAncestorUnitIds(selectedUnitId, unitById),
+  ...collectUnitTreeAncestorUnitIds(focusUnitId, unitById),
 ];
 
 const collectCurrentPathUnitIds = (
@@ -194,6 +205,7 @@ const setUnitExpanded = (
 const useExpandedUnitTreeState = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
+  focusUnitId: string | undefined,
   unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
 ) => {
   const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(
@@ -204,10 +216,15 @@ const useExpandedUnitTreeState = (
     setExpandedUnitIds((current) =>
       mergeUnitIds(
         current,
-        collectRequiredExpandedUnitIds(currentUnitId, selectedUnitId, unitById),
+        collectRequiredExpandedUnitIds(
+          currentUnitId,
+          selectedUnitId,
+          focusUnitId,
+          unitById,
+        ),
       ),
     );
-  }, [currentUnitId, selectedUnitId, unitById]);
+  }, [currentUnitId, focusUnitId, selectedUnitId, unitById]);
 
   const setExpanded = useCallback((unitId: string, expanded: boolean) => {
     setExpandedUnitIds((current) => setUnitExpanded(current, unitId, expanded));
@@ -521,6 +538,7 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
   onHoverUnit,
   onLeaveUnit,
   onOpenScope,
+  onEscape,
   onRowFocus,
   onRowKeyDown,
   onSelectUnit,
@@ -607,6 +625,7 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
         onHoverUnit={onHoverUnit}
         onLeaveUnit={onLeaveUnit}
         onOpenScope={onOpenScope}
+        onEscape={onEscape}
         onRowFocus={onRowFocus}
         onRowKeyDown={onRowKeyDown}
         onSelectUnit={onSelectUnit}
@@ -697,6 +716,7 @@ const CollapsedUnitTreeRail: FC<CollapsedUnitTreeRailProps> = ({
 const ExpandedUnitTreePanel: FC<ExpandedUnitTreePanelProps> = ({
   ariaLabel,
   onCollapse,
+  onKeyDownCapture,
   rootUnits,
   title,
   treeTabIndex,
@@ -724,6 +744,7 @@ const ExpandedUnitTreePanel: FC<ExpandedUnitTreePanelProps> = ({
       role="tree"
       aria-label={ariaLabel}
       tabIndex={treeTabIndex}
+      onKeyDownCapture={onKeyDownCapture}
       sx={{ minHeight: 0, flex: 1, overflow: "auto", paddingY: 0.5 }}
     >
       <UnitTreeSelectorTree units={rootUnits} {...treeProps} />
@@ -741,11 +762,13 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   ariaLabel = "Unit tree",
   collapsedAriaLabel = "Collapsed unit tree",
   autoScrollSelectedUnit = true,
+  focusRequest,
   canOpenScopeUnit = defaultCanOpenScopeUnit,
   isUnitEnabled = defaultIsUnitEnabled,
   onHoverUnit,
   onLeaveUnit,
   onOpenScope,
+  onEscape,
   onSelectUnit,
 }) => {
   const theme = useTheme();
@@ -758,6 +781,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   const { expandedUnitIds, setExpanded } = useExpandedUnitTreeState(
     currentUnitId,
     selectedUnitId,
+    focusRequest?.targetUnitId,
     unitById,
   );
   const { rowByUnitIdRef, setRowRef } = useSelectedTreeRowScroll(
@@ -774,6 +798,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   );
   const focusedUnitIdRef = useRef<string | undefined>(undefined);
   const pendingFocusUnitIdRef = useRef<string | undefined>(undefined);
+  const handledFocusRequestRevisionRef = useRef(0);
   const enabledVisibleRows = useMemo(
     () => visibleRows.filter((row) => row.isEnabled),
     [visibleRows],
@@ -833,6 +858,26 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   );
 
   useEffect(() => {
+    const revision = focusRequest?.revision ?? 0;
+    if (revision <= handledFocusRequestRevisionRef.current) return;
+    if (collapsed) {
+      expand();
+      return;
+    }
+    const requestedUnitId = focusRequest?.targetUnitId;
+    if (
+      requestedUnitId &&
+      !enabledVisibleRows.some((row) => row.id === requestedUnitId)
+    ) {
+      return;
+    }
+    const targetUnitId = requestedUnitId ?? enabledVisibleRows[0]?.id;
+    if (!targetUnitId) return;
+    requestRowFocus(targetUnitId);
+    handledFocusRequestRevisionRef.current = revision;
+  }, [collapsed, enabledVisibleRows, expand, focusRequest, requestRowFocus]);
+
+  useEffect(() => {
     const pendingUnitId = pendingFocusUnitIdRef.current;
     if (!pendingUnitId) return;
     if (!enabledVisibleRows.some((row) => row.id === pendingUnitId)) {
@@ -854,6 +899,19 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   const handleRowKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>, unitId: string) => {
       if (event.target !== event.currentTarget) return;
+      if (
+        event.key === "Escape" &&
+        !event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.shiftKey &&
+        onEscape
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        onEscape();
+        return;
+      }
       const result = resolveUnitTreeNavigationKey(visibleRows, unitId, {
         altKey: event.altKey,
         ctrlKey: event.ctrlKey,
@@ -879,7 +937,28 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
           return;
       }
     },
-    [onSelectUnit, requestRowFocus, setExpanded, visibleRows],
+    [onEscape, onSelectUnit, requestRowFocus, setExpanded, visibleRows],
+  );
+
+  const handleSelectorKeyDownCapture = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (
+        !onEscape ||
+        event.key !== "Escape" ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey
+      ) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest?.('[role="treeitem"]')) return;
+      event.preventDefault();
+      event.stopPropagation();
+      onEscape();
+    },
+    [onEscape],
   );
 
   const expandedPanel = (
@@ -895,9 +974,11 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
       hoveredUnitId={hoveredUnitId}
       isUnitEnabled={isUnitEnabled}
       onCollapse={collapse}
+      onKeyDownCapture={handleSelectorKeyDownCapture}
       onHoverUnit={onHoverUnit}
       onLeaveUnit={onLeaveUnit}
       onOpenScope={onOpenScope}
+      onEscape={onEscape}
       onRowFocus={handleRowFocus}
       onRowKeyDown={handleRowKeyDown}
       onSelectUnit={onSelectUnit}

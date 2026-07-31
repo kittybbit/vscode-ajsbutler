@@ -76,6 +76,13 @@ flow scope while preserving predictable navigation and viewport state.
   collapse operations
 - root-jobnet scope selection, detail inspection, and return preserve a
   meaningful selected node and focus destination
+- from a focused graph node, unmodified D focuses its detail pane and
+  unmodified L focuses the flow selector at the current scope root, falling
+  back to the first eligible root jobnet
+- from the flow selector, unmodified Escape returns focus to the saved graph
+  node without changing scope; from the detail pane, unmodified R returns
+  focus without closing it and Escape closes the pane or first closes its
+  definition dialog
 - selection, relationship, search-result, and scope state remain available
   without relying only on graph lines, position, hover, color, or tooltip
   content
@@ -158,6 +165,16 @@ Scenario: Keyboard navigation returns to a containing flow scope
   When the user presses Escape from a focused graph node
   Then the nearest containing N or RC scope becomes active
   And the scope that was left is selected and focused
+
+Scenario: Flow detail and selector shortcuts preserve graph focus
+  Given a focused graph node and its current flow scope
+  When the user presses D or L
+  Then D focuses the selected node detail heading or first enabled action
+  And L focuses the current scope root in the flow selector
+  When the user presses R in details
+  Then focus returns to the saved graph node without closing details
+  When the user presses Escape in details or the selector
+  Then the active region closes or returns focus without changing graph scope
 ```
 
 ## Acceptance Notes

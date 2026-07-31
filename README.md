@@ -39,8 +39,10 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   preferring the upper then left node. Shift+Down and Shift+Up expand or
   collapse a nested jobnet without changing scope. Enter opens a focused N or
   RC unit with internal units as the active flow scope, and Escape returns from
-  a nested N or RC scope to its containing scope. Tab and Shift+Tab retain
-  their normal Webview focus behavior.
+  a nested N or RC scope to its containing scope. D focuses the selected node's
+  detail pane, L focuses the flow selector, R returns from the detail pane, and
+  Escape closes details or returns from the selector to the saved graph node.
+  Tab and Shift+Tab retain their normal Webview focus behavior.
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
 - Navigate the shared unit tree with a roving keyboard focus. Up and Down move

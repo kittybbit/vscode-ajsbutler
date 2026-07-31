@@ -151,6 +151,19 @@ names that exist in those files.
   missing saved-node focus on the shared graph-region entry target with
   unchanged selection/zoom/scope/viewport, entry from nested N and RC scopes,
   graph-node Escape ownership remaining in Slice 3, desktop, and Web tests
+- Implementation Slice: Slice 5, Flow Scope, Detail, And Shortcut Focus
+  Continuity
+- Tests: `flowSelector.test.ts`, `flowViewerShortcuts.test.ts`,
+  `flowViewportFocus.test.ts`, existing `flowKeyboardNavigation.test.ts`,
+  `showUnitDefinitionInteraction.test.ts`
+- Current implementation validation (2026-08-01): unmodified D/L shortcut
+  boundaries, current/fallback selector targets, graph focus request waiting,
+  rendered-target focus, and graph-entry fallback are covered by focused tests.
+  The flow detail pane now acknowledges each one-shot focus request so a later
+  collapse action remains collapsed. `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run qlty`, and TypeScript compilation passed. DOM-level
+  detail/selector round trips and assistive-technology focus order were
+  reviewed manually, and Slice 5 completion was approved on 2026-08-01.
 
 ## Slice 6: Localized Semantic State And Announcements
 

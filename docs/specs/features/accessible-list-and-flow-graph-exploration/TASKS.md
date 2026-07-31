@@ -4,7 +4,7 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 4 are complete; Slice 5 is the
+- Approved or active slice: Slices 1 through 5 are complete; Slice 6 is the
   next pending implementation slice.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
@@ -16,7 +16,7 @@
 - Validate every code slice with its focused tests and
   `rtk pnpm run qlty`; run final cross-platform evidence in Slice 7.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: begin Slice 4 implementation under its existing approval
+- Next decision: begin Slice 6 implementation under its existing approval
   boundary.
 
 ## Sync Rule
@@ -37,11 +37,12 @@
 - Status: In Progress
 - Planning scope: implement `ACC-VIEW-001` through `ACC-VIEW-008` in seven
   ordered presentation and resource slices.
-- Review status: Reviewed; revised Slice 3 is approved for implementation
-- Human approval: All seven slices approved; Slice 4 completion is recorded
-  and implementation may proceed with Slice 5
-- Active implementation slice: Slice 5, Flow Scope, Detail, And Shortcut Focus
-  Continuity
+- Review status: Reviewed; revised Slices 3, 5, 6, and 7 are approved for
+  implementation
+- Human approval: All seven slices approved; Slice 5 completion is recorded
+  and implementation may proceed with Slice 6
+- Active implementation slice: Slice 6, Localized Semantic State And
+  Announcements
 
 ## Human Approval
 
@@ -486,7 +487,7 @@ the complete state model.
 
 ### Slice 5: Flow Scope, Detail, And Shortcut Focus Continuity
 
-- Status: Approved
+- Status: Complete
 - Scope: connect the shared selector and keyboard-focused graph to root-jobnet
   scope changes, selected-node details, panel closure, and definition-dialog
   return. Focus the opened scope's rendered root node and restore the invoking
@@ -543,6 +544,27 @@ the complete state model.
   unchanged selection,
   scope/zoom/viewport; `rtk pnpm test`;
   `rtk pnpm run test:web`; `rtk pnpm run qlty` with no new smell findings.
+- Implementation Evidence:
+  - `flowViewerShortcuts.ts` keeps unmodified, case-insensitive `D` and `L`
+    resolution separate from graph navigation and rejects modified keys.
+    `FlowGraphPanel` accepts those shortcuts only from the graph node wrapper or
+    graph-region entry target, so nested controls retain their native behavior.
+  - Flow detail focus uses the existing shared detail-pane request contract:
+    `D` selects the focused node when necessary and focuses the detail heading;
+    `R` returns to the saved graph node without closing; Escape closes the
+    detail pane and lets the dialog own Escape first.
+  - Selector focus requests expand required ancestors, focus the current scope
+    root or first eligible root-jobnet fallback, and return with Escape to the
+    saved graph node. Existing root-jobnet scope actions now wait for the
+    destination graph scope and focus/select its rendered root, with graph-entry
+    fallback for a missing target.
+  - `flowSelector.test.ts`, `flowViewerShortcuts.test.ts`, and
+    `flowViewportFocus.test.ts` cover selector target resolution, modifier and
+    case boundaries, asynchronous scope readiness, and missing-target fallback.
+    `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run qlty`, and TypeScript
+    compilation passed on 2026-08-01. The repository has no Webview DOM test
+    harness, so browser focus order and assistive-technology interaction were
+    reviewed manually and Slice 5 completion was approved on 2026-08-01.
 - Production Readiness:
   - Failure mode: an unavailable selector target uses the first eligible root
     jobnet. An unavailable saved graph node focuses the graph region's entry
@@ -858,6 +880,19 @@ the complete state model.
   bubble, only exact-target focus may update the active-row identity, and row
   scrolling/styling must target the row frame rather than the parent treeitem's
   full subtree. This remains feature-specific interaction guidance.
+- Slice 5 implementation confirmed that detail and selector return focus need
+  one saved graph-node identity independent of selection state. Graph scope
+  changes and missing rendered targets must resolve focus after the destination
+  scope is ready, with the graph-region entry as the no-false-selection
+  fallback. The shared detail-pane focus-request contract is sufficient for
+  flow details as well as list details; no durable architecture change is
+  needed.
+- Slice 5 follow-up confirmed that an opt-in detail focus request must be
+  acknowledged and cleared after the heading receives focus. Leaving the
+  revision active causes a later collapse click to be interpreted as another
+  expand request. The flow viewer now uses the shared one-shot acknowledgment
+  contract already used by the list viewer; no durable architecture change is
+  needed.
 
 ## Assumptions And Compatibility
 

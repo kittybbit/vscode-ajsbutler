@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import {
+  resolveFlowGraphFocusRequest,
   resolveFlowNodeCenter,
   resolveFlowViewportFocusAction,
   resolveFlowViewportFocusDecision,
@@ -11,6 +12,37 @@ suite("Flow Viewport Focus", () => {
     assert.deepStrictEqual(
       resolveFlowNodeCenter({ x: 120, y: 80, width: 240, height: 100 }),
       { x: 240, y: 130 },
+    );
+  });
+
+  test("waits for the expected scope and falls back to the graph entry", () => {
+    assert.deepStrictEqual(
+      resolveFlowGraphFocusRequest(
+        {
+          revision: 1,
+          expectedScopeUnitId: "nested",
+          targetUnitId: "nested",
+        },
+        "root",
+        new Set(["nested"]),
+      ),
+      { kind: "wait" },
+    );
+    assert.deepStrictEqual(
+      resolveFlowGraphFocusRequest(
+        { revision: 2, targetUnitId: "missing" },
+        "root",
+        new Set(["root"]),
+      ),
+      { kind: "graphEntry" },
+    );
+    assert.deepStrictEqual(
+      resolveFlowGraphFocusRequest(
+        { revision: 3, targetUnitId: "nested" },
+        "nested",
+        new Set(["nested"]),
+      ),
+      { kind: "node", targetUnitId: "nested" },
     );
   });
 

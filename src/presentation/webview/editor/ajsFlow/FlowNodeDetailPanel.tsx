@@ -18,6 +18,9 @@ type FlowNodeDetailPanelProps = {
   onOpenDefinition: VoidFunction;
   onOpenScope: VoidFunction;
   onOpenUnitList: VoidFunction;
+  onReturnFocus?: VoidFunction;
+  focusRequestRevision?: number;
+  onFocusRequestHandled?: (revision: number) => void;
   focusModeEnabled: boolean;
   onToggleFocusMode: VoidFunction;
 };
@@ -157,6 +160,9 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   onOpenDefinition,
   onOpenScope,
   onOpenUnitList,
+  onReturnFocus,
+  focusRequestRevision,
+  onFocusRequestHandled,
   focusModeEnabled,
   onToggleFocusMode,
 }) => {
@@ -208,6 +214,9 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
       expandTooltip="Expand node details"
       closeTooltip="Close node details"
       onClose={onClose}
+      onReturnFocus={onReturnFocus}
+      focusRequestRevision={focusRequestRevision}
+      onFocusRequestHandled={onFocusRequestHandled}
       rows={rows}
       relationshipRows={relationshipRows}
       chips={chips}
