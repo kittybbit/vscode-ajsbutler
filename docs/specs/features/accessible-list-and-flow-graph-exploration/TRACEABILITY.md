@@ -233,3 +233,54 @@ names that exist in those files.
   Integrated search validation also confirmed that stable reset callbacks in
   the table and flow search hooks preserve submitted queries across normal
   state updates, restoring list match cues and flow-node search highlighting.
+
+## Slice 8: Shared Tree Composite Focus Semantics And Action Targets
+
+- Use Case:
+  `uc-view-unit-list.md` — `Keyboard-only exploration preserves list context`;
+  `uc-explore-flow-graph.md` — `Graph and flow tree synchronize interaction`
+- Requirement: `ACC-VIEW-003`, `ACC-VIEW-005`, `ACC-VIEW-006`,
+  `ACC-VIEW-007`, `ACC-VIEW-008`
+- `SPECS.md`: Interaction Model Decisions; Acceptance Criteria
+- Implementation Slice: Slice 8, Shared Tree Composite Focus Semantics And
+  Action Targets
+- Tests/validation: `unitTreeNavigation.test.ts`, `unitTreeSelector.test.ts`,
+  list/flow consumer regressions, DOM Tab/order and collapse cases in Slice 10,
+  desktop/Web suites, qlty, and 28x28 target-size checks
+- Status: Proposed; implementation pending reviewed-plan approval
+
+## Slice 9: Flow Action Activation And Graph Keyboard-Entry Ownership
+
+- Use Case:
+  `uc-explore-flow-graph.md` — `Keyboard navigation follows rendered spatial
+direction`; `Supporting panels collapse without losing state`
+- Requirement: `ACC-VIEW-003`, `ACC-VIEW-005`, `ACC-VIEW-006`,
+  `ACC-VIEW-007`, `ACC-VIEW-008`
+- `SPECS.md`: Interaction Model Decisions; Behavioral Scenarios; Compatibility
+- Implementation Slice: Slice 9, Flow Action Activation And Graph
+  Keyboard-Entry Ownership
+- Tests/validation: `flowKeyboardNavigation.test.ts`, `flowNodeDisplay.test.ts`,
+  `flowViewportFocus.test.ts`, graph target-classification/entry helpers,
+  Slice 10 DOM/axe cases, desktop/Web suites, build, TypeScript compilation,
+  and qlty
+- Status: Proposed; implementation pending reviewed-plan approval
+
+## Slice 10: Browser-Level Accessibility Evidence And Focus/Selection Review
+
+- Use Case:
+  `uc-view-unit-list.md` — `Keyboard-only exploration preserves list context`;
+  `uc-explore-flow-graph.md` — `Rerendering preserves a meaningful focus
+destination`; `Viewer state remains perceivable without color`
+- Requirement: `ACC-VIEW-001`, `ACC-VIEW-002`, `ACC-VIEW-003`,
+  `ACC-VIEW-005`, `ACC-VIEW-006`, `ACC-VIEW-007`, `ACC-VIEW-008`
+- `SPECS.md`: Behavioral Scenarios; Compatibility; Acceptance Criteria
+- Implementation Slice: Slice 10, Browser-Level Accessibility Evidence And
+  Focus/Selection Review
+- Tests/validation: `jsdom`/`@testing-library/react`/`@testing-library/dom`
+  and `axe-core` browser-DOM suite for tree Tab order, one-shot
+  Enter/Space, virtualized final-row focus, detail return, hidden-descendant
+  collapse, graph fallback, duplicate IDs, ARIA references, and focused
+  selection/recomputation assertions; desktop/Web suites; 100/200/400% and
+  NVDA/VoiceOver/high-contrast manual matrix
+- Status: Proposed; implementation pending reviewed-plan approval. 2.4.11 is
+  the required AA target; 2.4.12 is a product-quality aspiration.

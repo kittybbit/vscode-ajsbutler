@@ -150,8 +150,11 @@ Scenario: Viewer state remains perceivable without color
   target is the shared fallback for graph-node restoration throughout the
   feature.
 - Flow navigation keys run only when the node wrapper itself owns focus.
-  Events originating from nested buttons, links, or inputs keep their native
-  behavior and do not trigger graph traversal.
+  Events originating from nested buttons, links, inputs, menus, sliders, or
+  other native interactive descendants keep their native behavior and do not
+  trigger graph traversal. The graph region remains programmatically
+  focusable as a no-node fallback, but it is not a second normal Tab entry when
+  a focusable React Flow node is available.
 - Spatial navigation uses final presentation coordinates after expanded nested
   layout is applied and excludes non-unit bounds nodes. A node center uses its
   measured dimensions when available and otherwise uses the existing initial
@@ -164,8 +167,11 @@ Scenario: Viewer state remains perceivable without color
   focus. Up and Down move between visible enabled rows, Right expands or enters
   children, Left collapses or returns to a parent, and Home and End move to the
   first or last visible enabled row. Enter or Space activates row selection.
-  Nested action buttons remain outside tree-row key handling and keep native
-  Tab, Enter, and Space behavior.
+  The treeitem is the only Tab stop: mouse-oriented expand and scope actions
+  use `tabIndex={-1}`, stop propagation when activated, and remain available
+  through the row's ArrowLeft/ArrowRight behavior and Alt+Enter scope action.
+  A click on the row's name or content selects the owning treeitem; nested
+  action clicks do not select the row a second time.
 - React Flow node dragging and edge Tab stops are not part of this read-only
   viewer. Built-in accessibility descriptions are localized and aligned with
   the viewer's actual keyboard behavior. They describe spatial

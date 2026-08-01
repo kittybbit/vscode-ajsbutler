@@ -4,8 +4,9 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 7 are complete; Feature Exit
-  Review is the next pending decision.
+- Approved or active slice: Slices 1 through 7 are complete; review remediation
+  Slices 8 through 10 require a revised plan and new Human Approval before
+  implementation.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
 - Do not: add extension-wide WCAG certification, printable-character
@@ -14,10 +15,11 @@
 - Read first: `SPECS.md`, this file, and the two owning use cases.
 - Read `TRACEABILITY.md` when reviewing or implementing a slice.
 - Validate every code slice with its focused tests and
-  `rtk pnpm run qlty`; run final cross-platform evidence in Slice 7.
+  `rtk pnpm run qlty`; run final cross-platform evidence in Slices 7 and 10.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: run Feature Exit Mode under `sdd-plan-task` after the Slice 7
-  completion approval.
+- Next decision: review and approve the remediation plan below before
+  implementation; Feature Exit remains blocked until the review findings and
+  their validation evidence are complete.
 
 ## Sync Rule
 
@@ -34,26 +36,22 @@
 
 ## Plan Status
 
-- Status: In Progress
-- Planning scope: implement `ACC-VIEW-001` through `ACC-VIEW-008` in seven
-  ordered presentation and resource slices.
-- Review status: Reviewed; revised Slices 3, 5, 6, and 7 are approved for
-  implementation
-- Human approval: All seven slices approved; Slice 7 completion approval was
-  received on 2026-08-01
-- Active implementation slice: none; Feature Exit Review is pending
+- Status: Replan Required
+- Planning scope: preserve the completed seven-slice implementation and add
+  review-remediation slices for composite-widget focus semantics, graph event
+  ownership, target size, and browser-level accessibility evidence.
+- Review status: Replanning prepared; pending `sdd-review-plan`
+- Human approval: Prior seven-slice approval retained; remediation slices are
+  pending new approval
+- Active implementation slice: none; remediation plan review is pending
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: Slice 3, Flow Spatial And Scope Navigation: presentation-local
-  spatial navigation, N-only inline expansion shortcuts, N/RC Enter scope
-  entry and Escape containing-scope return, asynchronous focus restoration,
-  read-only React Flow configuration, performance regressions, tests, and
-  required README/CHANGELOG updates. Existing Application scope eligibility,
-  selector/detail/announcement/theme implementation, and revised Slices 5–7
-  remain outside this approval.
+- Status: Pending
+- Approved at: prior seven-slice approval remains recorded; remediation scope
+  has not yet been approved
+- Approved scope: Prior approval covers only the completed Slices 1 through 7.
+  Slices 8 through 10 below require explicit approval after plan review.
 - Prior approved decisions retained: normal Tab traversal; spatial unmodified
   arrows independent of predecessor/successor edges; shortest center-to-center
   Euclidean distance with upper, left, then stable-order ties; inline
@@ -70,6 +68,23 @@
 - Revised Slices 3, 5, 6, and 7 received renewed approval. Slices 1 through 7
   now have completion approval; Feature Exit Review remains pending.
 
+## Review Remediation Gap
+
+- Source: static WCAG 2.2 review attached to the current branch on 2026-08-01.
+- The completed plan leaves three actionable gaps: nested tree action buttons
+  remain additional Tab stops and the row name is a `role="presentation"`
+  click target; native graph action buttons still duplicate button activation
+  through custom Enter key handlers; and the graph region is a second Tab
+  entry while React Flow nodes and controls are focusable.
+- The review also requires an explicit interactive-descendant guard for graph
+  capture, minimum 28 CSS-pixel action targets, a documented focus/selection
+  decision, and browser-level regression evidence. These are presentation and
+  validation concerns; Domain, Application, parser, DTO, host, and telemetry
+  boundaries remain unchanged.
+- Because these findings change the approved interaction contract and add new
+  validation/dependency scope, implementation must stop at this replan until
+  the revised plan is reviewed and approved.
+
 Implementation may proceed only inside the approved slice boundaries and only
 after switching from `main` to a dedicated non-doc feature branch.
 
@@ -82,6 +97,9 @@ after switching from `main` to a dedicated non-doc feature branch.
 5. Flow scope and detail focus continuity
 6. Localized semantic state and announcements
 7. Non-color state, high contrast, and compatibility validation
+8. Shared tree composite focus semantics and action target sizing
+9. Flow action activation and graph keyboard-entry ownership
+10. Browser-level accessibility regression evidence and focus/selection review
 
 Slices 1 and 3 establish the two primary interaction surfaces. Slice 2 depends
 on Slice 1. Slice 4 establishes the shared selector contract consumed by
@@ -773,11 +791,205 @@ the complete state model.
   WCAG certification, unrelated visual redesign, dependency upgrades, and
   fixes outside the two viewers.
 
+### Slice 8: Shared Tree Composite Focus Semantics And Action Targets
+
+- Status: Proposed
+- Scope: revise the shared unit tree so the owning `treeitem` is the only
+  normal Tab stop, move selection click handling to that semantic treeitem,
+  keep disclosure and scope actions mouse-operable with `tabIndex={-1}`, and
+  expose a keyboard path for scope actions through unmodified tree navigation
+  plus Alt+Enter. Give the small tree action controls a minimum 28x28 CSS-pixel
+  hit area without changing their visual icon size.
+- User / Domain Value: keyboard and screen-reader users enter the unit tree
+  once, traverse visible rows with one predictable model, and can still
+  expand, select, or open a scope without tabbing through every row action.
+- Cohesive Change Group:
+  `shared/UnitTreeSelector.tsx`, `shared/unitTreeNavigation.ts`, flow/list tree
+  consumer wiring only where the shared callback contract requires it,
+  localization guidance if the Alt+Enter action needs a label, and
+  `unitTreeSelector.test.ts` plus focused consumer regressions.
+- Acceptance:
+  - A tree with enabled rows exposes one roving `treeitem` Tab stop; the
+    disclosure and scope buttons have `tabIndex={-1}` and do not create a
+    second Tab sequence.
+  - Clicking a row name or content selects its owning treeitem; clicks on a
+    disclosure or scope action stop at that action and do not select twice.
+  - ArrowLeft/ArrowRight retain collapse, parent, expansion, and first-child
+    behavior. Enter/Space select the row, and Alt+Enter opens an eligible
+    scope exactly once.
+  - Collapsing a row with focus inside its descendants moves focus to the
+    owning visible treeitem or its defined fallback, never to a hidden child.
+  - Tree action hit areas are at least 28x28 CSS pixels in both themes and
+    forced-colors mode.
+- Validation: extend pure tree navigation and selector regressions for the
+  Alt+Enter and click-ownership contract; add the DOM-level Tab/order,
+  disclosure-collapse, and scope-action cases in Slice 10; run focused tests,
+  `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run qlty` with no new
+  actionable smell findings.
+- Production Readiness:
+  - Failure mode: an unavailable or disabled scope remains selected without
+    emitting an open request; a hidden descendant never retains DOM focus.
+  - JP1/AJS compatibility: existing normalized hierarchy, names, and scope
+    eligibility are consumed without reinterpretation.
+  - Large or malformed input risk: row navigation remains a visible-row
+    flattening operation and does not mount or expand the complete hierarchy.
+  - Desktop/web impact: shared browser-safe tree behavior is exercised in both
+    extension bundles.
+  - README/docs impact: update the discoverable tree keyboard guidance only if
+    the existing viewer instructions do not describe Alt+Enter.
+  - CHANGELOG impact: required because Tab order and keyboard scope access are
+    user-visible behavior changes.
+- Approval Boundary: shared tree focus ownership, tree action keyboard access,
+  action target sizing, focused tests, and directly related user guidance.
+  Graph-node action buttons and graph-region entry remain in Slice 9; the
+  focus/selection product decision and DOM/axe harness remain in Slice 10.
+- Dependencies: Slices 4 and 6 provide the current tree semantics and labels;
+  Slice 10 supplies DOM-level proof after the behavior is implemented.
+- Risks: removing button Tab stops without an equivalent scope action would
+  regress keyboard access; nested treeitems can bubble focus and click events;
+  responsive collapse can remove the active row.
+- Out of Scope: graph-node navigation, React Flow controls, parser or DTO
+  changes, and separating selection from focus across the viewers.
+
+### Slice 9: Flow Action Activation And Graph Keyboard-Entry Ownership
+
+- Status: Proposed
+- Scope: remove custom Enter key handlers from native React Flow node action
+  buttons so Enter/Space use one native activation path; make the graph region
+  a programmatic fallback rather than a second normal Tab entry when a
+  focusable node exists; and guard graph capture navigation when the event
+  originates from a button, link, input, select, textarea, menu item, slider,
+  or another interactive descendant. Give node action buttons a minimum 28x28
+  CSS-pixel hit area while preserving icon appearance.
+- User / Domain Value: graph keyboard behavior is predictable: one Enter
+  activates an action, Tab reaches a node rather than an empty wrapper first,
+  and native controls keep their own arrow and activation semantics.
+- Cohesive Change Group:
+  `ajsFlow/nodes/AjsNode.tsx`, `ajsFlow/nodes/JobNetNode.tsx`,
+  `ajsFlow/nodes/ConditionNode.tsx`, `ajsFlow/nodes/Utils.ts`,
+  `ajsFlow/FlowContents.tsx`, small presentation-local focus/event helpers,
+  and `flowNodeDisplay.test.ts`, `flowKeyboardNavigation.test.ts`, and
+  `flowViewportFocus.test.ts` regressions.
+- Acceptance:
+  - Enter and Space on each native node action produce exactly one click-side
+    operation; custom keydown handlers do not duplicate the request.
+  - When a focusable React Flow node exists, the graph region has
+    `tabIndex={-1}` but remains focusable through the existing programmatic
+    fallback. When no node can receive focus, the region is the single Tab
+    entry.
+  - Graph capture leaves native behavior unchanged for interactive descendants
+    and still handles navigation when the node wrapper owns focus.
+  - Existing spatial arrows, Shift+Up/Down expansion, Enter scope entry,
+    Escape scope return, controls, MiniMap, and detail/selector shortcuts keep
+    their current ownership and do not reintroduce flicker.
+  - Node action hit areas are at least 28x28 CSS pixels in light, dark, and
+    forced-colors themes.
+- Validation: add pure target-classification and graph-entry-tabindex tests;
+  extend flow action and navigation regressions for one-shot activation,
+  nested-control exclusion, no-node fallback, and existing scope behavior;
+  run focused tests, `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run test:compile`, `rtk pnpm run build`, and
+  `rtk pnpm run qlty` with no new actionable smell findings.
+- Production Readiness:
+  - Failure mode: a missing node uses the graph entry fallback without false
+    selection; an interactive child keeps its browser-native key behavior.
+  - JP1/AJS compatibility: node labels, hierarchy, and scope eligibility stay
+    unchanged; only presentation event ownership changes.
+  - Large or malformed input risk: target classification is constant-time per
+    event and spatial navigation retains the existing bounded geometry scan.
+  - Desktop/web impact: React Flow behavior is shared by desktop and web
+    bundles and must remain free of Node or VS Code APIs.
+  - README/docs impact: update graph keyboard guidance only if the final Tab
+    entry or native-action behavior is user-visible there.
+  - CHANGELOG impact: required for corrected Enter activation and graph Tab
+    order.
+- Approval Boundary: native graph action activation, graph-region Tab fallback,
+  interactive-descendant guard, node action target sizing, focused tests, and
+  directly related guidance. Tree semantics remain in Slice 8; DOM/axe and
+  focus/selection policy remain in Slice 10.
+- Dependencies: Slice 3 supplies the graph navigation ownership contract;
+  Slice 8 is independent at the code boundary but completes the related
+  composite-widget review before integrated validation.
+- Risks: React Flow may change its generated focus wrappers across versions;
+  `tabIndex={-1}` must not break programmatic focus restoration or normal Tab
+  exit; nested controls must be classified without relying on Node APIs.
+- Out of Scope: graph layout, scope eligibility, relationship semantics,
+  parser/application changes, and a product-wide focus/selection redesign.
+
+### Slice 10: Browser-Level Accessibility Evidence And Focus/Selection Review
+
+- Status: Proposed
+- Scope: add a small browser-DOM test harness for the two composite widgets,
+  including axe checks and real `document.activeElement` assertions, then
+  exercise Tab order, one-shot Enter/Space activation, virtualized-row focus
+  restoration, detail close restoration, hidden-descendant focus after tree
+  collapse, graph-entry fallback, and critical ARIA relationships. Record the
+  200%/400%, narrow Webview, language, high-contrast, screen-reader, and large
+  definition manual matrix. Keep focus and selection visually distinct while
+  explicitly deciding whether their existing coupling remains product policy.
+- User / Domain Value: accessibility regressions that pure navigation tests
+  cannot observe become repeatable, and the remaining WCAG 2.2 evidence has an
+  explicit owner and acceptance boundary.
+- Cohesive Change Group: test-only DOM harness and fixtures using
+  `jsdom`, `@testing-library/react`, `@testing-library/dom`, and `axe-core`
+  dev dependencies, focused accessibility tests, and the review evidence in
+  this feature's traceability records. Runtime changes are limited to any
+  small testability seam already approved by Slices 8 and 9.
+- Acceptance:
+  - DOM tests prove that the next Tab after entering the tree does not visit
+    every internal action button, and that Enter/Space on a disclosure action
+    executes once.
+  - A virtualized list's final-row move and detail close restore
+    `document.activeElement` to the intended cell or invoking node.
+  - Collapsing a tree branch never leaves focus on an unmounted/hidden
+    descendant; graph no-node fallback remains focusable.
+  - `axe-core` reports no critical ARIA violation in representative list,
+    tree, graph, and detail fixtures; duplicate IDs and broken
+    `aria-activedescendant` references are covered.
+  - The plan records 2.4.11 as the required AA target. 2.4.12 is explicitly a
+    product-quality aspiration, not an unclaimed conformance level.
+  - Focus/selection coupling is reviewed as a product decision: unless a
+    separate approved requirement requests decoupling, current focus-following
+    selection remains and tests guard against unnecessary recomputation or
+    duplicate announcements.
+- Validation: run the focused DOM/axe suite, desktop and Web suites, qlty,
+  and the final diff review. Manual evidence must cover 100/200/400% zoom,
+  narrow Webview, Japanese/English, light/dark/high-contrast themes, final
+  row/column, graph corners, tree expansion, detail open/close, NVDA,
+  VoiceOver, and a large nested definition. Unavailable platform evidence is
+  recorded as an explicit Feature Exit risk rather than inferred from unit
+  tests.
+- Production Readiness:
+  - Failure mode: a missing DOM target uses the defined fallback and test
+    failures identify the lost focus owner rather than silently passing.
+  - JP1/AJS compatibility: fixtures use existing normalized unit data and do
+    not change parser or definition semantics.
+  - Large or malformed input risk: the harness uses bounded representative
+    fixtures plus one large-definition smoke path; no production dependency is
+    added.
+  - Desktop/web impact: browser-DOM assertions supplement, not replace, both
+    desktop and Web extension suites.
+  - README/docs impact: record the final keyboard and conformance scope only
+    if the current user guidance is incomplete.
+  - CHANGELOG impact: no additional entry beyond Slices 8 and 9 unless the
+    manual review changes observable behavior.
+- Approval Boundary: DOM/axe test infrastructure, accessibility regression
+  tests, focus/selection policy decision, and manual validation evidence only.
+  New runtime behavior requires returning to Replanning Mode.
+- Dependencies: Slices 8 and 9. Feature Exit remains blocked until the
+  automated checks pass and remaining platform evidence is accepted or assigned.
+- Risks: adding test-only DOM dependencies can affect install size and test
+  bootstrapping; axe cannot prove screen-reader pronunciation or visual focus
+  visibility; platform evidence is unavailable in this environment.
+- Out of Scope: extension-wide WCAG certification, changing parser/domain
+  semantics, replacing React Flow, and speculative focus/selection redesign.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
-- Reason: the feature changes two user-visible use cases, spans seven dependent
-  slices, and requires explicit automated and manual validation mapping.
+- Reason: the feature changes two user-visible use cases, now spans ten
+  dependent implementation/remediation slices, and requires explicit DOM,
+  automated, and manual validation mapping.
 
 ## Cross-Slice Dependencies
 
@@ -795,6 +1007,18 @@ the complete state model.
 - Slice 7 validates the integrated state model but does not own fixes for
   earlier behavior. Changed design or approval boundaries require Replanning
   Mode.
+- Slice 8 supersedes only the nested-action Tab and click-ownership details of
+  Slice 4; its shared tree contract is consumed by both viewers.
+- Slice 9 supersedes only the native graph-action activation and graph-entry
+  details of Slices 3 and 6; its event guard must preserve the existing
+  spatial/scope ownership.
+- Slice 10 depends on Slices 8 and 9 and supplies the DOM/axe evidence needed
+  before Feature Exit. It does not authorize new runtime behavior.
+- Remediation Slice 8 updates the shared tree contract used by both viewers;
+  Slice 9 then applies the graph-specific focus-entry and native-control guard;
+  Slice 10 provides the DOM/axe evidence and records the remaining manual
+  platform matrix. Feature Exit cannot close while any remediation slice is
+  incomplete.
 
 ## Feature-Level Risks
 
@@ -811,6 +1035,11 @@ the complete state model.
 - Single-character shortcuts can conflict with screen-reader quick navigation,
   speech input, editable fields, or nested native controls if their owning
   focus region and event exclusions are too broad.
+- Composite-widget Tab order can become inconsistent if a nested action keeps
+  a positive/default `tabIndex` after the owning row becomes the roving stop.
+- Browser-level DOM evidence can diverge from VS Code Webview behavior unless
+  the manual matrix covers zoom, sticky regions, high contrast, and both
+  desktop screen-reader combinations.
 
 ## Implementation Feedback
 
@@ -999,6 +1228,9 @@ the complete state model.
 - No JP1/AJS command or definition/configuration reference changes.
 - No undocumented JP1/AJS behavior is inferred.
 - Desktop and web viewers consume the same browser-safe presentation behavior.
+- WCAG 2.2 AA 2.4.11 Focus Not Obscured is the required conformance target;
+  2.4.12 Enhanced is recorded as a product-quality aspiration only. Target
+  Size 2.5.8 is addressed with a minimum 28x28 CSS-pixel action region.
 - Each code slice treats actionable new qlty smells as work to resolve or an
   approved follow-up. Metrics-only movement is a review signal and does not
   authorize unrelated refactoring.
