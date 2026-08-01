@@ -29,16 +29,19 @@ const isRootJobnetUnit = (unit: FlowGraphUnitDto): boolean =>
 export const isSelectableFlowScopeUnit = (unit: FlowGraphUnitDto): boolean =>
   isRootJobnetUnit(unit);
 
+function* walkFlowScopeUnits(
+  units: readonly FlowGraphUnitDto[],
+): Generator<FlowGraphUnitDto> {
+  for (const unit of units) {
+    yield unit;
+    yield* walkFlowScopeUnits(unit.children);
+  }
+}
+
 const findFirstSelectableFlowScopeUnit = (
   units: readonly FlowGraphUnitDto[],
-): FlowGraphUnitDto | undefined => {
-  for (const unit of units) {
-    if (isSelectableFlowScopeUnit(unit)) return unit;
-    const descendant = findFirstSelectableFlowScopeUnit(unit.children);
-    if (descendant) return descendant;
-  }
-  return undefined;
-};
+): FlowGraphUnitDto | undefined =>
+  Array.from(walkFlowScopeUnits(units)).find(isSelectableFlowScopeUnit);
 
 export const resolveFlowSelectorFocusTarget = (
   currentUnitId: string | undefined,

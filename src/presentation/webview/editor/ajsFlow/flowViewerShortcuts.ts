@@ -1,5 +1,10 @@
 export type FlowViewerShortcut = "detail" | "selector";
 
+const flowViewerShortcutsByKey: Readonly<Record<string, FlowViewerShortcut>> = {
+  d: "detail",
+  l: "selector",
+};
+
 type FlowViewerShortcutContext = {
   key: string;
   altKey?: boolean;
@@ -15,9 +20,8 @@ export const resolveFlowViewerShortcut = ({
   metaKey = false,
   shiftKey = false,
 }: FlowViewerShortcutContext): FlowViewerShortcut | undefined => {
-  if (altKey || ctrlKey || metaKey || shiftKey) return undefined;
-  const normalizedKey = key.toLowerCase();
-  if (normalizedKey === "d") return "detail";
-  if (normalizedKey === "l") return "selector";
-  return undefined;
+  if (altKey || ctrlKey || metaKey || shiftKey) {
+    return undefined;
+  }
+  return flowViewerShortcutsByKey[key.toLowerCase()];
 };

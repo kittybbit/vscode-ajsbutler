@@ -1,11 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { Row } from "@tanstack/table-core";
-import {
-  toCountBucket,
-  toDurationBucket,
-} from "../../../../application/telemetry/telemetryBuckets";
 import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { createViewerSearchRequest } from "../../viewerRequestMessages";
+import { postViewerSearchEvent } from "../shared/viewerSearchTelemetry";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
 import {
   createEmptyTableSearchState,
@@ -40,37 +36,6 @@ const revealSearchedPath = (
   }
 };
 
-const postTableSearchEvent = ({
-  action,
-  query,
-  resultCount,
-  durationMs,
-}: {
-  action: "submitted" | "navigated" | "cleared";
-  query: string;
-  resultCount: number;
-  durationMs?: number;
-}): void => {
-  window.vscode.postMessage(
-    createViewerSearchRequest({
-      surface: "table",
-      action,
-      result:
-        action === "cleared"
-          ? "cleared"
-          : resultCount > 0
-            ? "matched"
-            : "no_match",
-      mode: "partial",
-      queryLengthBucket: toCountBucket(query.trim().length),
-      resultCountBucket: toCountBucket(resultCount),
-      durationBucket:
-        durationMs === undefined ? undefined : toDurationBucket(durationMs),
-      scope: "visible_rows",
-    }),
-  );
-};
-
 export const useTableSearchController = ({
   rows,
   parameterSearchValuesByPath,
@@ -88,10 +53,12 @@ export const useTableSearchController = ({
   const resetSearch = useCallback(() => {
     const currentSearchState = searchStateRef.current;
     if (currentSearchState.query !== undefined) {
-      postTableSearchEvent({
+      postViewerSearchEvent({
         action: "cleared",
         query: searchQueryRef.current,
         resultCount: currentSearchState.matchedAbsolutePaths.length,
+        scope: "visible_rows",
+        surface: "table",
       });
     }
     setSearchQuery("");
@@ -112,11 +79,13 @@ export const useTableSearchController = ({
         parameterSearchValuesByPath,
         query,
       );
-      postTableSearchEvent({
+      postViewerSearchEvent({
         action: "submitted",
         query,
         resultCount: matchedAbsolutePaths.length,
         durationMs: performance.now() - startedAt,
+        scope: "visible_rows",
+        surface: "table",
       });
       const nextState = createSubmittedTableSearchState(
         query,
@@ -136,11 +105,13 @@ export const useTableSearchController = ({
         return;
       }
       const nextState = moveTableSearchResult(searchState, direction);
-      postTableSearchEvent({
+      postViewerSearchEvent({
         action: "navigated",
         query,
         resultCount: nextState.matchedAbsolutePaths.length,
         durationMs: 0,
+        scope: "visible_rows",
+        surface: "table",
       });
       setSearchState(nextState);
       revealSearchedPath(nextState, revealPath);

@@ -33,31 +33,57 @@ type UnitTreeNavigationKeyOptions = {
   shiftKey?: boolean;
 };
 
-const appendVisibleUnitTreeRows = (
-  units: readonly UnitTreeNavigationUnit[],
+type AppendVisibleUnitTreeRowsContext = {
+  units: readonly UnitTreeNavigationUnit[];
+  expandedUnitIds: ReadonlySet<string>;
+  isUnitEnabled: (unit: UnitTreeNavigationUnit) => boolean;
+  rows: UnitTreeNavigationRow[];
+};
+
+const toVisibleUnitTreeRow = (
+  unit: UnitTreeNavigationUnit,
   expandedUnitIds: ReadonlySet<string>,
   isUnitEnabled: (unit: UnitTreeNavigationUnit) => boolean,
-  rows: UnitTreeNavigationRow[],
+): UnitTreeNavigationRow => {
+  const hasChildren = unit.children.length > 0;
+  return {
+    id: unit.id,
+    parentId: unit.parentId,
+    depth: unit.depth,
+    hasChildren,
+    isEnabled: isUnitEnabled(unit),
+    isExpanded: hasChildren && expandedUnitIds.has(unit.id),
+  };
+};
+
+const appendVisibleUnitTreeChildren = (
+  unit: UnitTreeNavigationUnit,
+  row: UnitTreeNavigationRow,
+  context: Omit<AppendVisibleUnitTreeRowsContext, "units">,
 ): void => {
+  if (!row.isExpanded) {
+    return;
+  }
+  appendVisibleUnitTreeRows({
+    ...context,
+    units: unit.children,
+  });
+};
+
+const appendVisibleUnitTreeRows = ({
+  units,
+  expandedUnitIds,
+  isUnitEnabled,
+  rows,
+}: AppendVisibleUnitTreeRowsContext): void => {
   for (const unit of units) {
-    const hasChildren = unit.children.length > 0;
-    const isExpanded = hasChildren && expandedUnitIds.has(unit.id);
-    rows.push({
-      id: unit.id,
-      parentId: unit.parentId,
-      depth: unit.depth,
-      hasChildren,
-      isEnabled: isUnitEnabled(unit),
-      isExpanded,
+    const row = toVisibleUnitTreeRow(unit, expandedUnitIds, isUnitEnabled);
+    rows.push(row);
+    appendVisibleUnitTreeChildren(unit, row, {
+      expandedUnitIds,
+      isUnitEnabled,
+      rows,
     });
-    if (isExpanded) {
-      appendVisibleUnitTreeRows(
-        unit.children,
-        expandedUnitIds,
-        isUnitEnabled,
-        rows,
-      );
-    }
   }
 };
 
@@ -67,7 +93,12 @@ export const resolveVisibleUnitTreeRows = (
   isUnitEnabled: (unit: UnitTreeNavigationUnit) => boolean,
 ): UnitTreeNavigationRow[] => {
   const rows: UnitTreeNavigationRow[] = [];
-  appendVisibleUnitTreeRows(rootUnits, expandedUnitIds, isUnitEnabled, rows);
+  appendVisibleUnitTreeRows({
+    units: rootUnits,
+    expandedUnitIds,
+    isUnitEnabled,
+    rows,
+  });
   return rows;
 };
 
@@ -108,91 +139,117 @@ const resolveChildTarget = (
 ): string | undefined =>
   rows.find((row) => row.parentId === currentRow.id && row.isEnabled)?.id;
 
+const focusResult = (
+  targetUnitId: string | undefined,
+): UnitTreeNavigationResult => ({
+  action: targetUnitId ? { kind: "focus", targetUnitId } : undefined,
+  suppressDefault: true,
+});
+
+const resolveVerticalNavigation = (
+  rows: readonly UnitTreeNavigationRow[],
+  currentUnitId: string,
+  offset: -1 | 1,
+): UnitTreeNavigationResult =>
+  focusResult(resolveDirectionalTarget(rows, currentUnitId, offset));
+
+const resolveHomeNavigation = (
+  rows: readonly UnitTreeNavigationRow[],
+): UnitTreeNavigationResult => focusResult(resolveEnabledRows(rows)[0]?.id);
+
+const resolveEndNavigation = (
+  rows: readonly UnitTreeNavigationRow[],
+): UnitTreeNavigationResult => {
+  const enabledRows = resolveEnabledRows(rows);
+  return focusResult(enabledRows[enabledRows.length - 1]?.id);
+};
+
+const resolveRightNavigation = (
+  rows: readonly UnitTreeNavigationRow[],
+  currentRow: UnitTreeNavigationRow,
+): UnitTreeNavigationResult => {
+  if (!currentRow.hasChildren) {
+    return { suppressDefault: true };
+  }
+  if (!currentRow.isExpanded) {
+    return {
+      action: { kind: "expand", targetUnitId: currentRow.id },
+      suppressDefault: true,
+    };
+  }
+  return focusResult(resolveChildTarget(rows, currentRow));
+};
+
+const resolveLeftNavigation = (
+  rows: readonly UnitTreeNavigationRow[],
+  currentRow: UnitTreeNavigationRow,
+): UnitTreeNavigationResult => {
+  if (currentRow.isExpanded) {
+    return {
+      action: { kind: "collapse", targetUnitId: currentRow.id },
+      suppressDefault: true,
+    };
+  }
+  return focusResult(resolveParentTarget(rows, currentRow));
+};
+
+const resolveSelection = (currentUnitId: string): UnitTreeNavigationResult => ({
+  action: { kind: "select", targetUnitId: currentUnitId },
+  suppressDefault: true,
+});
+
+type UnitTreeNavigationResolver = (
+  rows: readonly UnitTreeNavigationRow[],
+  currentRow: UnitTreeNavigationRow,
+) => UnitTreeNavigationResult;
+
+const navigationResolvers: Readonly<
+  Record<string, UnitTreeNavigationResolver>
+> = {
+  ArrowDown: (rows, currentRow) =>
+    resolveVerticalNavigation(rows, currentRow.id, 1),
+  ArrowUp: (rows, currentRow) =>
+    resolveVerticalNavigation(rows, currentRow.id, -1),
+  Home: (rows) => resolveHomeNavigation(rows),
+  End: (rows) => resolveEndNavigation(rows),
+  ArrowRight: (rows, currentRow) => resolveRightNavigation(rows, currentRow),
+  ArrowLeft: (rows, currentRow) => resolveLeftNavigation(rows, currentRow),
+  Enter: (_rows, currentRow) => resolveSelection(currentRow.id),
+  " ": (_rows, currentRow) => resolveSelection(currentRow.id),
+};
+
+type UnitTreeNavigationResultContext = {
+  rows: readonly UnitTreeNavigationRow[];
+  currentRow: UnitTreeNavigationRow;
+  key: string;
+};
+
+const resolveUnitTreeNavigationResult = ({
+  rows,
+  currentRow,
+  key,
+}: UnitTreeNavigationResultContext): UnitTreeNavigationResult => {
+  const resolver = navigationResolvers[key];
+  return resolver?.(rows, currentRow) ?? { suppressDefault: false };
+};
+
+const isNavigableUnitTreeRow = (
+  currentRow: UnitTreeNavigationRow | undefined,
+  options: UnitTreeNavigationKeyOptions,
+): boolean => currentRow?.isEnabled === true && !hasNavigationModifier(options);
+
 export const resolveUnitTreeNavigationKey = (
   rows: readonly UnitTreeNavigationRow[],
   currentUnitId: string,
   options: UnitTreeNavigationKeyOptions,
 ): UnitTreeNavigationResult => {
-  if (hasNavigationModifier(options)) {
-    return { suppressDefault: false };
-  }
+  const defaultResult = { suppressDefault: false };
   const currentRow = rows.find((row) => row.id === currentUnitId);
-  if (!currentRow || !currentRow.isEnabled) {
-    return { suppressDefault: false };
-  }
-
-  switch (options.key) {
-    case "ArrowDown": {
-      const targetUnitId = resolveDirectionalTarget(rows, currentUnitId, 1);
-      return {
-        action: targetUnitId ? { kind: "focus", targetUnitId } : undefined,
-        suppressDefault: true,
-      };
-    }
-    case "ArrowUp": {
-      const targetUnitId = resolveDirectionalTarget(rows, currentUnitId, -1);
-      return {
-        action: targetUnitId ? { kind: "focus", targetUnitId } : undefined,
-        suppressDefault: true,
-      };
-    }
-    case "Home": {
-      const firstEnabledRow = resolveEnabledRows(rows)[0];
-      return {
-        action: firstEnabledRow
-          ? { kind: "focus", targetUnitId: firstEnabledRow.id }
-          : undefined,
-        suppressDefault: true,
-      };
-    }
-    case "End": {
-      const enabledRows = resolveEnabledRows(rows);
-      const lastEnabledRow = enabledRows[enabledRows.length - 1];
-      return {
-        action: lastEnabledRow
-          ? { kind: "focus", targetUnitId: lastEnabledRow.id }
-          : undefined,
-        suppressDefault: true,
-      };
-    }
-    case "ArrowRight": {
-      if (!currentRow.hasChildren) {
-        return { suppressDefault: true };
-      }
-      if (!currentRow.isExpanded) {
-        return {
-          action: { kind: "expand", targetUnitId: currentUnitId },
-          suppressDefault: true,
-        };
-      }
-      const targetUnitId = resolveChildTarget(rows, currentRow);
-      return {
-        action: targetUnitId ? { kind: "focus", targetUnitId } : undefined,
-        suppressDefault: true,
-      };
-    }
-    case "ArrowLeft": {
-      if (currentRow.isExpanded) {
-        return {
-          action: { kind: "collapse", targetUnitId: currentUnitId },
-          suppressDefault: true,
-        };
-      }
-      const parentTarget = resolveParentTarget(rows, currentRow);
-      return {
-        action: parentTarget
-          ? { kind: "focus", targetUnitId: parentTarget }
-          : undefined,
-        suppressDefault: true,
-      };
-    }
-    case "Enter":
-    case " ":
-      return {
-        action: { kind: "select", targetUnitId: currentUnitId },
-        suppressDefault: true,
-      };
-    default:
-      return { suppressDefault: false };
-  }
+  return isNavigableUnitTreeRow(currentRow, options)
+    ? resolveUnitTreeNavigationResult({
+        rows,
+        currentRow: currentRow as UnitTreeNavigationRow,
+        key: options.key,
+      })
+    : defaultResult;
 };

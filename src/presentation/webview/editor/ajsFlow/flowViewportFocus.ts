@@ -34,20 +34,38 @@ export type FlowGraphFocusRequestDecision =
   | { kind: "graphEntry" }
   | { kind: "wait" };
 
+const isExpectedScope = (
+  expectedScopeUnitId: string | undefined,
+  currentScopeUnitId: string | undefined,
+): boolean => {
+  if (expectedScopeUnitId === undefined) {
+    return true;
+  }
+  return expectedScopeUnitId === currentScopeUnitId;
+};
+
+const resolveGraphTargetDecision = (
+  targetUnitId: string | undefined,
+  renderedUnitIds: ReadonlySet<string>,
+): FlowGraphFocusRequestDecision => {
+  if (targetUnitId === undefined) {
+    return { kind: "graphEntry" };
+  }
+  if (!renderedUnitIds.has(targetUnitId)) {
+    return { kind: "graphEntry" };
+  }
+  return { kind: "node", targetUnitId };
+};
+
 export const resolveFlowGraphFocusRequest = (
   request: FlowGraphFocusRequest,
   currentScopeUnitId: string | undefined,
   renderedUnitIds: ReadonlySet<string>,
 ): FlowGraphFocusRequestDecision => {
-  if (
-    request.expectedScopeUnitId &&
-    request.expectedScopeUnitId !== currentScopeUnitId
-  ) {
+  if (!isExpectedScope(request.expectedScopeUnitId, currentScopeUnitId)) {
     return { kind: "wait" };
   }
-  return request.targetUnitId && renderedUnitIds.has(request.targetUnitId)
-    ? { kind: "node", targetUnitId: request.targetUnitId }
-    : { kind: "graphEntry" };
+  return resolveGraphTargetDecision(request.targetUnitId, renderedUnitIds);
 };
 
 export type FlowViewportFocusAction =

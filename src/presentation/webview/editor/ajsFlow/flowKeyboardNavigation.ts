@@ -1,3 +1,5 @@
+import { resolveFlowKeyboardNavigationAction } from "./flowKeyboardNavigationActions";
+
 export type FlowKeyboardNavigationNode = {
   id: string;
   parentId?: string;
@@ -66,16 +68,21 @@ export const readOnlyFlowInteractionProps = {
   deleteKeyCode: null,
 } as const;
 
-type FlowKeyboardNavigationContext = {
-  currentUnitId: string;
-  currentScopeUnitId?: string;
-  scopeUnitById?: ReadonlyMap<string, FlowKeyboardScopeUnit>;
-  key: string;
-  altKey?: boolean;
-  ctrlKey?: boolean;
-  metaKey?: boolean;
-  shiftKey?: boolean;
-};
+const flowKeyboardNavigationKeys = new Set([
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowDown",
+  "ArrowUp",
+  "Enter",
+  "Escape",
+]);
+const flowKeyboardExpansionKeys = new Set(["ArrowDown", "ArrowUp"]);
+
+const hasFlowKeyboardModifier = (
+  altKey: boolean,
+  ctrlKey: boolean,
+  metaKey: boolean,
+): boolean => [altKey, ctrlKey, metaKey].some(Boolean);
 
 type RenderedFlowNodeGeometry = {
   position: { x: number; y: number };
@@ -95,13 +102,14 @@ const resolvePositiveDimension = (
   measured: number | undefined,
   initial: number | undefined,
 ): number | undefined => {
-  if (measured !== undefined && Number.isFinite(measured) && measured > 0) {
+  if (isPositiveDimension(measured)) {
     return measured;
   }
-  return initial !== undefined && Number.isFinite(initial) && initial > 0
-    ? initial
-    : undefined;
+  return isPositiveDimension(initial) ? initial : undefined;
 };
+
+const isPositiveDimension = (value: number | undefined): value is number =>
+  value !== undefined && Number.isFinite(value) && value > 0;
 
 export const resolveFlowKeyboardNodeGeometry = ({
   position,
@@ -134,16 +142,31 @@ export const isFlowKeyboardNavigationKey = ({
   metaKey = false,
   shiftKey = false,
 }: Omit<FlowKeyboardNavigationContext, "currentUnitId">): boolean => {
-  if (altKey || ctrlKey || metaKey) return false;
-  if (shiftKey) return key === "ArrowDown" || key === "ArrowUp";
+  if (hasFlowKeyboardModifier(altKey, ctrlKey, metaKey)) {
+    return false;
+  }
+  return (
+    shiftKey ? flowKeyboardExpansionKeys : flowKeyboardNavigationKeys
+  ).has(key);
+};
+
+const hasSameNavigationNode = (
+  cachedNode: FlowKeyboardNavigationNode,
+  node: FlowKeyboardNavigationNode | undefined,
+): boolean => {
+  if (!node) {
+    return false;
+  }
   return [
-    "ArrowLeft",
-    "ArrowRight",
-    "ArrowDown",
-    "ArrowUp",
-    "Enter",
-    "Escape",
-  ].includes(key);
+    [cachedNode.id, node.id],
+    [cachedNode.parentId, node.parentId],
+    [cachedNode.x, node.x],
+    [cachedNode.y, node.y],
+    [cachedNode.width, node.width],
+    [cachedNode.height, node.height],
+    [cachedNode.canExpandNested, node.canExpandNested],
+    [cachedNode.isExpandedNested, node.isExpandedNested],
+  ].every(([cachedValue, currentValue]) => cachedValue === currentValue);
 };
 
 export const buildFlowKeyboardNavigationIndex = (
@@ -160,19 +183,9 @@ const hasSameNavigationGeometry = (
   nodes: readonly FlowKeyboardNavigationNode[],
 ): boolean =>
   cache.nodes.length === nodes.length &&
-  cache.nodes.every((cachedNode, index) => {
-    const node = nodes[index];
-    return (
-      cachedNode.id === node?.id &&
-      cachedNode.parentId === node.parentId &&
-      cachedNode.x === node.x &&
-      cachedNode.y === node.y &&
-      cachedNode.width === node.width &&
-      cachedNode.height === node.height &&
-      cachedNode.canExpandNested === node.canExpandNested &&
-      cachedNode.isExpandedNested === node.isExpandedNested
-    );
-  });
+  cache.nodes.every((cachedNode, index) =>
+    hasSameNavigationNode(cachedNode, nodes[index]),
+  );
 
 export const resolveFlowKeyboardNavigationIndexCache = (
   cache: FlowKeyboardNavigationIndexCache | undefined,
@@ -185,215 +198,30 @@ export const resolveFlowKeyboardNavigationIndexCache = (
   };
 };
 
-type FlowKeyboardDirection = "left" | "right" | "up" | "down";
-
-type Center = {
-  x: number;
-  y: number;
+export type FlowKeyboardNavigationContext = {
+  currentUnitId: string;
+  currentScopeUnitId?: string;
+  scopeUnitById?: ReadonlyMap<string, FlowKeyboardScopeUnit>;
+  key: string;
+  altKey?: boolean;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  shiftKey?: boolean;
 };
 
-const nodeCenter = ({
-  x,
-  y,
-  width,
-  height,
-}: FlowKeyboardNavigationNode): Center => ({
-  x: x + width / 2,
-  y: y + height / 2,
-});
+export { resolveFlowKeyboardNavigationAction } from "./flowKeyboardNavigationActions";
 
-const isInDirection = (
-  direction: FlowKeyboardDirection,
-  current: Center,
-  candidate: Center,
-): boolean => {
-  if (direction === "left") return candidate.x < current.x;
-  if (direction === "right") return candidate.x > current.x;
-  if (direction === "up") return candidate.y < current.y;
-  return candidate.y > current.y;
-};
-
-type SpatialCandidate = {
-  unitId: string;
-  center: Center;
-  distanceSquared: number;
-};
-
-const compareSpatialCandidates = (
-  left: SpatialCandidate,
-  right: SpatialCandidate,
-): number =>
-  left.distanceSquared - right.distanceSquared ||
-  left.center.y - right.center.y ||
-  left.center.x - right.center.x;
-
-const resolveSpatialTarget = (
-  index: FlowKeyboardNavigationIndex,
-  currentUnitId: string,
-  direction: FlowKeyboardDirection,
-): string | undefined => {
-  const currentNode = index.nodeById.get(currentUnitId);
-  if (!currentNode) return undefined;
-  const currentCenter = nodeCenter(currentNode);
-  let bestCandidate: SpatialCandidate | undefined;
-
-  index.nodes.forEach((candidateNode) => {
-    if (candidateNode.id === currentUnitId) return;
-    const center = nodeCenter(candidateNode);
-    if (!isInDirection(direction, currentCenter, center)) return;
-    const deltaX = center.x - currentCenter.x;
-    const deltaY = center.y - currentCenter.y;
-    const candidate = {
-      unitId: candidateNode.id,
-      center,
-      distanceSquared: deltaX * deltaX + deltaY * deltaY,
-    };
-    if (
-      !bestCandidate ||
-      compareSpatialCandidates(candidate, bestCandidate) < 0
-    ) {
-      bestCandidate = candidate;
-    }
-  });
-
-  return bestCandidate?.unitId;
-};
-
-const toNavigateAction = (
-  movement: FlowKeyboardNavigationMovement,
-  targetUnitId: string | undefined,
-): FlowKeyboardNavigationAction | undefined =>
-  targetUnitId ? { kind: "navigate", movement, targetUnitId } : undefined;
-
-const resolveExpansionAction = (
-  index: FlowKeyboardNavigationIndex,
-  currentUnitId: string,
-  key: string,
-): FlowKeyboardNavigationAction | undefined => {
-  const currentNode = index.nodeById.get(currentUnitId);
-  if (!currentNode?.canExpandNested) return undefined;
-  if (key === "ArrowDown" && !currentNode.isExpandedNested) {
-    return { kind: "expand", targetUnitId: currentUnitId };
-  }
-  if (key === "ArrowUp" && currentNode.isExpandedNested) {
-    return { kind: "collapse", targetUnitId: currentUnitId };
-  }
-  return undefined;
-};
-
-const isFlowScopeUnit = (unit: FlowKeyboardScopeUnit): boolean =>
-  unit.unitType === "n" || unit.unitType === "rc";
-
-const resolveScopeEntryAction = (
-  scopeUnitById: ReadonlyMap<string, FlowKeyboardScopeUnit> | undefined,
-  currentUnitId: string,
+const resolveScopeMismatchDecision = (
   currentScopeUnitId: string | undefined,
-): FlowKeyboardNavigationAction | undefined => {
-  const unit = scopeUnitById?.get(currentUnitId);
+  sourceScopeUnitId: string | undefined,
+): FlowKeyboardScopeFocusDecision => {
   if (
-    !unit ||
-    unit.id === currentScopeUnitId ||
-    !isFlowScopeUnit(unit) ||
-    unit.childCount === 0
+    sourceScopeUnitId !== undefined &&
+    currentScopeUnitId !== sourceScopeUnitId
   ) {
-    return undefined;
+    return { kind: "cancel" };
   }
-  return {
-    kind: "enter-scope",
-    targetScopeId: unit.id,
-    focusUnitId: unit.id,
-  };
-};
-
-const resolveScopeReturnAction = (
-  scopeUnitById: ReadonlyMap<string, FlowKeyboardScopeUnit> | undefined,
-  currentScopeUnitId: string | undefined,
-): FlowKeyboardNavigationAction | undefined => {
-  if (!scopeUnitById || !currentScopeUnitId) return undefined;
-  const currentScope = scopeUnitById.get(currentScopeUnitId);
-  if (!currentScope || !isFlowScopeUnit(currentScope)) return undefined;
-
-  const visited = new Set<string>([currentScopeUnitId]);
-  let ancestorId = currentScope.parentId;
-  while (ancestorId && !visited.has(ancestorId)) {
-    visited.add(ancestorId);
-    const ancestor = scopeUnitById.get(ancestorId);
-    if (!ancestor) return undefined;
-    if (isFlowScopeUnit(ancestor)) {
-      return {
-        kind: "return-scope",
-        targetScopeId: ancestor.id,
-        focusUnitId: currentScopeUnitId,
-      };
-    }
-    ancestorId = ancestor.parentId;
-  }
-  return undefined;
-};
-
-export const resolveFlowKeyboardNavigationAction = (
-  index: FlowKeyboardNavigationIndex,
-  {
-    currentUnitId,
-    currentScopeUnitId,
-    scopeUnitById,
-    key,
-    altKey = false,
-    ctrlKey = false,
-    metaKey = false,
-    shiftKey = false,
-  }: FlowKeyboardNavigationContext,
-): FlowKeyboardNavigationAction | undefined => {
-  if (
-    !isFlowKeyboardNavigationKey({
-      key,
-      altKey,
-      ctrlKey,
-      metaKey,
-      shiftKey,
-    })
-  ) {
-    return undefined;
-  }
-  if (shiftKey) {
-    return resolveExpansionAction(index, currentUnitId, key);
-  }
-
-  if (key === "ArrowLeft") {
-    return toNavigateAction(
-      "left",
-      resolveSpatialTarget(index, currentUnitId, "left"),
-    );
-  }
-  if (key === "ArrowRight") {
-    return toNavigateAction(
-      "right",
-      resolveSpatialTarget(index, currentUnitId, "right"),
-    );
-  }
-  if (key === "ArrowDown") {
-    return toNavigateAction(
-      "down",
-      resolveSpatialTarget(index, currentUnitId, "down"),
-    );
-  }
-  if (key === "ArrowUp") {
-    return toNavigateAction(
-      "up",
-      resolveSpatialTarget(index, currentUnitId, "up"),
-    );
-  }
-  if (key === "Enter") {
-    return resolveScopeEntryAction(
-      scopeUnitById,
-      currentUnitId,
-      currentScopeUnitId,
-    );
-  }
-  if (key === "Escape") {
-    return resolveScopeReturnAction(scopeUnitById, currentScopeUnitId);
-  }
-  return undefined;
+  return { kind: "wait" };
 };
 
 export const resolveFlowKeyboardNavigationKeyResult = (
@@ -489,12 +317,11 @@ export const resolveFlowKeyboardScopeFocusDecision = ({
   sourceScopeUnitId: string | undefined;
   targetUnitId: string;
 }): FlowKeyboardScopeFocusDecision => {
-  if (!sourceNodesChanged) return { kind: "wait" };
+  if (!sourceNodesChanged) {
+    return { kind: "wait" };
+  }
   if (currentScopeUnitId !== expectedScopeUnitId) {
-    return sourceScopeUnitId !== undefined &&
-      currentScopeUnitId !== sourceScopeUnitId
-      ? { kind: "cancel" }
-      : { kind: "wait" };
+    return resolveScopeMismatchDecision(currentScopeUnitId, sourceScopeUnitId);
   }
   return resolveFlowKeyboardFocusTarget(renderedUnitIds, targetUnitId);
 };
