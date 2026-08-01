@@ -39,12 +39,11 @@
 - Planning scope: preserve the completed seven-slice implementation and add
   review-remediation slices for composite-widget focus semantics, graph event
   ownership, target size, and browser-level accessibility evidence.
-- Review status: Reviewed; Slice 9 is complete; Slice 11 completion approval
+- Review status: Reviewed; Slices 9, 10, and 11 are complete; Feature Exit
   remains pending
-- Human approval: Slices 1 through 12 approved; Slice 11 is active for
-  completion review
-- Active implementation slice: Slice 11, Flow Tree Out-of-Scope Scope
-  Navigation Follow-Up
+- Human approval: Slices 1 through 12 approved; Slice 10 completion approved
+- Active implementation slice: none; Slice 10 completion is recorded and the
+  feature is ready for Feature Exit review
 
 ## Human Approval
 
@@ -960,7 +959,7 @@ the complete state model.
 
 ### Slice 10: Browser-Level Accessibility Evidence And Focus/Selection Review
 
-- Status: Proposed
+- Status: Complete
 - Scope: add a small browser-DOM test harness for the two composite widgets,
   including axe checks and real `document.activeElement` assertions, then
   exercise Tab order, one-shot Enter/Space activation, virtualized-row focus
@@ -1023,12 +1022,31 @@ the complete state model.
 - Risks: adding test-only DOM dependencies can affect install size and test
   bootstrapping; axe cannot prove screen-reader pronunciation or visual focus
   visibility; platform evidence is unavailable in this environment.
+- Implementation Evidence: `accessibilityDom.test.tsx` installs an isolated
+  JSDOM window and exercises the shared tree's roving Tab stop, focus retention
+  across rerender, hidden-descendant collapse, and one-shot disclosure
+  activation. The same suite verifies detail collapse/close focus restoration,
+  final-row grid restoration, graph-entry fallback, native flow action
+  activation, and grounded `aria-activedescendant`/duplicate-ID references.
+  The selected axe rules cover representative tree, detail, and graph/grid DOM
+  fixtures without introducing production seams or Node imports.
+- Validation Result: `rtk pnpm run test:compile`, `rtk pnpm test`,
+  `rtk pnpm run test:web`, `rtk pnpm run build`, `rtk pnpm run qlty`,
+  `rtk pnpm run lint:md`, and `git diff --check` pass on 2026-08-01. The
+  production build retains the repository's existing bundle-size warnings.
+- Implementation Feedback: the approved test-only boundary was sufficient.
+  JSDOM global installation is isolated to the suite and restored after teardown;
+  focus/selection coupling remains the existing product policy, while DOM
+  assertions guard against duplicate activation and focus loss. Screen-reader,
+  visual-focus, zoom, and high-contrast evidence remains a manual Feature Exit
+  item because it cannot be inferred from this harness.
+- Completion Approval: Approved in current conversation.
 - Out of Scope: extension-wide WCAG certification, changing parser/domain
   semantics, replacing React Flow, and speculative focus/selection redesign.
 
 ### Slice 11: Flow Tree Out-of-Scope Scope Navigation Follow-Up
 
-- Status: In Progress
+- Status: Complete
 - Scope: let the shared tree's linear navigation include visible rows that are
   disabled for selection but represent an eligible flow scope, so a keyboard
   user can reach a sibling root-jobnet row from the active flow scope. Keep
@@ -1096,7 +1114,7 @@ the complete state model.
 - Implementation Feedback: the approved boundary was appropriate; the
   existing `canOpenScopeUnit` callback and scope-transition handler were
   sufficient, so no flow-specific contract or graph code change was needed.
-- Completion Approval: Pending human approval after final review.
+- Completion Approval: Approved in current conversation.
 - Out of Scope: enabling selection of arbitrary out-of-scope descendants,
   automatic scope changes on focus, changing Tab semantics, or redesigning the
   flow tree hierarchy.

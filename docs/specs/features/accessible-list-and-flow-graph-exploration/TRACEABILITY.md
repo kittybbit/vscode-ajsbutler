@@ -288,8 +288,10 @@ destination`; `Viewer state remains perceivable without color`
   collapse, graph fallback, duplicate IDs, ARIA references, and focused
   selection/recomputation assertions; desktop/Web suites; 100/200/400% and
   NVDA/VoiceOver/high-contrast manual matrix
-- Status: Proposed; implementation pending reviewed-plan approval. 2.4.11 is
-  the required AA target; 2.4.12 is a product-quality aspiration.
+- Status: Complete; implementation and automated validation complete. Manual
+  zoom, visual-focus, high-contrast, and NVDA/VoiceOver evidence remains a
+  Feature Exit item. 2.4.11 is the required AA target; 2.4.12 is a
+  product-quality aspiration.
 
 ## Slice 11: Flow Tree Out-of-Scope Scope Navigation Follow-Up
 
@@ -305,9 +307,8 @@ destination`; `Viewer state remains perceivable without color`
 - Tests/validation: `unitTreeSelector.test.ts`, `flowSelector.test.ts`, pure
   disabled-but-scope-focusable navigation tests, desktop/Web suites, qlty, and
   manual confirmation that sibling scope opening renders the destination graph
-- Status: In Progress; implementation and automated validation complete,
-  completion approval pending. Manual sibling-scope rendering confirmation
-  remains a Feature Exit evidence item.
+- Status: Complete; implementation and automated validation complete. Manual
+  sibling-scope rendering confirmation remains a Feature Exit evidence item.
 
 ## Slice 12: First-Level Sibling Tree Focus
 
