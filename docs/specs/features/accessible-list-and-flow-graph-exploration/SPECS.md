@@ -172,6 +172,12 @@ Scenario: Viewer state remains perceivable without color
   through the row's ArrowLeft/ArrowRight behavior and Alt+Enter scope action.
   A click on the row's name or content selects the owning treeitem; nested
   action clicks do not select the row a second time.
+- In the flow selector, a visible root-jobnet scope row outside the active
+  scope remains a keyboard navigation target even though it is
+  `aria-disabled="true"` for selection. Up/Down and Home/End may focus such a
+  scope row; Enter/Space do not select it, and Alt+Enter is the explicit scope
+  transition. Normal Tab and Shift+Tab enter or leave the tree and are not
+  reused for sibling-row traversal.
 - React Flow node dragging and edge Tab stops are not part of this read-only
   viewer. Built-in accessibility descriptions are localized and aligned with
   the viewer's actual keyboard behavior. They describe spatial

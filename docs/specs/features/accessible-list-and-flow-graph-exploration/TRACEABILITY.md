@@ -290,3 +290,19 @@ destination`; `Viewer state remains perceivable without color`
   NVDA/VoiceOver/high-contrast manual matrix
 - Status: Proposed; implementation pending reviewed-plan approval. 2.4.11 is
   the required AA target; 2.4.12 is a product-quality aspiration.
+
+## Slice 11: Flow Tree Out-of-Scope Scope Navigation Follow-Up
+
+- Use Case:
+  `uc-explore-flow-graph.md` — `Graph and flow tree synchronize interaction`;
+  `Flow detail and selector shortcuts preserve graph focus`
+- Requirement: `ACC-VIEW-003`, `ACC-VIEW-005`, `ACC-VIEW-006`,
+  `ACC-VIEW-007`, `ACC-VIEW-008`
+- `SPECS.md`: Interaction Model Decisions; Behavioral Scenarios; Acceptance
+  Criteria
+- Implementation Slice: Slice 11, Flow Tree Out-of-Scope Scope Navigation
+  Follow-Up
+- Tests/validation: `unitTreeSelector.test.ts`, `flowSelector.test.ts`, pure
+  disabled-but-scope-focusable navigation tests, desktop/Web suites, qlty, and
+  manual confirmation that sibling scope opening renders the destination graph
+- Status: Proposed; implementation pending plan review and Human Approval

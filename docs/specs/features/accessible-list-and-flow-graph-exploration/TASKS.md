@@ -4,8 +4,8 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 7 are complete; review remediation
-  Slices 8 through 10 require a revised plan and new Human Approval before
+- Approved or active slice: Slices 1 through 8 are complete; review remediation
+  Slice 11 requires a revised plan and new Human Approval before
   implementation.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
@@ -36,26 +36,26 @@
 
 ## Plan Status
 
-- Status: In Progress
+- Status: Replan Required
 - Planning scope: preserve the completed seven-slice implementation and add
   review-remediation slices for composite-widget focus semantics, graph event
   ownership, target size, and browser-level accessibility evidence.
-- Review status: Reviewed; remediation Slices 8 through 10 are approved for
-  implementation
-- Human approval: All ten slices approved; Slice 8 is active
-- Active implementation slice: none; Slice 8 completion recorded and Slice 9
-  is ready for the next implementation cycle
+- Review status: Replanning required after Slice 8 interaction verification
+- Human approval: Slices 1 through 10 approved; the new Slice 11 requires
+  review and approval
+- Active implementation slice: none; Slice 11 is pending plan review
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
+- Status: Pending
+- Approved at: prior approval for Slices 8 through 10 retained; Slice 11 is
+  pending approval
 - Approved scope: Remediation Slices 8 through 10: shared tree composite focus
   semantics and 28x28 action targets; native graph action activation, graph
   keyboard-entry ownership, and interactive-descendant guards; and the
   browser-DOM/axe accessibility evidence and focus/selection policy review.
-  No Domain, Application, parser, DTO, host, or telemetry changes are
-  approved.
+  Slice 11 below is pending new approval. No Domain, Application, parser, DTO,
+  host, or telemetry changes are approved.
 - Prior approved decisions retained: normal Tab traversal; spatial unmodified
   arrows independent of predecessor/successor edges; shortest center-to-center
   Euclidean distance with upper, left, then stable-order ties; inline
@@ -71,6 +71,19 @@
   integrated-validation responsibilities in Slices 5 through 7.
 - Revised Slices 3, 5, 6, and 7 received renewed approval. Slices 1 through 7
   now have completion approval; Feature Exit Review remains pending.
+
+## Slice 8 Interaction Gap
+
+- Verification after Slice 8 showed that `FlowSelector` marks rows outside the
+  active scope disabled, while shared tree navigation filters all disabled rows
+  from Up/Down/Home/End. Once nested action buttons became `tabIndex={-1}`, a
+  keyboard user could neither reach a sibling root-jobnet scope nor activate
+  its scope action. This is a concrete regression against the intended
+  keyboard-accessible scope workflow and requires a narrow follow-up slice.
+- The fix keeps out-of-scope rows non-selectable and does not change scope
+  automatically on focus. It makes only eligible root-jobnet scope rows
+  focusable for linear tree navigation; Alt+Enter remains the explicit scope
+  transition, while Tab/Shift+Tab retain normal tree entry/exit.
 
 ## Review Remediation Gap
 
@@ -104,6 +117,7 @@ after switching from `main` to a dedicated non-doc feature branch.
 8. Shared tree composite focus semantics and action target sizing
 9. Flow action activation and graph keyboard-entry ownership
 10. Browser-level accessibility regression evidence and focus/selection review
+11. Flow tree out-of-scope scope navigation follow-up
 
 Slices 1 and 3 establish the two primary interaction surfaces. Slice 2 depends
 on Slice 1. Slice 4 establishes the shared selector contract consumed by
@@ -998,10 +1012,73 @@ the complete state model.
 - Out of Scope: extension-wide WCAG certification, changing parser/domain
   semantics, replacing React Flow, and speculative focus/selection redesign.
 
+### Slice 11: Flow Tree Out-of-Scope Scope Navigation Follow-Up
+
+- Status: Proposed
+- Scope: let the shared tree's linear navigation include visible rows that are
+  disabled for selection but represent an eligible flow scope, so a keyboard
+  user can reach a sibling root-jobnet row from the active flow scope. Keep
+  those rows `aria-disabled` and non-selectable; Up/Down/Home/End only move
+  focus, and Alt+Enter performs the explicit scope transition. Preserve normal
+  Tab/Shift+Tab tree entry and exit, and leave nested descendants outside the
+  active scope unavailable until that scope is opened.
+- User / Domain Value: a flow-view keyboard user can leave the current scope's
+  tree position, reach a sibling root-jobnet scope, and open it without relying
+  on a mouse-only folder button or an internal action Tab stop.
+- Cohesive Change Group:
+  `shared/unitTreeNavigation.ts`, `shared/UnitTreeSelector.tsx`,
+  `ajsFlow/FlowSelector.tsx` or `ajsFlow/flowTreeSelection.ts` only if the
+  callback contract needs a presentation-local adjustment, and
+  `unitTreeSelector.test.ts` / `flowSelector.test.ts` regressions.
+- Acceptance:
+  - From an active root-jobnet scope, Up/Down and Home/End can focus another
+    visible root-jobnet scope row even when it is outside the active scope.
+  - The out-of-scope row remains `aria-disabled="true"`; Enter and Space do
+    not select it or announce a false selection.
+  - Alt+Enter on the focused eligible scope row invokes the existing flow-scope
+    transition exactly once and the graph renders that scope after readiness.
+  - ArrowLeft/ArrowRight on an out-of-scope scope row do not expand or select
+    its hidden descendants. After the scope opens, its descendants become the
+    normal enabled navigation set.
+  - Tab and Shift+Tab continue to enter or leave the tree; they are not used as
+    sibling-row traversal.
+- Validation: add pure navigation tests for disabled-but-scope-focusable rows,
+  modifier boundaries, Home/End, and no-op selection; add flow selector tests
+  proving out-of-scope selection remains rejected while scope opening remains
+  available; run focused tests, `rtk pnpm test`, `rtk pnpm run test:web`, and
+  `rtk pnpm run qlty`.
+- Production Readiness:
+  - Failure mode: focusing an out-of-scope row never changes graph scope until
+    Alt+Enter; an unavailable scope leaves focus and selection unchanged.
+  - JP1/AJS compatibility: root-jobnet identity and existing scope eligibility
+    remain authoritative; no parser or definition semantics change.
+  - Large or malformed input risk: only visible rows are scanned and no
+    out-of-scope subtree is expanded or rendered as active graph content.
+  - Desktop/web impact: shared browser-safe navigation and existing flow-scope
+    transition callbacks are verified in both bundles.
+  - README/docs impact: update the flow-tree keyboard guidance to explain that
+    arrows focus sibling scope rows and Alt+Enter opens them.
+  - CHANGELOG impact: required because keyboard reachability of sibling scopes
+    is user-visible.
+- Approval Boundary: linear tree focus candidates for out-of-scope eligible
+  flow scopes, their no-op selection behavior, existing Alt+Enter scope entry,
+  focused tests, and directly related guidance. No graph layout, parser,
+  Application, DTO, host, or telemetry changes.
+- Dependencies: Slice 8 is complete; Slice 11 must complete before Slice 10's
+  DOM focus evidence can be considered final. It is otherwise independent of
+  Slice 9's graph-node action work.
+- Risks: treating disabled rows as focusable can confuse assistive technology
+  unless `aria-disabled`, no-op Enter/Space, and the explicit Alt+Enter action
+  are announced consistently; the existing scope transition must not focus a
+  stale graph.
+- Out of Scope: enabling selection of arbitrary out-of-scope descendants,
+  automatic scope changes on focus, changing Tab semantics, or redesigning the
+  flow tree hierarchy.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
-- Reason: the feature changes two user-visible use cases, now spans ten
+- Reason: the feature changes two user-visible use cases, now spans eleven
   dependent implementation/remediation slices, and requires explicit DOM,
   automated, and manual validation mapping.
 
@@ -1028,11 +1105,14 @@ the complete state model.
   spatial/scope ownership.
 - Slice 10 depends on Slices 8 and 9 and supplies the DOM/axe evidence needed
   before Feature Exit. It does not authorize new runtime behavior.
+- Slice 11 is a follow-up to Slice 8. It restores keyboard reachability for
+  out-of-scope eligible flow scopes before Slice 10's DOM focus evidence is
+  treated as complete; it does not change Slice 9's graph-node controls.
 - Remediation Slice 8 updates the shared tree contract used by both viewers;
-  Slice 9 then applies the graph-specific focus-entry and native-control guard;
-  Slice 10 provides the DOM/axe evidence and records the remaining manual
-  platform matrix. Feature Exit cannot close while any remediation slice is
-  incomplete.
+  Slice 11 restores keyboard access to out-of-scope sibling scope rows; Slice 9
+  then applies the graph-specific focus-entry and native-control guard; Slice
+  10 provides the DOM/axe evidence and records the remaining manual platform
+  matrix. Feature Exit cannot close while any remediation slice is incomplete.
 
 ## Feature-Level Risks
 
@@ -1262,6 +1342,9 @@ the complete state model.
 - `uc-explore-flow-graph.md` now owns spatial arrow navigation, distinct N
   inline expansion, N/RC scope entry and containing-scope return, semantic
   state, and focus restoration.
+- Slice 11 will back-propagate the durable rule that out-of-scope eligible
+  root-jobnet rows are focusable but require explicit scope activation; it will
+  not broaden selection to arbitrary out-of-scope descendants.
 - README and CHANGELOG changes travel with the user-visible slices and are
   finalized in Slice 7.
 - No architecture, domain-rule, telemetry, or roadmap change is currently
