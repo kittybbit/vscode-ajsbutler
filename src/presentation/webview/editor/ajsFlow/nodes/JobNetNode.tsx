@@ -6,12 +6,12 @@ import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import classNames from "classnames";
 import { ActionIcon, AjsNode, FlowNodeCard, handleStyle } from "./AjsNode";
+import { handleClickChildOpen, handleClickNestedToggle } from "./Utils";
+import { useMyAppContext } from "../../MyContexts";
 import {
-  handleClickChildOpen,
-  handleClickNestedToggle,
-  handleKeyDownChildOpen,
-  handleKeyDownNestedToggle,
-} from "./Utils";
+  formatUnitInformationMessage,
+  unitInformationMessage,
+} from "../../unitInformationLocalization";
 
 type JobNetNode = Node<AjsNode, "jobnet">;
 type JobNetNodeProps = NodeProps<JobNetNode>;
@@ -41,40 +41,52 @@ export const getJobNetHeaderActionKinds = ({
     .filter((rule) => rule.isVisible({ canExpandNested, isCurrent }))
     .map((rule) => rule.kind);
 
-const getNestedToggleLabel = (isExpandedNested?: boolean): string =>
-  isExpandedNested
-    ? "Collapse the nested jobnet."
-    : "Expand the nested jobnet.";
-
 type JobNetHeaderActionProps = {
   data: AjsNode;
 };
 
 const OpenScopeAction: FC<JobNetHeaderActionProps> = ({ data }) => (
-  <ActionIcon
-    title="Open the jobnet."
-    ariaLabel="Open the jobnet."
-    onClick={handleClickChildOpen(data)}
-    onKeyDown={handleKeyDownChildOpen(data)}
-    icon={<FolderOpenIcon fontSize="inherit" />}
-  />
+  <LocalizedOpenScopeAction data={data} />
 );
 
-const NestedToggleAction: FC<JobNetHeaderActionProps> = ({ data }) => (
-  <ActionIcon
-    title={getNestedToggleLabel(data.isExpandedNested)}
-    ariaLabel={getNestedToggleLabel(data.isExpandedNested)}
-    onClick={handleClickNestedToggle(data)}
-    onKeyDown={handleKeyDownNestedToggle(data)}
-    icon={
-      data.isExpandedNested ? (
-        <UnfoldLessIcon fontSize="inherit" />
-      ) : (
-        <UnfoldMoreIcon fontSize="inherit" />
-      )
-    }
-  />
-);
+const LocalizedOpenScopeAction: FC<JobNetHeaderActionProps> = ({ data }) => {
+  const { lang = "en" } = useMyAppContext();
+  const label = formatUnitInformationMessage("a11y.flow.node.openScope", lang, {
+    name: data.label,
+  });
+  return (
+    <ActionIcon
+      title={label}
+      ariaLabel={label}
+      onClick={handleClickChildOpen(data)}
+      icon={<FolderOpenIcon fontSize="inherit" />}
+    />
+  );
+};
+
+const NestedToggleAction: FC<JobNetHeaderActionProps> = ({ data }) => {
+  const { lang = "en" } = useMyAppContext();
+  const label = unitInformationMessage(
+    data.isExpandedNested
+      ? "a11y.flow.node.collapseNested"
+      : "a11y.flow.node.expandNested",
+    lang,
+  );
+  return (
+    <ActionIcon
+      title={label}
+      ariaLabel={label}
+      onClick={handleClickNestedToggle(data)}
+      icon={
+        data.isExpandedNested ? (
+          <UnfoldLessIcon fontSize="inherit" />
+        ) : (
+          <UnfoldMoreIcon fontSize="inherit" />
+        )
+      }
+    />
+  );
+};
 
 const actionComponentByKind: Record<
   JobNetHeaderActionKind,

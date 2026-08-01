@@ -88,7 +88,7 @@ const CopyableTextField: FC<CopyableTextFieldProps> = ({
   );
 };
 
-const UnitDefinitionDialog: FC<UnitDefinitionDialogProps> = ({
+export const UnitDefinitionDialog: FC<UnitDefinitionDialogProps> = ({
   dialogData,
   onClose,
 }) => {

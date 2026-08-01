@@ -5,6 +5,7 @@ import type { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCo
 import { indexUnitDefinitionsByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
 import { applyHoveredUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphHover";
+import { applySelectedUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphSelection";
 
 type TestUnitParams = Pick<
   FlowGraphUnitDto,
@@ -239,6 +240,13 @@ suite("Flow Graph View", () => {
     assert.strictEqual(nodes[0].data.isAncestor, true);
     assert.strictEqual(nodes[0].data.isRootJobnet, true);
     assert.strictEqual(nodes[0].data.canExpandNested, false);
+    assert.strictEqual(nodes[0].draggable, false);
+    assert.strictEqual(nodes[0].connectable, false);
+    assert.strictEqual(nodes[0].selectable, false);
+    assert.strictEqual(nodes[0].focusable, true);
+    assert.strictEqual(nodes[0].ariaRole, "group");
+    assert.strictEqual(nodes[0].ariaLabel, "jobnet");
+    assert.strictEqual(nodes[0].domAttributes?.["aria-current"], "true");
     assert.strictEqual(nodes[0].initialWidth, 168);
     assert.strictEqual(nodes[0].initialHeight, 116);
     assert.strictEqual(nodes[0].data.isSearchMatch, false);
@@ -261,6 +269,10 @@ suite("Flow Graph View", () => {
     );
     assert.strictEqual(anotherSearchMatchNode.data.isSelected, true);
     assert.strictEqual(anotherSearchMatchNode.selected, true);
+    assert.strictEqual(
+      anotherSearchMatchNode.domAttributes?.["aria-current"],
+      undefined,
+    );
     const hoveredNodes = applyHoveredUnitToFlowNodes(
       nodes,
       "/root/jobnet/child-net",
@@ -273,6 +285,40 @@ suite("Flow Graph View", () => {
     assert.strictEqual(hoveredSearchMatchNode.data.isSelected, true);
     assert.notStrictEqual(hoveredSearchMatchNode, anotherSearchMatchNode);
     assert.strictEqual(hoveredNodes[0], nodes[0]);
+    const initiallyUnselectedNodes = nodes.map((node) => ({
+      ...node,
+      selected: false,
+      data: { ...node.data, isSelected: false },
+    }));
+    const firstSelection = applySelectedUnitToFlowNodes(
+      initiallyUnselectedNodes,
+      "/root/jobnet/child-net",
+    );
+    const secondSelection = applySelectedUnitToFlowNodes(
+      initiallyUnselectedNodes,
+      "/root/jobnet/child-net/grand-net",
+    );
+    const childNetIndex = nodes.findIndex(
+      (node) => node.id === "/root/jobnet/child-net",
+    );
+    const grandNetIndex = nodes.findIndex(
+      (node) => node.id === "/root/jobnet/child-net/grand-net",
+    );
+    assert.notStrictEqual(
+      firstSelection[childNetIndex],
+      initiallyUnselectedNodes[childNetIndex],
+    );
+    assert.notStrictEqual(
+      secondSelection[grandNetIndex],
+      initiallyUnselectedNodes[grandNetIndex],
+    );
+    assert.strictEqual(
+      secondSelection[childNetIndex],
+      initiallyUnselectedNodes[childNetIndex],
+    );
+    assert.strictEqual(secondSelection[0], initiallyUnselectedNodes[0]);
+    assert.strictEqual(firstSelection[childNetIndex].data.isSelected, true);
+    assert.strictEqual(secondSelection[grandNetIndex].data.isSelected, true);
     assert.strictEqual(nodes[1].data.unitId, "/root/jobnet/job-a");
     assert.strictEqual(nodes[1].data.hasWaitedFor, true);
     assert.deepStrictEqual(nodes[1].data.semanticDiffHighlight, {
@@ -299,6 +345,9 @@ suite("Flow Graph View", () => {
     assert.strictEqual(childNetBoundsNode.connectable, false);
     assert.strictEqual(edges[0].source, "/root/jobnet");
     assert.strictEqual(edges[0].target, "/root/jobnet/job-a");
+    assert.strictEqual(edges[0].focusable, false);
+    assert.strictEqual(edges[0].selectable, false);
+    assert.strictEqual(edges[0].reconnectable, false);
     assert.strictEqual(edges[0].style?.strokeWidth, 3);
     assert.deepStrictEqual(edges[0].data, {
       semanticDiffHighlight: {

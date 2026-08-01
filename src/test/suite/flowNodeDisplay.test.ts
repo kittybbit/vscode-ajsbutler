@@ -1,11 +1,15 @@
 import * as assert from "assert";
-import { getFlowNodeHeaderItemKinds } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import {
+  FLOW_NODE_ACTION_SIZE_PX,
+  getFlowNodeHeaderItemKinds,
+} from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
 import {
   resolveFlowNodeHeaderTone,
   resolveFlowNodeStatuses,
   shouldRenderNodeComment,
 } from "../../presentation/webview/editor/ajsFlow/nodes/flowNodeDisplay";
 import { getJobNetHeaderActionKinds } from "../../presentation/webview/editor/ajsFlow/nodes/JobNetNode";
+import { readOnlyFlowInteractionProps } from "../../presentation/webview/editor/ajsFlow/flowKeyboardNavigation";
 
 suite("flow node display", () => {
   test("does not render duplicate comments matching the label", () => {
@@ -101,5 +105,21 @@ suite("flow node display", () => {
       ),
       [],
     );
+  });
+
+  test("keeps React Flow nodes read-only and edges out of the Tab order", () => {
+    assert.deepStrictEqual(readOnlyFlowInteractionProps, {
+      nodesDraggable: false,
+      nodesConnectable: false,
+      nodesFocusable: true,
+      edgesFocusable: false,
+      elementsSelectable: false,
+      autoPanOnNodeFocus: false,
+      deleteKeyCode: null,
+    });
+  });
+
+  test("keeps flow node action targets at the WCAG minimum size", () => {
+    assert.strictEqual(FLOW_NODE_ACTION_SIZE_PX, 28);
   });
 });

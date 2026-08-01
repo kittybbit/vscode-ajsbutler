@@ -40,6 +40,15 @@ presentation.
   QUEUE and recovery QUEUE jobs (`qj`, `rq`)
 - row and field meaning used by CSV export remains stable unless a separate
   behavior change is approved
+- keyboard interaction can enter, navigate, select within, and leave the
+  virtualized table while preserving a meaningful current cell and stable unit
+  selection
+- sorting, detail inspection, panel closure, and virtualization preserve or
+  restore focus to the selected unit or a defined meaningful fallback
+- focus, selection, search-result, and sort state remain distinguishable
+  without relying only on color, hover, or tooltip content
+- necessary table state and operation outcomes are exposed semantically and
+  follow the current localization context
 
 ## Consumed Domain Rules
 
@@ -103,6 +112,21 @@ Scenario: QUEUE transfer fields use the supported parameter set
   When the unit list displays transfer fields
   Then transfer source and destination values are displayed
   And transfer operation values are not displayed
+
+Scenario: Keyboard-only exploration preserves list context
+  Given a unit list with content outside the rendered viewport
+  When a keyboard-only user navigates, sorts, inspects details, and returns
+  Then the intended unit and meaningful cell remain selected and focused
+  And the user can leave the table through the normal viewer focus order
+
+Scenario: List tree and grid focus handoffs remain predictable
+  Given the unit list tree and grid are visible
+  When the user presses Enter on an enabled tree row
+  Then that unit is selected/revealed and its meaningful grid cell receives
+    focus
+  When the user presses unmodified L from a grid cell or header
+  Then focus moves to the corresponding unit-tree row without changing the
+    selected unit
 ```
 
 ## Acceptance Notes
@@ -110,6 +134,10 @@ Scenario: QUEUE transfer fields use the supported parameter set
 - definition display, list-to-flow navigation, filtering, and CSV export
   continue to work from stable application-facing list metadata
 - representative fixtures should cover UTF-8, Shift_JIS, and large definitions
+- keyboard behavior, semantic state, and meaningful focus restoration remain
+  usable in supported desktop and web viewers and in high-contrast themes
+- Enter from the tree and L from the grid use the same focus-handoff model as
+  the flow graph, while grid-specific arrows and H retain their meanings
 
 ## Risks Or Edge Cases
 
@@ -118,3 +146,5 @@ Scenario: QUEUE transfer fields use the supported parameter set
 - large definitions must remain listable without moving filtering concerns into
   the use case
 - missing source or parameter evidence must not be invented for display
+- virtualization or sorting can remove the focused element unless a meaningful
+  fallback and stable-identity restoration rule is applied

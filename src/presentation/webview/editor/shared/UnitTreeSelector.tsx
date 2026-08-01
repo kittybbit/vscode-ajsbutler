@@ -1,5 +1,6 @@
 import React, {
   FC,
+  KeyboardEvent,
   memo,
   useCallback,
   useEffect,
@@ -8,7 +9,6 @@ import React, {
   useState,
 } from "react";
 import Box from "@mui/material/Box";
-import ButtonBase from "@mui/material/ButtonBase";
 import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
@@ -25,8 +25,23 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
+import { useMyAppContext } from "../MyContexts";
+import {
+  formatUnitInformationMessage,
+  unitInformationMessage,
+} from "../unitInformationLocalization";
 import { collectUnitTreeAncestorUnitIds } from "./unitTreeSelection";
+import {
+  isUnitTreeRowNavigable,
+  resolveUnitTreeNavigationKey,
+  resolveVisibleUnitTreeRows,
+} from "./unitTreeNavigation";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
+import {
+  viewerFocusBorder,
+  viewerPathBorder,
+  viewerSelectionBorder,
+} from "./viewerThemeStyles";
 
 export type UnitTreeSelectorProps = {
   rootUnits: FlowGraphUnitDto[];
@@ -38,12 +53,20 @@ export type UnitTreeSelectorProps = {
   ariaLabel?: string;
   collapsedAriaLabel?: string;
   autoScrollSelectedUnit?: boolean;
+  focusRequest?: UnitTreeFocusRequest;
   canOpenScopeUnit?: (unit: FlowGraphUnitDto) => boolean;
   isUnitEnabled?: (unit: FlowGraphUnitDto) => boolean;
   onHoverUnit?: (unitId: string) => void;
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
+  onEscape?: VoidFunction;
+  onEnterUnit?: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
+};
+
+export type UnitTreeFocusRequest = {
+  revision: number;
+  targetUnitId?: string;
 };
 
 type UnitTreeSelectorTreeProps = {
@@ -57,6 +80,10 @@ type UnitTreeSelectorTreeProps = {
   onHoverUnit?: (unitId: string) => void;
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
+  onEscape?: VoidFunction;
+  onEnterUnit?: (unitId: string) => void;
+  onRowFocus: (unitId: string) => void;
+  onRowKeyDown: (event: KeyboardEvent<HTMLElement>, unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
   selectedUnitId?: string;
   setExpanded: (unitId: string, expanded: boolean) => void;
@@ -91,7 +118,6 @@ type UnitTreeRowButtonProps = Pick<
   "isCurrent" | "isEnabled" | "isSelected"
 > & {
   unit: FlowGraphUnitDto;
-  onSelect: () => void;
 };
 
 type UnitTreeOpenScopeActionProps = Pick<UnitTreeRowState, "canOpenScope"> & {
@@ -99,7 +125,7 @@ type UnitTreeOpenScopeActionProps = Pick<UnitTreeRowState, "canOpenScope"> & {
   onOpenScope?: (unitId: string) => void;
 };
 
-type UnitTreeRowFrameProps = Pick<UnitTreeSelectorUnitProps, "setRowRef"> & {
+type UnitTreeRowFrameProps = {
   children: React.ReactNode;
   rowState: UnitTreeRowState;
   unit: FlowGraphUnitDto;
@@ -130,15 +156,35 @@ type CollapsedUnitTreeRailProps = {
 type ExpandedUnitTreePanelProps = Omit<UnitTreeSelectorTreeProps, "units"> & {
   ariaLabel: string;
   onCollapse: () => void;
+  onKeyDownCapture?: (event: KeyboardEvent<HTMLElement>) => void;
   rootUnits: readonly FlowGraphUnitDto[];
+  treeTabIndex: 0 | -1;
   title: string;
 };
 
 const defaultCanOpenScopeUnit = (): boolean => false;
 const defaultIsUnitEnabled = (): boolean => true;
 
+export const UNIT_TREE_ACTION_SIZE_PX = 28;
+
+const unitTreeActionSx = {
+  width: UNIT_TREE_ACTION_SIZE_PX,
+  height: UNIT_TREE_ACTION_SIZE_PX,
+  minWidth: UNIT_TREE_ACTION_SIZE_PX,
+  minHeight: UNIT_TREE_ACTION_SIZE_PX,
+  padding: 0,
+};
+
 const isDefinedUnitId = (unitId: string | undefined): unitId is string =>
   unitId !== undefined && unitId.length > 0;
+
+const isTreeNavigationKey = (key: string): boolean =>
+  key === "ArrowDown" ||
+  key === "ArrowUp" ||
+  key === "ArrowLeft" ||
+  key === "ArrowRight" ||
+  key === "Home" ||
+  key === "End";
 
 export const mergeUnitIds = (
   current: Set<string>,
@@ -154,11 +200,13 @@ export const mergeUnitIds = (
 const collectRequiredExpandedUnitIds = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
+  focusUnitId: string | undefined,
   unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
 ): readonly (string | undefined)[] => [
   ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
   currentUnitId,
   ...collectUnitTreeAncestorUnitIds(selectedUnitId, unitById),
+  ...collectUnitTreeAncestorUnitIds(focusUnitId, unitById),
 ];
 
 const collectCurrentPathUnitIds = (
@@ -187,6 +235,7 @@ const setUnitExpanded = (
 const useExpandedUnitTreeState = (
   currentUnitId: string | undefined,
   selectedUnitId: string | undefined,
+  focusUnitId: string | undefined,
   unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
 ) => {
   const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(
@@ -197,10 +246,15 @@ const useExpandedUnitTreeState = (
     setExpandedUnitIds((current) =>
       mergeUnitIds(
         current,
-        collectRequiredExpandedUnitIds(currentUnitId, selectedUnitId, unitById),
+        collectRequiredExpandedUnitIds(
+          currentUnitId,
+          selectedUnitId,
+          focusUnitId,
+          unitById,
+        ),
       ),
     );
-  }, [currentUnitId, selectedUnitId, unitById]);
+  }, [currentUnitId, focusUnitId, selectedUnitId, unitById]);
 
   const setExpanded = useCallback((unitId: string, expanded: boolean) => {
     setExpandedUnitIds((current) => setUnitExpanded(current, unitId, expanded));
@@ -272,7 +326,20 @@ const useSelectedTreeRowScroll = (
     );
   }, [autoScrollSelectedUnit, expandedUnitIds, selectedUnitId]);
 
-  return setRowRef;
+  return { rowByUnitIdRef, setRowRef };
+};
+
+const focusUnitTreeRow = (
+  rowByUnitId: ReadonlyMap<string, HTMLElement>,
+  unitId: string,
+): boolean => {
+  const treeItem = rowByUnitId.get(unitId);
+  if (!treeItem) return false;
+  treeItem.focus({ preventScroll: true });
+  treeItem
+    .querySelector<HTMLElement>("[data-unit-tree-row]")
+    ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  return true;
 };
 
 const resolveUnitTreeRowState = (
@@ -328,6 +395,15 @@ const resolveUnitTreeRowBorderColor = (
   selectedColor: string,
 ): string => (rowState.isSelected ? selectedColor : "transparent");
 
+export const resolveUnitTreeRowBorderStyle = (
+  rowState: Pick<UnitTreeRowState, "isSelected" | "isInCurrentPath">,
+): "double" | "dashed" | "solid" =>
+  rowState.isSelected
+    ? "double"
+    : rowState.isInCurrentPath
+      ? "dashed"
+      : "solid";
+
 const resolveUnitTreeRowOutline = (
   rowState: UnitTreeRowState,
   hoveredColor: string,
@@ -348,14 +424,24 @@ const UnitTreeExpandControl: FC<UnitTreeExpandControlProps> = ({
   unit,
   onToggle,
 }) => {
+  const { lang = "en" } = useMyAppContext();
   if (!hasChildren) {
     return <Box sx={{ width: 28, flexShrink: 0 }} />;
   }
   return (
     <IconButton
       size="small"
-      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${unit.name}`}
-      onClick={onToggle}
+      tabIndex={-1}
+      aria-label={formatUnitInformationMessage(
+        isExpanded ? "a11y.tree.collapse" : "a11y.tree.expand",
+        lang,
+        { title: unit.name },
+      )}
+      onClick={(event) => {
+        event.stopPropagation();
+        onToggle();
+      }}
+      sx={unitTreeActionSx}
     >
       <UnitTreeExpandIcon isExpanded={isExpanded} />
     </IconButton>
@@ -388,14 +474,11 @@ const UnitTreeRowButton: FC<UnitTreeRowButtonProps> = ({
   isEnabled,
   isSelected,
   unit,
-  onSelect,
 }) => (
-  <ButtonBase
-    disabled={!isEnabled}
-    aria-current={isCurrent ? "true" : undefined}
-    aria-pressed={isSelected}
-    onClick={onSelect}
+  <Box
     sx={{
+      display: "flex",
+      alignItems: "center",
       minWidth: 0,
       minHeight: "2rem",
       flex: 1,
@@ -403,6 +486,7 @@ const UnitTreeRowButton: FC<UnitTreeRowButtonProps> = ({
       borderRadius: 1,
       paddingX: 0.5,
       opacity: isEnabled ? 1 : 0.56,
+      cursor: isEnabled ? "pointer" : "default",
     }}
   >
     <UnitTreeStatusIcons isCurrent={isCurrent} isSelected={isSelected} />
@@ -411,25 +495,36 @@ const UnitTreeRowButton: FC<UnitTreeRowButtonProps> = ({
         {unit.name}
       </Typography>
     </Tooltip>
-  </ButtonBase>
+  </Box>
 );
 
 const UnitTreeOpenScopeAction: FC<UnitTreeOpenScopeActionProps> = ({
   canOpenScope,
   unit,
   onOpenScope,
-}) =>
-  canOpenScope && onOpenScope ? (
-    <Tooltip title="Open as graph scope">
+}) => {
+  const { lang = "en" } = useMyAppContext();
+  if (!canOpenScope || !onOpenScope) return null;
+  const label = formatUnitInformationMessage("a11y.tree.openScope", lang, {
+    name: unit.name,
+  });
+  return (
+    <Tooltip title={label}>
       <IconButton
         size="small"
-        aria-label={`Open ${unit.name} as graph scope`}
-        onClick={() => onOpenScope(unit.id)}
+        tabIndex={-1}
+        aria-label={label}
+        onClick={(event) => {
+          event.stopPropagation();
+          onOpenScope(unit.id);
+        }}
+        sx={unitTreeActionSx}
       >
         <FolderOpenIcon fontSize="inherit" />
       </IconButton>
     </Tooltip>
-  ) : null;
+  );
+};
 
 const UnitTreeNestedChildren: FC<UnitTreeNestedChildrenProps> = ({
   hasChildren,
@@ -439,21 +534,21 @@ const UnitTreeNestedChildren: FC<UnitTreeNestedChildrenProps> = ({
 }) =>
   hasChildren ? (
     <Collapse in={isExpanded} timeout="auto">
-      <UnitTreeSelectorTree units={unit.children} {...props} />
+      <Box role="group">
+        <UnitTreeSelectorTree units={unit.children} {...props} />
+      </Box>
     </Collapse>
   ) : null;
 
 const UnitTreeRowFrame: FC<UnitTreeRowFrameProps> = ({
   children,
   rowState,
-  setRowRef,
   unit,
   onMouseEnter,
   onMouseLeave,
 }) => (
   <Stack
-    ref={(element) => setRowRef(unit.id, element)}
-    data-unit-tree-unit-id={unit.id}
+    data-unit-tree-row="true"
     direction="row"
     alignItems="center"
     onMouseEnter={onMouseEnter}
@@ -467,12 +562,26 @@ const UnitTreeRowFrame: FC<UnitTreeRowFrameProps> = ({
       border: (theme) =>
         `1px solid ${resolveUnitTreeRowBorderColor(
           rowState,
-          theme.palette.secondary.main,
+          viewerSelectionBorder(theme),
         )}`,
+      borderStyle: resolveUnitTreeRowBorderStyle(rowState),
+      borderWidth: rowState.isSelected ? 2 : 1,
+      borderInlineStart: (theme) =>
+        rowState.isInCurrentPath
+          ? `3px dashed ${viewerPathBorder(theme)}`
+          : undefined,
       outline: (theme) =>
         resolveUnitTreeRowOutline(rowState, theme.palette.primary.main),
       outlineOffset: "-2px",
       backgroundColor: resolveUnitTreeRowBackgroundColor(rowState),
+      "@media (forced-colors: active)": {
+        backgroundColor: "Canvas",
+        borderColor: rowState.isSelected ? "CanvasText" : "Canvas",
+        borderInlineStartColor: rowState.isInCurrentPath
+          ? "Highlight"
+          : undefined,
+        outlineColor: rowState.isHovered ? "Highlight" : undefined,
+      },
     }}
   >
     {children}
@@ -490,6 +599,10 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
   onHoverUnit,
   onLeaveUnit,
   onOpenScope,
+  onEscape,
+  onEnterUnit,
+  onRowFocus,
+  onRowKeyDown,
   onSelectUnit,
   selectedUnitId,
   setExpanded,
@@ -506,17 +619,58 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
     selectedUnitId,
   });
   const handleToggle = () => setExpanded(unit.id, !rowState.isExpanded);
-  const handleSelect = () => onSelectUnit(unit.id);
   const handleMouseEnter = () =>
     notifyEnabledUnit(rowState.isEnabled, unit.id, onHoverUnit);
   const handleMouseLeave = () =>
     notifyEnabledUnit(rowState.isEnabled, unit.id, onLeaveUnit);
+  const handleRowMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+    if (!rowState.isEnabled) return;
+    const owningTreeItem = (event.target as HTMLElement).closest(
+      '[role="treeitem"]',
+    );
+    if (owningTreeItem !== event.currentTarget) return;
+    event.preventDefault();
+    event.currentTarget.focus({ preventScroll: true });
+  };
+  const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
+    const owningTreeItem = (event.target as HTMLElement).closest(
+      '[role="treeitem"]',
+    );
+    if (owningTreeItem !== event.currentTarget) return;
+    notifyEnabledUnit(rowState.isEnabled, unit.id, onSelectUnit);
+  };
 
   return (
-    <Box>
+    <Box
+      ref={(element: HTMLElement | null) => setRowRef(unit.id, element)}
+      role="treeitem"
+      tabIndex={-1}
+      aria-current={rowState.isCurrent ? "true" : undefined}
+      aria-disabled={!rowState.isEnabled ? "true" : undefined}
+      aria-expanded={rowState.hasChildren ? rowState.isExpanded : undefined}
+      aria-level={unit.depth + 1}
+      aria-selected={rowState.isSelected}
+      data-unit-tree-unit-id={unit.id}
+      onMouseDown={handleRowMouseDown}
+      onClick={handleRowClick}
+      onFocus={(event) => {
+        if (event.target === event.currentTarget) {
+          onRowFocus(unit.id);
+        }
+      }}
+      onKeyDown={(event) => onRowKeyDown(event, unit.id)}
+      sx={{
+        "&:focus-visible > [data-unit-tree-row]": {
+          outline: (theme) => `2px solid ${viewerFocusBorder(theme)}`,
+          outlineOffset: "-2px",
+          "@media (forced-colors: active)": {
+            outline: "2px solid Highlight",
+          },
+        },
+      }}
+    >
       <UnitTreeRowFrame
         rowState={rowState}
-        setRowRef={setRowRef}
         unit={unit}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -532,7 +686,6 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
           isEnabled={rowState.isEnabled}
           isSelected={rowState.isSelected}
           unit={unit}
-          onSelect={handleSelect}
         />
         <UnitTreeOpenScopeAction
           canOpenScope={rowState.canOpenScope}
@@ -553,6 +706,10 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
         onHoverUnit={onHoverUnit}
         onLeaveUnit={onLeaveUnit}
         onOpenScope={onOpenScope}
+        onEscape={onEscape}
+        onEnterUnit={onEnterUnit}
+        onRowFocus={onRowFocus}
+        onRowKeyDown={onRowKeyDown}
         onSelectUnit={onSelectUnit}
         selectedUnitId={selectedUnitId}
         setExpanded={setExpanded}
@@ -578,6 +735,12 @@ const UnitTreeSelectorToolbar: FC<UnitTreeSelectorToolbarProps> = ({
   title,
 }) => {
   const theme = useTheme();
+  const { lang = "en" } = useMyAppContext();
+  const collapseLabel = formatUnitInformationMessage(
+    "a11y.tree.collapse",
+    lang,
+    { title: title.toLowerCase() },
+  );
   return (
     <Toolbar
       sx={{
@@ -592,10 +755,7 @@ const UnitTreeSelectorToolbar: FC<UnitTreeSelectorToolbarProps> = ({
       >
         {title}
       </Typography>
-      <IconButton
-        aria-label={`Collapse ${title.toLowerCase()}`}
-        onClick={onCollapse}
-      >
+      <IconButton aria-label={collapseLabel} onClick={onCollapse}>
         {theme.direction === "ltr" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </IconButton>
     </Toolbar>
@@ -620,13 +780,25 @@ const CollapsedUnitTreeRail: FC<CollapsedUnitTreeRailProps> = ({
       boxSizing: "border-box",
     }}
   >
+    <LocalizedCollapsedTreeExpand
+      direction={direction}
+      onExpand={onExpand}
+      title={title}
+    />
+  </Paper>
+);
+
+const LocalizedCollapsedTreeExpand: FC<
+  Pick<CollapsedUnitTreeRailProps, "direction" | "onExpand" | "title">
+> = ({ direction, onExpand, title }) => {
+  const { lang = "en" } = useMyAppContext();
+  const label = formatUnitInformationMessage("a11y.tree.expand", lang, {
+    title: title.toLowerCase(),
+  });
+  return (
     <Stack alignItems="center" sx={{ paddingY: 1 }}>
-      <Tooltip title={`Expand ${title.toLowerCase()}`} placement="right">
-        <IconButton
-          size="small"
-          aria-label={`Expand ${title.toLowerCase()}`}
-          onClick={onExpand}
-        >
+      <Tooltip title={label} placement="right">
+        <IconButton size="small" aria-label={label} onClick={onExpand}>
           {direction === "ltr" ? (
             <ChevronRightIcon fontSize="small" />
           ) : (
@@ -635,14 +807,16 @@ const CollapsedUnitTreeRail: FC<CollapsedUnitTreeRailProps> = ({
         </IconButton>
       </Tooltip>
     </Stack>
-  </Paper>
-);
+  );
+};
 
 const ExpandedUnitTreePanel: FC<ExpandedUnitTreePanelProps> = ({
   ariaLabel,
   onCollapse,
+  onKeyDownCapture,
   rootUnits,
   title,
+  treeTabIndex,
   ...treeProps
 }) => (
   <Paper
@@ -660,10 +834,19 @@ const ExpandedUnitTreePanel: FC<ExpandedUnitTreePanelProps> = ({
       boxSizing: "border-box",
       background: (currentTheme) =>
         `linear-gradient(180deg, ${currentTheme.palette.background.paper} 0%, ${currentTheme.palette.background.default} 100%)`,
+      "body.vscode-high-contrast &": {
+        background: "var(--vscode-editor-background, Canvas)",
+      },
     }}
   >
     <UnitTreeSelectorToolbar onCollapse={onCollapse} title={title} />
-    <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", paddingY: 0.5 }}>
+    <Box
+      role="tree"
+      aria-label={ariaLabel}
+      tabIndex={treeTabIndex}
+      onKeyDownCapture={onKeyDownCapture}
+      sx={{ minHeight: 0, flex: 1, overflow: "auto", paddingY: 0.5 }}
+    >
       <UnitTreeSelectorTree units={rootUnits} {...treeProps} />
     </Box>
   </Paper>
@@ -675,18 +858,28 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   currentUnitId,
   hoveredUnitId,
   selectedUnitId,
-  title = "UNIT TREE",
-  ariaLabel = "Unit tree",
-  collapsedAriaLabel = "Collapsed unit tree",
+  title,
+  ariaLabel,
+  collapsedAriaLabel,
   autoScrollSelectedUnit = true,
+  focusRequest,
   canOpenScopeUnit = defaultCanOpenScopeUnit,
   isUnitEnabled = defaultIsUnitEnabled,
   onHoverUnit,
   onLeaveUnit,
   onOpenScope,
+  onEscape,
+  onEnterUnit,
   onSelectUnit,
 }) => {
   const theme = useTheme();
+  const { lang = "en" } = useMyAppContext();
+  const resolvedTitle =
+    title ?? unitInformationMessage("a11y.tree.title", lang);
+  const resolvedAriaLabel =
+    ariaLabel ?? unitInformationMessage("a11y.tree.label", lang);
+  const resolvedCollapsedAriaLabel =
+    collapsedAriaLabel ?? unitInformationMessage("a11y.tree.collapsed", lang);
   const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
   const { collapse, collapsed, expand } = useResponsivePanelCollapse(isNarrow);
   const currentPathUnitIds = useMemo(
@@ -696,19 +889,224 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   const { expandedUnitIds, setExpanded } = useExpandedUnitTreeState(
     currentUnitId,
     selectedUnitId,
+    focusRequest?.targetUnitId,
     unitById,
   );
-  const setRowRef = useSelectedTreeRowScroll(
+  const { rowByUnitIdRef, setRowRef } = useSelectedTreeRowScroll(
     autoScrollSelectedUnit,
     selectedUnitId,
     expandedUnitIds,
   );
+  const visibleRows = useMemo(
+    () =>
+      resolveVisibleUnitTreeRows(
+        rootUnits,
+        expandedUnitIds,
+        (unit) => isUnitEnabled(unit as FlowGraphUnitDto),
+        (unit) => canOpenScopeUnit(unit as FlowGraphUnitDto),
+      ),
+    [canOpenScopeUnit, expandedUnitIds, isUnitEnabled, rootUnits],
+  );
+  const focusedUnitIdRef = useRef<string | undefined>(undefined);
+  const pendingFocusUnitIdRef = useRef<string | undefined>(undefined);
+  const handledFocusRequestRevisionRef = useRef(0);
+  const navigableVisibleRows = useMemo(
+    () => visibleRows.filter(isUnitTreeRowNavigable),
+    [visibleRows],
+  );
+
+  const setActiveRow = useCallback(
+    (unitId: string | undefined) => {
+      const previousUnitId = focusedUnitIdRef.current;
+      if (previousUnitId && previousUnitId !== unitId) {
+        rowByUnitIdRef.current
+          .get(previousUnitId)
+          ?.setAttribute("tabindex", "-1");
+      }
+      if (unitId) {
+        rowByUnitIdRef.current.get(unitId)?.setAttribute("tabindex", "0");
+      }
+      focusedUnitIdRef.current = unitId;
+    },
+    [rowByUnitIdRef],
+  );
+
+  useEffect(() => {
+    const currentUnitId = focusedUnitIdRef.current;
+    if (
+      currentUnitId &&
+      navigableVisibleRows.some((row) => row.id === currentUnitId)
+    ) {
+      setActiveRow(currentUnitId);
+      return;
+    }
+    const fallbackUnitId =
+      navigableVisibleRows.find((row) => row.id === selectedUnitId)?.id ??
+      navigableVisibleRows[0]?.id;
+    if (
+      currentUnitId &&
+      fallbackUnitId &&
+      rowByUnitIdRef.current
+        .get(currentUnitId)
+        ?.contains(document.activeElement)
+    ) {
+      pendingFocusUnitIdRef.current = fallbackUnitId;
+    }
+    setActiveRow(fallbackUnitId);
+  }, [navigableVisibleRows, rowByUnitIdRef, selectedUnitId, setActiveRow]);
+
+  const requestRowFocus = useCallback(
+    (unitId: string) => {
+      setActiveRow(unitId);
+      pendingFocusUnitIdRef.current = focusUnitTreeRow(
+        rowByUnitIdRef.current,
+        unitId,
+      )
+        ? undefined
+        : unitId;
+    },
+    [rowByUnitIdRef, setActiveRow],
+  );
+
+  useEffect(() => {
+    const revision = focusRequest?.revision ?? 0;
+    if (revision <= handledFocusRequestRevisionRef.current) return;
+    if (collapsed) {
+      expand();
+      return;
+    }
+    const requestedUnitId = focusRequest?.targetUnitId;
+    if (
+      requestedUnitId &&
+      !navigableVisibleRows.some((row) => row.id === requestedUnitId)
+    ) {
+      return;
+    }
+    const targetUnitId = requestedUnitId ?? navigableVisibleRows[0]?.id;
+    if (!targetUnitId) return;
+    requestRowFocus(targetUnitId);
+    handledFocusRequestRevisionRef.current = revision;
+  }, [collapsed, expand, focusRequest, navigableVisibleRows, requestRowFocus]);
+
+  useEffect(() => {
+    const pendingUnitId = pendingFocusUnitIdRef.current;
+    if (!pendingUnitId) return;
+    if (!navigableVisibleRows.some((row) => row.id === pendingUnitId)) {
+      pendingFocusUnitIdRef.current = undefined;
+      return;
+    }
+    if (focusUnitTreeRow(rowByUnitIdRef.current, pendingUnitId)) {
+      pendingFocusUnitIdRef.current = undefined;
+    }
+  }, [expandedUnitIds, navigableVisibleRows, rowByUnitIdRef]);
+
+  const handleRowFocus = useCallback(
+    (unitId: string) => {
+      setActiveRow(unitId);
+    },
+    [setActiveRow],
+  );
+
+  const handleUnitTreeKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
+      if (
+        event.key === "Escape" &&
+        !event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.shiftKey &&
+        onEscape
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        onEscape();
+        return;
+      }
+      const result = resolveUnitTreeNavigationKey(visibleRows, unitId, {
+        altKey: event.altKey,
+        ctrlKey: event.ctrlKey,
+        key: event.key,
+        metaKey: event.metaKey,
+        shiftKey: event.shiftKey,
+      });
+      if (!result.suppressDefault) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const action = result.action;
+      if (!action) return;
+      switch (action.kind) {
+        case "collapse":
+        case "expand":
+          setExpanded(action.targetUnitId, action.kind === "expand");
+          return;
+        case "focus":
+          requestRowFocus(action.targetUnitId);
+          return;
+        case "select":
+          onSelectUnit(action.targetUnitId);
+          if (event.key === "Enter") {
+            onEnterUnit?.(action.targetUnitId);
+          }
+          return;
+        case "open-scope":
+          onOpenScope?.(action.targetUnitId);
+          return;
+      }
+    },
+    [
+      onEscape,
+      onEnterUnit,
+      onOpenScope,
+      onSelectUnit,
+      requestRowFocus,
+      setExpanded,
+      visibleRows,
+    ],
+  );
+
+  const handleRowKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
+      const target = event.target as HTMLElement | null;
+      const owningTreeItem = target?.closest?.('[role="treeitem"]');
+      if (owningTreeItem !== event.currentTarget) return;
+      if (
+        event.target !== event.currentTarget &&
+        !isTreeNavigationKey(event.key)
+      ) {
+        return;
+      }
+      handleUnitTreeKeyDown(event, unitId);
+    },
+    [handleUnitTreeKeyDown],
+  );
+
+  const handleSelectorKeyDownCapture = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (
+        !onEscape ||
+        event.key !== "Escape" ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey
+      ) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest?.('[role="treeitem"]')) return;
+      event.preventDefault();
+      event.stopPropagation();
+      onEscape();
+    },
+    [onEscape],
+  );
 
   const expandedPanel = (
     <ExpandedUnitTreePanel
-      ariaLabel={ariaLabel}
+      ariaLabel={resolvedAriaLabel}
       rootUnits={rootUnits}
-      title={title}
+      title={resolvedTitle}
+      treeTabIndex={navigableVisibleRows.length > 0 ? -1 : 0}
       canOpenScopeUnit={canOpenScopeUnit}
       currentPathUnitIds={currentPathUnitIds}
       currentUnitId={currentUnitId}
@@ -716,9 +1114,14 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
       hoveredUnitId={hoveredUnitId}
       isUnitEnabled={isUnitEnabled}
       onCollapse={collapse}
+      onKeyDownCapture={handleSelectorKeyDownCapture}
       onHoverUnit={onHoverUnit}
       onLeaveUnit={onLeaveUnit}
       onOpenScope={onOpenScope}
+      onEscape={onEscape}
+      onEnterUnit={onEnterUnit}
+      onRowFocus={handleRowFocus}
+      onRowKeyDown={handleRowKeyDown}
       onSelectUnit={onSelectUnit}
       selectedUnitId={selectedUnitId}
       setExpanded={setExpanded}
@@ -727,9 +1130,9 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   );
   const collapsedRail = (
     <CollapsedUnitTreeRail
-      collapsedAriaLabel={collapsedAriaLabel}
+      collapsedAriaLabel={resolvedCollapsedAriaLabel}
       direction={theme.direction}
-      title={title}
+      title={resolvedTitle}
       onExpand={expand}
     />
   );

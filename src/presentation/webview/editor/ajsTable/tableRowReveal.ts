@@ -12,6 +12,7 @@ export type TableRowRevealState = {
 type TableRowRevealContext = {
   rows: ReadonlyArray<Row<UnitListRowView>>;
   selectRow: (absolutePath: string) => void;
+  requestFocus?: (absolutePath: string) => void;
 };
 
 const buildRowByIdentity = (
@@ -45,11 +46,12 @@ export const findRowIndexByIdentity = (
 
 const selectResolvedRow = (
   identity: string,
-  { rows, selectRow }: TableRowRevealContext,
+  { rows, selectRow, requestFocus }: TableRowRevealContext,
 ): boolean => {
   const row = buildRowByIdentity(rows).get(identity);
   if (row) {
     selectRow(row.original.absolutePath);
+    requestFocus?.(row.original.absolutePath);
     return true;
   }
   return false;
@@ -68,18 +70,27 @@ export const revealTableRow = (
 export const useTableRowRevealState = (
   selectRow: (absolutePath: string) => void,
   rowsRef: MutableRefObject<ReadonlyArray<Row<UnitListRowView>>>,
+  requestFocus?: (absolutePath: string) => void,
 ): TableRowRevealState => {
   const handleJump = useCallback(
     (id: string) => {
-      selectResolvedRow(id, { rows: rowsRef.current, selectRow });
+      selectResolvedRow(id, {
+        rows: rowsRef.current,
+        selectRow,
+        requestFocus,
+      });
     },
-    [rowsRef, selectRow],
+    [requestFocus, rowsRef, selectRow],
   );
   const revealPath = useCallback(
     (absolutePath: string) => {
-      selectResolvedRow(absolutePath, { rows: rowsRef.current, selectRow });
+      selectResolvedRow(absolutePath, {
+        rows: rowsRef.current,
+        selectRow,
+        requestFocus,
+      });
     },
-    [rowsRef, selectRow],
+    [requestFocus, rowsRef, selectRow],
   );
 
   const revealUnit = useCallback(
@@ -87,8 +98,9 @@ export const useTableRowRevealState = (
       revealTableRow(data, {
         rows: rowsRef.current,
         selectRow,
+        requestFocus,
       }),
-    [rowsRef, selectRow],
+    [requestFocus, rowsRef, selectRow],
   );
 
   return { handleJump, revealPath, revealUnit };

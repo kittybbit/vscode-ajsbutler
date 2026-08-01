@@ -3,6 +3,7 @@ import { createTheme } from "@mui/material/styles";
 import {
   buildNodeFocusFilter,
   buildNodeHoverDecoration,
+  resolveNodeBorderStyle,
 } from "../../presentation/webview/editor/ajsFlow/nodes/nodeSxProps";
 import {
   createFlowNodeGeometryPx,
@@ -58,5 +59,40 @@ suite("Flow Node Style", () => {
       buildNodeFocusFilter("both", theme).includes(theme.palette.warning.main),
     );
     assert.strictEqual(buildNodeFocusFilter("unrelated", theme), "none");
+  });
+
+  test("uses border patterns that do not rely on node-state color", () => {
+    const state = {
+      isAncestor: false,
+      isCurrent: false,
+      isCurrentSearchResult: false,
+      isHovered: false,
+      isRootJobnet: false,
+      isSearchMatch: false,
+      isSelected: false,
+      nestedPanel: undefined,
+      relationshipFocusRole: undefined,
+      semanticDiffHighlight: undefined,
+    };
+
+    assert.strictEqual(
+      resolveNodeBorderStyle({ ...state, isSelected: true } as never),
+      "double",
+    );
+    assert.strictEqual(
+      resolveNodeBorderStyle({ ...state, isCurrent: true } as never),
+      "dashed",
+    );
+    assert.strictEqual(
+      resolveNodeBorderStyle({ ...state, isSearchMatch: true } as never),
+      "dotted",
+    );
+    assert.strictEqual(
+      resolveNodeBorderStyle({
+        ...state,
+        relationshipFocusRole: "upstream",
+      } as never),
+      "dashed",
+    );
   });
 });

@@ -21,6 +21,8 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { useMyAppContext } from "../MyContexts";
+import { unitInformationMessage } from "../unitInformationLocalization";
 
 type SearchShortcutEvent = Pick<
   globalThis.KeyboardEvent,
@@ -249,6 +251,8 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   sx,
 }) => {
   const isMac = isMacBrowserPlatform(getBrowserPlatform());
+  const { lang = "en" } = useMyAppContext();
+  const clearLabel = unitInformationMessage("a11y.search.clear", lang);
   useHeaderSearchShortcut(inputRef, isMac);
 
   const handleChange = useCallback(
@@ -295,11 +299,11 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
                 onMouseDown={(event) => event.preventDefault()}
               >
                 {endAdornment}
-                <Tooltip title="Clear search.">
+                <Tooltip title={clearLabel}>
                   <span>
                     <IconButton
                       size="small"
-                      aria-label="Clear search."
+                      aria-label={clearLabel}
                       onClick={onClear}
                       disabled={clearDisabled}
                     >

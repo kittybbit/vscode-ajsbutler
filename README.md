@@ -19,13 +19,50 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   ![unit-list](images/unit-list.png)
 - Select which items to display in the unit list.
   ![column-selector](images/column-selector.png)
+- Explore the unit list as a keyboard data grid. Tab enters or leaves the grid;
+  Arrow keys move between visible cells, Page Up and Page Down move by the
+  visible page, Home and End move across a row, and Control+Home or Control+End
+  move to the grid boundaries. Enter or Space changes sorting on a sortable
+  column header. From a data cell, H moves to the same column header and D
+  opens or enters the selected unit's detail pane. Escape returns from the
+  header to the saved cell. In the detail pane, R returns to the saved cell
+  without closing the pane, while Escape closes it and returns. Search results
+  restore the corresponding grid cell, and closing definition details returns
+  to the action that opened the dialog. L moves from the grid or its header to
+  the selected unit in the unit tree.
 - View unit definitions.
   ![unit-dialog](images/unit-dialog.png)
 - Save data in CSV format.
 - Switch the editor to enable a flow-style display of the information.
   ![unit-list](images/unit-flow.png)
+- Explore the rendered flow from a focused node. Arrow keys move to the
+  center-nearest node in the pressed visual direction, with equal distances
+  preferring the upper then left node. Shift+Down and Shift+Up expand or
+  collapse a nested jobnet without changing scope. Enter opens a focused N or
+  RC unit with internal units as the active flow scope, and Escape returns from
+  a nested N or RC scope to its containing scope. D focuses the selected node's
+  detail pane, L focuses the flow selector, R returns from the detail pane, and
+  Escape closes details or returns from the selector to the saved graph node.
+  Tab enters a rendered graph node when one is available; the graph surface is
+  the fallback Tab stop only when no node can receive focus. Node action
+  buttons retain native Enter/Space behavior.
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
+- Keeps focus, selection, search matches, relationship focus, and scope state
+  distinguishable with borders, outlines, icons, text, and VS Code theme or
+  high-contrast colors in both viewers.
+- Navigate the shared unit tree with a roving keyboard focus. Up and Down move
+  through visible rows that can be navigated, Right expands or enters children,
+  Left collapses or returns to a parent, Home and End move to the visible
+  boundaries, and Enter or Space selects the focused enabled row. Enter also
+  moves focus to the corresponding primary surface: the flow node in the flow
+  viewer or the selected grid cell in the list viewer. Space remains
+  selection-only. In the flow
+  viewer, first-level rows outside the active scope remain disabled for
+  selection but can be focused with the arrows. Eligible root-jobnet rows can
+  be opened with Alt+Enter; groups do not become graph scopes by receiving
+  focus. Tab and Shift+Tab enter or leave the tree, while expand and
+  scope-opening buttons remain available without adding nested Tab stops.
 - Compare the active JP1/AJS definition with a selected before definition and
   copy or save a semantic Markdown diff report, including confirmation-required
   notes for supported condition and wait changes.

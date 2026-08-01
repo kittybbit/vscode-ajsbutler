@@ -1,5 +1,8 @@
 import * as assert from "assert";
-import { isSelectableFlowScopeUnit } from "../../presentation/webview/editor/ajsFlow/FlowSelector";
+import {
+  isSelectableFlowScopeUnit,
+  resolveFlowSelectorFocusTarget,
+} from "../../presentation/webview/editor/ajsFlow/FlowSelector";
 import {
   collectFlowTreeAncestorUnitIds,
   isUnitInCurrentFlowScope,
@@ -96,7 +99,11 @@ suite("Flow Selector", () => {
 
   test("rejects selection outside the current root jobnet", () => {
     const current = createFlowTestUnit({ id: "/root/current" });
-    const another = createFlowTestUnit({ id: "/root/another" });
+    const another = createFlowTestUnit({
+      id: "/root/another",
+      unitType: "n",
+      isRootJobnet: true,
+    });
     const anotherJob = createFlowTestUnit({
       id: "/root/another/job",
       unitType: "j",
@@ -112,9 +119,48 @@ suite("Flow Selector", () => {
       isUnitInCurrentFlowScope(anotherJob, current, unitById),
       false,
     );
+    assert.strictEqual(isSelectableFlowScopeUnit(another), true);
+    assert.strictEqual(
+      isUnitInCurrentFlowScope(another, current, unitById),
+      false,
+    );
+    assert.strictEqual(
+      resolveFlowTreeSelectionTarget(another.id, current, unitById),
+      undefined,
+    );
     assert.strictEqual(
       resolveFlowTreeSelectionTarget(anotherJob.id, current, unitById),
       undefined,
+    );
+  });
+
+  test("focuses the current scope or falls back to the first root jobnet", () => {
+    const firstRoot = createFlowTestUnit({
+      id: "/root/first",
+      unitType: "n",
+      isRootJobnet: true,
+    });
+    const secondRoot = createFlowTestUnit({
+      id: "/root/second",
+      unitType: "n",
+      isRootJobnet: true,
+    });
+    const group = createFlowTestUnit({
+      id: "/root",
+      unitType: "g",
+      children: [firstRoot, secondRoot],
+    });
+    const unitById = new Map(
+      [group, firstRoot, secondRoot].map((unit) => [unit.id, unit]),
+    );
+
+    assert.strictEqual(
+      resolveFlowSelectorFocusTarget(firstRoot.id, [group], unitById),
+      firstRoot.id,
+    );
+    assert.strictEqual(
+      resolveFlowSelectorFocusTarget("/missing", [group], unitById),
+      firstRoot.id,
     );
   });
 });

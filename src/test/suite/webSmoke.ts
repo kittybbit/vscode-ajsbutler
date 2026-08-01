@@ -12,8 +12,22 @@ const activateExtension = async () => {
   await extension?.activate();
 };
 
-const waitFor = async (ms: number) =>
+const waitFor = async (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
+
+const waitForCondition = async (
+  condition: () => boolean,
+  timeoutMs = 5000,
+  intervalMs = 100,
+): Promise<void> => {
+  const deadline = Date.now() + timeoutMs;
+  while (!condition()) {
+    if (Date.now() >= deadline) {
+      throw new Error("Timed out waiting for the expected VS Code Web state");
+    }
+    await waitFor(intervalMs);
+  }
+};
 
 export async function run(): Promise<void> {
   await activateExtension();
@@ -63,11 +77,15 @@ export async function run(): Promise<void> {
   await vscode.window.showTextDocument(previewDocument);
   await vscode.commands.executeCommand("open.ajsbutler.tableViewer");
   await vscode.commands.executeCommand("open.ajsbutler.flowViewer");
-  await waitFor(200);
 
   const expectedPanelTitle =
     previewDocument.uri.path.split("/").filter(Boolean).pop() ??
     previewDocument.uri.scheme;
+  await waitForCondition(
+    () =>
+      vscode.window.tabGroups.activeTabGroup.activeTab?.label ===
+      expectedPanelTitle,
+  );
   const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
   if (activeTab?.label !== expectedPanelTitle) {
     throw new Error(

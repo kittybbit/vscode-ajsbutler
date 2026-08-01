@@ -101,37 +101,40 @@ const edgeStrokeColor = (
   return undefined;
 };
 
+const toEdgeData = (edge: FlowGraphEdgeDto): Edge["data"] =>
+  edge.semanticDiffHighlight
+    ? { semanticDiffHighlight: edge.semanticDiffHighlight }
+    : undefined;
+
+const toEdgeStyle = (edge: FlowGraphEdgeDto, theme: Theme): Edge["style"] => {
+  const highlight = edge.semanticDiffHighlight;
+  if (!highlight) return undefined;
+  return {
+    stroke: edgeStrokeColor(highlight, theme),
+    strokeWidth: highlight.kind === "confirmation-required" ? 4 : 3,
+  };
+};
+
+const toArrowMarker = (color?: string): Edge["markerEnd"] => ({
+  type: MarkerType.ArrowClosed,
+  width: 20,
+  height: 20,
+  color,
+});
+
 const toEdge = (edge: FlowGraphEdgeDto, theme: Theme): Edge => ({
   id: `${edge.source}-${edge.target}`,
   type: "smoothstep",
   source: edge.source,
   target: edge.target,
-  data: edge.semanticDiffHighlight
-    ? {
-        semanticDiffHighlight: edge.semanticDiffHighlight,
-      }
-    : undefined,
-  style: edge.semanticDiffHighlight
-    ? {
-        stroke: edgeStrokeColor(edge.semanticDiffHighlight, theme),
-        strokeWidth:
-          edge.semanticDiffHighlight.kind === "confirmation-required" ? 4 : 3,
-      }
-    : undefined,
-  markerStart:
-    edge.type === "con"
-      ? {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-        }
-      : undefined,
-  markerEnd: {
-    type: MarkerType.ArrowClosed,
-    width: 20,
-    height: 20,
-    color: edgeStrokeColor(edge.semanticDiffHighlight, theme),
-  },
+  focusable: false,
+  selectable: false,
+  reconnectable: false,
+  deletable: false,
+  data: toEdgeData(edge),
+  style: toEdgeStyle(edge, theme),
+  markerStart: edge.type === "con" ? toArrowMarker() : undefined,
+  markerEnd: toArrowMarker(edgeStrokeColor(edge.semanticDiffHighlight, theme)),
   animated:
     edge.type === "con" ||
     edge.semanticDiffHighlight?.kind === "confirmation-required",
@@ -149,10 +152,21 @@ const toReactFlowNode = (
   node: FlowGraphNodeDto,
   context: ReactFlowNodeBuildContext,
 ): Node<AjsNode> => {
+  const selected = context.options?.selectedUnitId === node.id;
   return {
     id: node.id,
     type: node.type,
-    selected: context.options?.selectedUnitId === node.id,
+    selected,
+    selectable: false,
+    draggable: false,
+    connectable: false,
+    deletable: false,
+    focusable: true,
+    ariaRole: "group",
+    ariaLabel: node.label,
+    domAttributes: {
+      "aria-current": node.metadata.isCurrent ? "true" : undefined,
+    },
     initialWidth: context.initialNodeGeometry.width,
     initialHeight: context.initialNodeGeometry.height,
     data: toNodeData(node, context),

@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Added keyboard data-grid navigation and logical table semantics to the unit
+  list, including stable cell focus across sorting, virtualized rows, search,
+  detail-pane closure, definition-dialog return, and H, D, R, and Escape
+  shortcuts for header and detail-pane round trips.
+- Added read-only flow-node keyboard navigation using rendered spatial
+  direction for arrow movement, N/RC flow-scope entry and return, and
+  nested-jobnet expansion while preserving normal Tab traversal and viewport
+  zoom.
+- Added flow-viewer D, L, R, and Escape focus continuity for node details,
+  selector scope actions, saved graph-node return, and missing-target fallback.
+- Added shared unit-tree keyboard navigation with roving row focus, visible
+  row Up/Down movement, Right/Left expand and parent navigation, Home/End
+  boundaries, Enter/Space selection, and tree semantics in both viewers.
+- Added equivalent viewer focus handoffs: Enter from a flow-tree row focuses
+  the selected graph node, Enter from a list-tree row restores the selected
+  grid cell, and L moves from either list-grid surface to its unit-tree row.
+- Restored keyboard reachability for flow-tree sibling root-jobnet scopes:
+  arrows can focus an out-of-scope eligible row and Alt+Enter opens that scope
+  without selecting the disabled row.
+- First-level flow-tree groups outside the active scope are also reachable with
+  the arrow keys without becoming selectable or changing graph scope.
+- Corrected flow-node action activation and graph Tab entry so native action
+  buttons activate once, interactive descendants do not trigger graph
+  traversal, and the graph surface remains a programmatic fallback.
+- Added localized accessible names, state announcements, and React Flow
+  keyboard instructions for English and Japanese, while preserving native
+  link and button activation during viewer movement.
+- Added non-color focus, selection, search, relationship, and scope cues for
+  light, dark, and high-contrast themes in the list and flow viewers.
+- Fixed list and flow searches being cleared immediately after submission,
+  restoring list match cues and flow-node search highlighting.
 - Aligned supported runtime semantic diagnostics with JP1/AJS3 version 13,
   including yearly schedule cycle ranges and complete file-monitoring condition
   forms, and measuring governed quoted file-name limits without serialization

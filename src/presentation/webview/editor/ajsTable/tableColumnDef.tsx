@@ -65,9 +65,7 @@ export const tableColumnDef = (
       cell: (props) => {
         return (
           <Box sx={{ textAlign: "right" }}>
-            <span id={props.row.original.id} tabIndex={0}>
-              {props.row.index + 1}
-            </span>
+            <span id={props.row.original.id}>{props.row.index + 1}</span>
           </Box>
         );
       },

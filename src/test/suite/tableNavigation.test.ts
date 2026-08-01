@@ -1,13 +1,18 @@
 import * as assert from "assert";
 import {
   canNavigateToSelectedUnit,
-  handleSelectTableRow,
-  handleSelectTableRowKeyDown,
   handleJumpLinkClick,
+  getStickyColumnRevealScrollLeft,
   isTableRowSelected,
+  isTableGridNavigationEventOwnedByCell,
+  isTableGridNavigationKey,
+  moveTableGridFocus,
   navigateToFlow,
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
+  resolveTableGridFocus,
+  resolveTableGridRestorationFocus,
+  resolveUnitListGridShortcut,
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
 import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
@@ -46,42 +51,318 @@ suite("Table navigation", () => {
     ]);
   });
 
-  test("selects a row with pointer, Enter, or Space interaction", () => {
-    const selected: string[] = [];
-    let prevented = 0;
-    const rowTarget = {} as EventTarget & HTMLElement;
-    const nestedTarget = {} as EventTarget;
-    const selectRow = (absolutePath: string) => selected.push(absolutePath);
-    const keyboardHandler = handleSelectTableRowKeyDown("/root/job", selectRow);
+  test("chooses one stable grid entry target", () => {
+    const rows = ["/root/a", "/root/b"];
+    const columns = ["#", "name", "comment"];
+    const sortable = ["name", "comment"];
 
-    handleSelectTableRow("/root/job", selectRow)();
-    keyboardHandler({
-      currentTarget: rowTarget,
-      key: "Escape",
-      preventDefault: () => prevented++,
-      target: rowTarget,
-    });
-    keyboardHandler({
-      currentTarget: rowTarget,
-      key: "Enter",
-      preventDefault: () => prevented++,
-      target: rowTarget,
-    });
-    keyboardHandler({
-      currentTarget: rowTarget,
-      key: " ",
-      preventDefault: () => prevented++,
-      target: rowTarget,
-    });
-    keyboardHandler({
-      currentTarget: rowTarget,
-      key: "Enter",
-      preventDefault: () => prevented++,
-      target: nestedTarget,
-    });
+    assert.deepStrictEqual(
+      resolveTableGridFocus(undefined, undefined, rows, columns, sortable),
+      { kind: "header", columnId: "name" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridFocus(undefined, "/root/b", rows, columns, sortable),
+      { kind: "cell", absolutePath: "/root/b", columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridFocus(
+        { kind: "header", columnId: "#" },
+        undefined,
+        rows,
+        columns,
+        sortable,
+      ),
+      { kind: "header", columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridFocus(
+        { kind: "cell", absolutePath: "/root/b", columnId: "comment" },
+        "/root/b",
+        ["/root/b", "/root/a"],
+        ["#", "comment"],
+        ["comment"],
+      ),
+      { kind: "cell", absolutePath: "/root/b", columnId: "comment" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridFocus(
+        { kind: "cell", absolutePath: "/missing", columnId: "hidden" },
+        undefined,
+        [],
+        ["#"],
+        [],
+      ),
+      undefined,
+    );
+  });
 
-    assert.deepStrictEqual(selected, ["/root/job", "/root/job", "/root/job"]);
-    assert.strictEqual(prevented, 2);
+  test("restores workflow focus by stable path and visible column", () => {
+    const rows = ["/root/a", "/root/b"];
+    const columns = ["#", "name", "comment"];
+    const sortable = ["name", "comment"];
+
+    assert.deepStrictEqual(
+      resolveTableGridRestorationFocus(
+        { kind: "cell", absolutePath: "/root/a", columnId: "comment" },
+        "/root/b",
+        rows,
+        columns,
+        sortable,
+      ),
+      { kind: "cell", absolutePath: "/root/b", columnId: "comment" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridRestorationFocus(
+        { kind: "cell", absolutePath: "/root/b", columnId: "hidden" },
+        "/root/b",
+        rows,
+        ["#", "name"],
+        ["name"],
+      ),
+      { kind: "cell", absolutePath: "/root/b", columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      resolveTableGridRestorationFocus(
+        { kind: "cell", absolutePath: "/removed", columnId: "comment" },
+        "/removed",
+        rows,
+        columns,
+        sortable,
+      ),
+      { kind: "header", columnId: "name" },
+    );
+    assert.strictEqual(
+      resolveTableGridRestorationFocus(undefined, "/removed", [], [], []),
+      undefined,
+    );
+  });
+
+  test("moves among visible grid columns and logical rows", () => {
+    const context = {
+      current: {
+        kind: "cell" as const,
+        absolutePath: "/root/b",
+        columnId: "name",
+      },
+      key: "ArrowRight",
+      pageSize: 2,
+      rowAbsolutePaths: ["/root/a", "/root/b", "/root/c", "/root/d"],
+      visibleColumnIds: ["#", "name", "comment"],
+      sortableColumnIds: ["name", "comment"],
+    };
+
+    assert.deepStrictEqual(moveTableGridFocus(context), {
+      kind: "cell",
+      absolutePath: "/root/b",
+      columnId: "comment",
+    });
+    assert.deepStrictEqual(
+      moveTableGridFocus({ ...context, key: "PageDown" }),
+      {
+        kind: "cell",
+        absolutePath: "/root/d",
+        columnId: "name",
+      },
+    );
+    assert.deepStrictEqual(moveTableGridFocus({ ...context, key: "Home" }), {
+      kind: "cell",
+      absolutePath: "/root/b",
+      columnId: "#",
+    });
+    assert.deepStrictEqual(
+      moveTableGridFocus({ ...context, key: "End", ctrlKey: true }),
+      {
+        kind: "cell",
+        absolutePath: "/root/d",
+        columnId: "comment",
+      },
+    );
+  });
+
+  test("clamps virtualized page movement at large-list boundaries", () => {
+    const rowAbsolutePaths = Array.from(
+      { length: 10_000 },
+      (_, index) => `/root/job-${index}`,
+    );
+    const base = {
+      current: {
+        kind: "cell" as const,
+        absolutePath: rowAbsolutePaths[4_999],
+        columnId: "comment",
+      },
+      key: "PageDown",
+      pageSize: 37,
+      rowAbsolutePaths,
+      visibleColumnIds: ["#", "comment"],
+      sortableColumnIds: ["comment"],
+    };
+
+    assert.deepStrictEqual(moveTableGridFocus(base), {
+      kind: "cell",
+      absolutePath: rowAbsolutePaths[5_036],
+      columnId: "comment",
+    });
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: {
+          ...base.current,
+          absolutePath: rowAbsolutePaths[9_990],
+        },
+      }),
+      {
+        kind: "cell",
+        absolutePath: rowAbsolutePaths[9_999],
+        columnId: "comment",
+      },
+    );
+  });
+
+  test("moves between sortable headers and data without trapping Tab", () => {
+    const base = {
+      pageSize: 10,
+      rowAbsolutePaths: ["/root/a"],
+      visibleColumnIds: ["#", "name", "comment"],
+      sortableColumnIds: ["name", "comment"],
+    };
+
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: { kind: "header", columnId: "#" },
+        key: "ArrowRight",
+      }),
+      { kind: "header", columnId: "name" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: { kind: "header", columnId: "name" },
+        key: "ArrowRight",
+      }),
+      { kind: "header", columnId: "comment" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: {
+          kind: "cell",
+          absolutePath: "/root/a",
+          columnId: "#",
+        },
+        key: "ArrowUp",
+      }),
+      { kind: "header", columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: { kind: "header", columnId: "comment" },
+        key: "ArrowDown",
+      }),
+      { kind: "cell", absolutePath: "/root/a", columnId: "comment" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: {
+          kind: "cell",
+          absolutePath: "/root/a",
+          columnId: "comment",
+        },
+        key: "ArrowUp",
+      }),
+      { kind: "header", columnId: "comment" },
+    );
+    assert.strictEqual(isTableGridNavigationKey("Tab"), false);
+    assert.strictEqual(isTableGridNavigationKey("Home"), true);
+    assert.strictEqual(isTableGridNavigationKey("End", true), true);
+
+    const cell = {};
+    const nestedLink = {
+      closest: (selector: string) =>
+        selector === '[role="gridcell"]' ? cell : undefined,
+    };
+    assert.strictEqual(
+      isTableGridNavigationEventOwnedByCell(
+        nestedLink as never,
+        cell as never,
+        "ArrowDown",
+      ),
+      true,
+    );
+    assert.strictEqual(
+      isTableGridNavigationEventOwnedByCell(
+        nestedLink as never,
+        cell as never,
+        "Enter",
+      ),
+      false,
+    );
+  });
+
+  test("resolves list grid shortcuts only for their owned focus target", () => {
+    const cell = {
+      kind: "cell" as const,
+      absolutePath: "/root/job",
+      columnId: "name",
+    };
+    const header = { kind: "header" as const, columnId: "name" };
+
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "h" }),
+      "focusColumnHeader",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "H" }),
+      "focusColumnHeader",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "l" }),
+      "focusTree",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: header, key: "L" }),
+      "focusTree",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "d" }),
+      "openDetails",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "D" }),
+      "openDetails",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: header, key: "Escape" }),
+      "returnToSavedCell",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: header, key: "d" }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "h", shiftKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "d", ctrlKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "d", metaKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "l", shiftKey: true }),
+      undefined,
+    );
+  });
+
+  test("reveals a cell that would otherwise sit behind the sticky index column", () => {
+    assert.strictEqual(getStickyColumnRevealScrollLeft(320, 42, 118), 244);
+    assert.strictEqual(getStickyColumnRevealScrollLeft(320, 140, 118), 320);
+    assert.strictEqual(getStickyColumnRevealScrollLeft(40, 20, 100), 0);
   });
 
   test("jump links select their target without selecting the source row", () => {
@@ -193,9 +474,11 @@ suite("Table navigation", () => {
       { original: { id: "job", absolutePath: "/root/job" } },
     ] as never;
     const selected: string[] = [];
+    const focused: string[] = [];
     const context = {
       rows,
       selectRow: (absolutePath: string) => selected.push(absolutePath),
+      requestFocus: (absolutePath: string) => focused.push(absolutePath),
     };
 
     assert.strictEqual(
@@ -208,5 +491,6 @@ suite("Table navigation", () => {
     );
     assert.strictEqual(revealTableRow({ absolutePath: 1 }, context), false);
     assert.deepStrictEqual(selected, ["/root/job"]);
+    assert.deepStrictEqual(focused, ["/root/job"]);
   });
 });

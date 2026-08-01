@@ -12,6 +12,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
+import GlobalStyles from "@mui/material/GlobalStyles";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
@@ -50,12 +51,15 @@ import {
   createViewerPerformanceRequest,
   createViewerReadyRequest,
 } from "../../viewerRequestMessages";
-import UnitTreeSelector from "../shared/UnitTreeSelector";
+import UnitTreeSelector, {
+  type UnitTreeFocusRequest,
+} from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
   selectUnitTreeUnitInTable,
+  type TableGridFocusRequest,
 } from "./navigation";
 import { getTableSearchResultPosition } from "./tableSearchState";
 import type {
@@ -73,6 +77,15 @@ import {
 } from "./tableRowReveal";
 import { useTableSearchController } from "./tableSearchController";
 import { createTableViewerData, findSelectedUnitId } from "./tableViewerData";
+import {
+  ViewerAnnouncementHost,
+  type ViewerAnnouncementHostHandle,
+} from "../shared/viewerAnnouncements";
+import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
+import {
+  formatUnitInformationMessage,
+  unitInformationMessage,
+} from "../unitInformationLocalization";
 
 export type AjsTableSearchState = {
   query: string;
@@ -112,6 +125,7 @@ type TableViewerShellProps = {
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   detailPaneClosed: boolean;
   closeDetailPane: VoidFunction;
+  detailFocusRequestRevision: number;
   dialogData: UnitDefinitionDialogDto | undefined;
   setDialogData: React.Dispatch<
     React.SetStateAction<UnitDefinitionDialogDto | undefined>
@@ -120,10 +134,19 @@ type TableViewerShellProps = {
   selectedDetail: ReturnType<typeof resolveUnitListDetail>;
   selectedUnitId: string | undefined;
   selectRow: (absolutePath: string) => void;
+  openDetailPane: (absolutePath: string) => void;
+  handleDetailFocusRequest: (revision: number) => void;
+  returnToGrid: VoidFunction;
+  restoreGridFocusRequest: TableGridFocusRequest;
+  focusTreeRequest: UnitTreeFocusRequest;
   rootUnits: UnitListRootDto[];
   unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
   selectTreeUnit: (unitId: string) => void;
+  focusUnitTree: VoidFunction;
   openTreeUnitScope: (unitId: string) => void;
+  onCopied: () => void;
+  announcementHostRef: React.RefObject<ViewerAnnouncementHostHandle | null>;
+  gridAriaLabel: string;
 };
 
 type ParsedTableDocumentState = {
@@ -241,20 +264,32 @@ const TableViewerShell = ({
   parameterSearchValuesByPath,
   detailPaneClosed,
   closeDetailPane,
+  detailFocusRequestRevision,
   dialogData,
   setDialogData,
   selectedAbsolutePath,
   selectedDetail,
   selectRow,
+  openDetailPane,
+  handleDetailFocusRequest,
+  returnToGrid,
+  restoreGridFocusRequest,
+  focusTreeRequest,
   selectedUnitId,
   rootUnits,
   unitById,
   selectTreeUnit,
+  focusUnitTree,
   openTreeUnitScope,
+  onCopied,
+  announcementHostRef,
+  gridAriaLabel,
 }: TableViewerShellProps) => (
   <>
     <ThemeProvider theme={theme}>
+      <ViewerAnnouncementHost ref={announcementHostRef} />
       <CssBaseline />
+      <GlobalStyles styles={viewerThemeGlobalStyles} />
       <Stack
         direction="column"
         spacing={0}
@@ -273,6 +308,7 @@ const TableViewerShell = ({
           onSearchNavigate={onSearchNavigate}
           onSearchSubmit={onSearchSubmit}
           onSearchClear={onSearchClear}
+          onCopied={onCopied}
           visibleRowCount={rows.length}
           totalRowCount={totalRowCount}
         />
@@ -286,6 +322,9 @@ const TableViewerShell = ({
             padding: 1.25,
             background: (theme) =>
               `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+            "body.vscode-high-contrast &": {
+              background: "var(--vscode-editor-background, Canvas)",
+            },
             boxSizing: "border-box",
           }}
         >
@@ -303,6 +342,7 @@ const TableViewerShell = ({
               rootUnits={rootUnits}
               unitById={unitById}
               selectedUnitId={selectedUnitId}
+              focusRequest={focusTreeRequest}
               autoScrollSelectedUnit={false}
               canOpenScopeUnit={isSelectableTableFlowScopeUnit}
               onOpenScope={openTreeUnitScope}
@@ -326,12 +366,18 @@ const TableViewerShell = ({
                 parameterSearchValuesByPath={parameterSearchValuesByPath}
                 selectedAbsolutePath={selectedAbsolutePath}
                 selectRow={selectRow}
+                focusUnitTree={focusUnitTree}
+                openDetailPane={openDetailPane}
+                restoreFocusRequest={restoreGridFocusRequest}
+                gridAriaLabel={gridAriaLabel}
               />
             </Box>
             {selectedDetail && !detailPaneClosed && (
               <UnitListDetailPanel
                 detail={selectedDetail}
+                focusRequestRevision={detailFocusRequestRevision}
                 onClose={closeDetailPane}
+                onFocusRequestHandled={handleDetailFocusRequest}
                 onOpenDefinition={() => {
                   reportTableOperation("definition.open");
                   setDialogData(selectedDetail.definition);
@@ -339,6 +385,7 @@ const TableViewerShell = ({
                 onOpenFlow={() =>
                   navigateToFlow(selectedDetail.row.absolutePath)
                 }
+                onReturnFocus={returnToGrid}
               />
             )}
           </Stack>
@@ -367,6 +414,10 @@ const TableContents = () => {
 
   const { isDarkMode, lang } = useMyAppContext();
   const renderReadyStartedAt = useRef(performance.now());
+  const announcementHostRef = useRef<ViewerAnnouncementHostHandle>(null);
+  const announceTable = useCallback((eventKey: string, message: string) => {
+    announcementHostRef.current?.announce({ eventKey, message });
+  }, []);
 
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
@@ -374,6 +425,12 @@ const TableContents = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [detailPaneClosed, setDetailPaneClosed] = useState(false);
+  const [detailFocusRequestRevision, setDetailFocusRequestRevision] =
+    useState(0);
+  const [restoreGridFocusRequest, setRestoreGridFocusRequest] =
+    useState<TableGridFocusRequest>({ revision: 0 });
+  const [focusTreeRequest, setFocusTreeRequest] =
+    useState<UnitTreeFocusRequest>({ revision: 0 });
   const [selectedAbsolutePath, dispatchRowSelection] = useReducer(
     reduceTableRowSelection,
     undefined,
@@ -382,6 +439,31 @@ const TableContents = () => {
     setDetailPaneClosed(false);
     dispatchRowSelection({ type: "select", absolutePath });
   }, []);
+  const requestGridFocus = useCallback((absolutePath?: string) => {
+    setRestoreGridFocusRequest((request) => ({
+      revision: request.revision + 1,
+      absolutePath,
+    }));
+  }, []);
+  const closeDetailPane = useCallback(() => {
+    setDetailPaneClosed(true);
+    requestGridFocus(selectedAbsolutePath);
+  }, [requestGridFocus, selectedAbsolutePath]);
+  const openDetailPane = useCallback(
+    (absolutePath: string) => {
+      selectRow(absolutePath);
+      setDetailFocusRequestRevision((revision) => revision + 1);
+    },
+    [selectRow],
+  );
+  const handleDetailFocusRequest = useCallback((revision: number) => {
+    setDetailFocusRequestRevision((current) =>
+      current === revision ? 0 : current,
+    );
+  }, []);
+  const returnToGrid = useCallback(() => {
+    requestGridFocus(selectedAbsolutePath);
+  }, [requestGridFocus, selectedAbsolutePath]);
   const { tableData, unitDefinitionByPath, changeDocument } =
     useChangeDocument();
   const rowViews = tableData?.rows;
@@ -389,6 +471,7 @@ const TableContents = () => {
   const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
     selectRow,
     rowsRef,
+    requestGridFocus,
   );
 
   const viewerData = useMemo(
@@ -429,6 +512,12 @@ const TableContents = () => {
     selectedAbsolutePath,
     viewerData.unitByAbsolutePath,
   );
+  const focusUnitTree = useCallback(() => {
+    setFocusTreeRequest((request) => ({
+      revision: request.revision + 1,
+      targetUnitId: selectedUnitId,
+    }));
+  }, [selectedUnitId]);
   const resolveSelectedDetail = useMemo(
     () =>
       createUnitListDetailResolver(
@@ -442,6 +531,31 @@ const TableContents = () => {
     [resolveSelectedDetail, selectedAbsolutePath],
   );
 
+  const getTableUnitName = useCallback(
+    (absolutePath: string): string =>
+      viewerData.unitByAbsolutePath.get(absolutePath)?.name ?? absolutePath,
+    [viewerData.unitByAbsolutePath],
+  );
+
+  const previousSelectedPathRef = useRef<string | undefined>(undefined);
+  const hasObservedSelectedPathRef = useRef(false);
+  useEffect(() => {
+    if (!hasObservedSelectedPathRef.current) {
+      hasObservedSelectedPathRef.current = true;
+      previousSelectedPathRef.current = selectedAbsolutePath;
+      return;
+    }
+    if (selectedAbsolutePath) {
+      announceTable(
+        `table:selected:${selectedAbsolutePath}`,
+        formatUnitInformationMessage("a11y.announce.selected", lang, {
+          unit: getTableUnitName(selectedAbsolutePath),
+        }),
+      );
+    }
+    previousSelectedPathRef.current = selectedAbsolutePath;
+  }, [announceTable, getTableUnitName, lang, selectedAbsolutePath]);
+
   const {
     searchQuery,
     searchState,
@@ -453,6 +567,79 @@ const TableContents = () => {
     parameterSearchValuesByPath,
     revealPath,
   });
+
+  const previousSearchSignatureRef = useRef<string | undefined>(undefined);
+  const hasObservedSearchRef = useRef(false);
+  useEffect(() => {
+    const position = getTableSearchResultPosition(searchState);
+    const signature = position
+      ? `${searchState.searchedAbsolutePath ?? ""}:${position.current}:${position.total}`
+      : undefined;
+    if (!hasObservedSearchRef.current) {
+      hasObservedSearchRef.current = true;
+      previousSearchSignatureRef.current = signature;
+      return;
+    }
+    if (!position) {
+      announceTable(
+        "table:search:cleared",
+        unitInformationMessage("a11y.announce.searchCleared", lang),
+      );
+    } else if (position.total === 0) {
+      announceTable(
+        "table:search:no-results",
+        unitInformationMessage("a11y.announce.searchNoResults", lang),
+      );
+    } else if (searchState.searchedAbsolutePath) {
+      announceTable(
+        `table:search:${signature}`,
+        formatUnitInformationMessage("a11y.announce.searchResults", lang, {
+          count: position.total,
+          current: position.current,
+          total: position.total,
+          unit: getTableUnitName(searchState.searchedAbsolutePath),
+        }),
+      );
+    }
+    previousSearchSignatureRef.current = signature;
+  }, [announceTable, getTableUnitName, lang, searchState]);
+
+  const previousSortingSignatureRef = useRef<string | undefined>(undefined);
+  const hasObservedSortingRef = useRef(false);
+  useEffect(() => {
+    const sort = sorting[0];
+    const signature = sort
+      ? `${sort.id}:${sort.desc ? "desc" : "asc"}`
+      : undefined;
+    if (!hasObservedSortingRef.current) {
+      hasObservedSortingRef.current = true;
+      previousSortingSignatureRef.current = signature;
+      return;
+    }
+    announceTable(
+      `table:sort:${signature ?? "none"}`,
+      formatUnitInformationMessage("a11y.announce.sorted", lang, {
+        direction: unitInformationMessage(
+          sort
+            ? sort.desc
+              ? "a11y.sort.descending"
+              : "a11y.sort.ascending"
+            : "a11y.sort.none",
+          lang,
+        ),
+      }),
+    );
+    previousSortingSignatureRef.current = signature;
+  }, [announceTable, lang, sorting]);
+
+  const copiedAnnouncementRevisionRef = useRef(0);
+  const handleCopied = useCallback(() => {
+    copiedAnnouncementRevisionRef.current += 1;
+    announceTable(
+      `table:copied:${copiedAnnouncementRevisionRef.current}`,
+      unitInformationMessage("a11y.announce.csvCopied", lang),
+    );
+  }, [announceTable, lang]);
 
   useEffect(() => {
     dispatchRowSelection({ type: "documentChanged" });
@@ -495,17 +682,27 @@ const TableContents = () => {
       columnVisibility={columnVisibility}
       parameterSearchValuesByPath={parameterSearchValuesByPath}
       detailPaneClosed={detailPaneClosed}
-      closeDetailPane={() => setDetailPaneClosed(true)}
+      closeDetailPane={closeDetailPane}
+      detailFocusRequestRevision={detailFocusRequestRevision}
       dialogData={dialogData}
       setDialogData={setDialogData}
       selectedAbsolutePath={selectedAbsolutePath}
       selectedDetail={selectedDetail}
       selectedUnitId={selectedUnitId}
       selectRow={selectRow}
+      openDetailPane={openDetailPane}
+      handleDetailFocusRequest={handleDetailFocusRequest}
+      returnToGrid={returnToGrid}
+      restoreGridFocusRequest={restoreGridFocusRequest}
+      focusTreeRequest={focusTreeRequest}
       rootUnits={viewerData.rootUnits}
       unitById={viewerData.unitById}
       selectTreeUnit={selectTreeUnit}
+      focusUnitTree={focusUnitTree}
       openTreeUnitScope={openTreeUnitScope}
+      onCopied={handleCopied}
+      announcementHostRef={announcementHostRef}
+      gridAriaLabel={unitInformationMessage("a11y.table.grid", lang)}
     />
   );
 };

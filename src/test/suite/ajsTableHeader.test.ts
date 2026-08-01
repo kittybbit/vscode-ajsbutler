@@ -9,7 +9,16 @@ import {
   getDisplayColumnSelectorControlLabels,
   getVisibleColumnSelectorColumns,
 } from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
-import { getFixedTableVirtuosoStyle } from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
+import {
+  getFixedTableVirtuosoStyle,
+  getSearchHitCellSx,
+  tableGridFocusSx,
+  tableRowStateSx,
+} from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
+import {
+  canFocusTableHeader,
+  getTableHeaderAriaSort,
+} from "../../presentation/webview/editor/ajsTable/TableHeader";
 
 suite("AJS Table Header", () => {
   test("formats visible and total unit counts", () => {
@@ -21,8 +30,8 @@ suite("AJS Table Header", () => {
   test("keeps header controls directly discoverable", () => {
     assert.deepStrictEqual(getAjsTableHeaderControlLabels("en"), {
       columns: "Select display columns.",
-      copyCsv: "Copy the contents to clipbord as csv.",
-      saveCsv: "Save the contents as csv.",
+      copyCsv: "Copy the contents to clipboard as CSV.",
+      saveCsv: "Save the contents as CSV.",
     });
     assert.strictEqual(
       getAjsTableHeaderControlLabels("ja").columns,
@@ -57,6 +66,35 @@ suite("AJS Table Header", () => {
       maxHeight: "100%",
       boxSizing: "border-box",
     });
+  });
+
+  test("exposes sortable header state with ARIA values", () => {
+    const header = (canSort: boolean, sort: false | "asc" | "desc") =>
+      ({
+        column: {
+          getCanSort: () => canSort,
+          getIsSorted: () => sort,
+        },
+      }) as never;
+
+    assert.strictEqual(getTableHeaderAriaSort(header(true, false)), "none");
+    assert.strictEqual(
+      getTableHeaderAriaSort(header(true, "asc")),
+      "ascending",
+    );
+    assert.strictEqual(
+      getTableHeaderAriaSort(header(true, "desc")),
+      "descending",
+    );
+    assert.strictEqual(getTableHeaderAriaSort(header(false, false)), undefined);
+  });
+
+  test("keeps every leaf column header available as a grid focus target", () => {
+    assert.strictEqual(canFocusTableHeader({ subHeaders: [] } as never), true);
+    assert.strictEqual(
+      canFocusTableHeader({ subHeaders: [{}] } as never),
+      false,
+    );
   });
 
   test("filters column selector options to hideable columns", () => {
@@ -97,5 +135,14 @@ suite("AJS Table Header", () => {
       getDisplayColumnSelectorControlLabels("unsupported"),
       getDisplayColumnSelectorControlLabels("en"),
     );
+  });
+
+  test("adds non-color cues for grid focus, selection, and search hits", () => {
+    assert.ok(tableGridFocusSx["&:focus-visible"]);
+    assert.ok(tableRowStateSx['&[aria-selected="true"] > td']);
+    const searchHitSx = getSearchHitCellSx(true);
+    assert.ok(searchHitSx);
+    assert.ok(searchHitSx?.borderBottom);
+    assert.strictEqual(getSearchHitCellSx(false), undefined);
   });
 });

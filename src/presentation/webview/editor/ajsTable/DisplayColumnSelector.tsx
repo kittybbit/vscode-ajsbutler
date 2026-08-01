@@ -258,7 +258,7 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
           variant="caption"
           sx={{ fontWeight: 700, letterSpacing: "0.08em", marginRight: "auto" }}
         >
-          COLUMNS
+          {unitInformationMessage("a11y.table.columnsTitle", lang)}
         </Typography>
         <Tooltip arrow title={controlLabels.hideAll}>
           <IconButton
@@ -279,7 +279,7 @@ const DisplayColumnSelector: FC<DisplayColumnSelectorProps> = ({
           </IconButton>
         </Tooltip>
         <IconButton
-          aria-label="Close column selector"
+          aria-label={unitInformationMessage("a11y.table.closeColumns", lang)}
           size="small"
           onClick={onClose}
         >

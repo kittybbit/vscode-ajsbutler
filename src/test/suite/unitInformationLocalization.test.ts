@@ -2,6 +2,7 @@ import * as assert from "assert";
 import { localizeUnitDefinitionLabel } from "../../presentation/webview/editor/UnitDefinitionDialog";
 import {
   unitInformationMessage,
+  formatUnitInformationMessage,
   unitInformationParameterDefinitions,
   unitInformationTableColumnLabels,
   unitInformationUnitTypeLabel,
@@ -28,6 +29,21 @@ suite("Unit information localization", () => {
     assert.strictEqual(
       localizeUnitDefinitionLabel("commandBuilder.common.command", "ja"),
       "コマンド",
+    );
+  });
+
+  test("formats localized message placeholders", () => {
+    assert.strictEqual(
+      formatUnitInformationMessage("a11y.tree.expand", "en", {
+        title: "unit tree",
+      }),
+      "Expand unit tree",
+    );
+    assert.strictEqual(
+      formatUnitInformationMessage("a11y.tree.expand", "ja", {
+        title: "ユニットツリー",
+      }),
+      "ユニットツリーを展開する",
     );
   });
 

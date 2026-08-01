@@ -8,6 +8,8 @@ flow scope while preserving predictable navigation and viewport state.
 ## Trigger
 
 - the user expands or collapses a nested jobnet
+- the user enters an N or RC unit's internal flow or returns to its containing
+  flow scope
 - the user searches within the current flow scope
 - the user selects or hovers a graph or flow-tree unit
 - the user changes relationship focus or collapses supporting panels
@@ -22,6 +24,8 @@ flow scope while preserving predictable navigation and viewport state.
 ## Outputs
 
 - visible nested-jobnet state
+- active N or RC flow scope and a meaningful scope-entry or scope-return focus
+  destination
 - current search matches and active result
 - selected, hovered, and relationship-focused units
 - viewport fitting, reveal, or centering requests that preserve the current
@@ -49,6 +53,11 @@ flow scope while preserving predictable navigation and viewport state.
 - selecting a node exposes lightweight relationship and status context without
   automatically opening unit-definition details
 - selecting an in-scope flow-tree row centers the unit without changing zoom
+- visible root-jobnet scope rows outside the active scope remain focusable in
+  the flow tree but are not selectable; Alt+Enter explicitly opens the focused
+  eligible scope
+- visible first-level group rows outside the active scope remain focusable for
+  sibling-tree navigation but are not selectable or graph scopes
 - flow-tree and graph selection and hover remain synchronized
 - synchronized selection or hover does not implicitly change graph scope
 - relationship focus preserves unrelated nodes and edges with weaker emphasis
@@ -56,6 +65,39 @@ flow scope while preserving predictable navigation and viewport state.
 - supporting tree and detail panels may collapse responsively or explicitly
   without clearing selection, hiding access to their actions, or overlaying the
   graph
+- keyboard interaction can move to the center-to-center nearest rendered node
+  above, below, left, or right of the current node without depending on
+  predecessor or successor relationships; equal distances prefer the upper
+  then left candidate
+- Enter on a focused N or RC node with internal units opens that unit as the
+  active flow scope; it does not select a child by parser or rendered order
+- Escape from a nested N or RC flow scope returns to the nearest containing N
+  or RC scope; a root-jobnet scope has no Escape target
+- after Enter, the opened scope's rendered root node is selected and focused;
+  after Escape, the scope that was left is selected and focused in its
+  containing scope
+- Enter and Escape use the existing flow-scope transition behavior, while
+  Shift+Down and Shift+Up remain same-scope inline nested-jobnet expansion and
+  collapse operations
+- root-jobnet scope selection, detail inspection, and return preserve a
+  meaningful selected node and focus destination
+- from a focused graph node, unmodified D focuses its detail pane and
+  unmodified L focuses the flow selector at the current scope root, falling
+  back to the first eligible root jobnet
+- from an enabled in-scope flow-tree row, unmodified Enter selects and focuses
+  the corresponding graph node without opening a scope; Space remains
+  selection-only and Alt+Enter remains the explicit scope action
+- from the flow selector, unmodified Escape returns focus to the saved graph
+  node without changing scope; from the detail pane, unmodified R returns
+  focus without closing it and Escape closes the pane or first closes its
+  definition dialog
+- selection, relationship, search-result, and scope state remain available
+  without relying only on graph lines, position, hover, color, or tooltip
+  content
+- necessary graph state and operation outcomes are exposed semantically and
+  follow the current localization context
+- graph rerendering or scope changes restore focus to the corresponding unit or
+  a defined meaningful fallback
 - this presentation-local search behavior does not create a shared search
   domain contract
 
@@ -95,6 +137,14 @@ Scenario: Flow-tree selection preserves zoom
   Then the graph centers the corresponding unit
   And the zoom level remains unchanged
 
+Scenario: Flow-tree navigation opens a sibling scope explicitly
+  Given the active root-jobnet and another visible eligible root-jobnet scope
+  When the user moves focus to the sibling scope with Up, Down, Home, or End
+  Then the sibling row remains disabled for selection
+  When the user presses Alt+Enter
+  Then the sibling root-jobnet becomes the active flow scope
+  And its graph is rendered and focused after the scope is ready
+
 Scenario: Graph and flow tree synchronize interaction
   Given the graph and flow tree are visible
   When the user selects or hovers a unit in either surface
@@ -112,6 +162,42 @@ Scenario: Supporting panels collapse without losing state
   When the viewport narrows or the user collapses a panel
   Then its actions remain accessible without overlaying the graph
   And the selected unit remains selected
+
+Scenario: Keyboard navigation follows rendered spatial direction
+  Given a selected flow node and other rendered flow nodes
+  When the user presses an unmodified arrow key
+  Then the nearest node in that rendered direction is selected and focused
+  And equal center-to-center distances prefer the upper then left node
+  And an unavailable direction leaves selection and focus unchanged
+
+Scenario: Keyboard navigation enters an internal flow scope
+  Given a focused N or RC node with internal units
+  When the user presses Enter
+  Then that unit becomes the active flow scope
+  And its rendered root node is selected and focused after the graph is ready
+
+Scenario: Keyboard navigation returns to a containing flow scope
+  Given an active nested N or RC flow scope
+  When the user presses Escape from a focused graph node
+  Then the nearest containing N or RC scope becomes active
+  And the scope that was left is selected and focused
+
+Scenario: Flow detail and selector shortcuts preserve graph focus
+  Given a focused graph node and its current flow scope
+  When the user presses D or L
+  Then D focuses the selected node detail heading or first enabled action
+  And L focuses the current scope root in the flow selector
+  When the user presses R in details
+  Then focus returns to the saved graph node without closing details
+  When the user presses Escape in details or the selector
+  Then the active region closes or returns focus without changing graph scope
+
+Scenario: Flow tree and graph focus handoffs match list-view semantics
+  Given a focused flow graph node and its unit-tree row
+  When the user presses unmodified L from the graph or Enter from an enabled
+    in-scope tree row
+  Then focus moves between the graph node and the flow selector's defined
+    target row without changing the selected unit or flow scope
 ```
 
 ## Acceptance Notes
@@ -121,6 +207,8 @@ Scenario: Supporting panels collapse without losing state
   requiring a shared search implementation
 - viewport behavior uses presentation-computed geometry and does not own graph
   placement constraints
+- keyboard behavior, semantic state, and meaningful focus restoration remain
+  usable in supported desktop and web viewers and in high-contrast themes
 
 ## Risks Or Edge Cases
 
@@ -130,3 +218,7 @@ Scenario: Supporting panels collapse without losing state
   during later navigation
 - selection synchronization can cause accidental scope changes unless scope
   actions remain explicit
+- graph rerendering or scope changes can lose focus unless stable unit identity
+  and a defined fallback are preserved
+- Enter and Escape can race asynchronous scope rendering unless focus targets
+  are resolved only after the destination graph is ready

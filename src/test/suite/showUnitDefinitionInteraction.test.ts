@@ -1,13 +1,9 @@
 import * as assert from "assert";
 import React from "react";
-import type { KeyboardEvent } from "react";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import type { UnitListRowView } from "../../application/unit-list/buildUnitListView";
-import {
-  handleClickNestedToggle,
-  handleKeyDownNestedToggle,
-} from "../../presentation/webview/editor/ajsFlow/nodes/Utils";
+import { handleClickNestedToggle } from "../../presentation/webview/editor/ajsFlow/nodes/Utils";
 import { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
 import { tableColumnDef } from "../../presentation/webview/editor/ajsTable/tableColumnDef";
 import {
@@ -21,7 +17,13 @@ import {
   createUnitListDetailResolver,
   resolveUnitListDetail,
 } from "../../presentation/webview/editor/ajsTable/unitListDetail";
-import { getSharedUnitDetailPaneActionLabels } from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
+import {
+  getSharedUnitDetailPaneActionLabels,
+  isDetailPaneShortcutTargetExcluded,
+  resolveDetailPaneShortcut,
+  resolveDetailPaneShortcutForTarget,
+} from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
+import { UnitDefinitionDialog } from "../../presentation/webview/editor/UnitDefinitionDialog";
 
 const dialogData: UnitDefinitionDialogDto = {
   absolutePath: "/root/job1",
@@ -273,6 +275,52 @@ suite("Show Unit Definition interaction", () => {
     );
   });
 
+  test("definition dialog keeps MUI default focus restoration enabled", () => {
+    const dialog = UnitDefinitionDialog({
+      dialogData,
+      onClose: () => undefined,
+    }) as React.ReactElement;
+
+    const props = dialog.props as { disableRestoreFocus?: boolean };
+    assert.strictEqual(props.disableRestoreFocus, undefined);
+  });
+
+  test("detail pane handles return and close only outside nested controls", () => {
+    const nestedButton = {
+      closest: () => ({ tagName: "BUTTON" }),
+    } as never;
+    assert.strictEqual(resolveDetailPaneShortcut({ key: "r" }), "return");
+    assert.strictEqual(resolveDetailPaneShortcut({ key: "R" }), "return");
+    assert.strictEqual(resolveDetailPaneShortcut({ key: "Escape" }), "close");
+    assert.strictEqual(
+      resolveDetailPaneShortcut({ key: "r", altKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveDetailPaneShortcut({ key: "Escape", shiftKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveDetailPaneShortcut({ key: "r", metaKey: true }),
+      undefined,
+    );
+    assert.strictEqual(isDetailPaneShortcutTargetExcluded(nestedButton), true);
+    assert.strictEqual(
+      resolveDetailPaneShortcutForTarget({ key: "r" }, nestedButton),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveDetailPaneShortcutForTarget({ key: "Escape" }, nestedButton),
+      "close",
+    );
+    assert.strictEqual(
+      isDetailPaneShortcutTargetExcluded({
+        closest: () => null,
+      } as never),
+      false,
+    );
+  });
+
   test("table utility column does not expose row-level dialog or flow actions", () => {
     const utilityColumn = tableColumnDef("en", () => undefined, new Map())[0];
     const renderCell = utilityColumn.cell as (
@@ -286,7 +334,7 @@ suite("Show Unit Definition interaction", () => {
     assert.strictEqual(React.Children.count(props.children), 1);
   });
 
-  test("flow nested toggle action expands only on click or Enter key", () => {
+  test("flow nested toggle action uses the shared click operation", () => {
     const toggled: string[] = [];
     const node = createNode({
       unitId: "/root/jobnet/child-net",
@@ -296,16 +344,7 @@ suite("Show Unit Definition interaction", () => {
     });
 
     handleClickNestedToggle(node)();
-    handleKeyDownNestedToggle(node)({
-      key: "Space",
-    } as KeyboardEvent<HTMLElement>);
-    handleKeyDownNestedToggle(node)({
-      key: "Enter",
-    } as KeyboardEvent<HTMLElement>);
 
-    assert.deepStrictEqual(toggled, [
-      "/root/jobnet/child-net",
-      "/root/jobnet/child-net",
-    ]);
+    assert.deepStrictEqual(toggled, ["/root/jobnet/child-net"]);
   });
 });

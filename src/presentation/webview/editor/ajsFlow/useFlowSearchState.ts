@@ -3,12 +3,9 @@ import {
   MutableRefObject,
   SetStateAction,
   useCallback,
+  useRef,
   useState,
 } from "react";
-import {
-  toCountBucket,
-  toDurationBucket,
-} from "../../../../application/telemetry/telemetryBuckets";
 import type {
   FlowGraphUnitDto,
   ValidatedFlowGraphDocument,
@@ -18,7 +15,7 @@ import {
   type FlowNavigationTargetDto,
   type NavigationRequestDto,
 } from "../../../../application/navigation/resolveNavigationTarget";
-import { createViewerSearchRequest } from "../../viewerRequestMessages";
+import { postViewerSearchEvent } from "../shared/viewerSearchTelemetry";
 import { findFlowSearchResult, FlowSearchResult } from "./flowSearch";
 import {
   createEmptyFlowSearchState,
@@ -136,37 +133,6 @@ const applyFlowSearchSubmission = (
   }
 };
 
-const postFlowSearchEvent = ({
-  action,
-  query,
-  resultCount,
-  durationMs,
-}: {
-  action: "submitted" | "navigated" | "cleared";
-  query: string;
-  resultCount: number;
-  durationMs?: number;
-}) => {
-  window.vscode.postMessage(
-    createViewerSearchRequest({
-      surface: "flow",
-      action,
-      result:
-        action === "cleared"
-          ? "cleared"
-          : resultCount > 0
-            ? "matched"
-            : "no_match",
-      mode: "partial",
-      queryLengthBucket: toCountBucket(query.trim().length),
-      resultCountBucket: toCountBucket(resultCount),
-      durationBucket:
-        durationMs === undefined ? undefined : toDurationBucket(durationMs),
-      scope: "current_flow_scope",
-    }),
-  );
-};
-
 const applyFlowRevealTarget = (
   revealTarget: FlowNavigationTargetDto,
   {
@@ -219,7 +185,7 @@ const useSearchSubmitHandler = ({
       if (submission.kind === "current") {
         return;
       }
-      postFlowSearchEvent({
+      postViewerSearchEvent({
         action: "submitted",
         query,
         resultCount:
@@ -227,6 +193,8 @@ const useSearchSubmitHandler = ({
             ? submission.result.matchedUnitIds.length
             : 0,
         durationMs: performance.now() - startedAt,
+        scope: "current_flow_scope",
+        surface: "flow",
       });
       applyFlowSearchSubmission(submission, {
         currentUnit,
@@ -280,19 +248,24 @@ export const useFlowSearchState = ({
   const [searchState, setSearchState] = useState<FlowSearchState>(
     createEmptyFlowSearchState,
   );
+  const searchStateRef = useRef(searchState);
+  searchStateRef.current = searchState;
 
   const resetSearch = useCallback(() => {
-    if (searchState.query !== undefined) {
-      postFlowSearchEvent({
+    const currentSearchState = searchStateRef.current;
+    if (currentSearchState.query !== undefined) {
+      postViewerSearchEvent({
         action: "cleared",
-        query: searchState.query,
-        resultCount: searchState.matchedUnitIds.length,
+        query: currentSearchState.query,
+        resultCount: currentSearchState.matchedUnitIds.length,
+        scope: "current_flow_scope",
+        surface: "flow",
       });
     }
     setSearchState((prev) =>
       createEmptyFlowSearchState(prev.focusRequestVersion),
     );
-  }, [searchState.matchedUnitIds.length, searchState.query]);
+  }, []);
 
   const handleSearchSubmit = useSearchSubmitHandler({
     currentUnit,
@@ -314,11 +287,13 @@ export const useFlowSearchState = ({
         handleSearchSubmit(query);
         return;
       }
-      postFlowSearchEvent({
+      postViewerSearchEvent({
         action: "navigated",
         query,
         resultCount: searchState.matchedUnitIds.length,
         durationMs: 0,
+        scope: "current_flow_scope",
+        surface: "flow",
       });
       setSearchState((prev) => moveFlowSearchResult(prev, direction));
     },

@@ -17,7 +17,10 @@ import {
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import { useMyAppContext } from "../MyContexts";
-import { unitInformationMessage } from "../unitInformationLocalization";
+import {
+  formatUnitInformationMessage,
+  unitInformationMessage,
+} from "../unitInformationLocalization";
 import {
   createViewerOperationRequest,
   createViewerPerformanceRequest,
@@ -43,6 +46,7 @@ type HeaderProps = {
   onSearchNavigate: (query: string, direction: TableSearchDirection) => void;
   onSearchSubmit: (query: string) => void;
   onSearchClear: () => void;
+  onCopied?: () => void;
   visibleRowCount: number;
   totalRowCount: number;
 };
@@ -60,6 +64,8 @@ type HeaderCsvActionsProps = {
   table: Table<UnitListRowView>;
   copyCsvLabel: string;
   saveCsvLabel: string;
+  copiedLabel: string;
+  onCopied?: () => void;
 };
 
 type HeaderColumnSelectorButtonProps = {
@@ -70,38 +76,45 @@ type HeaderColumnSelectorButtonProps = {
 export const formatUnitCountLabel = (
   visibleRowCount: number,
   totalRowCount: number,
-): string => `${visibleRowCount} / ${totalRowCount} units`;
+  language = "en",
+): string =>
+  formatUnitInformationMessage("a11y.table.count", language, {
+    total: totalRowCount,
+    visible: visibleRowCount,
+  });
 
 export const getAjsTableHeaderControlLabels = (lang: string) => ({
   columns: unitInformationMessage("table.menu.menuItem1", lang),
-  copyCsv: "Copy the contents to clipbord as csv.",
-  saveCsv: "Save the contents as csv.",
+  copyCsv: unitInformationMessage("a11y.table.copyCsv", lang),
+  saveCsv: unitInformationMessage("a11y.table.saveCsv", lang),
 });
 
-const tableHeaderSearchLabels: HeaderSearchControlLabels = {
+const getTableHeaderSearchLabels = (
+  language: string,
+): HeaderSearchControlLabels => ({
   helperText: {
-    noResults: "No units match in the list.",
-    matched: "Matched row is selected in the list.",
-    idle: "Search units by visible values, path, comment, or parameter value.",
+    noResults: unitInformationMessage("a11y.table.search.noResults", language),
+    matched: unitInformationMessage("a11y.table.search.matched", language),
+    idle: unitInformationMessage("a11y.table.search.idle", language),
   },
   navigation: {
-    resultAriaLabel: (position) =>
-      `${position.current} of ${position.total} list search results`,
-    previousTooltip: "Previous list search result (Shift+Enter).",
-    previousAriaLabel: "Previous list search result.",
-    nextTooltip: "Next list search result (Enter).",
-    nextAriaLabel: "Next list search result.",
+    resultAriaLabel: (position) => `${position.current} / ${position.total}`,
+    previousTooltip: unitInformationMessage("a11y.search.previous", language),
+    previousAriaLabel: unitInformationMessage("a11y.search.previous", language),
+    nextTooltip: unitInformationMessage("a11y.search.next", language),
+    nextAriaLabel: unitInformationMessage("a11y.search.next", language),
   },
-};
+});
 
 export const getAjsTableSearchHelperText = (
   searchedAbsolutePath?: string,
   resultPosition?: TableSearchResultPosition,
+  language = "en",
 ): string =>
   resolveHeaderSearchHelperText(
     searchedAbsolutePath,
     resultPosition,
-    tableHeaderSearchLabels.helperText,
+    getTableHeaderSearchLabels(language).helperText,
   );
 
 export const createCsvExportPerformanceEvent = (
@@ -121,17 +134,23 @@ const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
-}) => (
-  <HeaderSearchControl<TableSearchDirection>
-    matchedTargetId={searchedAbsolutePath}
-    resultPosition={searchResultPosition}
-    placeholderLabel="Search unit list"
-    labels={tableHeaderSearchLabels}
-    onSearchNavigate={onSearchNavigate}
-    onSearchSubmit={onSearchSubmit}
-    onSearchClear={onSearchClear}
-  />
-);
+}) => {
+  const { lang = "en" } = useMyAppContext();
+  return (
+    <HeaderSearchControl<TableSearchDirection>
+      matchedTargetId={searchedAbsolutePath}
+      resultPosition={searchResultPosition}
+      placeholderLabel={unitInformationMessage(
+        "a11y.table.search.placeholder",
+        lang,
+      )}
+      labels={getTableHeaderSearchLabels(lang)}
+      onSearchNavigate={onSearchNavigate}
+      onSearchSubmit={onSearchSubmit}
+      onSearchClear={onSearchClear}
+    />
+  );
+};
 
 const HeaderColumnSelectorButton: FC<HeaderColumnSelectorButtonProps> = ({
   label,
@@ -148,6 +167,8 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
   table,
   copyCsvLabel,
   saveCsvLabel,
+  copiedLabel,
+  onCopied,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -168,7 +189,8 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
     window.vscode.postMessage(createViewerOperationRequest("copy.csv"));
     navigator.clipboard.writeText(csv);
     setOpen(true);
-  }, [exportCsvWithPerformanceTelemetry]);
+    onCopied?.();
+  }, [exportCsvWithPerformanceTelemetry, onCopied]);
 
   const handleSave = useCallback(() => {
     const csv = exportCsvWithPerformanceTelemetry();
@@ -198,8 +220,8 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
           horizontal: "center",
         }}
       >
-        <Alert severity="info" variant="filled">
-          Copied
+        <Alert severity="info" variant="filled" aria-hidden="true">
+          {copiedLabel}
         </Alert>
       </Snackbar>
     </>
@@ -214,6 +236,7 @@ const Header: FC<HeaderProps> = ({
   onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
+  onCopied,
   visibleRowCount,
   totalRowCount,
 }) => {
@@ -266,11 +289,13 @@ const Header: FC<HeaderProps> = ({
             table={table}
             copyCsvLabel={controlLabels.copyCsv}
             saveCsvLabel={controlLabels.saveCsv}
+            copiedLabel={unitInformationMessage("a11y.table.copied", lang)}
+            onCopied={onCopied}
           />
           <Chip
             size="small"
             variant="outlined"
-            label={formatUnitCountLabel(visibleRowCount, totalRowCount)}
+            label={formatUnitCountLabel(visibleRowCount, totalRowCount, lang)}
           />
         </Toolbar>
         <DisplayColumnSelector

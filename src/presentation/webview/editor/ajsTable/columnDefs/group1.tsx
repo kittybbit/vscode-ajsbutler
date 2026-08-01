@@ -22,6 +22,8 @@ const parentPathCell = (
     return group1?.parentId ? (
       <Link
         key={0}
+        data-grid-cell-action
+        tabIndex={-1}
         sx={{
           display: "block",
           cursor: "pointer",

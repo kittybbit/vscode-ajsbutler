@@ -15,6 +15,7 @@ import {
 } from "../flowViewerStateTypes";
 import { unitInformationUnitTypeLabel } from "../../unitInformationLocalization";
 import { useMyAppContext } from "../../MyContexts";
+import { unitInformationMessage } from "../../unitInformationLocalization";
 import {
   FlowNodeStatus,
   FlowNodeKind,
@@ -73,6 +74,11 @@ export const nodeBadgeSxProps: SxProps<Theme> = {
   letterSpacing: "0.08em",
   lineHeight: 1.2,
   textAlign: "center",
+  "@media (forced-colors: active)": {
+    color: "CanvasText",
+    borderColor: "CanvasText",
+    backgroundColor: "Canvas",
+  },
 };
 
 export const handleStyle = {
@@ -90,6 +96,10 @@ const nodeTitleSxProps: SxProps<Theme> = {
   letterSpacing: "0.08em",
   lineHeight: 1.2,
   textAlign: "center",
+  "@media (forced-colors: active)": {
+    color: "CanvasText",
+    backgroundColor: "Canvas",
+  },
 };
 
 export const nodeActionsSxProps: SxProps<Theme> = {
@@ -100,6 +110,10 @@ export const nodeActionsSxProps: SxProps<Theme> = {
   paddingX: "0.35em",
   borderTop: (theme) => `1px solid ${theme.palette.divider}`,
   textAlign: "center",
+  "@media (forced-colors: active)": {
+    borderTopColor: "CanvasText",
+    color: "CanvasText",
+  },
 };
 
 export const TyTitle: FC<{
@@ -117,28 +131,27 @@ export const TyTitle: FC<{
     </Tooltip>
   );
 };
-const iconButtonSx: SxProps<Theme> = { padding: "0.1em" };
+export const FLOW_NODE_ACTION_SIZE_PX = 28;
+const iconButtonSx: SxProps<Theme> = {
+  boxSizing: "border-box",
+  width: FLOW_NODE_ACTION_SIZE_PX,
+  height: FLOW_NODE_ACTION_SIZE_PX,
+  minWidth: FLOW_NODE_ACTION_SIZE_PX,
+  minHeight: FLOW_NODE_ACTION_SIZE_PX,
+  padding: 0,
+};
 export const ActionIcon: FC<{
   title: string;
   ariaLabel: string;
   onClick?: () => void;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLElement>) => void;
   icon: React.ReactNode;
   disableRipple?: boolean;
-}> = ({
-  title,
-  ariaLabel,
-  onClick,
-  onKeyDown,
-  icon,
-  disableRipple = false,
-}) => (
+}> = ({ title, ariaLabel, onClick, icon, disableRipple = false }) => (
   <Tooltip title={title}>
     <IconButton
       aria-label={ariaLabel}
       size="small"
       onClick={onClick}
-      onKeyDown={onKeyDown}
       disableRipple={disableRipple}
       sx={iconButtonSx}
     >
@@ -236,6 +249,7 @@ export const getFlowNodeHeaderItemKinds = (
 ];
 
 const NodeStatusIndicators: FC<{ data: AjsNode }> = ({ data }) => {
+  const { lang = "en" } = useMyAppContext();
   const statuses = getFlowNodeHeaderItemKinds(data, false).filter(
     (itemKind): itemKind is FlowNodeStatus =>
       itemKind === "schedule" || itemKind === "waitedFor",
@@ -257,11 +271,24 @@ const NodeStatusIndicators: FC<{ data: AjsNode }> = ({ data }) => {
       {statuses.map((status) => {
         const presentation = statusPresentation[status];
         return (
-          <Tooltip key={status} title={presentation.title}>
+          <Tooltip
+            key={status}
+            title={unitInformationMessage(
+              status === "schedule"
+                ? "a11y.flow.node.hasSchedule"
+                : "a11y.flow.node.hasWaitedFor",
+              lang,
+            )}
+          >
             <Box
               component="span"
               role="img"
-              aria-label={presentation.title}
+              aria-label={unitInformationMessage(
+                status === "schedule"
+                  ? "a11y.flow.node.hasSchedule"
+                  : "a11y.flow.node.hasWaitedFor",
+                lang,
+              )}
               sx={{ display: "inline-flex" }}
             >
               {presentation.icon}
@@ -292,6 +319,16 @@ export const FlowNodeCard: FC<{
         justifyContent: "space-between",
         borderBottom: "2px solid",
         ...headerSxByTone[resolveFlowNodeHeaderTone(kind)],
+        "@media (forced-colors: active)": {
+          borderColor: "CanvasText",
+          backgroundColor: "Canvas",
+          color: "CanvasText",
+        },
+        "body.vscode-high-contrast &": {
+          borderColor: "var(--vscode-foreground, CanvasText)",
+          backgroundColor: "var(--vscode-editor-background, Canvas)",
+          color: "var(--vscode-foreground, CanvasText)",
+        },
       }}
     >
       <TyTitle ty={data.ty} gty={data.gty} />

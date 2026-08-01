@@ -37,6 +37,8 @@ const group2 = (
               return (
                 <Link
                   key={index}
+                  data-grid-cell-action
+                  tabIndex={-1}
                   sx={{
                     display: "block",
                     cursor: "pointer",

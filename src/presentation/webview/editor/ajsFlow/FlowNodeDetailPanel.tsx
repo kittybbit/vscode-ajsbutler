@@ -3,7 +3,10 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import TableChartIcon from "@mui/icons-material/TableChart";
-import { unitInformationUnitTypeLabel } from "../unitInformationLocalization";
+import {
+  unitInformationMessage,
+  unitInformationUnitTypeLabel,
+} from "../unitInformationLocalization";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
 import SharedUnitDetailPane, {
@@ -18,8 +21,12 @@ type FlowNodeDetailPanelProps = {
   onOpenDefinition: VoidFunction;
   onOpenScope: VoidFunction;
   onOpenUnitList: VoidFunction;
+  onReturnFocus?: VoidFunction;
+  focusRequestRevision?: number;
+  onFocusRequestHandled?: (revision: number) => void;
   focusModeEnabled: boolean;
   onToggleFocusMode: VoidFunction;
+  language?: string;
 };
 
 type FlowNodeDetailActionOptions = {
@@ -30,6 +37,7 @@ type FlowNodeDetailActionOptions = {
   onOpenScope: VoidFunction;
   onOpenUnitList: VoidFunction;
   onToggleFocusMode: VoidFunction;
+  language?: string;
 };
 
 const missingValueLabel = "—";
@@ -51,38 +59,86 @@ const formatParentUnit = ({
 
 export const buildFlowNodeDetailRows = (
   detail: FlowNodeDetail,
+  language = "en",
 ): SharedUnitDetailPaneRow[] => [
-  flowNodeDetailRow("Comment", detail.comment || missingValueLabel),
-  flowNodeDetailRow("Absolute path", detail.absolutePath),
-  flowNodeDetailRow("Parent unit", formatParentUnit(detail)),
+  flowNodeDetailRow(
+    unitInformationMessage("a11y.detail.comment", language),
+    detail.comment || missingValueLabel,
+  ),
+  flowNodeDetailRow(
+    unitInformationMessage("a11y.detail.absolutePath", language),
+    detail.absolutePath,
+  ),
+  flowNodeDetailRow(
+    unitInformationMessage("a11y.detail.parentUnit", language),
+    formatParentUnit(detail),
+  ),
 ];
 
 export const buildFlowNodeRelationshipRows = (
   detail: FlowNodeDetail,
+  language = "en",
 ): SharedUnitDetailPaneRow[] => [
-  { label: "Predecessors", value: detail.predecessorCount },
-  { label: "Successors", value: detail.successorCount },
-  { label: "Upstream", value: detail.upstreamCount },
-  { label: "Downstream", value: detail.downstreamCount },
+  {
+    label: unitInformationMessage("a11y.detail.predecessors", language),
+    value: detail.predecessorCount,
+  },
+  {
+    label: unitInformationMessage("a11y.detail.successors", language),
+    value: detail.successorCount,
+  },
+  {
+    label: unitInformationMessage("a11y.detail.upstream", language),
+    value: detail.upstreamCount,
+  },
+  {
+    label: unitInformationMessage("a11y.detail.downstream", language),
+    value: detail.downstreamCount,
+  },
 ];
 
 export const buildFlowNodeDetailChips = (
   detail: FlowNodeDetail,
   focusModeEnabled: boolean,
+  language = "en",
 ): SharedUnitDetailPaneChip[] => [
-  { active: detail.hasSchedule, label: "Schedule" },
-  { active: detail.hasWaitedFor, label: "Waited for" },
-  { active: detail.canExpandNested, label: "Nested expandable" },
-  { active: detail.isSearchMatch, label: "Search match" },
-  { active: detail.isCurrentSearchResult, label: "Current search result" },
-  { active: focusModeEnabled, label: "Relationship focus" },
+  {
+    active: detail.hasSchedule,
+    label: unitInformationMessage("a11y.detail.schedule", language),
+  },
+  {
+    active: detail.hasWaitedFor,
+    label: unitInformationMessage("a11y.detail.waitedFor", language),
+  },
+  {
+    active: detail.canExpandNested,
+    label: unitInformationMessage("a11y.detail.nestedExpandable", language),
+  },
+  {
+    active: detail.isSearchMatch,
+    label: unitInformationMessage("a11y.detail.searchMatch", language),
+  },
+  {
+    active: detail.isCurrentSearchResult,
+    label: unitInformationMessage("a11y.detail.currentSearchResult", language),
+  },
+  {
+    active: focusModeEnabled,
+    label: unitInformationMessage("a11y.detail.relationshipFocus", language),
+  },
 ];
 
 const buildRelationshipFocusAction = ({
   focusModeEnabled,
   onToggleFocusMode,
+  language = "en",
 }: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
-  label: focusModeEnabled ? "Exit relationship focus" : "Focus relationships",
+  label: unitInformationMessage(
+    focusModeEnabled
+      ? "a11y.detail.exitRelationships"
+      : "a11y.detail.focusRelationships",
+    language,
+  ),
   icon: <CenterFocusStrongIcon />,
   onClick: onToggleFocusMode,
   variant: focusModeEnabled ? "contained" : "outlined",
@@ -91,11 +147,12 @@ const buildRelationshipFocusAction = ({
 const buildOpenDefinitionActions = ({
   canOpenDefinition,
   onOpenDefinition,
+  language = "en",
 }: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction[] =>
   canOpenDefinition
     ? [
         {
-          label: "Open definition details",
+          label: unitInformationMessage("a11y.detail.openDefinition", language),
           icon: <DescriptionIcon />,
           onClick: onOpenDefinition,
         },
@@ -104,8 +161,9 @@ const buildOpenDefinitionActions = ({
 
 const buildOpenUnitListAction = ({
   onOpenUnitList,
+  language = "en",
 }: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
-  label: "Open in unit list",
+  label: unitInformationMessage("a11y.detail.openUnitList", language),
   icon: <TableChartIcon />,
   onClick: onOpenUnitList,
 });
@@ -113,11 +171,12 @@ const buildOpenUnitListAction = ({
 const buildOpenScopeActions = ({
   canOpenAsScope,
   onOpenScope,
+  language = "en",
 }: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction[] =>
   canOpenAsScope
     ? [
         {
-          label: "Open as graph scope",
+          label: unitInformationMessage("a11y.detail.openScope", language),
           icon: <FolderOpenIcon />,
           onClick: onOpenScope,
           variant: "contained",
@@ -141,6 +200,7 @@ const buildFlowNodeDetailActionOptions = ({
   onOpenScope,
   onOpenUnitList,
   onToggleFocusMode,
+  language,
 }: Omit<FlowNodeDetailPanelProps, "onClose">): FlowNodeDetailActionOptions => ({
   canOpenAsScope: detail.canOpenAsScope,
   canOpenDefinition: detail.canOpenDefinition,
@@ -149,6 +209,7 @@ const buildFlowNodeDetailActionOptions = ({
   onOpenScope,
   onOpenUnitList,
   onToggleFocusMode,
+  language,
 });
 
 const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
@@ -157,18 +218,24 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
   onOpenDefinition,
   onOpenScope,
   onOpenUnitList,
+  onReturnFocus,
+  focusRequestRevision,
+  onFocusRequestHandled,
   focusModeEnabled,
   onToggleFocusMode,
 }) => {
   const { lang = "en" } = useMyAppContext();
-  const rows = useMemo(() => buildFlowNodeDetailRows(detail), [detail]);
+  const rows = useMemo(
+    () => buildFlowNodeDetailRows(detail, lang),
+    [detail, lang],
+  );
   const relationshipRows = useMemo(
-    () => buildFlowNodeRelationshipRows(detail),
-    [detail],
+    () => buildFlowNodeRelationshipRows(detail, lang),
+    [detail, lang],
   );
   const chips = useMemo(
-    () => buildFlowNodeDetailChips(detail, focusModeEnabled),
-    [detail, focusModeEnabled],
+    () => buildFlowNodeDetailChips(detail, focusModeEnabled, lang),
+    [detail, focusModeEnabled, lang],
   );
   const actions = useMemo(
     () =>
@@ -180,6 +247,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
           onOpenUnitList,
           focusModeEnabled,
           onToggleFocusMode,
+          language: lang,
         }),
       ),
     [
@@ -190,6 +258,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
       onOpenScope,
       onOpenUnitList,
       onToggleFocusMode,
+      lang,
     ],
   );
 
@@ -201,13 +270,22 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
         lang,
         detail.groupType,
       )}
-      ariaLabel="Selected flow node details"
-      collapsedAriaLabel="Collapsed selected flow node details"
-      closeAriaLabel="Close node details"
-      collapseTooltip="Collapse node details"
-      expandTooltip="Expand node details"
-      closeTooltip="Close node details"
+      ariaLabel={unitInformationMessage("a11y.flow.detail", lang)}
+      collapsedAriaLabel={unitInformationMessage(
+        "a11y.flow.detail.collapsed",
+        lang,
+      )}
+      closeAriaLabel={unitInformationMessage("a11y.flow.detail.close", lang)}
+      collapseTooltip={unitInformationMessage(
+        "a11y.flow.detail.collapse",
+        lang,
+      )}
+      expandTooltip={unitInformationMessage("a11y.flow.detail.expand", lang)}
+      closeTooltip={unitInformationMessage("a11y.flow.detail.close", lang)}
       onClose={onClose}
+      onReturnFocus={onReturnFocus}
+      focusRequestRevision={focusRequestRevision}
+      onFocusRequestHandled={onFocusRequestHandled}
       rows={rows}
       relationshipRows={relationshipRows}
       chips={chips}
