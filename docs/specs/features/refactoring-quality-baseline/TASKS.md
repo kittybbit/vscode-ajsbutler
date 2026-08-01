@@ -3,9 +3,9 @@
 ## Agent Brief
 
 - Purpose: create a reproducible, auditable ranking of refactoring hotspots.
-- Approved or active slice: Slice 1A (architecture evidence) is approved for
-  implementation. Slice 2 evidence remains implemented under the approved
-  zero-versus-missing change-frequency decision and awaits its completion gate.
+- Approved or active slice: Slice 2 is complete under the approved
+  zero-versus-missing change-frequency decision. Slice 3 remains a planned
+  follow-on slice and requires its own implementation instruction.
 - Do not: edit production code, generated sources, Qlty configuration, package
   scripts, or CI in this feature. The approved architecture evidence slice may
   update the existing architecture-test helper and its in-memory fixture.
@@ -16,9 +16,9 @@
 - Validate: the slice-specific evidence, then docs-only Qlty and Markdown lint.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: implement and validate Slice 1A before requesting its
-  completion approval and then Slice 2 completion approval; Slice 3 remains
-  outside the implementation approval boundary.
+- Next decision: obtain a separate implementation instruction for Slice 3 or
+  enter Feature Exit review; Slice 2 completion is recorded and Slice 3 remains
+  outside the current implementation boundary.
 
 ## Sync Rule
 
@@ -59,16 +59,17 @@
 - Planning scope: capture reproducible structural evidence, rank hotspots with
   fixed Git history and cited business criticality, then turn the results into
   bounded follow-on feature intake and durable roadmap sequencing.
-- Review status: Reviewed; Slice 1A is complete and Slice 2 remains active.
-- Human approval: Slice 1A completion was approved in the current
-  conversation. The revised Slice 2 implementation approval remains recorded,
-  Slice 1 completion approval remains recorded, and Slice 3 remains
-  unauthorized for implementation.
-- Active implementation slice: Slice 2 (completion review).
+- Review status: Reviewed; Slice 1A and Slice 2 are complete, and Slice 3
+  remains planned.
+- Human approval: Slice 1A and Slice 2 completion were approved in the current
+  conversation. Slice 1 completion approval remains recorded, and Slice 3
+  remains unauthorized for implementation.
+- Active implementation slice: None; Slice 3 requires a separate
+  implementation instruction.
 
 ## Human Approval
 
-- Status: Slice 1A completion approved; Slice 2 implementation approved
+- Status: Slice 1A and Slice 2 completion approved
 - Approved at: approved in current conversation
 - Approved scope: Slice 1A only: reconcile the durable and agent-facing
   production-root catalogs, the architecture-test root enumeration, and its
@@ -94,10 +95,12 @@ current conversation`; do not copy the approval message.
 
 The current-conversation Slice 1A approval records the fresh approval required
 because it changes the durable architecture catalog and the architecture-test
-evidence boundary. The prior Slice 2 approval does not authorize Slice 1A.
+evidence boundary. The current-conversation Slice 2 completion approval
+records that its implemented evidence and validation satisfy the approved
+slice boundary.
 
-Reset this section to Pending only when the approved Slice 2 implementation is
-complete and no active implementation approval remains.
+Slice 3 remains separately planned and is not authorized by either completion
+approval.
 
 ## Replanning Record
 
@@ -352,7 +355,7 @@ complete and no active implementation approval remains.
 
 ### Slice 2: Auditable Refactoring Priority
 
-- Status: In Progress
+- Status: Complete
 - Scope:
 
   - Extend `BASELINE.md` with the fixed 100 non-merge first-parent commit
@@ -498,6 +501,7 @@ complete and no active implementation approval remains.
   after filtering and can incorrectly include commits outside the approved
   window; this was recorded as a validation guard. The Slice 2 boundary was
   sufficient after distinguishing observed zero from unavailable history.
+- Completion approval: approved in current conversation.
 - Out of Scope: widening the history window, changing the baseline commit,
   silently following renames for scoring, treating path absence as zero without
   baseline proof, changes to selected hotspots, characterization tests,
@@ -634,9 +638,8 @@ complete and no active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: Not assessed; Slice 1 and Slice 1A are complete,
-  Slice 2 is evidence-complete with its architecture gate restored and awaits
-  completion approval, and Slice 3 is not implemented.
+- Definition of Done status: Not assessed; Slice 1, Slice 1A, and Slice 2 are
+  complete, and Slice 3 is not implemented.
 - Durable documentation updates: Slice 3 may update only durable unfinished
   roadmap sequencing and entry conditions. Reusable measurement commands may
   be propagated only if they pass the Durable Documentation Gate.
@@ -647,7 +650,7 @@ complete and no active implementation approval remains.
 ## Validation
 
 - [x] Slice 1 reproducibility and Slice 1A architecture evidence complete.
-- [ ] Slice 2 raw factors, ranking calculation, citations, ties, and the
+- [x] Slice 2 raw factors, ranking calculation, citations, ties, and the
       zero-versus-missing candidate measurement verified.
 - [ ] Slice 3 target traceability and durable roadmap propagation verified.
 - [ ] No tracked production, test, generated, configuration, package, or CI

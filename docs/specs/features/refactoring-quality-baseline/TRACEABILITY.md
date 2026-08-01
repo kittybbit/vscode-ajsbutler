@@ -85,9 +85,10 @@
 - V5: `rtk pnpm run qlty` passed and `rtk pnpm run lint:md` passed with 0
   errors. No tracked production, test, generated, configuration, package, CI,
   compatibility, or user-visible behavior file changed.
-- Completion approval: not requested. The approved zero-versus-missing
-  implementation and validation are complete; the architecture-suite caveat
-  was resolved by Slice 1A and its 13 passing / 0 failing result.
+- Completion approval: approved in current conversation. The approved
+  zero-versus-missing implementation and validation are complete; the
+  architecture-suite caveat was resolved by Slice 1A and its 13 passing / 0
+  failing result.
 
 ## Slice 1A Plan
 
