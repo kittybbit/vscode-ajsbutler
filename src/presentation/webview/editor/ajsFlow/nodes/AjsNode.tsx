@@ -131,28 +131,27 @@ export const TyTitle: FC<{
     </Tooltip>
   );
 };
-const iconButtonSx: SxProps<Theme> = { padding: "0.1em" };
+export const FLOW_NODE_ACTION_SIZE_PX = 28;
+const iconButtonSx: SxProps<Theme> = {
+  boxSizing: "border-box",
+  width: FLOW_NODE_ACTION_SIZE_PX,
+  height: FLOW_NODE_ACTION_SIZE_PX,
+  minWidth: FLOW_NODE_ACTION_SIZE_PX,
+  minHeight: FLOW_NODE_ACTION_SIZE_PX,
+  padding: 0,
+};
 export const ActionIcon: FC<{
   title: string;
   ariaLabel: string;
   onClick?: () => void;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLElement>) => void;
   icon: React.ReactNode;
   disableRipple?: boolean;
-}> = ({
-  title,
-  ariaLabel,
-  onClick,
-  onKeyDown,
-  icon,
-  disableRipple = false,
-}) => (
+}> = ({ title, ariaLabel, onClick, icon, disableRipple = false }) => (
   <Tooltip title={title}>
     <IconButton
       aria-label={ariaLabel}
       size="small"
       onClick={onClick}
-      onKeyDown={onKeyDown}
       disableRipple={disableRipple}
       sx={iconButtonSx}
     >

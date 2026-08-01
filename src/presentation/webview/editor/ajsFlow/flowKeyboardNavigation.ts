@@ -68,6 +68,10 @@ export const readOnlyFlowInteractionProps = {
   deleteKeyCode: null,
 } as const;
 
+export const resolveFlowGraphEntryTabIndex = (
+  nodes: readonly { id: string }[],
+): 0 | -1 => (nodes.length > 0 ? -1 : 0);
+
 const flowKeyboardNavigationKeys = new Set([
   "ArrowLeft",
   "ArrowRight",
@@ -255,6 +259,32 @@ type FlowNodeTarget = {
   classList?: { contains: (className: string) => boolean };
   closest?: (selector: string) => unknown;
   dataset?: { id?: string };
+};
+
+const flowInteractiveTargetSelector = [
+  "button",
+  "a[href]",
+  "input",
+  "select",
+  "textarea",
+  "summary",
+  '[contenteditable="true"]',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="menuitem"]',
+  '[role="option"]',
+  '[role="slider"]',
+  '[role="checkbox"]',
+  '[role="radio"]',
+  '[role="switch"]',
+  '[role="tab"]',
+].join(",");
+
+export const isFlowInteractiveTarget = (
+  target: EventTarget | null,
+): boolean => {
+  const candidate = target as FlowNodeTarget | null;
+  return Boolean(candidate?.closest?.(flowInteractiveTargetSelector));
 };
 
 export const getFlowNodeIdFromTarget = (

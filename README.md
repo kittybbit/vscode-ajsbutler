@@ -42,7 +42,9 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   a nested N or RC scope to its containing scope. D focuses the selected node's
   detail pane, L focuses the flow selector, R returns from the detail pane, and
   Escape closes details or returns from the selector to the saved graph node.
-  Tab and Shift+Tab retain their normal Webview focus behavior.
+  Tab enters a rendered graph node when one is available; the graph surface is
+  the fallback Tab stop only when no node can receive focus. Node action
+  buttons retain native Enter/Space behavior.
 - Highlights the current node, ancestor path, and root jobnet more clearly in
   the flow viewer.
 - Keeps focus, selection, search matches, relationship focus, and scope state

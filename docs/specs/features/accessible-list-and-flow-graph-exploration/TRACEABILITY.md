@@ -269,7 +269,7 @@ direction`; `Supporting panels collapse without losing state`
   `flowViewportFocus.test.ts`, graph target-classification/entry helpers,
   Slice 10 DOM/axe cases, desktop/Web suites, build, TypeScript compilation,
   and qlty
-- Status: Proposed; implementation pending reviewed-plan approval
+- Status: Complete; implementation and automated validation complete.
 
 ## Slice 10: Browser-Level Accessibility Evidence And Focus/Selection Review
 

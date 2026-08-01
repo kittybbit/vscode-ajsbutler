@@ -2,7 +2,7 @@ import React, { FC, memo } from "react";
 import { Node, NodeProps } from "@xyflow/react";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import { ActionIcon, AjsNode, FlowNodeCard } from "./AjsNode";
-import { handleClickChildOpen, handleKeyDownChildOpen } from "./Utils";
+import { handleClickChildOpen } from "./Utils";
 import { useMyAppContext } from "../../MyContexts";
 import { unitInformationMessage } from "../../unitInformationLocalization";
 
@@ -34,7 +34,6 @@ const ConditionNode: FC<ConditionNodeProps> = ({
                 lang,
               )}
               onClick={handleClickChildOpen(data)}
-              onKeyDown={handleKeyDownChildOpen(data)}
               icon={<FolderOpenIcon fontSize="inherit" />}
             />
           ) : undefined

@@ -39,10 +39,12 @@
 - Planning scope: preserve the completed seven-slice implementation and add
   review-remediation slices for composite-widget focus semantics, graph event
   ownership, target size, and browser-level accessibility evidence.
-- Review status: Reviewed; Slice 12 is complete and Slice 9 is approved
-- Human approval: Slices 1 through 12 approved; Slice 9 is active
-- Active implementation slice: Slice 9, Flow Action Activation And Graph
-  Keyboard-Entry Ownership
+- Review status: Reviewed; Slice 9 is complete; Slice 11 completion approval
+  remains pending
+- Human approval: Slices 1 through 12 approved; Slice 11 is active for
+  completion review
+- Active implementation slice: Slice 11, Flow Tree Out-of-Scope Scope
+  Navigation Follow-Up
 
 ## Human Approval
 
@@ -879,7 +881,7 @@ the complete state model.
 
 ### Slice 9: Flow Action Activation And Graph Keyboard-Entry Ownership
 
-- Status: Approved
+- Status: Complete
 - Scope: remove custom Enter key handlers from native React Flow node action
   buttons so Enter/Space use one native activation path; make the graph region
   a programmatic fallback rather than a second normal Tab entry when a
@@ -939,6 +941,20 @@ the complete state model.
 - Risks: React Flow may change its generated focus wrappers across versions;
   `tabIndex={-1}` must not break programmatic focus restoration or normal Tab
   exit; nested controls must be classified without relying on Node APIs.
+- Implementation Evidence: `ActionIcon` now uses native button activation with
+  28x28 targets; `FlowContents.tsx` excludes interactive descendants from graph
+  capture and makes the graph region a no-node Tab fallback; pure helpers and
+  flow-node tests cover target classification, entry tabindex, and action size.
+  The legacy custom action key handlers were removed and their operation test
+  now verifies the shared click path.
+- Validation Result: `rtk pnpm run qlty`, `rtk pnpm run test:compile`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run build`,
+  `rtk pnpm run lint:md`, and `git diff --check` pass. The production build
+  retains the repository's existing bundle-size warnings.
+- Implementation Feedback: the slice boundary was appropriate; native action
+  ownership and graph capture guards can be verified with presentation-local
+  pure helpers without changing React Flow or host contracts.
+- Completion Approval: Approved in current conversation.
 - Out of Scope: graph layout, scope eligibility, relationship semantics,
   parser/application changes, and a product-wide focus/selection redesign.
 

@@ -1,5 +1,8 @@
 import * as assert from "assert";
-import { getFlowNodeHeaderItemKinds } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import {
+  FLOW_NODE_ACTION_SIZE_PX,
+  getFlowNodeHeaderItemKinds,
+} from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
 import {
   resolveFlowNodeHeaderTone,
   resolveFlowNodeStatuses,
@@ -114,5 +117,9 @@ suite("flow node display", () => {
       autoPanOnNodeFocus: false,
       deleteKeyCode: null,
     });
+  });
+
+  test("keeps flow node action targets at the WCAG minimum size", () => {
+    assert.strictEqual(FLOW_NODE_ACTION_SIZE_PX, 28);
   });
 });

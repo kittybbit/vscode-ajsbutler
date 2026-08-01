@@ -50,6 +50,7 @@ import {
   focusRenderedFlowNode,
   getFlowNodeIdFromTarget,
   getOwnedFlowNodeId,
+  isFlowInteractiveTarget,
   isFlowSpatialNavigationKey,
   readOnlyFlowInteractionProps,
   resolveFlowKeyboardFocusTarget,
@@ -57,6 +58,7 @@ import {
   resolveFlowKeyboardNavigationKeyResult,
   resolveFlowKeyboardNavigationIndexCache,
   resolveFlowKeyboardNodeGeometry,
+  resolveFlowGraphEntryTabIndex,
   type FlowKeyboardNavigationIndexCache,
 } from "./flowKeyboardNavigation";
 import {
@@ -353,6 +355,9 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
       const isNestedNodeTarget =
         currentUnitId !== undefined &&
         getOwnedFlowNodeId(event.target) === undefined;
+      if (isNestedNodeTarget && isFlowInteractiveTarget(event.target)) {
+        return;
+      }
       if (isNestedNodeTarget && !isFlowSpatialNavigationKey(event.key)) {
         return;
       }
@@ -448,7 +453,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
       ref={graphEntryRef}
       role="region"
       aria-label={graphAriaLabel}
-      tabIndex={0}
+      tabIndex={resolveFlowGraphEntryTabIndex(nodes)}
       onKeyDownCapture={handleFlowNodeKeyDown}
       variant="outlined"
       sx={{

@@ -20,6 +20,9 @@
   without selecting the disabled row.
 - First-level flow-tree groups outside the active scope are also reachable with
   the arrow keys without becoming selectable or changing graph scope.
+- Corrected flow-node action activation and graph Tab entry so native action
+  buttons activate once, interactive descendants do not trigger graph
+  traversal, and the graph surface remains a programmatic fallback.
 - Added localized accessible names, state announcements, and React Flow
   keyboard instructions for English and Japanese, while preserving native
   link and button activation during viewer movement.

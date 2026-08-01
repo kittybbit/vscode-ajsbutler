@@ -6,12 +6,7 @@ import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import classNames from "classnames";
 import { ActionIcon, AjsNode, FlowNodeCard, handleStyle } from "./AjsNode";
-import {
-  handleClickChildOpen,
-  handleClickNestedToggle,
-  handleKeyDownChildOpen,
-  handleKeyDownNestedToggle,
-} from "./Utils";
+import { handleClickChildOpen, handleClickNestedToggle } from "./Utils";
 import { useMyAppContext } from "../../MyContexts";
 import {
   formatUnitInformationMessage,
@@ -64,7 +59,6 @@ const LocalizedOpenScopeAction: FC<JobNetHeaderActionProps> = ({ data }) => {
       title={label}
       ariaLabel={label}
       onClick={handleClickChildOpen(data)}
-      onKeyDown={handleKeyDownChildOpen(data)}
       icon={<FolderOpenIcon fontSize="inherit" />}
     />
   );
@@ -83,7 +77,6 @@ const NestedToggleAction: FC<JobNetHeaderActionProps> = ({ data }) => {
       title={label}
       ariaLabel={label}
       onClick={handleClickNestedToggle(data)}
-      onKeyDown={handleKeyDownNestedToggle(data)}
       icon={
         data.isExpandedNested ? (
           <UnfoldLessIcon fontSize="inherit" />

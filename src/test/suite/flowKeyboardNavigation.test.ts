@@ -4,6 +4,7 @@ import {
   focusRenderedFlowNode,
   getFlowNodeIdFromTarget,
   getOwnedFlowNodeId,
+  isFlowInteractiveTarget,
   isFlowKeyboardNavigationKey,
   isFlowSpatialNavigationKey,
   resolveFlowKeyboardFocusTarget,
@@ -12,6 +13,7 @@ import {
   resolveFlowKeyboardNavigationKeyResult,
   resolveFlowKeyboardNodeGeometry,
   resolveFlowKeyboardScopeFocusDecision,
+  resolveFlowGraphEntryTabIndex,
   type FlowKeyboardScopeUnit,
   type FlowKeyboardNavigationNode,
 } from "../../presentation/webview/editor/ajsFlow/flowKeyboardNavigation";
@@ -416,6 +418,27 @@ suite("Flow Keyboard Navigation", () => {
         dataset: { id: "nested-button" },
       } as never),
       undefined,
+    );
+  });
+
+  test("keeps graph entry out of Tab order when nodes can receive focus", () => {
+    assert.strictEqual(resolveFlowGraphEntryTabIndex([]), 0);
+    assert.strictEqual(resolveFlowGraphEntryTabIndex([node("a", 0, 0)]), -1);
+  });
+
+  test("classifies native interactive descendants without classifying their node", () => {
+    assert.strictEqual(
+      isFlowInteractiveTarget({
+        closest: (selector: string) =>
+          selector.includes("button") ? {} : undefined,
+      } as never),
+      true,
+    );
+    assert.strictEqual(
+      isFlowInteractiveTarget({
+        closest: () => undefined,
+      } as never),
+      false,
     );
   });
 
