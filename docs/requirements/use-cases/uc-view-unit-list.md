@@ -118,6 +118,15 @@ Scenario: Keyboard-only exploration preserves list context
   When a keyboard-only user navigates, sorts, inspects details, and returns
   Then the intended unit and meaningful cell remain selected and focused
   And the user can leave the table through the normal viewer focus order
+
+Scenario: List tree and grid focus handoffs remain predictable
+  Given the unit list tree and grid are visible
+  When the user presses Enter on an enabled tree row
+  Then that unit is selected/revealed and its meaningful grid cell receives
+    focus
+  When the user presses unmodified L from a grid cell or header
+  Then focus moves to the corresponding unit-tree row without changing the
+    selected unit
 ```
 
 ## Acceptance Notes
@@ -127,6 +136,8 @@ Scenario: Keyboard-only exploration preserves list context
 - representative fixtures should cover UTF-8, Shift_JIS, and large definitions
 - keyboard behavior, semantic state, and meaningful focus restoration remain
   usable in supported desktop and web viewers and in high-contrast themes
+- Enter from the tree and L from the grid use the same focus-handoff model as
+  the flow graph, while grid-specific arrows and H retain their meanings
 
 ## Risks Or Edge Cases
 

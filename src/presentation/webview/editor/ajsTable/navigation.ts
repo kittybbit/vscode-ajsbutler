@@ -38,6 +38,7 @@ export type TableGridNavigationContext = {
 
 export type UnitListGridShortcut =
   | "focusColumnHeader"
+  | "focusTree"
   | "openDetails"
   | "returnToSavedCell";
 
@@ -60,6 +61,9 @@ export const resolveUnitListGridShortcut = ({
 }: UnitListGridShortcutContext): UnitListGridShortcut | undefined => {
   if (altKey || ctrlKey || metaKey || shiftKey) return undefined;
   const normalizedKey = key.toLowerCase();
+  if (normalizedKey === "l") {
+    return "focusTree";
+  }
   if (focus.kind === "cell" && normalizedKey === "h") {
     return "focusColumnHeader";
   }

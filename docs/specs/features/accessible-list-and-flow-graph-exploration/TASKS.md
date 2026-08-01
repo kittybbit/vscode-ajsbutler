@@ -4,8 +4,8 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 8 are complete; Slice 11 exposed
-  a first-level sibling navigation gap and Slice 12 is active.
+- Approved or active slice: Slices 1 through 12 are complete; Slice 13 is
+  approved and active for cross-view keyboard-parity implementation.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
 - Do not: add extension-wide WCAG certification, printable-character
@@ -16,9 +16,8 @@
 - Validate every code slice with its focused tests and
   `rtk pnpm run qlty`; run final cross-platform evidence in Slices 7 and 10.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: obtain Slice 12 completion approval after implementation;
-  Slice 11 completion and Feature Exit remain blocked until first-level
-  sibling navigation is validated.
+- Next decision: run Feature Exit review; Slice 13 is complete and the
+  cross-view focus contract is implemented.
 
 ## Sync Rule
 
@@ -39,11 +38,28 @@
 - Planning scope: preserve the completed seven-slice implementation and add
   review-remediation slices for composite-widget focus semantics, graph event
   ownership, target size, and browser-level accessibility evidence.
-- Review status: Reviewed; Slices 9, 10, and 11 are complete; Feature Exit
-  remains pending
-- Human approval: Slices 1 through 12 approved; Slice 10 completion approved
-- Active implementation slice: none; Slice 10 completion is recorded and the
-  feature is ready for Feature Exit review
+- Review status: Replanned and reviewed; Slices 1 through 13 are complete and
+  Feature Exit review is pending
+- Human approval: Slices 1 through 13 approved; Slice 13 completion approved
+- Active implementation slice: none; Feature Exit review is pending
+
+## Replanning Trigger
+
+- User follow-up requested that equivalent operations in list-view and
+  flow-graph-view have the same focus transition: Enter from either unit tree
+  reaches the selected unit in the viewer's primary region, and unmodified L
+  from either primary region reaches the corresponding unit-tree row. The
+  existing plan specifies these interactions asymmetrically, so implementation
+  cannot continue under the completed-slice approval boundary.
+- Assumption retained after review: parity applies to equivalent regions and
+  actions;
+  target resolution keeps each viewer's existing stable identity policy (the
+  flow selector's current-scope-root/fallback target and the list tree's
+  selected-row target). Grid-specific H, graph-specific spatial arrows, and
+  N/RC scope transitions retain their view-specific meanings. Space remains
+  selection-only in the shared tree, while Enter performs the requested focus
+  handoff for an enabled row. Modified keys and nested native controls remain
+  excluded.
 
 ## Human Approval
 
@@ -1187,10 +1203,96 @@ the complete state model.
 - Out of Scope: selecting arbitrary out-of-scope descendants, opening a group
   as a graph scope, changing Tab semantics, or redesigning the tree hierarchy.
 
+### Slice 13: Cross-Viewer Keyboard Focus Parity
+
+- Status: Complete
+- Scope: make equivalent keyboard operations produce the same focus handoff
+  in list-view and flow-graph-view. Enter on an enabled unit-tree row keeps
+  the row selection behavior and then focuses that unit in the owning viewer's
+  primary region (the rendered graph node or the selected list cell). An
+  unmodified L from the primary region focuses the viewer's existing unit-tree
+  target, expanding or revealing its ancestors as needed. Preserve Space as
+  selection-only, disabled/out-of-scope no-op behavior, normal Tab traversal,
+  graph N/RC scope Enter/Escape, spatial arrows, and list H/header behavior.
+- User / Domain Value: users can transfer focus between the same two logical
+  regions with the same mental model in both viewers instead of learning
+  viewer-specific exceptions.
+- Cohesive Change Group:
+  `shared/UnitTreeSelector.tsx`, shared tree focus callback contracts,
+  `ajsFlow/FlowContents.tsx` / `useFlowViewerController.ts` focus wiring,
+  `ajsTable/TableContents.tsx`, `ajsTable/VirtualizedTable.tsx`,
+  `ajsTable/navigation.ts`, and focused flow/tree/table shortcut tests.
+- Acceptance:
+  - Flow-tree Enter on an enabled in-scope row selects that unit and focuses
+    its rendered graph node after any required ancestor expansion; it does not
+    open a scope or move to a parser-order child.
+  - List-tree Enter on an enabled row selects/reveals that unit and focuses
+    its meaningful grid cell; Space retains selection without leaving the tree.
+  - Unmodified L from a focused flow graph node or list grid cell/header moves
+    focus to the unit tree without changing scope or selection. Flow preserves
+    its current-scope-root/first-eligible fallback; list targets the selected
+    row and uses its existing first-row fallback when necessary.
+  - The same modifier, editable-control, nested-action, disabled-row, and
+    first-level/out-of-scope guards apply in both viewers. Existing D/R/Escape
+    detail behavior and view-specific H/arrow/scope behavior remain unchanged.
+  - Focus handoffs avoid duplicate selection announcements and unnecessary
+    whole-view recomputation, and both desktop and Web entry points retain the
+    same observable key ownership.
+- Validation: `tableNavigation.test.ts`, the shared-tree DOM focus regression
+  in `accessibilityDom.test.tsx`, existing flow selector/shortcut coverage,
+  desktop/Web suites, TypeScript compilation, qlty, build, Markdown lint, and
+  diff checks. Record manual desktop/Web matrix follow-up at Feature Exit.
+- Production Readiness:
+  - Failure mode: an unavailable graph node or virtualized list cell falls
+    back to the existing graph-entry/grid restoration target without selecting
+    an unrelated unit.
+  - JP1/AJS compatibility: stable unit identity and existing normalized view
+    models remain authoritative; no definition semantics change.
+  - Large or malformed input risk: focus requests use existing stable-ID
+    lookup/reveal paths and do not scan or rebuild the full document.
+  - Desktop/web impact: shared browser-safe key ownership is checked in both
+    bundles; no Node-only or VS Code API dependency is introduced.
+  - README/docs impact: update keyboard guidance only where the parity matrix
+    is currently incomplete.
+  - CHANGELOG impact: required because cross-view keyboard focus behavior is
+    user-visible.
+- Approval Boundary: presentation-only cross-view focus callbacks, L shortcut
+  ownership, Enter handoff from the shared unit tree, focused regressions, and
+  directly related guidance. No parser, Domain, Application, DTO, host,
+  telemetry, graph-layout, or new shortcut-family changes.
+- Dependencies: Slices 8 through 12 are complete. Slice 13 must be reviewed
+  and approved before implementation; Feature Exit remains blocked until its
+  automated and manual evidence is accepted or assigned.
+- Risks: reusing one callback for Enter and Space could accidentally move
+  focus or announce selection twice; list virtualization and asynchronous
+  graph rendering may require separate target-ready handling; an overly broad
+  L handler could steal speech-input or nested-control events.
+- Out of Scope: making H or spatial arrows identical across incompatible
+  widgets, changing Tab/Shift+Tab, adding new printable shortcuts, changing
+  scope semantics, or redesigning the shared tree hierarchy.
+- Implementation Evidence: `UnitTreeSelector.tsx` now exposes an Enter-only
+  focus-handoff callback while preserving Space as selection-only. Flow tree
+  Enter requests focus on the selected rendered graph node. List grid `L`
+  requests the selected unit-tree row with the existing first-row fallback,
+  while list-tree Enter retains the stable row-reveal path to the selected
+  grid cell. Modifier and target ownership remain guarded by the existing
+  shortcut resolvers.
+- Validation Result: `rtk pnpm run test:compile`,
+  `rtk pnpm run test:desktop:run`, `rtk pnpm run test:web:run`,
+  `rtk pnpm run build`, `rtk pnpm run qlty:check`,
+  `rtk pnpm run lint:md`, and `rtk git diff --check` pass on 2026-08-01.
+  Web validation retains the existing package.nls 404 and mermaid extension
+  warning; the production build retains existing bundle-size warnings.
+- Implementation Feedback: the shared callback kept the cross-view contract
+  narrow and avoided a second list-cell focus request because list selection
+  already uses the stable row-reveal path. The remaining manual desktop/Web
+  focus matrix is a Feature Exit item.
+- Completion Approval: Approved in current conversation.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
-- Reason: the feature changes two user-visible use cases, now spans eleven
+- Reason: the feature changes two user-visible use cases, now spans thirteen
   dependent implementation/remediation slices, and requires explicit DOM,
   automated, and manual validation mapping.
 
@@ -1220,6 +1322,9 @@ the complete state model.
 - Slice 11 is a follow-up to Slice 8. It restores keyboard reachability for
   out-of-scope eligible flow scopes before Slice 10's DOM focus evidence is
   treated as complete; it does not change Slice 9's graph-node controls.
+- Slice 13 depends on the completed shared tree, list grid, flow selector, and
+  DOM focus contracts from Slices 1 through 12. It adds only the cross-view
+  Enter/L handoff and must complete before Feature Exit is reconsidered.
 - Remediation Slice 8 updates the shared tree contract used by both viewers;
   Slice 11 restores keyboard access to out-of-scope sibling scope rows; Slice 9
   then applies the graph-specific focus-entry and native-control guard; Slice

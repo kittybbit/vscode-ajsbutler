@@ -65,6 +65,15 @@ Scenario: Keyboard-only unit-list exploration preserves context
   Then the intended unit and meaningful cell remain selected and focused
   And the user can leave the table through the normal Webview focus order
 
+Scenario: Equivalent viewer focus handoffs preserve the selected unit
+  Given the list-view and flow-graph-view expose a unit tree and a primary
+    content region
+  When the user presses Enter on an enabled unit-tree row
+  Then the selected unit is focused in that viewer's primary content region
+  When the user presses unmodified L from the primary content region
+  Then focus moves to that viewer's defined unit-tree target without changing
+    selection or flow scope
+
 Scenario: Keyboard flow exploration follows rendered spatial direction
   Given a selected flow node and other rendered flow nodes
   When a user presses an unmodified arrow key
@@ -167,7 +176,10 @@ Scenario: Viewer state remains perceivable without color
   focus. Up and Down move between visible enabled rows and eligible flow-scope
   rows, Right expands or enters children, Left collapses or returns to a
   parent, and Home and End move to the first or last visible navigable row.
-  Enter or Space activates row selection for enabled rows.
+  Enter or Space activates row selection for enabled rows. Enter additionally
+  hands focus to the selected unit in the owning viewer's primary region;
+  Space remains selection-only and leaves focus in the tree. Disabled and
+  out-of-scope rows remain no-op activation targets.
   The treeitem is the only Tab stop: mouse-oriented expand and scope actions
   use `tabIndex={-1}`, stop propagation when activated, and remain available
   through the row's ArrowLeft/ArrowRight behavior and Alt+Enter scope action.
@@ -195,6 +207,10 @@ Scenario: Viewer state remains perceivable without color
   column header and header `Escape` returns to the saved cell. Unmodified `D`
   opens the selected unit's detail pane when necessary and moves focus to its
   heading or first action.
+- In the unit-list grid, unmodified `L` focuses the selected unit's row in the
+  unit tree. Enter from an enabled tree row selects/reveals the unit and moves
+  focus to its meaningful grid cell; this mirrors the flow tree's Enter/L
+  handoff while leaving H and grid arrows view-specific.
 - In either viewer's detail pane, unmodified `R` returns to the saved cell or
   graph node without closing the pane. `Escape` closes the active definition
   dialog first, otherwise closes the pane, and restores the invoking detail
@@ -203,6 +219,9 @@ Scenario: Viewer state remains perceivable without color
   pane. Unmodified `L` opens or focuses the flow selector at the current scope
   root, or the first eligible root-jobnet fallback. Selector `Escape` returns
   to the saved graph node without changing scope.
+- In the flow selector, Enter on an enabled in-scope row selects and focuses
+  the corresponding rendered graph node without opening a scope. Space remains
+  selection-only; Alt+Enter retains explicit eligible scope opening.
 - Single-character shortcuts run only when their owning composite or pane has
   focus and the event does not originate from an input, textarea, select,
   contenteditable element, or nested interactive control. Modified keys and

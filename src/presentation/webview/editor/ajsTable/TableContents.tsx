@@ -51,7 +51,9 @@ import {
   createViewerPerformanceRequest,
   createViewerReadyRequest,
 } from "../../viewerRequestMessages";
-import UnitTreeSelector from "../shared/UnitTreeSelector";
+import UnitTreeSelector, {
+  type UnitTreeFocusRequest,
+} from "../shared/UnitTreeSelector";
 import {
   navigateToFlow,
   openUnitTreeUnitInFlow,
@@ -136,9 +138,11 @@ type TableViewerShellProps = {
   handleDetailFocusRequest: (revision: number) => void;
   returnToGrid: VoidFunction;
   restoreGridFocusRequest: TableGridFocusRequest;
+  focusTreeRequest: UnitTreeFocusRequest;
   rootUnits: UnitListRootDto[];
   unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
   selectTreeUnit: (unitId: string) => void;
+  focusUnitTree: VoidFunction;
   openTreeUnitScope: (unitId: string) => void;
   onCopied: () => void;
   announcementHostRef: React.RefObject<ViewerAnnouncementHostHandle | null>;
@@ -270,10 +274,12 @@ const TableViewerShell = ({
   handleDetailFocusRequest,
   returnToGrid,
   restoreGridFocusRequest,
+  focusTreeRequest,
   selectedUnitId,
   rootUnits,
   unitById,
   selectTreeUnit,
+  focusUnitTree,
   openTreeUnitScope,
   onCopied,
   announcementHostRef,
@@ -336,6 +342,7 @@ const TableViewerShell = ({
               rootUnits={rootUnits}
               unitById={unitById}
               selectedUnitId={selectedUnitId}
+              focusRequest={focusTreeRequest}
               autoScrollSelectedUnit={false}
               canOpenScopeUnit={isSelectableTableFlowScopeUnit}
               onOpenScope={openTreeUnitScope}
@@ -359,6 +366,7 @@ const TableViewerShell = ({
                 parameterSearchValuesByPath={parameterSearchValuesByPath}
                 selectedAbsolutePath={selectedAbsolutePath}
                 selectRow={selectRow}
+                focusUnitTree={focusUnitTree}
                 openDetailPane={openDetailPane}
                 restoreFocusRequest={restoreGridFocusRequest}
                 gridAriaLabel={gridAriaLabel}
@@ -421,6 +429,8 @@ const TableContents = () => {
     useState(0);
   const [restoreGridFocusRequest, setRestoreGridFocusRequest] =
     useState<TableGridFocusRequest>({ revision: 0 });
+  const [focusTreeRequest, setFocusTreeRequest] =
+    useState<UnitTreeFocusRequest>({ revision: 0 });
   const [selectedAbsolutePath, dispatchRowSelection] = useReducer(
     reduceTableRowSelection,
     undefined,
@@ -502,6 +512,12 @@ const TableContents = () => {
     selectedAbsolutePath,
     viewerData.unitByAbsolutePath,
   );
+  const focusUnitTree = useCallback(() => {
+    setFocusTreeRequest((request) => ({
+      revision: request.revision + 1,
+      targetUnitId: selectedUnitId,
+    }));
+  }, [selectedUnitId]);
   const resolveSelectedDetail = useMemo(
     () =>
       createUnitListDetailResolver(
@@ -678,9 +694,11 @@ const TableContents = () => {
       handleDetailFocusRequest={handleDetailFocusRequest}
       returnToGrid={returnToGrid}
       restoreGridFocusRequest={restoreGridFocusRequest}
+      focusTreeRequest={focusTreeRequest}
       rootUnits={viewerData.rootUnits}
       unitById={viewerData.unitById}
       selectTreeUnit={selectTreeUnit}
+      focusUnitTree={focusUnitTree}
       openTreeUnitScope={openTreeUnitScope}
       onCopied={handleCopied}
       announcementHostRef={announcementHostRef}

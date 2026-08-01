@@ -15,6 +15,9 @@
 - Added shared unit-tree keyboard navigation with roving row focus, visible
   row Up/Down movement, Right/Left expand and parent navigation, Home/End
   boundaries, Enter/Space selection, and tree semantics in both viewers.
+- Added equivalent viewer focus handoffs: Enter from a flow-tree row focuses
+  the selected graph node, Enter from a list-tree row restores the selected
+  grid cell, and L moves from either list-grid surface to its unit-tree row.
 - Restored keyboard reachability for flow-tree sibling root-jobnet scopes:
   arrows can focus an out-of-scope eligible row and Alt+Enter opens that scope
   without selecting the disabled row.

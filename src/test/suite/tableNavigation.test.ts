@@ -318,6 +318,14 @@ suite("Table navigation", () => {
       "focusColumnHeader",
     );
     assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "l" }),
+      "focusTree",
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: header, key: "L" }),
+      "focusTree",
+    );
+    assert.strictEqual(
       resolveUnitListGridShortcut({ focus: cell, key: "d" }),
       "openDetails",
     );
@@ -343,6 +351,10 @@ suite("Table navigation", () => {
     );
     assert.strictEqual(
       resolveUnitListGridShortcut({ focus: cell, key: "d", metaKey: true }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitListGridShortcut({ focus: cell, key: "l", shiftKey: true }),
       undefined,
     );
   });

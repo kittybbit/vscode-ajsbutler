@@ -324,3 +324,35 @@ destination`; `Viewer state remains perceivable without color`
   first-level disabled-row navigation tests, desktop/Web suites, qlty,
   Markdown lint, and diff checks
 - Status: Complete; implementation and automated validation complete.
+
+## Slice 13: Cross-Viewer Keyboard Focus Parity
+
+- Use Case:
+  `uc-view-unit-list.md` — `List tree and grid focus handoffs remain
+predictable`; `uc-explore-flow-graph.md` — `Flow tree and graph focus
+handoffs match list-view semantics`
+- Requirement: `ACC-VIEW-001`, `ACC-VIEW-002`, `ACC-VIEW-003`,
+  `ACC-VIEW-005`, `ACC-VIEW-007`, `ACC-VIEW-008`
+- `SPECS.md`: Behavioral Scenarios; Interaction Model Decisions; Acceptance
+  Criteria
+- Implementation Slice: Slice 13, Cross-Viewer Keyboard Focus Parity
+- Tests/validation: `tableNavigation.test.ts`, the shared-tree DOM focus
+  regression in `accessibilityDom.test.tsx`, existing flow selector/shortcut
+  coverage, desktop/Web suites, TypeScript compilation, qlty, build, Markdown
+  lint, and the manual desktop/Web matrix
+- Status: Complete; implementation and automated validation complete. Feature
+  Exit review remains pending.
+- Implementation Evidence: `UnitTreeSelector.tsx` exposes an Enter-only
+  focus-handoff callback while preserving Space as selection-only. Flow tree
+  Enter requests focus on the selected rendered graph node. List grid `L`
+  requests the selected unit-tree row with the existing first-row fallback,
+  while list-tree Enter retains the stable row-reveal path to the selected
+  grid cell. `tableNavigation.test.ts` covers case-insensitive L handling and
+  modifier rejection; the DOM regression covers the Enter/Space callback split.
+- Validation Result: `rtk pnpm run test:compile`,
+  `rtk pnpm run test:desktop:run`, `rtk pnpm run test:web:run`,
+  `rtk pnpm run build`, `rtk pnpm run qlty:check`,
+  `rtk pnpm run lint:md`, and `rtk git diff --check` pass on 2026-08-01.
+- Implementation Feedback: the shared callback kept the parity contract
+  narrow and avoided duplicate list-cell focus requests; manual desktop/Web
+  focus evidence remains a Feature Exit item.

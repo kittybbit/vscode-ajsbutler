@@ -60,6 +60,7 @@ export type UnitTreeSelectorProps = {
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
   onEscape?: VoidFunction;
+  onEnterUnit?: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
 };
 
@@ -80,6 +81,7 @@ type UnitTreeSelectorTreeProps = {
   onLeaveUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
   onEscape?: VoidFunction;
+  onEnterUnit?: (unitId: string) => void;
   onRowFocus: (unitId: string) => void;
   onRowKeyDown: (event: KeyboardEvent<HTMLElement>, unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
@@ -598,6 +600,7 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
   onLeaveUnit,
   onOpenScope,
   onEscape,
+  onEnterUnit,
   onRowFocus,
   onRowKeyDown,
   onSelectUnit,
@@ -704,6 +707,7 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
         onLeaveUnit={onLeaveUnit}
         onOpenScope={onOpenScope}
         onEscape={onEscape}
+        onEnterUnit={onEnterUnit}
         onRowFocus={onRowFocus}
         onRowKeyDown={onRowKeyDown}
         onSelectUnit={onSelectUnit}
@@ -865,6 +869,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   onLeaveUnit,
   onOpenScope,
   onEscape,
+  onEnterUnit,
   onSelectUnit,
 }) => {
   const theme = useTheme();
@@ -1039,6 +1044,9 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
           return;
         case "select":
           onSelectUnit(action.targetUnitId);
+          if (event.key === "Enter") {
+            onEnterUnit?.(action.targetUnitId);
+          }
           return;
         case "open-scope":
           onOpenScope?.(action.targetUnitId);
@@ -1047,6 +1055,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
     },
     [
       onEscape,
+      onEnterUnit,
       onOpenScope,
       onSelectUnit,
       requestRowFocus,
@@ -1110,6 +1119,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
       onLeaveUnit={onLeaveUnit}
       onOpenScope={onOpenScope}
       onEscape={onEscape}
+      onEnterUnit={onEnterUnit}
       onRowFocus={handleRowFocus}
       onRowKeyDown={handleRowKeyDown}
       onSelectUnit={onSelectUnit}

@@ -60,6 +60,7 @@ type VirtualizedTableProps = {
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   selectedAbsolutePath?: string;
   selectRow: (absolutePath: string) => void;
+  focusUnitTree: VoidFunction;
   openDetailPane: (absolutePath: string) => void;
   restoreFocusRequest: TableGridFocusRequest;
   gridAriaLabel?: string;
@@ -323,6 +324,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   parameterSearchValuesByPath,
   selectedAbsolutePath,
   selectRow,
+  focusUnitTree,
   openDetailPane,
   restoreFocusRequest,
   gridAriaLabel,
@@ -469,6 +471,11 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         focusGridTarget({ kind: "header", columnId: focus.columnId });
         return;
       }
+      if (shortcut === "focusTree") {
+        event.preventDefault();
+        focusUnitTree();
+        return;
+      }
       if (shortcut === "openDetails" && focus.kind === "cell") {
         event.preventDefault();
         openDetailPane(focus.absolutePath);
@@ -522,6 +529,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     },
     [
       focusGridTarget,
+      focusUnitTree,
       openDetailPane,
       pageSize,
       rowAbsolutePaths,

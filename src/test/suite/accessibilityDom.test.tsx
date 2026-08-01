@@ -153,6 +153,7 @@ const renderTree = (
     currentUnitId?: string;
     selectedUnitId?: string;
     isUnitEnabled?: (unit: FlowGraphUnitDto) => boolean;
+    onEnterUnit?: (unitId: string) => void;
     onSelectUnit?: (unitId: string) => void;
   } = {},
 ) =>
@@ -165,6 +166,7 @@ const renderTree = (
         selectedUnitId={options.selectedUnitId}
         autoScrollSelectedUnit={false}
         isUnitEnabled={options.isUnitEnabled}
+        onEnterUnit={options.onEnterUnit}
         onSelectUnit={options.onSelectUnit ?? (() => undefined)}
         ariaLabel="Unit tree"
         title="Unit tree"
@@ -279,6 +281,24 @@ suite("Browser accessibility DOM", () => {
     fireEvent.click(expandButton);
     assert.deepStrictEqual(selected, []);
     assert.ok(view.getByRole("treeitem", { name: /child/i }));
+  });
+
+  test("separates Enter focus handoff from Space selection", () => {
+    const root = createUnit("/root", 0);
+    const selected: string[] = [];
+    const entered: string[] = [];
+    const view = renderTree([root], {
+      onSelectUnit: (unitId) => selected.push(unitId),
+      onEnterUnit: (unitId) => entered.push(unitId),
+    });
+    const rootRow = view.getByRole("treeitem", { name: /root/i });
+
+    rootRow.focus();
+    fireEvent.keyDown(rootRow, { key: "Enter" });
+    fireEvent.keyDown(rootRow, { key: " " });
+
+    assert.deepStrictEqual(selected, ["/root", "/root"]);
+    assert.deepStrictEqual(entered, ["/root"]);
   });
 
   test("passes focused tree markup through selected axe rules", async () => {

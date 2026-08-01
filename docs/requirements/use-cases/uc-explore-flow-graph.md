@@ -84,6 +84,9 @@ flow scope while preserving predictable navigation and viewport state.
 - from a focused graph node, unmodified D focuses its detail pane and
   unmodified L focuses the flow selector at the current scope root, falling
   back to the first eligible root jobnet
+- from an enabled in-scope flow-tree row, unmodified Enter selects and focuses
+  the corresponding graph node without opening a scope; Space remains
+  selection-only and Alt+Enter remains the explicit scope action
 - from the flow selector, unmodified Escape returns focus to the saved graph
   node without changing scope; from the detail pane, unmodified R returns
   focus without closing it and Escape closes the pane or first closes its
@@ -188,6 +191,13 @@ Scenario: Flow detail and selector shortcuts preserve graph focus
   Then focus returns to the saved graph node without closing details
   When the user presses Escape in details or the selector
   Then the active region closes or returns focus without changing graph scope
+
+Scenario: Flow tree and graph focus handoffs match list-view semantics
+  Given a focused flow graph node and its unit-tree row
+  When the user presses unmodified L from the graph or Enter from an enabled
+    in-scope tree row
+  Then focus moves between the graph node and the flow selector's defined
+    target row without changing the selected unit or flow scope
 ```
 
 ## Acceptance Notes

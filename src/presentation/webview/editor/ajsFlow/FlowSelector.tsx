@@ -19,6 +19,7 @@ type FlowSelectorProps = {
   onHoverUnit: (unitId: string) => void;
   onLeaveUnit: (unitId: string) => void;
   onEscape?: VoidFunction;
+  onEnterUnit?: (unitId: string) => void;
   onOpenScope?: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
 };
@@ -65,6 +66,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
   onHoverUnit,
   onLeaveUnit,
   onEscape,
+  onEnterUnit,
   onOpenScope,
   onSelectUnit,
 }) => {
@@ -95,6 +97,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
       onHoverUnit={onHoverUnit}
       onLeaveUnit={onLeaveUnit}
       onEscape={onEscape}
+      onEnterUnit={onEnterUnit}
       onOpenScope={onOpenScope ?? setCurrentUnitId}
       onSelectUnit={onSelectUnit}
     />

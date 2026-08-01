@@ -28,7 +28,8 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   header to the saved cell. In the detail pane, R returns to the saved cell
   without closing the pane, while Escape closes it and returns. Search results
   restore the corresponding grid cell, and closing definition details returns
-  to the action that opened the dialog.
+  to the action that opened the dialog. L moves from the grid or its header to
+  the selected unit in the unit tree.
 - View unit definitions.
   ![unit-dialog](images/unit-dialog.png)
 - Save data in CSV format.
@@ -53,7 +54,10 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
 - Navigate the shared unit tree with a roving keyboard focus. Up and Down move
   through visible rows that can be navigated, Right expands or enters children,
   Left collapses or returns to a parent, Home and End move to the visible
-  boundaries, and Enter or Space selects the focused enabled row. In the flow
+  boundaries, and Enter or Space selects the focused enabled row. Enter also
+  moves focus to the corresponding primary surface: the flow node in the flow
+  viewer or the selected grid cell in the list viewer. Space remains
+  selection-only. In the flow
   viewer, first-level rows outside the active scope remain disabled for
   selection but can be focused with the arrows. Eligible root-jobnet rows can
   be opened with Alt+Enter; groups do not become graph scopes by receiving

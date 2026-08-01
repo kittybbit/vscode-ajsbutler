@@ -546,6 +546,7 @@ type FlowViewerBodyProps = FlowViewerController & {
   onDetailFocusRequestHandled: (revision: number) => void;
   onFocusDetail: (unitId: string) => void;
   onFocusSelector: (unitId?: string) => void;
+  onEnterFlowTreeUnit: (unitId: string) => void;
   onNestedExpansion?: (unitId: string, expanded: boolean) => void;
   onNodeSelected?: (unitId: string) => void;
   onSpatialMove?: (
@@ -578,6 +579,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   onDetailFocusRequestHandled,
   onFocusDetail,
   onFocusSelector,
+  onEnterFlowTreeUnit,
   onNestedExpansion,
   onNodeSelected,
   onSpatialMove,
@@ -641,6 +643,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
           onHoverUnit={treeHoveredUnit}
           onLeaveUnit={clearTreeHoveredUnit}
           onEscape={onSelectorEscape}
+          onEnterUnit={onEnterFlowTreeUnit}
           onOpenScope={onOpenFlowScope}
           onSelectUnit={selectTreeUnit}
           ariaLabel={unitInformationMessage("a11y.flow.selector", language)}
@@ -831,6 +834,12 @@ const FlowContents: FC = () => {
       }));
     },
     [],
+  );
+  const handleEnterFlowTreeUnit = useCallback(
+    (unitId: string) => {
+      requestGraphFocus(unitId);
+    },
+    [requestGraphFocus],
   );
   const handleFocusDetail = useCallback(
     (unitId: string) => {
@@ -1118,6 +1127,7 @@ const FlowContents: FC = () => {
             onDetailFocusRequestHandled={handleDetailFocusRequestHandled}
             onFocusDetail={handleFocusDetail}
             onFocusSelector={handleFocusSelector}
+            onEnterFlowTreeUnit={handleEnterFlowTreeUnit}
             onNestedExpansion={announceFlowNestedExpansion}
             onNodeSelected={announceFlowSelection}
             onSpatialMove={announceFlowSpatialMove}
