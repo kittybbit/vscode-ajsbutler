@@ -70,7 +70,6 @@ const productionSourceDirs = [
   "infrastructure",
   "presentation",
   "bootstrap",
-  "shared",
   "resource",
 ] as const;
 

@@ -233,7 +233,7 @@ suite("Architecture dependency rules", () => {
       },
       {
         ruleId: architectureRuleIds.concreteInfrastructureOutsideComposition,
-        file: "src/shared/example.ts",
+        file: "src/resource/example.ts",
         source: 'import "../infrastructure/example";',
       },
       {

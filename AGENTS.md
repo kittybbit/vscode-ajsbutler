@@ -60,7 +60,6 @@ Production source structure:
 - `src/infrastructure`
 - `src/presentation`
 - `src/bootstrap`
-- `src/shared`
 - `src/resource`
 
 See `docs/specs/architecture.md` for the durable boundary definitions. The
