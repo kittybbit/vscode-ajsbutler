@@ -70,11 +70,3 @@ entry conditions that make planning each item useful.
 - Entry condition: real-world nested layouts expose an additional collision or
   refit gap.
 - Candidate: add focused regression fixtures for the observed layout case.
-
-### Viewer Accessibility Platform Verification
-
-- Entry condition: Windows/NVDA, macOS/VoiceOver, Windows high-contrast, and
-  a large-definition verification environment become available.
-- Candidate: complete the final manual accessibility matrix for the delivered
-  list and flow viewers; this is validation follow-up, not a new interaction
-  design or runtime scope.
