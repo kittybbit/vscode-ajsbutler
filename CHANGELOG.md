@@ -15,6 +15,11 @@
 - Added shared unit-tree keyboard navigation with roving row focus, visible
   row Up/Down movement, Right/Left expand and parent navigation, Home/End
   boundaries, Enter/Space selection, and tree semantics in both viewers.
+- Restored keyboard reachability for flow-tree sibling root-jobnet scopes:
+  arrows can focus an out-of-scope eligible row and Alt+Enter opens that scope
+  without selecting the disabled row.
+- First-level flow-tree groups outside the active scope are also reachable with
+  the arrow keys without becoming selectable or changing graph scope.
 - Added localized accessible names, state announcements, and React Flow
   keyboard instructions for English and Japanese, while preserving native
   link and button activation during viewer movement.

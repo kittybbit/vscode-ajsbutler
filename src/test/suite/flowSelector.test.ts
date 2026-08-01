@@ -99,7 +99,11 @@ suite("Flow Selector", () => {
 
   test("rejects selection outside the current root jobnet", () => {
     const current = createFlowTestUnit({ id: "/root/current" });
-    const another = createFlowTestUnit({ id: "/root/another" });
+    const another = createFlowTestUnit({
+      id: "/root/another",
+      unitType: "n",
+      isRootJobnet: true,
+    });
     const anotherJob = createFlowTestUnit({
       id: "/root/another/job",
       unitType: "j",
@@ -114,6 +118,15 @@ suite("Flow Selector", () => {
     assert.strictEqual(
       isUnitInCurrentFlowScope(anotherJob, current, unitById),
       false,
+    );
+    assert.strictEqual(isSelectableFlowScopeUnit(another), true);
+    assert.strictEqual(
+      isUnitInCurrentFlowScope(another, current, unitById),
+      false,
+    );
+    assert.strictEqual(
+      resolveFlowTreeSelectionTarget(another.id, current, unitById),
+      undefined,
     );
     assert.strictEqual(
       resolveFlowTreeSelectionTarget(anotherJob.id, current, unitById),

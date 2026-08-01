@@ -49,10 +49,14 @@ information for JP1/AJS3 from Hitachi in a human-readable format.
   distinguishable with borders, outlines, icons, text, and VS Code theme or
   high-contrast colors in both viewers.
 - Navigate the shared unit tree with a roving keyboard focus. Up and Down move
-  through visible enabled rows, Right expands or enters children, Left
-  collapses or returns to a parent, Home and End move to the visible
-  boundaries, and Enter or Space selects the focused row. Expand and
-  scope-opening buttons retain their native keyboard behavior.
+  through visible rows that can be navigated, Right expands or enters children,
+  Left collapses or returns to a parent, Home and End move to the visible
+  boundaries, and Enter or Space selects the focused enabled row. In the flow
+  viewer, first-level rows outside the active scope remain disabled for
+  selection but can be focused with the arrows. Eligible root-jobnet rows can
+  be opened with Alt+Enter; groups do not become graph scopes by receiving
+  focus. Tab and Shift+Tab enter or leave the tree, while expand and
+  scope-opening buttons remain available without adding nested Tab stops.
 - Compare the active JP1/AJS definition with a selected before definition and
   copy or save a semantic Markdown diff report, including confirmation-required
   notes for supported condition and wait changes.

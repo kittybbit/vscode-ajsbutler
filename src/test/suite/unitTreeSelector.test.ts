@@ -231,20 +231,148 @@ suite("Unit Tree Selector", () => {
     );
   });
 
+  test("keeps out-of-scope scope rows in linear navigation without selecting them", () => {
+    const rows = resolveVisibleUnitTreeRows(
+      [unit("/current", 0), unit("/other", 0)],
+      new Set(),
+      (candidate) => candidate.id === "/current",
+      (candidate) => candidate.id === "/other",
+    );
+
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/current", {
+        key: "ArrowDown",
+      }),
+      {
+        action: { kind: "focus", targetUnitId: "/other" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/other", {
+        key: "ArrowUp",
+      }),
+      {
+        action: { kind: "focus", targetUnitId: "/current" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/other", { key: "Home" }),
+      {
+        action: { kind: "focus", targetUnitId: "/current" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/current", { key: "End" }),
+      {
+        action: { kind: "focus", targetUnitId: "/other" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/other", { key: "Enter" }),
+      { suppressDefault: true },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/other", { key: " " }),
+      { suppressDefault: true },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/other", { key: "ArrowLeft" }),
+      { suppressDefault: true },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/other", { key: "ArrowRight" }),
+      { suppressDefault: true },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/other", {
+        key: "Enter",
+        altKey: true,
+      }),
+      {
+        action: { kind: "open-scope", targetUnitId: "/other" },
+        suppressDefault: true,
+      },
+    );
+  });
+
   test("keeps tree action hit areas above the WCAG minimum", () => {
     assert.strictEqual(UNIT_TREE_ACTION_SIZE_PX, 28);
   });
 
-  test("does not navigate to disabled rows", () => {
+  test("does not navigate to disabled descendant rows", () => {
     const rows = resolveVisibleUnitTreeRows(
-      [unit("/disabled", 0), unit("/enabled", 0)],
-      new Set(),
+      [unit("/enabled", 0, [unit("/disabled", 1, [], "/enabled")])],
+      new Set(["/enabled"]),
       (candidate) => candidate.id === "/enabled",
     );
 
     assert.deepStrictEqual(
       resolveUnitTreeNavigationKey(rows, "/enabled", { key: "ArrowUp" }),
       { suppressDefault: true },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/enabled", { key: "ArrowDown" }),
+      { suppressDefault: true },
+    );
+  });
+
+  test("moves between disabled first-level sibling rows without selecting them", () => {
+    const rows = resolveVisibleUnitTreeRows(
+      [unit("/test_jg_1", 0), unit("/test_jg_2", 0)],
+      new Set(),
+      (candidate) => candidate.id === "/test_jg_1",
+    );
+
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/test_jg_1", {
+        key: "ArrowDown",
+      }),
+      {
+        action: { kind: "focus", targetUnitId: "/test_jg_2" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/test_jg_2", {
+        key: "ArrowUp",
+      }),
+      {
+        action: { kind: "focus", targetUnitId: "/test_jg_1" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/test_jg_2", { key: "Home" }),
+      {
+        action: { kind: "focus", targetUnitId: "/test_jg_1" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/test_jg_1", { key: "End" }),
+      {
+        action: { kind: "focus", targetUnitId: "/test_jg_2" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/test_jg_2", { key: "Enter" }),
+      { suppressDefault: true },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/test_jg_2", { key: " " }),
+      { suppressDefault: true },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/test_jg_2", {
+        key: "Enter",
+        altKey: true,
+      }),
+      { suppressDefault: false },
     );
   });
 

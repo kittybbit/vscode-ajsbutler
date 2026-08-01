@@ -164,9 +164,10 @@ Scenario: Viewer state remains perceivable without color
   existing explicit nested controls. Existing explicit scope-opening and
   detail actions remain focusable alternatives to the Enter shortcut.
 - The shared unit selector uses one `tree`/`treeitem` contract with roving row
-  focus. Up and Down move between visible enabled rows, Right expands or enters
-  children, Left collapses or returns to a parent, and Home and End move to the
-  first or last visible enabled row. Enter or Space activates row selection.
+  focus. Up and Down move between visible enabled rows and eligible flow-scope
+  rows, Right expands or enters children, Left collapses or returns to a
+  parent, and Home and End move to the first or last visible navigable row.
+  Enter or Space activates row selection for enabled rows.
   The treeitem is the only Tab stop: mouse-oriented expand and scope actions
   use `tabIndex={-1}`, stop propagation when activated, and remain available
   through the row's ArrowLeft/ArrowRight behavior and Alt+Enter scope action.
@@ -178,6 +179,11 @@ Scenario: Viewer state remains perceivable without color
   scope row; Enter/Space do not select it, and Alt+Enter is the explicit scope
   transition. Normal Tab and Shift+Tab enter or leave the tree and are not
   reused for sibling-row traversal.
+- Visible first-level flow-tree rows are also keyboard navigation targets when
+  they are outside the active scope, including first-level groups that cannot
+  be opened as graph scopes. They remain `aria-disabled="true"`; focus alone
+  does not select them or change graph scope, and only an eligible root-jobnet
+  row responds to Alt+Enter.
 - React Flow node dragging and edge Tab stops are not part of this read-only
   viewer. Built-in accessibility descriptions are localized and aligned with
   the viewer's actual keyboard behavior. They describe spatial

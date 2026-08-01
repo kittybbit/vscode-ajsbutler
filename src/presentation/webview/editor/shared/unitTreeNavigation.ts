@@ -15,6 +15,9 @@ export type UnitTreeNavigationRow = {
   canOpenScope: boolean;
 };
 
+export const isUnitTreeRowNavigable = (row: UnitTreeNavigationRow): boolean =>
+  row.isEnabled || row.canOpenScope || row.depth === 0;
+
 export type UnitTreeNavigationAction =
   | { kind: "focus"; targetUnitId: string }
   | { kind: "expand"; targetUnitId: string }
@@ -124,18 +127,20 @@ const hasNavigationModifier = ({
 }: UnitTreeNavigationKeyOptions): boolean =>
   Boolean(altKey || ctrlKey || metaKey || shiftKey);
 
-const resolveEnabledRows = (
+const resolveNavigableRows = (
   rows: readonly UnitTreeNavigationRow[],
-): readonly UnitTreeNavigationRow[] => rows.filter((row) => row.isEnabled);
+): readonly UnitTreeNavigationRow[] => rows.filter(isUnitTreeRowNavigable);
 
 const resolveDirectionalTarget = (
   rows: readonly UnitTreeNavigationRow[],
   currentUnitId: string,
   offset: -1 | 1,
 ): string | undefined => {
-  const enabledRows = resolveEnabledRows(rows);
-  const currentIndex = enabledRows.findIndex((row) => row.id === currentUnitId);
-  return enabledRows[currentIndex + offset]?.id;
+  const navigableRows = resolveNavigableRows(rows);
+  const currentIndex = navigableRows.findIndex(
+    (row) => row.id === currentUnitId,
+  );
+  return navigableRows[currentIndex + offset]?.id;
 };
 
 const resolveParentTarget = (
@@ -169,13 +174,13 @@ const resolveVerticalNavigation = (
 
 const resolveHomeNavigation = (
   rows: readonly UnitTreeNavigationRow[],
-): UnitTreeNavigationResult => focusResult(resolveEnabledRows(rows)[0]?.id);
+): UnitTreeNavigationResult => focusResult(resolveNavigableRows(rows)[0]?.id);
 
 const resolveEndNavigation = (
   rows: readonly UnitTreeNavigationRow[],
 ): UnitTreeNavigationResult => {
-  const enabledRows = resolveEnabledRows(rows);
-  return focusResult(enabledRows[enabledRows.length - 1]?.id);
+  const navigableRows = resolveNavigableRows(rows);
+  return focusResult(navigableRows[navigableRows.length - 1]?.id);
 };
 
 const resolveRightNavigation = (
@@ -255,7 +260,13 @@ const resolveUnitTreeNavigationResult = ({
 const isNavigableUnitTreeRow = (
   currentRow: UnitTreeNavigationRow | undefined,
   options: UnitTreeNavigationKeyOptions,
-): boolean => currentRow?.isEnabled === true && !hasNavigationModifier(options);
+): boolean =>
+  currentRow !== undefined &&
+  isUnitTreeRowNavigable(currentRow) &&
+  !hasNavigationModifier(options);
+
+const isLinearNavigationKey = (key: string): boolean =>
+  key === "ArrowDown" || key === "ArrowUp" || key === "Home" || key === "End";
 
 export const resolveUnitTreeNavigationKey = (
   rows: readonly UnitTreeNavigationRow[],
@@ -264,7 +275,9 @@ export const resolveUnitTreeNavigationKey = (
 ): UnitTreeNavigationResult => {
   const defaultResult = { suppressDefault: false };
   const currentRow = rows.find((row) => row.id === currentUnitId);
-  if (!currentRow?.isEnabled) return defaultResult;
+  if (!currentRow || !isUnitTreeRowNavigable(currentRow)) {
+    return defaultResult;
+  }
   if (
     options.key === "Enter" &&
     options.altKey &&
@@ -274,6 +287,16 @@ export const resolveUnitTreeNavigationKey = (
     currentRow.canOpenScope
   ) {
     return resolveScopeOpen(currentRow.id);
+  }
+  if (!currentRow.isEnabled && !isLinearNavigationKey(options.key)) {
+    return {
+      suppressDefault:
+        !hasNavigationModifier(options) &&
+        (options.key === "Enter" ||
+          options.key === " " ||
+          options.key === "ArrowLeft" ||
+          options.key === "ArrowRight"),
+    };
   }
   return isNavigableUnitTreeRow(currentRow, options)
     ? resolveUnitTreeNavigationResult({

@@ -4,9 +4,8 @@
 
 - Purpose: make unit-list and flow-graph exploration practical through
   keyboard, assistive-technology, and high-contrast paths.
-- Approved or active slice: Slices 1 through 8 are complete; review remediation
-  Slice 11 requires a revised plan and new Human Approval before
-  implementation.
+- Approved or active slice: Slices 1 through 8 are complete; Slice 11 exposed
+  a first-level sibling navigation gap and Slice 12 is active.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
 - Do not: add extension-wide WCAG certification, printable-character
@@ -17,9 +16,9 @@
 - Validate every code slice with its focused tests and
   `rtk pnpm run qlty`; run final cross-platform evidence in Slices 7 and 10.
 - Approval policy and document roles: see `docs/specs/README.md`.
-- Next decision: review and approve the remediation plan below before
-  implementation; Feature Exit remains blocked until the review findings and
-  their validation evidence are complete.
+- Next decision: obtain Slice 12 completion approval after implementation;
+  Slice 11 completion and Feature Exit remain blocked until first-level
+  sibling navigation is validated.
 
 ## Sync Rule
 
@@ -36,26 +35,25 @@
 
 ## Plan Status
 
-- Status: Replan Required
+- Status: In Progress
 - Planning scope: preserve the completed seven-slice implementation and add
   review-remediation slices for composite-widget focus semantics, graph event
   ownership, target size, and browser-level accessibility evidence.
-- Review status: Replanning required after Slice 8 interaction verification
-- Human approval: Slices 1 through 10 approved; the new Slice 11 requires
-  review and approval
-- Active implementation slice: none; Slice 11 is pending plan review
+- Review status: Reviewed; Slice 12 is complete and Slice 9 is approved
+- Human approval: Slices 1 through 12 approved; Slice 9 is active
+- Active implementation slice: Slice 9, Flow Action Activation And Graph
+  Keyboard-Entry Ownership
 
 ## Human Approval
 
-- Status: Pending
-- Approved at: prior approval for Slices 8 through 10 retained; Slice 11 is
-  pending approval
+- Status: Approved
+- Approved at: approved in current conversation
 - Approved scope: Remediation Slices 8 through 10: shared tree composite focus
   semantics and 28x28 action targets; native graph action activation, graph
   keyboard-entry ownership, and interactive-descendant guards; and the
   browser-DOM/axe accessibility evidence and focus/selection policy review.
-  Slice 11 below is pending new approval. No Domain, Application, parser, DTO,
-  host, or telemetry changes are approved.
+  Slice 11 is approved as a narrow flow-tree navigation follow-up. No Domain,
+  Application, parser, DTO, host, or telemetry changes are approved.
 - Prior approved decisions retained: normal Tab traversal; spatial unmodified
   arrows independent of predecessor/successor edges; shortest center-to-center
   Euclidean distance with upper, left, then stable-order ties; inline
@@ -881,7 +879,7 @@ the complete state model.
 
 ### Slice 9: Flow Action Activation And Graph Keyboard-Entry Ownership
 
-- Status: Proposed
+- Status: Approved
 - Scope: remove custom Enter key handlers from native React Flow node action
   buttons so Enter/Space use one native activation path; make the graph region
   a programmatic fallback rather than a second normal Tab entry when a
@@ -1014,7 +1012,7 @@ the complete state model.
 
 ### Slice 11: Flow Tree Out-of-Scope Scope Navigation Follow-Up
 
-- Status: Proposed
+- Status: In Progress
 - Scope: let the shared tree's linear navigation include visible rows that are
   disabled for selection but represent an eligible flow scope, so a keyboard
   user can reach a sibling root-jobnet row from the active flow scope. Keep
@@ -1071,9 +1069,89 @@ the complete state model.
   unless `aria-disabled`, no-op Enter/Space, and the explicit Alt+Enter action
   are announced consistently; the existing scope transition must not focus a
   stale graph.
+- Implementation Evidence: `unitTreeNavigation.ts` now treats visible
+  scope-eligible rows as linear focus candidates while keeping them disabled
+  for selection; `UnitTreeSelector.tsx` keeps those rows in the roving focus
+  set; `unitTreeSelector.test.ts` covers arrows, Home/End, no-op selection,
+  Left/Right guards, and Alt+Enter; `flowSelector.test.ts` confirms scope
+  eligibility does not bypass out-of-scope selection rejection.
+- Validation Result: `rtk pnpm run qlty`, `rtk pnpm run test:compile`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, and `git diff --check` pass.
+- Implementation Feedback: the approved boundary was appropriate; the
+  existing `canOpenScopeUnit` callback and scope-transition handler were
+  sufficient, so no flow-specific contract or graph code change was needed.
+- Completion Approval: Pending human approval after final review.
 - Out of Scope: enabling selection of arbitrary out-of-scope descendants,
   automatic scope changes on focus, changing Tab semantics, or redesigning the
   flow tree hierarchy.
+
+### Slice 12: First-Level Sibling Tree Focus
+
+- Status: Complete
+- Scope: include visible first-level flow-tree rows in linear keyboard focus
+  candidates even when they are outside the active scope and are not eligible
+  flow scopes. Preserve `aria-disabled="true"`, no-op Enter/Space selection,
+  and explicit Alt+Enter only for rows already eligible to open a flow scope.
+  Do not change normal Tab entry/exit or automatically change graph scope when
+  a first-level group receives focus.
+- User / Domain Value: a flow-view keyboard user can move from one top-level
+  job group to its sibling, including `test_jg_1` to `test_jg_2`, instead of
+  being trapped by the active scope filter.
+- Cohesive Change Group:
+  `shared/unitTreeNavigation.ts`, `shared/UnitTreeSelector.tsx`,
+  `unitTreeSelector.test.ts`, `flowSelector.test.ts`, and the directly related
+  flow-tree guidance and traceability records.
+- Acceptance:
+  - From a visible first-level row, Up/Down and Home/End include another
+    visible first-level row even when it is disabled for selection.
+  - The focused first-level out-of-scope row remains `aria-disabled="true"`;
+    Enter and Space do not select it or change graph scope.
+  - Existing root-jobnet scope rows retain Alt+Enter scope opening, and
+    first-level group focus does not invent a graph scope for a group.
+  - Non-first-level out-of-scope descendants remain outside the navigation set
+    until their owning scope is opened.
+  - List-view navigation and Tab/Shift+Tab behavior remain unchanged.
+- Validation: add pure navigation tests for disabled first-level sibling rows
+  and retained descendant filtering; run focused selector/flow tests,
+  `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run test:compile`,
+  `rtk pnpm run qlty`, Markdown lint, and diff checks.
+- Production Readiness:
+  - Failure mode: focusing a first-level group never selects it or changes
+    graph scope; unavailable rows leave selection unchanged.
+  - JP1/AJS compatibility: first-level identity is derived from normalized
+    `depth`/hierarchy only; parser and flow-scope eligibility remain unchanged.
+  - Large or malformed input risk: only visible rows are scanned and no
+    out-of-scope descendant subtree is activated by focus.
+  - Desktop/web impact: the shared browser-safe selector behavior is tested in
+    both bundles.
+  - README/docs impact: clarify that first-level sibling groups are focusable
+    but not selectable unless they are eligible flow scopes.
+  - CHANGELOG impact: required because first-level keyboard reachability is
+    user-visible.
+- Approval Boundary: first-level out-of-scope row focus candidates, their
+  no-op selection behavior, preservation of eligible scope opening, focused
+  tests, and directly related guidance. No graph layout, parser, Application,
+  DTO, host, or telemetry changes.
+- Dependencies: Slice 11's shared scope-row navigation is the base behavior;
+  Slice 12 must complete before Slice 11 can receive completion approval and
+  before Slice 10's DOM focus evidence is considered final.
+- Risks: making disabled rows focusable can be confusing to assistive
+  technology; `aria-disabled`, no-op activation, and the distinction between
+  focus-only groups and Alt+Enter scope rows must remain explicit.
+- Implementation Evidence: `isUnitTreeRowNavigable` now includes visible
+  first-level rows alongside enabled rows and eligible scope rows;
+  `UnitTreeSelector.tsx` uses the same predicate for roving focus and focus
+  restoration; `unitTreeSelector.test.ts` covers `test_jg_1`/`test_jg_2`
+  movement, no-op activation, and continued descendant filtering.
+- Validation Result: `rtk pnpm run qlty`, `rtk pnpm run test:compile`,
+  `rtk pnpm test`, `rtk pnpm run test:web`, `rtk pnpm run lint:md`, and
+  `git diff --check` pass.
+- Implementation Feedback: the first-level boundary was the smallest useful
+  extension; no flow-scope eligibility or graph construction contract needed
+  to change.
+- Completion Approval: Approved in current conversation.
+- Out of Scope: selecting arbitrary out-of-scope descendants, opening a group
+  as a graph scope, changing Tab semantics, or redesigning the tree hierarchy.
 
 ## Traceability
 

@@ -32,6 +32,7 @@ import {
 } from "../unitInformationLocalization";
 import { collectUnitTreeAncestorUnitIds } from "./unitTreeSelection";
 import {
+  isUnitTreeRowNavigable,
   resolveUnitTreeNavigationKey,
   resolveVisibleUnitTreeRows,
 } from "./unitTreeNavigation";
@@ -904,8 +905,8 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   const focusedUnitIdRef = useRef<string | undefined>(undefined);
   const pendingFocusUnitIdRef = useRef<string | undefined>(undefined);
   const handledFocusRequestRevisionRef = useRef(0);
-  const enabledVisibleRows = useMemo(
-    () => visibleRows.filter((row) => row.isEnabled),
+  const navigableVisibleRows = useMemo(
+    () => visibleRows.filter(isUnitTreeRowNavigable),
     [visibleRows],
   );
 
@@ -929,14 +930,14 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
     const currentUnitId = focusedUnitIdRef.current;
     if (
       currentUnitId &&
-      enabledVisibleRows.some((row) => row.id === currentUnitId)
+      navigableVisibleRows.some((row) => row.id === currentUnitId)
     ) {
       setActiveRow(currentUnitId);
       return;
     }
     const fallbackUnitId =
-      enabledVisibleRows.find((row) => row.id === selectedUnitId)?.id ??
-      enabledVisibleRows[0]?.id;
+      navigableVisibleRows.find((row) => row.id === selectedUnitId)?.id ??
+      navigableVisibleRows[0]?.id;
     if (
       currentUnitId &&
       fallbackUnitId &&
@@ -947,7 +948,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
       pendingFocusUnitIdRef.current = fallbackUnitId;
     }
     setActiveRow(fallbackUnitId);
-  }, [enabledVisibleRows, rowByUnitIdRef, selectedUnitId, setActiveRow]);
+  }, [navigableVisibleRows, rowByUnitIdRef, selectedUnitId, setActiveRow]);
 
   const requestRowFocus = useCallback(
     (unitId: string) => {
@@ -972,27 +973,27 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
     const requestedUnitId = focusRequest?.targetUnitId;
     if (
       requestedUnitId &&
-      !enabledVisibleRows.some((row) => row.id === requestedUnitId)
+      !navigableVisibleRows.some((row) => row.id === requestedUnitId)
     ) {
       return;
     }
-    const targetUnitId = requestedUnitId ?? enabledVisibleRows[0]?.id;
+    const targetUnitId = requestedUnitId ?? navigableVisibleRows[0]?.id;
     if (!targetUnitId) return;
     requestRowFocus(targetUnitId);
     handledFocusRequestRevisionRef.current = revision;
-  }, [collapsed, enabledVisibleRows, expand, focusRequest, requestRowFocus]);
+  }, [collapsed, expand, focusRequest, navigableVisibleRows, requestRowFocus]);
 
   useEffect(() => {
     const pendingUnitId = pendingFocusUnitIdRef.current;
     if (!pendingUnitId) return;
-    if (!enabledVisibleRows.some((row) => row.id === pendingUnitId)) {
+    if (!navigableVisibleRows.some((row) => row.id === pendingUnitId)) {
       pendingFocusUnitIdRef.current = undefined;
       return;
     }
     if (focusUnitTreeRow(rowByUnitIdRef.current, pendingUnitId)) {
       pendingFocusUnitIdRef.current = undefined;
     }
-  }, [enabledVisibleRows, expandedUnitIds, rowByUnitIdRef]);
+  }, [expandedUnitIds, navigableVisibleRows, rowByUnitIdRef]);
 
   const handleRowFocus = useCallback(
     (unitId: string) => {
@@ -1096,7 +1097,7 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
       ariaLabel={resolvedAriaLabel}
       rootUnits={rootUnits}
       title={resolvedTitle}
-      treeTabIndex={enabledVisibleRows.length > 0 ? -1 : 0}
+      treeTabIndex={navigableVisibleRows.length > 0 ? -1 : 0}
       canOpenScopeUnit={canOpenScopeUnit}
       currentPathUnitIds={currentPathUnitIds}
       currentUnitId={currentUnitId}

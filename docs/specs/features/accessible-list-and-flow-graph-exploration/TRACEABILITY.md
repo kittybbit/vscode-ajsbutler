@@ -305,4 +305,21 @@ destination`; `Viewer state remains perceivable without color`
 - Tests/validation: `unitTreeSelector.test.ts`, `flowSelector.test.ts`, pure
   disabled-but-scope-focusable navigation tests, desktop/Web suites, qlty, and
   manual confirmation that sibling scope opening renders the destination graph
-- Status: Proposed; implementation pending plan review and Human Approval
+- Status: In Progress; implementation and automated validation complete,
+  completion approval pending. Manual sibling-scope rendering confirmation
+  remains a Feature Exit evidence item.
+
+## Slice 12: First-Level Sibling Tree Focus
+
+- Use Case:
+  `uc-explore-flow-graph.md` — `Graph and flow tree synchronize interaction`;
+  `Flow-tree navigation opens a sibling scope explicitly`
+- Requirement: `ACC-VIEW-003`, `ACC-VIEW-005`, `ACC-VIEW-006`,
+  `ACC-VIEW-007`, `ACC-VIEW-008`
+- `SPECS.md`: Interaction Model Decisions; Behavioral Scenarios; Acceptance
+  Criteria
+- Implementation Slice: Slice 12, First-Level Sibling Tree Focus
+- Tests/validation: `unitTreeSelector.test.ts`, `flowSelector.test.ts`, pure
+  first-level disabled-row navigation tests, desktop/Web suites, qlty,
+  Markdown lint, and diff checks
+- Status: Complete; implementation and automated validation complete.

@@ -53,6 +53,11 @@ flow scope while preserving predictable navigation and viewport state.
 - selecting a node exposes lightweight relationship and status context without
   automatically opening unit-definition details
 - selecting an in-scope flow-tree row centers the unit without changing zoom
+- visible root-jobnet scope rows outside the active scope remain focusable in
+  the flow tree but are not selectable; Alt+Enter explicitly opens the focused
+  eligible scope
+- visible first-level group rows outside the active scope remain focusable for
+  sibling-tree navigation but are not selectable or graph scopes
 - flow-tree and graph selection and hover remain synchronized
 - synchronized selection or hover does not implicitly change graph scope
 - relationship focus preserves unrelated nodes and edges with weaker emphasis
@@ -128,6 +133,14 @@ Scenario: Flow-tree selection preserves zoom
   When the user selects the row
   Then the graph centers the corresponding unit
   And the zoom level remains unchanged
+
+Scenario: Flow-tree navigation opens a sibling scope explicitly
+  Given the active root-jobnet and another visible eligible root-jobnet scope
+  When the user moves focus to the sibling scope with Up, Down, Home, or End
+  Then the sibling row remains disabled for selection
+  When the user presses Alt+Enter
+  Then the sibling root-jobnet becomes the active flow scope
+  And its graph is rendered and focused after the scope is ready
 
 Scenario: Graph and flow tree synchronize interaction
   Given the graph and flow tree are visible
