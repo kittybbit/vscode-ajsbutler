@@ -36,22 +36,26 @@
 
 ## Plan Status
 
-- Status: Replan Required
+- Status: In Progress
 - Planning scope: preserve the completed seven-slice implementation and add
   review-remediation slices for composite-widget focus semantics, graph event
   ownership, target size, and browser-level accessibility evidence.
-- Review status: Replanning prepared; pending `sdd-review-plan`
-- Human approval: Prior seven-slice approval retained; remediation slices are
-  pending new approval
-- Active implementation slice: none; remediation plan review is pending
+- Review status: Reviewed; remediation Slices 8 through 10 are approved for
+  implementation
+- Human approval: All ten slices approved; Slice 8 is active
+- Active implementation slice: none; Slice 8 completion recorded and Slice 9
+  is ready for the next implementation cycle
 
 ## Human Approval
 
-- Status: Pending
-- Approved at: prior seven-slice approval remains recorded; remediation scope
-  has not yet been approved
-- Approved scope: Prior approval covers only the completed Slices 1 through 7.
-  Slices 8 through 10 below require explicit approval after plan review.
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: Remediation Slices 8 through 10: shared tree composite focus
+  semantics and 28x28 action targets; native graph action activation, graph
+  keyboard-entry ownership, and interactive-descendant guards; and the
+  browser-DOM/axe accessibility evidence and focus/selection policy review.
+  No Domain, Application, parser, DTO, host, or telemetry changes are
+  approved.
 - Prior approved decisions retained: normal Tab traversal; spatial unmodified
   arrows independent of predecessor/successor edges; shortest center-to-center
   Euclidean distance with upper, left, then stable-order ties; inline
@@ -793,7 +797,7 @@ the complete state model.
 
 ### Slice 8: Shared Tree Composite Focus Semantics And Action Targets
 
-- Status: Proposed
+- Status: Complete
 - Scope: revise the shared unit tree so the owning `treeitem` is the only
   normal Tab stop, move selection click handling to that semantic treeitem,
   keep disclosure and scope actions mouse-operable with `tabIndex={-1}`, and
@@ -826,6 +830,16 @@ the complete state model.
   disclosure-collapse, and scope-action cases in Slice 10; run focused tests,
   `rtk pnpm test`, `rtk pnpm run test:web`, and `rtk pnpm run qlty` with no new
   actionable smell findings.
+- Implementation Evidence:
+  - The visible-row resolver now carries scope-action eligibility into the
+    presentation-local key resolver. Alt+Enter opens only an eligible enabled
+    row and does not change the Enter/Space selection contract.
+  - The owning treeitem now owns pointer focus and selection clicks. Disclosure
+    and scope buttons stop click bubbling, remain mouse-operable, leave the Tab
+    sequence through `tabIndex={-1}`, and use a 28x28 hit area.
+  - `unitTreeSelector.test.ts`, desktop tests, Web tests, TypeScript
+    compilation, and qlty passed. DOM-level Tab order and browser focus
+    assertions remain intentionally deferred to Slice 10.
 - Production Readiness:
   - Failure mode: an unavailable or disabled scope remains selected without
     emitting an open request; a hidden descendant never retains DOM focus.
@@ -1211,6 +1225,11 @@ the complete state model.
   pre-existing FlowContents type/wiring gaps that were fixed with no behavior
   change; future slice plans should include the production entry-point build,
   not only the test TypeScript project.
+- Slice 8 confirmed that carrying scope-action eligibility with the visible-row
+  projection avoids a second unit lookup while keeping Alt+Enter in the shared
+  presentation navigation contract. Pointer focus and selection can stay
+  DOM-local on the owning treeitem; DOM-level proof remains appropriately
+  isolated in Slice 10.
 
 ## Assumptions And Compatibility
 

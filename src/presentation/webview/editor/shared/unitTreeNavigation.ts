@@ -12,13 +12,15 @@ export type UnitTreeNavigationRow = {
   hasChildren: boolean;
   isEnabled: boolean;
   isExpanded: boolean;
+  canOpenScope: boolean;
 };
 
 export type UnitTreeNavigationAction =
   | { kind: "focus"; targetUnitId: string }
   | { kind: "expand"; targetUnitId: string }
   | { kind: "collapse"; targetUnitId: string }
-  | { kind: "select"; targetUnitId: string };
+  | { kind: "select"; targetUnitId: string }
+  | { kind: "open-scope"; targetUnitId: string };
 
 export type UnitTreeNavigationResult = {
   action?: UnitTreeNavigationAction;
@@ -37,6 +39,7 @@ type AppendVisibleUnitTreeRowsContext = {
   units: readonly UnitTreeNavigationUnit[];
   expandedUnitIds: ReadonlySet<string>;
   isUnitEnabled: (unit: UnitTreeNavigationUnit) => boolean;
+  canOpenScopeUnit: (unit: UnitTreeNavigationUnit) => boolean;
   rows: UnitTreeNavigationRow[];
 };
 
@@ -44,6 +47,7 @@ const toVisibleUnitTreeRow = (
   unit: UnitTreeNavigationUnit,
   expandedUnitIds: ReadonlySet<string>,
   isUnitEnabled: (unit: UnitTreeNavigationUnit) => boolean,
+  canOpenScopeUnit: (unit: UnitTreeNavigationUnit) => boolean,
 ): UnitTreeNavigationRow => {
   const hasChildren = unit.children.length > 0;
   return {
@@ -53,6 +57,7 @@ const toVisibleUnitTreeRow = (
     hasChildren,
     isEnabled: isUnitEnabled(unit),
     isExpanded: hasChildren && expandedUnitIds.has(unit.id),
+    canOpenScope: canOpenScopeUnit(unit),
   };
 };
 
@@ -74,14 +79,21 @@ const appendVisibleUnitTreeRows = ({
   units,
   expandedUnitIds,
   isUnitEnabled,
+  canOpenScopeUnit,
   rows,
 }: AppendVisibleUnitTreeRowsContext): void => {
   for (const unit of units) {
-    const row = toVisibleUnitTreeRow(unit, expandedUnitIds, isUnitEnabled);
+    const row = toVisibleUnitTreeRow(
+      unit,
+      expandedUnitIds,
+      isUnitEnabled,
+      canOpenScopeUnit,
+    );
     rows.push(row);
     appendVisibleUnitTreeChildren(unit, row, {
       expandedUnitIds,
       isUnitEnabled,
+      canOpenScopeUnit,
       rows,
     });
   }
@@ -91,12 +103,14 @@ export const resolveVisibleUnitTreeRows = (
   rootUnits: readonly UnitTreeNavigationUnit[],
   expandedUnitIds: ReadonlySet<string>,
   isUnitEnabled: (unit: UnitTreeNavigationUnit) => boolean,
+  canOpenScopeUnit: (unit: UnitTreeNavigationUnit) => boolean = () => false,
 ): UnitTreeNavigationRow[] => {
   const rows: UnitTreeNavigationRow[] = [];
   appendVisibleUnitTreeRows({
     units: rootUnits,
     expandedUnitIds,
     isUnitEnabled,
+    canOpenScopeUnit,
     rows,
   });
   return rows;
@@ -198,6 +212,11 @@ const resolveSelection = (currentUnitId: string): UnitTreeNavigationResult => ({
   suppressDefault: true,
 });
 
+const resolveScopeOpen = (currentUnitId: string): UnitTreeNavigationResult => ({
+  action: { kind: "open-scope", targetUnitId: currentUnitId },
+  suppressDefault: true,
+});
+
 type UnitTreeNavigationResolver = (
   rows: readonly UnitTreeNavigationRow[],
   currentRow: UnitTreeNavigationRow,
@@ -245,10 +264,21 @@ export const resolveUnitTreeNavigationKey = (
 ): UnitTreeNavigationResult => {
   const defaultResult = { suppressDefault: false };
   const currentRow = rows.find((row) => row.id === currentUnitId);
+  if (!currentRow?.isEnabled) return defaultResult;
+  if (
+    options.key === "Enter" &&
+    options.altKey &&
+    !options.ctrlKey &&
+    !options.metaKey &&
+    !options.shiftKey &&
+    currentRow.canOpenScope
+  ) {
+    return resolveScopeOpen(currentRow.id);
+  }
   return isNavigableUnitTreeRow(currentRow, options)
     ? resolveUnitTreeNavigationResult({
         rows,
-        currentRow: currentRow as UnitTreeNavigationRow,
+        currentRow,
         key: options.key,
       })
     : defaultResult;

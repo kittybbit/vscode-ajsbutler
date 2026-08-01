@@ -115,7 +115,6 @@ type UnitTreeRowButtonProps = Pick<
   "isCurrent" | "isEnabled" | "isSelected"
 > & {
   unit: FlowGraphUnitDto;
-  onSelect: () => void;
 };
 
 type UnitTreeOpenScopeActionProps = Pick<UnitTreeRowState, "canOpenScope"> & {
@@ -162,6 +161,16 @@ type ExpandedUnitTreePanelProps = Omit<UnitTreeSelectorTreeProps, "units"> & {
 
 const defaultCanOpenScopeUnit = (): boolean => false;
 const defaultIsUnitEnabled = (): boolean => true;
+
+export const UNIT_TREE_ACTION_SIZE_PX = 28;
+
+const unitTreeActionSx = {
+  width: UNIT_TREE_ACTION_SIZE_PX,
+  height: UNIT_TREE_ACTION_SIZE_PX,
+  minWidth: UNIT_TREE_ACTION_SIZE_PX,
+  minHeight: UNIT_TREE_ACTION_SIZE_PX,
+  padding: 0,
+};
 
 const isDefinedUnitId = (unitId: string | undefined): unitId is string =>
   unitId !== undefined && unitId.length > 0;
@@ -419,12 +428,17 @@ const UnitTreeExpandControl: FC<UnitTreeExpandControlProps> = ({
   return (
     <IconButton
       size="small"
+      tabIndex={-1}
       aria-label={formatUnitInformationMessage(
         isExpanded ? "a11y.tree.collapse" : "a11y.tree.expand",
         lang,
         { title: unit.name },
       )}
-      onClick={onToggle}
+      onClick={(event) => {
+        event.stopPropagation();
+        onToggle();
+      }}
+      sx={unitTreeActionSx}
     >
       <UnitTreeExpandIcon isExpanded={isExpanded} />
     </IconButton>
@@ -457,21 +471,8 @@ const UnitTreeRowButton: FC<UnitTreeRowButtonProps> = ({
   isEnabled,
   isSelected,
   unit,
-  onSelect,
 }) => (
   <Box
-    role="presentation"
-    onMouseDown={
-      isEnabled
-        ? (event) => {
-            event.preventDefault();
-            event.currentTarget
-              .closest<HTMLElement>('[role="treeitem"]')
-              ?.focus({ preventScroll: true });
-          }
-        : undefined
-    }
-    onClick={isEnabled ? onSelect : undefined}
     sx={{
       display: "flex",
       alignItems: "center",
@@ -508,8 +509,13 @@ const UnitTreeOpenScopeAction: FC<UnitTreeOpenScopeActionProps> = ({
     <Tooltip title={label}>
       <IconButton
         size="small"
+        tabIndex={-1}
         aria-label={label}
-        onClick={() => onOpenScope(unit.id)}
+        onClick={(event) => {
+          event.stopPropagation();
+          onOpenScope(unit.id);
+        }}
+        sx={unitTreeActionSx}
       >
         <FolderOpenIcon fontSize="inherit" />
       </IconButton>
@@ -609,11 +615,26 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
     selectedUnitId,
   });
   const handleToggle = () => setExpanded(unit.id, !rowState.isExpanded);
-  const handleSelect = () => onSelectUnit(unit.id);
   const handleMouseEnter = () =>
     notifyEnabledUnit(rowState.isEnabled, unit.id, onHoverUnit);
   const handleMouseLeave = () =>
     notifyEnabledUnit(rowState.isEnabled, unit.id, onLeaveUnit);
+  const handleRowMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+    if (!rowState.isEnabled) return;
+    const owningTreeItem = (event.target as HTMLElement).closest(
+      '[role="treeitem"]',
+    );
+    if (owningTreeItem !== event.currentTarget) return;
+    event.preventDefault();
+    event.currentTarget.focus({ preventScroll: true });
+  };
+  const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
+    const owningTreeItem = (event.target as HTMLElement).closest(
+      '[role="treeitem"]',
+    );
+    if (owningTreeItem !== event.currentTarget) return;
+    notifyEnabledUnit(rowState.isEnabled, unit.id, onSelectUnit);
+  };
 
   return (
     <Box
@@ -626,6 +647,8 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
       aria-level={unit.depth + 1}
       aria-selected={rowState.isSelected}
       data-unit-tree-unit-id={unit.id}
+      onMouseDown={handleRowMouseDown}
+      onClick={handleRowClick}
       onFocus={(event) => {
         if (event.target === event.currentTarget) {
           onRowFocus(unit.id);
@@ -659,7 +682,6 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
           isEnabled={rowState.isEnabled}
           isSelected={rowState.isSelected}
           unit={unit}
-          onSelect={handleSelect}
         />
         <UnitTreeOpenScopeAction
           canOpenScope={rowState.canOpenScope}
@@ -871,10 +893,13 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
   );
   const visibleRows = useMemo(
     () =>
-      resolveVisibleUnitTreeRows(rootUnits, expandedUnitIds, (unit) =>
-        isUnitEnabled(unit as FlowGraphUnitDto),
+      resolveVisibleUnitTreeRows(
+        rootUnits,
+        expandedUnitIds,
+        (unit) => isUnitEnabled(unit as FlowGraphUnitDto),
+        (unit) => canOpenScopeUnit(unit as FlowGraphUnitDto),
       ),
-    [expandedUnitIds, isUnitEnabled, rootUnits],
+    [canOpenScopeUnit, expandedUnitIds, isUnitEnabled, rootUnits],
   );
   const focusedUnitIdRef = useRef<string | undefined>(undefined);
   const pendingFocusUnitIdRef = useRef<string | undefined>(undefined);
@@ -1014,9 +1039,19 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
         case "select":
           onSelectUnit(action.targetUnitId);
           return;
+        case "open-scope":
+          onOpenScope?.(action.targetUnitId);
+          return;
       }
     },
-    [onEscape, onSelectUnit, requestRowFocus, setExpanded, visibleRows],
+    [
+      onEscape,
+      onOpenScope,
+      onSelectUnit,
+      requestRowFocus,
+      setExpanded,
+      visibleRows,
+    ],
   );
 
   const handleRowKeyDown = useCallback(

@@ -247,7 +247,13 @@ names that exist in those files.
 - Tests/validation: `unitTreeNavigation.test.ts`, `unitTreeSelector.test.ts`,
   list/flow consumer regressions, DOM Tab/order and collapse cases in Slice 10,
   desktop/Web suites, qlty, and 28x28 target-size checks
-- Status: Proposed; implementation pending reviewed-plan approval
+- Status: Complete; human completion approval recorded in TASKS.md
+- Current validation (2026-08-01): Alt+Enter eligibility/modifier boundaries,
+  visible-row preservation, and 28px action sizing pass in
+  `unitTreeSelector.test.ts`; `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run test:compile`, and `rtk pnpm run qlty` pass. Browser DOM Tab
+  order, native click activation, and hidden-descendant focus evidence remain
+  Slice 10 validation.
 
 ## Slice 9: Flow Action Activation And Graph Keyboard-Entry Ownership
 

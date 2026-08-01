@@ -2,6 +2,7 @@ import * as assert from "assert";
 import {
   mergeUnitIds,
   resolveUnitTreeRowBorderStyle,
+  UNIT_TREE_ACTION_SIZE_PX,
 } from "../../presentation/webview/editor/shared/UnitTreeSelector";
 import {
   resolveUnitTreeNavigationKey,
@@ -193,6 +194,45 @@ suite("Unit Tree Selector", () => {
       }),
       { suppressDefault: false },
     );
+  });
+
+  test("opens an eligible scope with Alt+Enter without changing row selection", () => {
+    const rows = resolveVisibleUnitTreeRows(
+      [unit("/root", 0), unit("/job", 0)],
+      new Set(),
+      () => true,
+      (candidate) => candidate.id === "/root",
+    );
+
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/root", {
+        key: "Enter",
+        altKey: true,
+      }),
+      {
+        action: { kind: "open-scope", targetUnitId: "/root" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/job", {
+        key: "Enter",
+        altKey: true,
+      }),
+      { suppressDefault: false },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/root", {
+        key: "Enter",
+        altKey: true,
+        shiftKey: true,
+      }),
+      { suppressDefault: false },
+    );
+  });
+
+  test("keeps tree action hit areas above the WCAG minimum", () => {
+    assert.strictEqual(UNIT_TREE_ACTION_SIZE_PX, 28);
   });
 
   test("does not navigate to disabled rows", () => {
