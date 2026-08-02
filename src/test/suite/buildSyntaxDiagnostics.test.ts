@@ -201,6 +201,16 @@ suite("Build Syntax Diagnostics", () => {
         syntaxDiagnosticCategories.eventReceiving,
       ],
     );
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => diagnostic.ruleId),
+      [
+        diagnosticRuleIds.scheduleRange,
+        diagnosticRuleIds.scheduleRange,
+        diagnosticRuleIds.eventSendIdRange,
+        diagnosticRuleIds.eventArrivalHost,
+        diagnosticRuleIds.eventReceiveFilter,
+      ],
+    );
   });
 
   test("returns parser errors as UI-independent diagnostics", () => {
@@ -219,6 +229,20 @@ suite("Build Syntax Diagnostics", () => {
   test("returns an empty array for valid input", () => {
     const diagnostics = buildSyntaxDiagnostics(
       "unit=root,,jp1admin,;\n{\n  ty=g;\n}\n",
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
+  test("keeps a bounded large valid definition diagnostic-free", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      buildRootUnitDefinition(
+        Array.from({ length: 128 }, (_, index) => ({
+          name: `job${index}`,
+          type: "j",
+          parameters: ["jd=cod;"],
+        })),
+      ),
     );
 
     assert.deepStrictEqual(diagnostics, []);

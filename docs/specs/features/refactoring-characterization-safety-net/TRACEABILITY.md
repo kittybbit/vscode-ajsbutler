@@ -56,3 +56,23 @@ also names the concrete test files that prove the slice contract.
 - `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
   existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
 - `rtk pnpm run qlty`: passed with no issues.
+
+## Slice 3 implementation evidence
+
+- `buildSyntaxDiagnostics.test.ts` now records stable application-level rule
+  IDs alongside category, severity, message, and source spans for a mixed
+  parser/semantic result, and verifies that a bounded 128-child valid
+  definition remains diagnostic-free.
+- `mapDiagnosticViolation.test.ts` records the current line-1/column-0/key-
+  length fallback when normalized parameter evidence omits source metadata.
+- The existing event, job-end, monitoring/wait, schedule, transfer, and event
+  rule suites remain the read-only semantic violation and allowed-form evidence
+  named by this slice; no diagnostic rule IDs, messages, spans, or runtime
+  behavior were changed.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
+- `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
+- `rtk pnpm run qlty`: passed with no issues.

@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 3: Application syntax and semantic
-  diagnostics characterization.
+- Active implementation slice: Slice 4: Application flow-graph construction
+  characterization.
 
 ## Replanning Decision
 
@@ -171,7 +171,7 @@ approved boundaries.
 
 ### Slice 3: Application syntax and semantic diagnostics characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize syntax parsing, supported semantic violations,
   diagnostic category/severity/message, and 1-based line/0-based column spans.
 - Target symbols: `createBuildSyntaxDiagnostics`,
@@ -723,6 +723,14 @@ approved boundaries.
 - The helper boundary intentionally preserves explicit rule numbers and raw
   values, while v13 range validity remains owned by schedule diagnostics; the
   matrix tests record that distinction for later domain restructuring.
+- Browser-hosted validation again required sandbox-external Chromium; no
+  desktop/web contract difference or new dependency was discovered.
+- Slice 3's boundary remained appropriate: application mapping assertions and
+  existing rule-family suites provide the diagnostic contract without changing
+  runtime orchestration or diagnostic meaning.
+- A bounded 128-child valid definition plus missing-position fallback evidence
+  was sufficient to cover large-input and source-span risks without broad
+  snapshots or a new partial-result policy.
 - Browser-hosted validation again required sandbox-external Chromium; no
   desktop/web contract difference or new dependency was discovered.
 
