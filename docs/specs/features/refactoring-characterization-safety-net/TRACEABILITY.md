@@ -350,3 +350,37 @@ also names the concrete test files that prove the slice contract.
   exited 0.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed after this traceability update.
+
+## Slice 14 implementation evidence
+
+- `telemetryEvent.test.ts` records the complete 47-event name catalog and the
+  complete forbidden content/path/identifier/error property set. Existing
+  allowlisted payload filtering remains immutable and string-normalized.
+- `telemetryBuckets.test.ts` records duration/count/HTTP boundary behavior,
+  invalid numeric fallbacks, fractional count flooring, and the accepted
+  duration/count vocabulary.
+- `performanceTelemetry.test.ts`, `searchTelemetry.test.ts`,
+  `viewerActionTelemetry.test.ts`, and `viewerTelemetry.test.ts` record every
+  supported builder mapping, stable payload meaning, failure/cancelled results,
+  legacy viewer events, and unknown-viewer fallbacks. The existing
+  `telemetryAdapter.test.ts` and `createTelemetry.test.ts` remain read-only
+  evidence for report/initialization/disposal failure isolation, no-op fallback,
+  and the browser telemetry port contract.
+- No runtime, generated-parser, configuration, dependency, or architecture
+  boundary changed. Telemetry privacy, event meaning, JP1/AJS behavior, and
+  desktop/browser user-visible behavior remain unchanged.
+- The slice boundary remained appropriate: complete catalog and builder
+  characterization was added without importing the SDK into application code,
+  changing collection policy, or adding test-only runtime seams. No durable
+  documentation or CHANGELOG update is required.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted EPIPE/ECONNRESET/Premature close logs but
+  exited 0.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run build`: remains blocked by the pre-existing
+  `src/test/suite/accessibilityDom.test.tsx` type errors (`UnitListRowView.name`
+  and `HTMLElement.disabled`); no build-production source or that test was
+  changed by Slice 14.

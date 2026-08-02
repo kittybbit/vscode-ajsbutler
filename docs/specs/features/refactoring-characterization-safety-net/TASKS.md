@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 14: Validated telemetry contract and
-  event-builder characterization.
+- Active implementation slice: None; all approved implementation slices are
+  complete. Feature Exit remains a separate `sdd-plan-task` decision.
 
 ## Replanning Decision
 
@@ -583,7 +583,7 @@ approved boundaries.
 
 ### Slice 14: Validated telemetry contract and event-builder characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize event names, allowlisted properties, duration/count/HTTP
   buckets, viewer/search/performance builders, no-op fallback, and disposal.
 - Target symbols: `createPerformanceTelemetryEvent`,
@@ -795,6 +795,19 @@ approved boundaries.
 - Browser-hosted validation again requires sandbox-external Chromium on this
   host; the existing EPIPE/ECONNRESET/Premature close teardown logs did not
   affect the passing result.
+
+- Slice 14's boundary remained appropriate: event catalog, privacy filtering,
+  bucket conversion, builder mapping, and failure isolation were characterized
+  without changing runtime code, SDK ownership, or collection policy.
+- Table-driven coverage of all supported performance/search/viewer builder
+  branches and the complete forbidden-property set improved future refactoring
+  confidence without requiring broad snapshots. No new dependency, JP1/AJS
+  compatibility issue, or desktop/web contract difference was discovered.
+- Browser-hosted validation again requires sandbox-external Chromium on this
+  host; the existing EPIPE/ECONNRESET/Premature close teardown logs did not
+  affect the passing result. The production build remains blocked by the
+  pre-existing `accessibilityDom.test.tsx` type errors recorded in the
+  traceability evidence.
 
 ## Notes
 

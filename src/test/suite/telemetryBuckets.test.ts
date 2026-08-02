@@ -1,5 +1,7 @@
 import * as assert from "assert";
 import {
+  isTelemetryCountBucket,
+  isTelemetryDurationBucket,
   toCountBucket,
   toDurationBucket,
   toHttpStatusCategory,
@@ -9,6 +11,7 @@ suite("Telemetry buckets", () => {
   test("maps durations to coarse stable buckets", () => {
     assert.strictEqual(toDurationBucket(-1), "unknown");
     assert.strictEqual(toDurationBucket(Number.NaN), "unknown");
+    assert.strictEqual(toDurationBucket(Number.POSITIVE_INFINITY), "unknown");
     assert.strictEqual(toDurationBucket(99), "lt100ms");
     assert.strictEqual(toDurationBucket(100), "100_499ms");
     assert.strictEqual(toDurationBucket(499), "100_499ms");
@@ -23,6 +26,7 @@ suite("Telemetry buckets", () => {
 
   test("maps counts to coarse stable buckets", () => {
     assert.strictEqual(toCountBucket(-1), "unknown");
+    assert.strictEqual(toCountBucket(Number.NaN), "unknown");
     assert.strictEqual(toCountBucket(Number.POSITIVE_INFINITY), "unknown");
     assert.strictEqual(toCountBucket(0), "0");
     assert.strictEqual(toCountBucket(1), "1");
@@ -33,6 +37,19 @@ suite("Telemetry buckets", () => {
     assert.strictEqual(toCountBucket(100), "100_999");
     assert.strictEqual(toCountBucket(999), "100_999");
     assert.strictEqual(toCountBucket(1000), "1000_plus");
+    assert.strictEqual(toCountBucket(1.9), "1");
+  });
+
+  test("accepts only the stable duration and count bucket vocabulary", () => {
+    assert.strictEqual(isTelemetryDurationBucket("unknown"), true);
+    assert.strictEqual(isTelemetryDurationBucket("15s_plus"), true);
+    assert.strictEqual(isTelemetryDurationBucket("raw duration"), false);
+    assert.strictEqual(isTelemetryDurationBucket(undefined), false);
+
+    assert.strictEqual(isTelemetryCountBucket("0"), true);
+    assert.strictEqual(isTelemetryCountBucket("1000_plus"), true);
+    assert.strictEqual(isTelemetryCountBucket("raw count"), false);
+    assert.strictEqual(isTelemetryCountBucket(undefined), false);
   });
 
   test("maps HTTP status codes to anonymous status classes", () => {
