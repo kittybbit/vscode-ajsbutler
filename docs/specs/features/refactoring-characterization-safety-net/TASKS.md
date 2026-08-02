@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 8: Flow search and viewer interaction-
-  state characterization.
+- Active implementation slice: Slice 9: Unit-list table presentation and
+  keyboard navigation characterization.
 
 ## Replanning Decision
 
@@ -363,7 +363,7 @@ approved boundaries.
 
 ### Slice 8: Flow search and viewer interaction-state characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize current-scope search, collapsed-ancestor reveal,
   selection, Enter/Escape transitions, focus restoration, and viewport effects.
 - Target symbols: `useSearchSubmitHandler`, `useFlowSearchState`,

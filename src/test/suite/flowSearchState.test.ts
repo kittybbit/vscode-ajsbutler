@@ -115,4 +115,50 @@ suite("Flow Search State", () => {
       createEmptyFlowSearchState(4),
     );
   });
+
+  test("wraps a bounded large result set without changing result position", () => {
+    const matchedUnitIds = Array.from(
+      { length: 2048 },
+      (_, index) => `unit-${index}`,
+    );
+    const initial = createSubmittedFlowSearchState(
+      "unit",
+      {
+        matchedUnitId: matchedUnitIds.at(-1) as string,
+        matchedUnitIds,
+        expandedAncestorUnitIds: [],
+      },
+      10,
+    );
+
+    const next = moveFlowSearchResult(initial, "next");
+    const previous = moveFlowSearchResult(next, "previous");
+
+    assert.deepStrictEqual(getFlowSearchResultPosition(initial), {
+      current: 2048,
+      total: 2048,
+    });
+    assert.strictEqual(next.searchedUnitId, "unit-0");
+    assert.strictEqual(previous.searchedUnitId, "unit-2047");
+    assert.strictEqual(previous.focusRequestVersion, 12);
+  });
+
+  test("recovers stale result selection without revealing an invalid unit", () => {
+    const staleState = {
+      query: "job",
+      matchedUnitIds: ["job-a", "job-b"],
+      searchedUnitId: "removed-job",
+      focusRequestVersion: 7,
+    };
+
+    assert.deepStrictEqual(moveFlowSearchResult(staleState, "next"), {
+      ...staleState,
+      searchedUnitId: "job-a",
+      focusRequestVersion: 8,
+    });
+    assert.deepStrictEqual(getFlowSearchResultPosition(staleState), {
+      current: 0,
+      total: 2,
+    });
+  });
 });

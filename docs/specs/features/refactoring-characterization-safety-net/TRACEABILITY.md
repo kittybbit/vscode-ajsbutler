@@ -175,3 +175,33 @@ also names the concrete test files that prove the slice contract.
   existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed.
+
+## Slice 8 implementation evidence
+
+- `flowSearch.test.ts` records current-scope matching, collapsed-ancestor
+  expansion, and deterministic order for a bounded 2,048-result fixture.
+  `flowSearchState.test.ts` records cyclic next/previous navigation across the
+  same result bound and safe recovery when the searched unit is stale.
+- `flowKeyboardNavigation.test.ts` retains Enter/Escape scope transitions,
+  modifier handling, rendered-node focus restoration, stale-node graph-entry
+  fallback, and a bounded 10,000-node navigation case. `flowViewerShortcuts.test.ts`
+  retains case-insensitive detail/selector shortcuts and modifier rejection.
+- `flowViewportFocus.test.ts` records search-over-selection priority,
+  zoom-preserving center actions, pending-render waits, stale-target fail-safe
+  behavior, layout fallback, and keyboard-expansion viewport preservation.
+  `revealUnit.test.ts` retains stable scope selection, collapsed ancestor
+  reveal, malformed/cyclic fallback, and bounded deep-hierarchy behavior.
+- No runtime, generated-parser, configuration, dependency, or architecture
+  boundary changed. Flow scope identity, keyboard bindings, viewport meaning,
+  and desktop/web user-visible behavior remain unchanged.
+- The slice boundary remained appropriate: deterministic state and fallback
+  evidence was added without exposing private hooks or introducing a shared
+  search contract. No additional durable documentation or CHANGELOG update is
+  required.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted EPIPE/ECONNRESET/Premature close logs but
+  exited 0.
+- `rtk pnpm run qlty`: passed with no issues.

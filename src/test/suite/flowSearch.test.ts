@@ -6,6 +6,7 @@ import {
   toFlowGraphDocumentDto,
   validateFlowGraphDocument,
 } from "../../application/flow-graph/flowGraphDocument";
+import { createFlowTestUnit } from "../support/flowUnits";
 
 const nestedDefinition = `
 unit=root,,jp1admin,;
@@ -152,5 +153,41 @@ suite("Flow Search", () => {
     const searchResult = findFlowSearchResult(currentUnit, "   ", unitById);
 
     assert.strictEqual(searchResult, undefined);
+  });
+
+  test("preserves current-scope order for a bounded large result set", () => {
+    const resultCount = 2048;
+    const currentUnit = createFlowTestUnit({
+      id: "/root/jobnet",
+      name: "jobnet",
+      children: [],
+    });
+    const children = Array.from({ length: resultCount }, (_, index) =>
+      createFlowTestUnit({
+        id: `/root/jobnet/job-${index}`,
+        name: `job-${index}`,
+        unitType: "j",
+        absolutePath: `/root/jobnet/job-${index}`,
+        depth: 2,
+        parentId: currentUnit.id,
+        isRootJobnet: false,
+      }),
+    );
+    currentUnit.children = children;
+    const unitById = new Map(
+      [currentUnit, ...children].map((unit) => [unit.id, unit]),
+    );
+
+    const first = findFlowSearchResult(currentUnit, "job-", unitById);
+    const repeated = findFlowSearchResult(currentUnit, "job-", unitById);
+
+    assert.ok(first);
+    assert.strictEqual(first.matchedUnitId, children[0].id);
+    assert.deepStrictEqual(
+      first.matchedUnitIds,
+      children.map(({ id }) => id),
+    );
+    assert.deepStrictEqual(first.expandedAncestorUnitIds, []);
+    assert.deepStrictEqual(repeated, first);
   });
 });
