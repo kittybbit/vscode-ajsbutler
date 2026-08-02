@@ -15,5 +15,16 @@ suite("Flow Header", () => {
       ),
       "N",
     );
+    assert.strictEqual(
+      getCurrentUnitLabel(createFlowTestUnit(), "ja"),
+      "ルートジョブネット",
+    );
+    assert.strictEqual(
+      getCurrentUnitLabel(
+        createFlowTestUnit({ unitType: "n", isRootJobnet: false }),
+        "ja",
+      ),
+      "N",
+    );
   });
 });

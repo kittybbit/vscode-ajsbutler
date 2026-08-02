@@ -83,6 +83,12 @@ suite("Flow Relationship Focus", () => {
     assert.strictEqual(focused.nodes[0].data.relationshipFocusRole, "selected");
     assert.strictEqual(focused.nodes[5].style?.opacity, 0.09);
     assert.strictEqual(focused.nodes[6].style?.opacity, 0);
+    assert.strictEqual(focused.nodes[6].style?.opacity, 0);
+    assert.strictEqual(
+      focused.nodes[6].data.relationshipFocusRole,
+      "unrelated",
+    );
+    assert.strictEqual(focused.nodes[5].data.isSearchMatch, undefined);
     assert.strictEqual(focused.edges[0].style?.stroke, "blue");
     assert.strictEqual(focused.edges[1].style?.stroke, "green");
     assert.strictEqual(focused.edges[1].animated, true);

@@ -144,3 +144,34 @@ also names the concrete test files that prove the slice contract.
 - `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed.
+
+## Slice 7 implementation evidence
+
+- `flowGraphView.test.ts` records application DTO identity, node ordering and
+  positions for a bounded 128-node graph, unchanged/conditional edge markers,
+  semantic-diff stroke and width, and deterministic repeated projection.
+- `flowNodeDetail.test.ts` records lightweight detail output, missing
+  comment/parent fallbacks, Japanese detail labels, focus-mode action labels,
+  and action callback retention. Existing expectations now include the current
+  definition-availability flag.
+- `flowRelationshipFocus.test.ts` records relationship role decoration while
+  preserving synthetic nested-panel opacity and unrelated-node state.
+  `flowHeader.test.ts`, `flowNodeDisplay.test.ts`,
+  `flowNodeDetailPanelCollapse.test.ts`, `nodeSxProps.test.ts`, and
+  `flowAccessibility.test.ts` retain the header, node-state, responsive-panel,
+  visual-priority, nested-bound, and accessibility evidence named by the slice.
+- No runtime, generated-parser, configuration, dependency, or architecture
+  boundary changed. Graph DTO meaning, JP1/AJS definition compatibility, and
+  user-visible behavior remain unchanged.
+- The slice boundary remained appropriate: semantic invariants were added
+  without brittle full geometry snapshots or broad renderer refactoring. The
+  focused Mocha suite is useful alongside host smoke checks for detecting stale
+  presentation expectations.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- Focused flow presentation suite: 36 tests passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run lint:md`: passed.

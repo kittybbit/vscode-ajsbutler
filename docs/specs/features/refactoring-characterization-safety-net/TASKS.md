@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 7: Flow rendering and detail
-  presentation characterization.
+- Active implementation slice: Slice 8: Flow search and viewer interaction-
+  state characterization.
 
 ## Replanning Decision
 
@@ -317,7 +317,7 @@ approved boundaries.
 
 ### Slice 7: Flow rendering and detail presentation characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize graph rendering, node/edge realization, nested bounds,
   relationship focus, detail rows/actions, and visual state in the flow
   webview.

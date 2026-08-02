@@ -371,10 +371,116 @@ suite("Flow Graph View", () => {
       },
     });
 
-    assert.strictEqual(flowDataWithoutDefinitions.nodes.length, 2);
+    assert.strictEqual(
+      flowDataWithoutDefinitions.nodes.length,
+      graph.nodes.length,
+    );
     assert.strictEqual(
       flowDataWithoutDefinitions.nodes[0].data.unitDefinition,
       undefined,
     );
+  });
+
+  test("preserves edge realization and deterministic output for a bounded deep graph", () => {
+    const nodeCount = 128;
+    const graph: FlowGraphDto = {
+      nodes: Array.from({ length: nodeCount }, (_, index) => ({
+        id: `/root/jobnet/job-${index}`,
+        label: `job-${index}`,
+        type: "job" as const,
+        metadata: {
+          absolutePath: `/root/jobnet/job-${index}`,
+          ty: "j" as const,
+          comment: index === nodeCount - 1 ? undefined : `step-${index}`,
+          isAncestor: false,
+          isCurrent: index === 0,
+          isRootJobnet: false,
+          hasSchedule: index % 3 === 0,
+          hasWaitedFor: index % 5 === 0,
+          layout: {
+            kind: "grid" as const,
+            h: index * 168,
+            v: index * 116,
+          },
+        },
+      })),
+      edges: [
+        {
+          source: "/root/jobnet/job-0",
+          target: "/root/jobnet/job-1",
+          type: "seq",
+        },
+        {
+          source: "/root/jobnet/job-1",
+          target: "/root/jobnet/job-2",
+          type: "con",
+        },
+        {
+          source: "/root/jobnet/job-2",
+          target: "/root/jobnet/job-3",
+          type: "seq",
+          semanticDiffHighlight: {
+            kind: "confirmation-required",
+            changeIds: [],
+            confirmationIds: ["confirm:job-3"],
+          },
+        },
+        {
+          source: "/root/jobnet/job-3",
+          target: "/root/jobnet/job-4",
+          type: "seq",
+          semanticDiffHighlight: {
+            kind: "changed",
+            changeIds: ["relation:changed"],
+            confirmationIds: [],
+          },
+        },
+        ...Array.from({ length: nodeCount - 5 }, (_, index) => ({
+          source: `/root/jobnet/job-${index + 4}`,
+          target: `/root/jobnet/job-${index + 5}`,
+          type: "seq" as const,
+        })),
+      ],
+    };
+    const options = {
+      graph,
+      unitDefinitionByPath: new Map(),
+      theme: createTheme(),
+      dialogDataState: {
+        dialogData: undefined,
+        setDialogData: () => undefined,
+      },
+      currentUnitIdState: {
+        currentUnitId: "/root/jobnet/job-0",
+        setCurrentUnitId: () => undefined,
+      },
+    };
+
+    const first = createReactFlowData(options);
+    const second = createReactFlowData(options);
+
+    assert.strictEqual(first.nodes.length, nodeCount);
+    assert.deepStrictEqual(
+      first.nodes.map(({ id, position }) => ({ id, position })),
+      second.nodes.map(({ id, position }) => ({ id, position })),
+    );
+    assert.strictEqual(first.edges.length, nodeCount - 1);
+    assert.strictEqual(first.edges[0].animated, false);
+    assert.strictEqual(first.edges[0].markerStart, undefined);
+    assert.strictEqual(first.edges[0].style, undefined);
+    assert.strictEqual(first.edges[1].animated, true);
+    assert.notStrictEqual(first.edges[1].markerStart, undefined);
+    assert.strictEqual(first.edges[2].animated, true);
+    assert.strictEqual(
+      first.edges[2].style?.stroke,
+      options.theme.palette.warning.main,
+    );
+    assert.strictEqual(first.edges[2].style?.strokeWidth, 4);
+    assert.strictEqual(first.edges[3].animated, false);
+    assert.strictEqual(
+      first.edges[3].style?.stroke,
+      options.theme.palette.info.main,
+    );
+    assert.strictEqual(first.edges[3].style?.strokeWidth, 3);
   });
 });

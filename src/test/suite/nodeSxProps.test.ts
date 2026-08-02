@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { createTheme } from "@mui/material/styles";
 import {
+  buildNodeSxProps,
   buildNodeFocusFilter,
   buildNodeHoverDecoration,
   resolveNodeBorderStyle,
@@ -94,5 +95,60 @@ suite("Flow Node Style", () => {
       } as never),
       "dashed",
     );
+  });
+
+  test("keeps visual-state precedence and nested panel geometry stable", () => {
+    const state = {
+      isAncestor: false,
+      isCurrent: false,
+      isCurrentSearchResult: false,
+      isHovered: false,
+      isRootJobnet: false,
+      isSearchMatch: false,
+      isSelected: false,
+      nestedPanel: undefined,
+      relationshipFocusRole: undefined,
+      semanticDiffHighlight: undefined,
+    };
+
+    assert.strictEqual(
+      resolveNodeBorderStyle({
+        ...state,
+        isSelected: true,
+        isCurrent: true,
+        isCurrentSearchResult: true,
+        semanticDiffHighlight: {
+          kind: "confirmation-required",
+          changeIds: [],
+          confirmationIds: [],
+        },
+      } as never),
+      "double",
+    );
+    assert.strictEqual(
+      resolveNodeBorderStyle({
+        ...state,
+        relationshipFocusRole: "unrelated",
+        isSelected: true,
+      } as never),
+      "double",
+    );
+
+    const style = buildNodeSxProps({
+      ...state,
+      nestedPanel: {
+        panelOffsetXPx: -24,
+        panelOffsetYPx: -16,
+        panelWidthPx: 512,
+        panelHeightPx: 384,
+      },
+    }) as Record<string, unknown>;
+    const nestedPanelStyle = style["&::after"] as Record<string, unknown>;
+    assert.strictEqual(nestedPanelStyle.left, "-24px");
+    assert.strictEqual(nestedPanelStyle.top, "-16px");
+    assert.strictEqual(nestedPanelStyle.width, "512px");
+    assert.strictEqual(nestedPanelStyle.height, "384px");
+    assert.strictEqual(nestedPanelStyle.pointerEvents, "none");
+    assert.strictEqual(style.overflow, "visible");
   });
 });
