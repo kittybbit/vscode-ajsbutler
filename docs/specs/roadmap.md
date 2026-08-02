@@ -24,23 +24,13 @@ feature.
   enforcement gap not already covered by the current architecture test.
 - Dependency: Refactoring Quality Baseline.
 
-### 3. Refactoring Characterization Safety Net
-
-- Purpose: fix the observable behavior of each selected high-risk boundary
-  before its internal structure changes.
-- Entry condition: the baseline selects the first bounded workflow or contract;
-  split further when parser, table, flow, semantic diff, WebAPI, desktop, and
-  web behavior do not share one approval boundary.
-- Dependency: Refactoring Quality Baseline and any required Architecture
-  Boundary Protection slice.
-
 ### 4. Application Use Case Extraction
 
 - Purpose: move one selected orchestration boundary out of VS Code, webview, or
   I/O adapters into a host-neutral application use case.
 - Entry condition: the target behavior is protected by characterization tests
   and its callers, ports, DTOs, errors, and host impacts are known.
-- Dependency: Refactoring Characterization Safety Net.
+- Dependency: completed characterization evidence for the selected boundary.
 
 ### 5. JP1/AJS Domain Model Restructuring
 
@@ -49,8 +39,9 @@ feature.
   representations to the domain.
 - Entry condition: a baseline-ranked rule has at least two evidenced consumers,
   explicit compatibility semantics, and protective tests.
-- Dependency: Refactoring Characterization Safety Net; Application Use Case
-  Extraction when the rule is still hidden inside orchestration.
+- Dependency: completed characterization evidence for the selected rule;
+  Application Use Case Extraction when the rule is still hidden inside
+  orchestration.
 
 ### 6. High-Complexity Hotspot Resolution
 
@@ -58,8 +49,9 @@ feature.
   while preserving external behavior.
 - Entry condition: the baseline identifies the exact file/function boundary,
   callers, tests, metric evidence, and business criticality.
-- Dependency: Refactoring Quality Baseline and the target's Characterization
-  Safety Net; split into separate feature folders per responsibility boundary.
+- Dependency: Refactoring Quality Baseline and the target's completed
+  characterization evidence; split into separate feature folders per
+  responsibility boundary.
 
 ### 7. Webview Presentation Separation
 
@@ -67,8 +59,8 @@ feature.
   one selected React/webview presentation boundary.
 - Entry condition: the baseline and characterization evidence identify a
   concrete component, message contract, or UI-state boundary.
-- Dependency: Refactoring Characterization Safety Net and any required
-  Application Use Case Extraction.
+- Dependency: completed characterization evidence and any required Application
+  Use Case Extraction.
 
 ### 8. Infrastructure Boundary Cleanup
 
@@ -76,8 +68,8 @@ feature.
   telemetry detail behind an existing or justified application port.
 - Entry condition: generated-model, technical-error, or host-specific leakage
   is demonstrated at an exact boundary with compatibility evidence.
-- Dependency: Refactoring Characterization Safety Net and any required
-  Application Use Case Extraction.
+- Dependency: completed characterization evidence and any required Application
+  Use Case Extraction.
 
 ### 9. Refactoring Quality Gate Strengthening
 
@@ -99,9 +91,9 @@ success signals are maintained in `features/BASELINE.md` for shared use by the
 dependent features. This shared evidence is temporary at the large-scale
 refactoring level and is removed only after that effort is complete.
 
-- Characterization Safety Net is the first dependency for every selected
-  boundary. Keep diagnostics, application flow construction, flow webview
-  rendering/state, unit-list projections, table presentation, viewer
+- Completed characterization evidence is the first dependency for every
+  selected boundary. Keep diagnostics, application flow construction, flow
+  webview rendering/state, unit-list projections, table presentation, viewer
   composition, viewer transport, parser contracts, telemetry, and the schedule
   rule as separate characterization boundaries when their observable behavior
   differs.
