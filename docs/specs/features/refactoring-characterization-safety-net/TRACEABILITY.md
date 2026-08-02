@@ -26,6 +26,45 @@ also names the concrete test files that prove the slice contract.
 
 <!-- markdownlint-enable MD013 -->
 
+## Slice 15 planning traceability
+
+- Use case / requirement: `uc-view-unit-list.md` for the table fixture and
+  shared header behavior used by `uc-explore-flow-graph.md`; R6, AC1, AC5, and
+  AC7. R1 and R4 remain preservation constraints, not new characterization
+  scope.
+- SPECS.md: Requirements, Compatibility, Acceptance Criteria, and Feature Exit.
+- Implementation slice: Slice 15, Characterization test build-and-run
+  integrity repair.
+- Test or validation: `src/test/suite/accessibilityDom.test.tsx`,
+  `tsconfig.test.json`; preserve the existing table, shared-header, and
+  selector assertions; run `rtk pnpm run build`, `rtk pnpm run test:compile`,
+  `rtk pnpm run test:full`, and `rtk pnpm run qlty`.
+
+The prior `V-DW` runs for Slices 9, 12, and 13 passed the existing host checks,
+but did not execute this `.tsx` suite because the test compiler included only
+`*.ts` and the compiled runner discovers only `*.test.js`. Slice 15 makes that
+existing evidence executable without changing its scenarios.
+
+## Slice 15 implementation evidence
+
+- `createTableRow` and the table name accessor now use the existing
+  `UnitListRowView.group1.name` contract. The shared search assertion now uses
+  the rendered `HTMLButtonElement` type without weakening the assertion.
+- `tsconfig.test.json` includes `src/test/**/*.tsx`, so
+  `accessibilityDom.test.tsx` is emitted and discovered by the compiled Mocha
+  runner. No characterization scenario or production code changed.
+- `rtk pnpm run test:compile`: passed.
+- `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
+- `rtk pnpm run test:full`: the desktop phase passed; its sandboxed browser
+  phase could not launch Chromium because of the host Mach-port permission.
+  `rtk pnpm run test:web:run` passed when rerun outside the sandbox. The
+  existing browser teardown EPIPE/Premature close logs did not affect the exit
+  code.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run lint:md`: passed after the implementation evidence update.
+- Slice 15 completion approval: approved in the current conversation after the
+  implementation validation above passed.
+
 ## Slice 1 implementation evidence
 
 - The application parser port remains a complete-result-or-owned-errors
@@ -240,6 +279,9 @@ also names the concrete test files that prove the slice contract.
 - `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
   existing web test teardown emitted ECONNRESET/Premature close logs but
   exited 0.
+- The host validation above did not execute `accessibilityDom.test.tsx`; the
+  test compiler included only `*.ts`. Slice 15 adds the test-only `.tsx` include
+  and will re-run this shared evidence through the compiled desktop suite.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed.
 
@@ -261,10 +303,6 @@ also names the concrete test files that prove the slice contract.
   sandbox-external execution and emitted the existing EPIPE/Premature close
   teardown logs before exiting 0.
 - `rtk pnpm run qlty`: passed with no issues.
-- `rtk pnpm run build`: attempted for `V-B` but remains blocked by the
-  pre-existing `src/test/suite/accessibilityDom.test.tsx:182` type error
-  (`UnitListRowView` has no `name` property); this file is unchanged by Slice
-  10 and the issue is recorded as a follow-up before feature exit.
 - `rtk pnpm run lint:md`: passed after this traceability update.
 
 ## Slice 11 implementation evidence
@@ -292,10 +330,6 @@ also names the concrete test files that prove the slice contract.
   sandbox-external execution and emitted the existing EPIPE/Premature close
   teardown logs before exiting 0.
 - `rtk pnpm run qlty`: passed with no issues.
-- `rtk pnpm run build`: attempted for `V-B` but remains blocked by the
-  pre-existing `src/test/suite/accessibilityDom.test.tsx:182` type error
-  (`UnitListRowView` has no `name` property); that file is unchanged by Slice
-  11 and the issue remains a follow-up before feature exit.
 
 ## Slice 12 implementation evidence
 
@@ -319,6 +353,9 @@ also names the concrete test files that prove the slice contract.
 - `rtk pnpm run test:full`: passed; browser-hosted Chromium required
   sandbox-external execution and emitted the existing EPIPE/ECONNRESET/
   Premature close teardown logs before exiting 0.
+- The host validation above did not execute `accessibilityDom.test.tsx`; the
+  test compiler included only `*.ts`. Slice 15 adds the test-only `.tsx` include
+  and will re-run this shared evidence through the compiled desktop suite.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed after this traceability update.
 
@@ -348,6 +385,9 @@ also names the concrete test files that prove the slice contract.
 - `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
   existing web test teardown emitted ECONNRESET/Premature close logs but
   exited 0.
+- The host validation above did not execute `accessibilityDom.test.tsx`; the
+  test compiler included only `*.ts`. Slice 15 adds the test-only `.tsx` include
+  and will re-run this shared evidence through the compiled desktop suite.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed after this traceability update.
 
@@ -380,7 +420,3 @@ also names the concrete test files that prove the slice contract.
   existing web test teardown emitted EPIPE/ECONNRESET/Premature close logs but
   exited 0.
 - `rtk pnpm run qlty`: passed with no issues.
-- `rtk pnpm run build`: remains blocked by the pre-existing
-  `src/test/suite/accessibilityDom.test.tsx` type errors (`UnitListRowView.name`
-  and `HTMLElement.disabled`); no build-production source or that test was
-  changed by Slice 14.

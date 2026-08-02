@@ -12,6 +12,7 @@
   "include": [
     "global.d.ts",
     "src/test/**/*.ts",
+    "src/test/**/*.tsx",
     "src/application/editor-feedback/**/*.ts",
     "src/application/flow-graph/**/*.ts",
     "src/application/telemetry/**/*.ts",

@@ -175,7 +175,9 @@ const createTableRow = (index: number): UnitListRowView =>
   ({
     id: `job-${index}`,
     absolutePath: `/root/job-${index}`,
-    name: `job-${index}`,
+    group1: {
+      name: `job-${index}`,
+    },
   }) as unknown as UnitListRowView;
 
 const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
@@ -199,7 +201,7 @@ const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
       {
         id: "name",
         header: "Name",
-        accessorFn: (row: UnitListRowView) => row.name,
+        accessorFn: (row: UnitListRowView) => row.group1.name,
       },
       {
         id: "path",
@@ -621,7 +623,8 @@ suite("Browser accessibility DOM", () => {
     );
     assert.strictEqual(view.getByLabelText("2 / 3").textContent, "2/3");
     assert.strictEqual(
-      view.getByRole("button", { name: "前の結果" }).disabled,
+      (view.getByRole("button", { name: "前の結果" }) as HTMLButtonElement)
+        .disabled,
       false,
     );
 

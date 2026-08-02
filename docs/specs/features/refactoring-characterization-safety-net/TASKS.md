@@ -4,8 +4,8 @@
 
 - Purpose: establish independently reviewable characterization contracts for
   the baseline-selected refactoring boundaries.
-- Approved or active slice: all 14 slices are approved; implement one slice at
-  a time.
+- Approved or active slice: Slices 1-15 are complete; Feature Exit remains a
+  separate planning decision.
 - Do not: change runtime behavior, refactor production structure, or add new
   JP1/AJS capabilities.
 - Do not: combine parser, application, presentation, host, and telemetry
@@ -37,13 +37,14 @@
 
 - Status: In Progress
 - Planning scope: Feature 3, Refactoring Characterization Safety Net, based on
-  baseline intake groups 1-14.
-- Review status: `sdd-review-plan` passed; Human Approval recorded on
-  2026-08-02.
-- Human approval: Approved for all 14 slices; implementation remains one slice
-  at a time.
-- Active implementation slice: None; all approved implementation slices are
-  complete. Feature Exit remains a separate `sdd-plan-task` decision.
+  baseline intake groups 1-14 plus one feature-exit build-and-test-integrity
+  repair.
+- Review status: `sdd-review-plan` passed for Slices 1-14 and revised Slice 15.
+- Human approval: Approved for Slices 1-14 and Slice 15 in the current
+  conversation.
+- Slice 15 completion approval: Approved in the current conversation.
+- Active implementation slice: None. Slices 1-15 are complete; Feature Exit
+  remains a separate `sdd-plan-task` decision.
 
 ## Replanning Decision
 
@@ -55,8 +56,22 @@
   validation evidence. No new product or refactoring scope is added.
 - Current state: Plan approved after `sdd-review-plan`; implementation may
   begin only within the approved slice boundaries.
-- Implementation assumption: characterization work may change tests and
-  fixtures only. Any runtime, generated-parser, configuration, or architecture
+- Current replan trigger: Feature Exit validation reproduced two TypeScript
+  errors in `src/test/suite/accessibilityDom.test.tsx`, caused by the
+  characterization additions from Slices 9 and 12. The errors are confined to
+  test fixture and DOM assertion typing, but they prevent `V-B` from passing.
+- Review gap: `V-DW` via `test:full` does not currently compile or execute
+  `accessibilityDom.test.tsx`. `tsconfig.test.json` includes `*.ts` but not
+  `*.tsx`, and the compiled Mocha runner discovers only `*.test.js` files.
+- Replanned decision: retain Slice 15 as a feature-exit repair slice and add
+  the smallest test-only compilation-scope repair needed to make the existing
+  accessibility characterization suite executable. It changes only the
+  affected fixture/accessor, button assertion, and the test include pattern;
+  it does not reopen Slices 9, 12, or 13, add a behavior boundary, or change a
+  production configuration.
+- Implementation assumption: characterization work may change tests, fixtures,
+  and the test-only TypeScript include needed to compile the existing `.tsx`
+  suite. Any runtime, generated-parser, product configuration, or architecture
   dependency change requires Replanning Mode and new approval.
 
 ## Validation Conventions
@@ -73,8 +88,10 @@
 - `V-B`: run `rtk pnpm run build` when the slice changes or characterizes
   bundling, extension entry points, or host transport.
 - The named test files below are the slice evidence set. The repository's
-  current runners execute the compiled suite; unrelated failures must not be
-  accepted as characterization evidence without an explicit follow-up.
+  current runners execute the compiled `*.test.js` suite; a `.tsx` test must be
+  included by `tsconfig.test.json` before `V-DW` can claim runtime evidence for
+  that file. Unrelated failures must not be accepted as characterization
+  evidence without an explicit follow-up.
 - Large-input evidence records the actual unit, row, node, query, and nesting
   bounds in the fixture/test name or assertion. Use bounded fixtures, not
   unbounded snapshots.
@@ -88,6 +105,13 @@
   work may change tests and fixtures only; runtime, generated-parser,
   configuration, or architecture dependency changes require Replanning Mode
   and new approval.
+- Additional Slice 15 approval: Approved in the current conversation; its
+  scope is limited to the two current-branch type errors in
+  `accessibilityDom.test.tsx`, the test-only include needed to compile and
+  execute that existing `.tsx` suite, and the validation needed to restore
+  build and characterization-test integrity.
+- Slice 15 completion approval: Approved in the current conversation after
+  implementation validation passed.
 
 Implementation must proceed one approved slice at a time and remain within the
 approved boundaries.
@@ -629,6 +653,71 @@ approved boundaries.
 - Out of Scope: new events, SDK imports in application code, or collection policy
   changes.
 
+### Slice 15: Characterization test build-and-run integrity repair
+
+- Status: Complete
+- Scope: Restore build and characterization-test integrity for the existing
+  `src/test/suite/accessibilityDom.test.tsx`: make the bounded table fixture and
+  accessor use the existing `UnitListRowView.group1.name` contract, make the
+  enabled-state assertion use the button DOM type returned by the rendered
+  control, and include the existing `.tsx` suite in `tsconfig.test.json` so the
+  compiled Mocha runner executes it.
+- Target files and symbols: `src/test/suite/accessibilityDom.test.tsx`
+  (`createTableRow`, `TableGridFixture`, and the shared-header search control
+  assertion) and the `tsconfig.test.json` test-file include pattern.
+- User / Domain Value: Feature Exit can use the required production build as
+  valid evidence; the existing characterization suite is compiled and
+  executed, so its table, shared-search, and selector assertions remain
+  reviewable evidence.
+- Cohesive Change Group: The two type-correctness repairs and the test-only
+  include repair in the shared accessibility characterization suite. They are
+  kept together because the type errors block the production build and the
+  omitted `.tsx` include prevents the same suite from being executable evidence.
+- Acceptance: `accessibilityDom.test.tsx` compiles and is discovered by the
+  compiled Mocha runner without broadening the `UnitListRowView` type,
+  weakening the enabled-state assertion, changing production code, changing
+  compiler options, or changing any characterization scenario. The production
+  build, the target characterization suite, and the existing desktop/browser
+  test suite pass.
+- Validation: `rtk pnpm run build`, `rtk pnpm run test:compile`,
+  `rtk pnpm run test:full`, and `rtk pnpm run qlty`; run
+  `rtk pnpm run lint:md` after this plan update and again after implementation
+  documentation changes. `V-B` is the primary type-integrity signal;
+  `test:compile` confirms the `.tsx` suite is emitted, and `test:full` confirms
+  the target suite is executed by the desktop runner while retaining browser
+  smoke coverage.
+- Production Readiness:
+  - Failure mode: test compilation must fail fast for an invalid fixture or
+    assertion type, and the target `.tsx` suite must not silently disappear
+    from the compiled runner; do not hide the contract mismatch with `any` or
+    compiler-option changes.
+  - JP1/AJS compatibility: no definition parsing, normalization, schedule
+    interpretation, list meaning, or JP1/AJS behavior changes.
+  - Large or malformed input risk: no new input path is introduced; the
+    existing bounded 128-row and long-query characterization cases remain
+    unchanged.
+  - Desktop/web impact: no runtime host path changes; `test:full` rechecks the
+    desktop runner with the target suite included and the existing browser
+    smoke runner. The test-only include does not alter the extension bundles.
+  - README/docs impact: none; this is a feature-local test integrity repair.
+  - CHANGELOG impact: none; there is no externally observable change.
+- Approval Boundary: the two test-only type corrections in
+  `accessibilityDom.test.tsx`, the single test-only include-pattern repair in
+  `tsconfig.test.json`, and their build/test evidence; no production,
+  generated-parser, product-configuration, or architecture changes.
+- Dependencies: completed Slices 9, 12, and 13. The current type errors were
+  introduced by Slices 9 and 12; the shared suite also contains Slice 13
+  evidence that becomes executable through the same include repair.
+- Risks: an assertion could be made type-correct by weakening its runtime
+  meaning, the fixture could drift from the application DTO, or including the
+  `.tsx` suite could reveal an unrelated test-compilation failure. Preserve the
+  existing behavior assertions and use the current DTO/DOM contracts directly;
+  stop and replan if unrelated failures require broader changes.
+- Out of Scope: reopening Slices 9, 12, or 13; changing `UnitListRowView` or
+  `HeaderSearchControl`; altering TypeScript compiler options or test-runner
+  behavior; changing product configuration; or fixing unrelated build/test
+  failures.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes.
@@ -654,6 +743,9 @@ approved boundaries.
 - Slice 14 is an independently approvable cross-layer telemetry contract.
   Workflow integration checks may consume completed evidence from Slices 3,
   8-12 without expanding the telemetry scope.
+- Slice 15 depends on completed Slices 9, 12, and 13 and is a feature-exit
+  repair slice only. It restores build integrity and makes the shared
+  characterization suite executable without reopening any behavior boundary.
 - Downstream Features 4-8 may start only after their relevant slices are
   complete and reviewed; Feature 9 remains last and evidence-gated.
 
@@ -675,6 +767,13 @@ approved boundaries.
 - Target symbols and current failure alternatives must remain traceable to the
   baseline group; discovering a different owner or runtime contract requires
   Replanning Mode before implementation.
+- Completed characterization additions can still block the production build
+  through test-only type drift; a final build check remains required before
+  Feature Exit.
+- A characterization test can appear in slice evidence while being omitted
+  from the compiled runner when its extension is not included by
+  `tsconfig.test.json`; Slice 15 owns the minimal test-only include repair for
+  the shared `.tsx` suite.
 
 ## Use-Case Back-Propagation
 
@@ -688,22 +787,33 @@ approved boundaries.
 
 ## Feature Exit
 
-- Definition of Done status: Not started; all slices are Proposed.
-- Durable documentation updates: none currently required.
-- Open risks: the risks above must be resolved, accepted, or assigned before
-  closure.
+- Definition of Done status: Feature Exit review not yet run. Slices 1-15 are
+  Complete, and Slice 15 implementation validation has passed.
+- Durable documentation updates: none currently required; characterization
+  adds no durable behavior or architecture decision.
+- Open risks: browser-hosted validation requires sandbox-external Chromium on
+  this host; the known EPIPE/Premature close teardown logs did not affect the
+  passing result. No Slice 15 product, JP1/AJS, desktop/web, or quality risk
+  remains unresolved.
+- Closure recommendation: Run `sdd-plan-task` Feature Exit Mode to evaluate the
+  feature-level Definition of Done and durable-documentation gate.
 
 ## Validation
 
-- [ ] Slice-specific tests added or updated after approval.
-- [ ] Desktop and browser-hosted validation completed for affected boundaries.
-- [ ] `V-Q` (`rtk pnpm run qlty`) recorded for every code slice, with new smells
-      resolved or explicitly approved as follow-up.
-- [ ] `V-D`, `V-W`, `V-DW`, and `V-B` evidence recorded wherever the slice
-      validation above requires them.
-- [ ] `rtk pnpm run lint:md` run after markdown changes.
-- [ ] Traceability updated with implementation evidence.
-- [ ] README/CHANGELOG impact evaluated; no update currently expected.
+- [x] Slice-specific tests added or updated after approval.
+- [x] Desktop and browser-hosted smoke validation completed for affected
+      boundaries; the shared `.tsx` characterization suite executed through
+      the compiled desktop runner.
+- [x] `V-Q` (`rtk pnpm run qlty`) recorded for every code slice, with no new
+      actionable smells.
+- [x] `V-D`, `V-W`, and `V-DW` host-smoke evidence recorded wherever required;
+      browser validation passed when run outside the sandbox.
+- [x] `V-B` production build passes with only the existing webpack asset-size
+      warnings.
+- [x] `rtk pnpm run lint:md` run after this feature's Markdown changes.
+- [x] Traceability updated with implementation evidence.
+- [x] README/CHANGELOG impact evaluated; no update is required because this
+      feature changes no externally observable behavior.
 
 ## Implementation Feedback
 
@@ -769,10 +879,6 @@ approved boundaries.
 - Desktop/browser host selection and viewer disposal remain covered by the
   existing extension dependency, lifecycle, bundle, and architecture suites;
   no host-specific contract difference or new dependency was discovered.
-- The required production build check remains blocked by a pre-existing type
-  error in `src/test/suite/accessibilityDom.test.tsx:182` (`UnitListRowView`
-  has no `name` property). The error is outside Slice 10 and was not changed;
-  it remains a follow-up before feature exit.
 - Slice 11's boundary remained appropriate: panel lifecycle and plain host
   message evidence fit the existing viewer suites without changing the VS
   Code adapter or shared message contracts.
@@ -782,9 +888,6 @@ approved boundaries.
   contract difference was discovered.
 - Browser-hosted validation required sandbox-external Chromium; the existing
   web teardown EPIPE/Premature close logs did not affect the passing result.
-- The required production build check remains blocked by the same pre-existing
-  `src/test/suite/accessibilityDom.test.tsx:182` type error; it is outside
-  Slice 11 and was not changed.
 - Slice 12's boundary remained appropriate: shared control DOM evidence and
   flow/table state cases characterize the existing search callbacks without
   exporting hook test seams or introducing a shared search domain contract.
@@ -805,14 +908,26 @@ approved boundaries.
   compatibility issue, or desktop/web contract difference was discovered.
 - Browser-hosted validation again requires sandbox-external Chromium on this
   host; the existing EPIPE/ECONNRESET/Premature close teardown logs did not
-  affect the passing result. The production build remains blocked by the
-  pre-existing `accessibilityDom.test.tsx` type errors recorded in the
-  traceability evidence.
+  affect the passing result.
+
+- Slice 15's boundary was appropriate: the two type corrections and the
+  test-only `.tsx` include repair formed one independently verifiable
+  build-and-run integrity responsibility without reopening completed behavior
+  boundaries.
+- The `.tsx` include was necessary to make the existing accessibility
+  characterization suite executable by the compiled Mocha runner; no test
+  scenario, production code, product configuration, or architecture boundary
+  changed.
+- `test:compile`, the production build, desktop tests, browser-hosted smoke
+  tests outside the sandbox, and `qlty` passed. Browser teardown EPIPE and
+  Premature close logs remain an environment-specific validation caveat.
 
 ## Notes
 
-- The 14 slices are deliberately boundary-sized, not file-sized. Each can be
-  reviewed, validated, committed, and approved independently.
+- The original 14 slices are deliberately boundary-sized, not file-sized. Each
+  can be reviewed, validated, committed, and approved independently. Slice 15
+  is a narrowly scoped feature-exit repair because the existing shared test
+  suite otherwise cannot pass the required build gate.
 - This feature is the first branch in a continuous refactoring sequence. The
   sequence does not merge approval boundaries or authorize downstream feature
   implementation.

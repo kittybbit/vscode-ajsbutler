@@ -120,8 +120,9 @@ it defines the evidence that later features must preserve.
 
 ## Acceptance Criteria
 
-- AC1. The 14 slices in `TASKS.md` each have a reviewable boundary, dependency,
-  validation plan, production-readiness risks, and approval boundary.
+- AC1. Every implementation slice recorded in `TASKS.md` has a reviewable
+  boundary, dependency, validation plan, production-readiness risks, and
+  approval boundary.
 - AC2. Characterization evidence records stable output and failure behavior for
   the normalized parser port, diagnostics, flow graph, list projections,
   schedule rule, telemetry, viewer lifecycle, and each selected webview
