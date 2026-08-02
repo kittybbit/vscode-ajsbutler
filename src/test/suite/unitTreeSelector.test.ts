@@ -376,6 +376,40 @@ suite("Unit Tree Selector", () => {
     );
   });
 
+  test("preserves visible navigation order through a bounded deep tree", () => {
+    const root = unit("/deep-0", 0);
+    let parent = root;
+    const depth = 512;
+
+    for (let index = 1; index <= depth; index += 1) {
+      const child = unit(`/deep-${index}`, index, [], parent.id);
+      parent.children.push(child);
+      parent = child;
+    }
+
+    const rows = resolveVisibleUnitTreeRows(
+      [root],
+      new Set(Array.from({ length: depth }, (_, index) => `/deep-${index}`)),
+      () => true,
+    );
+
+    assert.strictEqual(rows.length, depth + 1);
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/deep-0", { key: "ArrowDown" }),
+      {
+        action: { kind: "focus", targetUnitId: "/deep-1" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/deep-0", { key: "End" }),
+      {
+        action: { kind: "focus", targetUnitId: `/deep-${depth}` },
+        suppressDefault: true,
+      },
+    );
+  });
+
   test("uses border patterns for tree selection and current-path state", () => {
     assert.strictEqual(
       resolveUnitTreeRowBorderStyle({

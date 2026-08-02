@@ -321,3 +321,32 @@ also names the concrete test files that prove the slice contract.
   Premature close teardown logs before exiting 0.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed after this traceability update.
+
+## Slice 13 implementation evidence
+
+- `unitTreeSelector.test.ts` records enabled/disabled row navigation, Enter/
+  Space/Alt+Enter action resolution, and a bounded 512-level expanded tree's
+  visible order and focus targets.
+- `accessibilityDom.test.tsx` records disabled-row ARIA state and selection
+  suppression, focus-request reveal of a nested row, scope-open and Escape
+  callbacks, and a bounded 128-level rendered tree with one active row.
+  `flowSelector.test.ts` and `flowKeyboardNavigation.test.ts` remain
+  read-only evidence for flow-scope identity, ancestor selection, and keyboard
+  focus transitions consumed by the selector integration.
+- No runtime, generated-parser, configuration, dependency, or architecture
+  boundary changed. Unit identity, scope selection, reveal behavior, keyboard
+  semantics, focus management, JP1/AJS behavior, and desktop/browser
+  user-visible behavior remain unchanged.
+- The slice boundary remained appropriate: selector behavior is characterized
+  through existing navigation results and DOM callbacks without exporting test
+  seams or changing flow scope resolution, layout, unit identity, or
+  counterpart opening semantics. No durable documentation or CHANGELOG update
+  is required.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/Premature close logs but
+  exited 0.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run lint:md`: passed after this traceability update.

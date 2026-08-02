@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 13: Flow tree selector
-  characterization.
+- Active implementation slice: Slice 14: Validated telemetry contract and
+  event-builder characterization.
 
 ## Replanning Decision
 
@@ -549,7 +549,7 @@ approved boundaries.
 
 ### Slice 13: Flow tree selector characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize enabled/disabled rows, focus movement, Enter/Space/
   Alt+Enter behavior, scope selection, reveal, and return focus.
 - Target symbols: `UnitTreeSelector`, `UnitTreeSelectorUnit`,

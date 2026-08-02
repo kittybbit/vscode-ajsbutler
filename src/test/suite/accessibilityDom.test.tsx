@@ -7,7 +7,9 @@ import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 import type { UnitListRowView } from "../../application/unit-list/buildUnitListView";
-import UnitTreeSelector from "../../presentation/webview/editor/shared/UnitTreeSelector";
+import UnitTreeSelector, {
+  type UnitTreeFocusRequest,
+} from "../../presentation/webview/editor/shared/UnitTreeSelector";
 import SharedUnitDetailPane from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
 import DisplayColumnSelector from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { resolveTableGridRestorationFocus } from "../../presentation/webview/editor/ajsTable/navigation";
@@ -143,6 +145,19 @@ const createUnit = (
     children,
   }) as FlowGraphUnitDto;
 
+const createDeepTree = (
+  depth: number,
+): { deepest: FlowGraphUnitDto; root: FlowGraphUnitDto } => {
+  const root = createUnit("/deep-0", 0);
+  let deepest = root;
+  for (let index = 1; index <= depth; index += 1) {
+    const child = createUnit(`/deep-${index}`, index, [], deepest.id);
+    deepest.children = [child];
+    deepest = child;
+  }
+  return { deepest, root };
+};
+
 const createUnitById = (
   units: readonly FlowGraphUnitDto[],
 ): ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">> => {
@@ -218,10 +233,14 @@ const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
 const renderTree = (
   rootUnits: FlowGraphUnitDto[],
   options: {
+    canOpenScopeUnit?: (unit: FlowGraphUnitDto) => boolean;
     currentUnitId?: string;
+    focusRequest?: UnitTreeFocusRequest;
     selectedUnitId?: string;
     isUnitEnabled?: (unit: FlowGraphUnitDto) => boolean;
+    onEscape?: VoidFunction;
     onEnterUnit?: (unitId: string) => void;
+    onOpenScope?: (unitId: string) => void;
     onSelectUnit?: (unitId: string) => void;
   } = {},
 ) =>
@@ -230,11 +249,15 @@ const renderTree = (
       <UnitTreeSelector
         rootUnits={rootUnits}
         unitById={createUnitById(rootUnits)}
+        canOpenScopeUnit={options.canOpenScopeUnit}
         currentUnitId={options.currentUnitId}
+        focusRequest={options.focusRequest}
         selectedUnitId={options.selectedUnitId}
         autoScrollSelectedUnit={false}
         isUnitEnabled={options.isUnitEnabled}
+        onEscape={options.onEscape}
         onEnterUnit={options.onEnterUnit}
+        onOpenScope={options.onOpenScope}
         onSelectUnit={options.onSelectUnit ?? (() => undefined)}
         ariaLabel="Unit tree"
         title="Unit tree"
@@ -349,6 +372,65 @@ suite("Browser accessibility DOM", () => {
     fireEvent.click(expandButton);
     assert.deepStrictEqual(selected, []);
     assert.ok(view.getByRole("treeitem", { name: /child/i }));
+  });
+
+  test("exposes disabled nested rows and keeps them out of selection", () => {
+    const child = createUnit("/root/disabled", 1, [], "/root");
+    const root = createUnit("/root", 0, [child]);
+    const selected: string[] = [];
+    const view = renderTree([root], {
+      currentUnitId: root.id,
+      isUnitEnabled: (unit) => unit.id !== child.id,
+      onSelectUnit: (unitId) => selected.push(unitId),
+    });
+    const childRow = view.getByRole("treeitem", { name: /disabled/i });
+
+    assert.strictEqual(childRow.getAttribute("aria-disabled"), "true");
+    assert.strictEqual(childRow.tabIndex, -1);
+    fireEvent.click(childRow);
+
+    assert.deepStrictEqual(selected, []);
+  });
+
+  test("reveals a requested nested row and delegates scope and Escape actions", () => {
+    const child = createUnit("/root/child", 1, [], "/root");
+    const root = createUnit("/root", 0, [child]);
+    const opened: string[] = [];
+    let escaped = 0;
+    const view = renderTree([root], {
+      canOpenScopeUnit: (unit) => unit.id === root.id,
+      focusRequest: { revision: 1, targetUnitId: child.id },
+      onEscape: () => {
+        escaped += 1;
+      },
+      onOpenScope: (unitId) => opened.push(unitId),
+    });
+    const childRow = view.getByRole("treeitem", { name: /child/i });
+
+    assert.strictEqual(document.activeElement, childRow);
+
+    const rootRow = view.getByRole("treeitem", { name: /^root$/i });
+    rootRow.focus();
+    fireEvent.keyDown(rootRow, { key: "Enter", altKey: true });
+    fireEvent.keyDown(rootRow, { key: "Escape" });
+
+    assert.deepStrictEqual(opened, [root.id]);
+    assert.strictEqual(escaped, 1);
+  });
+
+  test("renders a bounded deep tree with one active row", () => {
+    const { deepest, root } = createDeepTree(128);
+    const view = renderTree([root], { selectedUnitId: deepest.id });
+    const rows = view.getAllByRole("treeitem");
+
+    assert.strictEqual(rows.length, 129);
+    assert.strictEqual(rows.filter((row) => row.tabIndex === 0).length, 1);
+    assert.strictEqual(
+      view
+        .getByRole("treeitem", { name: /deep-128/i })
+        .getAttribute("aria-level"),
+      "129",
+    );
   });
 
   test("separates Enter focus handoff from Space selection", () => {
