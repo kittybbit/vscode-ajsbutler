@@ -42,7 +42,7 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 4: Application flow-graph construction
+- Active implementation slice: Slice 5: Unit-list group projection
   characterization.
 
 ## Replanning Decision
@@ -213,7 +213,7 @@ approved boundaries.
 
 ### Slice 4: Application flow-graph construction characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize deterministic nodes, edges, ordering, containment,
   visible nested scope, job-group resolution, and malformed relations in
   `buildFlowGraph.ts`.
@@ -733,6 +733,18 @@ approved boundaries.
   snapshots or a new partial-result policy.
 - Browser-hosted validation again required sandbox-external Chromium; no
   desktop/web contract difference or new dependency was discovered.
+- Slice 4's boundary remained appropriate: flow graph DTO construction,
+  document validation, and expanded-scope constraints were characterized
+  without changing application or renderer implementation.
+- The relation evidence confirms malformed relation targets and malformed
+  relation containers are reported explicitly and never converted into
+  plausible edges; valid relations remain available in the same graph result.
+- A bounded 500-child scope plus the existing deep-nesting and visible-scope
+  cases was sufficient to record complete deterministic output without a broad
+  graph snapshot. No new dependency, JP1/AJS compatibility issue, or
+  desktop/web contract difference was discovered.
+- Browser-hosted validation again required sandbox-external Chromium; the
+  existing teardown ECONNRESET/EPIPE logs did not affect the passing result.
 
 ## Notes
 

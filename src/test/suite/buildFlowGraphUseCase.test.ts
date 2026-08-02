@@ -34,7 +34,7 @@ unit=root,,jp1admin,;
 `;
 
 suite("Build Flow Graph Use Case", () => {
-  test("builds a flow graph from the normalized model", () => {
+  test("builds a flow graph from the normalized model and group context", () => {
     const document = parseAjsDocumentForTest(validDefinition);
     const currentUnitId = document.rootUnits[0].children[0].id;
 
@@ -65,6 +65,46 @@ suite("Build Flow Graph Use Case", () => {
         document.rootUnits[0].id,
         document.rootUnits[0].children[0].id,
         document.rootUnits[0].children[0].children[2].id,
+      ],
+    );
+    assert.deepStrictEqual(
+      result.graph.nodes.map((node) => ({
+        id: node.id,
+        isAncestor: node.metadata.isAncestor,
+        isCurrent: node.metadata.isCurrent,
+        layout: node.metadata.layout.kind,
+      })),
+      [
+        {
+          id: document.rootUnits[0].children[0].children[0].id,
+          isAncestor: false,
+          isCurrent: false,
+          layout: "grid",
+        },
+        {
+          id: document.rootUnits[0].children[0].children[1].id,
+          isAncestor: false,
+          isCurrent: false,
+          layout: "grid",
+        },
+        {
+          id: document.rootUnits[0].id,
+          isAncestor: true,
+          isCurrent: false,
+          layout: "ancestor",
+        },
+        {
+          id: currentUnitId,
+          isAncestor: true,
+          isCurrent: true,
+          layout: "ancestor",
+        },
+        {
+          id: document.rootUnits[0].children[0].children[2].id,
+          isAncestor: true,
+          isCurrent: false,
+          layout: "ancestor",
+        },
       ],
     );
   });
@@ -124,5 +164,37 @@ suite("Build Flow Graph Use Case", () => {
         },
       ],
     });
+  });
+
+  test("reports malformed relations without returning a plausible edge", () => {
+    const document = parseAjsDocumentForTest(validDefinition);
+    const dto = toFlowGraphDocumentDto(document);
+    const jobnet = dto.rootUnits[0].children[0];
+    jobnet.relations.push({
+      sourceUnitId: jobnet.children[0].id,
+      targetUnitId: "missing-target",
+      type: "seq",
+    });
+
+    const result = buildFlowGraphResult(dto, jobnet.id);
+
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.deepStrictEqual(result.graph.edges, [
+      {
+        source: jobnet.children[0].id,
+        target: jobnet.children[1].id,
+        type: "seq",
+      },
+      {
+        source: jobnet.children[2].id,
+        target: jobnet.children[0].id,
+        type: "con",
+      },
+    ]);
+    assert.deepStrictEqual(
+      result.issues.map((issue) => issue.code),
+      ["invalid_relation"],
+    );
   });
 });

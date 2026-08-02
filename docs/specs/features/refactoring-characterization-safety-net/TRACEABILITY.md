@@ -76,3 +76,28 @@ also names the concrete test files that prove the slice contract.
   existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
 - `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
 - `rtk pnpm run qlty`: passed with no issues.
+
+## Slice 4 implementation evidence
+
+- `buildFlowGraphUseCase.test.ts` records stable node identity/order and the
+  ancestor/current layout contract when a root jobnet is selected beneath a
+  job group, and verifies that a missing relation target is reported without
+  becoming a plausible edge.
+- `flowGraphDocument.test.ts` records the malformed relation-container
+  fallback: the graph remains available with no edges and an explicit
+  `invalid_relation` issue.
+- `buildExpandedFlowGraphUseCase.test.ts` retains the existing deterministic
+  visible-scope, containment, affected-subtree, malformed-request, recovery,
+  condition, and deep-nesting evidence, and adds a bounded 500-child scope
+  completeness/determinism check. Renderer geometry remains outside this
+  slice.
+- The existing `buildFlowGraph.test.ts` and `buildExpandedFlowGraph.test.ts`
+  suites remain read-only evidence for core DTO mapping and presentation
+  realization; no renderer behavior or application implementation changed.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
+- `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
+- `rtk pnpm run qlty`: passed with no issues.
