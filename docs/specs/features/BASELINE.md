@@ -1,19 +1,25 @@
-# Refactoring Quality Baseline
+# Shared Refactoring Quality Baseline
 
 <!-- markdownlint-disable MD013 MD012 -->
 
 ## Scope and status
 
-This report is the Slice 1 structural baseline for
-`refactoring-quality-baseline`. It captures read-only evidence at one exact
-Git commit; it does not rank hotspots or select a refactoring target.
+This shared report captures the structural baseline, auditable ranking, and
+bounded follow-on intake evidence for the large-scale refactoring effort at one
+exact Git commit. Multiple later refactoring features may consume it; it does
+not select or implement a refactoring target.
+
+The file is retained until the large-scale refactoring effort is complete.
+Feature-local `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md` remain the owners of
+individual feature scope, approval, and traceability.
 
 - Baseline commit: `14d94fa3602fc4f6f467eccac35bc588ee44b9bb`
 - Captured: 2026-08-01
 - Qlty: `0.500.0` on `macos-arm64` (build `5945e00`, 2025-03-18)
-- Feature scope: feature-local evidence only
+- Evidence scope: shared baseline evidence and follow-on intake only
 - Runtime behavior: unchanged
-- Slice completion: approved complete
+- Baseline status: captured and approved for consumption by later refactoring
+  features; retained until the large-scale refactoring effort is complete
 
 ## Reproduction identity
 
@@ -80,18 +86,18 @@ normalization. The smell output matched byte-for-byte.
 
 ## Measurement inventory
 
-| Evidence              | Grain                         | Result at baseline                                            |
-| --------------------- | ----------------------------- | ------------------------------------------------------------- |
-| Cyclomatic complexity | file and function             | available; file and function values below                     |
-| Cognitive complexity  | function                      | available; function values below                              |
-| Lines and LOC         | file, directory, and function | available                                                     |
-| LCOM                  | file and directory            | available; 14 files have non-zero LCOM                        |
-| Qlty smells           | file and finding              | available; 223 findings in 67 files                           |
-| Duplication           | finding and file pair         | available through Qlty smell output; 14 similar-code findings |
-| Technical debt        | repository                    | unavailable; no reproducible repository command exists        |
-| Coverage              | repository                    | unavailable; no reproducible repository command exists        |
-| Dependency degree     | repository/file               | unavailable; no repository command in scope produces it       |
-| Architecture status   | repository test               | incomplete; existing test has 8 passing and 5 failing tests   |
+| Evidence              | Grain                         | Result at baseline                                                                         |
+| --------------------- | ----------------------------- | ------------------------------------------------------------------------------------------ |
+| Cyclomatic complexity | file and function             | available; file and function values below                                                  |
+| Cognitive complexity  | function                      | available; function values below                                                           |
+| Lines and LOC         | file, directory, and function | available                                                                                  |
+| LCOM                  | file and directory            | available; 14 files have non-zero LCOM                                                     |
+| Qlty smells           | file and finding              | available; 223 findings in 67 files                                                        |
+| Duplication           | finding and file pair         | available through Qlty smell output; 14 similar-code findings                              |
+| Technical debt        | repository                    | unavailable; no reproducible repository command exists                                     |
+| Coverage              | repository                    | unavailable; no reproducible repository command exists                                     |
+| Dependency degree     | repository/file               | unavailable; no repository command in scope produces it                                    |
+| Architecture status   | repository test               | historical baseline 8 passing / 5 failing; corrected current result 13 passing / 0 failing |
 
 Missing measurements are reported as unavailable, never as zero or an inferred
 substitute.
@@ -699,9 +705,14 @@ src/resource/i18n/message_ja.ts
         also found at src/resource/i18n/message_en.ts
 ```
 
-## Slice 2: Auditable refactoring priority (in progress)
+## Slice 2: Auditable refactoring priority (complete)
 
-Slice 2 now records a complete candidate ranking using the fixed-history calculation. Four candidates exist at the baseline commit but have zero current-path touches in the approved 100-commit window; their zero is an observed value and they receive change-frequency Tier 1. The incomplete architecture-suite result from Slice 1 remains an explicit validation caveat; it is not upgraded to a pass.
+Slice 2 records a complete candidate ranking using the fixed-history
+calculation. Four candidates exist at the baseline commit but have zero
+current-path touches in the approved 100-commit window; their zero is an
+observed value and they receive change-frequency Tier 1. The historical
+architecture-suite result remains visible, while Slice 1A supplies the
+corrected current result of 13 passing and 0 failing tests.
 
 ### Fixed Git history window
 
@@ -1021,3 +1032,468 @@ Criticality basis citations and rationale are: `C5-MODEL` uses `docs/specs/archi
 | 128  | `src/resource/i18n/ajscolumn_ja.ts`                                             | Resource / localization resources                 | `1/0/232/192/0`                  | yes   | 0 / 1             | 2 / `C2-RESOURCE`        | 5               | 10 / `10,5,1,src/resource/i18n/ajscolumn_ja.ts`                                             |
 | 129  | `src/resource/i18n/parameter_en.ts`                                             | Resource / localization resources                 | `1/0/679/679/0`                  | no    | 0 / 1             | 2 / `C2-RESOURCE`        | 5               | 10 / `10,5,1,src/resource/i18n/parameter_en.ts`                                             |
 | 130  | `src/resource/i18n/ty.ts`                                                       | Resource / localization resources                 | `2/0/217/209/0`                  | no    | 1 / 1             | 2 / `C2-RESOURCE`        | 5               | 10 / `10,5,1,src/resource/i18n/ty.ts`                                                       |
+
+## Slice 3: Bounded follow-on feature intake
+
+### Selection boundary
+
+The tenth-ranked candidate has priority score `100`. The approved cutoff
+therefore includes every candidate with that score: ranks 1 through 35. Rank
+36 is the first candidate at score `80` and is excluded from this intake. The
+stable path order in the ranked table remains the deterministic presentation
+order within the score tie; it is not used to merge unrelated responsibilities.
+No genuinely unranked candidate is selected.
+
+The groups below use the existing `Ranked candidates` and `Function-level
+evidence cross-reference` tables as their raw evidence source. Each group has
+one responsibility boundary and one concrete change reason. A later feature
+must perform its own call-site and characterization investigation before
+implementation; this intake does not approve any later feature.
+
+### Intake group 1: Application syntax and semantic diagnostics
+
+- Ranked evidence: ranks 1-6; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-DIAGNOSTICS`). The six files have no Qlty smell
+  finding; their fixed-window touches are 31, 3, 3, 4, 4, and 3 respectively.
+- Exact targets and functions:
+  - `src/application/editor-feedback/buildSyntaxDiagnostics.ts`: `createBuildSyntaxDiagnostics`, `mapParserErrorToSyntaxDiagnostic`.
+  - `src/application/editor-feedback/syntaxDiagnosticJobEndRuleBuilders.ts`: `buildJobEndJudgmentDiagnostics`, `staticMessage`.
+  - `src/application/editor-feedback/syntaxDiagnosticRuleBuilders.ts`: no function-level row; file-level rule-builder contract.
+  - `src/application/editor-feedback/syntaxDiagnosticRules.ts`: `withDiagnosticCategory`, `buildSemanticSyntaxDiagnostics`.
+  - `src/application/editor-feedback/syntaxDiagnosticScheduleRuleBuilders.ts`: `buildScheduleRuleDiagnostics`.
+  - `src/application/editor-feedback/syntaxDiagnosticTypes.ts`: no function-level row; diagnostic type contract.
+- Source evidence: `docs/requirements/use-cases/uc-diagnose-ajs-definition.md`
+  and `docs/requirements/domain-rules/jp1-diagnostic-parameter-rules.md`.
+- Intended roadmap feature and dependency order: Feature 3
+  `Refactoring Characterization Safety Net`, then Feature 4 `Application Use
+Case Extraction` if orchestration is confirmed at this boundary.
+- Purpose: preserve host-neutral diagnostic decisions while making syntax and
+  supported JP1/AJS rule evaluation easier to reason about.
+- Non-goals: adding diagnostic rule IDs, changing messages or source spans,
+  expanding supported JP1/AJS rules, or moving VS Code diagnostic mapping into
+  application code.
+- Compatibility and safety net: characterize invalid syntax, supported
+  semantic violations, allowed forms, unchanged 1-based line/0-based column
+  spans, and desktop/web parity. Large or malformed definitions must not be
+  presented as a complete partial diagnostic result.
+- Host impact: both desktop and web entry points consume the same application
+  diagnostic decisions; no host-specific implementation is selected here.
+- Success signal: characterization fixtures preserve diagnostic severity,
+  message, rule category, source position, and host-neutral output shape with
+  no new parser or VS Code types in the application boundary.
+
+### Intake group 2: Application flow-graph construction
+
+- Ranked evidence: rank 7; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-FLOW`), Qlty smell present, raw metrics
+  `17/15/152/143/0`, and four fixed-window touches.
+- Exact target and functions: `src/application/flow-graph/buildFlowGraph.ts`:
+  `buildFlowGraphFromValidatedDocument`, `toInput`, `toAncestorNodes`,
+  `buildFlowGraphResult`, `toEdgeDtos`.
+- Source evidence: `docs/requirements/use-cases/uc-build-flow-graph.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 4;
+  Feature 7 consumes the preserved application contract but is a separate
+  presentation boundary.
+- Purpose: keep deterministic graph structure, ordering, containment, and
+  placement constraints in the application responsibility.
+- Non-goals: calculating coordinates, changing normalized model semantics,
+  importing parser structures, or changing the webview renderer.
+- Compatibility and safety net: characterize deterministic nodes and edges,
+  malformed relations, nested visibility, job-group scope resolution, and
+  large definitions for both desktop and web consumers.
+- Host impact: both desktop and web viewers consume the same application graph
+  DTO and constraints.
+- Success signal: the same normalized input and visible nested set produce the
+  same DTO identity, ordering, constraints, and affected-subtree scope, with
+  no presentation geometry in the application result.
+
+### Intake group 3: Flow-graph rendering and detail presentation
+
+- Ranked evidence: ranks 12-17; all priority `100`, structural tier 5,
+  change-frequency tier 5, criticality 4 (`C4-FLOW`). Qlty smell findings are
+  present for `FlowContents.tsx`, `FlowNodeDetailPanel.tsx`, `Header.tsx`, and
+  `AjsNode.tsx`; the ranked table preserves the exact per-file metrics and
+  touch counts.
+- Exact targets and functions:
+  - `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`:
+    `FlowGraphPanelComponent`, `FlowContents`, `useSyncSelectedFlowNode`,
+    `syncSelectedNode`, `FlowViewerBody`.
+  - `src/presentation/webview/editor/ajsFlow/flowGraphView.ts`: `toEdge`,
+    `edgeStrokeColor`, `toNodeData`, `toEdgeStyle`, `toNestedPanelBoundsNode`.
+  - `src/presentation/webview/editor/ajsFlow/FlowNodeDetailPanel.tsx`:
+    `buildRelationshipFocusAction`, `formatParentUnit`,
+    `buildOpenScopeActions`, `buildOpenDefinitionActions`,
+    `buildFlowNodeDetailRows`.
+  - `src/presentation/webview/editor/ajsFlow/Header.tsx`:
+    `RelationshipFocusButton`, `CurrentUnitBadge`, `MiniMapButton`,
+    `getCurrentUnitLabel`, `ExpandAllNestedUnitsButton`.
+  - `src/presentation/webview/editor/ajsFlow/nodes/AjsNode.tsx`:
+    `NodeStatusIndicators`, `getFlowNodeHeaderItemKinds`, `FlowNodeCard`,
+    `NodeNameAndComment`, `ActionIcon`.
+  - `src/presentation/webview/editor/ajsFlow/nodes/nodeSxProps.ts`:
+    `resolveNodeBorderStyle`, `buildNodeSxProps`, `nestedPanelSxProps`,
+    `buildNodeHoverDecoration`, `resolveVisualKind`.
+- Source evidence: `docs/requirements/use-cases/uc-build-flow-graph.md` and
+  `docs/requirements/use-cases/uc-explore-flow-graph.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 7
+  `Webview Presentation Separation`, after the application flow contract in
+  Intake group 2 is characterized.
+- Purpose: separate graph rendering, detail actions, and visual state from
+  application-owned graph meaning.
+- Non-goals: changing graph identity, placement constraints, localization
+  meaning, or the application DTO contract.
+- Compatibility and safety net: characterize graph identity, node/edge
+  realization, nested bounds, relationship focus, detail actions, and
+  desktop/web webview rendering for large and deeply nested graphs.
+- Host impact: the shared webview presentation path affects both desktop and
+  browser extension hosts.
+- Success signal: existing graph exploration scenarios retain selection,
+  focus, non-overlap, unaffected-region stability, and detail actions while
+  application and parser imports remain outside the UI boundary.
+
+### Intake group 4: Flow search and viewer interaction state
+
+- Ranked evidence: ranks 18-20; all priority `100`, structural tier 5,
+  change-frequency tier 5, criticality 4 (`C4-FLOW`). The ranked table records
+  a smell for `useFlowSearchState.ts` and `useFlowViewerEffects.ts`, and no
+  smell for `useFlowViewerController.ts`.
+- Exact targets and functions:
+  - `src/presentation/webview/editor/ajsFlow/useFlowSearchState.ts`:
+    `useSearchSubmitHandler`, `useFlowSearchState`, `useRevealUnitHandler`,
+    `applyFlowSearchSubmission`, `resolveFlowSearchSubmission`.
+  - `src/presentation/webview/editor/ajsFlow/useFlowViewerController.ts`:
+    `useOpenSelectedNodeScope`, `useFlowTreeSelectionState`,
+    `useFlowViewerLifecycle`, `mergeExpandedUnitIds`,
+    `useOpenSelectedNodeDefinition`.
+  - `src/presentation/webview/editor/ajsFlow/useFlowViewerEffects.ts`:
+    `resolveNextCurrentUnitId`, `runFlowViewerFitViewEffect`,
+    `updateHandledViewportFocus`, `resolveFlowDocumentChange`,
+    `useRevealUnitSubscription`.
+- Source evidence: `docs/requirements/use-cases/uc-explore-flow-graph.md` and
+  `docs/requirements/use-cases/uc-navigate-between-unit-list-and-flow-graph.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 7;
+  this group depends on the characterized graph contract but remains separate
+  from graph rendering.
+- Purpose: preserve the distinct flow scope, selection, search, reveal, and
+  viewport state transitions.
+- Non-goals: creating a shared search domain contract, changing keyboard
+  bindings, or moving graph placement decisions into hooks.
+- Compatibility and safety net: characterize current-scope partial search,
+  collapsed-ancestor reveal, next/previous result navigation, Enter/Escape
+  scope transitions, focus restoration, and zoom preservation.
+- Host impact: the shared flow webview state path affects both desktop and web
+  extension hosts.
+- Success signal: the same scenario fixtures produce the same active scope,
+  selected unit, search result, viewport request, and focus destination in the
+  browser webview used by both extension hosts.
+
+### Intake group 5: Unit-list group projection
+
+- Ranked evidence: rank 8; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-UNIT-LIST`), no Qlty smell, raw metrics
+  `10/7/221/209/0`, and six fixed-window touches.
+- Exact target and functions: `src/application/unit-list/buildUnitListRemainingGroups.ts`:
+  `buildGroup17View`, `isCustomJob`, `isFlexibleJob`, `buildGroup18View`,
+  `buildGroup13View`.
+- Source evidence: `docs/requirements/use-cases/uc-view-unit-list.md` and
+  `docs/requirements/use-cases/uc-export-unit-list-csv.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 4.
+- Purpose: preserve the application-owned mapping of remaining JP1/AJS unit
+  groups into stable list and CSV rows.
+- Non-goals: changing group semantics, display-column visibility, CSV
+  escaping, or table-framework code.
+- Compatibility and safety net: characterize representative group types,
+  effective parameter values, stable ordering, CSV row metadata, and malformed
+  or unsupported definitions without presenting partial rows as complete.
+- Host impact: both desktop and web viewers consume the same application list
+  and CSV row contracts.
+- Success signal: golden list and CSV fixtures retain row identity, order,
+  fields, and effective values for desktop and web consumers.
+
+### Intake group 6: Unit-list document validation and projection
+
+- Ranked evidence: rank 9; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-UNIT-LIST`), Qlty smell present, raw metrics
+  `224/28/536/509/0`, and five fixed-window touches.
+- Exact target and functions: `src/application/unit-list/unitListDocument.ts`:
+  `isUnitListRowRecord`, `hasMatchingProjectionIdentity`,
+  `isUnitListRootDto`, `isUnitListUnitMetadata`, `toUnitListTableData`.
+- Source evidence: `docs/requirements/use-cases/uc-view-unit-list.md` and
+  `docs/requirements/use-cases/uc-export-unit-list-csv.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 6
+  `High-Complexity Hotspot Resolution`; Feature 4 is added only if call-site
+  investigation proves an orchestration extraction is required.
+- Purpose: decompose the high-complexity application boundary that validates
+  and projects normalized unit-list data without changing its contract.
+- Non-goals: changing parser normalization, list row meaning, error policy, or
+  CSV behavior.
+- Compatibility and safety net: characterize valid, malformed, encoded, and
+  large definitions; preserve no-partial-list behavior, stable identity, row
+  ordering, metadata, and desktop/web parity.
+- Host impact: the application projection is shared by desktop and web list
+  viewers.
+- Success signal: characterization output is unchanged and the selected
+  responsibility has a measurable before/after complexity result without
+  introducing new application-to-presentation or parser dependencies.
+
+### Intake group 7: Unit-list table presentation and keyboard navigation
+
+- Ranked evidence: ranks 21-25; all priority `100`, structural tier 5,
+  change-frequency tier 5, criticality 4 (`C4-UNIT-LIST`). The ranked table
+  records Qlty smells for `Header.tsx`, `TableContents.tsx`, and
+  `VirtualizedTable.tsx`, and preserves the exact raw metrics and touches.
+- Exact targets and functions:
+  - `src/presentation/webview/editor/ajsTable/DisplayColumnSelector.tsx`:
+    `ColumnDetail`, `ColumnDetailItem`, `DisplayColumnSelector`,
+    `NestedColumnGroup`, `createColumnVisibilityUpdate`.
+  - `src/presentation/webview/editor/ajsTable/Header.tsx`:
+    `HeaderCsvActions`, `Header`, `HeaderSearchField`,
+    `getTableHeaderSearchLabels`, `getAjsTableSearchHelperText`.
+  - `src/presentation/webview/editor/ajsTable/navigation.ts`:
+    `moveCellFocus`, `moveHeaderFocus`, `resolveUnitListGridShortcut`,
+    `resolveTableGridFocus`, `isTableGridNavigationKey`.
+  - `src/presentation/webview/editor/ajsTable/TableContents.tsx`:
+    `TableContents`, `TableViewerShell`, `useChangeDocument`,
+    `useTableViewerTheme`, `isSelectableTableFlowScopeUnit`.
+  - `src/presentation/webview/editor/ajsTable/VirtualizedTable.tsx`:
+    `VirtualizedTable`, `revealGridFocusElement`, `renderVisibleTableCell`,
+    `Table`, `getSearchHitCellSx`.
+- Source evidence: `docs/requirements/use-cases/uc-view-unit-list.md`,
+  `docs/requirements/use-cases/uc-export-unit-list-csv.md`, and
+  `docs/requirements/use-cases/uc-navigate-between-unit-list-and-flow-graph.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 7.
+- Purpose: separate table rendering, column actions, virtualization, and
+  keyboard focus state from application list DTOs.
+- Non-goals: changing list row fields, CSV payload meaning, unit identity, or
+  cross-view navigation semantics.
+- Compatibility and safety net: characterize visible-column export, escaping,
+  virtualized keyboard movement, sorting, detail inspection, focus restore,
+  and counterpart navigation for large lists.
+- Host impact: the shared table webview path affects both desktop and browser
+  extension hosts.
+- Success signal: the same selected unit, cell, visible columns, CSV payload,
+  and focus destination are retained while UI components continue to consume
+  application DTOs only.
+
+### Intake group 8: Viewer composition wiring
+
+- Ranked evidence: rank 10; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-COMPOSITION`), Qlty smell present, raw metrics
+  `16/27/297/277/0`, and six fixed-window touches.
+- Exact target and functions: `src/bootstrap/extension/viewerWiring.ts`:
+  `revealCounterpartPanel`, `createViewerBundle`, `onNavigate`,
+  `createViewerReadyHandler`, `resolveTargetViewType`.
+- Source evidence: `docs/specs/architecture.md` Composition and
+  Application/Presentation boundaries, plus
+  `docs/requirements/use-cases/uc-navigate-between-unit-list-and-flow-graph.md`.
+- Intended roadmap feature and dependency order: Feature 2
+  `Architecture Boundary Protection` remains evidence-gated; Feature 3 is
+  required before any behavior-preserving composition change.
+- Purpose: record the exact composition-root responsibility for viewer
+  dependencies, readiness, and counterpart navigation.
+- Non-goals: adding a service container, moving construction into presentation,
+  adding an architecture exception, or treating complexity as an architecture
+  violation.
+- Compatibility and safety net: characterize activation, viewer readiness,
+  counterpart opening, unavailable-view fallback, lifecycle disposal, and
+  desktop/browser capability selection.
+- Host impact: bootstrap selects capabilities for both desktop and web entry
+  points; no host behavior is changed by this intake.
+- Success signal: the architecture suite remains 13 passing / 0 failing and
+  viewer wiring preserves readiness, navigation, and lifecycle behavior; the
+  Feature 2 intake gate remains closed unless a concrete protection gap is
+  demonstrated.
+
+### Intake group 9: VS Code viewer factory boundary
+
+- Ranked evidence: rank 11; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-VIEWER`), no Qlty smell, raw metrics
+  `6/2/160/135/1`, and five fixed-window touches.
+- Exact target and functions: `src/presentation/vscode/webview/ViewerFactory.ts`:
+  `resolveViewerPanelTitle`, `getPanel`, `registerStandardViewerCustomize`,
+  `createAndStorePanel`, `constructor`.
+- Source evidence: `docs/specs/architecture.md` Transport and Serialization,
+  `docs/requirements/use-cases/uc-view-unit-list.md`, and
+  `docs/requirements/use-cases/uc-build-flow-graph.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 8
+  `Infrastructure Boundary Cleanup`, with desktop and web entry-point impact
+  investigated separately.
+- Purpose: isolate VS Code panel lifecycle and plain viewer transport from
+  application-facing viewer behavior.
+- Non-goals: changing panel titles, message schemas, webview lifecycle, or
+  introducing Node-only behavior into shared code.
+- Compatibility and safety net: characterize table/flow panel creation,
+  readiness, reuse, disposal, title selection, and serialized message
+  handling on desktop and web hosts.
+- Host impact: the VS Code presentation adapter requires separate desktop and
+  web host validation while retaining the same plain transport contracts.
+- Success signal: existing viewer smoke scenarios preserve panel lifecycle and
+  plain DTO transport, while no parser, domain, or application internals cross
+  into the host adapter.
+
+### Intake group 10: Shared webview header search control
+
+- Ranked evidence: rank 26; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-VIEWER`), no Qlty smell, raw metrics
+  `20/19/376/348/0`, and four fixed-window touches.
+- Exact target and functions: `src/presentation/webview/editor/shared/HeaderSearchField.tsx`:
+  `resolveHeaderSearchHelperText`, `isHeaderSearchShortcut`,
+  `HeaderSearchField`, `HeaderSearchControl`, `useHeaderSearchControlState`.
+- Source evidence: `docs/requirements/use-cases/uc-explore-flow-graph.md` and
+  `docs/requirements/use-cases/uc-view-unit-list.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 7;
+  the existing use-case rule keeps search behavior presentation-local.
+- Purpose: make shared header search state and accessibility behavior explicit
+  without creating a shared search domain contract.
+- Non-goals: unifying table and flow matching semantics, emitting query text,
+  changing search result ordering, or moving search into the domain.
+- Compatibility and safety net: characterize empty and non-empty queries,
+  shortcut handling, helper text, result counts, localization, and query-text
+  privacy in both table and flow viewers.
+- Host impact: the shared webview control affects both desktop and browser
+  extension hosts.
+- Success signal: current presentation-local search scenarios retain helper
+  text, shortcuts, matching, focus, and privacy behavior with no new shared
+  domain dependency.
+
+### Intake group 11: Flow tree selector interaction
+
+- Ranked evidence: rank 27; priority `100`, structural tier 5, change-frequency
+  tier 5, criticality 4 (`C4-VIEWER`), Qlty smell present, raw metrics
+  `139/147/1143/1077/0`, and four fixed-window touches.
+- Exact target and functions: `src/presentation/webview/editor/shared/UnitTreeSelector.tsx`:
+  `UnitTreeSelector`, `UnitTreeSelectorUnit`, `UnitTreeRowFrame`,
+  `isTreeNavigationKey`, `resolveUnitTreeRowState`.
+- Source evidence: `docs/requirements/use-cases/uc-explore-flow-graph.md` and
+  `docs/requirements/use-cases/uc-navigate-between-unit-list-and-flow-graph.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 7;
+  the selector remains separate from the table navigation group.
+- Purpose: isolate tree selection, focus, keyboard navigation, and scope-row
+  state while preserving stable list/flow identity.
+- Non-goals: changing flow scope resolution, graph placement, unit identity, or
+  counterpart-viewer opening behavior.
+- Compatibility and safety net: characterize enabled/disabled rows, focus
+  movement, Enter/Space/Alt+Enter behavior, scope selection, reveal, and
+  return focus for large and nested trees.
+- Host impact: the shared flow-tree webview control affects both desktop and
+  browser extension hosts.
+- Success signal: the same row state, selected unit, active scope, and focus
+  destination are produced without relying on color, hover, or parser order.
+
+### Intake group 12: Normalized parser application port
+
+- Ranked evidence: rank 28; priority `100`, structural tier 5, change-frequency
+  tier 4, criticality 5 (`C5-MODEL`), no function-level row, no Qlty smell,
+  raw metrics `1/0/21/18/0`, and two fixed-window touches.
+- Exact target: `src/application/parsing/AjsParserPort.ts`; no function-level
+  evidence row is reported.
+- Source evidence: `docs/specs/architecture.md` Parser and Model Boundary,
+  `docs/requirements/use-cases/uc-view-unit-list.md`,
+  `docs/requirements/use-cases/uc-build-flow-graph.md`, and
+  `docs/requirements/use-cases/uc-diagnose-ajs-definition.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 8.
+- Purpose: preserve a narrow normalized-document-or-owned-error contract at
+  the parser boundary.
+- Non-goals: changing ANTLR grammar, generated parser code, syntax wording,
+  normalized domain semantics, or `AjsRawUnit` ownership.
+- Compatibility and safety net: characterize valid, malformed, encoded, and
+  large JP1/AJS definitions, parser fallback spans, normalized model output,
+  and desktop/web consumers.
+- Host impact: the parser port is shared by both desktop and web entry points;
+  generated parser code remains infrastructure-only.
+- Success signal: parser golden results and error contracts remain unchanged;
+  generated parser types and raw units remain confined to infrastructure.
+
+### Intake group 13: Validated telemetry contract and event builders
+
+- Ranked evidence: ranks 29-34; all priority `100`, structural tier 5,
+  change-frequency tier 4, criticality 5 (`C5-TELEMETRY`). Qlty smells are
+  present for `telemetryBuckets.ts`, `telemetryEvent.ts`,
+  `viewerActionTelemetry.ts`, and `viewerTelemetry.ts`; the ranked table
+  preserves exact raw metrics and touch counts.
+- Exact targets and functions:
+  - `src/application/telemetry/performanceTelemetry.ts`:
+    `createPerformanceTelemetryEvent`.
+  - `src/application/telemetry/searchTelemetry.ts`:
+    `createSearchTelemetryEvent`.
+  - `src/application/telemetry/telemetryBuckets.ts`: `toDurationBucket`,
+    `toCountBucket`, `toHttpStatusCategory`, `isTelemetryDurationBucket`,
+    `isTelemetryCountBucket`.
+  - `src/application/telemetry/telemetryEvent.ts`:
+    `allowTelemetryProperties`, `createTelemetryEvent`.
+  - `src/application/telemetry/viewerActionTelemetry.ts`:
+    `createViewerNavigationActionEvent`, `findViewerActionDefinition`,
+    `resolveViewerActionView`, `createViewerActionEvent`.
+  - `src/application/telemetry/viewerTelemetry.ts`:
+    `createLegacyViewerOpenedEvent`, `resolveViewerTelemetryKind`,
+    `getViewerEventDefinition`, `createViewerEvent`, `createViewerReadyEvent`.
+- Source evidence: `docs/requirements/cross-cutting/telemetry.md` and
+  `docs/specs/architecture.md` Telemetry Boundary.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 8;
+  Feature 9 remains gated until a completed bounded refactor provides stable
+  before/after evidence for a differential quality gate.
+- Purpose: keep event names, allowlisted properties, bucket semantics, and
+  Noop/failure behavior behind the validated telemetry contract.
+- Non-goals: adding events, changing collection policy, exposing raw event
+  maps, importing the SDK into application code, or collecting content, paths,
+  queries, identifiers, or raw errors.
+- Compatibility and safety net: characterize event-builder outputs, privacy
+  allowlists, search/diagnostic/performance buckets, telemetry failure
+  fallback, lifecycle disposal, and desktop/web contract parity.
+- Host impact: both desktop and web entry points use the same validated
+  telemetry contract and no-op fallback.
+- Success signal: existing event names and payload meaning remain stable, no
+  prohibited data appears in builders, and telemetry failure never interrupts
+  the user workflow.
+
+### Intake group 14: JP1/AJS schedule-rule helper
+
+- Ranked evidence: rank 35; priority `100`, structural tier 5,
+  change-frequency tier 4, criticality 5 (`C5-MODEL`), no Qlty smell, raw
+  metrics `26/17/179/152/0`, and three fixed-window touches.
+- Exact target and functions: `src/domain/models/parameters/scheduleRuleHelpers.ts`:
+  `resolveEffectiveStartConditionMonitoringPair`, `parseRuleValue`,
+  `parseScheduleDateValue`, `resolveScheduleByDaysFromStart`,
+  `resolveMaxShiftableDays`.
+- Source evidence: `docs/requirements/domain-rules/interpret-jp1-parameters.md`,
+  `docs/requirements/use-cases/uc-view-unit-list.md`, and
+  `docs/requirements/use-cases/uc-diagnose-ajs-definition.md`.
+- Intended roadmap feature and dependency order: Feature 3, then Feature 5
+  `JP1/AJS Domain Model Restructuring`; Feature 4 is also required if the rule
+  is found to remain hidden in application orchestration.
+- Purpose: preserve one normative JP1/AJS version 13 schedule interpretation
+  across consumers while keeping raw and effective values distinct.
+- Non-goals: adding new manual rules, changing defaults, replacing parser
+  models, adding UI state to the domain, or changing diagnostic wording.
+- Compatibility and safety net: characterize omitted, explicit, inherited,
+  invalid, and boundary schedule values, raw/effective value retention, and
+  identical results for every existing consumer.
+- Host impact: the domain rule is shared by desktop and web application
+  workflows; no host-specific interpretation is permitted.
+- Success signal: at least two evidenced consumers share the same rule result,
+  JP1/AJS3 version 13 behavior is unchanged, and protective tests cover the
+  rule matrix before any domain restructuring.
+
+### Roadmap intake disposition
+
+The ranked evidence confirms the roadmap ordering without making any later
+feature optional or approved:
+
+- Feature 2 remains evidence-gated. The composition group is an exact review
+  input, but this baseline does not prove a new dependency, cycle, or
+  enforcement gap.
+- Feature 3 is the first dependency for every selected responsibility. Each
+  later feature must use a separate characterization boundary when parser,
+  diagnostics, list, flow, telemetry, desktop, or web behavior differs.
+- Feature 4 is the next application-boundary path for diagnostics, flow-graph
+  construction, and list projections after their behavior is protected.
+- Feature 5 is reserved for the schedule rule only after multiple consumers and
+  JP1/AJS compatibility semantics are evidenced.
+- Feature 6 is the bounded high-complexity path for `unitListDocument.ts` after
+  its list behavior and callers are characterized.
+- Feature 7 contains the flow rendering/state, table presentation, header
+  search, and flow-tree selector groups; these remain independent boundaries.
+- Feature 8 contains the VS Code viewer factory, normalized parser port, and
+  validated telemetry contract after host and failure behavior are protected.
+- Feature 9 remains last and evidence-gated until a completed bounded feature
+  supplies stable before/after measurements suitable for a differential gate.
