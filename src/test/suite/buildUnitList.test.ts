@@ -71,6 +71,62 @@ suite("Build Unit List", () => {
     );
   });
 
+  test("preserves schedule raw values and effective list projections", () => {
+    const definition = [
+      "unit=root,,jp1admin,;",
+      "{",
+      "  ty=g;",
+      "  sd=144,2036/12/31;",
+      "  st=144,+47:59;",
+      "  cftd=144,af,31,31;",
+      "  wc=144,999;",
+      "  wt=144,2879;",
+      "}",
+      "",
+    ].join("\n");
+
+    const result = buildUnitList(definition);
+
+    assert.deepStrictEqual(result.errors, []);
+    assert.ok(result.document);
+    assert.deepStrictEqual(
+      result.document?.rootUnits[0]?.parameters.map(({ key, value }) => ({
+        key,
+        value,
+      })),
+      [
+        { key: "ty", value: "g" },
+        { key: "sd", value: "144,2036/12/31" },
+        { key: "st", value: "144,+47:59" },
+        { key: "cftd", value: "144,af,31,31" },
+        { key: "wc", value: "144,999" },
+        { key: "wt", value: "144,2879" },
+      ],
+    );
+
+    const scheduleView = result.document?.unitList.rows[0]?.group10;
+    assert.deepStrictEqual(
+      {
+        scheduleDateYearMonths: scheduleView?.scheduleDateYearMonths,
+        scheduleDateDays: scheduleView?.scheduleDateDays,
+        startTimes: scheduleView?.startTimes,
+        scheduleByDaysFromStart: scheduleView?.scheduleByDaysFromStart,
+        maxShiftableDays: scheduleView?.maxShiftableDays,
+        waitCounts: scheduleView?.waitCounts,
+        waitTimes: scheduleView?.waitTimes,
+      },
+      {
+        scheduleDateYearMonths: ["2036/12"],
+        scheduleDateDays: ["31"],
+        startTimes: ["+47:59"],
+        scheduleByDaysFromStart: ["af,31"],
+        maxShiftableDays: ["31"],
+        waitCounts: ["999"],
+        waitTimes: ["2879"],
+      },
+    );
+  });
+
   test("validates the flow document from the shared document DTO", () => {
     const result = buildUnitList(validDefinition);
     assert.ok(result.document);

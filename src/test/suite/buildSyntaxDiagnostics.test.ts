@@ -284,6 +284,33 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
   });
 
+  test("preserves version-13 schedule boundary semantics through the parser path", () => {
+    const diagnostics = buildSyntaxDiagnostics(
+      [
+        "unit=root,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "  sd=144,2036/12/31;",
+        "  st=144,+47:59;",
+        "  cy=144,(9,y);",
+        "  shd=144,31;",
+        "  cftd=144,no;",
+        "  cftd=144,be,31,31;",
+        "  cftd=144,af,31,31;",
+        "  cftd=144,db,31;",
+        "  cftd=144,da,31;",
+        "  sy=144,U2879;",
+        "  ey=144,47:59;",
+        "  wc=144,999;",
+        "  wt=144,2879;",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepStrictEqual(diagnostics, []);
+  });
+
   test("reports schedule-rule diagnostics for explicit out-of-range values", () => {
     const diagnostics = buildSyntaxDiagnostics(
       [

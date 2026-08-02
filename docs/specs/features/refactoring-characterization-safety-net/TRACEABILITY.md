@@ -36,3 +36,23 @@ also names the concrete test files that prove the slice contract.
   bundled Chromium required sandbox-external execution on this host.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run build`: passed as the production build evidence.
+
+## Slice 2 implementation evidence
+
+- `scheduleRuleHelpers.test.ts` characterizes omitted/default and explicit
+  schedule-rule numbers, all `cftd` modes, mode-specific defaults, malformed
+  shapes, and effective `wc`/`wt` pairs including `no`, `un`, and invalid input.
+- `evaluateScheduleDiagnosticViolations.test.ts` and
+  `buildSyntaxDiagnostics.test.ts` characterize the JP1/AJS3 version-13
+  boundaries, including rule `144`, schedule-limit year `2036`, day/time/count
+  maxima, all `cftd` modes, and just-outside malformed values.
+- `buildUnitList.test.ts` verifies that raw schedule parameter values remain
+  available while the effective group-10 projection retains current display
+  values. `buildUnitListRemainingGroups.test.ts` remains passing as the
+  read-only list projection regression evidence named by the slice plan.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
+- `rtk pnpm run qlty`: passed with no issues.

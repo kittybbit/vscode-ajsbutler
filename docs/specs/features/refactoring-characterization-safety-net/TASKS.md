@@ -35,14 +35,15 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: In Progress
 - Planning scope: Feature 3, Refactoring Characterization Safety Net, based on
   baseline intake groups 1-14.
 - Review status: `sdd-review-plan` passed; Human Approval recorded on
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 2: JP1/AJS schedule-rule characterization.
+- Active implementation slice: Slice 3: Application syntax and semantic
+  diagnostics characterization.
 
 ## Replanning Decision
 
@@ -133,7 +134,7 @@ approved boundaries.
 
 ### Slice 2: JP1/AJS schedule-rule characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize `scheduleRuleHelpers.ts` for omitted, explicit,
   inherited, invalid, and boundary version-13 schedule values.
 - Target symbols: `resolveEffectiveStartConditionMonitoringPair`,
@@ -716,6 +717,14 @@ approved boundaries.
 - Web smoke validation requires sandbox-external Chromium execution on this
   host; retain that as a validation prerequisite for later shared-boundary
   slices.
+- Slice 2's boundary remained appropriate: helper parsing, schedule diagnostic
+  range validation, and the unit-list projection can be characterized without
+  changing runtime code or semantic-diff behavior.
+- The helper boundary intentionally preserves explicit rule numbers and raw
+  values, while v13 range validity remains owned by schedule diagnostics; the
+  matrix tests record that distinction for later domain restructuring.
+- Browser-hosted validation again required sandbox-external Chromium; no
+  desktop/web contract difference or new dependency was discovered.
 
 ## Notes
 

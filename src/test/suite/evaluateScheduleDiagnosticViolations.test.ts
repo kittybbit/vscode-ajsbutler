@@ -174,4 +174,76 @@ suite("Evaluate schedule diagnostic violations", () => {
       [],
     );
   });
+
+  test("accepts the version-13 schedule boundary matrix", () => {
+    const unit = createScheduleUnit([
+      { key: "ty", value: "g" },
+      { key: "sd", value: "144,2036/12/31" },
+      { key: "st", value: "144,+47:59" },
+      { key: "cy", value: "144,(9,y)" },
+      { key: "shd", value: "144,31" },
+      { key: "cftd", value: "144,no" },
+      { key: "cftd", value: "144,be,31,31" },
+      { key: "cftd", value: "144,af,31,31" },
+      { key: "cftd", value: "144,db,31" },
+      { key: "cftd", value: "144,da,31" },
+      { key: "sy", value: "144,U2879" },
+      { key: "ey", value: "144,47:59" },
+      { key: "wc", value: "144,999" },
+      { key: "wt", value: "144,2879" },
+    ]);
+
+    assert.deepStrictEqual(
+      evaluateScheduleDiagnosticViolations(createScheduleDocument(unit)),
+      [],
+    );
+  });
+
+  test("rejects malformed and just-outside schedule values without partial success", () => {
+    const unit = createScheduleUnit([
+      { key: "ty", value: "g" },
+      { key: "sd", value: "145,2036/12/31" },
+      { key: "st", value: "144,+48:00" },
+      { key: "cftd", value: "144,be,31,32" },
+      { key: "wc", value: "144,1000" },
+      { key: "wt", value: "144,2880" },
+    ]);
+
+    assert.deepStrictEqual(
+      evaluateScheduleDiagnosticViolations(createScheduleDocument(unit)).map(
+        ({ ruleId, reason, evidence }) => ({
+          ruleId,
+          reason,
+          key: evidence.key,
+        }),
+      ),
+      [
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          key: "sd",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleRange,
+          reason: scheduleRangeViolationReasons.invalidStartTime,
+          key: "st",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleRange,
+          reason: scheduleRangeViolationReasons.invalidDaysFromStart,
+          key: "cftd",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleRange,
+          reason: scheduleRangeViolationReasons.invalidStartConditionCount,
+          key: "wc",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleRange,
+          reason: scheduleRangeViolationReasons.invalidMonitoringEndTime,
+          key: "wt",
+        },
+      ],
+    );
+  });
 });

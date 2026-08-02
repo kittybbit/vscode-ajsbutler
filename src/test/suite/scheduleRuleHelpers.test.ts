@@ -59,40 +59,102 @@ suite("Schedule rule helpers", () => {
     });
   });
 
-  test("parses cftd defaults and mode-specific max-shift fields", () => {
-    assert.deepStrictEqual(parseScheduleByDaysFromStartValue("be"), {
-      rule: 1,
-      type: "be",
-      scheduleByDaysFromStart: "1",
-      maxShiftableDays: "10",
+  test("preserves explicit schedule-rule numbers at the helper boundary", () => {
+    assert.deepStrictEqual(parseScheduleDateValue("144,2036/12/31"), {
+      rule: 144,
+      yearMonth: "2036/12/",
+      day: "31",
     });
-    assert.deepStrictEqual(parseScheduleByDaysFromStartValue("2,af,4,8"), {
-      rule: 2,
+    assert.deepStrictEqual(parseStartTimeValue("144,+47:59"), {
+      rule: 144,
+      value: "+47:59",
+    });
+    assert.deepStrictEqual(parseWaitCountValue("144,999"), {
+      rule: 144,
+      value: "999",
+    });
+    assert.deepStrictEqual(parseWaitTimeValue("144,2879"), {
+      rule: 144,
+      value: "2879",
+    });
+    assert.deepStrictEqual(parseScheduleByDaysFromStartValue("144,af,31,31"), {
+      rule: 144,
       type: "af",
-      scheduleByDaysFromStart: "4",
-      maxShiftableDays: "8",
-    });
-    assert.deepStrictEqual(parseScheduleByDaysFromStartValue("db,4,8"), {
-      rule: 1,
-      type: "db",
-      scheduleByDaysFromStart: "4",
-      maxShiftableDays: undefined,
-    });
-    assert.deepStrictEqual(parseScheduleByDaysFromStartValue("no"), {
-      rule: 1,
-      type: "no",
-      scheduleByDaysFromStart: undefined,
-      maxShiftableDays: undefined,
+      scheduleByDaysFromStart: "31",
+      maxShiftableDays: "31",
     });
   });
 
+  test("applies cftd defaults and mode-specific max-shift fields", () => {
+    const cases = [
+      [
+        "be",
+        {
+          rule: 1,
+          type: "be",
+          scheduleByDaysFromStart: "1",
+          maxShiftableDays: "10",
+        },
+      ],
+      [
+        "2,af,4,8",
+        {
+          rule: 2,
+          type: "af",
+          scheduleByDaysFromStart: "4",
+          maxShiftableDays: "8",
+        },
+      ],
+      [
+        "db,4,8",
+        {
+          rule: 1,
+          type: "db",
+          scheduleByDaysFromStart: "4",
+          maxShiftableDays: undefined,
+        },
+      ],
+      [
+        "da,31",
+        {
+          rule: 1,
+          type: "da",
+          scheduleByDaysFromStart: "31",
+          maxShiftableDays: undefined,
+        },
+      ],
+      [
+        "no",
+        {
+          rule: 1,
+          type: "no",
+          scheduleByDaysFromStart: undefined,
+          maxShiftableDays: undefined,
+        },
+      ],
+    ] as const;
+
+    for (const [rawValue, expected] of cases) {
+      assert.deepStrictEqual(
+        parseScheduleByDaysFromStartValue(rawValue),
+        expected,
+      );
+    }
+  });
+
   test("does not partially parse unsupported value shapes", () => {
+    assert.strictEqual(parseScheduleDateValue("1,2024/02/xx"), undefined);
+    assert.strictEqual(parseScheduleDateValue("1,"), undefined);
     assert.strictEqual(parseStartTimeValue("09:00x"), undefined);
     assert.strictEqual(parseDelayTimeValue("+09:00"), undefined);
     assert.strictEqual(parseWaitTimeValue("M120"), undefined);
     assert.strictEqual(parseCycleValue("(3,q)"), undefined);
     assert.strictEqual(parseClosedDaySubstitutionValue("before"), undefined);
     assert.strictEqual(parseScheduleByDaysFromStartValue("be,3,9x"), undefined);
+    assert.strictEqual(
+      parseScheduleByDaysFromStartValue("be,3,9,1"),
+      undefined,
+    );
   });
 
   test("resolves effective wc and wt pairs", () => {
@@ -113,6 +175,17 @@ suite("Schedule rule helpers", () => {
     );
     assert.deepStrictEqual(
       resolveEffectiveStartConditionMonitoringPair(undefined, "00:30"),
+      {},
+    );
+    assert.deepStrictEqual(
+      resolveEffectiveStartConditionMonitoringPair("un", "un"),
+      {
+        numberOfTimes: "un",
+        time: "un",
+      },
+    );
+    assert.deepStrictEqual(
+      resolveEffectiveStartConditionMonitoringPair("invalid", "00:30"),
       {},
     );
   });
