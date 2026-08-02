@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { createBuildSyntaxDiagnostics } from "../../application/editor-feedback/buildSyntaxDiagnostics";
+import { createDiagnoseAjsDefinition } from "../../application/editor-feedback/diagnoseAjsDefinition";
 import { toDiagnosticSourceRange } from "../../application/editor-feedback/diagnosticSourceRange";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
@@ -11,7 +11,7 @@ import {
   expectedSyntaxDiagnostic,
 } from "../support/syntaxDiagnostics";
 
-const buildSyntaxDiagnostics = createBuildSyntaxDiagnostics(testAjsParser);
+const diagnoseAjsDefinition = createDiagnoseAjsDefinition(testAjsParser);
 
 type ExpectedDiagnosticLocation = Parameters<
   typeof expectedSyntaxDiagnostic
@@ -63,7 +63,7 @@ const buildTransferFileDefinition = (
     { name: "queue1", type: "qj", parameters: queueParameters },
   ]);
 
-suite("Build Syntax Diagnostics", () => {
+suite("Diagnose AJS Definition", () => {
   test("preserves diagnostic position fallback for normalized parameters", () => {
     assert.deepStrictEqual(
       toDiagnosticSourceRange({ length: undefined }, "evsid".length),
@@ -86,7 +86,7 @@ suite("Build Syntax Diagnostics", () => {
       }),
     };
 
-    const diagnostics = createBuildSyntaxDiagnostics(parser)("ignored");
+    const diagnostics = createDiagnoseAjsDefinition(parser)("ignored");
 
     assert.deepStrictEqual(diagnostics, [
       {
@@ -109,7 +109,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("characterizes mixed diagnostic summaries across parser and domain rules", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -214,7 +214,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("returns parser errors as UI-independent diagnostics", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       "unit=root,,jp1admin,;\n{\n  ty=g\n}\n",
     );
 
@@ -227,7 +227,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("returns an empty array for valid input", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       "unit=root,,jp1admin,;\n{\n  ty=g;\n}\n",
     );
 
@@ -235,7 +235,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("keeps a bounded large valid definition diagnostic-free", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition(
         Array.from({ length: 128 }, (_, index) => ({
           name: `job${index}`,
@@ -249,7 +249,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not infer semantic diagnostic target types during normalization", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       "unit=root,,jp1admin,;\n{\n  st=145,+48:00;\n}\n",
     );
 
@@ -257,7 +257,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report schedule-rule diagnostics for valid explicit values and ignored root ln", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -287,7 +287,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report sd diagnostics for valid explicit dates including sd=0,ud", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -309,7 +309,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("preserves version-13 schedule boundary semantics through the parser path", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -336,7 +336,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports schedule-rule diagnostics for explicit out-of-range values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -407,7 +407,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports sd diagnostics for explicit out-of-range rule and date values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -480,7 +480,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report sd/cy compatibility diagnostics for valid explicit schedule combinations", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -500,7 +500,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports sd/cy compatibility diagnostics for explicit weekly cycles on open-day and closed-day schedules", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -535,7 +535,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report end-judgment diagnostics for omitted defaults", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -554,7 +554,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report end-judgment diagnostics for explicit valid retry settings", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -579,7 +579,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports end-judgment numeric range diagnostics for explicit out-of-range values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "job1",
@@ -645,7 +645,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports end-judgment diagnostics for explicit invalid retry combinations", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "job1", type: "j", parameters: ["jd=ab;", "abr=y;"] },
         { name: "custom", type: "cj", parameters: ["jd=nm;", "abr=y;"] },
@@ -665,7 +665,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports retry parameter diagnostics for explicit invalid end-judgment combinations", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "job1", type: "j", parameters: ["jd=ab;", "rjs=1;", "rje=9;"] },
         {
@@ -705,7 +705,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports retry parameter diagnostics when automatic retry is not enabled", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "job1",
@@ -748,7 +748,7 @@ suite("Build Syntax Diagnostics", () => {
 
   test("reports end-judgment and retry diagnostics for normal and recovery QUEUE jobs", () => {
     for (const type of ["qj", "rq"]) {
-      const dependencyDiagnostics = buildSyntaxDiagnostics(
+      const dependencyDiagnostics = diagnoseAjsDefinition(
         buildRootUnitDefinition([
           {
             name: "queue1",
@@ -780,7 +780,7 @@ suite("Build Syntax Diagnostics", () => {
         "Retry parameter (rei) requires end judgment (jd) to be cod.",
       ]);
 
-      const thresholdDiagnostics = buildSyntaxDiagnostics(
+      const thresholdDiagnostics = diagnoseAjsDefinition(
         buildRootUnitDefinition([
           {
             name: "queue1",
@@ -801,7 +801,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report threshold-ordering diagnostics for omitted or ordered explicit end-judgment thresholds", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "job1", type: "j", parameters: ["jd=cod;"] },
         {
@@ -821,7 +821,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports threshold-ordering diagnostics for explicit invalid end-judgment thresholds", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "job1",
@@ -862,7 +862,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report file monitoring diagnostics for omitted defaults and valid explicit combinations", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "file1", type: "flwj", parameters: ["flco=y;"] },
         {
@@ -883,7 +883,7 @@ suite("Build Syntax Diagnostics", () => {
     const invalidConditions = ["d", "d:c", "c::s", "c:d:s:x", "c:d:s:m"];
 
     for (const condition of invalidConditions) {
-      const diagnostics = buildSyntaxDiagnostics(
+      const diagnostics = diagnoseAjsDefinition(
         buildRootUnitDefinition([
           {
             name: "file1",
@@ -905,7 +905,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report file monitoring target-pattern diagnostics for valid explicit values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "file1",
@@ -928,7 +928,7 @@ suite("Build Syntax Diagnostics", () => {
     const overAsciiContent = "a".repeat(256);
     const exactMultibyteContent = "あ".repeat(85);
     const overMultibyteContent = "あ".repeat(86);
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "file1",
@@ -964,7 +964,7 @@ suite("Build Syntax Diagnostics", () => {
 
   test("reports file monitoring target-pattern diagnostics for explicit out-of-range values and wildcard short intervals", () => {
     const tooLongFileName = "a".repeat(256);
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1022,7 +1022,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports file monitoring diagnostics for explicit invalid condition combinations", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1070,7 +1070,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports file monitoring fd diagnostics for explicit out-of-range values and start-condition usage", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildStartConditionDefinition([
         { name: "file1", type: "flwj", parameters: ["fd=0;"] },
         { name: "file2", type: "rflwj", parameters: ["fd=10;"] },
@@ -1090,7 +1090,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event timeout action diagnostics for omitted defaults and valid explicit values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "file1", type: "flwj" },
         { name: "file2", type: "rflwj", parameters: ["ets=wr;"] },
@@ -1103,7 +1103,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event timeout action diagnostics for explicit invalid values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "file1", type: "flwj", parameters: ["ets=xx;"] },
         { name: "interval1", type: "tmwj", parameters: ["ets=yy;"] },
@@ -1132,7 +1132,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report execution-interval control diagnostics for valid start-condition values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1164,7 +1164,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports execution-interval control diagnostics when etn=y is used outside start-condition context", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1193,7 +1193,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports execution-interval control diagnostics for explicit invalid tmitv and etn values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1252,7 +1252,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports execution-interval control fd diagnostics for explicit out-of-range values and start-condition usage", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildStartConditionDefinition([
         { name: "interval1", type: "tmwj", parameters: ["fd=1441;"] },
         { name: "interval2", type: "rtmwj", parameters: ["fd=10;"] },
@@ -1272,7 +1272,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report transfer-file diagnostics for valid explicit values and macro variables", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1308,7 +1308,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("accepts transfer-file macros only in supported unit and queuing contexts", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "job", type: "j", parameters: ["ts1=?SRC?;"] },
         {
@@ -1332,7 +1332,7 @@ suite("Build Syntax Diagnostics", () => {
     assert.deepStrictEqual(diagnostics, []);
 
     for (const type of ["j", "rj", "pj", "rp"]) {
-      const nonQueuingDiagnostics = buildSyntaxDiagnostics(
+      const nonQueuingDiagnostics = diagnoseAjsDefinition(
         buildRootUnitDefinition([
           {
             name: "job",
@@ -1366,7 +1366,7 @@ suite("Build Syntax Diagnostics", () => {
     );
 
     for (const type of ["cpj", "rcpj"]) {
-      const diagnostics = buildSyntaxDiagnostics(
+      const diagnostics = diagnoseAjsDefinition(
         buildRootUnitDefinition([{ name: "custom-pc", type, parameters }]),
       );
 
@@ -1379,7 +1379,7 @@ suite("Build Syntax Diagnostics", () => {
 
   test("reports transfer-file byte-length diagnostics for explicit out-of-range values", () => {
     const tooLongFileName = "a".repeat(512);
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1423,7 +1423,7 @@ suite("Build Syntax Diagnostics", () => {
     const overSourceContent = `/${"a".repeat(511)}`;
     const exactDestinationContent = "a".repeat(511);
     const overMultibyteDestinationContent = "あ".repeat(171);
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "job1",
@@ -1454,7 +1454,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports transfer-source path diagnostics for quoted relative paths", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildTransferFileDefinition(
         ['ts1="relative/source-1";', 'td1="dest-1";'],
         ['ts1="queue-source";', 'td1="queue-dest";'],
@@ -1473,7 +1473,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports transfer-file value-shape diagnostics for explicit bare strings", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildTransferFileDefinition(
         ["ts1=source-1;", "td1=dest-1;"],
         ["ts1=queue-source;"],
@@ -1502,7 +1502,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports transfer-file invalid-combination diagnostics when source files are omitted", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildTransferFileDefinition(
         ["td1=dest-only;", "top1=del;"],
         ["td1=queue-dest-only;", "top1=del;"],
@@ -1531,7 +1531,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event sending diagnostics for omitted evsrt defaults", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1550,7 +1550,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event sending diagnostics for valid explicit arrival-check settings", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1578,7 +1578,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event sending evsid diagnostics for omitted and valid explicit hexadecimal values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "event1", type: "evsj", parameters: ["evsid=1fff;"] },
         { name: "event2", type: "revsj", parameters: ["evsid=7fff8000;"] },
@@ -1590,7 +1590,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event sending evsid diagnostics for explicit invalid values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "event1", type: "evsj", parameters: ["evsid=ACT-1;"] },
         { name: "event2", type: "revsj", parameters: ["evsid=00002000;"] },
@@ -1616,7 +1616,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event sending range diagnostics for omitted defaults and valid explicit ranges", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "event1", type: "evsj" },
         {
@@ -1631,7 +1631,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event sending range diagnostics for explicit out-of-range values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "event1", type: "evsj", parameters: ["evspl=2;"] },
         { name: "event2", type: "revsj", parameters: ["evsrc=1000;"] },
@@ -1659,7 +1659,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event sending diagnostics when arrival checking omits evhst", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1701,7 +1701,7 @@ suite("Build Syntax Diagnostics", () => {
 
   test("does not report event-host diagnostics for valid explicit evhst values", () => {
     const sendingHost = "a".repeat(255);
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1728,7 +1728,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event receiving diagnostics for omitted defaults and valid explicit values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1768,7 +1768,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event receiving diagnostics for explicit invalid evesc, evwid, and evipa values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1843,7 +1843,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event receiving string-filter diagnostics for omitted and valid explicit values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1873,7 +1873,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event receiving string-filter diagnostics for explicit invalid values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",
@@ -1957,7 +1957,7 @@ suite("Build Syntax Diagnostics", () => {
     const exactContent = "a".repeat(1013);
     const overContent = "a".repeat(1014);
     const exactMultibyteContent = `${"あ".repeat(337)}aa`;
-    const exactDiagnostics = buildSyntaxDiagnostics(
+    const exactDiagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "wait1",
@@ -1972,7 +1972,7 @@ suite("Build Syntax Diagnostics", () => {
 
     assert.deepStrictEqual(exactDiagnostics, []);
 
-    const overDiagnostics = buildSyntaxDiagnostics(
+    const overDiagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "wait1",
@@ -1997,7 +1997,7 @@ suite("Build Syntax Diagnostics", () => {
       diagnosticRuleIds.eventReceiveFilter,
     );
 
-    const multibyteDiagnostics = buildSyntaxDiagnostics(
+    const multibyteDiagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "wait1",
@@ -2015,7 +2015,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("keeps evwfr shape and aggregate diagnostics separate for malformed values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "wait1",
@@ -2035,7 +2035,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event receiving numeric-identifier diagnostics for omitted and boundary values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "wait1",
@@ -2050,7 +2050,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event receiving numeric-identifier diagnostics for explicit out-of-range values", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "wait1", type: "evwj", parameters: ["evuid=-2;"] },
         { name: "wait2", type: "revwj", parameters: ["evgid=10000000000;"] },
@@ -2081,7 +2081,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("does not report event receiving timeout-control diagnostics for valid explicit values outside start-condition context", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         {
           name: "wait1",
@@ -2100,7 +2100,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event receiving timeout-control diagnostics for explicit invalid values and start-condition usage", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildRootUnitDefinition([
         { name: "start-condition", type: "rc" },
         { name: "wait1", type: "evwj", parameters: ["etm=0;"] },
@@ -2155,7 +2155,7 @@ suite("Build Syntax Diagnostics", () => {
   });
 
   test("reports event receiving fd diagnostics for explicit out-of-range values and start-condition usage", () => {
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       buildStartConditionDefinition([
         { name: "wait1", type: "evwj", parameters: ["fd=0;"] },
         { name: "wait2", type: "revwj", parameters: ["fd=10;"] },
@@ -2176,7 +2176,7 @@ suite("Build Syntax Diagnostics", () => {
 
   test("reports event-host diagnostics for explicit out-of-range evhst values", () => {
     const oversizedHost = "a".repeat(256);
-    const diagnostics = buildSyntaxDiagnostics(
+    const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
         "{",

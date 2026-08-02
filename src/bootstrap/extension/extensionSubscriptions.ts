@@ -11,7 +11,7 @@ export const createExtensionSubscriptions = (
   dependencies: ExtensionDependencies,
 ): vscode.Disposable[] => [
   registerDiagnostics(
-    dependencies.buildSyntaxDiagnostics,
+    dependencies.diagnoseAjsDefinition,
     dependencies.telemetry,
   ),
   registerHoverProvider(

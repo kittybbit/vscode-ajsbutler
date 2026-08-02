@@ -8,7 +8,7 @@ import {
 } from "../../domain/services/diagnostics/evaluateScheduleDiagnosticViolations";
 import { createMapDiagnosticViolation } from "./mapDiagnosticViolation";
 import type {
-  BuildSyntaxDiagnosticsOptions,
+  DiagnoseAjsDefinitionOptions,
   SyntaxDiagnosticDto,
 } from "./syntaxDiagnosticTypes";
 import { syntaxDiagnosticCategories } from "./syntaxDiagnosticTypes";
@@ -76,7 +76,7 @@ const mapScheduleDiagnosticViolation =
 
 export const buildScheduleRuleDiagnostics = (
   document: AjsDocument,
-  options: BuildSyntaxDiagnosticsOptions,
+  options: DiagnoseAjsDefinitionOptions,
 ): SyntaxDiagnosticDto[] =>
   evaluateScheduleDiagnosticViolations(document, options).map(
     mapScheduleDiagnosticViolation,

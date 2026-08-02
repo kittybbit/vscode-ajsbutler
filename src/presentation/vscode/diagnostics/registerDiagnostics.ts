@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { BuildSyntaxDiagnostics } from "../../../application/editor-feedback/buildSyntaxDiagnostics";
+import type { DiagnoseAjsDefinition } from "../../../application/editor-feedback/diagnoseAjsDefinition";
 import type {
   SyntaxDiagnosticCategory,
   SyntaxDiagnosticDto,
@@ -83,14 +83,14 @@ const trackTelemetryEvent = (
 };
 
 export const updateDiagnostics = (
-  buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
+  diagnoseAjsDefinition: DiagnoseAjsDefinition,
   collection: vscode.DiagnosticCollection,
   document: vscode.TextDocument,
   telemetry?: TelemetryPort,
 ): void => {
   console.log(`invoke checkForErrors. (${document.uri.toString()})`);
   const startedAt = performance.now();
-  const syntaxDiagnostics = buildSyntaxDiagnostics(document.getText());
+  const syntaxDiagnostics = diagnoseAjsDefinition(document.getText());
   collection.set(document.uri, syntaxDiagnostics.map(toVsCodeDiagnostic));
   reportDiagnosticsTelemetry(
     telemetry,
@@ -117,14 +117,14 @@ const runForAjsDocument = (
 
 const createOpenDocumentListener =
   (
-    buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
+    diagnoseAjsDefinition: DiagnoseAjsDefinition,
     collection: vscode.DiagnosticCollection,
     telemetry?: TelemetryPort,
   ) =>
   (document: vscode.TextDocument): void => {
     runForAjsDocument(document, "onDidOpenTextDocument", (targetDocument) => {
       updateDiagnostics(
-        buildSyntaxDiagnostics,
+        diagnoseAjsDefinition,
         collection,
         targetDocument,
         telemetry,
@@ -134,7 +134,7 @@ const createOpenDocumentListener =
 
 const createChangeDocumentListener =
   (
-    buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
+    diagnoseAjsDefinition: DiagnoseAjsDefinition,
     collection: vscode.DiagnosticCollection,
     telemetry?: TelemetryPort,
   ) =>
@@ -144,7 +144,7 @@ const createChangeDocumentListener =
       "onDidChangeTextDocument",
       (targetDocument) => {
         updateDiagnostics(
-          buildSyntaxDiagnostics,
+          diagnoseAjsDefinition,
           collection,
           targetDocument,
           telemetry,
@@ -162,7 +162,7 @@ const createCloseDocumentListener =
   };
 
 export const registerDiagnostics = (
-  buildSyntaxDiagnostics: BuildSyntaxDiagnostics,
+  diagnoseAjsDefinition: DiagnoseAjsDefinition,
   telemetry?: TelemetryPort,
 ): vscode.Disposable => {
   console.log("initialize Diagnostic.");
@@ -172,11 +172,11 @@ export const registerDiagnostics = (
   return vscode.Disposable.from(
     collection,
     vscode.workspace.onDidOpenTextDocument(
-      createOpenDocumentListener(buildSyntaxDiagnostics, collection, telemetry),
+      createOpenDocumentListener(diagnoseAjsDefinition, collection, telemetry),
     ),
     vscode.workspace.onDidChangeTextDocument(
       createChangeDocumentListener(
-        buildSyntaxDiagnostics,
+        diagnoseAjsDefinition,
         collection,
         telemetry,
       ),

@@ -17,19 +17,18 @@
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is the Current-State Boundary Gate, followed by
-  `sdd-implement-task` for Slice 1.
+- Next step is `sdd-implement-task` for Slice 2.
 
 ## Plan Status
 
-- Status: Approved
+- Status: In Progress
 - Planning scope: revise the full feature plan after review findings, with
   concrete contract dependencies, explicit Flow effect/controller ownership,
   and a cohesive Unit List shell/search boundary.
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: none; implementation has not started.
+- Active implementation slice: Slice 2: Stabilize plain viewer transport contracts.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -86,7 +85,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 1: Rename the Diagnose application capability
 
-- Status: Approved
+- Status: Complete
 - Scope: rename the application-facing diagnostics capability from
   `BuildSyntaxDiagnostics` to `DiagnoseAjsDefinition`, including
   `src/application/editor-feedback`, `src/bootstrap/extension/extensionDependencies.ts`,

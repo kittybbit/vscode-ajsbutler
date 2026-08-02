@@ -30,6 +30,6 @@ export type SyntaxDiagnosticDto = DiagnosticSourceRange & {
   ruleId?: DiagnosticRuleId;
 };
 
-export type BuildSyntaxDiagnosticsOptions = {
+export type DiagnoseAjsDefinitionOptions = {
   scheduleLimitYear?: number;
 };

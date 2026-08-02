@@ -3,18 +3,18 @@ import { toDiagnosticSourceRange } from "./diagnosticSourceRange";
 import { buildSemanticSyntaxDiagnostics } from "./syntaxDiagnosticRules";
 import { syntaxDiagnosticCategories } from "./syntaxDiagnosticTypes";
 import type {
-  BuildSyntaxDiagnosticsOptions,
+  DiagnoseAjsDefinitionOptions,
   SyntaxDiagnosticDto,
 } from "./syntaxDiagnosticTypes";
 
 export type {
-  BuildSyntaxDiagnosticsOptions,
+  DiagnoseAjsDefinitionOptions,
   SyntaxDiagnosticDto,
 } from "./syntaxDiagnosticTypes";
 
-export type BuildSyntaxDiagnostics = (
+export type DiagnoseAjsDefinition = (
   content: string,
-  options?: BuildSyntaxDiagnosticsOptions,
+  options?: DiagnoseAjsDefinitionOptions,
 ) => SyntaxDiagnosticDto[];
 
 export const mapParserErrorToSyntaxDiagnostic = (
@@ -26,8 +26,8 @@ export const mapParserErrorToSyntaxDiagnostic = (
   category: syntaxDiagnosticCategories.parserSyntax,
 });
 
-export const createBuildSyntaxDiagnostics =
-  (parser: AjsParserPort): BuildSyntaxDiagnostics =>
+export const createDiagnoseAjsDefinition =
+  (parser: AjsParserPort): DiagnoseAjsDefinition =>
   (content, options = {}) => {
     const result = parser.parse(content);
     if (result.ok === false) {
