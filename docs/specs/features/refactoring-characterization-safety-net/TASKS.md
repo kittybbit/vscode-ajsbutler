@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 11: VS Code viewer factory and plain
-  transport characterization.
+- Active implementation slice: Slice 12: Shared webview header search
+  characterization.
 
 ## Replanning Decision
 
@@ -479,7 +479,7 @@ approved boundaries.
 
 ### Slice 11: VS Code viewer factory and plain transport characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize panel creation/reuse, titles, readiness, disposal, and
   serialized plain-message transport in `ViewerFactory.ts`.
 - Target symbols: `resolveViewerPanelTitle`, `getPanel`, `getExistingPanel`,
@@ -773,6 +773,18 @@ approved boundaries.
   error in `src/test/suite/accessibilityDom.test.tsx:182` (`UnitListRowView`
   has no `name` property). The error is outside Slice 10 and was not changed;
   it remains a follow-up before feature exit.
+- Slice 11's boundary remained appropriate: panel lifecycle and plain host
+  message evidence fit the existing viewer suites without changing the VS
+  Code adapter or shared message contracts.
+- A bounded 500-child document payload was sufficient to characterize JSON
+  serialization and parser acceptance without broad snapshots or parser
+  internals. No new dependency, JP1/AJS compatibility issue, or desktop/web
+  contract difference was discovered.
+- Browser-hosted validation required sandbox-external Chromium; the existing
+  web teardown EPIPE/Premature close logs did not affect the passing result.
+- The required production build check remains blocked by the same pre-existing
+  `src/test/suite/accessibilityDom.test.tsx:182` type error; it is outside
+  Slice 11 and was not changed.
 
 ## Notes
 

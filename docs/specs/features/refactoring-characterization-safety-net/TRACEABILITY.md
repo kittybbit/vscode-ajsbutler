@@ -266,3 +266,33 @@ also names the concrete test files that prove the slice contract.
   (`UnitListRowView` has no `name` property); this file is unchanged by Slice
   10 and the issue is recorded as a follow-up before feature exit.
 - `rtk pnpm run lint:md`: passed after this traceability update.
+
+## Slice 11 implementation evidence
+
+- `viewerFactory.test.ts` records filename-equivalent and URI-fallback titles,
+  existing-panel reuse, new-panel creation, standard message customization,
+  readiness, navigation, save, and disposal behavior.
+- `viewerHostMessages.test.ts` records every host-message builder and parser,
+  explicit null handling, malformed-envelope rejection, and a bounded
+  500-child document payload that remains plain JSON through serialization and
+  parsing without losing root, row, or unit counts.
+- `viewerMessageRouting.test.ts` and `viewerRequestMessages.test.ts` retain
+  request routing, invalid-save diagnostics, disposal cleanup, request
+  round-trips, optional telemetry-field omission, and malformed-input
+  rejection. `reportWebviewOperation.test.ts` remains read-only evidence for
+  the existing operation bridge; telemetry event meaning is owned by Slice 14.
+- No runtime, generated-parser, configuration, dependency, or architecture
+  boundary changed. Panel lifecycle, plain DTO transport, JP1/AJS behavior,
+  and desktop/web user-visible behavior remain unchanged.
+- The slice boundary remained appropriate: the large-payload assertion fits
+  the host-message contract without exporting test seams or changing the
+  viewer factory implementation. No durable documentation or CHANGELOG update
+  is required.
+- `rtk pnpm run test:full`: passed; browser-hosted Chromium required
+  sandbox-external execution and emitted the existing EPIPE/Premature close
+  teardown logs before exiting 0.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run build`: attempted for `V-B` but remains blocked by the
+  pre-existing `src/test/suite/accessibilityDom.test.tsx:182` type error
+  (`UnitListRowView` has no `name` property); that file is unchanged by Slice
+  11 and the issue remains a follow-up before feature exit.
