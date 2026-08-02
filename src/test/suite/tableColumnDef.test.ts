@@ -54,6 +54,20 @@ const collectLeafColumns = (columns: ColumnLike[]): ColumnLike[] =>
   );
 
 suite("Table Column Definition", () => {
+  test("keeps the utility column and JP1/AJS groups in stable order", () => {
+    const columns = tableColumnDef(
+      "en",
+      () => undefined,
+      new Map(),
+    ) as ColumnLike[];
+
+    assert.deepStrictEqual(
+      columns.map((column) => column.id),
+      ["#", ...Array.from({ length: 20 }, (_, index) => `group${index + 1}`)],
+    );
+    assert.strictEqual(columns[0]?.header, "#");
+  });
+
   test("preserves English, Japanese, and fallback column labels", () => {
     const group1 = (language: string): ColumnLike =>
       tableColumnDef(language, () => undefined, new Map())[1] as ColumnLike;

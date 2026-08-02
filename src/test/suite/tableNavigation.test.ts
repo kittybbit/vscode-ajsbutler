@@ -301,6 +301,55 @@ suite("Table navigation", () => {
     );
   });
 
+  test("clamps header and cell focus at table boundaries", () => {
+    const rows = ["/root/first", "/root/last"];
+    const columns = ["#", "name", "comment"];
+    const context = {
+      pageSize: 10,
+      rowAbsolutePaths: rows,
+      visibleColumnIds: columns,
+      sortableColumnIds: ["name", "comment"],
+    };
+
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...context,
+        current: {
+          kind: "cell",
+          absolutePath: rows[0],
+          columnId: "#",
+        },
+        key: "ArrowLeft",
+      }),
+      { kind: "cell", absolutePath: rows[0], columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...context,
+        current: { kind: "header", columnId: "#" },
+        key: "ArrowLeft",
+      }),
+      { kind: "header", columnId: "#" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...context,
+        current: { kind: "header", columnId: "comment" },
+        key: "ArrowRight",
+      }),
+      { kind: "header", columnId: "comment" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...context,
+        current: { kind: "header", columnId: "comment" },
+        key: "End",
+        ctrlKey: true,
+      }),
+      { kind: "cell", absolutePath: rows[1], columnId: "comment" },
+    );
+  });
+
   test("resolves list grid shortcuts only for their owned focus target", () => {
     const cell = {
       kind: "cell" as const,

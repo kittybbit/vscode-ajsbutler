@@ -34,6 +34,12 @@ suite("Export CSV View", () => {
       warnings: [],
     };
     const row = buildUnitListProjection(document).rows[0];
+    const secondRow = {
+      ...row,
+      id: "job-id-2",
+      absolutePath: "/job-2",
+      group1: { ...row.group1, name: "job-2" },
+    };
     const table = {
       getHeaderGroups: () => [
         {
@@ -94,6 +100,9 @@ suite("Export CSV View", () => {
           {
             original: row,
           },
+          {
+            original: secondRow,
+          },
         ],
       }),
     } as Table<UnitListRowView>;
@@ -104,12 +113,15 @@ suite("Export CSV View", () => {
 
     assert.deepStrictEqual(input, {
       headerRows: [["#", "Flags", "Command", "Empty", "", ""]],
-      rows: [{ values: ["one\ntwo", "job\nline2", ""] }],
+      rows: [
+        { values: ["one\ntwo", "job\nline2", ""] },
+        { values: ["one\ntwo", "job-2\nline2", ""] },
+      ],
     });
     assert.deepStrictEqual(JSON.parse(JSON.stringify(input)), input);
     assert.strictEqual(
       copyCsv,
-      '"#","Flags","Command","Empty","",""\n"1","one\ntwo","job\nline2",""',
+      '"#","Flags","Command","Empty","",""\n"1","one\ntwo","job\nline2",""\n"2","one\ntwo","job-2\nline2",""',
     );
     assert.strictEqual(saveCsv, copyCsv);
   });

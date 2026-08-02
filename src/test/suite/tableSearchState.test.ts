@@ -97,6 +97,46 @@ suite("AJS table search state", () => {
     );
   });
 
+  test("preserves deterministic order and wraps a bounded large result set", () => {
+    const rows = Array.from({ length: 2048 }, (_, index) =>
+      createRow(`/root/job-${index}`, [`job-${index}`]),
+    );
+
+    const matchingPaths = findTableSearchMatchingAbsolutePaths(
+      rows,
+      new Map(),
+      "job-",
+    );
+    const state = createSubmittedTableSearchState("job-", matchingPaths);
+    const nextState = moveTableSearchResult(state, "next");
+    const previousState = moveTableSearchResult(nextState, "previous");
+
+    assert.strictEqual(matchingPaths.length, 2048);
+    assert.strictEqual(matchingPaths[0], "/root/job-0");
+    assert.strictEqual(matchingPaths.at(-1), "/root/job-2047");
+    assert.deepStrictEqual(getTableSearchResultPosition(state), {
+      current: 1,
+      total: 2048,
+    });
+    assert.strictEqual(nextState.searchedAbsolutePath, "/root/job-1");
+    assert.strictEqual(previousState.searchedAbsolutePath, "/root/job-0");
+    assert.deepStrictEqual(
+      findTableSearchMatchingAbsolutePaths(rows, new Map(), "job-"),
+      matchingPaths,
+    );
+  });
+
+  test("keeps an empty result safe when navigation is requested", () => {
+    const state = createSubmittedTableSearchState("missing", []);
+
+    assert.deepStrictEqual(moveTableSearchResult(state, "next"), state);
+    assert.deepStrictEqual(moveTableSearchResult(state, "previous"), state);
+    assert.deepStrictEqual(getTableSearchResultPosition(state), {
+      current: 0,
+      total: 0,
+    });
+  });
+
   test("empty query clears active search", () => {
     assert.deepStrictEqual(
       createSubmittedTableSearchState("   ", ["/root/job"]),

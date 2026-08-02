@@ -205,3 +205,40 @@ also names the concrete test files that prove the slice contract.
   existing web test teardown emitted EPIPE/ECONNRESET/Premature close logs but
   exited 0.
 - `rtk pnpm run qlty`: passed with no issues.
+
+## Slice 9 implementation evidence
+
+- `tableColumnDef.test.ts` records the utility column and all 20 JP1/AJS
+  column groups in stable order, while retaining localized labels, nested
+  schedule-column order, and primitive accessor output checks.
+- `tableNavigation.test.ts` records stable entry/restoration focus, bounded
+  10,000-row paging, header/cell boundary clamping, grid shortcuts, sticky
+  column reveal, row selection, detail focus requests, and flow counterpart
+  navigation. `tableSearchState.test.ts` records current row order, hidden
+  parameter/path matches, a bounded 2,048-row result set, wrapping, and empty
+  result safety.
+- `tableViewerData.test.ts` records a bounded 500-child viewer projection with
+  complete row/unit identity and retains malformed-row fail-closed behavior.
+  `exportCsvView.test.ts` records visible-column order and multi-row CSV output
+  for copy/save interactions. `ajsTableHeader.test.ts` retains header sorting,
+  display-column visibility, search helper, and non-color focus cues.
+- `accessibilityDom.test.tsx` records a 128-row virtualized grid's ARIA row/
+  column counts, roving cell focus, keyboard movement, grouped display-column
+  expansion, and leaf visibility updates. Existing detail-pane accessibility
+  checks remain in the same suite.
+- No runtime, generated-parser, configuration, dependency, or architecture
+  boundary changed. Unit identity, visible-column semantics, search behavior,
+  CSV meaning, keyboard behavior, and desktop/web user-visible behavior remain
+  unchanged.
+- The slice boundary remained appropriate: behavior-level assertions and a
+  bounded DOM fixture characterize private table presentation paths without
+  exporting test seams or refactoring the webview implementation. No durable
+  documentation or CHANGELOG update is required.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/Premature close logs but
+  exited 0.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run lint:md`: passed.

@@ -64,6 +64,47 @@ suite("Table viewer data", () => {
     );
   });
 
+  test("indexes a bounded large projection without losing row identity", () => {
+    const childCount = 500;
+    const rootUnit = document.rootUnits[0]!;
+    const largeDocument: AjsDocument = {
+      ...document,
+      rootUnits: [
+        {
+          ...rootUnit,
+          children: Array.from({ length: childCount }, (_, index) => ({
+            ...rootUnit,
+            id: `job-${index}`,
+            name: `job-${index}`,
+            unitAttribute: `job-${index},,jp1admin,`,
+            unitType: "j",
+            absolutePath: `/root/job-${index}`,
+            depth: 1,
+            isRoot: false,
+            isRootJobnet: false,
+            parameters: [{ key: "ty", value: "j" }],
+            children: [],
+          })),
+        },
+      ],
+    };
+    const payload = JSON.parse(
+      JSON.stringify(toUnitListDocumentDto(largeDocument)),
+    ) as unknown;
+    const tableData = toUnitListTableData(payload);
+    assert.ok(tableData);
+
+    const viewerData = createTableViewerData(tableData, new Map());
+
+    assert.strictEqual(viewerData.rowViewByPath.size, childCount + 1);
+    assert.strictEqual(viewerData.rowViewByPath.get("/root")?.id, rootUnit.id);
+    assert.strictEqual(
+      viewerData.rowViewByPath.get(`/root/job-${childCount - 1}`)?.id,
+      `job-${childCount - 1}`,
+    );
+    assert.strictEqual(viewerData.unitById.size, childCount + 1);
+  });
+
   test("uses an empty safe state for a rejected projection", () => {
     const viewerData = createTableViewerData(undefined, new Map());
 

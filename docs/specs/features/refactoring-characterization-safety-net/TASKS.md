@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 9: Unit-list table presentation and
-  keyboard navigation characterization.
+- Active implementation slice: Slice 10: Viewer composition wiring
+  characterization.
 
 ## Replanning Decision
 
@@ -404,7 +404,7 @@ approved boundaries.
 
 ### Slice 9: Unit-list table presentation and keyboard navigation characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize columns, virtualization, sorting/search display,
   keyboard focus movement, detail inspection, visible-column export, and
   counterpart navigation.

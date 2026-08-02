@@ -1,13 +1,17 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
-import React, { useRef, useState } from "react";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import React, { useMemo, useRef, useState } from "react";
 import axe from "axe-core";
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
+import type { UnitListRowView } from "../../application/unit-list/buildUnitListView";
 import UnitTreeSelector from "../../presentation/webview/editor/shared/UnitTreeSelector";
 import SharedUnitDetailPane from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
+import DisplayColumnSelector from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { resolveTableGridRestorationFocus } from "../../presentation/webview/editor/ajsTable/navigation";
+import VirtualizedTable from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
 import {
   focusRenderedFlowNode,
   resolveFlowGraphEntryTabIndex,
@@ -145,6 +149,65 @@ const createUnitById = (
   };
   units.forEach(visit);
   return new Map(entries);
+};
+
+const createTableRow = (index: number): UnitListRowView =>
+  ({
+    id: `job-${index}`,
+    absolutePath: `/root/job-${index}`,
+    name: `job-${index}`,
+  }) as unknown as UnitListRowView;
+
+const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
+  const rows = useMemo(
+    () => Array.from({ length: rowCount }, (_, index) => createTableRow(index)),
+    [rowCount],
+  );
+  const [selectedAbsolutePath, setSelectedAbsolutePath] = useState(
+    rows[0]?.absolutePath,
+  );
+  const table = useReactTable({
+    data: rows,
+    columns: [
+      {
+        id: "#",
+        header: "#",
+        enableHiding: false,
+        enableSorting: false,
+        accessorFn: (_row: UnitListRowView, index: number) => index + 1,
+      },
+      {
+        id: "name",
+        header: "Name",
+        accessorFn: (row: UnitListRowView) => row.name,
+      },
+      {
+        id: "path",
+        header: "Path",
+        accessorFn: (row: UnitListRowView) => row.absolutePath,
+      },
+    ],
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <VirtualizedTable
+      headerGroups={table.getHeaderGroups()}
+      rows={table.getRowModel().rows}
+      rowIndex={rows.findIndex(
+        (row) => row.absolutePath === selectedAbsolutePath,
+      )}
+      columnVisibility={{}}
+      searchQuery="job-1"
+      parameterSearchValuesByPath={new Map()}
+      selectedAbsolutePath={selectedAbsolutePath}
+      selectRow={setSelectedAbsolutePath}
+      focusUnitTree={() => undefined}
+      openDetailPane={() => undefined}
+      restoreFocusRequest={{ revision: 0 }}
+      gridAriaLabel="Units"
+    />
+  );
 };
 
 const renderTree = (
@@ -384,6 +447,97 @@ suite("Browser accessibility DOM", () => {
       results.violations.map(({ id }) => id),
       [],
     );
+  });
+
+  test("keeps the virtualized table grid accessible and keyboard-addressable", () => {
+    const postedMessages: unknown[] = [];
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <TableGridFixture rowCount={128} />
+      </ThemeProvider>,
+    );
+    const grid = view.getByRole("grid", { name: "Units" });
+    const headers = within(grid).getAllByRole("columnheader");
+    const cells = within(grid).getAllByRole("gridcell");
+
+    assert.strictEqual(grid.getAttribute("aria-rowcount"), "131");
+    assert.strictEqual(grid.getAttribute("aria-colcount"), "3");
+    assert.ok(headers.length >= 3);
+    assert.ok(cells.length > 0);
+    assert.strictEqual(
+      cells.filter((cell) => cell.getAttribute("tabindex") === "0").length,
+      1,
+    );
+    assert.ok(cells.some((cell) => cell.getAttribute("aria-colindex") === "2"));
+
+    const focusedCell = cells.find(
+      (cell) => cell.getAttribute("tabindex") === "0",
+    );
+    assert.ok(focusedCell);
+    focusedCell?.focus();
+    fireEvent.keyDown(focusedCell, { key: "ArrowRight" });
+
+    assert.strictEqual(
+      document.activeElement?.getAttribute("role"),
+      "gridcell",
+    );
+    assert.ok(postedMessages.length >= 1);
+    delete window.vscode;
+  });
+
+  test("keeps grouped display-column controls discoverable and scoped", () => {
+    const createLeafColumn = (id: string, label: string) => {
+      const column = {
+        id,
+        columns: [],
+        columnDef: { header: label, enableHiding: true },
+        getLeafColumns: () => [column],
+        getIsVisible: () => false,
+      };
+      return column;
+    };
+    const alpha = createLeafColumn("group.alpha", "Alpha");
+    const beta = createLeafColumn("group.beta", "Beta");
+    const group = {
+      id: "group",
+      columns: [alpha, beta],
+      columnDef: { header: "Group columns", enableHiding: true },
+      getLeafColumns: () => [alpha, beta],
+      getIsVisible: () => false,
+    };
+    const visibilityUpdates: unknown[] = [];
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const table = {
+      getAllColumns: () => [group],
+      setColumnVisibility: (update: (current: object) => object) =>
+        visibilityUpdates.push(update({})),
+      toggleAllColumnsVisible: () => undefined,
+    };
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <DisplayColumnSelector
+          table={table as never}
+          columnVisibility={{}}
+          anchorEl={anchor}
+          open={true}
+          onClose={() => undefined}
+        />
+      </ThemeProvider>,
+    );
+
+    fireEvent.click(view.getByText("Group columns"));
+    assert.ok(view.getByText("Alpha"));
+    assert.ok(view.getByText("Beta"));
+
+    const leafSwitch = view.getAllByRole("checkbox").at(-1);
+    assert.ok(leafSwitch);
+    fireEvent.click(leafSwitch as HTMLElement);
+    assert.deepStrictEqual(visibilityUpdates, [{ "group.beta": true }]);
   });
 
   test("keeps native flow actions one-shot and uses graph fallback focus", () => {
