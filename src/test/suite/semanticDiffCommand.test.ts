@@ -67,7 +67,7 @@ class SemanticDiffCommandHarness {
       getActiveEditor: () =>
         ({
           document: { getText: () => this.afterContent },
-        }) as vscode.TextEditor,
+        }) as unknown as vscode.TextEditor,
       showOpenDialog: async () => {
         this.observed.openDialogCount += 1;
         return openDialogResult;
@@ -190,6 +190,151 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(harness.observed.errorMessages, [
       "Semantic diff report could not be displayed.",
     ]);
+  });
+
+  test("maps before-definition picker failure to a host-safe result", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      showOpenDialog: async () => {
+        throw new Error("picker failed");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected read failure.");
+    }
+    assert.strictEqual(result.error.code, "read-failed");
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Selected before definition could not be read.",
+    ]);
+  });
+
+  test("maps before-definition file read failure to a host-safe result", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      readFile: async () => {
+        throw new Error("file read failed");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected read failure.");
+    }
+    assert.strictEqual(result.error.code, "read-failed");
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Selected before definition could not be read.",
+    ]);
+  });
+
+  test("distinguishes active-editor access failure from no active editor", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      getActiveEditor: () => {
+        throw new Error("editor access failed");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected active-editor failure.");
+    }
+    assert.strictEqual(result.error.code, "active-editor-failed");
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "The active JP1/AJS definition could not be accessed.",
+    ]);
+    assert.strictEqual(harness.observed.openDialogCount, 0);
+  });
+
+  test("maps active-definition read failure without exposing the host error", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      getActiveEditor: () =>
+        ({
+          document: {
+            getText: () => {
+              throw new Error("secret host failure");
+            },
+          },
+        }) as unknown as vscode.TextEditor,
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected active-definition read failure.");
+    }
+    assert.strictEqual(result.error.code, "read-failed");
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Active JP1/AJS definition could not be read.",
+    ]);
+    assert.ok(
+      harness.observed.errorMessages.every(
+        (message) => !message.includes("secret host failure"),
+      ),
+    );
+  });
+
+  test("maps unexpected application failures to the existing parse error", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      buildSemanticDiffReportData: () => {
+        throw new Error("parser internals");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected parse failure.");
+    }
+    assert.strictEqual(result.error.code, "parse-failed");
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Semantic diff could not parse one or both JP1/AJS definitions.",
+    ]);
+  });
+
+  test("maps report rendering failure without leaving a report to display", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      renderSemanticDiffMarkdown: () => {
+        throw new Error("render internals");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected render failure.");
+    }
+    assert.strictEqual(result.error.code, "render-failed");
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Semantic diff report could not be rendered.",
+    ]);
+    assert.deepStrictEqual(harness.observed.openedReports, []);
+  });
+
+  test("keeps the command result when error notification itself fails", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      showErrorMessage: async () => {
+        throw new Error("notification failed");
+      },
+      openReport: async () => {
+        throw new Error("display failed");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) {
+      throw new Error("Expected display failure.");
+    }
+    assert.strictEqual(result.error.code, "display-failed");
   });
 
   test("returns cancelled when the before definition picker is cancelled", async () => {

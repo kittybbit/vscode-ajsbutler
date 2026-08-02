@@ -31,6 +31,11 @@
 | Unit List shell, search, detail, and cross-view navigation | Table/search orchestration, detail inspection, definition action, focus restoration, and list-to-Flow reveal remain coherent               | Requirements; Architecture; Acceptance Criteria; `uc-view-unit-list.md` and `uc-navigate-between-unit-list-and-flow-graph.md` | Slice 20                                                  | `revealUnit.test.ts`, `viewerEventBridge.test.ts`, `showUnitDefinitionInteraction.test.ts`, planned `tableSearchController.test.ts` and `tableShellIntegration.test.ts`; `tableNavigation.test.ts` is rerun as Slice 19-owned integration evidence; `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`                                                                           |
 | Feature-wide boundary proof                                | All selected capabilities preserve JP1/AJS behavior, desktop/web parity, browser-safe imports, and no architecture exceptions              | Acceptance Criteria; Compatibility; Planning Decision                                                                         | Feature Exit after Slice 20                               | Current-State Boundary Gate, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`, `rtk pnpm run lint:md`, `rtk git diff --check`, architecture and traceability review                                                                                                                                                                                                                                                   |
 
+## Slice 3 Validation
+
+- Focused semantic-diff command/report tests, desktop Extension Host tests, production build, and qlty check passed.
+- The web host portion of `test:full` remains blocked by the existing macOS Playwright Chromium launch permission failure; rerun in an environment that permits the bundled browser before Feature Exit.
+
 ## Test Ownership Notes
 
 - `viewerEventBridge.test.ts` is owned only by Slice 20. It is not a Slice 2

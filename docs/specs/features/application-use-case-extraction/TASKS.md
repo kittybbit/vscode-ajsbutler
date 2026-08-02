@@ -9,15 +9,15 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slice 2 implementation, validation, and completion approval
-  are complete; Slice 3 is the next active implementation slice.
-- This run is limited to the approved Slice 2 source/tests and feature SDD
+- Current state: Slice 3 implementation, validation, and completion approval
+  are complete; Slice 4 is the next active implementation slice.
+- This run was limited to the approved Slice 3 source/tests and feature SDD
   evidence.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 3.
+- Next step is `sdd-implement-task` for Slice 4.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 3: Isolate the semantic-diff host adapter.
+- Active implementation slice: Slice 4: Isolate the viewer-open command adapter.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -164,7 +164,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 3: Isolate the semantic-diff host adapter
 
-- Status: Approved
+- Status: Complete
 - Scope: `src/presentation/vscode/commands/semanticDiffCommand.ts`,
   `src/bootstrap/extension/semanticDiffWiring.ts`, and semantic-diff host
   adapter tests. Keep active-editor access, file reads, cancellation, report
@@ -200,6 +200,19 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Risks: accidentally combining preview-open concerns or moving file I/O into
   Application.
 - Out of Scope: `openPreviewCommand.ts`, panel lifecycle, and webview routing.
+- Implementation Feedback:
+  - The Slice 3 boundary was appropriate: the existing composition wiring already
+    injects VS Code editor, picker, file-system, report-display, and message
+    operations, so the implementation stayed focused on command-level failure
+    mapping without moving host concerns into Application.
+  - Explicit mappings for picker/read, active-editor access, application
+    exceptions, report rendering, report display, and notification failures make
+    the host adapter retain repository-owned results instead of leaking raw
+    exceptions. Future command slices should include these host-exception cases
+    in their focused test estimate.
+  - Desktop validation passed. The combined web host check remains blocked by
+    the existing macOS Playwright Chromium launch permission failure; rerun it
+    in an environment that permits the bundled browser before feature exit.
 
 ### Slice 4: Isolate the viewer-open command adapter
 
