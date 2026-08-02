@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 10: Viewer composition wiring
-  characterization.
+- Active implementation slice: Slice 11: VS Code viewer factory and plain
+  transport characterization.
 
 ## Replanning Decision
 
@@ -443,7 +443,7 @@ approved boundaries.
 
 ### Slice 10: Viewer composition wiring characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize activation, dependency wiring, readiness, counterpart
   navigation, unavailable-view fallback, disposal, and desktop/browser
   capability selection in `viewerWiring.ts`.
@@ -763,6 +763,16 @@ approved boundaries.
   difference was discovered.
 - Browser-hosted validation again required sandbox-external Chromium; the
   existing web test teardown emitted EPIPE/Premature close logs but exited 0.
+- Slice 10's boundary remained appropriate: readiness source, pending reveal
+  consumption, and counterpart lookup failure fit the existing viewer wiring
+  suite without exporting new runtime seams or changing bootstrap composition.
+- Desktop/browser host selection and viewer disposal remain covered by the
+  existing extension dependency, lifecycle, bundle, and architecture suites;
+  no host-specific contract difference or new dependency was discovered.
+- The required production build check remains blocked by a pre-existing type
+  error in `src/test/suite/accessibilityDom.test.tsx:182` (`UnitListRowView`
+  has no `name` property). The error is outside Slice 10 and was not changed;
+  it remains a follow-up before feature exit.
 
 ## Notes
 

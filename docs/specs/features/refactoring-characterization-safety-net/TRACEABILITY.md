@@ -242,3 +242,27 @@ also names the concrete test files that prove the slice contract.
   exited 0.
 - `rtk pnpm run qlty`: passed with no issues.
 - `rtk pnpm run lint:md`: passed.
+
+## Slice 10 implementation evidence
+
+- `viewerWiring.test.ts` records command-versus-navigation readiness source,
+  one-time pending-reveal consumption, immediate counterpart reveal, latest
+  pending-path replacement, unavailable target fallback, and safe fallback
+  when existing-panel lookup or panel creation fails.
+- `viewerBundle.test.ts`, `extensionLifecycle.test.ts`,
+  `extensionDependencies.test.ts`, and `architectureDependencyRules.test.ts`
+  retain viewer bundle selection, activation/disposal, desktop/browser
+  capability selection, and zero architecture violations as read-only
+  compatibility evidence.
+- No runtime, generated-parser, configuration, dependency, or architecture
+  boundary changed. Viewer lifecycle, counterpart identity, telemetry meaning,
+  JP1/AJS behavior, and desktop/web user-visible behavior remain unchanged.
+- `rtk pnpm run test:full`: passed; browser-hosted Chromium required
+  sandbox-external execution and emitted the existing EPIPE/Premature close
+  teardown logs before exiting 0.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run build`: attempted for `V-B` but remains blocked by the
+  pre-existing `src/test/suite/accessibilityDom.test.tsx:182` type error
+  (`UnitListRowView` has no `name` property); this file is unchanged by Slice
+  10 and the issue is recorded as a follow-up before feature exit.
+- `rtk pnpm run lint:md`: passed after this traceability update.

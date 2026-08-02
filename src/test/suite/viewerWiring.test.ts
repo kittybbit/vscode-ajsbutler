@@ -71,6 +71,52 @@ suite("Viewer wiring", () => {
     assert.deepStrictEqual(calls, ["reveal", "post:revealUnit:/root/job"]);
   });
 
+  test("reports readiness source and consumes a pending reveal once", () => {
+    const calls: string[] = [];
+    const document = { uri: {} } as vscode.TextDocument;
+    const createPanel = (): vscode.WebviewPanel =>
+      ({
+        viewColumn: vscode.ViewColumn.Beside,
+        webview: {
+          postMessage: (message: {
+            type: string;
+            data: { absolutePath: string };
+          }) => calls.push(`post:${message.type}:${message.data.absolutePath}`),
+        },
+      }) as unknown as vscode.WebviewPanel;
+    const commandPanel = createPanel();
+    const navigationPanel = createPanel();
+    const pendingRevealByPanel = new WeakMap<vscode.WebviewPanel, string>();
+    pendingRevealByPanel.set(navigationPanel, "/root/job");
+
+    const onReady = createViewerReadyHandler(
+      (_document, panel) =>
+        calls.push(
+          `ready:${panel === navigationPanel ? "navigation" : "command"}`,
+        ),
+      pendingRevealByPanel,
+      (_document, panel, source) =>
+        calls.push(
+          `source:${panel === navigationPanel ? "navigation" : "command"}:${source}`,
+        ),
+    );
+
+    onReady(document, commandPanel);
+    onReady(document, navigationPanel);
+    onReady(document, navigationPanel);
+
+    assert.deepStrictEqual(calls, [
+      "ready:command",
+      "source:command:command",
+      "ready:navigation",
+      "source:navigation:navigation",
+      "post:revealUnit:/root/job",
+      "ready:navigation",
+      "source:navigation:command",
+    ]);
+    assert.strictEqual(pendingRevealByPanel.has(navigationPanel), false);
+  });
+
   test("opens a missing flow panel and reveals after document readiness", () => {
     const calls: string[] = [];
     const document = { uri: {} } as vscode.TextDocument;
@@ -203,6 +249,35 @@ suite("Viewer wiring", () => {
         mountPanel: () => calls.push("mount"),
         pendingRevealByPanel: new WeakMap(),
       },
+    );
+    assert.deepStrictEqual(calls, []);
+  });
+
+  test("keeps state stable when the existing-panel lookup fails", () => {
+    const calls: string[] = [];
+    const factory = {
+      getExistingPanel: () => {
+        throw new Error("context unavailable");
+      },
+      getPanel: () => {
+        calls.push("getPanel");
+        throw new Error("getPanel should not be called");
+      },
+    } as unknown as ViewerFactory;
+
+    assert.doesNotThrow(() =>
+      revealCounterpartPanel(
+        {
+          document: { uri: {} } as vscode.TextDocument,
+          targetViewType: AJS_FLOW_VIEWER_TYPE,
+          absolutePath: "/root/job",
+        },
+        {
+          factoryByViewType: new Map([[AJS_FLOW_VIEWER_TYPE, factory]]),
+          mountPanel: () => calls.push("mount"),
+          pendingRevealByPanel: new WeakMap(),
+        },
+      ),
     );
     assert.deepStrictEqual(calls, []);
   });
