@@ -121,3 +121,26 @@ also names the concrete test files that prove the slice contract.
   existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
 - `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
 - `rtk pnpm run qlty`: passed with no issues.
+
+## Slice 6 implementation evidence
+
+- `buildUnitList.test.ts` records rejection of malformed root/row records and
+  direct row identity mismatch, while the bounded 500-child serialized
+  projection is accepted with complete row count and ordering.
+- `tableViewerData.test.ts` records that a malformed serialized row produces
+  an empty safe viewer state. `unitDefinitionDocumentState.test.ts` records
+  that an identity-mismatched list fails closed while the flow state remains
+  available.
+- `unitListEncoding.test.ts` records that UTF-8 and Shift_JIS definitions
+  remain equivalent after the decoded projection passes list-document
+  validation.
+- No runtime, generated-parser, configuration, or architecture dependency
+  changed; CSV meaning and user-visible behavior remain outside this slice.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted EPIPE/Premature close logs but exited 0.
+- `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run lint:md`: passed.

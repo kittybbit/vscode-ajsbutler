@@ -289,6 +289,27 @@ suite("Build Unit List", () => {
       }),
       undefined,
     );
+
+    const inconsistentRowId = JSON.parse(
+      JSON.stringify(document),
+    ) as typeof document;
+    inconsistentRowId.unitList.rows[0].id = "different-root";
+    assert.strictEqual(toUnitListTableData(inconsistentRowId), undefined);
+  });
+
+  test("rejects malformed root and row records", () => {
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const cloneDocument = () =>
+      JSON.parse(JSON.stringify(result.document)) as typeof result.document;
+
+    const malformedRoot = cloneDocument()!;
+    malformedRoot.rootUnits[0].layout.h = "invalid" as unknown as number;
+    assert.strictEqual(toUnitListTableData(malformedRoot), undefined);
+
+    const malformedRow = cloneDocument()!;
+    malformedRow.unitList.rows[0].group6.openDates = [1] as unknown as string[];
+    assert.strictEqual(toUnitListTableData(malformedRow), undefined);
   });
 
   test("rejects corrupt fields and inconsistent projection metadata", () => {
@@ -353,7 +374,9 @@ suite("Build Unit List", () => {
     const message = createViewerDocumentChangedMessage(result.document);
     assertPlainJsonValue(message);
     assert.deepStrictEqual(JSON.parse(JSON.stringify(message)), message);
-    assert.strictEqual(message.data?.unitList.rows.length, childCount + 1);
+    const tableData = toUnitListTableData(message.data);
+    assert.ok(tableData);
+    assert.strictEqual(tableData.rows.length, childCount + 1);
   });
 
   test("keeps grouped rows and metadata ordered for a bounded mixed list", () => {

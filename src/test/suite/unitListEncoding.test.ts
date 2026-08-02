@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import * as vscode from "vscode";
 import { createBuildUnitList } from "../../application/unit-list/buildUnitList";
+import { toUnitListTableData } from "../../application/unit-list/unitListDocument";
 import { testAjsParser } from "../support/parseAjs";
 
 const decodedDefinition = `unit=ルート,,jp1admin,;
@@ -34,7 +35,9 @@ const readProjectionThroughVsCode = async (
   const document = await vscode.workspace.openTextDocument(filePath);
   const result = buildUnitList(document.getText());
   assert.deepStrictEqual(result.errors, []);
-  return result.document?.unitList.rows.map((row) => row.absolutePath) ?? [];
+  const tableData = toUnitListTableData(result.document);
+  assert.ok(tableData);
+  return tableData.rows.map((row) => row.absolutePath);
 };
 
 suite("Unit list host encoding", () => {

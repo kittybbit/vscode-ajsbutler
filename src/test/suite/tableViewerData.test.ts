@@ -72,4 +72,24 @@ suite("Table viewer data", () => {
     assert.strictEqual(viewerData.unitById.size, 0);
     assert.strictEqual(viewerData.parameterSearchValuesByPath.size, 0);
   });
+
+  test("fails closed when a serialized row record is malformed", () => {
+    const payload = JSON.parse(
+      JSON.stringify(toUnitListDocumentDto(document)),
+    ) as {
+      unitList: {
+        rows: Array<{ group2: { previousUnits: unknown[] } }>;
+      };
+    };
+    payload.unitList.rows[0].group2.previousUnits = [{}];
+
+    const tableData = toUnitListTableData(payload);
+    assert.strictEqual(tableData, undefined);
+
+    const viewerData = createTableViewerData(tableData, new Map());
+    assert.deepStrictEqual(viewerData.rootUnits, []);
+    assert.strictEqual(viewerData.rowViewByPath.size, 0);
+    assert.strictEqual(viewerData.unitById.size, 0);
+    assert.strictEqual(viewerData.unitByAbsolutePath.size, 0);
+  });
 });

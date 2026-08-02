@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 6: Unit-list document validation and
-  projection characterization.
+- Active implementation slice: Slice 7: Flow rendering and detail
+  presentation characterization.
 
 ## Replanning Decision
 
@@ -283,7 +283,7 @@ approved boundaries.
 
 ### Slice 6: Unit-list document validation and projection characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize validation and projection in `unitListDocument.ts`,
   including valid, malformed, encoded, and large documents.
 - Target symbols: `isUnitListRowRecord`, `hasMatchingProjectionIdentity`,
@@ -754,6 +754,15 @@ approved boundaries.
   desktop/web contract difference was discovered.
 - Browser-hosted validation again required sandbox-external Chromium; the
   existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
+- Slice 6's boundary remained appropriate: root/row validation, projection
+  identity, and consumer safe-state behavior were characterized in the named
+  suites without changing list projection or presentation runtime code.
+- A bounded 500-child serialized projection and host-decoded Shift_JIS rows
+  were sufficient to exercise validator acceptance without broad snapshots.
+  No new dependency, JP1/AJS compatibility issue, or desktop/web contract
+  difference was discovered.
+- Browser-hosted validation again required sandbox-external Chromium; the
+  existing web test teardown emitted EPIPE/Premature close logs but exited 0.
 
 ## Notes
 
