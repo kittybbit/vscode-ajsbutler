@@ -80,6 +80,14 @@ const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null &&
   Object.getPrototypeOf(value) === Object.prototype;
 
+const hasOnlyKeys = (
+  value: Record<string, unknown>,
+  keys: readonly string[],
+): boolean => {
+  const allowedKeys = new Set(keys);
+  return Object.keys(value).every((key) => allowedKeys.has(key));
+};
+
 const viewerOperationIdSet = new Set<string>(Object.values(viewerOperationIds));
 
 const isViewerOperationId = (value: unknown): value is ViewerOperationId =>
@@ -98,7 +106,11 @@ const parseViewerNavigationRequest = (
   data: unknown,
 ): ViewerNavigationRequest | undefined => {
   const navigation = parseNavigationRequest(data);
-  if (navigation.status !== "available" || !isPlainRecord(data)) {
+  if (
+    navigation.status !== "available" ||
+    !isPlainRecord(data) ||
+    !hasOnlyKeys(data, ["targetView", "absolutePath"])
+  ) {
     return undefined;
   }
   const targetView = data.targetView;
@@ -113,50 +125,77 @@ const parseViewerNavigationRequest = (
 const parseViewerSearchRequest = (
   data: unknown,
 ): ViewerSearchRequest | undefined =>
-  isPlainRecord(data) && isSearchTelemetryData(data)
+  isPlainRecord(data) &&
+  hasOnlyKeys(data, [
+    "surface",
+    "action",
+    "result",
+    "mode",
+    "queryLengthBucket",
+    "resultCountBucket",
+    "durationBucket",
+    "scope",
+  ]) &&
+  isSearchTelemetryData(data)
     ? createViewerSearchRequest(data)
     : undefined;
 
 const parseViewerPerformanceRequest = (
   data: unknown,
 ): ViewerPerformanceRequest | undefined => {
-  return isPlainRecord(data) && isViewerPerformanceTelemetryData(data)
+  return isPlainRecord(data) &&
+    hasOnlyKeys(data, [
+      "operation",
+      "result",
+      "durationBucket",
+      "rowCountBucket",
+      "nodeCountBucket",
+      "edgeCountBucket",
+    ]) &&
+    isViewerPerformanceTelemetryData(data)
     ? createViewerPerformanceRequest(data)
     : undefined;
+};
+
+const parseViewerSaveRequest = (
+  data: unknown,
+): ViewerSaveRequest | undefined =>
+  typeof data === "string" ? { type: SAVE, data } : undefined;
+
+const parseViewerOperationRequest = (
+  data: unknown,
+): ViewerOperationRequest | undefined =>
+  isViewerOperationId(data) ? { type: OPERATION, data } : undefined;
+
+type ViewerRequestDataParser = (data: unknown) => ViewerRequest | undefined;
+
+const viewerRequestDataParsers: Readonly<
+  Record<string, ViewerRequestDataParser>
+> = {
+  [RESOURCE]: parseViewerResourceRequest,
+  [SAVE]: parseViewerSaveRequest,
+  [OPERATION]: parseViewerOperationRequest,
+  [NAVIGATE]: parseViewerNavigationRequest,
+  [SEARCH]: parseViewerSearchRequest,
+  [PERFORMANCE]: parseViewerPerformanceRequest,
 };
 
 export const parseViewerRequest = (
   value: unknown,
 ): ViewerRequest | undefined => {
-  if (!isPlainRecord(value)) {
-    return undefined;
+  let result: ViewerRequest | undefined;
+  if (isPlainRecord(value)) {
+    const isReadyRequest = value.type === READY;
+    const allowedKeys = isReadyRequest ? ["type"] : ["type", "data"];
+    if (hasOnlyKeys(value, allowedKeys)) {
+      const parser =
+        typeof value.type === "string"
+          ? viewerRequestDataParsers[value.type]
+          : undefined;
+      result = isReadyRequest ? { type: READY } : parser?.(value.data);
+    }
   }
-  if (value.type === RESOURCE) {
-    return parseViewerResourceRequest(value.data);
-  }
-  if (value.type === READY) {
-    return "data" in value ? undefined : { type: READY };
-  }
-  if (value.type === SAVE) {
-    return typeof value.data === "string"
-      ? { type: SAVE, data: value.data }
-      : undefined;
-  }
-  if (value.type === OPERATION) {
-    return isViewerOperationId(value.data)
-      ? { type: OPERATION, data: value.data }
-      : undefined;
-  }
-  if (value.type === NAVIGATE) {
-    return parseViewerNavigationRequest(value.data);
-  }
-  if (value.type === SEARCH) {
-    return parseViewerSearchRequest(value.data);
-  }
-  if (value.type === PERFORMANCE) {
-    return parseViewerPerformanceRequest(value.data);
-  }
-  return undefined;
+  return result;
 };
 
 export const isInvalidViewerSaveRequest = (value: unknown): boolean =>

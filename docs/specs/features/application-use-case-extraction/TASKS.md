@@ -9,15 +9,15 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: plan approved; implementation has not started.
-- This run may update only feature SDD documents and related plan evidence.
-- Do not edit runtime code, tests, generated artifacts, configuration, or
-  implementation branches.
+- Current state: Slice 2 implementation, validation, and completion approval
+  are complete; Slice 3 is the next active implementation slice.
+- This run is limited to the approved Slice 2 source/tests and feature SDD
+  evidence.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 2.
+- Next step is `sdd-implement-task` for Slice 3.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 2: Stabilize plain viewer transport contracts.
+- Active implementation slice: Slice 3: Isolate the semantic-diff host adapter.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -120,7 +120,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 2: Stabilize plain viewer transport contracts
 
-- Status: Approved
+- Status: Complete
 - Scope: `src/presentation/vscode/webview/viewerRequestMessages.ts` and
   `viewerHostMessages.ts`, including validation, serialization, and their
   focused tests. Keep payloads plain and host-neutral.
@@ -147,6 +147,20 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Dependencies: Current-State Boundary Gate.
 - Risks: schema drift or accidental framework coupling.
 - Out of Scope: event bridging, document writes, panel lifecycle, and viewer UI.
+- Implementation Feedback:
+  - The boundary was appropriate. Existing transport builders and guards could
+    be strengthened in place without moving event-bridge, document, or UI
+    responsibilities into the slice.
+  - The plan names the transport files with a `src/presentation/vscode/webview/`
+    prefix, but the shared transport modules are actually under
+    `src/presentation/webview/`; implementation and focused tests used those
+    existing shared modules without changing the approved symbol boundary.
+  - Full Web host validation on macOS requires permission to launch the bundled
+    Playwright browser; record that requirement when reproducing the exact gate.
+  - The initial deep payload guard increased qlty complexity; the final
+    serialization-aware guard and request dispatch reduced that movement while
+    preserving malformed-payload rejection. Future transport slices should
+    include this quality check when estimating validation scope.
 
 ### Slice 3: Isolate the semantic-diff host adapter
 

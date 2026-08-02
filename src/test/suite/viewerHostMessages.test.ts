@@ -43,6 +43,12 @@ const createEveryViewerHostMessage = (): ViewerHostMessage[] => [
   createViewerRevealUnitMessage("/root"),
 ];
 
+const messagesResourceData = (): Record<string, unknown> => ({
+  isDarkMode: true,
+  lang: "ja",
+  scrollType: "table",
+});
+
 suite("Viewer host messages", () => {
   test("inventories every builder and round-trips plain JSON", () => {
     const messages = createEveryViewerHostMessage();
@@ -115,14 +121,38 @@ suite("Viewer host messages", () => {
     for (const value of [
       undefined,
       { type: "unknown", data: {} },
+      { type: "resource", data: { ...messagesResourceData(), extra: true } },
       { type: "revealUnit", data: {} },
+      { type: "revealUnit", data: { absolutePath: "/root", extra: true } },
       { type: "resource", data: {} },
       { type: "changeDocument", data: [] },
       { type: "changeDocument", data: {} },
+      {
+        type: "changeDocument",
+        data: {
+          rootUnits: ["not-a-unit"],
+          warnings: [],
+          unitDefinitions: [],
+          unitList: { rows: [], units: [] },
+        },
+      },
       new MessageEnvelope(),
     ]) {
       assert.strictEqual(parseViewerHostMessage(value), undefined);
     }
+
+    class NestedPayload {}
+    const validMessage = createViewerDocumentChangedMessage(
+      toUnitListDocumentDto(document),
+    );
+    const invalidNestedPayload = {
+      type: "changeDocument",
+      data: {
+        ...validMessage.data,
+        warnings: [new NestedPayload()],
+      },
+    };
+    assert.strictEqual(parseViewerHostMessage(invalidNestedPayload), undefined);
   });
 
   test("plain JSON assertion rejects prohibited runtime values", () => {
