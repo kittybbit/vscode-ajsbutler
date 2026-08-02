@@ -101,3 +101,23 @@ also names the concrete test files that prove the slice contract.
   existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
 - `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
 - `rtk pnpm run qlty`: passed with no issues.
+
+## Slice 5 implementation evidence
+
+- `buildUnitListRemainingGroups.test.ts` records Group 13 effective/raw values,
+  Group 17 `cpj`/`rcpj` type gating, and Group 18 `fxj`/`rfxj` type gating,
+  including encoded parameter values and non-custom/non-flexible fallbacks.
+- `buildUnitList.test.ts` records a bounded 128-child mixed projection with
+  stable row identity, ordering, metadata, encoded values, and repeated-result
+  determinism. `buildUnitListView.test.ts` records row/unit metadata ordering
+  and optional group-field absence for a regular job.
+- `exportUnitListCsv.test.ts` records that projected unit identity and order
+  reach CSV data rows. CSV escaping and visible-column formatting remain
+  covered only by their existing tests and are outside this slice.
+- `rtk pnpm run test:prepare:desktop`: passed.
+- `rtk pnpm run test:desktop:run`: passed.
+- `rtk pnpm run test:prepare:web`: passed.
+- `rtk pnpm run test:web:run`: passed with sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
+- `rtk pnpm run build`: passed with the existing webpack asset-size warnings.
+- `rtk pnpm run qlty`: passed with no issues.

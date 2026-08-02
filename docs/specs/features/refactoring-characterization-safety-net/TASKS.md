@@ -42,8 +42,8 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 5: Unit-list group projection
-  characterization.
+- Active implementation slice: Slice 6: Unit-list document validation and
+  projection characterization.
 
 ## Replanning Decision
 
@@ -248,7 +248,7 @@ approved boundaries.
 
 ### Slice 5: Unit-list group projection characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize remaining JP1/AJS group-to-row mapping in
   `buildUnitListRemainingGroups.ts`, including effective parameters, row
   metadata, stable ordering, and CSV-facing identity.
@@ -745,6 +745,15 @@ approved boundaries.
   desktop/web contract difference was discovered.
 - Browser-hosted validation again required sandbox-external Chromium; the
   existing teardown ECONNRESET/EPIPE logs did not affect the passing result.
+- Slice 5's boundary remained appropriate: Group 13/17/18 projection cases,
+  row metadata, and CSV identity can be characterized without changing list
+  orchestration, visible columns, or CSV formatting.
+- A bounded 128-child mixed list was sufficient to record type-gated fields,
+  encoded values, stable identity/order, and repeated projection determinism.
+  No runtime change, new dependency, JP1/AJS compatibility issue, or
+  desktop/web contract difference was discovered.
+- Browser-hosted validation again required sandbox-external Chromium; the
+  existing web test teardown emitted ECONNRESET/EPIPE logs but exited 0.
 
 ## Notes
 

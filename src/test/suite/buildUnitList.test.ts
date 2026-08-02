@@ -356,6 +356,86 @@ suite("Build Unit List", () => {
     assert.strictEqual(message.data?.unitList.rows.length, childCount + 1);
   });
 
+  test("keeps grouped rows and metadata ordered for a bounded mixed list", () => {
+    const childCount = 128;
+    const childDefinitions = Array.from({ length: childCount }, (_, index) => {
+      const unitName = `unit-${index}`;
+      switch (index % 3) {
+        case 0:
+          return `unit=${unitName},,jp1admin,;{ty=flwj;flwf="watch#"#"##${index}.txt";flwc=c:d:s;flco=y;flwi=30;ets=wr;}`;
+        case 1:
+          return `unit=${unitName},,jp1admin,;{ty=cpj;prm="--tool#"#"##${index}";env="ENV#"#"##${index}";}`;
+        default:
+          return `unit=${unitName},,jp1admin,;{ty=fxj;da=destination-${index};fxg=group-${index};ex="execution#"#"##${index}";}`;
+      }
+    }).join("\n");
+    const definition = `unit=root,,jp1admin,;{ty=g;${childDefinitions}}`;
+
+    const result = buildUnitList(definition);
+    const repeatedResult = buildUnitList(definition);
+
+    assert.deepStrictEqual(result.errors, []);
+    assert.deepStrictEqual(repeatedResult.errors, []);
+    assert.strictEqual(result.document?.unitList.rows.length, childCount + 1);
+    assert.deepStrictEqual(
+      result.document?.unitList.rows.slice(0, 4).map((row) => ({
+        id: row.id,
+        absolutePath: row.absolutePath,
+        unitType: row.group1.unitType,
+      })),
+      [
+        { id: "/root", absolutePath: "/root", unitType: "g" },
+        {
+          id: "/root/unit-0",
+          absolutePath: "/root/unit-0",
+          unitType: "flwj",
+        },
+        {
+          id: "/root/unit-1",
+          absolutePath: "/root/unit-1",
+          unitType: "cpj",
+        },
+        {
+          id: "/root/unit-2",
+          absolutePath: "/root/unit-2",
+          unitType: "fxj",
+        },
+      ],
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows.at(-1)?.absolutePath,
+      `/root/unit-${childCount - 1}`,
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows[1]?.group13.monitoredFileName,
+      '"watch#"#"##0.txt"',
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows[2]?.group17.toolParameters,
+      '"--tool#"#"##1"',
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows[3]?.group18.executionAgent,
+      '"execution#"#"##2"',
+    );
+    assert.deepStrictEqual(
+      repeatedResult.document?.unitList.rows.map((row) => ({
+        id: row.id,
+        absolutePath: row.absolutePath,
+        group13: row.group13,
+        group17: row.group17,
+        group18: row.group18,
+      })),
+      result.document?.unitList.rows.map((row) => ({
+        id: row.id,
+        absolutePath: row.absolutePath,
+        group13: row.group13,
+        group17: row.group17,
+        group18: row.group18,
+      })),
+    );
+  });
+
   test("returns no document when the parser reports errors", () => {
     const invalidDefinition = validDefinition.replace("ty=g;", "ty=g");
 
