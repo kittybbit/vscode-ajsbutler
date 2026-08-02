@@ -155,6 +155,16 @@ suite("Flow Search", () => {
     assert.strictEqual(searchResult, undefined);
   });
 
+  test("returns no match for a bounded long query", () => {
+    const { currentUnit, unitById } = createFlowSearchFixture();
+    const longQuery = `leaf-${"x".repeat(512)}`;
+
+    assert.strictEqual(
+      findFlowSearchResult(currentUnit, longQuery, unitById),
+      undefined,
+    );
+  });
+
   test("preserves current-scope order for a bounded large result set", () => {
     const resultCount = 2048;
     const currentUnit = createFlowTestUnit({

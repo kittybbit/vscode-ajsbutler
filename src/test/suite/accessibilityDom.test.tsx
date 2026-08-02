@@ -20,6 +20,11 @@ import {
   ActionIcon,
   FLOW_NODE_ACTION_SIZE_PX,
 } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import {
+  HeaderSearchControl,
+  type HeaderSearchControlLabels,
+  type HeaderSearchDirection,
+} from "../../presentation/webview/editor/shared/HeaderSearchField";
 
 type GlobalDescriptorMap = Map<string, PropertyDescriptor | undefined>;
 
@@ -487,6 +492,106 @@ suite("Browser accessibility DOM", () => {
     );
     assert.ok(postedMessages.length >= 1);
     delete window.vscode;
+  });
+
+  test("keeps the shared search control localized, focusable, and callback-driven", () => {
+    const submittedQueries: string[] = [];
+    const navigatedQueries: Array<[string, HeaderSearchDirection]> = [];
+    let clearCount = 0;
+    const labels: HeaderSearchControlLabels = {
+      helperText: {
+        noResults: "一致する結果はありません。",
+        matched: "一致する対象を選択しています。",
+        idle: "検索対象を入力してください。",
+      },
+      navigation: {
+        resultAriaLabel: ({ current, total }) => `${current} / ${total}`,
+        previousTooltip: "前の結果",
+        previousAriaLabel: "前の結果",
+        nextTooltip: "次の結果",
+        nextAriaLabel: "次の結果",
+      },
+    };
+    const controlProps = {
+      matchedTargetId: "/root/target",
+      resultPosition: { current: 2, total: 3 },
+      placeholderLabel: "検索対象",
+      labels,
+      onSearchNavigate: (query: string, direction: HeaderSearchDirection) =>
+        navigatedQueries.push([query, direction]),
+      onSearchSubmit: (query: string) => submittedQueries.push(query),
+      onSearchClear: () => {
+        clearCount += 1;
+      },
+    };
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <HeaderSearchControl {...controlProps} />
+      </ThemeProvider>,
+    );
+    const input = view.getByRole("textbox") as HTMLInputElement;
+    const longQuery = `  ${"対象".repeat(128)}  `;
+
+    assert.ok(input.placeholder.startsWith("検索対象...("));
+    assert.strictEqual(
+      view.getByText("一致する対象を選択しています。").textContent,
+      "一致する対象を選択しています。",
+    );
+    assert.strictEqual(view.getByLabelText("2 / 3").textContent, "2/3");
+    assert.strictEqual(
+      view.getByRole("button", { name: "前の結果" }).disabled,
+      false,
+    );
+
+    fireEvent.change(input, { target: { value: longQuery } });
+    fireEvent.keyUp(input, { key: "Enter" });
+    fireEvent.keyUp(input, { key: "Enter", shiftKey: true });
+    fireEvent.blur(input);
+    assert.strictEqual(input.value, longQuery);
+    assert.deepStrictEqual(navigatedQueries, [
+      [longQuery, "next"],
+      [longQuery, "previous"],
+    ]);
+    assert.deepStrictEqual(submittedQueries, [longQuery]);
+
+    const isMacShortcut = input.placeholder.endsWith("(\u2318F)");
+    view.getByRole("button", { name: "次の結果" }).focus();
+    const shortcutEvent = new dom.window.KeyboardEvent("keydown", {
+      key: "f",
+      cancelable: true,
+      ctrlKey: !isMacShortcut,
+      metaKey: isMacShortcut,
+    });
+    document.dispatchEvent(shortcutEvent);
+    assert.strictEqual(shortcutEvent.defaultPrevented, true);
+    assert.strictEqual(document.activeElement, input);
+
+    fireEvent.click(view.getByRole("button", { name: "検索をクリアする。" }));
+    assert.strictEqual(clearCount, 1);
+    assert.strictEqual(input.value, "");
+    assert.strictEqual(document.activeElement, input);
+
+    view.rerender(
+      <ThemeProvider theme={createTheme()}>
+        <HeaderSearchControl
+          {...controlProps}
+          matchedTargetId={undefined}
+          resultPosition={{ current: 0, total: 0 }}
+        />
+      </ThemeProvider>,
+    );
+    assert.strictEqual(
+      view.getByText("一致する結果はありません。").textContent,
+      "一致する結果はありません。",
+    );
+    assert.strictEqual(
+      view.getByRole("button", { name: "前の結果" }).hasAttribute("disabled"),
+      true,
+    );
+    assert.strictEqual(
+      view.getByRole("button", { name: "次の結果" }).hasAttribute("disabled"),
+      true,
+    );
   });
 
   test("keeps grouped display-column controls discoverable and scoped", () => {

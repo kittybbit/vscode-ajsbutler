@@ -296,3 +296,28 @@ also names the concrete test files that prove the slice contract.
   pre-existing `src/test/suite/accessibilityDom.test.tsx:182` type error
   (`UnitListRowView` has no `name` property); that file is unchanged by Slice
   11 and the issue remains a follow-up before feature exit.
+
+## Slice 12 implementation evidence
+
+- `headerSearchField.test.ts` records platform shortcut matching, helper-text
+  precedence for idle/matched/no-result states, and placeholder formatting.
+  `accessibilityDom.test.tsx` characterizes the shared control through its DOM
+  for localized helper/navigation labels, result counts, bounded long query
+  input, Enter/Shift+Enter navigation, blur submission, clear-and-refocus, and
+  document-level search shortcut focus.
+- `flowSearch.test.ts` and `tableSearchState.test.ts` retain blank-query and
+  bounded long-query behavior, deterministic matching/order, result positions,
+  and empty-result navigation safety for the two existing consumers.
+- No runtime, generated-parser, configuration, dependency, telemetry, or
+  architecture boundary changed. Search matching semantics, localization,
+  focus behavior, JP1/AJS behavior, and desktop/browser user-visible behavior
+  remain unchanged.
+- The slice boundary remained appropriate: the shared control is observed
+  through its existing callbacks and DOM without exporting hook test seams or
+  defining a shared search domain contract. No durable documentation or
+  CHANGELOG update is required.
+- `rtk pnpm run test:full`: passed; browser-hosted Chromium required
+  sandbox-external execution and emitted the existing EPIPE/ECONNRESET/
+  Premature close teardown logs before exiting 0.
+- `rtk pnpm run qlty`: passed with no issues.
+- `rtk pnpm run lint:md`: passed after this traceability update.

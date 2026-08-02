@@ -42,7 +42,7 @@
   2026-08-02.
 - Human approval: Approved for all 14 slices; implementation remains one slice
   at a time.
-- Active implementation slice: Slice 12: Shared webview header search
+- Active implementation slice: Slice 13: Flow tree selector
   characterization.
 
 ## Replanning Decision
@@ -514,7 +514,7 @@ approved boundaries.
 
 ### Slice 12: Shared webview header search characterization
 
-- Status: Approved
+- Status: Complete
 - Scope: Characterize empty/non-empty queries, shortcut handling, helper text,
   result counts, localization, and focus in the shared header control.
 - Target symbols: `resolveHeaderSearchHelperText`, `isHeaderSearchShortcut`,
@@ -785,6 +785,16 @@ approved boundaries.
 - The required production build check remains blocked by the same pre-existing
   `src/test/suite/accessibilityDom.test.tsx:182` type error; it is outside
   Slice 11 and was not changed.
+- Slice 12's boundary remained appropriate: shared control DOM evidence and
+  flow/table state cases characterize the existing search callbacks without
+  exporting hook test seams or introducing a shared search domain contract.
+- Bounded long-query cases (128 localized characters in the control and 512
+  repeated characters in each consumer state test) remained deterministic;
+  no new dependency, JP1/AJS compatibility issue, or desktop/web contract
+  difference was discovered.
+- Browser-hosted validation again requires sandbox-external Chromium on this
+  host; the existing EPIPE/ECONNRESET/Premature close teardown logs did not
+  affect the passing result.
 
 ## Notes
 

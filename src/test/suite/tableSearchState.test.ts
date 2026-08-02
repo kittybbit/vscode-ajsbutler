@@ -143,4 +143,25 @@ suite("AJS table search state", () => {
       createEmptyTableSearchState(),
     );
   });
+
+  test("keeps bounded long-query matching deterministic", () => {
+    const longQuery = `target-${"x".repeat(512)}`;
+    const matchingPath = `/root/${longQuery}`;
+    const rows = [createRow(matchingPath, [longQuery])];
+    const query = longQuery.toUpperCase();
+
+    const matchingPaths = findTableSearchMatchingAbsolutePaths(
+      rows,
+      new Map(),
+      query,
+    );
+    const state = createSubmittedTableSearchState(query, matchingPaths);
+
+    assert.deepStrictEqual(matchingPaths, [matchingPath]);
+    assert.strictEqual(isActiveTableSearchQuery(state, longQuery), true);
+    assert.deepStrictEqual(getTableSearchResultPosition(state), {
+      current: 1,
+      total: 1,
+    });
+  });
 });

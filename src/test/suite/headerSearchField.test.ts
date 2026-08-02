@@ -39,6 +39,13 @@ suite("Header Search Field", () => {
       ),
       false,
     );
+    assert.strictEqual(
+      isHeaderSearchShortcut(
+        { ctrlKey: true, metaKey: false, key: "F" },
+        false,
+      ),
+      false,
+    );
   });
 
   test("formats the platform shortcut in the placeholder", () => {
@@ -101,6 +108,18 @@ suite("Header Search Field", () => {
     assert.strictEqual(
       resolveHeaderSearchHelperText("target", { current: 1, total: 3 }, labels),
       "Matched target.",
+    );
+    assert.strictEqual(
+      resolveHeaderSearchHelperText(
+        undefined,
+        { current: 0, total: 3 },
+        labels,
+      ),
+      "Search targets.",
+    );
+    assert.strictEqual(
+      resolveHeaderSearchHelperText("target", { current: 0, total: 0 }, labels),
+      "No results.",
     );
   });
 });
