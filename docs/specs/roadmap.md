@@ -26,11 +26,17 @@ feature.
 
 ### 4. Application Use Case Extraction
 
-- Purpose: move one selected orchestration boundary out of VS Code, webview, or
-  I/O adapters into a host-neutral application use case.
-- Entry condition: the target behavior is protected by characterization tests
-  and its callers, ports, DTOs, errors, and host impacts are known.
-- Dependency: completed characterization evidence for the selected boundary.
+- Purpose: separate the Feature 4 application-facing use-case family from VS
+  Code, webview, and file-I/O concerns through independently approved slices
+  for the selected use cases, ports, application errors, adapters, and thin
+  host handlers.
+- Entry condition: each selected boundary is protected by characterization
+  tests and its callers, ports, DTOs, errors, and host impacts are known.
+- Dependency: completed characterization evidence for every selected boundary.
+- Planning rule: one Feature 4 branch may contain multiple independently
+  reviewable slices, but no slice may combine unrelated use cases or host
+  boundaries. Later Webview Presentation Separation and Infrastructure Boundary
+  Cleanup must exclude boundaries already selected and completed here.
 
 ### 5. JP1/AJS Domain Model Restructuring
 
@@ -98,20 +104,23 @@ refactoring level and is removed only after that effort is complete.
   rule as separate characterization boundaries when their observable behavior
   differs.
 - Application Use Case Extraction follows characterization for the syntax
-  diagnostics, flow-graph construction, and unit-list projection boundaries.
-  The entry condition remains that callers, ports, DTOs, errors, and host
-  impacts are known.
+  diagnostics, flow-graph construction, unit-list projection, CSV, stable
+  cross-view navigation, parser/error, selected VS Code/file-I/O, viewer
+  transport/composition, and selected webview boundaries. Each remains a
+  separate implementation slice with its own approval and validation.
 - JP1/AJS Domain Model Restructuring remains gated to the schedule-rule helper
   until multiple consumers, version-13 compatibility semantics, and protective
   tests are evidenced.
 - High-Complexity Hotspot Resolution is narrowed to the unit-list document
   validation/projection boundary after its behavior and callers are protected.
-- Webview Presentation Separation contains independent flow rendering, flow
-  interaction state, unit-list table interaction, header search, and flow-tree
-  selector targets. It does not create a shared search domain contract.
-- Infrastructure Boundary Cleanup contains the VS Code `ViewerFactory`, the
-  normalized `AjsParserPort`, and the validated telemetry contract only after
-  host, parser, privacy, and failure behavior are characterized.
+- Webview Presentation Separation contains only flow rendering, flow
+  interaction state, unit-list table interaction, header search, or flow-tree
+  selector targets that are not selected by Feature 4. It does not create a
+  shared search domain contract.
+- Infrastructure Boundary Cleanup contains only VS Code `ViewerFactory`, the
+  normalized `AjsParserPort`, file/host adapters, or the validated telemetry
+  contract that Feature 4 leaves unselected, and only after host, parser,
+  privacy, and failure behavior are characterized.
 - Architecture Boundary Protection remains behind its existing evidence gate:
   the composition-root candidate is not treated as a dependency violation
   without a concrete gap, cycle, or enforcement failure.
