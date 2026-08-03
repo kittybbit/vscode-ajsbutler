@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Improved viewer opening failure handling so unavailable editors and host
+  panel errors show safe messages without leaking raw exceptions or leaving a
+  partially mounted panel.
 - Added keyboard data-grid navigation and logical table semantics to the unit
   list, including stable cell focus across sorting, virtualized rows, search,
   detail-pane closure, definition-dialog return, and H, D, R, and Escape

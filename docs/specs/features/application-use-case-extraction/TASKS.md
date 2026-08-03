@@ -9,15 +9,15 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slice 3 implementation, validation, and completion approval
-  are complete; Slice 4 is the next active implementation slice.
-- This run was limited to the approved Slice 3 source/tests and feature SDD
+- Current state: Slice 4 implementation, validation, and completion approval
+  are complete; Slice 5 is the next active implementation slice.
+- This run was limited to the approved Slice 4 source/tests and feature SDD
   evidence.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 4.
+- Next step is `sdd-implement-task` for Slice 5.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 4: Isolate the viewer-open command adapter.
+- Active implementation slice: Slice 5: Separate viewer document update handling.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -216,7 +216,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 4: Isolate the viewer-open command adapter
 
-- Status: Approved
+- Status: Complete
 - Scope: `src/presentation/vscode/commands/openPreviewCommand.ts` and its
   existing focused command tests. Preserve the current injected panel-opening
   contract; composition changes remain owned by Slice 8.
@@ -245,6 +245,16 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   panel-opening contract is independent of viewer transport serialization.
 - Risks: accidentally re-coupling command execution to composition details.
 - Out of Scope: semantic diff, panel lifecycle, and viewer bundle composition.
+- Implementation Feedback:
+  - The Slice 4 boundary remained appropriate: active-editor access, panel
+    creation, mounting, failure notification, and telemetry protection fit in
+    the command adapter without changing viewer composition wiring.
+  - Direct command tests should include host exceptions from editor access,
+    panel creation, mounting, notification, and telemetry; the desktop host
+    run alone does not exercise every injected failure path.
+  - The web portion of `test:full` remains blocked by the existing macOS
+    Playwright Chromium launch permission failure and must be rerun in an
+    environment that permits the bundled browser before Feature Exit.
 
 ### Slice 5: Separate viewer document update handling
 
