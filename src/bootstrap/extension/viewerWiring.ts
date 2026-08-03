@@ -78,7 +78,41 @@ const postRevealUnit = (
   panel: vscode.WebviewPanel,
   absolutePath: string,
 ): void => {
-  panel.webview.postMessage(createViewerRevealUnitMessage(absolutePath));
+  try {
+    void Promise.resolve(
+      panel.webview.postMessage(createViewerRevealUnitMessage(absolutePath)),
+    ).catch(() => undefined);
+  } catch {
+    // A disposed counterpart must not break the source viewer's navigation.
+  }
+};
+
+const revealPanelSafely = (panel: vscode.WebviewPanel): boolean => {
+  try {
+    panel.reveal(panel.viewColumn);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const disposePanelSafely = (panel: vscode.WebviewPanel): void => {
+  try {
+    panel.dispose();
+  } catch {
+    // A cleanup failure must not replace the counterpart-open failure.
+  }
+};
+
+const reportTelemetrySafely = (
+  telemetry: TelemetryPort,
+  event: Parameters<TelemetryPort["report"]>[0],
+): void => {
+  try {
+    telemetry.report(event);
+  } catch {
+    // Telemetry must not change viewer lifecycle or navigation behavior.
+  }
 };
 
 export const flushPendingViewerReveal = (
@@ -108,11 +142,15 @@ export const createViewerReadyHandler =
   ) =>
   (document: vscode.TextDocument, panel: vscode.WebviewPanel): void => {
     onReady(document, panel);
-    onViewerReady(
-      document,
-      panel,
-      pendingRevealByPanel.has(panel) ? "navigation" : "command",
-    );
+    try {
+      onViewerReady(
+        document,
+        panel,
+        pendingRevealByPanel.has(panel) ? "navigation" : "command",
+      );
+    } catch {
+      // Lifecycle telemetry must not prevent a pending reveal from flushing.
+    }
     flushPendingViewerReveal(panel, pendingRevealByPanel);
   };
 
@@ -121,7 +159,10 @@ const revealExistingCounterpartPanel = (
   absolutePath: string,
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>,
 ): void => {
-  panel.reveal(panel.viewColumn);
+  if (!revealPanelSafely(panel)) {
+    pendingRevealByPanel.delete(panel);
+    throw new Error("Counterpart panel could not be revealed.");
+  }
   if (pendingRevealByPanel.has(panel)) {
     pendingRevealByPanel.set(panel, absolutePath);
     return;
@@ -135,9 +176,17 @@ const openCounterpartPanel = (
   newPanel: vscode.WebviewPanel,
 ): void => {
   deps.pendingRevealByPanel.set(newPanel, request.absolutePath);
-  deps.onOpenStarted?.(request.targetViewType);
-  deps.mountPanel(newPanel, request.targetViewType);
-  newPanel.reveal(newPanel.viewColumn);
+  try {
+    deps.onOpenStarted?.(request.targetViewType);
+    deps.mountPanel(newPanel, request.targetViewType);
+    if (!revealPanelSafely(newPanel)) {
+      throw new Error("Counterpart panel could not be revealed.");
+    }
+  } catch (error) {
+    deps.pendingRevealByPanel.delete(newPanel);
+    disposePanelSafely(newPanel);
+    throw error;
+  }
 };
 
 export const revealCounterpartPanel = (
@@ -188,6 +237,51 @@ const revealCounterpartFromNavigation = (
   );
 };
 
+const createViewerNavigationHandler =
+  ({
+    viewType,
+    telemetry,
+    previewDeps,
+    factoryByViewType,
+    pendingRevealByPanel,
+  }: {
+    viewType: string;
+    telemetry: TelemetryPort;
+    previewDeps: OpenPreviewCommandDependencies;
+    factoryByViewType: Map<string, ViewerFactory>;
+    pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
+  }): ((
+    document: vscode.TextDocument,
+    event: ViewerNavigationRequest,
+  ) => void) =>
+  (document, event) => {
+    const navigationEvent = createViewerNavigationActionEvent({
+      viewType,
+      targetView: event.data.targetView,
+      host: getTelemetryHost(),
+    });
+    if (navigationEvent) {
+      reportTelemetrySafely(telemetry, navigationEvent);
+    }
+
+    revealCounterpartFromNavigation(document, event, {
+      factoryByViewType,
+      mountPanel: previewDeps.mountPanel,
+      onOpenStarted: (targetViewType) => {
+        const openEvent = createViewerOpenStartedEvent({
+          viewType: targetViewType,
+          source: "navigation",
+          result: "success",
+          host: getTelemetryHost(),
+        });
+        if (openEvent) {
+          reportTelemetrySafely(telemetry, openEvent);
+        }
+      },
+      pendingRevealByPanel,
+    });
+  };
+
 const createViewerBundle = ({
   context,
   telemetry,
@@ -227,36 +321,17 @@ const createViewerBundle = ({
             host: getTelemetryHost(),
           });
           if (event) {
-            telemetry.report(event);
+            reportTelemetrySafely(telemetry, event);
           }
         },
       ),
-      onNavigate: (document, event) => {
-        const navigationEvent = createViewerNavigationActionEvent({
-          viewType,
-          targetView: event.data.targetView,
-          host: getTelemetryHost(),
-        });
-        if (navigationEvent) {
-          telemetry.report(navigationEvent);
-        }
-        revealCounterpartFromNavigation(document, event, {
-          factoryByViewType,
-          mountPanel: previewDeps.mountPanel,
-          onOpenStarted: (targetViewType) => {
-            const openEvent = createViewerOpenStartedEvent({
-              viewType: targetViewType,
-              source: "navigation",
-              result: "success",
-              host: getTelemetryHost(),
-            });
-            if (openEvent) {
-              telemetry.report(openEvent);
-            }
-          },
-          pendingRevealByPanel,
-        });
-      },
+      onNavigate: createViewerNavigationHandler({
+        viewType,
+        telemetry,
+        previewDeps,
+        factoryByViewType,
+        pendingRevealByPanel,
+      }),
       onSave: saveHandler,
     },
   });

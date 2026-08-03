@@ -9,15 +9,15 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-7 implementation, validation, and completion approval
-  are complete; Slice 8 is the next active implementation slice.
-- This run was limited to the approved Slice 7 source/tests and feature SDD
+- Current state: Slices 1-8 implementation, validation, and completion approval
+  are complete; Slice 9 is the next active implementation slice.
+- This run was limited to the approved Slice 8 source/tests and feature SDD
   evidence.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 8.
+- Next step is `sdd-implement-task` for Slice 9.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 8: Keep viewer composition and counterpart reveal atomic.
+- Active implementation slice: Slice 9: Extract Flow rendering and geometry responsibilities.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -376,7 +376,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 8: Keep viewer composition and counterpart reveal atomic
 
-- Status: Approved
+- Status: Complete
 - Scope: `src/bootstrap/extension/viewerWiring.ts`, including construction of
   application capabilities, viewer bundles, command registration, readiness
   callbacks, and the existing pending counterpart reveal behavior.
@@ -414,6 +414,16 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Risks: dependency construction in the wrong layer, stale pending reveal, or
   host-specific behavior leaking into shared presentation.
 - Out of Scope: graph/table component extraction and application use-case logic.
+- Implementation Feedback:
+  - The atomic boundary remained appropriate: composition, readiness callbacks,
+    counterpart reveal, and their shared pending state could be hardened without
+    introducing a separate reveal adapter or changing downstream viewer seams.
+  - Mount/reveal failure paths and telemetry exceptions needed direct focused
+    coverage because the normal desktop activation path does not exercise those
+    host failures.
+  - The exact web host gate remains environment-limited by the macOS Playwright
+    Chromium launch permission failure; reproduce it in a browser-permitted
+    environment before Feature Exit.
 
 ### Slice 9: Extract Flow rendering and geometry responsibilities
 

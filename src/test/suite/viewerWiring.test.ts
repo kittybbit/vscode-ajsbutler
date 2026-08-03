@@ -71,6 +71,42 @@ suite("Viewer wiring", () => {
     assert.deepStrictEqual(calls, ["reveal", "post:revealUnit:/root/job"]);
   });
 
+  test("drops pending state when an existing counterpart is disposed", () => {
+    const document = { uri: {} } as vscode.TextDocument;
+    const panel = {
+      viewColumn: vscode.ViewColumn.Beside,
+      reveal: () => {
+        throw new Error("panel disposed");
+      },
+      webview: { postMessage: () => undefined },
+    } as unknown as vscode.WebviewPanel;
+    const pendingRevealByPanel = new WeakMap<vscode.WebviewPanel, string>();
+    pendingRevealByPanel.set(panel, "/root/old");
+    const factory = {
+      getExistingPanel: () => panel,
+      getPanel: () => {
+        throw new Error("disposed panel should not be replaced here");
+      },
+    } as unknown as ViewerFactory;
+
+    assert.throws(() =>
+      revealCounterpartPanel(
+        {
+          document,
+          targetViewType: AJS_FLOW_VIEWER_TYPE,
+          absolutePath: "/root/latest",
+        },
+        {
+          factoryByViewType: new Map([[AJS_FLOW_VIEWER_TYPE, factory]]),
+          mountPanel: () => undefined,
+          pendingRevealByPanel,
+        },
+      ),
+    );
+
+    assert.strictEqual(pendingRevealByPanel.has(panel), false);
+  });
+
   test("reports readiness source and consumes a pending reveal once", () => {
     const calls: string[] = [];
     const document = { uri: {} } as vscode.TextDocument;
@@ -234,6 +270,89 @@ suite("Viewer wiring", () => {
       "document",
       "post:revealUnit:/root/job",
     ]);
+  });
+
+  test("cleans up pending reveal state when counterpart setup fails", () => {
+    const document = { uri: {} } as vscode.TextDocument;
+    const failureModes = [
+      {
+        name: "mount",
+        mountPanel: (calls: string[]) => {
+          calls.push("mount");
+          throw new Error("mount failed");
+        },
+        revealPanel: (calls: string[]) => calls.push("reveal"),
+        expectedCalls: ["mount", "dispose"],
+      },
+      {
+        name: "reveal",
+        mountPanel: (calls: string[]) => calls.push("mount"),
+        revealPanel: (calls: string[]) => {
+          calls.push("reveal");
+          throw new Error("reveal failed");
+        },
+        expectedCalls: ["mount", "reveal", "dispose"],
+      },
+    ];
+
+    failureModes.forEach(({ name, mountPanel, revealPanel, expectedCalls }) => {
+      const calls: string[] = [];
+      const pendingRevealByPanel = new WeakMap<vscode.WebviewPanel, string>();
+      const panel = {
+        viewColumn: vscode.ViewColumn.Beside,
+        reveal: () => revealPanel(calls),
+        dispose: () => calls.push("dispose"),
+      } as unknown as vscode.WebviewPanel;
+      const factory = {
+        getExistingPanel: () => undefined,
+        getPanel: () => panel,
+      } as unknown as ViewerFactory;
+
+      assert.throws(() =>
+        revealCounterpartPanel(
+          {
+            document,
+            targetViewType: AJS_FLOW_VIEWER_TYPE,
+            absolutePath: `/root/${name}`,
+          },
+          {
+            factoryByViewType: new Map([[AJS_FLOW_VIEWER_TYPE, factory]]),
+            mountPanel: () => mountPanel(calls),
+            pendingRevealByPanel,
+          },
+        ),
+      );
+
+      assert.deepStrictEqual(calls, expectedCalls);
+      assert.strictEqual(pendingRevealByPanel.has(panel), false);
+    });
+  });
+
+  test("flushes a pending reveal when lifecycle telemetry fails", () => {
+    const calls: string[] = [];
+    const document = { uri: {} } as vscode.TextDocument;
+    const panel = {
+      webview: {
+        postMessage: (message: {
+          type: string;
+          data: { absolutePath: string };
+        }) => calls.push(`post:${message.type}:${message.data.absolutePath}`),
+      },
+    } as unknown as vscode.WebviewPanel;
+    const pendingRevealByPanel = new WeakMap<vscode.WebviewPanel, string>();
+    pendingRevealByPanel.set(panel, "/root/job");
+
+    const onReady = createViewerReadyHandler(
+      () => calls.push("ready"),
+      pendingRevealByPanel,
+      () => {
+        throw new Error("telemetry failed");
+      },
+    );
+
+    assert.doesNotThrow(() => onReady(document, panel));
+    assert.deepStrictEqual(calls, ["ready", "post:revealUnit:/root/job"]);
+    assert.strictEqual(pendingRevealByPanel.has(panel), false);
   });
 
   test("keeps state stable when a target factory is unavailable", () => {
