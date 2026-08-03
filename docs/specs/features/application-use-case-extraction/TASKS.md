@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 9: Extract Flow rendering and geometry responsibilities.
+- Active implementation slice: Slice 10: Extract Flow detail and responsive panel behavior.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -427,7 +427,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 9: Extract Flow rendering and geometry responsibilities
 
-- Status: Approved
+- Status: Complete
 - Scope: Flow rendering and geometry files under
   `src/presentation/webview/editor/ajsFlow/` only:
   `buildExpandedFlowGraph.ts`, `flowGraphView.ts`, `flowGraphPosition.ts`,
@@ -467,6 +467,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   `flowGraphView.test.ts` and are not edited by this slice.
 - Risks: geometry code reconstructing application semantics or introducing
   browser/host assumptions.
+- Implementation Feedback: The approved Flow rendering and geometry boundary
+  was already represented by the listed presentation modules before Slice 9;
+  verification found no missing extraction or safe in-scope runtime change.
+  Preserve this boundary and do not duplicate the application graph use case
+  in later Flow presentation slices.
 - Out of Scope: Flow detail panels, scope state, search, tree selection, and
   application graph construction.
 

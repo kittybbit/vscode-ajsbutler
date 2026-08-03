@@ -76,3 +76,10 @@
   implementation-slice ownership.
 
 <!-- markdownlint-enable MD013 MD060 -->
+
+## Slice 9 Validation
+
+- Existing presentation boundary verified; the focused Flow presentation tests and
+  architecture coverage are included in the passing desktop Extension Host run.
+- Production build and qlty passed. The Web host remains blocked by the existing
+  macOS Playwright Chromium launch permission failure.
