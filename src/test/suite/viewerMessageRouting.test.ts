@@ -154,6 +154,75 @@ suite("Viewer message routing", () => {
     ]);
   });
 
+  test("maps host operation failures to safe messages", async () => {
+    const errors: string[] = [];
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: {} as never,
+      onReady: () => {
+        throw new Error("secret refresh failure");
+      },
+      onResource: () => {
+        throw new Error("secret resource failure");
+      },
+      onOperation: () => {
+        throw new Error("secret telemetry failure");
+      },
+      onNavigate: () => {
+        throw new Error("secret navigation failure");
+      },
+      onSave: async () => {
+        throw new Error("secret save failure");
+      },
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+
+    handler(createViewerResourceRequest("window"));
+    handler(createViewerReadyRequest());
+    handler(createViewerSaveRequest("body"));
+    handler(createViewerOperationRequest("copy.csv"));
+    handler(createViewerNavigationRequest("flow", "/root/unit"));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    assert.deepStrictEqual(errors, [
+      "Viewer resources could not be loaded.",
+      "The viewer document could not be refreshed.",
+      "Viewer navigation could not be completed.",
+      "The file could not be saved.",
+    ]);
+    assert.ok(errors.every((message) => !message.includes("secret")));
+  });
+
+  test("reports when a viewer cannot handle a valid save request", async () => {
+    const errors: string[] = [];
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: {} as never,
+      onReady: () => {},
+      onResource: () => {},
+      onOperation: () => {},
+      onNavigate: () => {},
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+
+    handler(createViewerSaveRequest("body"));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    assert.deepStrictEqual(errors, [
+      "Saving is not available for this viewer.",
+    ]);
+  });
+
   test("ignores invalid navigation payloads without invoking the host adapter", () => {
     const calls: string[] = [];
     const handler = createViewerMessageHandler({

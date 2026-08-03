@@ -53,6 +53,39 @@ export type ViewerOperationHostRequest = {
 };
 
 const SAVE_DATA_ERROR_MESSAGE = "Data is not a string and cannot be saved.";
+const SAVE_HANDLER_UNAVAILABLE_ERROR_MESSAGE =
+  "Saving is not available for this viewer.";
+const SAVE_OPERATION_ERROR_MESSAGE = "The file could not be saved.";
+const RESOURCE_OPERATION_ERROR_MESSAGE =
+  "Viewer resources could not be loaded.";
+const READY_OPERATION_ERROR_MESSAGE =
+  "The viewer document could not be refreshed.";
+const NAVIGATION_OPERATION_ERROR_MESSAGE =
+  "Viewer navigation could not be completed.";
+
+const showErrorMessageSafely = (
+  showErrorMessage: ViewerMessageRoutingDeps["showErrorMessage"],
+  message: string,
+): void => {
+  try {
+    void Promise.resolve(showErrorMessage(message)).catch(() => undefined);
+  } catch {
+    // A notification failure must not replace the host-safe outcome.
+  }
+};
+
+const runViewerHostOperationSafely = (
+  operation: () => void | Promise<void>,
+  onFailure?: () => void,
+): void => {
+  try {
+    void Promise.resolve(operation()).catch(() => {
+      onFailure?.();
+    });
+  } catch {
+    onFailure?.();
+  }
+};
 
 type ViewerMessageRouteMap = {
   [RESOURCE]: (event: ViewerResourceRequest) => void;
@@ -71,12 +104,24 @@ const handleSaveMessage = (
     showErrorMessage,
   }: Pick<ViewerMessageRoutingDeps, "onSave" | "showErrorMessage">,
 ): void => {
-  if (typeof event.data === "string" && onSave) {
-    void onSave(event.data);
+  if (typeof event.data !== "string") {
+    showErrorMessageSafely(showErrorMessage, SAVE_DATA_ERROR_MESSAGE);
     return;
   }
 
-  void showErrorMessage(SAVE_DATA_ERROR_MESSAGE);
+  if (!onSave) {
+    showErrorMessageSafely(
+      showErrorMessage,
+      SAVE_HANDLER_UNAVAILABLE_ERROR_MESSAGE,
+    );
+    return;
+  }
+
+  runViewerHostOperationSafely(
+    () => onSave(event.data),
+    () =>
+      showErrorMessageSafely(showErrorMessage, SAVE_OPERATION_ERROR_MESSAGE),
+  );
 };
 
 const createViewerMessageRoutes = ({
@@ -91,25 +136,47 @@ const createViewerMessageRoutes = ({
   showErrorMessage,
 }: ViewerMessageRoutingDeps): ViewerMessageRouteMap => ({
   [RESOURCE]: (event) => {
-    onResource(event, panel);
+    runViewerHostOperationSafely(
+      () => onResource(event, panel),
+      () =>
+        showErrorMessageSafely(
+          showErrorMessage,
+          RESOURCE_OPERATION_ERROR_MESSAGE,
+        ),
+    );
   },
   [READY]: () => {
-    onReady(document, panel);
+    runViewerHostOperationSafely(
+      () => onReady(document, panel),
+      () =>
+        showErrorMessageSafely(showErrorMessage, READY_OPERATION_ERROR_MESSAGE),
+    );
   },
   [SAVE]: (event) => {
     handleSaveMessage(event, { onSave, showErrorMessage });
   },
   [OPERATION]: (event) => {
-    onOperation({ document, panel, telemetry, operation: event.data });
+    runViewerHostOperationSafely(() =>
+      onOperation({ document, panel, telemetry, operation: event.data }),
+    );
   },
   [SEARCH]: (event) => {
-    reportWebviewSearch(telemetry, event);
+    runViewerHostOperationSafely(() => reportWebviewSearch(telemetry, event));
   },
   [PERFORMANCE]: (event) => {
-    reportWebviewPerformance(telemetry, event);
+    runViewerHostOperationSafely(() =>
+      reportWebviewPerformance(telemetry, event),
+    );
   },
   [NAVIGATE]: (event) => {
-    onNavigate(document, event);
+    runViewerHostOperationSafely(
+      () => onNavigate(document, event),
+      () =>
+        showErrorMessageSafely(
+          showErrorMessage,
+          NAVIGATION_OPERATION_ERROR_MESSAGE,
+        ),
+    );
   },
 });
 
@@ -150,7 +217,7 @@ export const createViewerMessageHandler = (
     const event = parseViewerRequest(value);
     if (!event) {
       if (isInvalidViewerSaveRequest(value)) {
-        void deps.showErrorMessage(SAVE_DATA_ERROR_MESSAGE);
+        showErrorMessageSafely(deps.showErrorMessage, SAVE_DATA_ERROR_MESSAGE);
       }
       return;
     }

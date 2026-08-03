@@ -9,15 +9,15 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-5 implementation, validation, and completion approval
-  are complete; Slice 6 is the next active implementation slice.
-- This run was limited to the approved Slice 5 source/tests and feature SDD
+- Current state: Slices 1-6 implementation, validation, and completion approval
+  are complete; Slice 7 is the next active implementation slice.
+- This run was limited to the approved Slice 6 source/tests and feature SDD
   evidence.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 6.
+- Next step is `sdd-implement-task` for Slice 7.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 6: Separate viewer message and host-operation routing.
+- Active implementation slice: Slice 7: Stabilize viewer panel lifecycle adapters.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -290,7 +290,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 6: Separate viewer message and host-operation routing
 
-- Status: Approved
+- Status: Complete
 - Scope: `src/presentation/vscode/webview/messageHandlers.ts` and
   `viewerMessageRouting.ts`, including resource mapping, save/resource operations,
   validated messages, and host-facing telemetry routing.
@@ -319,6 +319,17 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   validated request contracts but does not import the document-update adapter.
 - Risks: duplicate dispatch, raw error leakage, or telemetry scope expansion.
 - Out of Scope: panel lifecycle, composition, and presentation interaction.
+- Implementation Feedback:
+  - The slice boundary was appropriate. Existing message routing and host
+    handlers could be hardened without moving panel lifecycle or viewer UI
+    state into this slice.
+  - The existing fire-and-forget host callbacks required explicit coverage for
+    synchronous throws, asynchronous save rejection, safe notifications, and
+    telemetry failures; future viewer adapter slices should estimate those
+    failure-path tests explicitly.
+  - No new dependency or design decision was needed. The Web host portion of
+    the exact gate remains blocked on the existing macOS Playwright Chromium
+    launch permission failure.
 
 ### Slice 7: Stabilize viewer panel lifecycle adapters
 
