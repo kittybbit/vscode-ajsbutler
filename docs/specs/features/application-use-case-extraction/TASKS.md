@@ -9,15 +9,15 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slice 4 implementation, validation, and completion approval
-  are complete; Slice 5 is the next active implementation slice.
-- This run was limited to the approved Slice 4 source/tests and feature SDD
+- Current state: Slices 1-5 implementation, validation, and completion approval
+  are complete; Slice 6 is the next active implementation slice.
+- This run was limited to the approved Slice 5 source/tests and feature SDD
   evidence.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 5.
+- Next step is `sdd-implement-task` for Slice 6.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 5: Separate viewer document update handling.
+- Active implementation slice: Slice 6: Separate viewer message and host-operation routing.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -258,7 +258,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 5: Separate viewer document update handling
 
-- Status: Approved
+- Status: Complete
 - Scope: `src/presentation/vscode/webview/ajsDocument.ts` and its direct test.
   Keep document refresh, save, cancellation, and write failures in the host
   adapter while passing normalized data through existing ports.
