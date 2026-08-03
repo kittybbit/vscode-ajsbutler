@@ -97,16 +97,21 @@ suite("ViewerFactory", () => {
     let createdShowOptions:
       | Parameters<typeof vscode.window.createWebviewPanel>[2]
       | undefined;
+    let createdOptions:
+      | Parameters<typeof vscode.window.createWebviewPanel>[3]
+      | undefined;
     let createdTitle: string | undefined;
+    let storedPanel: vscode.WebviewPanel | undefined;
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
       telemetry,
       store: {
         panelByUri() {
-          return undefined;
+          return storedPanel;
         },
         add(receivedUri, receivedPanel) {
+          storedPanel = receivedPanel;
           added.push({ uri: receivedUri, panel: receivedPanel });
         },
         removeByUri() {},
@@ -118,9 +123,10 @@ suite("ViewerFactory", () => {
         onNavigate: () => {},
       },
       deps: {
-        createWebviewPanel(_viewType, title, viewColumn) {
+        createWebviewPanel(_viewType, title, viewColumn, options) {
           createdTitle = title;
           createdShowOptions = viewColumn;
+          createdOptions = options;
           return createdPanel;
         },
       },
@@ -135,6 +141,10 @@ suite("ViewerFactory", () => {
     });
     assert.strictEqual(createdTitle, "sample.ajs");
     assert.strictEqual(createdShowOptions, vscode.ViewColumn.Active);
+    assert.deepStrictEqual(createdOptions, {
+      enableScripts: true,
+      retainContextWhenHidden: true,
+    });
     assert.deepStrictEqual(added, [{ uri: document.uri, panel: createdPanel }]);
   });
 
@@ -209,11 +219,12 @@ suite("ViewerFactory", () => {
         onDidDispose = callback;
         return { dispose() {} };
       },
-    } as vscode.WebviewPanel;
+    } as unknown as vscode.WebviewPanel;
     const added: Array<{
       uri: vscode.Uri;
       panel: vscode.WebviewPanel;
     }> = [];
+    let storedPanel: vscode.WebviewPanel | undefined;
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
@@ -221,12 +232,14 @@ suite("ViewerFactory", () => {
       store: {
         removeByUri(uri) {
           removed.push(uri.toString());
+          storedPanel = undefined;
         },
         add(receivedUri, receivedPanel) {
+          storedPanel = receivedPanel;
           added.push({ uri: receivedUri, panel: receivedPanel });
         },
         panelByUri() {
-          return undefined;
+          return storedPanel;
         },
       },
       handlers: {
@@ -265,6 +278,7 @@ suite("ViewerFactory", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     onDidDispose?.();
+    receiveMessageHandler?.({ type: READY });
 
     assert.deepStrictEqual(calls, [
       "ready:file:///sample.ajs:ajsbutler.testViewer",
@@ -282,5 +296,60 @@ suite("ViewerFactory", () => {
     ]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
     assert.strictEqual(receiverDisposed, true);
+  });
+
+  test("does not return a panel that is disposed during callback registration", () => {
+    const telemetry: TelemetryPort = {
+      report() {},
+      dispose() {},
+    };
+    const document = {
+      uri: vscode.Uri.parse("file:///sample.ajs"),
+    } as vscode.TextDocument;
+    let storedPanel: vscode.WebviewPanel | undefined;
+    let panelDisposed = false;
+    const panel = {
+      webview: {
+        onDidReceiveMessage() {
+          return { dispose() {} };
+        },
+      },
+      onDidDispose(callback: () => void) {
+        callback();
+        return { dispose() {} };
+      },
+      dispose() {
+        panelDisposed = true;
+      },
+    } as unknown as vscode.WebviewPanel;
+
+    const factory = new ViewerFactory({
+      viewType: "ajsbutler.testViewer",
+      telemetry,
+      store: {
+        panelByUri() {
+          return storedPanel;
+        },
+        add(_uri, receivedPanel) {
+          storedPanel = receivedPanel;
+        },
+        removeByUri() {
+          storedPanel = undefined;
+        },
+      },
+      handlers: {
+        onReady: () => {},
+        onNavigate: () => {},
+      },
+      deps: {
+        createWebviewPanel() {
+          return panel;
+        },
+      },
+    });
+
+    assert.throws(() => factory.getPanel(document), /disposed during setup/u);
+    assert.strictEqual(storedPanel, undefined);
+    assert.strictEqual(panelDisposed, true);
   });
 });

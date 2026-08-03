@@ -11,6 +11,7 @@ suite("WebviewMediator", () => {
     const changed: string[] = [];
     let storeDisposed = false;
     let panelDisposed = false;
+    let subscriptionDisposed = 0;
 
     let onChangeTextDocument:
       | Listener<vscode.TextDocumentChangeEvent>
@@ -59,19 +60,35 @@ suite("WebviewMediator", () => {
       deps: {
         onDidChangeTextDocument(listener) {
           onChangeTextDocument = listener;
-          return { dispose() {} };
+          return {
+            dispose() {
+              subscriptionDisposed += 1;
+            },
+          };
         },
         onDidCloseTextDocument(listener) {
           onCloseTextDocument = listener;
-          return { dispose() {} };
+          return {
+            dispose() {
+              subscriptionDisposed += 1;
+            },
+          };
         },
         onDidRenameFiles(listener) {
           onRenameFiles = listener;
-          return { dispose() {} };
+          return {
+            dispose() {
+              subscriptionDisposed += 1;
+            },
+          };
         },
         onDidChangeActiveColorTheme(listener) {
           onChangeTheme = listener;
-          return { dispose() {} };
+          return {
+            dispose() {
+              subscriptionDisposed += 1;
+            },
+          };
         },
         mountPanel(_context, _panel, viewType) {
           mounted.push(viewType);
@@ -95,5 +112,65 @@ suite("WebviewMediator", () => {
     assert.deepStrictEqual(mounted, ["ajsbutler.testViewer"]);
     assert.strictEqual(panelDisposed, true);
     assert.strictEqual(storeDisposed, true);
+    assert.strictEqual(subscriptionDisposed, 4);
+
+    onChangeTextDocument?.({ document } as vscode.TextDocumentChangeEvent);
+    onCloseTextDocument?.(document);
+    onRenameFiles?.({
+      files: [{ oldUri: document.uri, newUri: renamedUri }],
+    } as vscode.FileRenameEvent);
+    onChangeTheme?.({} as vscode.ColorTheme);
+    mediator.dispose();
+
+    assert.deepStrictEqual(changed, ["file:///sample.ajs"]);
+    assert.deepStrictEqual(mounted, ["ajsbutler.testViewer"]);
+    assert.strictEqual(panelDisposed, true);
+    assert.strictEqual(storeDisposed, true);
+  });
+
+  test("continues theme remounts after one panel throws", () => {
+    const firstPanel = {} as vscode.WebviewPanel;
+    const secondPanel = {} as vscode.WebviewPanel;
+    let onChangeTheme: Listener<vscode.ColorTheme> | undefined;
+    const mounted: vscode.WebviewPanel[] = [];
+
+    const mediator = new WebviewMediator({
+      context: {} as vscode.ExtensionContext,
+      viewType: "ajsbutler.testViewer",
+      store: {
+        allPanels: new Set([firstPanel, secondPanel]),
+        panelByUri() {
+          return undefined;
+        },
+        removeByUri() {},
+        dispose() {},
+      },
+      change() {},
+      deps: {
+        onDidChangeTextDocument() {
+          return { dispose() {} };
+        },
+        onDidCloseTextDocument() {
+          return { dispose() {} };
+        },
+        onDidRenameFiles() {
+          return { dispose() {} };
+        },
+        onDidChangeActiveColorTheme(listener) {
+          onChangeTheme = listener;
+          return { dispose() {} };
+        },
+        mountPanel(_context, panel) {
+          if (panel === firstPanel) {
+            throw new Error("stale panel");
+          }
+          mounted.push(panel);
+        },
+      },
+    });
+
+    assert.doesNotThrow(() => onChangeTheme?.({} as vscode.ColorTheme));
+    assert.deepStrictEqual(mounted, [secondPanel]);
+    mediator.dispose();
   });
 });

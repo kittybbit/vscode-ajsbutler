@@ -9,15 +9,15 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-6 implementation, validation, and completion approval
-  are complete; Slice 7 is the next active implementation slice.
-- This run was limited to the approved Slice 6 source/tests and feature SDD
+- Current state: Slices 1-7 implementation, validation, and completion approval
+  are complete; Slice 8 is the next active implementation slice.
+- This run was limited to the approved Slice 7 source/tests and feature SDD
   evidence.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 7.
+- Next step is `sdd-implement-task` for Slice 8.
 
 ## Plan Status
 
@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 7: Stabilize viewer panel lifecycle adapters.
+- Active implementation slice: Slice 8: Keep viewer composition and counterpart reveal atomic.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -333,7 +333,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 7: Stabilize viewer panel lifecycle adapters
 
-- Status: Approved
+- Status: Complete
 - Scope: `src/presentation/vscode/webview/ViewerFactory.ts`,
   `WebviewMediator.ts`, `WebviewStore.ts`, and `mountViewerPanel.ts`, with the
   lifecycle tests that prove reuse, readiness, retained context, and disposal.
@@ -363,6 +363,16 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   Slice 8.
 - Risks: readiness/disposal race or retained-context regression.
 - Out of Scope: viewer command wiring, graph/table rendering, and navigation UX.
+- Implementation Feedback:
+  - The slice boundary was appropriate: panel registration, retained context,
+    host event subscriptions, and disposal cleanup were stabilized without
+    changing viewer wiring or composition ownership.
+  - Clearing the store before disposing panels is required so synchronous
+    disposal callbacks observe no live panel and cannot re-register dead
+    resources. Future lifecycle slices should include this re-entrancy case.
+  - Type compilation, focused desktop host tests, production build, and qlty
+    passed. The exact web host run remains blocked by the existing macOS
+    Playwright Chromium launch permission failure.
 
 ### Slice 8: Keep viewer composition and counterpart reveal atomic
 

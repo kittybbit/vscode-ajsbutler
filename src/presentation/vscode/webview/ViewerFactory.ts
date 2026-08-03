@@ -84,7 +84,7 @@ export class ViewerFactory {
   /**
    * Get or create a webview panel for the given URI.
    */
-  public getPanel(document: vscode.TextDocument) {
+  public getPanel(document: vscode.TextDocument): vscode.WebviewPanel {
     console.log(
       `invoke PanelFactory.getPanel. (${this.#viewType}, ${document.uri.toString()})`,
     );
@@ -107,18 +107,47 @@ export class ViewerFactory {
     document,
     panel,
   }: ViewerCustomizeRequest): void {
+    const isActivePanel = (): boolean => {
+      try {
+        return this.#store.panelByUri(document.uri) === panel;
+      } catch {
+        return false;
+      }
+    };
+
     const onDidReceiveMessage = createViewerMessageHandler({
       document,
       panel,
       telemetry: this.#telemetry,
-      onReady: this.#handlers.onReady,
+      onReady: (receivedDocument, receivedPanel) => {
+        if (isActivePanel()) {
+          this.#handlers.onReady(receivedDocument, receivedPanel);
+        }
+      },
       onResource: (event, receivedPanel) => {
+        if (!isActivePanel()) {
+          return;
+        }
         console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
         postResourceMessage(event.data, receivedPanel);
       },
-      onOperation: reportWebviewOperation,
-      onNavigate: this.#handlers.onNavigate,
-      onSave: this.#handlers.onSave,
+      onOperation: (request) => {
+        if (isActivePanel()) {
+          reportWebviewOperation(request);
+        }
+      },
+      onNavigate: (receivedDocument, event) => {
+        if (isActivePanel()) {
+          this.#handlers.onNavigate(receivedDocument, event);
+        }
+      },
+      onSave: this.#handlers.onSave
+        ? async (content) => {
+            if (isActivePanel()) {
+              await this.#handlers.onSave?.(content);
+            }
+          }
+        : undefined,
       showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     });
     const receiveMessageDispose =
@@ -153,8 +182,34 @@ export class ViewerFactory {
         retainContextWhenHidden: true,
       },
     );
-    this.customize(document, panel);
-    this.#store.add(document.uri, panel);
+
+    try {
+      // Register the panel before its callbacks so a synchronous disposal
+      // during setup cannot leave a dead panel in the store.
+      this.#store.add(document.uri, panel);
+      if (this.#store.panelByUri(document.uri) !== panel) {
+        throw new Error("Viewer panel could not be registered.");
+      }
+      this.customize(document, panel);
+    } catch (error) {
+      this.#store.removeByUri(document.uri);
+      try {
+        panel.dispose();
+      } catch {
+        // A cleanup failure must not replace the original setup failure.
+      }
+      throw error;
+    }
+
+    if (this.#store.panelByUri(document.uri) !== panel) {
+      try {
+        panel.dispose();
+      } catch {
+        // The panel may already have been disposed by a lifecycle callback.
+      }
+      throw new Error("Viewer panel was disposed during setup.");
+    }
+
     return panel;
   }
 }
