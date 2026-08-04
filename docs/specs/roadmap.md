@@ -24,17 +24,6 @@ feature.
   enforcement gap not already covered by the current architecture test.
 - Dependency: Refactoring Quality Baseline.
 
-### 5. JP1/AJS Domain Model Restructuring
-
-- Purpose: centralize one selected, duplicated JP1/AJS rule in an appropriate
-  value object, entity, or domain service without adding UI state or parser
-  representations to the domain.
-- Entry condition: a baseline-ranked rule has at least two evidenced consumers,
-  explicit compatibility semantics, and protective tests.
-- Dependency: completed characterization evidence for the selected rule;
-  Application Use Case Extraction when the rule is still hidden inside
-  orchestration.
-
 ### 6. High-Complexity Hotspot Resolution
 
 - Purpose: decompose one ranked high-change, high-risk responsibility boundary
@@ -94,9 +83,6 @@ refactoring level and is removed only after that effort is complete.
   cross-view navigation, parser/error, selected VS Code/file-I/O, viewer
   transport/composition, and selected webview boundaries. Each remains a
   separate implementation slice with its own approval and validation.
-- JP1/AJS Domain Model Restructuring remains gated to the schedule-rule helper
-  until multiple consumers, version-13 compatibility semantics, and protective
-  tests are evidenced.
 - High-Complexity Hotspot Resolution is narrowed to the unit-list document
   validation/projection boundary after its behavior and callers are protected.
 - Webview Presentation Separation contains only flow rendering, flow
