@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import {
+  interpretScheduleDateValue,
   parseClosedDaySubstitutionValue,
   parseCycleValue,
   parseDelayTimeValue,
@@ -14,6 +15,145 @@ import {
 } from "../../domain/models/parameters/scheduleRuleHelpers";
 
 suite("Schedule rule helpers", () => {
+  test("interprets schedule-date rule association and token categories", () => {
+    assert.deepStrictEqual(interpretScheduleDateValue("en"), {
+      rule: 1,
+      hasExplicitRuleNumber: false,
+      year: undefined,
+      month: undefined,
+      dayValue: "en",
+      day: { kind: "en" },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("2,2026/04/27"), {
+      rule: 2,
+      hasExplicitRuleNumber: true,
+      year: 2026,
+      month: 4,
+      dayValue: "27",
+      day: { kind: "calendar", value: 27 },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("3,+10"), {
+      rule: 3,
+      hasExplicitRuleNumber: true,
+      year: undefined,
+      month: undefined,
+      dayValue: "+10",
+      day: { kind: "relative", value: 10 },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("4,*10"), {
+      rule: 4,
+      hasExplicitRuleNumber: true,
+      year: undefined,
+      month: undefined,
+      dayValue: "*10",
+      day: { kind: "open", value: 10 },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("5,@b-30"), {
+      rule: 5,
+      hasExplicitRuleNumber: true,
+      year: undefined,
+      month: undefined,
+      dayValue: "@b-30",
+      day: { kind: "backward", prefix: "@", offset: 30 },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("6,+su:b"), {
+      rule: 6,
+      hasExplicitRuleNumber: true,
+      year: undefined,
+      month: undefined,
+      dayValue: "+su:b",
+      day: {
+        kind: "weekday",
+        prefix: "+",
+        weekday: "su",
+        occurrence: "b",
+      },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("0,ud"), {
+      rule: 0,
+      hasExplicitRuleNumber: true,
+      year: undefined,
+      month: undefined,
+      dayValue: "ud",
+      day: { kind: "ud" },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("0,15"), {
+      rule: 0,
+      hasExplicitRuleNumber: true,
+      year: undefined,
+      month: undefined,
+      dayValue: "15",
+      day: { kind: "calendar", value: 15 },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("145,2036/12/31"), {
+      rule: 145,
+      hasExplicitRuleNumber: true,
+      year: 2036,
+      month: 12,
+      dayValue: "31",
+      day: { kind: "calendar", value: 31 },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("ud"), {
+      rule: 1,
+      hasExplicitRuleNumber: false,
+      year: undefined,
+      month: undefined,
+      dayValue: "ud",
+      day: { kind: "ud" },
+    });
+    assert.deepStrictEqual(interpretScheduleDateValue("1,ud"), {
+      rule: 1,
+      hasExplicitRuleNumber: true,
+      year: undefined,
+      month: undefined,
+      dayValue: "ud",
+      day: { kind: "ud" },
+    });
+  });
+
+  test("keeps the legacy schedule-date helper as a compatibility projection", () => {
+    const values = [
+      "en",
+      "2,2026/04/27",
+      "3,+10",
+      "4,*10",
+      "5,@b-30",
+      "6,+su:b",
+      "0,ud",
+      "0,15",
+      "145,2036/12/31",
+      "ud",
+      "1,ud",
+      "0000/00/01",
+      "1,2024/02/xx",
+      "1,",
+    ];
+
+    for (const value of values) {
+      const interpreted = interpretScheduleDateValue(value);
+      const legacy = parseScheduleDateValue(value);
+
+      if (interpreted === undefined) {
+        assert.strictEqual(legacy, undefined);
+        continue;
+      }
+
+      const yearMonth =
+        interpreted.month === undefined
+          ? undefined
+          : `${
+              interpreted.year === undefined
+                ? ""
+                : `${String(interpreted.year).padStart(4, "0")}/`
+            }${String(interpreted.month).padStart(2, "0")}/`;
+      assert.deepStrictEqual(legacy, {
+        rule: interpreted.rule,
+        yearMonth,
+        day: interpreted.dayValue,
+      });
+    }
+  });
+
   test("parses supported schedule-rule values with omitted rule defaults", () => {
     assert.deepStrictEqual(parseScheduleDateValue("en"), {
       rule: 1,

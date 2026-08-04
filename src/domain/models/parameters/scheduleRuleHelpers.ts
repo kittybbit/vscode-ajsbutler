@@ -1,3 +1,15 @@
+import {
+  interpretScheduleDateValue,
+  type ScheduleDateInterpretation,
+} from "./scheduleDateInterpreter";
+
+export {
+  interpretScheduleDateValue,
+  type ScheduleDateDay,
+  type ScheduleDateInterpretation,
+  type ScheduleDateWeekday,
+} from "./scheduleDateInterpreter";
+
 export const resolveScheduleRuleNumber = (
   rawRuleNumber: string | undefined,
 ): number => (rawRuleNumber === undefined ? 1 : Number(rawRuleNumber));
@@ -33,17 +45,24 @@ export type ParsedScheduleDateValue = {
 export const parseScheduleDateValue = (
   rawValue: string | undefined,
 ): ParsedScheduleDateValue | undefined => {
-  const matched =
-    /^((\d{1,3}),)?((\d{4}\/)?\d{2}\/)?(([+*@])?\d{2}|([+*@])?b(-\d{2})?|\+?(su|mo|tu|we|th|fr|sa)(:(\d|b))?|en|ud)$/.exec(
-      rawValue ?? "",
-    );
-  return matched
-    ? {
-        rule: resolveScheduleRuleNumber(matched[2]),
-        yearMonth: matched[3],
-        day: matched[5],
-      }
-    : undefined;
+  const parsed: ScheduleDateInterpretation | undefined =
+    interpretScheduleDateValue(rawValue);
+  if (!parsed) {
+    return undefined;
+  }
+
+  const yearMonth =
+    parsed.month === undefined
+      ? undefined
+      : `${parsed.year === undefined ? "" : `${String(parsed.year).padStart(4, "0")}/`}${String(
+          parsed.month,
+        ).padStart(2, "0")}/`;
+
+  return {
+    rule: parsed.rule,
+    yearMonth,
+    day: parsed.dayValue,
+  };
 };
 
 export const parseParentScheduleRuleValue = (

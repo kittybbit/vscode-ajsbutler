@@ -52,6 +52,7 @@ presentation.
 
 ## Consumed Domain Rules
 
+- `JP1-PARAM-SCHEDULE-START-DATE-001`
 - `JP1-PARAM-SCHEDULE-WC-WT-001`
 - `JP1-PARAM-WAIT-ETS-DEFAULT-001`
 - `JP1-PARAM-EVENT-ARRIVAL-DEFAULT-001`
@@ -93,6 +94,15 @@ Scenario: Effective schedule monitoring values are displayed
   Given interpreted schedule values under JP1-PARAM-SCHEDULE-WC-WT-001
   When the unit list displays start-condition monitoring
   Then it displays the effective count and time returned by that rule
+
+Scenario: Schedule-date projection preserves interpreted fields
+  Given a normalized job group or jobnet with supported, omitted, or
+    uninterpretable `sd` values under JP1-PARAM-SCHEDULE-START-DATE-001
+  When the unit list displays schedule-date fields
+  Then it preserves the existing schedule-date type, year/month, day, order,
+    and raw parameter evidence
+  And it does not present a partial interpretation for an uninterpretable
+    value
 
 Scenario: Wait timeout-action defaults are displayed
   Given interpreted wait-job values under JP1-PARAM-WAIT-ETS-DEFAULT-001
