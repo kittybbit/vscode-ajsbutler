@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 11: Extract Flow graph scope and expansion state.
+- Active implementation slice: Slice 12: Extract Flow viewport, document, reveal, and overflow effects.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -515,7 +515,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 11: Extract Flow graph scope and expansion state
 
-- Status: Approved
+- Status: Complete
 - Scope: `useFlowGraphState.ts`, `useNestedExpansionState.ts`,
   `nestedExpansion.ts`, and `flowExpandedAncestors.ts`.
 - User / Domain Value: current Flow scope, nested expansion, and collapsed
@@ -544,6 +544,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Dependencies: Slices 2 and 9. `useFlowGraphState.ts` consumes the existing
   plain viewer message contract and Slice 9's Flow build/render helpers.
 - Risks: scope stack corruption, stale expanded IDs, or partial graph fallback.
+- Implementation Feedback: The approved Flow scope and expansion boundary was
+  already represented by the listed presentation modules. No runtime change was
+  required; the focused hook test now proves scope changes, nested expansion,
+  ancestor reveal, and unavailable-graph fallback without widening ownership
+  into controller or effects code.
 - Out of Scope: viewport/document effects, search, keyboard behavior, and
   `useFlowViewerController.ts`.
 
