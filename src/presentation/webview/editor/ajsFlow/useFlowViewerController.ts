@@ -32,7 +32,7 @@ import { useNestedExpansionState } from "./useNestedExpansionState";
 import { buildFlowNodeDetail } from "./flowNodeDetail";
 import { useSelectedFlowNodeState } from "./useSelectedFlowNodeState";
 import { useHoveredFlowNodeState } from "./useHoveredFlowNodeState";
-import { resolveFlowTreeSelectionTarget } from "./flowTreeSelection";
+import { useFlowTreeSelectionState } from "./flowTreeSelection";
 import type { FlowViewportFocusRequest } from "./flowViewportFocus";
 import { applyHoveredUnitToFlowNodes } from "./flowGraphHover";
 import { applyFlowRelationshipFocus } from "./flowRelationshipFocus";
@@ -95,16 +95,6 @@ const useCurrentUnitIdState = (
     [currentUnitId, setCurrentUnitId],
   );
 
-const mergeExpandedUnitIds = (
-  currentUnitIds: string[],
-  requiredUnitIds: readonly string[],
-): string[] => {
-  const mergedUnitIds = [...new Set([...currentUnitIds, ...requiredUnitIds])];
-  return mergedUnitIds.length === currentUnitIds.length
-    ? currentUnitIds
-    : mergedUnitIds;
-};
-
 const useFlowViewerUiState = () => {
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
@@ -122,46 +112,6 @@ const useFlowViewerUiState = () => {
     dialogDataState,
     setDialogData,
   };
-};
-
-type FlowTreeSelectionStateParams = {
-  currentUnit?: FlowGraphUnitDto;
-  selectUnit: (unitId: string) => void;
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
-};
-
-const useFlowTreeSelectionState = ({
-  currentUnit,
-  selectUnit,
-  setExpandedUnitIds,
-  unitById,
-}: FlowTreeSelectionStateParams) => {
-  const [selectionFocusRequest, setSelectionFocusRequest] =
-    useState<FlowViewportFocusRequest>({ version: 0 });
-  const selectTreeUnit = useCallback(
-    (unitId: string) => {
-      const target = resolveFlowTreeSelectionTarget(
-        unitId,
-        currentUnit,
-        unitById,
-      );
-      if (!target) {
-        return;
-      }
-      setExpandedUnitIds((current) =>
-        mergeExpandedUnitIds(current, target.expandedNestedUnitIds),
-      );
-      selectUnit(target.selectedUnitId);
-      setSelectionFocusRequest((current) => ({
-        targetUnitId: target.selectedUnitId,
-        version: current.version + 1,
-      }));
-    },
-    [currentUnit, selectUnit, setExpandedUnitIds, unitById],
-  );
-
-  return { selectTreeUnit, selectionFocusRequest };
 };
 
 type FocusedFlowDataParams = {

@@ -1,10 +1,19 @@
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { collectUnitTreeParentUnitIds } from "../shared/unitTreeSelection";
 import { collectExpandedAncestorUnitIds } from "./flowExpandedAncestors";
+import type { FlowViewportFocusRequest } from "./flowViewportFocus";
 
 export type FlowTreeSelectionTarget = {
   selectedUnitId: string;
   expandedNestedUnitIds: string[];
+};
+
+type FlowTreeSelectionStateParams = {
+  currentUnit?: FlowGraphUnitDto;
+  selectUnit: (unitId: string) => void;
+  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 export const collectFlowTreeAncestorUnitIds = (
@@ -89,4 +98,47 @@ export const resolveFlowTreeSelectionTarget = (
       unitById,
     ),
   };
+};
+
+const mergeExpandedUnitIds = (
+  currentUnitIds: string[],
+  requiredUnitIds: readonly string[],
+): string[] => {
+  const mergedUnitIds = [...new Set([...currentUnitIds, ...requiredUnitIds])];
+  return mergedUnitIds.length === currentUnitIds.length
+    ? currentUnitIds
+    : mergedUnitIds;
+};
+
+export const useFlowTreeSelectionState = ({
+  currentUnit,
+  selectUnit,
+  setExpandedUnitIds,
+  unitById,
+}: FlowTreeSelectionStateParams) => {
+  const [selectionFocusRequest, setSelectionFocusRequest] =
+    useState<FlowViewportFocusRequest>({ version: 0 });
+  const selectTreeUnit = useCallback(
+    (unitId: string) => {
+      const target = resolveFlowTreeSelectionTarget(
+        unitId,
+        currentUnit,
+        unitById,
+      );
+      if (!target) {
+        return;
+      }
+      setExpandedUnitIds((current) =>
+        mergeExpandedUnitIds(current, target.expandedNestedUnitIds),
+      );
+      selectUnit(target.selectedUnitId);
+      setSelectionFocusRequest((current) => ({
+        targetUnitId: target.selectedUnitId,
+        version: current.version + 1,
+      }));
+    },
+    [currentUnit, selectUnit, setExpandedUnitIds, unitById],
+  );
+
+  return { selectTreeUnit, selectionFocusRequest };
 };

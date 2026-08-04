@@ -9,13 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-15 implementation, validation, and completion
-  approval are complete; Slice 16 is the next active implementation slice.
+- Current state: Slices 1-16 implementation, validation, and completion
+  approval are complete; Slice 17 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 16.
+- Next step is `sdd-implement-task` for Slice 17.
 
 ## Plan Status
 
@@ -26,7 +26,8 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 16: Extract Flow controller composition.
+- Active implementation slice: Slice 17: Integrate Flow tree, selector, and
+  caller composition.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -732,7 +733,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 16: Extract Flow controller composition
 
-- Status: Approved
+- Status: Complete
 - Scope: `useFlowViewerController.ts` and `flowTreeSelection.ts`.
   Preserve the existing public hook shape while composing the already-separated
   graph state, effects, search, detail, and keyboard primitives.
@@ -750,6 +751,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   Slice 15/helper-owned regression evidence,
   `src/test/suite/architectureDependencyRules.test.ts`,
   `rtk pnpm run build`, `rtk pnpm run test:full`, and `rtk pnpm run qlty`.
+  Slice 16 validation: focused controller/tree-selection tests, test
+  compilation, production build, qlty, diff check, desktop Extension Host,
+  and web Extension Host validation passed. The combined host command reached
+  desktop successfully; its web launch was retried with the permitted macOS
+  Playwright browser after the sandbox launch permission failure.
 - Production Readiness:
   - Failure mode: missing graph state, stale selection, unavailable detail, or
     disposed viewer returns the existing safe fallback and does not trap focus.
@@ -767,6 +773,12 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   and minimap helpers remain unchanged and are not implementation dependencies.
 - Risks: stale callback wiring, accidental controller scope expansion, or
   public return-shape drift.
+- Implementation Feedback: The boundary was appropriate; moving tree-selection
+  orchestration into its existing helper kept the controller public shape and
+  effect contracts unchanged. Focused tests for the public return shape and
+  nested ancestor reveal provide useful regression coverage for Slice 17.
+  No new dependency, architecture exception, or desktop/web contract change
+  was discovered.
 - Out of Scope: Flow rendering helpers, viewport/effect internals, search
   matching, keyboard primitive implementation, and Flow shell components.
 
