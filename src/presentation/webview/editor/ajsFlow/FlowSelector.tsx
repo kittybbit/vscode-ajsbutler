@@ -3,13 +3,12 @@ import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGr
 import UnitTreeSelector, {
   type UnitTreeFocusRequest,
 } from "../shared/UnitTreeSelector";
-import { CurrentUnitIdStateType } from "./flowViewerStateTypes";
 import { isUnitInCurrentFlowScope } from "./flowTreeSelection";
 
 type FlowSelectorProps = {
   rootUnits: FlowGraphUnitDto[];
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
-  currentUnitIdState: CurrentUnitIdStateType;
+  currentUnitId?: string;
   focusRequest?: UnitTreeFocusRequest;
   hoveredUnitId?: string;
   selectedUnitId?: string;
@@ -20,7 +19,7 @@ type FlowSelectorProps = {
   onLeaveUnit: (unitId: string) => void;
   onEscape?: VoidFunction;
   onEnterUnit?: (unitId: string) => void;
-  onOpenScope?: (unitId: string) => void;
+  onOpenScope: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
 };
 
@@ -56,7 +55,7 @@ export const resolveFlowSelectorFocusTarget = (
 const FlowSelector: FC<FlowSelectorProps> = ({
   rootUnits,
   unitById,
-  currentUnitIdState,
+  currentUnitId,
   focusRequest,
   hoveredUnitId,
   selectedUnitId,
@@ -72,7 +71,6 @@ const FlowSelector: FC<FlowSelectorProps> = ({
 }) => {
   console.log("render FlowSelector.");
 
-  const { currentUnitId, setCurrentUnitId } = currentUnitIdState;
   const currentUnit = currentUnitId ? unitById.get(currentUnitId) : undefined;
   const isUnitEnabled = useCallback(
     (unit: FlowGraphUnitDto) =>
@@ -98,7 +96,7 @@ const FlowSelector: FC<FlowSelectorProps> = ({
       onLeaveUnit={onLeaveUnit}
       onEscape={onEscape}
       onEnterUnit={onEnterUnit}
-      onOpenScope={onOpenScope ?? setCurrentUnitId}
+      onOpenScope={onOpenScope}
       onSelectUnit={onSelectUnit}
     />
   );

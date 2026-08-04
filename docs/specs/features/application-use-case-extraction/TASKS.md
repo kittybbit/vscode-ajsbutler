@@ -9,13 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-16 implementation, validation, and completion
-  approval are complete; Slice 17 is the next active implementation slice.
+- Current state: Slices 1-17 implementation, validation, and completion
+  approval are complete; Slice 18 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 17.
+- Next step is `sdd-implement-task` for Slice 18.
 
 ## Plan Status
 
@@ -26,8 +26,8 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 17: Integrate Flow tree, selector, and
-  caller composition.
+- Active implementation slice: Slice 18: Extract Unit List rendering, columns,
+  and export mapping.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -784,7 +784,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 17: Integrate Flow tree, selector, and caller composition
 
-- Status: Approved
+- Status: Complete
 - Scope: `FlowContents.tsx`, `FlowSelector.tsx`, and `Header.tsx` under
   `src/presentation/webview/editor/ajsFlow`.
   This slice wires the already-separated geometry, detail, state, search,
@@ -822,6 +822,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   add new responsibilities while wiring existing ones.
 - Out of Scope: application graph construction, unrelated visual redesign, and
   changes to the listed existing Flow hover/selection/minimap helpers.
+- Implementation Feedback: The caller boundary was sufficient to preserve the
+  existing controller contract while making FlowSelector consume a plain scope
+  identity and explicit scope-opening action. A focused FlowContents integration
+  test was needed because the existing selector and header tests did not prove
+  their connection to document, graph, search, and relationship-focus state.
 
 ### Slice 18: Extract Unit List rendering, columns, and export mapping
 

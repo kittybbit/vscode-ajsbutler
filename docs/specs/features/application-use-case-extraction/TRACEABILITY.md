@@ -25,7 +25,7 @@
 | Flow search and reveal state                               | Current-scope matching, collapsed-ancestor reveal, result order, centering, and shared telemetry calls remain stable                       | Requirements; Non-Goals; Acceptance Criteria; `uc-explore-flow-graph.md` search scenarios                                     | Slice 14                                                  | `flowSearch.test.ts`, `flowSearchState.test.ts`, `flowSearchController.test.ts`, `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`; Slice 14 validation: focused search/controller tests, test compilation, desktop host, production build, qlty, Markdown lint, and diff check passed; web host remains blocked by the existing macOS Playwright Chromium launch permission failure                                                                         |
 | Flow keyboard and relationship-focus primitives            | Spatial navigation, explicit scope actions, relationship focus, and D/L/R/Escape handoffs remain stable                                    | Requirements; Architecture; Acceptance Criteria; `uc-explore-flow-graph.md` keyboard scenarios                                | Slice 15                                                  | `flowKeyboardNavigation.test.ts`, `flowRelationshipFocus.test.ts`, `flowViewerShortcuts.test.ts`, `flowAccessibility.test.ts`, `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`                                                                                                                                                                                                                                                                             |
 | Flow controller composition                                | Existing graph, detail, search, focus, mini-map, navigation, lifecycle, and tree-selection controller contract remains stable              | Requirements; Architecture; Acceptance Criteria; `uc-explore-flow-graph.md`                                                   | Slice 16                                                  | `flowViewerController.test.ts`, `flowTreeSelection.test.ts`; `flowRelationshipFocus.test.ts`, `flowViewerShortcuts.test.ts`, and `flowMiniMap.test.ts` as existing regression evidence; `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`; Slice 16 validation: focused tests, compilation, build, qlty, diff check, desktop host, and web host passed; web host required the permitted macOS Playwright browser after the sandbox launch permission failure |
-| Flow tree, selector, and caller composition                | Tree selection, header search, keyboard actions, detail, scope/expansion, focus, and graph rendering remain coherent                       | Requirements; Architecture; Acceptance Criteria; `uc-explore-flow-graph.md`                                                   | Slice 17                                                  | `flowSelector.test.ts`, `flowHeader.test.ts`, planned `flowContentsIntegration.test.ts`, `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`                                                                                                                                                                                                                                                                                                                   |
+| Flow tree, selector, and caller composition                | Tree selection, header search, keyboard actions, detail, scope/expansion, focus, and graph rendering remain coherent                       | Requirements; Architecture; Acceptance Criteria; `uc-explore-flow-graph.md`                                                   | Slice 17                                                  | `flowSelector.test.ts`, `flowHeader.test.ts`, `flowContentsIntegration.test.ts`, `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`; Slice 17 validation: focused tests, compilation, production build, qlty, diff check, desktop host, and web host passed; web host required the permitted macOS Playwright browser launch and emitted only existing stream cleanup logs after scenarios completed                                                                                                                                             |
 | Unit List rendering, columns, and export mapping           | Deterministic rows, visible-column order, sorting/search presentation, localized headers, and CSV mapping remain stable                    | Requirements; Architecture; Acceptance Criteria; `uc-view-unit-list.md` and `uc-export-unit-list-csv.md`                      | Slice 18                                                  | `tableColumnDef.test.ts`, `ajsTableHeader.test.ts`, `tableViewerData.test.ts`, `tableSearchState.test.ts`, `ajsTableGlobalFilter.test.ts`, `exportCsvView.test.ts`, `csvExportTelemetry.test.ts`, `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`                                                                                                                                                                                                          |
 | Unit List virtualization and grid focus                    | Virtualization, grid/tree handoff, sorting restoration, row reveal, and keyboard focus remain stable for large lists                       | Requirements; Architecture; Acceptance Criteria; `uc-view-unit-list.md`                                                       | Slice 19                                                  | `tableNavigation.test.ts`, planned `tableVirtualizationFocus.test.ts`, `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`                                                                                                                                                                                                                                                                                                                                     |
 | Unit List shell, search, detail, and cross-view navigation | Table/search orchestration, detail inspection, definition action, focus restoration, and list-to-Flow reveal remain coherent               | Requirements; Architecture; Acceptance Criteria; `uc-view-unit-list.md` and `uc-navigate-between-unit-list-and-flow-graph.md` | Slice 20                                                  | `revealUnit.test.ts`, `viewerEventBridge.test.ts`, `showUnitDefinitionInteraction.test.ts`, planned `tableSearchController.test.ts` and `tableShellIntegration.test.ts`; `tableNavigation.test.ts` is rerun as Slice 19-owned integration evidence; `architectureDependencyRules.test.ts`, `rtk pnpm run build`, `rtk pnpm run test:full`, `rtk pnpm run qlty`                                                                                                                                                        |
@@ -50,7 +50,7 @@
 - `flowAccessibility.test.ts` is owned by Slice 15 for keyboard/focus
   primitives; Slice 17 may use it as integration evidence but must not edit it.
 - `accessibilityDom.test.tsx` is owned by Slice 13 for shared controls; Slice 17
-  does not own or edit it. Slice 17 uses the planned
+  does not own or edit it. Slice 17 uses
   `flowContentsIntegration.test.ts` for Flow caller integration.
 - `searchTelemetry.test.ts` proves the existing Application telemetry contract;
   it is not edited by Slice 13 or Slice 14. Slice 13 owns the shared webview
@@ -64,14 +64,15 @@
   it is not edited unless the currently out-of-scope mini-map helper changes.
 - `flowViewerEffects.test.ts`, `flowSearchController.test.ts`,
   `flowViewerController.test.ts`,
-  `flowTreeSelection.test.ts`, `flowContentsIntegration.test.ts`,
-  `viewerSearchTelemetry.test.ts`, `tableVirtualizationFocus.test.ts`,
+  `flowTreeSelection.test.ts`, `viewerSearchTelemetry.test.ts`,
+  `tableVirtualizationFocus.test.ts`,
   `tableSearchController.test.ts`, and `tableShellIntegration.test.ts` are
   planned focused tests for responsibilities that currently have no exact
   dedicated test file.
 - Planned test files are explicitly marked as planned above; no existing test is
   assumed to prove a controller, telemetry helper, virtualization, or shell
-  responsibility when no exact focused test currently exists. Existing Flow
+  responsibility when no exact focused test currently exists. Slice 17's
+  `flowContentsIntegration.test.ts` is now implemented. Existing Flow
   hover, selection, and minimap helpers are explicitly unchanged and have no
   implementation-slice ownership.
 
@@ -132,3 +133,13 @@
   host validation, qlty, and diff check passed.
 - The web host completed successfully; it emitted only the existing stream
   cleanup logs after the host scenarios completed.
+
+## Slice 17 Validation
+
+- `flowSelector.test.ts`, `flowHeader.test.ts`, and the new
+  `flowContentsIntegration.test.ts` passed in the desktop Extension Host;
+  test compilation, production build, qlty, and diff check passed.
+- The web Extension Host completed successfully with the permitted macOS
+  Playwright browser launch. Its existing stream cleanup logs emitted
+  `ECONNRESET`/`EPIPE` messages after the scenarios completed; the command
+  exited successfully.

@@ -117,17 +117,6 @@ const getExpandAllLabel = (
     language,
   );
 
-const getSearchHelperText = (
-  searchedUnitId?: string,
-  resultPosition?: FlowSearchResultPosition,
-  language = "en",
-): string =>
-  resolveHeaderSearchHelperText(
-    searchedUnitId,
-    resultPosition,
-    getFlowHeaderSearchLabels(language).helperText,
-  );
-
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   language,
   searchedUnitId,

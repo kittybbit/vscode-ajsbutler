@@ -636,7 +636,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
         <FlowSelector
           rootUnits={flowDocumentDto?.rootUnits ?? []}
           unitById={unitById}
-          currentUnitIdState={currentUnitIdState}
+          currentUnitId={currentUnitIdState.currentUnitId}
           focusRequest={focusSelectorRequest}
           hoveredUnitId={hoveredUnitId}
           selectedUnitId={selectedUnitId}
