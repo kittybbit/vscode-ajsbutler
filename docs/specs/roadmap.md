@@ -24,20 +24,6 @@ feature.
   enforcement gap not already covered by the current architecture test.
 - Dependency: Refactoring Quality Baseline.
 
-### 4. Application Use Case Extraction
-
-- Purpose: separate the Feature 4 application-facing use-case family from VS
-  Code, webview, and file-I/O concerns through independently approved slices
-  for the selected use cases, ports, application errors, adapters, and thin
-  host handlers.
-- Entry condition: each selected boundary is protected by characterization
-  tests and its callers, ports, DTOs, errors, and host impacts are known.
-- Dependency: completed characterization evidence for every selected boundary.
-- Planning rule: one Feature 4 branch may contain multiple independently
-  reviewable slices, but no slice may combine unrelated use cases or host
-  boundaries. Later Webview Presentation Separation and Infrastructure Boundary
-  Cleanup must exclude boundaries already selected and completed here.
-
 ### 5. JP1/AJS Domain Model Restructuring
 
 - Purpose: centralize one selected, duplicated JP1/AJS rule in an appropriate
