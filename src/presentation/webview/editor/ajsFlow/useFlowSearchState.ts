@@ -16,7 +16,12 @@ import {
   type NavigationRequestDto,
 } from "../../../../application/navigation/resolveNavigationTarget";
 import { postViewerSearchEvent } from "../shared/viewerSearchTelemetry";
-import { findFlowSearchResult, FlowSearchResult } from "./flowSearch";
+import {
+  mergeExpandedAncestorUnitIds,
+  resolveFlowSearchSubmission,
+  type FlowSearchResult,
+  type FlowSearchSubmission,
+} from "./flowSearch";
 import {
   createEmptyFlowSearchState,
   createRevealedFlowSearchState,
@@ -35,13 +40,6 @@ type UseFlowSearchStateParams = {
   setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
-
-const mergeExpandedAncestorUnitIds = (
-  expandedUnitIds: readonly string[],
-  result: FlowSearchResult,
-): string[] => [
-  ...new Set([...expandedUnitIds, ...result.expandedAncestorUnitIds]),
-];
 
 type SearchSubmitHandlerParams = {
   currentUnit?: FlowGraphUnitDto;
@@ -69,19 +67,10 @@ type FlowSearchResultApplyParams = {
   setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
 };
 
-type FlowSearchSubmitContext = Pick<
+type FlowSearchStateSetters = Pick<
   SearchSubmitHandlerParams,
-  | "currentUnit"
-  | "searchState"
-  | "setExpandedUnitIds"
-  | "setSearchState"
-  | "unitById"
+  "setExpandedUnitIds" | "setSearchState"
 >;
-
-type FlowSearchSubmission =
-  | { kind: "current" }
-  | { kind: "empty"; query: string }
-  | { kind: "matched"; query: string; result: FlowSearchResult };
 
 const applyFlowSearchResult = ({
   query,
@@ -95,18 +84,6 @@ const applyFlowSearchResult = ({
   );
 };
 
-const resolveFlowSearchSubmission = (
-  query: string,
-  { currentUnit, searchState, unitById }: FlowSearchSubmitContext,
-): FlowSearchSubmission => {
-  if (isActiveFlowSearchQuery(searchState, query)) {
-    return { kind: "current" };
-  }
-
-  const result = findFlowSearchResult(currentUnit, query, unitById);
-  return result ? { kind: "matched", query, result } : { kind: "empty", query };
-};
-
 const applyEmptyFlowSearchResult = (
   query: string,
   setSearchState: Dispatch<SetStateAction<FlowSearchState>>,
@@ -118,7 +95,7 @@ const applyEmptyFlowSearchResult = (
 
 const applyFlowSearchSubmission = (
   submission: FlowSearchSubmission,
-  { setExpandedUnitIds, setSearchState }: FlowSearchSubmitContext,
+  { setExpandedUnitIds, setSearchState }: FlowSearchStateSetters,
 ) => {
   if (submission.kind === "matched") {
     applyFlowSearchResult({
@@ -164,22 +141,18 @@ const useSearchSubmitHandler = ({
         applyFlowSearchSubmission(
           { kind: "empty", query },
           {
-            currentUnit,
-            searchState,
             setExpandedUnitIds,
             setSearchState,
-            unitById,
           },
         );
         return;
       }
 
       const startedAt = performance.now();
-      const submission = resolveFlowSearchSubmission(query, {
+      const submission = resolveFlowSearchSubmission({
         currentUnit,
+        query,
         searchState,
-        setExpandedUnitIds,
-        setSearchState,
         unitById,
       });
       if (submission.kind === "current") {
@@ -197,11 +170,8 @@ const useSearchSubmitHandler = ({
         surface: "flow",
       });
       applyFlowSearchSubmission(submission, {
-        currentUnit,
-        searchState,
         setExpandedUnitIds,
         setSearchState,
-        unitById,
       });
     },
     [currentUnit, searchState, setSearchState, setExpandedUnitIds, unitById],

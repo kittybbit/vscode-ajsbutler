@@ -1,12 +1,16 @@
 import * as assert from "assert";
 import { parseAjsDocumentForTest } from "../support/parseAjs";
-import { findFlowSearchResult } from "../../presentation/webview/editor/ajsFlow/flowSearch";
+import {
+  findFlowSearchResult,
+  resolveFlowSearchSubmission,
+} from "../../presentation/webview/editor/ajsFlow/flowSearch";
 import {
   type FlowGraphUnitDto,
   toFlowGraphDocumentDto,
   validateFlowGraphDocument,
 } from "../../application/flow-graph/flowGraphDocument";
 import { createFlowTestUnit } from "../support/flowUnits";
+import { createSubmittedFlowSearchState } from "../../presentation/webview/editor/ajsFlow/flowSearchState";
 
 const nestedDefinition = `
 unit=root,,jp1admin,;
@@ -153,6 +157,60 @@ suite("Flow Search", () => {
     const searchResult = findFlowSearchResult(currentUnit, "   ", unitById);
 
     assert.strictEqual(searchResult, undefined);
+  });
+
+  test("resolves matched, repeated, and empty submissions in the current scope", () => {
+    const { currentUnit, leafJobId, unitById } = createFlowSearchFixture();
+    const emptyState = createSubmittedFlowSearchState("", undefined, 0);
+
+    assert.deepStrictEqual(
+      resolveFlowSearchSubmission({
+        currentUnit,
+        query: "leaf",
+        searchState: emptyState,
+        unitById,
+      }),
+      {
+        kind: "matched",
+        query: "leaf",
+        result: {
+          matchedUnitId: leafJobId,
+          matchedUnitIds: [leafJobId],
+          expandedAncestorUnitIds: [
+            currentUnit.children[0].id,
+            currentUnit.children[0].children[0].id,
+          ],
+        },
+      },
+    );
+
+    const activeState = createSubmittedFlowSearchState(
+      "leaf",
+      {
+        matchedUnitId: leafJobId,
+        matchedUnitIds: [leafJobId],
+        expandedAncestorUnitIds: [],
+      },
+      1,
+    );
+    assert.deepStrictEqual(
+      resolveFlowSearchSubmission({
+        currentUnit,
+        query: " LEAF ",
+        searchState: activeState,
+        unitById,
+      }),
+      { kind: "current" },
+    );
+    assert.deepStrictEqual(
+      resolveFlowSearchSubmission({
+        currentUnit,
+        query: "missing",
+        searchState: emptyState,
+        unitById,
+      }),
+      { kind: "empty", query: "missing" },
+    );
   });
 
   test("returns no match for a bounded long query", () => {

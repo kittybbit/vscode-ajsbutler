@@ -9,13 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-13 implementation, validation, and completion
-  approval are complete; Slice 14 is the next active implementation slice.
+- Current state: Slices 1-14 implementation, validation, and completion
+  approval are complete; Slice 15 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 14.
+- Next step is `sdd-implement-task` for Slice 15.
 
 ## Plan Status
 
@@ -26,7 +26,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 14: Extract Flow search and reveal state.
+- Active implementation slice: Slice 15: Extract Flow keyboard and relationship-focus primitives.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -637,7 +637,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 14: Extract Flow search and reveal state
 
-- Status: Approved
+- Status: Complete
 - Scope: `useFlowSearchState.ts`, `flowSearch.ts`, and `flowSearchState.ts` for
   Flow search matching, result ordering, ancestor reveal, and centering. The
   shared `viewerSearchTelemetry.ts` adapter remains owned by Slice 13; the
@@ -650,10 +650,14 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Acceptance: case-insensitive current-scope matching, collapsed-ancestor
   reveal, deterministic result order, centering, and the existing call to the
   shared privacy-safe telemetry adapter are unchanged.
-- Validation: `flowSearch.test.ts`, `flowSearchState.test.ts`, a planned
-  focused `flowSearchController.test.ts` for `useFlowSearchState`,
+- Validation: `flowSearch.test.ts`, `flowSearchState.test.ts`, focused
+  `flowSearchController.test.ts` for `useFlowSearchState`,
   `src/test/suite/architectureDependencyRules.test.ts`,
-  `rtk pnpm run build`, `rtk pnpm run test:full`, and `rtk pnpm run qlty`.
+  `rtk pnpm run build`, `rtk pnpm run test:full`, and `rtk pnpm run qlty`;
+  Slice 14 validation: focused search/controller tests, test compilation,
+  desktop host, production build, qlty, Markdown lint, and diff check passed;
+  the web host remains blocked by the existing macOS Playwright Chromium
+  launch permission failure.
 - Production Readiness:
   - Failure mode: no result or stale result returns the existing empty state and
     does not move focus to an unrelated node.
@@ -671,6 +675,13 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   Application telemetry contract.
 - Risks: search state becoming a hidden shared domain service or revealing a
   node outside the active scope.
+- Implementation Feedback: The pure submission decision and ancestor merge
+  belong with Flow search matching, while `useFlowSearchState` remains the
+  React/navigation/telemetry adapter. A dedicated hook test was needed to
+  prove setter ordering, reveal scope changes, and privacy-safe telemetry
+  calls beyond the existing pure matching and state-transition tests. No new
+  dependency, architecture exception, or desktop/web contract change was
+  discovered.
 - Out of Scope: shared header controls, keyboard primitives, and table search.
 
 ### Slice 15: Extract Flow keyboard and relationship-focus primitives
@@ -1006,6 +1017,10 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   the approved shared webview control/helper files and their direct tests;
   Flow-specific keyboard/tree orchestration and table rendering remain out of
   scope.
+- Slice 14 implementation approval: Approved in the current conversation for
+  the approved Flow search state, matching, ancestor reveal, centering, and
+  direct focused tests; the shared telemetry adapter, Application telemetry
+  contract, and controller public shape remain out of scope.
 
 ## Feature Exit
 
