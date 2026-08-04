@@ -9,13 +9,14 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-19 implementation, validation, and completion
-  approval are complete; Slice 20 is the next active implementation slice.
+- Current state: Slices 1-20 implementation, validation, and completion
+  approval are complete; Feature Exit Review is the next decision.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 20.
+- Next step is `sdd-plan-task` Feature Exit Mode after the human-approved
+  Slice 20 implementation commit.
 
 ## Plan Status
 
@@ -26,8 +27,8 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 20: Integrate Unit List shell, search,
-  detail, and cross-view navigation.
+- Active implementation slice: none; Slice 20 completion is approved and
+  Feature Exit Review remains pending.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -909,7 +910,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 20: Integrate Unit List shell, search, detail, and cross-view navigation
 
-- Status: Approved
+- Status: Complete
 - Scope: `TableContents.tsx`, `tableSearchController.ts`,
   `UnitListDetailPanel.tsx`, and `unitListDetail.ts` under `ajsTable`. Wire the
   already-separated table data and virtualization responsibilities to search,
@@ -951,6 +952,16 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   stale search or counterpart events, and overlapping focus ownership.
 - Out of Scope: application list/CSV semantics, graph construction, and Flow
   presentation helper extraction.
+- Implementation Feedback:
+  - The approved boundary was appropriate. Existing shell, search, detail, and
+    counterpart behavior could be proven without changing Application,
+    transport, parser, or Flow helper contracts.
+  - Dedicated controller and shell integration tests exposed the required
+    validation seam: focused unit tests are insufficient for the
+    `TableVirtuoso`/EventBridge composition, so desktop Extension Host
+    execution remains required. Web host execution remains a separate final
+    validation concern because of the existing macOS Chromium launch
+    restriction.
 
 ## Traceability
 
@@ -1069,8 +1080,8 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Definition of Done status: not evaluated
 - Durable documentation updates: evaluate only durable boundary or terminology
   changes; do not propagate temporary refactoring notes.
-- Open risks: revised plan review, Human Approval, all proposed slices,
-  integration validation, and Feature Exit remain pending.
+- Open risks: Feature Exit review and its final boundary, durability, and
+  remaining-risk decisions remain pending.
 
 ## Validation Checklist
 
