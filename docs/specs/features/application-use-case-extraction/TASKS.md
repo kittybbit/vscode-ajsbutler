@@ -9,13 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-12 implementation, validation, and completion
-  approval are complete; Slice 13 is the next active implementation slice.
+- Current state: Slices 1-13 implementation, validation, and completion
+  approval are complete; Slice 14 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 13.
+- Next step is `sdd-implement-task` for Slice 14.
 
 ## Plan Status
 
@@ -26,7 +26,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 13: Extract shared tree and header-search controls.
+- Active implementation slice: Slice 14: Extract Flow search and reveal state.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -596,7 +596,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 13: Extract shared tree and header-search controls
 
-- Status: Approved
+- Status: Complete
 - Scope: `UnitTreeSelector.tsx`, `HeaderSearchField.tsx`,
   `unitTreeNavigation.ts`, `unitTreeSelection.ts`, `viewerAnnouncements.tsx`,
   `viewerSearchTelemetry.ts`, and `viewerThemeStyles.ts`.
@@ -610,8 +610,8 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Validation: `unitTreeSelector.test.ts`, `headerSearchField.test.ts`,
   `accessibilityDom.test.tsx`, `viewerAnnouncements.test.ts`,
   `viewerThemeStyles.test.ts`, `searchTelemetry.test.ts` as existing
-  Application telemetry evidence, and a planned
-  `viewerSearchTelemetry.test.ts`; `src/test/suite/architectureDependencyRules.test.ts`,
+  Application telemetry evidence, and `viewerSearchTelemetry.test.ts`;
+  `src/test/suite/architectureDependencyRules.test.ts`,
   `rtk pnpm run build`, `rtk pnpm run test:full`, and `rtk pnpm run qlty`.
 - Production Readiness:
   - Failure mode: missing selection or announcement target produces a safe
@@ -628,6 +628,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Dependencies: Slice 2 and the Current-State Boundary Gate.
 - Risks: shared helper becoming a hidden application service or inconsistent
   focus semantics between viewers.
+- Implementation Feedback: The shared control boundary was already present in
+  the current source from the preceding accessibility work; the remaining
+  Slice 13 evidence gap was the direct webview search-telemetry adapter test.
+  No new dependency, architecture exception, or desktop/web contract change
+  was discovered.
 - Out of Scope: Flow-specific keyboard/tree orchestration and table rendering.
 
 ### Slice 14: Extract Flow search and reveal state
@@ -997,6 +1002,10 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   production-readiness constraints, traceability, and the Current-State
   Boundary Gate. No runtime code, tests, generated artifacts, configuration,
   or implementation commit is included in this approval.
+- Slice 13 implementation approval: Approved in the current conversation for
+  the approved shared webview control/helper files and their direct tests;
+  Flow-specific keyboard/tree orchestration and table rendering remain out of
+  scope.
 
 ## Feature Exit
 
