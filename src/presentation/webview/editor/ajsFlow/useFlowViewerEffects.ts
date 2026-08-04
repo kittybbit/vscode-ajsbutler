@@ -47,8 +47,12 @@ type UseFlowViewerFitViewParams = {
 
 type FlowViewerOverflowElements = {
   body: HTMLElement;
+  bodyOverflow: string;
   documentElement: HTMLElement;
+  documentElementOverflow: string;
   root: HTMLElement | null;
+  rootHeight: string;
+  rootOverflow: string;
 };
 
 type FitViewFrameRef = MutableRefObject<number | undefined>;
@@ -493,11 +497,18 @@ export const useRevealUnitSubscription = ({
   }, [handleRevealUnit]);
 };
 
-const getFlowViewerOverflowElements = (): FlowViewerOverflowElements => ({
-  body: document.body,
-  documentElement: document.documentElement,
-  root: document.getElementById("root"),
-});
+const getFlowViewerOverflowElements = (): FlowViewerOverflowElements => {
+  const root = document.getElementById("root");
+  return {
+    body: document.body,
+    bodyOverflow: document.body.style.overflow,
+    documentElement: document.documentElement,
+    documentElementOverflow: document.documentElement.style.overflow,
+    root,
+    rootHeight: root?.style.height ?? "",
+    rootOverflow: root?.style.overflow ?? "",
+  };
+};
 
 const applyFlowViewerOverflow = ({
   body,
@@ -514,14 +525,18 @@ const applyFlowViewerOverflow = ({
 
 const resetFlowViewerOverflow = ({
   body,
+  bodyOverflow,
   documentElement,
+  documentElementOverflow,
   root,
+  rootHeight,
+  rootOverflow,
 }: FlowViewerOverflowElements) => {
-  documentElement.style.overflow = "";
-  body.style.overflow = "";
+  documentElement.style.overflow = documentElementOverflow;
+  body.style.overflow = bodyOverflow;
   if (root) {
-    root.style.overflow = "";
-    root.style.height = "";
+    root.style.overflow = rootOverflow;
+    root.style.height = rootHeight;
   }
 };
 

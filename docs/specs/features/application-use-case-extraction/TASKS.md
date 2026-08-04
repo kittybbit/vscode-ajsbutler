@@ -9,15 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-8 implementation, validation, and completion approval
-  are complete; Slice 9 is the next active implementation slice.
-- This run was limited to the approved Slice 8 source/tests and feature SDD
-  evidence.
+- Current state: Slices 1-12 implementation, validation, and completion
+  approval are complete; Slice 13 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 9.
+- Next step is `sdd-implement-task` for Slice 13.
 
 ## Plan Status
 
@@ -28,7 +26,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 12: Extract Flow viewport, document, reveal, and overflow effects.
+- Active implementation slice: Slice 13: Extract shared tree and header-search controls.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -554,7 +552,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 12: Extract Flow viewport, document, reveal, and overflow effects
 
-- Status: Approved
+- Status: Complete
 - Scope: `useFlowViewerEffects.ts` and `flowViewportFocus.ts`, including fit,
   asynchronous focus, scope reset effects, document-change subscription,
   reveal-unit subscription, and the global viewer-overflow mount/unmount
@@ -567,9 +565,9 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Acceptance: fit/zoom preservation, async focus restoration, document changes,
   scope reset, reveal-unit behavior, and overflow-style restoration on unmount
   remain unchanged.
-- Validation: `flowViewportFocus.test.ts`, `unitDefinitionDocumentState.test.ts`,
-  planned focused `flowViewerEffects.test.ts` covering subscriptions and
-  overflow cleanup,
+- Validation: `flowViewerEffects.test.ts`, `flowViewportFocus.test.ts`,
+  `unitDefinitionDocumentState.test.ts` covering subscriptions and overflow
+  cleanup,
   `src/test/suite/architectureDependencyRules.test.ts`,
   `rtk pnpm run build`, `rtk pnpm run test:full`, and `rtk pnpm run qlty`.
 - Production Readiness:
@@ -588,6 +586,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Dependencies: Slices 2 and 11.
 - Risks: effect ordering, disposal races, stale closures, false reveal success,
   or leaked global overflow styles.
+- Implementation Feedback: The approved effect boundary was already present in
+  `useFlowViewerEffects.ts`; the missing focused coverage was the main slice
+  gap. Overflow cleanup needed to preserve and restore the styles that existed
+  before the viewer mounted. No new dependency, architecture exception, or
+  desktop/web contract change was discovered.
 - Out of Scope: `useFlowViewerController.ts`, Flow search, keyboard primitives,
   and tree/caller composition.
 
