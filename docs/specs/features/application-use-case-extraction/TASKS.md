@@ -9,13 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-17 implementation, validation, and completion
-  approval are complete; Slice 18 is the next active implementation slice.
+- Current state: Slices 1-18 implementation, validation, and completion
+  approval are complete; Slice 19 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 18.
+- Next step is `sdd-implement-task` for Slice 19.
 
 ## Plan Status
 
@@ -26,8 +26,8 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 18: Extract Unit List rendering, columns,
-  and export mapping.
+- Active implementation slice: Slice 19: Extract Unit List virtualization and
+  grid focus.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -830,7 +830,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 18: Extract Unit List rendering, columns, and export mapping
 
-- Status: Approved
+- Status: Complete
 - Scope: `DisplayColumnSelector.tsx`, `Header.tsx`, `TableHeader.tsx`,
   `tableColumnDef.tsx`, `tableViewerData.ts`, `tableSearchState.ts`,
   `globalFilter.ts`, and `exportCsvView.ts` under `ajsTable`.
@@ -863,6 +863,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   reconstructed in column definitions.
 - Out of Scope: application list/CSV semantics, file writes, virtualization,
   detail panels, and counterpart navigation.
+- Implementation Feedback: The approved presentation/data-mapping files were
+  already separated in the current source; the implementation boundary was
+  preserved by aligning column selection with TanStack's resolved
+  `Column.getCanHide()` contract. No new application, host, or table behavior
+  contract was needed.
 
 ### Slice 19: Extract Unit List virtualization and grid focus
 
@@ -1048,6 +1053,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   the approved Flow search state, matching, ancestor reveal, centering, and
   direct focused tests; the shared telemetry adapter, Application telemetry
   contract, and controller public shape remain out of scope.
+- Slice 18 implementation approval: Approved in the current conversation for
+  the approved Unit List rendering, column definition, table-view data,
+  search-state/filter, and CSV view-mapping files and their direct tests;
+  application list/CSV semantics, virtualization, detail, navigation, and
+  host file/clipboard operations remain out of scope.
 
 ## Feature Exit
 

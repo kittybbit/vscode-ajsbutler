@@ -44,13 +44,13 @@ type ToggleColumnVisibilityParams = {
 export const getVisibleColumnSelectorColumns = (
   table: ReactTable<UnitListRowView>,
 ): UnitListColumn[] =>
-  table.getAllColumns().filter((col) => col.columnDef.enableHiding);
+  table.getAllColumns().filter((column) => column.getCanHide());
 
 const getColumnLabel = (column: UnitListColumn): string =>
   column.columnDef.header as string;
 
 const getHideableSubColumns = (column: UnitListColumn): UnitListColumn[] =>
-  column.columns.filter((col) => col.columnDef.enableHiding);
+  column.columns.filter((subColumn) => subColumn.getCanHide());
 
 const hasNestedColumnGroup = (column: UnitListColumn): boolean =>
   column.columns.length > 1;

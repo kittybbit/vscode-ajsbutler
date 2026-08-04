@@ -98,8 +98,14 @@ suite("AJS Table Header", () => {
   });
 
   test("filters column selector options to hideable columns", () => {
-    const hideableColumn = { columnDef: { enableHiding: true } };
-    const fixedColumn = { columnDef: { enableHiding: false } };
+    const hideableColumn = {
+      columnDef: { enableHiding: undefined },
+      getCanHide: () => true,
+    };
+    const fixedColumn = {
+      columnDef: { enableHiding: false },
+      getCanHide: () => false,
+    };
     const table = {
       getAllColumns: () => [hideableColumn, fixedColumn],
     };
