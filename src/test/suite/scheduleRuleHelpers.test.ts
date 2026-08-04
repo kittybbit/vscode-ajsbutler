@@ -1,18 +1,17 @@
 import * as assert from "assert";
 import {
-  interpretScheduleDateValue,
   parseClosedDaySubstitutionValue,
   parseCycleValue,
   parseDelayTimeValue,
   parseParentScheduleRuleValue,
   parseScheduleByDaysFromStartValue,
-  parseScheduleDateValue,
   parseShiftDaysValue,
   parseStartTimeValue,
   parseWaitCountValue,
   parseWaitTimeValue,
   resolveEffectiveStartConditionMonitoringPair,
 } from "../../domain/models/parameters/scheduleRuleHelpers";
+import { interpretScheduleDateValue } from "../../domain/models/parameters/scheduleDateInterpreter";
 
 suite("Schedule rule helpers", () => {
   test("interprets schedule-date rule association and token categories", () => {
@@ -111,60 +110,7 @@ suite("Schedule rule helpers", () => {
     });
   });
 
-  test("keeps the legacy schedule-date helper as a compatibility projection", () => {
-    const values = [
-      "en",
-      "2,2026/04/27",
-      "3,+10",
-      "4,*10",
-      "5,@b-30",
-      "6,+su:b",
-      "0,ud",
-      "0,15",
-      "145,2036/12/31",
-      "ud",
-      "1,ud",
-      "0000/00/01",
-      "1,2024/02/xx",
-      "1,",
-    ];
-
-    for (const value of values) {
-      const interpreted = interpretScheduleDateValue(value);
-      const legacy = parseScheduleDateValue(value);
-
-      if (interpreted === undefined) {
-        assert.strictEqual(legacy, undefined);
-        continue;
-      }
-
-      const yearMonth =
-        interpreted.month === undefined
-          ? undefined
-          : `${
-              interpreted.year === undefined
-                ? ""
-                : `${String(interpreted.year).padStart(4, "0")}/`
-            }${String(interpreted.month).padStart(2, "0")}/`;
-      assert.deepStrictEqual(legacy, {
-        rule: interpreted.rule,
-        yearMonth,
-        day: interpreted.dayValue,
-      });
-    }
-  });
-
   test("parses supported schedule-rule values with omitted rule defaults", () => {
-    assert.deepStrictEqual(parseScheduleDateValue("en"), {
-      rule: 1,
-      yearMonth: undefined,
-      day: "en",
-    });
-    assert.deepStrictEqual(parseScheduleDateValue("2,2026/04/27"), {
-      rule: 2,
-      yearMonth: "2026/04/",
-      day: "27",
-    });
     assert.deepStrictEqual(parseStartTimeValue("+09:00"), {
       rule: 1,
       value: "+09:00",
@@ -200,11 +146,6 @@ suite("Schedule rule helpers", () => {
   });
 
   test("preserves explicit schedule-rule numbers at the helper boundary", () => {
-    assert.deepStrictEqual(parseScheduleDateValue("144,2036/12/31"), {
-      rule: 144,
-      yearMonth: "2036/12/",
-      day: "31",
-    });
     assert.deepStrictEqual(parseStartTimeValue("144,+47:59"), {
       rule: 144,
       value: "+47:59",
@@ -283,8 +224,6 @@ suite("Schedule rule helpers", () => {
   });
 
   test("does not partially parse unsupported value shapes", () => {
-    assert.strictEqual(parseScheduleDateValue("1,2024/02/xx"), undefined);
-    assert.strictEqual(parseScheduleDateValue("1,"), undefined);
     assert.strictEqual(parseStartTimeValue("09:00x"), undefined);
     assert.strictEqual(parseDelayTimeValue("+09:00"), undefined);
     assert.strictEqual(parseWaitTimeValue("M120"), undefined);

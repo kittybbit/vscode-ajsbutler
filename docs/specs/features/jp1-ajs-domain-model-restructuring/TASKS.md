@@ -5,8 +5,8 @@
 - Purpose: centralize schedule-date (`sd`) interpretation as one cohesive
   Domain responsibility without changing JP1/AJS behavior.
 - Selected feature: `jp1-ajs-domain-model-restructuring`.
-- Approved or active slice: Slice 3 is approved and ready after Slice 2
-  completion approval.
+- Approved or active slice: Slice 3 completion approved; Feature Exit review
+  is now required.
 - Do not change supported schedule forms, defaults, validation, diagnostics,
   DTOs, parser normalization, or Semantic Diff decisions.
 - Do not broaden the feature to other schedule parameters or domain rules.
@@ -34,7 +34,7 @@
   independently approvable consumer boundaries.
 - Review status: Reviewed
 - Human approval: Approved for all three reviewed slices
-- Active implementation slice: Slice 3
+- Active implementation slice: none; Feature Exit review
 
 ## Human Approval
 
@@ -267,7 +267,7 @@ not constitute implementation approval.
 
 ### Slice 3: Complete Unit List Migration And Retire The Old Contract
 
-- Status: In Progress
+- Status: Complete
 - Scope: migrate Unit List schedule-date display projection to the focused
   Domain interpretation; preserve the application-owned `type`, `yearMonth`,
   and `day` projection from semantic Domain fields; remove the temporary

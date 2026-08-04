@@ -4,48 +4,72 @@ import {
   parseCycleValue,
   parseParentScheduleRuleValue,
   parseScheduleByDaysFromStartValue,
-  parseScheduleDateValue,
   parseShiftDaysValue,
   parseWaitCountValue,
   resolveEffectiveStartConditionMonitoringPair,
   type ParsedScheduleByDaysFromStartValue,
 } from "../../domain/models/parameters/scheduleRuleHelpers";
+import {
+  interpretScheduleDateValue,
+  type ScheduleDateDay,
+  type ScheduleDateInterpretation,
+} from "../../domain/models/parameters/scheduleDateInterpreter";
 
 export const parseLnParentRule = (value: string): string =>
   parseParentScheduleRuleValue(value)?.value ?? "";
 
-const scheduleDateDayTypePrefixes = ["+", "*", "@"] as const;
-
-const isScheduleDateSpecialDayType = (dayValue: string): boolean =>
-  dayValue === "en" || dayValue === "ud";
-
-const scheduleDateType = (dayValue: string): string => {
-  if (isScheduleDateSpecialDayType(dayValue)) {
-    return dayValue;
+const formatScheduleDateDayValue = (day: ScheduleDateDay): string => {
+  switch (day.kind) {
+    case "calendar":
+    case "relative":
+    case "open":
+    case "closed":
+      return String(day.value).padStart(2, "0");
+    case "backward":
+      return day.offset === undefined
+        ? "b"
+        : `b-${day.offset.toString().padStart(2, "0")}`;
+    case "weekday":
+      return `${day.weekday}${day.occurrence === undefined ? "" : `:${day.occurrence}`}`;
+    case "en":
+    case "ud":
+      return "";
   }
-
-  return (
-    scheduleDateDayTypePrefixes.find((prefix) => dayValue.startsWith(prefix)) ??
-    ""
-  );
 };
 
-const scheduleDateDay = (dayValue: string): string =>
-  dayValue && !isScheduleDateSpecialDayType(dayValue)
-    ? dayValue.replace(/^[+*@]/, "")
-    : "";
+const scheduleDateType = (day: ScheduleDateDay): string => {
+  switch (day.kind) {
+    case "calendar":
+      return "";
+    case "relative":
+      return "+";
+    case "open":
+      return "*";
+    case "closed":
+      return "@";
+    case "backward":
+    case "weekday":
+      return day.prefix ?? "";
+    case "en":
+      return "en";
+    case "ud":
+      return "ud";
+  }
+};
+
+const scheduleDateYearMonth = (parsed: ScheduleDateInterpretation): string =>
+  parsed.month === undefined
+    ? ""
+    : `${parsed.year === undefined ? "" : `${String(parsed.year).padStart(4, "0")}/`}${String(parsed.month).padStart(2, "0")}`;
 
 export const parseSd = (
   value: string,
 ): { type: string; yearMonth: string; day: string } => {
-  const parsed = parseScheduleDateValue(value);
-  const yearMonth = parsed?.yearMonth?.slice(0, -1) ?? "";
-  const dayValue = parsed?.day ?? "";
-
+  const parsed = interpretScheduleDateValue(value);
   return {
-    type: scheduleDateType(dayValue),
-    yearMonth,
-    day: scheduleDateDay(dayValue),
+    type: parsed ? scheduleDateType(parsed.day) : "",
+    yearMonth: parsed ? scheduleDateYearMonth(parsed) : "",
+    day: parsed ? formatScheduleDateDayValue(parsed.day) : "",
   };
 };
 
