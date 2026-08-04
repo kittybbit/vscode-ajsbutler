@@ -23,5 +23,11 @@ export const resolveFlowViewerShortcut = ({
   if (altKey || ctrlKey || metaKey || shiftKey) {
     return undefined;
   }
-  return flowViewerShortcutsByKey[key.toLowerCase()];
+  const normalizedKey = key.toLowerCase();
+  return Object.prototype.hasOwnProperty.call(
+    flowViewerShortcutsByKey,
+    normalizedKey,
+  )
+    ? flowViewerShortcutsByKey[normalizedKey]
+    : undefined;
 };

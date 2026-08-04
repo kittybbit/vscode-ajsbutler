@@ -9,13 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-14 implementation, validation, and completion
-  approval are complete; Slice 15 is the next active implementation slice.
+- Current state: Slices 1-15 implementation, validation, and completion
+  approval are complete; Slice 16 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 15.
+- Next step is `sdd-implement-task` for Slice 16.
 
 ## Plan Status
 
@@ -26,7 +26,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 15: Extract Flow keyboard and relationship-focus primitives.
+- Active implementation slice: Slice 16: Extract Flow controller composition.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -686,7 +686,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 15: Extract Flow keyboard and relationship-focus primitives
 
-- Status: Approved
+- Status: Complete
 - Scope: `flowKeyboardNavigation.ts`, `flowKeyboardNavigationActions.ts`,
   `flowRelationshipFocus.ts`, `flowViewerShortcuts.ts`, and
   `useFlowFocusModeState.ts`, plus `flowAccessibility.ts` because its
@@ -700,7 +700,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 - Validation: `flowKeyboardNavigation.test.ts`, `flowRelationshipFocus.test.ts`,
   `flowViewerShortcuts.test.ts`, `flowAccessibility.test.ts`,
   `src/test/suite/architectureDependencyRules.test.ts`, `rtk pnpm run build`,
-  `rtk pnpm run test:full`, and `rtk pnpm run qlty`.
+  `rtk pnpm run test:full`, and `rtk pnpm run qlty`; Slice 15 validation:
+  test compilation, focused helper coverage in the desktop Extension Host,
+  production build, desktop/web host validation, qlty, Markdown lint, and diff
+  check passed; the web host completed with only the existing stream cleanup
+  logs after host scenarios completed.
 - Production Readiness:
   - Failure mode: unavailable target or unsupported key uses the existing no-op
     or fallback focus behavior without trapping the user.
@@ -717,6 +721,12 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   Boundary Gate. The keyboard primitives retain existing hook and DTO contracts
   and do not depend on Bootstrap or table presentation.
 - Risks: shortcuts overriding browser/VS Code expectations or focus divergence.
+- Implementation Feedback: The slice boundary was appropriate; the existing
+  helper seams allowed malformed-input safeguards and relationship-edge
+  evaluation improvements without changing caller composition. Targeted
+  regression coverage for unsupported keys and cyclic scope parents improved
+  validation. No new dependency, architecture exception, or desktop/web
+  contract change was discovered.
 - Out of Scope: `FlowContents.tsx`, `FlowSelector.tsx`, Flow header composition,
   and Unit List keyboard behavior.
 

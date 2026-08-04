@@ -22,5 +22,9 @@ suite("Flow Viewer Shortcuts", () => {
       );
     }
     assert.strictEqual(resolveFlowViewerShortcut({ key: "r" }), undefined);
+    assert.strictEqual(
+      resolveFlowViewerShortcut({ key: "toString" }),
+      undefined,
+    );
   });
 });

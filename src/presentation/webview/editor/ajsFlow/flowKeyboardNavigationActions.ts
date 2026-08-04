@@ -121,18 +121,20 @@ const resolveSpatialTarget = (
   return bestCandidate?.unitId;
 };
 
+const flowKeyboardExpansionActions = new Map<
+  string,
+  { kind: "expand" | "collapse"; isExpanded: boolean }
+>([
+  ["ArrowDown", { kind: "expand", isExpanded: false }],
+  ["ArrowUp", { kind: "collapse", isExpanded: true }],
+]);
+
 const resolveExpandableActionForNode = (
   key: string,
   currentUnitId: string,
   isExpandedNested: boolean,
 ): FlowKeyboardNavigationAction | undefined => {
-  const actionByKey: Readonly<
-    Record<string, { kind: "expand" | "collapse"; isExpanded: boolean }>
-  > = {
-    ArrowDown: { kind: "expand", isExpanded: false },
-    ArrowUp: { kind: "collapse", isExpanded: true },
-  };
-  const action = actionByKey[key];
+  const action = flowKeyboardExpansionActions.get(key);
   if (!action || action.isExpanded !== isExpandedNested) {
     return undefined;
   }
@@ -192,37 +194,23 @@ const resolveScopeEntryAction = (
   };
 };
 
-type ScopeTraversalState = {
-  currentId: string | undefined;
-  ancestors: FlowKeyboardScopeUnit[];
-};
-
-const appendScopeAncestor = (
-  state: ScopeTraversalState,
-  scopeUnitById: ReadonlyMap<string, FlowKeyboardScopeUnit>,
-): ScopeTraversalState => {
-  const ancestor =
-    state.currentId === undefined
-      ? undefined
-      : scopeUnitById.get(state.currentId);
-  if (ancestor) {
-    state.ancestors.push(ancestor);
-    state.currentId = ancestor.parentId;
-  }
-  return state;
-};
-
 const resolveAncestorScopeId = (
   scopeUnitById: ReadonlyMap<string, FlowKeyboardScopeUnit>,
   ancestorId: string | undefined,
+  excludedScopeId: string | undefined,
 ): string | undefined => {
-  const state = Array.from({
-    length: scopeUnitById.size,
-  }).reduce<ScopeTraversalState>(
-    (currentState) => appendScopeAncestor(currentState, scopeUnitById),
-    { currentId: ancestorId, ancestors: [] },
-  );
-  return state.ancestors.find(isFlowScopeUnit)?.id;
+  const visited = new Set<string>();
+  let currentId = ancestorId;
+  while (currentId !== undefined && !visited.has(currentId)) {
+    visited.add(currentId);
+    const currentUnit = scopeUnitById.get(currentId);
+    if (!currentUnit) return undefined;
+    if (currentId !== excludedScopeId && isFlowScopeUnit(currentUnit)) {
+      return currentId;
+    }
+    currentId = currentUnit.parentId;
+  }
+  return undefined;
 };
 
 const resolveScopeReturnAction = (
@@ -248,6 +236,7 @@ const resolveScopeReturnTarget = (
     ? resolveAncestorScopeId(
         scopeUnitById as ReadonlyMap<string, FlowKeyboardScopeUnit>,
         currentScope.parentId,
+        currentScopeUnitId,
       )
     : undefined;
 };
@@ -319,5 +308,11 @@ export const resolveFlowKeyboardNavigationAction = (
   if (context.shiftKey) {
     return resolveExpansionAction(index, context.currentUnitId, context.key);
   }
-  return flowKeyboardActionResolvers[context.key]?.(index, context);
+  const resolver = Object.prototype.hasOwnProperty.call(
+    flowKeyboardActionResolvers,
+    context.key,
+  )
+    ? flowKeyboardActionResolvers[context.key]
+    : undefined;
+  return resolver?.(index, context);
 };

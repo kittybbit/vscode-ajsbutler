@@ -83,38 +83,35 @@ const isSelectedLoopEdge = (
 ): boolean =>
   edge.source === focus.selectedUnitId && edge.target === focus.selectedUnitId;
 
-const edgeConnectsUnitSets = (
-  edge: Pick<Edge, "source" | "target">,
-  sourceUnitIds: ReadonlySet<string>,
-  targetUnitIds: ReadonlySet<string>,
-): boolean => sourceUnitIds.has(edge.source) && targetUnitIds.has(edge.target);
-
-const withSelectedUnit = (
+const isUnitInSetOrSelected = (
+  unitId: string,
   unitIds: ReadonlySet<string>,
   selectedUnitId: string,
-): ReadonlySet<string> => new Set([...unitIds, selectedUnitId]);
+): boolean => unitId === selectedUnitId || unitIds.has(unitId);
 
 const isUpstreamEdge = (
   edge: Pick<Edge, "source" | "target">,
   focus: FlowRelationshipFocus,
 ): boolean =>
   isSelectedLoopEdge(edge, focus) ||
-  edgeConnectsUnitSets(
-    edge,
-    focus.upstreamUnitIds,
-    withSelectedUnit(focus.upstreamUnitIds, focus.selectedUnitId),
-  );
+  (focus.upstreamUnitIds.has(edge.source) &&
+    isUnitInSetOrSelected(
+      edge.target,
+      focus.upstreamUnitIds,
+      focus.selectedUnitId,
+    ));
 
 const isDownstreamEdge = (
   edge: Pick<Edge, "source" | "target">,
   focus: FlowRelationshipFocus,
 ): boolean =>
   isSelectedLoopEdge(edge, focus) ||
-  edgeConnectsUnitSets(
-    edge,
-    withSelectedUnit(focus.downstreamUnitIds, focus.selectedUnitId),
+  (isUnitInSetOrSelected(
+    edge.source,
     focus.downstreamUnitIds,
-  );
+    focus.selectedUnitId,
+  ) &&
+    focus.downstreamUnitIds.has(edge.target));
 
 export const resolveFlowEdgeFocusRole = (
   edge: Pick<Edge, "source" | "target">,

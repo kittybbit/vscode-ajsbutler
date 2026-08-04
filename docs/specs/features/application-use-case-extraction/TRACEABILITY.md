@@ -123,3 +123,12 @@
 - The web host remains blocked by the existing macOS Playwright Chromium
   launch permission failure before scenarios start; no Slice 14 web behavior
   failure was observed.
+
+## Slice 15 Validation
+
+- `flowKeyboardNavigation.test.ts`, `flowRelationshipFocus.test.ts`,
+  `flowViewerShortcuts.test.ts`, and `flowAccessibility.test.ts` passed in the
+  desktop Extension Host; test compilation, production build, desktop/web
+  host validation, qlty, and diff check passed.
+- The web host completed successfully; it emitted only the existing stream
+  cleanup logs after the host scenarios completed.
