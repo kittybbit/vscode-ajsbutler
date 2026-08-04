@@ -9,13 +9,13 @@
 - Planning mode: Replanning Mode completed after `sdd-review-plan` findings.
 - Selected feature: `application-use-case-extraction` on branch
   `codex/application-use-case-extraction`.
-- Current state: Slices 1-18 implementation, validation, and completion
-  approval are complete; Slice 19 is the next active implementation slice.
+- Current state: Slices 1-19 implementation, validation, and completion
+  approval are complete; Slice 20 is the next active implementation slice.
 - Preserve the Current-State Boundary Gate and existing application seams.
 - No JP1/AJS rule, parser grammar, DTO meaning, telemetry meaning, or VS Code
   compatibility change is planned.
 - Every implementation slice owns its source and behavior-proving test files.
-- Next step is `sdd-implement-task` for Slice 19.
+- Next step is `sdd-implement-task` for Slice 20.
 
 ## Plan Status
 
@@ -26,8 +26,8 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 19: Extract Unit List virtualization and
-  grid focus.
+- Active implementation slice: Slice 20: Integrate Unit List shell, search,
+  detail, and cross-view navigation.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -871,7 +871,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 19: Extract Unit List virtualization and grid focus
 
-- Status: Approved
+- Status: Complete
 - Scope: `VirtualizedTable.tsx`, `navigation.ts`, and `tableRowReveal.ts` under
   `ajsTable`. Keep the table shell and its search controller out of this slice
   so virtualization/focus can be reviewed independently.
@@ -899,6 +899,11 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   counterpart caller integration belongs to Slice 20.
 - Dependencies: Slices 2 and 18.
 - Risks: focus loss, DOM state replacing stable identity, or large-list slowdown.
+- Implementation Feedback: The approved virtualization/focus boundary was
+  already present in the current source; the remaining evidence gap was a
+  focused contract test for deterministic visibility revisions, stable-path
+  restoration after sorting, bounded large-list movement, row reveal, and tree
+  handoff. No new application, host, or table behavior contract was discovered.
 - Out of Scope: `TableContents.tsx`, Unit List detail composition, and
   list-to-Flow command wiring. `tableSearchController.ts` is owned by Slice 20.
 

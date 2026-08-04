@@ -260,7 +260,7 @@ const VirtualizedTableRow = memo(
 );
 VirtualizedTableRow.displayName = "VirtualizedTableRow";
 
-const getColumnVisibilityRevision = (
+export const getColumnVisibilityRevision = (
   columnVisibility: VisibilityState,
 ): string =>
   Object.entries(columnVisibility)
