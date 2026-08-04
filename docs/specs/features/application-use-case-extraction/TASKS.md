@@ -28,7 +28,7 @@
 - Review status: `sdd-review-plan` findings incorporated; the revised full plan
   is approved in the current conversation.
 - Human approval: Approved for Slices 1-20
-- Active implementation slice: Slice 10: Extract Flow detail and responsive panel behavior.
+- Active implementation slice: Slice 11: Extract Flow graph scope and expansion state.
 - Replanning trigger: the review identified an incorrect telemetry file
   reference, unnecessary Bootstrap dependencies on presentation slices,
   incomplete Flow helper ownership, vague semantic-diff validation names,
@@ -477,7 +477,7 @@ not hidden inside a presentation slice; it requires Replanning Mode.
 
 ### Slice 10: Extract Flow detail and responsive panel behavior
 
-- Status: Approved
+- Status: Complete
 - Scope: `FlowNodeDetailPanel.tsx`, `flowNodeDetail.ts`,
   `useResponsiveFlowPanelCollapse.ts`, and the focused detail/panel tests.
 - User / Domain Value: selecting a Flow node exposes its existing details and
@@ -505,6 +505,12 @@ not hidden inside a presentation slice; it requires Replanning Mode.
   existing DTOs and can be reviewed independently of Bootstrap composition and
   graph geometry.
 - Risks: focus loss or presentation logic reconstructing domain meaning.
+- Implementation Feedback: The approved detail boundary was already represented
+  by `FlowNodeDetailPanel.tsx` and `flowNodeDetail.ts` before this slice;
+  validation found no missing extraction or safe in-scope runtime change. The
+  Flow-specific responsive hook module is a re-export seam, while the shared
+  detail pane owns the actual responsive collapse lifecycle. Preserve both
+  boundaries and do not duplicate responsive state in later Flow slices.
 - Out of Scope: Flow graph geometry, scope state, search, and Unit List detail.
 
 ### Slice 11: Extract Flow graph scope and expansion state

@@ -83,3 +83,13 @@
   architecture coverage are included in the passing desktop Extension Host run.
 - Production build and qlty passed. The Web host remains blocked by the existing
   macOS Playwright Chromium launch permission failure.
+
+## Slice 10 Validation
+
+- Existing Flow detail and responsive panel boundaries verified; focused
+  `flowNodeDetail.test.ts` and `flowNodeDetailPanelCollapse.test.ts` passed
+  with 11 tests, and architecture coverage passed in the desktop Extension
+  Host run.
+- Production build, qlty, and the combined desktop/web host validation passed
+  with no issues. The Web host required the permitted macOS Playwright browser
+  launch used for the final run.
