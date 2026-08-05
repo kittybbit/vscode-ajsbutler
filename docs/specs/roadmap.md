@@ -24,16 +24,6 @@ feature.
   enforcement gap not already covered by the current architecture test.
 - Dependency: Refactoring Quality Baseline.
 
-### 6. High-Complexity Hotspot Resolution
-
-- Purpose: decompose one ranked high-change, high-risk responsibility boundary
-  while preserving external behavior.
-- Entry condition: the baseline identifies the exact file/function boundary,
-  callers, tests, metric evidence, and business criticality.
-- Dependency: Refactoring Quality Baseline and the target's completed
-  characterization evidence; split into separate feature folders per
-  responsibility boundary.
-
 ### 7. Webview Presentation Separation
 
 - Purpose: remove domain decisions, DTO transformation, or side effects from
@@ -83,8 +73,6 @@ refactoring level and is removed only after that effort is complete.
   cross-view navigation, parser/error, selected VS Code/file-I/O, viewer
   transport/composition, and selected webview boundaries. Each remains a
   separate implementation slice with its own approval and validation.
-- High-Complexity Hotspot Resolution is narrowed to the unit-list document
-  validation/projection boundary after its behavior and callers are protected.
 - Webview Presentation Separation contains only flow rendering, flow
   interaction state, unit-list table interaction, header search, or flow-tree
   selector targets that are not selected by Feature 4. It does not create a
