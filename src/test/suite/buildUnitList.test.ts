@@ -297,6 +297,30 @@ suite("Build Unit List", () => {
     assert.strictEqual(toUnitListTableData(inconsistentRowId), undefined);
   });
 
+  test("rejects duplicate identities and broken tree ordering", () => {
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const cloneDocument = () =>
+      JSON.parse(JSON.stringify(result.document)) as typeof result.document;
+
+    const duplicateId = cloneDocument();
+    duplicateId.unitList.units[1].id = duplicateId.unitList.units[0].id;
+    assert.strictEqual(toUnitListTableData(duplicateId), undefined);
+
+    const duplicatePath = cloneDocument();
+    duplicatePath.unitList.units[1].absolutePath =
+      duplicatePath.unitList.units[0].absolutePath;
+    assert.strictEqual(toUnitListTableData(duplicatePath), undefined);
+
+    const brokenParentage = cloneDocument();
+    brokenParentage.rootUnits[0].children[0].parentId = undefined;
+    assert.strictEqual(toUnitListTableData(brokenParentage), undefined);
+
+    const reorderedTree = cloneDocument();
+    reorderedTree.rootUnits[0].children.reverse();
+    assert.strictEqual(toUnitListTableData(reorderedTree), undefined);
+  });
+
   test("preserves empty projection and current boundary acceptance semantics", () => {
     assert.deepStrictEqual(
       toUnitListTableData({

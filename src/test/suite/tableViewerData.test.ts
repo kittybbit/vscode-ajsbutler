@@ -105,8 +105,18 @@ suite("Table viewer data", () => {
     assert.strictEqual(viewerData.unitById.size, childCount + 1);
   });
 
-  test("uses an empty safe state for a rejected projection", () => {
-    const viewerData = createTableViewerData(undefined, new Map());
+  test("uses an empty safe state for an identity-rejected projection", () => {
+    const payload = JSON.parse(
+      JSON.stringify(toUnitListDocumentDto(document)),
+    ) as {
+      unitList: { units: Array<{ name: string }> };
+    };
+    payload.unitList.units[0].name = "different-root";
+
+    const tableData = toUnitListTableData(payload);
+    assert.strictEqual(tableData, undefined);
+
+    const viewerData = createTableViewerData(tableData, new Map());
 
     assert.deepStrictEqual(viewerData.rootUnits, []);
     assert.strictEqual(viewerData.rowViewByPath.size, 0);

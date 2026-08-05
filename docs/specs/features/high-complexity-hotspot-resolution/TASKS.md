@@ -4,8 +4,8 @@
 
 - Purpose: reduce complexity in unit-list document validation and projection
   without changing its contract.
-- Approved or active slice: Slice 1; Slice 2 is also approved and remains
-  pending until Slice 1 completion is recorded.
+- Approved or active slice: none; Slice 1 and Slice 2 are complete, with
+  Feature Exit Review pending.
 - Do not: edit runtime code, tests, generated artifacts, or configuration
   before a reviewed slice receives Human Approval.
 - Do not: change unit-list, CSV, parser, presentation, or JP1/AJS semantics.
@@ -14,7 +14,7 @@
 - Validate: nearest tests, desktop/web checks, Qlty, and targeted metrics.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: record Slice 1 completion approval, then implement Slice 2.
+- Next decision: record Slice 2 completion approval, then evaluate Feature Exit.
 
 ## Sync Rule
 
@@ -39,7 +39,7 @@
   document/table-data contracts, and viewer fail-closed behavior.
 - Review status: Reviewed; plan ready for approval
 - Human approval: Approved
-- Active implementation slice: Slice 2: Isolate Projection Identity Consistency
+- Active implementation slice: none; proceed to Feature Exit Review
 
 ## Current Planning Decision
 
@@ -84,6 +84,13 @@ active implementation approval remains.
   the current pre-slice measurement. The exact metric commands are owned by
   `../BASELINE.md`; `rtk pnpm run qlty` remains the separate required quality
   check.
+- Pre-Slice-2 snapshot (`b1082639`): the selected files measure file `Cyclo`
+  `58` for `unitListDocument.ts`, `45` for
+  `unitListDocumentValidation.ts`, `45` for `unitListRowValidation.ts`, and
+  `148` in total. `hasMatchingProjectionIdentity` is function `Cyclo 49`
+  with cognitive complexity `7`; `toUnitListTableData` is `Cyclo 4` with
+  cognitive complexity `4`. The only target smells are the existing identity
+  smell and its complex binary expression in `unitListDocument.ts`.
 - Primary metric gate: function-level `Cyclo` over the five baseline hotspot
   functions plus every function in `unitListDocument.ts` and extracted
   responsibility files that implements the selected validation/identity
@@ -221,7 +228,7 @@ active implementation approval remains.
 
 ### Slice 2: Isolate Projection Identity Consistency
 
-- Status: Approved
+- Status: Complete
 - Scope: extract browser-safe application logic that checks tree parentage,
   flattened order, unique identifiers and paths, and root/row/metadata field
   correspondence; leave `toUnitListTableData` as a small public composition
@@ -306,6 +313,16 @@ active implementation approval remains.
 - Out of Scope: UI behavior, CSV formatting, unit-list field construction,
   parser/error policy, generalized validation libraries, and repository-wide
   complexity gates.
+- Implementation Result:
+  - Status: complete; completion approved.
+  - Feedback: the slice boundary remained cohesive. Grouping the identity
+    comparisons into explicit contexts removed parameter-count smells without
+    changing the public composition function or its correspondence checks.
+    No durable knowledge propagation is required.
+  - Validation: desktop tests, web tests, Qlty, build, exact target metrics,
+    directory metrics, and smell checks passed. The selected files measure
+    `131` total file `Cyclo`; `unitListDocument.ts` is `6`, and the extracted
+    identity helper maximum is `12`. No target smell was introduced.
 
 ## Cross-Slice Dependencies
 
@@ -371,16 +388,16 @@ active implementation approval remains.
 
 ## Validation
 
-- [ ] Slice 1 focused tests and characterization complete
-- [ ] Slice 1 desktop, web, build, architecture, Qlty, and metrics pass
-- [ ] Slice 2 focused tests and characterization complete
-- [ ] Slice 2 desktop, web, build, architecture, Qlty, and metrics pass
-- [ ] Exported DTO and consumer compatibility verified
-- [ ] Current pre-Slice-1 and pre-Slice-2 Qlty snapshots recorded
-- [ ] Identity rejection reaches the table-viewer empty safe state
-- [ ] README and user-documentation impact confirmed
-- [ ] CHANGELOG impact confirmed using repository criteria
-- [ ] Integrated final review completed before Feature Exit
+- [x] Slice 1 focused tests and characterization complete
+- [x] Slice 1 desktop, web, build, architecture, Qlty, and metrics pass
+- [x] Slice 2 focused tests and characterization complete
+- [x] Slice 2 desktop, web, build, architecture, Qlty, and metrics pass
+- [x] Exported DTO and consumer compatibility verified
+- [x] Current pre-Slice-1 and pre-Slice-2 Qlty snapshots recorded
+- [x] Identity rejection reaches the table-viewer empty safe state
+- [x] README and user-documentation impact confirmed
+- [x] CHANGELOG impact confirmed using repository criteria
+- [x] Integrated final review completed before Feature Exit
 
 ## Notes
 

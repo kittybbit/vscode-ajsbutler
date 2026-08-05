@@ -65,6 +65,34 @@
 - Compatibility: no public signature, observable behavior, JP1/AJS input
   semantics, desktop encoding behavior, or desktop/web host contract changed.
 
+## Slice 2 Implementation Result
+
+- Status: Complete; completion approved.
+- Implementation: projection identity checks now live in
+  `unitListProjectionIdentity.ts`; `unitListDocument.ts` retains the public
+  structural-validation and identity-composition boundary. Focused tests cover
+  duplicate IDs and paths, broken parentage, reordered trees, cross-shape
+  mismatch, and the empty table-viewer safe state after rejection.
+- Validation: `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run qlty`, and `rtk pnpm run build` passed. The desktop suite
+  includes architecture, unit-list, table-viewer, viewer-message,
+  flow-navigation, and CSV regression coverage. The web run passed with only
+  existing cleanup noise after successful smoke execution; the production build
+  emitted only existing bundle-size warnings.
+- Qlty evidence: the selected responsibility measures `131` total file
+  `Cyclo`; `unitListDocument.ts` measures `6`, down from the pre-Slice-2 `58`,
+  and `hasMatchingProjectionIdentity` measures function `Cyclo 3`, down from
+  `49`. The extracted identity helper maximum is `12`, below the pre-Slice-1
+  hotspot maximum of `59`; exact function, file, directory, and smell commands
+  exited successfully, with no target smell introduced.
+- Production readiness: malformed or inconsistent identity fails closed and
+  the viewer exposes empty root, row, ID, and path maps. Preorder traversal,
+  root `/` handling, uniqueness, bounded large projections, JP1/AJS fields,
+  desktop encoding boundaries, and browser-safe application imports remain
+  unchanged. No README, user-documentation, or CHANGELOG update is required.
+- Compatibility: no public DTO/signature, consumer, parser, CSV, presentation,
+  host, telemetry, VS Code engine, or observable behavior changed.
+
 ## Acceptance Coverage
 
 - S1 proves fail-closed structural validation and the application dependency
