@@ -297,6 +297,28 @@ suite("Build Unit List", () => {
     assert.strictEqual(toUnitListTableData(inconsistentRowId), undefined);
   });
 
+  test("preserves empty projection and current boundary acceptance semantics", () => {
+    assert.deepStrictEqual(
+      toUnitListTableData({
+        rootUnits: [],
+        unitList: { rows: [], units: [] },
+        warnings: { unexpected: true },
+        unitDefinitions: "ignored",
+        extra: "ignored",
+      }),
+      { rootUnits: [], rows: [], units: [] },
+    );
+
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const numericDocument = JSON.parse(
+      JSON.stringify(result.document),
+    ) as typeof result.document;
+    numericDocument.rootUnits[0].layout.h = Number.NaN;
+
+    assert.ok(toUnitListTableData(numericDocument));
+  });
+
   test("rejects malformed root and row records", () => {
     const result = buildUnitList(validDefinition);
     assert.ok(result.document);
