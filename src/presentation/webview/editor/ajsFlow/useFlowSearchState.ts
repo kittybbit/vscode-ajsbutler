@@ -1,11 +1,4 @@
-import {
-  Dispatch,
-  MutableRefObject,
-  SetStateAction,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import { Dispatch, useCallback, useRef } from "react";
 import type {
   FlowGraphUnitDto,
   ValidatedFlowGraphDocument,
@@ -17,134 +10,61 @@ import {
 } from "../../../../application/navigation/resolveNavigationTarget";
 import { postViewerSearchEvent } from "../shared/viewerSearchTelemetry";
 import {
-  mergeExpandedAncestorUnitIds,
   resolveFlowSearchSubmission,
-  type FlowSearchResult,
   type FlowSearchSubmission,
 } from "./flowSearch";
+import type {
+  FlowInteractionAction,
+  FlowInteractionState,
+} from "./flowInteractionController";
 import {
-  createEmptyFlowSearchState,
-  createRevealedFlowSearchState,
-  createSubmittedFlowSearchState,
   getFlowSearchResultPosition,
   isActiveFlowSearchQuery,
-  moveFlowSearchResult,
 } from "./flowSearchState";
 import type { FlowSearchDirection, FlowSearchState } from "./flowSearchState";
 
 type UseFlowSearchStateParams = {
   currentUnit?: FlowGraphUnitDto;
   flowDocument?: ValidatedFlowGraphDocument;
-  preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
-  setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
+  interactionState: FlowInteractionState;
+  dispatch: Dispatch<FlowInteractionAction>;
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 type SearchSubmitHandlerParams = {
   currentUnit?: FlowGraphUnitDto;
+  dispatch: Dispatch<FlowInteractionAction>;
   searchState: FlowSearchState;
-  setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
-};
-
-type RevealTargetApplyParams = {
-  setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
-  setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-};
-
-type RevealUnitHandlerParams = RevealTargetApplyParams & {
-  flowDocument?: ValidatedFlowGraphDocument;
-  preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
-};
-
-type FlowSearchResultApplyParams = {
-  query: string;
-  result: FlowSearchResult;
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-  setSearchState: Dispatch<SetStateAction<FlowSearchState>>;
-};
-
-type FlowSearchStateSetters = Pick<
-  SearchSubmitHandlerParams,
-  "setExpandedUnitIds" | "setSearchState"
->;
-
-const applyFlowSearchResult = ({
-  query,
-  result,
-  setExpandedUnitIds,
-  setSearchState,
-}: FlowSearchResultApplyParams) => {
-  setExpandedUnitIds((prev) => mergeExpandedAncestorUnitIds(prev, result));
-  setSearchState((prev) =>
-    createSubmittedFlowSearchState(query, result, prev.focusRequestVersion + 1),
-  );
-};
-
-const applyEmptyFlowSearchResult = (
-  query: string,
-  setSearchState: Dispatch<SetStateAction<FlowSearchState>>,
-) => {
-  setSearchState((prev) =>
-    createSubmittedFlowSearchState(query, undefined, prev.focusRequestVersion),
-  );
 };
 
 const applyFlowSearchSubmission = (
   submission: FlowSearchSubmission,
-  { setExpandedUnitIds, setSearchState }: FlowSearchStateSetters,
+  dispatch: Dispatch<FlowInteractionAction>,
 ) => {
   if (submission.kind === "matched") {
-    applyFlowSearchResult({
+    dispatch({
+      type: "searchSubmitted",
       query: submission.query,
       result: submission.result,
-      setExpandedUnitIds,
-      setSearchState,
     });
+    return;
   }
   if (submission.kind === "empty") {
-    applyEmptyFlowSearchResult(submission.query, setSearchState);
+    dispatch({ type: "searchSubmitted", query: submission.query });
   }
-};
-
-const applyFlowRevealTarget = (
-  revealTarget: FlowNavigationTargetDto,
-  {
-    setSearchState,
-    setCurrentUnitId,
-    setExpandedUnitIds,
-  }: RevealTargetApplyParams,
-) => {
-  setExpandedUnitIds(revealTarget.requiredExpandedAncestorUnitIds);
-  setCurrentUnitId(revealTarget.activeFlowScopeUnitId);
-  setSearchState((prev) =>
-    createRevealedFlowSearchState(
-      revealTarget.revealedUnitId,
-      prev.focusRequestVersion + 1,
-    ),
-  );
 };
 
 const useSearchSubmitHandler = ({
   currentUnit,
+  dispatch,
   searchState,
-  setSearchState,
-  setExpandedUnitIds,
   unitById,
 }: SearchSubmitHandlerParams) =>
   useCallback(
     (query: string) => {
       if (query.trim().length === 0) {
-        applyFlowSearchSubmission(
-          { kind: "empty", query },
-          {
-            setExpandedUnitIds,
-            setSearchState,
-          },
-        );
+        dispatch({ type: "searchSubmitted", query });
         return;
       }
 
@@ -169,21 +89,22 @@ const useSearchSubmitHandler = ({
         scope: "current_flow_scope",
         surface: "flow",
       });
-      applyFlowSearchSubmission(submission, {
-        setExpandedUnitIds,
-        setSearchState,
-      });
+      applyFlowSearchSubmission(submission, dispatch);
     },
-    [currentUnit, searchState, setSearchState, setExpandedUnitIds, unitById],
+    [currentUnit, dispatch, searchState, unitById],
   );
 
+const applyFlowRevealTarget = (
+  revealTarget: FlowNavigationTargetDto,
+  dispatch: Dispatch<FlowInteractionAction>,
+) => {
+  dispatch({ type: "externalReveal", target: revealTarget });
+};
+
 const useRevealUnitHandler = ({
+  dispatch,
   flowDocument,
-  preserveSearchOnNextScopeChange,
-  setSearchState,
-  setCurrentUnitId,
-  setExpandedUnitIds,
-}: RevealUnitHandlerParams) =>
+}: Pick<UseFlowSearchStateParams, "dispatch" | "flowDocument">) =>
   useCallback(
     (request: NavigationRequestDto) => {
       if (!flowDocument) return;
@@ -191,33 +112,19 @@ const useRevealUnitHandler = ({
       if (result.status === "unavailable") {
         return;
       }
-      preserveSearchOnNextScopeChange.current = true;
-      applyFlowRevealTarget(result.target, {
-        setSearchState,
-        setCurrentUnitId,
-        setExpandedUnitIds,
-      });
+      applyFlowRevealTarget(result.target, dispatch);
     },
-    [
-      preserveSearchOnNextScopeChange,
-      flowDocument,
-      setSearchState,
-      setCurrentUnitId,
-      setExpandedUnitIds,
-    ],
+    [dispatch, flowDocument],
   );
 
 export const useFlowSearchState = ({
   currentUnit,
   flowDocument,
-  preserveSearchOnNextScopeChange,
-  setCurrentUnitId,
-  setExpandedUnitIds,
+  interactionState,
+  dispatch,
   unitById,
 }: UseFlowSearchStateParams) => {
-  const [searchState, setSearchState] = useState<FlowSearchState>(
-    createEmptyFlowSearchState,
-  );
+  const { searchState } = interactionState;
   const searchStateRef = useRef(searchState);
   searchStateRef.current = searchState;
 
@@ -232,25 +139,33 @@ export const useFlowSearchState = ({
         surface: "flow",
       });
     }
-    setSearchState((prev) =>
-      createEmptyFlowSearchState(prev.focusRequestVersion),
-    );
-  }, []);
+    dispatch({ type: "searchCleared" });
+  }, [dispatch]);
+
+  const resetScope = useCallback(() => {
+    const currentSearchState = searchStateRef.current;
+    if (
+      !interactionState.preserveSearchOnNextScopeChange &&
+      currentSearchState.query !== undefined
+    ) {
+      postViewerSearchEvent({
+        action: "cleared",
+        query: currentSearchState.query,
+        resultCount: currentSearchState.matchedUnitIds.length,
+        scope: "current_flow_scope",
+        surface: "flow",
+      });
+    }
+    dispatch({ type: "scopeReset" });
+  }, [dispatch, interactionState.preserveSearchOnNextScopeChange]);
 
   const handleSearchSubmit = useSearchSubmitHandler({
     currentUnit,
+    dispatch,
     searchState,
-    setSearchState,
-    setExpandedUnitIds,
     unitById,
   });
-  const handleRevealUnit = useRevealUnitHandler({
-    flowDocument,
-    preserveSearchOnNextScopeChange,
-    setSearchState,
-    setCurrentUnitId,
-    setExpandedUnitIds,
-  });
+  const handleRevealUnit = useRevealUnitHandler({ dispatch, flowDocument });
   const handleSearchNavigate = useCallback(
     (query: string, direction: FlowSearchDirection) => {
       if (!isActiveFlowSearchQuery(searchState, query)) {
@@ -265,9 +180,9 @@ export const useFlowSearchState = ({
         scope: "current_flow_scope",
         surface: "flow",
       });
-      setSearchState((prev) => moveFlowSearchResult(prev, direction));
+      dispatch({ type: "searchNavigated", direction });
     },
-    [handleSearchSubmit, searchState],
+    [dispatch, handleSearchSubmit, searchState],
   );
 
   return {
@@ -277,6 +192,7 @@ export const useFlowSearchState = ({
     handleSearchNavigate,
     handleSearchSubmit,
     resetSearch,
+    resetScope,
     searchedUnitId: searchState.searchedUnitId,
     searchMatchedUnitIds: searchState.matchedUnitIds,
     searchResultPosition: getFlowSearchResultPosition(searchState),

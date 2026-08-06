@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
-import React, { useRef, useState } from "react";
+import React, { useReducer } from "react";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import {
   toFlowGraphDocumentDto,
@@ -9,6 +9,10 @@ import {
   validateFlowGraphDocument,
 } from "../../application/flow-graph/flowGraphDocument";
 import { useFlowSearchState } from "../../presentation/webview/editor/ajsFlow/useFlowSearchState";
+import {
+  createInitialFlowInteractionState,
+  reduceFlowInteractionState,
+} from "../../presentation/webview/editor/ajsFlow/flowInteractionController";
 import { parseAjsDocumentForTest } from "../support/parseAjs";
 
 const nestedDefinition = `
@@ -140,17 +144,22 @@ const FlowSearchControllerFixture = ({
   flowDocument,
   initialScopeId,
 }: FlowSearchControllerFixtureProps) => {
-  const [currentUnitId, setCurrentUnitId] = useState(initialScopeId);
-  const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
-  const preserveSearchOnNextScopeChange = useRef(false);
+  const initialInteractionState = {
+    ...createInitialFlowInteractionState(),
+    currentUnitId: initialScopeId,
+  };
+  const [interactionState, dispatch] = useReducer(
+    reduceFlowInteractionState,
+    initialInteractionState,
+  );
+  const { currentUnitId, expandedUnitIds } = interactionState;
   const unitById = flowDocument.index.unitById;
   const currentUnit = unitById.get(currentUnitId);
   const search = useFlowSearchState({
     currentUnit,
     flowDocument,
-    preserveSearchOnNextScopeChange,
-    setCurrentUnitId,
-    setExpandedUnitIds,
+    interactionState,
+    dispatch,
     unitById,
   });
 
@@ -172,7 +181,7 @@ const FlowSearchControllerFixture = ({
     React.createElement(
       "output",
       { "data-testid": "preserve-search" },
-      String(preserveSearchOnNextScopeChange.current),
+      String(interactionState.preserveSearchOnNextScopeChange),
     ),
     React.createElement(
       "button",

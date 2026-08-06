@@ -3,6 +3,7 @@ import {
   SetStateAction,
   useCallback,
   useMemo,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -28,6 +29,10 @@ import {
   useRevealUnitSubscription,
 } from "./useFlowViewerEffects";
 import { useFlowSearchState } from "./useFlowSearchState";
+import {
+  createInitialFlowInteractionState,
+  reduceFlowInteractionState,
+} from "./flowInteractionController";
 import { useNestedExpansionState } from "./useNestedExpansionState";
 import { buildFlowNodeDetail } from "./flowNodeDetail";
 import { useSelectedFlowNodeState } from "./useSelectedFlowNodeState";
@@ -50,11 +55,9 @@ const useFlowViewerRefs = () => {
     Node<FlowNodeData>,
     Edge
   > | null>(null);
-  const preserveSearchOnNextScopeChange = useRef<boolean>(false);
   const previousUnitIdRef = useRef<string | undefined>(undefined);
 
   return {
-    preserveSearchOnNextScopeChange,
     previousUnitIdRef,
     reactFlowInstanceRef,
   };
@@ -231,14 +234,11 @@ type FlowViewerLifecycleParams = {
   handleRevealUnit: (request: NavigationRequestDto) => void;
   nodes: Node<FlowNodeData>[];
   preserveViewportRequestVersion: number;
-  preserveSearchOnNextScopeChange: ReturnType<
-    typeof useFlowViewerRefs
-  >["preserveSearchOnNextScopeChange"];
   previousUnitIdRef: ReturnType<typeof useFlowViewerRefs>["previousUnitIdRef"];
   reactFlowInstanceRef: ReturnType<
     typeof useFlowViewerRefs
   >["reactFlowInstanceRef"];
-  resetSearch: () => void;
+  resetScope: () => void;
   searchedUnitId?: string;
   selectedUnitId?: string;
   selectionFocusRequest: FlowViewportFocusRequest;
@@ -246,7 +246,6 @@ type FlowViewerLifecycleParams = {
     SetStateAction<ValidatedFlowGraphDocument | undefined>
   >;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
   setUnitDefinitionByPath: Dispatch<
     SetStateAction<ReadonlyMap<string, UnitDefinitionDialogDto>>
   >;
@@ -262,16 +261,14 @@ const useFlowViewerLifecycle = ({
   handleRevealUnit,
   nodes,
   preserveViewportRequestVersion,
-  preserveSearchOnNextScopeChange,
   previousUnitIdRef,
   reactFlowInstanceRef,
-  resetSearch,
+  resetScope,
   searchedUnitId,
   selectedUnitId,
   selectionFocusRequest,
   setFlowDocument,
   setCurrentUnitId,
-  setExpandedUnitIds,
   setUnitDefinitionByPath,
   theme,
 }: FlowViewerLifecycleParams) => {
@@ -296,9 +293,7 @@ const useFlowViewerLifecycle = ({
   useFlowScopeReset({
     documentIdentity: flowDocument,
     currentUnitId,
-    preserveSearchOnNextScopeChange,
-    resetSearch,
-    setExpandedUnitIds,
+    resetScope,
   });
   useFlowDocumentSubscription({
     previousUnitIdRef,
@@ -316,8 +311,36 @@ export const useFlowViewerController = ({
   const [flowDocument, setFlowDocument] =
     useState<ValidatedFlowGraphDocument>();
   const flowDocumentDto = flowDocument?.document;
-  const [currentUnitId, setCurrentUnitId] = useState<string>();
-  const [expandedUnitIds, setExpandedUnitIds] = useState<string[]>([]);
+  const [interactionState, dispatch] = useReducer(
+    reduceFlowInteractionState,
+    undefined,
+    createInitialFlowInteractionState,
+  );
+  const { currentUnitId, expandedUnitIds } = interactionState;
+  const setCurrentUnitId = useCallback(
+    (next: SetStateAction<string | undefined>) => {
+      dispatch({
+        type: "scopeChanged",
+        currentUnitId:
+          typeof next === "function"
+            ? next(interactionState.currentUnitId)
+            : next,
+      });
+    },
+    [interactionState.currentUnitId],
+  );
+  const setExpandedUnitIds = useCallback(
+    (next: SetStateAction<string[]>) => {
+      dispatch({
+        type: "expandedUnitIdsChanged",
+        expandedUnitIds:
+          typeof next === "function"
+            ? next(interactionState.expandedUnitIds)
+            : next,
+      });
+    },
+    [interactionState.expandedUnitIds],
+  );
   const [
     keyboardExpansionPreserveViewportVersion,
     setKeyboardExpansionPreserveViewportVersion,
@@ -325,11 +348,7 @@ export const useFlowViewerController = ({
   const [documentUnitDefinitionByPath, setUnitDefinitionByPath] = useState<
     ReadonlyMap<string, UnitDefinitionDialogDto>
   >(new Map());
-  const {
-    preserveSearchOnNextScopeChange,
-    previousUnitIdRef,
-    reactFlowInstanceRef,
-  } = useFlowViewerRefs();
+  const { previousUnitIdRef, reactFlowInstanceRef } = useFlowViewerRefs();
   const { dialogData, dialogDataState, setDialogData } = useFlowViewerUiState();
   const { currentUnit, unitById, unitDefinitionByPath } = useFlowDocumentState(
     flowDocument,
@@ -386,16 +405,15 @@ export const useFlowViewerController = ({
     handleSearchClear,
     handleSearchNavigate,
     handleSearchSubmit,
-    resetSearch,
+    resetScope,
     searchedUnitId,
     searchMatchedUnitIds,
     searchResultPosition,
   } = useFlowSearchState({
     currentUnit,
     flowDocument,
-    preserveSearchOnNextScopeChange,
-    setCurrentUnitId,
-    setExpandedUnitIds,
+    interactionState,
+    dispatch,
     unitById,
   });
   const { edges, nodes } = useFlowGraphState({
@@ -441,16 +459,14 @@ export const useFlowViewerController = ({
     handleRevealUnit,
     nodes,
     preserveViewportRequestVersion: keyboardExpansionPreserveViewportVersion,
-    preserveSearchOnNextScopeChange,
     previousUnitIdRef,
     reactFlowInstanceRef,
-    resetSearch,
+    resetScope,
     searchedUnitId,
     selectedUnitId,
     selectionFocusRequest,
     setFlowDocument,
     setCurrentUnitId,
-    setExpandedUnitIds,
     setUnitDefinitionByPath,
     theme,
   });

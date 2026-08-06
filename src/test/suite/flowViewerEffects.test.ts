@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useReducer, useRef, useState } from "react";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import type { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import {
@@ -23,6 +23,10 @@ import {
   useFlowViewerOverflow,
   useRevealUnitSubscription,
 } from "../../presentation/webview/editor/ajsFlow/useFlowViewerEffects";
+import {
+  reduceFlowInteractionState,
+  createInitialFlowInteractionState,
+} from "../../presentation/webview/editor/ajsFlow/flowInteractionController";
 
 type GlobalDescriptorMap = Map<string, PropertyDescriptor | undefined>;
 
@@ -211,47 +215,42 @@ const RevealSubscriptionFixture = ({
 };
 
 const ScopeResetFixture = () => {
-  const [currentUnitId, setCurrentUnitId] = useState("root");
-  const [expandedUnitIds, setExpandedUnitIds] = useState(["nested"]);
+  const [interactionState, dispatch] = useReducer(reduceFlowInteractionState, {
+    ...createInitialFlowInteractionState(),
+    currentUnitId: "root",
+    expandedUnitIds: ["nested"],
+  });
   const [resetCount, setResetCount] = useState(0);
   const documentIdentity = useRef<object>({}).current;
-  const preserveSearchOnNextScopeChange = useRef(false);
-  const resetSearch = useCallback(
-    () => setResetCount((count) => count + 1),
-    [],
-  );
+  const resetScope = useCallback(() => {
+    setResetCount((count) => count + 1);
+    dispatch({ type: "scopeReset" });
+  }, []);
   useFlowScopeReset({
-    currentUnitId,
+    currentUnitId: interactionState.currentUnitId,
     documentIdentity,
-    preserveSearchOnNextScopeChange,
-    resetSearch,
-    setExpandedUnitIds,
+    resetScope,
   });
   return React.createElement(
     React.Fragment,
     null,
-    React.createElement("output", { "data-testid": "scope" }, currentUnitId),
+    React.createElement(
+      "output",
+      { "data-testid": "scope" },
+      interactionState.currentUnitId,
+    ),
     React.createElement(
       "output",
       { "data-testid": "expanded" },
-      JSON.stringify(expandedUnitIds),
+      JSON.stringify(interactionState.expandedUnitIds),
     ),
     React.createElement("output", { "data-testid": "reset-count" }, resetCount),
     React.createElement(
       "button",
       {
-        "data-testid": "preserve-search",
-        onClick: () => {
-          preserveSearchOnNextScopeChange.current = true;
-        },
-      },
-      "preserve",
-    ),
-    React.createElement(
-      "button",
-      {
         "data-testid": "change-scope",
-        onClick: () => setCurrentUnitId("nested"),
+        onClick: () =>
+          dispatch({ type: "scopeChanged", currentUnitId: "nested" }),
       },
       "change",
     ),
@@ -300,7 +299,7 @@ suite("Flow viewer effects", () => {
     view.unmount();
   });
 
-  test("resets expanded scope state and supports preserving the next search", () => {
+  test("resets expanded scope state when the scope changes", () => {
     const view = render(React.createElement(ScopeResetFixture));
 
     assert.deepStrictEqual(
@@ -309,13 +308,12 @@ suite("Flow viewer effects", () => {
     );
     assert.strictEqual(view.getByTestId("reset-count").textContent, "1");
 
-    act(() => view.getByTestId("preserve-search").click());
     act(() => view.getByTestId("change-scope").click());
     assert.deepStrictEqual(
       JSON.parse(view.getByTestId("expanded").textContent ?? "null"),
       [],
     );
-    assert.strictEqual(view.getByTestId("reset-count").textContent, "1");
+    assert.strictEqual(view.getByTestId("reset-count").textContent, "2");
   });
 
   test("subscribes to document changes and removes the callback on cleanup", () => {

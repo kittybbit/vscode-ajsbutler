@@ -26,12 +26,54 @@ feature.
 
 ### 7. Webview Presentation Separation
 
-- Purpose: remove domain decisions, DTO transformation, or side effects from
-  one selected React/webview presentation boundary.
-- Entry condition: the baseline and characterization evidence identify a
-  concrete component, message contract, or UI-state boundary.
-- Dependency: completed characterization evidence and any required Application
-  Use Case Extraction.
+This roadmap area is decomposed into independent branch-owned features. Create,
+plan, review, approve, and close one feature before selecting the next unless a
+recorded dependency requires a different order.
+
+#### 7.1 Flow-graph Rendering and Detail Presentation Separation
+
+- Purpose: separate graph rendering, detail actions, and visual state from
+  application-owned graph meaning.
+- Entry condition: graph DTO and exploration characterization evidence identify
+  the exact renderer and detail-presentation boundary.
+- Dependency: completed flow-graph characterization and the preserved
+  Application flow-graph contract.
+
+#### 7.2 Flow Search and Viewer Interaction State Separation
+
+- Purpose: isolate flow scope, selection, search, reveal, and viewport state
+  transitions from graph rendering.
+- Entry condition: current-scope search, reveal, focus restoration, and scope
+  transition behavior are characterized independently from rendering.
+- Dependency: completed flow-interaction characterization and the preserved
+  flow-graph contract; remains separate from 7.1.
+
+#### 7.3 Unit-list Table Presentation and Keyboard Navigation Separation
+
+- Purpose: separate table rendering, column actions, virtualization, and
+  keyboard focus state from application list DTOs.
+- Entry condition: visible-column, export, navigation, sorting, detail, and
+  focus behavior are characterized for large lists.
+- Dependency: completed unit-list characterization and the preserved
+  Application unit-list contract.
+
+#### 7.4 Shared Webview Header Search Control Separation
+
+- Purpose: make shared header-search state and accessibility behavior explicit
+  without creating a shared search domain contract.
+- Entry condition: table and flow helper text, shortcuts, result counts,
+  localization, focus, and query privacy are characterized.
+- Dependency: completed header-search characterization; table and flow matching
+  semantics remain presentation-local.
+
+#### 7.5 Flow-tree Selector Interaction Separation
+
+- Purpose: isolate tree selection, focus, keyboard navigation, and scope-row
+  state while preserving stable list/flow identity.
+- Entry condition: enabled and disabled rows, focus movement, selection, scope
+  opening, reveal, and return-focus behavior are characterized.
+- Dependency: completed flow-tree characterization and stable cross-view
+  navigation identity; remains separate from 7.3.
 
 ### 8. Infrastructure Boundary Cleanup
 
@@ -73,10 +115,10 @@ refactoring level and is removed only after that effort is complete.
   cross-view navigation, parser/error, selected VS Code/file-I/O, viewer
   transport/composition, and selected webview boundaries. Each remains a
   separate implementation slice with its own approval and validation.
-- Webview Presentation Separation contains only flow rendering, flow
-  interaction state, unit-list table interaction, header search, or flow-tree
-  selector targets that are not selected by Feature 4. It does not create a
-  shared search domain contract.
+- Webview Presentation Separation features 7.1 through 7.5 contain only their
+  selected flow rendering, flow interaction state, unit-list table interaction,
+  header search, or flow-tree selector boundary not selected by Feature 4.
+  They do not create a shared search domain contract.
 - Infrastructure Boundary Cleanup contains only VS Code `ViewerFactory`, the
   normalized `AjsParserPort`, file/host adapters, or the validated telemetry
   contract that Feature 4 leaves unselected, and only after host, parser,

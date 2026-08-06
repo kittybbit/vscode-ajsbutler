@@ -338,62 +338,17 @@ export const useFlowViewerFitView = ({
 type UseFlowScopeResetParams = {
   documentIdentity?: object;
   currentUnitId?: string;
-  preserveSearchOnNextScopeChange: MutableRefObject<boolean>;
-  resetSearch: () => void;
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>;
-};
-
-const clearExpandedUnitIds = (
-  setExpandedUnitIds: Dispatch<SetStateAction<string[]>>,
-) => {
-  setExpandedUnitIds((prev) => (prev.length === 0 ? prev : []));
-};
-
-const shouldPreserveSearchOnScopeChange = (
-  preserveSearchOnNextScopeChange: MutableRefObject<boolean>,
-): boolean => {
-  if (!preserveSearchOnNextScopeChange.current) {
-    return false;
-  }
-
-  preserveSearchOnNextScopeChange.current = false;
-  return true;
-};
-
-const resetFlowScopeState = ({
-  preserveSearchOnNextScopeChange,
-  resetSearch,
-  setExpandedUnitIds,
-}: Pick<
-  UseFlowScopeResetParams,
-  "preserveSearchOnNextScopeChange" | "resetSearch" | "setExpandedUnitIds"
->) => {
-  clearExpandedUnitIds(setExpandedUnitIds);
-  if (!shouldPreserveSearchOnScopeChange(preserveSearchOnNextScopeChange)) {
-    resetSearch();
-  }
+  resetScope: () => void;
 };
 
 export const useFlowScopeReset = ({
   documentIdentity,
   currentUnitId,
-  preserveSearchOnNextScopeChange,
-  resetSearch,
-  setExpandedUnitIds,
+  resetScope,
 }: UseFlowScopeResetParams) => {
   useEffect(() => {
-    resetFlowScopeState({
-      preserveSearchOnNextScopeChange,
-      resetSearch,
-      setExpandedUnitIds,
-    });
-  }, [
-    documentIdentity,
-    currentUnitId,
-    preserveSearchOnNextScopeChange,
-    resetSearch,
-    setExpandedUnitIds,
-  ]);
+    resetScope();
+  }, [documentIdentity, currentUnitId, resetScope]);
 };
 
 type UseFlowDocumentSubscriptionParams = {
