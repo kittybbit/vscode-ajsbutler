@@ -39,15 +39,6 @@ recorded dependency requires a different order.
 - Dependency: completed flow-graph characterization and the preserved
   Application flow-graph contract.
 
-#### 7.2 Flow Search and Viewer Interaction State Separation
-
-- Purpose: isolate flow scope, selection, search, reveal, and viewport state
-  transitions from graph rendering.
-- Entry condition: current-scope search, reveal, focus restoration, and scope
-  transition behavior are characterized independently from rendering.
-- Dependency: completed flow-interaction characterization and the preserved
-  flow-graph contract; remains separate from 7.1.
-
 #### 7.3 Unit-list Table Presentation and Keyboard Navigation Separation
 
 - Purpose: separate table rendering, column actions, virtualization, and
