@@ -15,36 +15,23 @@ import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
 import {
-  Background,
-  BackgroundVariant,
-  Controls,
-  MiniMap,
   type Edge,
   type Node,
-  NodeTypes,
-  ReactFlow,
   type ReactFlowInstance,
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import { createViewerOperationRequest } from "../../viewerRequestMessages";
-import JobNode from "./nodes/JobNode";
-import JobNetNode from "./nodes/JobNetNode";
-import JobGroupNode from "./nodes/JobGroupNode";
-import ConditionNode from "./nodes/ConditionNode";
 import Header from "./Header";
 import FlowSelector from "./FlowSelector";
 import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
+import FlowGraphCanvas from "./FlowGraphCanvas";
 import { useFlowViewerController } from "./useFlowViewerController";
 import type { UnitTreeFocusRequest } from "../shared/UnitTreeSelector";
 import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
 import { navigateToTable } from "./nodes/Utils";
-import {
-  type FlowMiniMapColors,
-  resolveFlowMiniMapNodeFill,
-  resolveFlowMiniMapNodeStroke,
-} from "./flowMiniMap";
+import { type FlowMiniMapColors } from "./flowMiniMap";
 import type { FlowNodeData } from "./flowNodePresentationModel";
 import {
   focusRenderedFlowNode,
@@ -52,7 +39,6 @@ import {
   getOwnedFlowNodeId,
   isFlowInteractiveTarget,
   isFlowSpatialNavigationKey,
-  readOnlyFlowInteractionProps,
   resolveFlowKeyboardFocusTarget,
   resolveFlowKeyboardScopeFocusDecision,
   resolveFlowKeyboardNavigationKeyResult,
@@ -68,7 +54,6 @@ import {
 } from "./flowViewportFocus";
 import { resolveFlowViewerShortcut } from "./flowViewerShortcuts";
 import { resolveFlowSelectorFocusTarget } from "./FlowSelector";
-import { flowAriaLabelConfig } from "./flowAccessibility";
 import type { FlowKeyboardNavigationMovement } from "./flowKeyboardNavigation";
 import {
   ViewerAnnouncementHost,
@@ -78,16 +63,6 @@ import {
   formatUnitInformationMessage,
   unitInformationMessage,
 } from "../unitInformationLocalization";
-
-const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
-const minimumViewportZoom = 0.02;
-
-const nodeTypes: NodeTypes = {
-  job: JobNode,
-  jobnet: JobNetNode,
-  jobgroup: JobGroupNode,
-  condition: ConditionNode,
-};
 
 type FlowViewerController = ReturnType<typeof useFlowViewerController>;
 
@@ -100,6 +75,7 @@ type FlowGraphPanelProps = Pick<
   | "nodes"
   | "reactFlowInstanceRef"
   | "selectFlowNode"
+  | "selectedUnitId"
   | "showMiniMap"
   | "toggleExpandedFlowNodeFromKeyboard"
   | "unitById"
@@ -119,43 +95,6 @@ type FlowGraphPanelProps = Pick<
   theme: Theme;
 };
 
-type FlowGraphSelectionSyncProps = Pick<
-  FlowViewerController,
-  "nodes" | "reactFlowInstanceRef" | "selectedUnitId"
->;
-
-const useSyncSelectedFlowNode = ({
-  nodes,
-  reactFlowInstanceRef,
-  selectedUnitId,
-}: FlowGraphSelectionSyncProps): void => {
-  const previousSelectedUnitIdRef = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    const instance = reactFlowInstanceRef.current;
-    if (!instance) return;
-
-    const syncSelectedNode = (
-      unitId: string | undefined,
-      isSelected: boolean,
-    ) => {
-      if (!unitId) return;
-      const node = instance.getNode(unitId);
-      if (!node) return;
-      if (Boolean(node.selected) !== isSelected) {
-        instance.updateNode(unitId, { selected: isSelected });
-      }
-      if (Boolean(node.data.isSelected) !== isSelected) {
-        instance.updateNodeData(unitId, { isSelected });
-      }
-    };
-
-    syncSelectedNode(previousSelectedUnitIdRef.current, false);
-    syncSelectedNode(selectedUnitId, true);
-    previousSelectedUnitIdRef.current = selectedUnitId;
-  }, [nodes, reactFlowInstanceRef, selectedUnitId]);
-};
-
 const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   clearGraphHoveredUnit,
   currentUnitIdState,
@@ -173,6 +112,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   graphAriaLabel,
   reactFlowInstanceRef,
   selectFlowNode,
+  selectedUnitId,
   showMiniMap,
   theme,
   toggleExpandedFlowNodeFromKeyboard,
@@ -229,11 +169,6 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
     navigationNodes,
   );
   const navigationIndex = navigationIndexCacheRef.current.index;
-  const ariaLabelConfig = useMemo(
-    () => flowAriaLabelConfig(language),
-    [language],
-  );
-
   useEffect(() => {
     const request = pendingFocusRequestRef.current;
     if (!request) return;
@@ -466,70 +401,20 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         backgroundColor: "background.paper",
       }}
     >
-      <ReactFlow
+      <FlowGraphCanvas
         nodes={nodes}
         edges={edges}
-        defaultViewport={defaultViewport}
-        colorMode={theme.palette.mode}
-        nodeTypes={nodeTypes}
         onNodeClick={handleNodeClick}
         onNodeMouseEnter={handleNodeMouseEnter}
         onNodeMouseLeave={handleNodeMouseLeave}
-        onInit={handleReactFlowInit}
-        ariaLabelConfig={ariaLabelConfig}
-        {...readOnlyFlowInteractionProps}
-        fitView
-        minZoom={minimumViewportZoom}
-        fitViewOptions={{
-          padding: 0.22,
-          minZoom: minimumViewportZoom,
-        }}
-      >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1}
-          color={theme.palette.divider}
-        />
-        <Controls
-          position="bottom-left"
-          showInteractive={false}
-          style={{
-            borderRadius: 12,
-            overflow: "hidden",
-            boxShadow: theme.shadows[3],
-          }}
-        />
-        {showMiniMap && (
-          <MiniMap<Node<FlowNodeData>>
-            className="ajs-flow-minimap"
-            ariaLabel={unitInformationMessage(
-              "a11y.flow.reactFlow.minimap",
-              language,
-            )}
-            pannable
-            zoomable
-            position="bottom-right"
-            nodeColor={(node) =>
-              resolveFlowMiniMapNodeFill(node, miniMapColors)
-            }
-            nodeStrokeColor={(node) =>
-              resolveFlowMiniMapNodeStroke(node, miniMapColors)
-            }
-            nodeStrokeWidth={3}
-            bgColor={theme.palette.background.paper}
-            maskColor={`${theme.palette.background.default}66`}
-            maskStrokeColor="transparent"
-            maskStrokeWidth={0}
-            style={{
-              borderRadius: 12,
-              overflow: "hidden",
-              opacity: 1,
-              boxShadow: theme.shadows[3],
-            }}
-          />
-        )}
-      </ReactFlow>
+        onRendererReady={handleReactFlowInit}
+        reactFlowInstanceRef={reactFlowInstanceRef}
+        selectedUnitId={selectedUnitId}
+        showMiniMap={showMiniMap}
+        theme={theme}
+        language={language}
+        miniMapColors={miniMapColors}
+      />
     </Paper>
   );
 };
@@ -604,8 +489,6 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   unitById,
   currentUnitIdState,
 }) => {
-  useSyncSelectedFlowNode({ nodes, reactFlowInstanceRef, selectedUnitId });
-
   return (
     <Box
       sx={{
@@ -670,6 +553,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
           graphAriaLabel={unitInformationMessage("a11y.flow.graph", language)}
           reactFlowInstanceRef={reactFlowInstanceRef}
           selectFlowNode={selectFlowNode}
+          selectedUnitId={selectedUnitId}
           showMiniMap={showMiniMap}
           theme={theme}
           toggleExpandedFlowNodeFromKeyboard={

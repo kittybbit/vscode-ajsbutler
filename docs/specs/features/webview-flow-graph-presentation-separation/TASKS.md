@@ -4,9 +4,8 @@
 
 - Purpose: separate flow rendering, detail actions, and visual state from
   application-owned graph meaning without changing viewer behavior.
-- Approved or active slice: Slice 3; Slice 1 and Slice 2 are complete and all
-  three planned slices are approved for independent implementation within
-  their recorded boundaries.
+- Approved or active slice: none; all three planned slices are complete within
+  their independently approved boundaries. Feature Exit review remains.
 - Do not change Application DTOs, graph meaning, or viewer message contracts.
 - Do not redesign search, keyboard rules, viewport transitions, flow-tree,
   table, shared header search, or telemetry semantics.
@@ -41,7 +40,7 @@
   boundary identified as Intake group 3 in `../BASELINE.md`.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 3
+- Active implementation slice: None
 
 ## Replanning Decision
 
@@ -307,7 +306,7 @@ requires replanning and new approval.
 
 ### Slice 3: Isolate the ReactFlow canvas from viewer composition
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Extract a typed ReactFlow canvas adapter from `FlowGraphPanelComponent`
     containing ReactFlow nodes, edges, node types, background, controls,
@@ -419,6 +418,18 @@ requires replanning and new approval.
   XyFlow-internal selected-state synchronization, callback seam, and
   compatibility validation must change together to leave a usable viewer and
   one reviewable UI-framework adapter boundary.
+- Implementation Feedback: the adapter moved only direct ReactFlow realization
+  and selected-state synchronization. Graph-entry focus, keyboard navigation,
+  scope transitions, callbacks, telemetry, and announcement ownership stayed
+  in their recorded owners; no new boundary issue was found.
+- Validation Result: `rtk pnpm test`, `rtk pnpm run test:web`,
+  `rtk pnpm run test:compile`, `rtk pnpm run build`, `rtk pnpm run qlty`, and
+  `git diff --check` passed. The desktop suite included architecture
+  dependency checks. Production build emitted only the existing bundle-size
+  recommendations, and Web smoke exited successfully with existing browser
+  shutdown `ECONNRESET` logs.
+- Human Completion Approval: Approved in the current conversation per the
+  user's instruction to treat each completed implementation as approved.
 
 ## Cross-Slice Dependencies
 
@@ -491,7 +502,7 @@ requires replanning and new approval.
 - [x] Run `rtk pnpm run qlty` for every code slice completed so far.
 - [x] Run `rtk pnpm run test:prepare:web` for every shared-webview slice
       completed so far.
-- [ ] Complete host-neutral behavior, desktop integration, web smoke, build,
+- [x] Complete host-neutral behavior, desktop integration, web smoke, build,
       architecture, and final Qlty evidence in Slice 3.
 - [ ] Evaluate durable docs, README, CHANGELOG, and roadmap impact at Feature
       Exit.

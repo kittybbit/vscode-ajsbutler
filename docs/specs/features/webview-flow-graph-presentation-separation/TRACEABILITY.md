@@ -19,6 +19,13 @@
 - `rtk pnpm run test:compile`, `rtk pnpm run test:prepare:web`,
   `rtk pnpm run qlty`, and `git diff --check` passed.
 
+## Slice 3 Validation Result
+
+- `rtk pnpm test` and `rtk pnpm run test:web` passed.
+- `rtk pnpm run test:compile`, `rtk pnpm run build`, `rtk pnpm run qlty`,
+  and `git diff --check` passed; the desktop suite included architecture
+  dependency checks.
+
 ## Slice 2 Validation Result
 
 - `rtk pnpm test` passed, including flow integration and viewer-wiring

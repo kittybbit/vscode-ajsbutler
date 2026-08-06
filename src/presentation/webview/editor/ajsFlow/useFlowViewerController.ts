@@ -46,9 +46,10 @@ type UseFlowViewerControllerParams = {
 const emptyFlowUnitById: ReadonlyMap<string, FlowGraphUnitDto> = new Map();
 
 const useFlowViewerRefs = () => {
-  const reactFlowInstanceRef = useRef<ReactFlowInstance<Node, Edge> | null>(
-    null,
-  );
+  const reactFlowInstanceRef = useRef<ReactFlowInstance<
+    Node<FlowNodeData>,
+    Edge
+  > | null>(null);
   const preserveSearchOnNextScopeChange = useRef<boolean>(false);
   const previousUnitIdRef = useRef<string | undefined>(undefined);
 
