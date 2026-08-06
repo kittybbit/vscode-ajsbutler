@@ -30,15 +30,6 @@ This roadmap area is decomposed into independent branch-owned features. Create,
 plan, review, approve, and close one feature before selecting the next unless a
 recorded dependency requires a different order.
 
-#### 7.1 Flow-graph Rendering and Detail Presentation Separation
-
-- Purpose: separate graph rendering, detail actions, and visual state from
-  application-owned graph meaning.
-- Entry condition: graph DTO and exploration characterization evidence identify
-  the exact renderer and detail-presentation boundary.
-- Dependency: completed flow-graph characterization and the preserved
-  Application flow-graph contract.
-
 #### 7.3 Unit-list Table Presentation and Keyboard Navigation Separation
 
 - Purpose: separate table rendering, column actions, virtualization, and
