@@ -1,6 +1,6 @@
 import React from "react";
 import { GroupColumnDef } from "@tanstack/table-core";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import { box, ColumnGroupContext, rowViewColumn } from "./common";
 import Link from "@mui/material/Link";
 import { handleJumpLinkClick } from "../navigation";
@@ -8,7 +8,7 @@ import { handleJumpLinkClick } from "../navigation";
 const group2 = (
   context: ColumnGroupContext,
   handleJump: (id: string) => void,
-): GroupColumnDef<UnitListRowView, unknown> => {
+): GroupColumnDef<TableRowView, unknown> => {
   const { columnHelper, labels, rowViewByPath } = context;
 
   return columnHelper.group({

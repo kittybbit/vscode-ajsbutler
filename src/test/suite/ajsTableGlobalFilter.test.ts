@@ -1,21 +1,18 @@
 import * as assert from "assert";
 import { RankingInfo } from "@tanstack/match-sorter-utils";
 import { FilterMeta, Row } from "@tanstack/table-core";
-import { UnitListRowView } from "../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 import {
   buildParameterSearchValues,
   createAjsGlobalFilterFn,
   isAjsTableSearchHit,
 } from "../../presentation/webview/editor/ajsTable/globalFilter";
 
-const createRow = (
-  absolutePath: string,
-  value: unknown,
-): Row<UnitListRowView> =>
+const createRow = (absolutePath: string, value: unknown): Row<TableRowView> =>
   ({
-    original: { absolutePath } as unknown as UnitListRowView,
+    original: { absolutePath } as unknown as TableRowView,
     getValue: () => value,
-  }) as unknown as Row<UnitListRowView>;
+  }) as unknown as Row<TableRowView>;
 
 suite("AJS table global filter", () => {
   test("builds parameter value search candidates", () => {

@@ -1,5 +1,5 @@
 import type { MouseEvent } from "react";
-import type { UnitListUnitMetadataDto } from "../../../../application/unit-list/buildUnitListView";
+import type { TableUnitMetadata } from "./tableViewerData";
 import { createViewerNavigationRequest } from "../../viewerRequestMessages";
 
 type PostViewerMessage = (
@@ -383,7 +383,7 @@ export const navigateToFlow = (
 
 export const selectUnitTreeUnitInTable = (
   unitId: string,
-  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>,
+  unitById: ReadonlyMap<string, TableUnitMetadata>,
   revealPath: (absolutePath: string) => void,
 ): void => {
   const unit = unitById.get(unitId);
@@ -394,7 +394,7 @@ export const selectUnitTreeUnitInTable = (
 
 export const openUnitTreeUnitInFlow = (
   unitId: string,
-  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>,
+  unitById: ReadonlyMap<string, TableUnitMetadata>,
   navigate: (absolutePath: string) => void = navigateToFlow,
 ): void => {
   const unit = unitById.get(unitId);

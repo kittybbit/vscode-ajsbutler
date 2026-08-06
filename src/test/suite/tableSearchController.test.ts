@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { JSDOM } from "jsdom";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import type { Row } from "@tanstack/table-core";
-import type { UnitListRowView } from "../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 import { useTableSearchController } from "../../presentation/webview/editor/ajsTable/tableSearchController";
 
 type GlobalDescriptorMap = Map<string, PropertyDescriptor | undefined>;
@@ -52,15 +52,15 @@ const restoreDomGlobals = (dom: JSDOM, previous: GlobalDescriptorMap): void => {
 const createRow = (
   absolutePath: string,
   visibleValues: readonly unknown[],
-): Row<UnitListRowView> =>
+): Row<TableRowView> =>
   ({
-    original: { absolutePath } as UnitListRowView,
+    original: { absolutePath } as TableRowView,
     getVisibleCells: () =>
       visibleValues.map((value, index) => ({
         id: `${absolutePath}-${index}`,
         getValue: () => value,
       })),
-  }) as unknown as Row<UnitListRowView>;
+  }) as unknown as Row<TableRowView>;
 
 suite("Table search controller", () => {
   let dom: JSDOM;

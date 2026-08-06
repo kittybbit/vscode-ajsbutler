@@ -26,7 +26,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import TableHeader from "./TableHeader";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
@@ -52,8 +52,8 @@ import {
 } from "./navigation";
 
 type VirtualizedTableProps = {
-  headerGroups: HeaderGroup<UnitListRowView>[];
-  rows: Row<UnitListRowView>[];
+  headerGroups: HeaderGroup<TableRowView>[];
+  rows: Row<TableRowView>[];
   rowIndex?: number;
   columnVisibility: VisibilityState;
   searchQuery: string;
@@ -76,13 +76,13 @@ type VirtualizedTableContext = {
   gridAriaLabel?: string;
 };
 
-type VirtualizedTableRowProps = ItemProps<Row<UnitListRowView>> & {
+type VirtualizedTableRowProps = ItemProps<Row<TableRowView>> & {
   context: VirtualizedTableContext;
 };
 
 type VisibleTableCellRenderContext = {
-  cell: ReturnType<Row<UnitListRowView>["getVisibleCells"]>[number];
-  row: Row<UnitListRowView>;
+  cell: ReturnType<Row<TableRowView>["getVisibleCells"]>[number];
+  row: Row<TableRowView>;
   searchQuery: string;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   getCurrentFocus: () => TableGridFocus | undefined;
@@ -269,7 +269,7 @@ export const getColumnVisibilityRevision = (
     .join("|");
 
 const tableComponents: TableComponents<
-  Row<UnitListRowView>,
+  Row<TableRowView>,
   VirtualizedTableContext
 > = {
   Scroller: React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
@@ -567,7 +567,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   );
 
   const itemContent = useCallback(
-    (index: number, data: Row<UnitListRowView>) =>
+    (index: number, data: Row<TableRowView>) =>
       data.getVisibleCells().map((cell) =>
         renderVisibleTableCell({
           cell,
@@ -663,7 +663,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
 
   return (
     <>
-      <TableVirtuoso<Row<UnitListRowView>, VirtualizedTableContext>
+      <TableVirtuoso<Row<TableRowView>, VirtualizedTableContext>
         ref={virtuosoRef}
         style={virtuosoStyle}
         data={rows}

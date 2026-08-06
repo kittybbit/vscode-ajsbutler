@@ -1,14 +1,14 @@
 import React from "react";
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import Rating from "@mui/material/Rating";
 
 const group7 = (
-  columnHelper: ColumnHelper<UnitListRowView>,
+  columnHelper: ColumnHelper<TableRowView>,
   labels: UnitInformationColumnGroupLabels,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitListRowView, unknown> => {
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
+): GroupColumnDef<TableRowView, unknown> => {
   return columnHelper.group({
     id: "group7", //Jobnet definition information
     header: labels.label,

@@ -22,27 +22,27 @@ import ToggleOff from "@mui/icons-material/ToggleOff";
 import ToggleOn from "@mui/icons-material/ToggleOn";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Switch from "@mui/material/Switch";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { useMyAppContext } from "../MyContexts";
 import { unitInformationMessage } from "../unitInformationLocalization";
 
 type DisplayColumnSelectorProps = {
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
   columnVisibility: VisibilityState;
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: VoidFunction;
 };
 
-type UnitListColumn = Column<UnitListRowView, unknown>;
+type UnitListColumn = Column<TableRowView, unknown>;
 type ToggleColumnVisibilityParams = {
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
   visible: boolean;
 };
 
 export const getVisibleColumnSelectorColumns = (
-  table: ReactTable<UnitListRowView>,
+  table: ReactTable<TableRowView>,
 ): UnitListColumn[] =>
   table.getAllColumns().filter((column) => column.getCanHide());
 
@@ -96,7 +96,7 @@ const isAnyLeafColumnVisible = (column: UnitListColumn): boolean =>
 const ColumnSwitch: FC<{
   column: UnitListColumn;
   label: string;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, label, table }) => {
   const handleChange = (
     _event: React.ChangeEvent<HTMLInputElement>,
@@ -122,7 +122,7 @@ const ColumnSwitch: FC<{
 
 const ColumnSwitchItem: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => (
   <ListItem dense>
     <ColumnSwitch
@@ -135,7 +135,7 @@ const ColumnSwitchItem: FC<{
 
 const NestedColumnGroup: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => (
   <>
     <Divider sx={{ marginTop: "0.5em" }}>
@@ -155,7 +155,7 @@ const NestedColumnGroup: FC<{
 
 const ColumnDetailItem: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) =>
   hasNestedColumnGroup(column) ? (
     <NestedColumnGroup column={column} table={table} />
@@ -165,7 +165,7 @@ const ColumnDetailItem: FC<{
 
 const ColumnDetail: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => {
   const subColumns = getHideableSubColumns(column);
 
@@ -184,7 +184,7 @@ const ColumnDetail: FC<{
 
 const ColumnAccordion: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => (
   <Accordion disableGutters>
     <AccordionSummary expandIcon={<ExpandMore />}>

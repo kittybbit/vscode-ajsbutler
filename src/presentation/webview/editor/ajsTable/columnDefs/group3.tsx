@@ -6,11 +6,11 @@ import {
 } from "@tanstack/table-core";
 import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
 import Chip from "@mui/material/Chip";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import { rowViewColumn } from "./common";
 
 const recoveryCell = (
-  param: CellContext<UnitListRowView, boolean | undefined>,
+  param: CellContext<TableRowView, boolean | undefined>,
 ) => {
   const isRecovery = param.getValue<boolean | undefined>();
   if (isRecovery === undefined) {
@@ -24,10 +24,10 @@ const recoveryCell = (
 };
 
 const group3 = (
-  columnHelper: ColumnHelper<UnitListRowView>,
+  columnHelper: ColumnHelper<TableRowView>,
   labels: UnitInformationColumnGroupLabels,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitListRowView, unknown> => {
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
+): GroupColumnDef<TableRowView, unknown> => {
   return columnHelper.group({
     id: "group3", //Unit common attributes information
     header: labels.label,

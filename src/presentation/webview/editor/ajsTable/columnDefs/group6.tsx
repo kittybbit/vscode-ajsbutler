@@ -6,14 +6,14 @@ import {
 } from "@tanstack/table-core";
 import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
 import { arrayBoxCell, rowViewColumn } from "./common";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
 
 const weekSymbols = ["su", "mo", "tu", "we", "th", "fr", "sa"] as const;
 const dateArrayCell = arrayBoxCell<string>();
 
-const weekCell = (props: CellContext<UnitListRowView, boolean | undefined>) => {
+const weekCell = (props: CellContext<TableRowView, boolean | undefined>) => {
   const result = props.getValue<boolean | undefined>();
   if (result == undefined) {
     return undefined;
@@ -26,10 +26,10 @@ const weekCell = (props: CellContext<UnitListRowView, boolean | undefined>) => {
 };
 
 const group6 = (
-  columnHelper: ColumnHelper<UnitListRowView>,
+  columnHelper: ColumnHelper<TableRowView>,
   labels: UnitInformationColumnGroupLabels,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitListRowView, unknown> => {
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
+): GroupColumnDef<TableRowView, unknown> => {
   const standardWeekLabels = labels.subgroup(1);
 
   return columnHelper.group({

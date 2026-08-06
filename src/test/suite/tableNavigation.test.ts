@@ -17,12 +17,9 @@ import {
 } from "../../presentation/webview/editor/ajsTable/navigation";
 import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
 import { revealTableRow } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
-import type { UnitListUnitMetadataDto } from "../../application/unit-list/buildUnitListView";
+import type { TableUnitMetadata } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 
-const createUnit = (
-  id: string,
-  absolutePath: string,
-): UnitListUnitMetadataDto => ({
+const createUnit = (id: string, absolutePath: string): TableUnitMetadata => ({
   id,
   absolutePath,
   name: id,

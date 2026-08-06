@@ -48,6 +48,9 @@ suite("Table viewer data", () => {
       toUnitDefinitionByPath(payload),
     );
 
+    assert.notStrictEqual(viewerData.tableData?.rows[0], tableData.rows[0]);
+    assert.deepStrictEqual(viewerData.tableData?.rows[0], tableData.rows[0]);
+    assert.notStrictEqual(viewerData.tableData?.units[0], tableData.units[0]);
     assert.strictEqual(viewerData.rootUnits[0]?.id, "root-id");
     assert.strictEqual(viewerData.rowViewByPath.get("/root")?.id, "root-id");
     assert.strictEqual(

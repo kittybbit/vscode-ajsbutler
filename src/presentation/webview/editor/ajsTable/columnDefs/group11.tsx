@@ -1,6 +1,6 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import {
   labeledRowViewColumns,
   nestedColumnGroup,
@@ -9,10 +9,10 @@ import {
 } from "./common";
 
 const group11 = (
-  columnHelper: ColumnHelper<UnitListRowView>,
+  columnHelper: ColumnHelper<TableRowView>,
   labels: UnitInformationColumnGroupLabels,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitListRowView, unknown> => {
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
+): GroupColumnDef<TableRowView, unknown> => {
   const standardOutputLabels = labels.subgroup(1);
   const standardErrorLabels = labels.subgroup(2);
   const endJudgmentLabels = labels.subgroup(3);

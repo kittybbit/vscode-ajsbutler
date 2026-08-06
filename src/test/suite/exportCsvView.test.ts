@@ -1,14 +1,12 @@
 import * as assert from "assert";
 import { Table } from "@tanstack/table-core";
-import {
-  buildUnitListProjection,
-  UnitListRowView,
-} from "../../application/unit-list/buildUnitListView";
+import { buildUnitListProjection } from "../../application/unit-list/buildUnitListView";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import {
   exportCsvView,
   toExportUnitListCsvInput,
 } from "../../presentation/webview/editor/ajsTable/exportCsvView";
+import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 
 suite("Export CSV View", () => {
   test("exports visible reordered Slice 2 row values for copy and save", () => {
@@ -85,7 +83,7 @@ suite("Export CSV View", () => {
         {
           columnDef: {
             header: "Command",
-            accessorFn: (unit: UnitListRowView) => `${unit.group1.name}\nline2`,
+            accessorFn: (unit: TableRowView) => `${unit.group1.name}\nline2`,
           },
         },
         {
@@ -105,7 +103,7 @@ suite("Export CSV View", () => {
           },
         ],
       }),
-    } as Table<UnitListRowView>;
+    } as Table<TableRowView>;
 
     const input = toExportUnitListCsvInput(table);
     const copyCsv = exportCsvView(table);

@@ -6,7 +6,7 @@ import axe from "axe-core";
 import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
-import type { UnitListRowView } from "../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 import UnitTreeSelector, {
   type UnitTreeFocusRequest,
 } from "../../presentation/webview/editor/shared/UnitTreeSelector";
@@ -171,14 +171,14 @@ const createUnitById = (
   return new Map(entries);
 };
 
-const createTableRow = (index: number): UnitListRowView =>
+const createTableRow = (index: number): TableRowView =>
   ({
     id: `job-${index}`,
     absolutePath: `/root/job-${index}`,
     group1: {
       name: `job-${index}`,
     },
-  }) as unknown as UnitListRowView;
+  }) as unknown as TableRowView;
 
 const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
   const rows = useMemo(
@@ -196,17 +196,17 @@ const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
         header: "#",
         enableHiding: false,
         enableSorting: false,
-        accessorFn: (_row: UnitListRowView, index: number) => index + 1,
+        accessorFn: (_row: TableRowView, index: number) => index + 1,
       },
       {
         id: "name",
         header: "Name",
-        accessorFn: (row: UnitListRowView) => row.group1.name,
+        accessorFn: (row: TableRowView) => row.group1.name,
       },
       {
         id: "path",
         header: "Path",
-        accessorFn: (row: UnitListRowView) => row.absolutePath,
+        accessorFn: (row: TableRowView) => row.absolutePath,
       },
     ],
     getCoreRowModel: getCoreRowModel(),

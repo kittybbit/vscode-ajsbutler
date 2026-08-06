@@ -8,7 +8,7 @@ import {
   resolveUnitListGridShortcut,
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
-import type { UnitListUnitMetadataDto } from "../../application/unit-list/buildUnitListView";
+import type { TableUnitMetadata } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 import {
   findRowIndexByIdentity,
   revealTableRow,
@@ -122,7 +122,7 @@ suite("Table virtualization and focus", () => {
       "focusTree",
     );
 
-    const unit: UnitListUnitMetadataDto = {
+    const unit: TableUnitMetadata = {
       id: "job",
       absolutePath: "/root/job",
       name: "job",

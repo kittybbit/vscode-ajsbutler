@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { Row } from "@tanstack/table-core";
-import { UnitListRowView } from "../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 import {
   createEmptyTableSearchState,
   createSubmittedTableSearchState,
@@ -13,15 +13,15 @@ import {
 const createRow = (
   absolutePath: string,
   visibleValues: readonly unknown[],
-): Row<UnitListRowView> =>
+): Row<TableRowView> =>
   ({
-    original: { absolutePath } as UnitListRowView,
+    original: { absolutePath } as TableRowView,
     getVisibleCells: () =>
       visibleValues.map((value, index) => ({
         id: `${absolutePath}-${index}`,
         getValue: () => value,
       })),
-  }) as unknown as Row<UnitListRowView>;
+  }) as unknown as Row<TableRowView>;
 
 suite("AJS table search state", () => {
   test("finds matching rows in current table order", () => {

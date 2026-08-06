@@ -1,5 +1,5 @@
 import { Row } from "@tanstack/table-core";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { AccessorType } from "./columnDefs/common";
 import {
   getAjsTableSearchValues,
@@ -96,7 +96,7 @@ export const getTableSearchResultPosition = (
 };
 
 export const doesTableRowMatchSearch = (
-  row: Row<UnitListRowView>,
+  row: Row<TableRowView>,
   parameterSearchValuesByPath: ParameterSearchValuesByPath,
   query: string,
 ): boolean => {
@@ -122,7 +122,7 @@ export const doesTableRowMatchSearch = (
 };
 
 export const findTableSearchMatchingAbsolutePaths = (
-  rows: ReadonlyArray<Row<UnitListRowView>>,
+  rows: ReadonlyArray<Row<TableRowView>>,
   parameterSearchValuesByPath: ParameterSearchValuesByPath,
   query: string,
 ): string[] =>

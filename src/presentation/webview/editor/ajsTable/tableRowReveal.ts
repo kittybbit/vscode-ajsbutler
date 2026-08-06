@@ -1,6 +1,6 @@
 import { MutableRefObject, useCallback } from "react";
 import type { Row } from "@tanstack/table-core";
-import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { parseNavigationRequest } from "../../../../application/navigation/resolveNavigationTarget";
 
 export type TableRowRevealState = {
@@ -10,15 +10,15 @@ export type TableRowRevealState = {
 };
 
 type TableRowRevealContext = {
-  rows: ReadonlyArray<Row<UnitListRowView>>;
+  rows: ReadonlyArray<Row<TableRowView>>;
   selectRow: (absolutePath: string) => void;
   requestFocus?: (absolutePath: string) => void;
 };
 
 const buildRowByIdentity = (
-  rows: ReadonlyArray<Row<UnitListRowView>>,
-): Map<string, Row<UnitListRowView>> => {
-  const map = new Map<string, Row<UnitListRowView>>();
+  rows: ReadonlyArray<Row<TableRowView>>,
+): Map<string, Row<TableRowView>> => {
+  const map = new Map<string, Row<TableRowView>>();
   rows.forEach((row) => {
     map.set(row.original.id, row);
     map.set(row.original.absolutePath, row);
@@ -27,7 +27,7 @@ const buildRowByIdentity = (
 };
 
 const buildRowIndexByIdentity = (
-  rows: ReadonlyArray<Row<UnitListRowView>>,
+  rows: ReadonlyArray<Row<TableRowView>>,
 ): Map<string, number> => {
   const map = new Map<string, number>();
   rows.forEach((row, index) => {
@@ -38,7 +38,7 @@ const buildRowIndexByIdentity = (
 };
 
 export const findRowIndexByIdentity = (
-  rows: ReadonlyArray<Row<UnitListRowView>>,
+  rows: ReadonlyArray<Row<TableRowView>>,
   identity: string | undefined,
 ): number | undefined => {
   return identity ? buildRowIndexByIdentity(rows).get(identity) : undefined;
@@ -69,7 +69,7 @@ export const revealTableRow = (
 
 export const useTableRowRevealState = (
   selectRow: (absolutePath: string) => void,
-  rowsRef: MutableRefObject<ReadonlyArray<Row<UnitListRowView>>>,
+  rowsRef: MutableRefObject<ReadonlyArray<Row<TableRowView>>>,
   requestFocus?: (absolutePath: string) => void,
 ): TableRowRevealState => {
   const handleJump = useCallback(

@@ -1,13 +1,13 @@
 import { ColumnHelper, GroupColumnDef } from "@tanstack/table-core";
 import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import { labeledRowViewColumns, nestedColumnGroup } from "./common";
 
 const group15 = (
-  columnHelper: ColumnHelper<UnitListRowView>,
+  columnHelper: ColumnHelper<TableRowView>,
   labels: UnitInformationColumnGroupLabels,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitListRowView, unknown> => {
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
+): GroupColumnDef<TableRowView, unknown> => {
   const termination1Labels = labels.subgroup(1);
   const termination2Labels = labels.subgroup(2);
   const termination3Labels = labels.subgroup(3);

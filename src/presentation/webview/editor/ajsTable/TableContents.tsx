@@ -25,20 +25,10 @@ import {
   getSortedRowModel,
 } from "@tanstack/table-core";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import type {
-  UnitListRowView,
-  UnitListUnitMetadataDto,
-} from "../../../../application/unit-list/buildUnitListView";
 import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
-import {
-  toUnitListTableData,
-  type UnitListRootDto,
-  type UnitListTableDataDto,
-} from "../../../../application/unit-list/unitListDocument";
-import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { useMyAppContext } from "../MyContexts";
 import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import { ParameterSearchValuesByPath } from "./globalFilter";
@@ -76,7 +66,14 @@ import {
   useTableRowRevealState,
 } from "./tableRowReveal";
 import { useTableSearchController } from "./tableSearchController";
-import { createTableViewerData, findSelectedUnitId } from "./tableViewerData";
+import {
+  createTableViewerData,
+  findSelectedUnitId,
+  parseTableViewerData,
+  type TableRowView,
+  type TableUnitMetadata,
+  type TableViewerData,
+} from "./tableViewerData";
 import {
   ViewerAnnouncementHost,
   type ViewerAnnouncementHostHandle,
@@ -93,17 +90,16 @@ export type AjsTableSearchState = {
 };
 
 type TableDocumentState = {
-  tableData: UnitListTableDataDto | undefined;
-  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
+  viewerData: TableViewerData;
   changeDocument: (type: string, data: unknown) => void;
 };
 
 type TableModelSetupContext = {
-  rowViews: UnitListRowView[] | undefined;
+  rowViews: TableRowView[] | undefined;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   lang: string;
   handleJump: (id: string) => void;
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>;
+  rowViewByPath: ReadonlyMap<string, TableRowView>;
   sorting: SortingState;
   setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
   columnVisibility: VisibilityState;
@@ -112,8 +108,8 @@ type TableModelSetupContext = {
 
 type TableViewerShellProps = {
   theme: Theme;
-  table: ReactTable<UnitListRowView>;
-  rows: Row<UnitListRowView>[];
+  table: ReactTable<TableRowView>;
+  rows: Row<TableRowView>[];
   totalRowCount: number;
   searchQuery: string;
   searchState: TableSearchState;
@@ -139,8 +135,8 @@ type TableViewerShellProps = {
   returnToGrid: VoidFunction;
   restoreGridFocusRequest: TableGridFocusRequest;
   focusTreeRequest: UnitTreeFocusRequest;
-  rootUnits: UnitListRootDto[];
-  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
+  rootUnits: TableViewerData["rootUnits"];
+  unitById: ReadonlyMap<string, TableUnitMetadata>;
   selectTreeUnit: (unitId: string) => void;
   focusUnitTree: VoidFunction;
   openTreeUnitScope: (unitId: string) => void;
@@ -150,8 +146,9 @@ type TableViewerShellProps = {
 };
 
 type ParsedTableDocumentState = {
-  tableData: UnitListTableDataDto | undefined;
+  tableData: TableViewerData["tableData"];
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
+  viewerData: TableViewerData;
 };
 
 const isSelectableTableFlowScopeUnit = (unit: {
@@ -162,29 +159,28 @@ const isSelectableTableFlowScopeUnit = (unit: {
 export const parseTableDocumentState = (
   data: unknown,
 ): ParsedTableDocumentState => {
+  const viewerData = parseTableViewerData(data);
   return {
-    tableData: toUnitListTableData(data),
-    unitDefinitionByPath: toUnitDefinitionByPath(data),
+    tableData: viewerData.tableData,
+    unitDefinitionByPath: viewerData.unitDefinitionByPath,
+    viewerData,
   };
 };
 
 const useChangeDocument = (): TableDocumentState => {
-  const [tableData, setTableData] = useState<UnitListTableDataDto>();
-  const [unitDefinitionByPath, setUnitDefinitionByPath] = useState<
-    ReadonlyMap<string, UnitDefinitionDialogDto>
-  >(new Map());
+  const [viewerData, setViewerData] = useState<TableViewerData>(() =>
+    createTableViewerData(undefined, new Map()),
+  );
   const changeDocument = useCallback((type: string, data: unknown) => {
     try {
       const nextState = parseTableDocumentState(data);
-      setTableData(() => nextState.tableData);
-      setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
+      setViewerData(() => nextState.viewerData);
     } catch (error) {
       console.error("Failed to parse data:", error);
-      setTableData(() => undefined);
-      setUnitDefinitionByPath(() => new Map());
+      setViewerData(() => createTableViewerData(undefined, new Map()));
     }
   }, []);
-  return { tableData, unitDefinitionByPath, changeDocument };
+  return { viewerData, changeDocument };
 };
 
 const useTableModelSetup = ({
@@ -203,7 +199,7 @@ const useTableModelSetup = ({
     [lang, handleJump, rowViewByPath],
   );
 
-  const table = useReactTable<UnitListRowView>({
+  const table = useReactTable<TableRowView>({
     columns,
     data: rowViews ?? [],
     state: {
@@ -464,19 +460,14 @@ const TableContents = () => {
   const returnToGrid = useCallback(() => {
     requestGridFocus(selectedAbsolutePath);
   }, [requestGridFocus, selectedAbsolutePath]);
-  const { tableData, unitDefinitionByPath, changeDocument } =
-    useChangeDocument();
+  const { viewerData, changeDocument } = useChangeDocument();
+  const { tableData } = viewerData;
   const rowViews = tableData?.rows;
-  const rowsRef = useRef<ReadonlyArray<Row<UnitListRowView>>>([]);
+  const rowsRef = useRef<ReadonlyArray<Row<TableRowView>>>([]);
   const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
     selectRow,
     rowsRef,
     requestGridFocus,
-  );
-
-  const viewerData = useMemo(
-    () => createTableViewerData(tableData, unitDefinitionByPath),
-    [tableData, unitDefinitionByPath],
   );
 
   const selectTreeUnit = useCallback(
