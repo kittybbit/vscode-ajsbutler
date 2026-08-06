@@ -10,7 +10,7 @@ import {
   buildFlowNodeDetailActions,
   buildFlowNodeDetailChips,
   buildFlowNodeDetailRows,
-} from "../../presentation/webview/editor/ajsFlow/FlowNodeDetailPanel";
+} from "../../presentation/webview/editor/ajsFlow/flowNodeDetailPresentation";
 import { reduceSelectedFlowNodeId } from "../../presentation/webview/editor/ajsFlow/useSelectedFlowNodeState";
 import { getSharedUnitDetailPaneActionLabels } from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
 import type { FlowNodeData } from "../../presentation/webview/editor/ajsFlow/flowNodePresentationModel";

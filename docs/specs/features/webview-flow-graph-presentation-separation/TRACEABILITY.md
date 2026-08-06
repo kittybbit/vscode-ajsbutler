@@ -18,3 +18,10 @@
 - `rtk pnpm test` passed, including the architecture dependency suite.
 - `rtk pnpm run test:compile`, `rtk pnpm run test:prepare:web`,
   `rtk pnpm run qlty`, and `git diff --check` passed.
+
+## Slice 2 Validation Result
+
+- `rtk pnpm test` passed, including flow integration and viewer-wiring
+  success/fallback coverage.
+- `rtk pnpm run test:compile`, `rtk pnpm run test:prepare:web`,
+  `rtk pnpm run qlty`, and `git diff --check` passed.

@@ -9,10 +9,16 @@ import {
 } from "../unitInformationLocalization";
 import { useMyAppContext } from "../MyContexts";
 import type { FlowNodeDetail } from "./flowNodeDetail";
+import {
+  buildFlowNodeDetailActions,
+  buildFlowNodeDetailChips,
+  buildFlowNodeRelationshipRows,
+  buildFlowNodeDetailRows,
+  type FlowNodeDetailAction,
+  type FlowNodeDetailActionOptions,
+} from "./flowNodeDetailPresentation";
 import SharedUnitDetailPane, {
   type SharedUnitDetailPaneAction,
-  type SharedUnitDetailPaneChip,
-  type SharedUnitDetailPaneRow,
 } from "../shared/SharedUnitDetailPane";
 
 type FlowNodeDetailPanelProps = {
@@ -29,169 +35,24 @@ type FlowNodeDetailPanelProps = {
   language?: string;
 };
 
-type FlowNodeDetailActionOptions = {
-  canOpenAsScope: boolean;
-  canOpenDefinition: boolean;
-  focusModeEnabled: boolean;
-  onOpenDefinition: VoidFunction;
-  onOpenScope: VoidFunction;
-  onOpenUnitList: VoidFunction;
-  onToggleFocusMode: VoidFunction;
-  language?: string;
+const flowNodeDetailActionIcon: Record<
+  FlowNodeDetailAction["kind"],
+  React.ReactNode
+> = {
+  focusRelationships: <CenterFocusStrongIcon />,
+  openDefinition: <DescriptionIcon />,
+  openUnitList: <TableChartIcon />,
+  openScope: <FolderOpenIcon />,
 };
 
-const missingValueLabel = "—";
-
-const flowNodeDetailRow = (
-  label: string,
-  value: SharedUnitDetailPaneRow["value"],
-): SharedUnitDetailPaneRow => ({ label, value });
-
-const formatParentUnit = ({
-  parentName,
-  parentPath,
-}: FlowNodeDetail): string => {
-  if (!parentName) {
-    return missingValueLabel;
-  }
-  return parentPath ? `${parentName} (${parentPath})` : parentName;
-};
-
-export const buildFlowNodeDetailRows = (
-  detail: FlowNodeDetail,
-  language = "en",
-): SharedUnitDetailPaneRow[] => [
-  flowNodeDetailRow(
-    unitInformationMessage("a11y.detail.comment", language),
-    detail.comment || missingValueLabel,
-  ),
-  flowNodeDetailRow(
-    unitInformationMessage("a11y.detail.absolutePath", language),
-    detail.absolutePath,
-  ),
-  flowNodeDetailRow(
-    unitInformationMessage("a11y.detail.parentUnit", language),
-    formatParentUnit(detail),
-  ),
-];
-
-export const buildFlowNodeRelationshipRows = (
-  detail: FlowNodeDetail,
-  language = "en",
-): SharedUnitDetailPaneRow[] => [
-  {
-    label: unitInformationMessage("a11y.detail.predecessors", language),
-    value: detail.predecessorCount,
-  },
-  {
-    label: unitInformationMessage("a11y.detail.successors", language),
-    value: detail.successorCount,
-  },
-  {
-    label: unitInformationMessage("a11y.detail.upstream", language),
-    value: detail.upstreamCount,
-  },
-  {
-    label: unitInformationMessage("a11y.detail.downstream", language),
-    value: detail.downstreamCount,
-  },
-];
-
-export const buildFlowNodeDetailChips = (
-  detail: FlowNodeDetail,
-  focusModeEnabled: boolean,
-  language = "en",
-): SharedUnitDetailPaneChip[] => [
-  {
-    active: detail.hasSchedule,
-    label: unitInformationMessage("a11y.detail.schedule", language),
-  },
-  {
-    active: detail.hasWaitedFor,
-    label: unitInformationMessage("a11y.detail.waitedFor", language),
-  },
-  {
-    active: detail.canExpandNested,
-    label: unitInformationMessage("a11y.detail.nestedExpandable", language),
-  },
-  {
-    active: detail.isSearchMatch,
-    label: unitInformationMessage("a11y.detail.searchMatch", language),
-  },
-  {
-    active: detail.isCurrentSearchResult,
-    label: unitInformationMessage("a11y.detail.currentSearchResult", language),
-  },
-  {
-    active: focusModeEnabled,
-    label: unitInformationMessage("a11y.detail.relationshipFocus", language),
-  },
-];
-
-const buildRelationshipFocusAction = ({
-  focusModeEnabled,
-  onToggleFocusMode,
-  language = "en",
-}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
-  label: unitInformationMessage(
-    focusModeEnabled
-      ? "a11y.detail.exitRelationships"
-      : "a11y.detail.focusRelationships",
-    language,
-  ),
-  icon: <CenterFocusStrongIcon />,
-  onClick: onToggleFocusMode,
-  variant: focusModeEnabled ? "contained" : "outlined",
+const toSharedUnitDetailPaneAction = (
+  action: FlowNodeDetailAction,
+): SharedUnitDetailPaneAction => ({
+  label: action.label,
+  icon: flowNodeDetailActionIcon[action.kind],
+  onClick: action.onClick,
+  variant: action.variant,
 });
-
-const buildOpenDefinitionActions = ({
-  canOpenDefinition,
-  onOpenDefinition,
-  language = "en",
-}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction[] =>
-  canOpenDefinition
-    ? [
-        {
-          label: unitInformationMessage("a11y.detail.openDefinition", language),
-          icon: <DescriptionIcon />,
-          onClick: onOpenDefinition,
-        },
-      ]
-    : [];
-
-const buildOpenUnitListAction = ({
-  onOpenUnitList,
-  language = "en",
-}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction => ({
-  label: unitInformationMessage("a11y.detail.openUnitList", language),
-  icon: <TableChartIcon />,
-  onClick: onOpenUnitList,
-});
-
-const buildOpenScopeActions = ({
-  canOpenAsScope,
-  onOpenScope,
-  language = "en",
-}: FlowNodeDetailActionOptions): SharedUnitDetailPaneAction[] =>
-  canOpenAsScope
-    ? [
-        {
-          label: unitInformationMessage("a11y.detail.openScope", language),
-          icon: <FolderOpenIcon />,
-          onClick: onOpenScope,
-          variant: "contained",
-        },
-      ]
-    : [];
-
-export const buildFlowNodeDetailActions = (
-  options: FlowNodeDetailActionOptions,
-): SharedUnitDetailPaneAction[] => [
-  buildRelationshipFocusAction(options),
-  ...buildOpenDefinitionActions(options),
-  buildOpenUnitListAction(options),
-  ...buildOpenScopeActions(options),
-];
 
 const buildFlowNodeDetailActionOptions = ({
   detail,
@@ -249,7 +110,7 @@ const FlowNodeDetailPanel: FC<FlowNodeDetailPanelProps> = ({
           onToggleFocusMode,
           language: lang,
         }),
-      ),
+      ).map(toSharedUnitDetailPaneAction),
     [
       detail.canOpenAsScope,
       detail.canOpenDefinition,

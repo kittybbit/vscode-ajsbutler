@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { getCurrentUnitLabel } from "../../presentation/webview/editor/ajsFlow/Header";
+import { getCurrentUnitLabel } from "../../presentation/webview/editor/ajsFlow/flowHeaderPresentation";
 import { createFlowTestUnit } from "../support/flowUnits";
 
 suite("Flow Header", () => {

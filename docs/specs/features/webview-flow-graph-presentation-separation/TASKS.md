@@ -4,9 +4,9 @@
 
 - Purpose: separate flow rendering, detail actions, and visual state from
   application-owned graph meaning without changing viewer behavior.
-- Approved or active slice: Slice 2; Slice 1 is complete and all three planned
-  slices are approved for independent implementation within their recorded
-  boundaries.
+- Approved or active slice: Slice 3; Slice 1 and Slice 2 are complete and all
+  three planned slices are approved for independent implementation within
+  their recorded boundaries.
 - Do not change Application DTOs, graph meaning, or viewer message contracts.
 - Do not redesign search, keyboard rules, viewport transitions, flow-tree,
   table, shared header search, or telemetry semantics.
@@ -41,7 +41,7 @@
   boundary identified as Intake group 3 in `../BASELINE.md`.
 - Review status: Reviewed
 - Human approval: Approved
-- Active implementation slice: Slice 2
+- Active implementation slice: Slice 3
 
 ## Replanning Decision
 
@@ -223,7 +223,7 @@ requires replanning and new approval.
 
 ### Slice 2: Separate detail and non-search header display decisions
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Move flow-node detail row, chip, and action-availability decisions into a
     presentation helper/model consumed by `FlowNodeDetailPanel.tsx`; keep React
@@ -294,6 +294,16 @@ requires replanning and new approval.
 - Smallest Useful Slice: detail and non-search header decisions form one
   reviewable display-model responsibility while search remains explicitly
   excluded.
+- Implementation Feedback: the helper boundary kept localization and
+  availability decisions host-neutral while icons and injected callbacks
+  remained at the React boundary. Existing counterpart-view success and
+  unavailable fallback behavior required no contract change.
+- Validation Result: `rtk pnpm test`, `rtk pnpm run test:compile`,
+  `rtk pnpm run test:prepare:web`, `rtk pnpm run qlty`, and `git diff --check`
+  passed. Existing flow integration and viewer-wiring success/fallback tests
+  passed in the desktop suite.
+- Human Completion Approval: Approved in the current conversation per the
+  user's instruction to treat each completed implementation as approved.
 
 ### Slice 3: Isolate the ReactFlow canvas from viewer composition
 
