@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import Box from "@mui/material/Box";
 import GlobalStyles from "@mui/material/GlobalStyles";
@@ -84,6 +83,7 @@ type FlowGraphPanelProps = Pick<
   miniMapColors: FlowMiniMapColors;
   onFocusDetail: (unitId: string) => void;
   onFocusSelector: (unitId?: string) => void;
+  onScopeChange: (targetScopeUnitId: string) => void;
   onNestedExpansion?: (unitId: string, expanded: boolean) => void;
   onNodeSelected?: (unitId: string) => void;
   onSpatialMove?: (
@@ -105,6 +105,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   nodes,
   onFocusDetail,
   onFocusSelector,
+  onScopeChange,
   onNestedExpansion,
   onNodeSelected,
   onSpatialMove,
@@ -354,7 +355,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
           sourceNodes: nodes,
           targetUnitId: action.focusUnitId,
         };
-        currentUnitIdState.setCurrentUnitId(action.targetScopeId);
+        onScopeChange(action.targetScopeId);
         return;
       }
       if (action.kind !== "expand" && action.kind !== "collapse") return;
@@ -372,6 +373,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
       nodes,
       onFocusDetail,
       onFocusSelector,
+      onScopeChange,
       revealFlowNode,
       selectFlowNode,
       onNestedExpansion,
@@ -439,6 +441,7 @@ type FlowViewerBodyProps = FlowViewerController & {
     direction: FlowKeyboardNavigationMovement,
   ) => void;
   onOpenFlowScope: (unitId: string) => void;
+  onScopeChange: (targetScopeUnitId: string) => void;
   onReturnFromDetail: (unitId: string) => void;
   onSelectorEscape: VoidFunction;
   openSelectedNodeUnitList: () => void;
@@ -469,6 +472,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   onNodeSelected,
   onSpatialMove,
   onOpenFlowScope,
+  onScopeChange,
   onReturnFromDetail,
   onSelectorEscape,
   openSelectedNodeDefinition,
@@ -552,6 +556,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
           language={language}
           graphAriaLabel={unitInformationMessage("a11y.flow.graph", language)}
           reactFlowInstanceRef={reactFlowInstanceRef}
+          onScopeChange={onScopeChange}
           selectFlowNode={selectFlowNode}
           selectedUnitId={selectedUnitId}
           showMiniMap={showMiniMap}
@@ -647,12 +652,17 @@ const FlowContents: FC = () => {
     canEnableFocusMode,
     currentUnit,
     currentUnitIdState,
+    changeScope,
     clearGraphHoveredUnit,
     clearTreeHoveredUnit,
     clearSelectedUnit,
+    closeDetail,
     dialogData,
+    detailFocusRequestRevision,
     edges,
     expandableNestedUnitIds,
+    focusGraphRequest,
+    focusSelectorRequest,
     focusModeEnabled,
     handleSearchClear,
     handleSearchNavigate,
@@ -663,6 +673,12 @@ const FlowContents: FC = () => {
     nodes,
     openSelectedNodeDefinition,
     openSelectedNodeScope,
+    handleDetailFocusRequestHandled,
+    handleSelectorEscape,
+    requestDetailFocus,
+    requestGraphFocus,
+    requestScopeTransition,
+    requestSelectorFocus,
     reactFlowInstanceRef,
     searchedUnitId,
     searchResultPosition,
@@ -678,17 +694,11 @@ const FlowContents: FC = () => {
     toggleMiniMap,
     treeHoveredUnit,
     unitById,
+    returnFromDetail,
   } = useFlowViewerController({ theme });
   const openSelectedNodeUnitList =
     useSelectedNodeUnitListAction(selectedNodeDetail);
   const miniMapColors = useFlowMiniMapColors(theme);
-  const [detailFocusRequestRevision, setDetailFocusRequestRevision] =
-    useState(0);
-  const [focusGraphRequest, setFocusGraphRequest] =
-    useState<FlowGraphFocusRequest>({ revision: 0 });
-  const [focusSelectorRequest, setFocusSelectorRequest] =
-    useState<UnitTreeFocusRequest>({ revision: 0 });
-  const savedGraphFocusUnitIdRef = useRef<string | undefined>(undefined);
   const selectFlowNodeWithTelemetry = useCallback(
     (unitId: string) => {
       reportFlowOperation("unit.select");
@@ -703,22 +713,6 @@ const FlowContents: FC = () => {
     },
     [selectTreeUnit],
   );
-  const requestGraphFocus = useCallback(
-    (
-      targetUnitId: string | undefined,
-      options: Pick<
-        FlowGraphFocusRequest,
-        "expectedScopeUnitId" | "selectTarget"
-      > = {},
-    ) => {
-      setFocusGraphRequest((current) => ({
-        ...options,
-        revision: current.revision + 1,
-        targetUnitId,
-      }));
-    },
-    [],
-  );
   const handleEnterFlowTreeUnit = useCallback(
     (unitId: string) => {
       requestGraphFocus(unitId);
@@ -727,60 +721,35 @@ const FlowContents: FC = () => {
   );
   const handleFocusDetail = useCallback(
     (unitId: string) => {
-      savedGraphFocusUnitIdRef.current = unitId;
       if (selectedUnitId !== unitId) {
-        selectFlowNodeWithTelemetry(unitId);
+        reportFlowOperation("unit.select");
       }
-      setDetailFocusRequestRevision((revision) => revision + 1);
+      requestDetailFocus(unitId);
     },
-    [selectedUnitId, selectFlowNodeWithTelemetry],
+    [requestDetailFocus, selectedUnitId],
   );
-  const handleDetailFocusRequestHandled = useCallback((revision: number) => {
-    setDetailFocusRequestRevision((currentRevision) =>
-      currentRevision === revision ? 0 : currentRevision,
-    );
-  }, []);
   const handleFocusSelector = useCallback(
     (unitId?: string) => {
-      savedGraphFocusUnitIdRef.current = unitId;
       const targetUnitId = resolveFlowSelectorFocusTarget(
         currentUnitIdState.currentUnitId,
         flowDocumentDto?.rootUnits ?? [],
         unitById,
       );
-      setFocusSelectorRequest((current) => ({
-        revision: current.revision + 1,
-        targetUnitId,
-      }));
+      requestSelectorFocus(targetUnitId, unitId);
     },
-    [currentUnitIdState, flowDocumentDto?.rootUnits, unitById],
+    [
+      currentUnitIdState,
+      flowDocumentDto?.rootUnits,
+      requestSelectorFocus,
+      unitById,
+    ],
   );
-  const handleSelectorEscape = useCallback(() => {
-    requestGraphFocus(savedGraphFocusUnitIdRef.current);
-  }, [requestGraphFocus]);
   const handleOpenFlowScope = useCallback(
     (unitId: string) => {
       reportFlowOperation("flow.scope.open");
-      currentUnitIdState.setCurrentUnitId(unitId);
-      requestGraphFocus(unitId, {
-        expectedScopeUnitId: unitId,
-        selectTarget: true,
-      });
+      requestScopeTransition(unitId, unitId);
     },
-    [currentUnitIdState, requestGraphFocus],
-  );
-  const handleReturnFromDetail = useCallback(
-    (unitId: string) => {
-      requestGraphFocus(unitId);
-    },
-    [requestGraphFocus],
-  );
-  const handleCloseDetail = useCallback(
-    (unitId: string) => {
-      clearSelectedUnit();
-      requestGraphFocus(unitId);
-    },
-    [clearSelectedUnit, requestGraphFocus],
+    [requestScopeTransition],
   );
   const openSelectedNodeDefinitionWithTelemetry = useCallback(() => {
     if (!selectedNodeDetail?.canOpenDefinition) {
@@ -1007,7 +976,7 @@ const FlowContents: FC = () => {
             hoveredUnitId={hoveredUnitId}
             miniMapColors={miniMapColors}
             nodes={nodes}
-            onCloseDetail={handleCloseDetail}
+            onCloseDetail={closeDetail}
             onDetailFocusRequestHandled={handleDetailFocusRequestHandled}
             onFocusDetail={handleFocusDetail}
             onFocusSelector={handleFocusSelector}
@@ -1016,7 +985,8 @@ const FlowContents: FC = () => {
             onNodeSelected={announceFlowSelection}
             onSpatialMove={announceFlowSpatialMove}
             onOpenFlowScope={handleOpenFlowScope}
-            onReturnFromDetail={handleReturnFromDetail}
+            onScopeChange={changeScope}
+            onReturnFromDetail={returnFromDetail}
             onSelectorEscape={handleSelectorEscape}
             openSelectedNodeDefinition={openSelectedNodeDefinitionWithTelemetry}
             openSelectedNodeScope={openSelectedNodeScopeWithTelemetry}
@@ -1040,6 +1010,15 @@ const FlowContents: FC = () => {
             toggleMiniMap={toggleMiniMapWithTelemetry}
             treeHoveredUnit={treeHoveredUnit}
             unitById={unitById}
+            closeDetail={closeDetail}
+            changeScope={changeScope}
+            handleDetailFocusRequestHandled={handleDetailFocusRequestHandled}
+            handleSelectorEscape={handleSelectorEscape}
+            requestDetailFocus={requestDetailFocus}
+            requestGraphFocus={requestGraphFocus}
+            requestScopeTransition={requestScopeTransition}
+            requestSelectorFocus={requestSelectorFocus}
+            returnFromDetail={returnFromDetail}
           />
         </Stack>
       </ReactFlowProvider>

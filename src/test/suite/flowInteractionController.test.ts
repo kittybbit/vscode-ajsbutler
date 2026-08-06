@@ -28,6 +28,10 @@ suite("Flow interaction controller", () => {
       currentUnitId: undefined,
       expandedUnitIds: ["child"],
       preserveSearchOnNextScopeChange: false,
+      graphFocusRequest: { revision: 0 },
+      detailFocusRequestRevision: 0,
+      selectorFocusRequest: { revision: 0 },
+      selectionFocusRequest: { version: 0 },
       searchState: {
         query: "leaf",
         matchedUnitIds: ["child", "leaf"],
@@ -93,5 +97,84 @@ suite("Flow interaction controller", () => {
     });
 
     assert.strictEqual(revealed.preserveSearchOnNextScopeChange, false);
+  });
+
+  test("keeps selection and cross-region focus intents distinct", () => {
+    const selected = reduceFlowInteractionState(
+      createInitialFlowInteractionState(),
+      { type: "selectionChanged", unitId: "graph-unit" },
+    );
+    const detailFocused = reduceFlowInteractionState(selected, {
+      type: "detailFocusRequested",
+      unitId: "detail-unit",
+    });
+    const selectorFocused = reduceFlowInteractionState(detailFocused, {
+      type: "selectorFocusRequested",
+      savedGraphFocusUnitId: "detail-unit",
+      targetUnitId: "scope",
+    });
+    const graphFocused = reduceFlowInteractionState(selectorFocused, {
+      type: "selectorEscape",
+    });
+
+    assert.strictEqual(detailFocused.selectedUnitId, "detail-unit");
+    assert.strictEqual(detailFocused.detailFocusRequestRevision, 1);
+    assert.strictEqual(detailFocused.savedGraphFocusUnitId, "detail-unit");
+    assert.deepStrictEqual(selectorFocused.selectorFocusRequest, {
+      revision: 1,
+      targetUnitId: "scope",
+    });
+    assert.deepStrictEqual(graphFocused.graphFocusRequest, {
+      revision: 1,
+      targetUnitId: "detail-unit",
+    });
+  });
+
+  test("combines tree selection, ancestor expansion, and selection focus", () => {
+    const state = reduceFlowInteractionState(
+      {
+        ...createInitialFlowInteractionState(),
+        expandedUnitIds: ["existing"],
+      },
+      {
+        type: "treeSelectionChanged",
+        expandedNestedUnitIds: ["child", "grand"],
+        selectedUnitId: "leaf",
+      },
+    );
+
+    assert.deepStrictEqual(state.expandedUnitIds, [
+      "existing",
+      "child",
+      "grand",
+    ]);
+    assert.strictEqual(state.selectedUnitId, "leaf");
+    assert.deepStrictEqual(state.selectionFocusRequest, {
+      targetUnitId: "leaf",
+      version: 1,
+    });
+  });
+
+  test("creates one explicit scope transition and focus intent", () => {
+    const state = reduceFlowInteractionState(
+      {
+        ...createInitialFlowInteractionState(),
+        selectedUnitId: "old-unit",
+      },
+      {
+        type: "scopeTransitionRequested",
+        focusUnitId: "scope-entry",
+        targetScopeUnitId: "next-scope",
+      },
+    );
+
+    assert.strictEqual(state.currentUnitId, "next-scope");
+    assert.strictEqual(state.selectedUnitId, undefined);
+    assert.deepStrictEqual(state.graphFocusRequest, {
+      revision: 1,
+      expectedScopeUnitId: "next-scope",
+      selectTarget: true,
+      targetUnitId: "scope-entry",
+    });
   });
 });

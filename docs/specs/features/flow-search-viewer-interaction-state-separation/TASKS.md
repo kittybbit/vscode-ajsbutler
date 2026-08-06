@@ -4,8 +4,8 @@
 
 - Purpose: isolate flow search and viewer interaction state from graph
   rendering without changing exploration behavior.
-- Approved or active slice: Slice 2; Slice 1 is complete and Slices 2-3 remain
-  approved for sequential implementation.
+- Approved or active slice: Slice 3; Slices 1-2 are complete and Slice 3 remains
+  approved for implementation.
 - Do not change Application DTOs, parser behavior, viewer messages, telemetry
   vocabulary, matching semantics, or the VS Code compatibility floor.
 - Do not absorb graph rendering/detail, shared header search, or flow-tree
@@ -46,7 +46,7 @@
   selection-source, search, reveal, focus-transition, and viewport state.
 - Review status: Complete; no outstanding findings.
 - Human approval: Approved.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 - Branch condition: dedicated branch
   `codex/flow-search-viewer-interaction-state-separation` created for this
   feature.
@@ -250,7 +250,7 @@ active implementation approval remains.
 
 ### Slice 2: Centralize selection and cross-region focus intents
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Extend the presentation-local interaction controller from Slice 1 to own
     selected unit identity and renderer-neutral graph, detail, and selector
@@ -309,9 +309,16 @@ active implementation approval remains.
     `flowAccessibility.test.ts`, `viewerActionTelemetry.test.ts`,
     `viewerAnnouncements.test.ts`, and viewer-operation callback-count
     coverage.
-  - Run the nearest focused tests, then `rtk pnpm test` (desktop preparation,
+- Run the nearest focused tests, then `rtk pnpm test` (desktop preparation,
     compilation, and architecture dependency suite),
     `rtk pnpm run test:prepare:web`, and `rtk pnpm run qlty`.
+- Completion Evidence: desktop preparation and suite passed; web preparation
+  and TypeScript compilation passed; `rtk pnpm run qlty` reported no issues;
+  `git diff --check` passed.
+- Implementation Feedback: the existing keyboard DOM focus pending request was
+  kept as the sole readiness/fallback executor, while controller graph-focus
+  revisions serve tree/detail/selector handoffs. This avoids duplicate focus
+  effects and should remain an explicit boundary in the viewport slice.
 - Production Readiness:
   - Failure mode: stale or reordered focus intents can select the wrong node,
     lose keyboard focus, double-fire telemetry/announcements, or race a scope

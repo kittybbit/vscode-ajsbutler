@@ -11,18 +11,56 @@ import {
   type FlowSearchDirection,
   type FlowSearchState,
 } from "./flowSearchState";
+import type {
+  FlowGraphFocusRequest,
+  FlowViewportFocusRequest,
+} from "./flowViewportFocus";
+import type { UnitTreeFocusRequest } from "../shared/UnitTreeSelector";
 
 export type FlowInteractionState = {
   currentUnitId?: string;
   expandedUnitIds: string[];
   searchState: FlowSearchState;
   preserveSearchOnNextScopeChange: boolean;
+  selectedUnitId?: string;
+  graphFocusRequest: FlowGraphFocusRequest;
+  detailFocusRequestRevision: number;
+  selectorFocusRequest: UnitTreeFocusRequest;
+  savedGraphFocusUnitId?: string;
+  selectionFocusRequest: FlowViewportFocusRequest;
 };
 
 export type FlowInteractionAction =
   | { type: "scopeChanged"; currentUnitId?: string }
   | { type: "scopeReset" }
+  | {
+      type: "scopeTransitionRequested";
+      targetScopeUnitId: string;
+      focusUnitId: string;
+    }
   | { type: "expandedUnitIdsChanged"; expandedUnitIds: string[] }
+  | { type: "selectionChanged"; unitId: string }
+  | { type: "selectionCleared" }
+  | { type: "contextChanged" }
+  | {
+      type: "treeSelectionChanged";
+      selectedUnitId: string;
+      expandedNestedUnitIds: string[];
+    }
+  | {
+      type: "graphFocusRequested";
+      targetUnitId?: string;
+      expectedScopeUnitId?: string;
+      selectTarget?: boolean;
+    }
+  | { type: "detailFocusRequested"; unitId: string }
+  | { type: "detailFocusHandled"; revision: number }
+  | {
+      type: "selectorFocusRequested";
+      targetUnitId?: string;
+      savedGraphFocusUnitId?: string;
+    }
+  | { type: "selectorEscape" }
   | { type: "searchCleared" }
   | {
       type: "searchNavigated";
@@ -40,6 +78,21 @@ export const createInitialFlowInteractionState = (): FlowInteractionState => ({
   expandedUnitIds: [],
   searchState: createEmptyFlowSearchState(),
   preserveSearchOnNextScopeChange: false,
+  graphFocusRequest: { revision: 0 },
+  detailFocusRequestRevision: 0,
+  selectorFocusRequest: { revision: 0 },
+  selectionFocusRequest: { version: 0 },
+});
+
+const nextGraphFocusRequest = (
+  state: FlowInteractionState,
+  request: Omit<FlowGraphFocusRequest, "revision">,
+): FlowInteractionState => ({
+  ...state,
+  graphFocusRequest: {
+    ...request,
+    revision: state.graphFocusRequest.revision + 1,
+  },
 });
 
 const reduceSearchSubmission = (
@@ -64,6 +117,11 @@ const reduceSearchSubmission = (
       ),
 });
 
+const mergeExpandedUnitIds = (
+  currentUnitIds: readonly string[],
+  requiredUnitIds: readonly string[],
+): string[] => [...new Set([...currentUnitIds, ...requiredUnitIds])];
+
 export const reduceFlowInteractionState = (
   state: FlowInteractionState,
   action: FlowInteractionAction,
@@ -74,7 +132,25 @@ export const reduceFlowInteractionState = (
         ...state,
         currentUnitId: action.currentUnitId,
         preserveSearchOnNextScopeChange: false,
+        selectedUnitId:
+          action.currentUnitId === state.currentUnitId
+            ? state.selectedUnitId
+            : undefined,
       };
+    case "scopeTransitionRequested":
+      return nextGraphFocusRequest(
+        {
+          ...state,
+          currentUnitId: action.targetScopeUnitId,
+          preserveSearchOnNextScopeChange: false,
+          selectedUnitId: undefined,
+        },
+        {
+          expectedScopeUnitId: action.targetScopeUnitId,
+          selectTarget: true,
+          targetUnitId: action.focusUnitId,
+        },
+      );
     case "scopeReset":
       if (state.preserveSearchOnNextScopeChange) {
         return {
@@ -95,6 +171,59 @@ export const reduceFlowInteractionState = (
         ...state,
         expandedUnitIds: action.expandedUnitIds,
       };
+    case "selectionChanged":
+      return { ...state, selectedUnitId: action.unitId };
+    case "selectionCleared":
+      return { ...state, selectedUnitId: undefined };
+    case "contextChanged":
+      return { ...state, selectedUnitId: undefined };
+    case "treeSelectionChanged":
+      return {
+        ...state,
+        expandedUnitIds: mergeExpandedUnitIds(
+          state.expandedUnitIds,
+          action.expandedNestedUnitIds,
+        ),
+        selectedUnitId: action.selectedUnitId,
+        selectionFocusRequest: {
+          targetUnitId: action.selectedUnitId,
+          version: state.selectionFocusRequest.version + 1,
+        },
+      };
+    case "graphFocusRequested":
+      return nextGraphFocusRequest(state, {
+        expectedScopeUnitId: action.expectedScopeUnitId,
+        selectTarget: action.selectTarget,
+        targetUnitId: action.targetUnitId,
+      });
+    case "detailFocusRequested":
+      return {
+        ...state,
+        detailFocusRequestRevision: state.detailFocusRequestRevision + 1,
+        savedGraphFocusUnitId: action.unitId,
+        selectedUnitId: action.unitId,
+      };
+    case "detailFocusHandled":
+      return {
+        ...state,
+        detailFocusRequestRevision:
+          state.detailFocusRequestRevision === action.revision
+            ? 0
+            : state.detailFocusRequestRevision,
+      };
+    case "selectorFocusRequested":
+      return {
+        ...state,
+        savedGraphFocusUnitId: action.savedGraphFocusUnitId,
+        selectorFocusRequest: {
+          revision: state.selectorFocusRequest.revision + 1,
+          targetUnitId: action.targetUnitId,
+        },
+      };
+    case "selectorEscape":
+      return nextGraphFocusRequest(state, {
+        targetUnitId: state.savedGraphFocusUnitId,
+      });
     case "searchCleared":
       return {
         ...state,
@@ -117,6 +246,10 @@ export const reduceFlowInteractionState = (
         currentUnitId: action.target.activeFlowScopeUnitId,
         expandedUnitIds: [...action.target.requiredExpandedAncestorUnitIds],
         preserveSearchOnNextScopeChange,
+        selectedUnitId:
+          action.target.activeFlowScopeUnitId === state.currentUnitId
+            ? state.selectedUnitId
+            : undefined,
         searchState: createRevealedFlowSearchState(
           action.target.revealedUnitId,
           state.searchState.focusRequestVersion + 1,
