@@ -1,6 +1,12 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
-import React, { useCallback, useReducer, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import type { Edge, Node, ReactFlowInstance } from "@xyflow/react";
 import {
@@ -19,10 +25,11 @@ import type { NavigationRequestDto } from "../../application/navigation/resolveN
 import {
   useFlowDocumentSubscription,
   useFlowScopeReset,
-  useFlowViewerFitView,
   useFlowViewerOverflow,
   useRevealUnitSubscription,
 } from "../../presentation/webview/editor/ajsFlow/useFlowViewerEffects";
+import { useFlowViewportAdapter } from "../../presentation/webview/editor/ajsFlow/useFlowViewportAdapter";
+import type { FlowNodeData } from "../../presentation/webview/editor/ajsFlow/flowNodePresentationModel";
 import {
   reduceFlowInteractionState,
   createInitialFlowInteractionState,
@@ -138,7 +145,7 @@ const documentPayload = (): UnitListDocumentDto =>
 const createReactFlowInstance = (calls: {
   fitView: unknown[];
   setCenter: unknown[];
-}): ReactFlowInstance<Node, Edge> =>
+}): ReactFlowInstance<Node<FlowNodeData>, Edge> =>
   ({
     fitView: (options: unknown) => {
       calls.fitView.push(options);
@@ -150,26 +157,25 @@ const createReactFlowInstance = (calls: {
       calls.setCenter.push(args);
       return Promise.resolve(true);
     },
-  }) as unknown as ReactFlowInstance<Node, Edge>;
+  }) as unknown as ReactFlowInstance<Node<FlowNodeData>, Edge>;
 
 const FitViewFixture = ({
   instance,
 }: {
-  instance: ReactFlowInstance<Node, Edge>;
+  instance: ReactFlowInstance<Node<FlowNodeData>, Edge>;
 }) => {
-  const reactFlowInstanceRef = useRef<ReactFlowInstance<Node, Edge> | null>(
-    instance,
-  );
-  useFlowViewerFitView({
+  const { onRendererReady } = useFlowViewportAdapter({
     edges: [],
     focusRequestVersion: 0,
     layoutRequestIdentity: {},
-    nodes: [{ id: "target" } as Node],
+    nodes: [{ id: "target" } as Node<FlowNodeData>],
     preserveViewportRequestVersion: 0,
-    reactFlowInstanceRef,
     selectionFocusRequestVersion: 1,
     selectionFocusTargetUnitId: "target",
   });
+  useLayoutEffect(() => {
+    onRendererReady(instance);
+  }, [instance, onRendererReady]);
   return null;
 };
 

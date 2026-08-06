@@ -40,6 +40,7 @@ export type FlowInteractionAction =
     }
   | { type: "expandedUnitIdsChanged"; expandedUnitIds: string[] }
   | { type: "selectionChanged"; unitId: string }
+  | { type: "keyboardNavigationRequested"; unitId: string }
   | { type: "selectionCleared" }
   | { type: "contextChanged" }
   | {
@@ -173,6 +174,15 @@ export const reduceFlowInteractionState = (
       };
     case "selectionChanged":
       return { ...state, selectedUnitId: action.unitId };
+    case "keyboardNavigationRequested":
+      return {
+        ...state,
+        selectedUnitId: action.unitId,
+        selectionFocusRequest: {
+          targetUnitId: action.unitId,
+          version: state.selectionFocusRequest.version + 1,
+        },
+      };
     case "selectionCleared":
       return { ...state, selectedUnitId: undefined };
     case "contextChanged":

@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import type { Theme } from "@mui/material/styles";
-import type { Edge, Node, ReactFlowInstance } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
 import type {
   FlowGraphUnitDto,
   ValidatedFlowGraphDocument,
@@ -25,7 +25,6 @@ import { useFlowGraphState } from "./useFlowGraphState";
 import {
   useFlowDocumentSubscription,
   useFlowScopeReset,
-  useFlowViewerFitView,
   useFlowViewerOverflow,
   useRevealUnitSubscription,
 } from "./useFlowViewerEffects";
@@ -41,7 +40,6 @@ import {
   useFlowTreeSelectionState,
   type FlowTreeSelectionTarget,
 } from "./flowTreeSelection";
-import type { FlowViewportFocusRequest } from "./flowViewportFocus";
 import { applyHoveredUnitToFlowNodes } from "./flowGraphHover";
 import { applyFlowRelationshipFocus } from "./flowRelationshipFocus";
 import { useFlowFocusModeState } from "./useFlowFocusModeState";
@@ -54,16 +52,9 @@ type UseFlowViewerControllerParams = {
 const emptyFlowUnitById: ReadonlyMap<string, FlowGraphUnitDto> = new Map();
 
 const useFlowViewerRefs = () => {
-  const reactFlowInstanceRef = useRef<ReactFlowInstance<
-    Node<FlowNodeData>,
-    Edge
-  > | null>(null);
   const previousUnitIdRef = useRef<string | undefined>(undefined);
 
-  return {
-    previousUnitIdRef,
-    reactFlowInstanceRef,
-  };
+  return { previousUnitIdRef };
 };
 
 const useCurrentUnit = (
@@ -231,20 +222,9 @@ const useSelectedFlowNodeDetailState = ({
 type FlowViewerLifecycleParams = {
   flowDocument?: ValidatedFlowGraphDocument;
   currentUnitId?: string;
-  edges: Edge[];
-  expandedUnitIds: readonly string[];
-  focusRequestVersion: number;
   handleRevealUnit: (request: NavigationRequestDto) => void;
-  nodes: Node<FlowNodeData>[];
-  preserveViewportRequestVersion: number;
   previousUnitIdRef: ReturnType<typeof useFlowViewerRefs>["previousUnitIdRef"];
-  reactFlowInstanceRef: ReturnType<
-    typeof useFlowViewerRefs
-  >["reactFlowInstanceRef"];
   resetScope: () => void;
-  searchedUnitId?: string;
-  selectedUnitId?: string;
-  selectionFocusRequest: FlowViewportFocusRequest;
   setFlowDocument: Dispatch<
     SetStateAction<ValidatedFlowGraphDocument | undefined>
   >;
@@ -252,47 +232,18 @@ type FlowViewerLifecycleParams = {
   setUnitDefinitionByPath: Dispatch<
     SetStateAction<ReadonlyMap<string, UnitDefinitionDialogDto>>
   >;
-  theme: Theme;
 };
 
 const useFlowViewerLifecycle = ({
   flowDocument,
   currentUnitId,
-  edges,
-  expandedUnitIds,
-  focusRequestVersion,
   handleRevealUnit,
-  nodes,
-  preserveViewportRequestVersion,
   previousUnitIdRef,
-  reactFlowInstanceRef,
   resetScope,
-  searchedUnitId,
-  selectedUnitId,
-  selectionFocusRequest,
   setFlowDocument,
   setCurrentUnitId,
   setUnitDefinitionByPath,
-  theme,
 }: FlowViewerLifecycleParams) => {
-  const layoutRequestIdentity = useMemo(
-    () => ({}),
-    [flowDocument, currentUnitId, expandedUnitIds, theme],
-  );
-  useFlowViewerFitView({
-    edges,
-    focusRequestVersion,
-    layoutRequestIdentity,
-    nodes,
-    preserveViewportRequestVersion,
-    reactFlowInstanceRef,
-    searchedUnitId,
-    selectionFocusRequestVersion: selectionFocusRequest.version,
-    selectionFocusTargetUnitId:
-      selectionFocusRequest.targetUnitId === selectedUnitId
-        ? selectionFocusRequest.targetUnitId
-        : undefined,
-  });
   useFlowScopeReset({
     documentIdentity: flowDocument,
     currentUnitId,
@@ -351,7 +302,7 @@ export const useFlowViewerController = ({
   const [documentUnitDefinitionByPath, setUnitDefinitionByPath] = useState<
     ReadonlyMap<string, UnitDefinitionDialogDto>
   >(new Map());
-  const { previousUnitIdRef, reactFlowInstanceRef } = useFlowViewerRefs();
+  const { previousUnitIdRef } = useFlowViewerRefs();
   const { dialogData, dialogDataState, setDialogData } = useFlowViewerUiState();
   const { currentUnit, unitById, unitDefinitionByPath } = useFlowDocumentState(
     flowDocument,
@@ -379,6 +330,11 @@ export const useFlowViewerController = ({
   const selectionFocusRequest = interactionState.selectionFocusRequest;
   const selectUnit = useCallback(
     (unitId: string) => dispatch({ type: "selectionChanged", unitId }),
+    [],
+  );
+  const requestKeyboardNavigation = useCallback(
+    (unitId: string) =>
+      dispatch({ type: "keyboardNavigationRequested", unitId }),
     [],
   );
   const clearSelection = useCallback(
@@ -534,23 +490,17 @@ export const useFlowViewerController = ({
   useFlowViewerLifecycle({
     flowDocument,
     currentUnitId,
-    edges,
-    expandedUnitIds,
-    focusRequestVersion,
     handleRevealUnit,
-    nodes,
-    preserveViewportRequestVersion: keyboardExpansionPreserveViewportVersion,
     previousUnitIdRef,
-    reactFlowInstanceRef,
     resetScope,
-    searchedUnitId,
-    selectedUnitId,
-    selectionFocusRequest,
     setFlowDocument,
     setCurrentUnitId,
     setUnitDefinitionByPath,
-    theme,
   });
+  const layoutRequestIdentity = useMemo(
+    () => ({}),
+    [flowDocument, currentUnitId, expandedUnitIds, theme],
+  );
 
   return {
     flowDocumentDto,
@@ -569,6 +519,7 @@ export const useFlowViewerController = ({
     focusSelectorRequest: interactionState.selectorFocusRequest,
     focusModeEnabled,
     detailFocusRequestRevision: interactionState.detailFocusRequestRevision,
+    focusRequestVersion,
     handleSearchClear,
     handleSearchNavigate,
     handleSearchSubmit,
@@ -582,13 +533,16 @@ export const useFlowViewerController = ({
     handleSelectorEscape,
     requestDetailFocus,
     requestGraphFocus,
+    requestKeyboardNavigation,
     requestScopeTransition,
     requestSelectorFocus,
-    reactFlowInstanceRef,
+    layoutRequestIdentity,
+    preserveViewportRequestVersion: keyboardExpansionPreserveViewportVersion,
     searchedUnitId,
     searchResultPosition,
     selectedUnitId,
     selectedNodeDetail,
+    selectionFocusRequest,
     showMiniMap,
     selectFlowNode: selectUnit,
     selectTreeUnit,

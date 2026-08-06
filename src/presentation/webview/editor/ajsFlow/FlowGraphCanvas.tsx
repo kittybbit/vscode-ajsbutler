@@ -8,7 +8,6 @@ import {
   type Node,
   NodeTypes,
   ReactFlow,
-  type ReactFlowInstance,
 } from "@xyflow/react";
 import JobNode from "./nodes/JobNode";
 import JobNetNode from "./nodes/JobNetNode";
@@ -24,6 +23,10 @@ import { readOnlyFlowInteractionProps } from "./flowKeyboardNavigation";
 import { flowAriaLabelConfig } from "./flowAccessibility";
 import { unitInformationMessage } from "../unitInformationLocalization";
 import type { Theme } from "@mui/material/styles";
+import type {
+  FlowRendererReady,
+  FlowViewportInstanceRef,
+} from "./useFlowViewportAdapter";
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 const minimumViewportZoom = 0.02;
@@ -43,13 +46,8 @@ type FlowGraphCanvasProps = {
   onNodeClick: (event: React.MouseEvent, node: Node<FlowNodeData>) => void;
   onNodeMouseEnter: (event: React.MouseEvent, node: Node<FlowNodeData>) => void;
   onNodeMouseLeave: (event: React.MouseEvent, node: Node<FlowNodeData>) => void;
-  onRendererReady: (
-    instance: ReactFlowInstance<Node<FlowNodeData>, Edge>,
-  ) => void;
-  reactFlowInstanceRef: React.MutableRefObject<ReactFlowInstance<
-    Node<FlowNodeData>,
-    Edge
-  > | null>;
+  onRendererReady: FlowRendererReady;
+  reactFlowInstanceRef: FlowViewportInstanceRef;
   selectedUnitId?: string;
   showMiniMap: boolean;
   theme: Theme;

@@ -155,6 +155,20 @@ suite("Flow interaction controller", () => {
     });
   });
 
+  test("turns keyboard navigation into a selection viewport intent", () => {
+    const state = reduceFlowInteractionState(
+      createInitialFlowInteractionState(),
+      { type: "keyboardNavigationRequested", unitId: "next-unit" },
+    );
+
+    assert.strictEqual(state.selectedUnitId, "next-unit");
+    assert.deepStrictEqual(state.selectionFocusRequest, {
+      targetUnitId: "next-unit",
+      version: 1,
+    });
+    assert.strictEqual(state.currentUnitId, undefined);
+  });
+
   test("creates one explicit scope transition and focus intent", () => {
     const state = reduceFlowInteractionState(
       {

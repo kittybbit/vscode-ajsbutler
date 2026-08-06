@@ -4,8 +4,8 @@
 
 - Purpose: isolate flow search and viewer interaction state from graph
   rendering without changing exploration behavior.
-- Approved or active slice: Slice 3; Slices 1-2 are complete and Slice 3 remains
-  approved for implementation.
+- Approved or active slice: Slices 1-3 are complete; Feature Exit remains
+  pending.
 - Do not change Application DTOs, parser behavior, viewer messages, telemetry
   vocabulary, matching semantics, or the VS Code compatibility floor.
 - Do not absorb graph rendering/detail, shared header search, or flow-tree
@@ -17,8 +17,7 @@
   `rtk pnpm run qlty`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: complete Slice 1 and record its validation before moving to
-  Slice 2.
+- Next decision: run Feature Exit review before closing this feature.
 
 ## Sync Rule
 
@@ -46,7 +45,7 @@
   selection-source, search, reveal, focus-transition, and viewport state.
 - Review status: Complete; no outstanding findings.
 - Human approval: Approved.
-- Active implementation slice: Slice 3.
+- Active implementation slice: None; Feature Exit has not started.
 - Branch condition: dedicated branch
   `codex/flow-search-viewer-interaction-state-separation` created for this
   feature.
@@ -310,8 +309,8 @@ active implementation approval remains.
     `viewerAnnouncements.test.ts`, and viewer-operation callback-count
     coverage.
 - Run the nearest focused tests, then `rtk pnpm test` (desktop preparation,
-    compilation, and architecture dependency suite),
-    `rtk pnpm run test:prepare:web`, and `rtk pnpm run qlty`.
+  compilation, and architecture dependency suite),
+  `rtk pnpm run test:prepare:web`, and `rtk pnpm run qlty`.
 - Completion Evidence: desktop preparation and suite passed; web preparation
   and TypeScript compilation passed; `rtk pnpm run qlty` reported no issues;
   `git diff --check` passed.
@@ -354,7 +353,7 @@ active implementation approval remains.
 
 ### Slice 3: Separate viewport intent from ReactFlow effect execution
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Define renderer-neutral viewport intent/state for search result centering,
     tree-originated selection centering, keyboard spatial navigation,
@@ -445,6 +444,18 @@ active implementation approval remains.
   baseline as evidence of a useful responsibility boundary.
 - Approval Boundary: renderer-neutral viewport intents, ReactFlow adapter
   extraction, graph-panel wiring, and focused dual-host validation only.
+- Completion Evidence: `rtk pnpm test` passed; `rtk pnpm run test:prepare:web`
+  passed; `rtk pnpm test:web` passed with the required elevated browser
+  execution after the sandboxed Chromium launch was denied; `rtk pnpm run
+build` passed with the repository's existing bundle-size warnings; `rtk pnpm
+run qlty:check` reported no issues; markdown lint and `git diff --check`
+  passed.
+- Implementation Feedback: the viewport adapter boundary was appropriate: it
+  now owns renderer readiness, request priority, frame cancellation, and all
+  imperative viewport calls, while DOM focus remains in the graph panel and
+  selected-node visual synchronization remains in the canvas. Web smoke
+  required elevated execution because the local Chromium sandbox could not
+  start under the default permissions.
 - Dependencies: Slice 1 supplies search/scope intent; Slice 2 supplies
   selection and focus-request intent.
 - Risks: React effect ordering, stale closures, animation-frame cleanup,
@@ -528,10 +539,10 @@ active implementation approval remains.
 
 - [x] Review the full plan with `sdd-review-plan`.
 - [x] Obtain clear human approval for the reviewed implementation scope.
-- [ ] Add or update focused tests inside every approved code slice.
-- [ ] Run `rtk pnpm run qlty` for every code slice.
-- [ ] Run `rtk pnpm run test:prepare:web` for every shared-webview slice.
-- [ ] Complete full desktop, production build, web smoke, architecture, and
+- [x] Add or update focused tests inside every approved code slice.
+- [x] Run `rtk pnpm run qlty` for every code slice.
+- [x] Run `rtk pnpm run test:prepare:web` for every shared-webview slice.
+- [x] Complete full desktop, production build, web smoke, architecture, and
       final Qlty evidence in Slice 3.
 - [ ] Evaluate durable docs, README, CHANGELOG, and roadmap impact at Feature
       Exit.
