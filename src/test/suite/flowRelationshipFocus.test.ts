@@ -6,7 +6,7 @@ import {
   resolveFlowEdgeFocusRole,
   resolveFlowNodeFocusRole,
 } from "../../presentation/webview/editor/ajsFlow/flowRelationshipFocus";
-import type { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import type { FlowNodeData } from "../../presentation/webview/editor/ajsFlow/flowNodePresentationModel";
 
 const edges: Edge[] = [
   { id: "u-s", source: "u", target: "s" },
@@ -21,14 +21,14 @@ const edges: Edge[] = [
 const node = (
   id: string,
   options: { opacity?: number; searchMatch?: boolean } = {},
-): Node<AjsNode> => ({
+): Node<FlowNodeData> => ({
   id,
   position: { x: 0, y: 0 },
   data: {
     unitId: id,
     label: id,
     isSearchMatch: options.searchMatch,
-  } as AjsNode,
+  } as FlowNodeData,
   style:
     options.opacity === undefined ? undefined : { opacity: options.opacity },
 });

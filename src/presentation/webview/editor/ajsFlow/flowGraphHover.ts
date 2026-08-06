@@ -1,10 +1,10 @@
 import type { Node } from "@xyflow/react";
-import type { AjsNode } from "./nodes/AjsNode";
+import type { FlowNodeData } from "./flowNodePresentationModel";
 
 export const applyHoveredUnitToFlowNodes = (
-  nodes: readonly Node<AjsNode>[],
+  nodes: readonly Node<FlowNodeData>[],
   hoveredUnitId: string | undefined,
-): Node<AjsNode>[] =>
+): Node<FlowNodeData>[] =>
   nodes.map((node) => {
     const isHovered = node.id === hoveredUnitId;
     if (Boolean(node.data.isHovered) === isHovered) {

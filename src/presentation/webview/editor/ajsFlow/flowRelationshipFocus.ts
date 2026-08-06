@@ -1,13 +1,11 @@
 import type { Edge, Node } from "@xyflow/react";
 import { collectRelatedUnitIds } from "./flowNodeDetail";
-import type { AjsNode } from "./nodes/AjsNode";
+import type {
+  FlowNodeData,
+  FlowRelationshipFocusRole,
+} from "./flowNodePresentationModel";
 
-export type FlowRelationshipFocusRole =
-  | "selected"
-  | "upstream"
-  | "downstream"
-  | "both"
-  | "unrelated";
+export type { FlowRelationshipFocusRole } from "./flowNodePresentationModel";
 
 export type FlowRelationshipFocusColors = {
   both: string;
@@ -126,9 +124,9 @@ const weakenedOpacity = (opacity: unknown, factor: number): number =>
   typeof opacity === "number" ? opacity * factor : factor;
 
 const decorateNode = (
-  node: Node<AjsNode>,
+  node: Node<FlowNodeData>,
   focus: FlowRelationshipFocus,
-): Node<AjsNode> => {
+): Node<FlowNodeData> => {
   const relationshipFocusRole = resolveFlowNodeFocusRole(node.id, focus);
   return {
     ...node,
@@ -173,10 +171,10 @@ const decorateEdge = (
 };
 
 export const applyFlowRelationshipFocus = (
-  nodes: Node<AjsNode>[],
+  nodes: Node<FlowNodeData>[],
   edges: Edge[],
   { colors, enabled, selectedUnitId }: ApplyFlowRelationshipFocusOptions,
-): { edges: Edge[]; nodes: Node<AjsNode>[] } => {
+): { edges: Edge[]; nodes: Node<FlowNodeData>[] } => {
   if (
     !enabled ||
     !selectedUnitId ||

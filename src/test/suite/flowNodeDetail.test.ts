@@ -13,7 +13,7 @@ import {
 } from "../../presentation/webview/editor/ajsFlow/FlowNodeDetailPanel";
 import { reduceSelectedFlowNodeId } from "../../presentation/webview/editor/ajsFlow/useSelectedFlowNodeState";
 import { getSharedUnitDetailPaneActionLabels } from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
-import type { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import type { FlowNodeData } from "../../presentation/webview/editor/ajsFlow/flowNodePresentationModel";
 
 const edges: Edge[] = [
   { id: "a-b", source: "a", target: "b" },
@@ -110,7 +110,7 @@ suite("Flow Node Detail", () => {
         currentUnitId: "parent",
         setCurrentUnitId: () => undefined,
       },
-    } satisfies Node<AjsNode>;
+    } satisfies Node<FlowNodeData>;
 
     const detail = buildFlowNodeDetail(node, edges, units);
 
@@ -161,7 +161,7 @@ suite("Flow Node Detail", () => {
         setDialogData: () => undefined,
         setCurrentUnitId: () => undefined,
       },
-    } satisfies Omit<Node<AjsNode>, "type">;
+    } satisfies Omit<Node<FlowNodeData>, "type">;
     const units = new Map([["b", unit("b")]]);
 
     assert.strictEqual(

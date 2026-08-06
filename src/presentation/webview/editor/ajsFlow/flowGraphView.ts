@@ -14,7 +14,7 @@ import type {
   NestedExpansionStateType,
 } from "./flowViewerStateTypes";
 import type { ExpandedNodeDecoration } from "./buildExpandedFlowGraph";
-import type { AjsNode } from "./nodes/AjsNode";
+import type { FlowNodeData } from "./flowNodePresentationModel";
 import { createFlowNodeGeometryPx } from "./nodes/flowNodeGeometry";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
 import { isExpandableNestedUnit } from "./nestedExpansion";
@@ -50,7 +50,7 @@ const nestedPanelBoundsNodeId = (unitId: string): string =>
 const toNodeData = (
   node: FlowGraphNodeDto,
   context: FlowNodeDataBuildContext,
-): AjsNode => {
+): FlowNodeData => {
   const { unitDefinitionByPath, dialogDataState, currentUnitIdState, options } =
     context;
   const unitDefinition = unitDefinitionByPath.get(node.metadata.absolutePath);
@@ -151,7 +151,7 @@ const toNodePosition = (
 const toReactFlowNode = (
   node: FlowGraphNodeDto,
   context: ReactFlowNodeBuildContext,
-): Node<AjsNode> => {
+): Node<FlowNodeData> => {
   const selected = context.options?.selectedUnitId === node.id;
   return {
     id: node.id,
@@ -175,8 +175,8 @@ const toReactFlowNode = (
 };
 
 const toNestedPanelBoundsNode = (
-  node: Node<AjsNode>,
-): Node<AjsNode> | undefined => {
+  node: Node<FlowNodeData>,
+): Node<FlowNodeData> | undefined => {
   const nestedPanel = node.data.nestedPanel;
   if (!nestedPanel) {
     return undefined;
@@ -185,7 +185,7 @@ const toNestedPanelBoundsNode = (
   return {
     id: nestedPanelBoundsNodeId(node.id),
     type: "group",
-    data: { label: "" } as AjsNode,
+    data: { label: "" } as FlowNodeData,
     position: {
       x: node.position.x + nestedPanel.panelOffsetXPx,
       y: node.position.y + nestedPanel.panelOffsetYPx,
@@ -216,19 +216,22 @@ const toNestedPanelBoundsNode = (
 export const createReactFlowData = ({
   graph,
   ...context
-}: CreateReactFlowDataParams): { nodes: Node<AjsNode>[]; edges: Edge[] } => {
+}: CreateReactFlowDataParams): {
+  nodes: Node<FlowNodeData>[];
+  edges: Edge[];
+} => {
   const basePx = context.theme.typography.htmlFontSize;
   const nodeContext = {
     ...context,
     basePx,
     initialNodeGeometry: createFlowNodeGeometryPx(basePx),
   };
-  const nodes: Node<AjsNode>[] = graph.nodes.map((node) =>
+  const nodes: Node<FlowNodeData>[] = graph.nodes.map((node) =>
     toReactFlowNode(node, nodeContext),
   );
   const nestedPanelBoundsNodes = nodes
     .map(toNestedPanelBoundsNode)
-    .filter((node): node is Node<AjsNode> => !!node);
+    .filter((node): node is Node<FlowNodeData> => !!node);
 
   const edges: Edge[] = graph.edges.map((edge) => toEdge(edge, context.theme));
 

@@ -5,7 +5,7 @@ import {
   resolveFlowMiniMapNodeStroke,
 } from "../../presentation/webview/editor/ajsFlow/flowMiniMap";
 import type { FlowMiniMapColors } from "../../presentation/webview/editor/ajsFlow/flowMiniMap";
-import type { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import type { FlowNodeData } from "../../presentation/webview/editor/ajsFlow/flowNodePresentationModel";
 import {
   initialFlowMiniMapVisibility,
   reduceFlowMiniMapVisibility,
@@ -26,10 +26,10 @@ const colors: FlowMiniMapColors = {
   upstream: "upstream",
 };
 
-const node = (data: Partial<AjsNode> = {}): Node<AjsNode> => ({
+const node = (data: Partial<FlowNodeData> = {}): Node<FlowNodeData> => ({
   id: "node",
   position: { x: 0, y: 0 },
-  data: { label: "node", ...data } as AjsNode,
+  data: { label: "node", ...data } as FlowNodeData,
 });
 
 suite("Flow MiniMap", () => {
@@ -167,7 +167,7 @@ suite("Flow MiniMap", () => {
   });
 
   test("keeps invisible nested layout bounds transparent", () => {
-    const hiddenNode: Node<AjsNode> = {
+    const hiddenNode: Node<FlowNodeData> = {
       ...node({
         isCurrentSearchResult: true,
         isSearchMatch: true,

@@ -18,7 +18,7 @@ import type {
   CurrentUnitIdStateType,
   DialogDataStateType,
 } from "./flowViewerStateTypes";
-import type { AjsNode } from "./nodes/AjsNode";
+import type { FlowNodeData } from "./flowNodePresentationModel";
 import { useFlowGraphState } from "./useFlowGraphState";
 import {
   useFlowDocumentSubscription,
@@ -117,7 +117,7 @@ const useFlowViewerUiState = () => {
 type FocusedFlowDataParams = {
   edges: Edge[];
   focusModeEnabled: boolean;
-  nodes: Node<AjsNode>[];
+  nodes: Node<FlowNodeData>[];
   selectedUnitId?: string;
   theme: Theme;
   treeHoveredUnitId?: string;
@@ -154,7 +154,7 @@ const useFocusedFlowData = ({
 
 type SelectedFlowNodeDetailStateParams = {
   edges: Edge[];
-  nodes: Node<AjsNode>[];
+  nodes: Node<FlowNodeData>[];
   selectedUnitId?: string;
   setCurrentUnitId: Dispatch<SetStateAction<string | undefined>>;
   setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>;
@@ -162,7 +162,7 @@ type SelectedFlowNodeDetailStateParams = {
 };
 
 const useSelectedFlowNode = (
-  nodes: Node<AjsNode>[],
+  nodes: Node<FlowNodeData>[],
   selectedUnitId: string | undefined,
 ) =>
   useMemo(
@@ -171,7 +171,7 @@ const useSelectedFlowNode = (
   );
 
 const useOpenSelectedNodeDefinition = (
-  selectedNode: Node<AjsNode> | undefined,
+  selectedNode: Node<FlowNodeData> | undefined,
   setDialogData: Dispatch<SetStateAction<UnitDefinitionDialogDto | undefined>>,
 ) =>
   useCallback(() => {
@@ -228,7 +228,7 @@ type FlowViewerLifecycleParams = {
   expandedUnitIds: readonly string[];
   focusRequestVersion: number;
   handleRevealUnit: (request: NavigationRequestDto) => void;
-  nodes: Node<AjsNode>[];
+  nodes: Node<FlowNodeData>[];
   preserveViewportRequestVersion: number;
   preserveSearchOnNextScopeChange: ReturnType<
     typeof useFlowViewerRefs

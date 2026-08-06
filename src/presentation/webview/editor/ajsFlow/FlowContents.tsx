@@ -45,7 +45,7 @@ import {
   resolveFlowMiniMapNodeFill,
   resolveFlowMiniMapNodeStroke,
 } from "./flowMiniMap";
-import type { AjsNode } from "./nodes/AjsNode";
+import type { FlowNodeData } from "./flowNodePresentationModel";
 import {
   focusRenderedFlowNode,
   getFlowNodeIdFromTarget,
@@ -189,7 +189,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         expectedExpanded?: boolean;
         selectTarget?: boolean;
         sourceScopeUnitId?: string;
-        sourceNodes: readonly Node<AjsNode>[];
+        sourceNodes: readonly Node<FlowNodeData>[];
         targetUnitId: string;
       }
     | undefined
@@ -326,24 +326,24 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   );
 
   const handleNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node<AjsNode>) => {
+    (_event: React.MouseEvent, node: Node<FlowNodeData>) => {
       selectFlowNode(node.id);
       onNodeSelected?.(node.id);
     },
     [onNodeSelected, selectFlowNode],
   );
   const handleNodeMouseEnter = useCallback(
-    (_event: React.MouseEvent, node: Node<AjsNode>) =>
+    (_event: React.MouseEvent, node: Node<FlowNodeData>) =>
       graphHoveredUnit(node.id),
     [graphHoveredUnit],
   );
   const handleNodeMouseLeave = useCallback(
-    (_event: React.MouseEvent, node: Node<AjsNode>) =>
+    (_event: React.MouseEvent, node: Node<FlowNodeData>) =>
       clearGraphHoveredUnit(node.id),
     [clearGraphHoveredUnit],
   );
   const handleReactFlowInit = useCallback(
-    (instance: ReactFlowInstance<Node<AjsNode>, Edge>) => {
+    (instance: ReactFlowInstance<Node<FlowNodeData>, Edge>) => {
       reactFlowInstanceRef.current = instance;
     },
     [reactFlowInstanceRef],
@@ -501,7 +501,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
           }}
         />
         {showMiniMap && (
-          <MiniMap<Node<AjsNode>>
+          <MiniMap<Node<FlowNodeData>>
             className="ajs-flow-minimap"
             ariaLabel={unitInformationMessage(
               "a11y.flow.reactFlow.minimap",
