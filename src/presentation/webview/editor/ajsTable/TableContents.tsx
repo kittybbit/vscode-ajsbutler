@@ -16,21 +16,14 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
-import { type Table as ReactTable, useReactTable } from "@tanstack/react-table";
-import {
-  Row,
-  SortingState,
-  VisibilityState,
-  getCoreRowModel,
-  getSortedRowModel,
-} from "@tanstack/table-core";
+import { type Table as ReactTable } from "@tanstack/react-table";
+import { Row, SortingState, VisibilityState } from "@tanstack/table-core";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import { useMyAppContext } from "../MyContexts";
-import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
@@ -66,6 +59,7 @@ import {
   useTableRowRevealState,
 } from "./tableRowReveal";
 import { useTableSearchController } from "./tableSearchController";
+import { useTableModelSetup } from "./tableModel";
 import {
   createTableViewerData,
   findSelectedUnitId,
@@ -92,18 +86,6 @@ export type AjsTableSearchState = {
 type TableDocumentState = {
   viewerData: TableViewerData;
   changeDocument: (type: string, data: unknown) => void;
-};
-
-type TableModelSetupContext = {
-  rowViews: TableRowView[] | undefined;
-  parameterSearchValuesByPath: ParameterSearchValuesByPath;
-  lang: string;
-  handleJump: (id: string) => void;
-  rowViewByPath: ReadonlyMap<string, TableRowView>;
-  sorting: SortingState;
-  setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
-  columnVisibility: VisibilityState;
-  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>;
 };
 
 type TableViewerShellProps = {
@@ -181,40 +163,6 @@ const useChangeDocument = (): TableDocumentState => {
     }
   }, []);
   return { viewerData, changeDocument };
-};
-
-const useTableModelSetup = ({
-  rowViews,
-  parameterSearchValuesByPath,
-  lang,
-  handleJump,
-  rowViewByPath,
-  sorting,
-  setSorting,
-  columnVisibility,
-  setColumnVisibility,
-}: TableModelSetupContext) => {
-  const columns = useMemo(
-    () => tableColumnDef(lang, handleJump, rowViewByPath),
-    [lang, handleJump, rowViewByPath],
-  );
-
-  const table = useReactTable<TableRowView>({
-    columns,
-    data: rowViews ?? [],
-    state: {
-      columnVisibility,
-      sorting,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    defaultColumn: tableDefaultColumnDef,
-    debugAll: DEVELOPMENT,
-  });
-
-  return { table, parameterSearchValuesByPath };
 };
 
 const useTableViewerTheme = (isDarkMode: boolean): Theme =>

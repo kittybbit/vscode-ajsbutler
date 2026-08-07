@@ -2,44 +2,21 @@ import React, {
   FC,
   KeyboardEvent,
   memo,
-  ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { flexRender, HeaderGroup, Row } from "@tanstack/react-table";
+import { HeaderGroup, Row } from "@tanstack/react-table";
 import type { VisibilityState } from "@tanstack/table-core";
-import {
-  ItemProps,
-  ListRange,
-  TableComponents,
-  TableVirtuoso,
-  TableVirtuosoHandle,
-} from "react-virtuoso";
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import type { SxProps, Theme } from "@mui/material/styles";
+import { ListRange, TableVirtuoso, TableVirtuosoHandle } from "react-virtuoso";
 import type { TableRowView } from "./tableViewerData";
-import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import TableHeader from "./TableHeader";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
-import { AccessorType } from "./columnDefs/common";
-import { isAjsTableSearchHit } from "./globalFilter";
-import {
-  viewerFocusIndicatorSx,
-  viewerSearchBorder,
-  viewerSelectionBorder,
-} from "../shared/viewerThemeStyles";
+import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import {
   isTableGridNavigationEventOwnedByCell,
-  isTableRowSelected,
   getStickyColumnRevealScrollLeft,
 } from "./navigation";
 import {
@@ -52,6 +29,17 @@ import {
   type TableGridFocus,
   type TableGridFocusRequest,
 } from "./tableNavigationModel";
+import {
+  createTableComponents,
+  renderVisibleTableCell,
+  type VirtualizedTableContext,
+} from "./tableSemanticRenderer";
+
+export {
+  getSearchHitCellSx,
+  tableGridFocusSx,
+  tableRowStateSx,
+} from "./tableSemanticRenderer";
 
 type VirtualizedTableProps = {
   headerGroups: HeaderGroup<TableRowView>[];
@@ -68,60 +56,6 @@ type VirtualizedTableProps = {
   gridAriaLabel?: string;
 };
 
-type VirtualizedTableContext = {
-  columnCount: number;
-  columnVisibilityRevision: string;
-  headerRowCount: number;
-  rowCount: number;
-  rowIndex?: number;
-  selectedAbsolutePath?: string;
-  gridAriaLabel?: string;
-};
-
-type VirtualizedTableRowProps = ItemProps<Row<TableRowView>> & {
-  context: VirtualizedTableContext;
-};
-
-type VisibleTableCellRenderContext = {
-  cell: ReturnType<Row<TableRowView>["getVisibleCells"]>[number];
-  row: Row<TableRowView>;
-  searchQuery: string;
-  parameterSearchValuesByPath: ParameterSearchValuesByPath;
-  getCurrentFocus: () => TableGridFocus | undefined;
-  rowIndex: number;
-  visibleColumnIds: readonly string[];
-  onFocus: (focus: TableGridFocus) => void;
-  onKeyDown: (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => void;
-  registerFocusElement: (
-    focus: TableGridFocus,
-    element: HTMLElement | null,
-  ) => void;
-};
-
-const styleTableCell: SxProps<Theme> = {
-  whiteSpace: "nowrap",
-  verticalAlign: "top",
-  "&:first-child": {
-    position: "sticky",
-    left: 0,
-    backgroundColor: (theme) => theme.palette.background.default,
-  },
-};
-
-export const tableGridFocusSx = viewerFocusIndicatorSx;
-
-export const tableRowStateSx = {
-  '&[aria-selected="true"] > td': {
-    boxShadow: (theme) =>
-      `inset 0 2px 0 ${viewerSelectionBorder(theme)}, inset 0 -2px 0 ${viewerSelectionBorder(theme)}`,
-  },
-  "@media (forced-colors: active)": {
-    '&[aria-selected="true"] > td': {
-      boxShadow: "inset 0 2px 0 CanvasText, inset 0 -2px 0 CanvasText",
-    },
-  },
-};
-
 export const getFixedTableVirtuosoStyle = () => ({
   width: "100%",
   minWidth: 0,
@@ -130,7 +64,7 @@ export const getFixedTableVirtuosoStyle = () => ({
   boxSizing: "border-box" as const,
 });
 
-const omitVirtuosoContext = <T extends object>(
+export const omitVirtuosoContext = <T extends object>(
   props: T,
 ): Omit<T, "context"> => {
   const propsWithoutContext = { ...props } as T & {
@@ -138,26 +72,6 @@ const omitVirtuosoContext = <T extends object>(
   };
   Reflect.deleteProperty(propsWithoutContext, "context");
   return propsWithoutContext;
-};
-
-const searchHitBackgroundColor = {
-  dark: "rgba(255, 214, 102, 0.24)",
-  light: "rgba(255, 214, 102, 0.36)",
-};
-
-export const getSearchHitCellSx = (isSearchHit: boolean) => {
-  if (!isSearchHit) {
-    return undefined;
-  }
-  return {
-    backgroundColor: (theme: Theme) =>
-      searchHitBackgroundColor[theme.palette.mode],
-    borderBottom: (theme: Theme) => `2px dotted ${viewerSearchBorder(theme)}`,
-    "@media (forced-colors: active)": {
-      backgroundColor: "Canvas",
-      borderBottom: "2px dotted Highlight",
-    },
-  };
 };
 
 const revealGridFocusElement = (element: HTMLElement): void => {
@@ -188,80 +102,6 @@ const revealGridFocusElement = (element: HTMLElement): void => {
   }
 };
 
-const renderVisibleTableCell = ({
-  cell,
-  row,
-  searchQuery,
-  parameterSearchValuesByPath,
-  getCurrentFocus,
-  rowIndex,
-  visibleColumnIds,
-  onFocus,
-  onKeyDown,
-  registerFocusElement,
-}: VisibleTableCellRenderContext): ReactNode => {
-  const parameters =
-    parameterSearchValuesByPath.get(row.original.absolutePath) ?? [];
-  const isSearchHit = isAjsTableSearchHit(
-    cell.getValue<AccessorType | undefined>(),
-    parameters,
-    searchQuery,
-  );
-  const focus: TableGridFocus = {
-    kind: "cell",
-    absolutePath: row.original.absolutePath,
-    columnId: cell.column.id,
-  };
-  const currentFocus = getCurrentFocus();
-  const isCurrent =
-    currentFocus?.kind === "cell" &&
-    currentFocus.absolutePath === focus.absolutePath &&
-    currentFocus.columnId === focus.columnId;
-  return (
-    <TableCell
-      ref={(element) =>
-        registerFocusElement(focus, element as HTMLElement | null)
-      }
-      key={cell.id}
-      role="gridcell"
-      aria-colindex={visibleColumnIds.indexOf(cell.column.id) + 1}
-      aria-rowindex={rowIndex}
-      tabIndex={isCurrent ? 0 : -1}
-      onClick={(event) => event.currentTarget.focus()}
-      onFocus={() => onFocus(focus)}
-      onKeyDown={(event) => onKeyDown(event, focus)}
-      sx={[styleTableCell, tableGridFocusSx, getSearchHitCellSx(isSearchHit)]}
-    >
-      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-    </TableCell>
-  );
-};
-
-const VirtualizedTableRow = memo(
-  ({ context, ...props }: VirtualizedTableRowProps) => {
-    const absolutePath = props.item.original.absolutePath;
-    const { headerRowCount, rowIndex, selectedAbsolutePath } = context;
-    const isSelected = isTableRowSelected({
-      absolutePath,
-      selectedAbsolutePath,
-      index: props["data-index"],
-      revealedRowIndex: rowIndex,
-    });
-    return (
-      <TableRow
-        {...props}
-        role="row"
-        aria-rowindex={headerRowCount + props["data-index"] + 1}
-        aria-selected={isSelected}
-        hover={true}
-        selected={isSelected}
-        sx={tableRowStateSx}
-      />
-    );
-  },
-);
-VirtualizedTableRow.displayName = "VirtualizedTableRow";
-
 export const getColumnVisibilityRevision = (
   columnVisibility: VisibilityState,
 ): string =>
@@ -270,52 +110,7 @@ export const getColumnVisibilityRevision = (
     .map(([columnId, visible]) => `${columnId}:${visible}`)
     .join("|");
 
-const tableComponents: TableComponents<
-  Row<TableRowView>,
-  VirtualizedTableContext
-> = {
-  Scroller: React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
-    return (
-      <TableContainer
-        {...omitVirtuosoContext(props)}
-        data-table-grid-scroller
-        ref={ref}
-        component={Paper}
-        elevation={3}
-      />
-    );
-  }),
-  Table: (props: object) => {
-    const { context } = props as { context?: VirtualizedTableContext };
-    const tableProps = omitVirtuosoContext(props);
-    return (
-      <Table
-        {...tableProps}
-        role="grid"
-        aria-rowcount={
-          context ? context.headerRowCount + context.rowCount : undefined
-        }
-        aria-colcount={context?.columnCount}
-        aria-label={context?.gridAriaLabel}
-        size="small"
-        stickyHeader
-      />
-    );
-  },
-  TableHead: React.forwardRef<HTMLTableSectionElement>(
-    function tableHead(props, ref) {
-      const tableHeadProps = omitVirtuosoContext(props);
-      return <TableHead {...tableHeadProps} ref={ref} />;
-    },
-  ),
-  TableBody: React.forwardRef<HTMLTableSectionElement>(
-    function tableBody(props, ref) {
-      const tableBodyProps = omitVirtuosoContext(props);
-      return <TableBody {...tableBodyProps} ref={ref} />;
-    },
-  ),
-  TableRow: VirtualizedTableRow,
-};
+const tableComponents = createTableComponents(omitVirtuosoContext);
 
 const VirtualizedTable: FC<VirtualizedTableProps> = ({
   headerGroups,

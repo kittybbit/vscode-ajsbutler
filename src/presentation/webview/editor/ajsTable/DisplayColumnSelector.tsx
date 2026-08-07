@@ -12,11 +12,7 @@ import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import {
-  Column,
-  Table as ReactTable,
-  VisibilityState,
-} from "@tanstack/table-core";
+import { Table as ReactTable, VisibilityState } from "@tanstack/table-core";
 import CloseIcon from "@mui/icons-material/Close";
 import ToggleOff from "@mui/icons-material/ToggleOff";
 import ToggleOn from "@mui/icons-material/ToggleOn";
@@ -25,6 +21,9 @@ import Switch from "@mui/material/Switch";
 import type { TableRowView } from "./tableViewerData";
 import { useMyAppContext } from "../MyContexts";
 import { unitInformationMessage } from "../unitInformationLocalization";
+import { setColumnVisibility, type UnitListColumn } from "./tableColumnActions";
+
+export { createColumnVisibilityUpdate } from "./tableColumnActions";
 
 type DisplayColumnSelectorProps = {
   table: ReactTable<TableRowView>;
@@ -32,13 +31,6 @@ type DisplayColumnSelectorProps = {
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: VoidFunction;
-};
-
-type UnitListColumn = Column<TableRowView, unknown>;
-type ToggleColumnVisibilityParams = {
-  column: UnitListColumn;
-  table: ReactTable<TableRowView>;
-  visible: boolean;
 };
 
 export const getVisibleColumnSelectorColumns = (
@@ -55,15 +47,6 @@ const getHideableSubColumns = (column: UnitListColumn): UnitListColumn[] =>
 const hasNestedColumnGroup = (column: UnitListColumn): boolean =>
   column.columns.length > 1;
 
-const getLeafColumnIds = (column: UnitListColumn): string[] =>
-  column.getLeafColumns().map((leafColumn) => leafColumn.id);
-
-export const createColumnVisibilityUpdate = (
-  columnIds: readonly string[],
-  visible: boolean,
-): VisibilityState =>
-  Object.fromEntries(columnIds.map((columnId) => [columnId, visible]));
-
 export const getDisplayColumnSelectorControlLabels = (language: string) => ({
   hideAll: unitInformationMessage(
     "table.columnSelectSidebar.invisibleAll",
@@ -75,20 +58,11 @@ export const getDisplayColumnSelectorControlLabels = (language: string) => ({
   ),
 });
 
-const toggleColumnVisibility = ({
-  column,
-  table,
-  visible,
-}: ToggleColumnVisibilityParams) => {
-  const nextVisibility = createColumnVisibilityUpdate(
-    getLeafColumnIds(column),
-    visible,
-  );
-  table.setColumnVisibility((current) => ({
-    ...current,
-    ...nextVisibility,
-  }));
-};
+const toggleColumnVisibility = (
+  column: UnitListColumn,
+  table: ReactTable<TableRowView>,
+  visible: boolean,
+) => setColumnVisibility(table, column, visible);
 
 const isAnyLeafColumnVisible = (column: UnitListColumn): boolean =>
   column.getLeafColumns().some((col) => col.getIsVisible());
@@ -102,7 +76,7 @@ const ColumnSwitch: FC<{
     _event: React.ChangeEvent<HTMLInputElement>,
     checked: boolean,
   ) => {
-    toggleColumnVisibility({ column, table, visible: checked });
+    toggleColumnVisibility(column, table, checked);
   };
 
   return (
@@ -192,7 +166,7 @@ const ColumnAccordion: FC<{
         size="small"
         onClick={(e) => e.stopPropagation()}
         onChange={(_event, checked) =>
-          toggleColumnVisibility({ column, table, visible: checked })
+          toggleColumnVisibility(column, table, checked)
         }
         checked={isAnyLeafColumnVisible(column)}
       />

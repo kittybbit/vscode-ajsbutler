@@ -26,3 +26,11 @@ cover movement decisions with selection/scroll targets and restoration fallback;
 the virtualization focus tests cover 10,000-row bounded movement and the same
 off-screen decision contract. No user-visible behavior, desktop/web host API,
 Application DTO, or CHANGELOG update was required.
+
+Slice 3 validation result: `rtk pnpm run test:compile`, the full desktop suite,
+`rtk pnpm run qlty`, production `rtk pnpm run build`, and elevated `rtk pnpm run
+test:web` passed. The web runner emitted existing teardown `EPIPE` and
+premature-close noise after successful viewer activation. No Application,
+Domain, Infrastructure, transport, dependency, accessibility-copy, or
+user-visible behavior changed. Manual large-list keyboard smoke remains Feature
+Exit evidence because no interactive large-list fixture was available.

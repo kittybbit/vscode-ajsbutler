@@ -4,7 +4,7 @@
 
 - Purpose: separate unit-list table presentation and keyboard focus state behind
   presentation-owned contracts without changing observable behavior.
-- Approved or active slice: Slice 2; Slice 1 is complete and the complete
+- Approved or active slice: Slice 3; Slices 1 and 2 are complete and the complete
   three-slice plan has been
   reviewed and approved for implementation in dependency order.
 - Do not: change Application DTOs, JP1/AJS interpretation, viewer messages, or
@@ -18,8 +18,8 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: implement Slice 2 and complete its implementation review in
-  an independent session.
+- Next decision: obtain human completion approval for Slice 3 before Feature
+  Exit planning.
 
 ## Sync Rule
 
@@ -236,7 +236,7 @@ approved slice completes and no active implementation approval remains.
 
 ### Slice 3: Separate rendering, column actions, and virtualization adapters
 
-- Status: Approved
+- Status: Complete
 - Scope: decompose `TableContents` and `VirtualizedTable` into cohesive
   presentation composition, table/column state, semantic rendering, and
   virtualization/DOM-focus adapters that consume the Slice 1 model and Slice 2
@@ -296,6 +296,15 @@ approved slice completes and no active implementation approval remains.
   (roadmap 7.5), table redesign, new accessibility wording, telemetry catalog
   changes, and dependency upgrades.
 
+#### Slice 3 implementation feedback
+
+- The renderer and Virtuoso component seams were cohesive and could be
+  extracted without changing the interaction model or host wiring.
+- Keeping column visibility actions in a table-local helper preserved the
+  existing selector behavior while making the state update explicit.
+- The web smoke runner required browser process permissions in this environment;
+  the elevated retry completed with only existing teardown `EPIPE` noise.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
@@ -351,12 +360,15 @@ approved slice completes and no active implementation approval remains.
 
 ## Validation
 
-- [ ] Tests added or updated with each approved slice
-- [ ] Focused table model, column, export, navigation, virtualization, shell,
+- [x] Tests added or updated with each approved slice (existing regression
+      suites remained sufficient for this behavior-preserving extraction)
+- [x] Focused table model, column, export, navigation, virtualization, shell,
       and accessibility tests pass
-- [ ] `rtk pnpm run qlty` passes for every code slice
-- [ ] Production build and required desktop/web validation pass
-- [ ] Manual large-list keyboard smoke verification is recorded
+- [x] `rtk pnpm run qlty` passes for every code slice
+- [x] Production build and required desktop/web validation pass
+- [ ] Manual large-list keyboard smoke verification is recorded (requires an
+      interactive large-list fixture; automated 10,000-row Slice 2 coverage
+      passed)
 - [x] README/user-documentation impact evaluated as none for the proposed
       behavior-preserving scope
 - [x] CHANGELOG impact evaluated as none for the proposed internal refactoring
