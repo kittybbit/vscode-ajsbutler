@@ -5,8 +5,7 @@
 - Purpose: separate unit-list table presentation and keyboard focus state behind
   presentation-owned contracts while keeping repeated keyboard movement
   responsive.
-- Approved or active slice: Slice 4 is proposed for replan; Slices 1 through 3
-  are complete.
+- Approved or active slice: Slice 4; Slices 1 through 3 are complete.
 - Do not: change Application DTOs, JP1/AJS interpretation, viewer messages, or
   supported desktop/web behavior.
 - Do not: add table features, shortcuts, redesigns, shared interaction
@@ -18,8 +17,8 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: review and obtain human approval for the Slice 4 replan before
-  implementation.
+- Next decision: implement Slice 4 and complete its independent implementation
+  review.
 
 ## Sync Rule
 
@@ -38,11 +37,11 @@
 
 ## Plan Status
 
-- Status: Replan Required
+- Status: Approved
 - Planning scope: the full 7.3 feature plus the discovered keyboard-selection
   side-effect coalescing gap.
 - Review status: Reviewed; no outstanding findings after Slice 4 revision
-- Human approval: Pending for the revised Slice 4 scope
+- Human approval: Approved
 - Active implementation slice: Slice 4
 
 ## Replanning Trigger
@@ -58,12 +57,12 @@
 
 ## Human Approval
 
-- Status: Pending
-- Approved at: the prior approval covers Slices 1 through 3 only
-- Approved scope: The revised Slice 4 plan, its timing policy, and its
-  presentation-only approval boundary require new human approval. Application,
-  Domain, Infrastructure, transport, dependency, and unrelated user-visible
-  behavior changes remain out of scope.
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: Slice 4's coalesced keyboard-selection timing policy and
+  presentation-only implementation boundary; Application, Domain,
+  Infrastructure, transport, dependency, and unrelated user-visible behavior
+  changes remain out of scope.
 
 Implementation must not start while Status is Pending. Only clear human
 approval can change Status to Approved. Reset this section to Pending after an
@@ -319,7 +318,7 @@ approved slice completes and no active implementation approval remains.
 
 ### Slice 4: Coalesce keyboard-driven selection side effects
 
-- Status: Proposed
+- Status: Approved
 - Scope: keep grid focus, roving focus, virtualization, and the focused cell
   moving immediately, while coalescing keyboard-driven `selectRow` and
   `unit.select` side effects in the presentation layer. Commit only the last
@@ -373,7 +372,7 @@ approved slice completes and no active implementation approval remains.
 - Approval Boundary: presentation-only keyboard selection timing and its tests;
   no change to Application, Domain, Infrastructure, transport, dependencies,
   shortcuts, or unrelated viewer behavior.
-- Human approval: Pending.
+- Human approval: Approved in current conversation.
 - Dependencies: Slices 1 through 3; this slice changes only their presentation
   interaction wiring.
 - Risks: a debounce interval that is too long can make selection feel stale;
