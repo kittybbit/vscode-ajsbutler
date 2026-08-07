@@ -33,8 +33,7 @@ Slice 3 validation result: `rtk pnpm run test:compile`, the full desktop suite,
 test:web` passed. The web runner emitted existing teardown `EPIPE` and
 premature-close noise after successful viewer activation. No Application,
 Domain, Infrastructure, transport, dependency, accessibility-copy, or
-user-visible behavior changed. Manual large-list keyboard smoke remains Feature
-Exit evidence because no interactive large-list fixture was available.
+user-visible behavior changed.
 
 Slice 4 validation result: the previous time-based coalescing policy was
 removed. `tableNavigation.test.ts`, `tableVirtualizationFocus.test.ts`,
@@ -45,5 +44,10 @@ announcement behavior, document replacement, and unmount cleanup.
 `revealUnit.test.ts` remains covered by the desktop suite. Test compilation,
 the desktop suite, qlty, production build, and elevated web smoke all passed.
 The web smoke retry emitted only existing teardown `ECONNRESET`/`EPIPE`/
-premature-close noise; manual large-list keyboard smoke remains unavailable in
-this environment because no interactive large-list fixture is present.
+premature-close noise.
+
+Feature Exit validation result: manual smoke passed in the F5 extension
+development host using `sample/sample1_large_utf8` (868 units). Arrow Down and
+Page Down moved the provisional focus without changing the committed unit tree
+or detail panel, including after virtualization, and Enter committed the
+focused row. No open risks remain.

@@ -30,15 +30,6 @@ This roadmap area is decomposed into independent branch-owned features. Create,
 plan, review, approve, and close one feature before selecting the next unless a
 recorded dependency requires a different order.
 
-#### 7.3 Unit-list Table Presentation and Keyboard Navigation Separation
-
-- Purpose: separate table rendering, column actions, virtualization, and
-  keyboard focus state from application list DTOs.
-- Entry condition: visible-column, export, navigation, sorting, detail, and
-  focus behavior are characterized for large lists.
-- Dependency: completed unit-list characterization and the preserved
-  Application unit-list contract.
-
 #### 7.4 Shared Webview Header Search Control Separation
 
 - Purpose: make shared header-search state and accessibility behavior explicit

@@ -18,7 +18,8 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: complete Feature Exit after the manual large-list smoke gate.
+- Next decision: close the feature after recording the completed manual smoke
+  gate and propagating the roadmap closure.
 
 ## Sync Rule
 
@@ -517,15 +518,15 @@ approved slice completes and no active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: not ready pending manual large-list keyboard smoke
-  evidence and Feature Exit responsibilities.
+- Definition of Done status: complete. All approved slices, required automated
+  validation, traceability, durable documentation, and manual large-list
+  keyboard smoke evidence are complete.
 - Durable documentation updates: `uc-view-unit-list.md` and `CHANGELOG.md` now
-  record the Enter-confirmation behavior; no roadmap sequencing change is
-  planned.
-- Open risks: manual large-list keyboard smoke evidence remains open.
-- Feature Exit determination: not ready. All slices, required automated
-  validation, traceability, and durable documentation are complete, but the
-  manual large-list smoke gate remains open.
+  record the Enter-confirmation behavior; roadmap item 7.3 is removed because
+  this feature is complete.
+- Open risks: none identified at Feature Exit.
+- Feature Exit determination: complete and approved. The feature is ready to
+  close and its temporary feature documents may be removed.
 
 ## Validation
 
@@ -537,10 +538,11 @@ approved slice completes and no active implementation approval remains.
 - [x] Slice 4 qlty passes after the Enter-confirmation implementation
 - [x] Slice 4 compile, desktop suite, production build, and web smoke pass;
       the prior Slice 4 run is not evidence for the new behavior
-- [ ] Manual large-list keyboard smoke verification is recorded (requires an
-      interactive large-list fixture; automated 10,000-row focus coverage and
-      Slice 4 Enter-confirmation coverage pass, but no interactive fixture was
-      available in this environment)
+- [x] Manual large-list keyboard smoke verification is recorded in the F5
+      extension development host using `sample/sample1_large_utf8` (868 units):
+      Arrow Down and Page Down moved focus without changing the committed tree
+      or detail selection, and Enter committed the focused rows after both
+      local and virtualized scrolling.
 - [x] Slice 4 explicit Enter-confirmation implementation and independent review
       complete with no outstanding findings
 - [x] `uc-view-unit-list.md` and `CHANGELOG.md` updated for the approved
@@ -560,10 +562,12 @@ the environment's Chromium/macOS Mach-port permission; the elevated retry
 completed successfully and emitted only existing teardown `ECONNRESET`, `EPIPE`,
 and premature-close noise. The focused pure navigation, virtualization,
 accessibility, shell, and reveal tests are included in the compiled desktop
-suite. Manual large-list keyboard smoke was not available because this
-environment has no interactive large-list fixture; automated 10,000-row focus
-coverage remains passing. Independent final review found and fixed one stale
-pending-focus fallback edge; no findings remain.
+suite. Feature Exit manual smoke passed in the F5 extension development host
+with `sample/sample1_large_utf8` (868 units): Arrow Down and Page Down changed
+focus while the committed tree/detail remained unchanged, and Enter committed
+the focused rows after local and virtualized scrolling. Independent final
+review found and fixed one stale pending-focus fallback edge; no findings
+remain.
 
 Slice 4 implementation feedback: the approved presentation-only boundary was
 sufficient. A synchronous commit callback plus a ref-backed focused path kept
