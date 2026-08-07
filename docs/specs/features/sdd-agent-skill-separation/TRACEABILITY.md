@@ -49,6 +49,13 @@ findings`; completion was auto-approved under the user's instruction.
 - Slice 4 focused checks: pending Feature Exit ownership and lifecycle review.
 - Slice 4 focused checks: Feature Exit ownership/stale-claim search, roadmap
   propagation contract, Markdown lint (25 files, 0 errors), `rtk pnpm run
-  qlty` (no issues), and `rtk git diff --check` passed. Independent
+qlty` (no issues), and `rtk git diff --check` passed. Independent
   implementation review returned `Ready / no actionable findings`; completion
   was auto-approved under the user's instruction.
+- Slice 5 focused checks: pending routing and entry-point synchronization
+  review.
+- Slice 5 focused checks: routing/role canonical mapping, stale-authority
+  search, Markdown lint (29 files, 0 errors), `rtk pnpm run qlty` (no issues),
+  and `rtk git diff --check` passed. Independent implementation review
+  returned `Ready / no actionable findings`; completion was auto-approved under
+  the user's instruction.

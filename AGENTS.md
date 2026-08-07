@@ -2,29 +2,27 @@
 
 ## Project Overview
 
-This repository is a Visual Studio Code extension for viewing and analyzing JP1/AJS3 definition files.
-It supports both desktop extension execution and web extension execution.
+This repository is a Visual Studio Code extension for viewing and analyzing
+JP1/AJS3 definition files. It supports desktop and web extension execution.
 
-Primary goals of this repository:
+Primary goals:
 
 1. Keep VS Code compatibility stable.
 2. Modernize dependencies without breaking extension behavior.
-3. Use Specification-Driven Development (SDD) as the standard development
-   process for non-trivial work.
-4. Maintain the verified Domain-Driven Design (DDD) and Clean Architecture
+3. Use Specification-Driven Development (SDD) for non-trivial work.
+4. Maintain the verified Domain-Driven Design and Clean Architecture
    boundaries.
-5. Preserve behavior for parser, list view, flow view, CSV export, unit
-   definition, diagnostics, hover, navigation, WebAPI import, semantic
-   diff/report, and telemetry.
+5. Preserve parser, list view, flow view, CSV export, unit definition,
+   diagnostics, hover, navigation, WebAPI import, semantic diff/report, and
+   telemetry behavior.
 
 ## Product Constraints
 
-- Minimum supported VS Code compatibility is defined by `package.json` engines.vscode.
-- Do not casually raise the minimum VS Code version.
-- Do not introduce APIs that are unavailable in the declared minimum VS Code version.
+- Minimum VS Code compatibility is defined by `package.json`.
+- Do not casually raise the minimum VS Code version or use unavailable APIs.
 - Do not break web extension support.
-- Do not import Node built-ins from production source. Use injected capabilities
-  or browser-safe adapters for host-specific behavior.
+- Do not import Node built-ins from production source; use injected
+  capabilities or browser-safe adapters.
 
 ## Architecture Rules
 
@@ -38,20 +36,24 @@ Follow these dependency rules strictly:
 - Concrete infrastructure dependencies may be referenced only by
   `infrastructure` and `bootstrap`.
 - Generated parser code and ANTLR may be consumed only under
-  `src/infrastructure/parser`; `AjsRawUnit` must remain inside parser
+  `src/infrastructure/parser`; `AjsRawUnit` remains inside parser
   infrastructure.
-- Retired unit-wrapper dependencies under `src/domain/models/units` must not be
-  reintroduced.
+- Retired unit-wrapper dependencies under `src/domain/models/units` must not
+  be reintroduced.
 - `vscode` imports are limited to `src/extension.ts`, `bootstrap`,
   `infrastructure`, and `presentation/vscode`.
 - UI-framework imports are limited to `presentation/webview`.
-- UI components must consume DTOs/view models, not parser internals.
+- UI components consume DTOs/view models, not parser internals.
 - Production source must not import Node built-ins.
-- The telemetry SDK must remain in its infrastructure adapter.
+- The telemetry SDK remains in its infrastructure adapter.
 - Application factory functions may be invoked only by application or
   bootstrap.
 - Infrastructure implementations may be constructed only by infrastructure or
   bootstrap.
+
+See `docs/specs/architecture.md` for durable boundary definitions. The
+architecture dependency test enforces the complete catalog with zero
+exceptions.
 
 Production source structure:
 
@@ -62,210 +64,101 @@ Production source structure:
 - `src/bootstrap`
 - `src/resource`
 
-See `docs/specs/architecture.md` for the durable boundary definitions. The
-architecture dependency test enforces the complete catalog with zero
-exceptions.
-
 ## Refactoring Policy
-
-When refactoring:
 
 1. Preserve behavior first.
 2. Add or update tests before large structural changes.
-3. Prefer vertical slices over broad rewrites.
+3. Prefer vertical slices around one behavior or boundary.
 4. Extract one use case at a time.
 5. Keep pull requests small and reviewable.
 
-Choose vertical slices around one behavior or boundary, such as:
-
-- Build unit list
-- Export CSV
-- Build flow graph DTO
-- Build diagnostics or hover results
-- Import through an application port
-- Build a semantic diff report
-
 ## SDD Workflow
 
-SDD is the only standard process for non-trivial changes. Do not use an
-alternate implementation flow when SDD applies.
-Use `docs/specs/README.md` as the Single Source of Truth for deciding whether
-a change is trivial enough to skip SDD feature creation.
+SDD is the only standard process for non-trivial changes. Use
+`docs/specs/README.md` as the Single Source of Truth for trivial-change
+criteria, document roles, approval, validation, and Feature Exit policy.
 
 Follow this lifecycle:
 
-1. Start feature intake with `sdd-create-feature`.
-2. Create or revise the feature implementation-slice plan with
-   `sdd-plan-task`.
-3. Review the plan with `sdd-review-plan`.
-4. Obtain clear Human Approval for the reviewed plan and approved slice scope.
-5. Implement only approved slices with `sdd-implement-task`.
-6. Replan with `sdd-plan-task` only when scope, design decisions, impact, or
-   approval boundaries change.
-7. Close the feature only through Feature Exit Mode after the Feature
-   Definition of Done passes.
+1. Route trivial changes using the criteria in `docs/specs/README.md`.
+2. Start non-trivial feature intake with `feature-author` and
+   `$sdd-create-feature`.
+3. Create or revise the full slice plan with `plan-author` and
+   `$sdd-plan-task` in Planning or Replanning Mode.
+4. Review the plan with the read-only `plan-reviewer` and
+   `$sdd-review-plan`; Findings go to `plan-reviser`.
+5. Obtain clear Human Approval for the reviewed plan and approved slice scope.
+6. Implement one approved slice with `implementer` and
+   `$sdd-implement-task`.
+7. Review the completed slice with the read-only
+   `implementation-reviewer` and `$sdd-review-implementation`; Findings go
+   back to `implementer`.
+8. Run Feature Exit with `feature-closer` and `$sdd-feature-exit` only after
+   every slice is complete, then obtain explicit closure approval.
+9. Replan when a new slice, scope, design decision, wider impact, or approval
+   boundary is discovered.
 
-Before editing runtime code, tests, generated artifacts, or configuration,
-the selected feature must have an approved implementation slice recorded in
-`TASKS.md`. If the requested change is ambiguous, document assumptions in the
-right SDD artifact and stop for clarification or approval instead of making
-hidden assumptions.
+Before editing runtime code, tests, generated artifacts, or configuration, the
+selected feature must have an approved implementation slice recorded in
+`TASKS.md`. If scope or design changes, stop and use Replanning Mode.
 
-Document roles are defined only in `docs/specs/README.md`. Use that file as
-the Single Source of Truth for SDD artifact responsibilities, including
-temporary feature documents, durable documentation, and
-`docs/specs/roadmap.md`. One feature branch owns one selected feature even when
-inherited feature folders coexist. Each `TASKS.md` owns only its feature, and
-only the selected feature's `TASKS.md` owns active branch implementation work.
+## Coding and Testing Rules
 
-## Branch Naming
-
-- Use a dedicated git branch for each feature.
-- Reserve `docs/...` branch names for docs-only changes.
-- Treat "docs-only" the same way as the `Verify` workflow:
-  only `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md` may
-  change.
-- If a branch named `docs/...` needs any non-doc change, rename it or start a
-  non-doc branch before continuing so verification expectations stay honest.
-
-## Coding Rules
-
-- Use TypeScript.
-- Favor explicit types on exported APIs.
-- Avoid unnecessary framework coupling.
+- Use TypeScript with explicit exported API types.
 - Prefer pure functions in domain/application layers.
-- Keep functions small.
-- Prefer readability and maintainability over brevity, DRY-only extraction, or
-  generic abstraction.
-- Do not mix UI formatting logic with parsing/domain logic.
-- Avoid large files when extracting new use cases or adapters is practical.
-- Keep naming aligned with JP1/AJS business concepts.
-- Keep implementation diffs limited to the approved slice scope.
-- Do not plan new work during implementation; return to `sdd-plan-task` when
-  replanning is required.
-
-## Testing Policy
-
-Before finishing a task, run the most relevant checks available.
-
-Use `docs/specs/README.md` `Risk-Based Validation And Review` as the SSOT for
-validation selection and review timing. Do not add a second default sequence
-here.
-
-When touching parser, list, flow, CSV, or adapter boundaries, add/update tests.
-
-Recommended test layers:
-
-- parser golden tests
-- application use case tests
-- DTO/view model mapping tests
-- VS Code integration tests for desktop
-- web extension smoke tests
-
-Production readiness checks must cover failure modes, understandable
-diagnostics or fallback behavior, JP1/AJS definition-file compatibility, large
-or malformed input risk, desktop/web behavior, README or user-doc impact, and
-CHANGELOG update need according to `docs/specs/README.md`.
+- Keep functions small and names aligned with JP1/AJS concepts.
+- Do not mix UI formatting with parsing/domain logic.
+- Run the most relevant checks from `docs/specs/README.md` `Risk-Based
+Validation And Review` before finishing.
+- When touching parser, list, flow, CSV, or adapter boundaries, add or update
+  the relevant tests.
+- Production readiness covers failure modes, diagnostics/fallback behavior,
+  JP1/AJS compatibility, large/malformed input, desktop/web behavior,
+  README/user-doc impact, and CHANGELOG need.
 
 ## Durable Documentation Gate
 
-Before updating long-lived docs such as use cases, README, AGENTS,
-`roadmap.md`, or design/development guides, verify the content:
+Before updating a long-lived document, verify the content is reusable beyond
+one feature, describes durable behavior/specification/design/repository policy,
+helps future work, is not duplicated, and is not temporary investigation,
+implementation history, review commentary, or a resolved issue.
 
-- is reusable beyond one feature
-- describes durable behavior, specification, design policy, or repository
-  operating policy
-- helps future planning or implementation
-- does not duplicate another durable document
-- is not a temporary investigation result
-- is not implementation history
-- is not review commentary
-- is not a record of a resolved issue
-
-Update the smallest necessary durable document surface.
-
-## VS Code Compatibility Policy
+## VS Code and Web Extension Policy
 
 - Treat `engines.vscode` as a compatibility contract.
-- If code requires a newer VS Code API, document it explicitly.
-- Any proposal to raise the minimum supported VS Code version must:
-  - explain why
-  - list affected APIs
-  - update docs
-  - include a dedicated compatibility note
-
-## Web Extension Policy
-
-This repository has a browser entry point.
-When changing shared code:
-
-- keep production imports free of Node built-ins
-- use injected capabilities or browser-safe adapters for host-specific behavior
-- verify browser build assumptions
-- avoid filesystem/process assumptions in shared layers
-
-## Dependency Update Policy
-
-When modernizing packages:
-
-- prefer grouped updates by risk category
-- separate build-tool updates from runtime/UI updates
-- document breaking changes from major upgrades
-- do not combine dependency modernization and architectural refactor in one large PR
-
-Suggested order:
-
-1. tooling/lint/test
-2. build pipeline
-3. typings
-4. runtime libraries
-5. UI libraries
+- Keep shared code free of Node built-ins and filesystem/process assumptions.
+- Verify desktop and web behavior whenever shared contracts, bootstrap, or
+  extension entry points change.
 
 ## Telemetry Policy
 
-Telemetry must remain minimal and privacy-conscious.
-Do not add telemetry containing file content, file paths, or personal identifiers.
-Report only application-catalog events through `TelemetryPort`; do not expose
-raw event-name or property-map reporting.
+Telemetry remains minimal and privacy-conscious. Do not add file content, file
+paths, or personal identifiers. Report only application-catalog events through
+`TelemetryPort`; do not expose raw event-name or property-map reporting.
 
 ## Output Expectations for Agents
 
-When finishing a task, provide:
+When finishing a task, report:
 
 1. what changed
-2. what tests/checks were run
+2. tests/checks run
 3. compatibility risks
-4. follow-up tasks if any
+4. follow-up tasks
 
 ## CLI Command Policy
 
-AI agents should run CLI commands through `rtk` by default when `rtk` provides
-an appropriate proxy. Prefer `rtk` for command output that can otherwise flood
-agent context, including file inspection, search, git/GitHub operations,
-package scripts, tests, builds, type checks, and browser test tooling.
+Use `rtk` by default for inspection, search, git/GitHub operations, package
+scripts, tests, builds, type checks, and browser tooling. Use a native command
+only when `rtk` has no suitable proxy, exact raw output is required, or the
+command is interactive.
 
-Examples:
+## Branch Naming
 
-- `rtk ls`
-- `rtk read AGENTS.md`
-- `rtk grep "pattern" src`
-- `rtk git status --short --branch`
-- `rtk gh pr view`
-- `rtk pnpm run qlty`
-- `rtk pnpm test`
-- `rtk pnpm run test:web`
-- `rtk pnpm run build`
-
-Use the native command directly only when:
-
-- `rtk` has no suitable proxy for the command
-- exact, unfiltered output is required for diagnosis or user reporting
-- the command is interactive or relies on shell behavior that `rtk` should not
-  wrap
-- an `rtk` proxy fails and the native command is needed to confirm the issue
-
-When falling back to a native command, mention the reason in the task summary if
-it affects validation or reproducibility.
+- Use a dedicated branch for each feature.
+- Reserve `docs/...` for docs-only changes. The Verify docs-only allowlist is
+  `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md`.
+- If a `docs/...` branch needs a file outside that set, rename it or start a
+  non-doc branch before continuing.
 
 ## Forbidden Changes
 
@@ -281,108 +174,92 @@ Do not:
 
 ## AI Agent Routing Guide
 
-This repository is designed to work seamlessly with multiple AI agents, each with distinct strengths.
+`AGENTS.md` owns repository routing. Role authority and handoffs live in the
+Codex role definitions; reusable procedures live in `.agents/skills`; the
+Codex skill directory contains invocation adapters only.
 
-### Agents
+### Agent Entrypoints
 
-#### Copilot CLI
+- Copilot CLI: `.github/copilot-instructions.md`
+- Codex role contracts: `.codex/agents/*.md`
+- Codex invocation adapters: `.codex/skills/*/SKILL.md`
+- Canonical shared procedures: `.agents/skills/*/SKILL.md`
+- SDD policy/document SSOT: `docs/specs/README.md`
 
-- **Invocation**: `copilot ...` command in terminal
-- **Session Model**: Stateless, request-based
-- **Strengths**:
-  - Complex multi-step automation
-  - Git operations and branch management
-  - CI/CD setup and scripting
-  - Batch operations across files
-- **Capabilities**: Full bash/git/tool access through `rtk` by default,
-  parallel execution
-- **Configuration**: `.github/copilot-instructions.md`
+### Deterministic SDD Routing
 
-#### Codex (VS Code Copilot)
+1. **Trivial change**: use the trivial-change criteria in
+   `docs/specs/README.md`; no feature lifecycle is required when the criteria
+   permit skipping SDD.
+2. **Feature intake**: use `feature-author` with
+   `.agents/skills/sdd-feature-intake/SKILL.md` and `$sdd-create-feature`.
+   Handoff: `plan-author`. Stop for ambiguous purpose, feature kind, overlap,
+   or compatibility evidence.
+3. **Planning**: use `plan-author` with
+   `.agents/skills/sdd-plan-task/SKILL.md` and `$sdd-plan-task` in Planning
+   Mode. Handoff: `plan-reviewer`. Stop for missing impact or design evidence.
+4. **Plan review**: use read-only `plan-reviewer` with
+   `.agents/skills/sdd-review-plan/SKILL.md` and `$sdd-review-plan`.
+   `Ready` goes to Human Approval; `Findings` go to `plan-reviser`.
+5. **Plan revision**: use `plan-reviser` with the same planning procedure in
+   Replanning Mode. Handoff: `plan-reviewer`. Stop when Findings are absent or
+   a new scope/design/approval decision is required.
+6. **Approved implementation**: use `implementer` with
+   `.agents/skills/sdd-implement-task/SKILL.md` and `$sdd-implement-task` for
+   exactly one approved slice. Handoff: `implementation-reviewer`. Stop when
+   approval, dependencies, or scope is unclear.
+7. **Implementation review**: use read-only `implementation-reviewer` with
+   `.agents/skills/sdd-review-implementation/SKILL.md` and
+   `$sdd-review-implementation`. `Ready` goes to the completion gate;
+   `Findings` go back to `implementer`.
+8. **Feature Exit**: after all slices are complete, use `feature-closer` with
+   `.agents/skills/sdd-feature-exit/SKILL.md` and `$sdd-feature-exit`.
+   `Close` goes to explicit human closure approval; a new design/scope issue
+   goes to planning.
+9. **Release**: use `$release-extension` only for extension release work. It
+   uses `.agents/skills/release-extension/SKILL.md`, remains outside the seven
+   SDD roles, and does not participate in SDD lifecycle handoffs.
 
-- **Invocation**: Chat panel in VS Code editor
-- **Session Model**: Workspace-persistent, context-aware
-- **Strengths**:
-  - Live coding and refactoring
-  - Interactive debugging
-  - Editor-integrated analysis
-  - Contextual suggestions
-- **Capabilities**: Workspace awareness, real-time error feedback, file-level changes
-- **Configuration**: `.codex/skills/` directory with specialized skills
+Role files are the authority for each role's fixed model/effort, allowed input,
+forbidden actions, output contract, and stop conditions. Do not duplicate those
+contracts in this routing guide.
 
-### Task Routing Matrix
+### General Task Routing Matrix
 
-| Category         | Task                        | Primary                                    | Fallback | Notes                                                            |
-| ---------------- | --------------------------- | ------------------------------------------ | -------- | ---------------------------------------------------------------- |
-| **SDD Workflow** | Create/update SDD specs     | Codex                                      | CLI      | Editor context preferred; CLI for batch doc updates              |
-|                  | Implement feature from SDD  | Codex                                      | CLI      | Live coding preferred; CLI for multi-file refactor               |
-|                  | Update branch docs          | Codex                                      | CLI      | Either works; Codex for interactive flow                         |
-| **Analysis**     | Repository analysis         | Codex (repo-analyse skill)                 | CLI      | Workspace awareness preferred; CLI for complex grep              |
-|                  | Search codebase             | CLI                                        | Codex    | Batch speed preferred; Codex for contextual search               |
-| **Architecture** | Validate clean architecture | Codex (clean-architecture-refactor skill)  | CLI      | Interactive guidance preferred; CLI for systematic checks        |
-|                  | Refactor parser code        | Codex (parser-change skill)                | CLI      | Test-driven feedback preferred; CLI for large restructure        |
-| **VS Code**      | Safe extension API changes  | Codex (vscode-extension-safe-change skill) | CLI      | Compatibility built-in; CLI for API automation                   |
-| **Webview**      | React/webview changes       | Codex (webview-change skill)               | CLI      | Component awareness preferred; CLI for multi-module edits        |
-| **Automation**   | Set up CI/CD step           | CLI                                        | Codex    | Script execution required; Codex if workflow guidance needed     |
-|                  | Batch file edits            | CLI                                        | Codex    | Parallel ops preferred; Codex for interactive refinement         |
-|                  | Generate boilerplate        | CLI                                        | Codex    | Template expansion required; Codex for quick scaffolding         |
-| **Complex Ops**  | Multi-slice refactor        | CLI                                        | Codex    | Git coordination required; Codex if per-step iteration preferred |
+<!-- markdownlint-disable MD013 MD060 -->
 
-**Column Definitions**:
+| Category         | Task                                                           | Primary | Fallback | Notes                                                             |
+| ---------------- | -------------------------------------------------------------- | ------- | -------- | ----------------------------------------------------------------- |
+| **SDD Workflow** | Feature intake, planning, review, implementation, Feature Exit | Codex   | CLI      | Follow the deterministic SDD routing above and shared procedures. |
+| **Analysis**     | Repository analysis                                            | Codex   | CLI      | Workspace awareness preferred; CLI for complex search.            |
+| **Architecture** | Validate clean architecture                                    | Codex   | CLI      | Interactive guidance preferred; CLI for systematic checks.        |
+| **VS Code**      | Safe extension API changes                                     | Codex   | CLI      | Preserve declared engine compatibility.                           |
+| **Webview**      | React/webview changes                                          | Codex   | CLI      | Verify desktop and web behavior.                                  |
+| **Automation**   | CI/CD or batch operations                                      | CLI     | Codex    | Shell and git coordination preferred.                             |
+| **Complex Ops**  | Multi-slice refactor                                           | CLI     | Codex    | Use only after SDD scope and handoffs are clear.                  |
 
-- **Primary**: Recommended agent for this task (optimal capabilities/context match)
-- **Fallback**: Alternative if Primary reaches token limit, session loss, or scope expansion
-- **Notes**: Why each assignment and when fallback becomes the better choice
+<!-- markdownlint-enable MD013 MD060 -->
 
-**When to Switch to Fallback**:
+Switch to the fallback only for token/session loss, scope expansion, or a
+capability the primary lacks. Both agents still follow this file and the SDD
+SSOT.
 
-- ✅ Token limit reached on Primary
-- ✅ Session timeout or connection lost
-- ✅ Task scope expanded significantly beyond original scope
-- ✅ Need different perspective or approach
-- ❌ Just personal preference (stick with Primary for consistency)
+### Coordination Sources
 
-### Configuration Sources
+- `AGENTS.md`: repository architecture rules and routing
+- `docs/specs/`: SDD policy, feature artifacts, and durable specifications
+- `.codex/agents/`: Codex role contracts
+- `.agents/skills/`: canonical reusable procedures
+- `.codex/skills/`: Codex invocation adapters
+- `.agent.md` and `.github/copilot-instructions.md`: lightweight entry-point
+  adapters, not policy SSOT
 
-**Source of Truth** (all agents reference, never duplicate):
-
-- `AGENTS.md` - Architecture rules and agent routing (you are here)
-- `docs/specs/` and `docs/requirements/use-cases/` - SDD workflow,
-  feature artifacts, and durable behavior contracts
-- `README.md` - Build/test commands and quick reference
-
-**Agent-Specific Configuration** (agent instructions, not rules):
-
-- `.github/copilot-instructions.md` - Copilot CLI entry point
-- `.codex/skills/*/SKILL.md` - Codex specialized workflows
-- `.agent.md` - VS Code Copilot extension metadata
-
-### How Agents Find Information
-
-1. **Copilot CLI** reads:
-
-   - `.github/copilot-instructions.md` → points to this section
-   - `AGENTS.md` (this routing guide) → determines task type
-   - `docs/specs/` and `docs/requirements/use-cases/` → gets SDD context
-   - `README.md` → gets build/test commands
-
-2. **Codex** reads:
-   - `.codex/skills/*/SKILL.md` → references `AGENTS.md` routing
-   - `AGENTS.md` (this routing guide) → determines task type
-   - `docs/specs/` and `docs/requirements/use-cases/` → gets SDD context
-   - Editor context → live analysis
-
-### Best Practices for Multi-Agent Work
-
-1. **Use the right agent for the task** - Check the routing matrix above
-2. **Keep agents coordinated** - Both reference AGENTS.md, not separate configs
-3. **Document assumptions in specs** - Prefer `docs/specs/` over agent-specific notes
-4. **Avoid duplicating rules** - Update AGENTS.md once, both agents follow
-5. **Record manual verification** - Update feature docs when smoke testing completes
+Keep assumptions and design decisions in the responsible SDD artifact. Do not
+duplicate SDD policy in agent-specific adapters.
 
 ## Repository-Specific Guidance
 
-Current important concerns in this repository:
+Current important concerns:
 
 - Keep the zero-exception architecture rule catalog synchronized with durable
   policy whenever an approved architecture decision changes a boundary.

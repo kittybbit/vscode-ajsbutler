@@ -1,8 +1,9 @@
 # Copilot CLI Instructions
 
 This file is for **Copilot CLI** (terminal agent).
-For multi-agent coordination details, see `.agent.md` and `AGENTS.md`
-§ "AI Agent Routing Guide".
+For multi-agent coordination details, see `AGENTS.md` § "AI Agent Routing
+Guide". This file is a Copilot CLI entry-point adapter, not an SDD policy
+source.
 
 ## Overview
 
@@ -17,14 +18,19 @@ Read these in order before making changes
 
 1. **`AGENTS.md`** - Architecture rules, agent routing, and coding policies
 
-   - § "AI Agent Routing Guide" determines when to use Copilot CLI vs Codex
+   - § "AI Agent Routing Guide" determines lifecycle routing and when to use
+     Copilot CLI vs Codex
    - § "Architecture Rules" lists strict dependency rules
      (domain, application, presentation, infrastructure)
    - § "SDD Workflow" outlines the specification-driven process
 
 2. **`docs/specs/`** - Specification-driven development documentation
 
-   - `README.md` - SDD lifecycle and document-role Single Source of Truth
+   - `docs/specs/README.md` - SDD policy, document roles, approval, and
+     validation SSOT
+   - `README.md` - build/test commands and repository overview
+   - `.agents/skills/` - canonical reusable procedures
+   - `.codex/skills/` - Codex invocation adapters only
    - `features/*/SPECS.md` - Temporary feature requirements and boundaries
    - `features/*/TASKS.md` - Sole plan and current state for its feature; the
      selected feature owns active branch implementation work
@@ -131,8 +137,9 @@ routing matrix first.
 ## Next Steps
 
 - For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
-- Refer to `docs/specs/README.md` and `.codex/skills/` for the authoritative
-  SDD gates
+- Refer to `docs/specs/README.md` for authoritative SDD gates and document
+  roles. Use `.agents/skills/` for canonical procedures; `.codex/skills/`
+  contains invocation adapters only.
 - Keep assumptions and design decisions in the responsible SDD artifact:
   use cases for durable behavior, `SPECS.md` for feature requirements,
   `TASKS.md` for slice plans, and `TRACEABILITY.md` for requirement-to-test

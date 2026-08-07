@@ -4,10 +4,9 @@
 
 - Purpose: separate agent authority and lifecycle routing from reusable SDD
   procedures while preserving the existing repository gates.
-- Approved or active slice: Slices 1–4 are complete; Slice 5 is in progress;
-  Slice 6 remains approved and queued.
-- Do not: edit runtime code, tests, generated artifacts, packaging
-  configuration, or packaging/CI files in Slice 5.
+- Approved or active slice: Slices 1–5 are complete; Slice 6 is in progress.
+- Do not: edit runtime code, tests, generated artifacts, or routing/role
+  definitions in Slice 6.
 - Do not: broaden the feature into SDD policy replacement, product behavior,
   JP1/AJS changes, or speculative roles.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, `AGENTS.md`,
@@ -42,7 +41,8 @@
   integrity.
 - Review status: Reviewed (`sdd-review-plan`)
 - Human approval: Approved
-- Active implementation slice: Slice 5 — AGENTS Master Orchestrator and Entry-Point Adapters
+- Active implementation slice: Slice 6 — Packaging, CI Classification, and
+  Final Integrity Validation
 
 ## Human Approval
 
@@ -337,7 +337,7 @@ fixed adapter metadata is `Luna / medium`; it does not require a
 
 ### Slice 5: AGENTS Master Orchestrator and Entry-Point Adapters
 
-- Status: Approved
+- Status: Complete
 - Scope: revise deterministic SDD routing and synchronize all current
   agent-specific entry points as thin adapters to the shared skills and
   Codex role definitions.
