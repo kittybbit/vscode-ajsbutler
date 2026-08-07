@@ -5,3 +5,4 @@ interface:
   default_prompt: >-
     Use $release-extension to prepare a VS Code extension release, update
     CHANGELOG, bump version with pnpm, publish with vsce, and open the PR.
+    Fixed execution metadata: model Luna; reasoning effort medium.
