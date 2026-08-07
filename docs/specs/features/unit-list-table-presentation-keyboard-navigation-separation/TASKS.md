@@ -4,8 +4,8 @@
 
 - Purpose: separate unit-list table presentation and keyboard focus state behind
   presentation-owned contracts without changing observable behavior.
-- Approved or active slice: Slice 3; Slices 1 and 2 are complete and the complete
-  three-slice plan has been
+- Approved or active slice: Feature Exit review; all three implementation
+  slices are complete and the complete three-slice plan has been
   reviewed and approved for implementation in dependency order.
 - Do not: change Application DTOs, JP1/AJS interpretation, viewer messages, or
   supported desktop/web behavior.
@@ -18,8 +18,8 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: obtain human completion approval for Slice 3 before Feature
-  Exit planning.
+- Next decision: complete the Feature Exit review after the remaining manual
+  large-list keyboard smoke evidence is obtained.
 
 ## Sync Rule
 
@@ -43,7 +43,7 @@
   keyboard/focus interaction model, and rendering/virtualization adapters.
 - Review status: Reviewed; no outstanding findings after plan revision
 - Human approval: Approved
-- Active implementation slice: Slice 3
+- Active implementation slice: Feature Exit review
 
 ## Human Approval
 
@@ -212,7 +212,8 @@ approved slice completes and no active implementation approval remains.
   - CHANGELOG impact: none under the internal-refactoring criteria.
 - Approval Boundary: current table keyboard/focus behavior only; no new
   shortcuts, cross-view abstractions, visual redesign, or host API.
-- Human approval: Approved in current conversation.
+- Human approval: Approved in current conversation; implementation review found
+  no outstanding findings.
 - Dependencies: Slice 1, because interaction state uses presentation-owned row
   and column identity rather than Application DTO types.
 - Risks: event ownership inside actionable cells and asynchronous virtualized
@@ -350,13 +351,19 @@ approved slice completes and no active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: not started; all three slices, acceptance
-  criteria, validation, integrated review, and durable-document propagation
-  remain incomplete.
+- Definition of Done status: Feature Exit review incomplete; all three slices,
+  acceptance criteria, automated validation, integrated review, and impact
+  evaluation pass, but manual large-list keyboard smoke evidence is still
+  missing.
 - Durable documentation updates: none planned beyond removing or revising the
   completed roadmap item during Feature Exit.
-- Open risks: all feature-level and slice risks above remain open pending
-  implementation evidence.
+- Open risks: the remaining manual large-list keyboard smoke evidence is the
+  only open Feature Exit item; no implementation or compatibility finding is
+  outstanding.
+- Feature Exit determination: Not complete. Manual large-list keyboard smoke
+  could not be executed because the local Mac UI was locked; unlock the UI and
+  verify entry, traversal, sorting, column visibility, detail return, tree
+  handoff, and exit before closing this feature and removing roadmap item 7.3.
 
 ## Validation
 
