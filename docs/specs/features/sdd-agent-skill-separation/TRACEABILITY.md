@@ -34,28 +34,35 @@ qlty` (no issues), `rtk git diff --check`, adapter path reachability, and
   release metadata YAML/exact-text check passed. Independent implementation
   review returned `Ready / no actionable findings`; completion was
   auto-approved under the user's instruction.
-- Slice 2 focused checks: pending role-contract review.
 - Slice 2 focused checks: role-contract structure and fixed model search,
   Markdown lint (14 files, 0 errors), `rtk pnpm run qlty` (no issues), and
   `rtk git diff --check` passed. Independent implementation review returned
   `Ready / no actionable findings`; completion was auto-approved under the
   user's instruction.
-- Slice 3 focused checks: pending implementation/review role-contract review.
 - Slice 3 focused checks: role-contract structure and fixed model search,
   canonical/adapter reachability, Markdown lint (18 files, 0 errors),
   `rtk pnpm run qlty` (no issues), and `rtk git diff --check` passed.
   Independent implementation review returned `Ready / no actionable
 findings`; completion was auto-approved under the user's instruction.
-- Slice 4 focused checks: pending Feature Exit ownership and lifecycle review.
 - Slice 4 focused checks: Feature Exit ownership/stale-claim search, roadmap
   propagation contract, Markdown lint (25 files, 0 errors), `rtk pnpm run
 qlty` (no issues), and `rtk git diff --check` passed. Independent
   implementation review returned `Ready / no actionable findings`; completion
   was auto-approved under the user's instruction.
-- Slice 5 focused checks: pending routing and entry-point synchronization
-  review.
 - Slice 5 focused checks: routing/role canonical mapping, stale-authority
   search, Markdown lint (29 files, 0 errors), `rtk pnpm run qlty` (no issues),
   and `rtk git diff --check` passed. Independent implementation review
   returned `Ready / no actionable findings`; completion was auto-approved under
   the user's instruction.
+- Slice 6 validation evidence: `rtk pnpm run lint:md` covered 49 files with 0
+  errors; `rtk pnpm run qlty` reported no issues; `rtk git diff --check`
+  passed; build, desktop tests, and web tests exited 0; VSIX packaging created
+  `/private/tmp/vscode-ajsbutler-agent-skill-separation.vsix`; VSIX inspection
+  confirmed `.agents/`, `.codex/`, `docs/`, and `src/` are excluded; and the
+  Verify workflow's existing `.agents/` full-check classification remains
+  unchanged. Build performance warnings and the existing desktop codesign/web
+  EPIPE logs did not change the successful exit codes.
+- Slice 6 independent implementation review returned `Ready / no actionable
+findings`; completion was auto-approved under the user's instruction. All
+  six implementation slices are now complete. Feature Exit and explicit
+  closure approval remain pending.

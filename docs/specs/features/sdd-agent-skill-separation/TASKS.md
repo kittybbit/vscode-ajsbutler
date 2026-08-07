@@ -4,7 +4,7 @@
 
 - Purpose: separate agent authority and lifecycle routing from reusable SDD
   procedures while preserving the existing repository gates.
-- Approved or active slice: Slices 1–5 are complete; Slice 6 is in progress.
+- Approved or active slice: Slices 1–6 are complete; Feature Exit is ready.
 - Do not: edit runtime code, tests, generated artifacts, or routing/role
   definitions in Slice 6.
 - Do not: broaden the feature into SDD policy replacement, product behavior,
@@ -16,8 +16,8 @@
   Markdown/reference checks for the new shared skill paths.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: complete independent review of Slice 1, then continue with
-  the next approved slice when no actionable finding remains.
+- Next decision: run Feature Exit and obtain explicit closure approval; do not
+  remove the selected feature folder before that approval.
 
 ## Sync Rule
 
@@ -41,8 +41,7 @@
   integrity.
 - Review status: Reviewed (`sdd-review-plan`)
 - Human approval: Approved
-- Active implementation slice: Slice 6 — Packaging, CI Classification, and
-  Final Integrity Validation
+- Active implementation slice: none; Feature Exit is ready
 
 ## Human Approval
 
@@ -388,7 +387,7 @@ fixed adapter metadata is `Luna / medium`; it does not require a
 
 ### Slice 6: Packaging, CI Classification, and Final Integrity Validation
 
-- Status: Approved
+- Status: Complete
 - Scope: make repository coordination files intentional at packaging and CI
   boundaries, then validate the complete migration and references.
 - Affected files and references:
@@ -497,7 +496,8 @@ fixed adapter metadata is `Luna / medium`; it does not require a
 
 ## Feature Exit
 
-- Definition of Done status: Not started; not eligible for Feature Exit.
+- Definition of Done status: Implementation slices complete; Feature Exit
+  review ready, closure approval pending.
 - Durable documentation updates: planned candidates are `AGENTS.md`, the
   limited lifecycle references in `docs/specs/README.md`, `.agent.md`,
   `.github/copilot-instructions.md`, and README development links.
@@ -508,12 +508,12 @@ fixed adapter metadata is `Luna / medium`; it does not require a
 
 - [x] Plan reviewed independently with `sdd-review-plan`.
 - [x] Human Approval is recorded before implementation files change.
-- [ ] Shared skill and role paths are checked for stale references and
+- [x] Shared skill and role paths are checked for stale references and
       duplicated SSOT content.
-- [ ] `rtk pnpm run qlty` passes for each documentation/configuration slice.
-- [ ] Markdown lint covers the new `.agents/skills` and retained Codex files.
-- [ ] Packaging and CI classification impact is explicitly validated.
-- [ ] Build and desktop/web tests pass for the final configuration/package
+- [x] `rtk pnpm run qlty` passes for each documentation/configuration slice.
+- [x] Markdown lint covers the new `.agents/skills` and retained Codex files.
+- [x] Packaging and CI classification impact is explicitly validated.
+- [x] Build and desktop/web tests pass for the final configuration/package
       boundary slice.
 - [ ] Durable documentation and guardrail propagation are complete before
       Feature Exit.
