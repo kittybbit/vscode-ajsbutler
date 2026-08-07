@@ -77,6 +77,7 @@ import {
   formatUnitInformationMessage,
   unitInformationMessage,
 } from "../unitInformationLocalization";
+import { createKeyboardSelectionCoalescer } from "./tableSelectionTiming";
 
 export type AjsTableSearchState = {
   query: string;
@@ -112,6 +113,8 @@ type TableViewerShellProps = {
   selectedDetail: ReturnType<typeof resolveUnitListDetail>;
   selectedUnitId: string | undefined;
   selectRow: (absolutePath: string) => void;
+  scheduleKeyboardRowSelection: (absolutePath: string) => void;
+  flushPendingSelection: () => void;
   openDetailPane: (absolutePath: string) => void;
   handleDetailFocusRequest: (revision: number) => void;
   returnToGrid: VoidFunction;
@@ -214,6 +217,8 @@ const TableViewerShell = ({
   selectedAbsolutePath,
   selectedDetail,
   selectRow,
+  scheduleKeyboardRowSelection,
+  flushPendingSelection,
   openDetailPane,
   handleDetailFocusRequest,
   returnToGrid,
@@ -310,6 +315,8 @@ const TableViewerShell = ({
                 parameterSearchValuesByPath={parameterSearchValuesByPath}
                 selectedAbsolutePath={selectedAbsolutePath}
                 selectRow={selectRow}
+                scheduleKeyboardRowSelection={scheduleKeyboardRowSelection}
+                flushPendingSelection={flushPendingSelection}
                 focusUnitTree={focusUnitTree}
                 openDetailPane={openDetailPane}
                 restoreFocusRequest={restoreGridFocusRequest}
@@ -379,10 +386,32 @@ const TableContents = () => {
     reduceTableRowSelection,
     undefined,
   );
-  const selectRow = useCallback((absolutePath: string) => {
+  const commitRowSelection = useCallback((absolutePath: string) => {
     setDetailPaneClosed(false);
     dispatchRowSelection({ type: "select", absolutePath });
   }, []);
+  const commitKeyboardRowSelection = useCallback(
+    (absolutePath: string) => {
+      reportTableOperation("unit.select");
+      commitRowSelection(absolutePath);
+    },
+    [commitRowSelection],
+  );
+  const keyboardSelectionCoalescer = useMemo(
+    () => createKeyboardSelectionCoalescer(commitKeyboardRowSelection),
+    [commitKeyboardRowSelection],
+  );
+  const selectRow = useCallback(
+    (absolutePath: string) => {
+      keyboardSelectionCoalescer.flush();
+      commitRowSelection(absolutePath);
+    },
+    [commitRowSelection, keyboardSelectionCoalescer],
+  );
+  useEffect(
+    () => () => keyboardSelectionCoalescer.cancel(),
+    [keyboardSelectionCoalescer],
+  );
   const requestGridFocus = useCallback((absolutePath?: string) => {
     setRestoreGridFocusRequest((request) => ({
       revision: request.revision + 1,
@@ -390,9 +419,10 @@ const TableContents = () => {
     }));
   }, []);
   const closeDetailPane = useCallback(() => {
+    keyboardSelectionCoalescer.flush();
     setDetailPaneClosed(true);
     requestGridFocus(selectedAbsolutePath);
-  }, [requestGridFocus, selectedAbsolutePath]);
+  }, [keyboardSelectionCoalescer, requestGridFocus, selectedAbsolutePath]);
   const openDetailPane = useCallback(
     (absolutePath: string) => {
       selectRow(absolutePath);
@@ -406,8 +436,9 @@ const TableContents = () => {
     );
   }, []);
   const returnToGrid = useCallback(() => {
+    keyboardSelectionCoalescer.flush();
     requestGridFocus(selectedAbsolutePath);
-  }, [requestGridFocus, selectedAbsolutePath]);
+  }, [keyboardSelectionCoalescer, requestGridFocus, selectedAbsolutePath]);
   const { viewerData, changeDocument } = useChangeDocument();
   const { tableData } = viewerData;
   const rowViews = tableData?.rows;
@@ -420,10 +451,11 @@ const TableContents = () => {
 
   const selectTreeUnit = useCallback(
     (unitId: string) => {
+      keyboardSelectionCoalescer.flush();
       reportTableOperation("unit.select");
       selectUnitTreeUnitInTable(unitId, viewerData.unitById, revealPath);
     },
-    [revealPath, viewerData.unitById],
+    [keyboardSelectionCoalescer, revealPath, viewerData.unitById],
   );
   const openTreeUnitScope = useCallback(
     (unitId: string) => {
@@ -452,11 +484,12 @@ const TableContents = () => {
     viewerData.unitByAbsolutePath,
   );
   const focusUnitTree = useCallback(() => {
+    keyboardSelectionCoalescer.flush();
     setFocusTreeRequest((request) => ({
       revision: request.revision + 1,
       targetUnitId: selectedUnitId,
     }));
-  }, [selectedUnitId]);
+  }, [keyboardSelectionCoalescer, selectedUnitId]);
   const resolveSelectedDetail = useMemo(
     () =>
       createUnitListDetailResolver(
@@ -581,9 +614,10 @@ const TableContents = () => {
   }, [announceTable, lang]);
 
   useEffect(() => {
+    keyboardSelectionCoalescer.cancel();
     dispatchRowSelection({ type: "documentChanged" });
     resetSearch();
-  }, [tableData, resetSearch]);
+  }, [keyboardSelectionCoalescer, resetSearch, tableData]);
 
   useEffect(() => {
     window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocument);
@@ -629,6 +663,8 @@ const TableContents = () => {
       selectedDetail={selectedDetail}
       selectedUnitId={selectedUnitId}
       selectRow={selectRow}
+      scheduleKeyboardRowSelection={keyboardSelectionCoalescer.schedule}
+      flushPendingSelection={keyboardSelectionCoalescer.flush}
       openDetailPane={openDetailPane}
       handleDetailFocusRequest={handleDetailFocusRequest}
       returnToGrid={returnToGrid}

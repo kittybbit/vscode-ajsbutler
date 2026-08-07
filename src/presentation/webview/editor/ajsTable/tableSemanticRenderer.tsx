@@ -46,6 +46,7 @@ export type VisibleTableCellRenderContext = {
   rowIndex: number;
   visibleColumnIds: readonly string[];
   onFocus: (focus: TableGridFocus) => void;
+  onPointerDown: () => void;
   onKeyDown: (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => void;
   registerFocusElement: (
     focus: TableGridFocus,
@@ -104,6 +105,7 @@ export const renderVisibleTableCell = ({
   rowIndex,
   visibleColumnIds,
   onFocus,
+  onPointerDown,
   onKeyDown,
   registerFocusElement,
 }: VisibleTableCellRenderContext): ReactNode => {
@@ -135,6 +137,7 @@ export const renderVisibleTableCell = ({
       aria-rowindex={rowIndex}
       tabIndex={isCurrent ? 0 : -1}
       onClick={(event) => event.currentTarget.focus()}
+      onPointerDown={onPointerDown}
       onFocus={() => onFocus(focus)}
       onKeyDown={(event) => onKeyDown(event, focus)}
       sx={[styleTableCell, tableGridFocusSx, getSearchHitCellSx(isSearchHit)]}

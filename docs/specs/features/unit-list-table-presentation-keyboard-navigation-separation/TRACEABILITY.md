@@ -35,3 +35,12 @@ premature-close noise after successful viewer activation. No Application,
 Domain, Infrastructure, transport, dependency, accessibility-copy, or
 user-visible behavior changed. Manual large-list keyboard smoke remains Feature
 Exit evidence because no interactive large-list fixture was available.
+
+Slice 4 validation result: `rtk pnpm run test:compile`, the desktop suite,
+`rtk pnpm run qlty`, and production `rtk pnpm run build` passed. Focused fake-
+timer tests cover repeated ArrowDown/PageDown movement, intermediate
+side-effect suppression, one final commit, immediate flush, and cancellation.
+The web smoke runner compiled the web target but could not complete in this
+environment: the first run was blocked by Chromium process permissions and the
+elevated retry timed out while connecting to the VS Code test service. Manual
+large-list keyboard smoke remains Feature Exit evidence.

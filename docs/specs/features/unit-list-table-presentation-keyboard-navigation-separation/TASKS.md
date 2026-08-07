@@ -318,7 +318,7 @@ approved slice completes and no active implementation approval remains.
 
 ### Slice 4: Coalesce keyboard-driven selection side effects
 
-- Status: Approved
+- Status: Complete
 - Scope: keep grid focus, roving focus, virtualization, and the focused cell
   moving immediately, while coalescing keyboard-driven `selectRow` and
   `unit.select` side effects in the presentation layer. Commit only the last
@@ -381,6 +381,18 @@ approved slice completes and no active implementation approval remains.
   internals, detail content, search semantics, or the Feature Exit manual
   verification requirement.
 
+#### Slice 4 implementation feedback
+
+- The slice boundary was appropriate: the coalescer belongs at the existing
+  presentation selection seam, leaving focus, virtualization, and scrolling
+  synchronous while keeping tree, detail, announcement, and operation effects
+  together at commit time.
+- Explicit pointer, tree, reveal, detail, Enter, return, and grid-exit paths
+  need a shared flush boundary; document replacement and unmount use cancel to
+  prevent stale selection commits.
+- Focused fake-timer coverage was sufficient to validate the 150 ms policy and
+  final-row semantics without introducing a timer dependency.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
@@ -434,15 +446,13 @@ approved slice completes and no active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: blocked pending the approved Slice 4 plan and
-  implementation, followed by manual large-list keyboard smoke evidence.
+- Definition of Done status: Feature Exit review active; manual large-list
+  keyboard smoke evidence remains open.
 - Durable documentation updates: none planned beyond removing or revising the
   completed roadmap item during Feature Exit.
-- Open risks: Slice 4 selection timing and the manual large-list keyboard smoke
-  evidence remain open.
-- Feature Exit determination: Not complete. The newly discovered performance
-  gap requires an approved Slice 4 before Feature Exit can resume; the prior
-  manual smoke blocker also remains.
+- Open risks: manual large-list keyboard smoke evidence remains open.
+- Feature Exit determination: Review active. Slice 4 is complete; the prior
+  manual large-list smoke blocker remains.
 
 ## Validation
 
@@ -451,15 +461,17 @@ approved slice completes and no active implementation approval remains.
 - [x] Focused table model, column, export, navigation, virtualization, shell,
       and accessibility tests pass
 - [x] `rtk pnpm run qlty` passes for every code slice
-- [x] Production build and required desktop/web validation pass
+- [x] Production build and desktop validation pass; web smoke was attempted and
+      remains environment-blocked
 - [ ] Manual large-list keyboard smoke verification is recorded (requires an
       interactive large-list fixture; automated 10,000-row Slice 2 coverage
       passed)
-- [ ] Slice 4 selection-side-effect coalescing is implemented, reviewed, and
+- [x] Slice 4 selection-side-effect coalescing is implemented, reviewed, and
       validated
 - [x] README/user-documentation impact evaluated as none for the proposed
       behavior-preserving scope
-- [x] CHANGELOG impact evaluated as none for the proposed internal refactoring
+- [x] CHANGELOG impact evaluated; any externally observable timing note remains
+      a Feature Exit decision
 
 ## Notes
 
