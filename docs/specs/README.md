@@ -33,9 +33,9 @@ flowchart TD
     D --> E["Human Approval<br/>required before implementation"]
     E --> F["Implementation<br/>sdd-implement-task"]
     F --> G["Completion Approval"]
-    G --> H["Feature Exit Review<br/>sdd-plan-task Feature Exit Mode"]
+    G --> H["Feature Exit<br/>feature-closer"]
     H --> I["Feature Close"]
-    F -. "exception only: new slice, scope change, design decision,<br/>wider impact, or approval-boundary change" .-> C
+    F -. "replan trigger" .-> C
 ```
 
 Human Approval is required before implementation starts. Replanning is an
@@ -72,16 +72,17 @@ For non-trivial changes:
    `docs/...` only for docs-only slices
 2. start feature intake with `sdd-create-feature`
 3. create or revise the full implementation-slice plan with `sdd-plan-task`
-   in exactly one mode: Planning Mode, Replanning Mode, or Feature Exit Mode
+   in exactly one mode: Planning Mode or Replanning Mode
 4. review the plan with `sdd-review-plan`
 5. obtain clear Human Approval before editing runtime code, tests, generated
    artifacts, or configuration
 6. implement only approved slices with `sdd-implement-task`
 7. return to `sdd-plan-task` only when a new slice, scope change, design
-   decision, wider impact, approval-boundary change, or Feature Exit review is
-   required
-8. close a feature only after Feature Exit Mode confirms the Feature
-   Definition of Done
+   decision, wider impact, or approval-boundary change is required
+8. run Feature Exit with `feature-closer` and `sdd-feature-exit` only after all
+   implementation slices are complete
+9. close a feature only after the Feature Exit review confirms the Feature
+   Definition of Done and the required closure approval is recorded
 
 Prefer quality assurance, readability, KISS, DRY/YAGNI, then SOLID in that
 order. Do not add abstractions unless they reduce real complexity. Keep diffs
@@ -120,7 +121,8 @@ Plan review is the pre-approval scope gate. After implementation and final
 validation, perform one integrated review of scope, acceptance, quality, and
 production readiness. Add an independent second review only for the higher-risk
 surface above or when the first review finds a concern. Feature Exit remains a
-separate completion review.
+separate completion review owned by the independent `feature-closer` role
+through `sdd-feature-exit`.
 
 ## CHANGELOG Update Criteria
 
@@ -253,9 +255,11 @@ unknowns, and a recommended next action—not a decision or a transcript.
 
 The coordinating agent alone owns feature selection, SDD artifact updates,
 approval evidence, scope and design decisions, integration, validation records,
-and final user communication. Do not delegate human approval, feature exit,
-scope expansion, or final validation. Avoid overlapping file ownership and
-broad repository exploration; consolidate delegated findings before acting.
+and final user communication. Do not delegate human approval, scope expansion,
+or final validation. Feature Exit uses its independent `feature-closer` role;
+the coordinator retains the closure decision and evidence record. Avoid
+overlapping file ownership and broad repository exploration; consolidate
+delegated findings before acting.
 
 ## Implementation Change Gate
 
@@ -341,7 +345,9 @@ Implementation will not proceed until approval is given.
 ```
 
 After approval, `sdd-implement-task` implements exactly one approved slice
-using the Risk-Based Validation And Review policy above.
+using the Risk-Based Validation And Review policy above. When all slices are
+complete, `feature-closer` runs the Feature Exit review; planning no longer
+owns Feature Exit.
 
 Do not leave failing checks unexplained or deferred without an explicit
 follow-up decision.
@@ -686,9 +692,12 @@ feature folders. Git and pull requests retain that history.
   branch index or second plan is maintained.
 - Implementation updates only the approved slice state and its validation
   evidence.
+- `feature-closer` performs Feature Exit with `sdd-feature-exit` and prepares
+  the closure recommendation, durable-knowledge propagation, and guardrail
+  check.
 - Feature Exit propagates only knowledge that passes the Durable Documentation
   Gate, obtains human approval, and removes only the complete selected feature
-  folder.
+  folder. `sdd-plan-task` owns Planning and Replanning, not Feature Exit.
 
 ### Lightweight Feature Structure Check
 

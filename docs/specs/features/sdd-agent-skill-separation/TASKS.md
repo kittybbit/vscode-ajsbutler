@@ -4,10 +4,10 @@
 
 - Purpose: separate agent authority and lifecycle routing from reusable SDD
   procedures while preserving the existing repository gates.
-- Approved or active slice: Slices 1–3 are complete; Slice 4 is in progress;
-  Slices 5–6 remain approved and queued.
+- Approved or active slice: Slices 1–4 are complete; Slice 5 is in progress;
+  Slice 6 remains approved and queued.
 - Do not: edit runtime code, tests, generated artifacts, packaging
-  configuration, routing, or entry-point adapters in Slice 4.
+  configuration, or packaging/CI files in Slice 5.
 - Do not: broaden the feature into SDD policy replacement, product behavior,
   JP1/AJS changes, or speculative roles.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, `AGENTS.md`,
@@ -42,7 +42,7 @@
   integrity.
 - Review status: Reviewed (`sdd-review-plan`)
 - Human approval: Approved
-- Active implementation slice: Slice 4 — Feature Exit and Durable Knowledge Role
+- Active implementation slice: Slice 5 — AGENTS Master Orchestrator and Entry-Point Adapters
 
 ## Human Approval
 
@@ -273,7 +273,7 @@ fixed adapter metadata is `Luna / medium`; it does not require a
 
 ### Slice 4: Feature Exit and Durable Knowledge Role
 
-- Status: Approved
+- Status: Complete
 - Scope: add the independent `feature-closer`, extract a reusable Feature Exit
   procedure, and update the SDD lifecycle reference so Feature Exit is no
   longer owned by `sdd-plan-task`.

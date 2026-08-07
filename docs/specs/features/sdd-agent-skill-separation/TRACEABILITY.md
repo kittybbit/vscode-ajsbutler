@@ -45,4 +45,10 @@ qlty` (no issues), `rtk git diff --check`, adapter path reachability, and
   canonical/adapter reachability, Markdown lint (18 files, 0 errors),
   `rtk pnpm run qlty` (no issues), and `rtk git diff --check` passed.
   Independent implementation review returned `Ready / no actionable
-  findings`; completion was auto-approved under the user's instruction.
+findings`; completion was auto-approved under the user's instruction.
+- Slice 4 focused checks: pending Feature Exit ownership and lifecycle review.
+- Slice 4 focused checks: Feature Exit ownership/stale-claim search, roadmap
+  propagation contract, Markdown lint (25 files, 0 errors), `rtk pnpm run
+  qlty` (no issues), and `rtk git diff --check` passed. Independent
+  implementation review returned `Ready / no actionable findings`; completion
+  was auto-approved under the user's instruction.
