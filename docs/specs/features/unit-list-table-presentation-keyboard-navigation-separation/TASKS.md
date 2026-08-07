@@ -3,10 +3,10 @@
 ## Agent Brief
 
 - Purpose: separate unit-list table presentation and keyboard focus state behind
-  presentation-owned contracts without changing observable behavior.
-- Approved or active slice: Feature Exit review; all three implementation
-  slices are complete and the complete three-slice plan has been
-  reviewed and approved for implementation in dependency order.
+  presentation-owned contracts while keeping repeated keyboard movement
+  responsive.
+- Approved or active slice: Slice 4 is proposed for replan; Slices 1 through 3
+  are complete.
 - Do not: change Application DTOs, JP1/AJS interpretation, viewer messages, or
   supported desktop/web behavior.
 - Do not: add table features, shortcuts, redesigns, shared interaction
@@ -18,8 +18,8 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: complete the Feature Exit review after the remaining manual
-  large-list keyboard smoke evidence is obtained.
+- Next decision: review and obtain human approval for the Slice 4 replan before
+  implementation.
 
 ## Sync Rule
 
@@ -38,21 +38,32 @@
 
 ## Plan Status
 
-- Status: Approved
-- Planning scope: the full 7.3 feature across the presentation table model,
-  keyboard/focus interaction model, and rendering/virtualization adapters.
-- Review status: Reviewed; no outstanding findings after plan revision
-- Human approval: Approved
-- Active implementation slice: Feature Exit review
+- Status: Replan Required
+- Planning scope: the full 7.3 feature plus the discovered keyboard-selection
+  side-effect coalescing gap.
+- Review status: Reviewed; no outstanding findings after Slice 4 revision
+- Human approval: Pending for the revised Slice 4 scope
+- Active implementation slice: Slice 4
+
+## Replanning Trigger
+
+- Discovered gap: `VirtualizedTable.handleGridFocus` calls `selectRow` and
+  reports `unit.select` for every keyboard-focused row. `TableContents` then
+  recomputes the selected unit, detail panel, accessibility announcement, and
+  tree selection on every arrow/Page movement.
+- Why the current plan cannot continue unchanged: the completed separation
+  slices preserve the existing selection timing, but that timing causes an
+  unacceptable interaction delay for rapid keyboard movement. A new
+  presentation-only behavior slice and renewed approval are required.
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: The complete three-slice plan and the stated approval boundary,
-  validation, and out-of-scope conditions for each slice; presentation-only
-  changes are allowed, while Application, Domain, Infrastructure, transport,
-  dependency, and user-visible behavior changes require replanning.
+- Status: Pending
+- Approved at: the prior approval covers Slices 1 through 3 only
+- Approved scope: The revised Slice 4 plan, its timing policy, and its
+  presentation-only approval boundary require new human approval. Application,
+  Domain, Infrastructure, transport, dependency, and unrelated user-visible
+  behavior changes remain out of scope.
 
 Implementation must not start while Status is Pending. Only clear human
 approval can change Status to Approved. Reset this section to Pending after an
@@ -306,22 +317,90 @@ approved slice completes and no active implementation approval remains.
 - The web smoke runner required browser process permissions in this environment;
   the elevated retry completed with only existing teardown `EPIPE` noise.
 
+### Slice 4: Coalesce keyboard-driven selection side effects
+
+- Status: Proposed
+- Scope: keep grid focus, roving focus, virtualization, and the focused cell
+  moving immediately, while coalescing keyboard-driven `selectRow` and
+  `unit.select` side effects in the presentation layer. Commit only the last
+  focused row after the proposed 150 ms keyboard-idle interval. Pointer row
+  selection, tree selection, external reveal, Enter actions, detail opening,
+  and focus handoffs commit immediately. Preserve the final selected unit,
+  detail content, tree state, accessibility announcement, and operation
+  semantics after the commit.
+- User / Domain Value: rapid keyboard movement remains responsive and does not
+  repeatedly rebuild the unit tree or detail panel for intermediate rows.
+- Cohesive Change Group: `VirtualizedTable.tsx`, `TableContents.tsx`, the
+  table-local selection/focus adapter or hook, and focused navigation,
+  virtualization, shell, accessibility, and detail tests.
+- Acceptance:
+  - satisfies R5, R8, AC3, AC5, and AC7
+  - arrow, PageUp/PageDown, Home/End, and Ctrl+Home/End movement updates the
+    grid focus immediately without synchronously selecting every intermediate
+    row in the tree or detail panel
+  - one idle commit selects the final focused row, updates the existing tree,
+    detail, announcement, and `unit.select` paths once, and preserves stable
+    selection/focus semantics
+  - pointer selection, tree selection, external reveal, Enter actions, detail
+    opening/return, and leaving the grid flush or commit immediately
+  - no new shortcut, transport schema, Application DTO, host API, or table
+    library dependency is introduced
+- Validation:
+  - add focused tests with fake timers for repeated ArrowDown/PageDown input,
+    intermediate-side-effect suppression, one final commit, and explicit-action
+    immediate commits
+  - rerun `tableNavigation.test.ts`, `tableVirtualizationFocus.test.ts`,
+    `tableShellIntegration.test.ts`, `accessibilityDom.test.tsx`, and detail
+    interaction tests
+  - run `rtk pnpm run test:compile`, the desktop suite, `rtk pnpm run qlty`,
+    `rtk pnpm run build`, and `rtk pnpm run test:web`
+  - perform manual keyboard smoke verification in a large list after the
+    debounce policy is implemented
+- Production Readiness:
+  - Failure mode: a pending timer could leave selection stale or update after
+    document replacement; cancel and flush pending work on unmount, document
+    change, explicit action, and grid exit.
+  - JP1/AJS compatibility: only presentation-side timing changes; unit meaning,
+    identity, projection, and definition content remain unchanged.
+  - Large or malformed input risk: coalescing must remain O(1) per key event,
+    preserve bounded focus movement, and safely clear pending paths.
+  - Desktop/web impact: use browser-safe timers and preserve both host paths;
+    verify desktop and web smoke behavior.
+  - README/docs impact: update the source use case only if the approved timing
+    policy becomes durable user-facing behavior.
+  - CHANGELOG impact: required if the timing change is accepted as an
+    externally observable behavior improvement; decide at Feature Exit.
+- Approval Boundary: presentation-only keyboard selection timing and its tests;
+  no change to Application, Domain, Infrastructure, transport, dependencies,
+  shortcuts, or unrelated viewer behavior.
+- Human approval: Pending.
+- Dependencies: Slices 1 through 3; this slice changes only their presentation
+  interaction wiring.
+- Risks: a debounce interval that is too long can make selection feel stale;
+  flushing at explicit boundaries and validating the 150 ms policy are required.
+- Out of Scope: changing grid focus movement, row rendering, tree component
+  internals, detail content, search semantics, or the Feature Exit manual
+  verification requirement.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
 - Reason: this non-trivial user-workflow-preserving refactoring spans three
-  implementation slices and must map behavior, boundary requirements, and
-  desktop/web validation explicitly.
+  completed implementation slices plus one behavior-timing replan slice and
+  must map behavior, boundary requirements, and desktop/web validation
+  explicitly.
 
 ## Cross-Slice Dependencies
 
-- Implement in order: Slice 1 -> Slice 2 -> Slice 3.
+- Implement in order: Slice 1 -> Slice 2 -> Slice 3 -> Slice 4.
 - Slice 1 localizes the Application-to-presentation boundary used by all later
   table components.
 - Slice 2 establishes the pure interaction decisions before Slice 3 moves DOM
   and virtualization responsibilities behind adapters.
 - Slice 3 integrates the complete boundary and supplies final desktop/web and
   manual workflow evidence.
+- Slice 4 addresses the discovered selection-side-effect performance gap after
+  the interaction and rendering seams are available.
 - Each slice has explicit approval recorded above; completing one slice does not
   approve a changed scope or a new slice.
 
@@ -333,6 +412,9 @@ approved slice completes and no active implementation approval remains.
   document replacement, external reveal, or virtualized remounting.
 - Extracting effects without preserving timing can duplicate host events or
   lose viewer-ready, telemetry, search, or focus requests.
+- Keyboard focus and committed selection can diverge during a rapid sequence;
+  pending selection must be coalesced and flushed at explicit interaction
+  boundaries without leaving stale tree/detail state.
 - Generic abstractions could widen the feature into shared search or flow
   interaction; keep contracts table-specific.
 - Any Application DTO/schema or observable shortcut/workflow change requires
@@ -340,8 +422,10 @@ approved slice completes and no active implementation approval remains.
 
 ## Use-Case Back-Propagation
 
-- No durable use-case change is planned because all observable scenarios are
-  preserved.
+- Slice 4 is expected to preserve the existing use-case outcome while changing
+  only keyboard-selection timing. Update `uc-view-unit-list.md` at Feature Exit
+  if the approved coalescing policy is retained as durable user-facing
+  behavior.
 - At Feature Exit, update `uc-view-unit-list.md` or another source use case only
   if implementation discovers reusable behavior knowledge not already owned
   there; do not record file layout or implementation history.
@@ -351,19 +435,15 @@ approved slice completes and no active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: Feature Exit review incomplete; all three slices,
-  acceptance criteria, automated validation, integrated review, and impact
-  evaluation pass, but manual large-list keyboard smoke evidence is still
-  missing.
+- Definition of Done status: blocked pending the approved Slice 4 plan and
+  implementation, followed by manual large-list keyboard smoke evidence.
 - Durable documentation updates: none planned beyond removing or revising the
   completed roadmap item during Feature Exit.
-- Open risks: the remaining manual large-list keyboard smoke evidence is the
-  only open Feature Exit item; no implementation or compatibility finding is
-  outstanding.
-- Feature Exit determination: Not complete. Manual large-list keyboard smoke
-  could not be executed because the local Mac UI was locked; unlock the UI and
-  verify entry, traversal, sorting, column visibility, detail return, tree
-  handoff, and exit before closing this feature and removing roadmap item 7.3.
+- Open risks: Slice 4 selection timing and the manual large-list keyboard smoke
+  evidence remain open.
+- Feature Exit determination: Not complete. The newly discovered performance
+  gap requires an approved Slice 4 before Feature Exit can resume; the prior
+  manual smoke blocker also remains.
 
 ## Validation
 
@@ -376,6 +456,8 @@ approved slice completes and no active implementation approval remains.
 - [ ] Manual large-list keyboard smoke verification is recorded (requires an
       interactive large-list fixture; automated 10,000-row Slice 2 coverage
       passed)
+- [ ] Slice 4 selection-side-effect coalescing is implemented, reviewed, and
+      validated
 - [x] README/user-documentation impact evaluated as none for the proposed
       behavior-preserving scope
 - [x] CHANGELOG impact evaluated as none for the proposed internal refactoring

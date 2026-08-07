@@ -4,7 +4,7 @@
 
 Separate unit-list table rendering, column actions, virtualization, and keyboard
 focus state behind presentation-owned contracts while preserving the existing
-Application unit-list DTO and observable table behavior.
+Application unit-list DTO and keeping keyboard navigation responsive.
 
 ## Minimal Context
 
@@ -50,13 +50,18 @@ Application unit-list DTO and observable table behavior.
   model.
 - R5: Visible-column order, export output, search, sorting, detail actions,
   list-to-flow navigation, row reveal, tree/grid focus handoffs, and semantic
-  selection/focus state remain behaviorally unchanged.
+  selection/focus state remain behaviorally unchanged except for the timing
+  policy defined by R8.
 - R6: Sorting, column visibility changes, detail-pane return, document refresh,
   external row reveal, and virtualized mounting restore the selected unit and a
   meaningful visible cell or header fallback.
 - R7: The refactoring preserves supported desktop and web viewers, high-contrast
   focus visibility, localized accessible names and announcements, and large-list
   navigation behavior.
+- R8: Repeated keyboard row movement updates grid focus immediately but coalesces
+  selection side effects so the unit tree, detail panel, selection announcement,
+  and `unit.select` operation are updated once for the last focused row after
+  keyboard movement settles.
 
 ## Architecture
 
@@ -88,8 +93,9 @@ Application unit-list DTO and observable table behavior.
 
 ### Breaking Change Analysis
 
-- User-visible behavior: none; this is a behavior-preserving presentation
-  boundary refactoring.
+- User-visible behavior: Slice 4 intentionally changes only the timing of
+  keyboard-driven selection side effects to keep repeated movement responsive;
+  the final selected unit and explicit-action behavior remain unchanged.
 - API/DTO/schema compatibility: Application DTOs and viewer message schemas are
   unchanged; new contracts remain presentation-local.
 - VS Code/web extension compatibility: no new VS Code API or host capability;
@@ -147,6 +153,11 @@ Application unit-list DTO and observable table behavior.
   users can enter, traverse, and leave the grid in both desktop and web builds.
 - AC6: Required quality, focused tests, desktop/web tests, and build validation
   pass with no architecture-rule exception and no new unapproved smell.
+- AC7: A rapid keyboard sequence does not synchronously update the unit tree or
+  detail panel for every intermediate row; the final focused row is committed
+  after the defined idle interval, while pointer selection, tree selection,
+  external reveal, Enter actions, and focus handoffs retain immediate commit
+  behavior.
 
 ## Non-Goals
 
@@ -155,7 +166,8 @@ Application unit-list DTO and observable table behavior.
 - Change Application unit-list, CSV, navigation, unit-definition, telemetry, or
   viewer transport contracts.
 - Add keyboard shortcuts, table features, columns, search semantics, or visual
-  redesign.
+  redesign. The Slice 4 timing policy is the only approved behavior adjustment
+  under this replan.
 - Refactor shared header search, flow-tree selection, flow rendering, or flow
   interaction state owned by roadmap items 7.4 and 7.5 or completed features.
 - Replace React, MUI, TanStack Table, or React Virtuoso.
@@ -163,4 +175,6 @@ Application unit-list DTO and observable table behavior.
 
 ## Open Questions
 
-- None.
+- Proposed default for Slice 4: commit the last keyboard-focused row after a
+  150 ms idle interval; explicit pointer/tree/reveal/Enter actions commit
+  immediately. Human approval is required before implementation.
