@@ -4,11 +4,11 @@
 
 - Purpose: separate agent authority and lifecycle routing from reusable SDD
   procedures while preserving the existing repository gates.
-- Approved or active slice: Slice 1 is complete; Slice 2 is active; Slices 3–6
-  remain approved and queued.
+- Approved or active slice: Slices 1–2 are complete; Slice 3 is in progress;
+  Slices 4–6 remain approved and queued.
 - Do not: edit runtime code, tests, generated artifacts, packaging
-  configuration, role definitions, routing, or Feature Exit procedures in
-  Slice 1.
+  configuration, routing, Feature Exit procedures, or role definitions outside
+  Slice 3.
 - Do not: broaden the feature into SDD policy replacement, product behavior,
   JP1/AJS changes, or speculative roles.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, `AGENTS.md`,
@@ -43,7 +43,7 @@
   integrity.
 - Review status: Reviewed (`sdd-review-plan`)
 - Human approval: Approved
-- Active implementation slice: Slice 2 — Planning Lifecycle Role Definitions
+- Active implementation slice: Slice 3 — Implementation and Independent Review Role Definitions
 
 ## Human Approval
 
@@ -163,7 +163,7 @@ fixed adapter metadata is `Luna / medium`; it does not require a
 
 ### Slice 2: Planning Lifecycle Role Definitions
 
-- Status: Approved
+- Status: Complete
 - Scope: add Codex role definitions for `feature-author`, `plan-author`,
   `plan-reviewer`, and `plan-reviser`. Each definition must contain fixed
   model/effort, allowed input state, responsibility, authority, forbidden

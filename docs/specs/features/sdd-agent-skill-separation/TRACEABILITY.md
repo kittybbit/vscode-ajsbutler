@@ -30,7 +30,13 @@ procedure, and SDD policy ownership.
   release adapter records `Luna / medium` in its existing
   `interface.default_prompt` invocation metadata.
 - Slice 1 focused checks: Markdown lint (10 files, 0 errors), `rtk pnpm run
-  qlty` (no issues), `rtk git diff --check`, adapter path reachability, and
+qlty` (no issues), `rtk git diff --check`, adapter path reachability, and
   release metadata YAML/exact-text check passed. Independent implementation
   review returned `Ready / no actionable findings`; completion was
   auto-approved under the user's instruction.
+- Slice 2 focused checks: pending role-contract review.
+- Slice 2 focused checks: role-contract structure and fixed model search,
+  Markdown lint (14 files, 0 errors), `rtk pnpm run qlty` (no issues), and
+  `rtk git diff --check` passed. Independent implementation review returned
+  `Ready / no actionable findings`; completion was auto-approved under the
+  user's instruction.
