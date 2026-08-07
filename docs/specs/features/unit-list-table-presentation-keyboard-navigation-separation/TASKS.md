@@ -4,8 +4,9 @@
 
 - Purpose: separate unit-list table presentation and keyboard focus state behind
   presentation-owned contracts while keeping repeated keyboard movement
-  responsive.
-- Approved or active slice: Slice 4; Slices 1 through 3 are complete.
+  responsive and making selection confirmation explicit.
+- Approved or active slice: Slice 4 is being replanned; Slices 1 through 3 are
+  complete.
 - Do not: change Application DTOs, JP1/AJS interpretation, viewer messages, or
   supported desktop/web behavior.
 - Do not: add table features, shortcuts, redesigns, shared interaction
@@ -17,8 +18,8 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: implement Slice 4 and complete its independent implementation
-  review.
+- Next decision: implement the approved Enter-confirmation Slice 4 in an
+  independent session and complete its independent implementation review.
 
 ## Sync Rule
 
@@ -39,8 +40,9 @@
 
 - Status: Approved
 - Planning scope: the full 7.3 feature plus the discovered keyboard-selection
-  side-effect coalescing gap.
-- Review status: Reviewed; no outstanding findings after Slice 4 revision
+  side-effect gap, revised from time-based coalescing to explicit Enter
+  confirmation.
+- Review status: Reviewed; no outstanding findings after independent re-review
 - Human approval: Approved
 - Active implementation slice: Slice 4
 
@@ -50,19 +52,32 @@
   reports `unit.select` for every keyboard-focused row. `TableContents` then
   recomputes the selected unit, detail panel, accessibility announcement, and
   tree selection on every arrow/Page movement.
-- Why the current plan cannot continue unchanged: the completed separation
-  slices preserve the existing selection timing, but that timing causes an
-  unacceptable interaction delay for rapid keyboard movement. A new
-  presentation-only behavior slice and renewed approval are required.
+- Why the current plan cannot continue unchanged: the time-based coalescing
+  implementation still leaves selection confirmation dependent on timer
+  scheduling and can make focus handoffs observe stale React state. The
+  confirmed Enter direction therefore revises the presentation behavior and
+  approval boundary before implementation continues.
+
+## Replan Decision
+
+- Decision: separate focused-row state from committed-row state. Arrow,
+  PageUp/PageDown, Home/End, and Ctrl+Home/End move focus only. Enter commits
+  the focused row and runs the existing selection-dependent effects once.
+- Explicit handoffs such as tree focus, detail opening, reveal, and grid exit
+  commit the focused row immediately before performing the handoff. Pointer
+  selection remains immediate. Document replacement and unmount discard any
+  uncommitted focus path.
+- Rejected alternative: a 150 ms idle timer, because the commit boundary would
+  be time-dependent and would not give the user a clear confirmation action.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: approved in current conversation
-- Approved scope: Slice 4's coalesced keyboard-selection timing policy and
-  presentation-only implementation boundary; Application, Domain,
-  Infrastructure, transport, dependency, and unrelated user-visible behavior
-  changes remain out of scope.
+- Approved scope: Slice 4's explicit Enter-confirmation keyboard-selection
+  policy and presentation-only implementation boundary; Application, Domain,
+  Infrastructure, transport, dependency, and unrelated viewer behavior changes
+  remain out of scope.
 
 Implementation must not start while Status is Pending. Only clear human
 approval can change Status to Approved. Reset this section to Pending after an
@@ -316,17 +331,53 @@ approved slice completes and no active implementation approval remains.
 - The web smoke runner required browser process permissions in this environment;
   the elevated retry completed with only existing teardown `EPIPE` noise.
 
-### Slice 4: Coalesce keyboard-driven selection side effects
+### Slice 4: Confirm keyboard-driven selection explicitly
 
-- Status: Complete
+- Status: Approved
 - Scope: keep grid focus, roving focus, virtualization, and the focused cell
-  moving immediately, while coalescing keyboard-driven `selectRow` and
-  `unit.select` side effects in the presentation layer. Commit only the last
-  focused row after the proposed 150 ms keyboard-idle interval. Pointer row
-  selection, tree selection, external reveal, Enter actions, detail opening,
-  and focus handoffs commit immediately. Preserve the final selected unit,
-  detail content, tree state, accessibility announcement, and operation
-  semantics after the commit.
+  moving immediately, while separating the focused row from the committed row
+  in the presentation layer. Arrow, PageUp/PageDown, Home/End, and
+  Ctrl+Home/End must not select intermediate rows or update the unit tree,
+  detail panel, announcement, or `unit.select` operation. Enter commits the
+  focused row through the existing selection path exactly once, then preserves
+  the existing `[data-grid-cell-action]` activation for that Enter event without
+  duplicate selection or operation effects. Pointer row selection, tree
+  selection, external reveal, detail opening, and focus handoffs commit the
+  current focused path immediately before their existing action; an explicit
+  target supersedes any provisional focus path. Document change and unmount
+  discard any uncommitted focus path and reset pending focus restoration.
+- The implementation must retire the prior time-based approach: remove
+  `tableSelectionTiming.ts`, its `tableSelectionTiming.test.ts`, the
+  `createKeyboardSelectionCoalescer` imports and wiring, and the
+  `scheduleKeyboardRowSelection`/`flushPendingSelection` props. No delayed
+  keyboard-selection timer remains.
+- Action commit matrix:
+  - Pointer selection of target `B`: discard any provisional focus `A`, commit
+    `B` once, then run the pointer action; emit one selection announcement and
+    one `unit.select` operation for `B`.
+  - External reveal of target `B`: discard provisional `A`, commit `B` once,
+    then reveal and focus `B`; emit one announcement and one `unit.select` for
+    `B`, and do not commit `A` first.
+  - Tree-to-grid selection of target `B`: discard provisional `A`, commit `B`
+    once, then focus grid row `B`; emit one announcement and one `unit.select`
+    for `B`, with no additional operation for the focus transfer.
+  - Grid-to-tree handoff from focused `A` (`L`): commit `A` once, emit one
+    announcement and one `unit.select` for `A`, then focus tree unit `A`; the
+    handoff emits no second announcement or operation.
+  - Detail open from focused `A`: commit `A` once, emit one announcement and
+    one `unit.select` for `A`, then open detail for `A`; preserve the existing
+    detail action without duplicate selection effects.
+  - Detail return: use the already committed row `A` and move focus to `A`,
+    emitting zero additional announcements or `unit.select` operations. If a
+    provisional row exists at return, commit that row once before focusing it,
+    with exactly one announcement and one operation.
+  - Grid exit to the header: commit focused `A` once, emit one announcement and
+    one `unit.select` for `A`, then focus the header; the focus transfer emits
+    no second announcement or operation.
+  - Enter on focused `A`: commit `A` once, emit one announcement and one
+    `unit.select` for `A`, then activate the existing cell action once when
+    present; selection effects occur before the action and are not duplicated
+    by the action.
 - User / Domain Value: rapid keyboard movement remains responsive and does not
   repeatedly rebuild the unit tree or detail panel for intermediate rows.
 - Cohesive Change Group: `VirtualizedTable.tsx`, `TableContents.tsx`, the
@@ -337,68 +388,87 @@ approved slice completes and no active implementation approval remains.
   - arrow, PageUp/PageDown, Home/End, and Ctrl+Home/End movement updates the
     grid focus immediately without synchronously selecting every intermediate
     row in the tree or detail panel
-  - one idle commit selects the final focused row, updates the existing tree,
-    detail, announcement, and `unit.select` paths once, and preserves stable
-    selection/focus semantics
-  - pointer selection, tree selection, external reveal, Enter actions, detail
-    opening/return, and leaving the grid flush or commit immediately
+  - no idle timer is used for keyboard selection; intermediate movement leaves
+    the existing selection-dependent views unchanged
+  - Enter selects the currently focused row, updates the existing tree, detail,
+    announcement, and `unit.select` paths once, then activates the existing
+    cell action once when present, preserving stable selection/focus semantics
+  - pointer selection, tree selection, external reveal, detail opening/return,
+    and leaving the grid commit the current focused path immediately; an
+    explicit action target wins over a provisional path
+  - tree/detail/grid handoff code receives the committed path or unit identity
+    synchronously rather than reading a stale React selection closure
   - no new shortcut, transport schema, Application DTO, host API, or table
     library dependency is introduced
 - Validation:
-  - add focused tests with fake timers for repeated ArrowDown/PageDown input,
-    intermediate-side-effect suppression, one final commit, and explicit-action
-    immediate commits
+  - remove the old timer helper and test; add focused tests in
+    `tableNavigation.test.ts` and `tableShellIntegration.test.ts` for repeated
+    ArrowDown/PageDown input, intermediate-side-effect suppression, Enter
+    confirmation, existing cell-action activation, and exactly-one
+    `unit.select`/announcement path
+  - cover pointer selection, external reveal, tree handoff, detail open/return,
+    and grid exit in `tableShellIntegration.test.ts`, with semantic and
+    announcement assertions in `accessibilityDom.test.tsx`
+  - cover the pure rapid-movement and handoff decisions in
+    `tableNavigation.test.ts` and `tableVirtualizationFocus.test.ts`
+  - cover rapid movement followed by `L`, document replacement, and unmount in
+    `tableShellIntegration.test.ts` and/or `accessibilityDom.test.tsx` using
+    the rendered viewer and `unmount()`, asserting no stale selection,
+    announcement, tree/detail update, or focus restoration
   - rerun `tableNavigation.test.ts`, `tableVirtualizationFocus.test.ts`,
-    `tableShellIntegration.test.ts`, `accessibilityDom.test.tsx`, and detail
-    interaction tests
+    `tableShellIntegration.test.ts`, `accessibilityDom.test.tsx`, and
+    `revealUnit.test.ts`
   - run `rtk pnpm run test:compile`, the desktop suite, `rtk pnpm run qlty`,
     `rtk pnpm run build`, and `rtk pnpm run test:web`
-  - perform manual keyboard smoke verification in a large list after the
-    debounce policy is implemented
+  - perform manual keyboard smoke verification in a large list: move across
+    rows without Enter, confirm with Enter, verify existing cell actions, and
+    verify tree/detail updates occur only at confirmation or explicit handoff
 - Production Readiness:
-  - Failure mode: a pending timer could leave selection stale or update after
-    document replacement; cancel and flush pending work on unmount, document
-    change, explicit action, and grid exit.
-  - JP1/AJS compatibility: only presentation-side timing changes; unit meaning,
-    identity, projection, and definition content remain unchanged.
-  - Large or malformed input risk: coalescing must remain O(1) per key event,
-    preserve bounded focus movement, and safely clear pending paths.
-  - Desktop/web impact: use browser-safe timers and preserve both host paths;
-    verify desktop and web smoke behavior.
-  - README/docs impact: update the source use case only if the approved timing
-    policy becomes durable user-facing behavior.
-  - CHANGELOG impact: required if the timing change is accepted as an
-    externally observable behavior improvement; decide at Feature Exit.
-- Approval Boundary: presentation-only keyboard selection timing and its tests;
+  - Failure mode: focused and committed paths could diverge or an explicit
+    handoff could use the previous committed row; commit the current focused
+    path synchronously before handoff and discard it on document replacement or
+    unmount, including pending virtualization focus state.
+  - JP1/AJS compatibility: presentation-side keyboard selection behavior only;
+    unit meaning, identity, projection, and definition content remain
+    unchanged.
+  - Large or malformed input risk: focus transitions must not add repeated
+    tree/detail work per key event. Preserve the existing row lookup and
+    bounded virtualization behavior, do not duplicate its linear lookup, and
+    safely fall back to a visible cell or header when the focused path
+    disappears.
+  - Desktop/web impact: keep the state boundary browser-safe and preserve both
+    host paths; verify desktop and web smoke behavior.
+  - README/docs impact: update `uc-view-unit-list.md` at Feature Exit because
+    explicit keyboard confirmation is durable user-visible behavior.
+  - CHANGELOG impact: required because keyboard selection confirmation changes
+    the observable user workflow; record it at Feature Exit.
+- Approval Boundary: presentation-only keyboard selection confirmation,
+  retirement of the prior timer wiring, and their tests;
   no change to Application, Domain, Infrastructure, transport, dependencies,
   shortcuts, or unrelated viewer behavior.
 - Human approval: Approved in current conversation.
 - Dependencies: Slices 1 through 3; this slice changes only their presentation
   interaction wiring.
-- Risks: a debounce interval that is too long can make selection feel stale;
-  flushing at explicit boundaries and validating the 150 ms policy are required.
+- Risks: users may expect the focused row to update details without pressing
+  Enter; preserve clear focus styling and announce the existing committed row
+  semantics so the confirmation boundary is understandable.
 - Out of Scope: changing grid focus movement, row rendering, tree component
   internals, detail content, search semantics, or the Feature Exit manual
   verification requirement.
 
-#### Slice 4 implementation feedback
+#### Slice 4 replan review notes
 
-- The slice boundary was appropriate: the coalescer belongs at the existing
-  presentation selection seam, leaving focus, virtualization, and scrolling
-  synchronous while keeping tree, detail, announcement, and operation effects
-  together at commit time.
-- Explicit pointer, tree, reveal, detail, Enter, return, and grid-exit paths
-  need a shared flush boundary; document replacement and unmount use cancel to
-  prevent stale selection commits.
-- Focused fake-timer coverage was sufficient to validate the 150 ms policy and
-  final-row semantics without introducing a timer dependency.
+- The prior timer-based implementation is not the target of this replan. The
+  implementation must use an explicit focused-versus-committed state boundary,
+  with no idle timer or delayed selection side effect. Its helper, props,
+  wiring, and obsolete tests are removed as part of Slice 4.
 
 ## Traceability
 
 - TRACEABILITY.md required: yes
 - Reason: this non-trivial user-workflow-preserving refactoring spans three
-  completed implementation slices plus one behavior-timing replan slice and
-  must map behavior, boundary requirements, and desktop/web validation
+  completed implementation slices plus one keyboard-selection-contract replan
+  slice and must map behavior, boundary requirements, and desktop/web validation
   explicitly.
 
 ## Cross-Slice Dependencies
@@ -411,7 +481,8 @@ approved slice completes and no active implementation approval remains.
 - Slice 3 integrates the complete boundary and supplies final desktop/web and
   manual workflow evidence.
 - Slice 4 addresses the discovered selection-side-effect performance gap after
-  the interaction and rendering seams are available.
+  the interaction and rendering seams are available, including retirement of
+  the superseded timer implementation.
 - Each slice has explicit approval recorded above; completing one slice does not
   approve a changed scope or a new slice.
 
@@ -424,8 +495,8 @@ approved slice completes and no active implementation approval remains.
 - Extracting effects without preserving timing can duplicate host events or
   lose viewer-ready, telemetry, search, or focus requests.
 - Keyboard focus and committed selection can diverge during a rapid sequence;
-  pending selection must be coalesced and flushed at explicit interaction
-  boundaries without leaving stale tree/detail state.
+  Enter and explicit handoffs must commit the current focused path
+  synchronously without leaving stale tree/detail state.
 - Generic abstractions could widen the feature into shared search or flow
   interaction; keep contracts table-specific.
 - Any Application DTO/schema or observable shortcut/workflow change requires
@@ -433,10 +504,10 @@ approved slice completes and no active implementation approval remains.
 
 ## Use-Case Back-Propagation
 
-- Slice 4 is expected to preserve the existing use-case outcome while changing
-  only keyboard-selection timing. Update `uc-view-unit-list.md` at Feature Exit
-  if the approved coalescing policy is retained as durable user-facing
-  behavior.
+- Slice 4 changes the durable keyboard interaction contract: focus movement is
+  provisional until Enter or an explicit handoff commits the row. Update
+  `uc-view-unit-list.md` at Feature Exit and include the behavior in the
+  CHANGELOG.
 - At Feature Exit, update `uc-view-unit-list.md` or another source use case only
   if implementation discovers reusable behavior knowledge not already owned
   there; do not record file layout or implementation history.
@@ -446,32 +517,33 @@ approved slice completes and no active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: Feature Exit review active; manual large-list
-  keyboard smoke evidence remains open.
-- Durable documentation updates: none planned beyond removing or revising the
-  completed roadmap item during Feature Exit.
+- Definition of Done status: not ready pending Slice 4 replan review, approval,
+  implementation, and manual large-list keyboard smoke evidence.
+- Durable documentation updates: update `uc-view-unit-list.md` and
+  `CHANGELOG.md` at Feature Exit if the Enter-confirmation behavior passes its
+  acceptance and manual smoke gates; no roadmap sequencing change is planned.
 - Open risks: manual large-list keyboard smoke evidence remains open.
-- Feature Exit determination: Review active. Slice 4 is complete; the prior
-  manual large-list smoke blocker remains.
+- Feature Exit determination: not ready. The prior Slice 4 implementation is
+  superseded by the approved Enter-confirmation direction and must be
+  re-planned and re-implemented before Feature Exit.
 
 ## Validation
 
-- [x] Tests added or updated with each approved slice (existing regression
-      suites remained sufficient for this behavior-preserving extraction)
+- [x] Tests added or updated with each completed approved slice; Slice 4
+      replan tests remain pending approval and implementation
 - [x] Focused table model, column, export, navigation, virtualization, shell,
-      and accessibility tests pass
-- [x] `rtk pnpm run qlty` passes for every code slice
-- [x] Production build and desktop validation pass; web smoke was attempted and
-      remains environment-blocked
+      and accessibility tests for Slices 1 through 3 pass
+- [x] `rtk pnpm run qlty` passes for the completed Slices 1 through 3
+- [ ] Slice 4 qlty passes after the Enter-confirmation implementation
+- [ ] Slice 4 compile, desktop suite, production build, and web smoke pass;
+      the prior Slice 4 run is not evidence for the new behavior
 - [ ] Manual large-list keyboard smoke verification is recorded (requires an
       interactive large-list fixture; automated 10,000-row Slice 2 coverage
-      passed)
-- [x] Slice 4 selection-side-effect coalescing is implemented, reviewed, and
-      validated
-- [x] README/user-documentation impact evaluated as none for the proposed
-      behavior-preserving scope
-- [x] CHANGELOG impact evaluated; any externally observable timing note remains
-      a Feature Exit decision
+      passed; Slice 4 Enter-confirmation coverage is still pending)
+- [ ] Slice 4 explicit Enter-confirmation implementation and independent review
+      complete with no outstanding findings
+- [ ] `uc-view-unit-list.md` and `CHANGELOG.md` updated at Feature Exit for the
+      approved user-visible keyboard workflow
 
 ## Notes
 
