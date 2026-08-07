@@ -36,6 +36,14 @@ Domain, Infrastructure, transport, dependency, accessibility-copy, or
 user-visible behavior changed. Manual large-list keyboard smoke remains Feature
 Exit evidence because no interactive large-list fixture was available.
 
-Slice 4 replan status: the previously implemented time-based coalescing policy
-is superseded. The Enter-confirmation plan is awaiting independent plan review
-and renewed human approval; no new runtime validation is claimed yet.
+Slice 4 validation result: the previous time-based coalescing policy was
+removed. `tableNavigation.test.ts`, `tableVirtualizationFocus.test.ts`,
+`tableShellIntegration.test.ts`, and `accessibilityDom.test.tsx` now cover
+provisional movement, explicit Enter confirmation, existing cell-action
+activation, pointer/external/tree/detail/header handoffs, exact operation and
+announcement behavior, document replacement, and unmount cleanup.
+`revealUnit.test.ts` remains covered by the desktop suite. Test compilation,
+the desktop suite, qlty, production build, and elevated web smoke all passed.
+The web smoke retry emitted only existing teardown `ECONNRESET`/`EPIPE`/
+premature-close noise; manual large-list keyboard smoke remains unavailable in
+this environment because no interactive large-list fixture is present.

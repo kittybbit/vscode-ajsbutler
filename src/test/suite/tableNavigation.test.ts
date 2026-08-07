@@ -10,6 +10,7 @@ import {
   navigateToFlow,
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
+  resolveTableGridCommitPath,
   resolveTableGridFocus,
   resolveTableGridRestorationFocus,
   resolveUnitListGridShortcut,
@@ -33,21 +34,57 @@ const createUnit = (id: string, absolutePath: string): TableUnitMetadata => ({
 });
 
 suite("Table navigation", () => {
-  test("returns a pure movement decision with selection and off-screen target", () => {
-    const decision = decideTableGridNavigation({
-      current: { kind: "cell", absolutePath: "/root/first", columnId: "name" },
-      key: "PageDown",
+  test("commits the focused cell path before a targetless handoff", () => {
+    assert.strictEqual(
+      resolveTableGridCommitPath(
+        { kind: "cell", absolutePath: "/root/focused", columnId: "name" },
+        "/root/selected",
+      ),
+      "/root/focused",
+    );
+    assert.strictEqual(
+      resolveTableGridCommitPath(
+        { kind: "header", columnId: "name" },
+        "/root/selected",
+      ),
+      "/root/selected",
+    );
+  });
+
+  test("returns a pure movement decision without a selection side effect", () => {
+    const base = {
+      current: {
+        kind: "cell" as const,
+        absolutePath: "/root/first",
+        columnId: "name",
+      },
       pageSize: 2,
       rowAbsolutePaths: ["/root/first", "/root/middle", "/root/final"],
       visibleColumnIds: ["name"],
       sortableColumnIds: ["name"],
-    });
-
-    assert.deepStrictEqual(decision, {
-      focus: { kind: "cell", absolutePath: "/root/final", columnId: "name" },
-      selectedAbsolutePath: "/root/final",
-      scrollTargetAbsolutePath: "/root/final",
-    });
+    };
+    for (const [key, ctrlKey] of [
+      ["ArrowDown", false],
+      ["PageDown", false],
+      ["Home", false],
+      ["End", false],
+      ["Home", true],
+      ["End", true],
+    ] as const) {
+      assert.strictEqual(
+        decideTableGridNavigation({ ...base, key, ctrlKey })
+          .selectedAbsolutePath,
+        undefined,
+      );
+    }
+    assert.deepStrictEqual(
+      decideTableGridNavigation({ ...base, key: "PageDown" }),
+      {
+        focus: { kind: "cell", absolutePath: "/root/final", columnId: "name" },
+        selectedAbsolutePath: undefined,
+        scrollTargetAbsolutePath: "/root/final",
+      },
+    );
   });
 
   test("returns a stable header fallback when a saved cell is unavailable", () => {

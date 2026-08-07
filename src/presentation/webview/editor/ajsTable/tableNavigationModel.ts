@@ -58,6 +58,12 @@ export const getTableGridFocusKey = (
       ? `cell:${focus.absolutePath}:${focus.columnId}`
       : undefined;
 
+export const resolveTableGridCommitPath = (
+  focus: TableGridFocus | undefined,
+  committedAbsolutePath: string | undefined,
+): string | undefined =>
+  focus?.kind === "cell" ? focus.absolutePath : committedAbsolutePath;
+
 export const resolveUnitListGridShortcut = ({
   focus,
   key,
@@ -326,8 +332,7 @@ export const decideTableGridNavigation = (
   const focus = moveTableGridFocus(context);
   return {
     focus,
-    selectedAbsolutePath:
-      focus?.kind === "cell" ? focus.absolutePath : undefined,
+    selectedAbsolutePath: undefined,
     scrollTargetAbsolutePath:
       focus?.kind === "cell" ? focus.absolutePath : undefined,
   };
@@ -349,8 +354,7 @@ export const decideTableGridRestoration = (
   );
   return {
     focus,
-    selectedAbsolutePath:
-      focus?.kind === "cell" ? focus.absolutePath : undefined,
+    selectedAbsolutePath: undefined,
     scrollTargetAbsolutePath:
       focus?.kind === "cell" ? focus.absolutePath : undefined,
   };

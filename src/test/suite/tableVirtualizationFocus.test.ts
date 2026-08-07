@@ -90,7 +90,7 @@ suite("Table virtualization and focus", () => {
     });
     assert.deepStrictEqual(decideTableGridNavigation(context), {
       focus: { kind: "cell", absolutePath: "/root/job-9999", columnId: "name" },
-      selectedAbsolutePath: "/root/job-9999",
+      selectedAbsolutePath: undefined,
       scrollTargetAbsolutePath: "/root/job-9999",
     });
   });

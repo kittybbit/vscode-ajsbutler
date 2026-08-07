@@ -14,7 +14,6 @@ import { ListRange, TableVirtuoso, TableVirtuosoHandle } from "react-virtuoso";
 import type { TableRowView } from "./tableViewerData";
 import TableHeader from "./TableHeader";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
-import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import {
   isTableGridNavigationEventOwnedByCell,
   getStickyColumnRevealScrollLeft,
@@ -24,6 +23,7 @@ import {
   decideTableGridRestoration,
   getTableGridFocusKey,
   isTableGridNavigationKey,
+  resolveTableGridCommitPath,
   resolveTableGridFocus,
   resolveUnitListGridShortcut,
   type TableGridFocus,
@@ -50,11 +50,12 @@ type VirtualizedTableProps = {
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   selectedAbsolutePath?: string;
   selectRow: (absolutePath: string) => void;
-  scheduleKeyboardRowSelection?: (absolutePath: string) => void;
-  flushPendingSelection?: () => void;
-  focusUnitTree: VoidFunction;
+  commitFocusedRow?: (absolutePath?: string) => string | undefined;
+  focusUnitTree: (absolutePath?: string) => void;
   openDetailPane: (absolutePath: string) => void;
   restoreFocusRequest: TableGridFocusRequest;
+  documentRevision?: number;
+  onGridFocusChange?: (focus: TableGridFocus) => void;
   gridAriaLabel?: string;
 };
 
@@ -123,11 +124,12 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   parameterSearchValuesByPath,
   selectedAbsolutePath,
   selectRow,
-  scheduleKeyboardRowSelection = () => undefined,
-  flushPendingSelection = () => undefined,
+  commitFocusedRow: commitFocusedRowProp,
   focusUnitTree,
   openDetailPane,
   restoreFocusRequest,
+  documentRevision = 0,
+  onGridFocusChange,
   gridAriaLabel,
 }) => {
   console.log("render VirtualizedTable.");
@@ -151,27 +153,59 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   const gridFocus = useRef<TableGridFocus | undefined>(undefined);
   const selectedAbsolutePathRef = useRef(selectedAbsolutePath);
   selectedAbsolutePathRef.current = selectedAbsolutePath;
-  const currentFocus = resolveTableGridFocus(
-    gridFocus.current,
-    selectedAbsolutePath,
-    rowAbsolutePaths,
-    visibleColumnIds,
-    sortableColumnIds,
-  );
-  gridFocus.current = currentFocus;
-  const [pageSize, setPageSize] = useState(10);
+  const observedDocumentRevision = useRef(documentRevision);
+  const observedSelectedAbsolutePath = useRef(selectedAbsolutePath);
   const focusElements = useRef(new Map<string, HTMLElement>());
   const headerReturnFocus = useRef<TableGridFocus | undefined>(undefined);
   const pendingFocusKey = useRef<string | undefined>(undefined);
   const keyboardFocusPendingSelection = useRef(false);
-  const observedSelectedAbsolutePath = useRef(selectedAbsolutePath);
+  const pointerActionPending = useRef(false);
   const observedRestoreFocusRevision = useRef(restoreFocusRequest.revision);
+  const documentRevisionChanged =
+    observedDocumentRevision.current !== documentRevision;
+  const selectionChanged =
+    observedSelectedAbsolutePath.current !== selectedAbsolutePath;
+  if (documentRevisionChanged) {
+    observedDocumentRevision.current = documentRevision;
+    gridFocus.current = undefined;
+    pendingFocusKey.current = undefined;
+    headerReturnFocus.current = undefined;
+    keyboardFocusPendingSelection.current = false;
+    pointerActionPending.current = false;
+    observedRestoreFocusRevision.current = restoreFocusRequest.revision;
+  } else if (
+    selectionChanged &&
+    gridFocus.current?.kind === "cell" &&
+    gridFocus.current.absolutePath !== selectedAbsolutePath
+  ) {
+    gridFocus.current = undefined;
+    pendingFocusKey.current = undefined;
+    keyboardFocusPendingSelection.current = false;
+    pointerActionPending.current = false;
+  }
+  const previousFocus = gridFocus.current;
+  const currentFocus = resolveTableGridFocus(
+    gridFocus.current,
+    documentRevisionChanged ? undefined : selectedAbsolutePath,
+    rowAbsolutePaths,
+    visibleColumnIds,
+    sortableColumnIds,
+  );
+  if (
+    getTableGridFocusKey(previousFocus) !== getTableGridFocusKey(currentFocus)
+  ) {
+    pendingFocusKey.current = undefined;
+    keyboardFocusPendingSelection.current = false;
+  }
+  gridFocus.current = currentFocus;
+  const [pageSize, setPageSize] = useState(10);
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
-  const reportRowSelected = useCallback(
-    () =>
-      window.vscode.postMessage(createViewerOperationRequest("unit.select")),
-    [],
+  const notifyGridFocusChange = useCallback(
+    (focus: TableGridFocus): void => {
+      onGridFocusChange?.(focus);
+    },
+    [onGridFocusChange],
   );
   const registerFocusElement = useCallback(
     (focus: TableGridFocus, element: HTMLElement | null) => {
@@ -209,44 +243,56 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   const handleGridFocus = useCallback(
     (focus: TableGridFocus) => {
       applyRovingFocus(focus);
-      if (
-        keyboardFocusPendingSelection.current &&
-        (focus.kind !== "cell" ||
-          focus.absolutePath === selectedAbsolutePathRef.current)
-      ) {
+      notifyGridFocusChange(focus);
+      if (keyboardFocusPendingSelection.current) {
         keyboardFocusPendingSelection.current = false;
+        return;
+      }
+      if (pointerActionPending.current) {
+        pointerActionPending.current = false;
+        return;
       }
       if (
         focus.kind === "cell" &&
         focus.absolutePath !== selectedAbsolutePathRef.current
       ) {
-        selectedAbsolutePathRef.current = focus.absolutePath;
-        if (keyboardFocusPendingSelection.current) {
-          keyboardFocusPendingSelection.current = false;
-          scheduleKeyboardRowSelection(focus.absolutePath);
-        } else {
-          reportRowSelected();
-          selectRow(focus.absolutePath);
-        }
+        selectRow(focus.absolutePath);
       }
     },
-    [
-      applyRovingFocus,
-      reportRowSelected,
-      scheduleKeyboardRowSelection,
-      selectRow,
-    ],
+    [applyRovingFocus, notifyGridFocusChange, selectRow],
   );
-  const handleGridPointerDown = useCallback(() => {
-    keyboardFocusPendingSelection.current = false;
-    flushPendingSelection();
-  }, [flushPendingSelection]);
+  const handleGridPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      keyboardFocusPendingSelection.current = false;
+      const target = event.target as HTMLElement | null;
+      pointerActionPending.current = Boolean(
+        target?.closest?.("[data-grid-cell-action]"),
+      );
+    },
+    [],
+  );
+  const commitFocusedGridRow = useCallback(
+    (absolutePath?: string): string | undefined => {
+      const targetPath =
+        absolutePath ??
+        resolveTableGridCommitPath(
+          gridFocus.current,
+          selectedAbsolutePathRef.current,
+        );
+      if (!targetPath) return undefined;
+      if (commitFocusedRowProp) return commitFocusedRowProp(targetPath);
+      selectRow(targetPath);
+      return targetPath;
+    },
+    [commitFocusedRowProp, selectRow],
+  );
   const focusGridTarget = useCallback(
     (nextFocus: TableGridFocus | undefined, fromKeyboard = false) => {
       if (!nextFocus) return;
       if (fromKeyboard) keyboardFocusPendingSelection.current = true;
       const nextKey = getTableGridFocusKey(nextFocus);
       applyRovingFocus(nextFocus);
+      notifyGridFocusChange(nextFocus);
       const mountedElement = nextKey
         ? focusElements.current.get(nextKey)
         : undefined;
@@ -267,7 +313,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         });
       }
     },
-    [applyRovingFocus, rowAbsolutePaths],
+    [applyRovingFocus, notifyGridFocusChange, rowAbsolutePaths],
   );
   const handleGridKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => {
@@ -291,20 +337,22 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       });
       if (shortcut === "focusColumnHeader" && focus.kind === "cell") {
         event.preventDefault();
-        flushPendingSelection();
+        commitFocusedGridRow(focus.absolutePath);
         headerReturnFocus.current = focus;
         focusGridTarget({ kind: "header", columnId: focus.columnId });
         return;
       }
       if (shortcut === "focusTree") {
         event.preventDefault();
-        flushPendingSelection();
-        focusUnitTree();
+        const committedPath = commitFocusedGridRow(
+          focus.kind === "cell" ? focus.absolutePath : undefined,
+        );
+        focusUnitTree(committedPath);
         return;
       }
       if (shortcut === "openDetails" && focus.kind === "cell") {
         event.preventDefault();
-        flushPendingSelection();
+        commitFocusedGridRow(focus.absolutePath);
         openDetailPane(focus.absolutePath);
         return;
       }
@@ -312,7 +360,6 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         const returnFocus = headerReturnFocus.current;
         if (returnFocus) {
           event.preventDefault();
-          flushPendingSelection();
           headerReturnFocus.current = undefined;
           focusGridTarget(
             decideTableGridRestoration(
@@ -330,7 +377,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       }
       if (!isTableGridNavigationKey(event.key, event.ctrlKey)) {
         if (focus.kind === "cell" && event.key === "Enter") {
-          flushPendingSelection();
+          commitFocusedGridRow(focus.absolutePath);
           const action = event.currentTarget.querySelector<HTMLElement>(
             "[data-grid-cell-action]",
           );
@@ -358,9 +405,9 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       focusGridTarget(nextFocus, true);
     },
     [
+      commitFocusedGridRow,
       focusGridTarget,
       focusUnitTree,
-      flushPendingSelection,
       openDetailPane,
       pageSize,
       rowAbsolutePaths,
@@ -470,6 +517,18 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   useEffect(() => {
     observedSelectedAbsolutePath.current = selectedAbsolutePath;
   }, [selectedAbsolutePath]);
+
+  useEffect(
+    () => () => {
+      gridFocus.current = undefined;
+      pendingFocusKey.current = undefined;
+      headerReturnFocus.current = undefined;
+      keyboardFocusPendingSelection.current = false;
+      pointerActionPending.current = false;
+      focusElements.current.clear();
+    },
+    [],
+  );
 
   useEffect(() => {
     if (observedRestoreFocusRevision.current === restoreFocusRequest.revision) {

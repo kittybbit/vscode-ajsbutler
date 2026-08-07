@@ -8,6 +8,7 @@ export {
   getTableGridFocusKey,
   isTableGridNavigationKey,
   moveTableGridFocus,
+  resolveTableGridCommitPath,
   resolveTableGridFocus,
   resolveTableGridRestorationFocus,
   resolveUnitListGridShortcut,

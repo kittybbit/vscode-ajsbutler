@@ -46,7 +46,7 @@ export type VisibleTableCellRenderContext = {
   rowIndex: number;
   visibleColumnIds: readonly string[];
   onFocus: (focus: TableGridFocus) => void;
-  onPointerDown: () => void;
+  onPointerDown: (event: React.PointerEvent<HTMLElement>) => void;
   onKeyDown: (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => void;
   registerFocusElement: (
     focus: TableGridFocus,

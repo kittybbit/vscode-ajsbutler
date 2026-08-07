@@ -125,6 +125,49 @@ const isViewerMessage = (
   "type" in value &&
   value.type === type;
 
+const countUnitSelectOperations = (messages: readonly unknown[]): number =>
+  messages.filter((message) => {
+    if (!isViewerMessage(message, "operation")) return false;
+    return (message as { data?: unknown }).data === "unit.select";
+  }).length;
+
+const dispatchTableDocument = (
+  eventBridge: ReturnType<typeof createViewerEventBridge>,
+  documentDto: ReturnType<typeof toUnitListDocumentDto>,
+): void => {
+  act(() => {
+    eventBridge.dispatch(
+      new MessageEvent("message", {
+        data: createViewerResourceStateMessage({
+          isDarkMode: false,
+          lang: "en",
+          scrollType: "table",
+        }),
+      }),
+    );
+    eventBridge.dispatch(
+      new MessageEvent("message", {
+        data: createViewerDocumentChangedMessage(documentDto),
+      }),
+    );
+  });
+};
+
+const getTableRowByCellText = (
+  container: HTMLElement,
+  cellText: string,
+): HTMLElement => {
+  const row = Array.from(
+    container.querySelectorAll<HTMLElement>('[role="row"]'),
+  ).find((candidate) =>
+    Array.from(candidate.querySelectorAll('[role="gridcell"]')).some(
+      (cell) => cell.textContent?.trim() === cellText,
+    ),
+  );
+  assert.ok(row, `Expected a table row containing ${cellText}`);
+  return row;
+};
+
 suite("Table shell integration", () => {
   let dom: JSDOM;
   let previousGlobals: GlobalDescriptorMap;
@@ -223,5 +266,299 @@ suite("Table shell integration", () => {
       const revealedRow = view.getByRole("row", { name: /jobnet/i });
       assert.strictEqual(revealedRow.getAttribute("aria-selected"), "true");
     });
+  });
+
+  test("keeps keyboard movement provisional until Enter and commits once", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(React.createElement(AjsTableViewerApp));
+    dispatchTableDocument(
+      eventBridge,
+      toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+    );
+    await waitFor(() =>
+      assert.ok(view.getByRole("grid", { name: "Unit list" })),
+    );
+
+    const rootRow = getTableRowByCellText(view.container, "root");
+    const rootCell = within(rootRow).getAllByRole("gridcell")[0];
+    fireEvent.click(rootCell);
+    const committedCount = countUnitSelectOperations(postedMessages);
+    assert.strictEqual(rootRow.getAttribute("aria-selected"), "true");
+
+    fireEvent.keyDown(rootCell, { key: "ArrowDown" });
+    const focusedRow = view.getByRole("row", { name: /jobnet/i });
+    assert.strictEqual(rootRow.getAttribute("aria-selected"), "true");
+    assert.strictEqual(focusedRow.getAttribute("aria-selected"), "false");
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      committedCount,
+    );
+
+    const focusedCell = within(focusedRow).getAllByRole("gridcell")[0];
+    fireEvent.keyDown(focusedCell, { key: "Enter" });
+    await waitFor(() =>
+      assert.strictEqual(focusedRow.getAttribute("aria-selected"), "true"),
+    );
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      committedCount + 1,
+    );
+    assert.ok(view.getByRole("status").textContent?.includes("jobnet"));
+  });
+
+  test("uses explicit targets and focused paths for handoffs without stale commits", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(React.createElement(AjsTableViewerApp));
+    dispatchTableDocument(
+      eventBridge,
+      toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+    );
+    await waitFor(() =>
+      assert.ok(view.getByRole("grid", { name: "Unit list" })),
+    );
+
+    const rootCell = getTableRowByCellText(
+      view.container,
+      "root",
+    ).querySelector('[role="gridcell"]') as HTMLElement;
+    fireEvent.click(rootCell);
+    fireEvent.keyDown(rootCell, { key: "ArrowDown" });
+    const provisionalRow = view.getByRole("row", { name: /jobnet/i });
+    const beforeReveal = countUnitSelectOperations(postedMessages);
+
+    act(() => {
+      eventBridge.dispatch(
+        new MessageEvent("message", {
+          data: createViewerRevealUnitMessage("/root/jobnet/leaf-job"),
+        }),
+      );
+    });
+    await waitFor(() =>
+      assert.strictEqual(
+        view
+          .getByRole("row", { name: /leaf-job/i })
+          .getAttribute("aria-selected"),
+        "true",
+      ),
+    );
+    assert.strictEqual(provisionalRow.getAttribute("aria-selected"), "false");
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeReveal + 1,
+    );
+
+    const leafCell = within(
+      view.getByRole("row", { name: /leaf-job/i }),
+    ).getAllByRole("gridcell")[0];
+    fireEvent.keyDown(leafCell, { key: "l" });
+    await waitFor(() => {
+      const leafTreeItem = view.getByRole("treeitem", { name: /leaf-job/i });
+      assert.strictEqual(document.activeElement, leafTreeItem);
+    });
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeReveal + 2,
+    );
+  });
+
+  test("commits before Enter and activates the existing cell action once", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(React.createElement(AjsTableViewerApp));
+    dispatchTableDocument(
+      eventBridge,
+      toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+    );
+    await waitFor(() =>
+      assert.ok(view.getByRole("grid", { name: "Unit list" })),
+    );
+
+    const rootRow = getTableRowByCellText(view.container, "root");
+    const rootCell = within(rootRow).getAllByRole("gridcell")[0];
+    fireEvent.click(rootCell);
+    const jobnetRow = view.getByRole("row", { name: /jobnet/i });
+    fireEvent.keyDown(rootCell, { key: "ArrowDown" });
+    const jobnetActionCell = within(jobnetRow).getAllByRole("gridcell")[1];
+    assert.ok(jobnetActionCell.querySelector("[data-grid-cell-action]"));
+    const beforeEnter = countUnitSelectOperations(postedMessages);
+
+    fireEvent.keyDown(jobnetActionCell, { key: "Enter" });
+    await waitFor(() =>
+      assert.strictEqual(rootRow.getAttribute("aria-selected"), "true"),
+    );
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeEnter + 2,
+    );
+    assert.strictEqual(jobnetRow.getAttribute("aria-selected"), "false");
+  });
+
+  test("lets tree selection replace a provisional grid focus target", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(React.createElement(AjsTableViewerApp));
+    dispatchTableDocument(
+      eventBridge,
+      toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+    );
+    await waitFor(() =>
+      assert.ok(view.getByRole("grid", { name: "Unit list" })),
+    );
+
+    const rootCell = getTableRowByCellText(
+      view.container,
+      "root",
+    ).querySelector('[role="gridcell"]') as HTMLElement;
+    fireEvent.click(rootCell);
+    fireEvent.keyDown(rootCell, { key: "ArrowDown" });
+    const provisionalRow = view.getByRole("row", { name: /jobnet/i });
+    const beforeTreeSelection = countUnitSelectOperations(postedMessages);
+
+    fireEvent.click(view.getByRole("treeitem", { name: /leaf-job/i }));
+    await waitFor(() =>
+      assert.strictEqual(
+        view
+          .getByRole("row", { name: /leaf-job/i })
+          .getAttribute("aria-selected"),
+        "true",
+      ),
+    );
+    assert.strictEqual(provisionalRow.getAttribute("aria-selected"), "false");
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeTreeSelection + 1,
+    );
+  });
+
+  test("commits the focused path before header exit and detail return", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(React.createElement(AjsTableViewerApp));
+    dispatchTableDocument(
+      eventBridge,
+      toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+    );
+    await waitFor(() =>
+      assert.ok(view.getByRole("grid", { name: "Unit list" })),
+    );
+
+    const rootCell = getTableRowByCellText(
+      view.container,
+      "root",
+    ).querySelector('[role="gridcell"]') as HTMLElement;
+    fireEvent.click(rootCell);
+    fireEvent.keyDown(rootCell, { key: "ArrowDown" });
+    const focusedCell = within(
+      view.getByRole("row", { name: /jobnet/i }),
+    ).getAllByRole("gridcell")[0];
+    const beforeHeaderExit = countUnitSelectOperations(postedMessages);
+
+    fireEvent.keyDown(focusedCell, { key: "h" });
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeHeaderExit + 1,
+    );
+    assert.strictEqual(
+      document.activeElement?.getAttribute("role"),
+      "columnheader",
+    );
+
+    fireEvent.keyDown(document.activeElement as HTMLElement, { key: "Escape" });
+    fireEvent.keyDown(focusedCell, { key: "d" });
+    await waitFor(() =>
+      assert.ok(
+        view.getByRole("complementary", {
+          name: "Selected list unit details",
+        }),
+      ),
+    );
+    const beforeDetailReturn = countUnitSelectOperations(postedMessages);
+    fireEvent.keyDown(
+      view.getByRole("complementary", { name: "Selected list unit details" }),
+      { key: "r" },
+    );
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeDetailReturn,
+    );
+  });
+
+  test("discards provisional focus on document replacement and unmount", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(React.createElement(AjsTableViewerApp));
+    const documentDto = toUnitListDocumentDto(
+      parseAjsDocumentForTest(definition),
+    );
+    dispatchTableDocument(eventBridge, documentDto);
+    await waitFor(() =>
+      assert.ok(view.getByRole("grid", { name: "Unit list" })),
+    );
+
+    const rootCell = getTableRowByCellText(
+      view.container,
+      "root",
+    ).querySelector('[role="gridcell"]') as HTMLElement;
+    fireEvent.click(rootCell);
+    fireEvent.keyDown(rootCell, { key: "ArrowDown" });
+    const beforeReplacement = countUnitSelectOperations(postedMessages);
+    act(() => {
+      eventBridge.dispatch(
+        new MessageEvent("message", {
+          data: createViewerDocumentChangedMessage(documentDto),
+        }),
+      );
+    });
+    await waitFor(() => {
+      assert.strictEqual(
+        view.queryByRole("complementary", {
+          name: "Selected list unit details",
+        }),
+        null,
+      );
+    });
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeReplacement,
+    );
+    assert.strictEqual(view.queryByRole("status"), null);
+
+    view.unmount();
+    assert.strictEqual(
+      countUnitSelectOperations(postedMessages),
+      beforeReplacement,
+    );
   });
 });

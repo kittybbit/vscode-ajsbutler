@@ -578,6 +578,33 @@ suite("Browser accessibility DOM", () => {
     delete window.vscode;
   });
 
+  test("keeps focused and selected rows distinct during keyboard traversal", () => {
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <TableGridFixture rowCount={128} />
+      </ThemeProvider>,
+    );
+    const firstRow = view.getByRole("row", { name: /job-0/i });
+    const firstCell = within(firstRow).getAllByRole("gridcell")[0];
+    firstCell.focus();
+    fireEvent.keyDown(firstCell, { key: "ArrowDown" });
+
+    const secondRow = view.getByRole("row", { name: /job-1/i });
+    assert.strictEqual(firstRow.getAttribute("aria-selected"), "true");
+    assert.strictEqual(secondRow.getAttribute("aria-selected"), "false");
+    assert.strictEqual(
+      within(secondRow)
+        .getAllByRole("gridcell")
+        .some((cell) => cell.getAttribute("tabindex") === "0"),
+      true,
+    );
+
+    const secondCell = within(secondRow).getAllByRole("gridcell")[0];
+    fireEvent.keyDown(secondCell, { key: "Enter" });
+    assert.strictEqual(firstRow.getAttribute("aria-selected"), "false");
+    assert.strictEqual(secondRow.getAttribute("aria-selected"), "true");
+  });
+
   test("keeps the shared search control localized, focusable, and callback-driven", () => {
     const submittedQueries: string[] = [];
     const navigatedQueries: Array<[string, HeaderSearchDirection]> = [];

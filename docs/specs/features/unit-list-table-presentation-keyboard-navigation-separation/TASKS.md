@@ -5,8 +5,8 @@
 - Purpose: separate unit-list table presentation and keyboard focus state behind
   presentation-owned contracts while keeping repeated keyboard movement
   responsive and making selection confirmation explicit.
-- Approved or active slice: Slice 4 is being replanned; Slices 1 through 3 are
-  complete.
+- Approved or active slice: Slice 4 is complete; Feature Exit remains separate
+  and is not part of this implementation session.
 - Do not: change Application DTOs, JP1/AJS interpretation, viewer messages, or
   supported desktop/web behavior.
 - Do not: add table features, shortcuts, redesigns, shared interaction
@@ -18,8 +18,8 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: implement the approved Enter-confirmation Slice 4 in an
-  independent session and complete its independent implementation review.
+- Next decision: complete Feature Exit after the manual large-list smoke gate
+  and the approved durable documentation updates.
 
 ## Sync Rule
 
@@ -44,7 +44,8 @@
   confirmation.
 - Review status: Reviewed; no outstanding findings after independent re-review
 - Human approval: Approved
-- Active implementation slice: Slice 4
+- Active implementation slice: none; Slice 4 is complete and Feature Exit is
+  deferred to its separate approval boundary.
 
 ## Replanning Trigger
 
@@ -333,7 +334,7 @@ approved slice completes and no active implementation approval remains.
 
 ### Slice 4: Confirm keyboard-driven selection explicitly
 
-- Status: Approved
+- Status: Complete
 - Scope: keep grid focus, roving focus, virtualization, and the focused cell
   moving immediately, while separating the focused row from the committed row
   in the presentation layer. Arrow, PageUp/PageDown, Home/End, and
@@ -517,30 +518,30 @@ approved slice completes and no active implementation approval remains.
 
 ## Feature Exit
 
-- Definition of Done status: not ready pending Slice 4 replan review, approval,
-  implementation, and manual large-list keyboard smoke evidence.
+- Definition of Done status: not ready pending manual large-list keyboard smoke
+  evidence and Feature Exit responsibilities.
 - Durable documentation updates: update `uc-view-unit-list.md` and
   `CHANGELOG.md` at Feature Exit if the Enter-confirmation behavior passes its
   acceptance and manual smoke gates; no roadmap sequencing change is planned.
 - Open risks: manual large-list keyboard smoke evidence remains open.
-- Feature Exit determination: not ready. The prior Slice 4 implementation is
-  superseded by the approved Enter-confirmation direction and must be
-  re-planned and re-implemented before Feature Exit.
+- Feature Exit determination: not ready. Slice 4 is complete, but the manual
+  large-list smoke gate and durable documentation updates remain.
 
 ## Validation
 
-- [x] Tests added or updated with each completed approved slice; Slice 4
-      replan tests remain pending approval and implementation
+- [x] Tests added or updated with each completed approved slice, including the
+      approved Slice 4 Enter-confirmation coverage
 - [x] Focused table model, column, export, navigation, virtualization, shell,
       and accessibility tests for Slices 1 through 3 pass
 - [x] `rtk pnpm run qlty` passes for the completed Slices 1 through 3
-- [ ] Slice 4 qlty passes after the Enter-confirmation implementation
-- [ ] Slice 4 compile, desktop suite, production build, and web smoke pass;
+- [x] Slice 4 qlty passes after the Enter-confirmation implementation
+- [x] Slice 4 compile, desktop suite, production build, and web smoke pass;
       the prior Slice 4 run is not evidence for the new behavior
 - [ ] Manual large-list keyboard smoke verification is recorded (requires an
-      interactive large-list fixture; automated 10,000-row Slice 2 coverage
-      passed; Slice 4 Enter-confirmation coverage is still pending)
-- [ ] Slice 4 explicit Enter-confirmation implementation and independent review
+      interactive large-list fixture; automated 10,000-row focus coverage and
+      Slice 4 Enter-confirmation coverage pass, but no interactive fixture was
+      available in this environment)
+- [x] Slice 4 explicit Enter-confirmation implementation and independent review
       complete with no outstanding findings
 - [ ] `uc-view-unit-list.md` and `CHANGELOG.md` updated at Feature Exit for the
       approved user-visible keyboard workflow
@@ -550,3 +551,24 @@ approved slice completes and no active implementation approval remains.
 - Keep feature requirements and boundary decisions in `SPECS.md`.
 - Use this file for implementation-slice planning, approval state, validation,
   risk, and Feature Exit readiness only.
+
+Slice 4 validation result: `rtk pnpm run test:compile`, the full desktop test
+runner, `rtk pnpm run qlty`, production `rtk pnpm run build`, and the elevated
+`rtk pnpm run test:web:run` all passed. The production build retained existing
+webpack bundle-size warnings. The non-elevated web smoke attempt was blocked by
+the environment's Chromium/macOS Mach-port permission; the elevated retry
+completed successfully and emitted only existing teardown `ECONNRESET`, `EPIPE`,
+and premature-close noise. The focused pure navigation, virtualization,
+accessibility, shell, and reveal tests are included in the compiled desktop
+suite. Manual large-list keyboard smoke was not available because this
+environment has no interactive large-list fixture; automated 10,000-row focus
+coverage remains passing. Independent final review found and fixed one stale
+pending-focus fallback edge; no findings remain.
+
+Slice 4 implementation feedback: the approved presentation-only boundary was
+sufficient. A synchronous commit callback plus a ref-backed focused path kept
+tree/detail handoffs independent of stale React selection closures, while a
+document revision reset handled pending virtualized focus without changing
+Application or transport contracts. No durable documentation propagation is
+needed before Feature Exit; the approved user-visible use-case and CHANGELOG
+updates remain Feature Exit responsibilities.
