@@ -40,3 +40,9 @@ qlty` (no issues), `rtk git diff --check`, adapter path reachability, and
   `rtk git diff --check` passed. Independent implementation review returned
   `Ready / no actionable findings`; completion was auto-approved under the
   user's instruction.
+- Slice 3 focused checks: pending implementation/review role-contract review.
+- Slice 3 focused checks: role-contract structure and fixed model search,
+  canonical/adapter reachability, Markdown lint (18 files, 0 errors),
+  `rtk pnpm run qlty` (no issues), and `rtk git diff --check` passed.
+  Independent implementation review returned `Ready / no actionable
+  findings`; completion was auto-approved under the user's instruction.
