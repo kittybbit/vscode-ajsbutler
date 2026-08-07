@@ -18,8 +18,7 @@
   tests, and production build as specified by each slice.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: complete Feature Exit after the manual large-list smoke gate
-  and the approved durable documentation updates.
+- Next decision: complete Feature Exit after the manual large-list smoke gate.
 
 ## Sync Rule
 
@@ -520,12 +519,13 @@ approved slice completes and no active implementation approval remains.
 
 - Definition of Done status: not ready pending manual large-list keyboard smoke
   evidence and Feature Exit responsibilities.
-- Durable documentation updates: update `uc-view-unit-list.md` and
-  `CHANGELOG.md` at Feature Exit if the Enter-confirmation behavior passes its
-  acceptance and manual smoke gates; no roadmap sequencing change is planned.
+- Durable documentation updates: `uc-view-unit-list.md` and `CHANGELOG.md` now
+  record the Enter-confirmation behavior; no roadmap sequencing change is
+  planned.
 - Open risks: manual large-list keyboard smoke evidence remains open.
-- Feature Exit determination: not ready. Slice 4 is complete, but the manual
-  large-list smoke gate and durable documentation updates remain.
+- Feature Exit determination: not ready. All slices, required automated
+  validation, traceability, and durable documentation are complete, but the
+  manual large-list smoke gate remains open.
 
 ## Validation
 
@@ -543,8 +543,8 @@ approved slice completes and no active implementation approval remains.
       available in this environment)
 - [x] Slice 4 explicit Enter-confirmation implementation and independent review
       complete with no outstanding findings
-- [ ] `uc-view-unit-list.md` and `CHANGELOG.md` updated at Feature Exit for the
-      approved user-visible keyboard workflow
+- [x] `uc-view-unit-list.md` and `CHANGELOG.md` updated for the approved
+      user-visible keyboard workflow
 
 ## Notes
 

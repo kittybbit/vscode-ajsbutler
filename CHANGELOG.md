@@ -12,6 +12,9 @@
   list, including stable cell focus across sorting, virtualized rows, search,
   detail-pane closure, definition-dialog return, and H, D, R, and Escape
   shortcuts for header and detail-pane round trips.
+- Improved unit-list keyboard selection so arrow and page movement changes only
+  provisional focus; Enter confirms the focused row, and explicit tree, detail,
+  reveal, and grid-exit handoffs commit selection once before leaving the grid.
 - Added read-only flow-node keyboard navigation using rendered spatial
   direction for arrow movement, N/RC flow-scope entry and return, and
   nested-jobnet expansion while preserving normal Tab traversal and viewport

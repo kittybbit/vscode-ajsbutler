@@ -126,7 +126,10 @@ Scenario: QUEUE transfer fields use the supported parameter set
 Scenario: Keyboard-only exploration preserves list context
   Given a unit list with content outside the rendered viewport
   When a keyboard-only user navigates, sorts, inspects details, and returns
-  Then the intended unit and meaningful cell remain selected and focused
+  Then arrow and page movement changes the provisional grid focus without
+    changing the selected unit
+  And Enter confirms the focused unit and updates the selected unit once
+  And the intended unit and meaningful cell remain selected and focused
   And the user can leave the table through the normal viewer focus order
 
 Scenario: List tree and grid focus handoffs remain predictable
@@ -135,8 +138,9 @@ Scenario: List tree and grid focus handoffs remain predictable
   Then that unit is selected/revealed and its meaningful grid cell receives
     focus
   When the user presses unmodified L from a grid cell or header
-  Then focus moves to the corresponding unit-tree row without changing the
-    selected unit
+  Then the focused grid unit is committed if it differs from the selected unit
+  And focus moves to the corresponding unit-tree row without a second selection
+    operation
 ```
 
 ## Acceptance Notes
@@ -144,6 +148,9 @@ Scenario: List tree and grid focus handoffs remain predictable
 - definition display, list-to-flow navigation, filtering, and CSV export
   continue to work from stable application-facing list metadata
 - representative fixtures should cover UTF-8, Shift_JIS, and large definitions
+- keyboard behavior separates provisional grid focus from committed selection;
+  Enter confirms a focused row and explicit focus handoffs commit before
+  leaving the grid
 - keyboard behavior, semantic state, and meaningful focus restoration remain
   usable in supported desktop and web viewers and in high-contrast themes
 - Enter from the tree and L from the grid use the same focus-handoff model as
