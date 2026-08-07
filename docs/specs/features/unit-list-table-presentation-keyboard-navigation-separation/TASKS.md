@@ -43,7 +43,7 @@
   keyboard/focus interaction model, and rendering/virtualization adapters.
 - Review status: Reviewed; no outstanding findings after plan revision
 - Human approval: Approved
-- Active implementation slice: Slice 2
+- Active implementation slice: Slice 3
 
 ## Human Approval
 
@@ -155,7 +155,7 @@ approved slice completes and no active implementation approval remains.
 
 ### Slice 2: Extract the table keyboard and focus interaction model
 
-- Status: Approved
+- Status: Complete
 - Scope: introduce a presentation-local pure interaction model in
   `tableNavigationModel.ts` for current grid focus, saved header-return focus,
   row selection handoff, keyboard command classification, column/sort
@@ -220,6 +220,19 @@ approved slice completes and no active implementation approval remains.
   regression tests.
 - Out of Scope: broad renderer decomposition, shared flow/table interaction,
   header-search behavior, and accessibility copy changes.
+
+#### Slice 2 implementation feedback
+
+- The approved boundary was appropriate: pure focus, shortcut, restoration,
+  selection, and off-screen target decisions moved cleanly while DOM ownership,
+  mounted-element registration, Virtuoso scrolling, host/tree handoff, and
+  Enter activation remained adapter concerns.
+- Existing navigation exports were retained as compatibility re-exports for
+  current presentation tests; Slice 3 can remove that adapter compatibility
+  surface if no longer needed after renderer integration.
+- Validation required one retry because Qlty's sandboxed log initialization
+  failed after the initial passing run; the escalated rerun passed with no
+  findings.
 
 ### Slice 3: Separate rendering, column actions, and virtualization adapters
 

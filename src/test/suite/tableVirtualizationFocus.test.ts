@@ -13,6 +13,7 @@ import {
   findRowIndexByIdentity,
   revealTableRow,
 } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
+import { decideTableGridNavigation } from "../../presentation/webview/editor/ajsTable/tableNavigationModel";
 
 suite("Table virtualization and focus", () => {
   test("creates a deterministic revision when visible columns change", () => {
@@ -70,25 +71,28 @@ suite("Table virtualization and focus", () => {
       (_, index) => `/root/job-${index}`,
     );
 
-    assert.deepStrictEqual(
-      moveTableGridFocus({
-        current: {
-          kind: "cell",
-          absolutePath: "/root/job-9990",
-          columnId: "name",
-        },
-        key: "PageDown",
-        pageSize: 37,
-        rowAbsolutePaths,
-        visibleColumnIds: ["#", "name"],
-        sortableColumnIds: ["name"],
-      }),
-      {
+    const context = {
+      current: {
         kind: "cell",
-        absolutePath: "/root/job-9999",
+        absolutePath: "/root/job-9990",
         columnId: "name",
       },
-    );
+      key: "PageDown",
+      pageSize: 37,
+      rowAbsolutePaths,
+      visibleColumnIds: ["#", "name"],
+      sortableColumnIds: ["name"],
+    } as const;
+    assert.deepStrictEqual(moveTableGridFocus(context), {
+      kind: "cell",
+      absolutePath: "/root/job-9999",
+      columnId: "name",
+    });
+    assert.deepStrictEqual(decideTableGridNavigation(context), {
+      focus: { kind: "cell", absolutePath: "/root/job-9999", columnId: "name" },
+      selectedAbsolutePath: "/root/job-9999",
+      scrollTargetAbsolutePath: "/root/job-9999",
+    });
   });
 
   test("reveals rows and hands off tree focus through stable identities", () => {

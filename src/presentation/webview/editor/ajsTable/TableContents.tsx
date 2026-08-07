@@ -49,8 +49,8 @@ import {
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
   selectUnitTreeUnitInTable,
-  type TableGridFocusRequest,
 } from "./navigation";
+import type { TableGridFocusRequest } from "./tableNavigationModel";
 import { getTableSearchResultPosition } from "./tableSearchState";
 import type {
   TableSearchDirection,

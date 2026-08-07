@@ -19,3 +19,10 @@ Slice 1 validation result: `rtk pnpm run test:compile`, the desktop test
 runner, `rtk pnpm run qlty`, and `rtk pnpm run build` passed. The web smoke
 runner exited successfully; its teardown emitted transport shutdown noise
 (`ECONNRESET`/`EPIPE`) without a test failure.
+
+Slice 2 validation result: `rtk pnpm run test:compile`, the desktop test
+runner, `rtk pnpm run qlty`, and `rtk pnpm run build` passed. The model tests
+cover movement decisions with selection/scroll targets and restoration fallback;
+the virtualization focus tests cover 10,000-row bounded movement and the same
+off-screen decision contract. No user-visible behavior, desktop/web host API,
+Application DTO, or CHANGELOG update was required.

@@ -38,18 +38,20 @@ import {
   viewerSelectionBorder,
 } from "../shared/viewerThemeStyles";
 import {
-  getStickyColumnRevealScrollLeft,
-  getTableGridFocusKey,
   isTableGridNavigationEventOwnedByCell,
-  isTableGridNavigationKey,
   isTableRowSelected,
-  moveTableGridFocus,
-  resolveUnitListGridShortcut,
+  getStickyColumnRevealScrollLeft,
+} from "./navigation";
+import {
+  decideTableGridNavigation,
+  decideTableGridRestoration,
+  getTableGridFocusKey,
+  isTableGridNavigationKey,
   resolveTableGridFocus,
-  resolveTableGridRestorationFocus,
+  resolveUnitListGridShortcut,
   type TableGridFocus,
   type TableGridFocusRequest,
-} from "./navigation";
+} from "./tableNavigationModel";
 
 type VirtualizedTableProps = {
   headerGroups: HeaderGroup<TableRowView>[];
@@ -487,7 +489,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
           event.preventDefault();
           headerReturnFocus.current = undefined;
           focusGridTarget(
-            resolveTableGridRestorationFocus(
+            decideTableGridRestoration(
               returnFocus,
               returnFocus.kind === "cell"
                 ? returnFocus.absolutePath
@@ -495,7 +497,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
               rowAbsolutePaths,
               visibleColumnIds,
               sortableColumnIds,
-            ),
+            ).focus,
           );
         }
         return;
@@ -514,7 +516,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       }
 
       event.preventDefault();
-      const nextFocus = moveTableGridFocus({
+      const navigationDecision = decideTableGridNavigation({
         current: focus,
         key: event.key,
         ctrlKey: event.ctrlKey,
@@ -523,6 +525,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         visibleColumnIds,
         sortableColumnIds,
       });
+      const nextFocus = navigationDecision.focus;
       const nextKey = getTableGridFocusKey(nextFocus);
       if (!nextFocus || nextKey === getTableGridFocusKey(focus)) return;
       focusGridTarget(nextFocus);
@@ -644,13 +647,13 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     }
     observedRestoreFocusRevision.current = restoreFocusRequest.revision;
     focusGridTarget(
-      resolveTableGridRestorationFocus(
+      decideTableGridRestoration(
         gridFocus.current,
         restoreFocusRequest.absolutePath ?? selectedAbsolutePath,
         rowAbsolutePaths,
         visibleColumnIds,
         sortableColumnIds,
-      ),
+      ).focus,
     );
   }, [
     focusGridTarget,

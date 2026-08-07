@@ -15,6 +15,10 @@ import {
   resolveUnitListGridShortcut,
   selectUnitTreeUnitInTable,
 } from "../../presentation/webview/editor/ajsTable/navigation";
+import {
+  decideTableGridNavigation,
+  decideTableGridRestoration,
+} from "../../presentation/webview/editor/ajsTable/tableNavigationModel";
 import { findRowIndexByIdentity } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
 import { revealTableRow } from "../../presentation/webview/editor/ajsTable/tableRowReveal";
 import type { TableUnitMetadata } from "../../presentation/webview/editor/ajsTable/tableViewerData";
@@ -29,6 +33,38 @@ const createUnit = (id: string, absolutePath: string): TableUnitMetadata => ({
 });
 
 suite("Table navigation", () => {
+  test("returns a pure movement decision with selection and off-screen target", () => {
+    const decision = decideTableGridNavigation({
+      current: { kind: "cell", absolutePath: "/root/first", columnId: "name" },
+      key: "PageDown",
+      pageSize: 2,
+      rowAbsolutePaths: ["/root/first", "/root/middle", "/root/final"],
+      visibleColumnIds: ["name"],
+      sortableColumnIds: ["name"],
+    });
+
+    assert.deepStrictEqual(decision, {
+      focus: { kind: "cell", absolutePath: "/root/final", columnId: "name" },
+      selectedAbsolutePath: "/root/final",
+      scrollTargetAbsolutePath: "/root/final",
+    });
+  });
+
+  test("returns a stable header fallback when a saved cell is unavailable", () => {
+    const decision = decideTableGridRestoration(
+      { kind: "cell", absolutePath: "/root/removed", columnId: "name" },
+      "/root/removed",
+      [],
+      [],
+      ["name"],
+    );
+
+    assert.deepStrictEqual(decision, {
+      focus: { kind: "header", columnId: "name" },
+      selectedAbsolutePath: undefined,
+      scrollTargetAbsolutePath: undefined,
+    });
+  });
   test("enables flow navigation only for a selected stable path", () => {
     assert.strictEqual(canNavigateToSelectedUnit(undefined), false);
     assert.strictEqual(canNavigateToSelectedUnit(""), false);

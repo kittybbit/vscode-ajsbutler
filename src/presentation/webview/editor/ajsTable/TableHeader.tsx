@@ -6,7 +6,7 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TableRowView } from "./tableViewerData";
-import type { TableGridFocus } from "./navigation";
+import type { TableGridFocus } from "./tableNavigationModel";
 import { viewerFocusIndicatorSx } from "../shared/viewerThemeStyles";
 
 const styleTableCell: SxProps<Theme> = {
