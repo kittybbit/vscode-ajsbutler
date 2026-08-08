@@ -376,6 +376,47 @@ suite("Browser accessibility DOM", () => {
     assert.ok(view.getByRole("treeitem", { name: /child/i }));
   });
 
+  test("selects and focuses rows while child pointer controls stay isolated", () => {
+    const child = createUnit("/root/child", 1, [], "/root");
+    const root = createUnit("/root", 0, [child]);
+    const selected: string[] = [];
+    const opened: string[] = [];
+    const view = renderTree([root], {
+      canOpenScopeUnit: (unit) => unit.id === root.id,
+      onOpenScope: (unitId) => opened.push(unitId),
+      onSelectUnit: (unitId) => selected.push(unitId),
+    });
+    const rootRow = view.getByRole("treeitem", { name: /root/i });
+    const rowFrame = rootRow.querySelector<HTMLElement>(
+      '[data-unit-tree-row="true"]',
+    );
+    const expandButton = rootRow.querySelector("button");
+
+    assert.ok(rowFrame);
+    assert.ok(expandButton);
+    fireEvent.click(expandButton);
+    assert.deepStrictEqual(selected, []);
+    const childRow = view.container.querySelector(
+      '[data-unit-tree-unit-id="/root/child"]',
+    ) as HTMLElement | null;
+    assert.ok(childRow);
+    assert.strictEqual(childRow.getAttribute("role"), "treeitem");
+
+    const openScopeButton = rootRow.querySelectorAll("button")[1];
+    assert.ok(openScopeButton);
+    fireEvent.click(openScopeButton);
+    assert.deepStrictEqual(opened, [root.id]);
+    assert.deepStrictEqual(selected, []);
+
+    fireEvent.click(childRow);
+    assert.deepStrictEqual(selected, [child.id]);
+
+    fireEvent.mouseDown(rowFrame);
+    assert.strictEqual(document.activeElement, rootRow);
+    fireEvent.click(rowFrame);
+    assert.deepStrictEqual(selected, [child.id, root.id]);
+  });
+
   test("exposes disabled nested rows and keeps them out of selection", () => {
     const child = createUnit("/root/disabled", 1, [], "/root");
     const root = createUnit("/root", 0, [child]);
@@ -385,10 +426,14 @@ suite("Browser accessibility DOM", () => {
       isUnitEnabled: (unit) => unit.id !== child.id,
       onSelectUnit: (unitId) => selected.push(unitId),
     });
+    const rootRow = view.getByRole("treeitem", { name: /^root$/i });
     const childRow = view.getByRole("treeitem", { name: /disabled/i });
 
     assert.strictEqual(childRow.getAttribute("aria-disabled"), "true");
     assert.strictEqual(childRow.tabIndex, -1);
+    rootRow.focus();
+    fireEvent.mouseDown(childRow);
+    assert.strictEqual(document.activeElement, rootRow);
     fireEvent.click(childRow);
 
     assert.deepStrictEqual(selected, []);

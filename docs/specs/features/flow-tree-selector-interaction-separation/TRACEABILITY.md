@@ -20,3 +20,9 @@
   checks all completed successfully. The browser suite required a permitted
   native Playwright launch because the sandboxed launch lacked macOS Mach-port
   permissions.
+- P1/P2 remediation revalidation passed: the accessibility DOM test resolves
+  the nested child by stable `data-unit-tree-unit-id` and asserts that clicking
+  it selects only the child. Focused DOM, compile, desktop/web, build, qlty,
+  Markdown lint, and diff checks passed. Independent implementation re-review
+  is Ready with no actionable findings; Completion Approval is recorded in
+  `TASKS.md` for the exact completion commit. Feature Exit remains pending.

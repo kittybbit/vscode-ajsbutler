@@ -35,6 +35,7 @@ import {
   type UnitTreeFocusRequest,
   type UnitTreeRowState,
 } from "./unitTreeSelectorModel";
+import { createUnitTreeRowInteraction } from "./unitTreeRowInteraction";
 import {
   collectCurrentPathUnitIds,
   useExpandedUnitTreeState,
@@ -381,22 +382,11 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
     notifyEnabledUnit(rowState.isEnabled, unit.id, onHoverUnit);
   const handleMouseLeave = () =>
     notifyEnabledUnit(rowState.isEnabled, unit.id, onLeaveUnit);
-  const handleRowMouseDown = (event: React.MouseEvent<HTMLElement>) => {
-    if (!rowState.isEnabled) return;
-    const owningTreeItem = (event.target as HTMLElement).closest(
-      '[role="treeitem"]',
-    );
-    if (owningTreeItem !== event.currentTarget) return;
-    event.preventDefault();
-    event.currentTarget.focus({ preventScroll: true });
-  };
-  const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
-    const owningTreeItem = (event.target as HTMLElement).closest(
-      '[role="treeitem"]',
-    );
-    if (owningTreeItem !== event.currentTarget) return;
-    notifyEnabledUnit(rowState.isEnabled, unit.id, onSelectUnit);
-  };
+  const rowInteraction = createUnitTreeRowInteraction({
+    isEnabled: rowState.isEnabled,
+    onSelectUnit,
+    unitId: unit.id,
+  });
 
   return (
     <Box
@@ -409,8 +399,8 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
       aria-level={unit.depth + 1}
       aria-selected={rowState.isSelected}
       data-unit-tree-unit-id={unit.id}
-      onMouseDown={handleRowMouseDown}
-      onClick={handleRowClick}
+      onMouseDown={rowInteraction.onMouseDown}
+      onClick={rowInteraction.onClick}
       onFocus={(event) => {
         if (event.target === event.currentTarget) {
           onRowFocus(unit.id);

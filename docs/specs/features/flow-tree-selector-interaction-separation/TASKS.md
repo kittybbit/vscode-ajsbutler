@@ -38,18 +38,26 @@
 - Planning scope: one presentation-only slice covering selector row state,
   focus/tabindex coordination, pointer and keyboard interaction, expansion and
   reveal state, and the existing flow selector adapter contracts.
-- Review status: Plan review Ready; implementation review Ready with no
-  actionable findings.
+- Review status: Plan review Ready; P1/P2 remediation revalidated by
+  implementer; independent implementation re-review Ready.
 - Human approval: reset after Slice 1 completion; plan and completion approval
   evidence is recorded on the slice below.
 - Active implementation slice: None
 
 ## Human Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
-- Approved paths:
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: Slice 1 P1/P2 implementation-review remediation only:
+  make the nested-child DOM assertion unique, verify child-only selection,
+  reconcile remediation evidence, and preserve the extracted row pointer
+  interaction behavior.
+- Approved paths: `docs/specs/features/flow-tree-selector-interaction-separation/TASKS.md`,
+  `docs/specs/features/flow-tree-selector-interaction-separation/TRACEABILITY.md`,
+  `src/presentation/webview/editor/shared/UnitTreeSelector.tsx`,
+  `src/presentation/webview/editor/shared/unitTreeRowInteraction.ts`,
+  `src/test/suite/accessibilityDom.test.tsx`,
+  `src/test/suite/unitTreeSelector.test.ts`
 
 Implementation must not start while Status is Pending. Only clear human
 approval can change Status to Approved. `Approved at` records the approval
@@ -59,8 +67,9 @@ result only, such as `approved in current conversation`.
 
 - Status: Approved
 - Approved at: approved in current conversation
-- Approved scope: completed Slice 1 implementation, tests, validation evidence,
-  and the synchronized task/traceability records only.
+- Approved scope: completed Slice 1 implementation plus the reviewed P2
+  pointer-interaction seam remediation and P1 nested-child DOM test/evidence
+  correction, including validation and synchronized SDD records.
 - Approved paths: `docs/specs/features/flow-tree-selector-interaction-separation/TASKS.md`,
   `docs/specs/features/flow-tree-selector-interaction-separation/TRACEABILITY.md`,
   `src/presentation/webview/editor/shared/UnitTreeSelector.tsx`,
@@ -68,9 +77,13 @@ result only, such as `approved in current conversation`.
   `src/presentation/webview/editor/shared/useUnitTreeSelectorState.ts`,
   `src/presentation/webview/editor/shared/useUnitTreeSelectorFocus.ts`,
   `src/presentation/webview/editor/shared/useUnitTreeSelectorKeyboard.ts`,
+  `src/presentation/webview/editor/shared/unitTreeRowInteraction.ts`,
+  `src/test/suite/accessibilityDom.test.tsx`,
   `src/test/suite/unitTreeSelector.test.ts`
-- Implementation review verdict: Ready
-- Commit status: Committed
+- Implementation review verdict: Ready; P1/P2 findings addressed, revalidated,
+  and independently reviewed with no actionable findings.
+- Commit status: Eligible for the exact completion commit; prior Slice 1
+  implementation remains committed separately.
 
 ## Closure Approval
 
@@ -152,13 +165,16 @@ result only, such as `approved in current conversation`.
   `unitTreeSelectorModel.ts`, `useUnitTreeSelectorState.ts`,
   `useUnitTreeSelectorFocus.ts`, and `useUnitTreeSelectorKeyboard.ts` seams;
   `unitTreeSelector.test.ts` directly covers the new pure row-state and key
-  guard seams. No `FlowSelector.tsx` change was required because its stable-ID
+  guard seams. The P2 remediation additionally moves row pointer ownership,
+  enabled-row selection, and pointer focus to `unitTreeRowInteraction.ts`,
+  with DOM coverage for row selection/focus and expand/open-scope control
+  suppression. No `FlowSelector.tsx` change was required because its stable-ID
   callback contract remained compatible.
-- Checks passed: `rtk pnpm run qlty`, `rtk pnpm run lint:md`,
-  `rtk pnpm run test:compile`, `rtk pnpm run build`,
-  `rtk git diff --check`, desktop preparation and suite, and web preparation
-  and suite. The web suite required a permitted native Playwright launch after
-  the sandboxed launch was blocked by macOS Mach-port permissions.
+- Checks passed after the P1/P2 correction: focused accessibility DOM test,
+  `rtk pnpm run test:compile`, desktop suite, web suite, `rtk pnpm run build`,
+  `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and `rtk git diff --check`.
+  Independent implementation review is Ready; Completion Approval is recorded
+  above for the exact completion commit.
 - Compatibility impact: no user-visible selector semantics, flow scope,
   stable identity, DTO, host message, telemetry, parser, or VS Code engine
   changes; desktop and browser webview paths both passed.
@@ -178,8 +194,9 @@ result only, such as `approved in current conversation`.
 
 ## Feature Exit
 
-- Definition of Done status: Slice 1 implementation, validation, and
-  implementation review are complete; Feature Exit is pending.
+- Definition of Done status: Slice 1 implementation and corrected validation
+  are complete; implementation review is Ready and Completion Approval is
+  recorded for the exact completion commit. Feature Exit is pending.
 - Durable documentation updates: none expected unless a reusable behavior or
   repository policy change is discovered.
 - Open risks: implementation review must confirm no selector semantics or
