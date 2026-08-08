@@ -4,7 +4,7 @@
 
 - Purpose: separate flow-tree selection and focus responsibilities into
   reviewable presentation-local seams without changing flow behavior.
-- Approved or active slice: Slice 1 implementation is complete; review is
+- Approved or active slice: Slice 1 is complete and committed; Feature Exit is
   pending.
 - Do not: change flow scope resolution, graph placement, stable unit identity,
   cross-view navigation, or table keyboard behavior.
@@ -17,8 +17,7 @@
   suites, production build, qlty, Markdown lint, and diff checks.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: implementation review, then Completion Approval and the
-  focused slice commit.
+- Next decision: Feature Exit review after the implementation-complete handoff.
 
 ## Sync Rule
 
@@ -35,25 +34,22 @@
 
 ## Plan Status
 
-- Status: In Progress
+- Status: Complete
 - Planning scope: one presentation-only slice covering selector row state,
   focus/tabindex coordination, pointer and keyboard interaction, expansion and
   reveal state, and the existing flow selector adapter contracts.
 - Review status: Plan review Ready; implementation review Ready with no
   actionable findings.
-- Human approval: Approved in the current conversation for the exact Slice 1
-  scope below.
-- Active implementation slice: Slice 1 (implementation complete; review pending)
+- Human approval: reset after Slice 1 completion; plan and completion approval
+  evidence is recorded on the slice below.
+- Active implementation slice: None
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: Slice 1 plan and its feature-definition, task-plan, and
-  traceability documents; no runtime implementation yet.
-- Approved paths: `docs/specs/features/flow-tree-selector-interaction-separation/SPECS.md`,
-  `docs/specs/features/flow-tree-selector-interaction-separation/TASKS.md`,
-  `docs/specs/features/flow-tree-selector-interaction-separation/TRACEABILITY.md`
+- Status: Pending
+- Approved at:
+- Approved scope:
+- Approved paths:
 
 Implementation must not start while Status is Pending. Only clear human
 approval can change Status to Approved. `Approved at` records the approval
@@ -74,7 +70,7 @@ result only, such as `approved in current conversation`.
   `src/presentation/webview/editor/shared/useUnitTreeSelectorKeyboard.ts`,
   `src/test/suite/unitTreeSelector.test.ts`
 - Implementation review verdict: Ready
-- Commit status: Eligible
+- Commit status: Committed
 
 ## Closure Approval
 
@@ -182,7 +178,8 @@ result only, such as `approved in current conversation`.
 
 ## Feature Exit
 
-- Definition of Done status: pending implementation review and completion gate.
+- Definition of Done status: Slice 1 implementation, validation, and
+  implementation review are complete; Feature Exit is pending.
 - Durable documentation updates: none expected unless a reusable behavior or
   repository policy change is discovered.
 - Open risks: implementation review must confirm no selector semantics or
