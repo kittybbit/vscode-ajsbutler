@@ -30,15 +30,6 @@ This roadmap area is decomposed into independent branch-owned features. Create,
 plan, review, approve, and close one feature before selecting the next unless a
 recorded dependency requires a different order.
 
-#### 7.5 Flow-tree Selector Interaction Separation
-
-- Purpose: isolate tree selection, focus, keyboard navigation, and scope-row
-  state while preserving stable list/flow identity.
-- Entry condition: enabled and disabled rows, focus movement, selection, scope
-  opening, reveal, and return-focus behavior are characterized.
-- Dependency: completed flow-tree characterization and stable cross-view
-  navigation identity; remains separate from 7.3.
-
 ### 8. Infrastructure Boundary Cleanup
 
 - Purpose: isolate one selected ANTLR, WebAPI, VS Code, file, localization, or
