@@ -51,6 +51,25 @@ unit=root,,jp1admin,;
     assert.strictEqual(result.rootUnits[0].children[0].parent?.name, "root");
   });
 
+  test("keeps ANTLR syntax errors technical inside the raw seam", () => {
+    const result = new AntlrRawAjsParser().parse(`
+unit=root,,jp1admin,;
+{
+  ty=g
+}
+`);
+
+    assert.strictEqual(result.errors.length, 1);
+    assert.deepStrictEqual(Object.keys(result.errors[0]).sort(), [
+      "charPositionInLine",
+      "line",
+      "msg",
+    ]);
+    assert.strictEqual(result.errors[0].line, 5);
+    assert.strictEqual(result.errors[0].charPositionInLine, 0);
+    assert.ok(result.errors[0].msg.length > 0);
+  });
+
   test("preserves normalization warnings on successful parses", () => {
     const result = parser.parse(`
 unit=root,,jp1admin,;

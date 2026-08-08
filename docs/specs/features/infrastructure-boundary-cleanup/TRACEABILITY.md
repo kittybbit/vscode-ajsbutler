@@ -77,6 +77,41 @@ re-export the public type. No path outside the list above may be modified.
 Slice 3 starts only after Slice 2 completes because the architecture
 support/test paths are shared sequentially.
 
+## Slice 2 Implementation Evidence
+
+- Status: Implemented; independent implementation review returned `Ready`, and
+  Completion Approval was recorded in the current conversation. Awaiting the
+  exact Slice 2 completion commit.
+- Changed files: exactly the seven approved Slice 2 paths listed above:
+  `AntlrSyntaxError.ts`, `SyntaxErrorListener.ts`, `AntlrRawAjsParser.ts`,
+  `AntlrAjsParser.ts`, `AntlrAjsParser.test.ts`,
+  `architectureDependencyRules.ts`, and `architectureDependencyRules.test.ts`.
+- Acceptance evidence: raw ANTLR errors use the infrastructure-only
+  `AntlrSyntaxError` shape; only `AntlrAjsParser` maps `msg` /
+  `charPositionInLine` to the existing `AjsParserError` message / column
+  contract. Direct parser coverage retains nested normalization, warnings,
+  encoded input, malformed no-partial behavior, bounded-large input, and exact
+  normalized error assertions. Architecture fixtures reject value,
+  `import type`, and type-only named raw-seam imports and allow the normalized
+  adapter without changing the zero-exception rule catalog.
+- Validation evidence: `rtk pnpm run test:compile`, `rtk pnpm run build`,
+  `rtk pnpm run test:full`, and `rtk pnpm run qlty` passed;
+  `rtk git diff --check` passed. `test:full` covered the parser,
+  architecture, and four read-only consumer suites on desktop and web. Web
+  teardown produced the known `EPIPE` / `ERR_STREAM_PREMATURE_CLOSE` logs while
+  exiting successfully. Build retained only the existing three webpack
+  bundle-size warnings.
+- Compatibility and documentation: desktop/web shared parser behavior,
+  VS Code `^1.75.0`, grammar/generated artifacts, consumers, README, and
+  CHANGELOG are unchanged. No durable-document update is required.
+- Production readiness and remaining risk: no new exception policy, partial
+  result, Node dependency, host assumption, or parser performance path was
+  introduced. The remaining gate is the exact Slice 2 completion commit;
+  Slice 3 remains untouched.
+- Handoff: send the exact Slice 2 diff, test output, compatibility evidence,
+  and this traceability result to `approval-committer` after Completion
+  Approval.
+
 ## Candidate Disposition Traceability
 
 | Roadmap/baseline candidate                  | Evidence                                                                                                                                 | Disposition / owner                                    | Reopen trigger                                                                   |
@@ -94,13 +129,13 @@ support/test paths are shared sequentially.
 
 ## Approval And Exit Traceability
 
-| Gate               | Evidence required                                                                                                              | Current state                              |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
-| Plan review        | Complete 3-slice decomposition, candidate dispositions, validation, production readiness, approval boundaries                  | Ready for approval; Human Approval pending |
-| Human Approval     | Explicit approval for exact next-slice scope and paths after review `Ready`                                                    | Pending                                    |
-| Plan commit        | Review `Ready`, Human Approval, exactly the three feature-local documents; roadmap clean and separately committed as `9efd6ae` | Not eligible                               |
-| Slice 2 completion | Implementation review `Ready`, parser validation and compatibility evidence, Completion Approval                               | Pending                                    |
-| Slice 3 completion | Implementation review `Ready`, telemetry privacy/failure/host evidence, Completion Approval                                    | Pending                                    |
-| Feature Exit       | Both remaining slices completion-committed; full validation; candidate recheck; docs/CHANGELOG decision                        | Not ready                                  |
+| Gate               | Evidence required                                                                                                              | Current state                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| Plan review        | Complete 3-slice decomposition, candidate dispositions, validation, production readiness, approval boundaries                  | Ready for approval; approved                                    |
+| Human Approval     | Explicit approval for exact next-slice scope and paths after review `Ready`                                                    | Approved in current conversation                                |
+| Plan commit        | Review `Ready`, Human Approval, exactly the three feature-local documents; roadmap clean and separately committed as `9efd6ae` | Complete: `97e8e744`                                            |
+| Slice 2 completion | Implementation review `Ready`, parser validation and compatibility evidence, Completion Approval                               | Ready; Completion Approval recorded; exact completion commit pending |
+| Slice 3 completion | Implementation review `Ready`, telemetry privacy/failure/host evidence, Completion Approval                                    | Pending                                                         |
+| Feature Exit       | Both remaining slices completion-committed; full validation; candidate recheck; docs/CHANGELOG decision                        | Not ready                                                       |
 
 <!-- markdownlint-enable MD013 MD060 -->

@@ -17,13 +17,15 @@
 
 ## Plan Status
 
-- Status: Approved after independent plan review `Ready for approval`.
+- Status: Approved; Slice 2 implementation review `Ready`; completion
+  approval recorded; awaiting completion commit.
 - Planning scope: one completed historical slice and two remaining executable
   slices, plus explicit file/host candidate dispositions.
 - Review status: `Ready for approval` from independent `sdd-review-plan`.
 - Human approval: Approved in the current conversation; implementation remains
   sequential and slice-specific.
-- Active implementation slice: none.
+- Active implementation slice: Slice 2 — parser boundary; completion commit
+  pending.
 - Slice count and order: 3 total — Slice 1 complete; Slice 2 parser boundary;
   Slice 3 telemetry boundary.
 - Feature Exit: not ready; Slices 2-3 must each be reviewed, approved,
@@ -91,12 +93,23 @@ the full plan does not authorize simultaneous implementation of Slices 2-3.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: current conversation, after independent implementation review
+  returned `Ready`
+- Approved scope: the completed Slice 2 parser boundary only, with its exact
+  validation and traceability evidence; Slice 3 remains sequentially pending
+- Approved paths:
+  - `src/infrastructure/parser/AntlrSyntaxError.ts`
+  - `src/infrastructure/parser/SyntaxErrorListener.ts`
+  - `src/infrastructure/parser/AntlrRawAjsParser.ts`
+  - `src/infrastructure/parser/AntlrAjsParser.ts`
+  - `src/test/suite/AntlrAjsParser.test.ts`
+  - `src/test/support/architectureDependencyRules.ts`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `docs/specs/features/infrastructure-boundary-cleanup/TASKS.md`
+  - `docs/specs/features/infrastructure-boundary-cleanup/TRACEABILITY.md`
+- Implementation review verdict: Ready
+- Commit status: Eligible for the exact Slice 2 completion commit
 
 ## Closure Approval
 
@@ -157,7 +170,9 @@ slice and returns to Replanning Mode.
 
 ### Slice 2: Move parser error translation to the normalized adapter
 
-- Status: Planned; review and Human Approval pending.
+- Status: Implemented; implementation review pending. Human Approval was
+  recorded in the current conversation after the plan review `Ready for
+approval` and plan commit `97e8e744`.
 - Scope:
   - Define an infrastructure-internal syntax-error shape at the raw ANTLR seam.
   - Make `SyntaxErrorListener` and `AntlrRawAjsParser` return only that internal
@@ -236,6 +251,38 @@ slice and returns to Replanning Mode.
   - Desktop/web: shared parser and all three consumers require desktop and web
     host validation; no Node built-in or filesystem assumption.
   - README/CHANGELOG: none expected; any observable change triggers replan.
+- Implementation Evidence:
+  - Changed paths are exactly the seven approved Slice 2 production/test
+    paths: new `AntlrSyntaxError.ts`, the three parser files, the direct parser
+    suite, and the two architecture support/test paths. This feature-local
+    `TASKS.md` and `TRACEABILITY.md` update records the evidence only.
+  - Acceptance: raw listener/parser code now exposes only
+    `AntlrSyntaxError` and raw units; `AntlrAjsParser` performs the single
+    technical-to-`AjsParserError` mapping; parser port/result types and
+    normalized output behavior remain unchanged. Static fixtures reject value,
+    `import type`, and type-only named raw-seam imports while allowing the
+    normalized adapter.
+  - Validation: `rtk pnpm run test:compile`, `rtk pnpm run build`,
+    `rtk pnpm run test:full`, and `rtk pnpm run qlty` passed;
+    `rtk git diff --check` passed. The full test run covered the focused parser
+    and architecture suites plus the four read-only parser consumer suites on
+    desktop and web hosts. Web teardown emitted the known `EPIPE` /
+    `ERR_STREAM_PREMATURE_CLOSE` logs but exited successfully. The production
+    build retained only the existing three webpack bundle-size warnings.
+  - Compatibility / production readiness: no grammar, generated parser,
+    application port, consumer, VS Code engine, Node dependency, desktop
+    entrypoint, or web entrypoint changed. Failure results still return no
+    partial document, and syntax message/position conversion remains at the
+    normalized adapter. README and CHANGELOG impact remains none because this
+    is behavior-preserving internal cleanup.
+  - Implementation feedback: the repository's canonical extension-host runner
+    is required for parser/consumer fixtures because direct Node execution does
+    not provide webpack aliases and host initialization. The focused
+    architecture assertion remains deterministic and keeps the zero-exception
+    catalog unchanged.
+  - Remaining risk / handoff: independent implementation review is pending;
+    Completion Approval remains pending and no commit is eligible. Handoff is
+    the exact Slice 2 diff and evidence package to `implementation-reviewer`.
 - Approval Boundary: exactly the listed parser production/test paths, plus the
   feature-local planning evidence update. No path outside that list, port
   redesign, grammar/generated artifact, normalization, consumer, or telemetry

@@ -12,6 +12,7 @@ import {
   collectProductionSourceFiles,
   findArchitectureRuleViolations,
   findCompositionRootViolations,
+  findParserPortBoundaryViolations,
   formatViolation,
   resolveImportPath,
   type ArchitectureRuleId,
@@ -188,6 +189,74 @@ suite("Architecture dependency rules", () => {
     );
 
     assert.deepStrictEqual(violations.map(formatViolation), []);
+  });
+
+  test("keeps the application parser port at the normalized adapter", () => {
+    assert.deepStrictEqual(
+      findParserPortBoundaryViolations(
+        collectProductionImportReferences(repoRoot),
+      ),
+      [],
+    );
+  });
+
+  test("rejects parser raw-seam port imports in every import form", () => {
+    const fixtures = [
+      {
+        file: "src/infrastructure/parser/SyntaxErrorListener.ts",
+        source:
+          'import { AjsParserError } from "../../application/parsing/AjsParserPort";',
+      },
+      {
+        file: "src/infrastructure/parser/AntlrRawAjsParser.ts",
+        source:
+          'import type { AjsParserError } from "../../application/parsing/AjsParserPort";',
+      },
+      {
+        file: "src/infrastructure/parser/AntlrRawAjsParser.ts",
+        source:
+          'import { type ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+      },
+    ];
+
+    fixtures.forEach(({ file, source }) => {
+      assert.deepStrictEqual(
+        findParserPortBoundaryViolations(
+          collectImportReferencesFromSource(file, source),
+        ).map(({ file: violationFile, kind, specifier }) => ({
+          file: violationFile,
+          kind,
+          specifier,
+        })),
+        [
+          {
+            file,
+            kind: source.includes("import type") ? "import-type" : "import",
+            specifier: "../../application/parsing/AjsParserPort",
+          },
+        ],
+      );
+    });
+  });
+
+  test("allows parser port imports only in the normalized adapter", () => {
+    const fixtures = [
+      'import { AjsParserPort, ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+      'import type { AjsParserPort, ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+      'import { type AjsParserPort, type ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+    ];
+
+    fixtures.forEach((source) => {
+      assert.deepStrictEqual(
+        findParserPortBoundaryViolations(
+          collectImportReferencesFromSource(
+            "src/infrastructure/parser/AntlrAjsParser.ts",
+            source,
+          ),
+        ),
+        [],
+      );
+    });
   });
 
   test("keeps raw telemetry reporting calls out of production sources", () => {

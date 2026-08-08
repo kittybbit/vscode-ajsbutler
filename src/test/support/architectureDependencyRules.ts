@@ -458,6 +458,21 @@ const startsWithAny = (value: string, prefixes: readonly string[]): boolean =>
 const getDependencyTarget = (reference: ImportReference): string =>
   reference.resolvedPath ?? reference.specifier;
 
+const parserInfrastructurePrefix = "src/infrastructure/parser/";
+const parserApplicationPortPath = "src/application/parsing/AjsParserPort";
+const normalizedParserAdapterPath =
+  "src/infrastructure/parser/AntlrAjsParser.ts";
+
+export const findParserPortBoundaryViolations = (
+  references: readonly ImportReference[],
+): ImportReference[] =>
+  references.filter(
+    ({ file, resolvedPath, specifier }) =>
+      file.startsWith(parserInfrastructurePrefix) &&
+      (resolvedPath ?? specifier) === parserApplicationPortPath &&
+      file !== normalizedParserAdapterPath,
+  );
+
 const ruleMessages: Record<ArchitectureRuleId, string> = {
   [architectureRuleIds.domainOuterDependency]:
     "domain must not import an outer layer or host framework",
