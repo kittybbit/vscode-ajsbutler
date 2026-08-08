@@ -82,8 +82,8 @@ result only, such as `approved in current conversation`.
   `src/test/suite/unitTreeSelector.test.ts`
 - Implementation review verdict: Ready; P1/P2 findings addressed, revalidated,
   and independently reviewed with no actionable findings.
-- Commit status: Eligible for the exact completion commit; prior Slice 1
-  implementation remains committed separately.
+- Commit status: Committed in `a41c5c9b`; prior Slice 1 implementation remains
+  committed separately.
 
 ## Closure Approval
 
