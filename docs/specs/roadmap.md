@@ -30,15 +30,6 @@ This roadmap area is decomposed into independent branch-owned features. Create,
 plan, review, approve, and close one feature before selecting the next unless a
 recorded dependency requires a different order.
 
-#### 7.4 Shared Webview Header Search Control Separation
-
-- Purpose: make shared header-search state and accessibility behavior explicit
-  without creating a shared search domain contract.
-- Entry condition: table and flow helper text, shortcuts, result counts,
-  localization, focus, and query privacy are characterized.
-- Dependency: completed header-search characterization; table and flow matching
-  semantics remain presentation-local.
-
 #### 7.5 Flow-tree Selector Interaction Separation
 
 - Purpose: isolate tree selection, focus, keyboard navigation, and scope-row

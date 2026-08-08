@@ -28,11 +28,11 @@ import {
 } from "../../viewerRequestMessages";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
+import { HeaderSearchControl } from "../shared/HeaderSearchControl";
 import {
-  HeaderSearchControl,
   resolveHeaderSearchHelperText,
-} from "../shared/HeaderSearchField";
-import type { HeaderSearchControlLabels } from "../shared/HeaderSearchField";
+  type HeaderSearchControlLabels,
+} from "../shared/headerSearchControlModel";
 import type {
   TableSearchDirection,
   TableSearchResultPosition,

@@ -10,7 +10,7 @@ import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import { HeaderSearchControl } from "../shared/HeaderSearchField";
+import { HeaderSearchControl } from "../shared/HeaderSearchControl";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type {
   FlowSearchDirection,

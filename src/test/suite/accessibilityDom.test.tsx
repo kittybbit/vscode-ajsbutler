@@ -22,11 +22,11 @@ import {
   ActionIcon,
   FLOW_NODE_ACTION_SIZE_PX,
 } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
-import {
-  HeaderSearchControl,
-  type HeaderSearchControlLabels,
-  type HeaderSearchDirection,
-} from "../../presentation/webview/editor/shared/HeaderSearchField";
+import { HeaderSearchControl } from "../../presentation/webview/editor/shared/HeaderSearchControl";
+import type {
+  HeaderSearchControlLabels,
+  HeaderSearchDirection,
+} from "../../presentation/webview/editor/shared/headerSearchControlModel";
 
 type GlobalDescriptorMap = Map<string, PropertyDescriptor | undefined>;
 

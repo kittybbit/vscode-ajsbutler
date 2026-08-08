@@ -5,7 +5,7 @@ import {
   isHeaderSearchShortcut,
   isMacBrowserPlatform,
   resolveHeaderSearchHelperText,
-} from "../../presentation/webview/editor/shared/HeaderSearchField";
+} from "../../presentation/webview/editor/shared/headerSearchControlModel";
 
 suite("Header Search Field", () => {
   test("recognizes macOS browser platforms and otherwise falls back safely", () => {

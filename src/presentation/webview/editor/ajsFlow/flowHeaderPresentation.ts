@@ -1,5 +1,5 @@
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
-import type { HeaderSearchControlLabels } from "../shared/HeaderSearchField";
+import type { HeaderSearchControlLabels } from "../shared/headerSearchControlModel";
 import { unitInformationMessage } from "../unitInformationLocalization";
 
 const isRootJobnet = (unit: FlowGraphUnitDto): boolean =>
