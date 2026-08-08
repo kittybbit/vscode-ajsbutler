@@ -42,8 +42,9 @@ recommendation. Include the affected slice and whether replanning is required.
 
 Handoff:
 - Findings about plan quality go to plan-reviser.
-- A ready plan goes to the Human Approval boundary, then to implementer after
-  approval.
+- A ready plan goes to the Human Approval boundary, then to
+  approval-committer after approval. Implementation starts only after the
+  approved plan/replan package is committed.
 
 Stop conditions:
 Stop when feature selection or comparison base is ambiguous, evidence is

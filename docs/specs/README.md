@@ -30,17 +30,29 @@ flowchart TD
     A["Investigation"] --> B["Feature Creation<br/>sdd-create-feature"]
     B --> C["Planning<br/>sdd-plan-task"]
     C --> D["Plan Review<br/>sdd-review-plan"]
-    D --> E["Human Approval<br/>required before implementation"]
-    E --> F["Implementation<br/>sdd-implement-task"]
-    F --> G["Completion Approval"]
-    G --> H["Feature Exit<br/>feature-closer"]
-    H --> I["Feature Close"]
-    F -. "replan trigger" .-> C
+    D --> E["Plan / Replan Human Approval"]
+    E --> F["Plan Commit<br/>approval-committer"]
+    F --> G["Implementation<br/>sdd-implement-task"]
+    G --> H["Implementation Review<br/>sdd-review-implementation"]
+    H --> I["Completion Approval"]
+    I --> J["Slice Commit<br/>approval-committer"]
+    J --> K{"More approved slices?"}
+    K -->|"Yes"| C
+    K -->|"No"| L["Feature Exit<br/>feature-closer"]
+    L --> M["Closure Approval"]
+    M --> N["Closure Commit<br/>approval-committer"]
+    N --> O["Feature Close"]
+    G -. "replan trigger" .-> C
 ```
 
-Human Approval is required before implementation starts. Replanning is an
-exception flow, not the normal path between approved implementation slices.
-Feature Exit runs only after the Feature Definition of Done is satisfied.
+Every explicit human approval is a commit gate for the state it approves. The
+approval-committer creates the focused commit after approval and before the
+workflow advances: plan or replan approval commits the approved planning
+package, Completion Approval commits the completed implementation slice, and
+Closure Approval commits the approved Feature Exit propagation and temporary
+feature-folder removal. Replanning is an exception flow, not a silent scope
+change between approved commits. Feature Exit runs only after the Feature
+Definition of Done is satisfied and every implementation slice has a commit.
 
 ## Trivial Change Criteria
 
@@ -76,13 +88,19 @@ For non-trivial changes:
 4. review the plan with `sdd-review-plan`
 5. obtain clear Human Approval before editing runtime code, tests, generated
    artifacts, or configuration
-6. implement only approved slices with `sdd-implement-task`
-7. return to `sdd-plan-task` only when a new slice, scope change, design
-   decision, wider impact, or approval-boundary change is required
-8. run Feature Exit with `feature-closer` and `sdd-feature-exit` only after all
-   implementation slices are complete
-9. close a feature only after the Feature Exit review confirms the Feature
-   Definition of Done and the required closure approval is recorded
+6. after plan or replan approval, commit the approved planning package with
+   `approval-committer` and only then implement the approved slice
+7. implement only approved slices with `sdd-implement-task`
+8. review each completed slice with `sdd-review-implementation`
+9. obtain explicit Completion Approval, then commit that exact slice with
+   `approval-committer` before starting another slice
+10. return to `sdd-plan-task` only when a new slice, scope change, design
+    decision, wider impact, or approval-boundary change is required
+11. run Feature Exit with `feature-closer` and `sdd-feature-exit` only after
+    all implementation slices are complete and committed
+12. obtain explicit Closure Approval, then commit the approved Feature Exit
+    propagation and feature-folder removal with `approval-committer`
+13. close a feature only after that closure commit succeeds
 
 Prefer quality assurance, readability, KISS, DRY/YAGNI, then SOLID in that
 order. Do not add abstractions unless they reduce real complexity. Keep diffs
@@ -282,7 +300,7 @@ for the reported scope. The following are not approval:
 - ambiguous agreement
 - Codex's own judgment
 
-While approval is pending, Codex must not:
+While Human Approval is pending, Codex must not:
 
 - edit runtime code
 - edit tests
@@ -344,10 +362,32 @@ generated artifacts, or configuration.
 Implementation will not proceed until approval is given.
 ```
 
-After approval, `sdd-implement-task` implements exactly one approved slice
-using the Risk-Based Validation And Review policy above. When all slices are
-complete, `feature-closer` runs the Feature Exit review; planning no longer
-owns Feature Exit.
+After Human Approval, `approval-committer` commits the approved planning
+package. Only then does `sdd-implement-task` implement exactly one approved
+slice using the Risk-Based Validation And Review policy above. When the
+implementation reviewer returns `Ready`, the workflow waits for explicit
+Completion Approval before `approval-committer` commits the exact slice. When
+all slices are complete and committed, `feature-closer` runs the Feature Exit
+review; planning no longer owns Feature Exit.
+
+## Approval-Gated Commit Policy
+
+The approval-committer is the only SDD role authorized to create these
+workflow commits. It must receive the matching review verdict and explicit
+human approval for the exact gate before staging anything.
+
+| Gate                    | Required evidence                                                 | Commit scope                                                                        | Next stage                          |
+| ----------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------- |
+| Plan or Replan Approval | Plan review `Ready` and `Human Approval: Approved`                | Approved planning package and approval evidence                                     | Implementation                      |
+| Completion Approval     | Implementation review `Ready` and `Completion Approval: Approved` | Exact completed implementation slice and its evidence                               | Next approved slice or Feature Exit |
+| Closure Approval        | Feature Exit `Close` and `Closure Approval: Approved`             | Approved durable propagation, closure evidence, and selected feature-folder removal | Feature Close                       |
+
+The approval-committer must stop without staging or committing when approval,
+the required review verdict, the exact scope, or a clean scope boundary is
+missing. Unrelated or out-of-scope work in the worktree is a blocker; it must
+not be hidden with broad staging. The committer creates one focused commit per
+approval gate and must not amend, reset, force-push, publish, or change the
+approval evidence to manufacture authorization.
 
 Do not leave failing checks unexplained or deferred without an explicit
 follow-up decision.
@@ -474,8 +514,11 @@ Exit Mode, after all of these conditions are met:
    complete.
 8. The human explicitly approves Feature Exit.
 
-After approval, delete the whole selected feature folder together. Do not
-retain `SPECS.md`, `TASKS.md`, or `TRACEABILITY.md` as implementation history.
+After Closure Approval, the approval-committer deletes the whole selected
+feature folder together with the approved durable propagation in one focused
+closure commit. Do not retain `SPECS.md`, `TASKS.md`, or `TRACEABILITY.md` as
+implementation history. Feature Close is recorded only after that commit
+succeeds.
 Shared refactoring evidence under `docs/specs/features/BASELINE.md` is not
 part of an individual feature folder and follows its own effort-level
 retention policy.
@@ -489,6 +532,8 @@ another feature.
 A feature is complete only when:
 
 - every implementation slice is complete
+- every plan, implementation slice, and Feature Exit approval gate has its
+  focused commit
 - feature requirements and acceptance criteria are satisfied
 - required validation is complete
 - non-functional quality and production readiness are preserved or justified

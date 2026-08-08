@@ -30,6 +30,7 @@ Authority:
 
 Forbidden actions:
 - Do not implement code, tests, generated artifacts, or configuration.
+- Do not stage or commit a revised plan before explicit Human Approval.
 - Do not act as the plan reviewer or declare the revised plan ready yourself.
 - Do not grant Human Approval or silently change the approval boundary.
 - Do not redesign the whole feature when a local revision is sufficient.

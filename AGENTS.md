@@ -88,15 +88,22 @@ Follow this lifecycle:
 4. Review the plan with the read-only `plan-reviewer` and
    `$sdd-review-plan`; Findings go to `plan-reviser`.
 5. Obtain clear Human Approval for the reviewed plan and approved slice scope.
-6. Implement one approved slice with `implementer` and
+6. Commit the approved plan or replan package with `approval-committer` and
+   `$sdd-commit-gate` before implementation starts.
+7. Implement one approved slice with `implementer` and
    `$sdd-implement-task`.
-7. Review the completed slice with the read-only
+8. Review the completed slice with the read-only
    `implementation-reviewer` and `$sdd-review-implementation`; Findings go
    back to `implementer`.
-8. Run Feature Exit with `feature-closer` and `$sdd-feature-exit` only after
-   every slice is complete, then obtain explicit closure approval.
-9. Replan when a new slice, scope, design decision, wider impact, or approval
-   boundary is discovered.
+9. Obtain explicit Completion Approval and commit the exact completed slice
+   with `approval-committer` before starting another slice.
+10. Run Feature Exit with `feature-closer` and `$sdd-feature-exit` only after
+    every slice is complete and committed, then obtain explicit closure
+    approval.
+11. Commit the approved Feature Exit propagation and selected feature-folder
+    removal with `approval-committer` before closing the feature.
+12. Replan when a new slice, scope, design decision, wider impact, or approval
+    boundary is discovered.
 
 Before editing runtime code, tests, generated artifacts, or configuration, the
 selected feature must have an approved implementation slice recorded in
@@ -184,6 +191,8 @@ Codex skill directory contains invocation adapters only.
 - Codex custom-agent definitions: `.codex/agents/*.toml`
 - Canonical Codex skills: `.agents/skills/*/SKILL.md`
 - Canonical shared procedures: `.agents/skills/*/SKILL.md`
+- Approval-gated commit role: `.codex/agents/approval-committer.toml`
+- Approval-gated commit procedure: `.agents/skills/sdd-commit-gate/SKILL.md`
 - SDD policy/document SSOT: `docs/specs/README.md`
 
 ### Deterministic SDD Routing
@@ -201,6 +210,8 @@ Codex skill directory contains invocation adapters only.
 4. **Plan review**: use read-only `plan-reviewer` with
    `.agents/skills/sdd-review-plan/SKILL.md` and `$sdd-review-plan`.
    `Ready` goes to Human Approval; `Findings` go to `plan-reviser`.
+   After explicit Human Approval, hand off to `approval-committer` for the
+   plan/replan commit before implementation.
 5. **Plan revision**: use `plan-reviser` with the same planning procedure in
    Replanning Mode. Handoff: `plan-reviewer`. Stop when Findings are absent or
    a new scope/design/approval decision is required.
@@ -211,14 +222,16 @@ Codex skill directory contains invocation adapters only.
 7. **Implementation review**: use read-only `implementation-reviewer` with
    `.agents/skills/sdd-review-implementation/SKILL.md` and
    `$sdd-review-implementation`. `Ready` goes to the completion gate;
-   `Findings` go back to `implementer`.
+   `Findings` go back to `implementer`. After explicit Completion Approval,
+   hand off to `approval-committer` for the exact slice commit.
 8. **Feature Exit**: after all slices are complete, use `feature-closer` with
    `.agents/skills/sdd-feature-exit/SKILL.md` and `$sdd-feature-exit`.
-   `Close` goes to explicit human closure approval; a new design/scope issue
-   goes to planning.
+   `Close` goes to explicit human closure approval, then
+   `approval-committer` for the approved closure commit; a new design/scope
+   issue goes to planning.
 9. **Release**: use `$release-extension` only for extension release work. It
-   uses `.agents/skills/release-extension/SKILL.md`, remains outside the seven
-   SDD roles, and does not participate in SDD lifecycle handoffs.
+   uses `.agents/skills/release-extension/SKILL.md`, remains outside the SDD
+   lifecycle roles, and does not participate in SDD lifecycle handoffs.
 
 Role files are the authority for each role's fixed model/effort, allowed input,
 forbidden actions, output contract, and stop conditions. Do not duplicate those

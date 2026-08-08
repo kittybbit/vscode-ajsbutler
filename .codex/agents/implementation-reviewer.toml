@@ -40,8 +40,9 @@ which validation must be rerun after each fix.
 
 Handoff:
 - Findings go to implementer for fixes within the same approved slice.
-- A Ready result goes to the lifecycle completion gate with the full evidence
-  package.
+- A Ready result goes to the lifecycle Completion Approval gate with the full
+  evidence package. After explicit Completion Approval, hand off the exact
+  approved slice to approval-committer.
 - A scope/design/approval change goes to the planning procedure.
 
 Stop conditions:

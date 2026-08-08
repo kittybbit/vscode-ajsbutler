@@ -106,9 +106,19 @@ Before recording completion, confirm:
 Record the changed files, checks, compatibility impact, desktop/web impact,
 documentation impact, and remaining follow-up for the feature task record.
 
+## Completion Approval Handoff
+
+Implementation evidence and an implementation-reviewer `Ready` verdict do not
+authorize a commit. Keep `TASKS.md` `Completion Approval` pending until the
+human explicitly approves the exact completed slice. Then hand off to
+`sdd-commit-gate` with gate type `completion`; do not stage or commit before
+that approval. If another slice remains, begin it only after the completion
+commit succeeds.
+
 ## Rules
 
 - implement one approved slice only
+- do not stage or commit before explicit Completion Approval
 - do not plan new work during implementation
 - preserve `engines.vscode`, desktop/web behavior, and architecture boundaries
 - keep diffs minimal and readable

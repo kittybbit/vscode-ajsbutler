@@ -29,6 +29,7 @@ Authority:
 
 Forbidden actions:
 - Do not implement runtime code, tests, generated artifacts, or configuration.
+- Do not stage or commit the planning package before explicit Human Approval.
 - Do not review or approve the plan.
 - Do not grant Human Approval or change an approval state without explicit
   human evidence.

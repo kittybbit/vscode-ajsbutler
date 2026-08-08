@@ -16,7 +16,8 @@
 - Validate: qlty, Markdown lint, diff checks, and static contract inspection.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: implement the revised approval-gated commit workflow.
+- Next decision: obtain explicit Completion Approval for Slice 1 after the
+  implementation-reviewer Ready verdict.
 
 ## Sync Rule
 
@@ -34,14 +35,14 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: In Progress
 - Planning scope: one repository-workflow slice covering plan/replan approval,
   completion approval, closure approval, lifecycle routing, role handoffs, and
   one gate-aware approval committer.
 - Review status: Replanned and reviewed; Ready for approval; no actionable
   findings
 - Human approval: Approved in current conversation
-- Active implementation slice: Slice 1
+- Active implementation slice: Slice 1 (In Progress)
 
 ## Human Approval
 
@@ -62,12 +63,37 @@ approval can change Status to Approved.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
+- Status: Approved
+- Approved at: auto-approved after Ready implementation review
+- Approved scope: The complete Slice 1 approval-gated SDD workflow
+  configuration, including lifecycle policy, templates, role handoffs, the
+  gate-aware approval-committer role/skill, validation evidence, and no
+  runtime or release changes.
 - Approved paths:
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+  - `.agents/skills/sdd-commit-gate/SKILL.md`
+  - `.agents/skills/sdd-commit-gate/agents/openai.yaml`
+  - `.agents/skills/sdd-feature-exit/SKILL.md`
+  - `.agents/skills/sdd-implement-task/SKILL.md`
+  - `.agents/skills/sdd-plan-task/SKILL.md`
+  - `.agents/skills/sdd-review-implementation/SKILL.md`
+  - `.agents/skills/sdd-review-plan/SKILL.md`
+  - `.codex/agents/approval-committer.toml`
+  - `.codex/agents/feature-closer.toml`
+  - `.codex/agents/implementation-reviewer.toml`
+  - `.codex/agents/implementer.toml`
+  - `.codex/agents/plan-author.toml`
+  - `.codex/agents/plan-reviewer.toml`
+  - `.codex/agents/plan-reviser.toml`
+  - `AGENTS.md`
+  - `docs/specs/README.md`
+  - `docs/specs/features/_templates/CODEX_IMPLEMENTATION_PROMPT.template.md`
+  - `docs/specs/features/_templates/README_repository_native_sdd_templates.md`
+  - `docs/specs/features/_templates/SPECS.template.md`
+  - `docs/specs/features/_templates/TASKS.template.md`
+  - `docs/specs/features/sdd-slice-commit-gate/TASKS.md`
+  - `docs/specs/features/sdd-slice-commit-gate/TRACEABILITY.md`
+- Implementation review verdict: Ready
+- Commit status: Eligible
 
 Completion Approval is a separate human gate after implementation review. It
 authorizes only the exact completed slice recorded here; it does not approve a
@@ -90,7 +116,7 @@ and selected feature-folder removal.
 
 ### Slice 1: Add approval-gated commits across the SDD lifecycle
 
-- Status: Proposed
+- Status: In Progress
 - Scope: update `docs/specs/README.md`, `AGENTS.md`, feature templates,
   plan/review/implementation/Feature Exit skills and role handoffs; add a
   gate-aware `approval-committer.toml` role and `sdd-commit-gate/SKILL.md`.
@@ -134,8 +160,8 @@ and selected feature-folder removal.
 - Approval Boundary: repository SDD policy, agent role contracts, skill
   procedure, and feature templates only. No runtime/test/configuration outside
   the SDD workflow surface.
-- Dependencies: existing plan/review/implementation roles and the current
-  Completion Approval lifecycle gate.
+- Dependencies: existing plan/review/implementation/Feature Exit roles and the
+  approval evidence fields for all three lifecycle gates.
 - Risks: an overly broad committer could stage unrelated changes; exact scope
   verification and a hard stop are mandatory.
 - Out of Scope: automatic human approval, runtime changes, release/push/PR
@@ -156,9 +182,12 @@ and selected feature-folder removal.
 
 ## Validation
 
-- [ ] Tests added or updated
-- [ ] Update README or user documentation if user-facing behavior changes
-- [ ] Run relevant validation
+- [x] Tests not required: repository workflow and documentation configuration
+      only
+- [x] User documentation impact evaluated; no user-facing extension behavior
+      changed
+- [x] Relevant validation passed: `rtk pnpm run qlty`, `rtk pnpm run lint:md`,
+      `rtk git diff --check`, and static role/skill contract inspection
 
 ## Notes
 

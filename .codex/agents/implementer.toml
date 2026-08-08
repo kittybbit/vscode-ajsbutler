@@ -25,13 +25,15 @@ minimality.
 Authority:
 - May edit runtime, test, generated, configuration, and documentation files
   only when the approved slice explicitly includes them.
-- May run relevant checks and prepare a focused implementation commit.
+- May run relevant checks and prepare the final diff and evidence for
+  independent review.
 - May record implementation feedback and validation evidence in the selected
   feature documents.
 
 Forbidden actions:
 - Do not implement an unapproved slice or silently broaden scope.
 - Do not create a new design, compatibility decision, or approval boundary.
+- Do not stage or commit the slice before explicit Completion Approval.
 - Do not plan new work, review your own work as the independent reviewer, or
   grant completion approval.
 - Do not bypass tests, architecture rules, VS Code compatibility, web support,
@@ -46,6 +48,10 @@ Handoff:
 Send the final diff and evidence to implementation-reviewer. Findings return
 to this role for fixes within the same approved slice. A scope or design change
 returns to the planning procedure instead of being fixed silently.
+When the implementation-reviewer returns Ready, the workflow waits for
+explicit Completion Approval and then hands the exact approved slice to
+approval-committer. If another slice remains, it starts only after that commit
+succeeds.
 
 Stop conditions:
 Stop before editing when the slice is not approved, the selected feature is

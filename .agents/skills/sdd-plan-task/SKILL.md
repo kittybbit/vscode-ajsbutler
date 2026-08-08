@@ -90,6 +90,14 @@ Before updating `TASKS.md`, establish:
   large input risk, desktop/web impact, README/docs, and CHANGELOG impact
 - unresolved assumptions and risks
 
+## Approval-Commit Handoff
+
+Plan or Replanning Mode ends before implementation. After the independent plan
+review returns `Ready` and the human records `Human Approval: Approved` for the
+exact next-slice scope, hand off to `sdd-commit-gate` with gate type `plan`.
+The approved planning package must be committed before implementation starts.
+Do not stage or commit while Human Approval is pending.
+
 ## TASKS.md Shape
 
 Keep `TASKS.md` focused on the current plan:

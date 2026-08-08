@@ -22,16 +22,18 @@ Implementation rules:
 4. Before approval, do not create implementation branches, implementation
    commits, implementation refactors, or incidental fixes.
 5. Stop for clear human approval before implementation.
-6. After approval, enumerate all affected references and track the complete fix.
-7. Implement exactly one approved TASKS.md slice.
-8. Do not rewrite unrelated code.
-9. Preserve existing behavior unless SPECS.md explicitly changes it.
-10. Respect DDD and Clean Architecture boundaries.
-11. Keep UI, application, domain, and infrastructure responsibilities separate.
-12. Preserve VS Code compatibility declared in `package.json`.
-13. Add or update tests for every behavior change.
-14. Update documentation if implementation decisions differ from the spec.
-15. Changing the model or coding assistant does not change the SDD gate.
+6. After plan approval, commit the approved planning package with
+   `$sdd-commit-gate` before implementation.
+7. After approval, enumerate all affected references and track the complete fix.
+8. Implement exactly one approved TASKS.md slice.
+9. Do not rewrite unrelated code.
+10. Preserve existing behavior unless SPECS.md explicitly changes it.
+11. Respect DDD and Clean Architecture boundaries.
+12. Keep UI, application, domain, and infrastructure responsibilities separate.
+13. Preserve VS Code compatibility declared in `package.json`.
+14. Add or update tests for every behavior change.
+15. Update documentation if implementation decisions differ from the spec.
+16. Changing the model or coding assistant does not change the SDD gate.
 
 Approval definition, approval evidence, and re-approval rules are centralized
 in `docs/specs/README.md` `Implementation Change Gate`.
@@ -57,6 +59,8 @@ Before editing:
   the run, and exclude inherited feature state from the approval boundary.
 - Update TRACEABILITY.md when required.
 - Record the TASKS.md `Human Approval` section with `Status: Pending`.
+- Record exact `Approved paths` for each Human Approval, Completion Approval,
+  and Closure Approval gate.
 - Keep TASKS.md focused on slice plan/status, approval, validation, risks, and
   feature exit readiness; do not accumulate historical logs, prior approvals,
   or long validation histories there.
@@ -86,6 +90,8 @@ After approval:
 
 - Record `Status: Approved`, approval result, and approved scope in TASKS.md
   before implementation. Do not copy the approval message.
+- Commit the approved plan/replan package with `$sdd-commit-gate` before
+  implementation starts.
 - Do not implement if TASKS.md does not contain `Status: Approved` and
   `Approved scope`.
 - Do not switch to another feature because its inherited folder has pending or

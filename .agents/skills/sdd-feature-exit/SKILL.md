@@ -25,9 +25,9 @@ ambiguous.
 
 ## Feature Exit Review
 
-1. Confirm every implementation slice is `Complete` and its acceptance,
-   validation, traceability, production-readiness, and unresolved-risk
-   evidence is present.
+1. Confirm every implementation slice is `Complete`, has its focused
+   completion-approval commit, and its acceptance, validation, traceability,
+   production-readiness, and unresolved-risk evidence is present.
 2. Apply the Feature Definition of Done in `docs/specs/README.md` as the only
    completion standard.
 3. Check that behavior contracts, architecture decisions, terminology,
@@ -68,6 +68,14 @@ Report:
 Use `Close` only when the Feature Definition of Done is satisfied. A complete
 review still requires the repository's explicit closure approval before the
 selected feature folder is removed.
+
+## Closure Approval Handoff
+
+`Close` is a recommendation, not Closure Approval and not commit
+authorization. After explicit human Closure Approval records the exact
+durable-document propagation, closure evidence, and selected feature-folder
+removal, hand off to `sdd-commit-gate` with gate type `closure`. Feature Close
+follows only after that focused closure commit succeeds.
 
 ## Rules
 

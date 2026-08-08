@@ -75,8 +75,16 @@ Return one of:
 - Findings: return the exact fixes to the implementation procedure
 ```
 
-`Ready` means no actionable finding remains. Do not conceal an unresolved risk
-or turn a new design/scope decision into an implementation fix.
+`Ready` means no actionable finding remains. It is not Completion Approval and
+does not authorize a commit. Do not conceal an unresolved risk or turn a new
+design/scope decision into an implementation fix.
+
+## Completion Approval Handoff
+
+After `Ready`, send the full evidence package to the Completion Approval gate.
+Only after explicit human approval is recorded for the exact completed slice
+may `sdd-commit-gate` run with gate type `completion`. Findings return to the
+implementer; a new scope or design decision returns to Planning or Replanning.
 
 ## Rules
 

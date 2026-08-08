@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "SDD Approval-Gated Commit"
+  short_description: "Commit one approved SDD gate"
+  default_prompt: >-
+    Route to the approval-committer role and use $sdd-commit-gate for exactly
+    one approved plan, completion, or Feature Exit closure gate.
