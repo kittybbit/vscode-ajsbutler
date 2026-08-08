@@ -24,12 +24,6 @@ feature.
   enforcement gap not already covered by the current architecture test.
 - Dependency: Refactoring Quality Baseline.
 
-### 7. Webview Presentation Separation
-
-This roadmap area is decomposed into independent branch-owned features. Create,
-plan, review, approve, and close one feature before selecting the next unless a
-recorded dependency requires a different order.
-
 ### 8. Infrastructure Boundary Cleanup
 
 - Purpose: isolate one selected ANTLR, WebAPI, VS Code, file, localization, or
@@ -70,10 +64,6 @@ refactoring level and is removed only after that effort is complete.
   cross-view navigation, parser/error, selected VS Code/file-I/O, viewer
   transport/composition, and selected webview boundaries. Each remains a
   separate implementation slice with its own approval and validation.
-- Webview Presentation Separation features 7.1 through 7.5 contain only their
-  selected flow rendering, flow interaction state, unit-list table interaction,
-  header search, or flow-tree selector boundary not selected by Feature 4.
-  They do not create a shared search domain contract.
 - Infrastructure Boundary Cleanup contains only VS Code `ViewerFactory`, the
   normalized `AjsParserPort`, file/host adapters, or the validated telemetry
   contract that Feature 4 leaves unselected, and only after host, parser,

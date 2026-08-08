@@ -373,11 +373,10 @@ and are not approval for the new reconciliation slice.
 
 ## Feature Exit
 
-- Definition of Done status (current Feature Exit status): Slice 1 and the
-  Slice 2 docs-only reconciliation, including historical validation,
+- Definition of Done status (current Feature Exit status): Close. Slice 1 and
+  the Slice 2 docs-only reconciliation, including historical validation,
   traceability, and production-readiness evidence, are complete. The approved
-  Legacy Gate Exception / Closure Decision is recorded, and its revised plan
-  review is Ready; independent Feature Exit review is next.
+  Legacy Gate Exception and Feature Exit review are complete.
 - Durable documentation context: roadmap item 7.4 is absent, but the parent
   roadmap still has the empty `### 7` section and the stale completed-child
   ordering bullet around lines 73-75. The approved closure propagation is to
@@ -385,13 +384,26 @@ and are not approval for the new reconciliation slice.
   `features/BASELINE.md`; no source use case, README, or CHANGELOG update is
   required because behavior and user workflow are unchanged.
 - Open risks: the historical gate gap is accepted only for this feature. No
-  separate focused plan-approval or Slice 1 completion-approval commit exists,
-  and no closure commit or Closure Approval exists yet. The exception does not
-  change repository-wide policy or waive current Slice 1/Slice 2 evidence.
-- Feature Exit determination: hand off this revised plan to independent plan
-  review. After that review, Feature Exit must independently return `Close`,
-  followed by explicit Closure Approval and one focused closure commit;
-  closure must not be inferred from the recorded human approvals alone.
+  separate focused plan-approval or Slice 1 completion-approval commit exists;
+  the approved exception does not change repository-wide policy or waive
+  current Slice 1/Slice 2 evidence.
+- Feature Exit determination: `Close`, based on the independent Feature Exit
+  review and the approved one-feature-only Legacy Gate Exception.
+
+## Closure Approval
+
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: close this selected feature under the approved Legacy Gate
+  Exception; remove its temporary feature folder and remove only the empty
+  parent `### 7. Webview Presentation Separation` roadmap block and stale
+  completed-child ordering bullet. Preserve roadmap sections 8/9,
+  `docs/specs/features/BASELINE.md`, all runtime behavior, tests, and history.
+- Approved paths:
+  `docs/specs/features/shared-webview-header-search-control-separation/`
+  and `docs/specs/roadmap.md`
+- Required review: Feature Exit `Close`.
+- Closure commit: pending; no staging or deletion has occurred yet.
 
 ## Validation
 
@@ -413,5 +425,4 @@ with existing teardown `EPIPE`/stream-close noise; the initial sandboxed launch
 was blocked by Chromium macOS permissions. No new durable behavior, API,
 telemetry, or compatibility contract was introduced.
 
-Current Feature Exit status: pending independent Feature Exit review after the
-revised closure decision plan review returned Ready for approval.
+Current Feature Exit status: Close; closure commit pending.
