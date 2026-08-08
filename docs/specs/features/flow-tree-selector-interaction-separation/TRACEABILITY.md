@@ -1,0 +1,14 @@
+# Requirements Traceability: Flow-tree Selector Interaction Separation
+
+<!-- markdownlint-disable MD013 -->
+
+| Use case / requirement                                                                                                            | SPECS.md section             | Implementation slice | Test or validation                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
+| `uc-explore-flow-graph.md`: selection, focus, enabled/disabled flow-tree rows, scope-row behavior, reveal, and return-focus rules | R2-R5; R7                    | Slice 1              | `unitTreeSelector.test.ts`, `accessibilityDom.test.tsx`, flow interaction tests, desktop/web suites |
+| `uc-navigate-between-unit-list-and-flow-graph.md`: stable unit identity and separation from transient row state                   | R6; Breaking Change Analysis | Slice 1              | `FlowSelector.tsx` contract inspection, flow navigation tests, qlty/build checks                    |
+| R1 / AC1: presentation-local selector interaction seams and architecture boundaries                                               | R1; AC1                      | Slice 1              | focused tests, `rtk pnpm run qlty`, architecture test coverage, `rtk git diff --check`              |
+| R2-R4 / AC2: pointer, keyboard, disabled-row, and explicit scope-opening behavior                                                 | R2-R4; AC2                   | Slice 1              | `unitTreeSelector.test.ts`, `accessibilityDom.test.tsx`, flow keyboard/interaction tests            |
+| R5 / AC3: focus requests, rerender retention, expansion, reveal, nested fallback                                                  | R5; AC3                      | Slice 1              | `accessibilityDom.test.tsx`, deep-tree selector tests, desktop/web suites                           |
+| R7 / AC5-AC6: desktop/web, VS Code compatibility, docs and CHANGELOG evaluation                                                   | R7; AC5-AC6                  | Slice 1              | production build, `rtk pnpm run test:full`, qlty, Markdown lint, diff checks                        |
+
+<!-- markdownlint-enable MD013 -->
