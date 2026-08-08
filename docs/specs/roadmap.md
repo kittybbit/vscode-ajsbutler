@@ -64,10 +64,10 @@ refactoring level and is removed only after that effort is complete.
   cross-view navigation, parser/error, selected VS Code/file-I/O, viewer
   transport/composition, and selected webview boundaries. Each remains a
   separate implementation slice with its own approval and validation.
-- Infrastructure Boundary Cleanup contains only VS Code `ViewerFactory`, the
-  normalized `AjsParserPort`, file/host adapters, or the validated telemetry
-  contract that Feature 4 leaves unselected, and only after host, parser,
-  privacy, and failure behavior are characterized.
+- Infrastructure Boundary Cleanup contains only the normalized
+  `AjsParserPort`, file/host adapters, or the validated telemetry contract
+  that Feature 4 leaves unselected, and only after host, parser, privacy, and
+  failure behavior are characterized.
 - Architecture Boundary Protection remains behind its existing evidence gate:
   the composition-root candidate is not treated as a dependency violation
   without a concrete gap, cycle, or enforcement failure.
