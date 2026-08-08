@@ -4,7 +4,8 @@
 
 - Purpose: separate flow-tree selection and focus responsibilities into
   reviewable presentation-local seams without changing flow behavior.
-- Approved or active slice: Slice 1 is approved and ready for implementation.
+- Approved or active slice: Slice 1 implementation is complete; review is
+  pending.
 - Do not: change flow scope resolution, graph placement, stable unit identity,
   cross-view navigation, or table keyboard behavior.
 - Do not: add shortcuts, selection modes, parser/application contracts,
@@ -16,7 +17,8 @@
   suites, production build, qlty, Markdown lint, and diff checks.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: plan review, then approved plan commit before implementation.
+- Next decision: implementation review, then Completion Approval and the
+  focused slice commit.
 
 ## Sync Rule
 
@@ -33,14 +35,15 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: In Progress
 - Planning scope: one presentation-only slice covering selector row state,
   focus/tabindex coordination, pointer and keyboard interaction, expansion and
   reveal state, and the existing flow selector adapter contracts.
-- Review status: Plan review Ready; no actionable findings.
+- Review status: Plan review Ready; implementation review Ready with no
+  actionable findings.
 - Human approval: Approved in the current conversation for the exact Slice 1
   scope below.
-- Active implementation slice: Slice 1
+- Active implementation slice: Slice 1 (implementation complete; review pending)
 
 ## Human Approval
 
@@ -58,12 +61,20 @@ result only, such as `approved in current conversation`.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at:
-- Approved scope:
-- Approved paths:
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: completed Slice 1 implementation, tests, validation evidence,
+  and the synchronized task/traceability records only.
+- Approved paths: `docs/specs/features/flow-tree-selector-interaction-separation/TASKS.md`,
+  `docs/specs/features/flow-tree-selector-interaction-separation/TRACEABILITY.md`,
+  `src/presentation/webview/editor/shared/UnitTreeSelector.tsx`,
+  `src/presentation/webview/editor/shared/unitTreeSelectorModel.ts`,
+  `src/presentation/webview/editor/shared/useUnitTreeSelectorState.ts`,
+  `src/presentation/webview/editor/shared/useUnitTreeSelectorFocus.ts`,
+  `src/presentation/webview/editor/shared/useUnitTreeSelectorKeyboard.ts`,
+  `src/test/suite/unitTreeSelector.test.ts`
+- Implementation review verdict: Ready
+- Commit status: Eligible
 
 ## Closure Approval
 
@@ -78,7 +89,7 @@ result only, such as `approved in current conversation`.
 
 ### Slice 1: Establish flow-tree selector interaction seams
 
-- Status: Approved
+- Status: Complete
 - Scope: extract the shared selector's pure row-state and interaction
   decisions, focus/tabindex and focus-request coordination, and expansion /
   selected-row reveal state into small presentation-local modules or hooks;
@@ -139,6 +150,29 @@ result only, such as `approved in current conversation`.
   navigation, search, parser/application changes, host transport, telemetry,
   new shortcuts, virtualization, and visual redesign.
 
+#### Slice 1 implementation evidence
+
+- Changed files: `UnitTreeSelector.tsx` now composes the extracted
+  `unitTreeSelectorModel.ts`, `useUnitTreeSelectorState.ts`,
+  `useUnitTreeSelectorFocus.ts`, and `useUnitTreeSelectorKeyboard.ts` seams;
+  `unitTreeSelector.test.ts` directly covers the new pure row-state and key
+  guard seams. No `FlowSelector.tsx` change was required because its stable-ID
+  callback contract remained compatible.
+- Checks passed: `rtk pnpm run qlty`, `rtk pnpm run lint:md`,
+  `rtk pnpm run test:compile`, `rtk pnpm run build`,
+  `rtk git diff --check`, desktop preparation and suite, and web preparation
+  and suite. The web suite required a permitted native Playwright launch after
+  the sandboxed launch was blocked by macOS Mach-port permissions.
+- Compatibility impact: no user-visible selector semantics, flow scope,
+  stable identity, DTO, host message, telemetry, parser, or VS Code engine
+  changes; desktop and browser webview paths both passed.
+- Documentation impact: no README or CHANGELOG update is required under the
+  internal behavior-preserving refactoring criteria.
+- Implementation feedback: separating pure row-state and keyboard guards from
+  hook-based focus and expansion coordination made the selector boundary
+  explicit while preserving the existing `UnitTreeFocusRequest` export and
+  flow callback shapes.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
@@ -156,9 +190,9 @@ result only, such as `approved in current conversation`.
 
 ## Validation
 
-- [ ] Tests added or updated
+- [x] Tests added or updated
 - [ ] Update README or user documentation if user-facing behavior changes
-- [ ] Run relevant validation
+- [x] Run relevant validation
 
 ## Notes
 

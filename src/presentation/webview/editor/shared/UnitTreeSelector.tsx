@@ -1,13 +1,4 @@
-import React, {
-  FC,
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { FC, KeyboardEvent, memo, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
@@ -30,18 +21,35 @@ import {
   formatUnitInformationMessage,
   unitInformationMessage,
 } from "../unitInformationLocalization";
-import { collectUnitTreeAncestorUnitIds } from "./unitTreeSelection";
 import {
   isUnitTreeRowNavigable,
-  resolveUnitTreeNavigationKey,
   resolveVisibleUnitTreeRows,
 } from "./unitTreeNavigation";
+import {
+  notifyEnabledUnit,
+  resolveUnitTreeRowBackgroundColor,
+  resolveUnitTreeRowBorderColor,
+  resolveUnitTreeRowBorderStyle,
+  resolveUnitTreeRowOutline,
+  resolveUnitTreeRowState,
+  type UnitTreeFocusRequest,
+  type UnitTreeRowState,
+} from "./unitTreeSelectorModel";
+import {
+  collectCurrentPathUnitIds,
+  useExpandedUnitTreeState,
+  useSelectedTreeRowScroll,
+} from "./useUnitTreeSelectorState";
+import { useUnitTreeSelectorFocus } from "./useUnitTreeSelectorFocus";
+import { useUnitTreeSelectorKeyboard } from "./useUnitTreeSelectorKeyboard";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
 import {
   viewerFocusBorder,
   viewerPathBorder,
   viewerSelectionBorder,
 } from "./viewerThemeStyles";
+
+export type { UnitTreeFocusRequest } from "./unitTreeSelectorModel";
 
 export type UnitTreeSelectorProps = {
   rootUnits: FlowGraphUnitDto[];
@@ -62,11 +70,6 @@ export type UnitTreeSelectorProps = {
   onEscape?: VoidFunction;
   onEnterUnit?: (unitId: string) => void;
   onSelectUnit: (unitId: string) => void;
-};
-
-export type UnitTreeFocusRequest = {
-  revision: number;
-  targetUnitId?: string;
 };
 
 type UnitTreeSelectorTreeProps = {
@@ -92,17 +95,6 @@ type UnitTreeSelectorTreeProps = {
 
 type UnitTreeSelectorUnitProps = Omit<UnitTreeSelectorTreeProps, "units"> & {
   unit: FlowGraphUnitDto;
-};
-
-type UnitTreeRowState = {
-  hasChildren: boolean;
-  isCurrent: boolean;
-  isEnabled: boolean;
-  isExpanded: boolean;
-  isHovered: boolean;
-  isInCurrentPath: boolean;
-  isSelected: boolean;
-  canOpenScope: boolean;
 };
 
 type UnitTreeExpandControlProps = Pick<
@@ -174,240 +166,6 @@ const unitTreeActionSx = {
   minHeight: UNIT_TREE_ACTION_SIZE_PX,
   padding: 0,
 };
-
-const isDefinedUnitId = (unitId: string | undefined): unitId is string =>
-  unitId !== undefined && unitId.length > 0;
-
-const isTreeNavigationKey = (key: string): boolean =>
-  key === "ArrowDown" ||
-  key === "ArrowUp" ||
-  key === "ArrowLeft" ||
-  key === "ArrowRight" ||
-  key === "Home" ||
-  key === "End";
-
-export const mergeUnitIds = (
-  current: Set<string>,
-  requiredUnitIds: readonly (string | undefined)[],
-): Set<string> => {
-  const newUnitIds = requiredUnitIds.filter(
-    (unitId): unitId is string =>
-      isDefinedUnitId(unitId) && !current.has(unitId),
-  );
-  return newUnitIds.length > 0 ? new Set([...current, ...newUnitIds]) : current;
-};
-
-const collectRequiredExpandedUnitIds = (
-  currentUnitId: string | undefined,
-  selectedUnitId: string | undefined,
-  focusUnitId: string | undefined,
-  unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
-): readonly (string | undefined)[] => [
-  ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
-  currentUnitId,
-  ...collectUnitTreeAncestorUnitIds(selectedUnitId, unitById),
-  ...collectUnitTreeAncestorUnitIds(focusUnitId, unitById),
-];
-
-const collectCurrentPathUnitIds = (
-  currentUnitId: string | undefined,
-  unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
-): ReadonlySet<string> =>
-  new Set([
-    ...collectUnitTreeAncestorUnitIds(currentUnitId, unitById),
-    ...[currentUnitId].filter(isDefinedUnitId),
-  ]);
-
-const setUnitExpanded = (
-  current: Set<string>,
-  unitId: string,
-  expanded: boolean,
-): Set<string> => {
-  const next = new Set(current);
-  if (expanded) {
-    next.add(unitId);
-  } else {
-    next.delete(unitId);
-  }
-  return next;
-};
-
-const useExpandedUnitTreeState = (
-  currentUnitId: string | undefined,
-  selectedUnitId: string | undefined,
-  focusUnitId: string | undefined,
-  unitById: ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">>,
-) => {
-  const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(
-    () => new Set<string>(),
-  );
-
-  useEffect(() => {
-    setExpandedUnitIds((current) =>
-      mergeUnitIds(
-        current,
-        collectRequiredExpandedUnitIds(
-          currentUnitId,
-          selectedUnitId,
-          focusUnitId,
-          unitById,
-        ),
-      ),
-    );
-  }, [currentUnitId, focusUnitId, selectedUnitId, unitById]);
-
-  const setExpanded = useCallback((unitId: string, expanded: boolean) => {
-    setExpandedUnitIds((current) => setUnitExpanded(current, unitId, expanded));
-  }, []);
-
-  return { expandedUnitIds, setExpanded };
-};
-
-const scheduleSelectedTreeRowScroll = (
-  rowByUnitId: ReadonlyMap<string, HTMLElement>,
-  selectedUnitId: string,
-): (() => void) => {
-  let scrollFrameId: number | undefined;
-  const expansionFrameId = window.requestAnimationFrame(() => {
-    scrollFrameId = window.requestAnimationFrame(() => {
-      rowByUnitId.get(selectedUnitId)?.scrollIntoView({
-        block: "nearest",
-        inline: "nearest",
-      });
-    });
-  });
-  return () => {
-    window.cancelAnimationFrame(expansionFrameId);
-    if (scrollFrameId !== undefined) {
-      window.cancelAnimationFrame(scrollFrameId);
-    }
-  };
-};
-
-const setUnitTreeRowRef = (
-  rowByUnitId: Map<string, HTMLElement>,
-  unitId: string,
-  element: HTMLElement | null,
-) => {
-  if (element) {
-    rowByUnitId.set(unitId, element);
-  } else {
-    rowByUnitId.delete(unitId);
-  }
-};
-
-const maybeScheduleSelectedTreeRowScroll = (
-  rowByUnitId: ReadonlyMap<string, HTMLElement>,
-  autoScrollSelectedUnit: boolean,
-  selectedUnitId: string | undefined,
-): (() => void) | undefined =>
-  selectedUnitId && autoScrollSelectedUnit
-    ? scheduleSelectedTreeRowScroll(rowByUnitId, selectedUnitId)
-    : undefined;
-
-const useSelectedTreeRowScroll = (
-  autoScrollSelectedUnit: boolean,
-  selectedUnitId: string | undefined,
-  expandedUnitIds: ReadonlySet<string>,
-) => {
-  const rowByUnitIdRef = useRef(new Map<string, HTMLElement>());
-  const setRowRef = useCallback(
-    (unitId: string, element: HTMLElement | null) => {
-      setUnitTreeRowRef(rowByUnitIdRef.current, unitId, element);
-    },
-    [],
-  );
-
-  useEffect(() => {
-    return maybeScheduleSelectedTreeRowScroll(
-      rowByUnitIdRef.current,
-      autoScrollSelectedUnit,
-      selectedUnitId,
-    );
-  }, [autoScrollSelectedUnit, expandedUnitIds, selectedUnitId]);
-
-  return { rowByUnitIdRef, setRowRef };
-};
-
-const focusUnitTreeRow = (
-  rowByUnitId: ReadonlyMap<string, HTMLElement>,
-  unitId: string,
-): boolean => {
-  const treeItem = rowByUnitId.get(unitId);
-  if (!treeItem) return false;
-  treeItem.focus({ preventScroll: true });
-  treeItem
-    .querySelector<HTMLElement>("[data-unit-tree-row]")
-    ?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  return true;
-};
-
-const resolveUnitTreeRowState = (
-  unit: FlowGraphUnitDto,
-  props: Pick<
-    UnitTreeSelectorUnitProps,
-    | "canOpenScopeUnit"
-    | "currentPathUnitIds"
-    | "currentUnitId"
-    | "expandedUnitIds"
-    | "hoveredUnitId"
-    | "isUnitEnabled"
-    | "onOpenScope"
-    | "selectedUnitId"
-  >,
-): UnitTreeRowState => {
-  const hasChildren = unit.children.length > 0;
-  return {
-    hasChildren,
-    isCurrent: props.currentUnitId === unit.id,
-    isEnabled: props.isUnitEnabled(unit),
-    isExpanded: hasChildren && props.expandedUnitIds.has(unit.id),
-    isHovered: props.hoveredUnitId === unit.id,
-    isInCurrentPath: props.currentPathUnitIds.has(unit.id),
-    isSelected: props.selectedUnitId === unit.id,
-    canOpenScope: props.canOpenScopeUnit(unit) && Boolean(props.onOpenScope),
-  };
-};
-
-const notifyEnabledUnit = (
-  isEnabled: boolean,
-  unitId: string,
-  callback: ((unitId: string) => void) | undefined,
-) => {
-  if (isEnabled) {
-    callback?.(unitId);
-  }
-};
-
-const resolveUnitTreeRowBackgroundColor = ({
-  isHovered,
-  isInCurrentPath,
-  isSelected,
-}: UnitTreeRowState): string =>
-  [
-    { matches: isSelected, color: "action.selected" },
-    { matches: isHovered, color: "action.hover" },
-    { matches: isInCurrentPath, color: "action.hover" },
-  ].find(({ matches }) => matches)?.color ?? "transparent";
-
-const resolveUnitTreeRowBorderColor = (
-  rowState: UnitTreeRowState,
-  selectedColor: string,
-): string => (rowState.isSelected ? selectedColor : "transparent");
-
-export const resolveUnitTreeRowBorderStyle = (
-  rowState: Pick<UnitTreeRowState, "isSelected" | "isInCurrentPath">,
-): "double" | "dashed" | "solid" =>
-  rowState.isSelected
-    ? "double"
-    : rowState.isInCurrentPath
-      ? "dashed"
-      : "solid";
-
-const resolveUnitTreeRowOutline = (
-  rowState: UnitTreeRowState,
-  hoveredColor: string,
-): string => (rowState.isHovered ? `2px solid ${hoveredColor}` : "none");
 
 const UnitTreeExpandIcon: FC<Pick<UnitTreeRowState, "isExpanded">> = ({
   isExpanded,
@@ -615,7 +373,7 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
     expandedUnitIds,
     hoveredUnitId,
     isUnitEnabled,
-    onOpenScope,
+    hasOpenScopeHandler: Boolean(onOpenScope),
     selectedUnitId,
   });
   const handleToggle = () => setExpanded(unit.id, !rowState.isExpanded);
@@ -907,199 +665,29 @@ const UnitTreeSelector: FC<UnitTreeSelectorProps> = ({
       ),
     [canOpenScopeUnit, expandedUnitIds, isUnitEnabled, rootUnits],
   );
-  const focusedUnitIdRef = useRef<string | undefined>(undefined);
-  const pendingFocusUnitIdRef = useRef<string | undefined>(undefined);
-  const handledFocusRequestRevisionRef = useRef(0);
   const navigableVisibleRows = useMemo(
     () => visibleRows.filter(isUnitTreeRowNavigable),
     [visibleRows],
   );
 
-  const setActiveRow = useCallback(
-    (unitId: string | undefined) => {
-      const previousUnitId = focusedUnitIdRef.current;
-      if (previousUnitId && previousUnitId !== unitId) {
-        rowByUnitIdRef.current
-          .get(previousUnitId)
-          ?.setAttribute("tabindex", "-1");
-      }
-      if (unitId) {
-        rowByUnitIdRef.current.get(unitId)?.setAttribute("tabindex", "0");
-      }
-      focusedUnitIdRef.current = unitId;
-    },
-    [rowByUnitIdRef],
-  );
-
-  useEffect(() => {
-    const currentUnitId = focusedUnitIdRef.current;
-    if (
-      currentUnitId &&
-      navigableVisibleRows.some((row) => row.id === currentUnitId)
-    ) {
-      setActiveRow(currentUnitId);
-      return;
-    }
-    const fallbackUnitId =
-      navigableVisibleRows.find((row) => row.id === selectedUnitId)?.id ??
-      navigableVisibleRows[0]?.id;
-    if (
-      currentUnitId &&
-      fallbackUnitId &&
-      rowByUnitIdRef.current
-        .get(currentUnitId)
-        ?.contains(document.activeElement)
-    ) {
-      pendingFocusUnitIdRef.current = fallbackUnitId;
-    }
-    setActiveRow(fallbackUnitId);
-  }, [navigableVisibleRows, rowByUnitIdRef, selectedUnitId, setActiveRow]);
-
-  const requestRowFocus = useCallback(
-    (unitId: string) => {
-      setActiveRow(unitId);
-      pendingFocusUnitIdRef.current = focusUnitTreeRow(
-        rowByUnitIdRef.current,
-        unitId,
-      )
-        ? undefined
-        : unitId;
-    },
-    [rowByUnitIdRef, setActiveRow],
-  );
-
-  useEffect(() => {
-    const revision = focusRequest?.revision ?? 0;
-    if (revision <= handledFocusRequestRevisionRef.current) return;
-    if (collapsed) {
-      expand();
-      return;
-    }
-    const requestedUnitId = focusRequest?.targetUnitId;
-    if (
-      requestedUnitId &&
-      !navigableVisibleRows.some((row) => row.id === requestedUnitId)
-    ) {
-      return;
-    }
-    const targetUnitId = requestedUnitId ?? navigableVisibleRows[0]?.id;
-    if (!targetUnitId) return;
-    requestRowFocus(targetUnitId);
-    handledFocusRequestRevisionRef.current = revision;
-  }, [collapsed, expand, focusRequest, navigableVisibleRows, requestRowFocus]);
-
-  useEffect(() => {
-    const pendingUnitId = pendingFocusUnitIdRef.current;
-    if (!pendingUnitId) return;
-    if (!navigableVisibleRows.some((row) => row.id === pendingUnitId)) {
-      pendingFocusUnitIdRef.current = undefined;
-      return;
-    }
-    if (focusUnitTreeRow(rowByUnitIdRef.current, pendingUnitId)) {
-      pendingFocusUnitIdRef.current = undefined;
-    }
-  }, [expandedUnitIds, navigableVisibleRows, rowByUnitIdRef]);
-
-  const handleRowFocus = useCallback(
-    (unitId: string) => {
-      setActiveRow(unitId);
-    },
-    [setActiveRow],
-  );
-
-  const handleUnitTreeKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
-      if (
-        event.key === "Escape" &&
-        !event.altKey &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !event.shiftKey &&
-        onEscape
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
-        onEscape();
-        return;
-      }
-      const result = resolveUnitTreeNavigationKey(visibleRows, unitId, {
-        altKey: event.altKey,
-        ctrlKey: event.ctrlKey,
-        key: event.key,
-        metaKey: event.metaKey,
-        shiftKey: event.shiftKey,
-      });
-      if (!result.suppressDefault) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const action = result.action;
-      if (!action) return;
-      switch (action.kind) {
-        case "collapse":
-        case "expand":
-          setExpanded(action.targetUnitId, action.kind === "expand");
-          return;
-        case "focus":
-          requestRowFocus(action.targetUnitId);
-          return;
-        case "select":
-          onSelectUnit(action.targetUnitId);
-          if (event.key === "Enter") {
-            onEnterUnit?.(action.targetUnitId);
-          }
-          return;
-        case "open-scope":
-          onOpenScope?.(action.targetUnitId);
-          return;
-      }
-    },
-    [
-      onEscape,
+  const { handleRowFocus, requestRowFocus } = useUnitTreeSelectorFocus({
+    collapsed,
+    expand,
+    focusRequest,
+    navigableVisibleRows,
+    rowByUnitIdRef,
+    selectedUnitId,
+  });
+  const { handleRowKeyDown, handleSelectorKeyDownCapture } =
+    useUnitTreeSelectorKeyboard({
       onEnterUnit,
+      onEscape,
       onOpenScope,
       onSelectUnit,
       requestRowFocus,
       setExpanded,
       visibleRows,
-    ],
-  );
-
-  const handleRowKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
-      const target = event.target as HTMLElement | null;
-      const owningTreeItem = target?.closest?.('[role="treeitem"]');
-      if (owningTreeItem !== event.currentTarget) return;
-      if (
-        event.target !== event.currentTarget &&
-        !isTreeNavigationKey(event.key)
-      ) {
-        return;
-      }
-      handleUnitTreeKeyDown(event, unitId);
-    },
-    [handleUnitTreeKeyDown],
-  );
-
-  const handleSelectorKeyDownCapture = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      if (
-        !onEscape ||
-        event.key !== "Escape" ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey
-      ) {
-        return;
-      }
-      const target = event.target as HTMLElement | null;
-      if (!target?.closest?.('[role="treeitem"]')) return;
-      event.preventDefault();
-      event.stopPropagation();
-      onEscape();
-    },
-    [onEscape],
-  );
+    });
 
   const expandedPanel = (
     <ExpandedUnitTreePanel

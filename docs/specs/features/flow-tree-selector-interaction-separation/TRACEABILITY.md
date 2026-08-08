@@ -9,6 +9,14 @@
 | R1 / AC1: presentation-local selector interaction seams and architecture boundaries                                               | R1; AC1                      | Slice 1              | focused tests, `rtk pnpm run qlty`, architecture test coverage, `rtk git diff --check`              |
 | R2-R4 / AC2: pointer, keyboard, disabled-row, and explicit scope-opening behavior                                                 | R2-R4; AC2                   | Slice 1              | `unitTreeSelector.test.ts`, `accessibilityDom.test.tsx`, flow keyboard/interaction tests            |
 | R5 / AC3: focus requests, rerender retention, expansion, reveal, nested fallback                                                  | R5; AC3                      | Slice 1              | `accessibilityDom.test.tsx`, deep-tree selector tests, desktop/web suites                           |
-| R7 / AC5-AC6: desktop/web, VS Code compatibility, docs and CHANGELOG evaluation                                                   | R7; AC5-AC6                  | Slice 1              | production build, `rtk pnpm run test:full`, qlty, Markdown lint, diff checks                        |
+| R7 / AC5-AC6: desktop/web, VS Code compatibility, docs and CHANGELOG evaluation                                                   | R7; AC5-AC6                  | Slice 1              | production build, desktop/web preparation and suites, qlty, Markdown lint, diff checks              |
 
 <!-- markdownlint-enable MD013 -->
+
+## Validation Result
+
+- Slice 1 validation passed: focused selector compilation and tests, desktop
+  suite, browser web suite, production build, qlty, Markdown lint, and diff
+  checks all completed successfully. The browser suite required a permitted
+  native Playwright launch because the sandboxed launch lacked macOS Mach-port
+  permissions.
