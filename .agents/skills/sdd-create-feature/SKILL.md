@@ -1,5 +1,5 @@
 ---
-name: sdd-feature-intake
+name: sdd-create-feature
 description: Create one scoped SDD feature entry for vscode-ajsbutler and clarify its purpose, boundaries, and durable-document impact before planning.
 ---
 

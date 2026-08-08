@@ -30,7 +30,7 @@ Read these in order before making changes
      validation SSOT
    - `README.md` - build/test commands and repository overview
    - `.agents/skills/` - canonical reusable procedures
-   - `.codex/skills/` - Codex invocation adapters only
+   - `.agents/skills/` - canonical reusable Codex skills
    - `features/*/SPECS.md` - Temporary feature requirements and boundaries
    - `features/*/TASKS.md` - Sole plan and current state for its feature; the
      selected feature owns active branch implementation work
@@ -138,8 +138,8 @@ routing matrix first.
 
 - For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
 - Refer to `docs/specs/README.md` for authoritative SDD gates and document
-  roles. Use `.agents/skills/` for canonical procedures; `.codex/skills/`
-  contains invocation adapters only.
+  roles. Use `.agents/skills/` for canonical procedures and direct Codex skill
+  discovery.
 - Keep assumptions and design decisions in the responsible SDD artifact:
   use cases for durable behavior, `SPECS.md` for feature requirements,
   `TASKS.md` for slice plans, and `TRACEABILITY.md` for requirement-to-test

@@ -181,8 +181,8 @@ Codex skill directory contains invocation adapters only.
 ### Agent Entrypoints
 
 - Copilot CLI: `.github/copilot-instructions.md`
-- Codex role contracts: `.codex/agents/*.md`
-- Codex invocation adapters: `.codex/skills/*/SKILL.md`
+- Codex custom-agent definitions: `.codex/agents/*.toml`
+- Canonical Codex skills: `.agents/skills/*/SKILL.md`
 - Canonical shared procedures: `.agents/skills/*/SKILL.md`
 - SDD policy/document SSOT: `docs/specs/README.md`
 
@@ -192,7 +192,7 @@ Codex skill directory contains invocation adapters only.
    `docs/specs/README.md`; no feature lifecycle is required when the criteria
    permit skipping SDD.
 2. **Feature intake**: use `feature-author` with
-   `.agents/skills/sdd-feature-intake/SKILL.md` and `$sdd-create-feature`.
+   `.agents/skills/sdd-create-feature/SKILL.md` and `$sdd-create-feature`.
    Handoff: `plan-author`. Stop for ambiguous purpose, feature kind, overlap,
    or compatibility evidence.
 3. **Planning**: use `plan-author` with
@@ -250,7 +250,7 @@ SSOT.
 - `docs/specs/`: SDD policy, feature artifacts, and durable specifications
 - `.codex/agents/`: Codex role contracts
 - `.agents/skills/`: canonical reusable procedures
-- `.codex/skills/`: Codex invocation adapters
+- `.agents/skills/`: canonical Codex skills
 - `.agent.md` and `.github/copilot-instructions.md`: lightweight entry-point
   adapters, not policy SSOT
 

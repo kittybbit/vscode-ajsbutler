@@ -102,8 +102,8 @@ process for non-trivial changes.
 - Durable behavior contracts: `docs/requirements/use-cases/`
 - Copilot CLI entry point: `.github/copilot-instructions.md`
 - Canonical shared procedures: `.agents/skills/`
-- Codex role contracts and invocation adapters: `.codex/agents/` and
-  `.codex/skills/`
+- Codex custom-agent definitions and canonical skills: `.codex/agents/` and
+  `.agents/skills/`
 
 Keep README as an overview and command reference. Detailed development rules,
 approval gates, feature artifact responsibilities, and agent routing live in
