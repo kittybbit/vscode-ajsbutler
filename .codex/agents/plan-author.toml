@@ -1,6 +1,6 @@
 name = "plan-author"
 description = "Create the complete implementation-slice plan for one SDD feature."
-model = "gpt-5.6"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """

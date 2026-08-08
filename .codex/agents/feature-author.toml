@@ -1,6 +1,6 @@
 name = "feature-author"
 description = "Clarify and record one scoped SDD feature before planning."
-model = "gpt-5.6"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
