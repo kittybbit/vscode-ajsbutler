@@ -6,7 +6,8 @@
   behavior behind presentation-local contracts without changing table or flow
   matching semantics.
 - Approved or active slice: Slice 1 is complete and implementation review is
-  Ready; Slice 2 is a pending docs-only reconciliation slice.
+  Ready; Slice 2 is complete as a docs-only reconciliation and is pending
+  implementation review.
 - Do not: change table/flow matching, result ordering, host messages,
   telemetry, or domain/application contracts.
 - Do not: add shortcuts, search features, visual redesign, or a shared search
@@ -19,8 +20,9 @@
   preserve Slice 1's historical runtime validation evidence.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: obtain independent plan review for Slice 2, then follow its
-  approval-gated docs-only handoff before rerunning Feature Exit.
+- Next decision: obtain independent implementation review for Slice 2, then
+  record explicit human Completion Approval before the focused two-document
+  completion commit and Feature Exit.
 
 ## Sync Rule
 
@@ -38,15 +40,16 @@
 
 ## Plan Status
 
-- Status: Replanning
+- Status: Implementation complete; implementation review pending
 - Planning scope: one narrow docs-only reconciliation slice that records the
   existing Slice 1 approval evidence and the absence of separate focused gate
   commits, without reopening or changing Slice 1.
 - Review status: Replan review Ready; Slice 1 plan and implementation reviews
-  are Ready with no actionable findings.
+  are Ready with no actionable findings; Slice 2 implementation review is
+  pending.
 - Human approval: Slice 1 plan and completion approvals are historical; Slice 2
   replan approval is recorded below.
-- Active implementation slice: None
+- Active implementation slice: Slice 2 complete; implementation review pending
 
 ## Human Approval
 
@@ -84,8 +87,8 @@ current conversation`; do not copy the approval message.
 
 ## Slice 2 Completion Approval
 
-- Status: Pending
-- Approved at:
+- Status: Approved
+- Approved at: approved in current conversation
 - Approved scope: exactly the post-plan-commit Slice 2 completion record: record
   Slice 2 completion, its validation evidence, and this Slice 2 Completion
   Approval in the two selected feature documents only.
@@ -93,15 +96,13 @@ current conversation`; do not copy the approval message.
   `docs/specs/features/shared-webview-header-search-control-separation/TASKS.md`
   and
   `docs/specs/features/shared-webview-header-search-control-separation/TRACEABILITY.md`
-- Implementation review verdict: Pending; the completed docs-only Slice 2
-  delta must be sent to implementation-reviewer before Completion Approval.
-- Commit status: Not eligible; after explicit human Completion Approval, the
-  approval-committer must create one focused commit containing only the two
-  approved paths and the Slice 2 completion, validation, and approval record.
+- Implementation review verdict: Ready; no actionable findings.
+- Commit status: Eligible; the approval-committer must create one focused
+  commit containing only the two approved paths and the Slice 2 completion,
+  validation, and approval record.
 - Sequence: implementation review -> human Completion Approval -> focused
   two-document completion commit -> Feature Exit.
-- Completion Approval remains Pending until implementation review is Ready and
-  explicit human Completion Approval is recorded.
+- Completion Approval is recorded after implementation review returned Ready.
 
 ## Replan Approval
 
@@ -198,7 +199,7 @@ and are not approval for the new reconciliation slice.
 
 ### Slice 2: Reconcile approval-gate evidence for completed Slice 1
 
-- Status: Planned; pending independent plan review and human approval
+- Status: Complete; pending independent implementation review
 - Scope: update only this feature's `TASKS.md` and `TRACEABILITY.md` to
   preserve the already-recorded human approvals, state plainly that history
   lacks separate focused plan-approval and Slice 1 completion-approval commits,
@@ -221,8 +222,9 @@ and are not approval for the new reconciliation slice.
   - Slice 1 remains Complete with its existing plan and completion approval
     records and implementation validation evidence preserved.
   - `TASKS.md` distinguishes human approval records from Git commit evidence,
-    names the missing focused gate commits, and keeps Slice 2 approval pending
-    until the new plan is independently reviewed and approved.
+    names the missing focused gate commits, and keeps Slice 2 Completion
+    Approval pending until implementation review is Ready and explicit human
+    Completion Approval is recorded.
   - `TRACEABILITY.md` preserves all Slice 1 requirement mappings and adds one
     explicit mapping for the documentation-only approval-evidence
     reconciliation.
@@ -265,9 +267,8 @@ and are not approval for the new reconciliation slice.
   approval grant, closure approval, or commit is included.
 - Dependencies: Slice 1 remains Complete; its plan and completion approvals,
   implementation-review Ready result, validation evidence, and current
-  read-only history check must remain available. After this replan is Ready and
-  human-approved, the approval-committer must perform the plan/replan gate
-  before the docs-only slice is implemented. After implementation review and
+  read-only history check remain available. The approved replan gate is commit
+  `9f14202321da55d91529e962cc034f62441b85f4`. After implementation review and
   explicit human Completion Approval, the approval-committer creates the
   focused two-document completion commit; Feature Exit follows that commit.
 - Risks: a reviewer may expect the missing historical commits to be recreated;
@@ -279,6 +280,45 @@ and are not approval for the new reconciliation slice.
   roadmap, adding product requirements, rerunning Feature Exit in this slice,
   or granting plan, completion, or closure approval.
 
+#### Slice 2 implementation result
+
+- Completion: the approved docs-only reconciliation is recorded in this
+  `TASKS.md` and `TRACEABILITY.md` after replan approval commit
+  `9f14202321da55d91529e962cc034f62441b85f4`.
+- Scope result: Slice 1 remains Complete with its historical plan and
+  completion approvals, implementation-review Ready result, and runtime
+  validation evidence preserved and clearly labeled. No runtime, test,
+  generated, configuration, roadmap, README, CHANGELOG, or Git history file
+  was changed.
+- History result: read-only inspection confirms implementation commit
+  `6e12e98d` is present, while separate focused plan-approval and Slice 1
+  completion-approval commits are absent. They were not reconstructed or
+  claimed retroactively; no closure commit or closure approval is asserted.
+- Implementation review: Ready. Slice 2 Completion Approval is recorded after
+  the independent implementation review returned Ready.
+
+#### Slice 2 validation result
+
+- Passed `rtk pnpm run qlty`.
+- Passed `rtk pnpm run lint:md`.
+- Passed `rtk git diff --check`.
+- Read-only scope/status and diff inspection against the post-plan-commit
+  baseline confirmed that the Slice 2 delta contains only the two approved
+  feature documents.
+- Read-only history inspection confirmed that no focused historical gate
+  commit is present and no Git history was manufactured.
+- Runtime, desktop, web, and production-build checks were not rerun because
+  this approved slice changes documentation only; the historical Slice 1
+  validation evidence remains the applicable runtime evidence.
+
+#### Slice 2 implementation feedback
+
+- The two-document approval boundary was sufficient to reconcile lifecycle
+  evidence without reopening Slice 1 or introducing a design or scope change.
+- Keeping historical validation and missing historical gate commits explicitly
+  labeled prevents documentation-only completion from being mistaken for
+  retroactive approval or Feature Exit closure.
+
 ## Traceability
 
 - TRACEABILITY.md required: yes
@@ -288,12 +328,12 @@ and are not approval for the new reconciliation slice.
 
 ## Feature Exit
 
-- Definition of Done status (current Feature Exit status): pending Slice 2
-  docs-only reconciliation, its implementation review, human Completion
-  Approval, focused two-document completion commit, and independent Feature
-  Exit review. Slice 1, its implementation review, historical validation,
-  traceability, and production-readiness evidence are complete; the absence of
-  separate focused gate commits remains explicit and is not being backfilled.
+- Definition of Done status (current Feature Exit status): pending the Slice 2
+  focused two-document completion commit and independent Feature Exit review.
+  Slice 1 and the
+  Slice 2 docs-only reconciliation, including historical validation,
+  traceability, and production-readiness evidence, are complete; the absence
+  of separate focused gate commits remains explicit and is not being backfilled.
 - Durable documentation context (historical Slice 1):
   `docs/specs/roadmap.md` no longer lists roadmap item 7.4 because the
   implementation commit removed the completed item. No source use case,
@@ -303,16 +343,15 @@ and are not approval for the new reconciliation slice.
   remaining process risk is that history contains the implementation commit
   `6e12e98d`, but no separate focused plan-approval or completion-approval
   commit for this feature, and no closure commit.
-- Feature Exit determination: pending independent reassessment after Slice 2
-  is approved, completed, and reviewed. Closure approval must not be inferred
-  from the existing feature-document text or from the recorded human approvals
-  alone.
+- Feature Exit determination: pending independent reassessment after the Slice
+  2 focused completion commit. Closure approval must not be inferred from the
+  existing feature-document text or from the recorded human approvals alone.
 
 ## Validation
 
-- [x] Tests added or updated
+- [x] Tests added or updated (historical Slice 1)
 - [ ] Update README or user documentation if user-facing behavior changes
-- [x] Run relevant validation
+- [x] Run relevant validation (historical Slice 1 and current Slice 2)
 
 ## Notes
 
@@ -328,6 +367,5 @@ with existing teardown `EPIPE`/stream-close noise; the initial sandboxed launch
 was blocked by Chromium macOS permissions. No new durable behavior, API,
 telemetry, or compatibility contract was introduced.
 
-Current Feature Exit status: pending Slice 2 completion, implementation review,
-human Completion Approval, focused two-document completion commit, and
-independent Feature Exit review.
+Current Feature Exit status: pending the focused two-document completion
+commit and independent Feature Exit review.
