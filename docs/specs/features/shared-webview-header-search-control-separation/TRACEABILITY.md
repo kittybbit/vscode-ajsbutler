@@ -13,6 +13,39 @@
 
 <!-- markdownlint-enable MD013 -->
 
+## Legacy Gate Exception / Closure Decision
+
+- Decision: Option 2 — close this legacy feature with a narrowly bounded
+  `Legacy Gate Exception` for the missing Slice 1 plan-approval and Slice 1
+  completion focused gate commits.
+- Approval: explicitly approved in the current conversation. This is not
+  Feature Exit Close, Closure Approval, or a closure commit.
+- Traceability mapping: this decision covers `Approval Impact Decisions` and
+  `Feature Exit`; validation is the recorded history check for `6e12e98d`,
+  `2c137f56`, and `85bf909e`, the current Slice 1 acceptance evidence, and all
+  Slice 2 reconciliation evidence.
+- Historical evidence: Slice 1 implementation commit `6e12e98d` predates the
+  approval-gated workflow commits `2c137f56` and `85bf909e`. Neither later
+  workflow commit is a feature-specific focused gate commit for this feature.
+  History must not be rewritten, and the missing focused commits must not be
+  claimed as existing.
+- Scope boundary: this one-feature-only exception does not alter
+  repository-wide SDD policy, architecture, runtime behavior, or future
+  features. It accepts the historical gate gap for this feature only.
+- Required evidence: current Slice 1 acceptance and Slice 2 reconciliation
+  evidence remain required for Feature Exit, including their recorded
+  validation, traceability, and production-readiness evidence.
+- Parent `Webview Presentation Separation` propagation for the approved
+  closure commit: remove the empty `### 7. Webview Presentation Separation`
+  section and the stale completed-child ordering bullet around
+  `docs/specs/roadmap.md` lines 73-75, while preserving sections `### 8` and
+  `### 9` and `docs/specs/features/BASELINE.md`. This propagation is not made
+  in the current replan.
+- Closure gate: after independent plan review, Feature Exit must return
+  `Close`, explicit Closure Approval is still required, and one focused
+  closure commit is still required. The feature folder is not deleted and no
+  roadmap text is removed in this replan.
+
 Historical Slice 1 validation evidence (not current Feature Exit status): Slice
 1 implementation review Ready. `rtk pnpm run
 test:compile`, desktop preparation and suite, web preparation and suite,
@@ -31,8 +64,9 @@ required; matching semantics, viewer messages, telemetry, and supported
 desktop/web behavior remain unchanged.
 
 Slice 2 implementation validation result (documentation-only; implementation
-review Ready and Completion Approval recorded): `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and `rtk git diff
---check` passed. Read-only status/diff inspection against replan approval commit
+review Ready and Completion Approval recorded): `rtk pnpm run qlty`, `rtk pnpm
+run lint:md`, and `rtk git diff --check` passed. Read-only status/diff
+inspection against replan approval commit
 `9f14202321da55d91529e962cc034f62441b85f4` confirmed that only `TASKS.md` and
 `TRACEABILITY.md` changed. Read-only history inspection confirmed the existing
 implementation commit `6e12e98d` and the absence of separate focused
@@ -41,12 +75,14 @@ manufactured. Runtime, desktop, web, and build checks were not rerun because
 Slice 2 changes documentation only; the historical Slice 1 validation evidence
 above remains clearly separate and applicable to runtime behavior.
 
-Current Feature Exit status: pending the focused two-document completion
-commit and independent Feature Exit review.
+Current Feature Exit status: pending independent Feature Exit review after the
+revised closure decision plan review returned Ready for approval.
 
-Closure evidence blocker: Git history contains implementation commit
-`6e12e98d`, but does not evidence separate focused plan-approval or
-completion-approval commits for this feature. No closure commit or closure
-approval may be inferred from the existing feature-document text or the
-recorded human approvals. Slice 2 is documentation-only and must preserve this
-fact rather than reconstructing or claiming historical commits.
+Closure evidence status: Git history contains implementation commit
+`6e12e98d`, but does not evidence separate focused plan-approval or Slice 1
+completion-approval commits for this feature. The approved one-feature-only
+exception accepts this historical gap without recreating or claiming those
+commits. No closure commit or Closure Approval may be inferred from the
+recorded human approvals. Slice 2 remains documentation-only, and its
+reconciliation evidence plus all current Slice 1 acceptance evidence remain
+required for Feature Exit.

@@ -5,9 +5,10 @@
 - Purpose: separate shared webview header-search state and accessibility
   behavior behind presentation-local contracts without changing table or flow
   matching semantics.
-- Approved or active slice: Slice 1 is complete and implementation review is
-  Ready; Slice 2 is complete as a docs-only reconciliation and is pending
-  implementation review.
+- Approved or active slice: Slice 1 and Slice 2 are complete; Slice 2's
+  implementation review is Ready and its completion commit is recorded. The
+  Legacy Gate Exception / Closure Decision below is recorded for independent
+  plan review before Feature Exit.
 - Do not: change table/flow matching, result ordering, host messages,
   telemetry, or domain/application contracts.
 - Do not: add shortcuts, search features, visual redesign, or a shared search
@@ -20,9 +21,9 @@
   preserve Slice 1's historical runtime validation evidence.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: obtain independent implementation review for Slice 2, then
-  record explicit human Completion Approval before the focused two-document
-  completion commit and Feature Exit.
+- Next decision: send this revised plan to independent plan review, then obtain
+  independent Feature Exit Close, explicit Closure Approval, and one focused
+  closure commit.
 
 ## Sync Rule
 
@@ -32,24 +33,28 @@
   when this feature is selected does it own active branch implementation work.
 - Other feature folders inherited from the base branch remain outside this
   feature's scope.
-- Update `docs/specs/roadmap.md` only when unfinished repository-level work or
-  ordering changes; no roadmap change is required for this intake.
+- Update `docs/specs/roadmap.md` only in the approved Feature Exit closure
+  commit for the parent propagation recorded below; do not edit it during this
+  replan. Preserve roadmap sections 8/9 and `features/BASELINE.md`.
 - Keep this file focused on implementation slices, approval, validation, risk,
   production readiness, and Feature Exit readiness. Do not retain historical
   logs or long validation diaries once they stop being actionable.
 
 ## Plan Status
 
-- Status: Implementation complete; implementation review pending
-- Planning scope: one narrow docs-only reconciliation slice that records the
-  existing Slice 1 approval evidence and the absence of separate focused gate
-  commits, without reopening or changing Slice 1.
-- Review status: Replan review Ready; Slice 1 plan and implementation reviews
-  are Ready with no actionable findings; Slice 2 implementation review is
-  pending.
+- Status: Complete; revised closure decision plan review Ready; Feature Exit
+  pending
+- Planning scope: one narrow closure-evidence revision that records the
+  explicitly approved, one-feature-only Legacy Gate Exception for the missing
+  Slice 1 focused gate commits and the bounded parent-roadmap propagation,
+  without reopening or changing Slice 1 or Slice 2.
+- Review status: revised closure decision plan review Ready; prior replan and
+  Slice 1/Slice 2 implementation reviews are Ready with no actionable findings.
 - Human approval: Slice 1 plan and completion approvals are historical; Slice 2
-  replan approval is recorded below.
-- Active implementation slice: Slice 2 complete; implementation review pending
+  replan and completion approvals are recorded below; the Legacy Gate Exception
+  / Closure Decision is explicitly approved in the current conversation. No
+  Closure Approval is recorded.
+- Active implementation slice: None; Feature Exit pending
 
 ## Human Approval
 
@@ -97,11 +102,9 @@ current conversation`; do not copy the approval message.
   and
   `docs/specs/features/shared-webview-header-search-control-separation/TRACEABILITY.md`
 - Implementation review verdict: Ready; no actionable findings.
-- Commit status: Eligible; the approval-committer must create one focused
-  commit containing only the two approved paths and the Slice 2 completion,
-  validation, and approval record.
-- Sequence: implementation review -> human Completion Approval -> focused
-  two-document completion commit -> Feature Exit.
+- Commit status: Committed in `0f2c6dc51d553941bd70c40fdae16f1bb8c3c981`.
+- Sequence completed: implementation review -> human Completion Approval ->
+  focused two-document completion commit. Feature Exit is next.
 - Completion Approval is recorded after implementation review returned Ready.
 
 ## Replan Approval
@@ -118,6 +121,47 @@ current conversation`; do not copy the approval message.
 
 The existing Slice 1 plan and completion approvals remain historical evidence
 and are not approval for the new reconciliation slice.
+
+## Legacy Gate Exception / Closure Decision
+
+- Decision: Option 2 — close this legacy feature with a narrowly bounded
+  `Legacy Gate Exception` for the missing Slice 1 plan-approval and Slice 1
+  completion focused gate commits.
+- Approval status: Approved
+- Approved at: approved in current conversation
+- Approved scope: this one-feature-only Legacy Gate Exception and its closure
+  evidence, limited to the selected feature's TASKS.md and TRACEABILITY.md;
+  no repository-wide policy, runtime, test, configuration, or Git history
+  changes.
+- Approved paths:
+  `docs/specs/features/shared-webview-header-search-control-separation/TASKS.md`
+  and
+  `docs/specs/features/shared-webview-header-search-control-separation/TRACEABILITY.md`
+- Approval meaning: this records the closure decision and exception only; it is
+  not Feature Exit Close, Closure Approval, or a closure commit.
+- Independent plan review: Ready for approval; no actionable findings.
+- Historical evidence: the Slice 1 implementation commit `6e12e98d` predates
+  the approval-gated workflow commits `2c137f56` and `85bf909e`. Those later
+  workflow commits are not feature-specific focused gate commits for this
+  feature. Do not rewrite history or claim that the missing focused commits
+  exist.
+- Scope boundary: this is a one-feature-only exception. It does not alter
+  repository-wide SDD policy, architecture, runtime behavior, or future
+  features. It accepts the historical gate gap for this feature only.
+- Required evidence: current Slice 1 acceptance and validation,
+  traceability, and production-readiness evidence remain required, and all
+  Slice 2 reconciliation evidence remains required. The exception waives none
+  of that evidence.
+- Closure sequence: after this revised plan receives independent plan review,
+  Feature Exit must still return `Close`, a human must provide explicit
+  Closure Approval, and `approval-committer` must create one focused closure
+  commit. No feature-folder deletion, roadmap edit, staging, commit, or
+  Closure Approval occurs in this replan.
+- Parent `Webview Presentation Separation` propagation for that approved
+  closure commit: remove the empty `### 7. Webview Presentation Separation`
+  section and the stale completed-child ordering bullet around
+  `docs/specs/roadmap.md` lines 73-75. Preserve sections `### 8` and `### 9`
+  and `docs/specs/features/BASELINE.md`; do not perform this propagation now.
 
 ## Implementation Slices
 
@@ -199,7 +243,7 @@ and are not approval for the new reconciliation slice.
 
 ### Slice 2: Reconcile approval-gate evidence for completed Slice 1
 
-- Status: Complete; pending independent implementation review
+- Status: Complete; implementation review Ready; completion commit recorded
 - Scope: update only this feature's `TASKS.md` and `TRACEABILITY.md` to
   preserve the already-recorded human approvals, state plainly that history
   lacks separate focused plan-approval and Slice 1 completion-approval commits,
@@ -223,8 +267,8 @@ and are not approval for the new reconciliation slice.
     records and implementation validation evidence preserved.
   - `TASKS.md` distinguishes human approval records from Git commit evidence,
     names the missing focused gate commits, and keeps Slice 2 Completion
-    Approval pending until implementation review is Ready and explicit human
-    Completion Approval is recorded.
+    Approval recorded after implementation review returned Ready and explicit
+    human Completion Approval was recorded.
   - `TRACEABILITY.md` preserves all Slice 1 requirement mappings and adds one
     explicit mapping for the documentation-only approval-evidence
     reconciliation.
@@ -268,13 +312,14 @@ and are not approval for the new reconciliation slice.
 - Dependencies: Slice 1 remains Complete; its plan and completion approvals,
   implementation-review Ready result, validation evidence, and current
   read-only history check remain available. The approved replan gate is commit
-  `9f14202321da55d91529e962cc034f62441b85f4`. After implementation review and
-  explicit human Completion Approval, the approval-committer creates the
-  focused two-document completion commit; Feature Exit follows that commit.
+  `9f14202321da55d91529e962cc034f62441b85f4`, and the focused Slice 2
+  completion commit is `0f2c6dc51d553941bd70c40fdae16f1bb8c3c981`. Feature Exit
+  follows that completion commit.
 - Risks: a reviewer may expect the missing historical commits to be recreated;
-  this slice must instead preserve the factual gap and leave any closure
-  decision to the independent Feature Exit review. Unrelated worktree changes
-  must not be absorbed into the reconciliation.
+  the approved one-feature-only exception instead preserves the factual gap.
+  Independent plan review, Feature Exit Close, explicit Closure Approval, and
+  the focused closure commit remain required. Unrelated worktree changes must
+  not be absorbed into the reconciliation.
 - Out of Scope: recreating or rewriting Git history, redoing or reopening Slice
   1, changing runtime code/tests/configuration, changing `SPECS.md` or the
   roadmap, adding product requirements, rerunning Feature Exit in this slice,
@@ -328,24 +373,25 @@ and are not approval for the new reconciliation slice.
 
 ## Feature Exit
 
-- Definition of Done status (current Feature Exit status): pending the Slice 2
-  focused two-document completion commit and independent Feature Exit review.
-  Slice 1 and the
+- Definition of Done status (current Feature Exit status): Slice 1 and the
   Slice 2 docs-only reconciliation, including historical validation,
-  traceability, and production-readiness evidence, are complete; the absence
-  of separate focused gate commits remains explicit and is not being backfilled.
-- Durable documentation context (historical Slice 1):
-  `docs/specs/roadmap.md` no longer lists roadmap item 7.4 because the
-  implementation commit removed the completed item. No source use case,
-  README, or CHANGELOG update is required because behavior and user workflow
-  are unchanged; this does not change the current Feature Exit status.
-- Open risks: no implementation or compatibility risk was identified. The
-  remaining process risk is that history contains the implementation commit
-  `6e12e98d`, but no separate focused plan-approval or completion-approval
-  commit for this feature, and no closure commit.
-- Feature Exit determination: pending independent reassessment after the Slice
-  2 focused completion commit. Closure approval must not be inferred from the
-  existing feature-document text or from the recorded human approvals alone.
+  traceability, and production-readiness evidence, are complete. The approved
+  Legacy Gate Exception / Closure Decision is recorded, and its revised plan
+  review is Ready; independent Feature Exit review is next.
+- Durable documentation context: roadmap item 7.4 is absent, but the parent
+  roadmap still has the empty `### 7` section and the stale completed-child
+  ordering bullet around lines 73-75. The approved closure propagation is to
+  remove only those stale parent references, preserving sections 8/9 and
+  `features/BASELINE.md`; no source use case, README, or CHANGELOG update is
+  required because behavior and user workflow are unchanged.
+- Open risks: the historical gate gap is accepted only for this feature. No
+  separate focused plan-approval or Slice 1 completion-approval commit exists,
+  and no closure commit or Closure Approval exists yet. The exception does not
+  change repository-wide policy or waive current Slice 1/Slice 2 evidence.
+- Feature Exit determination: hand off this revised plan to independent plan
+  review. After that review, Feature Exit must independently return `Close`,
+  followed by explicit Closure Approval and one focused closure commit;
+  closure must not be inferred from the recorded human approvals alone.
 
 ## Validation
 
@@ -367,5 +413,5 @@ with existing teardown `EPIPE`/stream-close noise; the initial sandboxed launch
 was blocked by Chromium macOS permissions. No new durable behavior, API,
 telemetry, or compatibility contract was introduced.
 
-Current Feature Exit status: pending the focused two-document completion
-commit and independent Feature Exit review.
+Current Feature Exit status: pending independent Feature Exit review after the
+revised closure decision plan review returned Ready for approval.
