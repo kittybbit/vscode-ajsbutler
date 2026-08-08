@@ -6,7 +6,7 @@
 
 - Selected feature: `infrastructure-boundary-cleanup`.
 - Branch: `codex/infrastructure-boundary-cleanup`.
-- Mode: Replanning Mode.
+- Mode: Implementation Mode.
 - Purpose: complete all executable Feature 8 boundaries and record exact
   disposition of non-executable file/host candidates.
 - Preserve completed ViewerFactory Slice 1; do not reimplement it.
@@ -17,15 +17,14 @@
 
 ## Plan Status
 
-- Status: Approved; Slice 2 implementation review `Ready`; completion
-  approval recorded; awaiting completion commit.
+- Status: Approved; Slice 2 complete; Slice 3 implementation review `Ready`,
+  completion approval recorded; awaiting completion commit.
 - Planning scope: one completed historical slice and two remaining executable
   slices, plus explicit file/host candidate dispositions.
 - Review status: `Ready for approval` from independent `sdd-review-plan`.
 - Human approval: Approved in the current conversation; implementation remains
   sequential and slice-specific.
-- Active implementation slice: Slice 2 — parser boundary; completion commit
-  pending.
+- Active slice: Slice 3 — telemetry boundary; completion commit pending.
 - Slice count and order: 3 total — Slice 1 complete; Slice 2 parser boundary;
   Slice 3 telemetry boundary.
 - Feature Exit: not ready; Slices 2-3 must each be reviewed, approved,
@@ -95,21 +94,34 @@ the full plan does not authorize simultaneous implementation of Slices 2-3.
 
 - Status: Approved
 - Approved at: current conversation, after independent implementation review
-  returned `Ready`
-- Approved scope: the completed Slice 2 parser boundary only, with its exact
-  validation and traceability evidence; Slice 3 remains sequentially pending
+  returned `Ready` and the formatter Finding was resolved
+- Approved scope: the completed Slice 3 telemetry boundary only, preserving
+  event meanings, privacy filtering, adapter behavior, and desktop/web
+  compatibility; Feature Exit remains pending
 - Approved paths:
-  - `src/infrastructure/parser/AntlrSyntaxError.ts`
-  - `src/infrastructure/parser/SyntaxErrorListener.ts`
-  - `src/infrastructure/parser/AntlrRawAjsParser.ts`
-  - `src/infrastructure/parser/AntlrAjsParser.ts`
-  - `src/test/suite/AntlrAjsParser.test.ts`
-  - `src/test/support/architectureDependencyRules.ts`
+  - `src/application/telemetry/TelemetryPort.ts`
+  - `src/application/telemetry/telemetryEvent.ts`
+  - `src/application/telemetry/extensionLifecycleTelemetry.ts`
+  - `src/application/telemetry/viewerActionTelemetry.ts`
+  - `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts`
+  - `src/infrastructure/telemetry/NoopTelemetryAdapter.ts`
+  - `src/bootstrap/extension/extensionLifecycle.ts`
+  - `src/presentation/vscode/webview/messageHandlers.ts`
+  - `src/presentation/vscode/commands/openPreviewCommand.ts`
+  - `src/presentation/vscode/commands/importAjsDefinitionViaWebApiCommand.ts`
+  - `src/presentation/vscode/diagnostics/registerDiagnostics.ts`
+  - `src/presentation/vscode/languages/registerHoverProvider.ts`
+  - `src/test/suite/telemetryEvent.test.ts`
+  - `src/test/suite/extensionLifecycle.test.ts`
+  - `src/test/suite/importAjsDefinitionViaWebApiCommand.test.ts`
+  - `src/test/suite/registerDiagnostics.test.ts`
+  - `src/test/suite/registerHoverProvider.test.ts`
   - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/support/architectureDependencyRules.ts`
   - `docs/specs/features/infrastructure-boundary-cleanup/TASKS.md`
   - `docs/specs/features/infrastructure-boundary-cleanup/TRACEABILITY.md`
 - Implementation review verdict: Ready
-- Commit status: Eligible for the exact Slice 2 completion commit
+- Commit status: Eligible for the exact Slice 3 completion commit
 
 ## Closure Approval
 
@@ -170,9 +182,9 @@ slice and returns to Replanning Mode.
 
 ### Slice 2: Move parser error translation to the normalized adapter
 
-- Status: Implemented; implementation review pending. Human Approval was
-  recorded in the current conversation after the plan review `Ready for
-approval` and plan commit `97e8e744`.
+- Status: Complete; implementation review `Ready`, Completion Approval
+  recorded in the current conversation, and completion-committed as
+  `ba54fa0542f08a79e4064d4d9537acb799441d1a`.
 - Scope:
   - Define an infrastructure-internal syntax-error shape at the raw ANTLR seam.
   - Make `SyntaxErrorListener` and `AntlrRawAjsParser` return only that internal
@@ -280,9 +292,10 @@ approval` and plan commit `97e8e744`.
     not provide webpack aliases and host initialization. The focused
     architecture assertion remains deterministic and keeps the zero-exception
     catalog unchanged.
-  - Remaining risk / handoff: independent implementation review is pending;
-    Completion Approval remains pending and no commit is eligible. Handoff is
-    the exact Slice 2 diff and evidence package to `implementation-reviewer`.
+  - Remaining risk / handoff: Slice 2 implementation review and Completion
+    Approval are complete, and completion commit
+    `ba54fa0542f08a79e4064d4d9537acb799441d1a` is recorded. Slice 3 is the
+    active boundary.
 - Approval Boundary: exactly the listed parser production/test paths, plus the
   feature-local planning evidence update. No path outside that list, port
   redesign, grammar/generated artifact, normalization, consumer, or telemetry
@@ -299,7 +312,9 @@ approval` and plan commit `97e8e744`.
 
 ### Slice 3: Close telemetry construction behind named builders
 
-- Status: Planned; review and Human Approval pending.
+- Status: Implemented; independent implementation review `Ready`, Completion
+  Approval recorded in the current conversation, and the exact completion
+  commit is pending.
 - Scope:
   - Keep branded `ValidatedTelemetryEvent` and `TelemetryPort.report` as the
     reporting boundary.
@@ -475,6 +490,67 @@ approval` and plan commit `97e8e744`.
 - Out of Scope: new telemetry, analytics policy, SDK replacement, telemetry
   settings UX, exact-number collection, Feature 9 thresholds, and unrelated
   call-site refactoring.
+
+### Slice 3 Implementation Evidence
+
+- Changed paths: exactly the approved telemetry boundary, named-builder,
+  adapter, lifecycle/webview/VS Code caller, focused test, and architecture
+  support paths listed in the Slice 3 boundary above. The actual changed code
+  and test files are:
+  - `src/application/telemetry/TelemetryPort.ts`
+  - `src/application/telemetry/telemetryEvent.ts`
+  - `src/application/telemetry/extensionLifecycleTelemetry.ts`
+  - `src/application/telemetry/viewerActionTelemetry.ts`
+  - `src/infrastructure/telemetry/VscodeTelemetryAdapter.ts`
+  - `src/infrastructure/telemetry/NoopTelemetryAdapter.ts`
+  - `src/bootstrap/extension/extensionLifecycle.ts`
+  - `src/presentation/vscode/webview/messageHandlers.ts`
+  - `src/presentation/vscode/commands/openPreviewCommand.ts`
+  - `src/presentation/vscode/commands/importAjsDefinitionViaWebApiCommand.ts`
+  - `src/presentation/vscode/diagnostics/registerDiagnostics.ts`
+  - `src/presentation/vscode/languages/registerHoverProvider.ts`
+  - `src/test/suite/telemetryEvent.test.ts`
+  - `src/test/suite/extensionLifecycle.test.ts`
+  - `src/test/suite/importAjsDefinitionViaWebApiCommand.test.ts`
+  - `src/test/suite/registerDiagnostics.test.ts`
+  - `src/test/suite/registerHoverProvider.test.ts`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/support/architectureDependencyRules.ts`
+    No parser, generated, configuration, README, CHANGELOG, or read-only
+    telemetry adapter test path was changed.
+- Acceptance evidence: `TelemetryPort.ts` now owns
+  `ValidatedTelemetryEvent`; `telemetryEvent.ts` retains the catalog, generic
+  factory, raw input, forbidden-key filtering, and internal aliases without a
+  `ValidatedTelemetryEvent` re-export. Lifecycle and legacy webview operation
+  callers use named catalog-backed builders. Outer production imports of
+  `telemetryEvent.ts` are absent and the architecture fixtures reject all
+  listed internal names in value, `import type`, and type-only named forms
+  while allowing the public port and named builders.
+- Event/privacy/failure evidence: existing event names, allowed properties,
+  conversion, forbidden-key filtering, SDK reporting/disposal containment,
+  initialization fallback, Noop behavior, and lifecycle/webview failure
+  containment are preserved by the focused and read-only telemetry suites.
+- Validation evidence: `rtk pnpm run test:compile`, desktop preparation and
+  `rtk pnpm run test:desktop:run`, web preparation and
+  `rtk pnpm run test:web:run` (all passed); `rtk pnpm run build` passed with
+  the existing three webpack bundle-size warnings; `rtk pnpm run qlty`,
+  `rtk pnpm run lint:md`, and `rtk git diff --check` passed. The web run was
+  repeated with browser permissions outside the sandbox and ended with exit
+  0; known teardown `EPIPE` / `ERR_STREAM_PREMATURE_CLOSE` logs were
+  separated from the successful result. The pre-edit web baseline failed only
+  on the sandbox Chromium MachPort permission error; desktop baseline passed.
+- Compatibility and production readiness: the VS Code engine remains
+  `^1.75.0`; desktop and web use the same public port and named builders; no
+  Node built-in, parser/model, JP1/AJS definition, host workflow, SDK, or
+  telemetry privacy behavior changed. README and CHANGELOG updates are not
+  required because this is internal behavior-preserving refactoring.
+- Remaining risks: no public/internal telemetry import boundary or legacy
+  payload meaning issue was found by independent review. The exact completion
+  commit remains the next gate; any new scope or design issue returns to
+  planning.
+- Handoff: send the exact Slice 3 diff, validation output,
+  compatibility/privacy evidence, and this traceability result to
+  `approval-committer` after Completion Approval.
 
 ## Slice Order And Dependencies
 

@@ -3,10 +3,9 @@ import { createPerformanceTelemetryEvent } from "../../../application/telemetry/
 import { createSearchTelemetryEvent } from "../../../application/telemetry/searchTelemetry";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import {
-  createTelemetryEvent,
-  telemetryEvents,
-} from "../../../application/telemetry/telemetryEvent";
-import { createViewerActionEvent } from "../../../application/telemetry/viewerActionTelemetry";
+  createLegacyWebviewOperationEvent,
+  createViewerActionEvent,
+} from "../../../application/telemetry/viewerActionTelemetry";
 import {
   createViewerResourceStateMessage,
   type ViewerResourceStateDto,
@@ -124,8 +123,7 @@ export const reportWebviewOperation = ({
   console.log(`post a message of operation. (${documentUri}, ${operation})`);
   reportTelemetrySafely(
     telemetry,
-    createTelemetryEvent(telemetryEvents.legacyWebviewOperation, {
-      development: DEVELOPMENT,
+    createLegacyWebviewOperationEvent({
       viewType: panel.viewType,
       operation,
     }),

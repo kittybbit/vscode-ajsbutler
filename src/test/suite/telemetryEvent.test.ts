@@ -6,8 +6,8 @@ import {
   telemetryPropertyKeys,
   type TelemetryProperties,
   type TelemetryPropertyKey,
-  type ValidatedTelemetryEvent,
 } from "../../application/telemetry/telemetryEvent";
+import type { ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";
 
 type RawTelemetryEvent = Readonly<{
   name: string;

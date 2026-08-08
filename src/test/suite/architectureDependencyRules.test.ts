@@ -13,6 +13,7 @@ import {
   findArchitectureRuleViolations,
   findCompositionRootViolations,
   findParserPortBoundaryViolations,
+  findTelemetryBoundaryViolations,
   formatViolation,
   resolveImportPath,
   type ArchitectureRuleId,
@@ -257,6 +258,77 @@ suite("Architecture dependency rules", () => {
         [],
       );
     });
+  });
+
+  test("rejects internal telemetry imports from outer callers in every import form", () => {
+    const internalNames = [
+      "telemetryEvents",
+      "TelemetryEventDefinition",
+      "TelemetryPropertyInput",
+      "createTelemetryEvent",
+      "allowTelemetryProperties",
+    ];
+    const moduleSpecifier = "../../application/telemetry/telemetryEvent";
+    const fixtures = internalNames.flatMap((name) => [
+      {
+        file: "src/bootstrap/extension/example.ts",
+        source: `import { ${name} } from "${moduleSpecifier}";`,
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source: `import type { ${name} } from "${moduleSpecifier}";`,
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source: `import { type ${name} } from "${moduleSpecifier}";`,
+      },
+    ]);
+
+    fixtures.forEach(({ file, source }) => {
+      assert.strictEqual(
+        findTelemetryBoundaryViolations(
+          collectImportReferencesFromSource(file, source),
+        ).length,
+        1,
+        `${file} must reject ${source}`,
+      );
+    });
+  });
+
+  test("allows the public telemetry port and named builders", () => {
+    const fixtures = [
+      {
+        file: "src/bootstrap/extension/example.ts",
+        source:
+          'import type { TelemetryPort, ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";',
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source:
+          'import { type ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";',
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source:
+          'import { createLegacyWebviewOperationEvent } from "../../application/telemetry/viewerActionTelemetry";',
+      },
+    ];
+
+    fixtures.forEach(({ file, source }) => {
+      assert.deepStrictEqual(
+        findTelemetryBoundaryViolations(
+          collectImportReferencesFromSource(file, source),
+        ),
+        [],
+      );
+    });
+
+    assert.deepStrictEqual(
+      findTelemetryBoundaryViolations(
+        collectProductionImportReferences(repoRoot),
+      ),
+      [],
+    );
   });
 
   test("keeps raw telemetry reporting calls out of production sources", () => {

@@ -79,9 +79,10 @@ support/test paths are shared sequentially.
 
 ## Slice 2 Implementation Evidence
 
-- Status: Implemented; independent implementation review returned `Ready`, and
-  Completion Approval was recorded in the current conversation. Awaiting the
-  exact Slice 2 completion commit.
+- Status: Complete; independent implementation review returned `Ready`,
+  Completion Approval was recorded in the current conversation, and the exact
+  Slice 2 completion commit is
+  `ba54fa0542f08a79e4064d4d9537acb799441d1a`.
 - Changed files: exactly the seven approved Slice 2 paths listed above:
   `AntlrSyntaxError.ts`, `SyntaxErrorListener.ts`, `AntlrRawAjsParser.ts`,
   `AntlrAjsParser.ts`, `AntlrAjsParser.test.ts`,
@@ -106,11 +107,54 @@ support/test paths are shared sequentially.
   CHANGELOG are unchanged. No durable-document update is required.
 - Production readiness and remaining risk: no new exception policy, partial
   result, Node dependency, host assumption, or parser performance path was
-  introduced. The remaining gate is the exact Slice 2 completion commit;
-  Slice 3 remains untouched.
-- Handoff: send the exact Slice 2 diff, test output, compatibility evidence,
-  and this traceability result to `approval-committer` after Completion
-  Approval.
+  introduced. Slice 3 is the next active boundary and remains untouched.
+- Handoff: Slice 2 completion is recorded; proceed to the approved Slice 3
+  implementation boundary.
+
+## Slice 3 Implementation Evidence
+
+- Status: Implemented; independent implementation review returned `Ready`,
+  Completion Approval was recorded in the current conversation, and the exact
+  Slice 3 completion commit is pending.
+- Changed paths: the actual code/test files are `TelemetryPort.ts`,
+  `telemetryEvent.ts`, new `extensionLifecycleTelemetry.ts`,
+  `viewerActionTelemetry.ts`, both infrastructure telemetry adapters,
+  `extensionLifecycle.ts`, the five listed VS Code callers,
+  `telemetryEvent.test.ts`, `extensionLifecycle.test.ts`,
+  `importAjsDefinitionViaWebApiCommand.test.ts`, `registerDiagnostics.test.ts`,
+  `registerHoverProvider.test.ts`, and the architecture support/test files
+  `architectureDependencyRules.ts` / `architectureDependencyRules.test.ts`
+  under their approved `src/` paths.
+  `TASKS.md` and `TRACEABILITY.md` are the only feature-local evidence files
+  updated.
+  `viewerMessageRouting.test.ts`, `openPreviewCommand.test.ts`, the other
+  telemetry-family suites, `telemetryAdapter.test.ts`, and
+  `createTelemetry.test.ts` remained read-only because no expectation or type
+  update was needed. No path outside the approved boundary changed.
+- Traceability result: the public `TelemetryPort.ts` owns the branded
+  `ValidatedTelemetryEvent`; `telemetryEvent.ts` retains the catalog/factory,
+  input, and privacy filter internally without re-exporting the public type.
+  Named lifecycle and legacy webview builders preserve the existing event
+  names and payloads. Architecture fixtures reject every listed internal
+  symbol from bootstrap/presentation in value, `import type`, and type-only
+  named forms, and allow the public port and named builders. Production scan
+  reports no outer `telemetryEvent.ts` import.
+- Privacy/failure evidence: the complete forbidden-key filtering and
+  accidental-schema protection remain covered; SDK report and synchronous or
+  asynchronous disposal failures remain contained; initialization fallback,
+  Noop behavior, lifecycle disposal, and viewer/command failure behavior
+  remain covered by the read-only suites.
+- Validation: compile, desktop host, web host, production build, qlty,
+  Markdown lint, and diff checks passed. Web validation required the approved
+  sandbox-external browser permission and exited 0; its known teardown
+  `EPIPE` / `ERR_STREAM_PREMATURE_CLOSE` messages are non-failing evidence.
+  Build retained only the existing three bundle-size warnings. VS Code
+  `^1.75.0`, desktop/web entry points, parser/JP1/AJS behavior, README, and
+  CHANGELOG are unchanged.
+- Remaining risks and handoff: no event/property/privacy drift or accidental
+  public re-export was found by independent review. The exact uncommitted diff
+  and evidence package is ready for the Slice 3 completion commit; a new
+  design or scope issue must return to planning.
 
 ## Candidate Disposition Traceability
 
@@ -129,13 +173,13 @@ support/test paths are shared sequentially.
 
 ## Approval And Exit Traceability
 
-| Gate               | Evidence required                                                                                                              | Current state                                                   |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Plan review        | Complete 3-slice decomposition, candidate dispositions, validation, production readiness, approval boundaries                  | Ready for approval; approved                                    |
-| Human Approval     | Explicit approval for exact next-slice scope and paths after review `Ready`                                                    | Approved in current conversation                                |
-| Plan commit        | Review `Ready`, Human Approval, exactly the three feature-local documents; roadmap clean and separately committed as `9efd6ae` | Complete: `97e8e744`                                            |
-| Slice 2 completion | Implementation review `Ready`, parser validation and compatibility evidence, Completion Approval                               | Ready; Completion Approval recorded; exact completion commit pending |
-| Slice 3 completion | Implementation review `Ready`, telemetry privacy/failure/host evidence, Completion Approval                                    | Pending                                                         |
-| Feature Exit       | Both remaining slices completion-committed; full validation; candidate recheck; docs/CHANGELOG decision                        | Not ready                                                       |
+| Gate               | Evidence required                                                                                                              | Current state                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| Plan review        | Complete 3-slice decomposition, candidate dispositions, validation, production readiness, approval boundaries                  | Ready for approval; approved                                         |
+| Human Approval     | Explicit approval for exact next-slice scope and paths after review `Ready`                                                    | Approved in current conversation                                     |
+| Plan commit        | Review `Ready`, Human Approval, exactly the three feature-local documents; roadmap clean and separately committed as `9efd6ae` | Complete: `97e8e744`                                                 |
+| Slice 2 completion | Implementation review `Ready`, parser validation and compatibility evidence, Completion Approval                               | Complete: `ba54fa0542f08a79e4064d4d9537acb799441d1a`                 |
+| Slice 3 completion | Implementation review `Ready`, telemetry privacy/failure/host evidence, Completion Approval                                    | Ready; Completion Approval recorded; exact completion commit pending |
+| Feature Exit       | Both remaining slices completion-committed; full validation; candidate recheck; docs/CHANGELOG decision                        | Not ready                                                            |
 
 <!-- markdownlint-enable MD013 MD060 -->

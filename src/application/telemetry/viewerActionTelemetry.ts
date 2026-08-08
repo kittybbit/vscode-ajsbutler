@@ -2,9 +2,9 @@ import {
   createTelemetryEvent,
   telemetryEvents,
   telemetryPropertyKeys,
-  type TelemetryEvent,
   type TelemetryEventDefinition,
 } from "./telemetryEvent";
+import type { ValidatedTelemetryEvent } from "./TelemetryPort";
 import type { TelemetryHost } from "./viewerTelemetry";
 import { viewerOperationIds } from "./viewerOperation";
 
@@ -41,7 +41,7 @@ export const createViewerActionEvent = ({
   operation: string;
   host?: TelemetryHost;
   result?: "success" | "failed" | "cancelled";
-}): TelemetryEvent | undefined => {
+}): ValidatedTelemetryEvent | undefined => {
   const view = resolveViewerActionView(viewType);
   const definition = findViewerActionDefinition(view, operation);
   if (!definition) {
@@ -64,7 +64,7 @@ export const createViewerNavigationActionEvent = ({
   viewType: string;
   targetView: "table" | "flow";
   host?: TelemetryHost;
-}): TelemetryEvent | undefined => {
+}): ValidatedTelemetryEvent | undefined => {
   const sourceView = resolveViewerActionView(viewType);
   const definition =
     sourceView === "table" && targetView === "flow"
@@ -83,6 +83,19 @@ export const createViewerNavigationActionEvent = ({
     [telemetryPropertyKeys.result]: "success",
   });
 };
+
+export const createLegacyWebviewOperationEvent = ({
+  viewType,
+  operation,
+}: {
+  viewType: string;
+  operation: string;
+}): ValidatedTelemetryEvent =>
+  createTelemetryEvent(telemetryEvents.legacyWebviewOperation, {
+    [telemetryPropertyKeys.development]: DEVELOPMENT,
+    [telemetryPropertyKeys.viewType]: viewType,
+    [telemetryPropertyKeys.operation]: operation,
+  });
 
 const resolveViewerActionView = (
   viewType: string,

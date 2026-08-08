@@ -2,15 +2,17 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import { diagnosticRuleIds } from "../../domain/services/diagnostics/DiagnosticRuleId";
-import type { TelemetryEvent } from "../../application/telemetry/telemetryEvent";
-import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import type {
+  TelemetryPort,
+  ValidatedTelemetryEvent,
+} from "../../application/telemetry/TelemetryPort";
 import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 import { updateDiagnostics } from "../../presentation/vscode/diagnostics/registerDiagnostics";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 
 suite("Register diagnostics", () => {
   test("reports anonymous diagnostic evaluation and category counts", () => {
-    const trackedEvents: TelemetryEvent[] = [];
+    const trackedEvents: ValidatedTelemetryEvent[] = [];
     const telemetry: TelemetryPort = {
       report: (event) => trackedEvents.push(event),
       dispose() {},

@@ -473,6 +473,18 @@ export const findParserPortBoundaryViolations = (
       file !== normalizedParserAdapterPath,
   );
 
+const telemetryInternalModulePath = "src/application/telemetry/telemetryEvent";
+const telemetryOuterSourcePrefixes = ["src/bootstrap", "src/presentation"];
+
+export const findTelemetryBoundaryViolations = (
+  references: readonly ImportReference[],
+): ImportReference[] =>
+  references.filter(
+    ({ file, resolvedPath, specifier }) =>
+      startsWithAny(file, telemetryOuterSourcePrefixes) &&
+      (resolvedPath ?? specifier) === telemetryInternalModulePath,
+  );
+
 const ruleMessages: Record<ArchitectureRuleId, string> = {
   [architectureRuleIds.domainOuterDependency]:
     "domain must not import an outer layer or host framework",

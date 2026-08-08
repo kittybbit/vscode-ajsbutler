@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { TelemetryEvent } from "../../../application/telemetry/telemetryEvent";
+import type { ValidatedTelemetryEvent } from "../../../application/telemetry/TelemetryPort";
 import {
   createLegacyViewerOpenedEvent,
   createViewerOpenStartedEvent,
@@ -14,7 +14,7 @@ export type OpenPreviewCommandDependencies = {
   getActiveEditor: () => vscode.TextEditor | undefined;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void;
-  reportTelemetry: (event: TelemetryEvent) => void;
+  reportTelemetry: (event: ValidatedTelemetryEvent) => void;
 };
 
 type ViewerOpenFailureCode =
@@ -165,7 +165,7 @@ const reportViewerOpenStarted = (
 
 const reportTelemetrySafely = (
   deps: OpenPreviewCommandDependencies,
-  event: TelemetryEvent,
+  event: ValidatedTelemetryEvent,
 ): void => {
   try {
     deps.reportTelemetry(event);

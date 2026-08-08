@@ -8,12 +8,14 @@ import {
   createDiagnosticsEvaluatedTelemetryEvent,
   createDiagnosticsReportedTelemetryEvent,
 } from "../../../application/telemetry/editorFeedbackTelemetry";
-import type { TelemetryEvent } from "../../../application/telemetry/telemetryEvent";
 import {
   toCountBucket,
   toDurationBucket,
 } from "../../../application/telemetry/telemetryBuckets";
-import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
+import type {
+  TelemetryPort,
+  ValidatedTelemetryEvent,
+} from "../../../application/telemetry/TelemetryPort";
 import { LANGUAGE_ID } from "../constant";
 import { getTelemetryHost } from "../telemetryHost";
 
@@ -77,7 +79,7 @@ const reportDiagnosticsTelemetry = (
 
 const trackTelemetryEvent = (
   telemetry: TelemetryPort,
-  event: TelemetryEvent,
+  event: ValidatedTelemetryEvent,
 ): void => {
   telemetry.report(event);
 };
