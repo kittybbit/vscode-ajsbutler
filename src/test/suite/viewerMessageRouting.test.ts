@@ -17,6 +17,7 @@ import {
 } from "../../presentation/webview/viewerRequestMessages";
 import {
   createViewerMessageHandler,
+  registerViewerPanel,
   registerViewerPanelDispose,
 } from "../../presentation/vscode/webview/viewerMessageRouting";
 
@@ -221,6 +222,62 @@ suite("Viewer message routing", () => {
     assert.deepStrictEqual(errors, [
       "Saving is not available for this viewer.",
     ]);
+  });
+
+  test("registers active-panel routing and disposal as one bridge", () => {
+    const calls: string[] = [];
+    const telemetryEvents: string[] = [];
+    const removed: string[] = [];
+    let active = true;
+    let receiveMessageHandler: ((value: unknown) => void) | undefined;
+    let onDidDispose: (() => void) | undefined;
+    const document = {
+      uri: { toString: () => "file:///sample.ajs" },
+    };
+    const panel = {
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveMessageHandler = handler;
+          return {
+            dispose() {
+              calls.push("receiver-disposed");
+            },
+          };
+        },
+      },
+      onDidDispose(callback: () => void) {
+        onDidDispose = callback;
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: document as never,
+      panel: panel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers: {
+        onReady: () => calls.push("ready"),
+        onNavigate: () => {},
+      },
+      isActivePanel: () => active,
+      telemetry: {
+        report: (event) => telemetryEvents.push(event.name),
+        dispose() {},
+      },
+      store: {
+        removeByUri: (uri) => removed.push(uri.toString()),
+      },
+      showErrorMessage: async () => undefined,
+    });
+
+    receiveMessageHandler?.(createViewerReadyRequest());
+    active = false;
+    receiveMessageHandler?.(createViewerReadyRequest());
+    onDidDispose?.();
+
+    assert.deepStrictEqual(calls, ["ready", "receiver-disposed"]);
+    assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
+    assert.deepStrictEqual(telemetryEvents, ["viewer.flow.closed"]);
   });
 
   test("ignores invalid navigation payloads without invoking the host adapter", () => {

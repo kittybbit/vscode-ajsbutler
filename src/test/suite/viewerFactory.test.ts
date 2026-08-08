@@ -6,6 +6,10 @@ import {
   ViewerFactory,
 } from "../../presentation/vscode/webview/ViewerFactory";
 import {
+  registerViewerPanel,
+  type ViewerPanelRegistration,
+} from "../../presentation/vscode/webview/viewerMessageRouting";
+import {
   NAVIGATE,
   OPERATION,
   READY,
@@ -14,6 +18,19 @@ import {
 } from "../../presentation/webview/viewerRequestMessages";
 
 suite("ViewerFactory", () => {
+  const createRegisterPanel =
+    (
+      telemetry: TelemetryPort,
+      store: { removeByUri(uri: vscode.Uri): void },
+    ): ViewerPanelRegistration =>
+    (request) =>
+      registerViewerPanel({
+        ...request,
+        telemetry,
+        store,
+        showErrorMessage: async () => undefined,
+      });
+
   test("resolves filename-equivalent and stable URI panel titles", () => {
     assert.strictEqual(
       resolveViewerPanelTitle(vscode.Uri.parse("file:///tmp/sample.ajs")),
@@ -30,10 +47,6 @@ suite("ViewerFactory", () => {
   });
 
   test("reuses an existing panel before creating a new one", () => {
-    const telemetry: TelemetryPort = {
-      report() {},
-      dispose() {},
-    };
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
@@ -45,7 +58,6 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         panelByUri() {
           return existingPanel;
@@ -66,6 +78,7 @@ suite("ViewerFactory", () => {
           createCalled = true;
           throw new Error("panel should not be created");
         },
+        registerPanel() {},
       },
     });
 
@@ -78,10 +91,6 @@ suite("ViewerFactory", () => {
   });
 
   test("creates, customizes, and stores a new panel when missing", () => {
-    const telemetry: TelemetryPort = {
-      report() {},
-      dispose() {},
-    };
     const createdPanel = { id: "new" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
@@ -105,7 +114,6 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         panelByUri() {
           return storedPanel;
@@ -117,9 +125,7 @@ suite("ViewerFactory", () => {
         removeByUri() {},
       },
       handlers: {
-        onReady: (receivedDocument, receivedPanel) => {
-          readyArgs = { document: receivedDocument, panel: receivedPanel };
-        },
+        onReady: () => {},
         onNavigate: () => {},
       },
       deps: {
@@ -128,6 +134,12 @@ suite("ViewerFactory", () => {
           createdShowOptions = viewColumn;
           createdOptions = options;
           return createdPanel;
+        },
+        registerPanel: ({
+          document: receivedDocument,
+          panel: receivedPanel,
+        }) => {
+          readyArgs = { document: receivedDocument, panel: receivedPanel };
         },
       },
     });
@@ -149,10 +161,6 @@ suite("ViewerFactory", () => {
   });
 
   test("returns an existing panel without creating a new one", () => {
-    const telemetry: TelemetryPort = {
-      report() {},
-      dispose() {},
-    };
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
@@ -161,7 +169,6 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         panelByUri() {
           return existingPanel;
@@ -172,6 +179,12 @@ suite("ViewerFactory", () => {
       handlers: {
         onReady: () => {},
         onNavigate: () => {},
+      },
+      deps: {
+        createWebviewPanel() {
+          throw new Error("panel should not be created");
+        },
+        registerPanel() {},
       },
     });
 
@@ -228,7 +241,6 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         removeByUri(uri) {
           removed.push(uri.toString());
@@ -259,6 +271,12 @@ suite("ViewerFactory", () => {
         createWebviewPanel() {
           return panel;
         },
+        registerPanel: createRegisterPanel(telemetry, {
+          removeByUri(uri) {
+            removed.push(uri.toString());
+            storedPanel = undefined;
+          },
+        }),
       },
     });
 
@@ -325,7 +343,6 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         panelByUri() {
           return storedPanel;
@@ -345,6 +362,11 @@ suite("ViewerFactory", () => {
         createWebviewPanel() {
           return panel;
         },
+        registerPanel: createRegisterPanel(telemetry, {
+          removeByUri() {
+            storedPanel = undefined;
+          },
+        }),
       },
     });
 

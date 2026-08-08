@@ -4,8 +4,10 @@ import type { ViewerOperationId } from "../../../application/telemetry/viewerOpe
 import { createViewerClosedEvent } from "../../../application/telemetry/viewerTelemetry";
 import { getTelemetryHost } from "../telemetryHost";
 import {
+  postResourceMessage,
   reportWebviewPerformance,
   reportWebviewSearch,
+  reportWebviewOperation,
 } from "./messageHandlers";
 import {
   isInvalidViewerSaveRequest,
@@ -26,6 +28,27 @@ import {
   type ViewerSaveRequest,
   type ViewerSearchRequest,
 } from "../../webview/viewerRequestMessages";
+
+export type ViewerPanelHandlers = {
+  onReady: (document: vscode.TextDocument, panel: vscode.WebviewPanel) => void;
+  onNavigate: (
+    document: vscode.TextDocument,
+    event: ViewerNavigationRequest,
+  ) => void;
+  onSave?: (content: string) => Promise<void>;
+};
+
+export type ViewerPanelRegistrationRequest = {
+  document: vscode.TextDocument;
+  panel: vscode.WebviewPanel;
+  viewType: string;
+  handlers: ViewerPanelHandlers;
+  isActivePanel: () => boolean;
+};
+
+export type ViewerPanelRegistration = (
+  request: ViewerPanelRegistrationRequest,
+) => void;
 
 type ViewerMessageRoutingDeps = {
   document: vscode.TextDocument;
@@ -234,6 +257,70 @@ type ViewerPanelDisposeDeps = {
     removeByUri(uri: vscode.Uri): void;
   };
   receiveMessageDispose: Pick<vscode.Disposable, "dispose">;
+};
+
+type ViewerPanelRegistrationDeps = ViewerPanelRegistrationRequest & {
+  telemetry: TelemetryPort;
+  store: Pick<ViewerPanelDisposeDeps["store"], "removeByUri">;
+  showErrorMessage: (message: string) => Thenable<string | undefined>;
+};
+
+export const registerViewerPanel = ({
+  document,
+  panel,
+  viewType,
+  handlers,
+  isActivePanel,
+  telemetry,
+  store,
+  showErrorMessage,
+}: ViewerPanelRegistrationDeps): void => {
+  const onDidReceiveMessage = createViewerMessageHandler({
+    document,
+    panel,
+    telemetry,
+    onReady: (receivedDocument, receivedPanel) => {
+      if (isActivePanel()) {
+        handlers.onReady(receivedDocument, receivedPanel);
+      }
+    },
+    onResource: (event, receivedPanel) => {
+      if (!isActivePanel()) {
+        return;
+      }
+      console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
+      postResourceMessage(event.data, receivedPanel);
+    },
+    onOperation: (request) => {
+      if (isActivePanel()) {
+        reportWebviewOperation(request);
+      }
+    },
+    onNavigate: (receivedDocument, event) => {
+      if (isActivePanel()) {
+        handlers.onNavigate(receivedDocument, event);
+      }
+    },
+    onSave: handlers.onSave
+      ? async (content) => {
+          if (isActivePanel()) {
+            await handlers.onSave?.(content);
+          }
+        }
+      : undefined,
+    showErrorMessage,
+  });
+  const receiveMessageDispose =
+    panel.webview.onDidReceiveMessage(onDidReceiveMessage);
+
+  registerViewerPanelDispose({
+    uri: document.uri,
+    panel,
+    viewType,
+    telemetry,
+    store,
+    receiveMessageDispose,
+  });
 };
 
 export const registerViewerPanelDispose = ({

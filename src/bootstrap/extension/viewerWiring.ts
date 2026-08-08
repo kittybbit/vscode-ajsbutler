@@ -16,6 +16,10 @@ import {
   executeOpenPreviewCommand,
 } from "../../presentation/vscode/commands/openPreviewCommand";
 import { ViewerFactory } from "../../presentation/vscode/webview/ViewerFactory";
+import {
+  registerViewerPanel,
+  type ViewerPanelRegistration,
+} from "../../presentation/vscode/webview/viewerMessageRouting";
 import { WebviewMediator } from "../../presentation/vscode/webview/WebviewMediator";
 import {
   AJS_FLOW_VIEWER_TYPE,
@@ -305,9 +309,16 @@ const createViewerBundle = ({
     store,
     change: createDebouncedAjsDocumentChange(buildUnitList, 300, telemetry),
   });
+  const registerPanel: ViewerPanelRegistration = (registration) => {
+    registerViewerPanel({
+      ...registration,
+      telemetry,
+      store,
+      showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+    });
+  };
   const factory = new ViewerFactory({
     viewType,
-    telemetry,
     store,
     handlers: {
       onReady: createViewerReadyHandler(
@@ -333,6 +344,10 @@ const createViewerBundle = ({
         pendingRevealByPanel,
       }),
       onSave: saveHandler,
+    },
+    deps: {
+      createWebviewPanel: vscode.window.createWebviewPanel,
+      registerPanel,
     },
   });
   factoryByViewType.set(viewType, factory);

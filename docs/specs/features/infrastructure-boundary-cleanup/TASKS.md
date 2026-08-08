@@ -4,7 +4,8 @@
 
 - Purpose: isolate the VS Code `ViewerFactory` host boundary while preserving
   viewer lifecycle and plain transport behavior.
-- Approved or active slice: Slice 1 approved; plan commit is the next gate.
+- Approved or active slice: Slice 1 implementation complete; independent
+  implementation review is the next gate.
 - Do not: edit runtime code, tests, generated artifacts, or configuration until
   the reviewed plan is explicitly approved and committed.
 - Do not: include parser, WebAPI, file/host, localization, telemetry, or
@@ -16,7 +17,7 @@
   `rtk pnpm run qlty`, and `rtk pnpm run lint:md` after implementation.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: commit the approved plan, then implement Slice 1.
+- Next decision: implementation review, then Completion Approval for Slice 1.
 
 ## Sync Rule
 
@@ -34,12 +35,13 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: In Progress
 - Planning scope: one bounded VS Code `ViewerFactory` boundary cleanup with
   an injected panel-registration bridge.
 - Review status: Ready for approval; independent plan-review verdict is Ready
   for approval.
-- Human approval: Approved for Slice 1 exact scope.
+- Human approval: Approved for Slice 1 exact scope; implementation complete,
+  completion approval pending.
 - Active implementation slice: Slice 1.
 
 ## Human Approval
@@ -64,12 +66,19 @@ Replanning Mode and renewed approval.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: the completed Slice 1 panel-registration bridge extraction,
+  including its production wiring, focused tests, and current implementation
+  evidence; no additional boundary or behavior change.
+- Approved paths: `src/presentation/vscode/webview/ViewerFactory.ts`,
+  `src/presentation/vscode/webview/viewerMessageRouting.ts`,
+  `src/bootstrap/extension/viewerWiring.ts`,
+  `src/test/suite/viewerFactory.test.ts`,
+  `src/test/suite/viewerMessageRouting.test.ts`, and the selected feature
+  `TASKS.md` and `TRACEABILITY.md`.
+- Implementation review verdict: Ready
+- Commit status: Eligible
 
 ## Closure Approval
 
@@ -84,7 +93,7 @@ Replanning Mode and renewed approval.
 
 ### Slice 1: Inject the VS Code viewer panel bridge
 
-- Status: Approved
+- Status: Complete
 - Scope: Refactor `src/presentation/vscode/webview/ViewerFactory.ts` so it owns
   only panel creation, title selection, lookup, store registration, setup
   cleanup, and panel lifecycle checks. Inject a registration callback for the
@@ -109,7 +118,6 @@ Replanning Mode and renewed approval.
 - Validation: update `src/test/suite/viewerFactory.test.ts` for the injected
   registration seam and setup cleanup; add direct registration coverage in
   `src/test/suite/viewerMessageRouting.test.ts`; retain focused coverage in
-  `src/test/suite/viewerWiring.test.ts`; run the architecture suite, build,
   `src/test/suite/viewerWiring.test.ts`; run the architecture suite, build,
   desktop/web host tests, qlty, Markdown lint, and diff check.
 - Production Readiness:
@@ -146,18 +154,39 @@ Replanning Mode and renewed approval.
 
 ## Feature Exit
 
-- Definition of Done status: Planning complete; implementation pending plan
-  approval, commit, implementation review, and completion approval.
+- Definition of Done status: Implementation and required validation complete;
+  pending independent implementation review, Completion Approval, and the
+  completion commit.
 - Durable documentation updates: none identified at intake; reassess only if
   the current architecture or use-case contract changes.
 - Open risks: the selected slice must retain desktop/web lifecycle evidence
   and must not expand into the other roadmap boundary candidates.
 
+## Implementation Evidence
+
+- Status: Slice 1 implementation complete; independent implementation review
+  pending. No completion commit has been created.
+- Changed files: `ViewerFactory.ts`, `viewerMessageRouting.ts`,
+  `viewerWiring.ts`, `viewerFactory.test.ts`, and
+  `viewerMessageRouting.test.ts`.
+- Boundary result: `ViewerFactory` owns panel creation/reuse/store/cleanup and
+  receives the injected registration bridge; message validation, resource and
+  operation forwarding, active-panel filtering, and disposal registration are
+  owned by `registerViewerPanel`.
+- Validation: `rtk pnpm run test:compile`, production `build`, desktop and web
+  `test:full`, `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and
+  `rtk git diff --check` passed. The web run exited 0 after browser startup;
+  the test server emitted non-fatal EPIPE/PREMATURE_CLOSE teardown logs.
+- Compatibility: `package.json` `engines.vscode` and existing viewer message
+  schemas are unchanged; desktop and browser bundles both compiled.
+- Documentation and CHANGELOG: no user-visible behavior changed, so no README
+  or CHANGELOG update is required.
+
 ## Validation
 
-- [ ] Tests added or updated after approval
+- [x] Tests added or updated after approval
 - [ ] Update README or user documentation if user-facing behavior changes
-- [ ] Run relevant validation
+- [x] Run relevant validation
 
 ## Notes
 
