@@ -1,8 +1,8 @@
 {
   "publisher": "kittybbit",
   "name": "vscode-ajsbutler",
-  "displayName": "vscode-ajsbutler",
-  "description": "Support tool for JP1/AJS3",
+  "displayName": "JP1/AJS Butler - ジョブネット可視化",
+  "description": "JP1/AJS3の定義ファイルを一覧・検索・フロー図で可視化するVS Code拡張機能",
   "version": "1.16.0",
   "private": true,
   "license": "MIT",
@@ -23,7 +23,12 @@
     "Other"
   ],
   "keywords": [
-    "JP1/AJS"
+    "JP1",
+    "AJS",
+    "AJS3",
+    "JP1/AJS",
+    "JP1/AJS3",
+    "ajsprint"
   ],
   "main": "./out/extension.js",
   "browser": "./out/web.js",

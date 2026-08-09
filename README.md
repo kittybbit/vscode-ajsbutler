@@ -1,202 +1,120 @@
-# vscode-ajsbutler
+# JP1/AJS Butler
 
 <!-- markdownlint-disable MD013 -->
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Qlty Maintainability][qlty-badge]][qlty-project]
+JP1/AJS3 定義ファイル可視化ツール
 
-<!-- markdownlint-enable MD013 -->
+JP1/AJS3の定義ファイルをVS Code上で解析し、ユニット一覧で検索したり、ジョブネットをフロー図で確認したりできる拡張機能です。定義を開いたまま、必要なジョブや構造を調べられます。
 
-The vscode-ajsbutler extension offers a convenient way to display definition
-information for JP1/AJS3 from Hitachi in a human-readable format.
+[English product page](README.en.md)
 
-## Features
+<!-- markdownlint-disable MD033 -->
+<p>
+  <img src="images/unit-list.png" alt="JP1/AJSのユニット一覧。検索欄とユニット名、上位ユニット完全名、ユニット種別を表示しています。" width="720">
+</p>
+<p>
+  <img src="images/unit-flow.png" alt="JP1/AJSのジョブネットフロー。ユニット間の関係と左側の階層ツリーを表示しています。" width="720">
+</p>
+<!-- markdownlint-enable MD033 -->
 
-- Displays JP1/AJS3 definition information in an easily readable format.
-- Set the editor’s language mode to ‘jp1ajs’ to view the formatted
-  definition items.
-- Switch the editor to enable a list-style display of the information.
-  ![unit-list](images/unit-list.png)
-- Select which items to display in the unit list.
-  ![column-selector](images/column-selector.png)
-- Explore the unit list as a keyboard data grid. Tab enters or leaves the grid;
-  Arrow keys move between visible cells, Page Up and Page Down move by the
-  visible page, Home and End move across a row, and Control+Home or Control+End
-  move to the grid boundaries. Enter or Space changes sorting on a sortable
-  column header. From a data cell, H moves to the same column header and D
-  opens or enters the selected unit's detail pane. Escape returns from the
-  header to the saved cell. In the detail pane, R returns to the saved cell
-  without closing the pane, while Escape closes it and returns. Search results
-  restore the corresponding grid cell, and closing definition details returns
-  to the action that opened the dialog. L moves from the grid or its header to
-  the selected unit in the unit tree.
-- View unit definitions.
-  ![unit-dialog](images/unit-dialog.png)
-- Save data in CSV format.
-- Switch the editor to enable a flow-style display of the information.
-  ![unit-list](images/unit-flow.png)
-- Explore the rendered flow from a focused node. Arrow keys move to the
-  center-nearest node in the pressed visual direction, with equal distances
-  preferring the upper then left node. Shift+Down and Shift+Up expand or
-  collapse a nested jobnet without changing scope. Enter opens a focused N or
-  RC unit with internal units as the active flow scope, and Escape returns from
-  a nested N or RC scope to its containing scope. D focuses the selected node's
-  detail pane, L focuses the flow selector, R returns from the detail pane, and
-  Escape closes details or returns from the selector to the saved graph node.
-  Tab enters a rendered graph node when one is available; the graph surface is
-  the fallback Tab stop only when no node can receive focus. Node action
-  buttons retain native Enter/Space behavior.
-- Highlights the current node, ancestor path, and root jobnet more clearly in
-  the flow viewer.
-- Keeps focus, selection, search matches, relationship focus, and scope state
-  distinguishable with borders, outlines, icons, text, and VS Code theme or
-  high-contrast colors in both viewers.
-- Navigate the shared unit tree with a roving keyboard focus. Up and Down move
-  through visible rows that can be navigated, Right expands or enters children,
-  Left collapses or returns to a parent, Home and End move to the visible
-  boundaries, and Enter or Space selects the focused enabled row. Enter also
-  moves focus to the corresponding primary surface: the flow node in the flow
-  viewer or the selected grid cell in the list viewer. Space remains
-  selection-only. In the flow
-  viewer, first-level rows outside the active scope remain disabled for
-  selection but can be focused with the arrows. Eligible root-jobnet rows can
-  be opened with Alt+Enter; groups do not become graph scopes by receiving
-  focus. Tab and Shift+Tab enter or leave the tree, while expand and
-  scope-opening buttons remain available without adding nested Tab stops.
-- Compare the active JP1/AJS definition with a selected before definition and
-  copy or save a semantic Markdown diff report, including confirmation-required
-  notes for supported condition and wait changes.
-- Supports web extensions.
+## こんな課題を解決します
 
-## Recent Updates
+- JP1/AJSの定義ファイルをテキストのまま読み続けるのが大変
+- 大きなジョブネットの階層や依存関係を追いにくい
+- 必要なジョブや定義項目を探すたびにファイル全体を見直している
+- 障害調査や変更確認で、同じ定義を何度も追いかけている
 
-- Flow viewer now supports inline nested jobnet expansion, current-scope flow
-  search, and list/flow bridge navigation.
-- Flow viewer visuals and layout behavior are more stable in both desktop and
-  web hosts.
+## 主な機能
 
-## Extension Settings
+### ユニット一覧
 
-This extension does not require any specific configuration settings.
+JP1/AJS定義から、ジョブやジョブネットなどのユニットを一覧で確認できます。階層とユニットの情報を同じ画面で追えます。
 
-## Usage
+### 検索と絞り込み
 
-To use this extension:
+一覧やフローの検索で、必要なユニットを探せます。フローでは現在の範囲にある名前、コメント、パスを検索し、該当する位置へ移動できます。
 
-1. Install the extension.
-2. Set the editor’s language mode to ‘jp1ajs’ to view the formatted
-   definitions.
-3. Switch the editor to enable either a list-style or flow-style display.
-4. Run `JP1/AJS: Compare JP1/AJS Semantic Diff` from a JP1/AJS editor to
-   compare the active definition against a selected before definition. The
-   generated Markdown report opens in VS Code, and the report editor provides
-   a command to copy the displayed Markdown to the clipboard.
+### フロー図とネスト
 
-## Development
+ジョブネットの構造とユニット間の関係をフロー図で確認できます。ネストしたジョブネットは同じ画面で展開し、内部のフローへ入って確認できます。
 
-This repository uses Specification-Driven Development (SDD) as the standard
-process for non-trivial changes.
+### ユニット詳細
 
-- SDD workflow and document roles: `docs/specs/README.md`
-- Agent-facing repository rules and routing: `AGENTS.md`
-- Durable behavior contracts: `docs/requirements/use-cases/`
-- Copilot CLI entry point: `.github/copilot-instructions.md`
-- Canonical shared procedures: `.agents/skills/`
-- Codex custom-agent definitions and canonical skills: `.codex/agents/` and
-  `.agents/skills/`
+一覧やフローで選んだユニットの定義情報を確認できます。対応する範囲では、`ajsshow` や `ajsprint` のコマンド文字列も詳細に表示します。拡張機能がこれらのコマンドを実行したり、実行環境と連携したりする機能ではありません。
 
-Keep README as an overview and command reference. Detailed development rules,
-approval gates, feature artifact responsibilities, and agent routing live in
-the documents above.
+### CSV出力
 
-Browser-based extension testing uses `@vscode/test-web`, which currently
-requires Node.js 20 or later.
-If you manage Node with nodebrew, switch to a Node 20 release before running
-browser tooling:
+表示中のユニット一覧をCSVとしてコピーできます。保存を選んだ場合は、VS Codeの保存先選択を経てファイルに書き出します。
 
-```bash
-nodebrew install-binary v20.19.0
-nodebrew use v20.19.0
-hash -r
-corepack enable
-pnpm install
-pnpm exec playwright install chromium-headless-shell
-```
+### Semantic Diff
 
-After switching, you can run:
+`JP1/AJS: Compare JP1/AJS Semantic Diff` で、現在の定義と選択した比較元の定義を意味単位で比較できます。比較結果はVS Code上のMarkdownレポートとして表示され、必要なときに `JP1/AJS: Copy Semantic Diff Markdown` で表示中のMarkdownを明示的にコピーできます。
 
-```bash
-pnpm run qlty
-pnpm run test:full
-pnpm test
-pnpm run test:web
-pnpm run build
-```
+### 診断とホバー
 
-ANTLR parser generation is explicit. Normal build and test commands consume
-the committed parser artifacts in `src/generate/parser`. When changing
-`src/antlr/*.g4`, ANTLR command options, or the generator version, run:
+定義の診断結果をエディターで確認できます。対応するパラメーターにカーソルを合わせると、ホバーで補足情報を確認できます。
 
-```bash
-pnpm run antlr4ts
-```
+### WebAPI import beta
 
-Then commit any generated parser artifact changes with the grammar change.
+`JP1/AJS: Import JP1/AJS Definition via WebAPI (Beta)` で、利用者が指定したJP1/AJS WebAPIエンドポイントから定義情報を読み込めます。この機能はread-onlyのbeta版で、Desktop版のVS Codeでだけ利用できます。定義の変更や書き戻しは行いません。
 
-Desktop and web test commands are compatible from a clean checkout:
+## クイックスタート
 
-- `pnpm test` prepares the desktop extension and editor bundles, compiles
-  tests, then runs the desktop extension tests.
-- `pnpm run test:web` prepares the web extension and editor bundles, compiles
-  tests, then runs the web extension smoke tests.
-- `pnpm run test:full` prepares all development bundles and compiled tests
-  once, then runs both desktop and web test runners.
+1. [VS Code MarketplaceからJP1/AJS Butlerをインストール](https://marketplace.visualstudio.com/items?itemName=kittybbit.vscode-ajsbutler)します。
+2. JP1/AJSの定義ファイルを、VS Codeのアクティブなエディターで開きます。
+3. 必要に応じて、ステータスバーの言語モードを `JP1/AJS`（識別子 `jp1ajs`）に変更します。ファイルの自動認識を前提にしていません。
+4. コマンドパレットから `View: Open JP1/AJS table viewer` を実行します。
 
-The `sample/` directory contains reusable JP1/AJS definition files for parser,
-normalization, unit-list, and flow-graph regression tests. Prefer those shared
-fixtures over ad hoc large inline definitions when adding broader coverage.
+一覧が表示されたら、検索欄でユニットを探し、行の詳細を開いてください。フローを最初から試す場合は、同じ手順の4で `View: Open JP1/AJS flow viewer` を選べます。
 
-For manual browser-side verification during development, use the VS Code
-launch configuration `Launch Extension(web)` in `.vscode/launch.json`.
+## 画面と操作
 
-`pnpm run test:web` runs the extension test suite against VS Code for the Web
-in headless Chromium.
-`pnpm run test:full` prepares development bundles and compiled tests once
-before running both desktop and web extension tests.
-GitHub Actions also runs `pnpm run lint:md`, `pnpm run build`,
-`pnpm run test:compile`, `pnpm run test:desktop:run`, and
-`pnpm run test:web:run` on pull requests. The workflow caches Playwright
-browser downloads while still running the Playwright install command, so cache
-misses remain valid.
+一覧画面では、ユニットの階層を確認しながら検索、列の表示、詳細の確認、CSV出力を行えます。フロー画面では、検索結果をたどり、関係するユニットを選び、ネストしたジョブネットを展開できます。
 
-## For AI Agents
+Semantic Diffは `JP1/AJS: Compare JP1/AJS Semantic Diff` から起動します。
 
-Agent development rules are centralized in `AGENTS.md` and
-`docs/specs/README.md`. README intentionally stays at overview level to avoid
-duplicating the SDD workflow.
+## 対応範囲
 
-## Telemetry
+- JP1/AJS3の定義を対象に、一覧、検索、フロー、詳細表示、診断などを提供します。
+- 一覧とフローの表示は、Desktop版とWeb版のVS Codeで利用できます。共通の表示機能でも、ホストごとの制約があります。
+- VS Code互換性は、`package.json` の `engines.vscode` にある `^1.75.0` を基準にします。
+- リポジトリの代表例では、UTF-8とShift_JISの定義を扱う検証を行っています。すべての製品バージョンや定義形式を保証する対応表ではありません。
+- WebAPI import betaはDesktop版だけで利用できます。Web版で同じ通信機能は使えません。
 
-This extension collects telemetry data to improve the experience of using this
-extension with VS Code. We collect anonymous operational metadata such as
-extension lifecycle, command usage, viewer readiness or close events, and
-anonymous viewer action and search outcomes such as CSV export, navigation, or
-no-match searches, anonymous diagnostic categories and hover outcomes, and
-coarse performance buckets for operations such as parsing, unit-list build,
-flow graph build, and CSV export. We do not collect names, addresses, paths,
-definition contents, diagnostic messages, hover token text, search text,
-commands, server names, credentials, or other personal identifiers. The
-extension respects the telemetry.enableTelemetry setting. You can learn more
-about that setting in our [FAQ][telemetry-faq].
+## セキュリティとプライバシー
 
-## License
+この拡張機能は、利用者が開いたローカル定義を読み取って、一覧、フロー、診断、比較などの依頼された処理を行います。元の定義ファイルを自動で書き換えません。
 
-MIT
+テレメトリは、拡張機能の利用状況を改善するために、ホスト種別、機能領域、処理結果、診断カテゴリ、件数や時間の粗い区分などの匿名の運用情報を送信することがあります。定義内容、ファイルパス、ジョブ名やユニット名、サーバー名、検索文字列、資格情報、コマンド文字列はテレメトリに送信しません。テレメトリはVS Codeの `telemetry.enableTelemetry` 設定を尊重します。
 
-<!-- markdownlint-disable MD013 -->
+テレメトリ通信はテレメトリ用のアダプターを通じて行われます。CSVは、利用者がコピーまたは保存を選んだときに出力します。ファイルに保存する場合だけ、保存先を指定します。ファイルへの保存は利用者の操作で行います。
 
-[qlty-project]: https://qlty.sh/gh/kittybbit/projects/vscode-ajsbutler
-[qlty-badge]: https://qlty.sh/badges/0cc9e169-14e8-44d7-a0de-5c358687a18e/maintainability.png
-[telemetry-faq]: https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting
+WebAPI import betaを使う場合だけ、利用者が選択したJP1/AJS WebAPIエンドポイントへread-onlyの通信を行います。拡張機能の通常のローカル定義確認にWebAPI接続は必要ありません。
+
+## 制約と既知の問題
+
+- 不正な定義や解釈できない項目では、診断やエラーが表示されることがあります。すべての定義を完全に解釈できるとは限りません。
+- `ajsprint` は詳細画面に表示するコマンド文字列の生成に使います。拡張機能からのコマンド実行は行いません。
+- WebAPI import betaは、実際のJP1/AJS環境や接続条件によって利用できる範囲が変わります。現在はread-only、beta、Desktop-onlyです。
+
+## Issueとフィードバック
+
+不具合、対応してほしい定義、表示上の問題は、[GitHub Issues](https://github.com/kittybbit/vscode-ajsbutler/issues)へ報告してください。定義内容、ファイルパス、サーバー名、資格情報などの業務情報はIssueに貼り付けないでください。
+
+## 開発への参加
+
+開発環境、テスト、Web版の確認、ANTLR、SDD、AI Agent、デバッグ、リリース手順は [CONTRIBUTING.md](https://github.com/kittybbit/vscode-ajsbutler/blob/main/CONTRIBUTING.md) にまとめています。
+
+## ライセンス
+
+[MIT License](LICENSE)
+
+本拡張機能は、JP1/AJSの公式製品ではないOSSです。
+
+## English
+
+[Read the English product page](README.en.md)
+
+VS Code and JP1/AJS are trademarks of their respective owners.
 
 <!-- markdownlint-enable MD013 -->
