@@ -24,15 +24,6 @@ feature.
   enforcement gap not already covered by the current architecture test.
 - Dependency: Refactoring Quality Baseline.
 
-### 8. Infrastructure Boundary Cleanup
-
-- Purpose: isolate one selected ANTLR, WebAPI, VS Code, file, localization, or
-  telemetry detail behind an existing or justified application port.
-- Entry condition: generated-model, technical-error, or host-specific leakage
-  is demonstrated at an exact boundary with compatibility evidence.
-- Dependency: completed characterization evidence and any required Application
-  Use Case Extraction.
-
 ### 9. Refactoring Quality Gate Strengthening
 
 - Purpose: prevent recurrence using approved differential gates derived from
@@ -64,10 +55,6 @@ refactoring level and is removed only after that effort is complete.
   cross-view navigation, parser/error, selected VS Code/file-I/O, viewer
   transport/composition, and selected webview boundaries. Each remains a
   separate implementation slice with its own approval and validation.
-- Infrastructure Boundary Cleanup contains only the normalized
-  `AjsParserPort`, file/host adapters, or the validated telemetry contract
-  that Feature 4 leaves unselected, and only after host, parser, privacy, and
-  failure behavior are characterized.
 - Architecture Boundary Protection remains behind its existing evidence gate:
   the composition-root candidate is not treated as a dependency violation
   without a concrete gap, cycle, or enforcement failure.
