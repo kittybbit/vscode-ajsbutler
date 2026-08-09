@@ -28,16 +28,7 @@
     "AJS3",
     "JP1/AJS",
     "JP1/AJS3",
-    "jobnet",
-    "job scheduler",
-    "ajsprint",
-    "ジョブネット",
-    "ジョブ管理",
-    "運用管理",
-    "定義ファイル",
-    "visualization",
-    "viewer",
-    "CSV"
+    "ajsprint"
   ],
   "main": "./out/extension.js",
   "browser": "./out/web.js",

@@ -92,13 +92,14 @@ MP-05 was completed in the retained pre-correction Slice 1 record. MP-01
 through MP-04 and MP-06 through MP-08 are complete in the retained Slice 2
 record. The final row verifies the cross-slice non-goal and compatibility
 boundary. No requirement or acceptance criterion is unassigned; the additional
-correction gate recorded above is pending completion evidence, not a new
-requirement.
+correction gate recorded above is a completed correction approval pending its
+focused commit and evidence reconfirmation, not a new requirement.
 The previous Slice 2 plan review and Human Approval remain retained as the
 pre-trigger gate. The current Slice 2 replan, implementation review,
 Completion Approval, and focused completion commit `0df2df22` remain retained.
 The Feature Exit review is also retained as evidence for the pre-correction
-state, but the additional correction gate is pending independent re-review,
-Completion Approval, focused correction commit, and evidence reconfirmation;
-the selected feature folder remains ineligible for Closure Approval and
-removal until then.
+state. The additional correction replan is Ready and its Human Approval and
+Completion Approval are Approved. Its focused correction commit and the
+reconfirmation of the retained Feature Exit evidence remain pending; the
+selected feature folder remains ineligible for Closure Approval and removal
+until then.
