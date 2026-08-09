@@ -18,6 +18,10 @@ antlr/
 # github
 .github/
 
+# repository tooling
+pnpm-workspace.yaml
+scripts/
+
 # vscode
 .vscode/
 .vscode-test/

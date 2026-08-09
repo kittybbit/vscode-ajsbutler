@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [1.17.0] - 2026-08-09
+
 - Improved viewer opening failure handling so unavailable editors and host
   panel errors show safe messages without leaking raw exceptions or leaving a
   partially mounted panel.
