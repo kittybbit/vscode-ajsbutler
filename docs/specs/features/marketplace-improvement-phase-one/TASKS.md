@@ -28,19 +28,21 @@
 
 ## Plan Status
 
-- Status: Approved; Slice 1 ready after plan approval commit
-- Planning scope: all MP-01 through MP-08 requirements and acceptance criteria
-  without runtime behavior changes
+- Status: Slice 2 plan Ready for approval
+- Planning scope: smallest revision of Slice 2 link,
+  visual, quality-gate, and VSCE command validation within the existing
+  two-slice feature plan
 - Review status: Ready; no open Findings
-- Human approval: Approved from the user's explicit instruction to treat
-  normally completed human-approval gates as approved
-- Active implementation slice: None
+- Human approval: Approved for the exact Slice 2 scope and paths
+- Active implementation slice: Slice 2 selected; implementation remains
+  blocked until Plan Review is `Ready`, Human Approval is explicit, and the
+  focused planning package is committed through `approval-committer`
 
 ## Replanning Record
 
 - Finding 1 (High): the link plan did not account for `docs/`, `.agents/`, and
   `AGENTS.md` being excluded by `.vscodeignore`. The revised Slice 2 separates
-  package-valid Marketplace/VSIX links from repository-only developer links and
+  package-valid Marketplace/VSIX links from developer-only links and
   compares the generated `extension/README.md` destinations and image URLs with
   the actual VSIX entries. No ignored internal document is added to the VSIX,
   and `.vscodeignore` remains out of scope.
@@ -57,8 +59,35 @@
   README image references. Slice 2 now treats external-URL-to-source-path
   correspondence as a structural gate and local-source visual rendering as a
   separate gate; a structurally valid URL does not prove visual rendering.
+- Current plan-review Finding 1 (Medium): `CONTRIBUTING.md` is included in the
+  VSIX while its developer-document links could otherwise be interpreted as
+  package-relative links to ignored files. Slice 2 now requires stable
+  canonical repository URLs for `AGENTS.md`, `docs/**`, and `.agents/**` links
+  in `CONTRIBUTING.md`, verifies that `CONTRIBUTING.md` itself is a VSIX entry,
+  and keeps ignored-document links out of both product pages.
+- Current plan-review Finding 2 (Medium): the visual gate was explicit for
+  `README.md` but not independently for `README.en.md`. Slice 2 now requires
+  separate Marketplace-equivalent visual checks for both product pages,
+  including first-view placement, 720 CSS-pixel width, alt fallback,
+  legibility, and visible links.
+- Current plan-review Finding 3 (Medium): unconditional full `qlty` could
+  rewrite the feature plan documents and obscure the known Slice 1 baseline.
+  Slice 2 now records that baseline, uses a non-mutating qlty check scoped to
+  the three approved implementation files, and rejects completion if a
+  formatter changes either plan document or any out-of-scope file.
+- Current plan-review Finding 4 (Low): VSCE commands were split across lines
+  without copy-safe continuation. Slice 2 now records each VSCE command as a
+  single copyable shell command.
+- Remaining plan-review Finding (Medium): `docs/specs/README.md` requires
+  `rtk pnpm run qlty` for docs-only changes, but the Slice 2 plan described the
+  full check as optional and did not identify evidence for the new
+  `README.en.md` and `CONTRIBUTING.md`. Slice 2 now requires a post-
+  implementation full qlty run in a disposable checkout, records the known
+  feature-document formatter baseline separately from new findings, and keeps
+  the non-mutating three-file implementation-worktree check and its
+  formatter-side-effect completion boundary.
 
-## Human Approval
+## Prior Plan Approval (Feature Plan And Slice 1)
 
 - Status: Approved
 - Approved at: 2026-08-09 (current user request)
@@ -72,7 +101,7 @@ Implementation may start only after the approved planning package is committed
 through `approval-committer`; Slice 1 implementation paths remain governed by
 the approved plan and its subsequent completion gate.
 
-## Completion Approval
+## Slice 1 Completion Approval
 
 - Status: Approved
 - Approved at: 2026-08-09 (current user request)
@@ -81,13 +110,33 @@ the approved plan and its subsequent completion gate.
 - Approved paths: `package.json`, limited to `displayName`, `description`, and
   `keywords`, and this `TASKS.md` completion record only
 - Implementation review verdict: Ready; no open Findings
-- Commit status: Eligible for completion gate
+- Commit status: Committed as `ed4a283a`
 
-Slice 1 status: Completed; awaiting its focused completion commit. Validation
+Slice 1 status: Completed and focused completion commit recorded. Validation
 evidence includes manifest and VSIX package checks, production build,
 package-scoped qlty, and `git diff --check`. The full qlty check remains a
 known baseline issue limited to formatter findings in these feature documents;
-those out-of-scope files were not changed for this slice.
+those out-of-scope files were not changed for Slice 1.
+
+## Slice 2 Plan Approval
+
+- Status: Approved
+- Approved at: 2026-08-09 (current user request)
+- Review verdict: Ready; no open Findings
+- Approved scope: Slice 2 `Japanese-First Product Pages And Contributor
+  Separation`
+- Planning-package approval paths: this `TASKS.md` and sibling
+  `TRACEABILITY.md` only
+- Implementation approval paths: repository-root `README.md`, new
+  `README.en.md`, and new `CONTRIBUTING.md` only
+- Commit status: Eligible for plan approval gate
+
+Human Approval names Slice 2 and the exact three implementation paths. The
+implementation paths remain blocked until this planning package is committed
+through `approval-committer`.
+After approval, Main must delegate `approval-committer` to commit only the two
+planning documents before any product-page implementation begins. Existing
+images remain read-only inputs and are not approval paths.
 
 Each slice requires an independent implementation review, explicit Completion
 Approval, and its focused completion commit before the next slice starts.
@@ -109,9 +158,11 @@ Approval, and its focused completion commit before the next slice starts.
   folder is present and no other feature owns this branch goal.
 - `README.md` is currently an English product/development hybrid.
   `README.en.md` and `CONTRIBUTING.md` do not exist.
-- `package.json` currently uses `vscode-ajsbutler`, `Support tool for
-JP1/AJS3`, and the single `JP1/AJS` keyword. The only permitted manifest
-  targets are `displayName`, `description`, and `keywords`.
+- Slice 1 committed the product name
+  `JP1/AJS Butler - ジョブネット可視化`, the description
+  `JP1/AJS3の定義ファイルを一覧・検索・フロー図で可視化するVS Code拡張機能`,
+  and the approved keyword set in `package.json`. Slice 2 must use the same
+  product name and factual list/search/flow value without editing the manifest.
 - The exact current viewer commands are `View: Open JP1/AJS table viewer` and
   `View: Open JP1/AJS flow viewer` as formed from the manifest category and
   titles. Quick start must tell the user to open a definition in an active
@@ -131,8 +182,11 @@ JP1/AJS3`, and the single `JP1/AJS` keyword. The only permitted manifest
   capability parity or general availability.
 - Telemetry uses anonymous allowlisted operational metadata and respects VS
   Code telemetry settings through the SDK. Local definitions are read for
-  requested analysis; CSV and semantic-diff output can be written only through
-  user actions; telemetry and desktop WebAPI import are network boundaries.
+  requested analysis; CSV is written only after the user chooses a save
+  destination; Semantic Diff opens as a virtual Markdown report and is copied
+  to the clipboard only after an explicit user action. The extension must not
+  be described as automatically persisting Semantic Diff output. Telemetry and
+  desktop WebAPI import are the documented network boundaries.
 - The repository does not prove a comprehensive JP1/AJS version, OS,
   unsupported-syntax, or maximum-file-size matrix. Product pages must state
   only `engines.vscode` minimum compatibility (`^1.75.0`), evidenced host
@@ -166,7 +220,10 @@ JP1/AJS3`, and the single `JP1/AJS` keyword. The only permitted manifest
   remove duplicated workflow detail from the Marketplace page.
 - `CONTRIBUTING.md` becomes the concise contributor entry point and links to,
   rather than duplicates, `AGENTS.md`, `docs/specs/README.md`, durable
-  requirements, and existing scripts. No separate development document is
+  requirements, and existing scripts. Because `CONTRIBUTING.md` is included
+  in the VSIX, its links to ignored developer documents use stable canonical
+  repository URLs such as `https://github.com/kittybbit/vscode-ajsbutler/blob/main/AGENTS.md`
+  rather than package-relative paths. No separate development document is
   needed.
 - No use case, architecture, glossary, roadmap, or telemetry requirement
   changes are planned because those documents are evidence, not change
@@ -179,7 +236,7 @@ JP1/AJS3`, and the single `JP1/AJS` keyword. The only permitted manifest
 
 ### Slice 1: Marketplace Discovery Metadata
 
-- Status: Completed; awaiting focused completion commit
+- Status: Completed and committed as `ed4a283a`
 - Scope: update only `package.json` `displayName`, `description`, and
   `keywords` so the existing product is discoverable and its purpose is clear.
 - User / Domain Value: a Marketplace visitor can identify the JP1/AJS Butler
@@ -214,7 +271,7 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
   - `rtk pnpm run build` to verify that the existing desktop and web package
     entry artifacts remain buildable for the package boundary;
   - `rtk pnpm exec vsce package --no-dependencies
-    --out /tmp/vscode-ajsbutler-metadata-preview.vsix`, followed by inspection
+--out /tmp/vscode-ajsbutler-metadata-preview.vsix`, followed by inspection
     of the packaged manifest and removal of only that explicit temporary file;
     this is package-level validation, not publication;
   - `rtk pnpm run qlty` and `rtk git diff --check`;
@@ -246,8 +303,8 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
 
 ### Slice 2: Japanese-First Product Pages And Contributor Separation
 
-- Status: Planned; blocked on Slice 1 completion commit and exact Slice 2
-  approval
+- Status: Active planning target; revised plan awaiting independent re-review,
+  exact Human Approval, and focused plan-gate commit
 - Scope: atomically rewrite `README.md`, create `README.en.md`, and create
   `CONTRIBUTING.md`; reference the existing list/flow images without modifying
   image files; run integrated Marketplace-equivalent package checks.
@@ -274,6 +331,12 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
     evidence level recorded above, including command-text-only `ajsprint`,
     user-initiated saves, telemetry/network boundaries, and desktop-only
     read-only WebAPI beta;
+  - preserve these manifest-backed command labels where named:
+    `View: Open JP1/AJS table viewer`,
+    `View: Open JP1/AJS flow viewer`,
+    `JP1/AJS: Compare JP1/AJS Semantic Diff`, and
+    `JP1/AJS: Import JP1/AJS Definition via WebAPI (Beta)`; do not present a
+    command ID, inferred translation, or screenshot icon as the command name;
   - use this four-step quick-start contract in both languages: install the
     extension; open a JP1/AJS definition in the active editor; set language
     mode to `JP1/AJS` (`jp1ajs`) when needed; run
@@ -282,12 +345,21 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
     visual block, before the first problem/features section, with explicit
     bounded HTML display width of no more than 720 CSS pixels per image and
     meaningful Japanese/English alt text describing the list and flow views;
+  - apply that visual contract independently to `README.md` and
+    `README.en.md`: each source page must pass its own opening placement,
+    first-view hierarchy, 720 CSS-pixel bound, meaningful alt-text fallback,
+    list/flow legibility, and visible-link readability check;
   - keep two link tiers: product-page links in `README.md` and `README.en.md`
     may target only the other packaged product page, `CONTRIBUTING.md`,
-    `LICENSE`, packaged images, the repository `bugs.url`, and the telemetry
-    FAQ; developer links to `AGENTS.md`, `docs/**`, and `.agents/**` belong only
-    in `CONTRIBUTING.md` and are repository-checkout links, not Marketplace/VSIX
-    links;
+    `LICENSE`, packaged images, and the repository `bugs.url`; the telemetry
+    disclosure remains inline and product pages do not directly link to
+    ignored repository documents. Developer links to `AGENTS.md`, `docs/**`,
+    and `.agents/**` belong only in `CONTRIBUTING.md` and use stable canonical
+    repository URLs, not Marketplace/VSIX-relative links;
+  - include `CONTRIBUTING.md` in the VSIX link target, and validate every link
+    in that file as either a stable HTTPS repository URL for an ignored
+    developer document or a relative URL to an included VSIX entry; do not
+    require ignored documents to exist inside the VSIX;
   - preserve the existing `.vscodeignore` exclusions for `docs/`, `.agents/`,
     and `AGENTS.md`; do not add internal documents to the VSIX or change the
     ignore file.
@@ -298,18 +370,29 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
     uses the verified language mode and table-view command, and does not imply
     automatic recognition;
   - list and flow screenshots appear in the opening visual block before the
-    first problem/features section, each renders at no more than 720 CSS pixels
-    wide, has meaningful language-appropriate alt text, and remains legible at
-    the Marketplace-like preview width: list headers/search affordances and
-    representative flow nodes must be distinguishable without opening the
-    source image, and the reuse adds no new asset payload;
+    first problem/features section of both product pages, each renders at no
+    more than 720 CSS pixels wide, has meaningful language-appropriate alt text
+    and fallback, and remains legible at the Marketplace-like preview width:
+    list headers/search affordances and representative flow nodes must be
+    distinguishable without opening the source image, and the reuse adds no
+    new asset payload;
   - contributor detail leaves both product narratives but remains discoverable
     in `CONTRIBUTING.md` and the owning SSOT documents;
   - no broad JP1/AJS version, OS, unsupported-syntax, encoding, or file-size
     guarantee is added; no no-network/no-write statement is added;
+  - file/network wording distinguishes local-definition reads, explicit CSV
+    save writes, explicit Semantic Diff clipboard copy, telemetry adapter
+    communication, and user-selected desktop WebAPI endpoint communication;
+    it does not claim automatic Semantic Diff persistence or live `ajsprint`
+    execution;
   - product-page links and packaged local images are valid for the target they
     claim: ignored internal documents are not treated as VSIX assets, while
-    developer-only links resolve from the repository checkout;
+    developer-only links in `CONTRIBUTING.md` are stable canonical repository
+    URLs and are not treated as VSIX-relative assets;
+  - `CONTRIBUTING.md` is present in the VSIX and its complete link set passes
+    the package-facing check: stable HTTPS links to ignored developer
+    documents are syntactically valid repository URLs, and any package-local
+    link resolves to an included VSIX entry;
   - structural URL condition: the generated `extension/README.md` is compared
     with the source README; every emitted relative link resolves to an included
     VSIX entry, and each emitted image destination either resolves to the
@@ -317,48 +400,95 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
     /raw external URL whose normalized repository, ref, and path correspond
     exactly to the respective source image path. No direct `docs/`, `.agents/`,
     or `AGENTS.md` target remains in the Marketplace-facing README.
-  - independent visual condition: the source `README.md`, or an explicit local
-    Markdown preview that substitutes the source images for any external image
-    destinations, passes the 720 CSS pixel bound, first-view placement,
-    meaningful alt-text fallback, and list/flow legibility checks. A passing
-    URL/path structure check cannot substitute for this visual condition. The
-    final product name, description, and README terminology must agree.
+  - independent visual condition: the source `README.md` and source
+    `README.en.md` must each pass an independent VS Code Markdown preview, or
+    an explicit local Markdown preview that substitutes the source images for
+    any external image destinations. Each preview must pass the 720 CSS-pixel
+    bound, first-view placement, meaningful alt-text fallback, list/flow
+    legibility, and visible-link readability checks. A passing URL/path
+    structure check cannot substitute for either visual condition. The final
+    product name, description, and both README terminologies must agree.
 - Validation:
+
   - compare every capability/disclosure against the use cases, telemetry
     requirement, manifest, and targeted implementation evidence listed in
     `TRACEABILITY.md`; explicitly search for forbidden `ajsprint` execution,
-    general-availability WebAPI, no-network/no-write, and broad compatibility
-    wording;
-  - `rtk pnpm exec markdownlint-cli2 README.md README.en.md CONTRIBUTING.md
-docs/specs/features/marketplace-improvement-phase-one/*.md` and
-    `rtk pnpm run lint:md`;
+    automatic Semantic Diff persistence, general-availability WebAPI,
+    no-network/no-write, and broad compatibility wording;
+  - run the Markdown checks:
+
+    ```sh
+    rtk pnpm exec markdownlint-cli2 README.md README.en.md \
+      CONTRIBUTING.md docs/specs/features/marketplace-improvement-phase-one/*.md
+    rtk pnpm run lint:md
+    ```
+
   - run two explicit link/asset passes: resolve product-page relative links and
     image targets against the repository and the planned VSIX file set, while
-    resolving developer-only links in `CONTRIBUTING.md` against the repository
-    checkout only; reject any product-page target under ignored `docs/`,
-    `.agents/`, or `AGENTS.md`, and manually inspect external URL syntax;
-  - `rtk pnpm exec vsce ls --no-dependencies --readme-path README.md` and
-    confirm `README.md`, `README.en.md`, `CONTRIBUTING.md`, `LICENSE`,
+    checking `CONTRIBUTING.md` as a VSIX-included document whose ignored
+    developer-document links are stable canonical HTTPS repository URLs;
+    reject any product-page target under ignored `docs/`, `.agents/`, or
+    `AGENTS.md`, any relative ignored-document link in `CONTRIBUTING.md`, and
+    manually inspect external URL syntax;
+  - run:
+
+    ```sh
+    rtk pnpm exec vsce ls --no-dependencies --readme-path README.md
+    ```
+
+    Confirm `README.md`, `README.en.md`, `CONTRIBUTING.md`, `LICENSE`,
     `images/unit-list.png`, and `images/unit-flow.png` are included;
-  - create a disposable package with
-    `rtk pnpm exec vsce package --no-dependencies --readme-path README.md
-    --out /tmp/vscode-ajsbutler-marketplace-preview.vsix`, inspect the VSIX
+
+  - create a disposable package with:
+
+    ```sh
+    rtk pnpm exec vsce package --no-dependencies --readme-path README.md \
+      --out /tmp/vscode-ajsbutler-marketplace-preview.vsix
+    ```
+
+    Inspect the VSIX
     manifest and packaged `extension/README.md`, extract the actual Markdown
     link destinations and image URLs/paths from that generated file, and run
     the structural URL condition: normalize any GitHub/raw external image URL
     and prove that it maps to `images/unit-list.png` or `images/unit-flow.png`,
     while relative destinations are checked against the VSIX entry list and
     source README. Remove only that explicit temporary file; do not publish;
-  - separately render the source `README.md` in VS Code's built-in Markdown
-    preview, or use an explicit local Markdown preview that substitutes the
-    source images for external destinations, at a Marketplace-like content
-    width. Visually inspect first-view hierarchy, image placement, the 720-pixel
-    display bound, Japanese text, list/flow legibility, meaningful alt-text
-    fallback, and product-page links. This local visual gate is independent of
-    the generated external URL structure and is not claimed to reproduce
+
+  - separately render both source product pages, `README.md` and
+    `README.en.md`, in VS Code's built-in Markdown preview, or use an explicit
+    local Markdown preview that substitutes the source images for external
+    destinations, at a Marketplace-like content width. Visually inspect each
+    page's first-view hierarchy, image placement, 720-pixel display bound,
+    language text, list/flow legibility, meaningful alt-text fallback, and
+    product-page link display. These local visual gates are independent of the
+    generated external URL structure and are not claimed to reproduce
     Marketplace CSS or search ranking exactly;
-  - `rtk pnpm run qlty`, then `rtk git diff --check` and an exact scoped diff
-    review; no runtime tests are required because runtime behavior is unchanged.
+  - after Slice 2 implementation, **must** run the full-repository
+    `rtk pnpm run qlty` in a disposable checkout, as required for docs-only
+    changes by `docs/specs/README.md`; retain the complete result and classify
+    the known Slice 1 formatter baseline in
+    `docs/specs/features/marketplace-improvement-phase-one/TASKS.md` and
+    `TRACEABILITY.md` separately from new findings in `README.md`, the new
+    `README.en.md`, `CONTRIBUTING.md`, or any other path. This full run is
+    mandatory, not an optional recheck. Because it includes `qlty fmt`, do not
+    accept formatter writes in the implementation worktree;
+  - run the non-mutating, scope-limited check:
+
+    ```sh
+    rtk pnpm exec qlty check README.md README.en.md CONTRIBUTING.md
+    ```
+
+    in the implementation worktree. Retain evidence that exactly the three
+    approved implementation files have no new qlty findings; this scoped
+    check remains required in addition to the disposable full run;
+
+  - compare the implementation diff and file status before and after quality
+    checks. If a formatter changes `TASKS.md`, `TRACEABILITY.md`, or any
+    out-of-scope file, do not mark Slice 2 complete and do not expand the
+    approval boundary silently; stop for Main/replanning. Finish with
+    `rtk git diff --check` and an exact scoped diff review. No runtime tests are
+    required because runtime behavior is unchanged.
+
 - Production Readiness:
   - failure modes: broken relative links, omitted package assets, oversized
     first view, stale English claims, or misleading privacy/support wording;
@@ -370,6 +500,14 @@ docs/specs/features/marketplace-improvement-phase-one/*.md` and
     retain conservative limitations and an Issue path;
   - privacy: reuse inspected fixture-style images and verify telemetry, save,
     and network text against durable/current boundaries;
+  - quality: the docs-only SSOT requires the full `rtk pnpm run qlty` after
+    Slice 2 implementation in a disposable checkout, with the known
+    `TASKS.md`/`TRACEABILITY.md` formatter baseline recorded separately from
+    new findings in `README.md`, `README.en.md`, `CONTRIBUTING.md`, or other
+    paths. The implementation-worktree check remains the non-mutating qlty
+    check limited to those three approved files; it is not waived by the full
+    run. Formatter side effects in either plan document or any out-of-scope
+    file invalidate completion and require Main/replanning review;
   - docs/CHANGELOG: these are the durable product/contributor surfaces; no
     CHANGELOG, architecture, use-case, glossary, or roadmap edit.
 - Approval Boundary: `README.md`, new `README.en.md`, and new
@@ -383,7 +521,12 @@ docs/specs/features/marketplace-improvement-phase-one/*.md` and
   Marketplace service CSS, external URL availability, indexing, or ranking;
   structural URL normalization can still prove the generated external image
   destination maps to the selected source path, while the separate local
-  visual gate proves image placement and legibility. Final publication should
+  visual gates prove image placement and legibility for both product pages.
+  Stable repository URLs in `CONTRIBUTING.md` still depend on the repository's
+  public default branch and availability. The disposable full qlty run is
+  mandatory evidence and must separate the known baseline from new findings;
+  it does not replace the non-mutating three-file check, which remains the
+  Slice 2 implementation-worktree quality gate. Final publication should
   retain a post-publish visual smoke check as release/operations work outside
   this feature.
 - Out of Scope: GIF/composite creation, screenshots changes, runtime UI,
@@ -400,11 +543,15 @@ docs/specs/features/marketplace-improvement-phase-one/*.md` and
       privacy-safe, size-bounded reuse strategy was selected.
 - [x] Marketplace-equivalent offline validation uses actual installed VSCE and
       Markdown commands and states its limits.
-- [ ] Slice 1 manifest, build, VSCE package-level validation, and scoped diff
-      pass after implementation.
+- [x] Slice 1 manifest, build, VSCE package-level validation, scoped diff, and
+      focused completion commit are recorded.
 - [ ] Slice 2 Markdown, two-tier link, asset, generated `extension/README.md`
-      image-URL structure comparison, VSIX, independent local visual preview,
-      and visual pass-criteria checks pass after implementation.
+      image-URL structure comparison, VSIX, independent local visual previews
+      for both product pages, visual pass-criteria checks, implementation-
+      worktree scoped qlty, and the mandatory disposable-checkout full qlty
+      run pass after implementation; the known feature-document formatter
+      baseline is distinguished from new findings, with no formatter changes
+      to plan or out-of-scope files.
 - [ ] Japanese/English factual consistency and forbidden-claim review pass.
 - [ ] Runtime behavior remains unchanged and no out-of-scope files are changed.
 
