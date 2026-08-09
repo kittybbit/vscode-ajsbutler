@@ -28,15 +28,14 @@
 
 ## Plan Status
 
-- Status: Slice 2 replan approved; awaiting focused replan commit
+- Status: Slice 2 implementation complete; awaiting focused completion commit
 - Planning scope: smallest revision of the Slice 2 contributor-link target and
   VSIX validation after the discovered VSCE default exclusion; the two-slice
   feature purpose and the three implementation paths remain unchanged
 - Review status: Ready; no open Findings
 - Human approval: Approved for the revised Slice 2 plan
-- Active implementation slice: Slice 2 remains selected; any remaining
-  implementation correction and completion evidence must follow the revised
-  plan after re-review, Human Approval, and the focused replan commit
+- Active implementation slice: none; Slice 2 implementation and validation are
+  complete, pending its focused completion commit
 
 ## Replanning Record
 
@@ -191,7 +190,30 @@ validation.
 - Implementation paths: repository-root `README.md`, `README.en.md`, and
   `CONTRIBUTING.md` only
 - `.vscodeignore` and package configuration: unchanged and out of scope
-- Commit status: Eligible for focused replan approval commit
+- Commit status: Committed as `88b4ffc58d6225049df7b1e4a54e41f99abb0559`
+
+## Slice 2 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-08-09 (current user request)
+- Implementation review verdict: Ready; no open Findings
+- Approved scope: Completed Slice 2 `Japanese-First Product Pages And
+  Contributor Separation`, including final canonical-link and natural
+  Japanese wording corrections, plus completion evidence
+- Approved paths:
+  - `README.md`
+  - `README.en.md`
+  - `CONTRIBUTING.md`
+  - this `TASKS.md` completion and validation record only
+  - sibling `TRACEABILITY.md` completion and validation record only
+- Commit status: Eligible for focused completion commit
+
+Slice 2 validation evidence includes Markdown lint, repository lint, scoped
+qlty, disposable full qlty, link and image structure checks, disposable VSCE
+package and listing checks, generated README URL checks, static visual checks
+for both product pages, and implementation-worktree status/diff invariance.
+The browser file/data URL preview was unavailable under the environment
+policy; the planned local static preview and image checks passed.
 
 ## Closure Approval
 
@@ -208,11 +230,9 @@ validation.
 
 - The selected branch is `codex/marketplace-improvement`; the selected feature
   folder is present and no other feature owns this branch goal.
-- The approved Slice 2 implementation paths `README.md`, `README.en.md`, and
-  `CONTRIBUTING.md` are implemented and remain uncommitted. The remaining work
-  is to correct the product-page contribution links to the canonical HTTPS URL
-  and complete Marketplace-equivalent visual verification; no other
-  implementation files are in scope.
+  - The approved Slice 2 implementation paths `README.md`, `README.en.md`, and
+  `CONTRIBUTING.md` are implemented and remain uncommitted pending the focused
+  completion commit. No other implementation files are in scope.
 - Slice 1 committed the product name
   `JP1/AJS Butler - ジョブネット可視化`, the description
   `JP1/AJS3の定義ファイルを一覧・検索・フロー図で可視化するVS Code拡張機能`,
@@ -644,7 +664,7 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
       Markdown commands and states its limits.
 - [x] Slice 1 manifest, build, VSCE package-level validation, scoped diff, and
       focused completion commit are recorded.
-- [ ] Slice 2 Markdown, canonical contributor-link, asset, generated
+- [x] Slice 2 Markdown, canonical contributor-link, asset, generated
       `extension/README.md` and `extension/README.en.md` link/image structure
       comparison, expected VSCE inclusion/exclusion check, independent local
       visual previews for both product pages, visual pass-criteria checks,
@@ -654,8 +674,8 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
       implementation; the known feature-document formatter baseline is
       distinguished from new findings, with no formatter changes to plan or
       out-of-scope files.
-- [ ] Japanese/English factual consistency and forbidden-claim review pass.
-- [ ] Runtime behavior remains unchanged and no out-of-scope files are changed.
+- [x] Japanese/English factual consistency and forbidden-claim review pass.
+- [x] Runtime behavior remains unchanged and no out-of-scope files are changed.
 
 Feature Exit can begin only after both slices have independent implementation
 review verdicts of `Ready`, Completion Approval, and focused completion

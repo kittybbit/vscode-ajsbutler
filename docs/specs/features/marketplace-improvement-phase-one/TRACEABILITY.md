@@ -65,6 +65,6 @@ MP-05 is complete in Slice 1. MP-01 through MP-04 and MP-06 through MP-08 are
 complete in Slice 2. The final row verifies the cross-slice non-goal and
 compatibility boundary. No requirement or acceptance criterion is unassigned.
 The previous Slice 2 plan review and Human Approval remain retained as the
-pre-trigger gate. The current Slice 2 replan is independently Ready and
-Approved; implementation completion remains blocked until the focused replan
-approval commit succeeds.
+pre-trigger gate. The current Slice 2 replan and implementation review are
+Ready, and Completion Approval is Approved; implementation completion remains
+blocked only until the focused completion commit succeeds.
