@@ -1,9 +1,12 @@
 import * as assert from "assert";
+import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 import {
-  mergeUnitIds,
+  isTreeNavigationKey,
   resolveUnitTreeRowBorderStyle,
-  UNIT_TREE_ACTION_SIZE_PX,
-} from "../../presentation/webview/editor/shared/UnitTreeSelector";
+  resolveUnitTreeRowState,
+} from "../../presentation/webview/editor/shared/unitTreeSelectorModel";
+import { mergeUnitIds } from "../../presentation/webview/editor/shared/useUnitTreeSelectorState";
+import { UNIT_TREE_ACTION_SIZE_PX } from "../../presentation/webview/editor/shared/UnitTreeSelector";
 import {
   resolveUnitTreeNavigationKey,
   resolveVisibleUnitTreeRows,
@@ -23,7 +26,44 @@ const unit = (
   parentId?: string,
 ): TestUnit => ({ children, depth, id, parentId });
 
+const selectorUnit = (
+  id: string,
+  children: FlowGraphUnitDto[] = [],
+): FlowGraphUnitDto => ({ id, children }) as unknown as FlowGraphUnitDto;
+
 suite("Unit Tree Selector", () => {
+  test("recognizes only tree movement keys as navigation keys", () => {
+    assert.strictEqual(isTreeNavigationKey("ArrowDown"), true);
+    assert.strictEqual(isTreeNavigationKey("Home"), true);
+    assert.strictEqual(isTreeNavigationKey("Enter"), false);
+    assert.strictEqual(isTreeNavigationKey("Escape"), false);
+  });
+
+  test("derives enabled, selected, current-path, and scope-row state together", () => {
+    const root = selectorUnit("/root", [selectorUnit("/root/child")]);
+    const state = resolveUnitTreeRowState(root, {
+      canOpenScopeUnit: (candidate) => candidate.id === root.id,
+      currentPathUnitIds: new Set([root.id]),
+      currentUnitId: root.id,
+      expandedUnitIds: new Set([root.id]),
+      hoveredUnitId: root.id,
+      isUnitEnabled: () => true,
+      hasOpenScopeHandler: true,
+      selectedUnitId: root.id,
+    });
+
+    assert.deepStrictEqual(state, {
+      canOpenScope: true,
+      hasChildren: true,
+      isCurrent: true,
+      isEnabled: true,
+      isExpanded: true,
+      isHovered: true,
+      isInCurrentPath: true,
+      isSelected: true,
+    });
+  });
+
   test("merges required unit ids without changing an already complete set", () => {
     const current = new Set(["/root", "/root/jobnet"]);
     const next = mergeUnitIds(current, ["/root", undefined, "/root/jobnet"]);
@@ -373,6 +413,40 @@ suite("Unit Tree Selector", () => {
         altKey: true,
       }),
       { suppressDefault: false },
+    );
+  });
+
+  test("preserves visible navigation order through a bounded deep tree", () => {
+    const root = unit("/deep-0", 0);
+    let parent = root;
+    const depth = 512;
+
+    for (let index = 1; index <= depth; index += 1) {
+      const child = unit(`/deep-${index}`, index, [], parent.id);
+      parent.children.push(child);
+      parent = child;
+    }
+
+    const rows = resolveVisibleUnitTreeRows(
+      [root],
+      new Set(Array.from({ length: depth }, (_, index) => `/deep-${index}`)),
+      () => true,
+    );
+
+    assert.strictEqual(rows.length, depth + 1);
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/deep-0", { key: "ArrowDown" }),
+      {
+        action: { kind: "focus", targetUnitId: "/deep-1" },
+        suppressDefault: true,
+      },
+    );
+    assert.deepStrictEqual(
+      resolveUnitTreeNavigationKey(rows, "/deep-0", { key: "End" }),
+      {
+        action: { kind: "focus", targetUnitId: `/deep-${depth}` },
+        suppressDefault: true,
+      },
     );
   });
 

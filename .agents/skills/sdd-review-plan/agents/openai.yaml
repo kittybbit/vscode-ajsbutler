@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "SDD Review Plan"
+  short_description: "Review a feature implementation plan"
+  default_prompt: >-
+    Route to the read-only plan-reviewer role and use $sdd-review-plan to
+    review a prepared SDD feature implementation plan before Human Approval.

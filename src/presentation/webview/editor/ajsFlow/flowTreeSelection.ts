@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { collectUnitTreeParentUnitIds } from "../shared/unitTreeSelection";
 import { collectExpandedAncestorUnitIds } from "./flowExpandedAncestors";
@@ -5,6 +6,12 @@ import { collectExpandedAncestorUnitIds } from "./flowExpandedAncestors";
 export type FlowTreeSelectionTarget = {
   selectedUnitId: string;
   expandedNestedUnitIds: string[];
+};
+
+type FlowTreeSelectionStateParams = {
+  currentUnit?: FlowGraphUnitDto;
+  onSelectTarget: (target: FlowTreeSelectionTarget) => void;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 };
 
 export const collectFlowTreeAncestorUnitIds = (
@@ -89,4 +96,27 @@ export const resolveFlowTreeSelectionTarget = (
       unitById,
     ),
   };
+};
+
+export const useFlowTreeSelectionState = ({
+  currentUnit,
+  onSelectTarget,
+  unitById,
+}: FlowTreeSelectionStateParams) => {
+  const selectTreeUnit = useCallback(
+    (unitId: string) => {
+      const target = resolveFlowTreeSelectionTarget(
+        unitId,
+        currentUnit,
+        unitById,
+      );
+      if (!target) {
+        return;
+      }
+      onSelectTarget(target);
+    },
+    [currentUnit, onSelectTarget, unitById],
+  );
+
+  return { selectTreeUnit };
 };

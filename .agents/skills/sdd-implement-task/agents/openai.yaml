@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "SDD Implement Task"
+  short_description: "Implement one approved SDD slice"
+  default_prompt: >-
+    Route to the implementer role and use $sdd-implement-task to implement one
+    approved TASKS.md slice and prepare it for independent review.

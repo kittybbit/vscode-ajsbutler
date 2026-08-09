@@ -12,6 +12,8 @@ import {
   collectProductionSourceFiles,
   findArchitectureRuleViolations,
   findCompositionRootViolations,
+  findParserPortBoundaryViolations,
+  findTelemetryBoundaryViolations,
   formatViolation,
   resolveImportPath,
   type ArchitectureRuleId,
@@ -190,6 +192,145 @@ suite("Architecture dependency rules", () => {
     assert.deepStrictEqual(violations.map(formatViolation), []);
   });
 
+  test("keeps the application parser port at the normalized adapter", () => {
+    assert.deepStrictEqual(
+      findParserPortBoundaryViolations(
+        collectProductionImportReferences(repoRoot),
+      ),
+      [],
+    );
+  });
+
+  test("rejects parser raw-seam port imports in every import form", () => {
+    const fixtures = [
+      {
+        file: "src/infrastructure/parser/SyntaxErrorListener.ts",
+        source:
+          'import { AjsParserError } from "../../application/parsing/AjsParserPort";',
+      },
+      {
+        file: "src/infrastructure/parser/AntlrRawAjsParser.ts",
+        source:
+          'import type { AjsParserError } from "../../application/parsing/AjsParserPort";',
+      },
+      {
+        file: "src/infrastructure/parser/AntlrRawAjsParser.ts",
+        source:
+          'import { type ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+      },
+    ];
+
+    fixtures.forEach(({ file, source }) => {
+      assert.deepStrictEqual(
+        findParserPortBoundaryViolations(
+          collectImportReferencesFromSource(file, source),
+        ).map(({ file: violationFile, kind, specifier }) => ({
+          file: violationFile,
+          kind,
+          specifier,
+        })),
+        [
+          {
+            file,
+            kind: source.includes("import type") ? "import-type" : "import",
+            specifier: "../../application/parsing/AjsParserPort",
+          },
+        ],
+      );
+    });
+  });
+
+  test("allows parser port imports only in the normalized adapter", () => {
+    const fixtures = [
+      'import { AjsParserPort, ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+      'import type { AjsParserPort, ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+      'import { type AjsParserPort, type ParseAjsResult } from "../../application/parsing/AjsParserPort";',
+    ];
+
+    fixtures.forEach((source) => {
+      assert.deepStrictEqual(
+        findParserPortBoundaryViolations(
+          collectImportReferencesFromSource(
+            "src/infrastructure/parser/AntlrAjsParser.ts",
+            source,
+          ),
+        ),
+        [],
+      );
+    });
+  });
+
+  test("rejects internal telemetry imports from outer callers in every import form", () => {
+    const internalNames = [
+      "telemetryEvents",
+      "TelemetryEventDefinition",
+      "TelemetryPropertyInput",
+      "createTelemetryEvent",
+      "allowTelemetryProperties",
+    ];
+    const moduleSpecifier = "../../application/telemetry/telemetryEvent";
+    const fixtures = internalNames.flatMap((name) => [
+      {
+        file: "src/bootstrap/extension/example.ts",
+        source: `import { ${name} } from "${moduleSpecifier}";`,
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source: `import type { ${name} } from "${moduleSpecifier}";`,
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source: `import { type ${name} } from "${moduleSpecifier}";`,
+      },
+    ]);
+
+    fixtures.forEach(({ file, source }) => {
+      assert.strictEqual(
+        findTelemetryBoundaryViolations(
+          collectImportReferencesFromSource(file, source),
+        ).length,
+        1,
+        `${file} must reject ${source}`,
+      );
+    });
+  });
+
+  test("allows the public telemetry port and named builders", () => {
+    const fixtures = [
+      {
+        file: "src/bootstrap/extension/example.ts",
+        source:
+          'import type { TelemetryPort, ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";',
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source:
+          'import { type ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";',
+      },
+      {
+        file: "src/presentation/vscode/example.ts",
+        source:
+          'import { createLegacyWebviewOperationEvent } from "../../application/telemetry/viewerActionTelemetry";',
+      },
+    ];
+
+    fixtures.forEach(({ file, source }) => {
+      assert.deepStrictEqual(
+        findTelemetryBoundaryViolations(
+          collectImportReferencesFromSource(file, source),
+        ),
+        [],
+      );
+    });
+
+    assert.deepStrictEqual(
+      findTelemetryBoundaryViolations(
+        collectProductionImportReferences(repoRoot),
+      ),
+      [],
+    );
+  });
+
   test("keeps raw telemetry reporting calls out of production sources", () => {
     const rawReportingCallers = collectProductionSourceFiles(repoRoot)
       .filter((filePath) =>
@@ -233,7 +374,7 @@ suite("Architecture dependency rules", () => {
       },
       {
         ruleId: architectureRuleIds.concreteInfrastructureOutsideComposition,
-        file: "src/shared/example.ts",
+        file: "src/resource/example.ts",
         source: 'import "../infrastructure/example";',
       },
       {

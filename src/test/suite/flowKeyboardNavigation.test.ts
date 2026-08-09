@@ -325,6 +325,37 @@ suite("Flow Keyboard Navigation", () => {
     );
   });
 
+  test("ignores inherited object keys and cyclic scope parents", () => {
+    const index = buildFlowKeyboardNavigationIndex([node("loop", 0, 0)]);
+
+    assert.strictEqual(
+      resolveFlowKeyboardNavigationAction(index, {
+        currentUnitId: "loop",
+        key: "toString",
+      }),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveFlowKeyboardNavigationAction(index, {
+        currentUnitId: "loop",
+        currentScopeUnitId: "loop",
+        key: "Escape",
+        scopeUnitById: new Map([
+          [
+            "loop",
+            {
+              id: "loop",
+              parentId: "loop",
+              unitType: "n",
+              childCount: 1,
+            },
+          ],
+        ]),
+      }),
+      undefined,
+    );
+  });
+
   test("suppresses owned navigation keys even when no target exists", () => {
     const index = buildFlowKeyboardNavigationIndex([node("current", 0, 0)]);
 

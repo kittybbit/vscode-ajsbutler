@@ -2,9 +2,9 @@ import * as assert from "assert";
 import React from "react";
 import { UnitDefinitionDialogDto } from "../../application/unit-definition/buildUnitDefinition";
 import { toUnitDefinitionByPath } from "../../application/unit-definition/unitDefinitionDocument";
-import type { UnitListRowView } from "../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
 import { handleClickNestedToggle } from "../../presentation/webview/editor/ajsFlow/nodes/Utils";
-import { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import type { FlowNodeData } from "../../presentation/webview/editor/ajsFlow/flowNodePresentationModel";
 import { tableColumnDef } from "../../presentation/webview/editor/ajsTable/tableColumnDef";
 import {
   buildUnitListDetailActions,
@@ -43,7 +43,7 @@ const dialogData: UnitDefinitionDialogDto = {
   commandBuilders: [],
 };
 
-const createNode = (overrides: Partial<AjsNode> = {}): AjsNode =>
+const createNode = (overrides: Partial<FlowNodeData> = {}): FlowNodeData =>
   ({
     unitId: "u1",
     unitDefinition: dialogData,
@@ -60,7 +60,7 @@ const createNode = (overrides: Partial<AjsNode> = {}): AjsNode =>
     currentUnitId: undefined,
     setCurrentUnitId: () => undefined,
     ...overrides,
-  }) as AjsNode;
+  }) as FlowNodeData;
 
 const rowView = {
   id: "u1",
@@ -96,13 +96,13 @@ const rowView = {
     waitCounts: [],
     waitTimes: [],
   },
-} as UnitListRowView;
+} as TableRowView;
 
 const createRowView = (
   absolutePath: string,
-  previousUnits: UnitListRowView["group2"]["previousUnits"] = [],
-  nextUnits: UnitListRowView["group2"]["nextUnits"] = [],
-): UnitListRowView =>
+  previousUnits: TableRowView["group2"]["previousUnits"] = [],
+  nextUnits: TableRowView["group2"]["nextUnits"] = [],
+): TableRowView =>
   ({
     ...rowView,
     id: absolutePath,
@@ -116,7 +116,7 @@ const createRowView = (
       previousUnits,
       nextUnits,
     },
-  }) as UnitListRowView;
+  }) as TableRowView;
 
 suite("Show Unit Definition interaction", () => {
   test("list detail resolves selected definition content by stable path", () => {

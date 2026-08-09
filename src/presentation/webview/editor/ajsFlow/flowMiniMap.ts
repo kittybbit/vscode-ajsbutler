@@ -1,6 +1,8 @@
 import type { Node } from "@xyflow/react";
-import type { FlowRelationshipFocusRole } from "./flowRelationshipFocus";
-import type { AjsNode } from "./nodes/AjsNode";
+import type {
+  FlowNodeData,
+  FlowRelationshipFocusRole,
+} from "./flowNodePresentationModel";
 
 export type FlowMiniMapColors = {
   both: string;
@@ -17,7 +19,7 @@ export type FlowMiniMapColors = {
   upstream: string;
 };
 
-const isHiddenLayoutNode = (node: Node<AjsNode>): boolean =>
+const isHiddenLayoutNode = (node: Node<FlowNodeData>): boolean =>
   node.type === "group" && node.domAttributes?.["aria-hidden"] === true;
 
 const relationshipFocusColorKeys: Record<
@@ -43,7 +45,7 @@ const resolveRelationshipFocusColor = (
   role ? colors[relationshipFocusColorKeys[role]] : undefined;
 
 const resolveVisibleFlowMiniMapNodeColor = (
-  node: Node<AjsNode>,
+  node: Node<FlowNodeData>,
   colors: FlowMiniMapColors,
   defaultColor: string,
 ): string => {
@@ -66,7 +68,7 @@ const resolveVisibleFlowMiniMapNodeColor = (
 };
 
 const resolveFlowMiniMapNodeColor = (
-  node: Node<AjsNode>,
+  node: Node<FlowNodeData>,
   colors: FlowMiniMapColors,
   defaultColor: string,
 ): string =>
@@ -75,11 +77,11 @@ const resolveFlowMiniMapNodeColor = (
     : resolveVisibleFlowMiniMapNodeColor(node, colors, defaultColor);
 
 export const resolveFlowMiniMapNodeFill = (
-  node: Node<AjsNode>,
+  node: Node<FlowNodeData>,
   colors: FlowMiniMapColors,
 ): string => resolveFlowMiniMapNodeColor(node, colors, colors.normal);
 
 export const resolveFlowMiniMapNodeStroke = (
-  node: Node<AjsNode>,
+  node: Node<FlowNodeData>,
   colors: FlowMiniMapColors,
 ): string => resolveFlowMiniMapNodeColor(node, colors, colors.hidden);

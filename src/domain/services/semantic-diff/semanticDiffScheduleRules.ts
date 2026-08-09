@@ -3,10 +3,8 @@ import {
   type AjsParameter,
   type AjsUnit,
 } from "../../models/ajs/AjsDocument";
-import {
-  parseScheduleDateValue,
-  parseStartTimeValue,
-} from "../../models/parameters/scheduleRuleHelpers";
+import { interpretScheduleDateValue } from "../../models/parameters/scheduleDateInterpreter";
+import { parseStartTimeValue } from "../../models/parameters/scheduleRuleHelpers";
 import type {
   SemanticDiffComparisonPeriod,
   SemanticDiffScheduleRun,
@@ -220,7 +218,7 @@ const unsupportedUnpairedStartTimeDecisions = (
 ): SemanticDiffScheduleUnsupportedDecision[] => {
   const scheduleDateRules = parsedRuleSet(
     findAjsUnitParameters(unit, "sd"),
-    parseScheduleDateValue,
+    interpretScheduleDateValue,
   );
   return findAjsUnitParameters(unit, "st")
     .filter((parameter) => {
@@ -243,24 +241,26 @@ const explicitDateCandidates = (
   rawDateValue: string,
   period: ValidPeriod,
 ): string[] => {
-  const parsed = parseScheduleDateValue(rawDateValue);
-  if (!parsed || !parsed.day || !/^\d{2}$/.test(parsed.day)) {
+  const parsed = interpretScheduleDateValue(rawDateValue);
+  if (!parsed || parsed.day.kind !== "calendar") {
     return [];
   }
 
-  const yearMonth = parsed.yearMonth?.slice(0, -1);
-  if (yearMonth?.length === 7) {
-    return [`${yearMonth}-${parsed.day}`.replace(/\//g, "-")];
+  const day = String(parsed.day.value).padStart(2, "0");
+  if (parsed.year !== undefined && parsed.month !== undefined) {
+    return [
+      `${String(parsed.year).padStart(4, "0")}-${String(parsed.month).padStart(2, "0")}-${day}`,
+    ];
   }
 
-  if (yearMonth?.length === 2) {
+  if (parsed.month !== undefined) {
     const dates: string[] = [];
     for (
       let year = period.from.getUTCFullYear();
       year <= period.to.getUTCFullYear();
       year += 1
     ) {
-      dates.push(`${year}-${yearMonth}-${parsed.day}`);
+      dates.push(`${year}-${String(parsed.month).padStart(2, "0")}-${day}`);
     }
     return dates;
   }
@@ -272,7 +272,7 @@ const explicitDateCandidates = (
     year += 1
   ) {
     for (let month = 1; month <= 12; month += 1) {
-      dates.push(`${year}-${String(month).padStart(2, "0")}-${parsed.day}`);
+      dates.push(`${year}-${String(month).padStart(2, "0")}-${day}`);
     }
   }
   return dates;
@@ -289,7 +289,7 @@ const createRunsForScheduleDate = (
   startTimeByRule: Map<number, AjsParameter>,
   period: ValidPeriod,
 ): SemanticDiffScheduleRun[] => {
-  const parsedDate = parseScheduleDateValue(scheduleDate.value);
+  const parsedDate = interpretScheduleDateValue(scheduleDate.value);
   const startTime = parsedDate
     ? startTimeByRule.get(parsedDate.rule)
     : undefined;
@@ -324,8 +324,8 @@ const unsupportedScheduleDateDecision = (
   startTimeByRule: Map<number, AjsParameter>,
   period: ValidPeriod,
 ): SemanticDiffScheduleUnsupportedDecision | undefined => {
-  const parsedDate = parseScheduleDateValue(parameter.value);
-  if (!parsedDate || !parsedDate.day || !/^\d{2}$/.test(parsedDate.day)) {
+  const parsedDate = interpretScheduleDateValue(parameter.value);
+  if (!parsedDate || parsedDate.day.kind !== "calendar") {
     return {
       side,
       unit,

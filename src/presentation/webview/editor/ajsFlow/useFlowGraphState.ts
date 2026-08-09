@@ -27,7 +27,7 @@ import {
   NestedExpansionStateType,
 } from "./flowViewerStateTypes";
 import { createReactFlowData } from "./flowGraphView";
-import type { AjsNode } from "./nodes/AjsNode";
+import type { FlowNodeData } from "./flowNodePresentationModel";
 
 type UseFlowGraphStateParams = {
   flowDocument?: ValidatedFlowGraphDocument;
@@ -45,7 +45,7 @@ type UseFlowGraphStateParams = {
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
 };
 
-type FlowData = { nodes: Node<AjsNode>[]; edges: Edge[] };
+type FlowData = { nodes: Node<FlowNodeData>[]; edges: Edge[] };
 
 type FlowGraphDataBuildParams = Omit<
   UseFlowGraphStateParams,
@@ -123,7 +123,7 @@ const buildFlowData = (
 
 const updateFlowDataState = (
   flowData: FlowData,
-  setNodes: Dispatch<SetStateAction<Node<AjsNode>[]>>,
+  setNodes: Dispatch<SetStateAction<Node<FlowNodeData>[]>>,
   setEdges: Dispatch<SetStateAction<Edge[]>>,
 ) => {
   setNodes(() => flowData.nodes);
@@ -145,7 +145,7 @@ export const useFlowGraphState = ({
   unitById,
   unitDefinitionByPath,
 }: UseFlowGraphStateParams) => {
-  const [nodes, setNodes] = useState<Node<AjsNode>[]>([]);
+  const [nodes, setNodes] = useState<Node<FlowNodeData>[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
 
   const buildNodesAndEdges = useCallback(

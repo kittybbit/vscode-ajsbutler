@@ -10,10 +10,10 @@ import {
   buildFlowNodeDetailActions,
   buildFlowNodeDetailChips,
   buildFlowNodeDetailRows,
-} from "../../presentation/webview/editor/ajsFlow/FlowNodeDetailPanel";
+} from "../../presentation/webview/editor/ajsFlow/flowNodeDetailPresentation";
 import { reduceSelectedFlowNodeId } from "../../presentation/webview/editor/ajsFlow/useSelectedFlowNodeState";
 import { getSharedUnitDetailPaneActionLabels } from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
-import type { AjsNode } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import type { FlowNodeData } from "../../presentation/webview/editor/ajsFlow/flowNodePresentationModel";
 
 const edges: Edge[] = [
   { id: "a-b", source: "a", target: "b" },
@@ -110,7 +110,7 @@ suite("Flow Node Detail", () => {
         currentUnitId: "parent",
         setCurrentUnitId: () => undefined,
       },
-    } satisfies Node<AjsNode>;
+    } satisfies Node<FlowNodeData>;
 
     const detail = buildFlowNodeDetail(node, edges, units);
 
@@ -129,6 +129,7 @@ suite("Flow Node Detail", () => {
       isSearchMatch: true,
       isCurrentSearchResult: true,
       canOpenAsScope: true,
+      canOpenDefinition: true,
       predecessorCount: 1,
       successorCount: 2,
       upstreamCount: 2,
@@ -160,7 +161,7 @@ suite("Flow Node Detail", () => {
         setDialogData: () => undefined,
         setCurrentUnitId: () => undefined,
       },
-    } satisfies Omit<Node<AjsNode>, "type">;
+    } satisfies Omit<Node<FlowNodeData>, "type">;
     const units = new Map([["b", unit("b")]]);
 
     assert.strictEqual(
@@ -261,5 +262,58 @@ suite("Flow Node Detail", () => {
       ),
       ["Focus relationships", "Open in unit list"],
     );
+  });
+
+  test("keeps missing detail context safe and preserves localized action callbacks", () => {
+    const detail = {
+      unitId: "orphan",
+      name: "ORPHAN",
+      unitType: "j",
+      comment: "",
+      absolutePath: "/root/orphan",
+      hasSchedule: false,
+      hasWaitedFor: false,
+      canExpandNested: false,
+      isSearchMatch: false,
+      isCurrentSearchResult: false,
+      canOpenAsScope: false,
+      canOpenDefinition: false,
+      predecessorCount: 0,
+      successorCount: 0,
+      upstreamCount: 0,
+      downstreamCount: 0,
+    } as const;
+
+    assert.deepStrictEqual(buildFlowNodeDetailRows(detail, "ja"), [
+      { label: "コメント", value: "—" },
+      { label: "絶対パス", value: "/root/orphan" },
+      { label: "親ユニット", value: "—" },
+    ]);
+
+    let toggled = 0;
+    let openedList = 0;
+    const actions = buildFlowNodeDetailActions({
+      canOpenAsScope: false,
+      canOpenDefinition: false,
+      focusModeEnabled: true,
+      onOpenDefinition: () => undefined,
+      onOpenScope: () => undefined,
+      onOpenUnitList: () => {
+        openedList += 1;
+      },
+      onToggleFocusMode: () => {
+        toggled += 1;
+      },
+      language: "ja",
+    });
+
+    assert.deepStrictEqual(getSharedUnitDetailPaneActionLabels(actions), [
+      "関連フォーカスを終了",
+      "ユニット一覧で開く",
+    ]);
+    actions[0].onClick();
+    actions[1].onClick();
+    assert.strictEqual(toggled, 1);
+    assert.strictEqual(openedList, 1);
   });
 });

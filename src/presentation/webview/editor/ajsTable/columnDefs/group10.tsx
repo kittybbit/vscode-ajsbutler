@@ -8,7 +8,7 @@ import {
   RowViewByPath,
   TableColumnHelper,
 } from "./common";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 
 const blankArrayCell = arrayBoxCell<string>(blankWhenEmpty);
 
@@ -17,7 +17,7 @@ type BlankArrayGroupOptions = {
   id: string;
   labels: { label: string; column: (column: number) => string };
   rowViewByPath: RowViewByPath;
-  selectors: ((rowView: UnitListRowView | undefined) => string[] | undefined)[];
+  selectors: ((rowView: TableRowView | undefined) => string[] | undefined)[];
 };
 
 const blankArrayGroup = ({
@@ -44,7 +44,7 @@ const blankArrayGroup = ({
 const group10 = (
   context: ColumnGroupContext,
   paramDefinition: typeof parameter.en,
-): GroupColumnDef<UnitListRowView, unknown> => {
+): GroupColumnDef<TableRowView, unknown> => {
   const { columnHelper, labels, rowViewByPath } = context;
   const scheduleDateLabels = labels.subgroup(1);
   const startTimeRangeLabels = labels.subgroup(2);

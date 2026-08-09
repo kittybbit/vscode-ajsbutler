@@ -1,14 +1,27 @@
 # Copilot CLI Instructions
 
 This file is for **Copilot CLI** (terminal agent).
-For multi-agent coordination details, see `.agent.md` and `AGENTS.md`
-§ "AI Agent Routing Guide".
+For multi-agent coordination details, see `AGENTS.md` § "AI Agent Routing
+Guide". This file is a Copilot CLI entry-point adapter, not an SDD policy
+source.
 
 ## Overview
 
 This repository is a Visual Studio Code extension for viewing and analyzing
 JP1/AJS3 definition files.
 It supports both desktop and web extension execution.
+
+## Main-Agent and SDD Routing
+
+The main Codex agent is the default chat entrypoint and repository
+orchestrator. Ad-hoc discussion, investigation, analysis, troubleshooting,
+scope clarification, informal feedback, and routing classification stay with
+Main; an SDD topic alone does not activate a lifecycle role. Formal SDD
+operations are delegated one at a time as `Main -> Child -> Main`, with the
+child returning its result, evidence, and recommended route. Main preserves
+safety and approval gates and decides any subsequent delegation. Copilot CLI
+must not impersonate an SDD role or execute a role-owned lifecycle procedure
+directly.
 
 ## Architecture & Principles
 
@@ -17,14 +30,19 @@ Read these in order before making changes
 
 1. **`AGENTS.md`** - Architecture rules, agent routing, and coding policies
 
-   - § "AI Agent Routing Guide" determines when to use Copilot CLI vs Codex
+   - § "AI Agent Routing Guide" determines lifecycle routing and when to use
+     Copilot CLI vs Codex
    - § "Architecture Rules" lists strict dependency rules
      (domain, application, presentation, infrastructure)
    - § "SDD Workflow" outlines the specification-driven process
 
 2. **`docs/specs/`** - Specification-driven development documentation
 
-   - `README.md` - SDD lifecycle and document-role Single Source of Truth
+   - `docs/specs/README.md` - SDD policy, document roles, approval, and
+     validation SSOT
+   - `README.md` - build/test commands and repository overview
+   - `.agents/skills/` - canonical reusable procedures selected by their
+     owning custom roles
    - `features/*/SPECS.md` - Temporary feature requirements and boundaries
    - `features/*/TASKS.md` - Sole plan and current state for its feature; the
      selected feature owns active branch implementation work
@@ -126,13 +144,17 @@ Both Copilot CLI and Codex share a routing guide:
 **Single source of truth**: `AGENTS.md` § "AI Agent Routing Guide"
 
 If you're uncertain whether CLI or Codex should handle a task, check that
-routing matrix first.
+routing matrix first. For formal SDD work, route the designated operation
+through Main to the owning custom role; do not chain directly from one child to
+another.
 
 ## Next Steps
 
 - For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
-- Refer to `docs/specs/README.md` and `.codex/skills/` for the authoritative
-  SDD gates
+- Refer to `docs/specs/README.md` for authoritative SDD gates and document
+  roles. Use `.agents/skills/` as the location map for canonical procedures;
+  the owning custom role selects and runs its procedure after Main delegates
+  the formal operation.
 - Keep assumptions and design decisions in the responsible SDD artifact:
   use cases for durable behavior, `SPECS.md` for feature requirements,
   `TASKS.md` for slice plans, and `TRACEABILITY.md` for requirement-to-test

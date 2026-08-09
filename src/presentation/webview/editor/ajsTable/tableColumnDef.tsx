@@ -5,7 +5,7 @@ import {
   unitInformationParameterDefinitions,
   unitInformationTableColumnLabels,
 } from "../unitInformationLocalization";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { AccessorType, box, columnGroupContext } from "./columnDefs/common";
 import group1 from "./columnDefs/group1";
 import group2 from "./columnDefs/group2";
@@ -33,7 +33,7 @@ import Box from "@mui/material/Box";
 export const tableDefaultColumnDef = {
   enableHiding: true,
   enableSorting: true,
-  cell: (props: CellContext<UnitListRowView, unknown>) => {
+  cell: (props: CellContext<TableRowView, unknown>) => {
     const param = props.getValue<AccessorType>();
     // undefined
     if (param === undefined) {
@@ -49,14 +49,14 @@ export const tableDefaultColumnDef = {
 export const tableColumnDef = (
   language: string | undefined = "en",
   handleJump: (id: string) => void,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
 ) => {
   // column titles
   const tableColumnLabels = unitInformationTableColumnLabels(language);
   // paramter
   const paramDefinition = unitInformationParameterDefinitions(language);
 
-  const columnHelper = createColumnHelper<UnitListRowView>();
+  const columnHelper = createColumnHelper<TableRowView>();
 
   return [
     columnHelper.display({

@@ -1,6 +1,8 @@
 import { TelemetryReporter } from "@vscode/extension-telemetry";
-import type { ValidatedTelemetryEvent } from "../../application/telemetry/telemetryEvent";
-import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import type {
+  TelemetryPort,
+  ValidatedTelemetryEvent,
+} from "../../application/telemetry/TelemetryPort";
 
 type TelemetrySdkReporter = {
   sendTelemetryEvent(

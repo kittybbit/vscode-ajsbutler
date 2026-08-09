@@ -6,9 +6,9 @@ import {
   toDurationBucket,
 } from "../../application/telemetry/telemetryBuckets";
 import {
-  createBuildSyntaxDiagnostics,
-  type BuildSyntaxDiagnostics,
-} from "../../application/editor-feedback/buildSyntaxDiagnostics";
+  createDiagnoseAjsDefinition,
+  type DiagnoseAjsDefinition,
+} from "../../application/editor-feedback/diagnoseAjsDefinition";
 import {
   createFindParameterHover,
   type FindParameterHover,
@@ -36,7 +36,7 @@ import { createWebApiImportCapability } from "./webapiImportWiring";
 export type ExtensionDependencies = {
   host: ExtensionHostKind;
   telemetry: TelemetryPort;
-  buildSyntaxDiagnostics: BuildSyntaxDiagnostics;
+  diagnoseAjsDefinition: DiagnoseAjsDefinition;
   buildUnitList: BuildUnitList;
   findParameterHover: FindParameterHover;
   semanticDiff: {
@@ -114,7 +114,7 @@ export const createExtensionDependencies = (
   return {
     host,
     telemetry,
-    buildSyntaxDiagnostics: createBuildSyntaxDiagnostics(parser),
+    diagnoseAjsDefinition: createDiagnoseAjsDefinition(parser),
     buildUnitList: createBuildUnitList(parser),
     findParameterHover: createFindParameterHover(parameterSyntaxLookup),
     semanticDiff: {

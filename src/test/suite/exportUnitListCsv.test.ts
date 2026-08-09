@@ -1,5 +1,7 @@
 import * as assert from "assert";
 import { exportUnitListCsv } from "../../application/unit-list/exportUnitListCsv";
+import { buildUnitListProjection } from "../../application/unit-list/buildUnitListView";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
 
 suite("Export Unit List CSV", () => {
   test("quotes and escapes every exported field", () => {
@@ -62,5 +64,32 @@ suite("Export Unit List CSV", () => {
     assert.strictEqual(lines.length, rowCount + 1);
     assert.ok(lines[0]?.startsWith('"#","C0","C1"'));
     assert.ok(lines.at(-1)?.startsWith('"500","R499C0","R499C1"'));
+  });
+
+  test("preserves projected unit identity and ordering for CSV rows", () => {
+    const document = parseAjsDocumentForTest(`
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=custom,,jp1admin,;
+  {
+    ty=cpj;
+  }
+  unit=flexible,,jp1admin,;
+  {
+    ty=fxj;
+  }
+}
+`);
+    const projection = buildUnitListProjection(document);
+    const csv = exportUnitListCsv({
+      headerRows: [["#", "Absolute path"]],
+      rows: projection.rows.map((row) => ({ values: [row.absolutePath] })),
+    });
+
+    assert.strictEqual(
+      csv,
+      '"#","Absolute path"\n"1","/root"\n"2","/root/custom"\n"3","/root/flexible"',
+    );
   });
 });

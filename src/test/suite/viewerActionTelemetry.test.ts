@@ -109,6 +109,89 @@ suite("Viewer action telemetry", () => {
         },
       },
     );
+
+    assert.deepStrictEqual(
+      createViewerNavigationActionEvent({
+        viewType: "ajsbutler.tableViewer",
+        targetView: "flow",
+        host: "web",
+      }),
+      {
+        name: "viewer.table.navigate_to_flow",
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "web",
+          view: "table",
+          result: "success",
+        },
+      },
+    );
+  });
+
+  test("characterizes remaining action mappings and result states", () => {
+    const cases = [
+      ["ajsbutler.tableViewer", "unit.select", "viewer.table.unit_selected"],
+      ["ajsbutler.flowViewer", "unit.select", "viewer.flow.unit_selected"],
+      [
+        "ajsbutler.flowViewer",
+        "definition.open",
+        "viewer.flow.definition_opened",
+      ],
+      ["ajsbutler.flowViewer", "flow.scope.open", "viewer.flow.scope_opened"],
+      [
+        "ajsbutler.flowViewer",
+        "flow.nested.toggle",
+        "viewer.flow.nested_expansion_toggled",
+      ],
+      [
+        "ajsbutler.flowViewer",
+        "flow.relationship_focus.toggle",
+        "viewer.flow.relationship_focus_toggled",
+      ],
+    ] as const;
+
+    for (const [viewType, operation, name] of cases) {
+      const event = createViewerActionEvent({
+        viewType,
+        operation,
+        host: "desktop",
+        result: "failed",
+      });
+
+      assert.deepStrictEqual(event, {
+        name,
+        properties: {
+          development: String(DEVELOPMENT),
+          host: "desktop",
+          view: viewType.endsWith(".tableViewer") ? "table" : "flow",
+          result: "failed",
+        },
+      });
+    }
+
+    assert.deepStrictEqual(
+      createViewerActionEvent({
+        viewType: "ajsbutler.tableViewer",
+        operation: "copy.csv",
+        result: "cancelled",
+      }),
+      {
+        name: "viewer.table.csv_copied",
+        properties: {
+          development: String(DEVELOPMENT),
+          view: "table",
+          result: "cancelled",
+        },
+      },
+    );
+
+    assert.strictEqual(
+      createViewerNavigationActionEvent({
+        viewType: "ajsbutler.tableViewer",
+        targetView: "table",
+      }),
+      undefined,
+    );
   });
 
   test("ignores unknown operations and unknown viewers", () => {

@@ -55,4 +55,27 @@ suite("Report Webview Operation", () => {
       },
     ]);
   });
+
+  test("does not let telemetry failures escape the host operation bridge", () => {
+    const document = {
+      uri: { toString: () => "file:///sample.ajs" },
+    } as vscode.TextDocument;
+    const panel = {
+      viewType: "ajsbutler.tableViewer",
+    } as vscode.WebviewPanel;
+
+    assert.doesNotThrow(() =>
+      reportWebviewOperation({
+        document,
+        panel,
+        telemetry: {
+          report() {
+            throw new Error("secret telemetry failure");
+          },
+          dispose() {},
+        },
+        operation: "copy.csv",
+      }),
+    );
+  });
 });

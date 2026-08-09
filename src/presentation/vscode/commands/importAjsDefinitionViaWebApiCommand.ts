@@ -2,7 +2,7 @@ import {
   createWebApiImportWorkflowEvent,
   type WebApiImportTelemetryInputStep,
 } from "../../../application/telemetry/webApiImportTelemetry";
-import type { TelemetryEvent } from "../../../application/telemetry/telemetryEvent";
+import type { ValidatedTelemetryEvent } from "../../../application/telemetry/TelemetryPort";
 import {
   createImportAjsDefinitionError,
   type ImportAjsDefinitionConnectionDto,
@@ -48,7 +48,7 @@ export type ImportAjsDefinitionCommandDeps = {
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   importCapability: ImportAjsDefinitionCapability;
   now: () => number;
-  reportTelemetry: (event: TelemetryEvent) => void;
+  reportTelemetry: (event: ValidatedTelemetryEvent) => void;
 };
 
 type ImportInputValues = {

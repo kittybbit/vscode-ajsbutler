@@ -429,6 +429,33 @@ suite("Build Unit List View", () => {
     assert.strictEqual(flexJob?.group18.destinationAgent, '"agent-dest"');
     assert.strictEqual(flexJob?.group18.flexibleJobGroup, "sync");
     assert.strictEqual(flexJob?.group18.executionAgent, '"flex-agent"');
+    assert.deepStrictEqual(
+      rows.slice(0, 3).map(({ id, absolutePath }) => ({ id, absolutePath })),
+      [
+        { id: "/root", absolutePath: "/root" },
+        { id: "/root/jobnet", absolutePath: "/root/jobnet" },
+        { id: "/root/jobnet/job", absolutePath: "/root/jobnet/job" },
+      ],
+    );
+    assert.strictEqual(job?.group17.toolParameters, undefined);
+    assert.strictEqual(job?.group17.toolEnvironment, undefined);
+    assert.strictEqual(job?.group18.executionAgent, undefined);
+    assert.deepStrictEqual(
+      projection.units.slice(0, 3).map(({ id, absolutePath, parentId }) => ({
+        id,
+        absolutePath,
+        parentId,
+      })),
+      [
+        { id: "/root", absolutePath: "/root", parentId: undefined },
+        { id: "/root/jobnet", absolutePath: "/root/jobnet", parentId: "/root" },
+        {
+          id: "/root/jobnet/job",
+          absolutePath: "/root/jobnet/job",
+          parentId: "/root/jobnet",
+        },
+      ],
+    );
     assert.strictEqual(jobnet?.group19.httpConnectionConfig, '"conn.conf"');
     assert.strictEqual(jobnet?.group19.httpKind, "post");
     assert.strictEqual(jobnet?.group19.httpExecutionMode, "y");

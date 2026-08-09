@@ -12,57 +12,40 @@ import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import {
-  Column,
-  Table as ReactTable,
-  VisibilityState,
-} from "@tanstack/table-core";
+import { Table as ReactTable, VisibilityState } from "@tanstack/table-core";
 import CloseIcon from "@mui/icons-material/Close";
 import ToggleOff from "@mui/icons-material/ToggleOff";
 import ToggleOn from "@mui/icons-material/ToggleOn";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Switch from "@mui/material/Switch";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { useMyAppContext } from "../MyContexts";
 import { unitInformationMessage } from "../unitInformationLocalization";
+import { setColumnVisibility, type UnitListColumn } from "./tableColumnActions";
+
+export { createColumnVisibilityUpdate } from "./tableColumnActions";
 
 type DisplayColumnSelectorProps = {
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
   columnVisibility: VisibilityState;
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: VoidFunction;
 };
 
-type UnitListColumn = Column<UnitListRowView, unknown>;
-type ToggleColumnVisibilityParams = {
-  column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
-  visible: boolean;
-};
-
 export const getVisibleColumnSelectorColumns = (
-  table: ReactTable<UnitListRowView>,
+  table: ReactTable<TableRowView>,
 ): UnitListColumn[] =>
-  table.getAllColumns().filter((col) => col.columnDef.enableHiding);
+  table.getAllColumns().filter((column) => column.getCanHide());
 
 const getColumnLabel = (column: UnitListColumn): string =>
   column.columnDef.header as string;
 
 const getHideableSubColumns = (column: UnitListColumn): UnitListColumn[] =>
-  column.columns.filter((col) => col.columnDef.enableHiding);
+  column.columns.filter((subColumn) => subColumn.getCanHide());
 
 const hasNestedColumnGroup = (column: UnitListColumn): boolean =>
   column.columns.length > 1;
-
-const getLeafColumnIds = (column: UnitListColumn): string[] =>
-  column.getLeafColumns().map((leafColumn) => leafColumn.id);
-
-export const createColumnVisibilityUpdate = (
-  columnIds: readonly string[],
-  visible: boolean,
-): VisibilityState =>
-  Object.fromEntries(columnIds.map((columnId) => [columnId, visible]));
 
 export const getDisplayColumnSelectorControlLabels = (language: string) => ({
   hideAll: unitInformationMessage(
@@ -75,20 +58,11 @@ export const getDisplayColumnSelectorControlLabels = (language: string) => ({
   ),
 });
 
-const toggleColumnVisibility = ({
-  column,
-  table,
-  visible,
-}: ToggleColumnVisibilityParams) => {
-  const nextVisibility = createColumnVisibilityUpdate(
-    getLeafColumnIds(column),
-    visible,
-  );
-  table.setColumnVisibility((current) => ({
-    ...current,
-    ...nextVisibility,
-  }));
-};
+const toggleColumnVisibility = (
+  column: UnitListColumn,
+  table: ReactTable<TableRowView>,
+  visible: boolean,
+) => setColumnVisibility(table, column, visible);
 
 const isAnyLeafColumnVisible = (column: UnitListColumn): boolean =>
   column.getLeafColumns().some((col) => col.getIsVisible());
@@ -96,13 +70,13 @@ const isAnyLeafColumnVisible = (column: UnitListColumn): boolean =>
 const ColumnSwitch: FC<{
   column: UnitListColumn;
   label: string;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, label, table }) => {
   const handleChange = (
     _event: React.ChangeEvent<HTMLInputElement>,
     checked: boolean,
   ) => {
-    toggleColumnVisibility({ column, table, visible: checked });
+    toggleColumnVisibility(column, table, checked);
   };
 
   return (
@@ -122,7 +96,7 @@ const ColumnSwitch: FC<{
 
 const ColumnSwitchItem: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => (
   <ListItem dense>
     <ColumnSwitch
@@ -135,7 +109,7 @@ const ColumnSwitchItem: FC<{
 
 const NestedColumnGroup: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => (
   <>
     <Divider sx={{ marginTop: "0.5em" }}>
@@ -155,7 +129,7 @@ const NestedColumnGroup: FC<{
 
 const ColumnDetailItem: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) =>
   hasNestedColumnGroup(column) ? (
     <NestedColumnGroup column={column} table={table} />
@@ -165,7 +139,7 @@ const ColumnDetailItem: FC<{
 
 const ColumnDetail: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => {
   const subColumns = getHideableSubColumns(column);
 
@@ -184,7 +158,7 @@ const ColumnDetail: FC<{
 
 const ColumnAccordion: FC<{
   column: UnitListColumn;
-  table: ReactTable<UnitListRowView>;
+  table: ReactTable<TableRowView>;
 }> = ({ column, table }) => (
   <Accordion disableGutters>
     <AccordionSummary expandIcon={<ExpandMore />}>
@@ -192,7 +166,7 @@ const ColumnAccordion: FC<{
         size="small"
         onClick={(e) => e.stopPropagation()}
         onChange={(_event, checked) =>
-          toggleColumnVisibility({ column, table, visible: checked })
+          toggleColumnVisibility(column, table, checked)
         }
         checked={isAnyLeafColumnVisible(column)}
       />

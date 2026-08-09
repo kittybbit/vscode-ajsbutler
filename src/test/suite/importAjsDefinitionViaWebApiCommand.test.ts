@@ -9,7 +9,7 @@ import {
   createImportedAjsDefinitionContent,
   createImportAjsDefinitionError,
 } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
-import type { TelemetryEvent } from "../../application/telemetry/telemetryEvent";
+import type { ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";
 import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 
 type ImportAjsDefinitionCommandObservations = {
@@ -92,7 +92,7 @@ class ImportAjsDefinitionCommandHarness {
     };
   }
 
-  private reportTelemetry(event: TelemetryEvent): void {
+  private reportTelemetry(event: ValidatedTelemetryEvent): void {
     this.observed.events.push({
       eventName: event.name,
       properties: event.properties,

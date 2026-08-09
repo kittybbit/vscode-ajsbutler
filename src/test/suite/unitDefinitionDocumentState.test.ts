@@ -74,6 +74,27 @@ suite("Unit definition document state", () => {
     assert.strictEqual(flowState.currentUnitId, "root-id");
   });
 
+  test("identity-mismatched table projection fails closed without breaking flow state", () => {
+    const validPayload = toUnitListDocumentDto(document);
+    const payload = {
+      ...validPayload,
+      unitList: {
+        ...validPayload.unitList,
+        units: validPayload.unitList.units.map((unit) => ({
+          ...unit,
+          name: "different-root",
+        })),
+      },
+    };
+
+    const tableState = parseTableDocumentState(payload);
+    const flowState = resolveFlowDocumentChange(payload, undefined);
+
+    assert.strictEqual(tableState.tableData, undefined);
+    assert.strictEqual(flowState.flowDocument?.document.rootUnits.length, 1);
+    assert.strictEqual(flowState.currentUnitId, "root-id");
+  });
+
   test("invalid flow hierarchy leaves the flow presentation unavailable", () => {
     const validPayload = toUnitListDocumentDto(document);
     const payload = {

@@ -70,7 +70,6 @@ const productionSourceDirs = [
   "infrastructure",
   "presentation",
   "bootstrap",
-  "shared",
   "resource",
 ] as const;
 
@@ -458,6 +457,33 @@ const startsWithAny = (value: string, prefixes: readonly string[]): boolean =>
 
 const getDependencyTarget = (reference: ImportReference): string =>
   reference.resolvedPath ?? reference.specifier;
+
+const parserInfrastructurePrefix = "src/infrastructure/parser/";
+const parserApplicationPortPath = "src/application/parsing/AjsParserPort";
+const normalizedParserAdapterPath =
+  "src/infrastructure/parser/AntlrAjsParser.ts";
+
+export const findParserPortBoundaryViolations = (
+  references: readonly ImportReference[],
+): ImportReference[] =>
+  references.filter(
+    ({ file, resolvedPath, specifier }) =>
+      file.startsWith(parserInfrastructurePrefix) &&
+      (resolvedPath ?? specifier) === parserApplicationPortPath &&
+      file !== normalizedParserAdapterPath,
+  );
+
+const telemetryInternalModulePath = "src/application/telemetry/telemetryEvent";
+const telemetryOuterSourcePrefixes = ["src/bootstrap", "src/presentation"];
+
+export const findTelemetryBoundaryViolations = (
+  references: readonly ImportReference[],
+): ImportReference[] =>
+  references.filter(
+    ({ file, resolvedPath, specifier }) =>
+      startsWithAny(file, telemetryOuterSourcePrefixes) &&
+      (resolvedPath ?? specifier) === telemetryInternalModulePath,
+  );
 
 const ruleMessages: Record<ArchitectureRuleId, string> = {
   [architectureRuleIds.domainOuterDependency]:

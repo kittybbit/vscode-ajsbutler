@@ -67,7 +67,8 @@ Scenario: {{one observable behavior}}
 
 ### Approval Impact Decisions
 
-- Approval evidence owner: TASKS.md `Human Approval`
+- Approval evidence owner: TASKS.md `Human Approval`, `Completion Approval`,
+  or `Closure Approval`, according to the lifecycle gate
 - Scope changes requiring re-approval: {{changes that exceed the approved
   scope}}
 

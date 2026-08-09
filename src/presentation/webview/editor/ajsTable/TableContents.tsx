@@ -16,31 +16,14 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
-import { type Table as ReactTable, useReactTable } from "@tanstack/react-table";
-import {
-  Row,
-  SortingState,
-  VisibilityState,
-  getCoreRowModel,
-  getSortedRowModel,
-} from "@tanstack/table-core";
+import { type Table as ReactTable } from "@tanstack/react-table";
+import { Row, SortingState, VisibilityState } from "@tanstack/table-core";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import type {
-  UnitListRowView,
-  UnitListUnitMetadataDto,
-} from "../../../../application/unit-list/buildUnitListView";
 import {
   toCountBucket,
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
-import {
-  toUnitListTableData,
-  type UnitListRootDto,
-  type UnitListTableDataDto,
-} from "../../../../application/unit-list/unitListDocument";
-import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
 import { useMyAppContext } from "../MyContexts";
-import { tableColumnDef, tableDefaultColumnDef } from "./tableColumnDef";
 import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
 import VirtualizedTable from "./VirtualizedTable";
@@ -59,8 +42,8 @@ import {
   openUnitTreeUnitInFlow,
   reduceTableRowSelection,
   selectUnitTreeUnitInTable,
-  type TableGridFocusRequest,
 } from "./navigation";
+import type { TableGridFocusRequest } from "./tableNavigationModel";
 import { getTableSearchResultPosition } from "./tableSearchState";
 import type {
   TableSearchDirection,
@@ -76,7 +59,15 @@ import {
   useTableRowRevealState,
 } from "./tableRowReveal";
 import { useTableSearchController } from "./tableSearchController";
-import { createTableViewerData, findSelectedUnitId } from "./tableViewerData";
+import { useTableModelSetup } from "./tableModel";
+import {
+  createTableViewerData,
+  findSelectedUnitId,
+  parseTableViewerData,
+  type TableRowView,
+  type TableUnitMetadata,
+  type TableViewerData,
+} from "./tableViewerData";
 import {
   ViewerAnnouncementHost,
   type ViewerAnnouncementHostHandle,
@@ -86,6 +77,7 @@ import {
   formatUnitInformationMessage,
   unitInformationMessage,
 } from "../unitInformationLocalization";
+import type { TableGridFocus } from "./tableNavigationModel";
 
 export type AjsTableSearchState = {
   query: string;
@@ -93,27 +85,15 @@ export type AjsTableSearchState = {
 };
 
 type TableDocumentState = {
-  tableData: UnitListTableDataDto | undefined;
-  unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
+  viewerData: TableViewerData;
   changeDocument: (type: string, data: unknown) => void;
-};
-
-type TableModelSetupContext = {
-  rowViews: UnitListRowView[] | undefined;
-  parameterSearchValuesByPath: ParameterSearchValuesByPath;
-  lang: string;
-  handleJump: (id: string) => void;
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>;
-  sorting: SortingState;
-  setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
-  columnVisibility: VisibilityState;
-  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>;
+  documentRevision: number;
 };
 
 type TableViewerShellProps = {
   theme: Theme;
-  table: ReactTable<UnitListRowView>;
-  rows: Row<UnitListRowView>[];
+  table: ReactTable<TableRowView>;
+  rows: Row<TableRowView>[];
   totalRowCount: number;
   searchQuery: string;
   searchState: TableSearchState;
@@ -134,15 +114,18 @@ type TableViewerShellProps = {
   selectedDetail: ReturnType<typeof resolveUnitListDetail>;
   selectedUnitId: string | undefined;
   selectRow: (absolutePath: string) => void;
+  commitFocusedRow: (absolutePath?: string) => string | undefined;
   openDetailPane: (absolutePath: string) => void;
   handleDetailFocusRequest: (revision: number) => void;
   returnToGrid: VoidFunction;
   restoreGridFocusRequest: TableGridFocusRequest;
   focusTreeRequest: UnitTreeFocusRequest;
-  rootUnits: UnitListRootDto[];
-  unitById: ReadonlyMap<string, UnitListUnitMetadataDto>;
+  rootUnits: TableViewerData["rootUnits"];
+  unitById: ReadonlyMap<string, TableUnitMetadata>;
   selectTreeUnit: (unitId: string) => void;
-  focusUnitTree: VoidFunction;
+  focusUnitTree: (absolutePath?: string) => void;
+  onGridFocusChange: (focus: TableGridFocus) => void;
+  documentRevision: number;
   openTreeUnitScope: (unitId: string) => void;
   onCopied: () => void;
   announcementHostRef: React.RefObject<ViewerAnnouncementHostHandle | null>;
@@ -150,8 +133,9 @@ type TableViewerShellProps = {
 };
 
 type ParsedTableDocumentState = {
-  tableData: UnitListTableDataDto | undefined;
+  tableData: TableViewerData["tableData"];
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
+  viewerData: TableViewerData;
 };
 
 const isSelectableTableFlowScopeUnit = (unit: {
@@ -162,63 +146,30 @@ const isSelectableTableFlowScopeUnit = (unit: {
 export const parseTableDocumentState = (
   data: unknown,
 ): ParsedTableDocumentState => {
+  const viewerData = parseTableViewerData(data);
   return {
-    tableData: toUnitListTableData(data),
-    unitDefinitionByPath: toUnitDefinitionByPath(data),
+    tableData: viewerData.tableData,
+    unitDefinitionByPath: viewerData.unitDefinitionByPath,
+    viewerData,
   };
 };
 
 const useChangeDocument = (): TableDocumentState => {
-  const [tableData, setTableData] = useState<UnitListTableDataDto>();
-  const [unitDefinitionByPath, setUnitDefinitionByPath] = useState<
-    ReadonlyMap<string, UnitDefinitionDialogDto>
-  >(new Map());
+  const [viewerData, setViewerData] = useState<TableViewerData>(() =>
+    createTableViewerData(undefined, new Map()),
+  );
+  const [documentRevision, setDocumentRevision] = useState(0);
   const changeDocument = useCallback((type: string, data: unknown) => {
     try {
       const nextState = parseTableDocumentState(data);
-      setTableData(() => nextState.tableData);
-      setUnitDefinitionByPath(() => nextState.unitDefinitionByPath);
+      setViewerData(() => nextState.viewerData);
     } catch (error) {
       console.error("Failed to parse data:", error);
-      setTableData(() => undefined);
-      setUnitDefinitionByPath(() => new Map());
+      setViewerData(() => createTableViewerData(undefined, new Map()));
     }
+    setDocumentRevision((revision) => revision + 1);
   }, []);
-  return { tableData, unitDefinitionByPath, changeDocument };
-};
-
-const useTableModelSetup = ({
-  rowViews,
-  parameterSearchValuesByPath,
-  lang,
-  handleJump,
-  rowViewByPath,
-  sorting,
-  setSorting,
-  columnVisibility,
-  setColumnVisibility,
-}: TableModelSetupContext) => {
-  const columns = useMemo(
-    () => tableColumnDef(lang, handleJump, rowViewByPath),
-    [lang, handleJump, rowViewByPath],
-  );
-
-  const table = useReactTable<UnitListRowView>({
-    columns,
-    data: rowViews ?? [],
-    state: {
-      columnVisibility,
-      sorting,
-    },
-    getCoreRowModel: getCoreRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    defaultColumn: tableDefaultColumnDef,
-    debugAll: DEVELOPMENT,
-  });
-
-  return { table, parameterSearchValuesByPath };
+  return { viewerData, changeDocument, documentRevision };
 };
 
 const useTableViewerTheme = (isDarkMode: boolean): Theme =>
@@ -270,6 +221,7 @@ const TableViewerShell = ({
   selectedAbsolutePath,
   selectedDetail,
   selectRow,
+  commitFocusedRow,
   openDetailPane,
   handleDetailFocusRequest,
   returnToGrid,
@@ -280,6 +232,8 @@ const TableViewerShell = ({
   unitById,
   selectTreeUnit,
   focusUnitTree,
+  onGridFocusChange,
+  documentRevision,
   openTreeUnitScope,
   onCopied,
   announcementHostRef,
@@ -287,7 +241,10 @@ const TableViewerShell = ({
 }: TableViewerShellProps) => (
   <>
     <ThemeProvider theme={theme}>
-      <ViewerAnnouncementHost ref={announcementHostRef} />
+      <ViewerAnnouncementHost
+        key={documentRevision}
+        ref={announcementHostRef}
+      />
       <CssBaseline />
       <GlobalStyles styles={viewerThemeGlobalStyles} />
       <Stack
@@ -366,9 +323,12 @@ const TableViewerShell = ({
                 parameterSearchValuesByPath={parameterSearchValuesByPath}
                 selectedAbsolutePath={selectedAbsolutePath}
                 selectRow={selectRow}
+                commitFocusedRow={commitFocusedRow}
                 focusUnitTree={focusUnitTree}
                 openDetailPane={openDetailPane}
                 restoreFocusRequest={restoreGridFocusRequest}
+                documentRevision={documentRevision}
+                onGridFocusChange={onGridFocusChange}
                 gridAriaLabel={gridAriaLabel}
               />
             </Box>
@@ -435,10 +395,37 @@ const TableContents = () => {
     reduceTableRowSelection,
     undefined,
   );
-  const selectRow = useCallback((absolutePath: string) => {
+  const committedAbsolutePathRef = useRef<string | undefined>(undefined);
+  const focusedGridFocusRef = useRef<TableGridFocus | undefined>(undefined);
+  const observedDocumentRevisionRef = useRef(0);
+  const commitRowSelection = useCallback((absolutePath: string) => {
+    if (committedAbsolutePathRef.current === absolutePath) return false;
+    committedAbsolutePathRef.current = absolutePath;
     setDetailPaneClosed(false);
+    reportTableOperation("unit.select");
     dispatchRowSelection({ type: "select", absolutePath });
+    return true;
   }, []);
+  const selectRow = useCallback(
+    (absolutePath: string) => {
+      commitRowSelection(absolutePath);
+    },
+    [commitRowSelection],
+  );
+  const commitFocusedRow = useCallback(
+    (absolutePath?: string): string | undefined => {
+      const focusedPath =
+        focusedGridFocusRef.current?.kind === "cell"
+          ? focusedGridFocusRef.current.absolutePath
+          : undefined;
+      const targetPath =
+        absolutePath ?? focusedPath ?? committedAbsolutePathRef.current;
+      if (!targetPath) return undefined;
+      commitRowSelection(targetPath);
+      return targetPath;
+    },
+    [commitRowSelection],
+  );
   const requestGridFocus = useCallback((absolutePath?: string) => {
     setRestoreGridFocusRequest((request) => ({
       revision: request.revision + 1,
@@ -446,42 +433,41 @@ const TableContents = () => {
     }));
   }, []);
   const closeDetailPane = useCallback(() => {
+    const targetPath = commitFocusedRow();
     setDetailPaneClosed(true);
-    requestGridFocus(selectedAbsolutePath);
-  }, [requestGridFocus, selectedAbsolutePath]);
-  const openDetailPane = useCallback(
-    (absolutePath: string) => {
-      selectRow(absolutePath);
-      setDetailFocusRequestRevision((revision) => revision + 1);
-    },
-    [selectRow],
-  );
+    requestGridFocus(targetPath);
+  }, [commitFocusedRow, requestGridFocus]);
+  const openDetailPane = useCallback(() => {
+    setDetailFocusRequestRevision((revision) => revision + 1);
+  }, []);
   const handleDetailFocusRequest = useCallback((revision: number) => {
     setDetailFocusRequestRevision((current) =>
       current === revision ? 0 : current,
     );
   }, []);
   const returnToGrid = useCallback(() => {
-    requestGridFocus(selectedAbsolutePath);
-  }, [requestGridFocus, selectedAbsolutePath]);
-  const { tableData, unitDefinitionByPath, changeDocument } =
-    useChangeDocument();
+    const targetPath = commitFocusedRow();
+    requestGridFocus(targetPath);
+  }, [commitFocusedRow, requestGridFocus]);
+  const { viewerData, changeDocument, documentRevision } = useChangeDocument();
+  const { tableData } = viewerData;
+  if (observedDocumentRevisionRef.current !== documentRevision) {
+    observedDocumentRevisionRef.current = documentRevision;
+    committedAbsolutePathRef.current = undefined;
+    focusedGridFocusRef.current = undefined;
+  } else {
+    committedAbsolutePathRef.current = selectedAbsolutePath;
+  }
   const rowViews = tableData?.rows;
-  const rowsRef = useRef<ReadonlyArray<Row<UnitListRowView>>>([]);
+  const rowsRef = useRef<ReadonlyArray<Row<TableRowView>>>([]);
   const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
     selectRow,
     rowsRef,
     requestGridFocus,
   );
 
-  const viewerData = useMemo(
-    () => createTableViewerData(tableData, unitDefinitionByPath),
-    [tableData, unitDefinitionByPath],
-  );
-
   const selectTreeUnit = useCallback(
     (unitId: string) => {
-      reportTableOperation("unit.select");
       selectUnitTreeUnitInTable(unitId, viewerData.unitById, revealPath);
     },
     [revealPath, viewerData.unitById],
@@ -512,12 +498,22 @@ const TableContents = () => {
     selectedAbsolutePath,
     viewerData.unitByAbsolutePath,
   );
-  const focusUnitTree = useCallback(() => {
-    setFocusTreeRequest((request) => ({
-      revision: request.revision + 1,
-      targetUnitId: selectedUnitId,
-    }));
-  }, [selectedUnitId]);
+  const focusUnitTree = useCallback(
+    (absolutePath?: string) => {
+      const targetPath = absolutePath ?? committedAbsolutePathRef.current;
+      const targetUnitId = targetPath
+        ? viewerData.unitByAbsolutePath.get(targetPath)?.id
+        : selectedUnitId;
+      setFocusTreeRequest((request) => ({
+        revision: request.revision + 1,
+        targetUnitId,
+      }));
+    },
+    [selectedUnitId, viewerData.unitByAbsolutePath],
+  );
+  const onGridFocusChange = useCallback((focus: TableGridFocus): void => {
+    focusedGridFocusRef.current = focus;
+  }, []);
   const resolveSelectedDetail = useMemo(
     () =>
       createUnitListDetailResolver(
@@ -644,7 +640,7 @@ const TableContents = () => {
   useEffect(() => {
     dispatchRowSelection({ type: "documentChanged" });
     resetSearch();
-  }, [tableData, resetSearch]);
+  }, [resetSearch, tableData]);
 
   useEffect(() => {
     window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocument);
@@ -690,6 +686,7 @@ const TableContents = () => {
       selectedDetail={selectedDetail}
       selectedUnitId={selectedUnitId}
       selectRow={selectRow}
+      commitFocusedRow={commitFocusedRow}
       openDetailPane={openDetailPane}
       handleDetailFocusRequest={handleDetailFocusRequest}
       returnToGrid={returnToGrid}
@@ -699,6 +696,8 @@ const TableContents = () => {
       unitById={viewerData.unitById}
       selectTreeUnit={selectTreeUnit}
       focusUnitTree={focusUnitTree}
+      onGridFocusChange={onGridFocusChange}
+      documentRevision={documentRevision}
       openTreeUnitScope={openTreeUnitScope}
       onCopied={handleCopied}
       announcementHostRef={announcementHostRef}

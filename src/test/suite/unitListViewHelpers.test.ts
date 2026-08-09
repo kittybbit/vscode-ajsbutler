@@ -122,12 +122,47 @@ suite("Unit List View helpers", () => {
       yearMonth: "2024/12",
       day: "31",
     });
+    assert.deepStrictEqual(parseSd("4,*10"), {
+      type: "*",
+      yearMonth: "",
+      day: "10",
+    });
+    assert.deepStrictEqual(parseSd("5,@10"), {
+      type: "@",
+      yearMonth: "",
+      day: "10",
+    });
+    assert.deepStrictEqual(parseSd("6,b-10"), {
+      type: "",
+      yearMonth: "",
+      day: "b-10",
+    });
+    assert.deepStrictEqual(parseSd("7,+su:b"), {
+      type: "+",
+      yearMonth: "",
+      day: "su:b",
+    });
+    assert.deepStrictEqual(parseSd("0,ud"), {
+      type: "ud",
+      yearMonth: "",
+      day: "",
+    });
     assert.deepStrictEqual(parseSd("2,en"), {
       type: "en",
       yearMonth: "",
       day: "",
     });
-    assert.strictEqual(parseLnParentRule("2,parent-rule"), "parent-rule");
+    assert.deepStrictEqual(parseSd("0,15"), {
+      type: "",
+      yearMonth: "",
+      day: "15",
+    });
+    assert.deepStrictEqual(parseSd("invalid"), {
+      type: "",
+      yearMonth: "",
+      day: "",
+    });
+    assert.strictEqual(parseLnParentRule("2"), "2");
     assert.strictEqual(parseTimeValue("09:30", "+00:00"), "09:30");
     assert.strictEqual(parseCy("(3,d)"), "3,d");
     assert.strictEqual(parseSh("be"), "be");

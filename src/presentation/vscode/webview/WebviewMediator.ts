@@ -45,6 +45,7 @@ export class WebviewMediator implements vscode.Disposable {
   #change: DocumentChangeHandler;
   #deps: WebviewMediatorDeps;
   #subscriptions: vscode.Disposable;
+  #disposed = false;
 
   constructor({
     context,
@@ -75,36 +76,62 @@ export class WebviewMediator implements vscode.Disposable {
     );
   }
 
-  dispose() {
+  dispose(): void {
+    if (this.#disposed) {
+      return;
+    }
+    this.#disposed = true;
     console.log(`invoke WebviewMediator.dispose. (${this.#viewType})`);
-    this.#subscriptions.dispose();
-    this.#store.dispose();
+    try {
+      this.#subscriptions.dispose();
+    } catch {
+      // Continue releasing panels when a host subscription fails to dispose.
+    }
+    try {
+      this.#store.dispose();
+    } catch {
+      // Deactivation must remain non-throwing when panel cleanup fails.
+    }
   }
 
   private onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent): void {
-    if (event.document.languageId !== LANGUAGE_ID) {
+    if (this.#disposed || event.document.languageId !== LANGUAGE_ID) {
       return;
     }
     console.log(
       "invoke WebviewMediator.onDidChangeTextDocument.",
       `(${this.#viewType}, ${event.document.uri.toString()})`,
     );
-    const panel = this.#store.panelByUri(event.document.uri);
+    let panel: vscode.WebviewPanel | undefined;
+    try {
+      panel = this.#store.panelByUri(event.document.uri);
+    } catch {
+      return;
+    }
     if (panel === undefined) {
       return;
     }
-    this.#change(event.document, panel);
+    try {
+      this.#change(event.document, panel);
+    } catch {
+      // A stale or disposed panel must not break document-change delivery.
+    }
   }
 
   private onDidCloseTextDocument(document: vscode.TextDocument): void {
-    if (document.languageId !== LANGUAGE_ID) {
+    if (this.#disposed || document.languageId !== LANGUAGE_ID) {
       return;
     }
     console.log(
       "invoke WebviewMediator.onDidCloseTextDocument.",
       `(${this.#viewType}), ${document.uri.toString()})`,
     );
-    const panel = this.#store.panelByUri(document.uri);
+    let panel: vscode.WebviewPanel | undefined;
+    try {
+      panel = this.#store.panelByUri(document.uri);
+    } catch {
+      return;
+    }
     if (panel === undefined) {
       return;
     }
@@ -112,13 +139,21 @@ export class WebviewMediator implements vscode.Disposable {
   }
 
   private onDidRenameFiles(event: vscode.FileRenameEvent): void {
+    if (this.#disposed) {
+      return;
+    }
     console.log(`invoke WebviewMediator.onDidRenameFiles. (${this.#viewType})`);
     event.files.forEach((file) => {
       console.log(
         `File renamed from ${file.oldUri.toString()}`,
         `to ${file.newUri.toString()}`,
       );
-      const panel = this.#store.panelByUri(file.oldUri);
+      let panel: vscode.WebviewPanel | undefined;
+      try {
+        panel = this.#store.panelByUri(file.oldUri);
+      } catch {
+        return;
+      }
       if (panel !== undefined) {
         this.removeAndDisposePanel(file.oldUri, panel);
       }
@@ -126,9 +161,16 @@ export class WebviewMediator implements vscode.Disposable {
   }
 
   private onDidChangeActiveColorTheme(event: vscode.ColorTheme): void {
+    if (this.#disposed) {
+      return;
+    }
     console.log("invoke WebviewMediator.onDidChangeActiveColorTheme.", event);
     this.#store.allPanels.forEach((panel) => {
-      this.#deps.mountPanel(this.#context, panel, this.#viewType);
+      try {
+        this.#deps.mountPanel(this.#context, panel, this.#viewType);
+      } catch {
+        // Continue remounting the remaining viewers after a stale panel fails.
+      }
     });
   }
 
@@ -136,7 +178,15 @@ export class WebviewMediator implements vscode.Disposable {
     uri: vscode.Uri,
     panel: vscode.WebviewPanel,
   ): void {
-    this.#store.removeByUri(uri);
-    panel.dispose();
+    try {
+      this.#store.removeByUri(uri);
+    } catch {
+      // The panel is still disposed even if store cleanup races with it.
+    }
+    try {
+      panel.dispose();
+    } catch {
+      // A host disposal failure must not escape the document event handler.
+    }
   }
 }

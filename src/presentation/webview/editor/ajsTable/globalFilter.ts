@@ -1,6 +1,6 @@
 import { rankItem, rankings, RankingInfo } from "@tanstack/match-sorter-utils";
 import { FilterMeta, Row } from "@tanstack/table-core";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { AccessorType } from "./columnDefs/common";
 
 export type ParameterSearchValuesByPath = ReadonlyMap<
@@ -55,7 +55,7 @@ export const isAjsTableSearchHit = (
 export const createAjsGlobalFilterFn =
   (parameterSearchValuesByPath: ParameterSearchValuesByPath) =>
   (
-    row: Row<UnitListRowView>,
+    row: Row<TableRowView>,
     columnId: string,
     value: string,
     addMeta: (meta: FilterMeta) => void,

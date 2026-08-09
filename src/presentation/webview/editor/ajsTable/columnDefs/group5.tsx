@@ -5,12 +5,12 @@ import {
   GroupColumnDef,
 } from "@tanstack/table-core";
 import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import Chip from "@mui/material/Chip";
 import { labeledRowViewColumns, rowViewColumn } from "./common";
 
 const jobGroupTypeCell = (
-  param: CellContext<UnitListRowView, "n" | "p" | undefined>,
+  param: CellContext<TableRowView, "n" | "p" | undefined>,
 ) => {
   const jobGroupType = param.getValue<"n" | "p" | undefined>();
   if (jobGroupType === undefined) {
@@ -24,10 +24,10 @@ const jobGroupTypeCell = (
 };
 
 const group5 = (
-  columnHelper: ColumnHelper<UnitListRowView>,
+  columnHelper: ColumnHelper<TableRowView>,
   labels: UnitInformationColumnGroupLabels,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
-): GroupColumnDef<UnitListRowView, unknown> => {
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
+): GroupColumnDef<TableRowView, unknown> => {
   return columnHelper.group({
     id: "group5", //Job group definition information
     header: labels.label,

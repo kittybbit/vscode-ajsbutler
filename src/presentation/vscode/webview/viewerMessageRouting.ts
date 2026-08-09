@@ -4,8 +4,10 @@ import type { ViewerOperationId } from "../../../application/telemetry/viewerOpe
 import { createViewerClosedEvent } from "../../../application/telemetry/viewerTelemetry";
 import { getTelemetryHost } from "../telemetryHost";
 import {
+  postResourceMessage,
   reportWebviewPerformance,
   reportWebviewSearch,
+  reportWebviewOperation,
 } from "./messageHandlers";
 import {
   isInvalidViewerSaveRequest,
@@ -26,6 +28,27 @@ import {
   type ViewerSaveRequest,
   type ViewerSearchRequest,
 } from "../../webview/viewerRequestMessages";
+
+export type ViewerPanelHandlers = {
+  onReady: (document: vscode.TextDocument, panel: vscode.WebviewPanel) => void;
+  onNavigate: (
+    document: vscode.TextDocument,
+    event: ViewerNavigationRequest,
+  ) => void;
+  onSave?: (content: string) => Promise<void>;
+};
+
+export type ViewerPanelRegistrationRequest = {
+  document: vscode.TextDocument;
+  panel: vscode.WebviewPanel;
+  viewType: string;
+  handlers: ViewerPanelHandlers;
+  isActivePanel: () => boolean;
+};
+
+export type ViewerPanelRegistration = (
+  request: ViewerPanelRegistrationRequest,
+) => void;
 
 type ViewerMessageRoutingDeps = {
   document: vscode.TextDocument;
@@ -53,6 +76,39 @@ export type ViewerOperationHostRequest = {
 };
 
 const SAVE_DATA_ERROR_MESSAGE = "Data is not a string and cannot be saved.";
+const SAVE_HANDLER_UNAVAILABLE_ERROR_MESSAGE =
+  "Saving is not available for this viewer.";
+const SAVE_OPERATION_ERROR_MESSAGE = "The file could not be saved.";
+const RESOURCE_OPERATION_ERROR_MESSAGE =
+  "Viewer resources could not be loaded.";
+const READY_OPERATION_ERROR_MESSAGE =
+  "The viewer document could not be refreshed.";
+const NAVIGATION_OPERATION_ERROR_MESSAGE =
+  "Viewer navigation could not be completed.";
+
+const showErrorMessageSafely = (
+  showErrorMessage: ViewerMessageRoutingDeps["showErrorMessage"],
+  message: string,
+): void => {
+  try {
+    void Promise.resolve(showErrorMessage(message)).catch(() => undefined);
+  } catch {
+    // A notification failure must not replace the host-safe outcome.
+  }
+};
+
+const runViewerHostOperationSafely = (
+  operation: () => void | Promise<void>,
+  onFailure?: () => void,
+): void => {
+  try {
+    void Promise.resolve(operation()).catch(() => {
+      onFailure?.();
+    });
+  } catch {
+    onFailure?.();
+  }
+};
 
 type ViewerMessageRouteMap = {
   [RESOURCE]: (event: ViewerResourceRequest) => void;
@@ -71,12 +127,24 @@ const handleSaveMessage = (
     showErrorMessage,
   }: Pick<ViewerMessageRoutingDeps, "onSave" | "showErrorMessage">,
 ): void => {
-  if (typeof event.data === "string" && onSave) {
-    void onSave(event.data);
+  if (typeof event.data !== "string") {
+    showErrorMessageSafely(showErrorMessage, SAVE_DATA_ERROR_MESSAGE);
     return;
   }
 
-  void showErrorMessage(SAVE_DATA_ERROR_MESSAGE);
+  if (!onSave) {
+    showErrorMessageSafely(
+      showErrorMessage,
+      SAVE_HANDLER_UNAVAILABLE_ERROR_MESSAGE,
+    );
+    return;
+  }
+
+  runViewerHostOperationSafely(
+    () => onSave(event.data),
+    () =>
+      showErrorMessageSafely(showErrorMessage, SAVE_OPERATION_ERROR_MESSAGE),
+  );
 };
 
 const createViewerMessageRoutes = ({
@@ -91,25 +159,47 @@ const createViewerMessageRoutes = ({
   showErrorMessage,
 }: ViewerMessageRoutingDeps): ViewerMessageRouteMap => ({
   [RESOURCE]: (event) => {
-    onResource(event, panel);
+    runViewerHostOperationSafely(
+      () => onResource(event, panel),
+      () =>
+        showErrorMessageSafely(
+          showErrorMessage,
+          RESOURCE_OPERATION_ERROR_MESSAGE,
+        ),
+    );
   },
   [READY]: () => {
-    onReady(document, panel);
+    runViewerHostOperationSafely(
+      () => onReady(document, panel),
+      () =>
+        showErrorMessageSafely(showErrorMessage, READY_OPERATION_ERROR_MESSAGE),
+    );
   },
   [SAVE]: (event) => {
     handleSaveMessage(event, { onSave, showErrorMessage });
   },
   [OPERATION]: (event) => {
-    onOperation({ document, panel, telemetry, operation: event.data });
+    runViewerHostOperationSafely(() =>
+      onOperation({ document, panel, telemetry, operation: event.data }),
+    );
   },
   [SEARCH]: (event) => {
-    reportWebviewSearch(telemetry, event);
+    runViewerHostOperationSafely(() => reportWebviewSearch(telemetry, event));
   },
   [PERFORMANCE]: (event) => {
-    reportWebviewPerformance(telemetry, event);
+    runViewerHostOperationSafely(() =>
+      reportWebviewPerformance(telemetry, event),
+    );
   },
   [NAVIGATE]: (event) => {
-    onNavigate(document, event);
+    runViewerHostOperationSafely(
+      () => onNavigate(document, event),
+      () =>
+        showErrorMessageSafely(
+          showErrorMessage,
+          NAVIGATION_OPERATION_ERROR_MESSAGE,
+        ),
+    );
   },
 });
 
@@ -150,7 +240,7 @@ export const createViewerMessageHandler = (
     const event = parseViewerRequest(value);
     if (!event) {
       if (isInvalidViewerSaveRequest(value)) {
-        void deps.showErrorMessage(SAVE_DATA_ERROR_MESSAGE);
+        showErrorMessageSafely(deps.showErrorMessage, SAVE_DATA_ERROR_MESSAGE);
       }
       return;
     }
@@ -167,6 +257,70 @@ type ViewerPanelDisposeDeps = {
     removeByUri(uri: vscode.Uri): void;
   };
   receiveMessageDispose: Pick<vscode.Disposable, "dispose">;
+};
+
+type ViewerPanelRegistrationDeps = ViewerPanelRegistrationRequest & {
+  telemetry: TelemetryPort;
+  store: Pick<ViewerPanelDisposeDeps["store"], "removeByUri">;
+  showErrorMessage: (message: string) => Thenable<string | undefined>;
+};
+
+export const registerViewerPanel = ({
+  document,
+  panel,
+  viewType,
+  handlers,
+  isActivePanel,
+  telemetry,
+  store,
+  showErrorMessage,
+}: ViewerPanelRegistrationDeps): void => {
+  const onDidReceiveMessage = createViewerMessageHandler({
+    document,
+    panel,
+    telemetry,
+    onReady: (receivedDocument, receivedPanel) => {
+      if (isActivePanel()) {
+        handlers.onReady(receivedDocument, receivedPanel);
+      }
+    },
+    onResource: (event, receivedPanel) => {
+      if (!isActivePanel()) {
+        return;
+      }
+      console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
+      postResourceMessage(event.data, receivedPanel);
+    },
+    onOperation: (request) => {
+      if (isActivePanel()) {
+        reportWebviewOperation(request);
+      }
+    },
+    onNavigate: (receivedDocument, event) => {
+      if (isActivePanel()) {
+        handlers.onNavigate(receivedDocument, event);
+      }
+    },
+    onSave: handlers.onSave
+      ? async (content) => {
+          if (isActivePanel()) {
+            await handlers.onSave?.(content);
+          }
+        }
+      : undefined,
+    showErrorMessage,
+  });
+  const receiveMessageDispose =
+    panel.webview.onDidReceiveMessage(onDidReceiveMessage);
+
+  registerViewerPanelDispose({
+    uri: document.uri,
+    panel,
+    viewType,
+    telemetry,
+    store,
+    receiveMessageDispose,
+  });
 };
 
 export const registerViewerPanelDispose = ({

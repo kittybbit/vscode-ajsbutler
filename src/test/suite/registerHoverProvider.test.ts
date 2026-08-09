@@ -1,7 +1,9 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { TelemetryEvent } from "../../application/telemetry/telemetryEvent";
-import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import type {
+  TelemetryPort,
+  ValidatedTelemetryEvent,
+} from "../../application/telemetry/TelemetryPort";
 import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 import { createAjsHoverProvider } from "../../presentation/vscode/languages/registerHoverProvider";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
@@ -37,7 +39,7 @@ suite("Register hover provider", () => {
   });
 
   test("maps parameter-hover output to a markdown hover", async () => {
-    const trackedEvents: TelemetryEvent[] = [];
+    const trackedEvents: ValidatedTelemetryEvent[] = [];
     const telemetry: TelemetryPort = {
       report: (event) => trackedEvents.push(event),
       dispose() {},
@@ -86,7 +88,7 @@ suite("Register hover provider", () => {
   });
 
   test("reports a no-match hover without exposing the token", async () => {
-    const trackedEvents: TelemetryEvent[] = [];
+    const trackedEvents: ValidatedTelemetryEvent[] = [];
     const provider = createAjsHoverProvider(() => undefined, {
       report: (event) => trackedEvents.push(event),
       dispose() {},

@@ -71,6 +71,62 @@ suite("Build Unit List", () => {
     );
   });
 
+  test("preserves schedule raw values and effective list projections", () => {
+    const definition = [
+      "unit=root,,jp1admin,;",
+      "{",
+      "  ty=g;",
+      "  sd=144,2036/12/31;",
+      "  st=144,+47:59;",
+      "  cftd=144,af,31,31;",
+      "  wc=144,999;",
+      "  wt=144,2879;",
+      "}",
+      "",
+    ].join("\n");
+
+    const result = buildUnitList(definition);
+
+    assert.deepStrictEqual(result.errors, []);
+    assert.ok(result.document);
+    assert.deepStrictEqual(
+      result.document?.rootUnits[0]?.parameters.map(({ key, value }) => ({
+        key,
+        value,
+      })),
+      [
+        { key: "ty", value: "g" },
+        { key: "sd", value: "144,2036/12/31" },
+        { key: "st", value: "144,+47:59" },
+        { key: "cftd", value: "144,af,31,31" },
+        { key: "wc", value: "144,999" },
+        { key: "wt", value: "144,2879" },
+      ],
+    );
+
+    const scheduleView = result.document?.unitList.rows[0]?.group10;
+    assert.deepStrictEqual(
+      {
+        scheduleDateYearMonths: scheduleView?.scheduleDateYearMonths,
+        scheduleDateDays: scheduleView?.scheduleDateDays,
+        startTimes: scheduleView?.startTimes,
+        scheduleByDaysFromStart: scheduleView?.scheduleByDaysFromStart,
+        maxShiftableDays: scheduleView?.maxShiftableDays,
+        waitCounts: scheduleView?.waitCounts,
+        waitTimes: scheduleView?.waitTimes,
+      },
+      {
+        scheduleDateYearMonths: ["2036/12"],
+        scheduleDateDays: ["31"],
+        startTimes: ["+47:59"],
+        scheduleByDaysFromStart: ["af,31"],
+        maxShiftableDays: ["31"],
+        waitCounts: ["999"],
+        waitTimes: ["2879"],
+      },
+    );
+  });
+
   test("validates the flow document from the shared document DTO", () => {
     const result = buildUnitList(validDefinition);
     assert.ok(result.document);
@@ -233,6 +289,73 @@ suite("Build Unit List", () => {
       }),
       undefined,
     );
+
+    const inconsistentRowId = JSON.parse(
+      JSON.stringify(document),
+    ) as typeof document;
+    inconsistentRowId.unitList.rows[0].id = "different-root";
+    assert.strictEqual(toUnitListTableData(inconsistentRowId), undefined);
+  });
+
+  test("rejects duplicate identities and broken tree ordering", () => {
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const cloneDocument = () =>
+      JSON.parse(JSON.stringify(result.document)) as typeof result.document;
+
+    const duplicateId = cloneDocument();
+    duplicateId.unitList.units[1].id = duplicateId.unitList.units[0].id;
+    assert.strictEqual(toUnitListTableData(duplicateId), undefined);
+
+    const duplicatePath = cloneDocument();
+    duplicatePath.unitList.units[1].absolutePath =
+      duplicatePath.unitList.units[0].absolutePath;
+    assert.strictEqual(toUnitListTableData(duplicatePath), undefined);
+
+    const brokenParentage = cloneDocument();
+    brokenParentage.rootUnits[0].children[0].parentId = undefined;
+    assert.strictEqual(toUnitListTableData(brokenParentage), undefined);
+
+    const reorderedTree = cloneDocument();
+    reorderedTree.rootUnits[0].children.reverse();
+    assert.strictEqual(toUnitListTableData(reorderedTree), undefined);
+  });
+
+  test("preserves empty projection and current boundary acceptance semantics", () => {
+    assert.deepStrictEqual(
+      toUnitListTableData({
+        rootUnits: [],
+        unitList: { rows: [], units: [] },
+        warnings: { unexpected: true },
+        unitDefinitions: "ignored",
+        extra: "ignored",
+      }),
+      { rootUnits: [], rows: [], units: [] },
+    );
+
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const numericDocument = JSON.parse(
+      JSON.stringify(result.document),
+    ) as typeof result.document;
+    numericDocument.rootUnits[0].layout.h = Number.NaN;
+
+    assert.ok(toUnitListTableData(numericDocument));
+  });
+
+  test("rejects malformed root and row records", () => {
+    const result = buildUnitList(validDefinition);
+    assert.ok(result.document);
+    const cloneDocument = () =>
+      JSON.parse(JSON.stringify(result.document)) as typeof result.document;
+
+    const malformedRoot = cloneDocument()!;
+    malformedRoot.rootUnits[0].layout.h = "invalid" as unknown as number;
+    assert.strictEqual(toUnitListTableData(malformedRoot), undefined);
+
+    const malformedRow = cloneDocument()!;
+    malformedRow.unitList.rows[0].group6.openDates = [1] as unknown as string[];
+    assert.strictEqual(toUnitListTableData(malformedRow), undefined);
   });
 
   test("rejects corrupt fields and inconsistent projection metadata", () => {
@@ -297,7 +420,89 @@ suite("Build Unit List", () => {
     const message = createViewerDocumentChangedMessage(result.document);
     assertPlainJsonValue(message);
     assert.deepStrictEqual(JSON.parse(JSON.stringify(message)), message);
-    assert.strictEqual(message.data?.unitList.rows.length, childCount + 1);
+    const tableData = toUnitListTableData(message.data);
+    assert.ok(tableData);
+    assert.strictEqual(tableData.rows.length, childCount + 1);
+  });
+
+  test("keeps grouped rows and metadata ordered for a bounded mixed list", () => {
+    const childCount = 128;
+    const childDefinitions = Array.from({ length: childCount }, (_, index) => {
+      const unitName = `unit-${index}`;
+      switch (index % 3) {
+        case 0:
+          return `unit=${unitName},,jp1admin,;{ty=flwj;flwf="watch#"#"##${index}.txt";flwc=c:d:s;flco=y;flwi=30;ets=wr;}`;
+        case 1:
+          return `unit=${unitName},,jp1admin,;{ty=cpj;prm="--tool#"#"##${index}";env="ENV#"#"##${index}";}`;
+        default:
+          return `unit=${unitName},,jp1admin,;{ty=fxj;da=destination-${index};fxg=group-${index};ex="execution#"#"##${index}";}`;
+      }
+    }).join("\n");
+    const definition = `unit=root,,jp1admin,;{ty=g;${childDefinitions}}`;
+
+    const result = buildUnitList(definition);
+    const repeatedResult = buildUnitList(definition);
+
+    assert.deepStrictEqual(result.errors, []);
+    assert.deepStrictEqual(repeatedResult.errors, []);
+    assert.strictEqual(result.document?.unitList.rows.length, childCount + 1);
+    assert.deepStrictEqual(
+      result.document?.unitList.rows.slice(0, 4).map((row) => ({
+        id: row.id,
+        absolutePath: row.absolutePath,
+        unitType: row.group1.unitType,
+      })),
+      [
+        { id: "/root", absolutePath: "/root", unitType: "g" },
+        {
+          id: "/root/unit-0",
+          absolutePath: "/root/unit-0",
+          unitType: "flwj",
+        },
+        {
+          id: "/root/unit-1",
+          absolutePath: "/root/unit-1",
+          unitType: "cpj",
+        },
+        {
+          id: "/root/unit-2",
+          absolutePath: "/root/unit-2",
+          unitType: "fxj",
+        },
+      ],
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows.at(-1)?.absolutePath,
+      `/root/unit-${childCount - 1}`,
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows[1]?.group13.monitoredFileName,
+      '"watch#"#"##0.txt"',
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows[2]?.group17.toolParameters,
+      '"--tool#"#"##1"',
+    );
+    assert.strictEqual(
+      result.document?.unitList.rows[3]?.group18.executionAgent,
+      '"execution#"#"##2"',
+    );
+    assert.deepStrictEqual(
+      repeatedResult.document?.unitList.rows.map((row) => ({
+        id: row.id,
+        absolutePath: row.absolutePath,
+        group13: row.group13,
+        group17: row.group17,
+        group18: row.group18,
+      })),
+      result.document?.unitList.rows.map((row) => ({
+        id: row.id,
+        absolutePath: row.absolutePath,
+        group13: row.group13,
+        group17: row.group17,
+        group18: row.group18,
+      })),
+    );
   });
 
   test("returns no document when the parser reports errors", () => {

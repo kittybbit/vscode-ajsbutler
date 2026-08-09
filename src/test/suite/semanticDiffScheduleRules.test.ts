@@ -75,9 +75,9 @@ suite("Semantic Diff Schedule Rules", () => {
         decision.date,
       ]),
       [
+        ["added", "/root/main/nested", "2026-04-12"],
         ["changed-time", "/root/main", "2026-04-10"],
         ["removed", "/root/main/nested", "2026-04-11"],
-        ["added", "/root/main/nested", "2026-04-12"],
       ],
     );
     assert.deepStrictEqual(result.unsupportedDecisions, []);
@@ -125,6 +125,91 @@ suite("Semantic Diff Schedule Rules", () => {
     assert.deepStrictEqual(
       result.zeroRunCandidates.map((unit) => unit.id),
       [after.id],
+    );
+  });
+
+  test("uses interpreted token categories and rule association", () => {
+    const after = jobnet("/root/main", {
+      sd: [
+        "2026/04/10",
+        "0,15",
+        "0,ud",
+        "+15",
+        "2,2026/04/31",
+        "145,2026/04/10",
+        "malformed",
+      ],
+      st: ["09:00", "0,10:00", "2,11:00"],
+    });
+
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [after],
+      matches: [],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+    });
+
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") {
+      return;
+    }
+    assert.deepStrictEqual(
+      result.runDecisions
+        .filter((decision) => decision.kind === "added")
+        .map((decision) => [decision.date, decision.after.rule]),
+      [
+        ["2026-04-10", 1],
+        ["2026-04-15", 0],
+      ],
+    );
+    assert.deepStrictEqual(
+      result.unsupportedDecisions
+        .filter((decision) => decision.parameter.key === "sd")
+        .map((decision) => [
+          decision.parameter.value,
+          decision.reason,
+          decision.scheduleRule,
+        ])
+        .sort(),
+      [
+        ["0,ud", "unsupported-schedule-date", undefined],
+        ["145,2026/04/10", "missing-start-time", 145],
+        ["2,2026/04/31", "invalid-calendar-day", undefined],
+        ["+15", "unsupported-schedule-date", undefined],
+        ["malformed", "unsupported-schedule-date", undefined],
+      ].sort(),
+    );
+  });
+
+  test("bounds calendar candidates to the comparison period", () => {
+    const after = jobnet("/root/main", {
+      sd: [
+        ...Array.from({ length: 8 }, (_, index) =>
+          String(index + 1).padStart(2, "0"),
+        ),
+        "en",
+        "not-a-date",
+      ],
+      st: "09:00",
+    });
+
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [after],
+      matches: [],
+      period: { from: "2024-01-01", to: "2027-01-01" },
+    });
+
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") {
+      return;
+    }
+    assert.strictEqual(result.runDecisions.length, 8 * 36);
+    assert.deepStrictEqual(
+      result.unsupportedDecisions
+        .filter((decision) => decision.parameter.key === "sd")
+        .map((decision) => decision.reason),
+      ["unsupported-schedule-date", "unsupported-schedule-date"],
     );
   });
 

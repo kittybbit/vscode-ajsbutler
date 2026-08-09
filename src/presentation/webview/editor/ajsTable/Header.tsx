@@ -11,7 +11,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SaveIcon from "@mui/icons-material/Save";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
 import { Table, VisibilityState } from "@tanstack/table-core";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import {
   toCountBucket,
   toDurationBucket,
@@ -28,18 +28,18 @@ import {
 } from "../../viewerRequestMessages";
 import { exportCsvView } from "./exportCsvView";
 import DisplayColumnSelector from "./DisplayColumnSelector";
+import { HeaderSearchControl } from "../shared/HeaderSearchControl";
 import {
-  HeaderSearchControl,
   resolveHeaderSearchHelperText,
-} from "../shared/HeaderSearchField";
-import type { HeaderSearchControlLabels } from "../shared/HeaderSearchField";
+  type HeaderSearchControlLabels,
+} from "../shared/headerSearchControlModel";
 import type {
   TableSearchDirection,
   TableSearchResultPosition,
 } from "./tableSearchState";
 
 type HeaderProps = {
-  table: Table<UnitListRowView>;
+  table: Table<TableRowView>;
   columnVisibility: VisibilityState;
   searchedAbsolutePath?: string;
   searchResultPosition?: TableSearchResultPosition;
@@ -61,7 +61,7 @@ type HeaderSearchFieldProps = Pick<
 >;
 
 type HeaderCsvActionsProps = {
-  table: Table<UnitListRowView>;
+  table: Table<TableRowView>;
   copyCsvLabel: string;
   saveCsvLabel: string;
   copiedLabel: string;

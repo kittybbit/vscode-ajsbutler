@@ -14,7 +14,7 @@ suite("Extension subscriptions", () => {
     const dependencies: ExtensionDependencies = {
       host: "desktop",
       telemetry,
-      buildSyntaxDiagnostics: () => [],
+      diagnoseAjsDefinition: () => [],
       buildUnitList: () => ({ errors: [] }),
       findParameterHover: () => undefined,
       semanticDiff: {

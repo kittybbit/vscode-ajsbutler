@@ -1,12 +1,13 @@
 import React, { FC, memo } from "react";
 import { Node, NodeProps } from "@xyflow/react";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import { ActionIcon, AjsNode, FlowNodeCard } from "./AjsNode";
+import { ActionIcon, FlowNodeCard } from "./AjsNode";
+import type { FlowNodeData } from "../flowNodePresentationModel";
 import { handleClickChildOpen } from "./Utils";
 import { useMyAppContext } from "../../MyContexts";
 import { unitInformationMessage } from "../../unitInformationLocalization";
 
-type ConditionNode = Node<AjsNode, "condition">;
+type ConditionNode = Node<FlowNodeData, "condition">;
 type ConditionNodeProps = NodeProps<ConditionNode>;
 const ConditionNode: FC<ConditionNodeProps> = ({
   data,

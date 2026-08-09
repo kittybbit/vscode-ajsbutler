@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import Box from "@mui/material/Box";
 import GlobalStyles from "@mui/material/GlobalStyles";
@@ -14,45 +13,31 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
-import {
-  Background,
-  BackgroundVariant,
-  Controls,
-  MiniMap,
-  type Edge,
-  type Node,
-  NodeTypes,
-  ReactFlow,
-  type ReactFlowInstance,
-  ReactFlowProvider,
-} from "@xyflow/react";
+import { type Node, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import { createViewerOperationRequest } from "../../viewerRequestMessages";
-import JobNode from "./nodes/JobNode";
-import JobNetNode from "./nodes/JobNetNode";
-import JobGroupNode from "./nodes/JobGroupNode";
-import ConditionNode from "./nodes/ConditionNode";
 import Header from "./Header";
 import FlowSelector from "./FlowSelector";
 import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
+import FlowGraphCanvas from "./FlowGraphCanvas";
 import { useFlowViewerController } from "./useFlowViewerController";
+import {
+  useFlowViewportAdapter,
+  type FlowRendererReady,
+  type FlowViewportInstanceRef,
+} from "./useFlowViewportAdapter";
 import type { UnitTreeFocusRequest } from "../shared/UnitTreeSelector";
 import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
 import { navigateToTable } from "./nodes/Utils";
-import {
-  type FlowMiniMapColors,
-  resolveFlowMiniMapNodeFill,
-  resolveFlowMiniMapNodeStroke,
-} from "./flowMiniMap";
-import type { AjsNode } from "./nodes/AjsNode";
+import { type FlowMiniMapColors } from "./flowMiniMap";
+import type { FlowNodeData } from "./flowNodePresentationModel";
 import {
   focusRenderedFlowNode,
   getFlowNodeIdFromTarget,
   getOwnedFlowNodeId,
   isFlowInteractiveTarget,
   isFlowSpatialNavigationKey,
-  readOnlyFlowInteractionProps,
   resolveFlowKeyboardFocusTarget,
   resolveFlowKeyboardScopeFocusDecision,
   resolveFlowKeyboardNavigationKeyResult,
@@ -63,12 +48,10 @@ import {
 } from "./flowKeyboardNavigation";
 import {
   resolveFlowGraphFocusRequest,
-  resolveFlowNodeCenter,
   type FlowGraphFocusRequest,
 } from "./flowViewportFocus";
 import { resolveFlowViewerShortcut } from "./flowViewerShortcuts";
 import { resolveFlowSelectorFocusTarget } from "./FlowSelector";
-import { flowAriaLabelConfig } from "./flowAccessibility";
 import type { FlowKeyboardNavigationMovement } from "./flowKeyboardNavigation";
 import {
   ViewerAnnouncementHost,
@@ -79,16 +62,6 @@ import {
   unitInformationMessage,
 } from "../unitInformationLocalization";
 
-const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
-const minimumViewportZoom = 0.02;
-
-const nodeTypes: NodeTypes = {
-  job: JobNode,
-  jobnet: JobNetNode,
-  jobgroup: JobGroupNode,
-  condition: ConditionNode,
-};
-
 type FlowViewerController = ReturnType<typeof useFlowViewerController>;
 
 type FlowGraphPanelProps = Pick<
@@ -98,8 +71,8 @@ type FlowGraphPanelProps = Pick<
   | "edges"
   | "graphHoveredUnit"
   | "nodes"
-  | "reactFlowInstanceRef"
   | "selectFlowNode"
+  | "selectedUnitId"
   | "showMiniMap"
   | "toggleExpandedFlowNodeFromKeyboard"
   | "unitById"
@@ -108,6 +81,10 @@ type FlowGraphPanelProps = Pick<
   miniMapColors: FlowMiniMapColors;
   onFocusDetail: (unitId: string) => void;
   onFocusSelector: (unitId?: string) => void;
+  onKeyboardNavigation: (unitId: string) => void;
+  onRendererReady: FlowRendererReady;
+  reactFlowInstanceRef: FlowViewportInstanceRef;
+  onScopeChange: (targetScopeUnitId: string) => void;
   onNestedExpansion?: (unitId: string, expanded: boolean) => void;
   onNodeSelected?: (unitId: string) => void;
   onSpatialMove?: (
@@ -117,43 +94,6 @@ type FlowGraphPanelProps = Pick<
   language: string;
   graphAriaLabel: string;
   theme: Theme;
-};
-
-type FlowGraphSelectionSyncProps = Pick<
-  FlowViewerController,
-  "nodes" | "reactFlowInstanceRef" | "selectedUnitId"
->;
-
-const useSyncSelectedFlowNode = ({
-  nodes,
-  reactFlowInstanceRef,
-  selectedUnitId,
-}: FlowGraphSelectionSyncProps): void => {
-  const previousSelectedUnitIdRef = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    const instance = reactFlowInstanceRef.current;
-    if (!instance) return;
-
-    const syncSelectedNode = (
-      unitId: string | undefined,
-      isSelected: boolean,
-    ) => {
-      if (!unitId) return;
-      const node = instance.getNode(unitId);
-      if (!node) return;
-      if (Boolean(node.selected) !== isSelected) {
-        instance.updateNode(unitId, { selected: isSelected });
-      }
-      if (Boolean(node.data.isSelected) !== isSelected) {
-        instance.updateNodeData(unitId, { isSelected });
-      }
-    };
-
-    syncSelectedNode(previousSelectedUnitIdRef.current, false);
-    syncSelectedNode(selectedUnitId, true);
-    previousSelectedUnitIdRef.current = selectedUnitId;
-  }, [nodes, reactFlowInstanceRef, selectedUnitId]);
 };
 
 const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
@@ -166,6 +106,9 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   nodes,
   onFocusDetail,
   onFocusSelector,
+  onKeyboardNavigation,
+  onRendererReady,
+  onScopeChange,
   onNestedExpansion,
   onNodeSelected,
   onSpatialMove,
@@ -173,6 +116,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
   graphAriaLabel,
   reactFlowInstanceRef,
   selectFlowNode,
+  selectedUnitId,
   showMiniMap,
   theme,
   toggleExpandedFlowNodeFromKeyboard,
@@ -189,7 +133,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         expectedExpanded?: boolean;
         selectTarget?: boolean;
         sourceScopeUnitId?: string;
-        sourceNodes: readonly Node<AjsNode>[];
+        sourceNodes: readonly Node<FlowNodeData>[];
         targetUnitId: string;
       }
     | undefined
@@ -229,11 +173,6 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
     navigationNodes,
   );
   const navigationIndex = navigationIndexCacheRef.current.index;
-  const ariaLabelConfig = useMemo(
-    () => flowAriaLabelConfig(language),
-    [language],
-  );
-
   useEffect(() => {
     const request = pendingFocusRequestRef.current;
     if (!request) return;
@@ -312,43 +251,23 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
     handledFocusRequestRevisionRef.current = focusRequest.revision;
   }, [currentUnitIdState, focusRequest, nodes, selectFlowNode]);
 
-  const revealFlowNode = useCallback(
-    (unitId: string) => {
-      const instance = reactFlowInstanceRef.current;
-      if (!instance) return;
-      const center = resolveFlowNodeCenter(instance.getNodesBounds([unitId]));
-      void instance.setCenter(center.x, center.y, {
-        duration: 250,
-        zoom: instance.getZoom(),
-      });
-    },
-    [reactFlowInstanceRef],
-  );
-
   const handleNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node<AjsNode>) => {
+    (_event: React.MouseEvent, node: Node<FlowNodeData>) => {
       selectFlowNode(node.id);
       onNodeSelected?.(node.id);
     },
     [onNodeSelected, selectFlowNode],
   );
   const handleNodeMouseEnter = useCallback(
-    (_event: React.MouseEvent, node: Node<AjsNode>) =>
+    (_event: React.MouseEvent, node: Node<FlowNodeData>) =>
       graphHoveredUnit(node.id),
     [graphHoveredUnit],
   );
   const handleNodeMouseLeave = useCallback(
-    (_event: React.MouseEvent, node: Node<AjsNode>) =>
+    (_event: React.MouseEvent, node: Node<FlowNodeData>) =>
       clearGraphHoveredUnit(node.id),
     [clearGraphHoveredUnit],
   );
-  const handleReactFlowInit = useCallback(
-    (instance: ReactFlowInstance<Node<AjsNode>, Edge>) => {
-      reactFlowInstanceRef.current = instance;
-    },
-    [reactFlowInstanceRef],
-  );
-
   const handleFlowNodeKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
       const currentUnitId = getFlowNodeIdFromTarget(event.target);
@@ -400,8 +319,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
       const action = result.action;
       if (!action) return;
       if (action.kind === "navigate") {
-        revealFlowNode(action.targetUnitId);
-        selectFlowNode(action.targetUnitId);
+        onKeyboardNavigation(action.targetUnitId);
         focusRenderedFlowNode(
           graphEntryRef.current,
           action.targetUnitId,
@@ -419,7 +337,7 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
           sourceNodes: nodes,
           targetUnitId: action.focusUnitId,
         };
-        currentUnitIdState.setCurrentUnitId(action.targetScopeId);
+        onScopeChange(action.targetScopeId);
         return;
       }
       if (action.kind !== "expand" && action.kind !== "collapse") return;
@@ -437,8 +355,8 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
       nodes,
       onFocusDetail,
       onFocusSelector,
-      revealFlowNode,
-      selectFlowNode,
+      onScopeChange,
+      onKeyboardNavigation,
       onNestedExpansion,
       onNodeSelected,
       onSpatialMove,
@@ -466,70 +384,20 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
         backgroundColor: "background.paper",
       }}
     >
-      <ReactFlow
+      <FlowGraphCanvas
         nodes={nodes}
         edges={edges}
-        defaultViewport={defaultViewport}
-        colorMode={theme.palette.mode}
-        nodeTypes={nodeTypes}
         onNodeClick={handleNodeClick}
         onNodeMouseEnter={handleNodeMouseEnter}
         onNodeMouseLeave={handleNodeMouseLeave}
-        onInit={handleReactFlowInit}
-        ariaLabelConfig={ariaLabelConfig}
-        {...readOnlyFlowInteractionProps}
-        fitView
-        minZoom={minimumViewportZoom}
-        fitViewOptions={{
-          padding: 0.22,
-          minZoom: minimumViewportZoom,
-        }}
-      >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1}
-          color={theme.palette.divider}
-        />
-        <Controls
-          position="bottom-left"
-          showInteractive={false}
-          style={{
-            borderRadius: 12,
-            overflow: "hidden",
-            boxShadow: theme.shadows[3],
-          }}
-        />
-        {showMiniMap && (
-          <MiniMap<Node<AjsNode>>
-            className="ajs-flow-minimap"
-            ariaLabel={unitInformationMessage(
-              "a11y.flow.reactFlow.minimap",
-              language,
-            )}
-            pannable
-            zoomable
-            position="bottom-right"
-            nodeColor={(node) =>
-              resolveFlowMiniMapNodeFill(node, miniMapColors)
-            }
-            nodeStrokeColor={(node) =>
-              resolveFlowMiniMapNodeStroke(node, miniMapColors)
-            }
-            nodeStrokeWidth={3}
-            bgColor={theme.palette.background.paper}
-            maskColor={`${theme.palette.background.default}66`}
-            maskStrokeColor="transparent"
-            maskStrokeWidth={0}
-            style={{
-              borderRadius: 12,
-              overflow: "hidden",
-              opacity: 1,
-              boxShadow: theme.shadows[3],
-            }}
-          />
-        )}
-      </ReactFlow>
+        onRendererReady={onRendererReady}
+        reactFlowInstanceRef={reactFlowInstanceRef}
+        selectedUnitId={selectedUnitId}
+        showMiniMap={showMiniMap}
+        theme={theme}
+        language={language}
+        miniMapColors={miniMapColors}
+      />
     </Paper>
   );
 };
@@ -537,7 +405,31 @@ const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
 FlowGraphPanelComponent.displayName = "FlowGraphPanel";
 const FlowGraphPanel = memo(FlowGraphPanelComponent);
 
-type FlowViewerBodyProps = FlowViewerController & {
+type FlowViewerBodyProps = Pick<
+  FlowViewerController,
+  | "clearGraphHoveredUnit"
+  | "clearTreeHoveredUnit"
+  | "currentUnitIdState"
+  | "dialogData"
+  | "edges"
+  | "flowDocumentDto"
+  | "focusModeEnabled"
+  | "graphHoveredUnit"
+  | "hoveredUnitId"
+  | "nodes"
+  | "openSelectedNodeDefinition"
+  | "openSelectedNodeScope"
+  | "selectedNodeDetail"
+  | "selectedUnitId"
+  | "selectFlowNode"
+  | "selectTreeUnit"
+  | "setDialogData"
+  | "showMiniMap"
+  | "toggleExpandedFlowNodeFromKeyboard"
+  | "toggleFocusMode"
+  | "treeHoveredUnit"
+  | "unitById"
+> & {
   detailFocusRequestRevision: number;
   focusGraphRequest: FlowGraphFocusRequest;
   focusSelectorRequest: UnitTreeFocusRequest;
@@ -546,6 +438,7 @@ type FlowViewerBodyProps = FlowViewerController & {
   onDetailFocusRequestHandled: (revision: number) => void;
   onFocusDetail: (unitId: string) => void;
   onFocusSelector: (unitId?: string) => void;
+  onKeyboardNavigation: (unitId: string) => void;
   onEnterFlowTreeUnit: (unitId: string) => void;
   onNestedExpansion?: (unitId: string, expanded: boolean) => void;
   onNodeSelected?: (unitId: string) => void;
@@ -554,6 +447,9 @@ type FlowViewerBodyProps = FlowViewerController & {
     direction: FlowKeyboardNavigationMovement,
   ) => void;
   onOpenFlowScope: (unitId: string) => void;
+  onRendererReady: FlowRendererReady;
+  reactFlowInstanceRef: FlowViewportInstanceRef;
+  onScopeChange: (targetScopeUnitId: string) => void;
   onReturnFromDetail: (unitId: string) => void;
   onSelectorEscape: VoidFunction;
   openSelectedNodeUnitList: () => void;
@@ -579,11 +475,14 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   onDetailFocusRequestHandled,
   onFocusDetail,
   onFocusSelector,
+  onKeyboardNavigation,
   onEnterFlowTreeUnit,
   onNestedExpansion,
   onNodeSelected,
   onSpatialMove,
   onOpenFlowScope,
+  onRendererReady,
+  onScopeChange,
   onReturnFromDetail,
   onSelectorEscape,
   openSelectedNodeDefinition,
@@ -604,8 +503,6 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   unitById,
   currentUnitIdState,
 }) => {
-  useSyncSelectedFlowNode({ nodes, reactFlowInstanceRef, selectedUnitId });
-
   return (
     <Box
       sx={{
@@ -636,7 +533,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
         <FlowSelector
           rootUnits={flowDocumentDto?.rootUnits ?? []}
           unitById={unitById}
-          currentUnitIdState={currentUnitIdState}
+          currentUnitId={currentUnitIdState.currentUnitId}
           focusRequest={focusSelectorRequest}
           hoveredUnitId={hoveredUnitId}
           selectedUnitId={selectedUnitId}
@@ -663,13 +560,17 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
           nodes={nodes}
           onFocusDetail={onFocusDetail}
           onFocusSelector={onFocusSelector}
+          onKeyboardNavigation={onKeyboardNavigation}
+          onRendererReady={onRendererReady}
           onNestedExpansion={onNestedExpansion}
           onNodeSelected={onNodeSelected}
           onSpatialMove={onSpatialMove}
           language={language}
           graphAriaLabel={unitInformationMessage("a11y.flow.graph", language)}
           reactFlowInstanceRef={reactFlowInstanceRef}
+          onScopeChange={onScopeChange}
           selectFlowNode={selectFlowNode}
+          selectedUnitId={selectedUnitId}
           showMiniMap={showMiniMap}
           theme={theme}
           toggleExpandedFlowNodeFromKeyboard={
@@ -763,13 +664,18 @@ const FlowContents: FC = () => {
     canEnableFocusMode,
     currentUnit,
     currentUnitIdState,
+    changeScope,
     clearGraphHoveredUnit,
     clearTreeHoveredUnit,
-    clearSelectedUnit,
+    closeDetail,
     dialogData,
+    detailFocusRequestRevision,
     edges,
     expandableNestedUnitIds,
+    focusGraphRequest,
+    focusSelectorRequest,
     focusModeEnabled,
+    focusRequestVersion,
     handleSearchClear,
     handleSearchNavigate,
     handleSearchSubmit,
@@ -779,7 +685,15 @@ const FlowContents: FC = () => {
     nodes,
     openSelectedNodeDefinition,
     openSelectedNodeScope,
-    reactFlowInstanceRef,
+    handleDetailFocusRequestHandled,
+    handleSelectorEscape,
+    requestDetailFocus,
+    requestGraphFocus,
+    requestKeyboardNavigation,
+    requestScopeTransition,
+    requestSelectorFocus,
+    layoutRequestIdentity,
+    preserveViewportRequestVersion,
     searchedUnitId,
     searchResultPosition,
     selectedUnitId,
@@ -794,17 +708,25 @@ const FlowContents: FC = () => {
     toggleMiniMap,
     treeHoveredUnit,
     unitById,
+    returnFromDetail,
+    selectionFocusRequest,
   } = useFlowViewerController({ theme });
+  const { onRendererReady, reactFlowInstanceRef } = useFlowViewportAdapter({
+    edges,
+    focusRequestVersion,
+    layoutRequestIdentity,
+    nodes,
+    preserveViewportRequestVersion,
+    searchedUnitId,
+    selectionFocusRequestVersion: selectionFocusRequest.version,
+    selectionFocusTargetUnitId:
+      selectionFocusRequest.targetUnitId === selectedUnitId
+        ? selectionFocusRequest.targetUnitId
+        : undefined,
+  });
   const openSelectedNodeUnitList =
     useSelectedNodeUnitListAction(selectedNodeDetail);
   const miniMapColors = useFlowMiniMapColors(theme);
-  const [detailFocusRequestRevision, setDetailFocusRequestRevision] =
-    useState(0);
-  const [focusGraphRequest, setFocusGraphRequest] =
-    useState<FlowGraphFocusRequest>({ revision: 0 });
-  const [focusSelectorRequest, setFocusSelectorRequest] =
-    useState<UnitTreeFocusRequest>({ revision: 0 });
-  const savedGraphFocusUnitIdRef = useRef<string | undefined>(undefined);
   const selectFlowNodeWithTelemetry = useCallback(
     (unitId: string) => {
       reportFlowOperation("unit.select");
@@ -819,22 +741,6 @@ const FlowContents: FC = () => {
     },
     [selectTreeUnit],
   );
-  const requestGraphFocus = useCallback(
-    (
-      targetUnitId: string | undefined,
-      options: Pick<
-        FlowGraphFocusRequest,
-        "expectedScopeUnitId" | "selectTarget"
-      > = {},
-    ) => {
-      setFocusGraphRequest((current) => ({
-        ...options,
-        revision: current.revision + 1,
-        targetUnitId,
-      }));
-    },
-    [],
-  );
   const handleEnterFlowTreeUnit = useCallback(
     (unitId: string) => {
       requestGraphFocus(unitId);
@@ -843,60 +749,35 @@ const FlowContents: FC = () => {
   );
   const handleFocusDetail = useCallback(
     (unitId: string) => {
-      savedGraphFocusUnitIdRef.current = unitId;
       if (selectedUnitId !== unitId) {
-        selectFlowNodeWithTelemetry(unitId);
+        reportFlowOperation("unit.select");
       }
-      setDetailFocusRequestRevision((revision) => revision + 1);
+      requestDetailFocus(unitId);
     },
-    [selectedUnitId, selectFlowNodeWithTelemetry],
+    [requestDetailFocus, selectedUnitId],
   );
-  const handleDetailFocusRequestHandled = useCallback((revision: number) => {
-    setDetailFocusRequestRevision((currentRevision) =>
-      currentRevision === revision ? 0 : currentRevision,
-    );
-  }, []);
   const handleFocusSelector = useCallback(
     (unitId?: string) => {
-      savedGraphFocusUnitIdRef.current = unitId;
       const targetUnitId = resolveFlowSelectorFocusTarget(
         currentUnitIdState.currentUnitId,
         flowDocumentDto?.rootUnits ?? [],
         unitById,
       );
-      setFocusSelectorRequest((current) => ({
-        revision: current.revision + 1,
-        targetUnitId,
-      }));
+      requestSelectorFocus(targetUnitId, unitId);
     },
-    [currentUnitIdState, flowDocumentDto?.rootUnits, unitById],
+    [
+      currentUnitIdState,
+      flowDocumentDto?.rootUnits,
+      requestSelectorFocus,
+      unitById,
+    ],
   );
-  const handleSelectorEscape = useCallback(() => {
-    requestGraphFocus(savedGraphFocusUnitIdRef.current);
-  }, [requestGraphFocus]);
   const handleOpenFlowScope = useCallback(
     (unitId: string) => {
       reportFlowOperation("flow.scope.open");
-      currentUnitIdState.setCurrentUnitId(unitId);
-      requestGraphFocus(unitId, {
-        expectedScopeUnitId: unitId,
-        selectTarget: true,
-      });
+      requestScopeTransition(unitId, unitId);
     },
-    [currentUnitIdState, requestGraphFocus],
-  );
-  const handleReturnFromDetail = useCallback(
-    (unitId: string) => {
-      requestGraphFocus(unitId);
-    },
-    [requestGraphFocus],
-  );
-  const handleCloseDetail = useCallback(
-    (unitId: string) => {
-      clearSelectedUnit();
-      requestGraphFocus(unitId);
-    },
-    [clearSelectedUnit, requestGraphFocus],
+    [requestScopeTransition],
   );
   const openSelectedNodeDefinitionWithTelemetry = useCallback(() => {
     if (!selectedNodeDetail?.canOpenDefinition) {
@@ -1102,45 +983,38 @@ const FlowContents: FC = () => {
           />
           <FlowViewerBody
             flowDocumentDto={flowDocumentDto}
-            canEnableFocusMode={canEnableFocusMode}
             clearGraphHoveredUnit={clearGraphHoveredUnit}
             clearTreeHoveredUnit={clearTreeHoveredUnit}
-            currentUnit={currentUnit}
             currentUnitIdState={currentUnitIdState}
-            clearSelectedUnit={clearSelectedUnit}
             detailFocusRequestRevision={detailFocusRequestRevision}
             dialogData={dialogData}
             edges={edges}
-            expandableNestedUnitIds={expandableNestedUnitIds}
             focusGraphRequest={focusGraphRequest}
             focusSelectorRequest={focusSelectorRequest}
             focusModeEnabled={focusModeEnabled}
             graphHoveredUnit={graphHoveredUnit}
-            handleSearchClear={handleSearchClear}
-            handleSearchNavigate={handleSearchNavigate}
-            handleSearchSubmit={handleSearchSubmit}
-            hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
             hoveredUnitId={hoveredUnitId}
             miniMapColors={miniMapColors}
             nodes={nodes}
-            onCloseDetail={handleCloseDetail}
+            onCloseDetail={closeDetail}
             onDetailFocusRequestHandled={handleDetailFocusRequestHandled}
             onFocusDetail={handleFocusDetail}
             onFocusSelector={handleFocusSelector}
+            onKeyboardNavigation={requestKeyboardNavigation}
             onEnterFlowTreeUnit={handleEnterFlowTreeUnit}
             onNestedExpansion={announceFlowNestedExpansion}
             onNodeSelected={announceFlowSelection}
             onSpatialMove={announceFlowSpatialMove}
             onOpenFlowScope={handleOpenFlowScope}
-            onReturnFromDetail={handleReturnFromDetail}
+            onRendererReady={onRendererReady}
+            onScopeChange={changeScope}
+            onReturnFromDetail={returnFromDetail}
             onSelectorEscape={handleSelectorEscape}
             openSelectedNodeDefinition={openSelectedNodeDefinitionWithTelemetry}
             openSelectedNodeScope={openSelectedNodeScopeWithTelemetry}
             openSelectedNodeUnitList={openSelectedNodeUnitList}
             language={lang}
             reactFlowInstanceRef={reactFlowInstanceRef}
-            searchedUnitId={searchedUnitId}
-            searchResultPosition={searchResultPosition}
             selectedNodeDetail={selectedNodeDetail}
             selectedUnitId={selectedUnitId}
             selectFlowNode={selectFlowNodeWithTelemetry}
@@ -1148,12 +1022,10 @@ const FlowContents: FC = () => {
             setDialogData={setDialogData}
             showMiniMap={showMiniMap}
             theme={theme}
-            toggleExpandAllNestedUnits={toggleExpandAllNestedUnitsWithTelemetry}
             toggleExpandedFlowNodeFromKeyboard={
               toggleExpandedFlowNodeFromKeyboardWithTelemetry
             }
             toggleFocusMode={toggleFocusModeWithTelemetry}
-            toggleMiniMap={toggleMiniMapWithTelemetry}
             treeHoveredUnit={treeHoveredUnit}
             unitById={unitById}
           />

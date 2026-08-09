@@ -183,6 +183,61 @@ unit=root,,jp1admin,;
 }
 `;
 
+const remainingGroupsDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  unit=file-monitor,,jp1admin,;
+  {
+    ty=flwj;
+    flwf="watch#"#"##.txt";
+    flwc=c:d:s;
+    flco=y;
+    flwi=30;
+    ets=wr;
+  }
+  unit=custom-job,,jp1admin,;
+  {
+    ty=cpj;
+    prm="--name#"#"##value";
+    env="ENV#"#"##=1";
+  }
+  unit=recovery-custom-job,,jp1admin,;
+  {
+    ty=rcpj;
+    prm=--recovery;
+    env=RECOVERY=1;
+  }
+  unit=regular-job,,jp1admin,;
+  {
+    ty=j;
+    prm=--regular;
+    env=REGULAR=1;
+  }
+  unit=flexible-job,,jp1admin,;
+  {
+    ty=fxj;
+    da="agent#"#"##-destination";
+    fxg=flexible-group;
+    ex="agent#"#"##-execution";
+  }
+  unit=recovery-flexible-job,,jp1admin,;
+  {
+    ty=rfxj;
+    da=recovery-destination;
+    fxg=recovery-group;
+    ex=recovery-execution;
+  }
+  unit=regular-agent-job,,jp1admin,;
+  {
+    ty=j;
+    da=regular-destination;
+    fxg=regular-group;
+    ex=regular-execution;
+  }
+}
+`;
+
 suite("Build Unit List Remaining Groups", () => {
   test("projects all remaining group fields from unit parameters", () => {
     const document = parseAjsDocumentForTest(definition);
@@ -441,5 +496,95 @@ suite("Build Unit List Remaining Groups", () => {
     assert.strictEqual(regularView.group15.terminationStatus4, "regular-src-4");
     assert.strictEqual(regularView.group15.terminationDelay4, "regular-dst-4");
     assert.strictEqual(regularView.group15.terminationOperation4, "sav");
+  });
+
+  test("preserves group 13 values and type-gates group 17/18 fields", () => {
+    const document = parseAjsDocumentForTest(remainingGroupsDefinition);
+    const fileMonitor = document.rootUnits[0]?.children[0];
+    const customJob = document.rootUnits[0]?.children[1];
+    const recoveryCustomJob = document.rootUnits[0]?.children[2];
+    const regularJob = document.rootUnits[0]?.children[3];
+    const flexibleJob = document.rootUnits[0]?.children[4];
+    const recoveryFlexibleJob = document.rootUnits[0]?.children[5];
+    const regularAgentJob = document.rootUnits[0]?.children[6];
+
+    assert.ok(fileMonitor);
+    assert.ok(customJob);
+    assert.ok(recoveryCustomJob);
+    assert.ok(regularJob);
+    assert.ok(flexibleJob);
+    assert.ok(recoveryFlexibleJob);
+    assert.ok(regularAgentJob);
+
+    const fileMonitorView = buildUnitListRemainingGroups(fileMonitor, [], []);
+    const customJobView = buildUnitListRemainingGroups(customJob, [], []);
+    const recoveryCustomJobView = buildUnitListRemainingGroups(
+      recoveryCustomJob,
+      [],
+      [],
+    );
+    const regularJobView = buildUnitListRemainingGroups(regularJob, [], []);
+    const flexibleJobView = buildUnitListRemainingGroups(flexibleJob, [], []);
+    const recoveryFlexibleJobView = buildUnitListRemainingGroups(
+      recoveryFlexibleJob,
+      [],
+      [],
+    );
+    const regularAgentJobView = buildUnitListRemainingGroups(
+      regularAgentJob,
+      [],
+      [],
+    );
+
+    assert.strictEqual(
+      fileMonitorView.group13.monitoredFileName,
+      '"watch#"#"##.txt"',
+    );
+    assert.strictEqual(fileMonitorView.group13.monitoredFileCondition, "c:d:s");
+    assert.strictEqual(fileMonitorView.group13.monitoredFileCloseMode, "y");
+    assert.strictEqual(fileMonitorView.group13.monitoringInterval, "30");
+    assert.strictEqual(fileMonitorView.group13.eventTimeoutAction, "wr");
+
+    assert.strictEqual(
+      customJobView.group17.toolParameters,
+      '"--name#"#"##value"',
+    );
+    assert.strictEqual(customJobView.group17.toolEnvironment, '"ENV#"#"##=1"');
+    assert.strictEqual(
+      recoveryCustomJobView.group17.toolParameters,
+      "--recovery",
+    );
+    assert.strictEqual(
+      recoveryCustomJobView.group17.toolEnvironment,
+      "RECOVERY=1",
+    );
+    assert.strictEqual(regularJobView.group17.toolParameters, undefined);
+    assert.strictEqual(regularJobView.group17.toolEnvironment, undefined);
+
+    assert.strictEqual(
+      flexibleJobView.group18.destinationAgent,
+      '"agent#"#"##-destination"',
+    );
+    assert.strictEqual(
+      flexibleJobView.group18.flexibleJobGroup,
+      "flexible-group",
+    );
+    assert.strictEqual(
+      flexibleJobView.group18.executionAgent,
+      '"agent#"#"##-execution"',
+    );
+    assert.strictEqual(
+      recoveryFlexibleJobView.group18.executionAgent,
+      "recovery-execution",
+    );
+    assert.strictEqual(
+      regularAgentJobView.group18.destinationAgent,
+      "regular-destination",
+    );
+    assert.strictEqual(
+      regularAgentJobView.group18.flexibleJobGroup,
+      "regular-group",
+    );
+    assert.strictEqual(regularAgentJobView.group18.executionAgent, undefined);
   });
 });

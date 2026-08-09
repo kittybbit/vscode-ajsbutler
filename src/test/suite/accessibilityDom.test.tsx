@@ -1,13 +1,19 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
-import React, { useRef, useState } from "react";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import React, { useMemo, useRef, useState } from "react";
 import axe from "axe-core";
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
-import UnitTreeSelector from "../../presentation/webview/editor/shared/UnitTreeSelector";
+import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
+import UnitTreeSelector, {
+  type UnitTreeFocusRequest,
+} from "../../presentation/webview/editor/shared/UnitTreeSelector";
 import SharedUnitDetailPane from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
+import DisplayColumnSelector from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { resolveTableGridRestorationFocus } from "../../presentation/webview/editor/ajsTable/navigation";
+import VirtualizedTable from "../../presentation/webview/editor/ajsTable/VirtualizedTable";
 import {
   focusRenderedFlowNode,
   resolveFlowGraphEntryTabIndex,
@@ -16,6 +22,11 @@ import {
   ActionIcon,
   FLOW_NODE_ACTION_SIZE_PX,
 } from "../../presentation/webview/editor/ajsFlow/nodes/AjsNode";
+import { HeaderSearchControl } from "../../presentation/webview/editor/shared/HeaderSearchControl";
+import type {
+  HeaderSearchControlLabels,
+  HeaderSearchDirection,
+} from "../../presentation/webview/editor/shared/headerSearchControlModel";
 
 type GlobalDescriptorMap = Map<string, PropertyDescriptor | undefined>;
 
@@ -134,6 +145,19 @@ const createUnit = (
     children,
   }) as FlowGraphUnitDto;
 
+const createDeepTree = (
+  depth: number,
+): { deepest: FlowGraphUnitDto; root: FlowGraphUnitDto } => {
+  const root = createUnit("/deep-0", 0);
+  let deepest = root;
+  for (let index = 1; index <= depth; index += 1) {
+    const child = createUnit(`/deep-${index}`, index, [], deepest.id);
+    deepest.children = [child];
+    deepest = child;
+  }
+  return { deepest, root };
+};
+
 const createUnitById = (
   units: readonly FlowGraphUnitDto[],
 ): ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">> => {
@@ -147,13 +171,78 @@ const createUnitById = (
   return new Map(entries);
 };
 
+const createTableRow = (index: number): TableRowView =>
+  ({
+    id: `job-${index}`,
+    absolutePath: `/root/job-${index}`,
+    group1: {
+      name: `job-${index}`,
+    },
+  }) as unknown as TableRowView;
+
+const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
+  const rows = useMemo(
+    () => Array.from({ length: rowCount }, (_, index) => createTableRow(index)),
+    [rowCount],
+  );
+  const [selectedAbsolutePath, setSelectedAbsolutePath] = useState(
+    rows[0]?.absolutePath,
+  );
+  const table = useReactTable({
+    data: rows,
+    columns: [
+      {
+        id: "#",
+        header: "#",
+        enableHiding: false,
+        enableSorting: false,
+        accessorFn: (_row: TableRowView, index: number) => index + 1,
+      },
+      {
+        id: "name",
+        header: "Name",
+        accessorFn: (row: TableRowView) => row.group1.name,
+      },
+      {
+        id: "path",
+        header: "Path",
+        accessorFn: (row: TableRowView) => row.absolutePath,
+      },
+    ],
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <VirtualizedTable
+      headerGroups={table.getHeaderGroups()}
+      rows={table.getRowModel().rows}
+      rowIndex={rows.findIndex(
+        (row) => row.absolutePath === selectedAbsolutePath,
+      )}
+      columnVisibility={{}}
+      searchQuery="job-1"
+      parameterSearchValuesByPath={new Map()}
+      selectedAbsolutePath={selectedAbsolutePath}
+      selectRow={setSelectedAbsolutePath}
+      focusUnitTree={() => undefined}
+      openDetailPane={() => undefined}
+      restoreFocusRequest={{ revision: 0 }}
+      gridAriaLabel="Units"
+    />
+  );
+};
+
 const renderTree = (
   rootUnits: FlowGraphUnitDto[],
   options: {
+    canOpenScopeUnit?: (unit: FlowGraphUnitDto) => boolean;
     currentUnitId?: string;
+    focusRequest?: UnitTreeFocusRequest;
     selectedUnitId?: string;
     isUnitEnabled?: (unit: FlowGraphUnitDto) => boolean;
+    onEscape?: VoidFunction;
     onEnterUnit?: (unitId: string) => void;
+    onOpenScope?: (unitId: string) => void;
     onSelectUnit?: (unitId: string) => void;
   } = {},
 ) =>
@@ -162,11 +251,15 @@ const renderTree = (
       <UnitTreeSelector
         rootUnits={rootUnits}
         unitById={createUnitById(rootUnits)}
+        canOpenScopeUnit={options.canOpenScopeUnit}
         currentUnitId={options.currentUnitId}
+        focusRequest={options.focusRequest}
         selectedUnitId={options.selectedUnitId}
         autoScrollSelectedUnit={false}
         isUnitEnabled={options.isUnitEnabled}
+        onEscape={options.onEscape}
         onEnterUnit={options.onEnterUnit}
+        onOpenScope={options.onOpenScope}
         onSelectUnit={options.onSelectUnit ?? (() => undefined)}
         ariaLabel="Unit tree"
         title="Unit tree"
@@ -283,6 +376,110 @@ suite("Browser accessibility DOM", () => {
     assert.ok(view.getByRole("treeitem", { name: /child/i }));
   });
 
+  test("selects and focuses rows while child pointer controls stay isolated", () => {
+    const child = createUnit("/root/child", 1, [], "/root");
+    const root = createUnit("/root", 0, [child]);
+    const selected: string[] = [];
+    const opened: string[] = [];
+    const view = renderTree([root], {
+      canOpenScopeUnit: (unit) => unit.id === root.id,
+      onOpenScope: (unitId) => opened.push(unitId),
+      onSelectUnit: (unitId) => selected.push(unitId),
+    });
+    const rootRow = view.getByRole("treeitem", { name: /root/i });
+    const rowFrame = rootRow.querySelector<HTMLElement>(
+      '[data-unit-tree-row="true"]',
+    );
+    const expandButton = rootRow.querySelector("button");
+
+    assert.ok(rowFrame);
+    assert.ok(expandButton);
+    fireEvent.click(expandButton);
+    assert.deepStrictEqual(selected, []);
+    const childRow = view.container.querySelector(
+      '[data-unit-tree-unit-id="/root/child"]',
+    ) as HTMLElement | null;
+    assert.ok(childRow);
+    assert.strictEqual(childRow.getAttribute("role"), "treeitem");
+
+    const openScopeButton = rootRow.querySelectorAll("button")[1];
+    assert.ok(openScopeButton);
+    fireEvent.click(openScopeButton);
+    assert.deepStrictEqual(opened, [root.id]);
+    assert.deepStrictEqual(selected, []);
+
+    fireEvent.click(childRow);
+    assert.deepStrictEqual(selected, [child.id]);
+
+    fireEvent.mouseDown(rowFrame);
+    assert.strictEqual(document.activeElement, rootRow);
+    fireEvent.click(rowFrame);
+    assert.deepStrictEqual(selected, [child.id, root.id]);
+  });
+
+  test("exposes disabled nested rows and keeps them out of selection", () => {
+    const child = createUnit("/root/disabled", 1, [], "/root");
+    const root = createUnit("/root", 0, [child]);
+    const selected: string[] = [];
+    const view = renderTree([root], {
+      currentUnitId: root.id,
+      isUnitEnabled: (unit) => unit.id !== child.id,
+      onSelectUnit: (unitId) => selected.push(unitId),
+    });
+    const rootRow = view.getByRole("treeitem", { name: /^root$/i });
+    const childRow = view.getByRole("treeitem", { name: /disabled/i });
+
+    assert.strictEqual(childRow.getAttribute("aria-disabled"), "true");
+    assert.strictEqual(childRow.tabIndex, -1);
+    rootRow.focus();
+    fireEvent.mouseDown(childRow);
+    assert.strictEqual(document.activeElement, rootRow);
+    fireEvent.click(childRow);
+
+    assert.deepStrictEqual(selected, []);
+  });
+
+  test("reveals a requested nested row and delegates scope and Escape actions", () => {
+    const child = createUnit("/root/child", 1, [], "/root");
+    const root = createUnit("/root", 0, [child]);
+    const opened: string[] = [];
+    let escaped = 0;
+    const view = renderTree([root], {
+      canOpenScopeUnit: (unit) => unit.id === root.id,
+      focusRequest: { revision: 1, targetUnitId: child.id },
+      onEscape: () => {
+        escaped += 1;
+      },
+      onOpenScope: (unitId) => opened.push(unitId),
+    });
+    const childRow = view.getByRole("treeitem", { name: /child/i });
+
+    assert.strictEqual(document.activeElement, childRow);
+
+    const rootRow = view.getByRole("treeitem", { name: /^root$/i });
+    rootRow.focus();
+    fireEvent.keyDown(rootRow, { key: "Enter", altKey: true });
+    fireEvent.keyDown(rootRow, { key: "Escape" });
+
+    assert.deepStrictEqual(opened, [root.id]);
+    assert.strictEqual(escaped, 1);
+  });
+
+  test("renders a bounded deep tree with one active row", () => {
+    const { deepest, root } = createDeepTree(128);
+    const view = renderTree([root], { selectedUnitId: deepest.id });
+    const rows = view.getAllByRole("treeitem");
+
+    assert.strictEqual(rows.length, 129);
+    assert.strictEqual(rows.filter((row) => row.tabIndex === 0).length, 1);
+    assert.strictEqual(
+      view
+        .getByRole("treeitem", { name: /deep-128/i })
+        .getAttribute("aria-level"),
+      "129",
+    );
+  });
+
   test("separates Enter focus handoff from Space selection", () => {
     const root = createUnit("/root", 0);
     const selected: string[] = [];
@@ -384,6 +581,225 @@ suite("Browser accessibility DOM", () => {
       results.violations.map(({ id }) => id),
       [],
     );
+  });
+
+  test("keeps the virtualized table grid accessible and keyboard-addressable", () => {
+    const postedMessages: unknown[] = [];
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <TableGridFixture rowCount={128} />
+      </ThemeProvider>,
+    );
+    const grid = view.getByRole("grid", { name: "Units" });
+    const headers = within(grid).getAllByRole("columnheader");
+    const cells = within(grid).getAllByRole("gridcell");
+
+    assert.strictEqual(grid.getAttribute("aria-rowcount"), "131");
+    assert.strictEqual(grid.getAttribute("aria-colcount"), "3");
+    assert.ok(headers.length >= 3);
+    assert.ok(cells.length > 0);
+    assert.strictEqual(
+      cells.filter((cell) => cell.getAttribute("tabindex") === "0").length,
+      1,
+    );
+    assert.ok(cells.some((cell) => cell.getAttribute("aria-colindex") === "2"));
+
+    const focusedCell = cells.find(
+      (cell) => cell.getAttribute("tabindex") === "0",
+    );
+    assert.ok(focusedCell);
+    focusedCell?.focus();
+    fireEvent.keyDown(focusedCell, { key: "ArrowRight" });
+
+    assert.strictEqual(
+      document.activeElement?.getAttribute("role"),
+      "gridcell",
+    );
+    assert.ok(postedMessages.length >= 1);
+    delete window.vscode;
+  });
+
+  test("keeps focused and selected rows distinct during keyboard traversal", () => {
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <TableGridFixture rowCount={128} />
+      </ThemeProvider>,
+    );
+    const firstRow = view.getByRole("row", { name: /job-0/i });
+    const firstCell = within(firstRow).getAllByRole("gridcell")[0];
+    firstCell.focus();
+    fireEvent.keyDown(firstCell, { key: "ArrowDown" });
+
+    const secondRow = view.getByRole("row", { name: /job-1/i });
+    assert.strictEqual(firstRow.getAttribute("aria-selected"), "true");
+    assert.strictEqual(secondRow.getAttribute("aria-selected"), "false");
+    assert.strictEqual(
+      within(secondRow)
+        .getAllByRole("gridcell")
+        .some((cell) => cell.getAttribute("tabindex") === "0"),
+      true,
+    );
+
+    const secondCell = within(secondRow).getAllByRole("gridcell")[0];
+    fireEvent.keyDown(secondCell, { key: "Enter" });
+    assert.strictEqual(firstRow.getAttribute("aria-selected"), "false");
+    assert.strictEqual(secondRow.getAttribute("aria-selected"), "true");
+  });
+
+  test("keeps the shared search control localized, focusable, and callback-driven", () => {
+    const submittedQueries: string[] = [];
+    const navigatedQueries: Array<[string, HeaderSearchDirection]> = [];
+    let clearCount = 0;
+    const labels: HeaderSearchControlLabels = {
+      helperText: {
+        noResults: "一致する結果はありません。",
+        matched: "一致する対象を選択しています。",
+        idle: "検索対象を入力してください。",
+      },
+      navigation: {
+        resultAriaLabel: ({ current, total }) => `${current} / ${total}`,
+        previousTooltip: "前の結果",
+        previousAriaLabel: "前の結果",
+        nextTooltip: "次の結果",
+        nextAriaLabel: "次の結果",
+      },
+    };
+    const controlProps = {
+      matchedTargetId: "/root/target",
+      resultPosition: { current: 2, total: 3 },
+      placeholderLabel: "検索対象",
+      labels,
+      onSearchNavigate: (query: string, direction: HeaderSearchDirection) =>
+        navigatedQueries.push([query, direction]),
+      onSearchSubmit: (query: string) => submittedQueries.push(query),
+      onSearchClear: () => {
+        clearCount += 1;
+      },
+    };
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <HeaderSearchControl {...controlProps} />
+      </ThemeProvider>,
+    );
+    const input = view.getByRole("textbox") as HTMLInputElement;
+    const longQuery = `  ${"対象".repeat(128)}  `;
+
+    assert.ok(input.placeholder.startsWith("検索対象...("));
+    assert.strictEqual(
+      view.getByText("一致する対象を選択しています。").textContent,
+      "一致する対象を選択しています。",
+    );
+    assert.strictEqual(view.getByLabelText("2 / 3").textContent, "2/3");
+    assert.strictEqual(
+      (view.getByRole("button", { name: "前の結果" }) as HTMLButtonElement)
+        .disabled,
+      false,
+    );
+
+    fireEvent.change(input, { target: { value: longQuery } });
+    fireEvent.keyUp(input, { key: "Enter" });
+    fireEvent.keyUp(input, { key: "Enter", shiftKey: true });
+    fireEvent.blur(input);
+    assert.strictEqual(input.value, longQuery);
+    assert.deepStrictEqual(navigatedQueries, [
+      [longQuery, "next"],
+      [longQuery, "previous"],
+    ]);
+    assert.deepStrictEqual(submittedQueries, [longQuery]);
+
+    const isMacShortcut = input.placeholder.endsWith("(\u2318F)");
+    view.getByRole("button", { name: "次の結果" }).focus();
+    const shortcutEvent = new dom.window.KeyboardEvent("keydown", {
+      key: "f",
+      cancelable: true,
+      ctrlKey: !isMacShortcut,
+      metaKey: isMacShortcut,
+    });
+    document.dispatchEvent(shortcutEvent);
+    assert.strictEqual(shortcutEvent.defaultPrevented, true);
+    assert.strictEqual(document.activeElement, input);
+
+    fireEvent.click(view.getByRole("button", { name: "検索をクリアする。" }));
+    assert.strictEqual(clearCount, 1);
+    assert.strictEqual(input.value, "");
+    assert.strictEqual(document.activeElement, input);
+
+    view.rerender(
+      <ThemeProvider theme={createTheme()}>
+        <HeaderSearchControl
+          {...controlProps}
+          matchedTargetId={undefined}
+          resultPosition={{ current: 0, total: 0 }}
+        />
+      </ThemeProvider>,
+    );
+    assert.strictEqual(
+      view.getByText("一致する結果はありません。").textContent,
+      "一致する結果はありません。",
+    );
+    assert.strictEqual(
+      view.getByRole("button", { name: "前の結果" }).hasAttribute("disabled"),
+      true,
+    );
+    assert.strictEqual(
+      view.getByRole("button", { name: "次の結果" }).hasAttribute("disabled"),
+      true,
+    );
+  });
+
+  test("keeps grouped display-column controls discoverable and scoped", () => {
+    const createLeafColumn = (id: string, label: string) => {
+      const column = {
+        id,
+        columns: [],
+        columnDef: { header: label, enableHiding: true },
+        getLeafColumns: () => [column],
+        getIsVisible: () => false,
+      };
+      return column;
+    };
+    const alpha = createLeafColumn("group.alpha", "Alpha");
+    const beta = createLeafColumn("group.beta", "Beta");
+    const group = {
+      id: "group",
+      columns: [alpha, beta],
+      columnDef: { header: "Group columns", enableHiding: true },
+      getLeafColumns: () => [alpha, beta],
+      getIsVisible: () => false,
+    };
+    const visibilityUpdates: unknown[] = [];
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const table = {
+      getAllColumns: () => [group],
+      setColumnVisibility: (update: (current: object) => object) =>
+        visibilityUpdates.push(update({})),
+      toggleAllColumnsVisible: () => undefined,
+    };
+    const view = render(
+      <ThemeProvider theme={createTheme()}>
+        <DisplayColumnSelector
+          table={table as never}
+          columnVisibility={{}}
+          anchorEl={anchor}
+          open={true}
+          onClose={() => undefined}
+        />
+      </ThemeProvider>,
+    );
+
+    fireEvent.click(view.getByText("Group columns"));
+    assert.ok(view.getByText("Alpha"));
+    assert.ok(view.getByText("Beta"));
+
+    const leafSwitch = view.getAllByRole("checkbox").at(-1);
+    assert.ok(leafSwitch);
+    fireEvent.click(leafSwitch as HTMLElement);
+    assert.deepStrictEqual(visibilityUpdates, [{ "group.beta": true }]);
   });
 
   test("keeps native flow actions one-shot and uses graph fallback focus", () => {

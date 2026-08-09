@@ -17,9 +17,11 @@ export type SemanticDiffCommandResult =
       error: {
         code:
           | "no-active-editor"
+          | "active-editor-failed"
           | "cancelled"
           | "read-failed"
           | "parse-failed"
+          | "render-failed"
           | "display-failed";
         message: string;
       };
@@ -55,7 +57,11 @@ const safeShowErrorMessage = async (
   deps: SemanticDiffCommandDeps,
   message: string,
 ): Promise<void> => {
-  await deps.showErrorMessage(message);
+  try {
+    await deps.showErrorMessage(message);
+  } catch {
+    // A notification failure must not replace the command's repository-owned result.
+  }
 };
 
 const readBeforeDefinition = async (
@@ -65,12 +71,18 @@ const readBeforeDefinition = async (
   | { kind: "cancelled" }
   | { kind: "failed" }
 > => {
-  const selected = await deps.showOpenDialog({
-    canSelectFiles: true,
-    canSelectFolders: false,
-    canSelectMany: false,
-    openLabel: "Select Before Definition",
-  });
+  let selected: vscode.Uri[] | undefined;
+  try {
+    selected = await deps.showOpenDialog({
+      canSelectFiles: true,
+      canSelectFolders: false,
+      canSelectMany: false,
+      openLabel: "Select Before Definition",
+    });
+  } catch {
+    return { kind: "failed" };
+  }
+
   const beforeUri = selected?.[0];
   if (!beforeUri) {
     return { kind: "cancelled" };
@@ -89,7 +101,15 @@ const readBeforeDefinition = async (
 export const executeCompareSemanticDiffCommand = async (
   deps: SemanticDiffCommandDeps,
 ): Promise<SemanticDiffCommandResult> => {
-  const activeEditor = deps.getActiveEditor();
+  let activeEditor: vscode.TextEditor | undefined;
+  try {
+    activeEditor = deps.getActiveEditor();
+  } catch {
+    const message = "The active JP1/AJS definition could not be accessed.";
+    await safeShowErrorMessage(deps, message);
+    return commandError("active-editor-failed", message);
+  }
+
   if (!activeEditor) {
     const message = "Open a JP1/AJS definition before running semantic diff.";
     await safeShowErrorMessage(deps, message);
@@ -106,21 +126,45 @@ export const executeCompareSemanticDiffCommand = async (
     return commandError("read-failed", message);
   }
 
-  const reportInput = {
-    beforeContent: beforeDefinition.content,
-    afterContent: activeEditor.document.getText(),
-  };
-  const reportResult = deps.buildSemanticDiffReportData(reportInput);
+  let reportInput: Parameters<BuildSemanticDiffReportData>[0];
+  try {
+    reportInput = {
+      beforeContent: beforeDefinition.content,
+      afterContent: activeEditor.document.getText(),
+    };
+  } catch {
+    const message = "Active JP1/AJS definition could not be read.";
+    await safeShowErrorMessage(deps, message);
+    return commandError("read-failed", message);
+  }
+
+  let reportResult: ReturnType<BuildSemanticDiffReportData>;
+  try {
+    reportResult = deps.buildSemanticDiffReportData(reportInput);
+  } catch {
+    const message =
+      "Semantic diff could not parse one or both JP1/AJS definitions.";
+    await safeShowErrorMessage(deps, message);
+    return commandError("parse-failed", message);
+  }
+
   if (!reportResult.ok) {
     const message =
       "Semantic diff could not parse one or both JP1/AJS definitions.";
     await safeShowErrorMessage(deps, message);
     return commandError("parse-failed", message);
   }
-  const report = deps.renderSemanticDiffMarkdown(
-    reportResult.changeSet,
-    deps.language,
-  );
+  let report: string;
+  try {
+    report = deps.renderSemanticDiffMarkdown(
+      reportResult.changeSet,
+      deps.language,
+    );
+  } catch {
+    const message = "Semantic diff report could not be rendered.";
+    await safeShowErrorMessage(deps, message);
+    return commandError("render-failed", message);
+  }
 
   try {
     await deps.openReport(report);

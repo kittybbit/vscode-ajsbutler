@@ -24,28 +24,6 @@ const parseRuleValue = (
     : undefined;
 };
 
-export type ParsedScheduleDateValue = {
-  rule: number;
-  yearMonth?: string;
-  day?: string;
-};
-
-export const parseScheduleDateValue = (
-  rawValue: string | undefined,
-): ParsedScheduleDateValue | undefined => {
-  const matched =
-    /^((\d{1,3}),)?((\d{4}\/)?\d{2}\/)?(([+*@])?\d{2}|([+*@])?b(-\d{2})?|\+?(su|mo|tu|we|th|fr|sa)(:(\d|b))?|en|ud)$/.exec(
-      rawValue ?? "",
-    );
-  return matched
-    ? {
-        rule: resolveScheduleRuleNumber(matched[2]),
-        yearMonth: matched[3],
-        day: matched[5],
-      }
-    : undefined;
-};
-
 export const parseParentScheduleRuleValue = (
   rawValue: string | undefined,
 ): ParsedRuleValue | undefined => parseRuleValue(rawValue, /^\d{1,3}$/);

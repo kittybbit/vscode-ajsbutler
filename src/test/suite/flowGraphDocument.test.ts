@@ -158,6 +158,25 @@ suite("Flow Graph Document", () => {
     ]);
   });
 
+  test("reports a malformed relation container without creating edges", () => {
+    const document = cloneDocument();
+    const jobnet = document.rootUnits[0].children[0];
+    jobnet.relations = { malformed: true } as never;
+
+    const result = buildFlowGraphResult(document, jobnet.id);
+
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.deepStrictEqual(result.graph.edges, []);
+    assert.deepStrictEqual(result.issues, [
+      {
+        code: "invalid_relation",
+        message: "Relations must be an array; invalid relations were omitted.",
+        unitPath: "/root/jobnet",
+      },
+    ]);
+  });
+
   test("revalidates a changed document instead of returning stale data", () => {
     const document = cloneDocument();
     const jobnetId = document.rootUnits[0].children[0].id;

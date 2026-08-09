@@ -83,7 +83,9 @@ suite("Viewer request messages", () => {
       undefined,
       { type: "unknown" },
       { type: "ready", data: {} },
+      { type: "ready", extra: true },
       { type: "resource", data: {} },
+      { type: "resource", data: { scrollType: "table" }, extra: true },
       {
         type: "resource",
         data: {
@@ -92,8 +94,12 @@ suite("Viewer request messages", () => {
           scrollType: "table",
         },
       },
+      { type: "save", data: "csv", extra: true },
       { type: "operation", data: "unknown.operation" },
-      { type: "navigate", data: { targetView: "flow", absolutePath: "" } },
+      {
+        type: "navigate",
+        data: { targetView: "flow", absolutePath: "/root", extra: true },
+      },
       {
         type: "search",
         data: {
@@ -106,10 +112,29 @@ suite("Viewer request messages", () => {
         },
       },
       {
+        type: "search",
+        data: {
+          surface: "table",
+          action: "submitted",
+          result: "matched",
+          mode: "partial",
+          scope: "visible_rows",
+          extra: true,
+        },
+      },
+      {
         type: "performance",
         data: {
           operation: "parse",
           result: "success",
+        },
+      },
+      {
+        type: "performance",
+        data: {
+          operation: "flow_render",
+          result: "success",
+          extra: true,
         },
       },
       new RequestEnvelope(),

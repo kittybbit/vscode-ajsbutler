@@ -1,6 +1,6 @@
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import type {
-  BuildSyntaxDiagnosticsOptions,
+  DiagnoseAjsDefinitionOptions,
   SyntaxDiagnosticCategory,
   SyntaxDiagnosticDto,
 } from "./syntaxDiagnosticTypes";
@@ -27,7 +27,7 @@ const withDiagnosticCategory = (
 
 export const buildSemanticSyntaxDiagnostics = (
   document: AjsDocument,
-  options: BuildSyntaxDiagnosticsOptions = {},
+  options: DiagnoseAjsDefinitionOptions = {},
 ): SyntaxDiagnosticDto[] => [
   ...buildScheduleRuleDiagnostics(document, options),
   ...buildJobEndJudgmentDiagnostics(document),

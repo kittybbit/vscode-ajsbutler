@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "SDD Create Feature"
+  short_description: "Create a scoped SDD feature entry"
+  default_prompt: >-
+    Route to the feature-author role and use $sdd-create-feature to clarify a
+    proposed feature and create its SDD docs.

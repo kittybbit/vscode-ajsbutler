@@ -24,8 +24,6 @@ semantic diff/report, and telemetry workflows.
   Renders table and flow DTOs with React and browser-side UI libraries.
 - `src/bootstrap`
   Owns extension composition, capability selection, activation, and lifecycle.
-- `src/shared`
-  Contains host-neutral contracts shared across outer boundaries.
 - `src/resource`
   Contains repository-owned static resources.
 - `src/antlr`

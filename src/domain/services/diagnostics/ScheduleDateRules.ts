@@ -1,5 +1,8 @@
 import type { AjsParameter } from "../../models/ajs/AjsDocument";
-import { parseScheduleDateValue } from "../../models/parameters/scheduleRuleHelpers";
+import {
+  interpretScheduleDateValue,
+  type ScheduleDateDay,
+} from "../../models/parameters/scheduleDateInterpreter";
 
 export type ParsedExplicitScheduleDateValue = {
   hasExplicitRuleNumber: boolean;
@@ -7,10 +10,8 @@ export type ParsedExplicitScheduleDateValue = {
   year?: number;
   month?: number;
   dayValue: string;
+  day: ScheduleDateDay;
 };
-
-const toOptionalNumber = (rawValue: string | undefined): number | undefined =>
-  rawValue === undefined ? undefined : Number(rawValue);
 
 const isNumberInRange = (
   value: number,
@@ -27,18 +28,18 @@ const isOptionalNumberInRange = (
 export const parseExplicitScheduleDateDiagnosticValue = (
   rawValue: string | undefined,
 ): ParsedExplicitScheduleDateValue | undefined => {
-  const parsed = parseScheduleDateValue(rawValue);
-  if (!parsed?.day) {
+  const parsed = interpretScheduleDateValue(rawValue);
+  if (!parsed) {
     return undefined;
   }
 
-  const yearMonthMatch = /^((\d{4})\/)?(\d{2})\/$/.exec(parsed.yearMonth ?? "");
   return {
-    hasExplicitRuleNumber: /^\d{1,3},/.test(rawValue ?? ""),
+    hasExplicitRuleNumber: parsed.hasExplicitRuleNumber,
     ruleNumber: parsed.rule,
-    year: toOptionalNumber(yearMonthMatch?.[2]),
-    month: toOptionalNumber(yearMonthMatch?.[3]),
-    dayValue: parsed.day,
+    year: parsed.year,
+    month: parsed.month,
+    dayValue: parsed.dayValue,
+    day: parsed.day,
   };
 };
 
@@ -59,38 +60,26 @@ export const isValidScheduleDateYear = (
 export const isValidScheduleDateMonth = (month: number | undefined): boolean =>
   isOptionalNumberInRange(month, 1, 12);
 
-const reservedScheduleDateDayTokens = new Set(["en", "ud"]);
-
 type ScheduleDateDayTokenValidator = (
   parsed: ParsedExplicitScheduleDateValue,
 ) => boolean | undefined;
 
-const toMatchedNumber = (
-  pattern: RegExp,
-  value: string,
-  groupIndex: number,
-): number | undefined => {
-  const matched = pattern.exec(value);
-  return matched ? Number(matched[groupIndex]) : undefined;
-};
-
 const isReservedScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined =>
-  reservedScheduleDateDayTokens.has(parsed.dayValue)
+  parsed.day.kind === "en" || parsed.day.kind === "ud"
     ? parsed.month === undefined
     : undefined;
 
 const isExplicitCalendarDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  const day = toMatchedNumber(/^(\d{2})$/, parsed.dayValue, 1);
-  if (day === undefined) {
+  if (parsed.day.kind !== "calendar") {
     return undefined;
   }
 
   return isNumberInRange(
-    day,
+    parsed.day.value,
     1,
     getCalendarMonthDayLimit(parsed.year, parsed.month),
   );
@@ -99,57 +88,61 @@ const isExplicitCalendarDayToken = (
 const isRelativeScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  const day = toMatchedNumber(/^([+*@])(\d{2})$/, parsed.dayValue, 2);
-  if (day === undefined) {
+  if (
+    parsed.day.kind !== "relative" &&
+    parsed.day.kind !== "open" &&
+    parsed.day.kind !== "closed"
+  ) {
     return undefined;
   }
 
-  return isNumberInRange(day, 1, 35);
+  return isNumberInRange(parsed.day.value, 1, 35);
 };
 
 const getBackwardScheduleDateOffsetLimit = (
   parsed: ParsedExplicitScheduleDateValue,
-  direction: string | undefined,
+  prefix: "+" | "*" | "@" | undefined,
 ): number =>
-  direction ? 34 : getCalendarMonthDayLimit(parsed.year, parsed.month) - 1;
+  prefix ? 34 : getCalendarMonthDayLimit(parsed.year, parsed.month) - 1;
 
 const isValidBackwardScheduleDateOffset = (
   parsed: ParsedExplicitScheduleDateValue,
   offset: number | undefined,
-  direction: string | undefined,
+  prefix: "+" | "*" | "@" | undefined,
 ): boolean =>
   isOptionalNumberInRange(
     offset,
     0,
-    getBackwardScheduleDateOffsetLimit(parsed, direction),
+    getBackwardScheduleDateOffsetLimit(parsed, prefix),
   );
 
 const isBackwardScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  const backwardDayMatch = /^([+*@])?b(?:-(\d{2}))?$/.exec(parsed.dayValue);
-  if (!backwardDayMatch) {
+  if (parsed.day.kind !== "backward") {
     return undefined;
   }
 
-  const direction = backwardDayMatch[1];
-  const offset = backwardDayMatch[2] ? Number(backwardDayMatch[2]) : undefined;
-
-  return isValidBackwardScheduleDateOffset(parsed, offset, direction);
+  return isValidBackwardScheduleDateOffset(
+    parsed,
+    parsed.day.offset,
+    parsed.day.prefix,
+  );
 };
 
 const isWeekdayScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  const weekdayMatch = /^\+(su|mo|tu|we|th|fr|sa)(?::(\d|b))?$/.exec(
-    parsed.dayValue,
-  );
-  if (!weekdayMatch) {
+  if (parsed.day.kind !== "weekday" || parsed.day.prefix !== "+") {
     return undefined;
   }
 
-  const occurrence = weekdayMatch[2];
-  return occurrence === undefined || /^[1-5b]$/.test(occurrence);
+  const occurrence = parsed.day.occurrence;
+  return (
+    occurrence === undefined ||
+    occurrence === "b" ||
+    (typeof occurrence === "number" && isNumberInRange(occurrence, 1, 5))
+  );
 };
 
 const scheduleDateDayTokenValidators: readonly ScheduleDateDayTokenValidator[] =
@@ -173,6 +166,7 @@ const isValidUserDefinedScheduleDate = (
 ): boolean =>
   parsed.hasExplicitRuleNumber &&
   parsed.ruleNumber === 0 &&
+  parsed.day.kind === "ud" &&
   parsed.month === undefined;
 
 const isValidExplicitScheduleDateRuleNumber = (
@@ -196,7 +190,7 @@ export const isValidExplicitScheduleDate = (
   const parsed = parseExplicitScheduleDateDiagnosticValue(parameter.value);
   return (
     parsed !== undefined &&
-    (parsed.dayValue === "ud"
+    (parsed.day.kind === "ud"
       ? isValidUserDefinedScheduleDate(parsed)
       : isValidExplicitScheduleDateRuleNumber(parsed) &&
         isValidExplicitScheduleDateFields(parsed, scheduleLimitYear))

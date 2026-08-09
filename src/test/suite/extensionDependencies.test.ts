@@ -22,7 +22,7 @@ suite("Extension dependencies", () => {
 
     assert.strictEqual(dependencies.host, "desktop");
     assert.strictEqual(typeof dependencies.telemetry.report, "function");
-    assert.strictEqual(typeof dependencies.buildSyntaxDiagnostics, "function");
+    assert.strictEqual(typeof dependencies.diagnoseAjsDefinition, "function");
     assert.strictEqual(typeof dependencies.buildUnitList, "function");
     assert.strictEqual(typeof dependencies.findParameterHover, "function");
     assert.deepStrictEqual(dependencies.findParameterHover("ty", "en"), {

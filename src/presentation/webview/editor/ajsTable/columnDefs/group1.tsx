@@ -1,5 +1,5 @@
 import { CellContext, GroupColumnDef } from "@tanstack/table-core";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 import { unitInformationUnitTypeLabel } from "../../unitInformationLocalization";
 import Link from "@mui/material/Link";
 import React from "react";
@@ -16,7 +16,7 @@ const parentPathCell = (
   handleJump: (id: string) => void,
 ) => {
   const ParentPathCell = (
-    props: CellContext<UnitListRowView, string | undefined>,
+    props: CellContext<TableRowView, string | undefined>,
   ) => {
     const group1 = rowViewByPath.get(props.row.original.absolutePath)?.group1;
     return group1?.parentId ? (
@@ -40,7 +40,7 @@ const parentPathCell = (
 };
 
 const resolveUnitTypeLabel =
-  (language: string) => (rowView: UnitListRowView | undefined) => {
+  (language: string) => (rowView: TableRowView | undefined) => {
     const group1 = rowView?.group1;
     if (!group1) {
       return undefined;
@@ -55,7 +55,7 @@ const resolveUnitTypeLabel =
 const group1 = (
   context: ColumnGroupContext,
   options: Group1Options,
-): GroupColumnDef<UnitListRowView, unknown> => {
+): GroupColumnDef<TableRowView, unknown> => {
   const { columnHelper, labels, rowViewByPath } = context;
   const { handleJump, language } = options;
 

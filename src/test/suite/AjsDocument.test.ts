@@ -133,4 +133,62 @@ suite("ajsDocument", () => {
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
     assert.strictEqual(posted[0]?.data, null);
   });
+
+  test("cancels a pending update when the panel is disposed", async () => {
+    const posted: Array<{ type: string; data: unknown }> = [];
+    let disposePanel: (() => void) | undefined;
+    const document = {
+      getText() {
+        return "";
+      },
+      uri: { toString: () => "file:///sample.ajs" },
+    } as vscode.TextDocument;
+    const panel = {
+      webview: {
+        postMessage(message: { type: string; data: unknown }) {
+          posted.push(message);
+        },
+      },
+      onDidDispose(callback: () => void) {
+        disposePanel = callback;
+        return { dispose() {} };
+      },
+    } as unknown as vscode.WebviewPanel;
+
+    createDebouncedAjsDocumentChange(buildUnitList, 20)(document, panel);
+    disposePanel?.();
+
+    await new Promise((resolve) => setTimeout(resolve, 35));
+
+    assert.deepStrictEqual(posted, []);
+  });
+
+  test("dispose cancels pending updates and prevents later scheduling", async () => {
+    const posted: Array<{ type: string; data: unknown }> = [];
+    const document = {
+      getText() {
+        return "";
+      },
+      uri: { toString: () => "file:///sample.ajs" },
+    } as vscode.TextDocument;
+    const panel = {
+      webview: {
+        postMessage(message: { type: string; data: unknown }) {
+          posted.push(message);
+        },
+      },
+      onDidDispose() {
+        return { dispose() {} };
+      },
+    } as unknown as vscode.WebviewPanel;
+    const onChange = createDebouncedAjsDocumentChange(buildUnitList, 20);
+
+    onChange(document, panel);
+    onChange.dispose();
+    onChange(document, panel);
+
+    await new Promise((resolve) => setTimeout(resolve, 35));
+
+    assert.deepStrictEqual(posted, []);
+  });
 });

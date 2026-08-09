@@ -3,7 +3,7 @@ import { CellContext, ColumnHelper } from "@tanstack/table-core";
 import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import type { UnitInformationColumnGroupLabels } from "../../unitInformationLocalization";
-import { UnitListRowView } from "../../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "../tableViewerData";
 
 type PrimitiveType =
   | string
@@ -31,18 +31,18 @@ const isPrimitiveType = (value: unknown): value is PrimitiveType => {
 };
 type BoxType = PrimitiveType;
 export type AccessorType = BoxType | BoxType[];
-export type RowViewByPath = ReadonlyMap<string, UnitListRowView>;
-export type TableColumnHelper = ColumnHelper<UnitListRowView>;
+export type RowViewByPath = ReadonlyMap<string, TableRowView>;
+export type TableColumnHelper = ColumnHelper<TableRowView>;
 export type ColumnGroupContext = {
   columnHelper: TableColumnHelper;
   labels: UnitInformationColumnGroupLabels;
   rowViewByPath: RowViewByPath;
 };
 type ColumnCell<TValue> = (
-  props: CellContext<UnitListRowView, TValue>,
+  props: CellContext<TableRowView, TValue>,
 ) => React.ReactNode;
 type RowViewSelector<TValue> = (
-  rowView: UnitListRowView | undefined,
+  rowView: TableRowView | undefined,
 ) => TValue | undefined;
 type ColumnLabels = {
   label: string;
@@ -85,7 +85,7 @@ export const rowViewColumn = <TValue,>({
   const column = {
     id,
     header,
-    accessorFn: (row: UnitListRowView) =>
+    accessorFn: (row: TableRowView) =>
       selectValue(rowViewByPath.get(row.absolutePath)),
   };
   if (cell) {
@@ -133,7 +133,7 @@ export const arrayBoxCell = <TValue,>(
   mapValue: (value: TValue) => BoxType = (value) => value as BoxType,
 ) => {
   const ArrayBoxCell = (
-    props: CellContext<UnitListRowView, TValue[] | undefined>,
+    props: CellContext<TableRowView, TValue[] | undefined>,
   ) => {
     const values = props.getValue<TValue[] | undefined>();
     return Array.isArray(values) ? (
@@ -144,7 +144,7 @@ export const arrayBoxCell = <TValue,>(
 };
 
 export const ratingCell = (
-  props: CellContext<UnitListRowView, number | undefined>,
+  props: CellContext<TableRowView, number | undefined>,
 ) => {
   const priority = props.getValue<number | undefined>();
   return priority ? (

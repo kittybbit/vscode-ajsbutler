@@ -1,25 +1,17 @@
 import {
-  createTelemetryEvent,
-  telemetryEvents,
-} from "../../application/telemetry/telemetryEvent";
+  createExtensionLifecycleActivatedEvent,
+  createExtensionLifecycleDeactivatedEvent,
+  createLegacyExtensionActivatedEvent,
+  createLegacyExtensionDeactivatedEvent,
+} from "../../application/telemetry/extensionLifecycleTelemetry";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import { MyExtension } from "./MyExtension";
 
 export const reportExtensionActivated = (myExtension: MyExtension): void => {
+  myExtension.telemetry.report(createLegacyExtensionActivatedEvent());
   myExtension.telemetry.report(
-    createTelemetryEvent(telemetryEvents.legacyExtensionActivated, {
-      development: DEVELOPMENT,
-    }),
+    createExtensionLifecycleActivatedEvent(getTelemetryHost()),
   );
-  const event = createTelemetryEvent(
-    telemetryEvents.extensionLifecycleActivated,
-    {
-      development: DEVELOPMENT,
-      host: getTelemetryHost(),
-      result: "success",
-    },
-  );
-  myExtension.telemetry.report(event);
 };
 
 export const reportAndDisposeExtensionRuntime = (
@@ -29,19 +21,9 @@ export const reportAndDisposeExtensionRuntime = (
     return;
   }
 
+  myExtension.telemetry.report(createLegacyExtensionDeactivatedEvent());
   myExtension.telemetry.report(
-    createTelemetryEvent(telemetryEvents.legacyExtensionDeactivated, {
-      development: DEVELOPMENT,
-    }),
+    createExtensionLifecycleDeactivatedEvent(getTelemetryHost()),
   );
-  const event = createTelemetryEvent(
-    telemetryEvents.extensionLifecycleDeactivated,
-    {
-      development: DEVELOPMENT,
-      host: getTelemetryHost(),
-      result: "success",
-    },
-  );
-  myExtension.telemetry.report(event);
   myExtension.dispose();
 };

@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { getCurrentUnitLabel } from "../../presentation/webview/editor/ajsFlow/Header";
+import { getCurrentUnitLabel } from "../../presentation/webview/editor/ajsFlow/flowHeaderPresentation";
 import { createFlowTestUnit } from "../support/flowUnits";
 
 suite("Flow Header", () => {
@@ -12,6 +12,17 @@ suite("Flow Header", () => {
     assert.strictEqual(
       getCurrentUnitLabel(
         createFlowTestUnit({ unitType: "n", isRootJobnet: false }),
+      ),
+      "N",
+    );
+    assert.strictEqual(
+      getCurrentUnitLabel(createFlowTestUnit(), "ja"),
+      "ルートジョブネット",
+    );
+    assert.strictEqual(
+      getCurrentUnitLabel(
+        createFlowTestUnit({ unitType: "n", isRootJobnet: false }),
+        "ja",
       ),
       "N",
     );

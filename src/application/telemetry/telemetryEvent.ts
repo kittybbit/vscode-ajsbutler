@@ -1,3 +1,5 @@
+import type { ValidatedTelemetryEvent } from "./TelemetryPort";
+
 export type TelemetryProperties = Readonly<Record<string, string>>;
 
 export const telemetryPropertyKeys = {
@@ -59,14 +61,6 @@ export type TelemetryEventDefinition<
 > = Readonly<{
   name: Name;
   allowedProperties: readonly Key[];
-}>;
-
-declare const validatedTelemetryEventBrand: unique symbol;
-
-export type ValidatedTelemetryEvent<Name extends string = string> = Readonly<{
-  name: Name;
-  properties: TelemetryProperties;
-  readonly [validatedTelemetryEventBrand]: true;
 }>;
 
 export type TelemetryEvent<Name extends string = string> =

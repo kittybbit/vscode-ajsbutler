@@ -7,12 +7,7 @@ import Typography from "@mui/material/Typography";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { UnitDefinitionDialogDto } from "../../../../../application/unit-definition/buildUnitDefinition";
 import type { FlowGraphUnitDto } from "../../../../../application/flow-graph/flowGraphDocument";
-import {
-  CurrentUnitIdStateType,
-  DialogDataStateType,
-} from "../flowViewerStateTypes";
 import { unitInformationUnitTypeLabel } from "../../unitInformationLocalization";
 import { useMyAppContext } from "../../MyContexts";
 import { unitInformationMessage } from "../../unitInformationLocalization";
@@ -24,43 +19,13 @@ import {
   resolveFlowNodeHeaderTone,
   shouldRenderNodeComment,
 } from "./flowNodeDisplay";
-import type { FlowRelationshipFocusRole } from "../flowRelationshipFocus";
+import type {
+  FlowNodeData,
+  FlowNodePresentationModel,
+} from "../flowNodePresentationModel";
 import { buildNodeSxProps } from "./nodeSxProps";
 import { flowNodeHandleTop } from "./flowNodeGeometry";
-import type { FlowGraphSemanticDiffHighlight } from "../../../../../application/flow-graph/buildFlowGraphCore";
 export { buildNodeSxProps } from "./nodeSxProps";
-
-export type AjsNode = {
-  nestedPanel?: {
-    panelOffsetXPx: number;
-    panelOffsetYPx: number;
-    panelWidthPx: number;
-    panelHeightPx: number;
-  };
-  unitId: string;
-  absolutePath: string;
-  unitDefinition?: UnitDefinitionDialogDto;
-  label: string;
-  comment?: string;
-  ty: FlowGraphUnitDto["unitType"];
-  gty?: "n" | "p";
-  isAncestor: boolean;
-  isCurrent: boolean;
-  isRootJobnet: boolean;
-  hasSchedule: boolean;
-  hasWaitedFor: boolean;
-  semanticDiffHighlight?: FlowGraphSemanticDiffHighlight;
-  isHovered?: boolean;
-  isSearchMatch?: boolean;
-  isCurrentSearchResult?: boolean;
-  isSelected?: boolean;
-  relationshipFocusRole?: FlowRelationshipFocusRole;
-  canExpandNested?: boolean;
-  isExpandedNested?: boolean;
-  toggleExpandedUnitId?: (unitId: string) => void;
-} & DialogDataStateType &
-  CurrentUnitIdStateType &
-  Record<string, unknown>;
 
 export const nodeBadgeSxProps: SxProps<Theme> = {
   minWidth: "3.8em",
@@ -238,7 +203,10 @@ const statusPresentation: Record<
 export type FlowNodeHeaderItemKind = "rootBadge" | FlowNodeStatus | "action";
 
 export const getFlowNodeHeaderItemKinds = (
-  data: Pick<AjsNode, "hasSchedule" | "hasWaitedFor" | "isRootJobnet">,
+  data: Pick<
+    FlowNodePresentationModel,
+    "hasSchedule" | "hasWaitedFor" | "isRootJobnet"
+  >,
   hasHeaderAction: boolean,
 ): FlowNodeHeaderItemKind[] => [
   ...(data.isRootJobnet
@@ -248,7 +216,9 @@ export const getFlowNodeHeaderItemKinds = (
   ...(hasHeaderAction ? (["action"] satisfies FlowNodeHeaderItemKind[]) : []),
 ];
 
-const NodeStatusIndicators: FC<{ data: AjsNode }> = ({ data }) => {
+const NodeStatusIndicators: FC<{ data: FlowNodePresentationModel }> = ({
+  data,
+}) => {
   const { lang = "en" } = useMyAppContext();
   const statuses = getFlowNodeHeaderItemKinds(data, false).filter(
     (itemKind): itemKind is FlowNodeStatus =>
@@ -301,7 +271,7 @@ const NodeStatusIndicators: FC<{ data: AjsNode }> = ({ data }) => {
 };
 
 export const FlowNodeCard: FC<{
-  data: AjsNode;
+  data: FlowNodeData;
   kind: FlowNodeKind;
   className?: string;
   headerAction?: React.ReactNode;

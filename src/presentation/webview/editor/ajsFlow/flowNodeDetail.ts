@@ -1,6 +1,6 @@
 import type { Edge, Node } from "@xyflow/react";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
-import type { AjsNode } from "./nodes/AjsNode";
+import type { FlowNodeData } from "./flowNodePresentationModel";
 
 export type FlowNodeRelationshipSummary = {
   predecessorCount: number;
@@ -12,8 +12,8 @@ export type FlowNodeRelationshipSummary = {
 export type FlowNodeDetail = FlowNodeRelationshipSummary & {
   unitId: string;
   name: string;
-  unitType: AjsNode["ty"];
-  groupType?: AjsNode["gty"];
+  unitType: FlowNodeData["ty"];
+  groupType?: FlowNodeData["gty"];
   comment?: string;
   absolutePath: string;
   parentName?: string;
@@ -157,11 +157,11 @@ export const summarizeFlowNodeRelationships = (
   };
 };
 
-const canOpenNodeAsScope = (node: Node<AjsNode>): boolean =>
+const canOpenNodeAsScope = (node: Node<FlowNodeData>): boolean =>
   !node.data.isCurrent && (node.type === "jobnet" || node.type === "condition");
 
 export const buildFlowNodeDetail = (
-  node: Node<AjsNode> | undefined,
+  node: Node<FlowNodeData> | undefined,
   edges: readonly Edge[],
   unitById: ReadonlyMap<string, FlowGraphUnitDto>,
 ): FlowNodeDetail | undefined => {

@@ -2,122 +2,61 @@ import React, {
   FC,
   KeyboardEvent,
   memo,
-  ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { flexRender, HeaderGroup, Row } from "@tanstack/react-table";
+import { HeaderGroup, Row } from "@tanstack/react-table";
 import type { VisibilityState } from "@tanstack/table-core";
-import {
-  ItemProps,
-  ListRange,
-  TableComponents,
-  TableVirtuoso,
-  TableVirtuosoHandle,
-} from "react-virtuoso";
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import type { SxProps, Theme } from "@mui/material/styles";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import { createViewerOperationRequest } from "../../viewerRequestMessages";
+import { ListRange, TableVirtuoso, TableVirtuosoHandle } from "react-virtuoso";
+import type { TableRowView } from "./tableViewerData";
 import TableHeader from "./TableHeader";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
-import { AccessorType } from "./columnDefs/common";
-import { isAjsTableSearchHit } from "./globalFilter";
 import {
-  viewerFocusIndicatorSx,
-  viewerSearchBorder,
-  viewerSelectionBorder,
-} from "../shared/viewerThemeStyles";
-import {
-  getStickyColumnRevealScrollLeft,
-  getTableGridFocusKey,
   isTableGridNavigationEventOwnedByCell,
+  getStickyColumnRevealScrollLeft,
+} from "./navigation";
+import {
+  decideTableGridNavigation,
+  decideTableGridRestoration,
+  getTableGridFocusKey,
   isTableGridNavigationKey,
-  isTableRowSelected,
-  moveTableGridFocus,
-  resolveUnitListGridShortcut,
+  resolveTableGridCommitPath,
   resolveTableGridFocus,
-  resolveTableGridRestorationFocus,
+  resolveUnitListGridShortcut,
   type TableGridFocus,
   type TableGridFocusRequest,
-} from "./navigation";
+} from "./tableNavigationModel";
+import {
+  createTableComponents,
+  renderVisibleTableCell,
+  type VirtualizedTableContext,
+} from "./tableSemanticRenderer";
+
+export {
+  getSearchHitCellSx,
+  tableGridFocusSx,
+  tableRowStateSx,
+} from "./tableSemanticRenderer";
 
 type VirtualizedTableProps = {
-  headerGroups: HeaderGroup<UnitListRowView>[];
-  rows: Row<UnitListRowView>[];
+  headerGroups: HeaderGroup<TableRowView>[];
+  rows: Row<TableRowView>[];
   rowIndex?: number;
   columnVisibility: VisibilityState;
   searchQuery: string;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   selectedAbsolutePath?: string;
   selectRow: (absolutePath: string) => void;
-  focusUnitTree: VoidFunction;
+  commitFocusedRow?: (absolutePath?: string) => string | undefined;
+  focusUnitTree: (absolutePath?: string) => void;
   openDetailPane: (absolutePath: string) => void;
   restoreFocusRequest: TableGridFocusRequest;
+  documentRevision?: number;
+  onGridFocusChange?: (focus: TableGridFocus) => void;
   gridAriaLabel?: string;
-};
-
-type VirtualizedTableContext = {
-  columnCount: number;
-  columnVisibilityRevision: string;
-  headerRowCount: number;
-  rowCount: number;
-  rowIndex?: number;
-  selectedAbsolutePath?: string;
-  gridAriaLabel?: string;
-};
-
-type VirtualizedTableRowProps = ItemProps<Row<UnitListRowView>> & {
-  context: VirtualizedTableContext;
-};
-
-type VisibleTableCellRenderContext = {
-  cell: ReturnType<Row<UnitListRowView>["getVisibleCells"]>[number];
-  row: Row<UnitListRowView>;
-  searchQuery: string;
-  parameterSearchValuesByPath: ParameterSearchValuesByPath;
-  getCurrentFocus: () => TableGridFocus | undefined;
-  rowIndex: number;
-  visibleColumnIds: readonly string[];
-  onFocus: (focus: TableGridFocus) => void;
-  onKeyDown: (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => void;
-  registerFocusElement: (
-    focus: TableGridFocus,
-    element: HTMLElement | null,
-  ) => void;
-};
-
-const styleTableCell: SxProps<Theme> = {
-  whiteSpace: "nowrap",
-  verticalAlign: "top",
-  "&:first-child": {
-    position: "sticky",
-    left: 0,
-    backgroundColor: (theme) => theme.palette.background.default,
-  },
-};
-
-export const tableGridFocusSx = viewerFocusIndicatorSx;
-
-export const tableRowStateSx = {
-  '&[aria-selected="true"] > td': {
-    boxShadow: (theme) =>
-      `inset 0 2px 0 ${viewerSelectionBorder(theme)}, inset 0 -2px 0 ${viewerSelectionBorder(theme)}`,
-  },
-  "@media (forced-colors: active)": {
-    '&[aria-selected="true"] > td': {
-      boxShadow: "inset 0 2px 0 CanvasText, inset 0 -2px 0 CanvasText",
-    },
-  },
 };
 
 export const getFixedTableVirtuosoStyle = () => ({
@@ -128,7 +67,7 @@ export const getFixedTableVirtuosoStyle = () => ({
   boxSizing: "border-box" as const,
 });
 
-const omitVirtuosoContext = <T extends object>(
+export const omitVirtuosoContext = <T extends object>(
   props: T,
 ): Omit<T, "context"> => {
   const propsWithoutContext = { ...props } as T & {
@@ -136,26 +75,6 @@ const omitVirtuosoContext = <T extends object>(
   };
   Reflect.deleteProperty(propsWithoutContext, "context");
   return propsWithoutContext;
-};
-
-const searchHitBackgroundColor = {
-  dark: "rgba(255, 214, 102, 0.24)",
-  light: "rgba(255, 214, 102, 0.36)",
-};
-
-export const getSearchHitCellSx = (isSearchHit: boolean) => {
-  if (!isSearchHit) {
-    return undefined;
-  }
-  return {
-    backgroundColor: (theme: Theme) =>
-      searchHitBackgroundColor[theme.palette.mode],
-    borderBottom: (theme: Theme) => `2px dotted ${viewerSearchBorder(theme)}`,
-    "@media (forced-colors: active)": {
-      backgroundColor: "Canvas",
-      borderBottom: "2px dotted Highlight",
-    },
-  };
 };
 
 const revealGridFocusElement = (element: HTMLElement): void => {
@@ -186,81 +105,7 @@ const revealGridFocusElement = (element: HTMLElement): void => {
   }
 };
 
-const renderVisibleTableCell = ({
-  cell,
-  row,
-  searchQuery,
-  parameterSearchValuesByPath,
-  getCurrentFocus,
-  rowIndex,
-  visibleColumnIds,
-  onFocus,
-  onKeyDown,
-  registerFocusElement,
-}: VisibleTableCellRenderContext): ReactNode => {
-  const parameters =
-    parameterSearchValuesByPath.get(row.original.absolutePath) ?? [];
-  const isSearchHit = isAjsTableSearchHit(
-    cell.getValue<AccessorType | undefined>(),
-    parameters,
-    searchQuery,
-  );
-  const focus: TableGridFocus = {
-    kind: "cell",
-    absolutePath: row.original.absolutePath,
-    columnId: cell.column.id,
-  };
-  const currentFocus = getCurrentFocus();
-  const isCurrent =
-    currentFocus?.kind === "cell" &&
-    currentFocus.absolutePath === focus.absolutePath &&
-    currentFocus.columnId === focus.columnId;
-  return (
-    <TableCell
-      ref={(element) =>
-        registerFocusElement(focus, element as HTMLElement | null)
-      }
-      key={cell.id}
-      role="gridcell"
-      aria-colindex={visibleColumnIds.indexOf(cell.column.id) + 1}
-      aria-rowindex={rowIndex}
-      tabIndex={isCurrent ? 0 : -1}
-      onClick={(event) => event.currentTarget.focus()}
-      onFocus={() => onFocus(focus)}
-      onKeyDown={(event) => onKeyDown(event, focus)}
-      sx={[styleTableCell, tableGridFocusSx, getSearchHitCellSx(isSearchHit)]}
-    >
-      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-    </TableCell>
-  );
-};
-
-const VirtualizedTableRow = memo(
-  ({ context, ...props }: VirtualizedTableRowProps) => {
-    const absolutePath = props.item.original.absolutePath;
-    const { headerRowCount, rowIndex, selectedAbsolutePath } = context;
-    const isSelected = isTableRowSelected({
-      absolutePath,
-      selectedAbsolutePath,
-      index: props["data-index"],
-      revealedRowIndex: rowIndex,
-    });
-    return (
-      <TableRow
-        {...props}
-        role="row"
-        aria-rowindex={headerRowCount + props["data-index"] + 1}
-        aria-selected={isSelected}
-        hover={true}
-        selected={isSelected}
-        sx={tableRowStateSx}
-      />
-    );
-  },
-);
-VirtualizedTableRow.displayName = "VirtualizedTableRow";
-
-const getColumnVisibilityRevision = (
+export const getColumnVisibilityRevision = (
   columnVisibility: VisibilityState,
 ): string =>
   Object.entries(columnVisibility)
@@ -268,52 +113,7 @@ const getColumnVisibilityRevision = (
     .map(([columnId, visible]) => `${columnId}:${visible}`)
     .join("|");
 
-const tableComponents: TableComponents<
-  Row<UnitListRowView>,
-  VirtualizedTableContext
-> = {
-  Scroller: React.forwardRef<HTMLDivElement>(function scroller(props, ref) {
-    return (
-      <TableContainer
-        {...omitVirtuosoContext(props)}
-        data-table-grid-scroller
-        ref={ref}
-        component={Paper}
-        elevation={3}
-      />
-    );
-  }),
-  Table: (props: object) => {
-    const { context } = props as { context?: VirtualizedTableContext };
-    const tableProps = omitVirtuosoContext(props);
-    return (
-      <Table
-        {...tableProps}
-        role="grid"
-        aria-rowcount={
-          context ? context.headerRowCount + context.rowCount : undefined
-        }
-        aria-colcount={context?.columnCount}
-        aria-label={context?.gridAriaLabel}
-        size="small"
-        stickyHeader
-      />
-    );
-  },
-  TableHead: React.forwardRef<HTMLTableSectionElement>(
-    function tableHead(props, ref) {
-      const tableHeadProps = omitVirtuosoContext(props);
-      return <TableHead {...tableHeadProps} ref={ref} />;
-    },
-  ),
-  TableBody: React.forwardRef<HTMLTableSectionElement>(
-    function tableBody(props, ref) {
-      const tableBodyProps = omitVirtuosoContext(props);
-      return <TableBody {...tableBodyProps} ref={ref} />;
-    },
-  ),
-  TableRow: VirtualizedTableRow,
-};
+const tableComponents = createTableComponents(omitVirtuosoContext);
 
 const VirtualizedTable: FC<VirtualizedTableProps> = ({
   headerGroups,
@@ -324,9 +124,12 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   parameterSearchValuesByPath,
   selectedAbsolutePath,
   selectRow,
+  commitFocusedRow: commitFocusedRowProp,
   focusUnitTree,
   openDetailPane,
   restoreFocusRequest,
+  documentRevision = 0,
+  onGridFocusChange,
   gridAriaLabel,
 }) => {
   console.log("render VirtualizedTable.");
@@ -350,26 +153,59 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   const gridFocus = useRef<TableGridFocus | undefined>(undefined);
   const selectedAbsolutePathRef = useRef(selectedAbsolutePath);
   selectedAbsolutePathRef.current = selectedAbsolutePath;
+  const observedDocumentRevision = useRef(documentRevision);
+  const observedSelectedAbsolutePath = useRef(selectedAbsolutePath);
+  const focusElements = useRef(new Map<string, HTMLElement>());
+  const headerReturnFocus = useRef<TableGridFocus | undefined>(undefined);
+  const pendingFocusKey = useRef<string | undefined>(undefined);
+  const keyboardFocusPendingSelection = useRef(false);
+  const pointerActionPending = useRef(false);
+  const observedRestoreFocusRevision = useRef(restoreFocusRequest.revision);
+  const documentRevisionChanged =
+    observedDocumentRevision.current !== documentRevision;
+  const selectionChanged =
+    observedSelectedAbsolutePath.current !== selectedAbsolutePath;
+  if (documentRevisionChanged) {
+    observedDocumentRevision.current = documentRevision;
+    gridFocus.current = undefined;
+    pendingFocusKey.current = undefined;
+    headerReturnFocus.current = undefined;
+    keyboardFocusPendingSelection.current = false;
+    pointerActionPending.current = false;
+    observedRestoreFocusRevision.current = restoreFocusRequest.revision;
+  } else if (
+    selectionChanged &&
+    gridFocus.current?.kind === "cell" &&
+    gridFocus.current.absolutePath !== selectedAbsolutePath
+  ) {
+    gridFocus.current = undefined;
+    pendingFocusKey.current = undefined;
+    keyboardFocusPendingSelection.current = false;
+    pointerActionPending.current = false;
+  }
+  const previousFocus = gridFocus.current;
   const currentFocus = resolveTableGridFocus(
     gridFocus.current,
-    selectedAbsolutePath,
+    documentRevisionChanged ? undefined : selectedAbsolutePath,
     rowAbsolutePaths,
     visibleColumnIds,
     sortableColumnIds,
   );
+  if (
+    getTableGridFocusKey(previousFocus) !== getTableGridFocusKey(currentFocus)
+  ) {
+    pendingFocusKey.current = undefined;
+    keyboardFocusPendingSelection.current = false;
+  }
   gridFocus.current = currentFocus;
   const [pageSize, setPageSize] = useState(10);
-  const focusElements = useRef(new Map<string, HTMLElement>());
-  const headerReturnFocus = useRef<TableGridFocus | undefined>(undefined);
-  const pendingFocusKey = useRef<string | undefined>(undefined);
-  const observedSelectedAbsolutePath = useRef(selectedAbsolutePath);
-  const observedRestoreFocusRevision = useRef(restoreFocusRequest.revision);
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
-  const reportRowSelected = useCallback(
-    () =>
-      window.vscode.postMessage(createViewerOperationRequest("unit.select")),
-    [],
+  const notifyGridFocusChange = useCallback(
+    (focus: TableGridFocus): void => {
+      onGridFocusChange?.(focus);
+    },
+    [onGridFocusChange],
   );
   const registerFocusElement = useCallback(
     (focus: TableGridFocus, element: HTMLElement | null) => {
@@ -407,22 +243,56 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   const handleGridFocus = useCallback(
     (focus: TableGridFocus) => {
       applyRovingFocus(focus);
+      notifyGridFocusChange(focus);
+      if (keyboardFocusPendingSelection.current) {
+        keyboardFocusPendingSelection.current = false;
+        return;
+      }
+      if (pointerActionPending.current) {
+        pointerActionPending.current = false;
+        return;
+      }
       if (
         focus.kind === "cell" &&
         focus.absolutePath !== selectedAbsolutePathRef.current
       ) {
-        selectedAbsolutePathRef.current = focus.absolutePath;
-        reportRowSelected();
         selectRow(focus.absolutePath);
       }
     },
-    [applyRovingFocus, reportRowSelected, selectRow],
+    [applyRovingFocus, notifyGridFocusChange, selectRow],
+  );
+  const handleGridPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      keyboardFocusPendingSelection.current = false;
+      const target = event.target as HTMLElement | null;
+      pointerActionPending.current = Boolean(
+        target?.closest?.("[data-grid-cell-action]"),
+      );
+    },
+    [],
+  );
+  const commitFocusedGridRow = useCallback(
+    (absolutePath?: string): string | undefined => {
+      const targetPath =
+        absolutePath ??
+        resolveTableGridCommitPath(
+          gridFocus.current,
+          selectedAbsolutePathRef.current,
+        );
+      if (!targetPath) return undefined;
+      if (commitFocusedRowProp) return commitFocusedRowProp(targetPath);
+      selectRow(targetPath);
+      return targetPath;
+    },
+    [commitFocusedRowProp, selectRow],
   );
   const focusGridTarget = useCallback(
-    (nextFocus: TableGridFocus | undefined) => {
+    (nextFocus: TableGridFocus | undefined, fromKeyboard = false) => {
       if (!nextFocus) return;
+      if (fromKeyboard) keyboardFocusPendingSelection.current = true;
       const nextKey = getTableGridFocusKey(nextFocus);
       applyRovingFocus(nextFocus);
+      notifyGridFocusChange(nextFocus);
       const mountedElement = nextKey
         ? focusElements.current.get(nextKey)
         : undefined;
@@ -443,7 +313,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         });
       }
     },
-    [applyRovingFocus, rowAbsolutePaths],
+    [applyRovingFocus, notifyGridFocusChange, rowAbsolutePaths],
   );
   const handleGridKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>, focus: TableGridFocus) => {
@@ -467,17 +337,22 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       });
       if (shortcut === "focusColumnHeader" && focus.kind === "cell") {
         event.preventDefault();
+        commitFocusedGridRow(focus.absolutePath);
         headerReturnFocus.current = focus;
         focusGridTarget({ kind: "header", columnId: focus.columnId });
         return;
       }
       if (shortcut === "focusTree") {
         event.preventDefault();
-        focusUnitTree();
+        const committedPath = commitFocusedGridRow(
+          focus.kind === "cell" ? focus.absolutePath : undefined,
+        );
+        focusUnitTree(committedPath);
         return;
       }
       if (shortcut === "openDetails" && focus.kind === "cell") {
         event.preventDefault();
+        commitFocusedGridRow(focus.absolutePath);
         openDetailPane(focus.absolutePath);
         return;
       }
@@ -487,7 +362,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
           event.preventDefault();
           headerReturnFocus.current = undefined;
           focusGridTarget(
-            resolveTableGridRestorationFocus(
+            decideTableGridRestoration(
               returnFocus,
               returnFocus.kind === "cell"
                 ? returnFocus.absolutePath
@@ -495,13 +370,14 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
               rowAbsolutePaths,
               visibleColumnIds,
               sortableColumnIds,
-            ),
+            ).focus,
           );
         }
         return;
       }
       if (!isTableGridNavigationKey(event.key, event.ctrlKey)) {
         if (focus.kind === "cell" && event.key === "Enter") {
+          commitFocusedGridRow(focus.absolutePath);
           const action = event.currentTarget.querySelector<HTMLElement>(
             "[data-grid-cell-action]",
           );
@@ -514,7 +390,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       }
 
       event.preventDefault();
-      const nextFocus = moveTableGridFocus({
+      const navigationDecision = decideTableGridNavigation({
         current: focus,
         key: event.key,
         ctrlKey: event.ctrlKey,
@@ -523,11 +399,13 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
         visibleColumnIds,
         sortableColumnIds,
       });
+      const nextFocus = navigationDecision.focus;
       const nextKey = getTableGridFocusKey(nextFocus);
       if (!nextFocus || nextKey === getTableGridFocusKey(focus)) return;
-      focusGridTarget(nextFocus);
+      focusGridTarget(nextFocus, true);
     },
     [
+      commitFocusedGridRow,
       focusGridTarget,
       focusUnitTree,
       openDetailPane,
@@ -567,7 +445,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
   );
 
   const itemContent = useCallback(
-    (index: number, data: Row<UnitListRowView>) =>
+    (index: number, data: Row<TableRowView>) =>
       data.getVisibleCells().map((cell) =>
         renderVisibleTableCell({
           cell,
@@ -578,6 +456,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
           rowIndex: headerGroups.length + index + 1,
           visibleColumnIds,
           onFocus: handleGridFocus,
+          onPointerDown: handleGridPointerDown,
           onKeyDown: handleGridKeyDown,
           registerFocusElement,
         }),
@@ -587,6 +466,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
       getCurrentFocus,
       handleGridFocus,
       handleGridKeyDown,
+      handleGridPointerDown,
       headerGroups.length,
       parameterSearchValuesByPath,
       registerFocusElement,
@@ -638,19 +518,31 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
     observedSelectedAbsolutePath.current = selectedAbsolutePath;
   }, [selectedAbsolutePath]);
 
+  useEffect(
+    () => () => {
+      gridFocus.current = undefined;
+      pendingFocusKey.current = undefined;
+      headerReturnFocus.current = undefined;
+      keyboardFocusPendingSelection.current = false;
+      pointerActionPending.current = false;
+      focusElements.current.clear();
+    },
+    [],
+  );
+
   useEffect(() => {
     if (observedRestoreFocusRevision.current === restoreFocusRequest.revision) {
       return;
     }
     observedRestoreFocusRevision.current = restoreFocusRequest.revision;
     focusGridTarget(
-      resolveTableGridRestorationFocus(
+      decideTableGridRestoration(
         gridFocus.current,
         restoreFocusRequest.absolutePath ?? selectedAbsolutePath,
         rowAbsolutePaths,
         visibleColumnIds,
         sortableColumnIds,
-      ),
+      ).focus,
     );
   }, [
     focusGridTarget,
@@ -663,7 +555,7 @@ const VirtualizedTable: FC<VirtualizedTableProps> = ({
 
   return (
     <>
-      <TableVirtuoso<Row<UnitListRowView>, VirtualizedTableContext>
+      <TableVirtuoso<Row<TableRowView>, VirtualizedTableContext>
         ref={virtuosoRef}
         style={virtuosoStyle}
         data={rows}

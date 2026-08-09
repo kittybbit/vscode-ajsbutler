@@ -6,6 +6,10 @@ import {
   ViewerFactory,
 } from "../../presentation/vscode/webview/ViewerFactory";
 import {
+  registerViewerPanel,
+  type ViewerPanelRegistration,
+} from "../../presentation/vscode/webview/viewerMessageRouting";
+import {
   NAVIGATE,
   OPERATION,
   READY,
@@ -14,6 +18,19 @@ import {
 } from "../../presentation/webview/viewerRequestMessages";
 
 suite("ViewerFactory", () => {
+  const createRegisterPanel =
+    (
+      telemetry: TelemetryPort,
+      store: { removeByUri(uri: vscode.Uri): void },
+    ): ViewerPanelRegistration =>
+    (request) =>
+      registerViewerPanel({
+        ...request,
+        telemetry,
+        store,
+        showErrorMessage: async () => undefined,
+      });
+
   test("resolves filename-equivalent and stable URI panel titles", () => {
     assert.strictEqual(
       resolveViewerPanelTitle(vscode.Uri.parse("file:///tmp/sample.ajs")),
@@ -30,10 +47,6 @@ suite("ViewerFactory", () => {
   });
 
   test("reuses an existing panel before creating a new one", () => {
-    const telemetry: TelemetryPort = {
-      report() {},
-      dispose() {},
-    };
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
@@ -45,7 +58,6 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         panelByUri() {
           return existingPanel;
@@ -66,6 +78,7 @@ suite("ViewerFactory", () => {
           createCalled = true;
           throw new Error("panel should not be created");
         },
+        registerPanel() {},
       },
     });
 
@@ -78,10 +91,6 @@ suite("ViewerFactory", () => {
   });
 
   test("creates, customizes, and stores a new panel when missing", () => {
-    const telemetry: TelemetryPort = {
-      report() {},
-      dispose() {},
-    };
     const createdPanel = { id: "new" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
@@ -97,31 +106,40 @@ suite("ViewerFactory", () => {
     let createdShowOptions:
       | Parameters<typeof vscode.window.createWebviewPanel>[2]
       | undefined;
+    let createdOptions:
+      | Parameters<typeof vscode.window.createWebviewPanel>[3]
+      | undefined;
     let createdTitle: string | undefined;
+    let storedPanel: vscode.WebviewPanel | undefined;
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         panelByUri() {
-          return undefined;
+          return storedPanel;
         },
         add(receivedUri, receivedPanel) {
+          storedPanel = receivedPanel;
           added.push({ uri: receivedUri, panel: receivedPanel });
         },
         removeByUri() {},
       },
       handlers: {
-        onReady: (receivedDocument, receivedPanel) => {
-          readyArgs = { document: receivedDocument, panel: receivedPanel };
-        },
+        onReady: () => {},
         onNavigate: () => {},
       },
       deps: {
-        createWebviewPanel(_viewType, title, viewColumn) {
+        createWebviewPanel(_viewType, title, viewColumn, options) {
           createdTitle = title;
           createdShowOptions = viewColumn;
+          createdOptions = options;
           return createdPanel;
+        },
+        registerPanel: ({
+          document: receivedDocument,
+          panel: receivedPanel,
+        }) => {
+          readyArgs = { document: receivedDocument, panel: receivedPanel };
         },
       },
     });
@@ -135,14 +153,14 @@ suite("ViewerFactory", () => {
     });
     assert.strictEqual(createdTitle, "sample.ajs");
     assert.strictEqual(createdShowOptions, vscode.ViewColumn.Active);
+    assert.deepStrictEqual(createdOptions, {
+      enableScripts: true,
+      retainContextWhenHidden: true,
+    });
     assert.deepStrictEqual(added, [{ uri: document.uri, panel: createdPanel }]);
   });
 
   test("returns an existing panel without creating a new one", () => {
-    const telemetry: TelemetryPort = {
-      report() {},
-      dispose() {},
-    };
     const existingPanel = { id: "existing" } as unknown as vscode.WebviewPanel;
     const document = {
       fileName: "/tmp/sample.ajs",
@@ -151,7 +169,6 @@ suite("ViewerFactory", () => {
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         panelByUri() {
           return existingPanel;
@@ -162,6 +179,12 @@ suite("ViewerFactory", () => {
       handlers: {
         onReady: () => {},
         onNavigate: () => {},
+      },
+      deps: {
+        createWebviewPanel() {
+          throw new Error("panel should not be created");
+        },
+        registerPanel() {},
       },
     });
 
@@ -209,24 +232,26 @@ suite("ViewerFactory", () => {
         onDidDispose = callback;
         return { dispose() {} };
       },
-    } as vscode.WebviewPanel;
+    } as unknown as vscode.WebviewPanel;
     const added: Array<{
       uri: vscode.Uri;
       panel: vscode.WebviewPanel;
     }> = [];
+    let storedPanel: vscode.WebviewPanel | undefined;
 
     const factory = new ViewerFactory({
       viewType: "ajsbutler.testViewer",
-      telemetry,
       store: {
         removeByUri(uri) {
           removed.push(uri.toString());
+          storedPanel = undefined;
         },
         add(receivedUri, receivedPanel) {
+          storedPanel = receivedPanel;
           added.push({ uri: receivedUri, panel: receivedPanel });
         },
         panelByUri() {
-          return undefined;
+          return storedPanel;
         },
       },
       handlers: {
@@ -246,6 +271,12 @@ suite("ViewerFactory", () => {
         createWebviewPanel() {
           return panel;
         },
+        registerPanel: createRegisterPanel(telemetry, {
+          removeByUri(uri) {
+            removed.push(uri.toString());
+            storedPanel = undefined;
+          },
+        }),
       },
     });
 
@@ -265,6 +296,7 @@ suite("ViewerFactory", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     onDidDispose?.();
+    receiveMessageHandler?.({ type: READY });
 
     assert.deepStrictEqual(calls, [
       "ready:file:///sample.ajs:ajsbutler.testViewer",
@@ -282,5 +314,64 @@ suite("ViewerFactory", () => {
     ]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
     assert.strictEqual(receiverDisposed, true);
+  });
+
+  test("does not return a panel that is disposed during callback registration", () => {
+    const telemetry: TelemetryPort = {
+      report() {},
+      dispose() {},
+    };
+    const document = {
+      uri: vscode.Uri.parse("file:///sample.ajs"),
+    } as vscode.TextDocument;
+    let storedPanel: vscode.WebviewPanel | undefined;
+    let panelDisposed = false;
+    const panel = {
+      webview: {
+        onDidReceiveMessage() {
+          return { dispose() {} };
+        },
+      },
+      onDidDispose(callback: () => void) {
+        callback();
+        return { dispose() {} };
+      },
+      dispose() {
+        panelDisposed = true;
+      },
+    } as unknown as vscode.WebviewPanel;
+
+    const factory = new ViewerFactory({
+      viewType: "ajsbutler.testViewer",
+      store: {
+        panelByUri() {
+          return storedPanel;
+        },
+        add(_uri, receivedPanel) {
+          storedPanel = receivedPanel;
+        },
+        removeByUri() {
+          storedPanel = undefined;
+        },
+      },
+      handlers: {
+        onReady: () => {},
+        onNavigate: () => {},
+      },
+      deps: {
+        createWebviewPanel() {
+          return panel;
+        },
+        registerPanel: createRegisterPanel(telemetry, {
+          removeByUri() {
+            storedPanel = undefined;
+          },
+        }),
+      },
+    });
+
+    assert.throws(() => factory.getPanel(document), /disposed during setup/u);
+    assert.strictEqual(storedPanel, undefined);
+    assert.strictEqual(panelDisposed, true);
   });
 });

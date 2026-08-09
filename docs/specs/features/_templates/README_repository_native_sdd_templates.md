@@ -27,6 +27,10 @@ docs/requirements/use-cases/_template.md
 4. Use CODEX_SDD_PROMPT.template.md to generate SDD documents.
 5. Use CODEX_IMPLEMENTATION_PROMPT.template.md to implement from approved SDD.
 
+After each explicit approval gate, use the approval-gated commit procedure to
+commit only the approved planning package, implementation slice, or Feature
+Exit closure before advancing the lifecycle.
+
 Feature docs should be concise and decision-oriented. Completed refactor-only
 slices are not retained as long-lived feature folders. During Feature Exit,
 propagate only reusable current knowledge to its durable owner and move

@@ -2,8 +2,10 @@ import * as vscode from "vscode";
 import type { FindParameterHover } from "../../../application/editor-feedback/findParameterHover";
 import { createHoverTelemetryEvent } from "../../../application/telemetry/editorFeedbackTelemetry";
 import { toDurationBucket } from "../../../application/telemetry/telemetryBuckets";
-import type { TelemetryEvent } from "../../../application/telemetry/telemetryEvent";
-import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
+import type {
+  TelemetryPort,
+  ValidatedTelemetryEvent,
+} from "../../../application/telemetry/TelemetryPort";
 import { LANGUAGE_ID } from "../constant";
 import { getTelemetryHost } from "../telemetryHost";
 
@@ -20,7 +22,7 @@ type HoverLookupContext = {
 
 const reportHoverTelemetry = (
   telemetry: TelemetryPort | undefined,
-  event: TelemetryEvent,
+  event: ValidatedTelemetryEvent,
 ): void => {
   if (!telemetry) {
     return;

@@ -1,10 +1,7 @@
 import * as vscode from "vscode";
-import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
-import type { ViewerNavigationRequest } from "../../webview/viewerRequestMessages";
-import { postResourceMessage, reportWebviewOperation } from "./messageHandlers";
-import {
-  createViewerMessageHandler,
-  registerViewerPanelDispose,
+import type {
+  ViewerPanelHandlers,
+  ViewerPanelRegistration,
 } from "./viewerMessageRouting";
 
 type ViewerFactoryStore = {
@@ -15,38 +12,14 @@ type ViewerFactoryStore = {
 
 type ViewerFactoryDeps = {
   createWebviewPanel: typeof vscode.window.createWebviewPanel;
-};
-
-const defaultDeps: ViewerFactoryDeps = {
-  createWebviewPanel: vscode.window.createWebviewPanel,
-};
-
-type ViewerReadyHandler = (
-  document: vscode.TextDocument,
-  panel: vscode.WebviewPanel,
-) => void;
-type ViewerNavigateHandler = (
-  document: vscode.TextDocument,
-  event: ViewerNavigationRequest,
-) => void;
-
-type ViewerFactoryHandlers = {
-  onReady: ViewerReadyHandler;
-  onNavigate: ViewerNavigateHandler;
-  onSave?: (content: string) => Promise<void>;
+  registerPanel: ViewerPanelRegistration;
 };
 
 type ViewerFactoryOptions = {
   viewType: string;
-  telemetry: TelemetryPort;
   store: ViewerFactoryStore;
-  handlers: ViewerFactoryHandlers;
-  deps?: ViewerFactoryDeps;
-};
-
-type ViewerCustomizeRequest = {
-  document: vscode.TextDocument;
-  panel: vscode.WebviewPanel;
+  handlers: ViewerPanelHandlers;
+  deps: ViewerFactoryDeps;
 };
 
 export const resolveViewerPanelTitle = (
@@ -63,19 +36,16 @@ export const resolveViewerPanelTitle = (
 export class ViewerFactory {
   #store: ViewerFactoryStore;
   #viewType: string;
-  #telemetry: TelemetryPort;
-  #handlers: ViewerFactoryHandlers;
+  #handlers: ViewerPanelHandlers;
   #deps: ViewerFactoryDeps;
 
   public constructor({
     viewType,
-    telemetry,
     store,
     handlers,
-    deps = defaultDeps,
+    deps,
   }: ViewerFactoryOptions) {
     this.#viewType = viewType;
-    this.#telemetry = telemetry;
     this.#store = store;
     this.#handlers = handlers;
     this.#deps = deps;
@@ -84,7 +54,7 @@ export class ViewerFactory {
   /**
    * Get or create a webview panel for the given URI.
    */
-  public getPanel(document: vscode.TextDocument) {
+  public getPanel(document: vscode.TextDocument): vscode.WebviewPanel {
     console.log(
       `invoke PanelFactory.getPanel. (${this.#viewType}, ${document.uri.toString()})`,
     );
@@ -103,44 +73,6 @@ export class ViewerFactory {
     return this.#store.panelByUri(document.uri);
   }
 
-  private registerStandardViewerCustomize({
-    document,
-    panel,
-  }: ViewerCustomizeRequest): void {
-    const onDidReceiveMessage = createViewerMessageHandler({
-      document,
-      panel,
-      telemetry: this.#telemetry,
-      onReady: this.#handlers.onReady,
-      onResource: (event, receivedPanel) => {
-        console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
-        postResourceMessage(event.data, receivedPanel);
-      },
-      onOperation: reportWebviewOperation,
-      onNavigate: this.#handlers.onNavigate,
-      onSave: this.#handlers.onSave,
-      showErrorMessage: (message) => vscode.window.showErrorMessage(message),
-    });
-    const receiveMessageDispose =
-      panel.webview.onDidReceiveMessage(onDidReceiveMessage);
-
-    registerViewerPanelDispose({
-      uri: document.uri,
-      panel,
-      viewType: this.#viewType,
-      telemetry: this.#telemetry,
-      store: this.#store,
-      receiveMessageDispose,
-    });
-  }
-
-  private customize(document: vscode.TextDocument, panel: vscode.WebviewPanel) {
-    this.registerStandardViewerCustomize({
-      document,
-      panel,
-    });
-  }
-
   private createAndStorePanel(
     document: vscode.TextDocument,
   ): vscode.WebviewPanel {
@@ -153,8 +85,46 @@ export class ViewerFactory {
         retainContextWhenHidden: true,
       },
     );
-    this.customize(document, panel);
-    this.#store.add(document.uri, panel);
+
+    try {
+      // Register the panel before its callbacks so a synchronous disposal
+      // during setup cannot leave a dead panel in the store.
+      this.#store.add(document.uri, panel);
+      if (this.#store.panelByUri(document.uri) !== panel) {
+        throw new Error("Viewer panel could not be registered.");
+      }
+      this.#deps.registerPanel({
+        document,
+        panel,
+        viewType: this.#viewType,
+        handlers: this.#handlers,
+        isActivePanel: () => {
+          try {
+            return this.#store.panelByUri(document.uri) === panel;
+          } catch {
+            return false;
+          }
+        },
+      });
+    } catch (error) {
+      this.#store.removeByUri(document.uri);
+      try {
+        panel.dispose();
+      } catch {
+        // A cleanup failure must not replace the original setup failure.
+      }
+      throw error;
+    }
+
+    if (this.#store.panelByUri(document.uri) !== panel) {
+      try {
+        panel.dispose();
+      } catch {
+        // The panel may already have been disposed by a lifecycle callback.
+      }
+      throw new Error("Viewer panel was disposed during setup.");
+    }
+
     return panel;
   }
 }

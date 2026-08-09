@@ -5,8 +5,8 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
-import type { TableGridFocus } from "./navigation";
+import type { TableRowView } from "./tableViewerData";
+import type { TableGridFocus } from "./tableNavigationModel";
 import { viewerFocusIndicatorSx } from "../shared/viewerThemeStyles";
 
 const styleTableCell: SxProps<Theme> = {
@@ -20,7 +20,7 @@ const styleTableCell: SxProps<Theme> = {
 };
 
 type TableHeaderProps = {
-  headerGroup: HeaderGroup<UnitListRowView>;
+  headerGroup: HeaderGroup<TableRowView>;
   headerRowIndex: number;
   currentFocus: TableGridFocus | undefined;
   visibleColumnIds: readonly string[];
@@ -36,15 +36,15 @@ const sortLabelSx = viewerFocusIndicatorSx;
 
 const headerCellFocusSx = viewerFocusIndicatorSx;
 
-const canRenderSortableHeader = (header: Header<UnitListRowView, unknown>) =>
+const canRenderSortableHeader = (header: Header<TableRowView, unknown>) =>
   header.subHeaders.length === 0 && header.column.getCanSort();
 
 export const canFocusTableHeader = (
-  header: Pick<Header<UnitListRowView, unknown>, "subHeaders">,
+  header: Pick<Header<TableRowView, unknown>, "subHeaders">,
 ): boolean => header.subHeaders.length === 0;
 
 export const getTableHeaderAriaSort = (
-  header: Pick<Header<UnitListRowView, unknown>, "column">,
+  header: Pick<Header<TableRowView, unknown>, "column">,
 ): "ascending" | "descending" | "none" | undefined => {
   if (!header.column.getCanSort()) return undefined;
   const sort = header.column.getIsSorted();
@@ -52,7 +52,7 @@ export const getTableHeaderAriaSort = (
 };
 
 const renderSortableHeaderContent = (
-  header: Header<UnitListRowView, unknown>,
+  header: Header<TableRowView, unknown>,
   content: React.ReactNode,
   props: TableHeaderProps,
 ): React.ReactNode => {
@@ -81,7 +81,7 @@ const renderSortableHeaderContent = (
 };
 
 const renderHeaderContent = (
-  header: Header<UnitListRowView, unknown>,
+  header: Header<TableRowView, unknown>,
   props: TableHeaderProps,
 ): React.ReactNode => {
   const content = flexRender(
@@ -94,7 +94,7 @@ const renderHeaderContent = (
 };
 
 const renderHeaderCell = (
-  header: Header<UnitListRowView, unknown>,
+  header: Header<TableRowView, unknown>,
   props: TableHeaderProps,
 ): React.ReactNode => {
   const firstLeafColumnId = header.getLeafHeaders()[0]?.column.id;

@@ -54,19 +54,101 @@ export function createDebouncedAjsDocumentChange(
   delay: number = 300,
   telemetry?: TelemetryPort,
 ) {
-  const id = new Map<string, ReturnType<typeof setTimeout>>();
-  return (document: vscode.TextDocument, panel: vscode.WebviewPanel) => {
-    if (panel === undefined) {
+  type PendingChange = {
+    document: vscode.TextDocument;
+    panel: vscode.WebviewPanel;
+    timer: ReturnType<typeof setTimeout>;
+  };
+
+  const pendingByDocument = new Map<string, PendingChange>();
+  const disposedPanels = new WeakSet<vscode.WebviewPanel>();
+  const panelDisposals = new WeakMap<vscode.WebviewPanel, vscode.Disposable>();
+  const disposalSubscriptions = new Set<vscode.Disposable>();
+  let disposed = false;
+
+  const cancelPendingForPanel = (panel: vscode.WebviewPanel): void => {
+    for (const [key, pending] of pendingByDocument) {
+      if (pending.panel !== panel) {
+        continue;
+      }
+      clearTimeout(pending.timer);
+      pendingByDocument.delete(key);
+    }
+  };
+
+  const registerPanelDisposal = (panel: vscode.WebviewPanel): boolean => {
+    if (disposed || disposedPanels.has(panel)) {
+      return false;
+    }
+    if (typeof panel.onDidDispose !== "function") {
+      return true;
+    }
+    if (panelDisposals.has(panel)) {
+      return true;
+    }
+
+    const disposal = panel.onDidDispose(() => {
+      disposedPanels.add(panel);
+      cancelPendingForPanel(panel);
+      const registeredDisposal = panelDisposals.get(panel);
+      if (registeredDisposal) {
+        disposalSubscriptions.delete(registeredDisposal);
+      }
+      panelDisposals.delete(panel);
+    });
+
+    if (disposedPanels.has(panel)) {
+      disposal.dispose();
+      return false;
+    }
+    panelDisposals.set(panel, disposal);
+    disposalSubscriptions.add(disposal);
+    return true;
+  };
+
+  const onChange = (
+    document: vscode.TextDocument,
+    panel: vscode.WebviewPanel,
+  ): void => {
+    if (panel === undefined || !registerPanelDisposal(panel)) {
       return;
     }
+
     const key = document.uri.toString();
-    clearTimeout(id.get(key));
-    id.set(
-      key,
-      setTimeout(() => {
-        console.log(`post a message of changeDocument. ${key}:${id.get(key)}`);
+    const previous = pendingByDocument.get(key);
+    if (previous) {
+      clearTimeout(previous.timer);
+    }
+
+    const pending: PendingChange = {
+      document,
+      panel,
+      timer: setTimeout(() => {
+        if (pendingByDocument.get(key) !== pending) {
+          return;
+        }
+        pendingByDocument.delete(key);
+        if (disposedPanels.has(panel)) {
+          return;
+        }
+        console.log(`post a message of changeDocument. ${key}`);
         postAjsDocument(buildUnitList, document, panel, telemetry);
       }, delay),
-    );
+    };
+    pendingByDocument.set(key, pending);
   };
+
+  return Object.assign(onChange, {
+    dispose: (): void => {
+      disposed = true;
+      for (const pending of pendingByDocument.values()) {
+        clearTimeout(pending.timer);
+      }
+      pendingByDocument.clear();
+      for (const disposal of disposalSubscriptions) {
+        disposal.dispose();
+      }
+      disposalSubscriptions.clear();
+    },
+  });
 }

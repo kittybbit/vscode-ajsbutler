@@ -408,4 +408,47 @@ suite("Build Expanded Flow Graph use case", () => {
       { start: 399, end: 400 },
     );
   });
+
+  test("keeps a bounded large scope deterministic without partial content", () => {
+    const children = Array.from({ length: 500 }, (_, index) =>
+      unit({
+        id: `job-${index}`,
+        unitType: "j",
+        absolutePath: `/scope/job-${index}`,
+        depth: 1,
+        parentId: "scope",
+        layout: { h: index * 16, v: 144 },
+      }),
+    );
+    const document = validatedDocument([
+      unit({
+        id: "scope",
+        unitType: "n",
+        absolutePath: "/scope",
+        depth: 0,
+        children,
+      }),
+    ]);
+
+    const first = buildExpandedFlowGraphResult({
+      document,
+      activeScopeUnitId: "scope",
+      requestedExpandedUnitIds: [],
+    });
+    const second = buildExpandedFlowGraphResult({
+      document,
+      activeScopeUnitId: "scope",
+      requestedExpandedUnitIds: [],
+    });
+
+    assert.strictEqual(first.status, "available");
+    assert.strictEqual(second.status, "available");
+    assert.deepStrictEqual(first, second);
+    if (first.status !== "available") return;
+    assert.strictEqual(first.graph.nodes.length, 501);
+    assert.strictEqual(first.constraints.containmentOrderUnitIds.length, 501);
+    assert.strictEqual(first.graph.nodes[0].id, "job-0");
+    assert.strictEqual(first.graph.nodes.at(-1)?.id, "scope");
+    assert.deepStrictEqual(first.issues, []);
+  });
 });

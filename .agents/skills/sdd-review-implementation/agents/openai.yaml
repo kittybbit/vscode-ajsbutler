@@ -1,0 +1,8 @@
+---
+interface:
+  display_name: "SDD Review Implementation"
+  short_description: "Review one implemented SDD slice"
+  default_prompt: >-
+    Route to the read-only implementation-reviewer role and use
+    $sdd-review-implementation to review one completed approved SDD slice and
+    return Ready or actionable Findings.

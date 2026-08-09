@@ -1,8 +1,8 @@
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 
 export type UnitListDetail = {
-  row: UnitListRowView;
+  row: TableRowView;
   definition?: UnitDefinitionDialogDto;
   predecessorCount: number;
   successorCount: number;
@@ -18,18 +18,18 @@ type RelationshipSetCache = Map<string, ReadonlySet<string>>;
 type RelationshipTraversalContext = {
   cache: RelationshipSetCache;
   direction: RelationshipDirection;
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>;
+  rowViewByPath: ReadonlyMap<string, TableRowView>;
 };
 
 type UnitListDetailResolverContext = {
   detailCache: Map<string, UnitListDetail>;
   nextTraversal: RelationshipTraversalContext;
   previousTraversal: RelationshipTraversalContext;
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>;
+  rowViewByPath: ReadonlyMap<string, TableRowView>;
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>;
 };
 
-const hasWeeklySchedule = (row: UnitListRowView): boolean =>
+const hasWeeklySchedule = (row: TableRowView): boolean =>
   [
     row.group6.su,
     row.group6.mo,
@@ -40,7 +40,7 @@ const hasWeeklySchedule = (row: UnitListRowView): boolean =>
     row.group6.sa,
   ].some(Boolean);
 
-const hasSchedule = (row: UnitListRowView): boolean =>
+const hasSchedule = (row: TableRowView): boolean =>
   [
     hasWeeklySchedule(row),
     row.group6.openDates.length > 0,
@@ -50,11 +50,11 @@ const hasSchedule = (row: UnitListRowView): boolean =>
     Boolean(row.group5.startTimeType),
   ].some(Boolean);
 
-const isNestedExpandable = (row: UnitListRowView): boolean =>
+const isNestedExpandable = (row: TableRowView): boolean =>
   row.group1.unitType === "n";
 
 const directlyRelatedAbsolutePaths = (
-  row: UnitListRowView,
+  row: TableRowView,
   direction: RelationshipDirection,
 ): string[] =>
   (direction === "previous"
@@ -87,7 +87,7 @@ const appendDirectlyRelatedPaths = (
 };
 
 const collectUncachedRelatedAbsolutePaths = (
-  row: UnitListRowView,
+  row: TableRowView,
   context: RelationshipTraversalContext,
 ): Set<string> => {
   const related = new Set<string>();
@@ -106,7 +106,7 @@ const collectUncachedRelatedAbsolutePaths = (
 };
 
 const collectRelatedAbsolutePaths = (
-  row: UnitListRowView,
+  row: TableRowView,
   context: RelationshipTraversalContext,
 ): Set<string> => {
   const cached = context.cache.get(row.absolutePath);
@@ -120,7 +120,7 @@ const collectRelatedAbsolutePaths = (
 
 const buildUnitListDetail = (
   selectedAbsolutePath: string,
-  row: UnitListRowView,
+  row: TableRowView,
   context: UnitListDetailResolverContext,
 ): UnitListDetail => ({
   row,
@@ -146,14 +146,14 @@ const findCachedUnitListDetail = (
 const findSelectedRow = (
   selectedAbsolutePath: string | undefined,
   context: UnitListDetailResolverContext,
-): UnitListRowView | undefined =>
+): TableRowView | undefined =>
   selectedAbsolutePath === undefined
     ? undefined
     : context.rowViewByPath.get(selectedAbsolutePath);
 
 const buildSelectedUnitListDetail = (
   selectedAbsolutePath: string | undefined,
-  row: UnitListRowView | undefined,
+  row: TableRowView | undefined,
   context: UnitListDetailResolverContext,
 ): UnitListDetail | undefined =>
   selectedAbsolutePath === undefined || row === undefined
@@ -188,7 +188,7 @@ const resolveCachedUnitListDetail = (
 };
 
 export const createUnitListDetailResolver = (
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
 ): ((
   selectedAbsolutePath: string | undefined,
@@ -215,7 +215,7 @@ export const createUnitListDetailResolver = (
 
 export const resolveUnitListDetail = (
   selectedAbsolutePath: string | undefined,
-  rowViewByPath: ReadonlyMap<string, UnitListRowView>,
+  rowViewByPath: ReadonlyMap<string, TableRowView>,
   unitDefinitionByPath: ReadonlyMap<string, UnitDefinitionDialogDto>,
 ): UnitListDetail | undefined =>
   createUnitListDetailResolver(

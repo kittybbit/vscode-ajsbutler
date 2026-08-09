@@ -3,14 +3,14 @@ import { AjsParser } from "@generate/parser/AjsParser";
 import { CharStreams } from "antlr4ts/CharStreams";
 import { CommonTokenStream } from "antlr4ts/CommonTokenStream";
 import { ParseTreeWalker } from "antlr4ts/tree/ParseTreeWalker";
-import type { AjsParserError } from "../../application/parsing/AjsParserPort";
 import { Ajs3v12Evaluator } from "./AjsEvaluator";
+import type { AntlrSyntaxError } from "./AntlrSyntaxError";
 import type { AjsRawUnit } from "./raw/AjsRawUnit";
 import { SyntaxErrorListener } from "./SyntaxErrorListener";
 
 export type RawParseAjsResult = {
   rootUnits: AjsRawUnit[];
-  errors: AjsParserError[];
+  errors: AntlrSyntaxError[];
 };
 
 /** Infrastructure-internal ANTLR result used by the normalization adapter. */

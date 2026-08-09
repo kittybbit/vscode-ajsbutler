@@ -1,10 +1,10 @@
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { AjsNode } from "./AjsNode";
+import type { FlowNodePresentationModel } from "../flowNodePresentationModel";
 import { flowNodeGeometryEm } from "./flowNodeGeometry";
 import { viewerFocusBorder } from "../../shared/viewerThemeStyles";
 
 type NodeVisualState = Pick<
-  AjsNode,
+  FlowNodePresentationModel,
   | "isCurrent"
   | "isAncestor"
   | "isRootJobnet"

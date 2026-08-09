@@ -1,0 +1,8 @@
+---
+interface:
+  display_name: "SDD Feature Exit"
+  short_description: "Review and close a completed SDD feature"
+  default_prompt: >-
+    Route to the feature-closer role and use $sdd-feature-exit to verify the
+    completed SDD feature, propagate durable knowledge, and prepare the closure
+    recommendation.

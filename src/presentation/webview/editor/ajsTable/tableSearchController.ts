@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import type { Row } from "@tanstack/table-core";
-import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import { postViewerSearchEvent } from "../shared/viewerSearchTelemetry";
 import type { ParameterSearchValuesByPath } from "./globalFilter";
 import {
@@ -22,7 +22,7 @@ export type TableSearchController = {
 };
 
 type TableSearchControllerContext = {
-  rows: ReadonlyArray<Row<UnitListRowView>>;
+  rows: ReadonlyArray<Row<TableRowView>>;
   parameterSearchValuesByPath: ParameterSearchValuesByPath;
   revealPath: (absolutePath: string) => void;
 };

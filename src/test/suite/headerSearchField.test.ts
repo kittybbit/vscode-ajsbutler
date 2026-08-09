@@ -5,7 +5,7 @@ import {
   isHeaderSearchShortcut,
   isMacBrowserPlatform,
   resolveHeaderSearchHelperText,
-} from "../../presentation/webview/editor/shared/HeaderSearchField";
+} from "../../presentation/webview/editor/shared/headerSearchControlModel";
 
 suite("Header Search Field", () => {
   test("recognizes macOS browser platforms and otherwise falls back safely", () => {
@@ -35,6 +35,13 @@ suite("Header Search Field", () => {
     assert.strictEqual(
       isHeaderSearchShortcut(
         { ctrlKey: true, metaKey: false, key: "g" },
+        false,
+      ),
+      false,
+    );
+    assert.strictEqual(
+      isHeaderSearchShortcut(
+        { ctrlKey: true, metaKey: false, key: "F" },
         false,
       ),
       false,
@@ -101,6 +108,18 @@ suite("Header Search Field", () => {
     assert.strictEqual(
       resolveHeaderSearchHelperText("target", { current: 1, total: 3 }, labels),
       "Matched target.",
+    );
+    assert.strictEqual(
+      resolveHeaderSearchHelperText(
+        undefined,
+        { current: 0, total: 3 },
+        labels,
+      ),
+      "Search targets.",
+    );
+    assert.strictEqual(
+      resolveHeaderSearchHelperText("target", { current: 0, total: 0 }, labels),
+      "No results.",
     );
   });
 });

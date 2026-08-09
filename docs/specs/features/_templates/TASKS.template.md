@@ -42,6 +42,7 @@
 - Status: Pending
 - Approved at:
 - Approved scope:
+- Approved paths:
 
 Implementation must not start while Status is Pending.
 Only clear human approval can change Status to Approved.
@@ -50,6 +51,34 @@ current conversation`; do not copy the approval message.
 
 Reset this section back to Pending when the approved slice is complete and no
 active implementation approval remains.
+
+## Completion Approval
+
+- Status: Pending | Approved
+- Approved at:
+- Approved scope:
+- Approved paths:
+- Implementation review verdict: Pending | Ready
+- Commit status: Not eligible | Eligible | Committed
+
+Completion Approval is a separate human gate after the independent
+implementation review returns `Ready`. It authorizes only the exact completed
+slice recorded here. The approval-committer must create the focused slice
+commit before another slice or Feature Exit starts.
+
+## Closure Approval
+
+- Status: Pending | Approved
+- Approved at:
+- Approved scope:
+- Approved paths:
+- Feature Exit verdict: Pending | Close
+- Commit status: Not eligible | Eligible | Committed
+
+Closure Approval is a separate human gate after `feature-closer` returns
+`Close`. It authorizes only the recorded durable-document propagation, closure
+evidence, and selected feature-folder removal. The approval-committer must
+create the focused closure commit before the feature is closed.
 
 ## Implementation Slices
 

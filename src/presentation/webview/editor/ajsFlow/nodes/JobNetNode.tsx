@@ -5,7 +5,8 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import classNames from "classnames";
-import { ActionIcon, AjsNode, FlowNodeCard, handleStyle } from "./AjsNode";
+import { ActionIcon, FlowNodeCard, handleStyle } from "./AjsNode";
+import type { FlowNodeData } from "../flowNodePresentationModel";
 import { handleClickChildOpen, handleClickNestedToggle } from "./Utils";
 import { useMyAppContext } from "../../MyContexts";
 import {
@@ -13,12 +14,14 @@ import {
   unitInformationMessage,
 } from "../../unitInformationLocalization";
 
-type JobNetNode = Node<AjsNode, "jobnet">;
+type JobNetNode = Node<FlowNodeData, "jobnet">;
 type JobNetNodeProps = NodeProps<JobNetNode>;
 type JobNetHeaderActionKind = "openScope" | "toggleNested";
 type JobNetHeaderActionRule = {
   kind: JobNetHeaderActionKind;
-  isVisible: (data: Pick<AjsNode, "canExpandNested" | "isCurrent">) => boolean;
+  isVisible: (
+    data: Pick<FlowNodeData, "canExpandNested" | "isCurrent">,
+  ) => boolean;
 };
 
 const headerActionRules: readonly JobNetHeaderActionRule[] = [
@@ -36,13 +39,16 @@ const headerActionRules: readonly JobNetHeaderActionRule[] = [
 export const getJobNetHeaderActionKinds = ({
   canExpandNested,
   isCurrent,
-}: Pick<AjsNode, "canExpandNested" | "isCurrent">): JobNetHeaderActionKind[] =>
+}: Pick<
+  FlowNodeData,
+  "canExpandNested" | "isCurrent"
+>): JobNetHeaderActionKind[] =>
   headerActionRules
     .filter((rule) => rule.isVisible({ canExpandNested, isCurrent }))
     .map((rule) => rule.kind);
 
 type JobNetHeaderActionProps = {
-  data: AjsNode;
+  data: FlowNodeData;
 };
 
 const OpenScopeAction: FC<JobNetHeaderActionProps> = ({ data }) => (
@@ -96,7 +102,7 @@ const actionComponentByKind: Record<
   toggleNested: NestedToggleAction,
 };
 
-const renderJobNetHeaderActions = (data: AjsNode): React.ReactNode => {
+const renderJobNetHeaderActions = (data: FlowNodeData): React.ReactNode => {
   const headerActionKinds = getJobNetHeaderActionKinds(data);
   return headerActionKinds.length > 0 ? (
     <Box sx={{ display: "flex", alignItems: "center", gap: "0.25em" }}>
@@ -110,7 +116,7 @@ const renderJobNetHeaderActions = (data: AjsNode): React.ReactNode => {
   ) : undefined;
 };
 
-const JobNetHandles: FC<Pick<AjsNode, "isRootJobnet" | "isCurrent">> = ({
+const JobNetHandles: FC<Pick<FlowNodeData, "isRootJobnet" | "isCurrent">> = ({
   isRootJobnet,
   isCurrent,
 }) =>

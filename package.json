@@ -168,7 +168,7 @@
     "qlty": "npm-run-all qlty:fmt qlty:check",
     "qlty:fmt": "qlty fmt",
     "qlty:check": "qlty check",
-    "lint:md": "npx markdownlint-cli2 'docs/specs/features/**/*.md' 'docs/requirements/use-cases/**/*.md'",
+    "lint:md": "npx markdownlint-cli2 'docs/specs/features/**/*.md' 'docs/requirements/use-cases/**/*.md' '.agents/skills/**/*.md'",
     "openapi:generate": "node scripts/generate-webapi-openapi-artifacts.mjs",
     "openapi:check": "node scripts/generate-webapi-openapi-artifacts.mjs --check",
     "openapi:mock": "prism mock src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml",

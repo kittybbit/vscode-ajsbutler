@@ -130,4 +130,30 @@ suite("Map diagnostic violation", () => {
       ],
     );
   });
+
+  test("uses the diagnostic key as the fallback source span", () => {
+    const mapViolation = createMapDiagnosticViolation({
+      [eventReceiveFilterViolationReasons.invalidShape]: {
+        message: "shape failure",
+        category: syntaxDiagnosticCategories.eventReceiving,
+      },
+    });
+
+    assert.deepStrictEqual(
+      mapViolation({
+        ruleId: diagnosticRuleIds.eventReceiveFilter,
+        reason: eventReceiveFilterViolationReasons.invalidShape,
+        evidence: { key: "evwfr", value: "invalid-shape" },
+      }),
+      {
+        line: 1,
+        column: 0,
+        length: 5,
+        message: "shape failure",
+        severity: "error",
+        category: syntaxDiagnosticCategories.eventReceiving,
+        ruleId: diagnosticRuleIds.eventReceiveFilter,
+      },
+    );
+  });
 });

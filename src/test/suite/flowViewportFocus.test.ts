@@ -120,6 +120,20 @@ suite("Flow Viewport Focus", () => {
     );
   });
 
+  test("does not reveal a stale search target or fall through to layout fitting", () => {
+    assert.strictEqual(
+      resolveFlowViewportFocusDecision({
+        renderedUnitIds: new Set(["current"]),
+        searchRequest: { targetUnitId: "removed", version: 2 },
+        handledSearchVersion: 1,
+        selectionRequest: { targetUnitId: "selected", version: 1 },
+        handledSelectionVersion: 1,
+        layoutChanged: true,
+      }),
+      null,
+    );
+  });
+
   test("allows layout fitting after a pending selection is cleared", () => {
     assert.deepStrictEqual(
       resolveFlowViewportFocusDecision({

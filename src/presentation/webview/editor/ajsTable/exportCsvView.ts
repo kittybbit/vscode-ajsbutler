@@ -3,12 +3,12 @@ import {
   type ExportUnitListCsvInput,
   exportUnitListCsv,
 } from "../../../../application/unit-list/exportUnitListCsv";
-import type { UnitListRowView } from "../../../../application/unit-list/buildUnitListView";
+import type { TableRowView } from "./tableViewerData";
 import type { AccessorType } from "./columnDefs/common";
 
 type ExportableColumnDef = {
   accessorFn?: (
-    originalRow: UnitListRowView,
+    originalRow: TableRowView,
     rowIndex: number,
   ) => AccessorType | undefined;
 };
@@ -25,7 +25,7 @@ const toCellString = (value: AccessorType | undefined): string =>
 const toDefinedCellString = (value: AccessorType): string =>
   Array.isArray(value) ? toCellArrayString(value) : toCellItemString(value);
 
-const toHeaderRows = (table: Table<UnitListRowView>): string[][] =>
+const toHeaderRows = (table: Table<TableRowView>): string[][] =>
   table.getHeaderGroups().map((headerGroup) =>
     headerGroup.headers.flatMap((header) => {
       const placeholders = new Array(Math.max(header.colSpan - 1, 0)).fill("");
@@ -41,11 +41,11 @@ const toHeaderRows = (table: Table<UnitListRowView>): string[][] =>
     }),
   );
 
-const getColumnAccessor = (column: Column<UnitListRowView, unknown>) =>
+const getColumnAccessor = (column: Column<TableRowView, unknown>) =>
   (column.columnDef as ExportableColumnDef).accessorFn;
 
 export const toExportUnitListCsvInput = (
-  table: Table<UnitListRowView>,
+  table: Table<TableRowView>,
 ): ExportUnitListCsvInput => {
   const visibleColumns = table.getVisibleLeafColumns().slice(1);
   return {
@@ -58,5 +58,5 @@ export const toExportUnitListCsvInput = (
   };
 };
 
-export const exportCsvView = (table: Table<UnitListRowView>): string =>
+export const exportCsvView = (table: Table<TableRowView>): string =>
   exportUnitListCsv(toExportUnitListCsvInput(table));

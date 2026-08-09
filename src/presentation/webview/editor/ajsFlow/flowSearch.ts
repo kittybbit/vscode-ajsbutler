@@ -1,11 +1,20 @@
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import { collectExpandedAncestorUnitIdsForUnits } from "./flowExpandedAncestors";
+import {
+  isActiveFlowSearchQuery,
+  type FlowSearchState,
+} from "./flowSearchState";
 
 export type FlowSearchResult = {
   matchedUnitId: string;
   matchedUnitIds: string[];
   expandedAncestorUnitIds: string[];
 };
+
+export type FlowSearchSubmission =
+  | { kind: "current" }
+  | { kind: "empty"; query: string }
+  | { kind: "matched"; query: string; result: FlowSearchResult };
 
 type FlowSearchInput = {
   scopeRoot: FlowGraphUnitDto;
@@ -113,4 +122,32 @@ export const findFlowSearchResult = (
         unitById,
       })
     : undefined;
+};
+
+export const mergeExpandedAncestorUnitIds = (
+  expandedUnitIds: readonly string[],
+  result: FlowSearchResult,
+): string[] => [
+  ...new Set([...expandedUnitIds, ...result.expandedAncestorUnitIds]),
+];
+
+type ResolveFlowSearchSubmissionParams = {
+  currentUnit?: FlowGraphUnitDto;
+  query: string;
+  searchState: FlowSearchState;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
+};
+
+export const resolveFlowSearchSubmission = ({
+  currentUnit,
+  query,
+  searchState,
+  unitById,
+}: ResolveFlowSearchSubmissionParams): FlowSearchSubmission => {
+  if (isActiveFlowSearchQuery(searchState, query)) {
+    return { kind: "current" };
+  }
+
+  const result = findFlowSearchResult(currentUnit, query, unitById);
+  return result ? { kind: "matched", query, result } : { kind: "empty", query };
 };
