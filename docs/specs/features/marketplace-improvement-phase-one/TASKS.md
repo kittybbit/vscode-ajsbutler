@@ -74,12 +74,20 @@ the approved plan and its subsequent completion gate.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-08-09 (current user request)
+- Approved scope: Completed Slice 1, Marketplace Discovery Metadata, plus its
+  lifecycle evidence
+- Approved paths: `package.json`, limited to `displayName`, `description`, and
+  `keywords`, and this `TASKS.md` completion record only
+- Implementation review verdict: Ready; no open Findings
+- Commit status: Eligible for completion gate
+
+Slice 1 status: Completed; awaiting its focused completion commit. Validation
+evidence includes manifest and VSIX package checks, production build,
+package-scoped qlty, and `git diff --check`. The full qlty check remains a
+known baseline issue limited to formatter findings in these feature documents;
+those out-of-scope files were not changed for this slice.
 
 Each slice requires an independent implementation review, explicit Completion
 Approval, and its focused completion commit before the next slice starts.
@@ -171,7 +179,7 @@ JP1/AJS3`, and the single `JP1/AJS` keyword. The only permitted manifest
 
 ### Slice 1: Marketplace Discovery Metadata
 
-- Status: Planned; blocked on reviewed-plan approval and plan-gate commit
+- Status: Completed; awaiting focused completion commit
 - Scope: update only `package.json` `displayName`, `description`, and
   `keywords` so the existing product is discoverable and its purpose is clear.
 - User / Domain Value: a Marketplace visitor can identify the JP1/AJS Butler
