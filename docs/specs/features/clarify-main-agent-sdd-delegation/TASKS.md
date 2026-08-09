@@ -4,15 +4,15 @@
 
 - Purpose: make formal SDD execution role-delegated while preserving direct
   main-agent handling of ad-hoc repository work.
-- Approved or active slice: Slice 1 approved; implementation has not started.
+- Approved or active slice: Slice 1 implemented; implementation review pending.
 - Do not change lifecycle, approval, role, model/effort, runtime, or product
   behavior.
 - Read first: `SPECS.md`, this file, and the source correction directive.
 - Read `TRACEABILITY.md` when checking requirement coverage.
 - The implementation slice is an atomic repository-orchestration contract;
   do not leave routing, role, procedure, or adapter wording inconsistent.
-- Before implementation, move this work from the current `docs/...` branch to
-  a dedicated non-`docs/...` feature branch.
+- Implementation is on the dedicated non-`docs/...` feature branch
+  `codex/clarify-main-agent-sdd-delegation`.
 - Validate with the routing matrix, contradiction searches, the seven SDD
   skill-adapter audit, `rtk pnpm run qlty`, and `rtk pnpm run lint:md`.
 - Approval policy and document roles remain owned by `docs/specs/README.md`.
@@ -31,13 +31,13 @@
 
 ## Plan Status
 
-- Status: Complete; Ready for implementation after the plan-gate commit
+- Status: Complete; Completion Approval recorded; commit pending
 - Planning scope: the full `clarify-main-agent-sdd-delegation` feature.
-- Selection evidence: explicitly selected by the user; the folder is also the
-  only untracked feature folder on `docs/roadmap-backlog-pruning`.
+- Selection evidence: explicitly selected by the user on the dedicated feature
+  branch; the feature folder was carried forward from the planning commit.
 - Review status: Ready; independent plan-reviewer verdict recorded
 - Human approval: Approved
-- Active implementation slice: Slice 1 (approved; implementation not started)
+- Active implementation slice: Slice 1 (complete; completion commit pending)
 - Slice count and order: one atomic slice, Slice 1 only.
 
 ## Human Approval
@@ -54,18 +54,36 @@
   `.agents/skills/sdd-feature-exit/SKILL.md`, `docs/specs/README.md`, and
   this selected feature's `TASKS.md`/`TRACEABILITY.md` evidence
 
-Implementation must not start until the approved planning package receives
-its approval-gate commit. The plan-gate commit must contain only the approved
-paths above.
+Implementation started only after the approved planning package received its
+approval-gate commit (`afb454d9`), which contained only the approved paths.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: Slice 1 — Establish the Main-to-Role Orchestration Contract
+- Approved paths:
+  - `AGENTS.md`
+  - `.agent.md`
+  - `.github/copilot-instructions.md`
+  - `.codex/agents/approval-committer.toml`
+  - `.codex/agents/feature-author.toml`
+  - `.codex/agents/feature-closer.toml`
+  - `.codex/agents/implementation-reviewer.toml`
+  - `.codex/agents/implementer.toml`
+  - `.codex/agents/plan-author.toml`
+  - `.codex/agents/plan-reviewer.toml`
+  - `.codex/agents/plan-reviser.toml`
+  - `.agents/skills/sdd-plan-task/SKILL.md`
+  - `.agents/skills/sdd-review-plan/SKILL.md`
+  - `.agents/skills/sdd-implement-task/SKILL.md`
+  - `.agents/skills/sdd-review-implementation/SKILL.md`
+  - `.agents/skills/sdd-feature-exit/SKILL.md`
+  - `docs/specs/README.md`
+  - `docs/specs/features/clarify-main-agent-sdd-delegation/TASKS.md`
+  - `docs/specs/features/clarify-main-agent-sdd-delegation/TRACEABILITY.md`
+- Implementation review verdict: Ready
+- Commit status: Eligible for the exact approved completion gate
 
 ## Closure Approval
 
@@ -80,8 +98,8 @@ paths above.
 
 ### Slice 1: Establish the Main-to-Role Orchestration Contract
 
-- Status: Approved; blocked by the plan-gate commit and migration to a
-  dedicated non-`docs/...` branch; implementation has not started.
+- Status: Complete; independent implementation-reviewer verdict `Ready` and
+  Completion Approval recorded; completion commit pending.
 - Scope: align the repository routing SSOT, every SDD custom-role contract,
   only the reusable procedures whose handoff wording permits child chaining,
   and both lightweight entrypoint adapters so that formal lifecycle work is
@@ -316,20 +334,48 @@ paths above.
       state, and `.agent.md` role-count accuracy.
 - [x] Independent plan review completed with Ready verdict.
 - [x] Human Approval recorded for the exact implementation boundary.
-- [ ] Approved planning package committed.
-- [ ] Dedicated non-`docs/...` feature branch established before implementation.
-- [ ] Slice 1 routing and contradiction validation completed.
-- [ ] `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and
+- [x] Approved planning package committed (`afb454d9`).
+- [x] Dedicated non-`docs/...` feature branch established before implementation
+      (`codex/clarify-main-agent-sdd-delegation`).
+- [x] Slice 1 routing and contradiction validation completed; expected versus
+      actual request and formal-stage routes are recorded in `TRACEABILITY.md`.
+- [x] All twelve final-confirmation questions are answered from resulting
+      repository text in `TRACEABILITY.md`.
+- [x] `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and
       `rtk git diff --check` pass for implementation.
+- [x] Broad Markdown lint over every changed Markdown file passes with zero
+      errors.
+
+## Implementation Evidence
+
+- Changed paths are limited to the approved routing SSOT, lightweight
+  adapters, eight role definitions, five scoped procedures, `docs/specs/README.md`,
+  and this feature's evidence files. Runtime, tests, generated artifacts,
+  extension configuration, release files, README/CHANGELOG, and unrelated
+  feature folders are unchanged.
+- Main is documented as the direct ad-hoc chat entrypoint and formal work is
+  documented as `Main -> Child -> Main`. Each role now owns its canonical
+  procedure, executes only the delegated operation, and returns result,
+  evidence, and recommended route without invoking another lifecycle role.
+- The seven SDD sidecars under `.agents/skills/*/agents/openai.yaml` were
+  inspected and remain unchanged role-facing invocation adapters; no
+  Main-facing contradiction was found.
+- Implementation-review feedback was resolved within scope: the SDD SSOT
+  Working Agreement and non-trivial workflow now describe Main-to-role
+  delegation only; the Coordination Sources map has one accurate entry per
+  surface; and deterministic routing is represented without new MD013 issues.
+- Lifecycle and approval semantics are unchanged. Completion Approval is
+  `Approved`; the exact completion commit is pending, and Closure Approval
+  remains `Pending`.
 
 ## Risks
 
 - The single slice is intentionally broad in file count but indivisible in
   responsibility: a partial commit would leave the orchestration contract
   internally contradictory and cannot satisfy the acceptance criteria.
-- Approval is recorded; implementation remains blocked until the plan-gate
-  commit succeeds.
-- The current branch name is unsuitable for the planned non-allowlisted paths.
+- Approval, the plan-gate commit, the `Ready` review verdict, and Completion
+  Approval are recorded; the exact completion commit remains pending.
+- The dedicated branch name satisfies the non-`docs/...` path policy.
 
 ## Production Readiness
 

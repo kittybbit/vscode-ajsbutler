@@ -25,9 +25,10 @@ ambiguous.
 
 ## Replanning Boundary
 
-Return to the planning procedure when a new slice, scope change, design
-decision, wider impact, changed approval boundary, or untestable approved
-scope is discovered. Do not silently edit `TASKS.md` into a new plan.
+Return the blocker to the parent Main orchestrator for planning-procedure
+routing when a new slice, scope change, design decision, wider impact, changed
+approval boundary, or untestable approved scope is discovered. Do not silently
+edit `TASKS.md` into a new plan or invoke another lifecycle role.
 
 ## Baseline Check
 
@@ -109,11 +110,13 @@ documentation impact, and remaining follow-up for the feature task record.
 ## Completion Approval Handoff
 
 Implementation evidence and an implementation-reviewer `Ready` verdict do not
-authorize a commit. Keep `TASKS.md` `Completion Approval` pending until the
-human explicitly approves the exact completed slice. Then hand off to
-`sdd-commit-gate` with gate type `completion`; do not stage or commit before
-that approval. If another slice remains, begin it only after the completion
-commit succeeds.
+authorize a commit. Return the implementation evidence and recommended review
+route to Main. Keep `TASKS.md` `Completion Approval` pending until the human
+explicitly approves the exact completed slice. Main may then delegate
+`approval-committer` with gate type `completion`; do not stage or commit before
+that approval. If another slice remains, Main begins it only after the
+completion commit succeeds. This procedure does not invoke or spawn another
+lifecycle role.
 
 ## Rules
 

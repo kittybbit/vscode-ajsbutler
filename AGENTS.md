@@ -81,27 +81,23 @@ criteria, document roles, approval, validation, and Feature Exit policy.
 Follow this lifecycle:
 
 1. Route trivial changes using the criteria in `docs/specs/README.md`.
-2. Start non-trivial feature intake with `feature-author` and
-   `$sdd-create-feature`.
-3. Create or revise the full slice plan with `plan-author` and
-   `$sdd-plan-task` in Planning or Replanning Mode.
-4. Review the plan with the read-only `plan-reviewer` and
-   `$sdd-review-plan`; Findings go to `plan-reviser`.
+2. Delegate non-trivial feature intake to `feature-author`.
+3. Delegate Planning or Replanning to `plan-author` or `plan-reviser`.
+4. Delegate plan review to the read-only `plan-reviewer`; Findings are routed
+   back through Main to `plan-reviser`.
 5. Obtain clear Human Approval for the reviewed plan and approved slice scope.
-6. Commit the approved plan or replan package with `approval-committer` and
-   `$sdd-commit-gate` before implementation starts.
-7. Implement one approved slice with `implementer` and
-   `$sdd-implement-task`.
-8. Review the completed slice with the read-only
-   `implementation-reviewer` and `$sdd-review-implementation`; Findings go
-   back to `implementer`.
+6. Delegate the approved plan or replan commit to `approval-committer` before
+   implementation starts.
+7. Delegate exactly one approved slice to `implementer`.
+8. Delegate completed-slice review to the read-only
+   `implementation-reviewer`; Findings are routed back through Main to
+   `implementer`.
 9. Obtain explicit Completion Approval and commit the exact completed slice
-   with `approval-committer` before starting another slice.
-10. Run Feature Exit with `feature-closer` and `$sdd-feature-exit` only after
-    every slice is complete and committed, then obtain explicit closure
-    approval.
-11. Commit the approved Feature Exit propagation and selected feature-folder
-    removal with `approval-committer` before closing the feature.
+   through `approval-committer` before starting another slice.
+10. Delegate Feature Exit to `feature-closer` only after every slice is
+    complete and committed, then obtain explicit closure approval.
+11. Delegate the approved Feature Exit propagation and selected
+    feature-folder removal to `approval-committer` before closing the feature.
 12. Replan when a new slice, scope, design decision, wider impact, or approval
     boundary is discovered.
 
@@ -185,53 +181,148 @@ Do not:
 Codex role definitions; reusable procedures live in `.agents/skills`; the
 Codex skill directory contains invocation adapters only.
 
+### Main-Agent Orchestration Boundary
+
+The main Codex agent is the default chat entrypoint and repository
+orchestrator. Main may directly handle ad-hoc discussion, exploration,
+read-only investigation, architectural discussion, design comparison,
+analysis, explanation, troubleshooting, scope clarification, brainstorming,
+informal feedback, summarization, instruction or prompt preparation, and
+routing classification. Discussion of an SDD topic alone does not activate a
+lifecycle role. Trivial changes may also remain with Main when the SDD policy
+permits them.
+
+Formal, role-owned SDD execution is activated by operation intent, not by the
+topic. Main MUST delegate formal lifecycle execution to the designated custom
+subagent. Main MUST NOT execute the lifecycle skill directly, impersonate,
+assume, or internally perform the designated role, or edit the role-owned
+artifact in place of that role. Main MAY inspect enough repository state to
+classify the request, summarize delegated results, request Human Approval, and
+route Findings, approval results, completion results, or closure results. Main
+MUST wait for the delegated result before routing the next formal stage. Every
+formal handoff is
+`Main -> Child -> Main`; the child returns its result, evidence, and a
+recommended route, and Main decides whether and when to delegate the next
+operation.
+
+Skills are execution procedures used by delegated roles. They are not direct
+lifecycle entrypoints for Main.
+
+### Main-Agent Direct Work
+
+Main MAY directly perform repository exploration, read-only investigation,
+architecture or design discussion, explanation, troubleshooting analysis,
+task classification, scope clarification, summarization, brainstorming,
+informal review or feedback, preparation of instructions or migration guidance,
+and investigation needed only to choose the next lifecycle role. These
+activities do not activate a role merely because their subject is a feature,
+plan, implementation, or Feature Exit. Main MUST delegate when the requested
+action executes a formal role-owned lifecycle operation or crosses an
+approval-gated role boundary.
+
+### Discussion vs Lifecycle Execution
+
+Discussion, analysis, investigation, explanation, brainstorming, and informal
+feedback about an SDD stage do not by themselves activate that role. Delegate
+only when the user requests execution of the role-owned lifecycle operation or
+when continuing an active formal workflow requires that operation.
+
+Routing precedence is: safety and approval gates, role ownership, and active
+formal-work constraints take priority over an explicit routing preference. A
+user may name a role when the requested operation is formal and the request is
+safe; Main-specified investigation remains direct unless it continues an
+active formal operation. Release work remains outside the SDD lifecycle and
+uses its dedicated release procedure because no release lifecycle role exists.
+
 ### Agent Entrypoints
 
 - Copilot CLI: `.github/copilot-instructions.md`
 - Codex custom-agent definitions: `.codex/agents/*.toml`
-- Canonical Codex skills: `.agents/skills/*/SKILL.md`
-- Canonical shared procedures: `.agents/skills/*/SKILL.md`
-- Approval-gated commit role: `.codex/agents/approval-committer.toml`
-- Approval-gated commit procedure: `.agents/skills/sdd-commit-gate/SKILL.md`
+- Role-owned reusable procedures: `.agents/skills/*/SKILL.md`
+- Skill invocation adapters: `.agents/skills/*/agents/openai.yaml`
 - SDD policy/document SSOT: `docs/specs/README.md`
+
+The role catalog is seven SDD lifecycle roles—`feature-author`, `plan-author`,
+`plan-reviewer`, `plan-reviser`, `implementer`,
+`implementation-reviewer`, and `feature-closer`—plus the
+`approval-committer` gate role. Release is outside this catalog.
 
 ### Deterministic SDD Routing
 
-1. **Trivial change**: use the trivial-change criteria in
-   `docs/specs/README.md`; no feature lifecycle is required when the criteria
-   permit skipping SDD.
-2. **Feature intake**: use `feature-author` with
-   `.agents/skills/sdd-create-feature/SKILL.md` and `$sdd-create-feature`.
-   Handoff: `plan-author`. Stop for ambiguous purpose, feature kind, overlap,
-   or compatibility evidence.
-3. **Planning**: use `plan-author` with
-   `.agents/skills/sdd-plan-task/SKILL.md` and `$sdd-plan-task` in Planning
-   Mode. Handoff: `plan-reviewer`. Stop for missing impact or design evidence.
-4. **Plan review**: use read-only `plan-reviewer` with
-   `.agents/skills/sdd-review-plan/SKILL.md` and `$sdd-review-plan`.
-   `Ready` goes to Human Approval; `Findings` go to `plan-reviser`.
-   After explicit Human Approval, hand off to `approval-committer` for the
-   plan/replan commit before implementation.
-5. **Plan revision**: use `plan-reviser` with the same planning procedure in
-   Replanning Mode. Handoff: `plan-reviewer`. Stop when Findings are absent or
-   a new scope/design/approval decision is required.
-6. **Approved implementation**: use `implementer` with
-   `.agents/skills/sdd-implement-task/SKILL.md` and `$sdd-implement-task` for
-   exactly one approved slice. Handoff: `implementation-reviewer`. Stop when
-   approval, dependencies, or scope is unclear.
-7. **Implementation review**: use read-only `implementation-reviewer` with
-   `.agents/skills/sdd-review-implementation/SKILL.md` and
-   `$sdd-review-implementation`. `Ready` goes to the completion gate;
-   `Findings` go back to `implementer`. After explicit Completion Approval,
-   hand off to `approval-committer` for the exact slice commit.
-8. **Feature Exit**: after all slices are complete, use `feature-closer` with
-   `.agents/skills/sdd-feature-exit/SKILL.md` and `$sdd-feature-exit`.
-   `Close` goes to explicit human closure approval, then
-   `approval-committer` for the approved closure commit; a new design/scope
-   issue goes to planning.
-9. **Release**: use `$release-extension` only for extension release work. It
-   uses `.agents/skills/release-extension/SKILL.md`, remains outside the SDD
-   lifecycle roles, and does not participate in SDD lifecycle handoffs.
+Formal routing is deterministic. Main activates the operation, delegates one
+role-owned operation, records or integrates the returned evidence, and stops
+or makes the next delegation only after the stated gate is satisfied.
+
+1. **Feature intake**
+   - Activation: A concrete non-trivial feature requires SDD artifacts.
+   - Delegate: `feature-author`.
+   - Main responsibility: Confirm purpose, selection, and intake boundary.
+   - Result and return: Valid feature artifacts and traceability
+     recommendation return to Main.
+   - Stop: Ambiguous purpose, feature kind, overlap, or compatibility evidence.
+2. **Planning**
+   - Activation: The selected feature needs a complete slice plan.
+   - Delegate: `plan-author`.
+   - Main responsibility: Confirm feature selection and planning scope.
+   - Result and return: Complete plan and validation evidence return to Main.
+   - Stop: Missing impact, design evidence, or independently untestable slice.
+3. **Plan review**
+   - Activation: A complete plan is ready for independent review.
+   - Delegate: `plan-reviewer`.
+   - Main responsibility: Preserve the read-only review and approval boundary.
+   - Result and return: `Ready` or Findings return to Main; Main routes
+     Findings to `plan-reviser`.
+   - Stop: Ambiguous selection/base or insufficient risk evidence.
+4. **Plan revision**
+   - Activation: Findings or a replan trigger blocks continuation.
+   - Delegate: `plan-reviser`.
+   - Main responsibility: Keep the change within the approved feature purpose.
+   - Result and return: Revised plan and re-review recommendation return to
+     Main.
+   - Stop: New design, scope, dependency, or approval decision.
+5. **Approved plan commit**
+   - Activation: Plan-reviewer `Ready` plus Human Approval.
+   - Delegate: `approval-committer`.
+   - Main responsibility: Verify the exact gate and approved paths.
+   - Result and return: One focused plan/replan commit result returns to Main.
+   - Stop: Missing approval, verdict, exact scope, or clean boundary.
+6. **Implementation**
+   - Activation: One approved slice is committed and ready.
+   - Delegate: `implementer`.
+   - Main responsibility: Provide approved context and preserve scope.
+   - Result and return: Completed slice, diff, and evidence return to Main.
+   - Stop: Missing approval/dependency or required out-of-scope change.
+7. **Implementation review**
+   - Activation: One approved slice has a final diff and evidence.
+   - Delegate: `implementation-reviewer`.
+   - Main responsibility: Preserve independent read-only review.
+   - Result and return: `Ready` or Findings return to Main; Main routes
+     Findings to `implementer`.
+   - Stop: Ambiguous scope/base or incomplete evidence.
+8. **Completion commit**
+   - Activation: Implementation-reviewer `Ready` plus Completion Approval.
+   - Delegate: `approval-committer`.
+   - Main responsibility: Verify the exact completed-slice gate.
+   - Result and return: One focused completion commit result returns to Main.
+   - Stop: Missing approval, verdict, exact scope, or clean boundary.
+9. **Feature Exit**
+   - Activation: Every slice is complete and committed.
+   - Delegate: `feature-closer`.
+   - Main responsibility: Preserve independent exit review and closure
+     boundary.
+   - Result and return: `Close` or a blocker returns to Main.
+   - Stop: Incomplete slice, missing evidence, or unresolved risk.
+10. **Closure commit**
+    - Activation: Feature-closer `Close` plus Closure Approval.
+    - Delegate: `approval-committer`.
+    - Main responsibility: Verify approved propagation and folder-removal
+      scope.
+    - Result and return: One focused closure commit result returns to Main.
+    - Stop: Missing approval, verdict, exact scope, or clean boundary.
+
+Release remains an explicit non-SDD exception: use `$release-extension` and its
+canonical release procedure only for extension release work; it does not
+participate in SDD lifecycle routing.
 
 Role files are the authority for each role's fixed model/effort, allowed input,
 forbidden actions, output contract, and stop conditions. Do not duplicate those
@@ -262,8 +353,8 @@ SSOT.
 - `AGENTS.md`: repository architecture rules and routing
 - `docs/specs/`: SDD policy, feature artifacts, and durable specifications
 - `.codex/agents/`: Codex role contracts
-- `.agents/skills/`: canonical reusable procedures
-- `.agents/skills/`: canonical Codex skills
+- `.agents/skills/*/SKILL.md`: role-owned reusable procedures
+- `.agents/skills/*/agents/openai.yaml`: skill invocation adapters
 - `.agent.md` and `.github/copilot-instructions.md`: lightweight entry-point
   adapters, not policy SSOT
 

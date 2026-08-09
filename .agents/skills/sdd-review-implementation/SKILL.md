@@ -71,8 +71,10 @@ Return one of:
 
 ## Next Step
 
-- Ready: record completion evidence and continue the lifecycle completion gate
-- Findings: return the exact fixes to the implementation procedure
+- Ready: return completion evidence and the recommended completion-gate route
+  to Main.
+- Findings: return the exact fixes and validation requirements to Main for
+  routing to the implementation procedure.
 ```
 
 `Ready` means no actionable finding remains. It is not Completion Approval and
@@ -81,10 +83,12 @@ design/scope decision into an implementation fix.
 
 ## Completion Approval Handoff
 
-After `Ready`, send the full evidence package to the Completion Approval gate.
-Only after explicit human approval is recorded for the exact completed slice
-may `sdd-commit-gate` run with gate type `completion`. Findings return to the
-implementer; a new scope or design decision returns to Planning or Replanning.
+After `Ready`, return the full evidence package to Main. Only after explicit
+human approval is recorded for the exact completed slice may Main delegate
+`approval-committer` with gate type `completion`. Return Findings to Main for
+routing to `implementer`; return a new scope or design decision to Main for
+Planning or Replanning. This procedure does not invoke or spawn another
+lifecycle role.
 
 ## Rules
 

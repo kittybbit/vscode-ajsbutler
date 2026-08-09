@@ -92,11 +92,14 @@ Before updating `TASKS.md`, establish:
 
 ## Approval-Commit Handoff
 
-Plan or Replanning Mode ends before implementation. After the independent plan
-review returns `Ready` and the human records `Human Approval: Approved` for the
-exact next-slice scope, hand off to `sdd-commit-gate` with gate type `plan`.
-The approved planning package must be committed before implementation starts.
-Do not stage or commit while Human Approval is pending.
+Plan or Replanning Mode ends before implementation. Return the complete plan,
+validation evidence, and recommended next route to the parent Main
+orchestrator. After the independent plan review returns `Ready` and the human
+records `Human Approval: Approved` for the exact next-slice scope, Main may
+delegate the `approval-committer` role for the `plan` gate. The approved
+planning package must be committed before implementation starts. Do not stage
+or commit while Human Approval is pending, and do not invoke or spawn the next
+lifecycle role from this procedure.
 
 ## TASKS.md Shape
 
@@ -154,5 +157,5 @@ commentary. Update the smallest necessary durable surface.
   implementation branches in Planning or Replanning Mode
 - use `docs/specs/README.md` as the SSOT for approval and lifecycle policy
 - use `rtk pnpm run qlty` and `rtk pnpm run lint:md` as appropriate
-- return to planning when a new design decision, scope, impact, or approval
-  boundary appears
+- return the issue to Main for planning when a new design decision, scope,
+  impact, or approval boundary appears

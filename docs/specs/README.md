@@ -22,25 +22,27 @@ repository.
 
 ## Working Agreement
 
-SDD is the standard process for non-trivial changes. Use the Codex SDD skills
-as the operational workflow:
+SDD is the standard process for non-trivial changes. Main classifies the
+request and delegates each formal lifecycle operation to its designated custom
+role. The role owns its canonical procedure; Main receives the result before
+any later delegation.
 
 ```mermaid
 flowchart TD
-    A["Investigation"] --> B["Feature Creation<br/>sdd-create-feature"]
-    B --> C["Planning<br/>sdd-plan-task"]
-    C --> D["Plan Review<br/>sdd-review-plan"]
+    A["Main: Investigation"] --> B["Main → feature-author → Main"]
+    B --> C["Main → plan-author → Main"]
+    C --> D["Main → plan-reviewer → Main"]
     D --> E["Plan / Replan Human Approval"]
-    E --> F["Plan Commit<br/>approval-committer"]
-    F --> G["Implementation<br/>sdd-implement-task"]
-    G --> H["Implementation Review<br/>sdd-review-implementation"]
+    E --> F["Main → approval-committer → Main<br/>plan gate"]
+    F --> G["Main → implementer → Main"]
+    G --> H["Main → implementation-reviewer → Main"]
     H --> I["Completion Approval"]
-    I --> J["Slice Commit<br/>approval-committer"]
+    I --> J["Main → approval-committer → Main<br/>completion gate"]
     J --> K{"More approved slices?"}
     K -->|"Yes"| C
-    K -->|"No"| L["Feature Exit<br/>feature-closer"]
+    K -->|"No"| L["Main → feature-closer → Main"]
     L --> M["Closure Approval"]
-    M --> N["Closure Commit<br/>approval-committer"]
+    M --> N["Main → approval-committer → Main<br/>closure gate"]
     N --> O["Feature Close"]
     G -. "replan trigger" .-> C
 ```
@@ -76,30 +78,31 @@ Examples that may be trivial:
 - broken link fixes that do not change document meaning
 
 When any item above changes, or when impact is uncertain, treat the work as
-non-trivial and start with `sdd-create-feature`.
+non-trivial and ask Main to delegate formal feature intake to `feature-author`.
 
 For non-trivial changes:
 
 1. create a dedicated git branch before implementation work starts and use
    `docs/...` only for docs-only slices
-2. start feature intake with `sdd-create-feature`
-3. create or revise the full implementation-slice plan with `sdd-plan-task`
-   in exactly one mode: Planning Mode or Replanning Mode
-4. review the plan with `sdd-review-plan`
+2. delegate formal feature intake to `feature-author`
+3. delegate the complete implementation-slice plan to `plan-author`; route
+   Replanning Mode to `plan-reviser` when a replan trigger is present
+4. delegate independent plan review to `plan-reviewer`
 5. obtain clear Human Approval before editing runtime code, tests, generated
    artifacts, or configuration
-6. after plan or replan approval, commit the approved planning package with
+6. after plan or replan approval, delegate the approved planning package to
    `approval-committer` and only then implement the approved slice
-7. implement only approved slices with `sdd-implement-task`
-8. review each completed slice with `sdd-review-implementation`
-9. obtain explicit Completion Approval, then commit that exact slice with
+7. delegate exactly one approved slice to `implementer`
+8. delegate independent review of each completed slice to
+   `implementation-reviewer`
+9. obtain explicit Completion Approval, then delegate that exact slice to
    `approval-committer` before starting another slice
-10. return to `sdd-plan-task` only when a new slice, scope change, design
-    decision, wider impact, or approval-boundary change is required
-11. run Feature Exit with `feature-closer` and `sdd-feature-exit` only after
-    all implementation slices are complete and committed
-12. obtain explicit Closure Approval, then commit the approved Feature Exit
-    propagation and feature-folder removal with `approval-committer`
+10. route a new slice, scope change, design decision, wider impact, or
+    approval-boundary change to Main for Replanning Mode
+11. delegate Feature Exit to `feature-closer` only after all implementation
+    slices are complete and committed
+12. obtain explicit Closure Approval, then delegate the approved Feature Exit
+    propagation and feature-folder removal to `approval-committer`
 13. close a feature only after that closure commit succeeds
 
 Prefer quality assurance, readability, KISS, DRY/YAGNI, then SOLID in that
@@ -139,8 +142,8 @@ Plan review is the pre-approval scope gate. After implementation and final
 validation, perform one integrated review of scope, acceptance, quality, and
 production readiness. Add an independent second review only for the higher-risk
 surface above or when the first review finds a concern. Feature Exit remains a
-separate completion review owned by the independent `feature-closer` role
-through `sdd-feature-exit`.
+separate completion review owned by the independent `feature-closer` role under
+its canonical role-owned procedure.
 
 ## CHANGELOG Update Criteria
 
@@ -257,8 +260,23 @@ Copilot suggestions must be checked against the approved `SPECS.md`,
 suggestions outside the approved scope. If an out-of-scope change appears
 necessary, stop and return to investigation and re-approval.
 
-When Codex orchestrates work across agents, Codex owns consistency of the SDD
-documents, approval evidence, scope tracking, and validation record.
+The main Codex agent is the default chat entrypoint and repository
+orchestrator. It may directly handle ad-hoc discussion, exploration,
+read-only investigation, analysis, troubleshooting, scope clarification,
+brainstorming, informal feedback, routing classification, and trivial changes
+permitted by this SSOT. Discussion of an SDD topic alone does not activate a
+role. Formal, role-owned lifecycle operations are delegated to the designated
+custom role and return to Main before any later delegation. Main must not
+execute a lifecycle procedure directly, impersonate a lifecycle role, or edit
+role-owned artifacts in place of that role.
+
+Main owns feature selection, coordination, approval evidence, scope and design
+decisions, integration, the final validation record, and user communication.
+The designated role owns its delegated operation and the approved artifact
+edits assigned by its role contract. Each child returns its result, evidence,
+and recommended route to Main; a child must not invoke or spawn the next
+lifecycle role. Feature Exit remains an independent `feature-closer` review,
+and approval-committer remains the only approval-gated commit role.
 
 ## Bounded Subagent Delegation
 
@@ -266,16 +284,20 @@ Use a subagent only when an independent investigation, review, or explicitly
 approved mechanical task materially reduces uncertainty or elapsed time. Do not
 delegate a local task whose handoff would cost more context than it saves.
 
-Before delegating, give a concise brief with the question, target files or
-symbols, constraints, no-change rule unless mechanical editing is explicitly
-approved, and a short evidence-based output format. Ask for findings, risks,
-unknowns, and a recommended next action—not a decision or a transcript.
+Before delegating an ad-hoc investigation or explicitly approved mechanical
+task, give a concise brief with the question, target files or symbols,
+constraints, no-change rule unless mechanical editing is explicitly approved,
+and a short evidence-based output format. Ask for findings, risks, unknowns,
+and a recommended next action—not a decision or a transcript. Keep such
+delegation optional when Main can complete the work directly.
 
-The coordinating agent alone owns feature selection, SDD artifact updates,
-approval evidence, scope and design decisions, integration, validation records,
-and final user communication. Do not delegate human approval, scope expansion,
-or final validation. Feature Exit uses its independent `feature-closer` role;
-the coordinator retains the closure decision and evidence record. Avoid
+Formal SDD execution is different: operation intent activates the designated
+role, and Main must use the `Main -> Child -> Main` boundary. The child owns
+its role procedure and approved role-owned edits, then returns control to Main.
+Do not delegate human approval, scope expansion, or final validation. Main
+retains coordination, approval evidence, integration, and final user
+communication. Feature Exit uses its independent `feature-closer` role; the
+closure recommendation returns to Main for the human closure gate. Avoid
 overlapping file ownership and broad repository exploration; consolidate
 delegated findings before acting.
 
@@ -336,8 +358,8 @@ current conversation`; do not copy the human approval message into `TASKS.md`.
 Implementation may start only when `Status: Approved`, `Approved at`, and
 `Approved scope` record the human-approved implementation boundary for the
 slice. If implementation reveals required changes outside the approved scope,
-stop, use `sdd-plan-task` Replanning Mode, update the impact record, and
-obtain additional clear approval before editing those areas.
+stop, return the blocker to Main for Replanning Mode, update the impact record,
+and obtain additional clear approval before editing those areas.
 
 Before approval, Codex must report only this implementation-gate output and
 must not claim that implementation has started or completed:
@@ -362,13 +384,14 @@ generated artifacts, or configuration.
 Implementation will not proceed until approval is given.
 ```
 
-After Human Approval, `approval-committer` commits the approved planning
-package. Only then does `sdd-implement-task` implement exactly one approved
-slice using the Risk-Based Validation And Review policy above. When the
-implementation reviewer returns `Ready`, the workflow waits for explicit
-Completion Approval before `approval-committer` commits the exact slice. When
-all slices are complete and committed, `feature-closer` runs the Feature Exit
-review; planning no longer owns Feature Exit.
+After Human Approval, Main delegates the approved planning package to
+`approval-committer`. Only after that focused commit does Main delegate the
+implementation role for exactly one approved slice using the Risk-Based
+Validation And Review policy above. When the implementation reviewer returns
+`Ready`, Main waits for explicit Completion Approval before delegating the
+exact slice to `approval-committer`. When all slices are complete and
+committed, Main delegates Feature Exit to `feature-closer`; planning no longer
+owns Feature Exit.
 
 ## Approval-Gated Commit Policy
 
@@ -376,11 +399,20 @@ The approval-committer is the only SDD role authorized to create these
 workflow commits. It must receive the matching review verdict and explicit
 human approval for the exact gate before staging anything.
 
-| Gate                    | Required evidence                                                 | Commit scope                                                                        | Next stage                          |
-| ----------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------- |
-| Plan or Replan Approval | Plan review `Ready` and `Human Approval: Approved`                | Approved planning package and approval evidence                                     | Implementation                      |
-| Completion Approval     | Implementation review `Ready` and `Completion Approval: Approved` | Exact completed implementation slice and its evidence                               | Next approved slice or Feature Exit |
-| Closure Approval        | Feature Exit `Close` and `Closure Approval: Approved`             | Approved durable propagation, closure evidence, and selected feature-folder removal | Feature Close                       |
+1. **Plan or Replan Approval**
+   - Required evidence: Plan review `Ready` and Human Approval `Approved`.
+   - Commit scope: Approved planning package and approval evidence.
+   - Next stage: Implementation.
+2. **Completion Approval**
+   - Required evidence: Implementation review `Ready` and Completion Approval
+     `Approved`.
+   - Commit scope: Exact completed implementation slice and its evidence.
+   - Next stage: Next approved slice or Feature Exit.
+3. **Closure Approval**
+   - Required evidence: Feature Exit `Close` and Closure Approval `Approved`.
+   - Commit scope: Approved durable propagation, closure evidence, and selected
+     feature-folder removal.
+   - Next stage: Feature Close.
 
 The approval-committer must stop without staging or committing when approval,
 the required review verdict, the exact scope, or a clean scope boundary is
@@ -720,12 +752,12 @@ feature folders. Git and pull requests retain that history.
   branch index or second plan is maintained.
 - Implementation updates only the approved slice state and its validation
   evidence.
-- `feature-closer` performs Feature Exit with `sdd-feature-exit` and prepares
-  the closure recommendation, durable-knowledge propagation, and guardrail
-  check.
+- `feature-closer` performs Feature Exit and prepares the closure
+  recommendation, durable-knowledge propagation, and guardrail check.
 - Feature Exit propagates only knowledge that passes the Durable Documentation
   Gate, obtains human approval, and removes only the complete selected feature
-  folder. `sdd-plan-task` owns Planning and Replanning, not Feature Exit.
+  folder. Planning and Replanning remain planning responsibilities, not Feature
+  Exit responsibilities.
 
 ### Lightweight Feature Structure Check
 

@@ -43,8 +43,8 @@ ambiguous.
    is required.
 7. Confirm no reusable knowledge, unresolved risk, or unfinished repository
    work exists only in the temporary feature folder.
-8. Return a new design or scope decision to Planning or Replanning instead of
-   inventing a resolution during Feature Exit.
+8. Return a new design or scope decision to Main for Planning or Replanning
+   routing instead of inventing a resolution during Feature Exit.
 
 ## Closure Evidence
 
@@ -72,10 +72,12 @@ selected feature folder is removed.
 ## Closure Approval Handoff
 
 `Close` is a recommendation, not Closure Approval and not commit
-authorization. After explicit human Closure Approval records the exact
-durable-document propagation, closure evidence, and selected feature-folder
-removal, hand off to `sdd-commit-gate` with gate type `closure`. Feature Close
-follows only after that focused closure commit succeeds.
+authorization. Return the recommendation and evidence to Main. After explicit
+human Closure Approval records the exact durable-document propagation, closure
+evidence, and selected feature-folder removal, Main may delegate
+`approval-committer` with gate type `closure`. Feature Close follows only after
+that focused closure commit succeeds. This procedure does not invoke or spawn
+another lifecycle role.
 
 ## Rules
 

@@ -77,15 +77,18 @@ Evaluate every slice and the plan as a whole for:
 - ...
 ```
 
-Use `Ready for approval` only when no actionable finding remains. Send changed
-scope or a required plan revision back to the planning procedure.
+Use `Ready for approval` only when no actionable finding remains. Return the
+verdict, evidence, and recommended route to Main. Main may route Findings to
+the planning procedure and may delegate the approval gate after Human Approval;
+this procedure does not invoke or spawn another lifecycle role.
 
 ## Approval-Commit Handoff
 
 `Ready for approval` is not Human Approval and does not authorize a commit.
-After explicit Human Approval records the exact plan or replan scope, hand off
-to `sdd-commit-gate` with gate type `plan`. Implementation starts only after
-that focused planning commit succeeds.
+Return the Ready evidence to Main. After explicit Human Approval records the
+exact plan or replan scope, Main may delegate `approval-committer` with gate
+type `plan`. Implementation starts only after that focused planning commit
+succeeds.
 
 ## Rules
 

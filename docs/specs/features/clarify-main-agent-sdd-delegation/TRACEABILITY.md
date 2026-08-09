@@ -45,11 +45,45 @@
   - `.agents/skills/sdd-feature-exit/SKILL.md`
   - `docs/specs/README.md`
   - selected feature `TASKS.md` and `TRACEABILITY.md`
-- Implementation status: not started; Completion Approval and Closure Approval
-  remain Pending.
-- Validation caveat: the initial sandbox qlty attempt could not create its
-  external rolling log; an approved retry passed with no issues. Markdown lint
-  and diff whitespace checks passed.
+- Implementation status: Slice 1 complete; independent
+  implementation-reviewer verdict `Ready`; Completion Approval is `Approved`
+  at `approved in current conversation`; the exact completion commit is
+  pending. Closure Approval remains Pending.
+- Validation result: routing/contradiction searches, sidecar audit, configured
+  Markdown lint, broad Markdown lint over every changed Markdown file, qlty,
+  and diff whitespace checks passed. The initial sandbox qlty attempt could
+  not create its external rolling log; an approved retry passed with no issues.
+- Implementation-review feedback resolved: `docs/specs/README.md` Working
+  Agreement and non-trivial workflow no longer present lifecycle skills as
+  Main operational instructions; `AGENTS.md` Coordination Sources has no
+  duplicate skill entry; and deterministic routing uses MD013-safe lists.
+
+## Completion Approval Evidence
+
+- Approved scope: Slice 1 — Establish the Main-to-Role Orchestration Contract.
+- Implementation review verdict: `Ready`.
+- Completion Approval: `Approved`, recorded at `approved in current conversation`.
+- Exact approved completion paths (19):
+  - `AGENTS.md`
+  - `.agent.md`
+  - `.github/copilot-instructions.md`
+  - `.codex/agents/approval-committer.toml`
+  - `.codex/agents/feature-author.toml`
+  - `.codex/agents/feature-closer.toml`
+  - `.codex/agents/implementation-reviewer.toml`
+  - `.codex/agents/implementer.toml`
+  - `.codex/agents/plan-author.toml`
+  - `.codex/agents/plan-reviewer.toml`
+  - `.codex/agents/plan-reviser.toml`
+  - `.agents/skills/sdd-plan-task/SKILL.md`
+  - `.agents/skills/sdd-review-plan/SKILL.md`
+  - `.agents/skills/sdd-implement-task/SKILL.md`
+  - `.agents/skills/sdd-review-implementation/SKILL.md`
+  - `.agents/skills/sdd-feature-exit/SKILL.md`
+  - `docs/specs/README.md`
+  - `docs/specs/features/clarify-main-agent-sdd-delegation/TASKS.md`
+  - `docs/specs/features/clarify-main-agent-sdd-delegation/TRACEABILITY.md`
+- Commit status: Eligible for approval-committer; no commit has been created.
 
 ## Directive-to-SPECS Crosswalk
 
@@ -86,39 +120,56 @@ acceptance evidence.
 The implementation evidence must record both columns, not only the expected
 route. “Actual route” is the observed route after the documentation changes.
 
-| Request or condition                                    | Expected route                                                            | Actual route   |
-| ------------------------------------------------------- | ------------------------------------------------------------------------- | -------------- |
-| Ask to discuss feature scope                            | Main directly                                                             | To be recorded |
-| Create formal feature artifacts                         | Main → `feature-author` → Main                                            | To be recorded |
-| Ask for informal plan-slice opinion                     | Main directly                                                             | To be recorded |
-| Request formal plan review                              | Main → `plan-reviewer` → Main                                             | To be recorded |
-| Ask which implementation approach is best               | Main directly                                                             | To be recorded |
-| Implement an approved slice                             | Main → `implementer` → Main                                               | To be recorded |
-| Investigate an implementation error                     | Main directly unless continuing an active formal implementation operation | To be recorded |
-| Request completed-slice review                          | Main → `implementation-reviewer` → Main                                   | To be recorded |
-| Ask what knowledge should survive Feature Exit          | Main directly                                                             | To be recorded |
-| Run formal Feature Exit                                 | Main → `feature-closer` → Main                                            | To be recorded |
-| User explicitly names `plan-reviewer` for formal review | Main → `plan-reviewer` → Main, subject to safety and approval gates       | To be recorded |
-| User says “Main should implement the approved slice”    | Main routes to `implementer`; role ownership overrides preference         | To be recorded |
-| Trivial change permitted by SDD SSOT                    | Main directly unless another repository rule requires delegation          | To be recorded |
+| Request or condition                                    | Expected route                                                            | Actual route                                                                                    |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Ask to discuss feature scope                            | Main directly                                                             | Main directly; no formal activation.                                                            |
+| Create formal feature artifacts                         | Main → `feature-author` → Main                                            | Main delegates `feature-author`; intake artifacts and recommendation return to Main.            |
+| Ask for informal plan-slice opinion                     | Main directly                                                             | Main directly; informal planning discussion does not activate a role.                           |
+| Request formal plan review                              | Main → `plan-reviewer` → Main                                             | Main delegates read-only `plan-reviewer`; verdict and evidence return to Main.                  |
+| Ask which implementation approach is best               | Main directly                                                             | Main directly; approach discussion is ad hoc.                                                   |
+| Implement an approved slice                             | Main → `implementer` → Main                                               | Main delegates `implementer`; final diff and evidence return to Main.                           |
+| Investigate an implementation error                     | Main directly unless continuing an active formal implementation operation | Main investigates directly unless the active operation requires a delegated implementer result. |
+| Request completed-slice review                          | Main → `implementation-reviewer` → Main                                   | Main delegates read-only `implementation-reviewer`; verdict returns to Main.                    |
+| Ask what knowledge should survive Feature Exit          | Main directly                                                             | Main directly; knowledge discussion does not activate Feature Exit.                             |
+| Run formal Feature Exit                                 | Main → `feature-closer` → Main                                            | Main delegates `feature-closer`; Close/blocker recommendation returns to Main.                  |
+| User explicitly names `plan-reviewer` for formal review | Main → `plan-reviewer` → Main, subject to safety and approval gates       | Main honors the explicit role request; approval and safety gates remain in force.               |
+| User says “Main should implement the approved slice”    | Main routes to `implementer`; role ownership overrides preference         | Main routes to `implementer`; role ownership overrides the preference.                          |
+| Trivial change permitted by SDD SSOT                    | Main directly unless another repository rule requires delegation          | Main directly under the SDD trivial-change criteria.                                            |
 
 ### Formal Lifecycle Stage Routes
 
 The eight formal stages each return to Main before any subsequent delegation.
 Approval-committer is shown for all three existing approval-gate variants.
 
-| Formal stage or gate  | Activation and expected route                                                                                 | Actual route   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------- | -------------- |
-| Feature intake        | Formal feature-artifact creation → Main → `feature-author` → Main                                             | To be recorded |
-| Planning              | Create the implementation-slice plan → Main → `plan-author` → Main                                            | To be recorded |
-| Plan review           | Formal plan-review gate → Main → `plan-reviewer` → Main                                                       | To be recorded |
-| Plan revision         | Plan-review Findings require replanning → Main → `plan-reviser` → Main                                        | To be recorded |
-| Approved plan commit  | Human Approval plus plan-reviewer Ready → Main → `approval-committer` (plan gate) → Main                      | To be recorded |
-| Implementation        | Approved slice execution → Main → `implementer` → Main                                                        | To be recorded |
-| Implementation review | Completed approved-slice review → Main → `implementation-reviewer` → Main                                     | To be recorded |
-| Completion commit     | Completion Approval plus implementation-reviewer Ready → Main → `approval-committer` (completion gate) → Main | To be recorded |
-| Feature Exit          | All slices complete and committed → Main → `feature-closer` → Main                                            | To be recorded |
-| Closure commit        | Closure Approval plus feature-closer Close → Main → `approval-committer` (closure gate) → Main                | To be recorded |
+| Formal stage or gate  | Activation and expected route                                                                                 | Actual route                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Feature intake        | Formal feature-artifact creation → Main → `feature-author` → Main                                             | Confirmed: `feature-author` returns intake artifacts and recommendation to Main; no child chaining.         |
+| Planning              | Create the implementation-slice plan → Main → `plan-author` → Main                                            | Confirmed: `plan-author` returns the complete plan and evidence to Main.                                    |
+| Plan review           | Formal plan-review gate → Main → `plan-reviewer` → Main                                                       | Confirmed: `plan-reviewer` returns `Ready` or Findings to Main; Main routes any revision.                   |
+| Plan revision         | Plan-review Findings require replanning → Main → `plan-reviser` → Main                                        | Confirmed: `plan-reviser` returns the revised plan and recommended review route to Main.                    |
+| Approved plan commit  | Human Approval plus plan-reviewer Ready → Main → `approval-committer` (plan gate) → Main                      | Confirmed: Main delegates the plan gate only after both prerequisites; commit result returns to Main.       |
+| Implementation        | Approved slice execution → Main → `implementer` → Main                                                        | Confirmed: `implementer` returns the final diff and evidence to Main.                                       |
+| Implementation review | Completed approved-slice review → Main → `implementation-reviewer` → Main                                     | Confirmed: `implementation-reviewer` returns `Ready` or Findings to Main; Main routes fixes.                |
+| Completion commit     | Completion Approval plus implementation-reviewer Ready → Main → `approval-committer` (completion gate) → Main | Confirmed: Main delegates the completion gate only after both prerequisites; commit result returns to Main. |
+| Feature Exit          | All slices complete and committed → Main → `feature-closer` → Main                                            | Confirmed: `feature-closer` returns Close/blocker evidence to Main.                                         |
+| Closure commit        | Closure Approval plus feature-closer Close → Main → `approval-committer` (closure gate) → Main                | Confirmed: Main delegates the closure gate only after both prerequisites; commit result returns to Main.    |
+
+### Final Confirmation Answers
+
+| Question                                              | Answer from repository text                                              |
+| ----------------------------------------------------- | ------------------------------------------------------------------------ |
+| Chat default entrypoint                               | Main agent.                                                              |
+| May Main conduct non-formal design discussion?        | Yes. Main Direct Work includes architecture and design discussion.       |
+| Does feature discussion alone start `feature-author`? | No. SDD topic discussion does not activate a role.                       |
+| Who creates formal feature artifacts?                 | `feature-author`, delegated by Main.                                     |
+| May Main directly execute feature-intake skill?       | No. Skills are role-owned procedures, not Main lifecycle entrypoints.    |
+| Who handles an informal plan opinion?                 | Main directly.                                                           |
+| Who performs formal plan review?                      | `plan-reviewer`, delegated by Main.                                      |
+| Does a child start the next child?                    | No. Role contracts prohibit invoking or spawning another lifecycle role. |
+| Where does a child return?                            | Main orchestrator, with result, evidence, and recommended route.         |
+| Who selects and runs the canonical skill?             | The delegated role, as declared in its `.codex/agents/*.toml` contract.  |
+| May a user ask Main to investigate only?              | Yes, unless the action crosses a formal lifecycle or approval boundary.  |
+| What is the SDD policy SSOT?                          | `docs/specs/README.md`.                                                  |
 
 The seven SDD skill-adapter files are classified separately from Main routing:
 they are invocation adapters owned by their respective skill packages, not
