@@ -183,11 +183,9 @@ quality gate.
 
 ## Open Questions
 
-- Does the Qlty Cloud Project have the Qlty Gate enabled, and is it configured
-  to fail on new maintainability issues rather than only comment on them?
-- Which issue levels, smell categories, and changed-file scope are included in
-  the effective gate, and is the resulting GitHub status required for merge?
-- Does the current `[smells] mode = "comment"` in `.qlty/qlty.toml` match the
-  intended gate, or should an approved change use a blocking mode? The answer
-  must be validated against the baseline and bounded-refactoring evidence;
-  no threshold change is preselected.
+- Resolved by user confirmation at `2026-08-09 10:18 JST`: the Qlty Cloud
+  Quality Gate uses the approved new-issue behavior and target levels, and
+  its GitHub status is required for merge. The registered `qltysh` App and
+  existing Cloud/Actions integration remain the single Qlty owner.
+- Resolved by implementation: `[smells] mode` is set to `"block"`; no smell
+  threshold, plugin, workflow, package, or runtime setting was changed.

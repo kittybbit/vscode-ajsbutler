@@ -45,7 +45,8 @@
   owner and runtime verification paths.
 - Human approval: Approved at `2026-08-09 09:58 JST`; implementation may begin
   only within the approved configuration-alignment scope.
-- Active implementation slice: Slice 1, pending the required plan commit.
+- Active implementation slice: Slice 1, implementation complete; review Ready;
+  Completion Approval approved; pending focused commit.
 
 ## Replan Trigger
 
@@ -87,12 +88,19 @@ Implementation must not start while Status is Pending.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: `2026-08-09 10:23 JST`
+- Approved scope: The completed Slice 1 configuration alignment: change
+  `.qlty/qlty.toml` `[smells] mode` from `comment` to `block`, preserve the
+  existing Qlty Cloud/Actions owner, and retain the recorded Cloud gate
+  evidence. No threshold, plugin, workflow, package, runtime, or architecture
+  change is included.
+- Approved paths: `.qlty/qlty.toml`,
+  `docs/specs/features/refactoring-quality-gate-strengthening/SPECS.md`,
+  `docs/specs/features/refactoring-quality-gate-strengthening/TASKS.md`,
+  `docs/specs/features/refactoring-quality-gate-strengthening/TRACEABILITY.md`
+- Implementation review verdict: Ready
+- Commit status: Eligible for the focused completion commit
 
 ## Closure Approval
 
@@ -107,7 +115,7 @@ Implementation must not start while Status is Pending.
 
 ### Slice 1: Align the existing Qlty Cloud quality gate configuration
 
-- Status: Approved; pending plan commit
+- Status: Complete; approved for focused completion commit
 - Scope: Record the effective Qlty Cloud Project Settings and the
   repository's `.qlty/qlty.toml` behavior, then apply one narrow repository
   configuration change only if the evidence confirms a gate gap. The
@@ -117,6 +125,10 @@ Implementation must not start while Status is Pending.
   If the Cloud gate already blocks the approved signal, make no configuration
   change and record the no-change decision. Do not add a Qlty action, package
   script, local evaluator, or new workflow job.
+- Implementation record: changed `.qlty/qlty.toml` `[smells] mode` from
+  `comment` to `block`; no threshold, plugin, workflow, package, or runtime
+  change was made. The Cloud-side issue-level and required-status settings
+  remain external evidence supplied by the existing Qlty integration.
 - User / Domain Value: pull requests retain one authoritative Qlty status and
   can block newly introduced maintainability regressions without treating the
   existing backlog as a new failure.
@@ -147,6 +159,19 @@ Implementation must not start while Status is Pending.
   - Use a Qlty Cloud pull-request result or an approved controlled test to
     show that the selected new-issue condition produces the expected status;
     do not introduce a deliberately bad production change into this branch.
+- Validation result: `rtk pnpm run qlty`, `rtk pnpm run lint:md`,
+  `rtk git diff --check`, and `qlty config validate` passed after changing
+  `[smells] mode` to `block`. No test code was required for this configuration
+  slice.
+- External Cloud evidence: the user confirmed that Qlty Cloud checking is
+  integrated into Actions and that the `qltysh` GitHub App is registered. The
+  user then confirmed the Cloud gate's new-issue behavior, target issue
+  levels, and required GitHub status at `2026-08-09 10:18 JST`. These settings
+  are externally managed and are not duplicated in this checkout.
+- Implementation Review verdict: Ready. The final diff stays within the
+  approved boundary, preserves the existing Qlty Cloud owner and runtime
+  verification paths, and has no actionable regression or compatibility
+  finding.
 - Production Readiness:
   - Failure mode: invalid Qlty TOML, unsupported mode, missing Cloud status,
     or a gate that fails on the pre-existing backlog blocks completion with
@@ -348,7 +373,7 @@ implementation or commit.
 
 - [ ] Tests added or updated
 - [ ] Update README or user documentation if user-facing behavior changes
-- [ ] Run relevant validation
+- [x] Run relevant validation
 
 ## Notes
 

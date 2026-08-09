@@ -61,7 +61,7 @@ repository = "https://github.com/kittybbit/vscode-ajsbutler.git"
 branch = "main"
 
 [smells]
-mode = "comment"
+mode = "block"
 
 [smells.boolean_logic]
 threshold = 4
