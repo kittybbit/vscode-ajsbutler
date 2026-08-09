@@ -3,7 +3,7 @@
   "name": "vscode-ajsbutler",
   "displayName": "JP1/AJS Butler - ジョブネット可視化",
   "description": "JP1/AJS3の定義ファイルを一覧・検索・フロー図で可視化するVS Code拡張機能",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "private": true,
   "license": "MIT",
   "packageManager": "pnpm@10.33.0",
