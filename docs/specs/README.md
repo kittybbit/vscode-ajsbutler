@@ -519,9 +519,7 @@ feature folder together with the approved durable propagation in one focused
 closure commit. Do not retain `SPECS.md`, `TASKS.md`, or `TRACEABILITY.md` as
 implementation history. Feature Close is recorded only after that commit
 succeeds.
-Shared refactoring evidence under `docs/specs/features/BASELINE.md` is not
-part of an individual feature folder and follows its own effort-level
-retention policy.
+
 Preserve inherited feature folders, and do not treat their pending tasks or
 unresolved risks as completion conditions for the selected feature. Stop and
 replan only when closing the selected feature would damage or invalidate
@@ -687,21 +685,6 @@ the top of the existing feature documents:
   requirement, `SPECS.md` section, slice, and test or validation plan. Keep
   feature-specific design notes in `SPECS.md`, not in traceability. It does not
   become a work log or a second status document.
-
-### Shared Refactoring Evidence
-
-- `docs/specs/features/BASELINE.md` is the shared temporary evidence owner for
-  the large-scale refactoring effort. It may contain the exact baseline
-  identity, raw measurements, ranked candidates, bounded responsibility
-  groups, and measurable success signals consumed by multiple later features.
-- Individual feature folders reference this shared baseline; they do not copy
-  its detailed evidence. Their `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`
-  remain the owners of feature-local requirements, approval, status, and
-  traceability.
-- Retain the shared baseline until the large-scale refactoring effort is
-  complete and all reusable decisions have been propagated to durable
-  documents or owning feature folders. Remove it only at that effort's final
-  closure.
 
 Do not add task history, broad repository summaries, transcripts, or material
 that does not affect the next decision, approval, risk, validation, or feature

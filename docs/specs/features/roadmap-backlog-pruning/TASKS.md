@@ -25,13 +25,13 @@
 
 ## Plan Status
 
-- Status: Pending Approval
+- Status: Complete
 - Planning scope: one docs-only slice that prunes unsupported roadmap entries
   and removes shared refactoring evidence plus stale SSOT references after its
   last dependent item ends.
-- Review status: Ready for approval
-- Human approval: Pending
-- Active implementation slice: none until approval and plan commit
+- Review status: Implementation review Ready
+- Human approval: no active implementation approval
+- Active implementation slice: none; Slice 1 complete, completion review pending
 
 ## Investigation Evidence
 
@@ -60,20 +60,21 @@
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: approved in current conversation
-- Approved scope: Slice 1, `Prune unsupported roadmap backlog`, exactly as
-  recorded in this plan
-- Approved paths: `docs/specs/features/roadmap-backlog-pruning/` for the plan
-  commit; implementation paths remain gated by Completion Approval
-
-## Completion Approval
-
 - Status: Pending
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Implementation review verdict: Pending
+
+## Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: Slice 1 exact completed implementation and its recorded
+  validation evidence
+- Approved paths: `docs/specs/roadmap.md`, `docs/specs/README.md`,
+  `docs/specs/features/BASELINE.md`, and
+  `docs/specs/features/roadmap-backlog-pruning/TASKS.md`
+- Implementation review verdict: Ready
 - Commit status: Not eligible
 
 ## Closure Approval
@@ -89,7 +90,7 @@
 
 ### Slice 1: Prune unsupported roadmap backlog
 
-- Status: Proposed
+- Status: Complete
 - Scope:
   - remove Architecture Boundary Protection, its ordered-refactoring section,
     and baseline-derived ordering text
@@ -115,7 +116,8 @@
     roadmap
   - `BASELINE.md` is removed after its retention condition is confirmed ended,
     with no stale SSOT reference left behind
-  - no runtime, test, generated-artifact, configuration, README, CHANGELOG, or
+  - no runtime, test, generated-artifact, configuration, root `README.md`,
+    CHANGELOG, or
     use-case file changes occur
 - Validation:
   - `rtk git diff --check`
@@ -156,9 +158,30 @@
 - Out of Scope:
   - fixing the stale Prism artifact or changing OpenAPI generation
   - changing the inherited WebAPI feature
-  - runtime, tests, generated artifacts, configuration, README, CHANGELOG, or
+  - runtime, tests, generated artifacts, configuration, root `README.md`,
+    CHANGELOG, or
     use-case edits
   - creating replacement features for candidates without met entry conditions
+
+### Slice 1 Implementation Evidence
+
+- Changed files: `docs/specs/roadmap.md`, `docs/specs/README.md`,
+  `docs/specs/features/BASELINE.md` (removed), and this selected feature's
+  current-state record.
+- Acceptance evidence: roadmap retains only the WebAPI Import Beta Exit
+  decision; all reviewed speculative or unowned candidates are removed; the
+  inherited WebAPI feature remains unchanged; no stale baseline reference
+  remains in roadmap or SDD SSOT.
+- Validation: `rtk pnpm run qlty` passed; `rtk pnpm run lint:md` passed;
+  targeted `rtk pnpm exec markdownlint-cli2 docs/specs/roadmap.md` passed;
+  feature structure checks passed; `rtk git diff --check` passed.
+- Compatibility: no runtime, JP1/AJS, VS Code, desktop, web, parser, or
+  telemetry behavior changed.
+- Documentation impact: roadmap and SDD temporary-evidence policy were
+  synchronized; no user documentation or CHANGELOG update was required.
+- Remaining risk: future roadmap candidates must be recreated from concrete
+  evidence; existing WebAPI beta evidence remains blocked in its inherited
+  feature.
 
 ## Traceability
 
@@ -170,7 +193,7 @@
 
 - [x] Intake: `rtk pnpm run qlty`.
 - [x] Intake: `rtk pnpm run lint:md`.
-- [ ] Slice 1: run docs-only validation after implementation.
+- [x] Slice 1: run docs-only validation after implementation.
 
 ## Risks
 
