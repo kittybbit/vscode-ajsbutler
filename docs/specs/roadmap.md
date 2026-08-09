@@ -24,15 +24,6 @@ feature.
   enforcement gap not already covered by the current architecture test.
 - Dependency: Refactoring Quality Baseline.
 
-### 9. Refactoring Quality Gate Strengthening
-
-- Purpose: prevent recurrence using approved differential gates derived from
-  measured, stable evidence rather than preselected repository-wide limits.
-- Entry condition: the baseline is reproducible and at least one bounded
-  refactoring feature supplies before/after evidence for a stable gate.
-- Dependency: Refactoring Quality Baseline and evidence from completed bounded
-  refactoring features.
-
 ## Baseline-Derived Refactoring Intake Ordering
 
 The completed `refactoring-quality-baseline` identifies bounded responsibility
@@ -58,9 +49,6 @@ refactoring level and is removed only after that effort is complete.
 - Architecture Boundary Protection remains behind its existing evidence gate:
   the composition-root candidate is not treated as a dependency violation
   without a concrete gap, cycle, or enforcement failure.
-- Refactoring Quality Gate Strengthening remains last. It opens only after a
-  bounded refactoring supplies stable before/after evidence suitable for a
-  differential gate; no repository-wide threshold is introduced here.
 
 This ordering preserves the existing desktop/web, parser, telemetry, and
 JP1/AJS compatibility contracts. Later feature intake must cite the relevant
