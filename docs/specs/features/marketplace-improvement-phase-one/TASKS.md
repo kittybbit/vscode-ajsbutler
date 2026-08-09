@@ -28,14 +28,19 @@
 
 ## Plan Status
 
-- Status: Slice 2 implementation complete; awaiting focused completion commit
-- Planning scope: smallest revision of the Slice 2 contributor-link target and
-  VSIX validation after the discovered VSCE default exclusion; the two-slice
-  feature purpose and the three implementation paths remain unchanged
-- Review status: Ready; no open Findings
-- Human approval: Approved for the revised Slice 2 plan
-- Active implementation slice: none; Slice 2 implementation and validation are
-  complete, pending its focused completion commit
+- Status: Additional correction replan prepared; pending independent re-review
+  and post-correction Completion Approval
+- Planning scope: limited revalidation of the existing Slice 1 `keywords`
+  field and the current `README.md` wording correction; the feature purpose,
+  two-slice structure, and completed implementation commits remain unchanged
+- Review status: Pending independent re-review of the additional correction
+- Human approval: Pending for the Additional Correction Replan Gate. After the
+  independent plan review records `Ready`, Main applies the user's instruction
+  that a normally completed target task may proceed as approved and records
+  `Human Approval: Approved` for the exact scope below; this plan revision does
+  not itself grant or bypass that gate
+- Active implementation slice: Additional correction gate covering the
+  existing Slice 1 metadata output and the existing Slice 2 README output
 
 ## Replanning Record
 
@@ -116,6 +121,80 @@
   `CONTRIBUTING.md`; `.vscodeignore` and package settings remain unchanged and
   out of scope.
 
+- Implementation-review Finding P1 (High): the Slice 1 approval record
+  retained the prior broad exact keyword set, but the current user request
+  narrows the existing `package.json` `keywords` field to the exact six-item set
+  `JP1`, `AJS`, `AJS3`, `JP1/AJS`, `JP1/AJS3`, and `ajsprint`. This is a value
+  correction within the already approved Slice 1 field; it adds no path,
+  feature, integration, or runtime scope.
+- Historical P1 evidence: the superseded 15-item set is recorded in the
+  pre-correction Slice 1 approval commit `ed4a283a`,
+  `package.json:25-40`, and was also carried by the prior Slice 1 plan record:
+  `JP1`, `AJS`, `AJS3`, `JP1/AJS`, `JP1/AJS3`, `jobnet`, `job scheduler`,
+  `ajsprint`, `ジョブネット`, `ジョブ管理`, `運用管理`, `定義ファイル`,
+  `visualization`, `viewer`, and `CSV`. The current correction intentionally
+  narrows that evidence to the exact six-item target above.
+- Implementation-review Finding P2 (Medium): the current uncommitted
+  `README.md` and `package.json` changes post-date the two committed slices and
+  the retained Feature Exit record. The prior Feature Exit evidence remains
+  preserved below, but closure is suspended until this correction is
+  independently re-reviewed, completion-approved, committed, and the prior
+  evidence is re-confirmed.
+
+## Additional Correction Replan Gate
+
+- Status: Approved; awaiting focused plan commit, implementation review,
+  Completion Approval, and one focused correction commit
+- Plan review verdict: Ready (independent `plan-reviewer` re-review completed)
+- Human Approval: Approved under the user's stated proceed rule for a normally
+  completed target task
+- Approved at: 2026-08-09 (current user request)
+- Trigger: Findings P1 and P2 from implementation review, limited to the
+  existing Slice 1 `package.json` keyword field and the current uncommitted
+  `README.md` wording correction
+- Scope: apply only the current specified wording correction in `README.md`
+  and replace the previously recorded Slice 1 keyword set in `package.json`
+  with the exact six-item set `JP1`, `AJS`, `AJS3`, `JP1/AJS`, `JP1/AJS3`,
+  `ajsprint`; do not alter `displayName`, `description`, or any other manifest
+  field. `README.en.md` and `CONTRIBUTING.md` are unchanged and outside this
+  correction.
+- Target implementation paths: `README.md` and `package.json` only;
+  `package.json` is limited to `keywords`
+- Planning/evidence paths: this `TASKS.md` and sibling `TRACEABILITY.md` only
+- Preserved slices: Slice 1 remains the Marketplace metadata slice and Slice 2
+  remains the Japanese-first product-page slice; their existing completion
+  commits, approval records, and unrelated validation evidence are retained
+- Approval boundary: after independent plan review, the exact implementation
+  approval scope is `README.md` limited to the current specified wording
+  correction and `package.json` limited to the `keywords` field with the exact
+  six-item set. `README.en.md` and `CONTRIBUTING.md` remain unchanged; no new
+  slice, manifest field, runtime/UI behavior, host claim, compatibility claim,
+  or path is added.
+- Approval sequence completed for this gate: `Plan review verdict: Ready` ->
+  Main recorded `Human Approval: Approved` using the user's stated proceed
+  rule for this normally completed target task. `approval-committer` must now
+  commit only this `TASKS.md`/`TRACEABILITY.md` planning package before
+  implementation proceeds for the exact two-path correction.
+- Completion gate: after the correction is applied, obtain implementation
+  review `Ready`, explicit Completion Approval, and one focused commit for the
+  exact `README.md` plus `package.json` diff. Reconfirm the retained Feature
+  Exit evidence before closure can be reconsidered.
+- Required validation: rerun the existing local VSCE `readManifest` check for
+  the six keywords and unchanged non-keyword fields; run disposable
+  `vsce ls`/`vsce package` and inspect the packaged manifest; run
+  `markdownlint-cli2` and the repository Markdown lint; run the scoped
+  non-mutating qlty check plus full `pnpm run qlty` in a disposable checkout,
+  isolating formatter side effects; run `git diff --check`; and re-review the
+  existing Feature Exit acceptance, traceability, production readiness, and
+  compatibility evidence against the post-correction diff
+- Dependencies: no change to Slice 1/Slice 2 order or runtime dependency
+  graph; the additional correction gate must complete before Closure Approval
+  or feature-folder removal
+- Unresolved risk: Marketplace ranking, external link availability, and
+  post-publication rendering remain the same bounded release/operations risks;
+  the only new workflow risk is stale completion evidence, addressed by the
+  required re-review and evidence reconfirmation
+
 ## Prior Plan Approval (Feature Plan And Slice 1)
 
 - Status: Approved
@@ -131,7 +210,8 @@ through `approval-committer`; Slice 1 implementation paths remain governed by
 the approved plan and its subsequent completion gate.
 
 This record is retained as the previous plan gate. It does not authorize the
-revised Slice 2 plan after the current replan trigger.
+revised Slice 2 plan after the current replan trigger or the current
+Additional Correction Replan Gate.
 
 ## Slice 1 Completion Approval
 
@@ -148,7 +228,9 @@ Slice 1 status: Completed and focused completion commit recorded. Validation
 evidence includes manifest and VSIX package checks, production build,
 package-scoped qlty, and `git diff --check`. The full qlty check remains a
 known baseline issue limited to formatter findings in these feature documents;
-those out-of-scope files were not changed for Slice 1.
+those out-of-scope files were not changed for Slice 1. This retained approval
+and commit cover the prior keyword values; the exact six-item correction is
+pending the Additional Correction Completion Approval.
 
 ## Previous Slice 2 Plan Approval
 
@@ -192,6 +274,9 @@ validation.
 - `.vscodeignore` and package configuration: unchanged and out of scope
 - Commit status: Committed as `88b4ffc58d6225049df7b1e4a54e41f99abb0559`
 
+This is the retained Slice 2 replan gate and does not authorize the current
+Additional Correction Replan Gate.
+
 ## Slice 2 Completion Approval
 
 - Status: Approved
@@ -206,7 +291,7 @@ validation.
   - `CONTRIBUTING.md`
   - this `TASKS.md` completion and validation record only
   - sibling `TRACEABILITY.md` completion and validation record only
-- Commit status: Eligible for focused completion commit
+- Commit status: Committed as `0df2df22ee00950748e6f38482621f63ca1fac7f`
 
 Slice 2 validation evidence includes Markdown lint, repository lint, scoped
 qlty, disposable full qlty, link and image structure checks, disposable VSCE
@@ -215,13 +300,33 @@ for both product pages, and implementation-worktree status/diff invariance.
 The browser file/data URL preview was unavailable under the environment
 policy; the planned local static preview and image checks passed.
 
+This is the retained pre-correction Slice 2 completion record. The current
+`README.md` correction is covered only by the Additional Correction Replan
+Gate and requires its own implementation review and Completion Approval.
+
+## Additional Correction Completion Approval
+
+- Status: Pending independent implementation review and Completion Approval
+- Approved at: none
+- Implementation review verdict: Pending
+- Approved scope: the current additional `README.md` wording correction and
+  the `package.json` `keywords` correction to the exact six-item set only
+- Approved paths: `README.md`, `package.json` (the `keywords` field only), and
+  the completion evidence sections of this `TASKS.md` and sibling
+  `TRACEABILITY.md`
+- Excluded paths: `README.en.md` and `CONTRIBUTING.md` remain unchanged and are
+  not part of this correction approval
+- Commit status: Not eligible
+
 ## Closure Approval
 
-- Status: Pending
+- Status: Pending; suspended until the Additional Correction Replan Gate is
+  reviewed, completion-approved, committed, and its evidence is reconfirmed
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Pending
+- Feature Exit verdict: Retained prior review superseded for current closure;
+  pending post-correction reconfirmation
 - Commit status: Not eligible
 
 ## Investigation Evidence And Decisions
@@ -231,8 +336,8 @@ policy; the planned local static preview and image checks passed.
 - The selected branch is `codex/marketplace-improvement`; the selected feature
   folder is present and no other feature owns this branch goal.
   - The approved Slice 2 implementation paths `README.md`, `README.en.md`, and
-  `CONTRIBUTING.md` are implemented and remain uncommitted pending the focused
-  completion commit. No other implementation files are in scope.
+  `CONTRIBUTING.md` are implemented and committed in `0df2df22`. No other
+  implementation files are in scope.
 - Slice 1 committed the product name
   `JP1/AJS Butler - ジョブネット可視化`, the description
   `JP1/AJS3の定義ファイルを一覧・検索・フロー図で可視化するVS Code拡張機能`,
@@ -313,7 +418,8 @@ policy; the planned local static preview and image checks passed.
 
 ### Slice 1: Marketplace Discovery Metadata
 
-- Status: Completed and committed as `ed4a283a`
+- Status: Completed and committed as `ed4a283a`; additional keyword correction
+  is pending the Additional Correction Replan Gate
 - Scope: update only `package.json` `displayName`, `description`, and
   `keywords` so the existing product is discoverable and its purpose is clear.
 - User / Domain Value: a Marketplace visitor can identify the JP1/AJS Butler
@@ -324,11 +430,9 @@ policy; the planned local static preview and image checks passed.
     `JP1/AJS Butler - ジョブネット可視化`;
   - set `description` to
     `JP1/AJS3の定義ファイルを一覧・検索・フロー図で可視化するVS Code拡張機能`;
-  - replace the single keyword with this exact concise, case-insensitively
-    deduplicated Japanese/English set: `JP1`, `AJS`, `AJS3`, `JP1/AJS`,
-    `JP1/AJS3`, `jobnet`, `job scheduler`, `ajsprint`, `ジョブネット`,
-    `ジョブ管理`, `運用管理`, `定義ファイル`, `visualization`, `viewer`,
-    and `CSV`;
+  - replace the prior keyword set with this exact six-item product and
+    product-specific-command set: `JP1`, `AJS`, `AJS3`, `JP1/AJS`,
+    `JP1/AJS3`, and `ajsprint`;
   - inspect the exact manifest diff and reject any other field change.
 - Acceptance:
   - brand and purpose are clear without overstating compatibility or behavior;
@@ -380,8 +484,9 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
 
 ### Slice 2: Japanese-First Product Pages And Contributor Separation
 
-- Status: Active planning target; revised plan awaiting independent re-review,
-  exact Human Approval, and focused plan-gate commit
+- Status: Completed and committed as `0df2df22`; prior Feature Exit evidence is
+  retained and awaits reconfirmation after the Additional Correction Replan
+  Gate
 - Scope: atomically rewrite `README.md`, create `README.en.md`, and create
   `CONTRIBUTING.md`; reference the existing list/flow images without modifying
   image files; run integrated Marketplace-equivalent package checks.
@@ -663,7 +768,8 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
 - [x] Marketplace-equivalent offline validation uses actual installed VSCE and
       Markdown commands and states its limits.
 - [x] Slice 1 manifest, build, VSCE package-level validation, scoped diff, and
-      focused completion commit are recorded.
+      focused completion commit are recorded for the retained completion
+      state; the additional exact-six-keyword correction remains pending.
 - [x] Slice 2 Markdown, canonical contributor-link, asset, generated
       `extension/README.md` and `extension/README.en.md` link/image structure
       comparison, expected VSCE inclusion/exclusion check, independent local
@@ -676,12 +782,76 @@ description:m.description,keywords:m.keywords},null,2)))"` for local,
       out-of-scope files.
 - [x] Japanese/English factual consistency and forbidden-claim review pass.
 - [x] Runtime behavior remains unchanged and no out-of-scope files are changed.
+- [ ] Additional correction exact diff is limited to `README.md` and
+      `package.json` `keywords`, with no runtime, host, compatibility, or
+      unrelated manifest expansion.
+- [ ] Additional correction manifest/readManifest, disposable VSCE package,
+      Markdown/qlty, `git diff --check`, and retained Feature Exit evidence
+      reconfirmation pass; implementation review is `Ready`, Completion
+      Approval is recorded, and the focused correction commit succeeds.
 
-Feature Exit can begin only after both slices have independent implementation
-review verdicts of `Ready`, Completion Approval, and focused completion
-commits. Feature Exit must confirm the final diff, validation evidence,
-documentation ownership, compatibility wording, and absence of temporary
-package artifacts before recommending closure.
+Feature Exit can resume only after both slices retain their independent
+implementation review verdicts of `Ready`, Completion Approval, and focused
+completion commits, and the Additional Correction Replan Gate has its own
+implementation review, Completion Approval, focused correction commit, and
+evidence reconfirmation. Feature Exit must then confirm the final diff,
+validation evidence, documentation ownership, compatibility wording, and
+absence of temporary package artifacts before recommending closure.
+
+## Feature Exit Review
+
+- Review status: Complete for the pre-correction state represented by the two
+  recorded commits; retained as evidence but superseded for current closure by
+  Findings P1/P2.
+- Completed slices: Slice 1, Marketplace Discovery Metadata, committed as
+  `ed4a283a`; Slice 2, Japanese-First Product Pages And Contributor
+  Separation, committed as `0df2df22`.
+- Acceptance: All MP-01 through MP-08 criteria and the first-stage DoD were
+  satisfied at the retained Feature Exit point. README.md is Japanese-first
+  with opening value, list/flow
+  visuals, user problems, verified user-facing capabilities, a four-step
+  quick start, privacy/security, unofficial status, scope/constraints,
+  feedback, contribution, license, and English navigation. README.en.md
+  retains equivalent factual product information. package.json contains the
+  retained displayName, description, and prior keyword values at that point.
+  The exact six-item keyword correction is outside this retained verdict.
+- Validation: Recorded implementation-review `Ready` evidence had no open
+  Findings at the retained Feature Exit point. Markdown lint, repository
+  Markdown lint, scoped qlty, disposable full qlty with the known
+  feature-document formatter baseline separated, `git diff --check`,
+  disposable VSCE listing/package inspection, generated README link/image
+  checks, and static visual checks passed. The browser file/data URL preview
+  was unavailable under environment policy; bounded static previews, image
+  dimensions, first-view placement, alt text, and legibility passed, and the
+  independent reviewer classified this as non-blocking. These results must be
+  reconfirmed against the current `README.md` and `package.json` correction.
+- Traceability: `TRACEABILITY.md` maps every MP requirement, supporting use
+  case, telemetry/privacy boundary, compatibility boundary, slice, and final
+  validation. No requirement or acceptance criterion is unassigned.
+- Production readiness: No runtime, test, generated-artifact, parser, UI,
+  host, compatibility, telemetry, WebAPI, or `.vscodeignore` behavior changed.
+  Desktop/Web wording remains bounded, `ajsprint` remains command-text-only,
+  and the CHANGELOG impact was evaluated as not required.
+- Durable documentation: README.md, README.en.md, and CONTRIBUTING.md pass
+  the Durable Documentation Gate and are already committed. No additional
+  architecture, use-case, telemetry, glossary, AGENTS.md, or repository
+  policy propagation is required.
+- Roadmap propagation: Not required. The separate WebAPI beta-exit decision
+  remains owned by its existing roadmap/feature boundary and was not changed.
+- Remaining risks: the retained Marketplace service CSS, external URL
+  availability, indexing/ranking, and post-publication visual smoke check
+  remain release or operations concerns. In addition, the current correction
+  makes the retained completion and Feature Exit evidence stale until the
+  required re-review, Completion Approval, focused commit, and reconfirmation
+  complete.
+- Closure propagation remains prepared but suspended: after the additional
+  correction is complete and explicit Closure Approval is obtained, remove
+  only `docs/specs/features/marketplace-improvement-phase-one/`. Do not remove
+  inherited feature folders, modify durable documents, or retain temporary
+  VSIX/disposable-checkout artifacts.
+- Historical closure recommendation at the retained review point: Close
+- Current closure recommendation: Do not close pending the Additional
+  Correction Replan Gate and post-correction Feature Exit reconfirmation.
 
 ## Replanning Triggers
 
