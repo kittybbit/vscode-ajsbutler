@@ -4,8 +4,8 @@
 
 - Purpose: remove known high/moderate vulnerabilities from transitive
   development dependencies without changing extension behavior.
-- Approved or active slice: none; the complete one-slice plan is approved and
-  awaits its plan-gate commit.
+- Approved or active slice: Slice 1; implementation review is Ready and the
+  completion gate is pending.
 - Do not: edit dependencies, lockfiles, runtime code, tests, generated
   artifacts, or configuration before an approved plan is committed.
 - Do not: broaden the work into general dependency modernization.
@@ -16,7 +16,7 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: Main delegates the approved plan-gate commit to
+- Next decision: Main delegates the approved completion gate to
   `approval-committer`.
 
 ## Sync Rule
@@ -35,13 +35,15 @@
 
 ## Plan Status
 
-- Status: Approved; plan-gate commit pending
+- Status: Implementation review Ready; completion gate pending
 - Planning scope: one complete implementation slice covering the compatible
   development dependency resolution, lockfile audit closure, affected-tooling
   validation, and production-readiness evidence.
-- Review status: Ready for approval (`plan-reviewer` final verdict).
+- Review status: plan Ready (`plan-reviewer`) and implementation Ready
+  (`implementation-reviewer` final verdict).
 - Human approval: Approved.
-- Active implementation slice: none.
+- Active implementation slice: Slice 1
+- Implementation review verdict: Ready
 
 ## Human Approval
 
@@ -58,16 +60,21 @@
 - These plan-gate paths are separate from the implementation Slice 1 target
   paths below; this approval authorizes only the plan-gate commit.
 
-Implementation must not start until the approved plan-gate commit succeeds.
+This approval was the prerequisite for implementation; Slice 1 is now
+implemented and awaits independent implementation review.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-08-11 (explicit user completion-approval instruction in
+  Codex, conditional on normal task completion)
+- Approved scope: Completed Slice 1 implementation, validation evidence, and
+  the documented OpenAPI baseline follow-up.
+- Approved paths: `pnpm-workspace.yaml`, `pnpm-lock.yaml`,
+  `docs/specs/features/dependabot-security-updates/TASKS.md`, and
+  `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`.
+- Implementation review verdict: Ready
+- Commit status: Eligible for the completion gate
 
 ## Closure Approval
 
@@ -82,7 +89,7 @@ Implementation must not start until the approved plan-gate commit succeeds.
 
 ### Slice 1: Resolve and validate the security-clean development graph
 
-- Status: Planned; blocked by the approved plan commit.
+- Status: Implemented; completion gate pending
 - Scope:
   - Immediately before resolution, re-query open Dependabot alerts and
     `pnpm audit --json`; use any newer compatible high/moderate advisory floor
@@ -188,6 +195,8 @@ Implementation must not start until the approved plan-gate commit succeeds.
     Feature Exit evidence; this external check cannot be claimed from the
     local implementation diff alone.
 - Production Readiness:
+  - Status: Ready for implementation review with the documented OpenAPI and
+    validation-environment residuals.
   - Failure modes: fail closed on audit findings, resolver failure, unexpected
     lockfile churn, peer mismatch, build/test/tool startup failure, or a
     remaining GitHub alert; do not suppress or dismiss findings.
@@ -202,6 +211,103 @@ Implementation must not start until the approved plan-gate commit succeeds.
   - Documentation/release: no README, durable use-case, architecture,
     roadmap, or CHANGELOG update is expected because no observable contract
     changes; re-evaluate at Feature Exit.
+
+## Implementation Evidence
+
+- Changed files are limited to the approved implementation paths:
+  `pnpm-workspace.yaml` and `pnpm-lock.yaml`. `package.json`, production
+  dependencies, runtime source, tests, generated artifacts, and user-facing
+  documentation were not changed. Existing pnpm changes remain in the
+  worktree and were not reverted.
+- Security baseline and result: 17 open Dependabot alerts (11 high and
+  6 moderate); before-resolution `pnpm audit` reported 23 advisories
+  (17 high and 6 moderate); after resolution the audit reported 0, and
+  `pnpm audit --audit-level moderate` succeeded.
+- GitHub API re-query evidence is now fixed in `TRACEABILITY.md` as an
+  immutable 17-row open-alert table containing each alert number, package/path,
+  GHSA, severity, vulnerable range, first patched version, selected floor or
+  response, and stable repository URL. The local zero-audit result does not
+  claim remote alert closure; post-publication reevaluation remains Feature
+  Exit evidence.
+- All ten selected security floors are met:
+  `js-yaml@4.3.1`, `postcss@8.5.23`, `fast-uri@3.1.5`, `undici@7.29.0`,
+  `brace-expansion@1.1.18`, `brace-expansion@5.0.9`, `shell-quote@1.9.0`,
+  `linkify-it@5.0.2`, `morgan@1.11.0`, and `nanoid@3.3.17`.
+- Environment and validation: Node `20.20.2` with pnpm `10.33.0`; frozen
+  install succeeded and all compatibility floors were met. `qlty`, build,
+  test compilation, and desktop tests succeeded. `pnpm run test:web` exited
+  0; existing `ECONNRESET`/`Premature close` logs were observed without a
+  failing exit status.
+- Playwright `1.59.1` and the Chromium/headless-shell assets were already
+  cached. `playwright install --with-deps` was attempted, produced no output,
+  hung, and was manually interrupted; this is recorded as a validation
+  environment residual, not as a successful install result.
+- VSIX evidence: the normal `vsce ls`/package dependency detection path
+  failed because npm reported missing nested development dependencies in the
+  pnpm layout. The approved package check therefore used
+  `vsce package --no-dependencies` in a temporary directory; archive test,
+  file-list inspection, manifest validation, and temporary cleanup succeeded.
+- `pnpm run lint:md` succeeded for 35 files with 0 errors.
+- `openapi:check` failed only because
+  `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml` is
+  a stale baseline. The generated artifact and generator were not changed.
+  This remains a separate follow-up owned by Main/the existing WebAPI
+  maintainer, or a Feature Exit follow-up; it is not part of this Slice 1
+  document-only synchronization.
+
+## Main Validation-Equivalence Decisions
+
+- Web compatibility objective: `playwright install --with-deps` attempted
+  environment-dependent OS dependency installation but stopped with no output.
+  Playwright `1.59.1` and the Chromium/headless-shell assets were already in
+  the cache, and the same Node `20.20.2`/pnpm `10.33.0` environment completed
+  `pnpm run test:web` with exit 0, including its `pretest:web` build and test
+  compilation. Main therefore accepts the web compatibility objective as
+  validated by the real web test; the installer handoff is an environment
+  follow-up.
+- Archive/package-content objective: normal `vsce ls`/package dependency
+  detection misidentified the pnpm layout and reported missing nested dev
+  dependencies. The extension uses webpack-bundled assets and does not need
+  `node_modules` in the VSIX. Main therefore approves the temporary
+  `vsce package --no-dependencies` archive as validation-equivalent after
+  successful unzip, manifest, content, and cleanup checks.
+
+## OpenAPI Follow-up
+
+- Owner: Main will hand off the stale generated fixture to a separate task or
+  the existing WebAPI maintainer.
+- Route: handle it as separate work before Feature Exit; exclude it from Slice
+  1 and do not modify the generated artifact in this slice.
+- Done condition: `pnpm run openapi:check` exits 0 and
+  `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml`
+  matches the generator output.
+
+## Implementation Feedback
+
+- The pnpm layout can make normal VSCE dependency detection report missing
+  nested dev dependencies even when the approved temporary no-dependencies
+  package path succeeds. Future packaging validation should retain both the
+  failure context and the explicit fallback path.
+- A cached Playwright browser does not guarantee that
+  `playwright install --with-deps` will complete in the validation
+  environment; the command may hang without output and requires an explicit
+  residual record when interrupted.
+- `lint:md` is a useful low-cost document gate for this feature: the recorded
+  result is 35 files with 0 errors.
+
+## Remaining Items And Handoff
+
+- Implementation review verdict: Ready. Recommended next route:
+  `approval-committer` for the completion gate.
+- Completion Approval is Approved; the exact four approved paths may be
+  staged and committed by `approval-committer` only.
+- GitHub Dependabot closure requires the completed implementation to reach
+  GitHub and a post-publication reevaluation; it is not claimed by local
+  evidence.
+- The stale OpenAPI fixture baseline is unresolved and must be handled by
+  Main/the existing WebAPI maintainer as a separate task or Feature Exit
+  follow-up. No generated artifact change is included here.
+
 - Approval Boundary:
   - The exact plan-gate approved paths are the three completed feature
     documents: `docs/specs/features/dependabot-security-updates/SPECS.md`,
@@ -225,10 +331,11 @@ Implementation must not start until the approved plan-gate commit succeeds.
     explained by the approved override, targeted resolution, or unavoidable
     peer/integrity consequence, or when an additional resolution remains for
     an affected family beyond the approved floors.
-- Dependencies: Feature Intake complete, independent plan review Ready, and
-  explicit Human Approval are complete; next is the `approval-committer`
-  plan-gate commit. Dependabot closure evidence additionally depends on the
-  completed slice commit reaching GitHub and GitHub reevaluation.
+- Dependencies: Feature Intake, independent plan review Ready, Human Approval,
+  implementation review Ready, and the approved implementation boundary are
+  complete. Next is the `approval-committer` completion gate; Dependabot
+  closure evidence additionally depends on the completed slice reaching GitHub
+  and GitHub reevaluation.
 - Risks:
   - A global js-yaml override continues to place 4.x on two legacy 3.x parent
     ranges; this is existing branch behavior, not a new major-line change, but
@@ -291,8 +398,9 @@ Implementation must not start until the approved plan-gate commit succeeds.
 
 ## Feature Exit
 
-- Definition of Done status: not ready; the complete plan exists, but no slice
-  is reviewed, approved, committed, or implemented.
+- Definition of Done status: completion gate pending; Slice 1 implementation
+  and independent review are complete. The stale OpenAPI baseline follow-up
+  and post-publication Dependabot reevaluation remain for Feature Exit review.
 - Durable documentation updates: none expected beyond temporary feature
   artifacts; re-evaluate README and CHANGELOG impact at exit.
 - Open risks: advisory drift, transitive lockfile churn, Node 20 execution, and
@@ -301,11 +409,21 @@ Implementation must not start until the approved plan-gate commit succeeds.
 
 ## Validation
 
-- [x] Plan current advisory and resolved-graph checks.
-- [x] Plan the smallest relevant build, quality, package/tooling, desktop, and
-      web validation set.
+- [x] Security evidence recorded: 17 open Dependabot alerts (11 high/6
+      moderate), 23 pre-resolution audit advisories (17 high/6 moderate), and
+      0 post-resolution audit findings; moderate audit succeeded.
+- [x] Node `20.20.2`/pnpm `10.33.0` frozen install succeeded and all ten
+      security floors were met.
+- [x] `qlty`, build, test compilation, desktop tests, and web tests completed;
+      `pnpm run test:web` exited 0 with only existing connection/close logs.
+- [x] `pnpm run lint:md` completed for 35 files with 0 errors.
+- [x] VSIX temporary `--no-dependencies` package archive, list, manifest,
+      content validation, and cleanup succeeded after normal pnpm-layout
+      dependency detection failed.
 - [x] Confirm no production source, generated artifact, user documentation, or
       behavior-contract update is required.
+- [x] `openapi:check` executed; its only failure is the stale generated WebAPI
+      fixture baseline recorded above and assigned as follow-up.
 - [ ] Complete Feature Exit validation and durable-document evaluation.
 
 ## Notes
