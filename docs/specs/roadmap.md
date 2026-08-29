@@ -14,3 +14,72 @@ entry conditions that make planning each item useful.
   results, host constraints, and the sufficiency of
   `searchTarget=DEFINITION`.
 - Keep broader WebAPI behavior outside this decision.
+
+## Semantic Diff Roadmap
+
+### Wave 1: Comparison Confidence And Review Contracts
+
+#### Strengthen Semantic Diff Identity Confidence
+
+- Origin: proposals R-1 and E-1.
+- Improve unit-type-specific identity fingerprints and expose the evidence used
+  for exact, rename, move, candidate, added, and removed decisions.
+- Entry condition: current exact-match, fingerprint, candidate, added, and
+  removed behavior is captured as a regression baseline.
+
+#### Add Structured Semantic Diff Outputs And Report Modes
+
+- Origin: proposals R-2, N-4, and F-3.
+- Separate neutral comparison facts from presentation wording and support
+  summary, full, audit, and structured JSON review outputs.
+- Entry condition: identity-evidence ownership and the neutral comparison-result
+  boundary are settled.
+
+#### Expand Semantic Diff Review-Risk Rules
+
+- Origin: proposal E-2.
+- Extend confirmation-required evaluation for supported start, schedule, wait,
+  and environment changes without presenting external-runtime assumptions as
+  verified failures.
+- Entry condition: confirmation levels and structured risk-result ownership are
+  settled.
+
+### Wave 2: Schedule Semantics
+
+#### Expand Schedule Interpretation And Supported Semantics
+
+- Origin: proposals R-3 and E-3.
+- Separate interpretation, run projection, and comparison so calendar,
+  inheritance, 48-hour, cycle, shift, and closed-day behavior can be added in
+  reviewed slices.
+- Entry condition: current supported projections and uncalculated reasons are
+  captured as a regression baseline.
+
+### Wave 3: Review Exploration
+
+#### Add A Semantic Diff Explorer
+
+- Origin: proposals N-1 and E-4.
+- Add an interactive change tree, confirmation-required filtering, source
+  navigation, and Flow Viewer integration on top of the existing highlight
+  foundation.
+- Entry condition: Wave 1 contracts are stable and the existing Flow Viewer
+  highlight foundation can be reused.
+
+#### Add A Schedule Impact Calendar
+
+- Origin: proposal N-3.
+- Present added, removed, changed-time, zero-run, and uncalculated schedule
+  effects for a selected comparison period.
+- Entry condition: schedule interpretation and run-projection contracts are
+  stable.
+
+### Wave 4: Comparison Entry Workflow
+
+#### Improve The Semantic Diff Comparison Workflow
+
+- Origin: proposal F-1.
+- Provide user-facing comparison naming, file and Git HEAD comparison sources,
+  comparison-period input, and handoff to the applicable review view or output.
+- Entry condition: file, Git HEAD, comparison-period, and viewer-handoff
+  boundaries are stable.
