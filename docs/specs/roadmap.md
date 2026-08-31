@@ -55,7 +55,7 @@ entry conditions that make planning each item useful.
 - Entry condition: current supported projections and uncalculated reasons are
   captured as a regression baseline.
 
-### Wave 3: Review Exploration
+### Wave 3: Review Exploration And Comparison Entry
 
 #### Add A Semantic Diff Explorer
 
@@ -66,20 +66,23 @@ entry conditions that make planning each item useful.
 - Entry condition: Wave 1 contracts are stable and the existing Flow Viewer
   highlight foundation can be reused.
 
+#### Improve The Semantic Diff Comparison Workflow
+
+- Origin: proposal F-1.
+- Provide user-facing comparison naming, file and Git HEAD comparison sources,
+  comparison-period input, and handoff to the applicable review view or output.
+- Entry condition: the Explorer handoff and internal schedule-impact artifact
+  and session contracts are available. File, Git HEAD, and comparison-period
+  boundaries are stable; public calendar presentation is not a prerequisite.
+
+### Wave 4: Schedule Impact Presentation
+
 #### Add A Schedule Impact Calendar
 
 - Origin: proposal N-3.
 - Present added, removed, changed-time, zero-run, and uncalculated schedule
   effects for a selected comparison period.
 - Entry condition: schedule interpretation and run-projection contracts are
-  stable.
-
-### Wave 4: Comparison Entry Workflow
-
-#### Improve The Semantic Diff Comparison Workflow
-
-- Origin: proposal F-1.
-- Provide user-facing comparison naming, file and Git HEAD comparison sources,
-  comparison-period input, and handoff to the applicable review view or output.
-- Entry condition: file, Git HEAD, comparison-period, and viewer-handoff
-  boundaries are stable.
+  stable. Internal artifact and session support precedes the comparison
+  workflow; the public calendar action follows the completed period-bearing
+  workflow and Explorer handoff.
