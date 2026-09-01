@@ -19,3 +19,39 @@
 | Durable identity/report contract                                        | Durable Document Impact              | Feature Exit                          | Update build use case; conditionally update report use case; confirm CHANGELOG/README decisions                                                                                          |
 
 <!-- markdownlint-enable MD013 MD060 -->
+
+## Slice 1 Implementation Evidence
+
+- Status: Implemented; pending independent implementation review and
+  Completion Approval.
+- Changed paths: domain identity strategy types/factory and structural
+  correspondence, plus the approved structural and comparison test suites.
+- Acceptance evidence: command-text and executable-file forms are distinct;
+  event-reception and file-monitoring (including recovery) fields are
+  canonicalized with deterministic ordering/default handling; exact-first,
+  one-to-one, candidate, added, and removed outcomes retain typed evidence.
+  Unsupported and malformed forms use the legacy strategy representation;
+  command `te`/`prm` values are limited to 1-1023 bytes and `sc` values to
+  1-511 bytes after v13 quoted-string validation. Every repository
+  `AjsUnitType` has direct fallback-key coverage, and repeated-candidate,
+  selector-boundary, sc/prm-change, and exact/add/remove evidence cases are
+  table-driven.
+- Implementation-review follow-up: the v13 command value/form checks now
+  reject empty, overlong, unquoted, invalid-escape, duplicate, and mixed
+  `te`/`sc`/`prm` inputs. The legacy fallback grouping key is centralized in
+  the identity factory and is asserted byte-for-byte against the historical
+  representation for all repository unit types.
+- Validation: `rtk pnpm run test:compile`, compiled desktop runner
+  (`rtk pnpm run test:desktop:run`), `rtk git diff --check`, and
+  `rtk pnpm run qlty` passed after the follow-up. Direct targeted Mocha
+  executed 24 tests, with 22 passing; two pre-existing baseline expectations
+  remain outside this slice (relation decision duplicate and
+  normalization-warning shape).
+- Compatibility: no parser, DTO, presentation, telemetry, host API, Node
+  built-in, or configuration changes. Identity code remains pure and
+  browser-safe; `engines.vscode` is unchanged.
+- Implementation feedback: computing one structured fingerprint per scoped
+  unit before grouped matching keeps candidate handling deterministic and
+  near-linear while preserving duplicate values. The existing relation and
+  normalization baseline mismatches should be assessed independently before
+  the feature is closed.

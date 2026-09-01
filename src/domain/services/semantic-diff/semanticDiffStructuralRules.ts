@@ -6,9 +6,39 @@ import type {
 } from "../../models/ajs/AjsDocument";
 import type {
   SemanticDiffAttributeCategory,
+  SemanticDiffIdentityDecision,
+  SemanticDiffIdentityEvidence,
+  SemanticDiffIdentityFingerprintEvidence,
+  SemanticDiffIdentityUnitReference,
   SemanticDiffJobnetIdentityKey,
   SemanticDiffRelationIdentityKey,
   SemanticDiffUnitIdentityKey,
+} from "../../models/semantic-diff/SemanticDiff";
+import {
+  createSemanticDiffIdentityFingerprint,
+  semanticDiffLegacyUnitFingerprint,
+  semanticDiffUnitIdentityStrategy,
+  type SemanticDiffIdentityFingerprint,
+} from "./semanticDiffIdentity";
+
+export {
+  createSemanticDiffIdentityFingerprint,
+  semanticDiffUnitIdentityFingerprint,
+  semanticDiffUnitIdentityStrategy,
+} from "./semanticDiffIdentity";
+export type { SemanticDiffIdentityFingerprint } from "./semanticDiffIdentity";
+export type {
+  SemanticDiffIdentityDecision,
+  SemanticDiffIdentityDecisionId,
+  SemanticDiffIdentityDecisionRule,
+  SemanticDiffIdentityDecisionStatus,
+  SemanticDiffIdentityEvidence,
+  SemanticDiffIdentityExactKey,
+  SemanticDiffIdentityExactKeyEvidence,
+  SemanticDiffIdentityField,
+  SemanticDiffIdentityFingerprintEvidence,
+  SemanticDiffIdentityStrategyId,
+  SemanticDiffIdentityUnitReference,
 } from "../../models/semantic-diff/SemanticDiff";
 
 export type SemanticDiffUnitMatch = {
@@ -19,6 +49,7 @@ export type SemanticDiffUnitMatch = {
 
 export type SemanticDiffCandidateGroup = {
   fingerprint: string;
+  evidence: SemanticDiffIdentityFingerprintEvidence;
   before: AjsUnit[];
   after: AjsUnit[];
 };
@@ -29,6 +60,7 @@ export type SemanticDiffUnitCorrespondence = {
   candidates: SemanticDiffCandidateGroup[];
   removedUnits: AjsUnit[];
   addedUnits: AjsUnit[];
+  identityDecisions: SemanticDiffIdentityDecision[];
 };
 
 export type SemanticDiffAttributeDecision = {
@@ -43,8 +75,6 @@ export type SemanticDiffRelationDecision = {
 };
 
 const jobnetTypes = new Set<AjsUnitType>(["n", "rn", "rm", "rr"]);
-const ignoredFingerprintParameterKeys = new Set(["unit", "el"]);
-
 const executionEnvironmentKeys = new Set(["eu", "un", "rg", "qu"]);
 const startConditionKeys = new Set(["eun", "cond", "ar"]);
 const endControlKeys = new Set(["ej", "ejc", "ejf", "jdf"]);
@@ -81,6 +111,9 @@ const sortStrings = (values: string[]): string[] => [...values].sort();
 
 const compareStrings = (left: string, right: string): number =>
   left.localeCompare(right);
+
+const compareOrdinal = (left: string, right: string): number =>
+  left < right ? -1 : left > right ? 1 : 0;
 
 const groupBy = <T>(
   values: T[],
@@ -140,28 +173,20 @@ const unitExactKey = (
   unitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): string =>
-  isSemanticDiffJobnetUnit(unit)
-    ? `jobnet:${toRelativePath(unit.absolutePath, jobGroupPath)}:${unit.unitType}`
-    : `unit:${semanticDiffParentJobnetPath(unit, unitById)}:${unit.name}:${unit.unitType}`;
+  JSON.stringify(
+    isSemanticDiffJobnetUnit(unit)
+      ? semanticDiffJobnetIdentityKey(unit, jobGroupPath)
+      : semanticDiffUnitIdentityKey(unit, unitById),
+  );
 
-const parameterValueKey = (parameter: AjsParameter): string =>
-  `${parameter.key}=${parameter.value}`;
-
+/**
+ * Preserve the historical fallback representation while exposing the
+ * selected strategy's unambiguous grouping key for supported forms.
+ */
 export const semanticDiffUnitFingerprint = (unit: AjsUnit): string =>
-  [
-    unit.unitType,
-    unit.groupType ?? "",
-    unit.permission ?? "",
-    unit.jp1Username ?? "",
-    unit.jp1ResourceGroup ?? "",
-    sortStrings(
-      unit.parameters
-        .filter(
-          (parameter) => !ignoredFingerprintParameterKeys.has(parameter.key),
-        )
-        .map(parameterValueKey),
-    ).join("|"),
-  ].join("::");
+  semanticDiffUnitIdentityStrategy(unit) === "legacy-all-parameters-v1"
+    ? semanticDiffLegacyUnitFingerprint(unit)
+    : createSemanticDiffIdentityFingerprint(unit).fingerprint;
 
 const matchExactUnits = (
   beforeUnits: AjsUnit[],
@@ -177,28 +202,48 @@ const matchExactUnits = (
     unitExactKey(unit, afterUnitById, jobGroupPath),
   );
 
-  return [...beforeByKey.entries()].flatMap(([key, beforeMatches]) => {
-    const afterMatches = afterByKey.get(key) ?? [];
-    return beforeMatches.length === 1 && afterMatches.length === 1
-      ? [{ before: beforeMatches[0], after: afterMatches[0], kind: "exact" }]
-      : [];
-  });
+  return [...beforeByKey.entries()]
+    .flatMap(([key, beforeMatches]) => {
+      const afterMatches = afterByKey.get(key) ?? [];
+      return beforeMatches.length === 1 && afterMatches.length === 1
+        ? [
+            {
+              before: beforeMatches[0],
+              after: afterMatches[0],
+              kind: "exact" as const,
+            },
+          ]
+        : [];
+    })
+    .sort(
+      (left, right) =>
+        compareUnits(left.before, right.before) ||
+        compareUnits(left.after, right.after),
+    );
 };
 
 const matchFingerprintUnits = (
   beforeUnits: AjsUnit[],
   afterUnits: AjsUnit[],
+  beforeIdentityById: Map<string, SemanticDiffIdentityFingerprint>,
+  afterIdentityById: Map<string, SemanticDiffIdentityFingerprint>,
 ): {
   matches: SemanticDiffUnitMatch[];
   candidates: SemanticDiffCandidateGroup[];
 } => {
-  const beforeByFingerprint = groupBy(beforeUnits, semanticDiffUnitFingerprint);
-  const afterByFingerprint = groupBy(afterUnits, semanticDiffUnitFingerprint);
+  const beforeByFingerprint = groupBy(
+    beforeUnits,
+    (unit) => beforeIdentityById.get(unit.id)?.fingerprint ?? "",
+  );
+  const afterByFingerprint = groupBy(
+    afterUnits,
+    (unit) => afterIdentityById.get(unit.id)?.fingerprint ?? "",
+  );
   const matches: SemanticDiffUnitMatch[] = [];
   const candidates: SemanticDiffCandidateGroup[] = [];
 
   [...beforeByFingerprint.entries()]
-    .sort(([left], [right]) => compareStrings(left, right))
+    .sort(([left], [right]) => compareOrdinal(left, right))
     .forEach(([fingerprint, beforeMatches]) => {
       const afterMatches = afterByFingerprint.get(fingerprint) ?? [];
       if (beforeMatches.length === 1 && afterMatches.length === 1) {
@@ -208,21 +253,262 @@ const matchFingerprintUnits = (
           kind: "fingerprint",
         });
       } else if (beforeMatches.length > 0 && afterMatches.length > 0) {
+        const evidence = beforeIdentityById.get(beforeMatches[0].id)?.evidence;
+        if (!evidence) {
+          return;
+        }
         candidates.push({
           fingerprint,
-          before: beforeMatches,
-          after: afterMatches,
+          evidence,
+          before: [...beforeMatches].sort(compareUnits),
+          after: [...afterMatches].sort(compareUnits),
         });
       }
     });
 
-  return { matches, candidates };
+  return {
+    matches: matches.sort(
+      (left, right) =>
+        compareUnits(left.before, right.before) ||
+        compareUnits(left.after, right.after),
+    ),
+    candidates: candidates.sort((left, right) =>
+      compareOrdinal(left.fingerprint, right.fingerprint),
+    ),
+  };
 };
 
 const matchedIds = (
   matches: SemanticDiffUnitMatch[],
   side: "before" | "after",
 ): Set<string> => new Set(matches.map((match) => match[side].id));
+
+const identityReference = (
+  unit: AjsUnit,
+): SemanticDiffIdentityUnitReference => ({
+  id: unit.id,
+  name: unit.name,
+  absolutePath: unit.absolutePath,
+  unitType: String(unit.unitType),
+});
+
+const compareIdentityReferences = (
+  left: SemanticDiffIdentityUnitReference,
+  right: SemanticDiffIdentityUnitReference,
+): number => {
+  for (const [leftValue, rightValue] of [
+    [left.absolutePath, right.absolutePath],
+    [left.unitType, right.unitType],
+    [left.name, right.name],
+    [left.id, right.id],
+  ]) {
+    const comparison = compareOrdinal(leftValue, rightValue);
+    if (comparison !== 0) {
+      return comparison;
+    }
+  }
+  return 0;
+};
+
+const compareUnits = (left: AjsUnit, right: AjsUnit): number =>
+  compareIdentityReferences(identityReference(left), identityReference(right));
+
+const sortedIdentityReferences = (
+  units: AjsUnit[],
+): SemanticDiffIdentityUnitReference[] =>
+  units.map(identityReference).sort(compareIdentityReferences);
+
+const encodeIdentityComponent = (value: string): string =>
+  `${value.length}:${value}`;
+
+const encodeIdentityArray = (values: string[]): string =>
+  `${values.length}[${values.map(encodeIdentityComponent).join("")}]`;
+
+const identityDecisionId = ({
+  rule,
+  status,
+  evidence,
+  before,
+  after,
+}: {
+  rule: string;
+  status: string;
+  evidence: SemanticDiffIdentityEvidence;
+  before: SemanticDiffIdentityUnitReference[];
+  after: SemanticDiffIdentityUnitReference[];
+}): string => {
+  const evidenceMarker =
+    evidence.kind === "fingerprint" ? evidence.strategyId : evidence.key.kind;
+  const referenceEncoding = (
+    reference: SemanticDiffIdentityUnitReference,
+  ): string =>
+    encodeIdentityArray([
+      reference.absolutePath,
+      reference.unitType,
+      reference.name,
+      reference.id,
+    ]);
+  return `identity:v1:${encodeIdentityArray([
+    rule,
+    status,
+    evidence.kind,
+    evidenceMarker,
+    encodeIdentityArray(before.map(referenceEncoding)),
+    encodeIdentityArray(after.map(referenceEncoding)),
+  ])}`;
+};
+
+const exactIdentityDecision = (
+  match: SemanticDiffUnitMatch,
+  beforeUnitById: Map<string, AjsUnit>,
+  jobGroupPath?: string,
+): SemanticDiffIdentityDecision => {
+  const before = sortedIdentityReferences([match.before]);
+  const after = sortedIdentityReferences([match.after]);
+  const key = isSemanticDiffJobnetUnit(match.before)
+    ? semanticDiffJobnetIdentityKey(match.before, jobGroupPath)
+    : semanticDiffUnitIdentityKey(match.before, beforeUnitById);
+  const evidence: SemanticDiffIdentityEvidence = {
+    kind: "exact-key",
+    key,
+  };
+  return {
+    id: identityDecisionId({
+      rule: "exact-key",
+      status: "exact",
+      evidence,
+      before,
+      after,
+    }),
+    status: "exact",
+    rule: "exact-key",
+    before,
+    after,
+    evidence,
+  };
+};
+
+const fingerprintIdentityDecision = (
+  match: SemanticDiffUnitMatch,
+  identityById: Map<string, SemanticDiffIdentityFingerprint>,
+): SemanticDiffIdentityDecision => {
+  const before = sortedIdentityReferences([match.before]);
+  const after = sortedIdentityReferences([match.after]);
+  const evidence = identityById.get(match.before.id)?.evidence;
+  if (!evidence) {
+    throw new Error(`Missing identity fingerprint for ${match.before.id}`);
+  }
+  return {
+    id: identityDecisionId({
+      rule: "one-to-one-fingerprint",
+      status: "fingerprint-confirmed",
+      evidence,
+      before,
+      after,
+    }),
+    status: "fingerprint-confirmed",
+    rule: "one-to-one-fingerprint",
+    before,
+    after,
+    evidence,
+  };
+};
+
+const candidateIdentityDecision = (
+  candidate: SemanticDiffCandidateGroup,
+): SemanticDiffIdentityDecision => {
+  const before = sortedIdentityReferences(candidate.before);
+  const after = sortedIdentityReferences(candidate.after);
+  return {
+    id: identityDecisionId({
+      rule: "ambiguous-fingerprint",
+      status: "candidate",
+      evidence: candidate.evidence,
+      before,
+      after,
+    }),
+    status: "candidate",
+    rule: "ambiguous-fingerprint",
+    before,
+    after,
+    evidence: candidate.evidence,
+  };
+};
+
+const removedIdentityDecision = (
+  unit: AjsUnit,
+  identityById: Map<string, SemanticDiffIdentityFingerprint>,
+): SemanticDiffIdentityDecision => {
+  const before = sortedIdentityReferences([unit]);
+  const after: SemanticDiffIdentityUnitReference[] = [];
+  const evidence = identityById.get(unit.id);
+  if (!evidence) {
+    throw new Error(`Missing identity fingerprint for ${unit.id}`);
+  }
+  return {
+    id: identityDecisionId({
+      rule: "unmatched-before",
+      status: "removed",
+      evidence: evidence.evidence,
+      before,
+      after,
+    }),
+    status: "removed",
+    rule: "unmatched-before",
+    before,
+    after,
+    evidence: evidence.evidence,
+  };
+};
+
+const addedIdentityDecision = (
+  unit: AjsUnit,
+  identityById: Map<string, SemanticDiffIdentityFingerprint>,
+): SemanticDiffIdentityDecision => {
+  const before: SemanticDiffIdentityUnitReference[] = [];
+  const after = sortedIdentityReferences([unit]);
+  const evidence = identityById.get(unit.id);
+  if (!evidence) {
+    throw new Error(`Missing identity fingerprint for ${unit.id}`);
+  }
+  return {
+    id: identityDecisionId({
+      rule: "unmatched-after",
+      status: "added",
+      evidence: evidence.evidence,
+      before,
+      after,
+    }),
+    status: "added",
+    rule: "unmatched-after",
+    before,
+    after,
+    evidence: evidence.evidence,
+  };
+};
+
+const identityDecisionStatusOrder: Record<
+  SemanticDiffIdentityDecision["status"],
+  number
+> = {
+  exact: 0,
+  "fingerprint-confirmed": 1,
+  candidate: 2,
+  removed: 3,
+  added: 4,
+};
+
+const sortIdentityDecisions = (
+  decisions: SemanticDiffIdentityDecision[],
+): SemanticDiffIdentityDecision[] =>
+  [...decisions].sort((left, right) => {
+    const statusComparison =
+      identityDecisionStatusOrder[left.status] -
+      identityDecisionStatusOrder[right.status];
+    return statusComparison !== 0
+      ? statusComparison
+      : compareOrdinal(left.id, right.id);
+  });
 
 export const buildSemanticDiffUnitCorrespondence = ({
   beforeUnits,
@@ -237,6 +523,18 @@ export const buildSemanticDiffUnitCorrespondence = ({
   afterUnitById: Map<string, AjsUnit>;
   jobGroupPath?: string;
 }): SemanticDiffUnitCorrespondence => {
+  const beforeIdentityById = new Map(
+    beforeUnits.map((unit) => [
+      unit.id,
+      createSemanticDiffIdentityFingerprint(unit),
+    ]),
+  );
+  const afterIdentityById = new Map(
+    afterUnits.map((unit) => [
+      unit.id,
+      createSemanticDiffIdentityFingerprint(unit),
+    ]),
+  );
   const exactMatches = matchExactUnits(
     beforeUnits,
     afterUnits,
@@ -249,8 +547,14 @@ export const buildSemanticDiffUnitCorrespondence = ({
   const fingerprintResult = matchFingerprintUnits(
     beforeUnits.filter((unit) => !exactBeforeIds.has(unit.id)),
     afterUnits.filter((unit) => !exactAfterIds.has(unit.id)),
+    beforeIdentityById,
+    afterIdentityById,
   );
-  const matches = [...exactMatches, ...fingerprintResult.matches];
+  const matches = [...exactMatches, ...fingerprintResult.matches].sort(
+    (left, right) =>
+      compareUnits(left.before, right.before) ||
+      compareUnits(left.after, right.after),
+  );
   const matchedBeforeIds = matchedIds(matches, "before");
   const matchedAfterIds = matchedIds(matches, "after");
   const candidateBeforeIds = new Set(
@@ -264,18 +568,45 @@ export const buildSemanticDiffUnitCorrespondence = ({
     ),
   );
 
+  const identityDecisions = sortIdentityDecisions([
+    ...exactMatches.map((match) =>
+      exactIdentityDecision(match, beforeUnitById, jobGroupPath),
+    ),
+    ...fingerprintResult.matches.map((match) =>
+      fingerprintIdentityDecision(match, beforeIdentityById),
+    ),
+    ...fingerprintResult.candidates.map(candidateIdentityDecision),
+    ...beforeUnits
+      .filter(
+        (unit) =>
+          !matchedBeforeIds.has(unit.id) && !candidateBeforeIds.has(unit.id),
+      )
+      .map((unit) => removedIdentityDecision(unit, beforeIdentityById)),
+    ...afterUnits
+      .filter(
+        (unit) =>
+          !matchedAfterIds.has(unit.id) && !candidateAfterIds.has(unit.id),
+      )
+      .map((unit) => addedIdentityDecision(unit, afterIdentityById)),
+  ]);
+
   return {
     matches,
     fingerprintMatches: fingerprintResult.matches,
     candidates: fingerprintResult.candidates,
-    removedUnits: beforeUnits.filter(
-      (unit) =>
-        !matchedBeforeIds.has(unit.id) && !candidateBeforeIds.has(unit.id),
-    ),
-    addedUnits: afterUnits.filter(
-      (unit) =>
-        !matchedAfterIds.has(unit.id) && !candidateAfterIds.has(unit.id),
-    ),
+    removedUnits: beforeUnits
+      .filter(
+        (unit) =>
+          !matchedBeforeIds.has(unit.id) && !candidateBeforeIds.has(unit.id),
+      )
+      .sort(compareUnits),
+    addedUnits: afterUnits
+      .filter(
+        (unit) =>
+          !matchedAfterIds.has(unit.id) && !candidateAfterIds.has(unit.id),
+      )
+      .sort(compareUnits),
+    identityDecisions,
   };
 };
 

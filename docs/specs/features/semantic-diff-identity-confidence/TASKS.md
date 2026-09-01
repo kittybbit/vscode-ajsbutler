@@ -4,11 +4,12 @@
 
 - Purpose: make Semantic Diff identity matching unit-type-specific,
   deterministic, and explainable without weakening conservative safeguards.
-- Approved or active slice: none; the complete three-slice planning package is
-  approved for docs-only registration. Implementation remains deferred, and
-  each implementation slice requires a separate go-ahead and completion gate.
-- Do not edit runtime code, tests, generated artifacts, or configuration before
-  a `Ready` review, explicit Human Approval, and the focused plan commit.
+- Approved or active slice: Slice 1, Build Reference-Backed Identity Strategies
+  And Correspondence. The current conversation authorizes implementation of
+  this slice within its recorded approval boundary.
+- Do not edit runtime code, tests, generated artifacts, or configuration outside
+  the active approved Slice 1 boundary; only the focused completion commit is
+  authorized for this scope.
 - Do not add manual matching, similarity scoring, output modes, JSON export,
   new commands, or UI.
 - Read first: `SPECS.md`, this file,
@@ -17,8 +18,8 @@
 - Reference basis: JP1/AJS3 version 13 Command Reference sections 5.2.6,
   5.2.7, 5.2.9, and 5.2.10, plus the repository shared parameter rules.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main delegates this approved planning package to
-  `approval-committer` for the focused plan-gate commit.
+- Next route: Main delegates the exact completed Slice 1 scope to
+  `approval-committer` for the focused completion commit.
 
 ## Sync Rule
 
@@ -33,14 +34,16 @@
 
 ## Plan Status
 
-- Status: Approved plan; docs-only registration pending the focused plan-gate
-  commit.
+- Status: Approved plan; Slice 1 implementation reviewed and Completion
+  Approval granted, pending the focused completion commit.
 - Planning scope: all identity strategy, correspondence evidence, application
   DTO, existing Markdown rationale, regression, and compatibility work needed
   by `SPECS.md` R1-R10.
-- Review status: Ready (`plan-reviewer`).
+- Review status: plan Ready (`plan-reviewer`) and Slice 1 implementation Ready
+  (`implementation-reviewer`).
 - Human approval: Approved.
-- Active implementation slice: none.
+- Active implementation slice: Slice 1.
+- Implementation review verdict: Ready
 - Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
   implementation review, Completion Approval, and focused completion commit
   before the next slice begins.
@@ -49,26 +52,37 @@
 
 - Status: Approved
 - Approved at: approved in current conversation
-- Approved scope: Complete reviewed three-slice planning package and docs-only
-  registration; implementation remains deferred, and each implementation
-  slice requires a separate go-ahead and completion gate.
-- Approved paths:
-  `docs/specs/features/semantic-diff-identity-confidence/SPECS.md`,
-  `docs/specs/features/semantic-diff-identity-confidence/TASKS.md`,
-  `docs/specs/features/semantic-diff-identity-confidence/TRACEABILITY.md`
+- Approved scope: Slice 1 domain identity strategy/correspondence source,
+  approved structural/comparison tests, and Slice 1 implementation evidence.
+- Approved paths: `src/domain/models/semantic-diff/SemanticDiff.ts`,
+  `src/domain/services/semantic-diff/semanticDiffIdentity.ts`,
+  `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`,
+  `src/test/suite/semanticDiffStructuralRules.test.ts`,
+  `src/test/suite/compareSemanticDiff.test.ts`, and this feature's
+  `TASKS.md`/`TRACEABILITY.md` evidence updates.
 
-Implementation must not start from this plan-gate approval. Each implementation
-slice requires a separate go-ahead, implementation review, Completion Approval,
-and focused completion commit.
+Implementation was authorized for Slice 1 by the current conversation. The
+implementation review is Ready and Completion Approval is recorded below; the
+focused completion commit remains pending.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: immediately preceding user message, after the
+  `implementation-reviewer` Ready verdict
+- Approved scope: completed Slice 1 implementation, including the domain
+  identity strategy/correspondence source, approved structural/comparison
+  tests, and lifecycle evidence updates
+- Approved paths:
+  `docs/specs/features/semantic-diff-identity-confidence/TASKS.md`,
+  `docs/specs/features/semantic-diff-identity-confidence/TRACEABILITY.md`,
+  `src/domain/models/semantic-diff/SemanticDiff.ts`,
+  `src/domain/services/semantic-diff/semanticDiffIdentity.ts`,
+  `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`,
+  `src/test/suite/semanticDiffStructuralRules.test.ts`,
+  `src/test/suite/compareSemanticDiff.test.ts`
+- Implementation review verdict: Ready
+- Commit status: Eligible; pending focused completion commit
 
 ## Closure Approval
 
@@ -278,7 +292,8 @@ Changing the form discriminator is not treated as a cross-strategy match.
 
 ### Slice 1: Build Reference-Backed Identity Strategies And Correspondence
 
-- Status: Proposed; blocked by plan review, Human Approval, and plan commit.
+- Status: Implemented; implementation review Ready and Completion Approval
+  granted, completion gate pending.
 - Scope: replace the monolithic fingerprint helper with a pure domain strategy
   factory implementing the approved table; enrich correspondence with
   exact/fingerprint/candidate/add/remove decisions and canonical evidence;

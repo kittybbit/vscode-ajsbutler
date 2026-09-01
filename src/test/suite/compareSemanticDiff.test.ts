@@ -139,7 +139,11 @@ suite("Compare Semantic Diff", () => {
       "after LOAD should not be matched by name alone",
     );
     assert.ok(
-      !result.changes.some((change) => change.elementKind === "attribute"),
+      !result.changes.some(
+        (change) =>
+          change.elementKind === "attribute" &&
+          change.summary.startsWith("LOAD"),
+      ),
       "unmatched same-name units should not produce attribute changes",
     );
   });
@@ -148,12 +152,13 @@ suite("Compare Semantic Diff", () => {
     const beforeJob = unit({
       id: "/root/jobnet/job",
       absolutePath: "/root/jobnet/job",
-      parameters: params({ ty: "j", sc: "echo before", eu: "user-a" }),
+      parameters: params({ ty: "j", sc: "echo stable", eu: "user-a" }),
     });
     const afterJob = unit({
       id: "/root/jobnet/job",
       absolutePath: "/root/jobnet/job",
-      parameters: params({ ty: "j", sc: "echo after", eu: "user-b" }),
+      unitAttribute: "job,,jp1admin,changed",
+      parameters: params({ ty: "j", sc: "echo stable", eu: "user-b" }),
     });
 
     const result = compareSemanticDiff({
@@ -214,7 +219,7 @@ suite("Compare Semantic Diff", () => {
     );
   });
 
-  test("keeps matched IDs side-specific when rename paths collide", () => {
+  test("keeps exact identity precedence when rename paths collide", () => {
     const beforeRenamed = unit({
       id: "/root/jobnet/job-a",
       name: "job-a",
@@ -243,8 +248,8 @@ suite("Compare Semantic Diff", () => {
     assert.deepStrictEqual(
       result.changes.map((change) => [change.kind, change.summary]),
       [
-        ["removed", "job-b removed"],
-        ["renamed", "job-a renamed to job-b"],
+        ["changed", "job-b sc changed"],
+        ["removed", "job-a removed"],
       ],
     );
   });
