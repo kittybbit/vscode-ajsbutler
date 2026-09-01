@@ -57,7 +57,7 @@ const executableFileMaximumBytes = 511;
 const executableParameterMaximumBytes = 1023;
 
 const compareOrdinal = (left: string, right: string): number =>
-  left < right ? -1 : left > right ? 1 : 0;
+  Number(left > right) - Number(left < right);
 
 const sortOrdinal = (values: string[]): string[] =>
   [...values].sort(compareOrdinal);
@@ -112,64 +112,67 @@ const isValidEventServerValue = (value: string): boolean => {
   );
 };
 
-const isValidEventSelector = (
+const hasValidEventFilterReference = (parameter: AjsParameter): boolean =>
+  hasValidExplicitEventReceivingFilterReference(parameter) &&
+  (parseHashEscapedQuotedEventStringContent(
+    parameter.value.slice(parameter.value.indexOf(":") + 1),
+  )?.length ?? 0) > 0;
+
+const hasValidEventProcessIdentifier = (parameter: AjsParameter): boolean => {
+  const numericValue = Number(parameter.value);
+  return (
+    /^-?\d+$/.test(parameter.value) &&
+    numericValue >= -1 &&
+    numericValue <= 9999999999
+  );
+};
+
+type EventSelectorValidator = (parameter: AjsParameter) => boolean;
+
+const eventSelectorValidators: Record<
+  EventSelectorKey,
+  EventSelectorValidator
+> = {
+  evwid: hasValidExplicitEventReceivingId,
+  evusr: (parameter) =>
+    hasValidExplicitEventReceivingQuotedString(parameter, 1, 20),
+  evgrp: (parameter) =>
+    hasValidExplicitEventReceivingQuotedString(parameter, 1, 20),
+  evhst: hasValidExplicitEventHostLength,
+  evipa: hasValidExplicitEventSourceIpAddress,
+  evwms: (parameter) =>
+    hasValidExplicitEventReceivingQuotedString(parameter, 1, 1024),
+  evdet: (parameter) =>
+    hasValidExplicitEventReceivingQuotedString(parameter, 1, 1024),
+  evwsv: (parameter) => isValidEventServerValue(parameter.value),
+  evwfr: hasValidEventFilterReference,
+  evuid: hasValidEventProcessIdentifier,
+  evgid: hasValidEventProcessIdentifier,
+  evpid: hasValidEventProcessIdentifier,
+};
+
+const repeatableEventSelectorKeys = new Set<EventSelectorKey>(["evwfr"]);
+
+const hasValidEventSelectorValues = (
+  unit: AjsUnit,
   key: EventSelectorKey,
-  parameter: AjsParameter,
 ): boolean => {
-  switch (key) {
-    case "evwid":
-      return hasValidExplicitEventReceivingId(parameter);
-    case "evusr":
-    case "evgrp":
-      return hasValidExplicitEventReceivingQuotedString(parameter, 1, 20);
-    case "evhst":
-      return hasValidExplicitEventHostLength(parameter);
-    case "evipa":
-      return hasValidExplicitEventSourceIpAddress(parameter);
-    case "evwms":
-    case "evdet":
-      return hasValidExplicitEventReceivingQuotedString(parameter, 1, 1024);
-    case "evwsv":
-      return isValidEventServerValue(parameter.value);
-    case "evwfr":
-      if (!hasValidExplicitEventReceivingFilterReference(parameter)) {
-        return false;
-      }
-      return (
-        (
-          parseHashEscapedQuotedEventStringContent(
-            parameter.value.slice(parameter.value.indexOf(":") + 1),
-          ) ?? ""
-        ).length > 0
-      );
-    case "evuid":
-    case "evgid":
-    case "evpid":
-      return (
-        /^-?\d+$/.test(parameter.value) &&
-        Number(parameter.value) >= -1 &&
-        Number(parameter.value) <= 9999999999
-      );
-  }
+  const parameters = valuesFor(unit, key);
+  const hasValidCount =
+    repeatableEventSelectorKeys.has(key) || parameters.length <= 1;
+  return hasValidCount && parameters.every(eventSelectorValidators[key]);
 };
 
 const hasValidEventSelectors = (unit: AjsUnit): boolean => {
-  for (const key of eventSelectorKeys) {
-    const parameters = valuesFor(unit, key);
-    if (key !== "evwfr" && parameters.length > 1) {
-      return false;
-    }
-    if (parameters.some((parameter) => !isValidEventSelector(key, parameter))) {
-      return false;
-    }
-  }
-
+  const selectorsAreValid = eventSelectorKeys.every((key) =>
+    hasValidEventSelectorValues(unit, key),
+  );
   const totalFilterBytes = valuesFor(unit, "evwfr").reduce(
     (total, parameter) =>
       total + getCanonicalEventReceivingFilterByteLength(parameter),
     0,
   );
-  return totalFilterBytes <= 2048;
+  return selectorsAreValid && totalFilterBytes <= 2048;
 };
 
 const hasValidCommandTextForm = (unit: AjsUnit): boolean => {
@@ -193,15 +196,18 @@ const hasValidExecutableFileForm = (unit: AjsUnit): boolean => {
 
   const executable = exactlyOne(valuesFor(unit, "sc"));
   const parameters = valuesFor(unit, "prm");
-  return (
-    executable !== undefined &&
-    hasValidV13QuotedValue(executable, executableFileMaximumBytes) &&
-    valuesFor(unit, "te").length === 0 &&
-    parameters.length <= 1 &&
+  const executableIsValid = executable
+    ? hasValidV13QuotedValue(executable, executableFileMaximumBytes)
+    : false;
+  const checks = [
+    executableIsValid,
+    valuesFor(unit, "te").length === 0,
+    parameters.length <= 1,
     parameters.every((parameter) =>
       hasValidV13QuotedValue(parameter, executableParameterMaximumBytes),
-    )
-  );
+    ),
+  ];
+  return checks.every(Boolean);
 };
 
 const hasValidFileMonitoringForm = (unit: AjsUnit): boolean => {
@@ -221,61 +227,78 @@ const hasValidFileMonitoringForm = (unit: AjsUnit): boolean => {
   );
 };
 
-const strategyFor = (unit: AjsUnit): SemanticDiffIdentityStrategyId => {
-  const unitType = String(unit.unitType);
-  if (eventReceptionUnitTypes.has(unitType) && hasValidEventSelectors(unit)) {
-    return "event-reception-v1";
-  }
-  if (
-    fileMonitoringUnitTypes.has(unitType) &&
-    hasValidFileMonitoringForm(unit)
-  ) {
-    return "file-monitor-v1";
-  }
-  if (hasValidCommandTextForm(unit)) {
-    return "command-text-v1";
-  }
-  if (hasValidExecutableFileForm(unit)) {
-    return "executable-file-v1";
-  }
-  return "legacy-all-parameters-v1";
-};
-
-const semanticFieldsFor = (
-  unit: AjsUnit,
+type SemanticStrategyRule = {
   strategyId: Exclude<
     SemanticDiffIdentityStrategyId,
     "legacy-all-parameters-v1"
-  >,
-): SemanticDiffIdentityField[] => {
-  switch (strategyId) {
-    case "command-text-v1":
-      return [scalarField("te", valuesFor(unit, "te"))];
-    case "executable-file-v1":
-      return [
-        scalarField("sc", valuesFor(unit, "sc")),
-        scalarField("prm", valuesFor(unit, "prm")),
-      ];
-    case "event-reception-v1":
-      return eventSelectorKeys.map((key) =>
-        key === "evwfr"
-          ? field(
-              key,
-              sortOrdinal(
-                valuesFor(unit, key).map((parameter) => parameter.value),
-              ),
-            )
-          : scalarField(key, valuesFor(unit, key)),
-      );
-    case "file-monitor-v1": {
-      const explicitCondition = exactlyOne(valuesFor(unit, "flwc"));
-      return [
-        scalarField("flwf", valuesFor(unit, "flwf")),
-        field("flwc", [explicitCondition?.value ?? DEFAULTS.Flwc], true),
-      ];
-    }
-  }
+  >;
+  appliesTo: (unit: AjsUnit) => boolean;
 };
+
+const semanticStrategyRules: SemanticStrategyRule[] = [
+  {
+    strategyId: "event-reception-v1",
+    appliesTo: (unit) =>
+      eventReceptionUnitTypes.has(String(unit.unitType)) &&
+      hasValidEventSelectors(unit),
+  },
+  {
+    strategyId: "file-monitor-v1",
+    appliesTo: (unit) =>
+      fileMonitoringUnitTypes.has(String(unit.unitType)) &&
+      hasValidFileMonitoringForm(unit),
+  },
+  { strategyId: "command-text-v1", appliesTo: hasValidCommandTextForm },
+  {
+    strategyId: "executable-file-v1",
+    appliesTo: hasValidExecutableFileForm,
+  },
+];
+
+const strategyFor = (unit: AjsUnit): SemanticDiffIdentityStrategyId =>
+  semanticStrategyRules.find((rule) => rule.appliesTo(unit))?.strategyId ??
+  "legacy-all-parameters-v1";
+
+type SemanticStrategyId = Exclude<
+  SemanticDiffIdentityStrategyId,
+  "legacy-all-parameters-v1"
+>;
+
+type SemanticFieldFactory = (unit: AjsUnit) => SemanticDiffIdentityField[];
+
+const eventReceptionFields: SemanticFieldFactory = (unit) =>
+  eventSelectorKeys.map((key) =>
+    key === "evwfr"
+      ? field(
+          key,
+          sortOrdinal(valuesFor(unit, key).map((parameter) => parameter.value)),
+        )
+      : scalarField(key, valuesFor(unit, key)),
+  );
+
+const fileMonitoringFields: SemanticFieldFactory = (unit) => {
+  const explicitCondition = exactlyOne(valuesFor(unit, "flwc"));
+  return [
+    scalarField("flwf", valuesFor(unit, "flwf")),
+    field("flwc", [explicitCondition?.value ?? DEFAULTS.Flwc], true),
+  ];
+};
+
+const semanticFieldFactories: Record<SemanticStrategyId, SemanticFieldFactory> =
+  {
+    "command-text-v1": (unit) => [scalarField("te", valuesFor(unit, "te"))],
+    "executable-file-v1": (unit) => [
+      scalarField("sc", valuesFor(unit, "sc")),
+      scalarField("prm", valuesFor(unit, "prm")),
+    ],
+    "event-reception-v1": eventReceptionFields,
+    "file-monitor-v1": fileMonitoringFields,
+  };
+
+const semanticFieldsFor = (
+  unit: AjsUnit,
+  strategyId: SemanticStrategyId,
+): SemanticDiffIdentityField[] => semanticFieldFactories[strategyId](unit);
 
 const legacyFieldsFor = (unit: AjsUnit): SemanticDiffIdentityField[] => {
   const parameters = sortOrdinal(

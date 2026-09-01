@@ -102,66 +102,44 @@ const toUnitReference = (unit: AjsUnit): SemanticDiffUnitReference => ({
   unitType: unit.unitType,
 });
 
-const toIdentityDecision = (
-  decision: DomainSemanticDiffIdentityDecision,
-): SemanticDiffIdentityDecision => {
-  const base = {
-    id: decision.id,
-    before: decision.before.map((reference) => ({ ...reference })),
-    after: decision.after.map((reference) => ({ ...reference })),
-  };
-  if (decision.status === "exact") {
-    return {
-      ...base,
-      status: "exact",
-      rule: "exact-key",
-      evidence: {
-        kind: "exact-key",
-        key: { ...decision.evidence.key },
-      },
-    };
-  }
-  const evidence = {
-    kind: "fingerprint" as const,
-    strategyId: decision.evidence.strategyId,
-    unitType: decision.evidence.unitType,
+const copyIdentityReferences = (
+  references: DomainSemanticDiffIdentityDecision["before"],
+): SemanticDiffUnitReference[] =>
+  references.map((reference) => ({ ...reference }));
+
+const copyExactIdentityDecision = (
+  decision: Extract<DomainSemanticDiffIdentityDecision, { status: "exact" }>,
+): SemanticDiffIdentityDecision => ({
+  ...decision,
+  before: copyIdentityReferences(decision.before),
+  after: copyIdentityReferences(decision.after),
+  evidence: {
+    kind: "exact-key",
+    key: { ...decision.evidence.key },
+  },
+});
+
+const copyFingerprintIdentityDecision = (
+  decision: Exclude<DomainSemanticDiffIdentityDecision, { status: "exact" }>,
+): SemanticDiffIdentityDecision => ({
+  ...decision,
+  before: copyIdentityReferences(decision.before),
+  after: copyIdentityReferences(decision.after),
+  evidence: {
+    ...decision.evidence,
     fields: decision.evidence.fields.map((field) => ({
-      key: field.key,
-      presence: field.presence,
+      ...field,
       values: [...field.values],
     })),
-  };
-  switch (decision.status) {
-    case "fingerprint-confirmed":
-      return {
-        ...base,
-        status: decision.status,
-        rule: decision.rule,
-        evidence,
-      };
-    case "candidate":
-      return {
-        ...base,
-        status: decision.status,
-        rule: decision.rule,
-        evidence,
-      };
-    case "removed":
-      return {
-        ...base,
-        status: decision.status,
-        rule: decision.rule,
-        evidence,
-      };
-    case "added":
-      return {
-        ...base,
-        status: decision.status,
-        rule: decision.rule,
-        evidence,
-      };
-  }
-};
+  },
+});
+
+const toIdentityDecision = (
+  decision: DomainSemanticDiffIdentityDecision,
+): SemanticDiffIdentityDecision =>
+  decision.status === "exact"
+    ? copyExactIdentityDecision(decision)
+    : copyFingerprintIdentityDecision(decision);
 
 const identityPairKey = (beforeId: string, afterId: string): string =>
   `${beforeId}\u0000${afterId}`;
@@ -170,6 +148,12 @@ type SemanticDiffIdentityDecisionIndex = {
   byPair: Map<string, SemanticDiffIdentityDecisionId>;
   byBefore: Map<string, SemanticDiffIdentityDecisionId>;
   byAfter: Map<string, SemanticDiffIdentityDecisionId>;
+};
+
+type SemanticDiffUnitChangeContext = {
+  beforeUnitById: Map<string, AjsUnit>;
+  afterUnitById: Map<string, AjsUnit>;
+  identityDecisionIndex: SemanticDiffIdentityDecisionIndex;
 };
 
 const buildIdentityDecisionIndex = (
@@ -275,18 +259,16 @@ const createUnitChange = ({
 
 const createFingerprintMatchChanges = (
   matches: SemanticDiffUnitMatch[],
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-  identityDecisionIndex: SemanticDiffIdentityDecisionIndex,
+  context: SemanticDiffUnitChangeContext,
 ): SemanticDiffChange[] =>
   matches.flatMap((match) => {
     const beforeParent = semanticDiffParentJobnetPath(
       match.before,
-      beforeUnitById,
+      context.beforeUnitById,
     );
     const afterParent = semanticDiffParentJobnetPath(
       match.after,
-      afterUnitById,
+      context.afterUnitById,
     );
     const renamed = match.before.name !== match.after.name;
     const moved = beforeParent !== afterParent;
@@ -300,7 +282,7 @@ const createFingerprintMatchChanges = (
           confirmationLevel: "confirmed",
           before: match.before,
           after: match.after,
-          identityDecisionId: identityDecisionIndex.byPair.get(
+          identityDecisionId: context.identityDecisionIndex.byPair.get(
             identityPairKey(match.before.id, match.after.id),
           )!,
           summary: `${match.before.name} renamed to ${match.after.name}`,
@@ -315,7 +297,7 @@ const createFingerprintMatchChanges = (
           confirmationLevel: "confirmed",
           before: match.before,
           after: match.after,
-          identityDecisionId: identityDecisionIndex.byPair.get(
+          identityDecisionId: context.identityDecisionIndex.byPair.get(
             identityPairKey(match.before.id, match.after.id),
           )!,
           summary: `${match.before.name} moved from ${beforeParent} to ${afterParent}`,
@@ -637,12 +619,11 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   const identityDecisions =
     correspondence.identityDecisions.map(toIdentityDecision);
   const changes = [
-    ...createFingerprintMatchChanges(
-      correspondence.fingerprintMatches,
+    ...createFingerprintMatchChanges(correspondence.fingerprintMatches, {
       beforeUnitById,
       afterUnitById,
       identityDecisionIndex,
-    ),
+    }),
     ...createCandidateChanges(correspondence.candidates, identityDecisionIndex),
     ...createAddedRemovedChanges(
       correspondence.removedUnits,

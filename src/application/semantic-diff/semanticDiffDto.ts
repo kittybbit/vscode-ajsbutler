@@ -1,3 +1,17 @@
+import type {
+  SemanticDiffIdentityDecision as DomainSemanticDiffIdentityDecision,
+  SemanticDiffIdentityDecisionId as DomainSemanticDiffIdentityDecisionId,
+  SemanticDiffIdentityDecisionRule as DomainSemanticDiffIdentityDecisionRule,
+  SemanticDiffIdentityDecisionStatus as DomainSemanticDiffIdentityDecisionStatus,
+  SemanticDiffIdentityEvidence as DomainSemanticDiffIdentityEvidence,
+  SemanticDiffIdentityExactKey as DomainSemanticDiffIdentityExactKey,
+  SemanticDiffIdentityExactKeyEvidence as DomainSemanticDiffIdentityExactKeyEvidence,
+  SemanticDiffIdentityField as DomainSemanticDiffIdentityField,
+  SemanticDiffIdentityFingerprintEvidence as DomainSemanticDiffIdentityFingerprintEvidence,
+  SemanticDiffIdentityStrategyId as DomainSemanticDiffIdentityStrategyId,
+  SemanticDiffIdentityUnitReference as DomainSemanticDiffIdentityUnitReference,
+} from "../../domain/models/semantic-diff/SemanticDiff";
+
 export type SemanticDiffSide = "before" | "after";
 
 export type SemanticDiffElementKind =
@@ -40,103 +54,23 @@ export type SemanticDiffLimitationKind =
   | "normalization"
   | SemanticDiffUnsupportedKind;
 
-export type SemanticDiffUnitReference = {
-  id: string;
-  name: string;
-  absolutePath: string;
-  unitType: string;
-};
-
+export type SemanticDiffUnitReference = DomainSemanticDiffIdentityUnitReference;
 export type SemanticDiffIdentityStrategyId =
-  | "command-text-v1"
-  | "executable-file-v1"
-  | "event-reception-v1"
-  | "file-monitor-v1"
-  | "legacy-all-parameters-v1";
-
-export type SemanticDiffIdentityField = {
-  key: string;
-  presence: "absent" | "present";
-  values: string[];
-};
-
-export type SemanticDiffIdentityFingerprintEvidence = {
-  kind: "fingerprint";
-  strategyId: SemanticDiffIdentityStrategyId;
-  unitType: string;
-  fields: SemanticDiffIdentityField[];
-};
-
-export type SemanticDiffIdentityExactKey =
-  | {
-      kind: "jobnet";
-      jobGroupRelativePath: string;
-      unitType: string;
-    }
-  | {
-      kind: "unit";
-      parentJobnetPath: string;
-      unitName: string;
-      unitType: string;
-    };
-
-export type SemanticDiffIdentityExactKeyEvidence = {
-  kind: "exact-key";
-  key: SemanticDiffIdentityExactKey;
-};
-
-export type SemanticDiffIdentityEvidence =
-  | SemanticDiffIdentityExactKeyEvidence
-  | SemanticDiffIdentityFingerprintEvidence;
-
+  DomainSemanticDiffIdentityStrategyId;
+export type SemanticDiffIdentityField = DomainSemanticDiffIdentityField;
+export type SemanticDiffIdentityFingerprintEvidence =
+  DomainSemanticDiffIdentityFingerprintEvidence;
+export type SemanticDiffIdentityExactKey = DomainSemanticDiffIdentityExactKey;
+export type SemanticDiffIdentityExactKeyEvidence =
+  DomainSemanticDiffIdentityExactKeyEvidence;
+export type SemanticDiffIdentityEvidence = DomainSemanticDiffIdentityEvidence;
 export type SemanticDiffIdentityDecisionRule =
-  | "exact-key"
-  | "one-to-one-fingerprint"
-  | "ambiguous-fingerprint"
-  | "unmatched-before"
-  | "unmatched-after";
-
+  DomainSemanticDiffIdentityDecisionRule;
 export type SemanticDiffIdentityDecisionStatus =
-  | "exact"
-  | "fingerprint-confirmed"
-  | "candidate"
-  | "removed"
-  | "added";
-
-export type SemanticDiffIdentityDecisionId = string;
-
-type SemanticDiffIdentityDecisionBase = {
-  id: SemanticDiffIdentityDecisionId;
-  before: SemanticDiffUnitReference[];
-  after: SemanticDiffUnitReference[];
-};
-
-export type SemanticDiffIdentityDecision =
-  | (SemanticDiffIdentityDecisionBase & {
-      status: "exact";
-      rule: "exact-key";
-      evidence: SemanticDiffIdentityExactKeyEvidence;
-    })
-  | (SemanticDiffIdentityDecisionBase & {
-      status: "fingerprint-confirmed";
-      rule: "one-to-one-fingerprint";
-      evidence: SemanticDiffIdentityFingerprintEvidence;
-    })
-  | (SemanticDiffIdentityDecisionBase & {
-      status: "candidate";
-      rule: "ambiguous-fingerprint";
-      evidence: SemanticDiffIdentityFingerprintEvidence;
-    })
-  | (SemanticDiffIdentityDecisionBase & {
-      status: "removed";
-      rule: "unmatched-before";
-      evidence: SemanticDiffIdentityFingerprintEvidence;
-    })
-  | (SemanticDiffIdentityDecisionBase & {
-      status: "added";
-      rule: "unmatched-after";
-      evidence: SemanticDiffIdentityFingerprintEvidence;
-    });
+  DomainSemanticDiffIdentityDecisionStatus;
+export type SemanticDiffIdentityDecisionId =
+  DomainSemanticDiffIdentityDecisionId;
+export type SemanticDiffIdentityDecision = DomainSemanticDiffIdentityDecision;
 
 export type SemanticDiffRelationReference = {
   sourceUnitId: string;

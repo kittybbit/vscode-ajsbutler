@@ -211,6 +211,19 @@ const identityReference = (reference: SemanticDiffUnitReference): string =>
 
 const nestedBulletLine = (value: string): string => `    - ${value}`;
 
+const renderedIdentityFieldValues = (
+  field: SemanticDiffIdentityField,
+  language?: string,
+): string => {
+  if (field.values.length > 0) {
+    return field.values.map(escapeMarkdown).join(", ");
+  }
+  if (field.presence === "absent") {
+    return semanticDiffReportText("generated.none", language);
+  }
+  return '""';
+};
+
 const identityFieldValue = (
   field: SemanticDiffIdentityField,
   language?: string,
@@ -219,12 +232,7 @@ const identityFieldValue = (
     `identity.${field.presence}`,
     language,
   );
-  const values =
-    field.values.length > 0
-      ? field.values.map(escapeMarkdown).join(", ")
-      : field.presence === "absent"
-        ? semanticDiffReportText("generated.none", language)
-        : '""';
+  const values = renderedIdentityFieldValues(field, language);
   return `${escapeMarkdown(field.key)} (${presence}): ${values}`;
 };
 

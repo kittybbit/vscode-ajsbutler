@@ -113,7 +113,7 @@ const compareStrings = (left: string, right: string): number =>
   left.localeCompare(right);
 
 const compareOrdinal = (left: string, right: string): number =>
-  left < right ? -1 : left > right ? 1 : 0;
+  Number(left > right) - Number(left < right);
 
 const groupBy = <T>(
   values: T[],
@@ -202,19 +202,26 @@ const matchExactUnits = (
     unitExactKey(unit, afterUnitById, jobGroupPath),
   );
 
+  const uniqueMatch = (
+    beforeMatches: AjsUnit[],
+    afterMatches: AjsUnit[],
+  ): SemanticDiffUnitMatch[] => {
+    if (beforeMatches.length !== 1 || afterMatches.length !== 1) {
+      return [];
+    }
+    return [
+      {
+        before: beforeMatches[0],
+        after: afterMatches[0],
+        kind: "exact",
+      },
+    ];
+  };
+
   return [...beforeByKey.entries()]
-    .flatMap(([key, beforeMatches]) => {
-      const afterMatches = afterByKey.get(key) ?? [];
-      return beforeMatches.length === 1 && afterMatches.length === 1
-        ? [
-            {
-              before: beforeMatches[0],
-              after: afterMatches[0],
-              kind: "exact" as const,
-            },
-          ]
-        : [];
-    })
+    .flatMap(([key, beforeMatches]) =>
+      uniqueMatch(beforeMatches, afterByKey.get(key) ?? []),
+    )
     .sort(
       (left, right) =>
         compareUnits(left.before, right.before) ||
@@ -222,22 +229,26 @@ const matchExactUnits = (
     );
 };
 
+type FingerprintMatchContext = {
+  beforeIdentityById: Map<string, SemanticDiffIdentityFingerprint>;
+  afterIdentityById: Map<string, SemanticDiffIdentityFingerprint>;
+};
+
 const matchFingerprintUnits = (
   beforeUnits: AjsUnit[],
   afterUnits: AjsUnit[],
-  beforeIdentityById: Map<string, SemanticDiffIdentityFingerprint>,
-  afterIdentityById: Map<string, SemanticDiffIdentityFingerprint>,
+  context: FingerprintMatchContext,
 ): {
   matches: SemanticDiffUnitMatch[];
   candidates: SemanticDiffCandidateGroup[];
 } => {
   const beforeByFingerprint = groupBy(
     beforeUnits,
-    (unit) => beforeIdentityById.get(unit.id)?.fingerprint ?? "",
+    (unit) => context.beforeIdentityById.get(unit.id)?.fingerprint ?? "",
   );
   const afterByFingerprint = groupBy(
     afterUnits,
-    (unit) => afterIdentityById.get(unit.id)?.fingerprint ?? "",
+    (unit) => context.afterIdentityById.get(unit.id)?.fingerprint ?? "",
   );
   const matches: SemanticDiffUnitMatch[] = [];
   const candidates: SemanticDiffCandidateGroup[] = [];
@@ -253,7 +264,9 @@ const matchFingerprintUnits = (
           kind: "fingerprint",
         });
       } else if (beforeMatches.length > 0 && afterMatches.length > 0) {
-        const evidence = beforeIdentityById.get(beforeMatches[0].id)?.evidence;
+        const evidence = context.beforeIdentityById.get(
+          beforeMatches[0].id,
+        )?.evidence;
         if (!evidence) {
           return;
         }
@@ -295,20 +308,15 @@ const identityReference = (
 const compareIdentityReferences = (
   left: SemanticDiffIdentityUnitReference,
   right: SemanticDiffIdentityUnitReference,
-): number => {
-  for (const [leftValue, rightValue] of [
+): number =>
+  [
     [left.absolutePath, right.absolutePath],
     [left.unitType, right.unitType],
     [left.name, right.name],
     [left.id, right.id],
-  ]) {
-    const comparison = compareOrdinal(leftValue, rightValue);
-    if (comparison !== 0) {
-      return comparison;
-    }
-  }
-  return 0;
-};
+  ]
+    .map(([leftValue, rightValue]) => compareOrdinal(leftValue, rightValue))
+    .find((comparison) => comparison !== 0) ?? 0;
 
 const compareUnits = (left: AjsUnit, right: AjsUnit): number =>
   compareIdentityReferences(identityReference(left), identityReference(right));
@@ -547,8 +555,7 @@ export const buildSemanticDiffUnitCorrespondence = ({
   const fingerprintResult = matchFingerprintUnits(
     beforeUnits.filter((unit) => !exactBeforeIds.has(unit.id)),
     afterUnits.filter((unit) => !exactAfterIds.has(unit.id)),
-    beforeIdentityById,
-    afterIdentityById,
+    { beforeIdentityById, afterIdentityById },
   );
   const matches = [...exactMatches, ...fingerprintResult.matches].sort(
     (left, right) =>
