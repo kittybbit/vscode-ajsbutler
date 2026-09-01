@@ -4,11 +4,11 @@
 
 - Purpose: make Semantic Diff identity matching unit-type-specific,
   deterministic, and explainable without weakening conservative safeguards.
-- Approved or active slice: Slice 1, Build Reference-Backed Identity Strategies
-  And Correspondence. The current conversation authorizes implementation of
+- Approved or active slice: Slice 2, Project Complete Identity Decisions Into
+  The Application DTO. The current conversation authorizes implementation of
   this slice within its recorded approval boundary.
 - Do not edit runtime code, tests, generated artifacts, or configuration outside
-  the active approved Slice 1 boundary; only the focused completion commit is
+  the active approved Slice 2 boundary; only the focused completion commit is
   authorized for this scope.
 - Do not add manual matching, similarity scoring, output modes, JSON export,
   new commands, or UI.
@@ -18,8 +18,9 @@
 - Reference basis: JP1/AJS3 version 13 Command Reference sections 5.2.6,
   5.2.7, 5.2.9, and 5.2.10, plus the repository shared parameter rules.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main delegates the exact completed Slice 1 scope to
-  `approval-committer` for the focused completion commit.
+- Next route: Main delegates the exact completed Slice 2 scope to
+  `approval-committer` for the focused completion commit after this evidence
+  returns.
 
 ## Sync Rule
 
@@ -34,16 +35,17 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slice 1 implementation reviewed and Completion
-  Approval granted, pending the focused completion commit.
+- Status: Approved plan; Slice 1 completion commit `523301c6` is present and
+  Slice 2 implementation review is Ready with Completion Approval granted,
+  pending the focused completion commit.
 - Planning scope: all identity strategy, correspondence evidence, application
   DTO, existing Markdown rationale, regression, and compatibility work needed
   by `SPECS.md` R1-R10.
-- Review status: plan Ready (`plan-reviewer`) and Slice 1 implementation Ready
-  (`implementation-reviewer`).
+- Review status: plan Ready (`plan-reviewer`) and Slice 1/Slice 2
+  implementation Ready (`implementation-reviewer`).
 - Human approval: Approved.
-- Active implementation slice: Slice 1.
-- Implementation review verdict: Ready
+- Active implementation slice: Slice 2; completion commit pending.
+- Implementation review verdict: Slice 1 Ready; Slice 2 Ready
 - Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
   implementation review, Completion Approval, and focused completion commit
   before the next slice begins.
@@ -61,9 +63,37 @@
   `src/test/suite/compareSemanticDiff.test.ts`, and this feature's
   `TASKS.md`/`TRACEABILITY.md` evidence updates.
 
-Implementation was authorized for Slice 1 by the current conversation. The
-implementation review is Ready and Completion Approval is recorded below; the
-focused completion commit remains pending.
+Implementation was authorized for Slice 1 by the prior approval and its
+focused completion commit is `523301c6`. Slice 2 implementation was authorized
+by the renewed approval recorded below; its Completion Approval and focused
+completion-commit status are recorded in the Slice 2 section below.
+
+## Slice 2 Human Approval
+
+- Status: Approved
+- Approved at: immediately preceding user message, after Slice 1 completion
+  commit `523301c6`
+- Approved scope: project complete domain identity decisions into the
+  application Semantic Diff DTO, add `identityDecisions` and
+  `identityDecisionId`, and update only the direct DTO/comparison/report-data,
+  command, and Flow fixtures/tests required by this additive contract.
+- Approved paths: `src/application/semantic-diff/semanticDiffDto.ts`,
+  `src/application/semantic-diff/compareSemanticDiff.ts`,
+  `src/test/suite/semanticDiffContracts.test.ts`,
+  `src/test/suite/compareSemanticDiff.test.ts`,
+  `src/test/suite/buildSemanticDiffReportData.test.ts`,
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffFlowHighlights.test.ts`,
+  `src/test/suite/extensionSubscriptions.test.ts`,
+  `src/test/suite/renderSemanticDiffMarkdown.test.ts`, and this feature's
+  `TASKS.md`/`TRACEABILITY.md` evidence updates.
+- Excluded paths and behavior: Flow implementation, Markdown presentation
+  implementation, commands, telemetry, parser, package/configuration, public
+  JSON/schema output, report modes, risk types, UI, and Flow highlight rules.
+
+Implementation was authorized for Slice 2 within these paths and boundaries.
+Its Completion Approval is recorded below; Slice 3 remains blocked until this
+slice's focused completion commit and renewed approval.
 
 ## Completion Approval
 
@@ -81,6 +111,30 @@ focused completion commit remains pending.
   `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`,
   `src/test/suite/semanticDiffStructuralRules.test.ts`,
   `src/test/suite/compareSemanticDiff.test.ts`
+- Implementation review verdict: Ready
+- Commit status: Committed as `523301c6`
+
+## Slice 2 Completion Approval
+
+- Status: Approved
+- Approved at: immediately preceding user message, after the
+  `implementation-reviewer` Ready verdict
+- Approved scope: completed Slice 2 implementation, including application
+  Semantic Diff DTO decision union/projection, `identityDecisionId` wiring,
+  additive direct DTO/comparison/report-data/command/Flow/extension/Markdown
+  consumer fixtures/tests, and lifecycle evidence updates.
+- Approved paths:
+  `docs/specs/features/semantic-diff-identity-confidence/TASKS.md`,
+  `docs/specs/features/semantic-diff-identity-confidence/TRACEABILITY.md`,
+  `src/application/semantic-diff/compareSemanticDiff.ts`,
+  `src/application/semantic-diff/semanticDiffDto.ts`,
+  `src/test/suite/buildSemanticDiffReportData.test.ts`,
+  `src/test/suite/compareSemanticDiff.test.ts`,
+  `src/test/suite/extensionSubscriptions.test.ts`,
+  `src/test/suite/renderSemanticDiffMarkdown.test.ts`,
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffContracts.test.ts`,
+  `src/test/suite/semanticDiffFlowHighlights.test.ts`
 - Implementation review verdict: Ready
 - Commit status: Eligible; pending focused completion commit
 
@@ -355,7 +409,8 @@ Changing the form discriminator is not treated as a cross-strategy match.
 
 ### Slice 2: Project Complete Identity Decisions Into The Application DTO
 
-- Status: Proposed; blocked by Slice 1 completion commit and renewed approval.
+- Status: Implemented; implementation review Ready and Completion Approval
+  granted, focused completion commit pending.
 - Scope: add `identityDecisions` and `identityDecisionId`; project every domain
   outcome in stable order; update direct DTO fixtures/consumers required by the
   additive contract without changing presentation output.

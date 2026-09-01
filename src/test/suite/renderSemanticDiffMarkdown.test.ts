@@ -57,6 +57,7 @@ const changeSet = (
     },
   },
   changes: [],
+  identityDecisions: [],
   confirmationRequired: [],
   unsupportedItems: [],
   limitations: [],
@@ -167,6 +168,7 @@ suite("Render Semantic Diff Markdown", () => {
             kind: "changed",
             elementKind: "attribute",
             confirmationLevel: "confirmed",
+            identityDecisionId: "identity:test:attribute",
             after: {
               kind: "attribute",
               unit: unitReference(job),
@@ -218,11 +220,6 @@ suite("Render Semantic Diff Markdown", () => {
       name: "job-x",
       absolutePath: "/root/jobnet/job-x",
     });
-    const afterCandidate = unit({
-      id: "/root/jobnet/job-y",
-      name: "job-y",
-      absolutePath: "/root/jobnet/job-y",
-    });
     const afterAttribute: SemanticDiffTarget = {
       kind: "attribute",
       unit: unitReference(afterJob),
@@ -238,18 +235,19 @@ suite("Render Semantic Diff Markdown", () => {
           kind: "renamed",
           elementKind: "unit",
           confirmationLevel: "confirmed",
+          identityDecisionId: "identity:test:renamed",
           before: { kind: "unit", unit: unitReference(beforeJob) },
           after: { kind: "unit", unit: unitReference(afterJob) },
           summary: "job-a renamed to job-b",
           rationale: "one-to-one identity fingerprint match",
         },
         {
-          id: "unit:changed:/root/jobnet/job-x:/root/jobnet/job-y",
+          id: "unit:changed:/root/jobnet/job-x:",
           kind: "changed",
           elementKind: "unit",
           confirmationLevel: "candidate",
+          identityDecisionId: "identity:test:candidate",
           before: { kind: "unit", unit: unitReference(beforeCandidate) },
-          after: { kind: "unit", unit: unitReference(afterCandidate) },
           summary: "job-x has ambiguous rename or move candidates",
           rationale: "identity fingerprint matched 2 before and 2 after units",
         },
@@ -258,6 +256,7 @@ suite("Render Semantic Diff Markdown", () => {
           kind: "changed",
           elementKind: "attribute",
           confirmationLevel: "confirmed",
+          identityDecisionId: "identity:test:attribute-2",
           before: {
             kind: "attribute",
             unit: unitReference(beforeJob),
@@ -320,7 +319,6 @@ suite("Render Semantic Diff Markdown", () => {
 
 - [candidate] changed unit: job-x has ambiguous rename or move candidates
   - Before: unit /root/jobnet/job-x
-  - After: unit /root/jobnet/job-y
   - Rationale: identity fingerprint matched 2 before and 2 after units
 - [confirmed] renamed unit: job-a renamed to job-b
   - Before: unit /root/jobnet/job-a

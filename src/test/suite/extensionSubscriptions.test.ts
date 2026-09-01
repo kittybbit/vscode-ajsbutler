@@ -26,6 +26,7 @@ suite("Extension subscriptions", () => {
               after: { side: "after", unitIds: [], relations: [] },
             },
             changes: [],
+            identityDecisions: [],
             confirmationRequired: [],
             unsupportedItems: [],
             limitations: [],

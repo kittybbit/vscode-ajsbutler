@@ -12,6 +12,7 @@ import type {
   SemanticDiffUnsupportedItem,
 } from "../../application/semantic-diff/semanticDiffDto";
 import {
+  compareSemanticDiff,
   createSemanticDiffChangeSet,
   type CompareSemanticDiff,
   type CompareSemanticDiffInput,
@@ -95,6 +96,7 @@ suite("Semantic Diff Contracts", () => {
       },
     ]);
     assert.deepStrictEqual(changeSet.changes, []);
+    assert.deepStrictEqual(changeSet.identityDecisions, []);
     assert.deepStrictEqual(changeSet.confirmationRequired, []);
     assert.deepStrictEqual(changeSet.unsupportedItems, []);
     assert.deepStrictEqual(changeSet.reportSections, []);
@@ -120,6 +122,7 @@ suite("Semantic Diff Contracts", () => {
       kind: "changed",
       elementKind: "attribute",
       confirmationLevel: "confirmed",
+      identityDecisionId: "identity:test:attribute",
       attributeCategory: "execution-definition",
       summary: "execution definition changed",
       before: {
@@ -195,6 +198,7 @@ suite("Semantic Diff Contracts", () => {
     );
 
     assert.strictEqual(changeSet.changes[0], change);
+    assert.strictEqual(change.identityDecisionId, "identity:test:attribute");
     assert.strictEqual(changeSet.confirmationRequired[0], confirmationRequired);
     assert.strictEqual(changeSet.unsupportedItems[0], unsupportedItem);
     assert.strictEqual(changeSet.reportSections[0], reportSection);
@@ -215,5 +219,39 @@ suite("Semantic Diff Contracts", () => {
 
     assert.strictEqual(result.inputs.before.side, "before");
     assert.strictEqual(result.inputs.after.side, "after");
+  });
+
+  test("projects identity decisions as a plain, complete DTO", () => {
+    const result = compareSemanticDiff({
+      before: beforeDocument,
+      after: afterDocument,
+    });
+
+    assert.strictEqual(result.identityDecisions.length, 1);
+    const [decision] = result.identityDecisions;
+    assert.strictEqual(decision.status, "fingerprint-confirmed");
+    assert.strictEqual(decision.rule, "one-to-one-fingerprint");
+    assert.strictEqual(decision.id.startsWith("identity:v1:"), true);
+    assert.deepStrictEqual(decision.before, [unitReference(beforeUnit)]);
+    assert.deepStrictEqual(decision.after, [unitReference(afterUnit)]);
+    assert.strictEqual(decision.evidence.kind, "fingerprint");
+    if (decision.evidence.kind !== "fingerprint") {
+      throw new Error("Expected fingerprint evidence.");
+    }
+    assert.strictEqual(
+      decision.evidence.strategyId,
+      "legacy-all-parameters-v1",
+    );
+    assert.deepStrictEqual(decision.evidence.fields, [
+      { key: "unitType", presence: "present", values: ["j"] },
+      { key: "groupType", presence: "present", values: [""] },
+      { key: "permission", presence: "present", values: [""] },
+      { key: "jp1Username", presence: "present", values: [""] },
+      { key: "jp1ResourceGroup", presence: "present", values: [""] },
+      { key: "parameters", presence: "present", values: ["ty=j"] },
+    ]);
+    assert.strictEqual(JSON.stringify(result).includes("rootUnits"), false);
+    assert.strictEqual(JSON.stringify(result).includes("Map"), false);
+    assert.strictEqual(JSON.stringify(result).includes("function"), false);
   });
 });

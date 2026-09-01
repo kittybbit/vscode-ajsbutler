@@ -47,6 +47,97 @@ export type SemanticDiffUnitReference = {
   unitType: string;
 };
 
+export type SemanticDiffIdentityStrategyId =
+  | "command-text-v1"
+  | "executable-file-v1"
+  | "event-reception-v1"
+  | "file-monitor-v1"
+  | "legacy-all-parameters-v1";
+
+export type SemanticDiffIdentityField = {
+  key: string;
+  presence: "absent" | "present";
+  values: string[];
+};
+
+export type SemanticDiffIdentityFingerprintEvidence = {
+  kind: "fingerprint";
+  strategyId: SemanticDiffIdentityStrategyId;
+  unitType: string;
+  fields: SemanticDiffIdentityField[];
+};
+
+export type SemanticDiffIdentityExactKey =
+  | {
+      kind: "jobnet";
+      jobGroupRelativePath: string;
+      unitType: string;
+    }
+  | {
+      kind: "unit";
+      parentJobnetPath: string;
+      unitName: string;
+      unitType: string;
+    };
+
+export type SemanticDiffIdentityExactKeyEvidence = {
+  kind: "exact-key";
+  key: SemanticDiffIdentityExactKey;
+};
+
+export type SemanticDiffIdentityEvidence =
+  | SemanticDiffIdentityExactKeyEvidence
+  | SemanticDiffIdentityFingerprintEvidence;
+
+export type SemanticDiffIdentityDecisionRule =
+  | "exact-key"
+  | "one-to-one-fingerprint"
+  | "ambiguous-fingerprint"
+  | "unmatched-before"
+  | "unmatched-after";
+
+export type SemanticDiffIdentityDecisionStatus =
+  | "exact"
+  | "fingerprint-confirmed"
+  | "candidate"
+  | "removed"
+  | "added";
+
+export type SemanticDiffIdentityDecisionId = string;
+
+type SemanticDiffIdentityDecisionBase = {
+  id: SemanticDiffIdentityDecisionId;
+  before: SemanticDiffUnitReference[];
+  after: SemanticDiffUnitReference[];
+};
+
+export type SemanticDiffIdentityDecision =
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "exact";
+      rule: "exact-key";
+      evidence: SemanticDiffIdentityExactKeyEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "fingerprint-confirmed";
+      rule: "one-to-one-fingerprint";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "candidate";
+      rule: "ambiguous-fingerprint";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "removed";
+      rule: "unmatched-before";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "added";
+      rule: "unmatched-after";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    });
+
 export type SemanticDiffRelationReference = {
   sourceUnitId: string;
   targetUnitId: string;
@@ -96,17 +187,35 @@ export type SemanticDiffTarget =
   | SemanticDiffRelationTarget
   | SemanticDiffAttributeTarget;
 
-export type SemanticDiffChange = {
+type SemanticDiffIdentityChange = {
   id: string;
   kind: SemanticDiffChangeKind;
-  elementKind: SemanticDiffElementKind;
+  elementKind: "jobnet" | "unit" | "attribute";
   confirmationLevel: SemanticDiffConfirmationLevel;
   before?: SemanticDiffTarget;
   after?: SemanticDiffTarget;
   attributeCategory?: SemanticDiffAttributeCategory;
   summary: string;
   rationale?: string;
+  identityDecisionId: SemanticDiffIdentityDecisionId;
 };
+
+type SemanticDiffNonIdentityChange = {
+  id: string;
+  kind: SemanticDiffChangeKind;
+  elementKind: "job-group" | "relation";
+  confirmationLevel: SemanticDiffConfirmationLevel;
+  before?: SemanticDiffTarget;
+  after?: SemanticDiffTarget;
+  attributeCategory?: SemanticDiffAttributeCategory;
+  summary: string;
+  rationale?: string;
+  identityDecisionId?: never;
+};
+
+export type SemanticDiffChange =
+  | SemanticDiffIdentityChange
+  | SemanticDiffNonIdentityChange;
 
 export type SemanticDiffConfirmationRequiredItem = {
   id: string;
@@ -185,6 +294,7 @@ export type SemanticDiffScheduleComparison = {
 export type SemanticDiffChangeSet = {
   inputs: SemanticDiffInputPair;
   changes: SemanticDiffChange[];
+  identityDecisions: SemanticDiffIdentityDecision[];
   confirmationRequired: SemanticDiffConfirmationRequiredItem[];
   unsupportedItems: SemanticDiffUnsupportedItem[];
   limitations: SemanticDiffLimitation[];

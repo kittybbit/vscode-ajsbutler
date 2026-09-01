@@ -107,6 +107,12 @@ suite("Compare Semantic Diff", () => {
     });
 
     assert.deepStrictEqual(result.changes, []);
+    assert.ok(
+      result.identityDecisions.length > 0 &&
+        result.identityDecisions.every(
+          (decision) => decision.status === "exact",
+        ),
+    );
   });
 
   test("matches units by parent jobnet, name, and type rather than name alone", () => {
@@ -177,6 +183,15 @@ suite("Compare Semantic Diff", () => {
         ["attribute", "execution-environment"],
       ],
     );
+    assert.ok(
+      result.changes
+        .filter((change) => change.elementKind === "attribute")
+        .every((change) =>
+          result.identityDecisions.some(
+            (decision) => decision.id === change.identityDecisionId,
+          ),
+        ),
+    );
   });
 
   test("confirms one-to-one fingerprint rename and relation correspondence", () => {
@@ -216,6 +231,14 @@ suite("Compare Semantic Diff", () => {
         change.confirmationLevel,
       ]),
       [["renamed", "unit", "confirmed"]],
+    );
+    const [rename] = result.changes;
+    assert.ok(rename.identityDecisionId);
+    assert.deepStrictEqual(
+      result.identityDecisions.find(
+        (decision) => decision.id === rename.identityDecisionId,
+      )?.status,
+      "fingerprint-confirmed",
     );
   });
 
@@ -286,6 +309,18 @@ suite("Compare Semantic Diff", () => {
       result.changes.map((change) => change.confirmationLevel),
       ["candidate", "candidate"],
     );
+    assert.ok(result.changes.every((change) => change.after === undefined));
+    const candidateDecision = result.identityDecisions.find(
+      (decision) => decision.status === "candidate",
+    );
+    assert.ok(candidateDecision);
+    assert.strictEqual(candidateDecision.before.length, 2);
+    assert.strictEqual(candidateDecision.after.length, 2);
+    assert.ok(
+      result.changes.every(
+        (change) => change.identityDecisionId === candidateDecision.id,
+      ),
+    );
   });
 
   test("treats fingerprint-changing rename as deletion and addition", () => {
@@ -315,6 +350,185 @@ suite("Compare Semantic Diff", () => {
         ["removed", "unit"],
       ],
     );
+    assert.deepStrictEqual(
+      result.identityDecisions
+        .filter((decision) => decision.status !== "exact")
+        .map((decision) => decision.status),
+      ["removed", "added"],
+    );
+    assert.ok(
+      result.changes.every((change) =>
+        result.identityDecisions.some(
+          (decision) => decision.id === change.identityDecisionId,
+        ),
+      ),
+    );
+  });
+
+  test("projects every identity outcome in deterministic DTO order", () => {
+    const beforeExact = unit({
+      id: "/root/jobnet/exact",
+      name: "exact",
+      absolutePath: "/root/jobnet/exact",
+    });
+    const afterExact = unit({
+      id: "/root/jobnet/exact",
+      name: "exact",
+      absolutePath: "/root/jobnet/exact",
+    });
+    const beforeRenamed = unit({
+      id: "/root/jobnet/rename-before",
+      name: "rename-before",
+      absolutePath: "/root/jobnet/rename-before",
+      parameters: params({ ty: "j", sc: "echo rename" }),
+    });
+    const afterRenamed = unit({
+      id: "/root/jobnet/rename-after",
+      name: "rename-after",
+      absolutePath: "/root/jobnet/rename-after",
+      parameters: params({ ty: "j", sc: "echo rename" }),
+    });
+    const beforeCandidateA = unit({
+      id: "/root/jobnet/candidate-a",
+      name: "candidate-a",
+      absolutePath: "/root/jobnet/candidate-a",
+      parameters: params({ ty: "j", sc: "echo candidate" }),
+    });
+    const beforeCandidateB = unit({
+      id: "/root/jobnet/candidate-b",
+      name: "candidate-b",
+      absolutePath: "/root/jobnet/candidate-b",
+      parameters: params({ ty: "j", sc: "echo candidate" }),
+    });
+    const afterCandidateC = unit({
+      id: "/root/jobnet/candidate-c",
+      name: "candidate-c",
+      absolutePath: "/root/jobnet/candidate-c",
+      parameters: params({ ty: "j", sc: "echo candidate" }),
+    });
+    const afterCandidateD = unit({
+      id: "/root/jobnet/candidate-d",
+      name: "candidate-d",
+      absolutePath: "/root/jobnet/candidate-d",
+      parameters: params({ ty: "j", sc: "echo candidate" }),
+    });
+    const beforeRemoved = unit({
+      id: "/root/jobnet/removed",
+      name: "removed",
+      absolutePath: "/root/jobnet/removed",
+      parameters: params({ ty: "j", sc: "echo removed" }),
+    });
+    const afterAdded = unit({
+      id: "/root/jobnet/added",
+      name: "added",
+      absolutePath: "/root/jobnet/added",
+      parameters: params({ ty: "j", sc: "echo added" }),
+    });
+    const beforeJobnet = jobnet("jobnet", [
+      beforeExact,
+      beforeRenamed,
+      beforeCandidateA,
+      beforeCandidateB,
+      beforeRemoved,
+    ]);
+    const afterJobnet = jobnet("jobnet", [
+      afterExact,
+      afterRenamed,
+      afterCandidateC,
+      afterCandidateD,
+      afterAdded,
+    ]);
+    const input = {
+      before: document([beforeJobnet]),
+      after: document([afterJobnet]),
+      options: { jobGroupPath: "/root" },
+    };
+    const result = compareSemanticDiff(input);
+    const repeated = compareSemanticDiff(input);
+
+    assert.deepStrictEqual(
+      result.identityDecisions.map((decision) => decision.status),
+      [
+        "exact",
+        "exact",
+        "exact",
+        "fingerprint-confirmed",
+        "candidate",
+        "removed",
+        "added",
+      ],
+    );
+    assert.deepStrictEqual(
+      result.identityDecisions.map((decision) => decision.id),
+      repeated.identityDecisions.map((decision) => decision.id),
+    );
+    assert.strictEqual(
+      new Set(result.identityDecisions.map((decision) => decision.id)).size,
+      result.identityDecisions.length,
+    );
+    const candidate = result.identityDecisions.find(
+      (decision) => decision.status === "candidate",
+    );
+    assert.ok(candidate);
+    assert.deepStrictEqual(
+      candidate.after.map((reference) => reference.id),
+      [afterCandidateC.id, afterCandidateD.id],
+    );
+    assert.ok(
+      result.changes
+        .filter((change) => change.confirmationLevel === "candidate")
+        .every(
+          (change) =>
+            change.after === undefined &&
+            change.identityDecisionId === candidate.id,
+        ),
+    );
+    assert.ok(
+      result.changes.every((change) =>
+        result.identityDecisions.some(
+          (decision) => decision.id === change.identityDecisionId,
+        ),
+      ),
+    );
+    const serialized = JSON.stringify(result);
+    assert.doesNotThrow(() => JSON.parse(serialized));
+    assert.strictEqual(serialized.includes("AjsUnit"), false);
+  });
+
+  test("does not attach identity decisions to relation changes", () => {
+    const beforeSource = unit({
+      id: "/root/jobnet/source",
+      name: "source",
+      absolutePath: "/root/jobnet/source",
+    });
+    const beforeTarget = unit({
+      id: "/root/jobnet/target",
+      name: "target",
+      absolutePath: "/root/jobnet/target",
+    });
+    beforeSource.relations = [relation(beforeSource.id, beforeTarget.id)];
+    const afterSource = unit({
+      id: beforeSource.id,
+      name: beforeSource.name,
+      absolutePath: beforeSource.absolutePath,
+    });
+    const afterTarget = unit({
+      id: beforeTarget.id,
+      name: beforeTarget.name,
+      absolutePath: beforeTarget.absolutePath,
+    });
+
+    const result = compareSemanticDiff({
+      before: document([jobnet("jobnet", [beforeSource, beforeTarget])]),
+      after: document([jobnet("jobnet", [afterSource, afterTarget])]),
+      options: { jobGroupPath: "/root" },
+    });
+    const [relationChange] = result.changes.filter(
+      (change) => change.elementKind === "relation",
+    );
+
+    assert.ok(relationChange);
+    assert.strictEqual("identityDecisionId" in relationChange, false);
   });
 
   test("carries normalization warnings into comparison limitations", () => {

@@ -22,8 +22,8 @@
 
 ## Slice 1 Implementation Evidence
 
-- Status: Implemented; pending independent implementation review and
-  Completion Approval.
+- Status: Implemented; implementation review Ready, Completion Approval
+  granted, and focused completion commit `523301c6` present.
 - Changed paths: domain identity strategy types/factory and structural
   correspondence, plus the approved structural and comparison test suites.
 - Acceptance evidence: command-text and executable-file forms are distinct;
@@ -55,3 +55,53 @@
   near-linear while preserving duplicate values. The existing relation and
   normalization baseline mismatches should be assessed independently before
   the feature is closed.
+
+## Slice 2 Implementation Evidence
+
+- Status: Implemented; pending independent implementation review and
+  Completion Approval.
+- Human Approval: Slice 2 was approved in the current conversation after the
+  Slice 1 completion commit `523301c6`. The exact boundary is recorded in
+  `TASKS.md`; no presentation, parser, telemetry, command, package, or
+  configuration source was changed.
+- Changed paths: application Semantic Diff DTO and comparison mapping, plus
+  the approved direct DTO/comparison/report-data, command, Flow, extension,
+  and Markdown-consumer fixtures/tests. `identityDecisions` is always present
+  as an array, including the empty case; all domain decisions are cloned into
+  the host-neutral DTO once.
+- Acceptance evidence: exact, fingerprint-confirmed, candidate, removed, and
+  added decisions project with their typed rule, status, stable ID, required
+  empty/non-empty sides, sorted references, and copied fingerprint fields.
+  Structural and attribute changes carry their decision ID; relation changes
+  do not. Candidate changes retain only before context and no longer expose a
+  falsely selected first after target. Existing DTO fields and report/Flow/
+  command handoffs remain available.
+- Serialization and compatibility: DTO mapping contains only scalar strings,
+  arrays, and plain objects. Contract tests reject domain/parser values and
+  verify JSON parsing, stable IDs/order, complete candidate sets, and
+  unchanged exact outcomes. No telemetry or logging path receives evidence;
+  `engines.vscode` remains `^1.75.0` and shared code stays browser-safe.
+- Validation: `rtk pnpm run test:compile` passed; focused compiled Mocha passed
+  17 tests with one pre-existing normalization-warning expectation outside
+  this slice. The compiled desktop suite (`rtk pnpm run test:desktop:run`),
+  web suite (`rtk pnpm run test:web`, exit 0; browser teardown emitted benign
+  ECONNRESET/premature-close diagnostics), `rtk pnpm run qlty`,
+  `rtk pnpm run lint:md`, `rtk git diff --check`, and production
+  `rtk pnpm run build` passed. Production build retained existing asset-size
+  warnings only.
+- Implementation feedback: keeping an application-side decision index keyed
+  by domain reference pairs links every generated unit/attribute change to its
+  already-computed domain decision without rerunning identity rules. Explicit
+  conditional target projection prevents candidate/add/remove changes from
+  serializing non-applicable sides.
+- Re-review follow-up: the Markdown consumer fixture now mirrors the additive
+  candidate contract by omitting its non-applicable after target and aligning
+  the synthetic change ID with the before-only context. Presentation source and
+  wording remain unchanged.
+- Unresolved risks: the known relation-decision duplicate and
+  normalization-warning baseline expectations remain outside Slice 2. The
+  focused direct Markdown suite also retains three pre-existing expectations
+  for blank-line, escaping, and schedule-period output; the candidate-specific
+  after-target expectation is corrected. The independent implementation
+  reviewer must confirm additive DTO compatibility and that hand-built
+  consumers remain within the approved boundary.
