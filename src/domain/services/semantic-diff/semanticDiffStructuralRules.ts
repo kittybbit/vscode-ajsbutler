@@ -133,15 +133,17 @@ export const isSemanticDiffJobnetUnit = (unit: AjsUnit): boolean =>
 export const semanticDiffParentJobnetPath = (
   unit: AjsUnit,
   unitById: Map<string, AjsUnit>,
-): string => {
-  let current = unit.parentId ? unitById.get(unit.parentId) : undefined;
-  while (current) {
-    if (isSemanticDiffJobnetUnit(current)) {
-      return current.absolutePath;
-    }
-    current = current.parentId ? unitById.get(current.parentId) : undefined;
+): string => parentJobnet(unit.parentId, unitById)?.absolutePath ?? "";
+
+const parentJobnet = (
+  unitId: string | undefined,
+  unitById: Map<string, AjsUnit>,
+): AjsUnit | undefined => {
+  const unit = unitId ? unitById.get(unitId) : undefined;
+  if (!unit || isSemanticDiffJobnetUnit(unit)) {
+    return unit;
   }
-  return "";
+  return parentJobnet(unit.parentId, unitById);
 };
 
 const toRelativePath = (absolutePath: string, jobGroupPath?: string): string =>
@@ -191,15 +193,17 @@ export const semanticDiffUnitFingerprint = (unit: AjsUnit): string =>
 const matchExactUnits = (
   beforeUnits: AjsUnit[],
   afterUnits: AjsUnit[],
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-  jobGroupPath?: string,
+  context: {
+    beforeUnitById: Map<string, AjsUnit>;
+    afterUnitById: Map<string, AjsUnit>;
+    jobGroupPath?: string;
+  },
 ): SemanticDiffUnitMatch[] => {
   const beforeByKey = groupBy(beforeUnits, (unit) =>
-    unitExactKey(unit, beforeUnitById, jobGroupPath),
+    unitExactKey(unit, context.beforeUnitById, context.jobGroupPath),
   );
   const afterByKey = groupBy(afterUnits, (unit) =>
-    unitExactKey(unit, afterUnitById, jobGroupPath),
+    unitExactKey(unit, context.afterUnitById, context.jobGroupPath),
   );
 
   const uniqueMatch = (
@@ -234,6 +238,42 @@ type FingerprintMatchContext = {
   afterIdentityById: Map<string, SemanticDiffIdentityFingerprint>;
 };
 
+type FingerprintGroupResult = {
+  match?: SemanticDiffUnitMatch;
+  candidate?: SemanticDiffCandidateGroup;
+};
+
+const classifyFingerprintGroup = (
+  fingerprint: string,
+  beforeMatches: AjsUnit[],
+  afterMatches: AjsUnit[],
+  context: FingerprintMatchContext,
+): FingerprintGroupResult => {
+  if (beforeMatches.length === 1 && afterMatches.length === 1) {
+    return {
+      match: {
+        before: beforeMatches[0],
+        after: afterMatches[0],
+        kind: "fingerprint",
+      },
+    };
+  }
+  const evidence = context.beforeIdentityById.get(
+    beforeMatches[0]?.id ?? "",
+  )?.evidence;
+  if (!evidence || afterMatches.length === 0) {
+    return {};
+  }
+  return {
+    candidate: {
+      fingerprint,
+      evidence,
+      before: [...beforeMatches].sort(compareUnits),
+      after: [...afterMatches].sort(compareUnits),
+    },
+  };
+};
+
 const matchFingerprintUnits = (
   beforeUnits: AjsUnit[],
   afterUnits: AjsUnit[],
@@ -250,34 +290,20 @@ const matchFingerprintUnits = (
     afterUnits,
     (unit) => context.afterIdentityById.get(unit.id)?.fingerprint ?? "",
   );
-  const matches: SemanticDiffUnitMatch[] = [];
-  const candidates: SemanticDiffCandidateGroup[] = [];
-
-  [...beforeByFingerprint.entries()]
+  const groupResults = [...beforeByFingerprint.entries()]
     .sort(([left], [right]) => compareOrdinal(left, right))
-    .forEach(([fingerprint, beforeMatches]) => {
-      const afterMatches = afterByFingerprint.get(fingerprint) ?? [];
-      if (beforeMatches.length === 1 && afterMatches.length === 1) {
-        matches.push({
-          before: beforeMatches[0],
-          after: afterMatches[0],
-          kind: "fingerprint",
-        });
-      } else if (beforeMatches.length > 0 && afterMatches.length > 0) {
-        const evidence = context.beforeIdentityById.get(
-          beforeMatches[0].id,
-        )?.evidence;
-        if (!evidence) {
-          return;
-        }
-        candidates.push({
-          fingerprint,
-          evidence,
-          before: [...beforeMatches].sort(compareUnits),
-          after: [...afterMatches].sort(compareUnits),
-        });
-      }
-    });
+    .map(([fingerprint, beforeMatches]) =>
+      classifyFingerprintGroup(
+        fingerprint,
+        beforeMatches,
+        afterByFingerprint.get(fingerprint) ?? [],
+        context,
+      ),
+    );
+  const matches = groupResults.flatMap(({ match }) => (match ? [match] : []));
+  const candidates = groupResults.flatMap(({ candidate }) =>
+    candidate ? [candidate] : [],
+  );
 
   return {
     matches: matches.sort(
@@ -543,13 +569,11 @@ export const buildSemanticDiffUnitCorrespondence = ({
       createSemanticDiffIdentityFingerprint(unit),
     ]),
   );
-  const exactMatches = matchExactUnits(
-    beforeUnits,
-    afterUnits,
+  const exactMatches = matchExactUnits(beforeUnits, afterUnits, {
     beforeUnitById,
     afterUnitById,
     jobGroupPath,
-  );
+  });
   const exactBeforeIds = matchedIds(exactMatches, "before");
   const exactAfterIds = matchedIds(exactMatches, "after");
   const fingerprintResult = matchFingerprintUnits(
@@ -663,30 +687,22 @@ const scalarAttributeChangeKeys = (before: AjsUnit, after: AjsUnit): string[] =>
     .filter(([, beforeValue, afterValue]) => beforeValue !== afterValue)
     .map(([key]) => key);
 
-const attributeCategory = (key: string): SemanticDiffAttributeCategory => {
-  if (executionEnvironmentKeys.has(key)) {
-    return "execution-environment";
-  }
-  if (startConditionKeys.has(key)) {
-    return "start-condition";
-  }
-  if (endControlKeys.has(key)) {
-    return "end-control";
-  }
-  if (abnormalEndControlKeys.has(key)) {
-    return "abnormal-end-control";
-  }
-  if (waitConditionKeys.has(key)) {
-    return "wait-condition";
-  }
-  if (externalIntegrationKeys.has(key)) {
-    return "external-integration";
-  }
-  if (scheduleKeys.has(key)) {
-    return "schedule";
-  }
-  return "execution-definition";
-};
+const categorizedAttributeKeys: Array<{
+  category: Exclude<SemanticDiffAttributeCategory, "execution-definition">;
+  keys: Set<string>;
+}> = [
+  { category: "execution-environment", keys: executionEnvironmentKeys },
+  { category: "start-condition", keys: startConditionKeys },
+  { category: "end-control", keys: endControlKeys },
+  { category: "abnormal-end-control", keys: abnormalEndControlKeys },
+  { category: "wait-condition", keys: waitConditionKeys },
+  { category: "external-integration", keys: externalIntegrationKeys },
+  { category: "schedule", keys: scheduleKeys },
+];
+
+const attributeCategory = (key: string): SemanticDiffAttributeCategory =>
+  categorizedAttributeKeys.find(({ keys }) => keys.has(key))?.category ??
+  "execution-definition";
 
 export const compareSemanticDiffAttributes = (
   before: AjsUnit,

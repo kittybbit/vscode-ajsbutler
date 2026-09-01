@@ -22,27 +22,11 @@ export const en = {
     "{unit} has ambiguous rename or move candidates",
   "semanticDiff.generated.renamed": "{before} renamed to {after}",
   "semanticDiff.generated.moved": "{unit} moved",
-  "semanticDiff.identityRule": "Rule",
-  "semanticDiff.identityStrategy": "Strategy",
-  "semanticDiff.identityUnitType": "Unit type",
-  "semanticDiff.identityFields": "Fields",
-  "semanticDiff.identityCandidates": "Candidates",
-  "semanticDiff.identityKey": "Key",
-  "semanticDiff.identity.present": "present",
-  "semanticDiff.identity.absent": "absent",
-  "semanticDiff.identity.rule.exact-key": "exact identity key",
-  "semanticDiff.identity.rule.one-to-one-fingerprint":
-    "one-to-one fingerprint match",
-  "semanticDiff.identity.rule.ambiguous-fingerprint":
-    "ambiguous fingerprint candidates",
-  "semanticDiff.identity.rule.unmatched-before": "unmatched before unit",
-  "semanticDiff.identity.rule.unmatched-after": "unmatched after unit",
-  "semanticDiff.identity.strategy.command-text-v1": "command text",
-  "semanticDiff.identity.strategy.executable-file-v1": "executable file",
-  "semanticDiff.identity.strategy.event-reception-v1": "event reception",
-  "semanticDiff.identity.strategy.file-monitor-v1": "file monitoring",
-  "semanticDiff.identity.strategy.legacy-all-parameters-v1":
-    "legacy all parameters",
+  "semanticDiff.generated.rationaleExact": "exact identity match",
+  "semanticDiff.generated.rationaleFingerprint":
+    "one-to-one identity fingerprint match",
+  "semanticDiff.generated.rationaleCandidate":
+    "identity fingerprint matched multiple candidates",
   "semanticDiff.generated.confirmation": "Review this change.",
   "semanticDiff.generated.confirmationRationale":
     "Runtime conditions cannot be verified from definitions alone.",
