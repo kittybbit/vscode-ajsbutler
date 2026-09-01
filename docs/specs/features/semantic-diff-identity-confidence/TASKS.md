@@ -4,11 +4,11 @@
 
 - Purpose: make Semantic Diff identity matching unit-type-specific,
   deterministic, and explainable without weakening conservative safeguards.
-- Approved or active slice: Slice 2, Project Complete Identity Decisions Into
-  The Application DTO. The current conversation authorizes implementation of
+- Approved or active slice: Slice 3, Render Typed Identity Evidence And Verify
+  Host Compatibility. The current conversation authorizes implementation of
   this slice within its recorded approval boundary.
 - Do not edit runtime code, tests, generated artifacts, or configuration outside
-  the active approved Slice 2 boundary; only the focused completion commit is
+  the active approved Slice 3 boundary; only the focused completion commit is
   authorized for this scope.
 - Do not add manual matching, similarity scoring, output modes, JSON export,
   new commands, or UI.
@@ -18,9 +18,9 @@
 - Reference basis: JP1/AJS3 version 13 Command Reference sections 5.2.6,
   5.2.7, 5.2.9, and 5.2.10, plus the repository shared parameter rules.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main delegates the exact completed Slice 2 scope to
-  `approval-committer` for the focused completion commit after this evidence
-  returns.
+- Next route: Main delegates the exact completed Slice 3 scope to
+  `approval-committer` for the focused completion commit after this gate
+  evidence returns.
 
 ## Sync Rule
 
@@ -35,17 +35,19 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slice 1 completion commit `523301c6` is present and
-  Slice 2 implementation review is Ready with Completion Approval granted,
-  pending the focused completion commit.
+- Status: Approved plan; Slice 1 completion commit `523301c6`, Slice 2
+  completion commit `a52c370b`, and Slice 3 implementation review `Ready`
+  are present. Slice 3 Completion Approval is granted; its focused completion
+  commit is pending.
 - Planning scope: all identity strategy, correspondence evidence, application
   DTO, existing Markdown rationale, regression, and compatibility work needed
   by `SPECS.md` R1-R10.
-- Review status: plan Ready (`plan-reviewer`) and Slice 1/Slice 2
+- Review status: plan Ready (`plan-reviewer`) and Slice 1/Slice 2/Slice 3
   implementation Ready (`implementation-reviewer`).
 - Human approval: Approved.
-- Active implementation slice: Slice 2; completion commit pending.
-- Implementation review verdict: Slice 1 Ready; Slice 2 Ready
+- Active implementation slice: Slice 3 complete; focused completion commit
+  pending.
+- Implementation review verdict: Slice 1 Ready; Slice 2 Ready; Slice 3 Ready
 - Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
   implementation review, Completion Approval, and focused completion commit
   before the next slice begins.
@@ -136,6 +138,56 @@ slice's focused completion commit and renewed approval.
   `src/test/suite/semanticDiffContracts.test.ts`,
   `src/test/suite/semanticDiffFlowHighlights.test.ts`
 - Implementation review verdict: Ready
+- Commit status: Committed as `a52c370b`
+
+## Slice 3 Human Approval
+
+- Status: Approved
+- Approved at: immediately preceding user message, after Slice 2 completion
+  commit `a52c370b`
+- Approved scope: render the existing English/Japanese Semantic Diff Markdown
+  report from typed identity decisions; show typed rule, strategy, canonical
+  fields, and complete candidate references; preserve raw-value Markdown
+  escaping, no-change output, and Flow behavior; remove substring-based
+  rationale localization; update direct localization/report tests and the
+  externally observable CHANGELOG entry; record host-compatibility evidence.
+- Approved paths: existing Semantic Diff Markdown presentation/localization
+  source and text resources, the direct Markdown/localization/report tests,
+  `CHANGELOG.md`, and this feature's `TASKS.md`/`TRACEABILITY.md` evidence
+  updates. README remains unchanged unless implementation proves the workflow
+  changed.
+- Excluded paths and behavior: domain, application DTO, parser, telemetry,
+  JSON/schema output, report modes, Flow implementation/highlight rules,
+  commands, package metadata, configuration, new UI, and any new design or
+  workflow.
+
+## Slice 3 Completion Approval
+
+- Status: Approved
+- Approved at: immediately preceding user message, after the
+  `implementation-reviewer` Ready verdict with no Findings
+- Base: Slice 2 completion commit `a52c370bd94f9e65ec424ad01e3d78c32d7e2127`
+- Approved scope: completed Slice 3 implementation for typed English/Japanese
+  Semantic Diff Markdown identity evidence, localization, direct tests,
+  CHANGELOG, and lifecycle traceability. This includes exact-key,
+  fingerprint-confirmed, candidate, added, removed, missing-reference,
+  escaping, and no-change report behavior within the existing workflow.
+- Approved paths:
+  `CHANGELOG.md`,
+  `docs/specs/features/semantic-diff-identity-confidence/TASKS.md`,
+  `docs/specs/features/semantic-diff-identity-confidence/TRACEABILITY.md`,
+  `src/presentation/semantic-diff/renderSemanticDiffMarkdown.ts`,
+  `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`,
+  `src/resource/i18n/message_en.ts`,
+  `src/resource/i18n/message_ja.ts`,
+  `src/test/suite/nls.test.ts`,
+  `src/test/suite/renderSemanticDiffMarkdown.test.ts`,
+  `src/test/suite/semanticDiffSampleCoverage.test.ts`
+- Excluded paths and behavior: all paths outside this list, including domain,
+  application DTO, parser, telemetry, JSON/schema output, report modes, Flow
+  implementation/highlight rules, commands, package metadata, configuration,
+  new UI, README, and Feature Exit propagation.
+- Implementation review verdict: Ready; no Findings
 - Commit status: Eligible; pending focused completion commit
 
 ## Closure Approval
@@ -346,8 +398,8 @@ Changing the form discriminator is not treated as a cross-strategy match.
 
 ### Slice 1: Build Reference-Backed Identity Strategies And Correspondence
 
-- Status: Implemented; implementation review Ready and Completion Approval
-  granted, completion gate pending.
+- Status: Implemented; implementation review Ready, Completion Approval granted,
+  and focused completion commit `523301c6` present.
 - Scope: replace the monolithic fingerprint helper with a pure domain strategy
   factory implementing the approved table; enrich correspondence with
   exact/fingerprint/candidate/add/remove decisions and canonical evidence;
@@ -409,8 +461,8 @@ Changing the form discriminator is not treated as a cross-strategy match.
 
 ### Slice 2: Project Complete Identity Decisions Into The Application DTO
 
-- Status: Implemented; implementation review Ready and Completion Approval
-  granted, focused completion commit pending.
+- Status: Implemented; implementation review Ready, Completion Approval granted,
+  and focused completion commit `a52c370b` present.
 - Scope: add `identityDecisions` and `identityDecisionId`; project every domain
   outcome in stable order; update direct DTO fixtures/consumers required by the
   additive contract without changing presentation output.
@@ -464,7 +516,8 @@ Changing the form discriminator is not treated as a cross-strategy match.
 
 ### Slice 3: Render Typed Identity Evidence And Verify Host Compatibility
 
-- Status: Proposed; blocked by Slice 2 completion commit and renewed approval.
+- Status: Implemented; independent implementation review pending and Completion
+  Approval not yet granted.
 - Scope: make existing English/Japanese Markdown resolve typed identity
   decisions; render rule, strategy, fields, and full candidate set; remove
   rationale localization based on string substrings; finish cross-host and
@@ -511,6 +564,44 @@ Changing the form discriminator is not treated as a cross-strategy match.
   local review; do not copy implicitly, log, or send via telemetry.
 - Out of Scope: report modes, JSON/CI output, Explorer UI, implicit clipboard
   mutation, and Flow interaction changes.
+
+### Slice 3 Implementation Evidence
+
+- Changed paths: existing Markdown renderer and localization, English/Japanese
+  Semantic Diff text resources, direct Markdown/NLS/sample tests, `CHANGELOG.md`,
+  and this feature's lifecycle evidence documents. No README change was needed;
+  the existing comparison/report workflow is unchanged.
+- Acceptance evidence: identity changes resolve their typed decision by
+  `identityDecisionId`; exact decisions render the exact-key evidence;
+  fingerprint decisions render localized rule/strategy labels, raw strategy
+  IDs, unit type, ordered fields, presence, and escaped values; candidate
+  decisions render every before/after reference; added/removed decisions render
+  unmatched rules and evidence. Missing decisions retain the change and omit
+  unavailable evidence. Unchanged exact decisions do not create findings or
+  report output.
+- Localization evidence: Japanese and regional Japanese labels come from typed
+  rule/strategy resource keys; unsupported languages use English. Identity
+  rationale no longer inspects prose substrings, and the retired rationale
+  resource keys were removed.
+- Validation: test compilation, production build, Markdown lint, diff check,
+  and `qlty` passed. The focused typed Markdown/NLS checks passed 5 tests; the
+  wider direct Semantic Diff run passed 61 tests with 8 known baseline failures
+  outside the implementation behavior (relation duplicate, normalization
+  warning shape, schedule ordering, and three existing Markdown formatting
+  expectations). Desktop host tests exited 0. Web host tests passed when run
+  separately with the required macOS sandbox permission; the initial
+  `test:full` Web step was blocked by Chromium Mach rendezvous permissions.
+- Compatibility: only shared presentation and text resources changed; no Node
+  built-in, VS Code API, parser, DTO, domain, Flow, command, telemetry,
+  package, or configuration path changed. Desktop and web bundles compiled and
+  consume the same renderer.
+- Production readiness: lookup is one linear decision-index construction per
+  report; field and candidate order comes from the deterministic DTO; all raw
+  evidence values and references are Markdown-escaped; no evidence is logged,
+  telemetered, or recomputed in presentation.
+- Implementation review: Ready with no Findings. Completion Approval is
+  granted; the focused completion commit remains pending and is eligible for
+  the `approval-committer` gate.
 
 ## Cross-Slice Readiness
 

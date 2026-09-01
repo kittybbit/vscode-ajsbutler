@@ -27,6 +27,25 @@ suite("NLS", () => {
     );
   });
 
+  test("resolves typed semantic diff identity labels", () => {
+    assert.strictEqual(
+      semanticDiffReportText("identity.rule.one-to-one-fingerprint", "en"),
+      "one-to-one fingerprint match",
+    );
+    assert.strictEqual(
+      semanticDiffReportText("identity.rule.one-to-one-fingerprint", "ja-JP"),
+      "一対一フィンガープリント一致",
+    );
+    assert.strictEqual(
+      semanticDiffReportText("identity.strategy.command-text-v1", "ja"),
+      "コマンドテキスト",
+    );
+    assert.strictEqual(
+      semanticDiffReportText("identity.strategy.file-monitor-v1", "fr"),
+      "file monitoring",
+    );
+  });
+
   test("falls back to English parameter definitions for unsupported languages", () => {
     assert.strictEqual(
       paramDefinitionLang("unsupported").ty.syntax,

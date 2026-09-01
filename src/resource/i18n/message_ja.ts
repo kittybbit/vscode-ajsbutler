@@ -21,12 +21,27 @@ export const ja = {
     "{unit} の名前変更または移動候補は曖昧です",
   "semanticDiff.generated.renamed": "{before} を {after} に名前変更",
   "semanticDiff.generated.moved": "{unit} を移動",
-  "semanticDiff.generated.rationaleExact":
-    "完全一致の識別子により対応付けました",
-  "semanticDiff.generated.rationaleFingerprint":
-    "一対一の識別フィンガープリントにより対応付けました",
-  "semanticDiff.generated.rationaleCandidate":
-    "識別フィンガープリントが複数の候補に一致しました",
+  "semanticDiff.identityRule": "ルール",
+  "semanticDiff.identityStrategy": "戦略",
+  "semanticDiff.identityUnitType": "ユニット種別",
+  "semanticDiff.identityFields": "項目",
+  "semanticDiff.identityCandidates": "候補",
+  "semanticDiff.identityKey": "キー",
+  "semanticDiff.identity.present": "指定あり",
+  "semanticDiff.identity.absent": "指定なし",
+  "semanticDiff.identity.rule.exact-key": "完全一致キー",
+  "semanticDiff.identity.rule.one-to-one-fingerprint":
+    "一対一フィンガープリント一致",
+  "semanticDiff.identity.rule.ambiguous-fingerprint":
+    "曖昧なフィンガープリント候補",
+  "semanticDiff.identity.rule.unmatched-before": "変更前の未対応ユニット",
+  "semanticDiff.identity.rule.unmatched-after": "変更後の未対応ユニット",
+  "semanticDiff.identity.strategy.command-text-v1": "コマンドテキスト",
+  "semanticDiff.identity.strategy.executable-file-v1": "実行ファイル",
+  "semanticDiff.identity.strategy.event-reception-v1": "イベント受信",
+  "semanticDiff.identity.strategy.file-monitor-v1": "ファイル監視",
+  "semanticDiff.identity.strategy.legacy-all-parameters-v1":
+    "従来の全パラメーター",
   "semanticDiff.generated.confirmation": "変更内容を確認してください",
   "semanticDiff.generated.confirmationRationale":
     "定義比較だけでは実行時の条件を検証できません",

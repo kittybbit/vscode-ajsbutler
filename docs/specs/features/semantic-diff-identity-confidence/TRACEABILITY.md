@@ -58,8 +58,8 @@
 
 ## Slice 2 Implementation Evidence
 
-- Status: Implemented; pending independent implementation review and
-  Completion Approval.
+- Status: Implemented; implementation review Ready, Completion Approval
+  granted, and focused completion commit `a52c370b` present.
 - Human Approval: Slice 2 was approved in the current conversation after the
   Slice 1 completion commit `523301c6`. The exact boundary is recorded in
   `TASKS.md`; no presentation, parser, telemetry, command, package, or
@@ -105,3 +105,52 @@
   after-target expectation is corrected. The independent implementation
   reviewer must confirm additive DTO compatibility and that hand-built
   consumers remain within the approved boundary.
+
+## Slice 3 Implementation Evidence
+
+- Status: Implemented; pending independent implementation review and
+  Completion Approval.
+- Human Approval: Slice 3 was approved in the current conversation after the
+  Slice 2 completion commit `a52c370b`. The exact presentation/localization,
+  direct-test, `CHANGELOG.md`, and lifecycle-evidence boundary is recorded in
+  `TASKS.md`; README was evaluated and remains unchanged because the workflow
+  did not change.
+- Changed paths: shared Semantic Diff Markdown renderer and localization,
+  English/Japanese Semantic Diff text resources, direct Markdown/NLS/sample
+  coverage, `CHANGELOG.md`, and this feature's lifecycle evidence documents.
+- Acceptance evidence: existing identity changes resolve typed decisions once
+  by `identityDecisionId`. Exact changes render exact-key fields; confirmed,
+  added, and removed changes render typed rule, strategy, unit type, ordered
+  canonical fields, presence, and raw escaped values; candidate changes render
+  all sorted before/after references without selecting a target. Missing
+  decision references retain their changes and omit unavailable evidence.
+  Unchanged exact decisions do not affect no-change detection or output. Flow
+  behavior is unchanged.
+- Localization evidence: rule and strategy labels use typed resource keys for
+  English, Japanese, and regional Japanese; unsupported languages fall back to
+  English. The prior rationale substring classifier and its resource keys were
+  removed. Raw paths, keys, values, and reference identifiers remain in the
+  report and are Markdown-escaped.
+- Validation: `rtk pnpm run test:compile`, `rtk pnpm run build`,
+  `rtk pnpm run lint:md`, `rtk git diff --check`, and `rtk pnpm run qlty`
+  passed. Focused compiled Markdown/NLS checks passed 5 tests. The wider
+  compiled Semantic Diff run passed 61 tests; its 8 failures are known
+  baseline expectations outside this slice (relation duplicate, warning shape,
+  schedule ordering, and three existing Markdown blank-line/escaping/period
+  expectations). `rtk pnpm run test:desktop:run` exited 0. The initial
+  `rtk pnpm run test:full` reached the desktop pass but its Web step was
+  blocked by sandbox Chromium Mach rendezvous permissions; the separate
+  permission-approved `rtk pnpm run test:web` passed.
+- Compatibility and privacy: renderer and resources are shared by desktop and
+  web bundles; no Node built-in, VS Code API, parser, domain, DTO, Flow,
+  command, telemetry, package, or configuration source changed. Identity
+  evidence is not logged or sent through telemetry.
+- Implementation feedback: a report-local decision index keeps lookup linear
+  in changes, while evidence fields and candidate references are rendered in
+  their DTO order without re-running identity matching. The direct tests now
+  assert typed evidence rather than prose-substring rationale behavior.
+- Unresolved risks: typed evidence can make reports longer and exposes the
+  selected identity fields by design; the existing unrelated baseline
+  expectation failures remain for independent assessment before Feature Exit.
+  Implementation review must confirm minimality and host-neutral presentation
+  behavior before Completion Approval.

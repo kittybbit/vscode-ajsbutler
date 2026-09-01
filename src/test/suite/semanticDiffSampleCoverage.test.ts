@@ -38,10 +38,11 @@ suite("Semantic diff sample coverage", () => {
     assert.ok(result.changes.some((change) => change.kind === "removed"));
     assert.ok(result.changes.some((change) => change.kind === "renamed"));
     assert.ok(
-      result.changes.some(
-        (change) =>
-          change.confirmationLevel === "candidate" &&
-          change.rationale?.includes("identity fingerprint matched"),
+      result.identityDecisions.some(
+        (decision) =>
+          decision.status === "candidate" &&
+          decision.rule === "ambiguous-fingerprint" &&
+          decision.evidence.kind === "fingerprint",
       ),
     );
     assert.ok(
@@ -116,5 +117,7 @@ suite("Semantic diff sample coverage", () => {
     );
     assert.ok(report.includes("## Schedule Changes"));
     assert.ok(report.includes("## Unsupported Items"));
+    assert.ok(report.includes("Rule: "));
+    assert.ok(japaneseReport.includes("ルール: "));
   });
 });
