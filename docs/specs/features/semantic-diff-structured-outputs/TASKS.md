@@ -4,8 +4,8 @@
 
 - Purpose: expose one neutral Semantic Diff result as summary, full, audit, and
   JSON outputs without changing comparison meaning.
-- Approved or active slice: Slice 2; Slice 1 is complete and committed, and
-  the existing Slice 2 boundary is approved for implementation.
+- Approved or active slice: Slice 2; implementation review is `Ready` with no
+  Findings and the completion gate is approved.
 - Do not: change identity matching or identity-evidence generation.
 - Do not: change confirmation-required rules, schedule semantics, comparison
   sources, runtime code, tests, generated artifacts, or configuration before
@@ -16,8 +16,8 @@
 - Validate intake with `rtk pnpm run qlty` and `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 2 implementation to `implementer` after this
-  focused approval-state commit.
+- Next decision: delegate Slice 3 planning/implementation after this focused
+  completion commit.
 
 ## Sync Rule
 
@@ -36,22 +36,22 @@
 
 ## Plan Status
 
-- Status: Slice 2 approved for implementation
+- Status: Slice 2 implementation review Ready; completion gate approved
 - Planning scope: complete four-slice plan covering the neutral result
   boundary, purpose-specific Markdown, locale-neutral JSON version 1, and VS
   Code mode selection/display/save integration.
 - Review status: `Ready`
-- Human approval: Approved for the existing Slice 2 Approval Boundary in the
-  current conversation; later slices remain deferred to their own gates.
-- Active implementation slice: Slice 2
+- Human approval: Approved for Slice 2 implementation and, when the independent
+  review has no Findings, its completion in the current conversation.
+- Active implementation slice: Slice 2 (completion commit pending)
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-03 (explicit user approval in current conversation)
-- Approved scope: Slice 2 — Markdown output types, Summary/Audit/Full
-  renderers, localization, and focused Markdown tests within the existing
-  Slice 2 Approval Boundary. Later slices remain deferred.
+- Approved scope: Completed Slice 2 Markdown projections, validation evidence,
+  and current-state/traceability updates within the existing Slice 2 Approval
+  Boundary. Later slices remain deferred.
 - Approved paths:
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
 
@@ -64,34 +64,21 @@ completes one approved slice at a time in the order below.
 - Status: Approved
 - Approved at: 2026-09-03 (automatic per-slice completion approval explicitly
   authorized by the user when independent review has no Findings)
-- Approved scope: Completed Slice 1 implementation, validation evidence, and
-  the Slice 1 current-state and traceability updates within the documented
+- Approved scope: Completed Slice 2 Markdown projections, validation evidence,
+  and the Slice 2 current-state and traceability updates within the documented
   Approval Boundary.
 - Approved paths:
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
   - `docs/specs/features/semantic-diff-structured-outputs/TRACEABILITY.md`
-  - `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`
-  - `src/application/semantic-diff/buildSemanticDiffOutputContext.ts`
-  - `src/application/semantic-diff/buildSemanticDiffReportData.ts`
-  - `src/application/semantic-diff/buildSemanticDiffSummary.ts`
-  - `src/application/semantic-diff/compareScheduleDiff.ts`
-  - `src/application/semantic-diff/compareSemanticDiff.ts`
-  - `src/application/semantic-diff/semanticDiffDto.ts`
-  - `src/application/semantic-diff/semanticDiffStructuredFacts.ts`
-  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
   - `src/presentation/semantic-diff/renderSemanticDiffMarkdown.ts`
   - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
-  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
-  - `src/test/suite/buildSemanticDiffReportData.test.ts`
-  - `src/test/suite/compareSemanticDiff.test.ts`
-  - `src/test/suite/extensionSubscriptions.test.ts`
+  - `src/presentation/semantic-diff/renderSemanticDiffAuditMarkdown.ts`
+  - `src/presentation/semantic-diff/renderSemanticDiffSummaryMarkdown.ts`
+  - `src/presentation/semantic-diff/semanticDiffMarkdownTypes.ts`
+  - `src/resource/i18n/message_en.ts`
+  - `src/resource/i18n/message_ja.ts`
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
   - `src/test/suite/renderSemanticDiffMarkdown.test.ts`
-  - `src/test/suite/semanticDiffCommand.test.ts`
-  - `src/test/suite/semanticDiffConditions.test.ts`
-  - `src/test/suite/semanticDiffContracts.test.ts`
-  - `src/test/suite/semanticDiffFlowHighlights.test.ts`
-  - `src/test/suite/semanticDiffSampleCoverage.test.ts`
-  - `src/test/suite/semanticDiffSchedule.test.ts`
 - Implementation review verdict: Ready (no Findings)
 - Commit status: Eligible for the completion gate
 
@@ -864,7 +851,7 @@ applied.
 
 ### Slice 2: Add Summary And Audit Markdown Projections
 
-- Status: Approved; ready for implementation handoff
+- Status: Implemented; completion gate approved
 - Scope: introduce pure Summary, Full, and Audit Markdown projections over the
   immutable `SemanticDiffOutputContext`; have Summary consume `context.summary`
   and Full/Audit consume `context.result`; keep Full delegated to the parity
@@ -953,6 +940,25 @@ applied.
   locale tests must compare codes/IDs/details before and after projection.
 - Out of Scope: JSON, four-mode dispatcher/picker, VS Code
   selection/display/save behavior, Explorer, and new comparison semantics.
+
+- Implementation Evidence: Slice 2 Markdown projections are implemented and
+  ready for independent implementation review. Summary consumes only the
+  supplied context summary for counts and predicates, while Full and Audit
+  consume the same context result; no comparison or context construction is
+  performed by the presentation projections. Full context/result parity is
+  covered by the existing golden renderer suite. Audit fixtures cover exact
+  and fingerprint identity evidence, all nine confirmation reasons (including
+  the three downstream codes), typed details, relation pairs, constraints,
+  warning-present/absent states, unsupported and limitation facts, raw values,
+  and schedule periods/runs. Japanese Audit labels and the definition-derived
+  evidence non-assertion are covered, and Summary distinguishes an absent
+  schedule from a present zero-run schedule. Focused compiled semantic-diff
+  tests pass (75 tests), as do test compilation and qlty. Full/build, desktop,
+  web preparation, Markdown lint, and web smoke validation are recorded in
+  TRACEABILITY.md after final validation; the web smoke runner may remain
+  host-blocked when Chromium Mach-port access is unavailable. JSON, the mode
+  dispatcher/picker, VS Code host integration, and Explorer remain out of
+  scope.
 
 ### Slice 3: Add Deterministic Locale-Neutral JSON Version 1
 

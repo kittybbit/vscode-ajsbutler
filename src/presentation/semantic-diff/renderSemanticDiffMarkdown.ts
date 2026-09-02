@@ -1,5 +1,6 @@
 import type {
   SemanticDiffChange,
+  SemanticDiffOutputContext,
   SemanticDiffResult,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffIdentityDecision,
@@ -20,6 +21,7 @@ import {
   renderScheduleRunChange,
   renderSummary,
 } from "./semanticDiffMarkdownLocalization";
+import type { SemanticDiffMarkdownRenderer } from "./semanticDiffMarkdownTypes";
 
 const structuralElementOrder = new Map<string, number>([
   ["job-group", 0],
@@ -155,10 +157,17 @@ const renderScheduleComparison = (
   ];
 };
 
+type SemanticDiffMarkdownInput = SemanticDiffResult | SemanticDiffOutputContext;
+
+const resultFromMarkdownInput = (
+  input: SemanticDiffMarkdownInput,
+): SemanticDiffResult => ("result" in input ? input.result : input);
+
 export const renderSemanticDiffMarkdown = (
-  result: SemanticDiffResult,
+  input: SemanticDiffMarkdownInput,
   language?: string,
 ): string => {
+  const result = resultFromMarkdownInput(input);
   const identityDecisions = new Map(
     result.identityDecisions.map((decision) => [decision.id, decision]),
   );
@@ -167,7 +176,7 @@ export const renderSemanticDiffMarkdown = (
     "",
     `## ${label("Summary", language)}`,
     "",
-    ...renderSummary(result, language),
+    ...renderSummary(input, language),
     "",
     `## ${label("Structural Changes", language)}`,
     "",
@@ -199,3 +208,9 @@ export const renderSemanticDiffMarkdown = (
     .replace(/\n{3,}/g, "\n\n")
     .trimEnd();
 };
+
+/** Render the detailed Full projection from the supplied immutable context. */
+export const renderSemanticDiffFullMarkdown: SemanticDiffMarkdownRenderer = (
+  context,
+  language,
+): string => renderSemanticDiffMarkdown(context, language);

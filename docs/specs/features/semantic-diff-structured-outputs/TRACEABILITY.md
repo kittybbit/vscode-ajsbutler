@@ -48,3 +48,30 @@ later mode-picker, Summary/Audit/JSON projections, Explorer, or cross-mode
 orchestration evidence; those remain assigned to later slices. No new
 interpretation, identity matching, host API, Node dependency, or telemetry
 behavior was introduced.
+
+## Slice 2 Implementation Validation
+
+Slice 2 Markdown projections are implemented and ready for independent
+implementation review. Summary formats only the supplied
+`SemanticDiffOutputContext.summary` counts and predicates (using the context
+result only for scope and an optional schedule period); it does not aggregate
+records. Full and Audit receive the same context and read detailed facts from
+`context.result`, with Full preserving the existing result-input compatibility
+path and context/result output parity. Audit includes definition-derived
+identity evidence, all nine closed confirmation reason codes, typed details,
+relation pairs, constraints, warning-present/absent states, unsupported and
+limitation records, raw values, and schedule period/run facts. Japanese Audit
+labels and the explicit statement that runtime and external state were not
+verified are covered by focused fixtures. Absent schedules and present
+zero-run schedules are distinguished in Summary output; no projection invokes
+comparison, summary construction, or output-context construction.
+
+The focused compiled semantic-diff suites pass with 75 tests, including the
+new Summary/Full/Audit projection fixtures and existing Full English/Japanese
+goldens. `rtk pnpm run test:compile`, `rtk pnpm run qlty`, `rtk pnpm run build`,
+desktop preparation/tests, web preparation, and `rtk pnpm run lint:md` pass.
+The web smoke runner is host-blocked when Chromium cannot obtain its Mach-port
+rendezvous; this is an environment limitation rather than a shared-code
+failure. `git diff --check` passes. Slice 2 does not claim JSON, the
+mode-picker/dispatcher, VS Code host integration, Explorer, or new semantic
+facts.

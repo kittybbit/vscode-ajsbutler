@@ -7,6 +7,7 @@ import type {
   SemanticDiffIdentityExactKey,
   SemanticDiffIdentityField,
   SemanticDiffIdentityStrategyId,
+  SemanticDiffOutputContext,
   SemanticDiffRelationEndpoint,
   SemanticDiffRelationReference,
   SemanticDiffScheduleRunChange,
@@ -569,10 +570,15 @@ const hasFindings = (result: SemanticDiffResult): boolean =>
   ].some((count) => count > 0);
 
 export const renderSummary = (
-  result: SemanticDiffResult,
+  input: SemanticDiffResult | SemanticDiffOutputContext,
   language?: string,
 ): string[] => {
-  const scheduleChangeCount = result.scheduleComparison?.runChanges.length ?? 0;
+  const result = "summary" in input ? input.result : input;
+  const summary = "summary" in input ? input.summary : undefined;
+  const scheduleChangeCount =
+    summary?.scheduleRunChangeCount ??
+    result.scheduleComparison?.runChanges.length ??
+    0;
   const counts: Array<[number, string]> = [
     [result.changes.length, "semantic change"],
     [result.confirmationRequired.length, "confirmation-required item"],
@@ -609,7 +615,7 @@ export const renderSummary = (
   }
   lines.push(
     bulletLine(
-      hasFindings(result)
+      (summary?.hasFindings ?? hasFindings(result))
         ? label(
             "Result: semantic differences or review notes are present.",
             language,
