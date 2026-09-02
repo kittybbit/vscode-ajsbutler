@@ -238,8 +238,43 @@ type FingerprintMatchContext = {
 };
 
 type FingerprintGroupResult = {
-  match?: SemanticDiffUnitMatch;
-  candidate?: SemanticDiffCandidateGroup;
+  match: SemanticDiffUnitMatch | undefined;
+  candidate: SemanticDiffCandidateGroup | undefined;
+};
+
+const oneToOneFingerprintMatch = (
+  beforeMatches: AjsUnit[],
+  afterMatches: AjsUnit[],
+): SemanticDiffUnitMatch | undefined => {
+  if (beforeMatches.length !== 1 || afterMatches.length !== 1) {
+    return undefined;
+  }
+  return {
+    before: beforeMatches[0],
+    after: afterMatches[0],
+    kind: "fingerprint",
+  };
+};
+
+const ambiguousFingerprintCandidate = (input: {
+  fingerprint: string;
+  beforeMatches: AjsUnit[];
+  afterMatches: AjsUnit[];
+  context: FingerprintMatchContext;
+}): SemanticDiffCandidateGroup | undefined => {
+  const { fingerprint, beforeMatches, afterMatches, context } = input;
+  const evidence = context.beforeIdentityById.get(
+    beforeMatches[0]?.id ?? "",
+  )?.evidence;
+  if (!evidence || afterMatches.length === 0) {
+    return undefined;
+  }
+  return {
+    fingerprint,
+    evidence,
+    before: [...beforeMatches].sort(compareUnits),
+    after: [...afterMatches].sort(compareUnits),
+  };
 };
 
 const classifyFingerprintGroup = (input: {
@@ -248,29 +283,13 @@ const classifyFingerprintGroup = (input: {
   afterMatches: AjsUnit[];
   context: FingerprintMatchContext;
 }): FingerprintGroupResult => {
-  const { fingerprint, beforeMatches, afterMatches, context } = input;
-  if (beforeMatches.length === 1 && afterMatches.length === 1) {
-    return {
-      match: {
-        before: beforeMatches[0],
-        after: afterMatches[0],
-        kind: "fingerprint",
-      },
-    };
-  }
-  const evidence = context.beforeIdentityById.get(
-    beforeMatches[0]?.id ?? "",
-  )?.evidence;
-  if (!evidence || afterMatches.length === 0) {
-    return {};
-  }
+  const match = oneToOneFingerprintMatch(
+    input.beforeMatches,
+    input.afterMatches,
+  );
   return {
-    candidate: {
-      fingerprint,
-      evidence,
-      before: [...beforeMatches].sort(compareUnits),
-      after: [...afterMatches].sort(compareUnits),
-    },
+    match,
+    candidate: match ? undefined : ambiguousFingerprintCandidate(input),
   };
 };
 
