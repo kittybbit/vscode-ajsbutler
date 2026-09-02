@@ -4,8 +4,8 @@
 
 - Purpose: expose one neutral Semantic Diff result as summary, full, audit, and
   JSON outputs without changing comparison meaning.
-- Approved or active slice: Slice 1; implementation review is `Ready` with no
-  Findings and the completion gate is approved.
+- Approved or active slice: Slice 2; Slice 1 is complete and committed, and
+  the existing Slice 2 boundary is approved for implementation.
 - Do not: change identity matching or identity-evidence generation.
 - Do not: change confirmation-required rules, schedule semantics, comparison
   sources, runtime code, tests, generated artifacts, or configuration before
@@ -16,8 +16,8 @@
 - Validate intake with `rtk pnpm run qlty` and `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 2 planning/implementation after this focused
-  completion commit.
+- Next decision: delegate Slice 2 implementation to `implementer` after this
+  focused approval-state commit.
 
 ## Sync Rule
 
@@ -36,27 +36,26 @@
 
 ## Plan Status
 
-- Status: Slice 1 implementation review Ready; completion gate approved
+- Status: Slice 2 approved for implementation
 - Planning scope: complete four-slice plan covering the neutral result
   boundary, purpose-specific Markdown, locale-neutral JSON version 1, and VS
   Code mode selection/display/save integration.
 - Review status: `Ready`
-- Human approval: Approved for Slice 1 implementation and, when the independent
-  review has no Findings, its completion in the current conversation.
-- Active implementation slice: Slice 1 (completion commit pending)
+- Human approval: Approved for the existing Slice 2 Approval Boundary in the
+  current conversation; later slices remain deferred to their own gates.
+- Active implementation slice: Slice 2
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-03 (explicit user approval in current conversation)
-- Approved scope: Slice 1 — the neutral result boundary, reusable summary and
-  immutable output-context contracts, application consumer migration, and the
-  named pure contract tests within the Slice 1 Approval Boundary. Runtime
-  implementation outside Slice 1 and later slices remain deferred.
+- Approved scope: Slice 2 — Markdown output types, Summary/Audit/Full
+  renderers, localization, and focused Markdown tests within the existing
+  Slice 2 Approval Boundary. Later slices remain deferred.
 - Approved paths:
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
 
-The approved Slice 1 implementation scope is recorded above. Approval of the
+The approved Slice 2 implementation scope is recorded above. Approval of the
 complete plan does not permit parallel implementation: Main delegates and
 completes one approved slice at a time in the order below.
 
@@ -865,7 +864,7 @@ applied.
 
 ### Slice 2: Add Summary And Audit Markdown Projections
 
-- Status: Planned; blocked on Slice 1 completion and approval.
+- Status: Approved; ready for implementation handoff
 - Scope: introduce pure Summary, Full, and Audit Markdown projections over the
   immutable `SemanticDiffOutputContext`; have Summary consume `context.summary`
   and Full/Audit consume `context.result`; keep Full delegated to the parity
