@@ -4,10 +4,9 @@
 
 - Purpose: expose one neutral Semantic Diff result as summary, full, audit, and
   JSON outputs without changing comparison meaning.
-- Approved or active slice: none; the complete four-slice plan has an
-  independent `Ready` review and Human Approval for the documentation-only
-  planning package. The focused plan commit is the next step; implementation
-  remains deferred to separate slice approvals and gates.
+- Approved or active slice: Slice 1; the complete four-slice plan has an
+  independent `Ready` review and the selected Slice 1 implementation scope is
+  approved for the next implementation handoff.
 - Do not: change identity matching or identity-evidence generation.
 - Do not: change confirmation-required rules, schedule semantics, comparison
   sources, runtime code, tests, generated artifacts, or configuration before
@@ -18,9 +17,8 @@
 - Validate intake with `rtk pnpm run qlty` and `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate the approved planning package to
-  `approval-committer` for one focused docs-only plan commit. Implementation
-  remains deferred to separate explicit slice approval and lifecycle gates.
+- Next decision: delegate Slice 1 implementation to `implementer` after this
+  focused approval-state commit.
 
 ## Sync Rule
 
@@ -39,31 +37,29 @@
 
 ## Plan Status
 
-- Status: Ready for approved plan commit
+- Status: Slice 1 approved for implementation
 - Planning scope: complete four-slice plan covering the neutral result
   boundary, purpose-specific Markdown, locale-neutral JSON version 1, and VS
   Code mode selection/display/save integration.
 - Review status: `Ready`
-- Human approval: Approved for the reviewed four-slice documentation-only
-  planning package; implementation remains deferred.
-- Active implementation slice: none.
+- Human approval: Approved for Slice 1 implementation in the current
+  conversation; later slices remain deferred to their own approval gates.
+- Active implementation slice: Slice 1
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-08-31 (current conversation)
-- Approved scope: The reviewed four-slice planning package and its
-  documentation registration only. Runtime implementation is deferred and
-  requires separate explicit slice approval and lifecycle gates.
+- Approved at: 2026-09-03 (explicit user approval in current conversation)
+- Approved scope: Slice 1 — the neutral result boundary, reusable summary and
+  immutable output-context contracts, application consumer migration, and the
+  named pure contract tests within the Slice 1 Approval Boundary. Runtime
+  implementation outside Slice 1 and later slices remain deferred.
 - Approved paths:
-  - `docs/specs/features/semantic-diff-structured-outputs/SPECS.md`
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
-  - `docs/specs/features/semantic-diff-structured-outputs/TRACEABILITY.md`
 
-Implementation remains prohibited until an approved planning package is
-committed by `approval-committer` and a separate slice approval is recorded.
-Approval of the complete plan does not permit parallel implementation: Main
-delegates and completes one approved slice at a time in the order below.
+The approved Slice 1 implementation scope is recorded above. Approval of the
+complete plan does not permit parallel implementation: Main delegates and
+completes one approved slice at a time in the order below.
 
 ## Completion Approval
 
@@ -696,8 +692,7 @@ applied.
 
 ### Slice 1: Establish The Neutral Result Boundary And Summary Builder
 
-- Status: Planned; blocked on the completed and committed
-  `semantic-diff-identity-confidence` Slices 1-3 contract and Human Approval.
+- Status: Approved; ready for implementation handoff
 - Scope: replace prose-bearing report DTO fields and `reportSections` with the
   neutral `SemanticDiffResult`, the nine-member confirmation reason union,
   reason/constraint codes, structured details, and inherited identity evidence;
