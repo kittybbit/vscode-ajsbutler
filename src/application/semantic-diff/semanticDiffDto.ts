@@ -331,6 +331,9 @@ export type SemanticDiffOutputContext = {
   readonly summary: SemanticDiffSummary;
 };
 
+/** Host-neutral request contract shared by every Semantic Diff output mode. */
+export type SemanticDiffOutputMode = "summary" | "full" | "audit" | "json";
+
 export type SemanticDiffParserError = {
   line: number;
   column: number;

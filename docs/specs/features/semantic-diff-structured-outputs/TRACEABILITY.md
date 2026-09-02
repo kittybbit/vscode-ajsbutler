@@ -113,3 +113,36 @@ four-mode picker/dispatcher, VS Code host integration, Explorer, or
 cross-mode orchestration, which remain assigned to Slice 4 and the
 cross-slice gate. No new semantic interpretation, identity matching, host
 API, Node dependency, or telemetry behavior was introduced.
+
+## Slice 4 Implementation Validation
+
+Slice 4 adds the shared Full-first Summary/Full/Audit/JSON picker and the
+`presentSemanticDiffOutput(context, mode)` dispatcher. The standalone compare
+command checks the active editor before opening the picker, cancels before
+reading or comparing, performs one comparison, builds one immutable output
+context, and passes that context to the selected output projection. Dispatcher
+outputs carry the mode, Markdown/JSON language ID, extension, media type, and
+selected content. Summary, Full, Audit, and JSON retain their existing
+projection contracts; Markdown copy remains explicit and rejects JSON.
+
+The generalized virtual report provider stores output metadata under unique
+immutable URIs, uses bounded commit-time LRU retention with creation-sequence
+ties, protects in-flight opens, rolls back only failed invocations, serializes
+successful commits by creation order, and invalidates pending and committed
+state on idempotent disposal. Save uses injected `workspace.fs` and
+`TextEncoder`, mode-specific suggested file names, and safe cancellation and
+failure handling. Bootstrap and package contributions register the save
+command while preserving the compare and copy IDs and `^1.75.0` compatibility.
+
+Focused command, output, provider, package, and subscription tests cover picker
+ordering/cancellation, context identity, mode metadata, JSON copy guard,
+explicit save, explicit cache limits 31/32/33, equal-recency
+creation-sequence eviction, concurrent successful creation-order commits,
+rollback, disposal during `openTextDocument` and `showTextDocument`, late
+completion, and repeated disposal. `test:compile`,
+qlty, production build/package, desktop preparation/tests, web preparation,
+Markdown lint, and diff checks pass. Web smoke is host-blocked when Chromium
+cannot obtain its Mach-port rendezvous; shared browser-safe code and web
+bundle preparation pass. Slice 4 does not implement Explorer UI or its
+destination transition, automatic save/copy, new semantic facts, Node
+built-ins, or telemetry.

@@ -63,9 +63,18 @@ suite("Package manifest", () => {
       byCommand.get("ajsbutler.copySemanticDiffMarkdown")?.icon,
       "$(copy)",
     );
+    assert.strictEqual(
+      byCommand.get("ajsbutler.saveSemanticDiffOutput")?.icon,
+      "$(save)",
+    );
     assert.ok(
       manifest.activationEvents.includes(
         "onCommand:ajsbutler.compareSemanticDiff",
+      ),
+    );
+    assert.ok(
+      manifest.activationEvents.includes(
+        "onCommand:ajsbutler.saveSemanticDiffOutput",
       ),
     );
   });
@@ -114,6 +123,24 @@ suite("Package manifest", () => {
         {
           when: "resourceScheme == 'ajsbutler-semantic-diff'",
           command: "ajsbutler.copySemanticDiffMarkdown",
+          group: "navigation",
+        },
+      ],
+    );
+  });
+
+  test("contributes Semantic Diff save command only for semantic diff reports", () => {
+    const editorTitleItems =
+      readPackageJson().contributes.menus["editor/title"];
+
+    assert.deepStrictEqual(
+      editorTitleItems.filter(
+        (item) => item.command === "ajsbutler.saveSemanticDiffOutput",
+      ),
+      [
+        {
+          when: "resourceScheme == 'ajsbutler-semantic-diff'",
+          command: "ajsbutler.saveSemanticDiffOutput",
           group: "navigation",
         },
       ],

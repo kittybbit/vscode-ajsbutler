@@ -2,6 +2,7 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportDataInput } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffOutputDocument } from "../../presentation/semantic-diff/semanticDiffOutput";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -17,6 +18,10 @@ type SemanticDiffCommandObservations = {
   reportInputs: BuildSemanticDiffReportDataInput[];
   renderedResults: SemanticDiffResult[];
   renderedLanguages: (string | undefined)[];
+  selectedModes: string[];
+  presentedContexts: unknown[];
+  builtContexts: unknown[];
+  presentedModes: string[];
   reportSteps: string[];
 };
 
@@ -42,6 +47,10 @@ class SemanticDiffCommandHarness {
     reportInputs: [],
     renderedResults: [],
     renderedLanguages: [],
+    selectedModes: [],
+    presentedContexts: [],
+    builtContexts: [],
+    presentedModes: [],
     reportSteps: [],
   };
 
@@ -72,6 +81,10 @@ class SemanticDiffCommandHarness {
         this.observed.openDialogCount += 1;
         return openDialogResult;
       },
+      showQuickPick: async (items) => {
+        this.observed.selectedModes.push(items[0]!.mode);
+        return items[0];
+      },
       showErrorMessage: async (message) => {
         this.observed.errorMessages.push(message);
         return undefined;
@@ -82,12 +95,32 @@ class SemanticDiffCommandHarness {
       },
       openReport: async (report) => {
         this.observed.reportSteps.push("display");
-        this.observed.openedReports.push(report);
+        this.observed.openedReports.push(report.content);
       },
       buildSemanticDiffReportData: (input) =>
         this.buildSemanticDiffReportData(input),
-      renderSemanticDiffMarkdown: (result, language) =>
-        this.renderSemanticDiffMarkdown(result, language),
+      buildSemanticDiffOutputContext: (result) => {
+        this.observed.reportSteps.push("build-context");
+        const context = { result, summary: {} as never };
+        this.observed.builtContexts.push(context);
+        return context;
+      },
+      presentSemanticDiffOutput: (context, mode, language) => {
+        this.observed.reportSteps.push("present");
+        this.observed.presentedContexts.push(context);
+        this.observed.presentedModes.push(mode);
+        this.observed.renderedLanguages.push(language);
+        return {
+          mode,
+          languageId: mode === "json" ? "json" : "markdown",
+          extension: mode === "json" ? ".json" : ".md",
+          mediaType:
+            mode === "json"
+              ? "application/json; charset=utf-8"
+              : "text/markdown; charset=utf-8",
+          content: "rendered semantic diff",
+        } as SemanticDiffOutputDocument;
+      },
       ...overrides,
     };
   }
@@ -108,16 +141,6 @@ class SemanticDiffCommandHarness {
           ok: true as const,
           result: emptyResult(),
         };
-  }
-
-  private renderSemanticDiffMarkdown(
-    result: SemanticDiffResult,
-    language?: string,
-  ): string {
-    this.observed.reportSteps.push("render");
-    this.observed.renderedResults.push(result);
-    this.observed.renderedLanguages.push(language);
-    return "rendered semantic diff";
   }
 }
 
@@ -152,7 +175,8 @@ suite("Semantic diff command", () => {
     ]);
     assert.deepStrictEqual(harness.observed.reportSteps, [
       "build-data",
-      "render",
+      "build-context",
+      "present",
       "display",
     ]);
     assert.deepStrictEqual(harness.observed.clipboardWrites, []);
@@ -170,6 +194,57 @@ suite("Semantic diff command", () => {
       },
     ]);
     assert.deepStrictEqual(harness.observed.renderedLanguages, ["ja-JP"]);
+    assert.deepStrictEqual(harness.observed.presentedModes, ["full"]);
+  });
+
+  test("cancels the common picker before reading or comparing inputs", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      showQuickPick: async () => undefined,
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) throw new Error("Expected picker cancellation.");
+    assert.strictEqual(result.error.code, "cancelled");
+    assert.strictEqual(harness.observed.openDialogCount, 0);
+    assert.deepStrictEqual(harness.observed.reportInputs, []);
+  });
+
+  test("passes the selected JSON mode and one context to the dispatcher", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      showQuickPick: async (items) =>
+        items.find((item) => item.mode === "json"),
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, true);
+    assert.deepStrictEqual(harness.observed.presentedModes, ["json"]);
+    assert.strictEqual(harness.observed.presentedContexts.length, 1);
+    assert.strictEqual(
+      harness.observed.presentedContexts[0],
+      harness.observed.builtContexts[0],
+    );
+  });
+
+  test("maps picker host failure without reading or comparing inputs", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      showQuickPick: async () => {
+        throw new Error("picker failed");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.strictEqual(result.ok, false);
+    if (result.ok) throw new Error("Expected picker failure.");
+    assert.strictEqual(result.error.code, "mode-picker-failed");
+    assert.strictEqual(harness.observed.openDialogCount, 0);
+    assert.deepStrictEqual(harness.observed.reportInputs, []);
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Semantic diff output mode could not be selected.",
+    ]);
   });
 
   test("reports display failure without writing clipboard", async () => {
@@ -300,7 +375,7 @@ suite("Semantic diff command", () => {
 
   test("maps report rendering failure without leaving a report to display", async () => {
     const harness = new SemanticDiffCommandHarness({
-      renderSemanticDiffMarkdown: () => {
+      presentSemanticDiffOutput: () => {
         throw new Error("render internals");
       },
     });

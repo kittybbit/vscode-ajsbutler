@@ -4,8 +4,8 @@
 
 - Purpose: expose one neutral Semantic Diff result as summary, full, audit, and
   JSON outputs without changing comparison meaning.
-- Approved or active slice: Slice 4; Slices 1-3 are complete and committed,
-  and the existing Slice 4 boundary is approved for implementation.
+- Approved or active slice: Slice 4; implementation review is `Ready` with no
+  Findings and the completion gate is approved.
 - Do not: change identity matching or identity-evidence generation.
 - Do not: change confirmation-required rules, schedule semantics, comparison
   sources, runtime code, tests, generated artifacts, or configuration before
@@ -16,8 +16,8 @@
 - Validate intake with `rtk pnpm run qlty` and `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 4 implementation to `implementer` after this
-  focused approval-state commit.
+- Next decision: proceed to Feature Exit review after this focused completion
+  commit.
 
 ## Sync Rule
 
@@ -36,23 +36,23 @@
 
 ## Plan Status
 
-- Status: Slice 4 approved for implementation
+- Status: Slice 4 implementation review Ready; completion gate approved
 - Planning scope: complete four-slice plan covering the neutral result
   boundary, purpose-specific Markdown, locale-neutral JSON version 1, and VS
   Code mode selection/display/save integration.
 - Review status: `Ready`
-- Human approval: Approved for the existing Slice 4 Approval Boundary in the
-  current conversation.
-- Active implementation slice: Slice 4
+- Human approval: Approved for Slice 4 implementation and, when the independent
+  review has no Findings, its completion in the current conversation.
+- Active implementation slice: Slice 4 (completion commit pending)
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-03 (explicit user approval in current conversation)
-- Approved scope: Slice 4 — post-comparison four-mode picker, dispatcher,
-  output context lifetime, report metadata, copy/save behavior, bootstrap and
-  package wiring, virtual report lifecycle, and named host tests within the
-  existing Slice 4 Approval Boundary.
+- Approved scope: Completed Slice 4 picker/dispatcher, context lifetime,
+  report metadata, copy/save behavior, bootstrap/package wiring, virtual
+  report lifecycle, named host tests, validation evidence, and current-state /
+  traceability updates within the existing Slice 4 Approval Boundary.
 - Approved paths:
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
 
@@ -65,17 +65,29 @@ completes one approved slice at a time in the order below.
 - Status: Approved
 - Approved at: 2026-09-03 (automatic per-slice completion approval explicitly
   authorized by the user when independent review has no Findings)
-- Approved scope: Completed Slice 3 JSON v1 DTO/projection/serializer, focused
-  tests, accepted durable SPECS clarification, validation evidence, and the
-  Slice 3 current-state and traceability updates within the documented
-  Approval Boundary.
+- Approved scope: Completed Slice 4 picker/dispatcher, context lifetime,
+  report metadata, copy/save behavior, bootstrap/package wiring, virtual
+  report lifecycle, named host tests, validation evidence, and the Slice 4
+  current-state and traceability updates within the documented Approval
+  Boundary.
 - Approved paths:
-  - `docs/specs/features/semantic-diff-structured-outputs/SPECS.md`
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
   - `docs/specs/features/semantic-diff-structured-outputs/TRACEABILITY.md`
-  - `src/presentation/semantic-diff/semanticDiffJson.ts`
-  - `src/presentation/semantic-diff/serializeSemanticDiffJson.ts`
-  - `src/test/suite/semanticDiffJson.test.ts`
+  - `package.json`
+  - `src/application/semantic-diff/semanticDiffDto.ts`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`
+  - `src/presentation/semantic-diff/pickSemanticDiffOutputMode.ts`
+  - `src/presentation/semantic-diff/presentSemanticDiffOutput.ts`
+  - `src/presentation/semantic-diff/semanticDiffOutput.ts`
+  - `src/test/suite/extension.test.ts`
+  - `src/test/suite/extensionSubscriptions.test.ts`
+  - `src/test/suite/packageManifest.test.ts`
+  - `src/test/suite/semanticDiffCommand.test.ts`
+  - `src/test/suite/semanticDiffReportDocument.test.ts`
+  - `src/test/suite/semanticDiffOutput.test.ts`
+  - `src/test/suite/webSmoke.ts`
 - Implementation review verdict: Ready (no Findings)
 - Commit status: Eligible for the completion gate
 
@@ -1071,7 +1083,7 @@ applied.
 
 ### Slice 4: Integrate VS Code Mode Selection, Display, Copy, And Explicit Save
 
-- Status: Approved; ready for implementation handoff
+- Status: Implemented; completion gate approved
 - Scope: after a successful existing comparison, create the one
   `SemanticDiffOutputContext`, show the common four-mode picker, and call the
   exported `presentSemanticDiffOutput(context, mode)` dispatcher; generalize
@@ -1150,6 +1162,24 @@ applied.
 - Out of Scope: automatic saving/copying, persisted mode preference, a fifth
   output mode, comparison-source or period selection, Explorer UI or its
   successful-comparison destination switch, and Feature Exit propagation.
+
+- Implementation Evidence: Slice 4 adds the shared Full-first Summary/Full/
+  Audit/JSON mode picker and `presentSemanticDiffOutput` dispatcher. The
+  standalone command checks the active editor first, cancels before input
+  reading, compares once, builds one context, and passes that context to one
+  selected output projection. The report provider stores immutable output
+  metadata, uses the mode-specific `.md`/`.json` extension and media type,
+  preserves explicit Markdown copy, rejects JSON copy, and saves explicitly
+  through injected `workspace.fs` and `TextEncoder` capabilities with the
+  four suggested names. Provider tests cover explicit limits 31, 32, and 33,
+  equal-recency creation-sequence ties, concurrent successful creation-order
+  commits, per-invocation rollback, disposal during both host operations,
+  late completion, and idempotent disposal. Package and bootstrap tests cover
+  the save command and subscription disposal. `test:compile`,
+  qlty, production build/package, desktop preparation/tests, and web
+  preparation pass; web smoke remains host-blocked by Chromium Mach-port
+  permissions. No Explorer destination switch, automatic save/copy, new
+  semantic facts, Node built-in, telemetry, or command rename was introduced.
 
 ## Cross-Slice And Cross-Feature Validation Gate
 

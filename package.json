@@ -94,6 +94,14 @@
         "title": "Copy Semantic Diff Markdown",
         "shortTitle": "Copy Markdown",
         "icon": "$(copy)"
+      },
+      {
+        "enablement": "resourceScheme == 'ajsbutler-semantic-diff'",
+        "command": "ajsbutler.saveSemanticDiffOutput",
+        "category": "JP1/AJS",
+        "title": "Save Semantic Diff Output",
+        "shortTitle": "Save Semantic Diff",
+        "icon": "$(save)"
       }
     ],
     "menus": {
@@ -116,6 +124,11 @@
         {
           "when": "resourceScheme == 'ajsbutler-semantic-diff'",
           "command": "ajsbutler.copySemanticDiffMarkdown",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceScheme == 'ajsbutler-semantic-diff'",
+          "command": "ajsbutler.saveSemanticDiffOutput",
           "group": "navigation"
         }
       ]
@@ -145,6 +158,7 @@
   },
   "activationEvents": [
     "onCommand:ajsbutler.compareSemanticDiff",
+    "onCommand:ajsbutler.saveSemanticDiffOutput",
     "onCommand:ajsbutler.importDefinitionViaWebApiBeta",
     "onWebviewPanel:ajsbutler.tableViewer",
     "onWebviewPanel:ajsbutler.flowViewer"

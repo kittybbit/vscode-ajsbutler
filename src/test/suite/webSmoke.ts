@@ -39,6 +39,7 @@ export async function run(): Promise<void> {
     "ajsbutler.importDefinitionViaWebApiBeta",
     "ajsbutler.compareSemanticDiff",
     "ajsbutler.copySemanticDiffMarkdown",
+    "ajsbutler.saveSemanticDiffOutput",
   ]) {
     if (!commands.includes(command)) {
       throw new Error(`Expected command to be registered: ${command}`);

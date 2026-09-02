@@ -1,6 +1,16 @@
 import type * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
-import type { SemanticDiffResult } from "../../../application/semantic-diff/semanticDiffDto";
+import {
+  buildSemanticDiffOutputContext,
+  type SemanticDiffOutputContext,
+} from "../../../application/semantic-diff/buildSemanticDiffOutputContext";
+import {
+  pickSemanticDiffOutputMode,
+  presentSemanticDiffOutput,
+  type SemanticDiffOutputDocument,
+  type SemanticDiffOutputMode,
+  type SemanticDiffOutputModeItem,
+} from "../../semantic-diff/semanticDiffOutput";
 
 export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
 
@@ -19,6 +29,7 @@ export type SemanticDiffCommandResult =
           | "no-active-editor"
           | "active-editor-failed"
           | "cancelled"
+          | "mode-picker-failed"
           | "read-failed"
           | "parse-failed"
           | "render-failed"
@@ -29,18 +40,26 @@ export type SemanticDiffCommandResult =
 
 export type SemanticDiffCommandDeps = {
   getActiveEditor: () => vscode.TextEditor | undefined;
+  showQuickPick: (
+    items: readonly SemanticDiffOutputModeItem[],
+    options?: vscode.QuickPickOptions,
+  ) => Thenable<SemanticDiffOutputModeItem | undefined>;
   showOpenDialog: (
     options: vscode.OpenDialogOptions,
   ) => Thenable<vscode.Uri[] | undefined>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   readFile: (uri: vscode.Uri) => Thenable<Uint8Array>;
-  openReport: (report: string) => Thenable<void>;
+  openReport: (document: SemanticDiffOutputDocument) => Thenable<unknown>;
   language?: string;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
-  renderSemanticDiffMarkdown: (
-    result: SemanticDiffResult,
+  buildSemanticDiffOutputContext?: (
+    result: Parameters<typeof buildSemanticDiffOutputContext>[0],
+  ) => SemanticDiffOutputContext;
+  presentSemanticDiffOutput?: (
+    context: SemanticDiffOutputContext,
+    mode: SemanticDiffOutputMode,
     language?: string,
-  ) => string;
+  ) => SemanticDiffOutputDocument;
 };
 
 const textDecoder = new TextDecoder("utf-8");
@@ -98,6 +117,23 @@ const readBeforeDefinition = async (
   }
 };
 
+const selectOutputMode = async (
+  deps: SemanticDiffCommandDeps,
+): Promise<
+  | { kind: "selected"; mode: SemanticDiffOutputMode }
+  | { kind: "cancelled" }
+  | { kind: "failed" }
+> => {
+  try {
+    const mode = await pickSemanticDiffOutputMode((items, options) =>
+      deps.showQuickPick(items, options),
+    );
+    return mode ? { kind: "selected", mode } : { kind: "cancelled" };
+  } catch {
+    return { kind: "failed" };
+  }
+};
+
 export const executeCompareSemanticDiffCommand = async (
   deps: SemanticDiffCommandDeps,
 ): Promise<SemanticDiffCommandResult> => {
@@ -114,6 +150,16 @@ export const executeCompareSemanticDiffCommand = async (
     const message = "Open a JP1/AJS definition before running semantic diff.";
     await safeShowErrorMessage(deps, message);
     return commandError("no-active-editor", message);
+  }
+
+  const selectedMode = await selectOutputMode(deps);
+  if (selectedMode.kind === "cancelled") {
+    return commandError("cancelled", "Semantic diff was cancelled.");
+  }
+  if (selectedMode.kind === "failed") {
+    const message = "Semantic diff output mode could not be selected.";
+    await safeShowErrorMessage(deps, message);
+    return commandError("mode-picker-failed", message);
   }
 
   const beforeDefinition = await readBeforeDefinition(deps);
@@ -154,12 +200,14 @@ export const executeCompareSemanticDiffCommand = async (
     await safeShowErrorMessage(deps, message);
     return commandError("parse-failed", message);
   }
-  let report: string;
+
+  let output: SemanticDiffOutputDocument;
   try {
-    report = deps.renderSemanticDiffMarkdown(
-      reportResult.result,
-      deps.language,
-    );
+    const createContext =
+      deps.buildSemanticDiffOutputContext ?? buildSemanticDiffOutputContext;
+    const present = deps.presentSemanticDiffOutput ?? presentSemanticDiffOutput;
+    const context = createContext(reportResult.result);
+    output = present(context, selectedMode.mode, deps.language);
   } catch {
     const message = "Semantic diff report could not be rendered.";
     await safeShowErrorMessage(deps, message);
@@ -167,12 +215,12 @@ export const executeCompareSemanticDiffCommand = async (
   }
 
   try {
-    await deps.openReport(report);
+    await deps.openReport(output);
   } catch {
     const message = "Semantic diff report could not be displayed.";
     await safeShowErrorMessage(deps, message);
     return commandError("display-failed", message);
   }
 
-  return { ok: true, report, action: "displayed" };
+  return { ok: true, report: output.content, action: "displayed" };
 };
