@@ -133,17 +133,16 @@ export const isSemanticDiffJobnetUnit = (unit: AjsUnit): boolean =>
 export const semanticDiffParentJobnetPath = (
   unit: AjsUnit,
   unitById: Map<string, AjsUnit>,
-): string => parentJobnet(unit.parentId, unitById)?.absolutePath ?? "";
+): string =>
+  ancestorUnits(unit.parentId, unitById).find(isSemanticDiffJobnetUnit)
+    ?.absolutePath ?? "";
 
-const parentJobnet = (
+const ancestorUnits = (
   unitId: string | undefined,
   unitById: Map<string, AjsUnit>,
-): AjsUnit | undefined => {
+): AjsUnit[] => {
   const unit = unitId ? unitById.get(unitId) : undefined;
-  if (!unit || isSemanticDiffJobnetUnit(unit)) {
-    return unit;
-  }
-  return parentJobnet(unit.parentId, unitById);
+  return unit ? [unit, ...ancestorUnits(unit.parentId, unitById)] : [];
 };
 
 const toRelativePath = (absolutePath: string, jobGroupPath?: string): string =>
@@ -243,12 +242,13 @@ type FingerprintGroupResult = {
   candidate?: SemanticDiffCandidateGroup;
 };
 
-const classifyFingerprintGroup = (
-  fingerprint: string,
-  beforeMatches: AjsUnit[],
-  afterMatches: AjsUnit[],
-  context: FingerprintMatchContext,
-): FingerprintGroupResult => {
+const classifyFingerprintGroup = (input: {
+  fingerprint: string;
+  beforeMatches: AjsUnit[];
+  afterMatches: AjsUnit[];
+  context: FingerprintMatchContext;
+}): FingerprintGroupResult => {
+  const { fingerprint, beforeMatches, afterMatches, context } = input;
   if (beforeMatches.length === 1 && afterMatches.length === 1) {
     return {
       match: {
@@ -293,12 +293,12 @@ const matchFingerprintUnits = (
   const groupResults = [...beforeByFingerprint.entries()]
     .sort(([left], [right]) => compareOrdinal(left, right))
     .map(([fingerprint, beforeMatches]) =>
-      classifyFingerprintGroup(
+      classifyFingerprintGroup({
         fingerprint,
         beforeMatches,
-        afterByFingerprint.get(fingerprint) ?? [],
+        afterMatches: afterByFingerprint.get(fingerprint) ?? [],
         context,
-      ),
+      }),
     );
   const matches = groupResults.flatMap(({ match }) => (match ? [match] : []));
   const candidates = groupResults.flatMap(({ candidate }) =>
