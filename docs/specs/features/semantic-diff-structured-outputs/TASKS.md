@@ -4,8 +4,8 @@
 
 - Purpose: expose one neutral Semantic Diff result as summary, full, audit, and
   JSON outputs without changing comparison meaning.
-- Approved or active slice: Slice 3; implementation review is `Ready` with no
-  Findings and the completion gate is approved.
+- Approved or active slice: Slice 4; Slices 1-3 are complete and committed,
+  and the existing Slice 4 boundary is approved for implementation.
 - Do not: change identity matching or identity-evidence generation.
 - Do not: change confirmation-required rules, schedule semantics, comparison
   sources, runtime code, tests, generated artifacts, or configuration before
@@ -16,8 +16,8 @@
 - Validate intake with `rtk pnpm run qlty` and `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 4 planning/implementation after this focused
-  completion commit.
+- Next decision: delegate Slice 4 implementation to `implementer` after this
+  focused approval-state commit.
 
 ## Sync Rule
 
@@ -36,27 +36,27 @@
 
 ## Plan Status
 
-- Status: Slice 3 implementation review Ready; completion gate approved
+- Status: Slice 4 approved for implementation
 - Planning scope: complete four-slice plan covering the neutral result
   boundary, purpose-specific Markdown, locale-neutral JSON version 1, and VS
   Code mode selection/display/save integration.
 - Review status: `Ready`
-- Human approval: Approved for Slice 3 implementation and, when the independent
-  review has no Findings, its completion in the current conversation.
-- Active implementation slice: Slice 3 (completion commit pending)
+- Human approval: Approved for the existing Slice 4 Approval Boundary in the
+  current conversation.
+- Active implementation slice: Slice 4
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-03 (explicit user approval in current conversation)
-- Approved scope: Completed Slice 3 JSON v1 DTO/projection/serializer, focused
-  tests, accepted durable SPECS clarification, validation evidence, and
-  current-state/traceability updates within the existing Slice 3 Approval
-  Boundary. Slice 4 remains deferred.
+- Approved scope: Slice 4 — post-comparison four-mode picker, dispatcher,
+  output context lifetime, report metadata, copy/save behavior, bootstrap and
+  package wiring, virtual report lifecycle, and named host tests within the
+  existing Slice 4 Approval Boundary.
 - Approved paths:
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
 
-The approved Slice 2 implementation scope is recorded above. Approval of the
+The approved Slice 4 implementation scope is recorded above. Approval of the
 complete plan does not permit parallel implementation: Main delegates and
 completes one approved slice at a time in the order below.
 
@@ -1071,7 +1071,7 @@ applied.
 
 ### Slice 4: Integrate VS Code Mode Selection, Display, Copy, And Explicit Save
 
-- Status: Planned; blocked on Slice 3 completion and approval.
+- Status: Approved; ready for implementation handoff
 - Scope: after a successful existing comparison, create the one
   `SemanticDiffOutputContext`, show the common four-mode picker, and call the
   exported `presentSemanticDiffOutput(context, mode)` dispatcher; generalize
