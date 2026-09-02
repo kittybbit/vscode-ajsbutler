@@ -75,3 +75,41 @@ rendezvous; this is an environment limitation rather than a shared-code
 failure. `git diff --check` passes. Slice 2 does not claim JSON, the
 mode-picker/dispatcher, VS Code host integration, Explorer, or new semantic
 facts.
+
+## Slice 3 Implementation Validation
+
+Slice 3 implements the explicit locale-neutral JSON version 1 DTO and
+serializer over the supplied immutable `SemanticDiffOutputContext`. The
+projection constructs the schema identifier/version, summary, result, and
+every nested object in the declared key order. It emits required arrays as
+`[]`, optional targets/sides/paths/run sides/fallback values as `null`, keeps
+raw JP1/AJS identifiers, paths, parameter keys, values, dates, and times
+unchanged, and excludes prose, `reportSections`, diagnostics, and internal
+object layout. Summary values come from the supplied context summary; result
+facts come from the supplied context result without summary rebuilding,
+re-aggregation, or mutation. Identity evidence and contract reference order,
+correspondence-first relation canonical pairs and actual endpoints, typed
+details, warnings, constraints, unsupported/limitation facts, schedules, and
+all nine confirmation reason codes are preserved. Record-specific complete
+tuple comparators use UTF-16 ordinal comparison, explicit nullable/array
+ordering, and duplicate retention; identity decisions use the imported
+status/evidence-discriminator/rule/reference tuple; neither the serializer nor
+its helpers use `localeCompare` or `Intl.Collator`. Unknown and superseded
+confirmation reason codes are rejected, required undefined fields are rejected
+before serialization, and non-finite schedule rules are rejected rather than
+silently producing invalid JSON. Review fixtures cover same-status strategy
+and exact key-kind ordering, fingerprint ID-remap canonicalPair/original
+endpoints with relation `identityDecisionId: null` and the corresponding unit
+decision ID, Japanese/quote/backslash/newline escaping, equal-prefix nested
+tie-breakers, and retained duplicates.
+
+The compiled JSON suite passes 13 tests, and the complete focused Semantic Diff
+set passes 88 tests. `rtk pnpm run test:compile`, `rtk pnpm run qlty`,
+`rtk pnpm run build`, desktop preparation/tests, web preparation,
+`rtk pnpm run lint:md`, and `git diff --check` pass. The web smoke runner is
+host-blocked when Chromium cannot obtain its Mach-port rendezvous; the shared
+browser-safe code and web bundle preparation pass. Slice 3 does not claim the
+four-mode picker/dispatcher, VS Code host integration, Explorer, or
+cross-mode orchestration, which remain assigned to Slice 4 and the
+cross-slice gate. No new semantic interpretation, identity matching, host
+API, Node dependency, or telemetry behavior was introduced.

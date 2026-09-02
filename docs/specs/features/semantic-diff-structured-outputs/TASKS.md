@@ -4,8 +4,8 @@
 
 - Purpose: expose one neutral Semantic Diff result as summary, full, audit, and
   JSON outputs without changing comparison meaning.
-- Approved or active slice: Slice 3; Slices 1-2 are complete and committed,
-  and the existing Slice 3 boundary is approved for implementation.
+- Approved or active slice: Slice 3; implementation review is `Ready` with no
+  Findings and the completion gate is approved.
 - Do not: change identity matching or identity-evidence generation.
 - Do not: change confirmation-required rules, schedule semantics, comparison
   sources, runtime code, tests, generated artifacts, or configuration before
@@ -16,8 +16,8 @@
 - Validate intake with `rtk pnpm run qlty` and `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 3 implementation to `implementer` after this
-  focused approval-state commit.
+- Next decision: delegate Slice 4 planning/implementation after this focused
+  completion commit.
 
 ## Sync Rule
 
@@ -36,22 +36,23 @@
 
 ## Plan Status
 
-- Status: Slice 3 approved for implementation
+- Status: Slice 3 implementation review Ready; completion gate approved
 - Planning scope: complete four-slice plan covering the neutral result
   boundary, purpose-specific Markdown, locale-neutral JSON version 1, and VS
   Code mode selection/display/save integration.
 - Review status: `Ready`
-- Human approval: Approved for the existing Slice 3 Approval Boundary in the
-  current conversation; Slice 4 remains deferred to its own gate.
-- Active implementation slice: Slice 3
+- Human approval: Approved for Slice 3 implementation and, when the independent
+  review has no Findings, its completion in the current conversation.
+- Active implementation slice: Slice 3 (completion commit pending)
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-03 (explicit user approval in current conversation)
-- Approved scope: Slice 3 — deterministic locale-neutral JSON v1 DTO,
-  projection/serializer, summary serialization, and focused JSON tests within
-  the existing Slice 3 Approval Boundary. Slice 4 remains deferred.
+- Approved scope: Completed Slice 3 JSON v1 DTO/projection/serializer, focused
+  tests, accepted durable SPECS clarification, validation evidence, and
+  current-state/traceability updates within the existing Slice 3 Approval
+  Boundary. Slice 4 remains deferred.
 - Approved paths:
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
 
@@ -64,21 +65,17 @@ completes one approved slice at a time in the order below.
 - Status: Approved
 - Approved at: 2026-09-03 (automatic per-slice completion approval explicitly
   authorized by the user when independent review has no Findings)
-- Approved scope: Completed Slice 2 Markdown projections, validation evidence,
-  and the Slice 2 current-state and traceability updates within the documented
+- Approved scope: Completed Slice 3 JSON v1 DTO/projection/serializer, focused
+  tests, accepted durable SPECS clarification, validation evidence, and the
+  Slice 3 current-state and traceability updates within the documented
   Approval Boundary.
 - Approved paths:
+  - `docs/specs/features/semantic-diff-structured-outputs/SPECS.md`
   - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
   - `docs/specs/features/semantic-diff-structured-outputs/TRACEABILITY.md`
-  - `src/presentation/semantic-diff/renderSemanticDiffMarkdown.ts`
-  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
-  - `src/presentation/semantic-diff/renderSemanticDiffAuditMarkdown.ts`
-  - `src/presentation/semantic-diff/renderSemanticDiffSummaryMarkdown.ts`
-  - `src/presentation/semantic-diff/semanticDiffMarkdownTypes.ts`
-  - `src/resource/i18n/message_en.ts`
-  - `src/resource/i18n/message_ja.ts`
-  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
-  - `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  - `src/presentation/semantic-diff/semanticDiffJson.ts`
+  - `src/presentation/semantic-diff/serializeSemanticDiffJson.ts`
+  - `src/test/suite/semanticDiffJson.test.ts`
 - Implementation review verdict: Ready (no Findings)
 - Commit status: Eligible for the completion gate
 
@@ -219,8 +216,9 @@ null`. The neutral `relationPair` keeps
   non-applicable side); decisions and candidate references keep the identity
   contract's ordinal status/reference-tuple ordering (`exact`,
   `fingerprint-confirmed`, `candidate`, `removed`, `added`, then
-  strategy/rule and complete `(absolutePath, unitType, name, id)` reference
-  tuples); and
+  evidence discriminator (fingerprint strategy/unit type or exact key kind),
+  rule, and complete `(absolutePath, unitType, name, id)` reference tuples);
+  and
   `identityDecisionId` is required only on unit/jobnet structural or attribute
   changes and absent on relation/job-group/confirmation/unsupported/limitation/
   schedule records. The JSON projection emits relation
@@ -548,19 +546,19 @@ targetUnitId, type)`; `periodTuple` is `(from, to)`; a warning tuple is
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Collection                                                                              | Complete sort tuple, in order                                                                                                                                                              | Null/empty, ties, and duplicates                                                                                                                                                                                                   |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inputs[*].unitIds`                                                                     | `(id)`                                                                                                                                                                                     | No null IDs; ordinal scalar order; duplicates retained.                                                                                                                                                                            |
-| `inputs[*].relations`                                                                   | `(sourceUnitId, targetUnitId, type, sourceUnitPath, targetUnitPath)`                                                                                                                       | Nullable paths sort null first; scalar ties use the remaining tuple fields; duplicate relations retained.                                                                                                                          |
-| `changes`                                                                               | `(id, kind, elementKind, confirmationLevel, identityDecisionId, beforeTargetTuple, afterTargetTuple, relationPairTuple, attributeCategory)` plus every nested wire field in declared order | Nullable IDs/targets/pairs/categories and nested slots sort null first; arrays sort `[]` first; the complete recursive wire tuple is the final tie-breaker and duplicate change records are retained.                              |
-| `identityDecisions`                                                                     | Imported identity-contract tuple: status ordinal, strategy/rule, complete before/after reference tuples, complete evidence/field tuples, and decision ID in the contract's declared order  | Decision sides and nested arrays are always present (`[]` when empty); nullable nested values sort null first; contract-order ties retain duplicate decisions. Presentation sorting must not replace this declared identity order. |
-| `identityDecisions[*].before`, `identityDecisions[*].after`, candidate/reference arrays | `(absolutePath, unitType, name, id)` followed by the imported evidence tuple                                                                                                               | Empty arrays sort before non-empty arrays; nullable fields sort null first; duplicate references remain duplicated.                                                                                                                |
-| `schedule.runChanges`                                                                   | `(id, kind, unitPath, date, beforeRunTuple, afterRunTuple)`                                                                                                                                | Nullable run sides sort null first; nested nullable run slots sort null first; duplicate run changes are retained.                                                                                                                 |
-| `confirmationRequired`, `unsupportedItems`, `limitations`, warnings, and constraints    | Their complete record-specific tuples in the table below                                                                                                                                   | Apply recursive null/empty rules at every nested level; duplicate records remain present.                                                                                                                                          |
-| `relatedTargets` and target/reference collections                                       | Declared variant kind, then every variant field and nested reference in wire order                                                                                                         | `[]` sorts before non-empty; nullable variant fields sort null first; duplicate targets remain present.                                                                                                                            |
-| `beforeValues`, `afterValues`, `rawValues`, `removedSources`                            | UTF-16 ordinal array tuple, with each value's complete wire representation                                                                                                                 | `[]` sorts before non-empty; duplicate values remain present; array length is the final tie-breaker.                                                                                                                               |
-| `constraints`, `warnings`, and nested warning collections                               | Complete nested wire tuple in declared key order                                                                                                                                           | Empty arrays sort first; missing warning is `null` and sorts before a present warning; duplicate entries remain present.                                                                                                           |
-| `reportSections`                                                                        | Not applicable                                                                                                                                                                             | Forbidden: the field is not part of `SemanticDiffResult` or JSON v1 and no presentation-only section collection is serialized.                                                                                                     |
+| Collection                                                                              | Complete sort tuple, in order                                                                                                                                                                                                                                                    | Null/empty, ties, and duplicates                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inputs[*].unitIds`                                                                     | `(id)`                                                                                                                                                                                                                                                                           | No null IDs; ordinal scalar order; duplicates retained.                                                                                                                                                                            |
+| `inputs[*].relations`                                                                   | `(sourceUnitId, targetUnitId, type, sourceUnitPath, targetUnitPath)`                                                                                                                                                                                                             | Nullable paths sort null first; scalar ties use the remaining tuple fields; duplicate relations retained.                                                                                                                          |
+| `changes`                                                                               | `(id, kind, elementKind, confirmationLevel, identityDecisionId, beforeTargetTuple, afterTargetTuple, relationPairTuple, attributeCategory)` plus every nested wire field in declared order                                                                                       | Nullable IDs/targets/pairs/categories and nested slots sort null first; arrays sort `[]` first; the complete recursive wire tuple is the final tie-breaker and duplicate change records are retained.                              |
+| `identityDecisions`                                                                     | Imported identity-contract tuple: status ordinal, evidence discriminator (`evidence.kind` plus fingerprint strategy/unit type or exact key kind), rule, complete before/after reference tuples, complete evidence/field tuples, and decision ID in the contract's declared order | Decision sides and nested arrays are always present (`[]` when empty); nullable nested values sort null first; contract-order ties retain duplicate decisions. Presentation sorting must not replace this declared identity order. |
+| `identityDecisions[*].before`, `identityDecisions[*].after`, candidate/reference arrays | `(absolutePath, unitType, name, id)` followed by the imported evidence tuple                                                                                                                                                                                                     | Empty arrays sort before non-empty arrays; nullable fields sort null first; duplicate references remain duplicated.                                                                                                                |
+| `schedule.runChanges`                                                                   | `(id, kind, unitPath, date, beforeRunTuple, afterRunTuple)`                                                                                                                                                                                                                      | Nullable run sides sort null first; nested nullable run slots sort null first; duplicate run changes are retained.                                                                                                                 |
+| `confirmationRequired`, `unsupportedItems`, `limitations`, warnings, and constraints    | Their complete record-specific tuples in the table below                                                                                                                                                                                                                         | Apply recursive null/empty rules at every nested level; duplicate records remain present.                                                                                                                                          |
+| `relatedTargets` and target/reference collections                                       | Declared variant kind, then every variant field and nested reference in wire order                                                                                                                                                                                               | `[]` sorts before non-empty; nullable variant fields sort null first; duplicate targets remain present.                                                                                                                            |
+| `beforeValues`, `afterValues`, `rawValues`, `removedSources`                            | UTF-16 ordinal array tuple, with each value's complete wire representation                                                                                                                                                                                                       | `[]` sorts before non-empty; duplicate values remain present; array length is the final tie-breaker.                                                                                                                               |
+| `constraints`, `warnings`, and nested warning collections                               | Complete nested wire tuple in declared key order                                                                                                                                                                                                                                 | Empty arrays sort first; missing warning is `null` and sorts before a present warning; duplicate entries remain present.                                                                                                           |
+| `reportSections`                                                                        | Not applicable                                                                                                                                                                                                                                                                   | Forbidden: the field is not part of `SemanticDiffResult` or JSON v1 and no presentation-only section collection is serialized.                                                                                                     |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -962,7 +960,7 @@ applied.
 
 ### Slice 3: Add Deterministic Locale-Neutral JSON Version 1
 
-- Status: Approved; ready for implementation handoff
+- Status: Implemented; completion gate approved
 - Scope: define explicit version 1 JSON DTOs and a pure serializer over the
   immutable `SemanticDiffOutputContext`, serializing `context.summary` and
   `context.result` without creating a second aggregation path. Document schema
@@ -1043,6 +1041,33 @@ applied.
 - Out of Scope: Markdown projections, four-mode dispatcher/picker, VS Code
   command UX, file-source metadata, Git/WebAPI comparison, and guarantees for
   unknown future schema versions.
+
+- Implementation Evidence: Slice 3 implements the explicit locale-neutral JSON
+  v1 DTO and serializer over the supplied immutable output context. It writes
+  every top-level and nested key explicitly, maps optional values to `null`,
+  keeps required collections as `[]`, preserves raw identifiers/paths/values,
+  and excludes prose, `reportSections`, diagnostics, and internal object
+  layout. `summary` is projected from the supplied context summary and
+  `result` from the supplied context result without invoking builders,
+  re-aggregating, or mutating either input. Identity evidence and reference
+  ordering, correspondence-first relation pairs, warnings, constraints,
+  unsupported/limitation records, schedules, and all nine confirmation reason
+  codes are covered. Record-specific complete tuple comparators use UTF-16
+  ordinal ordering, retain duplicates, and do not use locale-aware APIs; a
+  runtime guard rejects unknown and superseded confirmation reason codes, and
+  non-finite schedule rules fail safely. The identity decision comparator
+  follows the imported status/evidence-discriminator/rule/reference tuple,
+  and the projection rejects undefined required fields before serialization.
+  Fingerprint ID remapping, Japanese and JSON-special escaping, equal-prefix
+  nested tie-breakers, and duplicate records are covered. The focused compiled
+  JSON suite has 13 passing tests and the complete Semantic Diff focus has 88
+  passing tests.
+  `rtk pnpm run test:compile`, `rtk pnpm run qlty`, `rtk pnpm run build`,
+  desktop preparation/tests, web preparation, `rtk pnpm run lint:md`, and
+  `git diff --check` pass. The web smoke runner remains host-blocked when
+  Chromium cannot obtain its Mach-port rendezvous. Slice 3 does not claim the
+  mode dispatcher/picker, VS Code host integration, Explorer, or cross-mode
+  orchestration; those remain assigned to Slice 4 and the cross-slice gate.
 
 ### Slice 4: Integrate VS Code Mode Selection, Display, Copy, And Explicit Save
 

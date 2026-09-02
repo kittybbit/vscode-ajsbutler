@@ -406,10 +406,11 @@ typed-evidence renderer and golden fixtures are the Full-report baseline.
   creates a second evidence type, reruns matching, or changes field presence.
 - Identity decision arrays and candidate references retain the contract's
   ordinal sorting: decision status order is `exact`,
-  `fingerprint-confirmed`, `candidate`, `removed`, `added`, followed by
-  strategy/rule and complete sorted reference tuples; reference sides use
-  `(absolutePath, unitType, name, id)`. JSON uses that order rather than
-  resorting by localized text.
+  `fingerprint-confirmed`, `candidate`, `removed`, `added`, followed by the
+  evidence discriminator (`evidence.kind` plus fingerprint strategy/unit type
+  or exact key kind), rule, and complete sorted reference tuples; reference
+  sides use `(absolutePath, unitType, name, id)`. JSON uses that order rather
+  than resorting by localized text.
 - `identityDecisionId` is required on unit/jobnet structural and attribute
   changes and absent on relation, job-group-only, confirmation-required,
   unsupported, limitation, and schedule-run records exactly as defined by the
