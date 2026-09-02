@@ -121,6 +121,84 @@ export type SemanticDiffTarget =
   | SemanticDiffRelationTarget
   | SemanticDiffAttributeTarget;
 
+export type SemanticDiffCanonicalPair = {
+  sourceUnitId: string;
+  targetUnitId: string;
+  type: "seq" | "con";
+};
+
+export type SemanticDiffRelationEndpoint = {
+  sourceUnitPath: string | null;
+  sourceUnitId: string;
+  targetUnitPath: string | null;
+  targetUnitId: string;
+  type: "seq" | "con";
+};
+
+export type SemanticDiffRelationPair = {
+  canonicalPair: SemanticDiffCanonicalPair;
+  before: SemanticDiffRelationEndpoint | null;
+  after: SemanticDiffRelationEndpoint | null;
+};
+
+export type SemanticDiffDetail = {
+  unitPath: string | null;
+  parameterKey: string | null;
+  relationPair: SemanticDiffRelationPair | null;
+  scheduleRule: number | null;
+  period: SemanticDiffComparisonPeriod | null;
+  beforeValues: string[];
+  afterValues: string[];
+  rawValues: string[];
+  removedSources: string[];
+};
+
+export type SemanticDiffWarning = {
+  code: string;
+  detail: SemanticDiffDetail;
+  fallbackText: string | null;
+};
+
+export type SemanticDiffConstraintCode =
+  | "jp1-ajs3-v13-rule-basis"
+  | "runtime-state-not-verified"
+  | "external-state-not-verified"
+  | "comparison-period";
+
+export type SemanticDiffConstraint = {
+  code: SemanticDiffConstraintCode;
+  detail: SemanticDiffDetail;
+  warning: SemanticDiffWarning | null;
+};
+
+export type SemanticDiffConfirmationReason =
+  | "conditional-relation-removed"
+  | "wait-release-source-changed"
+  | "timeout-removed"
+  | "condition-judgment-changed"
+  | "wait-target-changed"
+  | "no-calculated-schedule-run"
+  | "calculated-schedule-run-removed"
+  | "execution-user-type-changed"
+  | "jp1-resource-group-changed";
+export type SemanticDiffConfirmationReasonCode = SemanticDiffConfirmationReason;
+
+export type SemanticDiffUnsupportedReason =
+  | "uninterpretable-file-monitoring-condition"
+  | "cycle-schedule"
+  | "closed-day-substitution"
+  | "shift-days"
+  | "calendar-selection"
+  | "inherited-parent-rule"
+  | "days-from-start"
+  | "invalid-start-time"
+  | "unpaired-start-time"
+  | "unsupported-schedule-date"
+  | "missing-start-time"
+  | "invalid-calendar-day"
+  | "invalid-schedule-comparison-period";
+export type SemanticDiffUnsupportedReasonCode = SemanticDiffUnsupportedReason;
+
 type SemanticDiffIdentityChange = {
   id: string;
   kind: SemanticDiffChangeKind;
@@ -129,67 +207,66 @@ type SemanticDiffIdentityChange = {
   before?: SemanticDiffTarget;
   after?: SemanticDiffTarget;
   attributeCategory?: SemanticDiffAttributeCategory;
-  summary: string;
-  rationale?: string;
+  relationPair: null;
   identityDecisionId: SemanticDiffIdentityDecisionId;
 };
 
 type SemanticDiffNonIdentityChange = {
   id: string;
   kind: SemanticDiffChangeKind;
-  elementKind: "job-group" | "relation";
+  elementKind: "job-group";
   confirmationLevel: SemanticDiffConfirmationLevel;
   before?: SemanticDiffTarget;
   after?: SemanticDiffTarget;
   attributeCategory?: SemanticDiffAttributeCategory;
-  summary: string;
-  rationale?: string;
+  relationPair: null;
+  identityDecisionId?: never;
+};
+
+type SemanticDiffRelationChange = {
+  id: string;
+  kind: Extract<SemanticDiffChangeKind, "added" | "removed">;
+  elementKind: "relation";
+  confirmationLevel: SemanticDiffConfirmationLevel;
+  before?: SemanticDiffTarget;
+  after?: SemanticDiffTarget;
+  attributeCategory?: never;
+  relationPair: SemanticDiffRelationPair;
   identityDecisionId?: never;
 };
 
 export type SemanticDiffChange =
   | SemanticDiffIdentityChange
-  | SemanticDiffNonIdentityChange;
+  | SemanticDiffNonIdentityChange
+  | SemanticDiffRelationChange;
 
 export type SemanticDiffConfirmationRequiredItem = {
   id: string;
+  reasonCode: SemanticDiffConfirmationReason;
   target: SemanticDiffTarget;
-  changeContent: string;
-  rationale: string;
   relatedTargets: SemanticDiffTarget[];
-  constraints: string[];
+  detail: SemanticDiffDetail;
+  constraints: SemanticDiffConstraint[];
+  warning: SemanticDiffWarning | null;
 };
 
 export type SemanticDiffUnsupportedItem = {
   id: string;
   kind: SemanticDiffUnsupportedKind;
-  side?: SemanticDiffSide;
-  target?: SemanticDiffTarget;
-  message: string;
+  side: SemanticDiffSide | null;
+  reasonCode: SemanticDiffUnsupportedReason;
+  target: SemanticDiffTarget | null;
+  detail: SemanticDiffDetail;
+  warning: SemanticDiffWarning | null;
 };
 
 export type SemanticDiffLimitation = {
   code: string;
   kind: SemanticDiffLimitationKind;
-  side?: SemanticDiffSide;
-  message: string;
-  unitPath?: string;
-};
-
-export type SemanticDiffReportSectionId =
-  | "summary"
-  | "structural"
-  | "attributes"
-  | "confirmation-required"
-  | "unsupported"
-  | "limitations"
-  | "schedule";
-
-export type SemanticDiffReportSection = {
-  id: SemanticDiffReportSectionId;
-  title: string;
-  changeIds: string[];
-  limitationCodes: string[];
+  side: SemanticDiffSide | null;
+  unitPath: string | null;
+  detail: SemanticDiffDetail;
+  warning: SemanticDiffWarning | null;
 };
 
 export type SemanticDiffComparisonPeriod = {
@@ -215,9 +292,8 @@ export type SemanticDiffScheduleRunChange = {
   kind: SemanticDiffScheduleRunChangeKind;
   unitPath: string;
   date: string;
-  before?: SemanticDiffScheduleRun;
-  after?: SemanticDiffScheduleRun;
-  summary: string;
+  before: SemanticDiffScheduleRun | null;
+  after: SemanticDiffScheduleRun | null;
 };
 
 export type SemanticDiffScheduleComparison = {
@@ -225,7 +301,7 @@ export type SemanticDiffScheduleComparison = {
   runChanges: SemanticDiffScheduleRunChange[];
 };
 
-export type SemanticDiffChangeSet = {
+export type SemanticDiffResult = {
   inputs: SemanticDiffInputPair;
   changes: SemanticDiffChange[];
   identityDecisions: SemanticDiffIdentityDecision[];
@@ -233,7 +309,26 @@ export type SemanticDiffChangeSet = {
   unsupportedItems: SemanticDiffUnsupportedItem[];
   limitations: SemanticDiffLimitation[];
   scheduleComparison?: SemanticDiffScheduleComparison;
-  reportSections: SemanticDiffReportSection[];
+};
+
+export type SemanticDiffSummary = {
+  changeCountsByKind: Record<SemanticDiffChangeKind, number>;
+  changeCountsByElementKind: Record<SemanticDiffElementKind, number>;
+  changeCountsByAttributeCategory: Record<
+    SemanticDiffAttributeCategory,
+    number
+  >;
+  unsupportedCountsByKind: Record<SemanticDiffUnsupportedKind, number>;
+  confirmationRequiredCount: number;
+  limitationCount: number;
+  scheduleRunChangeCount: number;
+  hasUncalculated: boolean;
+  hasFindings: boolean;
+};
+
+export type SemanticDiffOutputContext = {
+  readonly result: SemanticDiffResult;
+  readonly summary: SemanticDiffSummary;
 };
 
 export type SemanticDiffParserError = {

@@ -109,12 +109,21 @@ suite("Semantic diff condition checks", () => {
     );
 
     assert.deepStrictEqual(
-      result.confirmationRequired.map((item) => item.changeContent),
-      ["source->target conditional relation removed or changed"],
+      result.confirmationRequired.map((item) => item.reasonCode),
+      ["conditional-relation-removed"],
     );
+    assert.deepStrictEqual(
+      result.confirmationRequired[0].detail.relationPair?.canonicalPair,
+      {
+        sourceUnitId: beforeSource.id,
+        targetUnitId: beforeTarget.id,
+        type: "con",
+      },
+    );
+    assert.strictEqual(result.confirmationRequired[0].warning, null);
     assert.ok(
-      result.confirmationRequired[0].constraints.some((constraint) =>
-        constraint.includes("JP1/AJS3 v13 unit definition parameters"),
+      result.confirmationRequired[0].constraints.some(
+        (constraint) => constraint.code === "jp1-ajs3-v13-rule-basis",
       ),
     );
   });
@@ -155,13 +164,43 @@ suite("Semantic diff condition checks", () => {
     );
 
     assert.deepStrictEqual(
-      result.confirmationRequired.map((item) => item.changeContent),
-      ["wait explicit timeout etm removed", "wait wait release source changed"],
+      result.confirmationRequired.map((item) => item.reasonCode),
+      ["timeout-removed", "wait-release-source-changed"],
     );
+    const timeout = result.confirmationRequired.find(
+      (item) => item.reasonCode === "timeout-removed",
+    );
+    const release = result.confirmationRequired.find(
+      (item) => item.reasonCode === "wait-release-source-changed",
+    );
+    assert.deepStrictEqual(timeout?.detail, {
+      unitPath: afterWait.absolutePath,
+      parameterKey: "etm",
+      relationPair: null,
+      scheduleRule: null,
+      period: null,
+      beforeValues: ["30"],
+      afterValues: [],
+      rawValues: [],
+      removedSources: [],
+    });
+    assert.deepStrictEqual(release?.detail, {
+      unitPath: afterWait.absolutePath,
+      parameterKey: "eun",
+      relationPair: null,
+      scheduleRule: null,
+      period: null,
+      beforeValues: ["release-a"],
+      afterValues: ["release-b"],
+      rawValues: ["release-a"],
+      removedSources: ["release-a"],
+    });
+    assert.strictEqual(timeout?.warning, null);
+    assert.strictEqual(release?.warning, null);
     assert.ok(
       result.confirmationRequired.every((item) =>
-        item.constraints.includes(
-          "Runtime history and external conditions are not verified by this comparison.",
+        item.constraints.some(
+          (constraint) => constraint.code === "runtime-state-not-verified",
         ),
       ),
     );
@@ -184,9 +223,20 @@ suite("Semantic diff condition checks", () => {
     const result = compareChildren([beforeJob], [afterJob]);
 
     assert.deepStrictEqual(
-      result.confirmationRequired.map((item) => item.changeContent),
-      ["job jd condition or judgment changed"],
+      result.confirmationRequired.map((item) => item.reasonCode),
+      ["condition-judgment-changed"],
     );
+    assert.deepStrictEqual(result.confirmationRequired[0].detail, {
+      unitPath: afterJob.absolutePath,
+      parameterKey: "jd",
+      relationPair: null,
+      scheduleRule: null,
+      period: null,
+      beforeValues: ["cod"],
+      afterValues: ["ab"],
+      rawValues: [],
+      removedSources: [],
+    });
   });
 
   test("reports file and event wait target changes with external constraints in the report", () => {
@@ -212,12 +262,18 @@ suite("Semantic diff condition checks", () => {
     const report = renderSemanticDiffMarkdown(result);
 
     assert.deepStrictEqual(
-      result.confirmationRequired.map((item) => item.changeContent),
-      [
-        "event-wait wait target evwid changed",
-        "file-wait wait target flwf changed",
-      ],
+      result.confirmationRequired.map((item) => item.reasonCode),
+      ["wait-target-changed", "wait-target-changed"],
     );
+    const waitDetails = result.confirmationRequired.map((item) => [
+      item.detail.parameterKey,
+      item.detail.beforeValues,
+      item.detail.afterValues,
+    ]);
+    assert.deepStrictEqual(waitDetails, [
+      ["evwid", ["00000001:00000002"], ["00000001:00000003"]],
+      ["flwf", ['"/var/before.dat"'], ['"/var/after.dat"']],
+    ]);
     assert.ok(report.includes("External files, events, hosts"));
     assert.ok(report.includes("Rule basis: JP1/AJS3 v13"));
   });
@@ -235,14 +291,21 @@ suite("Semantic diff condition checks", () => {
     const result = compareChildren([beforeFile], [afterFile]);
 
     assert.deepStrictEqual(
-      result.unsupportedItems.map((item) => [item.kind, item.message]),
-      [
-        [
-          "uninterpretable",
-          "file monitoring condition flwc is not interpreted because it combines mutually exclusive conditions",
-        ],
-      ],
+      result.unsupportedItems.map((item) => [item.kind, item.reasonCode]),
+      [["uninterpretable", "uninterpretable-file-monitoring-condition"]],
     );
+    assert.deepStrictEqual(result.unsupportedItems[0].detail, {
+      unitPath: afterFile.absolutePath,
+      parameterKey: "flwc",
+      relationPair: null,
+      scheduleRule: null,
+      period: null,
+      beforeValues: ["s:m"],
+      afterValues: ["s:m"],
+      rawValues: [],
+      removedSources: [],
+    });
+    assert.ok(result.unsupportedItems[0].warning);
     assert.deepStrictEqual(result.confirmationRequired, []);
   });
 });

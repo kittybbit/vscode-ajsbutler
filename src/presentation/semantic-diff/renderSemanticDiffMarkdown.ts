@@ -1,6 +1,6 @@
 import type {
   SemanticDiffChange,
-  SemanticDiffChangeSet,
+  SemanticDiffResult,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffIdentityDecision,
   SemanticDiffLimitation,
@@ -73,7 +73,7 @@ const renderUnsupportedItem = (
 ): string[] => {
   const lines = [
     bulletLine(
-      `[${localizedKind(item.kind, language)}]${item.side ? ` ${localizedKind(item.side, language)}:` : ""} ${escapeMarkdown(item.message)}`,
+      `[${localizedKind(item.kind, language)}]${item.side ? ` ${localizedKind(item.side, language)}:` : ""} ${escapeMarkdown(item.warning?.fallbackText ?? item.reasonCode)}`,
     ),
   ];
   if (item.target) {
@@ -105,7 +105,7 @@ const renderLimitation = (
     ? `${localizedKind(limitation.side, language)} `
     : "";
   const path = limitation.unitPath ? ` ${limitation.unitPath}` : "";
-  return `[${limitation.kind}:${limitation.code}] ${side}${path} ${limitation.message}`
+  return `[${limitation.kind}:${limitation.code}] ${side}${path} ${limitation.warning?.fallbackText ?? limitation.code}`
     .replace(/\s+/g, " ")
     .trim();
 };
@@ -118,8 +118,8 @@ const renderLimitations = (
     [...limitations]
       .sort((left, right) =>
         compareStrings(
-          `${left.kind}:${left.code}:${left.side ?? ""}:${left.unitPath ?? ""}:${left.message}`,
-          `${right.kind}:${right.code}:${right.side ?? ""}:${right.unitPath ?? ""}:${right.message}`,
+          `${left.kind}:${left.code}:${left.side ?? ""}:${left.unitPath ?? ""}:${left.warning?.fallbackText ?? ""}`,
+          `${right.kind}:${right.code}:${right.side ?? ""}:${right.unitPath ?? ""}:${right.warning?.fallbackText ?? ""}`,
         ),
       )
       .map((limitation) =>
@@ -129,10 +129,10 @@ const renderLimitations = (
   );
 
 const renderScheduleComparison = (
-  changeSet: SemanticDiffChangeSet,
+  result: SemanticDiffResult,
   language?: string,
 ): string[] => {
-  if (!changeSet.scheduleComparison) {
+  if (!result.scheduleComparison) {
     return [];
   }
 
@@ -141,12 +141,12 @@ const renderScheduleComparison = (
     "",
     bulletLine(
       semanticDiffReportText("generated.period", language, {
-        from: escapeMarkdown(changeSet.scheduleComparison.period.from),
-        to: escapeMarkdown(changeSet.scheduleComparison.period.to),
+        from: escapeMarkdown(result.scheduleComparison.period.from),
+        to: escapeMarkdown(result.scheduleComparison.period.to),
       }),
     ),
     ...sectionOrNone(
-      [...changeSet.scheduleComparison.runChanges]
+      [...result.scheduleComparison.runChanges]
         .sort((left, right) => compareStrings(left.id, right.id))
         .flatMap((change) => renderScheduleRunChange(change, language)),
       language,
@@ -156,41 +156,42 @@ const renderScheduleComparison = (
 };
 
 export const renderSemanticDiffMarkdown = (
-  changeSet: SemanticDiffChangeSet,
+  result: SemanticDiffResult,
   language?: string,
 ): string => {
   const identityDecisions = new Map(
-    changeSet.identityDecisions.map((decision) => [decision.id, decision]),
+    result.identityDecisions.map((decision) => [decision.id, decision]),
   );
   const lines = [
     `# ${label("Semantic Diff Report", language)}`,
     "",
     `## ${label("Summary", language)}`,
     "",
-    ...renderSummary(changeSet, language),
+    ...renderSummary(result, language),
     "",
     `## ${label("Structural Changes", language)}`,
     "",
     ...sectionOrNone(
-      renderStructuralChanges(changeSet.changes, identityDecisions, language),
+      renderStructuralChanges(result.changes, identityDecisions, language),
       language,
     ),
     "",
     `## ${label("Attribute Changes", language)}`,
     "",
-    ...renderAttributeChanges(changeSet.changes, language, identityDecisions),
-    ...renderScheduleComparison(changeSet, language),
+    ...renderAttributeChanges(result.changes, language, identityDecisions),
+    "",
+    ...renderScheduleComparison(result, language),
     `## ${label("Confirmation Required", language)}`,
     "",
-    ...renderConfirmationRequired(changeSet.confirmationRequired, language),
+    ...renderConfirmationRequired(result.confirmationRequired, language),
     "",
     `## ${label("Unsupported Items", language)}`,
     "",
-    ...renderUnsupportedItems(changeSet.unsupportedItems, language),
+    ...renderUnsupportedItems(result.unsupportedItems, language),
     "",
     `## ${label("Limitations", language)}`,
     "",
-    ...renderLimitations(changeSet.limitations, language),
+    ...renderLimitations(result.limitations, language),
   ];
 
   return lines

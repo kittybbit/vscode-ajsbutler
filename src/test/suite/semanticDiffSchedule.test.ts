@@ -117,15 +117,15 @@ suite("Semantic Diff Schedule", () => {
     assert.deepStrictEqual(
       result.scheduleComparison?.runChanges.map((change) => [
         change.kind,
-        change.summary,
+        change.unitPath,
+        change.date,
+        change.before?.time ?? null,
+        change.after?.time ?? null,
       ]),
       [
-        [
-          "changed-time",
-          "/root/main run on 2026-04-10 changed from 09:00 to 10:00",
-        ],
-        ["removed", "/root/main/nested run on 2026-04-11 10:00 removed"],
-        ["added", "/root/main/nested run on 2026-04-12 10:00 added"],
+        ["added", "/root/main/nested", "2026-04-12", null, "10:00"],
+        ["changed-time", "/root/main", "2026-04-10", "09:00", "10:00"],
+        ["removed", "/root/main/nested", "2026-04-11", "10:00", null],
       ],
     );
   });
@@ -153,9 +153,27 @@ suite("Semantic Diff Schedule", () => {
     });
 
     assert.deepStrictEqual(
-      result.confirmationRequired.map((item) => item.changeContent),
-      ["main has no calculated runs in the schedule comparison period"],
+      result.confirmationRequired.map((item) => item.reasonCode),
+      ["no-calculated-schedule-run"],
     );
+    assert.deepStrictEqual(result.confirmationRequired[0].detail, {
+      unitPath: afterRoot.absolutePath,
+      parameterKey: null,
+      relationPair: null,
+      scheduleRule: null,
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      beforeValues: [],
+      afterValues: [],
+      rawValues: [],
+      removedSources: [],
+    });
+    assert.deepStrictEqual(
+      result.confirmationRequired[0].constraints.map(
+        (constraint) => constraint.code,
+      ),
+      ["jp1-ajs3-v13-rule-basis", "comparison-period"],
+    );
+    assert.strictEqual(result.confirmationRequired[0].warning, null);
   });
 
   test("reports unsupported schedule elements as uncalculated instead of guessing", () => {
@@ -179,16 +197,24 @@ suite("Semantic Diff Schedule", () => {
     });
 
     assert.deepStrictEqual(
-      result.unsupportedItems.map((item) => item.message).sort(),
+      result.unsupportedItems.map((item) => item.reasonCode).sort(),
       [
-        "/root/main cy=(1,d): cycle schedules are not calculated in this slice",
-        "/root/main ln=1: inherited parent-rule schedules are not calculated in this slice",
-        "/root/main sd=2,2026/04/10: matching st for schedule rule 2 is missing or uncalculated",
-        "/root/main sd=2026/04/31: schedule date is not a valid calendar day in the comparison period",
-        "/root/main sd=en: schedule date is not a supported explicit calendar day in YYYY/MM/DD, MM/DD, or DD form",
-        "/root/main st=3,11:00: matching sd for this start-time rule is missing",
-        "/root/main st=+27:03: start time is missing, unparsable, offset-based, day-crossing, or outside HH:MM",
+        "cycle-schedule",
+        "inherited-parent-rule",
+        "invalid-calendar-day",
+        "invalid-start-time",
+        "missing-start-time",
+        "unpaired-start-time",
+        "unsupported-schedule-date",
       ],
+    );
+    assert.ok(
+      result.unsupportedItems.every(
+        (item) =>
+          item.detail.unitPath === afterRoot.absolutePath &&
+          item.warning?.code === item.reasonCode &&
+          item.warning?.fallbackText !== null,
+      ),
     );
   });
 
@@ -212,15 +238,42 @@ suite("Semantic Diff Schedule", () => {
 
     assert.strictEqual(result.scheduleComparison, undefined);
     assert.deepStrictEqual(
-      result.unsupportedItems.map((item) => item.message),
-      ["schedule comparison period is invalid: from=2026-05-01, to=2026-04-01"],
+      result.unsupportedItems.map((item) => item.reasonCode),
+      ["invalid-schedule-comparison-period"],
     );
     assert.deepStrictEqual(result.limitations, [
       {
         code: "invalid_schedule_comparison_period",
         kind: "uncalculated",
-        message:
-          "schedule comparison period is invalid: from=2026-05-01, to=2026-04-01",
+        side: null,
+        unitPath: null,
+        detail: {
+          unitPath: null,
+          parameterKey: null,
+          relationPair: null,
+          scheduleRule: null,
+          period: { from: "2026-05-01", to: "2026-04-01" },
+          beforeValues: [],
+          afterValues: [],
+          rawValues: [],
+          removedSources: [],
+        },
+        warning: {
+          code: "invalid-schedule-comparison-period",
+          detail: {
+            unitPath: null,
+            parameterKey: null,
+            relationPair: null,
+            scheduleRule: null,
+            period: { from: "2026-05-01", to: "2026-04-01" },
+            beforeValues: [],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          fallbackText:
+            "schedule comparison period is invalid: from=2026-05-01, to=2026-04-01",
+        },
       },
     ]);
   });

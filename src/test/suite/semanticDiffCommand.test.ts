@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportDataInput } from "../../application/semantic-diff/buildSemanticDiffReportData";
-import type { SemanticDiffChangeSet } from "../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -15,12 +15,12 @@ type SemanticDiffCommandObservations = {
   clipboardWrites: string[];
   errorMessages: string[];
   reportInputs: BuildSemanticDiffReportDataInput[];
-  renderedChangeSets: SemanticDiffChangeSet[];
+  renderedResults: SemanticDiffResult[];
   renderedLanguages: (string | undefined)[];
   reportSteps: string[];
 };
 
-const emptyChangeSet = (): SemanticDiffChangeSet => ({
+const emptyResult = (): SemanticDiffResult => ({
   inputs: {
     before: { side: "before", unitIds: [], relations: [] },
     after: { side: "after", unitIds: [], relations: [] },
@@ -30,7 +30,6 @@ const emptyChangeSet = (): SemanticDiffChangeSet => ({
   confirmationRequired: [],
   unsupportedItems: [],
   limitations: [],
-  reportSections: [],
 });
 
 class SemanticDiffCommandHarness {
@@ -41,7 +40,7 @@ class SemanticDiffCommandHarness {
     clipboardWrites: [],
     errorMessages: [],
     reportInputs: [],
-    renderedChangeSets: [],
+    renderedResults: [],
     renderedLanguages: [],
     reportSteps: [],
   };
@@ -87,8 +86,8 @@ class SemanticDiffCommandHarness {
       },
       buildSemanticDiffReportData: (input) =>
         this.buildSemanticDiffReportData(input),
-      renderSemanticDiffMarkdown: (changeSet, language) =>
-        this.renderSemanticDiffMarkdown(changeSet, language),
+      renderSemanticDiffMarkdown: (result, language) =>
+        this.renderSemanticDiffMarkdown(result, language),
       ...overrides,
     };
   }
@@ -107,16 +106,16 @@ class SemanticDiffCommandHarness {
         }
       : {
           ok: true as const,
-          changeSet: emptyChangeSet(),
+          result: emptyResult(),
         };
   }
 
   private renderSemanticDiffMarkdown(
-    changeSet: SemanticDiffChangeSet,
+    result: SemanticDiffResult,
     language?: string,
   ): string {
     this.observed.reportSteps.push("render");
-    this.observed.renderedChangeSets.push(changeSet);
+    this.observed.renderedResults.push(result);
     this.observed.renderedLanguages.push(language);
     return "rendered semantic diff";
   }
@@ -369,7 +368,7 @@ suite("Semantic diff command", () => {
       "Semantic diff could not parse one or both JP1/AJS definitions.",
     ]);
     assert.ok(!harness.observed.errorMessages[0].includes("secret-content"));
-    assert.deepStrictEqual(harness.observed.renderedChangeSets, []);
+    assert.deepStrictEqual(harness.observed.renderedResults, []);
     assert.deepStrictEqual(harness.observed.clipboardWrites, []);
   });
 

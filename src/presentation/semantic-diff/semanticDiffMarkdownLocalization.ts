@@ -1,14 +1,16 @@
 import type {
   SemanticDiffAttributeCategory,
   SemanticDiffChange,
-  SemanticDiffChangeSet,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffIdentityDecision,
   SemanticDiffIdentityDecisionRule,
   SemanticDiffIdentityExactKey,
   SemanticDiffIdentityField,
   SemanticDiffIdentityStrategyId,
+  SemanticDiffRelationEndpoint,
+  SemanticDiffRelationReference,
   SemanticDiffScheduleRunChange,
+  SemanticDiffResult,
   SemanticDiffTarget,
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
@@ -105,12 +107,17 @@ export const bulletLine = (value: string): string => `- ${value}`;
 
 export const indentedLine = (value: string): string => `  - ${value}`;
 
+const describeRelationEndpoint = (
+  endpoint: SemanticDiffRelationEndpoint | SemanticDiffRelationReference,
+): string => {
+  const source = endpoint.sourceUnitPath ?? endpoint.sourceUnitId;
+  const destination = endpoint.targetUnitPath ?? endpoint.targetUnitId;
+  return `${source} -> ${destination} (${endpoint.type})`;
+};
+
 const describeRelationTarget = (target: SemanticDiffTarget): string => {
   if (target.kind !== "relation") return "";
-  const source = target.relation.sourceUnitPath ?? target.relation.sourceUnitId;
-  const destination =
-    target.relation.targetUnitPath ?? target.relation.targetUnitId;
-  return `${source} -> ${destination} (${target.relation.type})`;
+  return describeRelationEndpoint(target.relation);
 };
 
 export const describeTarget = (
@@ -135,8 +142,14 @@ export const describeTarget = (
 };
 
 const unitNames = (change: SemanticDiffChange) => ({
-  before: change.before?.kind === "unit" ? change.before.unit : undefined,
-  after: change.after?.kind === "unit" ? change.after.unit : undefined,
+  before:
+    change.before?.kind === "unit" || change.before?.kind === "jobnet"
+      ? change.before.unit
+      : undefined,
+  after:
+    change.after?.kind === "unit" || change.after?.kind === "jobnet"
+      ? change.after.unit
+      : undefined,
 });
 
 const localizedUnitChange = (
@@ -156,8 +169,33 @@ const localizedUnitChange = (
     });
   }
   if (change.kind === "moved") {
-    return semanticDiffReportText("generated.moved", language, {
-      unit: before?.name ?? after?.name ?? localizedKind("unit", language),
+    const unit = before?.name ?? after?.name ?? localizedKind("unit", language);
+    if (isJapanese(language)) {
+      return semanticDiffReportText("generated.moved", language, { unit });
+    }
+    const beforeParent = before
+      ? before.absolutePath.slice(0, before.absolutePath.lastIndexOf("/"))
+      : "";
+    const afterParent = after
+      ? after.absolutePath.slice(0, after.absolutePath.lastIndexOf("/"))
+      : "";
+    return `${unit} moved from ${beforeParent} to ${afterParent}`;
+  }
+  if (change.elementKind === "attribute") {
+    const target = isJapanese(language)
+      ? change.after?.kind === "attribute"
+        ? change.after
+        : change.before?.kind === "attribute"
+          ? change.before
+          : undefined
+      : change.before?.kind === "attribute"
+        ? change.before
+        : change.after?.kind === "attribute"
+          ? change.after
+          : undefined;
+    return semanticDiffReportText("generated.attribute", language, {
+      unit: target?.unit.name ?? localizedKind("unit", language),
+      parameter: target?.parameterKey ?? localizedKind("attribute", language),
     });
   }
   return semanticDiffReportText("generated.elementChange", language, {
@@ -173,37 +211,19 @@ export const localizedChangeSummary = (
   change: SemanticDiffChange,
   language?: string,
 ): string => {
-  if (!isJapanese(language)) return change.summary;
-  if (change.elementKind === "attribute") {
-    const target =
-      change.after?.kind === "attribute"
-        ? change.after
-        : change.before?.kind === "attribute"
-          ? change.before
-          : undefined;
-    return semanticDiffReportText("generated.attribute", language, {
-      unit: target?.unit.name ?? localizedKind("unit", language),
-      parameter: target?.parameterKey ?? localizedKind("attribute", language),
-    });
-  }
   if (change.elementKind === "relation") {
-    return semanticDiffReportText(
-      change.kind === "added"
-        ? "generated.relationAdded"
-        : "generated.relationRemoved",
-      language,
-    );
+    if (isJapanese(language)) {
+      return semanticDiffReportText(
+        change.kind === "added"
+          ? "generated.relationAdded"
+          : "generated.relationRemoved",
+        language,
+      );
+    }
+    const pair = change.relationPair.canonicalPair;
+    return `${pair.sourceUnitId}->${pair.targetUnitId} relation ${change.kind}`;
   }
   return localizedUnitChange(change, language);
-};
-
-const nonIdentityRationale = (
-  change: SemanticDiffChange,
-): string | undefined => {
-  if (change.elementKind === "job-group" || change.elementKind === "relation") {
-    return change.rationale;
-  }
-  return undefined;
 };
 
 const identityReference = (reference: SemanticDiffUnitReference): string =>
@@ -322,7 +342,19 @@ export const renderChangeDetails = (
     ["After", change.after],
   ] as const;
   sides.forEach(([side, target]) => {
-    if (target) {
+    if (change.elementKind === "relation") {
+      const relationEndpoint =
+        side === "Before"
+          ? change.relationPair.before
+          : change.relationPair.after;
+      if (relationEndpoint) {
+        lines.push(
+          indentedLine(
+            `${label(side, language)}: ${escapeMarkdown(`${localizedKind("relation", language)} ${describeRelationEndpoint(relationEndpoint)}`)}`,
+          ),
+        );
+      }
+    } else if (target) {
       lines.push(
         indentedLine(
           `${label(side, language)}: ${escapeMarkdown(describeTarget(target, language))}`,
@@ -336,15 +368,6 @@ export const renderChangeDetails = (
       : undefined;
   if (identityDecision) {
     lines.push(...renderIdentityDecisionEvidence(identityDecision, language));
-  } else {
-    const rationale = nonIdentityRationale(change);
-    if (rationale) {
-      lines.push(
-        indentedLine(
-          `${label("Rationale", language)}: ${escapeMarkdown(rationale)}`,
-        ),
-      );
-    }
   }
   return lines;
 };
@@ -388,16 +411,65 @@ export const renderConfirmationRequiredItem = (
     item.target.kind === "unit" || item.target.kind === "jobnet"
       ? item.target.unit.name
       : undefined;
-  const parameterKey = item.id.split(":").at(-1) ?? "";
+  const parameterKey = item.detail.parameterKey ?? "";
+  const relationPair = item.detail.relationPair?.canonicalPair;
+  const pair = relationPair
+    ? `${relationPair.sourceUnitId}->${relationPair.targetUnitId}`
+    : "";
+  const englishContent = (() => {
+    switch (item.reasonCode) {
+      case "conditional-relation-removed":
+        return `${pair} conditional relation removed or changed`;
+      case "wait-release-source-changed":
+        return `${unitName ?? "unit"} wait release source changed`;
+      case "timeout-removed":
+        return `${unitName ?? "unit"} explicit timeout ${parameterKey} removed`;
+      case "condition-judgment-changed":
+        return `${unitName ?? "unit"} ${parameterKey} condition or judgment changed`;
+      case "wait-target-changed":
+        return `${unitName ?? "unit"} wait target ${parameterKey} changed`;
+      case "no-calculated-schedule-run":
+        return `${unitName ?? "unit"} has no calculated runs in the schedule comparison period`;
+      case "calculated-schedule-run-removed": {
+        const [date, time] = item.detail.rawValues;
+        return `${unitName ?? "unit"} calculated schedule run ${date ?? ""} ${time ?? ""} removed`.trim();
+      }
+      case "execution-user-type-changed":
+        return `${unitName ?? "unit"} execution user type changed`;
+      case "jp1-resource-group-changed":
+        return `${unitName ?? "unit"} JP1 resource group changed`;
+    }
+  })();
   const content = japanese
     ? semanticDiffReportText("generated.confirmation", language, {
         unit: unitName ?? localizedKind("unit", language),
         parameter: parameterKey,
       })
-    : item.changeContent;
+    : englishContent;
   const rationale = japanese
     ? semanticDiffReportText("generated.confirmationRationale", language)
-    : item.rationale;
+    : (() => {
+        switch (item.reasonCode) {
+          case "conditional-relation-removed":
+            return "a previously conditional branch path may no longer be available";
+          case "wait-release-source-changed":
+            return "a previously available within-job-group release source may no longer release this wait";
+          case "timeout-removed":
+            return "removing a previously explicit wait timeout may leave a wait unresolved for longer than before";
+          case "condition-judgment-changed":
+            return "a previously established start, end, or branch path may no longer be available";
+          case "wait-target-changed":
+            return "the compared definition now waits for a different file, event, or event filter";
+          case "no-calculated-schedule-run":
+            return "a schedule-defined jobnet may no longer have an execution opportunity in the compared period";
+          case "calculated-schedule-run-removed":
+            return "a previously calculated execution opportunity is absent in the compared period";
+          case "execution-user-type-changed":
+            return "execution prerequisites may differ after the definition change";
+          case "jp1-resource-group-changed":
+            return "resource availability and contention may differ after the definition change";
+        }
+      })();
   const lines = [
     bulletLine(escapeMarkdown(content)),
     indentedLine(
@@ -418,7 +490,7 @@ export const renderConfirmationRequiredItem = (
     ...lines,
     ...item.constraints.map((constraint) =>
       indentedLine(
-        `${label("Constraint", language)}: ${escapeMarkdown(japanese ? semanticDiffReportText("generated.constraint", language) : constraint)}`,
+        `${label("Constraint", language)}: ${escapeMarkdown(japanese ? semanticDiffReportText("generated.constraint", language) : localizedConstraint(constraint))}`,
       ),
     ),
   ];
@@ -438,7 +510,7 @@ export const renderScheduleRunChange = (
         language,
         { path: change.unitPath, date: change.date },
       )
-    : change.summary;
+    : scheduleRunSummary(change);
   const lines = [
     bulletLine(
       `[${localizedKind(change.kind, language)}] ${escapeMarkdown(summary)}`,
@@ -460,44 +532,70 @@ export const renderScheduleRunChange = (
   return lines;
 };
 
-const hasFindings = (changeSet: SemanticDiffChangeSet): boolean =>
+const localizedConstraint = (
+  constraint: SemanticDiffConfirmationRequiredItem["constraints"][number],
+): string => {
+  switch (constraint.code) {
+    case "jp1-ajs3-v13-rule-basis":
+      return constraint.detail.period
+        ? "Rule basis: JP1/AJS3 v13 unit definition schedule parameters sd and st for explicit directly defined jobnet schedules."
+        : "Rule basis: JP1/AJS3 v13 unit definition parameters for relations, wait units, event receiving, file monitoring, and job end judgment.";
+    case "runtime-state-not-verified":
+      return "Runtime history and external conditions are not verified by this comparison.";
+    case "external-state-not-verified":
+      return "External files, events, hosts, users, permissions, and resource groups are not verified.";
+    case "comparison-period":
+      return constraint.detail.period
+        ? `Comparison period: ${constraint.detail.period.from} to ${constraint.detail.period.to} (exclusive)`
+        : "Comparison period";
+  }
+};
+
+const scheduleRunSummary = (change: SemanticDiffScheduleRunChange): string => {
+  if (change.kind === "changed-time") {
+    return `${change.unitPath} run on ${change.date} changed from ${change.before?.time ?? ""} to ${change.after?.time ?? ""}`;
+  }
+  const run = change.kind === "removed" ? change.before : change.after;
+  return `${change.unitPath} run on ${change.date} ${run?.time ?? ""} ${change.kind}`.trim();
+};
+
+const hasFindings = (result: SemanticDiffResult): boolean =>
   [
-    changeSet.changes.length,
-    changeSet.confirmationRequired.length,
-    changeSet.unsupportedItems.length,
-    changeSet.limitations.length,
-    changeSet.scheduleComparison?.runChanges.length ?? 0,
+    result.changes.length,
+    result.confirmationRequired.length,
+    result.unsupportedItems.length,
+    result.limitations.length,
+    result.scheduleComparison?.runChanges.length ?? 0,
   ].some((count) => count > 0);
 
 export const renderSummary = (
-  changeSet: SemanticDiffChangeSet,
+  result: SemanticDiffResult,
   language?: string,
 ): string[] => {
-  const scheduleChangeCount =
-    changeSet.scheduleComparison?.runChanges.length ?? 0;
+  const scheduleChangeCount = result.scheduleComparison?.runChanges.length ?? 0;
   const counts: Array<[number, string]> = [
-    [changeSet.changes.length, "semantic change"],
-    [changeSet.confirmationRequired.length, "confirmation-required item"],
-    [changeSet.unsupportedItems.length, "unsupported item"],
-    [changeSet.limitations.length, "limitation"],
+    [result.changes.length, "semantic change"],
+    [result.confirmationRequired.length, "confirmation-required item"],
+    [result.unsupportedItems.length, "unsupported item"],
+    [result.limitations.length, "limitation"],
   ];
   const lines = [
     bulletLine(
-      `${label("Before scope", language)}: ${escapeMarkdown(optionalText(changeSet.inputs.before.jobGroupPath))}`,
+      `${label("Before scope", language)}: ${escapeMarkdown(optionalText(result.inputs.before.jobGroupPath))}`,
     ),
     bulletLine(
-      `${label("After scope", language)}: ${escapeMarkdown(optionalText(changeSet.inputs.after.jobGroupPath))}`,
+      `${label("After scope", language)}: ${escapeMarkdown(optionalText(result.inputs.after.jobGroupPath))}`,
     ),
     ...counts.map(([count, countLabel]) =>
       bulletLine(pluralize(count, label(countLabel, language), language)),
     ),
   ];
-  if (changeSet.scheduleComparison) {
+  if (result.scheduleComparison) {
     lines.push(
       bulletLine(
         semanticDiffReportText("generated.period", language, {
-          from: escapeMarkdown(changeSet.scheduleComparison.period.from),
-          to: escapeMarkdown(changeSet.scheduleComparison.period.to),
+          from: escapeMarkdown(result.scheduleComparison.period.from),
+          to: escapeMarkdown(result.scheduleComparison.period.to),
         }),
       ),
       bulletLine(
@@ -511,7 +609,7 @@ export const renderSummary = (
   }
   lines.push(
     bulletLine(
-      hasFindings(changeSet)
+      hasFindings(result)
         ? label(
             "Result: semantic differences or review notes are present.",
             language,

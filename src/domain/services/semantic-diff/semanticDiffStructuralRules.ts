@@ -835,22 +835,27 @@ export const compareSemanticDiffRelations = ({
     matches,
   });
 
-  return sortStrings([
+  const pairKeys = new Set([
     ...relationPairs.before.keys(),
     ...relationPairs.after.keys(),
-  ]).flatMap((pairKey): SemanticDiffRelationDecision[] => {
-    const beforeRelations = relationPairs.before.get(pairKey) ?? [];
-    const afterRelations = relationPairs.after.get(pairKey) ?? [];
-    const beforeTypes = new Set(
-      beforeRelations.map((relation) => relation.type),
-    );
-    const afterTypes = new Set(afterRelations.map((relation) => relation.type));
-    const removed = beforeRelations
-      .filter((relation) => !afterTypes.has(relation.type))
-      .map((relation) => ({ kind: "removed" as const, pairKey, relation }));
-    const added = afterRelations
-      .filter((relation) => !beforeTypes.has(relation.type))
-      .map((relation) => ({ kind: "added" as const, pairKey, relation }));
-    return [...removed, ...added];
-  });
+  ]);
+  return sortStrings([...pairKeys]).flatMap(
+    (pairKey): SemanticDiffRelationDecision[] => {
+      const beforeRelations = relationPairs.before.get(pairKey) ?? [];
+      const afterRelations = relationPairs.after.get(pairKey) ?? [];
+      const beforeTypes = new Set(
+        beforeRelations.map((relation) => relation.type),
+      );
+      const afterTypes = new Set(
+        afterRelations.map((relation) => relation.type),
+      );
+      const removed = beforeRelations
+        .filter((relation) => !afterTypes.has(relation.type))
+        .map((relation) => ({ kind: "removed" as const, pairKey, relation }));
+      const added = afterRelations
+        .filter((relation) => !beforeTypes.has(relation.type))
+        .map((relation) => ({ kind: "added" as const, pairKey, relation }));
+      return [...removed, ...added];
+    },
+  );
 };

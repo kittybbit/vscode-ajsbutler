@@ -1,6 +1,6 @@
 import type * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
-import type { SemanticDiffChangeSet } from "../../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffResult } from "../../../application/semantic-diff/semanticDiffDto";
 
 export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
 
@@ -38,7 +38,7 @@ export type SemanticDiffCommandDeps = {
   language?: string;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
   renderSemanticDiffMarkdown: (
-    changeSet: SemanticDiffChangeSet,
+    result: SemanticDiffResult,
     language?: string,
   ) => string;
 };
@@ -157,7 +157,7 @@ export const executeCompareSemanticDiffCommand = async (
   let report: string;
   try {
     report = deps.renderSemanticDiffMarkdown(
-      reportResult.changeSet,
+      reportResult.result,
       deps.language,
     );
   } catch {

@@ -4,13 +4,19 @@ import type {
 } from "../../domain/models/ajs/AjsDocument";
 import type {
   SemanticDiffComparisonPeriod,
+  SemanticDiffConstraint,
   SemanticDiffConfirmationRequiredItem,
+  SemanticDiffDetail,
   SemanticDiffLimitation,
   SemanticDiffScheduleComparison,
   SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
   SemanticDiffUnsupportedItem,
 } from "./semanticDiffDto";
+import {
+  createSemanticDiffDetail,
+  createSemanticDiffWarning,
+} from "./semanticDiffStructuredFacts";
 import {
   evaluateSemanticDiffSchedule,
   type SemanticDiffScheduleRunDecision,
@@ -42,9 +48,6 @@ export type ScheduleDiffResult = {
   unsupportedItems: SemanticDiffUnsupportedItem[];
   limitations: SemanticDiffLimitation[];
 };
-
-const scheduleBasisConstraint =
-  "Rule basis: JP1/AJS3 v13 unit definition schedule parameters sd and st for explicit directly defined jobnet schedules.";
 
 const ruleValueId = (parameter: AjsParameter): string =>
   `${parameter.key}:${parameter.value}`;
@@ -91,10 +94,26 @@ const createUnsupportedItem = (
   ].join(":"),
   kind: "uncalculated",
   side: decision.side,
+  reasonCode: decision.reason,
   target: toUnitTarget(decision.unit),
-  message: `${decision.unit.absolutePath} ${decision.parameter.key}=${
-    decision.parameter.value
-  }: ${unsupportedScheduleMessage(decision)}`,
+  detail: createSemanticDiffDetail({
+    unitPath: decision.unit.absolutePath,
+    parameterKey: decision.parameter.key,
+    scheduleRule: decision.scheduleRule,
+    rawValues: [decision.parameter.value],
+  }),
+  warning: createSemanticDiffWarning({
+    code: decision.reason,
+    detail: createSemanticDiffDetail({
+      unitPath: decision.unit.absolutePath,
+      parameterKey: decision.parameter.key,
+      scheduleRule: decision.scheduleRule,
+      rawValues: [decision.parameter.value],
+    }),
+    fallbackText: `${decision.unit.absolutePath} ${decision.parameter.key}=${
+      decision.parameter.value
+    }: ${unsupportedScheduleMessage(decision)}`,
+  }),
 });
 
 const createPeriodUnsupportedItem = (
@@ -104,8 +123,15 @@ const createPeriodUnsupportedItem = (
 ): SemanticDiffUnsupportedItem => ({
   id: "uncalculated:schedule:period",
   kind: "uncalculated",
-  target: unit ? toUnitTarget(unit) : undefined,
-  message: `schedule comparison period is invalid: from=${period.from}, to=${period.to}`,
+  side: null,
+  reasonCode: "invalid-schedule-comparison-period",
+  target: unit ? toUnitTarget(unit) : null,
+  detail: createSemanticDiffDetail({ period }),
+  warning: createSemanticDiffWarning({
+    code: "invalid-schedule-comparison-period",
+    detail: createSemanticDiffDetail({ period }),
+    fallbackText: `schedule comparison period is invalid: from=${period.from}, to=${period.to}`,
+  }),
 });
 
 const createPeriodLimitation = (
@@ -113,7 +139,14 @@ const createPeriodLimitation = (
 ): SemanticDiffLimitation => ({
   code: "invalid_schedule_comparison_period",
   kind: "uncalculated",
-  message: `schedule comparison period is invalid: from=${period.from}, to=${period.to}`,
+  side: null,
+  unitPath: null,
+  detail: createSemanticDiffDetail({ period }),
+  warning: createSemanticDiffWarning({
+    code: "invalid-schedule-comparison-period",
+    detail: createSemanticDiffDetail({ period }),
+    fallbackText: `schedule comparison period is invalid: from=${period.from}, to=${period.to}`,
+  }),
 });
 
 const toScheduleRunChange = (
@@ -128,7 +161,6 @@ const toScheduleRunChange = (
       date: decision.date,
       before: decision.before,
       after: decision.after,
-      summary: `${decision.unitPath} run on ${decision.date} changed from ${decision.before.time} to ${decision.after.time}`,
     };
   }
 
@@ -138,11 +170,19 @@ const toScheduleRunChange = (
     kind: decision.kind,
     unitPath: decision.unitPath,
     date: decision.date,
-    before: decision.kind === "removed" ? decision.before : undefined,
-    after: decision.kind === "added" ? decision.after : undefined,
-    summary: `${decision.unitPath} run on ${decision.date} ${run.time} ${decision.kind}`,
+    before: decision.kind === "removed" ? decision.before : null,
+    after: decision.kind === "added" ? decision.after : null,
   };
 };
+
+const createScheduleConstraint = (
+  code: SemanticDiffConstraint["code"],
+  detail: SemanticDiffDetail,
+): SemanticDiffConstraint => ({
+  code,
+  detail,
+  warning: null,
+});
 
 const createZeroRunConfirmation = (
   unit: AjsUnit,
@@ -150,15 +190,24 @@ const createZeroRunConfirmation = (
   toUnitTarget: ScheduleDiffInput["toUnitTarget"],
 ): SemanticDiffConfirmationRequiredItem => ({
   id: `confirm:schedule-zero-runs:${unit.id}`,
+  reasonCode: "no-calculated-schedule-run",
   target: toUnitTarget(unit),
-  changeContent: `${unit.name} has no calculated runs in the schedule comparison period`,
-  rationale:
-    "a schedule-defined jobnet may no longer have an execution opportunity in the compared period",
   relatedTargets: [],
+  detail: createSemanticDiffDetail({
+    unitPath: unit.absolutePath,
+    period,
+  }),
   constraints: [
-    scheduleBasisConstraint,
-    `Comparison period: ${period.from} to ${period.to} (exclusive)`,
+    createScheduleConstraint(
+      "jp1-ajs3-v13-rule-basis",
+      createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
+    ),
+    createScheduleConstraint(
+      "comparison-period",
+      createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
+    ),
   ],
+  warning: null,
 });
 
 export const compareScheduleDiff = (

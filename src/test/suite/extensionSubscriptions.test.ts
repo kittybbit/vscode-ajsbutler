@@ -20,7 +20,7 @@ suite("Extension subscriptions", () => {
       semanticDiff: {
         buildSemanticDiffReportData: () => ({
           ok: true,
-          changeSet: {
+          result: {
             inputs: {
               before: { side: "before", unitIds: [], relations: [] },
               after: { side: "after", unitIds: [], relations: [] },
@@ -30,7 +30,6 @@ suite("Extension subscriptions", () => {
             confirmationRequired: [],
             unsupportedItems: [],
             limitations: [],
-            reportSections: [],
           },
         }),
       },

@@ -25,3 +25,26 @@
 | Durable documentation and release communication                                       | Durable Document Impact                                                                    | Feature Exit                    | Feature Exit evaluates updates to both Semantic Diff use cases, architecture wording if needed, README, and CHANGELOG; roadmap changes only if repository-level sequencing changes.                                                                                                                                                                                                                                                                                                                                           |
 
 <!-- markdownlint-enable MD013 MD060 -->
+
+## Slice 1 Implementation Validation
+
+Slice 1 implementation and the first implementation-review findings are
+addressed and ready for independent re-review. The neutral application
+boundary, typed fact mapping, atomic `result` migration,
+correspondence-first relation pairs, and pure summary/context builders are
+covered by the application contract, report-data, comparison, schedule,
+condition, Flow, and Markdown regression suites. Contract evidence explicitly
+covers all nine confirmation reasons (including the three downstream codes),
+warning-present/absent records, former prose-to-detail mappings, schedule
+missing/empty/changed/unsupported states, exactly one summary-builder call,
+and readonly context identity/lifetime. Markdown fixtures prove Japanese
+after-before attribute precedence, English move parent derivation, and
+relationPair-only Full side rendering when generic targets conflict.
+`rtk pnpm run test:compile`, 69 focused semantic-diff tests, desktop tests,
+`rtk pnpm run qlty`, `rtk pnpm run build`, and `rtk pnpm run lint:md` passed.
+The web bundle build passed; the web smoke runner could not start Chromium
+because the host denied its Mach-port rendezvous. Slice 1 does not claim the
+later mode-picker, Summary/Audit/JSON projections, Explorer, or cross-mode
+orchestration evidence; those remain assigned to later slices. No new
+interpretation, identity matching, host API, Node dependency, or telemetry
+behavior was introduced.

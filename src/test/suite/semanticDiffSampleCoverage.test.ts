@@ -72,28 +72,34 @@ suite("Semantic diff sample coverage", () => {
     );
 
     assert.ok(
-      result.confirmationRequired.some((item) =>
-        item.changeContent.includes("conditional relation removed"),
+      result.confirmationRequired.some(
+        (item) => item.reasonCode === "conditional-relation-removed",
       ),
     );
     assert.ok(
-      result.confirmationRequired.some((item) =>
-        item.changeContent.includes("explicit timeout etm removed"),
+      result.confirmationRequired.some(
+        (item) =>
+          item.reasonCode === "timeout-removed" &&
+          item.detail.parameterKey === "etm",
       ),
     );
     assert.ok(
-      result.confirmationRequired.some((item) =>
-        item.changeContent.includes("wait release source changed"),
+      result.confirmationRequired.some(
+        (item) => item.reasonCode === "wait-release-source-changed",
       ),
     );
     assert.ok(
-      result.confirmationRequired.some((item) =>
-        item.changeContent.includes("wait target evwid changed"),
+      result.confirmationRequired.some(
+        (item) =>
+          item.reasonCode === "wait-target-changed" &&
+          item.detail.parameterKey === "evwid",
       ),
     );
     assert.ok(
-      result.confirmationRequired.some((item) =>
-        item.changeContent.includes("wait target flwf changed"),
+      result.confirmationRequired.some(
+        (item) =>
+          item.reasonCode === "wait-target-changed" &&
+          item.detail.parameterKey === "flwf",
       ),
     );
     assert.ok(
@@ -106,10 +112,8 @@ suite("Semantic diff sample coverage", () => {
       ),
     );
     assert.ok(
-      result.confirmationRequired.some((item) =>
-        item.changeContent.includes(
-          "has no calculated runs in the schedule comparison period",
-        ),
+      result.confirmationRequired.some(
+        (item) => item.reasonCode === "no-calculated-schedule-run",
       ),
     );
     assert.ok(

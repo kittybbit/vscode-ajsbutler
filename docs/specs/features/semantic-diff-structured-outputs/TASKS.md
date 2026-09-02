@@ -4,9 +4,8 @@
 
 - Purpose: expose one neutral Semantic Diff result as summary, full, audit, and
   JSON outputs without changing comparison meaning.
-- Approved or active slice: Slice 1; the complete four-slice plan has an
-  independent `Ready` review and the selected Slice 1 implementation scope is
-  approved for the next implementation handoff.
+- Approved or active slice: Slice 1; implementation review is `Ready` with no
+  Findings and the completion gate is approved.
 - Do not: change identity matching or identity-evidence generation.
 - Do not: change confirmation-required rules, schedule semantics, comparison
   sources, runtime code, tests, generated artifacts, or configuration before
@@ -17,8 +16,8 @@
 - Validate intake with `rtk pnpm run qlty` and `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 1 implementation to `implementer` after this
-  focused approval-state commit.
+- Next decision: delegate Slice 2 planning/implementation after this focused
+  completion commit.
 
 ## Sync Rule
 
@@ -37,14 +36,14 @@
 
 ## Plan Status
 
-- Status: Slice 1 approved for implementation
+- Status: Slice 1 implementation review Ready; completion gate approved
 - Planning scope: complete four-slice plan covering the neutral result
   boundary, purpose-specific Markdown, locale-neutral JSON version 1, and VS
   Code mode selection/display/save integration.
 - Review status: `Ready`
-- Human approval: Approved for Slice 1 implementation in the current
-  conversation; later slices remain deferred to their own approval gates.
-- Active implementation slice: Slice 1
+- Human approval: Approved for Slice 1 implementation and, when the independent
+  review has no Findings, its completion in the current conversation.
+- Active implementation slice: Slice 1 (completion commit pending)
 
 ## Human Approval
 
@@ -63,12 +62,39 @@ completes one approved slice at a time in the order below.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-03 (automatic per-slice completion approval explicitly
+  authorized by the user when independent review has no Findings)
+- Approved scope: Completed Slice 1 implementation, validation evidence, and
+  the Slice 1 current-state and traceability updates within the documented
+  Approval Boundary.
+- Approved paths:
+  - `docs/specs/features/semantic-diff-structured-outputs/TASKS.md`
+  - `docs/specs/features/semantic-diff-structured-outputs/TRACEABILITY.md`
+  - `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`
+  - `src/application/semantic-diff/buildSemanticDiffOutputContext.ts`
+  - `src/application/semantic-diff/buildSemanticDiffReportData.ts`
+  - `src/application/semantic-diff/buildSemanticDiffSummary.ts`
+  - `src/application/semantic-diff/compareScheduleDiff.ts`
+  - `src/application/semantic-diff/compareSemanticDiff.ts`
+  - `src/application/semantic-diff/semanticDiffDto.ts`
+  - `src/application/semantic-diff/semanticDiffStructuredFacts.ts`
+  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  - `src/presentation/semantic-diff/renderSemanticDiffMarkdown.ts`
+  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
+  - `src/test/suite/buildSemanticDiffReportData.test.ts`
+  - `src/test/suite/compareSemanticDiff.test.ts`
+  - `src/test/suite/extensionSubscriptions.test.ts`
+  - `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  - `src/test/suite/semanticDiffCommand.test.ts`
+  - `src/test/suite/semanticDiffConditions.test.ts`
+  - `src/test/suite/semanticDiffContracts.test.ts`
+  - `src/test/suite/semanticDiffFlowHighlights.test.ts`
+  - `src/test/suite/semanticDiffSampleCoverage.test.ts`
+  - `src/test/suite/semanticDiffSchedule.test.ts`
+- Implementation review verdict: Ready (no Findings)
+- Commit status: Eligible for the completion gate
 
 ## Closure Approval
 
@@ -692,7 +718,7 @@ applied.
 
 ### Slice 1: Establish The Neutral Result Boundary And Summary Builder
 
-- Status: Approved; ready for implementation handoff
+- Status: Implemented; completion gate approved
 - Scope: replace prose-bearing report DTO fields and `reportSections` with the
   neutral `SemanticDiffResult`, the nine-member confirmation reason union,
   reason/constraint codes, structured details, and inherited identity evidence;
@@ -815,6 +841,27 @@ applied.
   propagation.
   Summary aggregation and pure output-context construction are in scope only
   as the reusable application contracts described above.
+
+- Implementation Evidence: Slice 1 implementation and the first
+  implementation-review findings are addressed and ready for independent
+  re-review. The application boundary now exposes `SemanticDiffResult` with
+  typed detail, reason, constraint, warning, and correspondence-first
+  relation facts; report-data success is `result` only; Flow and existing
+  Markdown consumers use the migrated neutral contract; and the pure
+  summary/context builders materialize exhaustive zero-inclusive buckets and
+  the combined confirmation leaf count. Focused contract evidence covers the
+  exhaustive nine-reason transport (including downstream reason codes),
+  warning-present/absent states, former prose-to-detail mappings, schedule
+  missing/empty/changed/unsupported cases, one summary-builder invocation,
+  and the readonly context lifetime. Full Markdown fixtures cover Japanese
+  after-before attribute precedence, English move parent derivation, and
+  relation-pair-only side rendering with conflicting generic targets.
+  Validation passed with `rtk pnpm run test:compile`, 69 focused semantic-diff tests,
+  desktop tests, `rtk pnpm run qlty`, `rtk pnpm run build`, and
+  `rtk pnpm run lint:md`; the web bundle build passed, while the web smoke
+  run was blocked by the host Chromium Mach-port permission error. No new
+  JP1/AJS interpretation, identity matching, host API, Node dependency,
+  telemetry, or user documentation behavior was introduced.
 
 ### Slice 2: Add Summary And Audit Markdown Projections
 
