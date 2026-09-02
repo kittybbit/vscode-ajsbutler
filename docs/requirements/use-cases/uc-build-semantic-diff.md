@@ -4,7 +4,9 @@
 
 Compare two JP1/AJS3 job-group definitions by JP1/AJS meaning so consumers can
 review structural, execution-condition, wait-condition, and schedule-impact
-changes without relying on raw text differences.
+changes without relying on raw text differences. Return one host-neutral,
+structured result that presentation adapters can project without changing the
+comparison meaning.
 
 ## Trigger
 
@@ -24,10 +26,13 @@ changes without relying on raw text differences.
   conditions, waits, and schedules
 - confirmed and candidate rename or move matches with typed, deterministic
   decision evidence and rationale
-- confirmation-required items with target, change, rationale, related elements,
-  and analysis constraints
+- confirmation-required items with target, change, typed reason/detail,
+  related elements, and analysis constraints
 - unsupported attributes, uninterpretable conditions, uncalculated schedules,
-  and their reasons
+  and their typed reasons/details
+- one host-neutral result containing the comparison facts, identity evidence,
+  and optional schedule comparison; localized wording and report sections are
+  not part of its meaning
 
 ## Rules
 
@@ -75,6 +80,11 @@ changes without relying on raw text differences.
 - external files, events, host permissions, users, resource groups, resource
   contention, and execution history are not verified
 - unsupported and uncalculated portions remain explicit in the result
+- parse failure remains distinct from a successful result and cannot be
+  presented as an empty comparison
+- the successful result is presentation-agnostic and can be projected into
+  summary, full, audit, or locale-neutral structured output without rerunning
+  comparison, identity matching, schedule evaluation, or risk evaluation
 - relation cycles, cyclic waits, and terminal-reachability-only judgments are
   outside the supported comparison boundary
 - schedule comparison displays its period and distinguishes supported,
@@ -135,6 +145,12 @@ Scenario: Schedule comparison reports no calculated runs
   When semantic diff is built
   Then the result includes a confirmation-required schedule item
   And the comparison period is included
+
+Scenario: One result supports multiple report projections
+  Given a successful semantic comparison has produced structured facts
+  When a consumer requests summary, full, audit, or JSON output
+  Then every projection represents the same comparison facts and decisions
+  And the comparison is not rerun
 ```
 
 ## Acceptance Notes

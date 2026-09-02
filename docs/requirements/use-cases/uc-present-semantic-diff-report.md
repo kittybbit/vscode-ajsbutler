@@ -2,26 +2,32 @@
 
 ## Goal
 
-Present a semantic comparison as reviewable Markdown, show its rationale and
-limitations, and let the user copy it explicitly.
+Present a semantic comparison as a reviewable Summary, Full, Audit, or JSON
+output, show its rationale and limitations, and let the user copy or save it
+explicitly.
 
 ## Trigger
 
-- semantic comparison completes and a user-facing report is requested
-- the user requests copying from the displayed report
+- semantic comparison completes and a user-facing output is requested
+- the user selects an output mode from the available report modes
+- the user requests copying or saving from the displayed output
 
 ## Inputs
 
-- semantic change set, identity decisions, confirmation-required items,
-  unsupported or uncalculated information, and comparison constraints
+- one immutable host-neutral semantic comparison result and its canonical
+  summary
+- identity decisions, confirmation-required items, unsupported or
+  uncalculated information, and comparison constraints from that result
 - report language derived from the host display language
+- the selected output mode: Summary, Full, Audit, or JSON
 
 ## Outputs
 
-- localized Markdown suitable for pull requests, change-control records, and
-  release approval material
-- displayed report surface in VS Code
-- copied Markdown only after an explicit user action
+- localized Summary, Full, or Audit Markdown suitable for pull requests,
+  change-control records, and release approval material
+- deterministic locale-neutral JSON suitable for review automation
+- displayed output surface in VS Code with mode-specific metadata
+- copied Markdown or saved output only after an explicit user action
 
 ## Rules
 
@@ -44,12 +50,31 @@ limitations, and let the user copy it explicitly.
 - presentation consumes identity decisions without recomputing matching rules,
   and identity evidence is not logged or sent through telemetry
 - unsupported report languages fall back to English
+- Summary is a compact overview with zero-inclusive change and unsupported
+  counts, confirmation and limitation counts, schedule-run count, and status;
+  it does not enumerate every detail
+- Full is the default human-readable mode and preserves the detailed Markdown
+  report, including empty, unsupported, uncalculated, limitation, and schedule
+  states
+- Audit includes the available structured evidence, reason codes, constraints,
+  raw values, and limitations, and does not claim unavailable runtime or
+  external-state evidence was verified
+- JSON uses an explicit versioned schema, stable codes and raw values,
+  explicit null/empty fields, and deterministic ordering independent of
+  language, host, or source insertion order
+- all modes consume the same immutable comparison result and canonical summary;
+  selecting or rendering a mode does not rerun comparison or re-aggregate data
 - the report includes the schedule comparison period when schedule comparison
   was requested
 - report presentation does not change semantic comparison meaning
 - completing comparison displays the report before any copy action
 - completion never overwrites the clipboard implicitly
 - copying Markdown is an explicit user action from the displayed report
+- JSON is not treated as Markdown and is never copied by the Markdown copy
+  action
+- saving output is an explicit action with a user-selected destination; a
+  cancelled save or host failure does not change or discard the displayed
+  result
 - standard VS Code editor, document, command, and menu surfaces are preferred
   while they satisfy the report workflow
 - desktop and web hosts consume the same semantic report data through
@@ -59,6 +84,29 @@ limitations, and let the user copy it explicitly.
 
 ```gherkin
 Feature: Present semantic diff report
+
+Scenario: A selected mode reuses one comparison result
+  Given one successful semantic comparison result is available
+  When the user selects Summary, Full, Audit, or JSON
+  Then the selected output represents the same changes and decisions
+  And comparison and summary aggregation are not rerun
+
+Scenario: Summary provides a compact review overview
+  Given a comparison contains changes, confirmation items, and an uncalculated
+    schedule
+  When Summary output is selected
+  Then counts and status are displayed without enumerating every detail
+
+Scenario: Audit preserves available decision evidence
+  Given a comparison contains identity evidence, constraints, and limitations
+  When Audit output is selected
+  Then those structured facts are included
+  And unavailable runtime or external-state evidence is not described as verified
+
+Scenario: JSON remains locale-neutral
+  Given the same structured result is rendered on different hosts or languages
+  When JSON output is selected
+  Then its identifiers, reason codes, raw values, and bytes are unchanged
 
 Scenario: Report is displayed before explicit copy
   Given semantic diff results have been rendered as Markdown
