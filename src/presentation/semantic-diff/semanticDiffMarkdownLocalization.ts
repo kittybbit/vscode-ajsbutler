@@ -3,8 +3,14 @@ import type {
   SemanticDiffChange,
   SemanticDiffChangeSet,
   SemanticDiffConfirmationRequiredItem,
+  SemanticDiffIdentityDecision,
+  SemanticDiffIdentityDecisionRule,
+  SemanticDiffIdentityExactKey,
+  SemanticDiffIdentityField,
+  SemanticDiffIdentityStrategyId,
   SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
+  SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
 import { semanticDiffReportText } from "./semanticDiffReportText";
 
@@ -21,6 +27,12 @@ const labelKeys: Record<string, string> = {
   Before: "before",
   After: "after",
   Rationale: "rationale",
+  Rule: "identityRule",
+  Strategy: "identityStrategy",
+  "Unit type": "identityUnitType",
+  Fields: "identityFields",
+  Candidates: "identityCandidates",
+  Key: "identityKey",
   Target: "target",
   Related: "related",
   Constraint: "constraint",
@@ -75,6 +87,16 @@ export const pluralize = (
 
 export const escapeMarkdown = (value: string): string =>
   value.replace(/([\\`*_{}[\]()#+!|>])/g, "\\$1");
+
+export const localizedIdentityRule = (
+  rule: SemanticDiffIdentityDecisionRule,
+  language?: string,
+): string => semanticDiffReportText(`identity.rule.${rule}`, language);
+
+export const localizedIdentityStrategy = (
+  strategy: SemanticDiffIdentityStrategyId,
+  language?: string,
+): string => semanticDiffReportText(`identity.strategy.${strategy}`, language);
 
 export const optionalText = (value: string | undefined): string =>
   value && value.length > 0 ? value : "(not specified)";
@@ -175,21 +197,120 @@ export const localizedChangeSummary = (
   return localizedUnitChange(change, language);
 };
 
-const localizedRationale = (
+const nonIdentityRationale = (
   change: SemanticDiffChange,
-  language?: string,
 ): string | undefined => {
-  if (!change.rationale || !isJapanese(language)) return change.rationale;
-  return change.confirmationLevel === "candidate"
-    ? semanticDiffReportText("generated.rationaleCandidate", language)
-    : change.rationale.includes("exact")
-      ? semanticDiffReportText("generated.rationaleExact", language)
-      : semanticDiffReportText("generated.rationaleFingerprint", language);
+  if (change.elementKind === "job-group" || change.elementKind === "relation") {
+    return change.rationale;
+  }
+  return undefined;
+};
+
+const identityReference = (reference: SemanticDiffUnitReference): string =>
+  `${escapeMarkdown(reference.name)} (${escapeMarkdown(reference.unitType)}) ${escapeMarkdown(reference.absolutePath)} [${escapeMarkdown(reference.id)}]`;
+
+const nestedBulletLine = (value: string): string => `    - ${value}`;
+
+const renderedIdentityFieldValues = (
+  field: SemanticDiffIdentityField,
+  language?: string,
+): string => {
+  if (field.values.length > 0) {
+    return field.values.map(escapeMarkdown).join(", ");
+  }
+  if (field.presence === "absent") {
+    return semanticDiffReportText("generated.none", language);
+  }
+  return '""';
+};
+
+const identityFieldValue = (
+  field: SemanticDiffIdentityField,
+  language?: string,
+): string => {
+  const presence = semanticDiffReportText(
+    `identity.${field.presence}`,
+    language,
+  );
+  const values = renderedIdentityFieldValues(field, language);
+  return `${escapeMarkdown(field.key)} (${presence}): ${values}`;
+};
+
+const renderIdentityFields = (
+  fields: SemanticDiffIdentityField[],
+  language?: string,
+): string[] => [
+  indentedLine(`${label("Fields", language)}:`),
+  ...fields.map((field) =>
+    nestedBulletLine(identityFieldValue(field, language)),
+  ),
+];
+
+const renderIdentityKey = (
+  key: SemanticDiffIdentityExactKey,
+  language?: string,
+): string[] => {
+  const details =
+    key.kind === "jobnet"
+      ? `${escapeMarkdown(key.kind)}; jobGroupRelativePath=${escapeMarkdown(key.jobGroupRelativePath)}; unitType=${escapeMarkdown(key.unitType)}`
+      : `${escapeMarkdown(key.kind)}; parentJobnetPath=${escapeMarkdown(key.parentJobnetPath)}; unitName=${escapeMarkdown(key.unitName)}; unitType=${escapeMarkdown(key.unitType)}`;
+  return [indentedLine(`${label("Key", language)}: ${details}`)];
+};
+
+const renderIdentityCandidates = (
+  decision: SemanticDiffIdentityDecision,
+  language?: string,
+): string[] => [
+  indentedLine(`${label("Candidates", language)}:`),
+  ...decision.before.map((reference) =>
+    nestedBulletLine(
+      `${label("Before", language)}: ${identityReference(reference)}`,
+    ),
+  ),
+  ...decision.after.map((reference) =>
+    nestedBulletLine(
+      `${label("After", language)}: ${identityReference(reference)}`,
+    ),
+  ),
+];
+
+export const renderIdentityDecisionEvidence = (
+  decision: SemanticDiffIdentityDecision,
+  language?: string,
+): string[] => {
+  const lines = [
+    indentedLine(
+      `${label("Rationale", language)}: ${escapeMarkdown(localizedIdentityRule(decision.rule, language))}`,
+    ),
+    indentedLine(
+      `${label("Rule", language)}: ${escapeMarkdown(localizedIdentityRule(decision.rule, language))} (${escapeMarkdown(decision.rule)})`,
+    ),
+  ];
+  if (decision.evidence.kind === "exact-key") {
+    return [...lines, ...renderIdentityKey(decision.evidence.key, language)];
+  }
+  lines.push(
+    indentedLine(
+      `${label("Strategy", language)}: ${escapeMarkdown(localizedIdentityStrategy(decision.evidence.strategyId, language))} (${escapeMarkdown(decision.evidence.strategyId)})`,
+    ),
+    indentedLine(
+      `${label("Unit type", language)}: ${escapeMarkdown(decision.evidence.unitType)}`,
+    ),
+    ...renderIdentityFields(decision.evidence.fields, language),
+  );
+  if (decision.status === "candidate") {
+    lines.push(...renderIdentityCandidates(decision, language));
+  }
+  return lines;
 };
 
 export const renderChangeDetails = (
   change: SemanticDiffChange,
   language?: string,
+  identityDecisions: ReadonlyMap<
+    string,
+    SemanticDiffIdentityDecision
+  > = new Map(),
 ): string[] => {
   const lines = [
     bulletLine(
@@ -209,13 +330,21 @@ export const renderChangeDetails = (
       );
     }
   });
-  const rationale = localizedRationale(change, language);
-  if (rationale) {
-    lines.push(
-      indentedLine(
-        `${label("Rationale", language)}: ${escapeMarkdown(rationale)}`,
-      ),
-    );
+  const identityDecision =
+    change.elementKind !== "job-group" && change.elementKind !== "relation"
+      ? identityDecisions.get(change.identityDecisionId)
+      : undefined;
+  if (identityDecision) {
+    lines.push(...renderIdentityDecisionEvidence(identityDecision, language));
+  } else {
+    const rationale = nonIdentityRationale(change);
+    if (rationale) {
+      lines.push(
+        indentedLine(
+          `${label("Rationale", language)}: ${escapeMarkdown(rationale)}`,
+        ),
+      );
+    }
   }
   return lines;
 };
@@ -223,6 +352,10 @@ export const renderChangeDetails = (
 export const renderAttributeChanges = (
   changes: SemanticDiffChange[],
   language?: string,
+  identityDecisions: ReadonlyMap<
+    string,
+    SemanticDiffIdentityDecision
+  > = new Map(),
 ): string[] => {
   const attributeChanges = changes.filter(
     (change) => change.elementKind === "attribute",
@@ -239,7 +372,7 @@ export const renderAttributeChanges = (
       `### ${semanticDiffReportText(`category.${category}`, language)}`,
       "",
       ...categoryChanges.flatMap((change) =>
-        renderChangeDetails(change, language),
+        renderChangeDetails(change, language, identityDecisions),
       ),
       "",
     ];

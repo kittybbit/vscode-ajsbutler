@@ -41,6 +41,109 @@ export type SemanticDiffIdentityKey =
   | SemanticDiffUnitIdentityKey
   | SemanticDiffRelationIdentityKey;
 
+/**
+ * Closed set of identity strategies supported by Semantic Diff.  The
+ * strategy is deliberately part of the evidence so that equivalent values
+ * from different definition forms can never be matched implicitly.
+ */
+export type SemanticDiffIdentityStrategyId =
+  | "command-text-v1"
+  | "executable-file-v1"
+  | "event-reception-v1"
+  | "file-monitor-v1"
+  | "legacy-all-parameters-v1";
+
+export type SemanticDiffIdentityField = {
+  key: string;
+  presence: "absent" | "present";
+  values: string[];
+};
+
+export type SemanticDiffIdentityFingerprintEvidence = {
+  kind: "fingerprint";
+  strategyId: SemanticDiffIdentityStrategyId;
+  unitType: string;
+  fields: SemanticDiffIdentityField[];
+};
+
+export type SemanticDiffIdentityUnitReference = {
+  id: string;
+  name: string;
+  absolutePath: string;
+  unitType: string;
+};
+
+export type SemanticDiffIdentityExactKey =
+  | {
+      kind: "jobnet";
+      jobGroupRelativePath: string;
+      unitType: string;
+    }
+  | {
+      kind: "unit";
+      parentJobnetPath: string;
+      unitName: string;
+      unitType: string;
+    };
+
+export type SemanticDiffIdentityExactKeyEvidence = {
+  kind: "exact-key";
+  key: SemanticDiffIdentityExactKey;
+};
+
+export type SemanticDiffIdentityEvidence =
+  | SemanticDiffIdentityExactKeyEvidence
+  | SemanticDiffIdentityFingerprintEvidence;
+
+export type SemanticDiffIdentityDecisionRule =
+  | "exact-key"
+  | "one-to-one-fingerprint"
+  | "ambiguous-fingerprint"
+  | "unmatched-before"
+  | "unmatched-after";
+
+export type SemanticDiffIdentityDecisionStatus =
+  | "exact"
+  | "fingerprint-confirmed"
+  | "candidate"
+  | "removed"
+  | "added";
+
+export type SemanticDiffIdentityDecisionId = string;
+
+type SemanticDiffIdentityDecisionBase = {
+  id: SemanticDiffIdentityDecisionId;
+  before: SemanticDiffIdentityUnitReference[];
+  after: SemanticDiffIdentityUnitReference[];
+};
+
+export type SemanticDiffIdentityDecision =
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "exact";
+      rule: "exact-key";
+      evidence: SemanticDiffIdentityExactKeyEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "fingerprint-confirmed";
+      rule: "one-to-one-fingerprint";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "candidate";
+      rule: "ambiguous-fingerprint";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "removed";
+      rule: "unmatched-before";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    })
+  | (SemanticDiffIdentityDecisionBase & {
+      status: "added";
+      rule: "unmatched-after";
+      evidence: SemanticDiffIdentityFingerprintEvidence;
+    });
+
 export type SemanticDiffComparisonPeriod = {
   from: string;
   to: string;

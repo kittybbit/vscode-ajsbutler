@@ -22,7 +22,8 @@ changes without relying on raw text differences.
 
 - added, removed, and changed jobnets, units, relations, execution attributes,
   conditions, waits, and schedules
-- confirmed and candidate rename or move matches with decision rationale
+- confirmed and candidate rename or move matches with typed, deterministic
+  decision evidence and rationale
 - confirmation-required items with target, change, rationale, related elements,
   and analysis constraints
 - unsupported attributes, uninterpretable conditions, uncalculated schedules,
@@ -47,6 +48,23 @@ changes without relying on raw text differences.
   rename or move detection
 - rename or move is confirmed automatically only when one unmatched unit on
   each side has the same fingerprint and unit type
+- identity strategy selection is explicit and unit-type/form-specific:
+  command-text (`j`/`rj` with `te`), executable-file (`j`/`rj`/`pj`/`rp`/`qj`/`rq`
+  with `sc` and optional `prm`), event-reception (`evwj`/`revwj` selectors),
+  and file-monitor (`flwj`/`rflwj` file and effective condition) strategies
+  are supported; recovery counterparts retain their distinct unit type
+- strategy evidence preserves canonical field presence and values in a
+  deterministic order, including sorted repeated event filters and the
+  effective file-monitor condition default
+- unsupported, missing, duplicate, mixed, or malformed forms use the existing
+  all-parameter fallback representation and do not broaden automatic matches
+  without reference-backed support
+- each unit identity outcome exposes either its exact identity key or its
+  fingerprint strategy, unit type, and canonical fields; ambiguous decisions
+  retain every candidate in deterministic order, while a changed fingerprint
+  remains an addition and a removal
+- identity decisions are plain, host-neutral data and are not sent through
+  telemetry or logging
 - fingerprint-changing rename or move remains delete and add unless a separate
   approved feature introduces manual correspondence
 - confirmation-required items are limited to changes that may prevent an

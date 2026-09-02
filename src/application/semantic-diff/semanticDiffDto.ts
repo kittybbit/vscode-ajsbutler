@@ -1,3 +1,17 @@
+import type {
+  SemanticDiffIdentityDecision as DomainSemanticDiffIdentityDecision,
+  SemanticDiffIdentityDecisionId as DomainSemanticDiffIdentityDecisionId,
+  SemanticDiffIdentityDecisionRule as DomainSemanticDiffIdentityDecisionRule,
+  SemanticDiffIdentityDecisionStatus as DomainSemanticDiffIdentityDecisionStatus,
+  SemanticDiffIdentityEvidence as DomainSemanticDiffIdentityEvidence,
+  SemanticDiffIdentityExactKey as DomainSemanticDiffIdentityExactKey,
+  SemanticDiffIdentityExactKeyEvidence as DomainSemanticDiffIdentityExactKeyEvidence,
+  SemanticDiffIdentityField as DomainSemanticDiffIdentityField,
+  SemanticDiffIdentityFingerprintEvidence as DomainSemanticDiffIdentityFingerprintEvidence,
+  SemanticDiffIdentityStrategyId as DomainSemanticDiffIdentityStrategyId,
+  SemanticDiffIdentityUnitReference as DomainSemanticDiffIdentityUnitReference,
+} from "../../domain/models/semantic-diff/SemanticDiff";
+
 export type SemanticDiffSide = "before" | "after";
 
 export type SemanticDiffElementKind =
@@ -40,12 +54,23 @@ export type SemanticDiffLimitationKind =
   | "normalization"
   | SemanticDiffUnsupportedKind;
 
-export type SemanticDiffUnitReference = {
-  id: string;
-  name: string;
-  absolutePath: string;
-  unitType: string;
-};
+export type SemanticDiffUnitReference = DomainSemanticDiffIdentityUnitReference;
+export type SemanticDiffIdentityStrategyId =
+  DomainSemanticDiffIdentityStrategyId;
+export type SemanticDiffIdentityField = DomainSemanticDiffIdentityField;
+export type SemanticDiffIdentityFingerprintEvidence =
+  DomainSemanticDiffIdentityFingerprintEvidence;
+export type SemanticDiffIdentityExactKey = DomainSemanticDiffIdentityExactKey;
+export type SemanticDiffIdentityExactKeyEvidence =
+  DomainSemanticDiffIdentityExactKeyEvidence;
+export type SemanticDiffIdentityEvidence = DomainSemanticDiffIdentityEvidence;
+export type SemanticDiffIdentityDecisionRule =
+  DomainSemanticDiffIdentityDecisionRule;
+export type SemanticDiffIdentityDecisionStatus =
+  DomainSemanticDiffIdentityDecisionStatus;
+export type SemanticDiffIdentityDecisionId =
+  DomainSemanticDiffIdentityDecisionId;
+export type SemanticDiffIdentityDecision = DomainSemanticDiffIdentityDecision;
 
 export type SemanticDiffRelationReference = {
   sourceUnitId: string;
@@ -96,17 +121,35 @@ export type SemanticDiffTarget =
   | SemanticDiffRelationTarget
   | SemanticDiffAttributeTarget;
 
-export type SemanticDiffChange = {
+type SemanticDiffIdentityChange = {
   id: string;
   kind: SemanticDiffChangeKind;
-  elementKind: SemanticDiffElementKind;
+  elementKind: "jobnet" | "unit" | "attribute";
   confirmationLevel: SemanticDiffConfirmationLevel;
   before?: SemanticDiffTarget;
   after?: SemanticDiffTarget;
   attributeCategory?: SemanticDiffAttributeCategory;
   summary: string;
   rationale?: string;
+  identityDecisionId: SemanticDiffIdentityDecisionId;
 };
+
+type SemanticDiffNonIdentityChange = {
+  id: string;
+  kind: SemanticDiffChangeKind;
+  elementKind: "job-group" | "relation";
+  confirmationLevel: SemanticDiffConfirmationLevel;
+  before?: SemanticDiffTarget;
+  after?: SemanticDiffTarget;
+  attributeCategory?: SemanticDiffAttributeCategory;
+  summary: string;
+  rationale?: string;
+  identityDecisionId?: never;
+};
+
+export type SemanticDiffChange =
+  | SemanticDiffIdentityChange
+  | SemanticDiffNonIdentityChange;
 
 export type SemanticDiffConfirmationRequiredItem = {
   id: string;
@@ -185,6 +228,7 @@ export type SemanticDiffScheduleComparison = {
 export type SemanticDiffChangeSet = {
   inputs: SemanticDiffInputPair;
   changes: SemanticDiffChange[];
+  identityDecisions: SemanticDiffIdentityDecision[];
   confirmationRequired: SemanticDiffConfirmationRequiredItem[];
   unsupportedItems: SemanticDiffUnsupportedItem[];
   limitations: SemanticDiffLimitation[];

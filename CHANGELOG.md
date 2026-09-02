@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Improved Semantic Diff Markdown reports so English and Japanese output
+  explains typed identity rules, strategies, canonical fields, and all
+  ambiguous candidates while preserving raw JP1/AJS values safely.
+
 ## [1.17.0] - 2026-08-09
 
 - Improved viewer opening failure handling so unavailable editors and host

@@ -25,13 +25,24 @@ limitations, and let the user copy it explicitly.
 
 ## Rules
 
-- Markdown preserves enough rationale to review identity decisions, changes,
-  confirmation-required items, unsupported data, and limitations
+- Markdown preserves enough typed evidence and rationale to review identity
+  decisions, changes, confirmation-required items, unsupported data, and
+  limitations
+- identity decisions are rendered from their typed evidence: exact outcomes
+  show the exact key; fingerprint, added, and removed outcomes show the
+  localized rule and strategy together with the raw strategy ID, unit type,
+  canonical field presence/values, and deterministic field order; candidates
+  show every before/after reference without selecting a target
 - report headings, labels, summaries, rationale, schedule sections,
   confirmation wording, limitation notes, and empty states use the selected
   report language
 - semantic identifiers, paths, parameter keys, and raw JP1/AJS values are not
   translated
+- raw identity values and references remain unchanged apart from Markdown
+  escaping; missing decision references preserve the change and omit only the
+  unavailable evidence
+- presentation consumes identity decisions without recomputing matching rules,
+  and identity evidence is not logged or sent through telemetry
 - unsupported report languages fall back to English
 - the report includes the schedule comparison period when schedule comparison
   was requested

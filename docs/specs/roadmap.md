@@ -19,14 +19,6 @@ entry conditions that make planning each item useful.
 
 ### Wave 1: Comparison Confidence And Review Contracts
 
-#### Strengthen Semantic Diff Identity Confidence
-
-- Origin: proposals R-1 and E-1.
-- Improve unit-type-specific identity fingerprints and expose the evidence used
-  for exact, rename, move, candidate, added, and removed decisions.
-- Entry condition: current exact-match, fingerprint, candidate, added, and
-  removed behavior is captured as a regression baseline.
-
 #### Add Structured Semantic Diff Outputs And Report Modes
 
 - Origin: proposals R-2, N-4, and F-3.

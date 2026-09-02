@@ -2,6 +2,7 @@ import type {
   SemanticDiffChange,
   SemanticDiffChangeSet,
   SemanticDiffConfirmationRequiredItem,
+  SemanticDiffIdentityDecision,
   SemanticDiffLimitation,
   SemanticDiffUnsupportedItem,
 } from "../../application/semantic-diff/semanticDiffDto";
@@ -40,6 +41,7 @@ const sectionOrNone = (lines: string[], language?: string): string[] =>
 
 const renderStructuralChanges = (
   changes: SemanticDiffChange[],
+  identityDecisions: ReadonlyMap<string, SemanticDiffIdentityDecision>,
   language?: string,
 ): string[] =>
   changes
@@ -50,7 +52,9 @@ const renderStructuralChanges = (
         (structuralElementOrder.get(right.elementKind) ?? 99);
       return elementComparison || compareChanges(left, right);
     })
-    .flatMap((change) => renderChangeDetails(change, language));
+    .flatMap((change) =>
+      renderChangeDetails(change, language, identityDecisions),
+    );
 
 const renderConfirmationRequired = (
   items: SemanticDiffConfirmationRequiredItem[],
@@ -155,6 +159,9 @@ export const renderSemanticDiffMarkdown = (
   changeSet: SemanticDiffChangeSet,
   language?: string,
 ): string => {
+  const identityDecisions = new Map(
+    changeSet.identityDecisions.map((decision) => [decision.id, decision]),
+  );
   const lines = [
     `# ${label("Semantic Diff Report", language)}`,
     "",
@@ -165,13 +172,13 @@ export const renderSemanticDiffMarkdown = (
     `## ${label("Structural Changes", language)}`,
     "",
     ...sectionOrNone(
-      renderStructuralChanges(changeSet.changes, language),
+      renderStructuralChanges(changeSet.changes, identityDecisions, language),
       language,
     ),
     "",
     `## ${label("Attribute Changes", language)}`,
     "",
-    ...renderAttributeChanges(changeSet.changes, language),
+    ...renderAttributeChanges(changeSet.changes, language, identityDecisions),
     ...renderScheduleComparison(changeSet, language),
     `## ${label("Confirmation Required", language)}`,
     "",
