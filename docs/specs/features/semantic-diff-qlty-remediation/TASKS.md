@@ -3,10 +3,11 @@
 ## Agent Brief
 
 - Purpose: remove the 56 Qlty blockers on PR #313 without observable change.
-- Approved or active slice: Slice 1 production implementation and review are
-  complete; its structural cloud gate is satisfied at 46 because one hidden
-  aggregate belongs to Slice 2. A format-only planning-package gate remains;
-  Slices 2-5 remain approved and unchanged, queued behind that gate.
+- Approved or active slice: Slice 1 is complete and published at `29f34008`;
+  its structural cloud gate is satisfied at 46 because one hidden aggregate
+  belongs to Slice 2, and the published `qlty fmt` gate is clean. Slice 2 is
+  now the active Human-Approved slice under its exact 11-finding boundary;
+  Slices 3-5 remain approved and queued behind it.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -16,11 +17,9 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate the exact two-file inventory-reconciliation package
-  to `approval-committer`. Independent review and Human Approval are complete;
-  a published clean `qlty fmt` result on that package closes Slice 1 without
-  reopening production and permits Slice 2 to start with 35 expected remaining
-  structural blockers after its 11 findings.
+- Next decision: delegate the existing Slice 2 boundary to `implementer`.
+  The published next target is 35 structural blockers, zero format blockers,
+  and no replacement finding after its exact 11 findings are resolved.
 
 ## Sync Rule
 
@@ -52,28 +51,30 @@
 
 ## Plan Status
 
-- Status: Ready for approval-committer; format-only Slice 1 closure package
-  reviewed and approved
+- Status: Approved; Slice 2 active under its reviewed boundary
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
 - Review status: Ready for approval; Findings: none
 - Independent plan review: Ready for approval; Findings: none; the authoritative
   GraphQL reconciliation and Slice 1 completion gate are confirmed
-- Human approval: Approved for the format-only closure package; Slice 1
-  production completion and Slices 2-5 remain otherwise approved
-- Active implementation slice: Slice 1 — Preserve Comparison Facts And
-  Canonical Summary; production correction is complete, with the approved
-  format-only planning package pending focused commit and published checks
+- Human approval: Approved for the original five slice scopes; Slice 1 is
+  complete and published, and Slice 2 is now active under its existing exact
+  11-finding boundary
+- Active implementation slice: Slice 2 — Preserve Markdown Projection And
+  Mode Dispatch; Slice 1 published head `29f34008` records 46 structural
+  blockers, zero formatting blockers, and no replacement finding
 
 ## Human Approval
 
-- Status: Approved for the format-only closure package; Slice 1 production
-  correction and Slices 2-5 remain approved and unchanged
+- Status: Approved for Slice 2 implementation; Slice 1 is complete and
+  published, and Slices 3-5 remain approved and unchanged
 - Approved at: approved in current conversation
 - Approved scope: the original five slice scopes and Slice 1 correction 2
   production implementation remain approved in mandatory order. The
   authoritative `6b6e4df5` reconciliation accepts Slice 1's structural gate at
-  46; the exact format-only closure package below is approved for commit.
+  46, and published head `29f34008` confirms the clean format gate. Slice 2's
+  existing boundary is approved for implementation, including both hidden
+  `localizedUnitChange` aggregate findings.
 - Approved paths (unchanged original implementation scopes):
   - Slice 1: `src/application/semantic-diff/buildSemanticDiffSummary.ts`,
     `src/application/semantic-diff/compareSemanticDiff.ts`, and
@@ -115,64 +116,51 @@
   `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
   `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`.
 
-The format-only closure package is eligible for the focused
-`approval-committer` commit. `Approved at` records the approval result only,
-such as `none` or `approved in current conversation`; do not copy the approval
-message.
+The format-only closure package was published at `29f34008`. `Approved at`
+records the approval result only, such as `none` or `approved in current
+conversation`; do not copy the approval message.
 
 Reset this section back to Pending when the approved slice is complete and no
 active implementation approval remains.
 
 ## Format-only Reconciliation Package Approval Boundary
 
-- Status: Ready for approval-committer; independent plan review `Ready` with no
-  Findings and Human Approval approved
-- Purpose: authorize one focused format-only commit of this inventory
-  reconciliation package; it does not authorize runtime, test,
-  generated-artifact, or configuration changes.
+- Status: Complete; published at `29f34008` with independent plan review
+  `Ready` and no Findings
+- Purpose: record the completed format-only inventory reconciliation; it did
+  not authorize runtime, test, generated-artifact, or configuration changes.
 - Approval-committer paths (exactly):
   - `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`
   - `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`
 - The Slice 1 Format-only Closure Gate below is a separate planning/completion
-  boundary. The approved guarded global formatter may change only these two
-  planning paths; no runtime, test, generated-artifact, or configuration path
-  may change. The independent plan review and Human Approval gates are
-  satisfied, so the approval-committer is eligible to create this package
-  commit. A clean
-  published `qlty fmt` result on that exact head closes Slice 1 without
-  reopening production.
+  boundary. The published head `29f34008` changed only these two planning
+  paths and records `qlty fmt` pass with no formatting issues; the published
+  `qlty check` remains at 46 structural blockers with no Slice 1 replacement.
+  Verify and CodeQL also pass. Slice 1 is closed without reopening production.
 
 ## Completion Approval
 
-- Status: Approved for Slice 1 production completion and the format-only
-  closure package; published formatter gate pending
-- Approved at: approved in current conversation
-- Approved scope: Slice 1 correction 2 production completion, limited to the
-  exact two implementation paths below; its structural cloud gate is accepted
-  at 46 because the additional aggregate finding belongs to Slice 2
-- Approved paths:
-  `src/application/semantic-diff/buildSemanticDiffSummary.ts` and
-  `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`
-- Implementation review verdict: Ready; Findings: none
-- Commit status: The exact format-only planning package is eligible for the
-  focused approval-committer commit; published `qlty fmt` and `qlty check`
-  terminal results remain pending
+- Status: Pending for Slice 2 completion
+- Approved at: none
+- Approved scope: none; Slice 2 implementation and independent review are
+  still in progress
+- Approved paths: none
+- Implementation review verdict: Pending
+- Commit status: Not eligible
 
-The prior conditional clean-review authorization remains applied to correction
-2 because its independent implementation review returned `Ready` with no
-Findings. The authoritative `6b6e4df5` cloud reconciliation accepts 46
-structural blockers for the completed Slice 1 production scope: 45 active
-inline instances plus one hidden aggregate `function-complexity` finding
-owned by Slice 2. The approval-committer must preserve the exact two-file
-package and verify on its published head that `qlty fmt` is clean and the
-structural result remains 46 with no S1 replacement. A different formatting
-result or a new S1 rule/function/file finding requires Replanning; it does not
-reopen the completed Slice 1 production implementation.
+The prior conditional clean-review authorization was consumed by the completed
+Slice 1 package. The authoritative `6b6e4df5` reconciliation and published
+head `29f34008` accept 46 structural blockers for the completed Slice 1 scope:
+45 active inline instances plus one hidden aggregate `function-complexity`
+finding owned by Slice 2. Published `qlty fmt` is clean, and there is no Slice
+1 replacement. A different formatting result or a new S1 rule/function/file
+finding requires Replanning; it does not reopen the completed Slice 1
+production implementation.
 
-After that exact two-file planning package is committed and its published
-`qlty fmt` check is clean, Slice 1 may be marked complete and Slice 2 may start
-with both `localizedUnitChange` aggregate findings included in its 11-finding
-scope.
+Slice 2 is now active under its Human-Approved exact 11-finding scope, which
+includes both `localizedUnitChange` aggregate findings. Its next published
+target is 35 structural blockers, zero format blockers, and no replacement
+finding.
 
 For the corrected Slice 1 and each later approved slice, the user's prior
 conditional clean-review authorization applies only when the independent
@@ -203,8 +191,8 @@ create the focused closure commit before the feature is closed.
 
 - Slice order is mandatory. A later slice may start only after its dependencies
   have an implementation-review verdict of `Ready`, Completion Approval, and a
-  focused completion commit. Slice 1's format-only closure gate must pass
-  before Slice 2 can start.
+  focused completion commit. Slice 1's format-only closure gate is complete;
+  Slice 2 is the active slice.
 - Every slice must run `qlty fmt` and pass Qlty locally. For the format-only
   closure package's global `rtk pnpm run qlty:fmt` invocation, capture immutable
   pre-format snapshots of `git status --short --untracked-files=all`,
@@ -269,9 +257,9 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 1: Preserve Comparison Facts And Canonical Summary
 
-- Status: Production implementation and correction 2 review complete; the
-  Slice 1 structural gate is satisfied at 46, with only the format-only
-  closure package and published `qlty fmt` gate pending
+- Status: Complete and published at `29f34008`; correction 2 review is
+  complete, the structural gate is satisfied at 46, and the published
+  `qlty fmt` gate is clean with no Slice 1 replacement
 - Scope: simplify summary aggregation and comparison projection in
   `buildSemanticDiffSummary.ts` and `compareSemanticDiff.ts`. Replace complex
   boolean accumulation with named predicates or data-driven checks; reduce all
@@ -305,9 +293,9 @@ create the focused closure commit before the feature is closed.
   result was not a valid completion gate. The first correction and correction
   2 reran these behavior scenarios and passed the recorded local checks,
   summary/output-context byte comparison, and 400-case deterministic
-  differential corpus. The published `6b6e4df5` result confirms the expected
-  46 structural blockers for the post-S1 state; only the planning-artifact
-  Prettier gate remains.
+  differential corpus. The published `29f34008` result confirms the expected
+  46 structural blockers for the post-S1 state; `qlty fmt` reports no
+  formatting issues and no Slice 1 replacement is active.
 - Production Readiness: retain deterministic behavior for reordered, malformed,
   ambiguous, large, unsupported, and uncalculated inputs; do not add I/O, host,
   parser, telemetry, or Node dependencies.
@@ -317,8 +305,8 @@ create the focused closure commit before the feature is closed.
   test files named above. Test edits may strengthen characterization only and
   must not change expected semantics.
 - Dependencies: the correction 2 implementation is published at `6b6e4df5`
-  and independently reviewed. The format-only closure package below must be
-  reviewed, approved, and committed by `approval-committer` before Slice 2.
+  and independently reviewed. The format-only closure package completed at
+  published head `29f34008`; Slice 2 is now active.
 - Risks: a superficially equivalent helper can change relation ID remapping,
   ordering, truth-table precedence, or the combined confirmation count.
 - Out of Scope: DTO/schema changes, domain identity or risk rules, schedule
@@ -326,17 +314,16 @@ create the focused closure commit before the feature is closed.
 
 #### Slice 1 Correction 2 Gate: Reduce Summary Builder Complexity And Formatting
 
-- Status: Complete for production; independent implementation review `Ready`
-  with no Findings; structural gate accepted at 46. Only the format-only
-  planning package and its published `qlty fmt` check remain.
+- Status: Complete and published at `29f34008`; independent implementation
+  review `Ready` with no Findings; structural gate accepted at 46 and
+  published `qlty fmt` is clean.
 - Trigger and reconciliation: correction 2 was implemented from the historical
   `94081121` evidence and is preserved in history. Its published head
   `6b6e4df5` reports 45 active inline rule instances plus one non-inline
   aggregate `function-complexity` finding on `localizedUnitChange` in Slice 2.
   Therefore 46 structural blockers is the correct post-S1 cloud result, not an
-  S1 excess or replacement. The only remaining cloud issue is one Prettier
-  finding on feature `TASKS.md` (thread `3926429642`), handled by the separate
-  format-only closure gate below.
+  S1 excess or replacement. The prior Prettier finding on feature `TASKS.md`
+  (thread `3926429642`) is resolved by the published format-only gate.
 - Scope completed: reduce `buildSemanticDiffSummary` complexity by making its
   orchestration a straight-through composition of small, typed private
   helpers for derived counts, schedule count, uncalculated state, findings
@@ -366,23 +353,17 @@ create the focused closure commit before the feature is closed.
 - Validation: correction 2's existing focused suites, summary/output-context
   byte comparison, 400-case differential corpus, compile, desktop/web, and
   local Qlty evidence remain recorded below. The separate format-only gate
-  uses the approved guarded global `rtk pnpm run qlty:fmt`: capture immutable
-  pre/post status, changed-path, and content-digest snapshots and allow only
-  the two planning package paths to change. Run `rtk pnpm run lint:md` and a
-  Prettier check, push the exact two-file package, and wait for published
-  `qlty fmt` and `qlty check` terminal results. Accept structural 46 as the
-  correct post-S1 result, zero formatting blockers, and no new S1 replacement;
-  a formatting change outside the package or a new S1 rule/function/file
-  finding stops for Replanning.
+  completed at published head `29f34008`: Cloud-compatible Prettier 3.6.2,
+  Markdown lint, and diff checks passed; published `qlty fmt` is clean, the
+  structural result is 46, and no S1 replacement is active.
 - Production Readiness: retain all original Slice 1 malformed, ambiguous,
   reordered, large, unsupported, and uncalculated input coverage; preserve
   summary consumers and bytes; add no host, parser, telemetry, I/O, Node, VS
   Code, or configuration dependency.
 - Dependencies: correction 2 implementation is published at `6b6e4df5` and
-  independently reviewed. The format-only closure package requires a fresh
-  plan review, Human Approval, and focused package commit. Slices 2-5 remain
-  unchanged; Slice 2 owns 11 findings including both `localizedUnitChange`
-  aggregate findings.
+  independently reviewed. The format-only closure package completed at
+  `29f34008`. Slice 2 is active and owns 11 findings including both
+  `localizedUnitChange` aggregate findings.
 - Risks: the completed runtime refactor's behavior evidence must not be
   invalidated by a documentation-only reconciliation; global formatting can
   rewrite unrelated files; stale inventory attribution can incorrectly reopen
@@ -395,51 +376,54 @@ create the focused closure commit before the feature is closed.
 
 #### Slice 1 Format-only Closure Gate: Reconcile Inventory And Format Docs
 
-- Status: Approved; ready for approval-committer; published format gate
-  pending
+- Status: Complete; published at `29f34008`; qlty format gate passed with no
+  formatting issues
 - Trigger: authoritative GraphQL review-thread reconciliation at published
   head `6b6e4df5` reports 45 active inline rule instances and one hidden
   aggregate `function-complexity` finding owned by Slice 2. The resulting 46
-  structural blockers satisfy Slice 1's corrected inventory; only the cloud
-  Prettier finding on `TASKS.md` (thread `3926429642`) remains for this gate.
+  structural blockers satisfy Slice 1's corrected inventory. The cloud
+  Prettier finding on `TASKS.md` (thread `3926429642`) is resolved at published
+  head `29f34008`, with no active Slice 1 replacement thread.
 - Scope: update only the planning reconciliation in `TASKS.md` and
   `TRACEABILITY.md`, then run the approved guarded global Qlty formatter. Do
   not reopen or modify `buildSemanticDiffSummary.ts`, `compareSemanticDiff.ts`,
   any test, configuration, generated artifact, or production boundary.
-- Acceptance: the exact two-file planning package is formatted and committed;
+- Acceptance: the exact two-file planning package is formatted and published;
   pre/post snapshots prove that the global formatter changed no path outside
-  those two package paths; published `qlty fmt` is clean on the exact package
-  head; published `qlty check` remains at structural 46 with no new S1
-  replacement. At that point Slice 1 is marked complete and Slice 2 may begin.
+  those two package paths; published `qlty fmt` is clean on head `29f34008`;
+  published `qlty check` remains at structural 46 with no S1 replacement.
+  Slice 1 is complete and Slice 2 begins under its existing exact boundary.
 - Approval Boundary: exactly
   `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
   `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md` for
   the replan package. The package authorizes no runtime, test, generated,
   configuration, or other documentation path.
-- Validation: capture immutable `git status --short --untracked-files=all`,
-  `git diff --name-only`, and content digests for every listed path; run the
-  approved global `rtk pnpm run qlty:fmt`; compare the same snapshots and
-  digests afterward; run `rtk pnpm run lint:md`, a Prettier check, and
-  `git diff --check`; push the exact package head and wait for published
-  `qlty fmt` and `qlty check` terminal results. Do not rerun production tests
-  or source Qlty for this format-only gate; correction 2's completed evidence
-  remains authoritative.
-- Completion Decision: Yes. After the exact format-only planning package
-  commit and clean published formatter check, Slice 1 is complete for this
-  feature. The accepted structural count is 46, not 45, because the extra
-  aggregate belongs to Slice 2; no production implementation is reopened.
+- Validation: immutable status, changed-path, and content-digest snapshots
+  proved that only the two listed planning paths changed; Cloud-compatible
+  Prettier 3.6.2, `rtk pnpm run lint:md`, and `git diff --check` passed.
+  Published head `29f34008` reports `qlty fmt` pass with no formatting issues,
+  `qlty check` at structural 46, and no S1 replacement. Production tests and
+  source Qlty were not rerun for this format-only gate; correction 2's
+  completed evidence remains authoritative.
+- Completion Decision: Yes. The exact format-only planning package is
+  published at `29f34008` with a clean formatter check. Slice 1 is complete
+  for this feature. The accepted structural count is 46, not 45, because the
+  extra aggregate belongs to Slice 2; no production implementation is
+  reopened.
 - Dependencies: correction 2 implementation commit `6b6e4df5`, its `Ready`
   implementation review, and Completion Approval are preserved. This package
   has independent plan review `Ready` with no Findings and Human Approval;
-  Slice 2 remains queued until the focused commit and its published checks
-  pass.
+  Slice 2 is now active under its existing exact 11-finding boundary.
 - Out of Scope: all runtime, test, generated-artifact, configuration,
   suppression, threshold, baseline, and Qlty policy changes; all S2-S5
   production and test paths.
 
 ### Slice 2: Preserve Markdown Projection And Mode Dispatch
 
-- Status: Approved; queued behind the Slice 1 format-only closure package
+- Status: Approved; active implementation slice under the existing exact
+  11-finding boundary
+- Published target after Slice 2: 35 structural blockers, zero format blockers,
+  and no replacement finding
 - Scope: simplify Audit relation/section assembly, localization target and
   confirmation formatting, constraint selection, and Markdown output dispatch
   in `renderSemanticDiffAuditMarkdown.ts`,
@@ -489,8 +473,10 @@ create the focused closure commit before the feature is closed.
   files named in this slice. Same-directory pure helper extraction is allowed
   only inside those existing files; a new module requires Replanning.
 - Dependencies: Slice 1 production correction commit `6b6e4df5` plus the
-  format-only closure package and its clean published checks, so the shared
-  comparison context is a fixed regression baseline.
+  completed format-only closure package at published head `29f34008`, so the
+  shared comparison context is a fixed regression baseline. The hidden
+  `localizedUnitChange` complexity and return findings remain in this exact
+  11-finding boundary.
 - Risks: table-driven rendering can silently change fallback precedence,
   Markdown punctuation/newlines, section ordering, or missing-evidence output.
 - Out of Scope: wording/localization additions, mode behavior, JSON, commands,
@@ -681,15 +667,15 @@ create the focused closure commit before the feature is closed.
 - Historical Slice 1 publication evidence at `94081121` recorded 46
   structural blockers and one Prettier blocker while the original
   `buildSemanticDiffSummary` function-complexity finding remained. Correction
-  2 resolved that runtime finding and is preserved at `6b6e4df5`. The current
-  GraphQL reconciliation at that head is 46 structural blockers: 45 active
-  inline instances plus the hidden Slice 2 aggregate described above. No S1
-  replacement remains; the only open cloud issue is the Prettier finding on
-  feature `TASKS.md` (thread `3926429642`).
+  2 resolved that runtime finding and is preserved at `6b6e4df5`. Published
+  head `29f34008` confirms 46 structural blockers: 45 active inline instances
+  plus the hidden Slice 2 aggregate described above. No S1 replacement remains;
+  the Prettier finding on feature `TASKS.md` (thread `3926429642`) is resolved.
 - Slice ownership after reconciliation is fixed at S1=10, S2=11, S3=24, S4=1,
   and S5=10. The published progression is `56 → 46 → 35 → 11 → 10 → 0`;
-  the first 46 is the accepted post-S1 structural count and the remaining
-  format-only gate must not reopen production.
+  the first 46 is the accepted post-S1 structural count, and the completed
+  format-only gate did not reopen production. Slice 2's next target is 35
+  structural blockers, zero format blockers, and no replacement finding.
 - Regression boundary: exact JSON v1 serialization; Summary, Full, and Audit
   Markdown and localization; comparison, identity, schedule, and risk meaning;
   commands; report documents; desktop and web behavior.
@@ -751,30 +737,26 @@ create the focused closure commit before the feature is closed.
   bot formatting commit `ce9a3960` removed the one approved blank line in
   `TASKS.md` and is present in local history via merge `e80ddaa0`.
 - Post-commit published Qlty evidence for correction 2 is reconciled at head
-  `6b6e4df5`: 46 structural blockers consist of 45 active inline instances
+  `29f34008`: 46 structural blockers consist of 45 active inline instances
   plus one hidden aggregate assigned to Slice 2. This satisfies the Slice 1
-  structural gate and leaves no S1 replacement; the one remaining cloud issue
-  is the planning-artifact Prettier finding on `TASKS.md` (thread
-  `3926429642`). A format-only two-file planning package and its published
-  clean `qlty fmt` result remain pending.
+  structural gate and leaves no S1 replacement. Published `qlty fmt` passes
+  with no formatting issues; Verify and CodeQL also pass.
 - Independent implementation review of correction 2 returned `Ready` with no
-  Findings. The authoritative `6b6e4df5` reconciliation satisfies the S1
-  structural gate at 46 and preserves the completed production evidence. The
-  active gate is the format-only planning package review, Human Approval,
-  focused commit, and published clean `qlty fmt`; it must not reopen runtime
-  code or tests. Slice 2 remains blocked only until that format-only cloud gate
-  is confirmed, then starts with both `localizedUnitChange` aggregate findings
-  in its 11-finding scope.
+  Findings. The authoritative `6b6e4df5` reconciliation and published
+  `29f34008` evidence preserve the completed production result. Slice 2 is now
+  active with both `localizedUnitChange` aggregate findings in its exact
+  11-finding scope; its next published target is 35 structural blockers, zero
+  format blockers, and no replacement.
 - Production readiness: no Node, host, parser, telemetry, I/O, dependency,
   VS Code engine, desktop, or web compatibility surface is planned to change.
 
 ## Feature Exit
 
-- Definition of Done status: not started; Slice 1 production correction review
-  and conditional Completion Approval are complete, and its structural gate is
-  accepted at 46. The format-only planning package and published formatter
-  gate remain before Slice 1 is closed; all later implementation, review,
-  completion-commit, and Feature Exit gates remain.
+- Definition of Done status: not started; Slice 1 production correction review,
+  completion approval, and the format-only published gate are complete at 46
+  structural blockers with zero formatting blockers and no replacement. Slice
+  2 is active; its implementation, review, completion-commit, and all later
+  Feature Exit gates remain.
 - Durable documentation updates: none expected; re-evaluate only if an actual
   durable behavior or architecture decision changes.
 - Required exit evidence: five focused completion commits; every requirement
@@ -797,13 +779,13 @@ create the focused closure commit before the feature is closed.
 - [ ] Qlty PR blocking count is zero for the remediated head.
 - [ ] Local `rtk pnpm run qlty` passes with no suppression, baseline,
       configuration, or threshold change.
-- [ ] Slice 1 format-only closure package has an approved focused commit and
-      published `qlty fmt` terminal result on its exact pushed head, with zero
-      formatting blockers; published `qlty check` remains at the accepted 46
-      structural blockers (45 active inline plus the Slice 2 hidden aggregate),
-      with no S1 replacement finding. Correction 2's local source,
-      uncached-attempt, and summary byte/differential evidence are recorded;
-      no production code is reopened for the format-only gate.
+- [x] Slice 1 format-only closure package is published at `29f34008` with a
+      clean Cloud-compatible Prettier 3.6.2 check and published `qlty fmt`
+      terminal result; Markdown lint and `git diff --check` pass. Published
+      `qlty check` remains at the accepted 46 structural blockers (45 active
+      inline plus the Slice 2 hidden aggregate), with no S1 replacement
+      finding. Correction 2's local source, uncached-attempt, and summary
+      byte/differential evidence are recorded; no production code was reopened.
 - [ ] Slices 2-5 have published `qlty check` terminal results recorded on
       their exact pushed heads, with observed remaining structural inventory
       matching 35, 11, 10, and 0 respectively; any replacement or unexpected
