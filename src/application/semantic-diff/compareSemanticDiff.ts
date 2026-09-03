@@ -398,36 +398,62 @@ const toRelationEndpoint = (
   type: relation.type,
 });
 
-const toRelationPair = (
-  relation: AjsRelation,
+type SemanticDiffRelationPairContext = {
+  beforeUnitById: Map<string, AjsUnit>;
+  afterUnitById: Map<string, AjsUnit>;
+  correspondence: ReadonlyMap<string, string>;
+};
+
+type ToRelationPairInput = {
+  relation: AjsRelation;
+  kind: "added" | "removed";
+  context: SemanticDiffRelationPairContext;
+};
+
+const canonicalRelationUnitId = (
+  unitId: string,
   kind: "added" | "removed",
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
   correspondence: ReadonlyMap<string, string>,
-): SemanticDiffRelationPair => {
-  const sourceUnitId =
-    kind === "removed"
-      ? (correspondence.get(relation.sourceUnitId) ?? relation.sourceUnitId)
-      : relation.sourceUnitId;
-  const targetUnitId =
-    kind === "removed"
-      ? (correspondence.get(relation.targetUnitId) ?? relation.targetUnitId)
-      : relation.targetUnitId;
+): string =>
+  kind === "removed" ? (correspondence.get(unitId) ?? unitId) : unitId;
+
+const toRelationPair = ({
+  relation,
+  kind,
+  context,
+}: ToRelationPairInput): SemanticDiffRelationPair => {
+  const sourceUnitId = canonicalRelationUnitId(
+    relation.sourceUnitId,
+    kind,
+    context.correspondence,
+  );
+  const targetUnitId = canonicalRelationUnitId(
+    relation.targetUnitId,
+    kind,
+    context.correspondence,
+  );
   return {
     canonicalPair: { sourceUnitId, targetUnitId, type: relation.type },
     before:
-      kind === "removed" ? toRelationEndpoint(relation, beforeUnitById) : null,
+      kind === "removed"
+        ? toRelationEndpoint(relation, context.beforeUnitById)
+        : null,
     after:
-      kind === "added" ? toRelationEndpoint(relation, afterUnitById) : null,
+      kind === "added"
+        ? toRelationEndpoint(relation, context.afterUnitById)
+        : null,
   };
 };
 
-const createRelationChanges = (
-  decisions: SemanticDiffRelationDecision[],
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-  correspondence: ReadonlyMap<string, string>,
-): SemanticDiffChange[] =>
+type CreateRelationChangesInput = {
+  decisions: SemanticDiffRelationDecision[];
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createRelationChanges = ({
+  decisions,
+  relationPairContext,
+}: CreateRelationChangesInput): SemanticDiffChange[] =>
   decisions.map((decision) => ({
     id: changeId(
       "relation",
@@ -440,19 +466,17 @@ const createRelationChanges = (
     confirmationLevel: "confirmed",
     before:
       decision.kind === "removed"
-        ? relationTarget(decision.relation, beforeUnitById)
+        ? relationTarget(decision.relation, relationPairContext.beforeUnitById)
         : undefined,
     after:
       decision.kind === "added"
-        ? relationTarget(decision.relation, afterUnitById)
+        ? relationTarget(decision.relation, relationPairContext.afterUnitById)
         : undefined,
-    relationPair: toRelationPair(
-      decision.relation,
-      decision.kind,
-      beforeUnitById,
-      afterUnitById,
-      correspondence,
-    ),
+    relationPair: toRelationPair({
+      relation: decision.relation,
+      kind: decision.kind,
+      context: relationPairContext,
+    }),
   }));
 
 const createConfirmationRequiredItem = ({
@@ -491,15 +515,22 @@ const createConstraint = (
 const parameterValues = (unit: AjsUnit, parameterKey: string): string[] =>
   semanticDiffParameterValuesByKey(unit).get(parameterKey) ?? [];
 
-const parameterDetail = (
-  before: AjsUnit,
-  after: AjsUnit,
-  parameterKey: string,
-  overrides: {
+type ParameterDetailInput = {
+  before: AjsUnit;
+  after: AjsUnit;
+  parameterKey: string;
+  overrides?: {
     rawValues?: string[];
     removedSources?: string[];
-  } = {},
-): SemanticDiffDetail =>
+  };
+};
+
+const parameterDetail = ({
+  before,
+  after,
+  parameterKey,
+  overrides = {},
+}: ParameterDetailInput): SemanticDiffDetail =>
   createSemanticDiffDetail({
     unitPath: after.absolutePath,
     parameterKey,
@@ -524,143 +555,152 @@ const resolveRelatedUnitsByNames = (
     .map((relatedUnit) => toUnitTarget(relatedUnit));
 };
 
-const createEvidenceConfirmation = (
-  decision: SemanticDiffConfirmationEvidenceDecision,
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-  correspondence: ReadonlyMap<string, string>,
-): SemanticDiffConfirmationRequiredItem => {
-  if (decision.kind === "conditional-relation-removed") {
-    const relationPair = toRelationPair(
-      decision.relation,
-      "removed",
-      beforeUnitById,
-      afterUnitById,
-      correspondence,
-    );
-    return createConfirmationRequiredItem({
-      id: changeId("confirm", "conditional-relation", decision.pairKey),
-      target: relationTarget(decision.relation, beforeUnitById),
-      reasonCode: "conditional-relation-removed",
-      detail: createSemanticDiffDetail({ relationPair }),
-      constraints: [
-        createConstraint(
-          "jp1-ajs3-v13-rule-basis",
-          createSemanticDiffDetail({ relationPair }),
-        ),
-        createConstraint(
-          "runtime-state-not-verified",
-          createSemanticDiffDetail({ relationPair }),
-        ),
-      ],
-    });
-  }
+type UnitConfirmationEvidenceDecision = Exclude<
+  SemanticDiffConfirmationEvidenceDecision,
+  { kind: "conditional-relation-removed" }
+>;
 
-  const unit = decision.match.after;
-  const target = unitConfirmationTarget(unit);
-  const before = decision.match.before;
-  switch (decision.kind) {
-    case "wait-release-source-changed":
-      return createConfirmationRequiredItem({
-        id: changeId(
-          "confirm",
-          "wait-release-source",
-          unit.id,
-          decision.parameterKey,
-        ),
-        target,
-        reasonCode: "wait-release-source-changed",
-        detail: parameterDetail(before, unit, decision.parameterKey, {
-          rawValues: decision.removedSources,
-          removedSources: decision.removedSources,
-        }),
-        relatedTargets: resolveRelatedUnitsByNames(
-          decision.removedSources,
-          unit,
-          afterUnitById,
-        ),
-        constraints: [
-          createConstraint(
-            "jp1-ajs3-v13-rule-basis",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-          createConstraint(
-            "runtime-state-not-verified",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-        ],
-      });
-    case "timeout-removed":
-      return createConfirmationRequiredItem({
-        id: changeId(
-          "confirm",
-          "timeout-removed",
-          unit.id,
-          decision.parameterKey,
-        ),
-        target,
-        reasonCode: "timeout-removed",
-        detail: parameterDetail(before, unit, decision.parameterKey),
-        constraints: [
-          createConstraint(
-            "jp1-ajs3-v13-rule-basis",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-          createConstraint(
-            "runtime-state-not-verified",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-          createConstraint(
-            "external-state-not-verified",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-        ],
-      });
-    case "condition-judgment-changed":
-      return createConfirmationRequiredItem({
-        id: changeId(
-          "confirm",
-          "condition-judgment",
-          unit.id,
-          decision.parameterKey,
-        ),
-        target,
-        reasonCode: "condition-judgment-changed",
-        detail: parameterDetail(before, unit, decision.parameterKey),
-        constraints: [
-          createConstraint(
-            "jp1-ajs3-v13-rule-basis",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-          createConstraint(
-            "runtime-state-not-verified",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-        ],
-      });
-    case "wait-target-changed":
-      return createConfirmationRequiredItem({
-        id: changeId("confirm", "wait-target", unit.id, decision.parameterKey),
-        target,
-        reasonCode: "wait-target-changed",
-        detail: parameterDetail(before, unit, decision.parameterKey),
-        constraints: [
-          createConstraint(
-            "jp1-ajs3-v13-rule-basis",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-          createConstraint(
-            "runtime-state-not-verified",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-          createConstraint(
-            "external-state-not-verified",
-            parameterDetail(before, unit, decision.parameterKey),
-          ),
-        ],
-      });
-  }
+type UnitConfirmationSpec = {
+  idSegment: string;
+  constraintCodes: SemanticDiffConstraint["code"][];
 };
+
+const unitConfirmationSpecs: Record<
+  UnitConfirmationEvidenceDecision["kind"],
+  UnitConfirmationSpec
+> = {
+  "wait-release-source-changed": {
+    idSegment: "wait-release-source",
+    constraintCodes: ["jp1-ajs3-v13-rule-basis", "runtime-state-not-verified"],
+  },
+  "timeout-removed": {
+    idSegment: "timeout-removed",
+    constraintCodes: [
+      "jp1-ajs3-v13-rule-basis",
+      "runtime-state-not-verified",
+      "external-state-not-verified",
+    ],
+  },
+  "condition-judgment-changed": {
+    idSegment: "condition-judgment",
+    constraintCodes: ["jp1-ajs3-v13-rule-basis", "runtime-state-not-verified"],
+  },
+  "wait-target-changed": {
+    idSegment: "wait-target",
+    constraintCodes: [
+      "jp1-ajs3-v13-rule-basis",
+      "runtime-state-not-verified",
+      "external-state-not-verified",
+    ],
+  },
+};
+
+type ParameterDetailOverrides = NonNullable<ParameterDetailInput["overrides"]>;
+
+const confirmationDetailOverrides = (
+  decision: UnitConfirmationEvidenceDecision,
+): ParameterDetailOverrides | undefined =>
+  "removedSources" in decision
+    ? {
+        rawValues: decision.removedSources,
+        removedSources: decision.removedSources,
+      }
+    : undefined;
+
+const confirmationRelatedTargets = (
+  decision: UnitConfirmationEvidenceDecision,
+  afterUnitById: Map<string, AjsUnit>,
+): SemanticDiffTarget[] | undefined =>
+  "removedSources" in decision
+    ? resolveRelatedUnitsByNames(
+        decision.removedSources,
+        decision.match.after,
+        afterUnitById,
+      )
+    : undefined;
+
+type CreateUnitConfirmationInput = {
+  decision: UnitConfirmationEvidenceDecision;
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createUnitConfirmation = ({
+  decision,
+  relationPairContext,
+}: CreateUnitConfirmationInput): SemanticDiffConfirmationRequiredItem => {
+  const unit = decision.match.after;
+  const before = decision.match.before;
+  const detailInput = {
+    before,
+    after: unit,
+    parameterKey: decision.parameterKey,
+  };
+  const detail = parameterDetail({
+    ...detailInput,
+    overrides: confirmationDetailOverrides(decision),
+  });
+  const constraintDetail = parameterDetail(detailInput);
+  const spec = unitConfirmationSpecs[decision.kind];
+  return createConfirmationRequiredItem({
+    id: changeId("confirm", spec.idSegment, unit.id, decision.parameterKey),
+    target: unitConfirmationTarget(unit),
+    reasonCode: decision.kind,
+    relatedTargets: confirmationRelatedTargets(
+      decision,
+      relationPairContext.afterUnitById,
+    ),
+    detail,
+    constraints: spec.constraintCodes.map((code) =>
+      createConstraint(code, constraintDetail),
+    ),
+  });
+};
+
+type CreateConditionalRelationConfirmationInput = {
+  decision: Extract<
+    SemanticDiffConfirmationEvidenceDecision,
+    { kind: "conditional-relation-removed" }
+  >;
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createConditionalRelationConfirmation = ({
+  decision,
+  relationPairContext,
+}: CreateConditionalRelationConfirmationInput): SemanticDiffConfirmationRequiredItem => {
+  const relationPair = toRelationPair({
+    relation: decision.relation,
+    kind: "removed",
+    context: relationPairContext,
+  });
+  const detail = createSemanticDiffDetail({ relationPair });
+  return createConfirmationRequiredItem({
+    id: changeId("confirm", "conditional-relation", decision.pairKey),
+    target: relationTarget(
+      decision.relation,
+      relationPairContext.beforeUnitById,
+    ),
+    reasonCode: "conditional-relation-removed",
+    detail,
+    constraints: [
+      createConstraint("jp1-ajs3-v13-rule-basis", detail),
+      createConstraint("runtime-state-not-verified", detail),
+    ],
+  });
+};
+
+type CreateEvidenceConfirmationInput = {
+  decision: SemanticDiffConfirmationEvidenceDecision;
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createEvidenceConfirmation = ({
+  decision,
+  relationPairContext,
+}: CreateEvidenceConfirmationInput): SemanticDiffConfirmationRequiredItem =>
+  decision.kind === "conditional-relation-removed"
+    ? createConditionalRelationConfirmation({ decision, relationPairContext })
+    : createUnitConfirmation({ decision, relationPairContext });
 
 const createUnsupportedEvidenceItem = (
   decision: SemanticDiffUnsupportedEvidenceDecision,
@@ -771,18 +811,20 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
       identityDecisionIndex,
     ),
     ...createAttributeChanges(matches, identityDecisionIndex),
-    ...createRelationChanges(
-      compareSemanticDiffRelations({
+    ...createRelationChanges({
+      decisions: compareSemanticDiffRelations({
         beforeUnits,
         afterUnits,
         beforeUnitById,
         afterUnitById,
         matches,
       }),
-      beforeUnitById,
-      afterUnitById,
-      correspondenceMap,
-    ),
+      relationPairContext: {
+        beforeUnitById,
+        afterUnitById,
+        correspondence: correspondenceMap,
+      },
+    }),
   ];
   const evidence = evaluateSemanticDiffEvidence({
     beforeUnits,
@@ -793,12 +835,14 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   });
   const confirmationRequired = evidence.confirmationDecisions
     .map((decision) =>
-      createEvidenceConfirmation(
+      createEvidenceConfirmation({
         decision,
-        beforeUnitById,
-        afterUnitById,
-        correspondenceMap,
-      ),
+        relationPairContext: {
+          beforeUnitById,
+          afterUnitById,
+          correspondence: correspondenceMap,
+        },
+      }),
     )
     .sort((left, right) => compareStrings(left.id, right.id));
   const unsupportedItems = evidence.unsupportedDecisions.map(

@@ -47,7 +47,7 @@
 
 ## Plan Status
 
-- Status: Approved; plan-gate commit pending
+- Status: Approved; plan-gate committed (`0d1f2488237d741e5d9a56b2761951ce13c8bead`)
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
 - Review status: Ready for approval; no Findings
@@ -56,7 +56,7 @@
 - Human approval: Approved for all five existing slice scopes; sequential
   implementation only
 - Active implementation slice: Slice 1 — Preserve Comparison Facts And
-  Canonical Summary; awaiting the approved plan-gate commit
+  Canonical Summary; completion commit ready for approval-committer
 
 ## Human Approval
 
@@ -104,12 +104,17 @@ active implementation approval remains.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved under prior conditional clean-review authorization
+- Approved scope: Slice 1 — Preserve Comparison Facts And Canonical Summary;
+  implementation and validation evidence only
+- Approved paths:
+  `src/application/semantic-diff/buildSemanticDiffSummary.ts`,
+  `src/application/semantic-diff/compareSemanticDiff.ts`,
+  `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`, and
+  `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`
+- Implementation review verdict: Ready; Findings: none
+- Commit status: Eligible for completion gate
 
 For each approved slice, the user's prior conditional clean-review
 authorization applies only when the independent implementation review returns
@@ -171,7 +176,7 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 1: Preserve Comparison Facts And Canonical Summary
 
-- Status: Approved; active after the plan-gate commit
+- Status: Implemented; Completion Approval applied; completion commit pending
 - Scope: simplify summary aggregation and comparison projection in
   `buildSemanticDiffSummary.ts` and `compareSemanticDiff.ts`. Replace complex
   boolean accumulation with named predicates or data-driven checks; reduce all
@@ -226,7 +231,7 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 2: Preserve Markdown Projection And Mode Dispatch
 
-- Status: Approved; queued behind Slice 1 completion gate
+- Status: Approved; queued behind Slice 1 completion commit
 - Scope: simplify Audit relation/section assembly, localization target and
   confirmation formatting, constraint selection, and Markdown output dispatch
   in `renderSemanticDiffAuditMarkdown.ts`,
@@ -473,6 +478,35 @@ create the focused closure commit before the feature is closed.
 - Reason: the remediation spans application and presentation files and needs
   explicit mapping from unchanged use-case contracts to planned slices and
   regression evidence.
+
+## Slice 1 Implementation Evidence
+
+- Production implementation paths are limited to
+  `src/application/semantic-diff/buildSemanticDiffSummary.ts` and
+  `src/application/semantic-diff/compareSemanticDiff.ts`; this evidence is
+  recorded in `TASKS.md` and `TRACEABILITY.md`. No public DTO, exported
+  function signature, test expectation, configuration, or documentation
+  contract changed.
+- Comparison and summary behavior is preserved by named summary predicates,
+  one-pass count aggregation, typed relation-pair contexts, and a typed
+  confirmation-spec table. Relation correspondence remapping, deterministic
+  sorting, confirmation details/reasons/constraints, and zero-inclusive
+  buckets remain unchanged.
+- Validation succeeded in order with `rtk pnpm run test:compile` and
+  `rtk pnpm run test:desktop:run`; `rtk pnpm run build` succeeded for desktop
+  and web bundles; the compiled `rtk pnpm run test:web:run` succeeded; and
+  the explicit Slice 1 Qlty check returned `✔ No issues`.
+- A full `qlty check --all` still reports seven pre-existing findings outside
+  this slice (one unrelated formatting finding and six unrelated lint or
+  Markdown findings); none are in the two changed application files.
+- Independent implementation review returned `Ready` with no Findings after
+  409 deterministic differential scenarios confirmed unchanged summary,
+  comparison, identity, relation, schedule, and confirmation outputs.
+- Production readiness: no Node, host, parser, telemetry, I/O, dependency,
+  VS Code engine, desktop, or web compatibility surface was added. No
+  unresolved implementation risk was found; the published Qlty inventory and
+  focused completion commit remain Main-owned gates. Slice 2 starts only
+  after the Slice 1 completion commit succeeds.
 
 ## Feature Exit
 
