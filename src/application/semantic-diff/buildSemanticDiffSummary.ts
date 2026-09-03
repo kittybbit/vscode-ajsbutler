@@ -66,19 +66,33 @@ const attributeCategoryForChange = (
 ): SemanticDiffAttributeCategory | undefined =>
   change.elementKind === "attribute" ? change.attributeCategory : undefined;
 
+const countAttributeCategory = (
+  counts: SemanticDiffSummaryCounts,
+  change: SemanticDiffResult["changes"][number],
+): void => {
+  const attributeCategory = attributeCategoryForChange(change);
+  if (attributeCategory) {
+    counts.changeCountsByAttributeCategory[attributeCategory] += 1;
+  }
+};
+
+const countConfirmationRequirement = (
+  counts: SemanticDiffSummaryCounts,
+  change: SemanticDiffResult["changes"][number],
+): void => {
+  counts.confirmationRequiredCount += Number(
+    change.confirmationLevel === "confirmation-required",
+  );
+};
+
 const countChange = (
   counts: SemanticDiffSummaryCounts,
   change: SemanticDiffResult["changes"][number],
 ): void => {
   counts.changeCountsByKind[change.kind] += 1;
   counts.changeCountsByElementKind[change.elementKind] += 1;
-  const attributeCategory = attributeCategoryForChange(change);
-  if (attributeCategory) {
-    counts.changeCountsByAttributeCategory[attributeCategory] += 1;
-  }
-  counts.confirmationRequiredCount += Number(
-    change.confirmationLevel === "confirmation-required",
-  );
+  countAttributeCategory(counts, change);
+  countConfirmationRequirement(counts, change);
 };
 
 const countChanges = (

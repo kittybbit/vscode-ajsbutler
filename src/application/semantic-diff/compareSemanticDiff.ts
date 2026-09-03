@@ -410,6 +410,30 @@ type ToRelationPairInput = {
   context: SemanticDiffRelationPairContext;
 };
 
+type SemanticDiffRelationPairEndpoints = Pick<
+  SemanticDiffRelationPair,
+  "before" | "after"
+>;
+
+type RelationPairEndpointBuilder = (
+  relation: AjsRelation,
+  context: SemanticDiffRelationPairContext,
+) => SemanticDiffRelationPairEndpoints;
+
+const relationPairEndpointBuilders: Record<
+  "added" | "removed",
+  RelationPairEndpointBuilder
+> = {
+  added: (relation, context) => ({
+    before: null,
+    after: toRelationEndpoint(relation, context.afterUnitById),
+  }),
+  removed: (relation, context) => ({
+    before: toRelationEndpoint(relation, context.beforeUnitById),
+    after: null,
+  }),
+};
+
 const canonicalRelationUnitId = (
   unitId: string,
   kind: "added" | "removed",
@@ -434,14 +458,7 @@ const toRelationPair = ({
   );
   return {
     canonicalPair: { sourceUnitId, targetUnitId, type: relation.type },
-    before:
-      kind === "removed"
-        ? toRelationEndpoint(relation, context.beforeUnitById)
-        : null,
-    after:
-      kind === "added"
-        ? toRelationEndpoint(relation, context.afterUnitById)
-        : null,
+    ...relationPairEndpointBuilders[kind](relation, context),
   };
 };
 

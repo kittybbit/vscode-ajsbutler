@@ -3,8 +3,9 @@
 ## Agent Brief
 
 - Purpose: remove the 56 Qlty blockers on PR #313 without observable change.
-- Approved or active slice: the approved Slice 1 correction is active; Slices
-  2-5 remain approved and queued behind the corrected Slice 1 completion.
+- Approved or active slice: the approved Slice 1 correction is implemented and
+  independently reviewed; Slices 2-5 remain approved and queued behind its
+  completion commit.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -14,8 +15,9 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate the approved exact two-document replan package to
-  `approval-committer`, then implement the active Slice 1 correction.
+- Next decision: delegate the exact corrected Slice 1 completion commit to
+  `approval-committer`; the published cloud gate must confirm the expected
+  45-structural/zero-format/no-replacement result before Slice 2 starts.
 
 ## Sync Rule
 
@@ -47,7 +49,7 @@
 
 ## Plan Status
 
-- Status: Approved; Slice 1 correction gate active
+- Status: Approved; Slice 1 correction review complete
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
 - Review status: Ready for approval; no Findings
@@ -56,7 +58,8 @@
 - Human approval: Approved for the revised replan package and active Slice 1
   correction; Slices 2-5 remain unchanged and approved
 - Active implementation slice: Slice 1 — Preserve Comparison Facts And
-  Canonical Summary; correction active after the replan package commit
+  Canonical Summary; correction independently reviewed and conditionally
+  approved for its focused completion commit
 
 ## Human Approval
 
@@ -126,14 +129,22 @@ active implementation approval remains.
 
 ## Completion Approval
 
-- Status: Pending; Slice 1 completion is reopened by the published cloud gate
-- Approved at: none for the correction scope
-- Approved scope: none until the corrected Slice 1 implementation review
-- Approved paths: none until the corrected Slice 1 implementation review and
-  Completion Approval
-- Implementation review verdict: prior `Ready` had no Findings, but is
-  superseded for completion by the published Qlty result
-- Commit status: Not eligible
+- Status: Approved; Slice 1 correction completion commit eligible
+- Approved at: conditional clean-review authorization recorded in the current
+  conversation
+- Approved scope: the corrected Slice 1 implementation and its completion
+  evidence only
+- Approved paths (exactly):
+  - `src/application/semantic-diff/buildSemanticDiffSummary.ts`
+  - `src/application/semantic-diff/compareSemanticDiff.ts`
+  - `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`
+- Implementation review verdict: `Ready`; Findings: none
+- Commit status: Eligible for the focused completion gate
+
+The approval-committer must verify on the pushed completion head that the
+published Qlty inventory is exactly 45 structural blockers, zero formatting
+blockers, and no replacement finding. A different count, rule, file, or
+formatting result reopens Slice 1 and requires Replanning before Slice 2.
 
 For the corrected Slice 1 and each later approved slice, the user's prior
 conditional clean-review authorization applies only when the independent
@@ -217,8 +228,8 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 1: Preserve Comparison Facts And Canonical Summary
 
-- Status: Active; correction gate approved, pending replan package commit and
-  implementation; completion commit not eligible
+- Status: Implemented; correction independently reviewed `Ready` with no
+  Findings; Completion Approval applied; completion commit pending
 - Scope: simplify summary aggregation and comparison projection in
   `buildSemanticDiffSummary.ts` and `compareSemanticDiff.ts`. Replace complex
   boolean accumulation with named predicates or data-driven checks; reduce all
@@ -252,8 +263,8 @@ create the focused closure commit before the feature is closed.
   `semanticDiffSchedule.test.ts`, and `semanticDiffFlowHighlights.test.ts`;
   later slices do not edit these files. The fdd152be implementation passed
   local focused tests and implementation review, but its published cloud
-  result is not a valid completion gate. The correction must rerun these same
-  behavior scenarios, then run `rtk pnpm run test:compile`, the compiled
+  result was not a valid completion gate. The correction reran these same
+  behavior scenarios, then ran `rtk pnpm run test:compile`, the compiled
   desktop suite with `rtk pnpm run test:desktop:run`, `rtk pnpm run qlty:fmt`,
   and `rtk pnpm run qlty:check` in that order. Push the correction completion
   head, wait for both published checks to terminate, and record 45 remaining
@@ -276,7 +287,8 @@ create the focused closure commit before the feature is closed.
 
 #### Slice 1 Correction Gate: Close Remaining Comparison Findings And Formatting
 
-- Status: Approved; active after the replan package commit
+- Status: Implemented; independent implementation review `Ready` with no
+  Findings; conditional Completion Approval applied; completion commit pending
 - Scope: reduce the remaining `function-complexity` finding on
   `toRelationPair` in `src/application/semantic-diff/compareSemanticDiff.ts`
   (current line 445) and the replacement `countChange` finding in
@@ -306,16 +318,16 @@ create the focused closure commit before the feature is closed.
   target changed. If `TRACEABILITY.md` or any other path changes, stop without
   staging/committing and return to Main for Replanning. Verify Qlty reports 45
   structural blockers with the exact later-slice inventory, and the published
-  `qlty fmt` check is clean on the pushed correction head.
-  Obtain independent implementation review `Ready` with no Findings, apply
-  the user's conditional clean-review authorization, and create the focused
-  Slice 1 completion commit before Slice 2.
+  `qlty fmt` check is clean on the pushed correction head. The correction
+  implementation review returned `Ready` with no Findings, and the user's
+  conditional clean-review authorization is applied; the focused Slice 1
+  completion commit is the next gate before Slice 2.
 - Production Readiness: retain the original Slice 1 malformed, ambiguous,
   reordered, large, unsupported, and uncalculated input coverage; do not add
   host, parser, telemetry, I/O, Node, VS Code, or configuration dependencies.
 - Dependencies: this correction is the approved replan of incomplete Slice 1
-  after fdd152be; the replan package must be committed by
-  `approval-committer` before implementation.
+  after fdd152be; the approved replan package commit `e3b024e7` preceded this
+  implementation.
 - Risks: splitting `toRelationPair` or `countChange` can alter relation ID
   remapping, attribute bucket increments, confirmation counts, or output
   ordering; formatting must not rewrite unrelated plan or policy content.
@@ -612,22 +624,31 @@ create the focused closure commit before the feature is closed.
 - A full `qlty check --all` still reports seven pre-existing findings outside
   this slice (one unrelated formatting finding and six unrelated lint or
   Markdown findings); none are in the two changed application files.
-- Independent implementation review returned `Ready` with no Findings after
-  409 deterministic differential scenarios confirmed unchanged summary,
-  comparison, identity, relation, schedule, and confirmation outputs. The
-  later published PR result is a separate completion blocker and reopens the
-  Slice 1 correction gate.
+- Correction validation covered the exact five Slice 1 suites, 400
+  deterministic differential inputs, and summary edge cases. Compilation,
+  compiled desktop tests, desktop/web builds, and the compiled web test passed.
+  The changed `countChange` and `toRelationPair` anchors have no local Qlty
+  findings; the no-cache repository check reports only seven pre-existing
+  findings outside this slice. The global formatter status/path/content-digest
+  guard was unchanged for every forbidden path and made no change outside the
+  approved `TASKS.md` target.
+- Independent correction implementation review returned `Ready` with no
+  Findings after the differential and summary evidence confirmed unchanged
+  summary, comparison, identity, relation, schedule, and confirmation
+  outputs.
 - Production readiness: no Node, host, parser, telemetry, I/O, dependency,
-  VS Code engine, desktop, or web compatibility surface was added. The
-  published fdd152be Qlty inventory and TASKS.md formatting blockers mean
-  Slice 1 has unresolved completion risk; Slice 2 remains blocked until the
-  correction gate passes, is independently reviewed, and is committed.
+  VS Code engine, desktop, or web compatibility surface was added. The only
+  remaining gate is the focused completion commit and its published Qlty
+  result: exactly 45 structural blockers, zero formatting blockers, and no
+  replacement finding. Slice 2 remains blocked until that cloud gate is
+  confirmed.
 
 ## Feature Exit
 
-- Definition of Done status: not started; Slice 1 is reopened for its
-  correction gate, and all later implementation, review, completion-commit,
-  and Feature Exit gates remain.
+- Definition of Done status: not started; Slice 1 correction review and
+  conditional Completion Approval are complete, its completion commit and
+  published cloud gate remain, and all later implementation, review,
+  completion-commit, and Feature Exit gates remain.
 - Durable documentation updates: none expected; re-evaluate only if an actual
   durable behavior or architecture decision changes.
 - Required exit evidence: five focused completion commits; every requirement
