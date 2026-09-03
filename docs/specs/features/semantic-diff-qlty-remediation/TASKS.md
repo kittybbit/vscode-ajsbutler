@@ -205,7 +205,6 @@ create the focused closure commit before the feature is closed.
   different rule, function, file, format check, or count is a blocker for Main
   and requires Replanning before the next slice.
 - Expected published-cloud inventory, assuming no replacement findings:
-
   - Baseline `4fc38641`: 56 (`function-complexity` 23,
     `return-statements` 12, `boolean-logic` 11,
     `function-parameters` 4, `similar-code` 2,
