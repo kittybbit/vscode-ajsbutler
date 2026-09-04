@@ -708,8 +708,9 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 3: Preserve The Exact JSON V1 Wire Contract
 
-- Status: Approved and active; runtime implementation is queued behind the
-  required two-file Slice 2 transition documentation commit
+- Status: Implementation review Ready with no Findings; Completion Approval
+  Approved; completion commit pending (no commit or push was performed by
+  implementer)
 - Scope: decompose `serializeSemanticDiffJson.ts` by its existing
   responsibilities: primitive validation/ordering, relation and target
   projection, identity projection/order, and result projection/order. Keep the
@@ -763,6 +764,26 @@ create the focused closure commit before the feature is closed.
 - Risks: helper boundaries can alter object-literal key insertion order,
   comparator tie-breakers, explicit nulls, duplicates, exceptions, or bytes;
   splitting files can also create forbidden layer imports.
+- Implementation Handoff: the approved serializer and test paths now contain
+  the decomposition and immutable regression guard. Public serializer
+  signatures, wire types, field/key order, null/empty representation,
+  deterministic UTF-16 ordering, validation/error behavior, media type, and
+  trailing newline remain unchanged. Baseline byte fixtures from
+  `4fc386413d6eb84aaeefe13e0b6847bc3963cb94` assert empty JSON at 1,353 bytes
+  (`d7427cef14ac39af2bf4fc9ae00764d638d37fa8e116f754c95716963531f253`) and
+  populated JSON at 41,729 bytes
+  (`89fd4019f5c3200f138d5a8fc6c2f3b6baa35170e5fc36891c4bf8d308ffbbec`).
+  `test:compile`, the focused semantic-diff JSON suite, desktop tests,
+  production build, Web smoke tests, target Qlty, full local Qlty, formatter,
+  and diff checks passed. The first Web smoke attempt required the approved
+  browser-launch permission retry and then passed. No README, CHANGELOG,
+  architecture, engine, or telemetry change is required. Independent
+  implementation review returned Ready with no Findings, and Main applied the
+  existing conditional Completion Approval. The exact seven changed paths are
+  the two feature documents, the serializer entry point, the three private
+  JSON helpers, and `semanticDiffJson.test.ts`; `approval-committer` is the
+  next route for the completion commit. Cloud confirmation of the expected 11
+  later-slice blockers and format count 0 remains pending.
 - Out of Scope: JSON v2, schema/type changes, serialization libraries, locale
   options, loss of validation, and Qlty suppression or threshold changes.
 
