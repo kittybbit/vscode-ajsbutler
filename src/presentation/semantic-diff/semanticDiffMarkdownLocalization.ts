@@ -12,6 +12,7 @@ import type {
   SemanticDiffRelationReference,
   SemanticDiffScheduleRunChange,
   SemanticDiffResult,
+  SemanticDiffSummary,
   SemanticDiffTarget,
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
@@ -751,23 +752,37 @@ const hasFindings = (result: SemanticDiffResult): boolean =>
     result.scheduleComparison?.runChanges.length ?? 0,
   ].some((count) => count > 0);
 
-export const renderSummary = (
+type SummaryRenderInput = {
+  result: SemanticDiffResult;
+  summary: SemanticDiffSummary | undefined;
+};
+
+const summaryRenderInput = (
   input: SemanticDiffResult | SemanticDiffOutputContext,
+): SummaryRenderInput =>
+  "summary" in input
+    ? { result: input.result, summary: input.summary }
+    : { result: input, summary: undefined };
+
+const summaryChangeCount = (
+  summary: SemanticDiffSummary | undefined,
+  result: SemanticDiffResult,
+): number =>
+  summary?.scheduleRunChangeCount ??
+  result.scheduleComparison?.runChanges.length ??
+  0;
+
+const summaryScopeLines = (
+  result: SemanticDiffResult,
   language?: string,
 ): string[] => {
-  const result = "summary" in input ? input.result : input;
-  const summary = "summary" in input ? input.summary : undefined;
-  const scheduleChangeCount =
-    summary?.scheduleRunChangeCount ??
-    result.scheduleComparison?.runChanges.length ??
-    0;
   const counts: Array<[number, string]> = [
     [result.changes.length, "semantic change"],
     [result.confirmationRequired.length, "confirmation-required item"],
     [result.unsupportedItems.length, "unsupported item"],
     [result.limitations.length, "limitation"],
   ];
-  const lines = [
+  return [
     bulletLine(
       `${label("Before scope", language)}: ${escapeMarkdown(optionalText(result.inputs.before.jobGroupPath))}`,
     ),
@@ -778,32 +793,54 @@ export const renderSummary = (
       bulletLine(pluralize(count, label(countLabel, language), language)),
     ),
   ];
-  if (result.scheduleComparison) {
-    lines.push(
-      bulletLine(
-        semanticDiffReportText("generated.period", language, {
-          from: escapeMarkdown(result.scheduleComparison.period.from),
-          to: escapeMarkdown(result.scheduleComparison.period.to),
-        }),
-      ),
-      bulletLine(
-        pluralize(
-          scheduleChangeCount,
-          label("schedule run change", language),
-          language,
-        ),
-      ),
-    );
-  }
-  lines.push(
+};
+
+const summaryScheduleLines = (
+  result: SemanticDiffResult,
+  summary: SemanticDiffSummary | undefined,
+  language?: string,
+): string[] => {
+  if (!result.scheduleComparison) return [];
+  return [
     bulletLine(
-      (summary?.hasFindings ?? hasFindings(result))
-        ? label(
-            "Result: semantic differences or review notes are present.",
-            language,
-          )
-        : label("Result: no semantic changes detected.", language),
+      semanticDiffReportText("generated.period", language, {
+        from: escapeMarkdown(result.scheduleComparison.period.from),
+        to: escapeMarkdown(result.scheduleComparison.period.to),
+      }),
     ),
+    bulletLine(
+      pluralize(
+        summaryChangeCount(summary, result),
+        label("schedule run change", language),
+        language,
+      ),
+    ),
+  ];
+};
+
+const summaryResultLine = (
+  result: SemanticDiffResult,
+  summary: SemanticDiffSummary | undefined,
+  language?: string,
+): string =>
+  bulletLine(
+    (summary?.hasFindings ?? hasFindings(result))
+      ? label(
+          "Result: semantic differences or review notes are present.",
+          language,
+        )
+      : label("Result: no semantic changes detected.", language),
   );
+
+export const renderSummary = (
+  input: SemanticDiffResult | SemanticDiffOutputContext,
+  language?: string,
+): string[] => {
+  const { result, summary } = summaryRenderInput(input);
+  const lines = [
+    ...summaryScopeLines(result, language),
+    ...summaryScheduleLines(result, summary, language),
+    summaryResultLine(result, summary, language),
+  ];
   return lines;
 };
