@@ -8,9 +8,10 @@
   gate is clean. Slice 2's runtime correction and exact two-file format-only
   reconciliation are complete and published at `8ec1f070`: the structural
   cloud gate is 35, no replacement finding exists, `qlty fmt` reports no
-  formatting issues, and Verify/CodeQL pass. Slice 3 is the active approved
-  runtime slice; its transition documentation commit must land before runtime
-  implementation starts. Slice 2 runtime must not be reopened.
+  formatting issues, and Verify/CodeQL pass. Slice 3's first implementation
+  is published at `7c7e57c2`, but its cloud structural result is 17 versus the
+  target 11 because six `qlty smells` function-complexity findings remain.
+  Slice 3 correction replan is active; S4-S5 remain queued behind it.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -20,12 +21,14 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: have `approval-committer` create the exact two-file transition
-  commit for the completed Slice 2 format-only package, then route the already
-  approved Slice 3 runtime scope to `implementer`. No additional plan review
-  or approval is required for this evidence-only state transition. Runtime
-  files from Slice 2, including `semanticDiffMarkdownLocalization.ts`, must
-  not be reopened.
+- Next decision: route the Slice 3 correction replan to independent
+  `plan-reviewer`. The exact correction scope is the two production paths
+  `semanticDiffJsonOrdering.ts` and `semanticDiffJsonValidation.ts`, with the
+  immutable JSON test validation-only and the two feature documents carrying
+  the replan evidence. Existing Slice 3 approval does not cover this new
+  replan; after `Ready`, Main must apply approval and `approval-committer` must
+  commit the replan before implementation. The Slice 2 transition commit is
+  also required before Slice 3 runtime work.
 
 ## Sync Rule
 
@@ -57,36 +60,39 @@
 
 ## Plan Status
 
-- Status: Slice 2 complete; format-only package is published at `8ec1f070`
-  and Slice 3 is active under the existing approval. The required two-file
-  transition commit is pending before Slice 3 runtime implementation starts.
+- Status: Slice 3 correction Replanning; published `7c7e57c2` reports 17
+  structural blockers versus target 11. The six `qlty smells` findings are
+  isolated to the exact two production paths; correction review, approval,
+  and replan commit are pending before implementation.
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
-- Review status: Format-only replan independently reviewed `Ready` with no
-  Findings; its published terminal gate is complete at `8ec1f070`. The prior
-  runtime replan review remains separate and is not reused as this package's
-  review.
-- Independent plan review: `Ready` with no Findings; no additional plan review
-  is required for the evidence-only transition to Slice 3
-- Replan approval: `Approved`; Main applied the existing format-only Human
-  Approval to exactly the two feature-document paths because no runtime,
-  behavior, design, compatibility, or approval-boundary scope is introduced
-- Replan commit: Pending transition commit by `approval-committer`; exact paths
-  are `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
-  `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`. No
-  Slice 3 runtime implementation may start before this focused transition
-  commit
-- Human approval: Existing approval covers the original five slice scopes and
-  the exact two-file format-only reconciliation; Main applied it to this
-  reviewed replan. No new file, design, behavior, or approval-boundary scope
-  is introduced, and this document does not grant a new approval.
-- Active implementation slice: Slice 3 runtime refactor, queued behind the
-  required transition commit. Slice 1 published head `29f34008` records 46
-  structural blockers, zero formatting blockers, and no replacement finding;
-  Slice 2 published head `8ec1f070` records 35 structural blockers, zero
-  formatting blockers, no replacement finding, and passing Verify/CodeQL.
-  Slice 2 runtime and its format-only package are complete and must not be
-  reopened.
+- Review status: Slice 3 correction replan independently reviewed `Ready` with
+  no Findings; the prior Slice 3 implementation review remains separate.
+- Independent plan review: `Ready` with no Findings; it verified the six smells
+  findings, exact two-production-path boundary, and validation-only immutable
+  test boundary
+- Replan approval: `Approved`; Main applied the existing Human Approval to
+  this same approved Slice 3 correction scope
+- Replan commit: Pending `approval-committer`; the exact replan commit targets
+  only the two feature documents:
+  `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
+  `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`. After
+  this focused docs-only commit, implementation may modify only the two JSON
+  helper sources and these two feature documents.
+- Human approval: Existing approval covers the original five slice scopes, the
+  prior Slice 3 implementation gate, and the completed Slice 2 format-only
+  package. Main applied it to this independently reviewed Slice 3 correction
+  replan without expanding file, design, behavior, or approval-boundary scope.
+  The four implementation-authorized paths are the two JSON helper sources and
+  the two feature documents; the replan commit itself remains docs-only. This
+  document does not grant a new approval.
+- Active implementation slice: Slice 3 correction replan, before its
+  implementer gate. Slice 1 published head `29f34008` records 46 structural
+  blockers, zero formatting blockers, and no replacement finding; Slice 2
+  published head `8ec1f070` records 35 structural blockers, zero formatting
+  blockers, no replacement finding, and passing Verify/CodeQL. Slice 3's
+  published head `7c7e57c2` records 17 structural blockers, including six
+  smells findings; Slice 2 runtime and format-only package must not be reopened.
 
 ## Human Approval
 
@@ -320,7 +326,10 @@ create the focused closure commit before the feature is closed.
   Runtime is complete and must not be reopened.
 - After the Slice 2 format-only reconciliation: 35 structural blockers,
   zero format blockers, and no replacement finding.
-- After Slice 3: 11 (`function-complexity` 6,
+- Published Slice 3 initial head `7c7e57c2`: 17 structural blockers, including
+  six `function-complexity` smells findings in the two JSON helper paths;
+  `qlty fmt` is clean, and Verify/CodeQL pass. This is the replan trigger.
+- After Slice 3 correction: 11 (`function-complexity` 6,
   `return-statements` 4, `file-complexity` 1).
 - After Slice 4: 10 (`function-complexity` 6,
   `return-statements` 3, `file-complexity` 1).
@@ -708,9 +717,27 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 3: Preserve The Exact JSON V1 Wire Contract
 
-- Status: Implementation review Ready with no Findings; Completion Approval
-  Approved; completion commit pending (no commit or push was performed by
-  implementer)
+- Status: Approved correction replan; review `Ready` with no Findings and Main's
+  existing Human Approval applied. Published Slice 3 head `7c7e57c2` reports
+  17 structural blockers against the target 11. The initial implementation
+  completion evidence is retained, but the postpublish `qlty smells` result
+  requires the approved correction before completion. The docs-only replan
+  commit is pending and implementation has not started.
+- Replan trigger: `qlty check` reports only linters and does not expose the
+  remaining structural smells. Explicit `rtk pnpm exec qlty smells
+--no-snippets` reproduces six `function-complexity` findings: `firstDifference`
+  (5), `compareSharedArrayValues` (6), `compareTargetPayload` (8),
+  `compareIdentityEvidencePayload` (7), and
+  `compareIdentityDiscriminatorPayload` (7) in
+  `semanticDiffJsonOrdering.ts`, plus `assertNoUndefined` (7) in
+  `semanticDiffJsonValidation.ts`. The command exits 0 even when findings are
+  printed; the output is the authoritative local reproduction.
+- Replan scope: reduce only those six smells in exactly
+  `src/presentation/semantic-diff/semanticDiffJsonOrdering.ts` and
+  `src/presentation/semantic-diff/semanticDiffJsonValidation.ts` using private,
+  behavior-preserving helpers. `semanticDiffJson.test.ts` remains
+  validation-only. The replan evidence is limited to this file and
+  `TRACEABILITY.md`; no other runtime or test path is authorized.
 - Scope: decompose `serializeSemanticDiffJson.ts` by its existing
   responsibilities: primitive validation/ordering, relation and target
   projection, identity projection/order, and result projection/order. Keep the
@@ -719,13 +746,11 @@ create the focused closure commit before the feature is closed.
 - User / Domain Value: automation receives the identical locale-neutral JSON
   v1 bytes, field names, key order, null/empty representation, record order,
   error behavior, media type, and trailing newline with all JSON Qlty blockers
-  removed.
-- Cohesive Change Group: all 24 inline Qlty anchors in the serializer, including
-  file complexity, nullable/array comparison, undefined validation, relation
-  pair and target projection/order, identity evidence/order, change projection,
-  return-count, and boolean-chain findings. No S3 finding is hidden by the
-  reconciliation; the one hidden aggregate is the Slice 2
-  `renderSummary` correction described above.
+  removed after the correction replan completes.
+- Cohesive Change Group: the initial implementation cleared the 24 assigned
+  inline serializer anchors. The published head still has six structural
+  `qlty smells` findings in the two exact correction paths above; the replan
+  must remove those six findings without changing the JSON v1 contract.
 - Acceptance: `buildSemanticDiffJsonV1`, `serializeSemanticDiffJson`, and
   `renderSemanticDiffJson` signatures and results are unchanged; schema and
   schemaVersion stay fixed; JSON serialization does not use locale-dependent
@@ -745,45 +770,57 @@ create the focused closure commit before the feature is closed.
   nested ordering, Japanese/escaped values, and any literal newline in the
   populated corpus; do not regenerate or update constants from the changed
   implementation. Run `rtk pnpm run test:compile` first, then
-  `rtk pnpm run test:desktop:run`, then `rtk pnpm run qlty:check`. Push the
-  focused completion head, wait for the published PR `qlty check` to
-  terminate, and record that the 24 S3 blockers are gone and only the
-  expected 11 later-slice blockers remain.
+  `rtk pnpm run test:desktop:run`, then run both `rtk pnpm run qlty:check` and
+  `rtk pnpm exec qlty smells --no-snippets` against the two exact correction
+  paths. `qlty check`/linters are not a substitute for `qlty smells`; inspect
+  smells output even when the command exits 0. Push the focused correction
+  head, wait for the published PR `qlty check` and `qlty fmt` to terminate,
+  and record the transition from 17 to the expected 11 later-slice blockers
+  with no replacement finding.
 - Production Readiness: preserve linear/bounded behavior for large results,
   explicit cyclic-object handling, and browser-safe standard APIs; avoid a
   generic abstraction that obscures the v1 key construction order.
-- Approval Boundary: only
+- Existing Approval Boundary: only
   `src/presentation/semantic-diff/serializeSemanticDiffJson.ts`,
   new private modules
   `semanticDiffJsonOrdering.ts`, `semanticDiffJsonProjection.ts`, and
   `semanticDiffJsonValidation.ts` when extraction is necessary, plus
   `src/test/suite/semanticDiffJson.test.ts`. No change to
   `semanticDiffJson.ts` wire types is authorized.
-- Dependencies: Slices 1 and 2 completion commits, fixing source facts and
-  cross-mode presentation expectations before serializer decomposition.
+- Replan Approval Boundary: exactly
+  `src/presentation/semantic-diff/semanticDiffJsonOrdering.ts`,
+  `src/presentation/semantic-diff/semanticDiffJsonValidation.ts`, and the two
+  feature documents `TASKS.md` and `TRACEABILITY.md` for plan evidence. The
+  immutable JSON test is validation-only; no serializer entry-point, test,
+  wire-type, configuration, or other documentation change is authorized.
+- Dependencies: Slices 1 and 2 completion commits, independent review of this
+  correction replan (`Ready` with no Findings), Main's applied existing
+  approval for this same scope, and the exact docs-only replan commit by
+  `approval-committer` before implementation.
 - Risks: helper boundaries can alter object-literal key insertion order,
   comparator tie-breakers, explicit nulls, duplicates, exceptions, or bytes;
   splitting files can also create forbidden layer imports.
-- Implementation Handoff: the approved serializer and test paths now contain
-  the decomposition and immutable regression guard. Public serializer
-  signatures, wire types, field/key order, null/empty representation,
-  deterministic UTF-16 ordering, validation/error behavior, media type, and
-  trailing newline remain unchanged. Baseline byte fixtures from
+- Implementation Handoff: the approved serializer and test paths contain the
+  initial decomposition and immutable regression guard. The six postpublish
+  smells findings require the exact two-path correction above; no correction
+  implementation has started. Public serializer signatures, wire types,
+  field/key order, null/empty representation, deterministic UTF-16 ordering,
+  validation/error behavior, media type, and trailing newline remain unchanged.
+  Baseline byte fixtures from
   `4fc386413d6eb84aaeefe13e0b6847bc3963cb94` assert empty JSON at 1,353 bytes
   (`d7427cef14ac39af2bf4fc9ae00764d638d37fa8e116f754c95716963531f253`) and
   populated JSON at 41,729 bytes
   (`89fd4019f5c3200f138d5a8fc6c2f3b6baa35170e5fc36891c4bf8d308ffbbec`).
   `test:compile`, the focused semantic-diff JSON suite, desktop tests,
   production build, Web smoke tests, target Qlty, full local Qlty, formatter,
-  and diff checks passed. The first Web smoke attempt required the approved
-  browser-launch permission retry and then passed. No README, CHANGELOG,
-  architecture, engine, or telemetry change is required. Independent
-  implementation review returned Ready with no Findings, and Main applied the
-  existing conditional Completion Approval. The exact seven changed paths are
-  the two feature documents, the serializer entry point, the three private
-  JSON helpers, and `semanticDiffJson.test.ts`; `approval-committer` is the
-  next route for the completion commit. Cloud confirmation of the expected 11
-  later-slice blockers and format count 0 remains pending.
+  and diff checks passed for the initial implementation. The first Web smoke
+  attempt required the approved browser-launch permission retry and then
+  passed. No README, CHANGELOG, architecture, engine, or telemetry change is
+  required. The initial implementation review returned `Ready` with no
+  Findings and Main applied the existing conditional Completion Approval; that
+  completion is superseded by the published 17-blocker result. The correction
+  replan must pass smells, preserve the immutable bytes, and reach 11 before
+  the completion gate is reconsidered.
 - Out of Scope: JSON v2, schema/type changes, serialization libraries, locale
   options, loss of validation, and Qlty suppression or threshold changes.
 
@@ -812,10 +849,13 @@ create the focused closure commit before the feature is closed.
   behavior. Mode-picker and output-dispatch scenarios in
   `semanticDiffOutput.test.ts` are owned by S2; S4 must not edit or claim
   them. Run `rtk pnpm run test:compile` first, then
-  `rtk pnpm run test:desktop:run`, then `rtk pnpm run qlty:check`. Push the
-  focused completion head, wait for the published PR `qlty check` to
-  terminate, and record that the one S4 blocker is gone and only the
-  expected 10 Slice 5 blockers remain.
+  `rtk pnpm run test:desktop:run`, then run both `rtk pnpm run qlty:check` and
+  `rtk pnpm exec qlty smells --no-snippets
+src/presentation/vscode/commands/semanticDiffCommand.ts`. `qlty check` and
+  its linters are not a substitute for `qlty smells`; inspect smells output
+  even when the command exits 0. Push the focused completion head, wait for
+  the published PR `qlty check` to terminate, and record that the one S4
+  blocker is gone and only the expected 10 Slice 5 blockers remain.
 - Production Readiness: thrown VS Code host operations and notification failure
   remain contained; definition contents, paths, and errors are not leaked; the
   adapter remains compatible with desktop and web hosts and VS Code `^1.75.0`.
@@ -855,11 +895,15 @@ create the focused closure commit before the feature is closed.
   bytes, and metadata. Command orchestration remains owned by S4;
   `semanticDiffCommand.test.ts` is not edited or claimed by S5. Run
   `rtk pnpm run test:compile` before the compiled desktop suite, then
-  `rtk pnpm run test:desktop:run`, and run `rtk pnpm run qlty:check`. Push the
-  focused completion head, wait for the published PR `qlty check` to
-  terminate, and record that the 10 S5 blockers are gone with zero remaining
-  blockers and no replacement finding. Only then run the final full sequence:
-  `rtk pnpm run qlty`, `rtk pnpm run build`,
+  `rtk pnpm run test:desktop:run`, and run both `rtk pnpm run qlty:check` and
+  `rtk pnpm exec qlty smells --no-snippets
+src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`.
+  `qlty check` and its linters are not a substitute for `qlty smells`; inspect
+  smells output even when the command exits 0. Push the focused completion
+  head, wait for the published PR `qlty check` to terminate, and record that
+  the 10 S5 blockers are gone with zero remaining blockers and no replacement
+  finding. Only then run the final full sequence: `rtk pnpm run qlty`,
+  `rtk pnpm exec qlty smells --no-snippets`, `rtk pnpm run build`,
   `rtk pnpm run test:compile`, `rtk pnpm run test:desktop:run`, and
   `rtk pnpm run test:web:run`.
 - Production Readiness: verify no hung or double-settled promise, stale display,
@@ -921,8 +965,10 @@ create the focused closure commit before the feature is closed.
 - Slice ownership after reconciliation is fixed at S1=10, S2=11, S3=24, S4=1,
   and S5=10. The published progression is `56 → 46 → 35 → 11 → 10 → 0`;
   the first 46 is the accepted post-S1 structural count, and the completed
-  format-only gate did not reopen production. Slice 2's next target is 35
-  structural blockers, zero format blockers, and no replacement finding.
+  format-only gate did not reopen production. Slice 2's target is 35
+  structural blockers, zero format blockers, and no replacement finding. The
+  initial Slice 3 publication `7c7e57c2` is 17 because six `qlty smells`
+  findings remain; its correction target is 11, followed by 10 and 0.
 - Regression boundary: exact JSON v1 serialization; Summary, Full, and Audit
   Markdown and localization; comparison, identity, schedule, and risk meaning;
   commands; report documents; desktop and web behavior.
