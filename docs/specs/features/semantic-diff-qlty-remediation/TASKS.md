@@ -5,12 +5,12 @@
 - Purpose: remove the 56 Qlty blockers on PR #313 without observable change.
 - Approved or active slice: Slice 1 is complete and published at `29f34008`;
   its structural cloud gate is satisfied at 46 and the published `qlty fmt`
-  gate is clean. Slice 2's correction is runtime-complete and published at
-  `9e2c45a4`: the structural cloud gate is 35 and Verify/CodeQL pass, but
-  `qlty fmt` reports exactly two unformatted feature-document paths,
-  `TASKS.md` and `TRACEABILITY.md`. Runtime is complete and must not be
-  reopened; the Slice 2 format-only reconciliation is active and Slices 3-5
-  remain queued behind it.
+  gate is clean. Slice 2's runtime correction and exact two-file format-only
+  reconciliation are complete and published at `8ec1f070`: the structural
+  cloud gate is 35, no replacement finding exists, `qlty fmt` reports no
+  formatting issues, and Verify/CodeQL pass. Slice 3 is the active approved
+  runtime slice; its transition documentation commit must land before runtime
+  implementation starts. Slice 2 runtime must not be reopened.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -20,13 +20,12 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: route the format-only Slice 2 reconciliation to independent
-  `plan-reviewer`. The existing format-only Human Approval covers exactly the
-  two feature-document paths because the reconciliation changes no runtime,
-  behavior, design, or approval boundary. After `Ready`, Main applies that
-  approval and `approval-committer` commits the exact two-file replan package;
-  only then may the format-only execution run. Runtime files, including
-  `semanticDiffMarkdownLocalization.ts`, must not be reopened.
+- Next decision: have `approval-committer` create the exact two-file transition
+  commit for the completed Slice 2 format-only package, then route the already
+  approved Slice 3 runtime scope to `implementer`. No additional plan review
+  or approval is required for this evidence-only state transition. Runtime
+  files from Slice 2, including `semanticDiffMarkdownLocalization.ts`, must
+  not be reopened.
 
 ## Sync Rule
 
@@ -58,34 +57,36 @@
 
 ## Plan Status
 
-- Status: Replanning approved; Slice 2 runtime correction is complete at
-  `9e2c45a4`, but its two-file `qlty fmt` gate is pending and runtime must not
-  be reopened
+- Status: Slice 2 complete; format-only package is published at `8ec1f070`
+  and Slice 3 is active under the existing approval. The required two-file
+  transition commit is pending before Slice 3 runtime implementation starts.
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
 - Review status: Format-only replan independently reviewed `Ready` with no
-  Findings; the published `qlty fmt` trigger is limited to the two
-  feature-document paths while the runtime correction is already complete. The
-  prior runtime replan review remains separate and is not reused as this
-  package's review.
-- Independent plan review: `Ready` with no Findings; this review verifies the
-  two-version formatter gate and exact document-only boundary
+  Findings; its published terminal gate is complete at `8ec1f070`. The prior
+  runtime replan review remains separate and is not reused as this package's
+  review.
+- Independent plan review: `Ready` with no Findings; no additional plan review
+  is required for the evidence-only transition to Slice 3
 - Replan approval: `Approved`; Main applied the existing format-only Human
   Approval to exactly the two feature-document paths because no runtime,
   behavior, design, compatibility, or approval-boundary scope is introduced
-- Replan commit: Pending `approval-committer`; exact paths are
-  `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
+- Replan commit: Pending transition commit by `approval-committer`; exact paths
+  are `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
   `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`. No
-  format-only execution or later slice may start before this focused commit
+  Slice 3 runtime implementation may start before this focused transition
+  commit
 - Human approval: Existing approval covers the original five slice scopes and
   the exact two-file format-only reconciliation; Main applied it to this
   reviewed replan. No new file, design, behavior, or approval-boundary scope
   is introduced, and this document does not grant a new approval.
-- Active implementation slice: Slice 2 format-only reconciliation. Slice 1
-  published head `29f34008` records 46 structural blockers, zero formatting
-  blockers, and no replacement finding; `9e2c45a4` records 35 structural
-  blockers with Verify/CodeQL pass and exactly two unformatted feature-document
-  paths. Runtime correction is complete and must not be reopened.
+- Active implementation slice: Slice 3 runtime refactor, queued behind the
+  required transition commit. Slice 1 published head `29f34008` records 46
+  structural blockers, zero formatting blockers, and no replacement finding;
+  Slice 2 published head `8ec1f070` records 35 structural blockers, zero
+  formatting blockers, no replacement finding, and passing Verify/CodeQL.
+  Slice 2 runtime and its format-only package are complete and must not be
+  reopened.
 
 ## Human Approval
 
@@ -638,9 +639,15 @@ create the focused closure commit before the feature is closed.
 
 #### Slice 2 Format-only Reconciliation Gate: Stabilize Feature Documents
 
-- Status: Approved replan; independent review `Ready` with no Findings and
-  Main's existing format-only Human Approval applied. Execution is pending the
-  exact two-file `approval-committer` replan/format commit.
+- Status: Complete; published at `8ec1f070` with independent review `Ready`,
+  no Findings, and Main's existing format-only Human Approval applied.
+- Completion evidence: cloud structural Qlty is 35
+  (`function-complexity` 15, `boolean-logic` 10, `return-statements` 8,
+  `file-complexity` 2), no replacement finding exists, `qlty fmt` reports no
+  formatting issues, and Verify/CodeQL both pass. Main's read-only guard
+  preserved status, changed paths, and three-path SHA-256 digests; explicit
+  two-document Qlty checks report `No Issues`, and Prettier 3.6.2 plus
+  Markdown lint across 53 files pass.
 - Trigger: published runtime head `9e2c45a4` has structural Qlty 35 with
   Verify/CodeQL passing, but cloud `qlty fmt` reports exactly the two feature
   documents `TASKS.md` and `TRACEABILITY.md` as unformatted. Read-only
@@ -675,8 +682,10 @@ create the focused closure commit before the feature is closed.
   repository-local Qlty/Prettier 3.3.3 result, Markdown lint, and diff check.
   If either formatter rewrites a non-approved path or the two versions cannot
   agree without changing meaning, stop and return to Main for Replanning.
-  After the exact two-file commit is pushed, wait for terminal cloud `qlty fmt`
-  and confirm structural 35, no replacement, Verify, and CodeQL before Slice 3.
+  The published `8ec1f070` head records the terminal cloud `qlty fmt`,
+  structural 35, no replacement, Verify, and CodeQL results. A two-file
+  transition documentation commit is still required before Slice 3 runtime
+  implementation starts.
 - Production Readiness: this is a documentation-only formatting correction;
   no runtime, JP1/AJS, VS Code, desktop, web, parser, host, or Node behavior
   changes. The format-only package must not reopen or amend the published
@@ -686,10 +695,11 @@ create the focused closure commit before the feature is closed.
   `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`.
   `semanticDiffMarkdownLocalization.ts` is a read-only digest guard, not a
   change target.
-- Dependencies: independent format-only replan review `Ready`, Main's applied
-  existing format-only Human Approval, and the exact two-file
-  `approval-committer` replan/format commit before Slice 3. No implementation
-  slice or runtime review is reopened.
+- Dependencies: the format-only replan review is `Ready`, Main's existing
+  format-only Human Approval is applied, and the published package gate is
+  complete. `approval-committer` must record this state transition in the exact
+  two feature-document paths before Slice 3 runtime implementation. No
+  implementation slice or runtime review is reopened.
 - Risks: formatter-version differences can reintroduce blank-line or nested
   list churn; any semantic Markdown change, unexpected path, or source digest
   change is a Replanning stop.
@@ -698,7 +708,8 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 3: Preserve The Exact JSON V1 Wire Contract
 
-- Status: Approved; queued behind Slice 2 completion gate
+- Status: Approved and active; runtime implementation is queued behind the
+  required two-file Slice 2 transition documentation commit
 - Scope: decompose `serializeSemanticDiffJson.ts` by its existing
   responsibilities: primitive validation/ordering, relation and target
   projection, identity projection/order, and result projection/order. Keep the
