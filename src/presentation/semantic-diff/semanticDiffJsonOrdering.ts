@@ -94,12 +94,8 @@ export const compareOrdinal = (left: string, right: string): number =>
 export const compareNumber = (left: number, right: number): number =>
   Number(left > right) - Number(left < right);
 
-const firstDifference = (comparisons: readonly number[]): number => {
-  for (const comparison of comparisons) {
-    if (comparison !== 0) return comparison;
-  }
-  return 0;
-};
+const firstDifference = (comparisons: readonly number[]): number =>
+  comparisons.find((comparison) => comparison !== 0) ?? 0;
 
 const nullRank = <T>(value: T | null): number => Number(value !== null);
 
@@ -118,12 +114,13 @@ const compareSharedArrayValues = <T>(
   right: readonly T[],
   compare: (left: T, right: T) => number,
 ): number => {
-  const sharedLength = Math.min(left.length, right.length);
-  for (let index = 0; index < sharedLength; index += 1) {
-    const comparison = compare(left[index], right[index]);
-    if (comparison !== 0) return comparison;
-  }
-  return 0;
+  let comparison = 0;
+  left.some((value, index) => {
+    if (index >= right.length) return true;
+    comparison = compare(value, right[index]);
+    return comparison !== 0;
+  });
+  return comparison;
 };
 
 export const compareArrays = <T>(
@@ -230,39 +227,53 @@ const compareAttributeTargets = (
     compareStringArrays(left.values, right.values),
   ]);
 
+type TargetComparator = (
+  left: SemanticDiffJsonTarget,
+  right: SemanticDiffJsonTarget,
+) => number;
+
+const compareJobGroupTargets: TargetComparator = (left, right) =>
+  compareNullable(
+    (left as Extract<SemanticDiffJsonTarget, { kind: "job-group" }>).path,
+    (right as Extract<SemanticDiffJsonTarget, { kind: "job-group" }>).path,
+    compareOrdinal,
+  );
+
+const compareUnitTargets: TargetComparator = (left, right) =>
+  compareUnitReferencesWire(
+    (left as Extract<SemanticDiffJsonTarget, { kind: "jobnet" | "unit" }>).unit,
+    (right as Extract<SemanticDiffJsonTarget, { kind: "jobnet" | "unit" }>)
+      .unit,
+  );
+
+const compareRelationTargets: TargetComparator = (left, right) =>
+  compareRelationReferences(
+    (left as Extract<SemanticDiffJsonTarget, { kind: "relation" }>).relation,
+    (right as Extract<SemanticDiffJsonTarget, { kind: "relation" }>).relation,
+  );
+
+const targetPayloadComparators: Record<
+  SemanticDiffJsonTarget["kind"],
+  TargetComparator
+> = {
+  "job-group": compareJobGroupTargets,
+  jobnet: compareUnitTargets,
+  unit: compareUnitTargets,
+  relation: compareRelationTargets,
+  attribute: (left, right) =>
+    compareAttributeTargets(
+      left as Extract<SemanticDiffJsonTarget, { kind: "attribute" }>,
+      right as Extract<SemanticDiffJsonTarget, { kind: "attribute" }>,
+    ),
+};
+
 const compareTargetPayload = (
   left: SemanticDiffJsonTarget,
   right: SemanticDiffJsonTarget,
-): number => {
-  if (left.kind !== right.kind) return 0;
-  let comparison = 0;
-  switch (left.kind) {
-    case "job-group":
-      comparison = compareNullable(
-        left.path,
-        (right as typeof left).path,
-        compareOrdinal,
-      );
-      break;
-    case "jobnet":
-    case "unit":
-      comparison = compareUnitReferencesWire(
-        left.unit,
-        (right as typeof left).unit,
-      );
-      break;
-    case "relation":
-      comparison = compareRelationReferences(
-        left.relation,
-        (right as typeof left).relation,
-      );
-      break;
-    case "attribute":
-      comparison = compareAttributeTargets(left, right as typeof left);
-      break;
-  }
-  return comparison;
-};
+): number =>
+  left.kind === right.kind
+    ? targetPayloadComparators[left.kind](left, right)
+    : 0;
 
 export const compareTargets = (
   left: SemanticDiffJsonTarget,
@@ -357,19 +368,40 @@ const compareFingerprintEvidence = (
     compareArrays(left.fields, right.fields, compareIdentityFields),
   ]);
 
+type IdentityEvidenceComparator = (
+  left: SemanticDiffJsonIdentityEvidence,
+  right: SemanticDiffJsonIdentityEvidence,
+) => number;
+
+const identityEvidencePayloadComparators: Record<
+  SemanticDiffJsonIdentityEvidence["kind"],
+  IdentityEvidenceComparator
+> = {
+  "exact-key": (left, right) =>
+    compareExactKeyEvidence(
+      left as Extract<SemanticDiffJsonIdentityEvidence, { kind: "exact-key" }>,
+      right as Extract<SemanticDiffJsonIdentityEvidence, { kind: "exact-key" }>,
+    ),
+  fingerprint: (left, right) =>
+    compareFingerprintEvidence(
+      left as Extract<
+        SemanticDiffJsonIdentityEvidence,
+        { kind: "fingerprint" }
+      >,
+      right as Extract<
+        SemanticDiffJsonIdentityEvidence,
+        { kind: "fingerprint" }
+      >,
+    ),
+};
+
 const compareIdentityEvidencePayload = (
   left: SemanticDiffJsonIdentityEvidence,
   right: SemanticDiffJsonIdentityEvidence,
-): number => {
-  if (left.kind === "exact-key") {
-    return right.kind === "exact-key"
-      ? compareExactKeyEvidence(left, right)
-      : 0;
-  }
-  return right.kind === "fingerprint"
-    ? compareFingerprintEvidence(left, right)
+): number =>
+  left.kind === right.kind
+    ? identityEvidencePayloadComparators[left.kind](left, right)
     : 0;
-};
 
 export const compareIdentityEvidence = (
   left: SemanticDiffJsonIdentityEvidence,
@@ -380,21 +412,80 @@ export const compareIdentityEvidence = (
     compareIdentityEvidencePayload(left, right),
   ]);
 
+type IdentityDiscriminatorComparator = (
+  left: SemanticDiffJsonIdentityDecision,
+  right: SemanticDiffJsonIdentityDecision,
+) => number;
+
+const compareExactKeyDiscriminators: IdentityDiscriminatorComparator = (
+  left,
+  right,
+) =>
+  compareOrdinal(
+    (
+      left.evidence as Extract<
+        SemanticDiffJsonIdentityEvidence,
+        { kind: "exact-key" }
+      >
+    ).key.kind,
+    (
+      right.evidence as Extract<
+        SemanticDiffJsonIdentityEvidence,
+        { kind: "exact-key" }
+      >
+    ).key.kind,
+  );
+
+const compareFingerprintDiscriminators: IdentityDiscriminatorComparator = (
+  left,
+  right,
+) =>
+  firstDifference([
+    compareOrdinal(
+      (
+        left.evidence as Extract<
+          SemanticDiffJsonIdentityEvidence,
+          { kind: "fingerprint" }
+        >
+      ).strategyId,
+      (
+        right.evidence as Extract<
+          SemanticDiffJsonIdentityEvidence,
+          { kind: "fingerprint" }
+        >
+      ).strategyId,
+    ),
+    compareOrdinal(
+      (
+        left.evidence as Extract<
+          SemanticDiffJsonIdentityEvidence,
+          { kind: "fingerprint" }
+        >
+      ).unitType,
+      (
+        right.evidence as Extract<
+          SemanticDiffJsonIdentityEvidence,
+          { kind: "fingerprint" }
+        >
+      ).unitType,
+    ),
+  ]);
+
+const identityDiscriminatorComparators: Record<
+  SemanticDiffJsonIdentityEvidence["kind"],
+  IdentityDiscriminatorComparator
+> = {
+  "exact-key": compareExactKeyDiscriminators,
+  fingerprint: compareFingerprintDiscriminators,
+};
+
 const compareIdentityDiscriminatorPayload = (
   left: SemanticDiffJsonIdentityDecision,
   right: SemanticDiffJsonIdentityDecision,
-): number => {
-  if (left.evidence.kind === "exact-key") {
-    return right.evidence.kind === "exact-key"
-      ? compareOrdinal(left.evidence.key.kind, right.evidence.key.kind)
-      : 0;
-  }
-  if (right.evidence.kind !== "fingerprint") return 0;
-  return firstDifference([
-    compareOrdinal(left.evidence.strategyId, right.evidence.strategyId),
-    compareOrdinal(left.evidence.unitType, right.evidence.unitType),
-  ]);
-};
+): number =>
+  left.evidence.kind === right.evidence.kind
+    ? identityDiscriminatorComparators[left.evidence.kind](left, right)
+    : 0;
 
 export const compareIdentityDiscriminators = (
   left: SemanticDiffJsonIdentityDecision,

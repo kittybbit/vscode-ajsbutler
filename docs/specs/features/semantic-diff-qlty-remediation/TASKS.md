@@ -717,12 +717,11 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 3: Preserve The Exact JSON V1 Wire Contract
 
-- Status: Approved correction replan; review `Ready` with no Findings and Main's
-  existing Human Approval applied. Published Slice 3 head `7c7e57c2` reports
-  17 structural blockers against the target 11. The initial implementation
-  completion evidence is retained, but the postpublish `qlty smells` result
-  requires the approved correction before completion. The docs-only replan
-  commit is pending and implementation has not started.
+- Status: Correction implementation and independent review are complete;
+  review returned `Ready` with no Findings and Main applied the existing
+  conditional Completion Approval. The exact docs-only replan commit is
+  `d0bb8c68`. The completion commit remains pending; no commit or push was
+  performed by implementer.
 - Replan trigger: `qlty check` reports only linters and does not expose the
   remaining structural smells. Explicit `rtk pnpm exec qlty smells
 --no-snippets` reproduces six `function-complexity` findings: `firstDifference`
@@ -736,8 +735,8 @@ create the focused closure commit before the feature is closed.
   `src/presentation/semantic-diff/semanticDiffJsonOrdering.ts` and
   `src/presentation/semantic-diff/semanticDiffJsonValidation.ts` using private,
   behavior-preserving helpers. `semanticDiffJson.test.ts` remains
-  validation-only. The replan evidence is limited to this file and
-  `TRACEABILITY.md`; no other runtime or test path is authorized.
+  validation-only. The correction implementation evidence is recorded only in
+  this file and `TRACEABILITY.md`; no other runtime or test path is authorized.
 - Scope: decompose `serializeSemanticDiffJson.ts` by its existing
   responsibilities: primitive validation/ordering, relation and target
   projection, identity projection/order, and result projection/order. Keep the
@@ -795,32 +794,35 @@ create the focused closure commit before the feature is closed.
   wire-type, configuration, or other documentation change is authorized.
 - Dependencies: Slices 1 and 2 completion commits, independent review of this
   correction replan (`Ready` with no Findings), Main's applied existing
-  approval for this same scope, and the exact docs-only replan commit by
-  `approval-committer` before implementation.
+  approval for this same scope, and the completed docs-only replan commit
+  `d0bb8c68` before implementation.
 - Risks: helper boundaries can alter object-literal key insertion order,
   comparator tie-breakers, explicit nulls, duplicates, exceptions, or bytes;
   splitting files can also create forbidden layer imports.
-- Implementation Handoff: the approved serializer and test paths contain the
-  initial decomposition and immutable regression guard. The six postpublish
-  smells findings require the exact two-path correction above; no correction
-  implementation has started. Public serializer signatures, wire types,
-  field/key order, null/empty representation, deterministic UTF-16 ordering,
+- Implementation Handoff: the six named smells were reduced only in the exact
+  two approved production paths: lazy first-difference selection and bounded
+  shared-array comparison preserve comparator order, target/evidence
+  discriminator tables preserve union dispatch, and composite validation
+  preserves undefined, cycle, and error behavior. `semanticDiffJson.test.ts`
+  and all wire types remain unchanged. Public serializer signatures, field/key
+  order, null/empty representation, deterministic UTF-16 ordering,
   validation/error behavior, media type, and trailing newline remain unchanged.
   Baseline byte fixtures from
   `4fc386413d6eb84aaeefe13e0b6847bc3963cb94` assert empty JSON at 1,353 bytes
   (`d7427cef14ac39af2bf4fc9ae00764d638d37fa8e116f754c95716963531f253`) and
   populated JSON at 41,729 bytes
   (`89fd4019f5c3200f138d5a8fc6c2f3b6baa35170e5fc36891c4bf8d308ffbbec`).
-  `test:compile`, the focused semantic-diff JSON suite, desktop tests,
-  production build, Web smoke tests, target Qlty, full local Qlty, formatter,
-  and diff checks passed for the initial implementation. The first Web smoke
-  attempt required the approved browser-launch permission retry and then
-  passed. No README, CHANGELOG, architecture, engine, or telemetry change is
-  required. The initial implementation review returned `Ready` with no
-  Findings and Main applied the existing conditional Completion Approval; that
-  completion is superseded by the published 17-blocker result. The correction
-  replan must pass smells, preserve the immutable bytes, and reach 11 before
-  the completion gate is reconsidered.
+  `test:compile` and the focused semantic-diff JSON suite passed after the
+  correction. Target `qlty check` and full local `qlty:check` report no issues;
+  target `qlty smells --no-snippets` exits 0 with no smell output, confirming
+  the six findings are gone. Both Prettier 3.3.3 and 3.6.2 checks, Markdown
+  lint, and `git diff --check` passed. The immutable empty/populated bytes and
+  digests remain unchanged. Cloud confirmation of the expected 11 later-slice
+  blockers and fmt 0 is not yet available. Independent implementation review
+  review is `Ready` with no Findings and Main applied the conditional
+  Completion Approval. `approval-committer` is the next route for the exact
+  correction package; Cloud confirmation of the expected 11 later-slice
+  blockers and fmt 0 remains pending.
 - Out of Scope: JSON v2, schema/type changes, serialization libraries, locale
   options, loss of validation, and Qlty suppression or threshold changes.
 

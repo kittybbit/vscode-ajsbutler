@@ -1,6 +1,9 @@
 const isObjectValue = (value: unknown): value is object =>
   value !== null && typeof value === "object";
 
+const shouldVisit = (value: unknown, seen: Set<object>): value is object =>
+  isObjectValue(value) && !seen.has(value);
+
 const assertArrayValues = (
   value: readonly unknown[],
   path: string,
@@ -21,6 +24,18 @@ const assertObjectValues = (
   );
 };
 
+const assertCompositeValues = (
+  value: object,
+  path: string,
+  seen: Set<object>,
+): void => {
+  if (Array.isArray(value)) {
+    assertArrayValues(value, path, seen);
+    return;
+  }
+  assertObjectValues(value, path, seen);
+};
+
 /** Reject undefined members while allowing repeated and cyclic references. */
 export const assertNoUndefined = (
   value: unknown,
@@ -32,13 +47,9 @@ export const assertNoUndefined = (
       `Semantic Diff JSON has an undefined value at ${path}.`,
     );
   }
-  if (!isObjectValue(value) || seen.has(value)) return;
+  if (!shouldVisit(value, seen)) return;
   seen.add(value);
-  if (Array.isArray(value)) {
-    assertArrayValues(value, path, seen);
-    return;
-  }
-  assertObjectValues(value, path, seen);
+  assertCompositeValues(value, path, seen);
 };
 
 export const requiredValue = <T>(value: T | undefined, field: string): T => {
