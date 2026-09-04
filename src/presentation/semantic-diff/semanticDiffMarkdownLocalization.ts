@@ -121,111 +121,229 @@ const describeRelationTarget = (target: SemanticDiffTarget): string => {
   return describeRelationEndpoint(target.relation);
 };
 
+const describeJobGroupTarget = (
+  target: Extract<SemanticDiffTarget, { kind: "job-group" }>,
+  language?: string,
+): string =>
+  `${localizedKind("job-group", language)} ${optionalText(target.path)}`;
+
+const describeUnitTarget = (
+  target: Extract<SemanticDiffTarget, { kind: "jobnet" | "unit" }>,
+  language?: string,
+): string =>
+  `${localizedKind(target.kind, language)} ${target.unit.absolutePath}`;
+
+const describeRelationTargetText = (
+  target: Extract<SemanticDiffTarget, { kind: "relation" }>,
+  language?: string,
+): string =>
+  `${localizedKind("relation", language)} ${describeRelationTarget(target)}`;
+
+const describeAttributeTarget = (
+  target: Extract<SemanticDiffTarget, { kind: "attribute" }>,
+  language?: string,
+): string =>
+  semanticDiffReportText("generated.attributeTarget", language, {
+    parameter: target.parameterKey,
+    path: target.unit.absolutePath,
+  });
+
+type TargetDescriptionRenderer = (
+  target: SemanticDiffTarget,
+  language?: string,
+) => string;
+
+const targetDescriptionRenderers: Record<
+  SemanticDiffTarget["kind"],
+  TargetDescriptionRenderer
+> = {
+  "job-group": (target, language) =>
+    describeJobGroupTarget(
+      target as Extract<SemanticDiffTarget, { kind: "job-group" }>,
+      language,
+    ),
+  jobnet: (target, language) =>
+    describeUnitTarget(
+      target as Extract<SemanticDiffTarget, { kind: "jobnet" | "unit" }>,
+      language,
+    ),
+  unit: (target, language) =>
+    describeUnitTarget(
+      target as Extract<SemanticDiffTarget, { kind: "jobnet" | "unit" }>,
+      language,
+    ),
+  relation: (target, language) =>
+    describeRelationTargetText(
+      target as Extract<SemanticDiffTarget, { kind: "relation" }>,
+      language,
+    ),
+  attribute: (target, language) =>
+    describeAttributeTarget(
+      target as Extract<SemanticDiffTarget, { kind: "attribute" }>,
+      language,
+    ),
+};
+
 export const describeTarget = (
   target: SemanticDiffTarget | undefined,
   language?: string,
-): string => {
-  if (!target) return semanticDiffReportText("generated.none", language);
+): string =>
+  target
+    ? targetDescriptionRenderers[target.kind](target, language)
+    : semanticDiffReportText("generated.none", language);
+
+const unitTarget = (
+  target: SemanticDiffTarget | undefined,
+): SemanticDiffUnitReference | undefined => {
+  if (!target) return undefined;
   switch (target.kind) {
-    case "job-group":
-      return `${localizedKind("job-group", language)} ${optionalText(target.path)}`;
     case "jobnet":
     case "unit":
-      return `${localizedKind(target.kind, language)} ${target.unit.absolutePath}`;
-    case "relation":
-      return `${localizedKind("relation", language)} ${describeRelationTarget(target)}`;
-    case "attribute":
-      return semanticDiffReportText("generated.attributeTarget", language, {
-        parameter: target.parameterKey,
-        path: target.unit.absolutePath,
-      });
+      return target.unit;
+    default:
+      return undefined;
   }
 };
 
 const unitNames = (change: SemanticDiffChange) => ({
-  before:
-    change.before?.kind === "unit" || change.before?.kind === "jobnet"
-      ? change.before.unit
-      : undefined,
-  after:
-    change.after?.kind === "unit" || change.after?.kind === "jobnet"
-      ? change.after.unit
-      : undefined,
+  before: unitTarget(change.before),
+  after: unitTarget(change.after),
 });
+
+type UnitNames = ReturnType<typeof unitNames>;
+
+const localizedCandidateChange = (
+  names: UnitNames,
+  language?: string,
+): string =>
+  semanticDiffReportText("generated.candidate", language, {
+    unit:
+      names.before?.name ??
+      names.after?.name ??
+      localizedKind("unit", language),
+  });
+
+const localizedRenamedChange = (names: UnitNames, language?: string): string =>
+  semanticDiffReportText("generated.renamed", language, {
+    before: names.before?.name ?? localizedKind("unit", language),
+    after: names.after?.name ?? localizedKind("unit", language),
+  });
+
+const parentPath = (absolutePath: string | undefined): string =>
+  absolutePath ? absolutePath.slice(0, absolutePath.lastIndexOf("/")) : "";
+
+const isAttributeTarget = (
+  target: SemanticDiffTarget | undefined,
+): target is Extract<SemanticDiffTarget, { kind: "attribute" }> =>
+  target?.kind === "attribute";
+
+const localizedMovedChange = (names: UnitNames, language?: string): string => {
+  const unit =
+    names.before?.name ?? names.after?.name ?? localizedKind("unit", language);
+  if (isJapanese(language)) {
+    return semanticDiffReportText("generated.moved", language, { unit });
+  }
+  return `${unit} moved from ${parentPath(names.before?.absolutePath)} to ${parentPath(names.after?.absolutePath)}`;
+};
+
+const attributeTarget = (
+  change: SemanticDiffChange,
+  language?: string,
+): Extract<SemanticDiffTarget, { kind: "attribute" }> | undefined => {
+  const preferred = isJapanese(language) ? change.after : change.before;
+  const fallback = isJapanese(language) ? change.before : change.after;
+  return [preferred, fallback].find(isAttributeTarget);
+};
+
+const localizedAttributeChange = (
+  change: SemanticDiffChange,
+  language?: string,
+): string => {
+  const target = attributeTarget(change, language);
+  return semanticDiffReportText("generated.attribute", language, {
+    unit: target?.unit.name ?? localizedKind("unit", language),
+    parameter: target?.parameterKey ?? localizedKind("attribute", language),
+  });
+};
+
+const localizedElementChange = (
+  change: SemanticDiffChange,
+  names: UnitNames,
+  language?: string,
+): string =>
+  semanticDiffReportText("generated.elementChange", language, {
+    element:
+      names.before?.name ??
+      names.after?.name ??
+      localizedKind(change.elementKind, language),
+    kind: localizedKind(change.kind, language),
+  });
+
+type UnitChangeRenderer = (
+  change: SemanticDiffChange,
+  names: UnitNames,
+  language?: string,
+) => string;
+
+const unitChangeRenderers: readonly {
+  matches: (change: SemanticDiffChange) => boolean;
+  render: UnitChangeRenderer;
+}[] = [
+  {
+    matches: (change) => change.confirmationLevel === "candidate",
+    render: (_change, names, language) =>
+      localizedCandidateChange(names, language),
+  },
+  {
+    matches: (change) => change.kind === "renamed",
+    render: (_change, names, language) =>
+      localizedRenamedChange(names, language),
+  },
+  {
+    matches: (change) => change.kind === "moved",
+    render: (_change, names, language) => localizedMovedChange(names, language),
+  },
+  {
+    matches: (change) => change.elementKind === "attribute",
+    render: (change, names, language) =>
+      localizedAttributeChange(change, language),
+  },
+];
 
 const localizedUnitChange = (
   change: SemanticDiffChange,
   language: string | undefined,
 ): string => {
-  const { before, after } = unitNames(change);
-  if (change.confirmationLevel === "candidate") {
-    return semanticDiffReportText("generated.candidate", language, {
-      unit: before?.name ?? after?.name ?? localizedKind("unit", language),
-    });
-  }
-  if (change.kind === "renamed") {
-    return semanticDiffReportText("generated.renamed", language, {
-      before: before?.name ?? localizedKind("unit", language),
-      after: after?.name ?? localizedKind("unit", language),
-    });
-  }
-  if (change.kind === "moved") {
-    const unit = before?.name ?? after?.name ?? localizedKind("unit", language);
-    if (isJapanese(language)) {
-      return semanticDiffReportText("generated.moved", language, { unit });
-    }
-    const beforeParent = before
-      ? before.absolutePath.slice(0, before.absolutePath.lastIndexOf("/"))
-      : "";
-    const afterParent = after
-      ? after.absolutePath.slice(0, after.absolutePath.lastIndexOf("/"))
-      : "";
-    return `${unit} moved from ${beforeParent} to ${afterParent}`;
-  }
-  if (change.elementKind === "attribute") {
-    const target = isJapanese(language)
-      ? change.after?.kind === "attribute"
-        ? change.after
-        : change.before?.kind === "attribute"
-          ? change.before
-          : undefined
-      : change.before?.kind === "attribute"
-        ? change.before
-        : change.after?.kind === "attribute"
-          ? change.after
-          : undefined;
-    return semanticDiffReportText("generated.attribute", language, {
-      unit: target?.unit.name ?? localizedKind("unit", language),
-      parameter: target?.parameterKey ?? localizedKind("attribute", language),
-    });
-  }
-  return semanticDiffReportText("generated.elementChange", language, {
-    element:
-      before?.name ??
-      after?.name ??
-      localizedKind(change.elementKind, language),
-    kind: localizedKind(change.kind, language),
-  });
+  const names = unitNames(change);
+  const renderer = unitChangeRenderers.find(({ matches }) => matches(change));
+  return renderer
+    ? renderer.render(change, names, language)
+    : localizedElementChange(change, names, language);
+};
+
+const localizedRelationChange = (
+  change: Extract<SemanticDiffChange, { elementKind: "relation" }>,
+  language?: string,
+): string =>
+  isJapanese(language)
+    ? semanticDiffReportText(relationSummaryKeys[change.kind], language)
+    : `${change.relationPair.canonicalPair.sourceUnitId}->${change.relationPair.canonicalPair.targetUnitId} relation ${change.kind}`;
+
+const relationSummaryKeys: Record<
+  Extract<SemanticDiffChange, { elementKind: "relation" }>["kind"],
+  "generated.relationAdded" | "generated.relationRemoved"
+> = {
+  added: "generated.relationAdded",
+  removed: "generated.relationRemoved",
 };
 
 export const localizedChangeSummary = (
   change: SemanticDiffChange,
   language?: string,
-): string => {
-  if (change.elementKind === "relation") {
-    if (isJapanese(language)) {
-      return semanticDiffReportText(
-        change.kind === "added"
-          ? "generated.relationAdded"
-          : "generated.relationRemoved",
-        language,
-      );
-    }
-    const pair = change.relationPair.canonicalPair;
-    return `${pair.sourceUnitId}->${pair.targetUnitId} relation ${change.kind}`;
-  }
-  return localizedUnitChange(change, language);
-};
+): string =>
+  change.elementKind === "relation"
+    ? localizedRelationChange(change, language)
+    : localizedUnitChange(change, language);
 
 const identityReference = (reference: SemanticDiffUnitReference): string =>
   `${escapeMarkdown(reference.name)} (${escapeMarkdown(reference.unitType)}) ${escapeMarkdown(reference.absolutePath)} [${escapeMarkdown(reference.id)}]`;
@@ -403,97 +521,155 @@ export const renderAttributeChanges = (
   });
 };
 
+type SemanticDiffConfirmationReasonCode =
+  SemanticDiffConfirmationRequiredItem["reasonCode"];
+
+type ConfirmationTextContext = {
+  unitName: string | undefined;
+  parameterKey: string;
+  pair: string;
+  rawValues: string[];
+};
+
+const confirmationUnitName = (
+  target: SemanticDiffTarget,
+): string | undefined =>
+  target.kind === "unit" || target.kind === "jobnet"
+    ? target.unit.name
+    : undefined;
+
+const confirmationTextContext = (
+  item: SemanticDiffConfirmationRequiredItem,
+): ConfirmationTextContext => {
+  const relationPair = item.detail.relationPair?.canonicalPair;
+  return {
+    unitName: confirmationUnitName(item.target),
+    parameterKey: item.detail.parameterKey ?? "",
+    pair: relationPair
+      ? `${relationPair.sourceUnitId}->${relationPair.targetUnitId}`
+      : "",
+    rawValues: item.detail.rawValues,
+  };
+};
+
+const englishConfirmationContent: Record<
+  SemanticDiffConfirmationReasonCode,
+  (context: ConfirmationTextContext) => string
+> = {
+  "conditional-relation-removed": ({ pair }) =>
+    `${pair} conditional relation removed or changed`,
+  "wait-release-source-changed": ({ unitName }) =>
+    `${unitName ?? "unit"} wait release source changed`,
+  "timeout-removed": ({ unitName, parameterKey }) =>
+    `${unitName ?? "unit"} explicit timeout ${parameterKey} removed`,
+  "condition-judgment-changed": ({ unitName, parameterKey }) =>
+    `${unitName ?? "unit"} ${parameterKey} condition or judgment changed`,
+  "wait-target-changed": ({ unitName, parameterKey }) =>
+    `${unitName ?? "unit"} wait target ${parameterKey} changed`,
+  "no-calculated-schedule-run": ({ unitName }) =>
+    `${unitName ?? "unit"} has no calculated runs in the schedule comparison period`,
+  "calculated-schedule-run-removed": ({ unitName, rawValues }) => {
+    const [date, time] = rawValues;
+    return `${unitName ?? "unit"} calculated schedule run ${date ?? ""} ${time ?? ""} removed`.trim();
+  },
+  "execution-user-type-changed": ({ unitName }) =>
+    `${unitName ?? "unit"} execution user type changed`,
+  "jp1-resource-group-changed": ({ unitName }) =>
+    `${unitName ?? "unit"} JP1 resource group changed`,
+};
+
+const englishConfirmationRationale: Record<
+  SemanticDiffConfirmationReasonCode,
+  string
+> = {
+  "conditional-relation-removed":
+    "a previously conditional branch path may no longer be available",
+  "wait-release-source-changed":
+    "a previously available within-job-group release source may no longer release this wait",
+  "timeout-removed":
+    "removing a previously explicit wait timeout may leave a wait unresolved for longer than before",
+  "condition-judgment-changed":
+    "a previously established start, end, or branch path may no longer be available",
+  "wait-target-changed":
+    "the compared definition now waits for a different file, event, or event filter",
+  "no-calculated-schedule-run":
+    "a schedule-defined jobnet may no longer have an execution opportunity in the compared period",
+  "calculated-schedule-run-removed":
+    "a previously calculated execution opportunity is absent in the compared period",
+  "execution-user-type-changed":
+    "execution prerequisites may differ after the definition change",
+  "jp1-resource-group-changed":
+    "resource availability and contention may differ after the definition change",
+};
+
+const confirmationContent = (
+  item: SemanticDiffConfirmationRequiredItem,
+  context: ConfirmationTextContext,
+  language?: string,
+): string =>
+  isJapanese(language)
+    ? semanticDiffReportText("generated.confirmation", language, {
+        unit: context.unitName ?? localizedKind("unit", language),
+        parameter: context.parameterKey,
+      })
+    : englishConfirmationContent[item.reasonCode](context);
+
+const confirmationRationale = (
+  item: SemanticDiffConfirmationRequiredItem,
+  language?: string,
+): string =>
+  isJapanese(language)
+    ? semanticDiffReportText("generated.confirmationRationale", language)
+    : englishConfirmationRationale[item.reasonCode];
+
+const renderRelatedTargets = (
+  targets: SemanticDiffTarget[],
+  language?: string,
+): string[] =>
+  targets.length === 0
+    ? []
+    : [
+        indentedLine(
+          `${label("Related", language)}: ${targets.map((target) => escapeMarkdown(describeTarget(target, language))).join(", ")}`,
+        ),
+      ];
+
+const renderConstraintLabel = (
+  constraint: SemanticDiffConstraint,
+  language?: string,
+): string =>
+  isJapanese(language)
+    ? semanticDiffReportText("generated.constraint", language)
+    : localizedConstraint(constraint);
+
+const renderConstraintLines = (
+  constraints: SemanticDiffConstraint[],
+  language?: string,
+): string[] =>
+  constraints.map((constraint) =>
+    indentedLine(
+      `${label("Constraint", language)}: ${escapeMarkdown(renderConstraintLabel(constraint, language))}`,
+    ),
+  );
+
 export const renderConfirmationRequiredItem = (
   item: SemanticDiffConfirmationRequiredItem,
   language?: string,
 ): string[] => {
-  const japanese = isJapanese(language);
-  const unitName =
-    item.target.kind === "unit" || item.target.kind === "jobnet"
-      ? item.target.unit.name
-      : undefined;
-  const parameterKey = item.detail.parameterKey ?? "";
-  const relationPair = item.detail.relationPair?.canonicalPair;
-  const pair = relationPair
-    ? `${relationPair.sourceUnitId}->${relationPair.targetUnitId}`
-    : "";
-  const englishContent = (() => {
-    switch (item.reasonCode) {
-      case "conditional-relation-removed":
-        return `${pair} conditional relation removed or changed`;
-      case "wait-release-source-changed":
-        return `${unitName ?? "unit"} wait release source changed`;
-      case "timeout-removed":
-        return `${unitName ?? "unit"} explicit timeout ${parameterKey} removed`;
-      case "condition-judgment-changed":
-        return `${unitName ?? "unit"} ${parameterKey} condition or judgment changed`;
-      case "wait-target-changed":
-        return `${unitName ?? "unit"} wait target ${parameterKey} changed`;
-      case "no-calculated-schedule-run":
-        return `${unitName ?? "unit"} has no calculated runs in the schedule comparison period`;
-      case "calculated-schedule-run-removed": {
-        const [date, time] = item.detail.rawValues;
-        return `${unitName ?? "unit"} calculated schedule run ${date ?? ""} ${time ?? ""} removed`.trim();
-      }
-      case "execution-user-type-changed":
-        return `${unitName ?? "unit"} execution user type changed`;
-      case "jp1-resource-group-changed":
-        return `${unitName ?? "unit"} JP1 resource group changed`;
-    }
-  })();
-  const content = japanese
-    ? semanticDiffReportText("generated.confirmation", language, {
-        unit: unitName ?? localizedKind("unit", language),
-        parameter: parameterKey,
-      })
-    : englishContent;
-  const rationale = japanese
-    ? semanticDiffReportText("generated.confirmationRationale", language)
-    : (() => {
-        switch (item.reasonCode) {
-          case "conditional-relation-removed":
-            return "a previously conditional branch path may no longer be available";
-          case "wait-release-source-changed":
-            return "a previously available within-job-group release source may no longer release this wait";
-          case "timeout-removed":
-            return "removing a previously explicit wait timeout may leave a wait unresolved for longer than before";
-          case "condition-judgment-changed":
-            return "a previously established start, end, or branch path may no longer be available";
-          case "wait-target-changed":
-            return "the compared definition now waits for a different file, event, or event filter";
-          case "no-calculated-schedule-run":
-            return "a schedule-defined jobnet may no longer have an execution opportunity in the compared period";
-          case "calculated-schedule-run-removed":
-            return "a previously calculated execution opportunity is absent in the compared period";
-          case "execution-user-type-changed":
-            return "execution prerequisites may differ after the definition change";
-          case "jp1-resource-group-changed":
-            return "resource availability and contention may differ after the definition change";
-        }
-      })();
+  const context = confirmationTextContext(item);
   const lines = [
-    bulletLine(escapeMarkdown(content)),
+    bulletLine(escapeMarkdown(confirmationContent(item, context, language))),
     indentedLine(
       `${label("Target", language)}: ${escapeMarkdown(describeTarget(item.target, language))}`,
     ),
     indentedLine(
-      `${label("Rationale", language)}: ${escapeMarkdown(rationale)}`,
+      `${label("Rationale", language)}: ${escapeMarkdown(confirmationRationale(item, language))}`,
     ),
   ];
-  if (item.relatedTargets.length > 0) {
-    lines.push(
-      indentedLine(
-        `${label("Related", language)}: ${item.relatedTargets.map((target) => escapeMarkdown(describeTarget(target, language))).join(", ")}`,
-      ),
-    );
-  }
   return [
     ...lines,
-    ...item.constraints.map((constraint) =>
-      indentedLine(
-        `${label("Constraint", language)}: ${escapeMarkdown(japanese ? semanticDiffReportText("generated.constraint", language) : localizedConstraint(constraint))}`,
-      ),
-    ),
+    ...renderRelatedTargets(item.relatedTargets, language),
+    ...renderConstraintLines(item.constraints, language),
   ];
 };
 
@@ -533,24 +709,30 @@ export const renderScheduleRunChange = (
   return lines;
 };
 
-const localizedConstraint = (
-  constraint: SemanticDiffConfirmationRequiredItem["constraints"][number],
-): string => {
-  switch (constraint.code) {
-    case "jp1-ajs3-v13-rule-basis":
-      return constraint.detail.period
-        ? "Rule basis: JP1/AJS3 v13 unit definition schedule parameters sd and st for explicit directly defined jobnet schedules."
-        : "Rule basis: JP1/AJS3 v13 unit definition parameters for relations, wait units, event receiving, file monitoring, and job end judgment.";
-    case "runtime-state-not-verified":
-      return "Runtime history and external conditions are not verified by this comparison.";
-    case "external-state-not-verified":
-      return "External files, events, hosts, users, permissions, and resource groups are not verified.";
-    case "comparison-period":
-      return constraint.detail.period
-        ? `Comparison period: ${constraint.detail.period.from} to ${constraint.detail.period.to} (exclusive)`
-        : "Comparison period";
-  }
+type SemanticDiffConstraint =
+  SemanticDiffConfirmationRequiredItem["constraints"][number];
+type SemanticDiffConstraintCode = SemanticDiffConstraint["code"];
+
+const constraintTextByCode: Record<
+  SemanticDiffConstraintCode,
+  (constraint: SemanticDiffConstraint) => string
+> = {
+  "jp1-ajs3-v13-rule-basis": (constraint) =>
+    constraint.detail.period
+      ? "Rule basis: JP1/AJS3 v13 unit definition schedule parameters sd and st for explicit directly defined jobnet schedules."
+      : "Rule basis: JP1/AJS3 v13 unit definition parameters for relations, wait units, event receiving, file monitoring, and job end judgment.",
+  "runtime-state-not-verified": () =>
+    "Runtime history and external conditions are not verified by this comparison.",
+  "external-state-not-verified": () =>
+    "External files, events, hosts, users, permissions, and resource groups are not verified.",
+  "comparison-period": (constraint) =>
+    constraint.detail.period
+      ? `Comparison period: ${constraint.detail.period.from} to ${constraint.detail.period.to} (exclusive)`
+      : "Comparison period",
 };
+
+const localizedConstraint = (constraint: SemanticDiffConstraint): string =>
+  constraintTextByCode[constraint.code](constraint);
 
 const scheduleRunSummary = (change: SemanticDiffScheduleRunChange): string => {
   if (change.kind === "changed-time") {

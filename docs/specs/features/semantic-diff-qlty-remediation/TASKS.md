@@ -5,9 +5,9 @@
 - Purpose: remove the 56 Qlty blockers on PR #313 without observable change.
 - Approved or active slice: Slice 1 is complete and published at `29f34008`;
   its structural cloud gate is satisfied at 46 because one hidden aggregate
-  belongs to Slice 2, and the published `qlty fmt` gate is clean. Slice 2 is
-  now the active Human-Approved slice under its exact 11-finding boundary;
-  Slices 3-5 remain approved and queued behind it.
+  belongs to Slice 2, and the published `qlty fmt` gate is clean. Slice 2
+  implementation and review are complete under its exact 11-finding boundary;
+  its focused completion commit is pending, with Slices 3-5 queued behind it.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -17,9 +17,11 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate the existing Slice 2 boundary to `implementer`.
-  The published next target is 35 structural blockers, zero format blockers,
-  and no replacement finding after its exact 11 findings are resolved.
+- Next decision: delegate the exact Slice 2 completion commit to
+  `approval-committer`. Slice 2 implementation review is `Ready` with no
+  Findings, and the prior conditional clean-review authorization is recorded
+  below. The post-commit published target is 35 structural blockers, zero
+  format blockers, and no replacement finding.
 
 ## Sync Rule
 
@@ -51,30 +53,34 @@
 
 ## Plan Status
 
-- Status: Approved; Slice 2 active under its reviewed boundary
+- Status: Approved; Slice 2 implementation complete and awaiting its focused
+  completion commit
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
 - Review status: Ready for approval; Findings: none
 - Independent plan review: Ready for approval; Findings: none; the authoritative
   GraphQL reconciliation and Slice 1 completion gate are confirmed
 - Human approval: Approved for the original five slice scopes; Slice 1 is
-  complete and published, and Slice 2 is now active under its existing exact
-  11-finding boundary
+  complete and published, and Slice 2 is implemented under its existing exact
+  11-finding boundary with conditional completion approval recorded below
 - Active implementation slice: Slice 2 — Preserve Markdown Projection And
-  Mode Dispatch; Slice 1 published head `29f34008` records 46 structural
-  blockers, zero formatting blockers, and no replacement finding
+  Mode Dispatch; implementation review is `Ready` with no Findings. Slice 1
+  published head `29f34008` records 46 structural blockers, zero formatting
+  blockers, and no replacement finding.
 
 ## Human Approval
 
-- Status: Approved for Slice 2 implementation; Slice 1 is complete and
-  published, and Slices 3-5 remain approved and unchanged
+- Status: Approved for the original five slice scopes; Slice 2 implementation
+  and its conditional completion gate are recorded, while Slices 3-5 remain
+  approved and unchanged
 - Approved at: approved in current conversation
 - Approved scope: the original five slice scopes and Slice 1 correction 2
   production implementation remain approved in mandatory order. The
   authoritative `6b6e4df5` reconciliation accepts Slice 1's structural gate at
   46, and published head `29f34008` confirms the clean format gate. Slice 2's
-  existing boundary is approved for implementation, including both hidden
-  `localizedUnitChange` aggregate findings.
+  existing boundary, including both hidden `localizedUnitChange` aggregate
+  findings, is implemented without changing behavior; its exact completion
+  paths are recorded in the Completion Approval below.
 - Approved paths (unchanged original implementation scopes):
   - Slice 1: `src/application/semantic-diff/buildSemanticDiffSummary.ts`,
     `src/application/semantic-diff/compareSemanticDiff.ts`, and
@@ -140,13 +146,21 @@ active implementation approval remains.
 
 ## Completion Approval
 
-- Status: Pending for Slice 2 completion
-- Approved at: none
-- Approved scope: none; Slice 2 implementation and independent review are
-  still in progress
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved conditionally for Slice 2 completion
+- Approved at: prior conditional clean-review authorization, activated by the
+  independent implementation review returning `Ready` with no Findings
+- Approved scope: the exact completed Slice 2 implementation/test paths and the
+  two feature-artifact paths used only for completion evidence
+- Approved paths (exactly):
+  - `src/presentation/semantic-diff/renderSemanticDiffAuditMarkdown.ts`
+  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
+  - `src/presentation/semantic-diff/semanticDiffOutput.ts`
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
+  - `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`
+  - `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`
+- Implementation review verdict: `Ready`; Findings: none
+- Commit status: Ready for `approval-committer`; no commit or push has been
+  performed in this implementation handoff
 
 The prior conditional clean-review authorization was consumed by the completed
 Slice 1 package. The authoritative `6b6e4df5` reconciliation and published
@@ -157,21 +171,24 @@ finding owned by Slice 2. Published `qlty fmt` is clean, and there is no Slice
 finding requires Replanning; it does not reopen the completed Slice 1
 production implementation.
 
-Slice 2 is now active under its Human-Approved exact 11-finding scope, which
-includes both `localizedUnitChange` aggregate findings. Its next published
-target is 35 structural blockers, zero format blockers, and no replacement
-finding.
+Slice 2 is complete under its Human-Approved exact 11-finding scope, which
+includes both `localizedUnitChange` aggregate findings. Its post-commit
+published target is 35 structural blockers, zero format blockers, and no
+replacement finding; this terminal cloud result remains pending until the
+focused completion head is committed and pushed.
 
 For the corrected Slice 1 and each later approved slice, the user's prior
 conditional clean-review authorization applies only when the independent
 implementation review returns `Ready` with no Findings and the published
-Qlty gates are clean. The focused completion commit remains mandatory before
-the next slice starts.
+Qlty gates are clean. Slice 2 satisfies the review condition; the focused
+completion commit and post-commit published Qlty terminal result remain
+mandatory before the next slice starts.
 
 Completion Approval is a separate human gate after the independent
-implementation review returns `Ready`. It authorizes only the exact completed
-slice recorded here. The approval-committer must create the focused slice
-commit before another slice or Feature Exit starts.
+implementation review returns `Ready`. The recorded conditional authorization
+authorizes only the exact completed Slice 2 paths above. The
+approval-committer must create the focused slice commit before another slice
+or Feature Exit starts.
 
 ## Closure Approval
 
@@ -192,7 +209,8 @@ create the focused closure commit before the feature is closed.
 - Slice order is mandatory. A later slice may start only after its dependencies
   have an implementation-review verdict of `Ready`, Completion Approval, and a
   focused completion commit. Slice 1's format-only closure gate is complete;
-  Slice 2 is the active slice.
+  Slice 2's implementation review and conditional Completion Approval are
+  complete; its focused completion commit is pending.
 - Every slice must run `qlty fmt` and pass Qlty locally. For the format-only
   closure package's global `rtk pnpm run qlty:fmt` invocation, capture immutable
   pre-format snapshots of `git status --short --untracked-files=all`,
@@ -413,17 +431,18 @@ create the focused closure commit before the feature is closed.
 - Dependencies: correction 2 implementation commit `6b6e4df5`, its `Ready`
   implementation review, and Completion Approval are preserved. This package
   has independent plan review `Ready` with no Findings and Human Approval;
-  Slice 2 is now active under its existing exact 11-finding boundary.
+  Slice 2 implementation is complete under its existing exact 11-finding
+  boundary, with its focused completion commit pending.
 - Out of Scope: all runtime, test, generated-artifact, configuration,
   suppression, threshold, baseline, and Qlty policy changes; all S2-S5
   production and test paths.
 
 ### Slice 2: Preserve Markdown Projection And Mode Dispatch
 
-- Status: Approved; active implementation slice under the existing exact
+- Status: Implementation complete; completion commit pending under the exact
   11-finding boundary
-- Published target after Slice 2: 35 structural blockers, zero format blockers,
-  and no replacement finding
+- Published target after the Slice 2 completion commit: 35 structural
+  blockers, zero format blockers, and no replacement finding
 - Scope: simplify Audit relation/section assembly, localization target and
   confirmation formatting, constraint selection, and Markdown output dispatch
   in `renderSemanticDiffAuditMarkdown.ts`,
@@ -743,20 +762,42 @@ create the focused closure commit before the feature is closed.
   with no formatting issues; Verify and CodeQL also pass.
 - Independent implementation review of correction 2 returned `Ready` with no
   Findings. The authoritative `6b6e4df5` reconciliation and published
-  `29f34008` evidence preserve the completed production result. Slice 2 is now
-  active with both `localizedUnitChange` aggregate findings in its exact
-  11-finding scope; its next published target is 35 structural blockers, zero
-  format blockers, and no replacement.
+  `29f34008` evidence preserve the completed production result. Slice 2
+  implementation is complete with both `localizedUnitChange` aggregate
+  findings in its exact 11-finding scope; its post-commit published target is
+  35 structural blockers, zero format blockers, and no replacement.
 - Production readiness: no Node, host, parser, telemetry, I/O, dependency,
   VS Code engine, desktop, or web compatibility surface is planned to change.
 
+- Implementation result: the exact 11 assigned Markdown/output-mode Qlty
+  findings were removed through behavior-preserving helpers and typed lookup
+  tables. Only the three production paths above and
+  `semanticDiffMarkdownProjections.test.ts` changed; no JSON, command,
+  provider, comparison, configuration, suppression, or threshold path changed.
+- Review and byte evidence: independent implementation review returned
+  `Ready` with no Findings. The immutable baseline differential harness
+  compared 17 existing Markdown projection byte cases against commit
+  `4fc386413d6eb84aaeefe13e0b6847bc3963cb94` with zero mismatches. The focused
+  digest gate additionally asserts immutable UTF-8 byte lengths and SHA-256
+  digests for empty and populated Summary, Full, and Audit fixtures in English
+  and Japanese, including `undefined`, `en`, `ja`, `ja-JP`, unsupported `fr`
+  fallback, Markdown-special identifiers, and literal embedded newlines.
+- Validation evidence: `rtk pnpm run test:compile`,
+  `rtk pnpm run test:desktop:run`, `rtk pnpm run build`,
+  `rtk pnpm run test:web:run`, `rtk pnpm run lint:md`,
+  `rtk git diff --check`, and the focused four-path Qlty check all pass.
+  Cloud-compatible formatting was checked without changing Qlty policy or
+  using a conflicting local formatter. The global published Qlty result is
+  intentionally pending the focused completion commit.
+
 ## Feature Exit
 
-- Definition of Done status: not started; Slice 1 production correction review,
-  completion approval, and the format-only published gate are complete at 46
-  structural blockers with zero formatting blockers and no replacement. Slice
-  2 is active; its implementation, review, completion-commit, and all later
-  Feature Exit gates remain.
+- Definition of Done status: Slice 2 implementation review and conditional
+  Completion Approval are complete; its focused completion commit and the
+  post-commit published Qlty gate remain, followed by all later Feature Exit
+  gates. Slice 1's production correction review, completion approval, and
+  format-only published gate remain complete at 46 structural blockers with
+  zero formatting blockers and no replacement.
 - Durable documentation updates: none expected; re-evaluate only if an actual
   durable behavior or architecture decision changes.
 - Required exit evidence: five focused completion commits; every requirement

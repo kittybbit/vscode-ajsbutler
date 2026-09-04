@@ -34,6 +34,10 @@ const values = (items: string[]): string =>
 const relationEndpoint = (endpoint: SemanticDiffRelationEndpoint): string =>
   `${escapeMarkdown(endpoint.sourceUnitPath ?? endpoint.sourceUnitId)} -> ${escapeMarkdown(endpoint.targetUnitPath ?? endpoint.targetUnitId)} (${escapeMarkdown(endpoint.type)}; sourceUnitId=${escapeMarkdown(endpoint.sourceUnitId)}; targetUnitId=${escapeMarkdown(endpoint.targetUnitId)})`;
 
+const relationEndpointText = (
+  endpoint: SemanticDiffRelationEndpoint | null,
+): string => (endpoint ? relationEndpoint(endpoint) : "null");
+
 const relationPair = (
   pair: SemanticDiffRelationPair | null,
   language?: string,
@@ -41,8 +45,8 @@ const relationPair = (
   if (!pair) return ["null"];
   return [
     `${escapeMarkdown(pair.canonicalPair.sourceUnitId)}->${escapeMarkdown(pair.canonicalPair.targetUnitId)} (${escapeMarkdown(pair.canonicalPair.type)})`,
-    `  ${auditText("before", language)}: ${pair.before ? relationEndpoint(pair.before) : "null"}`,
-    `  ${auditText("after", language)}: ${pair.after ? relationEndpoint(pair.after) : "null"}`,
+    `  ${auditText("before", language)}: ${relationEndpointText(pair.before)}`,
+    `  ${auditText("after", language)}: ${relationEndpointText(pair.after)}`,
   ];
 };
 
@@ -297,6 +301,35 @@ const renderAuditSchedule = (
   ];
 };
 
+type AuditSection<T> = {
+  titleKey: string;
+  items: readonly T[];
+  compare: (left: T, right: T) => number;
+  render: (item: T, language?: string) => string[];
+  language?: string;
+};
+
+const renderAuditSection = <T>({
+  titleKey,
+  items,
+  compare,
+  render,
+  language,
+}: AuditSection<T>): string[] => [
+  `### ${auditText(titleKey, language)}`,
+  "",
+  ...(items.length === 0
+    ? [auditBullet(0, auditText("none", language))]
+    : [...items].sort(compare).flatMap((item) => render(item, language))),
+  "",
+];
+
+const compareById = <T extends { id: string }>(left: T, right: T): number =>
+  left.id.localeCompare(right.id);
+
+const compareByCode = <T extends { code: string }>(left: T, right: T): number =>
+  left.code.localeCompare(right.code);
+
 /** Render Full facts plus structured evidence for audit and change-control use. */
 export const renderSemanticDiffAuditMarkdown: SemanticDiffMarkdownRenderer = (
   context,
@@ -309,42 +342,34 @@ export const renderSemanticDiffAuditMarkdown: SemanticDiffMarkdownRenderer = (
     "",
     auditBullet(0, auditText("definitionEvidence", language)),
     "",
-    `### ${auditText("identityDecisions", language)}`,
-    "",
-    ...(context.result.identityDecisions.length === 0
-      ? [auditBullet(0, auditText("none", language))]
-      : [...context.result.identityDecisions]
-          .sort((left, right) => left.id.localeCompare(right.id))
-          .flatMap((decision) =>
-            renderAuditIdentityDecision(decision, language),
-          )),
-    "",
-    `### ${auditText("confirmationDetails", language)}`,
-    "",
-    ...(context.result.confirmationRequired.length === 0
-      ? [auditBullet(0, auditText("none", language))]
-      : [...context.result.confirmationRequired]
-          .sort((left, right) => left.id.localeCompare(right.id))
-          .flatMap((item) => renderAuditConfirmation(item, language))),
-    "",
-    `### ${auditText("unsupportedDetails", language)}`,
-    "",
-    ...(context.result.unsupportedItems.length === 0
-      ? [auditBullet(0, auditText("none", language))]
-      : [...context.result.unsupportedItems]
-          .sort((left, right) => left.id.localeCompare(right.id))
-          .flatMap((item) => renderAuditUnsupported(item, language))),
-    "",
-    `### ${auditText("limitationDetails", language)}`,
-    "",
-    ...(context.result.limitations.length === 0
-      ? [auditBullet(0, auditText("none", language))]
-      : [...context.result.limitations]
-          .sort((left, right) => left.code.localeCompare(right.code))
-          .flatMap((limitation) =>
-            renderAuditLimitation(limitation, language),
-          )),
-    "",
+    ...renderAuditSection({
+      titleKey: "identityDecisions",
+      items: context.result.identityDecisions,
+      compare: compareById,
+      render: renderAuditIdentityDecision,
+      language,
+    }),
+    ...renderAuditSection({
+      titleKey: "confirmationDetails",
+      items: context.result.confirmationRequired,
+      compare: compareById,
+      render: renderAuditConfirmation,
+      language,
+    }),
+    ...renderAuditSection({
+      titleKey: "unsupportedDetails",
+      items: context.result.unsupportedItems,
+      compare: compareById,
+      render: renderAuditUnsupported,
+      language,
+    }),
+    ...renderAuditSection({
+      titleKey: "limitationDetails",
+      items: context.result.limitations,
+      compare: compareByCode,
+      render: renderAuditLimitation,
+      language,
+    }),
     `### ${auditText("scheduleDetails", language)}`,
     "",
     ...renderAuditSchedule(context, language),

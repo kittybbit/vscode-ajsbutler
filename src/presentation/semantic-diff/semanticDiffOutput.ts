@@ -6,6 +6,7 @@ import { renderSemanticDiffAuditMarkdown } from "./renderSemanticDiffAuditMarkdo
 import { renderSemanticDiffMarkdown } from "./renderSemanticDiffMarkdown";
 import { renderSemanticDiffSummaryMarkdown } from "./renderSemanticDiffSummaryMarkdown";
 import { renderSemanticDiffJson } from "./serializeSemanticDiffJson";
+import type { SemanticDiffMarkdownRenderer } from "./semanticDiffMarkdownTypes";
 
 export type { SemanticDiffOutputMode } from "../../application/semantic-diff/semanticDiffDto";
 
@@ -28,20 +29,21 @@ const markdownDocument = (
   context: SemanticDiffOutputContext,
   mode: Exclude<SemanticDiffOutputMode, "json">,
   language?: string,
-): SemanticDiffOutputDocument => {
-  const content =
-    mode === "summary"
-      ? renderSemanticDiffSummaryMarkdown(context, language)
-      : mode === "audit"
-        ? renderSemanticDiffAuditMarkdown(context, language)
-        : renderSemanticDiffMarkdown(context, language);
-  return {
-    mode,
-    languageId: "markdown",
-    extension: ".md",
-    mediaType: SEMANTIC_DIFF_MARKDOWN_MEDIA_TYPE,
-    content,
-  };
+): SemanticDiffOutputDocument => ({
+  mode,
+  languageId: "markdown",
+  extension: ".md",
+  mediaType: SEMANTIC_DIFF_MARKDOWN_MEDIA_TYPE,
+  content: markdownRenderers[mode](context, language),
+});
+
+const markdownRenderers: Record<
+  Exclude<SemanticDiffOutputMode, "json">,
+  SemanticDiffMarkdownRenderer
+> = {
+  summary: renderSemanticDiffSummaryMarkdown,
+  full: renderSemanticDiffMarkdown,
+  audit: renderSemanticDiffAuditMarkdown,
 };
 
 /**
