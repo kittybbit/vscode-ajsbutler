@@ -17,6 +17,11 @@
   forms by using complete definition-backed `op`/`cl` classifications, with
   exact-date precedence, bounded operational-month counting, and no host or
   external calendar fallback.
+- Expanded schedule comparison with deterministic closed-day substitution for
+  `sh=be`, `sh=af`, and `sh=ca`, including rule-associated `shd`, the v13
+  default of two days, and a bounded 31-day lookaround. Invalid or incomplete
+  definitions, `sh=no`, and `cy`/`cftd` interactions remain explicit rather
+  than being resolved from external service state.
 - Improved Semantic Diff Markdown reports so English and Japanese output
   explains typed identity rules, strategies, canonical fields, and all
   ambiguous candidates while preserving raw JP1/AJS values safely.

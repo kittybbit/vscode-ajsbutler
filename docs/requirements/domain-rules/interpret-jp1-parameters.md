@@ -201,6 +201,28 @@ wording or a diagnostic message.
   application mapping and DTO shapes are unchanged.
 - Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM); [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10 and §5(7)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
+### `JP1-PARAM-SCHEDULE-SHIFT-001`
+
+- Applies to a fully qualified Gregorian `sd` date with a matching explicit
+  `sh=be`, `sh=af`, or `sh=ca` value for the same schedule-rule number.
+- `be` and `af` keep an open base date unchanged. A closed base date moves to
+  the nearest open date before or after it, respectively, inspecting no more
+  than the effective `shd` number of days. `ca` keeps an open base date and
+  suppresses a closed base date. The omitted `shd` value defaults to `2` for
+  `be` and `af`; an explicit value is limited to `1` through `31`.
+- No open date within the effective bound is a valid no-runs result. The
+  candidate period may be expanded by at most 31 days on either side, and
+  final runs remain filtered to the requested half-open comparison period.
+- Repeated identical `sh` or `shd` values are idempotent. Conflicting values,
+  invalid values, and an unpaired `shd` remain explicit errors with their raw
+  parameters. `sh=no` remains missing context because its result depends on
+  scheduler Manager service state. Incomplete or conflicting normalized
+  calendar data never falls back to a host or external calendar.
+- A rule that also contains `cy` or `cftd` remains unresolved as a whole;
+  substitution does not project a partial predecessor result. Omitted `sh`
+  preserves the existing no-substitution behavior.
+- Source: [Command Reference 5.2.4, `sh` and `shd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §5(8)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
 ## Diagnostic Interpretation Rules
 
 The unique normative bodies for all diagnostic rule IDs are in

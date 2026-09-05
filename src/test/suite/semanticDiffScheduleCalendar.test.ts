@@ -15,6 +15,7 @@ import {
 import {
   evaluateSemanticDiffSchedule,
   interpretSchedule,
+  projectScheduleRuns,
 } from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
 
 const params = (values: Record<string, string | string[]>): AjsParameter[] =>
@@ -1234,5 +1235,408 @@ suite("Semantic Diff Schedule Calendar Context", () => {
         rule: 1,
       },
     ]);
+  });
+
+  test("substitutes closed base dates with bounded before, after, and cancel modes", () => {
+    const before = jobnet("/root/before", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "be",
+    });
+    const after = jobnet("/root/after", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "af",
+      shd: "3",
+    });
+    const cancel = jobnet("/root/cancel", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "ca",
+    });
+    const root = group("/root", [before, after, cancel], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [before, after, cancel],
+      matches: [],
+      period,
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [
+        decision.kind,
+        decision.unitPath,
+        decision.date,
+      ]),
+      [
+        ["added", "/root/after", "2026-04-06"],
+        ["added", "/root/before", "2026-04-03"],
+      ],
+    );
+    assert.deepStrictEqual(result.unsupportedDecisions, []);
+    assert.deepStrictEqual(result.zeroRunCandidates, [cancel]);
+  });
+
+  test("keeps valid open base dates unchanged and suppresses when no target is found", () => {
+    const open = jobnet("/root/open", {
+      sd: "2026/04/01",
+      st: "09:00",
+      sh: "be",
+    });
+    const noTarget = jobnet("/root/no-target", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "be",
+      shd: "2",
+    });
+    const root = group("/root", [open, noTarget], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su", "2026/04/02", "2026/04/03"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [open, noTarget],
+      matches: [],
+      period,
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [decision.unitPath, decision.date]),
+      [["/root/open", "2026-04-01"]],
+    );
+    assert.deepStrictEqual(
+      result.zeroRunCandidates.map((candidate) => candidate.id),
+      [noTarget.id],
+    );
+  });
+
+  test("keeps legacy omitted-year and omitted-month dates out of substitution", () => {
+    const omittedMonth = jobnet("/root/omitted-month", {
+      sd: "04/04",
+      st: "09:00",
+      sh: "be",
+    });
+    const omittedYear = jobnet("/root/omitted-year", {
+      sd: "04",
+      st: "10:00",
+      sh: "af",
+    });
+    const root = group("/root", [omittedMonth, omittedYear], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [omittedMonth, omittedYear],
+      matches: [],
+      period,
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [decision.unitPath, decision.date]),
+      [
+        ["/root/omitted-month", "2026-04-04"],
+        ["/root/omitted-year", "2026-04-04"],
+        ["/root/omitted-year", "2026-05-04"],
+      ],
+    );
+    assert.deepStrictEqual(
+      result.unsupportedDecisions.map((decision) => [
+        decision.unit.absolutePath,
+        decision.parameter.key,
+        decision.parameter.value,
+        decision.reason,
+        decision.scheduleRule,
+      ]),
+      [
+        [omittedMonth.absolutePath, "sh", "be", "closed-day-substitution", 1],
+        [omittedYear.absolutePath, "sh", "af", "closed-day-substitution", 1],
+      ],
+    );
+    assert.deepStrictEqual(result.zeroRunCandidates, []);
+  });
+
+  test("shifts a date across the requested period boundary", () => {
+    const crossing = jobnet("/root/crossing", {
+      sd: "2026/04/01",
+      st: "09:00",
+      sh: "af",
+    });
+    const root = group("/root", [crossing], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["2026/04/01", "sa", "su"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [crossing],
+      matches: [],
+      period: { from: "2026-04-02", to: "2026-05-01" },
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [decision.unitPath, decision.date]),
+      [["/root/crossing", "2026-04-02"]],
+    );
+  });
+
+  test("associates duplicate substitution values and preserves raw evidence", () => {
+    const main = jobnet("/root/duplicate-shift", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: ["1,be", "be"],
+      shd: ["1,2", "2"],
+    });
+    const root = group("/root", [main], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const context = resolveScheduleCalendarContext(document([root]), main);
+    const projection = projectScheduleRuns({
+      interpretation: interpretSchedule(main),
+      period,
+      calendarContext: context,
+    });
+    assert.deepStrictEqual(
+      projection.runs.map((run) => run.date),
+      ["2026-04-03"],
+    );
+    const shiftEvidence = projection.evidence.filter(
+      (evidence) => evidence.id === "JP1-PARAM-SCHEDULE-SHIFT-001",
+    );
+    assert.strictEqual(shiftEvidence.length, 4);
+    shiftEvidence.forEach((evidence) => {
+      assert.deepStrictEqual(evidence.rawParameters, [
+        { key: "sh", value: "1,be" },
+        { key: "sh", value: "be" },
+        { key: "shd", value: "1,2" },
+        { key: "shd", value: "2" },
+      ]);
+    });
+  });
+
+  test("maps invalid and unresolved substitution values through existing reasons", () => {
+    const invalid = jobnet("/root/invalid-shift", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "1,unknown",
+      shd: "1,0",
+    });
+    const no = jobnet("/root/no-shift", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "no",
+    });
+    const root = group("/root", [invalid, no], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const result = compareSemanticDiff({
+      before: document([]),
+      after: document([root]),
+      options: { scheduleComparisonPeriod: period },
+    });
+    assert.deepStrictEqual(
+      result.unsupportedItems
+        .map((item) => [
+          item.detail.unitPath,
+          item.detail.parameterKey,
+          item.reasonCode,
+          item.id,
+          item.warning?.fallbackText,
+        ])
+        .sort(),
+      [
+        [
+          invalid.absolutePath,
+          "sh",
+          "closed-day-substitution",
+          `uncalculated:schedule:after:${invalid.id}:sh:1,unknown`,
+          `${invalid.absolutePath} sh=1,unknown: closed-day substitution is not calculated in this slice`,
+        ],
+        [
+          invalid.absolutePath,
+          "shd",
+          "shift-days",
+          `uncalculated:schedule:after:${invalid.id}:shd:1,0`,
+          `${invalid.absolutePath} shd=1,0: shift days are not calculated in this slice`,
+        ],
+        [
+          no.absolutePath,
+          "sh",
+          "closed-day-substitution",
+          `uncalculated:schedule:after:${no.id}:sh:no`,
+          `${no.absolutePath} sh=no: closed-day substitution is not calculated in this slice`,
+        ],
+      ].sort(),
+    );
+  });
+
+  test("does not partially substitute rules that still contain cy or cftd", () => {
+    const main = jobnet("/root/mixed-stage", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "be",
+      cy: "(1,d)",
+    });
+    const root = group("/root", [main], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [main],
+      matches: [],
+      period,
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(result.runDecisions, []);
+    assert.deepStrictEqual(
+      result.unsupportedDecisions.map((decision) => [
+        decision.parameter.key,
+        decision.reason,
+        decision.scheduleRule,
+      ]),
+      [["cy", "cycle-schedule", 1]],
+    );
+    assert.deepStrictEqual(result.zeroRunCandidates, []);
+  });
+
+  test("suppresses substitution for malformed cy and cftd on their effective rule", () => {
+    const malformedCycle = jobnet("/root/malformed-cycle", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "be",
+      cy: "not-a-cycle",
+    });
+    const malformedDays = jobnet("/root/malformed-days", {
+      sd: "2,2026/04/04",
+      st: "2,10:00",
+      sh: "2,be",
+      cftd: "2,not-a-days-rule",
+    });
+    const root = group("/root", [malformedCycle, malformedDays], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [malformedCycle, malformedDays],
+      matches: [],
+      period,
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(result.runDecisions, []);
+    assert.deepStrictEqual(
+      result.unsupportedDecisions.map((decision) => [
+        decision.unit.absolutePath,
+        decision.parameter.key,
+        decision.reason,
+        decision.scheduleRule,
+      ]),
+      [
+        [malformedCycle.absolutePath, "cy", "cycle-schedule", undefined],
+        [malformedDays.absolutePath, "cftd", "days-from-start", undefined],
+      ],
+    );
+    assert.deepStrictEqual(result.zeroRunCandidates, []);
+  });
+
+  test("honors the explicit 31-day substitution limit and keeps collisions distinct", () => {
+    const first = jobnet("/root/first", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "be",
+      shd: "31",
+    });
+    const second = jobnet("/root/second", {
+      sd: "2026/04/04",
+      st: "10:00",
+      sh: "be",
+      shd: "31",
+    });
+    const root = group("/root", [first, second], {
+      op: "2026/03/04",
+      cl: ["su", "mo", "tu", "we", "th", "fr", "sa"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [first, second],
+      matches: [],
+      period: { from: "2026-03-01", to: "2026-05-01" },
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [
+        decision.unitPath,
+        decision.date,
+        decision.kind === "added" ? decision.after.time : undefined,
+      ]),
+      [
+        ["/root/first", "2026-03-04", "09:00"],
+        ["/root/second", "2026-03-04", "10:00"],
+      ],
+    );
+    assert.deepStrictEqual(result.unsupportedDecisions, []);
+  });
+
+  test("keeps conflicting sh invalid and leaves an unpaired shd on its own rule", () => {
+    const conflict = jobnet("/root/conflict", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: ["be", "af"],
+    });
+    const unpaired = jobnet("/root/unpaired", {
+      sd: "2026/04/04",
+      st: "10:00",
+      shd: "2,3",
+    });
+    const root = group("/root", [conflict, unpaired], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [conflict, unpaired],
+      matches: [],
+      period,
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [decision.unitPath, decision.date]),
+      [["/root/unpaired", "2026-04-04"]],
+    );
+    assert.deepStrictEqual(
+      result.unsupportedDecisions.map((decision) => [
+        decision.unit.absolutePath,
+        decision.parameter.key,
+        decision.reason,
+        decision.scheduleRule,
+      ]),
+      [
+        ["/root/conflict", "sh", "closed-day-substitution", 1],
+        ["/root/conflict", "sh", "closed-day-substitution", 1],
+        ["/root/unpaired", "shd", "shift-days", 2],
+      ],
+    );
+    assert.deepStrictEqual(result.zeroRunCandidates, []);
   });
 });

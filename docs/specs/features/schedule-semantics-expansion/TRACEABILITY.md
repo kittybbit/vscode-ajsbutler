@@ -119,15 +119,15 @@ and tests before it can pass its completion review.
   findings. Completion Approval was automatically granted on 2026-09-05 under
   the user's explicit per-slice instruction; the exact approved path set is
   recorded in `TASKS.md`. Feature-level final/closure approval remains pending
-  until all slices complete for one bulk human approval.
+  until Feature Exit and the requested bulk human approval.
 - Compatibility impact: no VS Code engine, public/neutral DTO, presentation,
   command, telemetry, Node built-in, or host-calendar behavior changed. The
   new modules are browser-safe and deterministic.
 - Review evidence: duplicate start-time selection, zero-run suppression, and
   canonical before-path matching were independently reviewed and covered by
   focused tests with no actionable findings.
-- Unresolved risks: the planned calendar-dependent relative/open/closed,
-  inheritance, 48-hour, cycle, and substitution slices remain unimplemented.
+- Unresolved risks: parent inheritance, 48-hour, cycle, and `cftd` semantics
+  remain outside the completed slices.
 
 ## Slice 2 Implementation Evidence
 
@@ -164,8 +164,8 @@ and tests before it can pass its completion review.
   and browser-safe, with no host locale/timezone/clock or external calendar
   input. Malformed offsets and occurrences retain recoverable invalid status;
   valid no-runs remains distinct. README and CHANGELOG now state the expanded
-  observable support. Future calendar-dependent, relative, open/closed,
-  inheritance, 48-hour, cycle, and substitution work remains deferred.
+  observable support. Parent inheritance, 48-hour, cycle, and `cftd` semantics
+  remain outside the completed slices.
 - Review findings and replan: the approved correction synchronizes
   `ScheduleDateRules.ts` with calculated absolute weekdays, filters schedule
   assertions to `sd`, and adds explicit 31-day month-end coverage. No new
@@ -197,10 +197,9 @@ and tests before it can pass its completion review.
   application, documentation, and integration-test changes remain preserved
   without broadening. Slice 2 Completion Approval was granted and the exact
   completion commit is `23dfdcea`; feature-level final/closure approval remains
-  pending until the remaining Slices 4–5 are complete for the requested bulk
-  human approval.
-- Recommended route: send the exact approved Slice 3 diff to
-  approval-committer for the completion commit.
+  pending until Feature Exit and the requested bulk human approval.
+- Completion status: Slice 3 was subsequently implementation-reviewed Ready
+  with no findings and completion-committed as `e9f25f69`.
 
 ## Slice 3 Implementation Evidence
 
@@ -242,9 +241,9 @@ and tests before it can pass its completion review.
   `MachPortRendezvousServer` permission failure.
 - Compatibility and production readiness: the resolver and projector use pure,
   browser-safe Gregorian arithmetic without host locale, timezone, clock,
-  filesystem, network, WebAPI, or external calendar acquisition. Future
-  open/closed, substitution, inheritance, 48-hour, cycle, and related work
-  remains deferred to later planned slices.
+  filesystem, network, WebAPI, or external calendar acquisition. Parent
+  inheritance, 48-hour, cycle, and `cftd` semantics remain outside the
+  completed slices.
 - Changed paths: `src/domain/services/semantic-diff/semanticDiffScheduleCalendarContext.ts`,
   `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`,
   `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`,
@@ -262,14 +261,15 @@ and tests before it can pass its completion review.
   Completion Approval was automatically granted on 2026-09-06 under the
   user's explicit per-slice instruction, and the exact 15-path Slice 3 diff
   was completion-committed as `e9f25f69`. Feature-level final/closure approval
-  remains pending until Slices 4–5 complete for the requested bulk human
-  approval. Slice 4's completion commit is pending.
+  remains pending until Feature Exit and the requested bulk human approval.
+  Slice 4 is committed as `197d062d`.
 
 ## Slice 4 Implementation Evidence
 
-- Status: Slice 4 implementation complete; implementation-reviewer Ready with
-  no findings; Completion Approval automatically granted on 2026-09-06 under
-  the user's explicit per-slice instruction; completion commit pending.
+- Status: Slice 4 implementation complete and committed as `197d062d`;
+  implementation-reviewer Ready with no findings; Completion Approval
+  automatically granted on 2026-09-06 under the user's explicit per-slice
+  instruction.
 - Dependency evidence: Slices 1 through 3 are complete and committed; the
   Slice 3 dependency is `e9f25f69`.
 - Context evidence: normalized `op` and `cl` values are resolved from the
@@ -318,7 +318,67 @@ and tests before it can pass its completion review.
   `src/test/suite/semanticDiffScheduleCalendar.test.ts`.
 - Implementation review: Ready with no findings. Completion Approval was
   automatically granted on 2026-09-06 under the user's explicit per-slice
-  instruction; the exact 10-path Slice 4 diff is eligible for the completion
-  commit. Feature-level final/closure approval remains pending until all
-  slices are complete for the requested bulk human approval. Recommended
-  route: send the exact Slice 4 diff to approval-committer.
+  instruction; the exact 10-path Slice 4 diff was completion-committed as
+  `197d062d`. Feature-level final/closure approval remains pending until
+  Feature Exit and the requested bulk human approval.
+
+## Slice 5 Implementation Evidence
+
+- Status: Slice 5 implementation complete; implementation-reviewer Ready with
+  no findings; Completion Approval automatically granted on 2026-09-06 under
+  the user's explicit per-slice instruction; completion commit pending.
+- Dependency and completion evidence: all five slices are implemented and
+  independently reviewed Ready with no findings. Slices 1 through 4 are
+  completion-committed as `4a3b846d`, `23dfdcea`, `e9f25f69`, and `197d062d`;
+  Slice 5 completion commit remains pending.
+- Interpretation/projection evidence: `sh` and `shd` are associated by
+  schedule-rule number. `be` and `af` select the nearest open date within the
+  effective limit (default `2`, explicit `1..31`), while `ca` preserves an open
+  base date and suppresses a closed one. Repeated identical values are
+  idempotent; conflicts, invalid values, and unpaired `shd` retain raw
+  evidence. Candidate lookaround is limited to 31 days on each side before
+  final half-open period filtering. `sh=no` remains missing context, and rules
+  containing `cy` or `cftd` do not receive partial substitution. Suppression
+  derives rule 1 by default (or an explicit raw rule prefix) even when a
+  `cy`/`cftd` parameter is malformed and unparsed.
+  Substitution is gated to fully qualified `sd` dates; legacy omitted-year or
+  omitted-month `MM/DD` and `DD` forms retain direct-date compatibility while
+  their `sh` substitution remains uncalculated with the existing
+  `closed-day-substitution` evidence.
+- Application evidence: existing `closed-day-substitution` and `shift-days`
+  reason codes, legacy messages, dynamic unsupported IDs, raw details, run
+  changes, zero-run confirmations, and public/neutral DTOs remain unchanged.
+  Focused tests cover normal before/after shifts, default and explicit limits,
+  no-target suppression, period crossing, `ca`, duplicate raw evidence,
+  invalid/unresolved values, cycle interaction, and malformed `cy`/`cftd`
+  whole-rule suppression. Duplicate substitution rules retain four raw
+  per-parameter evidence entries, and conflicting `sh` values retain one
+  unsupported decision for each raw parameter.
+- Compatibility and production readiness: only normalized definition-backed
+  calendar data and browser-safe Gregorian arithmetic are used. No host
+  locale, timezone, clock, filesystem, network, WebAPI, or scheduler-service
+  calendar state is consulted; errors remain recoverable and explicit.
+- Validation evidence: `rtk pnpm run test:compile`, desktop extension tests,
+  focused schedule/calendar/application tests, an escalated `rtk pnpm run
+qlty` (`qlty check`: No issues), `rtk pnpm run lint:md`, `rtk pnpm run build`,
+  and `git diff --check` are green. The normal sandbox qlty invocation cannot
+  create its external rolling log, so the successful implementer run used the
+  approved external-log access. `rtk pnpm run test:full` passes its desktop
+  portion; the Web portion remains blocked before tests load by the unchanged
+  host Chromium `MachPortRendezvousServer` permission failure.
+- Changed paths (exact current Slice 5 diff): `CHANGELOG.md`, `README.md`,
+  `docs/requirements/domain-rules/interpret-jp1-parameters.md`,
+  `docs/requirements/use-cases/uc-build-semantic-diff.md`,
+  `docs/specs/features/schedule-semantics-expansion/TASKS.md`,
+  `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`, and
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`.
+- Completion gate: implementation-reviewer returned Ready with no findings.
+  Completion Approval was automatically granted on 2026-09-06 under the
+  user's explicit per-slice instruction; the exact current 9-path Slice 5
+  diff is ready for its completion commit. Feature-level final/closure
+  approval remains pending until Feature Exit and the requested bulk human
+  approval.
+- Recommended route: send this exact Slice 5 diff to approval-committer for
+  the completion commit.

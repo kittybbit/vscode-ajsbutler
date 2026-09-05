@@ -224,6 +224,23 @@ Scenario: Definition-backed open and closed schedule forms use explicit classifi
     calendar fallback
   And units outside the comparison scope are not added to the result
 
+Scenario: Closed-day substitution uses bounded definition-backed calendar data
+  Given schedule comparison is requested for a period
+  And a jobnet uses a fully qualified `sd` value with `sh=be`, `sh=af`, or
+    `sh=ca` for the same schedule rule
+  And its selected `jc` or containing group provides complete normalized
+    `op` and `cl` calendar data
+  When semantic diff is built
+  Then `be` and `af` select the nearest open day within effective `shd`
+  And omitted `shd` uses two days while explicit `shd` is limited to 31 days
+  And `ca` suppresses a closed base date while preserving an open base date
+  And a shift across the requested-period boundary is filtered to the
+    half-open comparison period after at most 31 days of lookaround
+  And invalid, conflicting, or unpaired values remain existing uncalculated
+    items with their raw parameter evidence
+  And `sh=no`, incomplete calendar data, and rules containing `cy` or `cftd`
+    are not resolved from host or external service state
+
 Scenario: A missing fifth weekday occurrence is a valid no-runs schedule
   Given schedule comparison is requested for a period
   And a fully qualified weekday rule has no fifth matching weekday in its month

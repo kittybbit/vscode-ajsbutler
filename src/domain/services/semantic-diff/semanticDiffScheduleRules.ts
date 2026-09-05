@@ -222,10 +222,15 @@ const collectScheduleUnit = (
       rule.date !== undefined &&
       isFullyQualifiedRelativeScheduleDate(rule.date),
   );
+  const hasClosedDaySubstitution = interpretation.rules.some(
+    (rule) => rule.parameter.key === "sh",
+  );
   const projection = projectScheduleRuns({
     interpretation,
     period,
-    ...(document && contextIndex && hasContextRelativeDate
+    ...(document &&
+    contextIndex &&
+    (hasContextRelativeDate || hasClosedDaySubstitution)
       ? {
           calendarContext: resolveScheduleCalendarContext(
             document,
