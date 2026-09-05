@@ -4,9 +4,9 @@
 
 - Purpose: expand evidence-based review recommendations without presenting
   definition changes as verified runtime failures.
-- Approved or active slice: Slice 2; Slice 1 is completion-committed and the
-  independently reviewed revised Slice 2 implementation scope is approved for
-  its focused replan commit.
+- Approved or active slice: Slice 3; Slices 1 and 2 are completion-committed,
+  and the selected Slice 3 implementation scope is approved for the next
+  implementation handoff.
 - Do not: add cycle or terminal-reachability analysis, schedule-semantics
   expansion, runtime or external probes, identity rules, a new confirmation
   level, or a competing structured-result DTO.
@@ -18,9 +18,8 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate the revised Slice 2 planning documents to
-  `approval-committer` for the focused replan commit, then resume the existing
-  Slice 2 implementation handoff.
+- Next decision: delegate Slice 3 implementation to `implementer` after this
+  focused approval-state commit.
 
 ## Replanning Record
 
@@ -62,12 +61,11 @@
   post-approval implementation paths and records the exact contract below.
 - Preserved: the four existing dependency-ordered slices, current evidence
   and report boundaries, approval gates, and all exclusions remain in force.
-  The current uncommitted Slice 2 domain/application implementation and tests
-  remain preserved; no new implementation slice, schema, or report mode is
-  introduced, and only one existing reason-specific mapping is corrected.
+  No new implementation slice, schema, or report mode was introduced, and only
+  one existing reason-specific mapping was corrected.
 - Route: independent plan re-review returned `Ready`, and Human Approval covers
-  the revised renderer mapping/test boundary. A focused replan commit is
-  required before implementation resumes.
+  the revised renderer mapping/test boundary. Replan commit `718c0919` and
+  Slice 2 completion commit `3ad7c0a6` satisfy that route.
 
 ## Sync Rule
 
@@ -86,39 +84,29 @@
 
 ## Plan Status
 
-- Status: Revised Slice 2 plan reviewed `Ready` and approved for replan commit.
+- Status: Slice 3 approved for implementation.
 - Planning scope: revised complete four-slice plan covering supported
   start-condition evidence, supported-versus-unsupported calculated schedule
   opportunity loss, external wait constraints, and v13-backed non-assertive
   execution-user-type/resource-group recommendations, with the localized
   Slice 2 Full projection correction recorded below.
 - Review status: `Ready`; independent revised-plan review complete.
-- Human approval: Approved for the revised Slice 2 boundary in the current
-  conversation, including the narrow exception for the existing English Full
-  mapping and its regression fixture.
-- Active implementation slice: Slice 2.
+- Human approval: Approved for Slice 3 implementation under the user's current
+  conversation direction to continue all planned slices in order and apply
+  conditional Completion Approval when independent review returns no findings.
+- Active implementation slice: Slice 3.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-05, explicit user approval in current conversation
-- Approved scope: revised Slice 2 — the existing schedule evidence and
-  confirmation mapping scope plus the existing reason-specific English Full
-  renderer mapping and its Full regression test. Audit/JSON are verification-
-  only and must retain exact detail values.
-- Historical pre-replan approved paths:
+- Approved scope: Slice 3 — existing supported wait-release, timeout, file,
+  and event evidence details and constraints across established output modes,
+  plus the named tests within the Slice 3 Approval Boundary.
+- Approved paths:
   - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
-- Revised replan planning-document commit scope:
-  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
-  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
-- Proposed post-approval implementation paths (not part of the planning-
-  document commit):
-  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
-  - `src/test/suite/semanticDiffMarkdownProjections.test.ts` (Full regression)
-- Dependency-owned validation-only path (no planned implementation edit):
-  - `src/test/suite/semanticDiffJson.test.ts` (exact-detail assertion)
 
-The approved Slice 2 implementation scope is recorded above. Main delegates
+The approved Slice 3 implementation scope is recorded above. Main delegates
 and completes one slice at a time in the order below. The user's standing
 direction permits Main to record Completion Approval after an independent
 `Ready` review with no findings and then activate the next planned slice. Any
@@ -126,27 +114,12 @@ finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
-- Status: Approved
-- Approved at: 2026-09-05, conditional approval granted by the user and applied
-  after the final independent implementation review returned `Ready` with no
-  findings
-- Approved scope: revised Slice 2 — supported schedule evidence
-  classification, zero-run and removed-run confirmation mapping, the narrow
-  English Full removed-run projection correction, focused tests, and updated
-  implementation/traceability evidence.
-- Approved paths:
-  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
-  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
-  - `src/application/semantic-diff/compareScheduleDiff.ts`
-  - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
-  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
-  - `src/test/suite/semanticDiffJson.test.ts`
-  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
-  - `src/test/suite/semanticDiffSchedule.test.ts`
-  - `src/test/suite/semanticDiffScheduleRules.test.ts`
-- Implementation review verdict: `Ready`; final review found no remaining
-  findings after the exact Full fixture and evidence updates
-- Commit status: Eligible for the focused Slice 2 completion commit
+- Status: Pending
+- Approved at: none
+- Approved scope: none
+- Approved paths: none
+- Implementation review verdict: Pending
+- Commit status: Not eligible
 
 ## Closure Approval
 
@@ -415,8 +388,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 2: Recommend Review For Supported Schedule Opportunity Loss
 
-- Status: Complete; independently reviewed `Ready`, Completion Approval
-  recorded, and focused completion commit pending.
+- Status: Complete; independently reviewed `Ready`, completion-approved, and
+  committed in `3ad7c0a6`.
 - Scope: preserve explicit after-side zero-run review and add one
   `calculated-schedule-run-removed` record for each removed run already emitted
   by the supported schedule comparison, after classifying supported,
@@ -496,7 +469,7 @@ not an implementation surface owned by this feature:
 
 ### Slice 3: Make External Wait Constraints Complete And Structured
 
-- Status: Planned; blocked on Slice 2 completion and approval.
+- Status: Approved; ready for implementation handoff.
 - Scope: preserve supported wait-release, timeout, file, and event selections
   while completing their typed before/after evidence and mandatory runtime or
   external-state constraints across every output mode.
