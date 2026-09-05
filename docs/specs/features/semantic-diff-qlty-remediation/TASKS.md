@@ -8,10 +8,11 @@
   gate is clean. Slice 2's runtime correction and exact two-file format-only
   reconciliation are complete and published at `8ec1f070`: the structural
   cloud gate is 35, no replacement finding exists, `qlty fmt` reports no
-  formatting issues, and Verify/CodeQL pass. Slice 3's first implementation
-  is published at `7c7e57c2`, but its cloud structural result is 17 versus the
-  target 11 because six `qlty smells` function-complexity findings remain.
-  Slice 3 correction replan is active; S4-S5 remain queued behind it.
+  formatting issues, and Verify/CodeQL pass. Slice 3 correction is complete
+  and published at `a7a7ecbc`: structural 11, no hidden or replacement finding,
+  fmt 0, and Verify/CodeQL pass. Slice 4 is the active approved runtime slice;
+  its one command return-count finding is unresolved. The two-document state
+  transition commit must land before S4 code starts.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -21,14 +22,12 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: route the Slice 3 correction replan to independent
-  `plan-reviewer`. The exact correction scope is the two production paths
-  `semanticDiffJsonOrdering.ts` and `semanticDiffJsonValidation.ts`, with the
-  immutable JSON test validation-only and the two feature documents carrying
-  the replan evidence. Existing Slice 3 approval does not cover this new
-  replan; after `Ready`, Main must apply approval and `approval-committer` must
-  commit the replan before implementation. The Slice 2 transition commit is
-  also required before Slice 3 runtime work.
+- Next decision: have `approval-committer` record the completed Slice 3
+  correction and gate transition in the exact two feature documents, then
+  route the already approved Slice 4 scope to `implementer`. The Slice 3
+  correction preserves its existing scope, design, and approval; no new plan
+  review or approval is required for this evidence-only transition. S4 code
+  must not start before the transition commit.
 
 ## Sync Rule
 
@@ -60,21 +59,24 @@
 
 ## Plan Status
 
-- Status: Slice 3 correction Replanning; published `7c7e57c2` reports 17
-  structural blockers versus target 11. The six `qlty smells` findings are
-  isolated to the exact two production paths; correction review, approval,
-  and replan commit are pending before implementation.
+- Status: Slice 3 correction complete and published at `a7a7ecbc`; structural
+  11 (`function-complexity` 6, `return-statements` 4,
+  `file-complexity` 1), no hidden or replacement finding, fmt 0, and
+  Verify/CodeQL pass. Slice 4 is active under the existing approval, but its
+  runtime implementation is gated by the exact two-document transition commit.
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
-- Review status: Slice 3 correction replan independently reviewed `Ready` with
-  no Findings; the prior Slice 3 implementation review remains separate.
+- Review status: Slice 3 correction implementation review is `Ready` with no
+  Findings; the correction's published cloud gate is complete. The prior Slice
+  3 implementation review and correction replan review remain distinct and
+  preserved.
 - Independent plan review: `Ready` with no Findings; it verified the six smells
   findings, exact two-production-path boundary, and validation-only immutable
   test boundary
 - Replan approval: `Approved`; Main applied the existing Human Approval to
   this same approved Slice 3 correction scope
-- Replan commit: Pending `approval-committer`; the exact replan commit targets
-  only the two feature documents:
+- Replan commit: Pending transition commit by `approval-committer`; the exact
+  commit targets only the two feature documents:
   `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
   `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`. After
   this focused docs-only commit, implementation may modify only the two JSON
@@ -83,16 +85,17 @@
   prior Slice 3 implementation gate, and the completed Slice 2 format-only
   package. Main applied it to this independently reviewed Slice 3 correction
   replan without expanding file, design, behavior, or approval-boundary scope.
-  The four implementation-authorized paths are the two JSON helper sources and
-  the two feature documents; the replan commit itself remains docs-only. This
+  The four implementation-authorized paths were the two JSON helper sources
+  and the two feature documents; the transition commit remains docs-only. This
   document does not grant a new approval.
-- Active implementation slice: Slice 3 correction replan, before its
-  implementer gate. Slice 1 published head `29f34008` records 46 structural
-  blockers, zero formatting blockers, and no replacement finding; Slice 2
-  published head `8ec1f070` records 35 structural blockers, zero formatting
-  blockers, no replacement finding, and passing Verify/CodeQL. Slice 3's
-  published head `7c7e57c2` records 17 structural blockers, including six
-  smells findings; Slice 2 runtime and format-only package must not be reopened.
+- Active implementation slice: Slice 4 runtime refactor, queued behind the
+  required transition commit. Slice 1 published head `29f34008` records 46
+  structural blockers, zero formatting blockers, and no replacement finding;
+  Slice 2 published head `8ec1f070` records 35 structural blockers, zero
+  formatting blockers, no replacement finding, and passing Verify/CodeQL.
+  Slice 3 published head `a7a7ecbc` records 11 structural blockers, zero
+  formatting blockers, no hidden or replacement finding, and passing
+  Verify/CodeQL. Slice 3 is complete and must not be reopened.
 
 ## Human Approval
 
@@ -185,8 +188,9 @@ active implementation approval remains.
 
 ## Completion Approval
 
-- Status: Approved conditionally for corrected Slice 2 runtime completion;
-  final Slice 2 gate is pending the format-only document reconciliation
+- Status: Approved conditionally for corrected Slice 2 and Slice 3 completion;
+  Slice 2 and Slice 3 gates are complete, and Slice 4 is active under the
+  existing approval after the required transition documentation commit
 - Approved at: existing user all-slice conditional authorization, activated
   after the corrected implementation review returned `Ready` with no Findings
 - Approved scope: the exact corrected implementation path and the two feature
@@ -199,8 +203,10 @@ active implementation approval remains.
   at `75add547`; its completion gate is superseded by the unexpected 36-blocker
   cloud result and must not be committed independently.
 - Corrected implementation review verdict: `Ready`; Findings: none
-- Commit status: Runtime completion published at `9e2c45a4`; the exact
-  two-file format-only replan commit remains pending `approval-committer`
+- Commit status: Slice 2 runtime completion is published at `9e2c45a4` and its
+  format-only package at `8ec1f070`; Slice 3 correction completion is published
+  at `a7a7ecbc`. The exact two-document transition commit remains pending
+  `approval-committer` before Slice 4 runtime implementation.
 
 The Slice 1-specific conditional clean-review authorization was consumed by its
 completed package. Separately, the user's one-time conditional authorization
@@ -221,23 +227,20 @@ one hidden `function-complexity` aggregate on `renderSummary` in
 `semanticDiffMarkdownLocalization.ts` (complexity count 8). The previous
 `localizedUnitChange` aggregate attribution was incorrect and is removed from
 the current plan. The corrected runtime was published at `9e2c45a4` with 35
-structural blockers and Verify/CodeQL passing; `qlty fmt` still reports exactly
-the two feature-document paths as unformatted, so the final Slice 2 gate is
-pending the format-only reconciliation.
+structural blockers and Verify/CodeQL passing; its format-only package was
+published at `8ec1f070` with no formatting issues and no replacement finding.
 
-For this corrected Slice 2 and each later approved slice, the user's
-all-slice conditional authorization applies only when the independent
-implementation review returns `Ready` with no Findings and the published
-Qlty gates are clean. The corrected Slice 2 review and structural cloud gate
-are complete; its two-file format-only gate remains mandatory before the next
-slice starts.
+For corrected Slice 2, corrected Slice 3, and each later approved slice, the
+user's all-slice conditional authorization applies only when the independent
+implementation review returns `Ready` with no Findings and the published Qlty
+gates are clean. Slice 2 and Slice 3 meet those conditions; Slice 4 is the
+active approved slice and its code starts only after the transition commit.
 
 Completion Approval was activated by the corrected independent implementation
-review returning `Ready` with no Findings and is consumed by the runtime
-completion published at `9e2c45a4`. The remaining format-only package is a
-separate planning/replanning gate on the two feature-document paths; its
-approval-committer commit must complete before another slice or Feature Exit
-starts.
+reviews returning `Ready` with no Findings and is consumed by the runtime
+completions published at `9e2c45a4` and `a7a7ecbc`; the Slice 2 format-only
+package is complete at `8ec1f070`. The two-document transition commit must
+complete before Slice 4 runtime implementation or Feature Exit starts.
 
 ## Closure Approval
 
@@ -329,8 +332,11 @@ create the focused closure commit before the feature is closed.
 - Published Slice 3 initial head `7c7e57c2`: 17 structural blockers, including
   six `function-complexity` smells findings in the two JSON helper paths;
   `qlty fmt` is clean, and Verify/CodeQL pass. This is the replan trigger.
-- After Slice 3 correction: 11 (`function-complexity` 6,
-  `return-statements` 4, `file-complexity` 1).
+- Published Slice 3 correction head `a7a7ecbc`: 11 structural blockers
+  (`function-complexity` 6, `return-statements` 4, `file-complexity` 1),
+  zero format blockers, no hidden or replacement finding, and passing
+  Verify/CodeQL. Slice 3 is complete; the two-document transition commit is
+  required before Slice 4 runtime implementation.
 - After Slice 4: 10 (`function-complexity` 6,
   `return-statements` 3, `file-complexity` 1).
 - After Slice 5 / Feature Exit: 0; no replacement blocker.
@@ -717,11 +723,12 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 3: Preserve The Exact JSON V1 Wire Contract
 
-- Status: Correction implementation and independent review are complete;
-  review returned `Ready` with no Findings and Main applied the existing
-  conditional Completion Approval. The exact docs-only replan commit is
-  `d0bb8c68`. The completion commit remains pending; no commit or push was
-  performed by implementer.
+- Status: Correction implementation, independent review, Completion Approval,
+  and publication are complete at `a7a7ecbc`. Cloud structural Qlty is 11
+  (`function-complexity` 6, `return-statements` 4, `file-complexity` 1), fmt
+  is 0, Verify/CodeQL pass, and no hidden or replacement finding remains. The
+  exact two-document transition commit is pending before Slice 4 runtime work;
+  Slice 3 must not be reopened.
 - Replan trigger: `qlty check` reports only linters and does not expose the
   remaining structural smells. Explicit `rtk pnpm exec qlty smells
 --no-snippets` reproduces six `function-complexity` findings: `firstDifference`
@@ -817,18 +824,19 @@ create the focused closure commit before the feature is closed.
   target `qlty smells --no-snippets` exits 0 with no smell output, confirming
   the six findings are gone. Both Prettier 3.3.3 and 3.6.2 checks, Markdown
   lint, and `git diff --check` passed. The immutable empty/populated bytes and
-  digests remain unchanged. Cloud confirmation of the expected 11 later-slice
-  blockers and fmt 0 is not yet available. Independent implementation review
-  review is `Ready` with no Findings and Main applied the conditional
-  Completion Approval. `approval-committer` is the next route for the exact
-  correction package; Cloud confirmation of the expected 11 later-slice
-  blockers and fmt 0 remains pending.
+  digests remain unchanged. Independent implementation review is `Ready` with
+  no Findings and Main applied the conditional Completion Approval. Published
+  `a7a7ecbc` confirms structural 11, no hidden or replacement finding, fmt 0,
+  Verify, and CodeQL. The exact two-document transition commit is the next
+  route before Slice 4 runtime implementation.
 - Out of Scope: JSON v2, schema/type changes, serialization libraries, locale
   options, loss of validation, and Qlty suppression or threshold changes.
 
 ### Slice 4: Preserve Semantic Diff Command Orchestration
 
-- Status: Approved; queued behind Slice 3 completion gate
+- Status: Approved and active; the one command return-count finding remains.
+  Runtime implementation starts only after the exact two-document Slice 3
+  transition commit.
 - Scope: replace the return-heavy command workflow in
   `semanticDiffCommand.ts` with typed phase helpers or one explicit command
   outcome pipeline, preserving the current dependency interface and operation
@@ -970,7 +978,9 @@ src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`.
   format-only gate did not reopen production. Slice 2's target is 35
   structural blockers, zero format blockers, and no replacement finding. The
   initial Slice 3 publication `7c7e57c2` is 17 because six `qlty smells`
-  findings remain; its correction target is 11, followed by 10 and 0.
+  findings remain; published correction `a7a7ecbc` reaches 11 with fmt 0,
+  Verify/CodeQL passing, and no hidden or replacement finding. The unresolved
+  inventory is S4=1 and S5=10; S4 is active after the transition commit.
 - Regression boundary: exact JSON v1 serialization; Summary, Full, and Audit
   Markdown and localization; comparison, identity, schedule, and risk meaning;
   commands; report documents; desktop and web behavior.
@@ -1089,13 +1099,12 @@ src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`.
 
 ## Feature Exit
 
-- Definition of Done status: Slice 2's original and corrected implementation
-  reviews are complete, and conditional Completion Approval is recorded; its
-  runtime correction is published at `9e2c45a4` with structural 35 and
-  Verify/CodeQL passing. The exact two-file format-only gate remains before
-  later slices and Feature Exit. Slice 1's production correction review,
-  completion approval, and format-only published gate remain complete at 46
-  structural blockers with zero formatting blockers and no replacement.
+- Definition of Done status: Slices 1-3 implementation reviews are complete,
+  and conditional Completion Approval is recorded. Slice 3 correction is
+  published at `a7a7ecbc` with structural 11, fmt 0, Verify/CodeQL passing,
+  and no hidden or replacement finding. Slice 4 is the active approved slice;
+  its code is gated only by the exact two-document transition commit. Slice 1
+  and Slice 2 published gates remain complete with no replacement findings.
 - Durable documentation updates: none expected; re-evaluate only if an actual
   durable behavior or architecture decision changes.
 - Required exit evidence: five focused completion commits; every requirement
