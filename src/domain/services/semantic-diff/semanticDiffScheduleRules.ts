@@ -1,14 +1,20 @@
-import {
-  findAjsUnitParameters,
-  type AjsParameter,
-  type AjsUnit,
-} from "../../models/ajs/AjsDocument";
-import { interpretScheduleDateValue } from "../../models/parameters/scheduleDateInterpreter";
-import { parseStartTimeValue } from "../../models/parameters/scheduleRuleHelpers";
+import type { AjsParameter, AjsUnit } from "../../models/ajs/AjsDocument";
 import type {
   SemanticDiffComparisonPeriod,
   SemanticDiffScheduleRun,
 } from "../../models/semantic-diff/SemanticDiff";
+import { compareScheduleRuns } from "./semanticDiffScheduleDiffer";
+import { interpretSchedule } from "./semanticDiffScheduleInterpreter";
+import { projectScheduleRuns } from "./semanticDiffScheduleProjector";
+import type {
+  SemanticDiffScheduleEvidence,
+  SemanticDiffScheduleInterpretation,
+  SemanticDiffScheduleProjection,
+  SemanticDiffScheduleRuleInterpretation,
+  SemanticDiffScheduleSide,
+  SemanticDiffScheduleStatus,
+  SemanticDiffScheduleUnsupportedReason,
+} from "./semanticDiffScheduleTypes";
 import type { SemanticDiffUnitMatch } from "./semanticDiffStructuralRules";
 
 export type SemanticDiffScheduleMatchedUnit = Pick<
@@ -16,20 +22,16 @@ export type SemanticDiffScheduleMatchedUnit = Pick<
   "before" | "after"
 >;
 
-export type SemanticDiffScheduleSide = "before" | "after";
-
-export type SemanticDiffScheduleUnsupportedReason =
-  | "cycle-schedule"
-  | "closed-day-substitution"
-  | "shift-days"
-  | "calendar-selection"
-  | "inherited-parent-rule"
-  | "days-from-start"
-  | "invalid-start-time"
-  | "unpaired-start-time"
-  | "unsupported-schedule-date"
-  | "missing-start-time"
-  | "invalid-calendar-day";
+export type {
+  SemanticDiffScheduleEvidence,
+  SemanticDiffScheduleInterpretation,
+  SemanticDiffScheduleProjection,
+  SemanticDiffScheduleRuleInterpretation,
+  SemanticDiffScheduleStatus,
+  SemanticDiffScheduleUnsupportedReason,
+};
+export type { SemanticDiffScheduleSide } from "./semanticDiffScheduleTypes";
+export { interpretSchedule, projectScheduleRuns, compareScheduleRuns };
 
 export type SemanticDiffScheduleUnsupportedDecision = {
   side: SemanticDiffScheduleSide;
@@ -65,6 +67,7 @@ export type SemanticDiffScheduleEvidenceKind =
   | "mixed"
   | "unsupported-or-uncalculated-only";
 
+/** Compatibility view retained for application and report consumers. */
 export type SemanticDiffScheduleSideEvaluation = {
   unit: AjsUnit;
   evidence: SemanticDiffScheduleEvidenceKind;
@@ -78,13 +81,8 @@ export type SemanticDiffSchedulePairEvaluation = {
 };
 
 export type SemanticDiffScheduleEvaluation =
-  | {
-      kind: "not-requested";
-    }
-  | {
-      kind: "invalid-period";
-      period: SemanticDiffComparisonPeriod;
-    }
+  | { kind: "not-requested" }
+  | { kind: "invalid-period"; period: SemanticDiffComparisonPeriod }
   | {
       kind: "evaluated";
       period: SemanticDiffComparisonPeriod;
@@ -101,19 +99,6 @@ export type EvaluateSemanticDiffScheduleInput = {
   period?: SemanticDiffComparisonPeriod;
 };
 
-type ValidPeriod = {
-  from: Date;
-  to: Date;
-  display: SemanticDiffComparisonPeriod;
-};
-
-type ScheduleCollection = {
-  runs: SemanticDiffScheduleRun[];
-  unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[];
-  zeroRunCandidates: AjsUnit[];
-  unitEvaluations: SemanticDiffScheduleSideEvaluation[];
-};
-
 const jobnetTypes = new Set(["n", "rn", "rm", "rr"]);
 const scheduleParameterKeys = new Set([
   "sd",
@@ -121,31 +106,24 @@ const scheduleParameterKeys = new Set([
   "cy",
   "sh",
   "shd",
-  "sc",
+  "jc",
   "ln",
   "cftd",
-]);
-const unsupportedScheduleParameterReasons = new Map<
-  string,
-  SemanticDiffScheduleUnsupportedReason
->([
-  ["cy", "cycle-schedule"],
-  ["sh", "closed-day-substitution"],
-  ["shd", "shift-days"],
-  ["sc", "calendar-selection"],
-  ["ln", "inherited-parent-rule"],
-  ["cftd", "days-from-start"],
 ]);
 
 const compareStrings = (left: string, right: string): number =>
   left.localeCompare(right);
+
+const isJobnetUnit = (unit: AjsUnit): boolean => jobnetTypes.has(unit.unitType);
+
+const hasDirectScheduleParameters = (unit: AjsUnit): boolean =>
+  unit.parameters.some((parameter) => scheduleParameterKeys.has(parameter.key));
 
 const toUtcDate = (value: string): Date | undefined => {
   const matched = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!matched) {
     return undefined;
   }
-
   const year = Number(matched[1]);
   const month = Number(matched[2]);
   const day = Number(matched[3]);
@@ -159,235 +137,57 @@ const toUtcDate = (value: string): Date | undefined => {
 
 const parsePeriod = (
   period: SemanticDiffComparisonPeriod,
-): ValidPeriod | undefined => {
+): SemanticDiffComparisonPeriod | undefined => {
   const from = toUtcDate(period.from);
   const to = toUtcDate(period.to);
-  return from && to && from.getTime() < to.getTime()
-    ? { from, to, display: period }
-    : undefined;
+  return from && to && from < to ? period : undefined;
 };
 
-const isJobnetUnit = (unit: AjsUnit): boolean => jobnetTypes.has(unit.unitType);
-
-const hasDirectScheduleParameters = (unit: AjsUnit): boolean =>
-  unit.parameters.some((parameter) => scheduleParameterKeys.has(parameter.key));
-
-const isNormalStartTime = (value: string): boolean => {
-  const matched = /^(\d{2}):(\d{2})$/.exec(value);
-  return !!matched && Number(matched[1]) < 24 && Number(matched[2]) < 60;
-};
-
-const firstParameterByParsedRule = (
-  parameters: AjsParameter[],
-): Map<number, AjsParameter> => {
-  const byRule = new Map<number, AjsParameter>();
-  parameters.forEach((parameter) => {
-    const parsed = parseStartTimeValue(parameter.value);
-    if (parsed && !byRule.has(parsed.rule)) {
-      byRule.set(parsed.rule, parameter);
-    }
-  });
-  return byRule;
-};
-
-const parsedRuleSet = (
-  parameters: AjsParameter[],
-  parse: (value: string) => { rule: number } | undefined,
-): Set<number> =>
-  new Set(
-    parameters
-      .map((parameter) => parse(parameter.value)?.rule)
-      .filter((rule): rule is number => rule !== undefined),
-  );
-
-const unsupportedScheduleParameterDecisions = (
+const unsupportedDecision = (
   side: SemanticDiffScheduleSide,
-  unit: AjsUnit,
-): SemanticDiffScheduleUnsupportedDecision[] =>
-  unit.parameters
-    .filter((parameter) =>
-      unsupportedScheduleParameterReasons.has(parameter.key),
-    )
-    .map((parameter) => ({
-      side,
-      unit,
-      parameter,
-      reason: unsupportedScheduleParameterReasons.get(parameter.key)!,
-    }));
-
-const unsupportedStartTimeDecisions = (
-  side: SemanticDiffScheduleSide,
-  unit: AjsUnit,
-): SemanticDiffScheduleUnsupportedDecision[] =>
-  findAjsUnitParameters(unit, "st")
-    .filter((parameter) => {
-      const parsed = parseStartTimeValue(parameter.value);
-      return !parsed || !isNormalStartTime(parsed.value);
-    })
-    .map((parameter) => ({
-      side,
-      unit,
-      parameter,
-      reason: "invalid-start-time",
-    }));
-
-const unsupportedUnpairedStartTimeDecisions = (
-  side: SemanticDiffScheduleSide,
-  unit: AjsUnit,
-): SemanticDiffScheduleUnsupportedDecision[] => {
-  const scheduleDateRules = parsedRuleSet(
-    findAjsUnitParameters(unit, "sd"),
-    interpretScheduleDateValue,
-  );
-  return findAjsUnitParameters(unit, "st")
-    .filter((parameter) => {
-      const parsed = parseStartTimeValue(parameter.value);
-      return (
-        parsed &&
-        isNormalStartTime(parsed.value) &&
-        !scheduleDateRules.has(parsed.rule)
-      );
-    })
-    .map((parameter) => ({
-      side,
-      unit,
-      parameter,
-      reason: "unpaired-start-time",
-    }));
-};
-
-const explicitDateCandidates = (
-  rawDateValue: string,
-  period: ValidPeriod,
-): string[] => {
-  const parsed = interpretScheduleDateValue(rawDateValue);
-  if (!parsed || parsed.day.kind !== "calendar") {
-    return [];
+  interpretation: SemanticDiffScheduleInterpretation,
+  rule: SemanticDiffScheduleRuleInterpretation,
+): SemanticDiffScheduleUnsupportedDecision | undefined => {
+  if (!rule.reason) {
+    return undefined;
   }
-
-  const day = String(parsed.day.value).padStart(2, "0");
-  if (parsed.year !== undefined && parsed.month !== undefined) {
-    return [
-      `${String(parsed.year).padStart(4, "0")}-${String(parsed.month).padStart(2, "0")}-${day}`,
-    ];
-  }
-
-  if (parsed.month !== undefined) {
-    const dates: string[] = [];
-    for (
-      let year = period.from.getUTCFullYear();
-      year <= period.to.getUTCFullYear();
-      year += 1
-    ) {
-      dates.push(`${year}-${String(parsed.month).padStart(2, "0")}-${day}`);
-    }
-    return dates;
-  }
-
-  const dates: string[] = [];
-  for (
-    let year = period.from.getUTCFullYear();
-    year <= period.to.getUTCFullYear();
-    year += 1
-  ) {
-    for (let month = 1; month <= 12; month += 1) {
-      dates.push(`${year}-${String(month).padStart(2, "0")}-${day}`);
-    }
-  }
-  return dates;
-};
-
-const isDateInPeriod = (dateValue: string, period: ValidPeriod): boolean => {
-  const date = toUtcDate(dateValue);
-  return !!date && date.getTime() >= period.from.getTime() && date < period.to;
-};
-
-type ScheduleDateProjection = {
-  runs: SemanticDiffScheduleRun[];
-  supported: boolean;
-};
-
-const createRunsForScheduleDate = (
-  unit: AjsUnit,
-  scheduleDate: AjsParameter,
-  startTimeByRule: Map<number, AjsParameter>,
-  period: ValidPeriod,
-): ScheduleDateProjection => {
-  const parsedDate = interpretScheduleDateValue(scheduleDate.value);
-  const startTime = parsedDate
-    ? startTimeByRule.get(parsedDate.rule)
-    : undefined;
-  const parsedStartTime = startTime
-    ? parseStartTimeValue(startTime.value)
-    : undefined;
-
-  if (
-    !parsedDate ||
-    !startTime ||
-    !parsedStartTime ||
-    !isNormalStartTime(parsedStartTime.value)
-  ) {
-    return { runs: [], supported: false };
-  }
-
-  const dateCandidates = explicitDateCandidates(scheduleDate.value, period);
-  const supported = dateCandidates.some((date) => toUtcDate(date));
-
   return {
-    runs: dateCandidates
-      .filter((date) => isDateInPeriod(date, period))
-      .map((date) => ({
-        unitPath: unit.absolutePath,
-        unitName: unit.name,
-        rule: parsedDate.rule,
-        date,
-        time: parsedStartTime.value,
-      })),
-    supported,
+    side,
+    unit: interpretation.unit,
+    parameter: rule.parameter,
+    reason: rule.reason,
+    ...(rule.rule === undefined ? {} : { scheduleRule: rule.rule }),
   };
 };
 
-const unsupportedScheduleDateDecision = (
+const collectUnsupportedDecisions = (
   side: SemanticDiffScheduleSide,
-  unit: AjsUnit,
-  parameter: AjsParameter,
-  startTimeByRule: Map<number, AjsParameter>,
-  period: ValidPeriod,
-): SemanticDiffScheduleUnsupportedDecision | undefined => {
-  const parsedDate = interpretScheduleDateValue(parameter.value);
-  if (!parsedDate || parsedDate.day.kind !== "calendar") {
-    return {
-      side,
-      unit,
-      parameter,
-      reason: "unsupported-schedule-date",
-    };
-  }
-
-  if (!startTimeByRule.has(parsedDate.rule)) {
-    return {
-      side,
-      unit,
-      parameter,
-      reason: "missing-start-time",
-      scheduleRule: parsedDate.rule,
-    };
-  }
-
-  if (
-    explicitDateCandidates(parameter.value, period).every(
-      (date) => !toUtcDate(date),
+  interpretation: SemanticDiffScheduleInterpretation,
+  projection: SemanticDiffScheduleProjection,
+): SemanticDiffScheduleUnsupportedDecision[] =>
+  projection.rules
+    // Rule-zero `ud` makes the rest of the schedule input ineffective. Keep
+    // it in the interpretation's raw evidence, but do not report the
+    // ineffective `st`/other schedule values as independent failures.
+    .filter(
+      (rule) =>
+        !interpretation.hasRuleZeroUndefined ||
+        (rule.parameter.key === "sd" && rule.rule !== 0),
     )
-  ) {
-    return {
-      side,
-      unit,
-      parameter,
-      reason: "invalid-calendar-day",
-    };
-  }
+    .map((rule) => unsupportedDecision(side, interpretation, rule))
+    .filter(
+      (decision): decision is SemanticDiffScheduleUnsupportedDecision =>
+        decision !== undefined,
+    );
 
-  return undefined;
+const sideEvaluationEvidence = (
+  supportedPairCount: number,
+  unsupportedCount: number,
+): SemanticDiffScheduleEvidenceKind => {
+  if (supportedPairCount === 0) {
+    return "unsupported-or-uncalculated-only";
+  }
+  return unsupportedCount === 0 ? "supported" : "mixed";
 };
 
 type ScheduleUnitCollection = {
@@ -397,78 +197,61 @@ type ScheduleUnitCollection = {
   unitEvaluation: SemanticDiffScheduleSideEvaluation;
 };
 
-const scheduleEvidenceKind = (
-  supportedPairCount: number,
-  unsupportedDecisionCount: number,
-): SemanticDiffScheduleEvidenceKind => {
-  if (supportedPairCount === 0) {
-    return "unsupported-or-uncalculated-only";
-  }
-  return unsupportedDecisionCount === 0 ? "supported" : "mixed";
-};
-
 const collectScheduleUnit = (
   side: SemanticDiffScheduleSide,
   unit: AjsUnit,
-  period: ValidPeriod,
+  period: SemanticDiffComparisonPeriod,
 ): ScheduleUnitCollection => {
-  const startTimeParameters = findAjsUnitParameters(unit, "st");
-  const startTimeByRule = firstParameterByParsedRule(startTimeParameters);
-  const scheduleDateParameters = findAjsUnitParameters(unit, "sd");
-  const dateProjections = scheduleDateParameters.map((scheduleDate) =>
-    createRunsForScheduleDate(unit, scheduleDate, startTimeByRule, period),
+  const interpretation = interpretSchedule(unit);
+  const projection = projectScheduleRuns({ interpretation, period });
+  const unsupportedDecisions = collectUnsupportedDecisions(
+    side,
+    interpretation,
+    projection,
   );
-  const runs = dateProjections.flatMap((projection) => projection.runs);
-  const unsupportedDecisions = [
-    ...unsupportedScheduleParameterDecisions(side, unit),
-    ...unsupportedStartTimeDecisions(side, unit),
-    ...unsupportedUnpairedStartTimeDecisions(side, unit),
-    ...scheduleDateParameters
-      .map((parameter) =>
-        unsupportedScheduleDateDecision(
-          side,
-          unit,
-          parameter,
-          startTimeByRule,
-          period,
-        ),
-      )
-      .filter(
-        (decision): decision is SemanticDiffScheduleUnsupportedDecision =>
-          decision !== undefined,
-      ),
-  ];
-  const supportedPairCount = dateProjections.filter(
-    (projection) => projection.supported,
-  ).length;
-
+  const supportedPairCount = interpretation.hasRuleZeroUndefined
+    ? 1
+    : projection.rules.filter(
+        (rule) =>
+          rule.parameter.key === "sd" &&
+          (rule.status === "supported" || rule.status === "no-runs"),
+      ).length;
+  const zeroRunCandidates =
+    projection.completeness === "complete" && projection.runs.length === 0
+      ? [unit]
+      : [];
   return {
-    runs,
+    runs: projection.runs,
     unsupportedDecisions,
-    zeroRunCandidates:
-      supportedPairCount > 0 && runs.length === 0 ? [unit] : [],
+    zeroRunCandidates,
     unitEvaluation: {
       unit,
-      evidence: scheduleEvidenceKind(
+      evidence: sideEvaluationEvidence(
         supportedPairCount,
         unsupportedDecisions.length,
       ),
       supportedPairCount,
-      runs,
+      runs: projection.runs,
     },
   };
+};
+
+type ScheduleCollection = {
+  runs: SemanticDiffScheduleRun[];
+  unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[];
+  zeroRunCandidates: AjsUnit[];
+  unitEvaluations: SemanticDiffScheduleSideEvaluation[];
 };
 
 const collectScheduleSide = (
   side: SemanticDiffScheduleSide,
   units: AjsUnit[],
-  period: ValidPeriod,
+  period: SemanticDiffComparisonPeriod,
 ): ScheduleCollection => {
   const unitCollections = units
     .filter(isJobnetUnit)
     .filter(hasDirectScheduleParameters)
     .map((unit) => collectScheduleUnit(side, unit, period));
-
   return {
     runs: unitCollections
       .flatMap((collection) => collection.runs)
@@ -498,149 +281,37 @@ const canonicalRun = (
   unitPath: canonicalPathByPath.get(run.unitPath) ?? run.unitPath,
 });
 
-const runDateKey = (run: SemanticDiffScheduleRun): string =>
-  `${run.unitPath}:${run.date}`;
-
-const runTimestampKey = (run: SemanticDiffScheduleRun): string =>
-  `${run.unitPath}:${run.date}:${run.time}`;
-
-const groupRunsByDate = (
-  runs: SemanticDiffScheduleRun[],
-): Map<string, SemanticDiffScheduleRun[]> => {
-  const grouped = new Map<string, SemanticDiffScheduleRun[]>();
-  runs.forEach((run) => {
-    grouped.set(runDateKey(run), [
-      ...(grouped.get(runDateKey(run)) ?? []),
-      run,
-    ]);
-  });
-  return grouped;
-};
-
-const scheduleRunDecisionKey = (
-  decision: SemanticDiffScheduleRunDecision,
-): string => {
-  if (decision.kind === "changed-time") {
-    return `schedule:changed-time:${decision.unitPath}:${decision.date}`;
-  }
-  const run = decision.kind === "removed" ? decision.before : decision.after;
-  return `schedule:${decision.kind}:${runTimestampKey(run)}`;
-};
-
-const compareScheduleRuns = (
-  beforeRuns: SemanticDiffScheduleRun[],
-  afterRuns: SemanticDiffScheduleRun[],
-): SemanticDiffScheduleRunDecision[] => {
-  const beforeByDate = groupRunsByDate(beforeRuns);
-  const afterByDate = groupRunsByDate(afterRuns);
-
-  return [...new Set([...beforeByDate.keys(), ...afterByDate.keys()])]
-    .sort(compareStrings)
-    .flatMap((dateKey): SemanticDiffScheduleRunDecision[] => {
-      const beforeDateRuns = beforeByDate.get(dateKey) ?? [];
-      const afterDateRuns = afterByDate.get(dateKey) ?? [];
-
-      if (
-        beforeDateRuns.length === 1 &&
-        afterDateRuns.length === 1 &&
-        beforeDateRuns[0].time !== afterDateRuns[0].time
-      ) {
-        const before = beforeDateRuns[0];
-        const after = afterDateRuns[0];
-        return [
-          {
-            kind: "changed-time",
-            unitPath: after.unitPath,
-            date: after.date,
-            before,
-            after,
-          },
-        ];
-      }
-
-      const afterTimestamps = new Set(afterDateRuns.map(runTimestampKey));
-      const beforeTimestamps = new Set(beforeDateRuns.map(runTimestampKey));
-      return [
-        ...beforeDateRuns
-          .filter((run) => !afterTimestamps.has(runTimestampKey(run)))
-          .map(
-            (run): SemanticDiffScheduleRunDecision => ({
-              kind: "removed",
-              unitPath: run.unitPath,
-              date: run.date,
-              before: run,
-            }),
-          ),
-        ...afterDateRuns
-          .filter((run) => !beforeTimestamps.has(runTimestampKey(run)))
-          .map(
-            (run): SemanticDiffScheduleRunDecision => ({
-              kind: "added",
-              unitPath: run.unitPath,
-              date: run.date,
-              after: run,
-            }),
-          ),
-      ];
-    })
-    .sort((left, right) =>
-      compareStrings(
-        scheduleRunDecisionKey(left),
-        scheduleRunDecisionKey(right),
-      ),
-    );
-};
-
-const toPairEvaluation = (
-  match: SemanticDiffScheduleMatchedUnit,
-  beforeEvaluationByPath: ReadonlyMap<
-    string,
-    SemanticDiffScheduleSideEvaluation
-  >,
-  afterEvaluationByPath: ReadonlyMap<
-    string,
-    SemanticDiffScheduleSideEvaluation
-  >,
-): SemanticDiffSchedulePairEvaluation[] => {
-  const before = beforeEvaluationByPath.get(match.before.absolutePath);
-  const after = afterEvaluationByPath.get(match.after.absolutePath);
-  return before && after ? [{ before, after }] : [];
-};
-
-const createPairEvaluations = (
+const toPairEvaluations = (
   matches: SemanticDiffScheduleMatchedUnit[],
-  beforeEvaluations: SemanticDiffScheduleSideEvaluation[],
-  afterEvaluations: SemanticDiffScheduleSideEvaluation[],
+  before: SemanticDiffScheduleSideEvaluation[],
+  after: SemanticDiffScheduleSideEvaluation[],
 ): SemanticDiffSchedulePairEvaluation[] => {
-  const beforeEvaluationByPath = new Map(
-    beforeEvaluations.map((evaluation) => [
-      evaluation.unit.absolutePath,
-      evaluation,
-    ]),
+  const beforeByPath = new Map(
+    before.map((evaluation) => [evaluation.unit.absolutePath, evaluation]),
   );
-  const afterEvaluationByPath = new Map(
-    afterEvaluations.map((evaluation) => [
-      evaluation.unit.absolutePath,
-      evaluation,
-    ]),
+  const afterByPath = new Map(
+    after.map((evaluation) => [evaluation.unit.absolutePath, evaluation]),
   );
-  return matches.flatMap((match) =>
-    toPairEvaluation(match, beforeEvaluationByPath, afterEvaluationByPath),
-  );
+  return matches.flatMap((match) => {
+    const beforeEvaluation = beforeByPath.get(match.before.absolutePath);
+    const afterEvaluation = afterByPath.get(match.after.absolutePath);
+    return beforeEvaluation && afterEvaluation
+      ? [{ before: beforeEvaluation, after: afterEvaluation }]
+      : [];
+  });
 };
 
+/** Compatibility facade for the separated interpreter/projector/differ pipeline. */
 export const evaluateSemanticDiffSchedule = (
   input: EvaluateSemanticDiffScheduleInput,
 ): SemanticDiffScheduleEvaluation => {
   if (!input.period) {
     return { kind: "not-requested" };
   }
-
   const period = parsePeriod(input.period);
   if (!period) {
     return { kind: "invalid-period", period: input.period };
   }
-
   const before = collectScheduleSide("before", input.beforeUnits, period);
   const after = collectScheduleSide("after", input.afterUnits, period);
   const afterPathByBeforePath = new Map(
@@ -649,15 +320,9 @@ export const evaluateSemanticDiffSchedule = (
       match.after.absolutePath,
     ]),
   );
-  const pairEvaluations = createPairEvaluations(
-    input.matches,
-    before.unitEvaluations,
-    after.unitEvaluations,
-  );
-
   return {
     kind: "evaluated",
-    period: period.display,
+    period,
     runDecisions: compareScheduleRuns(
       before.runs.map((run) => canonicalRun(run, afterPathByBeforePath)),
       after.runs,
@@ -667,6 +332,10 @@ export const evaluateSemanticDiffSchedule = (
       ...after.unsupportedDecisions,
     ],
     zeroRunCandidates: after.zeroRunCandidates,
-    pairEvaluations,
+    pairEvaluations: toPairEvaluations(
+      input.matches,
+      before.unitEvaluations,
+      after.unitEvaluations,
+    ),
   };
 };

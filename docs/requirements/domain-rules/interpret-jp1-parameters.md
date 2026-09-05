@@ -99,6 +99,21 @@ wording or a diagnostic message.
 - Other unit types receive no default from this rule.
 - Source: [Command Reference 5.2.16, execution-interval control job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0231.HTM).
 
+### `JP1-PARAM-SCHEDULE-UD-001`
+
+- Applies to a jobnet schedule rule whose effective schedule date is
+  `sd=0,ud`.
+- `0,ud` is an intentional undefined schedule and therefore produces no
+  execution dates. It is a valid complete no-runs result, including when an
+  `st` value or other schedule parameters are present; those raw values remain
+  evidence but do not override the rule-zero result.
+- `ud` attached to a non-zero schedule rule is not a valid rule-zero form and
+  remains contextually invalid for schedule comparison.
+- Interpretation retains the raw `sd` and contributing schedule parameters;
+  application consumers map a complete no-runs result through the existing
+  schedule confirmation shape rather than exposing an additional status field.
+- Source: [Command Reference 5.2.4, `sd=0,ud`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM).
+
 ## Diagnostic Interpretation Rules
 
 The unique normative bodies for all diagnostic rule IDs are in

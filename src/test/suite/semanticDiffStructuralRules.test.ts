@@ -194,6 +194,22 @@ suite("Semantic Diff Structural Rules", () => {
     ]);
   });
 
+  test("classifies schedule and execution-definition parameter keys correctly", () => {
+    const before = typedUnit("n", [["sc", "echo before"]]);
+    const after = typedUnit("n", [
+      ["sc", "echo after"],
+      ["jc", "/root/calendar"],
+      ["sd", "2026/04/10"],
+      ["st", "09:00"],
+    ]);
+    assert.deepStrictEqual(compareSemanticDiffAttributes(before, after), [
+      { key: "jc", category: "schedule" },
+      { key: "sc", category: "execution-definition" },
+      { key: "sd", category: "schedule" },
+      { key: "st", category: "schedule" },
+    ]);
+  });
+
   test("compares relations after applying unit correspondence", () => {
     const before = unit({
       id: "before",

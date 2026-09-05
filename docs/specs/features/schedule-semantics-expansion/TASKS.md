@@ -4,9 +4,11 @@
 
 - Purpose: separate schedule interpretation, bounded projection, and comparison,
   then add only source-backed schedule forms with complete normalized context.
-- Approved or active slice: none; the complete five-slice planning package is
-  human-approved for the plan gate. Implementation remains deferred until a
-  separate implementation go-ahead and per-slice completion gates.
+- Approved or active slice: Slice 1 is ready and approved for its completion
+  commit. The implementation review is Ready with no findings, and Completion
+  Approval was granted under the explicit per-slice automatic-approval
+  instruction. Feature-level final/closure approval remains pending until all
+  slices are complete for the requested bulk human approval.
 - Preserve current direct `sd` / `st`, period, ordering, and canonical-path
   behavior before expanding coverage.
 - Do not implement parent inheritance, 48-hour, cycle, `cftd`, UI, risk policy,
@@ -38,8 +40,9 @@
 - Validate every slice with the closest schedule tests, desktop/web coverage,
   `rtk pnpm run qlty`, and the required durable-document checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: Main delegates the approved planning package to
-  `approval-committer` for the plan gate. No implementation slice is active.
+- Next decision: Main delegates the exact approved Slice 1 scope to
+  `approval-committer` for the completion commit. Feature-level final/closure
+  approval remains pending until all slices are complete.
 
 ## Sync Rule
 
@@ -54,13 +57,14 @@
 
 ## Plan Status
 
-- Status: Plan Approved; plan-gate commit pending
+- Status: Plan Approved; plan-gate committed as `7e82cffe`
 - Planning scope: complete five-slice plan for boundary separation,
   calendar-independent dates, normalized calendar resolution, operational-day
   projection, and deterministic closed-day substitution
 - Review status: Ready (`plan-reviewer`)
 - Human approval: Approved
-- Active implementation slice: none
+- Active implementation slice: Slice 1 (Ready; Completion Approval granted;
+  completion commit pending)
 
 ## Human Approval
 
@@ -94,12 +98,31 @@ implementation go-ahead, and the per-slice completion gates.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved for Slice 1 completion commit
+- Approved at: 2026-09-05 (automatic per-slice Completion Approval under the
+  user's explicit instruction to approve each slice when independent review
+  has no findings)
+- Approved scope: Slice 1 schedule interpretation, bounded projection,
+  comparison, internal status mapping, structural classification, approved
+  schedule tests, and the approved durable documentation/evidence updates.
+- Approved paths:
+  - `docs/requirements/domain-rules/interpret-jp1-parameters.md`
+  - `docs/requirements/use-cases/uc-build-semantic-diff.md`
+  - `docs/specs/features/schedule-semantics-expansion/TASKS.md`
+  - `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`
+  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  - `src/test/suite/semanticDiffSchedule.test.ts`
+  - `src/test/suite/semanticDiffScheduleRules.test.ts`
+  - `src/test/suite/semanticDiffStructuralRules.test.ts`
+- Implementation review verdict: Ready; no findings
+- Commit status: Eligible for the Slice 1 completion commit; not yet committed
+- Feature-level final/closure approval: Pending until all slices are complete;
+  the user requested one bulk human approval at that point.
 
 ## Closure Approval
 
@@ -109,6 +132,8 @@ implementation go-ahead, and the per-slice completion gates.
 - Approved paths: none
 - Feature Exit verdict: Pending
 - Commit status: Not eligible
+- Note: feature-level final/closure approval remains intentionally pending
+  until all slices are complete and the requested bulk human approval is given.
 
 ## Implementation Contract
 
@@ -247,7 +272,8 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
 
 ### Slice 1: Separate The Schedule Pipeline And Preserve The Baseline
 
-- Status: Planned
+- Status: Ready for completion commit (implementation review Ready; Completion
+  Approval granted)
 - Scope: extract interpreter, bounded projector, and differ responsibilities;
   introduce the per-rule and unit completeness result model; keep
   `evaluateSemanticDiffSchedule` and `compareScheduleDiff` as orchestration
@@ -333,6 +359,25 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
   sort order, renamed-unit paths, or the accidental `sc` classification.
   Golden tests lock the baseline; explicit tests lock `sc` as
   `execution-definition` and `jc` as `schedule`.
+- Implementation evidence: `semanticDiffScheduleRules.ts` now orchestrates
+  `interpretSchedule`, `projectScheduleRuns`, and `compareScheduleRuns` through
+  domain-only modules. Complete supported no-runs and rule-zero `0,ud` retain
+  the existing zero-run confirmation; mixed, unsupported-only, and unresolved
+  projections do not. `sc` is excluded from schedule detection and `jc` is
+  classified as schedule context. Public/neutral DTOs and confirmation policy
+  were unchanged.
+- Validation evidence: Green after the implementation-review finding fix;
+  `pnpm run test:compile`, `pnpm run qlty`, `pnpm run lint:md`,
+  `pnpm run build`, `git diff --check`, focused schedule/structural tests, and
+  desktop extension tests pass. The full-test desktop portion passes; Web
+  execution remains blocked by the unchanged host Chromium
+  `MachPortRendezvousServer` permission failure. See `TRACEABILITY.md`.
+- The projection validates each explicit Gregorian date before resolving its
+  matching `st`, so invalid-calendar-day and invalid-start-time evidence remain
+  independent; only an absent matching `st` maps to missing-start-time.
+  Malformed `sd` retains its unsupported-schedule-date reason and raw evidence,
+  and parsed unpaired `st` rule identity remains available in the existing
+  application item detail.
 - Out of Scope: every new calculated schedule token and all presentation,
   confirmation-policy, and command changes.
 
@@ -340,9 +385,9 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
 
 - Status: Planned
 - Scope: add fully qualified `YYYY/MM/b`, `YYYY/MM/b-DD`, and absolute weekday
-  projection, and interpret `0,ud` as an intentional undefined schedule; retain
-  current direct date behavior without generalizing registration-relative
-  omissions.
+  projection; retain current direct date behavior without generalizing
+  registration-relative omissions. Rule-zero `0,ud` semantics are owned by
+  Slice 1 and are not reimplemented in this slice.
 - User / Domain Value: Semantic Diff can calculate explicit month-end schedules,
   including leap years and offsets, without requiring an operational calendar.
 - Cohesive Change Group: schedule-date interpretation/projector rules, v13 rule
@@ -356,20 +401,6 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
     fifth occurrence is a valid no-run result, not an invalid date.
   - Month-start and explicit day remain the existing `YYYY/MM/01` and
     `YYYY/MM/DD` behavior. Results are filtered by the half-open period.
-  - `0,ud` produces a complete valid intentional no-runs result and does not
-    require `st`; as the documented rule-zero unit-level override it makes
-    every other schedule item ineffective while preserving their raw evidence.
-    This includes `ud`-only, `ud+st`, and mixed `ud` input. `ud` with a rule
-    other than 0 is `invalid`. Its stable internal evidence ID is
-    `JP1-PARAM-SCHEDULE-UD-001`, grounded in Command Reference 5.2.4. `en`
-    remains `missing-context` because registration date is absent.
-  - `ud` no-runs is mapped through the domain-internal status table: a complete
-    supported `ud` no-runs projection retains the existing zero-run
-    confirmation. Unsupported-only, partial, or missing-context projections
-    suppress that confirmation. When before has supported runs and after is
-    the valid `ud` no-runs projection, the existing differ emits the `removed`
-    run changes alongside exactly one zero-run confirmation; review-risk and
-    Flow policy remain unchanged.
   - New support is not applied to `MM/b`, `b`, or other omitted-year/month forms;
     current supported `MM/DD` and `DD` behavior remains unchanged for
     compatibility.
@@ -378,15 +409,14 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
 - Validation:
   - Test month starts, 28/29/30/31-day endings, leap-century boundaries,
     `b-00`, largest valid offset, invalid offset, weekday first/nth/last/missing
-    occurrence, period edges, `ud`-only, `ud+st`, mixed `ud`, non-zero-rule
-    `ud`, `en`, and mixed supported/unsupported rules. Assert the normative
-    coverage matrix's `JP1-PARAM-SCHEDULE-MONTH-END-001`,
-    `JP1-PARAM-SCHEDULE-WEEKDAY-001`, and
-    `JP1-PARAM-SCHEDULE-UD-001` cases, including one zero-run confirmation for
-    complete supported no-runs and none for unresolved-only/partial/missing
-    context. Assert `0,ud` keeps the existing confirmation ID and non-zero
-    `ud` maps to the existing `unsupported-schedule-date` reason/message and
-    dynamic item ID with its internal evidence ID.
+    occurrence, period edges, `en`, and mixed supported/unsupported rules.
+    Assert the normative coverage matrix's
+    `JP1-PARAM-SCHEDULE-MONTH-END-001` and
+    `JP1-PARAM-SCHEDULE-WEEKDAY-001` cases, including one zero-run confirmation
+    for complete supported no-runs and none for unresolved-only/partial/missing
+    context. Rule-zero `0,ud` coverage, including the
+    `JP1-PARAM-SCHEDULE-UD-001` evidence and legacy unsupported mapping for
+    non-zero `ud`, is owned by Slice 1 and is not duplicated here.
   - Run `rtk pnpm run qlty`, `rtk pnpm run test:full`,
     `rtk pnpm run build`, and `rtk pnpm run lint:md`.
 - Production Readiness: compute candidates by month rather than scanning

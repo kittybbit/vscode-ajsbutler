@@ -172,6 +172,24 @@ Scenario: Schedule comparison reports no calculated runs
   Then the result includes a confirmation-required schedule item
   And the comparison period is included
 
+Scenario: Schedule comparison distinguishes complete no-runs from unresolved evidence
+  Given schedule comparison is requested for a period
+  And a schedule-defined jobnet has a complete supported projection with no run
+  When semantic diff is built
+  Then the existing zero-run confirmation is included exactly once
+  But an unsupported-only, partial, or missing-context projection does not
+    become a zero-run conclusion
+
+Scenario: Rule-zero undefined schedule is a complete no-runs result
+  Given schedule comparison is requested for a period
+  And a jobnet contains `sd=0,ud`
+  When semantic diff is built
+  Then the existing zero-run confirmation is included exactly once
+  And raw ineffective schedule parameters remain domain evidence
+  And a supported before-side run changed to after-side `0,ud` retains the
+    existing removed-run fact alongside that one confirmation
+  And review-risk and Flow policy are unchanged
+
 Scenario: One result supports multiple report projections
   Given a successful semantic comparison has produced structured facts
   When a consumer requests summary, full, audit, or JSON output
