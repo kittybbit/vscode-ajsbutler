@@ -126,12 +126,27 @@ finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-05, conditional approval granted by the user and applied
+  after the final independent implementation review returned `Ready` with no
+  findings
+- Approved scope: revised Slice 2 — supported schedule evidence
+  classification, zero-run and removed-run confirmation mapping, the narrow
+  English Full removed-run projection correction, focused tests, and updated
+  implementation/traceability evidence.
+- Approved paths:
+  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
+  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
+  - `src/application/semantic-diff/compareScheduleDiff.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
+  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
+  - `src/test/suite/semanticDiffJson.test.ts`
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
+  - `src/test/suite/semanticDiffSchedule.test.ts`
+  - `src/test/suite/semanticDiffScheduleRules.test.ts`
+- Implementation review verdict: `Ready`; final review found no remaining
+  findings after the exact Full fixture and evidence updates
+- Commit status: Eligible for the focused Slice 2 completion commit
 
 ## Closure Approval
 
@@ -400,8 +415,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 2: Recommend Review For Supported Schedule Opportunity Loss
 
-- Status: Implementation complete for the pre-replan scope; P1 finding
-  requires the localized renderer replan before completion review.
+- Status: Complete; independently reviewed `Ready`, Completion Approval
+  recorded, and focused completion commit pending.
 - Scope: preserve explicit after-side zero-run review and add one
   `calculated-schedule-run-removed` record for each removed run already emitted
   by the supported schedule comparison, after classifying supported,
@@ -695,15 +710,13 @@ not an implementation surface owned by this feature:
 
 ## Slice 2 Implementation Evidence
 
-- Status: Pre-replan implementation complete; P1 finding blocks independent
-  completion review and Completion Approval until the revised renderer scope
-  is implemented and validated.
-- Changed files are limited to the existing schedule domain projector,
-  application confirmation mapper, and focused schedule domain/application
-  tests in the current uncommitted implementation. No schedule
-  interpretation, structured-output schema, parser, adapter, or configuration
-  surface was added; the renderer correction is newly authorized by this
-  replan and remains outstanding.
+- Status: Implementation complete for the approved revised Slice 2 boundary;
+  pending independent implementation review and Completion Approval.
+- Changed files include the existing schedule domain projector, application
+  confirmation mapper, the approved existing English Full renderer mapping,
+  and focused schedule/domain, Full/Audit, and JSON verification tests. No
+  schedule interpretation, structured-output schema, parser, adapter, or
+  configuration surface was added.
 - Schedule evaluation now records per-jobnet supported-pair counts and
   supported/mixed/unsupported-only evidence using the existing single run
   projection. Zero-run candidates require a supported after-side pair;
@@ -717,38 +730,35 @@ not an implementation surface owned by this feature:
   unsupported-only, supported-before/unsupported-after,
   unsupported-before/supported-after, mixed zero-plus-removed evidence,
   before-only removal, invalid periods, evidence classification, target/detail
-  projection, and deterministic confirmation ordering.
-- Validation: `rtk pnpm run test:compile`, the focused schedule suites
-  (14 passing) and structured contract/JSON suites (37 passing), `rtk pnpm run
-test:prepare:desktop`, compiled desktop suite, `rtk pnpm run build`,
-  `rtk pnpm run qlty`, and `rtk git diff --check` passed. Direct Markdown
-  projection launch remains dependent on the repository's existing
-  `@resource/i18n/message` runtime alias; the compiled desktop suite covers
-  the same Full/Audit paths successfully.
-- Replan validation required: rerun the focused Full renderer regression and
-  Audit/JSON detail-preservation assertions after the mapping correction, then
-  rerun the relevant compiled desktop suite, `rtk pnpm run qlty`,
-  `rtk pnpm run build`, and `rtk git diff --check`.
-- Replan implementation target: with `beforeValues` exactly
-  `["date=2026-04-11", "time=10:00"]` and `rawValues` exactly `[]`, English
-  Full must contain the exact string
-  `- schedule-job calculated schedule run 2026-04-11 10:00 removed`; the input
-  detail remains unchanged, Audit must show both exact arrays, and JSON must
-  deep-equal both arrays.
-- Compatibility: the pre-replan change remains pure, browser-safe
-  domain/application evaluation over normalized inputs; the revised mapping
-  is an existing browser-safe presentation projection over the same result.
-  Half-open period handling, VS Code engine compatibility, desktop/web
-  contracts, parser behavior, telemetry, and unsupported schedule limitations
-  remain unchanged.
+- projection, deterministic confirmation ordering, and the revised renderer
+  contract. The Full fixture uses `schedule-job` with
+  `beforeValues: ["date=2026-04-11", "time=10:00"]` and `rawValues: []`.
+- Renderer evidence: English Full asserts the exact line
+  `- schedule-job calculated schedule run 2026-04-11 10:00 removed`; Audit
+  retains `beforeValues: [date=2026-04-11, time=10:00]` and `rawValues: []`;
+  JSON deep-equals the same arrays. Japanese output, other reason mappings,
+  and the schema remain unchanged.
+- Validation: `rtk pnpm run test:compile`, focused schedule suites (14
+  passing), focused JSON suite (15 passing), `rtk pnpm run
+test:prepare:desktop` plus the compiled desktop suite (including Full and
+  Audit), `rtk pnpm run build`, `rtk pnpm run qlty`, `rtk pnpm run lint:md`,
+  and `rtk git diff --check` all passed. Direct raw-mocha Markdown projection
+  launch remains blocked by the repository's existing
+  `@resource/i18n/message` alias resolution; the compiled desktop runner
+  covers the same Full/Audit tests successfully. Build output contains only
+  the existing webpack asset-size recommendations.
+- Compatibility: the change remains pure, browser-safe domain/application
+  evaluation plus the approved existing English presentation projection over
+  the same result. Half-open period handling, VS Code engine compatibility,
+  desktop/web contracts, parser behavior, telemetry, and unsupported schedule
+  limitations remain unchanged.
 - Documentation/release: no README, use-case, or CHANGELOG update is needed
   before Feature Exit; user-facing recommendation propagation remains owned by
   the Feature Exit review.
-- Unresolved risks: P1 Full output omits the removed run's date/time because
-  the existing reason-specific English renderer reads empty `rawValues`.
-  The independent plan reviewer must confirm the revised boundary remains
-  limited to that mapping and regression coverage; the later implementation
-  reviewer must verify Full, Audit, and JSON agree on the exact detail.
+- Unresolved risks: none requiring replanning. The independent implementation
+  reviewer should verify that Full reads only the existing structured
+  `beforeValues`, while Audit/JSON retain the exact arrays and all other
+  reason/Japanese/schema mappings remain untouched.
 
 ## Notes
 

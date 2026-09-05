@@ -82,6 +82,19 @@ suite("Semantic Diff Schedule Rules", () => {
     );
     assert.deepStrictEqual(result.unsupportedDecisions, []);
     assert.deepStrictEqual(result.zeroRunCandidates, []);
+    assert.deepStrictEqual(
+      result.pairEvaluations.map((pair) => [
+        pair.after.unit.id,
+        pair.before.evidence,
+        pair.before.supportedPairCount,
+        pair.after.evidence,
+        pair.after.supportedPairCount,
+      ]),
+      [
+        ["/root/main", "supported", 1, "supported", 1],
+        ["/root/main/nested", "supported", 1, "supported", 1],
+      ],
+    );
   });
 
   test("keeps unsupported and zero-run evidence explicit", () => {
@@ -124,8 +137,60 @@ suite("Semantic Diff Schedule Rules", () => {
     );
     assert.deepStrictEqual(
       result.zeroRunCandidates.map((unit) => unit.id),
+      [],
+    );
+    assert.deepStrictEqual(result.pairEvaluations, []);
+  });
+
+  test("classifies mixed supported and unsupported evidence without losing pairs", () => {
+    const before = jobnet("/root/main", {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+    const after = jobnet("/root/main", {
+      sd: ["2026/06/01", "en"],
+      st: "09:00",
+    });
+
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [before],
+      afterUnits: [after],
+      matches: [{ before, after }],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+    });
+
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") {
+      return;
+    }
+    assert.deepStrictEqual(
+      result.zeroRunCandidates.map((unit) => unit.id),
       [after.id],
     );
+    assert.deepStrictEqual(result.pairEvaluations, [
+      {
+        before: {
+          unit: before,
+          evidence: "supported",
+          supportedPairCount: 1,
+          runs: [
+            {
+              unitPath: before.absolutePath,
+              unitName: before.name,
+              rule: 1,
+              date: "2026-04-10",
+              time: "09:00",
+            },
+          ],
+        },
+        after: {
+          unit: after,
+          evidence: "mixed",
+          supportedPairCount: 1,
+          runs: [],
+        },
+      },
+    ]);
   });
 
   test("uses interpreted token categories and rule association", () => {

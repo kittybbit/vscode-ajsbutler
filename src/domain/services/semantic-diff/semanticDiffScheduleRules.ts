@@ -60,6 +60,23 @@ export type SemanticDiffScheduleRunDecision =
       after: SemanticDiffScheduleRun;
     };
 
+export type SemanticDiffScheduleEvidenceKind =
+  | "supported"
+  | "mixed"
+  | "unsupported-or-uncalculated-only";
+
+export type SemanticDiffScheduleSideEvaluation = {
+  unit: AjsUnit;
+  evidence: SemanticDiffScheduleEvidenceKind;
+  supportedPairCount: number;
+  runs: SemanticDiffScheduleRun[];
+};
+
+export type SemanticDiffSchedulePairEvaluation = {
+  before: SemanticDiffScheduleSideEvaluation;
+  after: SemanticDiffScheduleSideEvaluation;
+};
+
 export type SemanticDiffScheduleEvaluation =
   | {
       kind: "not-requested";
@@ -74,6 +91,7 @@ export type SemanticDiffScheduleEvaluation =
       runDecisions: SemanticDiffScheduleRunDecision[];
       unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[];
       zeroRunCandidates: AjsUnit[];
+      pairEvaluations: SemanticDiffSchedulePairEvaluation[];
     };
 
 export type EvaluateSemanticDiffScheduleInput = {
@@ -93,6 +111,7 @@ type ScheduleCollection = {
   runs: SemanticDiffScheduleRun[];
   unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[];
   zeroRunCandidates: AjsUnit[];
+  unitEvaluations: SemanticDiffScheduleSideEvaluation[];
 };
 
 const jobnetTypes = new Set(["n", "rn", "rm", "rr"]);
@@ -283,12 +302,17 @@ const isDateInPeriod = (dateValue: string, period: ValidPeriod): boolean => {
   return !!date && date.getTime() >= period.from.getTime() && date < period.to;
 };
 
+type ScheduleDateProjection = {
+  runs: SemanticDiffScheduleRun[];
+  supported: boolean;
+};
+
 const createRunsForScheduleDate = (
   unit: AjsUnit,
   scheduleDate: AjsParameter,
   startTimeByRule: Map<number, AjsParameter>,
   period: ValidPeriod,
-): SemanticDiffScheduleRun[] => {
+): ScheduleDateProjection => {
   const parsedDate = interpretScheduleDateValue(scheduleDate.value);
   const startTime = parsedDate
     ? startTimeByRule.get(parsedDate.rule)
@@ -303,18 +327,24 @@ const createRunsForScheduleDate = (
     !parsedStartTime ||
     !isNormalStartTime(parsedStartTime.value)
   ) {
-    return [];
+    return { runs: [], supported: false };
   }
 
-  return explicitDateCandidates(scheduleDate.value, period)
-    .filter((date) => isDateInPeriod(date, period))
-    .map((date) => ({
-      unitPath: unit.absolutePath,
-      unitName: unit.name,
-      rule: parsedDate.rule,
-      date,
-      time: parsedStartTime.value,
-    }));
+  const dateCandidates = explicitDateCandidates(scheduleDate.value, period);
+  const supported = dateCandidates.some((date) => toUtcDate(date));
+
+  return {
+    runs: dateCandidates
+      .filter((date) => isDateInPeriod(date, period))
+      .map((date) => ({
+        unitPath: unit.absolutePath,
+        unitName: unit.name,
+        rule: parsedDate.rule,
+        date,
+        time: parsedStartTime.value,
+      })),
+    supported,
+  };
 };
 
 const unsupportedScheduleDateDecision = (
@@ -368,6 +398,7 @@ const collectScheduleSide = (
   const runs: SemanticDiffScheduleRun[] = [];
   const unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[] = [];
   const zeroRunCandidates: AjsUnit[] = [];
+  const unitEvaluations: SemanticDiffScheduleSideEvaluation[] = [];
 
   units
     .filter(isJobnetUnit)
@@ -376,16 +407,11 @@ const collectScheduleSide = (
       const startTimeParameters = findAjsUnitParameters(unit, "st");
       const startTimeByRule = firstParameterByParsedRule(startTimeParameters);
       const scheduleDateParameters = findAjsUnitParameters(unit, "sd");
-      const unitRuns = scheduleDateParameters.flatMap((scheduleDate) =>
+      const dateProjections = scheduleDateParameters.map((scheduleDate) =>
         createRunsForScheduleDate(unit, scheduleDate, startTimeByRule, period),
       );
-
-      runs.push(...unitRuns);
-      if (unitRuns.length === 0) {
-        zeroRunCandidates.push(unit);
-      }
-
-      unsupportedDecisions.push(
+      const unitRuns = dateProjections.flatMap((projection) => projection.runs);
+      const unitUnsupportedDecisions = [
         ...unsupportedScheduleParameterDecisions(side, unit),
         ...unsupportedStartTimeDecisions(side, unit),
         ...unsupportedUnpairedStartTimeDecisions(side, unit),
@@ -403,7 +429,29 @@ const collectScheduleSide = (
             (decision): decision is SemanticDiffScheduleUnsupportedDecision =>
               decision !== undefined,
           ),
-      );
+      ];
+      const supportedPairCount = dateProjections.filter(
+        (projection) => projection.supported,
+      ).length;
+      const evidence: SemanticDiffScheduleEvidenceKind =
+        supportedPairCount === 0
+          ? "unsupported-or-uncalculated-only"
+          : unitUnsupportedDecisions.length === 0
+            ? "supported"
+            : "mixed";
+
+      runs.push(...unitRuns);
+      if (supportedPairCount > 0 && unitRuns.length === 0) {
+        zeroRunCandidates.push(unit);
+      }
+
+      unsupportedDecisions.push(...unitUnsupportedDecisions);
+      unitEvaluations.push({
+        unit,
+        evidence,
+        supportedPairCount,
+        runs: unitRuns,
+      });
     });
 
   return {
@@ -415,6 +463,7 @@ const collectScheduleSide = (
     ),
     unsupportedDecisions,
     zeroRunCandidates,
+    unitEvaluations,
   };
 };
 
@@ -539,6 +588,27 @@ export const evaluateSemanticDiffSchedule = (
       match.after.absolutePath,
     ]),
   );
+  const beforeEvaluationByPath = new Map(
+    before.unitEvaluations.map((evaluation) => [
+      evaluation.unit.absolutePath,
+      evaluation,
+    ]),
+  );
+  const afterEvaluationByPath = new Map(
+    after.unitEvaluations.map((evaluation) => [
+      evaluation.unit.absolutePath,
+      evaluation,
+    ]),
+  );
+  const pairEvaluations = input.matches.flatMap((match) => {
+    const beforeEvaluation = beforeEvaluationByPath.get(
+      match.before.absolutePath,
+    );
+    const afterEvaluation = afterEvaluationByPath.get(match.after.absolutePath);
+    return beforeEvaluation && afterEvaluation
+      ? [{ before: beforeEvaluation, after: afterEvaluation }]
+      : [];
+  });
 
   return {
     kind: "evaluated",
@@ -552,5 +622,6 @@ export const evaluateSemanticDiffSchedule = (
       ...after.unsupportedDecisions,
     ],
     zeroRunCandidates: after.zeroRunCandidates,
+    pairEvaluations,
   };
 };

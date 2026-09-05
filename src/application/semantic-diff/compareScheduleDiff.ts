@@ -203,12 +203,44 @@ const createZeroRunConfirmation = (
       createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
     ),
     createScheduleConstraint(
+      "runtime-state-not-verified",
+      createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
+    ),
+    createScheduleConstraint(
       "comparison-period",
       createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
     ),
   ],
   warning: null,
 });
+
+const createRemovedRunConfirmation = (
+  decision: Extract<SemanticDiffScheduleRunDecision, { kind: "removed" }>,
+  unit: AjsUnit,
+  period: SemanticDiffComparisonPeriod,
+  toUnitTarget: ScheduleDiffInput["toUnitTarget"],
+): SemanticDiffConfirmationRequiredItem => {
+  const run = decision.before;
+  const detail = createSemanticDiffDetail({
+    unitPath: unit.absolutePath,
+    scheduleRule: run.rule,
+    period,
+    beforeValues: [`date=${run.date}`, `time=${run.time}`],
+  });
+  return {
+    id: `confirm:schedule-run-removed:${unit.id}:${run.date}:${run.time}:${run.rule}`,
+    reasonCode: "calculated-schedule-run-removed",
+    target: toUnitTarget(unit),
+    relatedTargets: [],
+    detail,
+    constraints: [
+      createScheduleConstraint("jp1-ajs3-v13-rule-basis", detail),
+      createScheduleConstraint("runtime-state-not-verified", detail),
+      createScheduleConstraint("comparison-period", detail),
+    ],
+    warning: null,
+  };
+};
 
 export const compareScheduleDiff = (
   input: ScheduleDiffInput,
@@ -242,14 +274,53 @@ export const compareScheduleDiff = (
     };
   }
 
+  const pairEvaluationByAfterPath = new Map(
+    evaluation.pairEvaluations.map((pair) => [
+      pair.after.unit.absolutePath,
+      pair,
+    ]),
+  );
+  const removedRunConfirmations = [
+    ...new Map(
+      evaluation.runDecisions
+        .filter(
+          (
+            decision,
+          ): decision is Extract<
+            SemanticDiffScheduleRunDecision,
+            { kind: "removed" }
+          > => decision.kind === "removed",
+        )
+        .flatMap((decision) => {
+          const pair = pairEvaluationByAfterPath.get(decision.unitPath);
+          return pair &&
+            pair.before.supportedPairCount > 0 &&
+            pair.after.supportedPairCount > 0
+            ? [
+                createRemovedRunConfirmation(
+                  decision,
+                  pair.after.unit,
+                  evaluation.period,
+                  input.toUnitTarget,
+                ),
+              ]
+            : [];
+        })
+        .map((confirmation) => [confirmation.id, confirmation] as const),
+    ).values(),
+  ];
+
   return {
     scheduleComparison: {
       period: evaluation.period,
       runChanges: evaluation.runDecisions.map(toScheduleRunChange),
     },
-    confirmationRequired: evaluation.zeroRunCandidates.map((unit) =>
-      createZeroRunConfirmation(unit, evaluation.period, input.toUnitTarget),
-    ),
+    confirmationRequired: [
+      ...evaluation.zeroRunCandidates.map((unit) =>
+        createZeroRunConfirmation(unit, evaluation.period, input.toUnitTarget),
+      ),
+      ...removedRunConfirmations,
+    ],
     unsupportedItems: evaluation.unsupportedDecisions.map((decision) =>
       createUnsupportedItem(decision, input.toUnitTarget),
     ),

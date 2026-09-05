@@ -128,6 +128,83 @@ suite("Semantic Diff Schedule", () => {
         ["removed", "/root/main/nested", "2026-04-11", "10:00", null],
       ],
     );
+    assert.deepStrictEqual(
+      result.confirmationRequired.map((item) => item.reasonCode),
+      ["calculated-schedule-run-removed"],
+    );
+    assert.deepStrictEqual(result.confirmationRequired[0], {
+      id: "confirm:schedule-run-removed:/root/main/nested:2026-04-11:10:00:1",
+      reasonCode: "calculated-schedule-run-removed",
+      target: {
+        kind: "jobnet",
+        unit: {
+          id: afterNested.id,
+          name: afterNested.name,
+          absolutePath: afterNested.absolutePath,
+          unitType: afterNested.unitType,
+        },
+      },
+      relatedTargets: [],
+      detail: {
+        unitPath: afterNested.absolutePath,
+        parameterKey: null,
+        relationPair: null,
+        scheduleRule: 1,
+        period: { from: "2026-04-01", to: "2026-05-01" },
+        beforeValues: ["date=2026-04-11", "time=10:00"],
+        afterValues: [],
+        rawValues: [],
+        removedSources: [],
+      },
+      constraints: [
+        {
+          code: "jp1-ajs3-v13-rule-basis",
+          detail: {
+            unitPath: afterNested.absolutePath,
+            parameterKey: null,
+            relationPair: null,
+            scheduleRule: 1,
+            period: { from: "2026-04-01", to: "2026-05-01" },
+            beforeValues: ["date=2026-04-11", "time=10:00"],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          warning: null,
+        },
+        {
+          code: "runtime-state-not-verified",
+          detail: {
+            unitPath: afterNested.absolutePath,
+            parameterKey: null,
+            relationPair: null,
+            scheduleRule: 1,
+            period: { from: "2026-04-01", to: "2026-05-01" },
+            beforeValues: ["date=2026-04-11", "time=10:00"],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          warning: null,
+        },
+        {
+          code: "comparison-period",
+          detail: {
+            unitPath: afterNested.absolutePath,
+            parameterKey: null,
+            relationPair: null,
+            scheduleRule: 1,
+            period: { from: "2026-04-01", to: "2026-05-01" },
+            beforeValues: ["date=2026-04-11", "time=10:00"],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          warning: null,
+        },
+      ],
+      warning: null,
+    });
   });
 
   test("reports after-side schedule-defined jobnets with zero calculated runs", () => {
@@ -154,9 +231,12 @@ suite("Semantic Diff Schedule", () => {
 
     assert.deepStrictEqual(
       result.confirmationRequired.map((item) => item.reasonCode),
-      ["no-calculated-schedule-run"],
+      ["calculated-schedule-run-removed", "no-calculated-schedule-run"],
     );
-    assert.deepStrictEqual(result.confirmationRequired[0].detail, {
+    const zeroRunConfirmation = result.confirmationRequired.find(
+      (item) => item.reasonCode === "no-calculated-schedule-run",
+    );
+    assert.deepStrictEqual(zeroRunConfirmation?.detail, {
       unitPath: afterRoot.absolutePath,
       parameterKey: null,
       relationPair: null,
@@ -168,12 +248,14 @@ suite("Semantic Diff Schedule", () => {
       removedSources: [],
     });
     assert.deepStrictEqual(
-      result.confirmationRequired[0].constraints.map(
-        (constraint) => constraint.code,
-      ),
-      ["jp1-ajs3-v13-rule-basis", "comparison-period"],
+      zeroRunConfirmation?.constraints.map((constraint) => constraint.code),
+      [
+        "jp1-ajs3-v13-rule-basis",
+        "runtime-state-not-verified",
+        "comparison-period",
+      ],
     );
-    assert.strictEqual(result.confirmationRequired[0].warning, null);
+    assert.strictEqual(zeroRunConfirmation?.warning, null);
   });
 
   test("reports unsupported schedule elements as uncalculated instead of guessing", () => {
@@ -215,6 +297,149 @@ suite("Semantic Diff Schedule", () => {
           item.warning?.code === item.reasonCode &&
           item.warning?.fallbackText !== null,
       ),
+    );
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("keeps unsupported-only and one-sided supported evidence non-conclusive", () => {
+    const period = {
+      from: "2026-04-01",
+      to: "2026-05-01",
+    };
+    const compare = (beforeRoot: AjsUnit, afterRoot: AjsUnit) =>
+      compareSemanticDiff({
+        before: document(beforeRoot ? [beforeRoot] : []),
+        after: document(afterRoot ? [afterRoot] : []),
+        options: { jobGroupPath: "/root", scheduleComparisonPeriod: period },
+      });
+
+    const unsupportedBefore = jobnet("/root/main", [], {
+      cy: "(1,d)",
+      sd: "en",
+      st: "+27:03",
+    });
+    const unsupportedAfter = jobnet("/root/main", [], {
+      cy: "(1,d)",
+      sd: "en",
+      st: "+27:03",
+    });
+    assert.deepStrictEqual(
+      compare(unsupportedBefore, unsupportedAfter).confirmationRequired,
+      [],
+    );
+
+    const supportedBefore = jobnet("/root/main", [], {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+    const unsupportedOnlyAfter = jobnet("/root/main", [], {
+      cy: "(1,d)",
+    });
+    assert.deepStrictEqual(
+      compare(supportedBefore, unsupportedOnlyAfter).confirmationRequired,
+      [],
+    );
+
+    const unsupportedOnlyBefore = jobnet("/root/main", [], {
+      cy: "(1,d)",
+    });
+    const supportedAfter = jobnet("/root/main", [], {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+    assert.deepStrictEqual(
+      compare(unsupportedOnlyBefore, supportedAfter).confirmationRequired,
+      [],
+    );
+  });
+
+  test("keeps mixed unsupported evidence while reporting supported zero and removed runs", () => {
+    const beforeRoot = jobnet("/root/main", [], {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+    const afterRoot = jobnet("/root/main", [], {
+      sd: ["2026/06/01", "en"],
+      st: "09:00",
+    });
+
+    const result = compareSemanticDiff({
+      before: document([beforeRoot]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2026-04-01",
+          to: "2026-05-01",
+        },
+      },
+    });
+
+    assert.deepStrictEqual(
+      result.confirmationRequired.map((item) => item.reasonCode),
+      ["calculated-schedule-run-removed", "no-calculated-schedule-run"],
+    );
+    assert.ok(
+      result.unsupportedItems.some(
+        (item) =>
+          item.side === "after" &&
+          item.reasonCode === "unsupported-schedule-date",
+      ),
+    );
+  });
+
+  test("does not duplicate a schedule warning for a before-only removed jobnet", () => {
+    const beforeRoot = jobnet("/root/main", [], {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+
+    const result = compareSemanticDiff({
+      before: document([beforeRoot]),
+      after: document([]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2026-04-01",
+          to: "2026-05-01",
+        },
+      },
+    });
+
+    assert.deepStrictEqual(
+      result.scheduleComparison?.runChanges.map((change) => change.kind),
+      ["removed"],
+    );
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("deduplicates identical removed-run confirmation IDs", () => {
+    const beforeRoot = jobnet("/root/main", [], {
+      sd: ["2026/04/10", "2026/04/10"],
+      st: "09:00",
+    });
+    const afterRoot = jobnet("/root/main", [], {
+      sd: "2026/06/01",
+      st: "09:00",
+    });
+
+    const result = compareSemanticDiff({
+      before: document([beforeRoot]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2026-04-01",
+          to: "2026-05-01",
+        },
+      },
+    });
+
+    assert.strictEqual(
+      result.confirmationRequired.filter(
+        (item) => item.reasonCode === "calculated-schedule-run-removed",
+      ).length,
+      1,
     );
   });
 
