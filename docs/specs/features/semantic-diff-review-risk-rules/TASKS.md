@@ -4,8 +4,8 @@
 
 - Purpose: expand evidence-based review recommendations without presenting
   definition changes as verified runtime failures.
-- Approved or active slice: Slice 1; the reviewed four-slice plan is committed,
-  and the selected Slice 1 implementation scope is approved for the next
+- Approved or active slice: Slice 2; Slice 1 is completion-committed and the
+  selected Slice 2 implementation scope is approved for the next
   implementation handoff.
 - Do not: add cycle or terminal-reachability analysis, schedule-semantics
   expansion, runtime or external probes, identity rules, a new confirmation
@@ -18,7 +18,7 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 1 implementation to `implementer` after this
+- Next decision: delegate Slice 2 implementation to `implementer` after this
   focused approval-state commit.
 
 ## Replanning Record
@@ -58,31 +58,29 @@
 
 ## Plan Status
 
-- Status: Slice 1 approved for implementation.
+- Status: Slice 2 approved for implementation.
 - Planning scope: revised complete four-slice plan covering supported
   start-condition evidence, supported-versus-unsupported calculated schedule
   opportunity loss, external wait constraints, and v13-backed non-assertive
   execution-user-type/resource-group recommendations.
 - Review status: Ready; independent plan review complete.
-- Human approval: Approved for Slice 1 implementation in the current
-  conversation. The user also directed Main to continue later slices in order
-  and to apply conditional Completion Approval when independent review returns
-  no findings.
-- Active implementation slice: Slice 1.
+- Human approval: Approved for Slice 2 implementation under the user's current
+  conversation direction to continue all planned slices in order and apply
+  conditional Completion Approval when independent review returns no findings.
+- Active implementation slice: Slice 2.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-05, explicit user approval in current conversation
-- Approved scope: Slice 1 — supported condition and relation evidence
-  selection, mapping to the existing structured confirmation contract, and
-  the named focused tests within the Slice 1 Approval Boundary. The user also
-  authorized sequential continuation through all planned slices; each later
-  slice is activated only after the preceding completion commit.
+- Approved scope: Slice 2 — supported-versus-unsupported schedule evidence
+  classification, mapping existing supported removed-run decisions and
+  supported zero-run evidence into the established confirmation contract, and
+  the named tests within the Slice 2 Approval Boundary.
 - Approved paths:
   - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
 
-The approved Slice 1 implementation scope is recorded above. Main delegates
+The approved Slice 2 implementation scope is recorded above. Main delegates
 and completes one slice at a time in the order below. The user's standing
 direction permits Main to record Completion Approval after an independent
 `Ready` review with no findings and then activate the next planned slice. Any
@@ -90,22 +88,12 @@ finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
-- Status: Approved
-- Approved at: 2026-09-05, conditional approval granted by the user in the
-  current conversation and applied after the independent `Ready` re-review
-- Approved scope: Slice 1 — before-side correspondence-bounded conditional
-  relation evidence, preserved condition raw evidence, focused regression
-  tests, and Slice 1 implementation/traceability evidence.
-- Approved paths:
-  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
-  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
-  - `src/domain/services/semantic-diff/semanticDiffEvidenceRules.ts`
-  - `src/test/suite/compareSemanticDiff.test.ts`
-  - `src/test/suite/semanticDiffConditions.test.ts`
-  - `src/test/suite/semanticDiffEvidenceRules.test.ts`
-- Implementation review verdict: `Ready` after the endpoint-ID reuse finding
-  was fixed and independently re-reviewed
-- Commit status: Eligible for the focused Slice 1 completion commit
+- Status: Pending
+- Approved at: none
+- Approved scope: none
+- Approved paths: none
+- Implementation review verdict: Pending
+- Commit status: Not eligible
 
 ## Closure Approval
 
@@ -331,8 +319,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 1: Bound Start-Condition And Branch Recommendations
 
-- Status: Complete; independently reviewed `Ready`, Completion Approval
-  recorded, and focused completion commit pending.
+- Status: Complete; independently reviewed `Ready`, completion-approved, and
+  committed in `3abbfb02`.
 - Scope: preserve the supported condition/judgment baseline, make
   before/after evidence explicit, and lock the removed-conditional-relation
   rule as the only directional topology-based start-path recommendation.
@@ -374,7 +362,7 @@ not an implementation surface owned by this feature:
 
 ### Slice 2: Recommend Review For Supported Schedule Opportunity Loss
 
-- Status: Planned; blocked on Slice 1 completion and approval.
+- Status: Approved; ready for implementation handoff.
 - Scope: preserve explicit after-side zero-run review and add one
   `calculated-schedule-run-removed` record for each removed run already emitted
   by the supported schedule comparison, after classifying supported,
