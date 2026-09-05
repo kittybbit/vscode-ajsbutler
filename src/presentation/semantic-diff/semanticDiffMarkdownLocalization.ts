@@ -529,7 +529,7 @@ type ConfirmationTextContext = {
   unitName: string | undefined;
   parameterKey: string;
   pair: string;
-  rawValues: string[];
+  beforeValues: string[];
 };
 
 const confirmationUnitName = (
@@ -549,9 +549,15 @@ const confirmationTextContext = (
     pair: relationPair
       ? `${relationPair.sourceUnitId}->${relationPair.targetUnitId}`
       : "",
-    rawValues: item.detail.rawValues,
+    beforeValues: item.detail.beforeValues,
   };
 };
+
+const scheduleRunValue = (
+  beforeValues: string[],
+  prefix: "date=" | "time=",
+): string | undefined =>
+  beforeValues.find((value) => value.startsWith(prefix))?.slice(prefix.length);
 
 const englishConfirmationContent: Record<
   SemanticDiffConfirmationReasonCode,
@@ -569,9 +575,13 @@ const englishConfirmationContent: Record<
     `${unitName ?? "unit"} wait target ${parameterKey} changed`,
   "no-calculated-schedule-run": ({ unitName }) =>
     `${unitName ?? "unit"} has no calculated runs in the schedule comparison period`,
-  "calculated-schedule-run-removed": ({ unitName, rawValues }) => {
-    const [date, time] = rawValues;
-    return `${unitName ?? "unit"} calculated schedule run ${date ?? ""} ${time ?? ""} removed`.trim();
+  "calculated-schedule-run-removed": ({ unitName, beforeValues }) => {
+    const date = scheduleRunValue(beforeValues, "date=");
+    const time = scheduleRunValue(beforeValues, "time=");
+    const runValues = [date, time]
+      .filter((value): value is string => value !== undefined && value !== "")
+      .join(" ");
+    return `${unitName ?? "unit"} calculated schedule run${runValues ? ` ${runValues}` : ""} removed`;
   },
   "execution-user-type-changed": ({ unitName }) =>
     `${unitName ?? "unit"} execution user type changed`,

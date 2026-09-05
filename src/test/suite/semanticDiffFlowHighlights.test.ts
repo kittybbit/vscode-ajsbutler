@@ -224,4 +224,60 @@ suite("Semantic diff flow highlights", () => {
     assert.deepStrictEqual([...highlights.nodes.entries()], []);
     assert.deepStrictEqual([...highlights.edges.entries()], []);
   });
+
+  test("keeps execution environment confirmations generic in Flow highlights", () => {
+    const afterEu = unit({
+      id: "/root/jobnet/execution-user",
+      name: "execution-user",
+      absolutePath: "/root/jobnet/execution-user",
+    });
+    const afterResourceGroup = unit({
+      id: "/root/jobnet/resource-group",
+      name: "resource-group",
+      absolutePath: "/root/jobnet/resource-group",
+    });
+    const euTarget: SemanticDiffTarget = {
+      kind: "unit",
+      unit: unitReference(afterEu),
+    };
+    const resourceGroupTarget: SemanticDiffTarget = {
+      kind: "unit",
+      unit: unitReference(afterResourceGroup),
+    };
+    const highlights = buildSemanticDiffFlowHighlights(
+      result([], [afterEu, afterResourceGroup], {
+        confirmationRequired: [
+          {
+            id: "confirm:execution-user",
+            target: euTarget,
+            reasonCode: "execution-user-type-changed",
+            relatedTargets: [],
+            constraints: [],
+            detail: createSemanticDiffDetail({ parameterKey: "eu" }),
+            warning: null,
+          },
+          {
+            id: "confirm:resource-group",
+            target: resourceGroupTarget,
+            reasonCode: "jp1-resource-group-changed",
+            relatedTargets: [],
+            constraints: [],
+            detail: createSemanticDiffDetail({ parameterKey: "rg" }),
+            warning: null,
+          },
+        ],
+      }),
+    );
+
+    assert.deepStrictEqual(highlights.nodes.get(afterEu.id), {
+      kind: "confirmation-required",
+      changeIds: [],
+      confirmationIds: ["confirm:execution-user"],
+    });
+    assert.deepStrictEqual(highlights.nodes.get(afterResourceGroup.id), {
+      kind: "confirmation-required",
+      changeIds: [],
+      confirmationIds: ["confirm:resource-group"],
+    });
+  });
 });

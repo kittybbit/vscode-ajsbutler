@@ -532,6 +532,14 @@ const createConstraint = (
 const parameterValues = (unit: AjsUnit, parameterKey: string): string[] =>
   semanticDiffParameterValuesByKey(unit).get(parameterKey) ?? [];
 
+const resourceGroupValues = (unit: AjsUnit): string[] =>
+  unit.jp1ResourceGroup === undefined ? [] : [unit.jp1ResourceGroup];
+
+const evidenceValues = (unit: AjsUnit, parameterKey: string): string[] =>
+  parameterKey === "rg"
+    ? resourceGroupValues(unit)
+    : parameterValues(unit, parameterKey);
+
 type ParameterDetailInput = {
   before: AjsUnit;
   after: AjsUnit;
@@ -551,8 +559,8 @@ const parameterDetail = ({
   createSemanticDiffDetail({
     unitPath: after.absolutePath,
     parameterKey,
-    beforeValues: parameterValues(before, parameterKey),
-    afterValues: parameterValues(after, parameterKey),
+    beforeValues: evidenceValues(before, parameterKey),
+    afterValues: evidenceValues(after, parameterKey),
     rawValues: overrides.rawValues,
     removedSources: overrides.removedSources,
   });
@@ -604,6 +612,22 @@ const unitConfirmationSpecs: Record<
   },
   "wait-target-changed": {
     idSegment: "wait-target",
+    constraintCodes: [
+      "jp1-ajs3-v13-rule-basis",
+      "runtime-state-not-verified",
+      "external-state-not-verified",
+    ],
+  },
+  "execution-user-type-changed": {
+    idSegment: "execution-user-type",
+    constraintCodes: [
+      "jp1-ajs3-v13-rule-basis",
+      "runtime-state-not-verified",
+      "external-state-not-verified",
+    ],
+  },
+  "jp1-resource-group-changed": {
+    idSegment: "jp1-resource-group",
     constraintCodes: [
       "jp1-ajs3-v13-rule-basis",
       "runtime-state-not-verified",

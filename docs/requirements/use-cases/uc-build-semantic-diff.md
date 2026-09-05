@@ -74,7 +74,12 @@ comparison meaning.
   approved feature introduces manual correspondence
 - confirmation-required items are limited to changes that may prevent an
   expected start, remove or tighten a previously available condition, leave a
-  wait unresolved, remove a timeout, or change an established branch path
+  wait unresolved, remove a timeout, change an established branch path, or
+  remove a supported calculated schedule opportunity in the requested period
+- supported file or event wait-target changes, valid execution-user-type
+  changes on applicable units, and raw JP1 resource-group changes are
+  definition evidence for human review; they do not establish external
+  runtime, account, permission, authorization, or contention failures
 - missing predecessors, missing successors, disconnected relations, and
   jobnet-start parallelism are not problems by themselves
 - external files, events, host permissions, users, resource groups, resource
@@ -89,6 +94,9 @@ comparison meaning.
   outside the supported comparison boundary
 - schedule comparison displays its period and distinguishes supported,
   unsupported, and uncalculated elements
+- a removed calculated schedule run is review-recommended only when supported
+  before/after schedule-pair evidence exists; unsupported or uncalculated
+  evidence remains explicit and does not become a no-run conclusion
 - JP1/AJS3 version 13 is normative unless an approved feature records a narrower
   reference-backed scope
 
@@ -133,11 +141,29 @@ Scenario: Removed timeout requires confirmation
   When semantic diff is built
   Then possible unbounded wait is confirmation-required
 
+Scenario: Supported calculated schedule opportunity loss requires review
+  Given schedule comparison is requested for a period
+  And a supported before projection contains a calculated execution run
+  And the supported after projection no longer contains that run
+  When semantic diff is built
+  Then the result includes a confirmation-required schedule item for the
+    removed calculated run
+  And unsupported or uncalculated evidence is not treated as a no-run failure
+
+Scenario: External wait target changes require review without a runtime claim
+  Given a supported file or event wait target changes
+  When semantic diff is built
+  Then the result includes a confirmation-required item with the changed
+    target evidence
+  And external files, events, hosts, permissions, and runtime history are
+    stated as unverified
+
 Scenario: Execution-environment changes are not asserted as failures
-  Given an execution user or resource group changes
+  Given an execution user type or raw JP1 resource group changes
   When semantic diff is built
   Then the execution-environment change is included
-  And target-host facts and resource contention are stated as unverified
+  And account, user mapping, target-host facts, authorization, and resource
+    contention are stated as unverified
 
 Scenario: Schedule comparison reports no calculated runs
   Given schedule comparison is requested for a period

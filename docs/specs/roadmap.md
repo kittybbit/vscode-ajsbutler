@@ -17,17 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Semantic Diff Roadmap
 
-### Wave 1: Comparison Confidence And Review Contracts
-
-#### Expand Semantic Diff Review-Risk Rules
-
-- Origin: proposal E-2.
-- Extend confirmation-required evaluation for supported start, schedule, wait,
-  and environment changes without presenting external-runtime assumptions as
-  verified failures.
-- Entry condition: confirmation levels and structured risk-result ownership are
-  settled.
-
 ### Wave 2: Schedule Semantics
 
 #### Expand Schedule Interpretation And Supported Semantics

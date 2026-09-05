@@ -488,6 +488,67 @@ suite("Semantic Diff Markdown Projections", () => {
     );
   });
 
+  test("renders calculated schedule removal from typed before values in Full", () => {
+    const result = auditResult();
+    const removedDetail = createSemanticDiffDetail({
+      unitPath: "/root/schedule-job",
+      scheduleRule: 1,
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      beforeValues: ["date=2026-04-11", "time=10:00"],
+      rawValues: [],
+    });
+    result.confirmationRequired = result.confirmationRequired.map((item) =>
+      item.reasonCode === "calculated-schedule-run-removed"
+        ? {
+            ...item,
+            target: {
+              kind: "jobnet",
+              unit: reference("schedule-job", "/root/schedule-job"),
+            },
+            detail: removedDetail,
+            constraints: item.constraints.map((constraint) => ({
+              ...constraint,
+              detail: removedDetail,
+            })),
+            warning: null,
+          }
+        : item,
+    );
+
+    const context = buildSemanticDiffOutputContext(result);
+    const full = renderSemanticDiffFullMarkdown(context);
+    assert.ok(
+      full.includes(
+        "- schedule-job calculated schedule run 2026-04-11 10:00 removed\n",
+      ),
+    );
+    assert.strictEqual(
+      full.includes("schedule-job calculated schedule run removed"),
+      false,
+    );
+
+    const audit = renderSemanticDiffAuditMarkdown(
+      buildSemanticDiffOutputContext(result),
+    );
+    assert.ok(audit.includes("beforeValues: [date=2026-04-11, time=10:00]"));
+    assert.ok(audit.includes("rawValues: []"));
+    const removedConfirmation = result.confirmationRequired.find(
+      (item) => item.reasonCode === "calculated-schedule-run-removed",
+    );
+    assert.deepStrictEqual(removedConfirmation?.detail.beforeValues, [
+      "date=2026-04-11",
+      "time=10:00",
+    ]);
+    assert.deepStrictEqual(removedConfirmation?.detail.rawValues, []);
+
+    const japanese = renderSemanticDiffFullMarkdown(context, "ja-JP");
+    assert.ok(japanese.includes("変更内容を確認してください"));
+    assert.strictEqual(
+      japanese.includes("calculated schedule run 2026-04-11 10:00"),
+      false,
+    );
+  });
+
   test("preserves immutable baseline bytes and digests across Markdown locales", () => {
     const contexts: Record<MarkdownFixture, SemanticDiffOutputContext> = {
       empty: buildSemanticDiffOutputContext(emptyResult()),

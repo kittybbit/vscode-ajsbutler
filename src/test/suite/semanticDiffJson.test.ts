@@ -871,6 +871,62 @@ suite("Semantic Diff JSON v1", () => {
     assert.strictEqual(serialized.includes("execution-user-changed"), false);
   });
 
+  test("preserves the exact calculated schedule removal detail in JSON", () => {
+    const result = populatedResult();
+    const removedDetail = createSemanticDiffDetail({
+      unitPath: "/root/schedule-job",
+      scheduleRule: 1,
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      beforeValues: ["date=2026-04-11", "time=10:00"],
+      rawValues: [],
+    });
+    result.confirmationRequired = result.confirmationRequired.map((item) =>
+      item.reasonCode === "calculated-schedule-run-removed"
+        ? {
+            ...item,
+            target: {
+              kind: "jobnet",
+              unit: reference(
+                "schedule-job",
+                "schedule-job",
+                "/root/schedule-job",
+              ),
+            },
+            detail: removedDetail,
+            constraints: item.constraints.map((constraint) => ({
+              ...constraint,
+              detail: removedDetail,
+            })),
+            warning: null,
+          }
+        : item,
+    );
+
+    const projected = buildSemanticDiffJsonV1(
+      buildSemanticDiffOutputContext(result),
+    );
+    const removed = projected.result.confirmationRequired.find(
+      (item) => item.reasonCode === "calculated-schedule-run-removed",
+    );
+    assert.ok(removed);
+    assert.deepStrictEqual(removed.detail, {
+      unitPath: "/root/schedule-job",
+      parameterKey: null,
+      relationPair: null,
+      scheduleRule: 1,
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      beforeValues: ["date=2026-04-11", "time=10:00"],
+      afterValues: [],
+      rawValues: [],
+      removedSources: [],
+    });
+    assert.deepStrictEqual(
+      removed.constraints.map((constraint) => constraint.code),
+      ["runtime-state-not-verified"],
+    );
+    assert.strictEqual(removed.warning, null);
+  });
+
   test("keeps every nested wire shape explicit", () => {
     const document = buildSemanticDiffJsonV1(
       buildSemanticDiffOutputContext(populatedResult()),

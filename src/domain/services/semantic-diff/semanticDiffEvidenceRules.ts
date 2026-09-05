@@ -3,6 +3,9 @@ import type {
   AjsUnit,
   AjsUnitType,
 } from "../../models/ajs/AjsDocument";
+import { DEFAULTS } from "../../models/parameters/Defaults";
+import { resolveHttpConnectionJobEuDefaultRawValue } from "../../models/parameters/httpConnectionJobDefaultHelpers";
+import { TySymbols } from "../../values/AjsType";
 import {
   buildSemanticDiffRelationPairMaps,
   semanticDiffParameterChangeKeys,
@@ -33,6 +36,16 @@ export type SemanticDiffConfirmationEvidenceDecision =
       parameterKey: string;
     }
   | {
+      kind: "execution-user-type-changed";
+      match: SemanticDiffUnitMatch;
+      parameterKey: "eu";
+    }
+  | {
+      kind: "jp1-resource-group-changed";
+      match: SemanticDiffUnitMatch;
+      parameterKey: "rg";
+    }
+  | {
       kind: "conditional-relation-removed";
       pairKey: string;
       relation: AjsRelation;
@@ -58,6 +71,10 @@ export type EvaluateSemanticDiffEvidenceInput = {
 
 const eventReceivingWaitTypes = new Set<AjsUnitType>(["evwj", "revwj"]);
 const fileMonitoringWaitTypes = new Set<AjsUnitType>(["flwj", "rflwj"]);
+const supportedWaitTypes = new Set<AjsUnitType>([
+  ...eventReceivingWaitTypes,
+  ...fileMonitoringWaitTypes,
+]);
 const waitReleaseSourceKeys = new Set(["eun"]);
 const conditionJudgmentKeys = new Set([
   "cond",
@@ -85,6 +102,40 @@ const eventWaitTargetKeys = new Set([
   "evipa",
   "evesc",
 ]);
+const knownUnitTypes = new Set<AjsUnitType>(TySymbols);
+const httpConnectionJobEuDefault =
+  resolveHttpConnectionJobEuDefaultRawValue() as "def";
+const executionUserTypeDefaults: ReadonlyMap<AjsUnitType, "ent" | "def"> =
+  new Map<AjsUnitType, "ent" | "def">([
+    ["j", DEFAULTS.Eu],
+    ["rj", DEFAULTS.Eu],
+    ["pj", DEFAULTS.Eu],
+    ["rp", DEFAULTS.Eu],
+    ["qj", DEFAULTS.Eu],
+    ["rq", DEFAULTS.Eu],
+    ["evsj", DEFAULTS.Eu],
+    ["revsj", DEFAULTS.Eu],
+    ["mlsj", DEFAULTS.Eu],
+    ["rmlsj", DEFAULTS.Eu],
+    ["mqsj", DEFAULTS.Eu],
+    ["rmqsj", DEFAULTS.Eu],
+    ["mssj", DEFAULTS.Eu],
+    ["rmssj", DEFAULTS.Eu],
+    ["cmsj", DEFAULTS.Eu],
+    ["rcmsj", DEFAULTS.Eu],
+    ["pwlj", DEFAULTS.Eu],
+    ["rpwlj", DEFAULTS.Eu],
+    ["pwrj", DEFAULTS.Eu],
+    ["rpwrj", DEFAULTS.Eu],
+    ["cj", DEFAULTS.Eu],
+    ["rcj", DEFAULTS.Eu],
+    ["cpj", DEFAULTS.Eu],
+    ["rcpj", DEFAULTS.Eu],
+    ["fxj", DEFAULTS.Eu],
+    ["rfxj", DEFAULTS.Eu],
+    ["htpj", httpConnectionJobEuDefault],
+    ["rhtpj", httpConnectionJobEuDefault],
+  ]);
 
 const sortStrings = (values: string[]): string[] => [...values].sort();
 
@@ -113,9 +164,18 @@ const removedOrChangedValues = (
 const waitReleaseSourceDecisions = (
   matches: SemanticDiffUnitMatch[],
 ): SemanticDiffConfirmationEvidenceDecision[] =>
-  matches.flatMap((match) =>
-    changedSupportedKeys(match.before, match.after, waitReleaseSourceKeys).map(
-      (parameterKey) => ({
+  matches
+    .filter(
+      (match) =>
+        supportedWaitTypes.has(match.before.unitType) &&
+        supportedWaitTypes.has(match.after.unitType),
+    )
+    .flatMap((match) =>
+      changedSupportedKeys(
+        match.before,
+        match.after,
+        waitReleaseSourceKeys,
+      ).map((parameterKey) => ({
         kind: "wait-release-source-changed",
         match,
         parameterKey,
@@ -124,9 +184,8 @@ const waitReleaseSourceDecisions = (
           match.after,
           parameterKey,
         ),
-      }),
-    ),
-  );
+      })),
+    );
 
 const timeoutKeysForUnit = (unit: AjsUnit): string[] => {
   if (eventReceivingWaitTypes.has(unit.unitType)) {
@@ -186,19 +245,85 @@ const waitTargetDecisions = (
     if (!targetKeys) {
       return [];
     }
-    return changedSupportedKeys(match.before, match.after, targetKeys).map(
-      (parameterKey) => ({
+    return changedSupportedKeys(match.before, match.after, targetKeys)
+      .filter(
+        (parameterKey) =>
+          parameterKey !== "flwc" ||
+          ![match.before, match.after].some(
+            hasUninterpretableFileMonitoringCondition,
+          ),
+      )
+      .map((parameterKey) => ({
         kind: "wait-target-changed",
         match,
         parameterKey,
-      }),
-    );
+      }));
   });
+
+type ExecutionUserType = "ent" | "def";
+
+const validExecutionUserTypes = new Set<ExecutionUserType>(["ent", "def"]);
+
+const explicitExecutionUserType = (
+  values: string[],
+): ExecutionUserType | undefined =>
+  values.length === 1 &&
+  validExecutionUserTypes.has(values[0] as ExecutionUserType)
+    ? (values[0] as ExecutionUserType)
+    : undefined;
+
+const effectiveExecutionUserType = (
+  unit: AjsUnit,
+): ExecutionUserType | undefined => {
+  const defaultValue = executionUserTypeDefaults.get(unit.unitType);
+  const values = semanticDiffParameterValuesByKey(unit).get("eu") ?? [];
+  const configuredValue =
+    values.length === 0 ? defaultValue : explicitExecutionUserType(values);
+  return defaultValue === undefined ? undefined : configuredValue;
+};
+
+const executionUserTypeDecisions = (
+  matches: SemanticDiffUnitMatch[],
+): SemanticDiffConfirmationEvidenceDecision[] =>
+  matches.flatMap((match) => {
+    const beforeValue = effectiveExecutionUserType(match.before);
+    const afterValue = effectiveExecutionUserType(match.after);
+    return beforeValue !== undefined &&
+      afterValue !== undefined &&
+      beforeValue !== afterValue
+      ? [
+          {
+            kind: "execution-user-type-changed" as const,
+            match,
+            parameterKey: "eu" as const,
+          },
+        ]
+      : [];
+  });
+
+const resourceGroupDecisions = (
+  matches: SemanticDiffUnitMatch[],
+): SemanticDiffConfirmationEvidenceDecision[] =>
+  matches
+    .filter(
+      (match) =>
+        knownUnitTypes.has(match.before.unitType) &&
+        knownUnitTypes.has(match.after.unitType) &&
+        match.before.jp1ResourceGroup !== match.after.jp1ResourceGroup,
+    )
+    .map((match) => ({
+      kind: "jp1-resource-group-changed" as const,
+      match,
+      parameterKey: "rg" as const,
+    }));
 
 const conditionalRelationDecisions = (
   input: EvaluateSemanticDiffEvidenceInput,
 ): SemanticDiffConfirmationEvidenceDecision[] => {
   const relationPairs = buildSemanticDiffRelationPairMaps(input);
+  const correspondenceResolvedBeforeUnitIds = new Set(
+    input.matches.map((match) => match.before.id),
+  );
   return [...relationPairs.before.entries()].flatMap(
     ([pairKey, beforeRelations]) => {
       const afterTypes = new Set(
@@ -206,19 +331,31 @@ const conditionalRelationDecisions = (
           (relation) => relation.type,
         ),
       );
-      return beforeRelations
-        .filter((relation) => relation.type === "con")
-        .filter((relation) => !afterTypes.has(relation.type))
-        .map((relation) => ({
-          kind: "conditional-relation-removed" as const,
-          pairKey,
-          relation,
-        }));
+      return (
+        beforeRelations
+          // A removed relation is review evidence only when both endpoints
+          // still correspond to units in the after definition. A relation
+          // attached to a removed unit is covered by the structural removal;
+          // it is not evidence that an existing start path was tightened.
+          .filter((relation) =>
+            [relation.sourceUnitId, relation.targetUnitId].every((unitId) =>
+              correspondenceResolvedBeforeUnitIds.has(unitId),
+            ),
+          )
+          .filter((relation) => relation.type === "con")
+          .filter((relation) => !afterTypes.has(relation.type))
+          .map((relation) => ({
+            kind: "conditional-relation-removed" as const,
+            pairKey,
+            relation,
+          }))
+      );
     },
   );
 };
 
 const hasUninterpretableFileMonitoringCondition = (unit: AjsUnit): boolean =>
+  fileMonitoringWaitTypes.has(unit.unitType) &&
   (semanticDiffParameterValuesByKey(unit).get("flwc") ?? []).some((value) => {
     const conditions = new Set(
       value.split(":").filter((condition) => condition.length > 0),
@@ -249,6 +386,8 @@ export const evaluateSemanticDiffEvidence = (
     ...timeoutRemovalDecisions(input.matches),
     ...conditionJudgmentDecisions(input.matches),
     ...waitTargetDecisions(input.matches),
+    ...executionUserTypeDecisions(input.matches),
+    ...resourceGroupDecisions(input.matches),
   ],
   unsupportedDecisions: unsupportedEvidenceDecisions(input.matches),
 });

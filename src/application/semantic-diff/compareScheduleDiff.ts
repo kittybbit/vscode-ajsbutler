@@ -19,6 +19,8 @@ import {
 } from "./semanticDiffStructuredFacts";
 import {
   evaluateSemanticDiffSchedule,
+  type SemanticDiffScheduleEvaluation,
+  type SemanticDiffSchedulePairEvaluation,
   type SemanticDiffScheduleRunDecision,
   type SemanticDiffScheduleUnsupportedDecision,
 } from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
@@ -203,11 +205,116 @@ const createZeroRunConfirmation = (
       createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
     ),
     createScheduleConstraint(
+      "runtime-state-not-verified",
+      createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
+    ),
+    createScheduleConstraint(
       "comparison-period",
       createSemanticDiffDetail({ unitPath: unit.absolutePath, period }),
     ),
   ],
   warning: null,
+});
+
+const createRemovedRunConfirmation = (input: {
+  decision: Extract<SemanticDiffScheduleRunDecision, { kind: "removed" }>;
+  unit: AjsUnit;
+  period: SemanticDiffComparisonPeriod;
+  toUnitTarget: ScheduleDiffInput["toUnitTarget"];
+}): SemanticDiffConfirmationRequiredItem => {
+  const run = input.decision.before;
+  const detail = createSemanticDiffDetail({
+    unitPath: input.unit.absolutePath,
+    scheduleRule: run.rule,
+    period: input.period,
+    beforeValues: [`date=${run.date}`, `time=${run.time}`],
+  });
+  return {
+    id: `confirm:schedule-run-removed:${input.unit.id}:${run.date}:${run.time}:${run.rule}`,
+    reasonCode: "calculated-schedule-run-removed",
+    target: input.toUnitTarget(input.unit),
+    relatedTargets: [],
+    detail,
+    constraints: [
+      createScheduleConstraint("jp1-ajs3-v13-rule-basis", detail),
+      createScheduleConstraint("runtime-state-not-verified", detail),
+      createScheduleConstraint("comparison-period", detail),
+    ],
+    warning: null,
+  };
+};
+
+type EvaluatedSchedule = Extract<
+  SemanticDiffScheduleEvaluation,
+  { kind: "evaluated" }
+>;
+
+type RemovedRunDecision = Extract<
+  SemanticDiffScheduleRunDecision,
+  { kind: "removed" }
+>;
+
+const isRemovedRunDecision = (
+  decision: SemanticDiffScheduleRunDecision,
+): decision is RemovedRunDecision => decision.kind === "removed";
+
+const isSupportedSchedulePair = (
+  pair: SemanticDiffSchedulePairEvaluation | undefined,
+): pair is SemanticDiffSchedulePairEvaluation =>
+  pair !== undefined &&
+  pair.before.supportedPairCount > 0 &&
+  pair.after.supportedPairCount > 0;
+
+const createRemovedRunConfirmations = (
+  evaluation: EvaluatedSchedule,
+  toUnitTarget: ScheduleDiffInput["toUnitTarget"],
+): SemanticDiffConfirmationRequiredItem[] => {
+  const pairEvaluationByAfterPath = new Map(
+    evaluation.pairEvaluations.map((pair) => [
+      pair.after.unit.absolutePath,
+      pair,
+    ]),
+  );
+  const confirmations = evaluation.runDecisions
+    .filter(isRemovedRunDecision)
+    .flatMap((decision) => {
+      const pair = pairEvaluationByAfterPath.get(decision.unitPath);
+      return isSupportedSchedulePair(pair)
+        ? [
+            createRemovedRunConfirmation({
+              decision,
+              unit: pair.after.unit,
+              period: evaluation.period,
+              toUnitTarget,
+            }),
+          ]
+        : [];
+    });
+  return [
+    ...new Map(
+      confirmations.map((confirmation) => [confirmation.id, confirmation]),
+    ).values(),
+  ];
+};
+
+const createEvaluatedScheduleDiffResult = (
+  evaluation: EvaluatedSchedule,
+  input: ScheduleDiffInput,
+): ScheduleDiffResult => ({
+  scheduleComparison: {
+    period: evaluation.period,
+    runChanges: evaluation.runDecisions.map(toScheduleRunChange),
+  },
+  confirmationRequired: [
+    ...evaluation.zeroRunCandidates.map((unit) =>
+      createZeroRunConfirmation(unit, evaluation.period, input.toUnitTarget),
+    ),
+    ...createRemovedRunConfirmations(evaluation, input.toUnitTarget),
+  ],
+  unsupportedItems: evaluation.unsupportedDecisions.map((decision) =>
+    createUnsupportedItem(decision, input.toUnitTarget),
+  ),
+  limitations: [],
 });
 
 export const compareScheduleDiff = (
@@ -242,17 +349,5 @@ export const compareScheduleDiff = (
     };
   }
 
-  return {
-    scheduleComparison: {
-      period: evaluation.period,
-      runChanges: evaluation.runDecisions.map(toScheduleRunChange),
-    },
-    confirmationRequired: evaluation.zeroRunCandidates.map((unit) =>
-      createZeroRunConfirmation(unit, evaluation.period, input.toUnitTarget),
-    ),
-    unsupportedItems: evaluation.unsupportedDecisions.map((decision) =>
-      createUnsupportedItem(decision, input.toUnitTarget),
-    ),
-    limitations: [],
-  };
+  return createEvaluatedScheduleDiffResult(evaluation, input);
 };
