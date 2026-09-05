@@ -1,4 +1,5 @@
 import type {
+  AjsDocument,
   AjsParameter,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
@@ -37,6 +38,8 @@ export type ScheduleDiffMatchedUnit = Pick<
 >;
 
 export type ScheduleDiffInput = {
+  beforeDocument: AjsDocument;
+  afterDocument: AjsDocument;
   beforeUnits: AjsUnit[];
   afterUnits: AjsUnit[];
   matches: ScheduleDiffMatchedUnit[];
@@ -325,6 +328,8 @@ export const compareScheduleDiff = (
     afterUnits: input.afterUnits,
     matches: input.matches,
     period: input.period,
+    beforeDocument: input.beforeDocument,
+    afterDocument: input.afterDocument,
   });
 
   if (evaluation.kind === "not-requested") {

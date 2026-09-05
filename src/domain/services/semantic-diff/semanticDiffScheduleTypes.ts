@@ -5,6 +5,7 @@ import type {
   SemanticDiffComparisonPeriod,
   SemanticDiffScheduleRun,
 } from "../../models/semantic-diff/SemanticDiff";
+import type { SemanticDiffScheduleCalendarContext } from "./semanticDiffScheduleCalendarContext";
 
 /** Domain-only schedule interpretation/projection outcome. */
 export type SemanticDiffScheduleStatus =
@@ -65,4 +66,5 @@ export type SemanticDiffScheduleProjection = {
 export type SemanticDiffScheduleProjectionInput = {
   interpretation: SemanticDiffScheduleInterpretation;
   period: SemanticDiffComparisonPeriod;
+  calendarContext?: SemanticDiffScheduleCalendarContext;
 };

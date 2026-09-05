@@ -56,6 +56,19 @@ const calendarIndependentDateEvidence = (
   return undefined;
 };
 
+const relativeDateEvidence = (
+  date: ReturnType<typeof interpretScheduleDateValue>,
+): string | undefined => {
+  if (!date || date.year === undefined || date.month === undefined) {
+    return undefined;
+  }
+  return date.day.kind === "relative" ||
+    (date.day.kind === "backward" && date.day.prefix === "+") ||
+    (date.day.kind === "weekday" && date.day.prefix === "+")
+    ? "JP1-PARAM-SCHEDULE-RELATIVE-001"
+    : undefined;
+};
+
 const evidence = (
   parameter: AjsParameter,
   id: string,
@@ -130,6 +143,17 @@ const interpretScheduleDateRule = (
         status: "supported",
         id: calendarIndependentEvidence,
         rule: date.rule,
+        date,
+      });
+    }
+    const relativeEvidence = relativeDateEvidence(date);
+    if (relativeEvidence) {
+      return ruleResult({
+        parameter,
+        status: "unsupported",
+        id: relativeEvidence,
+        rule: date.rule,
+        reason: "unsupported-schedule-date",
         date,
       });
     }

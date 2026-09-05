@@ -197,6 +197,18 @@ Scenario: Calendar-independent schedule forms remain explicit when unsupported
   Then the existing uncalculated schedule item is returned
   And it is not treated as a valid no-runs conclusion
 
+Scenario: Calendar-relative schedule forms use normalized definition context
+  Given schedule comparison is requested for a period
+  And a jobnet uses a fully qualified relative `sd` value
+  And its selected `jc` or containing group provides normalized `sdd`, `md`,
+    and `stt` context
+  When semantic diff is built
+  Then the operational month and relative date are calculated from that
+    definition context
+  And a missing, invalid, or ambiguous context remains an explicit
+    `calendar-selection` item
+  And units outside the comparison scope are not added to the result
+
 Scenario: A missing fifth weekday occurrence is a valid no-runs schedule
   Given schedule comparison is requested for a period
   And a fully qualified weekday rule has no fifth matching weekday in its month

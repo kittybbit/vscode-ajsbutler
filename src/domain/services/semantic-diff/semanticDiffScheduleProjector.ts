@@ -10,12 +10,23 @@ import type {
   SemanticDiffScheduleProjectionInput,
   SemanticDiffScheduleRuleInterpretation,
 } from "./semanticDiffScheduleTypes";
+import {
+  operationalMonthDate,
+  operationalMonthLength,
+  isFullyQualifiedRelativeScheduleDate,
+  isSyntacticallyInvalidRelativeScheduleDate,
+  relativeScheduleDateRequiresContext,
+  resolveOperationalMonth,
+  type SemanticDiffScheduleCalendarContext,
+} from "./semanticDiffScheduleCalendarContext";
 
 type ValidPeriod = { from: Date; to: Date };
 
 type DateCandidateResult = {
   candidates: string[];
   invalid: boolean;
+  deferred: boolean;
+  contextInvalid?: boolean;
 };
 
 const createGregorianDate = (
@@ -60,13 +71,130 @@ const daysInGregorianMonth = (
 const formatDate = (year: number, month: number, day: number): string =>
   `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
+const relativeDateCandidates = (
+  parsed: NonNullable<ReturnType<typeof interpretScheduleDateValue>>,
+  context: SemanticDiffScheduleCalendarContext,
+): DateCandidateResult => {
+  if (parsed.year === undefined || parsed.month === undefined) {
+    return { candidates: [], invalid: false, deferred: true };
+  }
+  if (parsed.month < 1 || parsed.month > 12) {
+    return { candidates: [], invalid: true, deferred: false };
+  }
+  const operationalMonth = resolveOperationalMonth(
+    context,
+    parsed.year,
+    parsed.month,
+  );
+  if (!operationalMonth) {
+    return {
+      candidates: [],
+      invalid: true,
+      deferred: false,
+      contextInvalid: true,
+    };
+  }
+  const length = operationalMonthLength(operationalMonth);
+  if (parsed.day.kind === "relative") {
+    const offset = parsed.day.value - 1;
+    return offset < 0 || offset >= length
+      ? { candidates: [], invalid: true, deferred: false }
+      : {
+          candidates: [
+            formatDate(
+              operationalMonthDate(operationalMonth, offset).getUTCFullYear(),
+              operationalMonthDate(operationalMonth, offset).getUTCMonth() + 1,
+              operationalMonthDate(operationalMonth, offset).getUTCDate(),
+            ),
+          ],
+          invalid: false,
+          deferred: false,
+        };
+  }
+  if (parsed.day.kind === "backward" && parsed.day.prefix === "+") {
+    const offset = parsed.day.offset ?? 0;
+    return offset < 0 || offset >= length
+      ? { candidates: [], invalid: true, deferred: false }
+      : {
+          candidates: [
+            formatDate(
+              operationalMonthDate(
+                operationalMonth,
+                length - 1 - offset,
+              ).getUTCFullYear(),
+              operationalMonthDate(
+                operationalMonth,
+                length - 1 - offset,
+              ).getUTCMonth() + 1,
+              operationalMonthDate(
+                operationalMonth,
+                length - 1 - offset,
+              ).getUTCDate(),
+            ),
+          ],
+          invalid: false,
+          deferred: false,
+        };
+  }
+  if (parsed.day.kind === "weekday" && parsed.day.prefix === "+") {
+    const weekday = ["su", "mo", "tu", "we", "th", "fr", "sa"].indexOf(
+      parsed.day.weekday,
+    );
+    const matchingDates = Array.from({ length }, (_, offset) =>
+      operationalMonthDate(operationalMonth, offset),
+    ).filter((date) => date.getUTCDay() === weekday);
+    if (parsed.day.occurrence === "b") {
+      const date = matchingDates.at(-1);
+      return date
+        ? {
+            candidates: [
+              formatDate(
+                date.getUTCFullYear(),
+                date.getUTCMonth() + 1,
+                date.getUTCDate(),
+              ),
+            ],
+            invalid: false,
+            deferred: false,
+          }
+        : { candidates: [], invalid: false, deferred: false };
+    }
+    const occurrence = parsed.day.occurrence ?? 1;
+    if (occurrence < 1 || occurrence > 5) {
+      return { candidates: [], invalid: true, deferred: false };
+    }
+    const date = matchingDates[occurrence - 1];
+    return date
+      ? {
+          candidates: [
+            formatDate(
+              date.getUTCFullYear(),
+              date.getUTCMonth() + 1,
+              date.getUTCDate(),
+            ),
+          ],
+          invalid: false,
+          deferred: false,
+        }
+      : { candidates: [], invalid: false, deferred: false };
+  }
+  return { candidates: [], invalid: false, deferred: true };
+};
+
 const dateCandidates = (
   parameter: AjsParameter,
   period: ValidPeriod,
+  calendarContext?: SemanticDiffScheduleCalendarContext,
 ): DateCandidateResult => {
   const parsed = interpretScheduleDateValue(parameter.value);
   if (!parsed) {
-    return { candidates: [], invalid: true };
+    return { candidates: [], invalid: true, deferred: false };
+  }
+
+  if (relativeScheduleDateRequiresContext(parsed)) {
+    return calendarContext
+      ? relativeDateCandidates(parsed, calendarContext)
+      : { candidates: [], invalid: false, deferred: true };
   }
 
   if (
@@ -78,11 +206,12 @@ const dateCandidates = (
     const days = daysInGregorianMonth(parsed.year, parsed.month);
     const offset = parsed.day.offset ?? 0;
     if (days === undefined || offset < 0 || offset >= days) {
-      return { candidates: [], invalid: true };
+      return { candidates: [], invalid: true, deferred: false };
     }
     return {
       candidates: [formatDate(parsed.year, parsed.month, days - offset)],
       invalid: false,
+      deferred: false,
     };
   }
 
@@ -94,7 +223,7 @@ const dateCandidates = (
   ) {
     const days = daysInGregorianMonth(parsed.year, parsed.month);
     if (days === undefined) {
-      return { candidates: [], invalid: true };
+      return { candidates: [], invalid: true, deferred: false };
     }
     const weekday = ["su", "mo", "tu", "we", "th", "fr", "sa"].indexOf(
       parsed.day.weekday,
@@ -114,23 +243,25 @@ const dateCandidates = (
       return {
         candidates: [formatDate(parsed.year, parsed.month, day)],
         invalid: false,
+        deferred: false,
       };
     }
     const occurrence = parsed.day.occurrence ?? 1;
     if (occurrence < 1 || occurrence > 5) {
-      return { candidates: [], invalid: true };
+      return { candidates: [], invalid: true, deferred: false };
     }
     const day = 1 + ((weekday - firstWeekday + 7) % 7) + (occurrence - 1) * 7;
     return day > days
-      ? { candidates: [], invalid: false }
+      ? { candidates: [], invalid: false, deferred: false }
       : {
           candidates: [formatDate(parsed.year, parsed.month, day)],
           invalid: false,
+          deferred: false,
         };
   }
 
   if (parsed.day.kind !== "calendar") {
-    return { candidates: [], invalid: false };
+    return { candidates: [], invalid: false, deferred: true };
   }
   const day = String(parsed.day.value).padStart(2, "0");
   if (parsed.year !== undefined && parsed.month !== undefined) {
@@ -139,6 +270,7 @@ const dateCandidates = (
         `${String(parsed.year).padStart(4, "0")}-${String(parsed.month).padStart(2, "0")}-${day}`,
       ],
       invalid: false,
+      deferred: false,
     };
   }
   const years = Array.from(
@@ -151,6 +283,7 @@ const dateCandidates = (
         (year) => `${year}-${String(parsed.month).padStart(2, "0")}-${day}`,
       ),
       invalid: false,
+      deferred: false,
     };
   }
   return {
@@ -161,6 +294,7 @@ const dateCandidates = (
       ),
     ),
     invalid: false,
+    deferred: false,
   };
 };
 
@@ -244,6 +378,10 @@ export function projectScheduleRuns(
     "interpretation" in inputOrInterpretation
       ? inputOrInterpretation.period
       : periodInput;
+  const calendarContext =
+    "interpretation" in inputOrInterpretation
+      ? inputOrInterpretation.calendarContext
+      : undefined;
   if (!period) {
     return {
       unit: interpretation.unit,
@@ -285,16 +423,82 @@ export function projectScheduleRuns(
     }
   });
   const projectedRules = interpretation.rules.map((rule) => {
-    if (
-      rule.parameter.key !== "sd" ||
-      rule.status !== "supported" ||
-      !rule.date
-    ) {
+    if (rule.parameter.key === "jc" && calendarContext) {
+      const selection = calendarContext.selection;
+      return cloneRule(rule, {
+        status: selection.status,
+        reason:
+          selection.status === "supported" ? undefined : "calendar-selection",
+        evidence: {
+          id: selection.evidenceId,
+          rawParameters: [...selection.rawParameters],
+          rule: rule.rule,
+        },
+      });
+    }
+    if (rule.parameter.key !== "sd" || !rule.date) {
       return rule;
     }
     const startTime = startTimes.get(rule.rule ?? 1);
-    const candidateResult = dateCandidates(rule.parameter, parsedPeriod);
+    if (relativeScheduleDateRequiresContext(rule.date)) {
+      if (isSyntacticallyInvalidRelativeScheduleDate(rule.date)) {
+        return cloneRule(rule, {
+          status: "invalid",
+          reason: "invalid-calendar-day",
+          evidence: {
+            id: invalidDateEvidenceId(rule),
+            rawParameters: [
+              rule.parameter,
+              ...(startTime?.parameter ? [startTime.parameter] : []),
+            ],
+            rule: rule.rule,
+          },
+        });
+      }
+      // Omitted year/month relative forms are not promoted by this slice.
+      if (!isFullyQualifiedRelativeScheduleDate(rule.date)) {
+        return rule;
+      }
+      if (!calendarContext) {
+        return rule;
+      }
+      if (calendarContext.status !== "supported") {
+        return cloneRule(rule, {
+          status: calendarContext.status,
+          reason: "calendar-selection",
+          evidence: {
+            id: calendarContext.evidenceId,
+            rawParameters: [rule.parameter, ...calendarContext.rawParameters],
+            rule: rule.rule,
+          },
+        });
+      }
+    } else if (rule.status !== "supported") {
+      return rule;
+    }
+    const candidateResult = dateCandidates(
+      rule.parameter,
+      parsedPeriod,
+      calendarContext,
+    );
     const candidates = candidateResult.candidates;
+    if (candidateResult.deferred) {
+      return rule;
+    }
+    if (candidateResult.contextInvalid) {
+      return cloneRule(rule, {
+        status: "invalid",
+        reason: "calendar-selection",
+        evidence: {
+          id: "schedule:calendar:invalid-base-or-conflict:sdd",
+          rawParameters: [
+            rule.parameter,
+            ...(calendarContext?.rawParameters ?? []),
+          ],
+          rule: rule.rule,
+        },
+      });
+    }
     if (
       candidateResult.invalid ||
       (candidates.length > 0 &&
@@ -350,9 +554,16 @@ export function projectScheduleRuns(
       }));
     return cloneRule(rule, {
       status: runs.length === 0 ? "no-runs" : "supported",
+      reason: undefined,
       evidence: {
         id: projectedDateEvidenceId(rule, runs),
-        rawParameters: [rule.parameter, startTime.parameter],
+        rawParameters: [
+          rule.parameter,
+          startTime.parameter,
+          ...(relativeScheduleDateRequiresContext(rule.date)
+            ? (calendarContext?.rawParameters ?? [])
+            : []),
+        ],
         rule: rule.rule,
       },
     });
@@ -375,20 +586,22 @@ export function projectScheduleRuns(
     ) {
       return;
     }
-    dateCandidates(rule.parameter, parsedPeriod).candidates.forEach(
-      (candidate) => {
-        const date = toUtcDate(candidate);
-        if (date && isWithin(date, parsedPeriod)) {
-          runs.push({
-            unitPath: interpretation.unit.absolutePath,
-            unitName: interpretation.unit.name,
-            rule: rule.rule ?? 1,
-            date: candidate,
-            time: startTime.startTime.value,
-          });
-        }
-      },
-    );
+    dateCandidates(
+      rule.parameter,
+      parsedPeriod,
+      calendarContext,
+    ).candidates.forEach((candidate) => {
+      const date = toUtcDate(candidate);
+      if (date && isWithin(date, parsedPeriod)) {
+        runs.push({
+          unitPath: interpretation.unit.absolutePath,
+          unitName: interpretation.unit.name,
+          rule: rule.rule ?? 1,
+          date: candidate,
+          time: startTime.startTime.value,
+        });
+      }
+    });
   });
   const completeness = statusForRules(projectedRules, false);
   const status =

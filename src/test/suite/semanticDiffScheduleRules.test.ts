@@ -519,7 +519,7 @@ suite("Semantic Diff Schedule Rules", () => {
         ["4,2026/02/su:5", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
         ["5,2026/04/mo:0", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
         ["6,2026/04/mo:6", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
-        ["7,2026/04/+mo", "unsupported", "schedule:sd:unsupported:7"],
+        ["7,2026/04/+mo", "unsupported", "JP1-PARAM-SCHEDULE-RELATIVE-001"],
         ["8,04/mo", "unsupported", "schedule:sd:unsupported:8"],
         ["9,04/b", "unsupported", "schedule:sd:unsupported:9"],
         ["10,b", "unsupported", "schedule:sd:unsupported:10"],

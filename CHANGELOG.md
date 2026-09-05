@@ -9,6 +9,10 @@
   Gregorian month-end (`YYYY/MM/b`, `YYYY/MM/b-DD`) and absolute weekday
   (`YYYY/MM/{weekday}`, `:n`, `:b`) forms while preserving existing
   omitted-component and calendar-dependent limitations.
+- Expanded schedule comparison for fully qualified relative dates by resolving
+  `jc` or containing-group context, closest `sdd`/`md`/`stt` values, and the
+  documented defaults without consulting host or external calendars. Missing
+  or invalid definition context remains explicit.
 - Improved Semantic Diff Markdown reports so English and Japanese output
   explains typed identity rules, strategies, canonical fields, and all
   ambiguous candidates while preserving raw JP1/AJS values safely.

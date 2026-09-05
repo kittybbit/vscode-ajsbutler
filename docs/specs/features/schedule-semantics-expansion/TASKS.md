@@ -4,13 +4,14 @@
 
 - Purpose: separate schedule interpretation, bounded projection, and comparison,
   then add only source-backed schedule forms with complete normalized context.
-- Approved or active slice: Slice 2 is ready for its exact completion commit.
-  Slice 1 was independently reviewed Ready with no findings and
-  completion-committed as `4a3b846d`; Slice 2 was independently reviewed Ready
-  with no findings and automatically completion-approved on 2026-09-06 under
-  the user's explicit per-slice instruction. Slices 3–5 remain planned, and
-  feature-level final/closure approval remains pending until all slices are
-  complete for the requested bulk human approval.
+- Approved or active slice: Slice 3 implementation is complete and its
+  completion gate is ready. Slice 1
+  was independently reviewed Ready with no findings and completion-committed as
+  `4a3b846d`; Slice 2 was independently reviewed Ready with no findings,
+  automatically completion-approved on 2026-09-06 under the user's explicit
+  per-slice instruction, and completion-committed as `23dfdcea`. Feature-level
+  final/closure approval remains pending until all slices are complete for the
+  requested bulk human approval.
 - Preserve current direct `sd` / `st`, period, ordering, and canonical-path
   behavior before expanding coverage.
 - Do not implement parent inheritance, 48-hour, cycle, `cftd`, UI, risk policy,
@@ -42,9 +43,11 @@
 - Validate every slice with the closest schedule tests, desktop/web coverage,
   `rtk pnpm run qlty`, and the required durable-document checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: Main may route the exact approved Slice 2 diff to the
-  completion committer. Slices 3–5 remain planned; feature-level final/closure
-  approval remains pending until all slices are complete.
+- Next decision: send the exact approved Slice 3 diff to approval-committer for
+  its completion commit. Implementation review is Ready with no findings and
+  Completion Approval was granted automatically on 2026-09-06 under the
+  user's explicit per-slice instruction; feature-level final/closure approval
+  remains pending until all slices are complete.
 
 ## Sync Rule
 
@@ -64,11 +67,12 @@
   calendar-independent dates, normalized calendar resolution, operational-day
   projection, and deterministic closed-day substitution
 - Review status: Ready; plan-reviewer replan and Slice 2
-  implementation-reviewer verdicts Ready with no findings
+  implementation-reviewer verdicts Ready with no findings; Slice 3
+  implementation-reviewer Ready with no findings
 - Human approval: Existing plan and Slice 2 replan approved; replan commit
   `cb17d26a`
-- Active implementation slice: Slice 2 (carried-forward implementation and
-  approved correction complete; ready for completion commit)
+- Active implementation slice: Slice 3 (implementation complete; completion
+  commit pending)
 
 ## Human Approval
 
@@ -108,9 +112,9 @@ implementation go-ahead, and the per-slice completion gates.
   explicit per-slice instruction; the exact approved Slice 1 paths and evidence
   remain in the completed commit.
 
-## Completion Approval
+## Slice 2 Completion Record
 
-- Status: Granted for Slice 2; ready for the exact completion commit.
+- Status: Complete and committed as `23dfdcea`.
 - Approved at: 2026-09-06 automatically under the user's explicit per-slice
   instruction after the implementation-reviewer returned Ready with no
   findings.
@@ -130,10 +134,9 @@ implementation go-ahead, and the per-slice completion gates.
   - `src/test/suite/semanticDiffSchedule.test.ts`
   - `src/test/suite/semanticDiffScheduleRules.test.ts`
 - Implementation review verdict: Ready; no findings.
-- Commit status: Eligible for the exact Slice 2 completion commit; not yet
-  committed.
-- Feature-level final/closure approval: Pending until Slices 3–5 are complete;
-  the user requested one bulk human approval at that point.
+- Commit status: Complete and committed as `23dfdcea`.
+- Feature-level final/closure approval: Pending until the remaining Slices 4–5
+  are complete; the user requested one bulk human approval at that point.
 
 ## Slice 2 Replanning Record
 
@@ -156,9 +159,9 @@ implementation go-ahead, and the per-slice completion gates.
 - Approval effect: Human Approval for this replan was recorded on 2026-09-05
   after a `plan-reviewer` Ready verdict with no findings. It authorized only
   the exact correction scope recorded below; the carried-forward Slice 2
-  implementation remains uncommitted. The correction was independently
-  reviewed Ready with no findings, and the current Slice 2 Completion Approval
-  is recorded above.
+  implementation and correction were later completion-committed as
+  `23dfdcea`. The correction was independently reviewed Ready with no
+  findings, and the Slice 2 Completion Approval is recorded above.
 
 ## Slice 2 Replan Approval
 
@@ -174,10 +177,39 @@ implementation go-ahead, and the per-slice completion gates.
   - `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`
 - Replan commit: `cb17d26a`
 - Scope note: no other runtime or test path is authorized by this replan. The
-  existing uncommitted Slice 2 interpreter/projector, application, documentation,
-  and integration-test changes are carried forward unchanged; the approved
-  correction is implemented and included in the completion-approved Slice 2
-  diff above.
+  existing Slice 2 interpreter/projector, application, documentation, and
+  integration-test changes were carried forward unchanged; the approved
+  correction was implemented and included in the Slice 2 diff, which was
+  completion-committed as `23dfdcea`.
+
+## Completion Approval
+
+- Status: Granted for Slice 3; ready for the exact completion commit.
+- Approved at: 2026-09-06 automatically under the user's explicit per-slice
+  instruction that a slice is approved when independent implementation review
+  has no findings.
+- Approved scope: the reviewed Slice 3 implementation and its exact current
+  path set below; no other slice or feature-level closure work is approved by
+  this record.
+- Approved paths: `CHANGELOG.md`, `README.md`,
+  `docs/requirements/domain-rules/interpret-jp1-parameters.md`,
+  `docs/requirements/use-cases/uc-build-semantic-diff.md`,
+  `docs/specs/features/schedule-semantics-expansion/TASKS.md`,
+  `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`,
+  `src/application/semantic-diff/compareScheduleDiff.ts`,
+  `src/application/semantic-diff/compareSemanticDiff.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleCalendarContext.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`,
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`, and
+  `src/test/suite/semanticDiffScheduleRules.test.ts`.
+- Implementation review verdict: Ready; no findings.
+- Commit status: completion commit pending; the exact approved path set above
+  is eligible for approval-committer.
+- Feature-level final/closure approval: Pending until all slices are complete;
+  the user requested one bulk human approval at that point.
 
 ## Closure Approval
 
@@ -352,8 +384,9 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
     unsupported `sd`, missing pair, and invalid-day evidence remains explicit
     with compatible application messages. `sc` is removed from schedule
     detection and `scheduleKeys`, remains `execution-definition`, and never
-    makes an `sc`-only unit schedule-defined. `jc` is classified as `schedule`
-    but remains unresolved until Slice 3.
+    makes an `sc`-only unit schedule-defined. At the Slice 1 boundary, `jc`
+    was classified as `schedule` but its resolution was intentionally deferred;
+    Slice 3 now resolves its normalized calendar context.
   - Structural tests cover `sc`-only, `sc` plus `sd`/`st`, `jc`, and `sd`/`st`
     changes. Schedule tests prove an `sc`-only unit is not evaluated, while
     `sc` plus a valid `sd`/`st` pair is evaluated only because of that pair.
@@ -438,7 +471,7 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
 
 ### Slice 2: Complete Calendar-Independent Gregorian Dates
 
-- Status: Complete and ready for completion commit; focused replan approved and
+- Status: Complete and committed as `23dfdcea`; focused replan approved and
   replan commit `cb17d26a`; implementation-reviewer Ready with no findings;
   Completion Approval granted 2026-09-06 automatically under the user's
   explicit per-slice instruction
@@ -512,9 +545,8 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
   `docs/specs/features/schedule-semantics-expansion/TASKS.md` and
   `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md` evidence.
   Calendar lookup or clock context belongs to Slice 3 or Replanning.
-- Dependencies: Slice 1 complete and committed; the carried-forward Slice 2
-  implementation and approved correction remain in the working tree pending
-  the exact completion commit.
+- Dependencies: Slice 1 complete and committed; Slice 2 implementation and
+  approved correction are complete and committed as `23dfdcea`.
 - Risks: omitted date components have registration-time semantics in v13; the
   slice deliberately adds only fully qualified forms. The diagnostic validator
   now agrees with the projector for absolute weekdays, schedule assertions are
@@ -546,10 +578,10 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
   plan-reviewer and implementation-reviewer verdicts are Ready with no
   findings; replan commit `cb17d26a` is recorded and Slice 2 Completion
   Approval was automatically granted on 2026-09-06.
-- Carried-forward implementation paths remain the two schedule domain modules,
+- Carried-forward implementation paths were the two schedule domain modules,
   the application schedule suite, `README.md`, `CHANGELOG.md`, and the shared
-  rule/use-case documents already present in the uncommitted Slice 2 diff. The
-  approved correction paths are exactly those recorded in `Slice 2 Replan
+  rule/use-case documents. The complete Slice 2 diff was committed as
+  `23dfdcea`; its approved correction paths are recorded in `Slice 2 Replan
 Approval` above.
 - Compatibility impact: Gregorian arithmetic is pure and browser-safe; direct
   date, half-open period, start-time, ordering, and existing unsupported-item
@@ -563,7 +595,9 @@ Approval` above.
 
 ### Slice 3: Resolve Normalized Calendar Context And Relative Dates
 
-- Status: Planned
+- Status: Implemented; implementation-reviewer Ready with no findings;
+  Completion Approval granted automatically on 2026-09-06; completion commit
+  pending
 - Scope: pass each full normalized `AjsDocument` into schedule orchestration,
   resolve side-specific containing-group or `jc` calendar context, define the
   operational-month interval, and project fully qualified relative-day forms.
@@ -634,6 +668,70 @@ Approval` above.
   to the compared change set.
 - Out of Scope: open/closed-day counting, closed-day substitution, calendar UI,
   timezone conversion, non-zero base-time projection, parent schedules, and cycles.
+
+- Implementation evidence: Slice 3 resolves each jobnet's selected absolute
+  `jc` group or nearest containing `unitType=g` ancestor from the full
+  normalized side document. Closest explicit `sdd`, `md`, and `stt` values are
+  applied with defaults 1, `th`, and `00:00`; duplicate, malformed, cyclic, or
+  ambiguous context remains recoverable evidence.
+- Projection evidence: fully qualified `+DD`, `+b`, `+b-DD`, and relative
+  weekday forms use definition-backed operational-month intervals for `md=th`
+  and `md=ne`. Missing/non-group `jc`, non-zero base time, impossible base
+  boundaries, and absent context remain `calendar-selection` evidence. The
+  existing run, unsupported-item, zero-run, and DTO shapes are unchanged.
+- Condition evidence: only fully qualified, syntactically valid relative dates
+  are promoted to calendar-context resolution. Omitted-year/month forms retain
+  `unsupported-schedule-date`, while invalid relative offsets or weekday
+  occurrences retain `invalid-calendar-day` even when context is absent.
+- Evidence preservation: every duplicate `sdd`, `md`, and `stt` parameter is
+  retained in domain raw evidence before the existing application mapping is
+  applied.
+- Application evidence: schedule comparison receives full before/after
+  normalized documents for context resolution while continuing to pass only
+  scoped units to comparison; units in an out-of-scope `jc` group are never
+  added to the result.
+- Changed paths (exact current Slice 3 diff): `CHANGELOG.md`, `README.md`,
+  `docs/requirements/domain-rules/interpret-jp1-parameters.md`,
+  `docs/requirements/use-cases/uc-build-semantic-diff.md`,
+  `docs/specs/features/schedule-semantics-expansion/TASKS.md`,
+  `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`,
+  `src/application/semantic-diff/compareScheduleDiff.ts`,
+  `src/application/semantic-diff/compareSemanticDiff.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleCalendarContext.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`,
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`, and
+  `src/test/suite/semanticDiffScheduleRules.test.ts`.
+- Scaling evidence: each side builds one iterative document index and passes it
+  to per-unit resolution. A 144-rule ten-year schedule with 512 unrelated
+  groups remains bounded to the requested target runs.
+- Application mapping evidence: invalid/missing `jc`, duplicate base,
+  hierarchy-cycle, impossible-boundary, and non-zero-`stt` cases assert the
+  existing dynamic unsupported IDs, reason codes, legacy messages, and raw
+  parameter details.
+- Validation evidence: focused calendar-context, relative-projection, and
+  application scope tests, `pnpm run test:compile`, desktop extension tests,
+  `pnpm run qlty`, `pnpm run lint:md`, `pnpm run build`, and `git diff --check`
+  are green. In `pnpm run test:full`, the desktop portion passes; Web execution
+  remains blocked before tests load by the unchanged host Chromium
+  `MachPortRendezvousServer` permission failure.
+- Compatibility impact: Gregorian arithmetic is pure and browser-safe, with
+  no host locale, timezone, clock, filesystem, network, WebAPI, or external
+  calendar acquisition. Existing direct dates and public/neutral DTOs remain
+  unchanged.
+- Production readiness: only operational months requested by relative rules
+  are constructed; missing, invalid, duplicate, cyclic, and impossible context
+  is explicit rather than guessed. Open/closed counting, substitution,
+  inheritance, 48-hour, cycle, and other deferred semantics remain outside
+  this slice.
+- Implementation review: Ready with no findings. Completion Approval was
+  granted automatically on 2026-09-06 under the user's explicit per-slice
+  instruction. Completion commit is pending; feature-level final/closure
+  approval remains pending until Slices 4–5 are complete for the requested
+  bulk human approval. Recommended route: send the exact approved Slice 3
+  diff to approval-committer for the completion commit.
 
 ### Slice 4: Project Explicit Open And Closed Days
 

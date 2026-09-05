@@ -145,6 +145,35 @@ wording or a diagnostic message.
   consult an operational calendar, host locale, timezone, or current clock.
 - Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
+### `JP1-PARAM-SCHEDULE-RELATIVE-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/+DD`, `YYYY/MM/+b`, `YYYY/MM/+b-DD`, and
+  `YYYY/MM/+{su|mo|tu|we|th|fr|sa}` with optional `:n` or `:b`.
+- The calendar source is the exact normalized job group named by one absolute
+  `jc` value, or the nearest `unitType=g` ancestor when `jc` is omitted. A
+  missing or non-group `jc` target, a non-absolute or duplicated `jc`, and an
+  ambiguous normalized hierarchy remain explicit context errors.
+- The closest explicit `sdd`, `md`, and `stt` values in the selected group and
+  its group ancestors are effective. Defaults are `sdd=1`, `md=th`, and
+  `stt=00:00`. Duplicate or invalid base values are invalid; a non-zero valid
+  `stt` is missing context until a clock-context rule is available.
+- With `md=th`, an operational month starts on its base day in the named month
+  and ends immediately before the same base day in the next month. With
+  `md=ne`, it starts on the base day in the previous month and ends immediately
+  before the base day in the named month. Numeric or weekday base days must
+  exist at both boundaries and are never clamped.
+- `+DD` counts inclusively from the operational-month start, `+b` and
+  `+b-DD` count backward from its final calendar day, and relative weekdays
+  select the first, nth, or last matching weekday in the interval. An absent
+  valid occurrence is a no-run result; an out-of-range count or impossible
+  base boundary is invalid.
+- Omitted-year/month relative forms, non-zero base time, relative or omitted
+  `st`, day-crossing start times, and unresolved scheduler-service calendar
+  data remain uncalculated. The rule uses proleptic Gregorian arithmetic and
+  does not consult host locale, timezone, clock, or external calendar data.
+- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM); [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
 ## Diagnostic Interpretation Rules
 
 The unique normative bodies for all diagnostic rule IDs are in
