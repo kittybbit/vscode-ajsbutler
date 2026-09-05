@@ -1,6 +1,6 @@
 # Requirements Traceability: Schedule Semantics Expansion
 
-<!-- markdownlint-disable MD013 -->
+<!-- markdownlint-disable MD013 MD060 -->
 
 | Use case / requirement                                                                                             | SPECS.md owner                                                       | Implementation slice                 | Test or validation                                                                                                                                                                                                                 |
 | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -11,7 +11,7 @@
 | Existing output mapping with internal status and raw evidence                                                      | `SCH-RESULT-001`; Result Model                                       | Slices 1–5                           | Complete form-condition mapping in `SPECS.md`; legacy reason/message/item-ID and internal-evidence assertions; no DTO extension; unchanged review-risk/Flow policy                                                                 |
 | Every schedule form condition (`jc`, base duplicates/conflicts, `ud`, `sd`, `st`, `sh`, `shd`, `cy`, `ln`, `cftd`) | `SCH-RESULT-001`, `SCH-KEY-001`, `SCH-CALENDAR-001`, `SCH-SHIFT-001` | Slices 1–5                           | `semanticDiffScheduleRules.test.ts` and `semanticDiffSchedule.test.ts` cover each mapping row, exact legacy message/ID, raw parameter, rule number, and internal evidence ID                                                       |
 | Raw evidence and stable v13 rule identities                                                                        | `SCH-EVIDENCE-001`, `SCH-RESULT-001`                                 | Slices 1–5                           | Per-rule status/evidence assertions and durable source-rule review                                                                                                                                                                 |
-| Fully qualified month-start, explicit day, month-end, and weekday forms                                            | `SCH-CALENDAR-001`; Planning Decisions                               | Slice 2                              | `JP1-PARAM-SCHEDULE-MONTH-END-001` and `JP1-PARAM-SCHEDULE-WEEKDAY-001`; normal/boundary/invalid/missing matrix; rule-zero `0,ud` coverage is owned by Slice 1 and is not duplicated here                                          |
+| Fully qualified month-start, explicit day, month-end, and weekday forms                                            | `SCH-CALENDAR-001`; Planning Decisions                               | Slice 2                              | Projector normal/boundary/invalid/missing matrix with `JP1-PARAM-SCHEDULE-MONTH-END-001` and `JP1-PARAM-SCHEDULE-WEEKDAY-001`; existing start-date diagnostics accept supported absolute weekdays; `ScheduleDateRules.ts` and focused diagnostic tests; `sd`-filtered assertions and explicit 31-day month-end coverage; rule-zero `0,ud` coverage is owned by Slice 1 and is not duplicated here |
 | Calendar/base source selection and relative operational-month projection                                           | `SCH-CALENDAR-001`; Calendar Source And Precedence                   | Slice 3                              | `JP1-PARAM-SCHEDULE-RELATIVE-001`; `jc`, ancestor/default base settings, `md`, normal/boundary/invalid/missing and side-isolation tests                                                                                            |
 | Fully qualified open/closed/business-day projection                                                                | `SCH-CALENDAR-001`; Supported Expansion                              | Slice 4                              | `JP1-PARAM-SCHEDULE-OPEN-CLOSED-001`; normal/boundary/invalid/missing calendar matrix                                                                                                                                              |
 | Deterministic explicit closed-day substitution and shift limit                                                     | `SCH-SHIFT-001`; Supported Expansion                                 | Slice 5                              | `JP1-PARAM-SCHEDULE-SHIFT-001`; `be`, `af`, `ca`, `no`, `shd`, normal/boundary/invalid/missing matrix                                                                                                                              |
@@ -24,7 +24,7 @@
 | Omitted-`sh` Cancel default                                                                                        | `SCH-REGRESSION-001`; Supported Expansion                            | Unfinished follow-up owned here      | Entry gate: explicit scheduler-service calendar source and approved baseline migration; replan or scope decision before Exit                                                                                                       |
 | Durable JP1/AJS3 v13 meaning                                                                                       | Durable Documentation Impact; Normative Planning Sources             | Same slice as each supported meaning | Stable `JP1-PARAM-*` rules, source citation review, use-case sync, and Markdown validation                                                                                                                                         |
 
-<!-- markdownlint-enable MD013 -->
+<!-- markdownlint-enable MD013 MD060 -->
 
 ## Source Basis
 
@@ -45,9 +45,11 @@
   entries; `§5(8)` (PDF p.173) covers `sh` and `shd`, including defaults and
   bounds. These pages establish explicit-date precedence over standard-week
   values and closest-upper-group defaults.
-- Existing diagnostic rule IDs establish syntax and ranges only. New projector
-  semantics are added to `interpret-jp1-parameters.md` with stable IDs in their
-  implementation slice; diagnostic bodies are not duplicated.
+- Existing diagnostic rule IDs establish syntax and ranges only. Slice 2 must
+  keep the existing start-date validator aligned with the newly calculated
+  absolute weekday syntax; it adds no diagnostic ID or message body. New
+  projector semantics are added to `interpret-jp1-parameters.md` with stable
+  IDs in their implementation slice; diagnostic bodies are not duplicated.
 
 ## Stable Rule And Test Evidence
 
@@ -80,7 +82,7 @@ and tests before it can pass its completion review.
 ## Slice 1 Implementation Evidence
 
 - Status: Slice 1 complete; implementation review Ready with no findings;
-  Completion Approval granted 2026-09-05; completion commit pending.
+  Completion Approval granted 2026-09-05; completion commit `4a3b846d`.
 - Changed runtime boundaries: `interpretSchedule`, `projectScheduleRuns`, and
   `compareScheduleRuns` are separate pure domain responsibilities. The
   `evaluateSemanticDiffSchedule` facade preserves the existing compatibility
@@ -123,5 +125,58 @@ and tests before it can pass its completion review.
 - Review evidence: duplicate start-time selection, zero-run suppression, and
   canonical before-path matching were independently reviewed and covered by
   focused tests with no actionable findings.
-- Unresolved risks: the planned calendar-dependent, month-end/weekday,
+- Unresolved risks: the planned calendar-dependent relative/open/closed,
   inheritance, 48-hour, cycle, and substitution slices remain unimplemented.
+
+## Slice 2 Implementation Evidence
+
+- Status: Slice 2 implementation complete; focused replan approved and replan
+  commit pending; Completion Approval intentionally pending.
+- Changed behavior: fully qualified `YYYY/MM/b` and `YYYY/MM/b-DD` values now
+  calculate Gregorian month ends with zero-based offsets. Fully qualified
+  absolute weekdays now calculate first, nth, and last occurrences. A valid
+  missing fifth occurrence is a complete supported no-runs result; invalid
+  offsets and invalid occurrences remain invalid evidence.
+- Stable evidence: month-end uses `JP1-PARAM-SCHEDULE-MONTH-END-001` and
+  weekday uses `JP1-PARAM-SCHEDULE-WEEKDAY-001`. Existing direct date forms,
+  omitted-component behavior, half-open periods, and `0,ud` ownership remain
+  unchanged. Relative and calendar-dependent forms remain uncalculated.
+- Application evidence: newly calculated forms use the existing schedule run,
+  unsupported-item, and zero-run confirmation shapes. No public/neutral DTO,
+  confirmation policy, presentation, command, or calendar-context contract
+  changed.
+- Validation: focused schedule tests and application schedule tests,
+  `pnpm run test:compile`, desktop extension tests, `pnpm run qlty`,
+  `pnpm run lint:md`, `pnpm run build`, and `git diff --check` are green. In
+  `pnpm run test:full`, the desktop portion passes. Web execution remains
+  blocked before tests load by the unchanged host Chromium
+  `MachPortRendezvousServer` permission failure.
+- Compatibility and production readiness: Gregorian arithmetic is deterministic
+  and browser-safe, with no host locale/timezone/clock or external calendar
+  input. Malformed offsets and occurrences retain recoverable invalid status;
+  valid no-runs remains distinct. README and CHANGELOG now state the expanded
+  observable support. Future calendar-dependent, relative, open/closed,
+  inheritance, 48-hour, cycle, and substitution work remains deferred.
+- Review findings and replan: the projector calculates absolute weekdays, but
+  `ScheduleDateRules.ts` still requires a `+` prefix and therefore emits
+  `invalid-start-date` for those supported forms. The approved correction adds
+  that validator path and `evaluateScheduleDiagnosticViolations.test.ts`,
+  filters schedule-rule assertions to `sd`, and adds explicit 31-day month-end
+  coverage. No new diagnostic ID, schedule form, or public/neutral DTO is
+  introduced.
+- Replan approval: Human Approval was recorded on 2026-09-05 after the
+  `plan-reviewer` returned Ready with no findings. The exact approved correction
+  scope is `src/domain/services/diagnostics/ScheduleDateRules.ts`,
+  `src/test/suite/evaluateScheduleDiagnosticViolations.test.ts`,
+  `src/test/suite/semanticDiffScheduleRules.test.ts` limited to `sd`-only
+  assertion filtering and 31-day month-end coverage, plus synchronized
+  `docs/specs/features/schedule-semantics-expansion/TASKS.md` and
+  `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md` evidence.
+  Replan commit is pending.
+- Carried-forward implementation: the existing uncommitted Slice 2
+  interpreter/projector, application, documentation, and integration-test
+  changes remain preserved and are not broadened by this approval. Slice 2
+  Completion Approval and feature-level final/closure approval remain pending.
+- Recommended route after the replan commit: implement the exact approved
+  correction paths, then send Slice 2 to the independent
+  implementation-reviewer.

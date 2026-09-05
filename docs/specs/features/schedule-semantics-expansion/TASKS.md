@@ -4,11 +4,11 @@
 
 - Purpose: separate schedule interpretation, bounded projection, and comparison,
   then add only source-backed schedule forms with complete normalized context.
-- Approved or active slice: Slice 1 is ready and approved for its completion
-  commit. The implementation review is Ready with no findings, and Completion
-  Approval was granted under the explicit per-slice automatic-approval
-  instruction. Feature-level final/closure approval remains pending until all
-  slices are complete for the requested bulk human approval.
+- Approved or active slice: Slice 2 is the active implementation slice. Slice 1
+  was independently reviewed Ready with no findings and completion-committed as
+  `4a3b846d` under the explicit per-slice automatic-approval instruction.
+  Feature-level final/closure approval remains pending until all slices are
+  complete for the requested bulk human approval.
 - Preserve current direct `sd` / `st`, period, ordering, and canonical-path
   behavior before expanding coverage.
 - Do not implement parent inheritance, 48-hour, cycle, `cftd`, UI, risk policy,
@@ -40,9 +40,12 @@
 - Validate every slice with the closest schedule tests, desktop/web coverage,
   `rtk pnpm run qlty`, and the required durable-document checks.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: Main delegates the exact approved Slice 1 scope to
-  `approval-committer` for the completion commit. Feature-level final/closure
-  approval remains pending until all slices are complete.
+- Next decision: the approved Slice 2 replan is pending its focused replan
+  commit. Main may route the exact approved correction scope to the implementer
+  after that commit, then re-route Slice 2 to the independent
+  implementation-reviewer. Slice 2 Completion Approval remains pending;
+  feature-level final/closure approval remains pending until all slices are
+  complete.
 
 ## Sync Rule
 
@@ -61,10 +64,11 @@
 - Planning scope: complete five-slice plan for boundary separation,
   calendar-independent dates, normalized calendar resolution, operational-day
   projection, and deterministic closed-day substitution
-- Review status: Ready (`plan-reviewer`)
-- Human approval: Approved
-- Active implementation slice: Slice 1 (Ready; Completion Approval granted;
-  completion commit pending)
+- Review status: Ready; plan-reviewer replan verdict Ready with no findings
+- Human approval: Existing plan and Slice 2 replan approved; replan commit
+  pending
+- Active implementation slice: Slice 2 (implementation carried forward;
+  approved correction pending)
 
 ## Human Approval
 
@@ -96,33 +100,69 @@ implementation go-ahead, and the per-slice completion gates.
   paths; code, tests, generated artifacts, and configuration are forbidden on
   this planning branch.
 
+## Slice 1 Completion Record
+
+- Status: Complete and committed as `4a3b846d`.
+- Implementation review verdict: Ready; no findings.
+- Completion Approval: granted 2026-09-05 automatically under the user's
+  explicit per-slice instruction; the exact approved Slice 1 paths and evidence
+  remain in the completed commit.
+
 ## Completion Approval
 
-- Status: Approved for Slice 1 completion commit
-- Approved at: 2026-09-05 (automatic per-slice Completion Approval under the
-  user's explicit instruction to approve each slice when independent review
-  has no findings)
-- Approved scope: Slice 1 schedule interpretation, bounded projection,
-  comparison, internal status mapping, structural classification, approved
-  schedule tests, and the approved durable documentation/evidence updates.
-- Approved paths:
-  - `docs/requirements/domain-rules/interpret-jp1-parameters.md`
-  - `docs/requirements/use-cases/uc-build-semantic-diff.md`
-  - `docs/specs/features/schedule-semantics-expansion/TASKS.md`
-  - `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`
-  - `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`
-  - `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`
-  - `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`
-  - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
-  - `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`
-  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
-  - `src/test/suite/semanticDiffSchedule.test.ts`
-  - `src/test/suite/semanticDiffScheduleRules.test.ts`
-  - `src/test/suite/semanticDiffStructuralRules.test.ts`
-- Implementation review verdict: Ready; no findings
-- Commit status: Eligible for the Slice 1 completion commit; not yet committed
+- Status: Pending for Slice 2.
+- Approved at: none (the per-slice automatic approval is applied only after
+  Slice 2 receives an independent implementation-reviewer Ready verdict).
+- Approved scope: none yet; Slice 2 implementation evidence is prepared below
+  for independent review.
+- Approved paths: none yet.
+- Implementation review verdict: Pending.
+- Commit status: Not eligible until independent review is Ready and Completion
+  Approval is granted.
 - Feature-level final/closure approval: Pending until all slices are complete;
   the user requested one bulk human approval at that point.
+
+## Slice 2 Replanning Record
+
+- Trigger: implementation review found that the new fully qualified absolute
+  weekday forms are calculated by the Semantic Diff projector, but
+  `src/domain/services/diagnostics/ScheduleDateRules.ts` accepts weekday tokens
+  only when they have the `+` prefix. The same supported forms therefore still
+  produce the existing `invalid-start-date` diagnostic. The review also
+  requires the schedule-rule assertions to be filtered to `sd` and adds an
+  explicit 31-day month-end case.
+- Why the current plan cannot continue unchanged: the approved Slice 2 path
+  boundary omitted the syntax/range validator and its focused diagnostic test,
+  so the supported projector semantics and editor diagnostics can disagree.
+- Smallest revision: keep the existing absolute month-end and weekday
+  semantics, add the validator path and
+  `src/test/suite/evaluateScheduleDiagnosticViolations.test.ts` to Slice 2,
+  narrow per-rule schedule assertions to `sd`, and add 31-day month-end
+  coverage. No new diagnostic rule ID, message policy, public DTO, calendar
+  context, or schedule form is introduced.
+- Approval effect: Human Approval for this replan was recorded on 2026-09-05
+  after a `plan-reviewer` Ready verdict with no findings. It authorizes only the
+  exact correction scope recorded below; the carried-forward Slice 2
+  implementation remains uncommitted. Slice 2 Completion Approval remains
+  pending until the correction is implemented and independently reviewed Ready.
+
+## Slice 2 Replan Approval
+
+- Status: Approved; replan commit pending
+- Approved at: 2026-09-05
+- Plan-reviewer verdict: Ready; no findings
+- Approved correction scope (exact):
+  - `src/domain/services/diagnostics/ScheduleDateRules.ts`
+  - `src/test/suite/evaluateScheduleDiagnosticViolations.test.ts`
+  - `src/test/suite/semanticDiffScheduleRules.test.ts`, limited to filtering
+    assertions to `sd` and adding 31-day month-end coverage
+  - `docs/specs/features/schedule-semantics-expansion/TASKS.md`
+  - `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`
+- Replan commit: Pending
+- Scope note: no other runtime or test path is authorized by this replan. The
+  existing uncommitted Slice 2 interpreter/projector, application, documentation,
+  and integration-test changes are carried forward unchanged and remain subject
+  to their existing Slice 2 completion review.
 
 ## Closure Approval
 
@@ -272,8 +312,8 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
 
 ### Slice 1: Separate The Schedule Pipeline And Preserve The Baseline
 
-- Status: Ready for completion commit (implementation review Ready; Completion
-  Approval granted)
+- Status: Complete; completion commit `4a3b846d` (implementation review Ready;
+  Completion Approval granted)
 - Scope: extract interpreter, bounded projector, and differ responsibilities;
   introduce the per-rule and unit completeness result model; keep
   `evaluateSemanticDiffSchedule` and `compareScheduleDiff` as orchestration
@@ -383,15 +423,19 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
 
 ### Slice 2: Complete Calendar-Independent Gregorian Dates
 
-- Status: Planned
+- Status: Implemented; focused replan approved, replan commit pending;
+  correction and implementation review pending
 - Scope: add fully qualified `YYYY/MM/b`, `YYYY/MM/b-DD`, and absolute weekday
   projection; retain current direct date behavior without generalizing
   registration-relative omissions. Rule-zero `0,ud` semantics are owned by
-  Slice 1 and are not reimplemented in this slice.
+  Slice 1 and are not reimplemented in this slice. Keep the existing
+  `JP1-PARAM-SCHEDULE-START-DATE-001` diagnostic validator aligned with the
+  newly supported absolute weekday syntax.
 - User / Domain Value: Semantic Diff can calculate explicit month-end schedules,
   including leap years and offsets, without requiring an operational calendar.
-- Cohesive Change Group: schedule-date interpretation/projector rules, v13 rule
-  documentation, domain/application schedule tests, and changed user-facing
+- Cohesive Change Group: schedule-date interpretation/projector rules, the
+  existing schedule-date diagnostic validator, v13 rule documentation,
+  domain/application and focused diagnostic tests, and changed user-facing
   support documentation.
 - Acceptance:
   - `YYYY/MM/b` selects the Gregorian last calendar day and `b-DD` subtracts the
@@ -404,6 +448,15 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
   - New support is not applied to `MM/b`, `b`, or other omitted-year/month forms;
     current supported `MM/DD` and `DD` behavior remains unchanged for
     compatibility.
+  - Existing schedule-date diagnostics accept the newly supported,
+    fully-qualified unprefixed absolute weekday forms (`YYYY/MM/{weekday}`,
+    `:n`, and `:b`) without emitting `invalid-start-date`; invalid
+    weekday/occurrence values remain violations, and omitted-year/month or
+    `+`-prefixed relative forms are not promoted by this change.
+  - Per-rule projection assertions select `sd` rules before checking weekday
+    outcomes, so same-number `st` rules cannot satisfy or obscure the date
+    assertions. Month-end coverage includes an explicit 31-day month and its
+    zero-based boundary offset in addition to 28/29/30-day cases.
   - The application continues to expose existing run-change and unsupported
     item shapes; only newly calculated forms change observable results.
 - Validation:
@@ -417,19 +470,74 @@ requested period and an explicitly bounded lookaround)`. It must not enumerate
     context. Rule-zero `0,ud` coverage, including the
     `JP1-PARAM-SCHEDULE-UD-001` evidence and legacy unsupported mapping for
     non-zero `ud`, is owned by Slice 1 and is not duplicated here.
+  - Extend `evaluateScheduleDiagnosticViolations.test.ts` with focused
+    `sd` assertions proving fully qualified absolute weekday forms pass the
+    existing `JP1-PARAM-SCHEDULE-START-DATE-001` validator, while invalid
+    weekday/occurrence values remain violations and omitted-year/month or
+    `+`-prefixed relative forms are not promoted. The test must isolate `sd`
+    evidence from unrelated schedule parameters.
+  - Update `semanticDiffScheduleRules.test.ts` to filter projection-rule
+    assertions to `parameter.key === "sd"` and add a 31-day month-end case
+    covering `b-00` and the largest valid zero-based offset, while retaining
+    the existing 28/29/30-day and leap-century coverage.
   - Run `rtk pnpm run qlty`, `rtk pnpm run test:full`,
     `rtk pnpm run build`, and `rtk pnpm run lint:md`.
 - Production Readiness: compute candidates by month rather than scanning
-  unrelated dates; preserve recoverable invalid results; update README support
+  unrelated dates; preserve recoverable invalid results; keep the existing
+  syntax diagnostic and projector acceptance in sync; update README support
   wording and CHANGELOG because calculated user-visible coverage expands.
-- Approval Boundary: calendar-independent projector, tests, README, CHANGELOG,
-  `interpret-jp1-parameters.md`, and `uc-build-semantic-diff.md`. Calendar lookup
-  or clock context belongs to Slice 3 or Replanning.
-- Dependencies: Slice 1 complete and committed.
+- Approval Boundary: the carried-forward Slice 2 implementation remains
+  uncommitted and unchanged. The approved replan correction scope is exactly
+  `src/domain/services/diagnostics/ScheduleDateRules.ts`,
+  `src/test/suite/evaluateScheduleDiagnosticViolations.test.ts`,
+  `src/test/suite/semanticDiffScheduleRules.test.ts` limited to `sd`-only
+  assertion filtering and 31-day month-end coverage, and the synchronized
+  `docs/specs/features/schedule-semantics-expansion/TASKS.md` and
+  `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md` evidence.
+  Calendar lookup or clock context belongs to Slice 3 or Replanning.
+- Dependencies: Slice 1 complete and committed; the carried-forward Slice 2
+  implementation remains in the working tree, and the approved correction is
+  pending its replan commit before implementation continues.
 - Risks: omitted date components have registration-time semantics in v13; the
-  slice deliberately adds only fully qualified forms.
+  slice deliberately adds only fully qualified forms. Without the diagnostic
+  validator correction, editor feedback can reject a form that Semantic Diff
+  calculates; without `sd` filtering, same-number `st` rules can make focused
+  projector assertions ambiguous. The focused diagnostics and 31-day tests
+  close those gaps.
 - Out of Scope: relative/open/closed days, operational calendar lookup, start
   times with `+` or after `24:00`, inheritance, cycle, and shift.
+- Implementation evidence: fully qualified `YYYY/MM/b` and `b-DD` forms now
+  project Gregorian month ends with zero-based offsets, including leap-century
+  handling. Fully qualified absolute weekdays now project first, nth, and last
+  occurrences; an absent valid fifth occurrence is a complete no-runs result.
+  Omitted-component and relative forms remain uncalculated. The stable domain
+  evidence IDs are `JP1-PARAM-SCHEDULE-MONTH-END-001` and
+  `JP1-PARAM-SCHEDULE-WEEKDAY-001`; public and neutral DTOs are unchanged.
+- Validation evidence: `pnpm run test:compile`, focused schedule rules and
+  application schedule tests, desktop extension tests, `pnpm run qlty`,
+  `pnpm run lint:md`, `pnpm run build`, and `git diff --check` are green. In
+  `pnpm run test:full`, the desktop portion passes; Web execution remains
+  blocked before tests load by the unchanged host Chromium
+  `MachPortRendezvousServer` permission failure.
+- Review findings addressed by the approved correction: synchronize
+  `ScheduleDateRules.ts` with absolute weekday support, filter schedule-rule
+  assertions to `sd`, and add explicit 31-day month-end coverage. The
+  plan-reviewer verdict is Ready with no findings; the replan commit remains
+  pending and Slice 2 Completion Approval is not granted.
+- Carried-forward implementation paths remain the two schedule domain modules,
+  the application schedule suite, `README.md`, `CHANGELOG.md`, and the shared
+  rule/use-case documents already present in the uncommitted Slice 2 diff. The
+  approved correction paths are exactly those recorded in `Slice 2 Replan
+  Approval` above.
+- Compatibility impact: Gregorian arithmetic is pure and browser-safe; direct
+  date, half-open period, start-time, ordering, and existing unsupported-item
+  behavior remain unchanged. No calendar lookup, host locale/timezone/clock,
+  command, presentation, telemetry, or DTO behavior was added.
+- Production readiness: malformed month-end offsets and weekday occurrences
+  retain recoverable invalid evidence; valid missing occurrences remain
+  distinguishable from invalid dates. Future calendar-dependent, relative,
+  open/closed, inheritance, 48-hour, cycle, and substitution semantics remain
+  explicitly deferred to later approved slices.
 
 ### Slice 3: Resolve Normalized Calendar Context And Relative Dates
 
