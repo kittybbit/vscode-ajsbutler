@@ -8,6 +8,11 @@
 - Improved Semantic Diff Markdown reports so English and Japanese output
   explains typed identity rules, strategies, canonical fields, and all
   ambiguous candidates while preserving raw JP1/AJS values safely.
+- Added evidence-based Semantic Diff review recommendations for supported
+  start-condition, calculated-schedule-run, external-wait-target,
+  execution-user-type, and JP1 resource-group changes; unsupported runtime,
+  account, permission, authorization, and contention facts remain explicit as
+  unverified.
 
 ## [1.17.0] - 2026-08-09
 
